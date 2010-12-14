@@ -35,6 +35,7 @@ from sqlalchemy.sql.expression import asc, desc, bindparam
 from aquilon.exceptions_ import (ArgumentError, ProcessException,
                                  AquilonError, UnimplementedError)
 from aquilon.aqdb.model import Interface, Machine, FutureARecord
+from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.interface import (get_or_create_interface,
                                                  describe_interface,
@@ -111,8 +112,8 @@ class CommandAddInterfaceMachine(BrokerCommand):
                 # FIXME: Is this just always allowed?  Maybe restrict
                 # to only aqd-admin and the host itself?
                 dummy_machine = prev.hardware_entity
-                dummy_ip = prev.assignments[0].ip
-                old_network = prev.assignments[0].network
+                dummy_ip = dummy_machine.primary_ip
+                old_network = get_net_id_from_ip(session, dummy_ip)
                 self.remove_prev(session, logger, prev, pending_removals)
                 session.flush()
                 self.remove_dsdb(logger, dummy_ip)
