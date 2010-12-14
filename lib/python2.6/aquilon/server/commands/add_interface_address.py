@@ -36,7 +36,7 @@ from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.aqdb.model.address_assignment import ADDR_USAGES
 from aquilon.server.dbwrappers.interface import (get_interface,
                                                  generate_ip,
-                                                 restrict_switch_offsets)
+                                                 check_ip_restrictions)
 from aquilon.server.templates.host import PlenaryHost
 from aquilon.server.locks import lock_queue
 from aquilon.server.processes import DSDBRunner
@@ -71,7 +71,7 @@ class CommandAddInterfaceAddress(BrokerCommand):
 
         ip = generate_ip(session, dbinterface, **kwargs)
         dbnetwork = get_net_id_from_ip(session, ip)
-        restrict_switch_offsets(dbnetwork, ip)
+        check_ip_restrictions(dbnetwork, ip)
 
         if ip and ip in dbinterface.addresses:
             raise ArgumentError("{0} already has address {1} "
