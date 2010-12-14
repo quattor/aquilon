@@ -53,8 +53,9 @@ class TestUpdateInterface(TestBrokerCommand):
                    "--machine", "ut3c5n10", "--mac", mac]
         out = self.badrequesttest(command)
         self.matchoutput(out,
-                         "MAC address %s is already in use by interface xge49 "
-                         "of switch ut3gd1r04.aqd-unittest.ms.com" % mac,
+                         "MAC address %s is already in use by on-board admin "
+                         "interface xge49 of switch "
+                         "ut3gd1r04.aqd-unittest.ms.com" % mac,
                          command)
 
     def testupdateut3c5n10eth0ip(self):
