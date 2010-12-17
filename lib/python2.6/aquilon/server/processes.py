@@ -418,7 +418,7 @@ class DSDBRunner(object):
 
         status = {}
 
-        primary = dbhw_ent.fqdn
+        real_primary = dbhw_ent.fqdn
 
         # We need a stable index for generating virtual interface names for
         # DSDB. Sort the Zebra IPs and use the list index for this purpose.
@@ -460,15 +460,19 @@ class DSDBRunner(object):
 
             if addr.interface.interface_type == "management":
                 # Do not use -primary_host_name for the management address
-                status[key] = {'name': ifname,
-                               'ip': addr.ip,
-                               'fqdn': fqdn,
-                               'primary': None}
+                primary = None
+            elif fqdn == real_primary:
+                # Do not set the 'primary' key for the real primary name.
+                # update_host() uses this hint for issuing the operations in the
+                # correct order
+                primary = None
             else:
-                status[key] = {'name': ifname,
-                               'ip': addr.ip,
-                               'fqdn': fqdn,
-                               'primary': primary}
+                primary = real_primary
+
+            status[key] = {'name': ifname,
+                           'ip': addr.ip,
+                           'fqdn': fqdn,
+                           'primary': primary}
 
             # Exclude the MAC address for aliases
             if addr.label:
