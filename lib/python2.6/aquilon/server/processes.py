@@ -418,11 +418,6 @@ class DSDBRunner(object):
 
         status = {}
 
-        # If the hw does not have a primary name with an IP, then it should not
-        # be in DSDB
-        if not dbhw_ent or not dbhw_ent.primary_ip:
-            return status
-
         primary = dbhw_ent.fqdn
 
         # We need a stable index for generating virtual interface names for
@@ -455,15 +450,22 @@ class DSDBRunner(object):
             else:
                 ifname = addr.logical_name
 
-            key = '%s:%s' % (primary, ifname)
+            key = '%s:%s' % (dbhw_ent.label, ifname)
 
             if key in status:
                 continue
 
-            status[key] = {'name': ifname,
-                           'ip': addr.ip,
-                           'fqdn': fqdn,
-                           'primary': primary}
+            if addr.interface.interface_type == "management":
+                # Do not use -primary_host_name for the management address
+                status[key] = {'name': ifname,
+                               'ip': addr.ip,
+                               'fqdn': fqdn,
+                               'primary': None}
+            else:
+                status[key] = {'name': ifname,
+                               'ip': addr.ip,
+                               'fqdn': fqdn,
+                               'primary': primary}
 
             # Exclude the MAC address for aliases
             if addr.label:
