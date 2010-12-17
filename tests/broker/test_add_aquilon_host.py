@@ -132,7 +132,7 @@ class TestAddAquilonHost(TestBrokerCommand):
                         "--ip", ip, "--buildstatus", "build",
                         "--zebra_interfaces", "eth0,eth1",
                         "--machine", "ut3c5n2", "--domain", "unittest",
-                        "--osname", "linux", "--osversion", "4.0.1-x86_64",
+                        "--osname", "linux", "--osversion", "4.0.2-x86_64",
                         "--personality", "compileserver"])
         self.dsdb_verify()
 
