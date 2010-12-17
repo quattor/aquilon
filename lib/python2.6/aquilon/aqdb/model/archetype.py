@@ -27,34 +27,39 @@
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
 """ Archetype specifies the metaclass of the build """
+
 from datetime import datetime
-from sqlalchemy import (Column, Integer, DateTime, Sequence, String, ForeignKey,
+from sqlalchemy import (Column, Integer, DateTime, Sequence, String,
                         UniqueConstraint, Boolean)
-from sqlalchemy.orm import relation, deferred
+from sqlalchemy.orm import deferred
 from sqlalchemy.ext.associationproxy import association_proxy
 
 from aquilon.aqdb.model import Base
-from aquilon.utils import monkeypatch
 from aquilon.aqdb.column_types.aqstr import AqStr
 
-_ABV = 'archetype'
+_TN = 'archetype'
 
 
 class Archetype(Base):
     """ Archetype names """
-    __tablename__  = _ABV
+    __tablename__ = _TN
 
-    id = Column(Integer, Sequence('%s_id_seq'%(_ABV)), primary_key=True)
+    id = Column(Integer, Sequence('%s_id_seq' % _TN), primary_key=True)
+
     name = Column(AqStr(32), nullable=False)
-    is_compileable = Column(Boolean, default=False, nullable=False)
+
+    is_compileable = Column(Boolean(name="%s_is_compileable_ck" % _TN),
+                            default=False, nullable=False)
+
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
+
     comments = deferred(Column(String(255), nullable=True))
 
     services = association_proxy('_services', 'service')
 
-archetype = Archetype.__table__
+archetype = Archetype.__table__  # pylint: disable-msg=C0103, E1101
 archetype.info['unique_fields'] = ['name']
 
-archetype.primary_key.name='%s_pk'%(_ABV)
-archetype.append_constraint(UniqueConstraint('name',name='%s_uk'%(_ABV)))
+archetype.primary_key.name = '%s_pk' % _TN
+archetype.append_constraint(UniqueConstraint('name', name='%s_uk' % _TN))

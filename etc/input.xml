@@ -711,6 +711,10 @@
       highest:        Use the highest available IP in the subnet.
       max:            Find the highest IP in use and add one.
       The default is lowest.
+      <p/>
+      Specifying the --zebra_interfaces option will make the primary IP address of the host managed
+      by Zebra. The argument of the option is a comma-separated list of interface names, where
+      Zebra should be configured.
       <optgroup name="add_host_opts" mandatory="True" fields="all">
          <option name="hostname" type="string">Fully qualified Host name</option>
          <option name="machine" type="string">Machine (Node) name</option>
@@ -732,6 +736,7 @@
          <option name="buildstatus" type="string">Build Status: defaults to build.  'blind' and 'ready' also valid.</option>
          <option name="personality" type="string">Personality name: defaults to 'inventory' for aquilon and 'generic' otherwise.</option>
          <option name="ipalgorithm" type="string">Algorithm for automatically choosing an IP.</option>
+         <option name="zebra_interfaces" type="string">Interfaces to configure Zebra on</option>
          <option name="comments" type="string">Comments</option>
       </optgroup>
       <transport method="put" path="host/%(hostname)s" />
@@ -772,6 +777,7 @@
          <option name="comments" type="string">Comments</option>
          <option name="personality" type="string">Personality name.  Defaults to 'inventory'.</option>
          <option name="ipalgorithm" type="string">Algorithm for automatically choosing an IP.</option>
+         <option name="zebra_interfaces" type="string">Interfaces to configure Zebra on</option>
       </optgroup>
       <transport method="put" path="aquilon_host/%(hostname)s" />
    </command>
@@ -1088,6 +1094,7 @@
          <option name="switch" type="string" conflicts="machine hostname chassis">Switch name</option>
       </optgroup>
       <optgroup name="add_interface_optional" mandatory="False" fields="none">
+         <option name="type" type="string">Interface type: public, management, oa, vlan</option>
          <option name="comments" type="string">Comments</option>
          <option name="ip" type="ipv4" conflicts="hostname ipfromip ipfromsystem autoip">IP address</option>
          <option name="ipfromip" type="ipv4" conflicts="hostname ip ipfromsystem autoip">choose IP address in subnet</option>
@@ -1200,11 +1207,13 @@
       </optgroup>
       <optgroup name="update_interface_optional" mandatory="False" fields="none">
          <option name="mac" type="mac">MAC address</option>
-         <option name="ip" type="ipv4">IP address</option>
+         <option name="ip" type="ipv4" conflicts="master">IP address</option>
          <option name="boot" type="boolean">Mark the interface as bootable</option>
          <option name="pg" type="string" conflicts="autopg">portgroup, or an empty string to clear</option>
          <option name="autopg" type="flag" conflicts="pg">choose portgroup based on switch</option>
          <option name="comments" type="string">Comments</option>
+         <option name="master" type="string" conflicts="ip clear_master">Enslave interface to the given master</option>
+         <option name="clear_master" type="flag" conflicts="master">Clear the bonding</option>
       </optgroup>
       <transport trigger="machine" method="post" path="machine/%(machine)s/interface/%(interface)s" />
       <transport trigger="hostname" method="post" path="host/%(hostname)s/interface/%(interface)s" />
@@ -1229,6 +1238,60 @@
          <option name="mac" type="mac">MAC address</option>
       </optgroup>
       <transport method="post" path="interface/command/del" />
+   </command>
+
+   <command name="add_interface_address">
+      Assign a new IP address to an interface.
+      <p/>
+      If you specify only --fqdn, and none of the IP generation options, then
+      the appropriate DNS record must already exist. If you specify both --fqdn
+      and an IP generation option, then a new DNS record will be created.
+      <p/>
+      Valid values for the --usage option are: "system" and "zebra". To
+      configure Zebra, the same IP address with the same label and with
+      "--usage zebra" must be added to multiple physical interfaces.
+      <optgroup name="add_interface_address_req" mandatory="True" fields="all">
+         <optgroup name="add_interface_address_hw_opts" mandatory="True" fields="any">
+            <option name="machine" type="string" conflicts="chassis switch">Machine name</option>
+            <option name="chassis" type="string" conflicts="machine switch">Chassis name</option>
+            <option name="switch" type="string" conflicts="machine chassis">Switch name</option>
+         </optgroup>
+         <option name="interface" type="string">Name of the interface.</option>
+         <option name="fqdn" type="string">FQDN of the new address</option>
+      </optgroup>
+      <optgroup name="add_interface_address_opt" mandatory="False" fields="any">
+	 <option name="label" type="string">Interface alias of the new address</option>
+	 <option name="usage" type="string">Use of the new address (default: system)</option>
+         <option name="ipalgorithm" type="string">Algorithm for automatically choosing an IP.</option>
+      </optgroup>
+      <optgroup name="add_interface_address_ip_opts" mandatory="False" fields="any">
+         <option name="ip" type="ipv4" conflicts="ipfromip ipfromsystem autoip">IP address</option>
+         <option name="ipfromip" type="ipv4" conflicts="ip ipfromsystem autoip">choose IP address in subnet</option>
+         <option name="ipfromsystem" type="string" conflicts="ip ipfromip autoip">choose IP address in subnet of system</option>
+         <option name="autoip" type="flag" conflicts="ip ipfromip ipfromsystem">choose IP address based on MAC/switch</option>
+      </optgroup>
+      <transport method="put" path="interface_address"/>
+   </command>
+
+   <command name="del_interface_address">
+      Delete an IP address from an interface.
+      <optgroup name="del_interface_address_hw_opts" mandatory="True" fields="any">
+         <option name="machine" type="string" conflicts="chassis switch">Machine name</option>
+         <option name="chassis" type="string" conflicts="machine switch">Chassis name</option>
+         <option name="switch" type="string" conflicts="machine chassis">Switch name</option>
+      </optgroup>
+      <optgroup name="del_interface_address_req" mandatory="True" fields="all">
+         <option name="interface" type="string">Name of the interface</option>
+      </optgroup>
+      <optgroup name="del_interface_address_opt" mandatory="False" fields="any">
+         <option name="keep_dns" type="flag">Keep the DNS record</option>
+      </optgroup>
+      <optgroup name="del_interface_address_ip_opts" mandatory="True" fields="any">
+         <option name="fqdn" type="string" conflicts="ip">FQDN of the address</option>
+         <option name="ip" type="ipv4" conflicts="fqdn">IP address</option>
+         <option name="label" type="string" conflicts="fqdn">Interface alias</option>
+      </optgroup>
+      <transport method="delete" path="interface_address"/>
    </command>
 
    <command name="add_service">

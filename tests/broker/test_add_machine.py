@@ -77,23 +77,47 @@ class TestAddMachine(TestBrokerCommand):
         self.matchoutput(out,
             """"serialnumber" = "99C5553";""",
             command)
-        self.matchoutput(out,
-            """"sysloc/dns_search_domains" = list("new-york.ms.com");""",
-            command)
+        self.searchoutput(out,
+                          r'"sysloc/dns_search_domains" = list\(\s*'
+                          r'"new-york.ms.com"\s*\);',
+                          command)
         self.matchoutput(out,
             """include { 'hardware/machine/ibm/hs21-8853l5u' };""",
             command)
-        self.matchoutput(out,
-            """"ram" = list(create("hardware/ram/generic", "size", 8192*MB));""",
-            command)
-        # 1st cpu
-        self.matchoutput(out,
-            """"cpu" = list(create("hardware/cpu/intel/xeon_2660"),""",
-            command)
-        # 2nd cpu
-        self.matchoutput(out,
-            """create("hardware/cpu/intel/xeon_2660"));""",
-            command)
+        self.searchoutput(out,
+                          r'"ram" = list\(\s*'
+                          r'create\("hardware/ram/generic",\s*'
+                          r'"size", 8192\*MB\s*\)\s*\);',
+                          command)
+        self.searchoutput(out,
+                          r'"cpu" = list\(\s*'
+                          r'create\("hardware/cpu/intel/xeon_2660"\),\s*'
+                          r'create\("hardware/cpu/intel/xeon_2660"\s*\)\s*\);',
+                          command)
+
+    # Used for Zebra tests
+    def testaddut3c5n2(self):
+        self.noouttest(["add", "machine", "--machine", "ut3c5n2",
+                        "--rack", "ut3", "--model", "hs21-8853l5u",
+                        "--cpucount", "2", "--cpuvendor", "intel",
+                        "--cpuname", "xeon", "--cpuspeed", "2660",
+                        "--memory", "8192"])
+
+    # Used for bonding tests
+    def testaddut3c5n3(self):
+        self.noouttest(["add", "machine", "--machine", "ut3c5n3",
+                        "--rack", "ut3", "--model", "hs21-8853l5u",
+                        "--cpucount", "2", "--cpuvendor", "intel",
+                        "--cpuname", "xeon", "--cpuspeed", "2660",
+                        "--memory", "8192"])
+
+    # Used for bridge tests
+    def testaddut3c5n4(self):
+        self.noouttest(["add", "machine", "--machine", "ut3c5n4",
+                        "--rack", "ut3", "--model", "hs21-8853l5u",
+                        "--cpucount", "2", "--cpuvendor", "intel",
+                        "--cpuname", "xeon", "--cpuspeed", "2660",
+                        "--memory", "8192"])
 
     def testaddut3c1n3(self):
         self.noouttest(["add", "machine", "--machine", "ut3c1n3",
@@ -139,17 +163,16 @@ class TestAddMachine(TestBrokerCommand):
         self.matchoutput(out,
             """include { 'hardware/machine/ibm/hs21-8853l5u' };""",
             command)
-        self.matchoutput(out,
-            """"ram" = list(create("hardware/ram/generic", "size", 8192*MB));""",
-            command)
-        # 1st cpu
-        self.matchoutput(out,
-            """"cpu" = list(create("hardware/cpu/intel/xeon_2660"),""",
-            command)
-        # 2nd cpu
-        self.matchoutput(out,
-            """create("hardware/cpu/intel/xeon_2660"));""",
-            command)
+        self.searchoutput(out,
+                          r'"ram" = list\(\s*'
+                          r'create\("hardware/ram/generic",\s*'
+                          r'"size", 8192\*MB\s*\)\s*\);',
+                          command)
+        self.searchoutput(out,
+                          r'"cpu" = list\(\s*'
+                          r'create\("hardware/cpu/intel/xeon_2660"\),\s*'
+                          r'create\("hardware/cpu/intel/xeon_2660"\s*\)\s*\);',
+                          command)
 
     def testaddut3c1n4(self):
         self.noouttest(["add", "machine", "--machine", "ut3c1n4",
@@ -177,17 +200,16 @@ class TestAddMachine(TestBrokerCommand):
         self.matchoutput(out,
             """include { 'hardware/machine/ibm/hs21-8853l5u' };""",
             command)
-        self.matchoutput(out,
-            """"ram" = list(create("hardware/ram/generic", "size", 8192*MB));""",
-            command)
-        # 1st cpu
-        self.matchoutput(out,
-            """"cpu" = list(create("hardware/cpu/intel/xeon_2660"),""",
-            command)
-        # 2nd cpu
-        self.matchoutput(out,
-            """create("hardware/cpu/intel/xeon_2660"));""",
-            command)
+        self.searchoutput(out,
+                          r'"ram" = list\(\s*'
+                          r'create\("hardware/ram/generic",\s*'
+                          r'"size", 8192\*MB\s*\)\s*\);',
+                          command)
+        self.searchoutput(out,
+                          r'"cpu" = list\(\s*'
+                          r'create\("hardware/cpu/intel/xeon_2660"\),\s*'
+                          r'create\("hardware/cpu/intel/xeon_2660"\s*\)\s*\);',
+                          command)
 
     def testaddccissmachine(self):
         self.noouttest(["add", "machine", "--machine", "ut3c1n8",
@@ -211,11 +233,11 @@ class TestAddMachine(TestBrokerCommand):
                          "include { 'hardware/machine/hp/utccissmodel' };",
                          command)
         self.matchoutput(out,
-                         "escape('cciss/c0d0'), "
-                         "create('hardware/harddisk/generic/cciss',",
+                         'escape("cciss/c0d0"), '
+                         'create("hardware/harddisk/generic/cciss",',
                          command)
         self.matchoutput(out,
-                         "'capacity', 466*GB),",
+                         '"capacity", 466*GB',
                          command)
 
     def testaddut3c1n9(self):

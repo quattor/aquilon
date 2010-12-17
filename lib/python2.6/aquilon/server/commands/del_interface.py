@@ -64,15 +64,28 @@ class CommandDelInterface(BrokerCommand):
         if not dbhw_ent:
             dbhw_ent = dbinterface.hardware_entity
 
+        if dbinterface.vlans:
+            vlans = ", ".join([iface.name for iface in
+                               dbinterface.vlans.values()])
+            raise ArgumentError("{0} is the parent of the following VLAN "
+                                "interfaces, delete them first: "
+                                "{1}.".format(dbinterface, vlans))
+
+        if dbinterface.slaves:
+            slaves = ", ".join([iface.name for iface in dbinterface.slaves])
+            raise ArgumentError("{0} is the master of the following slave "
+                                "interfaces, delete them first: "
+                                "{1}.".format(dbinterface, slaves))
+
         try:
-            for addr in dbinterface.all_addresses():
+            for addr in dbinterface.assignments:
                 if addr.ip != dbhw_ent.primary_ip:
                     continue
 
                 # Special handling: if this interface was created automatically,
                 # and there is exactly one other interface with no IP address,
                 # then re-assign the primary address to that interface
-                if not dbinterface.mac and \
+                if not dbinterface.mac and dbinterface.comments is not None and \
                    dbinterface.comments.startswith("Created automatically") and \
                    len(dbhw_ent.interfaces) == 2:
                     if dbinterface == dbhw_ent.interfaces[0]:
@@ -80,9 +93,9 @@ class CommandDelInterface(BrokerCommand):
                     else:
                         other = dbhw_ent.interfaces[0]
 
-                    if len(list(other.all_addresses())) == 0:
-                        other.vlans[0].addresses.append(dbhw_ent.primary_ip)
-                        dbinterface.vlans[0].addresses.remove(dbhw_ent.primary_ip)
+                    if len(other.assignments) == 0:
+                        other.addresses.append(dbhw_ent.primary_ip)
+                        dbinterface.addresses.remove(dbhw_ent.primary_ip)
                         raise _Goto
 
                 # If this is a machine, it is possible to delete the host to get rid
@@ -99,7 +112,7 @@ class CommandDelInterface(BrokerCommand):
             pass
 
         addrs = ", ".join(["%s: %s" % (addr.logical_name, addr.ip) for addr in
-                           dbinterface.all_addresses()])
+                           dbinterface.assignments])
         if addrs:
             raise ArgumentError("{0} still has the following addresses "
                                 "configured, delete them first: "

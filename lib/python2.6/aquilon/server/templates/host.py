@@ -35,11 +35,13 @@ from sqlalchemy.orm.session import object_session
 
 from aquilon.config import Config
 from aquilon.exceptions_ import IncompleteError, InternalError
-from aquilon.aqdb.model import Host, AddressAssignment
+from aquilon.aqdb.model import (Host, AddressAssignment, VlanInterface,
+                                BondingInterface, BridgeInterface)
 from aquilon.server.locks import CompileKey
 from aquilon.server.templates.base import Plenary, PlenaryCollection
 from aquilon.server.templates.machine import PlenaryMachineInfo
 from aquilon.server.templates.cluster import PlenaryClusterClient
+from aquilon.server.templates.panutils import pan, StructureTemplate
 
 LOGGER = logging.getLogger('aquilon.server.templates.host')
 
@@ -115,63 +117,77 @@ class PlenaryToplevelHost(Plenary):
     def body(self, lines):
         session = object_session(self.dbhost)
 
-        interfaces = []
+        interfaces = dict()
+        vips = dict()
         default_gateway = None
         # FIXME: Enforce that one of the interfaces is marked boot?
         for dbinterface in self.dbhost.machine.interfaces:
-            if dbinterface.interface_type != 'public':
+            # Management interfaces are not configured at the host level
+            if dbinterface.interface_type == 'management':
                 continue
-            for vlan in dbinterface.vlan_ids:
-                ifdesc = {}
-                if dbinterface.vlans[vlan].dhcp_enabled:
-                    ifdesc["bootproto"] = "dhcp"
+
+            ifdesc = {}
+
+            if dbinterface.master:
+                ifdesc["bootproto"] = "none"
+                if isinstance(dbinterface.master, BondingInterface):
+                    ifdesc["master"] = dbinterface.master.name
+                elif isinstance(dbinterface.master, BridgeInterface):
+                    ifdesc["bridge"] = dbinterface.master.name
                 else:
-                    ifdesc["bootproto"] = "static"
+                    raise InternalError("Unexpected master interface type: "
+                                        "{0}".format(dbinterface.master))
+            else:
+                # XXX Move this to templates and allow it to be set to DHCP
+                ifdesc["bootproto"] = "static"
 
-                # XXX This is way too OS specific and should be in the
-                # templates instead
-                if vlan > 0:
-                    ifdesc["name"] = "%s.%d" % (dbinterface.name, vlan)
-                else:
-                    ifdesc["name"] = dbinterface.name
+            if isinstance(dbinterface, VlanInterface):
+                ifdesc["vlan"] = True
+                ifdesc["physdev"] = dbinterface.parent.name
 
-                if vlan > 0:
-                    ifdesc["vlan"] = "true"
-
-                for addr in dbinterface.vlans[vlan].assignments:
-                    # Skip addresses that are assigned to more than one
-                    # interfaces, anticipating that they will be handled by
-                    # something else (like Zebra).
-                    q = session.query(AddressAssignment)
-                    q = q.filter(AddressAssignment.ip == addr.ip)
-                    if q.count() > 1:
-                        self.logger.info("Skipping IP %s as it belongs to "
-                                         "multiple interfaces." % addr.ip)
-                        continue
-
-                    net = addr.network
-
-                    if addr.label == "":
-                        # Fudge the gateway as the first available ip
-                        gateway = net.network[1]
-                        if not default_gateway and dbinterface.bootable:
-                            default_gateway = gateway
-
-                        ifdesc["ip"] = addr.ip
-                        ifdesc["netmask"] = net.netmask
-                        ifdesc["broadcast"] = net.broadcast
-                        ifdesc["gateway"] = gateway
+            for addr in dbinterface.assignments:
+                if addr.usage == "zebra":
+                    if addr.label not in vips:
+                        vips[addr.label] = {"ip": addr.ip,
+                                            "interfaces": [dbinterface.name]}
                     else:
-                        if not ifdesc["aliases"]:
-                            ifdesc["aliases"] = []
+                        # Sanity check
+                        if vips[addr.label]["ip"] != addr.ip:
+                            raise ArgumentError("Zebra configuration mismatch: "
+                                                "label %s has IP %s on "
+                                                "interface %s, but IP %s on "
+                                                "interface %s." %
+                                                (addr.label, addr.ip,
+                                                 dbinterface.name,
+                                                 vips[addr.label]["ip"],
+                                                 vips[addr.label]["interfaces"][0].name))
+                        vips[addr.label]["interfaces"].append(dbinterface.name)
+                    continue
+                elif addr.usage != "system":
+                    continue
 
-                        aliasdesc = {"label": addr.label,
-                                     "ip": addr.ip,
-                                     "netmask": net.netmask,
-                                     "broadcast": net.broadcast}
-                        ifdesc["aliases"].append(aliasdesc)
+                net = addr.network
 
-                interfaces.append(ifdesc)
+                if addr.label == "":
+                    # Fudge the gateway as the first available ip
+                    gateway = net.network[1]
+                    if not default_gateway and dbinterface.bootable:
+                        default_gateway = gateway
+
+                    ifdesc["ip"] = addr.ip
+                    ifdesc["netmask"] = net.netmask
+                    ifdesc["broadcast"] = net.broadcast
+                    ifdesc["gateway"] = gateway
+                else:
+                    aliasdesc = {"ip": addr.ip,
+                                 "netmask": net.netmask,
+                                 "broadcast": net.broadcast}
+                    if "aliases" in ifdesc:
+                        ifdesc["aliases"][addr.label] = aliasdesc
+                    else:
+                        ifdesc["aliases"] = {addr.label: aliasdesc}
+
+            interfaces[dbinterface.name] = ifdesc
 
         personality_template = "personality/%s/config" % \
                 self.dbhost.personality.name
@@ -210,44 +226,32 @@ class PlenaryToplevelHost(Plenary):
         # Okay, here's the real content
         arcdir = self.dbhost.archetype.name
         lines.append("# this is an %s host, so all templates should be sourced from there" % self.dbhost.archetype.name)
-        lines.append("variable LOADPATH = list('%s');" % arcdir)
+        lines.append("variable LOADPATH = %s;" % pan([arcdir]))
         lines.append("")
         lines.append("include { 'pan/units' };")
         pmachine = PlenaryMachineInfo(self.dbhost.machine)
-        lines.append("'/hardware' = create('%(plenary_template)s');" % pmachine.__dict__)
-
-        for ifdesc in interfaces:
-            lines.append("'/system/network/interfaces/%(name)s' = nlist("
-                         "\n\t\t'bootproto', '%(bootproto)s'," % ifdesc)
-            if "ip" in ifdesc:
-                lines.append("\t\t'ip', '%(ip)s', "
-                             "\n\t\t'netmask', '%(netmask)s', "
-                             "\n\t\t'broadcast', '%(broadcast)s', "
-                             "\n\t\t'gateway', '%(gateway)s'," % ifdesc)
-            if "aliases" in ifdesc:
-                lines.append("\t\t'aliases', nlist(")
-                for aliasdesc in ifdesc["aliases"]:
-                    lines.append("\t\t\t'%(label)s', nlist('ip', '%(ip)s', "
-                                 "'netmask', '%(netmask)s', "
-                                 "'broadcast', '%(broadcast)s')," % aliasdesc)
-                lines.append("\t\t),")
-            lines.append(");")
-
+        lines.append("'/hardware' = %s;" %
+                     pan(StructureTemplate(pmachine.plenary_template)))
+        lines.append("'/system/network/interfaces' = %s;" % pan(interfaces))
+        lines.append("'/system/network/primary_ip' = %s;" %
+                     pan(self.dbhost.machine.primary_ip))
         if default_gateway:
-            lines.append("'/system/network/default_gateway' = '%s';" %
-                         default_gateway)
+            lines.append("'/system/network/default_gateway' = %s;" %
+                         pan(default_gateway))
+        if vips:
+            lines.append('"/system/network/vips" = %s;' % pan(vips))
         lines.append("")
+        # XXX: remove!
         # We put in a default function: this will be overridden by the
         # personality with a more suitable value, we just leave this here
         # for paranoia's sake.
         lines.append("'/system/function' = 'grid';");
-        lines.append("'/system/build' = '%s';" % self.dbhost.status.name)
+        lines.append("'/system/build' = %s;" % pan(self.dbhost.status.name))
         if self.dbhost.cluster:
-            lines.append("'/system/cluster/name' = '%s';" % self.dbhost.cluster.name)
+            lines.append("'/system/cluster/name' = %s;" % pan(self.dbhost.cluster.name))
         lines.append("")
         for template in templates:
-
-            lines.append("include { '%s' };" % template)
+            lines.append("include { %s };" % pan(template))
         lines.append("")
 
         return

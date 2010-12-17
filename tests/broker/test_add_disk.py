@@ -63,11 +63,11 @@ class TestAddDisk(TestBrokerCommand):
         command = "cat --machine ut3c5n10"
         out = self.commandtest(command.split(" "))
         self.searchoutput(out,
-                          r"'harddisks' = nlist\(\s*escape\('sda'\), "
-                          r"create\('hardware/harddisk/generic/scsi',\s*"
-                          r"'capacity', 68\*GB\),\s*"
-                          r"escape\('sdb'\), create\('hardware/harddisk/generic/scsi',"
-                          r"\s*'capacity', 34\*GB\),\s*\);",
+                          r'"harddisks" = nlist\(\s*"sda", '
+                          r'create\("hardware/harddisk/generic/scsi",\s*'
+                          r'"capacity", 68\*GB\s*\),\s*'
+                          r'"sdb", create\("hardware/harddisk/generic/scsi",\s*'
+                          r'"capacity", 34\*GB\s*\)\s*\);',
                           command)
 
     def testaddut3c1n3disk(self):
@@ -85,15 +85,14 @@ class TestAddDisk(TestBrokerCommand):
         command = "cat --machine ut3c1n3"
         out = self.commandtest(command.split(" "))
         self.searchoutput(out,
-                          r"'harddisks' = nlist\(\s*escape\('cciss/c0d0'\), "
-                          r"create\('hardware/harddisk/generic/cciss',\s*"
-                          r"'capacity', 34\*GB\),\s*"
-                          r"escape\('sda'\), create\('hardware/harddisk/generic/scsi',"
-                          r"\s*'capacity', 68\*GB\),\s*\);",
+                          r'"harddisks" = nlist\(\s*escape\("cciss/c0d0"\), '
+                          r'create\("hardware/harddisk/generic/cciss",\s*'
+                          r'"capacity", 34\*GB\s*\),\s*'
+                          r'"sda", create\("hardware/harddisk/generic/scsi",\s*'
+                          r'"capacity", 68\*GB\s*\)\s*\);',
                           command)
 
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddDisk)
     unittest.TextTestRunner(verbosity=2).run(suite)
-

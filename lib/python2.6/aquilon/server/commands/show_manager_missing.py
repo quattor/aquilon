@@ -33,9 +33,8 @@ from sqlalchemy.sql import exists
 
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.formats.interface import MissingManagersList
-from aquilon.aqdb.model import (Interface, VlanInterface, AddressAssignment,
-                                HardwareEntity, PrimaryNameAssociation, System,
-                                DnsDomain)
+from aquilon.aqdb.model import (Interface, AddressAssignment, HardwareEntity,
+                                PrimaryNameAssociation, System, DnsDomain)
 
 
 class CommandShowManagerMissing(BrokerCommand):
@@ -43,9 +42,8 @@ class CommandShowManagerMissing(BrokerCommand):
     def render(self, session, **arguments):
         q = session.query(Interface)
         q = q.filter_by(interface_type='management')
-        q = q.join(VlanInterface)
-        q = q.filter(~exists().where(AddressAssignment.vlan_interface_id ==
-                                     VlanInterface.id))
+        q = q.filter(~exists().where(AddressAssignment.interface_id ==
+                                     Interface.id))
         q = q.reset_joinpoint()
         q = q.join(HardwareEntity)
         q = q.filter_by(hardware_type='machine')

@@ -60,11 +60,10 @@ class CommandAddManager(BrokerCommand):
 
         dbinterface = get_or_create_interface(session, dbmachine,
                                               name=interface, mac=mac,
-                                              interface_type='management',
-                                              bootable=False)
+                                              interface_type='management')
 
         addrs = ", ".join(["%s [%s]" % (addr.logical_name, addr.ip) for addr
-                           in dbinterface.all_addresses()])
+                           in dbinterface.assignments])
         if addrs:
             raise ArgumentError("{0} already has the following addresses: "
                                 "{1}.".format(dbinterface, addrs))
@@ -86,7 +85,7 @@ class CommandAddManager(BrokerCommand):
                                   ip=ip, network=dbnetwork,
                                   comments=comments)
         session.add(dbdns_rec)
-        dbinterface.vlans[0].addresses.append(ip)
+        dbinterface.addresses.append(ip)
 
         session.flush()
 

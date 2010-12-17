@@ -80,10 +80,8 @@ class CommandSearchNetwork(BrokerCommand):
                     q = q.filter(ObservedVlan.vlan_id.in_(vlans))
                     q = q.reset_joinpoint()
             if not vlans:
-                networks = []
-                for iface in dbmachine.interfaces:
-                    for addr in iface.all_addresses():
-                        networks.append(addr.network.id)
+                networks = [addr.network.id for addr in
+                            dbmachine.all_addresses()]
                 if not networks:
                     msg = "Machine %s has no interfaces " % dbmachine.label
                     if dbmachine.cluster:

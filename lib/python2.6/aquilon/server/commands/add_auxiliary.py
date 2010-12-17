@@ -67,10 +67,13 @@ class CommandAddAuxiliary(BrokerCommand):
                                               interface_type='public',
                                               bootable=False)
 
+        if dbinterface.master:
+            raise ArgumentError("Slave interfaces cannot hold addresses.")
+
         # Multiple addresses will only be allowed with the "add interface
         # address" command
         addrs = ", ".join(["%s [%s]" % (addr.logical_name, addr.ip) for addr
-                           in dbinterface.all_addresses()])
+                           in dbinterface.assignments])
         if addrs:
             raise ArgumentError("{0} already has the following addresses: "
                                 "{1}.".format(dbinterface, addrs))
@@ -83,7 +86,7 @@ class CommandAddAuxiliary(BrokerCommand):
                                   ip=ip, network=dbnetwork,
                                   comments=comments)
         session.add(dbdns_rec)
-        dbinterface.vlans[0].addresses.append(ip)
+        dbinterface.addresses.append(ip)
 
         session.flush()
 

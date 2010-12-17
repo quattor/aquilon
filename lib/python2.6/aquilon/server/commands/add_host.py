@@ -34,8 +34,7 @@ from aquilon.exceptions_ import (ArgumentError, ProcessException, AquilonError,
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.branch import get_branch_and_author
 from aquilon.server.dbwrappers.hardware_entity import parse_primary_name
-from aquilon.server.dbwrappers.interface import (generate_ip,
-                                                 get_or_create_interface)
+from aquilon.server.dbwrappers.interface import generate_ip
 from aquilon.aqdb.model import (Domain, Host, OperatingSystem, Archetype,
                                 HostLifecycle, Machine, Personality)
 from aquilon.server.templates.base import PlenaryCollection
@@ -51,7 +50,7 @@ class CommandAddHost(BrokerCommand):
 
     def render(self, session, logger, hostname, machine, archetype, domain,
                sandbox, osname, osversion, buildstatus, personality, comments,
-               skip_dsdb_check=False, **arguments):
+               zebra_interfaces, skip_dsdb_check=False, **arguments):
         (dbbranch, dbauthor) = get_branch_and_author(session, logger,
                                                      domain=domain,
                                                      sandbox=sandbox,
@@ -110,35 +109,17 @@ class CommandAddHost(BrokerCommand):
             raise ArgumentError("{0:c} {0.label} is already allocated to "
                                 "{1:l}.".format(dbmachine, dbmachine.host))
 
-        # If the user wants an IP address, then we need an interface
-        if arguments.get("ip", None) or arguments.get("ipfromsystem", None) or \
-           arguments.get("ipfromip", None) or arguments.get("autoip", None):
-            dbinterface = get_or_create_interface(session, dbmachine,
-                                                  bootable=True)
+        if zebra_interfaces:
+            self.assign_zebra_address(session, dbmachine, hostname,
+                                      zebra_interfaces, **arguments)
         else:
-            dbinterface = None
-
-        # This method is allowed to return None, which will pass through
-        # the next two.
-        # This can only happen (currently) using add_aurora_host,
-        # add_windows_host, or possibly by bypassing the aq client and
-        # posting a request directly.
-        ip = generate_ip(session, dbinterface, **arguments)
-        dbdns_rec = parse_primary_name(session, hostname, ip)
-
-        # Should not happen
-        if ip and not dbinterface:
-            raise InternalError("IP address requested but interface was not "
-                                "enforced")
-
-        if ip and ip not in dbinterface.vlans[0].addresses:
-            dbinterface.vlans[0].addresses.append(ip)
+            self.assign_normal_address(session, dbmachine, hostname,
+                                       **arguments)
 
         dbhost = Host(machine=dbmachine, branch=dbbranch,
                       sandbox_author=dbauthor, personality=dbpersonality,
                       status=dbstatus, operating_system=dbos, comments=comments)
         session.add(dbhost)
-        dbmachine.primary_name = dbdns_rec
         session.flush()
         session.refresh(dbhost)
 
@@ -177,3 +158,77 @@ class CommandAddHost(BrokerCommand):
             lock_queue.release(key)
 
         return
+
+    def assign_normal_address(self, session, dbmachine, hostname, **arguments):
+        """ Assign an IP address to the boot interface """
+
+        dbinterface = None
+        # Look up the boot interface
+        for iface in dbmachine.interfaces:
+            if iface.bootable:
+                dbinterface = iface
+                # If the boot interface is enslaved in a bonding/bridge setup,
+                # then assign the address to the master instead
+                while dbinterface.master:
+                    dbinterface = dbinterface.master
+                break
+
+        # This method is allowed to return None. This can only happen
+        # (currently) using add_aurora_host, add_windows_host, or possibly by
+        # bypassing the aq client and posting a request directly.
+        ip = generate_ip(session, dbinterface, **arguments)
+
+        # FIXME: This should be in generic code, but parse_primary_name()
+        # currently has to be called after the IP have been generated but
+        # before the AddressAssignment record is created
+        dbdns_rec = parse_primary_name(session, hostname, ip)
+        dbmachine.primary_name = dbdns_rec
+
+        if ip:
+            if not dbinterface:
+                raise ArgumentError("You have specified an IP address for the "
+                                    "host, but {0:l} does not have a bootable "
+                                    "interface.".format(dbmachine))
+            if ip not in dbinterface.addresses:
+                for addr in dbinterface.assignments:
+                    if not addr.label:
+                        raise ArgumentError("{0} already has an unlabeled IP "
+                                            "address.".format(dbinterface))
+                dbinterface.addresses.append(ip)
+
+    def assign_zebra_address(self, session, dbmachine, hostname,
+                             zebra_interfaces, **arguments):
+        """ Assign a Zebra-managed address to multiple interfaces """
+
+        # --autoip does not make sense with Zebra, so no need to pass an
+        # interface
+        ip = generate_ip(session, None, **arguments)
+        if ip is None:
+            raise ArgumentError("Zebra configuration requires an IP address.")
+
+        # FIXME: This should be in generic code, but parse_primary_name()
+        # currently has to be called after the IP have been generated but before
+        # the AddressAssignment records are created
+        dbdns_rec = parse_primary_name(session, hostname, ip)
+        dbmachine.primary_name = dbdns_rec
+
+        for name in zebra_interfaces.split(","):
+            dbinterface = None
+            for iface in dbmachine.interfaces:
+                if iface.name == name:
+                    dbinterface = iface
+                    # If the interface is enslaved in a bonding/bridge setup,
+                    # then assign the address to the master instead
+                    while dbinterface.master:
+                        dbinterface = dbinterface.master
+                    break
+            if not dbinterface:
+                raise ArgumentError("{0} does not have an interface named "
+                                    "{1}.".format(dbmachine, name))
+            for addr in dbinterface.assignments:
+                if addr.label == "hostname":
+                    raise ArgumentError("{0} already has an alias named "
+                                        "hostname.".format(dbinterface))
+            dbinterface.addresses.append({"ip": ip,
+                                          "label": "hostname",
+                                          "usage": "zebra"})

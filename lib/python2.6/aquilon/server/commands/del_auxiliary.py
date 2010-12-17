@@ -54,11 +54,11 @@ class CommandDelAuxiliary(BrokerCommand):
                 is_aux = False
             else:
                 assignment = dbauxiliary.assignments[0]
-                dbmachine = assignment.vlan.interface.hardware_entity
+                dbmachine = assignment.interface.hardware_entity
 
                 if assignment.ip == dbmachine.primary_ip:
                     is_aux = False
-                if assignment.vlan.interface.interface_type == 'management':
+                if assignment.interface.interface_type == 'management':
                     is_aux = False
 
             if not is_aux:

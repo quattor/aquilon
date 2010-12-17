@@ -29,7 +29,7 @@
 """ Contains the logic for `aq add interface --switch`."""
 
 
-from aquilon.exceptions_ import ArgumentError
+from aquilon.exceptions_ import ArgumentError, AquilonError
 from aquilon.aqdb.model import Switch
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.interface import get_or_create_interface
@@ -42,7 +42,7 @@ class CommandAddInterfaceSwitch(BrokerCommand):
     invalid_parameters = ['automac', 'ip', 'ipfromip', 'ipfromsystem',
                           'autoip', 'ipalgorithm', 'pg', 'autopg']
 
-    def render(self, session, logger, interface, switch, mac, comments,
+    def render(self, session, logger, interface, switch, mac, type, comments,
                **arguments):
         """This command can handle three cases:
 
@@ -58,7 +58,12 @@ class CommandAddInterfaceSwitch(BrokerCommand):
         In this case, just record the new interface.
 
         """
+        if type and type != "oa":
+            raise ArgumentError("Only 'oa' is allowed as the interface type "
+                                "for switches.")
+
         dbswitch = Switch.get_unique(session, switch, compel=True)
+        oldinfo = DSDBRunner.snapshot_hw(dbswitch)
 
         for arg in self.invalid_parameters:
             if arguments.get(arg) is not None:
@@ -71,8 +76,14 @@ class CommandAddInterfaceSwitch(BrokerCommand):
                                               comments=comments, preclude=True)
 
         if dbswitch.primary_name.ip and not dbswitch.primary_name.assignments:
-            dbinterface.vlans[0].addresses.append(dbswitch.primary_ip)
+            dbinterface.addresses.append(dbswitch.primary_ip)
+
         session.flush()
 
-        # We could theoretically add the mac information to DSDB...
-        # doesn't seem worth the trouble.
+        dsdb_runner = DSDBRunner(logger=logger)
+        try:
+            dsdb_runner.update_host(dbswitch, oldinfo)
+        except AquilonError, err:
+            raise ArgumentError("Could not update switch in DSDB: %s" % err)
+
+        return

@@ -74,7 +74,7 @@ class CommandAddSwitch(BrokerCommand):
                                               name=interface, mac=mac,
                                               interface_type="oa",
                                               comments=ifcomments)
-        dbinterface.vlans[0].addresses.append(ip)
+        dbinterface.addresses.append(ip)
 
         session.flush()
 

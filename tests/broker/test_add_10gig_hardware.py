@@ -225,19 +225,21 @@ class TestAdd10GigHardware(TestBrokerCommand):
                              """include { """
                              """'hardware/machine/utvendor/utmedium' };""",
                              command)
-            self.matchoutput(out,
-                             """"ram" = list(create("hardware/ram/generic", """
-                             """"size", 8192*MB));""",
-                             command)
-            self.matchoutput(out,
-                             """"cpu" = list(create("""
-                             """"hardware/cpu/intel/xeon_2500"));""",
-                             command)
             self.searchoutput(out,
-                              r'"cards/nic/eth0" = nlist\(\s*'
-                              r'"hwaddr", "00:50:56:[0-9a-f:]{8}",\s*'
+                              r'"ram" = list\(\s*'
+                              r'create\("hardware/ram/generic",\s*'
+                              r'"size", 8192\*MB\s*\)\s*\);',
+                              command)
+            self.searchoutput(out,
+                              r'"cpu" = list\(\s*'
+                              r'create\("hardware/cpu/intel/xeon_2500"\)\s*\);',
+                              command)
+            self.searchoutput(out,
+                              r'"cards/nic" = nlist\(\s*'
+                              r'"eth0", nlist\(\s*'
                               r'"boot", true,\s*'
-                              r'"port_group", "%s",\s*\);'
+                              r'"hwaddr", "00:50:56:[0-9a-f:]{8}",\s*'
+                              r'"port_group", "%s"\s*\)\s*\);'
                               % port_group,
                               command)
 

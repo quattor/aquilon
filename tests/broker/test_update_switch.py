@@ -123,37 +123,20 @@ class TestUpdateSwitch(TestBrokerCommand):
         self.noouttest(command)
 
     def testaddinterface(self):
-        #self.dsdb_expect_delete(self.net.tor_net[8].usable[0])
-        #self.dsdb_expect_add("ut3gd1r06.aqd-unittest.ms.com", "xge49",
-        #                     self.net.tor_net[8].usable[0],
-        #                     self.net.tor_net[8].usable[1].mac)
+        ip = self.net.tor_net[8].usable[0]
+        mac = self.net.tor_net[8].usable[1].mac
+        self.dsdb_expect_delete(ip)
+        self.dsdb_expect_add("ut3gd1r06.aqd-unittest.ms.com", ip, "xge49", mac)
         command = ["add_interface", "--switch=ut3gd1r06.aqd-unittest.ms.com",
-                   "--interface=xge49",
-                   "--mac", self.net.tor_net[8].usable[1].mac]
+                   "--interface=xge49", "--mac", mac]
         self.noouttest(command)
-        self.verifyswitch("ut3gd1r06.aqd-unittest.ms.com", "generic",
-                          "temp_switch", "ut3", "a", "3", switch_type='tor',
-                          ip=self.net.tor_net[8].usable[0],
-                          mac=self.net.tor_net[8].usable[1].mac,
-                          interface="xge49")
-        #self.dsdb_verify()
-
-    # Check if removing the auto-generated interface after adding the real one
-    # transfers the primary IP assignment
-    def testdelautointerface(self):
-        command = ["del", "interface", "--interface", "xge",
-                   "--switch", "ut3gd1r06.aqd-unittest.ms.com"]
-        self.noouttest(command)
-        command = ["show", "switch", "--switch", "ut3gd1r06.aqd-unittest.ms.com"]
-        out = self.commandtest(command)
-        self.matchclean(out, "Interface: xge boot=False (no MAC addr)", command)
-        # The primary name should still be there
-        self.matchoutput(out,
-                         "Primary Name: ut3gd1r06.aqd-unittest.ms.com [%s]" %
-                         self.net.tor_net[8].usable[0], command)
-        # The AddressAssignment should have moved
-        self.matchoutput(out, "Provides: ut3gd1r06.aqd-unittest.ms.com [%s]" %
-                         self.net.tor_net[8].usable[0], command)
+        (out, cmd) = self.verifyswitch("ut3gd1r06.aqd-unittest.ms.com",
+                                       "generic", "temp_switch", "ut3", "a", "3",
+                                       switch_type='tor',
+                                       ip=ip, mac=mac, interface="xge49")
+        # Verify that the auto-created dummy interface is gone
+        self.matchclean(out, "Interface: xge ", command)
+        self.dsdb_verify()
 
     def testupdatewithinterface(self):
         oldip = self.net.tor_net[8].usable[0]

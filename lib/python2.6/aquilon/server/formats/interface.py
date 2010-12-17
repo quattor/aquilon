@@ -31,7 +31,9 @@
 
 from aquilon.server.formats.formatters import ObjectFormatter
 from aquilon.server.formats.list import ListFormatter
-from aquilon.aqdb.model import Interface
+from aquilon.aqdb.model import (Interface, PublicInterface, ManagementInterface,
+                                OnboardInterface, VlanInterface,
+                                BondingInterface, BridgeInterface)
 
 
 class InterfaceFormatter(ObjectFormatter):
@@ -52,33 +54,46 @@ class InterfaceFormatter(ObjectFormatter):
         if interface.port_group:
             details.append(indent + "  Port Group: %s" % interface.port_group)
 
+        if hasattr(interface, "vlan_id"):
+            details.append(indent + "  Parent Interface: %s, VLAN ID: %s" %
+                           (interface.parent.name, interface.vlan_id))
+
+        if interface.master:
+            details.append(indent + "  Master Interface: %s" %
+                           interface.master.name)
+
         hw = interface.hardware_entity
         details.append(indent + "  Attached to: {0}".format(hw))
 
-        for vlan in interface.vlan_ids:
-            if vlan > 0:
-                details.append(indent + "  VLAN: %d" % vlan)
-                vindent = indent + "  "
+        for addr in interface.assignments:
+            if addr.fqdns:
+                names = ", ".join(addr.fqdns)
             else:
-                vindent = indent
-            for assgn in interface.vlans[vlan].assignments:
-                if assgn.fqdns:
-                    names = ", ".join(assgn.fqdns)
-                else:
-                    names = "unknown"
+                names = "unknown"
 
-                if assgn.label:
-                    details.append(vindent + "  Provides: %s [%s] (label: %s)" %
-                                   (names, assgn.ip, assgn.label))
-                else:
-                    details.append(vindent + "  Provides: %s [%s]" %
-                                   (names, assgn.ip))
+            tags = []
+            if addr.label:
+                tags.append("label: %s" % addr.label)
+            if addr.usage != "system":
+                tags.append("usage: %s" % addr.usage)
+            if tags:
+                tagstr = " (%s)" % ", ".join(tags)
+            else:
+                tagstr = ""
+            details.append(indent + "  Provides: %s [%s]%s" %
+                           (names, addr.ip, tagstr))
 
         if interface.comments:
             details.append(indent + "  Comments: %s" % interface.comments)
         return "\n".join(details)
 
 ObjectFormatter.handlers[Interface] = InterfaceFormatter()
+ObjectFormatter.handlers[PublicInterface] = InterfaceFormatter()
+ObjectFormatter.handlers[ManagementInterface] = InterfaceFormatter()
+ObjectFormatter.handlers[OnboardInterface] = InterfaceFormatter()
+ObjectFormatter.handlers[VlanInterface] = InterfaceFormatter()
+ObjectFormatter.handlers[BondingInterface] = InterfaceFormatter()
+ObjectFormatter.handlers[BridgeInterface] = InterfaceFormatter()
 
 
 class MissingManagersList(list):

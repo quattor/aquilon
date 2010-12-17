@@ -97,6 +97,7 @@ from test_add_aquilon_host import TestAddAquilonHost
 from test_add_windows_host import TestAddWindowsHost
 from test_add_aurora_host import TestAddAuroraHost
 from test_add_auxiliary import TestAddAuxiliary
+from test_add_interface_address import TestAddInterfaceAddress
 from test_add_manager import TestAddManager
 from test_map_service import TestMapService
 from test_bind_client import TestBindClient
@@ -129,10 +130,12 @@ from test_constraints_service import TestServiceConstraints
 from test_constraints_domain import TestDomainConstraints
 from test_constraints_vendor import TestVendorConstraints
 from test_constraints_machine import TestMachineConstraints
+from test_constraints_interface import TestInterfaceConstraints
 from test_constraints_switch import TestSwitchConstraints
 from test_constraints_make import TestMakeConstraints
 from test_constraints_cluster import TestClusterConstraints
 from test_constraints_metacluster import TestMetaClusterConstraints
+from test_constraints_location import TestLocationConstraints
 from test_show_hostiplist import TestShowHostIPList
 from test_show_hostmachinelist import TestShowHostMachineList
 from test_show_machinemaclist import TestShowMachineMacList
@@ -175,6 +178,7 @@ from test_del_manager import TestDelManager
 from test_del_auxiliary import TestDelAuxiliary
 from test_del_host import TestDelHost
 from test_del_interface import TestDelInterface
+from test_del_interface_address import TestDelInterfaceAddress
 from test_del_disk import TestDelDisk
 from test_del_machine import TestDelMachine
 from test_del_chassis import TestDelChassis
@@ -237,7 +241,7 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestAddChassis, TestAddMachine, TestAddDisk, TestAddInterface,
                 TestAddAddress, TestAddDynamicRange, TestAddHost,
                 TestAddAquilonHost, TestAddWindowsHost, TestAddAuroraHost,
-                TestAddAuxiliary, TestAddManager,
+                TestAddAuxiliary, TestAddManager, TestAddInterfaceAddress,
                 TestMapService, TestBindClient, TestPrebindServer,
                 TestServiceConstraints,
                 TestFlush,
@@ -257,9 +261,11 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestArchetypeConstraints, TestPersonalityConstraints,
                 TestDomainConstraints, TestVendorConstraints,
                 TestMachineConstraints, TestSwitchConstraints,
+                TestInterfaceConstraints,
                 TestMakeConstraints,
                 TestUpdatePersonality,
                 TestClusterConstraints, TestMetaClusterConstraints,
+                TestLocationConstraints,
                 TestShowHostIPList, TestShowHostMachineList, TestShowMachineMacList,
                 TestShowServiceAll, TestShowCampus, TestShowFqdn,
                 TestShowSwitch, TestSearchSwitch,
@@ -277,6 +283,7 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestUnbindServer, TestUnmapService,
                 TestDel10GigHardware, TestDelVirtualHardware,
                 TestUnbindESXCluster, TestUncluster,
+                TestDelInterfaceAddress,
                 TestDelDynamicRange, TestDelAddress,
                 TestDelManager, TestDelAuxiliary, TestDelHost,
                 TestDelInterface, TestDelDisk, TestDelMachine, TestDelChassis,

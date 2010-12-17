@@ -62,8 +62,7 @@ class CommandShowTorSwitch(BrokerCommand):
             q = q.filter(Switch.model_id.in_(subq))
 
         q = q.options(subqueryload_all('location'))
-        q = q.options(subqueryload_all('interfaces._vlan_ids'))
-        q = q.options(subqueryload_all('interfaces.vlans.assignments.dns_records'))
+        q = q.options(subqueryload_all('interfaces.assignments.dns_records'))
         q = q.options(subqueryload_all('observed_vlans'))
         q = q.options(subqueryload_all('observed_macs'))
         q = q.options(subqueryload_all('model.vendor'))

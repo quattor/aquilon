@@ -53,7 +53,7 @@ class MachineInterfacePairFormatter(ObjectFormatter):
         details = [machine.label, rack, building, machine.model.vendor.name,
                    machine.model.name, machine.serial_no]
         if addr:
-            details.extend([addr.logical_name, addr.vlan.interface.mac, addr.ip])
+            details.extend([addr.logical_name, addr.interface.mac, addr.ip])
         else:
             details.extend([None, None, None])
         return details
@@ -76,14 +76,13 @@ class MachineFormatter(ObjectFormatter):
         # FIXME: This is now somewhat redundant
         managers = []
         auxiliaries = []
-        for iface in machine.interfaces:
-            for addr in iface.all_addresses():
-                if addr.ip == machine.primary_ip:
-                    continue
-                if iface.interface_type == 'management':
-                    managers.append((addr.fqdns, addr.ip))
-                else:
-                    auxiliaries.append((addr.fqdns, addr.ip))
+        for addr in machine.all_addresses():
+            if addr.ip == machine.primary_ip:
+                continue
+            if addr.interface.interface_type == 'management':
+                managers.append((addr.fqdns, addr.ip))
+            elif addr.usage == 'system':
+                auxiliaries.append((addr.fqdns, addr.ip))
 
         for mgr in managers:
             details.append(indent + "  Manager: %s [%s]" %
@@ -135,9 +134,8 @@ class MachineFormatter(ObjectFormatter):
     def csv_tolist(self, machine):
         if machine.interfaces:
             entries = []
-            for iface in machine.interfaces:
-                for addr in iface.all_addresses():
-                    entries.append(MachineInterfacePair((machine, addr)))
+            for addr in machine.all_addresses():
+                entries.append(MachineInterfacePair((machine, addr)))
             return entries
         else:
             return [MachineInterfacePair((machine, None))]

@@ -29,21 +29,20 @@
 """ The module governing tables and objects that represent IP networks in
     Aquilon. """
 from datetime import datetime
-from struct import pack
-from socket import inet_ntoa
 from ipaddr import IPv4Address, IPv4Network
 
-from sqlalchemy import (Column, Integer, Sequence, String, Index, DateTime,
-                        UniqueConstraint, ForeignKey, Boolean, func)
+from sqlalchemy import (Column, Integer, Sequence, String, Boolean, DateTime,
+                        ForeignKey, UniqueConstraint, CheckConstraint, Index,
+                        func)
 from sqlalchemy.orm import relation
 
-from aquilon.utils import monkeypatch
 from aquilon.exceptions_ import NotFoundException, InternalError
 from aquilon.aqdb.model import Base, Location
 from aquilon.aqdb.column_types import AqStr, IPV4
 
 #TODO: enum type for network_type
-#TODO: constraint for cidr
+
+_TN = "network"
 
 
 class Network(Base):
@@ -69,23 +68,24 @@ class Network(Base):
         *   campus
     """
 
-    __tablename__ = 'network'
+    __tablename__ = _TN
 
-    id = Column(Integer, Sequence('network_id_seq'), primary_key=True)
+    id = Column(Integer, Sequence('%s_id_seq' % _TN), primary_key=True)
 
     location_id = Column('location_id', Integer,
-                         ForeignKey('location.id', name='network_loc_fk'),
+                         ForeignKey('location.id', name='%s_loc_fk' % _TN),
                          nullable=False)
 
     network_type = Column(AqStr(32), nullable=False, default='unknown')
-    #TODO:  constrain <= 32, >= 1
     cidr = Column(Integer, nullable=False)
-    name = Column(AqStr(255), nullable=False) #TODO: default to ip
+    name = Column(AqStr(255), nullable=False)  # TODO: default to ip
     ip = Column(IPV4, nullable=False)
     side = Column(AqStr(4), nullable=True, default='a')
 
-    is_discoverable = Column(Boolean, nullable=False, default=False)
-    is_discovered = Column(Boolean, nullable=False, default=False)
+    is_discoverable = Column(Boolean(name="%s_is_discoverable_ck" % _TN),
+                             nullable=False, default=False)
+    is_discovered = Column(Boolean(name="%s_is_discovered_ck" % _TN),
+                           nullable=False, default=False)
 
     creation_date = Column(DateTime, default=datetime.now, nullable=False)
     comments = Column(String(255), nullable=True)
@@ -101,7 +101,7 @@ class Network(Base):
             raise TypeError("Invalid type for network: %s" % repr(net))
         args["ip"] = net.network
         args["cidr"] = net.prefixlen
-        super(Base, self).__init__(**args)
+        super(Network, self).__init__(**args)
 
     @property
     def first_usable_host(self):
@@ -203,15 +203,18 @@ class Network(Base):
         return msg
 
 
-network = Network.__table__
-network.primary_key.name = 'network_pk'
+network = Network.__table__  # pylint: disable-msg=C0103, E1101
+network.primary_key.name = '%s_pk' % _TN
 
-network.append_constraint(UniqueConstraint('ip', name='net_ip_uk'))
+network.append_constraint(UniqueConstraint('ip', name='%s_ip_uk' % _TN))
+network.append_constraint(CheckConstraint("cidr >= 1 AND cidr <= 32",
+                                          name="%s_cidr_ck" % _TN))
 
 network.info['unique_fields'] = ['ip']
 network.info['extra_search_fields'] = ['name', 'cidr']
 
-Index('net_loc_id_idx', network.c.location_id)
+Index('%s_loc_id_idx' % _TN, network.c.location_id)
+
 
 def get_net_id_from_ip(s, ip):
     """Requires a session, and will return the Network for a given ip."""

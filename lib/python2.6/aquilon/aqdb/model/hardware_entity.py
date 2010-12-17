@@ -171,6 +171,12 @@ class HardwareEntity(Base):  # pylint: disable-msg=W0232, R0903
             #select the dns_record with name, domain name
                 #select the dns_domain_id with the name of 'domain_name
 
+    def all_addresses(self):
+        """ Iterator returning all addresses of the hardware. """
+        for iface in self.interfaces:
+            for addr in iface.assignments:
+                yield addr
+
 
 hardware_entity = HardwareEntity.__table__
 hardware_entity.primary_key.name = '%s_pk' % _TN

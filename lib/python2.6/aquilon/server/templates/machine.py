@@ -34,6 +34,7 @@ import logging
 from aquilon.server.locks import CompileKey
 from aquilon.server.templates.base import Plenary
 from aquilon.server import templates
+from aquilon.server.templates.panutils import pan, StructureTemplate, PanUnit
 
 LOGGER = logging.getLogger('aquilon.server.templates.machine')
 
@@ -106,115 +107,111 @@ class PlenaryMachineInfo(Plenary):
         return CompileKey.merge([host_key, cluster_key])
 
     def body(self, lines):
-        # Firstly, location
-        lines.append('"location" = "%(sysloc)s";' % self.__dict__)
-        if self.rack:
-            lines.append('"rack/name" = "%(rack)s";' % self.__dict__)
-            if self.rackrow:
-                lines.append('"rack/row" = "%(rackrow)s";' % self.__dict__)
-            if self.rackcol:
-                lines.append('"rack/column" = "%(rackcol)s";' % self.__dict__)
-        if self.room:
-            lines.append('"rack/room" = "%(room)s";' % self.__dict__)
+        ram = [StructureTemplate("hardware/ram/generic",
+                                 {"size": PanUnit(self.dbmachine.memory, "MB")})]
+        cpus = []
+        for cpu_num in range(self.dbmachine.cpu_quantity):
+            cpu = StructureTemplate("hardware/cpu/%s/%s" %
+                                    (self.dbmachine.cpu.vendor.name,
+                                     self.dbmachine.cpu.name))
+            cpus.append(cpu)
 
-        # And a chassis location?
-        if self.dbmachine.chassis_slot:
-            slot = self.dbmachine.chassis_slot[0]
-            self.chassis = slot.chassis.fqdn
-            self.slot = slot.slot_number
-            lines.append('"chassis" = "%s";' % slot.chassis.fqdn)
-            lines.append('"slot" = %d;' % slot.slot_number)
-
-        #if self.hub:
-        #    lines.append('"sysloc/hub" = "%s";' % self.hub)
-        if self.campus:
-            lines.append('"sysloc/campus" = "%s";' % self.campus)
-        if self.dns_search_domains:
-            list = ", ".join(['"%s"' % dom for dom in self.dns_search_domains])
-            lines.append('"sysloc/dns_search_domains" = list(%s);' % list)
-
-        # Now describe the hardware
-        lines.append("")
-        if self.dbmachine.serial_no:
-            lines.append('"serialnumber" = "%s";\n' % self.dbmachine.serial_no)
-        lines.append('"nodename" = "%(machine)s";' % self.__dict__)
-        lines.append("include { 'hardware/machine/%s/%s' };\n" %
-                     (self.dbmachine.model.vendor.name,
-                      self.dbmachine.model.name))
-        lines.append('"ram" = list(create("hardware/ram/generic", '
-                     '"size", %d*MB));' % self.dbmachine.memory)
-        lines.append('"cpu" = list(' + ", \n             ".join(
-                ['create("hardware/cpu/%s/%s")' %
-                 (self.dbmachine.cpu.vendor.name, self.dbmachine.cpu.name)
-                for cpu_num in range(self.dbmachine.cpu_quantity)]) + ');')
-
-        lines.append("'harddisks' = nlist(")
+        disks = {}
         for disk in self.dbmachine.disks:
             devname = disk.device_name
             if disk.disk_type == 'local':
                 relpath = "hardware/harddisk/generic/%s" % disk.controller_type
-                disk_dev_info = "create('%s', \n" \
-                    "                   'capacity', %d*GB)" % \
-                    (relpath, disk.capacity)
+                params = {"capacity": PanUnit(disk.capacity, "GB")}
                 if disk.controller_type == 'cciss':
                     devname = "cciss/" + devname
             elif disk.disk_type == 'nas' and disk.service_instance:
                 relpath = "service/nas_disk_share/%s/client/nasinfo" % \
                     disk.service_instance.name
                 diskpath = "%s/%s.vmdk" % (self.machine, disk.device_name)
-                disk_dev_info = "create('%s', \n" \
-                    "                   'capacity', %d*GB,\n" \
-                    "                   'interface', '%s',\n" \
-                    "                   'address', '%s',\n" \
-                    "                   'path', '%s')" % \
-                    (relpath, disk.capacity, disk.controller_type, \
-                     disk.address, diskpath)
-            lines.append("    escape('%s'), %s," % (devname, disk_dev_info))
-        lines.append(");\n")
+                params = {"capacity": PanUnit(disk.capacity, "GB"),
+                          "interface": disk.controller_type,
+                          "address": disk.address,
+                          "path": diskpath}
 
-        managers = []
-        interfaces = []
+            disks[devname] = StructureTemplate(relpath, params)
+
+        managers = {}
+        interfaces = {}
         for interface in self.dbmachine.interfaces:
             if interface.interface_type == 'public':
-                interfaces.append({"name": interface.name,
-                                   "mac": interface.mac,
-                                   "port_group": interface.port_group,
-                                   "boot": interface.bootable})
+                ifinfo = {}
+                if interface.mac:
+                    ifinfo["hwaddr"] = interface.mac
+                if interface.port_group:
+                    ifinfo["port_group"] = interface.port_group
+                if interface.bootable:
+                    ifinfo["boot"] = interface.bootable
+                interfaces[interface.name] = ifinfo
             elif interface.interface_type == 'management':
                 has_addr = False
-                for addr in interface.all_addresses():
+                for addr in interface.assignments:
                     has_addr = True
-                    manager = {"type": addr.logical_name, "mac": interface.mac,
-                               "ip": addr.ip, "fqdn": None}
+                    manager = {"hwaddr": interface.mac}
                     if addr.fqdns:
                         manager["fqdn"] = addr.fqdns[0]
-                    managers.append(manager)
+                    managers[addr.logical_name] = manager
                 if not has_addr:
-                    managers.append({"type": interface.name,
-                                     "mac": interface.mac,
-                                     "ip": None, "fqdn": None})
+                    managers[interface.name] = {"hwaddr": interface.mac}
+            elif interface.interface_type == 'bonding':
+                # Bonding interfaces need an entry under /hardware/cards/nic
+                # only if the MAC address has been explicitely set
+                if interface.mac:
+                    interfaces[interface.name] = {"hwaddr": interface.mac}
 
-        for interface in interfaces:
-            lines.append('"cards/nic/%s" = nlist(' % interface['name'])
-            if interface['mac']:
-                indent = '                           '
-                lines.append('%s"hwaddr", "%s",' % (indent, interface['mac']))
-                if interface['boot']:
-                    lines.append('%s"boot", %s,' %
-                                 (indent, str(interface['boot']).lower()))
-                if interface['port_group']:
-                    lines.append('%s"port_group", "%s",' %
-                                 (indent, str(interface['port_group'])))
-            lines.append(");")
+        # Firstly, location
+        lines.append('"location" = %s;' % pan(self.sysloc))
+        if self.rack:
+            lines.append('"rack/name" = %s;' % pan(self.rack))
+            if self.rackrow:
+                lines.append('"rack/row" = %s;' % pan(self.rackrow))
+            if self.rackcol:
+                lines.append('"rack/column" = %s;' % pan(self.rackcol))
+        if self.room:
+            lines.append('"rack/room" = %s;' % pan(self.room))
 
-        for manager in managers:
-            lines.append('"console/%(type)s" = nlist(' % manager)
-            lines.append('                           "hwaddr", "%(mac)s"' %
-                         manager)
-            if (manager["fqdn"]):
-                lines.append('                           , "fqdn", "%(fqdn)s"' %
-                             manager)
-            lines.append('                     );')
+        # And a chassis location?
+        if self.dbmachine.chassis_slot:
+            slot = self.dbmachine.chassis_slot[0]
+            self.chassis = slot.chassis.fqdn
+            self.slot = slot.slot_number
+            lines.append('"chassis" = %s;' % pan(slot.chassis.fqdn))
+            lines.append('"slot" = %d;' % slot.slot_number)
+
+        #if self.hub:
+        #    lines.append('"sysloc/hub" = "%s";' % self.hub)
+        if self.campus:
+            lines.append('"sysloc/campus" = %s;' % pan(self.campus))
+        if self.dns_search_domains:
+            lines.append('"sysloc/dns_search_domains" = %s;' %
+                         pan(self.dns_search_domains))
+
+        # Now describe the hardware
+        lines.append("")
+        if self.dbmachine.serial_no:
+            lines.append('"serialnumber" = %s;' % pan(self.dbmachine.serial_no))
+        lines.append('"nodename" = %s;' % pan(self.machine))
+        lines.append("include { 'hardware/machine/%s/%s' };\n" %
+                     (self.dbmachine.model.vendor.name,
+                      self.dbmachine.model.name))
+
+        lines.append("")
+        lines.append('"ram" = %s;' % pan(ram))
+        lines.append('"cpu" = %s;' % pan(cpus))
+        if disks:
+            lines.append('"harddisks" = %s;' % pan(disks))
+        if interfaces:
+            lines.append('"cards/nic" = %s;' % pan(interfaces))
+
+        # /hardware/console needs "preferred" to be set, so we can't just use
+        # pan() for the whole thing
+        for manager in sorted(managers.keys()):
+            params = managers[manager]
+            lines.append('"console/%s" = %s;' % (manager, pan(params)))
 
     def write(self, *args, **kwargs):
         # Don't bother writing plenary files for dummy aurora hardware.

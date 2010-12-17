@@ -30,16 +30,13 @@
 
 from datetime import datetime
 
-from sqlalchemy import (Column, Integer, Boolean, DateTime, ForeignKey,
-                        Sequence, CheckConstraint, UniqueConstraint)
+from sqlalchemy import (Column, Integer, DateTime, ForeignKey, CheckConstraint,
+                        UniqueConstraint)
 from sqlalchemy.orm import relation, backref, object_session, aliased
-from sqlalchemy.orm.collections import attribute_mapped_collection
-from sqlalchemy.ext.associationproxy import association_proxy
-from sqlalchemy.sql.expression import asc
 
 from aquilon.exceptions_ import NotFoundException, InternalError
 from aquilon.aqdb.column_types import AqStr, Enum
-from aquilon.aqdb.model import Base, Network, Switch, Machine, Interface
+from aquilon.aqdb.model import Base, Network, Switch, Machine
 
 MAX_VLANS = 4096 #IEEE 802.1Q standard
 
@@ -80,7 +77,7 @@ class VlanInfo(Base):
             self.__class__.__name__, self.vlan_id, self.port_group,
             self.vlan_type)
 
-vlaninfo = VlanInfo.__table__
+vlaninfo = VlanInfo.__table__  # pylint: disable-msg=C0103, E1101
 vlaninfo.primary_key.name = '%s_pk' % _VTN
 vlaninfo.append_constraint(
     UniqueConstraint('port_group', name='%s_port_group_uk' % _VTN))
@@ -89,10 +86,10 @@ vlaninfo.info['unique_fields'] = ['port_group']
 #CheckConstraint doesn't upper case names by default
 vlaninfo.append_constraint(
     CheckConstraint(('"vlan_id" < %s' % MAX_VLANS).upper(),
-                    name=('%s_max_vlan_id' % _VTN).upper()))
+                    name=('%s_max_vlan_id_ck' % _VTN).upper()))
 vlaninfo.append_constraint(
     CheckConstraint(('"vlan_id" >= 0').upper(),
-                    name=('%s_min_vlan_id' % _VTN).upper()))
+                    name=('%s_min_vlan_id_ck' % _VTN).upper()))
 
 _TN = 'observed_vlan'
 _ABV = 'obs_vlan'
@@ -118,9 +115,9 @@ class ObservedVlan(Base):
                            default=datetime.now, nullable=False)
 
     switch = relation(Switch, backref=backref('%ss' % _TN, cascade='delete',
-                                              order_by=[asc('vlan_id')]))
+                                              order_by=[vlan_id]))
     network = relation(Network, backref=backref('%ss' % _TN, cascade='delete',
-                                                order_by=[asc('vlan_id')]))
+                                                order_by=[vlan_id]))
 
     @property
     def port_group(self):
@@ -172,72 +169,14 @@ class ObservedVlan(Base):
                                 "and VLAN %s" % (switch.fqdn, vlan_id))
         return nets[0].network
 
-ObservedVlan.__table__.primary_key.name = '%s_pk' % _TN
+
+obsvlan = ObservedVlan.__table__  # pylint: disable-msg=C0103, E1101
+obsvlan.primary_key.name = '%s_pk' % _TN
 
 #CheckConstraint doesn't upper case names by default
-ObservedVlan.__table__.append_constraint(
+obsvlan.append_constraint(
     CheckConstraint(('"vlan_id" < %s' % MAX_VLANS).upper(),
-                    name=('%s_max_vlan_id' % _TN).upper()))
-ObservedVlan.__table__.append_constraint(
+                    name=('%s_max_vlan_id_ck' % _TN).upper()))
+obsvlan.append_constraint(
     CheckConstraint(('"vlan_id" >= 0').upper(),
-                    name=('%s_min_vlan_id' % _TN).upper()))
-
-
-_TN = 'vlan_interface'
-
-
-class VlanInterface(Base):
-    """ assigns VLANs to interfaces """
-    __tablename__ = _TN
-
-    id = Column(Integer, Sequence('%s_seq' % _TN), primary_key=True)
-
-    interface_id = Column(Integer, ForeignKey('interface.id',
-                                              name='%s_iface_fk' % _TN,
-                                              ondelete='CASCADE'),
-                          nullable=False)
-
-    vlan_id = Column(Integer, nullable=False)
-
-    # Interface configuration method _after_ the OS have booted. Does not affect
-    # PXE setup.
-    dhcp_enabled = Column(Boolean, nullable=False, default=False)
-
-    creation_date = Column(DateTime, nullable=False, default=datetime.now)
-
-    interface = relation(Interface, lazy=False, uselist=False,
-                         backref=backref('_vlan_ids', uselist=True,
-                                         order_by=[asc('vlan_id')],
-                                         cascade='all, delete-orphan'))
-
-    def __repr__(self):
-        return "<VLAN %d on %s/%s>" % (self.vlan_id,
-                                       self.interface.hardware_entity.label,
-                                       self.interface.name)
-
-vlanif = VlanInterface.__table__
-vlanif.primary_key.name = "%s_pk" % _TN
-vlanif.append_constraint(
-    UniqueConstraint("interface_id", "vlan_id", name="%s_if_vlan_uk" % _TN))
-vlanif.append_constraint(
-    CheckConstraint(('"vlan_id" >= 0').upper(),
-                    name=('%s_min_vlan_id' % _TN).upper()))
-vlanif.append_constraint(
-    CheckConstraint(('"vlan_id" < %s' % MAX_VLANS).upper(),
-                    name=('%s_max_vlan_id' % _TN).upper()))
-
-
-# There are quite a number of mappings here, so probably a couple of examples
-# will help to understand them:
-#
-# repr(iface.vlan_ids) = [0, 100]
-# repr(iface.vlan) =  {0: <VLAN 0 on foo.ms.com/eth0>,
-#                      100: <VLAN 100 on foo.ms.com/eth0>}
-# repr(iface.vlans[0].addresses) = [IPv4Address('192.168.0.1')]
-# repr(iface.vlans[100].addresses) = [IPv4Address('192.168.1.1')]
-# repr(iface.addresses) = [IPv4Address('192.168.0.1'),
-#                          IPv4Address('192.168.1.1')]
-Interface.vlan_ids = association_proxy('_vlan_ids', 'vlan_id',
-                            creator=lambda vlan: VlanInterface(vlan_id=vlan))
-Interface.vlans = relation(VlanInterface,
-                           collection_class=attribute_mapped_collection('vlan_id'))
+                    name=('%s_min_vlan_id_ck' % _TN).upper()))

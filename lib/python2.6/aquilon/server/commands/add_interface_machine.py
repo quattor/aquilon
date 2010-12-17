@@ -35,6 +35,7 @@ from sqlalchemy.sql.expression import asc, desc, bindparam
 from aquilon.exceptions_ import (ArgumentError, ProcessException,
                                  AquilonError, UnimplementedError)
 from aquilon.aqdb.model import Interface, Machine, FutureARecord
+from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.interface import (get_or_create_interface,
                                                  describe_interface,
@@ -53,14 +54,9 @@ class CommandAddInterfaceMachine(BrokerCommand):
     required_parameters = ["interface", "machine"]
 
     def render(self, session, logger, interface, machine, mac, automac,
-               pg, autopg, comments, **arguments):
+               pg, autopg, type, comments, **arguments):
         dbmachine = Machine.get_unique(session, machine, compel=True)
         oldinfo = DSDBRunner.snapshot_hw(dbmachine)
-
-        if interface == 'eth0':
-            bootable = True
-        else:
-            bootable = False
 
         prev = session.query(Interface).filter_by(
                 name=interface,hardware_entity=dbmachine).first()
@@ -68,12 +64,33 @@ class CommandAddInterfaceMachine(BrokerCommand):
             raise ArgumentError("Machine %s already has an interface named %s."
                     % (machine, interface))
 
-        itype = 'public'
-        management_types = ['bmc', 'ilo', 'ipmi']
-        for mtype in management_types:
-            if interface.startswith(mtype):
-                itype = 'management'
-                break
+        if not type:
+            type = 'public'
+            management_types = ['bmc', 'ilo', 'ipmi']
+            for mtype in management_types:
+                if interface.startswith(mtype):
+                    type = 'management'
+                    break
+
+            if interface.startswith("bond"):
+                type = 'bonding'
+            elif interface.startswith("br"):
+                type = 'bridge'
+
+            # Test it last, VLANs can be added on top of almost anything
+            if '.' in interface:
+                type = 'vlan'
+
+        if type == "oa":
+            raise ArgumentError("Interface type 'oa' is not valid for "
+                                "machines.")
+
+        bootable = None
+        if type == 'public':
+            if interface == 'eth0':
+                bootable = True
+            else:
+                bootable = False
 
         dbmanager = None
         pending_removals = PlenaryCollection()
@@ -88,15 +105,15 @@ class CommandAddInterfaceMachine(BrokerCommand):
             # - the old interface belongs to a machine
             # - the old interface is associated with a host
             # - that host was blindly created, and thus can be removed safely
-            if prev and itype == 'management' and \
+            if prev and type == 'management' and \
                prev.hardware_entity.hardware_type == 'machine' and \
                prev.hardware_entity.host and \
                prev.hardware_entity.host.status.name == 'blind':
                 # FIXME: Is this just always allowed?  Maybe restrict
                 # to only aqd-admin and the host itself?
                 dummy_machine = prev.hardware_entity
-                dummy_ip = prev.vlans[0].assignments[0].ip
-                old_network = prev.vlans[0].assignments[0].network
+                dummy_ip = dummy_machine.primary_ip
+                old_network = get_net_id_from_ip(session, dummy_ip)
                 self.remove_prev(session, logger, prev, pending_removals)
                 session.flush()
                 self.remove_dsdb(logger, dummy_ip)
@@ -126,7 +143,7 @@ class CommandAddInterfaceMachine(BrokerCommand):
 
         dbinterface = get_or_create_interface(session, dbmachine,
                                               name=interface,
-                                              interface_type=itype, mac=mac,
+                                              interface_type=type, mac=mac,
                                               bootable=bootable,
                                               port_group=port_group,
                                               comments=comments, preclude=True)
@@ -134,7 +151,7 @@ class CommandAddInterfaceMachine(BrokerCommand):
         # So far, we're *only* creating a manager if we happen to be
         # removing a blind entry and we can steal its IP address.
         if dbmanager:
-            dbinterface.vlans[0].addresses.append(dbmanager.ip)
+            dbinterface.addresses.append(dbmanager.ip)
 
         session.add(dbinterface)
         session.flush()
@@ -147,7 +164,7 @@ class CommandAddInterfaceMachine(BrokerCommand):
                 logger.client_info("Could not reserve IP address %s for %s "
                                    "in DSDB: %s" %
                                    (dbmanager.ip, dbmanager.fqdn, e))
-                dbinterface.vlans[0].addresses.remove(dbmanager.ip)
+                dbinterface.addresses.remove(dbmanager.ip)
                 session.add(dbinterface)
                 session.delete(dbmanager)
                 session.flush()

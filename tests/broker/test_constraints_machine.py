@@ -54,12 +54,6 @@ class TestMachineConstraints(TestBrokerCommand):
         command = "del disk --machine ut3c5n10"
         self.badrequesttest(command.split(" "))
 
-    def testdelinterfaceprimary(self):
-        command = ["del", "interface", "--interface", "eth0",
-                   "--machine", "ut3c1n3"]
-        out = self.badrequesttest(command)
-        self.matchoutput(out, "holds the primary address", command)
-
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestMachineConstraints)

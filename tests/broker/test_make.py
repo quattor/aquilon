@@ -80,6 +80,70 @@ class TestMake(TestBrokerCommand):
         (out, err) = self.successtest(command)
         self.matchoutput(err, "1/1 compiled", command)
 
+    def testmakezebra(self):
+        command = ["make", "--hostname", "unittest20.aqd-unittest.ms.com"]
+        (out, err) = self.successtest(command)
+        self.matchoutput(err, "1/1 compiled", command)
+
+    def testverifyunittest20(self):
+        eth0_ip = self.net.unknown[11].usable[0]
+        eth0_broadcast = self.net.unknown[11].broadcast
+        eth0_netmask = self.net.unknown[11].netmask
+        eth0_gateway = self.net.unknown[11].gateway
+
+        eth1_ip = self.net.unknown[12].usable[0]
+        eth1_broadcast = self.net.unknown[12].broadcast
+        eth1_netmask = self.net.unknown[12].netmask
+        eth1_gateway = self.net.unknown[12].gateway
+        eth1_1_ip = self.net.unknown[12].usable[3]
+
+        hostname_ip = self.net.unknown[13].usable[2]
+        zebra2_ip = self.net.unknown[13].usable[1]
+        zebra3_ip = self.net.unknown[13].usable[0]
+
+        command = ["cat", "--hostname", "unittest20.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.searchoutput(out,
+                          r'"/system/network/vips" = nlist\(\s*'
+                          r'"hostname", nlist\(\s*'
+                          r'"interfaces", list\(\s*'
+                          r'"eth0",\s*"eth1"\s*\),\s*'
+                          r'"ip", "%s"\s*\),\s*'
+                          r'"zebra2", nlist\(\s*'
+                          r'"interfaces", list\(\s*'
+                          r'"eth0",\s*"eth1"\s*\),\s*'
+                          r'"ip", "%s"\s*\),\s*'
+                          r'"zebra3", nlist\(\s*'
+                          r'"interfaces", list\(\s*'
+                          r'"eth0",\s*"eth1"\s*\),\s*'
+                          r'"ip", "%s"\s*\)\s*'
+                          r'\);' % (hostname_ip, zebra2_ip, zebra3_ip),
+                          command)
+        self.searchoutput(out,
+                          r'"eth0", nlist\(\s*'
+                          r'"bootproto", "static",\s*'
+                          r'"broadcast", "%s",\s*'
+                          r'"gateway", "%s",\s*'
+                          r'"ip", "%s",\s*'
+                          r'"netmask", "%s"\s*\)' %
+                          (eth0_broadcast, eth0_gateway, eth0_ip, eth0_netmask),
+                          command)
+        self.searchoutput(out,
+                          r'"eth1", nlist\(\s*'
+                          r'"aliases", nlist\(\s*'
+                          r'escape\("1"\), nlist\(\s*'
+                          r'"broadcast", "%s",\s*'
+                          r'"ip", "%s",\s*'
+                          r'"netmask", "%s"\s*\)\s*\),\s*'
+                          r'"bootproto", "static",\s*'
+                          r'"broadcast", "%s",\s*'
+                          r'"gateway", "%s",\s*'
+                          r'"ip", "%s",\s*'
+                          r'"netmask", "%s"\s*\)' %
+                          (eth1_broadcast, eth1_1_ip, eth1_netmask,
+                           eth1_broadcast, eth1_gateway, eth1_ip, eth1_netmask),
+                          command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestMake)

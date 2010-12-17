@@ -204,7 +204,10 @@ class TestAddHost(TestBrokerCommand):
                    "--ip", ip, "--machine", "ut3c1n9",
                    "--domain", "unittest", "--archetype", "aquilon"]
         out = self.badrequesttest(command)
-        self.matchoutput(out, "Machine ut3c1n9 has no public interfaces.",
+        self.matchoutput(out,
+                         "You have specified an IP address for the host, but "
+                         "machine unittest03.aqd-unittest.ms.com does not have "
+                         "a bootable interface.",
                          command)
 
     def testpopulatehprackhosts(self):

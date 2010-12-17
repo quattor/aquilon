@@ -50,6 +50,35 @@ class TestAddInterface(TestBrokerCommand):
                         "--machine", "ut3c5n10",
                         "--mac", self.net.unknown[0].usable[1].mac.lower()])
 
+    def testaddut3c5n10eth1_2(self):
+        self.noouttest(["add", "interface", "--interface", "eth1.2",
+                        "--machine", "ut3c5n10"])
+
+    def testfailvlanstacking(self):
+        command = ["add", "interface", "--interface", "eth1.2.2",
+                   "--machine", "ut3c5n10"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Stacking of VLAN interfaces is not allowed.",
+                         command)
+
+    def testfailvlanmac(self):
+        mac = self.net.unknown[0].usable[-1].mac
+        command = ["add", "interface", "--interface", "eth1.3",
+                   "--machine", "ut3c5n10", "--mac", mac]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "VLAN interfaces can not have a distinct MAC address.",
+                         command)
+
+    def testfailbadvlan(self):
+        command = ["add", "interface", "--interface", "eth1.4096",
+                   "--machine", "ut3c5n10"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "Illegal VLAN ID 4096: it must be greater than 0 and "
+                         "smaller than 4096.",
+                         command)
+
     def testaddut3c5n10eth1again(self):
         command = ["add", "interface", "--interface", "eth1",
                    "--machine", "ut3c5n10",
@@ -66,6 +95,13 @@ class TestAddInterface(TestBrokerCommand):
         self.matchoutput(out, "MAC address %s is already in use" %
                          self.net.tor_net[6].usable[0].mac, command)
 
+    def testaddut3c5n10eth2_2(self):
+        command = ["add", "interface", "--interface", "eth2.2",
+                   "--machine", "ut3c5n10"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Parent interface eth2 for VLAN interface "
+                         "eth2.2 does not exist", command)
+
     def testaddut3c5n10eth2automac(self):
         command = ["add", "interface", "--interface", "eth2",
                    "--machine", "ut3c5n10", "--automac"]
@@ -76,29 +112,147 @@ class TestAddInterface(TestBrokerCommand):
     def testverifyaddut3c5n10interfaces(self):
         command = "show machine --machine ut3c5n10"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out,
-                         "Interface: eth0 %s boot=True" %
-                         self.net.unknown[0].usable[0].mac.lower(),
-                         command)
-        self.matchoutput(out,
-                         "Interface: eth1 %s boot=False" %
-                         self.net.unknown[0].usable[1].mac.lower(),
-                         command)
+        self.searchoutput(out,
+                          r"Interface: eth0 %s boot=True"
+                          r"\s+Type: public" %
+                          self.net.unknown[0].usable[0].mac.lower(),
+                          command)
+        self.searchoutput(out,
+                          r"Interface: eth1 %s boot=False"
+                          r"\s+Type: public" %
+                          self.net.unknown[0].usable[1].mac.lower(),
+                          command)
+        self.searchoutput(out,
+                          r"Interface: eth1\.2 boot=False \(no MAC addr\)"
+                          r"\s+Type: vlan"
+                          r"\s+Parent Interface: eth1, VLAN ID: 2",
+                          command)
         self.matchclean(out, "Port Group", command)
 
     def testverifycatut3c5n10interfaces(self):
         command = "cat --machine ut3c5n10"
         out = self.commandtest(command.split(" "))
         self.searchoutput(out,
-                          r'"cards/nic/eth0" = nlist\(\s*'
-                          r'"hwaddr", "%s",\s*'
-                          r'"boot", true,\s*\);'
+                          r'"cards/nic" = nlist\(\s*'
+                          r'"eth0", nlist\(\s*'
+                          r'"boot", true,\s*'
+                          r'"hwaddr", "%s"\s*\),'
                           % self.net.unknown[0].usable[0].mac,
                           command)
         self.searchoutput(out,
-                          r'"cards/nic/eth1" = nlist\(\s*'
-                          r'"hwaddr", "%s",\s*\);'
+                          r'"eth1", nlist\(\s*'
+                          r'"hwaddr", "%s"\s*\)\s*\);'
                           % self.net.unknown[0].usable[1].mac,
+                          command)
+
+    def testaddut3c5n2(self):
+        self.noouttest(["add", "interface", "--interface", "eth0",
+                        "--machine", "ut3c5n2",
+                        "--mac", self.net.unknown[11].usable[0].mac])
+        self.noouttest(["add", "interface", "--interface", "eth1",
+                        "--machine", "ut3c5n2",
+                        "--mac", self.net.unknown[12].usable[0].mac])
+
+    def testverifyut3c5n2(self):
+        command = "cat --machine ut3c5n2"
+        out = self.commandtest(command.split(" "))
+        self.searchoutput(out,
+                          r'"cards/nic" = nlist\(\s*'
+                          r'"eth0", nlist\(\s*'
+                          r'"boot", true,\s*'
+                          r'"hwaddr", "%s"\s*\),\s*'
+                          r'"eth1", nlist\(\s*'
+                          r'"hwaddr", "%s"\s*\)\s*\);'
+                          % (self.net.unknown[11].usable[0].mac,
+                             self.net.unknown[12].usable[0].mac),
+                          command)
+
+    def testaddut3c5n3(self):
+        self.noouttest(["add", "interface", "--interface", "eth0",
+                        "--machine", "ut3c5n3",
+                        "--mac", self.net.unknown[11].usable[1].mac])
+        self.noouttest(["add", "interface", "--interface", "eth1",
+                        "--machine", "ut3c5n3",
+                        "--mac", self.net.unknown[12].usable[1].mac])
+
+    def testaddut3c5n3bond0(self):
+        # Let the broker guess the type
+        self.noouttest(["add", "interface", "--interface", "bond0",
+                        "--machine", "ut3c5n3"])
+
+    def testenslaveut3c5n3eth0(self):
+        self.noouttest(["update", "interface", "--machine", "ut3c5n3",
+                        "--interface", "eth0", "--master", "bond0"])
+
+    def testenslaveut3c5n3eth1(self):
+        self.noouttest(["update", "interface", "--machine", "ut3c5n3",
+                        "--interface", "eth1", "--master", "bond0"])
+
+    def testforbidcircle(self):
+        command = ["update", "interface", "--machine", "ut3c5n3",
+                   "--interface", "bond0", "--master", "eth0"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "Enslaving bonding interface bond0 of machine ut3c5n3 "
+                         "would create a circle, which is not allowed.",
+                         command)
+
+    def testverifyut3c5n3(self):
+        command = "cat --machine ut3c5n3"
+        out = self.commandtest(command.split(" "))
+        self.searchoutput(out,
+                          r'"cards/nic" = nlist\(\s*'
+                          r'"eth0", nlist\(\s*'
+                          r'"boot", true,\s*'
+                          r'"hwaddr", "%s"\s*\),\s*'
+                          r'"eth1", nlist\(\s*'
+                          r'"hwaddr", "%s"\s*\)\s*\);'
+                          % (self.net.unknown[11].usable[1].mac,
+                             self.net.unknown[12].usable[1].mac),
+                          command)
+
+    def testaddut3c5n4(self):
+        self.noouttest(["add", "interface", "--interface", "eth0",
+                        "--machine", "ut3c5n4",
+                        "--mac", self.net.unknown[11].usable[2].mac])
+        self.noouttest(["add", "interface", "--interface", "eth1",
+                        "--machine", "ut3c5n4",
+                        "--mac", self.net.unknown[12].usable[2].mac])
+
+    def testaddut3c5n4br0(self):
+        # Specify the interface type explicitely this time
+        self.noouttest(["add", "interface", "--interface", "br0",
+                        "--type", "bridge", "--machine", "ut3c5n4"])
+
+    def testenslaveut3c5n4eth0(self):
+        self.noouttest(["update", "interface", "--machine", "ut3c5n4",
+                        "--interface", "eth0", "--master", "br0"])
+
+    def testenslaveut3c5n4eth1(self):
+        self.noouttest(["update", "interface", "--machine", "ut3c5n4",
+                        "--interface", "eth1", "--master", "br0"])
+
+    def testfailbridgemac(self):
+        mac = self.net.unknown[0].usable[-1].mac
+        command = ["add", "interface", "--interface", "br1",
+                   "--machine", "ut3c5n4", "--mac", mac]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "Bridge interfaces can not have a distinct MAC address.",
+                         command)
+
+    def testverifyut3c5n4(self):
+        command = "cat --machine ut3c5n4"
+        out = self.commandtest(command.split(" "))
+        self.searchoutput(out,
+                          r'"cards/nic" = nlist\(\s*'
+                          r'"eth0", nlist\(\s*'
+                          r'"boot", true,\s*'
+                          r'"hwaddr", "%s"\s*\),\s*'
+                          r'"eth1", nlist\(\s*'
+                          r'"hwaddr", "%s"\s*\)\s*\);'
+                          % (self.net.unknown[11].usable[2].mac,
+                             self.net.unknown[12].usable[2].mac),
                           command)
 
     def testaddut3c1n3eth0(self):
@@ -153,14 +307,15 @@ class TestAddInterface(TestBrokerCommand):
         command = "cat --machine ut3c1n3"
         out = self.commandtest(command.split(" "))
         self.searchoutput(out,
-                          r'"cards/nic/eth0" = nlist\(\s*'
-                          r'"hwaddr", "%s",\s*'
-                          r'"boot", true,\s*\);'
+                          r'"cards/nic" = nlist\(\s*'
+                          r'"eth0", nlist\(\s*'
+                          r'"boot", true,\s*'
+                          r'"hwaddr", "%s"\s*\),'
                           % self.net.unknown[0].usable[2].mac,
                           command)
         self.searchoutput(out,
-                          r'"cards/nic/eth1" = nlist\(\s*'
-                          r'"hwaddr", "%s",\s*\);'
+                          r'"eth1", nlist\(\s*'
+                          r'"hwaddr", "%s"\s*\)\s*\);'
                           % self.net.unknown[0].usable[3].mac,
                           command)
         self.searchoutput(out,
@@ -212,9 +367,10 @@ class TestAddInterface(TestBrokerCommand):
         command = "cat --machine ut3c1n4"
         out = self.commandtest(command.split(" "))
         self.searchoutput(out,
-                          r'"cards/nic/eth0" = nlist\(\s*'
-                          r'"hwaddr", "%s",\s*'
-                          r'"boot", true,\s*\);'
+                          r'"cards/nic" = nlist\(\s*'
+                          r'"eth0", nlist\(\s*'
+                          r'"boot", true,\s*'
+                          r'"hwaddr", "%s"\s*\)\s*\);'
                           % self.net.unknown[0].usable[5].mac,
                           command)
 
@@ -396,7 +552,7 @@ class TestAddInterface(TestBrokerCommand):
                    "ut9s03p1"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
-                         'Bootable and Management interfaces require a MAC address',
+                         'Bootable interfaces require a MAC address',
                          command)
 
     def testadd_no_mac(self):
@@ -463,15 +619,16 @@ class TestAddInterface(TestBrokerCommand):
         command = "cat --machine ut11s01p1"
         out = self.commandtest(command.split(" "))
         self.searchoutput(out,
-                          r'"cards/nic/eth0" = nlist\(\s*'
-                          r'"hwaddr", "%s",\s*'
-                          r'"boot", true,\s*\);'
+                          r'"cards/nic" = nlist\(\s*'
+                          r'"eth0", nlist\(\s*'
+                          r'"boot", true,\s*'
+                          r'"hwaddr", "%s"\s*\),'
                           % self.net.tor_net2[2].usable[2].mac,
                           command)
         self.searchoutput(out,
-                          r'"cards/nic/eth1" = nlist\(\s*'
+                          r'"eth1", nlist\(\s*'
                           r'"hwaddr", "%s",\s*'
-                          r'"port_group", "storage-v701",\s*\);'
+                          r'"port_group", "storage-v701"\s*\)\s*\);'
                           % self.net.vm_storage_net[0].usable[0].mac,
                           command)
 

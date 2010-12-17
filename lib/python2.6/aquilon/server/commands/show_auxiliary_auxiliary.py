@@ -46,7 +46,7 @@ class CommandShowAuxiliaryAuxiliary(BrokerCommand):
                                 "interfaces.".format(dbdns_rec))
         hws = []
         for addr in dbdns_rec.assignments:
-            iface = addr.vlan.interface
+            iface = addr.interface
             if iface.interface_type != 'public':
                 raise ArgumentError("{0:a} is not an auxiliary.".format(dbdns_rec))
             hws.append(iface.hardware_entity)

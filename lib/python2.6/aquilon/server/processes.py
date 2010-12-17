@@ -357,15 +357,11 @@ class DSDBRunner(object):
     def add_host(self, dbinterface):
         session = object_session(dbinterface)
         primary = dbinterface.hardware_entity.fqdn
-        for addr in dbinterface.all_addresses():
+        for addr in dbinterface.assignments:
             if not addr.fqdns:
                 continue
-            if addr.vlan.vlan_id == 0 and not addr.label:
-                mac = dbinterface.mac
-            else:
-                mac = None
             self.add_host_details(addr.fqdns[0], addr.ip, addr.logical_name,
-                                  mac, primary=primary)
+                                  dbinterface.mac, primary=primary)
 
     def add_host_details(self, fqdn, ip, name, mac, primary=None):
         # DSDB does not accept '/' as valid in an interface name.
@@ -429,25 +425,51 @@ class DSDBRunner(object):
 
         primary = dbhw_ent.fqdn
 
-        for iface in dbhw_ent.interfaces:
-            for addr in iface.all_addresses():
-                if addr.fqdns:
-                    fqdn = addr.fqdns[0]
-                else:
-                    continue
+        # We need a stable index for generating virtual interface names for
+        # DSDB. Sort the Zebra IPs and use the list index for this purpose.
+        # There is an exception though: while renumbering and thus
+        # deleting/re-adding the virtual interfaces is generally fine, we do not
+        # want to remove the primary IP address. So make sure the primary IP is
+        # always the first one.
+        zebra_ips = []
+        for addr in dbhw_ent.all_addresses():
+            if addr.usage != "zebra" or addr.ip in zebra_ips:
+                continue
+            zebra_ips.append(addr.ip)
+        zebra_ips.sort()
+        if dbhw_ent.primary_ip and dbhw_ent.primary_ip in zebra_ips:
+            zebra_ips.remove(dbhw_ent.primary_ip)
+            zebra_ips.insert(0, dbhw_ent.primary_ip)
 
-                # The MAC must be unique in DSDB, so only set it for the first
-                # address on the native VLAN
-                if addr.vlan.vlan_id == 0 and not addr.label:
-                    mac = iface.mac
-                else:
-                    mac = None
-                key = '%s:%s' % (primary, addr.logical_name)
-                status[key] = {'name': addr.logical_name,
-                               'mac': mac,
-                               'ip': addr.ip,
-                               'fqdn': fqdn,
-                               'primary': primary}
+        for addr in dbhw_ent.all_addresses():
+            if addr.fqdns:
+                fqdn = addr.fqdns[0]
+            else:
+                continue
+
+            # Zebra: in AQDB the address is assigned to multiple existing
+            # interfaces. In DSDB however, we need just a single virtual
+            # interface
+            if addr.usage == "zebra":
+                ifname = "le%d" % zebra_ips.index(addr.ip)
+            else:
+                ifname = addr.logical_name
+
+            key = '%s:%s' % (primary, ifname)
+
+            if key in status:
+                continue
+
+            status[key] = {'name': ifname,
+                           'ip': addr.ip,
+                           'fqdn': fqdn,
+                           'primary': primary}
+
+            # Exclude the MAC address for aliases
+            if addr.label:
+                status[key]["mac"] = None
+            else:
+                status[key]["mac"] = addr.interface.mac
         return status
 
     def update_host(self, dbhw_ent, oldinfo):

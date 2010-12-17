@@ -279,21 +279,22 @@ class TestAddVirtualHardware(TestBrokerCommand):
                              """include { """
                              """'hardware/machine/utvendor/utmedium' };""",
                              command)
-            self.matchoutput(out,
-                             """"ram" = list(create("hardware/ram/generic", """
-                             """"size", 8192*MB));""",
-                             command)
-            self.matchoutput(out,
-                             """"cpu" = list(create("""
-                             """"hardware/cpu/intel/xeon_2500"));""",
-                             command)
             self.searchoutput(out,
-                              r'"cards/nic/eth0" = nlist\(\s*'
-                              r'"hwaddr", "00:50:56:01:20:%02x",\s*'
-                              r'"boot", true,\s*\);'
+                              r'"ram" = list\(\s*'
+                              r'create\("hardware/ram/generic",\s*'
+                              r'"size", 8192\*MB\s*\)\s*\);',
+                              command)
+            self.searchoutput(out,
+                              r'"cpu" = list\(\s*'
+                              r'create\("hardware/cpu/intel/xeon_2500"\)\s*\);',
+                              command)
+            self.searchoutput(out,
+                              r'"cards/nic" = nlist\(\s*'
+                              r'"eth0", nlist\(\s*'
+                              r'"boot", true,\s*'
+                              r'"hwaddr", "00:50:56:01:20:%02x"\s*\)\s*\);'
                               % (i - 1),
                               command)
-            self.matchoutput(out, """"boot", true,""", command)
 
     def test_500_verifycatcluster(self):
         command = "cat --cluster=utecl1"
@@ -354,21 +355,22 @@ class TestAddVirtualHardware(TestBrokerCommand):
                          """include { """
                          """'hardware/machine/utvendor/utlarge' };""",
                          command)
-        self.matchoutput(out,
-                         """"ram" = list(create("hardware/ram/generic", """
-                         """"size", 12288*MB));""",
-                         command)
-        # Technically this isn't verifying two cpus, just more than one...
-        self.matchoutput(out,
-                         """"cpu" = list(create("""
-                         """"hardware/cpu/intel/xeon_2500"),""",
-                         command)
         self.searchoutput(out,
-                          r'"cards/nic/eth0" = nlist\(\s*'
-                          r'"hwaddr", "00:50:56:01:20:00",\s*'
-                          r'"boot", true,\s*\);',
+                          r'"ram" = list\(\s*'
+                          r'create\("hardware/ram/generic",\s*'
+                          r'"size", 12288\*MB\s*\)\s*\);',
                           command)
-        self.matchoutput(out, """"boot", true,""", command)
+        self.searchoutput(out,
+                          r'"cpu" = list\(\s*'
+                          r'create\("hardware/cpu/intel/xeon_2500"\),\s*'
+                          r'create\("hardware/cpu/intel/xeon_2500"\)\s*\);',
+                          command)
+        self.searchoutput(out,
+                          r'"cards/nic" = nlist\(\s*'
+                          r'"eth0", nlist\(\s*'
+                          r'"boot", true,\s*'
+                          r'"hwaddr", "00:50:56:01:20:00"\s*\)\s*\);',
+                          command)
 
     def test_552_verifyshowupdate(self):
         command = "show machine --machine evm1"

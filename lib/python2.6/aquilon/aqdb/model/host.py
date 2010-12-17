@@ -31,7 +31,7 @@
 from datetime import datetime
 
 from sqlalchemy import (Integer, DateTime, String, Column, ForeignKey,
-                        UniqueConstraint)
+                        UniqueConstraint, Index)
 from sqlalchemy.orm import relation, backref
 
 from aquilon.aqdb.model import (Base, Branch, Machine, HostLifecycle,
@@ -130,3 +130,5 @@ host = Host.__table__  # pylint: disable-msg=C0103, E1101
 host.primary_key.name = 'host_pk'
 host.append_constraint(
     UniqueConstraint('machine_id', 'branch_id', name='host_machine_branch_uk'))
+
+Index('host_prsnlty_idx', host.c.personality_id)

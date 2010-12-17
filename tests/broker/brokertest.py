@@ -691,6 +691,16 @@ class DummyNetworks(object):
         self.unknown.append(NetworkInfo("4.2.6.176/29", "unknown"))
         self.unknown.append(NetworkInfo("4.2.6.184/29", "unknown"))
         self.unknown.append(NetworkInfo("4.2.10.0/24", "unknown"))
+
+        # Zebra/bonding/bridge: eth0 address/mac
+        self.unknown.append(NetworkInfo("4.2.12.0/26", "unknown"))
+
+        # Zebra/bonding/bridge: eth1 address/mac
+        self.unknown.append(NetworkInfo("4.2.12.64/26", "unknown"))
+
+        # Zebra/bonding/bridge: virtual interface addresses
+        self.unknown.append(NetworkInfo("4.2.12.128/26", "unknown"))
+
         self.tor_net.append(NetworkInfo("4.2.1.128/26", "tor_net"))
         self.tor_net.append(NetworkInfo("4.2.1.192/26", "tor_net"))
         self.tor_net.append(NetworkInfo("4.2.2.0/26", "tor_net"))

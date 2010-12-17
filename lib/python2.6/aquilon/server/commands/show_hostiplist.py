@@ -33,10 +33,10 @@ from sqlalchemy.orm import contains_eager, aliased
 
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.formats.host import HostIPList
-from aquilon.aqdb.model import (AddressAssignment, VlanInterface, Interface,
-                                HardwareEntity, Personality, Machine, Host,
-                                Archetype, PrimaryNameAssociation,
-                                FutureARecord, System, DnsDomain)
+from aquilon.aqdb.model import (AddressAssignment, Interface, HardwareEntity,
+                                Personality, Machine, Host, Archetype,
+                                PrimaryNameAssociation, FutureARecord, System,
+                                DnsDomain)
 
 
 class CommandShowHostIPList(BrokerCommand):
@@ -73,7 +73,7 @@ class CommandShowHostIPList(BrokerCommand):
                                      alias=addr_domain))
 
         q = q.reset_joinpoint()
-        q = q.join(VlanInterface, Interface, HardwareEntity)
+        q = q.join(Interface, HardwareEntity)
 
         # If archetype was given, select only the matching hosts. Otherwise,
         # exclude aurora hosts.
@@ -86,17 +86,15 @@ class CommandShowHostIPList(BrokerCommand):
         q = q.outerjoin((pna_dnsrec, PrimaryNameAssociation.dns_record_id ==
                          pna_dnsrec.id))
         q = q.outerjoin((pna_domain, pna_dnsrec.dns_domain_id == pna_domain.id))
-        q = q.options(contains_eager('vlan'))
-        q = q.options(contains_eager('vlan.interface'))
-        q = q.options(contains_eager('vlan.interface.hardware_entity'))
-        q = q.options(contains_eager("vlan.interface.hardware_entity."
-                                     "_primary_name_asc"))
+        q = q.options(contains_eager('interface'))
+        q = q.options(contains_eager('interface.hardware_entity'))
+        q = q.options(contains_eager("interface.hardware_entity._primary_name_asc"))
 
         # Make sure we pick up the right System/DnsRecord instance
-        q = q.options(contains_eager("vlan.interface.hardware_entity."
+        q = q.options(contains_eager("interface.hardware_entity."
                                      "_primary_name_asc.dns_record",
                                      alias=pna_dnsrec))
-        q = q.options(contains_eager("vlan.interface.hardware_entity."
+        q = q.options(contains_eager("interface.hardware_entity."
                                      "_primary_name_asc.dns_record.dns_domain",
                                     alias=pna_domain))
 
@@ -104,11 +102,11 @@ class CommandShowHostIPList(BrokerCommand):
 
         iplist = HostIPList()
         for addr in q:
-            hwent = addr.vlan.interface.hardware_entity
+            hwent = addr.interface.hardware_entity
             # Only add the primary info for auxiliary addresses, not management
             # ones
             if hwent.primary_name and addr.ip != hwent.primary_ip and \
-               addr.vlan.interface.interface_type != 'management':
+               addr.interface.interface_type != 'management':
                 primary = hwent.fqdn
             else:
                 primary = None

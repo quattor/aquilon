@@ -125,6 +125,14 @@ class TestAddAddress(TestBrokerCommand):
         self.matchoutput(out, "IP address %s is the broadcast address of "
                          "network " % ip, command)
 
+    def test_500_addunittest20eth1(self):
+        ip = self.net.unknown[12].usable[0]
+        fqdn = "unittest20-e1.aqd-unittest.ms.com"
+        self.dsdb_expect_add(fqdn, ip)
+        command = ["add", "address", "--ip", ip, "--fqdn", fqdn]
+        self.noouttest(command)
+        self.dsdb_verify()
+
     def test_900_failbadenv(self):
         default = self.config.get("broker", "default_dns_environment")
         command = ["add_address", "--ip=%s" % self.net.unknown[0].usable[16],

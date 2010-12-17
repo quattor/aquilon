@@ -124,6 +124,50 @@ class TestAddAquilonHost(TestBrokerCommand):
         self.matchoutput(out, "Domain: unittest", command)
         self.matchoutput(out, "Build Status: blind", command)
 
+    def testaddunittest20(self):
+        ip = self.net.unknown[13].usable[2]
+        self.dsdb_expect_add("unittest20.aqd-unittest.ms.com", ip, "le0")
+        self.noouttest(["add", "aquilon", "host",
+                        "--hostname", "unittest20.aqd-unittest.ms.com",
+                        "--ip", ip, "--buildstatus", "build",
+                        "--zebra_interfaces", "eth0,eth1",
+                        "--machine", "ut3c5n2", "--domain", "unittest",
+                        "--osname", "linux", "--osversion", "4.0.1-x86_64",
+                        "--personality", "compileserver"])
+        self.dsdb_verify()
+
+    def testverifyunittest20(self):
+        ip = self.net.unknown[13].usable[2]
+        command = ["show", "host", "--hostname",
+                   "unittest20.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out,
+                         "Provides: unittest20.aqd-unittest.ms.com [%s] "
+                         "(label: hostname, usage: zebra)" % ip,
+                         command)
+
+    def testaddunittest21(self):
+        ip = self.net.unknown[11].usable[1]
+        self.dsdb_expect_add("unittest21.aqd-unittest.ms.com", ip, "bond0")
+        self.noouttest(["add", "aquilon", "host",
+                        "--hostname", "unittest21.aqd-unittest.ms.com",
+                        "--ip", ip, "--buildstatus", "build",
+                        "--machine", "ut3c5n3", "--domain", "unittest",
+                        "--osname", "linux", "--osversion", "4.0.1-x86_64",
+                        "--personality", "compileserver"])
+        self.dsdb_verify()
+
+    def testaddunittest22(self):
+        ip = self.net.unknown[11].usable[2]
+        self.dsdb_expect_add("unittest22.aqd-unittest.ms.com", ip, "br0")
+        self.noouttest(["add", "aquilon", "host",
+                        "--hostname", "unittest22.aqd-unittest.ms.com",
+                        "--ip", ip, "--buildstatus", "build",
+                        "--machine", "ut3c5n4", "--domain", "unittest",
+                        "--osname", "linux", "--osversion", "4.0.1-x86_64",
+                        "--personality", "compileserver"])
+        self.dsdb_verify()
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddAquilonHost)
