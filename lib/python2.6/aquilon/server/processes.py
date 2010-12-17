@@ -450,7 +450,10 @@ class DSDBRunner(object):
             else:
                 ifname = addr.logical_name
 
-            key = '%s:%s' % (dbhw_ent.label, ifname)
+            # FIXME: Using dbhw_ent.id here is not that nice, but the blind
+            # build magic in "add_interface --machine" renames the machine, so
+            # we can't use dbhw_ent.label
+            key = '%s:%s' % (dbhw_ent.id, ifname)
 
             if key in status:
                 continue

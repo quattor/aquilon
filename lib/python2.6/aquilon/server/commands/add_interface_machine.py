@@ -156,21 +156,6 @@ class CommandAddInterfaceMachine(BrokerCommand):
         session.add(dbinterface)
         session.flush()
 
-        if dbmanager:
-            dsdb_runner = DSDBRunner(logger=logger)
-            try:
-                dsdb_runner.add_host(dbinterface)
-            except ProcessException, e:
-                logger.client_info("Could not reserve IP address %s for %s "
-                                   "in DSDB: %s" %
-                                   (dbmanager.ip, dbmanager.fqdn, e))
-                dbinterface.addresses.remove(dbmanager.ip)
-                session.add(dbinterface)
-                session.delete(dbmanager)
-                session.flush()
-                session.refresh(dbinterface)
-                session.refresh(dbmachine)
-
         plenaries = PlenaryCollection(logger=logger)
         plenaries.append(PlenaryMachineInfo(dbmachine, logger=logger))
         if pending_removals and dbmachine.host:
