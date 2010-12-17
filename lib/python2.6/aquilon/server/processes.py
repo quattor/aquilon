@@ -512,6 +512,12 @@ class DSDBRunner(object):
             if key not in oldinfo:
                 adds.append(attrs)
 
+        # Add the primary address first, and delete it last. The primary address
+        # is identified by having an empty ['primary'] key (this is true for the
+        # management address as well, but it does not matter).
+        adds.sort(lambda x, y: cmp(x['primary'] or "", y['primary'] or ""))
+        deletes.sort(lambda x, y: cmp(x['primary'] or "", y['primary'] or ""), reverse=True)
+
         rollback_adds = []
         rollback_deletes = []
         try:

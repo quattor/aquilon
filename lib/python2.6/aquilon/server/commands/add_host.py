@@ -59,6 +59,7 @@ class CommandAddHost(BrokerCommand):
             buildstatus = 'build'
         dbstatus = HostLifecycle.get_unique(session, buildstatus, compel=True)
         dbmachine = Machine.get_unique(session, machine, compel=True)
+        oldinfo = DSDBRunner.snapshot_hw(dbmachine)
 
         dbarchetype = Archetype.get_unique(session, archetype, compel=True)
         if not personality:
@@ -148,7 +149,7 @@ class CommandAddHost(BrokerCommand):
                 logger.info("No IP for %s, not adding to DSDB." % dbmachine.fqdn)
             else:
                 try:
-                    dsdb_runner.update_host(dbmachine, None)
+                    dsdb_runner.update_host(dbmachine, oldinfo)
                 except AquilonError, err:
                     raise ArgumentError("Could not add host to DSDB: %s" % err)
         except:
