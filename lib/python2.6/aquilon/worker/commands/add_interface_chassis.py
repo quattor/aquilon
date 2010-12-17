@@ -59,6 +59,7 @@ class CommandAddInterfaceChassis(BrokerCommand):
                                     "interface to a chassis." % arg)
 
         dbchassis = Chassis.get_unique(session, chassis, compel=True)
+        oldinfo = DSDBRunner.snapshot_hw(dbchassis)
 
         dbinterface = get_or_create_interface(session, dbchassis,
                                               name=interface, mac=mac,
@@ -82,7 +83,7 @@ class CommandAddInterfaceChassis(BrokerCommand):
         if ip:
             dsdb_runner = DSDBRunner(logger=logger)
             try:
-                dsdb_runner.add_host(dbinterface)
+                dsdb_runner.update_host(dbchassis, oldinfo)
             except ProcessException, e:
-                raise ArgumentError("Could not add hostname to DSDB: %s" % e)
+                raise ArgumentError("Could not add chassis to DSDB: %s" % e)
         return

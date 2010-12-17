@@ -399,16 +399,6 @@ class DSDBRunner(object):
             self.logger.debug(
                 "Would have called '%s' if location sync was enabled" % cmd)
 
-    # For switches only.
-    def add_host(self, dbinterface):
-        session = object_session(dbinterface)
-        primary = dbinterface.hardware_entity.fqdn
-        for addr in dbinterface.assignments:
-            if not addr.fqdns:
-                continue
-            self.add_host_details(addr.fqdns[0], addr.ip, addr.logical_name,
-                                  dbinterface.mac, primary=primary)
-
     def add_host_details(self, fqdn, ip, name, mac, primary=None):
         # DSDB does not accept '/' as valid in an interface name.
         command = [self.config.get("broker", "dsdb"),
