@@ -44,8 +44,7 @@ class TestAddManager(TestBrokerCommand):
     # in test_add_aquilon_host.py.
     def testaddunittest00r(self):
         ip = self.net.unknown[0].usable[4]
-        self.dsdb_expect_add("unittest00r.one-nyp.ms.com", ip, "bmc", ip.mac,
-                             "unittest00.one-nyp.ms.com")
+        self.dsdb_expect_add("unittest00r.one-nyp.ms.com", ip, "bmc", ip.mac)
         self.noouttest(["add", "manager", "--ip", ip,
                         "--hostname", "unittest00.one-nyp.ms.com"])
         self.dsdb_verify()
@@ -83,8 +82,7 @@ class TestAddManager(TestBrokerCommand):
 
     def testaddunittest02rsa(self):
         ip = self.net.unknown[0].usable[9]
-        self.dsdb_expect_add("unittest02rsa.one-nyp.ms.com", ip, "ilo", ip.mac,
-                             "unittest02.one-nyp.ms.com")
+        self.dsdb_expect_add("unittest02rsa.one-nyp.ms.com", ip, "ilo", ip.mac)
         self.noouttest(["add", "manager", "--interface", "ilo",
                         "--ip", ip, "--mac", ip.mac,
                         "--hostname", "unittest02.one-nyp.ms.com",
@@ -138,7 +136,7 @@ class TestAddManager(TestBrokerCommand):
         ip = self.net.unknown[0].usable[8]
         self.dsdb_expect_delete(ip)
         self.dsdb_expect_add("unittest12r.aqd-unittest.ms.com", ip, "bmc",
-                             ip.mac, "unittest12.aqd-unittest.ms.com")
+                             ip.mac)
         command = ["add", "interface", "--interface", "bmc",
                    "--hostname", "unittest12.aqd-unittest.ms.com",
                    "--mac", ip.mac]
