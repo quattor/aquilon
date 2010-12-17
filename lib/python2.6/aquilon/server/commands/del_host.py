@@ -77,6 +77,8 @@ class CommandDelHost(BrokerCommand):
 
             archetype = dbhost.archetype.name
             dbmachine = dbhost.machine
+            oldinfo = DSDBRunner.snapshot_hw(dbmachine)
+
             ip = dbmachine.primary_ip
             fqdn = dbmachine.fqdn
 
@@ -105,12 +107,11 @@ class CommandDelHost(BrokerCommand):
             if archetype != 'aurora' and ip is not None:
                 try:
                     dsdb_runner = DSDBRunner(logger=logger)
-                    dsdb_runner.delete_host_details(ip)
+                    dsdb_runner.update_host(dbmachine, oldinfo)
                 except ProcessException, e:
                     raise ArgumentError("Could not remove host %s from "
                                         "DSDB: %s" % (hostname, e))
 
-            session.refresh(dbmachine)
             # Past the point of no return... commit the transaction so
             # that we can free the delete lock.
             session.commit()

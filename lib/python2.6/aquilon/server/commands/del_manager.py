@@ -61,16 +61,17 @@ class CommandDelManager(BrokerCommand):
 
             # FIXME: Look for dependencies...
 
-            ip = dbmanager.ip
             dbmachine = assignment.interface.hardware_entity
+            oldinfo = DSDBRunner.snapshot_hw(dbmachine)
+
             session.delete(assignment)
             session.delete(dbmanager)
-            session.expire(dbmachine)
             session.flush()
+            session.expire(dbmachine)
     
             try:
                 dsdb_runner = DSDBRunner(logger=logger)
-                dsdb_runner.delete_host_details(ip)
+                dsdb_runner.update_host(dbmachine, oldinfo)
             except ProcessException, e:
                 raise ArgumentError("Could not remove host %s from DSDB: %s" %
                             (manager, e))
