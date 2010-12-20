@@ -335,6 +335,7 @@
          <option name="instance" type="string">client of service instance (single instance only)</option>
          <option name="share" type="string">nas_disk_share in use by an virtual machine on the cluster</option>
          <option name="capacity_override" type="flag">Select clusters with capacity overrides</option>
+         <option name="switch" type="string">Select clusters bound to the given switch</option>
          <optgroup name="search_cluster_branch" fields="any">
             <option name="domain" type="string" conflicts="sandbox branch">template domain</option>
             <option name="sandbox" type="string" conflicts="domain branch">Name of the sandbox (given as 'author/branch')</option>
