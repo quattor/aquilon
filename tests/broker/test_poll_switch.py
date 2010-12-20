@@ -129,8 +129,16 @@ class TestPollSwitch(TestBrokerCommand):
 
     def testpollut01ga2s01(self):
         # Issues deprecated warning.
-        self.successtest(["poll", "tor_switch", "--vlan",
-                          "--tor_switch", "ut01ga2s01.aqd-unittest.ms.com"])
+        command = ["poll", "tor_switch", "--vlan", "--tor_switch",
+                   "ut01ga2s01.aqd-unittest.ms.com"]
+        (out, err) = self.successtest(command)
+        self.matchoutput(err, "Command poll_tor_switch is deprecated, please "
+                         "use poll_switch instead.", command)
+        self.matchoutput(err,
+                         "Switch ut01ga2s01.aqd-unittest.ms.com: skipping VLAN "
+                         "714, because network bitmask value 24 differs from "
+                         "prefixlen 26 of network 4.2.6.192.",
+                         command)
 
     def testverifypollut01ga2s01(self):
         command = "show tor_switch --tor_switch ut01ga2s01.aqd-unittest.ms.com"
@@ -150,6 +158,7 @@ class TestPollSwitch(TestBrokerCommand):
         self.matchoutput(out, "VLAN 711: %s" % self.net.unknown[3].ip, command)
         self.matchoutput(out, "VLAN 712: %s" % self.net.unknown[4].ip, command)
         self.matchoutput(out, "VLAN 713: %s" % self.net.unknown[5].ip, command)
+        self.matchclean(out, "VLAN 714", command)
 
     def testpollut01ga2s02(self):
         # Issues deprecated warning.
