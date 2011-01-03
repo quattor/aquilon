@@ -208,14 +208,15 @@ class PlenaryToplevelHost(Plenary):
         for si in self.dbhost.services_provided:
             provides.append('%s/server/config' % si.cfg_path)
 
+        # Ensure used/provided services have a stable order
+        services.sort()
+        provides.sort()
+
         templates = []
         templates.append("archetype/base")
         templates.append(os_template)
-
-        for service in services:
-            templates.append(service)
-        for provide in provides:
-            templates.append(provide)
+        templates.extend(services)
+        templates.extend(provides)
         templates.append(personality_template)
         if self.dbhost.cluster:
             clplenary = PlenaryClusterClient(self.dbhost.cluster)
