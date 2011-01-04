@@ -38,8 +38,7 @@ class CommandAddRequiredServicePersonality(BrokerCommand):
 
     required_parameters = ["service", "archetype", "personality"]
 
-    def render(self, session, service, archetype, personality, comments,
-               **arguments):
+    def render(self, session, service, archetype, personality, **arguments):
         dbpersonality = Personality.get_unique(session, name=personality,
                                                archetype=archetype, compel=True)
         dbservice = Service.get_unique(session, service, compel=True)

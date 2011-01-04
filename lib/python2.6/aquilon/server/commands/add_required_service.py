@@ -38,7 +38,7 @@ class CommandAddRequiredService(BrokerCommand):
 
     required_parameters = ["service", "archetype"]
 
-    def render(self, session, service, archetype, comments, **arguments):
+    def render(self, session, service, archetype, **arguments):
         dbarchetype = Archetype.get_unique(session, archetype, compel=True)
         dbservice = Service.get_unique(session, name=service, compel=True)
         if dbarchetype in dbservice.archetypes:
