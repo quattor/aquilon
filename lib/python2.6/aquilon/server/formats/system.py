@@ -41,7 +41,7 @@ class SystemFormatter(ObjectFormatter):
 
         # This should be replaced by format()...
         details = [indent + "{0:c}: {0.fqdn}".format(system)]
-        if system.ip:
+        if hasattr(system, "ip"):
             details.append(indent + "  IP: %s" % system.ip)
         if system.comments:
             details.append(indent + "  Comments: %s" % system.comments)

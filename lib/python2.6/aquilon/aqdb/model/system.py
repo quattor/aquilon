@@ -70,25 +70,14 @@ class System(Base):
 
     dns_domain_id = Column(Integer, ForeignKey('dns_domain.id',
                                                name='SYSTEM_DNS_FK'),
-                           nullable=False ) #TODO: default
+                           nullable=False) #TODO: default
 
-    ip = Column(IPV4, nullable=True)
-
-    # ON DELETE SET NULL and later passive_deletes=True helps refresh_network in
-    # case of network splits/merges
-    network_id = Column(Integer, ForeignKey('network.id',
-                                            name='SYSTEM_NET_ID_FK',
-                                            ondelete="SET NULL"),
-                        nullable=True)
-
-    creation_date = deferred(Column( DateTime, default=datetime.now,
+    creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
 
     comments = deferred(Column('comments', String(255), nullable=True))
 
     dns_domain = relation(DnsDomain)
-    network = relation(Network, backref=backref('interfaces',
-                                                passive_deletes=True))
 
     __mapper_args__ = {'polymorphic_on': system_type}
 
@@ -128,10 +117,7 @@ class System(Base):
     def __format__(self, format_spec):
         if format_spec != "a":
             return super(System, self).__format__(format_spec)
-        if self.ip:
-            return "%s [%s]" % (self.fqdn, self.ip)
-        else:
-            return self.fqdn
+        return self.fqdn
 
 
 system = System.__table__  # pylint: disable-msg=C0103, E1101
@@ -139,9 +125,6 @@ system.primary_key.name = 'SYSTEM_PK'
 
 system.append_constraint(
     UniqueConstraint('name','dns_domain_id', name='SYSTEM_DNS_NAME_UK'))
-
-system.append_constraint(                    #systm_pt_uk means 'primary tuple'
-    UniqueConstraint('name', 'dns_domain_id', 'ip', name='SYSTEM_PT_UK'))
 
 system.info['unique_fields'] = ['name', 'dns_domain']
 system.info['extra_search_fields'] = ['ip']
@@ -158,18 +141,33 @@ class FutureARecord(System):
     _class_label = 'DNS Record'
 
     system_id = Column(Integer, ForeignKey('system.id',
-                                           name='future_a_record_system_fk',
+                                           name='FUTURE_A_RECORD_SYSTEM_FK',
                                            ondelete='CASCADE'),
                        primary_key=True)
 
-    def __init__(self, ip=None, **kwargs):
-        if not ip:  # pragma: no cover
-            raise ArgumentError("DNS A records need an IP address.")
-        return super(FutureARecord, self).__init__(ip=ip, **kwargs)
+    ip = Column(IPV4, nullable=False)
+
+    # ON DELETE SET NULL and later passive_deletes=True helps refresh_network in
+    # case of network splits/merges
+    network_id = Column(Integer, ForeignKey('network.id',
+                                            name='FUTURE_A_RECORD_NET_ID_FK',
+                                            ondelete="SET NULL"),
+                        nullable=True)
+
+    network = relation(Network, backref=backref('interfaces',
+                                                passive_deletes=True))
+
+    def __format__(self, format_spec):
+        if format_spec != "a":
+            return super(FutureARecord, self).__format__(format_spec)
+        return "%s [%s]" % (self.fqdn, self.ip)
 
 
 farecord = FutureARecord.__table__  # pylint: disable-msg=C0103, E1101
 farecord.primary_key.name = 'future_a_record_pk'
+# TODO: remove this constraint
+farecord.append_constraint(UniqueConstraint('ip', name='future_a_record_ip_uk'))
+
 farecord.info['unique_fields'] = ['name', 'dns_domain']
 farecord.info['extra_search_fields'] = ['ip']
 

@@ -66,12 +66,10 @@ class CommandDelSwitch(BrokerCommand):
 
     def del_switch(self, session, logger, dbswitch):
         dbdns_rec = dbswitch.primary_name
+        ip = dbswitch.primary_ip
         session.delete(dbswitch)
         if dbdns_rec:
-            ip = dbdns_rec.ip
             session.delete(dbdns_rec)
-        else:
-            ip = None
 
         session.flush()
 
@@ -83,6 +81,5 @@ class CommandDelSwitch(BrokerCommand):
             try:
                 dsdb_runner.delete_host_details(ip)
             except ProcessException, e:
-                raise ArgumentError("Could not remove switch from DSDB: %s" %
-                                    e)
+                raise ArgumentError("Could not remove switch from DSDB: %s" % e)
         return

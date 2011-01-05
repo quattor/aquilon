@@ -33,7 +33,7 @@ from sqlalchemy.exceptions import InvalidRequestError
 
 from aquilon.exceptions_ import (AquilonError, ArgumentError, NotFoundException,
                                  UnimplementedError)
-from aquilon.aqdb.model import DnsDomain, System
+from aquilon.aqdb.model import DnsDomain, System, FutureARecord
 from aquilon.aqdb.model.dns_domain import parse_fqdn
 from aquilon.server.dbwrappers.network import get_network_byip
 
@@ -81,10 +81,10 @@ def search_system_query(session, system_type=System, **kwargs):
     if kwargs.get('shortname', None):
         q = q.filter_by(name=kwargs['shortname'])
     if kwargs.get('ip', None):
-        q = q.filter_by(ip=kwargs['ip'])
+        q = q.filter(FutureARecord.ip == kwargs['ip'])
     if kwargs.get('networkip', None):
         dbnetwork = get_network_byip(session, kwargs['networkip'])
-        q = q.filter_by(network=dbnetwork)
+        q = q.filter(FutureARecord.network == dbnetwork)
     if kwargs.get('mac', None):
         raise UnimplementedError("search_system --mac is no longer supported, "
                                  "try search_hardware.")

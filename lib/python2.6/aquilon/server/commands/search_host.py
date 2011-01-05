@@ -36,7 +36,7 @@ from aquilon.server.formats.system import SimpleSystemList
 from aquilon.aqdb.model import (Host, Cluster, Archetype, Personality,
                                 HostLifecycle, OperatingSystem, Service,
                                 ServiceInstance, NasDisk, Disk, Machine, Model,
-                                System, DnsDomain, Interface, AddressAssignment)
+                                FutureARecord, DnsDomain, Interface, AddressAssignment)
 from aquilon.aqdb.model.dns_domain import parse_fqdn
 from aquilon.server.dbwrappers.service_instance import get_service_instance
 from aquilon.server.dbwrappers.branch import get_branch_and_author
@@ -55,7 +55,7 @@ class CommandSearchHost(BrokerCommand):
                domain, sandbox, branch,
                dns_domain, shortname, mac, ip, networkip,
                exact_location, fullinfo, **arguments):
-        dnsq = session.query(System.ip)
+        dnsq = session.query(FutureARecord.ip)
         use_dnsq = False
         if hostname:
             (short, dbdns_domain) = parse_fqdn(session, hostname)

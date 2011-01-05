@@ -149,7 +149,7 @@ class ServiceInstance(Base):
         q = q.order_by(DnsDomain.name, System.name)
         ips = []
         for system in q.all():
-            if system.ip:
+            if hasattr(system, 'ip'):
                 ips.append(system.ip)
                 continue
             try:

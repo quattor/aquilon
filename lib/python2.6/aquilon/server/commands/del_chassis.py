@@ -66,7 +66,7 @@ class CommandDelChassis(BrokerCommand):
 
         # Order matters here
         dbdns_rec = dbchassis.primary_name
-        ip = dbdns_rec.ip
+        ip = dbchassis.primary_ip
         session.delete(dbchassis)
         if dbdns_rec:
             session.delete(dbdns_rec)

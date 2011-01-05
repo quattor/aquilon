@@ -122,7 +122,7 @@ def parse_primary_name(session, fqdn, ip):
         session.add(dbdns_rec)
         session.flush()
 
-    if dbdns_rec.ip:
+    if hasattr(dbdns_rec, "ip"):
         dbnetwork = get_net_id_from_ip(session, dbdns_rec.ip)
         check_ip_restrictions(dbnetwork, dbdns_rec.ip)
 

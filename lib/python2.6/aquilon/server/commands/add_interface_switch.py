@@ -75,7 +75,7 @@ class CommandAddInterfaceSwitch(BrokerCommand):
                                               interface_type='oa',
                                               comments=comments, preclude=True)
 
-        if dbswitch.primary_name.ip and not dbswitch.primary_name.assignments:
+        if dbswitch.primary_ip and not dbswitch.primary_name.assignments:
             dbinterface.addresses.append(dbswitch.primary_ip)
 
         session.flush()
