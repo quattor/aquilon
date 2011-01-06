@@ -47,8 +47,10 @@ class CommandShowChassisAll(BrokerCommand):
         q = q.options(subqueryload_all('model.machine_specs'))
         q = q.options(subqueryload_all('location'))
         q = q.options(subqueryload_all('slots.machine'))
-        q = q.options(subqueryload_all('interfaces.assignments.'
-                                       'dns_records.dns_domain'))
+
+        # FIXME: enable it again when ticket #2014 is fixed
+        #q = q.options(subqueryload_all('interfaces.assignments.'
+        #                               'dns_records.dns_domain'))
 
         # Prefer the primary name for ordering
         q = q.outerjoin(PrimaryNameAssociation, System, DnsDomain)
