@@ -1,0 +1,25 @@
+# These are meant to be relative to the base dir, i.e. /var/quattor
+# Just picking up the /build/xml directory structure, not the files!
++ /build/
++ /build/xml/
++ /build/xml/*/
++ /build/xml/*/clusters/
++ /cfg/
++ /cfg/domains/
++ /cfg/domains/**
++ /domains/
++ /domains/**
++ /objects/
++ /objects/**
++ /plenary/
++ /plenary/**
++ /swrep/
++ /swrep/repository/
++ /swrep/repository/*.tpl
++ /template-king/
++ /template-king/**
++ /web/
++ /web/htdocs/
++ /web/htdocs/profiles/
++ /web/htdocs/profiles/clusters/
+- *
