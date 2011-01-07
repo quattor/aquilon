@@ -44,7 +44,7 @@ class CommandShowAuxiliaryAll(BrokerCommand):
         q = session.query(FutureARecord)
         # ... is not a primary name...
         q = q.filter(~exists().where(PrimaryNameAssociation.dns_record_id ==
-                                     FutureARecord.system_id))
+                                     FutureARecord.dns_record_id))
         # ... and is assigned to a public interface...
         q = q.join((AddressAssignment, FutureARecord.ip == AddressAssignment.ip))
         q = q.join(Interface)

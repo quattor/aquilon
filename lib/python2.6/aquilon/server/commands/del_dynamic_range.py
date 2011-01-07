@@ -70,7 +70,7 @@ class CommandDelDynamicRange(BrokerCommand):
             raise ArgumentError("No system found with IP address %s." % startip)
         if existing[-1].ip != endip:
             raise ArgumentError("No system found with IP address %s." % endip)
-        invalid = [s for s in existing if s.system_type != 'dynamic_stub']
+        invalid = [s for s in existing if s.dns_record_type != 'dynamic_stub']
         if invalid:
             raise ArgumentError("The range contains non-dynamic systems:\n" +
                                 "\n".join([format(i, "a") for i in invalid]))

@@ -33,20 +33,20 @@ from sqlalchemy.exceptions import InvalidRequestError
 
 from aquilon.exceptions_ import (AquilonError, ArgumentError, NotFoundException,
                                  UnimplementedError)
-from aquilon.aqdb.model import DnsDomain, System, FutureARecord
+from aquilon.aqdb.model import DnsDomain, DnsRecord, FutureARecord
 from aquilon.aqdb.model.dns_domain import parse_fqdn
 from aquilon.server.dbwrappers.network import get_network_byip
 
 
-def get_system(session, system, system_type=System, system_label='FQDN'):
+def get_system(session, system, dns_record_type=DnsRecord, system_label='FQDN'):
     (short, dbdns_domain) = parse_fqdn(session, system)
-    return get_system_from_parts(session, short, dbdns_domain, system_type,
+    return get_system_from_parts(session, short, dbdns_domain, dns_record_type,
                                  system_label)
 
-def get_system_from_parts(session, short, dbdns_domain, system_type=System,
+def get_system_from_parts(session, short, dbdns_domain, dns_record_type=DnsRecord,
                           system_label='FQDN'):
     try:
-        q = session.query(system_type)
+        q = session.query(dns_record_type)
         q = q.filter_by(name=short, dns_domain=dbdns_domain)
         dbsystem = q.first()
         if not dbsystem:
@@ -59,17 +59,17 @@ def get_system_from_parts(session, short, dbdns_domain, system_type=System,
 
 def parse_system_and_verify_free(session, system):
     (short, dbdns_domain) = parse_fqdn(session, system)
-    q = session.query(System)
+    q = session.query(DnsRecord)
     dbsystem = q.filter_by(name=short, dns_domain=dbdns_domain).first()
     if dbsystem:
         raise ArgumentError("{0} already exists.".format(dbsystem))
     return (short, dbdns_domain)
 
-def search_system_query(session, system_type=System, **kwargs):
-    q = session.query(system_type)
+def search_system_query(session, dns_record_type=DnsRecord, **kwargs):
+    q = session.query(dns_record_type)
     # Outer-join in all the subclasses so that each access of
     # system doesn't (necessarily) issue another query.
-    if system_type is System:
+    if dns_record_type is DnsRecord:
         q = q.with_polymorphic('*')
     if kwargs.get('fqdn', None):
         (short, dbdns_domain) = parse_fqdn(session, kwargs['fqdn'])
@@ -91,5 +91,5 @@ def search_system_query(session, system_type=System, **kwargs):
     if kwargs.get('type', None):
         # Deprecated... remove if it becomes a problem.
         type_arg = kwargs['type'].strip().lower()
-        q = q.filter_by(system_type=type_arg)
+        q = q.filter_by(dns_record_type=type_arg)
     return q

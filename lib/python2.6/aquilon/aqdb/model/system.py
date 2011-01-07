@@ -26,7 +26,7 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-""" Systems are higher level constructs which can provide services """
+""" DnsRecords are higher level constructs which can provide services """
 from datetime import datetime
 
 from sqlalchemy import (Table, Integer, DateTime, Sequence, String, Column,
@@ -34,7 +34,7 @@ from sqlalchemy import (Table, Integer, DateTime, Sequence, String, Column,
 from sqlalchemy.orm import relation, deferred, backref
 
 from aquilon.exceptions_ import InternalError, ArgumentError
-from aquilon.aqdb.model import Base, DnsDomain, Network
+from aquilon.aqdb.model import Base, DnsDomain, Network, DnsRecord
 from aquilon.aqdb.model.dns_domain import parse_fqdn
 from aquilon.aqdb.column_types import AqStr, IPV4
 
@@ -42,95 +42,8 @@ from aquilon.aqdb.column_types import AqStr, IPV4
 #_sys_types = ['host', 'switch', 'console_switch', 'chassis', 'manager',
 #              'auxiliary' ]
 
-class System(Base):
-    """ System: a base class which abstracts out the details of between
-        all the various kinds of service providers we may use. A System might be
-        a host/server/workstation, router, firewall, netapp, etc. Naming this
-        is kind of difficult, but "system" seems neutral, and happens not to
-        be overloaded by anything I am aware of.
 
-        This is exactly what system does. System_id holds a name, and presents
-        an abstract entity that can provide, or utilize services, hardware,
-        networks, configuration sources, etc. It's subtyped for flexibilty to
-        weather future expansion and enhancement without breaking the
-        fundamental archetypes we're building today.
-
-        It is perhaps the most important table so far, and replaces the notion
-        of 'host' as we've used it in our discussions and designs thus far.
-    """
-    __tablename__ = 'system'
-    _instance_label = 'fqdn'
-
-    id = Column(Integer, Sequence('SYSTEM_SEQ'), primary_key=True)
-
-    name = Column(AqStr(64), nullable=False)
-
-    #TODO: create enum_types for this
-    system_type = Column(AqStr(32), nullable=False)
-
-    dns_domain_id = Column(Integer, ForeignKey('dns_domain.id',
-                                               name='SYSTEM_DNS_FK'),
-                           nullable=False) #TODO: default
-
-    creation_date = deferred(Column(DateTime, default=datetime.now,
-                                    nullable=False))
-
-    comments = deferred(Column('comments', String(255), nullable=True))
-
-    dns_domain = relation(DnsDomain)
-
-    __mapper_args__ = {'polymorphic_on': system_type}
-
-    @property
-    def fqdn(self):
-        return '.'.join([str(self.name), str(self.dns_domain.name)])
-
-    @classmethod
-    def get_unique(cls, session, *args, **kwargs):
-        if "fqdn" in kwargs:
-            (name, dbdns_domain) = parse_fqdn(session, kwargs.pop("fqdn"))
-            kwargs["name"] = name
-            kwargs["dns_domain"] = dbdns_domain
-        return super(System, cls).get_unique(session, *args, **kwargs)
-
-    def __init__(self, session=None, *args, **kwargs):
-        if "fqdn" in kwargs:
-            if not session:
-                raise InternalError("Passing fqdn to Session.__init__() needs "
-                                    "a session.")
-            (name, dbdns_domain) = parse_fqdn(session, kwargs.pop("fqdn"))
-            kwargs["name"] = name
-            kwargs["dns_domain"] = dbdns_domain
-        return super(System, self).__init__(*args, **kwargs)
-
-    @classmethod
-    def get_or_create(cls, session, **kwargs):
-        system = cls.get_unique(session, **kwargs)
-        if system:
-            return system
-        system = cls(session=session, **kwargs)
-        session.add(system)
-        session.flush()
-        session.refresh(system)
-        return system
-
-    def __format__(self, format_spec):
-        if format_spec != "a":
-            return super(System, self).__format__(format_spec)
-        return self.fqdn
-
-
-system = System.__table__  # pylint: disable-msg=C0103, E1101
-system.primary_key.name = 'SYSTEM_PK'
-
-system.append_constraint(
-    UniqueConstraint('name','dns_domain_id', name='SYSTEM_DNS_NAME_UK'))
-
-system.info['unique_fields'] = ['name', 'dns_domain']
-system.info['extra_search_fields'] = ['ip']
-
-
-class FutureARecord(System):
+class FutureARecord(DnsRecord):
     """FutureARecord is a placeholder to let us add name/IP addresses now.
 
     This will be done differently after the DNS revamp.
@@ -140,7 +53,7 @@ class FutureARecord(System):
     __mapper_args__ = {'polymorphic_identity': 'future_a_record'}
     _class_label = 'DNS Record'
 
-    system_id = Column(Integer, ForeignKey('system.id',
+    dns_record_id = Column(Integer, ForeignKey('dns_record.id',
                                            name='FUTURE_A_RECORD_SYSTEM_FK',
                                            ondelete='CASCADE'),
                        primary_key=True)
@@ -184,7 +97,7 @@ class DynamicStub(FutureARecord):
     __mapper_args__ = {'polymorphic_identity': 'dynamic_stub'}
     _class_label = 'Dynamic Stub'
 
-    system_id = Column(Integer, ForeignKey('future_a_record.system_id',
+    dns_record_id = Column(Integer, ForeignKey('future_a_record.dns_record_id',
                                            name='dynamic_stub_farecord_fk',
                                            ondelete='CASCADE'),
                        primary_key=True)
@@ -193,7 +106,7 @@ class DynamicStub(FutureARecord):
 DynamicStub.__table__.primary_key.name = 'dynamic_stub_pk'
 
 
-class ReservedName(System):
+class ReservedName(DnsRecord):
     """
         ReservedName is a placeholder for a name that does not have an IP
         address.
@@ -203,8 +116,8 @@ class ReservedName(System):
     __mapper_args__ = {'polymorphic_identity': 'reserved_name'}
     _class_label = 'Reserved Name'
 
-    system_id = Column(Integer, ForeignKey('system.id',
-                                           name='reserved_name_system_fk',
+    dns_record_id = Column(Integer, ForeignKey('dns_record.id',
+                                           name='reserved_name_dns_record_fk',
                                            ondelete='CASCADE'),
                        primary_key=True)
 

@@ -38,7 +38,7 @@ from aquilon.server.templates.base import PlenaryCollection
 from aquilon.server.templates.cluster import PlenaryCluster
 from aquilon.server.locks import lock_queue, SyncKey
 from aquilon.aqdb.model import (Host, Interface, Machine, Domain, Archetype,
-                                Personality, HostLifecycle, DnsDomain, System,
+                                Personality, HostLifecycle, DnsDomain, DnsRecord,
                                 OperatingSystem, ReservedName)
 
 
@@ -160,7 +160,7 @@ class CommandRefreshWindowsHosts(BrokerCommand):
                 failed.append(msg)
                 logger.info(msg)
                 continue
-            existing = System.get_unique(session, name=short,
+            existing = DnsRecord.get_unique(session, name=short,
                                          dns_domain=dbdns_domain)
             if existing:
                 if not existing.hardware_entity:

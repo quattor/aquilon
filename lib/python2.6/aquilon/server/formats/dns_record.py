@@ -26,24 +26,29 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-""" System formatter """
+"""DnsRecord formatter."""
+
 
 from aquilon.server.formats.formatters import ObjectFormatter
-from aquilon.server.formats.list import ListFormatter
+from aquilon.aqdb.model import DnsRecord, DynamicStub, FutureARecord, ReservedName
 
 
-class SimpleSystemList(list):
-    """By convention, holds a list of DNS records to be formatted in a simple
-       (fqdn-only) manner."""
-    pass
+class DnsRecordFormatter(ObjectFormatter):
+    def format_raw(self, dns_record, indent=""):
+        if dns_record.hardware_entity:
+            return self.redirect_raw(dns_record.hardware_entity, indent)
 
+        # This should be replaced by format()...
+        details = [indent + "{0:c}: {0.fqdn}".format(dns_record)]
+        if hasattr(dns_record, "ip"):
+            details.append(indent + "  IP: %s" % dns_record.ip)
+        if dns_record.comments:
+            details.append(indent + "  Comments: %s" % dns_record.comments)
+        return "\n".join(details)
 
-class SimpleSystemListFormatter(ListFormatter):
-    def format_raw(self, sslist, indent=""):
-        return str("\n".join([indent + system.fqdn for system in sslist]))
+# The DnsRecord entry should never get invoked, we always have a subclass.
+ObjectFormatter.handlers[DnsRecord] = DnsRecordFormatter()
 
-    # TODO: Should probably display some useful info...
-    def csv_fields(self, system):
-        return (system.fqdn,)
-
-ObjectFormatter.handlers[SimpleSystemList] = SimpleSystemListFormatter()
+ObjectFormatter.handlers[DynamicStub] = DnsRecordFormatter()
+ObjectFormatter.handlers[FutureARecord] = DnsRecordFormatter()
+ObjectFormatter.handlers[ReservedName] = DnsRecordFormatter()

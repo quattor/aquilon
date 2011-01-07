@@ -101,7 +101,7 @@ class AddressAssignment(Base):
                                          cascade='all, delete-orphan'))
 
     # Setting viewonly is very important here as we do not want the removal of
-    # an AddressAssignment record to change the linked System record(s)
+    # an AddressAssignment record to change the linked DNS record(s)
     dns_records = relation(FutureARecord, lazy=True, uselist=True,
                            primaryjoin=ip == FutureARecord.ip,
                            foreign_keys=[FutureARecord.ip],

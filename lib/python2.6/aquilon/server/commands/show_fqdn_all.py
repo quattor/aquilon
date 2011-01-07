@@ -31,10 +31,10 @@
 
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.formats.system import SimpleSystemList
-from aquilon.aqdb.model import System
+from aquilon.aqdb.model import DnsRecord
 
 
 class CommandShowFqdnAll(BrokerCommand):
 
     def render(self, session, **arguments):
-        return SimpleSystemList(session.query(System).all())
+        return SimpleSystemList(session.query(DnsRecord).all())

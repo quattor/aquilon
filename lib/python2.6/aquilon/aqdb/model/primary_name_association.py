@@ -36,7 +36,7 @@ from sqlalchemy import (Column, Integer, String, DateTime, ForeignKey,
                         UniqueConstraint)
 
 from aquilon.exceptions_ import ArgumentError, NotFoundException
-from aquilon.aqdb.model import Base, System, HardwareEntity
+from aquilon.aqdb.model import Base, DnsRecord, HardwareEntity
 
 _TN = 'primary_name_association'
 _ABV = 'primary_name_asc'
@@ -74,7 +74,8 @@ class PrimaryNameAssociation(Base):
                                                     name='%s_hw_fk' % _ABV),
                                 primary_key=True)
 
-    dns_record_id = Column(Integer, ForeignKey('system.id', ondelete='CASCADE',
+    dns_record_id = Column(Integer, ForeignKey('dns_record.id',
+                                               ondelete='CASCADE',
                                                name='%s_dns_rec_fk' % _ABV),
                            primary_key=True)
 
@@ -97,7 +98,7 @@ class PrimaryNameAssociation(Base):
     # Cascading:
     # - delete the DNS record if the association is removed
     # - delete the association if the DNS record is removed
-    dns_record = relation(System,
+    dns_record = relation(DnsRecord,
                           lazy=False,
                           uselist=False,
                           innerjoin=True,
@@ -147,5 +148,5 @@ pna.append_constraint(
 HardwareEntity.primary_name = association_proxy('_primary_name_asc', 'dns_record',
                 creator=lambda dns_rec: PrimaryNameAssociation(dns_record=dns_rec))
 
-System.hardware_entity = association_proxy('_primary_name_asc',
+DnsRecord.hardware_entity = association_proxy('_primary_name_asc',
                                                   'hardware_entity')
