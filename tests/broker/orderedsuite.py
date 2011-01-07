@@ -77,6 +77,7 @@ from test_add_vendor import TestAddVendor
 from test_add_cpu import TestAddCpu
 from test_add_model import TestAddModel
 from test_add_network import TestAddNetwork
+from test_add_router import TestAddRouter
 from test_add_metacluster import TestAddMetaCluster
 from test_add_esx_cluster import TestAddESXCluster
 from test_add_esx_cluster_aligned_service import (
@@ -187,6 +188,7 @@ from test_del_esx_cluster_aligned_service import (
     TestDelESXClusterAlignedService)
 from test_del_esx_cluster import TestDelESXCluster
 from test_del_metacluster import TestDelMetaCluster
+from test_del_router import TestDelRouter
 from test_del_network import TestDelNetwork
 from test_del_model import TestDelModel
 from test_del_cpu import TestDelCpu
@@ -239,7 +241,7 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestAddTorSwitch, TestAddSwitch, TestUpdateSwitch,
                 TestPollSwitch,
                 TestAddChassis, TestAddMachine, TestAddDisk, TestAddInterface,
-                TestAddAddress, TestAddDynamicRange, TestAddHost,
+                TestAddAddress, TestAddRouter, TestAddDynamicRange, TestAddHost,
                 TestAddAquilonHost, TestAddWindowsHost, TestAddAuroraHost,
                 TestAddAuxiliary, TestAddManager, TestAddInterfaceAddress,
                 TestMapService, TestBindClient, TestPrebindServer,
@@ -290,7 +292,7 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestDelSwitch,
                 TestDelESXClusterAlignedService,
                 TestDelESXCluster, TestDelMetaCluster,
-                TestDelNetwork,
+                TestDelRouter, TestDelNetwork,
                 TestDelModel, TestDelCpu, TestDelVendor,
                 TestDelRack, TestDelRoom,
                 TestDelBuilding, TestDelRequiredService, TestDelService,

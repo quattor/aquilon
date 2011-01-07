@@ -1,0 +1,131 @@
+#!/usr/bin/env python2.6
+# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+#
+# Copyright (C) 2011  Contributor
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the EU DataGrid Software License.  You should
+# have received a copy of the license with this program, and the
+# license is published at
+# http://eu-datagrid.web.cern.ch/eu-datagrid/license.html.
+#
+# THE FOLLOWING DISCLAIMER APPLIES TO ALL SOFTWARE CODE AND OTHER
+# MATERIALS CONTRIBUTED IN CONNECTION WITH THIS PROGRAM.
+#
+# THIS SOFTWARE IS LICENSED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+# FOR A PARTICULAR PURPOSE AND ANY WARRANTY OF NON-INFRINGEMENT, ARE
+# DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS
+# BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY,
+# OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT
+# OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
+# BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+# LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+# NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+# SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. THIS
+# SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
+# THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
+# TERMS THAT MAY APPLY.
+"""Module for testing the add_router command."""
+
+import unittest
+
+if __name__ == "__main__":
+    import utils
+    utils.import_depends()
+
+from brokertest import TestBrokerCommand
+
+
+class TestAddRouter(TestBrokerCommand):
+
+    def testaddrouter(self):
+        net = self.net.tor_net[12]
+        command = ["add", "router", "--ip", net.gateway,
+                   "--fqdn", "ut3gd1r01-v109-hsrp.aqd-unittest.ms.com",
+                   "--building", "ut", "--comments", "Test router"]
+        self.noouttest(command)
+
+    def testaddrouteragain(self):
+        net = self.net.tor_net[12]
+        command = ["add", "router", "--ip", net.gateway,
+                   "--fqdn", "ut3gd1r01-v109-hsrp.aqd-unittest.ms.com",
+                   "--building", "ut"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "IP address %s is already present as a router "
+                         "for network %s." % (net.gateway, net.ip), command)
+
+    def testaddrouter2(self):
+        net = self.net.tor_net[6]
+        command = ["add", "router", "--ip", net.gateway,
+                   "--fqdn", "ut3gd1r04-v110-hsrp.aqd-unittest.ms.com",
+                   "--building", "ut"]
+        self.noouttest(command)
+
+    def testaddnormalhostasrouter(self):
+        net = self.net.unknown[2]
+        ip = net.usable[0]
+        command = ["add", "router", "--ip", ip,
+                   "--fqdn", "not-a-router.aqd-unittest.ms.com",
+                   "--building", "ut"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "IP address %s is not a valid router address on "
+                         "network %s." % (ip, net.ip),
+                         command)
+
+    def testaddreserved(self):
+        net = self.net.tor_net[0]
+        ip = net.reserved[0]
+        command = ["add", "router", "--ip", ip,
+                   "--fqdn", "reserved-address.aqd-unittest.ms.com",
+                   "--building", "ut"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "IP address %s is not a valid router address on "
+                         "network %s." % (ip, net.ip),
+                         command)
+
+    def testshowrouter(self):
+        net = self.net.tor_net[12]
+        command = ["show", "router", "--ip", net.gateway]
+        out = self.commandtest(command)
+        self.matchoutput(out,
+                         "Router: ut3gd1r01-v109-hsrp.aqd-unittest.ms.com [%s]"
+                         % net.gateway,
+                         command)
+        self.matchoutput(out, "Network: %s" % net.ip, command)
+        self.matchoutput(out, "Comments: Test router", command)
+
+    def testshownetwork(self):
+        net = self.net.tor_net[12]
+        command = ["show", "network", "--ip", net.ip]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Routers: %s (Building ut)" % net.gateway, command)
+
+    def testshowbadip(self):
+        ip = self.net.tor_net[0].gateway
+        command = ["show", "router", "--ip", ip]
+        out = self.notfoundtest(command)
+        self.matchoutput(out, "Router with IP address %s not found." % ip,
+                         command)
+
+    def testshownotarouter(self):
+        command = ["show", "router",
+                   "--fqdn", "arecord13.aqd-unittest.ms.com"]
+        out = self.notfoundtest(command)
+        self.matchoutput(out,
+                         "Router named arecord13.aqd-unittest.ms.com not found.",
+                         command)
+
+    def testshowrouterall(self):
+        command = ["show", "router", "--all"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Router: ut3gd1r01-v109-hsrp.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "Router: ut3gd1r04-v110-hsrp.aqd-unittest.ms.com", command)
+
+
+if __name__=='__main__':
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestAddRouter)
+    unittest.TextTestRunner(verbosity=2).run(suite)

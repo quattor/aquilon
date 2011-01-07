@@ -35,6 +35,7 @@ from sqlalchemy import (Column, Integer, Sequence, String, Boolean, DateTime,
                         ForeignKey, UniqueConstraint, CheckConstraint, Index,
                         func)
 from sqlalchemy.orm import relation
+from sqlalchemy.ext.associationproxy import association_proxy
 
 from aquilon.exceptions_ import NotFoundException, InternalError
 from aquilon.aqdb.model import Base, Location
@@ -91,6 +92,9 @@ class Network(Base):
     comments = Column(String(255), nullable=True)
 
     location = relation(Location, backref='networks')
+
+    # The routers relation is defined in router_address.py
+    router_ips = association_proxy("routers", "ip")
 
     def __init__(self, **kw):
         args = kw.copy()

@@ -55,15 +55,14 @@ from aquilon.aqdb.model.desk import Desk
 #NETWORK
 from aquilon.aqdb.model.network import Network
 from aquilon.aqdb.model.dns_domain import DnsDomain
+from aquilon.aqdb.model.system import (System, DynamicStub, FutureARecord,
+                                       ReservedName)
+from aquilon.aqdb.model.router_address import RouterAddress
 
 #CONFIG
 from aquilon.aqdb.model.archetype import Archetype
 from aquilon.aqdb.model.personality import Personality
 from aquilon.aqdb.model.operating_system import OperatingSystem
-
-#SYSTEM
-from aquilon.aqdb.model.system import (System, DynamicStub, FutureARecord,
-                                       ReservedName)
 
 #HARDWARE
 from aquilon.aqdb.model.vendor import Vendor

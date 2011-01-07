@@ -171,6 +171,9 @@ class PlenaryToplevelHost(Plenary):
                 net = addr.network
 
                 if addr.label == "":
+                    # FIXME: consult the router information and in case there
+                    # are more than one routers, choose the one that is closer
+                    # (e.g. same building)
                     # Fudge the gateway as the first available ip
                     gateway = net.network[1]
                     if not default_gateway and dbinterface.bootable:
