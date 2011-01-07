@@ -29,7 +29,7 @@
 
 
 from aquilon.server.broker import BrokerCommand
-from aquilon.aqdb.model import FutureARecord
+from aquilon.aqdb.model import FutureARecord, DnsEnvironment
 from aquilon.exceptions_ import UnimplementedError, ArgumentError
 from aquilon.server.locks import lock_queue, DeleteKey
 from aquilon.server.processes import DSDBRunner
@@ -41,8 +41,9 @@ class CommandDelAddressDNSEnvironment(BrokerCommand):
     required_parameters = ["fqdn", "ip", "dns_environment"]
 
     def render(self, session, logger, fqdn, ip, dns_environment, **arguments):
-        default = self.config.get("site", "default_dns_environment")
-        if str(dns_environment).strip().lower() != default.strip().lower():
+        dbdns_env = DnsEnvironment.get_unique(session, dns_environment,
+                                              compel=True)
+        if not dbdns_env.is_default:
             raise UnimplementedError("Only the '%s' DNS environment is "
                                      "currently supported." % default)
 

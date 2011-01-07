@@ -1,6 +1,7 @@
+#!/usr/bin/env python2.6
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 #
-# Copyright (C) 2008,2009,2010,2011  Contributor
+# Copyright (C) 2010  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -26,19 +27,35 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
+"""Module for testing the del dns environment command."""
 
-from aquilon.server.broker import BrokerCommand
-from aquilon.server.commands.add_address_dns_environment \
-        import CommandAddAddressDNSEnvironment
+import os
+import unittest
+
+if __name__ == "__main__":
+    import utils
+    utils.import_depends()
+
+from brokertest import TestBrokerCommand
 
 
-class CommandAddAddress(CommandAddAddressDNSEnvironment):
+class TestDelDnsEnvironment(TestBrokerCommand):
 
-    required_parameters = ["fqdn"]
+    def testdelutenv(self):
+        command = ["del", "dns", "environment", "--dns_environment", "ut-env"]
+        self.noouttest(command)
 
-    def render(self, dns_environment, **kwargs):
-        if not dns_environment:
-            dns_environment = self.config.get("site", "default_dns_environment")
-        return CommandAddAddressDNSEnvironment.render(self,
-                                                      dns_environment=dns_environment,
-                                                      **kwargs)
+    def testdelnonexistant(self):
+        command = ["del", "dns", "environment", "--dns_environment", "no-such-env"]
+        out = self.notfoundtest(command)
+        self.matchoutput(out, "DNS Environment no-such-env not found.", command)
+
+    def testshowutenv(self):
+        command = ["show", "dns", "environment", "--dns_environment", "ut-env"]
+        out = self.notfoundtest(command)
+        self.matchoutput(out, "DNS Environment ut-env not found.", command)
+
+
+if __name__=='__main__':
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestDelDnsEnvironment)
+    unittest.TextTestRunner(verbosity=2).run(suite)

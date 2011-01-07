@@ -29,7 +29,7 @@
 
 from aquilon.exceptions_ import (UnimplementedError, ArgumentError,
                                  ProcessException)
-from aquilon.aqdb.model import System, FutureARecord
+from aquilon.aqdb.model import System, FutureARecord, DnsEnvironment
 from aquilon.aqdb.model.dns_domain import parse_fqdn
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.server.broker import BrokerCommand
@@ -44,8 +44,9 @@ class CommandAddAddressDNSEnvironment(BrokerCommand):
 
     def render(self, session, logger, fqdn, dns_environment, comments,
                **arguments):
-        default = self.config.get("site", "default_dns_environment")
-        if str(dns_environment).strip().lower() != default.strip().lower():
+        dbdns_env = DnsEnvironment.get_unique(session, dns_environment,
+                                              compel=True)
+        if not dbdns_env.is_default:
             raise UnimplementedError("Only the '%s' DNS environment is "
                                      "currently supported." % default)
 

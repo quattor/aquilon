@@ -53,6 +53,7 @@ from test_status import TestStatus
 from test_show_active_commands import TestShowActiveCommands
 from test_permission import TestPermission
 from test_add_dns_domain import TestAddDnsDomain
+from test_add_dns_environment import TestAddDnsEnvironment
 from test_add_sandbox import TestAddSandbox
 from test_add_domain import TestAddDomain
 from test_update_branch import TestUpdateBranch
@@ -207,6 +208,7 @@ from test_del_domain import TestDelDomain
 from test_del_sandbox import TestDelSandbox
 from test_del_ns_record import TestDelNSRecord
 from test_del_dns_domain import TestDelDnsDomain
+from test_del_dns_environment import TestDelDnsEnvironment
 from test_client_failure import TestClientFailure
 from test_client_bypass import TestClientBypass
 from test_stop import TestBrokerStop
@@ -227,7 +229,7 @@ class BrokerTestSuite(unittest.TestSuite):
         for test in [TestBrokerStart,
                 TestPing, TestStatus, TestShowActiveCommands,
                 TestPermission,
-                TestAddDnsDomain,
+                TestAddDnsDomain, TestAddDnsEnvironment,
                 TestAddSandbox, TestAddDomain, TestUpdateBranch,
                 TestGet, TestPublishSandbox, TestDeployDomain,
                 TestSyncDomain,
@@ -302,7 +304,7 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestDelCity,
                 TestDelPersonality, TestDelOS, TestDelArchetype,
                 TestDelDomain, TestDelSandbox,
-                TestDelNSRecord, TestDelDnsDomain,
+                TestDelNSRecord, TestDelDnsEnvironment, TestDelDnsDomain,
                 TestClientFailure,
                 TestBrokerStop]:
             self.addTest(unittest.TestLoader().loadTestsFromTestCase(test))

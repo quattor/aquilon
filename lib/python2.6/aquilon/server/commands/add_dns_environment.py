@@ -1,6 +1,6 @@
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 #
-# Copyright (C) 2008,2009,2010,2011  Contributor
+# Copyright (C) 2008,2009,2010  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -26,19 +26,21 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
+""" Provides adding dns_evironment functionality """
 
-from aquilon.server.broker import BrokerCommand
-from aquilon.server.commands.add_address_dns_environment \
-        import CommandAddAddressDNSEnvironment
+from aquilon.exceptions_ import ArgumentError
+from aquilon.server.broker import BrokerCommand, validate_basic
+from aquilon.aqdb.model import DnsEnvironment
 
+class CommandAddDnsEnvironment(BrokerCommand):
 
-class CommandAddAddress(CommandAddAddressDNSEnvironment):
+    required_parameters = ["dns_environment"]
 
-    required_parameters = ["fqdn"]
+    def render(self, session, logger, dns_environment, comments, **arguments):
+        validate_basic("DNS environment", dns_environment)
+        DnsEnvironment.get_unique(session, dns_environment, preclude=True)
 
-    def render(self, dns_environment, **kwargs):
-        if not dns_environment:
-            dns_environment = self.config.get("site", "default_dns_environment")
-        return CommandAddAddressDNSEnvironment.render(self,
-                                                      dns_environment=dns_environment,
-                                                      **kwargs)
+        db_dnsenv = DnsEnvironment(name=dns_environment, comments=comments)
+        session.add(db_dnsenv)
+        session.flush()
+        return

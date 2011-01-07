@@ -61,6 +61,9 @@ UserPrincipal(name="cdb", role=Role(name="aqd_admin"), realm=Realm(name="is1.mor
 #Status(name="failed")
 #Status(name="install")
 
+DnsEnvironment(name="internal")
+DnsEnvironment(name="external")
+
 DnsDomain(name="ms.com")
 DnsDomain(name="devin1.ms.com")
 DnsDomain(name="devin2.ms.com")

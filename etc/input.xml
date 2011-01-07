@@ -2912,6 +2912,35 @@
       <transport method="put" path="principal/%(principal)s/role" />
    </command>
 
+   <command name="add_dns_environment">
+      Add a new DNS Environment
+      <optgroup name="dns_env_opts" mandatory="True" fields="all">
+         <option name="dns_environment" type="string">The DNS environment name</option>
+      </optgroup>
+      <optgroup name="add_dns_env_optional" mandatory="False">
+        <option name="comments" type="string">Comments</option>
+      </optgroup>
+      <transport method="put" path="dns_environment/%(dns_environment)s" />
+   </command>
+
+   <command name="show_dns_environment">
+      Display a DNS Environment
+      <optgroup name="dns_env_opts" mandatory="True" fields="any">
+         <option name="dns_environment" type="string">Name of the DNS environment</option>
+         <option name="all" type="flag" conflicts="dns_domain">Show all DNS environments</option>
+      </optgroup>
+      <transport trigger="dns_environment" method="get" path="dns_environment/%(dns_environment)s" />
+      <transport trigger="all" method="get" path="dns_environment" />
+   </command>
+
+   <command name="del_dns_environment">
+      Delete a DNS Environment
+      <optgroup name="dns_env_opts" mandatory="True" fields="all">
+         <option name="dns_environment" type="string">The DNS environment name</option>
+      </optgroup>
+      <transport method="delete" path="dns_environment/%(dns_environment)s" />
+   </command>
+
    <command name="add_dns_domain">
       Add a new DNS subdomain.
       <optgroup name="add_dns_domain_options" mandatory="True" fields="all">

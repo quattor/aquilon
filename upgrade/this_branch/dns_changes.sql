@@ -16,4 +16,21 @@ ALTER TABLE future_a_record
 ALTER TABLE system DROP COLUMN ip;
 ALTER TABLE system DROP COLUMN network_id;
 
+CREATE SEQUENCE dns_environment_id_seq;
+CREATE TABLE dns_environment (
+	id INTEGER CONSTRAINT "DNS_ENVIRONMENT_ID_NN" NOT NULL,
+	name VARCHAR2(32 CHAR) CONSTRAINT "DNS_ENVIRONMENT_NAME_NN" NOT NULL,
+	creation_date DATE CONSTRAINT "DNS_ENVIRONMENT_CR_DATE_NN" NOT NULL,
+	comments VARCHAR2(255 CHAR),
+	CONSTRAINT "DNS_ENVIRONMENT_PK" PRIMARY KEY (id),
+	CONSTRAINT "DNS_ENVIRONMENT_NAME_UK" UNIQUE (name)
+);
+
+INSERT INTO dns_environment (id, name, creation_date)
+	VALUES (dns_environment_id_seq.nextval, 'internal', CURRENT_DATE);
+INSERT INTO dns_environment (id, name, creation_date)
+	VALUES (dns_environment_id_seq.nextval, 'external', CURRENT_DATE);
+INSERT INTO dns_environment (id, name, creation_date)
+	VALUES (dns_environment_id_seq.nextval, 'corpseg', CURRENT_DATE);
+
 QUIT;
