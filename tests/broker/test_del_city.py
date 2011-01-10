@@ -1,6 +1,7 @@
+#!/usr/bin/env python2.6
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 #
-# Copyright (C) 2010  Contributor
+# Copyright (C) 2008,2009,2010  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -26,25 +27,32 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
+"""Module for testing the del city command."""
 
 
 import os
-import logging
+import unittest
 
-from aquilon.server.templates.base import Plenary
+if __name__ == "__main__":
+    import utils
+    utils.import_depends()
 
-LOGGER = logging.getLogger('aquilon.server.templates.city')
+from brokertest import TestBrokerCommand
 
-class PlenaryCity(Plenary):
-    def __init__(self, dbcity, logger=LOGGER):
-        Plenary.__init__(self, dbcity, logger=logger)
-        self.template_type = ""
-        self.name = dbcity.name
-        self.hub = dbcity.hub.fullname.lower()
-        self.timezone = dbcity.timezone
-        self.plenary_core = "site/%(hub)s/%(name)s" % self.__dict__
-        self.plenary_template = self.plenary_core + "/config"
-        self.dir = self.config.get("broker", "plenarydir")
 
-    def body(self, lines):
-        lines.append("variable TIMEZONE = '%(timezone)s';" % self.__dict__)
+class TestDelCity(TestBrokerCommand):
+
+    def test_delex(self):
+        command = ["del_city", "--city=ex"]
+        self.dsdb_expect("delete_city_aq -city ex")
+        self.successtest(command)
+        self.dsdb_verify()
+        plenary = os.path.join(self.config.get("broker", "plenarydir"),
+                               "site", "americas", "ex", "config.tpl")
+        self.failIf(os.path.exists(plenary), "plenary still there after del")
+
+
+
+if __name__=='__main__':
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestDelDomain)
+    unittest.TextTestRunner(verbosity=2).run(suite)

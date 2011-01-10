@@ -55,6 +55,9 @@ class TestDelNetwork(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.parse_netlist_msg(out, expect=0)
 
+    def testdelnetworkcards(self):
+        command = ["del_network", "--ip=192.168.1.0"]
+        self.noouttest(command)
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddNetwork)

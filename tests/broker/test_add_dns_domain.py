@@ -50,6 +50,16 @@ class TestAddDnsDomain(TestBrokerCommand):
                         "--comments", "Some DNS domain comments"])
         self.dsdb_verify()
 
+    def testaddcardsdomain(self):
+        self.dsdb_expect("show dns_domains -domain_name cards.example.com",
+                         fail=True)
+        self.dsdb_expect("add dns_domain -domain_name cards.example.com "
+                         "-comments A pack of lies")
+        self.noouttest(["add", "dns_domain",
+                        "--dns_domain", "cards.example.com",
+                        "--comments", "A pack of lies"])
+        self.dsdb_verify()
+
     def testverifyaddaqdunittestdomain(self):
         command = "show dns_domain --dns_domain aqd-unittest.ms.com"
         out = self.commandtest(command.split(" "))

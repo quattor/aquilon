@@ -652,13 +652,27 @@ class TestAddInterface(TestBrokerCommand):
                                 "--machine", machine,
                                 "--mac", self.net.tor_net2[netoff].usable[port].mac])
 
-    # FIXME: Missing a test for an interface with comments.
-    # FIXME: Missing a test for adding an interface that already exists.
     # FIXME: Missing a test for a failed DSDB add_host.
     # FIXME: Missing tests around Dell rename hack.
 
     # Note: additional tests (mostly for --automac) are in the
     # test_add_virtual_hardware module.
+
+    def testaddjackmac(self):
+        self.noouttest(["add", "interface", "--interface", "eth0",
+                        "--machine", "jack",
+                        "--comments", "interface for jack",
+                        "--mac", self.net.unknown[0].usable[17].mac.upper()])
+
+    def testverifyjackmac(self):
+        command = "show machine --machine jack"
+        out = self.commandtest(command.split(" "))
+        self.searchoutput(out,
+                          r"Interface: eth0 %s boot=True" %
+                          self.net.unknown[0].usable[17].mac.lower(),
+                          command)
+        self.searchoutput(out, r"\s+Comments: interface for jack",
+                          command)
 
 
 if __name__=='__main__':

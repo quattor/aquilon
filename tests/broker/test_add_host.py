@@ -51,6 +51,18 @@ class TestAddHost(TestBrokerCommand):
                         "--personality", "compileserver"])
         self.dsdb_verify()
 
+    def testaddjackhost(self):
+        ip = self.net.unknown[0].usable[17]
+        self.dsdb_expect_add("jack.cards.example.com", ip, "eth0", ip.mac)
+        self.noouttest(["add", "host",
+                        "--hostname", "jack.cards.example.com",
+                        "--ip", ip,
+                        "--machine", "jack", "--domain", "unittest",
+                        "--buildstatus", "build", "--archetype", "aquilon",
+                        "--osname", "linux", "--osversion", "4.0.1-x86_64",
+                        "--personality", "compileserver"])
+        self.dsdb_verify()
+
     def testmachinereuse(self):
         ip = self.net.unknown[0].usable[-1]
         command = ["add", "host", "--hostname", "used-already.one-nyp.ms.com",

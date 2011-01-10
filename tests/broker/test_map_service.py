@@ -52,6 +52,10 @@ class TestMapService(TestBrokerCommand):
                          "Instance: q.ny.ms.com Map: Building ut",
                          command)
 
+    def testmapafsextra(self):
+        self.noouttest(["map", "service", "--city", "ex",
+                        "--service", "afs", "--instance", "q.ny.ms.com"])
+
     def testverifynomatch(self):
         command = "show map --service afs --instance q.ny.ms.com --organization ms"
         out = self.notfoundtest(command.split(" "))
@@ -73,6 +77,8 @@ class TestMapService(TestBrokerCommand):
     def testmapaqd(self):
         self.noouttest(["map", "service", "--campus", "ny",
                         "--service", "aqd", "--instance", "ny-prod"])
+        self.noouttest(["map", "service", "--city", "ex",
+                        "--service", "aqd", "--instance", "ny-prod"])
 
     def testverifymapaqd(self):
         command = ["show_map",
@@ -86,44 +92,63 @@ class TestMapService(TestBrokerCommand):
     def testmaplemon(self):
         self.noouttest(["map", "service", "--campus", "ny",
                         "--service", "lemon", "--instance", "ny-prod"])
+        self.noouttest(["map", "service", "--city", "ex",
+                        "--service", "lemon", "--instance", "ny-prod"])
 
     def testverifymaplemon(self):
         command = ["show_map",
-                   "--service=lemon", "--instance=ny-prod", "--campus=ny"]
+                   "--service=lemon", "--instance=ny-prod"]
         out = self.commandtest(command)
         self.matchoutput(out,
                          "Archetype: aquilon Service: lemon "
                          "Instance: ny-prod Map: Campus ny",
                          command)
+        self.matchoutput(out,
+                         "Archetype: aquilon Service: lemon "
+                         "Instance: ny-prod Map: City ex",
+                         command)
 
     def testmapbootserver(self):
         self.noouttest(["map", "service", "--building", "ut",
                         "--service", "bootserver", "--instance", "np.test"])
+        self.noouttest(["map", "service", "--building", "cards",
+                        "--service", "bootserver", "--instance", "np.test"])
 
     def testverifymapbootserver(self):
         command = ["show_map", "--service", "bootserver",
-                   "--instance", "np.test", "--building", "ut"]
+                   "--instance", "np.test"]
         out = self.commandtest(command)
         self.matchoutput(out,
                          "Archetype: aquilon Service: bootserver "
                          "Instance: np.test Map: Building ut",
                          command)
+        self.matchoutput(out,
+                         "Archetype: aquilon Service: bootserver "
+                         "Instance: np.test Map: Building cards",
+                         command)
 
     def testmapntp(self):
         self.noouttest(["map", "service", "--city", "ny",
                         "--service", "ntp", "--instance", "pa.ny.na"])
+        self.noouttest(["map", "service", "--city", "ex",
+                        "--service", "ntp", "--instance", "pa.ny.na"])
 
     def testverifymapntp(self):
-        command = ["show_map",
-                   "--service=ntp", "--instance=pa.ny.na", "--city=ny"]
+        command = ["show_map", "--service=ntp", "--instance=pa.ny.na"]
         out = self.commandtest(command)
         self.matchoutput(out,
                          "Archetype: aquilon Service: ntp "
                          "Instance: pa.ny.na Map: City ny",
                          command)
+        self.matchoutput(out,
+                         "Archetype: aquilon Service: ntp "
+                         "Instance: pa.ny.na Map: City ex",
+                         command)
 
     def testmaputsi1(self):
         self.noouttest(["map", "service", "--building", "ut",
+                        "--service", "utsvc", "--instance", "utsi1"])
+        self.noouttest(["map", "service", "--building", "cards",
                         "--service", "utsvc", "--instance", "utsi1"])
 
     def testmaputsi2(self):
@@ -136,6 +161,10 @@ class TestMapService(TestBrokerCommand):
         self.matchoutput(out,
                          "Archetype: aquilon Service: utsvc "
                          "Instance: utsi1 Map: Building ut",
+                         command)
+        self.matchoutput(out,
+                         "Archetype: aquilon Service: utsvc "
+                         "Instance: utsi1 Map: Building cards",
                          command)
         self.matchoutput(out,
                          "Archetype: aquilon Service: utsvc "

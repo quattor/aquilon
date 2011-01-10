@@ -50,6 +50,12 @@ class TestDelBuilding(TestBrokerCommand):
         command = "show building --building bu"
         self.notfoundtest(command.split(" "))
 
+    def testdelex(self):
+        self.dsdb_expect("delete_building_aq -building cards")
+        command = "del building --building cards"
+        self.noouttest(command.split(" "))
+        self.dsdb_verify()
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelBuilding)

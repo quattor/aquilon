@@ -96,6 +96,14 @@ class TestDelRack(TestBrokerCommand):
         command = "show rack --rack ut9"
         self.notfoundtest(command.split(" "))
 
+    def testdelcards(self):
+        command = "del rack --rack cards1"
+        self.noouttest(command.split(" "))
+
+    def testverifyvards(self):
+        command = "show rack --rack cards1"
+        self.notfoundtest(command.split(" "))
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelRack)
