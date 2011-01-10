@@ -57,7 +57,7 @@ class CommandAddRouter(BrokerCommand):
                                 "for {1:l}.".format(ip, dbnetwork))
 
         if ip <= dbnetwork.ip or ip >= dbnetwork.first_usable_host or \
-           ip in dbnetwork.reserved_addresses:
+           int(ip) - int(dbnetwork.ip) in dbnetwork.reserved_offsets:
             raise ArgumentError("IP address {0} is not a valid router address "
                                 "on {1:l}.".format(ip, dbnetwork))
 

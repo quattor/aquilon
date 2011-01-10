@@ -129,7 +129,7 @@ class Network(Base):
         return self.network[start]
 
     @property
-    def reserved_addresses(self):
+    def reserved_offsets(self):
         """returns address offsets from the base which are the reserved range"""
 
         # Always reserve the network and the broadcast address
