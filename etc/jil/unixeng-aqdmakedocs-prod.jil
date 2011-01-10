@@ -1,0 +1,12 @@
+insert_job: unixeng-aqdmakedocs-prod
+machine: nyaqd1
+job_type: c
+command: /ms/dist/aurora/bin/krun -- /ms/dist/aquilon/PROJ/tpldoc/prod/bin/build-doc -j /ms/dist/msjava/PROJ/sunjdk/1.6.0_22/exec/ /var/quattor/domains/prod /var/quattor/web/htdocs/tpldoc
+date_conditions: yes
+days_of_week: all
+start_times: "21:21"
+permission: mx
+std_out_file: /var/quattor/logs/$AUTO_JOB_NAME.out
+std_err_file: /var/quattor/logs/$AUTO_JOB_NAME.err
+alarm_if_fail: 1
+description: "this job maintains documentation regarding the prod aquilon templates"
