@@ -28,9 +28,10 @@
 # TERMS THAT MAY APPLY.
 
 
-from aquilon.exceptions_ import ArgumentError
+from aquilon.exceptions_ import ArgumentError, IncompleteError
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.host import hostname_to_host
+from aquilon.server.locks import lock_queue, CompileKey
 from aquilon.aqdb.model import Cluster
 from aquilon.server.templates.base import PlenaryCollection
 from aquilon.server.templates.host import PlenaryHost
@@ -53,7 +54,22 @@ class CommandUncluster(BrokerCommand):
         session.flush()
         session.refresh(dbcluster)
 
-        plenaries = PlenaryCollection(logger=logger)
-        plenaries.append(PlenaryHost(dbhost, logger=logger))
-        plenaries.append(PlenaryCluster(dbcluster, logger=logger))
-        plenaries.write()
+        # Will need to write a cluster plenary and either write or
+        # remove a host plenary.  Grab the domain key since the two
+        # must be in the same domain.
+        host_plenary = PlenaryHost(dbhost, logger=logger)
+        cluster_plenary = PlenaryCluster(dbcluster, logger=logger)
+        key = CompileKey(domain=dbcluster.branch.name, logger=logger)
+        try:
+            lock_queue.acquire(key)
+            cluster_plenary.write(locked=True)
+            try:
+                host_plenary.write(locked=True)
+            except IncompleteError, e:
+                host_plenary.cleanup(domain=dbhost.branch.name, locked=True)
+        except:
+            cluster_plenary.restore_stash()
+            host_plenary.restore_stash()
+            raise
+        finally:
+            lock_queue.release(key)

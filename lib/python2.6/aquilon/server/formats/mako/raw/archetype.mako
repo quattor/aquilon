@@ -2,6 +2,8 @@
     flags = []
     if record.is_compileable:
         flags.append("compilable")
+    if record.cluster_required:
+        flags.append("cluster_required")
     flagstr = ""
     if len(flags) != 0:
         flagstr = " [" + " ".join(flags) + "] "

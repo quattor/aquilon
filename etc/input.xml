@@ -1686,6 +1686,7 @@
       </optgroup>
       <optgroup name="update_archetype_options" mandatory="False">
          <option name="compilable" type="boolean">Can hosts be compiled?</option>
+         <option name="cluster_required" type="boolean">Do hosts require membership in a cluster to be compiled?</option>
       </optgroup>
       <transport method="post" path="archetype/%(archetype)s" />
    </command>

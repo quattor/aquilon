@@ -55,9 +55,13 @@ class TestUncluster(TestBrokerCommand):
 
     def testunbindutecl1(self):
         for i in range(2, 5):
-            self.noouttest(["uncluster",
-                            "--hostname", "evh%s.aqd-unittest.ms.com" % i,
-                            "--cluster", "utecl1"])
+            hostname = 'evh%s.aqd-unittest.ms.com' %i
+            self.verify_buildfiles('utsandbox', hostname, want_exist=True,
+                                   command='uncluster')
+            self.noouttest(['uncluster',
+                            '--hostname', hostname, '--cluster', 'utecl1'])
+            self.verify_buildfiles('utsandbox', hostname, want_exist=False,
+                                   command='uncluster')
 
     def testverifycat(self):
         command = "cat --cluster utecl1"

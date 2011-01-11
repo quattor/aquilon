@@ -629,6 +629,25 @@ class TestBrokerCommand(unittest.TestCase):
             self.fail("The following expected DSDB commands were not called:"
                       "\n@@@\n%s\n@@@\n" % "\n".join(errors))
 
+    def verify_buildfiles(self, domain, object,
+                          want_exist=True, command='manage'):
+        qdir = self.config.get('broker', 'quattordir')
+        domaindir = os.path.join(qdir, 'build', 'xml', domain)
+        xmlfile = os.path.join(domaindir, object + self.profile_suffix)
+        depfile = os.path.join(domaindir, object + '.xml.dep')
+        builddir = self.config.get('broker', 'builddir')
+        profile = os.path.join(builddir, 'domains', domain, 'profiles',
+                               object + '.tpl')
+        for f in [xmlfile, depfile, profile]:
+            if want_exist:
+                self.failUnless(os.path.exists(f),
+                                "Expecting %s to exist before running %s." %
+                                (f, command))
+            else:
+                self.failIf(os.path.exists(f),
+                            "Not expecting %s to exist after running %s." %
+                            (f, command))
+
 
 class DummyIP(IPv4Address):
     def __init__(self, *args, **kwargs):

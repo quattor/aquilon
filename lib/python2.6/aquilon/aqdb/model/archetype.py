@@ -51,6 +51,9 @@ class Archetype(Base):
     is_compileable = Column(Boolean(name="%s_is_compileable_ck" % _TN),
                             default=False, nullable=False)
 
+    cluster_required = Column(Boolean(name="%s_cluster_required_ck" % _TN),
+                              default=False, nullable=False)
+
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
 

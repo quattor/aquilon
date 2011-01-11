@@ -42,24 +42,53 @@ from brokertest import TestBrokerCommand
 class TestUpdateArchetype(TestBrokerCommand):
 
     def testupdatecompilable(self):
+        # Start clean
+        command = "show archetype --archetype utarchetype1"
+        out = self.commandtest(command.split(" "))
+        self.searchoutput(out, "Archetype: utarchetype1\s*$", command)
+
+        # Set the flag
         self.noouttest(["update_archetype", "--archetype=utarchetype1",
                         "--compilable"])
 
-    def testupdatenotcompilable(self):
-        self.noouttest(["update_archetype", "--archetype=utarchetype2",
-                        "--compilable"])
-        self.noouttest(["update_archetype", "--archetype=utarchetype2"])
-
-    def testverifycompilable(self):
+        # Check the flag
         command = "show archetype --archetype utarchetype1"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Archetype: utarchetype1 [compilable]", command)
 
-    def testverifynotcompilable(self):
+        # Unset the flag
+        self.noouttest(["update_archetype", "--archetype=utarchetype1",
+                        "--nocompilable"])
+
+        # End clean
+        command = "show archetype --archetype utarchetype1"
+        out = self.commandtest(command.split(" "))
+        self.searchoutput(out, "Archetype: utarchetype1\s*$", command)
+
+    def testupdateclusterrequired(self):
+        # Start clean
         command = "show archetype --archetype utarchetype2"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Archetype: utarchetype2", command)
-        self.matchclean(out, "compilable", command)
+        self.searchoutput(out, "Archetype: utarchetype2\s*$", command)
+
+        # Set the flag
+        self.noouttest(["update_archetype", "--archetype=utarchetype2",
+                        "--cluster_required"])
+
+        # Check the flag
+        command = "show archetype --archetype utarchetype2"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Archetype: utarchetype2 [cluster_required]",
+                         command)
+
+        # Unset the flag
+        self.noouttest(["update_archetype", "--archetype=utarchetype2",
+                        "--nocluster_required"])
+
+        # End clean
+        command = "show archetype --archetype utarchetype2"
+        out = self.commandtest(command.split(" "))
+        self.searchoutput(out, "Archetype: utarchetype2\s*$", command)
 
 
 if __name__=='__main__':
