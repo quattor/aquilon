@@ -55,7 +55,7 @@ class ProtocolError(AquilonError):
 class ProcessException(AquilonError):
     """Raised when a process being executed fails."""
     def __init__(self, command=None, out=None, err=None,
-            code=None, signalNum=None):
+                 code=None, signalNum=None, filtered=None):
         self.command = command
         self.out = out
         self.err = err
@@ -72,7 +72,8 @@ class ProcessException(AquilonError):
         if err and err.strip():
             msg = msg + " and stderr:\n%s" % err
         elif out and out.strip():
-            msg = msg + " and stdout:\n%s" % out
+            filter_msg = "filtered " if filtered else ""
+            msg = msg + " and %sstdout:\n%s" % (filter_msg, out)
         StandardError.__init__(self, msg)
 
 

@@ -55,11 +55,12 @@ LOGGER = logging.getLogger('aquilon.server.processes')
 
 class StreamLoggerThread(Thread):
     """Helper class for streaming output as it becomes available."""
-    def __init__(self, logger, loglevel, process, stream):
+    def __init__(self, logger, loglevel, process, stream, filterre=None):
         self.logger = logger
         self.loglevel = loglevel
         self.process = process
         self.stream = stream
+        self.filterre = filterre
         self.buffer = []
         Thread.__init__(self)
 
@@ -70,6 +71,8 @@ class StreamLoggerThread(Thread):
                                self.process.poll() != None):
                 break
             if data != '':
+                if self.filterre and not self.filterre.search(data):
+                    continue
                 self.buffer.append(data)
                 # This log output will appear in the server logs without
                 # correct channel information.  We will re-log it separately
@@ -78,12 +81,17 @@ class StreamLoggerThread(Thread):
 
 
 def run_command(args, env=None, path=".",
-                logger=LOGGER, loglevel=logging.INFO):
+                logger=LOGGER, loglevel=logging.INFO, filterre=None):
     '''Run the specified command (args should be a list corresponding to ARGV).
 
     Returns any output (stdout only).  If the command fails, then
     ProcessException will be raised.  To pass the output back to the client
     pass in a logger and specify loglevel as CLIENT_INFO.
+
+    To reduce the captured output, pass in a compiled regular expression
+    with the filterre keyword argument.  Any output lines on stdout will
+    only be kept if filterre.search() finds a match.
+
     '''
     if env:
         shell_env = env.copy()
@@ -110,7 +118,8 @@ def run_command(args, env=None, path=".",
 
     p = Popen(args=command_args, stdin=None, stdout=PIPE, stderr=PIPE,
               cwd=path, env=shell_env)
-    out_thread = StreamLoggerThread(logger, loglevel, p, p.stdout)
+    out_thread = StreamLoggerThread(logger, loglevel, p, p.stdout,
+                                    filterre=filterre)
     err_thread = StreamLoggerThread(logger, loglevel, p, p.stderr)
     out_thread.start()
     err_thread.start()
@@ -125,18 +134,20 @@ def run_command(args, env=None, path=".",
                     (simple_command, -p.returncode))
     out = "".join(out_thread.buffer)
     if out:
-        logger.info("command `%s` stdout: %s" % (simple_command, out))
+        filter_msg = "filtered " if filterre else ""
+        logger.info("command `%s` %sstdout: %s" %
+                    (simple_command, filter_msg, out))
     err = "".join(err_thread.buffer)
     if err:
         logger.info("command `%s` stderr: %s" % (simple_command, err))
 
     if p.returncode != 0:
         raise ProcessException(command=simple_command, out=out, err=err,
-                               code=p.returncode)
+                               code=p.returncode, filtered=bool(filterre))
     return out
 
 def run_git(args, env=None, path=".",
-            logger=LOGGER, loglevel=logging.INFO):
+            logger=LOGGER, loglevel=logging.INFO, filterre=None):
     config = Config()
     if env:
         git_env = env.copy()
@@ -152,7 +163,7 @@ def run_git(args, env=None, path=".",
         git_args = ["git", args]
 
     return run_command(git_args, env=git_env, path=path,
-                       logger=logger, loglevel=loglevel)
+                       logger=logger, loglevel=loglevel, filterre=filterre)
 
 def remove_dir(dir, logger=LOGGER):
     """Remove a directory.  Could have been implemented as a call to rm -rf."""
