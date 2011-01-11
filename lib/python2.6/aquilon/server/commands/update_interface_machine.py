@@ -139,8 +139,8 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
                 session.delete(dbhw_ent.primary_name)
                 session.flush()
                 session.expire(dbhw_ent)
-                dbdns_rec = FutureARecord(name=short, dns_domain=dbdns_domain,
-                                          ip=ip)
+                dbdns_rec = FutureARecord(session=session, name=short,
+                                          dns_domain=dbdns_domain, ip=ip)
                 session.add(dbdns_rec)
                 dbhw_ent.primary_name = dbdns_rec
 

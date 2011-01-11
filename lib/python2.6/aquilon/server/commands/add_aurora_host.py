@@ -103,7 +103,7 @@ class CommandAddAuroraHost(CommandAddHost):
                     dbchassis = Chassis(label=chassis, location=dbrack,
                                         model=dbchassis_model)
                     session.add(dbchassis)
-                    dbdns_rec = ReservedName(name=chassis,
+                    dbdns_rec = ReservedName(session=session, name=chassis,
                                              dns_domain=dbdns_domain)
                     session.add(dbdns_rec)
                     dbchassis.primary_name = dbdns_rec

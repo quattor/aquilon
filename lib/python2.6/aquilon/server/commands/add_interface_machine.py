@@ -265,8 +265,9 @@ class CommandAddInterfaceMachine(BrokerCommand):
                                "IP address %s for machine %s: %s" %
                                (manager, old_ip, dbmachine.label, e))
             return
-        dbmanager = FutureARecord(name=short, dns_domain=dbdns_domain,
-                                  ip=old_ip, network=old_network)
+        dbmanager = FutureARecord(session=session, name=short,
+                                  dns_domain=dbdns_domain, ip=old_ip,
+                                  network=old_network)
         session.add(dbmanager)
         return dbmanager
 

@@ -81,7 +81,7 @@ farecord.primary_key.name = 'future_a_record_pk'
 # TODO: remove this constraint
 farecord.append_constraint(UniqueConstraint('ip', name='future_a_record_ip_uk'))
 
-farecord.info['unique_fields'] = ['name', 'dns_domain']
+farecord.info['unique_fields'] = ['name', 'dns_domain', 'dns_environment']
 farecord.info['extra_search_fields'] = ['ip']
 
 
@@ -129,4 +129,4 @@ class ReservedName(DnsRecord):
 
 resname = ReservedName.__table__  # pylint: disable-msg=C0103, E1101
 resname.primary_key.name = 'reserved_name_pk'
-resname.info['unique_fields'] = ['name', 'dns_domain']
+resname.info['unique_fields'] = ['name', 'dns_domain', 'dns_environment']

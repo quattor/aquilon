@@ -81,8 +81,8 @@ class CommandUpdateSwitch(BrokerCommand):
                 session.delete(dbswitch.primary_name)
                 session.flush()
                 session.expire(dbswitch)
-                dbdns_rec = FutureARecord(name=short, dns_domain=dbdns_domain,
-                                          ip=ip)
+                dbdns_rec = FutureARecord(session=session, name=short,
+                                          dns_domain=dbdns_domain, ip=ip)
                 dbdns_rec.network = dbnetwork
                 session.add(dbdns_rec)
                 dbswitch.primary_name = dbdns_rec

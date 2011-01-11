@@ -59,4 +59,15 @@ ALTER TABLE reserved_name RENAME COLUMN system_id TO dns_record_id;
 ALTER TABLE reserved_name RENAME CONSTRAINT "RESERVED_NAME_SYSTEM_ID_NN" TO "RESERVED_NAME_DNS_RECORD_ID_NN";
 ALTER TABLE reserved_name RENAME CONSTRAINT "RESERVED_NAME_SYSTEM_FK" TO "RESERVED_NAME_DNS_RECORD_FK";
 
+ALTER TABLE dns_record ADD dns_environment_id INTEGER;
+UPDATE dns_record SET dns_environment_id = (SELECT id FROM dns_environment WHERE name = 'internal');
+ALTER TABLE dns_record
+	MODIFY (dns_environment_id CONSTRAINT "DNS_RECORD_DNS_ENV_ID_NN" NOT NULL);
+ALTER TABLE dns_record
+	ADD CONSTRAINT "DNS_RECORD_DNS_ENV_FK" FOREIGN KEY (dns_environment_id) REFERENCES dns_environment (id);
+ALTER TABLE dns_record DROP CONSTRAINT "DNS_RECORD_NAME_DOMAIN_UK";
+DROP INDEX "DNS_RECORD_NAME_DOMAIN_UK";
+ALTER TABLE dns_record
+	ADD CONSTRAINT "DNS_RECORD_NAME_DOMAIN_ENV_UK" UNIQUE (name, dns_domain_id, dns_environment_id);
+
 QUIT;

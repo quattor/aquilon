@@ -72,8 +72,9 @@ class CommandAddDynamicRange(BrokerCommand):
             ip = IPv4Address(ipint)
             check_ip_restrictions(startnet, ip)
             name = "%s-%s" % (prefix, str(ip).replace('.', '-'))
-            dbdynamic_stub = DynamicStub(name=name, dns_domain=dbdns_domain,
-                                         ip=ip, network=startnet)
+            dbdynamic_stub = DynamicStub(session=session, name=name,
+                                         dns_domain=dbdns_domain, ip=ip,
+                                         network=startnet)
             session.add(dbdynamic_stub)
             stubs.append(dbdynamic_stub)
 

@@ -116,9 +116,11 @@ def parse_primary_name(session, fqdn, ip):
 
     if not dbdns_rec:
         if ip:
-            dbdns_rec = FutureARecord(name=short, dns_domain=dbdns_domain, ip=ip)
+            dbdns_rec = FutureARecord(session=session, name=short,
+                                      dns_domain=dbdns_domain, ip=ip)
         else:
-            dbdns_rec = ReservedName(name=short, dns_domain=dbdns_domain)
+            dbdns_rec = ReservedName(session=session, name=short,
+                                     dns_domain=dbdns_domain)
         session.add(dbdns_rec)
         session.flush()
 

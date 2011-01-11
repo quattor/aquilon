@@ -82,9 +82,9 @@ class CommandAddAuxiliary(BrokerCommand):
         dbnetwork = get_net_id_from_ip(session, ip)
         check_ip_restrictions(dbnetwork, ip)
 
-        dbdns_rec = FutureARecord(name=short, dns_domain=dbdns_domain,
-                                  ip=ip, network=dbnetwork,
-                                  comments=comments)
+        dbdns_rec = FutureARecord(session=session, name=short,
+                                  dns_domain=dbdns_domain, ip=ip,
+                                  network=dbnetwork, comments=comments)
         session.add(dbdns_rec)
         dbinterface.addresses.append(ip)
 

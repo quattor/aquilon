@@ -61,7 +61,7 @@ class TestAddAddress(TestBrokerCommand):
         self.matchoutput(out, "IP: %s" % self.net.unknown[0].usable[13],
                          command)
 
-    def test_200_env(self):
+    def test_200_add_defaultenv(self):
         self.dsdb_expect_add("arecord14.aqd-unittest.ms.com",
                              self.net.unknown[0].usable[14])
         default = self.config.get("site", "default_dns_environment")
@@ -71,12 +71,31 @@ class TestAddAddress(TestBrokerCommand):
         self.noouttest(command)
         self.dsdb_verify()
 
-    def test_250_verifyenv(self):
+    def test_210_add_utenv(self):
+        # Different IP in this environment
+        command = ["add_address", "--ip", self.net.unknown[1].usable[14],
+                   "--fqdn", "arecord14.aqd-unittest.ms.com",
+                   "--dns_environment", "ut-env"]
+        self.noouttest(command)
+
+    def test_220_verifydefaultenv(self):
+        default = self.config.get("site", "default_dns_environment")
         command = ["show_fqdn", "--fqdn=arecord14.aqd-unittest.ms.com"]
         out = self.commandtest(command)
         self.matchoutput(out, "DNS Record: arecord14.aqd-unittest.ms.com",
                          command)
+        self.matchoutput(out, "DNS Environment: %s" % default, command)
         self.matchoutput(out, "IP: %s" % self.net.unknown[0].usable[14],
+                         command)
+
+    def test_230_verifyutenv(self):
+        command = ["show_fqdn", "--fqdn=arecord14.aqd-unittest.ms.com",
+                   "--dns_environment", "ut-env"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "DNS Record: arecord14.aqd-unittest.ms.com",
+                         command)
+        self.matchoutput(out, "DNS Environment: ut-env", command)
+        self.matchoutput(out, "IP: %s" % self.net.unknown[1].usable[14],
                          command)
 
     def test_300_ipfromip(self):
@@ -125,6 +144,31 @@ class TestAddAddress(TestBrokerCommand):
         self.matchoutput(out, "IP address %s is the broadcast address of "
                          "network " % ip, command)
 
+    def test_440_failbadenv(self):
+        ip = self.net.unknown[0].usable[16]
+        command = ["add", "address", "--fqdn", "no-such-env.aqd-unittest.ms.com",
+                   "--ip", ip, "--dns_environment", "no-such-env"]
+        out = self.notfoundtest(command)
+        self.matchoutput(out, "DNS Environment no-such-env not found.", command)
+
+    def test_450_add_too_long_name(self):
+        ip = self.net.unknown[0].usable[16]
+        cmd = ['add', 'address', '--fqdn',
+            #          1         2         3         4         5         6
+            's234567890123456789012345678901234567890123456789012345678901234' +
+            '.aqd-unittest.ms.com', '--dns_environment', 'internal', '--ip', ip]
+        out = self.badrequesttest(cmd)
+        self.matchoutput(out,
+                         "DNS name components must have a length between 1 and 63.",
+                         cmd)
+
+    def test_455_add_invalid_name(self):
+        ip = self.net.unknown[0].usable[16]
+        command = ['add', 'address', '--fqdn', 'foo-.aqd-unittest.ms.com',
+                   '--dns_environment', 'internal', '--ip', ip]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Illegal DNS name format 'foo-'.", command)
+
     def test_500_addunittest20eth1(self):
         ip = self.net.unknown[12].usable[0]
         fqdn = "unittest20-e1.aqd-unittest.ms.com"
@@ -132,17 +176,6 @@ class TestAddAddress(TestBrokerCommand):
         command = ["add", "address", "--ip", ip, "--fqdn", fqdn]
         self.noouttest(command)
         self.dsdb_verify()
-
-    def test_900_failbadenv(self):
-        default = self.config.get("site", "default_dns_environment")
-        command = ["add_address", "--ip=%s" % self.net.unknown[0].usable[16],
-                   "--fqdn=arecord16.aqd-unittest.ms.com",
-                   "--dns_environment=environment-does-not-exist"]
-        out = self.unimplementederrortest(command)
-        self.matchoutput(out,
-                         "Only the '%s' DNS environment is currently "
-                         "supported." % default,
-                         command)
 
 
 if __name__=='__main__':

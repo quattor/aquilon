@@ -56,7 +56,7 @@ class TestDelAddress(TestBrokerCommand):
         command = ["show_fqdn", "--fqdn=arecord13.aqd-unittest.ms.com"]
         self.notfoundtest(command)
 
-    def testenv(self):
+    def testdefaultenv(self):
         self.dsdb_expect_delete(self.net.unknown[0].usable[14])
         default = self.config.get("site", "default_dns_environment")
         command = ["del_address", "--ip=%s" % self.net.unknown[0].usable[14],
@@ -65,8 +65,19 @@ class TestDelAddress(TestBrokerCommand):
         self.noouttest(command)
         self.dsdb_verify()
 
-    def testverifyenv(self):
+    def testverifydefaultenv(self):
         command = ["show_fqdn", "--fqdn=arecord14.aqd-unittest.ms.com"]
+        self.notfoundtest(command)
+
+    def testutenvenv(self):
+        command = ["del_address", "--ip", self.net.unknown[1].usable[14],
+                   "--fqdn", "arecord14.aqd-unittest.ms.com",
+                   "--dns_environment", "ut-env"]
+        self.noouttest(command)
+
+    def testverifyutenvenv(self):
+        command = ["show_fqdn", "--fqdn", "arecord14.aqd-unittest.ms.com",
+                   "--dns_environment", "ut-env"]
         self.notfoundtest(command)
 
     def testcleanup(self):
@@ -81,10 +92,9 @@ class TestDelAddress(TestBrokerCommand):
         command = ["del_address", "--ip=%s" % self.net.unknown[0].usable[15],
                    "--fqdn=arecord15.aqd-unittest.ms.com",
                    "--dns_environment=environment-does-not-exist"]
-        out = self.unimplementederrortest(command)
+        out = self.notfoundtest(command)
         self.matchoutput(out,
-                         "Only the '%s' DNS environment is currently "
-                         "supported." % default,
+                         "DNS Environment environment-does-not-exist not found.",
                          command)
 
     def testfailprimary(self):

@@ -33,13 +33,18 @@ from datetime import datetime
 from sqlalchemy import (Integer, DateTime, Sequence, String, Column, ForeignKey,
                         UniqueConstraint)
 from sqlalchemy.orm import relation, deferred, backref
+from sqlalchemy.orm.session import Session
 
+from aquilon.config import Config
 from aquilon.exceptions_ import InternalError, ArgumentError
-from aquilon.aqdb.model import Base, DnsDomain
+from aquilon.aqdb.model import Base, DnsDomain, DnsEnvironment
 from aquilon.aqdb.model.dns_domain import parse_fqdn
 from aquilon.aqdb.column_types import AqStr
 
 _TN = "dns_record"
+
+_config = Config()
+
 
 class DnsRecord(Base):
     """ Base class for a DNS Resource Record """
@@ -57,12 +62,18 @@ class DnsRecord(Base):
                                                name='%s_dns_domain_fk' % _TN),
                            nullable=False)
 
+    dns_environment_id = Column(Integer, ForeignKey('dns_environment.id',
+                                                    name='%s_dns_env_fk' % _TN),
+                                nullable=False)
+
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
 
     comments = deferred(Column('comments', String(255), nullable=True))
 
     dns_domain = relation(DnsDomain, backref=backref("dns_records"))
+
+    dns_environment = relation(DnsEnvironment, backref=backref("dns_records"))
 
     # The extra with_polymorphic: '*' means queries don't require
     # "q = q.with_polymorphic(DnsRecord.__mapper__.polymorphic_map.values())"
@@ -75,15 +86,19 @@ class DnsRecord(Base):
         return self.name + '.' + self.dns_domain.name
 
     @classmethod
-    def get_unique(cls, session, name=None, dns_domain=None, fqdn=None,
-                   **kwargs):
+    def get_unique(cls, session, dns_environment=None, name=None,
+                   dns_domain=None, fqdn=None, **kwargs):
         if fqdn:
             if name or dns_domain:  # pragma: no cover
                 raise TypeError("fqdn and name/dns_domain should not be mixed")
             (name, dns_domain) = parse_fqdn(session, fqdn)
 
+        if not isinstance(dns_environment, DnsEnvironment):
+            dns_environment = DnsEnvironment.get_unique_or_default(session,
+                                                                   dns_environment)
         return super(DnsRecord, cls).get_unique(session, name=name,
                                                 dns_domain=dns_domain,
+                                                dns_environment=dns_environment,
                                                 **kwargs)
 
     @classmethod
@@ -104,7 +119,7 @@ class DnsRecord(Base):
             raise ValueError('The fully qualified domain name is too long.')
 
     def __init__(self, session=None, name=None, dns_domain=None, fqdn=None,
-                 **kwargs):
+                 dns_environment=None, **kwargs):
         if not session or not isinstance(session, Session):  # pragma: no cover
             raise InternalError("%s needs a session." % self._get_class_label())
 
@@ -115,16 +130,24 @@ class DnsRecord(Base):
 
         self.check_name(name, dns_domain)
 
+        if not isinstance(dns_environment, DnsEnvironment):
+            dns_environment = DnsEnvironment.get_unique_or_default(session,
+                                                                   dns_environment)
+
         super(DnsRecord, self).__init__(name=name, dns_domain=dns_domain,
-                                        **kwargs)
+                                        dns_environment=dns_environment, **kwargs)
 
     @classmethod
-    def get_or_create(cls, session, **kwargs):
-        dns_record = cls.get_unique(session, **kwargs)
+    def get_or_create(cls, session, dns_environment=None, **kwargs):
+        dns_record = cls.get_unique(session, dns_environment=dns_environment, **kwargs)
         if dns_record:
             return dns_record
 
-        dns_record = cls(session=session, **kwargs)
+        if not isinstance(dns_environment, DnsEnvironment):
+            dns_environment = DnsEnvironment.get_unique_or_default(session,
+                                                                   dns_environment)
+
+        dns_record = cls(session=session, dns_environment=dns_environment, **kwargs)
         session.add(dns_record)
         session.flush()
         return dns_record
@@ -140,7 +163,7 @@ dns_record.primary_key.name = '%s_pk' % _TN
 
 # TODO: Remove this constraint
 dns_record.append_constraint(
-    UniqueConstraint('name', 'dns_domain_id', name='%s_name_domain_uk' % _TN))
+    UniqueConstraint('name', 'dns_domain_id', 'dns_environment_id',
+                     name='%s_name_domain_env_uk' % _TN))
 
-# TODO: This is not quite correct
-dns_record.info['unique_fields'] = ['name', 'dns_domain']
+dns_record.info['unique_fields'] = ['name', 'dns_domain', 'dns_environment']

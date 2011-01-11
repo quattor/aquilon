@@ -1,6 +1,7 @@
+#!/usr/bin/env python2.6
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 #
-# Copyright (C) 2008,2009,2010  Contributor
+# Copyright (C) 2011  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -26,30 +27,27 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-"""Contains the logic for `aq add dns_domain`."""
+"""Module for testing constraints in commands involving DNS."""
+
+import unittest
+
+if __name__ == "__main__":
+    import utils
+    utils.import_depends()
+
+from brokertest import TestBrokerCommand
 
 
-from aquilon.exceptions_ import ArgumentError
-from aquilon.server.broker import BrokerCommand
-from aquilon.server.processes import DSDBRunner
-from aquilon.aqdb.model import DnsEnvironment, DnsRecord
+class TestDnsConstraints(TestBrokerCommand):
+
+    def testdelenvinuse(self):
+        command = ["del", "dns", "environment", "--dns_environment", "ut-env"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "DNS Environment ut-env is still in use by DNS "
+                         "records, and cannot be deleted.", command)
 
 
-class CommandDelDnsEnvironment(BrokerCommand):
-
-    required_parameters = ["dns_environment"]
-
-    def render(self, session, logger, dns_environment, **arguments):
-        db_dnsenv = DnsEnvironment.get_unique(session, dns_environment,
-                                              compel=True)
-
-        q = session.query(DnsRecord)
-        q = q.filter_by(dns_environment=db_dnsenv)
-        if q.first():
-            raise ArgumentError("{0} is still in use by DNS records, and "
-                                "cannot be deleted.".format(db_dnsenv))
-
-        session.delete(db_dnsenv)
-        session.flush()
-
-        return
+if __name__=='__main__':
+    suite = unittest.TestLoader().loadTestsFromTestCase(
+        TestDnsConstraints)
+    unittest.TextTestRunner(verbosity=2).run(suite)

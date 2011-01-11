@@ -33,7 +33,6 @@ from aquilon.aqdb.model import FutureARecord, DnsEnvironment
 from aquilon.exceptions_ import UnimplementedError, ArgumentError
 from aquilon.server.locks import lock_queue, DeleteKey
 from aquilon.server.processes import DSDBRunner
-from aquilon.server.dbwrappers.system import get_system
 
 
 class CommandDelAddressDNSEnvironment(BrokerCommand):
@@ -43,14 +42,12 @@ class CommandDelAddressDNSEnvironment(BrokerCommand):
     def render(self, session, logger, fqdn, ip, dns_environment, **arguments):
         dbdns_env = DnsEnvironment.get_unique(session, dns_environment,
                                               compel=True)
-        if not dbdns_env.is_default:
-            raise UnimplementedError("Only the '%s' DNS environment is "
-                                     "currently supported." % default)
 
         key = DeleteKey("system", logger=logger)
         try:
             lock_queue.acquire(key)
-            dbaddress = get_system(session, fqdn, FutureARecord, 'DNS Record')
+            dbaddress = FutureARecord.get_unique(session, fqdn=fqdn,
+                                                 dns_environment=dbdns_env)
             if ip != dbaddress.ip:
                 raise ArgumentError("IP address %s is not set for %s (%s).",
                                     (ip, dbaddress.fqdn, dbaddress.ip))

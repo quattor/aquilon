@@ -96,7 +96,7 @@ class TestAddDnsDomain(TestBrokerCommand):
     def testaddinvaliddomain(self):
         command = ['add', 'dns_domain', '--dns_domain', 'foo-.ms.com']
         out = self.badrequesttest(command)
-        self.matchoutput(out, "Illegal DNS domain name format 'foo-'.", command)
+        self.matchoutput(out, "Illegal DNS name format 'foo-'.", command)
 
     def testverifyshowall(self):
         command = "show dns_domain --all"

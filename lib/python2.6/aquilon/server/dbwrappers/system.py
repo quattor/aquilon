@@ -33,20 +33,27 @@ from sqlalchemy.exceptions import InvalidRequestError
 
 from aquilon.exceptions_ import (AquilonError, ArgumentError, NotFoundException,
                                  UnimplementedError)
-from aquilon.aqdb.model import DnsDomain, DnsRecord, FutureARecord
+from aquilon.aqdb.model import (DnsDomain, DnsRecord, FutureARecord,
+                                DnsEnvironment)
 from aquilon.aqdb.model.dns_domain import parse_fqdn
 from aquilon.server.dbwrappers.network import get_network_byip
 
 
-def get_system(session, system, dns_record_type=DnsRecord, system_label='FQDN'):
+def get_system(session, system, dns_record_type=DnsRecord, system_label='FQDN',
+              dns_environment=None):
+    if not dns_environment:
+        dns_enviromnemt = DnsEnvironment.get_unique_or_default(session)
     (short, dbdns_domain) = parse_fqdn(session, system)
     return get_system_from_parts(session, short, dbdns_domain, dns_record_type,
-                                 system_label)
+                                 system_label, dns_environment)
 
 def get_system_from_parts(session, short, dbdns_domain, dns_record_type=DnsRecord,
-                          system_label='FQDN'):
+                          system_label='FQDN', dns_environment=None):
+    if not dns_environment:
+        dns_enviromnemt = DnsEnvironment.get_unique_or_default(session)
     try:
         q = session.query(dns_record_type)
+        q = q.filter_by(dns_environment=dns_environment)
         q = q.filter_by(name=short, dns_domain=dbdns_domain)
         dbsystem = q.first()
         if not dbsystem:
@@ -71,6 +78,12 @@ def search_system_query(session, dns_record_type=DnsRecord, **kwargs):
     # system doesn't (necessarily) issue another query.
     if dns_record_type is DnsRecord:
         q = q.with_polymorphic('*')
+
+    dbdns_env = DnsEnvironment.get_unique_or_default(session,
+                                                     kwargs.get("dns_environment",
+                                                                None))
+    q = q.filter_by(dns_environment=dbdns_env)
+
     if kwargs.get('fqdn', None):
         (short, dbdns_domain) = parse_fqdn(session, kwargs['fqdn'])
         q = q.filter_by(name=short, dns_domain=dbdns_domain)

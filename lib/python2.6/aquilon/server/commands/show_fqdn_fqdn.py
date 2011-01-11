@@ -31,11 +31,13 @@
 
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.system import get_system
+from aquilon.aqdb.model import DnsEnvironment
 
 
 class CommandShowFqdnFqdn(BrokerCommand):
 
     required_parameters = ["fqdn"]
 
-    def render(self, session, fqdn, **kwargs):
-        return get_system(session, fqdn)
+    def render(self, session, fqdn, dns_environment, **kwargs):
+        dbdns_env = DnsEnvironment.get_unique_or_default(session, dns_environment)
+        return get_system(session, fqdn, dns_environment)

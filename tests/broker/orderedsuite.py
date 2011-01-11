@@ -139,6 +139,7 @@ from test_constraints_make import TestMakeConstraints
 from test_constraints_cluster import TestClusterConstraints
 from test_constraints_metacluster import TestMetaClusterConstraints
 from test_constraints_location import TestLocationConstraints
+from test_constraints_dns import TestDnsConstraints
 from test_show_hostiplist import TestShowHostIPList
 from test_show_hostmachinelist import TestShowHostMachineList
 from test_show_machinemaclist import TestShowMachineMacList
@@ -273,6 +274,7 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestUpdatePersonality,
                 TestClusterConstraints, TestMetaClusterConstraints,
                 TestLocationConstraints,
+                TestDnsConstraints,
                 TestShowHostIPList, TestShowHostMachineList, TestShowMachineMacList,
                 TestShowServiceAll, TestShowCampus, TestShowFqdn,
                 TestShowSwitch, TestSearchSwitch,

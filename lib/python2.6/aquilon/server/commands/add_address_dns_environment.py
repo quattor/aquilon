@@ -46,22 +46,18 @@ class CommandAddAddressDNSEnvironment(BrokerCommand):
                **arguments):
         dbdns_env = DnsEnvironment.get_unique(session, dns_environment,
                                               compel=True)
-        if not dbdns_env.is_default:
-            raise UnimplementedError("Only the '%s' DNS environment is "
-                                     "currently supported." % default)
 
         (short, dbdns_domain) = parse_fqdn(session, fqdn)
         DnsRecord.get_unique(session, name=short, dns_domain=dbdns_domain,
-                          preclude=True)
+                             dns_environment=dbdns_env, preclude=True)
 
-        ipargs = arguments.copy()
-        ipargs['compel'] = True
-        ipargs['dbinterface'] = None
-        ip = generate_ip(session, **ipargs)
+        ip = generate_ip(session, compel=True, dbinterface=None, **arguments)
         ipnet = get_net_id_from_ip(session, ip)
         check_ip_restrictions(ipnet, ip)
-        dbaddress = FutureARecord(name=short, dns_domain=dbdns_domain,
-                                  ip=ip, network=ipnet, comments=comments)
+        dbaddress = FutureARecord(session=session, name=short,
+                                  dns_domain=dbdns_domain,
+                                  dns_environment=dbdns_env, ip=ip,
+                                  network=ipnet, comments=comments)
         session.add(dbaddress)
 
         session.flush()

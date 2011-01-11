@@ -81,9 +81,9 @@ class CommandAddManager(BrokerCommand):
             raise ArgumentError("IP address {0!s} is already in use by "
                                 "{1:l}.".format(addr.ip, addr.vlan.interface))
 
-        dbdns_rec = FutureARecord(name=short, dns_domain=dbdns_domain,
-                                  ip=ip, network=dbnetwork,
-                                  comments=comments)
+        dbdns_rec = FutureARecord(session=session, name=short,
+                                  dns_domain=dbdns_domain, ip=ip,
+                                  network=dbnetwork, comments=comments)
         session.add(dbdns_rec)
         dbinterface.addresses.append(ip)
 

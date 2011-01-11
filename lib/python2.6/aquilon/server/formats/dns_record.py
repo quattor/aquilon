@@ -40,6 +40,7 @@ class DnsRecordFormatter(ObjectFormatter):
 
         # This should be replaced by format()...
         details = [indent + "{0:c}: {0.fqdn}".format(dns_record)]
+        details.append(indent + "  {0:c}: {0.name}".format(dns_record.dns_environment))
         if hasattr(dns_record, "ip"):
             details.append(indent + "  IP: %s" % dns_record.ip)
         if dns_record.comments:

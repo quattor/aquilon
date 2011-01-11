@@ -219,7 +219,8 @@ class CommandRefreshWindowsHosts(BrokerCommand):
                           personality=dbpersonality, operating_system=dbos,
                           comments="Created by refresh_windows_host")
             session.add(dbhost)
-            dbdns_rec = ReservedName(name=short, dns_domain=dbdns_domain)
+            dbdns_rec = ReservedName(session=session, name=short,
+                                     dns_domain=dbdns_domain)
             session.add(dbdns_rec)
             dbmachine.primary_name = dbdns_rec
             success.append("Added host entry for %s (%s)." %
