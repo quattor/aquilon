@@ -82,6 +82,59 @@ class TestCompile(TestBrokerCommand):
         self.matchoutput(err, "0/1 object template(s) being processed",
                          command)
 
+    def test_400_addsandbox(self):
+        command = "add_sandbox --sandbox=out_of_date --start=utsandbox"
+        self.successtest(command.split())
+
+    def test_405_compileempty(self):
+        command = "compile --sandbox %s/out_of_date" % self.user
+        (out, err) = self.successtest(command.split(' '))
+        # Funny enough, this message doesn't actually get returned
+        # to the client.
+        #self.matchoutput(out, "no hosts: nothing to do", command)
+        self.assertEmptyOut(out, command)
+        self.matchoutput(err,
+                         "Sandbox %s/out_of_date does not contain the "
+                         "latest changes from the prod domain.  If "
+                         "there are failures try "
+                         "`git fetch && git merge origin/prod`" % self.user,
+                         command)
+
+    def test_410_manage(self):
+        command = ['manage', '--hostname=unittest02.one-nyp.ms.com',
+                   '--sandbox=%s/out_of_date' % self.user]
+        self.successtest(command)
+
+    def test_415_compilebehind(self):
+        command = ['compile', '--sandbox=%s/out_of_date' % self.user]
+        (out, err) = self.successtest(command)
+        self.matchoutput(err,
+                         "Sandbox %s/out_of_date does not contain the "
+                         "latest changes from the prod domain.  If "
+                         "there are failures try "
+                         "`git fetch && git merge origin/prod`" % self.user,
+                         command)
+
+    def test_420_update(self):
+        sandboxdir = os.path.join(self.sandboxdir, 'out_of_date')
+        self.gitcommand(['fetch'], cwd=sandboxdir)
+        self.gitcommand(['merge', 'origin/prod'], cwd=sandboxdir)
+
+    def test_425_compileupdated(self):
+        command = ['compile', '--sandbox=%s/out_of_date' % self.user]
+        (out, err) = self.successtest(command)
+        self.matchclean(err,
+                         "Sandbox %s/out_of_date does not contain the "
+                         "latest changes from the prod domain." % self.user,
+                         command)
+
+    def test_430_cleanup(self):
+        command = ['manage', '--hostname=unittest02.one-nyp.ms.com',
+                   '--domain=unittest']
+        self.successtest(command)
+        command = ['compile', '--hostname=unittest02.one-nyp.ms.com']
+        self.successtest(command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestCompile)

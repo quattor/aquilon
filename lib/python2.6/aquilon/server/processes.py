@@ -295,8 +295,7 @@ def sync_domain(dbdomain, logger=LOGGER, locked=False):
                     path=kingdir, env=git_env, logger=logger)
     run_command(["git", "fetch"], path=domaindir, env=git_env, logger=logger)
     if dbdomain.tracked_branch:
-        out = run_command(["git", "log", "HEAD", "-n", "1",
-                           "--format=format:%H"],
+        out = run_command(["git", "rev-list", "-n", "1", "HEAD"],
                           path=domaindir, env=git_env, logger=logger)
         rollback_commit = out.strip()
     try:

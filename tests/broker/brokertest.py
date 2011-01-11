@@ -66,9 +66,11 @@ class TestBrokerCommand(unittest.TestCase):
                   'aqddnsdomains_pb2', "aqdlocations_pb2"]:
             globals()[m] = __import__(m)
 
+        self.user = self.config.get("broker", "user")
         self.sandboxdir = os.path.join(self.config.get("broker",
                                                        "templatesdir"),
-                                       self.config.get("broker", "user"))
+                                       self.user)
+
 
         # This method is cumbersome.  Should probably develop something
         # like unittest.conf.defaults.
