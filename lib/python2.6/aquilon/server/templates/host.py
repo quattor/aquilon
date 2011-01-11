@@ -260,6 +260,13 @@ class PlenaryToplevelHost(Plenary):
 
         return
 
+    def write(self, *args, **kwargs):
+        # Don't bother writing plenary files for dummy aurora hardware.
+        if self.dbhost.machine.model.machine_type == 'aurora_node':
+            return 0
+        return Plenary.write(self, *args, **kwargs)
+
+
 class PlenaryNamespacedHost(PlenaryToplevelHost):
     """
     A plenary template describing a host, namespaced by DNS domain

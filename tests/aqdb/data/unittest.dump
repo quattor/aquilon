@@ -115,7 +115,7 @@ Room(name="np-lab1", fullname="NP lab1", parent=@np)
 
 Archetype(name="aegis")
 Archetype(name="aquilon", is_compileable=True)
-Archetype(name="aurora")
+Archetype(name="aurora", is_compileable=True)
 Archetype(name="pserver", is_compileable=True)
 Archetype(name="vmhost", is_compileable=True, cluster_required=True)
 Archetype(name="windows")
