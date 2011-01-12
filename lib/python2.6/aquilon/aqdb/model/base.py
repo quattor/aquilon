@@ -244,12 +244,13 @@ class Base(object):
                 # building"
                 clslabel = mapper.polymorphic_map[value].class_._get_class_label()
             else:
-                name = value.name if hasattr(value, "name") else str(value)
-                if (hasattr(cls, "_instance_label") and field ==
-                    cls._instance_label) or field == "name":
-                    desc.append(name)
+                if field == "name" or (hasattr(cls, "_instance_label") and
+                                       field == cls._instance_label):
+                    desc.append(str(value))
+                elif isinstance(value, Base):
+                    desc.append("{0:l}".format(value))
                 else:
-                    desc.append(field + " " + name)
+                    desc.append(field + " " + str(value))
 
         # Check for arguments we don't know about
         if kwargs:
