@@ -116,7 +116,7 @@ class DnsRecord(Base):
         # translates to 253 for simple ASCII text; see:
         # http://www.ops.ietf.org/lists/namedroppers/namedroppers.2003/msg00964.html
         if len(name) + 1 + len(dns_domain.name) > 253:
-            raise ValueError('The fully qualified domain name is too long.')
+            raise ArgumentError('The fully qualified domain name is too long.')
 
     def __init__(self, session=None, name=None, dns_domain=None, fqdn=None,
                  dns_environment=None, **kwargs):

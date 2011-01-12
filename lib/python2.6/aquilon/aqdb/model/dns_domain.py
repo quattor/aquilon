@@ -84,9 +84,9 @@ class DnsDomain(Base):
     def check_label(cls, label):  # TODO: database check constraint for length
         if len(label) < 1 or len(label) > 63:
             msg = 'DNS name components must have a length between 1 and 63.'
-            raise ValueError(msg)
+            raise ArgumentError(msg)
         if not cls._name_check.match(label):
-            raise ValueError("Illegal DNS name format '%s'." % label)
+            raise ArgumentError("Illegal DNS name format '%s'." % label)
 
     def __init__(self, *args, **kwargs):
 
@@ -99,11 +99,11 @@ class DnsDomain(Base):
         # translates to 253 for simple ASCII text; see:
         # http://www.ops.ietf.org/lists/namedroppers/namedroppers.2003/msg00964.html
         if len(domain) > 253:
-            raise ValueError('The DNS domain name is too long.')
+            raise ArgumentError('The DNS domain name is too long.')
 
         parts = domain.split('.')
         if len(parts) < 2:
-            raise ValueError('Top-level DNS domains cannot be added.')
+            raise ArgumentError('Top-level DNS domains cannot be added.')
         # The limit of max. 127 parts mentioned at various documents about DNS
         # follows from the other checks above and below
         for part in parts:
