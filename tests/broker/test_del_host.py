@@ -202,22 +202,22 @@ class TestDelHost(TestBrokerCommand):
         self.dsdb_verify()
 
     def testdeltest_aurora_default_os(self):
-        command = "del host --hostname test_aurora_default_os.ms.com --quiet"
+        command = "del host --hostname test-aurora-default-os.ms.com --quiet"
         self.noouttest(command.split(" "))
 
     def testverifydeltest_aurora_default_os(self):
-        command = "show host --hostname test_aurora_default_os.ms.com"
+        command = "show host --hostname test-aurora-default-os.ms.com"
         self.notfoundtest(command.split(" "))
 
     def testdeltest_windows_default_os(self):
         ip = self.net.tor_net[10].usable[-2]
         self.dsdb_expect_delete(ip)
-        command = "del host --hostname test_windows_default_os.msad.ms.com --quiet"
+        command = "del host --hostname test-windows-default-os.msad.ms.com --quiet"
         self.noouttest(command.split(" "))
         self.dsdb_verify()
 
     def testverifydeltest_windows_default_os(self):
-        command = "show host --hostname test_windows_default_os.msad.ms.com"
+        command = "show host --hostname test-windows-default-os.msad.ms.com"
         self.notfoundtest(command.split(" "))
 
     def testdelhprackhosts(self):

@@ -364,17 +364,17 @@ class TestAddHost(TestBrokerCommand):
     #test aurora and windows defaults now
     def testaddauroradefaultos(self):
         ip = self.net.tor_net[10].usable[-1]
-        self.dsdb_expect("show host -host_name test_aurora_default_os")
+        self.dsdb_expect("show host -host_name test-aurora-default-os")
         self.noouttest(["add", "host", "--archetype", "aurora",
-                        "--hostname", "test_aurora_default_os.ms.com",
+                        "--hostname", "test-aurora-default-os.ms.com",
                         "--ip", ip, "--domain", "ny-prod", "--machine",
                         "ut8s02p4"])
         self.dsdb_verify()
 
     def testverifyaddauroradefaultos(self):
-        command = "show host --hostname test_aurora_default_os.ms.com"
+        command = "show host --hostname test-aurora-default-os.ms.com"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Primary Name: test_aurora_default_os.ms.com", command)
+        self.matchoutput(out, "Primary Name: test-aurora-default-os.ms.com", command)
         self.matchoutput(out, "Archetype: aurora", command)
         self.matchoutput(out, "Personality: generic", command)
         self.matchoutput(out, "Domain: ny-prod", command)
@@ -383,18 +383,18 @@ class TestAddHost(TestBrokerCommand):
 
     def testaddwindowsefaultos(self):
         ip = self.net.tor_net[10].usable[-2]
-        self.dsdb_expect_add("test_windows_default_os.msad.ms.com", ip,
+        self.dsdb_expect_add("test-windows-default-os.msad.ms.com", ip,
                              "eth0", self.net.tor_net[0].usable[5].mac)
         self.noouttest(["add", "host", "--archetype", "windows",
-                        "--hostname", "test_windows_default_os.msad.ms.com",
+                        "--hostname", "test-windows-default-os.msad.ms.com",
                         "--ip", ip, "--domain", "ny-prod",
                         "--machine", "ut8s02p5"])
         self.dsdb_verify()
 
     def testverifyaddwindowsdefaultos(self):
-        command = "show host --hostname test_windows_default_os.msad.ms.com"
+        command = "show host --hostname test-windows-default-os.msad.ms.com"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Primary Name: test_windows_default_os.msad.ms.com", command)
+        self.matchoutput(out, "Primary Name: test-windows-default-os.msad.ms.com", command)
         self.matchoutput(out, "Archetype: windows", command)
         self.matchoutput(out, "Personality: generic", command)
         self.matchoutput(out, "Domain: ny-prod", command)
@@ -412,8 +412,8 @@ class TestAddHost(TestBrokerCommand):
         self.matchoutput(out, "aquilon61.aqd-unittest.ms.com", command)
         self.matchoutput(out, "evh1.aqd-unittest.ms.com", command)
         self.matchoutput(out, "evh51.aqd-unittest.ms.com", command)
-        self.matchoutput(out, "test_aurora_default_os.ms.com", command)
-        self.matchoutput(out, "test_windows_default_os.msad.ms.com", command)
+        self.matchoutput(out, "test-aurora-default-os.ms.com", command)
+        self.matchoutput(out, "test-windows-default-os.msad.ms.com", command)
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddHost)
