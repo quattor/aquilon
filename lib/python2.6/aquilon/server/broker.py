@@ -176,6 +176,11 @@ class BrokerCommand(object):
             self.requires_format = True
             self.requires_readonly = True
             self._is_lock_free = True
+        if not self.requires_readonly \
+           and self.config.get('broker', 'mode') == 'readonly':
+            self.badmode = 'readonly'
+        else:
+            self.badmode = False
         self._update_render(self.render)
         if not self.defer_to_thread:
             if self.requires_azcheck or self.requires_transaction:
@@ -236,6 +241,10 @@ class BrokerCommand(object):
                         self._set_readonly(session)
                     # begin() is only required if session transactional=False
                     #session.begin()
+                if self.badmode: # pragma: no cover
+                    raise UnimplementedError("Command %s not available on "
+                                             "a %s broker." %
+                                             (self.command, self.badmode))
                 # Command is an instance method already having self...
                 retval = command(*args, **kwargs)
                 if self.requires_format:
