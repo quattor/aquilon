@@ -1,6 +1,6 @@
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 #
-# Copyright (C) 2008,2009,2010  Contributor
+# Copyright (C) 2008,2009,2010,2011  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -26,8 +26,48 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-from aquilon.aqdb.column_types.aqstr import AqStr
-from aquilon.aqdb.column_types.aqmac import AqMac
-from aquilon.aqdb.column_types.IPV4 import IPV4
-from aquilon.aqdb.column_types.enum import Enum
-from aquilon.aqdb.column_types.guid import GUID
+#-*- coding: utf-8; fill-column: 80 -*-
+""" A platform independant GUID """
+
+
+import uuid
+
+from sqlalchemy.types import TypeDecorator, CHAR
+from sqlalchemy.dialects.postgresql import UUID
+
+
+class GUID(TypeDecorator):
+    """ Platform-independent GUID type.
+
+        Uses Postgresql's UUID type, otherwise uses CHAR(32), storing as
+        stringified hex values. Based on a recipe found in
+        http://www.sqlalchemy.org/docs/core/types.html """
+
+    impl = CHAR
+
+    def __init__(self):
+        TypeDecorator.__init__(self, length=32)
+
+    def load_dialect_impl(self, dialect):
+        if dialect.name == 'postgresql':
+            return dialect.type_descriptor(UUID())
+        else:
+            return dialect.type_descriptor(CHAR(32))
+
+    def process_bind_param(self, value, dialect):
+        if value is None:
+            return value
+        elif dialect.name == 'postgresql':
+            return str(value)
+        else:
+            if not isinstance(value, uuid.UUID):
+                return "%.32x" % uuid.UUID(value)
+            else:
+                # hexstring
+                return "%.32x" % value
+
+    def process_result_value(self, value, dialect):
+        if value is None:
+            return value
+        else:
+            return uuid.UUID(value)
