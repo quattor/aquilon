@@ -63,7 +63,7 @@ class TestBrokerCommand(unittest.TestCase):
         if protodir not in sys.path:
             sys.path.append(protodir)
         for m in ['aqdsystems_pb2', 'aqdnetworks_pb2', 'aqdservices_pb2',
-                  'aqddnsdomains_pb2', "aqdlocations_pb2"]:
+                  'aqddnsdomains_pb2', 'aqdlocations_pb2', 'aqdaudit_pb2']:
             globals()[m] = __import__(m)
 
         self.user = self.config.get("broker", "user")
@@ -401,6 +401,10 @@ class TestBrokerCommand(unittest.TestCase):
         return self.parse_proto_msg(aqdsystems_pb2.PersonalityList,
                                     'personalities',
                                     msg, expect)
+
+    def parse_audit_msg(self, msg, expect=None):
+        return self.parse_proto_msg(aqdaudit_pb2.TransactionList,
+                                    'transactions', msg, expect)
 
     def gitenv(self, env=None):
         git_path = self.config.get("broker", "git_path")
