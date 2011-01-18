@@ -166,6 +166,9 @@ vlan2net = /ms/dist/aquilon/PROJ/vlan2net/prod/bin/vlan2net
 run_knc = True
 mean = /ms/dist/storage/PROJ/infra/prod/bin/mean
 qip_dump_subnetdata = /ms/dist/3rd/qip/usr/sbin/qip-dump-subnetdata
+# Default and maximum numbers of audit (xtn table) rows returned by search audit
+default_audit_rows = 5000
+max_audit_rows = 20000
 
 [panc]
 default_version = prod
