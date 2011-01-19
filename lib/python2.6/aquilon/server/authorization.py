@@ -78,7 +78,8 @@ class AuthorizationBroker(object):
                 raise AuthorizationException(
                     "Must have the engineering or aqd_admin role to %s." %
                     action)
-        if action in ['permission', 'flush', 'add_network', 'del_network']:
+        if action in ['permission', 'flush', 'add_network', 'del_network',
+                      'add_router', 'del_router']:
             if dbuser.role.name not in ['aqd_admin']:
                 raise AuthorizationException(
                     "Must have the aqd_admin role to %s." % action)
