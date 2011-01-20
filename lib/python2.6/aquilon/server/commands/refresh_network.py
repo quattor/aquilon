@@ -28,14 +28,15 @@
 # TERMS THAT MAY APPLY.
 """Contains the logic for `aq refresh network`."""
 
+import os
+from tempfile import mkdtemp
 
-from aquilon.exceptions_ import PartialError
+from aquilon.exceptions_ import ArgumentError
+from aquilon.aqdb.data_sync.qip import QIPRefresh
 from aquilon.server.broker import BrokerCommand
-from aquilon.server.logger import CLIENT_INFO
+from aquilon.server.processes import run_command, remove_dir
 from aquilon.server.dbwrappers.location import get_location
 from aquilon.server.locks import lock_queue, SyncKey
-from aquilon.aqdb.dsdb import DsdbConnection
-from aquilon.aqdb.data_sync.net_refresh import NetRefresher
 
 
 class CommandRefreshNetwork(BrokerCommand):
@@ -44,32 +45,34 @@ class CommandRefreshNetwork(BrokerCommand):
 
     def render(self, session, logger, building, dryrun, incremental,
                **arguments):
+        if building:
+            dbbuilding = get_location(session, building=building)
+        else:
+            dbbuilding = None
+
+        # --dryrun and --incremental do not mix well
+        if dryrun and incremental:
+            raise ArgumentError("--dryrun and --incremental cannot be given "
+                                "simultaneously.")
+
         key = SyncKey(data="network", logger=logger)
         lock_queue.acquire(key)
+
+        rundir = self.config.get("broker", "rundir")
+        tempdir = mkdtemp(prefix="refresh_network_", dir=rundir)
         try:
-            if building:
-                dbbuilding = get_location(session, building=building)
-                building = dbbuilding.name
+            args = [self.config.get("broker", "qip_dump_subnetdata"),
+                    "--datarootdir", tempdir, "--format", "txt", "--noaudit"]
+            run_command(args, logger=logger)
 
-            dsdb = DsdbConnection()
-            try:
-                nr = NetRefresher(dsdb, session, bldg=building,
-                                  logger=logger, loglevel=CLIENT_INFO,
-                                  incremental=incremental, dryrun=dryrun)
-                nr.refresh()
-            finally:
-                dsdb.close()
+            subnetdata = file(os.path.join(tempdir, "subnetdata.txt"), "r")
+            refresher = QIPRefresh(session, logger, dbbuilding, dryrun, incremental)
+            refresher.refresh(subnetdata)
 
-            if nr.errors:
-                if incremental:
-                    msg = ''
-                else:
-                    msg = 'No changes applied because of errors.'
-                raise PartialError(success=[], failed=nr.errors,
-                                   success_msg=msg)
+            session.flush()
+
             if dryrun:
                 session.rollback()
         finally:
             lock_queue.release(key)
-
-        return
+            remove_dir(tempdir, logger=logger)

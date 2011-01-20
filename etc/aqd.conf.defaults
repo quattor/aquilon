@@ -156,6 +156,7 @@ vlan2net = /ms/dist/aquilon/PROJ/vlan2net/prod/bin/vlan2net
 run_knc = True
 mean = /ms/dist/storage/PROJ/infra/prod/bin/mean
 default_dns_environment = internal
+qip_dump_subnetdata = /ms/dist/3rd/qip/usr/sbin/qip-dump-subnetdata
 
 [panc]
 default_version = prod
