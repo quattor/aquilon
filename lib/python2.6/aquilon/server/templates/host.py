@@ -215,7 +215,15 @@ class PlenaryToplevelHost(Plenary):
                 if addr.label != "" or addr.usage != "system":
                     continue
 
-                for router_ip in addr.network.router_ips:
+                # Note: addr.network is a @property and its value is not kept
+                # persistent. The association proxy only keeps a weak reference
+                # on its parent, so addr.network.routers can be garbage
+                # collected while iterating router_ips, which makes the
+                # association proxy upset. Storing addr.network in a variable
+                # creates a reference and fixes the issue.
+                net = addr.network
+
+                for router_ip in net.router_ips:
                     if addr.interface.name not in routers:
                         routers[addr.interface.name] = []
                     routers[addr.interface.name].append(router_ip)
