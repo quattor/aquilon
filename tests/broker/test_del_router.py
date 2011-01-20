@@ -41,13 +41,13 @@ from brokertest import TestBrokerCommand
 class TestDelRouter(TestBrokerCommand):
 
     def testdelrouterbyip(self):
-        net = self.net.tor_net[12]
+        net = self.net.tor_net[6]
         command = ["del", "router", "--ip", net.gateway]
         self.noouttest(command)
 
     def testdelrouterbyname(self):
         command = ["del", "router",
-                   "--fqdn", "ut3gd1r04-v110-hsrp.aqd-unittest.ms.com"]
+                   "--fqdn", "ut3gd1r01-v109-hsrp.aqd-unittest.ms.com"]
         self.noouttest(command)
 
     def testdelmissingrouter(self):

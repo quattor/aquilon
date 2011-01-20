@@ -41,27 +41,20 @@ from brokertest import TestBrokerCommand
 class TestAddRouter(TestBrokerCommand):
 
     def testaddrouter(self):
-        net = self.net.tor_net[12]
+        net = self.net.tor_net[6]
         command = ["add", "router", "--ip", net.gateway,
-                   "--fqdn", "ut3gd1r01-v109-hsrp.aqd-unittest.ms.com",
+                   "--fqdn", "ut3gd1r04-v109-hsrp.aqd-unittest.ms.com",
                    "--building", "ut", "--comments", "Test router"]
         self.noouttest(command)
 
     def testaddrouteragain(self):
-        net = self.net.tor_net[12]
-        command = ["add", "router", "--ip", net.gateway,
-                   "--fqdn", "ut3gd1r01-v109-hsrp.aqd-unittest.ms.com",
-                   "--building", "ut"]
-        out = self.badrequesttest(command)
-        self.matchoutput(out, "IP address %s is already present as a router "
-                         "for network %s." % (net.gateway, net.ip), command)
-
-    def testaddrouter2(self):
         net = self.net.tor_net[6]
         command = ["add", "router", "--ip", net.gateway,
                    "--fqdn", "ut3gd1r04-v110-hsrp.aqd-unittest.ms.com",
                    "--building", "ut"]
-        self.noouttest(command)
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "IP address %s is already present as a router "
+                         "for network %s." % (net.gateway, net.ip), command)
 
     def testaddnormalhostasrouter(self):
         net = self.net.unknown[2]
@@ -87,19 +80,29 @@ class TestAddRouter(TestBrokerCommand):
                          "network %s." % (ip, net.ip),
                          command)
 
+    def testaddzebrarouters(self):
+        for net_idx in range(0, 2):
+            net = self.net.unknown[11 + net_idx]
+            for rtr_idx in range(0, 2):
+                rtr = "ut3gd1r0%d-v%d-hsrp.aqd-unittest.ms.com" % (net_idx + 1,
+                                                                   rtr_idx + 109)
+                command = ["add", "router", "--ip", net[rtr_idx + 1],
+                           "--fqdn", rtr, "--building", "ut"]
+                self.noouttest(command)
+
     def testshowrouter(self):
-        net = self.net.tor_net[12]
+        net = self.net.tor_net[6]
         command = ["show", "router", "--ip", net.gateway]
         out = self.commandtest(command)
         self.matchoutput(out,
-                         "Router: ut3gd1r01-v109-hsrp.aqd-unittest.ms.com [%s]"
+                         "Router: ut3gd1r04-v109-hsrp.aqd-unittest.ms.com [%s]"
                          % net.gateway,
                          command)
         self.matchoutput(out, "Network: %s" % net.ip, command)
         self.matchoutput(out, "Comments: Test router", command)
 
     def testshownetwork(self):
-        net = self.net.tor_net[12]
+        net = self.net.tor_net[6]
         command = ["show", "network", "--ip", net.ip]
         out = self.commandtest(command)
         self.matchoutput(out, "Routers: %s (Building ut)" % net.gateway, command)
@@ -123,7 +126,10 @@ class TestAddRouter(TestBrokerCommand):
         command = ["show", "router", "--all"]
         out = self.commandtest(command)
         self.matchoutput(out, "Router: ut3gd1r01-v109-hsrp.aqd-unittest.ms.com", command)
-        self.matchoutput(out, "Router: ut3gd1r04-v110-hsrp.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "Router: ut3gd1r01-v110-hsrp.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "Router: ut3gd1r02-v109-hsrp.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "Router: ut3gd1r02-v110-hsrp.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "Router: ut3gd1r04-v109-hsrp.aqd-unittest.ms.com", command)
 
 
 if __name__=='__main__':

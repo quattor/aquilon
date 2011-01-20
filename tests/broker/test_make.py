@@ -123,6 +123,15 @@ class TestMake(TestBrokerCommand):
                           r'\);' % (hostname_ip, zebra2_ip, zebra3_ip),
                           command)
         self.searchoutput(out,
+                          r'"/system/network/routers" = nlist\(\s*'
+                          r'"eth0", list\(\s*"%s",\s*"%s"\s*\),\s*'
+                          r'"eth1", list\(\s*"%s",\s*"%s"\s*\)\s*'
+                          r'\);' % (self.net.unknown[11][1],
+                                    self.net.unknown[11][2],
+                                    self.net.unknown[12][1],
+                                    self.net.unknown[12][2]),
+                          command)
+        self.searchoutput(out,
                           r'"eth0", nlist\(\s*'
                           r'"bootproto", "static",\s*'
                           r'"broadcast", "%s",\s*'
