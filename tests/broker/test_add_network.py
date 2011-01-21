@@ -63,13 +63,12 @@ class TestAddNetwork(TestBrokerCommand):
     def testaddnetworkdup(self):
         # Old name, new address
         net = self.net.all[0]
-        subnet = net.subnet()[1]
         command = ["add", "network", "--network", net.ip,
-                   "--ip", subnet.ip, "--netmask", subnet.netmask,
+                   "--ip", "192.168.10.0", "--netmask", "255.255.255.0",
                    "--building", "ut", "--type", net.nettype]
-        out = self.badrequesttest(command)
-        self.matchoutput(out, "Network name %s is already used for address "
-                         "%s." % (str(net.ip), str(net)), command)
+        (out, err) = self.successtest(command)
+        self.matchoutput(err, "WARNING: Network name %s is already used for "
+                         "address %s." % (str(net.ip), str(net)), command)
 
     def testaddsubnet(self):
         # Add a subnet of an existing network
