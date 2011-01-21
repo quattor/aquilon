@@ -26,45 +26,30 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-"""Contains the logic for `aq add router`."""
+"""Contains the logic for `aq update router`."""
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand
 from aquilon.aqdb.model import RouterAddress, Building, FutureARecord
-from aquilon.aqdb.model.network import get_net_id_from_ip
 
 
-class CommandAddRouter(BrokerCommand):
+class CommandUpdateRouter(BrokerCommand):
 
-    required_parameters = ["fqdn"]
-
-    def render(self, session, fqdn, building, ip, comments, **arguments):
-        if building:
-            dbbuilding = Building.get_unique(session, building, compel=True)
-        else:
-            dbbuilding = None
-
-        if ip:
-            dbdns_rec = FutureARecord.get_or_create(session, fqdn=fqdn,
-                                                    ip=ip)
-        else:
+    def render(self, session, fqdn, ip, building, comments, **arguments):
+        if fqdn:
             dbdns_rec = FutureARecord.get_unique(session, fqdn, compel=True)
             ip = dbdns_rec.ip
+        if not ip:
+            raise ArgumentError("Please specify either --ip or --fqdn.")
 
-        dbnetwork = get_net_id_from_ip(session, ip)
-        if ip in dbnetwork.router_ips:
-            raise ArgumentError("IP address {0} is already present as a router "
-                                "for {1:l}.".format(ip, dbnetwork))
+        router = RouterAddress.get_unique(session, ip=ip, compel=True)
 
-        if ip <= dbnetwork.ip or ip >= dbnetwork.first_usable_host or \
-           ip in dbnetwork.reserved_addresses:
-            raise ArgumentError("IP address {0} is not a valid router address "
-                                "on {1:l}.".format(ip, dbnetwork))
+        if building:
+            dbbuilding = Building.get_unique(session, name=building,
+                                             compel=True)
+            router.location = dbbuilding
 
-        dbnetwork.routers.append(RouterAddress(ip=ip, location=dbbuilding,
-                                               comments=comments))
+        if comments:
+            router.comments = comments
+
         session.flush()
-
-        # TODO: update the templates of Zebra hosts on the network
-
-        return

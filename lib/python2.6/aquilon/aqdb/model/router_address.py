@@ -54,9 +54,12 @@ class RouterAddress(Base):
                                             ondelete="CASCADE"),
                         nullable=False)
 
+    # We don't want deleting a location to disrupt networking, so use "ON DELETE
+    # SET NULL" here
     location_id = Column(Integer, ForeignKey('location.id',
-                                             name='%s_location_fk' % _TN),
-                         nullable=False)
+                                             name='%s_location_fk' % _TN,
+                                             ondelete="SET NULL"),
+                         nullable=True)
 
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))

@@ -94,7 +94,8 @@ class AuthorizationBroker(object):
         if dbuser.role.name == 'telco_operations':
             if action not in ['add_rack', 'add_switch', 'add_tor_switch',
                               'update_rack', 'update_switch',
-                              'del_rack', 'del_switch', 'del_tor_switch']:
+                              'del_rack', 'del_switch', 'del_tor_switch',
+                              'update_router']:
                 self.raise_auth_error(principal, action, resource)
         if dbuser.role.name == 'maintech':
             if action not in ['pxeswitch', 'pxeswitch_list',
