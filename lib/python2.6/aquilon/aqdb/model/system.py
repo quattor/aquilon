@@ -73,9 +73,13 @@ class System(Base):
                            nullable=False ) #TODO: default
 
     ip = Column(IPV4, nullable=True)
+
+    # ON DELETE SET NULL and later passive_deletes=True helps refresh_network in
+    # case of network splits/merges
     network_id = Column(Integer, ForeignKey('network.id',
-                                                 name='SYSTEM_NET_ID_FK'),
-                                                nullable=True)
+                                            name='SYSTEM_NET_ID_FK',
+                                            ondelete="SET NULL"),
+                        nullable=True)
 
     creation_date = deferred(Column( DateTime, default=datetime.now,
                                     nullable=False))
@@ -83,7 +87,8 @@ class System(Base):
     comments = deferred(Column('comments', String(255), nullable=True))
 
     dns_domain = relation(DnsDomain)
-    network = relation(Network, backref='interfaces')
+    network = relation(Network, backref=backref('interfaces',
+                                                passive_deletes=True))
 
     __mapper_args__ = {'polymorphic_on': system_type}
 
