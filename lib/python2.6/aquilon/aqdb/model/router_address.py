@@ -71,10 +71,12 @@ class RouterAddress(Base):
 
     location = relation(Location)
 
+    # Cascading deletes here because we want "del network"/"refresh network" to
+    # really clean up everything with minimal fuss.
     dns_records = relation(FutureARecord, lazy=True, uselist=True,
                            primaryjoin=ip == FutureARecord.ip,
                            foreign_keys=[FutureARecord.ip],
-                           viewonly=True)
+                           cascade="delete")
 
 
 rtaddr = RouterAddress.__table__  # pylint: disable-msg=C0103, E1101
