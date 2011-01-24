@@ -39,8 +39,11 @@ DOMAIN = 'aqd-unittest.ms.com'
 NAME = 'dnstest1.%s' % DOMAIN
 NET_OFFSET = 10
 DJB = '--format djb'
+CSV = '--format csv'
+
 
 class TestAddNSRecord(TestBrokerCommand):
+    """ The tests for adding and displaying NS Records"""
 
     def setUp(self, *args, **kwargs):
         super(TestAddNSRecord, self).setUp(*args, **kwargs)
@@ -48,7 +51,7 @@ class TestAddNSRecord(TestBrokerCommand):
         self.IP = str(self.net.unknown[NET_OFFSET].usable[0])
 
     def test_100_add_a_record(self):
-        self.dsdb_expect_add(NAME,self.IP)
+        self.dsdb_expect_add(NAME, self.IP)
         cmd = ['add', 'address', '--fqdn', NAME, '--ip', self.IP]
         self.noouttest(cmd)
         self.dsdb_verify()
@@ -67,7 +70,7 @@ class TestAddNSRecord(TestBrokerCommand):
         self.badrequesttest(cmd.split(" "))
 
     def test_400_verify_ns_record(self):
-        cmd = "show ns record --dns_domain %s" % DOMAIN
+        cmd = "show ns record --dns_domain %s --fqdn %s" % (DOMAIN, NAME)
         out = self.commandtest(cmd.split(" "))
         self.matchoutput(out, NAME, cmd)
 
@@ -77,10 +80,17 @@ class TestAddNSRecord(TestBrokerCommand):
         self.matchoutput(out, 'DNS Domain: %s' % DOMAIN, cmd)
         self.matchoutput(out, NAME, cmd)
 
-    def test_410_verify_ns_record_djb(self):
-        cmd = "show ns record --dns_domain %s %s" % (DOMAIN, DJB)
+    def test_402_verify_csv(self):
+        cmd = "show ns record --dns_domain %s --fqdn %s %s" % (
+             DOMAIN, NAME, DJB)
         out = self.commandtest(cmd.split(" "))
         self.matchoutput(out, '.%s::%s' % (DOMAIN, NAME), cmd)
+
+    def test_410_verify_ns_record_djb(self):
+        cmd = "show ns record --dns_domain %s --fqdn %s %s" % (
+             DOMAIN, NAME, DJB)
+        out = self.commandtest(cmd.split(" "))
+        self.matchoutput(out, '%s,%s' % (DOMAIN, NAME), cmd)
 
 
 if __name__ == '__main__':

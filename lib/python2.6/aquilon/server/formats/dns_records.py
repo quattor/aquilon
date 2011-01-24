@@ -27,20 +27,37 @@
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
 """ Formatting for all sorts of DNS Records """
-import os
 
-import aquilon.server.depends
+#import aquilon.server.depends
 from aquilon.aqdb.model import NsRecord
+from aquilon.server.formats.list import ListFormatter
 from aquilon.server.formats.formatters import ObjectFormatter
 
 
 class NsRecordFormatter(ObjectFormatter):
-    template_raw = 'ns_record.mako'
+    template_raw = "ns_record.mako"
 
-    def csv_fields(self, dns_domain):
+    def csv_fields(self, ns):
         return (ns.dns_domain.name, ns.a_record.fqdn)
 
     def format_djb(self, ns):
         return ".%s::%s" % (ns.dns_domain.name, ns.a_record.fqdn)
 
 ObjectFormatter.handlers[NsRecord] = NsRecordFormatter()
+
+class SimpleNSRecordList(list):
+    """By convention, holds a list of ns_records to be formatted in a simple
+       (dns_domain: fqdn-only) manner."""
+    pass
+
+class SimpleNSRecordListFormatter(ListFormatter):
+    def format_raw(self, snsrlist, indent=""):
+        #return [self.redirect_raw(ns) for ns in snsrlist]
+        #return str("\n".join(
+        #    [indent + ns.dns_domain.name + ": " + ns.a_record.fqdn for ns in snsrlist]))
+
+        return str("\n".join(
+            [indent + self.redirect_raw(ns) for ns in snsrlist]))
+
+
+ObjectFormatter.handlers[SimpleNSRecordList] = SimpleNSRecordListFormatter()

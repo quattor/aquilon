@@ -3251,13 +3251,15 @@
 
    <command name="show_ns_record">
       Display NS Records
-      <optgroup name="show_ns_record_opts" mandatory="True" fields="all">
-         <option name="dns_domain" type="string">The dns domain name</option>
+      <optgroup name="show_ns_record_opts" mandatory="True" fields="any">
+           <optgroup name="show_one_ns_record" mandatory="False" fields="all">
+               <option name="dns_domain" type="string">The dns domain name</option>
+               <option name="fqdn" type="string">The fully qualified domain name of the server</option>
+           </optgroup>
+           <option name="all" type="flag" conflicts="fqdn dns_domain">Select all NS Records</option>
       </optgroup>
-      <optgroup name="show_ns_optional" mandatory="False" fields="all">
-         <option name="fqdn" type="string">The fully qualified domain name of the server</option>
-      </optgroup>
-      <transport method="get" path="find/ns_record" />
+      <transport method="get" path="ns_record/%(dns_domain)s/%(fqdn)s"/>
+      <transport trigger="all" method="get" path="ns_record"/>
    </command>
 
    <command name="add_ns_record">
