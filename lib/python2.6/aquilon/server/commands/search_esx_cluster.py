@@ -34,7 +34,7 @@ from sqlalchemy.orm import aliased
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.formats.cluster import SimpleClusterList
 from aquilon.aqdb.model import (EsxCluster, MetaCluster, Archetype,
-                                Personality, Machine,
+                                Personality, Machine, Switch,
                                 Service, ServiceInstance, NasDisk, Disk)
 from aquilon.server.dbwrappers.host import hostname_to_host
 from aquilon.server.dbwrappers.branch import get_branch_and_author
@@ -47,7 +47,7 @@ class CommandSearchESXCluster(BrokerCommand):
 
     def render(self, session, logger, cluster, metacluster,
                esx_hostname, virtual_machine, guest,
-               archetype, personality, service, instance, share,
+               archetype, personality, service, instance, share, switch,
                domain, sandbox, branch,
                capacity_override,
                fullinfo, **arguments):
@@ -78,6 +78,9 @@ class CommandSearchESXCluster(BrokerCommand):
             q = q.reset_joinpoint()
         if capacity_override:
             q = q.filter(EsxCluster.memory_capacity != None)
+        if switch:
+            dbswitch = Switch.get_unique(session, switch, compel=True)
+            q = q.filter_by(switch=dbswitch)
 
         (dbbranch, dbauthor) = get_branch_and_author(session, logger,
                                                      domain=domain,
