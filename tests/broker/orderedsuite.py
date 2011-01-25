@@ -96,6 +96,7 @@ from test_add_machine import TestAddMachine
 from test_add_disk import TestAddDisk
 from test_add_interface import TestAddInterface
 from test_add_address import TestAddAddress
+from test_add_alias import TestAddAlias
 from test_add_dynamic_range import TestAddDynamicRange
 from test_add_host import TestAddHost
 from test_add_aquilon_host import TestAddAquilonHost
@@ -153,6 +154,7 @@ from test_show_machine import TestShowMachine
 from test_search_switch import TestSearchSwitch
 from test_search_hardware import TestSearchHardware
 from test_search_machine import TestSearchMachine
+from test_search_dns import TestSearchDns
 from test_search_system import TestSearchSystem
 from test_search_host import TestSearchHost
 from test_search_esx_cluster import TestSearchESXCluster
@@ -181,6 +183,7 @@ from test_del_virtual_hardware import TestDelVirtualHardware
 from test_unbind_esx_cluster import TestUnbindESXCluster
 from test_uncluster import TestUncluster
 from test_del_dynamic_range import TestDelDynamicRange
+from test_del_alias import TestDelAlias
 from test_del_address import TestDelAddress
 from test_del_city import TestDelCity
 from test_del_manager import TestDelManager
@@ -254,7 +257,8 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestAddTorSwitch, TestAddSwitch, TestUpdateSwitch,
                 TestPollSwitch,
                 TestAddChassis, TestAddMachine, TestAddDisk, TestAddInterface,
-                TestAddAddress, TestAddRouter, TestAddDynamicRange, TestAddHost,
+                TestAddAddress, TestAddAlias,
+                TestAddRouter, TestAddDynamicRange, TestAddHost,
                 TestAddAquilonHost, TestAddWindowsHost, TestAddAuroraHost,
                 TestAddAuxiliary, TestAddManager, TestAddInterfaceAddress,
                 TestMapService, TestBindClient, TestPrebindServer,
@@ -286,7 +290,7 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestShowServiceAll, TestShowCampus, TestShowFqdn,
                 TestShowSwitch, TestSearchSwitch,
                 TestSearchHardware, TestSearchMachine, TestShowMachine,
-                TestSearchSystem, TestSearchHost, TestSearchESXCluster,
+                TestSearchDns, TestSearchSystem, TestSearchHost, TestSearchESXCluster,
                 TestSearchObservedMac, TestSearchNext, TestSearchNetwork,
                 TestUpdateInterface, TestUpdateMachine, TestUpdateModel,
                 TestUpdateRack,
@@ -301,7 +305,7 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestDel10GigHardware, TestDelVirtualHardware,
                 TestUnbindESXCluster, TestUncluster,
                 TestDelInterfaceAddress,
-                TestDelDynamicRange, TestDelAddress, TestDelNSRecord,
+                TestDelDynamicRange, TestDelAlias, TestDelAddress, TestDelNSRecord,
                 TestDelManager, TestDelAuxiliary, TestDelHost,
                 TestDelInterface, TestDelDisk, TestDelMachine, TestDelChassis,
                 TestDelSwitch,

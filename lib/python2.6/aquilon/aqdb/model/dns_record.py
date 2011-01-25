@@ -33,6 +33,7 @@ from datetime import datetime
 from sqlalchemy import Integer, DateTime, Sequence, String, Column, ForeignKey
 
 from sqlalchemy.orm import relation, deferred, backref
+from sqlalchemy.ext.associationproxy import association_proxy
 
 from aquilon.aqdb.model import Base, Fqdn
 from aquilon.aqdb.column_types import AqStr
@@ -60,6 +61,8 @@ class DnsRecord(Base):
 
     fqdn = relation(Fqdn, lazy=False, innerjoin=True,
                     backref=backref('dns_records'))
+
+    aliases = association_proxy('fqdn', 'aliases')
 
     # The extra with_polymorphic: '*' means queries don't require
     # "q = q.with_polymorphic(DnsRecord.__mapper__.polymorphic_map.values())"

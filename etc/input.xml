@@ -3515,6 +3515,56 @@
       <transport method="delete" path="ns_record/%(dns_domain)s/%(fqdn)s" />
    </command>
 
+   <command name="add_alias">
+      Add DNS aliases to the database.
+      <optgroup name="add_alias_opts" mandatory="True" fields="all">
+         <option name="fqdn" type="string">A fully qualified domain name</option>
+         <option name="target" type="string">The target of an alias (CNAME)</option>
+      </optgroup>
+      <optgroup name="add_alias_optional" mandatory="False">
+         <option name="comments" type="string">Comments</option>
+         <option name="dns_environment" type="string">The name of the environment the address is in (defaults to 'internal')</option>
+      </optgroup>
+      <transport method="put" path="alias/%(fqdn)s" />
+   </command>
+
+   <command name="del_alias">
+      Delete a DNS alias from the database.
+      <optgroup name="del_alias_opts" mandatory="True" fields="all">
+         <option name="fqdn" type="string">The fully qualified domain name</option>
+      </optgroup>
+      <optgroup name="del_alias_optional" mandatory="False">
+         <option name="dns_environment" type="string">The name of the environment the address is in (defaults to 'internal')</option>
+      </optgroup>
+      <transport method="delete" path="alias/%(fqdn)s" />
+   </command>
+
+   <command name='search_dns'>
+      Search DNS records in the database.
+      <p/>
+      If you specify multiple search criteria then only records matching all of them
+      will be returned.
+      <p/>
+      For record_type you can use either the standard DNS RR type names (A, CNAME<!--, SRV -->)
+      or the internal names.
+      <optgroup name="search_dns_opts" mandatory="True" fields="any">
+         <option name="fqdn" type="string">A fully qualified domain name</option>
+         <option name="shortname" type="string">The short name</option>
+         <option name="record_type" type="string">The type of the DNS record</option>
+         <option name="ip" type="ipv4">An IP Address (for A records)</option>
+	 <option name="network" type="string">Network name or address (for A records)</option>
+         <option name="target" type="string">The target of an alias or service (for CNAME records)</option>
+         <!-- <option name="service" type="string">The symbolic name of the service (for SRV records)</option> -->
+         <option name="dns_domain" type="string">Name of the DNS domain the record lives in</option>
+      </optgroup>
+      <optgroup name="search_dns_optional" mandatory="False" fields="any">
+         <option name="dns_environment" type="string" conflicts="network_environment">The name of an environment the address is in (default: internal)</option>
+         <option name="network_environment" type="string" conflicts="dns_environment"> The network environment for A records (default: internal)</option>
+         <option name="fullinfo" type="flag">Show full information for the matching records</option>
+      </optgroup>
+      <transport method="get" path="find/dns_record"/>
+   </command>
+
    <command name="map_dns_domain">
       Map a DNS domain to the given location.
       <optgroup name="map_dns_domain_opts" mandatory="True" fields="all">

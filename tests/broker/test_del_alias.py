@@ -1,6 +1,7 @@
+#!/usr/bin/env python2.6
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 #
-# Copyright (C) 2008,2009,2010,2011  Contributor
+# Copyright (C) 2011  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -26,42 +27,38 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-""" Helpers for managing DNS-related objects """
+"""Module for testing the del alias command."""
 
-from sqlalchemy.orm import object_session
+if __name__ == '__main__':
+    import utils
+    utils.import_depends()
 
-from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import Fqdn, DnsRecord
+from brokertest import TestBrokerCommand
 
 
-def delete_dns_record(dbdns_rec):
-    """
-    Delete a DNS record 
+class TestDelAlias(TestBrokerCommand):
+    def test_100_del_alias2host(self):
+        command = ["del", "alias", "--fqdn", "alias2host.aqd-unittest.ms.com"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Alias alias2host.aqd-unittest.ms.com still has "
+                         "aliases, delete them first.", command)
 
-    Deleting a DNS record is a bit tricky because we do not want to keep
-    orphaned FQDN entries.
-    """
+    def test_110_del_missing(self):
+        command = ["del", "alias", "--fqdn", "no-such-alias.aqd-unittest.ms.com"]
+        out = self.notfoundtest(command)
+        self.matchoutput(out,
+                         "Alias no-such-alias.aqd-unittest.ms.com not found.",
+                         command)
 
-    session = object_session(dbdns_rec)
+    def test_200_del_alias2alias(self):
+        command = ["del", "alias", "--fqdn", "alias2alias.aqd-unittest.ms.com"]
+        self.noouttest(command)
 
-    if dbdns_rec.aliases:
-        raise ArgumentError("{0} still has aliases, delete them "
-                            "first.".format(dbdns_rec))
+    def test_210_del_alias2host(self):
+        command = ["del", "alias", "--fqdn", "alias2host.aqd-unittest.ms.com"]
+        self.noouttest(command)
 
-    # Lock the FQDN
-    q = session.query(Fqdn)
-    q = q.filter_by(id=dbdns_rec.fqdn_id)
-    q = q.with_lockmode('update')
-    dbfqdn = q.one()
 
-    # Delete the DNS record
-    session.delete(dbdns_rec)
-    session.flush()
-
-    # Delete the FQDN if it is orphaned
-    q = session.query(DnsRecord)
-    q = q.filter_by(fqdn_id=dbfqdn.id)
-    if q.count() == 0:
-        session.delete(dbfqdn)
-    else:
-        session.expire(dbfqdn, ['dns_records'])
+if __name__=='__main__':
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestDelAlias)
+    unittest.TextTestRunner(verbosity=2).run(suite)
