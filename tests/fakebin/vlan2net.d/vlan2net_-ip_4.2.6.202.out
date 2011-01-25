@@ -1,4 +1,4 @@
-vlan,network,mask
+vlan,network,bitmask
 701,4.2.6.0,25
 702,4.2.6.192,26
 710,4.2.6.160,29

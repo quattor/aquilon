@@ -182,9 +182,10 @@ class CommandPollSwitch(BrokerCommand):
             for row in reader:
                 vlan = row.get("vlan", None)
                 network = row.get("network", None)
-                if vlan is None or network is None or \
-                   len(vlan) == 0 or len(network) == 0:
-                    logger.info("Missing value for vlan or network in "
+                bitmask = row.get("bitmask", None)
+                if vlan is None or network is None or bitmask is None or \
+                   len(vlan) == 0 or len(network) == 0 or len(bitmask) == 0:
+                    logger.info("Missing value for vlan, network or bitmask in "
                                 "output line #%d: %s" % (reader.line_num, row))
                     continue
                 try:
@@ -198,10 +199,24 @@ class CommandPollSwitch(BrokerCommand):
                     network = force_ipv4("network", network)
                 except ArgumentError, e:
                     raise InternalError(e)
+                try:
+                    bitmask_int = int(bitmask)
+                except ValueError, e:
+                    logger.info("Error parsing bitmask in output "
+                                "line #%d: %s error: %s" %
+                                (reader.line_num, row, e))
+                    continue
                 dbnetwork = Network.get_unique(session, ip=network)
                 if not dbnetwork:
                     logger.info("Unknown network %s in output line #%d: %s" %
                                 (network, reader.line_num, row))
+                    continue
+                if dbnetwork.cidr != bitmask_int:
+                    logger.client_info("{0}: skipping VLAN {1}, because network "
+                                       "bitmask value {2} differs from prefixlen "
+                                       "{3.cidr} of {3:l}.".format(switch, vlan,
+                                                                   bitmask,
+                                                                   dbnetwork))
                     continue
                 dbvlan = ObservedVlan(vlan_id=vlan_int, switch=switch,
                                       network=dbnetwork, creation_date=now)
