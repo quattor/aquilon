@@ -1,4 +1,3 @@
-#!/usr/bin/env python2.6
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 #
 # Copyright (C) 2011  Contributor
@@ -27,35 +26,30 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-"""Module for testing constraints in commands involving DNS."""
+""" Unmap DNS domains from locations """
 
-import unittest
-
-if __name__ == "__main__":
-    import utils
-    utils.import_depends()
-
-from brokertest import TestBrokerCommand
+from aquilon.exceptions_ import ArgumentError
+from aquilon.server.broker import BrokerCommand
+from aquilon.aqdb.model import DnsDomain, DnsMap
+from aquilon.server.dbwrappers.location import get_location
 
 
-class TestDnsConstraints(TestBrokerCommand):
+class CommandUnmapDnsDomain(BrokerCommand):
 
-    def testdelenvinuse(self):
-        command = ["del", "dns", "environment", "--dns_environment", "ut-env"]
-        out = self.badrequesttest(command)
-        self.matchoutput(out, "DNS Environment ut-env is still in use by DNS "
-                         "records, and cannot be deleted.", command)
+    required_parameters = ["dns_domain"]
 
-    def testdelmappeddomain(self):
-        command = ["del", "dns", "domain", "--dns_domain", "new-york.ms.com"]
-        out = self.badrequesttest(command)
-        self.matchoutput(out,
-                         "DNS Domain new-york.ms.com is still mapped to "
-                         "locations and cannot be deleted.",
-                         command)
+    def render(self, session, dns_domain, **kw):
+        dbdns_domain = DnsDomain.get_unique(session, name=dns_domain,
+                                            compel=True)
 
+        dblocation = get_location(session, **kw)
+        if not dblocation:
+            raise ArgumentError("Please specify a location.")
 
-if __name__=='__main__':
-    suite = unittest.TestLoader().loadTestsFromTestCase(
-        TestDnsConstraints)
-    unittest.TextTestRunner(verbosity=2).run(suite)
+        dbmap = DnsMap.get_unique(session, dns_domain=dbdns_domain,
+                                  location=dblocation)
+        if dbmap:
+            session.delete(dbmap)
+            session.flush()
+
+        return

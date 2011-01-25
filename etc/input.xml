@@ -3383,4 +3383,72 @@
       <transport method="delete" path="ns_record/%(dns_domain)s/%(fqdn)s" />
    </command>
 
+   <command name="map_dns_domain">
+      Map a DNS domain to the given location.
+      <optgroup name="map_dns_domain_opts" mandatory="True" fields="all">
+         <option name="dns_domain" type="string">The fully qualified domain name</option>
+         <optgroup name="map_dns_domain_loc_opts" fields="any">
+            <option name="organization" type="string">Organization</option>
+            <option name="hub" type="string">Hub</option>
+            <option name="continent" type="string">Continent</option>
+            <option name="country" type="string">Country</option>
+            <option name="campus" type="string">Campus</option>
+            <option name="city" type="string">City</option>
+            <option name="building" type="string">Building</option>
+            <option name="room" type="string">Room</option>
+            <option name="rack" type="string">Rack</option>
+            <option name="desk" type="string">Desk</option>
+         </optgroup>
+      </optgroup>
+      <optgroup name="map_dns_domain_opt" mandatory="False">
+         <option name="comments" type="string">Comments</option>
+      </optgroup>
+      <transport method="post" path="dns_map/%(dns_domain)s/command/map" />
+   </command>
+
+   <command name="unmap_dns_domain">
+      Unmap a DNS domain from the given location.
+      <optgroup name="unmap_dns_domain_opts" mandatory="True" fields="all">
+         <option name="dns_domain" type="string">The fully qualified domain name</option>
+         <optgroup name="unmap_dns_domain_loc_opts" fields="any">
+            <option name="organization" type="string">Organization</option>
+            <option name="hub" type="string">Hub</option>
+            <option name="continent" type="string">Continent</option>
+            <option name="country" type="string">Country</option>
+            <option name="campus" type="string">Campus</option>
+            <option name="city" type="string">City</option>
+            <option name="building" type="string">Building</option>
+            <option name="room" type="string">Room</option>
+            <option name="rack" type="string">Rack</option>
+            <option name="desk" type="string">Desk</option>
+         </optgroup>
+      </optgroup>
+      <transport method="post" path="dns_map/%(dns_domain)s/command/unmap" />
+   </command>
+
+   <command name="search_dns_domain_map">
+      Search DNS domain maps.
+      <p/>
+      If a location is specified and the --include_parents flag is used, then any
+      mappings of parent locations are also included. This allows testing what would
+      be included in the DNS search path if a machine was placed at the given location.
+      <optgroup name="search_dns_domain_opts" mandatory="True" fields="any">
+         <option name="dns_domain" type="string">The fully qualified domain name</option>
+         <option name="organization" type="string">Organization</option>
+         <option name="hub" type="string">Hub</option>
+         <option name="continent" type="string">Continent</option>
+         <option name="country" type="string">Country</option>
+         <option name="campus" type="string">Campus</option>
+         <option name="city" type="string">City</option>
+         <option name="building" type="string">Building</option>
+         <option name="room" type="string">Room</option>
+         <option name="rack" type="string">Rack</option>
+         <option name="desk" type="string">Desk</option>
+      </optgroup>
+      <optgroup name="search_dns_domain_optional" mandatory="False" fields="any">
+         <option name="include_parents" type="flag">Include maps of parent locations</option>
+      </optgroup>
+      <transport method="get" path="find/dns_map" />
+   </command>
+
 </commandline>

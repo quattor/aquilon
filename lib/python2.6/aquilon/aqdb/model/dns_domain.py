@@ -80,6 +80,9 @@ class DnsDomain(Base):
 
     servers = association_proxy('_ns_records', 'a_record')
 
+    # The relation is defined in dns_map.py
+    mapped_locations = association_proxy('dns_maps', 'location')
+
     @classmethod
     def check_label(cls, label):  # TODO: database check constraint for length
         if len(label) < 1 or len(label) > 63:

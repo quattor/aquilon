@@ -1,4 +1,3 @@
-#!/usr/bin/env python2.6
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 #
 # Copyright (C) 2011  Contributor
@@ -27,35 +26,39 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-"""Module for testing constraints in commands involving DNS."""
-
-import unittest
-
-if __name__ == "__main__":
-    import utils
-    utils.import_depends()
-
-from brokertest import TestBrokerCommand
+"""Contains the logic for `aq search dns domain map`."""
 
 
-class TestDnsConstraints(TestBrokerCommand):
+from aquilon.aqdb.model import DnsDomain, DnsMap, Location
+from aquilon.server.broker import BrokerCommand
+from aquilon.server.dbwrappers.location import get_location
 
-    def testdelenvinuse(self):
-        command = ["del", "dns", "environment", "--dns_environment", "ut-env"]
-        out = self.badrequesttest(command)
-        self.matchoutput(out, "DNS Environment ut-env is still in use by DNS "
-                         "records, and cannot be deleted.", command)
-
-    def testdelmappeddomain(self):
-        command = ["del", "dns", "domain", "--dns_domain", "new-york.ms.com"]
-        out = self.badrequesttest(command)
-        self.matchoutput(out,
-                         "DNS Domain new-york.ms.com is still mapped to "
-                         "locations and cannot be deleted.",
-                         command)
+from sqlalchemy.orm import contains_eager
 
 
-if __name__=='__main__':
-    suite = unittest.TestLoader().loadTestsFromTestCase(
-        TestDnsConstraints)
-    unittest.TextTestRunner(verbosity=2).run(suite)
+class CommandSearchDnsDomainMap(BrokerCommand):
+
+    required_parameters = []
+
+    def render(self, session, dns_domain, include_parents, **kwargs):
+        dblocation = get_location(session, **kwargs)
+        q = session.query(DnsMap)
+        if dblocation:
+            if include_parents:
+                location_ids = [parent.id for parent in dblocation.parents]
+                location_ids.append(dblocation.id)
+                q = q.filter(DnsMap.location_id.in_(location_ids))
+            else:
+                q = q.filter_by(location=dblocation)
+        if dns_domain:
+            dbdns_domain = DnsDomain.get_unique(session, dns_domain,
+                                                compel=True)
+            q = q.filter_by(dns_domain=dbdns_domain)
+
+        q = q.join(DnsDomain)
+        q = q.options(contains_eager('dns_domain'))
+        q = q.join(Location)
+        q = q.options(contains_eager('location'))
+        q = q.order_by(DnsDomain.name, Location.location_type, Location.name)
+
+        return q.all()

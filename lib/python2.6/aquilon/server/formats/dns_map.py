@@ -1,4 +1,3 @@
-#!/usr/bin/env python2.6
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 #
 # Copyright (C) 2011  Contributor
@@ -27,35 +26,24 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-"""Module for testing constraints in commands involving DNS."""
-
-import unittest
-
-if __name__ == "__main__":
-    import utils
-    utils.import_depends()
-
-from brokertest import TestBrokerCommand
+""" DNS Domain Map formatter. """
 
 
-class TestDnsConstraints(TestBrokerCommand):
-
-    def testdelenvinuse(self):
-        command = ["del", "dns", "environment", "--dns_environment", "ut-env"]
-        out = self.badrequesttest(command)
-        self.matchoutput(out, "DNS Environment ut-env is still in use by DNS "
-                         "records, and cannot be deleted.", command)
-
-    def testdelmappeddomain(self):
-        command = ["del", "dns", "domain", "--dns_domain", "new-york.ms.com"]
-        out = self.badrequesttest(command)
-        self.matchoutput(out,
-                         "DNS Domain new-york.ms.com is still mapped to "
-                         "locations and cannot be deleted.",
-                         command)
+from aquilon.server.formats.formatters import ObjectFormatter
+from aquilon.aqdb.model import DnsMap
 
 
-if __name__=='__main__':
-    suite = unittest.TestLoader().loadTestsFromTestCase(
-        TestDnsConstraints)
-    unittest.TextTestRunner(verbosity=2).run(suite)
+class DnsMapFormatter(ObjectFormatter):
+    def format_raw(self, dns_map, indent=""):
+        details = []
+        details.append(indent + "{0:c}: {0.name} Map: "
+                       "{1}".format(dns_map.dns_domain, dns_map.location))
+        if dns_map.comments:
+            details.append(indent + "  Comments: %s" % dns_map.comments)
+        return "\n".join(details)
+
+    def csv_fields(self, dns_map):
+        return (dns_map.dns_domain.fqdn, dns_map.location.location_type,
+                dns_map.location.name, dns_map.comments)
+
+ObjectFormatter.handlers[DnsMap] = DnsMapFormatter()
