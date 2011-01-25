@@ -53,7 +53,7 @@ class TestProfile(TestBrokerCommand):
         tree = etree.parse(path)
         return tree
 
-    def testsysloc(self):
+    def testunittest00sysloc(self):
         tree = self.load_profile("unittest00.one-nyp.ms.com")
         sysloc = tree.xpath("nlist[@name='hardware']/nlist[@name='sysloc']")
         self.assertEqual(len(sysloc), 1, "Number of sysloc elements was %d "
@@ -69,7 +69,24 @@ class TestProfile(TestBrokerCommand):
         domains = sysloc.xpath("list[@name='dns_search_domains']/string")
         self.failUnless(domains, "No DNS search domains set")
         searchlist = [e.text for e in domains]
-        expect =['new-york.ms.com']
+        # In room utroom1, so expect aqd-unittest.ms.com mapped, but just once
+        expect = ['aqd-unittest.ms.com', 'new-york.ms.com']
+        self.assertEqual(searchlist, expect,
+                         "dns_search_domains in sysloc was %s instead of %s" %
+                         (repr(searchlist), repr(expect)))
+
+    def testaquilon61sysloc(self):
+        tree = self.load_profile("aquilon61.aqd-unittest.ms.com")
+        sysloc = tree.xpath("nlist[@name='hardware']/nlist[@name='sysloc']")
+        self.assertEqual(len(sysloc), 1, "Number of sysloc elements was %d "
+                         "instead of 1" % len(sysloc))
+        sysloc = sysloc[0]
+
+        domains = sysloc.xpath("list[@name='dns_search_domains']/string")
+        self.failUnless(domains, "No DNS search domains set")
+        searchlist = [e.text for e in domains]
+        # Not in utroom1, so no aqd-unittest.ms.com
+        expect = ['new-york.ms.com']
         self.assertEqual(searchlist, expect,
                          "dns_search_domains in sysloc was %s instead of %s" %
                          (repr(searchlist), repr(expect)))
@@ -82,7 +99,7 @@ class TestProfile(TestBrokerCommand):
         rs = rs[0]
 
         searchlist = [e.text for e in rs.xpath("list[@name='search']/string")]
-        expect = ['new-york.ms.com', 'ms.com']
+        expect = ['aqd-unittest.ms.com', 'new-york.ms.com', 'ms.com']
         self.assertEqual(searchlist, expect,
                          "search list in resolver was %s instead of %s" %
                          (repr(searchlist), repr(expect)))

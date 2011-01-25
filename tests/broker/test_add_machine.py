@@ -79,6 +79,7 @@ class TestAddMachine(TestBrokerCommand):
             command)
         self.searchoutput(out,
                           r'"sysloc/dns_search_domains" = list\(\s*'
+                          r'"aqd-unittest.ms.com",\s*'
                           r'"new-york.ms.com"\s*\);',
                           command)
         self.matchoutput(out,

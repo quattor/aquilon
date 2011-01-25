@@ -1,0 +1,16 @@
+Upgrade procedure
+=================
+
+1. DB schema upgrade
+--------------------
+
+As cdb, run from this directory:
+
+	sqlplus /@NYPO_AQUILON_11 @dns_changes.sql
+
+2. Add default DNS maps
+-----------------------
+
+As cdb, run from this directory:
+
+	./add_campus_dns_maps.py
