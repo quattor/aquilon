@@ -83,6 +83,7 @@ class TestMakeAquilon(TestBrokerCommand):
                           r'"eth0", nlist\(\s*'
                           r'"bootproto", "static",\s*'
                           r'"broadcast", "%s",\s*'
+                          r'"fqdn", "unittest02.one-nyp.ms.com",\s*'
                           r'"gateway", "%s",\s*'
                           r'"ip", "%s",\s*'
                           r'"netmask", "%s"\s*\)' %
@@ -185,6 +186,7 @@ class TestMakeAquilon(TestBrokerCommand):
                           r'"eth0", nlist\(\s*'
                           r'"bootproto", "static",\s*'
                           r'"broadcast", "%s",\s*'
+                          r'"fqdn", "unittest00.one-nyp.ms.com",\s*'
                           r'"gateway", "%s",\s*'
                           r'"ip", "%s",\s*'
                           r'"netmask", "%s"\s*\),' %
@@ -197,6 +199,7 @@ class TestMakeAquilon(TestBrokerCommand):
                           r'"eth1", nlist\(\s*'
                           r'"bootproto", "static",\s*'
                           r'"broadcast", "%s",\s*'
+                          r'"fqdn", "unittest00-e1.one-nyp.ms.com",\s*'
                           r'"gateway", "%s",\s*'
                           r'"ip", "%s",\s*'
                           r'"netmask", "%s"\s*\)' %

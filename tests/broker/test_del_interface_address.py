@@ -135,6 +135,7 @@ class TestDelInterfaceAddress(TestBrokerCommand):
         self.searchoutput(out,
                           r'"/system/network/vips" = nlist\(\s*'
                           r'"hostname", nlist\(\s*'
+                          r'"fqdn", "unittest20.aqd-unittest.ms.com",\s*'
                           r'"interfaces", list\(\s*'
                           r'"eth0",\s*"eth1"\s*\),\s*'
                           r'"ip", "%s"\s*\)\s*'

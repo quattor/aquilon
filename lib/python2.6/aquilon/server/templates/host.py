@@ -150,6 +150,8 @@ class PlenaryToplevelHost(Plenary):
                     if addr.label not in vips:
                         vips[addr.label] = {"ip": addr.ip,
                                             "interfaces": [dbinterface.name]}
+                        if addr.dns_records:
+                            vips[addr.label]["fqdn"] = addr.dns_records[0]
                     else:
                         # Sanity check
                         if vips[addr.label]["ip"] != addr.ip:
@@ -178,10 +180,14 @@ class PlenaryToplevelHost(Plenary):
                     ifdesc["netmask"] = net.netmask
                     ifdesc["broadcast"] = net.broadcast
                     ifdesc["gateway"] = gateway
+                    if addr.dns_records:
+                        ifdesc["fqdn"] = addr.dns_records[0]
                 else:
                     aliasdesc = {"ip": addr.ip,
                                  "netmask": net.netmask,
                                  "broadcast": net.broadcast}
+                    if addr.dns_records:
+                        aliasdesc["fqdn"] = addr.dns_records[0]
                     if "aliases" in ifdesc:
                         ifdesc["aliases"][addr.label] = aliasdesc
                     else:

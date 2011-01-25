@@ -276,8 +276,8 @@ class BondingInterface(Interface):
 
     __mapper_args__ = {'polymorphic_identity': 'bonding'}
 
-    # The templates also enforce this naming
-    name_check = re.compile(r'^bond\d+$')
+    # Linux: ncm-networks wans "bond.*", but Netapp is more relaxed
+    name_check = re.compile(r'^[a-z]+\d+$')
 
 
 class BridgeInterface(Interface):
