@@ -32,7 +32,7 @@ from datetime import datetime
 from sqlalchemy import (Column, Integer, String, DateTime, ForeignKey)
 from sqlalchemy.orm import relation, deferred, backref
 
-from aquilon.aqdb.model import Base, Network, Location, FutureARecord
+from aquilon.aqdb.model import Base, Network, Location, ARecord
 from aquilon.aqdb.column_types import IPV4
 
 _TN = "router_address"
@@ -74,9 +74,9 @@ class RouterAddress(Base):
 
     # Cascading deletes here because we want "del network"/"refresh network" to
     # really clean up everything with minimal fuss.
-    dns_records = relation(FutureARecord, lazy=True, uselist=True,
-                           primaryjoin=ip == FutureARecord.ip,
-                           foreign_keys=[FutureARecord.ip],
+    dns_records = relation(ARecord, lazy=True, uselist=True,
+                           primaryjoin=ip == ARecord.ip,
+                           foreign_keys=[ARecord.ip],
                            cascade="delete")
 
 

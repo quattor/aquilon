@@ -29,7 +29,7 @@
 
 from aquilon.exceptions_ import (UnimplementedError, ArgumentError,
                                  ProcessException)
-from aquilon.aqdb.model import DnsRecord, FutureARecord, DnsEnvironment
+from aquilon.aqdb.model import DnsRecord, ARecord, DnsEnvironment
 from aquilon.aqdb.model.dns_domain import parse_fqdn
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.server.broker import BrokerCommand
@@ -54,10 +54,9 @@ class CommandAddAddressDNSEnvironment(BrokerCommand):
         ip = generate_ip(session, compel=True, dbinterface=None, **arguments)
         ipnet = get_net_id_from_ip(session, ip)
         check_ip_restrictions(ipnet, ip)
-        dbaddress = FutureARecord(session=session, name=short,
-                                  dns_domain=dbdns_domain,
-                                  dns_environment=dbdns_env, ip=ip,
-                                  network=ipnet, comments=comments)
+        dbaddress = ARecord(session=session, name=short, ip=ip, network=ipnet,
+                            dns_domain=dbdns_domain, dns_environment=dbdns_env,
+                            comments=comments)
         session.add(dbaddress)
 
         session.flush()

@@ -34,7 +34,7 @@ from aquilon.server.broker import BrokerCommand
 from aquilon.server.processes import DSDBRunner
 from aquilon.server.locks import lock_queue, DeleteKey
 from aquilon.server.templates.machine import PlenaryMachineInfo
-from aquilon.aqdb.model import FutureARecord
+from aquilon.aqdb.model import ARecord
 
 
 class CommandDelAuxiliary(BrokerCommand):
@@ -47,8 +47,8 @@ class CommandDelAuxiliary(BrokerCommand):
         try:
             lock_queue.acquire(key)
             # Check dependencies, translate into user-friendly message
-            dbauxiliary = FutureARecord.get_unique(session, fqdn=auxiliary,
-                                                   compel=True)
+            dbauxiliary = ARecord.get_unique(session, fqdn=auxiliary,
+                                             compel=True)
             is_aux = True
             if not dbauxiliary.assignments or len(dbauxiliary.assignments) > 1:
                 is_aux = False

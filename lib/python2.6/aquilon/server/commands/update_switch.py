@@ -35,7 +35,7 @@ from aquilon.server.dbwrappers.location import get_location
 from aquilon.server.dbwrappers.interface import check_ip_restrictions
 from aquilon.server.processes import DSDBRunner
 from aquilon.aqdb.model import (Interface, Model, Switch, AddressAssignment,
-                                ReservedName, FutureARecord)
+                                ReservedName, ARecord)
 from aquilon.aqdb.model.network import get_net_id_from_ip
 
 
@@ -74,14 +74,14 @@ class CommandUpdateSwitch(BrokerCommand):
             # Hmm... should this check apply to the switch's own network?
             check_ip_restrictions(dbnetwork, ip)
 
-            # Convert ReservedName to FutureARecord if needed
+            # Convert ReservedName to ARecord if needed
             if isinstance(dbswitch.primary_name, ReservedName):
                 dbdns_domain = dbswitch.primary_name.dns_domain
                 short = dbswitch.primary_name.name
                 session.delete(dbswitch.primary_name)
                 session.flush()
                 session.expire(dbswitch)
-                dbdns_rec = FutureARecord(session=session, name=short,
+                dbdns_rec = ARecord(session=session, name=short,
                                           dns_domain=dbdns_domain, ip=ip)
                 dbdns_rec.network = dbnetwork
                 session.add(dbdns_rec)

@@ -30,7 +30,7 @@
 
 from aquilon.server.broker import BrokerCommand
 from aquilon.exceptions_ import ArgumentError, ProcessException, IncompleteError
-from aquilon.aqdb.model import (FutureARecord, HardwareEntity, DynamicStub,
+from aquilon.aqdb.model import (ARecord, HardwareEntity, DynamicStub,
                                 AddressAssignment, DnsEnvironment)
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.aqdb.model.address_assignment import ADDR_USAGES
@@ -112,20 +112,20 @@ class CommandAddInterfaceAddress(BrokerCommand):
                 raise ArgumentError("Address {0:a} is reserved for dynamic "
                                     "DHCP.".format(dbdns_rec))
 
-            dbdns_rec = FutureARecord.get_unique(session, fqdn=fqdn, ip=ip,
-                                                 dns_environment=dbdns_env)
+            dbdns_rec = ARecord.get_unique(session, fqdn=fqdn, ip=ip,
+                                           dns_environment=dbdns_env)
             if dbdns_rec:
                 # If it was just a pure DNS placeholder, then delete & re-add it
                 if not dbdns_rec.assignments:
                     delete_old_dsdb_entry = True
             else:
-                dbdns_rec = FutureARecord(session=session, fqdn=fqdn, ip=ip,
-                                          dns_environment=dbdns_env)
+                dbdns_rec = ARecord(session=session, fqdn=fqdn, ip=ip,
+                                    dns_environment=dbdns_env)
                 session.add(dbdns_rec)
         else:
-            dbdns_rec = FutureARecord.get_unique(session, fqdn=fqdn,
-                                                 dns_environment=dbdns_env,
-                                                 compel=True)
+            dbdns_rec = ARecord.get_unique(session, fqdn=fqdn,
+                                           dns_environment=dbdns_env,
+                                           compel=True)
             if isinstance(dbdns_rec, DynamicStub):
                 raise ArgumentError("Address {0:a} is reserved for dynamic "
                                     "DHCP.".format(dbdns_rec))

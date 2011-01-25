@@ -34,7 +34,7 @@ from sqlalchemy.sql.expression import asc, desc, bindparam
 
 from aquilon.exceptions_ import (ArgumentError, ProcessException,
                                  AquilonError, UnimplementedError)
-from aquilon.aqdb.model import Interface, Machine, FutureARecord
+from aquilon.aqdb.model import Interface, Machine, ARecord
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.interface import (get_or_create_interface,
@@ -265,9 +265,9 @@ class CommandAddInterfaceMachine(BrokerCommand):
                                "IP address %s for machine %s: %s" %
                                (manager, old_ip, dbmachine.label, e))
             return
-        dbmanager = FutureARecord(session=session, name=short,
-                                  dns_domain=dbdns_domain, ip=old_ip,
-                                  network=old_network)
+        dbmanager = ARecord(session=session, name=short,
+                            dns_domain=dbdns_domain, ip=old_ip,
+                            network=old_network)
         session.add(dbmanager)
         return dbmanager
 

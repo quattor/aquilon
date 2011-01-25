@@ -30,7 +30,7 @@
 
 
 from aquilon.server.formats.formatters import ObjectFormatter
-from aquilon.aqdb.model import DnsRecord, DynamicStub, FutureARecord, ReservedName
+from aquilon.aqdb.model import DnsRecord, DynamicStub, ARecord, ReservedName
 
 
 class DnsRecordFormatter(ObjectFormatter):
@@ -51,5 +51,5 @@ class DnsRecordFormatter(ObjectFormatter):
 ObjectFormatter.handlers[DnsRecord] = DnsRecordFormatter()
 
 ObjectFormatter.handlers[DynamicStub] = DnsRecordFormatter()
-ObjectFormatter.handlers[FutureARecord] = DnsRecordFormatter()
+ObjectFormatter.handlers[ARecord] = DnsRecordFormatter()
 ObjectFormatter.handlers[ReservedName] = DnsRecordFormatter()

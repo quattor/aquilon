@@ -39,7 +39,7 @@ from aquilon.server.locks import lock_queue
 from aquilon.server.templates.machine import PlenaryMachineInfo
 from aquilon.server.processes import DSDBRunner
 from aquilon.aqdb.model.network import get_net_id_from_ip
-from aquilon.aqdb.model import FutureARecord, ReservedName, Machine, Interface
+from aquilon.aqdb.model import ARecord, ReservedName, Machine, Interface
 
 
 class CommandUpdateInterfaceMachine(BrokerCommand):
@@ -139,8 +139,8 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
                 session.delete(dbhw_ent.primary_name)
                 session.flush()
                 session.expire(dbhw_ent)
-                dbdns_rec = FutureARecord(session=session, name=short,
-                                          dns_domain=dbdns_domain, ip=ip)
+                dbdns_rec = ARecord(session=session, name=short,
+                                    dns_domain=dbdns_domain, ip=ip)
                 session.add(dbdns_rec)
                 dbhw_ent.primary_name = dbdns_rec
 

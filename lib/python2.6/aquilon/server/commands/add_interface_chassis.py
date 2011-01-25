@@ -31,7 +31,7 @@
 
 
 from aquilon.exceptions_ import ArgumentError, ProcessException
-from aquilon.aqdb.model import Chassis, FutureARecord, ReservedName
+from aquilon.aqdb.model import Chassis, ARecord, ReservedName
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.interface import (generate_ip,
@@ -64,16 +64,16 @@ class CommandAddInterfaceChassis(BrokerCommand):
         if ip:
             dbinterface.addresses.append(ip)
 
-            # Convert ReservedName to FutureARecord if needed
+            # Convert ReservedName to ARecord if needed
             if isinstance(dbchassis.primary_name, ReservedName):
                 dbdns_domain = dbchassis.primary_name.dns_domain
                 short = dbchassis.primary_name.name
                 session.delete(dbchassis.primary_name)
                 session.flush()
                 session.expire(dbchassis, ['_primary_name_asc'])
-                dbdns_rec = FutureARecord(session=session, name=short,
-                                          dns_domain=dbdns_domain, ip=ip,
-                                          network=dbnetwork)
+                dbdns_rec = ARecord(session=session, name=short,
+                                    dns_domain=dbdns_domain, ip=ip,
+                                    network=dbnetwork)
                 session.add(dbdns_rec)
                 dbchassis.primary_name = dbdns_rec
 

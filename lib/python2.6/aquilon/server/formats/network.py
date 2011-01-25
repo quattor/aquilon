@@ -36,7 +36,7 @@ from sqlalchemy.orm.session import object_session
 from aquilon.server.formats.formatters import ObjectFormatter
 from aquilon.server.formats.list import ListFormatter
 from aquilon.aqdb.model import (Network, AddressAssignment, DnsRecord,
-                                FutureARecord, DynamicStub,
+                                ARecord, DynamicStub,
                                 PrimaryNameAssociation, DnsDomain,
                                 Interface, HardwareEntity)
 
@@ -162,7 +162,7 @@ class NetworkHostListFormatter(ListFormatter):
             session = object_session(netlist[0])
             # DnsDomain and DnsRecord are used twice, so be certain which instance
             # is used where
-            addr_dnsrec = aliased(FutureARecord, name="addr_dnsrec")
+            addr_dnsrec = aliased(ARecord, name="addr_dnsrec")
             addr_domain = aliased(DnsDomain, name="addr_domain")
             pna_dnsrec = aliased(DnsRecord, name="pna_dnsrec")
             pna_domain = aliased(DnsDomain, name="pna_dnsdomain")

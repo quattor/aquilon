@@ -32,10 +32,7 @@ from datetime import datetime
 from sqlalchemy import Column, Integer, DateTime, String, ForeignKey
 from sqlalchemy.orm import relation, backref
 
-from aquilon.aqdb.model import Base, DnsDomain
-# Using some trickery to avoid later code changes when
-# migrating FutureARecord to ARecord
-from aquilon.aqdb.model import FutureARecord as ARecord
+from aquilon.aqdb.model import Base, DnsDomain, ARecord
 
 _TN = 'ns_record'
 
@@ -45,9 +42,8 @@ class NsRecord(Base):
     __tablename__ = _TN
     _class_label = "Name Server"
 
-                            # Soon to be ARecord.dns_record_id
-    a_record_id = Column(Integer, ForeignKey(ARecord.system_id,
-                                      name='%s_a_record_fk' % (_TN)),
+    a_record_id = Column(Integer, ForeignKey(ARecord.dns_record_id,
+                                             name='%s_a_record_fk' % (_TN)),
                          primary_key=True)
 
     dns_domain_id = Column(Integer, ForeignKey('dns_domain.id',
@@ -57,16 +53,16 @@ class NsRecord(Base):
     creation_date = Column(DateTime, default=datetime.now, nullable=False)
     comments = Column(String(255), nullable=True)
 
-    a_record = relation(ARecord, lazy=False,
-                         backref=backref('_ns_records', cascade='all'))
+    a_record = relation(ARecord, lazy=False, backref=backref('_ns_records',
+                                                             cascade='all'))
 
     dns_domain = relation(DnsDomain, lazy=False,
                           backref=backref('_ns_records', cascade='all'))
 
     def __format__(self, format_spec):
         instance = "%s [%s] of DNS Domain %s" % (self.a_record.fqdn,
-                                                             self.a_record.ip,
-                                                             self.dns_domain.name)
+                                                 self.a_record.ip,
+                                                 self.dns_domain.name)
         return self.format_helper(format_spec, instance)
 
     def __repr__(self):

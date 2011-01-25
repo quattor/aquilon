@@ -57,6 +57,8 @@ from aquilon.aqdb.model.network import Network
 from aquilon.aqdb.model.dns_domain import DnsDomain
 from aquilon.aqdb.model.dns_environment import DnsEnvironment
 from aquilon.aqdb.model.dns_record import DnsRecord
+from aquilon.aqdb.model.a_record import ARecord, DynamicStub
+from aquilon.aqdb.model.ns_record import NsRecord
 from aquilon.aqdb.model.router_address import RouterAddress
 
 #CONFIG
@@ -65,9 +67,7 @@ from aquilon.aqdb.model.personality import Personality
 from aquilon.aqdb.model.operating_system import OperatingSystem
 
 #SYSTEM
-from aquilon.aqdb.model.system import (DynamicStub, FutureARecord,
-                                       ReservedName)
-from aquilon.aqdb.model.ns_record import NsRecord
+from aquilon.aqdb.model.system import ReservedName
 
 #HARDWARE
 from aquilon.aqdb.model.vendor import Vendor

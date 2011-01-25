@@ -30,7 +30,7 @@
 
 
 from aquilon.exceptions_ import AquilonError, ArgumentError, NotFoundException
-from aquilon.aqdb.model import (HardwareEntity, Model, DnsRecord, FutureARecord,
+from aquilon.aqdb.model import (HardwareEntity, Model, DnsRecord, ARecord,
                                 ReservedName, AddressAssignment)
 from aquilon.aqdb.model.dns_domain import parse_fqdn
 from aquilon.aqdb.model.network import get_net_id_from_ip
@@ -100,10 +100,10 @@ def parse_primary_name(session, fqdn, ip):
         dbdns_rec = None
 
     if dbdns_rec:
-        # Exclude any other subclasses of DnsRecord except FutureARecord.
+        # Exclude any other subclasses of DnsRecord except ARecord.
         # Do not use isinstance() here, as DynDnsStub is a child of
-        # FutureARecord
-        if dbdns_rec.dns_record_type != 'future_a_record':
+        # ARecord
+        if dbdns_rec.dns_record_type != 'a_record':
             raise ArgumentError("%s already exists as a(n) %s." %
                                 (fqdn, dbdns_rec._get_class_label()))
 
@@ -116,8 +116,8 @@ def parse_primary_name(session, fqdn, ip):
 
     if not dbdns_rec:
         if ip:
-            dbdns_rec = FutureARecord(session=session, name=short,
-                                      dns_domain=dbdns_domain, ip=ip)
+            dbdns_rec = ARecord(session=session, name=short, ip=ip,
+                                dns_domain=dbdns_domain)
         else:
             dbdns_rec = ReservedName(session=session, name=short,
                                      dns_domain=dbdns_domain)

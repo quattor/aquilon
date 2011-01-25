@@ -32,7 +32,7 @@ from ipaddr import (IPv4Address, IPv4Network, AddressValueError,
                     NetmaskValueError)
 
 from aquilon.exceptions_ import PartialError, ArgumentError
-from aquilon.aqdb.model import Network, RouterAddress, FutureARecord, Building
+from aquilon.aqdb.model import Network, RouterAddress, ARecord, Building
 
 from sqlalchemy.orm import subqueryload, defer
 
@@ -85,8 +85,8 @@ class QIPRefresh(object):
             self.session.rollback()
 
     def refresh_system_networks(self):
-        q = self.session.query(FutureARecord)
-        q = q.order_by(FutureARecord.ip)
+        q = self.session.query(ARecord)
+        q = q.order_by(ARecord.ip)
         systems = q.all()
 
         q = self.session.query(Network)

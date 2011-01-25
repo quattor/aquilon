@@ -43,7 +43,7 @@ from sqlalchemy.sql import select
 from aquilon.exceptions_ import ArgumentError, InternalError, NotFoundException
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.aqdb.model import (Interface, HardwareEntity, ObservedMac,
-                                FutureARecord, VlanInfo, ObservedVlan, Network)
+                                ARecord, VlanInfo, ObservedVlan, Network)
 from aquilon.server.dbwrappers.system import get_system
 from aquilon.utils import force_mac
 
@@ -196,9 +196,9 @@ def generate_ip(session, dbinterface, ip=None, ipfromip=None,
 
     startip = dbnetwork.first_usable_host
 
-    used_ips = session.query(FutureARecord.ip)
-    used_ips = used_ips.filter(FutureARecord.ip >= startip)
-    used_ips = used_ips.filter(FutureARecord.ip < dbnetwork.broadcast)
+    used_ips = session.query(ARecord.ip)
+    used_ips = used_ips.filter(ARecord.ip >= startip)
+    used_ips = used_ips.filter(ARecord.ip < dbnetwork.broadcast)
 
     full_set = set(range(int(startip), int(dbnetwork.broadcast)))
     used_set = set([int(item.ip) for item in used_ips])

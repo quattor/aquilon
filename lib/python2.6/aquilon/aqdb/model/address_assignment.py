@@ -38,7 +38,7 @@ from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import relation, backref, object_session, deferred
 
 from aquilon.aqdb.column_types import IPV4, AqStr, Enum
-from aquilon.aqdb.model import Base, Interface, FutureARecord
+from aquilon.aqdb.model import Base, Interface, ARecord
 from aquilon.aqdb.model.network import get_net_id_from_ip
 
 _TN = 'address_assignment'
@@ -102,9 +102,9 @@ class AddressAssignment(Base):
 
     # Setting viewonly is very important here as we do not want the removal of
     # an AddressAssignment record to change the linked DNS record(s)
-    dns_records = relation(FutureARecord, lazy=True, uselist=True,
-                           primaryjoin=ip == FutureARecord.ip,
-                           foreign_keys=[FutureARecord.ip],
+    dns_records = relation(ARecord, lazy=True, uselist=True,
+                           primaryjoin=ip == ARecord.ip,
+                           foreign_keys=[ARecord.ip],
                            viewonly=True,
                            backref=backref('assignments', uselist=True))
 
