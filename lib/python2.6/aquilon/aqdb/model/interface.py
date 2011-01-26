@@ -192,7 +192,7 @@ class PublicInterface(Interface):
 
     extra_fields = ['bootable', 'port_group']
 
-    name_check = re.compile(r"^[a-z]+\d*$")
+    name_check = re.compile(r"^[a-z]+\d+[a-z]?$")
 
 
 class ManagementInterface(Interface):
