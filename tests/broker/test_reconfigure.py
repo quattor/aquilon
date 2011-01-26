@@ -183,24 +183,46 @@ class TestReconfigure(TestBrokerCommand):
                         "--hostname", "unittest01.one-nyp.ms.com",
                         "--buildstatus", "ready"])
 
-    def testreconfigurewindowsmissingargs(self):
-        command = ["reconfigure", "--hostname", "unittest01.one-nyp.ms.com"]
-        err = self.badrequesttest(command)
-        self.matchoutput(err, "Nothing to do.", command)
-
     def testreconfigurewindowspersonality(self):
         command = ["reconfigure", "--hostname", "unittest01.one-nyp.ms.com",
                    "--personality", "desktop"]
         self.noouttest(command)
 
-# This test needs to adapt to become a test that changes the OS on a
-# non-compilable archetype.
-#   def testreconfigurewindowsos(self):
-#       command = ["reconfigure", "--hostname", "unittest01.one-nyp.ms.com",
-#                  "--os", "linux/4.0.1-x86_64"]
-#       err = self.badrequesttest(command)
-#       self.matchoutput(err, "Can only set os for compileable archetypes",
-#                        command)
+    def testreconfigurewindowsos(self):
+        command = ["reconfigure", "--hostname", "unittest01.one-nyp.ms.com",
+                   "--osversion", "nt61e"]
+        self.noouttest(command)
+
+    def testreconfigurewindowswrongos(self):
+        command = ["reconfigure", "--hostname", "unittest01.one-nyp.ms.com",
+                   "--os", "linux/4.0.1-x86_64"]
+        err = self.notfoundtest(command)
+        self.matchoutput(err,
+                         "Operating System linux, version 4.0.1-x86_64, "
+                         "archetype windows not found.",
+                         command)
+
+    def testreconfigurewindowswrongarch(self):
+        command = ["reconfigure", "--hostname", "unittest01.one-nyp.ms.com",
+                   "--archetype", "aquilon", "--personality", "unixeng-test"]
+        err = self.badrequesttest(command)
+        self.matchoutput(err,
+                         "Operating System windows/windows-nt61e belongs to "
+                         "archetype windows, not archetype aquilon.  Please "
+                         "specify --osname/--osversion.",
+                         command)
+
+    def testreconfigurewindowswrongarchlist(self):
+        hosts = ["unittest01.one-nyp.ms.com\n"]
+        scratchfile = self.writescratch("hostlist", "".join(hosts))
+        command = ["reconfigure", "--list", scratchfile,
+                   "--archetype", "aquilon"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "unittest01.one-nyp.ms.com: Cannot change archetype "
+                         "because operating system windows/windows-nt61e needs "
+                         "archetype windows.",
+                         command)
 
     def testverifyreconfigurewindows(self):
         command = "show host --hostname unittest01.one-nyp.ms.com"
@@ -209,6 +231,8 @@ class TestReconfigure(TestBrokerCommand):
         self.matchoutput(out, "Archetype: windows", command)
         self.matchoutput(out, "Personality: desktop", command)
         self.matchoutput(out, "Build Status: ready", command)
+        self.matchoutput(out, "Operating System: windows", command)
+        self.matchoutput(out, "Version: nt61e", command)
 
     def testreconfigureos(self):
         command = ["reconfigure",
@@ -389,7 +413,7 @@ class TestReconfigure(TestBrokerCommand):
 
     def testfailchangeclustermemberpersonality(self):
         command = ["reconfigure", "--hostname", "evh1.aqd-unittest.ms.com",
-                   "--archetype", "aquilon", "--personality", "inventory"]
+                   "--archetype", "vmhost", "--personality", "esx_server"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "Cannot change personality of host "
@@ -484,6 +508,6 @@ class TestReconfigure(TestBrokerCommand):
         self.matchclean(out, "aquilon91.aqd-unittest.ms.com:", command)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestReconfigure)
     unittest.TextTestRunner(verbosity=2).run(suite)

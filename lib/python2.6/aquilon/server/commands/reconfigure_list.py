@@ -97,6 +97,9 @@ class CommandReconfigureList(BrokerCommand):
                                               version=osversion,
                                               archetype=dbarchetype,
                                               compel=True)
+        else:
+            dbos = None
+
         if buildstatus:
             dbstatus = HostLifecycle.get_unique(session, buildstatus,
                                                 compel=True)
@@ -119,12 +122,22 @@ class CommandReconfigureList(BrokerCommand):
                 failed.append("{0}: Cannot change personality of host "
                               "while it is a member of "
                               "{1:l}.".format(dbhost.fqdn, dbhost.cluster))
+            if dbos and not dbarchetype and dbhost.archetype != dbos.archetype:
+                failed.append("{0}: Cannot change operating system because it "
+                              "needs {1:l} instead of "
+                              "{2:l}.".format(dbhost.fqdn, dbhost.archetype,
+                                              dbos.archetype))
+            if dbarchetype and not dbos and \
+               dbhost.operating_system.archetype != dbarchetype:
+                failed.append("{0}: Cannot change archetype because {1:l} needs "
+                              "{2:l}.".format(dbhost.fqdn, dbhost.operating_system,
+                                              dbhost.operating_system.archetype))
         if failed:
             raise ArgumentError("Cannot modify the following hosts:\n%s" %
                                 "\n".join(failed))
         if len(branches) > 1:
             keys = branches.keys()
-            branch_sort = lambda x,y: cmp(len(branches[x]), len(branches[y]))
+            branch_sort = lambda x, y: cmp(len(branches[x]), len(branches[y]))
             keys.sort(cmp=branch_sort)
             stats = ["{0:d} hosts in {1:l}".format(len(branches[branch]), branch)
                      for branch in keys]
@@ -133,7 +146,7 @@ class CommandReconfigureList(BrokerCommand):
         dbbranch = branches.keys()[0]
         if len(authors) > 1:
             keys = authors.keys()
-            author_sort = lambda x,y: cmp(len(authors[x]), len(authors[y]))
+            author_sort = lambda x, y: cmp(len(authors[x]), len(authors[y]))
             keys.sort(cmp=author_sort)
             stats = ["%s hosts with sandbox author %s" %
                      (len(authors[author]), author.name) for author in keys]
@@ -203,7 +216,7 @@ class CommandReconfigureList(BrokerCommand):
                 logger.debug("Writing %s", template)
                 template.write(locked=True)
             td = TemplateDomain(dbbranch, dbauthor, logger=logger)
-            out = td.compile(session, locked=True)
+            td.compile(session, locked=True)
         except:
             logger.client_info("Restoring plenary templates.")
             for template in templates:
