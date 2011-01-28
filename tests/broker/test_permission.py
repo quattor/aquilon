@@ -139,21 +139,28 @@ class TestPermission(TestBrokerCommand):
         self.matchoutput(out, "User principal 'testuser' is not valid.",
                          command)
 
-    # FIXME: we can't test "aq permission" with host principals, because the aq
-    # client does not escape the '/' character and that confuses the URL parser
-    #def testmissinghostname(self):
-    #    command = ["permission", "--principal", "host/@is1.morgan",
-    #               "--role", "operations", "--createuser"]
-    #    out = self.notfoundtest(command)
-    #    self.matchoutput(out, "FQDN '' is not valid", command)
+    def testmissinghostname(self):
+        command = ["permission", "--principal", "host/@is1.morgan",
+                   "--role", "operations", "--createuser"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "No fully qualified name specified.", command)
 
-    #def testbadhostname(self):
-    #    command = ["permission", "--role", "operations", "--createuser",
-    #               "--principal", "host/no-such-host.aqd-unittest.ms.com@is1.morgan"]
-    #    out = self.notfoundtest(command)
-    #    self.matchoutput(out,
-    #                     "Host no-such-host.aqd-unittest.ms.com not found.",
-    #                     command)
+    def testmissingdomain(self):
+        command = ["permission", "--principal", "host/no-domain@is1.morgan",
+                   "--role", "operations", "--createuser"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "FQDN 'no-domain' is not valid, it does not "
+                         "contain a domain.", command)
+
+    def testunknownhost(self):
+        command = ["permission", "--role", "operations", "--createuser",
+                   "--principal", "host/no-such-host.aqd-unittest.ms.com@is1.morgan"]
+        out = self.notfoundtest(command)
+        # Ideally we would test for a "Host not found", but the DNS domains
+        # aren't set up yet.
+        self.matchoutput(out,
+                         "DNS Domain aqd-unittest.ms.com not found.",
+                         command)
 
 
 if __name__=='__main__':

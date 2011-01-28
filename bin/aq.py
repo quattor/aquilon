@@ -332,7 +332,10 @@ if __name__ == "__main__":
     # Quote options so that they can be safely included in the URI
     cleanOptions = {}
     for k, v in commandOptions.iteritems():
-        cleanOptions[k] = urllib.quote(v)
+        # urllib.quote() does not escape '/' by default. We have to turn off
+        # this behavior because otherwise a parameter containing '/' would
+        # confuse the URL parsing logic on the server side.
+        cleanOptions[k] = urllib.quote(v, safe='')
 
     # Decent amount of magic here...
     # Even though the server connection might be tunneled through
