@@ -29,7 +29,6 @@
 """Authorization stub for simple authorization checks."""
 
 
-from twisted.python import log
 import re
 
 from aquilon.exceptions_ import AuthorizationException
