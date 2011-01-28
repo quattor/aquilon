@@ -30,7 +30,7 @@
 from datetime import datetime
 
 from sqlalchemy import Column, Integer, DateTime, String, ForeignKey
-from sqlalchemy.orm import relation, backref
+from sqlalchemy.orm import relation, backref, deferred
 
 from aquilon.aqdb.model import Base, DnsDomain, ARecord
 
@@ -50,7 +50,9 @@ class NsRecord(Base):
                                                name='%s_domain_fk' % (_TN)),
                            primary_key=True)
 
-    creation_date = Column(DateTime, default=datetime.now, nullable=False)
+    creation_date = deferred(Column(DateTime, default=datetime.now,
+                                    nullable=False))
+
     comments = Column(String(255), nullable=True)
 
     a_record = relation(ARecord, lazy=False, innerjoin=True,

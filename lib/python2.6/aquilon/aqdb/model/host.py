@@ -32,7 +32,7 @@ from datetime import datetime
 
 from sqlalchemy import (Integer, Boolean, DateTime, String, Column, ForeignKey,
                         UniqueConstraint, Index)
-from sqlalchemy.orm import relation, backref
+from sqlalchemy.orm import relation, backref, deferred
 
 from aquilon.aqdb.model import (Base, Branch, Machine, HostLifecycle, Grn,
                                 Personality, OperatingSystem, UserPrincipal)
@@ -87,7 +87,8 @@ class Host(Base):
                                                      name='host_os_fk'),
                                  nullable=False)
 
-    creation_date = Column(DateTime, default=datetime.now, nullable=False)
+    creation_date = deferred(Column(DateTime, default=datetime.now,
+                                    nullable=False))
 
     comments = Column(String(255), nullable=True)
 

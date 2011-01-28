@@ -37,7 +37,8 @@ import re
 
 from sqlalchemy import (Column, Integer, DateTime, Sequence, String, Boolean,
                         ForeignKey, UniqueConstraint, CheckConstraint)
-from sqlalchemy.orm import relation, backref, validates, object_session
+from sqlalchemy.orm import (relation, backref, validates, object_session,
+                            deferred)
 from sqlalchemy.orm.collections import attribute_mapped_collection
 from sqlalchemy.sql.expression import desc, case
 
@@ -110,8 +111,8 @@ class Interface(Base):
     # FIXME: move to PublicInterface
     port_group = Column(AqStr(32), nullable=True)
 
-    creation_date = Column('creation_date', DateTime, default=datetime.now,
-                           nullable=False)
+    creation_date = deferred(Column(DateTime, default=datetime.now,
+                                    nullable=False))
 
     comments = Column('comments', String(255), nullable=True)
 

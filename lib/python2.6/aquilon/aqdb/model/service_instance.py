@@ -66,7 +66,8 @@ class ServiceInstance(Base):
                         nullable=False)
     name = Column(AqStr(64), nullable=False)
     max_clients = Column(Integer, nullable=True)  # null means 'no limit'
-    creation_date = Column(DateTime, default=datetime.now, nullable=False)
+    creation_date = deferred(Column(DateTime, default=datetime.now,
+                                    nullable=False))
     manager = Column(Enum(32, MANAGERS), default='aqd', nullable=False)
     comments = Column(String(255), nullable=True)
 

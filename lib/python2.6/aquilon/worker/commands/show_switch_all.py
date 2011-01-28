@@ -28,7 +28,7 @@
 # TERMS THAT MAY APPLY.
 """Contains the logic for `aq show switch --all`."""
 
-from sqlalchemy.orm import joinedload, subqueryload, contains_eager
+from sqlalchemy.orm import joinedload, subqueryload, contains_eager, undefer
 
 from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import Switch, DnsRecord, DnsDomain, Fqdn
@@ -45,7 +45,9 @@ class CommandShowSwitchAll(BrokerCommand):
                       joinedload('interfaces.assignments.dns_records'),
                       joinedload('interfaces.assignments.network'),
                       subqueryload('observed_macs'),
+                      undefer('observed_macs.creation_date'),
                       subqueryload('observed_vlans'),
+                      undefer('observed_vlans.creation_date'),
                       joinedload('observed_vlans.network'),
                       subqueryload('model'),
                       # Switches don't have machine specs, but the formatter

@@ -32,7 +32,7 @@ from datetime import datetime
 
 from sqlalchemy import (Column, Integer, DateTime, Sequence, String, ForeignKey,
                         UniqueConstraint)
-from sqlalchemy.orm import relation
+from sqlalchemy.orm import relation, deferred
 
 from aquilon.aqdb.model import Base, Role, Realm
 
@@ -52,7 +52,8 @@ class UserPrincipal(Base):
                                          ondelete='CASCADE'),
                      nullable=False)
 
-    creation_date = Column(DateTime, nullable=False, default=datetime.now)
+    creation_date = deferred(Column(DateTime, default=datetime.now,
+                                    nullable=False))
 
     comments = Column('comments', String(255), nullable=True)
 

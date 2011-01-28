@@ -33,7 +33,8 @@ import re
 from sqlalchemy import (Column, Integer, String, DateTime, ForeignKey,
                         Sequence, UniqueConstraint)
 from sqlalchemy.ext.associationproxy import association_proxy
-from sqlalchemy.orm import relation, backref, object_session, validates
+from sqlalchemy.orm import (relation, backref, object_session, validates,
+                            deferred)
 
 from aquilon.aqdb.column_types import AqStr, Enum
 from aquilon.aqdb.model import Base, Cluster, Host
@@ -58,7 +59,8 @@ class Resource(Base):
     id = Column(Integer, Sequence('%s_seq' % _TN), primary_key=True)
     resource_type = Column(AqStr(16), nullable=False)
     name = Column(AqStr(64), nullable=False)
-    creation_date = Column(DateTime, default=datetime.now, nullable=False)
+    creation_date = deferred(Column(DateTime, default=datetime.now,
+                                    nullable=False))
     comments = Column(String(255), nullable=True)
     holder_id = Column(Integer, ForeignKey('%s.id' % _RESHOLDER,
                                            name='%s_resholder_fk' % _TN,

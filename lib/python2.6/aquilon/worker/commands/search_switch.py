@@ -28,7 +28,7 @@
 # TERMS THAT MAY APPLY.
 """Contains the logic for `aq search switch`."""
 
-from sqlalchemy.orm import subqueryload, joinedload, contains_eager
+from sqlalchemy.orm import subqueryload, joinedload, contains_eager, undefer
 
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.formats.switch import SimpleSwitchList
@@ -65,7 +65,9 @@ class CommandSearchSwitch(BrokerCommand):
                           joinedload('interfaces.assignments.dns_records'),
                           joinedload('interfaces.assignments.network'),
                           subqueryload('observed_macs'),
+                          undefer('observed_macs.creation_date'),
                           subqueryload('observed_vlans'),
+                          undefer('observed_vlans.creation_date'),
                           joinedload('observed_vlans.network'),
                           subqueryload('model'),
                           # Switches don't have machine specs, but the formatter

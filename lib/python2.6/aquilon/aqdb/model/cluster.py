@@ -143,7 +143,8 @@ class Cluster(Base):
     down_maint_percent = Column(Boolean(name="%s_maint_hosts_ck" % _TN),
                                 default=False, nullable=False)
 
-    creation_date = Column(DateTime, default=datetime.now, nullable=False)
+    creation_date = deferred(Column(DateTime, default=datetime.now,
+                                    nullable=False))
     status_id = Column(Integer, ForeignKey('clusterlifecycle.id',
                                               name='cluster_status_fk'),
                           nullable=False)
@@ -617,7 +618,8 @@ class ClusterAllowedPersonality(Base):
                                                 ondelete='CASCADE'),
                             primary_key=True)
 
-    creation_date = Column(DateTime, default=datetime.now, nullable=False)
+    creation_date = deferred(Column(DateTime, default=datetime.now,
+                                    nullable=False))
 
     cluster = relation(Cluster, uselist=False, lazy=False,
                        backref=backref('_allowed_pers', cascade='all, delete-orphan'))

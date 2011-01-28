@@ -29,9 +29,10 @@
 
 from datetime import datetime
 
-from sqlalchemy.orm.session import object_session
 from sqlalchemy import (Column, Enum, Integer, DateTime, Sequence,
                         String, UniqueConstraint)
+from sqlalchemy.orm import deferred
+from sqlalchemy.orm.session import object_session
 
 from aquilon.aqdb.model import Base, StateEngine, HostLifecycle
 from aquilon.utils import monkeypatch
@@ -53,7 +54,8 @@ class ClusterLifecycle(StateEngine, Base):
     __tablename__ = _TN
     id = Column(Integer, Sequence('%s_id_seq' % _TN), primary_key=True)
     name = Column(Enum(32, transitions.keys()), nullable=False)
-    creation_date = Column(DateTime, default=datetime.now, nullable=False)
+    creation_date = deferred(Column(DateTime, default=datetime.now,
+                                    nullable=False))
     comments = Column(String(255), nullable=True)
     __mapper_args__ = {'polymorphic_on': name}
 

@@ -32,7 +32,7 @@ from datetime import datetime
 
 from sqlalchemy import (Column, Integer, DateTime, ForeignKey, CheckConstraint,
                         UniqueConstraint)
-from sqlalchemy.orm import relation, backref
+from sqlalchemy.orm import relation, backref, deferred
 
 from aquilon.exceptions_ import NotFoundException, InternalError
 from aquilon.aqdb.column_types import AqStr, Enum
@@ -112,8 +112,8 @@ class ObservedVlan(Base):
 
     vlan_id = Column(Integer, primary_key=True)
 
-    creation_date = Column('creation_date', DateTime,
-                           default=datetime.now, nullable=False)
+    creation_date = deferred(Column(DateTime, default=datetime.now,
+                                    nullable=False))
 
     switch = relation(Switch, backref=backref('%ss' % _TN, cascade='delete',
                                               passive_deletes=True,

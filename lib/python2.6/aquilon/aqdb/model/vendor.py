@@ -31,6 +31,7 @@ from datetime import datetime
 
 from sqlalchemy import (Integer, DateTime, Sequence, String, Column,
                         UniqueConstraint)
+from sqlalchemy.orm import deferred
 
 from aquilon.aqdb.model import Base
 from aquilon.aqdb.column_types.aqstr import AqStr
@@ -45,7 +46,8 @@ class Vendor(Base):
     id = Column(Integer, Sequence('%s_id_seq' % _TN), primary_key=True)
     name = Column(AqStr(32), nullable=False)
 
-    creation_date = Column(DateTime, default=datetime.now, nullable=False)
+    creation_date = deferred(Column(DateTime, default=datetime.now,
+                                    nullable=False))
     comments = Column(String(255), nullable=True)
 
 

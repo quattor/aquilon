@@ -34,6 +34,7 @@ import re
 from sqlalchemy import (Column, Integer, DateTime, Sequence, String, Boolean,
                         UniqueConstraint)
 from sqlalchemy.ext.associationproxy import association_proxy
+from sqlalchemy.orm import deferred
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Base
@@ -77,7 +78,8 @@ class DnsDomain(Base):
     restricted = Column(Boolean(name="%s_restricted_ck" % _TN),
                         nullable=False, default=False)
 
-    creation_date = Column(DateTime, default=datetime.now, nullable=False)
+    creation_date = deferred(Column(DateTime, default=datetime.now,
+                                    nullable=False))
     comments = Column(String(255), nullable=True)
 
     servers = association_proxy('_ns_records', 'a_record')

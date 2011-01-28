@@ -76,7 +76,8 @@ class Service(Base):
     id = Column(Integer, Sequence('service_id_seq'), primary_key=True)
     name = Column(AqStr(64), nullable=False)
     max_clients = Column(Integer, nullable=True)  # 0 means 'no limit'
-    creation_date = Column(DateTime, default=datetime.now, nullable=False)
+    creation_date = deferred(Column(DateTime, default=datetime.now,
+                                    nullable=False))
     comments = Column(String(255), nullable=True)
 
     archetypes = association_proxy('_archetypes', 'archetype',

@@ -31,7 +31,7 @@ from datetime import datetime
 
 from sqlalchemy import (Column, Integer, Boolean, DateTime, Sequence, String,
                         ForeignKey, UniqueConstraint, Index)
-from sqlalchemy.orm import relation
+from sqlalchemy.orm import relation, deferred
 from sqlalchemy.ext.associationproxy import association_proxy
 
 from aquilon.aqdb.model import Base, Archetype, Grn
@@ -56,7 +56,8 @@ class Personality(Base):
     cluster_required = Column(Boolean(name="%s_clstr_req_ck" % _TN),
                               default=False, nullable=False)
 
-    creation_date = Column(DateTime, default=datetime.now, nullable=False)
+    creation_date = deferred(Column(DateTime, default=datetime.now,
+                                    nullable=False))
     comments = Column(String(255), nullable=True)
 
     archetype = relation(Archetype, backref='personality', uselist=False)

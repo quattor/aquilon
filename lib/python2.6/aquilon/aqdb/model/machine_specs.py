@@ -35,7 +35,7 @@ from datetime import datetime
 
 from sqlalchemy import (Column, Integer, DateTime, Sequence, String, ForeignKey,
                         UniqueConstraint)
-from sqlalchemy.orm import relation, backref
+from sqlalchemy.orm import relation, backref, deferred
 
 from aquilon.aqdb.column_types import Enum
 from aquilon.aqdb.model import Base, Model, Cpu
@@ -74,7 +74,8 @@ class MachineSpecs(Base):
                                               name='mach_spec_nic_model_fk'),
                           nullable=False)
 
-    creation_date = Column('creation_date', DateTime, default=datetime.now)
+    creation_date = deferred(Column(DateTime, default=datetime.now,
+                                    nullable=False))
     comments = Column('comments', String(255), nullable=True)
 
     model = relation(Model, innerjoin=True,

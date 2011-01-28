@@ -31,6 +31,7 @@ from datetime import datetime
 
 from sqlalchemy import (Column, Integer, String, DateTime, Sequence,
                         UniqueConstraint)
+from sqlalchemy.orm import deferred
 
 from aquilon.aqdb.model import Base
 from aquilon.aqdb.column_types.aqstr import AqStr
@@ -47,7 +48,8 @@ class Role(Base):
 
     name = Column(AqStr(32), nullable=False)
 
-    creation_date = Column(DateTime, nullable=False, default=datetime.now)
+    creation_date = deferred(Column(DateTime, nullable=False,
+                                    default=datetime.now))
 
     comments = Column('comments', String(255), nullable=True)
 

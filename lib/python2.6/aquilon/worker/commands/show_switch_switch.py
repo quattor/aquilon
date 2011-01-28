@@ -28,6 +28,7 @@
 # TERMS THAT MAY APPLY.
 """Contains the logic for `aq show switch --switch`."""
 
+from sqlalchemy.orm import joinedload, subqueryload, undefer
 
 from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import Switch
@@ -38,4 +39,10 @@ class CommandShowSwitchSwitch(BrokerCommand):
     required_parameters = ["switch"]
 
     def render(self, session, switch, **arguments):
-        return Switch.get_unique(session, switch, compel=True)
+        options = [subqueryload('observed_vlans'),
+                   undefer('observed_vlans.creation_date'),
+                   joinedload('observed_vlans.network'),
+                   subqueryload('observed_macs'),
+                   undefer('observed_macs.creation_date')]
+        return Switch.get_unique(session, switch, compel=True,
+                                 query_options=options)

@@ -34,8 +34,8 @@ from ipaddr import IPv4Address, IPv4Network
 from sqlalchemy import (Column, Integer, Sequence, String, Boolean, DateTime,
                         ForeignKey, UniqueConstraint, CheckConstraint, Index,
                         func)
-from sqlalchemy.orm import relation
 from sqlalchemy.ext.associationproxy import association_proxy
+from sqlalchemy.orm import relation, deferred
 
 from aquilon.exceptions_ import NotFoundException, InternalError
 from aquilon.aqdb.model import Base, Location, NetworkEnvironment
@@ -88,7 +88,9 @@ class Network(Base):
     ip = Column(IPV4, nullable=False)
     side = Column(AqStr(4), nullable=True, default='a')
 
-    creation_date = Column(DateTime, default=datetime.now, nullable=False)
+    creation_date = deferred(Column(DateTime, default=datetime.now,
+                                    nullable=False))
+
     comments = Column(String(255), nullable=True)
 
     network_environment = relation(NetworkEnvironment, backref='networks')

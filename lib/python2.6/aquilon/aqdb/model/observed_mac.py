@@ -33,7 +33,7 @@
 from datetime import datetime
 
 from sqlalchemy import Column, Integer, DateTime, ForeignKey
-from sqlalchemy.orm import relation, backref
+from sqlalchemy.orm import relation, backref, deferred
 
 from aquilon.aqdb.model import Base, Switch
 from aquilon.aqdb.column_types.aqmac import AqMac
@@ -56,8 +56,8 @@ class ObservedMac(Base):
 
     slot = Column(Integer, nullable=True, default=1, primary_key=True)
 
-    creation_date = Column('creation_date', DateTime,
-                           default=datetime.now, nullable=False)
+    creation_date = deferred(Column(DateTime, default=datetime.now,
+                                    nullable=False))
 
     last_seen = Column('last_seen', DateTime,
                        default=datetime.now, nullable=False)

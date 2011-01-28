@@ -29,7 +29,7 @@
 """Contains the logic for `aq show tor_switch`."""
 
 
-from sqlalchemy.orm import joinedload, subqueryload, contains_eager
+from sqlalchemy.orm import joinedload, subqueryload, contains_eager, undefer
 
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.location import get_location
@@ -43,10 +43,16 @@ class CommandShowTorSwitch(BrokerCommand):
         self.deprecated_command("Command show_tor_switch is deprecated, please "
                                 "use show_switch or search_switch instead.",
                                 **arguments)
+        options = [subqueryload('observed_vlans'),
+                   undefer('observed_vlans.creation_date'),
+                   joinedload('observed_vlans.network'),
+                   subqueryload('observed_macs'),
+                   undefer('observed_macs.creation_date')]
         if tor_switch:
             # Must return a list
             return [TorSwitch(Switch.get_unique(session, tor_switch,
-                                                compel=True))]
+                                                compel=True,
+                                                query_options=options))]
 
         q = session.query(Switch)
         if rack:
@@ -57,14 +63,12 @@ class CommandShowTorSwitch(BrokerCommand):
                                             machine_type='switch', compel=True)
             q = q.filter(Switch.model_id.in_(subq))
 
+        q = q.options(*options)
         q = q.options(subqueryload('location'),
                       subqueryload('interfaces'),
                       joinedload('interfaces.assignments'),
                       joinedload('interfaces.assignments.dns_records'),
                       joinedload('interfaces.assignments.network'),
-                      subqueryload('observed_macs'),
-                      subqueryload('observed_vlans'),
-                      joinedload('observed_vlans.network'),
                       subqueryload('model'),
                       # Switches don't have machine specs, but the formatter
                       # checks for their existence anyway

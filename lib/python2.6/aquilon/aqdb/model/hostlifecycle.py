@@ -29,7 +29,7 @@
 
 from datetime import datetime
 
-from sqlalchemy.orm import object_session
+from sqlalchemy.orm import object_session, deferred
 from sqlalchemy import (Column, Enum, Integer, DateTime, Sequence, String,
                         UniqueConstraint)
 
@@ -64,7 +64,8 @@ class HostLifecycle(StateEngine, Base):
 
     id = Column(Integer, Sequence('%s_id_seq' % _TN), primary_key=True)
     name = Column(Enum(32, transitions.keys()), nullable=False)
-    creation_date = Column(DateTime, default=datetime.now, nullable=False)
+    creation_date = deferred(Column(DateTime, default=datetime.now,
+                                    nullable=False))
     comments = Column(String(255), nullable=True)
 
     __mapper_args__ = {'polymorphic_on': name}

@@ -32,6 +32,7 @@ from datetime import datetime
 
 from sqlalchemy import (Column, Integer, String, Boolean, UniqueConstraint,
                         DateTime)
+from sqlalchemy.orm import deferred
 
 from aquilon.aqdb.model import Base
 
@@ -54,7 +55,8 @@ class Grn(Base):
     # objects may still point to it
     disabled = Column(Boolean(name="%s_disabled_ck" % _TN), nullable=False)
 
-    creation_date = Column(DateTime, default=datetime.now, nullable=False)
+    creation_date = deferred(Column(DateTime, default=datetime.now,
+                                    nullable=False))
 
 
 grn= Grn.__table__  # pylint: disable=C0103, E1101

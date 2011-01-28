@@ -31,6 +31,7 @@ from datetime import datetime
 
 from sqlalchemy import (Column, Integer, String, DateTime, Sequence,
                         UniqueConstraint)
+from sqlalchemy.orm import deferred
 
 from aquilon.aqdb.model import Base
 from aquilon.aqdb.column_types.aqstr import AqStr
@@ -46,7 +47,8 @@ class Realm(Base):
 
     id = Column(Integer, Sequence('realm_id_seq'), primary_key=True)
     name = Column(AqStr(32), nullable=False)
-    creation_date = Column(DateTime, nullable=False, default=datetime.now)
+    creation_date = deferred(Column(DateTime, nullable=False,
+                                    default=datetime.now))
     comments = Column('comments', String(255), nullable=True)
 
 realm = Realm.__table__  # pylint: disable=C0103, E1101

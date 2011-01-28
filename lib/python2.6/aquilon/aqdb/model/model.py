@@ -33,7 +33,7 @@ from datetime import datetime
 from sqlalchemy import (Integer, DateTime, Sequence, String, Column, ForeignKey,
                         UniqueConstraint)
 
-from sqlalchemy.orm import relation, object_session
+from sqlalchemy.orm import relation, object_session, deferred
 
 from aquilon.exceptions_ import AquilonError
 from aquilon.aqdb.model import Base, Vendor
@@ -52,7 +52,8 @@ class Model(Base):
                        nullable=False)
     machine_type = Column(AqStr(16), nullable=False)
 
-    creation_date = Column(DateTime, default=datetime.now, nullable=False)
+    creation_date = deferred(Column(DateTime, default=datetime.now,
+                                    nullable=False))
     comments = Column(String(255))
 
     vendor = relation(Vendor)

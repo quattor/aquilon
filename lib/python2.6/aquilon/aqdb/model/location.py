@@ -32,7 +32,7 @@ from datetime import datetime
 from sqlalchemy import (Integer, DateTime, Sequence, String, Column,
                         ForeignKey, UniqueConstraint)
 
-from sqlalchemy.orm import relation, backref, object_session
+from sqlalchemy.orm import relation, backref, object_session, deferred
 from sqlalchemy.sql import and_, or_, desc
 
 from aquilon.aqdb.model import Base
@@ -51,7 +51,8 @@ class Location(Base):
 
     fullname = Column(String(255), nullable=False)
 
-    creation_date = Column(DateTime, default=datetime.now, nullable=False)
+    creation_date = deferred(Column(DateTime, default=datetime.now,
+                                    nullable=False))
 
     comments = Column(String(255), nullable=True)
 

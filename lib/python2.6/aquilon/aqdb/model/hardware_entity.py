@@ -34,7 +34,7 @@ import re
 
 from sqlalchemy import (Column, Integer, Sequence, ForeignKey, UniqueConstraint,
                         Index, String, DateTime)
-from sqlalchemy.orm import relation, backref, lazyload, validates
+from sqlalchemy.orm import relation, backref, lazyload, validates, deferred
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.orm.attributes import set_committed_value
 
@@ -70,7 +70,8 @@ class HardwareEntity(Base):  # pylint: disable=W0232, R0903
                                                  name='hw_ent_pri_name_fk'),
                              nullable=True)
 
-    creation_date = Column(DateTime, default=datetime.now, nullable=False)
+    creation_date = deferred(Column(DateTime, default=datetime.now,
+                                    nullable=False))
     comments = Column(String(255), nullable=True)
 
     location = relation(Location, uselist=False)

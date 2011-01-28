@@ -1,0 +1,2 @@
+ALTER TABLE machine_specs
+	MODIFY (creation_date CONSTRAINT "MACHINE_SPECS_CR_DATE_NN" NOT NULL);

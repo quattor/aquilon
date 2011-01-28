@@ -32,7 +32,7 @@ from datetime import datetime
 
 from sqlalchemy import (Column, Integer, DateTime, Sequence, String, Boolean,
                         ForeignKey, UniqueConstraint)
-from sqlalchemy.orm import relation, backref, column_property
+from sqlalchemy.orm import relation, backref, column_property, deferred
 from sqlalchemy.sql import select, func
 
 from aquilon.aqdb.model import Base, Machine, ServiceInstance
@@ -66,7 +66,9 @@ class Disk(Base):
     bootable = Column(Boolean(name="%s_bootable_ck" % _TN), nullable=False,
                       default=False)
 
-    creation_date = Column(DateTime, default=datetime.now, nullable=False)
+    creation_date = deferred(Column(DateTime, default=datetime.now,
+                                    nullable=False))
+
     comments = Column(String(255), nullable=True)
 
     # The order_by here ensures that machine templates always list the
