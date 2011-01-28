@@ -36,7 +36,7 @@ from aquilon.server.templates.base import Plenary
 from aquilon.server import templates
 from aquilon.server.templates.panutils import pan, StructureTemplate, PanUnit
 
-LOGGER = logging.getLogger('aquilon.server.templates.machine')
+LOGGER = logging.getLogger(__name__)
 
 
 class PlenaryMachineInfo(Plenary):

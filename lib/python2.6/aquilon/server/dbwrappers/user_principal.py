@@ -39,7 +39,7 @@ from aquilon.aqdb.model import Role, Realm, UserPrincipal
 from aquilon.server.dbwrappers.host import hostname_to_host
 
 
-LOGGER = logging.getLogger('aquilon.server.dbwrappers.user_principal')
+LOGGER = logging.getLogger(__name__)
 principal_re = re.compile(r'^(.+)@([^@]+)$')
 host_re = re.compile(r'^host/(.*)$')
 

@@ -50,7 +50,7 @@ from aquilon.exceptions_ import (ProcessException, AquilonError, ArgumentError,
 from aquilon.config import Config
 from aquilon.server.locks import lock_queue, CompileKey
 
-LOGGER = logging.getLogger('aquilon.server.processes')
+LOGGER = logging.getLogger(__name__)
 
 
 class StreamLoggerThread(Thread):

@@ -33,7 +33,7 @@ import logging
 from aquilon.server.templates.base import Plenary, PlenaryCollection
 from aquilon.exceptions_ import NotFoundException
 
-LOGGER = logging.getLogger('aquilon.server.templates.service')
+LOGGER = logging.getLogger(__name__)
 
 class PlenaryService(PlenaryCollection):
     """

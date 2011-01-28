@@ -42,7 +42,7 @@ from aquilon.server.locks import lock_queue, CompileKey
 from aquilon.aqdb.model import Host, Cluster
 from aquilon.server.logger import CLIENT_INFO
 
-LOGGER = logging.getLogger('aquilon.server.templates.domain')
+LOGGER = logging.getLogger(__name__)
 
 class TemplateDomain(object):
 

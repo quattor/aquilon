@@ -35,7 +35,7 @@ from aquilon.locks import LockQueue, LockKey
 from aquilon.exceptions_ import InternalError
 from aquilon.server.logger import CLIENT_INFO
 
-LOGGER = logging.getLogger('aquilon.server.locks')
+LOGGER = logging.getLogger(__name__)
 
 
 # Single instance of the LockQueue that should be used by any code
