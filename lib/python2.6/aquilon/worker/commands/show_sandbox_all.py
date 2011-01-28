@@ -16,6 +16,7 @@
 # limitations under the License.
 """Contains the logic for `aq show sandbox --all`."""
 
+from sqlalchemy.orm import joinedload, undefer
 
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.aqdb.model import Sandbox
@@ -24,4 +25,8 @@ from aquilon.aqdb.model import Sandbox
 class CommandShowSandboxAll(BrokerCommand):
 
     def render(self, session, **arguments):
-        return session.query(Sandbox).order_by(Sandbox.name).all()
+        q = session.query(Sandbox)
+        q = q.options(undefer('comments'),
+                      joinedload('owner'))
+        q = q.order_by(Sandbox.name)
+        return q.all()

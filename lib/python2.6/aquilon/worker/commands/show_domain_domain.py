@@ -16,6 +16,7 @@
 # limitations under the License.
 """Contains the logic for `aq show domain --domain`."""
 
+from sqlalchemy.orm import joinedload, undefer
 
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.aqdb.model import Domain
@@ -26,4 +27,6 @@ class CommandShowDomainDomain(BrokerCommand):
     required_parameters = ["domain"]
 
     def render(self, session, domain, **arguments):
-        return Domain.get_unique(session, domain, compel=True)
+        return Domain.get_unique(session, domain, compel=True,
+                                 query_options=[undefer('comments'),
+                                                joinedload('owner')])

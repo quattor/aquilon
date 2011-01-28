@@ -59,6 +59,9 @@ class HardwareEntity(Base):
 
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
+
+    # Most of the update_* commands need to load the comments due to
+    # snapshot_hw(), so it is not worth deferring it
     comments = Column(String(255), nullable=True)
 
     location = relation(Location)

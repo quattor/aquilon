@@ -49,7 +49,7 @@ class Disk(Base):
     # This isn't really nullable, but single-table inheritance means
     # that the base class will end up with the column and the base class
     # wants it to be nullable. We enforce this via __init__ instead.
-    address = Column("address", AqStr(128), nullable=True)
+    address = Column(AqStr(128), nullable=True)
 
     machine_id = Column(Integer, ForeignKey('machine.machine_id',
                                             name='disk_machine_fk',
@@ -62,7 +62,7 @@ class Disk(Base):
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
 
-    comments = Column(String(255), nullable=True)
+    comments = deferred(Column(String(255), nullable=True))
 
     # The order_by here ensures that machine templates always list the
     # disks in the same order.  Technically order is irrelevant in the

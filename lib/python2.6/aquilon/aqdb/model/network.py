@@ -78,7 +78,7 @@ class Network(Base):
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
 
-    comments = Column(String(255), nullable=True)
+    comments = deferred(Column(String(255), nullable=True))
 
     network_environment = relation(NetworkEnvironment)
 

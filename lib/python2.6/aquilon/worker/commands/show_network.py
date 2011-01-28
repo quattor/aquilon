@@ -16,7 +16,7 @@
 # limitations under the License.
 """Contains the logic for `aq show network`."""
 
-from sqlalchemy.orm import joinedload, subqueryload
+from sqlalchemy.orm import joinedload, subqueryload, undefer
 
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.aqdb.model import Network, NetworkEnvironment
@@ -32,7 +32,7 @@ class CommandShowNetwork(BrokerCommand):
 
     def render(self, session, network, ip, network_environment, all, style,
                type=False, hosts=False, **arguments):
-        options = []
+        options = [undefer('comments'), joinedload('location')]
         if hosts or style == "proto":
             options.extend([subqueryload("assignments"),
                             joinedload("assignments.interface"),
@@ -46,7 +46,7 @@ class CommandShowNetwork(BrokerCommand):
                                             query_options=options) or dbnetwork
         q = session.query(Network)
         q = q.filter_by(network_environment=dbnet_env)
-        q = q.options(joinedload('location'))
+        q = q.options(*options)
         if dbnetwork:
             if hosts:
                 return NetworkHostList([dbnetwork])

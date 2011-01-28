@@ -39,7 +39,7 @@ class Role(Base):
     creation_date = deferred(Column(DateTime, nullable=False,
                                     default=datetime.now))
 
-    comments = Column('comments', String(255), nullable=True)
+    comments = deferred(Column(String(255), nullable=True))
 
 
 role = Role.__table__  # pylint: disable=C0103

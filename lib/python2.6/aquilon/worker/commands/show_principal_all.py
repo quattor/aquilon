@@ -16,7 +16,7 @@
 # limitations under the License.
 """Contains the logic for `aq show principal`."""
 
-from sqlalchemy.orm import subqueryload
+from sqlalchemy.orm import subqueryload, undefer
 
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.aqdb.model import UserPrincipal
@@ -29,6 +29,7 @@ class CommandShowPrincipalAll(BrokerCommand):
     def render(self, session, **arguments):
         q = session.query(UserPrincipal)
         q = q.order_by(UserPrincipal.name)
-        q = q.options(subqueryload('realm'),
+        q = q.options(undefer('comments'),
+                      subqueryload('realm'),
                       subqueryload('role'))
         return q.all()

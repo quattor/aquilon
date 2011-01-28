@@ -59,9 +59,9 @@ class Branch(Base):
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
 
-    comments = Column(String(255), nullable=True)
+    comments = deferred(Column(String(255), nullable=True))
 
-    owner = relation(UserPrincipal)
+    owner = relation(UserPrincipal, innerjoin=True)
 
     __mapper_args__ = {'polymorphic_on': branch_type}
 

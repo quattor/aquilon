@@ -16,6 +16,7 @@
 # limitations under the License.
 """Contains the logic for `aq search network_environment`."""
 
+from sqlalchemy.orm import joinedload, undefer
 
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.aqdb.model import NetworkEnvironment
@@ -28,10 +29,14 @@ class CommandSearchNetworkEnvironment(BrokerCommand):
 
     def render(self, session, network_environment, **arguments):
         q = session.query(NetworkEnvironment)
+        q = q.options(undefer('comments'),
+                      joinedload('dns_environment'),
+                      undefer('dns_environment.comments'),
+                      joinedload('location'))
         if network_environment:
             q = q.filter_by(name=network_environment)
         location = get_location(session, **arguments)
         if location:
             q = q.filter_by(location=location)
-        q = q.order_by('name')
+        q = q.order_by(NetworkEnvironment.name)
         return q.all()

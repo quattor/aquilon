@@ -41,7 +41,7 @@ class NsRecord(Base):
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
 
-    comments = Column(String(255), nullable=True)
+    comments = deferred(Column(String(255), nullable=True))
 
     a_record = relation(ARecord, lazy=False, innerjoin=True,
                         backref=backref('_ns_records', cascade='all'))

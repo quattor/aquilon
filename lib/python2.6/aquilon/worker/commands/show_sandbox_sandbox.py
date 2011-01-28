@@ -16,6 +16,7 @@
 # limitations under the License.
 """Contains the logic for `aq show sandbox --sandbox`."""
 
+from sqlalchemy.orm import joinedload, undefer
 
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.exceptions_ import ArgumentError
@@ -28,7 +29,9 @@ class CommandShowSandboxSandbox(BrokerCommand):
     required_parameters = ["sandbox"]
 
     def render(self, session, logger, sandbox, pathonly, **arguments):
-        (mysandbox, dbauthor) = get_sandbox(session, logger, sandbox)
+        (mysandbox, dbauthor) = get_sandbox(session, logger, sandbox,
+                                            query_options=[undefer('comments'),
+                                                           joinedload('owner')])
         if dbauthor:
             mysandbox = AuthoredSandbox(mysandbox, dbauthor)
         if not pathonly:

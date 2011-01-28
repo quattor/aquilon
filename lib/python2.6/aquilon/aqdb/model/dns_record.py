@@ -64,7 +64,7 @@ class DnsRecord(Base):
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
 
-    comments = deferred(Column('comments', String(255), nullable=True))
+    comments = deferred(Column(String(255), nullable=True))
 
     fqdn = relation(Fqdn, lazy=False, innerjoin=True,
                     backref=backref('dns_records'))

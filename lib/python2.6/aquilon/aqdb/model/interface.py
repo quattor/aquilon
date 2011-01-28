@@ -106,6 +106,8 @@ class Interface(Base):
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
 
+    # Most of the update_* commands need to load the comments due to
+    # snapshot_hw(), so it is not worth deferring it
     comments = Column('comments', String(255), nullable=True)
 
     hardware_entity = relation(HardwareEntity, lazy=False, innerjoin=True,
