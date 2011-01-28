@@ -262,8 +262,11 @@ class Base(object):
     def get_unique(cls, session, *args, **kwargs):
         compel = kwargs.get('compel', False)
         preclude = kwargs.pop('preclude', False)
+        options = kwargs.pop('query_options', None)
 
         query = session.query(cls)
+        if options:
+            query = query.options(*options)
         (query, clslabel, desc) = cls._selection_helper(session, query, *args,
                                                         **kwargs)
         try:
@@ -284,7 +287,11 @@ class Base(object):
     @classmethod
     def get_matching_query(cls, session, *args, **kwargs):
         compel = kwargs.get('compel', False)
+        options = kwargs.pop('query_options', None)
+
         query = session.query(cls.__table__.c.id)
+        if options:
+            query = query.options(*options)
         (query, clslabel, desc) = cls._selection_helper(session, query, *args,
                                                         **kwargs)
         if compel:

@@ -113,7 +113,8 @@ class PrimaryNameAssociation(Base):
 
     #TODO: take fqdn/dns_environment and cut out extra work?
     @classmethod
-    def get_unique(cls, sess, dns_record, compel=False, preclude=False):
+    def get_unique(cls, sess, dns_record, compel=False, preclude=False,
+                   query_options=None):
         """ Take an ARecord, return a PrimaryNameAssociation
 
             This overridden method is heavily tweaked from the standard
@@ -123,7 +124,11 @@ class PrimaryNameAssociation(Base):
             the main use of this method is in HardwareEntity.get_unique, which
             doesn't need the use of these options.
         """
-        pna = sess.query(cls).filter_by(dns_record=dns_record).first()
+        q = sess.query(cls)
+        q = q.filter_by(dns_record=dns_record)
+        if query_options:
+            q = q.options(*query_options)
+        pna = q.first()
         if not pna and compel:
             raise NotFoundException('No such primary_name assignment %s' % (
                                     dns_record.fqdn))

@@ -173,8 +173,10 @@ class Network(Base):
         # exactly one non-keyword argument, and possibly compel.  Any
         # caller using preclude would be passing keywords anyway.
         compel = kwargs.pop("compel", False)
+        options = kwargs.pop("query_options", None)
         if kwargs or len(args) > 1:
             return super(Network, cls).get_unique(session, *args, compel=compel,
+                                                  query_options=options,
                                                   **kwargs)
 
         # Just a single positional argumentum - do magic
@@ -182,18 +184,21 @@ class Network(Base):
         # IPv4Network('1.2.3.4/32')
         try:
             ip = IPv4Address(args[0])
-            return super(Network, cls).get_unique(session, ip=ip, compel=compel)
+            return super(Network, cls).get_unique(session, ip=ip, compel=compel,
+                                                  query_options=options)
         except:
             pass
         try:
             net = IPv4Network(args[0])
             return super(Network, cls).get_unique(session, ip=net.network,
                                                   cidr=net.prefixlen,
-                                                  compel=compel)
+                                                  compel=compel,
+                                                  query_options=options)
         except:
             pass
         return super(Network, cls).get_unique(session, name=args[0],
-                                              compel=compel)
+                                              compel=compel,
+                                              query_options=options)
 
     def __repr__(self):
         msg = '<Network '

@@ -122,6 +122,7 @@ class HardwareEntity(Base):  # pylint: disable-msg=W0232, R0903
         compel = kw.pop('compel', False)
         preclude = kw.pop('preclude', False)
         hardware_type = kw.pop('hardware_type', None)
+        options = kw.pop('query_options', None)
 
         # If the hardware_type param isn't explicitly set and we have a
         # polymorphic identity, assume we're querying only for items of our
@@ -148,7 +149,11 @@ class HardwareEntity(Base):  # pylint: disable-msg=W0232, R0903
         else:
             # Always do the query against the base class, so we can detect
             # hardware_type mismatches
-            hwe = sess.query(HardwareEntity).filter_by(label=name).first()
+            q = sess.query(HardwareEntity)
+            q = q.filter_by(label=name)
+            if options:
+                q = q.options(*options)
+            hwe = q.first()
 
         if hwe:
             if hardware_type and hwe.hardware_type != hardware_type:
