@@ -40,27 +40,27 @@ from aquilon.server.dbwrappers.host import hostname_to_host
 
 
 LOGGER = logging.getLogger('aquilon.server.dbwrappers.user_principal')
-principal_re = re.compile(r'^(.*)@([^@]+)$')
-host_re = re.compile(r'^host/(.*)@([^@]+)$')
+principal_re = re.compile(r'^(.+)@([^@]+)$')
+host_re = re.compile(r'^host/(.*)$')
 
-def get_or_create_user_principal(session, user, createuser=True,
+def get_or_create_user_principal(session, principal, createuser=True,
                                  createrealm=True, commitoncreate=False,
                                  comments=None):
-    if user is None:
-        return user
-    principal = user
-    m = principal_re.match(user)
+    if principal is None:
+        return None
+
+    m = principal_re.match(principal)
     if not m:
-        raise ArgumentError("User principal '%s' is not valid." % user)
+        raise ArgumentError("User principal '%s' is not valid." % principal)
     realm = m.group(2)
     user = m.group(1)
-    m = host_re.match(principal)
+
+    m = host_re.match(user)
     if m:
         user = 'aquilonhost'
-        hostname = m.group(1)
-        # Don't actually need the host... just need to verify that it's
-        # in aqdb.
-        dbhost = hostname_to_host(session, hostname)
+        # Verify that the host exists in AQDB
+        hostname_to_host(session, m.group(1))
+
     # Short circuit the common case, and optimize it to eager load in
     # a single query since this happens on every command:
     q = session.query(UserPrincipal).filter_by(name=user)

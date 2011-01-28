@@ -30,11 +30,12 @@
 
 
 from twisted.python import log
+import re
 
 from aquilon.exceptions_ import AuthorizationException
 from aquilon.config import Config
-from aquilon.server.dbwrappers.user_principal import host_re
 
+host_re = re.compile(r'^host/(.+)@([^@]+)$')
 
 class AuthorizationBroker(object):
     """Handles any behind the scenes work in figuring out entitlements."""

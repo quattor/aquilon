@@ -125,6 +125,36 @@ class TestPermission(TestBrokerCommand):
                 "UserPrincipal: testuserdemote@is1.morgan [role: nobody]",
                 command)
 
+    def testmissinguser(self):
+        command = ["permission", "--principal", "@is1.morgan",
+                   "--role", "operations", "--createuser"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "User principal '@is1.morgan' is not valid.",
+                         command)
+
+    def testmissingrealm(self):
+        command = ["permission", "--principal", "testuser",
+                   "--role", "operations", "--createuser"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "User principal 'testuser' is not valid.",
+                         command)
+
+    # FIXME: we can't test "aq permission" with host principals, because the aq
+    # client does not escape the '/' character and that confuses the URL parser
+    #def testmissinghostname(self):
+    #    command = ["permission", "--principal", "host/@is1.morgan",
+    #               "--role", "operations", "--createuser"]
+    #    out = self.notfoundtest(command)
+    #    self.matchoutput(out, "FQDN '' is not valid", command)
+
+    #def testbadhostname(self):
+    #    command = ["permission", "--role", "operations", "--createuser",
+    #               "--principal", "host/no-such-host.aqd-unittest.ms.com@is1.morgan"]
+    #    out = self.notfoundtest(command)
+    #    self.matchoutput(out,
+    #                     "Host no-such-host.aqd-unittest.ms.com not found.",
+    #                     command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestPermission)
