@@ -98,6 +98,9 @@ class Domain(Branch):
                                nullable=True)
     rollback_commit = Column(AqStr(40), nullable=True)
 
+    requires_tcm = Column(Boolean(name="%s_requires_tcm_ck"), nullable=False,
+                          default=False)
+
     __mapper_args__ = {'polymorphic_identity': _DMN,
                        'inherit_condition': domain_id == Branch.id}
 

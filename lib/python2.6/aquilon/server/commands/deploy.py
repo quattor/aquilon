@@ -30,6 +30,7 @@
 
 
 import os
+import re
 from tempfile import mkdtemp
 
 from aquilon.exceptions_ import ProcessException, ArgumentError
@@ -37,6 +38,8 @@ from aquilon.aqdb.model import Domain, Branch
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.processes import run_git, remove_dir, sync_domain
 from aquilon.server.logger import CLIENT_INFO
+
+tcm_re = re.compile(r"\btcm=([0-9]+)\b", re.IGNORECASE)
 
 
 class CommandDeploy(BrokerCommand):
@@ -72,6 +75,15 @@ class CommandDeploy(BrokerCommand):
             pass
         if not dbtarget.is_sync_valid:
             dbtarget.is_sync_valid = True
+
+        if dbtarget.requires_tcm:
+            result = comments and tcm_re.search(comments) or None
+            if not result:
+                raise ArgumentError("Deploying to {0:l} requires TCM approval.  "
+                                    "Please specify --comments "
+                                    "tcm=XXXXXX.".format(dbtarget))
+            # TODO: EDM validation
+            #edm_validate(result.group(0))
 
         kingdir = self.config.get("broker", "kingdir")
         rundir = self.config.get("broker", "rundir")

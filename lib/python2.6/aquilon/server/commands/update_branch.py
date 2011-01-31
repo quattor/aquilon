@@ -32,8 +32,8 @@
 import re
 import os
 
-from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import Branch
+from aquilon.exceptions_ import ArgumentError, AuthorizationException
+from aquilon.aqdb.model import Branch, Domain
 from aquilon.server.broker import BrokerCommand
 
 VERSION_RE = re.compile(r'^[-_.a-zA-Z0-9]*$')
@@ -43,9 +43,15 @@ class CommandUpdateBranch(BrokerCommand):
 
     required_parameters = ["branch"]
 
-    def render(self, session, logger, branch, comments, compiler_version,
-               autosync, **arguments):
+    def render(self, session, logger, dbuser, branch, comments,
+               compiler_version, autosync, requires_tcm, **arguments):
         dbbranch = Branch.get_unique(session, branch, compel=True)
+
+        # FIXME: proper authorization
+        if dbbranch.owner != dbuser and dbuser.role.name != 'aqd_admin':
+            raise AuthorizationException("Only the owner or an AQD admin can "
+                                         "update a branch.")
+
         if comments:
             dbbranch.comments = comments
         if compiler_version:
@@ -58,5 +64,11 @@ class CommandUpdateBranch(BrokerCommand):
             dbbranch.compiler = compiler
         if autosync is not None:
             dbbranch.autosync = autosync
+        if requires_tcm is not None:
+            if not isinstance(dbbranch, Domain):
+                raise ArgumentError("TCM approval can only be controlled for "
+                                    "domains.")
+            dbbranch.requires_tcm = requires_tcm
         session.add(dbbranch)
+        session.flush()
         return

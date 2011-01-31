@@ -1674,6 +1674,7 @@
          <option name="track" type="string" conflicts="start">Branch to track</option>
          <option name="start" type="string" conflicts="track">Branch to use as a starting point (default: prod)</option>
          <option name="comments" type="string">Comments</option>
+         <option name="requires_tcm" type="boolean">When enabled, "aq deploy" requires a TCM</option>
       </optgroup>
       <transport method="put" path="domain/%(domain)s" />
    </command>
@@ -1704,6 +1705,7 @@
          <option name="comments" type="string">Comments on the branch</option>
          <option name="compiler_version" type="string">Version of panc to use</option>
          <option name="autosync" type="boolean">Set the autosync flag</option>
+         <option name="requires_tcm" type="boolean">When enabled, "aq deploy" requires a TCM</option>
       </optgroup>
       <transport method="post" path="branch/%(branch)s" />
    </command>
@@ -1770,6 +1772,9 @@
       of a previous rollback that flag is cleared.
       If using the nosync option follow this with the sync command to
       pull the changes into any production domains.
+      <p/>
+      If changes to the target branch require TCM approval, then the comments
+      must include the string "tcm=XXXXXX", where XXXXXX is a valid TCM number.
       <optgroup name="deploy options" mandatory="True" fields="all">
          <option name="source" type="string">Name of the branch (domain or sandbox) with changes</option>
          <option name="target" type="string">Name of the target domain</option>

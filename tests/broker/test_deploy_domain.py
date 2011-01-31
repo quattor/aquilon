@@ -55,7 +55,7 @@ class TestDeployDomain(TestBrokerCommand):
             contents = f.readlines()
         self.failUnlessEqual(contents[-1], "#Added by unittest\n")
 
-    def testverifygitlog(self):
+    def testverifydeploylog(self):
         kingdir = self.config.get("broker", "kingdir")
         command = ["log", "--no-color", "-n", "1", "deployable"]
         (out, err) = self.gitcommand(command, cwd=kingdir)
@@ -63,9 +63,19 @@ class TestDeployDomain(TestBrokerCommand):
         self.matchoutput(out, "Request ID:", command)
         self.matchoutput(out, "Comments: Test comment", command)
 
+    def testdeployfail(self):
+        command = ["deploy", "--source", "changetest1",
+                   "--target", "prod"]
+        (out, err) = self.failuretest(command, 4)
+        self.matchoutput(err,
+                         "Deploying to domain prod requires TCM approval.  "
+                         "Please specify --comments tcm=XXXXXX.",
+                         command)
+
     def testdeploynosync(self):
         self.successtest(["deploy", "--source", "changetest1",
-                          "--target", "prod", "--nosync"])
+                          "--target", "prod", "--nosync",
+                          "--comments", "tcm=12345678"])
 
     def testverifynosync(self):
         domainsdir = self.config.get("broker", "domainsdir")
@@ -81,6 +91,19 @@ class TestDeployDomain(TestBrokerCommand):
         with open(template) as f:
             contents = f.readlines()
         self.failIfEqual(contents[-1], "#Added by unittest\n")
+
+    def testverifynosynclog(self):
+        kingdir = self.config.get("broker", "kingdir")
+
+        # The change must be in prod...
+        command = ["log", "--no-color", "-n", "1", "prod"]
+        (out, err) = self.gitcommand(command, cwd=kingdir)
+        self.matchoutput(out, "Comments: tcm=12345678", command)
+
+        # ... but not in ut-prod
+        command = ["log", "--no-color", "-n", "1", "ut-prod"]
+        (out, err) = self.gitcommand(command, cwd=kingdir)
+        self.matchclean(out, "tcm=12345678", command)
 
 
 if __name__=='__main__':

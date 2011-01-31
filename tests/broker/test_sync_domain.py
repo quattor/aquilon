@@ -50,6 +50,12 @@ class TestSyncDomain(TestBrokerCommand):
             contents = f.readlines()
         self.failUnlessEqual(contents[-1], "#Added by unittest\n")
 
+    def testverifygitlog(self):
+        kingdir = self.config.get("broker", "kingdir")
+        command = ["log", "--no-color", "-n", "1", "ut-prod"]
+        (out, err) = self.gitcommand(command, cwd=kingdir)
+        self.matchoutput(out, "Comments: tcm=12345678", command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestSyncDomain)
