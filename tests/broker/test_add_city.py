@@ -78,22 +78,14 @@ class TestAddCity(TestBrokerCommand):
         self.dsdb_verify()
 
     def testplenary(self):
-        plenary = os.path.join(self.config.get("broker", "plenarydir"),
-                               "site", "americas", "ex", "config.tpl")
-        with open(plenary) as f:
-            contents = f.read()
-            self.matchoutput(contents,
-                             "variable TIMEZONE = 'EDT';",
-                             "read %s" % plenary)
+        command = ["cat", "--city", "ex"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "variable TIMEZONE = 'EDT';", command)
 
     def testplenarydefault(self):
-        plenary = os.path.join(self.config.get("broker", "plenarydir"),
-                               "site", "americas", "e3", "config.tpl")
-        with open(plenary) as f:
-            contents = f.read()
-            self.matchoutput(contents,
-                             "variable TIMEZONE = 'UTC';",
-                             "read %s" % plenary)
+        command = ["cat", "--city", "e3"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "variable TIMEZONE = 'UTC';", command)
 
     def testverifyaddbu(self):
         command = "show city --city ex"
