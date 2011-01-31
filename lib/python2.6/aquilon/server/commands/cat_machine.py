@@ -46,9 +46,8 @@ class CommandCatMachine(BrokerCommand):
             raise ArgumentError("Plenary file not available for %s machines." %
                     dbmachine.model.machine_type)
         plenary_info = PlenaryMachineInfo(dbmachine, logger=logger)
+
         if generate:
-            lines = []
-            plenary_info.body(lines)
-            return "\n".join(lines)
+            return plenary_info._generate_content()
         else:
             return plenary_info.read()

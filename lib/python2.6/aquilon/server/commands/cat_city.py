@@ -41,12 +41,9 @@ class CommandCatCity(BrokerCommand):
 
     def render(self, generate, session, logger, city, **kwargs):
         dbcity = City.get_unique(session, city, compel=True)
-
         plenary_info = PlenaryCity(dbcity, logger=logger)
 
         if generate:
-            lines = []
-            plenary_info.body(lines)
-            return "\n".join(lines)
+            return plenary_info._generate_content()
         else:
             return plenary_info.read()
