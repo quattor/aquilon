@@ -44,7 +44,7 @@ class CommandDeploy(BrokerCommand):
     required_parameters = ["source", "target"]
 
     def render(self, session, logger, source, target, sync, dryrun,
-               **arguments):
+               comments, user, requestid, **arguments):
         # Most of the logic here is duplicated in publish
         dbsource = Branch.get_unique(session, source, compel=True)
 
@@ -83,8 +83,21 @@ class CommandDeploy(BrokerCommand):
                      kingdir, dbtarget.name],
                     path=tempdir, logger=logger)
             temprepo = os.path.join(tempdir, dbtarget.name)
+
+            # We could try to use fmt-merge-msg but its usage is so obscure that
+            # faking it is easier
+            merge_msg = []
+            merge_msg.append("Merge remote branch 'origin/%s' into %s" %
+                             (dbsource.name, dbtarget.name))
+            merge_msg.append("")
+            merge_msg.append("User: %s" % user)
+            merge_msg.append("Request ID: %s" % requestid)
+            if comments:
+                merge_msg.append("Comments: %s" % comments)
+
             try:
-                run_git(["merge", "--no-ff", "origin/%s" % dbsource.name],
+                run_git(["merge", "--no-ff", "origin/%s" % dbsource.name,
+                         "-m", "\n".join(merge_msg)],
                         path=temprepo, logger=logger, loglevel=CLIENT_INFO)
             except ProcessException, e:
                 # No need to re-print e, output should have gone to client

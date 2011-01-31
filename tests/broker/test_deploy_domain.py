@@ -44,7 +44,8 @@ class TestDeployDomain(TestBrokerCommand):
 
     def testdeploychangetest1domain(self):
         self.successtest(["deploy", "--source", "changetest1",
-                          "--target", "deployable"])
+                          "--target", "deployable",
+                          "--comments", "Test comment"])
 
     def testverifydeploy(self):
         domainsdir = self.config.get("broker", "domainsdir")
@@ -53,6 +54,14 @@ class TestDeployDomain(TestBrokerCommand):
         with open(template) as f:
             contents = f.readlines()
         self.failUnlessEqual(contents[-1], "#Added by unittest\n")
+
+    def testverifygitlog(self):
+        kingdir = self.config.get("broker", "kingdir")
+        command = ["log", "--no-color", "-n", "1", "deployable"]
+        (out, err) = self.gitcommand(command, cwd=kingdir)
+        self.matchoutput(out, "User:", command)
+        self.matchoutput(out, "Request ID:", command)
+        self.matchoutput(out, "Comments: Test comment", command)
 
     def testdeploynosync(self):
         self.successtest(["deploy", "--source", "changetest1",

@@ -1777,6 +1777,7 @@
       <optgroup name="deploy optional" mandatory="False">
          <option name="sync" type="boolean" default="True">Automatically sync tracking domains</option>
          <option name="dryrun" type="boolean">Attempt a test merge and run tests without saving the merge result</option>
+         <option name="comments" type="string">Comments to include in the merge commit</option>
       </optgroup>
       <transport method="post" path="command/deploy" />
    </command>
