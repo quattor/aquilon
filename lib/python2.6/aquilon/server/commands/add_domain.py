@@ -36,6 +36,7 @@ from aquilon.exceptions_ import (AuthorizationException, ArgumentError,
                                  InternalError, ProcessException)
 from aquilon.server.broker import BrokerCommand
 from aquilon.aqdb.model import Domain, Branch
+from aquilon.aqdb.model.branch import CHANGE_MANAGERS
 from aquilon.server.processes import run_git, remove_dir
 
 
@@ -44,7 +45,7 @@ class CommandAddDomain(BrokerCommand):
     required_parameters = ["domain"]
 
     def render(self, session, logger, dbuser,
-               domain, track, start, requires_tcm, comments, **arguments):
+               domain, track, start, change_manager, comments, **arguments):
         if not dbuser:
             raise AuthorizationException("Cannot create a domain without "
                                          "an authenticated connection.")
@@ -71,11 +72,12 @@ class CommandAddDomain(BrokerCommand):
                 start = self.config.get("broker", "default_domain_start")
             start_point = Branch.get_unique(session, start, compel=True)
 
-        if requires_tcm is None:
-            requires_tcm = False
+        if change_manager and change_manager not in CHANGE_MANAGERS:
+            raise ArgumentError("Unknown change manager %s." % change_manager)
 
         dbdomain = Domain(name=domain, owner=dbuser, compiler=compiler,
-                          tracked_branch=dbtracked, requires_tcm=requires_tcm,
+                          tracked_branch=dbtracked,
+                          change_manager=change_manager,
                           comments=comments)
         session.add(dbdomain)
         session.flush()

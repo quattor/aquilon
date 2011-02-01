@@ -33,13 +33,23 @@ import os
 import re
 from tempfile import mkdtemp
 
-from aquilon.exceptions_ import ProcessException, ArgumentError
+from aquilon.exceptions_ import (ProcessException, ArgumentError,
+                                 AuthorizationException, InternalError)
 from aquilon.aqdb.model import Domain, Branch
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.processes import run_git, remove_dir, sync_domain
 from aquilon.server.logger import CLIENT_INFO
 
-tcm_re = re.compile(r"\btcm=([0-9]+)\b", re.IGNORECASE)
+tcm_re = re.compile(r"^tcm=([0-9]+)$", re.IGNORECASE)
+
+
+# TODO: move this to an external class
+def validate_tcm(principal, justification):
+    result = tcm_re.search(justification)
+    if not result:
+        raise ArgumentError("Failed to parse the TCM number.")
+    # TODO: EDM validation
+    #edm_validate(result.group(0))
 
 
 class CommandDeploy(BrokerCommand):
@@ -47,7 +57,7 @@ class CommandDeploy(BrokerCommand):
     required_parameters = ["source", "target"]
 
     def render(self, session, logger, source, target, sync, dryrun,
-               comments, user, requestid, **arguments):
+               comments, justification, user, requestid, **arguments):
         # Most of the logic here is duplicated in publish
         dbsource = Branch.get_unique(session, source, compel=True)
 
@@ -76,14 +86,15 @@ class CommandDeploy(BrokerCommand):
         if not dbtarget.is_sync_valid:
             dbtarget.is_sync_valid = True
 
-        if dbtarget.requires_tcm:
-            result = comments and tcm_re.search(comments) or None
-            if not result:
-                raise ArgumentError("Deploying to {0:l} requires TCM approval.  "
-                                    "Please specify --comments "
-                                    "tcm=XXXXXX.".format(dbtarget))
-            # TODO: EDM validation
-            #edm_validate(result.group(0))
+        if dbtarget.change_manager:
+            if not justification:
+                # FIXME: include a descriptive name of the change manager when
+                # it becomes a proper class
+                raise AuthorizationException("{0} is under change management "
+                                             "control.  Please specify "
+                                             "--justification.".format(dbtarget))
+            if dbtarget.change_manager == "tcm":
+                validate_tcm(user, justification)
 
         kingdir = self.config.get("broker", "kingdir")
         rundir = self.config.get("broker", "rundir")
@@ -104,6 +115,8 @@ class CommandDeploy(BrokerCommand):
             merge_msg.append("")
             merge_msg.append("User: %s" % user)
             merge_msg.append("Request ID: %s" % requestid)
+            if justification:
+                merge_msg.append("Justification: %s" % justification)
             if comments:
                 merge_msg.append("Comments: %s" % comments)
 

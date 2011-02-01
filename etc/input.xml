@@ -1667,6 +1667,9 @@
 
       Either type of domain can be used with the "manage" command in
       order to assign some hosts to the domain and run complete tests.
+      <p/>
+      The only value allowed right now for --change_manager is "tcm", which
+      means "aq deploy" requires a valid TCM.
       <optgroup name="add domain mandatory" mandatory="True" fields="all">
          <option name="domain" type="string">Name of the new domain</option>
       </optgroup>
@@ -1674,7 +1677,7 @@
          <option name="track" type="string" conflicts="start">Branch to track</option>
          <option name="start" type="string" conflicts="track">Branch to use as a starting point (default: prod)</option>
          <option name="comments" type="string">Comments</option>
-         <option name="requires_tcm" type="boolean">When enabled, "aq deploy" requires a TCM</option>
+         <option name="change_manager" type="string">Set the change manager of the domain</option>
       </optgroup>
       <transport method="put" path="domain/%(domain)s" />
    </command>
@@ -1698,6 +1701,9 @@
       comments about the domain, the version of the pan compiler to use,
       and whether to automatically sync deployed or published changes
       to tracking domains.
+      <p/>
+      The only value allowed right now for --change_manager is "tcm", which
+      means "aq deploy" requires a valid TCM.
       <optgroup name="update_branch_mandatory" mandatory="True" fields="all">
          <option name="branch" type="string">Name of the template branch (domain or sandbox)</option>
       </optgroup>
@@ -1705,7 +1711,7 @@
          <option name="comments" type="string">Comments on the branch</option>
          <option name="compiler_version" type="string">Version of panc to use</option>
          <option name="autosync" type="boolean">Set the autosync flag</option>
-         <option name="requires_tcm" type="boolean">When enabled, "aq deploy" requires a TCM</option>
+         <option name="change_manager" type="string">Set the change manager of the domain</option>
       </optgroup>
       <transport method="post" path="branch/%(branch)s" />
    </command>
@@ -1773,8 +1779,9 @@
       If using the nosync option follow this with the sync command to
       pull the changes into any production domains.
       <p/>
-      If changes to the target branch require TCM approval, then the comments
-      must include the string "tcm=XXXXXX", where XXXXXX is a valid TCM number.
+      If changes to the target branch require TCM approval, then the argument
+      to --justification must be "tcm=XXXXXX", where XXXXXX is a valid TCM
+      number.
       <optgroup name="deploy options" mandatory="True" fields="all">
          <option name="source" type="string">Name of the branch (domain or sandbox) with changes</option>
          <option name="target" type="string">Name of the target domain</option>
@@ -1783,6 +1790,7 @@
          <option name="sync" type="boolean" default="True">Automatically sync tracking domains</option>
          <option name="dryrun" type="boolean">Attempt a test merge and run tests without saving the merge result</option>
          <option name="comments" type="string">Comments to include in the merge commit</option>
+	 <option name="justification" type="string">Extra authorization tokens (e.g. TCM number) to validate the request</option>
       </optgroup>
       <transport method="post" path="command/deploy" />
    </command>

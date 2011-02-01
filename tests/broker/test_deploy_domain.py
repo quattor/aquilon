@@ -68,14 +68,15 @@ class TestDeployDomain(TestBrokerCommand):
                    "--target", "prod"]
         (out, err) = self.failuretest(command, 4)
         self.matchoutput(err,
-                         "Deploying to domain prod requires TCM approval.  "
-                         "Please specify --comments tcm=XXXXXX.",
+                         "Domain prod is under change management control.  "
+                         "Please specify --justification.",
                          command)
 
     def testdeploynosync(self):
         self.successtest(["deploy", "--source", "changetest1",
                           "--target", "prod", "--nosync",
-                          "--comments", "tcm=12345678"])
+                          "--justification", "tcm=12345678",
+                          "--comments", "Test comment 2"])
 
     def testverifynosync(self):
         domainsdir = self.config.get("broker", "domainsdir")
@@ -95,10 +96,14 @@ class TestDeployDomain(TestBrokerCommand):
     def testverifynosynclog(self):
         kingdir = self.config.get("broker", "kingdir")
 
+        # Note: "prod" is a copy of the real thing so limit the amount of
+        # history checked to avoid being fooled by real commits
+
         # The change must be in prod...
         command = ["log", "--no-color", "-n", "1", "prod"]
         (out, err) = self.gitcommand(command, cwd=kingdir)
-        self.matchoutput(out, "Comments: tcm=12345678", command)
+        self.matchoutput(out, "Justification: tcm=12345678", command)
+        self.matchoutput(out, "Comments: Test comment 2", command)
 
         # ... but not in ut-prod
         command = ["log", "--no-color", "-n", "1", "ut-prod"]

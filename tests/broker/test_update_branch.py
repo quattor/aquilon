@@ -71,12 +71,13 @@ class TestUpdateBranch(TestBrokerCommand):
         self.matchoutput(out, "Compiler not found at", command)
 
     def testupdateprod(self):
-        self.noouttest(["update", "branch", "--branch", "prod", "--requires_tcm"])
+        self.noouttest(["update", "branch", "--branch", "prod",
+                        "--change_manager", "tcm"])
 
     def testverifyprod(self):
         command = ["show", "domain", "--domain", "prod"]
         out = self.commandtest(command)
-        self.matchoutput(out, "Requires TCM: True", command)
+        self.matchoutput(out, "Change Manager: tcm", command)
 
 
 if __name__=='__main__':
