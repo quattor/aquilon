@@ -90,6 +90,13 @@ class TestAddRouter(TestBrokerCommand):
                            "--fqdn", rtr, "--building", "ut"]
                 self.noouttest(command)
 
+    def testaddvplsrouters(self):
+        net = self.net.vpls[0]
+        self.noouttest(["add", "router", "--ip", net[1], "--building", "ut",
+                        "--fqdn", "utvplsgw.aqd-unittest.ms.com"])
+        self.noouttest(["add", "router", "--ip", net[2], "--building", "np",
+                        "--fqdn", "npvplsgw.aqd-unittest.ms.com"])
+
     def testshowrouter(self):
         net = self.net.tor_net[6]
         command = ["show", "router", "--ip", net.gateway]

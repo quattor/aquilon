@@ -119,6 +119,21 @@ class TestAddMachine(TestBrokerCommand):
                         "--cpuname", "xeon", "--cpuspeed", "2660",
                         "--memory", "8192"])
 
+    # Usef for VPLS network tests
+    def testaddut3c5n5(self):
+        self.noouttest(["add", "machine", "--machine", "ut3c5n5",
+                        "--rack", "ut3", "--model", "hs21-8853l5u",
+                        "--cpucount", "2", "--cpuvendor", "intel",
+                        "--cpuname", "xeon", "--cpuspeed", "2660",
+                        "--memory", "8192"])
+
+    def testaddnp3c5n5(self):
+        self.noouttest(["add", "machine", "--machine", "np3c5n5",
+                        "--rack", "np3", "--model", "hs21-8853l5u",
+                        "--cpucount", "2", "--cpuvendor", "intel",
+                        "--cpuname", "xeon", "--cpuspeed", "2660",
+                        "--memory", "8192"])
+
     def testaddut3c1n3(self):
         self.noouttest(["add", "machine", "--machine", "ut3c1n3",
             "--chassis", "ut3c1.aqd-unittest.ms.com", "--slot", "3",

@@ -67,7 +67,8 @@ class RouterAddress(Base):
     comments = deferred(Column(String(255), nullable=True))
 
     network = relation(Network, backref=backref('routers',
-                                                cascade="all, delete-orphan"))
+                                                cascade="all, delete-orphan",
+                                                order_by=[ip]))
 
     location = relation(Location)
 

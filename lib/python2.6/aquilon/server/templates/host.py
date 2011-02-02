@@ -45,6 +45,21 @@ from aquilon.server.templates.panutils import pan, StructureTemplate
 
 LOGGER = logging.getLogger('aquilon.server.templates.host')
 
+# Select the closest (i.e. in the same building) router
+def select_router(dbmachine, routers):
+    # Safe default
+    gateway = routers[0].ip
+
+    dbbuilding = dbmachine.location and dbmachine.location.building or None
+    for router in routers:
+        if router.location and router.location.building and \
+           router.location.building == dbbuilding:
+            gateway = router.ip
+            break
+
+    return gateway
+
+
 class PlenaryHost(PlenaryCollection):
     """
     A facade for Toplevel and Namespaced Hosts (below).
@@ -122,6 +137,7 @@ class PlenaryToplevelHost(Plenary):
         transit_interfaces = []
         routers = {}
         default_gateway = None
+        dbmachine = self.dbhost.machine
 
         # FIXME: Enforce that one of the interfaces is marked boot?
         for dbinterface in self.dbhost.machine.interfaces:
@@ -178,11 +194,11 @@ class PlenaryToplevelHost(Plenary):
                 net = addr.network
 
                 if addr.label == "":
-                    # FIXME: consult the router information and in case there
-                    # are more than one routers, choose the one that is closer
-                    # (e.g. same building)
-                    # Fudge the gateway as the first available ip
-                    gateway = net.network[1]
+                    if net.routers:
+                        gateway = select_router(self.dbhost.machine, net.routers)
+                    else:
+                        # Fudge the gateway as the first available ip
+                        gateway = net.network[1]
                     if not default_gateway and dbinterface.bootable:
                         default_gateway = gateway
 
