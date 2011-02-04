@@ -137,6 +137,8 @@ class TestUpdateInterface(TestBrokerCommand):
                           (net.broadcast, net.gateway,
                            eth0ip, net.netmask),
                           command)
+        # No "fqdn" here as "update interface --interface eth1 --boot" does not
+        # transfer the primary IP. It is a question if it should...
         self.searchoutput(out,
                           r'"eth1", nlist\(\s*'
                           r'"bootproto", "static",\s*'
