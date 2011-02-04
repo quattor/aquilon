@@ -193,6 +193,19 @@ class AQDMaker(object):
                 continue
             logging.getLogger(logname).setLevel(logging._levelNames[logvalue])
 
+        progname = os.path.split(sys.argv[0])[1]
+        if progname == 'aqd':
+            if config.get('broker', 'mode') != 'readwrite':
+                log.msg("Broker started with aqd symlink, "
+                        "setting config mode to readwrite")
+                config.set('broker', 'mode', 'readwrite')
+        if progname == 'aqd_readonly':
+            if config.get('broker', 'mode') != 'readonly':
+                log.msg("Broker started with aqd_readonly symlink, "
+                        "setting config mode to readonly")
+                config.set('broker', 'mode', 'readonly')
+        log.msg("Loading broker in mode %s" % config.get('broker', 'mode'))
+
         # Dynamic import means that we can parse config options before
         # importing aqdb.  This is a hack until aqdb can be imported without
         # firing up database connections.
