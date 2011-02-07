@@ -39,11 +39,18 @@ class CommandCompile(BrokerCommand):
     required_parameters = []
     requires_readonly = True
 
-    def render(self, session, logger, domain, sandbox, **arguments):
+    def render(self, session, logger, domain, sandbox,
+               pancinclude, pancexclude, pancdebug, cleandeps,
+               **arguments):
         (dbdomain, dbauthor) = get_branch_and_author(session, logger,
                                                      domain=domain,
                                                      sandbox=sandbox,
                                                      compel=True)
+        if pancdebug:
+            pancinclude = r'.*'
         dom = TemplateDomain(dbdomain, dbauthor, logger=logger)
-        dom.compile(session)
+        dom.compile(session,
+                    panc_debug_include=pancinclude,
+                    panc_debug_exclude=pancexclude,
+                    cleandeps=cleandeps)
         return

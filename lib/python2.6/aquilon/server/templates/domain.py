@@ -85,7 +85,9 @@ class TemplateDomain(object):
                                      "clusters"))
         return dirs
 
-    def compile(self, session, only=None, locked=False):
+    def compile(self, session, only=None, locked=False,
+                panc_debug_include=None, panc_debug_exclude=None,
+                cleandeps=False):
         """The build directories are checked and constructed
         if necessary, so no prior setup is required.  The compile may
         take some time (current rate is 10 hosts per second, with a
@@ -179,6 +181,14 @@ class TemplateDomain(object):
             # Technically this is the default, but being explicit
             # doesn't hurt.
             args.append("compile.domain.profiles")
+        if panc_debug_include is not None:
+            args.append("-Dpanc.debug.include=%s" % panc_debug_include)
+        if panc_debug_exclude is not None:
+            args.append("-Dpanc.debug.exclude=%s" % panc_debug_exclude)
+        if cleandeps:
+            # Cannot send a false value - the test in build.xml is for
+            # whether or not the property is defined at all.
+            args.append("-Dclean.dep.files=%s" % cleandeps)
 
         out = ''
         try:

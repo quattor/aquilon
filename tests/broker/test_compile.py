@@ -135,6 +135,66 @@ class TestCompile(TestBrokerCommand):
         command = ['compile', '--hostname=unittest02.one-nyp.ms.com']
         self.successtest(command)
 
+    def test_500_adddebug(self):
+        sandboxdir = os.path.join(self.sandboxdir, "utsandbox")
+        template = os.path.join(sandboxdir, "aquilon", "archetype", "base.tpl")
+        with open(template) as f:
+            contents = f.readlines()
+        # These templates can't just have random debug statements...
+        # hiding it inside a variable statement works, though.
+        contents.append("variable AQDDEBUGBASE = "
+                        "debug('aqd unittest debug for aquilon base');\n")
+        with open(template, 'w') as f:
+            f.writelines(contents)
+        template = os.path.join(sandboxdir, "aquilon", "archetype", "final.tpl")
+        with open(template) as f:
+            contents = f.readlines()
+        contents.append("variable AQDDEBUGFINAL = "
+                        "debug('aqd unittest debug for aquilon final');\n")
+        with open(template, 'w') as f:
+            f.writelines(contents)
+        self.gitcommand(["commit", "-a",
+                         "-m", "added unittest debug statements"],
+                        cwd=sandboxdir)
+        self.successtest(["publish", "--branch", "utsandbox"],
+                         env=self.gitenv(), cwd=sandboxdir)
+
+    def test_505_verifynodebug(self):
+        command = ['compile', '--domain=unittest', '--cleandeps']
+        (out, err) = self.successtest(command)
+        self.matchoutput(err, "0 errors", command)
+        self.matchclean(err, "aqd unittest debug for aquilon base", command)
+        self.matchclean(err, "aqd unittest debug for aquilon final", command)
+
+    def test_510_verifydebughost(self):
+        command = ['compile', '--hostname=unittest02.one-nyp.ms.com',
+                   '--pancdebug', '--cleandeps']
+        (out, err) = self.successtest(command)
+        self.matchoutput(err, "aqd unittest debug for aquilon base", command)
+        self.matchoutput(err, "aqd unittest debug for aquilon final", command)
+
+    def test_520_verifydebugdomain(self):
+        command = ['compile', '--domain=unittest', '--pancdebug',
+                   '--cleandeps']
+        (out, err) = self.successtest(command)
+        self.matchoutput(err, "aqd unittest debug for aquilon base", command)
+        self.matchoutput(err, "aqd unittest debug for aquilon final", command)
+
+    def test_530_verifyexclude(self):
+        command = ['compile', '--hostname=unittest02.one-nyp.ms.com',
+                   '--pancexclude=archetype/base',
+                   '--pancdebug', '--cleandeps']
+        (out, err) = self.successtest(command)
+        self.matchclean(err, "aqd unittest debug for aquilon base", command)
+        self.matchoutput(err, "aqd unittest debug for aquilon final", command)
+
+    def test_540_verifyinclude(self):
+        command = ['compile', '--hostname=unittest02.one-nyp.ms.com',
+                   '--pancinclude=archetype/base', '--cleandeps']
+        (out, err) = self.successtest(command)
+        self.matchoutput(err, "aqd unittest debug for aquilon base", command)
+        self.matchclean(err, "aqd unittest debug for aquilon final", command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestCompile)

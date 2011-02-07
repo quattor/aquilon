@@ -39,9 +39,16 @@ class CommandCompileHostname(BrokerCommand):
     required_parameters = ["hostname"]
     requires_readonly = True
 
-    def render(self, session, logger, hostname, **arguments):
+    def render(self, session, logger, hostname,
+               pancinclude, pancexclude, pancdebug, cleandeps,
+               **arguments):
         dbhost = hostname_to_host(session, hostname)
+        if pancdebug:
+            pancinclude = r'.*'
         dom = TemplateDomain(dbhost.branch, dbhost.sandbox_author,
                              logger=logger)
-        dom.compile(session, only=dbhost.fqdn)
+        dom.compile(session, only=dbhost.fqdn,
+                    panc_debug_include=pancinclude,
+                    panc_debug_exclude=pancexclude,
+                    cleandeps=cleandeps)
         return
