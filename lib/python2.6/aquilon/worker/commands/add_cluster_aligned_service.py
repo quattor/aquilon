@@ -28,21 +28,24 @@
 # TERMS THAT MAY APPLY.
 
 
-from aquilon.exceptions_ import NotFoundException
+from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import Service, ClusterAlignedService
 
 
-class CommandDelESXClusterAlignedService(BrokerCommand):
+class CommandAddClusterAlignedService(BrokerCommand):
 
     required_parameters = ["service"]
 
-    def render(self, session, service, **arguments):
-        cluster_type = 'esx'
+    def render(self, session, service, cluster_type, comments, **arguments):
         dbservice = Service.get_unique(session, name=service, compel=True)
-        dbcas = ClusterAlignedService.get_unique(session,
-                                                 service=dbservice,
-                                                 cluster_type=cluster_type,
-                                                 compel=True)
-        session.delete(dbcas)
+        if cluster_type in dbservice.aligned_cluster_types:
+            raise ArgumentError("{0} is already aligned to ESX clusters."
+                                .format(dbservice))
+
+        dbcas = ClusterAlignedService(service=dbservice,
+                                      cluster_type=cluster_type,
+                                      comments=comments)
+        session.add(dbcas)
+        session.flush()
         return

@@ -307,10 +307,10 @@ class PlenaryToplevelHost(Plenary):
         if self.dbhost.cluster:
             clplenary = PlenaryClusterClient(self.dbhost.cluster)
             templates.append(clplenary.plenary_template)
-        elif self.dbhost.archetype.cluster_required:
-            raise IncompleteError("Host %s archetype %s requires cluster "
+        elif self.dbhost.personality.cluster_required:
+            raise IncompleteError("Host %s personality %s requires cluster "
                                   "membership." %
-                                  (self.name, self.dbhost.archetype.name))
+                                  (self.name, self.dbhost.personality.name))
 
         templates.append("archetype/final")
 

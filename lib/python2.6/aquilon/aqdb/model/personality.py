@@ -29,8 +29,8 @@
 """ Personality as a high level cfg object """
 from datetime import datetime
 
-from sqlalchemy import (Column, Integer, DateTime, Sequence, String, ForeignKey,
-                        UniqueConstraint, Index)
+from sqlalchemy import (Column, Integer, Boolean, DateTime, Sequence, String,
+                        ForeignKey, UniqueConstraint, Index)
 from sqlalchemy.orm import relation
 from sqlalchemy.ext.associationproxy import association_proxy
 
@@ -50,12 +50,19 @@ class Personality(Base):
     archetype_id = Column(Integer, ForeignKey(
         'archetype.id', name='%s_arch_fk' % (_ABV)), nullable=False)
 
+    cluster_required = Column(Boolean(name="%s_clstr_req_ck" % _TN),
+                              default=False, nullable=False)
+
     creation_date = Column(DateTime, default=datetime.now, nullable=False)
     comments = Column(String(255), nullable=True)
 
     archetype = relation(Archetype, backref='personality', uselist=False)
 
     services = association_proxy('_services', 'service')
+
+    @property
+    def is_cluster(self):
+        return self.archetype.cluster_type is not None
 
     def __format__(self, format_spec):
         instance = "%s/%s" % (self.archetype.name, self.name)

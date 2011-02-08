@@ -35,10 +35,11 @@ from sqlalchemy.orm import deferred
 from sqlalchemy.ext.associationproxy import association_proxy
 
 from aquilon.aqdb.model import Base
-from aquilon.aqdb.column_types.aqstr import AqStr
+from aquilon.aqdb.column_types import AqStr, Enum
 
 _TN = 'archetype'
 
+CLUSTER_TYPES = ('esx', 'storage', 'compute')
 
 class Archetype(Base):
     """ Archetype names """
@@ -47,12 +48,12 @@ class Archetype(Base):
     id = Column(Integer, Sequence('%s_id_seq' % _TN), primary_key=True)
 
     name = Column(AqStr(32), nullable=False)
+    outputdesc = Column(String(255), nullable=True)
 
     is_compileable = Column(Boolean(name="%s_is_compileable_ck" % _TN),
                             default=False, nullable=False)
 
-    cluster_required = Column(Boolean(name="%s_cluster_required_ck" % _TN),
-                              default=False, nullable=False)
+    cluster_type = Column(Enum(32, CLUSTER_TYPES), nullable=True)
 
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))

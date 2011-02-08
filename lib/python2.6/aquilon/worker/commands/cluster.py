@@ -32,30 +32,54 @@
 from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.host import hostname_to_host
-from aquilon.aqdb.model import Cluster, HostClusterMember, HostLifecycle
+from aquilon.aqdb.model import (Cluster, HostClusterMember, HostLifecycle,
+                                Archetype, Personality)
 from aquilon.worker.templates.cluster import PlenaryCluster
 from aquilon.worker.services import Chooser
+from aquilon.worker.locks import lock_queue, CompileKey
 
 
 class CommandCluster(BrokerCommand):
 
     required_parameters = ["hostname", "cluster"]
 
-    def render(self, session, logger, hostname, cluster, **arguments):
+    def render(self, session, logger, hostname, cluster,
+               personality, **arguments):
+        plenaries = []
         dbhost = hostname_to_host(session, hostname)
         dbcluster = Cluster.get_unique(session, cluster, compel=True)
-        if dbhost.machine.location != dbcluster.location_constraint and \
-           dbcluster.location_constraint not in \
-           dbhost.machine.location.parents:
-            raise ArgumentError("Host location {0} is not within cluster "
-                                "location {1}.".format(dbhost.machine.location,
-                                                       dbcluster.location_constraint))
-        if dbhost.personality != dbcluster.personality:
-            logger.client_info("Updating {0:l} to match cluster "
-                               "archetype {1!s} personality {2!s}.".format(
-                               dbhost, dbcluster.personality.archetype,
-                               dbcluster.personality))
-            dbhost.personality = dbcluster.personality
+
+        # We only support changing personality within the same
+        # archetype. The archetype decides things like which OS, how
+        # it builds (dhcp, etc), whether it's compilable, and
+        # switching all of that by side-effect seems wrong
+        # somehow. And besides, it would make the user-interface and
+        # implementation for this command ugly in order to support
+        # changing all of those options.
+        personality_change = False
+        if personality is not None:
+            dbpersonality = Personality.get_unique(session,
+                                                   name=personality,
+                                                   archetype=dbhost.archetype,
+                                                   compel=True)
+            if dbhost.personality != dbpersonality:
+                dbhost.personality = dbpersonality
+                personality_change = True
+
+        # Allow for non-restricted clusters (the default?)
+        if (len(dbcluster.allowed_personalities) > 0 and
+            dbhost.personality not in dbcluster.allowed_personalities):
+            raise ArgumentError("The personality %s for %s is not allowed "
+                                "by the cluster. Specify --personality "
+                                "and provide one of %s" %
+                                (dbhost.personality, dbhost.fqdn,
+                                 ", ".join([x.name for x in
+                                            dbcluster.allowed_personalities])))
+
+        # Now that we've changed the personality, we can check
+        # if this is a valid membership change
+        dbcluster.validate_membership(dbhost)
+
         if dbhost.cluster and dbhost.cluster != dbcluster:
             logger.client_info("Removing {0:l} from {1:l}.".format(dbhost,
                                                                    dbhost.cluster))
@@ -65,52 +89,54 @@ class CommandCluster(BrokerCommand):
             session.refresh(dbhost)
             session.refresh(old_cluster)
 
-        chooser = None
-        if not dbhost.cluster:
-            if dbhost.branch != dbcluster.branch or \
-               dbhost.sandbox_author != dbcluster.sandbox_author:
-                raise ArgumentError("{0} {1} {2} does not match {3:l} {4} "
-                                    "{5}.".format(dbhost,
-                                                  dbhost.branch.branch_type,
-                                                  dbhost.authored_branch,
-                                                  dbcluster,
-                                                  dbcluster.branch.branch_type,
-                                                  dbcluster.authored_branch))
-            # Check for max_members happens in aqdb layer
-            dbcluster.hosts.append(dbhost)
+        if dbhost.cluster:
+            if personality_change:
+                raise ArgumentError("{0:l} already in {1:l}, use "
+                                    "aq reconfigure to change personality."
+                                    .format(dbhost, dbhost.cluster))
+            # the cluster has not changed, therefore there's nothing
+            # to do here.
+            return
 
-            # demote a host when switching clusters
-            # promote a host when switching clusters
-            if dbhost.status.name == 'ready':
-                if dbcluster.status.name != 'ready':
-                    dbalmost = HostLifecycle.get_unique(session, 'almostready',
-                                                        compel=True)
-                    dbhost.status.transition(dbhost, dbalmost)
-            elif dbhost.status.name == 'almostready':
-                if dbcluster.status.name == 'ready':
-                    dbready = HostLifecycle.get_unique(session, 'ready',
-                                                       compel=True)
-                    dbhost.status.transition(dbhost, dbready)
-
-            session.flush()
-            session.refresh(dbhost)
-            # Enforce that service instances are set correctly for the
-            # new cluster association.
-            chooser = Chooser(dbhost, logger=logger)
-            chooser.set_required()
-            chooser.flush_changes()
-        # If this host is already bound to the cluster,
-        # rewrite the plenary anyway.
-
+        # Check for max_members happens in aqdb layer
+        dbcluster.hosts.append(dbhost)
         session.flush()
         session.refresh(dbcluster)
+        clusplenary = PlenaryCluster(dbcluster, logger=logger)
 
-        # XXX: Why not just try a compile of the cluster here and
-        # rollback if needed?
-        if chooser:
-            chooser.write_plenary_templates()
-        else:
-            plenary = PlenaryCluster(dbcluster, logger=logger)
-            plenary.write()
+        # demote a host when switching clusters
+        # promote a host when switching clusters
+        if dbhost.status.name == 'ready':
+            if dbcluster.status.name != 'ready':
+                dbalmost = HostLifecycle.get_unique(session, 'almostready',
+                                                    compel=True)
+                dbhost.status.transition(dbhost, dbalmost)
+        elif dbhost.status.name == 'almostready':
+            if dbcluster.status.name == 'ready':
+                dbready = HostLifecycle.get_unique(session, 'ready',
+                                                   compel=True)
+                dbhost.status.transition(dbhost, dbready)
+
+        session.flush()
+        session.refresh(dbhost)
+        # Enforce that service instances are set correctly for the
+        # new cluster association.
+        chooser = Chooser(dbhost, logger=logger)
+        chooser.set_required()
+        chooser.flush_changes()
+        # the chooser will include the host plenary
+        key = CompileKey.merge([chooser.get_write_key(),
+                                clusplenary.get_write_key()])
+
+        try:
+            lock_queue.acquire(key)
+            chooser.write_plenary_templates(locked=True)
+            clusplenary.write(locked=True)
+        except:
+            chooser.restore_stash()
+            clusplenary.restore_stash()
+            raise
+        finally:
+            lock_queue.release(key)
 
         return

@@ -53,6 +53,7 @@ except getopt.GetoptError, e:
 typemap = {
     "dns_domain": aqddnsdomains_pb2.DNSDomainList(),
     "host": aqdsystems_pb2.HostList(),
+    "cluster": aqdsystems_pb2.ClusterList(),
     "personality": aqdsystems_pb2.PersonalityList(),
     "operating_system": aqdsystems_pb2.OperatingSystemList(),
     "network": aqdnetworks_pb2.NetworkList(),

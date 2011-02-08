@@ -298,14 +298,26 @@ class ObjectFormatter(object):
                 if iface.mac:
                     int_msg.mac = str(iface.mac)
 
+    def add_archetype_data(self, msg, archetype):
+        msg.name = str(archetype.name)
+        for service in archetype.services:
+            si = msg.required_services.add()
+            si.service = service.name
+
+    def add_personality_data(self, msg, personality):
+        msg.name = str(personality.name)
+        for service in personality.services:
+            si = msg.required_services.add()
+            si.service = service.name
+        self.add_archetype_data(msg.archetype, personality.archetype)
+
     def add_host_data(self, host_msg, host):
         # FIXME: Add branch type and sandbox author to protobufs.
         host_msg.domain.name = str(host.branch.name)
         host_msg.domain.owner = str(host.branch.owner.name)
         host_msg.status = str(host.status.name)
-        host_msg.personality.name = str(host.personality.name)
-        host_msg.personality.archetype.name = str(host.personality.archetype.name)
-        host_msg.archetype.name = str(host.archetype.name)
+        self.add_personality_data(host_msg.personality, host.personality)
+        self.add_archetype_data(host_msg.archetype, host.archetype)
         self.redirect_proto(host.operating_system, host_msg.operating_system)
 
     def add_host_msg(self, host_msg, host):

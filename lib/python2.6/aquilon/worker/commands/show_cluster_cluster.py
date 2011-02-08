@@ -1,6 +1,6 @@
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 #
-# Copyright (C) 2009,2010,2011  Contributor
+# Copyright (C) 2008,2009,2010  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -28,41 +28,11 @@
 # TERMS THAT MAY APPLY.
 
 
-from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.broker import BrokerCommand
-from aquilon.aqdb.model import Archetype, Cluster, Host
+from aquilon.worker.commands.show_cluster_all import \
+    CommandShowClusterAll
 
 
-class CommandUpdateArchetype(BrokerCommand):
+class CommandShowClusterCluster(CommandShowClusterAll):
 
-    required_parameters = ["archetype"]
-
-    def render(self, session, archetype, compilable, cluster_type,
-               description, **kwargs):
-        dbarchetype = Archetype.get_unique(session, archetype, compel=True)
-
-        if compilable is not None:
-            dbarchetype.is_compileable = compilable
-
-        if description is not None:
-            dbarchetype.outputdesc = description
-
-        if cluster_type is not None and \
-            dbarchetype.cluster_type != cluster_type:
-            if dbarchetype.cluster_type is None:
-                q = session.query(Host)
-            else:
-                q = session.query(Cluster)
-            q = q.join('personality').filter_by(archetype=dbarchetype)
-            if q.count() > 0:
-                raise ArgumentError("The %s archetype is currently in use - "
-                                    "the cluster status cannot be "
-                                    "changed." %
-                                    dbarchetype.name)
-
-            if cluster_type == "":
-                dbarchetype.cluster_type = None
-            else:
-                dbarchetype.cluster_type = cluster_type
-
-        return
+    required_parameters = ['cluster']

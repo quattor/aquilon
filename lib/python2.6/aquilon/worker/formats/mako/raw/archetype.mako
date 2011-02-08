@@ -2,13 +2,16 @@
     flags = []
     if record.is_compileable:
         flags.append("compilable")
-    if record.cluster_required:
-        flags.append("cluster_required")
     flagstr = ""
     if len(flags) != 0:
         flagstr = " [" + " ".join(flags) + "] "
+    desc = ""
+    if record.cluster_type is not None:
+        desc = "Cluster"
+    else:
+        desc = "Host"
 %>\
-Archetype: ${record.name}${flagstr}
+${desc} Archetype: ${record.name}${flagstr}
 % for service in record.services:
   Required Service: ${service.name}
 % endfor

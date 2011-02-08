@@ -36,7 +36,7 @@ from aquilon.worker.dbwrappers.machine import create_machine
 from aquilon.worker.templates.base import PlenaryCollection
 from aquilon.worker.templates.machine import PlenaryMachineInfo
 from aquilon.worker.templates.cluster import PlenaryCluster
-from aquilon.aqdb.model import Chassis, ChassisSlot, Cluster, Model, Machine
+from aquilon.aqdb.model import (Chassis, ChassisSlot, Cluster, Model, Machine)
 
 
 class CommandAddMachine(BrokerCommand):
@@ -74,9 +74,10 @@ class CommandAddMachine(BrokerCommand):
                                     "attribute.")
             dbcluster = Cluster.get_unique(session, cluster,
                                            compel=ArgumentError)
-            if dbcluster.personality.archetype.name != 'vmhost':
+            # This test could be either archetype or cluster_type
+            if dbcluster.personality.archetype.name != 'esx_cluster':
                 raise ArgumentError("Can only add virtual machines to "
-                                    "clusters with archetype vmhost.")
+                                    "clusters with archetype esx_cluster.")
             if dblocation and dbcluster.location_constraint != dblocation:
                 raise ArgumentError("Cannot override cluster location {0} "
                                     "with location {1}.".format(
@@ -91,6 +92,7 @@ class CommandAddMachine(BrokerCommand):
         dbmachine = create_machine(session, machine, dblocation, dbmodel,
                                    cpuname, cpuvendor, cpuspeed, cpucount,
                                    memory, serial, comments)
+
         if chassis:
             # FIXME: Are virtual machines allowed to be in a chassis?
             dbslot = session.query(ChassisSlot).filter_by(chassis=dbchassis,

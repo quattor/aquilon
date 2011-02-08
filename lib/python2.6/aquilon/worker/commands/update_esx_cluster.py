@@ -29,6 +29,7 @@
 
 
 from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.commands.update_cluster import CommandUpdateCluster
 from aquilon.aqdb.model import EsxCluster, Personality, Switch
 from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.dbwrappers.location import get_location
@@ -41,137 +42,7 @@ from aquilon.worker.locks import lock_queue, CompileKey
 from aquilon.utils import force_ratio
 
 
-class CommandUpdateESXCluster(BrokerCommand):
+class CommandUpdateESXCluster(CommandUpdateCluster):
 
     required_parameters = ["cluster"]
 
-    def render(self, session, logger, cluster, archetype, personality,
-               max_members, vm_to_host_ratio, tor_switch, switch, fix_location,
-               down_hosts_threshold, comments, memory_capacity,
-               clear_overrides, **arguments):
-        cluster_type = 'esx'
-        dbcluster = EsxCluster.get_unique(session, cluster, compel=True)
-
-        cluster_updated = False
-        remove_plenaries = PlenaryCollection(logger=logger)
-        plenaries = PlenaryCollection(logger=logger)
-
-        dblocation = get_location(session, **arguments)
-        if fix_location:
-            dblocation = dbcluster.minimum_location
-            if not dblocation:
-                raise ArgumentError("Cannot infer the cluster location from "
-                                    "the host locations.")
-        if dblocation:
-            errors = []
-            if not dblocation.campus:
-                errors.append("{0} is not within a campus.".format(dblocation))
-            for host in dbcluster.hosts:
-                if host.machine.location != dblocation and \
-                   dblocation not in host.machine.location.parents:
-                    errors.append("{0} has location {1}.".format(host,
-                                                                 host.machine.location))
-            if errors:
-                raise ArgumentError("Cannot set {0} location constraint to "
-                                    "{1}:\n{2}".format(dbcluster, dblocation,
-                                                       "\n".join(errors)))
-            if dbcluster.location_constraint != dblocation:
-                if machine_plenary_will_move(old=dbcluster.location_constraint,
-                                             new=dblocation):
-                    for dbmachine in dbcluster.machines:
-                        # This plenary will have a path to the old location.
-                        plenary = PlenaryMachineInfo(dbmachine, logger=logger)
-                        remove_plenaries.append(plenary)
-                        dbmachine.location = dblocation
-                        session.add(dbmachine)
-                        # This plenary will have a path to the new location.
-                        plenaries.append(PlenaryMachineInfo(dbmachine,
-                                                            logger=logger))
-                dbcluster.location_constraint = dblocation
-                cluster_updated = True
-
-        if personality or archetype:
-            # This should probably run the Chooser for the cluster and all
-            # the hosts involved.
-            if not personality:
-                personality = dbcluster.personality.name
-            if not archetype:
-                archetype = dbcluster.personality.archetype.name
-            dbpersonality = Personality.get_unique(session, name=personality,
-                                                   archetype=archetype,
-                                                   compel=True)
-            for dbhost in dbcluster.hosts:
-                dbhost.personality = dbpersonality
-                session.add(dbhost)
-                plenaries.append(PlenaryHost(dbhost, logger=logger))
-            dbcluster.personality = dbpersonality
-            cluster_updated = True
-
-        if max_members is not None:
-            current_members = len(dbcluster.hosts)
-            if max_members < current_members:
-                raise ArgumentError("%s has %d hosts bound, which exceeds "
-                                    "the requested limit %d." %
-                                    (format(dbcluster), current_members,
-                                     max_members))
-            dbcluster.max_hosts = max_members
-            cluster_updated = True
-
-        (vm_count, host_count) = force_ratio("vm_to_host_ratio",
-                                             vm_to_host_ratio)
-        if vm_count is not None:
-            dbcluster.vm_count = vm_count
-            dbcluster.host_count = host_count
-            cluster_updated = True
-
-        if down_hosts_threshold is not None:
-            dbcluster.down_hosts_threshold = down_hosts_threshold
-            cluster_updated = True
-
-        if tor_switch is not None:
-            self.deprecated_option("tor_switch", "Please use --switch instead.",
-                                   logger=logger, **arguments)
-            switch = tor_switch
-        if switch is not None:
-            if switch:
-                # FIXME: Verify that any hosts are on the same network
-                dbswitch = Switch.get_unique(session, switch, compel=True)
-            else:
-                dbswitch = None
-            dbcluster.switch = dbswitch
-            cluster_updated = True
-
-        if comments is not None:
-            dbcluster.comments = comments
-            cluster_updated = True
-
-        if memory_capacity is not None:
-            dbcluster.memory_capacity = memory_capacity
-            cluster_updated = True
-
-        if clear_overrides is not None:
-            dbcluster.memory_capacity = None
-            cluster_updated = True
-
-        if not cluster_updated:
-            return
-
-        dbcluster.validate()
-        session.flush()
-
-        plenaries.append(PlenaryCluster(dbcluster, logger=logger))
-        key = CompileKey.merge([plenaries.get_write_key(),
-                                remove_plenaries.get_remove_key()])
-        try:
-            lock_queue.acquire(key)
-            remove_plenaries.stash()
-            plenaries.write(locked=True)
-            remove_plenaries.remove(locked=True)
-        except:
-            remove_plenaries.restore_stash()
-            plenaries.restore_stash()
-            raise
-        finally:
-            lock_queue.release(key)
-
-        return

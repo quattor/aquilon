@@ -36,78 +36,14 @@ from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.dbwrappers.branch import get_branch_and_author
 from aquilon.worker.dbwrappers.location import get_location
 from aquilon.worker.templates.cluster import PlenaryCluster
+from aquilon.worker.commands.add_cluster import CommandAddCluster
 from aquilon.utils import force_ratio
 
 
-class CommandAddESXCluster(BrokerCommand):
+class CommandAddESXCluster(CommandAddCluster):
 
     required_parameters = ["cluster", "metacluster", "down_hosts_threshold"]
 
-    def render(self, session, logger, cluster, metacluster, archetype,
-               personality, max_members, vm_to_host_ratio, domain, sandbox,
-               tor_switch, switch, down_hosts_threshold, buildstatus, comments,
-               **arguments):
-        validate_basic("cluster", cluster)
-
-        if not buildstatus:
-            buildstatus = "build"
-        dbstatus = ClusterLifecycle.get_unique(session, buildstatus,
-                                               compel=True)
-
-        (dbbranch, dbauthor) = get_branch_and_author(session, logger,
-                                                     domain=domain,
-                                                     sandbox=sandbox,
-                                                     compel=True)
-
-        dblocation = get_location(session, **arguments)
-        if not dblocation:
-            raise ArgumentError("Adding a cluster requires a location "
-                                "constraint.")
-        if not dblocation.campus:
-            raise ArgumentError("{0} is not within a campus.".format(dblocation))
-
-        Cluster.get_unique(session, cluster, preclude=True)
-
-        dbmetacluster = MetaCluster.get_unique(session, metacluster,
-                                               compel=True)
-        dbpersonality = Personality.get_unique(session, name=personality,
-                                               archetype=archetype, compel=True)
-
-        if max_members is None:
-            max_members = self.config.getint("broker",
-                                             "esx_cluster_max_members_default")
-
-        if vm_to_host_ratio is None:
-            vm_to_host_ratio = self.config.get("broker",
-                                               "esx_cluster_vm_to_host_ratio")
-        (vm_count, host_count) = force_ratio("vm_to_host_ratio",
-                                             vm_to_host_ratio)
-
-        if tor_switch:
-            self.deprecated_option("tor_switch", "Please use --switch instead.",
-                                   logger=logger, **arguments)
-            switch = tor_switch
-        if switch:
-            dbswitch = Switch.get_unique(session, switch, compel=True)
-        else:
-            dbswitch = None
-
-        dbcluster = EsxCluster(name=cluster,
-                               location_constraint=dblocation,
-                               personality=dbpersonality,
-                               max_hosts=max_members,
-                               vm_count=vm_count, host_count=host_count,
-                               branch=dbbranch, sandbox_author=dbauthor,
-                               switch=dbswitch,
-                               down_hosts_threshold=down_hosts_threshold,
-                               status=dbstatus,
-                               comments=comments)
-        session.add(dbcluster)
-        dbmetacluster.members.append(dbcluster)
-
-        session.flush()
-
-        plenary = PlenaryCluster(dbcluster, logger=logger)
-        plenary.write()
-
-        return
+    def render(self, session, **arguments):
+        return CommandAddCluster.render(self, session,
+                                        **arguments)

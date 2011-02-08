@@ -28,41 +28,28 @@
 # TERMS THAT MAY APPLY.
 
 
-from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.broker import BrokerCommand
-from aquilon.aqdb.model import Archetype, Cluster, Host
+from aquilon.aqdb.model import Personality, Cluster
+from aquilon.exceptions_ import ArgumentError
+import re
 
+class CommandDelAllowedPersonality(BrokerCommand):
 
-class CommandUpdateArchetype(BrokerCommand):
+    required_parameters = ["archetype", "personality", "cluster"]
 
-    required_parameters = ["archetype"]
+    def render(self, session, archetype, personality, cluster,
+               **kwargs):
+        dbpers = Personality.get_unique(session, name=personality,
+                                        archetype=archetype, compel=True)
+        dbclus = Cluster.get_unique(session, cluster, compel=True)
+        if len(dbclus.allowed_personalities) > 1:
+            for host in dbclus.hosts:
+                if host.personality == dbpers:
+                    raise ArgumentError("The cluster member %s has a "
+                                        "personality of %s which is "
+                                        "incompatible with this constraint." %
+                                        (host.fqdn, host.personality))
 
-    def render(self, session, archetype, compilable, cluster_type,
-               description, **kwargs):
-        dbarchetype = Archetype.get_unique(session, archetype, compel=True)
-
-        if compilable is not None:
-            dbarchetype.is_compileable = compilable
-
-        if description is not None:
-            dbarchetype.outputdesc = description
-
-        if cluster_type is not None and \
-            dbarchetype.cluster_type != cluster_type:
-            if dbarchetype.cluster_type is None:
-                q = session.query(Host)
-            else:
-                q = session.query(Cluster)
-            q = q.join('personality').filter_by(archetype=dbarchetype)
-            if q.count() > 0:
-                raise ArgumentError("The %s archetype is currently in use - "
-                                    "the cluster status cannot be "
-                                    "changed." %
-                                    dbarchetype.name)
-
-            if cluster_type == "":
-                dbarchetype.cluster_type = None
-            else:
-                dbarchetype.cluster_type = cluster_type
-
+        if dbpers in dbclus.allowed_personalities:
+            dbclus.allowed_personalities.remove(dbpers)
         return

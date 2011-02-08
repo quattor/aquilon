@@ -30,21 +30,95 @@
 
 from aquilon.worker.formats.formatters import ObjectFormatter
 from aquilon.worker.formats.list import ListFormatter
-from aquilon.aqdb.model import Cluster, EsxCluster
+from aquilon.aqdb.model import (Cluster, EsxCluster, ComputeCluster,
+                                StorageCluster)
 
 
 class ClusterFormatter(ObjectFormatter):
+    protocol = "aqdsystems_pb2"
+
+    def format_proto(self, cluster, skeleton):
+        container = skeleton
+        if not container:
+            container = self.loaded_protocols[self.protocol].ClusterList()
+            skeleton = container.resources.add()
+        skeleton.name = str(cluster.name)
+        skeleton.status = str(cluster.status)
+        self.add_personality_data(skeleton.personality, cluster.personality)
+        skeleton.domain.name = str(cluster.branch.name)
+        skeleton.domain.owner = str(cluster.branch.owner.name)
+
+        skeleton.threshold = cluster.down_hosts_threshold
+        skeleton.threshold_is_percent = cluster.down_hosts_percent
+        if cluster.down_maint_threshold is not None:
+            skeleton.maint_threshold = cluster.down_maint_threshold
+            skeleton.maint_threshold_is_percent = \
+                                           cluster.down_maint_percent
+
+        for host in sorted(cluster.hosts, key=lambda x : x.fqdn):
+            self.add_host_msg(skeleton.hosts.add(), host)
+
+        for dbsi in cluster.service_bindings:
+            si = skeleton.aligned_services.add()
+            si.service = dbsi.service.name
+            si.instance = dbsi.name
+
+        for personality in cluster.allowed_personalities:
+            p = skeleton.allowed_personalities.add()
+            p.name = str(personality.name)
+            p.archetype.name = str(personality.archetype.name)
+
+        if cluster.cluster_type == 'esx':
+            skeleton.vm_to_host_ratio = cluster.vm_to_host_ratio
+            skeleton.max_vm_count = cluster.max_vm_count
+
+            caps = cluster.get_total_capacity()
+            if caps:
+                overrides = cluster.get_capacity_overrides()
+                for name, value in caps.items():
+                    v = skeleton.limits.add()
+                    v.name = name
+                    v.value = value
+                    if overrides.get(name) is not None:
+                        v.override = True
+
+            usage = cluster.get_total_usage()
+            if usage:
+                for name, value in usage.items():
+                    u = skeleton.usage.add()
+                    u.name = name
+                    u.value = value
+
+        return container
+
+
     def format_raw(self, cluster, indent=""):
-        details = [indent + "{0:c}: {0.name}".format(cluster)]
+        details = [indent + "{0.title} Cluster: {0.name}".format(cluster)]
         if cluster.metacluster:
             details.append(indent + \
                            "  {0:c}: {0.name}".format(cluster.metacluster))
         details.append(self.redirect_raw(cluster.location_constraint,
                                          indent + "  "))
         details.append(indent + "  Max members: %s" % cluster.max_hosts)
-        if cluster.cluster_type == 'esx':
+        if cluster.down_hosts_percent:
+            dht = int((cluster.down_hosts_threshold * len(cluster.hosts))/100)
+            details.append(indent + "  Down Hosts Threshold: %s (%s%%)" %
+                           (dht, cluster.down_hosts_threshold))
+        else:
             details.append(indent + "  Down Hosts Threshold: %s" %
                            cluster.down_hosts_threshold)
+
+        if cluster.down_maint_threshold is not None:
+            if cluster.down_maint_percent:
+                dht = int((cluster.down_maint_threshold *
+                           len(cluster.hosts))/100)
+                details.append(indent + "  Maintenance Threshold: %s (%s%%)" %
+                           (dht, cluster.down_maint_threshold))
+            else:
+                details.append(indent + "  Maintenance Threshold: %s" %
+                               cluster.down_maint_threshold)
+
+        if cluster.cluster_type == 'esx':
             details.append(indent + "  Max vm_to_host_ratio: %s" %
                            cluster.vm_to_host_ratio)
             details.append(indent + "  Max virtual machine count: %s" %
@@ -88,7 +162,9 @@ class ClusterFormatter(ObjectFormatter):
             details.append(indent +
                            "  Member Alignment: Service %s Instance %s" %
                            (dbsi.service.name, dbsi.name))
-        for host in cluster.hosts:
+        for personality in cluster.allowed_personalities:
+            details.append(indent + "  Allowed Personality: {0}".format(personality))
+        for host in sorted(cluster.hosts, key=lambda x : x.fqdn):
             details.append(indent + "  Member: %s" % host.fqdn)
         if cluster.comments:
             details.append(indent + "  Comments: %s" % cluster.comments)
@@ -96,6 +172,8 @@ class ClusterFormatter(ObjectFormatter):
 
 ObjectFormatter.handlers[Cluster] = ClusterFormatter()
 ObjectFormatter.handlers[EsxCluster] = ClusterFormatter()
+ObjectFormatter.handlers[ComputeCluster] = ClusterFormatter()
+ObjectFormatter.handlers[StorageCluster] = ClusterFormatter()
 
 
 class SimpleClusterList(list):
@@ -108,4 +186,23 @@ class SimpleClusterListFormatter(ListFormatter):
     def format_raw(self, sclist, indent=""):
         return str("\n".join([indent + cluster.name for cluster in sclist]))
 
+
 ObjectFormatter.handlers[SimpleClusterList] = SimpleClusterListFormatter()
+
+
+class ClusterList(list):
+    pass
+
+
+class ClusterListFormatter(ListFormatter):
+    protocol = "aqdsystems_pb2"
+
+    def format_proto(self, cluslist, skeleton=None):
+        if not skeleton:
+            skeleton = self.loaded_protocols[self.protocol].ClusterList()
+        for resource in cluslist:
+            self.redirect_proto(resource, skeleton.clusters.add())
+        return skeleton
+
+
+ObjectFormatter.handlers[ClusterList] = ClusterListFormatter()

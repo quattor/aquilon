@@ -31,7 +31,8 @@
 from sqlalchemy.orm import joinedload_all
 
 from aquilon.worker.broker import BrokerCommand
-from aquilon.aqdb.model import Personality, PersonalityESXClusterInfo, Cluster
+from aquilon.aqdb.model import (Personality, PersonalityESXClusterInfo,
+                                Cluster, Host)
 from aquilon.aqdb.model.cluster import restricted_builtins
 from aquilon.exceptions_ import ArgumentError
 
@@ -41,7 +42,7 @@ class CommandUpdatePersonality(BrokerCommand):
     required_parameters = ["personality", "archetype"]
 
     def render(self, session, personality, archetype, vmhost_capacity_function,
-               vmhost_overcommit_memory, **arguments):
+               vmhost_overcommit_memory, cluster_required, **arguments):
         dbpersona = Personality.get_unique(session, name=personality,
                                            archetype=archetype, compel=True)
 
@@ -81,6 +82,19 @@ class CommandUpdatePersonality(BrokerCommand):
             if vmhost_overcommit_memory < 1:
                 raise ArgumentError("The memory overcommit factor must be >= 1.")
             dbpersona.cluster_infos["esx"].vmhost_overcommit_memory = vmhost_overcommit_memory
+
+        if cluster_required is not None and \
+               dbpersona.cluster_required != cluster_required:
+            if dbpersona.is_cluster:
+                q = session.query(Cluster)
+            else:
+                q = session.query(Host)
+            q = q.filter_by(personality=dbpersona)
+            # XXX: Ideally, filter based on hosts that are/arenot in cluster
+            if q.count() > 0:
+                raise ArgumentError("The personality %s is in use and cannot "
+                                    "be modified" % dbpersona.name)
+            dbpersona.cluster_required = cluster_required
 
         session.flush()
 

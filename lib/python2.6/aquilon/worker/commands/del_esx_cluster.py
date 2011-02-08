@@ -33,11 +33,10 @@ import os
 from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.aqdb.model import EsxCluster
 from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.templates.cluster import PlenaryCluster
-from aquilon.worker.processes import remove_file
+from aquilon.worker.commands.del_cluster import CommandDelCluster
 
 
-class CommandDelESXCluster(BrokerCommand):
+class CommandDelESXCluster(CommandDelCluster):
 
     required_parameters = ["cluster"]
 
@@ -48,31 +47,6 @@ class CommandDelESXCluster(BrokerCommand):
             machines = ", ".join([m.label for m in dbcluster.machines])
             raise ArgumentError("%s is still in use by virtual machines: %s." %
                                 (format(dbcluster), machines))
-        if dbcluster.hosts:
-            hosts = ", ".join([h.fqdn for h in  dbcluster.hosts])
-            raise ArgumentError("%s is still in use by vmhosts: %s." %
-                                (format(dbcluster), hosts))
-        dbmetacluster = dbcluster.metacluster
-        plenary = PlenaryCluster(dbcluster, logger=logger)
-        domain = dbcluster.branch.name
-        session.delete(dbcluster)
 
-        session.flush()
-
-        # Cleanup the domain-specific files.
-        plenary.cleanup(domain)
-
-        # Remove the compiled profile.
-        # The file is either gzip'd or not, but it doesn't hurt to try both.
-        xmlfile = os.path.join(self.config.get("broker", "profilesdir"),
-                               "clusters", cluster + ".xml")
-        remove_file(xmlfile, logger=logger)
-        xmlgzfile = xmlfile + ".gz"
-        remove_file(xmlgzfile, logger=logger)
-        # Remove the cache in the global profiles directory created by
-        # the ant task.
-        remove_file(os.path.join(self.config.get("broker", "quattordir"),
-                                 "objects", "clusters", cluster + ".tpl"),
-                    logger=logger)
-
-        return
+        return CommandDelCluster.render(self, session=session, logger=logger,
+                                        cluster=cluster, **arguments)

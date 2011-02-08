@@ -60,6 +60,9 @@ class CommandMake(BrokerCommand):
             if archetype:
                 dbarchetype = Archetype.get_unique(session, archetype,
                                                    compel=True)
+                if dbarchetype.cluster_type is not None:
+                    raise ArgumentError("Archetype %s is a cluster archetype" %
+                                        dbarchetype.name)
             else:
                 dbarchetype = dbhost.archetype
 
@@ -74,11 +77,11 @@ class CommandMake(BrokerCommand):
             dbpersonality = Personality.get_unique(session, name=personality,
                                                    archetype=dbarchetype,
                                                    compel=True)
-            if dbhost.cluster and \
-               dbhost.cluster.personality != dbpersonality:
-                raise ArgumentError("Cannot change personality of host {0} "
-                                    "while it is a member of "
-                                    "{1:l}.".format(dbhost.fqdn, dbhost.cluster))
+            if dbhost.cluster and dbhost.cluster.allowed_personalities and \
+               dbhost.personality not in dbhost.cluster_allowed_personalities:
+                raise ArgumentError("The personality %s is not allowed by "
+                                    "cluster %s.  Specify one of %s")
+
             dbhost.personality = dbpersonality
 
         if os:
