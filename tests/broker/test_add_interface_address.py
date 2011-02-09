@@ -64,6 +64,32 @@ class TestAddInterfaceAddress(TestBrokerCommand):
         self.noouttest(command)
         self.dsdb_verify()
 
+    def testverifyunittest20network(self):
+        # test_add_aquilon_host would be a better place for this test, but that
+        # runs before test_add_interface_address so the transits are not set up
+        # yet
+        e0net = self.net.unknown[11]
+        e0ip = e0net.usable[0]
+        command = ["show", "network", "--ip", e0net.ip, "--format", "proto"]
+        out = self.commandtest(command)
+
+        msg = self.parse_netlist_msg(out, expect=1)
+        network = msg.networks[0]
+        ut20 = None
+        for host in network.hosts:
+            if host.ip == str(e0ip):
+                ut20 = host
+                break
+
+        self.failUnless(ut20 is not None,
+                        "%s is missing from network protobuf output" % e0ip)
+        self.failUnless(ut20.archetype.name == "aquilon",
+                        "archetype is '%s' instead of aquilon in protobuf output" %
+                        ut20.archetype.name)
+        self.failUnless(str(ut20.mac) == str(e0ip.mac),
+                        "MAC is '%s' instead of %s in protobuf output" %
+                        (ut20.mac, e0ip.mac))
+
     def testaddbyip(self):
         ip = self.net.unknown[12].usable[3]
         fqdn = "unittest20-e1-1.aqd-unittest.ms.com"
