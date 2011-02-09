@@ -67,7 +67,7 @@ class TestAddInterfaceAddress(TestBrokerCommand):
     def testaddbyip(self):
         ip = self.net.unknown[12].usable[3]
         fqdn = "unittest20-e1-1.aqd-unittest.ms.com"
-        self.dsdb_expect_add(fqdn, ip, "eth1:1",
+        self.dsdb_expect_add(fqdn, ip, "eth1_1",
                              primary="unittest20.aqd-unittest.ms.com")
         command = ["add", "interface", "address", "--machine", "ut3c5n2",
                    "--interface", "eth1", "--label", "1",

@@ -379,7 +379,7 @@ class DSDBRunner(object):
                     "add", "host", "-host_name", fqdn,
                     "-ip_address", ip, "-status", "aq"]
         if name:
-            interface = str(name).replace('/', '_')
+            interface = str(name).replace('/', '_').replace(':', '_')
             command.extend(["-interface_name", interface])
         if mac:
             command.extend(["-ethernet_address", mac])
