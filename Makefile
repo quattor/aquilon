@@ -90,7 +90,9 @@ $(COMMON)etc/rc.d/init.d/aqd: etc/rc.d/init.d/aqd
 # and sophisticated for this, since remove_stale is dumb and will always
 # remove the generated files anyway.
 .PHONY: install
-install: remove_stale generate_symlinks $(INSTALLFILES)
+install: remove_stale $(INSTALLFILES)
+	ln -sf twistd "$(COMMON)bin/aqd"
+	ln -sf twistd "$(COMMON)bin/aqd_readonly"
 	$(COMMON)bin/twistd --help >/dev/null
 	./build/gen_completion.py --outputdir="$(COMMON)etc" --templatedir="./etc/templates" --all
 	./build/graph_schema.py --outputdir="$(COMMON)docs"
@@ -98,11 +100,6 @@ install: remove_stale generate_symlinks $(INSTALLFILES)
 .PHONY: remove_stale
 remove_stale:
 	./build/remove_stale.py "$(COMMON)"
-
-.PHONY: generate_symlinks
-generate_symlinks:
-	ln -sf twistd "$(COMMON)bin/aqd"
-	ln -sf twistd "$(COMMON)bin/aqd_readonly"
 
 .PHONY: default
 default:
