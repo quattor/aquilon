@@ -49,9 +49,8 @@ class CommandCatInstance(BrokerCommand):
         else:
             plenary_info = PlenaryServiceInstanceToplevel(dbservice, dbsi,
                                                           logger=logger)
+
         if generate:
-            lines = []
-            plenary_info.body(lines)
-            return "\n".join(lines)
+            return plenary_info._generate_content()
         else:
             return plenary_info.read()

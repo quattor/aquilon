@@ -42,9 +42,8 @@ class CommandCatCluster(BrokerCommand):
     def render(self, generate, session, logger, cluster, **kwargs):
         dbcluster = Cluster.get_unique(session, cluster, compel=True)
         plenary_info = PlenaryClusterObject(dbcluster, logger=logger)
+
         if generate:
-            lines = []
-            plenary_info.body(lines)
-            return "\n".join(lines)
+            return plenary_info._generate_content()
         else:
             return plenary_info.read()

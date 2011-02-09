@@ -1,6 +1,6 @@
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 #
-# Copyright (C) 2008,2009,2010  Contributor
+# Copyright (C) 2011  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -26,24 +26,24 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-"""Contains the logic for `aq cat --hostname`."""
+"""Contains the logic for `aq cat --city`."""
 
 
+from aquilon.aqdb.model import City
 from aquilon.server.broker import BrokerCommand
-from aquilon.server.dbwrappers.host import hostname_to_host
 from aquilon.server.processes import read_file
-from aquilon.server.templates.host import PlenaryToplevelHost
+from aquilon.server.templates.city import PlenaryCity
 
 
-class CommandCatHostname(BrokerCommand):
+class CommandCatCity(BrokerCommand):
 
-    required_parameters = ["hostname"]
+    required_parameters = ["city"]
 
-    def render(self, generate, session, logger, hostname, **kwargs):
-        dbhost = hostname_to_host(session, hostname)
-        plenary_info = PlenaryToplevelHost(dbhost, logger=logger)
+    def render(self, generate, session, logger, city, **kwargs):
+        dbcity = City.get_unique(session, city, compel=True)
+        plenary_info = PlenaryCity(dbcity, logger=logger)
 
         if generate:
-            return plenary_info._generate_content(self)
+            return plenary_info._generate_content()
         else:
             return plenary_info.read()
