@@ -87,12 +87,16 @@ def possible_mac_addresses(interface):
         interface = interface.parent
 
     # Bonding/bridge: append the MACs of the physical interfaces
+    # TODO: drop the public/bootable check once we decide how to send the extra
+    # information to clients
     for slave in interface.all_slaves():
-        if slave.mac:
+        if slave.mac and (slave.interface_type != "public" or slave.bootable):
             mac_addrs.append(slave.mac)
 
     # Handle physical interfaces, and bonding with a dedicated MAC
-    if interface.mac:
+    # TODO: drop the public/bootable check once we decide how to send the extra
+    # information to clients
+    if interface.mac and (interface.interface_type != "public" or interface.bootable):
         mac_addrs.append(interface.mac)
 
     return mac_addrs
@@ -301,6 +305,14 @@ class SimpleNetworkListFormatter(ListFormatter):
             # it
             if not mac_addrs:
                 mac_addrs.append(None)
+
+            # Associating the same IP with multiple MAC addresses is
+            # problematic using the current protocol. Sending multiple host
+            # messages is easy for the broker, but it can confuse consumers like
+            # aqdhcpd. For now just ensure it never happens, and revisit the
+            # problem when we have a real world requirement.
+            if len(mac_addrs) > 1:
+                mac_addrs = [mac_addrs[0]]
 
             for mac in mac_addrs:
                 host_msg = net_msg.hosts.add()

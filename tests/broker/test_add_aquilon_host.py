@@ -166,7 +166,7 @@ class TestAddAquilonHost(TestBrokerCommand):
         msg = self.parse_netlist_msg(out, expect=1)
         network = msg.networks[0]
         seen = False
-        macs = [ip.mac, self.net.unknown[12].usable[1].mac]
+        macs = [ip.mac] #, self.net.unknown[12].usable[1].mac]
         for host in network.hosts:
             if host.ip != str(ip):
                 continue
@@ -203,7 +203,7 @@ class TestAddAquilonHost(TestBrokerCommand):
         msg = self.parse_netlist_msg(out, expect=1)
         network = msg.networks[0]
         seen = False
-        macs = [ip.mac, self.net.unknown[12].usable[2].mac]
+        macs = [ip.mac] #, self.net.unknown[12].usable[2].mac]
         for host in network.hosts:
             if host.ip != str(ip):
                 continue
