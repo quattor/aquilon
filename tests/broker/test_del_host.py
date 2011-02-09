@@ -255,6 +255,16 @@ class TestDelHost(TestBrokerCommand):
             self.assertEmptyOut(out, command)
         self.dsdb_verify()
 
+    def testdeljack(self):
+        self.dsdb_expect_delete(self.net.unknown[0].usable[17])
+        command = "del host --hostname jack.cards.example.com"
+        (out, err) = self.successtest(command.split(" "))
+        self.assertEmptyOut(out, command)
+        self.dsdb_verify()
+        command = "show host --hostname jack.cards.example.ms.com"
+        self.notfoundtest(command.split(" "))
+
+
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelHost)
     unittest.TextTestRunner(verbosity=2).run(suite)

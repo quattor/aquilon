@@ -83,6 +83,16 @@ class TestAddNetwork(TestBrokerCommand):
                          "named %s with address %s." %
                          (str(subnet.ip), str(net.ip), str(net)), command)
 
+
+    def testaddnetworkofcards(self):
+        # An entirely fictitious network
+        self.noouttest(["add_network", "--ip", "192.168.1.0",
+                        "--network", "cardnetwork",
+                        "--netmask", "255.255.255.0",
+                        "--building", "cards", "--side", "a",
+                        "--type", "unknown",
+                        "--comments", "Made-up network"])
+
     def testshownetwork(self):
         for network in self.net.all:
             command = "show network --ip %s" % network.ip

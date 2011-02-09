@@ -174,6 +174,7 @@ from test_unbind_esx_cluster import TestUnbindESXCluster
 from test_uncluster import TestUncluster
 from test_del_dynamic_range import TestDelDynamicRange
 from test_del_address import TestDelAddress
+from test_del_city import TestDelCity
 from test_del_manager import TestDelManager
 from test_del_auxiliary import TestDelAuxiliary
 from test_del_host import TestDelHost
@@ -229,8 +230,8 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestMergeConflicts,
                 TestAddArchetype, TestAddOS, TestAddPersonality,
                 TestAddService, TestUpdateService, TestAddRequiredService,
-                TestAddBuilding, TestAddRoom, TestAddLocation,
                 TestAddCity,
+                TestAddBuilding, TestAddRoom, TestAddLocation,
                 TestAddRack, TestAddVendor, TestAddCpu, TestAddModel,
                 TestAddNetwork,
                 TestAddMetaCluster, TestAddESXCluster,
@@ -294,6 +295,7 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestDelModel, TestDelCpu, TestDelVendor,
                 TestDelRack, TestDelRoom,
                 TestDelBuilding, TestDelRequiredService, TestDelService,
+                TestDelCity,
                 TestDelPersonality, TestDelOS, TestDelArchetype,
                 TestDelDomain, TestDelSandbox, TestDelDnsDomain,
                 TestClientFailure,

@@ -43,11 +43,16 @@ class TestUnmapService(TestBrokerCommand):
     def testunmapafs(self):
         self.noouttest(["unmap", "service", "--building", "ut",
                         "--service", "afs", "--instance", "q.ny.ms.com"])
+        self.noouttest(["unmap", "service", "--city", "ex",
+                        "--service", "afs", "--instance", "q.ny.ms.com"])
 
     def testverifyunmapafs(self):
         command = ["show_map",
                    "--service=afs", "--instance=q.ny.ms.com", "--building=ut"]
         self.notfoundtest(command)
+
+        command = ["show_map", "--service=afs", "--instance=q.ny.ms.com"]
+        self.noouttest(command)
 
     def testunmapdns(self):
         self.noouttest(["unmap", "service", "--hub", "ny",
@@ -61,14 +66,22 @@ class TestUnmapService(TestBrokerCommand):
     def testunmapaqd(self):
         self.noouttest(["unmap", "service", "--campus", "ny",
                         "--service", "aqd", "--instance", "ny-prod"])
+        self.noouttest(["unmap", "service", "--city", "ex",
+                        "--service", "aqd", "--instance", "ny-prod"])
 
     def testverifyunmapaqd(self):
         command = ["show_map",
                    "--service=aqd", "--instance=ny-prod", "--campus=ny"]
         self.notfoundtest(command)
 
+        command = ["show_map",
+                   "--service=aqd", "--instance=ny-prod", "--city=ex"]
+        self.notfoundtest(command)
+
     def testunmaplemon(self):
         self.noouttest(["unmap", "service", "--campus", "ny",
+                        "--service", "lemon", "--instance", "ny-prod"])
+        self.noouttest(["unmap", "service", "--city", "ex",
                         "--service", "lemon", "--instance", "ny-prod"])
 
     def testverifyunmaplemon(self):
@@ -76,35 +89,50 @@ class TestUnmapService(TestBrokerCommand):
                    "--service=lemon", "--instance=ny-prod", "--campus=ny"]
         self.notfoundtest(command)
 
+        command = ["show_map",
+                   "--service=lemon", "--instance=ny-prod", "--city=ex"]
+        self.notfoundtest(command)
+
     def testunmapbootserver(self):
         self.noouttest(["unmap", "service", "--building", "ut",
+                        "--service", "bootserver", "--instance", "np.test"])
+        self.noouttest(["unmap", "service", "--building", "cards",
                         "--service", "bootserver", "--instance", "np.test"])
 
     def testverifyunmapbootserver(self):
         command = ["show_map", "--service=bootserver", "--instance=np.test",
                    "--building=ut"]
         self.notfoundtest(command)
+        command = ["show_map", "--service=bootserver", "--instance=np.test",
+                   "--building=cards"]
+        self.notfoundtest(command)
 
-    # Not unmap'ing ntp to test that the service instance is still
-    # deleted correctly.  (Deleting the service instance will blow
-    # away any maps.)
-   #def testunmapntp(self):
-   #    self.noouttest(["unmap", "service", "--city", "ny",
-   #                    "--service", "ntp", "--instance", "pa.ny.na",
-   #                    "--archetype", "aquilon"])
+    # we unmap ntp for the ex city because we want to tear that city down
+    # separately, but we leave the ntp mappings everywhere else in order
+    # to later test that the maps are correctly dropped when we delete
+    # the serviceinstance
+    def testunmapntp(self):
+        self.noouttest(["unmap", "service", "--city", "ex",
+                        "--service", "ntp", "--instance", "pa.ny.na"])
 
-   #def testverifyunmapntp(self):
-   #    command = ["show_map", "--archetype=aquilon",
-   #               "--service=ntp", "--instance=pa.ny.na", "--city=ny"]
-   #    self.notfoundtest(command)
+    def testverifyunmapntp(self):
+       command = ["show_map", "--archetype=aquilon",
+                  "--service=ntp", "--instance=pa.ny.na", "--city=ex"]
+       self.notfoundtest(command)
 
     def testunmaputsi1(self):
         self.noouttest(["unmap", "service", "--building", "ut",
                         "--service", "utsvc", "--instance", "utsi1"])
 
+        self.noouttest(["unmap", "service", "--building", "cards",
+                        "--service", "utsvc", "--instance", "utsi1"])
+
     def testverifyunmaputsi1(self):
         command = ["show_map",
                    "--service=utsvc", "--instance=utsi1", "--building=ut"]
+        self.notfoundtest(command)
+        command = ["show_map",
+                   "--service=utsvc", "--instance=utsi1", "--building=cards"]
         self.notfoundtest(command)
 
     def testunmaputsi2(self):

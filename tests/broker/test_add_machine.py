@@ -119,6 +119,14 @@ class TestAddMachine(TestBrokerCommand):
                         "--cpuname", "xeon", "--cpuspeed", "2660",
                         "--memory", "8192"])
 
+    # Used for house-of-cards location testing
+    def testaddjack(self):
+        self.noouttest(["add", "machine", "--machine", "jack",
+                        "--rack", "cards1", "--model", "hs21-8853l5u",
+                        "--cpucount", "2", "--cpuvendor", "intel",
+                        "--cpuname", "xeon", "--cpuspeed", "2660",
+                        "--memory", "8192"])
+
     def testaddut3c1n3(self):
         self.noouttest(["add", "machine", "--machine", "ut3c1n3",
             "--chassis", "ut3c1.aqd-unittest.ms.com", "--slot", "3",

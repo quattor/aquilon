@@ -53,6 +53,20 @@ class TestAddBuilding(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Building: bu", command)
 
+
+    def testaddbucards(self):
+        self.dsdb_expect("add_building_aq -building_name cards -city ex "
+                         "-building_addr Nowhere")
+        command = ["add", "building", "--building", "cards", "--city", "ex",
+                   "--address", "Nowhere"]
+        self.noouttest(command)
+        self.dsdb_verify()
+
+    def testverifyaddbucards(self):
+        command = "show building --building cards"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Building: cards", command)
+
     def testverifyaddbuproto(self):
         command = "show building --building bu --format proto"
         out = self.commandtest(command.split(" "))
