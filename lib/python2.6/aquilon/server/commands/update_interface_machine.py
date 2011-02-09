@@ -147,6 +147,9 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
         if comments:
             dbinterface.comments = comments
         if boot:
+            # Should we also transfer the primary IP to the new boot interface?
+            # That could get tricky if the new interface already has an IP
+            # address...
             for i in dbinterface.hardware_entity.interfaces:
                 if i == dbinterface:
                     i.bootable = True

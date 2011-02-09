@@ -138,8 +138,13 @@ class PlenaryToplevelHost(Plenary):
                     raise InternalError("Unexpected master interface type: "
                                         "{0}".format(dbinterface.master))
             else:
-                # XXX Move this to templates and allow it to be set to DHCP
-                ifdesc["bootproto"] = "static"
+                if dbinterface.assignments:
+                    # TODO: Let the templates select from "static"/"dhcp"
+                    ifdesc["bootproto"] = "static"
+                else:
+                    # Don't try to bring up the interface if there are no
+                    # addresses assigned to it
+                    ifdesc["bootproto"] = "none"
 
             if isinstance(dbinterface, VlanInterface):
                 ifdesc["vlan"] = True
