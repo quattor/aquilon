@@ -40,7 +40,7 @@ from aquilon.server.locks import lock_queue, CompileKey
 from aquilon.server.processes import write_file, read_file, remove_file
 from aquilon.server.logger import CLIENT_INFO
 
-LOGGER = logging.getLogger('aquilon.server.templates.base')
+LOGGER = logging.getLogger(__name__)
 
 
 class Plenary(object):

@@ -33,7 +33,7 @@ import logging
 
 from aquilon.server.templates.base import Plenary
 
-LOGGER = logging.getLogger('aquilon.server.templates.city')
+LOGGER = logging.getLogger(__name__)
 
 class PlenaryCity(Plenary):
     def __init__(self, dbcity, logger=LOGGER):

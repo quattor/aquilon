@@ -39,7 +39,7 @@ from aquilon.server.processes import write_file
 from aquilon.server.logger import CLIENT_INFO
 from aquilon.aqdb.model import Service
 
-LOGGER = logging.getLogger('aquilon.server.templates.index')
+LOGGER = logging.getLogger(__name__)
 
 CCM_NOTIF = 1
 CDB_NOTIF = 2

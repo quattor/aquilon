@@ -43,7 +43,7 @@ from aquilon.server.templates.machine import PlenaryMachineInfo
 from aquilon.server.templates.cluster import PlenaryClusterClient
 from aquilon.server.templates.panutils import pan, StructureTemplate
 
-LOGGER = logging.getLogger('aquilon.server.templates.host')
+LOGGER = logging.getLogger(__name__)
 
 class PlenaryHost(PlenaryCollection):
     """

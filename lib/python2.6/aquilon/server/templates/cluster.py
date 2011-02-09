@@ -34,7 +34,7 @@ from aquilon.server.templates.base import Plenary, PlenaryCollection
 from aquilon.server.templates.machine import PlenaryMachineInfo
 from aquilon.server.locks import CompileKey
 
-LOGGER = logging.getLogger('aquilon.server.templates.cluster')
+LOGGER = logging.getLogger(__name__)
 
 
 class PlenaryCluster(PlenaryCollection):
