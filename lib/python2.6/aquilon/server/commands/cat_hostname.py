@@ -44,6 +44,6 @@ class CommandCatHostname(BrokerCommand):
         plenary_info = PlenaryToplevelHost(dbhost, logger=logger)
 
         if generate:
-            return plenary_info._generate_content(self)
+            return plenary_info._generate_content()
         else:
             return plenary_info.read()
