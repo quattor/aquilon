@@ -48,6 +48,7 @@ class CommandCompile(BrokerCommand):
                                                      compel=True)
         if pancdebug:
             pancinclude = r'.*'
+            pancexclude = r'components/spma/functions'
         dom = TemplateDomain(dbdomain, dbauthor, logger=logger)
         dom.compile(session,
                     panc_debug_include=pancinclude,

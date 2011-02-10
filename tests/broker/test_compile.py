@@ -166,12 +166,16 @@ class TestCompile(TestBrokerCommand):
         self.matchclean(err, "aqd unittest debug for aquilon base", command)
         self.matchclean(err, "aqd unittest debug for aquilon final", command)
 
+    # The 'Assigning repositories to packages...' line is a debug() in
+    # aquilon/components/spma/functions.tpl that is used here to verify
+    # that the auto-exclude from pancdebug is working.
     def test_510_verifydebughost(self):
         command = ['compile', '--hostname=unittest02.one-nyp.ms.com',
                    '--pancdebug', '--cleandeps']
         (out, err) = self.successtest(command)
         self.matchoutput(err, "aqd unittest debug for aquilon base", command)
         self.matchoutput(err, "aqd unittest debug for aquilon final", command)
+        self.matchclean(err, "Assigning repositories to packages...", command)
 
     def test_520_verifydebugdomain(self):
         command = ['compile', '--domain=unittest', '--pancdebug',
@@ -179,14 +183,18 @@ class TestCompile(TestBrokerCommand):
         (out, err) = self.successtest(command)
         self.matchoutput(err, "aqd unittest debug for aquilon base", command)
         self.matchoutput(err, "aqd unittest debug for aquilon final", command)
+        self.matchclean(err, "Assigning repositories to packages...", command)
 
+    # If this fails on the 'Assigning...' line then all four tests
+    # (510, 520, 530, 540) should be revisited.  See comments above 510.
     def test_530_verifyexclude(self):
         command = ['compile', '--hostname=unittest02.one-nyp.ms.com',
                    '--pancexclude=archetype/base',
-                   '--pancdebug', '--cleandeps']
+                   '--pancinclude=.*', '--cleandeps']
         (out, err) = self.successtest(command)
         self.matchclean(err, "aqd unittest debug for aquilon base", command)
         self.matchoutput(err, "aqd unittest debug for aquilon final", command)
+        self.matchoutput(err, "Assigning repositories to packages...", command)
 
     def test_540_verifyinclude(self):
         command = ['compile', '--hostname=unittest02.one-nyp.ms.com',
@@ -194,6 +202,7 @@ class TestCompile(TestBrokerCommand):
         (out, err) = self.successtest(command)
         self.matchoutput(err, "aqd unittest debug for aquilon base", command)
         self.matchclean(err, "aqd unittest debug for aquilon final", command)
+        self.matchclean(err, "Assigning repositories to packages...", command)
 
 
 if __name__=='__main__':
