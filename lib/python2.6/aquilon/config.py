@@ -37,7 +37,7 @@ from ConfigParser import SafeConfigParser
 
 from exceptions_ import AquilonError
 
-# All defaults should be in etc/aqd.conf.defaults.  This is only needed to 
+# All defaults should be in etc/aqd.conf.defaults.  This is only needed to
 # supply defaults that are determined by code at run time.
 global_defaults = {
             # The user variable, since it can be overridden by a config file,
@@ -61,7 +61,7 @@ class Config(SafeConfigParser):
     def __init__(self, defaults=global_defaults, configfile=None):
         self.__dict__ = self.__shared_state
         if getattr(self, "baseconfig", None):
-            if not configfile or self.baseconfig == configfile:
+            if not configfile or self.baseconfig == os.path.realpath(configfile):
                 return
             raise AquilonError("Could not configure with %s, already configured with %s" %
                     (configfile, self.baseconfig))
