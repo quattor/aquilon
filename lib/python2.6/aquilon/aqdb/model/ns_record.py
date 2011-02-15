@@ -79,6 +79,7 @@ class NsRecord(Base):
         return "{0:a} of {1:l}".format(self.a_record, self.dns_domain)
 
 NsRecord.__table__.info['unique_fields'] = ['a_record', 'dns_domain']
+NsRecord.__table__.primary_key.name = '%s_pk' % _TN
 
 # Association proxies from/to NSRecord:
 # DnsDomain.servers = association_proxy('_name_servers', 'a_record')
