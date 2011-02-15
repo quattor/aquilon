@@ -43,6 +43,8 @@ class TestUnmapService(TestBrokerCommand):
     def testunmapafs(self):
         self.noouttest(["unmap", "service", "--building", "ut",
                         "--service", "afs", "--instance", "q.ny.ms.com"])
+        self.noouttest(["unmap", "service", "--building", "np",
+                        "--service", "afs", "--instance", "q.ny.ms.com"])
 
     def testverifyunmapafs(self):
         command = ["show_map",
@@ -79,6 +81,8 @@ class TestUnmapService(TestBrokerCommand):
     def testunmapbootserver(self):
         self.noouttest(["unmap", "service", "--building", "ut",
                         "--service", "bootserver", "--instance", "np.test"])
+        self.noouttest(["unmap", "service", "--building", "np",
+                        "--service", "bootserver", "--instance", "np.test"])
 
     def testverifyunmapbootserver(self):
         command = ["show_map", "--service=bootserver", "--instance=np.test",
@@ -101,6 +105,8 @@ class TestUnmapService(TestBrokerCommand):
     def testunmaputsi1(self):
         self.noouttest(["unmap", "service", "--building", "ut",
                         "--service", "utsvc", "--instance", "utsi1"])
+        self.noouttest(["unmap", "service", "--building", "np",
+                        "--service", "utsvc", "--instance", "utsi1"])
 
     def testverifyunmaputsi1(self):
         command = ["show_map",
@@ -109,6 +115,8 @@ class TestUnmapService(TestBrokerCommand):
 
     def testunmaputsi2(self):
         self.noouttest(["unmap", "service", "--building", "ut",
+                        "--service", "utsvc", "--instance", "utsi2"])
+        self.noouttest(["unmap", "service", "--building", "np",
                         "--service", "utsvc", "--instance", "utsi2"])
 
     def testverifyunmaputsi2(self):
