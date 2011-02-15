@@ -252,9 +252,10 @@ class QIPRefresh(object):
 
     def update_network(self, dbnetwork, qipinfo):
         if dbnetwork.name != qipinfo["name"]:
+            oldname = dbnetwork.name
             dbnetwork.name = qipinfo["name"]
-            self.commit_if_needed("Setting {0:l} name to "
-                                  "{1}".format(dbnetwork, qipinfo["name"]))
+            self.commit_if_needed("Setting network %s name to %s" %
+                                  (oldname, dbnetwork.name))
         if dbnetwork.network_type != qipinfo["type"]:
             dbnetwork.network_type = qipinfo["type"]
             self.commit_if_needed("Setting {0:l} type to "
