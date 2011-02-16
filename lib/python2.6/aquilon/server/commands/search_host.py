@@ -32,7 +32,7 @@
 from sqlalchemy.orm import aliased, joinedload_all, contains_eager
 
 from aquilon.server.broker import BrokerCommand
-from aquilon.server.formats.system import SimpleSystemList
+from aquilon.server.formats.host import SimpleHostList
 from aquilon.aqdb.model import (Host, Cluster, Archetype, Personality,
                                 HostLifecycle, OperatingSystem, Service,
                                 ServiceInstance, NasDisk, Disk, Machine, Model,
@@ -219,4 +219,4 @@ class CommandSearchHost(BrokerCommand):
             q = q.reset_joinpoint()
         if fullinfo:
             return q.all()
-        return SimpleSystemList(q.all())
+        return SimpleHostList(q.all())

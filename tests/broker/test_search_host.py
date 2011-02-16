@@ -433,6 +433,10 @@ class TestSearchHost(TestBrokerCommand):
         self.matchoutput(out, "ivirt1.aqd-unittest.ms.com", command)
         self.matchclean(out, "ivirt4.aqd-unittest.ms.com", command)
 
+    def testprotobuf(self):
+        command = "search host --hostname unittest02.one-nyp.ms.com --format proto"
+        out = self.commandtest(command.split(" "))
+        self.parse_hostlist_msg(out, expect=1)
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestSearchHost)
