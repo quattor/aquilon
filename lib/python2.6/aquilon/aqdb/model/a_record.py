@@ -28,7 +28,7 @@
 # TERMS THAT MAY APPLY.
 """ Representation of DNS A records """
 
-from sqlalchemy import Integer, Column, ForeignKey, UniqueConstraint
+from sqlalchemy import Integer, Column, ForeignKey
 from sqlalchemy.orm import relation, backref
 
 from aquilon.aqdb.model import Network, DnsRecord
@@ -65,8 +65,7 @@ class ARecord(DnsRecord):
 
 arecord = ARecord.__table__  # pylint: disable-msg=C0103, E1101
 arecord.primary_key.name = 'a_record_pk'
-# TODO: remove this constraint
-arecord.append_constraint(UniqueConstraint('ip', name='a_record_ip_uk'))
+# TODO: index on ip?
 
 arecord.info['unique_fields'] = ['name', 'dns_domain', 'dns_environment']
 arecord.info['extra_search_fields'] = ['ip']
