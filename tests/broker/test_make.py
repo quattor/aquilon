@@ -123,6 +123,15 @@ class TestMake(TestBrokerCommand):
                           r'\);' % (hostname_ip, zebra2_ip, zebra3_ip),
                           command)
         self.searchoutput(out,
+                          r'"/system/network/routers" = nlist\(\s*'
+                          r'"eth0", list\(\s*"%s",\s*"%s"\s*\),\s*'
+                          r'"eth1", list\(\s*"%s",\s*"%s"\s*\)\s*'
+                          r'\);' % (self.net.unknown[11][1],
+                                    self.net.unknown[11][2],
+                                    self.net.unknown[12][1],
+                                    self.net.unknown[12][2]),
+                          command)
+        self.searchoutput(out,
                           r'"eth0", nlist\(\s*'
                           r'"bootproto", "static",\s*'
                           r'"broadcast", "%s",\s*'
@@ -148,6 +157,52 @@ class TestMake(TestBrokerCommand):
                           r'"netmask", "%s"\s*\)' %
                           (eth1_broadcast, eth1_1_ip, eth1_netmask,
                            eth1_broadcast, eth1_gateway, eth1_ip, eth1_netmask),
+                          command)
+
+    def testmakeunittest23(self):
+        command = ["make", "--hostname", "unittest23.aqd-unittest.ms.com"]
+        (out, err) = self.successtest(command)
+        self.matchoutput(err, "1/1 compiled", command)
+
+    def testverifyunittest23(self):
+        # Verify that the host chooses the closest router
+        command = ["cat", "--hostname", "unittest23.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        net = self.net.vpls[0]
+        ip = net.usable[1]
+        router = net[1]
+        self.searchoutput(out,
+                          r'"eth0", nlist\(\s*'
+                          r'"bootproto", "static",\s*'
+                          r'"broadcast", "%s",\s*'
+                          r'"fqdn", "unittest23.aqd-unittest.ms.com",\s*'
+                          r'"gateway", "%s",\s*'
+                          r'"ip", "%s",\s*'
+                          r'"netmask", "%s"\s*\)' %
+                          (net.broadcast, router, ip, net.netmask),
+                          command)
+
+    def testmakeunittest24(self):
+        command = ["make", "--hostname", "unittest24.aqd-unittest.ms.com"]
+        (out, err) = self.successtest(command)
+        self.matchoutput(err, "1/1 compiled", command)
+
+    def testverifyunittest24(self):
+        # Verify that the host chooses the closest router
+        command = ["cat", "--hostname", "unittest24.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        net = self.net.vpls[0]
+        ip = net.usable[2]
+        router = net[2]
+        self.searchoutput(out,
+                          r'"eth0", nlist\(\s*'
+                          r'"bootproto", "static",\s*'
+                          r'"broadcast", "%s",\s*'
+                          r'"fqdn", "unittest24.aqd-unittest.ms.com",\s*'
+                          r'"gateway", "%s",\s*'
+                          r'"ip", "%s",\s*'
+                          r'"netmask", "%s"\s*\)' %
+                          (net.broadcast, router, ip, net.netmask),
                           command)
 
 

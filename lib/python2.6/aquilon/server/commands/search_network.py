@@ -55,6 +55,7 @@ class CommandSearchNetwork(BrokerCommand):
         """
         q = session.query(Network)
         if network:
+            # Note: the network name is not unique (neither in QIP)
             q = q.filter_by(name=network)
         if ip:
             dbnetwork = get_net_id_from_ip(session, ip)

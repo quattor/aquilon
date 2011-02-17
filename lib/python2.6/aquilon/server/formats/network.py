@@ -120,6 +120,11 @@ class NetworkFormatter(ObjectFormatter):
         if network.comments:
             details.append(indent + "  Comments: %s" % network.comments)
 
+        if network.routers:
+            routers = ", ".join(["{0} ({1})".format(rtr.ip, rtr.location)
+                                 for rtr in network.routers])
+            details.append(indent + "  Routers: %s" % routers)
+
         # Look for dynamic DHCP ranges
         session = object_session(network)
         q = session.query(DynamicStub.ip)

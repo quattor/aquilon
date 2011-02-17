@@ -102,9 +102,9 @@ class TestRefreshNetwork(TestBrokerCommand):
         (out, err) = self.successtest(command.split(" "))
         self.assertEmptyOut(out, command)
         err = self.striplock(err)
-        self.matchoutput(err, "adding", command)
-        self.matchclean(err, "updating", command)
-        self.matchclean(err, "deleting", command)
+        self.matchoutput(err, "Adding", command)
+        self.matchclean(err, "Setting", command)
+        self.matchclean(err, "Deleting", command)
 
     # 200 add a dummy 0.1.1.0/24 network to np
     def test_200_adddummynetwork(self):
@@ -132,7 +132,7 @@ class TestRefreshNetwork(TestBrokerCommand):
         err = self.partialerrortest(command.split(" "))
         err = self.striplock(err)
         self.matchoutput(err,
-                         "deleting Network 0.1.1.0",
+                         "Deleting network 0.1.1.0",
                          command)
         for i in range(4, 9):
             self.matchoutput(err,
@@ -195,7 +195,7 @@ class TestRefreshNetwork(TestBrokerCommand):
         self.assertEmptyOut(out, command)
         err = self.striplock(err)
         self.matchoutput(err,
-                         "deleting Network 0.1.1.0",
+                         "Deleting network 0.1.1.0",
                          command)
 
 

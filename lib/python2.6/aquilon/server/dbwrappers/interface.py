@@ -106,7 +106,7 @@ def check_ip_restrictions(dbnetwork, ip):
         # This network doesn't have enough addresses, the test is irrelevant.
         return
 
-    if int(ip) - int(dbnetwork.ip) in dbnetwork.reserved_addresses:
+    if int(ip) - int(dbnetwork.ip) in dbnetwork.reserved_offsets:
         raise ArgumentError("The IP address %s is reserved for dynamic "
                             "DHCP for a switch on subnet %s." %
                             (ip, dbnetwork.ip))

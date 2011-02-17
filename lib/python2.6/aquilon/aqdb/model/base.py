@@ -245,7 +245,8 @@ class Base(object):
                 clslabel = mapper.polymorphic_map[value].class_._get_class_label()
             else:
                 name = value.name if hasattr(value, "name") else str(value)
-                if field == "name":
+                if (hasattr(cls, "_instance_label") and field ==
+                    cls._instance_label) or field == "name":
                     desc.append(name)
                 else:
                     desc.append(field + " " + name)

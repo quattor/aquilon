@@ -1,0 +1,33 @@
+#! /bin/sh
+
+DATADIR=$(dirname "$0")/qip-subnetdata.d
+
+OUTPUTDIR="$PWD"
+FORMAT=
+
+while [ -n "$1" ]; do
+	case "$1" in
+		--datarootdir)
+			OUTPUTDIR="$2"
+			shift
+			;;
+		--noaudit)
+			;;
+		--format)
+			FORMAT="$2"
+			shift
+			;;
+		*)
+			echo "Unknown option $1" 1>&2
+			exit 1
+	esac
+	shift
+done
+
+if [ "$FORMAT" != "txt" ]; then
+	echo "Unsupported format $FORMAT" 1>&2
+	exit 1
+fi
+
+cp "$DATADIR"/subnetdata.txt "$OUTPUTDIR"/subnetdata.txt
+exit 0

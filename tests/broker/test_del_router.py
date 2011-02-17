@@ -1,7 +1,7 @@
 #!/usr/bin/env python2.6
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 #
-# Copyright (C) 2008,2009,2010,2011  Contributor
+# Copyright (C) 2011  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -27,7 +27,7 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-"""Module for testing the del_network command."""
+"""Module for testing the del_router command."""
 
 import unittest
 
@@ -38,40 +38,32 @@ if __name__ == "__main__":
 from brokertest import TestBrokerCommand
 
 
-class TestDelNetwork(TestBrokerCommand):
+class TestDelRouter(TestBrokerCommand):
 
-    def testdelnetwork(self):
-        for network in self.net.all:
-            command = ["del_network", "--ip=%s" % network.ip]
-            self.noouttest(command)
-
-    def testdelnetworkdup(self):
-        ip = "192.168.10.0"
-        self.noouttest(["del", "network", "--ip", ip])
-
-    def testshownetwork(self):
-        for network in self.net.all:
-            command = "show network --ip %s" % network.ip
-            out = self.notfoundtest(command.split(" "))
-
-    def testshownetwork(self):
-        command = "show network --building ut"
-        out = self.commandtest(command.split(" "))
-        # Unfortunately this command prints a header even if the output is
-        # otherwise empty. Check for a dot, as that will match any IP addresses,
-        # but not the header.
-        self.matchclean(out, ".", command)
-
-    def testshownetworkproto(self):
-        command = "show network --building ut --format proto"
-        out = self.commandtest(command.split(" "))
-        self.parse_netlist_msg(out, expect=0)
-
-    def testdelnetworkcards(self):
-        command = ["del_network", "--ip=192.168.1.0"]
+    def testdelrouterbyip(self):
+        net = self.net.tor_net[6]
+        command = ["del", "router", "--ip", net.gateway]
         self.noouttest(command)
 
-if __name__=='__main__':
-    suite = unittest.TestLoader().loadTestsFromTestCase(TestAddNetwork)
-    unittest.TextTestRunner(verbosity=2).run(suite)
+    def testdelrouterbyname(self):
+        command = ["del", "router",
+                   "--fqdn", "ut3gd1r01-v109-hsrp.aqd-unittest.ms.com"]
+        self.noouttest(command)
 
+    def testdelmissingrouter(self):
+        net = self.net.unknown[0]
+        command = ["del", "router", "--ip", net.gateway]
+        out = self.notfoundtest(command)
+        self.matchoutput(out, "Router Address %s not found." % net.gateway,
+                         command)
+
+    def testverifyrouter(self):
+        command = ["show", "router", "--all"]
+        out = self.commandtest(command)
+        self.matchclean(out, str(self.net.tor_net[12].gateway), command)
+        self.matchclean(out, str(self.net.tor_net[6].gateway), command)
+
+
+if __name__=='__main__':
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestDelRouter)
+    unittest.TextTestRunner(verbosity=2).run(suite)

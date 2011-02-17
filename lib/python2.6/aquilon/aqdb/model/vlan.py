@@ -115,8 +115,10 @@ class ObservedVlan(Base):
                            default=datetime.now, nullable=False)
 
     switch = relation(Switch, backref=backref('%ss' % _TN, cascade='delete',
+                                              passive_deletes=True,
                                               order_by=[vlan_id]))
     network = relation(Network, backref=backref('%ss' % _TN, cascade='delete',
+                                                passive_deletes=True,
                                                 order_by=[vlan_id]))
 
     @property

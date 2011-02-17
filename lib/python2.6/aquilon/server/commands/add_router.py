@@ -1,6 +1,6 @@
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 #
-# Copyright (C) 2008,2009,2010  Contributor
+# Copyright (C) 2011  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -26,53 +26,45 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-"""Contains the logic for `aq refresh network`."""
-
-import os
-from tempfile import mkdtemp
+"""Contains the logic for `aq add router`."""
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.data_sync.qip import QIPRefresh
 from aquilon.server.broker import BrokerCommand
-from aquilon.server.processes import run_command, remove_dir
-from aquilon.server.dbwrappers.location import get_location
-from aquilon.server.locks import lock_queue, SyncKey
+from aquilon.aqdb.model import RouterAddress, Building, FutureARecord
+from aquilon.aqdb.model.network import get_net_id_from_ip
 
 
-class CommandRefreshNetwork(BrokerCommand):
+class CommandAddRouter(BrokerCommand):
 
-    required_parameters = []
+    required_parameters = ["fqdn"]
 
-    def render(self, session, logger, building, dryrun, incremental,
-               **arguments):
+    def render(self, session, fqdn, building, ip, comments, **arguments):
         if building:
-            dbbuilding = get_location(session, building=building)
+            dbbuilding = Building.get_unique(session, building, compel=True)
         else:
             dbbuilding = None
 
-        # --dryrun and --incremental do not mix well
-        if dryrun and incremental:
-            raise ArgumentError("--dryrun and --incremental cannot be given "
-                                "simultaneously.")
+        if ip:
+            dbdns_rec = FutureARecord.get_or_create(session, fqdn=fqdn,
+                                                    ip=ip)
+        else:
+            dbdns_rec = FutureARecord.get_unique(session, fqdn, compel=True)
+            ip = dbdns_rec.ip
 
-        key = SyncKey(data="network", logger=logger)
-        lock_queue.acquire(key)
+        dbnetwork = get_net_id_from_ip(session, ip)
+        if ip in dbnetwork.router_ips:
+            raise ArgumentError("IP address {0} is already present as a router "
+                                "for {1:l}.".format(ip, dbnetwork))
 
-        rundir = self.config.get("broker", "rundir")
-        tempdir = mkdtemp(prefix="refresh_network_", dir=rundir)
-        try:
-            args = [self.config.get("broker", "qip_dump_subnetdata"),
-                    "--datarootdir", tempdir, "--format", "txt", "--noaudit"]
-            run_command(args, logger=logger)
+        if ip <= dbnetwork.ip or ip >= dbnetwork.first_usable_host or \
+           int(ip) - int(dbnetwork.ip) in dbnetwork.reserved_offsets:
+            raise ArgumentError("IP address {0} is not a valid router address "
+                                "on {1:l}.".format(ip, dbnetwork))
 
-            subnetdata = file(os.path.join(tempdir, "subnetdata.txt"), "r")
-            refresher = QIPRefresh(session, logger, dbbuilding, dryrun, incremental)
-            refresher.refresh(subnetdata)
+        dbnetwork.routers.append(RouterAddress(ip=ip, location=dbbuilding,
+                                               comments=comments))
+        session.flush()
 
-            session.flush()
+        # TODO: update the templates of Zebra hosts on the network
 
-            if dryrun:
-                session.rollback()
-        finally:
-            lock_queue.release(key)
-            remove_dir(tempdir, logger=logger)
+        return

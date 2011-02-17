@@ -1,0 +1,5 @@
+SubnetAddress 172.31.64.64	SubnetMask 255.255.255.192	SubnetId 62708	SubnetName np06bals03_v103	DHCPServer hqfid1.ms.com	DefaultRouters 172.31.64.65,172.31.64.66	DHCPOptionTemplate np.nt.a	UDF LOCATION=np.ny.na;SIDE=a
+SubnetAddress 172.31.88.0	SubnetMask 255.255.255.192	SubnetId 65362	SubnetName NYP_HPL_2960_Verari_Mnmt	DHCPServer hqfid1.ms.com	DefaultRouters 172.31.88.1	DHCPOptionTemplate np.nt.a	UDF LOCATION=np.ny.na;SIDE=a
+SubnetAddress 172.31.4.88	SubnetMask 255.255.255.248	SubnetId 37526	SubnetName bigdoglab-unused	DHCPServer hqfid1.ms.com	DHCPOptionTemplate hq.nt.a	UDF LOCATION=hq.ny.na;SIDE=a
+SubnetAddress 192.153.82.0	SubnetMask 255.255.255.0	SubnetId 18198	SubnetName hq2-ibd-dhcp1	DHCPServer pispm2.ms.com	DefaultRouters 192.153.82.1,192.153.82.2	DHCPOptionTemplate hq.nt.b	UDF LOCATION=hq.ny.na;SIDE=b
+SubnetAddress 10.184.78.224	SubnetMask 255.255.255.224	SubnetId 61770	SubnetName nyp_c4_vlan220	DHCPServer pispm2.ms.com	DefaultRouters 10.184.78.225,10.184.78.226	DHCPOptionTemplate np.nt.m	UDF BUCKET=NYB10;LOCATION=np.ny.na;SIDE=b;TYPE=transit

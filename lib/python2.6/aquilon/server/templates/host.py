@@ -45,6 +45,21 @@ from aquilon.server.templates.panutils import pan, StructureTemplate
 
 LOGGER = logging.getLogger(__name__)
 
+# Select the closest (i.e. in the same building) router
+def select_router(dbmachine, routers):
+    # Safe default
+    gateway = routers[0].ip
+
+    dbbuilding = dbmachine.location and dbmachine.location.building or None
+    for router in routers:
+        if router.location and router.location.building and \
+           router.location.building == dbbuilding:
+            gateway = router.ip
+            break
+
+    return gateway
+
+
 class PlenaryHost(PlenaryCollection):
     """
     A facade for Toplevel and Namespaced Hosts (below).
@@ -119,7 +134,11 @@ class PlenaryToplevelHost(Plenary):
 
         interfaces = dict()
         vips = dict()
+        transit_interfaces = []
+        routers = {}
         default_gateway = None
+        dbmachine = self.dbhost.machine
+
         # FIXME: Enforce that one of the interfaces is marked boot?
         for dbinterface in self.dbhost.machine.interfaces:
             # Management interfaces are not configured at the host level
@@ -169,6 +188,10 @@ class PlenaryToplevelHost(Plenary):
                                                  vips[addr.label]["ip"],
                                                  vips[addr.label]["interfaces"][0].name))
                         vips[addr.label]["interfaces"].append(dbinterface.name)
+
+                    if dbinterface.name not in transit_interfaces:
+                        transit_interfaces.append(dbinterface.name)
+
                     continue
                 elif addr.usage != "system":
                     continue
@@ -176,8 +199,11 @@ class PlenaryToplevelHost(Plenary):
                 net = addr.network
 
                 if addr.label == "":
-                    # Fudge the gateway as the first available ip
-                    gateway = net.network[1]
+                    if net.routers:
+                        gateway = select_router(self.dbhost.machine, net.routers)
+                    else:
+                        # Fudge the gateway as the first available ip
+                        gateway = net.network[1]
                     if not default_gateway and dbinterface.bootable:
                         default_gateway = gateway
 
@@ -199,6 +225,29 @@ class PlenaryToplevelHost(Plenary):
                         ifdesc["aliases"] = {addr.label: aliasdesc}
 
             interfaces[dbinterface.name] = ifdesc
+
+        # If the host uses Zebra, get the list of routers
+        if vips:
+            for addr in self.dbhost.machine.all_addresses():
+                # Ignore non-transit interfaces
+                if addr.interface.name not in transit_interfaces:
+                    continue
+                # Ignore aliases
+                if addr.label != "" or addr.usage != "system":
+                    continue
+
+                # Note: addr.network is a @property and its value is not kept
+                # persistent. The association proxy only keeps a weak reference
+                # on its parent, so addr.network.routers can be garbage
+                # collected while iterating router_ips, which makes the
+                # association proxy upset. Storing addr.network in a variable
+                # creates a reference and fixes the issue.
+                net = addr.network
+
+                for router_ip in net.router_ips:
+                    if addr.interface.name not in routers:
+                        routers[addr.interface.name] = []
+                    routers[addr.interface.name].append(router_ip)
 
         personality_template = "personality/%s/config" % \
                 self.dbhost.personality.name
@@ -255,6 +304,8 @@ class PlenaryToplevelHost(Plenary):
                          pan(default_gateway))
         if vips:
             lines.append('"/system/network/vips" = %s;' % pan(vips))
+        if routers:
+            lines.append('"/system/network/routers" = %s;' % pan(routers))
         lines.append("")
         # XXX: remove!
         # We put in a default function: this will be overridden by the

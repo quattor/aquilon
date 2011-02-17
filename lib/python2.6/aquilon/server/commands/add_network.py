@@ -42,7 +42,7 @@ class CommandAddNetwork(BrokerCommand):
     required_parameters = ["network", "ip"]
 
     def render(self, session, network, ip, discovered, discoverable, type, side,
-               comments, **arguments):
+               comments, logger, **arguments):
 
         # Handle the different ways of specifying the netmask
         mask_options = ["netmask", "prefixlen", "mask"]
@@ -73,14 +73,14 @@ class CommandAddNetwork(BrokerCommand):
         if not side:
             side = 'a'
 
-        # Check if the name is free
-        try:
-            dbnetwork = get_network_byname(session, network)
-            raise ArgumentError("Network name %s is already used for "
-                                "address %s." %
-                                (network, str(dbnetwork.network)))
-        except NotFoundException:
-            pass
+        # Check if the name is free. Network names are not unique in QIP and
+        # there is no uniqueness constraint in AQDB, so only warn if the name is
+        # already in use.
+        q = session.query(Network).filter_by(name=network)
+        dbnetwork = q.first()
+        if dbnetwork:
+            logger.client_info("WARNING: Network name %s is already used for "
+                               "address %s." % (network, str(dbnetwork.network)))
 
         # Check if the address is free
         try:

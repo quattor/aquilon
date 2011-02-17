@@ -78,7 +78,8 @@ class AuthorizationBroker(object):
                 raise AuthorizationException(
                     "Must have the engineering or aqd_admin role to %s." %
                     action)
-        if action in ['permission', 'flush', 'add_network', 'del_network']:
+        if action in ['permission', 'flush', 'add_network', 'del_network',
+                      'add_router', 'del_router']:
             if dbuser.role.name not in ['aqd_admin']:
                 raise AuthorizationException(
                     "Must have the aqd_admin role to %s." % action)
@@ -94,7 +95,8 @@ class AuthorizationBroker(object):
         if dbuser.role.name == 'telco_operations':
             if action not in ['add_rack', 'add_switch', 'add_tor_switch',
                               'update_rack', 'update_switch',
-                              'del_rack', 'del_switch', 'del_tor_switch']:
+                              'del_rack', 'del_switch', 'del_tor_switch',
+                              'update_router']:
                 self.raise_auth_error(principal, action, resource)
         if dbuser.role.name == 'maintech':
             if action not in ['pxeswitch', 'pxeswitch_list',

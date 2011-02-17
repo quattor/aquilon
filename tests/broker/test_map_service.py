@@ -43,6 +43,8 @@ class TestMapService(TestBrokerCommand):
     def testmapafs(self):
         self.noouttest(["map", "service", "--building", "ut",
                         "--service", "afs", "--instance", "q.ny.ms.com"])
+        self.noouttest(["map", "service", "--building", "np",
+                        "--service", "afs", "--instance", "q.ny.ms.com"])
 
     def testverifymapafs(self):
         command = "show map --service afs --instance q.ny.ms.com --building ut"
@@ -113,6 +115,8 @@ class TestMapService(TestBrokerCommand):
                         "--service", "bootserver", "--instance", "np.test"])
         self.noouttest(["map", "service", "--building", "cards",
                         "--service", "bootserver", "--instance", "np.test"])
+        self.noouttest(["map", "service", "--building", "np",
+                        "--service", "bootserver", "--instance", "np.test"])
 
     def testverifymapbootserver(self):
         command = ["show_map", "--service", "bootserver",
@@ -150,10 +154,15 @@ class TestMapService(TestBrokerCommand):
                         "--service", "utsvc", "--instance", "utsi1"])
         self.noouttest(["map", "service", "--building", "cards",
                         "--service", "utsvc", "--instance", "utsi1"])
+        self.noouttest(["map", "service", "--building", "np",
+                        "--service", "utsvc", "--instance", "utsi1"])
 
     def testmaputsi2(self):
         self.noouttest(["map", "service", "--building", "ut",
                         "--service", "utsvc", "--instance", "utsi2"])
+        # Do NOT bind utsi2 to "np" to keep test_compile results consistent
+        #self.noouttest(["map", "service", "--building", "np",
+        #                "--service", "utsvc", "--instance", "utsi2"])
 
     def testverifymaputsvc(self):
         command = "show map --service utsvc"
@@ -170,6 +179,15 @@ class TestMapService(TestBrokerCommand):
                          "Archetype: aquilon Service: utsvc "
                          "Instance: utsi2 Map: Building ut",
                          command)
+        self.matchoutput(out,
+                         "Archetype: aquilon Service: utsvc "
+                         "Instance: utsi1 Map: Building np",
+                         command)
+        # See testmaputsi2
+        #self.matchoutput(out,
+        #                 "Archetype: aquilon Service: utsvc "
+        #                 "Instance: utsi2 Map: Building np",
+        #                 command)
 
     def testverifyutmapproto(self):
         command = "show map --building ut --format proto"
