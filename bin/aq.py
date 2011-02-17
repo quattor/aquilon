@@ -49,7 +49,11 @@ from time import sleep
 from threading import Thread
 
 BINDIR = os.path.dirname(os.path.realpath(sys.argv[0]))
-sys.path.append(os.path.join(BINDIR, "..", "lib", "python2.6"))
+SRCDIR = os.path.join(BINDIR, "..")
+LIBDIR = os.path.join(SRCDIR, "lib", "python2.6")
+MANDIR = os.path.join(SRCDIR, "doc", "man")
+
+sys.path.append(LIBDIR)
 
 from aquilon.client.knchttp import KNCHTTPConnection
 from aquilon.client.chunked import ChunkedHTTPConnection
@@ -269,6 +273,10 @@ def quoteOptions(options):
 
 
 if __name__ == "__main__":
+    # Set up the search path for man pages. "man" does not like ".." in the
+    # path, so we have to normalize it
+    os.environ["MANPATH"] = os.path.realpath(MANDIR)
+
     parser = OptParser( os.path.join( BINDIR, '..', 'etc', 'input.xml' ) )
     try:
         (command, transport, commandOptions, globalOptions) = \
