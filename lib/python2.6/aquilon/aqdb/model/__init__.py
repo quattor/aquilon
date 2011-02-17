@@ -64,6 +64,7 @@ from aquilon.aqdb.model.operating_system import OperatingSystem
 #SYSTEM
 from aquilon.aqdb.model.system import (System, DynamicStub, FutureARecord,
                                        ReservedName)
+from aquilon.aqdb.model.ns_record import NsRecord
 
 #HARDWARE
 from aquilon.aqdb.model.vendor import Vendor

@@ -37,12 +37,36 @@ from aquilon.aqdb.model import DnsDomain
 class DnsDomainFormatter(ObjectFormatter):
     def format_raw(self, dns_domain, indent=""):
         details = [indent + "DNS Domain: %s" % dns_domain.name]
+
+        if len(dns_domain.servers) > 0:
+            server_list = map(str, dns_domain.servers)
+            server_list = ','.join(server_list)
+            details.append(indent + "Servers: %s" % server_list)
+
         if dns_domain.comments:
             details.append(indent + "  Comments: %s" % dns_domain.comments)
+
         return "\n".join(details)
 
     def csv_fields(self, dns_domain):
         return (dns_domain.name, dns_domain.comments)
+
+    def format_djb(self, dns_domain):
+        """ djb format for ns records copied from existing data.header """
+        msg = ''
+        lf = ListFormatter()
+        if len(dns_domain._ns_records) > 0:
+            msg += ''.join([msg, lf.format_djb(dns_domain._ns_records)])
+        #NOTE: This is VASTLY incomplete as yet. This will provide a full dump
+        # a dns domain in the future
+
+        #TODO: include SOA information
+        #TODO: when association proxy to System or DnsRecord table, then
+        #msg = ''.join([msg, lf.format_djb(dns_domain.dns_records)])
+        # will provide a full domain dump into djb. Also include all other
+        # records like SRVs, MXes, etc., while ensuring that reserved hosts
+        # are *not* included by the association proxy
+        return msg
 
 
 class DNSDomainList(list):

@@ -52,7 +52,7 @@ class ResponseFormatter(object):
         handlers and wrapped appropriately.
 
     """
-    formats = ["raw", "csv", "html", "proto"]
+    formats = ["raw", "csv", "html", "proto", "djb"]
 
     def format(self, style, result, request):
         """The main entry point - it is expected that any consumers call
@@ -67,6 +67,10 @@ class ResponseFormatter(object):
 
     def format_csv(self, result, request):
         return ObjectFormatter.redirect_csv(result)
+
+    def format_djb(self, result, request):
+        """ For tinydns-data formatting. use raw for now. """
+        return ObjectFormatter.redirect_djb(result)
 
     def format_proto(self, result, request):
         """This implementation is very similar to format_raw.
@@ -211,6 +215,10 @@ class ObjectFormatter(object):
                 writer.writerow(fields)
         return strbuf.getvalue()
 
+    def format_djb(self, result):
+        # We get here if the command throws an exception
+        return self.format_raw(result)
+
     def format_proto(self, result, skeleton=None):
         return self.format_raw(result)
 
@@ -231,6 +239,12 @@ class ObjectFormatter(object):
         handler = ObjectFormatter.handlers.get(result.__class__,
                 ObjectFormatter.default_handler)
         return handler.format_csv(result)
+
+    @staticmethod
+    def redirect_djb(result):
+        handler = ObjectFormatter.handlers.get(result.__class__,
+                                               ObjectFormatter.default_handler)
+        return handler.format_djb(result)
 
     @staticmethod
     def redirect_html(result):
