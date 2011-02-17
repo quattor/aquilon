@@ -14,6 +14,8 @@
 	<property name="panc.formatter" value="pan" />
 	<property name="panc.batch.size" value="1000" />
 	<property name="panc.jar" location="/ms/dist/elfms/PROJ/panc/${panc.version}/lib/panc.jar" />
+	<property name="panc.debug.include" value="" />
+	<property name="panc.debug.exclude" value="" />
 	<property name="ant-contrib.version" value="1.0b2" />
 	<property name="ant-contrib.jar" location="/ms/dist/msjava/PROJ/ant-contrib/${ant-contrib.version}/common/lib/ant-contrib.jar" />
 	<property name="force.build" value="false" />
@@ -121,6 +123,7 @@
 		<panc nthread="0" depWriteEnabled="true" outputDirectory="${compiled.profiles}" verbose="true" forceBuild="${force.build}" formatter="${panc.formatter}" gzipOutput="${gzip.output}">
 			<path refid="pan.objectloadpath" />
 			<fileset dir="${source.profiles}" includes="${source.includes}" />
+			<debug include="${panc.debug.include}" exclude="${panc.debug.exclude}" />
 		</panc>
 		<!-- Cache the valid profile in the global pool. -->
 		<copy todir="${global.profiles}" preservelastmodified="true" overwrite="${force.build}">
@@ -137,6 +140,7 @@
 		<panc nthread="0" depWriteEnabled="true" outputDirectory="${compiled.profiles}" verbose="true" batchSize="${panc.batch.size}" forceBuild="${force.build}" formatter="${panc.formatter}" gzipOutput="${gzip.output}">
 			<path refid="pan.objectloadpath" />
 			<fileset refid="source.fileset" />
+			<debug include="${panc.debug.include}" exclude="${panc.debug.exclude}" />
 		</panc>
 		<!-- Cache all of these valid profiles in the global pool. -->
 		<copy todir="${global.profiles}" preservelastmodified="true" overwrite="${force.build}">

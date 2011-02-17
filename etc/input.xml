@@ -443,6 +443,12 @@
          <option name="sandbox" type="string" conflicts="domain hostname">Name of the sandbox (given as 'author/branch')</option>
          <option name="hostname" type="string" conflicts="domain sandbox">FQDN</option>
       </optgroup>
+      <optgroup name="compile_optional" mandatory="False" fields="any">
+         <option name="pancinclude" type="string" conflicts="pancdebug">Regex for templates to include in debug output (None included by default)</option>
+         <option name="pancexclude" type="string" conflicts="pancdebug">Regex for templates to exclude in debug output (only useful if pancinclude has been given)</option>
+         <option name="pancdebug" type="boolean" conflicts="pancinclude pancexclude">Alias for pancinclude=.* and pancexclude=components/spma/functions</option>
+         <option name="cleandeps" type="boolean">Remove pan dependecy files before compiling (should only be required if switching panc versions)</option>
+      </optgroup>
       <transport method="post" path="compile"/>
       <transport trigger="hostname" method="post" path="host/%(hostname)s/command/compile" />
    </command>
