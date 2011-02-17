@@ -64,16 +64,20 @@ class TestCompile(TestBrokerCommand):
         finally:
             f.close()
 
+    # This test is broken.  It should get a count by searching for hosts
+    # that use utsi1 and then verify that count of hosts got compiled.
+    # However, there is a panc ant task bug that causes all the clusters
+    # to be recompiled as well, so for now we need to count them too.
     def test_200_compileunittest(self):
+        clusters = self.commandtest(["search_esx_cluster",
+                                     "--domain=unittest"]).splitlines()
+        hosts = self.commandtest(["search_host", "--domain=unittest",
+                                  "--service=utsvc", "--instance=utsi1"]
+                                ).splitlines()
+        total = len(hosts) + len(clusters)
         command = "compile --domain unittest"
         (out, err) = self.successtest(command.split(" "))
-        # The idea is to check that only that hosts that needed to
-        # be compiled actually were. Note that clusters and other
-        # included profiles might get recompiled, so we need to adjust
-        # the number we're looking for based on everything. It might
-        # be better to look for the objects being processed and checking
-        # that the numbers a/b (for processing) are different.
-        self.matchoutput(err, "17/17 compiled", command)
+        self.matchoutput(err, "%s/%s compiled" % (total, total), command)
 
     def test_300_compilehost(self):
         command = "compile --hostname unittest02.one-nyp.ms.com"
