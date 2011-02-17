@@ -157,6 +157,32 @@ class TestAddAquilonHost(TestBrokerCommand):
                         "--personality", "compileserver"])
         self.dsdb_verify()
 
+    def testverifyunittest21network(self):
+        net = self.net.unknown[11]
+        ip = net.usable[1]
+        command = ["show", "network", "--ip", net.ip, "--format", "proto"]
+        out = self.commandtest(command)
+
+        msg = self.parse_netlist_msg(out, expect=1)
+        network = msg.networks[0]
+        seen = False
+        macs = [ip.mac] #, self.net.unknown[12].usable[1].mac]
+        for host in network.hosts:
+            if host.ip != str(ip):
+                continue
+
+            seen = True
+            self.failUnless(host.archetype.name == "aquilon",
+                            "archetype is '%s' instead of aquilon" %
+                            host.archetype.name)
+            self.failUnless(host.mac in macs,
+                            "MAC is '%s' instead of %r" %
+                            (host.mac, macs))
+            macs.remove(host.mac)
+
+        self.failUnless(seen,
+                        "%s is missing from network protobuf output" % ip)
+
     def testaddunittest22(self):
         ip = self.net.unknown[11].usable[2]
         self.dsdb_expect_add("unittest22.aqd-unittest.ms.com", ip, "br0")
@@ -167,6 +193,32 @@ class TestAddAquilonHost(TestBrokerCommand):
                         "--osname", "linux", "--osversion", "4.0.1-x86_64",
                         "--personality", "compileserver"])
         self.dsdb_verify()
+
+    def testverifyunittest22network(self):
+        net = self.net.unknown[11]
+        ip = net.usable[2]
+        command = ["show", "network", "--ip", net.ip, "--format", "proto"]
+        out = self.commandtest(command)
+
+        msg = self.parse_netlist_msg(out, expect=1)
+        network = msg.networks[0]
+        seen = False
+        macs = [ip.mac] #, self.net.unknown[12].usable[2].mac]
+        for host in network.hosts:
+            if host.ip != str(ip):
+                continue
+
+            seen = True
+            self.failUnless(host.archetype.name == "aquilon",
+                            "archetype is '%s' instead of aquilon" %
+                            host.archetype.name)
+            self.failUnless(host.mac in macs,
+                            "MAC is '%s' instead of %r" %
+                            (host.mac, macs))
+            macs.remove(host.mac)
+
+        self.failUnless(seen,
+                        "%s is missing from network protobuf output" % ip)
 
 
 if __name__=='__main__':

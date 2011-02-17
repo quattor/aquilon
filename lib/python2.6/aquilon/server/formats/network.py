@@ -65,6 +65,42 @@ def summarize_ranges(addrlist):
 
     return ranges
 
+def possible_mac_addresses(interface):
+    """ Return the list of MAC addresses the DHCP server should accept.
+
+    There are a couple of cases to consider:
+
+    - 801.q VLANs: the MAC address of the physical interface may appear on
+      multiple networks that belong to the different VLANs configured on the
+      interface.
+
+    - Bonding devices: during PXE, the bonding is not configured yet, and the
+      DHCP server should accept the MAC address of the physical interface(s).
+      If the bonding device has a dedicated MAC address configured, then that
+      should also be accepted if the host configures the interface using DHCP.
+    """
+
+    mac_addrs = []
+
+    # In case of VLANs, just grab the parent interface
+    if interface.interface_type == 'vlan':
+        interface = interface.parent
+
+    # Bonding/bridge: append the MACs of the physical interfaces
+    # TODO: drop the public/bootable check once we decide how to send the extra
+    # information to clients
+    for slave in interface.all_slaves():
+        if slave.mac and (slave.interface_type != "public" or slave.bootable):
+            mac_addrs.append(slave.mac)
+
+    # Handle physical interfaces, and bonding with a dedicated MAC
+    # TODO: drop the public/bootable check once we decide how to send the extra
+    # information to clients
+    if interface.mac and (interface.interface_type != "public" or interface.bootable):
+        mac_addrs.append(interface.mac)
+
+    return mac_addrs
+
 
 class NetworkFormatter(ObjectFormatter):
     protocol = "aqdnetworks_pb2"
@@ -252,49 +288,66 @@ class SimpleNetworkListFormatter(ListFormatter):
         # Add interfaces that have addresses in this network
         addrs = addrq.params(ip=net.network.ip, broadcast=net.broadcast).all()
         for addr in addrs:
-            iface = addr.interface
-            hwent = iface.hardware_entity
+            hwent = addr.interface.hardware_entity
 
             if not addr.dns_records:
                 # hostname is a required field in the protobuf description
                 continue
 
-            host_msg = net_msg.hosts.add()
-
-            if iface.interface_type == 'management':
-                host_msg.type = 'manager'
-            elif addr.ip == hwent.primary_ip:
-                if hwent.hardware_type == 'machine':
-                    host_msg.type = 'host'
-                    if hwent.host:
-                        host_msg.archetype.name = str(hwent.host.archetype.name)
-                elif hwent.hardware_type == 'switch':
-                    # aqdhcpd uses the type
-                    host_msg.type = 'tor_switch'
-                else:
-                    host_msg.type = hwent.hardware_type
+            # DHCP: we do not care about secondary IP addresses, but in some
+            # cases the same IP address may show up with different MACs
+            if not addr.label:
+                mac_addrs = possible_mac_addresses(addr.interface)
             else:
-                host_msg.type = 'auxiliary'
+                mac_addrs = []
 
-            host_msg.hostname = str(addr.dns_records[0].name)
-            host_msg.fqdn = str(addr.dns_records[0].fqdn)
-            host_msg.dns_domain = str(addr.dns_records[0].dns_domain)
+            # Generate a host record even if there is no known MAC address for
+            # it
+            if not mac_addrs:
+                mac_addrs.append(None)
 
-            host_msg.ip = str(addr.ip)
+            # Associating the same IP with multiple MAC addresses is
+            # problematic using the current protocol. Sending multiple host
+            # messages is easy for the broker, but it can confuse consumers like
+            # aqdhcpd. For now just ensure it never happens, and revisit the
+            # problem when we have a real world requirement.
+            if len(mac_addrs) > 1:
+                mac_addrs = [mac_addrs[0]]
 
-            # This ensures that we do not generate multiple DHCP entries if the
-            # host has multiple addresses
-            if iface.interface_type != 'public' or (iface.bootable and not
-                                                    addr.label):
-                if iface.mac:
-                    host_msg.mac = iface.mac
+            for mac in mac_addrs:
+                host_msg = net_msg.hosts.add()
 
-            host_msg.machine.name = str(hwent.label)
-            for iface in hwent.interfaces:
-                int_msg = host_msg.machine.interfaces.add()
-                int_msg.device = iface.name
-                if iface.mac:
-                    int_msg.mac = str(iface.mac)
+                if addr.interface.interface_type == 'management':
+                    host_msg.type = 'manager'
+                else:
+                    if hwent.hardware_type == 'machine':
+                        host_msg.type = 'host'
+                        if hwent.host:
+                            host_msg.archetype.name = str(hwent.host.archetype.name)
+                    elif hwent.hardware_type == 'switch':
+                        # aqdhcpd uses the type
+                        host_msg.type = 'tor_switch'
+                    else:
+                        host_msg.type = hwent.hardware_type
+
+                host_msg.hostname = str(addr.dns_records[0].name)
+                host_msg.fqdn = str(addr.dns_records[0].fqdn)
+                host_msg.dns_domain = str(addr.dns_records[0].dns_domain)
+
+                host_msg.ip = str(addr.ip)
+
+                if mac:
+                    host_msg.mac = mac
+
+                host_msg.machine.name = str(hwent.label)
+
+                # aqdhcpd uses the interface list when excluding hosts it is not
+                # authoritative for
+                for iface in hwent.interfaces:
+                    int_msg = host_msg.machine.interfaces.add()
+                    int_msg.device = iface.name
+                    if iface.mac:
+                        int_msg.mac = str(iface.mac)
 
         # Add dynamic DHCP records
         dynhosts = dynq.params(ip=net.network.ip, broadcast=net.broadcast).all()
