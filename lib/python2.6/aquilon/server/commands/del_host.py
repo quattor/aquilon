@@ -47,7 +47,7 @@ class CommandDelHost(BrokerCommand):
 
     required_parameters = ["hostname"]
 
-    def render(self, session, logger, hostname, user, **arguments):
+    def render(self, session, logger, hostname, **arguments):
         # removing the plenary host requires a compile lock, however
         # we want to avoid deadlock by the fact that we're messing
         # with two locks here, so we want to be careful. We grab the
@@ -82,16 +82,14 @@ class CommandDelHost(BrokerCommand):
             ip = dbmachine.primary_ip
             fqdn = dbmachine.fqdn
 
-            for binding in dbhost.templates:
-                ### WARNING ###
-                si = binding.service_instance
-                if si:
-                    plenary = PlenaryServiceInstanceServer(si.service, si,
-                                                           logger=logger)
-                    bindings.append(plenary)
+            for si in dbhost.services_used:
+                plenary = PlenaryServiceInstanceServer(si.service, si,
+                                                       logger=logger)
+                bindings.append(plenary)
                 logger.info("Before deleting host '%s', removing binding '%s'"
-                            % (fqdn, binding.cfg_path))
-                session.delete(binding)
+                            % (fqdn, si.cfg_path))
+
+            del dbhost.services_used[:]
 
             # In case of Zebra, the IP may be configured on multiple interfaces
             for iface in dbmachine.interfaces:

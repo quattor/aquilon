@@ -29,9 +29,8 @@
 """Contains the logic for `aq unbind server`."""
 
 
-from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand
-from aquilon.aqdb.model import Service, ServiceInstance, ServiceInstanceServer
+from aquilon.aqdb.model import Service, ServiceInstance
 from aquilon.server.dbwrappers.host import hostname_to_host
 from aquilon.server.dbwrappers.service_instance import get_service_instance
 from aquilon.server.templates.base import PlenaryCollection
@@ -42,8 +41,7 @@ class CommandUnbindServer(BrokerCommand):
 
     required_parameters = ["hostname", "service"]
 
-    def render(self, session, logger, hostname, service, instance, user,
-               **arguments):
+    def render(self, session, logger, hostname, service, instance, **arguments):
         dbhost = hostname_to_host(session, hostname)
         dbservice = Service.get_unique(session, service, compel=True)
         if instance:
@@ -55,9 +53,9 @@ class CommandUnbindServer(BrokerCommand):
             q = q.filter_by(host=dbhost)
             dbinstances = q.all()
         for dbinstance in dbinstances:
-            for item in dbinstance.servers:
-                if item.host == dbhost:
-                    session.delete(item)
+            if dbhost in dbinstance.server_hosts:
+                dbinstance.server_hosts.remove(dbhost)
+                session.expire(dbhost, ['_services_provided'])
         session.flush()
 
         plenaries = PlenaryCollection(logger=logger)

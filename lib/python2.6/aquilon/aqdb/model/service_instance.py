@@ -33,10 +33,12 @@ import socket
 
 from sqlalchemy import (Column, Integer, Sequence, String, DateTime,
                         ForeignKey, UniqueConstraint)
-from sqlalchemy.orm import relation, contains_eager, column_property
+from sqlalchemy.orm import (relation, contains_eager, column_property, backref,
+                            deferred)
 from sqlalchemy.orm.session import object_session
 from sqlalchemy.sql.expression import or_
 from sqlalchemy.sql import select, func
+from sqlalchemy.ext.associationproxy import association_proxy
 
 from aquilon.aqdb.model import (Base, Service, Host, System, DnsDomain, Machine,
                                 PrimaryNameAssociation)
@@ -86,8 +88,7 @@ class ServiceInstance(Base):
         as though max_members are bound.  The tricky bit is de-duplication.
 
         """
-        from aquilon.aqdb.model import (ClusterServiceBinding, BuildItem,
-                                        Cluster)
+        from aquilon.aqdb.model import (ClusterServiceBinding, Cluster)
         session = object_session(self)
 
         cluster_types = self.service.aligned_cluster_types
@@ -242,7 +243,7 @@ class ServiceInstance(Base):
         return cache
 
 
-service_instance = ServiceInstance.__table__
+service_instance = ServiceInstance.__table__  # pylint: disable-msg=C0103, E1101
 
 service_instance.primary_key.name = 'svc_inst_pk'
 service_instance.append_constraint(
@@ -339,17 +340,23 @@ class BuildItem(Base):
                                             name='build_item_svc_inst_fk'),
                                  nullable=False)
 
-    creation_date = Column(DateTime, default=datetime.now, nullable=False)
-    comments = Column(String(255), nullable=True)
+    creation_date = deferred(Column(DateTime, default=datetime.now,
+                                    nullable=False))
+    comments = deferred(Column(String(255), nullable=True))
 
-    service_instance = relation(ServiceInstance, backref='clients')
+    service_instance = relation(ServiceInstance, uselist=False,
+                                backref=backref('clients'))
 
-    host = relation(Host, uselist=False, backref='services_used')
+    host = relation(Host, uselist=False,
+                    backref=backref('_services_used',
+                                    cascade="all, delete-orphan"))
 
-    @property
-    def cfg_path(self):
-        return self.service_instance.cfg_path
 
+def _build_item_si_creator(service_instance):
+    return BuildItem(service_instance=service_instance)
+
+Host.services_used = association_proxy('_services_used', 'service_instance',
+                                       creator=_build_item_si_creator)
 
 build_item = BuildItem.__table__  # pylint: disable-msg=C0103, E1101
 
@@ -357,8 +364,6 @@ build_item.primary_key.name = 'build_item_pk'
 
 build_item.append_constraint(
     UniqueConstraint('host_id', 'service_instance_id', name='build_item_uk'))
-
-Host.templates = relation(BuildItem)
 
 # Make this a column property so it can be undeferred on bulk loads
 ServiceInstance._client_count = column_property(

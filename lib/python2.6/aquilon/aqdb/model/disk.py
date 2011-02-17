@@ -76,7 +76,7 @@ class Disk(Base):
         # The default __repr__() is too long
         return "<%s %s (%s) of machine %s, %d GB>" % \
             (self._get_class_label(), self.device_name, self.controller_type,
-             self.machine.name, self.capacity)
+             self.machine.label, self.capacity)
 
 
 disk = Disk.__table__  # pylint: disable-msg=C0103, E1101

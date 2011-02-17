@@ -54,11 +54,7 @@ class CommandUpdateMachine(BrokerCommand):
         plenaries = PlenaryCollection(logger=logger)
 
         if clearchassis:
-            for dbslot in dbmachine.chassis_slot:
-                dbslot.machine = None
-                session.add(dbslot)
-            session.flush()
-            session.refresh(dbmachine)
+            del dbmachine.chassis_slot[:]
 
         remove_plenaries = PlenaryCollection(logger=logger)
         if chassis:
@@ -88,6 +84,7 @@ class CommandUpdateMachine(BrokerCommand):
 
         dblocation = get_location(session, **arguments)
         if dblocation:
+            loc_clear_chassis = False
             for dbslot in dbmachine.chassis_slot:
                 dbcl = dbslot.chassis.location
                 if dbcl != dblocation:
@@ -96,7 +93,9 @@ class CommandUpdateMachine(BrokerCommand):
                                             "location {2}.".format(dblocation,
                                                         dbslot.chassis, dbcl))
                     else:
-                        session.delete(dbslot)
+                        loc_clear_chassis = True
+            if loc_clear_chassis:
+                del dbmachine.chassis_slot[:]
             if machine_plenary_will_move(old=dbmachine.location,
                                          new=dblocation):
                 remove_plenaries.append(PlenaryMachineInfo(dbmachine,
@@ -161,9 +160,7 @@ class CommandUpdateMachine(BrokerCommand):
             dbmachine.location = dbcluster.location_constraint
             dbcluster.machines.append(dbmachine)
             session.flush()
-            session.refresh(dbmachine)
-            session.refresh(dbcluster)
-            session.refresh(old_cluster)
+            session.expire(dbmachine, ['_cluster'])
             plenaries.append(PlenaryCluster(old_cluster, logger=logger))
             plenaries.append(PlenaryCluster(dbcluster, logger=logger))
 
@@ -219,11 +216,11 @@ class CommandUpdateMachine(BrokerCommand):
                                 "than one slot, or --clearchassis to remove "
                                 "current chassis slot information.")
         if not multislot:
-            for dbslot in dbmachine.chassis_slot:
-                logger.info("Clearing {0:l} out of {1:l} slot "
-                            "{2}".format(dbmachine, dbslot.chassis,
-                                         dbslot.slot_number))
-                dbslot.machine = None
+            slots = ", ".join([str(dbslot.slot_number) for dbslot in
+                               dbmachine.chassis_slot])
+            logger.info("Clearing {0:l} out of {1:l} slot(s) "
+                        "{2}".format(dbmachine, dbchassis, slots))
+            del dbmachine.chassis_slot[:]
         q = session.query(ChassisSlot)
         q = q.filter_by(chassis=dbchassis, slot_number=slot)
         dbslot = q.first()
@@ -232,10 +229,8 @@ class CommandUpdateMachine(BrokerCommand):
                 raise ArgumentError("{0} slot {1} already has machine "
                                     "{2}.".format(dbchassis, slot,
                                                   dbslot.machine.label))
-            dbslot.machine = dbmachine
-            session.add(dbslot)
         else:
-            dbslot = ChassisSlot(chassis=dbchassis, slot_number=slot,
-                                 machine=dbmachine)
-            session.add(dbslot)
+            dbslot = ChassisSlot(chassis=dbchassis, slot_number=slot)
+        dbmachine.chassis_slot.append(dbslot)
+
         return

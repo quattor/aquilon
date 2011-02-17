@@ -69,6 +69,5 @@ class CommandMapService(BrokerCommand):
 
         session.add(dbmap)
         session.flush()
-        session.refresh(dbservice)
-        session.refresh(dbinstance)
+
         return

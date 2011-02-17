@@ -29,15 +29,13 @@
 """Provides various utilities around services."""
 
 
-import logging
 from random import choice
 
 from sqlalchemy.orm.session import object_session
 
-from aquilon.exceptions_ import ArgumentError, InternalError, IncompleteError
-from aquilon.aqdb.model import (Host, Cluster, BuildItem, ServiceMap,
-                                PersonalityServiceMap, ClusterServiceBinding,
-                                ClusterAlignedService, ServiceInstance)
+from aquilon.exceptions_ import ArgumentError, InternalError
+from aquilon.aqdb.model import (Host, Cluster, ClusterAlignedService,
+                                ServiceInstance)
 from aquilon.server.templates.service import PlenaryServiceInstanceServer
 from aquilon.server.templates.cluster import PlenaryCluster
 from aquilon.server.templates.host import PlenaryHost
@@ -74,10 +72,9 @@ class Chooser(object):
         service instances) and finalized into chosen_services (dictionary
         of service to single service instance).
 
-        The original state of the object is held in the caches
-        original_service_build_items (list of build items, but only
-        services) and original_service_instances (dictionary of
-        service to single service instance).
+        The original state of the object is held in the cache
+        original_service_instances (dictionary of service to single service
+        instance).
 
         The instances_bound and instances_unbound lists are populated
         after chosen_services with the differences between chosen_services
@@ -305,11 +302,11 @@ class Chooser(object):
             if len(instances) > 1:
                 # Ignore any services where an instance has not been chosen.
                 continue
-            for sis in instances[0].servers:
-                if self.servers.get(sis.host, None):
-                    self.servers[sis.host] += 1
+            for host in instances[0].server_hosts:
+                if self.servers.get(host, None):
+                    self.servers[host] += 1
                 else:
-                    self.servers[sis.host] = 1
+                    self.servers[host] = 1
 
     def reduce_service_instances(self, dbservice):
         if len(self.staging_services[dbservice]) == 1:
@@ -344,10 +341,10 @@ class Chooser(object):
             common_servers = []
             self.logger.debug("Checking service %s instance %s servers %s",
                               instance.service.name, instance.name,
-                              [sis.host.fqdn for sis in instance.servers])
-            for sis in instance.servers:
-                if self.servers.get(sis.host, None):
-                    common_servers.append(sis.host)
+                              [host.fqdn for host in instance.server_hosts])
+            for host in instance.server_hosts:
+                if self.servers.get(host, None):
+                    common_servers.append(host)
             if not common_servers:
                 continue
             if len(common_servers) > max_servers:
@@ -462,18 +459,14 @@ class HostChooser(Chooser):
             self.required_services.add(service)
         for service in self.personality.services:
             self.required_services.add(service)
-        q = self.session.query(BuildItem).filter_by(host=self.dbhost)
-        self.original_service_build_items = q.all()
-        """Cache of the build_items related to services."""
         self.original_service_instances = {}
         """Cache of any already bound services (keys) and the instance
         that was bound (values).
         """
-        for dbbi in self.original_service_build_items:
-            self.original_service_instances[dbbi.service_instance.service] = \
-                    dbbi.service_instance
+        for si in self.dbhost.services_used:
+            self.original_service_instances[si.service] = si
             self.logger.debug("%s original binding: %s",
-                              self.description, dbbi.cfg_path)
+                              self.description, si.cfg_path)
         self.cluster_aligned_services = {}
         if self.dbhost.cluster:
             # Note that cluster services are currently ignored unless
@@ -531,48 +524,13 @@ class HostChooser(Chooser):
                                     "instance %s",
                                     self.description,
                                     instance.service.name, instance.name)
-            if self.original_service_instances.get(instance.service, None):
-                previous = None
-                for bi in self.original_service_build_items:
-                    if bi.service_instance and \
-                       bi.service_instance.service == instance.service:
-                        previous = bi
-                        break
-                if previous:
-                    previous.service_instance = instance
-                else:
-                    self.error("Internal Error: Error in alogorithm to find "
-                               "previous binding for %s %s" %
-                               (instance.service.name, instance.name))
-                continue
-            bi = BuildItem(host=self.dbhost, service_instance=instance)
-            self.dbhost.templates.append(bi)
+            self.dbhost.services_used.append(instance)
         for instance in self.instances_unbound:
             self.logger.client_info("%s removing binding for "
                                     "service %s instance %s",
                                     self.description,
                                     instance.service.name, instance.name)
-            if self.chosen_services.get(instance.service, None):
-                # We have a replacement, no need to remove BuildItem
-                continue
-            found_instance = False
-            for bi in self.original_service_build_items:
-                if bi.service_instance == instance:
-                    self.session.delete(bi)
-                    found_instance = True
-                    break
-            if not found_instance:
-                self.error("Internal Error: Could not unbind "
-                           "service %s instance %s" %
-                           (instance.service.name, instance.name))
-        if self.instances_bound or self.instances_unbound:
-            # Can't use _reorder if missing os, as adding the os later
-            # will fail.
-            # It may make sense to never call reorder()...
-            #if self.dbhost.templates and \
-            #   self.dbhost.templates[0].cfg_path.tld.type == 'os':
-            #    self.dbhost.templates._reorder()
-            self.session.add(self.dbhost)
+            self.dbhost.services_used.remove(instance)
 
     def prestash_primary(self):
         plenary_host = PlenaryHost(self.dbhost, logger=self.logger)
@@ -625,11 +583,8 @@ class ClusterChooser(Chooser):
                                     "service %s instance %s",
                                     self.description,
                                     instance.service.name, instance.name)
-            dbcs = ClusterServiceBinding.get_unique(self.session,
-                                                    cluster=self.dbcluster,
-                                                    service_instance=instance)
-            if dbcs:
-                self.session.delete(dbcs)
+            if instance in self.dbcluster.service_bindings:
+                self.dbcluster.service_bindings.remove(instance)
             else:
                 self.error("Internal Error: Could not unbind "
                            "service %s instance %s" %
@@ -639,9 +594,7 @@ class ClusterChooser(Chooser):
                                     "service %s instance %s",
                                     self.description,
                                     instance.service.name, instance.name)
-            dbcs = ClusterServiceBinding(cluster=self.dbcluster,
-                                         service_instance=instance)
-            self.session.add(dbcs)
+            self.dbcluster.service_bindings.append(instance)
             self.flush_changes()
             for h in self.dbcluster.hosts:
                 host_plenary = PlenaryHost(h, logger=self.logger)

@@ -1501,7 +1501,6 @@
       </optgroup>
       <optgroup name="optional_opts">
          <option name="personality" type="string">personality name</option>
-         <option name="comments" type="string">Comments</option>
       </optgroup>
       <transport method="put" path="service/%(service)s/required_for/archetype/%(archetype)s" />
       <transport trigger="personality" method="put" path="service/%(service)s/required_for/personality/%(archetype)s/%(personality)s" />

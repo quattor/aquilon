@@ -116,7 +116,7 @@ class PlenaryToplevelHost(Plenary):
         if not self.new_content:
             try:
                 self.new_content = self._generate_content()
-            except IncompleteError, e:
+            except IncompleteError:
                 # Attempting to have IncompleteError thrown later by
                 # not caching the return
                 return self.old_content is None
@@ -257,25 +257,26 @@ class PlenaryToplevelHost(Plenary):
         required_services = set(self.dbhost.archetype.services +
                                 self.dbhost.personality.services)
 
-        for t in self.dbhost.templates:
-            required_services.discard(t.service_instance.service)
-            services.append(t.cfg_path + '/client/config')
+        for si in self.dbhost.services_used:
+            required_services.discard(si.service)
+            services.append(si.cfg_path + '/client/config')
         if required_services:
             raise IncompleteError("Host %s is missing required services %s." %
                                   (self.name, required_services))
 
         provides = []
-        for sis in self.dbhost.services_provided:
-            provides.append('%s/server/config' % sis.service_instance.cfg_path)
+        for si in self.dbhost.services_provided:
+            provides.append('%s/server/config' % si.cfg_path)
+
+        # Ensure used/provided services have a stable order
+        services.sort()
+        provides.sort()
 
         templates = []
         templates.append("archetype/base")
         templates.append(os_template)
-
-        for service in services:
-            templates.append(service)
-        for provide in provides:
-            templates.append(provide)
+        templates.extend(services)
+        templates.extend(provides)
         templates.append(personality_template)
         if self.dbhost.cluster:
             clplenary = PlenaryClusterClient(self.dbhost.cluster)
@@ -311,7 +312,7 @@ class PlenaryToplevelHost(Plenary):
         # We put in a default function: this will be overridden by the
         # personality with a more suitable value, we just leave this here
         # for paranoia's sake.
-        lines.append("'/system/function' = 'grid';");
+        lines.append("'/system/function' = 'grid';")
         lines.append("'/system/build' = %s;" % pan(self.dbhost.status.name))
         if self.dbhost.cluster:
             lines.append("'/system/cluster/name' = %s;" % pan(self.dbhost.cluster.name))

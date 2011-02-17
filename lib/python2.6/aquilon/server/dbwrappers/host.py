@@ -50,11 +50,10 @@ def hostname_to_host(session, hostname):
                                 "assigned.".format(dbmachine))
     return dbmachine.host
 
-def get_host_build_item(self, dbhost, dbservice):
-    for template in dbhost.templates:
-        si = template.service_instance
-        if si and si.service == dbservice:
-            return template
+def get_host_bound_service(dbhost, dbservice):
+    for si in dbhost.services_used:
+        if si.service == dbservice:
+            return si
     return None
 
 def get_host_dependencies(session, dbhost):
@@ -62,10 +61,9 @@ def get_host_dependencies(session, dbhost):
     If the host has no dependencies, then an empty list is returned
     """
     ret = []
-    for sis in dbhost.services_provided:
+    for si in dbhost.services_provided:
         ret.append("%s is bound as a server for service %s instance %s" %
-                   (sis.host.fqdn, sis.service_instance.service.name,
-                    sis.service_instance.name))
+                   (dbhost.fqdn, si.service.name, si.name))
     if dbhost.cluster and hasattr(dbhost.cluster, 'vm_to_host_ratio') and \
        dbhost.cluster.host_count * len(dbhost.cluster.machines) > \
        dbhost.cluster.vm_count * (len(dbhost.cluster.hosts) - 1):

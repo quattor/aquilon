@@ -32,7 +32,7 @@ from datetime import datetime
 from sqlalchemy import (Column, Integer, String, DateTime, Sequence, ForeignKey,
                         UniqueConstraint)
 
-from sqlalchemy.orm import relation, backref, object_session
+from sqlalchemy.orm import relation, backref, object_session, deferred
 from sqlalchemy.orm.attributes import instance_state
 from sqlalchemy.orm.interfaces import MapperExtension
 from sqlalchemy.ext.associationproxy import association_proxy
@@ -82,6 +82,15 @@ _CASABV = 'clstr_alnd_svc'
 _CSB = 'cluster_service_binding'
 _CSBABV = 'clstr_svc_bndg'
 
+def _hcm_host_creator(host):
+    return HostClusterMember(host=host)
+
+def _mcm_machine_creator(machine):
+    return MachineClusterMember(machine=machine)
+
+def _csb_svcinst_creator(service_instance):
+    return ClusterServiceBinding(service_instance=service_instance)
+
 
 class Cluster(Base):
     """
@@ -128,13 +137,12 @@ class Cluster(Base):
     branch = relation(Branch, uselist=False, lazy=False, backref='clusters')
     sandbox_author = relation(UserPrincipal, uselist=False)
 
-    hosts = association_proxy('_hosts', 'host',
-                              creator=lambda host: HostClusterMember(host=host))
+    hosts = association_proxy('_hosts', 'host', creator=_hcm_host_creator)
     machines = association_proxy('_machines', 'machine',
-                         creator=lambda mach: MachineClusterMember(machine=mach))
-
+                                 creator=_mcm_machine_creator)
     service_bindings = association_proxy('_cluster_svc_binding',
-                                         'service_instance')
+                                         'service_instance',
+                                         creator=_csb_svcinst_creator)
 
     _metacluster = None
     metacluster = association_proxy('_metacluster', 'metacluster')
@@ -421,7 +429,8 @@ class HostClusterMember(Base):
                         #if the host is deleted, so is the membership
                         primary_key=True)
 
-    creation_date = Column(DateTime, default=datetime.now, nullable=False)
+    creation_date = deferred(Column(DateTime, default=datetime.now,
+                                    nullable=False))
 
     """
         Association Proxy and relation cascading:
@@ -463,7 +472,8 @@ class MachineClusterMember(Base):
                                             ondelete='CASCADE'),
                         primary_key=True)
 
-    creation_date = Column(DateTime, default=datetime.now, nullable=False)
+    creation_date = deferred(Column(DateTime, default=datetime.now,
+                                    nullable=False))
 
     """ See comments for HostClusterMembers relations """
     cluster = relation(Cluster, uselist=False, lazy=False,
@@ -503,8 +513,9 @@ class ClusterAlignedService(Base):
 
     cluster_type = Column(AqStr(16), primary_key=True)
 
-    creation_date = Column(DateTime, default=datetime.now, nullable=False)
-    comments = Column(String(255))
+    creation_date = deferred(Column(DateTime, default=datetime.now,
+                                    nullable=False))
+    comments = deferred(Column(String(255)))
 
     service = relation(Service, uselist=False, lazy=False,
                        backref=backref('_clusters', cascade='all'))
@@ -532,12 +543,13 @@ class ClusterServiceBinding(Base):
                                             name='%s_srv_inst_fk' % _CSBABV),
                                  primary_key=True)
 
-    creation_date = Column(DateTime, default=datetime.now, nullable=False)
-    comments = Column(String(255))
+    creation_date = deferred(Column(DateTime, default=datetime.now,
+                                    nullable=False))
+    comments = deferred(Column(String(255)))
 
     cluster = relation(Cluster, uselist=False, lazy=False,
                        backref=backref('_cluster_svc_binding',
-                                       cascade='all'))
+                                       cascade='all, delete-orphan'))
 
     """
         backref name != forward reference name intentional as it seems more
@@ -548,7 +560,8 @@ class ClusterServiceBinding(Base):
                 cluster.service_bindings.append(svc_inst)
     """
     service_instance = relation(ServiceInstance, lazy=False,
-                                backref='service_instances')
+                                backref=backref('service_instances',
+                                                cascade="all, delete-orphan"))
 
     """
         cfg_path will die soon. using service instance here to

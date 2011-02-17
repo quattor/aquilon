@@ -309,19 +309,19 @@ class CommandAddInterfaceMachine(BrokerCommand):
         # This query (with a different order_by) is used below.
         mac = q.order_by(desc(Interface.mac)).first()
         if not mac:
-            return mac_start.get_address()
+            return str(mac_start)
         highest_mac = MACAddress(mac[0])
         if highest_mac < mac_start:
-            return mac_start.get_address()
+            return str(mac_start)
         if highest_mac < mac_end:
-            return highest_mac.next().get_address()
+            return str(highest_mac.next())
         potential_hole = mac_start
         for mac in q.order_by(asc(Interface.mac)).all():
             current_mac = MACAddress(mac[0])
             if current_mac < mac_start:
                 continue
             if potential_hole < current_mac:
-                return potential_hole.get_address()
+                return str(potential_hole)
             potential_hole = current_mac.next()
         raise ArgumentError("All MAC addresses between %s and %s inclusive "
                             "are currently in use." % (mac_start, mac_end))
@@ -334,8 +334,11 @@ class MACAddress(object):
                 value = long(address.replace(':', ''), 16)
         elif value is None:
             raise ValueError("Must specify either address or value.")
-        self.address = address
         self.value = value
+
+        # Force __str__() to generate it so we don't depend on the input
+        # formatting
+        self.address = None
 
     def __cmp__(self, other):
         return cmp(self.value, other.value)
@@ -344,17 +347,10 @@ class MACAddress(object):
         next_value = self.value + 1
         return MACAddress(value=next_value)
 
-    def get_address(self):
-        """Address is created as needed."""
-        if not self.address:
-            self.address = "%012x" % self.value
-        return self.address
-
     def __str__(self):
-        a = self.get_address()
-        if a.find(':'):
-            return a
-        # This is almost perl-esque, ain't it?  Basically, stich a colon
-        # in between every two characters of the address.
-        return ":".join(["".join(t) for t in
-                         zip(a[0:len(a):2], a[1:len(a):2])])
+        if not self.address:
+            addr = "%012x" % self.value
+            addr = ":".join(["".join(t) for t in zip(addr[0:len(addr):2],
+                                                     addr[1:len(addr):2])])
+            self.address = addr
+        return self.address

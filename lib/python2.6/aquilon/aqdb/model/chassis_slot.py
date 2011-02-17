@@ -59,9 +59,10 @@ class ChassisSlot(Base):  # pylint: disable-msg=W0232, R0903
                        backref=backref('slots', cascade='delete, delete-orphan',
                                        order_by=[slot_number]))
 
+    # No delete-orphan here, it's fine to leave the slot in place even if the
+    # machine is removed
     machine = relation(Machine, uselist=False,
-                       backref=backref('chassis_slot',
-                                       cascade='delete, delete-orphan'))
+                       backref=backref('chassis_slot', cascade='all'))
 
 chassis_slot = ChassisSlot.__table__
 chassis_slot.primary_key.name = '%s_pk' % _TN  # pylint: disable-msg=E1101, C0301

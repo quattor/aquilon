@@ -30,10 +30,10 @@
 
 from datetime import datetime
 
-from sqlalchemy import (Column, Table, Integer, Sequence, String, DateTime,
-                        ForeignKey, UniqueConstraint, Index)
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
 from sqlalchemy.orm import relation, deferred, backref
 from sqlalchemy.ext.orderinglist import ordering_list
+from sqlalchemy.ext.associationproxy import association_proxy
 
 from aquilon.aqdb.model import Base, Host, ServiceInstance
 
@@ -60,12 +60,28 @@ class ServiceInstanceServer(Base):
     comments = deferred(Column(String(255), nullable=True))
 
     service_instance = relation(ServiceInstance, uselist=False,
-                                backref=backref("servers",
+                                backref=backref("servers", lazy=True,
+                                                cascade="all, delete-orphan",
                                                 collection_class=ordering_list('position'),
                                                 order_by=[position]))
 
-    host = relation(Host, uselist=False, backref='services_provided')
+    host = relation(Host, uselist=False,
+                    backref=backref('_services_provided', lazy=True,
+                                    cascade="all, delete-orphan"))
 
 
-service_instance_server = ServiceInstanceServer.__table__
-service_instance_server.primary_key.name='service_instance_server_pk'
+def _sis_host_creator(host):
+    return ServiceInstanceServer(host=host)
+
+def _sis_si_creator(service_instance):
+    return ServiceInstanceServer(service_instance=service_instance)
+
+ServiceInstance.server_hosts = association_proxy('servers', 'host',
+                                                 creator=_sis_host_creator)
+
+Host.services_provided = association_proxy('_services_provided',
+                                           'service_instance',
+                                           creator=_sis_si_creator)
+
+sis = ServiceInstanceServer.__table__  # pylint: disable-msg=C0103, E1101
+sis.primary_key.name = 'service_instance_server_pk'

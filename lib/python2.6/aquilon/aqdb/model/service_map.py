@@ -30,8 +30,8 @@
 
 from datetime import datetime
 
-from sqlalchemy import (Column, Table, Integer, Sequence, String, DateTime,
-                        ForeignKey, UniqueConstraint, Index)
+from sqlalchemy import (Column, Integer, Sequence, String, DateTime, ForeignKey,
+                        UniqueConstraint)
 from sqlalchemy.orm import relation, deferred, backref
 
 from aquilon.aqdb.model import Base, Location, ServiceInstance
@@ -47,33 +47,34 @@ class ServiceMap(Base):
 
     id = Column(Integer, Sequence('service_map_id_seq'), primary_key=True)
     service_instance_id = Column(Integer, ForeignKey('service_instance.id',
-                                                name='svc_map_svc_inst_fk'),
-                          nullable=False)
+                                                     name='svc_map_svc_inst_fk',
+                                                     ondelete='CASCADE'),
+                                 nullable=False)
 
     location_id = Column(Integer, ForeignKey('location.id',
                                              ondelete='CASCADE',
                                              name='svc_map_loc_fk'),
-                    nullable=False)
+                         nullable=False)
 
     creation_date = deferred(Column(DateTime, default=datetime.now,
-                                       nullable=False))
+                                    nullable=False))
     comments = deferred(Column(String(255), nullable=True))
-    location = relation(Location, backref='service_maps')
-    service_instance = relation(ServiceInstance, backref='service_map')
 
-    def _service(self):
+    location = relation(Location,
+                        backref=backref('service_maps', lazy=True,
+                                        cascade="all, delete-orphan"))
+    service_instance = relation(ServiceInstance,
+                                backref=backref('service_map', lazy=True,
+                                                cascade="all, delete-orphan"))
+
+    @property
+    def service(self):
         return self.service_instance.service
-    service = property(_service)
 
-    def __repr__(self):
-        return '<%s %s at %s >' % (self.__class__.__name__,
-                                   self.service_instance.service, self.location)
 
-service_map = ServiceMap.__table__
-service_map.primary_key.name='service_map_pk'
+service_map = ServiceMap.__table__  # pylint: disable-msg=C0103, E1101
+service_map.primary_key.name = 'service_map_pk'
 
 service_map.append_constraint(
     UniqueConstraint('service_instance_id', 'location_id',
                      name='svc_map_loc_inst_uk'))
-
-table = service_map

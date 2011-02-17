@@ -29,12 +29,12 @@
 
 from __future__ import with_statement
 
-from socket import gethostbyname
 from tempfile import NamedTemporaryFile
 
 from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.server.broker import BrokerCommand
-from aquilon.server.dbwrappers.host import (hostname_to_host, get_host_build_item)
+from aquilon.server.dbwrappers.host import (hostname_to_host,
+                                            get_host_bound_service)
 from aquilon.server.processes import run_command
 from aquilon.server.logger import CLIENT_INFO
 from aquilon.aqdb.model import Service
@@ -72,17 +72,17 @@ class CommandPxeswitchList(BrokerCommand):
                 # Find what "bootserver" instance we're bound to
                 dbservice = Service.get_unique(session, "bootserver",
                                                compel=True)
-                bootbi = get_host_build_item(session, dbhost, dbservice)
-                if not bootbi:
+                si = get_host_bound_service(dbhost, dbservice)
+                if not si:
                     failed.append("%s: Host has no bootserver." % host)
                 else:
-                    if bootbi.service_instance.name in groups:
-                        groups[bootbi.service_instance.name].append(dbhost)
+                    if si.name in groups:
+                        groups[si.name].append(dbhost)
                     else:
                         # for that instance, find what servers are bound to it.
-                        servers[bootbi.service_instance.name] = [s.host.fqdn
-                          for s in bootbi.service_instance.servers]
-                        groups[bootbi.service_instance.name] = [dbhost]
+                        servers[si.name] = [host.fqdn for host in
+                                            si.server_hosts]
+                        groups[si.name] = [dbhost]
 
             except NotFoundException, nfe:
                 failed.append("%s: %s" % (host, nfe))
@@ -108,7 +108,8 @@ class CommandPxeswitchList(BrokerCommand):
                     raise ArgumentError("Missing required target parameter.")
 
                 groupargs.append("--servers")
-                groupargs.append(" ".join(["%s@%s" % (user,s) for s in servers[group]]))
+                groupargs.append(" ".join(["%s@%s" % (user, s) for s in
+                                           servers[group]]))
 
                 # it would be nice to parallelize this....
                 run_command(groupargs, logger=logger, loglevel=CLIENT_INFO)

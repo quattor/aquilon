@@ -164,7 +164,7 @@ class PlenaryServiceInstanceServer(Plenary):
     """
     This structure template provides information for the template
     specific to the service instance and for use by the server.
-    This data is separated away from the ServiceInstanceServerDefault
+    This data is separated away from the PlenaryServiceInstanceServerDefault
     to allow that template to be overridden in the template library
     while still having access to the generated data here (the list
     of clients and the instance name)

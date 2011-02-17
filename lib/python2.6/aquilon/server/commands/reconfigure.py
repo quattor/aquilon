@@ -32,7 +32,7 @@
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.commands.make import CommandMake
 from aquilon.server.dbwrappers.host import hostname_to_host
-from aquilon.aqdb.model import BuildItem, HostLifecycle, Archetype, Personality
+from aquilon.aqdb.model import HostLifecycle, Archetype, Personality
 from aquilon.exceptions_ import ArgumentError
 
 

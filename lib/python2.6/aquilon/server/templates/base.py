@@ -120,9 +120,6 @@ class Plenary(object):
 
     def _generate_content(self):
         """Not meant to be overridden or called directly."""
-        # This potentially calls refresh several times for objects that
-        # have multiple plenaries, like service and cluster...
-        self.refresh()
         lines = []
         type = self.template_type
         if type is not None and type is not "":
@@ -134,10 +131,6 @@ class Plenary(object):
 
     def write(self, dir=None, user=None, locked=False, content=None):
         """Write out the template.
-
-        Note that session.flush() MUST be called before writing a
-        changed sqlalchemy object or the embedded call to refresh
-        will revert the object back to its old state.
 
         If the content is unchanged, then the file will not be modified
         (preserving the mtime).
@@ -254,18 +247,6 @@ class Plenary(object):
         finally:
             if not locked:
                 lock_queue.release(key)
-
-    def refresh(self):
-        """Refresh any stored database objects.
-
-        Note that the session MUST be flushed before calling a refresh
-        if the object's state has changed or it will be reverted.
-
-        """
-        # This could be enhanced to deal with dbobj being a list...
-        if hasattr(self, 'dbobj') and self.dbobj:
-            session = object_session(self.dbobj)
-            session.refresh(self.dbobj)
 
     def stash(self):
         """Record the state of the plenary to make restoration possible.
@@ -449,7 +430,3 @@ class PlenaryCollection(object):
     def append(self, plenary):
         plenary.logger = self.logger
         self.plenaries.append(plenary)
-
-    def refresh(self):
-        for plen in self.plenaries:
-            plen.refresh()

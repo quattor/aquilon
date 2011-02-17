@@ -31,10 +31,9 @@
 
 from sqlalchemy.orm import aliased, joinedload_all, contains_eager
 
-from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.formats.system import SimpleSystemList
-from aquilon.aqdb.model import (Host, Cluster, Domain, Archetype, Personality,
+from aquilon.aqdb.model import (Host, Cluster, Archetype, Personality,
                                 HostLifecycle, OperatingSystem, Service,
                                 ServiceInstance, NasDisk, Disk, Machine, Model,
                                 System, DnsDomain, Interface, AddressAssignment)
@@ -173,15 +172,15 @@ class CommandSearchHost(BrokerCommand):
             dbservice = Service.get_unique(session, service, compel=True)
             if instance:
                 dbsi = get_service_instance(session, dbservice, instance)
-                q = q.join('services_used')
+                q = q.join('_services_used')
                 q = q.filter_by(service_instance=dbsi)
                 q = q.reset_joinpoint()
             else:
-                q = q.join('services_used', 'service_instance')
+                q = q.join('_services_used', 'service_instance')
                 q = q.filter_by(service=dbservice)
                 q = q.reset_joinpoint()
         elif instance:
-            q = q.join(['services_used', 'service_instance'])
+            q = q.join(['_services_used', 'service_instance'])
             q = q.filter_by(name=instance)
             q = q.reset_joinpoint()
 

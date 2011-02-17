@@ -69,6 +69,4 @@ class CommandUnmapService(BrokerCommand):
         if dbmap:
             session.delete(dbmap)
         session.flush()
-        session.refresh(dbservice)
-        session.refresh(dbinstance)
         return

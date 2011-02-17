@@ -342,8 +342,8 @@ class ObjectFormatter(object):
     def add_service_instance_msg(self, si_msg, service_instance):
         si_msg.name = str(service_instance.name)
         si_msg.template = str(service_instance.cfg_path)
-        for server in service_instance.servers:
-            self.add_host_msg(si_msg.servers.add(), server.host)
+        for host in service_instance.server_hosts:
+            self.add_host_msg(si_msg.servers.add(), host)
         # TODO: make this conditional to avoid performance problems
         #for client in service_instance.clients:
         #    self.add_host_msg(si_msg.clients.add(), client.host)

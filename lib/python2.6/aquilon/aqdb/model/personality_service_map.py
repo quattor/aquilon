@@ -30,8 +30,8 @@
 
 from datetime import datetime
 
-from sqlalchemy import (Column, Table, Integer, Sequence, String, DateTime,
-                        ForeignKey, UniqueConstraint, Index)
+from sqlalchemy import (Column, Integer, Sequence, String, DateTime, ForeignKey,
+                        UniqueConstraint)
 from sqlalchemy.orm import relation, deferred, backref
 
 from aquilon.aqdb.model import (Base, Location, Personality, Archetype,
@@ -52,25 +52,32 @@ class PersonalityServiceMap(Base):
     id = Column(Integer, Sequence('%s_seq'%(_ABV)), primary_key=True)
 
     service_instance_id = Column(Integer, ForeignKey('service_instance.id',
-                                                name='%s_svc_inst_fk'%(_ABV)),
-                          nullable=False)
+                                                     name='%s_svc_inst_fk'%(_ABV),
+                                                     ondelete='CASCADE'),
+                                 nullable=False)
 
-    location_id = Column(Integer, ForeignKey('location.id',
-                                                ondelete='CASCADE',
-                                                name='%s_loc_fk'%(_ABV)),
-                            nullable=False)
+    location_id = Column(Integer, ForeignKey('location.id', ondelete='CASCADE',
+                                             name='%s_loc_fk'%(_ABV)),
+                         nullable=False)
 
     personality_id = Column(Integer, ForeignKey('personality.id',
-                                                  name='personality',
-                                                  ondelete='CASCADE'),
+                                                name='personality',
+                                                ondelete='CASCADE'),
                             nullable=False)
 
     creation_date = deferred(Column(DateTime, default=datetime.now, nullable=False))
     comments = deferred(Column(String(255), nullable=True))
 
-    location = relation(Location, backref='personality_service_maps')
-    service_instance = relation(ServiceInstance, backref='personality_service_map')
-    personality = relation(Personality, backref='maps', uselist=False)
+    location = relation(Location,
+                        backref=backref('personality_service_maps', lazy=True,
+                                        cascade="all, delete-orphan"))
+    service_instance = relation(ServiceInstance,
+                                backref=backref('personality_service_map',
+                                                lazy=True,
+                                                cascade="all, delete-orphan"))
+    personality = relation(Personality, uselist=False,
+                           backref=backref('maps', lazy=True,
+                                           cascade="all, delete-orphan"))
 
     #Archetype probably shouldn't be exposed at this table/object: This isn't
     #intended for use with Archetype, but I'm not 100% sure yet
@@ -78,17 +85,15 @@ class PersonalityServiceMap(Base):
     #    return self.personality.archetype
     #archetype = property(_archetype)
 
-    def _service(self):
+    @property
+    def service(self):
         return self.service_instance.service
-    service = property(_service)
 
 
-personality_service_map = PersonalityServiceMap.__table__
-table = personality_service_map
-
-personality_service_map.primary_key.name='prsnlty_svc_map_pk'
+psm = PersonalityServiceMap.__table__  # pylint: disable-msg=C0103, E1101
+psm.primary_key.name = 'prsnlty_svc_map_pk'
 
 #TODO: reconsider the surrogate primary key?
-personality_service_map.append_constraint(
+psm.append_constraint(
     UniqueConstraint('personality_id', 'service_instance_id', 'location_id',
                      name='%s_loc_inst_uk'%(_ABV)))

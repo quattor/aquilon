@@ -34,7 +34,6 @@ from sqlalchemy.orm import joinedload, subqueryload, undefer, contains_eager
 from aquilon.server.broker import BrokerCommand
 from aquilon.aqdb.model import Service, ServiceInstance
 from aquilon.server.dbwrappers.host import hostname_to_host
-from aquilon.server.dbwrappers.service_instance import get_client_service_instances
 from aquilon.server.formats.service_instance import ServiceInstanceList
 from aquilon.server.formats.service import ServiceList
 
@@ -56,7 +55,7 @@ class CommandShowService(BrokerCommand):
             q = q.order_by(Service.name, ServiceInstance.name)
             return ServiceInstanceList(q.all())
         elif dbclient:
-            service_instances = get_client_service_instances(session, dbclient)
+            service_instances = dbclient.services_used
             if instance:
                 service_instances = [si for si in service_instances if si.name == instance]
             return ServiceInstanceList(service_instances)

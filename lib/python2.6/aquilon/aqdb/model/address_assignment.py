@@ -35,7 +35,7 @@ import re
 from sqlalchemy import (Column, Integer, String, DateTime, ForeignKey, Sequence,
                         UniqueConstraint)
 from sqlalchemy.ext.associationproxy import association_proxy
-from sqlalchemy.orm import relation, backref, object_session
+from sqlalchemy.orm import relation, backref, object_session, deferred
 
 from aquilon.aqdb.column_types import IPV4, AqStr, Enum
 from aquilon.aqdb.model import Base, Interface, FutureARecord
@@ -90,9 +90,10 @@ class AddressAssignment(Base):
 
     usage = Column(Enum(16, ADDR_USAGES), nullable=False)
 
-    creation_date = Column(DateTime, default=datetime.now, nullable=False)
+    creation_date = deferred(Column(DateTime, default=datetime.now,
+                                    nullable=False))
 
-    comments = Column(String(255), nullable=True)
+    comments = deferred(Column(String(255), nullable=True))
 
     interface = relation(Interface, lazy=False, uselist=False,
                          backref=backref('assignments', uselist=True,

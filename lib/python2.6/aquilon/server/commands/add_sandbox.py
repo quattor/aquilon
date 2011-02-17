@@ -71,7 +71,6 @@ class CommandAddSandbox(CommandGet):
                             comments=comments)
         session.add(dbsandbox)
         session.flush()
-        session.refresh(dbsandbox)
         # Get the cleaned up version...
         sandbox = dbsandbox.name
 
