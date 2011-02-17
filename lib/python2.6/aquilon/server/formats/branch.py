@@ -48,6 +48,9 @@ class DomainFormatter(ObjectFormatter):
         details.append(indent + "  Validated: %s" % domain.is_sync_valid)
         details.append(indent + "  Owner: %s" % domain.owner.name)
         details.append(indent + "  Compiler: %s" % domain.compiler)
+        if domain.change_manager:
+            details.append(indent + "  Change Manager: %s" %
+                           domain.change_manager)
         if domain.comments:
             details.append(indent + "  Comments: %s" % domain.comments)
         return "\n".join(details)

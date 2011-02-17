@@ -70,6 +70,15 @@ class TestUpdateBranch(TestBrokerCommand):
         out = self.badrequesttest(command)
         self.matchoutput(out, "Compiler not found at", command)
 
+    def testupdateprod(self):
+        self.noouttest(["update", "branch", "--branch", "prod",
+                        "--change_manager", "tcm"])
+
+    def testverifyprod(self):
+        command = ["show", "domain", "--domain", "prod"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Change Manager: tcm", command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestUpdateBranch)

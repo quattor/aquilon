@@ -44,7 +44,8 @@ class TestDeployDomain(TestBrokerCommand):
 
     def testdeploychangetest1domain(self):
         self.successtest(["deploy", "--source", "changetest1",
-                          "--target", "deployable"])
+                          "--target", "deployable",
+                          "--comments", "Test comment"])
 
     def testverifydeploy(self):
         domainsdir = self.config.get("broker", "domainsdir")
@@ -54,9 +55,28 @@ class TestDeployDomain(TestBrokerCommand):
             contents = f.readlines()
         self.failUnlessEqual(contents[-1], "#Added by unittest\n")
 
+    def testverifydeploylog(self):
+        kingdir = self.config.get("broker", "kingdir")
+        command = ["log", "--no-color", "-n", "1", "deployable"]
+        (out, err) = self.gitcommand(command, cwd=kingdir)
+        self.matchoutput(out, "User:", command)
+        self.matchoutput(out, "Request ID:", command)
+        self.matchoutput(out, "Comments: Test comment", command)
+
+    def testdeployfail(self):
+        command = ["deploy", "--source", "changetest1",
+                   "--target", "prod"]
+        (out, err) = self.failuretest(command, 4)
+        self.matchoutput(err,
+                         "Domain prod is under change management control.  "
+                         "Please specify --justification.",
+                         command)
+
     def testdeploynosync(self):
         self.successtest(["deploy", "--source", "changetest1",
-                          "--target", "prod", "--nosync"])
+                          "--target", "prod", "--nosync",
+                          "--justification", "tcm=12345678",
+                          "--comments", "Test comment 2"])
 
     def testverifynosync(self):
         domainsdir = self.config.get("broker", "domainsdir")
@@ -72,6 +92,23 @@ class TestDeployDomain(TestBrokerCommand):
         with open(template) as f:
             contents = f.readlines()
         self.failIfEqual(contents[-1], "#Added by unittest\n")
+
+    def testverifynosynclog(self):
+        kingdir = self.config.get("broker", "kingdir")
+
+        # Note: "prod" is a copy of the real thing so limit the amount of
+        # history checked to avoid being fooled by real commits
+
+        # The change must be in prod...
+        command = ["log", "--no-color", "-n", "1", "prod"]
+        (out, err) = self.gitcommand(command, cwd=kingdir)
+        self.matchoutput(out, "Justification: tcm=12345678", command)
+        self.matchoutput(out, "Comments: Test comment 2", command)
+
+        # ... but not in ut-prod
+        command = ["log", "--no-color", "-n", "1", "ut-prod"]
+        (out, err) = self.gitcommand(command, cwd=kingdir)
+        self.matchclean(out, "tcm=12345678", command)
 
 
 if __name__=='__main__':

@@ -32,8 +32,9 @@
 import re
 import os
 
-from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import Branch
+from aquilon.exceptions_ import ArgumentError, AuthorizationException
+from aquilon.aqdb.model import Branch, Domain
+from aquilon.aqdb.model.branch import CHANGE_MANAGERS
 from aquilon.server.broker import BrokerCommand
 
 VERSION_RE = re.compile(r'^[-_.a-zA-Z0-9]*$')
@@ -43,9 +44,15 @@ class CommandUpdateBranch(BrokerCommand):
 
     required_parameters = ["branch"]
 
-    def render(self, session, logger, branch, comments, compiler_version,
-               autosync, **arguments):
+    def render(self, session, logger, dbuser, branch, comments,
+               compiler_version, autosync, change_manager, **arguments):
         dbbranch = Branch.get_unique(session, branch, compel=True)
+
+        # FIXME: proper authorization
+        if dbbranch.owner != dbuser and dbuser.role.name != 'aqd_admin':
+            raise AuthorizationException("Only the owner or an AQD admin can "
+                                         "update a branch.")
+
         if comments:
             dbbranch.comments = comments
         if compiler_version:
@@ -58,5 +65,17 @@ class CommandUpdateBranch(BrokerCommand):
             dbbranch.compiler = compiler
         if autosync is not None:
             dbbranch.autosync = autosync
+        if change_manager is not None:
+            if not isinstance(dbbranch, Domain):
+                raise ArgumentError("Change management can only be controlled "
+                                    "for domains.")
+            if change_manager == '':
+                dbbranch.change_manager = None
+            else:
+                if change_manager not in CHANGE_MANAGERS:
+                    raise ArgumentError("Unknown change manager %s." %
+                                        change_manager)
+                dbbranch.change_manager = change_manager
         session.add(dbbranch)
+        session.flush()
         return

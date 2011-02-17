@@ -41,6 +41,9 @@ _TN = "branch"
 _DMN = "domain"
 _SBX = "sandbox"
 
+# FIXME: this should be somewhere else
+CHANGE_MANAGERS = ["tcm"]
+
 
 class Branch(Base):
     """
@@ -97,6 +100,10 @@ class Domain(Branch):
                                                    name='%s_branch_fk' % _DMN),
                                nullable=True)
     rollback_commit = Column(AqStr(40), nullable=True)
+
+    # FIXME: this should be an Enum, but Enum does not seem to play nice
+    # together with nullable=True
+    change_manager = Column(AqStr(16), nullable=True)
 
     __mapper_args__ = {'polymorphic_identity': _DMN,
                        'inherit_condition': domain_id == Branch.id}
