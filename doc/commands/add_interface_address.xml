@@ -23,6 +23,9 @@
     <refsynopsisdiv>
 	<cmdsynopsis>
 	    <command>aq add interface address</command>
+	    <group>
+		<synopfragmentref linkend="global-options">Global options</synopfragmentref>
+	    </group>
 	    <group choice="req">
 	        <arg choice="plain"><option>--machine <replaceable>MACHINE</replaceable></option></arg>
 	        <arg choice="plain"><option>--chassis <replaceable>CHASSIS</replaceable></option></arg>
@@ -35,6 +38,7 @@
 	    <group>
 		<synopfragmentref linkend="ip-options">IP address options</synopfragmentref>
 	    </group>
+	    <xi:include href="../common/global_options.xml"/>
 	    <xi:include href="../common/ip_options.xml"/>
 	</cmdsynopsis>
     </refsynopsisdiv>
@@ -133,6 +137,7 @@
 	    </varlistentry>
 	</variablelist>
 	<xi:include href="../common/ip_options_desc.xml"/>
+	<xi:include href="../common/global_options_desc.xml"/>
     </refsect1>
 
     <refsect1 xml:id="virtual-iface">

@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V5.0//EN"
+	"http://docbook.org/xml/5.0/dtd/docbook.dtd" []>
+<synopfragment xml:id="global-options">
+    <group choice="opt">
+	<arg choice="plain"><option>-v</option></arg>
+	<arg choice="plain"><option>--verbose</option></arg>
+    </group>
+    <group choice="opt">
+	<arg choice="plain"><option>-q</option></arg>
+	<arg choice="plain"><option>--quiet</option></arg>
+    </group>
+    <group choice="opt">
+	<arg choice="plain"><option>--partialok</option></arg>
+	<arg choice="plain"><option>--nopartialok</option></arg>
+    </group>
+    <group choice="opt">
+	<arg choice="plain"><option>-d</option></arg>
+	<arg choice="plain"><option>--debug</option></arg>
+    </group>
+    <group choice="opt">
+	<arg choice="plain"><option>-u</option></arg>
+	<arg choice="plain"><option>--httpinfo</option></arg>
+    </group>
+    <group choice="opt">
+	<arg choice="plain"><option>-f <replaceable>FORMAT</replaceable></option></arg>
+	<arg choice="plain"><option>--format <replaceable>FORMAT</replaceable></option></arg>
+    </group>
+    <group choice="opt">
+	<arg choice="plain"><option>--auth</option></arg>
+	<arg choice="plain"><option>--noauth</option></arg>
+    </group>
+    <group choice="opt">
+	<arg choice="plain"><option>--exec</option></arg>
+	<arg choice="plain"><option>--noexec</option></arg>
+    </group>
+    <!-- FIXME: - -usesock does not seem to exist on the client side -->
+    <!-- FIXME: - -slowstatus: do we need it documented? -->
+    <arg choice="opt"><option>--aqport <replaceable>PORT</replaceable></option></arg>
+    <arg choice="opt"><option>--aqhost <replaceable>FQDN</replaceable></option></arg>
+    <arg choice="opt"><option>--aquser <replaceable>USER</replaceable></option></arg>
+</synopfragment>
+
+<!-- vim: set ai sw=4: -->
