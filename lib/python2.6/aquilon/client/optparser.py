@@ -580,7 +580,7 @@ class option(Element):
     def recursiveHelp(self, indentlevel, width=None):
         whitespace = " " * (4 * indentlevel)
         help = self.help if len(self.help) else "\n"
-        if self.default:
+        if self.default is not None:
             help += "\nDefault: %s" % self.default
 
         helplines = textwrap.wrap(help, width - 36)
