@@ -334,11 +334,6 @@ class PlenaryToplevelHost(Plenary):
         if routers:
             lines.append('"/system/network/routers" = %s;' % pan(routers))
         lines.append("")
-        # XXX: remove!
-        # We put in a default function: this will be overridden by the
-        # personality with a more suitable value, we just leave this here
-        # for paranoia's sake.
-        lines.append("'/system/function' = 'grid';")
         lines.append("'/system/build' = %s;" % pan(self.dbhost.status.name))
         if self.dbhost.cluster:
             lines.append("'/system/cluster/name' = %s;" % pan(self.dbhost.cluster.name))
