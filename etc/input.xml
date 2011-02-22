@@ -1133,6 +1133,61 @@
       <transport trigger="switch" method="put" path="switch/%(switch)s/interface/%(interface)s" />
    </command>
 
+   <command name="add_network_environment">
+      Define a new network environment.
+      <optgroup name="add_netenv_mandatory" mandatory="True" fields="all">
+	 <option name="network_environment" type="string">Name of the environment</option>
+      </optgroup>
+      <optgroup name="add_netenv_optional" mandatory="False" fields="any">
+	 <!-- TODO: Do we need any other kind of location? -->
+	 <option name="building" type="string">Building</option>
+	 <option name="comments" type="string">Comments</option>
+      </optgroup>
+      <transport method="put" path="network_environment/%(network_environment)s"/>
+   </command>
+
+   <command name="del_network_environment">
+      Delete a new network environment.
+      <optgroup name="del_netenv_mandatory" mandatory="True" fields="all">
+	 <option name="network_environment" type="string">Name of the environment</option>
+      </optgroup>
+      <transport method="delete" path="network_environment/%(network_environment)s"/>
+   </command>
+
+   <command name="update_network_environment">
+      Update a new network environment.
+      <optgroup name="add_netenv_mandatory" mandatory="True" fields="all">
+	 <option name="network_environment" type="string">Name of the environment</option>
+      </optgroup>
+      <optgroup name="add_netenv_optional" mandatory="False" fields="any">
+	 <!-- TODO: Do we need any other kind of location? -->
+	 <option name="building" type="string">Building</option>
+	 <option name="clear_location" type="flag" conflicts="building">Clear the location mapping</option>
+	 <option name="comments" type="string">Comments</option>
+      </optgroup>
+      <transport method="post" path="network_environment/%(network_environment)s"/>
+   </command>
+
+   <command name="show_network_environment">
+      Display a new network environment.
+      <optgroup name="show_netenv_options" mandatory="True" fields="any">
+	 <option name="network_environment" type="string">Name of the environment</option>
+	 <option name="all" type="flag">Show all environments</option>
+      </optgroup>
+      <transport trigger="network_environment" method="get" path="network_environment/%(network_environment)s"/>
+      <transport trigger="all" method="get" path="network_environment"/>
+   </command>
+
+   <command name="search_network_environment">
+      Display a new network environment.
+      <optgroup name="search_netenv_options" mandatory="True" fields="any">
+	 <option name="network_environment" type="string">Name of the environment</option>
+	 <!-- TODO: Do we need any other kind of location? -->
+	 <option name="building" type="string">Building</option>
+      </optgroup>
+      <transport method="get" path="find/network_environment"/>
+   </command>
+
    <command name="add_network">
       Define a new network.
       <p/>

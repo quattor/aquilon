@@ -82,7 +82,6 @@ class TestAddNetwork(TestBrokerCommand):
                          "named %s with address %s." %
                          (str(subnet.ip), str(net.ip), str(net)), command)
 
-
     def testaddnetworkofcards(self):
         # An entirely fictitious network
         self.noouttest(["add_network", "--ip", "192.168.1.0",
@@ -91,6 +90,23 @@ class TestAddNetwork(TestBrokerCommand):
                         "--building", "cards", "--side", "a",
                         "--type", "unknown",
                         "--comments", "Made-up network"])
+
+    def testaddexcx(self):
+        net = self.net.unknown[0]
+        subnet = net.subnet()[0]
+        command = ["add", "network", "--network", "excx-net",
+                   "--ip", subnet.ip, "--netmask", subnet.netmask,
+                   "--building", "np", "--type", net.nettype,
+                   "--network_environment", "excx"]
+        self.noouttest(command)
+
+    def testaddutcolo(self):
+        net = self.net.unknown[1]
+        command = ["add", "network", "--network", "utcolo-net",
+                   "--ip", net.ip, "--netmask", net.netmask,
+                   "--building", "ut", "--type", net.nettype,
+                   "--network_environment", "utcolo"]
+        self.noouttest(command)
 
     def testshownetwork(self):
         for network in self.net.all:
@@ -137,6 +153,44 @@ class TestAddNetwork(TestBrokerCommand):
                    "127.0.0.0", "--netmask", "255.0.0.0",
                    "--building", "ut"]
         self.noouttest(command)
+
+    def testshownetworknoenv(self):
+        command = "show network --building np"
+        out = self.commandtest(command.split(" "))
+        self.matchclean(out, "excx-net", command)
+
+        command = "show network --building ut"
+        out = self.commandtest(command.split(" "))
+        self.matchclean(out, "utcolo-net", command)
+
+    def testshownetworkwithenv(self):
+        command = "show network --building np --network_environment excx"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "excx-net", command)
+
+    def testshowexcxnoenv(self):
+        command = "show network --network excx-net"
+        out = self.notfoundtest(command.split(" "))
+        self.matchoutput(out, "Network excx-net not found.", command)
+
+    def testshowexcxwithenv(self):
+        net = self.net.unknown[0]
+        subnet = net.subnet()[0]
+        command = "show network --network excx-net --network_environment excx"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Network: excx-net", command)
+        self.matchoutput(out, "Network Environment: excx", command)
+        self.matchoutput(out, "IP: %s" % subnet.ip, command)
+        self.matchoutput(out, "Netmask: %s" % subnet.netmask, command)
+
+    def testshowutcolowithenv(self):
+        net = self.net.unknown[1]
+        command = "show network --network utcolo-net --network_environment utcolo"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Network: utcolo-net", command)
+        self.matchoutput(out, "Network Environment: utcolo", command)
+        self.matchoutput(out, "IP: %s" % net.ip, command)
+        self.matchoutput(out, "Netmask: %s" % net.netmask, command)
 
 
 if __name__ == '__main__':

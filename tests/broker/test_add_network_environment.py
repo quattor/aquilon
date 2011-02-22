@@ -1,7 +1,7 @@
 #!/usr/bin/env python2.6
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 #
-# Copyright (C) 2008,2009,2010,2011  Contributor
+# Copyright (C) 2011  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -27,7 +27,7 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-"""Module for testing the update network command."""
+"""Module for testing the add_network_environment command."""
 
 import unittest
 
@@ -38,45 +38,44 @@ if __name__ == "__main__":
 from brokertest import TestBrokerCommand
 
 
-class TestUpdateNetwork(TestBrokerCommand):
+class TestAddNetworkEnvironment(TestBrokerCommand):
 
-    def test_100_update_discoverable(self):
-        self.noouttest(["update", "network", "--ip", "10.184.78.224",
-                        "--discoverable"])
-
-    def test_110_verify_discoverable(self):
-        command = "show network --ip 10.184.78.224"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Discoverable: True", command)
-
-    def test_200_update_nodiscoverable(self):
-        self.noouttest(["update", "network", "--ip", "10.184.78.224",
-                        "--nodiscoverable"])
-
-    def test_210_verify_nodiscoverable(self):
-        command = "show network --ip 10.184.78.224"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Discoverable: False", command)
-
-    def test_300_update_noenv(self):
-        command = ["update", "network", "--network", "excx-net",
-                   "--discoverable"]
-        out = self.notfoundtest(command)
-        self.matchoutput(out, "Network excx-net not found.", command)
-
-    def test_310_update_withenv(self):
-        command = ["update", "network", "--network", "excx-net",
-                   "--discoverable", "--network_environment", "excx"]
+    def testaddexcx(self):
+        command = ["add", "network", "environment",
+                   "--network_environment", "excx", "--building", "np",
+                   "--comments", "Exchange X"]
         self.noouttest(command)
 
-    def test_315_verify(self):
-        command = ["show", "network", "--network", "excx-net",
+    def testaddutcolo(self):
+        command = ["add", "network", "environment",
+                   "--network_environment", "utcolo",
+                   "--comments", "Unit test colo environment"]
+        self.noouttest(command)
+
+    def testverifyexcx(self):
+        command = ["show", "network", "environment",
                    "--network_environment", "excx"]
         out = self.commandtest(command)
-        self.matchoutput(out, "Discoverable: True", command)
+        self.matchoutput(out, "Network Environment: excx", command)
+        self.matchoutput(out, "Building: np", command)
+        self.matchoutput(out, "Comments: Exchange X", command)
+
+    def testverifyutcolo(self):
+        command = ["show", "network", "environment",
+                   "--network_environment", "utcolo"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Network Environment: utcolo", command)
+        self.matchclean(out, "Building:", command)
+        self.matchoutput(out, "Comments: Unit test colo environment", command)
+
+    def testshowall(self):
+        command = ["show", "network", "environment", "--all"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Network Environment: internal", command)
+        self.matchoutput(out, "Network Environment: excx", command)
+        self.matchoutput(out, "Network Environment: utcolo", command)
 
 
 if __name__=='__main__':
-    suite = unittest.TestLoader().loadTestsFromTestCase(TestUpdateDomain)
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestAddNetworkEnvironment)
     unittest.TextTestRunner(verbosity=2).run(suite)
-
