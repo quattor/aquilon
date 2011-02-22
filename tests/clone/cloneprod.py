@@ -32,6 +32,9 @@
 Maybe one day this will be generalized.  For now it uses the production
 database and server as a source and AQDCONF values for the destination.
 
+There are some simple overrides to help with populating an environment
+for a proid.
+
 """
 
 
@@ -40,13 +43,13 @@ import sys
 from subprocess import Popen
 
 import ms.version
-
+ms.version.addpkg('ms.modulecmd', '1.0.4')
+import ms.modulecmd
+ms.modulecmd.load('orcl/client/11.2.0.1.0')
+ms.version.addpkg('cx_Oracle', '5.0.4-11.2.0.1.0')
 ms.version.addpkg('argparse', '1.1')
 import argparse
-
-parser = argparse.ArgumentParser(description='Create a dev copy of prod data.')
-# No args yet, but at least someone will get a quick description on -h...
-args = parser.parse_args()
+import cx_Oracle
 
 BINDIR = os.path.dirname(os.path.realpath(__file__))
 SRCDIR = os.path.join(BINDIR, '..', '..')
@@ -54,74 +57,140 @@ sys.path.append(os.path.join(SRCDIR, 'lib', 'python2.6'))
 
 from aquilon.config import Config
 
-config = Config()
 
-source_db = 'NYPO_AQUILON_11'
-source_exp = '/@%s' % source_db
-
-target_dsn = config.get('database', 'dsn')
-target_db = config.get('database', 'server')
-target_imp = '/@%s' % target_db
-
-if not target_dsn.startswith('oracle'):
-    print >>sys.stderr, 'Can only copy into an Oracle database.'
-    sys.exit(1)
-if target_db == source_db or target_dsn.endswith(source_db):
-    print >>sys.stderr, 'Check to make sure config does not point at prod.'
-    sys.exit(1)
-
-ms.version.addpkg('ms.modulecmd', '1.0.4')
-import ms.modulecmd
-ms.modulecmd.load('orcl/client/11.2.0.1.0')
-ms.version.addpkg('cx_Oracle', '5.0.4-11.2.0.1.0')
-import cx_Oracle
-
-def nuke_target(target_imp):
-    connection = cx_Oracle.connect(target_imp)
+def nuke_target(target_login, target_user):
+    connection = cx_Oracle.connect(target_login)
     cursor = connection.cursor()
-    cursor.execute('SELECT table_name FROM user_tables')
+    cursor.execute("SELECT table_name FROM all_tables WHERE owner = :owner",
+                   owner=target_user)
     tables = [table for (table,) in cursor.fetchall()]
-    cursor.execute('SELECT sequence_name FROM user_sequences')
+    cursor.execute("SELECT sequence_name FROM all_sequences "
+                   "WHERE sequence_owner = :owner", owner=target_user)
     sequences = [sequence for (sequence,) in cursor.fetchall()]
     for table in tables:
-        cursor.execute('DROP TABLE "%s" CASCADE CONSTRAINTS' % table)
+        cursor.execute('DROP TABLE "%s"."%s" CASCADE CONSTRAINTS' %
+                       (target_user, table))
     for sequence in sequences:
-        cursor.execute('DROP SEQUENCE "%s"' % sequence)
+        cursor.execute('DROP SEQUENCE "%s"."%s"' % (target_user, sequence))
     cursor.close()
     connection.close()
 
-dbdir = config.get('database', 'dbdir')
-if not os.path.exists(dbdir):
-    os.makedirs(dbdir)
-dumpfile = os.path.join(dbdir, 'clone.dmp')
-if os.path.exists(dumpfile):
-    os.remove(dumpfile)
-p = Popen(['exp', source_exp, 'FILE=%s' % dumpfile, 'OWNER=cdb',
-           'CONSISTENT=y', 'DIRECT=y'],
-          stdout=1, stderr=2)
-p.communicate()
-if p.returncode != 0:
-    print >>sys.stderr, "exp of %s failed!" % source_exp
-    sys.exit(p.returncode)
+class Cloner(object):
+    @staticmethod
+    def get_parser():
+        parser = argparse.ArgumentParser(
+            description='Create a dev copy of prod data.')
+        parser.add_argument('--configfile',
+                            help='Config file to use instead of AQDCONF')
+        parser.add_argument('--touser',
+                            help='Specify a different target user/schema '
+                                 'for the database import')
+        parser.add_argument('--finishfrom',
+                            help='Skip the database actions and do the '
+                                 'final rsync from this destination')
+        return parser
 
-nuke_target(target_imp)
+    def __init__(self, args):
+        self.config = Config(configfile=args.configfile)
 
-p = Popen(['imp', target_imp, 'FILE=%s' % dumpfile, 'IGNORE=y',
-           'SKIP_UNUSABLE_INDEXES=y', 'FROMUSER=CDB',
-           'TOUSER=%s' % config.get('database', 'user')],
-          stdout=1, stderr=2)
-p.communicate()
-if p.returncode != 0:
-    print >>sys.stderr, "imp to %s failed!" % target_imp
-    sys.exit(p.returncode)
+        self.do_create = True
+        self.do_clear = True
+        self.do_restore = True
+        self.do_rsync = True
+        self.warnings = []
 
-source_dir = 'nyaqd1:/var/quattor/'
-target_dir = config.get('broker', 'quattordir')
-RSYNC_FILTER = os.path.join(BINDIR, 'broker_sync.filter')
-p = Popen(['rsync', '-avP', '-e', 'ssh', '--delete',
-           '--filter=merge %s' % RSYNC_FILTER, source_dir, target_dir],
-          stdout=1, stderr=2)
-p.communicate()
-if p.returncode != 0:
-    print >>sys.stderr, "Rsync failed!"
-    sys.exit(p.returncode)
+        self.source_db = 'NYPO_AQUILON_11'
+        self.source_exp = '/@%s' % self.source_db
+
+        self.target_dsn = self.config.get('database', 'dsn')
+        self.target_db = self.config.get('database', 'server')
+        self.target_imp = '/@%s' % self.target_db
+        if args.touser:
+            self.target_schema = args.touser.upper()
+        else:
+            self.target_schema = self.config.get('database', 'user').upper()
+
+        self.dbdir = self.config.get('database', 'dbdir')
+        self.dumpfile = os.path.join(self.dbdir, 'clone.dmp')
+
+        self.source_dir = 'nyaqd1:/var/quattor/'
+        self.target_dir = self.config.get('broker', 'quattordir')
+        self.rsync_filter = os.path.join(BINDIR, 'broker_sync.filter')
+
+        if args.touser:
+            self.warnings.append("Sync'd data to: %s" % self.target_dir)
+
+        if args.finishfrom:
+            self.do_create = False
+            self.do_clear = False
+            self.do_restore = False
+            self.source_dir = args.finishfrom
+
+        if not self.target_dsn.startswith('oracle'):
+            print >>sys.stderr, 'Can only copy into an Oracle database.'
+            sys.exit(1)
+        if self.target_db == self.source_db or \
+           self.target_dsn.endswith(self.source_db):
+            print >>sys.stderr, \
+                    'Check to make sure config does not point at prod.'
+            sys.exit(1)
+
+    def cloneprod(self):
+        self.create_dumpfile()
+        self.clear_target()
+        self.restore_dumpfile()
+        self.run_rsync()
+        if self.warnings:
+            print >>sys.stderr, "/n".join(self.warnings)
+
+    def create_dumpfile(self):
+        if not self.do_create:
+            return
+        if not os.path.exists(self.dbdir):
+            os.makedirs(self.dbdir)
+        if os.path.exists(self.dumpfile):
+            os.remove(self.dumpfile)
+        p = Popen(['exp', self.source_exp, 'FILE=%s' % self.dumpfile,
+                   'OWNER=cdb', 'CONSISTENT=y', 'DIRECT=y'],
+                  stdout=1, stderr=2)
+        p.communicate()
+        if p.returncode != 0:
+            print >>sys.stderr, "exp of %s failed!" % self.source_exp
+            sys.exit(p.returncode)
+
+    def clear_target(self):
+        if not self.do_clear:
+            return
+        nuke_target(self.target_imp, self.target_schema)
+
+    def restore_dumpfile(self):
+        if not self.do_restore:
+            return
+        p = Popen(['imp', self.target_imp, 'FILE=%s' % self.dumpfile,
+                   'IGNORE=y', 'SKIP_UNUSABLE_INDEXES=y', 'FROMUSER=CDB',
+                   'TOUSER=%s' % self.target_schema],
+                  stdout=1, stderr=2)
+        p.communicate()
+        if p.returncode != 0:
+            print >>sys.stderr, "imp to %s failed!" % self.target_imp
+            sys.exit(p.returncode)
+
+    def run_rsync(self):
+        if not self.do_rsync:
+            return
+        if not os.path.exists(self.target_dir):
+            os.makedirs(self.target_dir)
+        p = Popen(['rsync', '-avP', '-e', 'ssh', '--delete',
+                   '--filter=merge %s' % self.rsync_filter,
+                   self.source_dir, self.target_dir],
+                  stdout=1, stderr=2)
+        p.communicate()
+        if p.returncode != 0:
+            print >>sys.stderr, "Rsync failed!"
+            sys.exit(p.returncode)
+
+if __name__ == '__main__':
+    parser = Cloner.get_parser()
+    args = parser.parse_args()
+    cloner = Cloner(args)
+    cloner.cloneprod()
