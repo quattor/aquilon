@@ -127,10 +127,10 @@ class NetworkFormatter(ObjectFormatter):
             details.append(indent + "  Routers: %s" % routers)
 
         # Look for dynamic DHCP ranges
+        # TODO: convert it to a relation with a custom WHERE
         session = object_session(network)
         q = session.query(DynamicStub.ip)
-        q = q.filter(DynamicStub.ip > network.network.ip)
-        q = q.filter(DynamicStub.ip < network.broadcast)
+        q = q.filter_by(network=network)
         q = q.order_by(DynamicStub.ip)
         ranges = summarize_ranges(q)
         if ranges:
@@ -157,31 +157,12 @@ class NetworkHostListFormatter(ListFormatter):
     def format_raw(self, netlist, indent=""):
         details = []
 
-        # The query is quite complex, so construct it only once, and use
-        # bindparams to execute it multiple times
-        if netlist:
-            session = object_session(netlist[0])
-
-            q = session.query(AddressAssignment)
-            q = q.filter(AddressAssignment.ip > bindparam('ip'))
-            q = q.filter(AddressAssignment.ip < bindparam('broadcast'))
-
-            q = q.options(joinedload('dns_records'))
-            q = q.options(subqueryload('interface.hardware_entity.'
-                                       '_primary_name_asc'))
-            q = q.options(lazyload('interface.hardware_entity.'
-                                   '_primary_name_asc.hardware_entity'))
-
-            q = q.order_by(AddressAssignment.ip)
-
         for network in netlist:
             # we'll get the header from the existing formatter
             nfm = NetworkFormatter()
             details.append(indent + nfm.format_raw(network))
 
-            addrs = q.params(ip=network.network.ip,
-                             broadcast=network.broadcast).all()
-            for addr in addrs:
+            for addr in network.assignments:
                 iface = addr.interface
                 hw_ent = iface.hardware_entity
                 if addr.fqdns:
@@ -227,25 +208,12 @@ class SimpleNetworkListFormatter(ListFormatter):
         return "\n".join(details)
 
     def format_proto(self, nlist, skeleton=None):
-        if nlist:
-            session = object_session(nlist[0])
-            addrq = session.query(AddressAssignment)
-            addrq = addrq.filter(AddressAssignment.ip > bindparam('ip'))
-            addrq = addrq.filter(AddressAssignment.ip < bindparam('broadcast'))
-            addrq = addrq.options(joinedload('dns_records'))
-            addrq = addrq.options(subqueryload('interface.hardware_entity.'
-                                               'interfaces'))
-
-            dynq = session.query(DynamicStub)
-            dynq = dynq.filter(DynamicStub.ip > bindparam('ip'))
-            dynq = dynq.filter(DynamicStub.ip < bindparam('broadcast'))
-
         netlist_msg = self.loaded_protocols[self.protocol].NetworkList()
         for n in nlist:
-            self.add_net_msg(netlist_msg.networks.add(), n, addrq, dynq)
+            self.add_net_msg(netlist_msg.networks.add(), n)
         return netlist_msg.SerializeToString()
 
-    def add_net_msg(self, net_msg, net, addrq, dynq):
+    def add_net_msg(self, net_msg, net):
         net_msg.name = str(net.name)
         net_msg.id = net.id
         net_msg.ip = str(net.ip)
@@ -261,8 +229,7 @@ class SimpleNetworkListFormatter(ListFormatter):
         net_msg.discovered = net.is_discovered
 
         # Add interfaces that have addresses in this network
-        addrs = addrq.params(ip=net.network.ip, broadcast=net.broadcast).all()
-        for addr in addrs:
+        for addr in net.assignments:
             hwent = addr.interface.hardware_entity
 
             if not addr.dns_records:
@@ -325,8 +292,11 @@ class SimpleNetworkListFormatter(ListFormatter):
                         int_msg.mac = str(iface.mac)
 
         # Add dynamic DHCP records
-        dynhosts = dynq.params(ip=net.network.ip, broadcast=net.broadcast).all()
-        for dynhost in dynhosts:
+        # TODO: convert it to a relation with a custom WHERE
+        session = object_session(net)
+        q = session.query(DynamicStub)
+        q = q.filter_by(network=net)
+        for dynhost in q:
             host_msg = net_msg.hosts.add()
             # aqdhcpd uses the type
             host_msg.type = 'dynamic_stub'

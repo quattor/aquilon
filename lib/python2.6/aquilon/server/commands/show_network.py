@@ -28,7 +28,7 @@
 # TERMS THAT MAY APPLY.
 """Contains the logic for `aq show network`."""
 
-from sqlalchemy.orm import joinedload
+from sqlalchemy.orm import joinedload, subqueryload
 
 from aquilon.server.broker import BrokerCommand
 from aquilon.aqdb.model import Interface, Network, NetworkEnvironment
@@ -43,7 +43,7 @@ class CommandShowNetwork(BrokerCommand):
     required_parameters = []
 
     def render(self, session, network, ip, network_environment, all, discovered,
-               discoverable, type=False, hosts=False, **arguments):
+               discoverable, style, type=False, hosts=False, **arguments):
         dbnet_env = NetworkEnvironment.get_unique_or_default(session,
                                                              network_environment)
         dbnetwork = network and get_network_byname(session, network, dbnet_env) or None
@@ -67,6 +67,9 @@ class CommandShowNetwork(BrokerCommand):
             childids = dblocation.offspring_ids()
             q = q.filter(Network.location_id.in_(childids))
         q = q.order_by(Network.ip)
+        if hosts or style == "proto":
+            q = q.options(subqueryload("assignments"))
+            q = q.options(joinedload("assignments.dns_records"))
         if hosts:
             return NetworkHostList(q.all())
         else:

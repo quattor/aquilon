@@ -118,7 +118,8 @@ class AddressAssignment(Base):
     fqdns = association_proxy('dns_records', 'fqdn')
 
     network = relation(Network, backref=backref('assignments',
-                                                passive_deletes=True))
+                                                passive_deletes=True,
+                                                order_by=[ip]))
 
     @property
     def logical_name(self):

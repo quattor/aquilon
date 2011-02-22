@@ -29,10 +29,9 @@
 
 from ipaddr import IPv4Address
 
-from sqlalchemy.sql.expression import asc
-
 from aquilon.server.broker import BrokerCommand
-from aquilon.aqdb.model import DynamicStub, ARecord, DnsDomain, Fqdn
+from aquilon.aqdb.model import (DynamicStub, ARecord, DnsDomain, Fqdn,
+                                NetworkEnvironment)
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.exceptions_ import ArgumentError, ProcessException
 from aquilon.server.dbwrappers.interface import check_ip_restrictions
@@ -47,17 +46,19 @@ class CommandAddDynamicRange(BrokerCommand):
                **arguments):
         if not prefix:
             prefix = 'dynamic'
-        startnet = get_net_id_from_ip(session, startip)
-        endnet = get_net_id_from_ip(session, endip)
+        dbnet_env = NetworkEnvironment.get_unique_or_default(session)
+        startnet = get_net_id_from_ip(session, startip, dbnet_env)
+        endnet = get_net_id_from_ip(session, endip, dbnet_env)
         if startnet != endnet:
             raise ArgumentError("IP addresses %s (%s) and %s (%s) must be on "
                                 "the same subnet." %
                                 (startip, startnet.ip, endip, endnet.ip))
         dbdns_domain = DnsDomain.get_unique(session, dns_domain, compel=True)
         q = session.query(ARecord)
+        q = q.filter_by(network=startnet)
         q = q.filter(ARecord.ip >= startip)
         q = q.filter(ARecord.ip <= endip)
-        q = q.order_by(asc(ARecord.ip))
+        q = q.order_by(ARecord.ip)
         conflicts = q.all()
         if conflicts:
             raise ArgumentError("Cannot allocate IP address range because the "
