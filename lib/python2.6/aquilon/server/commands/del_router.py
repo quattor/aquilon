@@ -28,17 +28,20 @@
 # TERMS THAT MAY APPLY.
 """Contains the logic for `aq del router`."""
 
-from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import ARecord, RouterAddress, DnsEnvironment
+from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.dns import delete_dns_record
+from aquilon.aqdb.model import (ARecord, RouterAddress, DnsEnvironment,
+                                NetworkEnvironment)
+from aquilon.aqdb.model.network import get_net_id_from_ip
 
 
 class CommandDelRouter(BrokerCommand):
 
     required_parameters = []
 
-    def render(self, session, ip, fqdn, **arguments):
+    def render(self, session, ip, fqdn, network_environment, **arguments):
+        # FIXME: the DNS environment should come from the network environment
         if fqdn:
             dbdns_rec = ARecord.get_unique(session, fqdn=fqdn, compel=True)
             ip = dbdns_rec.ip
@@ -48,10 +51,17 @@ class CommandDelRouter(BrokerCommand):
         else:
             raise ArgumentError("Please specify either --ip or --fqdn.")
 
-        dbrouter = RouterAddress.get_unique(session, ip=ip,
-                                            dns_environment=dbdns_env,
-                                            compel=True)
-        dbnetwork = dbrouter.network
+        dbnet_env = NetworkEnvironment.get_unique_or_default(session,
+                                                             network_environment)
+        dbnetwork = get_net_id_from_ip(session, ip, dbnet_env)
+        dbrouter = None
+        for rtaddr in dbnetwork.routers:
+            if rtaddr.ip == ip:
+                dbrouter = rtaddr
+                break
+        if not dbrouter:
+            raise NotFoundException("IP address {0} is not a router on "
+                                    "{1:l}.".format(ip, dbnetwork))
 
         map(delete_dns_record, dbrouter.dns_records)
         dbnetwork.routers.remove(dbrouter)

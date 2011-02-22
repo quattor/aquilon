@@ -131,6 +131,24 @@ class TestAddDnsDomain(TestBrokerCommand):
         command = ["add", "dns", "domain",
                    "--dns_domain", "td2.aqd-unittest.ms.com"]
         self.noouttest(command)
+
+    def testaddcolodomains(self):
+        self.dsdb_expect("show dns_domains -domain_name excx.aqd-unittest.ms.com",
+                         fail=True)
+        self.dsdb_expect("add dns_domain -domain_name excx.aqd-unittest.ms.com "
+                         "-comments ")
+        command = ["add", "dns", "domain",
+                   "--dns_domain", "excx.aqd-unittest.ms.com"]
+        self.noouttest(command)
+
+        self.dsdb_expect("show dns_domains -domain_name utcolo.aqd-unittest.ms.com",
+                         fail=True)
+        self.dsdb_expect("add dns_domain -domain_name utcolo.aqd-unittest.ms.com "
+                         "-comments ")
+        command = ["add", "dns", "domain",
+                   "--dns_domain", "utcolo.aqd-unittest.ms.com"]
+        self.noouttest(command)
+
         self.dsdb_verify()
 
     def testaddlocaldomain(self):

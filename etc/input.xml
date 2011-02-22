@@ -1279,6 +1279,7 @@
          <option name="fqdn" type="string">Name of the router</option>
       </optgroup>
       <optgroup name="add_router_optional" mandatory="False" fields="any">
+         <option name="network_environment" type="string">Network environment (default: internal)</option>
          <option name="building" type="string">Building where the router is located</option>
          <option name="ip" type="ipv4">IP address of the router</option>
          <option name="comments" type="string">Comments</option>
@@ -1292,6 +1293,9 @@
          <option name="fqdn" type="string" conflicts="ip">Name of the router</option>
          <option name="ip" type="ipv4" conflicts="fqdn">IP address of the router</option>
       </optgroup>
+      <optgroup name="del_router_optional" mandatory="False" fields="any">
+         <option name="network_environment" type="string">Network environment (default: internal)</option>
+      </optgroup>
       <transport method="delete" path="router" />
    </command>
 
@@ -1301,6 +1305,9 @@
          <option name="fqdn" type="string" conflicts="ip all">Name of the router</option>
          <option name="ip" type="ipv4" conflicts="fqdn all">IP address of the router</option>
          <option name="all" type="flag" conflicts="ip fqdn">Show all routers</option>
+      </optgroup>
+      <optgroup name="del_router_optional" mandatory="False" fields="any">
+         <option name="network_environment" type="string">Network environment (default: internal)</option>
       </optgroup>
       <transport method="get" path="router" />
    </command>

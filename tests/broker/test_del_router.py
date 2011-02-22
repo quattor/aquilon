@@ -54,14 +54,26 @@ class TestDelRouter(TestBrokerCommand):
         net = self.net.unknown[0]
         command = ["del", "router", "--ip", net.gateway]
         out = self.notfoundtest(command)
-        self.matchoutput(out, "Router Address %s, DNS environment internal not "
-                         "found." % net.gateway, command)
+        self.matchoutput(out, "IP address %s is not a router on network %s." %
+                         (net.gateway, net.ip), command)
 
     def testverifyrouter(self):
         command = ["show", "router", "--all"]
         out = self.commandtest(command)
         self.matchclean(out, str(self.net.tor_net[12].gateway), command)
         self.matchclean(out, str(self.net.tor_net[6].gateway), command)
+
+    def testdelexcx(self):
+        net = self.net.unknown[0].subnet()[0]
+        command = ["del", "router", "--ip", net[-2],
+                   "--network_environment", "excx"]
+        self.noouttest(command)
+
+    def testdelutcolo(self):
+        net = self.net.unknown[1]
+        command = ["del", "router", "--ip", net[2],
+                   "--network_environment", "utcolo"]
+        self.noouttest(command)
 
 
 if __name__=='__main__':
