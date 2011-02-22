@@ -29,7 +29,7 @@
 
 
 from aquilon.server.broker import BrokerCommand
-from aquilon.aqdb.model.network import Network
+from aquilon.aqdb.model.network import Network, NetworkEnvironment
 from aquilon.server.dbwrappers.dns import delete_dns_record
 
 
@@ -37,8 +37,11 @@ class CommandDelNetwork(BrokerCommand):
 
     required_parameters = ["ip"]
 
-    def render(self, session, ip, **arguments):
-        dbnetwork = Network.get_unique(session, ip, compel=True)
+    def render(self, session, ip, network_environment, **arguments):
+        dbnet_env = NetworkEnvironment.get_unique_or_default(session,
+                                                             network_environment)
+        dbnetwork = Network.get_unique(session, network_environment=dbnet_env,
+                                       ip=ip, compel=True)
         for dbrouter in dbnetwork.routers:
             map(delete_dns_record, dbrouter.dns_records)
         session.delete(dbnetwork)

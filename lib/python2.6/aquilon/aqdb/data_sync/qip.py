@@ -32,10 +32,10 @@ from ipaddr import (IPv4Address, IPv4Network, AddressValueError,
                     NetmaskValueError)
 
 from aquilon.exceptions_ import PartialError, ArgumentError
-from aquilon.aqdb.model import (Network, RouterAddress, ARecord, Building,
-                                DnsEnvironment)
+from aquilon.aqdb.model import (Network, NetworkEnvironment, RouterAddress,
+                                ARecord, Building, DnsEnvironment)
 
-from sqlalchemy.orm import subqueryload, defer
+from sqlalchemy.orm import subqueryload, defer, contains_eager
 
 
 class QIPRefresh(object):
@@ -45,6 +45,9 @@ class QIPRefresh(object):
         self.building = dbbuilding
         self.dryrun = dryrun
         self.incremental = incremental
+
+        # Synchronize the internal environment only
+        self.net_env = NetworkEnvironment.get_unique_or_default(session)
 
         self.errors = []
 
@@ -63,6 +66,7 @@ class QIPRefresh(object):
         # Load existing networks
         self.aqnetworks = {}
         q = session.query(Network)
+        q = q.filter_by(network_environment=self.net_env)
         if dbbuilding:
             q = q.filter_by(location=dbbuilding)
         q = q.options(subqueryload("routers"))
@@ -89,10 +93,14 @@ class QIPRefresh(object):
 
     def refresh_system_networks(self):
         q = self.session.query(ARecord)
+        q = q.join(Network)
+        q = q.options(contains_eager('network'))
+        q = q.filter_by(network_environment=self.net_env)
         q = q.order_by(ARecord.ip)
         systems = q.all()
 
         q = self.session.query(Network)
+        q = q.filter_by(network_environment=self.net_env)
         q = q.options(defer('location_id'))
         q = q.options(defer('side'))
         q = q.options(defer('is_discoverable'))
@@ -333,7 +341,8 @@ class QIPRefresh(object):
         for qipinfo in qipnetworks.values():
             dbnetwork = Network(name=qipinfo["name"], network=qipinfo["address"],
                                 network_type=qipinfo["type"], side=qipinfo["side"],
-                                location=qipinfo["location"])
+                                location=qipinfo["location"],
+                                network_environment=self.net_env)
             self.session.add(dbnetwork)
             self.commit_if_needed("Adding {0:l}".format(dbnetwork))
             for ip in qipinfo["routers"]:

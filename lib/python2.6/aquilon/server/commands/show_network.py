@@ -31,7 +31,7 @@
 from sqlalchemy.orm import joinedload
 
 from aquilon.server.broker import BrokerCommand
-from aquilon.aqdb.model import Interface, Network
+from aquilon.aqdb.model import Interface, Network, NetworkEnvironment
 from aquilon.server.dbwrappers.location import get_location
 from aquilon.server.dbwrappers.network import get_network_byname, get_network_byip
 from aquilon.server.formats.network import SimpleNetworkList
@@ -42,10 +42,14 @@ class CommandShowNetwork(BrokerCommand):
 
     required_parameters = []
 
-    def render(self, session, network, ip, all, discovered, discoverable, type=False, hosts=False, **arguments):
-        dbnetwork = network and get_network_byname(session, network) or None
-        dbnetwork = ip and get_network_byip(session, ip) or dbnetwork
+    def render(self, session, network, ip, network_environment, all, discovered,
+               discoverable, type=False, hosts=False, **arguments):
+        dbnet_env = NetworkEnvironment.get_unique_or_default(session,
+                                                             network_environment)
+        dbnetwork = network and get_network_byname(session, network, dbnet_env) or None
+        dbnetwork = ip and get_network_byip(session, ip, dbnet_env) or dbnetwork
         q = session.query(Network)
+        q = q.filter_by(network_environment=dbnet_env)
         q = q.options(joinedload('location'))
         if dbnetwork:
             if hosts:

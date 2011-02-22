@@ -82,6 +82,8 @@ _long_nms['PRIMARY_NAME_ASSOCIATION'] = 'PRI_NAME_ASC'
 _long_nms['VLAN_INTERFACE_ID'] = 'VLAN_IFACE_ID'
 _long_nms['ADDRESS_ASSIGNMENT'] = 'ADDR_ASSIGN'
 _long_nms['DNS_ENVIRONMENT_ID'] = 'DNS_ENV_ID'
+_long_nms['NETWORK_ENVIRONMENT'] = 'NET_ENV'
+_long_nms['NETWORK_ENVIRONMENT_ID'] = 'NET_ENV_ID'
 
 
 def rename_sys_pks(db, *args, **kw):

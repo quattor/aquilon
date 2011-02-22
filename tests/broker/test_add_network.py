@@ -97,6 +97,7 @@ class TestAddNetwork(TestBrokerCommand):
             command = "show network --ip %s" % network.ip
             out = self.commandtest(command.split(" "))
             self.matchoutput(out, "Network: %s" % network.ip, command)
+            self.matchoutput(out, "Network Environment: internal", command)
             self.matchoutput(out, "IP: %s" % network.ip, command)
             self.matchoutput(out, "Netmask: %s" % network.netmask, command)
             self.matchoutput(out, "Sysloc: ut.ny.na", command)

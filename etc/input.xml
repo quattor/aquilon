@@ -276,6 +276,7 @@
          <option name="buildstatus" type="string">buildstatus (blind, build, ready)</option>
          <option name="ip" type="ipv4">IP address</option>
          <option name="networkip" type="ipv4">Network IP address</option>
+         <option name="network_environment" type="string">Network environment (default: internal)</option>
          <option name="mac" type="mac">primary MAC address</option>
          <option name="personality" type="string">personality</option>
          <option name="osname" type="string">osname</option>
@@ -521,6 +522,9 @@
          </optgroup>
          <option name="exact_location" type="flag">match the location exactly</option>
       </optgroup>
+      <optgroup name="show_network_prefs" mandatory="False" fields="any">
+         <option name="network_environment" type="string">Network environment (default: internal)</option>
+      </optgroup>
       <transport method="get" path="network" />
    </command>
 
@@ -561,6 +565,7 @@
          </optgroup>
       </optgroup>
       <optgroup name="search_network_prefs" mandatory="False">
+         <option name="network_environment" type="string">Network environment (default: internal)</option>
          <option name="fullinfo" type="flag">show full information for the matching networks</option>
       </optgroup>
       <transport method="get" path="find/network" />
@@ -1158,6 +1163,7 @@
       </optgroup>
 
       <optgroup name="add_network_modifiers" mandatory="False" fields="any">
+         <option name="network_environment" type="string">Network environment (default: internal)</option>
          <option name="discoverable" type="boolean">Set network(s) updateable</option>
          <option name="discovered" type="boolean">Set network(s) updated</option>
          <option name="type" type="string">Network type, defaults to 'unknown'</option>
@@ -1174,6 +1180,9 @@
       <optgroup name="del_network_mandatory" mandatory="True" fields="all">
          <option name="ip" type="ipv4">Network IP address</option>
       </optgroup>
+      <optgroup name="del_network_modifiers" mandatory="False" fields="any">
+         <option name="network_environment" type="string">Network environment (default: internal)</option>
+      </optgroup>
       <transport method="delete" path="network/%(ip)s" />
    </command>
 
@@ -1184,7 +1193,7 @@
      and/or network type.
      <optgroup name="update_network_opts" mandatory="True" fields="any">
 	<option name="network" type="string" conflicts="ip update_network_location_opts">Network name</option>
-	<option name="ip" type="ipv4" conflicts="network update_network_location_opts">Network name</option>
+	<option name="ip" type="ipv4" conflicts="network update_network_location_opts">Network address</option>
 	<option name="type" type="string" conflicts="ip network">Network type</option>
 	<optgroup name="update_network_location_opts" fields="any">
             <option name="organization" type="string">Organization</option>
@@ -1202,7 +1211,10 @@
      <optgroup name="update_network_modifiers" mandatory="True" fields="any">
 	<option name="discoverable" type="boolean" conflicts="">Set network(s) updateable</option>
 	<option name="discovered" type="boolean" conflicts="">Set network(s) updated</option>
-    </optgroup>
+     </optgroup>
+     <optgroup name="update_network_optional" mandatory="False" fields="any">
+	<option name="network_environment" type="string">Network environment (default: internal)</option>
+     </optgroup>
      <transport method="post" path="network" />
    </command>
 

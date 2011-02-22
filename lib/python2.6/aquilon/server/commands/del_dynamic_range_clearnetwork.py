@@ -32,7 +32,7 @@ from sqlalchemy.sql.expression import asc
 
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.commands.del_dynamic_range import CommandDelDynamicRange
-from aquilon.aqdb.model import DynamicStub, Network
+from aquilon.aqdb.model import DynamicStub, Network, NetworkEnvironment
 from aquilon.exceptions_ import ArgumentError
 from aquilon.server.locks import lock_queue, DeleteKey
 
@@ -52,7 +52,10 @@ class CommandDelDynamicRangeClearnetwork(CommandDelDynamicRange):
         return
 
     def del_dynamic_network(self, session, logger, network):
-        dbnetwork = Network.get_unique(session, network, compel=True)
+        dbnet_env = NetworkEnvironment.get_unique_or_default(session)
+        dbnetwork = Network.get_unique(session, network,
+                                       network_environment=dbnet_env,
+                                       compel=True)
         q = session.query(DynamicStub)
         q = q.filter_by(network=dbnetwork)
         q = q.order_by(asc(DynamicStub.ip))

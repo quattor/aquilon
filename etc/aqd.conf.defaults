@@ -181,6 +181,7 @@ advertise_gzip_as_xml = true
 [site]
 # Site specific settings
 default_dns_environment = internal
+default_network_environment = internal
 
 # This can be used for any components that use python logging
 # Valid values are INFO, DEBUG, and WARNING

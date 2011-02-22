@@ -109,6 +109,7 @@ class NetworkFormatter(ObjectFormatter):
         netmask = network.netmask
         sysloc = network.location.sysloc()
         details = [indent + "Network: %s" % network.name]
+        details.append(indent + "  {0:c}: {0.name}".format(network.network_environment))
         details.append(indent + "  IP: %s" % network.ip)
         details.append(indent + "  Netmask: %s" % netmask)
         details.append(indent + "  Sysloc: %s" % sysloc)
