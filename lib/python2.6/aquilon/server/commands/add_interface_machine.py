@@ -293,19 +293,12 @@ class CommandAddInterfaceMachine(BrokerCommand):
                                      "been enabled for ESX Clusters.")
         # FIXME: These values should probably be configurable.
         mac_prefix_esx = "00:50:56"
-        mac_start_esx = "01:20:00"
-        mac_end_esx = "3f:ff:ff"
-        mac_prefix = mac_prefix_esx
-        mac_start = MACAddress(mac_prefix + ":" + mac_start_esx)
-        mac_end = MACAddress(mac_prefix + ":" + mac_end_esx)
+        mac_start_esx = mac_prefix_esx + ":01:20:00"
+        mac_end_esx = mac_prefix_esx + ":3f:ff:ff"
+        mac_start = MACAddress(mac_start_esx)
+        mac_end = MACAddress(mac_end_esx)
         q = session.query(Interface.mac)
-        # Need to explicitly bypass AqMac conversion here so that we
-        # do not get an error about the prefix being an invalid mac.
-        # This implies that the prefix must already be lower cased
-        # and include colons.
-        q = q.filter(Interface.mac.startswith(bindparam('prefix',
-                                                        type_=String)))
-        q = q.params(prefix=mac_prefix_esx)
+        q = q.filter(Interface.mac.between(str(mac_start), str(mac_end)))
         # This query (with a different order_by) is used below.
         mac = q.order_by(desc(Interface.mac)).first()
         if not mac:
