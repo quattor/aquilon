@@ -32,10 +32,11 @@ from ipaddr import (IPv4Address, IPv4Network, AddressValueError,
                     NetmaskValueError)
 
 from aquilon.exceptions_ import PartialError, ArgumentError
-from aquilon.aqdb.model import (Network, NetworkEnvironment, RouterAddress,
-                                ARecord, Building, DnsEnvironment)
+from aquilon.aqdb.model import (NetworkEnvironment, Network, RouterAddress,
+                                ARecord, DnsEnvironment, AddressAssignment,
+                                Building)
 
-from sqlalchemy.orm import subqueryload, defer, contains_eager
+from sqlalchemy.orm import subqueryload, lazyload, defer, contains_eager
 
 
 class QIPRefresh(object):
@@ -147,6 +148,64 @@ class QIPRefresh(object):
             self.error('No network found for IP address %s [%s].' %
                        (sys.ip, sys.fqdn))
             set_network(sys, None)
+            s_index += 1
+            continue
+
+    def refresh_address_assignments(self):
+        q = self.session.query(AddressAssignment)
+        q = q.join(Network)
+        q = q.options(contains_eager('network'))
+        q = q.filter_by(network_environment=self.net_env)
+        q = q.order_by(AddressAssignment.ip)
+        q = q.options(lazyload('interface'))
+        assignments = q.all()
+
+        q = self.session.query(Network)
+        q = q.filter_by(network_environment=self.net_env)
+        q = q.options(defer('location_id'))
+        q = q.options(defer('side'))
+        q = q.options(defer('is_discoverable'))
+        q = q.options(defer('is_discovered'))
+        q = q.order_by(Network.ip)
+        networks = q.all()
+
+        def set_network(assignment, net):
+            if assignment.network != net:
+                assignment.network = net
+                # Looking up the host name would take a lot of time esp. in
+                # incremental mode
+                self.commit_if_needed('Updating assignment %d [%s] with network %s' %
+                                      (assignment.ip, assignment.ip, net.ip))
+
+        s_index = 0
+        n_index = 0
+        while (s_index < len(assignments) and n_index < len(networks)):
+            # database objects
+            assignment = assignments[s_index]
+            net = networks[n_index]
+
+            # Hopefully the common case... our system IP is in the range
+            # of the current network.  Make sure the network is set
+            # appropriately and move on to the next system.
+            if assignment.ip in net.network:
+                set_network(assignment, net)
+                s_index += 1
+                continue
+
+            # Our system is beyond the range of the current network, so
+            # proceed to checking against the next network.
+            if assignment.ip > net.broadcast:
+                n_index += 1
+                continue
+
+            # At this point we know our system is not in the range of
+            # any networks.  We started at the "lowest" network and
+            # have been working up.  Since the system IP is less than
+            # the network IP we can't expect incrementing to the next
+            # network to help us find one. :)
+            self.error('No network found for IP address %s [%s].' %
+                       (assignment.ip, format(assignment.interface)))
+            set_network(assignment, None)
             s_index += 1
             continue
 
@@ -353,6 +412,7 @@ class QIPRefresh(object):
         self.session.flush()
 
         self.refresh_system_networks()
+        self.refresh_address_assignments()
 
         if self.errors:
             if self.incremental:

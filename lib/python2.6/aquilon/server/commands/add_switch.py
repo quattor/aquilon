@@ -31,6 +31,7 @@
 
 from aquilon.exceptions_ import ArgumentError, AquilonError
 from aquilon.aqdb.model import Switch, Model
+from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.location import get_location
 from aquilon.server.dbwrappers.hardware_entity import parse_primary_name
@@ -75,7 +76,8 @@ class CommandAddSwitch(BrokerCommand):
                                               name=interface, mac=mac,
                                               interface_type="oa",
                                               comments=ifcomments)
-        assign_address(dbinterface, ip)
+        dbnetwork = get_net_id_from_ip(session, ip)
+        assign_address(dbinterface, ip, dbnetwork)
 
         session.flush()
 

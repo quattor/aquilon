@@ -121,7 +121,8 @@ class CommandAddInterfaceAddress(BrokerCommand):
                 if not dbdns_rec.assignments:
                     delete_old_dsdb_entry = True
             else:
-                dbdns_rec = ARecord(fqdn=dbfqdn, ip=ip, network=dbnetwork)
+                dbdns_rec = ARecord(fqdn=dbfqdn, ip=ip, network=dbnetwork,
+                                    dns_environment=dbdns_env)
                 session.add(dbdns_rec)
         else:
             dbdns_rec = ARecord.get_unique(session, fqdn=dbfqdn, compel=True)
@@ -129,6 +130,7 @@ class CommandAddInterfaceAddress(BrokerCommand):
                 raise ArgumentError("Address {0:a} is reserved for dynamic "
                                     "DHCP.".format(dbdns_rec))
             ip = dbdns_rec.ip
+            dbnetwork = dbdns_rec.network
 
             # If it was just a pure DNS placeholder, then delete & re-add it
             if not dbdns_rec.assignments:
@@ -155,7 +157,7 @@ class CommandAddInterfaceAddress(BrokerCommand):
                                         "and is not configured for "
                                         "Zebra.".format(ip, addr.interface))
 
-        assign_address(dbinterface, ip, label=label, usage=usage)
+        assign_address(dbinterface, ip, dbnetwork, label=label, usage=usage)
         session.flush()
 
         dbhost = getattr(dbhw_ent, "host", None)

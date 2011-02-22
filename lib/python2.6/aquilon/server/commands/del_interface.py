@@ -94,7 +94,8 @@ class CommandDelInterface(BrokerCommand):
                         other = dbhw_ent.interfaces[0]
 
                     if len(other.assignments) == 0:
-                        assign_address(other, dbhw_ent.primary_ip)
+                        assign_address(other, dbhw_ent.primary_ip,
+                                       dbhw_ent.primary_name.network)
                         dbinterface.addresses.remove(dbhw_ent.primary_ip)
                         raise _Goto
 

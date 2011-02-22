@@ -85,7 +85,7 @@ class CommandAddAuxiliary(BrokerCommand):
         dbdns_rec = ARecord(fqdn=dbfqdn, ip=ip, network=dbnetwork,
                             comments=comments)
         session.add(dbdns_rec)
-        assign_address(dbinterface, ip)
+        assign_address(dbinterface, ip, dbnetwork)
 
         session.flush()
 

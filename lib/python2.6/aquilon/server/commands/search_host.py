@@ -37,7 +37,7 @@ from aquilon.aqdb.model import (Host, Cluster, Archetype, Personality,
                                 HostLifecycle, OperatingSystem, Service,
                                 ServiceInstance, NasDisk, Disk, Machine, Model,
                                 ARecord, Fqdn, DnsDomain, Interface,
-                                AddressAssignment, NetworkEnvironment)
+                                AddressAssignment, NetworkEnvironment, Network)
 from aquilon.aqdb.model.dns_domain import parse_fqdn
 from aquilon.server.dbwrappers.service_instance import get_service_instance
 from aquilon.server.dbwrappers.branch import get_branch_and_author
@@ -56,6 +56,8 @@ class CommandSearchHost(BrokerCommand):
                domain, sandbox, branch,
                dns_domain, shortname, mac, ip, networkip, network_environment,
                exact_location, fullinfo, **arguments):
+        dbnet_env = NetworkEnvironment.get_unique_or_default(session,
+                                                             network_environment)
         dnsq = session.query(ARecord.ip)
         dnsq = dnsq.join(Fqdn)
         use_dnsq = False
@@ -77,16 +79,14 @@ class CommandSearchHost(BrokerCommand):
         if mac:
             addrq = addrq.filter(Interface.mac == mac)
             use_addrq = True
-        addrq = addrq.join(AddressAssignment)
+        addrq = addrq.join(AddressAssignment, Network)
+        addrq = addrq.filter_by(network_environment=dbnet_env)
         if ip:
-            addrq = addrq.filter_by(ip=ip)
+            addrq = addrq.filter(AddressAssignment.ip == ip)
             use_addrq = True
         if networkip:
-            dbnet_env = NetworkEnvironment.get_unique_or_default(session,
-                                                                 network_environment)
             dbnetwork = get_network_byip(session, networkip, dbnet_env)
-            addrq = addrq.filter(AddressAssignment.ip > dbnetwork.network.ip)
-            addrq = addrq.filter(AddressAssignment.ip < dbnetwork.network.broadcast)
+            addrq = addrq.filter(AddressAssignment.network == dbnetwork)
             use_addrq = True
         if use_dnsq:
             addrq = addrq.filter(AddressAssignment.ip.in_(dnsq.subquery()))

@@ -73,7 +73,8 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
             dbhost = dbhw_ent.host
             if dbhost.archetype.name == 'aurora' and \
                dbhw_ent.primary_ip and not dbinterface.addresses:
-                assign_address(dbinterface, dbhw_ent.primary_ip)
+                assign_address(dbinterface, dbhw_ent.primary_ip,
+                               dbhw_ent.primary_name.network)
 
         # We may need extra IP verification (or an autoip option)...
         # This may also throw spurious errors if attempting to set the
@@ -129,7 +130,7 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
                     session.expire(assignment, ['dns_records'])
                 assignment.ip = ip
             else:
-                assign_address(dbinterface, ip)
+                assign_address(dbinterface, ip, dbnetwork)
 
             # Fix up the primary name if needed
             if dbinterface.bootable and \

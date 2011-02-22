@@ -38,8 +38,8 @@ from sqlalchemy.orm import relation, backref, object_session, deferred
 from sqlalchemy.sql import and_
 
 from aquilon.aqdb.column_types import IPV4, AqStr, Enum
-from aquilon.aqdb.model import Base, Interface, ARecord, DnsEnvironment, Fqdn
-from aquilon.aqdb.model.network import get_net_id_from_ip
+from aquilon.aqdb.model import (Base, Interface, ARecord, DnsEnvironment, Fqdn,
+                                Network)
 from aquilon.aqdb.model.a_record import dns_fqdn_mapper
 
 _TN = 'address_assignment'
@@ -79,6 +79,13 @@ class AddressAssignment(Base):
 
     ip = Column(IPV4, nullable=False)
 
+    # ON DELETE SET NULL and later passive_deletes=True helps refresh_network in
+    # case of network splits/merges
+    network_id = Column(Integer, ForeignKey('network.id',
+                                            name='%s_network_fk' % _TN,
+                                            ondelete="SET NULL"),
+                        nullable=True)
+
     usage = Column(Enum(16, ADDR_USAGES), nullable=False, default="system")
 
     dns_environment_id = Column(Integer, ForeignKey('dns_environment.id',
@@ -110,6 +117,9 @@ class AddressAssignment(Base):
 
     fqdns = association_proxy('dns_records', 'fqdn')
 
+    network = relation(Network, backref=backref('assignments',
+                                                passive_deletes=True))
+
     @property
     def logical_name(self):
         """
@@ -131,17 +141,13 @@ class AddressAssignment(Base):
         return name
 
     @property
-    def network(self):
-        return get_net_id_from_ip(object_session(self), self.ip)
-
-    @property
     def label(self):
         if self._label == '-':
             return ""
         else:
             return self._label
 
-    def __init__(self, label=None, **kwargs):
+    def __init__(self, label=None, network=None, **kwargs):
         # This is dirty. We want to allow empty labels, but Oracle converts
         # empty strings to NULL, violating the NOT NULL constraint. We could
         # allow label to be NULL and relying on the unique indexes to forbid
@@ -152,7 +158,14 @@ class AddressAssignment(Base):
             label = '-'
         elif not self._label_check.match(label):
             raise ValueError("Illegal address label '%s'." % label)
-        super(AddressAssignment, self).__init__(_label=label, **kwargs)
+
+        # Right now network_id is nullable due to how refresh_network works, so
+        # verify the network here
+        if not network:
+            raise ValueError("AddressAssignment needs a network")
+
+        super(AddressAssignment, self).__init__(_label=label, network=network,
+                                                **kwargs)
 
     def __repr__(self):
         return "<Address %s on %s/%s>" % (self.ip,
