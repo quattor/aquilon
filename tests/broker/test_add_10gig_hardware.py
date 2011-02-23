@@ -132,12 +132,16 @@ class TestAdd10GigHardware(TestBrokerCommand):
                             "--size", "15", "--share", share,
                             "--address", "0:0"])
 
+    # We are checking the portgroups the machines have been mapped to
+    # evm10 -> user-v710, evm11 -> user-v711, evm12 -> user-v712, evm13 -> user-v13
+    # evm14 -> user-v710, evm15 -> user-v711, evm16 -> user-v712, evm17 -> user-v13
+    # and so on and so forth
     def test_150_verifypg(self):
         for i in range(0, 8) + range(9, 17):
             if i < 9:
-                port_group = "user-v71%d" % (i / 2)
+                port_group = "user-v71%d" % (i % 4)
             else:
-                port_group = "user-v71%d" % ((i - 9) / 2)
+                port_group = "user-v71%d" % ((i - 9) % 4)
             machine = "evm%d" % (i + 10)
             command = ["search_machine", "--machine", machine,
                        "--pg", port_group]
@@ -218,7 +222,7 @@ class TestAdd10GigHardware(TestBrokerCommand):
     def test_500_verifycatmachines(self):
         for i in range(0, 8):
             command = "cat --machine evm%s" % (10 + i)
-            port_group = "user-v71%d" % (i / 2)
+            port_group = "user-v71%d" % (i % 4)
             out = self.commandtest(command.split(" "))
             self.matchoutput(out, """"location" = "ut.ny.na";""", command)
             self.matchoutput(out,
@@ -248,6 +252,16 @@ class TestAdd10GigHardware(TestBrokerCommand):
             command = ["make_cluster", "--cluster=utecl%s" % i]
             (out, err) = self.successtest(command)
 
+    # Because the machines are allocated across portgroups, the IP addresses
+    # allocated by autoip also differ
+    # evm10 -> self.net.unknown[2].usable[0]
+    # evm11 -> self.net.unknown[3].usable[0]
+    # evm12 -> self.net.unknown[4].usable[0]
+    # evm13 -> self.net.unknown[5].usable[0]
+    # evm14 -> self.net.unknown[2].usable[1]
+    # As each subnet only has two usable IPs, when we get to evm19 it becomes
+    # evm19 -> self.net.unknown[6].usable[0]
+    # and the above pattern repeats
     def test_700_add_hosts(self):
         # Skip index 8 and 17 - these don't have interfaces.
         mac_prefix = "00:50:56:01:20"
@@ -257,11 +271,11 @@ class TestAdd10GigHardware(TestBrokerCommand):
             hostname = "ivirt%d.aqd-unittest.ms.com" % (1 + i)
 
             if i < 9:
-                net_index = (i / 2) + 2
-                usable_index = i % 2
+                net_index = (i % 4) + 2
+                usable_index = i / 4
             else:
-                net_index = ((i - 9) / 2) + 6
-                usable_index = (i - 9) % 2
+                net_index = ((i - 9) % 4) + 6
+                usable_index = (i - 9) / 4
             ip = self.net.unknown[net_index].usable[usable_index]
 
             # FIXME: the MAC check is fragile...
@@ -276,15 +290,17 @@ class TestAdd10GigHardware(TestBrokerCommand):
             (out, err) = self.successtest(command)
         self.dsdb_verify()
 
+    # This is verifying test_700, so logic applies for determing
+    # the IP addresses autoIP will give out
     def test_800_verify_add_host(self):
-        for i in range(1, 9) + range(10, 18):
-            if i < 10:
-                net_index = ((i - 1) / 2) + 2
-                usable_index = (i - 1) % 2
+        for i in range(0, 8) + range(9, 17):
+            if i < 9:
+                net_index = (i % 4) + 2
+                usable_index = i / 4
             else:
-                net_index = ((i - 10) / 2) + 6
-                usable_index = (i - 10) % 2
-            hostname = "ivirt%d.aqd-unittest.ms.com" % i
+                net_index = ((i - 9) % 4) + 6
+                usable_index = (i - 9)  / 4
+            hostname = "ivirt%d.aqd-unittest.ms.com" % (i + 1)
             ip = self.net.unknown[net_index].usable[usable_index]
             command = "search host --hostname %s --ip %s" % (hostname, ip)
             out = self.commandtest(command.split(" "))
