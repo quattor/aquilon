@@ -46,11 +46,11 @@ class TestDel10GigHardware(TestBrokerCommand):
             command = "del_host --hostname %s" % hostname
 
             if i < 9:
-                net_index = (i / 2) + 2
-                usable_index = i % 2
+                net_index = (i % 4) + 2
+                usable_index = i / 4
             else:
-                net_index = ((i - 9) / 2) + 6
-                usable_index = (i - 9) % 2
+                net_index = ((i - 9) % 4) + 6
+                usable_index = (i - 9) / 4
             ip = self.net.unknown[net_index].usable[usable_index]
             self.dsdb_expect_delete(ip)
 

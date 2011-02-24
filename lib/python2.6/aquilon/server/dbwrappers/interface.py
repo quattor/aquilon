@@ -307,12 +307,17 @@ def choose_port_group(dbmachine):
     if not dbmachine.cluster.switch:
         raise ArgumentError("Cannot automatically allocate port group: no "
                             "switch record for {0}.".format(dbmachine.cluster))
+    selected_vlan = None
     for dbobserved_vlan in dbmachine.cluster.switch.observed_vlans:
         if dbobserved_vlan.vlan_type != 'user':
             continue
         if dbobserved_vlan.is_at_guest_capacity:
             continue
-        return dbobserved_vlan.port_group
+        if not selected_vlan or \
+           selected_vlan.guest_count > dbobserved_vlan.guest_count:
+            selected_vlan = dbobserved_vlan
+    if selected_vlan:
+        return selected_vlan.port_group
     raise ArgumentError("No available user port groups on "
                         "{0:l}.".format(dbmachine.cluster.switch))
 
