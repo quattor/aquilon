@@ -32,17 +32,20 @@ from datetime import datetime
 from sqlalchemy import (Column, Integer, String, DateTime, Sequence, ForeignKey,
                         UniqueConstraint)
 
-from sqlalchemy.orm import relation, backref, object_session, deferred
+from sqlalchemy.orm import (relation, backref, object_session, deferred,
+                            column_property)
 from sqlalchemy.orm.attributes import instance_state
 from sqlalchemy.orm.interfaces import MapperExtension
 from sqlalchemy.ext.associationproxy import association_proxy
+from sqlalchemy.sql import select, func, and_
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.column_types import AqStr
 from aquilon.aqdb.model import (Base, Host, Service, Location,
                                 Personality, ClusterLifecycle,
                                 ServiceInstance, Machine, Branch, Switch,
-                                UserPrincipal)
+                                UserPrincipal, VlanInfo, ObservedVlan,
+                                Interface, HardwareEntity)
 
 # List of functions allowed to be used in vmhost_capacity_function
 restricted_builtins = {'None': None,
@@ -492,6 +495,24 @@ mcm.append_constraint(UniqueConstraint('machine_id',
 mcm.info['unique_fields'] = ['cluster', 'machine']
 
 Machine.cluster = association_proxy('_cluster', 'cluster')
+
+# Defined here to avoid circular dependencies
+ObservedVlan.guest_count = column_property(
+    select([func.count()],
+           and_(
+                # Select VMs on clusters that belong to the given switch
+                EsxCluster.switch_id == ObservedVlan.switch_id,
+                Cluster.id == EsxCluster.esx_cluster_id,
+                MachineClusterMember.cluster_id == Cluster.id,
+                Machine.machine_id == MachineClusterMember.machine_id,
+                # Select interfaces with the right port group
+                HardwareEntity.id == Machine.machine_id,
+                Interface.hardware_entity_id == HardwareEntity.id,
+                Interface.port_group == VlanInfo.port_group,
+                VlanInfo.vlan_id == ObservedVlan.vlan_id
+               )
+          ).label('guest_count'),
+    deferred=True)
 
 
 class ClusterAlignedService(Base):

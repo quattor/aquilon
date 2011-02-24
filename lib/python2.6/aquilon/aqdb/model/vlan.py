@@ -32,11 +32,11 @@ from datetime import datetime
 
 from sqlalchemy import (Column, Integer, DateTime, ForeignKey, CheckConstraint,
                         UniqueConstraint)
-from sqlalchemy.orm import relation, backref, object_session, aliased
+from sqlalchemy.orm import relation, backref
 
 from aquilon.exceptions_ import NotFoundException, InternalError
 from aquilon.aqdb.column_types import AqStr, Enum
-from aquilon.aqdb.model import Base, Network, Switch, Machine
+from aquilon.aqdb.model import Base, Network, Switch
 
 MAX_VLANS = 4096 #IEEE 802.1Q standard
 
@@ -53,6 +53,7 @@ _VTN = 'vlan_info'
 class VlanInfo(Base):
     """ information regarding well-known/standardized vlans """
     __tablename__ = _VTN
+    _instance_label = 'vlan_id'
 
     vlan_id = Column(Integer, primary_key=True)
     port_group = Column(AqStr(32), nullable=False)
@@ -121,39 +122,24 @@ class ObservedVlan(Base):
                                                 passive_deletes=True,
                                                 order_by=[vlan_id]))
 
+    vlan = relation(VlanInfo, lazy=True, uselist=False,
+                    primaryjoin=vlan_id == VlanInfo.vlan_id,
+                    foreign_keys=[VlanInfo.vlan_id],
+                    viewonly=True)
+
+    # guest_count is defined in cluster.py
+
     @property
     def port_group(self):
-        session = object_session(self)
-        info = session.query(VlanInfo).filter_by(vlan_id=self.vlan_id).first()
-        if info:
-            return info.port_group
+        if self.vlan:
+            return self.vlan.port_group
         return None
 
     @property
     def vlan_type(self):
-        session = object_session(self)
-        info = session.query(VlanInfo).filter_by(vlan_id=self.vlan_id).first()
-        if info:
-            return info.vlan_type
+        if self.vlan:
+            return self.vlan.vlan_type
         return None
-
-    @property
-    def guest_count(self):
-        # Can't import this earlier due to circular dependencies...
-        from aquilon.aqdb.model import Cluster, EsxCluster
-        # Count the number of VMs in the clusters with this switch and vlan.
-        session = object_session(self)
-        port_group = VlanInfo.get_port_group(session, vlan_id=self.vlan_id)
-        ESXAlias = aliased(EsxCluster)
-        q = session.query(Machine)
-        q = q.join('_cluster', 'cluster',
-                   (ESXAlias, ESXAlias.esx_cluster_id == Cluster.id))
-        q = q.filter_by(switch=self.switch)
-        q = q.reset_joinpoint()
-        q = q.join('interfaces')
-        q = q.filter_by(port_group=port_group)
-        q = q.reset_joinpoint()
-        return q.count()
 
     @property
     def is_at_guest_capacity(self):
