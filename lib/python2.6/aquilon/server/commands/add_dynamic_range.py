@@ -63,13 +63,10 @@ class CommandAddDynamicRange(BrokerCommand):
         if conflicts:
             raise ArgumentError("Cannot allocate IP address range because the "
                                 "following hosts already exist:\n" +
-                                "\n".join(["%s (%s)" % (c.fqdn, c.ip)
-                                           for c in conflicts]))
+                                "\n".join([format(c, "a") for c in conflicts]))
 
-        start = IPv4Address(startip)
-        end = IPv4Address(endip)
         stubs = []
-        for ipint in range(int(start), int(end) + 1):
+        for ipint in range(int(startip), int(endip) + 1):
             ip = IPv4Address(ipint)
             check_ip_restrictions(startnet, ip)
             name = "%s-%s" % (prefix, str(ip).replace('.', '-'))

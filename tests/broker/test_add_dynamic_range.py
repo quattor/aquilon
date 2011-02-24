@@ -125,10 +125,10 @@ class TestAddDynamicRange(TestBrokerCommand):
                    "--dns_domain=aqd-unittest.ms.com"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "the following hosts already exist", command)
-        self.matchoutput(out, "%s (%s)" %
+        self.matchoutput(out, "%s [%s]" %
                          (dynname(self.net.tor_net2[0].usable[2]),
                           self.net.tor_net2[0].usable[2]), command)
-        self.matchoutput(out, "%s (%s)" %
+        self.matchoutput(out, "%s [%s]" %
                          (dynname(self.net.tor_net2[0].usable[3]),
                           self.net.tor_net2[0].usable[3]), command)
 
