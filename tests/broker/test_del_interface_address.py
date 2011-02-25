@@ -143,6 +143,17 @@ class TestDelInterfaceAddress(TestBrokerCommand):
                           command)
         self.matchclean(out, "aliases", command)
 
+    def testdelunittest25utcolo(self):
+        net = self.net.unknown[1]
+        ip = net[4]
+        command = ["del", "interface", "address",
+                   "--machine", "unittest25.aqd-unittest.ms.com",
+                   "--interface", "eth1", "--ip", ip,
+                   "--network_environment", "utcolo"]
+        self.noouttest(command)
+        # External addresses should not affect DSDB
+        self.dsdb_verify(empty=True)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelInterfaceAddress)

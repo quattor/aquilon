@@ -546,7 +546,7 @@ class TestBrokerCommand(unittest.TestCase):
         self.dsdb_expect("update host -host_name %s -status aq "
                          "-ethernet_address %s" % (fqdn, mac), fail=fail)
 
-    def dsdb_verify(self):
+    def dsdb_verify(self, empty=False):
         dsdb_coverage_dir = os.path.join(self.config.get("unittest", "scratchdir"),
                                          "dsdb_coverage")
         fail_expected_name = os.path.join(dsdb_coverage_dir,
@@ -564,7 +564,7 @@ class TestBrokerCommand(unittest.TestCase):
                 pass
 
         # This is likely a logic error in the test
-        if not expected:
+        if not expected and not empty:
             self.fail("dsdb_verify() called when no DSDB commands were "
                       "expected?!?")
 

@@ -234,6 +234,46 @@ class TestAddInterfaceAddress(TestBrokerCommand):
         self.matchclean(out, "Auxiliary: zebra2.aqd-unittest.ms.com", command)
         self.matchclean(out, "Auxiliary: zebra3.aqd-unittest.ms.com", command)
 
+    def testmixenvironments(self):
+        net = self.net.unknown[1]
+        ip = net[3]
+        command = ["add", "interface", "address", "--machine", "ut3c5n7",
+                   "--interface", "eth0", "--ip", ip, "--label", "e0",
+                   "--fqdn", "unittest25-e0.utcolo.aqd-unittest.ms.com",
+                   "--network_environment", "utcolo"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "Mixing different network environments on the same "
+                         "interface is not allowed.",
+                         command)
+
+    def testaddunittest25utcolo(self):
+        net = self.net.unknown[1]
+        ip = net[4]
+        command = ["add", "interface", "address", "--machine", "ut3c5n7",
+                   "--interface", "eth1", "--ip", ip,
+                   "--fqdn", "unittest25-e1.utcolo.aqd-unittest.ms.com",
+                   "--network_environment", "utcolo"]
+        self.noouttest(command)
+        # External IP addresses should not be added to DSDB
+        self.dsdb_verify(empty=True)
+
+    def testaddunittest25excx(self):
+        net_internal = self.net.unknown[0]
+        net_excx = self.net.unknown[0].subnet()[0]
+        ip = net_excx[3]
+        command = ["add", "interface", "address", "--machine", "ut3c5n7",
+                   "--interface", "eth2", "--ip", ip,
+                   "--fqdn", "unittest25-e2.utcolo.aqd-unittest.ms.com",
+                   "--network_environment", "excx"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "Network %s in network environment internal used on "
+                         "public interface eth0 of machine "
+                         "unittest25.aqd-unittest.ms.com overlaps requested "
+                         "network excx-net in network environment excx." % net_internal.ip,
+                         command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddInterfaceAddress)

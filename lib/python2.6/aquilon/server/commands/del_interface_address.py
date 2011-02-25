@@ -30,13 +30,15 @@
 
 from aquilon.server.broker import BrokerCommand
 from aquilon.exceptions_ import ArgumentError, ProcessException, IncompleteError
-from aquilon.aqdb.model import (HardwareEntity, AddressAssignment,
-                                ARecord, DnsEnvironment, Fqdn)
+from aquilon.aqdb.model import (HardwareEntity, AddressAssignment, ARecord,
+                                Fqdn, DnsEnvironment, Network,
+                                NetworkEnvironment)
 from aquilon.server.dbwrappers.dns import delete_dns_record
 from aquilon.server.dbwrappers.interface import get_interface
 from aquilon.server.templates.host import PlenaryHost
 from aquilon.server.locks import lock_queue
 from aquilon.server.processes import DSDBRunner
+from aquilon.utils import first_of
 
 
 class CommandDelInterfaceAddress(BrokerCommand):
@@ -44,7 +46,8 @@ class CommandDelInterfaceAddress(BrokerCommand):
     required_parameters = ['interface']
 
     def render(self, session, logger, machine, chassis, switch, interface,
-               fqdn, ip, label, keep_dns, dns_environment, **kwargs):
+               fqdn, ip, label, keep_dns, dns_environment, network_environment,
+               **kwargs):
 
         if machine:
             hwtype = 'machine'
@@ -58,8 +61,9 @@ class CommandDelInterfaceAddress(BrokerCommand):
 
         dbhw_ent = HardwareEntity.get_unique(session, hwname,
                                              hardware_type=hwtype)
-
         dbinterface = get_interface(session, interface, dbhw_ent, None)
+        dbnet_env = NetworkEnvironment.get_unique_or_default(session,
+                                                             network_environment)
 
         oldinfo = DSDBRunner.snapshot_hw(dbhw_ent)
 
@@ -71,37 +75,47 @@ class CommandDelInterfaceAddress(BrokerCommand):
                                            dns_environment=dbdns_env,
                                            compel=True)
             ip = dbdns_rec.ip
+
+        addr = None
+        if ip:
+            addr = first_of(dbinterface.assignments, lambda x: x.ip == ip)
+            if not addr:
+                raise ArgumentError("{0} does not have IP address {1} assigned to "
+                                    "it.".format(dbinterface, ip))
         elif label is not None:
-            for addr in dbinterface.assignments:
-                if addr.label == label:
-                    ip = addr.ip
-                    break
-            if not ip:
+            addr = first_of(dbinterface.assignments, lambda x: x.label == label)
+            if not addr:
                 raise ArgumentError("{0} does not have an address with label "
                                     "{1}.".format(dbinterface, label))
 
-        if not ip:
+        if not addr:
             raise ArgumentError("Please specify the address to be removed "
                                 "using either --ip, --label, or --fqdn.")
 
-        if ip not in dbinterface.addresses:
-            raise ArgumentError("{0} does not have IP address {1} assigned to "
-                                "it.".format(dbinterface, ip))
+        dbnetwork = addr.network
+        ip = addr.ip
+
+        if dbnetwork.network_environment != dbnet_env:
+            # XXX Better error message. Revisit when integrating this with
+            # DNS environments
+            raise ArgumentError("Network environment mismatch")
 
         # Forbid removing the primary name
         if ip == dbhw_ent.primary_ip:
             raise ArgumentError("The primary IP address of a hardware entity "
                                 "cannot be removed.")
 
-        dbinterface.addresses.remove(ip)
+        dbinterface.assignments.remove(addr)
 
         # Check if the address was assigned to multiple interfaces, and remove
         # the DNS entries if this was the last use
         q = session.query(AddressAssignment)
+        q = q.filter_by(network=dbnetwork)
         q = q.filter_by(ip=ip)
         other_uses = q.all()
         if not other_uses and not keep_dns:
             q = session.query(ARecord)
+            q = q.filter_by(network=dbnetwork)
             q = q.filter_by(ip=ip)
             q = q.join(Fqdn)
             q = q.filter_by(dns_environment=dbdns_env)
@@ -130,7 +144,10 @@ class CommandDelInterfaceAddress(BrokerCommand):
 
                     # FIXME: update_host() is not rolled back if this fails
                     if not other_uses and keep_dns:
-                        dbdns_rec = session.query(ARecord).filter_by(ip=ip).first()
+                        q = session.query(ARecord)
+                        q = q.filter_by(network=dbnetwork)
+                        q = q.filter_by(ip=ip)
+                        dbdns_rec = q.first()
                         dsdb_runner.add_host_details(dbdns_rec.fqdn, ip, None,
                                                      None)
                 except ProcessException, e:

@@ -244,6 +244,18 @@ class TestAddAquilonHost(TestBrokerCommand):
                         "--personality", "compileserver"])
         self.dsdb_verify()
 
+    def testaddunittest25(self):
+        ip = self.net.unknown[0].usable[20]
+        self.dsdb_expect_add("unittest25.aqd-unittest.ms.com", ip, "eth0",
+                             ip.mac)
+        self.noouttest(["add", "aquilon", "host",
+                        "--hostname", "unittest25.aqd-unittest.ms.com",
+                        "--ip", ip, "--buildstatus", "build",
+                        "--machine", "ut3c5n7", "--domain", "unittest",
+                        "--osname", "linux", "--osversion", "4.0.1-x86_64",
+                        "--personality", "compileserver"])
+        self.dsdb_verify()
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddAquilonHost)

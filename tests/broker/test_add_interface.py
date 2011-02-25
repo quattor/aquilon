@@ -667,6 +667,17 @@ class TestAddInterface(TestBrokerCommand):
                         "--machine", "ut3c5n6",
                         "--mac", self.net.unknown[0].usable[19].mac])
 
+    def testaddut3c5n7(self):
+        self.noouttest(["add", "interface", "--interface", "eth0",
+                        "--machine", "ut3c5n7",
+                        "--mac", self.net.unknown[0].usable[20].mac])
+        self.noouttest(["add", "interface", "--interface", "eth1",
+                        "--machine", "ut3c5n7",
+                        "--mac", self.net.unknown[0].usable[21].mac])
+        self.noouttest(["add", "interface", "--interface", "eth2",
+                        "--machine", "ut3c5n7",
+                        "--mac", self.net.unknown[0].usable[22].mac])
+
     # FIXME: Missing a test for a failed DSDB add_host.
     # FIXME: Missing tests around Dell rename hack.
 

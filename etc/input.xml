@@ -1397,6 +1397,7 @@
          <option name="fqdn" type="string">FQDN of the new address</option>
       </optgroup>
       <optgroup name="add_interface_address_opt" mandatory="False" fields="any">
+	 <option name="network_environment" type="string">Network environment (default: internal)</option>
 	 <option name="label" type="string">Interface alias of the new address</option>
 	 <option name="usage" type="string">Use of the new address (default: system)</option>
          <option name="ipalgorithm" type="string">Algorithm for automatically choosing an IP.</option>
@@ -1424,6 +1425,7 @@
       <optgroup name="del_interface_address_opt" mandatory="False" fields="any">
          <option name="keep_dns" type="flag">Keep the DNS record</option>
          <option name="dns_environment" type="string">The name of the environment the address is in (defaults to 'internal')</option>
+         <option name="network_environment" type="string">Network environment (default: internal)</option>
       </optgroup>
       <optgroup name="del_interface_address_ip_opts" mandatory="True" fields="any">
          <option name="fqdn" type="string" conflicts="ip">FQDN of the address</option>

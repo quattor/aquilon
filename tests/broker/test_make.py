@@ -200,6 +200,29 @@ class TestMake(TestBrokerCommand):
                           (net.broadcast, router, ip, net.netmask),
                           command)
 
+    def testmakeunittest25(self):
+        command = ["make", "--hostname", "unittest25.aqd-unittest.ms.com"]
+        (out, err) = self.successtest(command)
+        self.matchoutput(err, "1/1 compiled", command)
+
+    def testverifyunittest25(self):
+        # Verify that the host chooses the closest router
+        command = ["cat", "--hostname", "unittest25.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        net = self.net.unknown[1]
+        ip = net[4]
+        router = net[2]
+        self.searchoutput(out,
+                          r'"eth1", nlist\(\s*'
+                          r'"bootproto", "static",\s*'
+                          r'"broadcast", "%s",\s*'
+                          r'"fqdn", "unittest25-e1.utcolo.aqd-unittest.ms.com",\s*'
+                          r'"gateway", "%s",\s*'
+                          r'"ip", "%s",\s*'
+                          r'"netmask", "%s"\s*\)' %
+                          (net.broadcast, router, ip, net.netmask),
+                          command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestMake)
