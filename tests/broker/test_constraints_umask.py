@@ -49,6 +49,13 @@ class TestUmaskConstraints(TestBrokerCommand):
                                           "refs", "heads", "utsandbox")
                             ).st_mode & stat.S_IROTH)
 
+    # Check that directory created by the broker has the proper
+    # permissions.  This gets created as part of test_compile.
+    def testdirpermission(self):
+        builddir = self.config.get('broker', 'builddir')
+        dirstat = os.stat(os.path.join(builddir, 'domains', 'out_of_date'))
+        self.assert_(dirstat.st_mode & stat.S_IROTH)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestUmaskConstraints)
