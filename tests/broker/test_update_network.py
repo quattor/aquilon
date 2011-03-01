@@ -75,6 +75,13 @@ class TestUpdateNetwork(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out, "Discoverable: True", command)
 
+    # There should be a test_constraint_network.py one day...
+    def test_900_delinuse(self):
+        net = self.net.unknown[0]
+        command = ["del", "network", "--ip", net.ip]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Network %s is still in use" % net.ip, command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestUpdateDomain)
