@@ -56,6 +56,12 @@ class TestDelBuilding(TestBrokerCommand):
         self.noouttest(command.split(" "))
         self.dsdb_verify()
 
+    def testdelnettest(self):
+        self.dsdb_expect("delete_building_aq -building nettest")
+        command = "del building --building nettest"
+        self.noouttest(command.split(" "))
+        self.dsdb_verify()
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelBuilding)

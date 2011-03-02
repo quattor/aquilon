@@ -30,13 +30,41 @@
 
 from ipaddr import (IPv4Address, IPv4Network, AddressValueError,
                     NetmaskValueError)
+import heapq
 
 from aquilon.exceptions_ import PartialError, ArgumentError
 from aquilon.aqdb.model import (NetworkEnvironment, Network, RouterAddress,
                                 ARecord, DnsEnvironment, AddressAssignment,
                                 Building)
+from aquilon.server.dbwrappers.dns import delete_dns_record
+from aquilon.server.dbwrappers.network import fix_foreign_links
 
 from sqlalchemy.orm import subqueryload, lazyload, defer, contains_eager
+from sqlalchemy.sql import update, and_, or_
+
+
+# Add a wrapper around heapq.heappop because handling None is simpler than
+# adding try/except blocks everywhere
+def heap_pop(heap):
+    try:
+        return heapq.heappop(heap)
+    except IndexError:
+        return None
+
+
+class QIPInfo(object):
+    def __init__(self, name, address, location, network_type, side, routers):
+        self.name = name
+        self.address = address
+        self.location = location
+        self.network_type = network_type
+        self.side = side
+        self.routers = routers
+
+    def __cmp__(self, other):
+        # The refresh algorithm depends on QIPInfo objects being ordered by the
+        # network IP address
+        return cmp(self.address.ip, other.address.ip)
 
 
 class QIPRefresh(object):
@@ -81,133 +109,15 @@ class QIPRefresh(object):
         self.logger.error(msg)
         self.errors.append(msg)
 
-    def commit_if_needed(self, msg):
-        self.logger.client_info(msg)
+    def commit_if_needed(self):
         try:
             if self.dryrun:
                 self.session.flush()
             if self.incremental:
                 self.session.commit()
-        except Exception, err:
-            self.error(err)
+        except Exception, err:  # pragma: no cover
+            self.error(str(err))
             self.session.rollback()
-
-    def refresh_system_networks(self):
-        q = self.session.query(ARecord)
-        q = q.join(Network)
-        q = q.options(contains_eager('network'))
-        q = q.filter_by(network_environment=self.net_env)
-        q = q.order_by(ARecord.ip)
-        systems = q.all()
-
-        q = self.session.query(Network)
-        q = q.filter_by(network_environment=self.net_env)
-        q = q.options(defer('location_id'))
-        q = q.options(defer('side'))
-        q = q.options(defer('is_discoverable'))
-        q = q.options(defer('is_discovered'))
-        q = q.order_by(Network.ip)
-        networks = q.all()
-
-        def set_network(dnsrec, net):
-            if dnsrec.network != net:
-                dnsrec.network = net
-                self.commit_if_needed('Updating %s [%s] with network %s' %
-                                      (dnsrec.fqdn, dnsrec.ip, net.ip))
-
-        s_index = 0
-        n_index = 0
-        # Iterate through the ordered lists matching systems to their networks.
-        # Not worried about the edge cases of no networks or no systems.  If
-        # there are no systems there is nothing to fix.  If there are no
-        # networks then all the systems are pointing at null anyway.
-        while (s_index < len(systems) and n_index < len(networks)):
-            # database objects
-            sys = systems[s_index]
-            net = networks[n_index]
-
-            # Hopefully the common case... our system IP is in the range
-            # of the current network.  Make sure the network is set
-            # appropriately and move on to the next system.
-            if sys.ip in net.network:
-                set_network(sys, net)
-                s_index += 1
-                continue
-
-            # Our system is beyond the range of the current network, so
-            # proceed to checking against the next network.
-            if sys.ip > net.broadcast:
-                n_index += 1
-                continue
-
-            # At this point we know our system is not in the range of
-            # any networks.  We started at the "lowest" network and
-            # have been working up.  Since the system IP is less than
-            # the network IP we can't expect incrementing to the next
-            # network to help us find one. :)
-            self.error('No network found for IP address %s [%s].' %
-                       (sys.ip, sys.fqdn))
-            set_network(sys, None)
-            s_index += 1
-            continue
-
-    def refresh_address_assignments(self):
-        q = self.session.query(AddressAssignment)
-        q = q.join(Network)
-        q = q.options(contains_eager('network'))
-        q = q.filter_by(network_environment=self.net_env)
-        q = q.order_by(AddressAssignment.ip)
-        q = q.options(lazyload('interface'))
-        assignments = q.all()
-
-        q = self.session.query(Network)
-        q = q.filter_by(network_environment=self.net_env)
-        q = q.options(defer('location_id'))
-        q = q.options(defer('side'))
-        q = q.options(defer('is_discoverable'))
-        q = q.options(defer('is_discovered'))
-        q = q.order_by(Network.ip)
-        networks = q.all()
-
-        def set_network(assignment, net):
-            if assignment.network != net:
-                assignment.network = net
-                # Looking up the host name would take a lot of time esp. in
-                # incremental mode
-                self.commit_if_needed('Updating assignment %d [%s] with network %s' %
-                                      (assignment.ip, assignment.ip, net.ip))
-
-        s_index = 0
-        n_index = 0
-        while (s_index < len(assignments) and n_index < len(networks)):
-            # database objects
-            assignment = assignments[s_index]
-            net = networks[n_index]
-
-            # Hopefully the common case... our system IP is in the range
-            # of the current network.  Make sure the network is set
-            # appropriately and move on to the next system.
-            if assignment.ip in net.network:
-                set_network(assignment, net)
-                s_index += 1
-                continue
-
-            # Our system is beyond the range of the current network, so
-            # proceed to checking against the next network.
-            if assignment.ip > net.broadcast:
-                n_index += 1
-                continue
-
-            # At this point we know our system is not in the range of
-            # any networks.  We started at the "lowest" network and
-            # have been working up.  Since the system IP is less than
-            # the network IP we can't expect incrementing to the next
-            # network to help us find one. :)
-            self.error('No network found for IP address %s [%s].' %
-                       (assignment.ip, format(assignment.interface)))
-            set_network(assignment, None)
-            s_index += 1
-            continue
 
     def parse_line(self, line):
         """
@@ -313,52 +223,112 @@ class QIPRefresh(object):
                 # FIXME: the testsuite does not have the "xx" building
                 return None
 
-        return {"name": name,
-                "address": address,
-                "location": location,
-                "type": network_type,
-                "side": side,
-                "routers": routers}
+        return QIPInfo(name=name, address=address, location=location,
+                       network_type=network_type, side=side, routers=routers)
 
     def update_network(self, dbnetwork, qipinfo):
-        if dbnetwork.name != qipinfo["name"]:
+        """ Update the network parameters except the netmask """
+
+        if dbnetwork.name != qipinfo.name:
+            self.logger.client_info("Setting network {0:a} name to {1}"
+                                    .format(dbnetwork, qipinfo.name))
             oldname = dbnetwork.name
-            dbnetwork.name = qipinfo["name"]
-            self.commit_if_needed("Setting network %s name to %s" %
-                                  (oldname, dbnetwork.name))
-        if dbnetwork.network_type != qipinfo["type"]:
-            dbnetwork.network_type = qipinfo["type"]
-            self.commit_if_needed("Setting {0:l} type to "
-                                  "{1}".format(dbnetwork, qipinfo["type"]))
-        if dbnetwork.location != qipinfo["location"]:
-            dbnetwork.location = qipinfo["location"]
-            self.commit_if_needed("Setting {0:l} location to "
-                                  "{1:l}".format(dbnetwork, qipinfo["location"]))
-        if dbnetwork.side != qipinfo["side"]:
-            dbnetwork.side = qipinfo["side"]
-            self.commit_if_needed("Setting {0:l} side to "
-                                  "{1}".format(dbnetwork, qipinfo["side"]))
-        if dbnetwork.netmask != qipinfo["address"].netmask:
-            dbnetwork.cidr = qipinfo["address"].prefixlen
-            self.commit_if_needed("Setting {0:l} netmask to "
-                                  "{1}".format(dbnetwork,
-                                               qipinfo["address"].netmask))
+            dbnetwork.name = qipinfo.name
+        if dbnetwork.network_type != qipinfo.network_type:
+            self.logger.client_info("Setting network {0:a} type to {1}"
+                                    .format(dbnetwork, qipinfo.network_type))
+            dbnetwork.network_type = qipinfo.network_type
+        if dbnetwork.location != qipinfo.location:
+            self.logger.client_info("Setting network {0:a} location to {1:l}"
+                                    .format(dbnetwork, qipinfo.location))
+            dbnetwork.location = qipinfo.location
+        if dbnetwork.side != qipinfo.side:
+            self.logger.client_info("Setting network {0:a} side to {1}"
+                                    .format(dbnetwork, qipinfo.side))
+            dbnetwork.side = qipinfo.side
 
         old_rtrs = set(dbnetwork.router_ips)
-        new_rtrs = set(qipinfo["routers"])
+        new_rtrs = set(qipinfo.routers)
 
-        for ip in old_rtrs - new_rtrs:
-            dbnetwork.router_ips.remove(ip)
-            self.commit_if_needed("Removing router {0:s} from "
-                                  "{1:l}".format(ip, dbnetwork))
+        del_routers = []
+        for router in dbnetwork.routers:
+            if router.ip in old_rtrs - new_rtrs:
+                del_routers.append(router)
+
+        for router in del_routers:
+            self.logger.client_info("Removing router {0:s} from "
+                                    "{1:l}".format(router.ip, dbnetwork))
+            map(delete_dns_record, router.dns_records)
+            dbnetwork.routers.remove(router)
 
         for ip in new_rtrs - old_rtrs:
-            dbnetwork.routers.append(RouterAddress(ip=ip,
-                                                   dns_environment=self.dns_env))
-            self.commit_if_needed("Adding router {0:s} to "
-                                  "{1:l}".format(ip, dbnetwork))
+            self.add_router(dbnetwork, ip)
 
         # TODO: add support for updating router locations
+
+        return dbnetwork.netmask == qipinfo.address.netmask
+
+    def add_network(self, qipinfo):
+        dbnetwork = Network(name=qipinfo.name, network=qipinfo.address,
+                            network_type=qipinfo.network_type,
+                            side=qipinfo.side, location=qipinfo.location,
+                            network_environment=self.net_env)
+        self.session.add(dbnetwork)
+        self.logger.client_info("Adding network {0:a}".format(dbnetwork))
+        for ip in qipinfo.routers:
+            self.add_router(dbnetwork, ip)
+        self.session.flush()
+        return dbnetwork
+
+    def del_network(self, dbnetwork):
+        # Check if the network is in use and a return readable error message if
+        # it is
+        in_use = False
+        for addr in dbnetwork.assignments:
+            self.error("{0} cannot be deleted because {1} is still assigned to "
+                       "{2:l}.".format(dbnetwork, addr.ip, addr.interface))
+            in_use = True
+        for dns_rec in dbnetwork.dns_records:
+            if hasattr(dns_rec, "ip") and dns_rec.ip in dbnetwork.router_ips:
+                continue
+            self.error("{0} cannot be deleted because DNS record {1:a} still "
+                       "exists.".format(dbnetwork, dns_rec))
+            in_use = True
+
+        if not in_use:
+            for router in dbnetwork.routers:
+                self.logger.client_info("Removing router {0:s} from "
+                                        "{1:l}".format(router.ip, dbnetwork))
+                map(delete_dns_record, router.dns_records)
+            dbnetwork.routers = []
+            self.logger.client_info("Deleting network {0:a}".format(dbnetwork))
+            self.session.delete(dbnetwork)
+
+    def add_router(self, dbnetwork, ip):
+        dbnetwork.routers.append(RouterAddress(ip=ip,
+                                               dns_environment=self.dns_env))
+        self.logger.client_info("Adding router {0:s} to "
+                                "{1:l}".format(ip, dbnetwork))
+
+    def check_split_network(self, dbnetwork):
+        # If a network was split and some of the subnets were deleted, then
+        # some IP address allocations may be left in limbo. Force these cases to
+        # generate an SQL error by violating the NOT NULL constraint
+        self.session.execute(
+            update(AddressAssignment.__table__,
+                   values={'network_id': None})
+            .where(and_(AddressAssignment.network_id == dbnetwork.id,
+                        or_(AddressAssignment.ip < dbnetwork.ip,
+                            AddressAssignment.ip > dbnetwork.broadcast)))
+        )
+
+        self.session.execute(
+            update(ARecord.__table__,
+                   values={'network_id': None})
+            .where(and_(ARecord.network_id == dbnetwork.id,
+                        or_(ARecord.ip < dbnetwork.ip,
+                            ARecord.ip > dbnetwork.broadcast)))
+        )
 
     def refresh(self, filehandle):
         linecnt = 0
@@ -370,49 +340,125 @@ class QIPRefresh(object):
                 qipinfo = self.parse_line(line)
                 if not qipinfo:
                     continue
-                if self.building and qipinfo["location"] != self.building:
+                if self.building and qipinfo.location != self.building:
                     continue
-                qipnetworks[qipinfo["address"].ip] = qipinfo
+                qipnetworks[qipinfo.address.ip] = qipinfo
             except ValueError, err:
                 self.error("%s; skipping line %d: %s" % (err, linecnt, line))
 
-        deletes = set(self.aqnetworks.keys()) - set(qipnetworks.keys())
-        # Safety margin: refuse if we're about to delete more than 1/4 of the
-        # existing networks
-        if len(deletes) > self.networks_before / 4:
-            # TODO: add a --force argument
-            raise ArgumentError("The operation would delete more than 25% of "
-                                "the networks defined in AQDB, refusing.")
-        for ip in deletes:
-            self.session.delete(self.aqnetworks[ip])
-            self.commit_if_needed("Deleting {0:l}".format(self.aqnetworks[ip]))
-            del self.aqnetworks[ip]
-        self.session.flush()
+        # Check/update network attributes that do not affect other objects. Do
+        # this in a single transaction, even in incremental mode
+        ips = self.aqnetworks.keys()
+        for ip in ips:
+            if ip not in qipnetworks:
+                continue
+            if self.update_network(self.aqnetworks[ip], qipnetworks[ip]):
+                # If the netmask did not change, then we're done with this
+                # network
+                del self.aqnetworks[ip]
+                del qipnetworks[ip]
+        self.commit_if_needed()
 
-        # What remained in self.aqnetworks is also in qipnetworks, so check for
-        # updates
-        for ip, dbnetwork in self.aqnetworks.items():
-            self.update_network(dbnetwork, qipnetworks[ip])
-            del qipnetworks[ip]
-        self.session.flush()
+        # What is left after this point is additions, deletions, splits and
+        # merges
 
-        # What remained in qipnetworks was not present in AQDB
-        for qipinfo in qipnetworks.values():
-            dbnetwork = Network(name=qipinfo["name"], network=qipinfo["address"],
-                                network_type=qipinfo["type"], side=qipinfo["side"],
-                                location=qipinfo["location"],
-                                network_environment=self.net_env)
-            self.session.add(dbnetwork)
-            self.commit_if_needed("Adding {0:l}".format(dbnetwork))
-            for ip in qipinfo["routers"]:
-                dbnetwork.routers.append(RouterAddress(ip=ip,
-                                                       dns_environment=self.dns_env))
-                self.commit_if_needed("Adding router {0:s} to "
-                                      "{1:l}".format(ip, dbnetwork))
-        self.session.flush()
+        aqnets = self.aqnetworks.values()
+        heapq.heapify(aqnets)
+        qipnets = qipnetworks.values()
+        heapq.heapify(qipnets)
 
-        self.refresh_system_networks()
-        self.refresh_address_assignments()
+        aqnet = heap_pop(aqnets)
+        qipinfo = heap_pop(qipnets)
+        while aqnet or qipinfo:
+            # We have 3 cases regarding aqnet/qipinfo:
+            # - One contains the other: this is a split or a merge
+            # - aqnet.ip < qipinfo.address.ip (or there is no qipinfo): the
+            #   network was deleted from QIP
+            # - qipinfo.address.ip < aqnet.ip (or there is no aqnet): a new
+            #   network was added to QIP
+            if aqnet and qipinfo and (aqnet.ip in qipinfo.address or
+                                      qipinfo.address.ip in aqnet.network):
+                # This is a split or a merge. The trick here is to perform
+                # multiple network additions/deletions inside the same
+                # transaction even in incremental mode, to maintain relational
+                # integrity
+
+                startip = min(aqnet.ip, qipinfo.address.ip)
+                prefixlen = max(aqnet.cidr, qipinfo.address.prefixlen)
+                supernet = IPv4Network("%s/%s" % (startip, prefixlen))
+
+                # Always deleting & possibly recreating aqnet would make things
+                # simpler, but we can't do that due to the unique constraint on
+                # the IP address and the non-null foreign key constraints in
+                # other tables. So we need a flag to remember if we want to keep
+                # the original object or not
+                if aqnet.ip == qipinfo.address.ip:
+                    self.logger.client_info("Setting network {0:a} prefix "
+                                            "length to {1}"
+                                            .format(aqnet,
+                                                    qipinfo.address.prefixlen))
+                    aqnet.cidr = qipinfo.address.prefixlen
+                    keep_aqnet = True
+                else:
+                    # This can happen if the network was split, and then the
+                    # first subnet was deleted
+                    keep_aqnet = False
+
+                # Here we rely heavily on network sizes being a power of two, so
+                # supernet is either equal to aqnet or to qipinfo - partial
+                # overlap is not possible
+                if aqnet.network == supernet:
+                    # Split:
+                    #  AQ:  ******** (one big network)
+                    #  QIP: --**++++ (smaller networks, some may be missing)
+                    if keep_aqnet:
+                        # The first subnet was handled above by setting
+                        # aqnet.cidr
+                        qipinfo = heap_pop(qipnets)
+                    else:
+                        # The first subnet was deleted
+                        pass
+                    while qipinfo and qipinfo.address.ip in aqnet.network:
+                        newnet = self.add_network(qipinfo)
+                        # Redirect addresses from the split network to the new
+                        # subnet
+                        fix_foreign_links(self.session, aqnet, newnet)
+                        qipinfo = heap_pop(qipnets)
+                    if keep_aqnet:
+                        self.check_split_network(aqnet)
+                    else:
+                        self.del_network(aqnet)
+                    aqnet = heap_pop(aqnets)
+                else:
+                    # Merge:
+                    #  AQ:  --++**** (smaller networks, some may be missing)
+                    #  QIP: ******** (one big network)
+                    if keep_aqnet:
+                        # The first subnet was handled above by setting
+                        # aqnet.cidr
+                        newnet = aqnet
+                        aqnet = heap_pop(aqnets)
+                    else:
+                        # The first subnet was missing from AQDB before
+                        newnet = self.add_network(qipinfo)
+                    while aqnet and aqnet.ip in newnet.network:
+                        # Redirect addresses from the subnet to the merged
+                        # network
+                        fix_foreign_links(self.session, aqnet, newnet)
+                        self.del_network(aqnet)
+                        aqnet = heap_pop(aqnets)
+                    qipinfo = heap_pop(qipnets)
+            elif aqnet and (not qipinfo or aqnet.ip < qipinfo.address.ip):
+                # Network is deleted
+                self.del_network(aqnet)
+                aqnet = heap_pop(aqnets)
+            else:
+                # New network
+                self.add_network(qipinfo)
+                qipinfo = heap_pop(qipnets)
+
+            self.commit_if_needed()
+        self.session.flush()
 
         if self.errors:
             if self.incremental:

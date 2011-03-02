@@ -79,12 +79,9 @@ class AddressAssignment(Base):
 
     ip = Column(IPV4, nullable=False)
 
-    # ON DELETE SET NULL and later passive_deletes=True helps refresh_network in
-    # case of network splits/merges
     network_id = Column(Integer, ForeignKey('network.id',
-                                            name='%s_network_fk' % _TN,
-                                            ondelete="SET NULL"),
-                        nullable=True)
+                                            name='%s_network_fk' % _TN),
+                        nullable=False)
 
     usage = Column(Enum(16, ADDR_USAGES), nullable=False, default="system")
 

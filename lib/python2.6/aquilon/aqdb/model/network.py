@@ -153,6 +153,7 @@ class Network(Base):
 
     @property
     def network(self):
+        # TODO: cache the IPv4Network object
         return IPv4Network("%s/%s" % (self.ip, self.cidr))
 
     @network.setter
@@ -177,6 +178,26 @@ class Network(Base):
     @property
     def is_internal(self):
         return self.network_environment.is_default
+
+    def __le__(self, other):
+        if self.network_environment_id != other.network_environment_id:
+            return NotImplemented
+        return self.ip.__le__(other.ip)
+
+    def __lt__(self, other):
+        if self.network_environment_id != other.network_environment_id:
+            return NotImplemented
+        return self.ip.__lt__(other.ip)
+
+    def __ge__(self, other):
+        if self.network_environment_id != other.network_environment_id:
+            return NotImplemented
+        return self.ip.__ge__(other.ip)
+
+    def __gt__(self, other):
+        if self.network_environment_id != other.network_environment_id:
+            return NotImplemented
+        return self.ip.__gt__(other.ip)
 
     @classmethod
     def get_unique(cls, session, *args, **kwargs):

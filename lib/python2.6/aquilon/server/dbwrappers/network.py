@@ -30,9 +30,10 @@
 
 
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
+from sqlalchemy.sql import and_, update
 
 from aquilon.exceptions_ import NotFoundException, ArgumentError
-from aquilon.aqdb.model import Network
+from aquilon.aqdb.model import Network, AddressAssignment, ARecord
 
 
 def get_network_byname(session, netname, environment):
@@ -58,3 +59,31 @@ def get_network_byip(session, ipaddr, environment):
     except NoResultFound:
         raise NotFoundException("Network with address %s not found." % ipaddr)
     return dbnetwork
+
+def fix_foreign_links(session, oldnet, newnet):
+    """
+    Fix foreign keys that point to the network table
+
+    When a network is split or multiple networks are merged, foreign keys
+    must be updated accordingly. Do not use the size of the old network,
+    as it has already been updated when this function gets called.
+    """
+    session.execute(
+        update(AddressAssignment.__table__,  # pylint: disable-msg=E1101
+               values={'network_id': newnet.id})
+        .where(and_(AddressAssignment.network_id == oldnet.id,
+                    AddressAssignment.ip >= newnet.ip,
+                    AddressAssignment.ip <= newnet.broadcast))
+    )
+    session.expire(oldnet, ['assignments'])
+    session.expire(newnet, ['assignments'])
+
+    session.execute(
+        update(ARecord.__table__,  # pylint: disable-msg=E1101
+               values={'network_id': newnet.id})
+        .where(and_(ARecord.network_id == oldnet.id,
+                    ARecord.ip >= newnet.ip,
+                    ARecord.ip <= newnet.broadcast))
+    )
+    session.expire(oldnet, ['dns_records'])
+    session.expire(newnet, ['dns_records'])

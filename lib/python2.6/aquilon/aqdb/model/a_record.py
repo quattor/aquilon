@@ -47,12 +47,9 @@ class ARecord(DnsRecord):
 
     ip = Column(IPV4, nullable=False)
 
-    # ON DELETE SET NULL and later passive_deletes=True helps refresh_network in
-    # case of network splits/merges
     network_id = Column(Integer, ForeignKey('network.id',
-                                            name='A_RECORD_NETWORK_FK',
-                                            ondelete="SET NULL"),
-                        nullable=True)
+                                            name='A_RECORD_NETWORK_FK'),
+                        nullable=False)
 
     network = relation(Network, backref=backref('dns_records',
                                                 passive_deletes=True))
