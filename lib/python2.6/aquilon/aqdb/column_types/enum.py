@@ -59,11 +59,15 @@ class Enum(sqlalchemy.types.TypeDecorator):
     def process_bind_param(self, value, dialect):
         if self.empty_to_none and value is '':
             value = None
+        if value is None:
+            return value
         if value not in self.values:
             raise ValueError('"%s" not in Enum.values' % value)
         return str(value).strip().lower()
 
     def process_result_value(self, value, dialect):
+        if value is None:
+            return value
         if self.strict and value not in self.values:
             raise ValueError('"%s" not in Enum.values' % value)
         return value
