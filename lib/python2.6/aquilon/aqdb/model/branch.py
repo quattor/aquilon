@@ -36,6 +36,7 @@ from sqlalchemy.orm import relation
 
 from aquilon.aqdb.model import Base, UserPrincipal
 from aquilon.aqdb.column_types.aqstr import AqStr
+from aquilon.aqdb.column_types.enum import Enum
 
 _TN = "branch"
 _DMN = "domain"
@@ -101,9 +102,7 @@ class Domain(Branch):
                                nullable=True)
     rollback_commit = Column(AqStr(40), nullable=True)
 
-    # FIXME: this should be an Enum, but Enum does not seem to play nice
-    # together with nullable=True
-    change_manager = Column(AqStr(16), nullable=True)
+    change_manager = Column(Enum(16, CHANGE_MANAGERS), nullable=True)
 
     __mapper_args__ = {'polymorphic_identity': _DMN,
                        'inherit_condition': domain_id == Branch.id}
