@@ -40,19 +40,6 @@ from brokertest import TestBrokerCommand
 
 class TestUnbindESXCluster(TestBrokerCommand):
 
-    def testfailunbindevh1(self):
-        # This test is duplicated in uncluster, but here it is testing the
-        # deprecation warning.  This test can be removed if/when the
-        # --hostname option is removed from unbind_esx_cluster.
-        command = ["unbind_esx_cluster",
-                   "--hostname", "evh1.aqd-unittest.ms.com",
-                   "--cluster", "utecl1"]
-        (p, out, err) = self.runcommand(command)
-        self.matchoutput(err,
-                         "The --hostname option is deprecated.  "
-                         "Please use the 'uncluster' command instead.",
-                         command)
-
     def testfailservicemissingcluster(self):
         command = ["unbind_esx_cluster", "--cluster", "cluster-does-not-exist",
                    "--service=esx_management_server", "--instance=ut.a"]
