@@ -63,6 +63,14 @@ class CommandReconfigureList(BrokerCommand):
         if not dbhosts:
             raise ArgumentError("Empty list.")
 
+        self.reconfigure_list(session, logger, dbhosts, archetype, personality,
+                              buildstatus, osname, osversion, os, **arguments)
+
+
+    def reconfigure_list(self, session, logger, dbhosts, archetype,
+                         personality, buildstatus, osname, osversion, os,
+                         **arguments):
+        failed = []
         # Check all the parameters up front.
         # Some of these could be more intelligent about defaults
         # (either by checking for unique entries or relying on the list)
