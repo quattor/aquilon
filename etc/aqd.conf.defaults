@@ -102,6 +102,7 @@ umask = 0022
 kncport = 6900
 openport = 6901
 git_port = 9418
+gzip_level = 9
 templateport = %(openport)s
 git_templates_url = git://%(servername)s:%(git_port)s/quattor/template-king
 git_daemon_basedir = %(basedir)s
