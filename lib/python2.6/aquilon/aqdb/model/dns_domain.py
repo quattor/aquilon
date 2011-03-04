@@ -86,7 +86,7 @@ class DnsDomain(Base):
             msg = 'DNS name components must have a length between 1 and 63.'
             raise ValueError(msg)
         if not cls._name_check.match(label):
-            raise ValueError("Illegal DNS domain name format '%s'." % label)
+            raise ValueError("Illegal DNS name format '%s'." % label)
 
     def __init__(self, *args, **kwargs):
 

@@ -75,32 +75,58 @@ class DnsRecord(Base):
         return self.name + '.' + self.dns_domain.name
 
     @classmethod
-    def get_unique(cls, session, *args, **kwargs):
-        if "fqdn" in kwargs:
-            (name, dbdns_domain) = parse_fqdn(session, kwargs.pop("fqdn"))
-            kwargs["name"] = name
-            kwargs["dns_domain"] = dbdns_domain
-        return super(DnsRecord, cls).get_unique(session, *args, **kwargs)
+    def get_unique(cls, session, name=None, dns_domain=None, fqdn=None,
+                   **kwargs):
+        if fqdn:
+            if name or dns_domain:  # pragma: no cover
+                raise TypeError("fqdn and name/dns_domain should not be mixed")
+            (name, dns_domain) = parse_fqdn(session, fqdn)
 
-    def __init__(self, session=None, *args, **kwargs):
-        if "fqdn" in kwargs:
-            if not session:
-                raise InternalError("Passing fqdn to Session.__init__() needs "
-                                    "a session.")
-            (name, dbdns_domain) = parse_fqdn(session, kwargs.pop("fqdn"))
-            kwargs["name"] = name
-            kwargs["dns_domain"] = dbdns_domain
-        super(DnsRecord, self).__init__(*args, **kwargs)
+        return super(DnsRecord, cls).get_unique(session, name=name,
+                                                dns_domain=dns_domain,
+                                                **kwargs)
+
+    @classmethod
+    def check_name(cls, name, dns_domain):
+        """ Validate the name parameter """
+
+        if not isinstance(name, basestring):  # pragma: no cover
+            raise TypeError("%s: name must be a string." % cls.name)
+        if not isinstance(dns_domain, DnsDomain):  # pragma: no cover
+            raise TypeError("%s: dns_domain must be a DnsDomain." % cls.name)
+
+        DnsDomain.check_label(name)
+
+        # The limit for DNS name length is 255, assuming wire format. This
+        # translates to 253 for simple ASCII text; see:
+        # http://www.ops.ietf.org/lists/namedroppers/namedroppers.2003/msg00964.html
+        if len(name) + 1 + len(dns_domain.name) > 253:
+            raise ValueError('The fully qualified domain name is too long.')
+
+    def __init__(self, session=None, name=None, dns_domain=None, fqdn=None,
+                 **kwargs):
+        if not session or not isinstance(session, Session):  # pragma: no cover
+            raise InternalError("%s needs a session." % self._get_class_label())
+
+        if fqdn:
+            if name or dns_domain:  # pragma: no cover
+                raise TypeError("fqdn and name/dns_domain should not be mixed")
+            (name, dns_domain) = parse_fqdn(session, fqdn)
+
+        self.check_name(name, dns_domain)
+
+        super(DnsRecord, self).__init__(name=name, dns_domain=dns_domain,
+                                        **kwargs)
 
     @classmethod
     def get_or_create(cls, session, **kwargs):
         dns_record = cls.get_unique(session, **kwargs)
         if dns_record:
             return dns_record
+
         dns_record = cls(session=session, **kwargs)
         session.add(dns_record)
         session.flush()
-        session.refresh(dns_record)
         return dns_record
 
     def __format__(self, format_spec):
@@ -117,4 +143,4 @@ dns_record.append_constraint(
     UniqueConstraint('name', 'dns_domain_id', name='%s_name_domain_uk' % _TN))
 
 # TODO: This is not quite correct
-dns_record.info['unique_fields'] = ['name', 'dns_domain', 'dns_environment']
+dns_record.info['unique_fields'] = ['name', 'dns_domain']
