@@ -554,6 +554,12 @@ class TestBrokerCommand(unittest.TestCase):
             f.write(contents)
         return scratchfile
 
+    def readscratch(self, filename):
+        scratchfile = os.path.join(self.scratchdir, filename)
+        with open(scratchfile, 'r') as f:
+            contents = f.read()
+        return contents
+
     def dsdb_expect(self, command, fail=False):
         dsdb_coverage_dir = os.path.join(self.config.get("unittest", "scratchdir"),
                                          "dsdb_coverage")
