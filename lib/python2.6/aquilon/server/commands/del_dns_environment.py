@@ -32,7 +32,7 @@
 from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.processes import DSDBRunner
-from aquilon.aqdb.model import DnsEnvironment, DnsRecord
+from aquilon.aqdb.model import DnsEnvironment, DnsRecord, RouterAddress
 
 
 class CommandDelDnsEnvironment(BrokerCommand):
@@ -47,6 +47,12 @@ class CommandDelDnsEnvironment(BrokerCommand):
         q = q.filter_by(dns_environment=db_dnsenv)
         if q.first():
             raise ArgumentError("{0} is still in use by DNS records, and "
+                                "cannot be deleted.".format(db_dnsenv))
+
+        q = session.query(RouterAddress)
+        q = q.filter_by(dns_environment=db_dnsenv)
+        if q.first():
+            raise ArgumentError("{0} is still in use by routers, and "
                                 "cannot be deleted.".format(db_dnsenv))
 
         session.delete(db_dnsenv)

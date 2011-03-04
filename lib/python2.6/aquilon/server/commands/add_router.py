@@ -61,6 +61,7 @@ class CommandAddRouter(BrokerCommand):
                                 "on {1:l}.".format(ip, dbnetwork))
 
         dbnetwork.routers.append(RouterAddress(ip=ip, location=dbbuilding,
+                                               dns_environment=dbdns_rec.dns_environment,
                                                comments=comments))
         session.flush()
 

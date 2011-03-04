@@ -93,4 +93,11 @@ CREATE TABLE dns_map (
 	CONSTRAINT "DNS_MAP_DNS_DOMAIN_FK" FOREIGN KEY (dns_domain_id) REFERENCES dns_domain (id)
 );
 
+ALTER TABLE router_address ADD dns_environment_id INTEGER;
+UPDATE router_address SET dns_environment_id = (SELECT id FROM dns_environment WHERE name = 'internal');
+ALTER TABLE router_address
+	MODIFY (dns_environment_id CONSTRAINT "ROUTER_ADDRESS_DNS_ENV_ID_NN" NOT NULL);
+ALTER TABLE router_address
+	ADD CONSTRAINT "ROUTER_ADDRESS_DNS_ENV_FK" FOREIGN KEY (dns_environment_id) REFERENCES dns_environment (id);
+
 QUIT;
