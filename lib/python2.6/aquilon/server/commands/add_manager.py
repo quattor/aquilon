@@ -35,7 +35,8 @@ from aquilon.server.dbwrappers.host import hostname_to_host
 from aquilon.server.dbwrappers.system import parse_system_and_verify_free
 from aquilon.server.dbwrappers.interface import (generate_ip,
                                                  check_ip_restrictions,
-                                                 get_or_create_interface)
+                                                 get_or_create_interface,
+                                                 assign_address)
 from aquilon.aqdb.model import ARecord, AddressAssignment
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.server.locks import lock_queue
@@ -85,7 +86,7 @@ class CommandAddManager(BrokerCommand):
                             dns_domain=dbdns_domain, ip=ip,
                             network=dbnetwork, comments=comments)
         session.add(dbdns_rec)
-        dbinterface.addresses.append(ip)
+        assign_address(dbinterface, ip)
 
         session.flush()
 

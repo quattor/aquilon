@@ -32,7 +32,8 @@
 from aquilon.exceptions_ import ArgumentError, AquilonError
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.location import get_location
-from aquilon.server.dbwrappers.interface import check_ip_restrictions
+from aquilon.server.dbwrappers.interface import (check_ip_restrictions,
+                                                 assign_address)
 from aquilon.server.processes import DSDBRunner
 from aquilon.aqdb.model import (Interface, Model, Switch, AddressAssignment,
                                 ReservedName, ARecord)
@@ -100,7 +101,7 @@ class CommandUpdateSwitch(BrokerCommand):
             else:
                 # This should only happen if the switch did not have an IP
                 # address before
-                dbswitch.interfaces[0].addresses.append(ip)
+                assign_address(dbswitch.interfaces[0], ip)
 
         if comments is not None:
             dbswitch.comments = comments

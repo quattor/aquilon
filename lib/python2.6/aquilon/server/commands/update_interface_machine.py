@@ -34,7 +34,8 @@ from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.interface import (get_interface,
                                                  check_ip_restrictions,
                                                  verify_port_group,
-                                                 choose_port_group)
+                                                 choose_port_group,
+                                                 assign_address)
 from aquilon.server.locks import lock_queue
 from aquilon.server.templates.machine import PlenaryMachineInfo
 from aquilon.server.processes import DSDBRunner
@@ -71,7 +72,7 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
             dbhost = dbhw_ent.host
             if dbhost.archetype.name == 'aurora' and \
                dbhw_ent.primary_ip and not dbinterface.addresses:
-                dbinterface.addresses.append(dbhw_ent.primary_ip)
+                assign_address(dbinterface, dbhw_ent.primary_ip)
 
         # We may need extra IP verification (or an autoip option)...
         # This may also throw spurious errors if attempting to set the
@@ -127,7 +128,7 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
                     session.expire(assignment, ['dns_records'])
                 assignment.ip = ip
             else:
-                dbinterface.addresses.append(ip)
+                assign_address(dbinterface, ip)
 
             # Fix up the primary name if needed
             if dbinterface.bootable and \

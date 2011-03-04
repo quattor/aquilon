@@ -43,7 +43,8 @@ from sqlalchemy.sql import select
 from aquilon.exceptions_ import ArgumentError, InternalError, NotFoundException
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.aqdb.model import (Interface, HardwareEntity, ObservedMac,
-                                ARecord, VlanInfo, ObservedVlan, Network)
+                                ARecord, VlanInfo, ObservedVlan, Network,
+                                AddressAssignment)
 from aquilon.utils import force_mac
 
 
@@ -473,3 +474,18 @@ def get_or_create_interface(session, dbhw_ent, name=None, mac=None,
     dbhw_ent.interfaces.append(dbinterface)
     session.flush()
     return dbinterface
+
+def assign_address(dbinterface, ip, label=None, usage=None):
+    for addr in dbinterface.assignments:
+        if not label and not addr.label:
+            raise ArgumentError("{0} already has an IP "
+                                "address.".format(dbinterface))
+        if label and addr.label == label:
+            raise ArgumentError("{0} already has an alias labeled "
+                                "{1}.".format(dbinterface, label))
+        if addr.ip == ip:
+            raise ArgumentError("{0} already has IP address {1} "
+                                "configured.".format(dbinterface, ip))
+
+    dbinterface.assignments.append(AddressAssignment(ip=ip, label=label,
+                                                     usage=usage))

@@ -40,7 +40,8 @@ from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.interface import (get_or_create_interface,
                                                  describe_interface,
                                                  verify_port_group,
-                                                 choose_port_group)
+                                                 choose_port_group,
+                                                 assign_address)
 from aquilon.server.dbwrappers.system import parse_system_and_verify_free
 from aquilon.server.templates.base import PlenaryCollection
 from aquilon.server.locks import lock_queue
@@ -151,7 +152,7 @@ class CommandAddInterfaceMachine(BrokerCommand):
         # So far, we're *only* creating a manager if we happen to be
         # removing a blind entry and we can steal its IP address.
         if dbmanager:
-            dbinterface.addresses.append(dbmanager.ip)
+            assign_address(dbinterface, dbmanager.ip)
 
         session.add(dbinterface)
         session.flush()

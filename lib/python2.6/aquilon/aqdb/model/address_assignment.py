@@ -50,16 +50,6 @@ _ABV = 'addr_assign'
 ADDR_USAGES = ['system', 'zebra']
 
 
-def _address_creator(addr):
-    if isinstance(addr, IPv4Address):
-        return AddressAssignment(ip=addr, label=None, usage="system")
-    elif isinstance(addr, dict):
-        return AddressAssignment(**addr)
-    else:  # pragma: no cover
-        raise TypeError("Adding an address requires either a bare IP or a "
-                        "map containing the IP and the label.")
-
-
 class AddressAssignment(Base):
     """
         Assignment of IP addresses to network interfaces.
@@ -88,7 +78,7 @@ class AddressAssignment(Base):
 
     ip = Column(IPV4, nullable=False)
 
-    usage = Column(Enum(16, ADDR_USAGES), nullable=False)
+    usage = Column(Enum(16, ADDR_USAGES), nullable=False, default="system")
 
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
@@ -168,5 +158,4 @@ address.append_constraint(
     UniqueConstraint("interface_id", "label", name="%s_iface_label_uk" % _ABV))
 
 # Assigned to external classes here to avoid circular dependencies.
-Interface.addresses = association_proxy('assignments', 'ip',
-                                        creator=_address_creator)
+Interface.addresses = association_proxy('assignments', 'ip')

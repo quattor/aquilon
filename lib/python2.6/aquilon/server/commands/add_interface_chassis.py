@@ -36,7 +36,8 @@ from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.interface import (generate_ip,
                                                  check_ip_restrictions,
-                                                 get_or_create_interface)
+                                                 get_or_create_interface,
+                                                 assign_address)
 from aquilon.server.processes import DSDBRunner
 
 
@@ -62,7 +63,7 @@ class CommandAddInterfaceChassis(BrokerCommand):
         check_ip_restrictions(dbnetwork, ip)
 
         if ip:
-            dbinterface.addresses.append(ip)
+            assign_address(dbinterface, ip)
 
             # Convert ReservedName to ARecord if needed
             if isinstance(dbchassis.primary_name, ReservedName):

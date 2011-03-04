@@ -36,7 +36,8 @@ from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.aqdb.model.address_assignment import ADDR_USAGES
 from aquilon.server.dbwrappers.interface import (get_interface,
                                                  generate_ip,
-                                                 check_ip_restrictions)
+                                                 check_ip_restrictions,
+                                                 assign_address)
 from aquilon.server.templates.host import PlenaryHost
 from aquilon.server.locks import lock_queue
 from aquilon.server.processes import DSDBRunner
@@ -156,8 +157,7 @@ class CommandAddInterfaceAddress(BrokerCommand):
                                         "and is not configured for "
                                         "Zebra.".format(ip, addr.interface))
 
-        dbinterface.addresses.append({"ip": ip, "label": label,
-                                                  "usage": usage})
+        assign_address(dbinterface, ip, label=label, usage=usage)
         session.flush()
 
         dbhost = getattr(dbhw_ent, "host", None)

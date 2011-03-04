@@ -35,7 +35,8 @@ from aquilon.server.dbwrappers.host import hostname_to_host
 from aquilon.server.dbwrappers.system import parse_system_and_verify_free
 from aquilon.server.dbwrappers.interface import (generate_ip,
                                                  check_ip_restrictions,
-                                                 get_or_create_interface)
+                                                 get_or_create_interface,
+                                                 assign_address)
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.aqdb.model import Machine, ARecord
 from aquilon.server.templates.machine import PlenaryMachineInfo
@@ -86,7 +87,7 @@ class CommandAddAuxiliary(BrokerCommand):
                             dns_domain=dbdns_domain, network=dbnetwork,
                             comments=comments)
         session.add(dbdns_rec)
-        dbinterface.addresses.append(ip)
+        assign_address(dbinterface, ip)
 
         session.flush()
 

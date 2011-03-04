@@ -32,7 +32,7 @@
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Chassis, Machine, Switch
 from aquilon.server.broker import BrokerCommand
-from aquilon.server.dbwrappers.interface import get_interface
+from aquilon.server.dbwrappers.interface import get_interface, assign_address
 from aquilon.server.templates.machine import PlenaryMachineInfo
 
 
@@ -94,7 +94,7 @@ class CommandDelInterface(BrokerCommand):
                         other = dbhw_ent.interfaces[0]
 
                     if len(other.assignments) == 0:
-                        other.addresses.append(dbhw_ent.primary_ip)
+                        assign_address(other, dbhw_ent.primary_ip)
                         dbinterface.addresses.remove(dbhw_ent.primary_ip)
                         raise _Goto
 
