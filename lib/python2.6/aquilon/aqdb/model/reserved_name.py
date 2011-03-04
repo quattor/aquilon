@@ -27,20 +27,11 @@
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
 """ DnsRecords are higher level constructs which can provide services """
-from datetime import datetime
 
-from sqlalchemy import (Table, Integer, DateTime, Sequence, String, Column,
-                        ForeignKey, UniqueConstraint)
-from sqlalchemy.orm import relation, deferred, backref
+from sqlalchemy import Integer, Column, ForeignKey
 
-from aquilon.exceptions_ import InternalError, ArgumentError
-from aquilon.aqdb.model import Base, DnsDomain, Network, DnsRecord
-from aquilon.aqdb.model.dns_domain import parse_fqdn
-from aquilon.aqdb.column_types import AqStr, IPV4
-
-#TODO: enum type for system_type column
-#_sys_types = ['host', 'switch', 'console_switch', 'chassis', 'manager',
-#              'auxiliary' ]
+from aquilon.exceptions_ import ArgumentError
+from aquilon.aqdb.model import Base, DnsRecord
 
 class ReservedName(DnsRecord):
     """
