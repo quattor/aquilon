@@ -31,6 +31,11 @@
 
 import os
 import unittest
+import gzip
+from cStringIO import StringIO
+from cPickle import Pickler, Unpickler
+
+import xml.etree.ElementTree as ET
 
 if __name__ == "__main__":
     import utils
@@ -41,10 +46,55 @@ from brokertest import TestBrokerCommand
 
 class TestCompile(TestBrokerCommand):
 
+    def get_profile_mtimes(self):
+        """Returns a dictionary of objects to profile-info (indexed) mtimes.
+
+        The dictionary key is the object name and does not include the
+        suffix of the file.  Only objects that are listed with an
+        expected suffix are included.
+
+        """
+        advertise_xml = self.config.getboolean('panc', 'advertise_gzip_as_xml')
+        profilesdir = self.config.get('broker', 'profilesdir')
+        index = os.path.join(profilesdir, 'profiles-info.xml')
+        if self.gzip_profiles and advertise_xml:
+            source = gzip.open(index + '.gz')
+            profile_suffix = '.xml'
+        else:
+            source = open(index)
+            profile_suffix = self.profile_suffix
+        tree = ET.parse(source)
+        mtimes = dict()
+        for profile in tree.getiterator('profile'):
+            if profile.text and profile.attrib.has_key('mtime'):
+                obj = profile.text.strip()
+                if obj and obj.endswith(profile_suffix):
+                    mtimes[obj[:-len(profile_suffix)]] = \
+                            int(profile.attrib['mtime'])
+        return mtimes
+
     def test_000_precompile(self):
         # Before the tests below, make sure everything is up to date.
         command = "compile --domain unittest"
         (out, err) = self.successtest(command.split(" "))
+
+    def test_010_index(self):
+        # Verify and stash mtimes
+        stashed_mtimes = self.get_profile_mtimes()
+        buffer = StringIO()
+        pickler = Pickler(buffer)
+        pickler.dump(stashed_mtimes)
+        scratchfile = self.writescratch("stashed_mtimes", buffer.getvalue())
+
+        command = ["search_host", "--domain=unittest",
+                   "--service=utsvc", "--instance=utsi1"]
+        hosts = self.commandtest(command).splitlines()
+        # Failure here could mean:
+        # - The host profile is not in the index
+        # - The host profile is in the index but with the wrong extension.
+        for host in hosts:
+            self.assertTrue(host in stashed_mtimes,
+                            "host %s missing from profiles-info" % host)
 
     def test_100_addchange(self):
         # Touch the template used by utsi1 clients to trigger a recompile.
@@ -78,6 +128,24 @@ class TestCompile(TestBrokerCommand):
         command = "compile --domain unittest"
         (out, err) = self.successtest(command.split(" "))
         self.matchoutput(err, "%s/%s compiled" % (total, total), command)
+
+    def test_210_index(self):
+        new_mtimes = self.get_profile_mtimes()
+        buffer = StringIO(self.readscratch("stashed_mtimes"))
+        unpickler = Unpickler(buffer)
+        stashed_mtimes = unpickler.load()
+
+        command = ["search_host", "--domain=unittest", "--service=utsvc",
+                   "--instance=utsi1"]
+        hosts = self.commandtest(command).splitlines()
+        for host in hosts:
+            self.assertTrue(host in stashed_mtimes,
+                            "host %s missing from old profiles-info" % host)
+            self.assertTrue(host in new_mtimes,
+                            "host %s missing from new profiles-info" % host)
+            self.assertTrue(new_mtimes[host] > stashed_mtimes[host],
+                            "host %s mtime %s not greater than original %s" %
+                            (host, new_mtimes[host], stashed_mtimes[host]))
 
     def test_300_compilehost(self):
         command = "compile --hostname unittest02.one-nyp.ms.com"
