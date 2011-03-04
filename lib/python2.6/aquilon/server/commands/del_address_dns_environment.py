@@ -76,8 +76,10 @@ class CommandDelAddressDNSEnvironment(BrokerCommand):
             session.delete(dbaddress)
             session.flush()
 
-            dsdb_runner = DSDBRunner(logger=logger)
-            dsdb_runner.delete_host_details(ip)
+            if dbdns_env.is_default:
+                dsdb_runner = DSDBRunner(logger=logger)
+                dsdb_runner.delete_host_details(ip)
+
             session.commit()
         finally:
             lock_queue.release(key)

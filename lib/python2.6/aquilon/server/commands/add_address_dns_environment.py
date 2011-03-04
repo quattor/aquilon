@@ -61,10 +61,12 @@ class CommandAddAddressDNSEnvironment(BrokerCommand):
 
         session.flush()
 
-        dsdb_runner = DSDBRunner(logger=logger)
-        try:
-            dsdb_runner.add_host_details(fqdn=dbaddress.fqdn, ip=dbaddress.ip,
-                                         name=None, mac=None)
-        except ProcessException, e:
-            raise ArgumentError("Could not add address to DSDB: %s" % e)
+        if dbdns_env.is_default:
+            dsdb_runner = DSDBRunner(logger=logger)
+            try:
+                dsdb_runner.add_host_details(fqdn=dbaddress.fqdn, ip=dbaddress.ip,
+                                             name=None, mac=None)
+            except ProcessException, e:
+                raise ArgumentError("Could not add address to DSDB: %s" % e)
+
         return
