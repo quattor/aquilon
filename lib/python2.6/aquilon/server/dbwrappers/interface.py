@@ -44,7 +44,6 @@ from aquilon.exceptions_ import ArgumentError, InternalError, NotFoundException
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.aqdb.model import (Interface, HardwareEntity, ObservedMac,
                                 ARecord, VlanInfo, ObservedVlan, Network)
-from aquilon.server.dbwrappers.system import get_system
 from aquilon.utils import force_mac
 
 
@@ -173,9 +172,8 @@ def generate_ip(session, dbinterface, ip=None, ipfromip=None,
 
     if ipfromsystem:
         # Assumes one system entry, not necessarily correct.
-        dbsystem = get_system(session, ipfromsystem)
-        if hasattr(dbsystem, "ip"):
-            dbnetwork = get_net_id_from_ip(session, dbsystem.ip)
+        dbdns_rec = ARecord.get_unique(session, fqdn=ipfromsystem, compel=True)
+        dbnetwork = dbdns_rec.network
 
     if ipfromip:
         # determine network

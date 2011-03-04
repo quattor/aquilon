@@ -30,8 +30,7 @@
 
 
 from aquilon.server.broker import BrokerCommand
-from aquilon.server.dbwrappers.system import get_system
-from aquilon.aqdb.model import DnsEnvironment
+from aquilon.aqdb.model import DnsEnvironment, DnsRecord
 
 
 class CommandShowFqdnFqdn(BrokerCommand):
@@ -40,4 +39,5 @@ class CommandShowFqdnFqdn(BrokerCommand):
 
     def render(self, session, fqdn, dns_environment, **kwargs):
         dbdns_env = DnsEnvironment.get_unique_or_default(session, dns_environment)
-        return get_system(session, fqdn, dns_environment)
+        return DnsRecord.get_unique(session, fqdn=fqdn,
+                                    dns_environment=dbdns_env, compel=True)

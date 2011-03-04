@@ -29,39 +29,11 @@
 """Wrappers to make getting and using systems simpler."""
 
 
-from sqlalchemy.exceptions import InvalidRequestError
-
-from aquilon.exceptions_ import (AquilonError, ArgumentError, NotFoundException,
-                                 UnimplementedError)
+from aquilon.exceptions_ import ArgumentError, UnimplementedError
 from aquilon.aqdb.model import DnsDomain, DnsRecord, ARecord, DnsEnvironment
 from aquilon.aqdb.model.dns_domain import parse_fqdn
 from aquilon.server.dbwrappers.network import get_network_byip
 
-
-def get_system(session, system, dns_record_type=DnsRecord, system_label='FQDN',
-              dns_environment=None):
-    if not dns_environment:
-        dns_enviromnemt = DnsEnvironment.get_unique_or_default(session)
-    (short, dbdns_domain) = parse_fqdn(session, system)
-    return get_system_from_parts(session, short, dbdns_domain, dns_record_type,
-                                 system_label, dns_environment)
-
-def get_system_from_parts(session, short, dbdns_domain, dns_record_type=DnsRecord,
-                          system_label='FQDN', dns_environment=None):
-    if not dns_environment:
-        dns_enviromnemt = DnsEnvironment.get_unique_or_default(session)
-    try:
-        q = session.query(dns_record_type)
-        q = q.filter_by(dns_environment=dns_environment)
-        q = q.filter_by(name=short, dns_domain=dbdns_domain)
-        dbsystem = q.first()
-        if not dbsystem:
-            raise NotFoundException("%s %s.%s not found." %
-                                    (system_label, short, dbdns_domain.name))
-    except InvalidRequestError, e:
-        raise AquilonError("Failed to find %s %s.%s: %s" %
-                                (system_label, short, dbdns_domain.name, e))
-    return dbsystem
 
 def parse_system_and_verify_free(session, system):
     (short, dbdns_domain) = parse_fqdn(session, system)
