@@ -64,7 +64,7 @@ class TestAddAddress(TestBrokerCommand):
     def test_200_env(self):
         self.dsdb_expect_add("arecord14.aqd-unittest.ms.com",
                              self.net.unknown[0].usable[14])
-        default = self.config.get("broker", "default_dns_environment")
+        default = self.config.get("site", "default_dns_environment")
         command = ["add_address", "--ip=%s" % self.net.unknown[0].usable[14],
                    "--fqdn=arecord14.aqd-unittest.ms.com",
                    "--dns_environment=%s" % default]
@@ -134,7 +134,7 @@ class TestAddAddress(TestBrokerCommand):
         self.dsdb_verify()
 
     def test_900_failbadenv(self):
-        default = self.config.get("broker", "default_dns_environment")
+        default = self.config.get("site", "default_dns_environment")
         command = ["add_address", "--ip=%s" % self.net.unknown[0].usable[16],
                    "--fqdn=arecord16.aqd-unittest.ms.com",
                    "--dns_environment=environment-does-not-exist"]

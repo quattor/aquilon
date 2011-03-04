@@ -44,7 +44,7 @@ class CommandAddAddressDNSEnvironment(BrokerCommand):
 
     def render(self, session, logger, fqdn, dns_environment, comments,
                **arguments):
-        default = self.config.get("broker", "default_dns_environment")
+        default = self.config.get("site", "default_dns_environment")
         if str(dns_environment).strip().lower() != default.strip().lower():
             raise UnimplementedError("Only the '%s' DNS environment is "
                                      "currently supported." % default)

@@ -39,6 +39,6 @@ class CommandDelAddress(CommandDelAddressDNSEnvironment):
 
     def render(self, **kwargs):
         if not kwargs.get('dns_environment', None):
-            default = self.config.get("broker", "default_dns_environment")
+            default = self.config.get("site", "default_dns_environment")
             kwargs['dns_environment'] = default
         return CommandDelAddressDNSEnvironment.render(self, **kwargs)
