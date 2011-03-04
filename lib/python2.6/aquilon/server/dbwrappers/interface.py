@@ -44,7 +44,7 @@ from aquilon.exceptions_ import ArgumentError, InternalError, NotFoundException
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.aqdb.model import (Interface, HardwareEntity, ObservedMac,
                                 ARecord, VlanInfo, ObservedVlan, Network,
-                                AddressAssignment)
+                                AddressAssignment, DnsEnvironment)
 from aquilon.utils import force_mac
 
 
@@ -475,7 +475,9 @@ def get_or_create_interface(session, dbhw_ent, name=None, mac=None,
     session.flush()
     return dbinterface
 
-def assign_address(dbinterface, ip, label=None, usage=None):
+def assign_address(dbinterface, ip, label=None, usage=None,
+                   dns_environment=None):
+    assert isinstance(dbinterface, Interface)
     for addr in dbinterface.assignments:
         if not label and not addr.label:
             raise ArgumentError("{0} already has an IP "
@@ -487,5 +489,11 @@ def assign_address(dbinterface, ip, label=None, usage=None):
             raise ArgumentError("{0} already has IP address {1} "
                                 "configured.".format(dbinterface, ip))
 
+    if not isinstance(dns_environment, DnsEnvironment):
+        session = object_session(dbinterface)
+        dns_environment = DnsEnvironment.get_unique_or_default(session,
+                                                               dns_environment)
+
     dbinterface.assignments.append(AddressAssignment(ip=ip, label=label,
-                                                     usage=usage))
+                                                     usage=usage,
+                                                     dns_environment=dns_environment))

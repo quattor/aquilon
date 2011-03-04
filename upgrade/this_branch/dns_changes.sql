@@ -100,4 +100,11 @@ ALTER TABLE router_address
 ALTER TABLE router_address
 	ADD CONSTRAINT "ROUTER_ADDRESS_DNS_ENV_FK" FOREIGN KEY (dns_environment_id) REFERENCES dns_environment (id);
 
+ALTER TABLE address_assignment ADD dns_environment_id INTEGER;
+UPDATE address_assignment SET dns_environment_id = (SELECT id FROM dns_environment WHERE name = 'internal');
+ALTER TABLE address_assignment
+	MODIFY (dns_environment_id CONSTRAINT "ADDR_ASSIGN_DNS_ENV_ID_NN" NOT NULL);
+ALTER TABLE address_assignment
+	ADD CONSTRAINT "ADDR_ASSIGN_DNS_ENV_FK" FOREIGN KEY (dns_environment_id) REFERENCES dns_environment (id);
+
 QUIT;
