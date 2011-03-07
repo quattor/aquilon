@@ -38,6 +38,7 @@ class DnsMapFormatter(ObjectFormatter):
         details = []
         details.append(indent + "{0:c}: {0.name} Map: "
                        "{1}".format(dns_map.dns_domain, dns_map.location))
+        details.append(indent + "  Position: %s" % dns_map.position)
         if dns_map.comments:
             details.append(indent + "  Comments: %s" % dns_map.comments)
         return "\n".join(details)

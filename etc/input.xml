@@ -3401,6 +3401,7 @@
          </optgroup>
       </optgroup>
       <optgroup name="map_dns_domain_opt" mandatory="False">
+         <option name="position" type="int">Position in the list</option>
          <option name="comments" type="string">Comments</option>
       </optgroup>
       <transport method="post" path="dns_map/%(dns_domain)s/command/map" />

@@ -33,6 +33,7 @@ from datetime import datetime
 from sqlalchemy import (Column, Integer, DateTime, String, Sequence, ForeignKey,
                         UniqueConstraint)
 from sqlalchemy.orm import relation, backref, deferred
+from sqlalchemy.ext.orderinglist import ordering_list
 
 from aquilon.aqdb.model import Base, DnsDomain, Location
 
@@ -62,12 +63,16 @@ class DnsMap(Base):
                                                name='%s_dns_domain_fk' % _TN),
                            nullable=False)
 
+    position = Column(Integer, nullable=False)
+
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
     comments = deferred(Column(String(255), nullable=True))
 
     location = relation(Location, lazy=False,
                         backref=backref('dns_maps', lazy=True,
+                                        collection_class=ordering_list('position'),
+                                        order_by=[position],
                                         cascade='all, delete-orphan'))
 
     dns_domain = relation(DnsDomain, lazy=False,
@@ -85,3 +90,5 @@ dnsmap.info['unique_fields'] = ['location', 'dns_domain']
 dnsmap.append_constraint(
     UniqueConstraint('location_id', 'dns_domain_id',
                      name='%s_loc_dns_dom_uk' % _TN))
+# In theory we should have a unique constraint on (location_id, position), but
+# the ordering_list documentation does not recommend it

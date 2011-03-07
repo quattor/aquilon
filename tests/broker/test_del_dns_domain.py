@@ -74,6 +74,16 @@ class TestDelDnsDomain(TestBrokerCommand):
             self.failIf(domain in dns_names,
                         "Domain %s appears in list %s" % (domain, dns_names))
 
+    def testdeltd1(self):
+        command = ["del", "dns", "domain",
+                   "--dns_domain", "td1.aqd-unittest.ms.com"]
+        self.noouttest(command)
+
+    def testdeltd2(self):
+        command = ["del", "dns", "domain",
+                   "--dns_domain", "td2.aqd-unittest.ms.com"]
+        self.noouttest(command)
+
 
 if __name__=='__main__':
     import aquilon.aqdb.depends

@@ -28,6 +28,8 @@
 # TERMS THAT MAY APPLY.
 """ Unmap DNS domains from locations """
 
+from sqlalchemy.orm import subqueryload
+
 from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand
 from aquilon.aqdb.model import DnsDomain, DnsMap
@@ -42,14 +44,20 @@ class CommandUnmapDnsDomain(BrokerCommand):
         dbdns_domain = DnsDomain.get_unique(session, name=dns_domain,
                                             compel=True)
 
-        dblocation = get_location(session, **kw)
+        dblocation = get_location(session,
+                                  query_options=[subqueryload('dns_maps')],
+                                  **kw)
         if not dblocation:
             raise ArgumentError("Please specify a location.")
 
-        dbmap = DnsMap.get_unique(session, dns_domain=dbdns_domain,
-                                  location=dblocation)
+        dbmap = None
+        for item in dblocation.dns_maps:
+            if item.dns_domain == dbdns_domain:
+                dbmap = item
+                break
+
         if dbmap:
-            session.delete(dbmap)
+            dblocation.dns_maps.remove(dbmap)
             session.flush()
 
         return

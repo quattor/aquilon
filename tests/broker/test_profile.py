@@ -69,8 +69,14 @@ class TestProfile(TestBrokerCommand):
         domains = sysloc.xpath("list[@name='dns_search_domains']/string")
         self.failUnless(domains, "No DNS search domains set")
         searchlist = [e.text for e in domains]
-        # In room utroom1, so expect aqd-unittest.ms.com mapped, but just once
-        expect = ['aqd-unittest.ms.com', 'new-york.ms.com']
+        # DNS maps:
+        # - aqd-unittest.ms.com comes from rack ut3
+        # - utroom1 also has aqd-unittest.ms.com mapped _after_ td1 and td2,
+        #   but the rack mapping is more specific, so aqd-unittest.ms.com
+        #   remains at the beginning
+        # - new-york.ms.com comes from the campus
+        expect = ['aqd-unittest.ms.com', 'td1.aqd-unittest.ms.com',
+                  'td2.aqd-unittest.ms.com', 'new-york.ms.com']
         self.assertEqual(searchlist, expect,
                          "dns_search_domains in sysloc was %s instead of %s" %
                          (repr(searchlist), repr(expect)))
@@ -85,7 +91,7 @@ class TestProfile(TestBrokerCommand):
         domains = sysloc.xpath("list[@name='dns_search_domains']/string")
         self.failUnless(domains, "No DNS search domains set")
         searchlist = [e.text for e in domains]
-        # Not in utroom1, so no aqd-unittest.ms.com
+        # Not in utroom1, so no (td[12].)?aqd-unittest.ms.com
         expect = ['new-york.ms.com']
         self.assertEqual(searchlist, expect,
                          "dns_search_domains in sysloc was %s instead of %s" %
@@ -99,7 +105,15 @@ class TestProfile(TestBrokerCommand):
         rs = rs[0]
 
         searchlist = [e.text for e in rs.xpath("list[@name='search']/string")]
-        expect = ['aqd-unittest.ms.com', 'new-york.ms.com', 'ms.com']
+        # DNS maps:
+        # - aqd-unittest.ms.com comes from rack ut3
+        # - utroom1 also has aqd-unittest.ms.com mapped _after_ td1 and td2,
+        #   but the rack mapping is more specific, so aqd-unittest.ms.com
+        #   remains at the beginning
+        # - new-york.ms.com comes from the campus
+        # - ms.com comes from DEFAULT_DOMAIN in aquilon/archetype/base.tpl
+        expect = ['aqd-unittest.ms.com', 'td1.aqd-unittest.ms.com',
+                  'td2.aqd-unittest.ms.com', 'new-york.ms.com', 'ms.com']
         self.assertEqual(searchlist, expect,
                          "search list in resolver was %s instead of %s" %
                          (repr(searchlist), repr(expect)))

@@ -77,9 +77,17 @@ class TestAddMachine(TestBrokerCommand):
         self.matchoutput(out,
             """"serialnumber" = "99C5553";""",
             command)
+        # DNS maps:
+        # - aqd-unittest.ms.com comes from rack ut3
+        # - utroom1 also has aqd-unittest.ms.com mapped _after_ td1 and td2,
+        #   but the rack mapping is more specific, so aqd-unittest.ms.com
+        #   remains at the beginning
+        # - new-york.ms.com comes from the campus
         self.searchoutput(out,
                           r'"sysloc/dns_search_domains" = list\(\s*'
                           r'"aqd-unittest.ms.com",\s*'
+                          r'"td1.aqd-unittest.ms.com",\s*'
+                          r'"td2.aqd-unittest.ms.com",\s*'
                           r'"new-york.ms.com"\s*\);',
                           command)
         self.matchoutput(out,

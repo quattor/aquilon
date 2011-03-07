@@ -59,6 +59,6 @@ class CommandSearchDnsDomainMap(BrokerCommand):
         q = q.options(contains_eager('dns_domain'))
         q = q.join(Location)
         q = q.options(contains_eager('location'))
-        q = q.order_by(DnsDomain.name, Location.location_type, Location.name)
+        q = q.order_by(Location.location_type, Location.name, DnsMap.position)
 
         return q.all()

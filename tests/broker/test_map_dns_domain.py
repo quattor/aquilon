@@ -97,6 +97,27 @@ class TestMapDnsDomain(TestBrokerCommand):
                          command)
         self.matchclean(out, "new-york.ms.com", command)
 
+    def test_400_map_td1_first(self):
+        command = ["map", "dns", "domain", "--room", "utroom1",
+                   "--dns_domain", "td1.aqd-unittest.ms.com", "--position", 0]
+        self.noouttest(command)
+
+    def test_410_map_td2_middle(self):
+        command = ["map", "dns", "domain", "--room", "utroom1",
+                   "--dns_domain", "td2.aqd-unittest.ms.com", "--position", 1]
+        self.noouttest(command)
+
+    def test_450_verify_positions(self):
+        command = ["search", "dns", "domain", "map", "--room", "utroom1"]
+        out = self.commandtest(command)
+        self.searchoutput(out,
+                          r"DNS Domain: td1.aqd-unittest.ms.com Map: Room utroom1\s*"
+                          r"Position: 0\s*"
+                          r"DNS Domain: td2.aqd-unittest.ms.com Map: Room utroom1\s*"
+                          r"Position: 1\s*"
+                          r"DNS Domain: aqd-unittest.ms.com Map: Room utroom1\s*"
+                          r"Position: 2\s*",
+                          command)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestMapDnsDomain)

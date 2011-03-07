@@ -28,6 +28,8 @@
 # TERMS THAT MAY APPLY.
 """ Map DNS domains to locations """
 
+from sqlalchemy.orm import subqueryload
+
 from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand
 from aquilon.aqdb.model import DnsDomain, DnsMap
@@ -38,20 +40,24 @@ class CommandMapDnsDomain(BrokerCommand):
 
     required_parameters = ["dns_domain"]
 
-    def render(self, session, dns_domain, comments, **kw):
+    def render(self, session, dns_domain, position, comments, **kw):
         dbdns_domain = DnsDomain.get_unique(session, name=dns_domain,
                                             compel=True)
 
-        dblocation = get_location(session, **kw)
+        dblocation = get_location(session,
+                                  query_options=[subqueryload('dns_maps')],
+                                  **kw)
         if not dblocation:
             raise ArgumentError("Please specify a location.")
 
         DnsMap.get_unique(session, dns_domain=dbdns_domain, location=dblocation,
                           preclude=True)
 
-        dbmap = DnsMap(dns_domain=dbdns_domain, location=dblocation,
-                       comments=comments)
-        session.add(dbmap)
+        dbmap = DnsMap(dns_domain=dbdns_domain, comments=comments)
+        if position is not None:
+            dblocation.dns_maps.insert(position, dbmap)
+        else:
+            dblocation.dns_maps.append(dbmap)
 
         session.flush()
         return
