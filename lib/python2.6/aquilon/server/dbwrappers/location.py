@@ -31,37 +31,43 @@
 
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 
-from aquilon import const
 from aquilon.exceptions_ import NotFoundException, ArgumentError
 from aquilon.aqdb.model import Location
 
 
-def get_location(session, **kwargs):
+def get_location(session, query_options=None, **kwargs):
     """Somewhat sophisticated getter for any of the location types."""
-    location_type = None # The type in the DB
-    argname = None # The name of the key in the args
-    #TODO: remove dependency on const and pull types from an ordered query
-    for lt in const.location_types:
-        lookup = lt
-        if lt == "company":
-            lookup = "organization" # temporary until locations in DB restructured
-        if kwargs.get(lookup):
-            if location_type:
-                raise ArgumentError("Single location can not be both %s and %s."
-                        % (lookup, location_type))
-            location_type = lt
-            argname = lookup
-    if not location_type:
+    cls = None
+    name = None
+    for key, mapper in Location.__mapper__.polymorphic_map.items():
+        if key == "company":
+            # temporary until locations in DB restructured
+            value = kwargs.get("organization", None)
+        else:
+            value = kwargs.get(key, None)
+
+        if value is None:
+            continue
+
+        if cls:  # pragma: no cover
+            raise ArgumentError("Please specify just a single location "
+                                "parameter.")
+        name = value
+        cls = mapper.class_
+
+    if not cls:
         return None
+
     try:
-        dblocation = session.query(Location).filter_by(
-                name=kwargs[argname], location_type=location_type).one()
+        q = session.query(cls)
+        q = q.filter_by(name=name)
+        if query_options:
+            q = q.options(query_options)
+        dblocation = q.one()
     except NoResultFound:
         raise NotFoundException("%s %s not found." %
-                                (location_type.capitalize(),
-                                 kwargs[location_type]))
-    except MultipleResultsFound:
+                                (cls._get_class_label(), name))
+    except MultipleResultsFound:  # pragma: no cover
         raise ArgumentError("There are multiple matches for %s %s." %
-                            (location_type.capitalize(),
-                             kwargs[location_type]))
+                            (cls._get_class_label(), name))
     return dblocation
