@@ -27,7 +27,6 @@
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
 """ see class.__doc__ for description """
-
 from datetime import datetime
 import socket
 
@@ -43,9 +42,13 @@ from sqlalchemy.ext.associationproxy import association_proxy
 from aquilon.aqdb.model import (Base, Service, Host, System, DnsDomain, Machine,
                                 PrimaryNameAssociation)
 from aquilon.aqdb.column_types.aqstr import AqStr
+from aquilon.aqdb.column_types import Enum
 
 _TN  = 'service_instance'
 _ABV = 'svc_inst'
+
+# list of possible external service managers to enable federated control to
+MANAGERS = ['aqd', 'resourcepool']
 
 
 class ServiceInstance(Base):
@@ -60,12 +63,11 @@ class ServiceInstance(Base):
     service_id = Column(Integer, ForeignKey('service.id',
                                             name='%s_svc_fk'%(_ABV)),
                         nullable=False)
-
     name = Column(AqStr(64), nullable=False)
     max_clients = Column(Integer, nullable=True) #null means 'no limit'
     creation_date = Column(DateTime, default=datetime.now, nullable=False)
+    manager = Column(Enum(32, MANAGERS), default='aqd', nullable=False)
     comments = Column(String(255), nullable=True)
-
     service = relation(Service, lazy=False, uselist=False, backref='instances')
 
     # _client_count is defined later in this file
