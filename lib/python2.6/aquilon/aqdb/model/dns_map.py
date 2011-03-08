@@ -63,6 +63,8 @@ class DnsMap(Base):
                                                name='%s_dns_domain_fk' % _TN),
                            nullable=False)
 
+    # No default value to force the use of the Location.dns_maps relation to
+    # manage the maps
     position = Column(Integer, nullable=False)
 
     creation_date = deferred(Column(DateTime, default=datetime.now,
@@ -81,6 +83,12 @@ class DnsMap(Base):
     def __repr__(self):
         return '<%s %s at %s>' % (self.__class__.__name__,
                                   self.dns_domain, self.location)
+
+    def __init__(self, **kwargs):
+        if 'position' in kwargs:  # pragma: no cover
+            raise TypeError("Always use the Location.dns_maps relation to "
+                            "manage the position attribute.")
+        super(DnsMap, self).__init__(**kwargs)
 
 
 dnsmap = DnsMap.__table__  # pylint: disable-msg=C0103, E1101

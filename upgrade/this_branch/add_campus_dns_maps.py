@@ -37,8 +37,7 @@ def main():
             print "    - {0} is already mapped, skipping".format(dbdns_domain)
             continue
 
-        map = DnsMap(location=campus, dns_domain=dbdns_domain)
-        session.add(map)
+        campus.dns_maps.append(DnsMap(dns_domain=dbdns_domain))
         print "    * Mapping {0:l} to {1:l}".format(dbdns_domain, campus)
 
     session.commit()
