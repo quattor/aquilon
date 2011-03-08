@@ -26,37 +26,34 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-"""Contains a wrapper for `aq del service --instance`."""
+"""Contains the logic for `aq add service`."""
 
-from aquilon.exceptions_ import ArgumentError
+from aquilon.exceptions_ import ArgumentError, NotFoundException, InternalError
 from aquilon.server.broker import BrokerCommand
-from aquilon.server.dbwrappers.service_instance import get_service_instance
-from aquilon.aqdb.model import Service
-from aquilon.server.templates.service import PlenaryServiceInstance
+from aquilon.aqdb.model import Service, ServiceInstance
+from aquilon.server.templates.base import PlenaryCollection
+from aquilon.server.templates.service import (PlenaryService,
+                                              PlenaryServiceInstance)
 
 
-class CommandDelServiceInstance(BrokerCommand):
+class CommandAddNASDiskShare(BrokerCommand):
 
-    required_parameters = ["service", "instance"]
+    required_parameters = ["share"]
 
-    def render(self, session, logger, service, instance, **arguments):
-        dbservice = Service.get_unique(session, service, compel=True)
-        dbsi = get_service_instance(session, dbservice, instance)
-        if dbsi.client_count > 0:
-            raise ArgumentError("Service %s, instance %s still has clients and "
-                                "cannot be deleted." %
-                                (dbservice.name, dbsi.name))
-        if dbsi.server_hosts:
-            msg = ", ".join([host.fqdn for host in dbsi.server_hosts])
-            raise ArgumentError("Service %s, instance %s is still being "
-                                "provided by servers: %s." %
-                                (dbservice.name, dbsi.name, msg))
+    def render(self, session, logger, share, comments, manager,
+               **arguments):
+        dbservice = Service.get_unique(session, name='nas_disk_share',
+                                       compel=InternalError)
+        plenaries = PlenaryCollection(logger=logger)
+        plenaries.append(PlenaryService(dbservice, logger=logger))
 
-        # Depend on cascading to remove any mappings
-        session.delete(dbsi)
+        ServiceInstance.get_unique(session, service=dbservice,
+                                   name=share, preclude=True)
+        dbsi = ServiceInstance(service=dbservice, name=share,
+                               comments=comments, manager=manager)
+        session.add(dbsi)
+        plenaries.append(PlenaryServiceInstance(dbservice, dbsi,
+                                                logger=logger ))
         session.flush()
-
-        plenary_info = PlenaryServiceInstance(dbservice, dbsi, logger=logger)
-        plenary_info.remove()
-
+        plenaries.write()
         return

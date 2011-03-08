@@ -1362,6 +1362,20 @@
       <transport trigger="instance" method="put" path="service/%(service)s/instance/%(instance)s" />
    </command>
 
+   <command name="add_nas_disk_share">
+     Add a new NAS share service instance. If the --manager property is set, membership and capacity
+     management is deferred to an external manager such as  Resource Pool. Default templates
+      describing the service will be created so that shares can be immediately used (bound and configured) by clients.
+      <optgroup name="add_nas_disk_share_opts" mandatory="True" fields="all">
+         <option name="share" type="string" mandatory="True">share name</option>
+      </optgroup>
+      <optgroup name="optional_opts">
+         <option name="comments" type="string">Comments</option>
+         <option name="manager" type="string">External Manager (resourcepool, ...)</option>
+      </optgroup>
+      <transport method="put" path="/nas_disk_share/instance/%(share)s" />
+   </command>
+   
    <command name="show_service">
       Show the configuration of a service. All instances of the service will
       be listed, the number of clients bound to that service and any service mappings.
