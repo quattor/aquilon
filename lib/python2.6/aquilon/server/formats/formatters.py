@@ -312,9 +312,9 @@ class ObjectFormatter(object):
             raise InternalError("add_host_msg was called with {0} instead of "
                                 "a Host.".format(host))
         host_msg.type = "host"  # FIXME: is hardcoding this ok?
-        host_msg.hostname = str(host.machine.primary_name.name)
-        host_msg.fqdn = host.fqdn
-        host_msg.dns_domain = str(host.machine.primary_name.dns_domain.name)
+        host_msg.hostname = str(host.machine.primary_name.fqdn.name)
+        host_msg.fqdn = str(host.machine.primary_name.fqdn)
+        host_msg.dns_domain = str(host.machine.primary_name.fqdn.dns_domain.name)
         if host.machine.primary_ip:
             host_msg.ip = str(host.machine.primary_ip)
         for iface in host.machine.interfaces:

@@ -56,4 +56,4 @@ class ReservedName(DnsRecord):
 
 resname = ReservedName.__table__  # pylint: disable-msg=C0103, E1101
 resname.primary_key.name = 'reserved_name_pk'
-resname.info['unique_fields'] = ['name', 'dns_domain', 'dns_environment']
+resname.info['unique_fields'] = ['fqdn']

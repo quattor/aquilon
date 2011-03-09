@@ -29,9 +29,9 @@
 """ Representation of DNS A records """
 
 from sqlalchemy import Integer, Column, ForeignKey
-from sqlalchemy.orm import relation, backref
+from sqlalchemy.orm import relation, backref, mapper
 
-from aquilon.aqdb.model import Network, DnsRecord
+from aquilon.aqdb.model import Network, DnsRecord, Fqdn
 from aquilon.aqdb.column_types import IPV4
 
 
@@ -67,8 +67,15 @@ arecord = ARecord.__table__  # pylint: disable-msg=C0103, E1101
 arecord.primary_key.name = 'a_record_pk'
 # TODO: index on ip?
 
-arecord.info['unique_fields'] = ['name', 'dns_domain', 'dns_environment']
+arecord.info['unique_fields'] = ['fqdn']
 arecord.info['extra_search_fields'] = ['ip']
+
+# Create a secondary mapper on the join of the DnsRecord and Fqdn tables
+dns_fqdn_mapper = mapper(ARecord, ARecord.__table__.join(DnsRecord.__table__).join(Fqdn.__table__),
+                         exclude_properties=[Fqdn.__table__.c.id,
+                                             Fqdn.__table__.c.creation_date],
+                         primary_key=[ARecord.__table__.c.dns_record_id],
+                         non_primary=True)
 
 
 class DynamicStub(ARecord):

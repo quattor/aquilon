@@ -67,7 +67,7 @@ class InterfaceFormatter(ObjectFormatter):
 
         for addr in interface.assignments:
             if addr.fqdns:
-                names = ", ".join(addr.fqdns)
+                names = ", ".join([str(fqdn) for fqdn in addr.fqdns])
             else:
                 names = "unknown"
 

@@ -31,7 +31,7 @@
 
 import sqlite3
 
-from aquilon.exceptions_ import PartialError, InternalError
+from aquilon.exceptions_ import PartialError, InternalError, AquilonError
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.host import get_host_dependencies
 from aquilon.server.templates.base import PlenaryCollection
@@ -39,7 +39,8 @@ from aquilon.server.templates.cluster import PlenaryCluster
 from aquilon.server.locks import lock_queue, SyncKey
 from aquilon.aqdb.model import (Host, Interface, Machine, Domain, Archetype,
                                 Personality, HostLifecycle, DnsDomain, DnsRecord,
-                                OperatingSystem, ReservedName)
+                                OperatingSystem, ReservedName, Fqdn)
+from aquilon.aqdb.model.dns_domain import parse_fqdn
 
 
 class CommandRefreshWindowsHosts(BrokerCommand):
@@ -146,22 +147,19 @@ class CommandRefreshWindowsHosts(BrokerCommand):
                                           archetype=dbarchetype,
                                           compel=InternalError)
         for (host, mac) in windows_hosts.items():
-            if host.find('.') < 0:
-                msg = "Skipping host %s: Missing DNS domain in name." % \
-                        host
+            try:
+                (short, dbdns_domain) = parse_fqdn(session, host)
+            except AquilonError, err:
+                msg = "Skipping host %s: %s" % (host, err)
                 failed.append(msg)
                 logger.info(msg)
                 continue
-            (short, dns_domain) = host.split('.', 1)
-            dbdns_domain = DnsDomain.get_unique(session, dns_domain)
-            if not dbdns_domain:
-                msg = "Skipping host %s: No AQDB entry for DNS domain %s." % \
-                        (host, dns_domain)
-                failed.append(msg)
-                logger.info(msg)
-                continue
-            existing = DnsRecord.get_unique(session, name=short,
-                                         dns_domain=dbdns_domain)
+            dbfqdn = Fqdn.get_unique(session, name=short,
+                                     dns_domain=dbdns_domain)
+            if dbfqdn:
+                existing = DnsRecord.get_unique(session, fqdn=dbfqdn)
+            else:
+                existing = None
             if existing:
                 if not existing.hardware_entity:
                     msg = "Skipping host %s: It is not a primary name." % host
@@ -219,8 +217,9 @@ class CommandRefreshWindowsHosts(BrokerCommand):
                           personality=dbpersonality, operating_system=dbos,
                           comments="Created by refresh_windows_host")
             session.add(dbhost)
-            dbdns_rec = ReservedName(session=session, name=short,
-                                     dns_domain=dbdns_domain)
+            dbfqdn = Fqdn.get_or_create(session, name=short,
+                                        dns_domain=dbdns_domain, preclude=True)
+            dbdns_rec = ReservedName(fqdn=dbfqdn)
             session.add(dbdns_rec)
             dbmachine.primary_name = dbdns_rec
             success.append("Added host entry for %s (%s)." %

@@ -40,10 +40,10 @@ class SimpleSystemList(list):
 
 class SimpleSystemListFormatter(ListFormatter):
     def format_raw(self, sslist, indent=""):
-        return str("\n".join([indent + system.fqdn for system in sslist]))
+        return str("\n".join([indent + str(system.fqdn) for system in sslist]))
 
     # TODO: Should probably display some useful info...
     def csv_fields(self, system):
-        return (system.fqdn,)
+        return (str(system.fqdn),)
 
 ObjectFormatter.handlers[SimpleSystemList] = SimpleSystemListFormatter()

@@ -32,7 +32,7 @@
 from aquilon.server.broker import BrokerCommand
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import (Network, Machine, VlanInfo, ObservedVlan,
-                                Cluster, ARecord)
+                                Cluster, ARecord, Fqdn)
 from aquilon.aqdb.model.dns_domain import parse_fqdn
 from aquilon.server.dbwrappers.location import get_location
 from aquilon.server.formats.network import ShortNetworkList
@@ -93,6 +93,7 @@ class CommandSearchNetwork(BrokerCommand):
         if fqdn:
             (short, dbdns_domain) = parse_fqdn(session, fqdn)
             dnsq = session.query(ARecord.ip)
+            dnsq = dnsq.join(Fqdn)
             dnsq = dnsq.filter_by(name=short)
             dnsq = dnsq.filter_by(dns_domain=dbdns_domain)
             networks = [get_net_id_from_ip(session, addr.ip).id for addr in

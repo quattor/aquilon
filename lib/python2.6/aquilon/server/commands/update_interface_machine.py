@@ -41,7 +41,7 @@ from aquilon.server.locks import lock_queue
 from aquilon.server.templates.machine import PlenaryMachineInfo
 from aquilon.server.processes import DSDBRunner
 from aquilon.aqdb.model.network import get_net_id_from_ip
-from aquilon.aqdb.model import ARecord, ReservedName, Machine, Interface
+from aquilon.aqdb.model import ReservedName, Machine, Interface
 
 
 class CommandUpdateInterfaceMachine(BrokerCommand):

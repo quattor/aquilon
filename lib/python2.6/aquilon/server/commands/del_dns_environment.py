@@ -32,8 +32,8 @@
 from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.processes import DSDBRunner
-from aquilon.aqdb.model import (DnsEnvironment, DnsRecord, RouterAddress,
-                                AddressAssignment)
+from aquilon.aqdb.model import (DnsEnvironment, RouterAddress,
+                                AddressAssignment, Fqdn)
 
 
 class CommandDelDnsEnvironment(BrokerCommand):
@@ -44,7 +44,7 @@ class CommandDelDnsEnvironment(BrokerCommand):
         db_dnsenv = DnsEnvironment.get_unique(session, dns_environment,
                                               compel=True)
 
-        q = session.query(DnsRecord)
+        q = session.query(Fqdn)
         q = q.filter_by(dns_environment=db_dnsenv)
         if q.first():
             raise ArgumentError("{0} is still in use by DNS records, and "

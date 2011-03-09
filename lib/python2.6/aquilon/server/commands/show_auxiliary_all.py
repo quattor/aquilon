@@ -33,7 +33,7 @@ from sqlalchemy.sql import exists
 
 from aquilon.server.broker import BrokerCommand
 from aquilon.aqdb.model import (Interface, AddressAssignment, HardwareEntity,
-                                PrimaryNameAssociation, ARecord, DnsDomain)
+                                PrimaryNameAssociation, ARecord, DnsDomain, Fqdn)
 
 
 class CommandShowAuxiliaryAll(BrokerCommand):
@@ -52,8 +52,9 @@ class CommandShowAuxiliaryAll(BrokerCommand):
         q = q.join(HardwareEntity)
         q = q.filter_by(hardware_type='machine')
         q = q.reset_joinpoint()
-        q = q.join(DnsDomain)
-        q = q.options(contains_eager(ARecord.dns_domain))
-        q = q.order_by(ARecord.name, DnsDomain.name)
+        q = q.join(Fqdn, DnsDomain)
+        q = q.options(contains_eager('fqdn'))
+        q = q.options(contains_eager('fqdn.dns_domain'))
+        q = q.order_by(Fqdn.name, DnsDomain.name)
         fqdns = [rec.fqdn for rec in q.all()]
         return fqdns

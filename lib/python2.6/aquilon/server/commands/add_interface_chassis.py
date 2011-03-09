@@ -31,7 +31,7 @@
 
 
 from aquilon.exceptions_ import ArgumentError, ProcessException
-from aquilon.aqdb.model import Chassis, ARecord, ReservedName
+from aquilon.aqdb.model import Chassis, ARecord, ReservedName, Fqdn
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.interface import (generate_ip,

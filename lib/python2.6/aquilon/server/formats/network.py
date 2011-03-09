@@ -38,7 +38,7 @@ from aquilon.server.formats.list import ListFormatter
 from aquilon.aqdb.model import (Network, AddressAssignment, DnsRecord,
                                 ARecord, DynamicStub,
                                 PrimaryNameAssociation, DnsDomain,
-                                Interface, HardwareEntity)
+                                Interface, HardwareEntity, Fqdn)
 
 def summarize_ranges(addrlist):
     """ Convert a list like [1,2,3,5] to ["1-3", "5"], but with IP addresses """
@@ -163,8 +163,10 @@ class NetworkHostListFormatter(ListFormatter):
             # DnsDomain and DnsRecord are used twice, so be certain which instance
             # is used where
             addr_dnsrec = aliased(ARecord, name="addr_dnsrec")
+            addr_fqdn = aliased(Fqdn, name="addr_fqdn")
             addr_domain = aliased(DnsDomain, name="addr_domain")
             pna_dnsrec = aliased(DnsRecord, name="pna_dnsrec")
+            pna_fqdn = aliased(Fqdn, name="pna_fqdn")
             pna_domain = aliased(DnsDomain, name="pna_dnsdomain")
 
             q = session.query(AddressAssignment)
@@ -173,10 +175,13 @@ class NetworkHostListFormatter(ListFormatter):
 
             # Make sure we pick up the right DnsDomain/DnsRecord instance
             q = q.join((addr_dnsrec, addr_dnsrec.ip == AddressAssignment.ip))
-            q = q.join((addr_domain, addr_dnsrec.dns_domain_id ==
+            q = q.join((addr_fqdn, addr_dnsrec.fqdn_id == addr_fqdn.id))
+            q = q.join((addr_domain, addr_fqdn.dns_domain_id ==
                         addr_domain.id))
             q = q.options(contains_eager("dns_records", alias=addr_dnsrec))
-            q = q.options(contains_eager("dns_records.dns_domain",
+            q = q.options(contains_eager("dns_records.fqdn",
+                                         alias=addr_fqdn))
+            q = q.options(contains_eager("dns_records.fqdn.dns_domain",
                                          alias=addr_domain))
 
             q = q.reset_joinpoint()
@@ -190,13 +195,17 @@ class NetworkHostListFormatter(ListFormatter):
             # Make sure we pick up the right DnsDomain/DnsRecord instance
             q = q.outerjoin((pna_dnsrec, PrimaryNameAssociation.dns_record_id ==
                              pna_dnsrec.id))
-            q = q.outerjoin((pna_domain, pna_dnsrec.dns_domain_id ==
+            q = q.outerjoin((pna_fqdn, pna_dnsrec.fqdn_id == pna_fqdn.id))
+            q = q.outerjoin((pna_domain, pna_fqdn.dns_domain_id ==
                              pna_domain.id))
             q = q.options(contains_eager("interface.hardware_entity."
                                          "_primary_name_asc.dns_record",
                                          alias=pna_dnsrec))
             q = q.options(contains_eager("interface.hardware_entity."
-                                         "_primary_name_asc.dns_record.dns_domain",
+                                         "_primary_name_asc.dns_record.fqdn",
+                                        alias=pna_fqdn))
+            q = q.options(contains_eager("interface.hardware_entity."
+                                         "_primary_name_asc.dns_record.fqdn.dns_domain",
                                         alias=pna_domain))
 
             q = q.order_by(AddressAssignment.ip)
@@ -212,7 +221,7 @@ class NetworkHostListFormatter(ListFormatter):
                 iface = addr.interface
                 hw_ent = iface.hardware_entity
                 if addr.fqdns:
-                    names = ", ".join(addr.fqdns)
+                    names = ", ".join([str(fqdn) for fqdn in addr.fqdns])
                 else:
                     names = "unknown"
                 details.append(indent + "  {0:c}: {0.printable_name}, "
@@ -259,7 +268,7 @@ class SimpleNetworkListFormatter(ListFormatter):
             addrq = session.query(AddressAssignment)
             addrq = addrq.filter(AddressAssignment.ip > bindparam('ip'))
             addrq = addrq.filter(AddressAssignment.ip < bindparam('broadcast'))
-            addrq = addrq.options(joinedload_all('dns_records.dns_domain'))
+            addrq = addrq.options(joinedload_all('dns_records.fqdn.dns_domain'))
             addrq = addrq.join(Interface)
             addrq = addrq.options(contains_eager('interface'))
             addrq = addrq.options(subqueryload_all('interface.hardware_entity.'
@@ -268,7 +277,7 @@ class SimpleNetworkListFormatter(ListFormatter):
             dynq = session.query(DynamicStub)
             dynq = dynq.filter(DynamicStub.ip > bindparam('ip'))
             dynq = dynq.filter(DynamicStub.ip < bindparam('broadcast'))
-            dynq = dynq.options(joinedload_all('dns_domain'))
+            dynq = dynq.options(joinedload_all('fqdn.dns_domain'))
 
         netlist_msg = self.loaded_protocols[self.protocol].NetworkList()
         for n in nlist:
@@ -335,9 +344,9 @@ class SimpleNetworkListFormatter(ListFormatter):
                     else:
                         host_msg.type = hwent.hardware_type
 
-                host_msg.hostname = str(addr.dns_records[0].name)
+                host_msg.hostname = str(addr.dns_records[0].fqdn.name)
                 host_msg.fqdn = str(addr.dns_records[0].fqdn)
-                host_msg.dns_domain = str(addr.dns_records[0].dns_domain)
+                host_msg.dns_domain = str(addr.dns_records[0].fqdn.dns_domain)
 
                 host_msg.ip = str(addr.ip)
 
@@ -360,9 +369,9 @@ class SimpleNetworkListFormatter(ListFormatter):
             host_msg = net_msg.hosts.add()
             # aqdhcpd uses the type
             host_msg.type = 'dynamic_stub'
-            host_msg.hostname = str(dynhost.name)
+            host_msg.hostname = str(dynhost.fqdn.name)
             host_msg.fqdn = str(dynhost.fqdn)
-            host_msg.dns_domain = str(dynhost.dns_domain)
+            host_msg.dns_domain = str(dynhost.fqdn.dns_domain)
             host_msg.ip = str(dynhost.ip)
 
     def csv_fields(self, network):

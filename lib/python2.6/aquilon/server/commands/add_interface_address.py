@@ -31,7 +31,7 @@
 from aquilon.server.broker import BrokerCommand
 from aquilon.exceptions_ import ArgumentError, ProcessException, IncompleteError
 from aquilon.aqdb.model import (ARecord, HardwareEntity, DynamicStub,
-                                AddressAssignment, DnsEnvironment)
+                                AddressAssignment, DnsEnvironment, Fqdn)
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.aqdb.model.address_assignment import ADDR_USAGES
 from aquilon.server.dbwrappers.interface import (get_interface,
@@ -105,6 +105,8 @@ class CommandAddInterfaceAddress(BrokerCommand):
             dbdns_env = None
 
         delete_old_dsdb_entry = False
+        dbfqdn = Fqdn.get_or_create(session, fqdn=fqdn,
+                                    dns_environment=dbdns_env)
         if ip:
             q = session.query(DynamicStub)
             q = q.filter_by(ip=ip)
@@ -113,20 +115,16 @@ class CommandAddInterfaceAddress(BrokerCommand):
                 raise ArgumentError("Address {0:a} is reserved for dynamic "
                                     "DHCP.".format(dbdns_rec))
 
-            dbdns_rec = ARecord.get_unique(session, fqdn=fqdn, ip=ip,
-                                           dns_environment=dbdns_env)
+            dbdns_rec = ARecord.get_unique(session, fqdn=dbfqdn, ip=ip)
             if dbdns_rec:
                 # If it was just a pure DNS placeholder, then delete & re-add it
                 if not dbdns_rec.assignments:
                     delete_old_dsdb_entry = True
             else:
-                dbdns_rec = ARecord(session=session, fqdn=fqdn, ip=ip,
-                                    dns_environment=dbdns_env)
+                dbdns_rec = ARecord(fqdn=dbfqdn, ip=ip)
                 session.add(dbdns_rec)
         else:
-            dbdns_rec = ARecord.get_unique(session, fqdn=fqdn,
-                                           dns_environment=dbdns_env,
-                                           compel=True)
+            dbdns_rec = ARecord.get_unique(session, fqdn=dbfqdn, compel=True)
             if isinstance(dbdns_rec, DynamicStub):
                 raise ArgumentError("Address {0:a} is reserved for dynamic "
                                     "DHCP.".format(dbdns_rec))

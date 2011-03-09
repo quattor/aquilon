@@ -30,7 +30,8 @@
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand
-from aquilon.aqdb.model import RouterAddress, Building, ARecord
+from aquilon.aqdb.model import RouterAddress, Building, ARecord, Fqdn
+from aquilon.aqdb.model.dns_domain import parse_fqdn
 from aquilon.aqdb.model.network import get_net_id_from_ip
 
 
@@ -44,10 +45,13 @@ class CommandAddRouter(BrokerCommand):
         else:
             dbbuilding = None
 
+        (short, dbdns_domain) = parse_fqdn(session, fqdn)
+        dbfqdn = Fqdn.get_or_create(session, name=short,
+                                    dns_domain=dbdns_domain)
         if ip:
-            dbdns_rec = ARecord.get_or_create(session, fqdn=fqdn, ip=ip)
+            dbdns_rec = ARecord.get_or_create(session, fqdn=dbfqdn, ip=ip)
         else:
-            dbdns_rec = ARecord.get_unique(session, fqdn, compel=True)
+            dbdns_rec = ARecord.get_unique(session, dbfqdn, compel=True)
             ip = dbdns_rec.ip
 
         dbnetwork = get_net_id_from_ip(session, ip)
@@ -61,7 +65,7 @@ class CommandAddRouter(BrokerCommand):
                                 "on {1:l}.".format(ip, dbnetwork))
 
         dbnetwork.routers.append(RouterAddress(ip=ip, location=dbbuilding,
-                                               dns_environment=dbdns_rec.dns_environment,
+                                               dns_environment=dbdns_rec.fqdn.dns_environment,
                                                comments=comments))
         session.flush()
 

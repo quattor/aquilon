@@ -41,7 +41,7 @@ class CommandDelRouter(BrokerCommand):
         if fqdn:
             dbdns_rec = ARecord.get_unique(session, fqdn=fqdn, compel=True)
             ip = dbdns_rec.ip
-            dbdns_env = dbdns_rec.dns_environment
+            dbdns_env = dbdns_rec.fqdn.dns_environment
         elif ip:
             dbdns_env = DnsEnvironment.get_unique_or_default(session)
         else:

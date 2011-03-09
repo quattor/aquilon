@@ -81,12 +81,12 @@ class TestRefreshWindowsHosts(TestBrokerCommand):
         self.matchclean(err, "Skipping removal of host", command)
         self.matchclean(err, "Removed host entry for", command)
         self.matchoutput(err,
-                         "Skipping host badhost1: Missing DNS domain in name.",
+                         "Skipping host badhost1: FQDN 'badhost1' is not "
+                         "valid, it does not contain a domain.",
                          command)
         self.matchoutput(err,
-                         "Skipping host badhost2.domain-does-not-exist.ms.com:"
-                         " No AQDB entry for DNS domain "
-                         "domain-does-not-exist.ms.com",
+                         "Skipping host badhost2.domain-does-not-exist.ms.com: "
+                         "DNS Domain domain-does-not-exist.ms.com not found.",
                          command)
         self.matchoutput(err,
                          "Skipping host badhost3.msad.ms.com: "
@@ -136,12 +136,12 @@ class TestRefreshWindowsHosts(TestBrokerCommand):
         self.matchclean(err, "Skipping removal of host", command)
         self.matchclean(err, "Removed host entry for", command)
         self.matchoutput(err,
-                         "Skipping host badhost1: Missing DNS domain in name.",
+                         "Skipping host badhost1: FQDN 'badhost1' is not "
+                         "valid, it does not contain a domain.",
                          command)
         self.matchoutput(err,
-                         "Skipping host badhost2.domain-does-not-exist.ms.com:"
-                         " No AQDB entry for DNS domain "
-                         "domain-does-not-exist.ms.com",
+                         "Skipping host badhost2.domain-does-not-exist.ms.com: "
+                         "DNS Domain domain-does-not-exist.ms.com not found.",
                          command)
         self.matchoutput(err,
                          "Skipping host badhost3.msad.ms.com: "

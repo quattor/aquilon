@@ -39,8 +39,8 @@ class DnsRecordFormatter(ObjectFormatter):
             return self.redirect_raw(dns_record.hardware_entity, indent)
 
         # This should be replaced by format()...
-        details = [indent + "{0:c}: {0.fqdn}".format(dns_record)]
-        details.append(indent + "  {0:c}: {0.name}".format(dns_record.dns_environment))
+        details = [indent + "{0:c}: {1!s}".format(dns_record, dns_record.fqdn)]
+        details.append(indent + "  {0:c}: {0.name}".format(dns_record.fqdn.dns_environment))
         if hasattr(dns_record, "ip"):
             details.append(indent + "  IP: %s" % dns_record.ip)
         if dns_record.comments:
