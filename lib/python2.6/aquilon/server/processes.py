@@ -44,6 +44,7 @@ from tempfile import mkstemp
 from threading import Thread
 
 from sqlalchemy.orm.session import object_session
+import yaml
 
 from aquilon.exceptions_ import (ProcessException, AquilonError, ArgumentError,
                                  InternalError)
@@ -80,8 +81,8 @@ class StreamLoggerThread(Thread):
                 self.logger.log(self.loglevel, data.rstrip())
 
 
-def run_command(args, env=None, path=".",
-                logger=LOGGER, loglevel=logging.INFO, filterre=None):
+def run_command(args, env=None, path=".", logger=LOGGER, loglevel=logging.INFO,
+                filterre=None, input=None):
     '''Run the specified command (args should be a list corresponding to ARGV).
 
     Returns any output (stdout only).  If the command fails, then
@@ -116,13 +117,22 @@ def run_command(args, env=None, path=".",
     simple_command = " ".join(command_args)
     logger.info("run_command: %s" % simple_command)
 
-    p = Popen(args=command_args, stdin=None, stdout=PIPE, stderr=PIPE,
+    if input:
+        proc_stdin = PIPE
+        logger.info("command `%s` stdin: %s" % (simple_command, input))
+    else:
+        proc_stdin = None
+
+    p = Popen(args=command_args, stdin=proc_stdin, stdout=PIPE, stderr=PIPE,
               cwd=path, env=shell_env)
     out_thread = StreamLoggerThread(logger, loglevel, p, p.stdout,
                                     filterre=filterre)
     err_thread = StreamLoggerThread(logger, loglevel, p, p.stderr)
     out_thread.start()
     err_thread.start()
+    if proc_stdin:
+        p.stdin.write(input)
+        p.stdin.close()
     out_thread.join()
     err_thread.join()
     p.wait()
@@ -636,3 +646,74 @@ class DSDBRunner(object):
         else:
             fields["state"] = None
         return fields
+
+
+
+class NASAssign(object):
+    
+    def __init__(self, machine, disk, owner, rack=None, size=None):
+        self.machine = machine
+        self.disk = disk
+        self.owner = owner
+        self.rack = rack
+        self.size = size
+        self.config = Config()
+        if self.config.get('nasassign', 'use_dev_db'):
+            self.devdb = 1
+        self.laf_dict = {'_id':'%s_%s' % (self.disk, self.machine),
+                         'owner':self.owner, 'rack':self.rack, 'size':self.size,
+                         'devdb':self.devdb}
+        self.bin = self.config.get('nasassign', 'bin')
+        self.cmdline_args = self.config.get('nasassign', 'cmdline_args')
+        self.args = [ self.bin ]
+        if self.cmdline_args:
+            self.args.extend(self.cmdline_args.split())
+
+    def yaml(self):
+        return yaml.dump(self.laf_dict, explicit_start=True,
+                         default_flow_style=True, indent=2, tags=False)
+
+    def create(self):
+        if not self.rack or not self.size:
+            raise ArgumentError("Must set rack and size attributes to "
+                                "create nas assignments.")
+        args = self.args[:]
+        args.extend(['create', '-'])
+        output = run_command(args, input=self.yaml())
+        response_obj = yaml.load(output)
+        if response_obj.get('sharename'):
+            self.sharename = response_obj['sharename']
+            return response_obj['sharename']
+        else:
+            #parse error output if possible, else just stringify it.
+            error = str(response_obj.get('_error', {}).get('why', output))
+            #check for parsable 'default handler' error from LAF
+            try:
+                default_handler_errors = response_obj['_error']['why']['default']
+            except:
+                default_handler_errors = []
+            if error.startswith("Requested number of nas slots "
+                                "are not available"):
+                raise ArgumentError("No available NAS capacity in Resource Pool "
+                                    "for rack %s. Please notify an "
+                                    "administrator or add capacity." % self.rack)
+            for dherr in default_handler_errors:
+                if dherr.startswith("data@size"):
+                    sizes = re.findall("\[([\d+, ]+)\]", dherr)
+                    raise ArgumentError("Invalid size for autoshare disk. "
+                                        "Supported sizes are: %s" % sizes )
+            raise AquilonError("Received unexpected output from nasassign "
+                               "/ resource pool: %s" % error)
+            
+    def delete(self):
+        args = self.args[:]
+        args.extend(['delete', '-'])
+        output = run_command(args, input=self.yaml())
+        response_obj = yaml.load(output)
+        if response_obj:
+            error = str(response_obj.get('_error', {}).get('why', output))
+            raise AquilonError("Received unexpected output from nasassign "
+                               "/ resource pool: %s" % error)
+        else:
+            self.sharename = None
+            return True
