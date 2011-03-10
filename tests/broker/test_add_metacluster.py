@@ -95,7 +95,7 @@ class TestAddMetaCluster(TestBrokerCommand):
     def testaddutmc4(self):
         # Sort of a mini-10 Gig design for port group testing...
         command = ["add_metacluster", "--metacluster=utmc4",
-                   "--max_members=6", "--max_shares=6"]
+                   "--max_members=6", "--max_shares=7"]
         self.noouttest(command)
 
     def testaddutmc5(self):

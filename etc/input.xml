@@ -671,7 +671,10 @@
          </optgroup>
       </optgroup>
       <optgroup name="nas_opts" fields="all">
-         <option name="share" type="string">Share name (an instance of nas_disk_share service)</option>
+         <optgroup name="share_opts" fields="any">
+            <option name="share" type="string" conflicts="autoshare">Share name (an instance of nas_disk_share service)</option>
+            <option name="autoshare" type="flag" conflicts="share">Resource pool will pick an appropriate share</option>
+         </optgroup>
          <option name="address" type="string">Bus address (e.g. 0:0)</option>
       </optgroup>
       <optgroup name="optional_opts">

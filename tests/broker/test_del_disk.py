@@ -74,7 +74,6 @@ class TestDelDisk(TestBrokerCommand):
                          "type-does-not-exist is not a valid controller type",
                          command)
 
-
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelDisk)
     unittest.TextTestRunner(verbosity=2).run(suite)

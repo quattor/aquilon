@@ -28,29 +28,26 @@
 # TERMS THAT MAY APPLY.
 """Contains the logic for `aq del machine`."""
 
-
-from aquilon.exceptions_ import ArgumentError
+from aquilon.exceptions_ import ArgumentError, AquilonError
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.locks import lock_queue, CompileKey
 from aquilon.server.templates.machine import PlenaryMachineInfo
 from aquilon.server.templates.cluster import PlenaryCluster
 from aquilon.aqdb.model import Machine
-
+from aquilon.server.processes import NASAssign
 
 class CommandDelMachine(BrokerCommand):
 
     required_parameters = ["machine"]
 
-    def render(self, session, logger, machine, **arguments):
+    def render(self, session, logger, machine, user, dbuser, **arguments):
         dbmachine = Machine.get_unique(session, machine, compel=True)
-
         plenary_machine = PlenaryMachineInfo(dbmachine, logger=logger)
         dbcluster = dbmachine.cluster
 
         if dbmachine.host:
             raise ArgumentError("{0} is still in use by {1:l} and cannot be "
                                 "deleted.".format(dbmachine, dbmachine.host))
-
         addrs = []
         for addr in dbmachine.all_addresses():
             addrs.append("%s: %s" % (addr.logical_name, addr.ip))
@@ -59,14 +56,27 @@ class CommandDelMachine(BrokerCommand):
             raise ArgumentError("{0} still provides the following addresses, "
                                 "delete them first: {1}.".format(dbmachine,
                                                                  addrmsg))
-
-        for disk in dbmachine.disks:
+        uname = str(dbuser.name)
+        to_remove_from_rp = None
+        for dbdisk in dbmachine.disks:
+            if (hasattr(dbdisk, 'service_instance') and
+                dbdisk.service_instance.manager == 'resourcepool'):
+                if to_remove_from_rp:
+                    raise ArgumentError('Multiple managed shares must be '
+                                        'removed as seperate operations. '
+                                        'Please run "del_disk" individually for '
+                                        'the following shares: %s '
+                                        % (" ,".join(to_remove_from_rp)))
+                else:
+                    na_obj = NASAssign(machine=machine, disk=dbdisk.device_name,
+                                       owner=uname)
+                    to_remove_from_rp = na_obj
             # Rely on cascade delete to remove the disks.  The Oracle driver
             # can handle the additional/explicit delete request but the
             # sqlite driver can't.
             logger.info("While deleting machine '%s' will remove disk '%s'" %
-                        (dbmachine.label, disk.device_name))
-            #session.delete(disk)
+                        (dbmachine.label, dbdisk.device_name))
+            #session.delete(dbdisk)
         session.delete(dbmachine)
         session.flush()
 
@@ -80,6 +90,8 @@ class CommandDelMachine(BrokerCommand):
             if dbcluster:
                 plenary_cluster.write(locked=True)
             plenary_machine.remove(locked=True)
+            if to_remove_from_rp:
+                self._remove_from_rp(to_remove_from_rp)
         except:
             plenary_machine.restore_stash()
             if dbcluster:
@@ -87,5 +99,12 @@ class CommandDelMachine(BrokerCommand):
             raise
         finally:
             lock_queue.release(key)
+        return
 
+    def _remove_from_rp(self, na_obj):
+        try:
+            na_obj.delete()
+        except Exception, e:
+            raise AquilonError('Failed while removing nas assignment in '
+                               'resource pool: %s' % e)
         return
