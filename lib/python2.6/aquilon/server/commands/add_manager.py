@@ -35,8 +35,9 @@ from aquilon.server.dbwrappers.host import hostname_to_host
 from aquilon.server.dbwrappers.system import parse_system_and_verify_free
 from aquilon.server.dbwrappers.interface import (generate_ip,
                                                  check_ip_restrictions,
-                                                 get_or_create_interface)
-from aquilon.aqdb.model import FutureARecord, AddressAssignment
+                                                 get_or_create_interface,
+                                                 assign_address)
+from aquilon.aqdb.model import ARecord, AddressAssignment
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.server.locks import lock_queue
 from aquilon.server.templates.machine import PlenaryMachineInfo
@@ -81,11 +82,11 @@ class CommandAddManager(BrokerCommand):
             raise ArgumentError("IP address {0!s} is already in use by "
                                 "{1:l}.".format(addr.ip, addr.vlan.interface))
 
-        dbdns_rec = FutureARecord(name=short, dns_domain=dbdns_domain,
-                                  ip=ip, network=dbnetwork,
-                                  comments=comments)
+        dbdns_rec = ARecord(session=session, name=short,
+                            dns_domain=dbdns_domain, ip=ip,
+                            network=dbnetwork, comments=comments)
         session.add(dbdns_rec)
-        dbinterface.addresses.append(ip)
+        assign_address(dbinterface, ip)
 
         session.flush()
 

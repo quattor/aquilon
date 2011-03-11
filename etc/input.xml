@@ -150,6 +150,9 @@
          <option name="fqdn" type="string" conflicts="all">full qualified domain name</option>
          <option name="all" type="flag" conflicts="fqdn">select all systems</option>
       </optgroup>
+      <optgroup name="show_fqdn_options" mandatory="False" fields="any">
+         <option name="dns_environment" type="string">The name of the environment the address is in (defaults to 'internal')</option>
+      </optgroup>
       <transport trigger="all" method="get" path="system" />
       <transport trigger="fqdn" method="get" path="system/%(fqdn)s" />
    </command>
@@ -1315,6 +1318,7 @@
 	 <option name="label" type="string">Interface alias of the new address</option>
 	 <option name="usage" type="string">Use of the new address (default: system)</option>
          <option name="ipalgorithm" type="string">Algorithm for automatically choosing an IP.</option>
+         <option name="dns_environment" type="string">The name of the environment the address is in (defaults to 'internal')</option>
       </optgroup>
       <optgroup name="add_interface_address_ip_opts" mandatory="False" fields="any">
          <option name="ip" type="ipv4" conflicts="ipfromip ipfromsystem autoip">IP address</option>
@@ -1337,6 +1341,7 @@
       </optgroup>
       <optgroup name="del_interface_address_opt" mandatory="False" fields="any">
          <option name="keep_dns" type="flag">Keep the DNS record</option>
+         <option name="dns_environment" type="string">The name of the environment the address is in (defaults to 'internal')</option>
       </optgroup>
       <optgroup name="del_interface_address_ip_opts" mandatory="True" fields="any">
          <option name="fqdn" type="string" conflicts="ip">FQDN of the address</option>
@@ -2912,6 +2917,35 @@
       <transport method="put" path="principal/%(principal)s/role" />
    </command>
 
+   <command name="add_dns_environment">
+      Add a new DNS Environment
+      <optgroup name="dns_env_opts" mandatory="True" fields="all">
+         <option name="dns_environment" type="string">The DNS environment name</option>
+      </optgroup>
+      <optgroup name="add_dns_env_optional" mandatory="False">
+        <option name="comments" type="string">Comments</option>
+      </optgroup>
+      <transport method="put" path="dns_environment/%(dns_environment)s" />
+   </command>
+
+   <command name="show_dns_environment">
+      Display a DNS Environment
+      <optgroup name="dns_env_opts" mandatory="True" fields="any">
+         <option name="dns_environment" type="string">Name of the DNS environment</option>
+         <option name="all" type="flag" conflicts="dns_domain">Show all DNS environments</option>
+      </optgroup>
+      <transport trigger="dns_environment" method="get" path="dns_environment/%(dns_environment)s" />
+      <transport trigger="all" method="get" path="dns_environment" />
+   </command>
+
+   <command name="del_dns_environment">
+      Delete a DNS Environment
+      <optgroup name="dns_env_opts" mandatory="True" fields="all">
+         <option name="dns_environment" type="string">The DNS environment name</option>
+      </optgroup>
+      <transport method="delete" path="dns_environment/%(dns_environment)s" />
+   </command>
+
    <command name="add_dns_domain">
       Add a new DNS subdomain.
       <optgroup name="add_dns_domain_options" mandatory="True" fields="all">
@@ -3294,7 +3328,7 @@
          </optgroup>
       </optgroup>
       <optgroup name="add_address_optional" mandatory="False">
-         <option name="dns_environment" type="string">The name of the environment the address is in (only the default is currently accepted)</option>
+         <option name="dns_environment" type="string">The name of the environment the address is in (defaults to 'internal')</option>
          <option name="ipalgorithm" type="string">Algorithm for automatically choosing an IP.</option>
          <option name="comments" type="string">Comments</option>
       </optgroup>
@@ -3309,7 +3343,7 @@
          <option name="ip" type="ipv4">An IP Address</option>
       </optgroup>
       <optgroup name="del_address_optional" mandatory="False">
-         <option name="dns_environment" type="string">The name of the environment the address is in (only the default is currently accepted)</option>
+         <option name="dns_environment" type="string">The name of the environment the address is in (defaults to 'internal')</option>
       </optgroup>
       <transport method="delete" path="address_default/%(fqdn)s/%(ip)s" />
       <transport method="delete" trigger="dns_environment" path="address/%(dns_environment)s/%(fqdn)s/%(ip)s" />
@@ -3347,6 +3381,75 @@
          <option name="dns_domain" type="string">The dns domain to delete the record from</option>
       </optgroup>
       <transport method="delete" path="ns_record/%(dns_domain)s/%(fqdn)s" />
+   </command>
+
+   <command name="map_dns_domain">
+      Map a DNS domain to the given location.
+      <optgroup name="map_dns_domain_opts" mandatory="True" fields="all">
+         <option name="dns_domain" type="string">The fully qualified domain name</option>
+         <optgroup name="map_dns_domain_loc_opts" fields="any">
+            <option name="organization" type="string">Organization</option>
+            <option name="hub" type="string">Hub</option>
+            <option name="continent" type="string">Continent</option>
+            <option name="country" type="string">Country</option>
+            <option name="campus" type="string">Campus</option>
+            <option name="city" type="string">City</option>
+            <option name="building" type="string">Building</option>
+            <option name="room" type="string">Room</option>
+            <option name="rack" type="string">Rack</option>
+            <option name="desk" type="string">Desk</option>
+         </optgroup>
+      </optgroup>
+      <optgroup name="map_dns_domain_opt" mandatory="False">
+         <option name="position" type="int">Position in the list</option>
+         <option name="comments" type="string">Comments</option>
+      </optgroup>
+      <transport method="post" path="dns_map/%(dns_domain)s/command/map" />
+   </command>
+
+   <command name="unmap_dns_domain">
+      Unmap a DNS domain from the given location.
+      <optgroup name="unmap_dns_domain_opts" mandatory="True" fields="all">
+         <option name="dns_domain" type="string">The fully qualified domain name</option>
+         <optgroup name="unmap_dns_domain_loc_opts" fields="any">
+            <option name="organization" type="string">Organization</option>
+            <option name="hub" type="string">Hub</option>
+            <option name="continent" type="string">Continent</option>
+            <option name="country" type="string">Country</option>
+            <option name="campus" type="string">Campus</option>
+            <option name="city" type="string">City</option>
+            <option name="building" type="string">Building</option>
+            <option name="room" type="string">Room</option>
+            <option name="rack" type="string">Rack</option>
+            <option name="desk" type="string">Desk</option>
+         </optgroup>
+      </optgroup>
+      <transport method="post" path="dns_map/%(dns_domain)s/command/unmap" />
+   </command>
+
+   <command name="search_dns_domain_map">
+      Search DNS domain maps.
+      <p/>
+      If a location is specified and the --include_parents flag is used, then any
+      mappings of parent locations are also included. This allows testing what would
+      be included in the DNS search path if a machine was placed at the given location.
+      <optgroup name="search_dns_domain_opts" mandatory="True" fields="any">
+         <option name="dns_domain" type="string">The fully qualified domain name</option>
+         <option name="organization" type="string">Organization</option>
+         <option name="hub" type="string">Hub</option>
+         <option name="continent" type="string">Continent</option>
+         <option name="country" type="string">Country</option>
+         <option name="campus" type="string">Campus</option>
+         <option name="city" type="string">City</option>
+         <option name="building" type="string">Building</option>
+         <option name="room" type="string">Room</option>
+         <option name="rack" type="string">Rack</option>
+         <option name="desk" type="string">Desk</option>
+      </optgroup>
+      <optgroup name="search_dns_domain_optional" mandatory="False" fields="any">
+         <option name="include_parents" type="flag">Include maps of parent locations</option>
+      </optgroup>
+      <transport method="get" path="find/dns_map" />
    </command>
 
 </commandline>

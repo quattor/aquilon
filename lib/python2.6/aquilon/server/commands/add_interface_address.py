@@ -30,13 +30,14 @@
 
 from aquilon.server.broker import BrokerCommand
 from aquilon.exceptions_ import ArgumentError, ProcessException, IncompleteError
-from aquilon.aqdb.model import (FutureARecord, HardwareEntity, DynamicStub,
-                                AddressAssignment)
+from aquilon.aqdb.model import (ARecord, HardwareEntity, DynamicStub,
+                                AddressAssignment, DnsEnvironment)
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.aqdb.model.address_assignment import ADDR_USAGES
 from aquilon.server.dbwrappers.interface import (get_interface,
                                                  generate_ip,
-                                                 check_ip_restrictions)
+                                                 check_ip_restrictions,
+                                                 assign_address)
 from aquilon.server.templates.host import PlenaryHost
 from aquilon.server.locks import lock_queue
 from aquilon.server.processes import DSDBRunner
@@ -46,8 +47,8 @@ class CommandAddInterfaceAddress(BrokerCommand):
 
     required_parameters = ['fqdn', 'interface']
 
-    def render(self, session, logger, machine, chassis, switch, fqdn, interface,
-               label, usage, **kwargs):
+    def render(self, session, logger, machine, chassis, switch, fqdn,
+               dns_environment, interface, label, usage, **kwargs):
 
         if machine:
             hwtype = 'machine'
@@ -96,6 +97,13 @@ class CommandAddInterfaceAddress(BrokerCommand):
         if usage not in ADDR_USAGES:
             raise ArgumentError("Illegal address usage '%s'." % usage)
 
+        if dns_environment:
+            dbdns_env = DnsEnvironment.get_unique(session, dns_environment,
+                                                  compel=True)
+        else:
+            # Use default
+            dbdns_env = None
+
         delete_old_dsdb_entry = False
         if ip:
             q = session.query(DynamicStub)
@@ -105,17 +113,20 @@ class CommandAddInterfaceAddress(BrokerCommand):
                 raise ArgumentError("Address {0:a} is reserved for dynamic "
                                     "DHCP.".format(dbdns_rec))
 
-            dbdns_rec = FutureARecord.get_unique(session, fqdn=fqdn, ip=ip)
+            dbdns_rec = ARecord.get_unique(session, fqdn=fqdn, ip=ip,
+                                           dns_environment=dbdns_env)
             if dbdns_rec:
                 # If it was just a pure DNS placeholder, then delete & re-add it
                 if not dbdns_rec.assignments:
                     delete_old_dsdb_entry = True
             else:
-                dbdns_rec = FutureARecord(session=session, fqdn=fqdn, ip=ip)
+                dbdns_rec = ARecord(session=session, fqdn=fqdn, ip=ip,
+                                    dns_environment=dbdns_env)
                 session.add(dbdns_rec)
         else:
-            dbdns_rec = FutureARecord.get_unique(session, fqdn=fqdn,
-                                                 compel=True)
+            dbdns_rec = ARecord.get_unique(session, fqdn=fqdn,
+                                           dns_environment=dbdns_env,
+                                           compel=True)
             if isinstance(dbdns_rec, DynamicStub):
                 raise ArgumentError("Address {0:a} is reserved for dynamic "
                                     "DHCP.".format(dbdns_rec))
@@ -146,8 +157,7 @@ class CommandAddInterfaceAddress(BrokerCommand):
                                         "and is not configured for "
                                         "Zebra.".format(ip, addr.interface))
 
-        dbinterface.addresses.append({"ip": ip, "label": label,
-                                                  "usage": usage})
+        assign_address(dbinterface, ip, label=label, usage=usage)
         session.flush()
 
         dbhost = getattr(dbhw_ent, "host", None)

@@ -31,7 +31,7 @@
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand
-from aquilon.aqdb.model import FutureARecord
+from aquilon.aqdb.model import ARecord
 
 
 class CommandShowManagerManager(BrokerCommand):
@@ -39,7 +39,7 @@ class CommandShowManagerManager(BrokerCommand):
     required_parameters = ["manager"]
 
     def render(self, session, manager, **kwargs):
-        dbdns_rec = FutureARecord.get_unique(session, fqdn=manager, compel=True)
+        dbdns_rec = ARecord.get_unique(session, fqdn=manager, compel=True)
         if not dbdns_rec.assignments:
             raise ArgumentError("Address {0:a} is not assigned to any "
                                 "interfaces.".format(dbdns_rec))

@@ -34,7 +34,7 @@ from aquilon.exceptions_ import (ArgumentError, ProcessException, AquilonError,
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.branch import get_branch_and_author
 from aquilon.server.dbwrappers.hardware_entity import parse_primary_name
-from aquilon.server.dbwrappers.interface import generate_ip
+from aquilon.server.dbwrappers.interface import generate_ip, assign_address
 from aquilon.aqdb.model import (Domain, Host, OperatingSystem, Archetype,
                                 HostLifecycle, Machine, Personality)
 from aquilon.server.templates.base import PlenaryCollection
@@ -189,11 +189,7 @@ class CommandAddHost(BrokerCommand):
                                     "host, but {0:l} does not have a bootable "
                                     "interface.".format(dbmachine))
             if ip not in dbinterface.addresses:
-                for addr in dbinterface.assignments:
-                    if not addr.label:
-                        raise ArgumentError("{0} already has an unlabeled IP "
-                                            "address.".format(dbinterface))
-                dbinterface.addresses.append(ip)
+                assign_address(dbinterface, ip)
 
     def assign_zebra_address(self, session, dbmachine, hostname,
                              zebra_interfaces, **arguments):
@@ -224,10 +220,4 @@ class CommandAddHost(BrokerCommand):
             if not dbinterface:
                 raise ArgumentError("{0} does not have an interface named "
                                     "{1}.".format(dbmachine, name))
-            for addr in dbinterface.assignments:
-                if addr.label == "hostname":
-                    raise ArgumentError("{0} already has an alias named "
-                                        "hostname.".format(dbinterface))
-            dbinterface.addresses.append({"ip": ip,
-                                          "label": "hostname",
-                                          "usage": "zebra"})
+            assign_address(dbinterface, ip, label="hostname", usage="zebra")

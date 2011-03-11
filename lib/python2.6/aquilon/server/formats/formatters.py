@@ -38,7 +38,7 @@ from mako.lookup import TemplateLookup
 
 from aquilon.config import Config
 from aquilon.exceptions_ import ProtocolError, InternalError
-from aquilon.aqdb.model import Host, System
+from aquilon.aqdb.model import Host
 
 # Note: the built-in "excel" dialect uses '\r\n' for line ending and that breaks
 # the tests.

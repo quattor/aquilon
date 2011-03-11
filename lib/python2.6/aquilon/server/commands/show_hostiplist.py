@@ -35,7 +35,7 @@ from aquilon.server.broker import BrokerCommand
 from aquilon.server.formats.host import HostIPList
 from aquilon.aqdb.model import (AddressAssignment, Interface, HardwareEntity,
                                 Personality, Machine, Host, Archetype,
-                                PrimaryNameAssociation, FutureARecord, System,
+                                PrimaryNameAssociation, ARecord, DnsRecord,
                                 DnsDomain)
 
 
@@ -55,11 +55,11 @@ class CommandShowHostIPList(BrokerCommand):
             dbarchetype = Archetype.get_unique(session, "aurora", compel=True)
             archq = archq.filter(Personality.archetype == dbarchetype)
 
-        # System and DnsRecord are used twice, so be certain which instance
+        # DnsDomain and DnsRecord are used twice, so be certain which instance
         # is used where
-        addr_dnsrec = aliased(FutureARecord, name="addr_dnsrec")
+        addr_dnsrec = aliased(ARecord, name="addr_dnsrec")
         addr_domain = aliased(DnsDomain, name="addr_domain")
-        pna_dnsrec = aliased(System, name="pna_dnsrec")
+        pna_dnsrec = aliased(DnsRecord, name="pna_dnsrec")
         pna_domain = aliased(DnsDomain, name="pna_dnsdomain")
 
         q = session.query(AddressAssignment)
@@ -67,7 +67,7 @@ class CommandShowHostIPList(BrokerCommand):
         q = q.join((addr_domain, addr_dnsrec.dns_domain_id ==
                     addr_domain.id))
 
-        # Make sure we pick up the right System/DnsRecord instance
+        # Make sure we pick up the right DnsDomain/DnsRecord instance
         q = q.options(contains_eager("dns_records", alias=addr_dnsrec))
         q = q.options(contains_eager("dns_records.dns_domain",
                                      alias=addr_domain))
@@ -90,7 +90,7 @@ class CommandShowHostIPList(BrokerCommand):
         q = q.options(contains_eager('interface.hardware_entity'))
         q = q.options(contains_eager("interface.hardware_entity._primary_name_asc"))
 
-        # Make sure we pick up the right System/DnsRecord instance
+        # Make sure we pick up the right DnsDomain/DnsRecord instance
         q = q.options(contains_eager("interface.hardware_entity."
                                      "_primary_name_asc.dns_record",
                                      alias=pna_dnsrec))
@@ -115,16 +115,16 @@ class CommandShowHostIPList(BrokerCommand):
 
         # Append addresses that are not bound to interfaces
         if not archetype:
-            q = session.query(FutureARecord)
+            q = session.query(ARecord)
             q = q.join(DnsDomain)
             q = q.options(contains_eager("dns_domain"))
             q = q.reset_joinpoint()
 
             q = q.outerjoin((AddressAssignment,
-                             AddressAssignment.ip == FutureARecord.ip))
+                             AddressAssignment.ip == ARecord.ip))
             q = q.filter(AddressAssignment.id == None)
 
-            q = q.order_by(FutureARecord.name, DnsDomain.name)
+            q = q.order_by(ARecord.name, DnsDomain.name)
 
             for entry in q:
                 iplist.append((entry.fqdn, entry.ip, None))

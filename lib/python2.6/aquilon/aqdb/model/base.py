@@ -244,12 +244,13 @@ class Base(object):
                 # building"
                 clslabel = mapper.polymorphic_map[value].class_._get_class_label()
             else:
-                name = value.name if hasattr(value, "name") else str(value)
-                if (hasattr(cls, "_instance_label") and field ==
-                    cls._instance_label) or field == "name":
-                    desc.append(name)
+                if field == "name" or (hasattr(cls, "_instance_label") and
+                                       field == cls._instance_label):
+                    desc.append(str(value))
+                elif isinstance(value, Base):
+                    desc.append("{0:l}".format(value))
                 else:
-                    desc.append(field + " " + name)
+                    desc.append(field + " " + str(value))
 
         # Check for arguments we don't know about
         if kwargs:
@@ -261,8 +262,11 @@ class Base(object):
     def get_unique(cls, session, *args, **kwargs):
         compel = kwargs.get('compel', False)
         preclude = kwargs.pop('preclude', False)
+        options = kwargs.pop('query_options', None)
 
         query = session.query(cls)
+        if options:
+            query = query.options(*options)
         (query, clslabel, desc) = cls._selection_helper(session, query, *args,
                                                         **kwargs)
         try:
@@ -283,7 +287,11 @@ class Base(object):
     @classmethod
     def get_matching_query(cls, session, *args, **kwargs):
         compel = kwargs.get('compel', False)
+        options = kwargs.pop('query_options', None)
+
         query = session.query(cls.__table__.c.id)
+        if options:
+            query = query.options(*options)
         (query, clslabel, desc) = cls._selection_helper(session, query, *args,
                                                         **kwargs)
         if compel:

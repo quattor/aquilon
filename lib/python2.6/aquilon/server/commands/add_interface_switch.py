@@ -32,7 +32,8 @@
 from aquilon.exceptions_ import ArgumentError, AquilonError
 from aquilon.aqdb.model import Switch
 from aquilon.server.broker import BrokerCommand
-from aquilon.server.dbwrappers.interface import get_or_create_interface
+from aquilon.server.dbwrappers.interface import (get_or_create_interface,
+                                                 assign_address)
 from aquilon.server.processes import DSDBRunner
 
 
@@ -75,8 +76,8 @@ class CommandAddInterfaceSwitch(BrokerCommand):
                                               interface_type='oa',
                                               comments=comments, preclude=True)
 
-        if dbswitch.primary_name.ip and not dbswitch.primary_name.assignments:
-            dbinterface.addresses.append(dbswitch.primary_ip)
+        if dbswitch.primary_ip and not dbswitch.primary_name.assignments:
+            assign_address(dbinterface, dbswitch.primary_ip)
 
         session.flush()
 

@@ -33,20 +33,19 @@ from sqlalchemy.sql import exists
 
 from aquilon.server.broker import BrokerCommand
 from aquilon.aqdb.model import (Interface, AddressAssignment, HardwareEntity,
-                                PrimaryNameAssociation, FutureARecord,
-                                DnsDomain)
+                                PrimaryNameAssociation, ARecord, DnsDomain)
 
 
 class CommandShowAuxiliaryAll(BrokerCommand):
 
     def render(self, session, **arguments):
         # An auxiliary...
-        q = session.query(FutureARecord)
+        q = session.query(ARecord)
         # ... is not a primary name...
         q = q.filter(~exists().where(PrimaryNameAssociation.dns_record_id ==
-                                     FutureARecord.system_id))
+                                     ARecord.dns_record_id))
         # ... and is assigned to a public interface...
-        q = q.join((AddressAssignment, FutureARecord.ip == AddressAssignment.ip))
+        q = q.join((AddressAssignment, ARecord.ip == AddressAssignment.ip))
         q = q.join(Interface)
         q = q.filter_by(interface_type='public')
         # ... of a machine.
@@ -54,7 +53,7 @@ class CommandShowAuxiliaryAll(BrokerCommand):
         q = q.filter_by(hardware_type='machine')
         q = q.reset_joinpoint()
         q = q.join(DnsDomain)
-        q = q.options(contains_eager(FutureARecord.dns_domain))
-        q = q.order_by(FutureARecord.name, DnsDomain.name)
+        q = q.options(contains_eager(ARecord.dns_domain))
+        q = q.order_by(ARecord.name, DnsDomain.name)
         fqdns = [rec.fqdn for rec in q.all()]
         return fqdns

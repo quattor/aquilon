@@ -34,7 +34,8 @@ from aquilon.aqdb.model import Chassis, Model
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.location import get_location
 from aquilon.server.dbwrappers.hardware_entity import parse_primary_name
-from aquilon.server.dbwrappers.interface import get_or_create_interface
+from aquilon.server.dbwrappers.interface import (get_or_create_interface,
+                                                 assign_address)
 from aquilon.server.processes import DSDBRunner
 
 
@@ -72,7 +73,7 @@ class CommandAddChassis(BrokerCommand):
                                               interface_type="oa",
                                               comments=ifcomments)
         if ip:
-            dbinterface.addresses.append(ip)
+            assign_address(dbinterface, ip)
 
         session.flush()
 

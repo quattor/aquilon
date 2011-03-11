@@ -30,7 +30,7 @@
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand
-from aquilon.aqdb.model import FutureARecord, RouterAddress
+from aquilon.aqdb.model import ARecord, RouterAddress, DnsEnvironment
 
 
 class CommandDelRouter(BrokerCommand):
@@ -39,13 +39,17 @@ class CommandDelRouter(BrokerCommand):
 
     def render(self, session, ip, fqdn, **arguments):
         if fqdn:
-            dbdns_rec = FutureARecord.get_unique(session, fqdn=fqdn,
-                                                 compel=True)
+            dbdns_rec = ARecord.get_unique(session, fqdn=fqdn, compel=True)
             ip = dbdns_rec.ip
-        elif not ip:
+            dbdns_env = dbdns_rec.dns_environment
+        elif ip:
+            dbdns_env = DnsEnvironment.get_unique_or_default(session)
+        else:
             raise ArgumentError("Please specify either --ip or --fqdn.")
 
-        dbrouter = RouterAddress.get_unique(session, ip, compel=True)
+        dbrouter = RouterAddress.get_unique(session, ip=ip,
+                                            dns_environment=dbdns_env,
+                                            compel=True)
         dbnetwork = dbrouter.network
 
         if dbrouter.dns_records:

@@ -31,7 +31,7 @@
 
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.formats.system import SimpleSystemList
-from aquilon.aqdb.model import System
+from aquilon.aqdb.model import DnsRecord
 from aquilon.server.dbwrappers.system import search_system_query
 
 
@@ -40,7 +40,7 @@ class CommandSearchSystem(BrokerCommand):
     required_parameters = []
 
     def render(self, session, fullinfo, **arguments):
-        q = search_system_query(session, System, **arguments)
+        q = search_system_query(session, DnsRecord, **arguments)
         if fullinfo:
             return q.all()
         return SimpleSystemList(q.all())

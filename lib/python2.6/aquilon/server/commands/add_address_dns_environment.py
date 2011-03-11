@@ -29,7 +29,7 @@
 
 from aquilon.exceptions_ import (UnimplementedError, ArgumentError,
                                  ProcessException)
-from aquilon.aqdb.model import System, FutureARecord
+from aquilon.aqdb.model import DnsRecord, ARecord, DnsEnvironment
 from aquilon.aqdb.model.dns_domain import parse_fqdn
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.server.broker import BrokerCommand
@@ -44,31 +44,29 @@ class CommandAddAddressDNSEnvironment(BrokerCommand):
 
     def render(self, session, logger, fqdn, dns_environment, comments,
                **arguments):
-        default = self.config.get("broker", "default_dns_environment")
-        if str(dns_environment).strip().lower() != default.strip().lower():
-            raise UnimplementedError("Only the '%s' DNS environment is "
-                                     "currently supported." % default)
+        dbdns_env = DnsEnvironment.get_unique(session, dns_environment,
+                                              compel=True)
 
         (short, dbdns_domain) = parse_fqdn(session, fqdn)
-        System.get_unique(session, name=short, dns_domain=dbdns_domain,
-                          preclude=True)
+        DnsRecord.get_unique(session, name=short, dns_domain=dbdns_domain,
+                             dns_environment=dbdns_env, preclude=True)
 
-        ipargs = arguments.copy()
-        ipargs['compel'] = True
-        ipargs['dbinterface'] = None
-        ip = generate_ip(session, **ipargs)
+        ip = generate_ip(session, compel=True, dbinterface=None, **arguments)
         ipnet = get_net_id_from_ip(session, ip)
         check_ip_restrictions(ipnet, ip)
-        dbaddress = FutureARecord(name=short, dns_domain=dbdns_domain,
-                                  ip=ip, network=ipnet, comments=comments)
+        dbaddress = ARecord(session=session, name=short, ip=ip, network=ipnet,
+                            dns_domain=dbdns_domain, dns_environment=dbdns_env,
+                            comments=comments)
         session.add(dbaddress)
 
         session.flush()
 
-        dsdb_runner = DSDBRunner(logger=logger)
-        try:
-            dsdb_runner.add_host_details(fqdn=dbaddress.fqdn, ip=dbaddress.ip,
-                                         name=None, mac=None)
-        except ProcessException, e:
-            raise ArgumentError("Could not add address to DSDB: %s" % e)
+        if dbdns_env.is_default:
+            dsdb_runner = DSDBRunner(logger=logger)
+            try:
+                dsdb_runner.add_host_details(fqdn=dbaddress.fqdn, ip=dbaddress.ip,
+                                             name=None, mac=None)
+            except ProcessException, e:
+                raise ArgumentError("Could not add address to DSDB: %s" % e)
+
         return

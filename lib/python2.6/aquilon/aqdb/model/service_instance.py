@@ -40,7 +40,7 @@ from sqlalchemy.sql.expression import or_
 from sqlalchemy.sql import select, func
 from sqlalchemy.ext.associationproxy import association_proxy
 
-from aquilon.aqdb.model import (Base, Service, Host, System, DnsDomain, Machine,
+from aquilon.aqdb.model import (Base, Service, Host, DnsRecord, DnsDomain, Machine,
                                 PrimaryNameAssociation)
 from aquilon.aqdb.column_types.aqstr import AqStr
 
@@ -114,46 +114,46 @@ class ServiceInstance(Base):
     @property
     def client_fqdns(self):
         session = object_session(self)
-        q = session.query(System)
+        q = session.query(DnsRecord)
         q = q.join(PrimaryNameAssociation, Machine, Host, BuildItem)
         q = q.filter_by(service_instance=self)
         q = q.reset_joinpoint()
         q = q.join(DnsDomain)
-        q = q.options(contains_eager(System.dns_domain))
-        q = q.order_by(DnsDomain.name, System.name)
+        q = q.options(contains_eager(DnsRecord.dns_domain))
+        q = q.order_by(DnsDomain.name, DnsRecord.name)
         return [sys.fqdn for sys in q.all()]
 
     @property
     def server_fqdns(self):
         from aquilon.aqdb.model import ServiceInstanceServer
         session = object_session(self)
-        q = session.query(System)
+        q = session.query(DnsRecord)
         q = q.join(PrimaryNameAssociation, Machine, Host, ServiceInstanceServer)
         q = q.filter_by(service_instance=self)
         q = q.reset_joinpoint()
-        q = q.outerjoin(System.dns_domain)
-        q = q.options(contains_eager(System.dns_domain))
-        q = q.order_by(DnsDomain.name, System.name)
+        q = q.outerjoin(DnsRecord.dns_domain)
+        q = q.options(contains_eager(DnsRecord.dns_domain))
+        q = q.order_by(DnsDomain.name, DnsRecord.name)
         return [sys.fqdn for sys in q.all()]
 
     @property
     def server_ips(self):
         from aquilon.aqdb.model import ServiceInstanceServer
         session = object_session(self)
-        q = session.query(System)
+        q = session.query(DnsRecord)
         q = q.join(PrimaryNameAssociation, Machine, Host, ServiceInstanceServer)
         q = q.filter_by(service_instance=self)
         q = q.reset_joinpoint()
-        q = q.outerjoin(System.dns_domain)
-        q = q.options(contains_eager(System.dns_domain))
-        q = q.order_by(DnsDomain.name, System.name)
+        q = q.outerjoin(DnsRecord.dns_domain)
+        q = q.options(contains_eager(DnsRecord.dns_domain))
+        q = q.order_by(DnsDomain.name, DnsRecord.name)
         ips = []
-        for system in q.all():
-            if system.ip:
-                ips.append(system.ip)
+        for dbdns_rec in q.all():
+            if hasattr(dbdns_rec, 'ip'):
+                ips.append(dbdns_rec.ip)
                 continue
             try:
-                ips.append(socket.gethostbyname(system.fqdn))
+                ips.append(socket.gethostbyname(dbdns_rec.fqdn))
             except socket.gaierror:  # pragma: no cover
                 # For now this fails silently.  It may be correct to raise
                 # an error here but the timing could be unpredictable.

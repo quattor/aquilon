@@ -61,12 +61,16 @@ UserPrincipal(name="cdb", role=Role(name="aqd_admin"), realm=Realm(name="is1.mor
 #Status(name="failed")
 #Status(name="install")
 
+DnsEnvironment(name="internal")
+DnsEnvironment(name="external")
+
 DnsDomain(name="ms.com")
 DnsDomain(name="devin1.ms.com")
 DnsDomain(name="devin2.ms.com")
 DnsDomain(name="msad.ms.com")
 DnsDomain(name="one-nyp.ms.com")
 DnsDomain(name="the-ha.ms.com")
+DnsDomain(name="new-york.ms.com")
 
 Domain(name="prod", owner=UserPrincipal(name="cdb"),
        compiler="/ms/dist/elfms/PROJ/panc/prod/lib/panc.jar",

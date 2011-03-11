@@ -32,7 +32,8 @@ from ipaddr import (IPv4Address, IPv4Network, AddressValueError,
                     NetmaskValueError)
 
 from aquilon.exceptions_ import PartialError, ArgumentError
-from aquilon.aqdb.model import Network, RouterAddress, FutureARecord, Building
+from aquilon.aqdb.model import (Network, RouterAddress, ARecord, Building,
+                                DnsEnvironment)
 
 from sqlalchemy.orm import subqueryload, defer
 
@@ -46,6 +47,8 @@ class QIPRefresh(object):
         self.incremental = incremental
 
         self.errors = []
+
+        self.dns_env = DnsEnvironment.get_unique_or_default(session)
 
         # Cache building information. Load all buildings even if we're
         # interested in only one, so we can verify subnetdata.txt
@@ -85,8 +88,8 @@ class QIPRefresh(object):
             self.session.rollback()
 
     def refresh_system_networks(self):
-        q = self.session.query(FutureARecord)
-        q = q.order_by(FutureARecord.ip)
+        q = self.session.query(ARecord)
+        q = q.order_by(ARecord.ip)
         systems = q.all()
 
         q = self.session.query(Network)
@@ -283,7 +286,8 @@ class QIPRefresh(object):
                                   "{1:l}".format(ip, dbnetwork))
 
         for ip in new_rtrs - old_rtrs:
-            dbnetwork.routers.append(RouterAddress(ip=ip))
+            dbnetwork.routers.append(RouterAddress(ip=ip,
+                                                   dns_environment=self.dns_env))
             self.commit_if_needed("Adding router {0:s} to "
                                   "{1:l}".format(ip, dbnetwork))
 
@@ -333,7 +337,8 @@ class QIPRefresh(object):
             self.session.add(dbnetwork)
             self.commit_if_needed("Adding {0:l}".format(dbnetwork))
             for ip in qipinfo["routers"]:
-                dbnetwork.routers.append(RouterAddress(ip=ip))
+                dbnetwork.routers.append(RouterAddress(ip=ip,
+                                                       dns_environment=self.dns_env))
                 self.commit_if_needed("Adding router {0:s} to "
                                       "{1:l}".format(ip, dbnetwork))
         self.session.flush()

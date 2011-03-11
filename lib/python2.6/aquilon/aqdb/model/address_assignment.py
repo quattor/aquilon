@@ -36,9 +36,10 @@ from sqlalchemy import (Column, Integer, String, DateTime, ForeignKey, Sequence,
                         UniqueConstraint)
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import relation, backref, object_session, deferred
+from sqlalchemy.sql import and_
 
 from aquilon.aqdb.column_types import IPV4, AqStr, Enum
-from aquilon.aqdb.model import Base, Interface, FutureARecord
+from aquilon.aqdb.model import Base, Interface, ARecord, DnsEnvironment
 from aquilon.aqdb.model.network import get_net_id_from_ip
 
 _TN = 'address_assignment'
@@ -48,16 +49,6 @@ _ABV = 'addr_assign'
 # - system: used/configured by the operating system
 # - zebra: used/configured by Zebra
 ADDR_USAGES = ['system', 'zebra']
-
-
-def _address_creator(addr):
-    if isinstance(addr, IPv4Address):
-        return AddressAssignment(ip=addr, label=None, usage="system")
-    elif isinstance(addr, dict):
-        return AddressAssignment(**addr)
-    else:  # pragma: no cover
-        raise TypeError("Adding an address requires either a bare IP or a "
-                        "map containing the IP and the label.")
 
 
 class AddressAssignment(Base):
@@ -88,7 +79,13 @@ class AddressAssignment(Base):
 
     ip = Column(IPV4, nullable=False)
 
-    usage = Column(Enum(16, ADDR_USAGES), nullable=False)
+    usage = Column(Enum(16, ADDR_USAGES), nullable=False, default="system")
+
+    dns_environment_id = Column(Integer, ForeignKey('dns_environment.id',
+                                                    name='%s_dns_env_fk' %
+                                                    _ABV),
+                                nullable=False)
+
 
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
@@ -100,11 +97,14 @@ class AddressAssignment(Base):
                                          order_by=[_label],
                                          cascade='all, delete-orphan'))
 
+    dns_environment = relation(DnsEnvironment, backref=backref('assignments'))
+
     # Setting viewonly is very important here as we do not want the removal of
-    # an AddressAssignment record to change the linked System record(s)
-    dns_records = relation(FutureARecord, lazy=True, uselist=True,
-                           primaryjoin=ip == FutureARecord.ip,
-                           foreign_keys=[FutureARecord.ip],
+    # an AddressAssignment record to change the linked DNS record(s)
+    dns_records = relation(ARecord, lazy=True, uselist=True,
+                           primaryjoin=and_(ip == ARecord.ip,
+                                            dns_environment_id == ARecord.dns_environment_id),
+                           foreign_keys=[ARecord.ip, ARecord.dns_environment_id],
                            viewonly=True,
                            backref=backref('assignments', uselist=True))
 
@@ -168,5 +168,4 @@ address.append_constraint(
     UniqueConstraint("interface_id", "label", name="%s_iface_label_uk" % _ABV))
 
 # Assigned to external classes here to avoid circular dependencies.
-Interface.addresses = association_proxy('assignments', 'ip',
-                                        creator=_address_creator)
+Interface.addresses = association_proxy('assignments', 'ip')

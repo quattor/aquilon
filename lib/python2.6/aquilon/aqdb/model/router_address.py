@@ -31,8 +31,9 @@ from datetime import datetime
 
 from sqlalchemy import (Column, Integer, String, DateTime, ForeignKey)
 from sqlalchemy.orm import relation, deferred, backref
+from sqlalchemy.sql import and_
 
-from aquilon.aqdb.model import Base, Network, Location, FutureARecord
+from aquilon.aqdb.model import Base, Network, Location, ARecord, DnsEnvironment
 from aquilon.aqdb.column_types import IPV4
 
 _TN = "router_address"
@@ -54,6 +55,10 @@ class RouterAddress(Base):
                                             ondelete="CASCADE"),
                         nullable=False)
 
+    dns_environment_id = Column(Integer, ForeignKey('dns_environment.id',
+                                                    name='%s_dns_env_fk' % _TN),
+                                nullable=False)
+
     # We don't want deleting a location to disrupt networking, so use "ON DELETE
     # SET NULL" here
     location_id = Column(Integer, ForeignKey('location.id',
@@ -70,16 +75,20 @@ class RouterAddress(Base):
                                                 cascade="all, delete-orphan",
                                                 order_by=[ip]))
 
+    dns_environment = relation(DnsEnvironment, backref=backref('routers'))
+
     location = relation(Location)
 
     # Cascading deletes here because we want "del network"/"refresh network" to
     # really clean up everything with minimal fuss.
-    dns_records = relation(FutureARecord, lazy=True, uselist=True,
-                           primaryjoin=ip == FutureARecord.ip,
-                           foreign_keys=[FutureARecord.ip],
+    dns_records = relation(ARecord, lazy=True, uselist=True,
+                           primaryjoin=and_(ip == ARecord.ip,
+                                            dns_environment_id == ARecord.dns_environment_id),
+                           foreign_keys=[ARecord.ip, ARecord.dns_environment_id],
                            cascade="delete")
 
 
 rtaddr = RouterAddress.__table__  # pylint: disable-msg=C0103, E1101
 rtaddr.primary_key.name = '%s_pk' % _TN
 rtaddr.info['unique_fields'] = ['ip']
+rtaddr.info['extra_search_fields'] = ['dns_environment']

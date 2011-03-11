@@ -30,7 +30,7 @@
 
 
 from aquilon.exceptions_ import ArgumentError, ProcessException
-from aquilon.aqdb.model import FutureARecord
+from aquilon.aqdb.model import ARecord
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.processes import DSDBRunner
 from aquilon.server.locks import lock_queue, DeleteKey
@@ -47,8 +47,7 @@ class CommandDelManager(BrokerCommand):
         try:
             lock_queue.acquire(key)
             # Check dependencies, translate into user-friendly message
-            dbmanager = FutureARecord.get_unique(session, fqdn=manager,
-                                                   compel=True)
+            dbmanager = ARecord.get_unique(session, fqdn=manager, compel=True)
 
             is_mgr = True
             if not dbmanager.assignments or len(dbmanager.assignments) > 1:

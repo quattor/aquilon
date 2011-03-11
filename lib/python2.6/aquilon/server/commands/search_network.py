@@ -32,7 +32,7 @@
 from aquilon.server.broker import BrokerCommand
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import (Network, Machine, VlanInfo, ObservedVlan,
-                                Cluster, FutureARecord)
+                                Cluster, ARecord)
 from aquilon.aqdb.model.dns_domain import parse_fqdn
 from aquilon.server.dbwrappers.location import get_location
 from aquilon.server.formats.network import ShortNetworkList
@@ -92,7 +92,7 @@ class CommandSearchNetwork(BrokerCommand):
                 q = q.filter(Network.id.in_(networks))
         if fqdn:
             (short, dbdns_domain) = parse_fqdn(session, fqdn)
-            dnsq = session.query(FutureARecord.ip)
+            dnsq = session.query(ARecord.ip)
             dnsq = dnsq.filter_by(name=short)
             dnsq = dnsq.filter_by(dns_domain=dbdns_domain)
             networks = [get_net_id_from_ip(session, addr.ip).id for addr in
@@ -106,7 +106,8 @@ class CommandSearchNetwork(BrokerCommand):
                 q = q.reset_joinpoint()
             else:
                 net_ids = [h.machine.primary_name.network.id for h in
-                           dbcluster.hosts if h.machine.primary_name.network]
+                           dbcluster.hosts if getattr(h.machine.primary_name,
+                                                      "network")]
                 q = q.filter(Network.id.in_(net_ids))
         if pg:
             vlan = VlanInfo.get_vlan_id(session, pg, compel=ArgumentError)

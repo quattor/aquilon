@@ -58,19 +58,23 @@ class PlenaryMachineInfo(Plenary):
             self.room = loc.room.fullname
         else:
             self.room = None
+
+        self.dns_search_domains = []
+        parents = loc.parents[:]
+        parents.append(loc)
+        parents.reverse()
+        for parent in parents:
+            # Filter out duplicates
+            extra_domains = [map.dns_domain.name
+                             for map in parent.dns_maps
+                             if map.dns_domain.name not in self.dns_search_domains]
+            self.dns_search_domains.extend(extra_domains)
+
         if loc.campus:
             self.campus = loc.campus.name
-            # TODO: We will need more complex mapping here
-            self.dns_search_domains = \
-                    [loc.campus.fullname.lower().strip().replace(" ", "-") +
-                     ".ms.com"]
         else:
             self.campus = None
-            self.dns_search_domains = None
-        #if loc.hub:
-        #   self.hub = loc.hub.fullname.lower()
-        #else:
-        #   self.hub = None
+
         self.sysloc = loc.sysloc()
 
         # If this changes need to update machine_plenary_will_move() to match.

@@ -31,20 +31,20 @@
 from sqlalchemy.orm import contains_eager
 
 from aquilon.server.broker import BrokerCommand
-from aquilon.aqdb.model import (AddressAssignment, Interface, FutureARecord,
+from aquilon.aqdb.model import (AddressAssignment, Interface, ARecord,
                                 DnsDomain)
 
 
 class CommandShowManagerAll(BrokerCommand):
 
     def render(self, session, **arguments):
-        q = session.query(FutureARecord)
-        q = q.join((AddressAssignment, FutureARecord.ip ==
+        q = session.query(ARecord)
+        q = q.join((AddressAssignment, ARecord.ip ==
                     AddressAssignment.ip))
         q = q.join(Interface)
         q = q.filter_by(interface_type='management')
         q = q.reset_joinpoint()
         q = q.join(DnsDomain)
-        q = q.options(contains_eager(FutureARecord.dns_domain))
-        q = q.order_by(FutureARecord.name, DnsDomain.name)
+        q = q.options(contains_eager(ARecord.dns_domain))
+        q = q.order_by(ARecord.name, DnsDomain.name)
         return [rec.fqdn for rec in q.all()]

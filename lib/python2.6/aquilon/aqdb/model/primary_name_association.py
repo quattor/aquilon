@@ -36,7 +36,7 @@ from sqlalchemy import (Column, Integer, String, DateTime, ForeignKey,
                         UniqueConstraint)
 
 from aquilon.exceptions_ import ArgumentError, NotFoundException
-from aquilon.aqdb.model import Base, System, HardwareEntity
+from aquilon.aqdb.model import Base, DnsRecord, HardwareEntity
 
 _TN = 'primary_name_association'
 _ABV = 'primary_name_asc'
@@ -74,7 +74,8 @@ class PrimaryNameAssociation(Base):
                                                     name='%s_hw_fk' % _ABV),
                                 primary_key=True)
 
-    dns_record_id = Column(Integer, ForeignKey('system.id', ondelete='CASCADE',
+    dns_record_id = Column(Integer, ForeignKey('dns_record.id',
+                                               ondelete='CASCADE',
                                                name='%s_dns_rec_fk' % _ABV),
                            primary_key=True)
 
@@ -97,7 +98,7 @@ class PrimaryNameAssociation(Base):
     # Cascading:
     # - delete the DNS record if the association is removed
     # - delete the association if the DNS record is removed
-    dns_record = relation(System,
+    dns_record = relation(DnsRecord,
                           lazy=False,
                           uselist=False,
                           innerjoin=True,
@@ -112,7 +113,8 @@ class PrimaryNameAssociation(Base):
 
     #TODO: take fqdn/dns_environment and cut out extra work?
     @classmethod
-    def get_unique(cls, sess, dns_record, compel=False, preclude=False):
+    def get_unique(cls, sess, dns_record, compel=False, preclude=False,
+                   query_options=None):
         """ Take an ARecord, return a PrimaryNameAssociation
 
             This overridden method is heavily tweaked from the standard
@@ -122,7 +124,11 @@ class PrimaryNameAssociation(Base):
             the main use of this method is in HardwareEntity.get_unique, which
             doesn't need the use of these options.
         """
-        pna = sess.query(cls).filter_by(dns_record=dns_record).first()
+        q = sess.query(cls)
+        q = q.filter_by(dns_record=dns_record)
+        if query_options:
+            q = q.options(*query_options)
+        pna = q.first()
         if not pna and compel:
             raise NotFoundException('No such primary_name assignment %s' % (
                                     dns_record.fqdn))
@@ -147,5 +153,5 @@ pna.append_constraint(
 HardwareEntity.primary_name = association_proxy('_primary_name_asc', 'dns_record',
                 creator=lambda dns_rec: PrimaryNameAssociation(dns_record=dns_rec))
 
-System.hardware_entity = association_proxy('_primary_name_asc',
+DnsRecord.hardware_entity = association_proxy('_primary_name_asc',
                                                   'hardware_entity')

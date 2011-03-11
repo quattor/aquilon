@@ -36,8 +36,9 @@ class CommandAddAddress(CommandAddAddressDNSEnvironment):
 
     required_parameters = ["fqdn"]
 
-    def render(self, **kwargs):
-        if not kwargs.get('dns_environment', None):
-            default = self.config.get("broker", "default_dns_environment")
-            kwargs['dns_environment'] = default
-        return CommandAddAddressDNSEnvironment.render(self, **kwargs)
+    def render(self, dns_environment, **kwargs):
+        if not dns_environment:
+            dns_environment = self.config.get("site", "default_dns_environment")
+        return CommandAddAddressDNSEnvironment.render(self,
+                                                      dns_environment=dns_environment,
+                                                      **kwargs)

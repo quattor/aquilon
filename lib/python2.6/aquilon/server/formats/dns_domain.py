@@ -43,6 +43,8 @@ class DnsDomainFormatter(ObjectFormatter):
             server_list = ','.join(server_list)
             details.append(indent + "Servers: %s" % server_list)
 
+        for location in dns_domain.mapped_locations:
+            details.append(indent + "  Mapped to: {0}".format(location))
         if dns_domain.comments:
             details.append(indent + "  Comments: %s" % dns_domain.comments)
 

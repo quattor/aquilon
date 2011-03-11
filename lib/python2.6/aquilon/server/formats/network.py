@@ -35,8 +35,8 @@ from sqlalchemy.orm.session import object_session
 
 from aquilon.server.formats.formatters import ObjectFormatter
 from aquilon.server.formats.list import ListFormatter
-from aquilon.aqdb.model import (Network, AddressAssignment, System,
-                                FutureARecord, DynamicStub,
+from aquilon.aqdb.model import (Network, AddressAssignment, DnsRecord,
+                                ARecord, DynamicStub,
                                 PrimaryNameAssociation, DnsDomain,
                                 Interface, HardwareEntity)
 
@@ -160,18 +160,18 @@ class NetworkHostListFormatter(ListFormatter):
         # bindparams to execute it multiple times
         if netlist:
             session = object_session(netlist[0])
-            # System and DnsRecord are used twice, so be certain which instance
+            # DnsDomain and DnsRecord are used twice, so be certain which instance
             # is used where
-            addr_dnsrec = aliased(FutureARecord, name="addr_dnsrec")
+            addr_dnsrec = aliased(ARecord, name="addr_dnsrec")
             addr_domain = aliased(DnsDomain, name="addr_domain")
-            pna_dnsrec = aliased(System, name="pna_dnsrec")
+            pna_dnsrec = aliased(DnsRecord, name="pna_dnsrec")
             pna_domain = aliased(DnsDomain, name="pna_dnsdomain")
 
             q = session.query(AddressAssignment)
             q = q.filter(AddressAssignment.ip > bindparam('ip'))
             q = q.filter(AddressAssignment.ip < bindparam('broadcast'))
 
-            # Make sure we pick up the right System/DnsRecord instance
+            # Make sure we pick up the right DnsDomain/DnsRecord instance
             q = q.join((addr_dnsrec, addr_dnsrec.ip == AddressAssignment.ip))
             q = q.join((addr_domain, addr_dnsrec.dns_domain_id ==
                         addr_domain.id))
@@ -187,7 +187,7 @@ class NetworkHostListFormatter(ListFormatter):
             q = q.options(contains_eager("interface.hardware_entity."
                                          "_primary_name_asc"))
 
-            # Make sure we pick up the right System/DnsRecord instance
+            # Make sure we pick up the right DnsDomain/DnsRecord instance
             q = q.outerjoin((pna_dnsrec, PrimaryNameAssociation.dns_record_id ==
                              pna_dnsrec.id))
             q = q.outerjoin((pna_domain, pna_dnsrec.dns_domain_id ==

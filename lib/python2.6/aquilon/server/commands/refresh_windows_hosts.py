@@ -38,7 +38,7 @@ from aquilon.server.templates.base import PlenaryCollection
 from aquilon.server.templates.cluster import PlenaryCluster
 from aquilon.server.locks import lock_queue, SyncKey
 from aquilon.aqdb.model import (Host, Interface, Machine, Domain, Archetype,
-                                Personality, HostLifecycle, DnsDomain, System,
+                                Personality, HostLifecycle, DnsDomain, DnsRecord,
                                 OperatingSystem, ReservedName)
 
 
@@ -160,7 +160,7 @@ class CommandRefreshWindowsHosts(BrokerCommand):
                 failed.append(msg)
                 logger.info(msg)
                 continue
-            existing = System.get_unique(session, name=short,
+            existing = DnsRecord.get_unique(session, name=short,
                                          dns_domain=dbdns_domain)
             if existing:
                 if not existing.hardware_entity:
@@ -219,7 +219,8 @@ class CommandRefreshWindowsHosts(BrokerCommand):
                           personality=dbpersonality, operating_system=dbos,
                           comments="Created by refresh_windows_host")
             session.add(dbhost)
-            dbdns_rec = ReservedName(name=short, dns_domain=dbdns_domain)
+            dbdns_rec = ReservedName(session=session, name=short,
+                                     dns_domain=dbdns_domain)
             session.add(dbdns_rec)
             dbmachine.primary_name = dbdns_rec
             success.append("Added host entry for %s (%s)." %

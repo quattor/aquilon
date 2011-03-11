@@ -32,11 +32,11 @@
 from sqlalchemy.orm import aliased, joinedload_all, contains_eager
 
 from aquilon.server.broker import BrokerCommand
-from aquilon.server.formats.system import SimpleSystemList
+from aquilon.server.formats.host import SimpleHostList
 from aquilon.aqdb.model import (Host, Cluster, Archetype, Personality,
                                 HostLifecycle, OperatingSystem, Service,
                                 ServiceInstance, NasDisk, Disk, Machine, Model,
-                                System, DnsDomain, Interface, AddressAssignment)
+                                ARecord, DnsDomain, Interface, AddressAssignment)
 from aquilon.aqdb.model.dns_domain import parse_fqdn
 from aquilon.server.dbwrappers.service_instance import get_service_instance
 from aquilon.server.dbwrappers.branch import get_branch_and_author
@@ -55,7 +55,7 @@ class CommandSearchHost(BrokerCommand):
                domain, sandbox, branch,
                dns_domain, shortname, mac, ip, networkip,
                exact_location, fullinfo, **arguments):
-        dnsq = session.query(System.ip)
+        dnsq = session.query(ARecord.ip)
         use_dnsq = False
         if hostname:
             (short, dbdns_domain) = parse_fqdn(session, hostname)
@@ -219,4 +219,4 @@ class CommandSearchHost(BrokerCommand):
             q = q.reset_joinpoint()
         if fullinfo:
             return q.all()
-        return SimpleSystemList(q.all())
+        return SimpleHostList(q.all())

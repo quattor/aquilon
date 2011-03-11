@@ -26,37 +26,14 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-"""System formatter."""
-
+""" System formatter """
 
 from aquilon.server.formats.formatters import ObjectFormatter
 from aquilon.server.formats.list import ListFormatter
-from aquilon.aqdb.model import System, DynamicStub, FutureARecord, ReservedName
-
-
-class SystemFormatter(ObjectFormatter):
-    def format_raw(self, system, indent=""):
-        if system.hardware_entity:
-            return self.redirect_raw(system.hardware_entity, indent)
-
-        # This should be replaced by format()...
-        details = [indent + "{0:c}: {0.fqdn}".format(system)]
-        if system.ip:
-            details.append(indent + "  IP: %s" % system.ip)
-        if system.comments:
-            details.append(indent + "  Comments: %s" % system.comments)
-        return "\n".join(details)
-
-# The System entry should never get invoked, we always have a subclass.
-ObjectFormatter.handlers[System] = SystemFormatter()
-
-ObjectFormatter.handlers[DynamicStub] = SystemFormatter()
-ObjectFormatter.handlers[FutureARecord] = SystemFormatter()
-ObjectFormatter.handlers[ReservedName] = SystemFormatter()
 
 
 class SimpleSystemList(list):
-    """By convention, holds a list of systems to be formatted in a simple
+    """By convention, holds a list of DNS records to be formatted in a simple
        (fqdn-only) manner."""
     pass
 
@@ -68,10 +45,5 @@ class SimpleSystemListFormatter(ListFormatter):
     # TODO: Should probably display some useful info...
     def csv_fields(self, system):
         return (system.fqdn,)
-
-    def format_html(self, sslist):
-        return "<ul>\n%s\n</ul>\n" % "\n".join([
-            """<li><a href="/system/%(fqdn)s.html">%(fqdn)s</a></li>"""
-            % {"fqdn": system.fqdn} for system in sslist])
 
 ObjectFormatter.handlers[SimpleSystemList] = SimpleSystemListFormatter()

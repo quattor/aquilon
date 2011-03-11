@@ -28,8 +28,7 @@
 # TERMS THAT MAY APPLY.
 
 
-from aquilon.aqdb.model import DnsDomain, NsRecord
-from aquilon.aqdb.model import FutureARecord as ARecord
+from aquilon.aqdb.model import DnsDomain, NsRecord, ARecord
 from aquilon.server.broker import BrokerCommand
 
 

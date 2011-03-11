@@ -31,7 +31,7 @@
 from aquilon.server.broker import BrokerCommand
 from aquilon.exceptions_ import ArgumentError, ProcessException, IncompleteError
 from aquilon.aqdb.model import (HardwareEntity, AddressAssignment,
-                                FutureARecord)
+                                ARecord, DnsEnvironment)
 from aquilon.server.dbwrappers.interface import get_interface
 from aquilon.server.templates.host import PlenaryHost
 from aquilon.server.locks import lock_queue
@@ -43,7 +43,7 @@ class CommandDelInterfaceAddress(BrokerCommand):
     required_parameters = ['interface']
 
     def render(self, session, logger, machine, chassis, switch, interface,
-               fqdn, ip, label, keep_dns, **kwargs):
+               fqdn, ip, label, keep_dns, dns_environment, **kwargs):
 
         if machine:
             hwtype = 'machine'
@@ -62,9 +62,13 @@ class CommandDelInterfaceAddress(BrokerCommand):
 
         oldinfo = DSDBRunner.snapshot_hw(dbhw_ent)
 
+        dbdns_env = DnsEnvironment.get_unique_or_default(session,
+                                                         dns_environment)
+
         if fqdn:
-            dbdns_rec = FutureARecord.get_unique(session, fqdn=fqdn,
-                                                 compel=True)
+            dbdns_rec = ARecord.get_unique(session, fqdn=fqdn,
+                                           dns_environment=dbdns_env,
+                                           compel=True)
             ip = dbdns_rec.ip
         elif label is not None:
             for addr in dbinterface.assignments:
@@ -96,9 +100,13 @@ class CommandDelInterfaceAddress(BrokerCommand):
         q = q.filter_by(ip=ip)
         other_uses = q.all()
         if not other_uses and not keep_dns:
+            q = session.query(ARecord)
+            q = q.filter_by(dns_environment=dbdns_env)
+            q = q.filter_by(ip=ip)
+
             # session.query().delete() does not work when multiple tables are
-            # involved, and FutureARecord uses joined-table inheritance
-            dnsrecs = session.query(FutureARecord).filter_by(ip=ip).all()
+            # involved, and ARecord uses joined-table inheritance
+            dnsrecs = q.all()
             for rec in dnsrecs:
                 session.delete(rec)
 
@@ -125,7 +133,7 @@ class CommandDelInterfaceAddress(BrokerCommand):
 
                     # FIXME: update_host() is not rolled back if this fails
                     if not other_uses and keep_dns:
-                        dbdns_rec = session.query(FutureARecord).filter_by(ip=ip).first()
+                        dbdns_rec = session.query(ARecord).filter_by(ip=ip).first()
                         dsdb_runner.add_host_details(dbdns_rec.fqdn, ip, None,
                                                      None)
                 except ProcessException, e:

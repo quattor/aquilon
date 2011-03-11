@@ -28,8 +28,7 @@
 # TERMS THAT MAY APPLY.
 
 
-from aquilon.aqdb.model import NsRecord, DnsDomain
-from aquilon.aqdb.model import FutureARecord as ARecord
+from aquilon.aqdb.model import NsRecord, DnsDomain, ARecord
 from aquilon.server.broker import BrokerCommand
 from aquilon.exceptions_ import NotFoundException
 

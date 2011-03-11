@@ -158,7 +158,6 @@ vlan2net = /ms/dist/aquilon/PROJ/vlan2net/prod/bin/vlan2net
 # Will default to True until we migrate to a new configuration in prod.
 run_knc = True
 mean = /ms/dist/storage/PROJ/infra/prod/bin/mean
-default_dns_environment = internal
 qip_dump_subnetdata = /ms/dist/3rd/qip/usr/sbin/qip-dump-subnetdata
 
 [panc]
@@ -175,6 +174,10 @@ gzip_output = false
 # Assume the webserver will decompress transparently as needed.
 # only used if gzip_output = true
 advertise_gzip_as_xml = true
+
+[site]
+# Site specific settings
+default_dns_environment = internal
 
 # This can be used for any components that use python logging
 # Valid values are INFO, DEBUG, and WARNING

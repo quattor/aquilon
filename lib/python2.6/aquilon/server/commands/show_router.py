@@ -33,7 +33,7 @@ from sqlalchemy.orm import undefer, joinedload, subqueryload_all
 
 from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.server.broker import BrokerCommand
-from aquilon.aqdb.model import RouterAddress, FutureARecord
+from aquilon.aqdb.model import RouterAddress, ARecord
 
 
 class CommandShowRouter(BrokerCommand):
@@ -51,7 +51,7 @@ class CommandShowRouter(BrokerCommand):
             return q.all()
 
         if fqdn:
-            dbdns_rec = FutureARecord.get_unique(session, fqdn=fqdn, compel=True)
+            dbdns_rec = ARecord.get_unique(session, fqdn=fqdn, compel=True)
             ip = dbdns_rec.ip
             errmsg = "named %s" % fqdn
         elif ip:

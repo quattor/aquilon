@@ -32,7 +32,7 @@
 from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.processes import DSDBRunner
-from aquilon.aqdb.model import System, DnsDomain
+from aquilon.aqdb.model import DnsRecord, DnsDomain
 
 
 class CommandDelDnsDomain(BrokerCommand):
@@ -42,11 +42,15 @@ class CommandDelDnsDomain(BrokerCommand):
     def render(self, session, logger, dns_domain, **arguments):
         dbdns_domain = DnsDomain.get_unique(session, dns_domain, compel=True)
 
-        dbsystem = session.query(System).filter_by(
-                dns_domain=dbdns_domain).first()
-        if dbsystem:
+        q = session.query(DnsRecord)
+        q = q.filter_by(dns_domain=dbdns_domain)
+        if q.first():
             raise ArgumentError("DNS domain %s cannot be deleted while still "
                                 "in use." % dns_domain)
+
+        if dbdns_domain.dns_maps:
+            raise ArgumentError("{0} is still mapped to locations and cannot "
+                                "be deleted.".format(dbdns_domain))
 
         session.delete(dbdns_domain)
         session.flush()

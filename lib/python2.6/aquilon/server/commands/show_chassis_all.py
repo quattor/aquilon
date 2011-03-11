@@ -32,7 +32,7 @@
 from sqlalchemy.orm import subqueryload_all, contains_eager
 
 from aquilon.server.broker import BrokerCommand
-from aquilon.aqdb.model import (Chassis, PrimaryNameAssociation, System,
+from aquilon.aqdb.model import (Chassis, PrimaryNameAssociation, DnsRecord,
                                 DnsDomain)
 
 
@@ -47,13 +47,15 @@ class CommandShowChassisAll(BrokerCommand):
         q = q.options(subqueryload_all('model.machine_specs'))
         q = q.options(subqueryload_all('location'))
         q = q.options(subqueryload_all('slots.machine'))
-        q = q.options(subqueryload_all('interfaces.assignments.'
-                                       'dns_records.dns_domain'))
+
+        # FIXME: enable it again when ticket #2014 is fixed
+        #q = q.options(subqueryload_all('interfaces.assignments.'
+        #                               'dns_records.dns_domain'))
 
         # Prefer the primary name for ordering
-        q = q.outerjoin(PrimaryNameAssociation, System, DnsDomain)
+        q = q.outerjoin(PrimaryNameAssociation, DnsRecord, DnsDomain)
         q = q.options(contains_eager('_primary_name_asc'))
         q = q.options(contains_eager('_primary_name_asc.dns_record'))
         q = q.options(contains_eager('_primary_name_asc.dns_record.dns_domain'))
-        q = q.order_by(System.name, DnsDomain.name, Chassis.label)
+        q = q.order_by(DnsRecord.name, DnsDomain.name, Chassis.label)
         return q.all()

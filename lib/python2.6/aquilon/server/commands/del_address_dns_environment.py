@@ -29,11 +29,10 @@
 
 
 from aquilon.server.broker import BrokerCommand
-from aquilon.aqdb.model import FutureARecord
+from aquilon.aqdb.model import ARecord, DnsEnvironment
 from aquilon.exceptions_ import UnimplementedError, ArgumentError
 from aquilon.server.locks import lock_queue, DeleteKey
 from aquilon.server.processes import DSDBRunner
-from aquilon.server.dbwrappers.system import get_system
 
 
 class CommandDelAddressDNSEnvironment(BrokerCommand):
@@ -41,15 +40,15 @@ class CommandDelAddressDNSEnvironment(BrokerCommand):
     required_parameters = ["fqdn", "ip", "dns_environment"]
 
     def render(self, session, logger, fqdn, ip, dns_environment, **arguments):
-        default = self.config.get("broker", "default_dns_environment")
-        if str(dns_environment).strip().lower() != default.strip().lower():
-            raise UnimplementedError("Only the '%s' DNS environment is "
-                                     "currently supported." % default)
+        dbdns_env = DnsEnvironment.get_unique(session, dns_environment,
+                                              compel=True)
 
         key = DeleteKey("system", logger=logger)
         try:
             lock_queue.acquire(key)
-            dbaddress = get_system(session, fqdn, FutureARecord, 'DNS Record')
+            dbaddress = ARecord.get_unique(session, fqdn=fqdn,
+                                           dns_environment=dbdns_env,
+                                           compel=True)
             if ip != dbaddress.ip:
                 raise ArgumentError("IP address %s is not set for %s (%s).",
                                     (ip, dbaddress.fqdn, dbaddress.ip))
@@ -77,8 +76,10 @@ class CommandDelAddressDNSEnvironment(BrokerCommand):
             session.delete(dbaddress)
             session.flush()
 
-            dsdb_runner = DSDBRunner(logger=logger)
-            dsdb_runner.delete_host_details(ip)
+            if dbdns_env.is_default:
+                dsdb_runner = DSDBRunner(logger=logger)
+                dsdb_runner.delete_host_details(ip)
+
             session.commit()
         finally:
             lock_queue.release(key)
