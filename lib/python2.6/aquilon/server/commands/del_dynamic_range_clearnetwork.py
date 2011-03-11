@@ -52,7 +52,7 @@ class CommandDelDynamicRangeClearnetwork(CommandDelDynamicRange):
         return
 
     def del_dynamic_network(self, session, logger, network):
-        dbnetwork = Network.get_unique(session, network)
+        dbnetwork = Network.get_unique(session, network, compel=True)
         q = session.query(DynamicStub)
         q = q.filter_by(network=dbnetwork)
         q = q.order_by(asc(DynamicStub.ip))

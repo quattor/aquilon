@@ -109,6 +109,9 @@ class CommandDelHost(BrokerCommand):
                 except ProcessException, e:
                     raise ArgumentError("Could not remove host %s from "
                                         "DSDB: %s" % (hostname, e))
+            if archetype == 'aurora':
+                logger.client_info("WARNING: removing host %s from AQDB and "
+                                   "*not* changing DSDB." % hostname)
 
             # Past the point of no return... commit the transaction so
             # that we can free the delete lock.

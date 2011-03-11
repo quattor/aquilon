@@ -38,7 +38,7 @@ class CommandAddDynamicRangeFillnetwork(CommandAddDynamicRange):
     required_parameters = ["fillnetwork", "dns_domain"]
 
     def render(self, session, logger, fillnetwork, **arguments):
-        dbnetwork = Network.get_unique(session, fillnetwork)
+        dbnetwork = Network.get_unique(session, fillnetwork, compel=True)
         arguments['startip'] = dbnetwork.first_usable_host
         arguments['endip'] = dbnetwork.broadcast - 1
         return CommandAddDynamicRange.render(self, session, logger,
