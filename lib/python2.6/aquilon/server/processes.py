@@ -39,9 +39,11 @@ import os
 import re
 import errno
 import logging
+import gzip
 from subprocess import Popen, PIPE
 from tempfile import mkstemp
 from threading import Thread
+from cStringIO import StringIO
 
 from sqlalchemy.orm.session import object_session
 
@@ -192,7 +194,7 @@ def remove_dir(dir, logger=LOGGER):
         logger.info("Failed to remove '%s': %s" % (dir, e))
     return
 
-def write_file(filename, content, mode=None, logger=LOGGER):
+def write_file(filename, content, mode=None, logger=LOGGER, compress=None):
     """Atomically write content into the specified filename.
 
     The content is written into a temp file in the same directory as
@@ -212,7 +214,19 @@ def write_file(filename, content, mode=None, logger=LOGGER):
     swapping into place) fail.  The method will attempt to remove
     the temp file if it had been created.
 
+    If the compress keyword is passed, the content is compressed in
+    memory before writing.  The only compression currently supported
+    is gzip.
+
     """
+    if compress == 'gzip':
+        config = Config()
+        buffer = StringIO()
+        compress = config.getint('broker', 'gzip_level')
+        zipper = gzip.GzipFile(filename, 'wb', compress, buffer)
+        zipper.write(content)
+        zipper.close()
+        content = buffer.getvalue()
     if mode is None:
         try:
             old_mode = os.stat(filename).st_mode

@@ -32,6 +32,7 @@ import os
 import time
 import socket
 import logging
+import gzip
 
 import xml.etree.ElementTree as ET
 
@@ -72,13 +73,39 @@ def build_index(config, session, profilesdir, clientNotify=True,
     clientNotify be checked.
 
     '''
-    profile_index = "profiles-info.xml"
+    gzip_output = config.getboolean('panc', 'gzip_output')
+    gzip_as_xml = config.getboolean('panc', 'advertise_gzip_as_xml')
+    gzip_index = gzip_output and gzip_as_xml
+
+    # Profiles are xml files, and can be configured to (additionally) be gzip'd
+    profile_suffix = '.xml'
+    if gzip_output:
+        profile_suffix += '.gz'
+
+    # The index generally just lists whatever is produced.  However, the
+    # webserver may be configured to transparently serve up .xml.gz files
+    # when just the .xml is requested.  In this case, the index should just
+    # list (advertise) the profile as a .xml file.
+    advertise_suffix = profile_suffix
+    if gzip_as_xml:
+        advertise_suffix = '.xml'
+
+    # The profile should be .xml, unless webserver trickery is going to
+    # redirect all requests for .xml files to be .xml.gz requests. :)
+    profile_index = 'profiles-info.xml'
+    if gzip_index:
+        profile_index += '.gz'
 
     old_object_index = {}
     index_path = os.path.join(profilesdir, profile_index)
+    source = None
     if os.path.exists(index_path):
         try:
-            tree = ET.parse(index_path)
+            if gzip_index:
+                source = gzip.open(index_path)
+            else:
+                source = open(index_path)
+            tree = ET.parse(source)
             for profile in tree.getiterator("profile"):
                 if (profile.text and profile.attrib.has_key("mtime")):
                     obj = profile.text.strip()
@@ -91,14 +118,15 @@ def build_index(config, session, profilesdir, clientNotify=True,
         except Exception, e:
             logger.info("Error processing %s, continuing: %s" %
                         (index_path, e))
+        finally:
+            if source:
+                source.close()
 
     # object_index ties namespaced files to mtime
     object_index = {}
     # modified_index stores the subset of namespaced names that
     # have changed since the last index. The values are unused.
     modified_index = {}
-    gzip_output = config.getboolean("panc", "gzip_output")
-    profile_suffix = ".xml.gz" if gzip_output else ".xml"
 
     for root, _dirs, files in os.walk(profilesdir):
         for profile in files:
@@ -106,7 +134,7 @@ def build_index(config, session, profilesdir, clientNotify=True,
                 continue
             if not profile.endswith(profile_suffix):
                 continue
-            obj = os.path.join(root, profile[:-4])
+            obj = os.path.join(root, profile[:-len(profile_suffix)])
             # Remove the common prefix: our profilesdir, so that the
             # remaining object name is relative to that root (+1 in order
             # to remove the slash separator)
@@ -128,10 +156,14 @@ def build_index(config, session, profilesdir, clientNotify=True,
     content.append("<profiles>")
     for obj, mtime in object_index.items():
         content.append("<profile mtime='%d'>%s%s</profile>" %
-                       (mtime, obj, profile_suffix))
+                       (mtime, obj, advertise_suffix))
     content.append("</profiles>")
 
-    write_file(index_path, "\n".join(content), logger=logger)
+    compress = None
+    if gzip_index:
+        compress = 'gzip'
+    write_file(index_path, "\n".join(content), logger=logger,
+               compress=compress)
 
     if config.has_option("broker", "server_notifications"):
         service_modules = {}
