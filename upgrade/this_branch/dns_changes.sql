@@ -33,8 +33,10 @@ INSERT INTO dns_environment (id, name, creation_date)
 
 ALTER TABLE system RENAME TO dns_record;
 RENAME system_seq TO dns_record_id_seq;
-ALTER TABLE dns_record MODIFY (name VARCHAR2(63));
+ALTER TABLE dns_record MODIFY (name VARCHAR2(63 CHAR));
 ALTER TABLE dns_record RENAME COLUMN system_type TO dns_record_type;
+ALTER TABLE dns_record MODIFY (dns_record_type VARCHAR2(32 CHAR));
+ALTER TABLE dns_record MODIFY (comments VARCHAR2(255 CHAR));
 ALTER TABLE dns_record RENAME CONSTRAINT "SYSTEM_ID_NN" TO "DNS_RECORD_ID_NN";
 ALTER TABLE dns_record RENAME CONSTRAINT "SYSTEM_NAME_NN" TO "DNS_RECORD_NAME_NN";
 ALTER TABLE dns_record RENAME CONSTRAINT "SYSTEM_SYSTEM_TYPE_NN" TO "DNS_RECORD_DNS_RECORD_TYPE_NN";
@@ -90,7 +92,7 @@ CREATE TABLE dns_map (
 	comments VARCHAR2(255 CHAR),
 	CONSTRAINT "DNS_MAP_PK" PRIMARY KEY (id),
 	CONSTRAINT "DNS_MAP_LOC_DNS_DOM_UK" UNIQUE (location_id, dns_domain_id),
-	CONSTRAINT "DNS_MAP_LOCATION_FK" FOREIGN KEY (location_id) REFERENCES location (id),
+	CONSTRAINT "DNS_MAP_LOCATION_FK" FOREIGN KEY (location_id) REFERENCES location (id) ON DELETE CASCADE,
 	CONSTRAINT "DNS_MAP_DNS_DOMAIN_FK" FOREIGN KEY (dns_domain_id) REFERENCES dns_domain (id)
 );
 
