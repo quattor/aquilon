@@ -70,11 +70,6 @@ class TestMake(TestBrokerCommand):
             command = ["make", "--hostname", "evh%s.aqd-unittest.ms.com" % i]
             (out, err) = self.successtest(command)
 
-    def testfailwindows(self):
-        command = ["make", "--hostname", "unittest01.one-nyp.ms.com"]
-        out = self.badrequesttest(command)
-        self.matchoutput(out, "is not a compilable archetype", command)
-
     def testmakeccisshost(self):
         command = ["make", "--hostname=unittest18.aqd-unittest.ms.com"]
         (out, err) = self.successtest(command)

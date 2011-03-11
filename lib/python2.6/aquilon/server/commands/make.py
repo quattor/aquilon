@@ -32,7 +32,8 @@
 from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.host import hostname_to_host
-from aquilon.aqdb.model import HostLifecycle, OperatingSystem, Personality
+from aquilon.aqdb.model import (Archetype, HostLifecycle,
+                                OperatingSystem, Personality)
 from aquilon.server.templates.domain import TemplateDomain
 from aquilon.server.locks import lock_queue, CompileKey
 from aquilon.server.services import Chooser
@@ -44,21 +45,34 @@ class CommandMake(BrokerCommand):
 
     def render(self, session, logger, hostname, osname, osversion,
                archetype, personality, buildstatus, keepbindings, os,
-               debug, **arguments):
+               **arguments):
         dbhost = hostname_to_host(session, hostname)
 
         # Currently, for the Host to be created it *must* be associated with
         # a Machine already.  If that ever changes, need to check here and
         # bail if dbhost.machine does not exist.
 
-        # Need to get all the BuildItem/Service instance objects
+        if archetype and archetype != dbhost.archetype.name:
+            if not personality:
+                raise ArgumentError("Changing archetype also requires "
+                                    "specifying --personality.")
         if personality:
-            arch = archetype
-            if not arch:
-                arch = dbhost.archetype.name
+            if archetype:
+                dbarchetype = Archetype.get_unique(session, archetype,
+                                                   compel=True)
+            else:
+                dbarchetype = dbhost.archetype
+
+            if not os and not osname and not osversion and \
+               dbhost.operating_system.archetype != dbarchetype:
+                raise ArgumentError("{0} belongs to {1:l}, not {2:l}.  Please "
+                                    "specify --osname/--osversion."
+                                    .format(dbhost.operating_system,
+                                            dbhost.operating_system.archetype,
+                                            dbarchetype))
 
             dbpersonality = Personality.get_unique(session, name=personality,
-                                                   archetype=arch,
+                                                   archetype=dbarchetype,
                                                    compel=True)
             if dbhost.cluster and \
                dbhost.cluster.personality != dbpersonality:
@@ -66,26 +80,25 @@ class CommandMake(BrokerCommand):
                                     "while it is a member of "
                                     "{1:l}.".format(dbhost.fqdn, dbhost.cluster))
             dbhost.personality = dbpersonality
-            session.add(dbhost)
 
         dbos = self.get_os(session, dbhost, osname, osversion, os)
         if dbos:
             # Hmm... no cluster constraint here...
             dbhost.operating_system = dbos
-            session.add(dbhost)
-
-        if not dbhost.archetype.is_compileable:
-            raise ArgumentError("{0} is not a compilable archetype "
-                                "({1!s}).".format(dbhost, dbhost.archetype))
 
         if buildstatus:
             dbstatus = HostLifecycle.get_unique(session, buildstatus,
                                                 compel=True)
             dbhost.status.transition(dbhost, dbstatus)
-            session.add(dbhost)
 
         session.flush()
 
+        if dbhost.archetype.is_compileable:
+            self.compile(session, dbhost, logger, keepbindings)
+
+        return
+
+    def compile(self, session, dbhost, logger, keepbindings):
         chooser = Chooser(dbhost, logger=logger,
                           required_only=not(keepbindings))
         chooser.set_required()
@@ -102,7 +115,7 @@ class CommandMake(BrokerCommand):
 
             td = TemplateDomain(dbhost.branch, dbhost.sandbox_author,
                                 logger=logger)
-            out = td.compile(session, only=dbhost.fqdn, locked=True)
+            td.compile(session, only=dbhost.fqdn, locked=True)
 
         except:
             if chooser:
@@ -110,7 +123,6 @@ class CommandMake(BrokerCommand):
 
             # Okay, cleaned up templates, make sure the caller knows
             # we've aborted so that DB can be appropriately rollback'd.
-
             raise
 
         finally:
