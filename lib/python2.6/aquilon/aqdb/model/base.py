@@ -254,8 +254,8 @@ class Base(object):
 
         # Check for arguments we don't know about
         if kwargs:
-            raise InternalError("Extra arguments to %s(): %s." %
-                                (caller, kwargs))
+            raise InternalError("Class %s: Extra arguments to %s(): %s." %
+                                (cls.__name__, caller, kwargs))
         return (query, clslabel, desc)
 
     @classmethod
