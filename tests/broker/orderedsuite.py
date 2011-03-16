@@ -300,7 +300,7 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestDel10GigHardware, TestDelVirtualHardware,
                 TestUnbindESXCluster, TestUncluster,
                 TestDelInterfaceAddress,
-                TestDelDynamicRange, TestDelAddress,
+                TestDelDynamicRange, TestDelAddress, TestDelNSRecord,
                 TestDelManager, TestDelAuxiliary, TestDelHost,
                 TestDelInterface, TestDelDisk, TestDelMachine, TestDelChassis,
                 TestDelSwitch,
@@ -314,7 +314,7 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestDelCity,
                 TestDelPersonality, TestDelOS, TestDelArchetype,
                 TestDelDomain, TestDelSandbox,
-                TestDelNSRecord, TestDelDnsEnvironment, TestDelDnsDomain,
+                TestDelDnsEnvironment, TestDelDnsDomain,
                 TestClientFailure,
                 TestBrokerStop]:
             self.addTest(unittest.TestLoader().loadTestsFromTestCase(test))
