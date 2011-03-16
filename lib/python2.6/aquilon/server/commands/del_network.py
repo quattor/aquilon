@@ -42,6 +42,13 @@ class CommandDelNetwork(BrokerCommand):
                                                              network_environment)
         dbnetwork = Network.get_unique(session, network_environment=dbnet_env,
                                        ip=ip, compel=True)
+
+        # Delete the routers so they don't trigger the checks below
+        for dbrouter in dbnetwork.routers:
+            map(delete_dns_record, dbrouter.dns_records)
+        dbnetwork.routers = []
+        session.flush()
+
         if dbnetwork.dns_records:
             raise ArgumentError("{0} is still in use by DNS entries and "
                                 "cannot be deleted.".format(dbnetwork))
@@ -49,8 +56,6 @@ class CommandDelNetwork(BrokerCommand):
             raise ArgumentError("{0} is still in use by hosts and "
                                 "cannot be deleted.".format(dbnetwork))
 
-        for dbrouter in dbnetwork.routers:
-            map(delete_dns_record, dbrouter.dns_records)
         session.delete(dbnetwork)
         session.flush()
         return
