@@ -29,8 +29,9 @@
 """Contains the logic for `aq add network_environment`."""
 
 
+from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand
-from aquilon.aqdb.model import NetworkEnvironment
+from aquilon.aqdb.model import NetworkEnvironment, DnsEnvironment
 from aquilon.server.dbwrappers.location import get_location
 
 
@@ -38,15 +39,24 @@ class CommandAddNetworkEnvironment(BrokerCommand):
 
     required_parameters = ["network_environment"]
 
-    def render(self, session, network_environment, comments, **arguments):
+    def render(self, session, network_environment, dns_environment, comments,
+               **arguments):
         NetworkEnvironment.get_unique(session, network_environment,
                                       preclude=True)
+        dbdns_env = DnsEnvironment.get_unique(session, dns_environment,
+                                              compel=True)
 
         # Currently input.xml lists --building only, but that may change
         location = get_location(session, **arguments)
 
         dbnet_env = NetworkEnvironment(name=network_environment,
+                                       dns_environment=dbdns_env,
                                        location=location, comments=comments)
+
+        if dbdns_env.is_default != dbnet_env.is_default:
+            raise ArgumentError("Only the default network environment may be "
+                                "associated with the default DNS environment.")
+
         session.add(dbnet_env)
         session.flush()
         return

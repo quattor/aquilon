@@ -3,15 +3,18 @@ CREATE TABLE network_environment (
 	id INTEGER CONSTRAINT "NET_ENV_ID_NN" NOT NULL,
 	name VARCHAR2(64 CHAR) CONSTRAINT "NET_ENV_NAME_NN" NOT NULL,
 	location_id INTEGER,
+	dns_environment_id INTEGER CONSTRAINT "NET_ENV_DNS_ENV_ID_NN" NOT NULL,
 	creation_date DATE CONSTRAINT "NET_ENV_CR_DATE_NN" NOT NULL,
 	comments VARCHAR(255 CHAR),
 	CONSTRAINT "NETWORK_ENVIRONMENT_PK" PRIMARY KEY (id),
 	CONSTRAINT "NET_ENV_NAME_UK" UNIQUE (name),
-	CONSTRAINT "NET_ENV_LOC_FK" FOREIGN KEY (location_id) REFERENCES location (id)
+	CONSTRAINT "NET_ENV_LOC_FK" FOREIGN KEY (location_id) REFERENCES location (id),
+	CONSTRAINT "NET_ENV_DNS_ENV_FK" FOREIGN KEY (dns_environment_id) REFERENCES dns_environment (id)
 );
 
-INSERT INTO network_environment (id, name, location_id, creation_date, comments)
+INSERT INTO network_environment (id, name, location_id, dns_environment_id, creation_date, comments)
 	VALUES (network_environment_id_seq.NEXTVAL, 'internal', NULL,
+		(SELECT dns_environment.id FROM dns_environment WHERE dns_environment.name = 'internal'),
 		CURRENT_DATE, 'Morgan Stanley internal networks');
 
 ALTER TABLE network ADD network_environment_id INTEGER;

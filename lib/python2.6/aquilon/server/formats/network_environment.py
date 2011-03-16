@@ -35,6 +35,7 @@ from aquilon.server.formats.formatters import ObjectFormatter
 class NetworkEnvironmentFormatter(ObjectFormatter):
     def format_raw(self, netenv, indent=""):
         details = [indent + "{0:c}: {0.name}".format(netenv)]
+        details.append(self.redirect_raw(netenv.dns_environment, indent + "  "))
         if netenv.location:
             details.append(self.redirect_raw(netenv.location, indent + "  "))
         if netenv.comments:

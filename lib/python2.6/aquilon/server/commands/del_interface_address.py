@@ -46,7 +46,7 @@ class CommandDelInterfaceAddress(BrokerCommand):
     required_parameters = ['interface']
 
     def render(self, session, logger, machine, chassis, switch, interface,
-               fqdn, ip, label, keep_dns, dns_environment, network_environment,
+               fqdn, ip, label, keep_dns, network_environment,
                **kwargs):
 
         if machine:
@@ -67,12 +67,9 @@ class CommandDelInterfaceAddress(BrokerCommand):
 
         oldinfo = DSDBRunner.snapshot_hw(dbhw_ent)
 
-        dbdns_env = DnsEnvironment.get_unique_or_default(session,
-                                                         dns_environment)
-
         if fqdn:
             dbdns_rec = ARecord.get_unique(session, fqdn=fqdn,
-                                           dns_environment=dbdns_env,
+                                           dns_environment=dbnet_env.dns_environment,
                                            compel=True)
             ip = dbdns_rec.ip
 
@@ -118,7 +115,7 @@ class CommandDelInterfaceAddress(BrokerCommand):
             q = q.filter_by(network=dbnetwork)
             q = q.filter_by(ip=ip)
             q = q.join(Fqdn)
-            q = q.filter_by(dns_environment=dbdns_env)
+            q = q.filter_by(dns_environment=dbnet_env.dns_environment)
             map(delete_dns_record, q.all())
 
         session.flush()

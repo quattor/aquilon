@@ -49,7 +49,7 @@ class CommandAddInterfaceAddress(BrokerCommand):
     required_parameters = ['fqdn', 'interface']
 
     def render(self, session, logger, machine, chassis, switch, fqdn, interface,
-               label, usage, dns_environment, network_environment, **kwargs):
+               label, usage, network_environment, **kwargs):
 
         if machine:
             hwtype = 'machine'
@@ -105,16 +105,9 @@ class CommandAddInterfaceAddress(BrokerCommand):
         if usage not in ADDR_USAGES:
             raise ArgumentError("Illegal address usage '%s'." % usage)
 
-        if dns_environment:
-            dbdns_env = DnsEnvironment.get_unique(session, dns_environment,
-                                                  compel=True)
-        else:
-            # Use default
-            dbdns_env = None
-
         delete_old_dsdb_entry = False
         dbfqdn = Fqdn.get_or_create(session, fqdn=fqdn,
-                                    dns_environment=dbdns_env)
+                                    dns_environment=dbnet_env.dns_environment)
         if ip:
             q = session.query(DynamicStub)
             q = q.filter_by(network=dbnetwork)
@@ -131,8 +124,7 @@ class CommandAddInterfaceAddress(BrokerCommand):
                 if not dbdns_rec.assignments:
                     delete_old_dsdb_entry = True
             else:
-                dbdns_rec = ARecord(fqdn=dbfqdn, ip=ip, network=dbnetwork,
-                                    dns_environment=dbdns_env)
+                dbdns_rec = ARecord(fqdn=dbfqdn, ip=ip, network=dbnetwork)
                 session.add(dbdns_rec)
         else:
             dbdns_rec = ARecord.get_unique(session, fqdn=dbfqdn, compel=True)
@@ -191,7 +183,8 @@ class CommandAddInterfaceAddress(BrokerCommand):
         # that would confuse routing on the host. E.g. if eth0 is an internal
         # and eth1 is an external interface, then using 192.168.1.10/24 on eth0
         # and using 192.168.1.20/26 on eth1 won't work.
-        assign_address(dbinterface, ip, dbnetwork, label=label, usage=usage)
+        assign_address(dbinterface, ip, dbnetwork, label=label, usage=usage,
+                       dns_environment=dbnet_env.dns_environment)
         session.flush()
 
         dbhost = getattr(dbhw_ent, "host", None)

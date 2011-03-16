@@ -1137,6 +1137,7 @@
       Define a new network environment.
       <optgroup name="add_netenv_mandatory" mandatory="True" fields="all">
 	 <option name="network_environment" type="string">Name of the environment</option>
+	 <option name="dns_environment" type="string">DNS environment to use for looking up addresses in this network environment</option>
       </optgroup>
       <optgroup name="add_netenv_optional" mandatory="False" fields="any">
 	 <!-- TODO: Do we need any other kind of location? -->
@@ -1401,7 +1402,6 @@
 	 <option name="label" type="string">Interface alias of the new address</option>
 	 <option name="usage" type="string">Use of the new address (default: system)</option>
          <option name="ipalgorithm" type="string">Algorithm for automatically choosing an IP.</option>
-         <option name="dns_environment" type="string">The name of the environment the address is in (defaults to 'internal')</option>
       </optgroup>
       <optgroup name="add_interface_address_ip_opts" mandatory="False" fields="any">
          <option name="ip" type="ipv4" conflicts="ipfromip ipfromsystem autoip">IP address</option>
@@ -1424,7 +1424,6 @@
       </optgroup>
       <optgroup name="del_interface_address_opt" mandatory="False" fields="any">
          <option name="keep_dns" type="flag">Keep the DNS record</option>
-         <option name="dns_environment" type="string">The name of the environment the address is in (defaults to 'internal')</option>
          <option name="network_environment" type="string">Network environment (default: internal)</option>
       </optgroup>
       <optgroup name="del_interface_address_ip_opts" mandatory="True" fields="any">

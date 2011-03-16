@@ -46,6 +46,10 @@ class TestAddDnsEnvironment(TestBrokerCommand):
                    "--comment", "Unit test environment"]
         self.noouttest(command)
 
+    def testaddexcx(self):
+        command = ["add", "dns", "environment", "--dns_environment", "excx"]
+        self.noouttest(command)
+
     def testaddutenvagain(self):
         command = ["add", "dns", "environment", "--dns_environment", "ut-env"]
         out = self.badrequesttest(command)

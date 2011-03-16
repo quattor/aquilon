@@ -35,7 +35,7 @@ from sqlalchemy import (Column, Integer, DateTime, Sequence, String,
 from sqlalchemy.orm import deferred, relation, backref
 
 from aquilon.exceptions_ import InternalError
-from aquilon.aqdb.model import Base, Location
+from aquilon.aqdb.model import Base, Location, DnsEnvironment
 from aquilon.aqdb.column_types.aqstr import AqStr
 from aquilon.config import Config
 
@@ -66,12 +66,20 @@ class NetworkEnvironment(Base):
                                              name='%s_loc_fk' % _ABV),
                          nullable=True)
 
+    dns_environment_id = Column(Integer, ForeignKey('dns_environment.id',
+                                                    name='%s_dns_env_fk' % _ABV),
+                                nullable=False)
+
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
 
     comments = deferred(Column(String(255), nullable=True))
 
     location = relation(Location, backref=backref('network_environments', lazy=True))
+
+    dns_environment = relation(DnsEnvironment,
+                               backref=backref('network_environments',
+                                               lazy=True))
 
     @property
     def is_default(self):

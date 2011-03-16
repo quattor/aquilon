@@ -60,8 +60,7 @@ class TestAddInterfaceAddress(TestBrokerCommand):
         self.dsdb_expect_add(fqdn, ip, "eth1", ip.mac,
                              primary="unittest20.aqd-unittest.ms.com")
         command = ["add", "interface", "address", "--machine", "ut3c5n2",
-                   "--interface", "eth1", "--fqdn", fqdn,
-                   "--dns_environment", "internal"]
+                   "--interface", "eth1", "--fqdn", fqdn]
         self.noouttest(command)
         self.dsdb_verify()
 

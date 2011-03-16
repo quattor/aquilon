@@ -43,12 +43,14 @@ class TestAddNetworkEnvironment(TestBrokerCommand):
     def testaddexcx(self):
         command = ["add", "network", "environment",
                    "--network_environment", "excx", "--building", "np",
+                   "--dns_environment", "excx",
                    "--comments", "Exchange X"]
         self.noouttest(command)
 
     def testaddutcolo(self):
         command = ["add", "network", "environment",
                    "--network_environment", "utcolo",
+                   "--dns_environment", "ut-env",
                    "--comments", "Unit test colo environment"]
         self.noouttest(command)
 
@@ -74,6 +76,15 @@ class TestAddNetworkEnvironment(TestBrokerCommand):
         self.matchoutput(out, "Network Environment: internal", command)
         self.matchoutput(out, "Network Environment: excx", command)
         self.matchoutput(out, "Network Environment: utcolo", command)
+
+    def testinternal(self):
+        command = ["add", "network", "environment",
+                   "--network_environment", "not-internal",
+                   "--dns_environment", "internal"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Only the default network environment may be "
+                         "associated with the default DNS environment.",
+                         command)
 
 
 if __name__=='__main__':
