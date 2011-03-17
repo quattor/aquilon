@@ -29,6 +29,7 @@
 
 
 from aquilon.server.broker import BrokerCommand
+from aquilon.server.formats.operating_system import OperatingSystemList
 from aquilon.exceptions_ import NotFoundException
 from aquilon.aqdb.model import OperatingSystem, Archetype
 
@@ -50,4 +51,4 @@ class CommandShowOS(BrokerCommand):
         oslist = q.all()
         if not oslist:
             raise NotFoundException("No matching operating system.")
-        return oslist
+        return OperatingSystemList(oslist)

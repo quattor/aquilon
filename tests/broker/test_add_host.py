@@ -329,6 +329,10 @@ class TestAddHost(TestBrokerCommand):
         hostlist = self.parse_hostlist_msg(out, expect=1)
         host = hostlist.hosts[0]
         self.assertEqual(host.fqdn, "evh1.aqd-unittest.ms.com")
+        self.assertEqual(host.archetype.name, "vmhost")
+        self.assertEqual(host.operating_system.archetype.name, "vmhost")
+        self.assertEqual(host.operating_system.name, "esxi")
+        self.assertEqual(host.operating_system.version, "4.0.0")
         self.assertEqual(host.ip, str(self.net.tor_net[2].usable[1]))
         self.assertEqual(host.machine.name, "ut10s04p1")
         self.assertEqual(len(host.machine.interfaces), 2)

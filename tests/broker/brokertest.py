@@ -402,6 +402,11 @@ class TestBrokerCommand(unittest.TestCase):
                                     'personalities',
                                     msg, expect)
 
+    def parse_os_msg(self, msg, expect=None):
+        return self.parse_proto_msg(aqdsystems_pb2.OperatingSystemList,
+                                    'operating_systems',
+                                    msg, expect)
+
     def gitenv(self, env=None):
         git_path = self.config.get("broker", "git_path")
         newenv = {}

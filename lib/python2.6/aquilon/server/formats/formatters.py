@@ -302,6 +302,7 @@ class ObjectFormatter(object):
         host_msg.personality.name = str(host.personality.name)
         host_msg.personality.archetype.name = str(host.personality.archetype.name)
         host_msg.archetype.name = str(host.archetype.name)
+        self.redirect_proto(host.operating_system, host_msg.operating_system)
 
     def add_host_msg(self, host_msg, host):
         """ Return a host message.
