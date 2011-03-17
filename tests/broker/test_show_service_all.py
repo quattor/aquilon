@@ -52,7 +52,7 @@ class TestShowServiceAll(TestBrokerCommand):
     def testshowserviceproto(self):
         command = "show service --all --format proto"
         out = self.commandtest(command.split(" "))
-        self.parse_srvlist_msg(out)
+        self.parse_service_msg(out)
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestShowServiceAll)
