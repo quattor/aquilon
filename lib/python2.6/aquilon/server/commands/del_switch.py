@@ -32,6 +32,7 @@
 from aquilon.exceptions_ import ArgumentError, ProcessException
 from aquilon.aqdb.model import Switch
 from aquilon.server.broker import BrokerCommand
+from aquilon.server.dbwrappers.dns import delete_dns_record
 from aquilon.server.processes import DSDBRunner
 from aquilon.server.locks import lock_queue, DeleteKey
 
@@ -69,7 +70,7 @@ class CommandDelSwitch(BrokerCommand):
         ip = dbswitch.primary_ip
         session.delete(dbswitch)
         if dbdns_rec:
-            session.delete(dbdns_rec)
+            delete_dns_record(dbdns_rec)
 
         session.flush()
 

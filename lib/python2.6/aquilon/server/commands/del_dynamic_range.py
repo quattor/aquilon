@@ -36,6 +36,7 @@ from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.exceptions_ import ArgumentError, ProcessException
 from aquilon.server.locks import lock_queue, DeleteKey
 from aquilon.server.processes import DSDBRunner
+from aquilon.server.dbwrappers.dns import delete_dns_record
 
 
 class CommandDelDynamicRange(BrokerCommand):
@@ -80,7 +81,7 @@ class CommandDelDynamicRange(BrokerCommand):
         stubs = {}
         for stub in dbstubs:
             stubs[stub.fqdn] = dict(ip=stub.ip, label="{0:a}".format(stub))
-            session.delete(stub)
+            delete_dns_record(stub)
         session.flush()
 
         dsdb_runner = DSDBRunner(logger=logger)

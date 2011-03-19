@@ -1,6 +1,6 @@
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 #
-# Copyright (C) 2009,2010,2011  Contributor
+# Copyright (C) 2011  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -26,37 +26,37 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-"""Contains the logic for `aq del router`."""
+""" Helpers for managing DNS-related objects """
 
-from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import ARecord, RouterAddress, DnsEnvironment
-from aquilon.server.broker import BrokerCommand
-from aquilon.server.dbwrappers.dns import delete_dns_record
+from sqlalchemy.orm import object_session
+
+from aquilon.aqdb.model import Fqdn, DnsRecord
 
 
-class CommandDelRouter(BrokerCommand):
+def delete_dns_record(dbdns_rec):
+    """
+    Delete a DNS record 
 
-    required_parameters = []
+    Deleting a DNS record is a bit tricky because we do not want to keep
+    orphaned FQDN entries.
+    """
 
-    def render(self, session, ip, fqdn, **arguments):
-        if fqdn:
-            dbdns_rec = ARecord.get_unique(session, fqdn=fqdn, compel=True)
-            ip = dbdns_rec.ip
-            dbdns_env = dbdns_rec.fqdn.dns_environment
-        elif ip:
-            dbdns_env = DnsEnvironment.get_unique_or_default(session)
-        else:
-            raise ArgumentError("Please specify either --ip or --fqdn.")
+    session = object_session(dbdns_rec)
 
-        dbrouter = RouterAddress.get_unique(session, ip=ip,
-                                            dns_environment=dbdns_env,
-                                            compel=True)
-        dbnetwork = dbrouter.network
+    # Lock the FQDN
+    q = session.query(Fqdn)
+    q = q.filter_by(id=dbdns_rec.fqdn_id)
+    q = q.with_lockmode('update')
+    dbfqdn = q.one()
 
-        map(delete_dns_record, dbrouter.dns_records)
-        dbnetwork.routers.remove(dbrouter)
-        session.flush()
+    # Delete the DNS record
+    session.delete(dbdns_rec)
+    session.flush()
 
-        # TODO: update the templates of Zebra hosts on the network
-
-        return
+    # Delete the FQDN if it is orphaned
+    q = session.query(DnsRecord)
+    q = q.filter_by(fqdn_id=dbfqdn.id)
+    if q.count() == 0:
+        session.delete(dbfqdn)
+    else:
+        session.expire(dbfqdn, 'dns_records')

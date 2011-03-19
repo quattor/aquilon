@@ -90,22 +90,23 @@ class PrimaryNameAssociation(Base):
                                lazy=False,
                                uselist=False,
                                innerjoin=True,
-                               cascade=False,
                                backref=backref('_primary_name_asc',
                                                uselist=False,
-                                               cascade='all, delete-orphan'))
+                                               cascade='all, delete-orphan',
+                                               passive_deletes=True))
 
     # Cascading:
-    # - delete the DNS record if the association is removed
+    # - do not delete the DNS record if the association is removed. Doing so
+    #   would leave the FQDN orphaned
     # - delete the association if the DNS record is removed
     dns_record = relation(DnsRecord,
                           lazy=False,
                           uselist=False,
                           innerjoin=True,
-                          cascade='all',
                           backref=backref('_primary_name_asc',
                                           uselist=False,
-                                          cascade='all, delete-orphan'))
+                                          cascade='all, delete-orphan',
+                                          passive_deletes=True))
 
     def __repr__(self):
         return "<{0} for {1}: {2}>".format(self.__class__.__name__,

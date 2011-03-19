@@ -37,6 +37,7 @@ from aquilon.exceptions_ import (ArgumentError, ProcessException,
 from aquilon.aqdb.model import Interface, Machine, ARecord, Fqdn
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.server.broker import BrokerCommand
+from aquilon.server.dbwrappers.dns import delete_dns_record
 from aquilon.server.dbwrappers.interface import (get_or_create_interface,
                                                  describe_interface,
                                                  verify_port_group,
@@ -207,6 +208,9 @@ class CommandAddInterfaceMachine(BrokerCommand):
         machine_plenary_info = PlenaryMachineInfo(dbmachine, logger=logger)
         pending_removals.append(machine_plenary_info)
         # This will cascade to prev & the host
+        if dbmachine.primary_name:
+            delete_dns_record(dbmachine.primary_name)
+            session.expire(dbmachine, ["_primary_name_asc"])
         session.delete(dbmachine)
         session.flush()
 

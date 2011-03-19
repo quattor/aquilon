@@ -33,6 +33,7 @@ import sqlite3
 
 from aquilon.exceptions_ import PartialError, InternalError, AquilonError
 from aquilon.server.broker import BrokerCommand
+from aquilon.server.dbwrappers.dns import delete_dns_record
 from aquilon.server.dbwrappers.host import get_host_dependencies
 from aquilon.server.templates.base import PlenaryCollection
 from aquilon.server.templates.cluster import PlenaryCluster
@@ -125,7 +126,7 @@ class CommandRefreshWindowsHosts(BrokerCommand):
             if dbmachine.cluster:
                 clusters.add(dbmachine.cluster)
             session.delete(dbhost)
-            session.delete(dbmachine.primary_name)
+            delete_dns_record(dbmachine.primary_name)
             session.expire(dbmachine, ['_primary_name_asc'])
         session.flush()
         # The Host() creations below fail when autoflush is enabled.

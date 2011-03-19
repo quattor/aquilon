@@ -33,6 +33,7 @@ from aquilon.exceptions_ import ArgumentError, ProcessException
 from aquilon.server.broker import BrokerCommand
 from aquilon.aqdb.model import Chassis, ChassisSlot
 from aquilon.server.processes import DSDBRunner
+from aquilon.server.dbwrappers.dns import delete_dns_record
 
 
 class CommandDelChassis(BrokerCommand):
@@ -69,7 +70,7 @@ class CommandDelChassis(BrokerCommand):
         ip = dbchassis.primary_ip
         session.delete(dbchassis)
         if dbdns_rec:
-            session.delete(dbdns_rec)
+            delete_dns_record(dbdns_rec)
 
         session.flush()
 

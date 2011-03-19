@@ -53,8 +53,7 @@ class RouterAddress(Base):
     # The main reason for having this field is to allow cascaded deletion to
     # work. Otherwise 'ip' should be enough to identify the network.
     network_id = Column(Integer, ForeignKey('network.id',
-                                            name='%s_network_fk' % _TN,
-                                            ondelete="CASCADE"),
+                                            name='%s_network_fk' % _TN),
                         nullable=False)
 
     dns_environment_id = Column(Integer, ForeignKey('dns_environment.id',
@@ -81,13 +80,11 @@ class RouterAddress(Base):
 
     location = relation(Location)
 
-    # Cascading deletes here because we want "del network"/"refresh network" to
-    # really clean up everything with minimal fuss.
     dns_records = relation(dns_fqdn_mapper, lazy=True, uselist=True,
                            primaryjoin=and_(ip == ARecord.ip,
                                             dns_environment_id == Fqdn.dns_environment_id),
                            foreign_keys=[ARecord.ip, Fqdn.dns_environment_id],
-                           cascade="delete")
+                           viewonly=True)
 
 
 rtaddr = RouterAddress.__table__  # pylint: disable-msg=C0103, E1101

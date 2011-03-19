@@ -35,6 +35,7 @@ from aquilon.exceptions_ import ArgumentError, ProcessException
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.host import (hostname_to_host,
                                             get_host_dependencies)
+from aquilon.server.dbwrappers.dns import delete_dns_record
 from aquilon.server.processes import (DSDBRunner, remove_file)
 from aquilon.server.templates.base import PlenaryCollection
 from aquilon.server.templates.index import build_index
@@ -97,9 +98,9 @@ class CommandDelHost(BrokerCommand):
                     iface.addresses.remove(ip)
 
             session.delete(dbhost)
-            session.delete(dbmachine.primary_name)
+            delete_dns_record(dbmachine.primary_name)
             session.flush()
-            session.expire(dbmachine)
+            session.expire(dbmachine, ['host', '_primary_name_asc'])
             delplenary = True
 
             if archetype != 'aurora' and ip is not None:
