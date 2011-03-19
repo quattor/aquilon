@@ -31,8 +31,8 @@
 from sqlalchemy.orm import contains_eager
 
 from aquilon.server.broker import BrokerCommand
-from aquilon.server.formats.system import SimpleSystemList
-from aquilon.aqdb.model import DnsRecord, DnsDomain, DnsEnvironment, Fqdn
+from aquilon.server.formats.list import StringList
+from aquilon.aqdb.model import DnsDomain, DnsEnvironment, Fqdn
 
 
 class CommandShowFqdnAll(BrokerCommand):
@@ -40,11 +40,9 @@ class CommandShowFqdnAll(BrokerCommand):
     def render(self, session, dns_environment, **arguments):
         dbdns_env = DnsEnvironment.get_unique_or_default(session,
                                                          dns_environment)
-        q = session.query(DnsRecord)
-        q = q.join(Fqdn)
-        q = q.options(contains_eager("fqdn"))
+        q = session.query(Fqdn)
         q = q.filter_by(dns_environment=dbdns_env)
         q = q.join(DnsDomain)
-        q = q.options(contains_eager("fqdn.dns_domain"))
+        q = q.options(contains_eager("dns_domain"))
         q = q.order_by(DnsDomain.name, Fqdn.name)
-        return SimpleSystemList(q.all())
+        return StringList(q.all())

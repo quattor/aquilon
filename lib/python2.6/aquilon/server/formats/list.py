@@ -82,3 +82,50 @@ class ListFormatter(ObjectFormatter):
         return "\n".join([self.redirect_djb(item) for item in result])
 
 ObjectFormatter.handlers[list] = ListFormatter()
+
+
+class StringList(list):
+    pass
+
+
+class StringListFormatter(ListFormatter):
+    """ Format a list of object as strings, regardless of type """
+
+    def format_raw(self, objects, indent=""):
+        return "\n".join([indent + str(obj) for obj in objects])
+
+    def format_csv(self, objects):
+        # Optimized version to skip the csv_tolist() redirections
+        strbuf = cStringIO.StringIO()
+        writer = csv.writer(strbuf, dialect='aquilon')
+        for obj in objects:
+            writer.writerow((str(obj),))
+        return strbuf.getvalue()
+
+
+ObjectFormatter.handlers[StringList] = StringListFormatter()
+
+
+class StringAttributeList(list):
+    def __init__(self, items, attr_name):
+        self.attr_name = attr_name
+        super(StringAttributeList, self).__init__(items)
+
+
+class StringAttributeListFormatter(ListFormatter):
+    """ Format a single attribute of every object as a string """
+
+    def format_raw(self, objects, indent=""):
+        return "\n".join([indent + str(getattr(obj, objects.attr_name))
+                          for obj in objects])
+
+    def format_csv(self, objects):
+        # Optimized version to skip the csv_tolist() redirections
+        strbuf = cStringIO.StringIO()
+        writer = csv.writer(strbuf, dialect='aquilon')
+        for obj in objects:
+            writer.writerow((str(getattr(obj, objects.attr_name)),))
+        return strbuf.getvalue()
+
+
+ObjectFormatter.handlers[StringAttributeList] = StringAttributeListFormatter()

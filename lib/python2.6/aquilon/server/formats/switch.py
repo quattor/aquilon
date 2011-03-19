@@ -32,7 +32,6 @@
 from aquilon import const
 from aquilon.server.formats.formatters import ObjectFormatter
 from aquilon.server.formats.list import ListFormatter
-from aquilon.server.formats.system import SimpleSystemListFormatter
 from aquilon.aqdb.model import Switch
 
 
@@ -149,12 +148,11 @@ class TorSwitchFormatter(SwitchFormatter):
 
 ObjectFormatter.handlers[TorSwitch] = TorSwitchFormatter()
 
-
 class SimpleSwitchList(list):
     pass
 
-class SimpleSwitchListFormatter(SimpleSystemListFormatter):
-    def csv_fields(self, switch):
-        return super(SimpleSystemListFormatter, self).csv_fields(switch)
+class SimpleSwitchListFormatter(ListFormatter):
+    def format_raw(self, objects, indent=""):
+        return "\n".join([indent + str(obj.fqdn) for obj in objects])
 
 ObjectFormatter.handlers[SimpleSwitchList] = SimpleSwitchListFormatter()
