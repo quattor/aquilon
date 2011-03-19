@@ -109,8 +109,9 @@ class PrimaryNameAssociation(Base):
                                           passive_deletes=True))
 
     def __repr__(self):
-        return "<{0} for {1}: {2}>".format(self.__class__.__name__,
-                                           self.hardware_entity, self.dns_record)
+        return "<{0} for {1:c} {1.label}: {2}>".format(self.__class__.__name__,
+                                                       self.hardware_entity,
+                                                       self.dns_record)
 
     #TODO: take fqdn/dns_environment and cut out extra work?
     @classmethod
