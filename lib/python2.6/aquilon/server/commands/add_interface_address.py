@@ -121,7 +121,7 @@ class CommandAddInterfaceAddress(BrokerCommand):
                 if not dbdns_rec.assignments:
                     delete_old_dsdb_entry = True
             else:
-                dbdns_rec = ARecord(fqdn=dbfqdn, ip=ip)
+                dbdns_rec = ARecord(fqdn=dbfqdn, ip=ip, network=dbnetwork)
                 session.add(dbdns_rec)
         else:
             dbdns_rec = ARecord.get_unique(session, fqdn=dbfqdn, compel=True)

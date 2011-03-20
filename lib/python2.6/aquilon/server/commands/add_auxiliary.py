@@ -82,7 +82,8 @@ class CommandAddAuxiliary(BrokerCommand):
         dbnetwork = get_net_id_from_ip(session, ip)
         check_ip_restrictions(dbnetwork, ip)
 
-        dbdns_rec = ARecord(fqdn=dbfqdn, ip=ip, comments=comments)
+        dbdns_rec = ARecord(fqdn=dbfqdn, ip=ip, network=dbnetwork,
+                            comments=comments)
         session.add(dbdns_rec)
         assign_address(dbinterface, ip)
 

@@ -62,13 +62,20 @@ class ARecord(DnsRecord):
             return super(ARecord, self).__format__(format_spec)
         return "%s [%s]" % (self.fqdn, self.ip)
 
+    def __init__(self, ip=None, network=None, **kwargs):
+        if not network:
+            raise ValueError("network argument is missing")
+        if ip not in network.network:
+            raise ValueError("IP not inside network")
+        super(ARecord, self).__init__(ip=ip, network=network, **kwargs)
+
 
 arecord = ARecord.__table__  # pylint: disable-msg=C0103, E1101
 arecord.primary_key.name = 'a_record_pk'
 # TODO: index on ip?
 
 arecord.info['unique_fields'] = ['fqdn']
-arecord.info['extra_search_fields'] = ['ip']
+arecord.info['extra_search_fields'] = ['ip', 'network']
 
 # Create a secondary mapper on the join of the DnsRecord and Fqdn tables
 dns_fqdn_mapper = mapper(ARecord, ARecord.__table__.join(DnsRecord.__table__).join(Fqdn.__table__),

@@ -49,12 +49,14 @@ class CommandAddRouter(BrokerCommand):
         dbfqdn = Fqdn.get_or_create(session, name=short,
                                     dns_domain=dbdns_domain)
         if ip:
-            dbdns_rec = ARecord.get_or_create(session, fqdn=dbfqdn, ip=ip)
+            dbnetwork = get_net_id_from_ip(session, ip)
+            dbdns_rec = ARecord.get_or_create(session, fqdn=dbfqdn, ip=ip,
+                                              network=dbnetwork)
         else:
             dbdns_rec = ARecord.get_unique(session, dbfqdn, compel=True)
             ip = dbdns_rec.ip
+            dbnetwork = dbdns_rec.network
 
-        dbnetwork = get_net_id_from_ip(session, ip)
         if ip in dbnetwork.router_ips:
             raise ArgumentError("IP address {0} is already present as a router "
                                 "for {1:l}.".format(ip, dbnetwork))
