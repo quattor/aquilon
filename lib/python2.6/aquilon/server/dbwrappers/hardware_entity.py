@@ -132,3 +132,15 @@ def parse_primary_name(session, fqdn, ip):
         dbdns_rec.network = dbnetwork
 
     return dbdns_rec
+
+def convert_primary_name_to_arecord(session, dbhw_ent, ip, dbnetwork):
+    dbdns_domain = dbhw_ent.primary_name.dns_domain
+    short = dbhw_ent.primary_name.name
+    comments = dbhw_ent.primary_name.comments
+    session.delete(dbhw_ent.primary_name)
+    session.flush()
+    session.expire(dbhw_ent, ['_primary_name_asc'])
+    dbdns_rec = ARecord(session=session, name=short, dns_domain=dbdns_domain,
+                        ip=ip, network=dbnetwork, comments=comments)
+    session.add(dbdns_rec)
+    dbhw_ent.primary_name = dbdns_rec

@@ -38,6 +38,7 @@ from aquilon.server.dbwrappers.interface import (generate_ip,
                                                  check_ip_restrictions,
                                                  get_or_create_interface,
                                                  assign_address)
+from aquilon.server.dbwrappers.hardware_entity import convert_primary_name_to_arecord
 from aquilon.server.processes import DSDBRunner
 
 
@@ -67,16 +68,8 @@ class CommandAddInterfaceChassis(BrokerCommand):
 
             # Convert ReservedName to ARecord if needed
             if isinstance(dbchassis.primary_name, ReservedName):
-                dbdns_domain = dbchassis.primary_name.dns_domain
-                short = dbchassis.primary_name.name
-                session.delete(dbchassis.primary_name)
-                session.flush()
-                session.expire(dbchassis, ['_primary_name_asc'])
-                dbdns_rec = ARecord(session=session, name=short,
-                                    dns_domain=dbdns_domain, ip=ip,
-                                    network=dbnetwork)
-                session.add(dbdns_rec)
-                dbchassis.primary_name = dbdns_rec
+                convert_primary_name_to_arecord(session, dbchassis, ip,
+                                                dbnetwork)
 
         session.flush()
 

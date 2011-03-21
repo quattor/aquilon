@@ -36,6 +36,7 @@ from aquilon.server.dbwrappers.interface import (get_interface,
                                                  verify_port_group,
                                                  choose_port_group,
                                                  assign_address)
+from aquilon.server.dbwrappers.hardware_entity import convert_primary_name_to_arecord
 from aquilon.server.locks import lock_queue
 from aquilon.server.templates.machine import PlenaryMachineInfo
 from aquilon.server.processes import DSDBRunner
@@ -135,15 +136,8 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
                dbinterface.interface_type == 'public' and \
                dbhw_ent.primary_name and isinstance(dbhw_ent.primary_name,
                                                     ReservedName):
-                short = dbhw_ent.primary_name.name
-                dbdns_domain = dbhw_ent.primary_name.dns_domain
-                session.delete(dbhw_ent.primary_name)
-                session.flush()
-                session.expire(dbhw_ent)
-                dbdns_rec = ARecord(session=session, name=short,
-                                    dns_domain=dbdns_domain, ip=ip)
-                session.add(dbdns_rec)
-                dbhw_ent.primary_name = dbdns_rec
+                convert_primary_name_to_arecord(session, dbhw_ent, ip,
+                                                dbnetwork)
 
         if comments:
             dbinterface.comments = comments
