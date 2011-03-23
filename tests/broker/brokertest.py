@@ -153,6 +153,11 @@ class TestBrokerCommand(unittest.TestCase):
                          % (command, out, err))
         return (out, err)
 
+    def statustest(self, command, **kwargs):
+        (out, err) = self.successtest(command, **kwargs)
+        self.assertEmptyOut(out, command)
+        return err
+
     def failuretest(self, command, returncode, **kwargs):
         (p, out, err) = self.runcommand(command, **kwargs)
         self.assertEqual(p.returncode, returncode,
