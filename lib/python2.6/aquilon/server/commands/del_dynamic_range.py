@@ -79,16 +79,17 @@ class CommandDelDynamicRange(BrokerCommand):
     def del_dynamic_stubs(self, session, logger, dbstubs):
         stubs = {}
         for stub in dbstubs:
-            stubs[stub.fqdn] = stub.ip
+            stubs[stub.fqdn] = dict(ip=stub.ip, label="{0:a}".format(stub))
             session.delete(stub)
         session.flush()
 
         dsdb_runner = DSDBRunner(logger=logger)
         stubs_removed = {}
         try:
-            for (fqdn, ip) in stubs.items():
-                dsdb_runner.delete_host_details(ip)
-                stubs_removed[fqdn] = ip
+            for (fqdn, info) in stubs.items():
+                logger.client_info("Removing %s from DSDB.", info['label'])
+                dsdb_runner.delete_host_details(info['ip'])
+                stubs_removed[fqdn] = info['ip']
         except ProcessException, e:
             # Try to roll back anything that had succeeded...
             for (fqdn, ip) in stubs_removed.items():

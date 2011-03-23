@@ -39,6 +39,7 @@ if __name__ == "__main__":
 from ipaddr import IPv4Address
 
 from brokertest import TestBrokerCommand
+from test_add_dynamic_range import dynname
 
 
 class TestDelDynamicRange(TestBrokerCommand):
@@ -95,13 +96,20 @@ class TestDelDynamicRange(TestBrokerCommand):
                          command)
 
     def testdelrange(self):
+        messages = []
         for ip in range(int(self.net.tor_net2[0].usable[2]),
                         int(self.net.tor_net2[0].usable[-3]) + 1):
-            self.dsdb_expect_delete(IPv4Address(ip))
+            address = IPv4Address(ip)
+            hostname = dynname(address)
+            self.dsdb_expect_delete(address)
+            messages.append("Removing %s [%s] from DSDB." %
+                            (hostname, address))
         command = ["del_dynamic_range",
                    "--startip", self.net.tor_net2[0].usable[2],
                    "--endip", self.net.tor_net2[0].usable[-3]]
-        self.noouttest(command)
+        err = self.statustest(command)
+        for message in messages:
+            self.matchoutput(err, message, command)
         self.dsdb_verify()
 
     def testverifydelrange(self):
@@ -109,20 +117,29 @@ class TestDelDynamicRange(TestBrokerCommand):
         self.noouttest(command.split(" "))
 
     def testdelendingrange(self):
-        self.dsdb_expect_delete(self.net.tor_net2[1].usable[-1])
-        command = ["del_dynamic_range",
-                   "--startip", self.net.tor_net2[1].usable[-1],
-                   "--endip", self.net.tor_net2[1].usable[-1]]
-        self.noouttest(command)
+        ip = self.net.tor_net2[1].usable[-1]
+        self.dsdb_expect_delete(ip)
+        command = ["del_dynamic_range", "--startip", ip, "--endip", ip]
+        err = self.statustest(command)
+        self.matchoutput(err,
+                         "Removing %s [%s] from DSDB." % (dynname(ip), ip),
+                         command)
         self.dsdb_verify()
 
     def testclearnetwork(self):
+        messages = []
         for ip in range(int(self.net.tor_net2[5].usable[0]),
                         int(self.net.tor_net2[5].usable[-1]) + 1):
-            self.dsdb_expect_delete(IPv4Address(ip))
+            address = IPv4Address(ip)
+            hostname = dynname(address)
+            self.dsdb_expect_delete(address)
+            messages.append("Removing %s [%s] from DSDB." %
+                            (hostname, address))
         command = ["del_dynamic_range",
                    "--clearnetwork", self.net.tor_net2[5].ip]
-        self.noouttest(command)
+        err = self.statustest(command)
+        for message in messages:
+            self.matchoutput(err, message, command)
         self.dsdb_verify()
 
     def testclearnetworkagain(self):

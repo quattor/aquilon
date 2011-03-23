@@ -119,7 +119,7 @@ class TestRefreshNetwork(TestBrokerCommand):
             self.dsdb_expect_add(dynname(IPv4Address(ip)), IPv4Address(ip))
         command = ["add_dynamic_range", "--startip=0.1.1.4", "--endip=0.1.1.8",
                    "--dns_domain=aqd-unittest.ms.com"]
-        self.noouttest(command)
+        self.successtest(command)
         self.dsdb_verify()
 
     def test_310_verifynetwork(self):
@@ -184,7 +184,7 @@ class TestRefreshNetwork(TestBrokerCommand):
                           int(IPv4Address("0.1.1.8")) + 1):
             self.dsdb_expect_delete(IPv4Address(ip))
         command = ["del_dynamic_range", "--startip=0.1.1.4", "--endip=0.1.1.8"]
-        self.noouttest(command)
+        self.successtest(command)
         self.dsdb_verify()
 
     # 700 sync up building np
