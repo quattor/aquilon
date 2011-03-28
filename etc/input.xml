@@ -50,7 +50,11 @@
          <option name="aqhost" type="string" conflicts="">
             Name of the server to connect to.
          </option>
-         <option name="aqservice" type="string" conflicts="">
+         <option name="aquser" type="string" conflicts="aqservice">
+            [Deprecated] Name of the kerberos service principal to authenticate to the server.
+            Use aqservice instead.
+         </option>
+         <option name="aqservice" type="string" conflicts="aquser">
             Name of the kerberos service principal to authenticate to the server.
             Should default correctly, only useful for development.
          </option>

@@ -302,8 +302,20 @@ if __name__ == "__main__":
             default_aqhost
     port = globalOptions.get('aqport') or os.environ.get('AQPORT', None) or \
             default_aqport
-    aqservice = globalOptions.get('aqservice') or os.environ.get('AQSERVICE', None) or \
-            default_aqservice
+    if globalOptions.get('aqservice'):
+        aqservice = globalOptions.get('aqservice')
+    elif os.environ.get('AQSERVICE', None):
+        aqservice = os.environ['AQSERVICE']
+    elif globalOptions.get('aquser'):
+        print >>sys.stderr, "WARNING: --aquser is deprecated, " \
+                            "please use --aqservice"
+        aqservice = globalOptions.get('aquser')
+    elif os.environ.get('AQUSER', None):
+        print >>sys.stderr, "WARNING: AQUSER environment variable is " \
+                            "deprecated, please use AQSERVICE"
+        aqservice = os.environ['AQUSER']
+    else:
+        aqservice = default_aqservice
     if 'AQSLOWSTATUS' in os.environ and not globalOptions.get('slowstatus'):
         serial = str(os.environ['AQSLOWSTATUS']).strip().lower()
         false_values = ['false', 'f', 'no', 'n', '0', '']
