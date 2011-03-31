@@ -119,13 +119,6 @@ class TestBindClient(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Template: service/utsvc/utsi2", command)
 
-    def testbindunittest20(self):
-        # Do an explicit bind to prevent random selection from causing spurious
-        # errors in test_200_compileunittest() in test_compile.py
-        command = ["bind", "client", "--service", "utsvc", "--instance", "utsi2",
-                   "--hostname", "unittest20.aqd-unittest.ms.com"]
-        self.successtest(command)
-
     def testverifybinddns(self):
         command = "show host --hostname unittest02.one-nyp.ms.com"
         out = self.commandtest(command.split(" "))
