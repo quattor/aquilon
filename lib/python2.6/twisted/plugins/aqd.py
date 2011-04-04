@@ -246,10 +246,10 @@ class AQDMaker(object):
             # FIXME: Should probably run krb5_keytab here as well.
             # and/or verify that the keytab file exists.
             if config.getboolean("broker", "run_knc"):
+                keytab = config.get("broker", "keytab")
                 mon.addProcess("knc",
                                ["/usr/bin/env",
-                                "KRB5_KTNAME=FILE:/var/spool/keytabs/%s"
-                                % config.get("broker", "user"),
+                                "KRB5_KTNAME=FILE:%s" % keytab,
                                 config.get("broker", "knc"), "-lS", sockname,
                                 config.get("broker", "kncport")])
             if config.getboolean("broker", "run_git_daemon"):

@@ -290,7 +290,7 @@ if __name__ == "__main__":
     # Setting this as a global default.  It might make sense to set
     # the default to the current running user when running out of a
     # shadow, though.
-    default_aquser = "cdb"
+    default_aqservice = "cdb"
 
     # Default for /ms/dist
     if re.match(r"/ms(/.(global|local)/[^/]+)?/dist/", BINDIR):
@@ -310,8 +310,20 @@ if __name__ == "__main__":
             default_aqhost
     port = globalOptions.get('aqport') or os.environ.get('AQPORT', None) or \
             default_aqport
-    aquser = globalOptions.get('aquser') or os.environ.get('AQUSER', None) or \
-            default_aquser
+    if globalOptions.get('aqservice'):
+        aqservice = globalOptions.get('aqservice')
+    elif os.environ.get('AQSERVICE', None):
+        aqservice = os.environ['AQSERVICE']
+    elif globalOptions.get('aquser'):
+        print >>sys.stderr, "WARNING: --aquser is deprecated, " \
+                            "please use --aqservice"
+        aqservice = globalOptions.get('aquser')
+    elif os.environ.get('AQUSER', None):
+        print >>sys.stderr, "WARNING: AQUSER environment variable is " \
+                            "deprecated, please use AQSERVICE"
+        aqservice = os.environ['AQUSER']
+    else:
+        aqservice = default_aqservice
     if 'AQSLOWSTATUS' in os.environ and not globalOptions.get('slowstatus'):
         serial = str(os.environ['AQSLOWSTATUS']).strip().lower()
         false_values = ['false', 'f', 'no', 'n', '0', '']
@@ -368,7 +380,7 @@ if __name__ == "__main__":
         else:
             uri = uri + extension
 
-    authuser = globalOptions.get('auth') and aquser or None
+    authuser = globalOptions.get('auth') and aqservice or None
     # create HTTP connection object adhering to the command line request
     if authuser:
         conn = KNCHTTPConnection(host, port, authuser)

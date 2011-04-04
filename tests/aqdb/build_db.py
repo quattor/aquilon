@@ -32,6 +32,7 @@ import sys
 import logging
 import optparse
 import getpass
+import os
 
 logging.basicConfig(levl=logging.ERROR)
 log = logging.getLogger('aqdb.populate')
@@ -48,6 +49,9 @@ from aquilon.aqdb.model import *
 from aquilon.aqdb.db_factory import DbFactory
 from aquilon.aqdb.utils import constraints as cnst
 from loader import load_from_file
+
+
+BINDIR = os.path.dirname(os.path.realpath(__file__))
 
 
 def importName(modulename, name):
@@ -84,10 +88,9 @@ def parse_cli(*args, **kw):
                       help    = 'write debug info on stdout')
 
     parser.add_argument('-p', '--populate',
-                      action  = 'store_true',
                       dest    = 'populate',
-                      help    = 'run functions to prepopulate data',
-                      default = False)
+                      help    = 'run functions to prepopulate data from the named file',
+                      default = os.path.join(BINDIR, "data", "unittest.dump"))
 
     return parser.parse_args()
 
@@ -122,7 +125,7 @@ def main(*args, **kw):
     Base.metadata.create_all(checkfirst=True)
 
     if opts.populate:
-        load_from_file(s, "data/unittest.dump")
+        load_from_file(s, opts.populate)
 
         # Add the current user as admin
         admin = Role.get_unique(s, "aqd_admin", compel=True)

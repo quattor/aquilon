@@ -103,7 +103,7 @@ class AQRunner(object):
             full_args.append("--aqport")
             full_args.append(str(self.port))
         if self.aqservice:
-            full_args.append("--aquser")
+            full_args.append("--aqservice")
             full_args.append(str(self.aqservice))
         if not kwargs.has_key("stdout"):
             kwargs["stdout"] = 1

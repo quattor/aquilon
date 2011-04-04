@@ -181,9 +181,8 @@ if (config.get("database", "vendor") == "oracle" and
             production_database)
 
 # Maybe just execute this every run...
-if not os.path.exists("/var/spool/keytabs/%s" % config.get("broker", "user")):
-    p = Popen(("/ms/dist/kerberos/PROJ/krb5_keytab/prod/sbin/krb5_keytab"),
-            stdout=1, stderr=2)
+if not os.path.exists(config.get("broker", "keytab")):
+    p = Popen(config.get("broker", "krb5_keytab"), stdout=1, stderr=2)
     rc = p.wait()
 
 pid_file = os.path.join(config.get('broker', 'rundir') , 'aqd.pid')

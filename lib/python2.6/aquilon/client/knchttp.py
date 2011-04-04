@@ -93,6 +93,8 @@ class WrappedHTTPConnection(ChunkedHTTPConnection):
         self._process = process
 
     def getError(self):
+        if not hasattr(self, '_process'):
+            return 'no knc process'
         return self._process.stderr.read()
 
 
