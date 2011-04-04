@@ -32,6 +32,7 @@
 
 from optparse import OptionParser, OptionValueError
 from xml.parsers import expat
+from subprocess import Popen, PIPE
 import os
 import re
 import textwrap
@@ -175,6 +176,23 @@ class commandline(Element):
 
 # --------------------------------------------------------------------------- #
 
+    def print_help(self, command, width):
+        # Check if the command has a man page
+        use_man = False
+        with open("/dev/null", "w") as devnull:
+            p = Popen(["man", "-W", command], stdout=devnull, stderr=devnull)
+            p.communicate()
+            if p.returncode == 0:
+                use_man = True
+
+        if use_man:
+            p = Popen(["man", command])
+            p.communicate()
+            exit(p.returncode)
+        else:
+            print self.__commandlist[command].recursiveHelp(0, width=width)
+            exit(0)
+
     def check (self, command, options):
 
         # check generic options
@@ -190,8 +208,7 @@ class commandline(Element):
         if (command.find('help') != -1):
             helpfor = command[5:]
             if (self.__commandlist.has_key(helpfor)):
-                print self.__commandlist[helpfor].recursiveHelp(0, width=width)
-                exit(0)
+                self.print_help(helpfor, width)
             else:
                 if helpfor:
                     print "The command '%s' is not known to this server." % helpfor
@@ -203,8 +220,7 @@ class commandline(Element):
 
             # print help if --help is on the command line
             if options.help:
-                print self.__commandlist[command].recursiveHelp(0, width=width)
-                exit(0)
+                self.print_help(command, width)
 
             commandElement = self.__commandlist[command]
             (res, found) = commandElement.check(command, options)

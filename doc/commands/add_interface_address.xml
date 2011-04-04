@@ -1,0 +1,216 @@
+<?xml version="1.0"?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V5.0//EN"
+"http://docbook.org/xml/5.0/dtd/docbook.dtd" [
+<!ENTITY aqd_version SYSTEM "../version.txt">
+]>
+<refentry xml:id="add_interface_address"
+	  xmlns:xi="http://www.w3.org/2001/XInclude">
+    <refmeta>
+        <refentrytitle>add_interface_address</refentrytitle>
+        <manvolnum>1</manvolnum>
+        <refmiscinfo class="version">&aqd_version;</refmiscinfo>
+        <refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
+    </refmeta>
+
+    <refnamediv>
+        <refname>add interface address</refname>
+        <refpurpose>
+	    Assign an IP address to an interface
+        </refpurpose>
+	<refclass>Aquilon</refclass>
+    </refnamediv>
+
+    <refsynopsisdiv>
+	<cmdsynopsis>
+	    <command>aq add interface address</command>
+	    <group>
+		<synopfragmentref linkend="global-options">Global options</synopfragmentref>
+	    </group>
+	    <group choice="req">
+	        <arg choice="plain"><option>--machine <replaceable>MACHINE</replaceable></option></arg>
+	        <arg choice="plain"><option>--chassis <replaceable>CHASSIS</replaceable></option></arg>
+	        <arg choice="plain"><option>--switch <replaceable>SWITCH</replaceable></option></arg>
+	    </group>
+	    <arg choice="plain"><option>--interface <replaceable>IFACE</replaceable></option></arg>
+	    <arg choice="plain"><option>--fqdn <replaceable>FQDN</replaceable></option></arg>
+	    <arg choice="opt"><option>--label <replaceable>LABEL</replaceable></option></arg>
+	    <arg choice="opt"><option>--usage <replaceable>USAGE</replaceable></option></arg>
+	    <group>
+		<synopfragmentref linkend="ip-options">IP address options</synopfragmentref>
+	    </group>
+	    <xi:include href="../common/global_options.xml"/>
+	    <xi:include href="../common/ip_options.xml"/>
+	</cmdsynopsis>
+    </refsynopsisdiv>
+
+    <refsect1>
+        <title>Description</title>
+	<para>
+	    The <command>aq add interface address</command> command assigns an IP address to
+	    an interface.
+	</para>
+	<para>
+	    Note that you cannot add the primary IP address of a hardware entity using this command.
+	    Primary addresses are created by the <command>add switch</command>, <command>add
+		chassis</command>, and <command>add host</command> commands.
+	</para>
+    </refsect1>
+
+    <refsect1>
+        <title>Options</title>
+	<variablelist>
+	    <title>Command-specific options</title>
+	    <varlistentry>
+	        <term>
+		    <option>--machine <replaceable>MACHINE</replaceable></option>,
+		    <option>--chassis <replaceable>CHASSIS</replaceable></option>,
+		    <option>--switch <replaceable>SWITCH</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+		        Specify the hardware entity you wish to add the IP address to. You can use either
+			the hardware label or the primary name for <replaceable>MACHINE</replaceable>,
+			<replaceable>CHASISS</replaceable> and <replaceable>SWITCH</replaceable>.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--interface <replaceable>IFACE</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Name of the interface where the IP address should be added.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--fqdn <replaceable>FQDN</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Name to assign to the IP address in DNS. If you specify the
+			<option>--fqdn</option> option only, and none of the IP options, then
+			<replaceable>FQDN</replaceable> must refer to an existing address in DNS,
+			and the IP address of this address is added to the interface. If you specify
+			both <option>--fqdn</option> and an IP option, then a new DNS record will be
+			created.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--label <replaceable>LABEL</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			The label (alias) of the address. Every interface may have exactly
+			one address with no label. Every subsequent address must have a
+			label that is unique on that interface. See <xref linkend="virtual-iface"/>
+			for further information.
+		    </para>
+		    <para>
+			The <literal>hostname</literal> label is reserved for the primary IP
+			address when the host uses Zebra.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--usage <replaceable>USAGE</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Valid values for <replaceable>USAGE</replaceable> are
+			<literal>system</literal> and <literal>zebra</literal>.
+			<literal>system</literal> means that the address will be configured by the
+			operating system. <literal>zebra</literal> means that the address will be
+			managed by Zebra.
+		    </para>
+		    <para>
+			To enable IP failover support using Zebra, the same IP address must be
+			assigned to multiple interfaces with the same
+			<replaceable>LABEL</replaceable>.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	</variablelist>
+	<xi:include href="../common/ip_options_desc.xml"/>
+	<xi:include href="../common/global_options_desc.xml"/>
+    </refsect1>
+
+    <refsect1 xml:id="virtual-iface">
+	<title>Labels and virtual interfaces</title>
+	<para>
+	    Using the <option>--label</option> option will cause the IP address to show up as a
+	    virtual interface on Linux. For example, if <replaceable>IFACE</replaceable> is
+	    <literal>eth0</literal> and <replaceable>LABEL</replaceable> is <literal>e0</literal>,
+	    then <command>ifconfig</command> will show you an interface called
+	    <literal>eth0:e0</literal>. The combined length of <replaceable>IFACE</replaceable> and
+	    <replaceable>LABEL</replaceable> must therefore be at most 15, one less than the maximum
+	    length of the name of a network interface.
+	</para>
+	<para>
+	    Also note that such virtual interfaces are only emulated for some legacy tools like
+	    <command>ifconfig</command>. New style tools like <command>ip addr list</command> will show you
+	    just one interface with multiple addresses, and <replaceable>LABEL</replaceable> will
+	    show up as the label of the given IP address.
+	</para>
+    </refsect1>
+
+    <refsect1>
+	<title>Examples</title>
+	<example>
+	    <title>Add an auxiliary address to the second interface of host foo</title>
+	    <programlisting>
+aq add interface address --machine foo.one-nyp.ms.com \
+                         --interface eth1 \
+			 --fqdn foo-e1.one-nyp.ms.com \
+			 --ip 10.10.1.10
+	    </programlisting>
+	</example>
+
+	<example>
+	    <title>Add a second auxiliary address to the same interface</title>
+	    <programlisting>
+aq add interface address --machine foo.one-nyp.ms.com \
+                         --interface eth1 \
+			 --label bar \
+			 --fqdn foo-e1-bar.one-nyp.ms.com \
+			 --ip 10.10.1.11
+	    </programlisting>
+	</example>
+
+	<example>
+	    <title>Add a Zebra-managed address, which is not the primary IP</title>
+	    <programlisting>
+aq add interface address --machine foo.one-nyp.ms.com \
+                         --interface eth0 \
+			 --label bar \
+			 --usage zebra \
+			 --fqdn foo-bar.one-nyp.ms.com \
+			 --ip 10.10.1.12
+
+aq add interface address --machine foo.one-nyp.ms.com \
+                         --interface eth1 \
+			 --label bar \
+			 --usage zebra \
+			 --fqdn foo-bar.one-nyp.ms.com \
+			 --ip 10.10.1.12
+	    </programlisting>
+	</example>
+    </refsect1>
+
+    <refsect1>
+	<title>See also</title>
+	<para>
+	    <citerefentry><refentrytitle>add_chassis</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>add_host</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>add_switch</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>poll_switch</refentrytitle><manvolnum>1</manvolnum></citerefentry>
+	</para>
+    </refsect1>
+</refentry>
+
+<!-- vim: set ai sw=4: -->

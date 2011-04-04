@@ -90,12 +90,16 @@ $(COMMON)etc/rc.d/init.d/aqd: etc/rc.d/init.d/aqd
 # and sophisticated for this, since remove_stale is dumb and will always
 # remove the generated files anyway.
 .PHONY: install
-install: remove_stale $(INSTALLFILES)
+install: remove_stale $(INSTALLFILES) install-doc
 	ln -sf twistd "$(COMMON)bin/aqd"
 	ln -sf twistd "$(COMMON)bin/aqd_readonly"
 	$(COMMON)bin/twistd --help >/dev/null
 	./build/gen_completion.py --outputdir="$(COMMON)etc" --templatedir="./etc/templates" --all
-	./build/graph_schema.py --outputdir="$(COMMON)docs"
+	./build/graph_schema.py --outputdir="$(COMMON)doc"
+
+.PHONY: install-doc
+install-doc:
+	$(MAKE) -C doc install DESTDIR="$(abspath $(COMMON)doc)"
 
 .PHONY: remove_stale
 remove_stale:
@@ -109,6 +113,7 @@ default:
 # find on * is an easy/legit way to do that in this case.
 .PHONY: clean
 clean:
+	$(MAKE) -C doc clean
 	find . -name '*.pyc' -exec rm {} \;
 	find * -type d -empty -exec rmdir {} \;
 
