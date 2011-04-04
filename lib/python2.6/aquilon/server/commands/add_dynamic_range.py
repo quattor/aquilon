@@ -87,6 +87,7 @@ class CommandAddDynamicRange(BrokerCommand):
         stubs_added = []
         try:
             for dbstub in stubs:
+                logger.client_info("Adding {0:a} to DSDB.".format(dbstub))
                 dsdb_runner.add_host_details(fqdn=dbstub.fqdn, ip=dbstub.ip,
                                              name=None, mac=None)
                 stubs_added.append(dbstub)

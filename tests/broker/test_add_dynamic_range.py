@@ -64,15 +64,21 @@ class TestAddDynamicRange(TestBrokerCommand):
                          command)
 
     def testaddrange(self):
+        messages = []
         for ip in range(int(self.net.tor_net2[0].usable[2]),
                         int(self.net.tor_net2[0].usable[-3]) + 1):
-            self.dsdb_expect_add(dynname(IPv4Address(ip)), IPv4Address(ip))
+            address = IPv4Address(ip)
+            hostname = dynname(address)
+            self.dsdb_expect_add(hostname, address)
+            messages.append("Adding %s [%s] to DSDB." % (hostname, address))
 
         command = ["add_dynamic_range",
                    "--startip=%s" % self.net.tor_net2[0].usable[2],
                    "--endip=%s" % self.net.tor_net2[0].usable[-3],
                    "--dns_domain=aqd-unittest.ms.com"]
-        self.noouttest(command)
+        err = self.statustest(command)
+        for message in messages:
+            self.matchoutput(err, message, command)
         self.dsdb_verify()
 
     def testverifyrange(self):
@@ -129,10 +135,13 @@ class TestAddDynamicRange(TestBrokerCommand):
     def testaddendingrange(self):
         # Set up a network that has its final IP address taken.
         ip = self.net.tor_net2[1].usable[-1]
-        self.dsdb_expect_add(dynname(ip), ip)
+        hostname = dynname(ip)
+        self.dsdb_expect_add(hostname, ip)
         command = ["add_dynamic_range", "--startip", ip, "--endip", ip,
                    "--dns_domain=aqd-unittest.ms.com"]
-        self.noouttest(command)
+        err = self.statustest(command)
+        self.matchoutput(err, "Adding %s [%s] to DSDB." % (hostname, ip),
+                         command)
         self.dsdb_verify()
 
     def testfailaddrestricted(self):
@@ -164,13 +173,19 @@ class TestAddDynamicRange(TestBrokerCommand):
         self.matchoutput(out, "Could not add addresses to DSDB", command)
 
     def testfillnetwork(self):
+        messages = []
         for ip in range(int(self.net.tor_net2[5].usable[0]),
                         int(self.net.tor_net2[5].usable[-1]) + 1):
-            self.dsdb_expect_add(dynname(IPv4Address(ip)), IPv4Address(ip))
+            address = IPv4Address(ip)
+            hostname = dynname(address)
+            self.dsdb_expect_add(hostname, address)
+            messages.append("Adding %s [%s] to DSDB." % (hostname, address))
         command = ["add_dynamic_range",
                    "--fillnetwork", self.net.tor_net2[5].ip,
                    "--dns_domain=aqd-unittest.ms.com"]
-        out = self.commandtest(command)
+        err = self.statustest(command)
+        for message in messages:
+            self.matchoutput(err, message, command)
         self.dsdb_verify()
 
     def testverifyfillnetwork(self):
