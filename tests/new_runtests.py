@@ -144,8 +144,8 @@ instead.""" % (os.environ["AQDCONF"], opts.configfile)
 
     # Maybe just execute this every run...
     if (not os.path.exists(config.get("broker", "keytab")) and
-            config.get("broker", "krb5_keytab")):
-        p = Popen((config.get("broker", "krb5_keytab"), stdout=1, stderr=2)
+            config.has_option("kerberos", "krb5_keytab")):
+        p = Popen(config.get("kerberos", "krb5_keytab"), stdout=1, stderr=2)
         rc = p.wait()
 
     pid_file = os.path.join(config.get('broker', 'rundir'), 'aqd.pid')

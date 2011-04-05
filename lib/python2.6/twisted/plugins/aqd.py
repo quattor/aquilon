@@ -250,7 +250,7 @@ class AQDMaker(object):
                 mon.addProcess("knc",
                                ["/usr/bin/env",
                                 "KRB5_KTNAME=FILE:%s" % keytab,
-                                config.get("broker", "knc"), "-lS", sockname,
+                                config.get("kerberos", "knc"), "-lS", sockname,
                                 config.get("broker", "kncport")])
             if config.getboolean("broker", "run_git_daemon"):
                 # The git daemon *must* be invoked using the form 'git-daemon'

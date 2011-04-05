@@ -91,7 +91,7 @@ class AQBroker(object):
         
         """
         if not os.path.exists(self.config.get("broker", "keytab")):
-            p = Popen(self.config.get("broker", "krb5_keytab"),
+            p = Popen(self.config.get("kerberos", "krb5_keytab"),
                        stdout=1, stderr=2)
             if p.wait():
                 raise ProcessException(code=p.returncode)
