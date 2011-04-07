@@ -179,6 +179,7 @@ advertise_gzip_as_xml = true
 [kerberos]
 knc = /ms/dist/kerberos/PROJ/knc/prod/bin/knc
 krb5_keytab = /ms/dist/kerberos/PROJ/krb5_keytab/prod/bin/krb5_keytab
+klist = /ms/dist/aurora/bin/klist
 
 [site]
 # Site specific settings
