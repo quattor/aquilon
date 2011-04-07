@@ -100,8 +100,13 @@ class WrappedHTTPConnection(ChunkedHTTPConnection):
 
 class KNCHTTPConnection(WrappedHTTPConnection):
 
-    KNC_PATH = '/ms/dist/kerberos/PROJ/knc/prod/bin/knc'
+    # Quick hack to support other environments...
+    KNC_BIN = 'knc'
+    KNC_PATH = '/ms/dist/kerberos/PROJ/knc/prod/bin'
 
     def __init__(self, host, port, service, strict = None):
-        WrappedHTTPConnection.__init__(self, self.__class__.KNC_PATH,
+        if os.path.exists(self.__class__.KNC_PATH):
+            os.environ['PATH'] = "%s:%s" % (self.__class__.KNC_PATH,
+                                            os.environ.get('PATH', ''))
+        WrappedHTTPConnection.__init__(self, self.__class__.KNC_BIN,
                                        host, port, service, strict)
