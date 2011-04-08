@@ -44,6 +44,7 @@ from aquilon.server.authorization import AuthorizationBroker
 from aquilon.server.messages import StatusCatalog
 from aquilon.server.logger import RequestLogger
 from aquilon.aqdb.db_factory import DbFactory
+from aquilon.aqdb.model.xtn import start_xtn, end_xtn
 from aquilon.server.formats.formatters import ResponseFormatter
 from aquilon.server.dbwrappers.user_principal import (
         get_or_create_user_principal)
@@ -53,6 +54,8 @@ from aquilon.server.templates.domain import TemplateDomain
 from aquilon.server.services import Chooser
 from aquilon.server.processes import sync_domain
 
+# Things we don't need cluttering up the transaction details table
+_IGNORED_AUDIT_ARGS = ('requestid', 'bundle', 'debug')
 
 audit_id = 0
 """This will help with debugging active incoming requests.
@@ -238,10 +241,12 @@ class BrokerCommand(object):
         def updated_render(self, *args, **kwargs):
             principal = kwargs["user"]
             request = kwargs["request"]
+            logger = kwargs["logger"]
             for key in kwargs.keys():
                 if key in self.parameter_checks:
                     kwargs[key] = self.parameter_checks[key]("--" + key,
                                                              kwargs[key])
+            raising_exception = None
             try:
                 if self.requires_transaction or self.requires_azcheck:
                     # Set up a session...
@@ -254,10 +259,13 @@ class BrokerCommand(object):
                     dbuser = get_or_create_user_principal(session, principal,
                                                           commitoncreate=True)
                     kwargs["dbuser"] = dbuser
+                    self._record_xtn(session, logger.get_status())
+
                     if self.requires_azcheck:
                         self.az.check(principal=principal, dbuser=dbuser,
                                       action=self.action,
                                       resource=request.path)
+
                     if self.requires_readonly:
                         self._set_readonly(session)
                     # begin() is only required if session transactional=False
@@ -274,7 +282,8 @@ class BrokerCommand(object):
                 if "session" in kwargs:
                     session.commit()
                 return retval
-            except:
+            except Exception, e:
+                raising_exception = e
                 # Need to close after the rollback, or the next time session
                 # is accessed it tries to commit the transaction... (?)
                 if "session" in kwargs:
@@ -285,6 +294,10 @@ class BrokerCommand(object):
                 # Obliterating the scoped_session - next call to session()
                 # will create a new one.
                 if "session" in kwargs:
+                    # Complete the transaction
+                    end_xtn(session, {'xtn_id': kwargs['requestid'],
+                                      'return_code': get_code_for_error_class(
+                                        raising_exception.__class__)})
                     if self.is_lock_free:
                         self.dbf.NLSession.remove()
                     else:
@@ -312,12 +325,16 @@ class BrokerCommand(object):
         session = kwargs.pop('session', None)
         request = kwargs.pop('request')
         user = kwargs.pop('user', None)
+        # Log a dummy user with no realm for unauthenticated requests.
+        if user is None or user == '':
+            user = 'nobody'
         dbuser = kwargs.pop('dbuser', None)
         kwargs['format'] = kwargs.pop('style', 'raw')
-        # TODO: Have this less hard-coded...
-        if self.action == 'put':
-            kwargs.pop('bundle')
+
         for (key, value) in kwargs.items():
+            if key in _IGNORED_AUDIT_ARGS:
+                kwargs.pop(key)
+                continue
             if value is None:
                 kwargs.pop(key)
                 continue
@@ -367,6 +384,27 @@ class BrokerCommand(object):
                 logger.debug("Server finishing request.")
                 logger.remove_status_by_auditid(self.catalog)
             logger.close_handlers()
+
+    def _record_xtn(self, session, status):
+        audit_msg = dict()
+        audit_msg['xtn_id'] = status.requestid
+        audit_msg['username'] = status.user
+        audit_msg['command'] = status.command
+        audit_msg['readonly'] = self.requires_readonly
+
+        details = dict()
+        for k, v in status.kwargs.items():
+            # Skip uber-redundant raw format parameter
+            if (k == 'format') and v == 'raw':
+                continue
+            # Sometimes we delete a value and the arg comes in as an empty
+            # string.  Denote this with a dash '-' to work around Oracle
+            # not being able to store the concept of a non-NULL empty string.
+            if v == '':
+                v = '-'
+            details[k] = str(v)
+        audit_msg['details'] = details
+        start_xtn(session, audit_msg, self.parameters_by_type.get('file'))
 
     @property
     def is_lock_free(self):
