@@ -29,6 +29,7 @@
 """Pub/sub mechanism for status messages."""
 
 
+import uuid
 from threading import Lock
 from collections import deque
 from logging import DEBUG
@@ -119,7 +120,7 @@ class RequestStatus(object):
             # Constrain the number of debug messages kept to keep memory
             # usage in check.
             if record.levelno <= DEBUG:
-                self.debug_fifo.append(len(self.records)-1)
+                self.debug_fifo.append(len(self.records) - 1)
                 if len(self.debug_fifo) > MAX_DEBUG_MESSAGES_PER_REQUEST:
                     remove_index = self.debug_fifo.popleft()
                     self.records[remove_index] = None
@@ -188,11 +189,10 @@ class StatusCatalog(object):
         """Create a new RequestStatus and store it."""
         if auditid is not None:
             auditid = str(auditid)
-            if requestid:
-                status = RequestStatus(auditid, requestid)
-                self.status_by_requestid[requestid] = status
-            else:
-                status = RequestStatus(auditid)
+            if not requestid:
+                requestid = uuid.uuid4()
+            status = RequestStatus(auditid, requestid)
+            self.status_by_requestid[requestid] = status
             self.status_by_auditid[auditid] = status
             return status
         return None
