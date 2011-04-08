@@ -26,19 +26,20 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
+""" Module containing the base class BrokerCommand """
 
-
-import os
 import sys
 import re
 from inspect import isclass
 
 from sqlalchemy.sql import text
-from twisted.internet import defer
+from twisted.web import http
 from twisted.python import log
 
 from aquilon.config import Config
-from aquilon.exceptions_ import ArgumentError, UnimplementedError
+from aquilon.exceptions_ import (ArgumentError, AuthorizationException,
+                                 NotFoundException, UnimplementedError,
+                                 PartialError)
 from aquilon.server.authorization import AuthorizationBroker
 from aquilon.server.messages import StatusCatalog
 from aquilon.server.logger import RequestLogger
@@ -59,6 +60,19 @@ audit_id = 0
    Eventually it will be replaced by a primary key in the audit log table.
 
    """
+
+# Mapping of command exceptions to client return code.
+ERROR_TO_CODE = {NotFoundException:http.NOT_FOUND,
+                 AuthorizationException:http.UNAUTHORIZED,
+                 ArgumentError:http.BAD_REQUEST,
+                 UnimplementedError:http.NOT_IMPLEMENTED,
+                 PartialError:http.MULTI_STATUS}
+
+def get_code_for_error_class(e):
+    if e is None or e == None.__class__:
+        return http.OK
+    return ERROR_TO_CODE.get(e, http.INTERNAL_SERVER_ERROR)
+
 
 class BrokerCommand(object):
     """ The basis for each command module under commands.
@@ -220,6 +234,7 @@ class BrokerCommand(object):
         of rendor().
 
         """
+
         def updated_render(self, *args, **kwargs):
             principal = kwargs["user"]
             request = kwargs["request"]

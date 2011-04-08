@@ -68,10 +68,9 @@ from twisted.web import server, resource, http, static
 from twisted.internet import defer, threads, reactor
 from twisted.python import log
 
-from aquilon.exceptions_ import ArgumentError, AuthorizationException, \
-        NotFoundException, UnimplementedError, PartialError
+from aquilon.exceptions_ import ArgumentError
 from aquilon.server.formats.formatters import ResponseFormatter
-from aquilon.server.broker import BrokerCommand
+from aquilon.server.broker import BrokerCommand, ERROR_TO_CODE
 from aquilon.server import commands
 from aquilon.server.processes import cache_version
 from aquilon.utils import (force_int, force_float, force_boolean, force_ipv4,
@@ -245,18 +244,8 @@ class ResponsePage(resource.Resource):
 
     def wrapNonInternalError(self, failure, request):
         """This takes care of 'expected' problems, like NotFoundException."""
-        r = failure.trap(NotFoundException, AuthorizationException,
-                ArgumentError, UnimplementedError, PartialError)
-        if r == NotFoundException:
-            request.setResponseCode(http.NOT_FOUND)
-        elif r == AuthorizationException:
-            request.setResponseCode(http.UNAUTHORIZED)
-        elif r == ArgumentError:
-            request.setResponseCode(http.BAD_REQUEST)
-        elif r == UnimplementedError:
-            request.setResponseCode(http.NOT_IMPLEMENTED)
-        elif r == PartialError:
-            request.setResponseCode(http.MULTI_STATUS)
+        r = failure.trap(*ERROR_TO_CODE.keys())
+        request.setResponseCode(ERROR_TO_CODE[r])
         formatted = self.format(failure.value, request)
         return self.finishRender(formatted, request)
 
