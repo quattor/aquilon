@@ -1,0 +1,205 @@
+<?xml version="1.0"?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V5.0//EN"
+"http://docbook.org/xml/5.0/dtd/docbook.dtd" [
+<!ENTITY aqd_version SYSTEM "../version.txt">
+]>
+<refentry xml:id="search_audit"
+          xmlns:xi="http://www.w3.org/2001/XInclude">
+    <refmeta>
+        <refentrytitle>search_audit</refentrytitle>
+        <manvolnum>1</manvolnum>
+        <refmiscinfo class="version">&aqd_version;</refmiscinfo>
+        <refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
+    </refmeta>
+
+    <refnamediv>
+        <refname>search audit</refname>
+        <refpurpose>
+            Search the transaction history tables for usage information
+        </refpurpose>
+        <refclass>Aquilon</refclass>
+    </refnamediv>
+
+    <refsynopsisdiv>
+        <cmdsynopsis>
+            <command>aq search audit</command>
+            <group>
+                <synopfragmentref linkend="global-options">Global options</synopfragmentref>
+            </group>
+            <arg choice="plain"><option>--keyword <replaceable>KEYWORD</replaceable></option></arg>
+            <arg choice="plain"><option>--username <replaceable>USERNAME</replaceable></option></arg>
+            <arg choice="plain"><option>--cmd <replaceable>COMMAND</replaceable></option></arg>
+            <arg choice="plain"><option>--return_code <replaceable>RETURN CODE</replaceable></option></arg>
+            <arg choice="plain"><option>--before <replaceable>DATE/TIME</replaceable></option></arg>
+            <arg choice="plain"><option>--after <replaceable>DATE/TIME</replaceable></option></arg>
+            <arg choice="plain"><option>--limit <replaceable>LIMIT</replaceable></option></arg>
+            <arg choice="plain"><option>--oldest_first</option></arg>
+	    <xi:include href="../common/global_options.xml"/>
+        </cmdsynopsis>
+    </refsynopsisdiv>
+
+    <refsect1>
+        <title>Description</title>
+        <para>
+            The <command>aq search audit</command> command searches through the
+            recorded history of all commands run on the broker.  The times
+            reported by the command are in UTC.
+        </para>
+    </refsect1>
+
+    <refsect1>
+        <title>Options</title>
+        <variablelist>
+            <title>Command-specific options</title>
+            <varlistentry>
+                <term>
+                    <option>--keyword
+                        <replaceable>KEYWORD</replaceable>
+                    </option>
+                </term>
+                <listitem>
+                    <para>
+                        Search for commands which have been run with an argument
+                        whose value is the keyword supplied to the command.
+                    </para>
+                </listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term>
+                    <option>--username
+                        <replaceable>USERNAME</replaceable>
+                    </option>
+                </term>
+                <listitem>
+		    <para>
+			Restrict the search to a specific named user.  If
+			no realm is specified all realms will be searched.
+		    </para>
+                </listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term>
+                    <option>--cmd
+                        <replaceable>COMMAND</replaceable>
+                    </option>
+                </term>
+                <listitem>
+                    <para>
+			Restrict the search to the specified command. The
+			default behavior is only to display commands which
+			create, update or delete data.
+                    </para>
+                    <para>
+			"--cmd rw" will fetch _most_ commands (including
+			show and search commands)
+                    </para>
+                    <para>
+			"--cmd all" will show _everything_ (including
+			search_audit)
+                    </para>
+                </listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term>
+                <option>--return_code
+                    <replaceable>RETURN CODE</replaceable>
+                </option>
+                </term>
+                <listitem>
+                    <para>
+			Restrict the search to commands with a given return
+			code.  Use zero to search for commands without a
+			recorded completion.
+                    </para>
+                </listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term>
+                <option>--before
+                    <replaceable>DATE/TIME</replaceable>
+                </option>
+                </term>
+                <listitem>
+                    <para>
+			Restrict the search to transactions started before
+			the supplied date/time string.  See the
+			<xref linkend="datetime"/> section for examples of
+			valid date formats.
+                    </para>
+                </listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term>
+                <option>--after
+                    <replaceable>DATE/TIME</replaceable>
+                </option>
+                </term>
+                <listitem>
+                    <para>
+			Restrict the search to transactions started after
+			the supplied date/time string.  See the
+			<xref linkend="datetime"/> section for examples of
+			valid date format specifications.
+                    </para>
+                </listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term>
+                <option>--limit
+                    <replaceable>LIMIT</replaceable>
+                </option>
+                </term>
+                <listitem>
+                    <para>
+			Restrict the number of results to the supplied value.
+			The maximum number of results is 20,000 to avoid
+			overutilizing resources on the broker.  The default
+			is 5,000.
+                    </para>
+                </listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term>
+                    <option>--oldest_first</option>
+                </term>
+                <listitem>
+                    <para>
+                        Order results with the oldest results first. This
+			overrides the default behavior of ordering results
+			from newest to oldest.
+                    </para>
+                </listitem>
+            </varlistentry>
+        </variablelist>
+        <xi:include href="../common/global_options_desc.xml"/>
+    </refsect1>
+
+    <refsect1 xml:id="datetime">
+        <title>Date/Time Format Specifications</title>
+        <para>
+            The Date/Time strings are parsed with python's 'dateutil' module so
+            any string that can be parsed by it's "parse()" method will be
+            accepted as an argument.
+        </para>
+        <title>Date/Time Examples</title>
+        <para>
+            RFC 822 format, based on date -R: "Thu, 25 Sep 2003 10:49:41 -0300"
+        </para>
+        <para>
+            ISO format: "2003-09-25T10:49:41.5-03:00"
+        </para>
+        <para>
+            MM-DD-YY: "04-08-11"
+        </para>
+    </refsect1>
+
+</refentry>
+
+<!-- vim: set ai sw=4: -->
