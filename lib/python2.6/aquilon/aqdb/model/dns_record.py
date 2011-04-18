@@ -64,11 +64,8 @@ class DnsRecord(Base):
 
     aliases = association_proxy('fqdn', 'aliases')
 
-    # The extra with_polymorphic: '*' means queries don't require
-    # "q = q.with_polymorphic(DnsRecord.__mapper__.polymorphic_map.values())"
     __mapper_args__ = {'polymorphic_on': dns_record_type,
-                       'polymorphic_identity': 'dns_record',
-                       'with_polymorphic': '*'}
+                       'polymorphic_identity': 'dns_record'}
 
     @classmethod
     def get_unique(cls, session, name=None, dns_domain=None, fqdn=None,
