@@ -66,7 +66,7 @@ class CommandShowPersonality(BrokerCommand):
             q = q.filter_by(name=personality)
         q = q.join(Archetype)
         q = q.options(contains_eager('archetype'))
-        q = q.order_by([Archetype.name, Personality.name])
+        q = q.order_by(Archetype.name, Personality.name)
         q = q.options(joinedload('_services'))
         q = q.options(joinedload('cluster_infos'))
         results = PersonalityList()

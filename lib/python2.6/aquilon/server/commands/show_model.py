@@ -51,5 +51,5 @@ class CommandShowModel(BrokerCommand):
             q = q.filter(Vendor.name.like(vendor + '%'))
         if type is not None:
             q = q.filter(Model.machine_type.like(type + '%'))
-        q = q.order_by([Vendor.name, Model.name])
+        q = q.order_by(Vendor.name, Model.name)
         return q.all()

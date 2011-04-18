@@ -183,7 +183,7 @@ class CommandSearchHost(BrokerCommand):
                 q = q.filter_by(service=dbservice)
                 q = q.reset_joinpoint()
         elif instance:
-            q = q.join(['_services_used', 'service_instance'])
+            q = q.join('_services_used', 'service_instance')
             q = q.filter_by(name=instance)
             q = q.reset_joinpoint()
 
@@ -195,7 +195,7 @@ class CommandSearchHost(BrokerCommand):
         if guest_on_cluster:
             dbcluster = Cluster.get_unique(session, guest_on_cluster,
                                            compel=True)
-            q = q.join(['machine', '_cluster'])
+            q = q.join('machine', '_cluster')
             q = q.filter_by(cluster=dbcluster)
             q = q.reset_joinpoint()
         if guest_on_share:
@@ -205,7 +205,7 @@ class CommandSearchHost(BrokerCommand):
                                                  service=nas_disk_share,
                                                  compel=True)
             NasAlias = aliased(NasDisk)
-            q = q.join(['machine', 'disks', (NasAlias, NasAlias.id==Disk.id)])
+            q = q.join('machine', 'disks', (NasAlias, NasAlias.id==Disk.id))
             q = q.filter_by(service_instance=dbshare)
             q = q.reset_joinpoint()
         if member_cluster_share:
