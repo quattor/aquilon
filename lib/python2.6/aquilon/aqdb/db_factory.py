@@ -40,7 +40,7 @@ from aquilon.aqdb import depends
 from aquilon.config import Config
 from aquilon.utils import confirm, monkeypatch
 
-from sqlalchemy import MetaData, create_engine, text
+from sqlalchemy import MetaData, create_engine, text, event
 from sqlalchemy.ext.compiler import compiles
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.exc import DBAPIError, DatabaseError as SaDBError
@@ -93,7 +93,6 @@ def visit_create_index(create, compiler, **kw):
 
     return text
 
-
 # Add support for table compression
 @monkeypatch(OracleDDLCompiler)
 def post_create_table(self, table):
@@ -101,14 +100,11 @@ def post_create_table(self, table):
         return " COMPRESS"
     return ""
 
+def sqlite_foreign_keys(dbapi_con, con_record):
+    dbapi_con.execute('pragma foreign_keys=ON')
 
-class ForeignKeySQLiteListener(PoolListener):
-    def connect(self, dbapi_con, con_record):
-        dbapi_con.execute('pragma foreign_keys=ON')
-
-class UnsafeSQLiteListener(PoolListener):
-    def connect(self, dbapi_con, con_record):
-        dbapi_con.execute('pragma synchronous=OFF')
+def sqlite_no_fsync(dbapi_con, con_record):
+    dbapi_con.execute('pragma synchronous=OFF')
 
 
 class DbFactory(object):
@@ -165,14 +161,13 @@ class DbFactory(object):
 
         #SQLITE
         elif self.dsn.startswith('sqlite'):
-            listeners = [ForeignKeySQLiteListener()]
+            self.engine = create_engine(self.dsn)
+            event.listen(self.engine, "connect", sqlite_foreign_keys)
             if config.has_option("database", "disable_fsync") and \
                config.getboolean("database", "disable_fsync"):
-                listeners.append(UnsafeSQLiteListener())
+                event.listen(self.engine, "connect", sqlite_no_fsync)
                 log = logging.getLogger('aqdb.db_factory')
                 log.info("SQLite is operating in unsafe mode!")
-
-            self.engine = create_engine(self.dsn, listeners=listeners)
             connection = self.engine.connect()
             connection.close()
             self.vendor = 'sqlite'
