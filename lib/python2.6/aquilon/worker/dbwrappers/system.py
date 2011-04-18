@@ -47,7 +47,7 @@ def search_system_query(session, dns_record_type=DnsRecord, **kwargs):
     dbdns_env = DnsEnvironment.get_unique_or_default(session,
                                                      kwargs.get("dns_environment",
                                                                 None))
-    q = q.join(Fqdn)
+    q = q.join((Fqdn, DnsRecord.fqdn_id == Fqdn.id))
     q = q.filter_by(dns_environment=dbdns_env)
     q = q.options(contains_eager('fqdn'))
     if kwargs.get('fqdn', None):

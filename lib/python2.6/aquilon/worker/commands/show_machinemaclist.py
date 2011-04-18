@@ -46,7 +46,8 @@ class CommandShowMachineMacList(BrokerCommand):
         q = q.filter(Interface.mac != None)
         q = q.join(HardwareEntity)
         q = q.options(contains_eager('hardware_entity'))
-        q = q.outerjoin(PrimaryNameAssociation, DnsRecord, Fqdn, DnsDomain)
+        q = q.outerjoin(PrimaryNameAssociation, DnsRecord,
+                        (Fqdn, DnsRecord.fqdn_id == Fqdn.id), DnsDomain)
         q = q.options(contains_eager('hardware_entity._primary_name_asc'))
         q = q.options(contains_eager('hardware_entity._primary_name_asc.'
                                      'dns_record'))
