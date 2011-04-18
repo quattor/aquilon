@@ -42,7 +42,7 @@ from aquilon.utils import confirm
 
 from sqlalchemy import MetaData, create_engine, text
 from sqlalchemy.orm import scoped_session, sessionmaker
-from sqlalchemy.exceptions import SQLError, DatabaseError as SaDBError
+from sqlalchemy.exc import DBAPIError, DatabaseError as SaDBError
 from sqlalchemy.interfaces import PoolListener
 
 import ms.modulecmd as modcmd
@@ -208,7 +208,7 @@ class DbFactory(object):
         """ convenience wrapper """
         try:
             return self.engine.execute(text(stmt), **kw)
-        except SQLError, e:
+        except DBAPIError, e:
             print >> sys.stderr, e
 
     def get_id(self, table, key, value):
