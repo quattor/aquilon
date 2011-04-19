@@ -41,11 +41,9 @@ class CommandDelAlias(BrokerCommand):
     def render(self, session, fqdn, dns_environment, **kwargs):
         dbdns_env = DnsEnvironment.get_unique_or_default(session,
                                                          dns_environment)
-        dbfqdn = Fqdn.get_unique(session, fqdn=fqdn, dns_environment=dbdns_env,
-                                 compel=True)
-
-        dbdns_rec = Alias.get_unique(session, fqdn=dbfqdn, compel=True)
-
+        dbdns_rec = Alias.get_unique(session, fqdn=fqdn,
+                                     dns_environment=dbdns_env,
+                                     compel=True)
         delete_dns_record(dbdns_rec)
         session.flush()
         return

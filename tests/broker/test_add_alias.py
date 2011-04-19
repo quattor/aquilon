@@ -46,9 +46,15 @@ class TestAddAlias(TestBrokerCommand):
         cmd = ['add', 'alias', '--fqdn', 'alias2host.aqd-unittest.ms.com',
                '--target', 'arecord13.aqd-unittest.ms.com']
         out = self.badrequesttest(cmd)
-        self.matchoutput(out,
-                         "Alias alias2host.aqd-unittest.ms.com already exists.",
-                         cmd)
+        self.matchoutput(out, "Alias alias2host.aqd-unittest.ms.com "
+                         "already exists.", cmd)
+
+    def test_120_usedname(self):
+        cmd = ['add', 'alias', '--fqdn', 'arecord14.aqd-unittest.ms.com',
+               '--target', 'arecord13.aqd-unittest.ms.com']
+        out = self.badrequesttest(cmd)
+        self.matchoutput(out, "DNS Record arecord14.aqd-unittest.ms.com "
+                         "already exists.", cmd)
 
     def test_400_verify_alias2host(self):
         cmd = "show fqdn --fqdn alias2host.aqd-unittest.ms.com"

@@ -36,7 +36,9 @@ from sqlalchemy import Integer, DateTime, Sequence, String, Column, ForeignKey
 from sqlalchemy.orm import relation, deferred, backref
 from sqlalchemy.ext.associationproxy import association_proxy
 
-from aquilon.aqdb.model import Base, Fqdn
+from aquilon.exceptions_ import NotFoundException
+from aquilon.aqdb.model import Base, Fqdn, DnsEnvironment
+from aquilon.aqdb.model.dns_domain import parse_fqdn
 from aquilon.aqdb.column_types import AqStr
 
 _TN = "dns_record"
@@ -70,24 +72,35 @@ class DnsRecord(Base):
 
     @classmethod
     def get_unique(cls, session, name=None, dns_domain=None, fqdn=None,
-                   dns_environment=None, compel=False, **kwargs):
+                   dns_environment=None, compel=False, preclude=False, **kwargs):
         # Proxy FQDN lookup to the Fqdn class
-        if fqdn:
-            if name or dns_domain:
-                raise TypeError("fqdn and name/dns_domain cannot be mixed")
-            if not isinstance(fqdn, Fqdn):
-                fqdn = Fqdn.get_unique(session, fqdn=fqdn,
+        if not fqdn or not isinstance(fqdn, Fqdn):
+            if not isinstance(dns_environment, DnsEnvironment):
+                dns_environment = DnsEnvironment.get_unique_or_default(session,
+                                                                      dns_environment)
+            if fqdn:
+                if name or dns_domain:
+                    raise TypeError("fqdn and name/dns_domain cannot be mixed")
+                (name, dns_domain) = parse_fqdn(session, fqdn)
+            try:
+                # Do not pass preclude=True to Fqdn
+                fqdn = Fqdn.get_unique(session, name=name,
+                                       dns_domain=dns_domain,
                                        dns_environment=dns_environment,
-                                       compel=compel)
-                if not fqdn:
-                    return None
-        elif name or dns_domain:
-            fqdn = Fqdn.get_unique(session, name=name, dns_domain=dns_domain,
-                                   dns_environment=dns_environment,
-                                   compel=compel)
+                                       compel=compel, **kwargs)
+            except NotFoundException:
+                # Replace the "Fqdn ... not found" message with a more user
+                # friendly one
+                msg = "%s %s.%s, %s not found." % (cls._get_class_label(),
+                                                   name, dns_domain,
+                                                   format(dns_environment, "l"))
+                raise NotFoundException(msg)
+            if not fqdn:
+                return None
 
         return super(DnsRecord, cls).get_unique(session, fqdn=fqdn,
-                                                compel=compel, **kwargs)
+                                                compel=compel,
+                                                preclude=preclude, **kwargs)
 
     @classmethod
     def get_or_create(cls, session, **kwargs):

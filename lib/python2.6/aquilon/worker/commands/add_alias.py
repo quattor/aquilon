@@ -44,8 +44,8 @@ class CommandAddAlias(BrokerCommand):
                                                          dns_environment)
         (name, dbdns_domain) = parse_fqdn(session, fqdn)
 
-        Fqdn.get_unique(session, dns_environment=dbdns_env, name=name,
-                        dns_domain=dbdns_domain, preclude=True)
+        DnsRecord.get_unique(session, dns_environment=dbdns_env, name=name,
+                             dns_domain=dbdns_domain, preclude=True)
 
         dbfqdn = Fqdn(session=session, dns_environment=dbdns_env, name=name,
                       dns_domain=dbdns_domain)

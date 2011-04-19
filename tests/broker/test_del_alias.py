@@ -47,7 +47,8 @@ class TestDelAlias(TestBrokerCommand):
         command = ["del", "alias", "--fqdn", "no-such-alias.aqd-unittest.ms.com"]
         out = self.notfoundtest(command)
         self.matchoutput(out,
-                         "Alias no-such-alias.aqd-unittest.ms.com not found.",
+                         "Alias no-such-alias.aqd-unittest.ms.com, DNS "
+                         "environment internal not found.",
                          command)
 
     def test_200_del_alias2alias(self):
