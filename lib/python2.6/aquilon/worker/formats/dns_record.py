@@ -35,52 +35,26 @@ from aquilon.aqdb.model import (DnsRecord, DynamicStub, ARecord, Alias,
 
 
 class DnsRecordFormatter(ObjectFormatter):
-    def format_raw(self, dns_record, indent=""):
-        if dns_record.hardware_entity:
-            return self.redirect_raw(dns_record.hardware_entity, indent)
+    template_raw = "dns_record.mako"
 
-        details = [indent + "{0:c}: {1!s}".format(dns_record, dns_record.fqdn)]
-        details.append(indent + "  {0:c}: {0.name}".format(dns_record.fqdn.dns_environment))
-        if dns_record.aliases:
-            details.append(indent + "  Aliases: %s" % ", ".join([str(alias.fqdn) for
-                                                                 alias in
-                                                                 dns_record.aliases]))
-        if dns_record.comments:
-            details.append(indent + "  Comments: %s" % dns_record.comments)
-        return "\n".join(details)
+    def csv_fields(self, dns_record):
+        return (dns_record.fqdn, dns_record.fqdn.dns_environment.name, None)
 
 
 class ARecordFormatter(ObjectFormatter):
-    def format_raw(self, dns_record, indent=""):
-        if dns_record.hardware_entity:
-            return self.redirect_raw(dns_record.hardware_entity, indent)
+    template_raw = "a_record.mako"
 
-        details = [indent + "{0:c}: {1!s}".format(dns_record, dns_record.fqdn)]
-        details.append(indent + "  {0:c}: {0.name}".format(dns_record.fqdn.dns_environment))
-        details.append(indent + "  IP: %s" % dns_record.ip)
-        if dns_record.aliases:
-            details.append(indent + "  Aliases: %s" % ", ".join([str(alias.fqdn) for
-                                                                 alias in
-                                                                 dns_record.aliases]))
-        details.append(indent + "  Network: {0:a}".format(dns_record.network))
-        #details.append(indent + "    Network Environment: %s" %
-        #               dns_record.network.network_environment)
-        if dns_record.comments:
-            details.append(indent + "  Comments: %s" % dns_record.comments)
-        return "\n".join(details)
+    def csv_fields(self, dns_record):
+        return (dns_record.fqdn, dns_record.fqdn.dns_environment.name,
+                'A', dns_record.ip)
 
 
 class AliasFormatter(ObjectFormatter):
-    def format_raw(self, dns_record, indent=""):
-        details = [indent + "{0:c}: {1!s}".format(dns_record, dns_record.fqdn)]
-        details.append(indent + "  {0:c}: {0.name}".format(dns_record.fqdn.dns_environment))
-        if dns_record.aliases:
-            details.append(indent + "  Aliases: %s" % ", ".join([str(alias.fqdn) for
-                                                                 alias in
-                                                                 dns_record.aliases]))
-        details.append(indent + "  Target: {0.fqdn}".format(dns_record.target))
-        if dns_record.comments:
-            details.append(indent + "  Comments: %s" % dns_record.comments)
+    template_raw = "alias.mako"
+
+    def csv_fields(self, dns_record):
+        return (dns_record.fqdn, dns_record.fqdn.dns_environment.name,
+                'CNAME', dns_record.target)
 
 # The DnsRecord entry should never get invoked, we always have a subclass.
 ObjectFormatter.handlers[DnsRecord] = DnsRecordFormatter()

@@ -61,6 +61,7 @@ class TestAddAddress(TestBrokerCommand):
                          command)
         self.matchoutput(out, "IP: %s" % net.usable[13], command)
         self.matchoutput(out, "Network: %s [%s]" % (net.ip, net), command)
+        self.matchoutput(out, "Network Environment: internal", command)
 
     def test_200_add_defaultenv(self):
         self.dsdb_expect_add("arecord14.aqd-unittest.ms.com",

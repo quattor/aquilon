@@ -29,6 +29,7 @@
 """ Representation of DNS Data """
 
 from datetime import datetime
+from collections import deque
 
 from sqlalchemy import Integer, DateTime, Sequence, String, Column, ForeignKey
 
@@ -103,6 +104,27 @@ class DnsRecord(Base):
         if format_spec != "a":
             return super(DnsRecord, self).__format__(format_spec)
         return str(self.fqdn)
+
+    @property
+    def all_aliases(self):
+        """ Returns all distinct aliases that point to this record
+
+            If Alias1 -> B, A2lias2 -> B, B -> C, remove duplicates.
+        """
+
+        found = {}
+        queue = deque(self.aliases)
+        while queue:
+            alias = queue.popleft()
+            found[str(alias.fqdn)] = alias
+            for a in alias.aliases:
+                if not str(a.fqdn) in found:
+                    queue.append(a)
+
+        # Ensure a deterministic order of the returned values
+        aliases = found.values()
+        aliases.sort(cmp=lambda x, y: cmp(str(x.fqdn), str(y.fqdn)))
+        return aliases
 
 
 dns_record = DnsRecord.__table__  # pylint: disable-msg=C0103, E1101
