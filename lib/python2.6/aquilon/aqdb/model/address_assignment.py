@@ -29,13 +29,12 @@
 """ Assign Addresses to interfaces """
 
 from datetime import datetime
-from ipaddr import IPv4Address
 import re
 
 from sqlalchemy import (Column, Integer, String, DateTime, ForeignKey, Sequence,
                         UniqueConstraint)
 from sqlalchemy.ext.associationproxy import association_proxy
-from sqlalchemy.orm import relation, backref, object_session, deferred, mapper
+from sqlalchemy.orm import relation, backref, object_session, deferred
 from sqlalchemy.sql import and_
 
 from aquilon.aqdb.column_types import IPV4, AqStr, Enum
@@ -171,24 +170,12 @@ address.append_constraint(
 # Assigned to external classes here to avoid circular dependencies.
 Interface.addresses = association_proxy('assignments', 'ip')
 
-# This join is not immediately obvious. We need a triangle-like relation between
-# the AddressAssignment, Fqdn, and ARecord tables. This secondary mapper gives
-# us one side of the triangle.
-assignment_fqdn_mapper = mapper(
-    AddressAssignment,
-    AddressAssignment.__table__.join(Fqdn.__table__,
-                                     onclause=AddressAssignment.dns_environment_id == Fqdn.dns_environment_id),
-    exclude_properties=[Fqdn.__table__.c.id,
-                        Fqdn.__table__.c.dns_environment_id,
-                        Fqdn.__table__.c.creation_date],
-    primary_key=[AddressAssignment.__table__.c.id],
-    non_primary=True)
-
 # Can't use backref or back_populates due to the different mappers
 # This relation gives us the two other sides of the triangle mentioned above
 ARecord.assignments = relation(
-    assignment_fqdn_mapper,
+    AddressAssignment,
     primaryjoin=and_(AddressAssignment.ip == ARecord.ip,
-                     ARecord.fqdn_id == Fqdn.id),
-    foreign_keys=[AddressAssignment.ip, Fqdn.dns_environment_id],
+                     ARecord.fqdn_id == Fqdn.id,
+                     AddressAssignment.dns_environment_id == Fqdn.dns_environment_id),
+    foreign_keys=[AddressAssignment.ip, Fqdn.id],
     viewonly=True)
