@@ -665,6 +665,18 @@ class DSDBRunner(object):
             fields["state"] = None
         return fields
 
+    def add_alias(self, alias, target, comments):
+        if not comments:
+            comments = ""
+        run_command([self.config.get("broker", "dsdb"),
+                     "add", "host", "alias", "-host_name", target,
+                     "-alias_name", alias, "-comments", comments],
+                    env=self.getenv())
+
+    def del_alias(self, alias):
+        run_command([self.config.get("broker", "dsdb"),
+                     "delete", "host", "alias", "-alias_name", alias],
+                    env=self.getenv())
 
 
 class NASAssign(object):

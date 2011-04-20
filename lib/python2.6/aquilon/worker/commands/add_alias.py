@@ -28,17 +28,18 @@
 # TERMS THAT MAY APPLY.
 """Contains the logic for `aq add alias`."""
 
-from aquilon.exceptions_ import ArgumentError
+from aquilon.exceptions_ import ArgumentError, ProcessException
 from aquilon.aqdb.model import DnsRecord, Alias, Fqdn, DnsEnvironment
 from aquilon.aqdb.model.dns_domain import parse_fqdn
 from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.processes import DSDBRunner
 
 
 class CommandAddAlias(BrokerCommand):
 
     required_parameters = ["fqdn", "target"]
 
-    def render(self, session, fqdn, dns_environment, target, comments,
+    def render(self, session, logger, fqdn, dns_environment, target, comments,
                **kwargs):
         dbdns_env = DnsEnvironment.get_unique_or_default(session,
                                                          dns_environment)
@@ -60,4 +61,12 @@ class CommandAddAlias(BrokerCommand):
             raise ArgumentError(err.message)
 
         session.flush()
+
+        if dbdns_env.is_default and dbdns_domain.name == "ms.com":
+            dsdb_runner = DSDBRunner(logger=logger)
+            try:
+                dsdb_runner.add_alias(fqdn, target, comments)
+            except ProcessException, e:
+                raise ArgumentError("Could not add alias to DSDB: %s" % e)
+
         return

@@ -59,6 +59,12 @@ class TestDelAlias(TestBrokerCommand):
         command = ["del", "alias", "--fqdn", "alias2host.aqd-unittest.ms.com"]
         self.noouttest(command)
 
+    def test_220_del_mscom_alias(self):
+        command = ["del", "alias", "--fqdn", "alias.ms.com"]
+        self.dsdb_expect("delete host alias -alias_name alias.ms.com")
+        self.noouttest(command)
+        self.dsdb_verify()
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelAlias)

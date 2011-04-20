@@ -29,21 +29,33 @@
 """Contains the logic for `aq del alias`."""
 
 
+from aquilon.exceptions_ import ArgumentError, ProcessException
 from aquilon.aqdb.model import DnsEnvironment, Alias, Fqdn
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.dns import delete_dns_record
+from aquilon.worker.processes import DSDBRunner
 
 
 class CommandDelAlias(BrokerCommand):
 
     required_parameters = ["fqdn"]
 
-    def render(self, session, fqdn, dns_environment, **kwargs):
+    def render(self, session, logger, fqdn, dns_environment, **kwargs):
         dbdns_env = DnsEnvironment.get_unique_or_default(session,
                                                          dns_environment)
         dbdns_rec = Alias.get_unique(session, fqdn=fqdn,
                                      dns_environment=dbdns_env,
                                      compel=True)
+        domain = dbdns_rec.fqdn.dns_domain.name
         delete_dns_record(dbdns_rec)
+
         session.flush()
+
+        if dbdns_env.is_default and domain == "ms.com":
+            dsdb_runner = DSDBRunner(logger=logger)
+            try:
+                dsdb_runner.del_alias(fqdn)
+            except ProcessException, e:
+                raise ArgumentError("Could not delete alias from DSDB: %s" % e)
+
         return

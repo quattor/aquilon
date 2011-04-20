@@ -49,6 +49,16 @@ class TestAddAlias(TestBrokerCommand):
         self.matchoutput(out, "Alias alias2host.aqd-unittest.ms.com "
                          "already exists.", cmd)
 
+    def test_110_mscom_alias(self):
+        cmd = ['add', 'alias', '--fqdn', 'alias.ms.com',
+               '--target', 'arecord13.aqd-unittest.ms.com']
+        self.dsdb_expect("add host alias "
+                         "-host_name arecord13.aqd-unittest.ms.com "
+                         "-alias_name alias.ms.com "
+                         "-comments ")
+        self.noouttest(cmd)
+        self.dsdb_verify()
+
     def test_120_usedname(self):
         cmd = ['add', 'alias', '--fqdn', 'arecord14.aqd-unittest.ms.com',
                '--target', 'arecord13.aqd-unittest.ms.com']
@@ -67,7 +77,8 @@ class TestAddAlias(TestBrokerCommand):
     def test_405_verify_host_shows_alias(self):
         cmd = "show fqdn --fqdn arecord13.aqd-unittest.ms.com"
         out = self.commandtest(cmd.split(" "))
-        self.matchoutput(out, "Aliases: alias2host.aqd-unittest.ms.com", cmd)
+        self.matchoutput(out, "Aliases: alias.ms.com, "
+                         "alias2host.aqd-unittest.ms.com", cmd)
 
     #def test_410_verify_alias_djb(self):
     #    cmd = 'search dns --fqdn arecord13.aqd-unittest.ms.com --format djb'
@@ -95,7 +106,8 @@ class TestAddAlias(TestBrokerCommand):
         cmd = 'show fqdn --fqdn arecord13.aqd-unittest.ms.com'
         out = self.commandtest(cmd.split(" "))
         self.matchoutput(out,
-                         "Aliases: alias2alias.aqd-unittest.ms.com, "
+                         "Aliases: alias.ms.com, "
+                         "alias2alias.aqd-unittest.ms.com, "
                          "alias2host.aqd-unittest.ms.com",
                          cmd)
 
