@@ -54,12 +54,13 @@ class TestAddAddress(TestBrokerCommand):
         self.dsdb_verify()
 
     def test_150_verifybasic(self):
+        net = self.net.unknown[0]
         command = ["show_fqdn", "--fqdn=arecord13.aqd-unittest.ms.com"]
         out = self.commandtest(command)
         self.matchoutput(out, "DNS Record: arecord13.aqd-unittest.ms.com",
                          command)
-        self.matchoutput(out, "IP: %s" % self.net.unknown[0].usable[13],
-                         command)
+        self.matchoutput(out, "IP: %s" % net.usable[13], command)
+        self.matchoutput(out, "Network: %s [%s]" % (net.ip, net), command)
 
     def test_200_add_defaultenv(self):
         self.dsdb_expect_add("arecord14.aqd-unittest.ms.com",

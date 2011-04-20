@@ -105,7 +105,7 @@ class TestAddRouter(TestBrokerCommand):
                          "Router: ut3gd1r04-v109-hsrp.aqd-unittest.ms.com [%s]"
                          % net.gateway,
                          command)
-        self.matchoutput(out, "Network: %s" % net.ip, command)
+        self.matchoutput(out, "Network: %s [%s]" % (net.ip, net), command)
         self.matchoutput(out, "Comments: Test router", command)
 
     def testshownetwork(self):

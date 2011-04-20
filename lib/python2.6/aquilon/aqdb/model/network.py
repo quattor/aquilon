@@ -200,6 +200,11 @@ class Network(Base):
                                               compel=compel,
                                               query_options=options)
 
+    def __format__(self, format_spec):
+        if format_spec != "a":
+            return super(Network, self).__format__(format_spec)
+        return "%s [%s]" % (self.name, self.network)
+
     def __repr__(self):
         msg = '<Network '
 
