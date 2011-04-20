@@ -29,8 +29,9 @@
 """ DNS CNAME records """
 
 from sqlalchemy import Column, Integer, ForeignKey
-from sqlalchemy.orm import relation, backref
+from sqlalchemy.orm import relation, backref, column_property
 from sqlalchemy.ext.associationproxy import association_proxy
+from sqlalchemy.sql import select, func
 
 from aquilon.aqdb.model import DnsRecord, Fqdn
 
@@ -80,3 +81,10 @@ alias = Alias.__table__  # pylint: disable-msg=C0103, E1101
 alias.primary_key.name = '%s_pk' % _TN
 alias.info['unique_fields'] = ['fqdn']
 alias.info['extra_search_fields'] = ['target']
+
+# Most addresses will not have aliases. This bulk loadable property allows the
+# formatter to avoid querying the alias table for every displayed DNS record
+# See http://www.sqlalchemy.org/trac/ticket/2139 about why we need the .alias()
+DnsRecord.alias_cnt = column_property(
+    select([func.count()], DnsRecord.fqdn_id == alias.alias().c.target_id)
+    .label("alias_cnt"), deferred=True)

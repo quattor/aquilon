@@ -105,6 +105,7 @@ class CommandSearchDns(BrokerCommand):
             q = q.options(undefer('comments'))
             q = q.options(subqueryload('_primary_name_asc'))
             q = q.options(joinedload('_primary_name_asc.hardware_entity'))
+            q = q.options(undefer('alias_cnt'))
             return q.all()
         elif style == "raw":
             return StringAttributeList(q.all(), 'fqdn')
