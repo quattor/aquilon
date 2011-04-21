@@ -272,7 +272,10 @@ class Base(object):
         try:
             obj = query.one()
             if preclude:
-                msg = "%s %s already exists." % (clslabel, ", ".join(desc))
+                # The object may belong to a subclass of what was requested, so
+                # query its class label instead of using the precomputed value
+                msg = "%s %s already exists." % (obj._get_class_label(),
+                                                 ", ".join(desc))
                 _raise_custom(preclude, ArgumentError, msg)
             return obj
         except NoResultFound:
