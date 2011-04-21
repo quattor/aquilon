@@ -59,7 +59,8 @@ class DnsRecord(Base):
 
     comments = deferred(Column('comments', String(255), nullable=True))
 
-    fqdn = relation(Fqdn, lazy=False, backref=backref('dns_records'))
+    fqdn = relation(Fqdn, lazy=False, innerjoin=True,
+                    backref=backref('dns_records'))
 
     # The extra with_polymorphic: '*' means queries don't require
     # "q = q.with_polymorphic(DnsRecord.__mapper__.polymorphic_map.values())"

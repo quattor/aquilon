@@ -92,12 +92,13 @@ class AddressAssignment(Base):
 
     comments = deferred(Column(String(255), nullable=True))
 
-    interface = relation(Interface, lazy=False, uselist=False,
+    interface = relation(Interface, lazy=False, uselist=False, innerjoin=True,
                          backref=backref('assignments', uselist=True,
                                          order_by=[_label],
                                          cascade='all, delete-orphan'))
 
-    dns_environment = relation(DnsEnvironment, backref=backref('assignments'))
+    dns_environment = relation(DnsEnvironment, innerjoin=True,
+                               backref=backref('assignments'))
 
     # Setting viewonly is very important here as we do not want the removal of
     # an AddressAssignment record to change the linked DNS record(s)

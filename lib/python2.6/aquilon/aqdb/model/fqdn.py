@@ -64,9 +64,10 @@ class Fqdn(Base):
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
 
-    dns_domain = relation(DnsDomain, backref=backref("fqdns"))
+    dns_domain = relation(DnsDomain, innerjoin=True, backref=backref("fqdns"))
 
-    dns_environment = relation(DnsEnvironment, backref=backref("fqdns"))
+    dns_environment = relation(DnsEnvironment, innerjoin=True,
+                               backref=backref("fqdns"))
 
     @property
     def fqdn(self):

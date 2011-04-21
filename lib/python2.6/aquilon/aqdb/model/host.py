@@ -91,15 +91,16 @@ class Host(Base):
     # Deletion of a machine deletes the host. When this is 'machine profile'
     # this should no longer be the case as it will be many to one as opposed to
     # one to one as it stands now. Could do innerjoin now...
-    machine = relation(Machine, lazy=False, uselist=False,
+    machine = relation(Machine, lazy=False, uselist=False, innerjoin=True,
                        backref=backref('host', uselist=False, lazy=False,
                                        cascade='all'))
 
-    branch = relation(Branch, backref='hosts')
+    branch = relation(Branch, innerjoin=True, backref='hosts')
     sandbox_author = relation(UserPrincipal, backref='sandboxed_hosts')
-    personality = relation(Personality, backref='hosts')
-    status = relation(HostLifecycle, backref='hosts')
-    operating_system = relation(OperatingSystem, uselist=False, backref='hosts')
+    personality = relation(Personality, innerjoin=True, backref='hosts')
+    status = relation(HostLifecycle, innerjoin=True, backref='hosts')
+    operating_system = relation(OperatingSystem, uselist=False, innerjoin=True,
+                                backref='hosts')
 
     @property
     def fqdn(self):

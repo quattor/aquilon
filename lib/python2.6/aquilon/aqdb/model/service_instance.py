@@ -66,7 +66,8 @@ class ServiceInstance(Base):
     creation_date = Column(DateTime, default=datetime.now, nullable=False)
     comments = Column(String(255), nullable=True)
 
-    service = relation(Service, lazy=False, uselist=False, backref='instances')
+    service = relation(Service, lazy=False, uselist=False, innerjoin=True,
+                       backref='instances')
 
     # _client_count is defined later in this file
     # nas_disk_count and nas_machine_count are defined in disk.py
@@ -347,10 +348,10 @@ class BuildItem(Base):
                                     nullable=False))
     comments = deferred(Column(String(255), nullable=True))
 
-    service_instance = relation(ServiceInstance, uselist=False,
+    service_instance = relation(ServiceInstance, uselist=False, innerjoin=True,
                                 backref=backref('clients'))
 
-    host = relation(Host, uselist=False,
+    host = relation(Host, uselist=False, innerjoin=True,
                     backref=backref('_services_used',
                                     cascade="all, delete-orphan"))
 

@@ -49,15 +49,15 @@ class PersonalityServiceMap(Base):
 
     __tablename__ = _TN
 
-    id = Column(Integer, Sequence('%s_seq'%(_ABV)), primary_key=True)
+    id = Column(Integer, Sequence('%s_seq' % _ABV), primary_key=True)
 
     service_instance_id = Column(Integer, ForeignKey('service_instance.id',
-                                                     name='%s_svc_inst_fk'%(_ABV),
+                                                     name='%s_svc_inst_fk' % _ABV,
                                                      ondelete='CASCADE'),
                                  nullable=False)
 
     location_id = Column(Integer, ForeignKey('location.id', ondelete='CASCADE',
-                                             name='%s_loc_fk'%(_ABV)),
+                                             name='%s_loc_fk' % _ABV),
                          nullable=False)
 
     personality_id = Column(Integer, ForeignKey('personality.id',
@@ -68,14 +68,14 @@ class PersonalityServiceMap(Base):
     creation_date = deferred(Column(DateTime, default=datetime.now, nullable=False))
     comments = deferred(Column(String(255), nullable=True))
 
-    location = relation(Location,
+    location = relation(Location, innerjoin=True,
                         backref=backref('personality_service_maps', lazy=True,
                                         cascade="all, delete-orphan"))
-    service_instance = relation(ServiceInstance,
+    service_instance = relation(ServiceInstance, innerjoin=True,
                                 backref=backref('personality_service_map',
                                                 lazy=True,
                                                 cascade="all, delete-orphan"))
-    personality = relation(Personality, uselist=False,
+    personality = relation(Personality, uselist=False, innerjoin=True,
                            backref=backref('maps', lazy=True,
                                            cascade="all, delete-orphan"))
 
@@ -96,4 +96,4 @@ psm.primary_key.name = 'prsnlty_svc_map_pk'
 #TODO: reconsider the surrogate primary key?
 psm.append_constraint(
     UniqueConstraint('personality_id', 'service_instance_id', 'location_id',
-                     name='%s_loc_inst_uk'%(_ABV)))
+                     name='%s_loc_inst_uk' % _ABV))

@@ -45,16 +45,18 @@ class OperatingSystem(Base):
     __tablename__  = _TN
     _class_label = 'Operating System'
 
-    id = Column(Integer, Sequence('%s_seq'%(_ABV)), primary_key=True)
+    id = Column(Integer, Sequence('%s_seq' % _ABV), primary_key=True)
     name = Column(AqStr(32), nullable=False)
     version = Column(AqStr(16), nullable=False)
-    archetype_id = Column(Integer, ForeignKey(
-        'archetype.id', name='%s_arch_fk'%(_ABV)), nullable=False)
+    archetype_id = Column(Integer, ForeignKey('archetype.id',
+                                              name='%s_arch_fk' % _ABV),
+                          nullable=False)
     #vendor id?
     creation_date = Column(DateTime, default=datetime.now, nullable=False)
     comments = Column(String(255), nullable=True)
 
-    archetype = relation(Archetype, backref='os', uselist=False, lazy=False)
+    archetype = relation(Archetype, backref='os', uselist=False, lazy=False,
+                         innerjoin=True)
 
     def __format__(self, format_spec):
         instance = "%s/%s-%s" % (self.archetype.name, self.name, self.version)

@@ -131,13 +131,15 @@ class Cluster(Base):
                           nullable=False)
     comments = Column(String(255))
 
-    status = relation(ClusterLifecycle, backref='clusters')
+    status = relation(ClusterLifecycle, innerjoin=True, backref='clusters')
     location_constraint = relation(Location,
                                    uselist=False,
                                    lazy=False)
 
-    personality = relation(Personality, uselist=False, lazy=False)
-    branch = relation(Branch, uselist=False, lazy=False, backref='clusters')
+    personality = relation(Personality, uselist=False, lazy=False,
+                           innerjoin=True)
+    branch = relation(Branch, uselist=False, lazy=False, innerjoin=True,
+                      backref='clusters')
     sandbox_author = relation(UserPrincipal, uselist=False)
 
     hosts = association_proxy('_hosts', 'host', creator=_hcm_host_creator)
@@ -443,10 +445,10 @@ class HostClusterMember(Base):
         cascade='all' on the forward mapper here, else deletion of clusters
         and their links also causes deleteion of hosts (BAD)
     """
-    cluster = relation(Cluster, uselist=False, lazy=False,
+    cluster = relation(Cluster, uselist=False, lazy=False, innerjoin=True,
                        backref=backref('_hosts', cascade='all, delete-orphan'))
 
-    host = relation(Host, lazy=False,
+    host = relation(Host, lazy=False, innerjoin=True,
                     backref=backref('_cluster', uselist=False,
                                     cascade='all, delete-orphan'))
 
@@ -479,10 +481,10 @@ class MachineClusterMember(Base):
                                     nullable=False))
 
     """ See comments for HostClusterMembers relations """
-    cluster = relation(Cluster, uselist=False, lazy=False,
+    cluster = relation(Cluster, uselist=False, lazy=False, innerjoin=True,
                        backref=backref('_machines', cascade='all, delete-orphan'))
 
-    machine = relation(Machine, lazy=False,
+    machine = relation(Machine, lazy=False, innerjoin=True,
                   backref=backref('_cluster', uselist=False,
                                   cascade='all, delete-orphan'))
 
@@ -538,7 +540,7 @@ class ClusterAlignedService(Base):
                                     nullable=False))
     comments = deferred(Column(String(255)))
 
-    service = relation(Service, uselist=False, lazy=False,
+    service = relation(Service, uselist=False, lazy=False, innerjoin=True,
                        backref=backref('_clusters', cascade='all'))
     #cascade deleted services to delete their being required to cluster_types
 
@@ -568,7 +570,7 @@ class ClusterServiceBinding(Base):
                                     nullable=False))
     comments = deferred(Column(String(255)))
 
-    cluster = relation(Cluster, uselist=False, lazy=False,
+    cluster = relation(Cluster, uselist=False, lazy=False, innerjoin=True,
                        backref=backref('_cluster_svc_binding',
                                        cascade='all, delete-orphan'))
 
@@ -580,7 +582,7 @@ class ClusterServiceBinding(Base):
         But if you append to the association_proxy
                 cluster.service_bindings.append(svc_inst)
     """
-    service_instance = relation(ServiceInstance, lazy=False,
+    service_instance = relation(ServiceInstance, lazy=False, innerjoin=True,
                                 backref=backref('service_instances',
                                                 cascade="all, delete-orphan"))
 

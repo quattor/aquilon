@@ -205,10 +205,11 @@ class MetaClusterMember(Base):
     """
 
     metacluster = relation(MetaCluster, lazy='subquery', uselist=False,
-                            backref=backref('_clusters',
-                                            cascade='all, delete-orphan'))
+                           innerjoin=True,
+                           backref=backref('_clusters',
+                                           cascade='all, delete-orphan'))
 
-    cluster = relation(Cluster, lazy='subquery',
+    cluster = relation(Cluster, lazy='subquery', innerjoin=True,
                        backref=backref('_metacluster', uselist=False,
                                        cascade='all, delete-orphan'))
 

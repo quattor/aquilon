@@ -74,8 +74,9 @@ class MachineSpecs(Base):
     creation_date = Column('creation_date', DateTime, default=datetime.now)
     comments = Column('comments', String(255), nullable=True)
 
-    model = relation(Model, backref=backref('machine_specs', uselist=False))
-    cpu = relation(Cpu)
+    model = relation(Model, innerjoin=True,
+                     backref=backref('machine_specs', uselist=False))
+    cpu = relation(Cpu, innerjoin=True)
 
     @property
     def disk_name(self):

@@ -60,10 +60,10 @@ class ServiceMap(Base):
                                     nullable=False))
     comments = deferred(Column(String(255), nullable=True))
 
-    location = relation(Location,
+    location = relation(Location, innerjoin=True,
                         backref=backref('service_maps', lazy=True,
                                         cascade="all, delete-orphan"))
-    service_instance = relation(ServiceInstance,
+    service_instance = relation(ServiceInstance, innerjoin=True,
                                 backref=backref('service_map', lazy=True,
                                                 cascade="all, delete-orphan"))
 
