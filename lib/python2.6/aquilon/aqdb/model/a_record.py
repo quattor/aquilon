@@ -29,7 +29,7 @@
 """ Representation of DNS A records """
 
 from sqlalchemy import Integer, Column, ForeignKey
-from sqlalchemy.orm import relation, backref, mapper
+from sqlalchemy.orm import relation, backref, mapper, deferred
 
 from aquilon.aqdb.model import Network, DnsRecord, Fqdn
 from aquilon.aqdb.column_types import IPV4
@@ -77,12 +77,31 @@ arecord.primary_key.name = 'a_record_pk'
 arecord.info['unique_fields'] = ['fqdn']
 arecord.info['extra_search_fields'] = ['ip', 'network']
 
+dns_record = DnsRecord.__table__  # pylint: disable-msg=C0103, E1101
+fqdn = Fqdn.__table__  # pylint: disable-msg=C0103, E1101
+
 # Create a secondary mapper on the join of the DnsRecord and Fqdn tables
-dns_fqdn_mapper = mapper(ARecord, ARecord.__table__.join(DnsRecord.__table__).join(Fqdn.__table__),
-                         exclude_properties=[Fqdn.__table__.c.id,
-                                             Fqdn.__table__.c.creation_date],
-                         primary_key=[ARecord.__table__.c.dns_record_id],
+dns_fqdn_mapper = mapper(ARecord, arecord.join(dns_record).join(fqdn),
+                         # DnsRecord has a column with the same name
+                         exclude_properties=[fqdn.c.creation_date],
+                         properties={
+                             # Both DnsRecord and Fqdn have a column named 'id'.
+                             # Tell the ORM that DnsRecord.fqdn_id and Fqdn.id are
+                             # really the same thing due to the join condition
+                             'fqdn_id': [dns_record.c.fqdn_id, fqdn.c.id],
+
+                             # Usually these columns are not needed, so don't
+                             # load them automatically
+                             'creation_date': deferred(dns_record.c.creation_date),
+                             'comments': deferred(dns_record.c.comments),
+                         },
+                         polymorphic_identity="a_record",
+                         primary_key=arecord.c.dns_record_id,
                          non_primary=True)
+
+# The secondary mapper does not know about the class inheritance, so we have to
+# set the superclass explicitely
+dns_fqdn_mapper._identity_class = DnsRecord
 
 
 class DynamicStub(ARecord):
