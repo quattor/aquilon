@@ -61,8 +61,7 @@ class TestDelDnsDomain(TestBrokerCommand):
         self.matchclean(out, "DNS Domain: aqd-unittest.ms.com", command)
 
     def testverifyfqdns(self):
-        # Eventually this will become "search dns"
-        command = ["search", "system", "--dns_domain", "aqd-unittest.ms.com"]
+        command = ["search", "dns", "--dns_domain", "aqd-unittest.ms.com"]
         self.notfoundtest(command)
 
     def testverifyshowallproto(self):

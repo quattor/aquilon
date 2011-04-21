@@ -53,11 +53,12 @@ class TestSearchSystem(TestBrokerCommand):
         out = self.notfoundtest(command.split(" "))
         self.matchoutput(out, "DNS Domain does-not-exist.ms.com", command)
 
-    def testfqdnavailablefull(self):
-        command = "search system --fqdn unittest00.one-nyp.ms.com --fullinfo"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Primary Name: unittest00.one-nyp.ms.com", command)
-        self.matchoutput(out, "Blade: ut3c1n3", command)
+#    def testfqdnavailablefull(self):
+#        command = "search system --fqdn unittest00.one-nyp.ms.com --fullinfo"
+#        out = self.commandtest(command.split(" "))
+#        self.matchoutput(out, "Primary Name: unittest00.one-nyp.ms.com", command)
+#        self.matchoutput(out, "Blade: ut3c1n3", command)
+
 
     def testdnsdomainavailable(self):
         command = "search system --dns_domain aqd-unittest.ms.com"
@@ -148,29 +149,29 @@ class TestSearchSystem(TestBrokerCommand):
         self.matchoutput(out, "ut3gd1r01.aqd-unittest.ms.com", command)
         self.matchoutput(out, "ut3c1.aqd-unittest.ms.com", command)
 
-    def testallfull(self):
-        command = "search system --all --fullinfo"
-        out = self.commandtest(command.split(" "))
-        # This is a good sampling, but not the full output
-        self.matchoutput(out, "Blade: ut3c1n3", command)
-        self.matchoutput(out, "Primary Name: unittest00.one-nyp.ms.com", command)
-        self.matchoutput(out, "unittest00r.one-nyp.ms.com", command)
-        self.matchoutput(out, "unittest00-e1.one-nyp.ms.com", command)
-        self.matchoutput(out, "Blade: ut3c1n4", command)
-        self.matchoutput(out, "Primary Name: unittest01.one-nyp.ms.com", command)
-        self.matchoutput(out, "Blade: ut3c5n10", command)
-        self.matchoutput(out, "Primary Name: unittest02.one-nyp.ms.com", command)
-        self.matchoutput(out, "unittest02rsa.one-nyp.ms.com", command)
-        self.matchoutput(out, "Aurora_node: %s" % self.aurora_with_node,
-                         command)
-        self.matchoutput(out, "Primary Name: %s.ms.com" % self.aurora_with_node,
-                         command)
-        self.matchoutput(out, "Aurora_node: %s" % self.aurora_without_node,
-                         command)
-        self.matchoutput(out, "Primary Name: %s.ms.com" % self.aurora_without_node,
-                         command)
-        self.matchoutput(out, "Switch: ut3gd1r01", command)
-        self.matchoutput(out, "Chassis: ut3c1", command)
+#    def testallfull(self):
+#        command = "search system --all --fullinfo"
+#        out = self.commandtest(command.split(" "))
+#        # This is a good sampling, but not the full output
+#        self.matchoutput(out, "Blade: ut3c1n3", command)
+#        self.matchoutput(out, "Primary Name: unittest00.one-nyp.ms.com", command)
+#        self.matchoutput(out, "unittest00r.one-nyp.ms.com", command)
+#        self.matchoutput(out, "unittest00-e1.one-nyp.ms.com", command)
+#        self.matchoutput(out, "Blade: ut3c1n4", command)
+#        self.matchoutput(out, "Primary Name: unittest01.one-nyp.ms.com", command)
+#        self.matchoutput(out, "Blade: ut3c5n10", command)
+#        self.matchoutput(out, "Primary Name: unittest02.one-nyp.ms.com", command)
+#        self.matchoutput(out, "unittest02rsa.one-nyp.ms.com", command)
+#        self.matchoutput(out, "Aurora_node: %s" % self.aurora_with_node,
+#                         command)
+#        self.matchoutput(out, "Primary Name: %s.ms.com" % self.aurora_with_node,
+#                         command)
+#        self.matchoutput(out, "Aurora_node: %s" % self.aurora_without_node,
+#                         command)
+#        self.matchoutput(out, "Primary Name: %s.ms.com" % self.aurora_without_node,
+#                         command)
+#        self.matchoutput(out, "Switch: ut3gd1r01", command)
+#        self.matchoutput(out, "Chassis: ut3c1", command)
 
 
 if __name__=='__main__':
