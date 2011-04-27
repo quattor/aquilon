@@ -44,7 +44,6 @@ _PECI = "personality_esx_cluster_info"
 _PECIABV = "pers_esxcl_info"
 
 
-
 class PersonalityClusterInfo(Base):
     """ Extra personality data specific to clusters """
 

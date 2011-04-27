@@ -73,6 +73,7 @@ class ServiceInstanceServer(Base):
 def _sis_host_creator(host):
     return ServiceInstanceServer(host=host)
 
+
 def _sis_si_creator(service_instance):
     return ServiceInstanceServer(service_instance=service_instance)
 

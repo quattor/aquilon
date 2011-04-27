@@ -141,7 +141,7 @@ class PrimaryNameAssociation(Base):
 
         return pna
 
-pna = PrimaryNameAssociation.__table__  # pylint: disable-msg=C0103
+pna = PrimaryNameAssociation.__table__  # pylint: disable-msg=C0103, E1101
 
 pna.primary_key.name = '%s_pk' % _TN
 

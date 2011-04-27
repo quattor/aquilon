@@ -26,13 +26,12 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-from aquilon.aqdb.model import Base
 from sqlalchemy.orm.session import Session, object_session
-from sqlalchemy.orm.exc import NoResultFound
 from aquilon.exceptions_ import ArgumentError, NotFoundException
 
+
 class StateEngine:
-    transitions = {} # Override in derived class!
+    transitions = {}  # Override in derived class!
 
     def transition(self, obj, target_state):
         '''Transition to another state.
@@ -71,7 +70,6 @@ class StateEngine:
             target_state.onEnter(obj)
         return True
 
-
     @classmethod
     def get_unique(cls, session, name, **kwargs):
         '''override the Base get_unique to deal with simple polymorphic table
@@ -80,8 +78,8 @@ class StateEngine:
         '''
 
         if not isinstance(session, Session):  # pragma: no cover
-            raise TypeError("The first argument of %s() must be an "
-                            "SQLAlchemy session." % caller)
+            raise TypeError("The first argument of get_unique() must be an "
+                            "SQLAlchemy session.")
 
         compel = kwargs.get('compel', False)
         preclude = kwargs.pop('preclude', False)
@@ -101,4 +99,3 @@ class StateEngine:
             msg = "%s %s already exists." % (clslabel, name)
             raise ArgumentError(msg)
         return obj
-

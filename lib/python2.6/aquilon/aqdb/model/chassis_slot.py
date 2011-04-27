@@ -64,5 +64,6 @@ class ChassisSlot(Base):  # pylint: disable-msg=W0232, R0903
     machine = relation(Machine, uselist=False,
                        backref=backref('chassis_slot', cascade='all'))
 
-chassis_slot = ChassisSlot.__table__
+
+chassis_slot = ChassisSlot.__table__  # pylint: disable-msg=C0103, E1101
 chassis_slot.primary_key.name = '%s_pk' % _TN  # pylint: disable-msg=E1101, C0301

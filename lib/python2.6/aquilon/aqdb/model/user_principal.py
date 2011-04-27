@@ -34,7 +34,6 @@ from sqlalchemy import (Column, Integer, DateTime, Sequence, String, ForeignKey,
                         UniqueConstraint)
 from sqlalchemy.orm import relation
 
-from aquilon.utils import monkeypatch
 from aquilon.aqdb.model import Base, Role, Realm
 
 
@@ -63,7 +62,8 @@ class UserPrincipal(Base):
     def __str__(self):
         return '@'.join([self.name, self.realm.name])
 
-user_principal = UserPrincipal.__table__
+
+user_principal = UserPrincipal.__table__  # pylint: disable-msg=C0103, E1101
 user_principal.primary_key.name = 'user_principal_pk'
 user_principal.append_constraint(
     UniqueConstraint('name', 'realm_id', name='user_principal_realm_uk'))

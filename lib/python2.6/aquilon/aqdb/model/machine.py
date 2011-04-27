@@ -28,10 +28,9 @@
 # TERMS THAT MAY APPLY.
 """The tables/objects/mappings related to hardware in Aquilon. """
 
-from sqlalchemy import Column, Integer, ForeignKey, UniqueConstraint
-from sqlalchemy.orm  import relation, backref
+from sqlalchemy import Column, Integer, ForeignKey
+from sqlalchemy.orm  import relation
 
-from aquilon.aqdb.column_types import AqStr
 from aquilon.aqdb.model import Cpu, HardwareEntity
 
 

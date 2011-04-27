@@ -183,8 +183,8 @@ class HardwareEntity(Base):  # pylint: disable-msg=W0232, R0903
                 yield addr
 
 
-hardware_entity = HardwareEntity.__table__
+hardware_entity = HardwareEntity.__table__  # pylint: disable-msg=C0103, E1101
 hardware_entity.primary_key.name = '%s_pk' % _TN
 hardware_entity.append_constraint(UniqueConstraint('label', name='%s_label_uk' % _TN))
 hardware_entity.info['unique_fields'] = ['label']
-Index('hw_ent_loc_idx',  hardware_entity.c.location_id)
+Index('hw_ent_loc_idx', hardware_entity.c.location_id)

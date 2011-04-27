@@ -33,7 +33,6 @@ from sqlalchemy import (Column, Integer, DateTime, Sequence, String, ForeignKey,
                         UniqueConstraint)
 from sqlalchemy.orm import relation
 
-from aquilon.utils import monkeypatch
 from aquilon.aqdb.model import Base, Vendor
 from aquilon.aqdb.column_types.aqstr import AqStr
 
@@ -44,7 +43,7 @@ class Cpu(Base):
     """ Cpus with vendor, model name and speed (in MHz) """
     __tablename__ = _TN
 
-    id = Column(Integer, Sequence('%s_id_seq' % (_TN)), primary_key=True)
+    id = Column(Integer, Sequence('%s_id_seq' % _TN), primary_key=True)
     name = Column(AqStr(64), nullable=False)
     vendor_id = Column(Integer, ForeignKey('vendor.id',
                                            name='cpu_vendor_fk'),
@@ -58,7 +57,7 @@ class Cpu(Base):
     vendor = relation(Vendor)
 
 
-cpu = Cpu.__table__
+cpu = Cpu.__table__   # pylint: disable-msg=C0103, E1101
 cpu.primary_key.name = '%s_pk' % _TN
 cpu.append_constraint(
     UniqueConstraint('vendor_id', 'name', 'speed', name='%s_nm_speed_uk' % _TN))

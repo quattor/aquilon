@@ -29,18 +29,19 @@
 """ Country is a subclass of Location """
 from sqlalchemy import Column, Integer, ForeignKey
 
-from aquilon.utils import monkeypatch
-from aquilon.aqdb.model import Location, Continent
+from aquilon.aqdb.model import Location
+
 
 class Country(Location):
     """ Country is a subtype of location """
     __tablename__ = 'country'
-    __mapper_args__ = {'polymorphic_identity':'country'}
-    id = Column(Integer,ForeignKey('location.id',
-                                   name='country_loc_fk',
-                                   ondelete='CASCADE'),
+    __mapper_args__ = {'polymorphic_identity': 'country'}
+
+    id = Column(Integer, ForeignKey('location.id',
+                                    name='country_loc_fk',
+                                    ondelete='CASCADE'),
                 primary_key=True)
 
-country = Country.__table__
-country.primary_key.name='country_pk'
+country = Country.__table__  # pylint: disable-msg=C0103, E1101
+country.primary_key.name = 'country_pk'
 country.info['unique_fields'] = ['name']

@@ -27,24 +27,24 @@
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
 """ Building is a subclass of Location """
-import logging
+
 from sqlalchemy import Column, Integer, ForeignKey, String
 
-from aquilon.utils import monkeypatch
-from aquilon.aqdb.model import Location, City
+from aquilon.aqdb.model import Location
 
 
 class Building(Location):
     """ Building is a subtype of location """
     __tablename__ = 'building'
-    __mapper_args__ = {'polymorphic_identity' : 'building'}
+    __mapper_args__ = {'polymorphic_identity': 'building'}
 
     id = Column(Integer, ForeignKey('location.id',
                                     name='building_loc_fk',
                                     ondelete='CASCADE'),
                 primary_key=True)
+
     address = Column(String(255), nullable=False)
 
-building = Building.__table__
-building.primary_key.name='building_pk'
+building = Building.__table__  # pylint: disable-msg=C0103, E1101
+building.primary_key.name = 'building_pk'
 building.info['unique_fields'] = ['name']

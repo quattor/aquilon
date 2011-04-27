@@ -40,6 +40,7 @@ from aquilon.aqdb.column_types.aqmac import AqMac
 
 _TN = 'observed_mac'
 
+
 class ObservedMac(Base):
     """ reports the observance of a mac address on a switch port. """
     __tablename__ = _TN
@@ -65,4 +66,6 @@ class ObservedMac(Base):
                                               cascade='delete',
                                               order_by=[slot, port_number]))
 
-ObservedMac.__table__.primary_key.name = '%s_pk' % _TN
+
+observedmac = ObservedMac.__table__  # pylint: disable-msg=C0103, E1101
+observedmac.primary_key.name = '%s_pk' % _TN

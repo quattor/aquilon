@@ -49,7 +49,7 @@ class Realm(Base):
     creation_date = Column(DateTime, nullable=False, default=datetime.now)
     comments = Column('comments', String(255), nullable=True)
 
-realm = Realm.__table__
+realm = Realm.__table__  # pylint: disable-msg=C0103, E1101
 
 realm.primary_key.name = 'realm_pk'
 realm.append_constraint(UniqueConstraint('name', name='realm_uk'))

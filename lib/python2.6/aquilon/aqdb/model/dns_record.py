@@ -30,11 +30,10 @@
 
 from datetime import datetime
 
-from sqlalchemy import (Integer, DateTime, Sequence, String, Column, ForeignKey,
-                        UniqueConstraint)
+from sqlalchemy import Integer, DateTime, Sequence, String, Column, ForeignKey
+
 from sqlalchemy.orm import relation, deferred, backref
 
-from aquilon.exceptions_ import InternalError, ArgumentError
 from aquilon.aqdb.model import Base, Fqdn
 from aquilon.aqdb.column_types import AqStr
 

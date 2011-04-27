@@ -86,7 +86,6 @@ class AddressAssignment(Base):
                                                     _ABV),
                                 nullable=False)
 
-
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
 

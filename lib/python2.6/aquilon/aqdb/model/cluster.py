@@ -85,11 +85,14 @@ _CASABV = 'clstr_alnd_svc'
 _CSB = 'cluster_service_binding'
 _CSBABV = 'clstr_svc_bndg'
 
+
 def _hcm_host_creator(host):
     return HostClusterMember(host=host)
 
+
 def _mcm_machine_creator(machine):
     return MachineClusterMember(machine=machine)
+
 
 def _csb_svcinst_creator(service_instance):
     return ClusterServiceBinding(service_instance=service_instance)

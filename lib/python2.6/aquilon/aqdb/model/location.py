@@ -36,7 +36,6 @@ from sqlalchemy import (Integer, DateTime, Sequence, String, Column,
 
 from sqlalchemy.orm import relation, backref, object_session
 
-from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Base
 from aquilon.aqdb.column_types import AqStr
 
@@ -197,14 +196,15 @@ class Location(Base):
             merged = self_part
         return merged
 
-location = Location.__table__
+
+location = Location.__table__  # pylint: disable-msg=C0103, E1101
 
 location.primary_key.name = 'location_pk'
+location.info['unique_fields'] = ['name', 'location_type']
 
 location.append_constraint(
     UniqueConstraint('name', 'location_type', name='loc_name_type_uk'))
 
-location.info['unique_fields'] = ['name', 'location_type']
-
-Location.sublocations = relation('Location', backref=backref(
-                                    'parent', remote_side=[location.c.id]))
+Location.sublocations = relation('Location',
+                                 backref=backref('parent',
+                                                 remote_side=[location.c.id]))

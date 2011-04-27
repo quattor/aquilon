@@ -34,11 +34,11 @@ from sqlalchemy import (Column, Integer, Sequence, String, DateTime, ForeignKey,
                         UniqueConstraint)
 from sqlalchemy.orm import relation, deferred, backref
 
-from aquilon.aqdb.model import (Base, Location, Personality, Archetype,
-                                ServiceInstance)
+from aquilon.aqdb.model import Base, Location, Personality, ServiceInstance
 
-_TN  = 'personality_service_map'
+_TN = 'personality_service_map'
 _ABV = 'prsnlty_svc_map'
+
 
 class PersonalityServiceMap(Base):
     """ Personality Service Map: mapping a service_instance to a location,

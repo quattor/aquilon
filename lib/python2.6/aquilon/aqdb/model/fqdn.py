@@ -30,7 +30,7 @@
 
 from datetime import datetime
 
-from sqlalchemy import (Integer, DateTime, Sequence, String, Column, ForeignKey,
+from sqlalchemy import (Integer, DateTime, Sequence, Column, ForeignKey,
                         UniqueConstraint)
 from sqlalchemy.orm import relation, deferred, backref
 from sqlalchemy.orm.session import Session
