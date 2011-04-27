@@ -106,7 +106,8 @@ class ServiceInstance(Base):
 
         q = session.query(BuildItem)
         q = q.filter_by(service_instance=self)
-        q = q.outerjoin('host', '_cluster', 'cluster')
+        q = q.join('host')
+        q = q.outerjoin('_cluster', 'cluster', from_joinpoint=True)
         q = q.filter(or_(Cluster.id == None,
                          ~Cluster.cluster_type.in_(cluster_types)))
         adjusted_count += q.count()
