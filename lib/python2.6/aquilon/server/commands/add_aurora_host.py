@@ -37,7 +37,7 @@ from aquilon.server.commands.add_host import CommandAddHost
 from aquilon.server.processes import DSDBRunner, run_command
 from aquilon.server.dbwrappers.machine import create_machine
 from aquilon.aqdb.model import (Building, Rack, Chassis, ChassisSlot, Model,
-                                Machine, DnsDomain, ReservedName)
+                                Machine, DnsDomain, ReservedName, Fqdn)
 
 
 class CommandAddAuroraHost(CommandAddHost):
@@ -103,8 +103,10 @@ class CommandAddAuroraHost(CommandAddHost):
                     dbchassis = Chassis(label=chassis, location=dbrack,
                                         model=dbchassis_model)
                     session.add(dbchassis)
-                    dbdns_rec = ReservedName(session=session, name=chassis,
-                                             dns_domain=dbdns_domain)
+                    dbfqdn = Fqdn.get_or_create(session, name=chassis,
+                                                dns_domain=dbdns_domain,
+                                                preclude=True)
+                    dbdns_rec = ReservedName(fqdn=dbfqdn)
                     session.add(dbdns_rec)
                     dbchassis.primary_name = dbdns_rec
                 dbslot = session.query(ChassisSlot).filter_by(

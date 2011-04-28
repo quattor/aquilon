@@ -38,18 +38,30 @@ class DnsRecordFormatter(ObjectFormatter):
         if dns_record.hardware_entity:
             return self.redirect_raw(dns_record.hardware_entity, indent)
 
-        # This should be replaced by format()...
-        details = [indent + "{0:c}: {0.fqdn}".format(dns_record)]
-        details.append(indent + "  {0:c}: {0.name}".format(dns_record.dns_environment))
-        if hasattr(dns_record, "ip"):
-            details.append(indent + "  IP: %s" % dns_record.ip)
+        details = [indent + "{0:c}: {1!s}".format(dns_record, dns_record.fqdn)]
+        details.append(indent + "  {0:c}: {0.name}".format(dns_record.fqdn.dns_environment))
+        if dns_record.comments:
+            details.append(indent + "  Comments: %s" % dns_record.comments)
+        return "\n".join(details)
+
+class ARecordFormatter(ObjectFormatter):
+    def format_raw(self, dns_record, indent=""):
+        if dns_record.hardware_entity:
+            return self.redirect_raw(dns_record.hardware_entity, indent)
+
+        details = [indent + "{0:c}: {1!s}".format(dns_record, dns_record.fqdn)]
+        details.append(indent + "  {0:c}: {0.name}".format(dns_record.fqdn.dns_environment))
+        details.append(indent + "  IP: %s" % dns_record.ip)
+        details.append(indent + "  Network: %s" % dns_record.network.network)
+        #details.append(indent + "    Network Environment: %s" %
+        #               dns_record.network.network_environment)
         if dns_record.comments:
             details.append(indent + "  Comments: %s" % dns_record.comments)
         return "\n".join(details)
 
 # The DnsRecord entry should never get invoked, we always have a subclass.
 ObjectFormatter.handlers[DnsRecord] = DnsRecordFormatter()
-
-ObjectFormatter.handlers[DynamicStub] = DnsRecordFormatter()
-ObjectFormatter.handlers[ARecord] = DnsRecordFormatter()
 ObjectFormatter.handlers[ReservedName] = DnsRecordFormatter()
+
+ObjectFormatter.handlers[DynamicStub] = ARecordFormatter()
+ObjectFormatter.handlers[ARecord] = ARecordFormatter()

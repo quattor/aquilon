@@ -31,7 +31,7 @@
 
 from aquilon.exceptions_ import AquilonError, ArgumentError, NotFoundException
 from aquilon.aqdb.model import (HardwareEntity, Model, DnsRecord, ARecord,
-                                ReservedName, AddressAssignment)
+                                ReservedName, AddressAssignment, Fqdn)
 from aquilon.aqdb.model.dns_domain import parse_fqdn
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.server.dbwrappers.location import get_location
@@ -82,8 +82,8 @@ def parse_primary_name(session, fqdn, ip):
     given, then it is converted to an A record.
     """
 
-    (short, dbdns_domain) = parse_fqdn(session, fqdn)
-    dbdns_rec = DnsRecord.get_unique(session, name=short, dns_domain=dbdns_domain)
+    dbfqdn = Fqdn.get_or_create(session, fqdn=fqdn)
+    dbdns_rec = DnsRecord.get_unique(session, fqdn=dbfqdn)
 
     if dbdns_rec and dbdns_rec.hardware_entity:
         raise ArgumentError("{0} already exists as the primary name of {1:cl} "
@@ -116,19 +116,30 @@ def parse_primary_name(session, fqdn, ip):
 
     if not dbdns_rec:
         if ip:
-            dbdns_rec = ARecord(session=session, name=short, ip=ip,
-                                dns_domain=dbdns_domain)
+            dbnetwork = get_net_id_from_ip(session, ip)
+            check_ip_restrictions(dbnetwork, ip)
+            dbdns_rec = ARecord(fqdn=dbfqdn, ip=ip, network=dbnetwork)
         else:
-            dbdns_rec = ReservedName(session=session, name=short,
-                                     dns_domain=dbdns_domain)
+            dbdns_rec = ReservedName(fqdn=dbfqdn)
         session.add(dbdns_rec)
         session.flush()
 
-    if hasattr(dbdns_rec, "ip"):
-        dbnetwork = get_net_id_from_ip(session, dbdns_rec.ip)
-        check_ip_restrictions(dbnetwork, dbdns_rec.ip)
-
-        # TODO: get rid of this
-        dbdns_rec.network = dbnetwork
-
     return dbdns_rec
+
+def convert_primary_name_to_arecord(session, dbhw_ent, ip, dbnetwork):
+    # Lock the FQDN, so nothing can steal it while there is no DNS record
+    # associated with it
+    q = session.query(Fqdn)
+    q = q.filter_by(id=dbhw_ent.primary_name.fqdn_id)
+    q = q.with_lockmode('update')
+    dbfqdn = q.one()
+
+    comments = dbhw_ent.primary_name.comments
+    session.delete(dbhw_ent.primary_name)
+    session.flush()
+    session.expire(dbhw_ent, ['_primary_name_asc'])
+    session.expire(dbfqdn, ['dns_records'])
+    dbdns_rec = ARecord(fqdn=dbfqdn, ip=ip, network=dbnetwork,
+                        comments=comments)
+    session.add(dbdns_rec)
+    dbhw_ent.primary_name = dbdns_rec

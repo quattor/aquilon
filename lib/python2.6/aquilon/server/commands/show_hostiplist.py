@@ -36,7 +36,7 @@ from aquilon.server.formats.host import HostIPList
 from aquilon.aqdb.model import (AddressAssignment, Interface, HardwareEntity,
                                 Personality, Machine, Host, Archetype,
                                 PrimaryNameAssociation, ARecord, DnsRecord,
-                                DnsDomain)
+                                DnsDomain, Fqdn)
 
 
 class CommandShowHostIPList(BrokerCommand):
@@ -58,18 +58,22 @@ class CommandShowHostIPList(BrokerCommand):
         # DnsDomain and DnsRecord are used twice, so be certain which instance
         # is used where
         addr_dnsrec = aliased(ARecord, name="addr_dnsrec")
+        addr_fqdn = aliased(Fqdn, name="addr_fqdn")
         addr_domain = aliased(DnsDomain, name="addr_domain")
         pna_dnsrec = aliased(DnsRecord, name="pna_dnsrec")
+        pna_fqdn = aliased(Fqdn, name="pna_fqdn")
         pna_domain = aliased(DnsDomain, name="pna_dnsdomain")
 
         q = session.query(AddressAssignment)
         q = q.join((addr_dnsrec, addr_dnsrec.ip == AddressAssignment.ip))
-        q = q.join((addr_domain, addr_dnsrec.dns_domain_id ==
-                    addr_domain.id))
+        q = q.join((addr_fqdn, addr_dnsrec.fqdn_id == addr_fqdn.id))
+        q = q.join((addr_domain, addr_fqdn.dns_domain_id == addr_domain.id))
 
         # Make sure we pick up the right DnsDomain/DnsRecord instance
         q = q.options(contains_eager("dns_records", alias=addr_dnsrec))
-        q = q.options(contains_eager("dns_records.dns_domain",
+        q = q.options(contains_eager("dns_records.fqdn",
+                                     alias=addr_fqdn))
+        q = q.options(contains_eager("dns_records.fqdn.dns_domain",
                                      alias=addr_domain))
 
         q = q.reset_joinpoint()
@@ -85,7 +89,8 @@ class CommandShowHostIPList(BrokerCommand):
         q = q.outerjoin(PrimaryNameAssociation)
         q = q.outerjoin((pna_dnsrec, PrimaryNameAssociation.dns_record_id ==
                          pna_dnsrec.id))
-        q = q.outerjoin((pna_domain, pna_dnsrec.dns_domain_id == pna_domain.id))
+        q = q.outerjoin((pna_fqdn, pna_dnsrec.fqdn_id == pna_fqdn.id))
+        q = q.outerjoin((pna_domain, pna_fqdn.dns_domain_id == pna_domain.id))
         q = q.options(contains_eager('interface'))
         q = q.options(contains_eager('interface.hardware_entity'))
         q = q.options(contains_eager("interface.hardware_entity._primary_name_asc"))
@@ -95,10 +100,13 @@ class CommandShowHostIPList(BrokerCommand):
                                      "_primary_name_asc.dns_record",
                                      alias=pna_dnsrec))
         q = q.options(contains_eager("interface.hardware_entity."
-                                     "_primary_name_asc.dns_record.dns_domain",
+                                     "_primary_name_asc.dns_record.fqdn",
+                                    alias=pna_fqdn))
+        q = q.options(contains_eager("interface.hardware_entity."
+                                     "_primary_name_asc.dns_record.fqdn.dns_domain",
                                     alias=pna_domain))
 
-        q = q.order_by(addr_dnsrec.name, addr_domain.name)
+        q = q.order_by(addr_fqdn.name, addr_domain.name)
 
         iplist = HostIPList()
         for addr in q:
@@ -116,17 +124,18 @@ class CommandShowHostIPList(BrokerCommand):
         # Append addresses that are not bound to interfaces
         if not archetype:
             q = session.query(ARecord)
-            q = q.join(DnsDomain)
-            q = q.options(contains_eager("dns_domain"))
+            q = q.join(Fqdn, DnsDomain)
+            q = q.options(contains_eager("fqdn"))
+            q = q.options(contains_eager("fqdn.dns_domain"))
             q = q.reset_joinpoint()
 
             q = q.outerjoin((AddressAssignment,
                              AddressAssignment.ip == ARecord.ip))
             q = q.filter(AddressAssignment.id == None)
 
-            q = q.order_by(ARecord.name, DnsDomain.name)
+            q = q.order_by(Fqdn.name, DnsDomain.name)
 
             for entry in q:
-                iplist.append((entry.fqdn, entry.ip, None))
+                iplist.append((str(entry.fqdn), entry.ip, None))
 
         return iplist

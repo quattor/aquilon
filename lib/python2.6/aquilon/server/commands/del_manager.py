@@ -34,6 +34,7 @@ from aquilon.aqdb.model import ARecord
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.processes import DSDBRunner
 from aquilon.server.locks import lock_queue, DeleteKey
+from aquilon.server.dbwrappers.dns import delete_dns_record
 from aquilon.server.templates.machine import PlenaryMachineInfo
 
 
@@ -53,20 +54,20 @@ class CommandDelManager(BrokerCommand):
             if not dbmanager.assignments or len(dbmanager.assignments) > 1:
                 is_mgr = False
             assignment = dbmanager.assignments[0]
-            if assignment.interface.interface_type != 'management':
+            dbinterface = assignment.interface
+            if dbinterface.interface_type != 'management':
                 is_mgr = False
             if not is_mgr:
                 raise ArgumentError("{0:a} is not a manager.".format(dbmanager))
 
             # FIXME: Look for dependencies...
 
-            dbmachine = assignment.interface.hardware_entity
+            dbmachine = dbinterface.hardware_entity
             oldinfo = DSDBRunner.snapshot_hw(dbmachine)
 
-            session.delete(assignment)
-            session.delete(dbmanager)
+            dbinterface.assignments.remove(assignment)
+            delete_dns_record(dbmanager)
             session.flush()
-            session.expire(dbmachine)
     
             try:
                 dsdb_runner = DSDBRunner(logger=logger)

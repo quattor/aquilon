@@ -337,5 +337,5 @@ class PlenaryNamespacedHost(PlenaryToplevelHost):
     def __init__(self, dbhost, logger=LOGGER):
         PlenaryToplevelHost.__init__(self, dbhost, logger=logger)
         self.name = dbhost.fqdn
-        self.plenary_core = dbhost.machine.primary_name.dns_domain.name
+        self.plenary_core = dbhost.machine.primary_name.fqdn.dns_domain.name
         self.plenary_template = "%(plenary_core)s/%(name)s" % self.__dict__

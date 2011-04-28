@@ -31,7 +31,8 @@
 from aquilon.server.broker import BrokerCommand
 from aquilon.exceptions_ import ArgumentError, ProcessException, IncompleteError
 from aquilon.aqdb.model import (HardwareEntity, AddressAssignment,
-                                ARecord, DnsEnvironment)
+                                ARecord, DnsEnvironment, Fqdn)
+from aquilon.server.dbwrappers.dns import delete_dns_record
 from aquilon.server.dbwrappers.interface import get_interface
 from aquilon.server.templates.host import PlenaryHost
 from aquilon.server.locks import lock_queue
@@ -101,14 +102,10 @@ class CommandDelInterfaceAddress(BrokerCommand):
         other_uses = q.all()
         if not other_uses and not keep_dns:
             q = session.query(ARecord)
-            q = q.filter_by(dns_environment=dbdns_env)
             q = q.filter_by(ip=ip)
-
-            # session.query().delete() does not work when multiple tables are
-            # involved, and ARecord uses joined-table inheritance
-            dnsrecs = q.all()
-            for rec in dnsrecs:
-                session.delete(rec)
+            q = q.join(Fqdn)
+            q = q.filter_by(dns_environment=dbdns_env)
+            map(delete_dns_record, q.all())
 
         session.flush()
 

@@ -29,8 +29,9 @@
 """Contains the logic for `aq del router`."""
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.server.broker import BrokerCommand
 from aquilon.aqdb.model import ARecord, RouterAddress, DnsEnvironment
+from aquilon.server.broker import BrokerCommand
+from aquilon.server.dbwrappers.dns import delete_dns_record
 
 
 class CommandDelRouter(BrokerCommand):
@@ -41,7 +42,7 @@ class CommandDelRouter(BrokerCommand):
         if fqdn:
             dbdns_rec = ARecord.get_unique(session, fqdn=fqdn, compel=True)
             ip = dbdns_rec.ip
-            dbdns_env = dbdns_rec.dns_environment
+            dbdns_env = dbdns_rec.fqdn.dns_environment
         elif ip:
             dbdns_env = DnsEnvironment.get_unique_or_default(session)
         else:
@@ -52,8 +53,7 @@ class CommandDelRouter(BrokerCommand):
                                             compel=True)
         dbnetwork = dbrouter.network
 
-        if dbrouter.dns_records:
-            map(session.delete, dbrouter.dns_records)
+        map(delete_dns_record, dbrouter.dns_records)
         dbnetwork.routers.remove(dbrouter)
         session.flush()
 

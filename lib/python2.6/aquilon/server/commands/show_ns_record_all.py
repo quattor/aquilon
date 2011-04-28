@@ -31,7 +31,7 @@
 from aquilon.aqdb.model import NsRecord
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.commands.show_ns_record import CommandShowNsRecord
-from aquilon.server.formats.dns_records import SimpleNSRecordList
+from aquilon.server.formats.ns_record import SimpleNSRecordList
 
 class CommandShowNsRecordAll(CommandShowNsRecord):
 

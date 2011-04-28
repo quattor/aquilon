@@ -34,15 +34,15 @@ from sqlalchemy.sql.expression import asc, desc, bindparam
 
 from aquilon.exceptions_ import (ArgumentError, ProcessException,
                                  AquilonError, UnimplementedError)
-from aquilon.aqdb.model import Interface, Machine, ARecord
+from aquilon.aqdb.model import Interface, Machine, ARecord, Fqdn
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.server.broker import BrokerCommand
+from aquilon.server.dbwrappers.dns import delete_dns_record
 from aquilon.server.dbwrappers.interface import (get_or_create_interface,
                                                  describe_interface,
                                                  verify_port_group,
                                                  choose_port_group,
                                                  assign_address)
-from aquilon.server.dbwrappers.system import parse_system_and_verify_free
 from aquilon.server.templates.base import PlenaryCollection
 from aquilon.server.locks import lock_queue
 from aquilon.server.templates.machine import PlenaryMachineInfo
@@ -208,6 +208,9 @@ class CommandAddInterfaceMachine(BrokerCommand):
         machine_plenary_info = PlenaryMachineInfo(dbmachine, logger=logger)
         pending_removals.append(machine_plenary_info)
         # This will cascade to prev & the host
+        if dbmachine.primary_name:
+            delete_dns_record(dbmachine.primary_name)
+            session.expire(dbmachine, ["_primary_name_asc"])
         session.delete(dbmachine)
         session.flush()
 
@@ -256,19 +259,16 @@ class CommandAddInterfaceMachine(BrokerCommand):
                                "auto-creating manager for %s with IP address "
                                "%s." % (dbmachine.label, old_ip))
             return
-        manager = "%sr.%s" % (dbmachine.primary_name.name,
-                              dbmachine.primary_name.dns_domain.name)
+        manager = "%sr.%s" % (dbmachine.primary_name.fqdn.name,
+                              dbmachine.primary_name.fqdn.dns_domain.name)
         try:
-            (short, dbdns_domain) = parse_system_and_verify_free(session,
-                                                                 manager)
+            dbfqdn = Fqdn.get_or_create(session, fqdn=manager, preclude=True)
         except ArgumentError, e:
             logger.client_info("Could not create manager with name %s and "
                                "IP address %s for machine %s: %s" %
                                (manager, old_ip, dbmachine.label, e))
             return
-        dbmanager = ARecord(session=session, name=short,
-                            dns_domain=dbdns_domain, ip=old_ip,
-                            network=old_network)
+        dbmanager = ARecord(fqdn=dbfqdn, ip=old_ip, network=old_network)
         session.add(dbmanager)
         return dbmanager
 

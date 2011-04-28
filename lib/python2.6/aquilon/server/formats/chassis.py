@@ -87,7 +87,7 @@ class MissingChassisListFormatter(ListFormatter):
                 dbchassis = Chassis.get_unique(session, chassis)
                 if not dbchassis and machine.primary_name:
                     fqdn = "%s.%s" % (chassis,
-                                      machine.primary_name.dns_domain.name)
+                                      machine.primary_name.fqdn.dns_domain.name)
                     commands.append("aq add chassis --chassis '%s' "
                                     "--rack 'RACK' --model 'MODEL'" % fqdn)
             else:

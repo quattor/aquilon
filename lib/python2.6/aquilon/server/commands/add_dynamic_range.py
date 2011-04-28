@@ -32,7 +32,7 @@ from ipaddr import IPv4Address
 from sqlalchemy.sql.expression import asc
 
 from aquilon.server.broker import BrokerCommand
-from aquilon.aqdb.model import DynamicStub, ARecord, DnsDomain
+from aquilon.aqdb.model import DynamicStub, ARecord, DnsDomain, Fqdn
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.exceptions_ import ArgumentError, ProcessException
 from aquilon.server.dbwrappers.interface import check_ip_restrictions
@@ -72,9 +72,9 @@ class CommandAddDynamicRange(BrokerCommand):
             ip = IPv4Address(ipint)
             check_ip_restrictions(startnet, ip)
             name = "%s-%s" % (prefix, str(ip).replace('.', '-'))
-            dbdynamic_stub = DynamicStub(session=session, name=name,
-                                         dns_domain=dbdns_domain, ip=ip,
-                                         network=startnet)
+            dbfqdn = Fqdn.get_or_create(session, name=name,
+                                        dns_domain=dbdns_domain, preclude=True)
+            dbdynamic_stub = DynamicStub(fqdn=dbfqdn, ip=ip, network=startnet)
             session.add(dbdynamic_stub)
             stubs.append(dbdynamic_stub)
 

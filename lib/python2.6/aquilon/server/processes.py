@@ -397,7 +397,7 @@ class DSDBRunner(object):
             command.extend(["-interface_name", interface])
         if mac:
             command.extend(["-ethernet_address", mac])
-        if primary and primary != fqdn:
+        if primary and str(primary) != str(fqdn):
             command.extend(["-primary_host_name", primary])
         out = run_command(command,env=self.getenv())
         return

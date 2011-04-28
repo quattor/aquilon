@@ -110,8 +110,8 @@ class CommandPollSwitch(BrokerCommand):
     def run_checknet(self, logger, switch):
         if not switch.primary_name:
             hostname = switch.label
-        elif switch.primary_name.dns_domain.name == 'ms.com':
-            hostname = switch.primary_name.name
+        elif switch.primary_name.fqdn.dns_domain.name == 'ms.com':
+            hostname = switch.primary_name.fqdn.name
         else:
             hostname = switch.fqdn
         return run_command([self.config.get("broker", "CheckNet"),

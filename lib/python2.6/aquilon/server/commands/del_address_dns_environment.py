@@ -33,6 +33,7 @@ from aquilon.aqdb.model import ARecord, DnsEnvironment
 from aquilon.exceptions_ import UnimplementedError, ArgumentError
 from aquilon.server.locks import lock_queue, DeleteKey
 from aquilon.server.processes import DSDBRunner
+from aquilon.server.dbwrappers.dns import delete_dns_record
 
 
 class CommandDelAddressDNSEnvironment(BrokerCommand):
@@ -73,7 +74,7 @@ class CommandDelAddressDNSEnvironment(BrokerCommand):
                                        last_use])
                     raise ArgumentError("IP address %s is still in use by %s." %
                                         (ip, users))
-            session.delete(dbaddress)
+            delete_dns_record(dbaddress)
             session.flush()
 
             if dbdns_env.is_default:

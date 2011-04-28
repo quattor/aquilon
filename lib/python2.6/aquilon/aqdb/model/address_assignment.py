@@ -35,12 +35,13 @@ import re
 from sqlalchemy import (Column, Integer, String, DateTime, ForeignKey, Sequence,
                         UniqueConstraint)
 from sqlalchemy.ext.associationproxy import association_proxy
-from sqlalchemy.orm import relation, backref, object_session, deferred
+from sqlalchemy.orm import relation, backref, object_session, deferred, mapper
 from sqlalchemy.sql import and_
 
 from aquilon.aqdb.column_types import IPV4, AqStr, Enum
-from aquilon.aqdb.model import Base, Interface, ARecord, DnsEnvironment
+from aquilon.aqdb.model import Base, Interface, ARecord, DnsEnvironment, Fqdn
 from aquilon.aqdb.model.network import get_net_id_from_ip
+from aquilon.aqdb.model.a_record import dns_fqdn_mapper
 
 _TN = 'address_assignment'
 _ABV = 'addr_assign'
@@ -101,12 +102,12 @@ class AddressAssignment(Base):
 
     # Setting viewonly is very important here as we do not want the removal of
     # an AddressAssignment record to change the linked DNS record(s)
-    dns_records = relation(ARecord, lazy=True, uselist=True,
+    # Can't use backref or back_populates due to the different mappers
+    dns_records = relation(dns_fqdn_mapper, lazy=True, uselist=True,
                            primaryjoin=and_(ip == ARecord.ip,
-                                            dns_environment_id == ARecord.dns_environment_id),
-                           foreign_keys=[ARecord.ip, ARecord.dns_environment_id],
-                           viewonly=True,
-                           backref=backref('assignments', uselist=True))
+                                            dns_environment_id == Fqdn.dns_environment_id),
+                           foreign_keys=[ARecord.ip, Fqdn.dns_environment_id],
+                           viewonly=True)
 
     fqdns = association_proxy('dns_records', 'fqdn')
 
@@ -169,3 +170,25 @@ address.append_constraint(
 
 # Assigned to external classes here to avoid circular dependencies.
 Interface.addresses = association_proxy('assignments', 'ip')
+
+# This join is not immediately obvious. We need a triangle-like relation between
+# the AddressAssignment, Fqdn, and ARecord tables. This secondary mapper gives
+# us one side of the triangle.
+assignment_fqdn_mapper = mapper(
+    AddressAssignment,
+    AddressAssignment.__table__.join(Fqdn.__table__,
+                                     onclause=AddressAssignment.dns_environment_id == Fqdn.dns_environment_id),
+    exclude_properties=[Fqdn.__table__.c.id,
+                        Fqdn.__table__.c.dns_environment_id,
+                        Fqdn.__table__.c.creation_date],
+    primary_key=[AddressAssignment.__table__.c.id],
+    non_primary=True)
+
+# Can't use backref or back_populates due to the different mappers
+# This relation gives us the two other sides of the triangle mentioned above
+ARecord.assignments = relation(
+    assignment_fqdn_mapper,
+    primaryjoin=and_(AddressAssignment.ip == ARecord.ip,
+                     ARecord.fqdn_id == Fqdn.id),
+    foreign_keys=[AddressAssignment.ip, Fqdn.dns_environment_id],
+    viewonly=True)

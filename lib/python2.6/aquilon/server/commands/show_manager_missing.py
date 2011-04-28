@@ -34,7 +34,8 @@ from sqlalchemy.sql import exists
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.formats.interface import MissingManagersList
 from aquilon.aqdb.model import (Interface, AddressAssignment, HardwareEntity,
-                                PrimaryNameAssociation, DnsRecord, DnsDomain)
+                                PrimaryNameAssociation, DnsRecord, DnsDomain,
+                                Fqdn)
 
 
 class CommandShowManagerMissing(BrokerCommand):
@@ -50,13 +51,15 @@ class CommandShowManagerMissing(BrokerCommand):
         q = q.options(contains_eager('hardware_entity'))
 
         # MissingManagerList wants the fqdn, so get it in one go
-        q = q.outerjoin(PrimaryNameAssociation, DnsRecord, DnsDomain)
+        q = q.outerjoin(PrimaryNameAssociation, DnsRecord, Fqdn, DnsDomain)
         q = q.options(contains_eager('hardware_entity._primary_name_asc'))
         q = q.options(contains_eager('hardware_entity._primary_name_asc.'
                                      'dns_record'))
         q = q.options(contains_eager('hardware_entity._primary_name_asc.'
-                                     'dns_record.dns_domain'))
+                                     'dns_record.fqdn'))
+        q = q.options(contains_eager('hardware_entity._primary_name_asc.'
+                                     'dns_record.fqdn.dns_domain'))
 
         # Order by FQDN if it exists, otherwise fall back to the label
-        q = q.order_by(DnsRecord.name, DnsDomain.name, HardwareEntity.label)
+        q = q.order_by(Fqdn.name, DnsDomain.name, HardwareEntity.label)
         return MissingManagersList(q.all())

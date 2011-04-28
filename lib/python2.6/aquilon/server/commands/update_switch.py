@@ -34,9 +34,10 @@ from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.location import get_location
 from aquilon.server.dbwrappers.interface import (check_ip_restrictions,
                                                  assign_address)
+from aquilon.server.dbwrappers.hardware_entity import convert_primary_name_to_arecord
 from aquilon.server.processes import DSDBRunner
 from aquilon.aqdb.model import (Interface, Model, Switch, AddressAssignment,
-                                ReservedName, ARecord)
+                                ReservedName, ARecord, Fqdn)
 from aquilon.aqdb.model.network import get_net_id_from_ip
 
 
@@ -77,16 +78,8 @@ class CommandUpdateSwitch(BrokerCommand):
 
             # Convert ReservedName to ARecord if needed
             if isinstance(dbswitch.primary_name, ReservedName):
-                dbdns_domain = dbswitch.primary_name.dns_domain
-                short = dbswitch.primary_name.name
-                session.delete(dbswitch.primary_name)
-                session.flush()
-                session.expire(dbswitch)
-                dbdns_rec = ARecord(session=session, name=short,
-                                          dns_domain=dbdns_domain, ip=ip)
-                dbdns_rec.network = dbnetwork
-                session.add(dbdns_rec)
-                dbswitch.primary_name = dbdns_rec
+                convert_primary_name_to_arecord(session, dbswitch, ip,
+                                                dbnetwork)
             else:
                 dbswitch.primary_name.ip = ip
                 dbswitch.primary_name.network = dbnetwork

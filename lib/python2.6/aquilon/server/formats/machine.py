@@ -80,9 +80,9 @@ class MachineFormatter(ObjectFormatter):
             if addr.ip == machine.primary_ip:
                 continue
             if addr.interface.interface_type == 'management':
-                managers.append((addr.fqdns, addr.ip))
+                managers.append(([str(fqdn) for fqdn in addr.fqdns], addr.ip))
             elif addr.usage == 'system':
-                auxiliaries.append((addr.fqdns, addr.ip))
+                auxiliaries.append(([str(fqdn) for fqdn in addr.fqdns], addr.ip))
 
         for mgr in managers:
             details.append(indent + "  Manager: %s [%s]" %

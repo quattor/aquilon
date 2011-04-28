@@ -28,6 +28,7 @@
 # TERMS THAT MAY APPLY.
 """Contains the logic for `aq show dns_domain --all`."""
 
+from sqlalchemy.orm import subqueryload, joinedload
 
 from aquilon.server.broker import BrokerCommand
 from aquilon.aqdb.model import DnsDomain
@@ -39,4 +40,9 @@ class CommandShowDnsDomainAll(BrokerCommand):
     required_parameters = []
 
     def render(self, session, **arguments):
-        return DNSDomainList(session.query(DnsDomain).all())
+        q = session.query(DnsDomain)
+        q = q.options(subqueryload('dns_maps'))
+        q = q.options(subqueryload('_ns_records'))
+        q = q.options(joinedload('_ns_records.a_record.fqdn'))
+        q = q.options(joinedload('_ns_records.a_record.fqdn.dns_domain'))
+        return DNSDomainList(q.all())

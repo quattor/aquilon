@@ -34,18 +34,21 @@ from sqlalchemy.orm import contains_eager
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.formats.host import SimpleHostList
 from aquilon.aqdb.model import (Host, Machine, PrimaryNameAssociation, DnsRecord,
-                                DnsDomain)
+                                DnsDomain, Fqdn)
 
 
 class CommandShowHostAll(BrokerCommand):
 
     def render(self, session, **arguments):
         q = session.query(Host)
-        q = q.join(Machine, PrimaryNameAssociation, DnsRecord, DnsDomain)
+        q = q.join(Machine, PrimaryNameAssociation, DnsRecord, Fqdn, DnsDomain)
         q = q.options(contains_eager('machine'))
         q = q.options(contains_eager('machine._primary_name_asc'))
-        q = q.options(contains_eager('machine._primary_name_asc.dns_record'))
         q = q.options(contains_eager('machine._primary_name_asc.'
-                                     'dns_record.dns_domain'))
-        q = q.order_by(DnsRecord.name, DnsDomain.name)
+                                     'dns_record'))
+        q = q.options(contains_eager('machine._primary_name_asc.'
+                                     'dns_record.fqdn'))
+        q = q.options(contains_eager('machine._primary_name_asc.'
+                                     'dns_record.fqdn.dns_domain'))
+        q = q.order_by(Fqdn.name, DnsDomain.name)
         return SimpleHostList(q.all())

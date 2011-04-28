@@ -90,7 +90,7 @@ class HardwareEntity(Base):  # pylint: disable-msg=W0232, R0903
     def fqdn(self):
         """ Returns the FQDN, if there is a primary name """
         if self.primary_name:
-            return self.primary_name.fqdn
+            return str(self.primary_name.fqdn)
         else:
             return None
 
@@ -106,7 +106,7 @@ class HardwareEntity(Base):  # pylint: disable-msg=W0232, R0903
     def printable_name(self):
         """ Returns the most meaningful name """
         if self.primary_name:
-            return self.primary_name.fqdn
+            return str(self.primary_name.fqdn)
         else:
             return self.label
 

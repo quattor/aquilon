@@ -32,7 +32,8 @@
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.formats.machine import MachineMacList
 from aquilon.aqdb.model import (HardwareEntity, Interface,
-                                PrimaryNameAssociation, DnsRecord, DnsDomain)
+                                PrimaryNameAssociation, DnsRecord, DnsDomain,
+                                Fqdn)
 from sqlalchemy.orm import contains_eager
 
 
@@ -45,10 +46,14 @@ class CommandShowMachineMacList(BrokerCommand):
         q = q.filter(Interface.mac != None)
         q = q.join(HardwareEntity)
         q = q.options(contains_eager('hardware_entity'))
-        q = q.outerjoin(PrimaryNameAssociation, DnsRecord, DnsDomain)
+        q = q.outerjoin(PrimaryNameAssociation, DnsRecord, Fqdn, DnsDomain)
         q = q.options(contains_eager('hardware_entity._primary_name_asc'))
-        q = q.options(contains_eager('hardware_entity._primary_name_asc.dns_record'))
-        q = q.options(contains_eager('hardware_entity._primary_name_asc.dns_record.dns_domain'))
+        q = q.options(contains_eager('hardware_entity._primary_name_asc.'
+                                     'dns_record'))
+        q = q.options(contains_eager('hardware_entity._primary_name_asc.'
+                                     'dns_record.fqdn'))
+        q = q.options(contains_eager('hardware_entity._primary_name_asc.'
+                                     'dns_record.fqdn.dns_domain'))
         q = q.order_by(HardwareEntity.label)
 
         maclist = MachineMacList()

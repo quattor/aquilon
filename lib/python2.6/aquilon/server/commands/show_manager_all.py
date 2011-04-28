@@ -32,7 +32,7 @@ from sqlalchemy.orm import contains_eager
 
 from aquilon.server.broker import BrokerCommand
 from aquilon.aqdb.model import (AddressAssignment, Interface, ARecord,
-                                DnsDomain)
+                                DnsDomain, Fqdn)
 
 
 class CommandShowManagerAll(BrokerCommand):
@@ -44,7 +44,8 @@ class CommandShowManagerAll(BrokerCommand):
         q = q.join(Interface)
         q = q.filter_by(interface_type='management')
         q = q.reset_joinpoint()
-        q = q.join(DnsDomain)
-        q = q.options(contains_eager(ARecord.dns_domain))
-        q = q.order_by(ARecord.name, DnsDomain.name)
+        q = q.join(Fqdn, DnsDomain)
+        q = q.options(contains_eager('fqdn'))
+        q = q.options(contains_eager('fqdn.dns_domain'))
+        q = q.order_by(Fqdn.name, DnsDomain.name)
         return [rec.fqdn for rec in q.all()]

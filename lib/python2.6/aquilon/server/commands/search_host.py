@@ -36,7 +36,8 @@ from aquilon.server.formats.host import SimpleHostList
 from aquilon.aqdb.model import (Host, Cluster, Archetype, Personality,
                                 HostLifecycle, OperatingSystem, Service,
                                 ServiceInstance, NasDisk, Disk, Machine, Model,
-                                ARecord, DnsDomain, Interface, AddressAssignment)
+                                ARecord, DnsDomain, Interface,
+                                AddressAssignment, Fqdn)
 from aquilon.aqdb.model.dns_domain import parse_fqdn
 from aquilon.server.dbwrappers.service_instance import get_service_instance
 from aquilon.server.dbwrappers.branch import get_branch_and_author
@@ -56,6 +57,7 @@ class CommandSearchHost(BrokerCommand):
                dns_domain, shortname, mac, ip, networkip,
                exact_location, fullinfo, **arguments):
         dnsq = session.query(ARecord.ip)
+        dnsq = dnsq.join(Fqdn)
         use_dnsq = False
         if hostname:
             (short, dbdns_domain) = parse_fqdn(session, hostname)
@@ -97,7 +99,8 @@ class CommandSearchHost(BrokerCommand):
         # Hardware-specific filters
         q = q.join(Machine)
         q = q.options(contains_eager('machine'))
-        q = q.options(joinedload_all('machine._primary_name_asc.dns_record.dns_domain'))
+        q = q.options(joinedload_all('machine._primary_name_asc.dns_record.'
+                                     'fqdn.dns_domain'))
 
         dblocation = get_location(session, **arguments)
         if dblocation:

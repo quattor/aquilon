@@ -33,7 +33,7 @@ from aquilon.aqdb.model import DnsDomain, DnsMap, Location
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.location import get_location
 
-from sqlalchemy.orm import contains_eager
+from sqlalchemy.orm import contains_eager, undefer
 
 
 class CommandSearchDnsDomainMap(BrokerCommand):
@@ -43,6 +43,7 @@ class CommandSearchDnsDomainMap(BrokerCommand):
     def render(self, session, dns_domain, include_parents, **kwargs):
         dblocation = get_location(session, **kwargs)
         q = session.query(DnsMap)
+        q = q.options(undefer('comments'))
         if dblocation:
             if include_parents:
                 location_ids = [parent.id for parent in dblocation.parents]

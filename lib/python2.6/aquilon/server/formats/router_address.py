@@ -38,7 +38,7 @@ class RouterAddressFormatter(ObjectFormatter):
     def format_raw(self, router, indent=""):
         details = []
         if router.dns_records:
-            names = ", ".join([dnsrec.fqdn for dnsrec in router.dns_records])
+            names = ", ".join([str(dnsrec.fqdn) for dnsrec in router.dns_records])
         else:
             names = "unknown"
 

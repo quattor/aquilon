@@ -35,7 +35,7 @@ from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.location import get_location
 from aquilon.server.formats.switch import TorSwitch
-from aquilon.aqdb.model import (Switch, HardwareEntity, Model,
+from aquilon.aqdb.model import (Switch, HardwareEntity, Model, Fqdn,
                                 PrimaryNameAssociation, DnsRecord, DnsDomain)
 from aquilon.aqdb.model.dns_domain import parse_fqdn
 
@@ -71,12 +71,13 @@ class CommandShowTorSwitch(BrokerCommand):
         q = q.options(subqueryload_all('model.machine_specs'))
 
         # Prefer the primary name when ordering
-        q = q.outerjoin(PrimaryNameAssociation, DnsRecord, DnsDomain)
+        q = q.outerjoin(PrimaryNameAssociation, DnsRecord, Fqdn, DnsDomain)
         q = q.options(contains_eager('_primary_name_asc'))
         q = q.options(contains_eager('_primary_name_asc.dns_record'))
-        q = q.options(contains_eager('_primary_name_asc.dns_record.dns_domain'))
+        q = q.options(contains_eager('_primary_name_asc.dns_record.fqdn'))
+        q = q.options(contains_eager('_primary_name_asc.dns_record.fqdn.dns_domain'))
         q = q.reset_joinpoint()
-        q = q.order_by(DnsRecord.name, DnsDomain.name, Switch.label)
+        q = q.order_by(Fqdn.name, DnsDomain.name, Switch.label)
 
         # This output gets the old CSV formatter.
         return [TorSwitch(dbswitch) for dbswitch in q.all()]
