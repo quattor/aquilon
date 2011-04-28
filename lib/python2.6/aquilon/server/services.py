@@ -597,9 +597,6 @@ class ClusterChooser(Chooser):
             self.dbcluster.service_bindings.append(instance)
             self.flush_changes()
             for h in self.dbcluster.hosts:
-                host_plenary = PlenaryHost(h, logger=self.logger)
-                host_plenary.stash()
-                self.plenaries.append(host_plenary)
                 host_chooser = Chooser(h, logger=self.logger,
                                        required_only=False)
                 host_chooser.set_single(instance.service, instance, force=True)
@@ -610,3 +607,7 @@ class ClusterChooser(Chooser):
         plenary_cluster = PlenaryCluster(self.dbcluster, logger=self.logger)
         plenary_cluster.stash()
         self.plenaries.append(plenary_cluster)
+        for dbhost in self.dbcluster.hosts:
+            host_plenary = PlenaryHost(dbhost, logger=self.logger)
+            host_plenary.stash()
+            self.plenaries.append(host_plenary)
