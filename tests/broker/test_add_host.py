@@ -113,8 +113,8 @@ class TestAddHost(TestBrokerCommand):
                          self.net.unknown[0].usable[0],
                          command)
 
-    def testverifyshowfqdnhost(self):
-        command = "show fqdn --fqdn unittest02.one-nyp.ms.com"
+    def testverifyhostdns(self):
+        command = "search dns --fqdn unittest02.one-nyp.ms.com"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "unittest02.one-nyp.ms.com", command)
 

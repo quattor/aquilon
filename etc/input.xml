@@ -147,6 +147,8 @@
    </command>
 
    <command name="show_fqdn">
+      This command is deprecated.  Please use search_dns instead.
+      <p/>
       Shows any information available for the fqdn.  This could be a host,
       a top of rack switch, a chassis, or any other system tracked by
       AQDB.

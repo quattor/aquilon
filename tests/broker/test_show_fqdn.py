@@ -42,7 +42,10 @@ class TestShowFqdn(TestBrokerCommand):
 
     def testshowfqdnall(self):
         command = "show fqdn --all"
-        out = self.commandtest(command.split(" "))
+        (out, err) = self.successtest(command.split(" "))
+        # The aq client does not ask for this...
+        #self.matchoutput(err, "The show_fqdn command is deprecated.", command)
+
         # Chassis
         self.matchoutput(out, "ut3c1.aqd-unittest.ms.com", command)
         # TorSwitch

@@ -64,7 +64,7 @@ class TestDelHost(TestBrokerCommand):
         self.notfoundtest(command.split(" "))
 
     def testverifydelunittest00dns(self):
-        command = "show fqdn --fqdn unittest00.one-nyp.ms.com"
+        command = "show address --fqdn unittest00.one-nyp.ms.com"
         self.notfoundtest(command.split(" "))
 
     def testverifyut3c1n3(self):

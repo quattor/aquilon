@@ -55,7 +55,7 @@ class TestAddAddress(TestBrokerCommand):
 
     def test_150_verifybasic(self):
         net = self.net.unknown[0]
-        command = ["show_fqdn", "--fqdn=arecord13.aqd-unittest.ms.com"]
+        command = ["show_address", "--fqdn=arecord13.aqd-unittest.ms.com"]
         out = self.commandtest(command)
         self.matchoutput(out, "DNS Record: arecord13.aqd-unittest.ms.com",
                          command)
@@ -82,7 +82,7 @@ class TestAddAddress(TestBrokerCommand):
 
     def test_220_verifydefaultenv(self):
         default = self.config.get("site", "default_dns_environment")
-        command = ["show_fqdn", "--fqdn=arecord14.aqd-unittest.ms.com"]
+        command = ["show_address", "--fqdn=arecord14.aqd-unittest.ms.com"]
         out = self.commandtest(command)
         self.matchoutput(out, "DNS Record: arecord14.aqd-unittest.ms.com",
                          command)
@@ -91,7 +91,7 @@ class TestAddAddress(TestBrokerCommand):
                          command)
 
     def test_230_verifyutenv(self):
-        command = ["show_fqdn", "--fqdn=arecord14.aqd-unittest.ms.com",
+        command = ["show_address", "--fqdn=arecord14.aqd-unittest.ms.com",
                    "--dns_environment", "ut-env"]
         out = self.commandtest(command)
         self.matchoutput(out, "DNS Record: arecord14.aqd-unittest.ms.com",
@@ -110,7 +110,7 @@ class TestAddAddress(TestBrokerCommand):
         self.dsdb_verify()
 
     def test_350_verifyipfromip(self):
-        command = ["show_fqdn", "--fqdn=arecord15.aqd-unittest.ms.com"]
+        command = ["show_address", "--fqdn=arecord15.aqd-unittest.ms.com"]
         out = self.commandtest(command)
         self.matchoutput(out, "DNS Record: arecord15.aqd-unittest.ms.com",
                          command)
@@ -127,7 +127,7 @@ class TestAddAddress(TestBrokerCommand):
         self.dsdb_verify()
 
     def test_410_verifydsdbfailure(self):
-        command = ["show", "fqdn", "--fqdn", "arecord16.aqd-unittest.ms.com"]
+        command = ["search", "dns", "--fqdn", "arecord16.aqd-unittest.ms.com"]
         self.notfoundtest(command)
 
     def test_420_failnetaddress(self):

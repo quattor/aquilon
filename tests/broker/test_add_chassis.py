@@ -110,8 +110,8 @@ class TestAddChassis(TestBrokerCommand):
         self.verifychassis("ut3c1.aqd-unittest.ms.com",
                            "aurora_vendor", "utchassis", "ut3", "a", "3")
 
-    def testverifyshowfqdnchassis(self):
-        command = "show fqdn --fqdn ut3c1.aqd-unittest.ms.com"
+    def testverifychassisdns(self):
+        command = "search dns --fqdn ut3c1.aqd-unittest.ms.com"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "ut3c1.aqd-unittest.ms.com", command)
 

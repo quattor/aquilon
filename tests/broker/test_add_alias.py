@@ -67,7 +67,7 @@ class TestAddAlias(TestBrokerCommand):
                          "already exists.", cmd)
 
     def test_400_verify_alias2host(self):
-        cmd = "show fqdn --fqdn alias2host.aqd-unittest.ms.com"
+        cmd = "show alias --fqdn alias2host.aqd-unittest.ms.com"
         out = self.commandtest(cmd.split(" "))
 
         self.matchoutput(out, "Alias: alias2host.aqd-unittest.ms.com", cmd)
@@ -75,13 +75,13 @@ class TestAddAlias(TestBrokerCommand):
         self.matchoutput(out, "DNS Environment: internal", cmd)
 
     def test_405_verify_host_shows_alias(self):
-        cmd = "show fqdn --fqdn arecord13.aqd-unittest.ms.com"
+        cmd = "show address --fqdn arecord13.aqd-unittest.ms.com"
         out = self.commandtest(cmd.split(" "))
         self.matchoutput(out, "Aliases: alias.ms.com, "
                          "alias2host.aqd-unittest.ms.com", cmd)
 
     #def test_410_verify_alias_djb(self):
-    #    cmd = 'search dns --fqdn arecord13.aqd-unittest.ms.com --format djb'
+    #    cmd = 'show address --fqdn arecord13.aqd-unittest.ms.com --format djb'
     #    out = self.commandtest(cmd.split(' '))
     #    self.matchoutput(out,
     #                     'Calias2host.aqd-unittest.ms.com:arecord13.aqd-unittest.ms.com::',
@@ -93,17 +93,17 @@ class TestAddAlias(TestBrokerCommand):
         self.noouttest(cmd)
 
     def test_600_verify_alias2alias(self):
-        cmd = 'show fqdn --fqdn alias2alias.aqd-unittest.ms.com'
+        cmd = 'show alias --fqdn alias2alias.aqd-unittest.ms.com'
         out = self.commandtest(cmd.split(" "))
         self.matchoutput(out, 'Alias: alias2alias.aqd-unittest.ms.com', cmd)
 
     def test_601_verify_alias2alias_backwards(self):
-        cmd = 'show fqdn --fqdn alias2host.aqd-unittest.ms.com'
+        cmd = 'show alias --fqdn alias2host.aqd-unittest.ms.com'
         out = self.commandtest(cmd.split(" "))
         self.matchoutput(out, "Aliases: alias2alias.aqd-unittest.ms.com", cmd)
 
     def test_602_verify_alias2alias_recursive(self):
-        cmd = 'show fqdn --fqdn arecord13.aqd-unittest.ms.com'
+        cmd = 'show address --fqdn arecord13.aqd-unittest.ms.com'
         out = self.commandtest(cmd.split(" "))
         self.matchoutput(out,
                          "Aliases: alias.ms.com, "
@@ -112,7 +112,7 @@ class TestAddAlias(TestBrokerCommand):
                          cmd)
 
     #def test_610_verify_alias2alias_djb(self):
-    #    cmd = "search dns --fqdn alias2alias.aqd-unittest.ms.com"
+    #    cmd = "show alias --fqdn alias2alias.aqd-unittest.ms.com"
     #    out = self.commandtest(cmd.split(" "))
     #    self.matchoutput(out,
     #                     'Calias2alias.aqd-unittest.ms.com:alias2host.aqd-unittest.ms.com:::',

@@ -38,6 +38,8 @@ from aquilon.aqdb.model import DnsDomain, DnsEnvironment, Fqdn
 class CommandShowFqdnAll(BrokerCommand):
 
     def render(self, session, dns_environment, **arguments):
+        self.deprecated_command("The show_fqdn command is deprecated.  Please "
+                                "use search_dns instead.", **arguments)
         dbdns_env = DnsEnvironment.get_unique_or_default(session,
                                                          dns_environment)
         q = session.query(Fqdn)

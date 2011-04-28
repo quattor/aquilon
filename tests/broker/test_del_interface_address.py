@@ -70,7 +70,7 @@ class TestDelInterfaceAddress(TestBrokerCommand):
                          command)
 
     def testverifykeepdns(self):
-        command = ["show", "fqdn",
+        command = ["search", "dns",
                    "--fqdn", "unittest20-e1.aqd-unittest.ms.com"]
         out = self.commandtest(command)
         self.matchoutput(out, "unittest20-e1.aqd-unittest.ms.com", command)

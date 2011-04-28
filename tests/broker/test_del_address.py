@@ -52,7 +52,7 @@ class TestDelAddress(TestBrokerCommand):
         self.dsdb_verify()
 
     def testverifybasic(self):
-        command = ["show_fqdn", "--fqdn=arecord13.aqd-unittest.ms.com"]
+        command = ["show_address", "--fqdn=arecord13.aqd-unittest.ms.com"]
         self.notfoundtest(command)
 
     def testdefaultenv(self):
@@ -64,7 +64,7 @@ class TestDelAddress(TestBrokerCommand):
         self.dsdb_verify()
 
     def testverifydefaultenv(self):
-        command = ["show_fqdn", "--fqdn=arecord14.aqd-unittest.ms.com"]
+        command = ["show_address", "--fqdn=arecord14.aqd-unittest.ms.com"]
         self.notfoundtest(command)
 
     def testutenvenv(self):
@@ -74,7 +74,7 @@ class TestDelAddress(TestBrokerCommand):
         self.noouttest(command)
 
     def testverifyutenvenv(self):
-        command = ["show_fqdn", "--fqdn", "arecord14.aqd-unittest.ms.com",
+        command = ["show_address", "--fqdn", "arecord14.aqd-unittest.ms.com",
                    "--dns_environment", "ut-env"]
         self.notfoundtest(command)
 
