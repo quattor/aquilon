@@ -3493,6 +3493,18 @@
       <transport method="delete" trigger="dns_environment" path="address/%(dns_environment)s" />
    </command>
 
+   <command name="show_address">
+      Show an address in the DNS.
+      <optgroup name="show_address_opts" mandatory="True" fields="all">
+         <option name="fqdn" type="string">The fully qualified domain name</option>
+      </optgroup>
+      <optgroup name="show_address_optional" mandatory="False">
+         <option name="dns_environment" type="string">The name of the environment the address is in (defaults to 'internal')</option>
+      </optgroup>
+      <transport method="get" path="address_default/%(fqdn)s" />
+      <transport method="get" trigger="dns_environment" path="address/%(dns_environment)s/%(fqdn)s" />
+   </command>
+
    <command name="show_ns_record">
       Display NS Records
       <optgroup name="show_ns_record_opts" mandatory="True" fields="any">
@@ -3549,6 +3561,17 @@
          <option name="dns_environment" type="string">The name of the environment the address is in (defaults to 'internal')</option>
       </optgroup>
       <transport method="delete" path="alias/%(fqdn)s" />
+   </command>
+
+   <command name="show_alias">
+      Show an alias in the DNS.
+      <optgroup name="show_alias_opts" mandatory="True" fields="all">
+         <option name="fqdn" type="string">The fully qualified domain name</option>
+      </optgroup>
+      <optgroup name="show_alias_optional" mandatory="False">
+         <option name="dns_environment" type="string">The name of the environment the alias is in (defaults to 'internal')</option>
+      </optgroup>
+      <transport method="get" path="alias/%(fqdn)s" />
    </command>
 
    <command name='search_dns'>
