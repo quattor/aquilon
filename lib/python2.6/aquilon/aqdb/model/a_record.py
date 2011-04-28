@@ -101,6 +101,8 @@ dns_fqdn_mapper = mapper(ARecord, arecord.join(dns_record).join(fqdn),
 
 # The secondary mapper does not know about the class inheritance, so we have to
 # set the superclass explicitely
+# This is http://www.sqlalchemy.org/trac/ticket/2151 - this workaround can be
+# removed when we upgrade to SQLA 0.6.8
 dns_fqdn_mapper._identity_class = DnsRecord
 
 
