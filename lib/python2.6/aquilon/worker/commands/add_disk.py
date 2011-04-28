@@ -123,8 +123,12 @@ class CommandAddDisk(BrokerCommand):
 
         # Handle deprecated arguments
         if kw.get("type"):
+            self.deprecated_option("type", "Please use --controller instead.",
+                                   logger=logger, **kw)
             controller = kw["type"]
         if kw.get("capacity"):
+            self.deprecated_option("capacity", "Please use --size instead.",
+                                   logger=logger, **kw)
             size = kw["capacity"]
         if not size or not controller:
             raise ArgumentError("Please specify both --size "
@@ -132,7 +136,7 @@ class CommandAddDisk(BrokerCommand):
 
         dbmachine = Machine.get_unique(session, machine, compel=True)
         dbdisks = session.query(Disk).filter_by(machine=dbmachine,
-                                                  device_name=disk).all()
+                                                device_name=disk).all()
         if dbmachine.cluster:
             dbmetacluster = dbmachine.cluster.metacluster
         else:

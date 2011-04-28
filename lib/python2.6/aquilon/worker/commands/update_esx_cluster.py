@@ -133,8 +133,8 @@ class CommandUpdateESXCluster(BrokerCommand):
             cluster_updated = True
 
         if tor_switch is not None:
-            logger.client_info("Option --tor_switch is deprecated, please use "
-                               "--switch instead.")
+            self.deprecated_option("tor_switch", "Please use --switch instead.",
+                                   logger=logger, **arguments)
             switch = tor_switch
         if switch is not None:
             if switch:

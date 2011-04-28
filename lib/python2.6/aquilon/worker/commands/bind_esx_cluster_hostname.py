@@ -35,7 +35,6 @@ from aquilon.worker.commands.cluster import CommandCluster
 class CommandBindESXClusterHostname(CommandCluster):
 
     def render(self, **arguments):
-        logger = arguments['logger']
-        logger.client_info("WARNING: bind_esx_cluster --hostname is "
-                           "deprecated, use the cluster command instead.")
+        self.deprecated_option("hostname", "Please use the 'cluster' command "
+                               "instead.", **arguments)
         return CommandCluster.render(self, **arguments)

@@ -38,7 +38,7 @@ from twisted.internet import defer
 from twisted.python import log
 
 from aquilon.config import Config
-from aquilon.exceptions_ import ArgumentError, UnimplementedError
+from aquilon.exceptions_ import ArgumentError, UnimplementedError, AquilonError
 from aquilon.worker.authorization import AuthorizationBroker
 from aquilon.worker.messages import StatusCatalog
 from aquilon.worker.logger import RequestLogger
@@ -393,6 +393,28 @@ class BrokerCommand(object):
                 if not super_is_free:
                     return super_is_free
         return True
+
+    @classmethod
+    def deprecated_command(cls, msg, logger=None, user=None, **kwargs):
+        if not logger or not user:  # pragma: no cover
+            raise AquilonError("Too few arguments to deprecated_command")
+
+        # cls.__name__ is good enough to mine the logs which deprecated commands
+        # are still in use.
+        logger.info("User %s invoked deprecated command %s" % (user,
+                                                                cls.__name__))
+        logger.client_info(msg)
+
+    @classmethod
+    def deprecated_option(cls, option, msg="", logger=None, user=None, **kwargs):
+        if not option or not logger or not user:  # pragma: no cover
+            raise AquilonError("Too few arguments to deprecated_option")
+
+        # cls.__name__ is good enough to mine the logs which deprecated options
+        # are still in use.
+        logger.info("User %s used deprecated option %s of command %s" %
+                    (user, option, cls.__name__))
+        logger.client_info("The --%s option is deprecated.  %s" % (option, msg))
 
 
 # This might belong somewhere else.  The functionality that uses this

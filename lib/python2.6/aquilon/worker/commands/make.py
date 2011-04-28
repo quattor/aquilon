@@ -81,6 +81,9 @@ class CommandMake(BrokerCommand):
                                     "{1:l}.".format(dbhost.fqdn, dbhost.cluster))
             dbhost.personality = dbpersonality
 
+        if os:
+            self.deprecated_option("os", "Please use --osname/--osversion "
+                                   "instead.", logger=logger, **arguments)
         dbos = self.get_os(session, dbhost, osname, osversion, os)
         if dbos:
             # Hmm... no cluster constraint here...

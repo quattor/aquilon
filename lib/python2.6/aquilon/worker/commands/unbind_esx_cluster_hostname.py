@@ -35,7 +35,6 @@ from aquilon.worker.commands.uncluster import CommandUncluster
 class CommandUnbindESXClusterHostname(CommandUncluster):
 
     def render(self, **arguments):
-        logger = arguments['logger']
-        logger.client_info("WARNING: unbind_esx_cluster --hostname is "
-                           "deprecated, use the uncluster command instead.")
+        self.deprecated_option("hostname", "Please use the 'uncluster' command "
+                               "instead.", **arguments)
         return CommandUncluster.render(self, **arguments)

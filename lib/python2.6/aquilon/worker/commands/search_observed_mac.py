@@ -38,14 +38,13 @@ class CommandSearchObservedMac(BrokerCommand):
     required_parameters = []
     default_style = "csv"
 
-    def render(self, session, logger, tor_switch, switch, port_number, mac,
+    def render(self, session, tor_switch, switch, port_number, mac,
                **arguments):
         q = session.query(ObservedMac)
         if tor_switch:
+            self.deprecated_option("tor_switch", "Please use --switch instead.",
+                                   **arguments)
             switch = tor_switch
-            # Almost pointless - the aq client doesn't ask for this channel...
-            logger.client_info("Option --tor_switch is deprecated, please use "
-                               "--switch instead.")
         if switch:
             dbswitch = Switch.get_unique(session, switch, compel=True)
             q = q.filter_by(switch=dbswitch)

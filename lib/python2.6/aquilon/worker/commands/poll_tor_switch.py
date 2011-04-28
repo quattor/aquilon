@@ -36,7 +36,7 @@ from aquilon.worker.commands.poll_switch import CommandPollSwitch
 class CommandPollTorSwitch(CommandPollSwitch):
     """Deprecated wrapper for poll_switch."""
 
-    def render(self, logger, **arguments):
-        logger.client_info("Command poll_tor_switch is deprecated, please use "
-                           "poll_switch instead.")
-        return CommandPollSwitch.render(self, logger=logger, **arguments)
+    def render(self, **arguments):
+        self.deprecated_command("Command poll_tor_switch is deprecated, please "
+                                "use poll_switch instead.", **arguments)
+        return CommandPollSwitch.render(self, **arguments)
