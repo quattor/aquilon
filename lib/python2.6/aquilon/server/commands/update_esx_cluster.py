@@ -34,6 +34,7 @@ from aquilon.exceptions_ import ArgumentError
 from aquilon.server.dbwrappers.location import get_location
 from aquilon.server.templates.machine import (PlenaryMachineInfo,
                                               machine_plenary_will_move)
+from aquilon.server.templates.host import PlenaryHost
 from aquilon.server.templates.cluster import PlenaryCluster
 from aquilon.server.templates.base import PlenaryCollection
 from aquilon.server.locks import lock_queue, CompileKey
@@ -104,6 +105,7 @@ class CommandUpdateESXCluster(BrokerCommand):
             for dbhost in dbcluster.hosts:
                 dbhost.personality = dbpersonality
                 session.add(dbhost)
+                plenaries.append(PlenaryHost(dbhost, logger=logger))
             dbcluster.personality = dbpersonality
             cluster_updated = True
 

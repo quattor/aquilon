@@ -178,6 +178,13 @@ class TestUpdateESXCluster(TestBrokerCommand):
         original_hosts.sort()
         self.failUnless(original_hosts, "No hosts found using %s" % command)
 
+        # Also test that the host plenary will be re-written correctly.
+        command = ["cat", "--hostname", original_hosts[0]]
+        out = self.commandtest(command)
+        self.matchoutput(out,
+            """include { "personality/esx_desktop/config" };""",
+            command)
+
         command = ["update_esx_cluster", "--cluster=utecl1",
                    "--archetype=vmhost", "--personality=esx_server"]
         out = self.commandtest(command)
@@ -192,6 +199,12 @@ class TestUpdateESXCluster(TestBrokerCommand):
                              "Expected only/all updated hosts %s to match the "
                              "list of original hosts %s" %
                              (updated_hosts, original_hosts))
+
+        command = ["cat", "--hostname", updated_hosts[0]]
+        out = self.commandtest(command)
+        self.matchoutput(out,
+            """include { "personality/esx_server/config" };""",
+            command)
 
         command = ["update_esx_cluster", "--cluster=utecl1",
                    "--archetype=vmhost", "--personality=esx_desktop"]
