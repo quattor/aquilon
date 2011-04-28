@@ -298,6 +298,15 @@ class TestSearchESXCluster(TestBrokerCommand):
         self.matchoutput(out, "Rack rack-does-not-exist not found",
                          command)
 
+    def testbuildstatuspos(self):
+        command = ['search_esx_cluster', '--buildstatus=build']
+        out = self.commandtest(command)
+        self.matchoutput(out, "utecl4", command)
+
+    def testbuildstatusneg(self):
+        command = ['search_esx_cluster', '--buildstatus=decommissioned']
+        self.noouttest(command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestSearchESXCluster)
