@@ -97,6 +97,16 @@ class TestAddDynamicRange(TestBrokerCommand):
             self.matchoutput(subout, dynname(ip), command)
         self.failUnless(checked, "Problem with test algorithm or data.")
 
+    def testshowrange(self):
+        net = self.net.tor_net2[0]
+        start = net.usable[2]
+        end = net.usable[-3]
+        command = "show dynamic range --ip %s" % IPv4Address(int(start) + 1)
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Dynamic Range: %s - %s" % (start, end), command)
+        self.matchoutput(out, "Network: %s [%s]" % (net.ip, net),
+                         command)
+
     def testverifynetwork(self):
         command = "show network --ip %s" % self.net.tor_net2[0].ip
         out = self.commandtest(command.split(" "))

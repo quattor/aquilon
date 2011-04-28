@@ -3439,6 +3439,18 @@
       <transport trigger="clearnetwork" method="post" path="dynamic_range/clear/%(clearnetwork)s" />
    </command>
 
+   <command name="show_dynamic_range">
+      Show a range reserved for dynamic DHCP.
+      <optgroup name="show_dynamic_range_opts" mandatory="True" fields="any">
+         <option name="ip" type="ipv4" conflicts="fqdn">Any IP address inside the range</option>
+	 <option name="fqdn" type="string" conflicts="ip">Any FQDN inside the range</option>
+      </optgroup>
+      <optgroup name="show_dynamic_range_optional" mandatory="False" fields="any">
+         <option name="dns_environment" type="string">The name of the environment the address is in (defaults to 'internal')</option>
+      </optgroup>
+      <transport method="get" path="dynamic_range"/>
+   </command>
+
    <command name="add_address">
       Add DNS addresses to the database.
       <p/>
