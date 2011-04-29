@@ -30,6 +30,7 @@
 dynamically pull all possible values at run-time with some clever caching.
 Borrowed from http://www.sqlalchemy.org/trac/wiki/UsageRecipes/Enum """
 import sqlalchemy
+from aquilon.exceptions_ import ArgumentError
 
 class Enum(sqlalchemy.types.TypeDecorator):
     impl = sqlalchemy.types.String
@@ -62,14 +63,16 @@ class Enum(sqlalchemy.types.TypeDecorator):
         if value is None:
             return value
         if value not in self.values:
-            raise ValueError('"%s" not in Enum.values' % value)
+            raise ArgumentError('"%s" not a valid value. Valid values are: %s'
+                                % (value, self.values))
         return str(value).strip().lower()
 
     def process_result_value(self, value, dialect):
         if value is None:
             return value
         if self.strict and value not in self.values:
-            raise ValueError('"%s" not in Enum.values' % value)
+            raise ArgumentError('"%s" not a valid value. Valid values are: %s'
+                                % (value, self.values))
         return value
 
 def test_enum():  # pragma: no cover

@@ -136,6 +136,58 @@ class TestAdd10GigHardware(TestBrokerCommand):
     # evm10 -> user-v710, evm11 -> user-v711, evm12 -> user-v712, evm13 -> user-v13
     # evm14 -> user-v710, evm15 -> user-v711, evm16 -> user-v712, evm17 -> user-v13
     # and so on and so forth
+
+    def test_135_addmgddisks(self):
+        for i in range(0, 8):
+            share = "utecl%d_share" % (5 + (i / 3))
+            machine = "evm%d" % (10 + i)
+            #these get deleted in test_del_machine
+            self.noouttest(["add", "disk", "--machine", machine,
+                            "--disk", "sdb", "--controller", "sata",
+                            "--size", "30", "--autoshare",
+                            "--address", "0:0"])
+            #these get deleted in test_del_disk
+            self.noouttest(["add", "disk", "--machine", machine,
+                            "--disk", "sdc", "--controller", "sata",
+                            "--size", "30", "--autoshare",
+                            "--address", "0:0"])
+
+    def test_137_addmgddisks_badmgdshare(self):
+        #try to add a managed share manually. should error.
+        command = ["add", "disk", "--machine", "evm10",
+                   "--disk", "sdf", "--controller", "sata",
+                   "--size", "15", "--share", "utecl13_share",
+                   "--address", "0:0"]
+        out,err = self.failuretest(command, 4)
+        self.matchoutput(err, "Bad Request: Disk 'utecl13_share' is managed by "
+                         "resourcepool and can only be assigned with the "
+                         "'autoshare' option.", command)
+
+    def test_140_addmgddisks_badsize(self):
+        #size 15 triggers the unsupported size error msg
+        command = ["add", "disk", "--machine", "evm10",
+                   "--disk", "sdd", "--controller", "sata",
+                   "--size", "15", "--autoshare",
+                   "--address", "0:0"]
+        out,err = self.failuretest(command, 4)
+        self.matchoutput(err,
+                         "Bad Request: Invalid size for autoshare disk. "
+                         "Supported sizes are: ['30, 40, 50']",
+                         command)
+
+    def test_145_addmgddisks_nocapacity(self):
+        #id sde_evm10 triggers no capacity error
+        command = ["add", "disk", "--machine", "evm10",
+                   "--disk", "sde", "--controller", "sata",
+                   "--size", "30", "--autoshare",
+                   "--address", "0:0"]
+        out,err = self.failuretest(command, 4)
+        self.matchoutput(err,
+                         "Bad Request: No available NAS capacity in "
+                         "Resource Pool for rack ut11. Please notify an "
+                         "administrator or add capacity.",
+                         command)
+
     def test_150_verifypg(self):
         for i in range(0, 8) + range(9, 17):
             if i < 9:

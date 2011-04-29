@@ -167,6 +167,11 @@ class TestDelService(TestBrokerCommand):
             self.noouttest(["del_service", "--service=nas_disk_share",
                             "--instance=npecl%d_share" % i])
 
+    def testdelmgdshares(self):
+        for i in range(13,15):
+            self.noouttest(["del_service", "--service=nas_disk_share",
+                            "--instance=utecl%d_share" % i])
+
     def testdelnasshares(self):
         for i in range(1, 10):
             self.noouttest(["del_service", "--service=nas_disk_share",

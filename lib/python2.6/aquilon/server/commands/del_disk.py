@@ -28,12 +28,15 @@
 # TERMS THAT MAY APPLY.
 """Contains the logic for `aq del disk`."""
 
-
-from aquilon.exceptions_ import ArgumentError, NotFoundException
+from aquilon.exceptions_ import (ArgumentError, NotFoundException,
+                                 ProcessException, AquilonError)
 from aquilon.aqdb.model import Disk, Machine
 from aquilon.aqdb.model.disk import controller_types
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.templates.machine import PlenaryMachineInfo
+from aquilon.server.templates.cluster import PlenaryCluster
+from aquilon.server.processes import NASAssign
+from aquilon.server.locks import lock_queue, CompileKey
 
 
 class CommandDelDisk(BrokerCommand):
@@ -41,7 +44,7 @@ class CommandDelDisk(BrokerCommand):
     required_parameters = ["machine"]
 
     def render(self, session, logger, machine, disk, controller, size, all,
-               user, **arguments):
+               user, dbuser,  **arguments):
 
         # Handle deprecated arguments
         if arguments.get("type", None):
@@ -57,11 +60,27 @@ class CommandDelDisk(BrokerCommand):
             if controller not in controller_types:
                 raise ArgumentError("%s is not a valid controller type, use "
                                     "one of: %s." % (controller,
-                                                     ", ".join(controller_types)))
+                                                     ", ".join(controller_types)
+                                                     ))
             q = q.filter_by(controller_type=controller)
         if size is not None:
             q = q.filter_by(capacity=size)
         results = q.all()
+        to_remove_from_rp = None
+        uname = str(dbuser.name)
+        for dbdisk in results:
+            if hasattr(dbdisk, 'service_instance') and (
+                dbdisk.service_instance.manager == 'resourcepool'):
+                na_obj = NASAssign(machine=machine, disk=dbdisk.device_name,
+                                   owner=uname)
+                if to_remove_from_rp:
+                    raise ArgumentError('Multiple managed shares must be '
+                                        'removed as seperate operations. '
+                                        'Please run "del_disk" individually for '
+                                        'the following shares: %s '
+                                        % " ,".join(to_remove_from_rp))
+                else:
+                    to_remove_from_rp = na_obj
         if len(results) == 1:
             session.delete(results[0])
         elif len(results) == 0:
@@ -75,6 +94,31 @@ class CommandDelDisk(BrokerCommand):
         session.flush()
         session.expire(dbmachine, ['disks'])
 
-        plenary_info = PlenaryMachineInfo(dbmachine, logger=logger)
-        plenary_info.write()
+        plenary_machine = PlenaryMachineInfo(dbmachine, logger=logger)
+        key = plenary_machine.get_write_key()
+        dbcluster = dbmachine.cluster
+        if dbcluster:
+            plenary_cluster = PlenaryCluster(dbcluster, logger=logger)
+            key = CompileKey.merge([key, plenary_cluster.get_write_key()])
+        try:
+            lock_queue.acquire(key)
+            if dbcluster:
+                plenary_cluster.write(locked=True)
+            plenary_machine.write(locked=True)
+            if to_remove_from_rp:
+                self._remove_from_rp(to_remove_from_rp)
+        except:
+            plenary_machine.restore_stash()
+            if dbcluster:
+                plenary_cluster.restore_stash()
+            raise
+        finally:
+            lock_queue.release(key)
+
+    def _remove_from_rp(self, na_obj):
+        try:
+            na_obj.delete()
+        except Exception, e:
+            raise AquilonError('Failed while removing nas assignment in '
+                               'resource pool: %s' % e)
         return
