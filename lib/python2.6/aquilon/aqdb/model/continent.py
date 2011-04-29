@@ -29,19 +29,19 @@
 """ Continent is a subclass of Location """
 from sqlalchemy import Column, Integer, ForeignKey
 
-from aquilon.utils import monkeypatch
 from aquilon.aqdb.model import Location
 
 
 class Continent(Location):
     """ Continent is a subtype of location """
     __tablename__ = 'continent'
-    __mapper_args__ = {'polymorphic_identity':'continent'}
+    __mapper_args__ = {'polymorphic_identity': 'continent'}
+
     id = Column(Integer, ForeignKey('location.id',
                                     name='continent_loc_fk',
                                     ondelete='CASCADE'),
                 primary_key=True)
 
-continent = Continent.__table__
-continent.primary_key.name='continent_pk'
+continent = Continent.__table__  # pylint: disable-msg=C0103, E1101
+continent.primary_key.name = 'continent_pk'
 continent.info['unique_fields'] = ['name']

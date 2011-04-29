@@ -61,7 +61,7 @@ class MachineSpecs(Base):
                                         name='mach_spec_cpu_fk'),
                     nullable=False)
 
-    cpu_quantity = Column(Integer, nullable=False) #Constrain to below 512?
+    cpu_quantity = Column(Integer, nullable=False)  # Constrain to below 512?
 
     memory = Column(Integer, nullable=False, default=0)
 
@@ -74,8 +74,9 @@ class MachineSpecs(Base):
     creation_date = Column('creation_date', DateTime, default=datetime.now)
     comments = Column('comments', String(255), nullable=True)
 
-    model = relation(Model, backref=backref('machine_specs', uselist=False))
-    cpu = relation(Cpu)
+    model = relation(Model, innerjoin=True,
+                     backref=backref('machine_specs', uselist=False))
+    cpu = relation(Cpu, innerjoin=True)
 
     @property
     def disk_name(self):
@@ -84,7 +85,7 @@ class MachineSpecs(Base):
         return 'sda'
 
 
-machine_specs = MachineSpecs.__table__
+machine_specs = MachineSpecs.__table__  # pylint: disable-msg=C0103, E1101
 machine_specs.primary_key.name = 'machine_specs_pk'
 
 #for now, need a UK on model_id. WILL be a name AND a model_id as UK.

@@ -43,13 +43,16 @@ controller_types = ['cciss', 'ide', 'sas', 'sata', 'scsi', 'flash',
                     'fibrechannel']
 
 _TN = 'disk'
+_NDTN = 'nas_disk'
+
+
 class Disk(Base):
     """
         Base Class for polymorphic representation of disk or disk-like resources
     """
     __tablename__ = _TN
 
-    id = Column(Integer, Sequence('%s_id_seq'% (_TN)), primary_key=True)
+    id = Column(Integer, Sequence('%s_id_seq' % _TN), primary_key=True)
     disk_type = Column(Enum(64, disk_types), nullable=False)
     capacity = Column(Integer, nullable=False)
     device_name = Column(AqStr(128), nullable=False, default='sda')
@@ -80,16 +83,16 @@ class Disk(Base):
 
 
 disk = Disk.__table__  # pylint: disable-msg=C0103, E1101
-disk.primary_key.name = '%s_pk'% (_TN)
+disk.primary_key.name = '%s_pk' % _TN
 disk.append_constraint(UniqueConstraint('machine_id', 'device_name',
                                         name='disk_mach_dev_name_uk'))
 disk.info['unique_fields'] = ['machine', 'device_name']
+
 
 class LocalDisk(Disk):
     __mapper_args__ = {'polymorphic_identity': 'local'}
 
 
-_NDTN = 'nas_disk'
 class NasDisk(Disk):
     """
         Network attached disks required for root diskless machines, primarily
@@ -111,7 +114,7 @@ class NasDisk(Disk):
         any service instance that has client dependencies.
     """
     service_instance_id = Column(Integer, ForeignKey('service_instance.id',
-                                                     name='%s_srv_inst_fk'% (
+                                                     name='%s_srv_inst_fk' % (
                                                         _NDTN)),
                                  nullable=True)
 
@@ -129,6 +132,7 @@ class NasDisk(Disk):
                 (self._get_class_label(), self.device_name,
                  self.controller_type, self.machine.name, self.capacity,
                  self.service_instance.name)
+
 
 # The formatter code is interested in the count of disks/machines, and it is
 # cheaper to query the DB than to load all entities into memory

@@ -67,6 +67,8 @@ class CommandShowHostIPList(BrokerCommand):
         q = session.query(AddressAssignment)
         q = q.join((addr_dnsrec, addr_dnsrec.ip == AddressAssignment.ip))
         q = q.join((addr_fqdn, addr_dnsrec.fqdn_id == addr_fqdn.id))
+        q = q.filter(addr_fqdn.dns_environment_id ==
+                     AddressAssignment.dns_environment_id)
         q = q.join((addr_domain, addr_fqdn.dns_domain_id == addr_domain.id))
 
         # Make sure we pick up the right DnsDomain/DnsRecord instance

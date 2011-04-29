@@ -44,7 +44,7 @@ from aquilon.aqdb.model import (Base, Service, Host, DnsRecord, DnsDomain, Machi
 from aquilon.aqdb.column_types.aqstr import AqStr
 from aquilon.aqdb.column_types import Enum
 
-_TN  = 'service_instance'
+_TN = 'service_instance'
 _ABV = 'svc_inst'
 
 # list of possible external service managers to enable federated control to
@@ -56,19 +56,21 @@ class ServiceInstance(Base):
         particular purpose (aka usage). If machines have a 'personality'
         dictated by the application they run """
 
-    __tablename__  = _TN
+    __tablename__ = _TN
     _class_label = 'Service Instance'
 
-    id = Column(Integer, Sequence('%s_id_seq'%(_TN)), primary_key=True)
+    id = Column(Integer, Sequence('%s_id_seq' % _TN), primary_key=True)
     service_id = Column(Integer, ForeignKey('service.id',
-                                            name='%s_svc_fk'%(_ABV)),
+                                            name='%s_svc_fk' % _ABV),
                         nullable=False)
     name = Column(AqStr(64), nullable=False)
-    max_clients = Column(Integer, nullable=True) #null means 'no limit'
+    max_clients = Column(Integer, nullable=True)  # null means 'no limit'
     creation_date = Column(DateTime, default=datetime.now, nullable=False)
     manager = Column(Enum(32, MANAGERS), default='aqd', nullable=False)
     comments = Column(String(255), nullable=True)
-    service = relation(Service, lazy=False, uselist=False, backref='instances')
+
+    service = relation(Service, lazy=False, uselist=False, innerjoin=True,
+                       backref='instances')
 
     # _client_count is defined later in this file
     # nas_disk_count and nas_machine_count are defined in disk.py
@@ -79,7 +81,7 @@ class ServiceInstance(Base):
 
     @property
     def cfg_path(self):
-        return 'service/%s/%s'% (self.service.name, self.name)
+        return 'service/%s/%s' % (self.service.name, self.name)
 
     @property
     def client_count(self):
@@ -107,8 +109,9 @@ class ServiceInstance(Base):
 
         q = session.query(BuildItem)
         q = q.filter_by(service_instance=self)
-        q = q.outerjoin('host', '_cluster', 'cluster')
-        q = q.filter(or_(Cluster.id==None,
+        q = q.join('host')
+        q = q.outerjoin('_cluster', 'cluster', from_joinpoint=True)
+        q = q.filter(or_(Cluster.id == None,
                          ~Cluster.cluster_type.in_(cluster_types)))
         adjusted_count += q.count()
         return adjusted_count
@@ -349,10 +352,10 @@ class BuildItem(Base):
                                     nullable=False))
     comments = deferred(Column(String(255), nullable=True))
 
-    service_instance = relation(ServiceInstance, uselist=False,
+    service_instance = relation(ServiceInstance, uselist=False, innerjoin=True,
                                 backref=backref('clients'))
 
-    host = relation(Host, uselist=False,
+    host = relation(Host, uselist=False, innerjoin=True,
                     backref=backref('_services_used',
                                     cascade="all, delete-orphan"))
 

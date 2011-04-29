@@ -31,7 +31,8 @@
 from sqlalchemy import Integer, Column, ForeignKey
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import Base, DnsRecord
+from aquilon.aqdb.model import DnsRecord
+
 
 class ReservedName(DnsRecord):
     """
@@ -51,7 +52,7 @@ class ReservedName(DnsRecord):
     def __init__(self, **kwargs):
         if "ip" in kwargs and kwargs["ip"]:  # pragma: no cover
             raise ArgumentError("Reserved names must not have an IP address.")
-        return super(ReservedName, self).__init__(**kwargs)
+        super(ReservedName, self).__init__(**kwargs)
 
 
 resname = ReservedName.__table__  # pylint: disable-msg=C0103, E1101

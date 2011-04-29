@@ -29,7 +29,6 @@
 """ Company is a subclass of Location """
 from sqlalchemy import Column, Integer, ForeignKey
 
-from aquilon.utils import monkeypatch
 from aquilon.aqdb.model import Location
 
 
@@ -37,12 +36,13 @@ class Company(Location):
     """ Company is a subtype of location """
     __tablename__ = 'company'
     _class_label = 'Organization'
-    __mapper_args__ = {'polymorphic_identity':'company'}
+    __mapper_args__ = {'polymorphic_identity': 'company'}
+
     id = Column(Integer, ForeignKey('location.id',
                                     name='company_loc_fk',
                                     ondelete='CASCADE'),
                 primary_key=True)
 
-company = Company.__table__
-company.primary_key.name='company_pk'
+company = Company.__table__  # pylint: disable-msg=C0103, E1101
+company.primary_key.name = 'company_pk'
 company.info['unique_fields'] = ['name']

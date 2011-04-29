@@ -37,7 +37,6 @@ from sqlalchemy.ext.associationproxy import association_proxy
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Base
-from aquilon.utils import monkeypatch
 from aquilon.aqdb.column_types.aqstr import AqStr
 
 _TN = 'dns_domain'

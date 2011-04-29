@@ -29,20 +29,20 @@
 """ Room is a subclass of Location """
 from sqlalchemy import Column, Integer, ForeignKey
 
-from aquilon.utils import monkeypatch
-from aquilon.aqdb.model import Location, Building
+from aquilon.aqdb.model import Location
 
 
 class Room(Location):
     """ Room is a subtype of location """
     __tablename__ = 'room'
-    __mapper_args__ = {'polymorphic_identity' : 'room'}
+    __mapper_args__ = {'polymorphic_identity': 'room'}
 
     id = Column(Integer, ForeignKey('location.id',
                                     name='room_loc_fk',
                                     ondelete='CASCADE'),
                 primary_key=True)
 
-room = Room.__table__
+
+room = Room.__table__  # pylint: disable-msg=C0103, E1101
 room.primary_key.name = 'room_pk'
 room.info['unique_fields'] = ['name']

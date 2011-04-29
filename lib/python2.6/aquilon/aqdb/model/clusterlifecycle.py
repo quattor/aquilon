@@ -31,12 +31,11 @@ from datetime import datetime
 
 from sqlalchemy.orm.session import object_session
 from sqlalchemy import (Column, Enum, Integer, DateTime, Sequence,
-                        String, ForeignKey, UniqueConstraint)
+                        String, UniqueConstraint)
 
 from aquilon.aqdb.model import Base, StateEngine, HostLifecycle
 from aquilon.utils import monkeypatch
 from aquilon.aqdb.column_types import Enum
-from aquilon.exceptions_ import ArgumentError
 
 _TN = 'clusterlifecycle'
 
@@ -52,20 +51,21 @@ class ClusterLifecycle(StateEngine, Base):
                }
 
     __tablename__ = _TN
-    id = Column(Integer, Sequence('%s_id_seq'%(_TN)), primary_key=True)
+    id = Column(Integer, Sequence('%s_id_seq' % _TN), primary_key=True)
     name = Column(Enum(32, transitions.keys()), nullable=False)
     creation_date = Column(DateTime, default=datetime.now, nullable=False)
     comments = Column(String(255), nullable=True)
-    __mapper_args__ = { 'polymorphic_on': name }
+    __mapper_args__ = {'polymorphic_on': name}
 
     def __repr__(self):
         return str(self.name)
 
 
-clusterlifecycle = ClusterLifecycle.__table__
-clusterlifecycle.primary_key.name='%s_pk'%(_TN)
-clusterlifecycle.append_constraint(UniqueConstraint('name',name='%s_uk'%(_TN)))
+clusterlifecycle = ClusterLifecycle.__table__  # pylint: disable-msg=C0103, E1101
+clusterlifecycle.primary_key.name = '%s_pk' % _TN
+clusterlifecycle.append_constraint(UniqueConstraint('name', name='%s_uk' % _TN))
 clusterlifecycle.info['unique_fields'] = ['name']
+
 
 @monkeypatch(clusterlifecycle)
 def populate(sess, *args, **kw):  # pragma: no cover
@@ -110,6 +110,7 @@ r=s.query(Ready).first()
 type(r)
     Out[55]: <class 'aquilon.aqdb.model.clusterlifecycle.Ready'>
 """
+
 
 class Decommissioned(ClusterLifecycle):
     __mapper_args__ = {'polymorphic_identity': 'decommissioned'}

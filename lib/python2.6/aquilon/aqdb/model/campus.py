@@ -33,17 +33,19 @@ from sqlalchemy import Column, Integer, ForeignKey
 
 from aquilon.aqdb.model import Location, Building
 
+
 class Campus(Location):
     """ Campus is a subtype of location """
     __tablename__ = 'campus'
-    __mapper_args__ = {'polymorphic_identity':'campus'}
+    __mapper_args__ = {'polymorphic_identity': 'campus'}
+
     id = Column(Integer, ForeignKey('location.id',
                                     name='campus_loc_fk',
                                     ondelete='CASCADE'),
                 primary_key=True)
 
 
-campus = Campus.__table__
+campus = Campus.__table__  # pylint: disable-msg=C0103, E1101
 campus.primary_key.name = 'campus_pk'
 campus.info['unique_fields'] = ['name']
 
@@ -65,12 +67,11 @@ class CampusDiffStruct(object):  # pragma: no cover
                                        campus=self.co.name))
 
         if len(building_names) < 1:
-            msg = "No buildings found for campus '%s'"% (self.co.name)
+            msg = "No buildings found for campus '%s'" % self.co.name
             warnings.warn(msg)
 
         query = self.sess.query(Building)
-        self.buildings  = query.filter(
-            Location.name.in_(building_names)).all()
+        self.buildings = query.filter(Location.name.in_(building_names)).all()
 
         self.data['cities'] = []
         self.data['countries'] = []
@@ -91,9 +92,8 @@ class CampusDiffStruct(object):  # pragma: no cover
         for (key, val) in self.data.iteritems():
             self.data[key] = set(val)
 
-
     def __repr__(self):
-        return '<Campus Struct: name = %s, code = %s, comments = %s >'% (
+        return '<Campus Struct: name = %s, code = %s, comments = %s >' % (
             self.co.name, self.co.code, self.co.comments)
 
     def _dbg(self, level, msg):
@@ -102,22 +102,22 @@ class CampusDiffStruct(object):  # pragma: no cover
 
     def _validate(self):
         if len(self.data['continents']) <= 0:
-            msg = "No continents found for %s"% (self.co)
+            msg = "No continents found for %s" % self.co
             raise ValueError(msg)
 
         elif len(self.data['countries']) <= 0:
-            msg = "No countries found for %s"% (self.co)
+            msg = "No countries found for %s" % self.co
             raise ValueError(msg)
 
-        elif len(self.data['cities']) <= 0 :
-            msg = "No cities found for campus '%s'"% (self.co)
+        elif len(self.data['cities']) <= 0:
+            msg = "No cities found for campus '%s'" % self.co
             raise ValueError(msg)
 
         elif len(self.data['continents']) > 1:
             #we span continents, raise a BIG alarm!
             #TODO: give error message useful diagnostic info:
             # campus code plus the buildings and continents you found.
-            msg = "ERROR: Campus %s with %s. Continents aren't to be spanned"% (
+            msg = "ERROR: Campus %s with %s. Continents aren't to be spanned" % (
                 self.co, self.data['continents'])
             raise ValueError(msg)
 
@@ -132,42 +132,42 @@ class CampusDiffStruct(object):  # pragma: no cover
             if len(self.data[atrb]) > 1 or (
                 len(self.data[atrb]) == 1 and atrb == 'cities'):
 
-                self._dbg(3, 'Have to reparent %s %s'% (atrb, self.data[atrb]))
+                self._dbg(3, 'Have to reparent %s %s' % (atrb, self.data[atrb]))
 
                 self.data[atrb] = list(self.data[atrb])
                 self.co.parent = self.data[atrb][0].parent
 
-                self._dbg(3, 'campus parent is now set to %s'% (self.co.parent))
+                self._dbg(3, 'campus parent is now set to %s' % self.co.parent)
 
                 try:
                     self.sess.add(self.co)
                     self.sess.flush()
                 except Exception, e:
-                    print 'ERROR commiting new campus parent: %s'% (e)
+                    print 'ERROR commiting new campus parent: %s' % e
                     self.sess.close()
                     return False
 
                 for subloc in self.data[atrb]:
                     subloc.parent = self.co
-                    msg = '%s parent now set to %s'% (subloc, self.co)
+                    msg = '%s parent now set to %s' % (subloc, self.co)
                     self._dbg(3, msg)
                     self.sess.add(subloc)
 
-                self._dbg(3, 'commiting changes to sublocs %s'% (self.data[atrb]))
+                self._dbg(3, 'commiting changes to sublocs %s' % self.data[atrb])
 
                 try:
                     self.sess.commit()
                 except Exception, e:
-                    print 'rolling back in sync()\n%s'% (e)
+                    print 'rolling back in sync()\n%s' % e
                     self.sess.close()
                     return False
 
-                msg = 'new campus %s has sublocs %s'% (self.co,
-                                                       self.co.sublocations)
+                msg = 'new campus %s has sublocs %s' % (self.co,
+                                                        self.co.sublocations)
                 self._dbg(3, msg)
                 return True
 
         else:
             #this *should* be caught by _verify() anyway.
-            msg = "No valid interpretation for campus %s"% (self.co.name)
+            msg = "No valid interpretation for campus %s" % self.co.name
             raise ValueError(msg)

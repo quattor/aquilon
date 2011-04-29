@@ -38,7 +38,7 @@ from aquilon.exceptions_ import NotFoundException, InternalError
 from aquilon.aqdb.column_types import AqStr, Enum
 from aquilon.aqdb.model import Base, Network, Switch
 
-MAX_VLANS = 4096 #IEEE 802.1Q standard
+MAX_VLANS = 4096  # IEEE 802.1Q standard
 
 VLAN_TYPES = ('storage', 'vmotion', 'user')
 

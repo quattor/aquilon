@@ -34,7 +34,6 @@ from sqlalchemy import (Column, Integer, DateTime, Sequence, String, ForeignKey,
                         UniqueConstraint)
 from sqlalchemy.orm import relation
 
-from aquilon.utils import monkeypatch
 from aquilon.aqdb.model import Base, Role, Realm
 
 
@@ -46,24 +45,25 @@ class UserPrincipal(Base):
 
     name = Column(String(32), nullable=False)
 
-    realm_id = Column(Integer, ForeignKey(
-        'realm.id', name='usr_princ_rlm_fk'), nullable=False)
+    realm_id = Column(Integer, ForeignKey('realm.id', name='usr_princ_rlm_fk'),
+                      nullable=False)
 
-    role_id = Column(Integer, ForeignKey('role.id',
-                                         name='usr_princ_role_fk',
-                                         ondelete='CASCADE'), nullable=False)
+    role_id = Column(Integer, ForeignKey('role.id', name='usr_princ_role_fk',
+                                         ondelete='CASCADE'),
+                     nullable=False)
 
     creation_date = Column(DateTime, nullable=False, default=datetime.now)
 
     comments = Column('comments', String(255), nullable=True)
 
-    role = relation(Role, uselist=False)
-    realm = relation(Realm, uselist=False)
+    role = relation(Role, uselist=False, innerjoin=True)
+    realm = relation(Realm, uselist=False, innerjoin=True)
 
     def __str__(self):
         return '@'.join([self.name, self.realm.name])
 
-user_principal = UserPrincipal.__table__
+
+user_principal = UserPrincipal.__table__  # pylint: disable-msg=C0103, E1101
 user_principal.primary_key.name = 'user_principal_pk'
 user_principal.append_constraint(
     UniqueConstraint('name', 'realm_id', name='user_principal_realm_uk'))

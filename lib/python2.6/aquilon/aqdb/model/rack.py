@@ -31,10 +31,9 @@
 from sqlalchemy import Column, Integer, ForeignKey
 from sqlalchemy.orm import validates
 
-from aquilon.utils import monkeypatch
 from aquilon.aqdb.column_types import AqStr
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import Location, Building
+from aquilon.aqdb.model import Location
 
 
 class Rack(Location):
@@ -59,7 +58,7 @@ class Rack(Location):
         else:
             return value
 
-rack = Rack.__table__
+rack = Rack.__table__  # pylint: disable-msg=C0103, E1101
 
 rack.primary_key.name = 'rack_pk'
 rack.info['unique_fields'] = ['name']

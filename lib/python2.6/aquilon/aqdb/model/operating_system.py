@@ -32,29 +32,31 @@ from datetime import datetime
 from sqlalchemy import (Column, Integer, DateTime, Sequence, String, ForeignKey,
                         UniqueConstraint)
 from sqlalchemy.orm import relation
-from sqlalchemy.orm.session import object_session
 
 from aquilon.aqdb.model import Base, Archetype
 from aquilon.aqdb.column_types.aqstr import AqStr
 
-_TN  = 'operating_system'
+_TN = 'operating_system'
 _ABV = 'os'
+
 
 class OperatingSystem(Base):
     """ Operating Systems """
-    __tablename__  = _TN
+    __tablename__ = _TN
     _class_label = 'Operating System'
 
-    id = Column(Integer, Sequence('%s_seq'%(_ABV)), primary_key=True)
+    id = Column(Integer, Sequence('%s_seq' % _ABV), primary_key=True)
     name = Column(AqStr(32), nullable=False)
     version = Column(AqStr(16), nullable=False)
-    archetype_id = Column(Integer, ForeignKey(
-        'archetype.id', name='%s_arch_fk'%(_ABV)), nullable=False)
+    archetype_id = Column(Integer, ForeignKey('archetype.id',
+                                              name='%s_arch_fk' % _ABV),
+                          nullable=False)
     #vendor id?
     creation_date = Column(DateTime, default=datetime.now, nullable=False)
     comments = Column(String(255), nullable=True)
 
-    archetype = relation(Archetype, backref='os', uselist=False, lazy=False)
+    archetype = relation(Archetype, backref='os', uselist=False, lazy=False,
+                         innerjoin=True)
 
     def __format__(self, format_spec):
         instance = "%s/%s-%s" % (self.archetype.name, self.name, self.version)
@@ -62,12 +64,12 @@ class OperatingSystem(Base):
 
     @property
     def cfg_path(self):
-        return 'os/%s/%s'% (self.name, self.version)
+        return 'os/%s/%s' % (self.name, self.version)
 
 
-operating_system = OperatingSystem.__table__
+operating_system = OperatingSystem.__table__  # pylint: disable-msg=C0103, E1101
 
-operating_system.primary_key.name = '%s_pk'% (_ABV)
+operating_system.primary_key.name = '%s_pk' % _ABV
 operating_system.append_constraint(
-    UniqueConstraint('name', 'version', 'archetype_id', name='%s_uk'% (_TN)))
+    UniqueConstraint('name', 'version', 'archetype_id', name='%s_uk' % _TN))
 operating_system.info['unique_fields'] = ['name', 'version', 'archetype']

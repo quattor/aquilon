@@ -44,17 +44,19 @@
 
 from sqlalchemy import Column, Integer, ForeignKey
 
-from aquilon.aqdb.model import Location, Company
+from aquilon.aqdb.model import Location
+
 
 class Hub(Location):
     """ Hub is a subtype of location """
     __tablename__ = 'hub'
-    __mapper_args__ = {'polymorphic_identity':'hub'}
+    __mapper_args__ = {'polymorphic_identity': 'hub'}
+
     id = Column(Integer, ForeignKey('location.id',
                                     name='hub_loc_fk',
                                     ondelete='CASCADE'),
                 primary_key=True)
 
-hub = Hub.__table__
-hub.primary_key.name='hub_pk'
+hub = Hub.__table__  # pylint: disable-msg=C0103, E1101
+hub.primary_key.name = 'hub_pk'
 hub.info['unique_fields'] = ['name']

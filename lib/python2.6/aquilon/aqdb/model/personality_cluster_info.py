@@ -44,12 +44,11 @@ _PECI = "personality_esx_cluster_info"
 _PECIABV = "pers_esxcl_info"
 
 
-
 class PersonalityClusterInfo(Base):
     """ Extra personality data specific to clusters """
 
     __tablename__ = _PCI
-    id = Column(Integer, Sequence("%s_seq" % (_PCIABV)), primary_key=True)
+    id = Column(Integer, Sequence("%s_seq" % _PCIABV), primary_key=True)
 
     personality_id = Column(Integer, ForeignKey("personality.id",
                                                 name="%s_pers_fk" % _PCIABV,
@@ -58,6 +57,7 @@ class PersonalityClusterInfo(Base):
     cluster_type = Column(AqStr(16), nullable=False)
 
     personality = relation(Personality, uselist=False, lazy=False,
+                           innerjoin=True,
                            backref=backref("cluster_infos",
                                            collection_class=column_mapped_collection(cluster_type),
                                            cascade="all"))

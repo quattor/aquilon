@@ -53,10 +53,10 @@ class NsRecord(Base):
     creation_date = Column(DateTime, default=datetime.now, nullable=False)
     comments = Column(String(255), nullable=True)
 
-    a_record = relation(ARecord, lazy=False, backref=backref('_ns_records',
-                                                             cascade='all'))
+    a_record = relation(ARecord, lazy=False, innerjoin=True,
+                        backref=backref('_ns_records', cascade='all'))
 
-    dns_domain = relation(DnsDomain, lazy=False,
+    dns_domain = relation(DnsDomain, lazy=False, innerjoin=True,
                           backref=backref('_ns_records', cascade='all'))
 
     def __format__(self, format_spec):
@@ -74,8 +74,10 @@ class NsRecord(Base):
     def _get_instance_label(self):
         return "{0:a} of {1:l}".format(self.a_record, self.dns_domain)
 
-NsRecord.__table__.info['unique_fields'] = ['a_record', 'dns_domain']
-NsRecord.__table__.primary_key.name = '%s_pk' % _TN
+
+nsrecord = NsRecord.__table__  # pylint: disable-msg=C0103, E1101
+nsrecord.info['unique_fields'] = ['a_record', 'dns_domain']
+nsrecord.primary_key.name = '%s_pk' % _TN
 
 # Association proxies from/to NSRecord:
 # DnsDomain.servers = association_proxy('_name_servers', 'a_record')

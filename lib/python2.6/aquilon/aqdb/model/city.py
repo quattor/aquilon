@@ -29,20 +29,22 @@
 """ City is a subclass of Location """
 from sqlalchemy import Column, Integer, String, ForeignKey
 
-from aquilon.utils import monkeypatch
-from aquilon.aqdb.model import Location, Country
-from aquilon.aqdb.column_types.aqstr import AqStr
+from aquilon.aqdb.model import Location
+
 
 class City(Location):
     """ City is a subtype of location """
     __tablename__ = 'city'
-    __mapper_args__ = {'polymorphic_identity' : 'city'}
+    __mapper_args__ = {'polymorphic_identity': 'city'}
+
     id = Column(Integer, ForeignKey('location.id',
                                     name='city_loc_fk',
                                     ondelete='CASCADE'),
                 primary_key=True)
-    timezone = Column(String(64), nullable=True, default = 'UTC')
 
-city = City.__table__
-city.primary_key.name='city_pk'
+    timezone = Column(String(64), nullable=True, default='UTC')
+
+
+city = City.__table__  # pylint: disable-msg=C0103, E1101
+city.primary_key.name = 'city_pk'
 city.info['unique_fields'] = ['name']

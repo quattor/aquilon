@@ -30,13 +30,12 @@
 from datetime import datetime
 
 from sqlalchemy.orm import object_session
-from sqlalchemy import (Column, Enum, Integer, DateTime, Sequence,
-                        String, ForeignKey, UniqueConstraint)
+from sqlalchemy import (Column, Enum, Integer, DateTime, Sequence, String,
+                        UniqueConstraint)
 
 from aquilon.aqdb.model import StateEngine, Base
 from aquilon.utils import monkeypatch
 from aquilon.aqdb.column_types import Enum
-from aquilon.exceptions_ import ArgumentError
 
 _TN = 'hostlifecycle'
 
@@ -62,20 +61,23 @@ class HostLifecycle(StateEngine, Base):
                }
 
     __tablename__ = _TN
-    id = Column(Integer, Sequence('%s_id_seq'%(_TN)), primary_key=True)
+
+    id = Column(Integer, Sequence('%s_id_seq' % _TN), primary_key=True)
     name = Column(Enum(32, transitions.keys()), nullable=False)
     creation_date = Column(DateTime, default=datetime.now, nullable=False)
     comments = Column(String(255), nullable=True)
-    __mapper_args__ = { 'polymorphic_on': name }
+
+    __mapper_args__ = {'polymorphic_on': name}
 
     def __repr__(self):
         return str(self.name)
 
 
-hostlifecycle = HostLifecycle.__table__
-hostlifecycle.primary_key.name='%s_pk'%(_TN)
-hostlifecycle.append_constraint(UniqueConstraint('name',name='%s_uk'%(_TN)))
+hostlifecycle = HostLifecycle.__table__  # pylint: disable-msg=C0103, E1101
+hostlifecycle.primary_key.name = '%s_pk' % _TN
+hostlifecycle.append_constraint(UniqueConstraint('name', name='%s_uk' % _TN))
 hostlifecycle.info['unique_fields'] = ['name']
+
 
 @monkeypatch(hostlifecycle)
 def populate(sess, *args, **kw):  # pragma: no cover
@@ -120,6 +122,7 @@ r=s.query(Ready).first()
 type(r)
     Out[55]: <class 'aquilon.aqdb.model.clusterlifecycle.Ready'>
 """
+
 
 class Blind(HostLifecycle):
     __mapper_args__ = {'polymorphic_identity': 'blind'}
