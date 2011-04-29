@@ -143,21 +143,26 @@ class HardwareEntity(Base):  # pylint: disable-msg=W0232, R0903
                 hardware_type = cls.__mapper_args__['polymorphic_identity']
             clslabel = cls._get_class_label()
 
-        hwe = None
-
-        if "." in name:
-            dns_rec = DnsRecord.get_unique(sess, fqdn=name)
-            my_pna = pna.PrimaryNameAssociation.get_unique(sess, dns_rec)
-            if my_pna:
-                hwe = my_pna.hardware_entity
+        # Always do the query against the base class, so we can detect
+        # hardware_type mismatches
+        q = sess.query(HardwareEntity)
+        if cls != HardwareEntity:
+            q = q.with_polymorphic(cls)
         else:
-            # Always do the query against the base class, so we can detect
-            # hardware_type mismatches
-            q = sess.query(HardwareEntity)
-            q = q.filter_by(label=name)
+            q = q.with_polymorphic('*')
+
+        try:
+            if "." in name:
+                dns_rec = DnsRecord.get_unique(sess, fqdn=name, compel=True)
+                q = q.filter_by(primary_name=dns_rec)
+            else:
+                q = q.filter_by(label=name)
             if options:
                 q = q.options(*options)
             hwe = q.first()
+        except NotFoundException:
+            # Fall through if the DNS record was not found
+            hwe = None
 
         if hwe:
             if hardware_type and hwe.hardware_type != hardware_type:

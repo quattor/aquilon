@@ -211,7 +211,7 @@ class CommandAddInterfaceMachine(BrokerCommand):
         # This will cascade to prev & the host
         if dbmachine.primary_name:
             delete_dns_record(dbmachine.primary_name)
-            session.expire(dbmachine, ["_primary_name_asc"])
+            session.expire(dbmachine, ["primary_name"])
         session.delete(dbmachine)
         session.flush()
 

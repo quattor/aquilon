@@ -55,9 +55,8 @@ class CommandShowChassisAll(BrokerCommand):
         # Prefer the primary name for ordering
         q = q.outerjoin(PrimaryNameAssociation, DnsRecord,
                         (Fqdn, DnsRecord.fqdn_id == Fqdn.id), DnsDomain)
-        q = q.options(contains_eager('_primary_name_asc'))
-        q = q.options(contains_eager('_primary_name_asc.dns_record'))
-        q = q.options(contains_eager('_primary_name_asc.dns_record.fqdn'))
-        q = q.options(contains_eager('_primary_name_asc.dns_record.fqdn.dns_domain'))
+        q = q.options(contains_eager('primary_name'))
+        q = q.options(contains_eager('primary_name.fqdn'))
+        q = q.options(contains_eager('primary_name.fqdn.dns_domain'))
         q = q.order_by(Fqdn.name, DnsDomain.name, Chassis.label)
         return q.all()

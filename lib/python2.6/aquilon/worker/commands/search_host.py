@@ -107,8 +107,6 @@ class CommandSearchHost(BrokerCommand):
         # Hardware-specific filters
         q = q.join(Machine)
         q = q.options(contains_eager('machine'))
-        q = q.options(joinedload_all('machine._primary_name_asc.dns_record.'
-                                     'fqdn.dns_domain'))
 
         dblocation = get_location(session, **arguments)
         if dblocation:

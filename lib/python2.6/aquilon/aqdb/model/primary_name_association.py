@@ -83,63 +83,11 @@ class PrimaryNameAssociation(Base):
                                     nullable=False))
     comments = deferred(Column(String(255), nullable=True))
 
-    # Cascading:
-    # - do not delete the HW if the association is removed
-    # - remove the association if the HW is removed
-    hardware_entity = relation(HardwareEntity,
-                               lazy=False,
-                               uselist=False,
-                               innerjoin=True,
-                               backref=backref('_primary_name_asc',
-                                               uselist=False,
-                                               cascade='all, delete-orphan',
-                                               passive_deletes=True))
-
-    # Cascading:
-    # - do not delete the DNS record if the association is removed. Doing so
-    #   would leave the FQDN orphaned
-    # - delete the association if the DNS record is removed
-    dns_record = relation(DnsRecord,
-                          lazy=False,
-                          uselist=False,
-                          innerjoin=True,
-                          backref=backref('_primary_name_asc',
-                                          uselist=False,
-                                          cascade='all, delete-orphan',
-                                          passive_deletes=True))
-
     def __repr__(self):
         return "<{0} for {1:c} {1.label}: {2}>".format(self.__class__.__name__,
                                                        self.hardware_entity,
                                                        self.dns_record)
 
-    #TODO: take fqdn/dns_environment and cut out extra work?
-    @classmethod
-    def get_unique(cls, sess, dns_record, compel=False, preclude=False,
-                   query_options=None):
-        """ Take an ARecord, return a PrimaryNameAssociation
-
-            This overridden method is heavily tweaked from the standard
-            version supplied to the base class. It seems unlikely we'd run
-            into the situation where you have a bit of hardware and need to
-            find it's name. It also doesn't support compel and preclude as
-            the main use of this method is in HardwareEntity.get_unique, which
-            doesn't need the use of these options.
-        """
-        q = sess.query(cls)
-        q = q.filter_by(dns_record=dns_record)
-        if query_options:
-            q = q.options(*query_options)
-        pna = q.first()
-        if not pna and compel:
-            raise NotFoundException('No such primary_name assignment %s' % (
-                                    dns_record.fqdn))
-
-        if pna and preclude:
-            raise ArgumentError('Primary Name %s already exists' % (
-                                dns_record.fqdn))
-
-        return pna
 
 pna = PrimaryNameAssociation.__table__  # pylint: disable-msg=C0103, E1101
 
@@ -151,9 +99,12 @@ pna.append_constraint(
 pna.append_constraint(
     UniqueConstraint('dns_record_id', name='%s_dns_uk' % _ABV))
 
-
-HardwareEntity.primary_name = association_proxy('_primary_name_asc', 'dns_record',
-                creator=lambda dns_rec: PrimaryNameAssociation(dns_record=dns_rec))
-
-DnsRecord.hardware_entity = association_proxy('_primary_name_asc',
-                                                  'hardware_entity')
+# When working with machines, the primary name always crops up, so load it
+# eagerly
+HardwareEntity.primary_name = relation(DnsRecord, uselist=False, lazy=False,
+                                       passive_deletes=False,
+                                       secondary=PrimaryNameAssociation.__table__,
+                                       backref=backref('hardware_entity',
+                                                       uselist=False,
+                                                       passive_deletes=True,
+                                                       lazy=True))

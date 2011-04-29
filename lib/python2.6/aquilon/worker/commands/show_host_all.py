@@ -44,12 +44,8 @@ class CommandShowHostAll(BrokerCommand):
         q = q.join(Machine, PrimaryNameAssociation, DnsRecord,
                    (Fqdn, DnsRecord.fqdn_id == Fqdn.id), DnsDomain)
         q = q.options(contains_eager('machine'))
-        q = q.options(contains_eager('machine._primary_name_asc'))
-        q = q.options(contains_eager('machine._primary_name_asc.'
-                                     'dns_record'))
-        q = q.options(contains_eager('machine._primary_name_asc.'
-                                     'dns_record.fqdn'))
-        q = q.options(contains_eager('machine._primary_name_asc.'
-                                     'dns_record.fqdn.dns_domain'))
+        q = q.options(contains_eager('machine.primary_name'))
+        q = q.options(contains_eager('machine.primary_name.fqdn'))
+        q = q.options(contains_eager('machine.primary_name.fqdn.dns_domain'))
         q = q.order_by(Fqdn.name, DnsDomain.name)
         return SimpleHostList(q.all())

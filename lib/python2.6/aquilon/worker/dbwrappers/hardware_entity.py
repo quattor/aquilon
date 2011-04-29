@@ -158,7 +158,7 @@ def convert_primary_name_to_arecord(session, dbhw_ent, ip, dbnetwork):
     comments = dbhw_ent.primary_name.comments
     session.delete(dbhw_ent.primary_name)
     session.flush()
-    session.expire(dbhw_ent, ['_primary_name_asc'])
+    session.expire(dbhw_ent, ['primary_name'])
     session.expire(dbfqdn, ['dns_records'])
     dbdns_rec = ARecord(fqdn=dbfqdn, ip=ip, network=dbnetwork,
                         comments=comments)

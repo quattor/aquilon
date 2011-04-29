@@ -124,7 +124,7 @@ class CommandRefreshWindowsHosts(BrokerCommand):
                 clusters.add(dbmachine.cluster)
             session.delete(dbhost)
             delete_dns_record(dbmachine.primary_name)
-            session.expire(dbmachine, ['_primary_name_asc'])
+            session.expire(dbmachine, ['primary_name'])
         session.flush()
         # The Host() creations below fail when autoflush is enabled.
         session.autoflush = False

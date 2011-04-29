@@ -76,11 +76,6 @@ class CommandShowHostIPList(BrokerCommand):
             q = q.filter(~HardwareEntity.id.in_(archq.subquery()))
         q = q.reset_joinpoint()
 
-        q = q.options(subqueryload('interface.hardware_entity.'
-                                   '_primary_name_asc'))
-        q = q.options(lazyload('interface.hardware_entity.'
-                               '_primary_name_asc.hardware_entity'))
-
         iplist = HostIPList()
         for addr in q:
             hwent = addr.interface.hardware_entity

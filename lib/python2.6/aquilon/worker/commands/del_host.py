@@ -98,7 +98,7 @@ class CommandDelHost(BrokerCommand):
             session.delete(dbhost)
             delete_dns_record(dbmachine.primary_name)
             session.flush()
-            session.expire(dbmachine, ['host', '_primary_name_asc'])
+            session.expire(dbmachine, ['host', 'primary_name'])
             delplenary = True
 
             if archetype != 'aurora' and ip is not None:
