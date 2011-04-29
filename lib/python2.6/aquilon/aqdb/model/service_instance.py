@@ -127,7 +127,7 @@ class ServiceInstance(Base):
         q = q.options(contains_eager('fqdn'))
         q = q.options(contains_eager('fqdn.dns_domain'))
         q = q.order_by(DnsDomain.name, Fqdn.name)
-        return [sys.fqdn for sys in q.all()]
+        return [str(sys.fqdn) for sys in q.all()]
 
     @property
     def server_fqdns(self):
@@ -141,7 +141,7 @@ class ServiceInstance(Base):
         q = q.options(contains_eager('fqdn'))
         q = q.options(contains_eager('fqdn.dns_domain'))
         q = q.order_by(DnsDomain.name, Fqdn.name)
-        return [sys.fqdn for sys in q.all()]
+        return [str(sys.fqdn) for sys in q.all()]
 
     @property
     def server_ips(self):
