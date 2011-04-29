@@ -29,8 +29,8 @@
 """Host formatter."""
 
 from sqlalchemy.sql import bindparam
-from sqlalchemy.orm import (contains_eager, aliased, joinedload_all,
-                            subqueryload_all)
+from sqlalchemy.orm import (contains_eager, aliased, joinedload, subqueryload,
+                            lazyload)
 from sqlalchemy.orm.session import object_session
 
 from aquilon.server.formats.formatters import ObjectFormatter
@@ -160,55 +160,16 @@ class NetworkHostListFormatter(ListFormatter):
         # bindparams to execute it multiple times
         if netlist:
             session = object_session(netlist[0])
-            # DnsDomain and DnsRecord are used twice, so be certain which instance
-            # is used where
-            addr_dnsrec = aliased(ARecord, name="addr_dnsrec")
-            addr_fqdn = aliased(Fqdn, name="addr_fqdn")
-            addr_domain = aliased(DnsDomain, name="addr_domain")
-            pna_dnsrec = aliased(DnsRecord, name="pna_dnsrec")
-            pna_fqdn = aliased(Fqdn, name="pna_fqdn")
-            pna_domain = aliased(DnsDomain, name="pna_dnsdomain")
 
             q = session.query(AddressAssignment)
             q = q.filter(AddressAssignment.ip > bindparam('ip'))
             q = q.filter(AddressAssignment.ip < bindparam('broadcast'))
 
-            # Make sure we pick up the right DnsDomain/DnsRecord instance
-            q = q.join((addr_dnsrec, addr_dnsrec.ip == AddressAssignment.ip))
-            q = q.join((addr_fqdn, addr_dnsrec.fqdn_id == addr_fqdn.id))
-            q = q.filter(addr_fqdn.dns_environment_id ==
-                         AddressAssignment.dns_environment_id)
-            q = q.join((addr_domain, addr_fqdn.dns_domain_id ==
-                        addr_domain.id))
-            q = q.options(contains_eager("dns_records", alias=addr_dnsrec))
-            q = q.options(contains_eager("dns_records.fqdn",
-                                         alias=addr_fqdn))
-            q = q.options(contains_eager("dns_records.fqdn.dns_domain",
-                                         alias=addr_domain))
-
-            q = q.reset_joinpoint()
-            q = q.join(Interface, HardwareEntity)
-            q = q.outerjoin(PrimaryNameAssociation)
-            q = q.options(contains_eager('interface'))
-            q = q.options(contains_eager('interface.hardware_entity'))
-            q = q.options(contains_eager("interface.hardware_entity."
-                                         "_primary_name_asc"))
-
-            # Make sure we pick up the right DnsDomain/DnsRecord instance
-            q = q.outerjoin((pna_dnsrec, PrimaryNameAssociation.dns_record_id ==
-                             pna_dnsrec.id))
-            q = q.outerjoin((pna_fqdn, pna_dnsrec.fqdn_id == pna_fqdn.id))
-            q = q.outerjoin((pna_domain, pna_fqdn.dns_domain_id ==
-                             pna_domain.id))
-            q = q.options(contains_eager("interface.hardware_entity."
-                                         "_primary_name_asc.dns_record",
-                                         alias=pna_dnsrec))
-            q = q.options(contains_eager("interface.hardware_entity."
-                                         "_primary_name_asc.dns_record.fqdn",
-                                        alias=pna_fqdn))
-            q = q.options(contains_eager("interface.hardware_entity."
-                                         "_primary_name_asc.dns_record.fqdn.dns_domain",
-                                        alias=pna_domain))
+            q = q.options(joinedload('dns_records'))
+            q = q.options(subqueryload('interface.hardware_entity.'
+                                       '_primary_name_asc'))
+            q = q.options(lazyload('interface.hardware_entity.'
+                                   '_primary_name_asc.hardware_entity'))
 
             q = q.order_by(AddressAssignment.ip)
 
@@ -270,16 +231,13 @@ class SimpleNetworkListFormatter(ListFormatter):
             addrq = session.query(AddressAssignment)
             addrq = addrq.filter(AddressAssignment.ip > bindparam('ip'))
             addrq = addrq.filter(AddressAssignment.ip < bindparam('broadcast'))
-            addrq = addrq.options(joinedload_all('dns_records.fqdn.dns_domain'))
-            addrq = addrq.join(Interface)
-            addrq = addrq.options(contains_eager('interface'))
-            addrq = addrq.options(subqueryload_all('interface.hardware_entity.'
-                                                   'interfaces'))
+            addrq = addrq.options(joinedload('dns_records'))
+            addrq = addrq.options(subqueryload('interface.hardware_entity.'
+                                               'interfaces'))
 
             dynq = session.query(DynamicStub)
             dynq = dynq.filter(DynamicStub.ip > bindparam('ip'))
             dynq = dynq.filter(DynamicStub.ip < bindparam('broadcast'))
-            dynq = dynq.options(joinedload_all('fqdn.dns_domain'))
 
         netlist_msg = self.loaded_protocols[self.protocol].NetworkList()
         for n in nlist:

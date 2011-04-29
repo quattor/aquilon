@@ -94,6 +94,9 @@ dns_fqdn_mapper = mapper(ARecord, arecord.join(dns_record).join(fqdn),
                              # load them automatically
                              'creation_date': deferred(dns_record.c.creation_date),
                              'comments': deferred(dns_record.c.comments),
+                             # Make sure FQDNs are eager loaded when using this
+                             # mapper
+                             'fqdn': relation(Fqdn, lazy=False, innerjoin=True)
                          },
                          polymorphic_identity="a_record",
                          primary_key=arecord.c.dns_record_id,

@@ -29,7 +29,9 @@
 """Contains the logic for `aq show hostiplist`."""
 
 
-from sqlalchemy.orm import contains_eager, aliased
+from sqlalchemy.orm import (contains_eager, aliased, subqueryload, joinedload,
+                            lazyload)
+from sqlalchemy.sql import and_
 
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.formats.host import HostIPList
@@ -55,31 +57,12 @@ class CommandShowHostIPList(BrokerCommand):
             dbarchetype = Archetype.get_unique(session, "aurora", compel=True)
             archq = archq.filter(Personality.archetype == dbarchetype)
 
-        # DnsDomain and DnsRecord are used twice, so be certain which instance
-        # is used where
-        addr_dnsrec = aliased(ARecord, name="addr_dnsrec")
-        addr_fqdn = aliased(Fqdn, name="addr_fqdn")
-        addr_domain = aliased(DnsDomain, name="addr_domain")
-        pna_dnsrec = aliased(DnsRecord, name="pna_dnsrec")
-        pna_fqdn = aliased(Fqdn, name="pna_fqdn")
-        pna_domain = aliased(DnsDomain, name="pna_dnsdomain")
-
         q = session.query(AddressAssignment)
-        q = q.join((addr_dnsrec, addr_dnsrec.ip == AddressAssignment.ip))
-        q = q.join((addr_fqdn, addr_dnsrec.fqdn_id == addr_fqdn.id))
-        q = q.filter(addr_fqdn.dns_environment_id ==
-                     AddressAssignment.dns_environment_id)
-        q = q.join((addr_domain, addr_fqdn.dns_domain_id == addr_domain.id))
+        q = q.options(joinedload('dns_records'))
 
-        # Make sure we pick up the right DnsDomain/DnsRecord instance
-        q = q.options(contains_eager("dns_records", alias=addr_dnsrec))
-        q = q.options(contains_eager("dns_records.fqdn",
-                                     alias=addr_fqdn))
-        q = q.options(contains_eager("dns_records.fqdn.dns_domain",
-                                     alias=addr_domain))
-
-        q = q.reset_joinpoint()
         q = q.join(Interface, HardwareEntity)
+        q = q.options(contains_eager('interface'))
+        q = q.options(contains_eager('interface.hardware_entity'))
 
         # If archetype was given, select only the matching hosts. Otherwise,
         # exclude aurora hosts.
@@ -87,28 +70,12 @@ class CommandShowHostIPList(BrokerCommand):
             q = q.filter(HardwareEntity.id.in_(archq.subquery()))
         else:
             q = q.filter(~HardwareEntity.id.in_(archq.subquery()))
+        q = q.reset_joinpoint()
 
-        q = q.outerjoin(PrimaryNameAssociation)
-        q = q.outerjoin((pna_dnsrec, PrimaryNameAssociation.dns_record_id ==
-                         pna_dnsrec.id))
-        q = q.outerjoin((pna_fqdn, pna_dnsrec.fqdn_id == pna_fqdn.id))
-        q = q.outerjoin((pna_domain, pna_fqdn.dns_domain_id == pna_domain.id))
-        q = q.options(contains_eager('interface'))
-        q = q.options(contains_eager('interface.hardware_entity'))
-        q = q.options(contains_eager("interface.hardware_entity._primary_name_asc"))
-
-        # Make sure we pick up the right DnsDomain/DnsRecord instance
-        q = q.options(contains_eager("interface.hardware_entity."
-                                     "_primary_name_asc.dns_record",
-                                     alias=pna_dnsrec))
-        q = q.options(contains_eager("interface.hardware_entity."
-                                     "_primary_name_asc.dns_record.fqdn",
-                                    alias=pna_fqdn))
-        q = q.options(contains_eager("interface.hardware_entity."
-                                     "_primary_name_asc.dns_record.fqdn.dns_domain",
-                                    alias=pna_domain))
-
-        q = q.order_by(addr_fqdn.name, addr_domain.name)
+        q = q.options(subqueryload('interface.hardware_entity.'
+                                   '_primary_name_asc'))
+        q = q.options(lazyload('interface.hardware_entity.'
+                               '_primary_name_asc.hardware_entity'))
 
         iplist = HostIPList()
         for addr in q:
@@ -132,7 +99,9 @@ class CommandShowHostIPList(BrokerCommand):
             q = q.reset_joinpoint()
 
             q = q.outerjoin((AddressAssignment,
-                             AddressAssignment.ip == ARecord.ip))
+                             and_(AddressAssignment.ip == ARecord.ip,
+                                  AddressAssignment.dns_environment_id ==
+                                  Fqdn.dns_environment_id)))
             q = q.filter(AddressAssignment.id == None)
 
             q = q.order_by(Fqdn.name, DnsDomain.name)

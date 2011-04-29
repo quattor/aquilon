@@ -44,7 +44,7 @@ class CommandShowRouter(BrokerCommand):
         q = session.query(RouterAddress)
         q = q.options(undefer(RouterAddress.comments))
         q = q.options(joinedload('location'))
-        q = q.options(subqueryload_all('dns_records.fqdn.dns_domain'))
+        q = q.options(joinedload('dns_records'))
         q = q.options(subqueryload_all('network'))
 
         if all:
