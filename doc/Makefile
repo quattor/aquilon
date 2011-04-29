@@ -34,9 +34,7 @@ html: HTML.MANIFEST
 HTML.MANIFEST: $(ALL_SOURCES) version.txt
 	$(XSLTPROC) $(XSLT_PARAMS) style-html.xsl $(ALL_SOURCES)
 
-# Using git internals as a dependency here is a hack, but that's the only
-# way to get the correct version number
-version.txt: ../.git/HEAD
+version.txt:
 	# We don't want the -rc suffix to show up in the man pages
 	git describe | sed -e 's/-rc[0-9]\+$$//' > $@.tmp
 	# Don't force a full rebuild unless the version has changed
