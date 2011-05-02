@@ -33,12 +33,12 @@ import os
 from tempfile import mkstemp, mkdtemp
 from base64 import b64decode
 
-from aquilon.server.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand
 from aquilon.exceptions_ import ProcessException, ArgumentError
 from aquilon.aqdb.model import Sandbox
-from aquilon.server.processes import (write_file, remove_file, remove_dir,
+from aquilon.worker.processes import (write_file, remove_file, remove_dir,
                                       run_git, sync_domain)
-from aquilon.server.logger import CLIENT_INFO
+from aquilon.worker.logger import CLIENT_INFO
 
 
 class CommandPublish(BrokerCommand):

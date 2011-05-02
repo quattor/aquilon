@@ -30,8 +30,8 @@
 
 
 from aquilon.exceptions_ import ArgumentError, NotFoundException
-from aquilon.server.broker import BrokerCommand
-from aquilon.server.dbwrappers.user_principal import (
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.dbwrappers.user_principal import (
         get_or_create_user_principal)
 
 

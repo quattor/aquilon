@@ -29,8 +29,8 @@
 """Contains a wrapper for `aq add aquilon host`."""
 
 
-from aquilon.server.broker import BrokerCommand
-from aquilon.server.commands.add_host import CommandAddHost
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.commands.add_host import CommandAddHost
 
 
 class CommandAddAquilonHost(CommandAddHost):

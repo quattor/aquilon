@@ -70,10 +70,10 @@ from twisted.python import log
 
 from aquilon.exceptions_ import ArgumentError, AuthorizationException, \
         NotFoundException, UnimplementedError, PartialError
-from aquilon.server.formats.formatters import ResponseFormatter
-from aquilon.server.broker import BrokerCommand
-from aquilon.server import commands
-from aquilon.server.processes import cache_version
+from aquilon.worker.formats.formatters import ResponseFormatter
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker import commands
+from aquilon.worker.processes import cache_version
 from aquilon.utils import (force_int, force_float, force_boolean, force_ipv4,
                            force_mac)
 
@@ -346,7 +346,7 @@ class RestServer(ResponsePage):
                     fullcommand = fullcommand + "_" + trigger
                 mymodule = getattr(commands, fullcommand, None)
                 if not mymodule:
-                    log.msg("No module available in aquilon.server.commands " +
+                    log.msg("No module available in aquilon.worker.commands " +
                             "for %s" % fullcommand)
                 # See commands/__init__.py for more info here...
                 myinstance = getattr(mymodule, "broker_command", None)

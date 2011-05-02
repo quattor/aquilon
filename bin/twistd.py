@@ -22,7 +22,7 @@ import warnings
 warnings.simplefilter("ignore", DeprecationWarning)
 
 
-import aquilon.server.depends
+import aquilon.worker.depends
 import aquilon.aqdb.depends
 
 from twisted.scripts import twistd

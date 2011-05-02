@@ -31,8 +31,8 @@
 
 from aquilon.exceptions_ import NotFoundException
 from aquilon.aqdb.model import Cluster
-from aquilon.server.broker import BrokerCommand
-from aquilon.server.templates.cluster import PlenaryClusterObject
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.templates.cluster import PlenaryClusterObject
 
 
 class CommandCatCluster(BrokerCommand):

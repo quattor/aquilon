@@ -31,7 +31,7 @@
 import os
 import logging
 
-from aquilon.server.templates.base import Plenary
+from aquilon.worker.templates.base import Plenary
 
 LOGGER = logging.getLogger(__name__)
 

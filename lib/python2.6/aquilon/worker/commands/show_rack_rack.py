@@ -29,8 +29,8 @@
 """Contains the logic for `aq show rack --rack`."""
 
 
-from aquilon.server.broker import BrokerCommand
-from aquilon.server.commands.show_location_type import CommandShowLocationType
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.commands.show_location_type import CommandShowLocationType
 
 
 class CommandShowRackRack(CommandShowLocationType):

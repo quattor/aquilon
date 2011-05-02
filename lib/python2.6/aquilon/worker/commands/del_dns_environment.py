@@ -30,8 +30,8 @@
 
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.server.broker import BrokerCommand
-from aquilon.server.processes import DSDBRunner
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.processes import DSDBRunner
 from aquilon.aqdb.model import (DnsEnvironment, RouterAddress,
                                 AddressAssignment, Fqdn)
 

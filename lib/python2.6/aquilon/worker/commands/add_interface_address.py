@@ -28,19 +28,19 @@
 # TERMS THAT MAY APPLY.
 """Contains the logic for `aq add interface address`."""
 
-from aquilon.server.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand
 from aquilon.exceptions_ import ArgumentError, ProcessException, IncompleteError
 from aquilon.aqdb.model import (ARecord, HardwareEntity, DynamicStub,
                                 AddressAssignment, DnsEnvironment, Fqdn,
                                 NetworkEnvironment)
 from aquilon.aqdb.model.network import get_net_id_from_ip
-from aquilon.server.dbwrappers.interface import (get_interface,
+from aquilon.worker.dbwrappers.interface import (get_interface,
                                                  generate_ip,
                                                  check_ip_restrictions,
                                                  assign_address)
-from aquilon.server.templates.host import PlenaryHost
-from aquilon.server.locks import lock_queue
-from aquilon.server.processes import DSDBRunner
+from aquilon.worker.templates.host import PlenaryHost
+from aquilon.worker.locks import lock_queue
+from aquilon.worker.processes import DSDBRunner
 
 
 class CommandAddInterfaceAddress(BrokerCommand):

@@ -29,13 +29,13 @@
 
 
 from aquilon.exceptions_ import ArgumentError, IncompleteError
-from aquilon.server.broker import BrokerCommand
-from aquilon.server.dbwrappers.host import hostname_to_host
-from aquilon.server.locks import lock_queue, CompileKey
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.dbwrappers.host import hostname_to_host
+from aquilon.worker.locks import lock_queue, CompileKey
 from aquilon.aqdb.model import Cluster
-from aquilon.server.templates.base import PlenaryCollection
-from aquilon.server.templates.host import PlenaryHost
-from aquilon.server.templates.cluster import PlenaryCluster
+from aquilon.worker.templates.base import PlenaryCollection
+from aquilon.worker.templates.host import PlenaryHost
+from aquilon.worker.templates.cluster import PlenaryCluster
 
 
 class CommandUncluster(BrokerCommand):

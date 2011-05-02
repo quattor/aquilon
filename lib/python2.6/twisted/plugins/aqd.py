@@ -35,7 +35,7 @@ from logging import Handler
 from signal import SIGTERM, SIGKILL
 
 # This is done by the wrapper script.
-#import aquilon.server.depends
+#import aquilon.worker.depends
 
 import coverage
 from zope.interface import implements
@@ -48,12 +48,12 @@ from twisted.internet import reactor, process
 from ms.modulecmd import Modulecmd, ModulecmdExecError
 
 from aquilon.config import Config
-from aquilon.server.kncwrappers import KNCSite
-from aquilon.server.anonwrappers import AnonSite
+from aquilon.worker.kncwrappers import KNCSite
+from aquilon.worker.anonwrappers import AnonSite
 
 # This gets imported dynamically to avoid loading libraries before the
 # config file has been parsed.
-#from aquilon.server.resources import RestServer
+#from aquilon.worker.resources import RestServer
 
 
 class Options(usage.Options):
@@ -209,7 +209,7 @@ class AQDMaker(object):
         # Dynamic import means that we can parse config options before
         # importing aqdb.  This is a hack until aqdb can be imported without
         # firing up database connections.
-        resources = __import__("aquilon.server.resources", globals(), locals(),
+        resources = __import__("aquilon.worker.resources", globals(), locals(),
                 ["RestServer"], -1)
         RestServer = getattr(resources, "RestServer")
 

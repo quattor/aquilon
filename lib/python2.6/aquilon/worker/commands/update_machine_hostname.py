@@ -29,9 +29,9 @@
 """Contains the logic for `aq update machine --hostname`."""
 
 
-from aquilon.server.broker import BrokerCommand
-from aquilon.server.commands.update_machine import CommandUpdateMachine
-from aquilon.server.dbwrappers.host import hostname_to_host
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.commands.update_machine import CommandUpdateMachine
+from aquilon.worker.dbwrappers.host import hostname_to_host
 
 
 class CommandUpdateMachineHostname(CommandUpdateMachine):

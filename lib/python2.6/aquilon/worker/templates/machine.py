@@ -31,10 +31,10 @@
 
 import logging
 
-from aquilon.server.locks import CompileKey
-from aquilon.server.templates.base import Plenary
-from aquilon.server import templates
-from aquilon.server.templates.panutils import pan, StructureTemplate, PanUnit
+from aquilon.worker.locks import CompileKey
+from aquilon.worker.templates.base import Plenary
+from aquilon.worker import templates
+from aquilon.worker.templates.panutils import pan, StructureTemplate, PanUnit
 
 LOGGER = logging.getLogger(__name__)
 

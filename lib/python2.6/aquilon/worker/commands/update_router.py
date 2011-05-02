@@ -29,7 +29,7 @@
 """Contains the logic for `aq update router`."""
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.server.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import RouterAddress, Building, ARecord
 
 

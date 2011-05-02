@@ -31,8 +31,8 @@
 
 from inspect import isclass
 
-from aquilon.server.formats.formatters import ObjectFormatter
-from aquilon.server.formats.list import ListFormatter
+from aquilon.worker.formats.formatters import ObjectFormatter
+from aquilon.worker.formats.list import ListFormatter
 from aquilon.aqdb.model import (Location, Company, Hub, Continent, Country,
                                 Campus, City, Building, Room, Rack, Desk)
 

@@ -29,7 +29,7 @@
 """Contains the logic for `aq add router`."""
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.server.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import (RouterAddress, Building, ARecord, Fqdn,
                                 NetworkEnvironment)
 from aquilon.aqdb.model.dns_domain import parse_fqdn

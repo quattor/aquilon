@@ -31,11 +31,11 @@
 
 import os
 
-from aquilon.server.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import Sandbox
-from aquilon.server.processes import run_command, remove_dir
+from aquilon.worker.processes import run_command, remove_dir
 from aquilon.exceptions_ import ArgumentError, ProcessException
-from aquilon.server.formats.branch import RemoteSandbox
+from aquilon.worker.formats.branch import RemoteSandbox
 
 
 class CommandGet(BrokerCommand):

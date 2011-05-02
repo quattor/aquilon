@@ -29,8 +29,8 @@
 """Contains the logic for `aq show machine --all`."""
 
 
-from aquilon.server.broker import BrokerCommand
-from aquilon.server.formats.machine import SimpleMachineList
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.formats.machine import SimpleMachineList
 from aquilon.aqdb.model import Machine
 
 

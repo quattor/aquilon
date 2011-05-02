@@ -29,8 +29,8 @@
 """Contains the logic for `aq cat --service`."""
 
 
-from aquilon.server.broker import BrokerCommand
-from aquilon.server.templates.service import (PlenaryServiceToplevel,
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.templates.service import (PlenaryServiceToplevel,
                                               PlenaryServiceClientDefault)
 from aquilon.aqdb.model import Service
 

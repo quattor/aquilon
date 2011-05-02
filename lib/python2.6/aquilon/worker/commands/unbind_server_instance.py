@@ -29,8 +29,8 @@
 """Contains a wrapper for `aq unbind server --instance`."""
 
 
-from aquilon.server.broker import BrokerCommand
-from aquilon.server.commands.unbind_server import CommandUnbindServer
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.commands.unbind_server import CommandUnbindServer
 
 
 class CommandUnbindServerInstance(CommandUnbindServer):

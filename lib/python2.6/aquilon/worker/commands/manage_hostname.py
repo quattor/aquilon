@@ -28,11 +28,11 @@
 # TERMS THAT MAY APPLY.
 
 
-from aquilon.server.broker import BrokerCommand
-from aquilon.server.dbwrappers.branch import get_branch_and_author
-from aquilon.server.dbwrappers.host import hostname_to_host
-from aquilon.server.templates.host import PlenaryHost
-from aquilon.server.locks import lock_queue, CompileKey
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.dbwrappers.branch import get_branch_and_author
+from aquilon.worker.dbwrappers.host import hostname_to_host
+from aquilon.worker.templates.host import PlenaryHost
+from aquilon.worker.locks import lock_queue, CompileKey
 from aquilon.exceptions_ import IncompleteError, ArgumentError
 from aquilon.aqdb.model import Domain
 

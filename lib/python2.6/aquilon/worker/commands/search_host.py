@@ -31,18 +31,18 @@
 
 from sqlalchemy.orm import aliased, joinedload_all, contains_eager
 
-from aquilon.server.broker import BrokerCommand
-from aquilon.server.formats.host import SimpleHostList
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.formats.host import SimpleHostList
 from aquilon.aqdb.model import (Host, Cluster, Archetype, Personality,
                                 HostLifecycle, OperatingSystem, Service,
                                 ServiceInstance, NasDisk, Disk, Machine, Model,
                                 ARecord, Fqdn, DnsDomain, Interface,
                                 AddressAssignment, NetworkEnvironment, Network)
 from aquilon.aqdb.model.dns_domain import parse_fqdn
-from aquilon.server.dbwrappers.service_instance import get_service_instance
-from aquilon.server.dbwrappers.branch import get_branch_and_author
-from aquilon.server.dbwrappers.location import get_location
-from aquilon.server.dbwrappers.network import get_network_byip
+from aquilon.worker.dbwrappers.service_instance import get_service_instance
+from aquilon.worker.dbwrappers.branch import get_branch_and_author
+from aquilon.worker.dbwrappers.location import get_location
+from aquilon.worker.dbwrappers.network import get_network_byip
 
 
 class CommandSearchHost(BrokerCommand):

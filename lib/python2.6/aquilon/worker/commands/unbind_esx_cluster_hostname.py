@@ -28,8 +28,8 @@
 # TERMS THAT MAY APPLY.
 
 
-from aquilon.server.broker import BrokerCommand
-from aquilon.server.commands.uncluster import CommandUncluster
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.commands.uncluster import CommandUncluster
 
 
 class CommandUnbindESXClusterHostname(CommandUncluster):

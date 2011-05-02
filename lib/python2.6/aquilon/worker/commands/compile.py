@@ -29,9 +29,9 @@
 """Contains the logic for `aq compile`."""
 
 
-from aquilon.server.broker import BrokerCommand
-from aquilon.server.dbwrappers.branch import get_branch_and_author
-from aquilon.server.templates.domain import TemplateDomain
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.dbwrappers.branch import get_branch_and_author
+from aquilon.worker.templates.domain import TemplateDomain
 
 
 class CommandCompile(BrokerCommand):

@@ -31,17 +31,17 @@
 
 from aquilon.exceptions_ import (ArgumentError, ProcessException, AquilonError,
                                  InternalError)
-from aquilon.server.broker import BrokerCommand
-from aquilon.server.dbwrappers.branch import get_branch_and_author
-from aquilon.server.dbwrappers.hardware_entity import parse_primary_name
-from aquilon.server.dbwrappers.interface import generate_ip, assign_address
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.dbwrappers.branch import get_branch_and_author
+from aquilon.worker.dbwrappers.hardware_entity import parse_primary_name
+from aquilon.worker.dbwrappers.interface import generate_ip, assign_address
 from aquilon.aqdb.model import (Domain, Host, OperatingSystem, Archetype,
                                 HostLifecycle, Machine, Personality)
-from aquilon.server.templates.base import PlenaryCollection
-from aquilon.server.templates.machine import PlenaryMachineInfo
-from aquilon.server.templates.cluster import PlenaryCluster
-from aquilon.server.locks import lock_queue
-from aquilon.server.processes import DSDBRunner
+from aquilon.worker.templates.base import PlenaryCollection
+from aquilon.worker.templates.machine import PlenaryMachineInfo
+from aquilon.worker.templates.cluster import PlenaryCluster
+from aquilon.worker.locks import lock_queue
+from aquilon.worker.processes import DSDBRunner
 
 
 class CommandAddHost(BrokerCommand):

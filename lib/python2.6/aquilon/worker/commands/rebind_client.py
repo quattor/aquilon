@@ -29,8 +29,8 @@
 """Contains a wrapper for `aq rebind client`."""
 
 
-from aquilon.server.broker import BrokerCommand
-from aquilon.server.commands.bind_client import CommandBindClient
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.commands.bind_client import CommandBindClient
 
 
 class CommandRebindClient(CommandBindClient):

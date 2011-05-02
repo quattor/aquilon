@@ -34,9 +34,9 @@ from logging import DEBUG
 from twisted.internet.defer import Deferred
 
 from aquilon.exceptions_ import NotFoundException
-from aquilon.server.broker import BrokerCommand
-from aquilon.server.logger import CLIENT_INFO
-from aquilon.server.messages import StatusSubscriber
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.logger import CLIENT_INFO
+from aquilon.worker.messages import StatusSubscriber
 
 
 class StatusWriter(StatusSubscriber):

@@ -29,10 +29,10 @@
 """Contains the logic for `aq add service`."""
 
 from aquilon.exceptions_ import ArgumentError, NotFoundException, InternalError
-from aquilon.server.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import Service, ServiceInstance
-from aquilon.server.templates.base import PlenaryCollection
-from aquilon.server.templates.service import (PlenaryService,
+from aquilon.worker.templates.base import PlenaryCollection
+from aquilon.worker.templates.service import (PlenaryService,
                                               PlenaryServiceInstance)
 
 

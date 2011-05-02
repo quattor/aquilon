@@ -29,8 +29,8 @@
 """Contains the logic for `aq poll tor_switch`."""
 
 
-from aquilon.server.broker import BrokerCommand
-from aquilon.server.commands.poll_switch import CommandPollSwitch
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.commands.poll_switch import CommandPollSwitch
 
 
 class CommandPollTorSwitch(CommandPollSwitch):

@@ -29,8 +29,8 @@
 """Contains the logic for `aq show dns_domain --dns_domain`."""
 
 
-from aquilon.server.broker import BrokerCommand
-from aquilon.server.formats.dns_domain import DNSDomainList
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.formats.dns_domain import DNSDomainList
 from aquilon.aqdb.model import DnsDomain
 
 

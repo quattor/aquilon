@@ -30,7 +30,7 @@
 
 from sqlalchemy.orm import contains_eager
 
-from aquilon.server.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import (AddressAssignment, Interface, ARecord,
                                 DnsDomain, Fqdn)
 

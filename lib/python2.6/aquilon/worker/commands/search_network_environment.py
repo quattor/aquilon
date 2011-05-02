@@ -29,9 +29,9 @@
 """Contains the logic for `aq search network_environment`."""
 
 
-from aquilon.server.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import NetworkEnvironment
-from aquilon.server.dbwrappers.location import get_location
+from aquilon.worker.dbwrappers.location import get_location
 
 
 class CommandSearchNetworkEnvironment(BrokerCommand):

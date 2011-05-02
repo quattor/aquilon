@@ -31,10 +31,10 @@
 
 from aquilon.exceptions_ import ArgumentError, ProcessException
 from aquilon.aqdb.model import Switch
-from aquilon.server.broker import BrokerCommand
-from aquilon.server.dbwrappers.dns import delete_dns_record
-from aquilon.server.processes import DSDBRunner
-from aquilon.server.locks import lock_queue, DeleteKey
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.dbwrappers.dns import delete_dns_record
+from aquilon.worker.processes import DSDBRunner
+from aquilon.worker.locks import lock_queue, DeleteKey
 
 
 class CommandDelSwitch(BrokerCommand):

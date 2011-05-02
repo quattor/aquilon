@@ -28,7 +28,7 @@
 # TERMS THAT MAY APPLY.
 """ Provides show_dns_environment """
 
-from aquilon.server.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import DnsEnvironment
 
 

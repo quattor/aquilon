@@ -35,7 +35,7 @@ from subprocess import Popen, PIPE
 import re
 
 from aquilon.config import Config
-from aquilon.server import depends # fetch protobuf, ipaddr dependency
+from aquilon.worker import depends # fetch protobuf, ipaddr dependency
 
 from ipaddr import IPv4Network, IPv4Address
 

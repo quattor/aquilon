@@ -30,11 +30,11 @@
 
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.server.broker import BrokerCommand
-from aquilon.server.dbwrappers.host import hostname_to_host
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.dbwrappers.host import hostname_to_host
 from aquilon.aqdb.model import Cluster, HostClusterMember, HostLifecycle
-from aquilon.server.templates.cluster import PlenaryCluster
-from aquilon.server.services import Chooser
+from aquilon.worker.templates.cluster import PlenaryCluster
+from aquilon.worker.services import Chooser
 
 
 class CommandCluster(BrokerCommand):

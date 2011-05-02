@@ -36,7 +36,7 @@ from sqlalchemy.orm import eagerload
 
 from aquilon.exceptions_ import ArgumentError, InternalError, NotFoundException
 from aquilon.aqdb.model import Role, Realm, UserPrincipal
-from aquilon.server.dbwrappers.host import hostname_to_host
+from aquilon.worker.dbwrappers.host import hostname_to_host
 
 
 LOGGER = logging.getLogger(__name__)

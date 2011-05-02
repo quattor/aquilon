@@ -29,7 +29,7 @@
 
 
 from aquilon.aqdb.model import OperatingSystem, Archetype
-from aquilon.server.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand
 
 
 class CommandDelOS(BrokerCommand):

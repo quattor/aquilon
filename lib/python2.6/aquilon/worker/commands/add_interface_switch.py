@@ -31,10 +31,10 @@
 
 from aquilon.exceptions_ import ArgumentError, AquilonError
 from aquilon.aqdb.model import Switch
-from aquilon.server.broker import BrokerCommand
-from aquilon.server.dbwrappers.interface import (get_or_create_interface,
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.dbwrappers.interface import (get_or_create_interface,
                                                  assign_address)
-from aquilon.server.processes import DSDBRunner
+from aquilon.worker.processes import DSDBRunner
 
 
 class CommandAddInterfaceSwitch(BrokerCommand):

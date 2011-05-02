@@ -8,7 +8,7 @@ src = os.path.realpath(os.path.join(os.path.dirname(__file__), '..',
 sys.path.append(src)
 
 import aquilon.aqdb.depends
-import aquilon.server.depends
+import aquilon.worker.depends
 import aquilon.client.depends
 # Any other packages?
 

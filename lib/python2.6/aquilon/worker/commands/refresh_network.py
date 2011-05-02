@@ -33,10 +33,10 @@ from tempfile import mkdtemp
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.data_sync.qip import QIPRefresh
-from aquilon.server.broker import BrokerCommand
-from aquilon.server.processes import run_command, remove_dir
-from aquilon.server.dbwrappers.location import get_location
-from aquilon.server.locks import lock_queue, SyncKey
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.processes import run_command, remove_dir
+from aquilon.worker.dbwrappers.location import get_location
+from aquilon.worker.locks import lock_queue, SyncKey
 
 
 class CommandRefreshNetwork(BrokerCommand):

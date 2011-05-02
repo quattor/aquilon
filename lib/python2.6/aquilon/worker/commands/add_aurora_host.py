@@ -32,10 +32,10 @@
 import re
 
 from aquilon.exceptions_ import ProcessException, ArgumentError
-from aquilon.server.broker import BrokerCommand
-from aquilon.server.commands.add_host import CommandAddHost
-from aquilon.server.processes import DSDBRunner, run_command
-from aquilon.server.dbwrappers.machine import create_machine
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.commands.add_host import CommandAddHost
+from aquilon.worker.processes import DSDBRunner, run_command
+from aquilon.worker.dbwrappers.machine import create_machine
 from aquilon.aqdb.model import (Building, Rack, Chassis, ChassisSlot, Model,
                                 Machine, DnsDomain, ReservedName, Fqdn)
 

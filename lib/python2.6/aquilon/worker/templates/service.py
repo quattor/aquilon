@@ -30,7 +30,7 @@
 
 import logging
 
-from aquilon.server.templates.base import Plenary, PlenaryCollection
+from aquilon.worker.templates.base import Plenary, PlenaryCollection
 from aquilon.exceptions_ import NotFoundException
 
 LOGGER = logging.getLogger(__name__)

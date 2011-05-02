@@ -30,7 +30,7 @@
 
 from sqlalchemy.orm import joinedload_all
 
-from aquilon.server.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import Personality, PersonalityESXClusterInfo, Cluster
 from aquilon.aqdb.model.cluster import restricted_builtins
 from aquilon.exceptions_ import ArgumentError

@@ -30,12 +30,12 @@
 
 from sqlalchemy.orm import joinedload, subqueryload
 
-from aquilon.server.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import Interface, Network, NetworkEnvironment
-from aquilon.server.dbwrappers.location import get_location
-from aquilon.server.dbwrappers.network import get_network_byname, get_network_byip
-from aquilon.server.formats.network import SimpleNetworkList
-from aquilon.server.formats.network import NetworkHostList
+from aquilon.worker.dbwrappers.location import get_location
+from aquilon.worker.dbwrappers.network import get_network_byname, get_network_byip
+from aquilon.worker.formats.network import SimpleNetworkList
+from aquilon.worker.formats.network import NetworkHostList
 
 
 class CommandShowNetwork(BrokerCommand):

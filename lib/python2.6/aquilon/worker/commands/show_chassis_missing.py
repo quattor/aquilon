@@ -30,8 +30,8 @@
 
 from sqlalchemy.sql import exists
 
-from aquilon.server.broker import BrokerCommand
-from aquilon.server.formats.chassis import MissingChassisList
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.formats.chassis import MissingChassisList
 from aquilon.aqdb.model import Machine, Model, ChassisSlot
 
 

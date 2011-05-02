@@ -29,8 +29,8 @@
 """Contains the logic for `aq make aquilon`."""
 
 
-from aquilon.server.broker import BrokerCommand
-from aquilon.server.commands.make import CommandMake
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.commands.make import CommandMake
 
 
 class CommandMakeAquilon(CommandMake):

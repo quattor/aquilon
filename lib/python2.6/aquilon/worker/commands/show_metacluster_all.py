@@ -32,7 +32,7 @@ from sqlalchemy.orm import joinedload_all
 
 from aquilon.exceptions_ import NotFoundException
 from aquilon.aqdb.model import MetaCluster, MetaClusterMember, Cluster, EsxCluster
-from aquilon.server.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand
 
 
 class CommandShowMetaClusterAll(BrokerCommand):

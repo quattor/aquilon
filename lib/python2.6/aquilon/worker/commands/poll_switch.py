@@ -35,11 +35,11 @@ from datetime import datetime
 
 from aquilon.exceptions_ import (AquilonError, ArgumentError, InternalError,
                                  NotFoundException, ProcessException)
-from aquilon.server.broker import BrokerCommand
-from aquilon.server.dbwrappers.location import get_location
-from aquilon.server.dbwrappers.observed_mac import (
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.dbwrappers.location import get_location
+from aquilon.worker.dbwrappers.observed_mac import (
     update_or_create_observed_mac)
-from aquilon.server.processes import run_command
+from aquilon.worker.processes import run_command
 from aquilon.aqdb.model import (Switch, HardwareEntity, ObservedMac,
                                 ObservedVlan, Network, NetworkEnvironment)
 from aquilon.utils import force_ipv4

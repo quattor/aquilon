@@ -28,8 +28,8 @@
 # TERMS THAT MAY APPLY.
 
 
-from aquilon.server.broker import BrokerCommand
-from aquilon.server.formats.operating_system import OperatingSystemList
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.formats.operating_system import OperatingSystemList
 from aquilon.exceptions_ import NotFoundException
 from aquilon.aqdb.model import OperatingSystem, Archetype
 

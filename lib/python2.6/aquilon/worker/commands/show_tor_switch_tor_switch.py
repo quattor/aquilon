@@ -29,8 +29,8 @@
 """Contains the logic for `aq show tor_switch --tor_switch`."""
 
 
-from aquilon.server.broker import BrokerCommand
-from aquilon.server.commands.show_tor_switch import CommandShowTorSwitch
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.commands.show_tor_switch import CommandShowTorSwitch
 
 
 class CommandShowTorSwitchTorSwitch(CommandShowTorSwitch):

@@ -29,8 +29,8 @@
 """Contains a wrapper for `aq add manager --manager`."""
 
 
-from aquilon.server.broker import BrokerCommand
-from aquilon.server.commands.add_manager import CommandAddManager
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.commands.add_manager import CommandAddManager
 
 
 class CommandAddManagerManager(CommandAddManager):

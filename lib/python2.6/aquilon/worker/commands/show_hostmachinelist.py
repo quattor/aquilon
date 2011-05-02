@@ -30,8 +30,8 @@
 
 from sqlalchemy.sql import select
 
-from aquilon.server.broker import BrokerCommand
-from aquilon.server.formats.host import HostMachineList
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.formats.host import HostMachineList
 from aquilon.aqdb.model import Host, Archetype, Personality
 
 

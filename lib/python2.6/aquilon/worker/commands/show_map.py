@@ -30,11 +30,11 @@
 
 
 from aquilon.exceptions_ import UnimplementedError, NotFoundException
-from aquilon.server.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import (Personality, Service, ServiceMap,
                                 PersonalityServiceMap)
-from aquilon.server.dbwrappers.location import get_location
-from aquilon.server.formats.service_map import ServiceMapList
+from aquilon.worker.dbwrappers.location import get_location
+from aquilon.worker.formats.service_map import ServiceMapList
 
 
 class CommandShowMap(BrokerCommand):

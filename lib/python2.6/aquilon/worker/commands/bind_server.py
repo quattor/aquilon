@@ -31,10 +31,10 @@
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Service
-from aquilon.server.broker import BrokerCommand
-from aquilon.server.dbwrappers.host import hostname_to_host
-from aquilon.server.dbwrappers.service_instance import get_service_instance
-from aquilon.server.templates.service import PlenaryServiceInstance
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.dbwrappers.host import hostname_to_host
+from aquilon.worker.dbwrappers.service_instance import get_service_instance
+from aquilon.worker.templates.service import PlenaryServiceInstance
 
 
 class CommandBindServer(BrokerCommand):

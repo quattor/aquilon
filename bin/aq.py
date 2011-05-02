@@ -59,7 +59,7 @@ from aquilon.client.knchttp import KNCHTTPConnection
 from aquilon.client.chunked import ChunkedHTTPConnection
 from aquilon.client.optparser import OptParser, ParsingError
 
-# Stolen from aquilon.server.formats.fomatters
+# Stolen from aquilon.worker.formats.fomatters
 csv.register_dialect('aquilon', delimiter=',', quoting=csv.QUOTE_MINIMAL,
                      doublequote=True, lineterminator='\n')
 

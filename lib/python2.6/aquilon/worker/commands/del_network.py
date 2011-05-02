@@ -28,9 +28,9 @@
 # TERMS THAT MAY APPLY.
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.server.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model.network import Network, NetworkEnvironment
-from aquilon.server.dbwrappers.dns import delete_dns_record
+from aquilon.worker.dbwrappers.dns import delete_dns_record
 
 
 class CommandDelNetwork(BrokerCommand):

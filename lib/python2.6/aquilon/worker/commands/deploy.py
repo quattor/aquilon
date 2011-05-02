@@ -36,9 +36,9 @@ from tempfile import mkdtemp
 from aquilon.exceptions_ import (ProcessException, ArgumentError,
                                  AuthorizationException, InternalError)
 from aquilon.aqdb.model import Domain, Branch
-from aquilon.server.broker import BrokerCommand
-from aquilon.server.processes import run_git, remove_dir, sync_domain
-from aquilon.server.logger import CLIENT_INFO
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.processes import run_git, remove_dir, sync_domain
+from aquilon.worker.logger import CLIENT_INFO
 
 tcm_re = re.compile(r"^tcm=([0-9]+)$", re.IGNORECASE)
 

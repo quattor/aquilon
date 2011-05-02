@@ -28,13 +28,13 @@
 # TERMS THAT MAY APPLY.
 
 
-from aquilon.server.broker import BrokerCommand
-from aquilon.server.dbwrappers.branch import get_branch_and_author
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.dbwrappers.branch import get_branch_and_author
 from aquilon.aqdb.model import Cluster
-from aquilon.server.templates.cluster import PlenaryCluster
-from aquilon.server.templates.host import PlenaryHost
-from aquilon.server.templates.base import PlenaryCollection
-from aquilon.server.locks import lock_queue, CompileKey
+from aquilon.worker.templates.cluster import PlenaryCluster
+from aquilon.worker.templates.host import PlenaryHost
+from aquilon.worker.templates.base import PlenaryCollection
+from aquilon.worker.locks import lock_queue, CompileKey
 from aquilon.exceptions_ import IncompleteError, NotFoundException
 
 

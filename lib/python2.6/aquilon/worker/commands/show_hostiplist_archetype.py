@@ -29,8 +29,8 @@
 """Contains a wrapper for `aq show hostiplist --archetype`."""
 
 
-from aquilon.server.broker import BrokerCommand
-from aquilon.server.commands.show_hostiplist import CommandShowHostIPList
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.commands.show_hostiplist import CommandShowHostIPList
 
 
 class CommandShowHostIPListArchetype(CommandShowHostIPList):

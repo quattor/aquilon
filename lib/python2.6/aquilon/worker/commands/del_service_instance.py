@@ -29,10 +29,10 @@
 """Contains a wrapper for `aq del service --instance`."""
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.server.broker import BrokerCommand
-from aquilon.server.dbwrappers.service_instance import get_service_instance
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.dbwrappers.service_instance import get_service_instance
 from aquilon.aqdb.model import Service
-from aquilon.server.templates.service import PlenaryServiceInstance
+from aquilon.worker.templates.service import PlenaryServiceInstance
 
 
 class CommandDelServiceInstance(BrokerCommand):

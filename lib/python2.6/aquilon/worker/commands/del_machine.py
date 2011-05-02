@@ -29,12 +29,12 @@
 """Contains the logic for `aq del machine`."""
 
 from aquilon.exceptions_ import ArgumentError, AquilonError
-from aquilon.server.broker import BrokerCommand
-from aquilon.server.locks import lock_queue, CompileKey
-from aquilon.server.templates.machine import PlenaryMachineInfo
-from aquilon.server.templates.cluster import PlenaryCluster
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.locks import lock_queue, CompileKey
+from aquilon.worker.templates.machine import PlenaryMachineInfo
+from aquilon.worker.templates.cluster import PlenaryCluster
 from aquilon.aqdb.model import Machine
-from aquilon.server.processes import NASAssign
+from aquilon.worker.processes import NASAssign
 
 class CommandDelMachine(BrokerCommand):
 

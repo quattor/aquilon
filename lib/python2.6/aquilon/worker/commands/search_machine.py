@@ -32,11 +32,11 @@
 from sqlalchemy.orm import aliased
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.server.broker import BrokerCommand
-from aquilon.server.formats.machine import SimpleMachineList
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.formats.machine import SimpleMachineList
 from aquilon.aqdb.model import (Machine, Vendor, Cpu, Cluster, Service,
                                 ServiceInstance, NasDisk, Disk)
-from aquilon.server.dbwrappers.hardware_entity import (
+from aquilon.worker.dbwrappers.hardware_entity import (
     search_hardware_entity_query)
 
 

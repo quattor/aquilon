@@ -30,9 +30,9 @@
 
 import logging
 
-from aquilon.server.templates.base import Plenary, PlenaryCollection
-from aquilon.server.templates.machine import PlenaryMachineInfo
-from aquilon.server.locks import CompileKey
+from aquilon.worker.templates.base import Plenary, PlenaryCollection
+from aquilon.worker.templates.machine import PlenaryMachineInfo
+from aquilon.worker.locks import CompileKey
 
 LOGGER = logging.getLogger(__name__)
 

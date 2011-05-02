@@ -32,11 +32,11 @@ from aquilon.exceptions_ import (ArgumentError, NotFoundException,
                                  ProcessException, AquilonError)
 from aquilon.aqdb.model import Disk, Machine
 from aquilon.aqdb.model.disk import controller_types
-from aquilon.server.broker import BrokerCommand
-from aquilon.server.templates.machine import PlenaryMachineInfo
-from aquilon.server.templates.cluster import PlenaryCluster
-from aquilon.server.processes import NASAssign
-from aquilon.server.locks import lock_queue, CompileKey
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.templates.machine import PlenaryMachineInfo
+from aquilon.worker.templates.cluster import PlenaryCluster
+from aquilon.worker.processes import NASAssign
+from aquilon.worker.locks import lock_queue, CompileKey
 
 
 class CommandDelDisk(BrokerCommand):

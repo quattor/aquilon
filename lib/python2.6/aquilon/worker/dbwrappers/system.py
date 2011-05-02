@@ -34,7 +34,7 @@ from aquilon.exceptions_ import ArgumentError, UnimplementedError
 from aquilon.aqdb.model import (DnsDomain, DnsRecord, Fqdn, ARecord,
                                 DnsEnvironment, NetworkEnvironment)
 from aquilon.aqdb.model.dns_domain import parse_fqdn
-from aquilon.server.dbwrappers.network import get_network_byip
+from aquilon.worker.dbwrappers.network import get_network_byip
 
 
 def search_system_query(session, dns_record_type=DnsRecord, **kwargs):

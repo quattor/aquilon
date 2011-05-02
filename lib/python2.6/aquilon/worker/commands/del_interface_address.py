@@ -28,16 +28,16 @@
 # TERMS THAT MAY APPLY.
 """Contains the logic for `aq del interface address`."""
 
-from aquilon.server.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand
 from aquilon.exceptions_ import ArgumentError, ProcessException, IncompleteError
 from aquilon.aqdb.model import (HardwareEntity, AddressAssignment, ARecord,
                                 Fqdn, DnsEnvironment, Network,
                                 NetworkEnvironment)
-from aquilon.server.dbwrappers.dns import delete_dns_record
-from aquilon.server.dbwrappers.interface import get_interface
-from aquilon.server.templates.host import PlenaryHost
-from aquilon.server.locks import lock_queue
-from aquilon.server.processes import DSDBRunner
+from aquilon.worker.dbwrappers.dns import delete_dns_record
+from aquilon.worker.dbwrappers.interface import get_interface
+from aquilon.worker.templates.host import PlenaryHost
+from aquilon.worker.locks import lock_queue
+from aquilon.worker.processes import DSDBRunner
 from aquilon.utils import first_of
 
 

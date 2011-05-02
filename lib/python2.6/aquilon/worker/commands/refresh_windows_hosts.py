@@ -32,12 +32,12 @@
 import sqlite3
 
 from aquilon.exceptions_ import PartialError, InternalError, AquilonError
-from aquilon.server.broker import BrokerCommand
-from aquilon.server.dbwrappers.dns import delete_dns_record
-from aquilon.server.dbwrappers.host import get_host_dependencies
-from aquilon.server.templates.base import PlenaryCollection
-from aquilon.server.templates.cluster import PlenaryCluster
-from aquilon.server.locks import lock_queue, SyncKey
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.dbwrappers.dns import delete_dns_record
+from aquilon.worker.dbwrappers.host import get_host_dependencies
+from aquilon.worker.templates.base import PlenaryCollection
+from aquilon.worker.templates.cluster import PlenaryCluster
+from aquilon.worker.locks import lock_queue, SyncKey
 from aquilon.aqdb.model import (Host, Interface, Machine, Domain, Archetype,
                                 Personality, HostLifecycle, DnsDomain, DnsRecord,
                                 OperatingSystem, ReservedName, Fqdn)

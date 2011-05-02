@@ -35,10 +35,10 @@ import re
 from sqlalchemy.orm import joinedload, contains_eager
 
 from aquilon.aqdb.model import Archetype, Personality
-from aquilon.server.broker import BrokerCommand
-from aquilon.server.formats.personality import (ThresholdedPersonality,
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.formats.personality import (ThresholdedPersonality,
                                                 PersonalityList)
-from aquilon.server.dbwrappers.branch import get_branch_and_author
+from aquilon.worker.dbwrappers.branch import get_branch_and_author
 
 
 class CommandShowPersonality(BrokerCommand):

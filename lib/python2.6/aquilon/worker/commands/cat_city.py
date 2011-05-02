@@ -30,9 +30,9 @@
 
 
 from aquilon.aqdb.model import City
-from aquilon.server.broker import BrokerCommand
-from aquilon.server.processes import read_file
-from aquilon.server.templates.city import PlenaryCity
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.processes import read_file
+from aquilon.worker.templates.city import PlenaryCity
 
 
 class CommandCatCity(BrokerCommand):

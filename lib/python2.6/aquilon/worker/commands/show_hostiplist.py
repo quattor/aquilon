@@ -33,8 +33,8 @@ from sqlalchemy.orm import (contains_eager, aliased, subqueryload, joinedload,
                             lazyload)
 from sqlalchemy.sql import and_
 
-from aquilon.server.broker import BrokerCommand
-from aquilon.server.formats.host import HostIPList
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.formats.host import HostIPList
 from aquilon.aqdb.model import (AddressAssignment, Interface, HardwareEntity,
                                 Personality, Machine, Host, Archetype,
                                 PrimaryNameAssociation, ARecord, DnsRecord,

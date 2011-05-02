@@ -29,7 +29,7 @@
 """ Provides adding dns_evironment functionality """
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.server.broker import BrokerCommand, validate_basic
+from aquilon.worker.broker import BrokerCommand, validate_basic
 from aquilon.aqdb.model import DnsEnvironment
 
 class CommandAddDnsEnvironment(BrokerCommand):

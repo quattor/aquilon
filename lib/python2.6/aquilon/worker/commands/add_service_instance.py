@@ -29,8 +29,8 @@
 """Contains a wrapper for `aq add service --instance`."""
 
 
-from aquilon.server.broker import BrokerCommand
-from aquilon.server.commands.add_service import CommandAddService
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.commands.add_service import CommandAddService
 
 
 class CommandAddServiceInstance(CommandAddService):

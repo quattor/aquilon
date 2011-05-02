@@ -28,8 +28,8 @@
 # TERMS THAT MAY APPLY.
 
 
-from aquilon.server.broker import BrokerCommand
-from aquilon.server.commands.show_metacluster_all import CommandShowMetaClusterAll
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.commands.show_metacluster_all import CommandShowMetaClusterAll
 
 
 class CommandShowMetaClusterMetaCluster(CommandShowMetaClusterAll):

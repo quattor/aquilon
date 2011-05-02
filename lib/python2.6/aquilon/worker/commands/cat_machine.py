@@ -30,8 +30,8 @@
 
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.server.broker import BrokerCommand
-from aquilon.server.templates.machine import PlenaryMachineInfo
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.templates.machine import PlenaryMachineInfo
 from aquilon.aqdb.model import Machine
 
 

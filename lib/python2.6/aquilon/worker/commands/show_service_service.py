@@ -29,11 +29,11 @@
 """Contains the logic for `aq show service --service`."""
 
 
-from aquilon.server.broker import BrokerCommand
-from aquilon.server.dbwrappers.host import hostname_to_host
-from aquilon.server.dbwrappers.service_instance import get_service_instance
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.dbwrappers.host import hostname_to_host
+from aquilon.worker.dbwrappers.service_instance import get_service_instance
 from aquilon.aqdb.model import Service, ServiceInstance
-from aquilon.server.formats.service_instance import ServiceInstanceList
+from aquilon.worker.formats.service_instance import ServiceInstanceList
 
 
 class CommandShowServiceService(BrokerCommand):

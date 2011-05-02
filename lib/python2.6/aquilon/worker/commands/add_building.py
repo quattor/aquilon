@@ -29,9 +29,9 @@
 """Contains the logic for `aq add building`."""
 
 
-from aquilon.server.processes import DSDBRunner
-from aquilon.server.broker import BrokerCommand
-from aquilon.server.commands.add_location import (CommandAddLocation,
+from aquilon.worker.processes import DSDBRunner
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.commands.add_location import (CommandAddLocation,
                                                   add_location)
 
 

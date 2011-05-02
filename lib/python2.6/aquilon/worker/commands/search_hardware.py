@@ -29,10 +29,10 @@
 """Contains the logic for `aq search hardware`."""
 
 
-from aquilon.server.broker import BrokerCommand
-from aquilon.server.formats.hardware_entity import SimpleHardwareEntityList
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.formats.hardware_entity import SimpleHardwareEntityList
 from aquilon.aqdb.model import HardwareEntity
-from aquilon.server.dbwrappers.hardware_entity import (
+from aquilon.worker.dbwrappers.hardware_entity import (
     search_hardware_entity_query)
 
 

@@ -31,11 +31,11 @@ from ipaddr import IPv4Network
 from sqlalchemy.sql import or_
 
 from aquilon.exceptions_ import ArgumentError, AquilonError
-from aquilon.server.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import (Network, NetworkEnvironment, AddressAssignment,
                                 ARecord)
 from aquilon.aqdb.model.network import get_net_id_from_ip
-from aquilon.server.dbwrappers.network import fix_foreign_links
+from aquilon.worker.dbwrappers.network import fix_foreign_links
 
 
 class CommandSplitNetwork(BrokerCommand):

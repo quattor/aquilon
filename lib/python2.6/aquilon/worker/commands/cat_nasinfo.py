@@ -29,9 +29,9 @@
 """Contains the logic for `aq cat --nasinfo`."""
 
 
-from aquilon.server.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import Service, ServiceInstance
-from aquilon.server.templates.service import PlenaryInstanceNasDiskShare
+from aquilon.worker.templates.service import PlenaryInstanceNasDiskShare
 
 
 class CommandCatNasinfo(BrokerCommand):

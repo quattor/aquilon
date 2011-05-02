@@ -30,11 +30,11 @@
 
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.server.broker import BrokerCommand
-from aquilon.server.dbwrappers.host import (hostname_to_host,
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.dbwrappers.host import (hostname_to_host,
                                             get_host_bound_service)
-from aquilon.server.processes import run_command
-from aquilon.server.logger import CLIENT_INFO
+from aquilon.worker.processes import run_command
+from aquilon.worker.logger import CLIENT_INFO
 from aquilon.aqdb.model import Service
 
 class CommandPxeswitch(BrokerCommand):

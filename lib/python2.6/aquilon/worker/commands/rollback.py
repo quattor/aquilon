@@ -32,11 +32,11 @@
 import os
 import re
 
-from aquilon.server.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand
 from aquilon.exceptions_ import ProcessException, ArgumentError
 from aquilon.aqdb.model import Domain
-from aquilon.server.processes import run_git
-from aquilon.server.locks import lock_queue, CompileKey
+from aquilon.worker.processes import run_git
+from aquilon.worker.locks import lock_queue, CompileKey
 
 
 class CommandRollback(BrokerCommand):
@@ -81,7 +81,7 @@ class CommandRollback(BrokerCommand):
             lock_queue.acquire(key)
             run_git(["push", ".", "+%s:%s" % (ref, dbdomain.name)],
                     path=kingdir, logger=logger)
-            # Duplicated this logic from aquilon.server.processes.sync_domain()
+            # Duplicated this logic from aquilon.worker.processes.sync_domain()
             run_git(["fetch"], path=domaindir, logger=logger)
             run_git(["reset", "--hard", "origin/%s" % dbdomain.name],
                     path=domaindir, logger=logger)

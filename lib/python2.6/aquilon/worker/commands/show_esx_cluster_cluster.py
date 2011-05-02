@@ -28,8 +28,8 @@
 # TERMS THAT MAY APPLY.
 
 
-from aquilon.server.broker import BrokerCommand
-from aquilon.server.commands.show_esx_cluster_all import CommandShowESXClusterAll
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.commands.show_esx_cluster_all import CommandShowESXClusterAll
 
 
 class CommandShowESXClusterCluster(CommandShowESXClusterAll):

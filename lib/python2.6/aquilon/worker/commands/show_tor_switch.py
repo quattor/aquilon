@@ -32,9 +32,9 @@
 from sqlalchemy.orm import subqueryload_all, contains_eager
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.server.broker import BrokerCommand
-from aquilon.server.dbwrappers.location import get_location
-from aquilon.server.formats.switch import TorSwitch
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.dbwrappers.location import get_location
+from aquilon.worker.formats.switch import TorSwitch
 from aquilon.aqdb.model import (Switch, HardwareEntity, Model, Fqdn,
                                 PrimaryNameAssociation, DnsRecord, DnsDomain)
 from aquilon.aqdb.model.dns_domain import parse_fqdn

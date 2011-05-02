@@ -31,10 +31,10 @@ from aquilon.exceptions_ import (UnimplementedError, ArgumentError,
                                  ProcessException)
 from aquilon.aqdb.model import DnsRecord, ARecord, DnsEnvironment, Fqdn
 from aquilon.aqdb.model.network import get_net_id_from_ip
-from aquilon.server.broker import BrokerCommand
-from aquilon.server.dbwrappers.interface import (generate_ip,
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.dbwrappers.interface import (generate_ip,
                                                  check_ip_restrictions)
-from aquilon.server.processes import DSDBRunner
+from aquilon.worker.processes import DSDBRunner
 
 
 class CommandAddAddressDNSEnvironment(BrokerCommand):

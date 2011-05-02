@@ -36,18 +36,18 @@ from aquilon.exceptions_ import (ArgumentError, ProcessException,
                                  AquilonError, UnimplementedError)
 from aquilon.aqdb.model import Interface, Machine, ARecord, Fqdn
 from aquilon.aqdb.model.network import get_net_id_from_ip
-from aquilon.server.broker import BrokerCommand
-from aquilon.server.dbwrappers.dns import delete_dns_record
-from aquilon.server.dbwrappers.interface import (get_or_create_interface,
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.dbwrappers.dns import delete_dns_record
+from aquilon.worker.dbwrappers.interface import (get_or_create_interface,
                                                  describe_interface,
                                                  verify_port_group,
                                                  choose_port_group,
                                                  assign_address)
-from aquilon.server.templates.base import PlenaryCollection
-from aquilon.server.locks import lock_queue
-from aquilon.server.templates.machine import PlenaryMachineInfo
-from aquilon.server.templates.host import PlenaryHost
-from aquilon.server.processes import DSDBRunner
+from aquilon.worker.templates.base import PlenaryCollection
+from aquilon.worker.locks import lock_queue
+from aquilon.worker.templates.machine import PlenaryMachineInfo
+from aquilon.worker.templates.host import PlenaryHost
+from aquilon.worker.processes import DSDBRunner
 
 
 class CommandAddInterfaceMachine(BrokerCommand):

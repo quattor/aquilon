@@ -36,9 +36,9 @@ from sqlalchemy.orm.session import object_session
 
 from aquilon.exceptions_ import InternalError, IncompleteError
 from aquilon.config import Config
-from aquilon.server.locks import lock_queue, CompileKey
-from aquilon.server.processes import write_file, read_file, remove_file
-from aquilon.server.logger import CLIENT_INFO
+from aquilon.worker.locks import lock_queue, CompileKey
+from aquilon.worker.processes import write_file, read_file, remove_file
+from aquilon.worker.logger import CLIENT_INFO
 
 LOGGER = logging.getLogger(__name__)
 

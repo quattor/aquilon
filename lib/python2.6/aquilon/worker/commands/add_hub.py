@@ -30,8 +30,8 @@
 
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.server.commands.add_location import CommandAddLocation
-from aquilon.server.commands import BrokerCommand
+from aquilon.worker.commands.add_location import CommandAddLocation
+from aquilon.worker.commands import BrokerCommand
 from aquilon.aqdb.model import Company
 
 

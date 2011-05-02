@@ -29,8 +29,8 @@
 """Contains the logic for `aq show machine --machine`."""
 
 
-from aquilon.server.broker import BrokerCommand
-from aquilon.server.commands.show_machine import CommandShowMachine
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.commands.show_machine import CommandShowMachine
 
 
 class CommandShowMachineMachine(CommandShowMachine):

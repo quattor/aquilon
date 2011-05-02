@@ -31,8 +31,8 @@
 from sqlalchemy.orm import contains_eager
 from sqlalchemy.sql import exists
 
-from aquilon.server.broker import BrokerCommand
-from aquilon.server.formats.interface import MissingManagersList
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.formats.interface import MissingManagersList
 from aquilon.aqdb.model import (Interface, AddressAssignment, HardwareEntity,
                                 PrimaryNameAssociation, DnsRecord, DnsDomain,
                                 Fqdn)

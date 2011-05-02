@@ -35,8 +35,8 @@ from aquilon.aqdb.model import (HardwareEntity, Model, DnsRecord, ARecord,
                                 NetworkEnvironment, Network)
 from aquilon.aqdb.model.dns_domain import parse_fqdn
 from aquilon.aqdb.model.network import get_net_id_from_ip
-from aquilon.server.dbwrappers.location import get_location
-from aquilon.server.dbwrappers.interface import check_ip_restrictions
+from aquilon.worker.dbwrappers.location import get_location
+from aquilon.worker.dbwrappers.interface import check_ip_restrictions
 
 
 def search_hardware_entity_query(session, hardware_type=HardwareEntity,

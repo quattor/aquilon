@@ -31,9 +31,9 @@
 
 from aquilon.exceptions_ import (UnimplementedError, NotFoundException,
                                  AquilonError, ArgumentError)
-from aquilon.server.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import Interface, Switch
-from aquilon.server.processes import DSDBRunner
+from aquilon.worker.processes import DSDBRunner
 
 
 class CommandUpdateInterfaceSwitch(BrokerCommand):

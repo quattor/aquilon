@@ -29,8 +29,8 @@
 """Contains the logic for `aq del continent`."""
 
 
-from aquilon.server.broker import BrokerCommand
-from aquilon.server.commands.del_location import CommandDelLocation
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.commands.del_location import CommandDelLocation
 
 
 class CommandDelContinent(CommandDelLocation):

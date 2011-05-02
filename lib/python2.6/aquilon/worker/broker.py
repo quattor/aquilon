@@ -39,18 +39,18 @@ from twisted.python import log
 
 from aquilon.config import Config
 from aquilon.exceptions_ import ArgumentError, UnimplementedError
-from aquilon.server.authorization import AuthorizationBroker
-from aquilon.server.messages import StatusCatalog
-from aquilon.server.logger import RequestLogger
+from aquilon.worker.authorization import AuthorizationBroker
+from aquilon.worker.messages import StatusCatalog
+from aquilon.worker.logger import RequestLogger
 from aquilon.aqdb.db_factory import DbFactory
-from aquilon.server.formats.formatters import ResponseFormatter
-from aquilon.server.dbwrappers.user_principal import (
+from aquilon.worker.formats.formatters import ResponseFormatter
+from aquilon.worker.dbwrappers.user_principal import (
         get_or_create_user_principal)
-from aquilon.server.locks import lock_queue
-from aquilon.server.templates.base import Plenary, PlenaryCollection
-from aquilon.server.templates.domain import TemplateDomain
-from aquilon.server.services import Chooser
-from aquilon.server.processes import sync_domain
+from aquilon.worker.locks import lock_queue
+from aquilon.worker.templates.base import Plenary, PlenaryCollection
+from aquilon.worker.templates.domain import TemplateDomain
+from aquilon.worker.services import Chooser
+from aquilon.worker.processes import sync_domain
 
 
 audit_id = 0
@@ -159,7 +159,7 @@ class BrokerCommand(object):
         self.optional_parameters = self.optional_parameters[:]
         self.parameter_checks = self.parameter_checks.copy()
         self.action = self.__module__
-        package_prefix = "aquilon.server.commands."
+        package_prefix = "aquilon.worker.commands."
         if self.action.startswith(package_prefix):
             self.action = self.action[len(package_prefix):]
         # self.command is set correctly in resources.py after parsing input.xml
@@ -200,7 +200,7 @@ class BrokerCommand(object):
         _update_render() to enforce the class requires_* flags.
 
         """
-        if self.__class__.__module__ == 'aquilon.server.broker':
+        if self.__class__.__module__ == 'aquilon.worker.broker':
             # Default class... no useful command info to repeat back...
             raise UnimplementedError("Command has not been implemented.")
         raise UnimplementedError("%s has not been implemented" %

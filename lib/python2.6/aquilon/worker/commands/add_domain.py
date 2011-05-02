@@ -34,10 +34,10 @@ import re
 
 from aquilon.exceptions_ import (AuthorizationException, ArgumentError,
                                  InternalError, ProcessException)
-from aquilon.server.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import Domain, Branch
 from aquilon.aqdb.model.branch import CHANGE_MANAGERS
-from aquilon.server.processes import run_git, remove_dir
+from aquilon.worker.processes import run_git, remove_dir
 
 
 class CommandAddDomain(BrokerCommand):

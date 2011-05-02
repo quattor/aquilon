@@ -32,8 +32,8 @@ import math
 from ipaddr import IPv4Network, AddressValueError, NetmaskValueError
 
 from aquilon.exceptions_ import ArgumentError, NotFoundException
-from aquilon.server.broker import BrokerCommand
-from aquilon.server.dbwrappers.location import get_location
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.dbwrappers.location import get_location
 from aquilon.aqdb.model import Network, NetworkEnvironment
 from aquilon.aqdb.model.network import get_net_id_from_ip
 

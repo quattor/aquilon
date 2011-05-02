@@ -29,10 +29,10 @@
 """Contains the logic for `aq search system`."""
 
 
-from aquilon.server.broker import BrokerCommand
-from aquilon.server.formats.list import StringAttributeList
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.formats.list import StringAttributeList
 from aquilon.aqdb.model import DnsRecord
-from aquilon.server.dbwrappers.system import search_system_query
+from aquilon.worker.dbwrappers.system import search_system_query
 
 
 class CommandSearchSystem(BrokerCommand):

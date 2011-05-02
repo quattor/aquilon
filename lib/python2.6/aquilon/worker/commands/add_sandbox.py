@@ -32,10 +32,10 @@
 import re
 
 from aquilon.exceptions_ import (AuthorizationException, ArgumentError)
-from aquilon.server.broker import BrokerCommand
-from aquilon.server.commands.get import CommandGet
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.commands.get import CommandGet
 from aquilon.aqdb.model import Sandbox, Branch
-from aquilon.server.processes import run_git
+from aquilon.worker.processes import run_git
 
 
 class CommandAddSandbox(CommandGet):

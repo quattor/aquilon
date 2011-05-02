@@ -29,7 +29,7 @@
 """Contains the logic for `aq show domain --domain`."""
 
 
-from aquilon.server.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import Domain
 
 

@@ -30,7 +30,7 @@
 
 
 from aquilon.aqdb.model import Sandbox
-from aquilon.server.dbwrappers.user_principal import get_user_principal
+from aquilon.worker.dbwrappers.user_principal import get_user_principal
 
 
 def get_sandbox(session, logger, sandbox):

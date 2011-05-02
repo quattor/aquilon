@@ -32,9 +32,9 @@ import os
 
 from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.aqdb.model import EsxCluster
-from aquilon.server.broker import BrokerCommand
-from aquilon.server.templates.cluster import PlenaryCluster
-from aquilon.server.processes import remove_file
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.templates.cluster import PlenaryCluster
+from aquilon.worker.processes import remove_file
 
 
 class CommandDelESXCluster(BrokerCommand):

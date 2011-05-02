@@ -32,10 +32,10 @@
 from sqlalchemy.orm.session import object_session
 
 from aquilon.exceptions_ import ArgumentError, UnimplementedError
-from aquilon.server.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import Vendor, Model, Cpu, MachineSpecs, Machine, Disk
-from aquilon.server.templates.base import PlenaryCollection
-from aquilon.server.templates.machine import PlenaryMachineInfo
+from aquilon.worker.templates.base import PlenaryCollection
+from aquilon.worker.templates.machine import PlenaryMachineInfo
 
 
 class CommandUpdateModel(BrokerCommand):

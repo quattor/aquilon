@@ -30,14 +30,14 @@
 
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.server.broker import BrokerCommand
-from aquilon.server.dbwrappers.location import get_location
-from aquilon.server.templates.machine import (PlenaryMachineInfo,
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.dbwrappers.location import get_location
+from aquilon.worker.templates.machine import (PlenaryMachineInfo,
                                               machine_plenary_will_move)
-from aquilon.server.templates.cluster import PlenaryCluster
-from aquilon.server.templates.host import PlenaryHost
-from aquilon.server.templates.base import PlenaryCollection
-from aquilon.server.locks import lock_queue, CompileKey
+from aquilon.worker.templates.cluster import PlenaryCluster
+from aquilon.worker.templates.host import PlenaryHost
+from aquilon.worker.templates.base import PlenaryCollection
+from aquilon.worker.locks import lock_queue, CompileKey
 from aquilon.aqdb.model import (Cpu, Chassis, ChassisSlot, Model, Cluster,
                                 Machine)
 

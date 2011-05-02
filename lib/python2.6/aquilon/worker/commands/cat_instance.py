@@ -29,9 +29,9 @@
 """Contains the logic for `aq cat --service --instance`."""
 
 
-from aquilon.server.broker import BrokerCommand
-from aquilon.server.dbwrappers.service_instance import get_service_instance
-from aquilon.server.templates.service import (PlenaryServiceInstanceToplevel,
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.dbwrappers.service_instance import get_service_instance
+from aquilon.worker.templates.service import (PlenaryServiceInstanceToplevel,
                                         PlenaryServiceInstanceClientDefault)
 from aquilon.aqdb.model import Service
 

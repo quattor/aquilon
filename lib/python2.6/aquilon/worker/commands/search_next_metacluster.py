@@ -29,9 +29,9 @@
 """Contains the logic for `aq search next --metacluster`."""
 
 
-from aquilon.server.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import MetaCluster
-from aquilon.server.dbwrappers.search import search_next
+from aquilon.worker.dbwrappers.search import search_next
 
 
 class CommandSearchNextMetaCluster(BrokerCommand):

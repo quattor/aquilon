@@ -29,8 +29,8 @@
 """Contains the logic for `aq add country`."""
 
 
-from aquilon.server.broker import BrokerCommand
-from aquilon.server.commands.add_location import CommandAddLocation
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.commands.add_location import CommandAddLocation
 
 
 class CommandAddCountry(CommandAddLocation):

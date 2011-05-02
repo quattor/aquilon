@@ -29,7 +29,7 @@
 """Router address formatter."""
 
 
-from aquilon.server.formats.formatters import ObjectFormatter
+from aquilon.worker.formats.formatters import ObjectFormatter
 from aquilon.aqdb.model import RouterAddress
 
 

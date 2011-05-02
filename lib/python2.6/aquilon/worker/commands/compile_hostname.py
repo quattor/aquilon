@@ -29,9 +29,9 @@
 """Contains the logic for `aq compile`."""
 
 
-from aquilon.server.broker import BrokerCommand
-from aquilon.server.templates.domain import TemplateDomain
-from aquilon.server.dbwrappers.host import hostname_to_host
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.templates.domain import TemplateDomain
+from aquilon.worker.dbwrappers.host import hostname_to_host
 
 
 class CommandCompileHostname(BrokerCommand):

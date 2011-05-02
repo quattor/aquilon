@@ -33,8 +33,8 @@ import os
 import re
 from logging import DEBUG, INFO
 
-from aquilon.server.broker import BrokerCommand
-from aquilon.server.messages import StatusCatalog
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.messages import StatusCatalog
 
 
 class CommandShowActiveCommands(BrokerCommand):

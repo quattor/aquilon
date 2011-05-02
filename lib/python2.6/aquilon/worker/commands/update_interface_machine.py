@@ -30,16 +30,16 @@
 
 
 from aquilon.exceptions_ import ArgumentError, AquilonError
-from aquilon.server.broker import BrokerCommand
-from aquilon.server.dbwrappers.interface import (get_interface,
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.dbwrappers.interface import (get_interface,
                                                  check_ip_restrictions,
                                                  verify_port_group,
                                                  choose_port_group,
                                                  assign_address)
-from aquilon.server.dbwrappers.hardware_entity import convert_primary_name_to_arecord
-from aquilon.server.locks import lock_queue
-from aquilon.server.templates.machine import PlenaryMachineInfo
-from aquilon.server.processes import DSDBRunner
+from aquilon.worker.dbwrappers.hardware_entity import convert_primary_name_to_arecord
+from aquilon.worker.locks import lock_queue
+from aquilon.worker.templates.machine import PlenaryMachineInfo
+from aquilon.worker.processes import DSDBRunner
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.aqdb.model import ReservedName, Machine, Interface
 

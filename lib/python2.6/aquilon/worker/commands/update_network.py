@@ -29,9 +29,9 @@
 """Contains the logic for `aq update machine`."""
 
 from aquilon.exceptions_ import NotFoundException
-from aquilon.server.broker import BrokerCommand
-from aquilon.server.dbwrappers.location import get_location
-from aquilon.server.dbwrappers.network import get_network_byname, get_network_byip
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.dbwrappers.location import get_location
+from aquilon.worker.dbwrappers.network import get_network_byname, get_network_byip
 from aquilon.aqdb.model import Network, NetworkEnvironment
 
 

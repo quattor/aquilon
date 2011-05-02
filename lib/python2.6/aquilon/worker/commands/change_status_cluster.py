@@ -30,11 +30,11 @@
 
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.server.broker import BrokerCommand
-from aquilon.server.templates.domain import TemplateDomain
-from aquilon.server.templates.cluster import PlenaryCluster
-from aquilon.server.templates.host import PlenaryHost
-from aquilon.server.locks import lock_queue, CompileKey
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.templates.domain import TemplateDomain
+from aquilon.worker.templates.cluster import PlenaryCluster
+from aquilon.worker.templates.host import PlenaryHost
+from aquilon.worker.locks import lock_queue, CompileKey
 from aquilon.aqdb.model import Cluster, HostLifecycle, ClusterLifecycle
 
 class CommandChangeClusterStatus(BrokerCommand):

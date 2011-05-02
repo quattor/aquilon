@@ -32,16 +32,16 @@
 import os
 
 from aquilon.exceptions_ import ArgumentError, ProcessException
-from aquilon.server.broker import BrokerCommand
-from aquilon.server.dbwrappers.host import (hostname_to_host,
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.dbwrappers.host import (hostname_to_host,
                                             get_host_dependencies)
-from aquilon.server.dbwrappers.dns import delete_dns_record
-from aquilon.server.processes import (DSDBRunner, remove_file)
-from aquilon.server.templates.base import PlenaryCollection
-from aquilon.server.templates.index import build_index
-from aquilon.server.templates.host import PlenaryHost
-from aquilon.server.templates.service import PlenaryServiceInstanceServer
-from aquilon.server.locks import lock_queue, DeleteKey, CompileKey
+from aquilon.worker.dbwrappers.dns import delete_dns_record
+from aquilon.worker.processes import (DSDBRunner, remove_file)
+from aquilon.worker.templates.base import PlenaryCollection
+from aquilon.worker.templates.index import build_index
+from aquilon.worker.templates.host import PlenaryHost
+from aquilon.worker.templates.service import PlenaryServiceInstanceServer
+from aquilon.worker.locks import lock_queue, DeleteKey, CompileKey
 
 
 class CommandDelHost(BrokerCommand):

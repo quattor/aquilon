@@ -29,13 +29,13 @@
 """Contains the logic for `aq search network`."""
 
 
-from aquilon.server.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import (Network, Machine, VlanInfo, ObservedVlan,
                                 Cluster, ARecord, Fqdn, NetworkEnvironment)
 from aquilon.aqdb.model.dns_domain import parse_fqdn
-from aquilon.server.dbwrappers.location import get_location
-from aquilon.server.formats.network import ShortNetworkList
+from aquilon.worker.dbwrappers.location import get_location
+from aquilon.worker.formats.network import ShortNetworkList
 from aquilon.aqdb.model.network import get_net_id_from_ip
 
 

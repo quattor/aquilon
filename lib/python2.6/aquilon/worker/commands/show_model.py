@@ -31,7 +31,7 @@
 
 from sqlalchemy.orm import joinedload, contains_eager
 
-from aquilon.server.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import Model, Vendor
 
 

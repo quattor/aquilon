@@ -29,7 +29,7 @@
 """Contains the logic for `aq status`."""
 
 
-from aquilon.server.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand
 
 
 class CommandStatus(BrokerCommand):

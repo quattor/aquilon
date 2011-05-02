@@ -30,8 +30,8 @@
 
 
 from aquilon.exceptions_ import NotFoundException
-from aquilon.server.broker import BrokerCommand
-from aquilon.server.commands.show_request import CommandShowRequest
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.commands.show_request import CommandShowRequest
 
 
 class CommandShowRequestAuditID(CommandShowRequest):

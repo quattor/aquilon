@@ -33,8 +33,8 @@ import re
 
 from sqlalchemy.orm.session import object_session
 
-from aquilon.server.formats.formatters import ObjectFormatter
-from aquilon.server.formats.list import ListFormatter
+from aquilon.worker.formats.formatters import ObjectFormatter
+from aquilon.worker.formats.list import ListFormatter
 from aquilon.aqdb.model import Chassis
 
 chassis_re = re.compile("^(.*)c(\d+)n(\d+)$")

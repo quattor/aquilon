@@ -29,8 +29,8 @@
 """Contains the logic for `aq poll switch --switch`."""
 
 
-from aquilon.server.broker import BrokerCommand
-from aquilon.server.commands.poll_switch import CommandPollSwitch
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.commands.poll_switch import CommandPollSwitch
 from aquilon.aqdb.model import Switch
 
 

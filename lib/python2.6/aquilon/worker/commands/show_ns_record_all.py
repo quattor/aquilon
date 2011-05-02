@@ -29,9 +29,9 @@
 """Contains the logic for `aq show city`."""
 
 from aquilon.aqdb.model import NsRecord
-from aquilon.server.broker import BrokerCommand
-from aquilon.server.commands.show_ns_record import CommandShowNsRecord
-from aquilon.server.formats.ns_record import SimpleNSRecordList
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.commands.show_ns_record import CommandShowNsRecord
+from aquilon.worker.formats.ns_record import SimpleNSRecordList
 
 class CommandShowNsRecordAll(CommandShowNsRecord):
 

@@ -29,13 +29,13 @@
 
 from ipaddr import IPv4Address
 
-from aquilon.server.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import (DynamicStub, ARecord, DnsDomain, Fqdn,
                                 NetworkEnvironment)
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.exceptions_ import ArgumentError, ProcessException
-from aquilon.server.dbwrappers.interface import check_ip_restrictions
-from aquilon.server.processes import DSDBRunner
+from aquilon.worker.dbwrappers.interface import check_ip_restrictions
+from aquilon.worker.processes import DSDBRunner
 
 
 class CommandAddDynamicRange(BrokerCommand):

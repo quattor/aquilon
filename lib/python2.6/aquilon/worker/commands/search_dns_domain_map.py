@@ -30,8 +30,8 @@
 
 
 from aquilon.aqdb.model import DnsDomain, DnsMap, Location
-from aquilon.server.broker import BrokerCommand
-from aquilon.server.dbwrappers.location import get_location
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.dbwrappers.location import get_location
 
 from sqlalchemy.orm import contains_eager, undefer
 

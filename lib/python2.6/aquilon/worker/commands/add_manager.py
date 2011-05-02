@@ -30,17 +30,17 @@
 
 
 from aquilon.exceptions_ import ArgumentError, AquilonError
-from aquilon.server.broker import BrokerCommand
-from aquilon.server.dbwrappers.host import hostname_to_host
-from aquilon.server.dbwrappers.interface import (generate_ip,
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.dbwrappers.host import hostname_to_host
+from aquilon.worker.dbwrappers.interface import (generate_ip,
                                                  check_ip_restrictions,
                                                  get_or_create_interface,
                                                  assign_address)
 from aquilon.aqdb.model import ARecord, AddressAssignment, Fqdn
 from aquilon.aqdb.model.network import get_net_id_from_ip
-from aquilon.server.locks import lock_queue
-from aquilon.server.templates.machine import PlenaryMachineInfo
-from aquilon.server.processes import DSDBRunner
+from aquilon.worker.locks import lock_queue
+from aquilon.worker.templates.machine import PlenaryMachineInfo
+from aquilon.worker.processes import DSDBRunner
 
 
 class CommandAddManager(BrokerCommand):

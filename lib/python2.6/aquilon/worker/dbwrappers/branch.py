@@ -33,10 +33,10 @@ from sqlalchemy.orm.session import object_session
 
 from aquilon.exceptions_ import ArgumentError, ProcessException
 from aquilon.aqdb.model import Domain, Sandbox, Branch, UserPrincipal
-from aquilon.server.dbwrappers.user_principal import get_user_principal
-from aquilon.server.processes import remove_dir, run_git
-from aquilon.server.locks import lock_queue, CompileKey
-from aquilon.server.templates.domain import TemplateDomain
+from aquilon.worker.dbwrappers.user_principal import get_user_principal
+from aquilon.worker.processes import remove_dir, run_git
+from aquilon.worker.locks import lock_queue, CompileKey
+from aquilon.worker.templates.domain import TemplateDomain
 
 
 def get_branch_and_author(session, logger,

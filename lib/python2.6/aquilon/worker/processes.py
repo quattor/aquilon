@@ -51,7 +51,7 @@ import yaml
 from aquilon.exceptions_ import (ProcessException, AquilonError, ArgumentError,
                                  InternalError)
 from aquilon.config import Config
-from aquilon.server.locks import lock_queue, CompileKey
+from aquilon.worker.locks import lock_queue, CompileKey
 
 LOGGER = logging.getLogger(__name__)
 

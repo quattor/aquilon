@@ -32,9 +32,9 @@
 from sqlalchemy.orm import undefer
 
 from aquilon.exceptions_ import InternalError
-from aquilon.server.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import Service, ServiceInstance, NasDisk
-from aquilon.server.formats.service_instance import Share
+from aquilon.worker.formats.service_instance import Share
 
 
 class CommandShowNASDiskShareAll(BrokerCommand):

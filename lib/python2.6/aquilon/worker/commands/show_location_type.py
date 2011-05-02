@@ -32,9 +32,9 @@
 from sqlalchemy.orm.exc import NoResultFound
 
 from aquilon.exceptions_ import NotFoundException
-from aquilon.server.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import Location
-from aquilon.server.formats.location import LocationList
+from aquilon.worker.formats.location import LocationList
 
 class CommandShowLocationType(BrokerCommand):
 

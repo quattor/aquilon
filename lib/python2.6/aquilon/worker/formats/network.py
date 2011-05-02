@@ -33,8 +33,8 @@ from sqlalchemy.orm import (contains_eager, aliased, joinedload, subqueryload,
                             lazyload)
 from sqlalchemy.orm.session import object_session
 
-from aquilon.server.formats.formatters import ObjectFormatter
-from aquilon.server.formats.list import ListFormatter
+from aquilon.worker.formats.formatters import ObjectFormatter
+from aquilon.worker.formats.list import ListFormatter
 from aquilon.aqdb.model import (Network, AddressAssignment, DnsRecord,
                                 ARecord, DynamicStub,
                                 PrimaryNameAssociation, DnsDomain,

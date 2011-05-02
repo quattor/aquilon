@@ -31,8 +31,8 @@
 
 from sqlalchemy.orm import contains_eager
 
-from aquilon.server.broker import BrokerCommand
-from aquilon.server.formats.host import SimpleHostList
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.formats.host import SimpleHostList
 from aquilon.aqdb.model import (Host, Machine, PrimaryNameAssociation, DnsRecord,
                                 DnsDomain, Fqdn)
 

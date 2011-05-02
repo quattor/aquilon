@@ -31,7 +31,7 @@
 from sqlalchemy.orm import contains_eager
 from sqlalchemy.sql import exists
 
-from aquilon.server.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import (Interface, AddressAssignment, HardwareEntity,
                                 PrimaryNameAssociation, ARecord, DnsDomain, Fqdn)
 

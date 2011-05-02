@@ -31,9 +31,9 @@
 from sqlalchemy.orm import subqueryload
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.server.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import DnsDomain, DnsMap
-from aquilon.server.dbwrappers.location import get_location
+from aquilon.worker.dbwrappers.location import get_location
 
 
 class CommandMapDnsDomain(BrokerCommand):

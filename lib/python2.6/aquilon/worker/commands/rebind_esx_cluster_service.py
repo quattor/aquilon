@@ -28,10 +28,10 @@
 # TERMS THAT MAY APPLY.
 
 
-from aquilon.server.broker import BrokerCommand
-from aquilon.server.commands.bind_esx_cluster_service import (
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.commands.bind_esx_cluster_service import (
     CommandBindESXClusterService)
-from aquilon.server.dbwrappers.host import hostname_to_host
+from aquilon.worker.dbwrappers.host import hostname_to_host
 
 
 class CommandRebindESXClusterService(CommandBindESXClusterService):

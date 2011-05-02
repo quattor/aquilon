@@ -33,9 +33,9 @@ import os
 
 from aquilon.exceptions_ import NotFoundException
 from aquilon.aqdb.model import Sandbox
-from aquilon.server.broker import BrokerCommand
-from aquilon.server.dbwrappers.sandbox import get_sandbox
-from aquilon.server.dbwrappers.branch import remove_branch
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.dbwrappers.sandbox import get_sandbox
+from aquilon.worker.dbwrappers.branch import remove_branch
 
 
 class CommandDelSandbox(BrokerCommand):

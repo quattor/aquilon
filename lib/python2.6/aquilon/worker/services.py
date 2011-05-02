@@ -36,10 +36,10 @@ from sqlalchemy.orm.session import object_session
 from aquilon.exceptions_ import ArgumentError, InternalError
 from aquilon.aqdb.model import (Host, Cluster, ClusterAlignedService,
                                 ServiceInstance)
-from aquilon.server.templates.service import PlenaryServiceInstanceServer
-from aquilon.server.templates.cluster import PlenaryCluster
-from aquilon.server.templates.host import PlenaryHost
-from aquilon.server.templates.base import PlenaryCollection
+from aquilon.worker.templates.service import PlenaryServiceInstanceServer
+from aquilon.worker.templates.cluster import PlenaryCluster
+from aquilon.worker.templates.host import PlenaryHost
+from aquilon.worker.templates.base import PlenaryCollection
 
 
 class Chooser(object):

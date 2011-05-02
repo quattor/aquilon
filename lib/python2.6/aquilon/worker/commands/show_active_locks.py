@@ -29,8 +29,8 @@
 """Contains the logic for `aq show active locks`."""
 
 
-from aquilon.server.broker import BrokerCommand
-from aquilon.server.locks import lock_queue
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.locks import lock_queue
 
 
 class CommandShowActiveLocks(BrokerCommand):

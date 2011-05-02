@@ -29,8 +29,8 @@
 """Machine formatter."""
 
 from aquilon import const
-from aquilon.server.formats.formatters import ObjectFormatter, shift
-from aquilon.server.formats.list import ListFormatter
+from aquilon.worker.formats.formatters import ObjectFormatter, shift
+from aquilon.worker.formats.list import ListFormatter
 from aquilon.aqdb.model import Machine
 
 

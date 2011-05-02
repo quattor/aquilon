@@ -136,7 +136,7 @@ class ObjectFormatter(object):
     """
 
     mako_dir = os.path.join(config.get("broker", "srcdir"), "lib", "python2.6",
-                            "aquilon", "server", "formats", "mako")
+                            "aquilon", "worker", "formats", "mako")
     # Be careful about using the module_directory and cache!
     # Not using module_directory so that we don't have to worry about stale
     # files hanging around on upgrade.  Race conditions in writing the files
@@ -146,7 +146,7 @@ class ObjectFormatter(object):
     lookup_raw = TemplateLookup(directories=[os.path.join(mako_dir, "raw")],
                                 imports=['from string import rstrip',
                                          'from '
-                                         'aquilon.server.formats.formatters '
+                                         'aquilon.worker.formats.formatters '
                                          'import shift'],
                                 default_filters=['unicode', 'rstrip'])
     lookup_html = TemplateLookup(directories=[os.path.join(mako_dir, "html")])

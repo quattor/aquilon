@@ -30,11 +30,11 @@
 
 from sqlalchemy.sql.expression import asc
 
-from aquilon.server.broker import BrokerCommand
-from aquilon.server.commands.del_dynamic_range import CommandDelDynamicRange
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.commands.del_dynamic_range import CommandDelDynamicRange
 from aquilon.aqdb.model import DynamicStub, Network, NetworkEnvironment
 from aquilon.exceptions_ import ArgumentError
-from aquilon.server.locks import lock_queue, DeleteKey
+from aquilon.worker.locks import lock_queue, DeleteKey
 
 
 class CommandDelDynamicRangeClearnetwork(CommandDelDynamicRange):

@@ -30,7 +30,7 @@
 
 
 from aquilon.aqdb.model import Branch
-from aquilon.server.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand
 
 
 class CommandValidate(BrokerCommand):

@@ -31,14 +31,14 @@
 
 from sqlalchemy.orm import aliased
 
-from aquilon.server.broker import BrokerCommand
-from aquilon.server.formats.cluster import SimpleClusterList
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.formats.cluster import SimpleClusterList
 from aquilon.aqdb.model import (EsxCluster, MetaCluster, Archetype,
                                 Personality, Machine, Switch, ClusterLifecycle,
                                 Service, ServiceInstance, NasDisk, Disk)
-from aquilon.server.dbwrappers.host import hostname_to_host
-from aquilon.server.dbwrappers.branch import get_branch_and_author
-from aquilon.server.dbwrappers.location import get_location
+from aquilon.worker.dbwrappers.host import hostname_to_host
+from aquilon.worker.dbwrappers.branch import get_branch_and_author
+from aquilon.worker.dbwrappers.location import get_location
 
 
 class CommandSearchESXCluster(BrokerCommand):

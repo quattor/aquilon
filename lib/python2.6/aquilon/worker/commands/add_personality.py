@@ -29,10 +29,10 @@
 """Contains the logic for `aq add personality`."""
 
 
-from aquilon.server.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import Archetype, Personality
 from aquilon.exceptions_ import ArgumentError
-from aquilon.server.templates.personality import PlenaryPersonality
+from aquilon.worker.templates.personality import PlenaryPersonality
 import re
 
 class CommandAddPersonality(BrokerCommand):

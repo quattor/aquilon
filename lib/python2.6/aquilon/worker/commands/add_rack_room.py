@@ -29,8 +29,8 @@
 """Contains the logic for `aq add rack`."""
 
 
-from aquilon.server.broker import BrokerCommand
-from aquilon.server.dbwrappers.rack import get_or_create_rack
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.dbwrappers.rack import get_or_create_rack
 
 
 class CommandAddRackRoom(BrokerCommand):

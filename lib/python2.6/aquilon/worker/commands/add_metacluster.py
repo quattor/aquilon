@@ -28,7 +28,7 @@
 # TERMS THAT MAY APPLY.
 
 
-from aquilon.server.broker import BrokerCommand, validate_basic
+from aquilon.worker.broker import BrokerCommand, validate_basic
 from aquilon.aqdb.model import MetaCluster
 from aquilon.exceptions_ import ArgumentError
 

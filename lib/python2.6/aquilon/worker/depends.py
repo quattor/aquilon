@@ -30,7 +30,7 @@
 
     These versions are the defaults for the binaries shipped.
 
-    Anything referencing aquilon.server.depends should also set up the
+    Anything referencing aquilon.worker.depends should also set up the
     dependencies listed in aquilon.aqdb.depends.
 
 """

@@ -28,8 +28,8 @@
 # TERMS THAT MAY APPLY.
 
 
-from aquilon.server.broker import BrokerCommand
-from aquilon.server.commands.add_dynamic_range import CommandAddDynamicRange
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.commands.add_dynamic_range import CommandAddDynamicRange
 from aquilon.aqdb.model import Network, NetworkEnvironment
 
 

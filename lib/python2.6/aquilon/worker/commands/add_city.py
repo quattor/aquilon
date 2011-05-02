@@ -30,11 +30,11 @@
 
 
 from aquilon.exceptions_ import ArgumentError, AquilonError
-from aquilon.server.broker import BrokerCommand
-from aquilon.server.processes import DSDBRunner
-from aquilon.server.locks import lock_queue
-from aquilon.server.templates.city import PlenaryCity
-from aquilon.server.commands.add_location import (CommandAddLocation,
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.processes import DSDBRunner
+from aquilon.worker.locks import lock_queue
+from aquilon.worker.templates.city import PlenaryCity
+from aquilon.worker.commands.add_location import (CommandAddLocation,
                                                   add_location)
 
 

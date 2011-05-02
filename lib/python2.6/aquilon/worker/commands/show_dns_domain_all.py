@@ -30,9 +30,9 @@
 
 from sqlalchemy.orm import subqueryload, joinedload
 
-from aquilon.server.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import DnsDomain
-from aquilon.server.formats.dns_domain import DNSDomainList
+from aquilon.worker.formats.dns_domain import DNSDomainList
 
 
 class CommandShowDnsDomainAll(BrokerCommand):

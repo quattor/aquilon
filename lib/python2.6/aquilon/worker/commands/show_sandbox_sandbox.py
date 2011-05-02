@@ -31,11 +31,11 @@
 
 import os
 
-from aquilon.server.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import Sandbox
 from aquilon.exceptions_ import ArgumentError
-from aquilon.server.dbwrappers.sandbox import get_sandbox
-from aquilon.server.formats.branch import AuthoredSandbox
+from aquilon.worker.dbwrappers.sandbox import get_sandbox
+from aquilon.worker.formats.branch import AuthoredSandbox
 
 
 class CommandShowSandboxSandbox(BrokerCommand):

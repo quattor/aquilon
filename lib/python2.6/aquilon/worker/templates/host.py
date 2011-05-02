@@ -37,11 +37,11 @@ from aquilon.config import Config
 from aquilon.exceptions_ import IncompleteError, InternalError
 from aquilon.aqdb.model import (Host, AddressAssignment, VlanInterface,
                                 BondingInterface, BridgeInterface)
-from aquilon.server.locks import CompileKey
-from aquilon.server.templates.base import Plenary, PlenaryCollection
-from aquilon.server.templates.machine import PlenaryMachineInfo
-from aquilon.server.templates.cluster import PlenaryClusterClient
-from aquilon.server.templates.panutils import pan, StructureTemplate
+from aquilon.worker.locks import CompileKey
+from aquilon.worker.templates.base import Plenary, PlenaryCollection
+from aquilon.worker.templates.machine import PlenaryMachineInfo
+from aquilon.worker.templates.cluster import PlenaryClusterClient
+from aquilon.worker.templates.panutils import pan, StructureTemplate
 
 LOGGER = logging.getLogger(__name__)
 

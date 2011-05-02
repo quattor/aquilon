@@ -29,8 +29,8 @@
 """Contains a wrapper for `aq show network --network`."""
 
 
-from aquilon.server.broker import BrokerCommand
-from aquilon.server.commands.show_network import CommandShowNetwork
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.commands.show_network import CommandShowNetwork
 
 
 class CommandShowNetworkNetwork(CommandShowNetwork):

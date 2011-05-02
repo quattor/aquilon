@@ -28,10 +28,10 @@
 # TERMS THAT MAY APPLY.
 """Contains the logic for `aq del personality`."""
 
-from aquilon.server.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Personality, Archetype, Host
-from aquilon.server.templates.personality import PlenaryPersonality
+from aquilon.worker.templates.personality import PlenaryPersonality
 
 
 class CommandDelPersonality(BrokerCommand):

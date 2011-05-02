@@ -29,10 +29,10 @@
 """Contains the logic for `aq update city`."""
 
 
-from aquilon.server.broker import BrokerCommand
-from aquilon.server.dbwrappers.location import get_location
-from aquilon.server.templates.city import PlenaryCity
-from aquilon.server.locks import lock_queue
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.dbwrappers.location import get_location
+from aquilon.worker.templates.city import PlenaryCity
+from aquilon.worker.locks import lock_queue
 
 
 class CommandUpdateCity(BrokerCommand):

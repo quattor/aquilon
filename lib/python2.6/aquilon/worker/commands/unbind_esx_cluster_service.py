@@ -29,10 +29,10 @@
 
 
 from aquilon.exceptions_ import NotFoundException, ArgumentError
-from aquilon.server.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import EsxCluster, ClusterServiceBinding, Service
-from aquilon.server.dbwrappers.service_instance import get_service_instance
-from aquilon.server.templates.cluster import PlenaryCluster
+from aquilon.worker.dbwrappers.service_instance import get_service_instance
+from aquilon.worker.templates.cluster import PlenaryCluster
 
 
 class CommandUnbindESXClusterService(BrokerCommand):

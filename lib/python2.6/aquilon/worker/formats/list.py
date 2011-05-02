@@ -32,7 +32,7 @@
 import csv
 import cStringIO
 
-from aquilon.server.formats.formatters import ObjectFormatter
+from aquilon.worker.formats.formatters import ObjectFormatter
 
 
 class ListFormatter(ObjectFormatter):

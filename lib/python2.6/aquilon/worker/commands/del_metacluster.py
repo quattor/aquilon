@@ -30,7 +30,7 @@
 
 from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.aqdb.model import MetaCluster
-from aquilon.server.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand
 
 
 class CommandDelMetaCluster(BrokerCommand):

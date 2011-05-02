@@ -31,10 +31,10 @@
 
 import os
 
-from aquilon.server.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand
 from aquilon.exceptions_ import ProcessException, ArgumentError
 from aquilon.aqdb.model import Domain
-from aquilon.server.processes import sync_domain
+from aquilon.worker.processes import sync_domain
 
 
 class CommandSync(BrokerCommand):

@@ -27,8 +27,8 @@
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
 
-from aquilon.server.broker import BrokerCommand
-from aquilon.server.commands.add_address_dns_environment \
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.commands.add_address_dns_environment \
         import CommandAddAddressDNSEnvironment
 
 

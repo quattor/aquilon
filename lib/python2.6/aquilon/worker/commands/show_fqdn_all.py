@@ -30,8 +30,8 @@
 
 from sqlalchemy.orm import contains_eager
 
-from aquilon.server.broker import BrokerCommand
-from aquilon.server.formats.list import StringList
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.formats.list import StringList
 from aquilon.aqdb.model import DnsDomain, DnsEnvironment, Fqdn
 
 

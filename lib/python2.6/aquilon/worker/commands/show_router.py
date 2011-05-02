@@ -33,7 +33,7 @@ from sqlalchemy.orm import (undefer, joinedload, subqueryload_all,
                             contains_eager)
 
 from aquilon.exceptions_ import ArgumentError, NotFoundException
-from aquilon.server.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import (RouterAddress, ARecord, Network,
                                 NetworkEnvironment)
 

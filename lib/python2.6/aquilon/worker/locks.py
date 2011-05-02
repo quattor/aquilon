@@ -33,7 +33,7 @@ from threading import Condition, Lock
 
 from aquilon.locks import LockQueue, LockKey
 from aquilon.exceptions_ import InternalError
-from aquilon.server.logger import CLIENT_INFO
+from aquilon.worker.logger import CLIENT_INFO
 
 LOGGER = logging.getLogger(__name__)
 

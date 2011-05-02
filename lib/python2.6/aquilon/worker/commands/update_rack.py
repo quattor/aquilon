@@ -31,10 +31,10 @@
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Machine
-from aquilon.server.broker import BrokerCommand
-from aquilon.server.dbwrappers.location import get_location
-from aquilon.server.templates.machine import PlenaryMachineInfo
-from aquilon.server.templates.base import PlenaryCollection
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.dbwrappers.location import get_location
+from aquilon.worker.templates.machine import PlenaryMachineInfo
+from aquilon.worker.templates.base import PlenaryCollection
 
 
 class CommandUpdateRack(BrokerCommand):

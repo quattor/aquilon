@@ -29,7 +29,7 @@
 
 
 from aquilon.aqdb.model import DnsDomain, NsRecord, ARecord
-from aquilon.server.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand
 
 
 class CommandAddNsRecord(BrokerCommand):

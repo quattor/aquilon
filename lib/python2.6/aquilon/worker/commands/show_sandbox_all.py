@@ -29,7 +29,7 @@
 """Contains the logic for `aq show sandbox --all`."""
 
 
-from aquilon.server.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import Sandbox
 
 

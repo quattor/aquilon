@@ -29,8 +29,8 @@
 """Contains the logic for `aq show host --hostname`."""
 
 
-from aquilon.server.broker import BrokerCommand
-from aquilon.server.dbwrappers.host import hostname_to_host
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.dbwrappers.host import hostname_to_host
 
 
 class CommandShowHostHostname(BrokerCommand):

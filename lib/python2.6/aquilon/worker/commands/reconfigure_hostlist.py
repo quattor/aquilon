@@ -29,8 +29,8 @@
 """Contains the logic for `aq reconfigure --hostlist`."""
 
 
-from aquilon.server.commands.reconfigure_list import CommandReconfigureList
-from aquilon.server.broker import BrokerCommand
+from aquilon.worker.commands.reconfigure_list import CommandReconfigureList
+from aquilon.worker.broker import BrokerCommand
 
 
 class CommandReconfigureHostlist(CommandReconfigureList):

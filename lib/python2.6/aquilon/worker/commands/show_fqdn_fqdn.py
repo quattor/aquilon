@@ -29,7 +29,7 @@
 """Contains the logic for `aq show fqdn --fqdn`."""
 
 
-from aquilon.server.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import DnsEnvironment, Fqdn, DnsRecord
 
 

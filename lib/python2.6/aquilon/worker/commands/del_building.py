@@ -29,9 +29,9 @@
 """Contains the logic for `aq del building`."""
 
 
-from aquilon.server.processes import DSDBRunner
-from aquilon.server.broker import BrokerCommand
-from aquilon.server.commands.del_location import CommandDelLocation
+from aquilon.worker.processes import DSDBRunner
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.commands.del_location import CommandDelLocation
 
 
 class CommandDelBuilding(CommandDelLocation):

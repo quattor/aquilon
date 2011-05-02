@@ -30,14 +30,14 @@
 from sqlalchemy.orm import contains_eager
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 
-from aquilon.server.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import ARecord, Fqdn, DnsEnvironment
 from aquilon.aqdb.model.dns_domain import parse_fqdn
 from aquilon.exceptions_ import (UnimplementedError, ArgumentError,
                                  NotFoundException)
-from aquilon.server.locks import lock_queue, DeleteKey
-from aquilon.server.processes import DSDBRunner
-from aquilon.server.dbwrappers.dns import delete_dns_record
+from aquilon.worker.locks import lock_queue, DeleteKey
+from aquilon.worker.processes import DSDBRunner
+from aquilon.worker.dbwrappers.dns import delete_dns_record
 
 
 class CommandDelAddressDNSEnvironment(BrokerCommand):

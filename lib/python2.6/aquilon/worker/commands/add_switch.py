@@ -32,12 +32,12 @@
 from aquilon.exceptions_ import ArgumentError, AquilonError
 from aquilon.aqdb.model import Switch, Model
 from aquilon.aqdb.model.network import get_net_id_from_ip
-from aquilon.server.broker import BrokerCommand
-from aquilon.server.dbwrappers.location import get_location
-from aquilon.server.dbwrappers.hardware_entity import parse_primary_name
-from aquilon.server.dbwrappers.interface import (get_or_create_interface,
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.dbwrappers.location import get_location
+from aquilon.worker.dbwrappers.hardware_entity import parse_primary_name
+from aquilon.worker.dbwrappers.interface import (get_or_create_interface,
                                                  assign_address)
-from aquilon.server.processes import DSDBRunner
+from aquilon.worker.processes import DSDBRunner
 
 
 class CommandAddSwitch(BrokerCommand):

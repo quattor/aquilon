@@ -28,8 +28,8 @@
 # TERMS THAT MAY APPLY.
 
 
-from aquilon.server.broker import BrokerCommand
-from aquilon.server.commands.del_address_dns_environment \
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.commands.del_address_dns_environment \
         import CommandDelAddressDNSEnvironment
 
 

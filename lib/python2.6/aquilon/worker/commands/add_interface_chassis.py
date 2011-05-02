@@ -33,13 +33,13 @@
 from aquilon.exceptions_ import ArgumentError, ProcessException
 from aquilon.aqdb.model import Chassis, ARecord, ReservedName, Fqdn
 from aquilon.aqdb.model.network import get_net_id_from_ip
-from aquilon.server.broker import BrokerCommand
-from aquilon.server.dbwrappers.interface import (generate_ip,
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.dbwrappers.interface import (generate_ip,
                                                  check_ip_restrictions,
                                                  get_or_create_interface,
                                                  assign_address)
-from aquilon.server.dbwrappers.hardware_entity import convert_primary_name_to_arecord
-from aquilon.server.processes import DSDBRunner
+from aquilon.worker.dbwrappers.hardware_entity import convert_primary_name_to_arecord
+from aquilon.worker.processes import DSDBRunner
 
 
 class CommandAddInterfaceChassis(BrokerCommand):

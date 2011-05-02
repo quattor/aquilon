@@ -31,11 +31,11 @@
 
 from sqlalchemy.orm import joinedload, subqueryload, undefer, contains_eager
 
-from aquilon.server.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import Service, ServiceInstance
-from aquilon.server.dbwrappers.host import hostname_to_host
-from aquilon.server.formats.service_instance import ServiceInstanceList
-from aquilon.server.formats.service import ServiceList
+from aquilon.worker.dbwrappers.host import hostname_to_host
+from aquilon.worker.formats.service_instance import ServiceInstanceList
+from aquilon.worker.formats.service import ServiceList
 
 
 class CommandShowService(BrokerCommand):

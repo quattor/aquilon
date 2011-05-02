@@ -28,10 +28,10 @@
 # TERMS THAT MAY APPLY.
 """ Formatting for all sorts of DNS Records """
 
-#import aquilon.server.depends
+#import aquilon.worker.depends
 from aquilon.aqdb.model import NsRecord
-from aquilon.server.formats.list import ListFormatter
-from aquilon.server.formats.formatters import ObjectFormatter
+from aquilon.worker.formats.list import ListFormatter
+from aquilon.worker.formats.formatters import ObjectFormatter
 
 
 class NsRecordFormatter(ObjectFormatter):

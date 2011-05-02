@@ -29,8 +29,8 @@
 
 
 from aquilon.exceptions_ import NotFoundException
-from aquilon.server.formats.cluster_type import ClusterType
-from aquilon.server.broker import BrokerCommand
+from aquilon.worker.formats.cluster_type import ClusterType
+from aquilon.worker.broker import BrokerCommand
 
 
 class CommandShowClusterTypeAll(BrokerCommand):

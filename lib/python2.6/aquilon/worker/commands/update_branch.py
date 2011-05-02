@@ -35,7 +35,7 @@ import os
 from aquilon.exceptions_ import ArgumentError, AuthorizationException
 from aquilon.aqdb.model import Branch, Domain
 from aquilon.aqdb.model.branch import CHANGE_MANAGERS
-from aquilon.server.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand
 
 VERSION_RE = re.compile(r'^[-_.a-zA-Z0-9]*$')
 

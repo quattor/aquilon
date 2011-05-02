@@ -32,7 +32,7 @@
 import os
 
 from aquilon.config import Config
-from aquilon.server.formats.formatters import ObjectFormatter
+from aquilon.worker.formats.formatters import ObjectFormatter
 from aquilon.aqdb.model import Domain, Sandbox
 
 

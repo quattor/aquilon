@@ -29,8 +29,8 @@
 """Contains the logic for `aq del disk --disk`."""
 
 
-from aquilon.server.broker import BrokerCommand
-from aquilon.server.commands.del_disk import CommandDelDisk
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.commands.del_disk import CommandDelDisk
 
 
 class CommandDelDiskDisk(CommandDelDisk):
