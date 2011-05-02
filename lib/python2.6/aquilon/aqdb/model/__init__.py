@@ -88,8 +88,6 @@ from aquilon.aqdb.model.chassis import Chassis
 from aquilon.aqdb.model.branch import Branch, Domain, Sandbox
 from aquilon.aqdb.model.host import Host, HostGrnMap
 
-from aquilon.aqdb.model.primary_name_association import PrimaryNameAssociation
-
 #HARDWARE/SYSTEM LINKAGES
 from aquilon.aqdb.model.observed_mac import ObservedMac
 from aquilon.aqdb.model.chassis_slot import ChassisSlot

@@ -32,8 +32,7 @@
 from sqlalchemy.orm import subqueryload_all, contains_eager
 
 from aquilon.worker.broker import BrokerCommand
-from aquilon.aqdb.model import (Chassis, PrimaryNameAssociation, DnsRecord,
-                                DnsDomain, Fqdn)
+from aquilon.aqdb.model import Chassis, DnsRecord, DnsDomain, Fqdn
 
 
 class CommandShowChassisAll(BrokerCommand):
@@ -53,8 +52,8 @@ class CommandShowChassisAll(BrokerCommand):
         #                               'dns_records.dns_domain'))
 
         # Prefer the primary name for ordering
-        q = q.outerjoin(PrimaryNameAssociation, DnsRecord,
-                        (Fqdn, DnsRecord.fqdn_id == Fqdn.id), DnsDomain)
+        q = q.outerjoin(DnsRecord, (Fqdn, DnsRecord.fqdn_id == Fqdn.id),
+                        DnsDomain)
         q = q.options(contains_eager('primary_name'))
         q = q.options(contains_eager('primary_name.fqdn'))
         q = q.options(contains_eager('primary_name.fqdn.dns_domain'))

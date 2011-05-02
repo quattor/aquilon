@@ -33,7 +33,7 @@ from sqlalchemy.sql import and_
 
 from aquilon.aqdb.model import (ARecord, DnsRecord, Fqdn, DnsDomain,
                                 DnsEnvironment, AddressAssignment, Interface,
-                                PrimaryNameAssociation)
+                                HardwareEntity)
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.formats.dns_record import DnsDump
 
@@ -79,8 +79,8 @@ class CommandDumpDns(BrokerCommand):
                           Fqdn.dns_environment == dbdns_env))
         # This is the join from address assignment to the primary FQDN
         q = q.filter(and_(AddressAssignment.interface_id == Interface.id,
-                          Interface.hardware_entity_id == PrimaryNameAssociation.hardware_entity_id,
-                          PrimaryNameAssociation.dns_record_id == DnsRecord.id,
+                          Interface.hardware_entity_id == HardwareEntity.id,
+                          HardwareEntity.primary_name_id == DnsRecord.id,
                           ARecord.dns_record_id == DnsRecord.id,
                           DnsRecord.fqdn_id == Fqdn.id))
         # Management interfaces should not resolve to the primary name of the

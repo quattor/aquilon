@@ -39,8 +39,8 @@ from sqlalchemy.sql.expression import or_
 from sqlalchemy.sql import select, func
 from sqlalchemy.ext.associationproxy import association_proxy
 
-from aquilon.aqdb.model import (Base, Service, Host, DnsRecord, DnsDomain, Machine,
-                                PrimaryNameAssociation, Fqdn)
+from aquilon.aqdb.model import (Base, Service, Host, DnsRecord, DnsDomain,
+                                Machine, Fqdn)
 from aquilon.aqdb.column_types.aqstr import AqStr
 from aquilon.aqdb.column_types import Enum
 from collections import defaultdict
@@ -125,7 +125,7 @@ class ServiceInstance(Base):
     def client_fqdns(self):
         session = object_session(self)
         q = session.query(DnsRecord)
-        q = q.join(PrimaryNameAssociation, Machine, Host, BuildItem)
+        q = q.join(Machine, Host, BuildItem)
         q = q.filter_by(service_instance=self)
         q = q.reset_joinpoint()
         # Due to aliases we have to explicitely tell how do we link to Fqdn
@@ -140,7 +140,7 @@ class ServiceInstance(Base):
         from aquilon.aqdb.model import ServiceInstanceServer
         session = object_session(self)
         q = session.query(DnsRecord)
-        q = q.join(PrimaryNameAssociation, Machine, Host, ServiceInstanceServer)
+        q = q.join(Machine, Host, ServiceInstanceServer)
         q = q.filter_by(service_instance=self)
         q = q.reset_joinpoint()
         # Due to aliases we have to explicitely tell how do we link to Fqdn
@@ -155,7 +155,7 @@ class ServiceInstance(Base):
         from aquilon.aqdb.model import ServiceInstanceServer
         session = object_session(self)
         q = session.query(DnsRecord)
-        q = q.join(PrimaryNameAssociation, Machine, Host, ServiceInstanceServer)
+        q = q.join(Machine, Host, ServiceInstanceServer)
         q = q.filter_by(service_instance=self)
         q = q.reset_joinpoint()
         # Due to aliases we have to explicitely tell how do we link to Fqdn

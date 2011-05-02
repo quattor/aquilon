@@ -33,16 +33,15 @@ from sqlalchemy.orm import contains_eager
 
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.formats.host import SimpleHostList
-from aquilon.aqdb.model import (Host, Machine, PrimaryNameAssociation, DnsRecord,
-                                DnsDomain, Fqdn)
+from aquilon.aqdb.model import Host, Machine, DnsRecord, DnsDomain, Fqdn
 
 
 class CommandShowHostAll(BrokerCommand):
 
     def render(self, session, **arguments):
         q = session.query(Host)
-        q = q.join(Machine, PrimaryNameAssociation, DnsRecord,
-                   (Fqdn, DnsRecord.fqdn_id == Fqdn.id), DnsDomain)
+        q = q.join(Machine, DnsRecord, (Fqdn, DnsRecord.fqdn_id == Fqdn.id),
+                   DnsDomain)
         q = q.options(contains_eager('machine'))
         q = q.options(contains_eager('machine.primary_name'))
         q = q.options(contains_eager('machine.primary_name.fqdn'))

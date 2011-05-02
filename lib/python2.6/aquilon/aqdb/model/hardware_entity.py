@@ -34,7 +34,7 @@ import re
 
 from sqlalchemy import (Column, Integer, Sequence, ForeignKey, UniqueConstraint,
                         Index, String, DateTime)
-from sqlalchemy.orm import relation
+from sqlalchemy.orm import relation, backref
 
 from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.aqdb.model import Base, Location, Model, DnsRecord
@@ -64,11 +64,21 @@ class HardwareEntity(Base):  # pylint: disable-msg=W0232, R0903
 
     serial_no = Column(String(64), nullable=True)
 
+    primary_name_id = Column(Integer, ForeignKey('dns_record.id',
+                                                 name='hw_ent_pri_name_fk'),
+                             nullable=True)
+
     creation_date = Column(DateTime, default=datetime.now, nullable=False)
     comments = Column(String(255), nullable=True)
 
     location = relation(Location, uselist=False)
     model = relation(Model, uselist=False)
+
+    # When working with machines the primary name always crops up, so load it
+    # eagerly
+    primary_name = relation(DnsRecord, lazy=False,
+                            backref=backref('hardware_entity',
+                                            lazy=True, uselist=False))
 
     __mapper_args__ = {'polymorphic_on': hardware_type}
 
@@ -117,11 +127,6 @@ class HardwareEntity(Base):  # pylint: disable-msg=W0232, R0903
     @classmethod
     def get_unique(cls, sess, name, **kw):
         """ Returns a unique HardwareEntity given session and fqdn """
-        import aquilon.aqdb.model.primary_name_association as pna
-        # Using a series of get_unique's under the covers may be inefficient
-        # the aim is to get functional code as quick as possible for now.
-        # The import required at runtime due to circular dependency between
-        # PrimaryNameAssociation and HardwareEntity.
 
         compel = kw.pop('compel', False)
         preclude = kw.pop('preclude', False)
@@ -178,12 +183,6 @@ class HardwareEntity(Base):  # pylint: disable-msg=W0232, R0903
             raise NotFoundException(msg)
         else:
             return None
-
-    #Pseudosql for a full sql query implementation for get_unique:
-    #select the hardware_entity from the primary_name_association of:
-        #select the primary_name_association with an a_record with the id of:
-            #select the dns_record with name, domain name
-                #select the dns_domain_id with the name of 'domain_name
 
     def all_addresses(self):
         """ Iterator returning all addresses of the hardware. """

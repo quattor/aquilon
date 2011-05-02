@@ -34,8 +34,7 @@ from sqlalchemy.orm import subqueryload_all, contains_eager
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.location import get_location
 from aquilon.worker.formats.switch import TorSwitch
-from aquilon.aqdb.model import (Switch, Model, Fqdn, PrimaryNameAssociation,
-                                DnsRecord, DnsDomain)
+from aquilon.aqdb.model import Switch, Model, Fqdn, DnsRecord, DnsDomain
 
 
 class CommandShowTorSwitch(BrokerCommand):
@@ -68,8 +67,8 @@ class CommandShowTorSwitch(BrokerCommand):
         q = q.options(subqueryload_all('model.machine_specs'))
 
         # Prefer the primary name when ordering
-        q = q.outerjoin(PrimaryNameAssociation, DnsRecord,
-                        (Fqdn, DnsRecord.fqdn_id == Fqdn.id), DnsDomain)
+        q = q.outerjoin(DnsRecord, (Fqdn, DnsRecord.fqdn_id == Fqdn.id),
+                        DnsDomain)
         q = q.options(contains_eager('primary_name'))
         q = q.options(contains_eager('primary_name.fqdn'))
         q = q.options(contains_eager('primary_name.fqdn.dns_domain'))

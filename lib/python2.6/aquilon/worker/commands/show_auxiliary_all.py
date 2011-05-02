@@ -28,12 +28,12 @@
 # TERMS THAT MAY APPLY.
 """Contains the logic for `aq show auxiliary --all`."""
 
-from sqlalchemy.orm import contains_eager
+from sqlalchemy.orm import contains_eager, aliased
 from sqlalchemy.sql import exists
 
 from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import (Interface, AddressAssignment, HardwareEntity,
-                                PrimaryNameAssociation, ARecord, DnsDomain, Fqdn)
+                                ARecord, DnsDomain, Fqdn)
 
 
 class CommandShowAuxiliaryAll(BrokerCommand):
@@ -42,14 +42,15 @@ class CommandShowAuxiliaryAll(BrokerCommand):
         # An auxiliary...
         q = session.query(ARecord)
         # ... is not a primary name...
-        q = q.filter(~exists().where(PrimaryNameAssociation.dns_record_id ==
-                                     ARecord.dns_record_id))
+        q = q.outerjoin(HardwareEntity)
+        q = q.filter(HardwareEntity.id == None)
+        q = q.reset_joinpoint()
         # ... and is assigned to a public interface...
         q = q.join((AddressAssignment, ARecord.ip == AddressAssignment.ip))
         q = q.join(Interface)
         q = q.filter_by(interface_type='public')
         # ... of a machine.
-        q = q.join(HardwareEntity)
+        q = q.join(aliased(HardwareEntity))
         q = q.filter_by(hardware_type='machine')
         q = q.reset_joinpoint()
         q = q.join(Fqdn, DnsDomain)
