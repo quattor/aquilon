@@ -21,7 +21,8 @@ from collections import deque
 
 from sqlalchemy import Integer, DateTime, Sequence, String, Column, ForeignKey
 
-from sqlalchemy.orm import relation, deferred, backref, object_session
+from sqlalchemy.orm import relation, deferred, backref, object_session, lazyload
+from sqlalchemy.orm.attributes import set_committed_value
 from sqlalchemy.ext.associationproxy import association_proxy
 
 from aquilon.exceptions_ import NotFoundException, ArgumentError
@@ -102,9 +103,18 @@ class DnsRecord(Base):
             if not fqdn:
                 return None
 
-        return super(DnsRecord, cls).get_unique(session, fqdn=fqdn,
-                                                compel=compel,
-                                                preclude=preclude, **kwargs)
+        # We already have the FQDN, no need to load it again
+        if "query_options" not in kwargs:
+            kwargs["query_options"] = [lazyload("fqdn")]
+
+        result = super(DnsRecord, cls).get_unique(session, fqdn=fqdn,
+                                                  compel=compel,
+                                                  preclude=preclude, **kwargs)
+        if result:
+            # Make sure not to load the relation again if we already know its
+            # value
+            set_committed_value(result, 'fqdn', fqdn)
+        return result
 
     @classmethod
     def get_or_create(cls, session, **kwargs):
