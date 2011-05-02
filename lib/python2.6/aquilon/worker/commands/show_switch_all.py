@@ -28,7 +28,7 @@
 # TERMS THAT MAY APPLY.
 """Contains the logic for `aq show switch --all`."""
 
-from sqlalchemy.orm import subqueryload_all, contains_eager
+from sqlalchemy.orm import joinedload, subqueryload, contains_eager
 
 from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import Switch, DnsRecord, DnsDomain, Fqdn
@@ -39,21 +39,25 @@ class CommandShowSwitchAll(BrokerCommand):
     def render(self, session, **arguments):
         q = session.query(Switch)
 
-        q = q.options(subqueryload_all('location'))
-        q = q.options(subqueryload_all('interfaces.assignments.dns_records'))
-        q = q.options(subqueryload_all('observed_vlans'))
-        q = q.options(subqueryload_all('observed_macs'))
-        q = q.options(subqueryload_all('model.vendor'))
-        # Switches don't have machine specs, but the formatter checks for their
-        # existence anyway
-        q = q.options(subqueryload_all('model.machine_specs'))
+        q = q.options(subqueryload('location'),
+                      subqueryload('interfaces'),
+                      joinedload('interfaces.assignments'),
+                      joinedload('interfaces.assignments.dns_records'),
+                      joinedload('interfaces.assignments.network'),
+                      subqueryload('observed_macs'),
+                      subqueryload('observed_vlans'),
+                      joinedload('observed_vlans.network'),
+                      subqueryload('model'),
+                      # Switches don't have machine specs, but the formatter
+                      # checks for their existence anyway
+                      joinedload('model.machine_specs'))
 
         # Prefer the primary name for ordering
         q = q.outerjoin(DnsRecord, (Fqdn, DnsRecord.fqdn_id == Fqdn.id),
                         DnsDomain)
-        q = q.options(contains_eager('primary_name'))
-        q = q.options(contains_eager('primary_name.fqdn'))
-        q = q.options(contains_eager('primary_name.fqdn.dns_domain'))
+        q = q.options(contains_eager('primary_name'),
+                      contains_eager('primary_name.fqdn'),
+                      contains_eager('primary_name.fqdn.dns_domain'))
         q = q.reset_joinpoint()
         q = q.order_by(Fqdn.name, DnsDomain.name, Switch.label)
 

@@ -28,10 +28,11 @@
 # TERMS THAT MAY APPLY.
 """Contains the logic for `aq search switch`."""
 
+from sqlalchemy.orm import subqueryload, joinedload, contains_eager
 
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.formats.switch import SimpleSwitchList
-from aquilon.aqdb.model import Switch
+from aquilon.aqdb.model import Switch, DnsRecord, Fqdn, DnsDomain
 from aquilon.worker.dbwrappers.hardware_entity import search_hardware_entity_query
 
 
@@ -48,6 +49,27 @@ class CommandSearchSwitch(BrokerCommand):
             dbswitch = Switch.get_unique(session, switch, compel=True)
             q = q.filter_by(id=dbswitch.id)
 
+        # Prefer the primary name for ordering
+        q = q.outerjoin(DnsRecord, (Fqdn, DnsRecord.fqdn_id == Fqdn.id),
+                        DnsDomain)
+        q = q.options(contains_eager('primary_name'),
+                      contains_eager('primary_name.fqdn'),
+                      contains_eager('primary_name.fqdn.dns_domain'))
+        q = q.reset_joinpoint()
+        q = q.order_by(Fqdn.name, DnsDomain.name, Switch.label)
+
         if fullinfo:
+            q = q.options(joinedload('location'),
+                          subqueryload('interfaces'),
+                          joinedload('interfaces.assignments'),
+                          joinedload('interfaces.assignments.dns_records'),
+                          joinedload('interfaces.assignments.network'),
+                          subqueryload('observed_macs'),
+                          subqueryload('observed_vlans'),
+                          joinedload('observed_vlans.network'),
+                          subqueryload('model'),
+                          # Switches don't have machine specs, but the formatter
+                          # checks for their existence anyway
+                          joinedload('model.machine_specs'))
             return q.all()
         return SimpleSwitchList(q.all())

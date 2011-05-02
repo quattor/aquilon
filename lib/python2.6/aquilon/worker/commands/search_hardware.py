@@ -28,6 +28,7 @@
 # TERMS THAT MAY APPLY.
 """Contains the logic for `aq search hardware`."""
 
+from sqlalchemy.orm import subqueryload, joinedload
 
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.formats.hardware_entity import SimpleHardwareEntityList
@@ -43,5 +44,9 @@ class CommandSearchHardware(BrokerCommand):
     def render(self, session, fullinfo, **arguments):
         q = search_hardware_entity_query(session, HardwareEntity, **arguments)
         if fullinfo:
+            q = q.options(joinedload('location'),
+                          subqueryload('interfaces'),
+                          joinedload('interfaces.assignments'),
+                          joinedload('interfaces.assignments.dns_records'))
             return q.all()
         return SimpleHardwareEntityList(q.all())

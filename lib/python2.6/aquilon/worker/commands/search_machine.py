@@ -29,7 +29,7 @@
 """Contains the logic for `aq search machine`."""
 
 
-from sqlalchemy.orm import aliased
+from sqlalchemy.orm import aliased, subqueryload, joinedload
 
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.formats.machine import SimpleMachineList
@@ -73,5 +73,16 @@ class CommandSearchMachine(BrokerCommand):
             q = q.filter_by(service_instance=dbshare)
             q = q.reset_joinpoint()
         if fullinfo:
+            q = q.options(joinedload('location'),
+                          subqueryload('interfaces'),
+                          joinedload('interfaces.assignments'),
+                          joinedload('interfaces.assignments.dns_records'),
+                          joinedload('chassis_slot'),
+                          subqueryload('chassis_slot.chassis'),
+                          subqueryload('disks'),
+                          subqueryload('host'),
+                          subqueryload('host._services_used'),
+                          subqueryload('host._cluster'),
+                          subqueryload('_cluster'))
             return q.all()
         return SimpleMachineList(q.all())

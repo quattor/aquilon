@@ -29,7 +29,7 @@
 """Contains the logic for `aq show chassis`."""
 
 
-from sqlalchemy.orm import subqueryload_all, contains_eager
+from sqlalchemy.orm import subqueryload, joinedload, lazyload, contains_eager
 
 from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import Chassis, DnsRecord, DnsDomain, Fqdn
@@ -42,20 +42,26 @@ class CommandShowChassisAll(BrokerCommand):
     def render(self, session, **arguments):
         q = session.query(Chassis)
 
-        q = q.options(subqueryload_all('model.vendor'))
-        q = q.options(subqueryload_all('model.machine_specs'))
-        q = q.options(subqueryload_all('location'))
-        q = q.options(subqueryload_all('slots.machine'))
+        q = q.options(subqueryload('model'),
+                      joinedload('model.machine_specs'),
+                      subqueryload('location'),
+                      joinedload('slots'),
+                      subqueryload('slots.machine'),
 
-        # FIXME: enable it again when ticket #2014 is fixed
-        #q = q.options(subqueryload_all('interfaces.assignments.'
-        #                               'dns_records.dns_domain'))
+                      # A rare case when we don't need primary name/host
+                      lazyload('slots.machine.primary_name'),
+                      lazyload('slots.machine.host'),
+
+                      subqueryload('interfaces'),
+                      joinedload('interfaces.assignments'),
+                      joinedload('interfaces.assignments.network'),
+                      joinedload('interfaces.assignments.dns_records'))
 
         # Prefer the primary name for ordering
         q = q.outerjoin(DnsRecord, (Fqdn, DnsRecord.fqdn_id == Fqdn.id),
                         DnsDomain)
-        q = q.options(contains_eager('primary_name'))
-        q = q.options(contains_eager('primary_name.fqdn'))
-        q = q.options(contains_eager('primary_name.fqdn.dns_domain'))
+        q = q.options(contains_eager('primary_name'),
+                      contains_eager('primary_name.fqdn'),
+                      contains_eager('primary_name.fqdn.dns_domain'))
         q = q.order_by(Fqdn.name, DnsDomain.name, Chassis.label)
         return q.all()
