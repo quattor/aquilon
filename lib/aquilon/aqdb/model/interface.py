@@ -116,7 +116,7 @@ class Interface(Base):
 
     model = relation(Model, innerjoin=True)
 
-    master = relation('Interface', uselist=False,
+    master = relation('Interface',
                       remote_side=id,
                       primaryjoin=master_id == id,
                       backref=backref('slaves'))
@@ -263,7 +263,7 @@ class VlanInterface(Interface):
 
     vlan_id = Column(Integer)
 
-    parent = relation(Interface, uselist=False,
+    parent = relation(Interface,
                       remote_side=Interface.id,
                       primaryjoin=parent_id == Interface.id,
                       backref=backref('vlans',

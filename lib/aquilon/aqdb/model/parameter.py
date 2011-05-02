@@ -69,7 +69,7 @@ class PersonalityParameter(ParameterHolder):
                                        ondelete='CASCADE'),
                             nullable=True)
 
-    personality = relation(Personality, uselist=False,
+    personality = relation(Personality,
                            backref=backref('paramholder', uselist=False,
                                            cascade='all, delete-orphan'))
 
