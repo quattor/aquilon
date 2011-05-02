@@ -1,0 +1,87 @@
+Users with access to the internal wiki and the /ms/dev and /ms/dist
+namespaces should go to http://aquilon and the HowToDevelop page to
+get started.
+
+The rest of this file is meant for everyone else.
+
+Under Scientific Linux 6, install the following RPMs:
+python-2.6.5
+python-devel-2.6.5
+python-setuptools-0.6.10
+gcc-4.4.4
+git-1.7.1
+git-daemon-1.7.1
+ant-contrib-1.0
+
+If using a different distribution, you will need python 2.6.x and git 1.7.x.
+
+Also, grab and install a recent set of protobuf RPMs...
+ftp://ftp.pbone.net/mirror/download.fedora.redhat.com/pub/fedora/epel/6/i386/protobuf-2.3.0-7.el6.i686.rpm
+ftp://ftp.pbone.net/mirror/download.fedora.redhat.com/pub/fedora/epel/6/i386/protobuf-compiler-2.3.0-7.el6.i686.rpm
+ftp://ftp.pbone.net/mirror/download.fedora.redhat.com/pub/fedora/epel/6/i386/protobuf-devel-2.3.0-7.el6.i686.rpm
+ftp://ftp.pbone.net/mirror/download.fedora.redhat.com/pub/fedora/epel/6/i386/protobuf-python-2.3.0-7.el6.i686.rpm
+ftp://ftp.pbone.net/mirror/download.fedora.redhat.com/pub/fedora/epel/6/i386/protobuf-vim-2.3.0-7.el6.i686.rpm
+
+You'll need to download and compile KNC (Kerberised NetCat). To
+compile the binary requires (at least) the following RPMs:
+- make
+- krb5-libs
+- krb5-devel
+- gcc
+The knc source and instructions for building can be found at:
+http://oskt.secure-endpoints.com/knc.html
+Install the knc binary into the PATH, such as in /usr/local/bin.
+
+Use the python setuptools installed earlier to run (as root):
+easy_install virtualenv
+
+Follow the sourceforge instructions for cloning the git repository,
+using PROJECTNAME=quattor and REPONAME=aquilon.
+http://sourceforge.net/apps/trac/sourceforge/wiki/Git
+
+FIXME: Add an aquilon.protocols repository to sourceforge for the protocols.
+
+Also clone the aquilon.protocols project.  Pass in an alternate INSTALLDIR
+if desired.  Compiling the protocol buffers into perl may fail.
+make PROTOC=protoc install
+
+The last step can be run as root to install to a system directory,
+or run as a normal user to install into a user-writable location.
+cd build
+./bootstrap.py >aq_env.py
+# The cx_Oracle install will fail if there is no local Oracle client
+# installed - that's fine.  Some versions may fail to install, and the
+# current stable version will be installed instead.
+python2.6 aq_env.py --python=python2.6 --prompt="(aquilon) " /usr/local/aquilon/pythonenv
+
+An environment has now been setup appropriate for running commands and
+development.  To activate the environment:
+source /usr/local/aquilon/pythonenv/bin/activate
+Alternately, just add the bin directory to the $PATH.
+
+Setup up the aquilon broker configuration file.  There is an example
+in etc/aqd.conf.example.com.  Copy that to the system /etc/aqd.conf
+or just set the AQDCONF environment variable to point wherever it is
+installed.  Update the file as needed.  The default will use a sqlite
+database back-end.
+
+Take a look at the example load file for the database in the aquilon
+source repository's tests/aqdb/example.dump.  Update as desired for the
+site.  When ready, a database can be initialized (or recreated) with
+the following command.  Set up AQDCONF (or have an /etc/aqd.conf) as
+described above first.  Create the database directory if using sqlite
+and it does not exist.
+cd ../tests/aqdb
+./build_db.py -D -p example.dump
+
+Make sure there is a keytab set up for the running user, and then
+try starting up a development broker:
+cd ..
+./dev_aqd.sh
+
+In another window:
+cd aqd/bin
+AQSERVICE=$USER ./aq.py status
+
+To test without kerberos:
+./aq.py status --noauth
