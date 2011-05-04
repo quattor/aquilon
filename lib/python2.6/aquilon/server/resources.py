@@ -371,6 +371,7 @@ class RestServer(ResponsePage):
                         myinstance.optional_parameters.append(option_name)
                     if option.attrib.has_key("type"):
                         paramtype = option.attrib["type"]
+                        myinstance.parameter_types[option_name] = paramtype
                         if paramtype == "int":
                             myinstance.parameter_checks[option_name] = force_int
                         elif paramtype == "float":
@@ -388,6 +389,13 @@ class RestServer(ResponsePage):
                     else:  # pragma: no cover
                         log.msg("Warning: argument type not known for %s.%s" %
                                 (myinstance.command, option_name))
+                    pbt = myinstance.parameters_by_type
+                    for option_name, paramtype \
+                            in myinstance.parameter_types.items():
+                        if paramtype in pbt:
+                            pbt[paramtype].append(option_name)
+                        else:
+                            pbt[paramtype] = [option_name]
 
         cache_version(config)
         log.msg("Starting aqd version %s" % config.get("broker", "version"))

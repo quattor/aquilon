@@ -93,6 +93,12 @@ class BrokerCommand(object):
 
     """
 
+    # The parameter types are filled in automatically based on input.xml.
+    parameter_types = {}
+    # This is the pivot of the above, filled in at the same time.  It is a
+    # dictionary of type names to lists of parameters.
+    parameters_by_type = {}
+
     requires_azcheck = True
     """ Opt out of authorization checks by setting this flag to False."""
 
