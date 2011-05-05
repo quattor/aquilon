@@ -124,6 +124,8 @@ class AuthorizationBroker(object):
                               'cluster',
                               'add_manager', 'add_dynamic_range', 'add_disk',
                               'add_auxiliary',
+                              'poll_switch', 'poll_tor_switch_tor_switch',
+                              'poll_switch_switch', 'poll_tor_switch',
                               'make', 'make_cluster']:
                 self.raise_auth_error(principal, action, resource)
         return True
