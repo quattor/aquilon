@@ -92,12 +92,11 @@ class QIPRefresh(object):
         # Used to limit the number of warnings
         self.unknown_syslocs = set()
 
-        # Load existing networks
+        # Load existing networks. We have to load all, otherwise we won't be
+        # able to fix networks with wrong location
         self.aqnetworks = {}
         q = session.query(Network)
         q = q.filter_by(network_environment=self.net_env)
-        if dbbuilding:
-            q = q.filter_by(location=dbbuilding)
         q = q.options(subqueryload("routers"))
         for item in q:
             self.aqnetworks[item.ip] = item
@@ -351,6 +350,10 @@ class QIPRefresh(object):
         ips = self.aqnetworks.keys()
         for ip in ips:
             if ip not in qipnetworks:
+                # "Forget" networks not inside the requested building to prevent
+                # them being deleted
+                if self.building and self.aqnetworks[ip].location != self.building:
+                    del self.aqnetworks[ip]
                 continue
             if self.update_network(self.aqnetworks[ip], qipnetworks[ip]):
                 # If the netmask did not change, then we're done with this

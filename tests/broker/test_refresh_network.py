@@ -130,6 +130,8 @@ class TestRefreshNetwork(TestBrokerCommand):
         err = self.striplock(err)
         self.matchoutput(err, "Adding", command)
         self.matchclean(err, "Setting", command)
+        # Make sure the refresh logic does not try to remove networks in other
+        # buildings
         self.matchclean(err, "Deleting", command)
 
     # 200 add a dummy 0.1.1.0/24 network to np
