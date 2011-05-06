@@ -47,8 +47,7 @@ class TestDelAddress(TestBrokerCommand):
 
     def testbasic(self):
         self.dsdb_expect_delete(self.net.unknown[0].usable[13])
-        command = ["del_address", "--ip=%s" % self.net.unknown[0].usable[13],
-                   "--fqdn=arecord13.aqd-unittest.ms.com"]
+        command = ["del_address", "--ip=%s" % self.net.unknown[0].usable[13]]
         self.noouttest(command)
         self.dsdb_verify()
 
@@ -59,9 +58,8 @@ class TestDelAddress(TestBrokerCommand):
     def testdefaultenv(self):
         self.dsdb_expect_delete(self.net.unknown[0].usable[14])
         default = self.config.get("site", "default_dns_environment")
-        command = ["del_address", "--ip=%s" % self.net.unknown[0].usable[14],
-                   "--fqdn=arecord14.aqd-unittest.ms.com",
-                   "--dns_environment=%s" % default]
+        command = ["del_address", "--fqdn", "arecord14.aqd-unittest.ms.com",
+                   "--dns_environment", default]
         self.noouttest(command)
         self.dsdb_verify()
 
@@ -79,6 +77,14 @@ class TestDelAddress(TestBrokerCommand):
         command = ["show_fqdn", "--fqdn", "arecord14.aqd-unittest.ms.com",
                    "--dns_environment", "ut-env"]
         self.notfoundtest(command)
+
+    def testbadip(self):
+        ip = self.net.unknown[0].usable[14]
+        command = ["del_address", "--ip", ip,
+                   "--fqdn=arecord15.aqd-unittest.ms.com"]
+        out = self.notfoundtest(command)
+        self.matchoutput(out, "DNS Record arecord15.aqd-unittest.ms.com, ip "
+                         "%s not found." % ip, command)
 
     def testcleanup(self):
         self.dsdb_expect_delete(self.net.unknown[0].usable[15])

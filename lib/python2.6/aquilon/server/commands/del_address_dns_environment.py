@@ -27,10 +27,14 @@
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
 
+from sqlalchemy.orm import contains_eager
+from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 
 from aquilon.server.broker import BrokerCommand
-from aquilon.aqdb.model import ARecord, DnsEnvironment
-from aquilon.exceptions_ import UnimplementedError, ArgumentError
+from aquilon.aqdb.model import ARecord, Fqdn, DnsEnvironment
+from aquilon.aqdb.model.dns_domain import parse_fqdn
+from aquilon.exceptions_ import (UnimplementedError, ArgumentError,
+                                 NotFoundException)
 from aquilon.server.locks import lock_queue, DeleteKey
 from aquilon.server.processes import DSDBRunner
 from aquilon.server.dbwrappers.dns import delete_dns_record
@@ -38,7 +42,7 @@ from aquilon.server.dbwrappers.dns import delete_dns_record
 
 class CommandDelAddressDNSEnvironment(BrokerCommand):
 
-    required_parameters = ["fqdn", "ip", "dns_environment"]
+    required_parameters = ["dns_environment"]
 
     def render(self, session, logger, fqdn, ip, dns_environment, **arguments):
         dbdns_env = DnsEnvironment.get_unique(session, dns_environment,
@@ -47,12 +51,38 @@ class CommandDelAddressDNSEnvironment(BrokerCommand):
         key = DeleteKey("system", logger=logger)
         try:
             lock_queue.acquire(key)
-            dbaddress = ARecord.get_unique(session, fqdn=fqdn,
-                                           dns_environment=dbdns_env,
-                                           compel=True)
-            if ip != dbaddress.ip:
-                raise ArgumentError("IP address %s is not set for %s (%s).",
-                                    (ip, dbaddress.fqdn, dbaddress.ip))
+
+            # We can't use get_unique() here, since we always want to filter by
+            # DNS environment, even if no FQDN was given
+            q = session.query(ARecord)
+            if ip:
+                q = q.filter_by(ip=ip)
+            q = q.join(Fqdn)
+            q = q.options(contains_eager('fqdn'))
+            q = q.filter_by(dns_environment=dbdns_env)
+            if fqdn:
+                (name, dbdns_domain) = parse_fqdn(session, fqdn)
+                q = q.filter_by(name=name)
+                q = q.filter_by(dns_domain=dbdns_domain)
+            try:
+                dbaddress = q.one()
+            except NoResultFound:
+                parts = []
+                if fqdn:
+                    parts.append(fqdn)
+                if ip:
+                    parts.append("ip %s" % ip)
+                raise NotFoundException("DNS Record %s not found." %
+                                        ", ".join(parts))
+            except MultipleResutsFound:
+                parts = []
+                if fqdn:
+                    parts.append(fqdn)
+                if ip:
+                    parts.append("ip %s" % ip)
+                raise NotFoundException("DNS Record %s is not unique." %
+                                        ", ".join(parts))
+
             if dbaddress.hardware_entity:
                 raise ArgumentError("DNS record {0:a} is the primary name of "
                                     "{1:l}, therefore it cannot be "
@@ -79,7 +109,7 @@ class CommandDelAddressDNSEnvironment(BrokerCommand):
 
             if dbdns_env.is_default:
                 dsdb_runner = DSDBRunner(logger=logger)
-                dsdb_runner.delete_host_details(ip)
+                dsdb_runner.delete_host_details(dbaddress.ip)
 
             session.commit()
         finally:

@@ -35,7 +35,7 @@ from aquilon.server.commands.del_address_dns_environment \
 
 class CommandDelAddress(CommandDelAddressDNSEnvironment):
 
-    required_parameters = ["fqdn", "ip"]
+    required_parameters = []
 
     def render(self, dns_environment, **kwargs):
         if not dns_environment:
