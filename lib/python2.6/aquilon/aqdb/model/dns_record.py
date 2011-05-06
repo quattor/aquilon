@@ -68,20 +68,20 @@ class DnsRecord(Base):
                        'with_polymorphic': '*'}
 
     @classmethod
-    def get_unique(cls, session, short=None, dns_domain=None, fqdn=None,
+    def get_unique(cls, session, name=None, dns_domain=None, fqdn=None,
                    dns_environment=None, compel=False, **kwargs):
         # Proxy FQDN lookup to the Fqdn class
         if fqdn:
-            if short or dns_domain:
-                raise TypeError("fqdn and short/dns_domain cannot be mixed")
+            if name or dns_domain:
+                raise TypeError("fqdn and name/dns_domain cannot be mixed")
             if not isinstance(fqdn, Fqdn):
                 fqdn = Fqdn.get_unique(session, fqdn=fqdn,
                                        dns_environment=dns_environment,
                                        compel=compel)
                 if not fqdn:
                     return None
-        else:
-            fqdn = Fqdn.get_unique(session, short=short, dns_domain=dns_domain,
+        elif name or dns_domain:
+            fqdn = Fqdn.get_unique(session, name=name, dns_domain=dns_domain,
                                    dns_environment=dns_environment,
                                    compel=compel)
 
