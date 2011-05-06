@@ -71,6 +71,16 @@ class TestAddOS(TestBrokerCommand):
         self.matchoutput(out, "Template: utarchetype1/os/utos/1.0", command)
         self.matchclean(out, "linux", command)
 
+    def testverifyutosproto(self):
+        command = ["show_os", "--archetype=utarchetype1", "--osname=utos",
+                   "--osversion=1.0", "--format=proto"]
+        out = self.commandtest(command)
+        oslist = self.parse_os_msg(out, 1)
+        utos = oslist.operating_systems[0]
+        self.assertEqual(utos.archetype.name, "utarchetype1")
+        self.assertEqual(utos.name, "utos")
+        self.assertEqual(utos.version, "1.0")
+
     def testverifyosonly(self):
         command = "show os --osname utos --archetype utarchetype1"
         out = self.commandtest(command.split(" "))
@@ -92,6 +102,24 @@ class TestAddOS(TestBrokerCommand):
         self.matchoutput(out, "Archetype: aquilon", command)
         self.matchoutput(out, "Template: utarchetype1/os/utos/1.0", command)
         self.matchoutput(out, "Template: aquilon/os/linux/4.0.1-x86_64", command)
+
+    def testverifyallproto(self):
+        command = "show os --all --format=proto"
+        out = self.commandtest(command.split(" "))
+        oslist = self.parse_os_msg(out)
+        found_rhel4 = False
+        found_ut = False
+        for os in oslist.operating_systems:
+            if os.archetype.name == 'aquilon' and \
+               os.name == 'linux' and os.version == '4.0.1-x86_64':
+                found_rhel4 = True
+            if os.archetype.name == 'utarchetype1' and \
+               os.name == 'utos' and os.version == '1.0':
+                found_ut = True
+        self.assertTrue(found_rhel4,
+                        "Missing proto output for aquilon/linux/4.0.1-x86_64")
+        self.assertTrue(found_ut,
+                        "Missing proto output for utarchetype1/utos/1.0")
 
     def testshownotfound(self):
         command = "show os --osname os-does-not-exist --osversion foobar --archetype aquilon"

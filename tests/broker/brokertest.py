@@ -353,115 +353,59 @@ class TestBrokerCommand(unittest.TestCase):
                     "output for %s matches '%s':\n@@@\n'%s'\n@@@\n" %
                     (command, r, out))
 
-    def parse_netlist_msg(self, msg, expect=None):
-        netlist = aqdnetworks_pb2.NetworkList()
-        netlist.ParseFromString(msg)
-        received = len(netlist.networks)
+    def parse_proto_msg(self, listclass, attr, msg, expect=None):
+        protolist = listclass()
+        protolist.ParseFromString(msg)
+        received = len(getattr(protolist, attr))
         if expect is None:
             self.failUnless(received > 0,
-                            "No networks listed in NetworkList "
-                            "protobuf message\n")
+                            "No %s listed in %s protobuf message\n" %
+                            (attr, listclass))
         else:
             self.failUnlessEqual(received, expect,
-                                 "%d network(s) expected, got %d\n" %
-                                 (expect, received))
-        return netlist
+                                 "%d %s expected, got %d\n" %
+                                 (expect, attr, received))
+        return protolist
 
-    def parse_srvlist_msg(self, msg, expect=None):
-        srvlist = aqdservices_pb2.ServiceList()
-        srvlist.ParseFromString(msg)
-        received = len(srvlist.services)
-        if expect is None:
-            self.failUnless(received > 0,
-                            "No services listed in ServiceList "
-                            "protobuf message\n")
-        else:
-            self.failUnlessEqual(received, expect,
-                                 "%d service(s) expected, got %d\n" %
-                                 (expect, received))
-        return srvlist
+    def parse_netlist_msg(self, msg, expect=None):
+        return self.parse_proto_msg(aqdnetworks_pb2.NetworkList,
+                                    'networks',
+                                    msg, expect)
 
     def parse_hostlist_msg(self, msg, expect=None):
-        hostlist = aqdsystems_pb2.HostList()
-        hostlist.ParseFromString(msg)
-        received = len(hostlist.hosts)
-        if expect is None:
-            self.failUnless(received > 0,
-                            "No hosts listed in HostList protobuf message\n")
-        else:
-            self.failUnlessEqual(received, expect,
-                                 "%d host(s) expected, got %d\n" %
-                                 (expect, received))
-        return hostlist
+        return self.parse_proto_msg(aqdsystems_pb2.HostList,
+                                    'hosts',
+                                    msg, expect)
 
     def parse_location_msg(self, msg, expect=None):
-        loclist = aqdlocations_pb2.LocationList()
-        loclist.ParseFromString(msg)
-        received = len(loclist.locations)
-        if expect is None:
-            self.failUnless(received > 0,
-                            "No locations in LocationList protobuf\n")
-        else:
-            self.failUnlessEqual(received, expect,
-                                 "%d location(s) expected, got %d\n" %
-                                 (expect, received))
-        return loclist
+        return self.parse_proto_msg(aqdlocations_pb2.LocationList,
+                                    'locations',
+                                    msg, expect)
 
     def parse_dns_domainlist_msg(self, msg, expect=None):
-        dns_domainlist = aqddnsdomains_pb2.DNSDomainList()
-        dns_domainlist.ParseFromString(msg)
-        received = len(dns_domainlist.dns_domains)
-        if expect is None:
-            self.failUnless(received > 0,
-                            "No DNS domains listed in DNSDomainList "
-                            "protobuf message\n")
-        else:
-            self.failUnlessEqual(received, expect,
-                                 "%d DNS domain(s) expected, got %d\n" %
-                                 (expect, received))
-        return dns_domainlist
+        return self.parse_proto_msg(aqddnsdomains_pb2.DNSDomainList,
+                                    'dns_domains',
+                                    msg, expect)
 
     def parse_service_msg(self, msg, expect=None):
-        service = aqdservices_pb2.ServiceList()
-        service.ParseFromString(msg)
-        received = len(service.services)
-        if expect is None:
-            self.failUnless(received > 0,
-                            "No services listed in protobuf message\n")
-        else:
-            self.failUnlessEqual(received, expect,
-                                 "%d service(s) expected, got %d\n" %
-                                 (expect, received))
-        return service
-
+        return self.parse_proto_msg(aqdservices_pb2.ServiceList,
+                                    'services',
+                                    msg, expect)
 
     def parse_servicemap_msg(self, msg, expect=None):
-        servicemaplist = aqdservices_pb2.ServiceMapList()
-        servicemaplist.ParseFromString(msg)
-        received = len(servicemaplist.servicemaps)
-        if expect is None:
-            self.failUnless(received > 0,
-                            "No service maps listed in ServiceMapList "
-                            "protobuf message\n")
-        else:
-            self.failUnlessEqual(received, expect,
-                                 "%d host(s) expected, got %d\n" %
-                                 (expect, received))
-        return servicemaplist
+        return self.parse_proto_msg(aqdservices_pb2.ServiceMapList,
+                                    'servicemaps',
+                                    msg, expect)
 
     def parse_personality_msg(self, msg, expect=None):
-        personalitylist = aqdsystems_pb2.PersonalityList()
-        personalitylist.ParseFromString(msg)
-        received = len(personalitylist.personalities)
-        if expect is None:
-            self.failUnless(received > 0,
-                            "No personalities listed in PersonalityList "
-                            "protobuf message\n")
-        else:
-            self.failUnlessEqual(received, expect,
-                                 "%d personalities expected, got %d\n" %
-                                 (expect, received))
-        return personalitylist
+        return self.parse_proto_msg(aqdsystems_pb2.PersonalityList,
+                                    'personalities',
+                                    msg, expect)
+
+    def parse_os_msg(self, msg, expect=None):
+        return self.parse_proto_msg(aqdsystems_pb2.OperatingSystemList,
+                                    'operating_systems',
+                                    msg, expect)
 
     def gitenv(self, env=None):
         git_path = self.config.get("broker", "git_path")

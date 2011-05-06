@@ -53,6 +53,7 @@ typemap = {
     "dns_domain": aqddnsdomains_pb2.DNSDomainList(),
     "host": aqdsystems_pb2.HostList(),
     "personality": aqdsystems_pb2.PersonalityList(),
+    "operating_system": aqdsystems_pb2.OperatingSystemList(),
     "network": aqdnetworks_pb2.NetworkList(),
     "service": aqdservices_pb2.ServiceList(),
     "service_map": aqdservices_pb2.ServiceMapList(),
