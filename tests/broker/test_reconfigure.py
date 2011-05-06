@@ -63,6 +63,7 @@ class TestReconfigure(TestBrokerCommand):
                          "unittest02.one-nyp.ms.com removing binding for "
                          "service afs instance q.ln.ms.com",
                          command)
+        self.matchoutput(err, "sent 1 server notifications", command)
 
     def testverifybuildstatus(self):
         command = "show host --hostname unittest02.one-nyp.ms.com"
@@ -120,6 +121,7 @@ class TestReconfigure(TestBrokerCommand):
         self.matchoutput(err, "0/1 object template", command)
         self.matchclean(err, "removing binding", command)
         self.matchclean(err, "adding binding", command)
+        self.matchoutput(err, "sent 1 server notifications", command)
 
     def testverifycatunittest00(self):
         command = "cat --hostname unittest00.one-nyp.ms.com"

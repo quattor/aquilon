@@ -31,6 +31,7 @@
 
 import os
 import unittest
+import socket
 
 if __name__ == "__main__":
     import utils
@@ -132,7 +133,19 @@ class TestAddDnsDomain(TestBrokerCommand):
         self.noouttest(command)
         self.dsdb_verify()
 
+    def testaddlocaldomain(self):
+        (name, dot, domain) = socket.getfqdn().partition('.')
+        # If the local host is under .ms.com, then we don't want to add it again
+        (p, out, err) = self.runcommand(["show", "dns", "domain",
+                                         "--dns_domain", domain])
+        if p.returncode == 4:
+            self.dsdb_expect("show dns_domains -domain_name %s" % domain, fail=True)
+            self.dsdb_expect("add dns_domain -domain_name %s -comments " % domain)
+            command = ["add", "dns", "domain", "--dns_domain", domain]
+            self.noouttest(command)
+            self.dsdb_verify()
 
-if __name__=='__main__':
+
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddDnsDomain)
     unittest.TextTestRunner(verbosity=2).run(suite)
