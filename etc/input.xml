@@ -1274,6 +1274,41 @@
      <transport method="post" path="network" />
    </command>
 
+   <command name="split_network">
+      Split a network to smaller subnets.  Any devices on the old network will
+      be reassigned to the new subnets.
+      <optgroup name="split_network_mandatory" mandatory="True" fields="all">
+         <option name="ip" type="ipv4">Network address</option>
+	 <optgroup name="merge_network_netmask" mandatory="True" fields="any">
+            <option name="netmask" type="ipv4" conflicts="prefixlen">New netmask</option>
+            <option name="prefixlen" type="int" conflicts="netmask">New network prefix length</option>
+	 </optgroup>
+      </optgroup>
+      <optgroup name="split_network_optional" mandatory="False" fields="any">
+         <option name="network_environment" type="string">Network environment (default: internal)</option>
+      </optgroup>
+      <transport method="post" path="network/split" />
+   </command>
+
+   <command name="merge_network">
+      Merge multiple networks.  The merged network will inherit its parameters (like location)
+      from the network specifyed by --ip.  Note that --ip does not need to specify the
+      first network to be merged: e.g. if you want to merge 4 existing networks, then --ip may
+      point to the 2nd one; the IP address of the merged network will be calculated using 
+      --prefixlen.
+      <optgroup name="merge_network_mandatory" mandatory="True" fields="all">
+         <option name="ip" type="ipv4">Network address</option>
+	 <optgroup name="merge_network_netmask" mandatory="True" fields="any">
+            <option name="netmask" type="ipv4" conflicts="prefixlen">New netmask</option>
+            <option name="prefixlen" type="int" conflicts="netmask">New network prefix length</option>
+	 </optgroup>
+      </optgroup>
+      <optgroup name="merge_network_optional" mandatory="False" fields="any">
+         <option name="network_environment" type="string">Network environment (default: internal)</option>
+      </optgroup>
+      <transport method="post" path="network/merge" />
+   </command>
+
    <command name="add_router">
       Add a router address.
       <optgroup name="add_router_mandatory" mandatory="True" fields="all">
