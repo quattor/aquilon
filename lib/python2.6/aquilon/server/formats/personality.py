@@ -35,9 +35,12 @@ from aquilon.aqdb.model import Personality
 
 
 class ThresholdedPersonality(object):
-    def __init__(self, dbpersonality, threshold):
+    def __init__(self, dbpersonality, thresholds):
         self.dbpersonality = dbpersonality
-        self.threshold = threshold
+        if not thresholds:
+            thresholds = {}
+        self.threshold = thresholds.get('threshold')
+        self.maintenance_threshold = thresholds.get('maintenance_threshold')
 
 
 class PersonalityList(list):
@@ -63,6 +66,7 @@ class PersonalityFormatter(ObjectFormatter):
         has_threshold = False
         if hasattr(personality, "dbpersonality"):
             threshold = personality.threshold
+            maintenance_threshold = personality.maintenance_threshold
             has_threshold = True
             personality = personality.dbpersonality
         details = [indent + "Personality: %s" % personality.name +
@@ -71,6 +75,8 @@ class PersonalityFormatter(ObjectFormatter):
                        (personality.archetype.name, personality.name))
         if has_threshold:
             details.append(indent + "  Threshold: %s" % threshold)
+            details.append(indent + "  Maintenance Threshold: %s" %
+                           maintenance_threshold)
         for service in personality.services:
             details.append(indent + "  Required Service: %s" % service.name)
         if personality.comments:

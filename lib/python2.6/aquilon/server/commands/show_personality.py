@@ -56,8 +56,8 @@ class CommandShowPersonality(BrokerCommand):
                                                    compel=True)
             if not dbbranch:
                 return dbpersonality
-            threshold = self.get_threshold(dbpersonality, dbbranch, dbauthor)
-            return ThresholdedPersonality(dbpersonality, threshold)
+            thresholds = self.get_threshold(dbpersonality, dbbranch, dbauthor)
+            return ThresholdedPersonality(dbpersonality, thresholds)
         q = session.query(Personality)
         if archetype:
             dbarchetype = Archetype.get_unique(session, archetype, compel=True)
@@ -77,11 +77,12 @@ class CommandShowPersonality(BrokerCommand):
             # In theory the results here could be inconsistent if the
             # domain is being written to.  In practice... it's not worth
             # taking out the compile lock to ensure consistency.
-            threshold = self.get_threshold(dbpersonality, dbbranch, dbauthor)
-            results.append(ThresholdedPersonality(dbpersonality, threshold))
+            thresholds = self.get_threshold(dbpersonality, dbbranch, dbauthor)
+            results.append(ThresholdedPersonality(dbpersonality, thresholds))
         return results
 
-    threshold_re = re.compile(r'^\s*"threshold"\s*=\s*(\d+)\s*;\s*$', re.M)
+    threshold_re = re.compile(r'^\s*"((?:maintenance_)?threshold)"\s*='
+                              r'\s*(\d+)\s*;\s*$', re.M)
 
     def get_threshold(self, dbpersonality, dbbranch, dbauthor):
         if dbbranch.branch_type == 'sandbox':
@@ -97,7 +98,7 @@ class CommandShowPersonality(BrokerCommand):
             contents = open(template).read()
         except IOError:
             return None
-        m = self.threshold_re.search(contents)
-        if not m:
-            return None
-        return int(m.group(1))
+        values = dict(threshold=None, maintenance_threshold=None)
+        for m in self.threshold_re.finditer(contents):
+            values[m.group(1)] = int(m.group(2))
+        return values
