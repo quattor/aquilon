@@ -30,6 +30,7 @@
 """Module for testing the add host command."""
 
 import unittest
+import socket
 
 if __name__ == "__main__":
     import utils
@@ -39,6 +40,21 @@ from brokertest import TestBrokerCommand
 
 
 class TestAddHost(TestBrokerCommand):
+
+    def testaddutnotify(self):
+        hostname = socket.getfqdn()
+        # We _could_ also look up the real address of the host...
+        self.dsdb_expect_add(hostname, "127.0.0.1", "eth0",
+                             self.net.unknown[0].usable[19].mac)
+        self.noouttest(["add", "host",
+                        "--hostname", hostname,
+                        "--ip", "127.0.0.1", "--machine", "ut3c5n6",
+                        "--domain", "unittest", "--buildstatus", "ready",
+                        "--archetype", "aquilon", "--osname", "linux",
+                        "--osversion", "4.0.1-x86_64",
+                        "--personality", "compileserver"])
+        self.noouttest(["bind", "server", "--service", "utnotify",
+                        "--instance", "localhost", "--hostname", hostname])
 
     def testaddunittest02(self):
         ip = self.net.unknown[0].usable[0]
@@ -415,6 +431,6 @@ class TestAddHost(TestBrokerCommand):
         self.matchoutput(out, "test-aurora-default-os.ms.com", command)
         self.matchoutput(out, "test-windows-default-os.msad.ms.com", command)
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddHost)
     unittest.TextTestRunner(verbosity=2).run(suite)

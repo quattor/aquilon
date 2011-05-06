@@ -30,6 +30,7 @@
 """Module for testing the del host command."""
 
 import unittest
+import socket
 
 if __name__ == "__main__":
     import utils
@@ -286,7 +287,18 @@ class TestDelHost(TestBrokerCommand):
         command = "show host --hostname jack.cards.example.ms.com"
         self.notfoundtest(command.split(" "))
 
+    def testdelnotify(self):
+        hostname = socket.getfqdn()
+        self.noouttest(["unbind", "server", "--service", "utnotify",
+                        "--instance", "localhost", "--hostname", hostname])
 
-if __name__=='__main__':
+        self.dsdb_expect_delete("127.0.0.1")
+        command = ["del", "host", "--hostname", hostname]
+        (out, err) = self.successtest(command)
+        self.matchoutput(err, "sent 0 server notifications", command)
+        self.dsdb_verify()
+
+
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelHost)
     unittest.TextTestRunner(verbosity=2).run(suite)

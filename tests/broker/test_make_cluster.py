@@ -52,6 +52,7 @@ class TestMakeCluster(TestBrokerCommand):
                          "service esx_management_server",
                          command)
         self.matchclean(err, "removing binding", command)
+        self.matchoutput(err, "sent 1 server notifications", command)
 
         self.assert_(os.path.exists(os.path.join(
             self.config.get("broker", "profilesdir"), "clusters",
@@ -83,6 +84,7 @@ class TestMakeCluster(TestBrokerCommand):
                          "service esx_management_server",
                          command)
         self.matchclean(err, "removing binding", command)
+        self.matchoutput(err, "sent 1 server notifications", command)
 
         self.assert_(os.path.exists(os.path.join(
             self.config.get("broker", "profilesdir"), "clusters",
@@ -122,6 +124,6 @@ class TestMakeCluster(TestBrokerCommand):
             self.successtest(["make_cluster", "--cluster", "utecl%d" % i])
             self.successtest(["make_cluster", "--cluster", "npecl%d" % i])
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestMakeCluster)
     unittest.TextTestRunner(verbosity=2).run(suite)

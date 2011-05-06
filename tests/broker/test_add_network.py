@@ -131,7 +131,14 @@ class TestAddNetwork(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.parse_netlist_msg(out)
 
-if __name__=='__main__':
+    def testaddlocalnet(self):
+        command = ["add", "network", "--network", "localnet", "--ip",
+                   "127.0.0.0", "--netmask", "255.0.0.0",
+                   "--building", "ut"]
+        self.noouttest(command)
+
+
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddNetwork)
     unittest.TextTestRunner(verbosity=2).run(suite)
 

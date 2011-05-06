@@ -56,6 +56,7 @@ class TestMakeAquilon(TestBrokerCommand):
                          "service aqd instance ny-prod",
                          command)
         self.matchclean(err, "removing binding", command)
+        self.matchoutput(err, "sent 1 server notifications", command)
 
         self.assert_(os.path.exists(os.path.join(
             self.config.get("broker", "profilesdir"),
@@ -146,6 +147,7 @@ class TestMakeAquilon(TestBrokerCommand):
                          "service afs instance q.ny.ms.com",
                          command)
         self.matchclean(err, "removing binding", command)
+        self.matchoutput(err, "sent 1 server notifications", command)
         self.assert_(os.path.exists(os.path.join(
             self.config.get("broker", "profilesdir"),
             "unittest00.one-nyp.ms.com%s" % self.profile_suffix)))
@@ -431,6 +433,6 @@ class TestMakeAquilon(TestBrokerCommand):
                     "One of the instances was never bound:\n%s" % out)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestMakeAquilon)
     unittest.TextTestRunner(verbosity=2).run(suite)

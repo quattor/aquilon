@@ -386,8 +386,13 @@ class TestAddService(TestBrokerCommand):
                          "in NAS maps.",
                          command)
 
+    def testaddnotify(self):
+        self.noouttest(["add", "service", "--service", "utnotify"])
+        self.noouttest(["add", "service", "--service", "utnotify",
+                        "--instance", "localhost"])
 
-if __name__=='__main__':
+
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddService)
     unittest.TextTestRunner(verbosity=2).run(suite)
 

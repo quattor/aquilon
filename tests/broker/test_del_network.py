@@ -71,7 +71,11 @@ class TestDelNetwork(TestBrokerCommand):
         command = ["del_network", "--ip=192.168.1.0"]
         self.noouttest(command)
 
-if __name__=='__main__':
+    def testdellocalnet(self):
+        self.noouttest(["del", "network", "--ip", "127.0.0.0"])
+
+
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddNetwork)
     unittest.TextTestRunner(verbosity=2).run(suite)
 

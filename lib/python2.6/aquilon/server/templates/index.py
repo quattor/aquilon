@@ -52,7 +52,7 @@ NOTIFICATION_TYPES = {
 
 try:
     CDPPORT = socket.getservbyname("cdp")
-except:
+except:  # pragma: no cover
     CDPPORT = 7777
 
 def build_index(config, session, profilesdir, clientNotify=True,
@@ -115,7 +115,7 @@ def build_index(config, session, profilesdir, clientNotify=True,
                         elif obj.endswith(".xml.gz"):
                             obj = obj[:-7]
                         old_object_index[obj] = int(profile.attrib["mtime"])
-        except Exception, e:
+        except Exception, e:  # pragma: no cover
             logger.info("Error processing %s, continuing: %s" %
                         (index_path, e))
         finally:
@@ -184,7 +184,7 @@ def build_index(config, session, profilesdir, clientNotify=True,
 
     if (config.has_option("broker", "client_notifications")
         and config.getboolean("broker", "client_notifications")
-        and clientNotify):
+        and clientNotify):  # pragma: no cover
         count = send_notification(CCM_NOTIF, modified_index.keys(),
                                   logger=logger)
         logger.log(CLIENT_INFO, "sent %d client notifications" % count)
@@ -208,6 +208,11 @@ def send_notification(ntype, modified, logger=LOGGER):
         (_ns, _sep, host) = obj.rpartition('/')
 
         try:
+            # If you think it would be a good idea to look up the IP address
+            # from the DB directly, then think about the case when the IP
+            # address of a host changes: the DB contains the new address, but
+            # the host still uses the old. Relying on DNS here means that the
+            # notification goes to the right place.
             ip = socket.gethostbyname(host)
             packet = NOTIFICATION_TYPES[ntype] + "\0" + str(int(time.time()))
             sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
