@@ -31,3 +31,4 @@ from aquilon.aqdb.column_types.aqmac import AqMac
 from aquilon.aqdb.column_types.IPV4 import IPV4
 from aquilon.aqdb.column_types.enum import Enum
 from aquilon.aqdb.column_types.guid import GUID
+from aquilon.aqdb.column_types.utc_datetime import UTCDateTime

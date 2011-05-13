@@ -1,6 +1,6 @@
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 #
-# Copyright (C) 2008,2009,2010,2011  Contributor
+# Copyright (C) 2008,2009,2010  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -26,14 +26,26 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-""" Pull dependencies onto sys.path via ms.version """
+""" A Type Decorator which forces datetime values to the UTC timezone
 
-import ms.version
+    Adapted from the recipie at http://pylonshq.com/pasties/421
+"""
 
-ms.version.addpkg('sqlalchemy', '0.6.6')
-ms.version.addpkg('cx_Oracle', '5.0.4-11.2.0.1.0')
-ms.version.addpkg('ipython', '0.10.1')
-ms.version.addpkg('argparse', '1.1')
-ms.version.addpkg('ms.modulecmd', '1.0.4')
-ms.version.addpkg('ipaddr', '2.1.4')
-ms.version.addpkg('dateutil', '1.2')
+from sqlalchemy import types
+from dateutil.tz import tzutc
+from datetime import datetime
+
+class UTCDateTime(types.TypeDecorator):
+    """A Type Decorator which forces datetime values to the UTC timezone """
+
+    impl = types.DateTime
+
+    def process_bind_param(self, value, engine):
+        if value is not None:
+            return value.astimezone(tzutc())
+
+    def process_result_value(self, value, engine):
+        if value is not None:
+            return datetime(value.year, value.month, value.day,
+                            value.hour, value.minute, value.second,
+                            value.microsecond, tzinfo=tzutc())
