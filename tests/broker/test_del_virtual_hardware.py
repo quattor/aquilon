@@ -79,7 +79,7 @@ class TestDelVirtualHardware(TestBrokerCommand):
     def test_900_verifydelclusterwithmachines(self):
         command = "del esx cluster --cluster utecl1"
         out = self.badrequesttest(command.split(" "))
-        self.matchoutput(out, "Cluster utecl1 is still in use by vmhosts",
+        self.matchoutput(out, "Cluster utecl1 is still in use by hosts",
                          command)
 
     def test_800_verifycatcluster(self):

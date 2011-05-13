@@ -47,21 +47,21 @@ class TestUpdatePersonality(TestBrokerCommand):
     def testinvalidfunction(self):
         """ Verify that the list of built-in functions is restricted """
         command = ["update", "personality", "--personality", "esx_desktop",
-                   "--archetype", "vmhost",
+                   "--archetype", "esx_cluster",
                    "--vmhost_capacity_function", "locals()"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "name 'locals' is not defined", command)
 
     def testinvalidtype(self):
         command = ["update", "personality", "--personality", "esx_desktop",
-                   "--archetype", "vmhost",
+                   "--archetype", "esx_cluster",
                    "--vmhost_capacity_function", "memory - 100"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "The function should return a dictonary.", command)
 
     def testinvaliddict(self):
         command = ["update", "personality", "--personality", "esx_desktop",
-                   "--archetype", "vmhost",
+                   "--archetype", "esx_cluster",
                    "--vmhost_capacity_function", "{'memory': 'bar'}"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
@@ -71,7 +71,7 @@ class TestUpdatePersonality(TestBrokerCommand):
 
     def testmissingmemory(self):
         command = ["update", "personality", "--personality", "esx_desktop",
-                   "--archetype", "vmhost",
+                   "--archetype", "esx_cluster",
                    "--vmhost_capacity_function", "{'foo': 5}"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
@@ -80,7 +80,7 @@ class TestUpdatePersonality(TestBrokerCommand):
 
     def testnotenoughmemory(self):
         command = ["update", "personality", "--personality", "esx_desktop",
-                   "--archetype", "vmhost",
+                   "--archetype", "esx_cluster",
                    "--vmhost_capacity_function", "{'memory': memory / 4}"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
@@ -92,24 +92,43 @@ class TestUpdatePersonality(TestBrokerCommand):
 
     def testupdatecapacity(self):
         command = ["update", "personality", "--personality", "esx_desktop",
-                   "--archetype", "vmhost",
+                   "--archetype", "esx_cluster",
                    "--vmhost_capacity_function", "{'memory': (memory - 1500) * 0.94}"]
         self.noouttest(command)
 
     def testupdateovercommit(self):
         command = ["update", "personality", "--personality", "esx_desktop",
-                   "--archetype", "vmhost",
+                   "--archetype", "esx_cluster",
                    "--vmhost_overcommit_memory", 1.04]
         self.noouttest(command)
 
     def testverifyupdatecapacity(self):
         command = ["show", "personality", "--personality", "esx_desktop",
-                   "--archetype", "vmhost"]
+                   "--archetype", "esx_cluster"]
         out = self.commandtest(command)
         self.matchoutput(out,
                          "VM host capacity function: {'memory': (memory - 1500) * 0.94}",
                          command)
         self.matchoutput(out, "VM host overcommit factor: 1.04", command)
+
+    def testupdateclusterrequirement(self):
+        command = ["update", "personality", "--personality=esx_desktop",
+                   "--archetype=esx_cluster",
+                   "--cluster"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "The personality esx_desktop is in use", command)
+
+        command = ["add", "personality", "--archetype=aquilon",
+                   "--personality=unused"]
+        self.successtest(command)
+
+        command = ["update", "personality", "--personality", "unused",
+                   "--archetype=aquilon", "--cluster"]
+        out = self.successtest(command)
+
+        command = ["del", "personality", "--personality", "unused",
+                   "--archetype=aquilon"]
+        out = self.successtest(command)
 
 
 if __name__=='__main__':

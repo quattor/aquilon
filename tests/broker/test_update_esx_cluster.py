@@ -59,7 +59,7 @@ class TestUpdateESXCluster(TestBrokerCommand):
         self.matchoutput(out, "Building: ut", command)
         self.matchoutput(out, "Max members: %s" % default_max, command)
         self.matchoutput(out, "vm_to_host_ratio: %s" % default_ratio, command)
-        self.matchoutput(out, "Personality: esx_desktop Archetype: vmhost",
+        self.matchoutput(out, "Personality: esx_desktop Archetype: esx_cluster",
                          command)
         self.matchclean(out, "Comments", command)
 
@@ -82,7 +82,7 @@ class TestUpdateESXCluster(TestBrokerCommand):
         self.matchoutput(out, "Down Hosts Threshold: 0",command)
         self.matchoutput(out, "Capacity limits: memory: 16384 [override]",
                          command)
-        self.matchoutput(out, "Personality: esx_desktop Archetype: vmhost",
+        self.matchoutput(out, "Personality: esx_desktop Archetype: esx_cluster",
                          command)
         self.matchoutput(out, "Comments: ESX Cluster with a new comment",
                          command)
@@ -138,7 +138,7 @@ class TestUpdateESXCluster(TestBrokerCommand):
         self.matchoutput(out, "ESX Cluster: utecl3", command)
         self.matchoutput(out, "Metacluster: utmc1", command)
         self.matchoutput(out, "Building: ut", command)
-        self.matchoutput(out, "Personality: esx_desktop Archetype: vmhost",
+        self.matchoutput(out, "Personality: esx_desktop Archetype: esx_cluster",
                          command)
 
     def test_320_updateutecl1(self):
@@ -185,12 +185,13 @@ class TestUpdateESXCluster(TestBrokerCommand):
             """include { "personality/esx_desktop/config" };""",
             command)
 
-        command = ["update_esx_cluster", "--cluster=utecl1",
-                   "--archetype=vmhost", "--personality=esx_server"]
-        out = self.commandtest(command)
+        command = ["reconfigure", "--membersof=utecl1",
+                   "--archetype=vmhost",
+                   "--osname=esxi", "--osver=4.1.0-u1"]
+        out = self.successtest(command)
 
         command = ["search_host", "--cluster=utecl1",
-                   "--personality=esx_server"]
+                   "--osversion=4.1.0-u1"]
         updated_hosts = self.commandtest(command).splitlines()
         updated_hosts.sort()
         self.failUnless(updated_hosts, "No hosts found using %s" % command)
@@ -203,21 +204,28 @@ class TestUpdateESXCluster(TestBrokerCommand):
         command = ["cat", "--hostname", updated_hosts[0]]
         out = self.commandtest(command)
         self.matchoutput(out,
-            """include { "personality/esx_server/config" };""",
+            """include { "os/esxi/4.1.0-u1/config" };""",
             command)
 
-        command = ["update_esx_cluster", "--cluster=utecl1",
-                   "--archetype=vmhost", "--personality=esx_desktop"]
-        out = self.commandtest(command)
+        command = ["reconfigure", "--membersof=utecl1",
+                   "--archetype=vmhost", "--osname=esxi",
+                   "--osversion=4.0.0"]
+        out = self.successtest(command)
 
     def test_380_failupdatearchetype(self):
         # If personality is not specified the current personality name
         # is assumed for the new archetype.
-        command = ["update_esx_cluster", "--cluster=utecl1",
+        command = ["reconfigure", "--membersof=utecl1",
                    "--archetype=windows"]
-        out = self.notfoundtest(command)
+        out = self.badrequesttest(command)
+        # The command complains both about the broker personality and OS.
         self.matchoutput(out,
-                         "Personality esx_desktop, archetype windows not found",
+                         "No personality esx_desktop found for "
+                         "archetype windows.",
+                         command)
+        self.matchoutput(out,
+                         "Cannot change archetype because operating system "
+                         "vmhost/esxi-4.0.0 needs archetype vmhost.",
                          command)
 
     def test_390_failupdatemaxmembers(self):
@@ -264,7 +272,7 @@ class TestUpdateESXCluster(TestBrokerCommand):
         self.matchoutput(out, "Rack: ut10", command)
         self.matchoutput(out, "Max members: %s" % default_max, command)
         self.matchoutput(out, "vm_to_host_ratio: %s" % default_ratio, command)
-        self.matchoutput(out, "Personality: esx_desktop Archetype: vmhost",
+        self.matchoutput(out, "Personality: esx_desktop Archetype: esx_cluster",
                          command)
         self.matchoutput(out, "Switch: ut01ga1s04.aqd-unittest.ms.com",
                          command)

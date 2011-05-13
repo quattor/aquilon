@@ -389,12 +389,43 @@ class TestAddPersonality(TestBrokerCommand):
                          "already exists.", command)
 
     def testaddesxserver(self):
-        command = "add personality --personality esx_server --archetype vmhost"
-        self.noouttest(command.split(" "))
+        command = ["add_personality", "--cluster_required",
+                   "--personality=esx_server", "--archetype=vmhost"]
+        self.noouttest(command)
+        command = ["show_personality", "--personality=esx_server",
+                   "--archetype=vmhost"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Requires clustered hosts", command)
+
+        command = ["add_personality",
+                   "--personality=esx_server", "--archetype=esx_cluster"]
+        self.noouttest(command)
 
     def testaddesxdesktop(self):
-        command = ["add_personality",
+        command = ["add_personality", "--cluster_required",
                    "--personality=esx_desktop", "--archetype=vmhost"]
+        self.noouttest(command)
+        command = ["add_personality",
+                   "--personality=esx_desktop", "--archetype=esx_cluster"]
+        self.noouttest(command)
+
+    def testaddesxstandalone(self):
+        command = ["add_personality", "--personality=esx_standalone",
+                   "--archetype=vmhost"]
+        self.noouttest(command)
+        command = ["show_personality", "--personality=esx_standalone",
+                   "--archetype=vmhost"]
+        out = self.commandtest(command)
+        self.matchclean(out, "Requires clustered hosts", command)
+
+    def testaddgridpersonality(self):
+        command = ["add_personality",
+                   "--personality=hadoop", "--archetype=gridcluster"]
+        self.noouttest(command)
+
+    def testaddhapersonality(self):
+        command = ["add_personality",
+                   "--personality=vcs", "--archetype=hacluster"]
         self.noouttest(command)
 
 

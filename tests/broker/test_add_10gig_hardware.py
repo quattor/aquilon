@@ -86,9 +86,8 @@ class TestAdd10GigHardware(TestBrokerCommand):
 
     def test_090_addswitch(self):
         for i in range(5, 8):
-            # Deprecated.
             self.successtest(["update_esx_cluster", "--cluster=utecl%d" % i,
-                              "--tor_switch=ut01ga2s01.aqd-unittest.ms.com"])
+                              "--switch=ut01ga2s01.aqd-unittest.ms.com"])
         for i in range(8, 11):
             self.noouttest(["update_esx_cluster", "--cluster=utecl%d" % i,
                             "--switch=ut01ga2s02.aqd-unittest.ms.com"])

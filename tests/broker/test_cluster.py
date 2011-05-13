@@ -47,6 +47,7 @@ class TestCluster(TestBrokerCommand):
         for i in range(1, 5):
             self.successtest(["cluster",
                               "--hostname", "evh%s.aqd-unittest.ms.com" % i,
+                              "--personality=esx_desktop",
                               "--cluster", "utecl1"])
 
     def testbindutecl2(self):
@@ -54,11 +55,13 @@ class TestCluster(TestBrokerCommand):
         for i in [5]:
             self.successtest(["cluster",
                               "--hostname", "evh%s.aqd-unittest.ms.com" % i,
+                              "--personality=esx_desktop",
                               "--cluster", "utecl2"])
 
     def testduplicatebindutecl1(self):
         self.successtest(["cluster",
                           "--hostname", "evh1.aqd-unittest.ms.com",
+                          "--personality=esx_desktop",
                           "--cluster", "utecl1"])
 
     def testverifybindutecl1(self):
@@ -97,6 +100,16 @@ class TestCluster(TestBrokerCommand):
                              """include { "%s" };""" % template,
                              cat_host_command)
 
+        for i in range(1, 5):
+            command = "cat --hostname evh%s.aqd-unittest.ms.com" % i
+            out = self.commandtest(command.split())
+            self.searchoutput(out,
+                              "'/system/cluster/name' = \"utecl1\";",
+                              command)
+            self.searchoutput(out,
+                              "include { \"cluster/utecl1/client\" };",
+                              command)
+
     def testfailmissingcluster(self):
         command = ["cluster", "--hostname=evh9.aqd-unittest.ms.com",
                    "--cluster", "cluster-does-not-exist"]
@@ -105,8 +118,21 @@ class TestCluster(TestBrokerCommand):
                          "Cluster cluster-does-not-exist not found.",
                          command)
 
-    def testfaildifferentdomain(self):
+    def test_switching_archetype(self):
         command = ["cluster", "--cluster=utecl1",
+                   "--hostname=aquilon61.aqd-unittest.ms.com",
+                   "--personality=esx_desktop"]
+        # Currently aquilon61 will be an "aquilon" archetype. Which is
+        # incompatible with esx_desktop...
+        out = self.notfoundtest(command)
+
+        # So, make it a compatible archetype and try again
+        command = ["reconfigure", "--hostname=aquilon61.aqd-unittest.ms.com",
+                   "--personality=esx_server", "--archetype=vmhost",
+                   "--os=esxi/4.0.0", "--buildstatus=rebuild"]
+        self.successtest(command)
+        command = ["cluster", "--cluster=utecl1",
+                   "--personality=esx_desktop",
                    "--hostname=aquilon61.aqd-unittest.ms.com"]
         out = self.badrequesttest(command)
         user = self.config.get("unittest", "user")
@@ -116,30 +142,45 @@ class TestCluster(TestBrokerCommand):
                          "domain unittest" % user,
                          command)
 
-    def testbinddifferentarchetype(self):
-        # Need the host to be in the same domain for the bind to work...
+        # Ah yes, we need it to be in the same sandbox
         command = ["manage", "--domain=unittest",
                    "--hostname=aquilon61.aqd-unittest.ms.com"]
-        out = self.commandtest(command)
+        self.successtest(command)
+
         command = ["cluster", "--cluster=utecl1",
+                   "--hostname=aquilon61.aqd-unittest.ms.com",
+                   "--personality=esx_desktop"]
+        self.successtest(command)
+
+        # Restore the host.  Need to move to a more permissive cluster first.
+        command = ["cluster", "--cluster=utecl2",
                    "--hostname=aquilon61.aqd-unittest.ms.com"]
-        (out, err) = self.successtest(command)
-        self.matchoutput(err,
-                         "Updating host aquilon61.aqd-unittest.ms.com to "
-                         "match cluster archetype vmhost "
-                         "personality esx_desktop",
+        self.successtest(command)
+
+        # Now try to uncluster it...
+        command = ["uncluster", "--cluster=utecl2",
+                   "--hostname=aquilon61.aqd-unittest.ms.com"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "Host personality esx_desktop requires a cluster, "
+                         "use --personality to change personality when "
+                         "leaving the cluster.",
                          command)
-        # Restore the host.
-        command[0] = "uncluster"
-        out = self.commandtest(command)
+
+        # Oops.
+        command = ["uncluster", "--hostname=aquilon61.aqd-unittest.ms.com",
+                   "--cluster=utecl2", "--personality=generic"]
+        out = self.successtest(command)
+
         user = self.config.get("unittest", "user")
         command = ["manage", "--sandbox=%s/utsandbox" % user,
                    "--hostname=aquilon61.aqd-unittest.ms.com"]
         out = self.commandtest(command)
-        command = ["reconfigure",
-                   "--archetype=aquilon", "--personality=inventory",
-                   "--hostname=aquilon61.aqd-unittest.ms.com"]
-        (out, err) = self.successtest(command)
+
+        command = ["reconfigure", "--hostname=aquilon61.aqd-unittest.ms.com",
+                   "--personality=inventory", "--archetype=aquilon",
+                   "--os=linux/5.0.1-x86_64", "--buildstatus=rebuild"]
+        self.successtest(command)
 
     def testfailbadlocation(self):
         command = ["cluster", "--hostname=%s.ms.com" % self.aurora_with_node,
@@ -170,6 +211,17 @@ class TestCluster(TestBrokerCommand):
             self.successtest(["cluster",
                               "--hostname", host, "--cluster", cluster])
 
+    def testbindstoragecluster(self):
+        command = ["cluster", "--hostname=evh9.aqd-unittest.ms.com",
+                   "--cluster=utstorage1"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "only hosts with archetype 'filer' can be added",
+                         command)
+
+        command = ["cluster", "--hostname=filer1.ms.com",
+                   "--cluster=utstorage1"]
+        self.successtest(command)
+
     def testbindhaclusters(self):
         for i in range(25, 49):
             host = "evh%s.aqd-unittest.ms.com" % (i + 50)
@@ -180,6 +232,13 @@ class TestCluster(TestBrokerCommand):
             cluster = "npecl%d" % (11 + ((i - 25) / 12))
             self.successtest(["cluster",
                               "--hostname", host, "--cluster", cluster])
+
+            command = ["show_cluster", "--cluster", cluster, "--format=proto"]
+            out = self.commandtest(command)
+            clus_list = self.parse_clusters_msg(out, 1)
+            clustobj = clus_list.clusters[0]
+            hostfromproto = filter(lambda x: x.fqdn == host, clustobj.hosts)
+            self.assertEqual(len(hostfromproto), 1)
 
 
 if __name__=='__main__':

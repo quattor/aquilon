@@ -72,7 +72,7 @@ class TestChangeClusterStatus(TestBrokerCommand):
 
 
     def testZBindDemotion(self):
-        self.successtest(["rebind_esx_cluster",
+        self.successtest(["cluster",
                           "--hostname", "evh1.aqd-unittest.ms.com",
                           "--cluster", "utecl2"])
 
@@ -81,7 +81,7 @@ class TestChangeClusterStatus(TestBrokerCommand):
         self.matchoutput(out, "Build Status: almostready", command)
 
         # Put the host back and confirm it can move to ready
-        self.successtest(["rebind_esx_cluster",
+        self.successtest(["cluster",
                           "--hostname", "evh1.aqd-unittest.ms.com",
                           "--cluster", "utecl1"])
         self.successtest(["change_status",

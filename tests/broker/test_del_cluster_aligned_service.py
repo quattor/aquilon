@@ -27,7 +27,7 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-"""Module for testing the del esx cluster aligned service command."""
+"""Module for testing the del cluster aligned service command."""
 
 import unittest
 
@@ -38,10 +38,10 @@ if __name__ == "__main__":
 from brokertest import TestBrokerCommand
 
 
-class TestDelESXClusterAlignedService(TestBrokerCommand):
+class TestDelClusterAlignedService(TestBrokerCommand):
 
     def testdelesxmanagement(self):
-        command = ["del_esx_cluster_aligned_service",
+        command = ["del_cluster_aligned_service", "--cluster_type=esx",
                    "--service=esx_management_server"]
         self.noouttest(command)
 
@@ -58,14 +58,14 @@ class TestDelESXClusterAlignedService(TestBrokerCommand):
         self.matchclean(out, "esx_management_server", command)
 
     def testfailmissingservice(self):
-        command = ["del_esx_cluster_aligned_service",
+        command = ["del_cluster_aligned_service", "--cluster_type=esx",
                    "--service=service-does-not-exist"]
         out = self.notfoundtest(command)
         self.matchoutput(out, "Service service-does-not-exist not found",
                          command)
 
     def testfailnotaligned(self):
-        command = ["del_esx_cluster_aligned_service",
+        command = ["del_cluster_aligned_service", "--cluster_type=esx",
                    "--service=utsvc"]
         out = self.notfoundtest(command)
         self.matchoutput(out, "Cluster Aligned Service cluster_type esx, "

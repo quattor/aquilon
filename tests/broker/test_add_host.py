@@ -306,7 +306,7 @@ class TestAddHost(TestBrokerCommand):
             self.noouttest(command)
         self.dsdb_verify()
 
-    def testpopulatehaclusterhosts(self):
+    def testpopulate_esx_bcp_clusterhosts(self):
         utnet = self.net.tor_net2[3]
         npnet = self.net.tor_net2[4]
         for i in range(25, 49):
@@ -366,7 +366,7 @@ class TestAddHost(TestBrokerCommand):
                 self.fail("Unrecognized interface '%s'" % i.device)
 
     def testaddhostnousefularchetype(self):
-        command = ["add", "host", "--archetype", "pserver",
+        command = ["add", "host", "--archetype", "filer",
                    "--hostname", "unittest01.one-nyp.ms.com",
                    "--ip", self.net.unknown[0].usable[10],
                    "--domain", "unittest", "--machine", "ut3c1n4"]
@@ -380,6 +380,16 @@ class TestAddHost(TestBrokerCommand):
         command = ["add", "host", "--archetype", "aquilon",
                    "--hostname", "unittest18.aqd-unittest.ms.com", "--ip", ip,
                    "--domain", "unittest", "--machine", "ut3c1n8"]
+        self.noouttest(command)
+        self.dsdb_verify()
+
+    def testaddfiler(self):
+        ip = self.net.vm_storage_net[0].usable[25]
+        self.dsdb_expect_add("filer1.ms.com", ip, "v0")
+        command = ["add", "host", "--archetype", "filer",
+                   "--hostname", "filer1.ms.com", "--ip", ip,
+                   "--domain", "unittest", "--machine", "filer1",
+                   "--osname=ontap", "--osversion=7.3.3p1"]
         self.noouttest(command)
         self.dsdb_verify()
 
@@ -436,6 +446,7 @@ class TestAddHost(TestBrokerCommand):
         self.matchoutput(out, "evh51.aqd-unittest.ms.com", command)
         self.matchoutput(out, "test-aurora-default-os.ms.com", command)
         self.matchoutput(out, "test-windows-default-os.msad.ms.com", command)
+        self.matchoutput(out, "filer1.ms.com", command)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddHost)

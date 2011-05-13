@@ -704,6 +704,20 @@ class TestAddInterface(TestBrokerCommand):
         self.searchoutput(out, r"\s+Comments: interface for jack",
                           command)
 
+    def testaddfilermac(self):
+        self.noouttest(["add", "interface", "--machine", "filer1",
+                        "--interface", "e4a"])
+        self.noouttest(["add", "interface", "--machine", "filer1",
+                        "--interface", "e4b"])
+        self.noouttest(["add", "interface", "--machine", "filer1",
+                        "--interface", "v0", "--type", "bonding"])
+        self.noouttest(["update", "interface", "--machine", "filer1",
+                        "--master", "v0", "--interface", "e4a"])
+        self.noouttest(["update", "interface", "--machine", "filer1",
+                        "--master", "v0", "--interface", "e4b"])
+        self.noouttest(["update", "interface", "--machine", "filer1",
+                        "--interface", "v0", "--boot"])
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddInterface)

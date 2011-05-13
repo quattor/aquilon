@@ -69,7 +69,7 @@ class TestClusterConstraints(TestBrokerCommand):
 
     def testunbindmachine(self):
         command = ["uncluster", "--hostname", "evh87.one-nyp.ms.com",
-                   "--cluster", "npecl12"]
+                   "--cluster", "npecl12", "--personality", "generic"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "ESX Cluster npecl12 is over capacity regarding memory",

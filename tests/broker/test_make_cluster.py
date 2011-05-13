@@ -119,7 +119,7 @@ class TestMakeCluster(TestBrokerCommand):
             command = ["make_cluster", "--cluster", "utecl%d" % i]
             (out, err) = self.successtest(command)
 
-    def testmakehaclusters(self):
+    def testmake_esx_bcp_clusters(self):
         for i in range(11, 13):
             self.successtest(["make_cluster", "--cluster", "utecl%d" % i])
             self.successtest(["make_cluster", "--cluster", "npecl%d" % i])

@@ -65,30 +65,49 @@ class TestUpdateArchetype(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.searchoutput(out, "Archetype: utarchetype1\s*$", command)
 
-    def testupdateclusterrequired(self):
+    def testupdate_to_cluster(self):
         # Start clean
         command = "show archetype --archetype utarchetype2"
         out = self.commandtest(command.split(" "))
-        self.searchoutput(out, "Archetype: utarchetype2\s*$", command)
+        self.searchoutput(out, "Host Archetype: utarchetype2\s*$", command)
 
         # Set the flag
-        self.noouttest(["update_archetype", "--archetype=utarchetype2",
-                        "--cluster_required"])
+        out = self.successtest(["update_archetype",
+                                "--archetype=utarchetype2",
+                                "--cluster=compute"])
 
         # Check the flag
         command = "show archetype --archetype utarchetype2"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Archetype: utarchetype2 [cluster_required]",
-                         command)
+        self.matchoutput(out, "Cluster Archetype: utarchetype2", command)
 
         # Unset the flag
         self.noouttest(["update_archetype", "--archetype=utarchetype2",
-                        "--nocluster_required"])
+                        "--cluster="])
 
         # End clean
         command = "show archetype --archetype utarchetype2"
         out = self.commandtest(command.split(" "))
-        self.searchoutput(out, "Archetype: utarchetype2\s*$", command)
+        self.searchoutput(out, "Host Archetype: utarchetype2\s*$", command)
+
+
+    def testfailupdate_to_cluster(self):
+        # Set the flag
+        command = ["update_archetype", "--archetype=aquilon",
+                   "--cluster=compute"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "The aquilon archetype is currently in use",
+                         command)
+
+        command = ["update_archetype", "--archetype=esx_cluster",
+                   "--cluster="]
+        out = self.badrequesttest(command)
+
+        self.matchoutput(out, "The esx_cluster archetype is currently in use",
+                         command)
+
+
+
 
 
 if __name__=='__main__':

@@ -218,7 +218,7 @@ class TestReconfigure(TestBrokerCommand):
         hosts = ["unittest01.one-nyp.ms.com\n"]
         scratchfile = self.writescratch("hostlist", "".join(hosts))
         command = ["reconfigure", "--list", scratchfile,
-                   "--archetype", "aquilon"]
+                   "--archetype", "aquilon", "--personality=unixeng-test"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "unittest01.one-nyp.ms.com: Cannot change archetype "
@@ -412,16 +412,6 @@ class TestReconfigure(TestBrokerCommand):
         self.matchoutput(out, "evh2.aqd-unittest.ms.com", command)
         self.matchoutput(out, "evh3.aqd-unittest.ms.com", command)
         self.matchoutput(out, "evh4.aqd-unittest.ms.com", command)
-
-    def testfailchangeclustermemberpersonality(self):
-        command = ["reconfigure", "--hostname", "evh1.aqd-unittest.ms.com",
-                   "--archetype", "vmhost", "--personality", "esx_server"]
-        out = self.badrequesttest(command)
-        self.matchoutput(out,
-                         "Cannot change personality of host "
-                         "evh1.aqd-unittest.ms.com while it is a member of "
-                         "ESX cluster ",
-                         command)
 
     # This doesn't work since the manage test comes after this one.
     # Note that these are template domains and not dns domains.

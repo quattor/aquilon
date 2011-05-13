@@ -131,7 +131,7 @@ class TestSearchESXCluster(TestBrokerCommand):
                          command)
 
     def testarchetypeavailable(self):
-        command = "search esx cluster --archetype vmhost"
+        command = "search esx cluster --archetype esx_cluster"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "utecl1", command)
         self.matchoutput(out, "utecl2", command)
@@ -153,7 +153,7 @@ class TestSearchESXCluster(TestBrokerCommand):
         self.matchoutput(out, "utecl4", command)
 
     def testpersonalityavailable2(self):
-        command = ["search_esx_cluster", "--archetype=vmhost",
+        command = ["search_esx_cluster", "--archetype=esx_cluster",
                    "--personality=esx_desktop"]
         out = self.commandtest(command)
         self.matchoutput(out, "utecl1", command)
