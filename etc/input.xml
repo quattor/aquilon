@@ -3110,6 +3110,16 @@
       <transport method="delete" path="dns_domain/%(dns_domain)s" />
    </command>
 
+   <command name="dump_dns">
+      Dump DNS information.
+      <p/>
+      <optgroup name="dump_dns_optional" mandatory="False" fields="any">
+         <option name="dns_domain" type="string">Name of the DNS domain</option>
+         <option name="dns_environment" type="string">The name of the environment (defaults to 'internal')</option>
+      </optgroup>
+      <transport method="get" path="dump_dns" />
+   </command>
+
    <command name="add_metacluster">
       Add a new metacluster.
       <optgroup name="add_metacluster_req" mandatory="True" fields="all">

@@ -64,3 +64,70 @@ ObjectFormatter.handlers[DynamicStub] = ARecordFormatter()
 ObjectFormatter.handlers[ARecord] = ARecordFormatter()
 
 ObjectFormatter.handlers[Alias] = AliasFormatter()
+
+
+def inaddr_ptr(ip, absolute=False):
+    octets = str(ip).split('.')
+    octets.reverse()
+    return "%s.in-addr.arpa" % '.'.join(octets)
+
+
+class DnsDump(list):
+    def __init__(self, records, aux_map, dns_domains):
+        self.aux_map = aux_map
+        # Store a reference to the DNS domains to prevent them being evicted
+        # from the session's cache
+        self.dns_domains = dns_domains
+        super(DnsDump, self).__init__(records)
+
+
+class DnsDumpFormatter(ObjectFormatter):
+    # Class for producing full DNS dumps. The type of a record alone is not
+    # always enough to decide how to dump it, so we don't use the individual
+    # record formatters.
+
+    def format_raw(self, dump, indent=""):
+        result = []
+        # The output is not the most readable as we don't make use of $ORIGIN,
+        # but BIND should be able to digest it
+        for record in dump:
+            if isinstance(record, ARecord):
+                # If the record is for an auxiliary, then the reverse PTR record
+                # should point to the primary
+                if record.ip in dump.aux_map:
+                    primary = dump.aux_map[record.ip]
+                else:
+                    primary = record.fqdn
+
+                # Mind the dot!
+                result.append("%s.\tIN\tA\t%s" % (record.fqdn, record.ip))
+                result.append("%s.\tIN\tPTR\t%s." % (inaddr_ptr(record.ip),
+                                                     primary))
+            elif isinstance(record, ReservedName):
+                pass
+            elif isinstance(record, Alias):
+                # Mind the dot!
+                result.append("%s.\tIN\tCNAME\t%s." % (record.fqdn,
+                                                       record.target.fqdn))
+        return "\n".join(result)
+
+    def format_djb(self, dump):
+        result = []
+        for record in dump:
+            if isinstance(record, ARecord):
+                if record.ip in dump.aux_map:
+                    # If the record is for an auxiliary, then the reverse PTR
+                    # record should point to the primary
+                    primary = dump.aux_map[record.ip]
+                    result.append("+%s:%s" % (record.fqdn, record.ip))
+                    result.append("^%s:%s" % (inaddr_ptr(record.ip), primary))
+                else:
+                    result.append("=%s:%s" % (record.fqdn, record.ip))
+            elif isinstance(record, ReservedName):
+                pass
+            elif isinstance(record, Alias):
+                result.append("C%s:%s" % (record.fqdn, record.target.fqdn))
+        return "\n".join(result)
+
+
+ObjectFormatter.handlers[DnsDump] = DnsDumpFormatter()

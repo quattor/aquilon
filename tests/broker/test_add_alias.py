@@ -86,13 +86,6 @@ class TestAddAlias(TestBrokerCommand):
         self.matchoutput(out, "Aliases: alias.ms.com, "
                          "alias2host.aqd-unittest.ms.com", cmd)
 
-    #def test_410_verify_alias_djb(self):
-    #    cmd = 'show address --fqdn arecord13.aqd-unittest.ms.com --format djb'
-    #    out = self.commandtest(cmd.split(' '))
-    #    self.matchoutput(out,
-    #                     'Calias2host.aqd-unittest.ms.com:arecord13.aqd-unittest.ms.com::',
-    #                     cmd)
-
     def test_500_add_alias2alias(self):
         cmd = ['add', 'alias', '--fqdn', 'alias2alias.aqd-unittest.ms.com',
                '--target', 'alias2host.aqd-unittest.ms.com']
