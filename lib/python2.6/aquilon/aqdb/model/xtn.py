@@ -29,23 +29,21 @@
 """ Xtn (transaction) is an audit trail of all broker activity """
 import logging
 from datetime import datetime
+from dateutil.tz import tzutc
 
-from sqlalchemy import (Column, String, Integer, TIMESTAMP, ForeignKey, Index,
-                        UniqueConstraint, Boolean)
+from sqlalchemy import Column, String, Integer, ForeignKey, Index, Boolean
 from sqlalchemy.orm import relationship, backref
-from sqlalchemy.ext.compiler import compiles
 
 from aquilon.config import Config
 from aquilon.aqdb.model.base import Base
-from aquilon.aqdb.column_types import GUID
+from aquilon.aqdb.column_types import GUID, UTCDateTime
 
 config = Config()
 log = logging.getLogger('aquilon.aqdb.model.xtn')
 
 
-@compiles(TIMESTAMP, 'oracle')
-def compile_timestamp(element, compiler, **kw):
-        return "TIMESTAMP WITH TIME ZONE"  # pragma: no cover
+def utcnow(context, tz=tzutc()):
+    return datetime.now(tz)
 
 
 class Xtn(Base):
@@ -57,7 +55,10 @@ class Xtn(Base):
     command = Column(String(64), nullable=False)
     # This column is *massively* redundant, but we're fully denormalized
     is_readonly = Column(Boolean(name="XTN_IS_READONLY"), nullable=False)
-    start_time = Column(TIMESTAMP, default=datetime.utcnow, nullable=False)
+    # Note this column is forced to be UTC by the column type. The timezone is
+    # not explicitly stored as data in the table
+    start_time = Column(UTCDateTime(timezone=True),
+                        default=utcnow, nullable=False)
 
     args = relationship("XtnDetail", backref=backref("xtn"), lazy="joined")
 
@@ -84,7 +85,7 @@ class Xtn(Base):
         msg = ['%s %s %s aq %s' % (self.start_time, self.username,
                                    return_code, self.command)]
         for arg in self.args:
-            msg.append(" --%s=%r" % (arg.name, str(arg.value)))
+            msg.append("--%s=%r" % (arg.name, str(arg.value)))
         return " ".join(msg)
 
 
@@ -94,7 +95,7 @@ xtn.primary_key.name = 'XTN_PK'  # pylint: disable=C0103, E1101
 Index('XTN_USERNAME_IDX', xtn.c.username)
 Index('XTN_COMMAND_IDX', xtn.c.command)
 Index('XTN_ISREADONLY_IDX', xtn.c.is_readonly)
-Index('XTN_START_TIME_IDX', xtn.c.start_time)  # FIXME: how to make it ASC?
+Index('XTN_START_TIME_IDX', xtn.c.start_time)
 
 
 class XtnEnd(Base):
@@ -105,11 +106,13 @@ class XtnEnd(Base):
                     ForeignKey(Xtn.xtn_id, name='XTN_END_XTN_FK'),
                     primary_key=True)
     return_code = Column(Integer, nullable=False)
-    end_time = Column(TIMESTAMP, default=datetime.utcnow, nullable=False)
+    end_time = Column(UTCDateTime(timezone=True),
+                      default=utcnow, nullable=False)
 
 xtn_end = XtnEnd.__table__
 xtn_end.primary_key.name = 'XTN_END_PK'
 Index('XTN_RETURN_CODE_IDX', xtn_end.c.return_code)
+
 
 class XtnDetail(Base):
     """ Key/Value argument pairs for executed commands """
