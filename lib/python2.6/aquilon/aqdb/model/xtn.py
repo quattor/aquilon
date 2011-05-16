@@ -123,7 +123,7 @@ class XtnDetail(Base):
                     primary_key=True)
 
     name = Column(String(255), primary_key=True)
-    value = Column(String(255), primary_key=True)
+    value = Column(String(255), default='True', primary_key=True)
 
 
 xtn_detail = XtnDetail.__table__  # pylint: disable=C0103, E1101
