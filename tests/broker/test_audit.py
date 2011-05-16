@@ -29,17 +29,19 @@
 # TERMS THAT MAY APPLY.
 """ Module for testing the search_audit command """
 import unittest
+from time import time, mktime
 from datetime import datetime
+
 
 if __name__ == "__main__":
     import utils
     utils.import_depends()
 
-from aquilon.server import depends  # pylint: disable=W0611 (for dateutil)
+from aquilon.server import depends  # pylint: disable=W0611
 from dateutil.parser import parse
 
-from broker.brokertest import TestBrokerCommand
 
+from broker.brokertest import TestBrokerCommand
 
 
 class TestAudit(TestBrokerCommand):
@@ -47,7 +49,7 @@ class TestAudit(TestBrokerCommand):
 
     def test_100_get_start(self):
         """ get the oldest row in the xtn table"""
-        cmd = ["search_audit", "--cmd", "all", "--limit", "1" ,"--oldest_first"]
+        cmd = ["search_audit", "--cmd", "all", "--limit", "1", "--oldest_first"]
         out = self.commandtest(cmd)
         global start_time
         start_time = parse(' '.join(out.split()[0:2]))
@@ -59,12 +61,11 @@ class TestAudit(TestBrokerCommand):
 
         cmd = ["search_audit", "--cmd", "all", "--limit", "1"]
         out = self.commandtest(cmd)
-        global end_time
         end_time = parse(' '.join(out.split()[0:2]))
         assert isinstance(end_time, datetime)
         assert end_time > start_time
+
         elapsed = end_time - start_time
-        global midpoint
         midpoint = start_time + (elapsed / 2)
         assert isinstance(midpoint, datetime)
 
@@ -73,6 +74,8 @@ class TestAudit(TestBrokerCommand):
         cmd = ["search_audit", "--keyword", "ut"]
         out = self.commandtest(cmd)
         self.searchoutput(out, self.user, cmd)
+        for line in out.splitlines():
+            self.searchoutput(line, "--[a-z]+='ut'", cmd)
 
     def test_210_user(self):
         """ test search audit by user name """
@@ -84,34 +87,79 @@ class TestAudit(TestBrokerCommand):
         """ test search audit by command with protobuf output """
         cmd = ["search_audit", "--username", self.user,
                "--cmd", "search_audit", "--format", "proto"]
+        my_start_time = datetime.utcnow()
         out = self.commandtest(cmd)
+        my_end_time = datetime.utcnow()
         outlist = self.parse_audit_msg(out)
         unit = outlist.transactions[0]
         user = self.user + "@is1.morgan"
         self.assertEqual(unit.username, user)
         self.assertEqual(unit.is_readonly, True)
 
+    def test_230_timezone_proto(self):
+        """ test start/end_times recorded are correctly """
+        cmd1 = ["search_audit", "--username", self.user, "--cmd",
+                "search_audit", "--limit", "1"]
+        my_start_time = int(time())
+        out = self.commandtest(cmd1)
+        my_end_time = int(time())
+
+        cmd2 = ["search_audit", "--username", self.user,
+               "--cmd", "search_audit", "--format", "proto", "--limit", "2"]
+        out = self.commandtest(cmd2)
+        outlist = self.parse_audit_msg(out)
+        unit = outlist.transactions[1]
+        start = unit.start_time
+        end = unit.end_time
+
+        assert my_start_time <= start, 'start time is not <= start time in the DB'
+        assert my_end_time >= end, 'end time is not >= end time in the DB'
+
+    def test_231_timezone_raw(self):
+        """ Test the raw output has the correct date/timezone info """
+        cmd = ["search_audit", "--username", self.user, "--cmd",
+                "search_audit", "--limit", "1"]
+
+        my_start_time = int(time())
+        out = self.commandtest(cmd)
+
+        self.searchoutput(out, "\+00:00", cmd)
+        tm = out[0:25]
+        a = parse(out[0:25])
+        seconds = int(mktime(a.timetuple()))
+
+        assert my_start_time <= seconds, 'Raw start time is not <= what is recorded'
+
     def test_300_before(self):
         """ test audit 'before' functionality """
         cmd = ["search_audit", "--before", midpoint]
-        self.ignoreoutputtest(cmd)
+        out = self.commandtest(cmd)
+        self.searchoutput(out, self.user, cmd)
 
     def test_310_after(self):
         """ test audit 'after' functionality """
         cmd = ["search_audit", "--after", midpoint]
-        self.ignoreoutputtest(cmd)
+        out = self.commandtest(cmd)
+        self.searchoutput(out, self.user, cmd)
 
     def test_320_before_and_after(self):
         """ test audit 'before' and 'after' simultaneously """
         cmd = ["search_audit", "--before", end_time,
                "--after", midpoint]
-        self.ignoreoutputtest(cmd)
+        out = self.commandtest(cmd)
+        self.searchoutput(out, self.user, cmd)
 
     def test_500_by_return_code(self):
         """ test search by return code """
         cmd = ["search_audit", "--cmd", "add_switch", "--return_code", "200"]
         out = self.commandtest(cmd)
         self.searchoutput(out, "200 aq add_switch", cmd)
+
+    def test_501_zero_return_code(self):
+        """ test searching for unfinished commands """
+        cmd = ["search_audit", "--return_code", "0", "--cmd", "all"]
+        out = self.commandtest(cmd)
+        self.searchoutput(out, "- aq search_audit --return_code='0' --cmd='all'", cmd)
 
     def test_600_rw_command(self):
         """ test the rw option contains read commands and NOT search_audit """
@@ -136,13 +184,13 @@ class TestAudit(TestBrokerCommand):
 
     def test_700_invalid_before(self):
         """ test invalid date spec in before """
-        cmd = ["search_audit", "--cmd", "all", "--before", "today"]
+        cmd = ["search_audit", "--cmd", "all", "--before", "XXX"]
         out = self.badrequesttest(cmd)
         self.matchoutput(out, "Unable to parse date string", cmd)
 
     def test_710_invalid_after(self):
         """ test invalid date spec in after """
-        cmd = ["search_audit", "--cmd", "all", "--after", "yesterday"]
+        cmd = ["search_audit", "--cmd", "all", "--after", "XXX"]
         out = self.badrequesttest(cmd)
         self.matchoutput(out, "Unable to parse date string", cmd)
 
@@ -161,6 +209,24 @@ class TestAudit(TestBrokerCommand):
                "proto"]
         out = self.badrequesttest(cmd)
         self.matchoutput(out, "Cannot set the limit higher than", cmd)
+
+    def test_900_empty_list_arg(self):
+        """ test the output with an empty string as a list element """
+        hosts = ["no_such_host.ut.com\n", "   \n", "another_non_host.ut.com\n"]
+        scratchfile = self.writescratch("audit_hostlist", "".join(hosts))
+        cmd1 = ["reconfigure", "--list", scratchfile]
+        err = self.badrequesttest(cmd1)
+
+        cmd2 = ["search_audit", "--cmd", "reconfigure", "--limit", "1",
+                "--format", "proto"]
+        out = self.parse_audit_msg(self.commandtest(cmd2)).transactions[0]
+        values = [arg.value for arg in out.arguments]
+        self.assertEqual(len(values), 2,
+                         "Number of arguments was %d" % len(values))
+        assert "no_such_host.ut.com" in values, "missing argument in args list"
+        assert "another_non_host.ut.com" in values, "missing argument in args list"
+
+
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAudit)
