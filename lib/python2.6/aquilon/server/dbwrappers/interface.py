@@ -475,10 +475,11 @@ def get_or_create_interface(session, dbhw_ent, name=None, mac=None,
     session.flush()
     return dbinterface
 
-def assign_address(dbinterface, ip, dbnetwork, label=None, usage=None,
-                   dns_environment=None):
-    # FIXME: the DNS environment should come from the network environment
+def assign_address(dbinterface, ip, dbnetwork, label=None, usage=None):
     assert isinstance(dbinterface, Interface)
+
+    dns_environment = dbnetwork.network_environment.dns_environment
+
     for addr in dbinterface.assignments:
         if not label and not addr.label:
             raise ArgumentError("{0} already has an IP "
@@ -494,11 +495,6 @@ def assign_address(dbinterface, ip, dbnetwork, label=None, usage=None,
         if addr.ip == ip:
             raise ArgumentError("{0} already has IP address {1} "
                                 "configured.".format(dbinterface, ip))
-
-    if not isinstance(dns_environment, DnsEnvironment):
-        session = object_session(dbinterface)
-        dns_environment = DnsEnvironment.get_unique_or_default(session,
-                                                               dns_environment)
 
     dbinterface.assignments.append(AddressAssignment(ip=ip, network=dbnetwork,
                                                      label=label, usage=usage,

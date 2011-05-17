@@ -93,9 +93,10 @@ class CommandDelInterfaceAddress(BrokerCommand):
         ip = addr.ip
 
         if dbnetwork.network_environment != dbnet_env:
-            # XXX Better error message. Revisit when integrating this with
-            # DNS environments
-            raise ArgumentError("Network environment mismatch")
+            raise ArgumentError("The specified address lives in {0:l}, not in "
+                                "{1:l}.  Use the --network_environment option "
+                                "to select the correct environment."
+                                .format(dbnetwork.network_environment, dbnet_env))
 
         # Forbid removing the primary name
         if ip == dbhw_ent.primary_ip:

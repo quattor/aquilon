@@ -135,9 +135,12 @@ class CommandAddInterfaceAddress(BrokerCommand):
             dbnetwork = dbdns_rec.network
 
             if dbnetwork.network_environment != dbnet_env:
-                # XXX Better error message. Revisit when integrating this with
-                # DNS environments
-                raise ArgumentError("Network environment mismatch")
+                raise ArgumentError("Address {0:a} lives in {1:l}, not in "
+                                    "{2:l}.  Use the --network_environment "
+                                    "option to select the correct environment."
+                                    .format(dbdns_rec,
+                                            dbnetwork.network_environment,
+                                            dbnet_env))
 
             # If it was just a pure DNS placeholder, then delete & re-add it
             if not dbdns_rec.assignments:
@@ -149,8 +152,11 @@ class CommandAddInterfaceAddress(BrokerCommand):
                                 "it cannot be assigned to "
                                 "{1:l}.".format(dbdns_rec, dbinterface))
 
-        # Check for network overlaps. This could happen when different
-        # interfaces use different network environments
+        # Check that the network ranges assigned to different interfaces
+        # do not overlap even if the network environments are different, because
+        # that would confuse routing on the host. E.g. if eth0 is an internal
+        # and eth1 is an external interface, then using 192.168.1.10/24 on eth0
+        # and using 192.168.1.20/26 on eth1 won't work.
         for addr in dbhw_ent.all_addresses():
             if addr.network != dbnetwork and \
                addr.network.network.overlaps(dbnetwork.network):
@@ -178,13 +184,7 @@ class CommandAddInterfaceAddress(BrokerCommand):
                                         "and is not configured for "
                                         "Zebra.".format(ip, addr.interface))
 
-        # TODO: check that the network ranges assigned to different interfaces
-        # do not overlap even if the network environments are different, because
-        # that would confuse routing on the host. E.g. if eth0 is an internal
-        # and eth1 is an external interface, then using 192.168.1.10/24 on eth0
-        # and using 192.168.1.20/26 on eth1 won't work.
-        assign_address(dbinterface, ip, dbnetwork, label=label, usage=usage,
-                       dns_environment=dbnet_env.dns_environment)
+        assign_address(dbinterface, ip, dbnetwork, label=label, usage=usage)
         session.flush()
 
         dbhost = getattr(dbhw_ent, "host", None)

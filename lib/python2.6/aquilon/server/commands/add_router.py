@@ -52,7 +52,8 @@ class CommandAddRouter(BrokerCommand):
 
         (short, dbdns_domain) = parse_fqdn(session, fqdn)
         dbfqdn = Fqdn.get_or_create(session, name=short,
-                                    dns_domain=dbdns_domain)
+                                    dns_domain=dbdns_domain,
+                                    dns_environment=dbnet_env.dns_environment)
         if ip:
             dbnetwork = get_net_id_from_ip(session, ip, dbnet_env)
             dbdns_rec = ARecord.get_or_create(session, fqdn=dbfqdn, ip=ip,

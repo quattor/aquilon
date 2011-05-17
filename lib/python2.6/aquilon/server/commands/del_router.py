@@ -41,18 +41,16 @@ class CommandDelRouter(BrokerCommand):
     required_parameters = []
 
     def render(self, session, ip, fqdn, network_environment, **arguments):
-        # FIXME: the DNS environment should come from the network environment
-        if fqdn:
-            dbdns_rec = ARecord.get_unique(session, fqdn=fqdn, compel=True)
-            ip = dbdns_rec.ip
-            dbdns_env = dbdns_rec.fqdn.dns_environment
-        elif ip:
-            dbdns_env = DnsEnvironment.get_unique_or_default(session)
-        else:
-            raise ArgumentError("Please specify either --ip or --fqdn.")
-
         dbnet_env = NetworkEnvironment.get_unique_or_default(session,
                                                              network_environment)
+        if fqdn:
+            dbdns_rec = ARecord.get_unique(session, fqdn=fqdn,
+                                           dns_environment=dbnet_env.dns_environment,
+                                           compel=True)
+            ip = dbdns_rec.ip
+        elif not ip:
+            raise ArgumentError("Please specify either --ip or --fqdn.")
+
         dbnetwork = get_net_id_from_ip(session, ip, dbnet_env)
         dbrouter = None
         for rtaddr in dbnetwork.routers:
