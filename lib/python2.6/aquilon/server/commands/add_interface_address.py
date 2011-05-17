@@ -34,7 +34,6 @@ from aquilon.aqdb.model import (ARecord, HardwareEntity, DynamicStub,
                                 AddressAssignment, DnsEnvironment, Fqdn,
                                 NetworkEnvironment)
 from aquilon.aqdb.model.network import get_net_id_from_ip
-from aquilon.aqdb.model.address_assignment import ADDR_USAGES
 from aquilon.server.dbwrappers.interface import (get_interface,
                                                  generate_ip,
                                                  check_ip_restrictions,
@@ -78,37 +77,23 @@ class CommandAddInterfaceAddress(BrokerCommand):
         dbnetwork = get_net_id_from_ip(session, ip, dbnet_env)
         check_ip_restrictions(dbnetwork, ip)
 
-        if ip and ip in dbinterface.addresses:
-            raise ArgumentError("{0} already has address {1} "
-                                "assigned.".format(dbinterface, ip))
-
         if label is None:
             label = ""
-        for addr in dbinterface.assignments:
-            if label == addr.label:
-                raise ArgumentError("{0} already has an alias named "
-                                    "{1}.".format(dbinterface, label))
-
-            if addr.network.network_environment != dbnet_env:
-                raise ArgumentError("Mixing different network environments on "
-                                    "the same interface is not allowed.")
-
-        # When add_host sets up Zebra, it always uses the label 'hostname'. Due
-        # to the primary IP being special, add_interface_address cannot really
-        # emulate what add_host does, so tell the user where to look.
-        if label == "hostname":
+        elif label == "hostname":
+            # When add_host sets up Zebra, it always uses the label 'hostname'.
+            # Due to the primary IP being special, add_interface_address cannot
+            # really emulate what add_host does, so tell the user where to look.
             raise ArgumentError("The 'hostname' label can only be managed "
                                 "by add_host/del_host.")
 
         if not usage:
             usage = "system"
-        if usage not in ADDR_USAGES:
-            raise ArgumentError("Illegal address usage '%s'." % usage)
 
         delete_old_dsdb_entry = False
         dbfqdn = Fqdn.get_or_create(session, fqdn=fqdn,
                                     dns_environment=dbnet_env.dns_environment)
         if ip:
+            # TODO: move this check to the model
             q = session.query(DynamicStub)
             q = q.filter_by(network=dbnetwork)
             q = q.filter_by(ip=ip)

@@ -41,10 +41,11 @@ from sqlalchemy.orm import object_session
 from sqlalchemy.sql import select
 
 from aquilon.exceptions_ import ArgumentError, InternalError, NotFoundException
-from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.aqdb.model import (Interface, HardwareEntity, ObservedMac,
                                 ARecord, VlanInfo, ObservedVlan, Network,
                                 AddressAssignment, DnsEnvironment)
+from aquilon.aqdb.model.address_assignment import ADDR_USAGES
+from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.utils import force_mac
 
 
@@ -480,12 +481,15 @@ def assign_address(dbinterface, ip, dbnetwork, label=None, usage=None):
 
     dns_environment = dbnetwork.network_environment.dns_environment
 
+    if usage and usage not in ADDR_USAGES:
+            raise ArgumentError("Illegal address usage '%s'." % usage)
+
     for addr in dbinterface.assignments:
         if not label and not addr.label:
             raise ArgumentError("{0} already has an IP "
                                 "address.".format(dbinterface))
         if label and addr.label == label:
-            raise ArgumentError("{0} already has an alias labeled "
+            raise ArgumentError("{0} already has an alias named "
                                 "{1}.".format(dbinterface, label))
         if addr.network.network_environment != dbnetwork.network_environment:
             raise ArgumentError("{0} already has an IP address from "

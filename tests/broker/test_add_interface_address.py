@@ -53,6 +53,17 @@ class TestAddInterfaceAddress(TestBrokerCommand):
         self.noouttest(command)
         self.dsdb_verify()
 
+    def testaddunittest20e0again(self):
+        # No label, different IP
+        ip = self.net.unknown[11].usable[-1]
+        fqdn = "unittest20-e0.aqd-unittest.ms.com"
+        command = ["add", "interface", "address", "--machine", "ut3c5n2",
+                   "--interface", "eth0", "--fqdn", fqdn, "--ip", ip]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Public Interface eth0 of machine "
+                         "unittest20.aqd-unittest.ms.com already "
+                         "has an IP address.", command)
+
     def testaddunittest20e1(self):
         ip = self.net.unknown[12].usable[0]
         fqdn = "unittest20-e1.aqd-unittest.ms.com"
@@ -149,6 +160,15 @@ class TestAddInterfaceAddress(TestBrokerCommand):
                          (ip, self.net.tor_net2[0].ip),
                          command)
 
+    def testrejectbadusage(self):
+        ip = self.net.tor_net2[0].usable[-1]
+        command = ["add", "interface", "address", "--machine", "ut3c5n2",
+                   "--interface", "eth1", "--label", "3",
+                   "--fqdn", "badusage.aqd-unittest.ms.com", "--ip", ip,
+                   "--usage", "badusage"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Illegal address usage 'badusage'.", command)
+
     def testsystemzebramix(self):
         ip = self.net.unknown[0].usable[3]
         command = ["add", "interface", "address", "--machine", "ut3c5n2",
@@ -242,8 +262,10 @@ class TestAddInterfaceAddress(TestBrokerCommand):
                    "--network_environment", "utcolo"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
-                         "Mixing different network environments on the same "
-                         "interface is not allowed.",
+                         "Public Interface eth0 of machine "
+                         "unittest25.aqd-unittest.ms.com already has an IP "
+                         "address from network environment internal.  Network "
+                         "environments cannot be mixed.",
                          command)
 
     def testaddunittest25utcolo(self):
