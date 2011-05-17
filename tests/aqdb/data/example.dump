@@ -1,0 +1,175 @@
+#
+# Define base data that gets loaded into the database at the beginning of
+# the unittest.
+#
+# Note: the parser is DUMB. Don't try to do anything smart in this file.
+#
+# Basic syntax
+# ------------
+#
+# The file contains a list of statements. Threr are two kinds of statements:
+# object creation and macro definition. (Incomplete) BNF:
+#
+#	<statement> ::= <object definition> | <macro definition>
+#	<macro definition> ::= <macro name> <object definition>
+#	<macro name> ::= '@' <symbol>
+#	<object definition> ::= <class name> '(' <param name> '=' <param value>[',' ...] ')'
+#	<param value> ::= <literal> | <macro name> | <object definiton>
+#	<literal> ::= <integer> | <float> | <string> | 'True' | 'False' | 'None'
+#
+# <class name> is a class defined in aquilon.aqdb.model.
+#
+# <object definition> can appear in two contexts: either as a statement, in
+# which case it creates a new object, or as a reference in macro defintions or
+# parameter values, in which case it means object lookup.
+#
+# When creating an object, the parameters are passed directly to the __init__()
+# method of the given class. When looking up an object, the parameters are
+# passed to the get_unique(..., compel=True) method of the given class.
+#
+# Literals can be integers, True/False, and strings. Strings should be between
+# quotes (single or double), although the parser does not enforce that
+# currently. Backslash-style escaping works between double quotes.
+#
+# White space is generally ignored.
+#
+# Macros
+# ------
+#
+# Macros can be used as a shorthand when the same object is referenced many
+# times by subsequently created objects. Macro names start with the '@'
+# character. The rest of the name should be a valid Python identifier, although
+# this is not enforced yet.
+
+
+Role(name="nobody")
+Role(name="operations")
+Role(name="engineering")
+Role(name="aqd_admin")
+Role(name="telco_eng")
+Role(name="unixops_l2")
+Role(name="winops")
+
+Realm(name="example.realm")
+UserPrincipal(name="njw", role=Role(name="aqd_admin"), realm=Realm(name="example.realm"))
+Domain(name="prod", owner=UserPrincipal(name="njw"),
+       compiler="/qwg/templates/external/panc/lib/panc.jar",
+       comments="Production templates")
+
+
+# FIXME: Status objects cannot be instantiated
+#Status(name="blind")
+#Status(name="build")
+#Status(name="ready")
+#Status(name="failed")
+#Status(name="install")
+
+DnsDomain(name="example.com")
+
+Company(name="example", fullname="An Example Organization")
+Hub(name="ln", fullname="Europe", parent=Company(name="example"))
+Continent(name="eu", fullname="Europe", parent=Hub(name="ln"))
+Country(name="gb", fullname="Great Britain", parent=Continent(name="eu"))
+Campus(name="ln", fullname="London", parent=Country(name="gb"))
+City(name="ln", fullname="London", parent=Campus(name="ln"))
+
+Archetype(name="qwg", is_compileable=True)
+
+OperatingSystem(archetype=Archetype(name="qwg"), name="linux", version="5.0-x86_64")
+
+Personality(archetype=Archetype(name="qwg"), name="generic")
+
+Vendor(name="amd")
+Vendor(name="intel")
+Vendor(name="generic")
+Vendor(name="dell")
+Vendor(name="hp")
+Vendor(name="ibm")
+Vendor(name="verari")
+Vendor(name="virtual")
+Vendor(name="vmware")
+Vendor(name="3com")
+Vendor(name="broadcom")
+Vendor(name="bnt")
+Vendor(name="cisco")
+Vendor(name="netapp")
+
+@amd Vendor(name="amd")
+@intel Vendor(name="intel")
+@hp Vendor(name="hp")
+@ibm Vendor(name="ibm")
+@dell Vendor(name="dell")
+
+Cpu(vendor=@amd, name="opteron_2212", speed=2000)
+Cpu(vendor=@amd, name="opteron_2216", speed=2400)
+Cpu(vendor=@amd, name="opteron_2218", speed=2600)
+Cpu(vendor=@amd, name="opteron_248", speed=2200)
+Cpu(vendor=@amd, name="opteron_250", speed=2400)
+Cpu(vendor=@amd, name="opteron_2600", speed=2600)
+Cpu(vendor=@amd, name="opteron_275", speed=2200)
+Cpu(vendor=@amd, name="opteron_280", speed=2400)
+Cpu(vendor=@intel, name="pentium_2660", speed=2600)
+Cpu(vendor=@intel, name="core_duo", speed=2000)
+Cpu(vendor=@intel, name="l5420", speed=2500)
+Cpu(vendor=@intel, name="woodcrest_2300", speed=2300)
+Cpu(vendor=@intel, name="woodcrest_2660", speed=2660)
+Cpu(vendor=@intel, name="xeon_2500", speed=2500)
+Cpu(vendor=@intel, name="xeon_2660", speed=2660)
+Cpu(vendor=@intel, name="xeon_3000", speed=3000)
+Cpu(vendor=@intel, name="xeon_3100", speed=3100)
+Cpu(vendor=@intel, name="xeon_3400", speed=3400)
+Cpu(vendor=@intel, name="xeon_3600", speed=3600)
+Cpu(vendor=Vendor(name="virtual"), name="virtual_cpu", speed=0)
+
+Model(vendor=@ibm, name="hs20-884345u", machine_type="blade")
+Model(vendor=@ibm, name="ls20-8850pap", machine_type="blade")
+Model(vendor=@ibm, name="hs21-8853l5u", machine_type="blade")
+Model(vendor=@ibm, name="bce", machine_type="chassis")
+Model(vendor=@ibm, name="bch", machine_type="chassis")
+Model(vendor=@ibm, name="dx320-6388ac1", machine_type="rackmount")
+Model(vendor=@ibm, name="dx320-6388dau", machine_type="rackmount")
+Model(vendor=@hp, name="bl35p", machine_type="blade")
+Model(vendor=@hp, name="bl465c", machine_type="blade")
+Model(vendor=@hp, name="bl480c", machine_type="blade")
+Model(vendor=@hp, name="bl680c", machine_type="blade")
+Model(vendor=@hp, name="bl685c", machine_type="blade")
+Model(vendor=@hp, name="dl145", machine_type="rackmount")
+Model(vendor=@hp, name="dl580", machine_type="rackmount")
+Model(vendor=@hp, name="bl45p", machine_type="blade")
+Model(vendor=@hp, name="bl260c", machine_type="blade")
+Model(vendor=@hp, name="c-class", machine_type="chassis")
+Model(vendor=@hp, name="p-class", machine_type="chassis")
+Model(vendor=Vendor(name="verari"), name="vb1205xm", machine_type="blade")
+Model(vendor=Vendor(name="netapp"), name="v3160", machine_type="rackmount")
+Model(vendor=Vendor(name="netapp"), name="v3170", machine_type="rackmount")
+Model(vendor=@dell, name="poweredge_6850", machine_type="rackmount")
+Model(vendor=@dell, name="poweredge_6650", machine_type="rackmount")
+Model(vendor=@dell, name="poweredge_2650", machine_type="rackmount")
+Model(vendor=@dell, name="poweredge_2850", machine_type="rackmount")
+Model(vendor=@dell, name="optiplex_260", machine_type="workstation")
+
+MachineSpecs(model=Model(name="hs20-884345u"),
+             cpu=Cpu(name="xeon_2660"), cpu_quantity=2, memory=8192,
+             controller_type="scsi", disk_type="local", disk_capacity=36, nic_count=2)
+MachineSpecs(model=Model(name="hs21-8853l5u"),
+             cpu=Cpu(name="xeon_2660"), cpu_quantity=2, memory=8192,
+             controller_type="scsi", disk_type="local", disk_capacity=68, nic_count=2)
+MachineSpecs(model=Model(name="poweredge_6650"),
+             cpu=Cpu(name="xeon_3000"), cpu_quantity=4, memory=16384,
+             controller_type="scsi", disk_type="local", disk_capacity=36, nic_count=2)
+MachineSpecs(model=Model(name="bl45p"),
+             cpu=Cpu(name="opteron_2600"), cpu_quantity=2, memory=32768,
+             controller_type="scsi", disk_type="local", disk_capacity=36, nic_count=2)
+MachineSpecs(model=Model(name="bl260c"),
+             cpu=Cpu(name="xeon_2500"), cpu_quantity=2, memory=24576,
+             controller_type="scsi", disk_type="local", disk_capacity=36, nic_count=2)
+MachineSpecs(model=Model(name="vb1205xm"),
+             cpu=Cpu(name="xeon_2500"), cpu_quantity=2, memory=24576,
+             controller_type="scsi", disk_type="local", disk_capacity=36, nic_count=2)
+MachineSpecs(model=Model(name="v3160"),
+             cpu=Cpu(name="opteron_2600"), cpu_quantity=2, memory=16384,
+             controller_type="fibrechannel", disk_type="local", disk_capacity=0, nic_count=8)
+MachineSpecs(model=Model(name="v3170"),
+             cpu=Cpu(name="opteron_2600"), cpu_quantity=2, memory=16384,
+             controller_type="fibrechannel", disk_type="local", disk_capacity=0, nic_count=8)
+

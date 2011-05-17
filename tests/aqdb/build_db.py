@@ -33,6 +33,7 @@ import logging
 import optparse
 import getpass
 import os
+import subprocess
 
 logging.basicConfig(levl=logging.ERROR)
 log = logging.getLogger('aqdb.populate')
@@ -127,13 +128,12 @@ def main(*args, **kw):
     if opts.populate:
         load_from_file(s, opts.populate)
 
-        # Add the current user as admin
-        admin = Role.get_unique(s, "aqd_admin", compel=True)
-        realm = Realm.get_unique(s, "is1.morgan", compel=True)
-        user = UserPrincipal(name=getpass.getuser(), role=admin, realm=realm)
-        s.add(user)
-        s.commit()
-        s.expire(user)
+        env = os.environ.copy()
+        env['AQDCONF'] = config.baseconfig
+        rc = subprocess.call([os.path.join(BINDIR, 'add_admin.py')],
+                             env=env, stdout=1, stderr=2)
+        if rc != 0:
+            log.warn("Failed to add current user as administrator.")
 
     #New loop: over sorted tables in Base.metadata.
     for tbl in Base.metadata.sorted_tables:

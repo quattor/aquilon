@@ -27,11 +27,12 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-"""Give anyone with access to read the password file the aqd_admin role."""
+"""Give anyone with write access to the database the aqd_admin role."""
 import sys
 import logging
+import re
 
-logging.basicConfig(levl=logging.ERROR)
+logging.basicConfig(level=logging.INFO)
 log = logging.getLogger('aqdb.add_admin')
 
 import utils
@@ -51,19 +52,37 @@ from aquilon.aqdb.db_factory import DbFactory
 
 def parse_cli(*args, **kw):
     parser = argparse.ArgumentParser(
-        description = 'add password readers as admins')
+        description='add current user as an admin')
 
     parser.add_argument('-v', '--verbose',
-                      action  = 'store_true',
-                      dest    = 'verbose',
-                      help    = 'makes metadata bind.echo = True')
+                        action='store_true',
+                        dest='verbose',
+                        help='show queries (metadata bind.echo = True)')
 
     parser.add_argument('-d', '--debug',
-                      action  = 'store_true',
-                      dest    = 'debug',
-                      help    = 'write debug info on stdout')
+                        action='store_true',
+                        dest='debug',
+                        help='write debug messages on stdout')
+
+    parser.add_argument('-n', '--dry-run',
+                        action='store_false',
+                        dest='commit',
+                        default=True,
+                        help='do not add records to the database')
 
     return parser.parse_args()
+
+def parse_klist():
+    """Run klist and return a (principal, realm) tuple."""
+    klist = config.get('kerberos', 'klist')
+    log.debug("Running %s", klist)
+    p = Popen([klist], stdout=PIPE, stderr=2)
+    (out, err) = p.communicate()
+    m = re.search(r'^Default principal:\s+(.*)@(.*?)$', out, re.M)
+    if not m:
+        raise ValueError("Could not determine default principal from klist "
+                         "output: %s" % out)
+    return m.groups()
 
 
 def main(*args, **kw):
@@ -71,6 +90,8 @@ def main(*args, **kw):
 
     if opts.debug:
         log.setLevel(logging.DEBUG)
+
+    (principal, realm) = parse_klist()
 
     db = DbFactory(verbose=opts.verbose)
     Base.metadata.bind = db.engine
@@ -80,59 +101,30 @@ def main(*args, **kw):
 
     session = db.Session()
 
-    password_file = config.get("database", "password_file")
-    p = Popen(["fs", "listacl", "-path", password_file],
-              stdout=PIPE, stderr=2)
-    (out, err) = p.communicate()
-
-    groups = []
-    for line in out.splitlines():
-        line = line.strip()
-        if line.startswith("Access"):
-            continue
-        if line.startswith("Normal"):
-            continue
-        if line.startswith("Negative"):
-            break
-        info = line.split(' ', 1)
-        if len(info) < 2:
-            log.debug("Bad line encountered: %s", line)
-            continue
-        (group, perm) = info
-        if not perm.startswith("r"):
-            continue
-        log.debug("Found group %s", group)
-        groups.append(group)
-
-    members = set()
-    for group in groups:
-        p = Popen(["pts", "mem", group], stdout=PIPE, stderr=2)
-        (out, err) = p.communicate()
-        for line in out.splitlines():
-            member = line.strip()
-            if member.startswith("Members"):
-                continue
-            if member.startswith("Groups"):
-                break
-            if member:
-                log.debug("Found member %s from group %s", member, group)
-                members.add(member)
-
     aqd_admin = Role.get_unique(session, "aqd_admin", compel=True)
-    realm = Realm.get_unique(session, "is1.morgan", compel=True)
-    for member in members:
-        q = session.query(UserPrincipal).filter_by( name=member, realm=realm)
-        dbuser = q.first()
-        if dbuser:
-            log.info("Ensuring %s is aqd_admin", dbuser.name)
-            dbuser.role = aqd_admin
+    dbrealm = Realm.get_unique(session, realm)
+    if not dbrealm:
+        dbrealm = Realm(name=realm)
+        session.add(dbrealm)
+    dbuser = UserPrincipal.get_unique(session, name=principal, realm=dbrealm)
+    if dbuser:
+        if dbuser.role == aqd_admin:
+            log.info("%s@%s is already an aqd_admin, nothing to do",
+                     principal, realm)
         else:
-            log.info("Creating %s as aqd_admin", member)
-            dbuser = UserPrincipal(name=member, realm=realm, role=aqd_admin,
-                                   comments='User with access to db password')
-            session.add(dbuser)
+            log.info("Updating %s %s to aqd_admin",
+                     dbuser.name, dbuser.role.name)
+            dbuser.role = aqd_admin
+    else:
+        log.info("Creating %s@%s as aqd_admin", principal, realm)
+        dbuser = UserPrincipal(name=principal, realm=dbrealm, role=aqd_admin,
+                               comments='User with write access to database')
+        session.add(dbuser)
 
-    session.commit()
+    if opts.commit:
+        session.commit()
+    elif session.new or session.dirty:
+        log.debug("dry-run mode enabled, not running commit()")
 
 
 if __name__ == '__main__':
