@@ -41,7 +41,7 @@ from aquilon.server.dbwrappers.observed_mac import (
     update_or_create_observed_mac)
 from aquilon.server.processes import run_command
 from aquilon.aqdb.model import (Switch, HardwareEntity, ObservedMac,
-                                ObservedVlan, Network)
+                                ObservedVlan, Network, NetworkEnvironment)
 from aquilon.utils import force_ipv4
 
 
@@ -175,6 +175,10 @@ class CommandPollSwitch(BrokerCommand):
                                 "a registered IP address.".format(switch))
         session.query(ObservedVlan).filter_by(switch=switch).delete()
         session.flush()
+
+        # Restrict operations to the internal network
+        dbnet_env = NetworkEnvironment.get_unique_or_default(session)
+
         out = run_command([self.config.get("broker", "vlan2net"),
                            "-ip", switch.primary_ip])
         try:
@@ -206,7 +210,8 @@ class CommandPollSwitch(BrokerCommand):
                                 "line #%d: %s error: %s" %
                                 (reader.line_num, row, e))
                     continue
-                dbnetwork = Network.get_unique(session, ip=network)
+                dbnetwork = Network.get_unique(session, ip=network,
+                                               network_environment=dbnet_env)
                 if not dbnetwork:
                     logger.info("Unknown network %s in output line #%d: %s" %
                                 (network, reader.line_num, row))

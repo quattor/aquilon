@@ -50,11 +50,11 @@ class RouterAddress(Base):
 
     ip = Column(IPV4, primary_key=True)
 
-    # The main reason for having this field is to allow cascaded deletion to
-    # work. Otherwise 'ip' should be enough to identify the network.
+    # With the introduction of network environments, the IP alone is not enough
+    # to uniquely identify the router
     network_id = Column(Integer, ForeignKey('network.id',
                                             name='%s_network_fk' % _TN),
-                        nullable=False)
+                        primary_key=True)
 
     dns_environment_id = Column(Integer, ForeignKey('dns_environment.id',
                                                     name='%s_dns_env_fk' % _TN),
@@ -89,5 +89,5 @@ class RouterAddress(Base):
 
 rtaddr = RouterAddress.__table__  # pylint: disable-msg=C0103, E1101
 rtaddr.primary_key.name = '%s_pk' % _TN
-rtaddr.info['unique_fields'] = ['ip']
+rtaddr.info['unique_fields'] = ['ip', 'network']
 rtaddr.info['extra_search_fields'] = ['dns_environment']

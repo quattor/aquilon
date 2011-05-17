@@ -85,6 +85,7 @@ class CommandUpdateSwitch(BrokerCommand):
                 dbswitch.primary_name.network = dbnetwork
 
             q = session.query(AddressAssignment)
+            q = q.filter_by(network=dbnetwork)
             q = q.filter_by(ip=old_ip)
             q = q.join(Interface)
             q = q.filter_by(hardware_entity=dbswitch)
@@ -94,7 +95,7 @@ class CommandUpdateSwitch(BrokerCommand):
             else:
                 # This should only happen if the switch did not have an IP
                 # address before
-                assign_address(dbswitch.interfaces[0], ip)
+                assign_address(dbswitch.interfaces[0], ip, dbnetwork)
 
         if comments is not None:
             dbswitch.comments = comments

@@ -58,6 +58,30 @@ class TestUpdateNetwork(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Discoverable: False", command)
 
+    def test_300_update_noenv(self):
+        command = ["update", "network", "--network", "excx-net",
+                   "--discoverable"]
+        out = self.notfoundtest(command)
+        self.matchoutput(out, "Network excx-net not found.", command)
+
+    def test_310_update_withenv(self):
+        command = ["update", "network", "--network", "excx-net",
+                   "--discoverable", "--network_environment", "excx"]
+        self.noouttest(command)
+
+    def test_315_verify(self):
+        command = ["show", "network", "--network", "excx-net",
+                   "--network_environment", "excx"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Discoverable: True", command)
+
+    # There should be a test_constraint_network.py one day...
+    def test_900_delinuse(self):
+        net = self.net.unknown[0]
+        command = ["del", "network", "--ip", net.ip]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Network %s is still in use" % net.ip, command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestUpdateDomain)

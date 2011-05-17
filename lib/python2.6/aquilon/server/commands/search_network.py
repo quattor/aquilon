@@ -32,7 +32,7 @@
 from aquilon.server.broker import BrokerCommand
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import (Network, Machine, VlanInfo, ObservedVlan,
-                                Cluster, ARecord, Fqdn)
+                                Cluster, ARecord, Fqdn, NetworkEnvironment)
 from aquilon.aqdb.model.dns_domain import parse_fqdn
 from aquilon.server.dbwrappers.location import get_location
 from aquilon.server.formats.network import ShortNetworkList
@@ -43,8 +43,9 @@ class CommandSearchNetwork(BrokerCommand):
 
     required_parameters = []
 
-    def render(self, session, network, ip, type, discoverable, discovered,
-               machine, fqdn, cluster, pg, fullinfo, **arguments):
+    def render(self, session, network, network_environment, ip, type,
+               discoverable, discovered, machine, fqdn, cluster, pg, fullinfo,
+               **arguments):
         """Return a network matching the parameters.
 
         Some of the search terms can only return a unique network.  For
@@ -53,12 +54,15 @@ class CommandSearchNetwork(BrokerCommand):
         a tor_net2?".
 
         """
+        dbnet_env = NetworkEnvironment.get_unique_or_default(session,
+                                                             network_environment)
         q = session.query(Network)
+        q = q.filter_by(network_environment=dbnet_env)
         if network:
             # Note: the network name is not unique (neither in QIP)
             q = q.filter_by(name=network)
         if ip:
-            dbnetwork = get_net_id_from_ip(session, ip)
+            dbnetwork = get_net_id_from_ip(session, ip, dbnet_env)
             q = q.filter_by(id=dbnetwork.id)
         if type:
             q = q.filter_by(network_type=type)
@@ -96,8 +100,8 @@ class CommandSearchNetwork(BrokerCommand):
             dnsq = dnsq.join(Fqdn)
             dnsq = dnsq.filter_by(name=short)
             dnsq = dnsq.filter_by(dns_domain=dbdns_domain)
-            networks = [get_net_id_from_ip(session, addr.ip).id for addr in
-                        dnsq.all()]
+            networks = [get_net_id_from_ip(session, addr.ip, dbnet_env).id
+                        for addr in dnsq.all()]
             q = q.filter(Network.id.in_(networks))
         if cluster:
             dbcluster = Cluster.get_unique(session, cluster, compel=True)

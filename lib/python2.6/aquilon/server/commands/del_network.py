@@ -27,9 +27,9 @@
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
 
-
+from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand
-from aquilon.aqdb.model.network import Network
+from aquilon.aqdb.model.network import Network, NetworkEnvironment
 from aquilon.server.dbwrappers.dns import delete_dns_record
 
 
@@ -37,10 +37,25 @@ class CommandDelNetwork(BrokerCommand):
 
     required_parameters = ["ip"]
 
-    def render(self, session, ip, **arguments):
-        dbnetwork = Network.get_unique(session, ip, compel=True)
+    def render(self, session, ip, network_environment, **arguments):
+        dbnet_env = NetworkEnvironment.get_unique_or_default(session,
+                                                             network_environment)
+        dbnetwork = Network.get_unique(session, network_environment=dbnet_env,
+                                       ip=ip, compel=True)
+
+        # Delete the routers so they don't trigger the checks below
         for dbrouter in dbnetwork.routers:
             map(delete_dns_record, dbrouter.dns_records)
+        dbnetwork.routers = []
+        session.flush()
+
+        if dbnetwork.dns_records:
+            raise ArgumentError("{0} is still in use by DNS entries and "
+                                "cannot be deleted.".format(dbnetwork))
+        if dbnetwork.assignments:
+            raise ArgumentError("{0} is still in use by hosts and "
+                                "cannot be deleted.".format(dbnetwork))
+
         session.delete(dbnetwork)
         session.flush()
         return

@@ -184,6 +184,7 @@ klist = /ms/dist/aurora/bin/klist
 [site]
 # Site specific settings
 default_dns_environment = internal
+default_network_environment = internal
 
 # This can be used for any components that use python logging
 # Valid values are INFO, DEBUG, and WARNING

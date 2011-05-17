@@ -123,6 +123,33 @@ class TestSearchNetwork(TestBrokerCommand):
         self.matchoutput(out, "Network: %s" % self.net.tor_net[0].ip, command)
         self.matchoutput(out, "IP: %s" % self.net.tor_net[0].ip, command)
 
+    def testnoenv(self):
+        # Same IP defined differently in different environments
+        net = self.net.unknown[0]
+        command = ["search", "network", "--ip", net.ip, "--fullinfo"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Network: %s" % net.ip, command)
+        self.matchoutput(out, "Network Environment: internal", command)
+        self.matchclean(out, "Network Environment: excx", command)
+        self.matchclean(out, "Network Environment: utcolo", command)
+        self.matchoutput(out, "Netmask: %s" % net.netmask, command)
+        self.matchclean(out, "excx-net", command)
+
+    def testwithenv(self):
+        # Same IP defined differently in different environments
+        net = self.net.unknown[0]
+        subnet = net.subnet()[0]
+        command = ["search", "network", "--ip", net.ip,
+                   "--network_environment", "excx", "--fullinfo"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Network: excx-net" % net.ip, command)
+        self.matchclean(out, "Network: %s" % net.ip, command)
+        self.matchoutput(out, "Network Environment: excx", command)
+        self.matchclean(out, "Network Environment: internal", command)
+        self.matchclean(out, "Network Environment: utcolo", command)
+        self.matchoutput(out, "Netmask: %s" % subnet.netmask, command)
+        self.matchclean(out, "Netmask: %s" % net.netmask, command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestSearchNetwork)

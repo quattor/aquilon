@@ -28,30 +28,38 @@
 # TERMS THAT MAY APPLY.
 """Contains the logic for `aq del router`."""
 
-from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import ARecord, RouterAddress, DnsEnvironment
+from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.dns import delete_dns_record
+from aquilon.aqdb.model import (ARecord, RouterAddress, DnsEnvironment,
+                                NetworkEnvironment)
+from aquilon.aqdb.model.network import get_net_id_from_ip
 
 
 class CommandDelRouter(BrokerCommand):
 
     required_parameters = []
 
-    def render(self, session, ip, fqdn, **arguments):
+    def render(self, session, ip, fqdn, network_environment, **arguments):
+        dbnet_env = NetworkEnvironment.get_unique_or_default(session,
+                                                             network_environment)
         if fqdn:
-            dbdns_rec = ARecord.get_unique(session, fqdn=fqdn, compel=True)
+            dbdns_rec = ARecord.get_unique(session, fqdn=fqdn,
+                                           dns_environment=dbnet_env.dns_environment,
+                                           compel=True)
             ip = dbdns_rec.ip
-            dbdns_env = dbdns_rec.fqdn.dns_environment
-        elif ip:
-            dbdns_env = DnsEnvironment.get_unique_or_default(session)
-        else:
+        elif not ip:
             raise ArgumentError("Please specify either --ip or --fqdn.")
 
-        dbrouter = RouterAddress.get_unique(session, ip=ip,
-                                            dns_environment=dbdns_env,
-                                            compel=True)
-        dbnetwork = dbrouter.network
+        dbnetwork = get_net_id_from_ip(session, ip, dbnet_env)
+        dbrouter = None
+        for rtaddr in dbnetwork.routers:
+            if rtaddr.ip == ip:
+                dbrouter = rtaddr
+                break
+        if not dbrouter:
+            raise NotFoundException("IP address {0} is not a router on "
+                                    "{1:l}.".format(ip, dbnetwork))
 
         map(delete_dns_record, dbrouter.dns_records)
         dbnetwork.routers.remove(dbrouter)

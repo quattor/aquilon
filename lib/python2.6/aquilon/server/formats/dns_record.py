@@ -52,7 +52,7 @@ class ARecordFormatter(ObjectFormatter):
         details = [indent + "{0:c}: {1!s}".format(dns_record, dns_record.fqdn)]
         details.append(indent + "  {0:c}: {0.name}".format(dns_record.fqdn.dns_environment))
         details.append(indent + "  IP: %s" % dns_record.ip)
-        details.append(indent + "  Network: %s" % dns_record.network.network)
+        details.append(indent + "  Network: {0:a}".format(dns_record.network))
         #details.append(indent + "    Network Environment: %s" %
         #               dns_record.network.network_environment)
         if dns_record.comments:

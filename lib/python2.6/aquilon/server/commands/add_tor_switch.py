@@ -31,6 +31,7 @@
 
 from aquilon.exceptions_ import ArgumentError, ProcessException
 from aquilon.aqdb.model import Switch, Model
+from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.location import get_location
 from aquilon.server.dbwrappers.rack import get_or_create_rack
@@ -97,7 +98,8 @@ class CommandAddTorSwitch(BrokerCommand):
                                               interface_type="oa",
                                               comments=ifcomments)
         if ip:
-            assign_address(dbinterface, ip)
+            dbnetwork = get_net_id_from_ip(session, ip)
+            assign_address(dbinterface, ip, dbnetwork)
 
         session.flush()
 

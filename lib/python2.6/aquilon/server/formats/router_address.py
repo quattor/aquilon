@@ -43,7 +43,8 @@ class RouterAddressFormatter(ObjectFormatter):
             names = "unknown"
 
         details.append(indent + "Router: %s [%s]" % (names, router.ip))
-        details.append(indent + "  {0:c}: {0.name}".format(router.network))
+        details.append(indent + "  {0:c}: {0:a}".format(router.network))
+        details.append(indent + "  {0:c}: {0.name}".format(router.network.network_environment))
         if router.location:
             details.append(self.redirect_raw(router.location, indent + "  "))
         if router.comments:

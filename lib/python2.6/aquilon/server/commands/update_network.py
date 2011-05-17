@@ -28,29 +28,33 @@
 # TERMS THAT MAY APPLY.
 """Contains the logic for `aq update machine`."""
 
-import re
-
-from aquilon.exceptions_ import ArgumentError, NotFoundException
+from aquilon.exceptions_ import NotFoundException
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.location import get_location
 from aquilon.server.dbwrappers.network import get_network_byname, get_network_byip
-from aquilon.aqdb.model import Network
+from aquilon.aqdb.model import Network, NetworkEnvironment
+
 
 class CommandUpdateNetwork(BrokerCommand):
 
-    def render(self, session, network, discovered, discoverable, ip, user, type=False, **arguments):
+    def render(self, session, network, ip, network_environment, discovered,
+               discoverable, type=False, **arguments):
 
-        required_parameters = []
         networks = []
 
+        dbnet_env = NetworkEnvironment.get_unique_or_default(session,
+                                                             network_environment)
+
         if network or ip:
-            dbnetwork = network and get_network_byname(session, network) or None
-            dbnetwork = ip and get_network_byip(session, ip) or dbnetwork
+            dbnetwork = network and get_network_byname(session, network,
+                                                       dbnet_env) or None
+            dbnetwork = ip and get_network_byip(session, ip, dbnet_env) or dbnetwork
             if not dbnetwork:
                 raise NotFoundException('No valid network supplied.')
             networks.append(dbnetwork)
         else:
             q = session.query(Network)
+            q = q.filter_by(network_environment=dbnet_env)
             if type:
                 q = q.filter_by(network_type = type)
             dblocation = get_location(session, **arguments)

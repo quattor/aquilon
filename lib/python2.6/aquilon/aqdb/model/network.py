@@ -38,11 +38,11 @@ from sqlalchemy.orm import relation
 from sqlalchemy.ext.associationproxy import association_proxy
 
 from aquilon.exceptions_ import NotFoundException, InternalError
-from aquilon.aqdb.model import Base, Location
+from aquilon.aqdb.model import Base, Location, NetworkEnvironment
 from aquilon.aqdb.column_types import AqStr, IPV4
 
-#TODO: enum type for network_type
 
+#TODO: enum type for network_type
 _TN = "network"
 
 
@@ -73,7 +73,12 @@ class Network(Base):
 
     id = Column(Integer, Sequence('%s_id_seq' % _TN), primary_key=True)
 
-    location_id = Column('location_id', Integer,
+    network_environment_id = Column(Integer,
+                                    ForeignKey('network_environment.id',
+                                               name='%s_net_env_fk' % _TN),
+                                    nullable=False)
+
+    location_id = Column(Integer,
                          ForeignKey('location.id', name='%s_loc_fk' % _TN),
                          nullable=False)
 
@@ -90,6 +95,8 @@ class Network(Base):
 
     creation_date = Column(DateTime, default=datetime.now, nullable=False)
     comments = Column(String(255), nullable=True)
+
+    network_environment = relation(NetworkEnvironment, backref='networks')
 
     location = relation(Location, backref='networks')
 
@@ -146,6 +153,7 @@ class Network(Base):
 
     @property
     def network(self):
+        # TODO: cache the IPv4Network object
         return IPv4Network("%s/%s" % (self.ip, self.cidr))
 
     @network.setter
@@ -167,38 +175,73 @@ class Network(Base):
     def available_ip_count(self):
         return int(self.broadcast) - int(self.first_usable_host)
 
+    @property
+    def is_internal(self):
+        return self.network_environment.is_default
+
+    def __le__(self, other):
+        if self.network_environment_id != other.network_environment_id:
+            return NotImplemented
+        return self.ip.__le__(other.ip)
+
+    def __lt__(self, other):
+        if self.network_environment_id != other.network_environment_id:
+            return NotImplemented
+        return self.ip.__lt__(other.ip)
+
+    def __ge__(self, other):
+        if self.network_environment_id != other.network_environment_id:
+            return NotImplemented
+        return self.ip.__ge__(other.ip)
+
+    def __gt__(self, other):
+        if self.network_environment_id != other.network_environment_id:
+            return NotImplemented
+        return self.ip.__gt__(other.ip)
+
     @classmethod
     def get_unique(cls, session, *args, **kwargs):
-        # Fall back to the generic implementation unless the caller used
-        # exactly one non-keyword argument, and possibly compel.  Any
-        # caller using preclude would be passing keywords anyway.
+        # Fall back to the generic implementation unless the caller used exactly
+        # one non-keyword argument.  Any caller using preclude would be passing
+        # keywords anyway.
         compel = kwargs.pop("compel", False)
         options = kwargs.pop("query_options", None)
+        netenv = kwargs.pop("network_environment", None)
         if kwargs or len(args) > 1:
-            return super(Network, cls).get_unique(session, *args, compel=compel,
+            return super(Network, cls).get_unique(session, *args,
+                                                  network_environment=netenv,
                                                   query_options=options,
-                                                  **kwargs)
+                                                  compel=compel, **kwargs)
 
         # Just a single positional argumentum - do magic
         # The order matters here, we don't want to parse '1.2.3.4' as
         # IPv4Network('1.2.3.4/32')
         try:
             ip = IPv4Address(args[0])
-            return super(Network, cls).get_unique(session, ip=ip, compel=compel,
-                                                  query_options=options)
+            return super(Network, cls).get_unique(session, ip=ip,
+                                                  network_environment=netenv,
+                                                  query_options=options,
+                                                  compel=compel)
         except:
             pass
         try:
             net = IPv4Network(args[0])
             return super(Network, cls).get_unique(session, ip=net.network,
                                                   cidr=net.prefixlen,
-                                                  compel=compel,
-                                                  query_options=options)
+                                                  network_environment=netenv,
+                                                  query_options=options,
+                                                  compel=compel)
         except:
             pass
         return super(Network, cls).get_unique(session, name=args[0],
-                                              compel=compel,
-                                              query_options=options)
+                                              network_environment=netenv,
+                                              query_options=options,
+                                              compel=compel)
+
+    def __format__(self, format_spec):
+        if format_spec != "a":
+            return super(Network, self).__format__(format_spec)
+        return "%s [%s]" % (self.name, self.network)
 
     def __repr__(self):
         msg = '<Network '
@@ -206,35 +249,49 @@ class Network(Base):
         if self.name != self.network:
             msg += '%s ip=' % (self.name)
 
-        msg += '%s (netmask=%s), type=%s, side=%s, located in %r>' % (
+        msg += '%s (netmask=%s), type=%s, side=%s, located in %s, environment=%s>' % (
             str(self.network), str(self.network.netmask), self.network_type,
-            self.side, self.location)
+            self.side, format(self.location), self.network_environment)
         return msg
 
 
 network = Network.__table__  # pylint: disable-msg=C0103, E1101
 network.primary_key.name = '%s_pk' % _TN
 
-network.append_constraint(UniqueConstraint('ip', name='%s_ip_uk' % _TN))
+network.append_constraint(UniqueConstraint('network_environment_id', 'ip',
+                                           name='%s_net_env_ip_uk' % _TN))
 network.append_constraint(CheckConstraint("cidr >= 1 AND cidr <= 32",
                                           name="%s_cidr_ck" % _TN))
 
-network.info['unique_fields'] = ['ip']
+network.info['unique_fields'] = ['network_environment', 'ip']
 network.info['extra_search_fields'] = ['name', 'cidr']
 
 Index('%s_loc_id_idx' % _TN, network.c.location_id)
 
 
-def get_net_id_from_ip(s, ip):
+def get_net_id_from_ip(session, ip, network_environment=None):
+    # Prevent circular dep
+    from aquilon.aqdb.model import NetworkEnvironment
+
     """Requires a session, and will return the Network for a given ip."""
     if ip is None:
         return None
 
+    if isinstance(network_environment, NetworkEnvironment):
+        dbnet_env = network_environment
+    else:
+        dbnet_env = NetworkEnvironment.get_unique_or_default(session,
+                                                             network_environment)
+
     # Query the last network having an address smaller than the given ip. There
     # is no guarantee that the returned network does in fact contain the given
     # ip, so this must be checked separately.
-    subq = s.query(func.max(Network.ip).label('net_ip')).filter(Network.ip <= ip)
-    q = s.query(Network).filter(Network.ip == subq.subquery().c.net_ip)
+    subq = session.query(func.max(Network.ip).label('net_ip'))
+    subq = subq.filter_by(network_environment=dbnet_env)
+    subq = subq.filter(Network.ip <= ip)
+    q = session.query(Network)
+    q = q.filter_by(network_environment=dbnet_env)
+    q = q.filter(Network.ip == subq.subquery().c.net_ip)
     net = q.first()
     if not net or not ip in net.network:
         raise NotFoundException("Could not determine network containing IP "

@@ -64,6 +64,8 @@ UserPrincipal(name="cdb", role=Role(name="aqd_admin"), realm=Realm(name="is1.mor
 DnsEnvironment(name="internal")
 DnsEnvironment(name="external")
 
+NetworkEnvironment(name="internal", dns_environment=DnsEnvironment(name="internal"))
+
 DnsDomain(name="ms.com")
 DnsDomain(name="devin1.ms.com")
 DnsDomain(name="devin2.ms.com")

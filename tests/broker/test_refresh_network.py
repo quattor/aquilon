@@ -40,7 +40,7 @@ if __name__ == "__main__":
     import utils
     utils.import_depends()
 
-from ipaddr import IPv4Address
+from ipaddr import IPv4Address, IPv4Network
 
 from brokertest import TestBrokerCommand
 
@@ -96,6 +96,32 @@ class TestRefreshNetwork(TestBrokerCommand):
         err = self.striplock(err)
         self.assertEmptyErr(err, command)
 
+    def test_130_updates(self):
+        self.noouttest(["del", "network", "--ip", "172.31.29.0"])
+        self.noouttest(["add", "network", "--network", "wrong-params",
+                        "--ip", "172.31.29.0", "--netmask", "255.255.255.128",
+                        "--side", "a", "--type", "transit", "--building", "ut"])
+        self.noouttest(["add", "router", "--ip", "172.31.29.3",
+                        "--fqdn", "extrartr.aqd-unittest.ms.com"])
+
+    def test_135_syncagain(self):
+        command = "refresh network --building np"
+        (out, err) = self.successtest(command.split(" "))
+        self.matchoutput(err, "Setting network wrong-params [172.31.29.0/25] "
+                         "name to nplab-vlan1", command)
+
+        msg = "Setting network nplab-vlan1 [172.31.29.0/25] "
+        self.matchoutput(err, msg + "type to unknown", command)
+        self.matchoutput(err, msg + "side to b", command)
+        self.matchoutput(err, msg + "location to building np", command)
+
+        self.matchoutput(err, "Removing router 172.31.29.3 from network "
+                         "nplab-vlan1", command)
+
+    def test_138_router_gone(self):
+        command = "search system --fqdn extrartr.aqd-unittest.ms.com"
+        self.noouttest(command.split())
+
     # 150 test adds with the sync of another building
     def test_150_addhq(self):
         command = "refresh network --building hq"
@@ -104,6 +130,8 @@ class TestRefreshNetwork(TestBrokerCommand):
         err = self.striplock(err)
         self.matchoutput(err, "Adding", command)
         self.matchclean(err, "Setting", command)
+        # Make sure the refresh logic does not try to remove networks in other
+        # buildings
         self.matchclean(err, "Deleting", command)
 
     # 200 add a dummy 0.1.1.0/24 network to np
@@ -111,6 +139,67 @@ class TestRefreshNetwork(TestBrokerCommand):
         command = ["add_network", "--network=0.1.1.0", "--ip=0.1.1.0",
                    "--prefixlen=24", "--building=np"]
         self.noouttest(command)
+        command = ["add", "router", "--ip", "0.1.1.1",
+                   "--fqdn", "dummydyn.aqd-unittest.ms.com"]
+        self.noouttest(command)
+
+    def test_250_addtestnets(self):
+        networks = [
+            # Merge various sized subnets, one is missing
+            "0.1.2.0/25", "0.1.2.192/26",
+            # Merge various sized subnets, first is missing
+            "0.1.3.64/26", "0.1.3.128/25",
+            # Split in QIP
+            "0.1.4.0/24",
+            # Another split in QIP
+            "0.1.5.0/24"
+        ]
+        for net in networks:
+            ipnet = IPv4Network(net)
+            self.noouttest(["add", "network", "--network", ipnet.ip,
+                            "--ip", ipnet.ip, "--prefixlen", ipnet.prefixlen,
+                            "--building", "nettest"])
+
+    def test_260_test_split_merge(self):
+        command = ["refresh", "network", "--building", "nettest"]
+        (out, err) = self.successtest(command)
+        # 0.1.2.x
+        self.matchoutput(err, "Setting network 0.1.2.0 [0.1.2.0/25] "
+                         "name to merge_1", command)
+        self.matchoutput(err, "Adding router 0.1.2.1 to network merge_1",
+                         command)
+        self.matchoutput(err, "Setting network merge_1 [0.1.2.0/25] "
+                         "prefix length to 24", command)
+        self.matchoutput(err, "Deleting network 0.1.2.192 [0.1.2.192/26]",
+                         command)
+        # 0.1.3.x
+        self.matchclean(err, "Setting network 0.1.3.0", command)
+        self.matchoutput(err, "Adding network merge_2 [0.1.3.0/24]", command)
+        self.matchoutput(err, "Adding router 0.1.3.1 to network merge_2",
+                         command)
+        self.matchoutput(err, "Deleting network 0.1.3.64 [0.1.3.64/26]",
+                         command)
+        self.matchoutput(err, "Deleting network 0.1.3.128 [0.1.3.128/25]",
+                         command)
+        # 0.1.4.x
+        self.matchoutput(err, "Setting network 0.1.4.0 [0.1.4.0/24] "
+                         "name to split_1", command)
+        self.matchoutput(err, "Adding router 0.1.4.1 to network split_1",
+                         command)
+        self.matchoutput(err, "Setting network split_1 [0.1.4.0/24] "
+                         "prefix length to 25", command)
+        self.matchoutput(err, "Adding network split_2 [0.1.4.192/26]", command)
+        self.matchoutput(err, "Adding router 0.1.4.193 to network split_2",
+                         command)
+        # 0.1.5.x
+        self.matchclean(err, "Setting network 0.1.5.0", command)
+        self.matchoutput(err, "Adding network split_3 [0.1.5.128/26]", command)
+        self.matchoutput(err, "Adding router 0.1.5.129 to network split_3",
+                         command)
+        self.matchoutput(err, "Adding network split_4 [0.1.5.192/26]", command)
+        self.matchoutput(err, "Adding router 0.1.5.193 to network split_4",
+                         command)
+        self.matchoutput(err, "Deleting network 0.1.5.0", command)
 
     # 300 add a small dynamic range to 0.1.1.0
     def test_300_adddynamicrange(self):
@@ -131,13 +220,14 @@ class TestRefreshNetwork(TestBrokerCommand):
         """Common code for the two tests below."""
         err = self.partialerrortest(command.split(" "))
         err = self.striplock(err)
-        self.matchoutput(err,
-                         "Deleting network 0.1.1.0",
-                         command)
+        self.matchclean(err,
+                        "Deleting network 0.1.1.0",
+                        command)
         for i in range(4, 9):
             self.matchoutput(err,
-                             "No network found for IP address 0.1.1.%d "
-                             "[dynamic-0-1-1-%d.aqd-unittest.ms.com]." %
+                             "Network 0.1.1.0 cannot be deleted because DNS "
+                             "record dynamic-0-1-1-%d.aqd-unittest.ms.com "
+                             "[0.1.1.%d] still exists." %
                              (i, i),
                              command)
         return err
@@ -166,17 +256,11 @@ class TestRefreshNetwork(TestBrokerCommand):
         err = self.failsync(command)
         self.matchclean(err, "No changes applied because of errors.", command)
 
-    # 550 verify network is gone
+    # 550 verify network still exists
     def test_550_verifynetwork(self):
         command = "show network --ip 0.1.1.0"
-        out = self.notfoundtest(command.split(" "))
-
-    # 600 re-add the dummy 0.1.1.0/26 network to np
-    # Needed for the del dynamic range command to succeed.
-    def test_600_adddummynetwork(self):
-        command = ["add_network", "--network=0.1.1.0", "--ip=0.1.1.0",
-                   "--mask=256", "--building=np"]
-        self.noouttest(command)
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "IP: 0.1.1.0", command)
 
     # 650 delete the dynamic range
     def test_650_deldynamicrange(self):
@@ -187,6 +271,12 @@ class TestRefreshNetwork(TestBrokerCommand):
         self.successtest(command)
         self.dsdb_verify()
 
+    def test_680_cleanup_nettest(self):
+        networks = ["0.1.2.0", "0.1.3.0", "0.1.4.0", "0.1.4.192", "0.1.5.128",
+                    "0.1.5.192"]
+        for net in networks:
+            self.noouttest(["del", "network", "--ip", net])
+
     # 700 sync up building np
     # One last time to clean up the dummy network
     def test_700_syncclean(self):
@@ -194,9 +284,12 @@ class TestRefreshNetwork(TestBrokerCommand):
         (out, err) = self.successtest(command.split(" "))
         self.assertEmptyOut(out, command)
         err = self.striplock(err)
-        self.matchoutput(err,
-                         "Deleting network 0.1.1.0",
-                         command)
+        self.matchoutput(err, "Deleting network 0.1.1.0", command)
+        self.matchoutput(err, "Removing router 0.1.1.1", command)
+
+    def test_710_cleanrouter(self):
+        command = ["search", "system", "--fqdn", "dummydyn.aqd-unittest.ms.com"]
+        self.noouttest(command)
 
 
 if __name__=='__main__':

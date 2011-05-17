@@ -173,3 +173,15 @@ def force_mac(label, value):
         return value
     raise ArgumentError("Expected a MAC address like 00:1a:2b:3c:0d:55, "
                         "001a2b3c0d55 or 0:1a:2b:3c:d:55 for %s." % label)
+
+def first_of(iterable, function):
+    """
+    Return the first matching element of an iterable
+
+    This function is useful if you already know there is at most one matching
+    element.
+    """
+    for item in iterable:
+        if function(item):
+            return item
+    return None

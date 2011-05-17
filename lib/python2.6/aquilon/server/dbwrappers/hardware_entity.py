@@ -31,7 +31,8 @@
 
 from aquilon.exceptions_ import AquilonError, ArgumentError, NotFoundException
 from aquilon.aqdb.model import (HardwareEntity, Model, DnsRecord, ARecord,
-                                ReservedName, AddressAssignment, Fqdn)
+                                ReservedName, AddressAssignment, Fqdn,
+                                NetworkEnvironment, Network)
 from aquilon.aqdb.model.dns_domain import parse_fqdn
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.server.dbwrappers.location import get_location
@@ -84,12 +85,17 @@ def parse_primary_name(session, fqdn, ip):
 
     dbfqdn = Fqdn.get_or_create(session, fqdn=fqdn)
     dbdns_rec = DnsRecord.get_unique(session, fqdn=dbfqdn)
+    dbnet_env = NetworkEnvironment.get_unique_or_default(session)
 
     if dbdns_rec and dbdns_rec.hardware_entity:
         raise ArgumentError("{0} already exists as the primary name of {1:cl} "
                             "{1.label}.".format(fqdn, dbdns_rec.hardware_entity))
     if ip:
-        addr = session.query(AddressAssignment).filter_by(ip=ip).first()
+        q = session.query(AddressAssignment)
+        q = q.filter_by(ip=ip)
+        q = q.join(Network)
+        q = q.filter_by(network_environment=dbnet_env)
+        addr = q.first()
         if addr:
             raise ArgumentError("IP address {0} is already in use by "
                                 "{1:l}.".format(ip, addr.interface))
@@ -116,13 +122,16 @@ def parse_primary_name(session, fqdn, ip):
 
     if not dbdns_rec:
         if ip:
-            dbnetwork = get_net_id_from_ip(session, ip)
+            dbnetwork = get_net_id_from_ip(session, ip, dbnet_env)
             check_ip_restrictions(dbnetwork, ip)
             dbdns_rec = ARecord(fqdn=dbfqdn, ip=ip, network=dbnetwork)
         else:
             dbdns_rec = ReservedName(fqdn=dbfqdn)
         session.add(dbdns_rec)
         session.flush()
+    elif hasattr(dbdns_rec, 'ip'):
+        dbnetwork = get_net_id_from_ip(session, dbdns_rec.ip, dbnet_env)
+        check_ip_restrictions(dbnetwork, dbdns_rec.ip)
 
     return dbdns_rec
 

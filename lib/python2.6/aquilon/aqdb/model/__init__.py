@@ -53,10 +53,11 @@ from aquilon.aqdb.model.rack import Rack
 from aquilon.aqdb.model.desk import Desk
 
 #NETWORK
+from aquilon.aqdb.model.dns_environment import DnsEnvironment
+from aquilon.aqdb.model.network_environment import NetworkEnvironment
 from aquilon.aqdb.model.network import Network
 from aquilon.aqdb.model.dns_domain import DnsDomain
 from aquilon.aqdb.model.dns_map import DnsMap
-from aquilon.aqdb.model.dns_environment import DnsEnvironment
 from aquilon.aqdb.model.fqdn import Fqdn
 from aquilon.aqdb.model.dns_record import DnsRecord
 from aquilon.aqdb.model.a_record import ARecord, DynamicStub

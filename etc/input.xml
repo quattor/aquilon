@@ -276,6 +276,7 @@
          <option name="buildstatus" type="string">buildstatus (blind, build, ready)</option>
          <option name="ip" type="ipv4">IP address</option>
          <option name="networkip" type="ipv4">Network IP address</option>
+         <option name="network_environment" type="string">Network environment (default: internal)</option>
          <option name="mac" type="mac">primary MAC address</option>
          <option name="personality" type="string">personality</option>
          <option name="osname" type="string">osname</option>
@@ -521,6 +522,9 @@
          </optgroup>
          <option name="exact_location" type="flag">match the location exactly</option>
       </optgroup>
+      <optgroup name="show_network_prefs" mandatory="False" fields="any">
+         <option name="network_environment" type="string">Network environment (default: internal)</option>
+      </optgroup>
       <transport method="get" path="network" />
    </command>
 
@@ -561,6 +565,7 @@
          </optgroup>
       </optgroup>
       <optgroup name="search_network_prefs" mandatory="False">
+         <option name="network_environment" type="string">Network environment (default: internal)</option>
          <option name="fullinfo" type="flag">show full information for the matching networks</option>
       </optgroup>
       <transport method="get" path="find/network" />
@@ -1128,6 +1133,62 @@
       <transport trigger="switch" method="put" path="switch/%(switch)s/interface/%(interface)s" />
    </command>
 
+   <command name="add_network_environment">
+      Define a new network environment.
+      <optgroup name="add_netenv_mandatory" mandatory="True" fields="all">
+	 <option name="network_environment" type="string">Name of the environment</option>
+	 <option name="dns_environment" type="string">DNS environment to use for looking up addresses in this network environment</option>
+      </optgroup>
+      <optgroup name="add_netenv_optional" mandatory="False" fields="any">
+	 <!-- TODO: Do we need any other kind of location? -->
+	 <option name="building" type="string">Building</option>
+	 <option name="comments" type="string">Comments</option>
+      </optgroup>
+      <transport method="put" path="network_environment/%(network_environment)s"/>
+   </command>
+
+   <command name="del_network_environment">
+      Delete a new network environment.
+      <optgroup name="del_netenv_mandatory" mandatory="True" fields="all">
+	 <option name="network_environment" type="string">Name of the environment</option>
+      </optgroup>
+      <transport method="delete" path="network_environment/%(network_environment)s"/>
+   </command>
+
+   <command name="update_network_environment">
+      Update a new network environment.
+      <optgroup name="add_netenv_mandatory" mandatory="True" fields="all">
+	 <option name="network_environment" type="string">Name of the environment</option>
+      </optgroup>
+      <optgroup name="add_netenv_optional" mandatory="False" fields="any">
+	 <!-- TODO: Do we need any other kind of location? -->
+	 <option name="building" type="string">Building</option>
+	 <option name="clear_location" type="flag" conflicts="building">Clear the location mapping</option>
+	 <option name="comments" type="string">Comments</option>
+      </optgroup>
+      <transport method="post" path="network_environment/%(network_environment)s"/>
+   </command>
+
+   <command name="show_network_environment">
+      Display a new network environment.
+      <optgroup name="show_netenv_options" mandatory="True" fields="any">
+	 <option name="network_environment" type="string">Name of the environment</option>
+	 <option name="all" type="flag">Show all environments</option>
+      </optgroup>
+      <transport trigger="network_environment" method="get" path="network_environment/%(network_environment)s"/>
+      <transport trigger="all" method="get" path="network_environment"/>
+   </command>
+
+   <command name="search_network_environment">
+      Display a new network environment.
+      <optgroup name="search_netenv_options" mandatory="True" fields="any">
+	 <option name="network_environment" type="string">Name of the environment</option>
+	 <!-- TODO: Do we need any other kind of location? -->
+	 <option name="building" type="string">Building</option>
+      </optgroup>
+      <transport method="get" path="find/network_environment"/>
+   </command>
+
    <command name="add_network">
       Define a new network.
       <p/>
@@ -1158,6 +1219,7 @@
       </optgroup>
 
       <optgroup name="add_network_modifiers" mandatory="False" fields="any">
+         <option name="network_environment" type="string">Network environment (default: internal)</option>
          <option name="discoverable" type="boolean">Set network(s) updateable</option>
          <option name="discovered" type="boolean">Set network(s) updated</option>
          <option name="type" type="string">Network type, defaults to 'unknown'</option>
@@ -1174,6 +1236,9 @@
       <optgroup name="del_network_mandatory" mandatory="True" fields="all">
          <option name="ip" type="ipv4">Network IP address</option>
       </optgroup>
+      <optgroup name="del_network_modifiers" mandatory="False" fields="any">
+         <option name="network_environment" type="string">Network environment (default: internal)</option>
+      </optgroup>
       <transport method="delete" path="network/%(ip)s" />
    </command>
 
@@ -1184,7 +1249,7 @@
      and/or network type.
      <optgroup name="update_network_opts" mandatory="True" fields="any">
 	<option name="network" type="string" conflicts="ip update_network_location_opts">Network name</option>
-	<option name="ip" type="ipv4" conflicts="network update_network_location_opts">Network name</option>
+	<option name="ip" type="ipv4" conflicts="network update_network_location_opts">Network address</option>
 	<option name="type" type="string" conflicts="ip network">Network type</option>
 	<optgroup name="update_network_location_opts" fields="any">
             <option name="organization" type="string">Organization</option>
@@ -1202,8 +1267,46 @@
      <optgroup name="update_network_modifiers" mandatory="True" fields="any">
 	<option name="discoverable" type="boolean" conflicts="">Set network(s) updateable</option>
 	<option name="discovered" type="boolean" conflicts="">Set network(s) updated</option>
-    </optgroup>
+     </optgroup>
+     <optgroup name="update_network_optional" mandatory="False" fields="any">
+	<option name="network_environment" type="string">Network environment (default: internal)</option>
+     </optgroup>
      <transport method="post" path="network" />
+   </command>
+
+   <command name="split_network">
+      Split a network to smaller subnets.  Any devices on the old network will
+      be reassigned to the new subnets.
+      <optgroup name="split_network_mandatory" mandatory="True" fields="all">
+         <option name="ip" type="ipv4">Network address</option>
+	 <optgroup name="merge_network_netmask" mandatory="True" fields="any">
+            <option name="netmask" type="ipv4" conflicts="prefixlen">New netmask</option>
+            <option name="prefixlen" type="int" conflicts="netmask">New network prefix length</option>
+	 </optgroup>
+      </optgroup>
+      <optgroup name="split_network_optional" mandatory="False" fields="any">
+         <option name="network_environment" type="string">Network environment (default: internal)</option>
+      </optgroup>
+      <transport method="post" path="network/split" />
+   </command>
+
+   <command name="merge_network">
+      Merge multiple networks.  The merged network will inherit its parameters (like location)
+      from the network specifyed by --ip.  Note that --ip does not need to specify the
+      first network to be merged: e.g. if you want to merge 4 existing networks, then --ip may
+      point to the 2nd one; the IP address of the merged network will be calculated using 
+      --prefixlen.
+      <optgroup name="merge_network_mandatory" mandatory="True" fields="all">
+         <option name="ip" type="ipv4">Network address</option>
+	 <optgroup name="merge_network_netmask" mandatory="True" fields="any">
+            <option name="netmask" type="ipv4" conflicts="prefixlen">New netmask</option>
+            <option name="prefixlen" type="int" conflicts="netmask">New network prefix length</option>
+	 </optgroup>
+      </optgroup>
+      <optgroup name="merge_network_optional" mandatory="False" fields="any">
+         <option name="network_environment" type="string">Network environment (default: internal)</option>
+      </optgroup>
+      <transport method="post" path="network/merge" />
    </command>
 
    <command name="add_router">
@@ -1212,6 +1315,7 @@
          <option name="fqdn" type="string">Name of the router</option>
       </optgroup>
       <optgroup name="add_router_optional" mandatory="False" fields="any">
+         <option name="network_environment" type="string">Network environment (default: internal)</option>
          <option name="building" type="string">Building where the router is located</option>
          <option name="ip" type="ipv4">IP address of the router</option>
          <option name="comments" type="string">Comments</option>
@@ -1225,6 +1329,9 @@
          <option name="fqdn" type="string" conflicts="ip">Name of the router</option>
          <option name="ip" type="ipv4" conflicts="fqdn">IP address of the router</option>
       </optgroup>
+      <optgroup name="del_router_optional" mandatory="False" fields="any">
+         <option name="network_environment" type="string">Network environment (default: internal)</option>
+      </optgroup>
       <transport method="delete" path="router" />
    </command>
 
@@ -1234,6 +1341,9 @@
          <option name="fqdn" type="string" conflicts="ip all">Name of the router</option>
          <option name="ip" type="ipv4" conflicts="fqdn all">IP address of the router</option>
          <option name="all" type="flag" conflicts="ip fqdn">Show all routers</option>
+      </optgroup>
+      <optgroup name="del_router_optional" mandatory="False" fields="any">
+         <option name="network_environment" type="string">Network environment (default: internal)</option>
       </optgroup>
       <transport method="get" path="router" />
    </command>
@@ -1323,10 +1433,10 @@
          <option name="fqdn" type="string">FQDN of the new address</option>
       </optgroup>
       <optgroup name="add_interface_address_opt" mandatory="False" fields="any">
+	 <option name="network_environment" type="string">Network environment (default: internal)</option>
 	 <option name="label" type="string">Interface alias of the new address</option>
 	 <option name="usage" type="string">Use of the new address (default: system)</option>
          <option name="ipalgorithm" type="string">Algorithm for automatically choosing an IP.</option>
-         <option name="dns_environment" type="string">The name of the environment the address is in (defaults to 'internal')</option>
       </optgroup>
       <optgroup name="add_interface_address_ip_opts" mandatory="False" fields="any">
          <option name="ip" type="ipv4" conflicts="ipfromip ipfromsystem autoip">IP address</option>
@@ -1349,7 +1459,7 @@
       </optgroup>
       <optgroup name="del_interface_address_opt" mandatory="False" fields="any">
          <option name="keep_dns" type="flag">Keep the DNS record</option>
-         <option name="dns_environment" type="string">The name of the environment the address is in (defaults to 'internal')</option>
+         <option name="network_environment" type="string">Network environment (default: internal)</option>
       </optgroup>
       <optgroup name="del_interface_address_ip_opts" mandatory="True" fields="any">
          <option name="fqdn" type="string" conflicts="ip">FQDN of the address</option>

@@ -38,7 +38,7 @@ from aquilon.server.formats.host import HostIPList
 from aquilon.aqdb.model import (AddressAssignment, Interface, HardwareEntity,
                                 Personality, Machine, Host, Archetype,
                                 PrimaryNameAssociation, ARecord, DnsRecord,
-                                DnsDomain, Fqdn)
+                                Fqdn, DnsDomain, NetworkEnvironment, Network)
 
 
 class CommandShowHostIPList(BrokerCommand):
@@ -46,6 +46,7 @@ class CommandShowHostIPList(BrokerCommand):
     default_style = "csv"
 
     def render(self, session, archetype, **arguments):
+        dbnet_env = NetworkEnvironment.get_unique_or_default(session)
         archq = session.query(Machine.id)
         archq = archq.join(Host, Personality)
         if archetype:
@@ -59,6 +60,10 @@ class CommandShowHostIPList(BrokerCommand):
 
         q = session.query(AddressAssignment)
         q = q.options(joinedload('dns_records'))
+        q = q.join(Network)
+        q = q.filter_by(network_environment=dbnet_env)
+        q = q.options(contains_eager('network'))
+        q = q.reset_joinpoint()
 
         q = q.join(Interface, HardwareEntity)
         q = q.options(contains_eager('interface'))
@@ -96,6 +101,11 @@ class CommandShowHostIPList(BrokerCommand):
             q = q.join(Fqdn, DnsDomain)
             q = q.options(contains_eager("fqdn"))
             q = q.options(contains_eager("fqdn.dns_domain"))
+            q = q.reset_joinpoint()
+
+            q = q.join(Network)
+            q = q.filter_by(network_environment=dbnet_env)
+            q = q.options(contains_eager("network"))
             q = q.reset_joinpoint()
 
             q = q.outerjoin((AddressAssignment,

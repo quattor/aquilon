@@ -31,10 +31,12 @@
 
 from aquilon.exceptions_ import ArgumentError, AquilonError
 from aquilon.aqdb.model import Chassis, Model
+from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.location import get_location
 from aquilon.server.dbwrappers.hardware_entity import parse_primary_name
 from aquilon.server.dbwrappers.interface import (get_or_create_interface,
+                                                 check_ip_restrictions,
                                                  assign_address)
 from aquilon.server.processes import DSDBRunner
 
@@ -73,7 +75,9 @@ class CommandAddChassis(BrokerCommand):
                                               interface_type="oa",
                                               comments=ifcomments)
         if ip:
-            assign_address(dbinterface, ip)
+            dbnetwork = get_net_id_from_ip(session, ip)
+            check_ip_restrictions(dbnetwork, ip)
+            assign_address(dbinterface, ip, dbnetwork)
 
         session.flush()
 

@@ -30,7 +30,7 @@
 
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.commands.add_dynamic_range import CommandAddDynamicRange
-from aquilon.aqdb.model import Network
+from aquilon.aqdb.model import Network, NetworkEnvironment
 
 
 class CommandAddDynamicRangeFillnetwork(CommandAddDynamicRange):
@@ -38,7 +38,10 @@ class CommandAddDynamicRangeFillnetwork(CommandAddDynamicRange):
     required_parameters = ["fillnetwork", "dns_domain"]
 
     def render(self, session, logger, fillnetwork, **arguments):
-        dbnetwork = Network.get_unique(session, fillnetwork, compel=True)
+        dbnet_env = NetworkEnvironment.get_unique_or_default(session)
+        dbnetwork = Network.get_unique(session, fillnetwork,
+                                       network_environment=dbnet_env,
+                                       compel=True)
         arguments['startip'] = dbnetwork.first_usable_host
         arguments['endip'] = dbnetwork.broadcast - 1
         return CommandAddDynamicRange.render(self, session, logger,

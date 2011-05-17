@@ -29,19 +29,30 @@
 """Contains the logic for `aq show router`."""
 
 from sqlalchemy.orm.exc import NoResultFound
-from sqlalchemy.orm import undefer, joinedload, subqueryload_all
+from sqlalchemy.orm import (undefer, joinedload, subqueryload_all,
+                            contains_eager)
 
 from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.server.broker import BrokerCommand
-from aquilon.aqdb.model import RouterAddress, ARecord
+from aquilon.aqdb.model import (RouterAddress, ARecord, Network,
+                                NetworkEnvironment)
 
 
 class CommandShowRouter(BrokerCommand):
 
     required_parameters = []
 
-    def render(self, session, ip, fqdn, all, **arguments):
+    def render(self, session, ip, fqdn, all, network_environment, **arguments):
+        dbnet_env = NetworkEnvironment.get_unique_or_default(session,
+                                                             network_environment)
+
         q = session.query(RouterAddress)
+
+        q = q.join(Network)
+        q = q.filter_by(network_environment=dbnet_env)
+        q = q.options(contains_eager('network'))
+        q = q.reset_joinpoint()
+
         q = q.options(undefer(RouterAddress.comments))
         q = q.options(joinedload('location'))
         q = q.options(joinedload('dns_records'))
@@ -59,7 +70,7 @@ class CommandShowRouter(BrokerCommand):
         else:
             raise ArgumentError("Please specify either --ip or --fqdn.")
 
-        q = q.filter_by(ip=ip)
+        q = q.filter(RouterAddress.ip == ip)
 
         try:
             return q.one()

@@ -84,6 +84,14 @@ class TestAddBuilding(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "building,bu,city,ny", command)
 
+    def testaddnettest(self):
+        self.dsdb_expect("add_building_aq -building_name nettest -city ny "
+                         "-building_addr Nowhere")
+        command = ["add", "building", "--building", "nettest", "--city", "ny",
+                   "--address", "Nowhere"]
+        self.noouttest(command)
+        self.dsdb_verify()
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddBuilding)

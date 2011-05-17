@@ -53,6 +53,17 @@ class TestAddInterfaceAddress(TestBrokerCommand):
         self.noouttest(command)
         self.dsdb_verify()
 
+    def testaddunittest20e0again(self):
+        # No label, different IP
+        ip = self.net.unknown[11].usable[-1]
+        fqdn = "unittest20-e0.aqd-unittest.ms.com"
+        command = ["add", "interface", "address", "--machine", "ut3c5n2",
+                   "--interface", "eth0", "--fqdn", fqdn, "--ip", ip]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Public Interface eth0 of machine "
+                         "unittest20.aqd-unittest.ms.com already "
+                         "has an IP address.", command)
+
     def testaddunittest20e1(self):
         ip = self.net.unknown[12].usable[0]
         fqdn = "unittest20-e1.aqd-unittest.ms.com"
@@ -60,8 +71,7 @@ class TestAddInterfaceAddress(TestBrokerCommand):
         self.dsdb_expect_add(fqdn, ip, "eth1", ip.mac,
                              primary="unittest20.aqd-unittest.ms.com")
         command = ["add", "interface", "address", "--machine", "ut3c5n2",
-                   "--interface", "eth1", "--fqdn", fqdn,
-                   "--dns_environment", "internal"]
+                   "--interface", "eth1", "--fqdn", fqdn]
         self.noouttest(command)
         self.dsdb_verify()
 
@@ -150,6 +160,15 @@ class TestAddInterfaceAddress(TestBrokerCommand):
                          (ip, self.net.tor_net2[0].ip),
                          command)
 
+    def testrejectbadusage(self):
+        ip = self.net.tor_net2[0].usable[-1]
+        command = ["add", "interface", "address", "--machine", "ut3c5n2",
+                   "--interface", "eth1", "--label", "3",
+                   "--fqdn", "badusage.aqd-unittest.ms.com", "--ip", ip,
+                   "--usage", "badusage"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Illegal address usage 'badusage'.", command)
+
     def testsystemzebramix(self):
         ip = self.net.unknown[0].usable[3]
         command = ["add", "interface", "address", "--machine", "ut3c5n2",
@@ -233,6 +252,48 @@ class TestAddInterfaceAddress(TestBrokerCommand):
                          command)
         self.matchclean(out, "Auxiliary: zebra2.aqd-unittest.ms.com", command)
         self.matchclean(out, "Auxiliary: zebra3.aqd-unittest.ms.com", command)
+
+    def testmixenvironments(self):
+        net = self.net.unknown[1]
+        ip = net[3]
+        command = ["add", "interface", "address", "--machine", "ut3c5n7",
+                   "--interface", "eth0", "--ip", ip, "--label", "e0",
+                   "--fqdn", "unittest25-e0.utcolo.aqd-unittest.ms.com",
+                   "--network_environment", "utcolo"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "Public Interface eth0 of machine "
+                         "unittest25.aqd-unittest.ms.com already has an IP "
+                         "address from network environment internal.  Network "
+                         "environments cannot be mixed.",
+                         command)
+
+    def testaddunittest25utcolo(self):
+        net = self.net.unknown[1]
+        ip = net[4]
+        command = ["add", "interface", "address", "--machine", "ut3c5n7",
+                   "--interface", "eth1", "--ip", ip,
+                   "--fqdn", "unittest25-e1.utcolo.aqd-unittest.ms.com",
+                   "--network_environment", "utcolo"]
+        self.noouttest(command)
+        # External IP addresses should not be added to DSDB
+        self.dsdb_verify(empty=True)
+
+    def testaddunittest25excx(self):
+        net_internal = self.net.unknown[0]
+        net_excx = self.net.unknown[0].subnet()[0]
+        ip = net_excx[3]
+        command = ["add", "interface", "address", "--machine", "ut3c5n7",
+                   "--interface", "eth2", "--ip", ip,
+                   "--fqdn", "unittest25-e2.utcolo.aqd-unittest.ms.com",
+                   "--network_environment", "excx"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "Network %s in network environment internal used on "
+                         "public interface eth0 of machine "
+                         "unittest25.aqd-unittest.ms.com overlaps requested "
+                         "network excx-net in network environment excx." % net_internal.ip,
+                         command)
 
 
 if __name__=='__main__':

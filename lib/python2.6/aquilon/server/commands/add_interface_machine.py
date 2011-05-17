@@ -152,7 +152,7 @@ class CommandAddInterfaceMachine(BrokerCommand):
         # So far, we're *only* creating a manager if we happen to be
         # removing a blind entry and we can steal its IP address.
         if dbmanager:
-            assign_address(dbinterface, dbmanager.ip)
+            assign_address(dbinterface, dbmanager.ip, dbmanager.network)
 
         session.add(dbinterface)
         session.flush()

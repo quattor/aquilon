@@ -41,10 +41,11 @@ from sqlalchemy.orm import object_session
 from sqlalchemy.sql import select
 
 from aquilon.exceptions_ import ArgumentError, InternalError, NotFoundException
-from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.aqdb.model import (Interface, HardwareEntity, ObservedMac,
                                 ARecord, VlanInfo, ObservedVlan, Network,
                                 AddressAssignment, DnsEnvironment)
+from aquilon.aqdb.model.address_assignment import ADDR_USAGES
+from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.utils import force_mac
 
 
@@ -196,8 +197,8 @@ def generate_ip(session, dbinterface, ip=None, ipfromip=None,
     startip = dbnetwork.first_usable_host
 
     used_ips = session.query(ARecord.ip)
+    used_ips = used_ips.filter_by(network=dbnetwork)
     used_ips = used_ips.filter(ARecord.ip >= startip)
-    used_ips = used_ips.filter(ARecord.ip < dbnetwork.broadcast)
 
     full_set = set(range(int(startip), int(dbnetwork.broadcast)))
     used_set = set([int(item.ip) for item in used_ips])
@@ -475,25 +476,33 @@ def get_or_create_interface(session, dbhw_ent, name=None, mac=None,
     session.flush()
     return dbinterface
 
-def assign_address(dbinterface, ip, label=None, usage=None,
-                   dns_environment=None):
+def assign_address(dbinterface, ip, dbnetwork, label=None, usage=None):
     assert isinstance(dbinterface, Interface)
+
+    dns_environment = dbnetwork.network_environment.dns_environment
+
+    if dbinterface.master:
+        raise ArgumentError("Slave interfaces cannot hold addresses.")
+
+    if usage and usage not in ADDR_USAGES:
+            raise ArgumentError("Illegal address usage '%s'." % usage)
+
     for addr in dbinterface.assignments:
         if not label and not addr.label:
             raise ArgumentError("{0} already has an IP "
                                 "address.".format(dbinterface))
         if label and addr.label == label:
-            raise ArgumentError("{0} already has an alias labeled "
+            raise ArgumentError("{0} already has an alias named "
                                 "{1}.".format(dbinterface, label))
+        if addr.network.network_environment != dbnetwork.network_environment:
+            raise ArgumentError("{0} already has an IP address from "
+                                "{1:l}.  Network environments cannot be "
+                                "mixed.".format(dbinterface,
+                                                addr.network.network_environment))
         if addr.ip == ip:
             raise ArgumentError("{0} already has IP address {1} "
                                 "configured.".format(dbinterface, ip))
 
-    if not isinstance(dns_environment, DnsEnvironment):
-        session = object_session(dbinterface)
-        dns_environment = DnsEnvironment.get_unique_or_default(session,
-                                                               dns_environment)
-
-    dbinterface.assignments.append(AddressAssignment(ip=ip, label=label,
-                                                     usage=usage,
+    dbinterface.assignments.append(AddressAssignment(ip=ip, network=dbnetwork,
+                                                     label=label, usage=usage,
                                                      dns_environment=dns_environment))

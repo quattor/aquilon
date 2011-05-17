@@ -28,10 +28,8 @@
 # TERMS THAT MAY APPLY.
 
 
-from sqlalchemy.sql.expression import asc
-
 from aquilon.server.broker import BrokerCommand
-from aquilon.aqdb.model import ARecord
+from aquilon.aqdb.model import ARecord, NetworkEnvironment
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.exceptions_ import ArgumentError, ProcessException
 from aquilon.server.locks import lock_queue, DeleteKey
@@ -54,16 +52,18 @@ class CommandDelDynamicRange(BrokerCommand):
         return
 
     def del_dynamic_range(self, session, logger, startip, endip):
-        startnet = get_net_id_from_ip(session, startip)
-        endnet = get_net_id_from_ip(session, endip)
+        dbnet_env = NetworkEnvironment.get_unique_or_default(session)
+        startnet = get_net_id_from_ip(session, startip, dbnet_env)
+        endnet = get_net_id_from_ip(session, endip, dbnet_env)
         if startnet != endnet:
             raise ArgumentError("IP addresses %s (%s) and %s (%s) must be "
                                 "on the same subnet." %
                                 (startip, startnet.ip, endip, endnet.ip))
         q = session.query(ARecord)
+        q = q.filter_by(network=startnet)
         q = q.filter(ARecord.ip >= startip)
         q = q.filter(ARecord.ip <= endip)
-        q = q.order_by(asc(ARecord.ip))
+        q = q.order_by(ARecord.ip)
         existing = q.all()
         if not existing:
             raise ArgumentError("Nothing found in range.")

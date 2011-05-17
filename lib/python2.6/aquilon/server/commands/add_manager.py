@@ -75,6 +75,7 @@ class CommandAddManager(BrokerCommand):
         # Do not allow assigning an address which is already in use to a
         # management interface
         q = session.query(AddressAssignment)
+        q = q.filter_by(network=dbnetwork)
         q = q.filter_by(ip=ip)
         addr = q.first()
         if (addr):
@@ -84,7 +85,7 @@ class CommandAddManager(BrokerCommand):
         dbdns_rec = ARecord(fqdn=dbfqdn, ip=ip, network=dbnetwork,
                             comments=comments)
         session.add(dbdns_rec)
-        assign_address(dbinterface, ip)
+        assign_address(dbinterface, ip, dbnetwork)
 
         session.flush()
 

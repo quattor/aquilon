@@ -34,15 +34,16 @@ from ipaddr import IPv4Network, AddressValueError, NetmaskValueError
 from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.location import get_location
-from aquilon.server.dbwrappers.network import get_network_byname
-from aquilon.aqdb.model.network import Network, get_net_id_from_ip
+from aquilon.aqdb.model import Network, NetworkEnvironment
+from aquilon.aqdb.model.network import get_net_id_from_ip
+
 
 class CommandAddNetwork(BrokerCommand):
 
     required_parameters = ["network", "ip"]
 
-    def render(self, session, network, ip, discovered, discoverable, type, side,
-               comments, logger, **arguments):
+    def render(self, session, network, ip, network_environment, discovered,
+               discoverable, type, side, comments, logger, **arguments):
 
         # Handle the different ways of specifying the netmask
         mask_options = ["netmask", "prefixlen", "mask"]
@@ -73,6 +74,9 @@ class CommandAddNetwork(BrokerCommand):
         if not side:
             side = 'a'
 
+        dbnet_env = NetworkEnvironment.get_unique_or_default(session,
+                                                             network_environment)
+
         # Check if the name is free. Network names are not unique in QIP and
         # there is no uniqueness constraint in AQDB, so only warn if the name is
         # already in use.
@@ -84,7 +88,8 @@ class CommandAddNetwork(BrokerCommand):
 
         # Check if the address is free
         try:
-            dbnetwork = get_net_id_from_ip(session, address.ip)
+            dbnetwork = get_net_id_from_ip(session, address.ip,
+                                           network_environment=dbnet_env)
             raise ArgumentError("IP address %s is part of existing network "
                                 "named %s with address %s." %
                                 (str(address.ip), dbnetwork.name,
@@ -93,7 +98,8 @@ class CommandAddNetwork(BrokerCommand):
             pass
 
         # Okay, all looks good, let's create the network
-        net = Network(name=network, network=address, network_type=type,
+        net = Network(name=network, network=address,
+                      network_environment=dbnet_env, network_type=type,
                       side=side, location=location, comments=comments)
 
         if discoverable is not None:

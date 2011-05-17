@@ -64,7 +64,7 @@ class CommandAddInterfaceChassis(BrokerCommand):
         check_ip_restrictions(dbnetwork, ip)
 
         if ip:
-            assign_address(dbinterface, ip)
+            assign_address(dbinterface, ip, dbnetwork)
 
             # Convert ReservedName to ARecord if needed
             if isinstance(dbchassis.primary_name, ReservedName):

@@ -462,6 +462,8 @@ class DSDBRunner(object):
         # always the first one.
         zebra_ips = []
         for addr in dbhw_ent.all_addresses():
+            if not addr.network.is_internal:
+                continue
             if addr.usage != "zebra" or addr.ip in zebra_ips:
                 continue
             zebra_ips.append(addr.ip)
@@ -471,6 +473,8 @@ class DSDBRunner(object):
             zebra_ips.insert(0, dbhw_ent.primary_ip)
 
         for addr in dbhw_ent.all_addresses():
+            if not addr.network.is_internal:
+                continue
             if addr.fqdns:
                 fqdn = addr.fqdns[0]
             else:

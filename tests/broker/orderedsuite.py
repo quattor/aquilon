@@ -79,6 +79,7 @@ from test_add_vendor import TestAddVendor
 from test_add_cpu import TestAddCpu
 from test_add_model import TestAddModel
 from test_add_network import TestAddNetwork
+from test_add_network_environment import TestAddNetworkEnvironment
 from test_add_ns_record import TestAddNSRecord
 from test_add_router import TestAddRouter
 from test_add_metacluster import TestAddMetaCluster
@@ -159,11 +160,13 @@ from test_search_observed_mac import TestSearchObservedMac
 from test_search_next import TestSearchNext
 from test_search_network import TestSearchNetwork
 from test_refresh_network import TestRefreshNetwork
+from test_split_merge_network import TestSplitMergeNetwork
 from test_update_interface import TestUpdateInterface
 from test_update_machine import TestUpdateMachine
 from test_update_model import TestUpdateModel
 from test_update_rack import TestUpdateRack
 from test_update_network import TestUpdateNetwork
+from test_update_network_environment import TestUpdateNetworkEnvironment
 from test_update_archetype import TestUpdateArchetype
 from test_update_personality import TestUpdatePersonality
 from test_update_metacluster import TestUpdateMetaCluster
@@ -195,6 +198,7 @@ from test_del_esx_cluster import TestDelESXCluster
 from test_del_metacluster import TestDelMetaCluster
 from test_del_router import TestDelRouter
 from test_del_network import TestDelNetwork
+from test_del_network_environment import TestDelNetworkEnvironment
 from test_del_model import TestDelModel
 from test_del_cpu import TestDelCpu
 from test_del_vendor import TestDelVendor
@@ -242,7 +246,8 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestAddCity,
                 TestAddBuilding, TestAddRoom, TestAddLocation,
                 TestAddRack, TestAddVendor, TestAddCpu, TestAddModel,
-                TestAddNetwork, TestAddNSRecord, TestMapDnsDomain,
+                TestAddNetworkEnvironment, TestAddNetwork,
+                TestAddNSRecord, TestMapDnsDomain,
                 TestAddMetaCluster, TestAddESXCluster,
                 TestAddESXClusterAlignedService,
                 TestClusterEarlyConstraints,
@@ -285,7 +290,8 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestSearchObservedMac, TestSearchNext, TestSearchNetwork,
                 TestUpdateInterface, TestUpdateMachine, TestUpdateModel,
                 TestUpdateRack,
-                TestRefreshNetwork, TestUpdateNetwork,
+                TestRefreshNetwork, TestUpdateNetwork, TestSplitMergeNetwork,
+                TestUpdateNetworkEnvironment,
                 TestUpdateArchetype,
                 TestUpdateMetaCluster, TestUpdateESXCluster,
                 TestPxeswitch, TestManage,
@@ -295,13 +301,13 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestDel10GigHardware, TestDelVirtualHardware,
                 TestUnbindESXCluster, TestUncluster,
                 TestDelInterfaceAddress,
-                TestDelDynamicRange, TestDelAddress,
+                TestDelDynamicRange, TestDelAddress, TestDelNSRecord,
                 TestDelManager, TestDelAuxiliary, TestDelHost,
                 TestDelInterface, TestDelDisk, TestDelMachine, TestDelChassis,
                 TestDelSwitch,
                 TestDelESXClusterAlignedService,
                 TestDelESXCluster, TestDelMetaCluster,
-                TestDelRouter, TestDelNetwork,
+                TestDelRouter, TestDelNetwork, TestDelNetworkEnvironment,
                 TestDelModel, TestDelCpu, TestDelVendor,
                 TestUnmapDnsDomain,
                 TestDelRack, TestDelRoom,
@@ -309,7 +315,7 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestDelCity,
                 TestDelPersonality, TestDelOS, TestDelArchetype,
                 TestDelDomain, TestDelSandbox,
-                TestDelNSRecord, TestDelDnsEnvironment, TestDelDnsDomain,
+                TestDelDnsEnvironment, TestDelDnsDomain,
                 TestClientFailure,
                 TestBrokerStop]:
             self.addTest(unittest.TestLoader().loadTestsFromTestCase(test))

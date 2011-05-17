@@ -189,7 +189,7 @@ class CommandAddHost(BrokerCommand):
                                     "host, but {0:l} does not have a bootable "
                                     "interface.".format(dbmachine))
             if ip not in dbinterface.addresses:
-                assign_address(dbinterface, ip)
+                assign_address(dbinterface, ip, dbdns_rec.network)
 
     def assign_zebra_address(self, session, dbmachine, hostname,
                              zebra_interfaces, **arguments):
@@ -220,4 +220,5 @@ class CommandAddHost(BrokerCommand):
             if not dbinterface:
                 raise ArgumentError("{0} does not have an interface named "
                                     "{1}.".format(dbmachine, name))
-            assign_address(dbinterface, ip, label="hostname", usage="zebra")
+            assign_address(dbinterface, ip, dbdns_rec.network, label="hostname",
+                           usage="zebra")

@@ -31,9 +31,9 @@
 from aquilon.server.broker import BrokerCommand
 from aquilon.exceptions_ import ArgumentError, ProcessException, IncompleteError
 from aquilon.aqdb.model import (ARecord, HardwareEntity, DynamicStub,
-                                AddressAssignment, DnsEnvironment, Fqdn)
+                                AddressAssignment, DnsEnvironment, Fqdn,
+                                NetworkEnvironment)
 from aquilon.aqdb.model.network import get_net_id_from_ip
-from aquilon.aqdb.model.address_assignment import ADDR_USAGES
 from aquilon.server.dbwrappers.interface import (get_interface,
                                                  generate_ip,
                                                  check_ip_restrictions,
@@ -47,8 +47,8 @@ class CommandAddInterfaceAddress(BrokerCommand):
 
     required_parameters = ['fqdn', 'interface']
 
-    def render(self, session, logger, machine, chassis, switch, fqdn,
-               dns_environment, interface, label, usage, **kwargs):
+    def render(self, session, logger, machine, chassis, switch, fqdn, interface,
+               label, usage, network_environment, **kwargs):
 
         if machine:
             hwtype = 'machine'
@@ -65,57 +65,42 @@ class CommandAddInterfaceAddress(BrokerCommand):
 
         dbinterface = get_interface(session, interface, dbhw_ent, None)
 
-        if dbinterface.master:
-            raise ArgumentError("Slave interfaces cannot hold addresses.")
-
         oldinfo = DSDBRunner.snapshot_hw(dbhw_ent)
 
-        ip = generate_ip(session, dbinterface, **kwargs)
-        dbnetwork = get_net_id_from_ip(session, ip)
-        check_ip_restrictions(dbnetwork, ip)
+        dbnet_env = NetworkEnvironment.get_unique_or_default(session,
+                                                             network_environment)
 
-        if ip and ip in dbinterface.addresses:
-            raise ArgumentError("{0} already has address {1} "
-                                "assigned.".format(dbinterface, ip))
+        ip = generate_ip(session, dbinterface, **kwargs)
+        dbnetwork = get_net_id_from_ip(session, ip, dbnet_env)
+        check_ip_restrictions(dbnetwork, ip)
 
         if label is None:
             label = ""
-        for addr in dbinterface.assignments:
-            if label == addr.label:
-                raise ArgumentError("{0} already has an alias named "
-                                    "{1}.".format(dbinterface, label))
-
-        # When add_host sets up Zebra, it always uses the label 'hostname'. Due
-        # to the primary IP being special, add_interface_address cannot really
-        # emulate what add_host does, so tell the user where to look.
-        if label == "hostname":
+        elif label == "hostname":
+            # When add_host sets up Zebra, it always uses the label 'hostname'.
+            # Due to the primary IP being special, add_interface_address cannot
+            # really emulate what add_host does, so tell the user where to look.
             raise ArgumentError("The 'hostname' label can only be managed "
                                 "by add_host/del_host.")
 
         if not usage:
             usage = "system"
-        if usage not in ADDR_USAGES:
-            raise ArgumentError("Illegal address usage '%s'." % usage)
-
-        if dns_environment:
-            dbdns_env = DnsEnvironment.get_unique(session, dns_environment,
-                                                  compel=True)
-        else:
-            # Use default
-            dbdns_env = None
 
         delete_old_dsdb_entry = False
         dbfqdn = Fqdn.get_or_create(session, fqdn=fqdn,
-                                    dns_environment=dbdns_env)
+                                    dns_environment=dbnet_env.dns_environment)
         if ip:
+            # TODO: move this check to the model
             q = session.query(DynamicStub)
+            q = q.filter_by(network=dbnetwork)
             q = q.filter_by(ip=ip)
             dbdns_rec = q.first()
             if dbdns_rec:
                 raise ArgumentError("Address {0:a} is reserved for dynamic "
                                     "DHCP.".format(dbdns_rec))
 
-            dbdns_rec = ARecord.get_unique(session, fqdn=dbfqdn, ip=ip)
+            dbdns_rec = ARecord.get_unique(session, fqdn=dbfqdn, ip=ip,
+                                           network=dbnetwork)
             if dbdns_rec:
                 # If it was just a pure DNS placeholder, then delete & re-add it
                 if not dbdns_rec.assignments:
@@ -129,6 +114,15 @@ class CommandAddInterfaceAddress(BrokerCommand):
                 raise ArgumentError("Address {0:a} is reserved for dynamic "
                                     "DHCP.".format(dbdns_rec))
             ip = dbdns_rec.ip
+            dbnetwork = dbdns_rec.network
+
+            if dbnetwork.network_environment != dbnet_env:
+                raise ArgumentError("Address {0:a} lives in {1:l}, not in "
+                                    "{2:l}.  Use the --network_environment "
+                                    "option to select the correct environment."
+                                    .format(dbdns_rec,
+                                            dbnetwork.network_environment,
+                                            dbnet_env))
 
             # If it was just a pure DNS placeholder, then delete & re-add it
             if not dbdns_rec.assignments:
@@ -140,7 +134,24 @@ class CommandAddInterfaceAddress(BrokerCommand):
                                 "it cannot be assigned to "
                                 "{1:l}.".format(dbdns_rec, dbinterface))
 
+        # Check that the network ranges assigned to different interfaces
+        # do not overlap even if the network environments are different, because
+        # that would confuse routing on the host. E.g. if eth0 is an internal
+        # and eth1 is an external interface, then using 192.168.1.10/24 on eth0
+        # and using 192.168.1.20/26 on eth1 won't work.
+        for addr in dbhw_ent.all_addresses():
+            if addr.network != dbnetwork and \
+               addr.network.network.overlaps(dbnetwork.network):
+                raise ArgumentError("{0} in {1:l} used on {2:l} overlaps "
+                                    "requested {3:l} in "
+                                    "{4:l}.".format(addr.network,
+                                                    addr.network.network_environment,
+                                                    addr.interface,
+                                                    dbnetwork,
+                                                    dbnetwork.network_environment))
+
         q = session.query(AddressAssignment)
+        q = q.filter_by(network=dbnetwork)
         q = q.filter_by(ip=ip)
         other_uses = q.all()
         if usage == "system":
@@ -155,7 +166,7 @@ class CommandAddInterfaceAddress(BrokerCommand):
                                         "and is not configured for "
                                         "Zebra.".format(ip, addr.interface))
 
-        assign_address(dbinterface, ip, label=label, usage=usage)
+        assign_address(dbinterface, ip, dbnetwork, label=label, usage=usage)
         session.flush()
 
         dbhost = getattr(dbhw_ent, "host", None)

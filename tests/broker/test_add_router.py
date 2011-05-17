@@ -105,7 +105,8 @@ class TestAddRouter(TestBrokerCommand):
                          "Router: ut3gd1r04-v109-hsrp.aqd-unittest.ms.com [%s]"
                          % net.gateway,
                          command)
-        self.matchoutput(out, "Network: %s" % net.ip, command)
+        self.matchoutput(out, "Network: %s [%s]" % (net.ip, net), command)
+        self.matchoutput(out, "Network Environment: internal", command)
         self.matchoutput(out, "Comments: Test router", command)
 
     def testshownetwork(self):
@@ -137,6 +138,32 @@ class TestAddRouter(TestBrokerCommand):
         self.matchoutput(out, "Router: ut3gd1r02-v109-hsrp.aqd-unittest.ms.com", command)
         self.matchoutput(out, "Router: ut3gd1r02-v110-hsrp.aqd-unittest.ms.com", command)
         self.matchoutput(out, "Router: ut3gd1r04-v109-hsrp.aqd-unittest.ms.com", command)
+        self.matchclean(out, "excx", command)
+        self.matchclean(out, "utcolo", command)
+
+    def testaddexcx(self):
+        net = self.net.unknown[0].subnet()[0]
+        # Test a different address assignment convention: router addresses are
+        # at the end, not at the beginning
+        command = ["add", "router", "--ip", net[-2],
+                   "--fqdn", "gw1.excx.aqd-unittest.ms.com",
+                   "--network_environment", "excx"]
+        self.noouttest(command)
+
+    def testaddutcolo(self):
+        net = self.net.unknown[1]
+        command = ["add", "router", "--ip", net[2],
+                   "--fqdn", "gw1.utcolo.aqd-unittest.ms.com",
+                   "--network_environment", "utcolo"]
+        self.noouttest(command)
+
+    def testshowexcx(self):
+        command = ["show", "router", "--network_environment", "excx", "--all"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Router: gw1.excx.aqd-unittest.ms.com", command)
+        self.matchclean(out, "ut3gd1r01", command)
+        self.matchclean(out, "ut3gd1r02", command)
+        self.matchclean(out, "ut3gd1r04", command)
 
 
 if __name__=='__main__':
