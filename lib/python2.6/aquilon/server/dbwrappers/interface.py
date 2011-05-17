@@ -481,6 +481,9 @@ def assign_address(dbinterface, ip, dbnetwork, label=None, usage=None):
 
     dns_environment = dbnetwork.network_environment.dns_environment
 
+    if dbinterface.master:
+        raise ArgumentError("Slave interfaces cannot hold addresses.")
+
     if usage and usage not in ADDR_USAGES:
             raise ArgumentError("Illegal address usage '%s'." % usage)
 

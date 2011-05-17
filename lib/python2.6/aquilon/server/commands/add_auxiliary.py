@@ -67,9 +67,6 @@ class CommandAddAuxiliary(BrokerCommand):
                                               interface_type='public',
                                               bootable=False)
 
-        if dbinterface.master:
-            raise ArgumentError("Slave interfaces cannot hold addresses.")
-
         # Multiple addresses will only be allowed with the "add interface
         # address" command
         addrs = ", ".join(["%s [%s]" % (addr.logical_name, addr.ip) for addr
