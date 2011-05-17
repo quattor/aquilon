@@ -44,6 +44,7 @@ LOCK_RE = re.compile(r'^(acquired|releasing) '
 
 DSDB_EXPECT_SUCCESS_FILE = "expected_dsdb_cmds"
 DSDB_EXPECT_FAILURE_FILE = "fail_expected_dsdb_cmds"
+DSDB_EXPECT_FAILURE_ERROR= "fail_expected_dsdb_error"
 DSDB_ISSUED_CMDS_FILE = "issued_dsdb_cmds"
 
 
@@ -99,7 +100,7 @@ class TestBrokerCommand(unittest.TestCase):
         dsdb_coverage_dir = os.path.join(self.config.get("unittest", "scratchdir"),
                                          "dsdb_coverage")
         for name in [DSDB_EXPECT_SUCCESS_FILE, DSDB_EXPECT_FAILURE_FILE,
-                     DSDB_ISSUED_CMDS_FILE]:
+                     DSDB_ISSUED_CMDS_FILE, DSDB_EXPECT_FAILURE_ERROR]:
             path = os.path.join(dsdb_coverage_dir, name)
             try:
                 os.remove(path)
@@ -505,7 +506,7 @@ class TestBrokerCommand(unittest.TestCase):
             contents = f.read()
         return contents
 
-    def dsdb_expect(self, command, fail=False):
+    def dsdb_expect(self, command, fail=False, errstr=""):
         dsdb_coverage_dir = os.path.join(self.config.get("unittest", "scratchdir"),
                                          "dsdb_coverage")
         if fail:
@@ -520,6 +521,13 @@ class TestBrokerCommand(unittest.TestCase):
             else:
                 fp.write(str(command))
             fp.write("\n")
+        if fail and errstr :
+            errfile = DSDB_EXPECT_FAILURE_ERROR
+            expected_name = os.path.join(dsdb_coverage_dir,errfile)
+            with open(expected_name, "a") as fp:
+                fp.write(errstr)
+                fp.write("\n")
+            
 
     def dsdb_expect_add(self, hostname, ip, interface=None, mac=None,
                         primary=None, fail=False):

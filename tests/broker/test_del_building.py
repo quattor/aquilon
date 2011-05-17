@@ -55,6 +55,28 @@ class TestDelBuilding(TestBrokerCommand):
         command = "del building --building cards"
         self.noouttest(command.split(" "))
         self.dsdb_verify()
+    
+    def testdelbunotindsdb(self):
+        ## add building 
+
+        test_building= "bz"
+        self.dsdb_expect("add_building_aq -building_name bz -city ex "
+                         "-building_addr Nowhere")
+        command = ["add", "building", "--building", test_building, "--city", "ex",
+                   "--address", "Nowhere"]
+        self.noouttest(command)
+        self.dsdb_verify()
+
+
+        dsdb_command = "delete_building_aq -building %s" % test_building
+        errstr= "bldg %s doesn't exists" % test_building
+        self.dsdb_expect(dsdb_command,True,errstr)
+        command = "del building --building %s" % test_building
+        (out, err) = self.successtest(command.split(" "))
+        self.assertEmptyOut(out, command)
+        self.dsdb_verify()
+
+
 
     def testdelnettest(self):
         self.dsdb_expect("delete_building_aq -building nettest")

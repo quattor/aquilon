@@ -54,5 +54,5 @@ class TestDelCity(TestBrokerCommand):
 
 
 if __name__=='__main__':
-    suite = unittest.TestLoader().loadTestsFromTestCase(TestDelDomain)
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestDelCity)
     unittest.TextTestRunner(verbosity=2).run(suite)
