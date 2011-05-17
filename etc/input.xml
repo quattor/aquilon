@@ -3360,15 +3360,15 @@
 
    <command name="del_address">
       Delete an address record from the database.
-      <optgroup name="del_address_mandatory" mandatory="True" fields="all">
+      <optgroup name="del_address_mandatory" mandatory="True" fields="any">
          <option name="fqdn" type="string">The fully qualified domain name</option>
          <option name="ip" type="ipv4">An IP Address</option>
       </optgroup>
       <optgroup name="del_address_optional" mandatory="False">
          <option name="dns_environment" type="string">The name of the environment the address is in (defaults to 'internal')</option>
       </optgroup>
-      <transport method="delete" path="address_default/%(fqdn)s/%(ip)s" />
-      <transport method="delete" trigger="dns_environment" path="address/%(dns_environment)s/%(fqdn)s/%(ip)s" />
+      <transport method="delete" path="address_default" />
+      <transport method="delete" trigger="dns_environment" path="address/%(dns_environment)s" />
    </command>
 
    <command name="show_ns_record">
