@@ -59,4 +59,4 @@ def delete_dns_record(dbdns_rec):
     if q.count() == 0:
         session.delete(dbfqdn)
     else:
-        session.expire(dbfqdn, 'dns_records')
+        session.expire(dbfqdn, ['dns_records'])
