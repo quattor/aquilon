@@ -61,6 +61,6 @@ install: all install-man install-html
 # Use "make check" to validate the XML files. Unfortunately the error
 # messages can be misleading sometimes...
 check:
-	$(XMLLINT) $(XMLLINT_PARAMS) $(SOURCES)
+	$(XMLLINT) $(XMLLINT_PARAMS) $(ALL_SOURCES)
 
 .PHONY: all check clean install install-man install-html man html
