@@ -1,0 +1,177 @@
+<?xml version="1.0"?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V5.0//EN"
+"http://docbook.org/xml/5.0/dtd/docbook.dtd" [
+<!ENTITY aqd_version SYSTEM "../version.txt">
+]>
+<refentry xml:id="reconfigure"
+  xmlns:xi="http://www.w3.org/2001/XInclude">
+  <refmeta>
+    <refentrytitle>reconfigure</refentrytitle>
+    <manvolnum>1</manvolnum>
+    <refmiscinfo class="version">&aqd_version;</refmiscinfo>
+    <refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
+  </refmeta>
+
+  <refnamediv>
+    <refname>reconfigure</refname>
+    <refpurpose>
+      Rebuild configuration
+    </refpurpose>
+    <refclass>Aquilon</refclass>
+  </refnamediv>
+
+  <refsynopsisdiv>
+    <cmdsynopsis>
+      <command>aq reconfigure </command>
+      <group choice="req">
+	<arg choice="plain"><option>--hostname <replaceable>HOSTNAME</replaceable></option></arg>
+	<arg choice="plain"><option>--list <replaceable>FILENAME</replaceable></option></arg>
+	<arg choice="plain"><option>--membersof <replaceable>CLUSTER</replaceable></option></arg>
+      </group>
+      <arg choice="opt"><option>--osname <replaceable>OSNAME</replaceable></option></arg>
+      <arg choice="opt"><option>--osversion <replaceable>OSVERSION</replaceable></option></arg>
+      <arg choice="opt"><option>--archetype <replaceable>ARCHETYPE</replaceable></option></arg>
+      <arg choice="opt"><option>--personality <replaceable>PERSONALITY</replaceable></option></arg>
+      <arg choice="opt"><option>--buildstatus <replaceable>BUILDSTATUS</replaceable></option></arg>
+      <group choice="opt">
+	<arg choice="plain"><option>--keepbindings</option></arg>
+	<arg choice="plain"><option>--nokeepbindings</option></arg>
+      </group>
+      <group>
+	<synopfragmentref linkend="global-options">Global options</synopfragmentref>
+      </group>
+      <xi:include href="../common/global_options.xml"/>
+    </cmdsynopsis>
+  </refsynopsisdiv>
+
+  <refsect1>
+    <title>Description</title>
+    <para>
+      The <command>aq reconfigure</command> command forces a complete
+      rebuild of the configuration of the specified hosts. This
+      includes the tasks of:
+    </para>
+      <variablelist>
+	<varlistentry>
+	  <term>re-evaluating all the service bindings</term>
+	  <listitem>
+	    <para>
+	      All service bindings will be re-evaluated and possible
+	      changed to new defaults unless the
+	      <option>--keepbindings</option> flag is used. Also, any
+	      services that are not listed as required will be dropped
+	      unless the <option>--keepbindings</option> flag is used.
+	    </para>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term>re-writing the plenary template files for the hosts</term>
+	</varlistentry>
+	<varlistentry>
+	  <term>rebuilding the configuration files on AII bootservers</term>
+	</varlistentry>
+	<varlistentry>
+	  <term>updating downstream datawarehouses</term>
+	</varlistentry>
+      </variablelist>
+  </refsect1>
+
+  <refsect1>
+    <title>Entitlements</title>
+    <para>Requires "operations" role</para>
+  </refsect1>
+
+  <refsect1>
+    <title>Templates</title>
+    <para>This command may modify: host templates and service templates (if any service bindings are changed).
+    </para>
+  </refsect1>
+
+  <refsect1>
+    <title>Options</title>
+    <variablelist>
+      <title>Command-specific options</title>
+      <varlistentry>
+	<term>
+	  <option>--hostname <replaceable>HOSTNAME</replaceable></option>,
+	</term>
+	<listitem>
+	  <para>
+	    Only the named <replaceable>HOSTNAME</replaceable> will be reconfigured.
+	  </para>
+	</listitem>
+      </varlistentry>
+      <varlistentry>
+	<term>
+	  <option>--list <replaceable>FILENAME</replaceable></option>
+	</term>
+	<listitem>
+	  <para>
+	    A list of hosts will be read from <replaceable>FILENAME</replaceable> and the given reconfiguration options will be applied equally to all hosts. The format of the file is one hostname per line. Lines that are blank or begin with "#" will be skipped.
+	  </para>
+	</listitem>
+      </varlistentry>
+      <varlistentry>
+	<term>
+	  <option>--personality <replaceable>PERSONALITY</replaceable></option>
+	</term>
+	<listitem>
+	  <para>
+	    The name of the personality that should be given to
+	    the host.
+	    If the operation fails,
+	    then the previous personality will remain on the host.
+	  </para>
+	</listitem>
+      </varlistentry>
+    </variablelist>
+    <xi:include href="../common/global_options_desc.xml"/>
+  </refsect1>
+
+  <refsect1>
+    <title>EXIT STATUS</title>
+    <variablelist>
+      <varlistentry>
+	<term>0</term>
+	<listitem>
+	  <para>
+	    all hosts were successfully reconfigured.
+	  </para>
+	</listitem>
+      </varlistentry>
+      <varlistentry>
+	<term>2</term>
+	<listitem>
+	    <para>
+	      partial success. When specifying a number of hosts (either using the <option>--list</option> or the <option>--membersof</option> options) some of the hosts were successful and some failed.</para>
+	</listitem>
+      </varlistentry>
+      <varlistentry>
+	<term>4</term>
+	<listitem><para>
+	    no hosts were reconfigured.</para>
+	</listitem>
+      </varlistentry>
+    </variablelist>
+  </refsect1>
+
+  <refsect1>
+    <title>Examples</title>
+    <example>
+      <title>Change the operating system of a host</title>
+      <programlisting>
+aq reconfigure --hostname foo.example.com --osver 5.0.1-x86_64 \
+               --buildstatus rebuild
+      </programlisting>
+    </example>
+  </refsect1>
+
+  <refsect1>
+    <title>See also</title>
+    <para>
+      <citerefentry><refentrytitle>compile</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+    </para>
+  </refsect1>
+</refentry>
+
+<!-- vim: set ai sw=4: -->

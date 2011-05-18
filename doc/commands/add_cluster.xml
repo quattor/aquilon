@@ -1,0 +1,252 @@
+<?xml version="1.0"?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V5.0//EN"
+"http://docbook.org/xml/5.0/dtd/docbook.dtd" [
+<!ENTITY aqd_version SYSTEM "../version.txt">
+]>
+<refentry xml:id="add_cluster"
+	  xmlns:xi="http://www.w3.org/2001/XInclude">
+    <refmeta>
+        <refentrytitle>add_cluster</refentrytitle>
+        <manvolnum>1</manvolnum>
+        <refmiscinfo class="version">&aqd_version;</refmiscinfo>
+        <refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
+    </refmeta>
+
+    <refnamediv>
+        <refname>add cluster</refname>
+        <refpurpose>
+	    Add a new cluster
+        </refpurpose>
+	<refclass>Aquilon</refclass>
+    </refnamediv>
+
+    <refsynopsisdiv>
+	<cmdsynopsis>
+	    <command>aq add cluster </command>
+	    <arg choice="req"><option>--cluster <replaceable>CLUSTER</replaceable></option></arg>
+	    <arg choice="req"><option>--down_hosts_threshold <replaceable>DHT</replaceable></option></arg>
+	    <arg choice="req"><option>--archetype <replaceable>ARCHETYPE</replaceable></option></arg>
+	    <arg choice="req"><option>--personality <replaceable>PERSONALITY</replaceable></option></arg>
+	    <group choice="req">
+	      <arg choice="plain"><option>--domain <replaceable>DOMAIN</replaceable></option></arg>
+	      <arg choice="plain"><option>--sandbox <replaceable>SANDBOX</replaceable></option></arg>
+	    </group>
+	    <group choice="req">
+	    <xi:include href="../common/location_options.xml"/>
+	    </group>
+	    <arg choice="opt"><option>--maint_threshold <replaceable>THRESHOLD</replaceable></option></arg>
+	    <arg choice="opt"><option>--max_members <replaceable>LIMIT</replaceable></option></arg>
+	    <arg choice="opt"><option>--buildstatus <replaceable>STATUS</replaceable></option></arg>
+	    <arg choice="opt"><option>--comments <replaceable>COMMENTS</replaceable></option></arg>
+	    <group>
+		<synopfragmentref linkend="global-options">Global options</synopfragmentref>
+	    </group>
+	    <xi:include href="../common/global_options.xml"/>
+	</cmdsynopsis>
+    </refsynopsisdiv>
+
+    <refsect1>
+        <title>Description</title>
+	<para>
+	    The <command>aq add cluster</command> command creates a
+	    new cluster. Clusters can take various styles, defined by
+	    the cluster archetype. For example, high availability clusters
+	    would be configured with a "hacluster" archetype. Grid clusters
+	    would be configured with an archetype of "gridcluster".
+	</para>
+    </refsect1>
+
+    <refsect1>
+        <title>Entitlements</title>
+        <para>Requires "operations" role</para>
+    </refsect1>
+
+    <refsect1>
+        <title>Templates</title>
+        <para>This command will create the following cluster templates:
+        </para>
+	<variablelist>
+	  <varlistentry>
+	    <term>clusters/<replaceable>CLUSTER</replaceable></term>
+	    <listitem><para>
+	      An object template that produces a output configuration
+	      profile for the cluster.
+            </para></listitem>
+          </varlistentry>
+	  <varlistentry>
+	    <term>cluster/<replaceable>CLUSTER</replaceable>/client</term>
+	    <listitem><para>
+	      A normal template that will be included by member hosts to
+	      provide cluster-specific information. By default, this will
+	      try (via if_exists) to include the "features/<replaceable>HOST_ARCHETYPE</replaceable>/<replaceable>CLUSTER_ARCHETYPE</replaceable>/<replaceable>PERSONALITY</replaceable>/config" template.
+	      For example, a cluster called "nyvcs1", of archetype "hacluster" and
+	      personality "vcs" would have a template named
+	      "cluster/nyvcs1/client" which would try to include
+	      "features/<replaceable>HOST_ARCHETYPE</replaceable>/hacluster/vcs/config".
+	      Hosts which are members of the cluster will automatically
+	      include this template.
+            </para></listitem>
+          </varlistentry>
+	</variablelist>
+    </refsect1>
+
+    <refsect1>
+        <title>Options</title>
+	<variablelist>
+	    <title>Command-specific options</title>
+	    <varlistentry>
+	        <term>
+		    <option>--cluster <replaceable>CLUSTER</replaceable></option>,
+		</term>
+		<listitem>
+		    <para>
+		        Specify the name of the new cluster. Cluster names are
+			unique across all cluster types. The name of a cluster
+			may only consist of alphanumeric characters.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--down_hosts_threshold <replaceable>THRESHOLD</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			A numeric value describing how many hosts can
+			be down before the monitoring system declares
+			a problem. This can be specified as an absolute
+			number or as a percentage (by appending a
+			"%" character on the argument). If a percentage
+			is used, then the threshold data is exposed
+			as both a percentage and an absolute value
+			based on the current cluster population.
+			The threshold value is exposed from Aquilon but
+			the interpretation of that threshold is purely
+			from within the monitoring system.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--archetype <replaceable>ARCHETYPE</replaceable></option>
+		    <option>--personality <replaceable>PERSONALITY</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			The archetype and personality of the cluster. This
+			is the configuration of the cluster itself, not of
+			the hosts that are members of the cluster. Typically
+			the archetype indicates the style of cluster (HA,
+			grid, etc) whereas the personality indicates the
+			type of technology being used.
+			For example, "hadoop", "vcs",
+			etc.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--domain <replaceable>DOMAIN</replaceable></option>
+		    <option>--sandbox <replaceable>SANDBOX</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			The name of the template library to use when
+			compiling the cluster, and all member hosts.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--maint_threshold <replaceable>THRESHOLD</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			An alternative threshold to the main
+			down_hosts_threshold. This threshold can be specified
+			in the same manner as down_hosts_threshold: either as
+			an absolute number or as a percentage. This threshold
+			is intended to be observed by the monitoring system
+			when the cluster is considered to be in a maintenance
+			window. This allows you to indicate that during the
+			maintenance period, it would be acceptable to have
+			far more hosts down than during normal operations.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--max_members <replaceable>MAX</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			The maximum hosts that can be added to the cluster.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--buildstatus <replaceable>STATUS</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			The status of the cluster. This defaults to "build".
+		    </para>
+		</listitem>
+	    </varlistentry>
+	</variablelist>
+	<xi:include href="../common/global_options_desc.xml"/>
+    </refsect1>
+
+    <refsect1>
+	<title>Examples</title>
+	<example>
+	    <title>Adding a 2-node HA cluster</title>
+	    <programlisting>
+aq add_cluster --cluster nyvcs1 \
+    --campus ny \
+    --archetype hacluster --personality vcs --domain prod \
+    --down_hosts 0 --max_members 2
+	    </programlisting>
+	</example>
+	<example>
+	    <title>Adding a 3-node N+1 cluster</title>
+	    <programlisting>
+aq add cluster --cluster nyvcs2 \
+    --campus ny \
+    --archetype hacluster --personality vcs --domain prod \
+    --down_hosts 1 --max_members 3
+	    </programlisting>
+	</example>
+	<example>
+	    <title>Adding a grid cluster</title>
+	    <programlisting>
+aq add cluster --cluster nygrid1 \
+    --campus ny \
+    --archetype gridcluster --personality hadoop --domain prod \
+    --down_hosts 5% --max_members 2000
+	    </programlisting>
+	</example>
+	<example>
+	    <title>Adding an ESX cluster</title>
+	    <programlisting>
+aq add cluster --cluster nyesx1 \
+    --campus ny \
+    --archetype esx_cluster --personality vsphere4.1 --domain prod \
+    --down_hosts 2 --max_members 16 --vm_to_host_ratio 16:1
+	    </programlisting>
+	</example>
+    </refsect1>
+
+    <refsect1>
+	<title>See also</title>
+	<para>
+	    <citerefentry><refentrytitle>del_cluster</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>show_cluster</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>cluster</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>uncluster</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	</para>
+    </refsect1>
+</refentry>
+
+<!-- vim: set ai sw=4: -->
