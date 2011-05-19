@@ -33,15 +33,26 @@ from collections import deque
 
 from sqlalchemy import Integer, DateTime, Sequence, String, Column, ForeignKey
 
-from sqlalchemy.orm import relation, deferred, backref
+from sqlalchemy.orm import relation, deferred, backref, object_session
 from sqlalchemy.ext.associationproxy import association_proxy
 
-from aquilon.exceptions_ import NotFoundException
+from aquilon.exceptions_ import NotFoundException, ArgumentError
 from aquilon.aqdb.model import Base, Fqdn, DnsEnvironment
 from aquilon.aqdb.model.dns_domain import parse_fqdn
 from aquilon.aqdb.column_types import AqStr
 
 _TN = "dns_record"
+
+# This relation must be symmetric, i.e. whenever "x in _rr_conflict_map[y]" is
+# True, "y in _rr_conflict_map[x]" must also be true.
+_rr_conflict_map = {
+    'a_record': frozenset(['alias', 'dynamic_stub', 'reserved_name']),
+    'alias': frozenset(['a_record', 'alias', 'dynamic_stub', 'reserved_name']),
+    'dynamic_stub': frozenset(['a_record', 'alias', 'dynamic_stub',
+                               'reserved_name']),
+    'reserved_name': frozenset(['a_record', 'alias', 'dynamic_stub',
+                                'reserved_name'])
+}
 
 
 class DnsRecord(Base):
@@ -138,6 +149,32 @@ class DnsRecord(Base):
         aliases = found.values()
         aliases.sort(cmp=lambda x, y: cmp(str(x.fqdn), str(y.fqdn)))
         return aliases
+
+    def __init__(self, fqdn=None, **kwargs):
+        if not fqdn:
+            raise ValueError("fqdn cannot be empty")
+        session = object_session(fqdn)
+        if not session:
+            raise ValueError("fqdn must be already part of a session")
+
+        # Disable autoflush temporarily
+        flush_state = session.autoflush
+        session.autoflush = False
+
+        # self.dns_record_type is not populated by the ORM yet, so query our
+        # class
+        own_type = self.__class__.__mapper_args__['polymorphic_identity']
+
+        # Asking for just one column makes both the query and the ORM faster
+        q = session.query(DnsRecord.dns_record_type).filter_by(fqdn=fqdn)
+        for existing in q.all():
+            if existing.dns_record_type in _rr_conflict_map[own_type]:
+                cls = DnsRecord.__mapper__.polymorphic_map[existing.dns_record_type].class_
+                raise ArgumentError("%s %s already exist." %
+                                    (cls._get_class_label(), fqdn))
+
+        session.autoflush = flush_state
+        super(DnsRecord, self).__init__(fqdn=fqdn, **kwargs)
 
 
 dns_record = DnsRecord.__table__  # pylint: disable-msg=C0103, E1101

@@ -59,12 +59,18 @@ class TestAddAlias(TestBrokerCommand):
         self.noouttest(cmd)
         self.dsdb_verify()
 
-    def test_120_usedname(self):
+    def test_120_conflict_a_record(self):
         cmd = ['add', 'alias', '--fqdn', 'arecord14.aqd-unittest.ms.com',
                '--target', 'arecord13.aqd-unittest.ms.com']
         out = self.badrequesttest(cmd)
         self.matchoutput(out, "DNS Record arecord14.aqd-unittest.ms.com "
                          "already exists.", cmd)
+
+    def test_130_conflict_reserver_name(self):
+        cmd = ['add', 'alias', '--fqdn', 'nyaqd1.ms.com',
+               '--target', 'arecord13.aqd-unittest.ms.com']
+        out = self.badrequesttest(cmd)
+        self.matchoutput(out, "Reserved Name nyaqd1.ms.com already exists.", cmd)
 
     def test_400_verify_alias2host(self):
         cmd = "show alias --fqdn alias2host.aqd-unittest.ms.com"
