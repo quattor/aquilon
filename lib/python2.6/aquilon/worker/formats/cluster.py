@@ -58,6 +58,11 @@ class ClusterFormatter(ObjectFormatter):
         for host in sorted(cluster.hosts, key=lambda x : x.fqdn):
             self.add_host_msg(skeleton.hosts.add(), host)
 
+        if len(cluster.resources) > 0:
+            for resource in cluster.resources:
+                r = skeleton.resources.add()
+                self.redirect_proto(resource, r)
+
         for dbsi in cluster.service_bindings:
             si = skeleton.aligned_services.add()
             si.service = dbsi.service.name
@@ -117,6 +122,9 @@ class ClusterFormatter(ObjectFormatter):
             else:
                 details.append(indent + "  Maintenance Threshold: %s" %
                                cluster.down_maint_threshold)
+
+        for resource in cluster.resources:
+            details.append(indent + "  Resource: %s (%s)" % (resource.name, resource.resource_type))
 
         if cluster.cluster_type == 'esx':
             details.append(indent + "  Max vm_to_host_ratio: %s" %

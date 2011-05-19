@@ -92,6 +92,7 @@
          <option name="personalities" type="boolean">flush the personality templates</option>
          <option name="clusters" type="boolean">flush the cluster templates</option>
          <option name="services" type="boolean">flush the service templates</option>
+         <option name="resources" type="boolean">flush the resource templates</option>
          <option name="locations" type="boolean">flush templates related to locations. This is only cities for now.</option>
          <option name="all" type="flag">flush all templates</option>
       </optgroup>
@@ -2138,14 +2139,22 @@
       that template generated on-demand in this way will be incomplete
       (especially if it cannot be compiled) and is purely provided for debugging.
       <optgroup name="cat selector" mandatory="True" fields="any">
-         <option name="hostname" type="string" conflicts="machine cluster service instance default nasinfo city">Name of the host</option>
-         <option name="machine" type="string" conflicts="hostname cluster service instance default nasinfo city">Name of the machine</option>
-         <option name="cluster" type="string" conflicts="hostname machine service instance default nasinfo city">Name of the machine</option>
-         <option name="service" type="string" conflicts="hostname machine cluster nasinfo city">Name of the service</option>
-         <option name="instance" type="string" conflicts="hostname machine cluster nasinfo city">Name of the service instance</option>
-	 <option name="default" type="flag" conflicts="hostname machine cluster nasinfo city">Show the default client config for the service/instance</option>
-	 <option name="nasinfo" type="string" conflicts="hostname machine cluster service instance default city">Show the default client config for the service/instance</option>
-	 <option name="city" type="string" conflicts="hostname machine cluster service instance default nasinfo">Name of the city</option>
+         <option name="hostname" type="string" conflicts="machine cluster service instance default nasinfo city resource">Name of the host</option>
+         <option name="machine" type="string" conflicts="hostname cluster service instance default nasinfo city resource">Name of the machine</option>
+         <option name="cluster" type="string" conflicts="hostname machine service instance default nasinfo city resource">Name of the cluster</option>
+         <option name="service" type="string" conflicts="hostname machine cluster nasinfo city resource">Name of the service</option>
+         <option name="instance" type="string" conflicts="hostname machine cluster nasinfo city resource">Name of the service instance</option>
+	 <option name="default" type="flag" conflicts="hostname machine cluster nasinfo city resource">Show the default client config for the service/instance</option>
+	 <option name="nasinfo" type="string" conflicts="hostname machine cluster service instance default city resource">Show the default client config for the service/instance</option>
+	 <option name="city" type="string" conflicts="hostname machine cluster service instance default nasinfo resource">Name of the city</option>
+         <optgroup name="resopts" fields="all">
+	   <option name="resource" type="string" conflicts="hostname machine cluster service instance default nasinfo">Name of the resource</option>
+	   <option name="restype" type="string" conflicts="reshost">The resource type</option>
+	   <optgroup name="resplacement" fields="any">
+             <option name="reshostname" type="string" conflicts="rescluster">The resource host</option>
+             <option name="rescluster" type="string" conflicts="reshost">The resource cluster</option>
+            </optgroup>
+          </optgroup>
       </optgroup>
       <optgroup name="cat options" fields="any">
           <option name="generate" type="boolean">Show the plenary template as it would be generated</option>
@@ -2157,6 +2166,7 @@
       <transport trigger="cluster" method="get" path="cluster/any/%(cluster)s/plenary" />
       <transport trigger="nasinfo" method="get" path="nasinfo/%(nasinfo)s/plenary" />
       <transport trigger="city" method="get" path="city/%(city)s/plenary" />
+      <transport trigger="resource" method="get" path="resource/%(resource)s/plenary" />
    </command>
 
    <command name="sync">
@@ -3934,5 +3944,138 @@
       </optgroup>
       <transport method="get" path="find/audit" />
    </command>
+
+   <command name="add_filesystem">
+      Add a new filesystem resource.
+      <optgroup name="add_fs_opts" mandatory="True" fields="all">
+         <option name="filesystem" type="string">name</option>
+         <option name="type" type="string">type</option>
+         <option name="mountpoint" type="string">mountpoint</option>
+         <option name="blockdevice" type="string">blockdevice</option>
+         <option name="bootmount" type="boolean">immediately mount on boot</option>
+      </optgroup>
+      <optgroup name="optional_opts">
+         <option name="dumpfreq" type="int" default='0'>dump frequency</option>
+         <option name="fsckpass" type="int" default='2'>fsck passno</option>
+         <option name="options" type="string">mountoptions</option>
+         <option name="comments" type="string">Comments</option>
+      </optgroup>
+      <optgroup name="resource_mapping_opts" mandatory="True" fields="any">
+         <option name="hostname" type="string">Hostname to apply resource</option>
+         <option name="cluster" type="string">Cluster to apply resource</option>
+      </optgroup>
+      <transport method="put" path="resource/filesystem/%(filesystem)s" />
+   </command>
+
+   <command name="del_filesystem">
+      Delete a filesystem resource.
+      <optgroup name="del_fs_opts" mandatory="True" fields="all">
+         <option name="filesystem" type="string">name</option>
+      </optgroup>
+      <optgroup name="resource_mapping_opts" mandatory="True" fields="any">
+        <option name="hostname" type="string">Hostname of resource</option>
+        <option name="cluster" type="string">Cluster of resource</option>
+      </optgroup>
+      <transport method="delete" path="resource/filesystem/%(filesystem)s" />
+   </command>
+
+   <command name="show_filesystem">
+      Show filesystems based on filtering for host/cluster association
+      <optgroup name="show_resource_opts" mandatory="True" fields="any">
+         <option name="cluster" type="string">cluster name</option>
+         <option name="hostname" type="string">hostname</option>
+         <option name="filesystem" type="string">filesystem name</option>
+         <option name="all" type="flag">list all hardware</option>
+      </optgroup>
+      <transport method="get" trigger="filesystem" path="resource/filesystem/%(filesystem)s" />
+      <transport method="get" path="find/resource/filesystem" />
+   </command>
+
+   <command name="add_application">
+      Add a new application resource.
+      <optgroup name="add_app_opts" mandatory="True" fields="all">
+         <option name="application" type="string">Name of applicaiton</option>
+         <option name="eonid" type="int">EON identity</option>
+      </optgroup>
+      <optgroup name="optional_opts">
+         <option name="comments" type="string">Comments</option>
+      </optgroup>
+      <optgroup name="resource_mapping_opts" mandatory="True" fields="any">
+         <option name="hostname" type="string">Hostname to apply resource</option>
+         <option name="cluster" type="string">Cluster to apply resource</option>
+      </optgroup>
+      <transport method="put" path="resource/application/%(application)s" />
+   </command>
+
+   <command name="del_application">
+      Delete an application resource.
+      <optgroup name="del_app_opts" mandatory="True" fields="all">
+         <option name="application" type="string">name</option>
+      </optgroup>
+      <optgroup name="resource_mapping_opts" mandatory="True" fields="any">
+        <option name="hostname" type="string">Hostname of resource</option>
+        <option name="cluster" type="string">Cluster of resource</option>
+      </optgroup>
+      <transport method="delete" path="resource/application/%(application)s" />
+   </command>
+
+   <command name="show_application">
+      Show applications based on filtering for host/cluster association
+      <optgroup name="show_resource_opts" mandatory="True" fields="any">
+         <option name="cluster" type="string">cluster name</option>
+         <option name="hostname" type="string">hostname</option>
+         <option name="application" type="string">application name</option>
+         <option name="eonid" type="int">EON id</option>
+         <option name="all" type="flag">list all hardware</option>
+      </optgroup>
+      <transport method="get" trigger="application" path="resource/application/%(application)s" />
+      <transport method="get" path="find/resource/application" />
+   </command>
+
+   <command name="add_intervention">
+      Add a new intervention resource.
+      <optgroup name="add_iv_opts" mandatory="True" fields="all">
+         <option name="expiry" type="string">when to expire this intervention</option>
+         <option name="intervention" type="string">the name of the intervention</option>
+         <option name="justification" type="string">the reason for the intervention</option>
+      </optgroup>
+      <optgroup name="optional_opts">
+         <option name="comments" type="string">Comments</option>
+         <option name="allowusers" type="string">Additional users allowed access</option>
+         <option name="allowgroups" type="string">Additional groups allowed access</option>
+         <option name="disabled_actions" type="string">Disabled actions</option>
+         <option name="start_time" type="string">when to start this intervention (default=now)</option>
+      </optgroup>
+      <optgroup name="optional_binding" fields="any">
+         <option name="hostname" type="string">Host</option>
+         <option name="cluster" type="string">Cluster</option>
+      </optgroup>
+      <transport method="post" path="resource/intervention/%(intervention)s" />
+   </command>
+
+   <command name="show_intervention">
+      Display the attributes of an existing intervention resource.
+      <optgroup name="add_iv_opts" mandatory="True" fields="any">
+         <option name="intervention" type="string">the name of the intervention</option>
+         <option name="cluster" type="string">cluster name</option>
+         <option name="hostname" type="string">hostname</option>
+         <option name="all" type="flag">list all hardware</option>
+      </optgroup>
+      <transport method="get" trigger="intervention" path="resource/intervention/%(intervention)s" />
+      <transport method="get" path="find/resource/intervention" />
+   </command>
+
+   <command name="del_intervention">
+      Delete an intervention resource.
+      <optgroup name="del_iv_opts" mandatory="True" fields="all">
+         <option name="intervention" type="string">name</option>
+      </optgroup>
+      <optgroup name="resource_mapping_opts" mandatory="True" fields="any">
+        <option name="hostname" type="string">Hostname of resource</option>
+        <option name="cluster" type="string">Cluster of resource</option>
+      </optgroup>
+      <transport method="delete" path="resource/intervention/%(intervention)s" />
+   </command>
+
 
 </commandline>

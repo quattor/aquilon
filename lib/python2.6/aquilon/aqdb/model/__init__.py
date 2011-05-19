@@ -135,3 +135,10 @@ from aquilon.aqdb.model.metacluster import MetaCluster, MetaClusterMember
 from aquilon.aqdb.model.machine_specs import MachineSpecs
 
 from aquilon.aqdb.model.xtn import Xtn, XtnDetail, XtnEnd
+
+# Resources
+from aquilon.aqdb.model.resource import (Resource, ResourceHolder,
+                                         HostResource, ClusterResource)
+from aquilon.aqdb.model.filesystem import Filesystem
+from aquilon.aqdb.model.application import Application
+from aquilon.aqdb.model.intervention import Intervention

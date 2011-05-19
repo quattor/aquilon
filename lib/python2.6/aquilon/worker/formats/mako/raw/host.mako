@@ -1,6 +1,9 @@
 % if record.cluster:
 Member of ${"{0:c}".format(record.cluster)}: ${record.cluster.name}
 % endif
+% for resource in record.resources:
+Resource: ${resource} (${resource.resource_type})
+%endfor
 ${formatter.redirect_raw(record.personality)}
 ${formatter.redirect_raw(record.archetype)}
 ${formatter.redirect_raw(record.operating_system)}

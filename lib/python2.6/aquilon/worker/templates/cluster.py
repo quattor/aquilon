@@ -104,6 +104,11 @@ class PlenaryClusterObject(Plenary):
                                  self.dbcluster.hosts])))
 
         lines.append("")
+        for resource in sorted(self.dbcluster.resources):
+            lines.append("'/system/resources/%s' = push(%s);" % (
+                         resource.resource_type,
+                         pan(StructureTemplate(resource.template_base +
+                                               '/config'))))
         lines.append("")
 
         lines.append("include { 'archetype/base' };");
@@ -175,6 +180,17 @@ class PlenaryClusterClient(Plenary):
 
     def body(self, lines):
         lines.append('"/system/cluster/name" = %s;' % pan(self.name))
+        # we could just use a PAN external reference to pull in this
+        # value from the cluster template, i.e. using
+        #  value('clusters/'+value('/system/cluster/name')+':/system/resources')
+        # but since we know that these templates are always in sync,
+        # we can duplicate the content here to avoid the possibility of
+        # circular external references.
+        for resource in sorted(self.dbobj.resources):
+            lines.append("'/system/cluster/resources/%s' = push(%s);" % (
+                         resource.resource_type,
+                         pan(StructureTemplate(resource.template_base +
+                                               '/config'))))
         lines.append("include { if_exists('features/' + value('/system/archetype/name') + '/%s/%s/config') };"
                      % (self.dbobj.personality.archetype.name,
                         self.dbobj.personality.name))
