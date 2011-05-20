@@ -37,9 +37,7 @@ if __name__ == "__main__":
     import utils
     utils.import_depends()
 
-from aquilon.server import depends  # pylint: disable=W0611
 from dateutil.parser import parse
-
 
 from broker.brokertest import TestBrokerCommand
 
