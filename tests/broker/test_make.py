@@ -65,6 +65,13 @@ class TestMake(TestBrokerCommand):
             self.failUnless(results, "No service plenary data that includes"
                                      "evh%s.aqd-unittest.ms.com" % i)
 
+    def testbados(self):
+        command = ["make", "--hostname", "evh1.aqd-unittest.ms.com",
+                   "--os", "bad-os-value"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Incorrect value for --os.  Please use "
+                         "--osname/--osversion instead.", command)
+
     def testmake10gighosts(self):
         for i in range(51, 75):
             command = ["make", "--hostname", "evh%s.aqd-unittest.ms.com" % i]
