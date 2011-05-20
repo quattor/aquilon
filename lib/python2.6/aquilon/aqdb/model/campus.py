@@ -162,9 +162,6 @@ class CampusDiffStruct(object):  # pragma: no cover
                     self.sess.close()
                     return False
 
-                msg = 'new campus %s has sublocs %s' % (self.co,
-                                                        self.co.sublocations)
-                self._dbg(3, msg)
                 return True
 
         else:

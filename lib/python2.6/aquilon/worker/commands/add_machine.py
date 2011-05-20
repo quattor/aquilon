@@ -28,6 +28,7 @@
 # TERMS THAT MAY APPLY.
 """Contains the logic for `aq add machine`."""
 
+from sqlalchemy.orm import joinedload, subqueryload
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.broker import BrokerCommand
@@ -47,7 +48,10 @@ class CommandAddMachine(BrokerCommand):
     def render(self, session, logger, machine, model, vendor, serial, chassis,
                slot, cpuname, cpuvendor, cpuspeed, cpucount, memory, cluster,
                comments, **arguments):
-        dblocation = get_location(session, **arguments)
+        dblocation = get_location(session,
+                                  query_options=[subqueryload('parents'),
+                                                 joinedload('parents.dns_maps')],
+                                  **arguments)
         if chassis:
             dbchassis = Chassis.get_unique(session, chassis, compel=True)
             if slot is None:
