@@ -30,7 +30,7 @@
 
 
 from aquilon.worker.broker import BrokerCommand
-from aquilon.aqdb.model import (Service, Machine, Branch, Personality,
+from aquilon.aqdb.model import (Service, Machine, Host, Branch, Personality,
                                 Cluster, City)
 from aquilon.worker.templates.personality import PlenaryPersonality
 from aquilon.worker.templates.cluster import PlenaryCluster
@@ -101,7 +101,13 @@ class CommandFlush(BrokerCommand):
 
             if machines or all:
                 logger.client_info("Flushing machines.")
+                cnt = session.query(Machine).count()
+                idx = 0
                 for machine in session.query(Machine).all():
+                    idx += 1
+                    if idx % 1000 == 0:  # pragma: no cover
+                        logger.client_info("Processing machine %d of %d..." %
+                                           (idx, cnt))
                     try:
                         plenary_info = PlenaryMachineInfo(machine)
                         written += plenary_info.write(locked=True)
@@ -115,8 +121,14 @@ class CommandFlush(BrokerCommand):
 
             if hosts or all:
                 logger.client_info("Flushing hosts.")
+                cnt = session.query(Host).count()
+                idx = 0
                 for b in session.query(Branch).all():
                     for h in b.hosts:
+                        idx += 1
+                        if idx % 1000 == 0:  # pragma: no cover
+                            logger.client_info("Processing host %d of %d..." %
+                                               (idx, cnt))
                         if not h.archetype.is_compileable:
                             continue
                         try:
@@ -130,7 +142,13 @@ class CommandFlush(BrokerCommand):
 
             if clusters or all:
                 logger.client_info("Flushing clusters.")
+                cnt = session.query(Cluster).count()
+                idx = 0
                 for clus in session.query(Cluster).all():
+                    idx += 1
+                    if idx % 20 == 0:  # pragma: no cover
+                        logger.client_info("Processing cluster %d of %d..." %
+                                           (idx, cnt))
                     try:
                         plenary = PlenaryCluster(clus)
                         written += plenary.write(locked=True)
