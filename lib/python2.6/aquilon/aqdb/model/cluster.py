@@ -158,12 +158,6 @@ class Cluster(Base):
     __mapper_args__ = {'polymorphic_on': cluster_type}
 
     @property
-    def required_services(self):
-        q = object_session(self).query(ClusterAlignedService)
-        q = q.filter_by(cluster_type=self.cluster_type)
-        return q.all()
-
-    @property
     def authored_branch(self):
         if self.sandbox_author:
             return "%s/%s" % (self.sandbox_author.name, self.branch.name)
@@ -550,6 +544,12 @@ class ClusterAlignedService(Base):
 cas = ClusterAlignedService.__table__  # pylint: disable-msg=C0103, E1101
 cas.primary_key.name = '%s_pk' % _CASABV
 cas.info['unique_fields'] = ['cluster_type', 'service']
+
+
+Cluster.required_services = relation(ClusterAlignedService,
+    primaryjoin=ClusterAlignedService.cluster_type == Cluster.cluster_type,
+    foreign_keys=[ClusterAlignedService.cluster_type],
+    viewonly=True)
 
 
 class ClusterServiceBinding(Base):
