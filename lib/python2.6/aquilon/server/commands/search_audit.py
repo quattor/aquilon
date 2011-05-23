@@ -36,7 +36,7 @@ from aquilon.server.broker import BrokerCommand
 from aquilon.server.formats.transaction_info import TransactionList
 from aquilon.aqdb.model import Xtn, XtnDetail, XtnEnd
 
-_IGNORED_COMMANDS = ('show_active_locks','show_active_commands', 'cat',
+_IGNORED_COMMANDS = ('show_active_locks', 'show_active_commands', 'cat',
                      'search_audit')
 
 
@@ -64,7 +64,7 @@ class CommandSearchAudit(BrokerCommand):
 
         if username is not None:
             username = username.lower().strip()
-            q = q.filter(or_(Xtn.username==username,
+            q = q.filter(or_(Xtn.username == username,
                              Xtn.username.like(username + '@%')))
 
         if before is not None:
@@ -87,7 +87,7 @@ class CommandSearchAudit(BrokerCommand):
                 q = q.filter(~exists().where(Xtn.xtn_id == XtnEnd.xtn_id))
             else:
                 q = q.join(XtnEnd)
-                q = q.filter(XtnEnd.return_code==return_code)
+                q = q.filter(XtnEnd.return_code == return_code)
                 q = q.reset_joinpoint()
 
         if keyword is not None:
