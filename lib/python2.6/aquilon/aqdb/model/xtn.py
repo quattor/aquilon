@@ -111,7 +111,7 @@ class XtnEnd(Base):
 
 xtn_end = XtnEnd.__table__
 xtn_end.primary_key.name = 'XTN_END_PK'
-Index('XTN_RETURN_CODE_IDX', xtn_end.c.return_code)
+Index('XTN_END_RETURN_CODE_IDX', xtn_end.c.return_code)
 
 
 class XtnDetail(Base):
@@ -132,7 +132,7 @@ xtn_detail.primary_key.name = 'XTN_DTL_PK'
 Index('xtn_dtl_name_idx', xtn_detail.c.name)
 Index('xtn_dtl_value_idx', xtn_detail.c.value)
 
-if config.has_option('database', 'audit_schema'):
+if config.has_option('database', 'audit_schema'):  # pragma: no cover
     schema = config.get('database', 'audit_schema')
     xtn.schema = schema
     xtn_end.schema = schema
@@ -185,9 +185,10 @@ def start_xtn(session, record, options_to_split=None):
             if not list_args:
                 continue
             for item in list_args.strip().split('\n'):
+                item = item.strip()
                 if not item:
                     continue
-                x = XtnDetail(xtn_id=xtn_id, name=option, value=item.strip())
+                x = XtnDetail(xtn_id=xtn_id, name=option, value=item)
                 session.add(x)
 
     log.debug("start_xtn: finished list processing")
