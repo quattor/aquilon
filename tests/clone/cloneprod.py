@@ -78,8 +78,29 @@ def nuke_target(target_login, target_user):
 class Cloner(object):
     @staticmethod
     def get_parser():
+        msg = """Create a dev copy of prod data.
+
+        For a dev environment, just call the script on its own, either
+        with AQDCONF set or using the --configfile option.  This will
+        connect to prod, exp data, and rsync templates.
+
+        To set up a QA environment, call the script with the --touser
+        option.  This will exp the data and then imp it as the appropriate
+        user.  The template files will be rsync'd into your directory.
+
+        Afterwards, re-run the script as the right id, passing in the
+        --finishfrom argument.
+
+        To test a database upgrade script, run with --schemaonly.  This
+        will exp and imp as normal, but not imp any rows.  Afterwards,
+        run build_db.py with the populate option.  To use runtests.py,
+        disable the call to the AQDB tests that would rebuild the
+        database!
+
+        """
         parser = argparse.ArgumentParser(
-            description='Create a dev copy of prod data.')
+            description=msg,
+            formatter_class=argparse.RawDescriptionHelpFormatter)
         parser.add_argument('--configfile',
                             help='Config file to use instead of AQDCONF')
         parser.add_argument('--touser',
@@ -88,6 +109,9 @@ class Cloner(object):
         parser.add_argument('--finishfrom',
                             help='Skip the database actions and do the '
                                  'final rsync from this destination')
+        parser.add_argument('--schemaonly', action='store_true',
+                            help='Skip the rsync and do not imp any rows '
+                                 'into the database')
         return parser
 
     def __init__(self, args):
@@ -96,6 +120,7 @@ class Cloner(object):
         self.do_create = True
         self.do_clear = True
         self.do_restore = True
+        self.do_schemaonly = False
         self.do_rsync = True
         self.warnings = []
 
@@ -126,6 +151,13 @@ class Cloner(object):
             self.do_restore = False
             self.source_dir = args.finishfrom
 
+        if args.schemaonly:
+            self.do_create = True
+            self.do_clear = True
+            self.do_restore = True
+            self.do_schemaonly = True
+            self.do_rsync = False
+
         if not self.target_dsn.startswith('oracle'):
             print >>sys.stderr, 'Can only copy into an Oracle database.'
             sys.exit(1)
@@ -150,9 +182,11 @@ class Cloner(object):
             os.makedirs(self.dbdir)
         if os.path.exists(self.dumpfile):
             os.remove(self.dumpfile)
-        p = Popen(['exp', self.source_exp, 'FILE=%s' % self.dumpfile,
-                   'OWNER=cdb', 'CONSISTENT=y', 'DIRECT=y'],
-                  stdout=1, stderr=2)
+        exp_args = ['exp', self.source_exp, 'FILE=%s' % self.dumpfile,
+                    'OWNER=cdb', 'CONSISTENT=y', 'DIRECT=y']
+        if self.do_schemaonly:
+            exp_args.append('ROWS=n')
+        p = Popen(exp_args, stdout=1, stderr=2)
         p.communicate()
         if p.returncode != 0:
             print >>sys.stderr, "exp of %s failed!" % self.source_exp
