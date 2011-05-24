@@ -258,6 +258,8 @@ class EsxCluster(Cluster):
             down_hosts_threshold = self.down_hosts_threshold
 
         if len(self.hosts) <= down_hosts_threshold:
+            if self.memory_capacity is not None:
+                return {'memory' : self.memory_capacity}
             return {'memory': 0}
 
         func = self.vmhost_capacity_function
