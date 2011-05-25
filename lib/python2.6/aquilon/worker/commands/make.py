@@ -133,7 +133,11 @@ class CommandMake(BrokerCommand):
     def get_os(self, session, dbhost, osname, osversion, os):
         """Wrapper for handling deprecated os argument."""
         if os:
-            (splitname, splitversion) = os.split('/')
+            try:
+                (splitname, splitversion) = os.split('/')
+            except ValueError:
+                raise ArgumentError("Incorrect value for --os.  Please use "
+                                    "--osname/--osversion instead.")
             if not osname:
                 osname = splitname
             if not osversion:
