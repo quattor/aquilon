@@ -70,14 +70,30 @@ class TestUpdateBranch(TestBrokerCommand):
         out = self.badrequesttest(command)
         self.matchoutput(out, "Compiler not found at", command)
 
+    def testchangemanagerforsandbox(self):
+        command = ["update_branch", "--branch=changetest1", "--change_manager"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "Change management can only be controlled for "
+                         "domains.",
+                         command)
+
+    def testchangemanagerfortracked(self):
+        command = ["update_branch", "--branch=ut-prod", "--change_manager"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "Cannot enforce a change manager for tracking "
+                         "domains.",
+                         command)
+
     def testupdateprod(self):
         self.noouttest(["update", "branch", "--branch", "prod",
-                        "--change_manager", "tcm"])
+                        "--change_manager"])
 
     def testverifyprod(self):
         command = ["show", "domain", "--domain", "prod"]
         out = self.commandtest(command)
-        self.matchoutput(out, "Change Manager: tcm", command)
+        self.matchoutput(out, "Requires Change Manager: True", command)
 
 
 if __name__=='__main__':

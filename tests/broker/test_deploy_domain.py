@@ -78,6 +78,12 @@ class TestDeployDomain(TestBrokerCommand):
                           "--justification", "tcm=12345678",
                           "--comments", "Test comment 2"])
 
+    def testdeploybadjustification(self):
+        command = ["deploy", "--source", "changetest1", "--target", "prod",
+                   "--justification", "I felt like deploying changes."]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Failed to parse the justification", command)
+
     def testverifynosync(self):
         domainsdir = self.config.get("broker", "domainsdir")
         # The change should be in prod...

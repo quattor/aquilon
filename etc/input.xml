@@ -1855,8 +1855,9 @@
       Either type of domain can be used with the "manage" command in
       order to assign some hosts to the domain and run complete tests.
       <p/>
-      The only value allowed right now for --change_manager is "tcm", which
-      means "aq deploy" requires a valid TCM.
+      Setting the --change_manager flag will require a valid TCM or
+      Service Now id passed into the "aq deploy" command's --justification
+      option for the deploy to work.
       <optgroup name="add domain mandatory" mandatory="True" fields="all">
          <option name="domain" type="string">Name of the new domain</option>
       </optgroup>
@@ -1864,7 +1865,7 @@
          <option name="track" type="string" conflicts="start">Branch to track</option>
          <option name="start" type="string" conflicts="track">Branch to use as a starting point (default: prod)</option>
          <option name="comments" type="string">Comments</option>
-         <option name="change_manager" type="string">Set the change manager of the domain</option>
+         <option name="change_manager" type="boolean">Require a change manager for the domain</option>
       </optgroup>
       <transport method="put" path="domain/%(domain)s" />
    </command>
@@ -1898,7 +1899,7 @@
          <option name="comments" type="string">Comments on the branch</option>
          <option name="compiler_version" type="string">Version of panc to use</option>
          <option name="autosync" type="boolean">Set the autosync flag</option>
-         <option name="change_manager" type="string">Set the change manager of the domain</option>
+         <option name="change_manager" type="boolean">Require a change manager for the domain</option>
       </optgroup>
       <transport method="post" path="branch/%(branch)s" />
    </command>
@@ -1966,9 +1967,10 @@
       If using the nosync option follow this with the sync command to
       pull the changes into any production domains.
       <p/>
-      If changes to the target branch require TCM approval, then the argument
-      to --justification must be "tcm=XXXXXX", where XXXXXX is a valid TCM
-      number.
+      If changes to the target branch are under change manager control,
+      then the --justification must be provided in the form of
+      "tcm=NNNNNNNNN" or "sn=XXXNNNNN", where either a valid TCM or
+      Service Now id is provided.
       <optgroup name="deploy options" mandatory="True" fields="all">
          <option name="source" type="string">Name of the branch (domain or sandbox) with changes</option>
          <option name="target" type="string">Name of the target domain</option>

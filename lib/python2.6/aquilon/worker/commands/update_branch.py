@@ -34,7 +34,6 @@ import os
 
 from aquilon.exceptions_ import ArgumentError, AuthorizationException
 from aquilon.aqdb.model import Branch, Domain
-from aquilon.aqdb.model.branch import CHANGE_MANAGERS
 from aquilon.worker.broker import BrokerCommand
 
 VERSION_RE = re.compile(r'^[-_.a-zA-Z0-9]*$')
@@ -69,13 +68,10 @@ class CommandUpdateBranch(BrokerCommand):
             if not isinstance(dbbranch, Domain):
                 raise ArgumentError("Change management can only be controlled "
                                     "for domains.")
-            if change_manager == '':
-                dbbranch.change_manager = None
-            else:
-                if change_manager not in CHANGE_MANAGERS:
-                    raise ArgumentError("Unknown change manager %s." %
-                                        change_manager)
-                dbbranch.change_manager = change_manager
+            if dbbranch.tracked_branch:
+                raise ArgumentError("Cannot enforce a change manager for "
+                                    "tracking domains.")
+            dbbranch.requires_change_manager = bool(change_manager)
         session.add(dbbranch)
         session.flush()
         return
