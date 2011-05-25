@@ -34,8 +34,7 @@ from random import choice
 from sqlalchemy.orm.session import object_session
 
 from aquilon.exceptions_ import ArgumentError, InternalError
-from aquilon.aqdb.model import (Host, Cluster, ClusterAlignedService,
-                                ServiceInstance)
+from aquilon.aqdb.model import Host, Cluster, ServiceInstance
 from aquilon.worker.templates.service import PlenaryServiceInstanceServer
 from aquilon.worker.templates.cluster import PlenaryCluster
 from aquilon.worker.templates.host import PlenaryHost
@@ -473,9 +472,7 @@ class HostChooser(Chooser):
             # they are otherwise required by the archetype/personality.
             for si in self.dbhost.cluster.service_bindings:
                 self.cluster_aligned_services[si.service] = si
-            q = self.session.query(ClusterAlignedService)
-            q = q.filter_by(cluster_type=self.dbhost.cluster.cluster_type)
-            for item in q.all():
+            for item in self.dbhost.cluster.required_services:
                 if item.service not in self.cluster_aligned_services:
                     # Don't just error here because the error() call
                     # has not yet been set up.  Will error out later.
@@ -553,9 +550,7 @@ class ClusterChooser(Chooser):
         self.personality = self.dbcluster.personality
         self.required_services = set()
         """Stores interim service instance lists."""
-        q = self.session.query(ClusterAlignedService)
-        q = q.filter_by(cluster_type=self.dbcluster.cluster_type)
-        for item in q.all():
+        for item in self.dbcluster.required_services:
             self.required_services.add(item.service)
         self.original_service_instances = {}
         """Cache of any already bound services (keys) and the instance

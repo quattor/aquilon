@@ -45,6 +45,15 @@ class TestAddESXClusterAlignedService(TestBrokerCommand):
                    "--service=esx_management_server"]
         self.noouttest(command)
 
+    def testaddesxmanagementagain(self):
+        command = ["add_esx_cluster_aligned_service",
+                   "--service=esx_management_server"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "Service esx_management_server is already aligned to "
+                         "ESX clusters.",
+                         command)
+
     def testfailmissingservice(self):
         command = ["add_esx_cluster_aligned_service",
                    "--service=service-does-not-exist"]
