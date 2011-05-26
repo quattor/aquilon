@@ -66,14 +66,12 @@ class DnsEnvironment(Base):
 
     @classmethod
     def get_unique_or_default(cls, session, dns_environment=None):
-        dbdns_env = None
         if dns_environment:
-            dbdns_env = cls.get_unique(session, dns_environment, compel=True)
-        if not dbdns_env:
-            dbdns_env = cls.get_unique(session, _config.get("site",
-                                                            "default_dns_environment"),
-                                       compel=InternalError)
-        return dbdns_env
+            return cls.get_unique(session, dns_environment, compel=True)
+        else:
+            return cls.get_unique(session, _config.get("site",
+                                                       "default_dns_environment"),
+                                  compel=InternalError)
 
 
 dnsenv = DnsEnvironment.__table__  # pylint: disable-msg=C0103, E1101

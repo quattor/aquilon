@@ -268,6 +268,18 @@ class TestAddInterfaceAddress(TestBrokerCommand):
                          "environments cannot be mixed.",
                          command)
 
+    def testmissingnetenv(self):
+        net = self.net.unknown[1]
+        ip = net[3]
+        command = ["add", "interface", "address", "--machine", "ut3c5n7",
+                   "--interface", "eth0", "--ip", ip, "--label", "e0",
+                   "--fqdn", "unittest25-e0.utcolo.aqd-unittest.ms.com",
+                   "--network_environment", "no-such-env"]
+        out = self.notfoundtest(command)
+        self.matchoutput(out,
+                         "Network Environment no-such-env not found.",
+                         command)
+
     def testaddunittest25utcolo(self):
         net = self.net.unknown[1]
         ip = net[4]
