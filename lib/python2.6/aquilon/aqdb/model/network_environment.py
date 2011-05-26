@@ -89,7 +89,7 @@ class NetworkEnvironment(Base):
     def get_unique_or_default(cls, session, network_environment=None):
         dbnet_env = None
         if network_environment:
-            dbnet_env = cls.get_unique(session, network_environment)
+            dbnet_env = cls.get_unique(session, network_environment, compel=True)
         if not dbnet_env:
             dbnet_env = cls.get_unique(session, _config.get("site",
                                                             "default_network_environment"),
