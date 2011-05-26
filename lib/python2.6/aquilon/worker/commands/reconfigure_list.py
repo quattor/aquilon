@@ -31,7 +31,7 @@
 
 from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.dbwrappers.host import hostname_to_host
+from aquilon.worker.dbwrappers.host import hostlist_to_hosts
 from aquilon.aqdb.model import (Archetype, Personality,
                                 OperatingSystem, HostLifecycle)
 from aquilon.worker.templates.domain import TemplateDomain
@@ -45,23 +45,7 @@ class CommandReconfigureList(BrokerCommand):
 
     def render(self, session, logger, list, archetype, personality,
                buildstatus, osname, osversion, os, **arguments):
-        dbhosts = []
-        failed = []
-        for host in list.splitlines():
-            host = host.strip()
-            if not host or host.startswith('#'):
-                continue
-            try:
-                dbhosts.append(hostname_to_host(session, host))
-            except NotFoundException, nfe:
-                failed.append("%s: %s" % (host, nfe))
-            except ArgumentError, ae:
-                failed.append("%s: %s" % (host, ae))
-        if failed:
-            raise ArgumentError("Invalid hosts in list:\n%s" %
-                                "\n".join(failed))
-        if not dbhosts:
-            raise ArgumentError("Empty list.")
+        dbhosts = hostlist_to_hosts(session, list)
 
         self.reconfigure_list(session, logger, dbhosts, archetype, personality,
                               buildstatus, osname, osversion, os, **arguments)

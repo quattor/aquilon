@@ -31,7 +31,7 @@
 
 from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.dbwrappers.host import hostname_to_host
+from aquilon.worker.dbwrappers.host import hostlist_to_hosts
 from aquilon.worker.commands.reset_advertised_status \
      import CommandResetAdvertisedStatus
 from aquilon.worker.templates.domain import TemplateDomain
@@ -46,23 +46,7 @@ class CommandResetAdvertisedStatusList(CommandResetAdvertisedStatus):
     required_parameters = ["list"]
 
     def render(self, session, logger, list, **arguments):
-        dbhosts = []
-        failed = []
-        for host in list.splitlines():
-            host = host.strip()
-            if not host or host.startswith('#'):
-                continue
-            try:
-                dbhosts.append(hostname_to_host(session, host))
-            except NotFoundException, nferr:
-                failed.append("%s: %s" % (host, nferr))
-            except ArgumentError, aerr:
-                failed.append("%s: %s" % (host, aerr))
-        if failed:
-            raise ArgumentError("Invalid hosts in list:\n%s" %
-                                "\n".join(failed))
-        if not dbhosts:
-            raise ArgumentError("Empty list.")
+        dbhosts = hostlist_to_hosts(session, list)
 
         self.resetadvertisedstatus_list(session, logger, dbhosts)
 

@@ -436,7 +436,7 @@ class Option(Element):
         elif self.type == 'float':
             parser.add_option(*names, dest=self.name, action="store",
                               type="float", **extra_args)
-        elif self.type == 'file':
+        elif self.type == 'file' or self.type == 'list':
             # Need type?
             parser.add_option(*names, dest=self.name, action="callback",
                               callback=read_file, type="string")
@@ -456,7 +456,7 @@ class Option(Element):
     def shortHelp(self):
         if self.type == "boolean":
             return "--[no]" + self.name
-        elif self.type in ["string", "file", "int"]:
+        elif self.type in ["string", "file", "list", "int"]:
             return "--" + self.name + " " + self.name.upper()
         else:
             return "--" + self.name

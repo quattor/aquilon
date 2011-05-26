@@ -183,6 +183,17 @@ def force_ascii(label, value):
         raise ArgumentError("Only ASCII characters are allowed for %s." % label)
     return value
 
+def force_list(label, value):
+    """
+    Convert a value containing embedded newlines to a list.
+
+    The function also removes empty lines and lines starting with '#'.
+    """
+    if value is None:
+        return None
+    lines = map(lambda x: force_ascii('line', x.strip()), value.splitlines())
+    return filter(lambda x: x and not x.startswith("#"), lines)
+
 def first_of(iterable, function):
     """
     Return the first matching element of an iterable

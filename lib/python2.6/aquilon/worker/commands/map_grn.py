@@ -32,7 +32,7 @@ from aquilon.exceptions_ import NotFoundException, ArgumentError
 from aquilon.aqdb.model import Personality
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.grn import lookup_grn
-from aquilon.worker.dbwrappers.host import hostname_to_host
+from aquilon.worker.dbwrappers.host import hostname_to_host, hostlist_to_hosts
 
 
 class CommandMapGrn(BrokerCommand):
@@ -51,23 +51,7 @@ class CommandMapGrn(BrokerCommand):
         if hostname:
             objs = [hostname_to_host(session, hostname)]
         elif list:
-            objs = []
-            failed = []
-            for host in list.splitlines():
-                host = host.strip()
-                if not host or host.startswith('#'):
-                    continue
-                try:
-                    objs.append(hostname_to_host(session, host))
-                except NotFoundException, nfe:
-                    failed.append("%s: %s" % (host, nfe))
-                except ArgumentError, ae:
-                    failed.append("%s: %s" % (host, ae))
-            if failed:
-                raise ArgumentError("Invalid hosts in list:\n%s" %
-                                    "\n".join(failed))
-            if not objs:
-                raise ArgumentError("Empty list.")
+            objs = hostlist_to_hosts(session, list)
         elif personality:
             objs = [Personality.get_unique(session, name=personality,
                                            archetype=archetype, compel=True)]

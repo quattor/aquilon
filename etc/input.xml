@@ -1940,7 +1940,7 @@
       All hosts will be set to the same status.
       <optgroup name="pxeswitch_opts" mandatory="True" fields="any">
          <option name="hostname" type="string" conflicts="list">Host name</option>
-         <option name="list" type="file" conflicts="hostname">file containing hostnames</option>
+         <option name="list" type="list" conflicts="hostname">file containing hostnames</option>
       </optgroup>
       <optgroup name="pxeswitch_action" mandatory="False" fields="any">
          <option name="status" type="flag" conflicts="localboot install firmware blindbuild rescue">display the current status of how the host will boot</option>
@@ -1970,8 +1970,8 @@
       --keepbindings flag is specified.
       <optgroup name="reconfigure_options" mandatory="True" fields="any">
          <option name="hostname" type="string" conflicts="hostlist list memberof">Host name</option>
-         <option name="hostlist" type="file" conflicts="hostname list memberof">[Deprecated] File with one host per line</option>
-         <option name="list" type="file" conflicts="hostname hostlist memberof">File with one host per line</option>
+         <option name="hostlist" type="list" conflicts="hostname list memberof">[Deprecated] File with one host per line</option>
+         <option name="list" type="list" conflicts="hostname hostlist memberof">File with one host per line</option>
          <option name="membersof" type="string" conflicts="hostlist list hostname">Hosts which are members of the specified cluster</option>
       </optgroup>
       <optgroup name="reconfigure_optional" mandatory="False">
@@ -2022,7 +2022,7 @@
       <optgroup name="reset_advertised_status" mandatory="True" fields="all">
          <optgroup name='what_to_change' mandatory="True" fields="any">
                 <option name="hostname" type="string">Host name</option>
-                <option name="list" type="file" conflicts="hostname">File with one host per line</option>
+                <option name="list" type="list" conflicts="hostname">File with one host per line</option>
          </optgroup>
       </optgroup>
       <transport method="post" path="host/%(hostname)s/command/resetadvertisedstatus" />
@@ -4473,7 +4473,7 @@
       </optgroup>
       <optgroup name="map_grn_target" mandatory="true" fields="any">
          <option name="hostname" type="string" conflicts="list personality">Host</option>
-         <option name="list" type="file" conflicts="hostname personality">List of hosts</option>
+         <option name="list" type="list" conflicts="hostname personality">List of hosts</option>
          <option name="personality" type="string" conflicts="hostname list">Personality</option>
       </optgroup>
       <optgroup name="map_grn_optional" mandatory="false" fields="any">
@@ -4492,7 +4492,7 @@
       </optgroup>
       <optgroup name="unmap_grn_target" mandatory="true" fields="any">
          <option name="hostname" type="string" conflicts="list personality">Host</option>
-         <option name="list" type="file" conflicts="hostname personality">List of hosts</option>
+         <option name="list" type="list" conflicts="hostname personality">List of hosts</option>
          <option name="personality" type="string" conflicts="hostname list">Personality</option>
       </optgroup>
       <optgroup name="unmap_grn_optional" mandatory="false" fields="any">
