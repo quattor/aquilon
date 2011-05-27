@@ -3082,11 +3082,17 @@
 
    <command name="add_dns_domain">
       Add a new DNS subdomain.
+      <p/>
+      The --restricted flag tells the broker that it does not have full control over
+      the DNS domain, so commands that manipulate the DNS information are not allowed.
+      Such operations must be performed by the tool that has full control over the
+      domain (e.g. Active Directory).
       <optgroup name="add_dns_domain_options" mandatory="True" fields="all">
          <option name="dns_domain" type="string">Name of the new DNS domain</option>
       </optgroup>
       <optgroup name="add_dns_domain_optional_options" mandatory="False">
          <option name="comments" type="string">Comments</option>
+         <option name="restricted" type="flag">Restrict direct DNS manipulation commands</option>
       </optgroup>
       <transport method="put" path="dns_domain/%(dns_domain)s" />
    </command>
@@ -3108,6 +3114,18 @@
          <option name="dns_domain" type="string">Name of the DNS domain</option>
       </optgroup>
       <transport method="delete" path="dns_domain/%(dns_domain)s" />
+   </command>
+
+   <command name="update_dns_domain">
+      Update the named DNS subdomain.
+      <optgroup name="update_dns_domain_options" mandatory="True" fields="all">
+         <option name="dns_domain" type="string">Name of the DNS domain</option>
+      </optgroup>
+      <optgroup name="update_dns_domain_optional_options" mandatory="False">
+         <option name="comments" type="string">Comments</option>
+         <option name="restricted" type="boolean">Restrict direct DNS manipulation commands</option>
+      </optgroup>
+      <transport method="post" path="dns_domain/%(dns_domain)s" />
    </command>
 
    <command name="dump_dns">

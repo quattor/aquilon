@@ -43,14 +43,15 @@ class CommandAddAlias(BrokerCommand):
                **kwargs):
         dbdns_env = DnsEnvironment.get_unique_or_default(session,
                                                          dns_environment)
-        (name, dbdns_domain) = parse_fqdn(session, fqdn)
 
-        DnsRecord.get_unique(session, dns_environment=dbdns_env, name=name,
-                             dns_domain=dbdns_domain, preclude=True)
+        dbfqdn = Fqdn.get_or_create(session, dns_environment=dbdns_env,
+                                    fqdn=fqdn)
 
-        dbfqdn = Fqdn(session=session, dns_environment=dbdns_env, name=name,
-                      dns_domain=dbdns_domain)
-        session.add(dbfqdn)
+        if dbfqdn.dns_domain.restricted:
+            raise ArgumentError("{0} is restricted, aliases are not allowed."
+                                .format(dbfqdn.dns_domain))
+
+        DnsRecord.get_unique(session, fqdn=dbfqdn, preclude=True)
 
         dbtarget = Fqdn.get_unique(session, fqdn=target, compel=True)
 
@@ -62,7 +63,7 @@ class CommandAddAlias(BrokerCommand):
 
         session.flush()
 
-        if dbdns_env.is_default and dbdns_domain.name == "ms.com":
+        if dbdns_env.is_default and dbfqdn.dns_domain.name == "ms.com":
             dsdb_runner = DSDBRunner(logger=logger)
             try:
                 dsdb_runner.add_alias(fqdn, target, comments)

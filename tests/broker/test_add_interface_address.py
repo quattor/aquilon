@@ -169,6 +169,17 @@ class TestAddInterfaceAddress(TestBrokerCommand):
         out = self.badrequesttest(command)
         self.matchoutput(out, "Illegal address usage 'badusage'.", command)
 
+    def testrejectrestricteddomain(self):
+        ip = self.net.tor_net2[0].usable[-1]
+        command = ["add", "interface", "address", "--machine", "ut3c5n2",
+                   "--interface", "eth1", "--label", "3",
+                   "--fqdn", "foo.restrict.aqd-unittest.ms.com", "--ip", ip]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "DNS Domain restrict.aqd-unittest.ms.com is "
+                         "restricted, auxiliary addresses are not allowed.",
+                         command)
+
     def testsystemzebramix(self):
         ip = self.net.unknown[0].usable[3]
         command = ["add", "interface", "address", "--machine", "ut3c5n2",

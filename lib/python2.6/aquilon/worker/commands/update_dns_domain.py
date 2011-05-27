@@ -1,6 +1,6 @@
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 #
-# Copyright (C) 2008,2009,2010,2011  Contributor
+# Copyright (C) 2011  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -26,33 +26,22 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-"""Contains the logic for `aq add dns_domain`."""
+"""Contains the logic for `aq update dns domain`."""
 
 
 from aquilon.exceptions_ import ArgumentError, ProcessException
 from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import DnsDomain
-from aquilon.worker.processes import DSDBRunner
 
 
-class CommandAddDnsDomain(BrokerCommand):
+class CommandUpdateDnsDomain(BrokerCommand):
 
     required_parameters = ["dns_domain"]
 
-    def render(self, session, logger, dns_domain, restricted, comments,
-               **arguments):
-        DnsDomain.get_unique(session, dns_domain, preclude=True)
-
-        dbdns_domain = DnsDomain(name=dns_domain, comments=comments)
-        if restricted:
-            dbdns_domain.restricted = True
-        session.add(dbdns_domain)
+    def render(self, session, dns_domain, restricted, comments, **arguments):
+        dbdns_domain = DnsDomain.get_unique(session, dns_domain, compel=True)
+        if restricted is not None:
+            dbdns_domain.restricted = restricted
+        if comments is not None:
+            dbdns_domain.comments = comments
         session.flush()
-
-        dsdb_runner = DSDBRunner(logger=logger)
-        try:
-            dsdb_runner.add_dns_domain(dbdns_domain.name, comments)
-        except ProcessException, err:
-            raise ArgumentError(err)
-
-        return

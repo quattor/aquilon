@@ -170,6 +170,16 @@ class TestAddAddress(TestBrokerCommand):
         out = self.badrequesttest(command)
         self.matchoutput(out, "Illegal DNS name format 'foo-'.", command)
 
+    def test_460_restricted_domain(self):
+        ip = self.net.unknown[0].usable[-1]
+        command = ["add", "address", "--fqdn", "foo.restrict.aqd-unittest.ms.com",
+                   "--ip", ip]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "DNS Domain restrict.aqd-unittest.ms.com is "
+                         "restricted, standalone A records are not allowed.",
+                         command)
+
     def test_500_addunittest20eth1(self):
         ip = self.net.unknown[12].usable[0]
         fqdn = "unittest20-e1.aqd-unittest.ms.com"

@@ -31,7 +31,7 @@
 from datetime import datetime
 import re
 
-from sqlalchemy import (Column, Integer, DateTime, Sequence, String,
+from sqlalchemy import (Column, Integer, DateTime, Sequence, String, Boolean,
                         UniqueConstraint)
 from sqlalchemy.ext.associationproxy import association_proxy
 
@@ -73,6 +73,9 @@ class DnsDomain(Base):
 
     id = Column(Integer, Sequence('%s_id_seq' % (_TN)), primary_key=True)
     name = Column(AqStr(32), nullable=False)
+
+    restricted = Column(Boolean(name="%s_restricted_ck" % _TN),
+                        nullable=False, default=False)
 
     creation_date = Column(DateTime, default=datetime.now, nullable=False)
     comments = Column(String(255), nullable=True)

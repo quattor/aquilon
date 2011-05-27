@@ -72,6 +72,15 @@ class TestAddAlias(TestBrokerCommand):
         out = self.badrequesttest(cmd)
         self.matchoutput(out, "Reserved Name nyaqd1.ms.com already exists.", cmd)
 
+    def test_140_restricted_domain(self):
+        cmd = ["add", "alias", "--fqdn", "foo.restrict.aqd-unittest.ms.com",
+               "--target", "arecord13.aqd-unittest.ms.com"]
+        out = self.badrequesttest(cmd)
+        self.matchoutput(out,
+                         "DNS Domain restrict.aqd-unittest.ms.com is "
+                         "restricted, aliases are not allowed.",
+                         cmd)
+
     def test_400_verify_alias2host(self):
         cmd = "show alias --fqdn alias2host.aqd-unittest.ms.com"
         out = self.commandtest(cmd.split(" "))

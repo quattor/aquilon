@@ -89,6 +89,9 @@ class CommandAddInterfaceAddress(BrokerCommand):
         delete_old_dsdb_entry = False
         dbfqdn = Fqdn.get_or_create(session, fqdn=fqdn,
                                     dns_environment=dbnet_env.dns_environment)
+        if dbfqdn.dns_domain.restricted:
+            raise ArgumentError("{0} is restricted, auxiliary addresses "
+                                "are not allowed.".format(dbfqdn.dns_domain))
         if ip:
             # TODO: move this check to the model
             q = session.query(DynamicStub)

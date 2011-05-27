@@ -58,6 +58,7 @@ class CommandAddManager(BrokerCommand):
                                   dbmachine.primary_name.fqdn.dns_domain.name)
 
         dbfqdn = Fqdn.get_or_create(session, fqdn=manager, preclude=True)
+
         dbinterface = get_or_create_interface(session, dbmachine,
                                               name=interface, mac=mac,
                                               interface_type='management')
