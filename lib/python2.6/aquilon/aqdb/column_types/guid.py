@@ -50,15 +50,15 @@ class GUID(TypeDecorator):
 
     def load_dialect_impl(self, dialect):
         if dialect.name == 'postgresql':
-            return dialect.type_descriptor(UUID())
+            return dialect.type_descriptor(UUID())  # pragma: no cover
         else:
             return dialect.type_descriptor(CHAR(32))
 
     def process_bind_param(self, value, dialect):
         if value is None:
-            return value
+            return value  # pragma: no cover
         elif dialect.name == 'postgresql':
-            return str(value)
+            return str(value)  # pragma: no cover
         else:
             if not isinstance(value, uuid.UUID):
                 return "%.32x" % uuid.UUID(value)
