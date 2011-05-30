@@ -30,3 +30,7 @@
     binaries shipped.
     
 """
+
+import ms.version
+
+ms.version.addpkg('lxml', '2.2.4')

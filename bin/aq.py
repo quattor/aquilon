@@ -55,6 +55,7 @@ MANDIR = os.path.join(SRCDIR, "doc", "man")
 
 sys.path.append(LIBDIR)
 
+from aquilon.client import depends
 from aquilon.client.knchttp import KNCHTTPConnection
 from aquilon.client.chunked import ChunkedHTTPConnection
 from aquilon.client.optparser import OptParser, ParsingError
@@ -282,8 +283,7 @@ if __name__ == "__main__":
         (command, transport, commandOptions, globalOptions) = \
                 parser.parse(sys.argv[1:])
     except ParsingError, e:
-        print >>sys.stderr, '%s: Option parsing error: %s' % (sys.argv[0],
-                                                              e.error)
+        print >>sys.stderr, '%s: %s' % (sys.argv[0], e.error)
         print >>sys.stderr, '%s: Try --help for usage details.' % (sys.argv[0])
         sys.exit(1)
 
