@@ -30,7 +30,7 @@
 
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand, validate_basic
 from aquilon.aqdb.model import NetworkEnvironment, DnsEnvironment
 from aquilon.worker.dbwrappers.location import get_location
 
@@ -41,6 +41,7 @@ class CommandAddNetworkEnvironment(BrokerCommand):
 
     def render(self, session, network_environment, dns_environment, comments,
                **arguments):
+        validate_basic("network environment", network_environment)
         NetworkEnvironment.get_unique(session, network_environment,
                                       preclude=True)
         dbdns_env = DnsEnvironment.get_unique(session, dns_environment,
