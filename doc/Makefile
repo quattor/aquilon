@@ -34,11 +34,11 @@ html: HTML.MANIFEST
 HTML.MANIFEST: $(ALL_SOURCES) version.txt
 	$(XSLTPROC) $(XSLT_PARAMS) style-html.xsl $(ALL_SOURCES)
 
-version.txt:
-	# We don't want the -rc suffix to show up in the man pages
-	git describe | sed -e 's/-rc[0-9]\+$$//' > $@.tmp
-	# Don't force a full rebuild unless the version has changed
-	if cmp -s $@ $@.tmp; then rm -f $@.tmp; else mv $@.tmp $@; fi
+version.txt: FORCE
+	@# We don't want the -rc suffix to show up in the man pages
+	@git describe 2>/dev/null | sed -e 's/-rc[0-9]\+$$//' > $@.tmp
+	@# Don't force a full rebuild unless the version has changed
+	@cmp -s $@ $@.tmp; if [ $$? -gt 0 -a -s $@.tmp ]; then mv $@.tmp $@; else rm -f $@.tmp; fi
 
 clean:
 	-rm -f *.MANIFEST
@@ -60,7 +60,7 @@ install: all install-man install-html
 
 # Use "make check" to validate the XML files. Unfortunately the error
 # messages can be misleading sometimes...
-check:
+check: version.txt
 	$(XMLLINT) $(XMLLINT_PARAMS) $(ALL_SOURCES)
 
-.PHONY: all check clean install install-man install-html man html
+.PHONY: all check clean install install-man install-html man html FORCE
