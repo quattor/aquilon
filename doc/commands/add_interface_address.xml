@@ -35,6 +35,7 @@
 	    <arg choice="plain"><option>--fqdn <replaceable>FQDN</replaceable></option></arg>
 	    <arg choice="opt"><option>--label <replaceable>LABEL</replaceable></option></arg>
 	    <arg choice="opt"><option>--usage <replaceable>USAGE</replaceable></option></arg>
+	    <arg choice="opt"><option>--network_environment <replaceable>NETENV</replaceable></option></arg>
 	    <group>
 		<synopfragmentref linkend="ip-options">IP address options</synopfragmentref>
 	    </group>
@@ -97,6 +98,12 @@
 			both <option>--fqdn</option> and an IP option, then a new DNS record will be
 			created.
 		    </para>
+		    <para>
+			If the <option>--network_environment</option> is also specified, then the
+			FQDN will be looked up/created in the DNS environment bound to
+			<replaceable>NETENV</replaceable>. Otherwise the default DNS environment is
+			used.
+		    </para>
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
@@ -132,6 +139,22 @@
 			To enable IP failover support using Zebra, the same IP address must be
 			assigned to multiple interfaces with the same
 			<replaceable>LABEL</replaceable>.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--network_environment <replaceable>NETENV</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Register the address in <replaceable>NETENV</replaceable> instead of the
+			default network environment. A network containing the address must already
+			exist in the given environment.
+		    </para>
+		    <para>
+			Specifying <option>--network_environment</option> also sets the DNS
+			environment where <replaceable>FQDN</replaceable> is looked up or created.
 		    </para>
 		</listitem>
 	    </varlistentry>
@@ -208,7 +231,8 @@ aq add interface address --machine foo.one-nyp.ms.com \
 	    <citerefentry><refentrytitle>add_chassis</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
 	    <citerefentry><refentrytitle>add_host</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
 	    <citerefentry><refentrytitle>add_switch</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-	    <citerefentry><refentrytitle>poll_switch</refentrytitle><manvolnum>1</manvolnum></citerefentry>
+	    <citerefentry><refentrytitle>poll_switch</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>add_network_environment</refentrytitle><manvolnum>1</manvolnum></citerefentry>
 	</para>
     </refsect1>
 </refentry>

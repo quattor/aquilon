@@ -134,12 +134,13 @@
     </varlistentry>
     <varlistentry>
 	<term>
-	    <option>--aquser <replaceable>USER</replaceable></option>
+	    <option>--aqservice <replaceable>SERVICE</replaceable></option>
 	</term>
 	<listitem>
 	    <para>
-		Name of the user running the server. Should default correctly,
-		only useful for development.
+		Name of the Kerberos service principal used to authenticate to
+		the server. Should default correctly, only useful for
+		development.
 	    </para>
 	</listitem>
     </varlistentry>

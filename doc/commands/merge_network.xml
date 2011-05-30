@@ -1,0 +1,127 @@
+<?xml version="1.0"?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V5.0//EN"
+"http://docbook.org/xml/5.0/dtd/docbook.dtd" [
+<!ENTITY aqd_version SYSTEM "../version.txt">
+]>
+<refentry xml:id="merge_network"
+	  xmlns:xi="http://www.w3.org/2001/XInclude">
+    <refmeta>
+        <refentrytitle>merge_network</refentrytitle>
+        <manvolnum>1</manvolnum>
+        <refmiscinfo class="version">&aqd_version;</refmiscinfo>
+        <refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
+    </refmeta>
+
+    <refnamediv>
+        <refname>merge network</refname>
+        <refpurpose>
+	    Merge existing subnets to a larger network
+        </refpurpose>
+	<refclass>Aquilon</refclass>
+    </refnamediv>
+
+    <refsynopsisdiv>
+	<cmdsynopsis>
+	    <command>aq merge network</command>
+	    <group>
+		<synopfragmentref linkend="global-options">Global options</synopfragmentref>
+	    </group>
+	    <arg choice="plain"><option>--ip <replaceable>IP</replaceable></option></arg>
+	    <group choice="req">
+	        <arg choice="plain"><option>--netmask <replaceable>NETMASK</replaceable></option></arg>
+	        <arg choice="plain"><option>--prefixlen <replaceable>LENGTH</replaceable></option></arg>
+	    </group>
+	    <arg choice="opt"><option>--network_environment <replaceable>NETENV</replaceable></option></arg>
+	    <xi:include href="../common/global_options.xml"/>
+	</cmdsynopsis>
+    </refsynopsisdiv>
+
+    <refsect1>
+        <title>Description</title>
+	<para>
+	    The <command>aq merge network</command> command merges multiple existing subnets to form
+	    a larger network. Existing address assignments will be updated to point to the new network.
+	</para>
+	<para>
+	    <replaceable>IP</replaceable> must identify an existing network. It is not neccessary to
+	    specify the first subnet, however the new network will inherit its name, location and
+	    side from the subnet specified.
+	</para>
+    </refsect1>
+
+    <refsect1>
+        <title>Options</title>
+	<variablelist>
+	    <title>Command-specific options</title>
+	    <varlistentry>
+	        <term>
+		    <option>--ip <replaceable>IP</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			The IP address of any subnet inside the would be merged network.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--netmask <replaceable>NETMASK</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			The new netmask, in dotted quad notation. The new netmask must have less
+			bits set than the old one. Exactly one of <option>--netmask</option> and
+			<option>--prefixlen</option> must be specified.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--prefixlen <replaceable>LENGTH</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			The new prefix lenght of the network. It must be strictly smaller than the
+			old prefix length. Exactly one of <option>--netmask</option> and
+			<option>--prefixlen</option> must be specified.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--network_environment <replaceable>NETENV</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Select the network environment that contains the networks to be merged. If not
+			specified, the default defined by the <literal>default_network_environment</literal>
+			key in the <literal>site</literal> section of the broker's configuration
+			will be used.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	</variablelist>
+	<xi:include href="../common/global_options_desc.xml"/>
+    </refsect1>
+
+    <refsect1>
+	<title>Examples</title>
+	<example>
+	    <title>Merge networks 192.168.0.0/25 and 192.168.0.128/25 into 192.168.0.0/24</title>
+	    <programlisting>
+aq merge network --ip 192.168.0.128 --prefixlen 24
+	    </programlisting>
+	</example>
+    </refsect1>
+
+    <refsect1>
+	<title>See also</title>
+	<para>
+	    <citerefentry><refentrytitle>add_network</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>split_network</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>add_network_environment</refentrytitle><manvolnum>1</manvolnum></citerefentry>
+	</para>
+    </refsect1>
+</refentry>
+
+<!-- vim: set ai sw=4: -->

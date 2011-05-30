@@ -1,0 +1,84 @@
+<?xml version="1.0"?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V5.0//EN"
+"http://docbook.org/xml/5.0/dtd/docbook.dtd" [
+<!ENTITY aqd_version SYSTEM "../version.txt">
+]>
+<refentry xml:id="unmap_dns_domain"
+	  xmlns:xi="http://www.w3.org/2001/XInclude">
+    <refmeta>
+        <refentrytitle>unmap_dns_domain</refentrytitle>
+        <manvolnum>1</manvolnum>
+        <refmiscinfo class="version">&aqd_version;</refmiscinfo>
+        <refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
+    </refmeta>
+
+    <refnamediv>
+        <refname>unmap dns domain</refname>
+        <refpurpose>
+	    Remove the mapping of a DNS domain to a given location
+        </refpurpose>
+	<refclass>Aquilon</refclass>
+    </refnamediv>
+
+    <refsynopsisdiv>
+	<cmdsynopsis>
+	    <command>aq unmap dns domain</command>
+	    <group>
+		<synopfragmentref linkend="global-options">Global options</synopfragmentref>
+	    </group>
+	    <arg choice="plain"><option>--dns_domain <replaceable>DOMAIN</replaceable></option></arg>
+	    <group>
+		<synopfragmentref linkend="location-options">Location options</synopfragmentref>
+	    </group>
+	    <xi:include href="../common/location_options.xml"/>
+	    <xi:include href="../common/global_options.xml"/>
+	</cmdsynopsis>
+    </refsynopsisdiv>
+
+    <refsect1>
+        <title>Description</title>
+	<para>
+	    The <command>aq unmap dns domain</command> command removes the mapping of a DNS domain
+	    to a given location. See the
+	    <citerefentry><refentrytitle>map_dns_domain</refentrytitle><manvolnum>1</manvolnum></citerefentry>
+	    command for information about how this affects the DNS search path.
+	</para>
+	<para>
+	    Changes in the DNS search path due to changes in the domain mapping take effect only
+	    when the machine's plenary template is updated. Use the
+	    <citerefentry><refentrytitle>flush</refentrytitle><manvolnum>1</manvolnum></citerefentry>
+	    command to force an update of the machine templates.
+	</para>
+    </refsect1>
+
+    <refsect1>
+        <title>Options</title>
+	<variablelist>
+	    <title>Command-specific options</title>
+	    <varlistentry>
+	        <term>
+		    <option>--dns_domain <replaceable>DOMAIN</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			The DNS domain to unmap from the specified location.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	</variablelist>
+	<xi:include href="../common/location_options_desc.xml"/>
+	<xi:include href="../common/global_options_desc.xml"/>
+    </refsect1>
+
+    <refsect1>
+	<title>See also</title>
+	<para>
+	    <citerefentry><refentrytitle>map_dns_domain</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>search_dns_domain_map</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>show_dns_domain</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>flush</refentrytitle><manvolnum>1</manvolnum></citerefentry>
+	</para>
+    </refsect1>
+</refentry>
+
+<!-- vim: set ai sw=4: -->
