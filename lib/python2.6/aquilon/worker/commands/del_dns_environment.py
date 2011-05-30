@@ -44,6 +44,10 @@ class CommandDelDnsEnvironment(BrokerCommand):
         db_dnsenv = DnsEnvironment.get_unique(session, dns_environment,
                                               compel=True)
 
+        if db_dnsenv.is_default:
+            raise ArgumentError("{0} is the default DNS environment, "
+                                "therefore it cannot be deleted."
+                                .format(db_dnsenv))
         q = session.query(Fqdn)
         q = q.filter_by(dns_environment=db_dnsenv)
         if q.first():

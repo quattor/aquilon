@@ -50,6 +50,14 @@ class TestDelDnsEnvironment(TestBrokerCommand):
         out = self.notfoundtest(command)
         self.matchoutput(out, "DNS Environment no-such-env not found.", command)
 
+    def testdelinternal(self):
+        command = ["del", "dns", "environment", "--dns_environment", "internal"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "DNS Environment internal is the default DNS "
+                         "environment, therefore it cannot be deleted.",
+                         command)
+
     def testshowutenv(self):
         command = ["show", "dns", "environment", "--dns_environment", "ut-env"]
         out = self.notfoundtest(command)

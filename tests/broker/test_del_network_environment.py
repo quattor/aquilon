@@ -50,6 +50,15 @@ class TestDelNetworkEnvironment(TestBrokerCommand):
                    "--network_environment", "utcolo"]
         self.noouttest(command)
 
+    def testdelinternal(self):
+        command = ["del", "network", "environment",
+                   "--network_environment", "internal"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "Network Environment internal is the default network "
+                         "environment, therefore it cannot be deleted.",
+                         command)
+
     def testverifyexcx(self):
         command = ["show", "network", "environment",
                    "--network_environment", "excx"]
