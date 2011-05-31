@@ -49,7 +49,7 @@ class TestMakeAquilon(TestBrokerCommand):
     def testmakeunittest02(self):
         command = ["make", "aquilon",
                    "--hostname", "unittest02.one-nyp.ms.com",
-                   "--os", "linux/4.0.1-x86_64"]
+                   "--os", "linux/5.0.1-x86_64"]
         (out, err) = self.successtest(command)
         self.matchoutput(err,
                          "unittest02.one-nyp.ms.com adding binding for "
@@ -109,7 +109,7 @@ class TestMakeAquilon(TestBrokerCommand):
             """include { "archetype/base" };""",
             command)
         self.matchoutput(out,
-            """include { "os/linux/4.0.1-x86_64/config" };""",
+            """include { "os/linux/5.0.1-x86_64/config" };""",
             command)
         self.matchoutput(out,
             """include { "service/afs/q.ny.ms.com/client/config" };""",
@@ -134,7 +134,7 @@ class TestMakeAquilon(TestBrokerCommand):
         command = ["make", "aquilon",
                    "--hostname", "unittest00.one-nyp.ms.com",
                    "--buildstatus", "blind", "--personality", "compileserver",
-                   "--os", "linux/4.0.1-x86_64"]
+                   "--os", "linux/5.0.1-x86_64"]
         (out, err) = self.successtest(command)
         self.matchoutput(err,
                          "unittest00.one-nyp.ms.com adding binding for "
@@ -226,7 +226,7 @@ class TestMakeAquilon(TestBrokerCommand):
             """include { "archetype/base" };""",
             command)
         self.matchoutput(out,
-            """include { "os/linux/4.0.1-x86_64/config" };""",
+            """include { "os/linux/5.0.1-x86_64/config" };""",
             command)
         self.matchoutput(out,
             """include { "service/afs/q.ny.ms.com/client/config" };""",
@@ -282,7 +282,7 @@ class TestMakeAquilon(TestBrokerCommand):
         scratchfile = self.writescratch("rhel5hosts", "".join(hosts))
         command = ["reconfigure", "--list", scratchfile,
                    "--buildstatus=build", "--archetype=aquilon",
-                   "--osname=linux", "--osversion=5.0-x86_64"]
+                   "--osname=linux", "--osversion=5.0.1-x86_64"]
         (out, err) = self.successtest(command)
         for hostname in hosts:
             h = hostname.strip()
@@ -308,7 +308,7 @@ class TestMakeAquilon(TestBrokerCommand):
         command = ["make", "aquilon",
                    "--hostname", "aquilon91.aqd-unittest.ms.com",
                    "--personality", "badpersonality2",
-                   "--os", "linux/4.0.1-x86_64"]
+                   "--os", "linux/5.0.1-x86_64"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Could not find a relevant service map", command)
 
@@ -316,7 +316,7 @@ class TestMakeAquilon(TestBrokerCommand):
         command = ["make", "aquilon", "--debug",
                    "--hostname", "aquilon92.aqd-unittest.ms.com",
                    "--personality", "badpersonality2",
-                   "--os", "linux/4.0.1-x86_64"]
+                   "--os", "linux/5.0.1-x86_64"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Creating service Chooser", command)
         self.matchoutput(out, "Could not find a relevant service map", command)
@@ -325,7 +325,7 @@ class TestMakeAquilon(TestBrokerCommand):
         command = ["make", "aquilon",
                    "--hostname", "aquilon93.aqd-unittest.ms.com",
                    "--personality", "badpersonality",
-                   "--os", "linux/4.0.1-x86_64"]
+                   "--os", "linux/5.0.1-x86_64"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "cannot locate template", command)
         self.failIf(os.path.exists(os.path.join(
@@ -348,7 +348,7 @@ class TestMakeAquilon(TestBrokerCommand):
     def testmakewithos(self):
         command = ["make", "aquilon",
                    "--hostname", "unittest17.aqd-unittest.ms.com",
-                   "--os", "linux/4.0.1-x86_64"]
+                   "--os", "linux/5.0.1-x86_64"]
         (out, err) = self.successtest(command)
 
     def testverifyunittest17(self):
@@ -359,7 +359,7 @@ class TestMakeAquilon(TestBrokerCommand):
                          self.net.tor_net[0].usable[3],
                          command)
         self.matchoutput(out,
-                         "Template: aquilon/os/linux/4.0.1-x86_64/config.tpl",
+                         "Template: aquilon/os/linux/5.0.1-x86_64/config.tpl",
                          command)
 
     def testverifyunittest17proto(self):

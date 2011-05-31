@@ -42,9 +42,9 @@ from brokertest import TestBrokerCommand
 class TestAddOS(TestBrokerCommand):
 
     def testaddexisting(self):
-        command = "add os --archetype aquilon --osname linux --osversion 4.0.1-x86_64"
+        command = "add os --archetype aquilon --osname linux --osversion 5.0.1-x86_64"
         out = self.badrequesttest(command.split(" "))
-        self.matchoutput(out, "Operating System linux, version 4.0.1-x86_64, "
+        self.matchoutput(out, "Operating System linux, version 5.0.1-x86_64, "
                          "archetype aquilon already exists.",
                          command)
 
@@ -101,23 +101,23 @@ class TestAddOS(TestBrokerCommand):
         self.matchoutput(out, "Archetype: utarchetype1", command)
         self.matchoutput(out, "Archetype: aquilon", command)
         self.matchoutput(out, "Template: utarchetype1/os/utos/1.0", command)
-        self.matchoutput(out, "Template: aquilon/os/linux/4.0.1-x86_64", command)
+        self.matchoutput(out, "Template: aquilon/os/linux/5.0.1-x86_64", command)
 
     def testverifyallproto(self):
         command = "show os --all --format=proto"
         out = self.commandtest(command.split(" "))
         oslist = self.parse_os_msg(out)
-        found_rhel4 = False
+        found_rhel5 = False
         found_ut = False
         for os in oslist.operating_systems:
             if os.archetype.name == 'aquilon' and \
-               os.name == 'linux' and os.version == '4.0.1-x86_64':
-                found_rhel4 = True
+               os.name == 'linux' and os.version == '5.0.1-x86_64':
+                found_rhel5 = True
             if os.archetype.name == 'utarchetype1' and \
                os.name == 'utos' and os.version == '1.0':
                 found_ut = True
-        self.assertTrue(found_rhel4,
-                        "Missing proto output for aquilon/linux/4.0.1-x86_64")
+        self.assertTrue(found_rhel5,
+                        "Missing proto output for aquilon/linux/5.0.1-x86_64")
         self.assertTrue(found_ut,
                         "Missing proto output for utarchetype1/utos/1.0")
 

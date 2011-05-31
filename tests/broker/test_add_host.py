@@ -51,7 +51,7 @@ class TestAddHost(TestBrokerCommand):
                         "--ip", "127.0.0.1", "--machine", "ut3c5n6",
                         "--domain", "unittest", "--buildstatus", "ready",
                         "--archetype", "aquilon", "--osname", "linux",
-                        "--osversion", "4.0.1-x86_64",
+                        "--osversion", "5.0.1-x86_64",
                         "--personality", "compileserver"])
         self.noouttest(["bind", "server", "--service", "utnotify",
                         "--instance", "localhost", "--hostname", hostname])
@@ -63,7 +63,7 @@ class TestAddHost(TestBrokerCommand):
                         "--hostname", "unittest02.one-nyp.ms.com", "--ip", ip,
                         "--machine", "ut3c5n10", "--domain", "unittest",
                         "--buildstatus", "build", "--archetype", "aquilon",
-                        "--osname", "linux", "--osversion", "4.0.1-x86_64",
+                        "--osname", "linux", "--osversion", "5.0.1-x86_64",
                         "--personality", "compileserver"])
         self.dsdb_verify()
 
@@ -75,7 +75,7 @@ class TestAddHost(TestBrokerCommand):
                         "--ip", ip,
                         "--machine", "jack", "--domain", "unittest",
                         "--buildstatus", "build", "--archetype", "aquilon",
-                        "--osname", "linux", "--osversion", "4.0.1-x86_64",
+                        "--osname", "linux", "--osversion", "5.0.1-x86_64",
                         "--personality", "compileserver"])
         self.dsdb_verify()
 
@@ -84,7 +84,7 @@ class TestAddHost(TestBrokerCommand):
         command = ["add", "host", "--hostname", "used-already.one-nyp.ms.com",
                    "--ip", ip, "--machine", "ut3c5n10", "--domain", "unittest",
                    "--buildstatus", "build", "--archetype", "aquilon",
-                   "--osname", "linux", "--osversion", "4.0.1-x86_64",
+                   "--osname", "linux", "--osversion", "5.0.1-x86_64",
                    "--personality", "compileserver"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Machine ut3c5n10 is already allocated to "
@@ -103,7 +103,7 @@ class TestAddHost(TestBrokerCommand):
         self.matchoutput(out, "Domain: unittest", command)
         self.matchoutput(out, "Build Status: build", command)
         self.matchoutput(out, "Operating System: linux", command)
-        self.matchoutput(out, "Version: 4.0.1-x86_64", command)
+        self.matchoutput(out, "Version: 5.0.1-x86_64", command)
 
     def testverifyunittest02machine(self):
         command = "show machine --machine ut3c5n10"
@@ -136,7 +136,7 @@ class TestAddHost(TestBrokerCommand):
             "--hostname", "unittest15.aqd-unittest.ms.com",
             "--ipfromsystem", "ut01ga1s02.aqd-unittest.ms.com",
             "--ipalgorithm", "max",
-            "--osname", "linux", "--osversion", "4.0.1-x86_64",
+            "--osname", "linux", "--osversion", "5.0.1-x86_64",
             "--machine", "ut8s02p1", "--domain", "unittest",
             "--buildstatus", "build", "--archetype", "aquilon"])
         self.dsdb_verify()
@@ -157,7 +157,7 @@ class TestAddHost(TestBrokerCommand):
                    "--ipalgorithm", "max",
                    "--machine", "ut8s02p2", "--domain", "unittest",
                    "--buildstatus", "build", "--archetype", "aquilon",
-                   "--osname", "linux", "--osversion", "4.0.1-x86_64",
+                   "--osname", "linux", "--osversion", "5.0.1-x86_64",
                    "--personality", "compileserver"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Failed to find an IP that is suitable for "
@@ -171,7 +171,7 @@ class TestAddHost(TestBrokerCommand):
                    "--ip", "not-an-ip-address",
                    "--machine", "ut8s02p2", "--domain", "unittest",
                    "--buildstatus", "build", "--archetype", "aquilon",
-                   "--osname", "linux", "--osversion", "4.0.1-x86_64",
+                   "--osname", "linux", "--osversion", "5.0.1-x86_64",
                    "--personality", "compileserver"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
@@ -188,7 +188,7 @@ class TestAddHost(TestBrokerCommand):
                         "--ipfromip", net.usable[0], "--ipalgorithm", "lowest",
                         "--machine", "ut8s02p2", "--domain", "unittest",
                         "--buildstatus", "build", "--archetype", "aquilon",
-                        "--osname", "linux", "--osversion", "4.0.1-x86_64",
+                        "--osname", "linux", "--osversion", "5.0.1-x86_64",
                         "--personality", "compileserver"])
         self.dsdb_verify()
 
@@ -201,7 +201,7 @@ class TestAddHost(TestBrokerCommand):
                          command)
         self.matchoutput(out, "Personality: compileserver", command)
 
-    #test aquilons default linux/4.0.1-x86_64
+    #test aquilons default linux/5.0.1-x86_64
     def testaddunittest17(self):
         ip = self.net.tor_net[0].usable[3]
         self.dsdb_expect_add("unittest17.aqd-unittest.ms.com", ip, "eth0",
@@ -222,7 +222,7 @@ class TestAddHost(TestBrokerCommand):
                          self.net.tor_net[0].usable[3],
                          command)
         self.matchoutput(out,
-                         "Template: aquilon/os/linux/4.0.1-x86_64/config.tpl",
+                         "Template: aquilon/os/linux/5.0.1-x86_64/config.tpl",
                          command)
         self.matchoutput(out, "Personality: inventory", command)
 
@@ -262,7 +262,7 @@ class TestAddHost(TestBrokerCommand):
                        "--machine", "ut9s03p%d" % port,
                        "--sandbox", "%s/utsandbox" % user,
                        "--buildstatus", "build",
-                       "--osname", "linux", "--osversion", "4.0.1-x86_64",
+                       "--osname", "linux", "--osversion", "5.0.1-x86_64",
                        "--archetype", "aquilon", "--personality", "inventory"]
             self.noouttest(command)
         self.dsdb_verify()

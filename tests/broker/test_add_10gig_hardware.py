@@ -338,7 +338,7 @@ class TestAdd10GigHardware(TestBrokerCommand):
             command = ["add_host", "--hostname", hostname,
                        "--machine", machine, "--autoip", "--domain=unittest",
                        "--archetype=aquilon", "--personality=inventory",
-                       "--osname=linux", "--osversion=4.0.1-x86_64"]
+                       "--osname=linux", "--osversion=5.0.1-x86_64"]
             (out, err) = self.successtest(command)
         self.dsdb_verify()
 

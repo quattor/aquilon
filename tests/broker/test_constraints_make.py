@@ -46,7 +46,7 @@ class TestMakeConstraints(TestBrokerCommand):
         # This is not a realistic OS for this archetype, but that's not
         # what the test is checking...
         command = ["make", "--hostname", "evh1.aqd-unittest.ms.com",
-                   "--os", "linux/4.0.1-x86_64", "--buildstatus", "ready",
+                   "--os", "linux/5.0.1-x86_64", "--buildstatus", "ready",
                    "--archetype", "vmhost", "--personality", "esx_server"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Cannot change personality of host", command)

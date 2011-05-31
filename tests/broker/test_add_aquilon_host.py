@@ -46,7 +46,7 @@ class TestAddAquilonHost(TestBrokerCommand):
         self.noouttest(["add", "aquilon", "host",
                         "--hostname", "unittest00.one-nyp.ms.com", "--ip", ip,
                         "--machine", "ut3c1n3", "--domain", "unittest",
-                        "--osname", "linux", "--osversion", "4.0.1-x86_64",
+                        "--osname", "linux", "--osversion", "5.0.1-x86_64",
                         "--personality", "inventory", "--buildstatus", "blind"])
         self.dsdb_verify()
 
@@ -82,7 +82,7 @@ class TestAddAquilonHost(TestBrokerCommand):
         self.noouttest(["add", "aquilon", "host",
                         "--hostname", "unittest12.aqd-unittest.ms.com",
                         "--ip", ip, "--buildstatus", "blind",
-                        "--osname", "linux", "--osversion", "4.0.1-x86_64",
+                        "--osname", "linux", "--osversion", "5.0.1-x86_64",
                         "--machine", "ut3s01p1a", "--domain", "unittest"])
         self.dsdb_verify()
 
@@ -107,7 +107,7 @@ class TestAddAquilonHost(TestBrokerCommand):
                         "--hostname", "unittest13.aqd-unittest.ms.com",
                         "--ip", ip, "--buildstatus", "blind",
                         "--machine", "ut3s01p1b", "--domain", "unittest",
-                        "--osname", "linux", "--osversion", "4.0.1-x86_64",
+                        "--osname", "linux", "--osversion", "5.0.1-x86_64",
                         "--personality", "compileserver"])
         self.dsdb_verify()
 
@@ -153,7 +153,7 @@ class TestAddAquilonHost(TestBrokerCommand):
                         "--hostname", "unittest21.aqd-unittest.ms.com",
                         "--ip", ip, "--buildstatus", "build",
                         "--machine", "ut3c5n3", "--domain", "unittest",
-                        "--osname", "linux", "--osversion", "4.0.1-x86_64",
+                        "--osname", "linux", "--osversion", "5.0.1-x86_64",
                         "--personality", "compileserver"])
         self.dsdb_verify()
 
@@ -190,7 +190,7 @@ class TestAddAquilonHost(TestBrokerCommand):
                         "--hostname", "unittest22.aqd-unittest.ms.com",
                         "--ip", ip, "--buildstatus", "build",
                         "--machine", "ut3c5n4", "--domain", "unittest",
-                        "--osname", "linux", "--osversion", "4.0.1-x86_64",
+                        "--osname", "linux", "--osversion", "5.0.1-x86_64",
                         "--personality", "compileserver"])
         self.dsdb_verify()
 
@@ -228,7 +228,7 @@ class TestAddAquilonHost(TestBrokerCommand):
                         "--hostname", "unittest23.aqd-unittest.ms.com",
                         "--ip", ip, "--buildstatus", "build",
                         "--machine", "ut3c5n5", "--domain", "unittest",
-                        "--osname", "linux", "--osversion", "4.0.1-x86_64",
+                        "--osname", "linux", "--osversion", "5.0.1-x86_64",
                         "--personality", "compileserver"])
         self.dsdb_verify()
 
@@ -240,7 +240,7 @@ class TestAddAquilonHost(TestBrokerCommand):
                         "--hostname", "unittest24.aqd-unittest.ms.com",
                         "--ip", ip, "--buildstatus", "build",
                         "--machine", "np3c5n5", "--domain", "unittest",
-                        "--osname", "linux", "--osversion", "4.0.1-x86_64",
+                        "--osname", "linux", "--osversion", "5.0.1-x86_64",
                         "--personality", "compileserver"])
         self.dsdb_verify()
 
@@ -252,7 +252,7 @@ class TestAddAquilonHost(TestBrokerCommand):
                         "--hostname", "unittest25.aqd-unittest.ms.com",
                         "--ip", ip, "--buildstatus", "build",
                         "--machine", "ut3c5n7", "--domain", "unittest",
-                        "--osname", "linux", "--osversion", "4.0.1-x86_64",
+                        "--osname", "linux", "--osversion", "5.0.1-x86_64",
                         "--personality", "compileserver"])
         self.dsdb_verify()
 

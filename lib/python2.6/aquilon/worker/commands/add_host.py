@@ -71,13 +71,11 @@ class CommandAddHost(BrokerCommand):
                                                archetype=archetype, compel=True)
 
         if dbarchetype.name == 'aquilon':
-            # default to os linux/4.0.1-x86_64 for aquilon
-            # this is a statistically valid assumption given the population
-            # of aquilon machines as of Oct. 2009
+            # default to os linux/5.0.1-x86_64 for aquilon
             if not osname:
                 osname = 'linux'
             if not osversion:
-                osversion = '4.0.1-x86_64'
+                osversion = '5.0.1-x86_64'
         elif dbarchetype.name =='aurora':
             if not osname:
                 #no solaris yet
