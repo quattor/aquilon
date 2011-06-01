@@ -3604,6 +3604,19 @@
       <transport method="get" path="alias/%(fqdn)s" />
    </command>
 
+   <command name="update_alias">
+      Update a DNS alias.
+      <optgroup name="update_alias_opts" mandatory="True" fields="all">
+         <option name="fqdn" type="string">The fully qualified domain name</option>
+      </optgroup>
+      <optgroup name="update_alias_optional" mandatory="False">
+         <option name="target" type="string">The new target of the alias</option>
+         <option name="comments" type="string">Comments</option>
+         <option name="dns_environment" type="string">The name of the environment the address is in (defaults to 'internal')</option>
+      </optgroup>
+      <transport method="post" path="alias/%(fqdn)s" />
+   </command>
+
    <command name='search_dns'>
       Search DNS records in the database.
       <p/>
