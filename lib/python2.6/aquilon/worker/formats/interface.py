@@ -62,8 +62,9 @@ class InterfaceFormatter(ObjectFormatter):
             details.append(indent + "  Master Interface: %s" %
                            interface.master.name)
 
-        hw = interface.hardware_entity
-        details.append(indent + "  Attached to: {0}".format(hw))
+        if interface.assignments:
+            details.append(indent + "  {0:c}: {0.name}"
+                           .format(interface.assignments[0].network.network_environment))
 
         for addr in interface.assignments:
             if addr.fqdns:

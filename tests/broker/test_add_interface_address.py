@@ -318,6 +318,22 @@ class TestAddInterfaceAddress(TestBrokerCommand):
                          "network excx-net in network environment excx." % net_internal.ip,
                          command)
 
+    def testverifyunittest23(self):
+        command = ["show", "host", "--hostname", "unittest25.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        # Rely on the indentation to ensure we're checking the network
+        # environment of the right interface
+        self.searchoutput(out,
+                          'Interface: eth0 .*\n'
+                          '(?:    .*\n)*'
+                          '    Network Environment: internal',
+                          command)
+        self.searchoutput(out,
+                          'Interface: eth1 .*\n'
+                          '(?:    .*\n)*'
+                          '    Network Environment: utcolo',
+                          command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddInterfaceAddress)
