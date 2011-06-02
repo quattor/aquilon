@@ -42,6 +42,10 @@ class CommandDelNetworkEnvironment(BrokerCommand):
         dbnet_env = NetworkEnvironment.get_unique(session, network_environment,
                                                   compel=True)
 
+        if dbnet_env.is_default:
+            raise ArgumentError("{0} is the default network environment, "
+                                "therefore it cannot be deleted."
+                                .format(dbnet_env))
         if dbnet_env.networks:
             raise ArgumentError("{0} still has networks defined, delete them "
                                 "first.".format(dbnet_env))

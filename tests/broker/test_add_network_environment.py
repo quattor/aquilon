@@ -54,6 +54,15 @@ class TestAddNetworkEnvironment(TestBrokerCommand):
                    "--comments", "Unit test colo environment"]
         self.noouttest(command)
 
+    def testaddbadname(self):
+        command = ["add", "network", "environment",
+                   "--dns_environment", "ut-env",
+                   "--network_environment", "<badname>"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "'<badname>' is not a valid value for network environment",
+                         command)
+
     def testverifyexcx(self):
         command = ["show", "network", "environment",
                    "--network_environment", "excx"]
