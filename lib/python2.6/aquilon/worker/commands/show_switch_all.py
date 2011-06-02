@@ -50,7 +50,8 @@ class CommandShowSwitchAll(BrokerCommand):
         q = q.options(subqueryload_all('model.machine_specs'))
 
         # Prefer the primary name for ordering
-        q = q.outerjoin(PrimaryNameAssociation, DnsRecord, Fqdn, DnsDomain)
+        q = q.outerjoin(PrimaryNameAssociation, DnsRecord,
+                        (Fqdn, DnsRecord.fqdn_id == Fqdn.id), DnsDomain)
         q = q.options(contains_eager('_primary_name_asc'))
         q = q.options(contains_eager('_primary_name_asc.dns_record'))
         q = q.options(contains_eager('_primary_name_asc.dns_record.fqdn'))

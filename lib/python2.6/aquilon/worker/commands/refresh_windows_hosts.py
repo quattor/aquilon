@@ -155,12 +155,8 @@ class CommandRefreshWindowsHosts(BrokerCommand):
                 failed.append(msg)
                 logger.info(msg)
                 continue
-            dbfqdn = Fqdn.get_unique(session, name=short,
-                                     dns_domain=dbdns_domain)
-            if dbfqdn:
-                existing = DnsRecord.get_unique(session, fqdn=dbfqdn)
-            else:
-                existing = None
+            existing = DnsRecord.get_unique(session, name=short,
+                                            dns_domain=dbdns_domain)
             if existing:
                 if not existing.hardware_entity:
                     msg = "Skipping host %s: It is not a primary name." % host

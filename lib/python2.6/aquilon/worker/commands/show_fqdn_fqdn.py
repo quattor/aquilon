@@ -38,6 +38,8 @@ class CommandShowFqdnFqdn(BrokerCommand):
     required_parameters = ["fqdn"]
 
     def render(self, session, fqdn, dns_environment, **kwargs):
+        self.deprecated_command("The show_fqdn command is deprecated.  Please "
+                                "use search_dns instead.", **kwargs)
         dbdns_env = DnsEnvironment.get_unique_or_default(session, dns_environment)
         dbfqdn = Fqdn.get_unique(session, fqdn=fqdn, dns_environment=dbdns_env,
                                  compel=True)

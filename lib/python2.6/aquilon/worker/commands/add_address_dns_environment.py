@@ -48,6 +48,11 @@ class CommandAddAddressDNSEnvironment(BrokerCommand):
 
         dbfqdn = Fqdn.get_or_create(session, dns_environment=dbdns_env,
                                     fqdn=fqdn)
+
+        if dbfqdn.dns_domain.restricted:
+            raise ArgumentError("{0} is restricted, standalone A records "
+                                "are not allowed.".format(dbfqdn.dns_domain))
+
         DnsRecord.get_unique(session, fqdn=dbfqdn, preclude=True)
 
         ip = generate_ip(session, compel=True, dbinterface=None, **arguments)

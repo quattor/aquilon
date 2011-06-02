@@ -49,8 +49,8 @@ class TestUnbindESXCluster(TestBrokerCommand):
                    "--cluster", "utecl1"]
         (p, out, err) = self.runcommand(command)
         self.matchoutput(err,
-                         "WARNING: unbind_esx_cluster --hostname is "
-                         "deprecated, use the uncluster command instead.",
+                         "The --hostname option is deprecated.  "
+                         "Please use the 'uncluster' command instead.",
                          command)
 
     def testfailservicemissingcluster(self):

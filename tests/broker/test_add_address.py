@@ -33,13 +33,12 @@
 import os
 import sys
 import unittest
-from ipaddr import IPv4Address
 
 if __name__ == "__main__":
-    BINDIR = os.path.dirname(os.path.realpath(sys.argv[0]))
-    SRCDIR = os.path.join(BINDIR, "..", "..")
-    sys.path.append(os.path.join(SRCDIR, "lib", "python2.6"))
+    import utils
+    utils.import_depends()
 
+from ipaddr import IPv4Address
 from brokertest import TestBrokerCommand
 
 
@@ -55,12 +54,13 @@ class TestAddAddress(TestBrokerCommand):
 
     def test_150_verifybasic(self):
         net = self.net.unknown[0]
-        command = ["show_fqdn", "--fqdn=arecord13.aqd-unittest.ms.com"]
+        command = ["show_address", "--fqdn=arecord13.aqd-unittest.ms.com"]
         out = self.commandtest(command)
         self.matchoutput(out, "DNS Record: arecord13.aqd-unittest.ms.com",
                          command)
         self.matchoutput(out, "IP: %s" % net.usable[13], command)
         self.matchoutput(out, "Network: %s [%s]" % (net.ip, net), command)
+        self.matchoutput(out, "Network Environment: internal", command)
 
     def test_200_add_defaultenv(self):
         self.dsdb_expect_add("arecord14.aqd-unittest.ms.com",
@@ -81,7 +81,7 @@ class TestAddAddress(TestBrokerCommand):
 
     def test_220_verifydefaultenv(self):
         default = self.config.get("site", "default_dns_environment")
-        command = ["show_fqdn", "--fqdn=arecord14.aqd-unittest.ms.com"]
+        command = ["show_address", "--fqdn=arecord14.aqd-unittest.ms.com"]
         out = self.commandtest(command)
         self.matchoutput(out, "DNS Record: arecord14.aqd-unittest.ms.com",
                          command)
@@ -90,7 +90,7 @@ class TestAddAddress(TestBrokerCommand):
                          command)
 
     def test_230_verifyutenv(self):
-        command = ["show_fqdn", "--fqdn=arecord14.aqd-unittest.ms.com",
+        command = ["show_address", "--fqdn=arecord14.aqd-unittest.ms.com",
                    "--dns_environment", "ut-env"]
         out = self.commandtest(command)
         self.matchoutput(out, "DNS Record: arecord14.aqd-unittest.ms.com",
@@ -109,7 +109,7 @@ class TestAddAddress(TestBrokerCommand):
         self.dsdb_verify()
 
     def test_350_verifyipfromip(self):
-        command = ["show_fqdn", "--fqdn=arecord15.aqd-unittest.ms.com"]
+        command = ["show_address", "--fqdn=arecord15.aqd-unittest.ms.com"]
         out = self.commandtest(command)
         self.matchoutput(out, "DNS Record: arecord15.aqd-unittest.ms.com",
                          command)
@@ -126,7 +126,7 @@ class TestAddAddress(TestBrokerCommand):
         self.dsdb_verify()
 
     def test_410_verifydsdbfailure(self):
-        command = ["show", "fqdn", "--fqdn", "arecord16.aqd-unittest.ms.com"]
+        command = ["search", "dns", "--fqdn", "arecord16.aqd-unittest.ms.com"]
         self.notfoundtest(command)
 
     def test_420_failnetaddress(self):
@@ -169,6 +169,16 @@ class TestAddAddress(TestBrokerCommand):
                    '--dns_environment', 'internal', '--ip', ip]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Illegal DNS name format 'foo-'.", command)
+
+    def test_460_restricted_domain(self):
+        ip = self.net.unknown[0].usable[-1]
+        command = ["add", "address", "--fqdn", "foo.restrict.aqd-unittest.ms.com",
+                   "--ip", ip]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "DNS Domain restrict.aqd-unittest.ms.com is "
+                         "restricted, standalone A records are not allowed.",
+                         command)
 
     def test_500_addunittest20eth1(self):
         ip = self.net.unknown[12].usable[0]

@@ -48,8 +48,8 @@ class TestBindESXCluster(TestBrokerCommand):
                    "--cluster", "cluster-does-not-exist"]
         (p, out, err) = self.runcommand(command)
         self.matchoutput(err,
-                         "WARNING: bind_esx_cluster --hostname is "
-                         "deprecated, use the cluster command instead.",
+                         "The --hostname option is deprecated.  "
+                         "Please use the 'cluster' command instead.",
                          command)
 
     def testfailbindservicemissingcluster(self):

@@ -51,7 +51,8 @@ class CommandShowManagerMissing(BrokerCommand):
         q = q.options(contains_eager('hardware_entity'))
 
         # MissingManagerList wants the fqdn, so get it in one go
-        q = q.outerjoin(PrimaryNameAssociation, DnsRecord, Fqdn, DnsDomain)
+        q = q.outerjoin(PrimaryNameAssociation, DnsRecord,
+                        (Fqdn, DnsRecord.fqdn_id == Fqdn.id), DnsDomain)
         q = q.options(contains_eager('hardware_entity._primary_name_asc'))
         q = q.options(contains_eager('hardware_entity._primary_name_asc.'
                                      'dns_record'))

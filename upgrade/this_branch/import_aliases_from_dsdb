@@ -1,0 +1,133 @@
+#! /usr/bin/env python2.6
+# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+#
+# Copyright (C) 2011  Contributor
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the EU DataGrid Software License.  You should
+# have received a copy of the license with this program, and the
+# license is published at
+# http://eu-datagrid.web.cern.ch/eu-datagrid/license.html.
+#
+# THE FOLLOWING DISCLAIMER APPLIES TO ALL SOFTWARE CODE AND OTHER
+# MATERIALS CONTRIBUTED IN CONNECTION WITH THIS PROGRAM.
+#
+# THIS SOFTWARE IS LICENSED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+# FOR A PARTICULAR PURPOSE AND ANY WARRANTY OF NON-INFRINGEMENT, ARE
+# DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS
+# BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY,
+# OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT
+# OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
+# BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+# LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+# NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+# SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. THIS
+# SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
+# THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
+# TERMS THAT MAY APPLY.
+
+"""
+This script imports aliases from DSDB that point to hosts having status
+'aquilon'. Such aliases were created manually before official alias
+support was implemented.
+"""
+
+import os
+import sys
+from optparse import OptionParser
+
+BINDIR = os.path.dirname(os.path.realpath(sys.argv[0]))
+sys.path.append(os.path.join(BINDIR, "..", "..", "lib", "python2.6"))
+
+import aquilon.aqdb.depends
+from aquilon.config import Config
+
+from aquilon.aqdb.model import Base, Fqdn, Alias, DnsEnvironment
+from aquilon.aqdb.db_factory import DbFactory
+from aquilon.aqdb.dsdb.dsdb import DsdbConnection
+
+db = DbFactory()
+Base.metadata.bind = db.engine
+#db.engine.echo = True
+
+session = db.Session()
+dsdb = DsdbConnection(testdb=False)
+
+def main(dryrun=False):
+    db_env = DnsEnvironment.get_unique_or_default(session, None)
+
+    # Look up the numeric id for status 'aquilon'
+    query = """
+        SELECT status_id
+        FROM host_status
+        WHERE status = "aquilon" AND state >= 0
+"""
+    res = dsdb.run_query(query).fetchall()
+    status_id = res[0][0]
+
+    # Select aliases of Aquilon hosts
+    query = """
+        SELECT A.host_name AS alias, B.host_name AS target
+        FROM network_host A, network_host B
+        WHERE A.host_id = B.host_id AND
+              A.machine_id = B.machine_id AND
+              A.status_id = %d AND
+              A.name_type = 1 AND
+              B.name_type != 1 AND
+              A.state >= 0 AND
+              B.state >= 0
+""" % status_id
+
+    res = dsdb.run_query(query).fetchall()
+    added = 0
+    for row in res:
+        alias = row[0]
+        target = row[1]
+
+        dbtarget = Fqdn.get_unique(session, fqdn=target, dns_environment=db_env)
+        if not dbtarget:
+            print "*** ERROR *** Failed to look up target FQDN %s" % target
+            continue
+
+        try:
+            dbfqdn = Fqdn.get_or_create(session, fqdn=alias,
+                                        dns_environment=db_env)
+        except Exception, err:
+            print "*** ERROR *** Failed to parse alias FQDN %s: %s" % (alias, err)
+            continue
+
+        dbalias = Alias.get_unique(session, fqdn=dbfqdn)
+        if dbalias:
+            if dbalias.target == dbtarget:
+                print "Alias %s -> %s already exists, skipping" % (dbfqdn,
+                                                                   dbtarget)
+            else:
+                print "*** WARNING *** Alias %s exists, but points to %s instead " \
+                      "of %s" % (dbfqdn, dbalias.target, dbtarget)
+            continue
+
+        try:
+            dbalias = Alias(fqdn=dbfqdn, target=dbtarget)
+            session.add(dbalias)
+            print "Created alias %s -> %s" % (dbfqdn, dbtarget)
+            added += 1
+        except Exception, err:
+            print "*** ERROR *** Failed to create alias %s -> %s: %s" % (dbfqdn, dbtarget, err)
+            continue
+
+    if dryrun:
+        session.rollback()
+        print "Would have added %d aliases to AQDB" % added
+    else:
+        session.commit()
+        print "Added %d aliases to AQDB" % added
+
+
+if __name__ == '__main__':
+    parser = OptionParser()
+    parser.add_option("--dryrun", action="store_true", default=False,
+                      help="Do not modify the database")
+    options, args = parser.parse_args()
+    main(dryrun=options.dryrun)

@@ -123,7 +123,8 @@ class ServiceInstance(Base):
         q = q.join(PrimaryNameAssociation, Machine, Host, BuildItem)
         q = q.filter_by(service_instance=self)
         q = q.reset_joinpoint()
-        q = q.outerjoin(Fqdn, DnsDomain)
+        # Due to aliases we have to explicitely tell how do we link to Fqdn
+        q = q.join((Fqdn, DnsRecord.fqdn_id == Fqdn.id), DnsDomain)
         q = q.options(contains_eager('fqdn'))
         q = q.options(contains_eager('fqdn.dns_domain'))
         q = q.order_by(DnsDomain.name, Fqdn.name)
@@ -137,7 +138,8 @@ class ServiceInstance(Base):
         q = q.join(PrimaryNameAssociation, Machine, Host, ServiceInstanceServer)
         q = q.filter_by(service_instance=self)
         q = q.reset_joinpoint()
-        q = q.outerjoin(Fqdn, DnsDomain)
+        # Due to aliases we have to explicitely tell how do we link to Fqdn
+        q = q.join((Fqdn, DnsRecord.fqdn_id == Fqdn.id), DnsDomain)
         q = q.options(contains_eager('fqdn'))
         q = q.options(contains_eager('fqdn.dns_domain'))
         q = q.order_by(DnsDomain.name, Fqdn.name)
@@ -151,7 +153,8 @@ class ServiceInstance(Base):
         q = q.join(PrimaryNameAssociation, Machine, Host, ServiceInstanceServer)
         q = q.filter_by(service_instance=self)
         q = q.reset_joinpoint()
-        q = q.outerjoin(Fqdn, DnsDomain)
+        # Due to aliases we have to explicitely tell how do we link to Fqdn
+        q = q.join((Fqdn, DnsRecord.fqdn_id == Fqdn.id), DnsDomain)
         q = q.options(contains_eager('fqdn'))
         q = q.options(contains_eager('fqdn.dns_domain'))
         q = q.order_by(DnsDomain.name, Fqdn.name)

@@ -40,6 +40,9 @@ class CommandSearchSystem(BrokerCommand):
     required_parameters = []
 
     def render(self, session, fullinfo, **arguments):
+        self.deprecated_command("Command search_system is deprecated. Please "
+                                "use search_hardware, search_host, or "
+                                "search_dns instead.", **arguments)
         q = search_system_query(session, DnsRecord, **arguments)
         if fullinfo:
             return q.all()

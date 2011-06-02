@@ -41,7 +41,8 @@ class CommandShowHostAll(BrokerCommand):
 
     def render(self, session, **arguments):
         q = session.query(Host)
-        q = q.join(Machine, PrimaryNameAssociation, DnsRecord, Fqdn, DnsDomain)
+        q = q.join(Machine, PrimaryNameAssociation, DnsRecord,
+                   (Fqdn, DnsRecord.fqdn_id == Fqdn.id), DnsDomain)
         q = q.options(contains_eager('machine'))
         q = q.options(contains_eager('machine._primary_name_asc'))
         q = q.options(contains_eager('machine._primary_name_asc.'

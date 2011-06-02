@@ -29,15 +29,30 @@
 """ Representation of DNS Data """
 
 from datetime import datetime
+from collections import deque
 
 from sqlalchemy import Integer, DateTime, Sequence, String, Column, ForeignKey
 
-from sqlalchemy.orm import relation, deferred, backref
+from sqlalchemy.orm import relation, deferred, backref, object_session
+from sqlalchemy.ext.associationproxy import association_proxy
 
-from aquilon.aqdb.model import Base, Fqdn
+from aquilon.exceptions_ import NotFoundException, ArgumentError
+from aquilon.aqdb.model import Base, Fqdn, DnsEnvironment
+from aquilon.aqdb.model.dns_domain import parse_fqdn
 from aquilon.aqdb.column_types import AqStr
 
 _TN = "dns_record"
+
+# This relation must be symmetric, i.e. whenever "x in _rr_conflict_map[y]" is
+# True, "y in _rr_conflict_map[x]" must also be true.
+_rr_conflict_map = {
+    'a_record': frozenset(['alias', 'dynamic_stub', 'reserved_name']),
+    'alias': frozenset(['a_record', 'alias', 'dynamic_stub', 'reserved_name']),
+    'dynamic_stub': frozenset(['a_record', 'alias', 'dynamic_stub',
+                               'reserved_name']),
+    'reserved_name': frozenset(['a_record', 'alias', 'dynamic_stub',
+                                'reserved_name'])
+}
 
 
 class DnsRecord(Base):
@@ -61,32 +76,42 @@ class DnsRecord(Base):
     fqdn = relation(Fqdn, lazy=False, innerjoin=True,
                     backref=backref('dns_records'))
 
-    # The extra with_polymorphic: '*' means queries don't require
-    # "q = q.with_polymorphic(DnsRecord.__mapper__.polymorphic_map.values())"
+    aliases = association_proxy('fqdn', 'aliases')
+
     __mapper_args__ = {'polymorphic_on': dns_record_type,
-                       'polymorphic_identity': 'dns_record',
-                       'with_polymorphic': '*'}
+                       'polymorphic_identity': 'dns_record'}
 
     @classmethod
     def get_unique(cls, session, name=None, dns_domain=None, fqdn=None,
-                   dns_environment=None, compel=False, **kwargs):
+                   dns_environment=None, compel=False, preclude=False, **kwargs):
         # Proxy FQDN lookup to the Fqdn class
-        if fqdn:
-            if name or dns_domain:
-                raise TypeError("fqdn and name/dns_domain cannot be mixed")
-            if not isinstance(fqdn, Fqdn):
-                fqdn = Fqdn.get_unique(session, fqdn=fqdn,
+        if not fqdn or not isinstance(fqdn, Fqdn):
+            if not isinstance(dns_environment, DnsEnvironment):
+                dns_environment = DnsEnvironment.get_unique_or_default(session,
+                                                                      dns_environment)
+            if fqdn:
+                if name or dns_domain:
+                    raise TypeError("fqdn and name/dns_domain cannot be mixed")
+                (name, dns_domain) = parse_fqdn(session, fqdn)
+            try:
+                # Do not pass preclude=True to Fqdn
+                fqdn = Fqdn.get_unique(session, name=name,
+                                       dns_domain=dns_domain,
                                        dns_environment=dns_environment,
-                                       compel=compel)
-                if not fqdn:
-                    return None
-        elif name or dns_domain:
-            fqdn = Fqdn.get_unique(session, name=name, dns_domain=dns_domain,
-                                   dns_environment=dns_environment,
-                                   compel=compel)
+                                       compel=compel, **kwargs)
+            except NotFoundException:
+                # Replace the "Fqdn ... not found" message with a more user
+                # friendly one
+                msg = "%s %s.%s, %s not found." % (cls._get_class_label(),
+                                                   name, dns_domain,
+                                                   format(dns_environment, "l"))
+                raise NotFoundException(msg)
+            if not fqdn:
+                return None
 
         return super(DnsRecord, cls).get_unique(session, fqdn=fqdn,
-                                                compel=compel, **kwargs)
+                                                compel=compel,
+                                                preclude=preclude, **kwargs)
 
     @classmethod
     def get_or_create(cls, session, **kwargs):
@@ -103,6 +128,53 @@ class DnsRecord(Base):
         if format_spec != "a":
             return super(DnsRecord, self).__format__(format_spec)
         return str(self.fqdn)
+
+    @property
+    def all_aliases(self):
+        """ Returns all distinct aliases that point to this record
+
+            If Alias1 -> B, A2lias2 -> B, B -> C, remove duplicates.
+        """
+
+        found = {}
+        queue = deque(self.aliases)
+        while queue:
+            alias = queue.popleft()
+            found[str(alias.fqdn)] = alias
+            for a in alias.aliases:
+                if not str(a.fqdn) in found:
+                    queue.append(a)
+
+        # Ensure a deterministic order of the returned values
+        aliases = found.values()
+        aliases.sort(cmp=lambda x, y: cmp(str(x.fqdn), str(y.fqdn)))
+        return aliases
+
+    def __init__(self, fqdn=None, **kwargs):
+        if not fqdn:
+            raise ValueError("fqdn cannot be empty")
+        session = object_session(fqdn)
+        if not session:
+            raise ValueError("fqdn must be already part of a session")
+
+        # Disable autoflush temporarily
+        flush_state = session.autoflush
+        session.autoflush = False
+
+        # self.dns_record_type is not populated by the ORM yet, so query our
+        # class
+        own_type = self.__class__.__mapper_args__['polymorphic_identity']
+
+        # Asking for just one column makes both the query and the ORM faster
+        q = session.query(DnsRecord.dns_record_type).filter_by(fqdn=fqdn)
+        for existing in q.all():
+            if existing.dns_record_type in _rr_conflict_map[own_type]:
+                cls = DnsRecord.__mapper__.polymorphic_map[existing.dns_record_type].class_
+                raise ArgumentError("%s %s already exist." %
+                                    (cls._get_class_label(), fqdn))
+
+        session.autoflush = flush_state
+        super(DnsRecord, self).__init__(fqdn=fqdn, **kwargs)
 
 
 dns_record = DnsRecord.__table__  # pylint: disable-msg=C0103, E1101

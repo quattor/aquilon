@@ -42,11 +42,10 @@ from aquilon.aqdb.model.dns_domain import parse_fqdn
 
 class CommandShowTorSwitch(BrokerCommand):
 
-    def render(self, session, logger, tor_switch, rack, model, vendor,
-               **arguments):
-        # Almost pointless - the aq client doesn't ask for this channel...
-        logger.client_info("Command show_tor_switch is deprecated, please use "
-                           "show_switch or search_switch instead.")
+    def render(self, session, tor_switch, rack, model, vendor, **arguments):
+        self.deprecated_command("Command show_tor_switch is deprecated, please "
+                                "use show_switch or search_switch instead.",
+                                **arguments)
         if tor_switch:
             # Must return a list
             return [TorSwitch(Switch.get_unique(session, tor_switch,
@@ -71,7 +70,8 @@ class CommandShowTorSwitch(BrokerCommand):
         q = q.options(subqueryload_all('model.machine_specs'))
 
         # Prefer the primary name when ordering
-        q = q.outerjoin(PrimaryNameAssociation, DnsRecord, Fqdn, DnsDomain)
+        q = q.outerjoin(PrimaryNameAssociation, DnsRecord,
+                        (Fqdn, DnsRecord.fqdn_id == Fqdn.id), DnsDomain)
         q = q.options(contains_eager('_primary_name_asc'))
         q = q.options(contains_eager('_primary_name_asc.dns_record'))
         q = q.options(contains_eager('_primary_name_asc.dns_record.fqdn'))

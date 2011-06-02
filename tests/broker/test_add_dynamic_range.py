@@ -82,7 +82,7 @@ class TestAddDynamicRange(TestBrokerCommand):
         self.dsdb_verify()
 
     def testverifyrange(self):
-        command = "search_system --type=dynamic_stub"
+        command = "search_dns --record_type=dynamic_stub"
         out = self.commandtest(command.split(" "))
         # Assume that first three octets are the same.
         start = self.net.tor_net2[0].usable[2]
@@ -92,10 +92,20 @@ class TestAddDynamicRange(TestBrokerCommand):
             checked = True
             ip = IPv4Address(i)
             self.matchoutput(out, dynname(ip), command)
-            subcommand = ["search_system", "--ip", ip, "--fqdn", dynname(ip)]
+            subcommand = ["search_dns", "--ip", ip, "--fqdn", dynname(ip)]
             subout = self.commandtest(subcommand)
             self.matchoutput(subout, dynname(ip), command)
         self.failUnless(checked, "Problem with test algorithm or data.")
+
+    def testshowrange(self):
+        net = self.net.tor_net2[0]
+        start = net.usable[2]
+        end = net.usable[-3]
+        command = "show dynamic range --ip %s" % IPv4Address(int(start) + 1)
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Dynamic Range: %s - %s" % (start, end), command)
+        self.matchoutput(out, "Network: %s [%s]" % (net.ip, net),
+                         command)
 
     def testverifynetwork(self):
         command = "show network --ip %s" % self.net.tor_net2[0].ip
@@ -192,15 +202,16 @@ class TestAddDynamicRange(TestBrokerCommand):
         # Check that the network has only dynamic entries
         checkip = self.net.tor_net2[5].ip
         while checkip < self.net.tor_net2[5].usable[0]:
-            command = ['search_system', '--ip', checkip]
+            command = ['search_dns', '--ip', checkip]
             self.noouttest(command)
             checkip += 1
         for ip in self.net.tor_net2[5].usable:
-            command = ['search_system', '--ip', checkip, '--type=dynamic_stub']
+            command = ['search_dns', '--ip', checkip,
+                       '--record_type=dynamic_stub']
             out = self.commandtest(command)
             self.matchoutput(out, 'aqd-unittest.ms.com', command)
         broadcast = self.net.tor_net2[5].broadcast
-        command = ['search_system', '--ip', broadcast]
+        command = ['search_dns', '--ip', broadcast]
         self.noouttest(command)
 
 

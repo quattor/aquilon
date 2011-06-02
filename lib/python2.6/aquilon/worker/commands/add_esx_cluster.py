@@ -84,8 +84,8 @@ class CommandAddESXCluster(BrokerCommand):
                                              vm_to_host_ratio)
 
         if tor_switch:
-            logger.client_info("Option --tor_switch is deprecated, please use "
-                               "--switch instead.")
+            self.deprecated_option("tor_switch", "Please use --switch instead.",
+                                   logger=logger, **arguments)
             switch = tor_switch
         if switch:
             dbswitch = Switch.get_unique(session, switch, compel=True)

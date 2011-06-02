@@ -30,6 +30,7 @@
 
 from sqlalchemy.orm import object_session
 
+from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Fqdn, DnsRecord
 
 
@@ -42,6 +43,10 @@ def delete_dns_record(dbdns_rec):
     """
 
     session = object_session(dbdns_rec)
+
+    if dbdns_rec.aliases:
+        raise ArgumentError("{0} still has aliases, delete them "
+                            "first.".format(dbdns_rec))
 
     # Lock the FQDN
     q = session.query(Fqdn)

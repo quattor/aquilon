@@ -54,6 +54,8 @@ class CommandAddModel(BrokerCommand):
 
         # Handle the deprecated cputype parameter
         if arguments.get("cputype", None):
+            self.deprecated_option("cputype", "Please use --cpuname instead.",
+                                   **arguments)
             cpuname = arguments["cputype"]
 
         dbmodel = Model(name=model, vendor=dbvendor, machine_type=type,

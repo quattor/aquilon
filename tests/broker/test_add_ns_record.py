@@ -57,7 +57,7 @@ class TestAddNSRecord(TestBrokerCommand):
         self.dsdb_verify()
 
     def test_200_verify_a_record(self):
-        cmd = "show fqdn --fqdn %s" % NAME
+        cmd = "show address --fqdn %s" % NAME
         out = self.commandtest(cmd.split(" "))
         self.matchoutput(out, "DNS Record: %s" % NAME, cmd)
 

@@ -41,8 +41,8 @@ class CommandDelTorSwitch(CommandDelSwitch):
 
     required_parameters = ["tor_switch"]
 
-    def render(self, logger, tor_switch, **arguments):
-        logger.client_info("Command del_tor_switch is deprecated, please use "
-                           "del_switch instead.")
-        return CommandDelSwitch.render(self, logger=logger, switch=tor_switch,
+    def render(self, tor_switch, **arguments):
+        self.deprecated_command("Command del_tor_switch is deprecated, please "
+                                "use del_switch instead.", **arguments)
+        return CommandDelSwitch.render(self, switch=tor_switch,
                                        **arguments)

@@ -29,8 +29,10 @@
 """ Representation of DNS A records """
 
 from sqlalchemy import Integer, Column, ForeignKey
-from sqlalchemy.orm import relation, backref, mapper, deferred
+from sqlalchemy.orm import relation, backref, mapper, deferred, object_session
+from sqlalchemy.orm.attributes import instance_state
 
+from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Network, DnsRecord, Fqdn
 from aquilon.aqdb.column_types import IPV4
 
@@ -59,12 +61,37 @@ class ARecord(DnsRecord):
             return super(ARecord, self).__format__(format_spec)
         return "%s [%s]" % (self.fqdn, self.ip)
 
-    def __init__(self, ip=None, network=None, **kwargs):
+    def __init__(self, ip=None, network=None, fqdn=None, **kwargs):
         if not network:
             raise ValueError("network argument is missing")
         if ip not in network.network:
             raise ValueError("IP not inside network")
-        super(ARecord, self).__init__(ip=ip, network=network, **kwargs)
+
+        if not fqdn:
+            raise ValueError("fqdn cannot be empty")
+
+        # We can't share both the IP and the FQDN with an other A record. Only
+        # do the query if the FQDN is already persistent
+        if instance_state(fqdn).has_identity:
+            session = object_session(fqdn)
+            if not session:
+                raise ValueError("fqdn must be already part of a session")
+
+            # Disable autoflush temporarily
+            flush_state = session.autoflush
+            session.autoflush = False
+
+            q = session.query(ARecord.id)
+            q = q.filter_by(ip=ip)
+            q = q.filter_by(network=network)
+            q = q.filter_by(fqdn=fqdn)
+            if q.all():
+                raise ArgumentError("%s, ip %s already exists." %
+                                    (self._get_class_label(), ip))
+            session.autoflush = flush_state
+
+        super(ARecord, self).__init__(ip=ip, network=network, fqdn=fqdn,
+                                      **kwargs)
 
 
 arecord = ARecord.__table__  # pylint: disable-msg=C0103, E1101

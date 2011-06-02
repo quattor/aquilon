@@ -39,11 +39,13 @@ class CommandAddDnsDomain(BrokerCommand):
 
     required_parameters = ["dns_domain"]
 
-    def render(self, session, logger, dns_domain, comments, **arguments):
-        if session.query(DnsDomain).filter_by(name=dns_domain).first():
-            raise ArgumentError("DNS domain %s already exists." % dns_domain)
+    def render(self, session, logger, dns_domain, restricted, comments,
+               **arguments):
+        DnsDomain.get_unique(session, dns_domain, preclude=True)
 
         dbdns_domain = DnsDomain(name=dns_domain, comments=comments)
+        if restricted:
+            dbdns_domain.restricted = True
         session.add(dbdns_domain)
         session.flush()
 

@@ -246,7 +246,7 @@ class Base(object):
             else:
                 if field == "name" or (hasattr(cls, "_instance_label") and
                                        field == cls._instance_label):
-                    desc.append(str(value))
+                    desc.insert(0, str(value))
                 elif isinstance(value, Base):
                     desc.append("{0:l}".format(value))
                 else:
@@ -272,7 +272,10 @@ class Base(object):
         try:
             obj = query.one()
             if preclude:
-                msg = "%s %s already exists." % (clslabel, ", ".join(desc))
+                # The object may belong to a subclass of what was requested, so
+                # query its class label instead of using the precomputed value
+                msg = "%s %s already exists." % (obj._get_class_label(),
+                                                 ", ".join(desc))
                 _raise_custom(preclude, ArgumentError, msg)
             return obj
         except NoResultFound:

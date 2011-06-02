@@ -163,8 +163,8 @@ class TestAddVirtualHardware(TestBrokerCommand):
         # The first 8 shares should work...
         for i in range(1, 9):
             self.noouttest(["add", "disk", "--machine", "evm%s" % i,
-                            "--disk", "sda", "--type", "sata",
-                            "--capacity", "15", "--share", "test_share_%s" % i,
+                            "--disk", "sda", "--controller", "sata",
+                            "--size", "15", "--share", "test_share_%s" % i,
                             "--address", "0:0"])
 
     def test_140_searchhostmemberclustershare(self):
@@ -176,7 +176,7 @@ class TestAddVirtualHardware(TestBrokerCommand):
 
     def test_150_failaddillegaldisk(self):
         command = ["add", "disk", "--machine", "evm9", "--disk", "sda",
-                   "--type", "sata", "--capacity", "15",
+                   "--controller", "sata", "--size", "15",
                    "--share", "test_share_9", "--address", "badaddress"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Disk address 'badaddress' is not valid", command)
@@ -184,7 +184,7 @@ class TestAddVirtualHardware(TestBrokerCommand):
     def test_160_failaddmaxshares(self):
         # Number 9 should trip the limit.
         command = ["add", "disk", "--machine", "evm9", "--disk", "sda",
-                   "--type", "sata", "--capacity", "15",
+                   "--controller", "sata", "--size", "15",
                    "--share", "test_share_9", "--address", "0:0"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Metacluster utmc1 already has the maximum "
@@ -196,7 +196,7 @@ class TestAddVirtualHardware(TestBrokerCommand):
         self.noouttest(command)
 
         command = ["add", "disk", "--machine", "evm9", "--disk", "sda",
-                   "--type", "sata", "--capacity", "15",
+                   "--controller", "sata", "--size", "15",
                    "--share", "test_share_8", "--address", "0:0"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "NAS share test_share_8 is full (1/1)", command)

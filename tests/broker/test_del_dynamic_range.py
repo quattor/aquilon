@@ -113,7 +113,7 @@ class TestDelDynamicRange(TestBrokerCommand):
         self.dsdb_verify()
 
     def testverifydelrange(self):
-        command = "search_system --type=dynamic_stub"
+        command = "search_dns --record_type=dynamic_stub"
         self.noouttest(command.split(" "))
 
     def testdelendingrange(self):

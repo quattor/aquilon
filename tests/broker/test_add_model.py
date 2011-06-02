@@ -119,7 +119,10 @@ class TestAddModel(TestBrokerCommand):
                    "--type=virtual_machine", "--cputype=xeon_2660",
                    "--cpunum=4", "--memory=16384", "--disktype=nas",
                    "--diskcontroller=sata", "--disksize=45", "--nics=1"]
-        self.noouttest(command)
+        (out, err) = self.successtest(command)
+        self.assertEmptyOut(out, command)
+        self.matchoutput(err, "The --cputype option is deprecated.  "
+                         "Please use --cpuname instead.", command)
 
     def testverifyaddutmedium(self):
         command = "show model --model utmedium"

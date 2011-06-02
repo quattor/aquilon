@@ -62,6 +62,10 @@ class CommandAddAuxiliary(BrokerCommand):
 
         dbfqdn = Fqdn.get_or_create(session, fqdn=auxiliary, preclude=True)
 
+        if dbfqdn.dns_domain.restricted:
+            raise ArgumentError("{0} is restricted, auxiliary addresses "
+                                "are not allowed.".format(dbfqdn.dns_domain))
+
         dbinterface = get_or_create_interface(session, dbmachine,
                                               name=interface, mac=mac,
                                               interface_type='public',

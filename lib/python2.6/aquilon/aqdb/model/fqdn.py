@@ -74,8 +74,8 @@ class Fqdn(Base):
         return self.name + '.' + self.dns_domain.name
 
     @classmethod
-    def get_unique(cls, session, dns_environment=None, name=None,
-                   dns_domain=None, fqdn=None, **kwargs):
+    def get_unique(cls, session, fqdn=None, dns_environment=None, name=None,
+                   dns_domain=None, **kwargs):
         if fqdn:
             if name or dns_domain:  # pragma: no cover
                 raise TypeError("fqdn and name/dns_domain should not be mixed")
