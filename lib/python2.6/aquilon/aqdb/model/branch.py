@@ -36,14 +36,10 @@ from sqlalchemy.orm import relation
 
 from aquilon.aqdb.model import Base, UserPrincipal
 from aquilon.aqdb.column_types.aqstr import AqStr
-from aquilon.aqdb.column_types.enum import Enum
 
 _TN = "branch"
 _DMN = "domain"
 _SBX = "sandbox"
-
-# FIXME: this should be somewhere else
-CHANGE_MANAGERS = ["tcm"]
 
 
 class Branch(Base):
@@ -102,7 +98,8 @@ class Domain(Branch):
                                nullable=True)
     rollback_commit = Column(AqStr(40), nullable=True)
 
-    change_manager = Column(Enum(16, CHANGE_MANAGERS), nullable=True)
+    requires_change_manager = Column(Boolean(name="%s_req_chg_mgr_ck" % _DMN),
+                                     nullable=False, default=False)
 
     __mapper_args__ = {'polymorphic_identity': _DMN,
                        'inherit_condition': domain_id == Branch.id}

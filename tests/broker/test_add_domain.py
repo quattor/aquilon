@@ -77,6 +77,14 @@ class TestAddDomain(TestBrokerCommand):
         self.failUnless(os.path.exists(os.path.join(
             self.config.get("broker", "domainsdir"), "deployable")))
 
+    def test_100_invalidtrack(self):
+        command = ["add_domain", "--domain=notvalid-prod", "--track=prod",
+                   "--change_manager"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "Cannot enforce a change manager for tracking domain",
+                         command)
+
     def test_200_verifyunittest(self):
         command = ["show_domain", "--domain=unittest"]
         out = self.commandtest(command)

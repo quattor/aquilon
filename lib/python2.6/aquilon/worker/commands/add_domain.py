@@ -36,7 +36,6 @@ from aquilon.exceptions_ import (AuthorizationException, ArgumentError,
                                  InternalError, ProcessException)
 from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import Domain, Branch
-from aquilon.aqdb.model.branch import CHANGE_MANAGERS
 from aquilon.worker.processes import run_git, remove_dir
 
 
@@ -67,17 +66,17 @@ class CommandAddDomain(BrokerCommand):
                 raise ArgumentError("Cannot nest tracking.  Try tracking "
                                     "{0:l} directly.".format(dbtracked.tracked_branch))
             start_point = dbtracked
+            if change_manager:
+                raise ArgumentError("Cannot enforce a change manager for "
+                                    "tracking domains.")
         else:
             if not start:
                 start = self.config.get("broker", "default_domain_start")
             start_point = Branch.get_unique(session, start, compel=True)
 
-        if change_manager and change_manager not in CHANGE_MANAGERS:
-            raise ArgumentError("Unknown change manager %s." % change_manager)
-
         dbdomain = Domain(name=domain, owner=dbuser, compiler=compiler,
                           tracked_branch=dbtracked,
-                          change_manager=change_manager,
+                          requires_change_manager=bool(change_manager),
                           comments=comments)
         session.add(dbdomain)
         session.flush()

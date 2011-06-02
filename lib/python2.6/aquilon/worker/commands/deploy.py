@@ -40,14 +40,20 @@ from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.processes import run_git, remove_dir, sync_domain
 from aquilon.worker.logger import CLIENT_INFO
 
-tcm_re = re.compile(r"^tcm=([0-9]+)$", re.IGNORECASE)
+TCM_RE = re.compile(r"^tcm=([0-9]+)$", re.IGNORECASE)
+SN_RE = re.compile(r"^sn=([a-z]+[0-9]+)$", re.IGNORECASE)
 
 
 # TODO: move this to an external class
-def validate_tcm(principal, justification):
-    result = tcm_re.search(justification)
+def validate_justification(principal, justification):
+    result = None
+    for valid_re in [TCM_RE, SN_RE]:
+        result = valid_re.search(justification)
+        if result:
+            break
     if not result:
-        raise ArgumentError("Failed to parse the TCM number.")
+        raise ArgumentError("Failed to parse the justification: expected "
+                            "tcm=NNNNNNNNN or sn=XXXNNNNN.")
     # TODO: EDM validation
     #edm_validate(result.group(0))
 
@@ -86,15 +92,12 @@ class CommandDeploy(BrokerCommand):
         if not dbtarget.is_sync_valid:
             dbtarget.is_sync_valid = True
 
-        if dbtarget.change_manager:
+        if dbtarget.requires_change_manager:
             if not justification:
-                # FIXME: include a descriptive name of the change manager when
-                # it becomes a proper class
-                raise AuthorizationException("{0} is under change management "
-                                             "control.  Please specify "
-                                             "--justification.".format(dbtarget))
-            if dbtarget.change_manager == "tcm":
-                validate_tcm(user, justification)
+                raise AuthorizationException(
+                    "{0} is under change management control.  Please specify "
+                    "--justification.".format(dbtarget))
+            validate_justification(user, justification)
 
         kingdir = self.config.get("broker", "kingdir")
         rundir = self.config.get("broker", "rundir")
