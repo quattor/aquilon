@@ -76,13 +76,26 @@ class TestCluster(TestBrokerCommand):
                              command)
 
     def testverifycat(self):
-        command = "cat --cluster utecl1"
-        out = self.commandtest(command.split())
+        cat_cluster_command = "cat --cluster utecl1"
+        cat_cluster_out = self.commandtest(cat_cluster_command.split())
+        m = self.searchoutput(cat_cluster_out,
+                              r"include { '(service/esx_management_server/"
+                              r"ut.[ab]/client/config)' };",
+                              cat_cluster_command)
+        template = m.group(1)
         for i in range(1, 5):
-            self.searchoutput(out,
+            host = "evh%s.aqd-unittest.ms.com" % i
+            self.searchoutput(cat_cluster_out,
                               "'/system/cluster/members' = list\([^\)]*"
-                              "'evh%s.aqd-unittest.ms.com'[^\)]*\);" % i,
-                              command)
+                              "'%s'[^\)]*\);" % host,
+                              cat_cluster_command)
+
+            # Also verify that the host plenary was written correctly.
+            cat_host_command = ["cat", "--hostname", host]
+            cat_host_out = self.commandtest(cat_host_command)
+            self.matchoutput(cat_host_out,
+                             """include { "%s" };""" % template,
+                             cat_host_command)
 
     def testfailmissingcluster(self):
         command = ["cluster", "--hostname=evh9.aqd-unittest.ms.com",
