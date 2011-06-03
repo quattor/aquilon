@@ -49,8 +49,7 @@ class Alias(DnsRecord):
                            primary_key=True)
 
     target_id = Column(Integer, ForeignKey('fqdn.id',
-                                           name='%s_target_fk' % _TN,
-                                           ondelete='CASCADE'),
+                                           name='%s_target_fk' % _TN),
                        nullable=False)
 
     target = relation(Fqdn, lazy=True,
