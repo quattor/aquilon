@@ -81,7 +81,7 @@ class CommandAddManager(BrokerCommand):
         addr = q.first()
         if (addr):
             raise ArgumentError("IP address {0!s} is already in use by "
-                                "{1:l}.".format(addr.ip, addr.vlan.interface))
+                                "{1:l}.".format(addr.ip, addr.interface))
 
         dbdns_rec = ARecord(fqdn=dbfqdn, ip=ip, network=dbnetwork,
                             comments=comments)
