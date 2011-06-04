@@ -70,7 +70,7 @@ class CommandDeploy(BrokerCommand):
         # The target has to be a non-tracking domain
         dbtarget = Domain.get_unique(session, target, compel=True)
 
-        if sync and dbtarget.tracked_branch \
+        if sync and isinstance(dbtarget.tracked_branch, Domain) \
            and dbtarget.tracked_branch.autosync and dbtarget.autosync:
             # The user probably meant to deploy to the tracked branch,
             # but only do so if all the relevant autosync flags are
