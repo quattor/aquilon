@@ -3484,8 +3484,8 @@
       provide customization to this behavior:
       <p/>"rw": includes read only commands except 'cat' and "show_active_*"
       <p/>"all": includes ALL commands including the above
-      <p/>Date specifications: MM-DD-YY (midnight),
-      or "MM-DD-YY HH:MM:SS" (quotes needed).
+      <p/>Date specifications: MM-DD-YY (midnight UTC),
+      or "MM-DD-YY HH:MM:SS+OOOO" (quotes needed).
       <p/>
       Some more complex formats are capable, details can be found in
       the "parser" section of http://niemeyer.net/python-dateutil

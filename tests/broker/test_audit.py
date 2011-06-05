@@ -32,7 +32,7 @@
 import unittest
 import re
 from time import time
-from datetime import datetime
+from datetime import datetime, timedelta
 
 if __name__ == "__main__":
     import utils
@@ -245,6 +245,34 @@ class TestAudit(TestBrokerCommand):
             start_time = parse(m.group('datetime'))
             self.assertTrue(start_time > midpoint)
             self.assertTrue(start_time < end_time)
+
+    def test_400_missing_timezone(self):
+        """Test behavior of a missing timezone."""
+        # The datetime object will not have a timezone, even though we
+        # explicitly ask for a UTC value.  While the rest of this file has to
+        # work around this odd behavior, actually using it here.
+        my_start_time = datetime.utcnow()
+        # Run a control command - something with a unique string, keeping
+        # the time before and after.
+        my_keyword = self.test_400_missing_timezone.__name__
+        command = ["del_archetype", "--archetype", my_keyword]
+        self.notfoundtest(command)
+        my_end_time = datetime.utcnow()
+
+        start_boundary = (my_start_time.replace(microsecond=0) -
+                          timedelta(seconds=1))
+        end_boundary = (my_end_time.replace(microsecond=0) +
+                        timedelta(seconds=1))
+        command = ["search_audit", "--cmd=del_archetype",
+                   "--keyword", my_keyword, "--after", start_boundary,
+                   "--before", end_boundary]
+        out = self.commandtest(command)
+        lines = out.splitlines()
+        self.assertEqual(len(lines), 1,
+                         "Expected one match for %s, got '%s'" %
+                         (command, out))
+        m = self.searchoutput(out, AUDIT_RAW_RE, command)
+        self.assertEqual(m.group('command'), 'del_archetype')
 
     def test_500_by_return_code(self):
         """ test search by return code """

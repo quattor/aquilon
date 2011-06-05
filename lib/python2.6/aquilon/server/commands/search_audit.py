@@ -29,6 +29,7 @@
 """ Search the transaction log for history """
 
 from dateutil.parser import parse
+from dateutil.tz import tzutc
 from sqlalchemy.sql.expression import asc, desc, or_, exists
 
 from aquilon.exceptions_ import ArgumentError
@@ -67,12 +68,16 @@ class CommandSearchAudit(BrokerCommand):
             q = q.filter(or_(Xtn.username == username,
                              Xtn.username.like(username + '@%')))
 
+        # TODO: These should be typed in input.xml as datetime and use
+        # the standard broker methods for dealing with input validation.
         if before is not None:
             try:
                 end = parse(before)
             except ValueError:
                 raise ArgumentError("Unable to parse date string '%s'" %
                                     before)
+            if not end.tzinfo:
+                end = end.replace(tzinfo=tzutc())
             q = q.filter(Xtn.start_time < end)
 
         if after is not None:
@@ -80,6 +85,8 @@ class CommandSearchAudit(BrokerCommand):
                 start = parse(after)
             except ValueError:
                 raise ArgumentError("Unable to parse date string '%s'" % after)
+            if not start.tzinfo:
+                start = start.replace(tzinfo=tzutc())
             q = q.filter(Xtn.start_time > start)
 
         if return_code is not None:

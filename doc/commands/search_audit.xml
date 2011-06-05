@@ -188,6 +188,10 @@
             any string that can be parsed by it's "parse()" method will be
             accepted as an argument.
         </para>
+        <para>
+	    If no timezone offset is given the broker will assume UTC (+0000).
+	    This may change in a future version.
+        </para>
         <title>Date/Time Examples</title>
         <para>
             RFC 822 format, based on date -R: "Thu, 25 Sep 2003 10:49:41 -0300"
