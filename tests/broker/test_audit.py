@@ -44,7 +44,7 @@ from dateutil.tz import tzutc
 from broker.brokertest import TestBrokerCommand
 
 
-# 2011-06-03 18:33:39+00:00 wesleyhe@is1.morgan - aq search_audit --cmd='all'
+#2011-06-03 18:33:39+00:00 wesleyhe@is1.morgan - aq search_audit --command='all'
 AUDIT_RAW_RE = re.compile(r'^(?P<datetime>(?P<date>'
                           r'(?P<year>\d{4,})-(?P<month>\d{2})-(?P<day>\d{2})) '
                           r'(?P<hour>\d{2}):(?P<minute>\d{2}):'
@@ -61,7 +61,7 @@ class TestAudit(TestBrokerCommand):
     def test_100_get_start(self):
         """ get the oldest row in the xtn table"""
         global start_time
-        command = ["search_audit", "--cmd", "all", "--limit", "1",
+        command = ["search_audit", "--command", "all", "--limit", "1",
                    "--oldest_first"]
         out = self.commandtest(command)
         m = self.searchoutput(out, AUDIT_RAW_RE, command)
@@ -71,7 +71,7 @@ class TestAudit(TestBrokerCommand):
     def test_101_get_end(self):
         """ get the newest row of xtn table, calcluate midpoint """
         global start_time, midpoint, end_time
-        command = ["search_audit", "--cmd", "all", "--limit", "1"]
+        command = ["search_audit", "--command", "all", "--limit", "1"]
         out = self.commandtest(command)
         m = self.searchoutput(out, AUDIT_RAW_RE, command)
         end_time = parse(m.group('datetime'))
@@ -116,7 +116,7 @@ class TestAudit(TestBrokerCommand):
         # Need to truncate time to seconds.
         my_start_time = datetime.fromtimestamp(int(time()), tz=tzutc())
         command = ["search_audit", "--username", self.user,
-                   "--cmd", "search_audit", "--format", "proto"]
+                   "--command", "search_audit", "--format", "proto"]
         out = self.commandtest(command)
         my_end_time = datetime.fromtimestamp(int(time()), tz=tzutc())
         outlist = self.parse_audit_msg(out)
@@ -176,14 +176,14 @@ class TestAudit(TestBrokerCommand):
 
     def test_230_timezone_proto(self):
         """ test start/end_times recorded are correctly """
-        cmd1 = ["search_audit", "--username", self.user, "--cmd",
+        cmd1 = ["search_audit", "--username", self.user, "--command",
                 "search_audit", "--limit", "1"]
         my_start_time = int(time())
         out = self.commandtest(cmd1)
         my_end_time = int(time())
 
         cmd2 = ["search_audit", "--username", self.user,
-               "--cmd", "search_audit", "--format", "proto", "--limit", "2"]
+               "--command", "search_audit", "--format", "proto", "--limit", "2"]
         out = self.commandtest(cmd2)
         outlist = self.parse_audit_msg(out)
         unit = outlist.transactions[1]
@@ -200,7 +200,7 @@ class TestAudit(TestBrokerCommand):
     def test_231_timezone_raw(self):
         """ Test the raw output has the correct date/timezone info """
         command = ["search_audit", "--username", self.user,
-                   "--cmd", "search_audit", "--limit", "1"]
+                   "--command", "search_audit", "--limit", "1"]
 
         my_start_time = datetime.fromtimestamp(int(time()), tz=tzutc())
         out = self.commandtest(command)
@@ -263,7 +263,7 @@ class TestAudit(TestBrokerCommand):
                           timedelta(seconds=1))
         end_boundary = (my_end_time.replace(microsecond=0) +
                         timedelta(seconds=1))
-        command = ["search_audit", "--cmd=del_archetype",
+        command = ["search_audit", "--command=del_archetype",
                    "--keyword", my_keyword, "--after", start_boundary,
                    "--before", end_boundary]
         out = self.commandtest(command)
@@ -276,7 +276,7 @@ class TestAudit(TestBrokerCommand):
 
     def test_500_by_return_code(self):
         """ test search by return code """
-        command = ["search_audit", "--cmd=add_switch", "--return_code=200"]
+        command = ["search_audit", "--command=add_switch", "--return_code=200"]
         out = self.commandtest(command)
         self.searchoutput(out, self.user, command)
         for line in out.splitlines():
@@ -286,7 +286,7 @@ class TestAudit(TestBrokerCommand):
 
     def test_501_zero_return_code(self):
         """ test searching for unfinished commands """
-        command = ["search_audit", "--return_code", "0", "--cmd", "all"]
+        command = ["search_audit", "--return_code", "0", "--command", "all"]
         out = self.commandtest(command)
         lines = out.splitlines()
         self.assertEqual(len(lines), 1,
@@ -296,12 +296,12 @@ class TestAudit(TestBrokerCommand):
         self.assertEqual(m.group('command'), 'search_audit')
         self.assertTrue(m.group('args').index("--return_code='0'"),
                         "Expected return_code arg in %s" % m.group('args'))
-        self.assertTrue(m.group('args').index("--cmd='all'"),
+        self.assertTrue(m.group('args').index("--command='all'"),
                         "Expected cmd arg in %s" % m.group('args'))
 
     def test_600_rw_command(self):
         """ test the rw option contains read commands and NOT search_audit """
-        command = ["search_audit", "--cmd", "rw"]
+        command = ["search_audit", "--command", "rw"]
         out = self.commandtest(command)
         # test what's there and what's NOT there: make sure audit is not
         self.searchoutput(out, "200 aq add_building", command)
@@ -310,7 +310,7 @@ class TestAudit(TestBrokerCommand):
 
     def test_620_all_command(self):
         """ test the all option """
-        command = ["search_audit", "--cmd", "all"]
+        command = ["search_audit", "--command", "all"]
         out = self.commandtest(command)
         # test search_audit is there
         self.searchoutput(out, "200 aq add_building", command)
@@ -327,13 +327,13 @@ class TestAudit(TestBrokerCommand):
 
     def test_700_invalid_before(self):
         """ test invalid date spec in before """
-        cmd = ["search_audit", "--cmd", "all", "--before", "XXX"]
+        cmd = ["search_audit", "--command", "all", "--before", "XXX"]
         out = self.badrequesttest(cmd)
         self.matchoutput(out, "Unable to parse date string", cmd)
 
     def test_710_invalid_after(self):
         """ test invalid date spec in after """
-        cmd = ["search_audit", "--cmd", "all", "--after", "XXX"]
+        cmd = ["search_audit", "--command", "all", "--after", "XXX"]
         out = self.badrequesttest(cmd)
         self.matchoutput(out, "Unable to parse date string", cmd)
 
@@ -341,15 +341,15 @@ class TestAudit(TestBrokerCommand):
         """ test the limit option """
         # use protobufs to exploit the "expect" functionality to count the
         # number of replies
-        cmd = ["search_audit", "--cmd", "all", "--limit", 1000, "--format",
+        cmd = ["search_audit", "--command", "all", "--limit", 1000, "--format",
                "proto"]
         out = self.commandtest(cmd)
         outlist = self.parse_audit_msg(out, 1000)
 
     def test_810_max_limit(self):
         """ test the maximum is checked properly """
-        cmd = ["search_audit", "--cmd", "all", "--limit", 30000, "--format",
-               "proto"]
+        cmd = ["search_audit", "--command", "all", "--limit", 30000,
+               "--format", "proto"]
         out = self.badrequesttest(cmd)
         self.matchoutput(out, "Cannot set the limit higher than", cmd)
 
@@ -360,7 +360,7 @@ class TestAudit(TestBrokerCommand):
         cmd1 = ["reconfigure", "--list", scratchfile]
         err = self.badrequesttest(cmd1)
 
-        cmd2 = ["search_audit", "--cmd", "reconfigure", "--limit", "1",
+        cmd2 = ["search_audit", "--command", "reconfigure", "--limit", "1",
                 "--format", "proto"]
         out = self.parse_audit_msg(self.commandtest(cmd2)).transactions[0]
         values = [arg.value for arg in out.arguments]

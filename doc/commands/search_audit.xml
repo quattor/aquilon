@@ -28,7 +28,7 @@
             </group>
             <arg choice="plain"><option>--keyword <replaceable>KEYWORD</replaceable></option></arg>
             <arg choice="plain"><option>--username <replaceable>USERNAME</replaceable></option></arg>
-            <arg choice="plain"><option>--cmd <replaceable>COMMAND</replaceable></option></arg>
+            <arg choice="plain"><option>--command <replaceable>COMMAND</replaceable></option></arg>
             <arg choice="plain"><option>--return_code <replaceable>RETURN CODE</replaceable></option></arg>
             <arg choice="plain"><option>--before <replaceable>DATE/TIME</replaceable></option></arg>
             <arg choice="plain"><option>--after <replaceable>DATE/TIME</replaceable></option></arg>
@@ -81,7 +81,7 @@
 
             <varlistentry>
                 <term>
-                    <option>--cmd
+                    <option>--command
                         <replaceable>COMMAND</replaceable>
                     </option>
                 </term>
@@ -92,11 +92,11 @@
 			create, update or delete data.
                     </para>
                     <para>
-			"--cmd rw" will fetch _most_ commands (including
+			"--command rw" will fetch _most_ commands (including
 			show and search commands)
                     </para>
                     <para>
-			"--cmd all" will show _everything_ (including
+			"--command all" will show _everything_ (including
 			search_audit)
                     </para>
                 </listitem>

@@ -3480,7 +3480,7 @@
       Defaults:
       <p/>
       The default is only to search for commands that create, update or
-      delete data.  There are some special values for the cmd option to
+      delete data.  There are some special values for the command option to
       provide customization to this behavior:
       <p/>"rw": includes read only commands except 'cat' and "show_active_*"
       <p/>"all": includes ALL commands including the above
@@ -3494,7 +3494,7 @@
       <optgroup name="search_audit_opts" mandatory="True" fields="any">
          <option name="keyword" type="string">The value of any argument supplied to a command</option>
          <option name="username" type="string">The user name who executed the command</option>
-         <option name="cmd" type="string">The name of the command (see "Defaults")</option>
+         <option name="command" type="string">The name of the command (see "Defaults")</option>
          <option name="before" type="string">Search for transactions started before a specific date/time</option>
          <option name="after" type="string">Search for transactions started after a specific date/time</option>
          <option name="return_code" type="int">Search by an HTTP response code (200-505)</option>

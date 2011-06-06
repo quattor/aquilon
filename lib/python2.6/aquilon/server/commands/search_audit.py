@@ -45,20 +45,20 @@ class CommandSearchAudit(BrokerCommand):
 
     required_parameters = []
 
-    def render(self, session, logger, keyword, username, cmd, before, after,
-               return_code, limit, oldest_first, **arguments):
+    def render(self, session, logger, keyword, username, command,
+               before, after, return_code, limit, oldest_first, **arguments):
 
         q = session.query(Xtn)
 
-        if cmd is not None:
-            if cmd == 'all':
+        if command is not None:
+            if command == 'all':
                 # No filter
                 pass
-            elif cmd == 'rw':
+            elif command == 'rw':
                 # Filter our command list
                 q = q.filter(~Xtn.command.in_(_IGNORED_COMMANDS))
             else:
-                q = q.filter_by(command=cmd)
+                q = q.filter_by(command=command)
         else:
             # filter out read only
             q = q.filter_by(is_readonly=False)
