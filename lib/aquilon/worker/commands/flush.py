@@ -104,7 +104,7 @@ class CommandFlush(BrokerCommand):
         q = session.query(AddressAssignment)
         q = q.options(joinedload("network"),
                       joinedload("dns_records"))
-        q = q.order_by(AddressAssignment._label)
+        q = q.order_by(AddressAssignment.label)
 
         if hosts:
             q = q.options(subqueryload("network.static_routes"),

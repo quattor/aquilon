@@ -26,7 +26,7 @@ from sqlalchemy.orm import relation, backref, deferred, validates
 from sqlalchemy.sql import and_
 
 from aquilon.exceptions_ import InternalError
-from aquilon.aqdb.column_types import IPV4, AqStr
+from aquilon.aqdb.column_types import IPV4, AqStr, EmptyStr
 from aquilon.aqdb.model import (Base, Interface, ARecord, DnsEnvironment, Fqdn,
                                 Network)
 from aquilon.aqdb.model.a_record import dns_fqdn_mapper
@@ -59,7 +59,7 @@ class AddressAssignment(Base):
     interface_id = Column(ForeignKey(Interface.id, ondelete='CASCADE'),
                           nullable=False)
 
-    _label = Column("label", AqStr(16), nullable=False)
+    label = Column(EmptyStr(16), nullable=False)
 
     ip = Column(IPV4, nullable=False)
 
@@ -75,7 +75,7 @@ class AddressAssignment(Base):
                                     nullable=False))
 
     interface = relation(Interface, innerjoin=True,
-                         backref=backref('assignments', order_by=[_label],
+                         backref=backref('assignments', order_by=[label],
                                          cascade='all, delete-orphan'))
 
     dns_environment = relation(DnsEnvironment, innerjoin=True)
@@ -97,7 +97,7 @@ class AddressAssignment(Base):
                                        order_by=[ip]))
 
     __table_args__ = (UniqueConstraint(interface_id, ip),
-                      UniqueConstraint(interface_id, _label),
+                      UniqueConstraint(interface_id, label),
                       Index("%s_network_ip_idx" % _ABV, network_id, ip))
 
     __mapper_args__ = {'polymorphic_on': assignment_type,
@@ -124,25 +124,12 @@ class AddressAssignment(Base):
         return name
 
     @property
-    def label(self):
-        if self._label == '-':
-            return ""
-        else:
-            return self._label
-
-    @property
     def is_shared(self):
         return False
 
     def __init__(self, label=None, network=None, **kwargs):
-        # This is dirty. We want to allow empty labels, but Oracle converts
-        # empty strings to NULL, violating the NOT NULL constraint. We could
-        # allow label to be NULL and relying on the unique indexes to forbid
-        # adding multiple empty labels, but that is again Oracle-specific
-        # behavior which actually violates the SQL standard, so it would not
-        # work with other databases.
         if not label:
-            label = '-'
+            label = ""
         elif not self._label_check.match(label):  # pragma: no cover
             raise ValueError("Illegal address label '%s'." % label)
 
@@ -151,7 +138,7 @@ class AddressAssignment(Base):
         if not network:  # pragma: no cover
             raise InternalError("AddressAssignment needs a network")
 
-        super(AddressAssignment, self).__init__(_label=label, network=network,
+        super(AddressAssignment, self).__init__(label=label, network=network,
                                                 **kwargs)
 
     def __repr__(self):
