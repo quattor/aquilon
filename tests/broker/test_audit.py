@@ -44,11 +44,11 @@ from dateutil.tz import tzutc
 from broker.brokertest import TestBrokerCommand
 
 
-#2011-06-03 18:33:39+00:00 wesleyhe@is1.morgan - aq search_audit --command='all'
+#2011-06-03 18:33:39+0000 wesleyhe@is1.morgan - aq search_audit --command='all'
 AUDIT_RAW_RE = re.compile(r'^(?P<datetime>(?P<date>'
                           r'(?P<year>\d{4,})-(?P<month>\d{2})-(?P<day>\d{2})) '
                           r'(?P<hour>\d{2}):(?P<minute>\d{2}):'
-                          r'(?P<second>\d{2})(?P<offset>[-\+]\d{2}:\d{2})) '
+                          r'(?P<second>\d{2})(?P<offset>[-\+]\d{4})) '
                           r'(?P<principal>(?P<user>\w+)'
                           r'(?:@(?P<realm>[\w\.]+))?) '
                           r'(?P<returncode>\d+|-) '
@@ -205,7 +205,7 @@ class TestAudit(TestBrokerCommand):
         my_start_time = datetime.fromtimestamp(int(time()), tz=tzutc())
         out = self.commandtest(command)
         m = self.searchoutput(out, AUDIT_RAW_RE, command)
-        self.assertEqual(m.group('offset'), "+00:00")
+        self.assertEqual(m.group('offset'), "+0000")
 
         db_start_time = parse(m.group('datetime'))
         self.assertTrue(my_start_time <= db_start_time,

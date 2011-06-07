@@ -82,8 +82,8 @@ class Xtn(Base):
         else:
             return_code = '-'
 
-        msg = ['%s %s %s aq %s' % (self.start_time, self.username,
-                                   return_code, self.command)]
+        msg = [self.start_time.strftime('%Y-%m-%d %H:%M:%S%z'),
+               str(self.username), str(return_code), 'aq', str(self.command)]
         for arg in self.args:
             msg.append("--%s=%r" % (arg.name, str(arg.value)))
         return " ".join(msg)
