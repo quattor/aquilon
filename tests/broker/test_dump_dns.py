@@ -46,7 +46,7 @@ class TestDumpDns(TestBrokerCommand):
 
     def test_djb(self):
         command = ["dump", "dns"]
-        out = self.commandtest(command)
+        out = self.commandtest(command, auth=False)
         # Primary name
         self.matchoutput(out,
                          "=unittest20.aqd-unittest.ms.com:%s" %

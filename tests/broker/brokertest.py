@@ -111,9 +111,12 @@ class TestBrokerCommand(unittest.TestCase):
 
     msversion_dev_re = re.compile('WARNING:msversion:Loading \S* from dev\n')
 
-    def runcommand(self, command, **kwargs):
+    def runcommand(self, command, auth=True, **kwargs):
         aq = os.path.join(self.config.get("broker", "srcdir"), "bin", "aq.py")
-        kncport = self.config.get("broker", "kncport")
+        if auth:
+            port = self.config.get("broker", "kncport")
+        else:
+            port = self.config.get("broker", "openport")
         if isinstance(command, list):
             args = [str(cmd) for cmd in command]
         else:
@@ -121,9 +124,12 @@ class TestBrokerCommand(unittest.TestCase):
         args.insert(0, sys.executable)
         args.insert(1, aq)
         args.append("--aqport")
-        args.append(kncport)
-        args.append("--aqservice")
-        args.append(self.config.get("broker", "service"))
+        args.append(port)
+        if auth:
+            args.append("--aqservice")
+            args.append(self.config.get("broker", "service"))
+        else:
+            args.append("--noauth")
         if kwargs.has_key("env"):
             # Make sure that kerberos tickets are still present if the
             # environment is being overridden...
@@ -244,21 +250,7 @@ class TestBrokerCommand(unittest.TestCase):
         return err
 
     def unauthorizedtest(self, command, **kwargs):
-        aq = os.path.join(self.config.get("broker", "srcdir"), "bin", "aq.py")
-        openport = self.config.get("broker", "openport")
-        if isinstance(command, list):
-            args = command[:]
-        else:
-            args = [command]
-        args.insert(0, sys.executable)
-        args.insert(1, aq)
-        args.append("--aqport")
-        args.append(openport)
-        args.append("--noauth")
-        p = Popen(args, stdout=PIPE, stderr=PIPE, **kwargs)
-        (out, err) = p.communicate()
-        # Strip any msversion dev warnings out of STDERR
-        err = self.msversion_dev_re.sub('', err)
+        (p, out, err) = self.runcommand(command, auth=False, **kwargs)
         self.assertEqual(p.returncode, 4,
                          "Return code for %s was %d instead of %d"
                          "\nSTDOUT:\n@@@\n'%s'\n@@@"
