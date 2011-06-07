@@ -232,7 +232,11 @@ class TestAudit(TestBrokerCommand):
         for line in out.splitlines():
             m = self.searchoutput(line, AUDIT_RAW_RE, command)
             start_time = parse(m.group('datetime'))
-            self.assertTrue(start_time > midpoint)
+            # This should be strictly '>' for Oracle, where we do not store
+            # microseconds.  However, sqlite *does* store microseconds.
+            # Since we do not print the microseconds, this test can't know
+            # if the result is strictly after the request time.
+            self.assertTrue(start_time >= midpoint)
 
     def test_320_before_and_after(self):
         """ test audit 'before' and 'after' simultaneously """
@@ -243,7 +247,14 @@ class TestAudit(TestBrokerCommand):
         for line in out.splitlines():
             m = self.searchoutput(line, AUDIT_RAW_RE, command)
             start_time = parse(m.group('datetime'))
-            self.assertTrue(start_time > midpoint)
+            # This should be strictly '>' for Oracle, where we do not store
+            # microseconds.  However, sqlite *does* store microseconds.
+            # Since we do not print the microseconds, this test can't know
+            # if the result is strictly after the request time.
+            # We do not have the same problem with end_time, since all
+            # the boundary is 0 microseconds.  (Any recorded time before
+            # the second we ask for will be a different second.)
+            self.assertTrue(start_time >= midpoint)
             self.assertTrue(start_time < end_time)
 
     def test_400_missing_timezone(self):
