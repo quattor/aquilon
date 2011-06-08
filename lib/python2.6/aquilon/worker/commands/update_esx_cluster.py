@@ -121,16 +121,12 @@ class CommandUpdateESXCluster(BrokerCommand):
 
         (vm_count, host_count) = force_ratio("vm_to_host_ratio",
                                              vm_to_host_ratio)
-        if vm_count is not None or down_hosts_threshold is not None:
-            if vm_count is None:
-                vm_count = dbcluster.vm_count
-                host_count = dbcluster.host_count
-            if down_hosts_threshold is None:
-                down_hosts_threshold = dbcluster.down_hosts_threshold
-            dbcluster.validate(vm_part=vm_count, host_part=host_count,
-                               down_hosts_threshold=down_hosts_threshold)
+        if vm_count is not None:
             dbcluster.vm_count = vm_count
             dbcluster.host_count = host_count
+            cluster_updated = True
+
+        if down_hosts_threshold is not None:
             dbcluster.down_hosts_threshold = down_hosts_threshold
             cluster_updated = True
 
@@ -153,18 +149,16 @@ class CommandUpdateESXCluster(BrokerCommand):
 
         if memory_capacity is not None:
             dbcluster.memory_capacity = memory_capacity
-            dbcluster.validate()
             cluster_updated = True
 
         if clear_overrides is not None:
             dbcluster.memory_capacity = None
-            dbcluster.validate()
             cluster_updated = True
 
         if not cluster_updated:
             return
 
-        session.add(dbcluster)
+        dbcluster.validate()
         session.flush()
 
         plenaries.append(PlenaryCluster(dbcluster, logger=logger))
