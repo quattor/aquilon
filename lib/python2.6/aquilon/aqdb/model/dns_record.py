@@ -103,7 +103,7 @@ class DnsRecord(Base):
                 fqdn = Fqdn.get_unique(session, name=name,
                                        dns_domain=dns_domain,
                                        dns_environment=dns_environment,
-                                       compel=compel, **kwargs)
+                                       compel=compel)
             except NotFoundException:
                 # Replace the "Fqdn ... not found" message with a more user
                 # friendly one
