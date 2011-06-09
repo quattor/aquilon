@@ -1163,6 +1163,8 @@
          <option name="ipalgorithm" type="string">Algorithm for automatically choosing an IP.</option>
          <option name="pg" type="string" conflicts="autopg">portgroup</option>
          <option name="autopg" type="flag" conflicts="pg">choose portgroup based on switch</option>
+         <option name="model" type="string">Interface model name. Default is 'generic_nic'.</option>
+         <option name="vendor" type="string">Interface vendor name. Default is 'generic'.</option>
       </optgroup>
       <transport trigger="machine" method="put" path="machine/%(machine)s/interface/%(interface)s" />
       <transport trigger="hostname" method="put" path="host/%(hostname)s/interface/%(interface)s" />
@@ -1457,6 +1459,8 @@
          <option name="comments" type="string">Comments</option>
          <option name="master" type="string" conflicts="ip clear_master">Enslave interface to the given master</option>
          <option name="clear_master" type="flag" conflicts="master">Clear the bonding</option>
+         <option name="model" type="string">Interface model name</option>
+         <option name="vendor" type="string">Interface vendor name</option>
       </optgroup>
       <transport trigger="machine" method="post" path="machine/%(machine)s/interface/%(interface)s" />
       <transport trigger="hostname" method="post" path="host/%(hostname)s/interface/%(interface)s" />

@@ -43,7 +43,7 @@ from sqlalchemy.sql.expression import desc, case
 
 from aquilon.exceptions_ import InternalError
 from aquilon.aqdb.column_types import AqMac, AqStr
-from aquilon.aqdb.model import Base, HardwareEntity, ObservedMac
+from aquilon.aqdb.model import Base, HardwareEntity, ObservedMac, Model
 
 from aquilon.aqdb.model.vlan import MAX_VLANS
 
@@ -80,6 +80,10 @@ class Interface(Base):
 
     mac = Column(AqMac(17), nullable=True)
 
+    model_id = Column(Integer, ForeignKey('model.id',
+                                          name='%s_model_fk' % _TN),
+                      nullable=False)
+
     # PXE boot control. Does not affect how the OS configures the interface.
     # FIXME: move to PublicInterface
     bootable = Column(Boolean(name="%s_bootable_ck" % _ABV), nullable=False,
@@ -107,6 +111,8 @@ class Interface(Base):
 
     hardware_entity = relation(HardwareEntity, lazy=False, innerjoin=True,
                                backref=backref('interfaces', cascade='all'))
+
+    model = relation(Model, lazy=True, innerjoin=True)
 
     master = relation('Interface', uselist=False, lazy=True,
                       remote_side=id,

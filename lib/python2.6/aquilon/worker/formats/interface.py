@@ -51,6 +51,8 @@ class InterfaceFormatter(ObjectFormatter):
                 interface.name, interface.bootable)]
 
         details.append(indent + "  Type: %s" % interface.interface_type)
+        details.append(indent + "  Vendor: %s Model: %s" %
+                       (interface.model.vendor, interface.model))
         if interface.port_group:
             details.append(indent + "  Port Group: %s" % interface.port_group)
 

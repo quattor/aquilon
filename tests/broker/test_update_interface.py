@@ -72,7 +72,8 @@ class TestUpdateInterface(TestBrokerCommand):
         self.noouttest(["update", "interface", "--interface", "eth1",
                         "--hostname", "unittest02.one-nyp.ms.com",
                         "--mac", self.net.unknown[0].usable[12].mac,
-                        "--ip", self.net.unknown[0].usable[12], "--boot"])
+                        "--ip", self.net.unknown[0].usable[12], "--boot",
+                        "--model", "e1000"])
 
     def testupdateut3c5n10eth2(self):
         self.notfoundtest(["update", "interface", "--interface", "eth2",
@@ -107,12 +108,12 @@ class TestUpdateInterface(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.searchoutput(out,
                           r'"cards/nic" = nlist\(\s*'
-                          r'"eth0", nlist\(\s*'
+                          r'"eth0", create\("hardware/nic/generic/generic_nic",\s*'
                           r'"hwaddr", "%s"\s*\),'
                           % self.net.unknown[0].usable[11].mac,
                           command)
         self.searchoutput(out,
-                          r'"eth1", nlist\(\s*'
+                          r'"eth1", create\("hardware/nic/intel/e1000",\s*'
                           r'"boot", true,\s*'
                           r'"hwaddr", "%s"\s*\)\s*\);'
                           % self.net.unknown[0].usable[12].mac,
@@ -168,9 +169,7 @@ class TestUpdateInterface(TestBrokerCommand):
         command = ["update_interface", "--boot", "--interface=xge49",
                    "--switch=ut3gd1r01.aqd-unittest.ms.com"]
         out = self.unimplementederrortest(command)
-        self.matchoutput(out,
-                         "cannot use the --autopg, --pg, or --boot options",
-                         command)
+        self.matchoutput(out, "cannot use the --boot option.", command)
 
     def testfailswitchip(self):
         command = ["update_interface", "--interface=xge49",

@@ -43,7 +43,7 @@ from sqlalchemy.sql import select
 from aquilon.exceptions_ import ArgumentError, InternalError, NotFoundException
 from aquilon.aqdb.model import (Interface, HardwareEntity, ObservedMac,
                                 ARecord, VlanInfo, ObservedVlan, Network,
-                                AddressAssignment, DnsEnvironment)
+                                AddressAssignment, DnsEnvironment, Model)
 from aquilon.aqdb.model.address_assignment import ADDR_USAGES
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.utils import force_mac
@@ -334,6 +334,7 @@ def _type_msg(interface_type, bootable):
         return interface_type
 
 def get_or_create_interface(session, dbhw_ent, name=None, mac=None,
+                            model=None, vendor=None,
                             interface_type='public', bootable=None,
                             preclude=False, port_group=None, comments=None):
     """
@@ -445,6 +446,12 @@ def get_or_create_interface(session, dbhw_ent, name=None, mac=None,
     if port_group is not None:
         extra_args["port_group"] = port_group
 
+    if not model and not vendor:
+        model = "generic_nic"
+        vendor = "generic"
+    dbmodel = Model.get_unique(session, name=model, vendor=vendor,
+                               machine_type="nic", compel=True)
+
     # VLAN interfaces need some special handling
     if interface_type == 'vlan':
         result = _vlan_re.match(name)
@@ -472,7 +479,7 @@ def get_or_create_interface(session, dbhw_ent, name=None, mac=None,
                                 "interfaces." % (key, interface_type))
 
     try:
-        dbinterface = cls(name=name, mac=mac, comments=comments,
+        dbinterface = cls(name=name, mac=mac, comments=comments, model=dbmodel,
                           **extra_args)
     except ValueError, err:
         raise ArgumentError(err)

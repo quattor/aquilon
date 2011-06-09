@@ -39,12 +39,14 @@ from aquilon.worker.processes import DSDBRunner
 class CommandUpdateInterfaceSwitch(BrokerCommand):
 
     required_parameters = ["interface", "switch"]
+    invalid_parameters = ['autopg', 'pg', 'boot', 'model', 'vendor']
 
-    def render(self, session, logger, interface, switch, mac, comments,
-               ip, boot, pg, autopg, **arguments):
-        if autopg or pg or boot is not None:
-            raise UnimplementedError("update_interface --switch cannot use "
-                                     "the --autopg, --pg, or --boot options")
+    def render(self, session, logger, interface, switch, mac, comments, ip,
+               **arguments):
+        for arg in self.invalid_parameters:
+            if arguments.get(arg) is not None:
+                raise UnimplementedError("update_interface --switch cannot use "
+                                         "the --%s option." % arg)
         if ip:
             raise UnimplementedError("use update_switch to update the IP")
 
