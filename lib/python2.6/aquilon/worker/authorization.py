@@ -89,6 +89,9 @@ class AuthorizationBroker(object):
             if action not in ['add_host', 'add_windows_host', 'make_cluster',
                               'reconfigure']:
                 self.raise_auth_error(principal, action, resource)
+        if dbuser.role.name == 'resource_pool':
+            if action not in ['add_address', 'del_address']:
+                self.raise_auth_error(principal, action, resource)
         if dbuser.role.name == 'location_admin':
             if action not in ['add_location', 'del_location',
                               'add_building', 'del_building',
