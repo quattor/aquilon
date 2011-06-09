@@ -53,7 +53,6 @@ class CommandUpdateESXCluster(BrokerCommand):
         dbcluster = EsxCluster.get_unique(session, cluster, compel=True)
 
         cluster_updated = False
-        location_changed = False
         remove_plenaries = PlenaryCollection(logger=logger)
         plenaries = PlenaryCollection(logger=logger)
 
@@ -89,7 +88,6 @@ class CommandUpdateESXCluster(BrokerCommand):
                         plenaries.append(PlenaryMachineInfo(dbmachine,
                                                             logger=logger))
                 dbcluster.location_constraint = dblocation
-                location_changed = True
                 cluster_updated = True
 
         if personality or archetype:
