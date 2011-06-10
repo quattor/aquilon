@@ -61,6 +61,9 @@ dblogfile = %(dbdir)s/aqdb.log
 vendor = oracle
 server = LNPO_AQUILON_NY
 dbuser = USER
+# Schema the xtn_log tables exist in, if separate from the rest of the tables.
+# There is no default - the value is only used if set.
+#audit_schema = USER
 dsn = oracle://%(dbuser)s:PASSWORD@%(server)s
 connect_str = %(dbuser)s/%(dbuser)s@%(server)s
 dumpfile = %(dbdir)s/%(dbuser)s.dmp
@@ -92,6 +95,7 @@ database_section = database_sqlite
 pool_size = 3
 pool_max_overflow = 0
 pool_timeout =
+
 
 [broker]
 default_organization = ms
@@ -160,6 +164,9 @@ vlan2net = /ms/dist/aquilon/PROJ/vlan2net/prod/bin/vlan2net
 run_knc = True
 mean = /ms/dist/storage/PROJ/infra/prod/bin/mean
 qip_dump_subnetdata = /ms/dist/3rd/qip/usr/sbin/qip-dump-subnetdata
+# Default and maximum numbers of audit (xtn table) rows returned by search audit
+default_audit_rows = 5000
+max_audit_rows = 20000
 
 [panc]
 default_version = prod

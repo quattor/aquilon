@@ -131,3 +131,5 @@ from aquilon.aqdb.model.personality_cluster_info import (PersonalityClusterInfo,
 
 from aquilon.aqdb.model.metacluster import MetaCluster, MetaClusterMember
 from aquilon.aqdb.model.machine_specs import MachineSpecs
+
+from aquilon.aqdb.model.xtn import Xtn, XtnDetail, XtnEnd

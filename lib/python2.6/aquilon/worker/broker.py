@@ -26,23 +26,25 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
+""" Module containing the base class BrokerCommand """
 
-
-import os
 import sys
 import re
 from inspect import isclass
 
 from sqlalchemy.sql import text
-from twisted.internet import defer
+from twisted.web import http
 from twisted.python import log
 
 from aquilon.config import Config
-from aquilon.exceptions_ import ArgumentError, UnimplementedError, AquilonError
+from aquilon.exceptions_ import (ArgumentError, AuthorizationException,
+                                 NotFoundException, UnimplementedError,
+                                 PartialError)
 from aquilon.worker.authorization import AuthorizationBroker
 from aquilon.worker.messages import StatusCatalog
 from aquilon.worker.logger import RequestLogger
 from aquilon.aqdb.db_factory import DbFactory
+from aquilon.aqdb.model.xtn import start_xtn, end_xtn
 from aquilon.worker.formats.formatters import ResponseFormatter
 from aquilon.worker.dbwrappers.user_principal import (
         get_or_create_user_principal)
@@ -52,6 +54,8 @@ from aquilon.worker.templates.domain import TemplateDomain
 from aquilon.worker.services import Chooser
 from aquilon.worker.processes import sync_domain
 
+# Things we don't need cluttering up the transaction details table
+_IGNORED_AUDIT_ARGS = ('requestid', 'bundle', 'debug')
 
 audit_id = 0
 """This will help with debugging active incoming requests.
@@ -59,6 +63,19 @@ audit_id = 0
    Eventually it will be replaced by a primary key in the audit log table.
 
    """
+
+# Mapping of command exceptions to client return code.
+ERROR_TO_CODE = {NotFoundException:http.NOT_FOUND,
+                 AuthorizationException:http.UNAUTHORIZED,
+                 ArgumentError:http.BAD_REQUEST,
+                 UnimplementedError:http.NOT_IMPLEMENTED,
+                 PartialError:http.MULTI_STATUS}
+
+def get_code_for_error_class(e):
+    if e is None or e == None.__class__:
+        return http.OK
+    return ERROR_TO_CODE.get(e, http.INTERNAL_SERVER_ERROR)
+
 
 class BrokerCommand(object):
     """ The basis for each command module under commands.
@@ -92,6 +109,12 @@ class BrokerCommand(object):
     invoked.
 
     """
+
+    # The parameter types are filled in automatically based on input.xml.
+    parameter_types = {}
+    # This is the pivot of the above, filled in at the same time.  It is a
+    # dictionary of type names to lists of parameters.
+    parameters_by_type = {}
 
     requires_azcheck = True
     """ Opt out of authorization checks by setting this flag to False."""
@@ -214,13 +237,16 @@ class BrokerCommand(object):
         of rendor().
 
         """
+
         def updated_render(self, *args, **kwargs):
             principal = kwargs["user"]
             request = kwargs["request"]
+            logger = kwargs["logger"]
             for key in kwargs.keys():
                 if key in self.parameter_checks:
                     kwargs[key] = self.parameter_checks[key]("--" + key,
                                                              kwargs[key])
+            raising_exception = None
             try:
                 if self.requires_transaction or self.requires_azcheck:
                     # Set up a session...
@@ -233,10 +259,13 @@ class BrokerCommand(object):
                     dbuser = get_or_create_user_principal(session, principal,
                                                           commitoncreate=True)
                     kwargs["dbuser"] = dbuser
+                    self._record_xtn(session, logger.get_status())
+
                     if self.requires_azcheck:
                         self.az.check(principal=principal, dbuser=dbuser,
                                       action=self.action,
                                       resource=request.path)
+
                     if self.requires_readonly:
                         self._set_readonly(session)
                     # begin() is only required if session transactional=False
@@ -253,7 +282,8 @@ class BrokerCommand(object):
                 if "session" in kwargs:
                     session.commit()
                 return retval
-            except:
+            except Exception, e:
+                raising_exception = e
                 # Need to close after the rollback, or the next time session
                 # is accessed it tries to commit the transaction... (?)
                 if "session" in kwargs:
@@ -264,6 +294,10 @@ class BrokerCommand(object):
                 # Obliterating the scoped_session - next call to session()
                 # will create a new one.
                 if "session" in kwargs:
+                    # Complete the transaction
+                    end_xtn(session, {'xtn_id': kwargs['requestid'],
+                                      'return_code': get_code_for_error_class(
+                                        raising_exception.__class__)})
                     if self.is_lock_free:
                         self.dbf.NLSession.remove()
                     else:
@@ -291,12 +325,16 @@ class BrokerCommand(object):
         session = kwargs.pop('session', None)
         request = kwargs.pop('request')
         user = kwargs.pop('user', None)
+        # Log a dummy user with no realm for unauthenticated requests.
+        if user is None or user == '':
+            user = 'nobody'
         dbuser = kwargs.pop('dbuser', None)
         kwargs['format'] = kwargs.pop('style', 'raw')
-        # TODO: Have this less hard-coded...
-        if self.action == 'put':
-            kwargs.pop('bundle')
+
         for (key, value) in kwargs.items():
+            if key in _IGNORED_AUDIT_ARGS:
+                kwargs.pop(key)
+                continue
             if value is None:
                 kwargs.pop(key)
                 continue
@@ -328,6 +366,8 @@ class BrokerCommand(object):
             status = self.catalog.create_request_status(
                 auditid=request.aq_audit_id,
                 requestid=command_kwargs.get("requestid", None))
+        # If no requestid was given, the RequestStatus object created it.
+        command_kwargs['requestid'] = status.requestid
         logger = RequestLogger(status=status, module_logger=self.module_logger)
         command_kwargs["logger"] = logger
         self._audit(message_status=status, **command_kwargs)
@@ -344,6 +384,27 @@ class BrokerCommand(object):
                 logger.debug("Server finishing request.")
                 logger.remove_status_by_auditid(self.catalog)
             logger.close_handlers()
+
+    def _record_xtn(self, session, status):
+        audit_msg = dict()
+        audit_msg['xtn_id'] = status.requestid
+        audit_msg['username'] = status.user
+        audit_msg['command'] = status.command
+        audit_msg['readonly'] = self.requires_readonly
+
+        details = dict()
+        for k, v in status.kwargs.items():
+            # Skip uber-redundant raw format parameter
+            if (k == 'format') and v == 'raw':
+                continue
+            # Sometimes we delete a value and the arg comes in as an empty
+            # string.  Denote this with a dash '-' to work around Oracle
+            # not being able to store the concept of a non-NULL empty string.
+            if v == '':
+                v = '-'
+            details[k] = str(v)
+        audit_msg['details'] = details
+        start_xtn(session, audit_msg, self.parameters_by_type.get('file'))
 
     @property
     def is_lock_free(self):

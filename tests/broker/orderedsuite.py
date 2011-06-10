@@ -223,6 +223,7 @@ from test_del_dns_domain import TestDelDnsDomain
 from test_del_dns_environment import TestDelDnsEnvironment
 from test_client_failure import TestClientFailure
 from test_client_bypass import TestClientBypass
+from test_audit import TestAudit
 from test_stop import TestBrokerStop
 
 
@@ -325,7 +326,7 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestDelPersonality, TestDelOS, TestDelArchetype,
                 TestDelDomain, TestDelSandbox,
                 TestDelDnsEnvironment, TestDelDnsDomain,
-                TestClientFailure,
+                TestClientFailure, TestAudit,
                 TestBrokerStop]:
             self.addTest(unittest.TestLoader().loadTestsFromTestCase(test))
 

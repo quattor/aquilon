@@ -3714,4 +3714,34 @@
       <transport method="get" path="find/dns_map" />
    </command>
 
+   <command name="search_audit">
+      Search for activity in the transaction logs.
+      <p/>
+      Defaults:
+      <p/>
+      The default is only to search for commands that create, update or
+      delete data.  There are some special values for the command option to
+      provide customization to this behavior:
+      <p/>"rw": includes read only commands except 'cat' and "show_active_*"
+      <p/>"all": includes ALL commands including the above
+      <p/>Date specifications: MM-DD-YY (midnight UTC),
+      or "MM-DD-YY HH:MM:SS+OOOO" (quotes needed).
+      <p/>
+      Some more complex formats are capable, details can be found in
+      the "parser" section of http://niemeyer.net/python-dateutil
+      <p/>The limit option defaults to 5000 and has a maximum of 20000
+      in order to enhance performance and stability.
+      <optgroup name="search_audit_opts" mandatory="True" fields="any">
+         <option name="keyword" type="string">The value of any argument supplied to a command</option>
+         <option name="username" type="string">The user name who executed the command</option>
+         <option name="command" type="string">The name of the command (see "Defaults")</option>
+         <option name="before" type="string">Search for transactions started before a specific date/time</option>
+         <option name="after" type="string">Search for transactions started after a specific date/time</option>
+         <option name="return_code" type="int">Search by an HTTP response code (200-505)</option>
+         <option name="limit" type="int">Limit the number of rows returned. (Default 5000/Max 20000)</option>
+         <option name="oldest_first" type="boolean">Order results with oldest records first (defaults to false, or newest info first)</option>
+      </optgroup>
+      <transport method="get" path="find/audit" />
+   </command>
+
 </commandline>

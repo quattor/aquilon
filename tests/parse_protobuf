@@ -28,6 +28,7 @@ import aqdnetworks_pb2
 import aqdservices_pb2
 import aqddnsdomains_pb2
 import aqdlocations_pb2
+import aqdaudit_pb2
 
 
 def usage():
@@ -57,7 +58,8 @@ typemap = {
     "network": aqdnetworks_pb2.NetworkList(),
     "service": aqdservices_pb2.ServiceList(),
     "service_map": aqdservices_pb2.ServiceMapList(),
-    "location": aqdlocations_pb2.LocationList()
+    "location": aqdlocations_pb2.LocationList(),
+    "transaction": aqdaudit_pb2.TransactionList()
 }
 
 input = sys.stdin

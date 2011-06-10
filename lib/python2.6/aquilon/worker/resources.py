@@ -68,10 +68,9 @@ from twisted.web import server, resource, http, static
 from twisted.internet import defer, threads, reactor
 from twisted.python import log
 
-from aquilon.exceptions_ import ArgumentError, AuthorizationException, \
-        NotFoundException, UnimplementedError, PartialError
+from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.formats.formatters import ResponseFormatter
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand, ERROR_TO_CODE
 from aquilon.worker import commands
 from aquilon.worker.processes import cache_version
 from aquilon.utils import (force_int, force_float, force_boolean, force_ipv4,
@@ -245,18 +244,8 @@ class ResponsePage(resource.Resource):
 
     def wrapNonInternalError(self, failure, request):
         """This takes care of 'expected' problems, like NotFoundException."""
-        r = failure.trap(NotFoundException, AuthorizationException,
-                ArgumentError, UnimplementedError, PartialError)
-        if r == NotFoundException:
-            request.setResponseCode(http.NOT_FOUND)
-        elif r == AuthorizationException:
-            request.setResponseCode(http.UNAUTHORIZED)
-        elif r == ArgumentError:
-            request.setResponseCode(http.BAD_REQUEST)
-        elif r == UnimplementedError:
-            request.setResponseCode(http.NOT_IMPLEMENTED)
-        elif r == PartialError:
-            request.setResponseCode(http.MULTI_STATUS)
+        r = failure.trap(*ERROR_TO_CODE.keys())
+        request.setResponseCode(ERROR_TO_CODE[r])
         formatted = self.format(failure.value, request)
         return self.finishRender(formatted, request)
 
@@ -371,6 +360,7 @@ class RestServer(ResponsePage):
                         myinstance.optional_parameters.append(option_name)
                     if option.attrib.has_key("type"):
                         paramtype = option.attrib["type"]
+                        myinstance.parameter_types[option_name] = paramtype
                         if paramtype == "int":
                             myinstance.parameter_checks[option_name] = force_int
                         elif paramtype == "float":
@@ -388,6 +378,13 @@ class RestServer(ResponsePage):
                     else:  # pragma: no cover
                         log.msg("Warning: argument type not known for %s.%s" %
                                 (myinstance.command, option_name))
+                    pbt = myinstance.parameters_by_type
+                    for option_name, paramtype \
+                            in myinstance.parameter_types.items():
+                        if paramtype in pbt:
+                            pbt[paramtype].append(option_name)
+                        else:
+                            pbt[paramtype] = [option_name]
 
         cache_version(config)
         log.msg("Starting aqd version %s" % config.get("broker", "version"))
