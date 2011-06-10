@@ -40,6 +40,16 @@ from brokertest import TestBrokerCommand
 
 class TestAddManager(TestBrokerCommand):
 
+    def testaddaddrinuse(self):
+        ip = self.net.unknown[0].usable[2]
+        command = ["add", "manager", "--ip", ip,
+                   "--hostname", "unittest00.one-nyp.ms.com"]
+        out = self.badrequesttest(command)
+        self.matchoutput (out,
+                          "IP address %s is already in use by public interface "
+                          "eth0 of machine unittest00.one-nyp.ms.com" % ip,
+                          command)
+
     # Note: If changing this, also change testverifyshowmissingmanager
     # in test_add_aquilon_host.py.
     def testaddunittest00r(self):
