@@ -696,7 +696,7 @@ class NASAssign(object):
         self.rack = rack
         self.size = size
         self.config = Config()
-        if self.config.get('nasassign', 'use_dev_db'):
+        if self.config.getboolean('nasassign', 'use_dev_db'):
             self.devdb = 1
         self.laf_dict = {'_id':'%s_%s' % (self.disk, self.machine),
                          'owner':self.owner, 'rack':self.rack, 'size':self.size,
