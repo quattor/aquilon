@@ -366,8 +366,8 @@ class BrokerCommand(object):
             status = self.catalog.create_request_status(
                 auditid=request.aq_audit_id,
                 requestid=command_kwargs.get("requestid", None))
-        # If no requestid was given, the RequestStatus object created it.
-        command_kwargs['requestid'] = status.requestid
+            # If no requestid was given, the RequestStatus object created it.
+            command_kwargs['requestid'] = status.requestid
         logger = RequestLogger(status=status, module_logger=self.module_logger)
         command_kwargs["logger"] = logger
         self._audit(message_status=status, **command_kwargs)
