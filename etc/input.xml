@@ -1383,7 +1383,7 @@
       <optgroup name="update_interface_optional" mandatory="False" fields="none">
          <option name="mac" type="mac">MAC address</option>
          <option name="ip" type="ipv4" conflicts="master">IP address</option>
-         <option name="boot" type="boolean">Mark the interface as bootable</option>
+         <option name="boot" type="flag">Mark the interface as bootable</option>
          <option name="pg" type="string" conflicts="autopg">portgroup, or an empty string to clear</option>
          <option name="autopg" type="flag" conflicts="pg">choose portgroup based on switch</option>
          <option name="comments" type="string">Comments</option>
