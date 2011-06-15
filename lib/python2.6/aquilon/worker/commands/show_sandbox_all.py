@@ -36,4 +36,4 @@ from aquilon.aqdb.model import Sandbox
 class CommandShowSandboxAll(BrokerCommand):
 
     def render(self, session, **arguments):
-        return session.query(Sandbox).all()
+        return session.query(Sandbox).order_by(Sandbox.name).all()
