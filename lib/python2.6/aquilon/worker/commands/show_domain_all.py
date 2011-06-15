@@ -30,10 +30,10 @@
 
 
 from aquilon.worker.broker import BrokerCommand
-from aquilon.aqdb.model import Domain, Branch
+from aquilon.aqdb.model import Domain
 
 
 class CommandShowDomainAll(BrokerCommand):
 
     def render(self, session, **arguments):
-        return session.query(Domain).order_by(Branch.name).all()
+        return session.query(Domain).order_by(Domain.name).all()
