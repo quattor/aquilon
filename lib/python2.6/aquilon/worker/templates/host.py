@@ -179,6 +179,8 @@ class PlenaryToplevelHost(Plenary):
                 ifdesc["vlan"] = True
                 ifdesc["physdev"] = dbinterface.parent.name
 
+            static_routes = set()
+
             for addr in dbinterface.assignments:
                 if addr.usage == "zebra":
                     if addr.label not in vips:
@@ -233,6 +235,16 @@ class PlenaryToplevelHost(Plenary):
                         ifdesc["aliases"][addr.label] = aliasdesc
                     else:
                         ifdesc["aliases"] = {addr.label: aliasdesc}
+
+                static_routes |= set(net.static_routes)
+
+            if static_routes:
+                if "route" not in ifdesc:
+                    ifdesc["route"] = []
+                for route in static_routes:
+                    ifdesc["route"].append({"address": route.destination.ip,
+                                            "netmask": route.destination.netmask,
+                                            "gateway": route.gateway_ip})
 
             interfaces[dbinterface.name] = ifdesc
 

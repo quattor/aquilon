@@ -66,6 +66,7 @@ class InterfaceFormatter(ObjectFormatter):
             details.append(indent + "  {0:c}: {0.name}"
                            .format(interface.assignments[0].network.network_environment))
 
+        static_routes = set()
         for addr in interface.assignments:
             if addr.fqdns:
                 names = ", ".join([str(fqdn) for fqdn in addr.fqdns])
@@ -83,6 +84,13 @@ class InterfaceFormatter(ObjectFormatter):
                 tagstr = ""
             details.append(indent + "  Provides: %s [%s]%s" %
                            (names, addr.ip, tagstr))
+            static_routes |= set(addr.network.static_routes)
+
+        for route in sorted(static_routes):
+            details.append(indent + "  Static Route: {0} gateway {1}"
+                           .format(route.destination, route.gateway_ip))
+            if route.comments:
+                details.append(indent + "    Comments: %s" % route.comments)
 
         if interface.comments:
             details.append(indent + "  Comments: %s" % interface.comments)
