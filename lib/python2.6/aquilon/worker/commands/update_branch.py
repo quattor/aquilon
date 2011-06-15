@@ -29,14 +29,12 @@
 """Contains the logic for `aq update branch`."""
 
 
-import re
 import os
 
 from aquilon.exceptions_ import ArgumentError, AuthorizationException
 from aquilon.aqdb.model import Branch, Domain
 from aquilon.worker.broker import BrokerCommand
-
-VERSION_RE = re.compile(r'^[-_.a-zA-Z0-9]*$')
+from aquilon.worker.dbwrappers.branch import VERSION_RE
 
 
 class CommandUpdateBranch(BrokerCommand):

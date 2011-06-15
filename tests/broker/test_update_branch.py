@@ -95,7 +95,21 @@ class TestUpdateBranch(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out, "Requires Change Manager: True", command)
 
+    def testverifysearchchm(self):
+        command = ["search", "domain", "--change_manager"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "prod", command)
+        self.matchclean(out, "ut-prod", command)
+        self.matchclean(out, "deployable", command)
 
-if __name__=='__main__':
+    def testverifysearchversion(self):
+        command = ["search", "domain", "--compiler_version", "8.2.7"]
+        out = self.commandtest(command)
+        self.matchclean(out, "prod", command)
+        self.matchclean(out, "ut-prod", command)
+        self.matchoutput(out, "deployable", command)
+
+
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestUpdateBranch)
     unittest.TextTestRunner(verbosity=2).run(suite)

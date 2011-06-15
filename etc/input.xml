@@ -475,6 +475,22 @@
       <transport trigger="domain" method="get" path="domain/%(domain)s" />
    </command>
 
+   <command name="search_domain">
+      Search domains.
+      <optgroup name="search_domain_input" mandatory="True" fields="any">
+         <option name="track" type="string" conflicts="start">Name of tracked branch</option>
+         <option name="change_manager" type="boolean">Change manager required</option>
+         <option name="owner" type="string">Show only domains of a given user</option>
+         <option name="compiler_version" type="string">Version of panc to use</option>
+         <option name="autosync" type="boolean">Filter by the autosync flag</option>
+         <option name="validated" type="boolean">Filter by the validated flag</option>
+      </optgroup>
+      <optgroup name="search_sandbox_options" mandatory="False">
+         <option name="fullinfo" type="flag">Show full information for the matching domains</option>
+      </optgroup>
+      <transport method="get" path="find/domain" />
+   </command>
+
    <command name="show_sandbox">
       Shows the configuration for a given sandbox.  With the '--all' option,
       every sandbox will be listed with its configuration.
@@ -487,6 +503,19 @@
       </optgroup>
       <transport trigger="all" method="get" path="sandbox/command/show_all" />
       <transport trigger="sandbox" method="get" path="sandbox/command/show" />
+   </command>
+
+   <command name="search_sandbox">
+      <optgroup name="search_sandbox_input" mandatory="True" fields="any">
+         <option name="owner" type="string">Show only sandboxes of a given user</option>
+         <option name="compiler_version" type="string">Version of panc to use</option>
+         <option name="autosync" type="boolean">Filter by the autosync flag</option>
+         <option name="validated" type="boolean">Filter by the validated flag</option>
+      </optgroup>
+      <optgroup name="search_sandbox_options" mandatory="False">
+         <option name="fullinfo" type="flag">Show full information for the matching sandboxes</option>
+      </optgroup>
+      <transport method="get" path="find/sandbox" />
    </command>
 
    <command name="show_network">

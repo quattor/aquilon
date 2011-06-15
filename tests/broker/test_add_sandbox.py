@@ -127,7 +127,13 @@ class TestAddSandbox(TestBrokerCommand):
         self.matchoutput(out, "sandbox name 'bad:characters!' is not valid",
                          command)
 
+    def testverifysearch(self):
+        user = self.config.get("unittest", "user")
+        command = ["search", "sandbox", "--owner", user]
+        out = self.commandtest(command)
+        self.matchoutput(out, "utsandbox", command)
 
-if __name__=='__main__':
+
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddSandbox)
     unittest.TextTestRunner(verbosity=2).run(suite)
