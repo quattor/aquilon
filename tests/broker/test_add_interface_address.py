@@ -279,6 +279,13 @@ class TestAddInterfaceAddress(TestBrokerCommand):
                          "environments cannot be mixed.",
                          command)
 
+    def testbadmachine(self):
+        command = ["add", "interface", "address", "--machine", "no-such-machine",
+                   "--interface", "eth0", "--ip", "192.168.0.1",
+                   "--fqdn", "foo.aqd-unittest.ms.com"]
+        out = self.notfoundtest(command)
+        self.matchoutput(out, "Machine no-such-machine not found.", command)
+
     def testmissingnetenv(self):
         net = self.net.unknown[1]
         ip = net[3]
