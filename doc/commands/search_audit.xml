@@ -192,16 +192,19 @@
 	    If no timezone offset is given the broker will assume UTC (+0000).
 	    This may change in a future version.
         </para>
-        <title>Date/Time Examples</title>
-        <para>
-            RFC 822 format, based on date -R: "Thu, 25 Sep 2003 10:49:41 -0300"
-        </para>
-        <para>
-            ISO format: "2003-09-25T10:49:41.5-03:00"
-        </para>
-        <para>
-            MM-DD-YY: "04-08-11"
-        </para>
+
+	<refsect2>
+	    <title>Date/Time Examples</title>
+	    <para>
+		RFC 822 format, based on date -R: <computeroutput>Thu, 25 Sep 2003 10:49:41 -0300</computeroutput>
+	    </para>
+	    <para>
+		ISO format: <computeroutput>2003-09-25T10:49:41.5-03:00</computeroutput>
+	    </para>
+	    <para>
+		MM-DD-YY: <computeroutput>04-08-11</computeroutput>
+	    </para>
+	</refsect2>
     </refsect1>
 
 </refentry>
