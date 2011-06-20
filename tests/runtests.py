@@ -180,10 +180,10 @@ if (config.get("database", "vendor") == "oracle" and
     force_yes("About to run against the production database %s" %
             production_database)
 
-# Maybe just execute this every run...
-if not os.path.exists(config.get("broker", "keytab")):
-    p = Popen(config.get("kerberos", "krb5_keytab"), stdout=1, stderr=2)
-    rc = p.wait()
+# Execute this every run... the man page says that it should do the right
+# thing in terms of not contacting the kdc very often.
+p = Popen(config.get("kerberos", "krb5_keytab"), stdout=1, stderr=2)
+rc = p.wait()
 
 pid_file = os.path.join(config.get('broker', 'rundir') , 'aqd.pid')
 kill_from_pid_file(pid_file)

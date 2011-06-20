@@ -90,11 +90,10 @@ class AQBroker(object):
         Most of this was ripped straight from runtests.py.
         
         """
-        if not os.path.exists(self.config.get("broker", "keytab")):
-            p = Popen(self.config.get("kerberos", "krb5_keytab"),
-                       stdout=1, stderr=2)
-            if p.wait():
-                raise ProcessException(code=p.returncode)
+        p = Popen(self.config.get("kerberos", "krb5_keytab"),
+                  stdout=1, stderr=2)
+        if p.wait():
+            raise ProcessException(code=p.returncode)
 
         for label in ["quattordir", "swrepdir", ]:
             dir = self.config.get("broker", label)
