@@ -49,6 +49,7 @@ def utcnow(context, tz=tzutc()):
 class Xtn(Base):
     """ auditing information from command invocations """
     __tablename__ = 'xtn'
+    __table_args__ = {'oracle_compress': True}
 
     xtn_id = Column(GUID(), primary_key=True)
     username = Column(String(65), nullable=False, default='nobody')
@@ -92,15 +93,16 @@ class Xtn(Base):
 xtn = Xtn.__table__  # pylint: disable=C0103, E1101
 xtn.primary_key.name = 'XTN_PK'  # pylint: disable=C0103, E1101
 
-Index('XTN_USERNAME_IDX', xtn.c.username)
-Index('XTN_COMMAND_IDX', xtn.c.command)
-Index('XTN_ISREADONLY_IDX', xtn.c.is_readonly)
-Index('XTN_START_TIME_IDX', xtn.c.start_time)
+Index('XTN_USERNAME_IDX', xtn.c.username, oracle_compress=True)
+Index('XTN_COMMAND_IDX', xtn.c.command, oracle_compress=True)
+Index('XTN_ISREADONLY_IDX', xtn.c.is_readonly, oracle_bitmap=True)
+Index('XTN_START_TIME_IDX', xtn.c.start_time, oracle_desc=True)
 
 
 class XtnEnd(Base):
     """ A record of a completed command/transaction """
     __tablename__ = 'xtn_end'
+    __table_args__ = {'oracle_compress': True}
 
     xtn_id = Column(GUID(),
                     ForeignKey(Xtn.xtn_id, name='XTN_END_XTN_FK'),
@@ -111,12 +113,13 @@ class XtnEnd(Base):
 
 xtn_end = XtnEnd.__table__
 xtn_end.primary_key.name = 'XTN_END_PK'
-Index('XTN_END_RETURN_CODE_IDX', xtn_end.c.return_code)
+Index('XTN_END_RETURN_CODE_IDX', xtn_end.c.return_code, oracle_compress=True)
 
 
 class XtnDetail(Base):
     """ Key/Value argument pairs for executed commands """
     __tablename__ = 'xtn_detail'
+    __table_args__ = {'oracle_compress': True}
 
     xtn_id = Column(GUID(),
                     ForeignKey(Xtn.xtn_id, name='XTN_DTL_XTN_FK'),
@@ -129,8 +132,8 @@ class XtnDetail(Base):
 xtn_detail = XtnDetail.__table__  # pylint: disable=C0103, E1101
 xtn_detail.primary_key.name = 'XTN_DTL_PK'
 
-Index('xtn_dtl_name_idx', xtn_detail.c.name)
-Index('xtn_dtl_value_idx', xtn_detail.c.value)
+Index('xtn_dtl_name_idx', xtn_detail.c.name, oracle_compress=True)
+Index('xtn_dtl_value_idx', xtn_detail.c.value, oracle_compress=True)
 
 if config.has_option('database', 'audit_schema'):  # pragma: no cover
     schema = config.get('database', 'audit_schema')
