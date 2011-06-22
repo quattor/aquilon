@@ -1,0 +1,3 @@
+id,parent_id,name,type,display_name,deleted,lifecycle,can_map_resources
+1,1,grn:/ms/ei/aquilon,domain,Aquilon,0,Production,0
+2,1,grn:/ms/ei/aquilon/aqd,system,aqd,0,Production,1

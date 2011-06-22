@@ -34,7 +34,7 @@ from sqlalchemy import (Column, Integer, Boolean, DateTime, Sequence, String,
 from sqlalchemy.orm import relation
 from sqlalchemy.ext.associationproxy import association_proxy
 
-from aquilon.aqdb.model import Base, Archetype
+from aquilon.aqdb.model import Base, Archetype, Grn
 from aquilon.aqdb.column_types.aqstr import AqStr
 
 _ABV = 'prsnlty'

@@ -1,6 +1,6 @@
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 #
-# Copyright (C) 2008,2009,2010,2011  Contributor
+# Copyright (C) 2011  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -26,23 +26,17 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-""" Suggested versions of external libraries.
+""" Contains the logic of "aq refresh grns" """
 
-    These versions are the defaults for the binaries shipped.
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.dbwrappers.grn import update_grn_map
+from aquilon.worker.locks import SyncKey
 
-    Anything referencing aquilon.worker.depends should also set up the
-    dependencies listed in aquilon.aqdb.depends.
 
-"""
+class CommandRefreshGrns(BrokerCommand):
 
-import ms.version
+    def render(self, session, logger, **arguments):
+        with SyncKey(data="grn", logger=logger) as lock:
+            update_grn_map(self.config, session, logger)
 
-ms.version.addpkg('setuptools', '0.6c11')
-ms.version.addpkg('protobuf', '2.3.0')
-ms.version.addpkg('zope.interface', '3.6.1')
-ms.version.addpkg('twisted', '8.2.0-ms1')
-ms.version.addpkg('coverage', '3.4')
-ms.version.addpkg('ipaddr', '2.1.4')
-ms.version.addpkg('mako', '0.4.0')
-ms.version.addpkg('yaml', '3.09')
-ms.version.addpkg('cdb', '0.34')
+        return

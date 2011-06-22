@@ -4099,5 +4099,58 @@
       <transport method="delete" path="resource/intervention/%(intervention)s" />
    </command>
 
+   <command name="add_grn">
+      Add a new GRN.
+      <optgroup name="add_grn_required" mandatory="true" fields="all">
+         <option name="grn" type="string">GRN as string</option>
+         <option name="eon_id" type="int">Numeric EON ID</option>
+      </optgroup>
+      <optgroup name="add_grn_optional" mandatory="false" fields="any">
+         <option name="disabled" type="flag">GRN is disabled and cannot be added to new systems</option>
+      </optgroup>
+
+      <transport method="put" path="grn/%(eon_id)s/%(grn)s" />
+   </command>
+
+   <command name="del_grn">
+      Delete a GRN.
+      <optgroup name="del_grn_required" mandatory="true" fields="any">
+         <option name="grn" type="string" conflicts="eon_id">GRN to delete</option>
+         <option name="eon_id" type="int" conflicts="grn">Numeric EON ID to delete</option>
+      </optgroup>
+
+      <transport method="delete" path="grn" />
+   </command>
+
+   <command name="update_grn">
+      Update a GRN.
+      <optgroup name="update_grn_required" mandatory="true" fields="any">
+         <option name="grn" type="string" conflicts="eon_id">GRN to update</option>
+         <option name="eon_id" type="int" conflicts="grn">Numeric EON ID to update</option>
+      </optgroup>
+
+      <optgroup name="update_grn_optional" mandatory="false" fields="any">
+         <option name="disabled" type="boolean">GRN is disabled and cannot be mapped to new systems</option>
+	 <option name="rename_to" type="string">Rename GRN</option>
+      </optgroup>
+
+      <transport method="post" path="grn" />
+   </command>
+
+   <command name="show_grn">
+      Display a GRN.
+      <optgroup name="update_grn_required" mandatory="true" fields="any">
+         <option name="grn" type="string">GRN to display</option>
+         <option name="eon_id" type="int">Numeric EON ID to display</option>
+         <option name="all" type="flag">Show all GRNs</option>
+      </optgroup>
+
+      <transport method="get" path="grn" />
+   </command>
+
+   <command name="refresh_grns">
+      Refresh the mapping from GRNs to EON IDs.
+      <transport method="post" path="grn/command/refresh"/>
+   </command>
 
 </commandline>

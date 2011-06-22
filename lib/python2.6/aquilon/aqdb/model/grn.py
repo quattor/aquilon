@@ -1,6 +1,6 @@
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 #
-# Copyright (C) 2008,2009,2010,2011  Contributor
+# Copyright (C) 2011  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -26,23 +26,41 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-""" Suggested versions of external libraries.
+""" Class for mapping GRNs to EON IDs """
 
-    These versions are the defaults for the binaries shipped.
+from datetime import datetime
 
-    Anything referencing aquilon.worker.depends should also set up the
-    dependencies listed in aquilon.aqdb.depends.
+from sqlalchemy import (Column, Integer, String, Boolean, UniqueConstraint,
+                        DateTime)
 
-"""
+from aquilon.aqdb.model import Base
 
-import ms.version
+_TN = 'grn'
 
-ms.version.addpkg('setuptools', '0.6c11')
-ms.version.addpkg('protobuf', '2.3.0')
-ms.version.addpkg('zope.interface', '3.6.1')
-ms.version.addpkg('twisted', '8.2.0-ms1')
-ms.version.addpkg('coverage', '3.4')
-ms.version.addpkg('ipaddr', '2.1.4')
-ms.version.addpkg('mako', '0.4.0')
-ms.version.addpkg('yaml', '3.09')
-ms.version.addpkg('cdb', '0.34')
+
+class Grn(Base):
+    """ Map GRNs to EON IDs """
+    __tablename__ = _TN
+    _instance_label = 'grn'
+    _class_label = 'GRN'
+
+    eon_id = Column(Integer, primary_key=True)
+
+    # GRNs are case sensitive, so no AqStr here
+    # TODO: is there a limit on the length of GRNs? 132 is the longest currently
+    grn = Column(String(255), nullable=False)
+
+    # If False, then assigning new objects to this GRN should fail, but old
+    # objects may still point to it
+    disabled = Column(Boolean("%s_disabled_ck" % _TN), nullable=False)
+
+    creation_date = Column(DateTime, default=datetime.now, nullable=False)
+
+
+grn= Grn.__table__  # pylint: disable-msg=C0103, E1101
+
+grn.primary_key.name = '%s_pk' % _TN
+grn.append_constraint(
+    UniqueConstraint('grn', name='%s_grn_uk' % _TN))
+grn.info['unique_fields'] = ['grn']
+grn.info['extra_search_fields'] = ['eon_id']

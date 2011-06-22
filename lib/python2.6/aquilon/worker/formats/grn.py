@@ -1,6 +1,6 @@
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 #
-# Copyright (C) 2008,2009,2010,2011  Contributor
+# Copyright (C) 2011  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -26,23 +26,18 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-""" Suggested versions of external libraries.
+""" GRN formatter """
 
-    These versions are the defaults for the binaries shipped.
+from aquilon.worker.formats.formatters import ObjectFormatter
+from aquilon.aqdb.model import Grn
 
-    Anything referencing aquilon.worker.depends should also set up the
-    dependencies listed in aquilon.aqdb.depends.
 
-"""
+class GrnFormatter(ObjectFormatter):
 
-import ms.version
+    def format_raw(self, grn, indent=""):
+        details = [indent + "GRN: %s" % grn.grn,
+                   indent + "  EON ID: %d" % grn.eon_id,
+                   indent + "  Disabled: %s" % grn.disabled]
+        return "\n".join(details)
 
-ms.version.addpkg('setuptools', '0.6c11')
-ms.version.addpkg('protobuf', '2.3.0')
-ms.version.addpkg('zope.interface', '3.6.1')
-ms.version.addpkg('twisted', '8.2.0-ms1')
-ms.version.addpkg('coverage', '3.4')
-ms.version.addpkg('ipaddr', '2.1.4')
-ms.version.addpkg('mako', '0.4.0')
-ms.version.addpkg('yaml', '3.09')
-ms.version.addpkg('cdb', '0.34')
+ObjectFormatter.handlers[Grn] = GrnFormatter()
