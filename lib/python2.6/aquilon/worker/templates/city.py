@@ -32,6 +32,7 @@ import os
 import logging
 
 from aquilon.worker.templates.base import Plenary
+from aquilon.worker.templates.panutils import pan
 
 LOGGER = logging.getLogger(__name__)
 
@@ -47,4 +48,4 @@ class PlenaryCity(Plenary):
         self.dir = self.config.get("broker", "plenarydir")
 
     def body(self, lines):
-        lines.append("variable TIMEZONE = '%(timezone)s';" % self.__dict__)
+        lines.append("variable TIMEZONE = %s;" % pan(self.timezone))

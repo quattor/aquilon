@@ -32,6 +32,7 @@ import logging
 
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
 from aquilon.worker.templates.machine import PlenaryMachineInfo
+from aquilon.worker.templates.panutils import pan, StructureTemplate
 from aquilon.worker.locks import CompileKey
 
 LOGGER = logging.getLogger(__name__)
@@ -75,14 +76,14 @@ class PlenaryClusterObject(Plenary):
         arcdir = self.dbcluster.personality.archetype.name
         lines.append("# this is an %s cluster, so all templates "
                      "should be sourced from there" % arcdir)
-        lines.append("variable LOADPATH = list('%s');" % arcdir)
+        lines.append("variable LOADPATH = %s;" % pan([arcdir]))
         lines.append("")
 
         lines.append("include { 'pan/units' };")
         lines.append("")
-        lines.append("'/system/cluster/name' = '%s';" % self.name)
-        lines.append("'/system/cluster/type' = '%s';" %
-                        self.dbcluster.cluster_type)
+        lines.append('"/system/cluster/name" = %s;' % pan(self.name))
+        lines.append('"/system/cluster/type" = %s;' %
+                        pan(self.dbcluster.cluster_type))
         lines.append("")
         lines.append("include { 'archetype/cluster/base' };");
         fname = "body_%s" % self.dbcluster.cluster_type
@@ -96,17 +97,17 @@ class PlenaryClusterObject(Plenary):
 
     def body_esx(self, lines):
         if self.metacluster:
-            lines.append("'/system/metacluster/name' = '%s';" %
-                         self.metacluster)
+            lines.append('"/system/metacluster/name" = %s;' %
+                         pan(self.metacluster))
         campus = self.dbcluster.location_constraint.campus
         if campus:
-            lines.append("'/system/cluster/campus' = '%s';" % campus.name)
-        lines.append("'/system/cluster/ratio' = list(%d, %d);" % (
+            lines.append('"/system/cluster/campus" = %s;' % pan(campus.name))
+        lines.append('"/system/cluster/ratio" = %s;' % pan([
                             self.dbcluster.vm_count,
-                            self.dbcluster.host_count))
-        lines.append("'/system/cluster/max_hosts' = %d;" %
+                            self.dbcluster.host_count]))
+        lines.append('"/system/cluster/max_hosts" = %d;' %
                      self.dbcluster.max_hosts)
-        lines.append("'/system/cluster/down_hosts_threshold' = %d;" %
+        lines.append('"/system/cluster/down_hosts_threshold" = %d;' %
                      self.dbcluster.down_hosts_threshold)
         lines.append('')
         # Only use system names here to avoid circular dependencies.
@@ -114,42 +115,33 @@ class PlenaryClusterObject(Plenary):
         # foreach(idx; host; value("/system/cluster/members")) {
         #     v = value("//" + host + "/system/foo/bar/baz");
         # );
-        lines.append("'/system/cluster/members' = list(%s);" %
-                     ", ".join(["'%s'" % member.fqdn
-                                for member in self.dbcluster.hosts]))
+        lines.append('"/system/cluster/members" = %s;' %
+                     pan([member.fqdn for member in self.dbcluster.hosts]))
         lines.append('')
-        lines.append("'/system/cluster/machines' = nlist(")
+        machines = {}
         for machine in self.dbcluster.machines:
             if not machine.interfaces or not machine.disks:
                 # Do not bother creating entries for VMs that are incomplete.
                 continue
             pmac = PlenaryMachineInfo(machine)
-            lines.append("    '%s', nlist(" % machine.label)
-            lines.append("            'hardware', create('%s')," %
-                                                    pmac.plenary_template)
+            macdesc = {'hardware': StructureTemplate(pmac.plenary_template)}
+
             # One day we may get to the point where this will be required.
             if (machine.host):
                 # we fill this in manually instead of just assigning
                 # 'system' = value("//hostname/system")
                 # because the target host might not actually have a profile.
-                lines.append("            'system', nlist(")
-                lines.append("                'archetype', nlist(")
-                lines.append("                    'name', '%s'," %
-                             machine.host.archetype.name)
-                lines.append("                    'os', '%s'," %
-                             machine.host.operating_system.name)
-                lines.append("                    'osversion', '%s'," %
-                             machine.host.operating_system.version)
-                lines.append("                 ),")
-                lines.append("                'network', nlist(")
-                lines.append("                    'hostname', '%s'," %
-                             machine.primary_name.fqdn.name)
-                lines.append("                    'domainname', '%s'," %
-                             machine.primary_name.fqdn.dns_domain)
-                lines.append("                 ),")
-                lines.append("             ),")
-            lines.append("         ),")
-        lines.append(");")
+                arch = machine.host.archetype
+                os = machine.host.operating_system
+                pn = machine.primary_name.fqdn
+                macdesc["system"] = {'archetype': {'name': arch.name,
+                                                   'os': os.name,
+                                                   'osversion': os.version},
+                                     'network': {'hostname': pn.name,
+                                                 'domainname': pn.dns_domain}}
+
+            machines[machine.label] = macdesc
+        lines.append('"/system/cluster/machines" = %s;' % pan(machines))
 
         for servinst in self.dbcluster.service_bindings:
             lines.append("include { 'service/%s/%s/client/config' };" % \
@@ -174,4 +166,4 @@ class PlenaryClusterClient(Plenary):
         return CompileKey(domain=self.dbobj.branch.name, logger=self.logger)
 
     def body(self, lines):
-        lines.append("'/system/cluster/name' = '%s';" % self.name)
+        lines.append('"/system/cluster/name" = %s;' % pan(self.name))

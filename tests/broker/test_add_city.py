@@ -80,12 +80,12 @@ class TestAddCity(TestBrokerCommand):
     def testplenary(self):
         command = ["cat", "--city", "ex"]
         out = self.commandtest(command)
-        self.matchoutput(out, "variable TIMEZONE = 'EDT';", command)
+        self.matchoutput(out, 'variable TIMEZONE = "EDT";', command)
 
     def testplenarydefault(self):
         command = ["cat", "--city", "e3"]
         out = self.commandtest(command)
-        self.matchoutput(out, "variable TIMEZONE = 'UTC';", command)
+        self.matchoutput(out, 'variable TIMEZONE = "UTC";', command)
 
     def testverifyaddbu(self):
         command = "show city --city ex"

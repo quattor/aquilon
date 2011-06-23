@@ -135,8 +135,8 @@ class TestAddService(TestBrokerCommand):
                          command)
         self.matchoutput(out, "include { 'servicedata/utsvc/config' };",
                          command)
-        self.matchoutput(out, "'instance' = 'utsi1';", command)
-        self.matchoutput(out, "'servers' = list();", command)
+        self.matchoutput(out, '"instance" = "utsi1";', command)
+        self.searchoutput(out, r'"servers" = list\(\s*\);', command)
 
     def testcatutsi1default(self):
         command = "cat --service utsvc --instance utsi1 --default"
@@ -144,7 +144,7 @@ class TestAddService(TestBrokerCommand):
         self.matchoutput(out, "template service/utsvc/utsi1/client/config;",
                          command)
         self.matchoutput(out,
-                         "'/system/services/utsvc' = create('servicedata/utsvc/utsi1/config');",
+                         '"/system/services/utsvc" = create("servicedata/utsvc/utsi1/config");',
                          command)
         self.matchoutput(out, "include { 'service/utsvc/client/config' };",
                          command)
@@ -161,8 +161,8 @@ class TestAddService(TestBrokerCommand):
                          command)
         self.matchoutput(out, "include { 'servicedata/utsvc/config' };",
                          command)
-        self.matchoutput(out, "'instance' = 'utsi2';", command)
-        self.matchoutput(out, "'servers' = list();", command)
+        self.matchoutput(out, '"instance" = "utsi2";', command)
+        self.searchoutput(out, r'"servers" = list\(\s*\);', command)
 
     def testcatutsi2default(self):
         command = "cat --service utsvc --instance utsi2 --default"
@@ -170,7 +170,7 @@ class TestAddService(TestBrokerCommand):
         self.matchoutput(out, "template service/utsvc/utsi2/client/config;",
                          command)
         self.matchoutput(out,
-                         "'/system/services/utsvc' = create('servicedata/utsvc/utsi2/config');",
+                         '"/system/services/utsvc" = create("servicedata/utsvc/utsi2/config");',
                          command)
         self.matchoutput(out, "include { 'service/utsvc/client/config' };",
                          command)
@@ -372,9 +372,9 @@ class TestAddService(TestBrokerCommand):
                          "structure template service/nas_disk_share/"
                          "test_share_1/client/nasinfo",
                          command)
-        self.matchoutput(out, "'sharename' = 'test_share_1';", command)
-        self.matchoutput(out, "'server' = 'lnn30f1';", command)
-        self.matchoutput(out, "'mountpoint' = '/vol/lnn30f1v1/test_share_1';",
+        self.matchoutput(out, '"sharename" = "test_share_1";', command)
+        self.matchoutput(out, '"server" = "lnn30f1";', command)
+        self.matchoutput(out, '"mountpoint" = "/vol/lnn30f1v1/test_share_1";',
                          command)
 
     def testfailaddnasshare(self):

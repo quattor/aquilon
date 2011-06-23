@@ -86,8 +86,8 @@ class TestCluster(TestBrokerCommand):
         for i in range(1, 5):
             host = "evh%s.aqd-unittest.ms.com" % i
             self.searchoutput(cat_cluster_out,
-                              "'/system/cluster/members' = list\([^\)]*"
-                              "'%s'[^\)]*\);" % host,
+                              '"/system/cluster/members" = list\([^\)]*'
+                              '"%s"[^\)]*\);' % host,
                               cat_cluster_command)
 
             # Also verify that the host plenary was written correctly.

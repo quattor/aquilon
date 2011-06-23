@@ -124,7 +124,7 @@ class TestAddVirtualHardware(TestBrokerCommand):
         # The cluster plenary should not have VMs.
         command = ["cat", "--cluster=utecl1"]
         out = self.commandtest(command)
-        self.searchoutput(out, r"'/system/cluster/machines' = nlist\(\s*\);",
+        self.searchoutput(out, r'"/system/cluster/machines" = nlist\(\s*\);',
                           command)
 
     def test_100_addinterfaces(self):
@@ -156,7 +156,7 @@ class TestAddVirtualHardware(TestBrokerCommand):
         # The cluster plenary should not have VMs.
         command = ["cat", "--cluster=utecl1"]
         out = self.commandtest(command)
-        self.searchoutput(out, r"'/system/cluster/machines' = nlist\(\s*\);",
+        self.searchoutput(out, r'"/system/cluster/machines" = nlist\(\s*\);',
                           command)
 
     def test_130_adddisks(self):
@@ -300,26 +300,23 @@ class TestAddVirtualHardware(TestBrokerCommand):
         command = "cat --cluster=utecl1"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "object template clusters/utecl1;", command)
-        self.matchoutput(out, "'/system/cluster/name' = 'utecl1';", command)
-        self.matchoutput(out, "'/system/metacluster/name' = 'utmc1';", command)
-        self.matchoutput(out, "'/system/cluster/machines' = nlist(", command)
-        self.matchoutput(out, "'/system/cluster/ratio' = list(16, 1);",
+        self.matchoutput(out, '"/system/cluster/name" = "utecl1";', command)
+        self.matchoutput(out, '"/system/metacluster/name" = "utmc1";', command)
+        self.matchoutput(out, '"/system/cluster/machines" = nlist(', command)
+        self.searchoutput(out, '"/system/cluster/ratio" = list\(\s*16,\s*1\s*\);',
+                          command)
+        self.matchoutput(out, '"/system/cluster/max_hosts" = 8;', command)
+        self.matchoutput(out, '"/system/cluster/down_hosts_threshold" = 2;',
                          command)
-        self.matchoutput(out, "'/system/cluster/max_hosts' = 8;", command)
-        self.matchoutput(out, "'/system/cluster/down_hosts_threshold' = 2;",
-                         command)
-        self.matchclean(out, "'hostname'", command)
+        self.matchclean(out, "hostname", command)
         for i in range(1, 9):
             machine = "evm%s" % i
             self.searchoutput(out,
-                              r"'%s', nlist\(\s*'hardware', create\("
-                              r"'machine/americas/ut/None/%s'\),\s*\),"
+                              r'"%s", nlist\(\s*"hardware", create\('
+                              r'"machine/americas/ut/None/%s"\)\s*\)'
                               % (machine, machine),
                               command)
-        self.searchclean(out,
-                         r"'evm9', nlist\(\s*'hardware', create\("
-                         r"'machine/americas/ut/None/evm9'\),\s*\),",
-                         command)
+        self.matchclean(out, "evm9", command)
         self.searchoutput(out,
                           r"include { 'service/esx_management_server/ut.[ab]/"
                           r"client/config' };",
@@ -412,11 +409,11 @@ class TestAddVirtualHardware(TestBrokerCommand):
     def test_810_verifycatcluster(self):
         command = "cat --cluster=utecl1"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "'name', 'windows',", command)
-        self.matchoutput(out, "'os', 'windows',", command)
-        self.matchoutput(out, "'osversion', 'nt61e',", command)
-        self.matchoutput(out, "'hostname', 'aqddesk1',", command)
-        self.matchoutput(out, "'domainname', 'msad.ms.com',", command)
+        self.matchoutput(out, '"name", "windows"', command)
+        self.matchoutput(out, '"os", "windows"', command)
+        self.matchoutput(out, '"osversion", "nt61e"', command)
+        self.matchoutput(out, '"hostname", "aqddesk1"', command)
+        self.matchoutput(out, '"domainname", "msad.ms.com"', command)
 
     def test_820_makecluster(self):
         command = ["make_cluster", "--cluster=utecl1"]
@@ -464,6 +461,6 @@ class TestAddVirtualHardware(TestBrokerCommand):
                          command)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddVirtualHardware)
     unittest.TextTestRunner(verbosity=2).run(suite)

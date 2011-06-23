@@ -70,8 +70,10 @@ class TestBindServerConstraints(TestBrokerCommand):
                          command)
         self.matchoutput(out, "include { 'servicedata/utsvc/config' };",
                          command)
-        self.matchoutput(out, "'instance' = 'utsi1';", command)
-        self.matchoutput(out, "'servers' = list('unittest02.one-nyp.ms.com');", command)
+        self.matchoutput(out, '"instance" = "utsi1";', command)
+        self.searchoutput(out,
+                          r'"servers" = list\(\s*"unittest02.one-nyp.ms.com"\s*\);',
+                          command)
 
     def testverifyunbindutsi1(self):
         command = "show service --service utsvc --instance utsi1"
@@ -87,8 +89,10 @@ class TestBindServerConstraints(TestBrokerCommand):
                          command)
         self.matchoutput(out, "include { 'servicedata/utsvc/config' };",
                          command)
-        self.matchoutput(out, "'instance' = 'utsi2';", command)
-        self.matchoutput(out, "'servers' = list('unittest00.one-nyp.ms.com');", command)
+        self.matchoutput(out, '"instance" = "utsi2";', command)
+        self.searchoutput(out,
+                          r'"servers" = list\(\s*"unittest00.one-nyp.ms.com"\s*\);',
+                          command)
 
     def testverifyutsi2(self):
         command = "show service --service utsvc --instance utsi2"
@@ -101,7 +105,7 @@ class TestBindServerConstraints(TestBrokerCommand):
         self.badrequesttest(command.split(" "))
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestBindServer)
     unittest.TextTestRunner(verbosity=2).run(suite)
 
