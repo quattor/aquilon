@@ -146,7 +146,7 @@ class TestMake(TestBrokerCommand):
         self.searchoutput(out,
                           r'"eth1", nlist\(\s*'
                           r'"aliases", nlist\(\s*'
-                          r'escape\("1"\), nlist\(\s*'
+                          r'"e1", nlist\(\s*'
                           r'"broadcast", "%s",\s*'
                           r'"fqdn", "unittest20-e1-1.aqd-unittest.ms.com",\s*'
                           r'"ip", "%s",\s*'
