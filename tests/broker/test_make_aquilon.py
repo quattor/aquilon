@@ -98,7 +98,7 @@ class TestMakeAquilon(TestBrokerCommand):
                           r'"bootproto", "none"\s*\)',
                           command)
         self.searchoutput(out,
-                          r'escape\("eth1\.2"\), nlist\(\s*'
+                          r'"eth1\.2", nlist\(\s*'
                           r'"bootproto", "none",\s*'
                           r'"physdev", "eth1",\s*'
                           r'"vlan", true\s*\)',

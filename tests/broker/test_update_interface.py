@@ -150,7 +150,7 @@ class TestUpdateInterface(TestBrokerCommand):
                            eth1ip, net.netmask),
                           command)
         self.searchoutput(out,
-                          r'escape\("eth1\.2"\), nlist\(\s*'
+                          r'"eth1\.2", nlist\(\s*'
                           r'"bootproto", "none",\s*'
                           r'"physdev", "eth1",\s*'
                           r'"vlan", true\s*\)',

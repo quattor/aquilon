@@ -34,7 +34,8 @@ import logging
 from aquilon.worker.locks import CompileKey
 from aquilon.worker.templates.base import Plenary
 from aquilon.worker import templates
-from aquilon.worker.templates.panutils import pan, StructureTemplate, PanUnit
+from aquilon.worker.templates.panutils import (pan, StructureTemplate, PanUnit,
+                                               PanEscape)
 
 LOGGER = logging.getLogger(__name__)
 
@@ -137,7 +138,7 @@ class PlenaryMachineInfo(Plenary):
                           "address": disk.address,
                           "path": diskpath}
 
-            disks[devname] = StructureTemplate(relpath, params)
+            disks[PanEscape(devname)] = StructureTemplate(relpath, params)
 
         managers = {}
         interfaces = {}
