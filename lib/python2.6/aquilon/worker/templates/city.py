@@ -28,13 +28,13 @@
 # TERMS THAT MAY APPLY.
 
 
-import os
 import logging
 
 from aquilon.worker.templates.base import Plenary
 from aquilon.worker.templates.panutils import pan
 
 LOGGER = logging.getLogger(__name__)
+
 
 class PlenaryCity(Plenary):
     def __init__(self, dbcity, logger=LOGGER):

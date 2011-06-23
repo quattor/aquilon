@@ -85,7 +85,7 @@ class PlenaryClusterObject(Plenary):
         lines.append('"/system/cluster/type" = %s;' %
                         pan(self.dbcluster.cluster_type))
         lines.append("")
-        lines.append("include { 'archetype/cluster/base' };");
+        lines.append("include { 'archetype/cluster/base' };")
         fname = "body_%s" % self.dbcluster.cluster_type
         if hasattr(self, fname):
             getattr(self, fname)(lines)
@@ -93,7 +93,7 @@ class PlenaryClusterObject(Plenary):
         lines.append("include { 'personality/%s/config' };" %
                      self.dbcluster.personality.name)
         lines.append("")
-        lines.append("include { 'archetype/cluster/final' };");
+        lines.append("include { 'archetype/cluster/final' };")
 
     def body_esx(self, lines):
         if self.metacluster:

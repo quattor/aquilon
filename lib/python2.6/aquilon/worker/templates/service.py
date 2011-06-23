@@ -36,6 +36,7 @@ from aquilon.exceptions_ import NotFoundException
 
 LOGGER = logging.getLogger(__name__)
 
+
 class PlenaryService(PlenaryCollection):
     """
     A facade for the variety of PlenaryService subsidiary files
@@ -114,15 +115,13 @@ class PlenaryServiceInstance(PlenaryCollection):
                                                              logger=logger))
         self.plenaries.append(PlenaryServiceInstanceClientDefault(dbservice,
                                                                   dbinstance,
-                                                                  logger=
-                                                                  logger))
+                                                                  logger=logger))
         self.plenaries.append(PlenaryServiceInstanceServer(dbservice,
                                                            dbinstance,
                                                            logger=logger))
         self.plenaries.append(PlenaryServiceInstanceServerDefault(dbservice,
                                                                   dbinstance,
-                                                                  logger=
-                                                                  logger))
+                                                                  logger=logger))
         if dbservice.name == 'nas_disk_share':
             self.plenaries.append(PlenaryInstanceNasDiskShare(dbservice,
                                                               dbinstance,
@@ -207,6 +206,7 @@ class PlenaryServiceInstanceClientDefault(Plenary):
                                                            self.name)))))
         lines.append("include { 'service/%s/client/config' };" % self.service)
 
+
 class PlenaryServiceInstanceServerDefault(Plenary):
     """
     Any server of the servivce will include this
@@ -290,6 +290,7 @@ class PlenaryInstanceNasDiskShare(Plenary):
         else:
             return False
 
+
 # This should come from some external API...?
 def find_storage_data(datafile, fn):
     """
@@ -310,7 +311,7 @@ def find_storage_data(datafile, fn):
             hdr = line[1:].split('|')
         else:
             fields = line.split('|')
-            if len(fields) == len(hdr): # silently ignore invalid lines
+            if len(fields) == len(hdr):  # silently ignore invalid lines
                 info = dict()
                 for i in range(0, len(hdr)):
                     info[hdr[i]] = fields[i]

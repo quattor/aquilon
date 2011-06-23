@@ -49,8 +49,8 @@ def pan(obj, indent=0):
             if isinstance(key, PanEscape):
                 pass
             elif isinstance(key, basestring):
-               if not _valid_id.match(str(key)):  # pragma: no cover
-                   raise ValueError("Invalid nlist key '%s'." % key)
+                if not _valid_id.match(str(key)):  # pragma: no cover
+                    raise ValueError("Invalid nlist key '%s'." % key)
             else:  # pragma: no cover
                 raise TypeError("The value of an nlist key must be a string, "
                                 "optionally escaped (it was: %r)" % key)
@@ -91,6 +91,7 @@ def pan(obj, indent=0):
 
     return "\n".join(("%s" % x) for x in accumulator)
 
+
 def pan_create(path, params=None, indent=0):
     """ Return a PAN create() statement """
 
@@ -106,8 +107,8 @@ def pan_create(path, params=None, indent=0):
             if isinstance(key, PanEscape):
                 pass
             elif isinstance(key, basestring):
-               if not _valid_id.match(str(key)):  # pragma: no cover
-                   raise ValueError("Invalid nlist key '%s'." % key)
+                if not _valid_id.match(str(key)):  # pragma: no cover
+                    raise ValueError("Invalid nlist key '%s'." % key)
             else:  # pragma: no cover
                 raise TypeError("The value of an nlist key must be a string, "
                                 "optionally escaped (it was: %r)" % key)

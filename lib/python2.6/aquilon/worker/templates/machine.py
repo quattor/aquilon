@@ -182,8 +182,6 @@ class PlenaryMachineInfo(Plenary):
         # And a chassis location?
         if self.dbmachine.chassis_slot:
             slot = self.dbmachine.chassis_slot[0]
-            self.chassis = slot.chassis.fqdn
-            self.slot = slot.slot_number
             lines.append('"chassis" = %s;' % pan(slot.chassis.fqdn))
             lines.append('"slot" = %d;' % slot.slot_number)
 
