@@ -28,6 +28,7 @@
 # TERMS THAT MAY APPLY.
 
 import re
+from numbers import Number
 
 # See the definition of a "term" in the "Path Literals" section of the Pan
 # language documentation
@@ -139,8 +140,12 @@ class StructureTemplate(PanObject):
         return pan_create(self.path, self.params, indent)
 
 
-class PanUnit(PanObject):
+class PanMetric(PanObject):
     def __init__(self, value, unit):
+        if not isinstance(value, Number):  # pragma: no cover
+            raise TypeError("The value of a pan metric must be a number "
+                            "(it was %r)." % value)
+
         self.value = value
         self.unit = unit
 
