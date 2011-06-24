@@ -34,7 +34,7 @@ import logging
 from sqlalchemy.orm.session import object_session
 
 from aquilon.config import Config
-from aquilon.exceptions_ import IncompleteError, InternalError
+from aquilon.exceptions_ import IncompleteError, InternalError, ArgumentError
 from aquilon.aqdb.model import (Host, AddressAssignment, VlanInterface,
                                 BondingInterface, BridgeInterface)
 from aquilon.worker.locks import CompileKey
