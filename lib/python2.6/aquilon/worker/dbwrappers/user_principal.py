@@ -20,7 +20,7 @@
 import re
 import logging
 
-from sqlalchemy.orm import eagerload
+from sqlalchemy.orm import contains_eager, joinedload
 
 from aquilon.exceptions_ import ArgumentError, InternalError, NotFoundException
 from aquilon.aqdb.model import Role, Realm, UserPrincipal
@@ -52,9 +52,13 @@ def get_or_create_user_principal(session, principal, createuser=True,
 
     # Short circuit the common case, and optimize it to eager load in
     # a single query since this happens on every command:
-    q = session.query(UserPrincipal).filter_by(name=user)
-    q = q.options(eagerload('role'), eagerload('realm'))
-    q = q.join('realm').filter_by(name=realm)
+    q = session.query(UserPrincipal)
+    q = q.filter_by(name=user)
+    q = q.join(Realm)
+    q = q.filter_by(name=realm)
+    q = q.reset_joinpoint()
+    q = q.options(contains_eager('realm'),
+                  joinedload('role'))
     dbuser = q.first()
     if dbuser:
         return dbuser
