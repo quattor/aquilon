@@ -253,10 +253,15 @@ class BrokerCommand(object):
                         else:
                             kwargs["session"] = self.dbf.Session()
                     session = kwargs["session"]
+
+                    # This does a COMMIT, which in turn invalidates the session.
+                    # We should therefore avoid looking up anything in the DB
+                    # before this point which might be used later.
+                    self._record_xtn(session, logger.get_status())
+
                     dbuser = get_or_create_user_principal(session, principal,
                                                           commitoncreate=True)
                     kwargs["dbuser"] = dbuser
-                    self._record_xtn(session, logger.get_status())
 
                     if self.requires_azcheck:
                         self.az.check(principal=principal, dbuser=dbuser,
