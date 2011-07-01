@@ -155,3 +155,7 @@ dynstub = DynamicStub.__table__  # pylint: disable=C0103, E1101
 dynstub.primary_key.name = 'dynamic_stub_pk'
 dynstub.info['unique_fields'] = ['fqdn']
 dynstub.info['extra_search_fields'] = ['ip', 'network']
+
+Network.dynamic_stubs = relation(DynamicStub, lazy=True,
+                                 order_by=[DynamicStub.ip],
+                                 viewonly=True)

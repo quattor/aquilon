@@ -66,6 +66,7 @@ class CommandShowNetwork(BrokerCommand):
         if hosts or style == "proto":
             q = q.options(subqueryload("assignments"))
             q = q.options(joinedload("assignments.dns_records"))
+            q = q.options(subqueryload("dynamic_stubs"))
         if hosts:
             return NetworkHostList(q.all())
         else:

@@ -28,8 +28,6 @@
 # TERMS THAT MAY APPLY.
 """Host formatter."""
 
-from sqlalchemy.orm.session import object_session
-
 from aquilon.worker.formats.formatters import ObjectFormatter
 from aquilon.worker.formats.list import ListFormatter
 from aquilon.aqdb.model import Network, DynamicStub
@@ -119,12 +117,7 @@ class NetworkFormatter(ObjectFormatter):
             details.append(indent + "  Routers: %s" % routers)
 
         # Look for dynamic DHCP ranges
-        # TODO: convert it to a relation with a custom WHERE
-        session = object_session(network)
-        q = session.query(DynamicStub.ip)
-        q = q.filter_by(network=network)
-        q = q.order_by(DynamicStub.ip)
-        ranges = summarize_ranges(q)
+        ranges = summarize_ranges(network.dynamic_stubs)
         if ranges:
             details.append(indent + "  Dynamic Ranges: %s" % ", ".join(ranges))
 
@@ -288,11 +281,7 @@ class SimpleNetworkListFormatter(ListFormatter):
                         int_msg.mac = str(iface.mac)
 
         # Add dynamic DHCP records
-        # TODO: convert it to a relation with a custom WHERE
-        session = object_session(net)
-        q = session.query(DynamicStub)
-        q = q.filter_by(network=net)
-        for dynhost in q:
+        for dynhost in net.dynamic_stubs:
             host_msg = net_msg.hosts.add()
             # aqdhcpd uses the type
             host_msg.type = 'dynamic_stub'
