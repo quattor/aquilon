@@ -34,7 +34,9 @@ import re
 
 from sqlalchemy import (Column, Integer, Sequence, ForeignKey, UniqueConstraint,
                         Index, String, DateTime)
-from sqlalchemy.orm import relation, backref
+from sqlalchemy.orm import relation, backref, lazyload
+from sqlalchemy.orm.exc import NoResultFound
+from sqlalchemy.orm.attributes import set_committed_value
 
 from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.aqdb.model import Base, Location, Model, DnsRecord
@@ -125,13 +127,9 @@ class HardwareEntity(Base):  # pylint: disable-msg=W0232, R0903
             return self.label
 
     @classmethod
-    def get_unique(cls, sess, name, **kw):
+    def get_unique(cls, sess, name, hardware_type=None, compel=False,
+                   preclude=False, query_options=None):
         """ Returns a unique HardwareEntity given session and fqdn """
-
-        compel = kw.pop('compel', False)
-        preclude = kw.pop('preclude', False)
-        hardware_type = kw.pop('hardware_type', None)
-        options = kw.pop('query_options', None)
 
         # If the hardware_type param isn't explicitly set and we have a
         # polymorphic identity, assume we're querying only for items of our
@@ -148,41 +146,50 @@ class HardwareEntity(Base):  # pylint: disable-msg=W0232, R0903
                 hardware_type = cls.__mapper_args__['polymorphic_identity']
             clslabel = cls._get_class_label()
 
-        # Always do the query against the base class, so we can detect
-        # hardware_type mismatches
-        q = sess.query(HardwareEntity)
-        if cls != HardwareEntity:
-            q = q.with_polymorphic(cls)
+        q = sess.query(cls)
+        if "." in name:
+            dns_rec = DnsRecord.get_unique(sess, fqdn=name, compel=True)
+            # We know the primary name, do not load it again
+            q = q.options(lazyload('primary_name'))
+            q = q.filter_by(primary_name=dns_rec)
         else:
-            q = q.with_polymorphic('*')
+            dns_rec = None
+            q = q.filter_by(label=name)
+        if query_options:
+            q = q.options(*query_options)
 
         try:
-            if "." in name:
-                dns_rec = DnsRecord.get_unique(sess, fqdn=name, compel=True)
+            hwe = q.one()
+        except NoResultFound:
+            # Check if the name is in use by a different hardware type
+            q = sess.query(HardwareEntity)
+            if dns_rec:
+                # We know the primary name, do not load it again
+                q = q.options(lazyload('primary_name'))
                 q = q.filter_by(primary_name=dns_rec)
             else:
                 q = q.filter_by(label=name)
-            if options:
-                q = q.options(*options)
-            hwe = q.first()
-        except NotFoundException:
-            # Fall through if the DNS record was not found
-            hwe = None
+            try:
+                hwe = q.one()
+                if dns_rec:
+                    # We know the primary name, do not load it again
+                    set_committed_value(hwe, 'primary_name', dns_rec)
+                raise ArgumentError("{0} exists, but is not a {1}."
+                                    .format(hwe, hardware_type))
+            except NoResultFound:
+                hwe = None
+
+            if compel:
+                raise NotFoundException("%s %s not found." % (clslabel, name))
 
         if hwe:
-            if hardware_type and hwe.hardware_type != hardware_type:
-                msg = "{0} exists, but is not a {1}.".format(hwe, hardware_type)
-                raise ArgumentError(msg)
             if preclude:
                 raise ArgumentError('{0} already exists.'.format(hwe))
-            else:
-                return hwe
+            if dns_rec:
+                # We know the primary name, do not load it again
+                set_committed_value(hwe, 'primary_name', dns_rec)
 
-        if compel and not hwe:
-            msg = "%s %s not found." % (clslabel, name)
-            raise NotFoundException(msg)
-        else:
-            return None
+        return hwe
 
     def all_addresses(self):
         """ Iterator returning all addresses of the hardware. """
