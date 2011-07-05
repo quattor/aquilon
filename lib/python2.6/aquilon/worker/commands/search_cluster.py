@@ -53,12 +53,18 @@ class CommandSearchCluster(BrokerCommand):
                capacity_override, cluster, esx_guest, instance,
                esx_metacluster, service, esx_share,
                esx_switch, esx_virtual_machine,
-               fullinfo, **arguments):
+               fullinfo, style, **arguments):
 
         if cluster_type == 'esx':
-            q = session.query(EsxCluster)
+            cls = EsxCluster
         else:
-            q = session.query(Cluster)
+            cls = Cluster
+
+        # Don't load full objects if we only want to show their name
+        if fullinfo or style != 'raw':
+            q = session.query(cls)
+        else:
+            q = session.query(cls.name)
 
         (dbbranch, dbauthor) = get_branch_and_author(session, logger,
                                                      domain=domain,

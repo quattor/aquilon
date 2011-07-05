@@ -44,8 +44,11 @@ class CommandSearchMachine(BrokerCommand):
     required_parameters = []
 
     def render(self, session, machine, cpuname, cpuvendor, cpuspeed, cpucount,
-               memory, cluster, share, fullinfo, **arguments):
-        q = search_hardware_entity_query(session, Machine, **arguments)
+               memory, cluster, share, fullinfo, style, **arguments):
+        if fullinfo or style != 'raw':
+            q = search_hardware_entity_query(session, Machine, **arguments)
+        else:
+            q = search_hardware_entity_query(session, Machine.label, **arguments)
         if machine:
             q = q.filter_by(label=machine)
         if cpuname or cpuvendor or cpuspeed is not None:

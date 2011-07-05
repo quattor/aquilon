@@ -41,12 +41,17 @@ class CommandSearchHardware(BrokerCommand):
 
     required_parameters = []
 
-    def render(self, session, fullinfo, **arguments):
-        q = search_hardware_entity_query(session, HardwareEntity, **arguments)
+    def render(self, session, fullinfo, style, **arguments):
+        if fullinfo or style != "raw":
+            q = search_hardware_entity_query(session, HardwareEntity, **arguments)
+        else:
+            q = search_hardware_entity_query(session, HardwareEntity.label, **arguments)
+
         if fullinfo:
             q = q.options(joinedload('location'),
                           subqueryload('interfaces'),
                           joinedload('interfaces.assignments'),
                           joinedload('interfaces.assignments.dns_records'))
             return q.all()
-        return SimpleHardwareEntityList(q.all())
+        else:
+            return SimpleHardwareEntityList(q.all())
