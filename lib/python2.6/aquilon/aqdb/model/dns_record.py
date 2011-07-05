@@ -87,7 +87,7 @@ class DnsRecord(Base):
                        'polymorphic_identity': 'dns_record'}
 
     @classmethod
-    def get_unique(cls, session, name=None, dns_domain=None, fqdn=None,
+    def get_unique(cls, session, fqdn=None, name=None, dns_domain=None,
                    dns_environment=None, compel=False, preclude=False, **kwargs):
         # Proxy FQDN lookup to the Fqdn class
         if not fqdn or not isinstance(fqdn, Fqdn):
