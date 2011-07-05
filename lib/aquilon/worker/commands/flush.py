@@ -176,8 +176,10 @@ class CommandFlush(BrokerCommand):
                 # Most machines are in racks...
                 q = session.query(Rack)
                 q = q.options(subqueryload("dns_maps"),
+                              lazyload("dns_maps.location"),
                               subqueryload("parents"),
-                              subqueryload("parents.dns_maps"))
+                              subqueryload("parents.dns_maps"),
+                              lazyload("parents.dns_maps.location"))
                 racks = q.all()
 
             if hosts or clusters or resources:
@@ -205,7 +207,8 @@ class CommandFlush(BrokerCommand):
             if services:
                 logger.client_info("Flushing services.")
                 q = session.query(Service)
-                q = q.options(subqueryload("instances"))
+                q = q.options(subqueryload("instances"),
+                              lazyload("instances.service"))
                 for dbservice in q:
                     try:
                         plenary_info = Plenary.get_plenary(dbservice,
@@ -355,6 +358,7 @@ class CommandFlush(BrokerCommand):
                 q = session.query(Cluster)
                 q = q.with_polymorphic('*')
                 q = q.options(subqueryload('_hosts'),
+                              lazyload('_hosts.cluster'),
                               joinedload('_hosts.host'),
                               joinedload('_hosts.host.machine'),
                               subqueryload('_metacluster'),

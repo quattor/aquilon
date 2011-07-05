@@ -23,7 +23,8 @@ from aquilon.aqdb.model import (DnsRecord, ARecord, Alias, SrvRecord, Fqdn,
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.formats.list import StringAttributeList
 
-from sqlalchemy.orm import contains_eager, undefer, subqueryload, aliased
+from sqlalchemy.orm import (contains_eager, undefer, subqueryload, lazyload,
+                            aliased)
 from sqlalchemy.sql import or_, and_
 
 # Map standard DNS record types to our internal types
@@ -131,9 +132,10 @@ class CommandSearchDns(BrokerCommand):
             q = q.filter(ARecord.reverse_ptr == dbtarget)
 
         if fullinfo:
-            q = q.options(undefer('comments'))
-            q = q.options(subqueryload('hardware_entity'))
-            q = q.options(undefer('alias_cnt'))
+            q = q.options(undefer('comments'),
+                          subqueryload('hardware_entity'),
+                          lazyload('hardware_entity.primary_name'),
+                          undefer('alias_cnt'))
             return q.all()
         elif style == "raw":
             return StringAttributeList(q.all(), 'fqdn')

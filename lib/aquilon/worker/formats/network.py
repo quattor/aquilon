@@ -150,7 +150,8 @@ class NetworkFormatter(ObjectFormatter):
             session = object_session(net)
             q = session.query(HardwareEntity)
             q = q.filter(HardwareEntity.id.in_(hw_ids))
-            q = q.options(subqueryload('interfaces'))
+            q = q.options(subqueryload('interfaces'),
+                          lazyload('interfaces.hardware_entity'))
             hwent_by_id = {}
             for dbhwent in q.all():
                 hwent_by_id[dbhwent.id] = dbhwent
