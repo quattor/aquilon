@@ -79,6 +79,7 @@ class HardwareEntity(Base):  # pylint: disable-msg=W0232, R0903
         return cls._label_check.match(label)
 
     def __init__(self, label=None, **kwargs):
+        label = AqStr.normalize(label)
         if not label:
             raise ArgumentError("HardwareEntity needs a label.")
         elif not self.valid_label(label):

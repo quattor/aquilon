@@ -144,12 +144,22 @@ class TestAddMachine(TestBrokerCommand):
                         "--cpuname", "xeon", "--cpuspeed", "2660",
                         "--memory", "8192"])
 
+    # Test normalization
     def testaddnp3c5n5(self):
-        self.noouttest(["add", "machine", "--machine", "np3c5n5",
+        self.noouttest(["add", "machine", "--machine", "np3C5N5",
                         "--rack", "np3", "--model", "hs21-8853l5u",
                         "--cpucount", "2", "--cpuvendor", "intel",
                         "--cpuname", "xeon", "--cpuspeed", "2660",
                         "--memory", "8192"])
+
+    def testverifynormalization(self):
+        command = "show machine --machine NP3c5N5"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Blade: np3c5n5", command)
+
+        command = "show machine --machine np3c5n5"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Blade: np3c5n5", command)
 
     # Used for testing notifications
     def testaddut3c5n6(self):
