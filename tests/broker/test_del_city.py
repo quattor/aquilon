@@ -41,6 +41,7 @@ from brokertest import TestBrokerCommand
 
 
 class TestDelCity(TestBrokerCommand):
+    """ test delete city functionality """
 
     def test_delex(self):
         command = ["del_city", "--city=ex"]
@@ -53,6 +54,6 @@ class TestDelCity(TestBrokerCommand):
 
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelCity)
     unittest.TextTestRunner(verbosity=2).run(suite)

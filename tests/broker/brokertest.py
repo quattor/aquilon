@@ -44,7 +44,7 @@ LOCK_RE = re.compile(r'^(acquired|releasing) '
 
 DSDB_EXPECT_SUCCESS_FILE = "expected_dsdb_cmds"
 DSDB_EXPECT_FAILURE_FILE = "fail_expected_dsdb_cmds"
-DSDB_EXPECT_FAILURE_ERROR= "fail_expected_dsdb_error"
+DSDB_EXPECT_FAILURE_ERROR = "fail_expected_dsdb_error"
 DSDB_ISSUED_CMDS_FILE = "issued_dsdb_cmds"
 
 
@@ -523,7 +523,7 @@ class TestBrokerCommand(unittest.TestCase):
             fp.write("\n")
         if fail and errstr :
             errfile = DSDB_EXPECT_FAILURE_ERROR
-            expected_name = os.path.join(dsdb_coverage_dir,errfile)
+            expected_name = os.path.join(dsdb_coverage_dir, errfile)
             with open(expected_name, "a") as fp:
                 fp.write(errstr)
                 fp.write("\n")

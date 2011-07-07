@@ -420,7 +420,7 @@ class DSDBRunner(object):
             command.extend(["-ethernet_address", mac])
         if primary and str(primary) != str(fqdn):
             command.extend(["-primary_host_name", primary])
-        out = run_command(command,env=self.getenv())
+        out = run_command(command, env=self.getenv())
         return
 
     def update_host_mac(self, fqdn, mac):

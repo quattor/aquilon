@@ -39,6 +39,7 @@ from brokertest import TestBrokerCommand
 
 
 class TestDelDnsDomain(TestBrokerCommand):
+    """ test delete dns functionality """
 
     def testdelaqdunittestdomain(self):
         self.dsdb_expect("delete dns_domain -domain_name aqd-unittest.ms.com")
@@ -88,21 +89,22 @@ class TestDelDnsDomain(TestBrokerCommand):
         self.dsdb_verify()
 
     def testdeltd3(self):
-       
-        test_domain="td3.aqd-unittest.ms.com"
+        """ test delete domain with dsdb failure """
+ 
+        test_domain = "td3.aqd-unittest.ms.com"
         self.dsdb_expect("add dns_domain -domain_name %s -comments " % test_domain)
         command = ["add", "dns", "domain", "--dns_domain", test_domain]
         self.noouttest(command)
         self.dsdb_verify()
 
-        errstr="DNS domain %s doesn't exists" % test_domain
-        self.dsdb_expect("delete dns_domain -domain_name %s" % test_domain, True,errstr)
+        errstr = "DNS domain %s doesn't exists" % test_domain
+        self.dsdb_expect("delete dns_domain -domain_name %s" % test_domain, True, errstr)
         command = ["del", "dns", "domain", "--dns_domain", test_domain]
         self.noouttest(command)
         self.dsdb_verify()
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     import aquilon.aqdb.depends
     import nose
 
