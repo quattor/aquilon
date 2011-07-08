@@ -476,7 +476,7 @@ class DSDBRunner(object):
             if not addr.network.is_internal:
                 continue
             if addr.fqdns:
-                fqdn = addr.fqdns[0]
+                fqdn = str(addr.fqdns[0])
             else:
                 continue
 
