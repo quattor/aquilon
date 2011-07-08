@@ -59,6 +59,12 @@ class TestPermission(TestBrokerCommand):
                 command)
         self.matchoutput(out, "Comments: Some user comments", command)
 
+    def testverifycsvnocomments(self):
+        command = ["show_principal", "--principal=testusernobody@is1.morgan",
+                   "--format=csv"]
+        out = self.commandtest(command)
+        self.searchoutput(out, r"^testusernobody@is1.morgan,nobody$", command)
+
     def testverifynohostpart(self):
         command = ["permission", "--principal", "testusernobody",
                    "--role", "nobody", "--createuser"]
@@ -76,6 +82,13 @@ class TestPermission(TestBrokerCommand):
         self.matchoutput(out,
                 "UserPrincipal: testuseroperations@is1.morgan [role: operations]",
                 command)
+
+    def testverifycsv(self):
+        command = ["show_principal",
+                   "--principal=testuseroperations@is1.morgan", "--format=csv"]
+        out = self.commandtest(command)
+        self.searchoutput(out, r"^testuseroperations@is1.morgan,operations$",
+                          command)
 
     def testpermissionengineering(self):
         command = "permission --principal testuserengineering@is1.morgan --role engineering --createuser"

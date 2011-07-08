@@ -41,4 +41,7 @@ class UserPrincipalFormatter(ObjectFormatter):
             details.append(indent + "  Comments: %s" % user_principal.comments)
         return "\n".join(details)
 
+    def csv_fields(self, user_principal):
+        return (user_principal, user_principal.role.name)
+
 ObjectFormatter.handlers[UserPrincipal] = UserPrincipalFormatter()
