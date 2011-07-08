@@ -103,6 +103,8 @@ class TestMakeAquilon(TestBrokerCommand):
                           r'"physdev", "eth1",\s*'
                           r'"vlan", true\s*\)',
                           command)
+        self.matchoutput(out, "'/system/network/default_gateway' = \"%s\";" %
+                         self.net.unknown[0].gateway, command)
         self.matchoutput(out,
             """include { "archetype/base" };""",
             command)
