@@ -32,13 +32,10 @@
 import os
 import logging
 
-from sqlalchemy.orm.session import object_session
-
 from aquilon.exceptions_ import InternalError, IncompleteError
 from aquilon.config import Config
 from aquilon.worker.locks import lock_queue, CompileKey
 from aquilon.worker.processes import write_file, read_file, remove_file
-from aquilon.worker.logger import CLIENT_INFO
 
 LOGGER = logging.getLogger(__name__)
 
@@ -127,7 +124,7 @@ class Plenary(object):
         lines.append("%stemplate %s;" % (type, self.plenary_template))
         lines.append("")
         self.body(lines)
-        return "\n".join(lines)+"\n"
+        return "\n".join(lines) + "\n"
 
     def write(self, dir=None, user=None, locked=False, content=None):
         """Write out the template.
@@ -259,7 +256,7 @@ class Plenary(object):
         try:
             self.old_content = self.read()
             self.old_mtime = os.stat(self.pathname()).st_atime
-        except IOError, e:
+        except IOError:
             self.old_content = None
         self.stashed = True
 
@@ -377,7 +374,7 @@ class PlenaryCollection(object):
                 try:
                     total += plen.write(dir=dir, user=user, locked=True,
                                         content=content)
-                except IncompleteError, e:
+                except IncompleteError:
                     pass
         except:
             if not locked:

@@ -31,12 +31,10 @@
 
 import logging
 
-from sqlalchemy.orm.session import object_session
-
 from aquilon.config import Config
-from aquilon.exceptions_ import IncompleteError, InternalError
-from aquilon.aqdb.model import (Host, AddressAssignment, VlanInterface,
-                                BondingInterface, BridgeInterface)
+from aquilon.exceptions_ import IncompleteError, InternalError, ArgumentError
+from aquilon.aqdb.model import (Host, VlanInterface, BondingInterface,
+                                BridgeInterface)
 from aquilon.worker.locks import CompileKey
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
 from aquilon.worker.templates.machine import PlenaryMachineInfo
@@ -44,6 +42,7 @@ from aquilon.worker.templates.cluster import PlenaryClusterClient
 from aquilon.worker.templates.panutils import pan, StructureTemplate
 
 LOGGER = logging.getLogger(__name__)
+
 
 # Select the closest (i.e. in the same building) router
 def select_router(dbmachine, routers):
@@ -130,14 +129,11 @@ class PlenaryToplevelHost(Plenary):
                           logger=self.logger)
 
     def body(self, lines):
-        session = object_session(self.dbhost)
-
         interfaces = dict()
         vips = dict()
         transit_interfaces = []
         routers = {}
         default_gateway = None
-        dbmachine = self.dbhost.machine
 
         # FIXME: Enforce that one of the interfaces is marked boot?
         for dbinterface in self.dbhost.machine.interfaces:

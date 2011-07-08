@@ -104,10 +104,10 @@ class TestAddInterfaceAddress(TestBrokerCommand):
     def testaddbyip(self):
         ip = self.net.unknown[12].usable[3]
         fqdn = "unittest20-e1-1.aqd-unittest.ms.com"
-        self.dsdb_expect_add(fqdn, ip, "eth1_1",
+        self.dsdb_expect_add(fqdn, ip, "eth1_e1",
                              primary="unittest20.aqd-unittest.ms.com")
         command = ["add", "interface", "address", "--machine", "ut3c5n2",
-                   "--interface", "eth1", "--label", "1",
+                   "--interface", "eth1", "--label", "e1",
                    "--fqdn", fqdn, "--ip", ip]
         self.noouttest(command)
         self.dsdb_verify()
@@ -120,16 +120,23 @@ class TestAddInterfaceAddress(TestBrokerCommand):
         out = self.badrequesttest(command)
         self.matchoutput(out, "is used as a primary name", command)
 
-    def testrejectduplicatelabel(self):
+    def testrejectnumericlabel(self):
         command = ["add", "interface", "address", "--machine", "ut3c5n2",
                    "--interface", "eth1", "--label", "1",
+                   "--fqdn", "arecord15.aqd-unittest.ms.com"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "'1' is not a valid value for label", command)
+
+    def testrejectduplicatelabel(self):
+        command = ["add", "interface", "address", "--machine", "ut3c5n2",
+                   "--interface", "eth1", "--label", "e1",
                    "--fqdn", "arecord15.aqd-unittest.ms.com"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "already has an alias named", command)
 
     def testrejectduplicateuse(self):
         command = ["add", "interface", "address", "--machine", "ut3c5n2",
-                   "--interface", "eth1", "--label", "2",
+                   "--interface", "eth1", "--label", "e2",
                    "--fqdn", "unittest00-e1.one-nyp.ms.com"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Non-zebra addresses cannot be assigned to "
@@ -139,7 +146,7 @@ class TestAddInterfaceAddress(TestBrokerCommand):
         # Dynamic DHCP address, set up using add_dynamic_range
         ip = self.net.tor_net2[0].usable[2]
         command = ["add", "interface", "address", "--machine", "ut3c5n2",
-                   "--interface", "eth1", "--label", "3",
+                   "--interface", "eth1", "--label", "e3",
                    "--fqdn", "dyndhcp.aqd-unittest.ms.com", "--ip", ip]
         out = self.badrequesttest(command)
         self.matchoutput(out,
@@ -151,7 +158,7 @@ class TestAddInterfaceAddress(TestBrokerCommand):
         # Address in the reserved range
         ip = self.net.tor_net2[0].reserved[0]
         command = ["add", "interface", "address", "--machine", "ut3c5n2",
-                   "--interface", "eth1", "--label", "3",
+                   "--interface", "eth1", "--label", "e3",
                    "--fqdn", "dyndhcp.aqd-unittest.ms.com", "--ip", ip]
         out = self.badrequesttest(command)
         self.matchoutput(out,
@@ -163,7 +170,7 @@ class TestAddInterfaceAddress(TestBrokerCommand):
     def testrejectbadusage(self):
         ip = self.net.tor_net2[0].usable[-1]
         command = ["add", "interface", "address", "--machine", "ut3c5n2",
-                   "--interface", "eth1", "--label", "3",
+                   "--interface", "eth1", "--label", "e3",
                    "--fqdn", "badusage.aqd-unittest.ms.com", "--ip", ip,
                    "--usage", "badusage"]
         out = self.badrequesttest(command)
@@ -172,7 +179,7 @@ class TestAddInterfaceAddress(TestBrokerCommand):
     def testrejectrestricteddomain(self):
         ip = self.net.tor_net2[0].usable[-1]
         command = ["add", "interface", "address", "--machine", "ut3c5n2",
-                   "--interface", "eth1", "--label", "3",
+                   "--interface", "eth1", "--label", "e3",
                    "--fqdn", "foo.restrict.aqd-unittest.ms.com", "--ip", ip]
         out = self.badrequesttest(command)
         self.matchoutput(out,
@@ -183,7 +190,7 @@ class TestAddInterfaceAddress(TestBrokerCommand):
     def testsystemzebramix(self):
         ip = self.net.unknown[0].usable[3]
         command = ["add", "interface", "address", "--machine", "ut3c5n2",
-                   "--interface", "eth1", "--label", "2",
+                   "--interface", "eth1", "--label", "e2",
                    "--usage", "zebra",
                    "--fqdn", "unittest00-e1.one-nyp.ms.com"]
         out = self.badrequesttest(command)

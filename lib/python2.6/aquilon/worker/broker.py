@@ -480,7 +480,8 @@ class BrokerCommand(object):
 
 # This might belong somewhere else.  The functionality that uses this
 # might end up in aqdb (in a similar class as AqStr).
-basic_validation_re = re.compile('^[a-zA-Z0-9_.-]+$')
+# What is considered valid here should also be a valid nlist key.
+basic_validation_re = re.compile('^[a-zA-Z_][a-zA-Z0-9_.-]*$')
 """Restriction for certain incoming labels beyond AqStr."""
 
 def validate_basic(label, value):

@@ -31,9 +31,11 @@
 import logging
 
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
+from aquilon.worker.templates.panutils import pan, StructureTemplate
 from aquilon.exceptions_ import NotFoundException
 
 LOGGER = logging.getLogger(__name__)
+
 
 class PlenaryService(PlenaryCollection):
     """
@@ -113,15 +115,13 @@ class PlenaryServiceInstance(PlenaryCollection):
                                                              logger=logger))
         self.plenaries.append(PlenaryServiceInstanceClientDefault(dbservice,
                                                                   dbinstance,
-                                                                  logger=
-                                                                  logger))
+                                                                  logger=logger))
         self.plenaries.append(PlenaryServiceInstanceServer(dbservice,
                                                            dbinstance,
                                                            logger=logger))
         self.plenaries.append(PlenaryServiceInstanceServerDefault(dbservice,
                                                                   dbinstance,
-                                                                  logger=
-                                                                  logger))
+                                                                  logger=logger))
         if dbservice.name == 'nas_disk_share':
             self.plenaries.append(PlenaryInstanceNasDiskShare(dbservice,
                                                               dbinstance,
@@ -150,14 +150,10 @@ class PlenaryServiceInstanceToplevel(Plenary):
     def body(self, lines):
         lines.append("include { 'servicedata/%(service)s/config' };" % self.__dict__)
         lines.append("")
-        lines.append("'instance' = '%(name)s';" % self.__dict__)
-        lines.append("'servers' = list(%s);" %
-                     ", ".join(["'%s'" % fqdn for fqdn
-                                in self.dbinstance.server_fqdns]))
+        lines.append('"instance" = %s;' % pan(self.name))
+        lines.append('"servers" = %s;' % pan(self.dbinstance.server_fqdns))
         if self.service == 'dns':
-            lines.append("'server_ips' = list(%s);" %
-                         ", ".join(["'%s'" % ip for ip
-                                    in self.dbinstance.server_ips]))
+            lines.append('"server_ips" = %s;' % pan(self.dbinstance.server_ips))
 
 
 class PlenaryServiceInstanceServer(Plenary):
@@ -180,11 +176,8 @@ class PlenaryServiceInstanceServer(Plenary):
         self.dir = self.config.get("broker", "plenarydir")
 
     def body(self, lines):
-        lines.append("'instance' = '%(name)s';" % self.__dict__)
-        lines.append("'clients' = list(" +
-                     ", ".join(["'%s'" % client
-                                for client in self.dbinstance.client_fqdns]) +
-                     ");")
+        lines.append('"instance" = %s;' % pan(self.name))
+        lines.append('"clients" = %s;' % pan(self.dbinstance.client_fqdns))
 
 
 class PlenaryServiceInstanceClientDefault(Plenary):
@@ -207,8 +200,12 @@ class PlenaryServiceInstanceClientDefault(Plenary):
         self.dir = self.config.get("broker", "plenarydir")
 
     def body(self, lines):
-        lines.append("'/system/services/%(service)s' = create('servicedata/%(service)s/%(name)s/config');" % self.__dict__)
-        lines.append("include { 'service/%(service)s/client/config' };"%self.__dict__)
+        lines.append('"/system/services/%s" = %s;' %
+                     (self.service, pan(StructureTemplate('servicedata/%s/%s/config' %
+                                                          (self.service,
+                                                           self.name)))))
+        lines.append("include { 'service/%s/client/config' };" % self.service)
+
 
 class PlenaryServiceInstanceServerDefault(Plenary):
     """
@@ -229,8 +226,11 @@ class PlenaryServiceInstanceServerDefault(Plenary):
         self.dir = self.config.get("broker", "plenarydir")
 
     def body(self, lines):
-        lines.append("'/system/provides/%(service)s' = create('servicedata/%(service)s/%(name)s/srvconfig');" % self.__dict__)
-        lines.append("include { 'service/%(service)s/server/config' };"%self.__dict__)
+        lines.append('"/system/provides/%s" = %s;' %
+                     (self.service, pan(StructureTemplate('servicedata/%s/%s/srvconfig' %
+                                                          (self.service,
+                                                           self.name)))))
+        lines.append("include { 'service/%s/server/config' };" % self.service)
 
 
 class PlenaryInstanceNasDiskShare(Plenary):
@@ -266,9 +266,9 @@ class PlenaryInstanceNasDiskShare(Plenary):
             # beyond me). We need a CSV parser...
             raise NotFoundException("Share %s cannot be found in NAS maps." %
                                     self.name)
-        lines.append("'sharename' = '%(name)s';" % self.__dict__)
-        lines.append("'server' = '%(server)s';" % self.__dict__)
-        lines.append("'mountpoint' = '%(mount)s';" % self.__dict__)
+        lines.append('"sharename" = %s;' % pan(self.name))
+        lines.append('"server" = %s;' % pan(self.server))
+        lines.append('"mountpoint" = %s;' % pan(self.mount))
 
     def lookup(self):
         with open(self.config.get("broker", "sharedata")) as sharedata:
@@ -290,6 +290,7 @@ class PlenaryInstanceNasDiskShare(Plenary):
         else:
             return False
 
+
 # This should come from some external API...?
 def find_storage_data(datafile, fn):
     """
@@ -310,7 +311,7 @@ def find_storage_data(datafile, fn):
             hdr = line[1:].split('|')
         else:
             fields = line.split('|')
-            if len(fields) == len(hdr): # silently ignore invalid lines
+            if len(fields) == len(hdr):  # silently ignore invalid lines
                 info = dict()
                 for i in range(0, len(hdr)):
                     info[hdr[i]] = fields[i]

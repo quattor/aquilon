@@ -69,8 +69,8 @@ class TestUnbindServer(TestBrokerCommand):
                          command)
         self.matchoutput(out, "include { 'servicedata/utsvc/config' };",
                          command)
-        self.matchoutput(out, "'instance' = 'utsi1';", command)
-        self.matchoutput(out, "'servers' = list();", command)
+        self.matchoutput(out, '"instance" = "utsi1";', command)
+        self.searchoutput(out, r'"servers" = list\(\s*\);', command)
 
     def testverifybindutsi1(self):
         command = "show service --service utsvc --instance utsi1"
@@ -91,8 +91,8 @@ class TestUnbindServer(TestBrokerCommand):
                          command)
         self.matchoutput(out, "include { 'servicedata/utsvc/config' };",
                          command)
-        self.matchoutput(out, "'instance' = 'utsi2';", command)
-        self.matchoutput(out, "'servers' = list();", command)
+        self.matchoutput(out, '"instance" = "utsi2";', command)
+        self.searchoutput(out, r'"servers" = list\(\s*\);', command)
 
     def testverifybindutsi2(self):
         command = "show service --service utsvc --instance utsi2"

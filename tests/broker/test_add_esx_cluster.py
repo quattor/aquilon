@@ -75,14 +75,15 @@ class TestAddESXCluster(TestBrokerCommand):
         command = ["cat", "--cluster=utecl1"]
         out = self.commandtest(command)
         self.matchoutput(out, "object template clusters/utecl1;", command)
-        self.matchoutput(out, "'/system/cluster/name' = 'utecl1';", command)
-        self.matchoutput(out, "'/system/metacluster/name' = 'utmc1';", command)
+        self.matchoutput(out, '"/system/cluster/name" = "utecl1";', command)
+        self.matchoutput(out, '"/system/metacluster/name" = "utmc1";', command)
         default_ratio = self.config.get("broker",
                                         "esx_cluster_vm_to_host_ratio")
-        default_ratio = re.sub(r"(\d+):(\d+)", r"\1, \2", default_ratio)
+        default_ratio = re.sub(r"(\d+):(\d+)", r"\1,\\s*\2", default_ratio)
 
-        self.matchoutput(out, "'/system/cluster/ratio' = list(%s);" % default_ratio, command)
-        self.searchoutput(out, r"'/system/cluster/machines' = nlist\(\s*\);",
+        self.searchoutput(out, r'"/system/cluster/ratio" = list\(\s*' +
+                          default_ratio + r'\s*\);', command)
+        self.searchoutput(out, r'"/system/cluster/machines" = nlist\(\s*\);',
                           command)
         self.matchclean(out, "include { 'service", command)
         self.matchoutput(out, "include { 'personality/esx_desktop/config' };",
@@ -118,9 +119,9 @@ class TestAddESXCluster(TestBrokerCommand):
         command = ["cat", "--cluster=utecl2"]
         out = self.commandtest(command)
         self.matchoutput(out, "object template clusters/utecl2;", command)
-        self.matchoutput(out, "'/system/cluster/name' = 'utecl2';", command)
-        self.matchoutput(out, "'/system/metacluster/name' = 'utmc1';", command)
-        self.searchoutput(out, r"'/system/cluster/machines' = nlist\(\s*\);",
+        self.matchoutput(out, '"/system/cluster/name" = "utecl2";', command)
+        self.matchoutput(out, '"/system/metacluster/name" = "utmc1";', command)
+        self.searchoutput(out, r'"/system/cluster/machines" = nlist\(\s*\);',
                           command)
         self.matchclean(out, "include { 'service", command)
 
@@ -231,9 +232,9 @@ class TestAddESXCluster(TestBrokerCommand):
         command = ["cat", "--cluster=utecl3"]
         out = self.commandtest(command)
         self.matchoutput(out, "object template clusters/utecl3;", command)
-        self.matchoutput(out, "'/system/cluster/name' = 'utecl3';", command)
-        self.matchoutput(out, "'/system/metacluster/name' = 'utmc2';", command)
-        self.searchoutput(out, r"'/system/cluster/machines' = nlist\(\s*\);",
+        self.matchoutput(out, '"/system/cluster/name" = "utecl3";', command)
+        self.matchoutput(out, '"/system/metacluster/name" = "utmc2";', command)
+        self.searchoutput(out, r'"/system/cluster/machines" = nlist\(\s*\);',
                           command)
         self.matchclean(out, "include { 'service", command)
 
@@ -268,9 +269,9 @@ class TestAddESXCluster(TestBrokerCommand):
         command = ["cat", "--cluster=utecl4"]
         out = self.commandtest(command)
         self.matchoutput(out, "object template clusters/utecl4;", command)
-        self.matchoutput(out, "'/system/cluster/name' = 'utecl4';", command)
-        self.matchoutput(out, "'/system/metacluster/name' = 'utmc2';", command)
-        self.searchoutput(out, r"'/system/cluster/machines' = nlist\(\s*\);",
+        self.matchoutput(out, '"/system/cluster/name" = "utecl4";', command)
+        self.matchoutput(out, '"/system/metacluster/name" = "utmc2";', command)
+        self.searchoutput(out, r'"/system/cluster/machines" = nlist\(\s*\);',
                           command)
         self.matchclean(out, "include { 'service", command)
 
@@ -282,7 +283,7 @@ class TestAddESXCluster(TestBrokerCommand):
             with open(plenary) as f:
                 contents = f.read()
             self.matchoutput(contents,
-                             "'/system/cluster/name' = '%s';" % cluster,
+                             '"/system/cluster/name" = "%s";' % cluster,
                              "read %s" % plenary)
 
     def testaddutmc4(self):

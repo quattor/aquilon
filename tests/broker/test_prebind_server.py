@@ -95,20 +95,20 @@ class TestPrebindServer(TestBrokerCommand):
     def testcatdns(self):
         command = "cat --service dns --instance utdnsinstance"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out,
-                         "'servers' = list('nyaqd1.ms.com', "
-                         "'unittest02.one-nyp.ms.com');",
-                         command)
+        self.searchoutput(out,
+                          r'"servers" = list\(\s*"nyaqd1.ms.com",\s*'
+                          r'"unittest02.one-nyp.ms.com"\s*\);',
+                          command)
         # Relying on 'nyaqd1.ms.com' to be in DNS isn't going to work
         # in other locations.  A better choice might be one of the
         # root servers (a.root-servers.net) but there's no sane way
         # to add that to the database right now.  Maybe post DNS
         # revamp.
-        self.matchoutput(out,
-                         "'server_ips' = list('%s', '%s');" %
-                         (socket.gethostbyname('nyaqd1.ms.com'),
-                          self.net.unknown[0].usable[0]),
-                         command)
+        self.searchoutput(out,
+                          '"server_ips" = list\(\s*"%s",\s*"%s"\s*\);' %
+                          (socket.gethostbyname('nyaqd1.ms.com'),
+                           self.net.unknown[0].usable[0]),
+                          command)
 
 
 if __name__=='__main__':

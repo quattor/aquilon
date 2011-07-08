@@ -65,9 +65,13 @@ class TestBindServer(TestBrokerCommand):
                          command)
         self.matchoutput(out, "include { 'servicedata/utsvc/config' };",
                          command)
-        self.matchoutput(out, "'instance' = 'utsi1';", command)
-        self.matchoutput(out, "'servers' = list('unittest00.one-nyp.ms.com', 'unittest02.one-nyp.ms.com');", command)
-        self.matchclean(out, "'server_ips'", command)
+        self.matchoutput(out, '"instance" = "utsi1";', command)
+        self.searchoutput(out,
+                          r'"servers" = list\(\s*'
+                          r'"unittest00.one-nyp.ms.com",\s*'
+                          r'"unittest02.one-nyp.ms.com"\s*\);',
+                          command)
+        self.matchclean(out, "server_ips", command)
 
     def testverifybindutsi1(self):
         command = "show service --service utsvc --instance utsi1"
@@ -110,9 +114,12 @@ class TestBindServer(TestBrokerCommand):
                          command)
         self.matchoutput(out, "include { 'servicedata/utsvc/config' };",
                          command)
-        self.matchoutput(out, "'instance' = 'utsi2';", command)
-        self.matchoutput(out, "'servers' = list('unittest00.one-nyp.ms.com');", command)
-        self.matchclean(out, "'server_ips'", command)
+        self.matchoutput(out, '"instance" = "utsi2";', command)
+        self.searchoutput(out,
+                          r'"servers" = list\(\s*'
+                          r'"unittest00.one-nyp.ms.com"\s*\);',
+                          command)
+        self.matchclean(out, "server_ips", command)
 
     def testreconfigureunittest00(self):
         command = "reconfigure --hostname unittest00.one-nyp.ms.com"

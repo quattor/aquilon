@@ -79,18 +79,18 @@ class TestDelInterfaceAddress(TestBrokerCommand):
         ip = self.net.unknown[12].usable[3]
         self.dsdb_expect_delete(ip)
         command = ["del", "interface", "address", "--machine", "ut3c5n2",
-                   "--interface", "eth1", "--label", "1"]
+                   "--interface", "eth1", "--label", "e1"]
         self.noouttest(command)
         self.dsdb_verify()
 
     def testdelbylabelagain(self):
         ip = self.net.unknown[12].usable[3]
         command = ["del", "interface", "address", "--machine", "ut3c5n2",
-                   "--interface", "eth1", "--label", "1"]
+                   "--interface", "eth1", "--label", "e1"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "Interface eth1 of machine unittest20.aqd-unittest.ms.com "
-                         "does not have an address with label 1.",
+                         "does not have an address with label e1.",
                          command)
 
     def testdelunittest20e0(self):

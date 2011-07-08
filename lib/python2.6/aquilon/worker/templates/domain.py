@@ -44,6 +44,7 @@ from aquilon.worker.logger import CLIENT_INFO
 
 LOGGER = logging.getLogger(__name__)
 
+
 class TemplateDomain(object):
 
     def __init__(self, domain, author=None, logger=LOGGER):
@@ -64,7 +65,7 @@ class TemplateDomain(object):
                                  "cfg",
                                  "domains",
                                  self.domain.name))
-              
+
         dirs.append(os.path.join(config.get("broker", "quattordir"),
                                  "build",
                                  "xml",
@@ -151,9 +152,9 @@ class TemplateDomain(object):
         if (len(objectlist) == 0):
             return 'no hosts: nothing to do'
 
-        panc_env = {"PATH":"%s:%s" % (config.get("broker", "javadir"),
-                                      os_environ.get("PATH", ""))}
-            
+        panc_env = {"PATH": "%s:%s" % (config.get("broker", "javadir"),
+                                       os_environ.get("PATH", ""))}
+
         args = [config.get("broker", "ant")]
         args.append("-f")
         args.append("%s/build.xml" %
@@ -163,8 +164,7 @@ class TemplateDomain(object):
         args.append("-Dpanc.formatter=%s" %
                     config.get("panc", "formatter"))
         args.append("-Ddomain=%s" % self.domain.name)
-        args.append("-Ddistributed.profiles=%s" %
-                    config.get("broker", "profilesdir"))
+        args.append("-Ddistributed.profiles=%s" % outputdir)
         args.append("-Dpanc.batch.size=%s" %
                     config.get("panc", "batch_size"))
         args.append("-Dant-contrib.jar=%s" %
@@ -213,8 +213,7 @@ class TemplateDomain(object):
 
         # No need for a lock here - there is only a single file written
         # and it is swapped into place atomically.
-        build_index(config, session, config.get("broker", "profilesdir"),
-                    logger=self.logger)
+        build_index(config, session, outputdir, logger=self.logger)
         return out
 
     def sandbox_has_latest(self, config, sandboxdir):
@@ -224,7 +223,7 @@ class TemplateDomain(object):
         try:
             prod_commit = run_git(['rev-list', '-n', '1', 'HEAD'],
                                   path=proddir, logger=self.logger).strip()
-        except ProcessException, e:
+        except ProcessException:
             prod_commit = ''
         if not prod_commit:
             raise InternalError("Error finding top commit for %s" %
@@ -233,7 +232,7 @@ class TemplateDomain(object):
         try:
             found_latest = run_git(['rev-list', 'HEAD'], path=sandboxdir,
                                    logger=self.logger, filterre=filterre)
-        except ProcessException, e:
+        except ProcessException:
             self.logger.warn("Failed to run git command in sandbox %s." %
                              sandboxdir)
             found_latest = ''

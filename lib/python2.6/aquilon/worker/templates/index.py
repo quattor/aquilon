@@ -55,6 +55,7 @@ try:
 except:  # pragma: no cover
     CDPPORT = 7777
 
+
 def build_index(config, session, profilesdir, clientNotify=True,
                 logger=LOGGER):
     '''
@@ -107,7 +108,7 @@ def build_index(config, session, profilesdir, clientNotify=True,
                 source = open(index_path)
             tree = ET.parse(source)
             for profile in tree.getiterator("profile"):
-                if (profile.text and profile.attrib.has_key("mtime")):
+                if (profile.text and "mtime" in profile.attrib):
                     obj = profile.text.strip()
                     if obj:
                         if obj.endswith(".xml"):
@@ -138,7 +139,7 @@ def build_index(config, session, profilesdir, clientNotify=True,
             # Remove the common prefix: our profilesdir, so that the
             # remaining object name is relative to that root (+1 in order
             # to remove the slash separator)
-            obj = obj[len(profilesdir)+1:]
+            obj = obj[len(profilesdir) + 1:]
             # This operation is not done with a lock, and it's possible
             # that the file has been removed since calling os.walk().
             # If that's the case, no need to add it to the modified_index.
@@ -147,10 +148,10 @@ def build_index(config, session, profilesdir, clientNotify=True,
                                                                   profile))
             except OSError, e:
                 continue
-            if (old_object_index.has_key(obj) and
+            if (obj in old_object_index and
                 object_index[obj] > old_object_index[obj]):
                 modified_index[obj] = object_index[obj]
- 
+
     content = []
     content.append("<?xml version='1.0' encoding='utf-8'?>")
     content.append("<profiles>")
@@ -188,6 +189,7 @@ def build_index(config, session, profilesdir, clientNotify=True,
         count = send_notification(CCM_NOTIF, modified_index.keys(),
                                   logger=logger)
         logger.log(CLIENT_INFO, "sent %d client notifications" % count)
+
 
 def send_notification(ntype, modified, logger=LOGGER):
     '''send CDP notification messages to a list of hosts.

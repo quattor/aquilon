@@ -34,7 +34,8 @@ import logging
 from aquilon.worker.locks import CompileKey
 from aquilon.worker.templates.base import Plenary
 from aquilon.worker import templates
-from aquilon.worker.templates.panutils import pan, StructureTemplate, PanUnit
+from aquilon.worker.templates.panutils import (pan, StructureTemplate,
+                                               PanMetric, PanEscape)
 
 LOGGER = logging.getLogger(__name__)
 
@@ -112,7 +113,7 @@ class PlenaryMachineInfo(Plenary):
 
     def body(self, lines):
         ram = [StructureTemplate("hardware/ram/generic",
-                                 {"size": PanUnit(self.dbmachine.memory, "MB")})]
+                                 {"size": PanMetric(self.dbmachine.memory, "MB")})]
         cpus = []
         for cpu_num in range(self.dbmachine.cpu_quantity):
             cpu = StructureTemplate("hardware/cpu/%s/%s" %
@@ -125,19 +126,19 @@ class PlenaryMachineInfo(Plenary):
             devname = disk.device_name
             if disk.disk_type == 'local':
                 relpath = "hardware/harddisk/generic/%s" % disk.controller_type
-                params = {"capacity": PanUnit(disk.capacity, "GB")}
+                params = {"capacity": PanMetric(disk.capacity, "GB")}
                 if disk.controller_type == 'cciss':
                     devname = "cciss/" + devname
             elif disk.disk_type == 'nas' and disk.service_instance:
                 relpath = "service/nas_disk_share/%s/client/nasinfo" % \
                     disk.service_instance.name
                 diskpath = "%s/%s.vmdk" % (self.machine, disk.device_name)
-                params = {"capacity": PanUnit(disk.capacity, "GB"),
+                params = {"capacity": PanMetric(disk.capacity, "GB"),
                           "interface": disk.controller_type,
                           "address": disk.address,
                           "path": diskpath}
 
-            disks[devname] = StructureTemplate(relpath, params)
+            disks[PanEscape(devname)] = StructureTemplate(relpath, params)
 
         managers = {}
         interfaces = {}
@@ -181,8 +182,6 @@ class PlenaryMachineInfo(Plenary):
         # And a chassis location?
         if self.dbmachine.chassis_slot:
             slot = self.dbmachine.chassis_slot[0]
-            self.chassis = slot.chassis.fqdn
-            self.slot = slot.slot_number
             lines.append('"chassis" = %s;' % pan(slot.chassis.fqdn))
             lines.append('"slot" = %d;' % slot.slot_number)
 

@@ -28,7 +28,7 @@
 # TERMS THAT MAY APPLY.
 """Contains the logic for `aq add interface address`."""
 
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand, validate_basic
 from aquilon.exceptions_ import ArgumentError, ProcessException, IncompleteError
 from aquilon.aqdb.model import (ARecord, HardwareEntity, DynamicStub,
                                 AddressAssignment, DnsEnvironment, Fqdn,
@@ -82,6 +82,10 @@ class CommandAddInterfaceAddress(BrokerCommand):
             # really emulate what add_host does, so tell the user where to look.
             raise ArgumentError("The 'hostname' label can only be managed "
                                 "by add_host/del_host.")
+
+        # The label will be used as an nlist key
+        if label:
+            validate_basic("label", label)
 
         if not usage:
             usage = "system"

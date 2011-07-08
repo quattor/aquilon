@@ -32,8 +32,10 @@ import os
 import logging
 
 from aquilon.worker.templates.base import Plenary
+from aquilon.worker.templates.panutils import pan
 
 LOGGER = logging.getLogger(__name__)
+
 
 class PlenaryPersonality(Plenary):
     def __init__(self, dbpersonality, logger=LOGGER):
@@ -46,5 +48,5 @@ class PlenaryPersonality(Plenary):
                                 dbpersonality.archetype.name)
 
     def body(self, lines):
-        lines.append("variable PERSONALITY = '%(name)s';" % self.__dict__)
-        lines.append("include { 'personality/config' };");
+        lines.append("variable PERSONALITY = %s;" % pan(self.name))
+        lines.append("include { 'personality/config' };")

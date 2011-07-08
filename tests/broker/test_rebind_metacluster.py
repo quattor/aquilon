@@ -72,9 +72,9 @@ class TestRebindMetaCluster(TestBrokerCommand):
         command = ["cat", "--cluster=utecl3"]
         out = self.commandtest(command)
         self.matchoutput(out, "object template clusters/utecl3;", command)
-        self.matchoutput(out, "'/system/cluster/name' = 'utecl3';", command)
-        self.matchoutput(out, "'/system/metacluster/name' = 'utmc1';", command)
-        self.searchoutput(out, r"'/system/cluster/machines' = nlist\(\s*\);",
+        self.matchoutput(out, '"/system/cluster/name" = "utecl3";', command)
+        self.matchoutput(out, '"/system/metacluster/name" = "utmc1";', command)
+        self.searchoutput(out, r'"/system/cluster/machines" = nlist\(\s*\);',
                           command)
 
 
