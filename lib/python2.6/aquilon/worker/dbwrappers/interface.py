@@ -158,7 +158,7 @@ def generate_ip(session, dbinterface, ip=None, ipfromip=None,
             dbnetwork = ObservedVlan.get_network(session, vlan_id=vlan_id,
                                                  switch=dbcluster.switch,
                                                  compel=ArgumentError)
-        else:
+        elif dbinterface.mac:
             q = session.query(ObservedMac)
             q = q.filter_by(mac_address=dbinterface.mac)
             q = q.order_by(desc(ObservedMac.last_seen))
@@ -171,6 +171,11 @@ def generate_ip(session, dbinterface, ip=None, ipfromip=None,
                                     "to use for network "
                                     "selection.".format(dbom.switch))
             dbnetwork = get_net_id_from_ip(session, dbom.switch.primary_ip)
+        else:
+            raise ArgumentError("{0} has neither a MAC address nor port group "
+                                "information, it is not possible to generate "
+                                "an IP address automatically."
+                                .format(dbinterface))
 
     if ipfromsystem:
         # Assumes one system entry, not necessarily correct.

@@ -154,8 +154,20 @@ class TestAddAuxiliary(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchclean(out, "Interface: eth4", command)
 
+    def testautoipbadiface(self):
+        # There is no e4 interface so it will be auto-created
+        command = ["add", "auxiliary", "--autoip",
+                   "--auxiliary", "unittest01-e4.one-nyp.ms.com",
+                   "--machine", "ut3c1n4", "--interface", "e4"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "Interface e4 of machine unittest01.one-nyp.ms.com "
+                         "has neither a MAC address nor port group information, "
+                         "it is not possible to generate an IP address "
+                         "automatically.",
+                         command)
 
-if __name__=='__main__':
+
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddAuxiliary)
     unittest.TextTestRunner(verbosity=2).run(suite)
-
