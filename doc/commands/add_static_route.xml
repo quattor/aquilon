@@ -58,6 +58,11 @@
 	    Note that this command does not update the profiles of affected hosts. You have
 	    to run the <command>aq make</command> for all affected hosts.
 	</para>
+	<para>
+	    If <replaceable>GW</replaceable> is the default gateway of a host, then the static
+	    route definition will be omitted from the plenary template, but the
+	    <command>aq show host</command> command will still display the static route.
+	</para>
     </refsect1>
 
     <refsect1>

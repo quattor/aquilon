@@ -126,6 +126,8 @@ class TestUpdateInterface(TestBrokerCommand):
         # templates
         command = "cat --hostname unittest02.one-nyp.ms.com --generate"
         out = self.commandtest(command.split(" "))
+        # After flipping the boot flag, the static route should now appear on
+        # eth0
         self.searchoutput(out,
                           r'"eth0", nlist\(\s*'
                           r'"bootproto", "static",\s*'
@@ -133,7 +135,13 @@ class TestUpdateInterface(TestBrokerCommand):
                           r'"fqdn", "unittest02.one-nyp.ms.com",\s*'
                           r'"gateway", "%s",\s*'
                           r'"ip", "%s",\s*'
-                          r'"netmask", "%s"\s*\)' %
+                          r'"netmask", "%s",\s*'
+                          r'"route", list\(\s*'
+                          r'nlist\(\s*'
+                          r'"address", "250.250.0.0",\s*'
+                          r'"gateway", "4.2.1.1",\s*'
+                          r'"netmask", "255.255.0.0"\s*\)\s*'
+                          r'\)\s*\)' %
                           (net.broadcast, net.gateway,
                            eth0ip, net.netmask),
                           command)

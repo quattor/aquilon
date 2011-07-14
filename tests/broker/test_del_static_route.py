@@ -62,8 +62,19 @@ class TestDelStaticRoute(TestBrokerCommand):
                    "--ip", "192.168.252.0", "--prefixlen", "23"]
         self.noouttest(command)
 
+    def testdelroute3(self):
+        gw = self.net.unknown[0].gateway
+        command = ["del", "static", "route", "--gateway", gw,
+                   "--ip", "250.250.0.0", "--prefixlen", "16"]
+        self.noouttest(command)
+
     def testverifynetwork(self):
         command = ["show", "network", "--ip", self.net.unknown[14].ip]
+        out = self.commandtest(command)
+        self.matchclean(out, "Static Route", command)
+
+    def testverifyunittest02(self):
+        command = ["show", "host", "--hostname", "unittest02.one-nyp.ms.com"]
         out = self.commandtest(command)
         self.matchclean(out, "Static Route", command)
 

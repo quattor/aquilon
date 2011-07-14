@@ -64,6 +64,12 @@ class TestAddStaticRoute(TestBrokerCommand):
                          "192.168.252.0/23 using gateway %s." % (net.ip, gw),
                          command)
 
+    def test_120_add_default(self):
+        gw = self.net.unknown[0].gateway
+        command = ["add", "static", "route", "--gateway", gw,
+                   "--ip", "250.250.0.0", "--prefixlen", "16"]
+        self.noouttest(command)
+
     def test_200_show_host(self):
         gw = self.net.unknown[14].usable[-1]
         command = ["show", "host", "--hostname", "unittest26.aqd-unittest.ms.com"]
@@ -88,12 +94,25 @@ class TestAddStaticRoute(TestBrokerCommand):
         self.matchoutput(err, "1/1 compiled", command)
 
     def test_220_verify_unittest26(self):
-        net = self.net.unknown[14]
-        ip = net.usable[0]
-        gw = net.usable[-1]
+        eth0_net = self.net.unknown[0]
+        eth0_ip = eth0_net.usable[23]
+        eth1_net = self.net.unknown[14]
+        eth1_ip = eth1_net.usable[0]
+        eth1_gw = eth1_net.usable[-1]
         command = ["cat", "--hostname", "unittest26.aqd-unittest.ms.com",
                    "--generate"]
         out = self.commandtest(command)
+        self.searchoutput(out,
+                          r'"eth0", nlist\(\s*'
+                          r'"bootproto", "static",\s*'
+                          r'"broadcast", "%s",\s*'
+                          r'"fqdn", "unittest26.aqd-unittest.ms.com",\s*'
+                          r'"gateway", "%s",\s*'
+                          r'"ip", "%s",\s*'
+                          r'"netmask", "%s"\s*\)' %
+                          (eth0_net.broadcast, eth0_net.gateway, eth0_ip,
+                           eth0_net.netmask),
+                          command)
         self.searchoutput(out,
                           r'"eth1", nlist\(\s*'
                           r'"bootproto", "static",\s*'
@@ -108,9 +127,33 @@ class TestAddStaticRoute(TestBrokerCommand):
                           r'"gateway", "%s",\s*'
                           r'"netmask", "255.255.254.0"\s*\)\s*'
                           '\)\s*\)' %
-                          (net.broadcast, net.gateway, ip, net.netmask, gw),
+                          (eth1_net.broadcast, eth1_net.gateway, eth1_ip,
+                           eth1_net.netmask, eth1_gw),
                           command)
 
+    def test_230_verify_show_unittest02(self):
+        command = ["show", "host", "--hostname", "unittest02.one-nyp.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Static Route: 250.250.0.0/16 gateway %s" %
+                         self.net.unknown[0].gateway, command)
+
+    def test_240_verify_cat_unittest02(self):
+        net = self.net.unknown[0]
+        eth0ip = net.usable[0]
+        command = ["cat", "--hostname", "unittest02.one-nyp.ms.com", "--generate"]
+        out = self.commandtest(command)
+        # No routes should be listed here, because the gw is the default gw
+        self.searchoutput(out,
+                          r'"eth0", nlist\(\s*'
+                          r'"bootproto", "static",\s*'
+                          r'"broadcast", "%s",\s*'
+                          r'"fqdn", "unittest02.one-nyp.ms.com",\s*'
+                          r'"gateway", "%s",\s*'
+                          r'"ip", "%s",\s*'
+                          r'"netmask", "%s"\s*\)' %
+                          (net.broadcast, net.gateway,
+                           eth0ip, net.netmask),
+                          command)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddStaticRoute)
