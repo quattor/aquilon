@@ -85,6 +85,9 @@ class Interface(Base):
     bootable = Column(Boolean(name="%s_bootable_ck" % _ABV), nullable=False,
                       default=False)
 
+    default_route = Column(Boolean(name="%s_default_route_ck" % _ABV),
+                           nullable=False, default=False)
+
     interface_type = Column(AqStr(32), nullable=False)
 
     hardware_entity_id = Column(Integer, ForeignKey('hardware_entity.id',

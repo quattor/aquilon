@@ -221,8 +221,29 @@ class TestUpdateInterface(TestBrokerCommand):
         out = self.badrequesttest(command)
         self.matchoutput(out, "but is not a switch", command)
 
+    def testfliproute1(self):
+        command = ["update", "interface", "--interface", "eth0",
+                   "--machine", "unittest25.aqd-unittest.ms.com",
+                   "--nodefault_route"]
+        (out, err) = self.successtest(command)
+        self.matchoutput(err, "Warning: machine unittest25.aqd-unittest.ms.com "
+                         "has no default route, hope that's ok.", command)
 
-if __name__=='__main__':
+    def testfliproute2(self):
+        command = ["update", "interface", "--interface", "eth1",
+                   "--machine", "unittest25.aqd-unittest.ms.com",
+                   "--default_route"]
+        self.noouttest(command)
+
+    def testverifyfliproutecat(self):
+        command = ["cat", "--hostname", "unittest25.aqd-unittest.ms.com",
+                   "--generate"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "'/system/network/default_gateway' = \"%s\";" %
+                         self.net.unknown[1][2], command)
+
+
+if __name__ == '__main__':
     import aquilon.aqdb.depends
     import nose
 

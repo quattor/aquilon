@@ -246,8 +246,10 @@ class TestMake(TestBrokerCommand):
                           r'"netmask", "%s"\s*\)' %
                           (net.broadcast, router, ip, net.netmask),
                           command)
+        self.matchoutput(out, "'/system/network/default_gateway' = \"%s\";" %
+                         self.net.unknown[0].gateway, command)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestMake)
     unittest.TextTestRunner(verbosity=2).run(suite)

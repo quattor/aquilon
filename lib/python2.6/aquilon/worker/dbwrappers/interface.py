@@ -440,8 +440,10 @@ def get_or_create_interface(session, dbhw_ent, name=None, mac=None,
         raise ArgumentError("Invalid interface type '%s'." % interface_type)
 
     extra_args = {}
+    default_route = False
     if bootable is not None:
         extra_args["bootable"] = bootable
+        default_route = bootable
     if port_group is not None:
         extra_args["port_group"] = port_group
 
@@ -473,7 +475,7 @@ def get_or_create_interface(session, dbhw_ent, name=None, mac=None,
 
     try:
         dbinterface = cls(name=name, mac=mac, comments=comments,
-                          **extra_args)
+                          default_route=default_route, **extra_args)
     except ValueError, err:
         raise ArgumentError(err)
 

@@ -65,7 +65,7 @@ def is_default_route(dbinterface):
     - it is the boot interface
     - it is a bonding/bridge and one of the members is the boot interface
     """
-    if dbinterface.bootable:
+    if dbinterface.default_route:
         return True
     for slave in dbinterface.slaves:
         if is_default_route(slave):
@@ -216,6 +216,8 @@ class PlenaryToplevelHost(Plenary):
                     else:
                         # Fudge the gateway as the first available ip
                         gateway = net.network[1]
+                    # FIXME: generate appropriate routing policy if there are
+                    # multiple interfaces marked as default_route
                     if not default_gateway and is_default_route(dbinterface):
                         default_gateway = gateway
 
