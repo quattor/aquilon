@@ -296,6 +296,111 @@ class TestSearchHost(TestBrokerCommand):
         command = "search host --instance service-instance-does-not-exist"
         self.noouttest(command.split(" "))
 
+    def testserverofservice00(self):
+        """search host by server of service provided """
+        self.noouttest(["add", "service", "--service", "foo", 
+            "--instance", "fooinst1"])
+
+        self.noouttest(["add", "service", "--service", "foo", 
+            "--instance", "fooinst2"])
+
+        self.noouttest(["add", "service", "--service", "baa", 
+            "--instance", "fooinst1"])
+
+        self.noouttest(["bind", "server",
+            "--hostname", "unittest00.one-nyp.ms.com",
+            "--service", "foo", "--instance", "fooinst1"])
+
+        self.noouttest(["bind", "server",
+            "--hostname", "unittest01.one-nyp.ms.com",
+            "--service", "foo", "--instance", "fooinst2"])
+
+        self.noouttest(["bind", "server",
+            "--hostname", "unittest02.one-nyp.ms.com",
+            "--service", "baa", "--instance", "fooinst1"])
+
+        command = "search host --server_of_service foo"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "unittest00.one-nyp.ms.com", command)
+        self.matchoutput(out, "unittest01.one-nyp.ms.com", command)
+
+    def testserverofserviceunavailable(self):
+        """ search host for a service which is not defined """
+        command = "search host --server_of_service service-does-not-exist"
+        out = self.notfoundtest(command.split(" "))
+        self.matchoutput(out, "Service service-does-not-exist not found",
+                         command)
+
+    def testserverofservice01(self):
+        """ search host for a defined service and instance """
+        command = "search host --server_of_service foo " \
+                  "--server_of_instance fooinst1"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "unittest00.one-nyp.ms.com", command)
+
+    def testserverofservice02(self):
+        """ search host for a defined instance """
+        command = "search host --server_of_instance fooinst1"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "unittest00.one-nyp.ms.com", command)
+        self.matchoutput(out, "unittest02.one-nyp.ms.com", command)
+
+    def testserverofservice03(self):
+        """" search host for a defined service with undefined instance """
+        command = "search host --server_of_service foo " \
+                  "--server_of_instance service-instance-does-not-exist"
+        out = self.notfoundtest(command.split(" "))
+        self.matchoutput(out, "Service foo, instance "
+                              "service-instance-does-not-exist not found",
+                         command)
+
+    def testserverofinstanceunavailable(self):
+        """search host for a undefined instance """
+        command = "search host --server_of_instance " \
+                  "service-instance-does-not-exist"
+        self.noouttest(command.split(" "))
+
+    def testserverofservice04(self):
+        """search host for a defined service but no servers assigned"""
+        self.noouttest(["unbind", "server",
+            "--hostname", "unittest01.one-nyp.ms.com",
+            "--service", "foo", "--instance", "fooinst2"])
+
+        self.noouttest(["search", "host",
+            "--server_of_service",  "foo", "--server_of_instance", "fooinst2"])
+
+        self.noouttest(["search", "host", "--server_of_instance", "fooinst2"])
+
+
+
+    def testserverofservice05(self):
+        """search host for a defined service but no servers assigned """
+        self.noouttest(["unbind", "server",
+            "--hostname", "unittest00.one-nyp.ms.com",
+            "--service", "foo", "--instance", "fooinst1"])
+
+        self.noouttest(["unbind", "server",
+            "--hostname", "unittest02.one-nyp.ms.com",
+            "--service", "baa", "--instance", "fooinst1"])
+
+        command = "search host --server_of_service foo"
+
+        self.noouttest(command.split(" "))
+
+        ## cleanup
+        self.noouttest(["del", "service",
+            "--service", "foo", "--instance", "fooinst1"])
+
+        self.noouttest(["del", "service",
+            "--service", "foo", "--instance", "fooinst2"])
+
+        self.noouttest(["del", "service", "--service", "foo"])
+    
+        self.noouttest(["del", "service",
+            "--service", "baa", "--instance", "fooinst1"])
+
+        self.noouttest(["del", "service", "--service", "baa"])
+
     def testmodelavailable(self):
         command = "search host --model vb1205xm"
         out = self.commandtest(command.split(" "))
@@ -438,6 +543,6 @@ class TestSearchHost(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.parse_hostlist_msg(out, expect=1)
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestSearchHost)
-    unittest.TextTestRunner(verbosity=2).run(suite)
+    unittest.TextTestRunner(verbosity=5).run(suite)

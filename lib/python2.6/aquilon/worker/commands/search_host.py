@@ -55,7 +55,7 @@ class CommandSearchHost(BrokerCommand):
                guest_on_cluster, guest_on_share, member_cluster_share,
                domain, sandbox, branch,
                dns_domain, shortname, mac, ip, networkip, network_environment,
-               exact_location, fullinfo, **arguments):
+               exact_location, server_of_service, server_of_instance, fullinfo, **arguments):
         dbnet_env = NetworkEnvironment.get_unique_or_default(session,
                                                              network_environment)
         dnsq = session.query(ARecord.ip)
@@ -187,6 +187,24 @@ class CommandSearchHost(BrokerCommand):
         elif instance:
             q = q.join(['_services_used', 'service_instance'])
             q = q.filter_by(name=instance)
+            q = q.reset_joinpoint()
+
+        if server_of_service:
+            dbserver_service = Service.get_unique(session, server_of_service, 
+                compel=True)
+            if server_of_instance:
+                dbssi = get_service_instance(session, dbserver_service, 
+                   server_of_instance)
+                q = q.join ('_services_provided')
+                q = q.filter_by (service_instance=dbssi)
+                q = q.reset_joinpoint()
+            else:
+                q = q.join('_services_provided', 'service_instance')
+                q = q.filter_by(service=dbserver_service)
+                q = q.reset_joinpoint()
+        elif server_of_instance:
+            q = q.join(['_services_provided', 'service_instance'])
+            q = q.filter_by(name=server_of_instance)
             q = q.reset_joinpoint()
 
         if cluster:
