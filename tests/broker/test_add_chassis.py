@@ -83,11 +83,11 @@ class TestAddChassis(TestBrokerCommand):
             self.matchoutput(out, "\n    Comments: Created automatically "
                              "by add_chassis", command)
         if mac:
-            self.matchoutput(out, "Interface: %s %s boot=False" %
-                             (interface, mac), command)
+            self.searchoutput(out, r"Interface: %s %s$" % (interface, mac),
+                              command)
         else:
-            self.matchoutput(out, "Interface: %s boot=False (no MAC addr)" %
-                             interface, command)
+            self.searchoutput(out, r"Interface: %s \(no MAC addr\)$" %
+                              interface, command)
 
         return (out, command)
 

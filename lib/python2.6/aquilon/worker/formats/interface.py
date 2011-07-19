@@ -39,16 +39,27 @@ from aquilon.aqdb.model import (Interface, PublicInterface, ManagementInterface,
 class InterfaceFormatter(ObjectFormatter):
     def format_raw(self, interface, indent=""):
         details = ''
+
+        flags = []
+        if interface.bootable:
+            flags.append("boot")
+        if interface.default_route:
+            flags.append("default_route")
+        if flags:
+            flagstr = " [" + ", ".join(flags) + "]"
+        else:
+            flagstr = ""
+
         if interface.mac:
-            details = [indent + "Interface: %s %s boot=%s" % (
-                interface.name, interface.mac, interface.bootable)]
+            details = [indent + "Interface: %s %s%s" % (interface.name,
+                                                        interface.mac, flagstr)]
             obs = interface.last_observation
             if obs:
                 details.append(indent + "  Last switch poll: %s port %s [%s]" %
                                (obs.switch, obs.port_number, obs.last_seen))
         else:
-            details = [indent + "Interface: %s boot=%s (no MAC addr)" % (
-                interface.name, interface.bootable)]
+            details = [indent + "Interface: %s (no MAC addr)%s" %
+                       (interface.name, flagstr)]
 
         details.append(indent + "  Type: %s" % interface.interface_type)
         if interface.port_group:

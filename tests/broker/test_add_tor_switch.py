@@ -77,11 +77,11 @@ class TestAddTorSwitch(TestBrokerCommand):
             self.matchoutput(out, "\n    Comments: Created automatically "
                              "by add_tor_switch", command)
         if mac:
-            self.matchoutput(out, "Interface: %s %s boot=False" %
-                             (interface, mac), command)
+            self.searchoutput(out, r"Interface: %s %s$" % (interface, mac),
+                              command)
         else:
-            self.matchoutput(out, "Interface: %s boot=False (no MAC addr)" %
-                             interface, command)
+            self.searchoutput(out, r"Interface: %s \(no MAC addr\)$" %
+                              interface, command)
 #        for port in range(1,49):
 #            self.matchoutput(out, "Switch Port %d" % port, command)
         return (out, command)

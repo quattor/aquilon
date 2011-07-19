@@ -66,10 +66,10 @@ class TestAddManager(TestBrokerCommand):
                          "Manager: unittest00r.one-nyp.ms.com [%s]" %
                          self.net.unknown[0].usable[4],
                          command)
-        self.matchoutput(out,
-                         "Interface: bmc %s boot=False" %
-                         self.net.unknown[0].usable[4].mac,
-                         command)
+        self.searchoutput(out,
+                          r"Interface: bmc %s$" %
+                          self.net.unknown[0].usable[4].mac,
+                          command)
         self.matchoutput(out, "Blade: ut3c1n3", command)
 
     def testverifyunittest00(self):
@@ -106,10 +106,10 @@ class TestAddManager(TestBrokerCommand):
                          "Manager: unittest02rsa.one-nyp.ms.com [%s]" %
                          self.net.unknown[0].usable[9],
                          command)
-        self.matchoutput(out,
-                         "Interface: ilo %s boot=False" %
-                         self.net.unknown[0].usable[9].mac,
-                         command)
+        self.searchoutput(out,
+                          r"Interface: ilo %s$" %
+                          self.net.unknown[0].usable[9].mac,
+                          command)
         self.matchoutput(out, "Blade: ut3c5n10", command)
 
     def testverifyunittest02(self):
@@ -192,10 +192,10 @@ class TestAddManager(TestBrokerCommand):
                          "Manager: unittest12r.aqd-unittest.ms.com [%s]" %
                          self.net.unknown[0].usable[8],
                          command)
-        self.matchoutput(out, "Interface: eth0 %s boot=True" %
-                         self.net.unknown[0].usable[7].mac.lower(), command)
-        self.matchoutput(out, "Interface: bmc %s boot=False" %
-                         self.net.unknown[0].usable[8].mac.lower(), command)
+        self.searchoutput(out, "Interface: eth0 %s \[boot, default_route\]" %
+                          self.net.unknown[0].usable[7].mac.lower(), command)
+        self.searchoutput(out, "Interface: bmc %s$" %
+                          self.net.unknown[0].usable[8].mac.lower(), command)
 
     def testverifymanagerall(self):
         command = ["show", "manager", "--all"]

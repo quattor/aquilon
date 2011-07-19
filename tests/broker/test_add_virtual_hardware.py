@@ -264,10 +264,10 @@ class TestAddVirtualHardware(TestBrokerCommand):
             self.matchoutput(out, "Vendor: utvendor Model: utmedium", command)
             self.matchoutput(out, "Cpu: xeon_2500 x 1", command)
             self.matchoutput(out, "Memory: 8192 MB", command)
-            self.matchoutput(out,
-                             "Interface: eth0 00:50:56:01:20:%02x boot=True" %
-                             (i - 1),
-                             command)
+            self.searchoutput(out,
+                              r"Interface: eth0 00:50:56:01:20:%02x \[boot, default_route\]" %
+                              (i - 1),
+                              command)
 
     def test_500_verifycatmachines(self):
         # Skipping evm9 since the mac is out of sequence
@@ -378,9 +378,9 @@ class TestAddVirtualHardware(TestBrokerCommand):
         self.matchoutput(out, "Vendor: utvendor Model: utlarge", command)
         self.matchoutput(out, "Cpu: xeon_2500 x 2", command)
         self.matchoutput(out, "Memory: 12288 MB", command)
-        self.matchoutput(out,
-                         "Interface: eth0 00:50:56:01:20:00 boot=True",
-                         command)
+        self.searchoutput(out,
+                          "Interface: eth0 00:50:56:01:20:00 \[boot, default_route\]",
+                          command)
 
     def test_555_statusquo(self):
         command = ["update_machine", "--machine=evm1", "--model=utmedium",

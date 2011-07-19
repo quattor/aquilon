@@ -87,12 +87,12 @@ class TestUpdateInterface(TestBrokerCommand):
         command = "show host --hostname unittest02.one-nyp.ms.com"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Blade: ut3c5n10", command)
-        self.matchoutput(out, "Interface: eth0 %s boot=False" %
-                         self.net.unknown[0].usable[11].mac.lower(), command)
+        self.searchoutput(out, r"Interface: eth0 %s$" %
+                          self.net.unknown[0].usable[11].mac.lower(), command)
         self.matchoutput(out, "Provides: unittest02.one-nyp.ms.com [%s]" %
                          self.net.unknown[0].usable[11], command)
-        self.matchoutput(out, "Interface: eth1 %s boot=True" %
-                         self.net.unknown[0].usable[12].mac.lower(), command)
+        self.searchoutput(out, r"Interface: eth1 %s \[boot, default_route\]" %
+                          self.net.unknown[0].usable[12].mac.lower(), command)
         self.matchoutput(out, "Provides: unknown [%s]" %
                          self.net.unknown[0].usable[12], command)
         # Verify that the primary name got updated
@@ -241,6 +241,14 @@ class TestUpdateInterface(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out, "'/system/network/default_gateway' = \"%s\";" %
                          self.net.unknown[1][2], command)
+
+    def testverifyfliprouteshow(self):
+        command = ["show", "host", "--hostname", "unittest25.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Interface: eth0 %s [boot]" %
+                         self.net.unknown[0].usable[20].mac, command)
+        self.matchoutput(out, "Interface: eth1 %s [default_route]" %
+                         self.net.unknown[0].usable[21].mac, command)
 
 
 if __name__ == '__main__':
