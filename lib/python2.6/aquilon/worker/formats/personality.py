@@ -75,6 +75,8 @@ class PersonalityFormatter(ObjectFormatter):
         details = [indent + "%s Personality: %s" % (description,
                                                     personality.name) +
                    " Archetype: %s" % personality.archetype.name]
+        for grn in personality.grns:
+            details.append(indent + "  GRN: %s" % grn)
         details.append(indent + "  Template: %s/personality/%s/config.tpl" %
                        (personality.archetype.name, personality.name))
         if has_threshold:

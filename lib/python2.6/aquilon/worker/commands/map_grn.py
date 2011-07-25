@@ -26,32 +26,53 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-"""Contains the logic for `aq del grn`."""
+"""Contains the logic for `aq map grn`."""
 
-from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import HostGrnMap, PersonalityGrnMap
+from aquilon.aqdb.model import Grn, Host, Personality
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.grn import lookup_grn
+from aquilon.worker.dbwrappers.host import hostname_to_host
 
 
-class CommandDelGrn(BrokerCommand):
+class CommandMapGrn(BrokerCommand):
 
-    def render(self, session, logger, grn, eon_id, **arguments):
+    def _update_dbobj(self, obj, grn):
+        if grn in obj.grns:
+            # TODO: should we throw an error here?
+            return
+        obj.grns.append(grn)
+
+    def render(self, session, logger, grn, eon_id, hostname, list, personality,
+               archetype, **arguments):
         dbgrn = lookup_grn(session, grn, eon_id, logger=logger,
-                           config=self.config, usable_only=False)
+                           config=self.config)
 
-        q = session.query(HostGrnMap)
-        q = q.filter_by(grn=dbgrn)
-        if q.first():
-            raise ArgumentError("GRN %s is still mapped to hosts, and "
-                                "cannot be deleted." % dbgrn.grn)
+        if hostname:
+            objs = [hostname_to_host(session, hostname)]
+        elif list:
+            objs = []
+            failed = []
+            for host in list.splitlines():
+                host = host.strip()
+                if not host or host.startswith('#'):
+                    continue
+                try:
+                    objs.append(hostname_to_host(session, host))
+                except NotFoundException, nfe:
+                    failed.append("%s: %s" % (host, nfe))
+                except ArgumentError, ae:
+                    failed.append("%s: %s" % (host, ae))
+            if failed:
+                raise ArgumentError("Invalid hosts in list:\n%s" %
+                                    "\n".join(failed))
+            if not objs:
+                raise ArgumentError("Empty list.")
+        elif personality:
+            objs = [Personality.get_unique(session, name=personality,
+                                           archetype=archetype, compel=True)]
 
-        q = session.query(PersonalityGrnMap)
-        q = q.filter_by(grn=dbgrn)
-        if q.first():
-            raise ArgumentError("GRN %s is still mapped to personalities, "
-                                "and cannot be deleted." % dbgrn.grn)
+        for obj in objs:
+            self._update_dbobj(obj, dbgrn)
 
-        session.delete(dbgrn)
         session.flush()
         return

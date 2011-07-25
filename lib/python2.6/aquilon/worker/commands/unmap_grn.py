@@ -26,32 +26,16 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-"""Contains the logic for `aq del grn`."""
+"""Contains the logic for `aq unmap grn`."""
 
-from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import HostGrnMap, PersonalityGrnMap
 from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.dbwrappers.grn import lookup_grn
+from aquilon.worker.commands.map_grn import CommandMapGrn
 
 
-class CommandDelGrn(BrokerCommand):
+class CommandUnMapGrn(CommandMapGrn):
 
-    def render(self, session, logger, grn, eon_id, **arguments):
-        dbgrn = lookup_grn(session, grn, eon_id, logger=logger,
-                           config=self.config, usable_only=False)
-
-        q = session.query(HostGrnMap)
-        q = q.filter_by(grn=dbgrn)
-        if q.first():
-            raise ArgumentError("GRN %s is still mapped to hosts, and "
-                                "cannot be deleted." % dbgrn.grn)
-
-        q = session.query(PersonalityGrnMap)
-        q = q.filter_by(grn=dbgrn)
-        if q.first():
-            raise ArgumentError("GRN %s is still mapped to personalities, "
-                                "and cannot be deleted." % dbgrn.grn)
-
-        session.delete(dbgrn)
-        session.flush()
-        return
+    def _update_dbobj(self, obj, grn):
+        if grn not in obj.grns:
+            # TODO: should we throw an error here?
+            return
+        obj.grns.remove(grn)

@@ -309,6 +309,11 @@ class PlenaryToplevelHost(Plenary):
 
         templates.append("archetype/final")
 
+        eon_id_set = set([grn.eon_id for grn in self.dbhost.grns])
+        eon_id_set |= set([grn.eon_id for grn in self.dbhost.personality.grns])
+        eon_id_list = list(eon_id_set)
+        eon_id_list.sort()
+
         # Okay, here's the real content
         arcdir = self.dbhost.archetype.name
         lines.append("# this is an %s host, so all templates should be sourced from there" % self.dbhost.archetype.name)
@@ -331,6 +336,8 @@ class PlenaryToplevelHost(Plenary):
             lines.append('"/system/network/routers" = %s;' % pan(routers))
         lines.append("")
         lines.append("'/system/build' = %s;" % pan(self.dbhost.status.name))
+        if eon_id_list:
+            lines.append('"/system/eon_ids" = %s;' % pan(eon_id_list))
         if self.dbhost.cluster:
             lines.append("'/system/cluster/name' = %s;" % pan(self.dbhost.cluster.name))
         lines.append("")

@@ -30,10 +30,12 @@
 
 
 from sqlalchemy.orm import aliased, joinedload_all, contains_eager
+from sqlalchemy.sql import or_
 
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.formats.host import SimpleHostList
 from aquilon.aqdb.model import (Host, Cluster, Archetype, Personality,
+                                PersonalityGrnMap, HostGrnMap,
                                 HostLifecycle, OperatingSystem, Service,
                                 ServiceInstance, NasDisk, Disk, Machine, Model,
                                 ARecord, Fqdn, DnsDomain, Interface,
@@ -41,6 +43,7 @@ from aquilon.aqdb.model import (Host, Cluster, Archetype, Personality,
 from aquilon.aqdb.model.dns_domain import parse_fqdn
 from aquilon.worker.dbwrappers.service_instance import get_service_instance
 from aquilon.worker.dbwrappers.branch import get_branch_and_author
+from aquilon.worker.dbwrappers.grn import lookup_grn
 from aquilon.worker.dbwrappers.location import get_location
 from aquilon.worker.dbwrappers.network import get_network_byip
 
@@ -55,7 +58,8 @@ class CommandSearchHost(BrokerCommand):
                guest_on_cluster, guest_on_share, member_cluster_share,
                domain, sandbox, branch,
                dns_domain, shortname, mac, ip, networkip, network_environment,
-               exact_location, server_of_service, server_of_instance, fullinfo, **arguments):
+               exact_location, server_of_service, server_of_instance, grn,
+               eon_id, fullinfo, **arguments):
         dbnet_env = NetworkEnvironment.get_unique_or_default(session,
                                                              network_environment)
         dnsq = session.query(ARecord.ip)
@@ -147,10 +151,12 @@ class CommandSearchHost(BrokerCommand):
                                                    compel=True)
             q = q.filter_by(personality=dbpersonality)
         elif personality:
-            q = q.join('personality').filter_by(name=personality)
+            PersAlias = aliased(Personality)
+            q = q.join(PersAlias).filter_by(name=personality)
             q = q.reset_joinpoint()
         elif archetype:
-            q = q.join('personality').filter_by(archetype=dbarchetype)
+            PersAlias = aliased(Personality)
+            q = q.join(PersAlias).filter_by(archetype=dbarchetype)
             q = q.reset_joinpoint()
 
         if buildstatus:
@@ -240,6 +246,26 @@ class CommandSearchHost(BrokerCommand):
                        'disks', (NasAlias, NasAlias.id==Disk.id))
             q = q.filter_by(service_instance=dbshare)
             q = q.reset_joinpoint()
+
+        if grn or eon_id:
+            dbgrn = lookup_grn(session, grn, eon_id, autoupdate=False)
+
+            # For some reason, this does not work:
+            # q = q.join(Personality).filter_by(or_(Personality.grns.contains(dbgrn),
+            #                                       Host.grns.contains(dbgrn)))
+            # The generated SQL query contains an implicit inner join instead of
+            # an outer join, so if either PersonalityGrnMap or HostGrnMap is
+            # empty, there will be no results
+
+            PersAlias = aliased(Personality)
+            q = q.join(PersAlias)
+            q = q.outerjoin(PersonalityGrnMap)
+            q = q.reset_joinpoint()
+            q = q.outerjoin(HostGrnMap)
+            q = q.reset_joinpoint()
+            q = q.filter(or_(PersonalityGrnMap.grn == dbgrn,
+                             HostGrnMap.grn == dbgrn))
+
         if fullinfo:
             return q.all()
         return SimpleHostList(q.all())

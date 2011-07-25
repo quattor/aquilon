@@ -34,8 +34,11 @@ from sqlalchemy import (Integer, DateTime, String, Column, ForeignKey,
                         UniqueConstraint, Index)
 from sqlalchemy.orm import relation, backref
 
-from aquilon.aqdb.model import (Base, Branch, Machine, HostLifecycle,
+from aquilon.aqdb.model import (Base, Branch, Machine, HostLifecycle, Grn,
                                 Personality, OperatingSystem, UserPrincipal)
+
+_TN = 'host'
+_HOSTGRN = 'host_grn_map'
 
 
 class Host(Base):
@@ -56,7 +59,7 @@ class Host(Base):
         rows below, which potentially would need to be nullable.
     """
 
-    __tablename__ = 'host'
+    __tablename__ = _TN
     _instance_label = 'fqdn'
 
     machine_id = Column(Integer, ForeignKey('machine.machine_id',
@@ -125,3 +128,24 @@ host.append_constraint(
     UniqueConstraint('machine_id', 'branch_id', name='host_machine_branch_uk'))
 
 Index('host_prsnlty_idx', host.c.personality_id)
+
+
+class HostGrnMap(Base):
+    __tablename__ = _HOSTGRN
+
+    host_id = Column(Integer, ForeignKey("%s.machine_id" % _TN,
+                                         name="%s_host_id_fk" % _HOSTGRN),
+                     primary_key=True)
+
+    eon_id = Column(Integer, ForeignKey('grn.eon_id',
+                                        name='%s_grn_fk' % _HOSTGRN),
+                    primary_key=True)
+
+    host = relation(Host)
+    grn = relation(Grn)
+
+
+hostgrns = HostGrnMap.__table__  # pylint: disable-msg=C0103, E1101
+hostgrns.primary_key.name = "%s_pk" % _HOSTGRN
+
+Host.grns = relation(Grn, secondary=HostGrnMap.__table__, backref='hosts')

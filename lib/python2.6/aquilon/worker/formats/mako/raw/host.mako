@@ -13,6 +13,9 @@ Domain: ${record.branch.name}
 Sandbox: ${record.sandbox_author.name}/${record.branch.name}
 % endif
 ${formatter.redirect_raw(record.status)}
+% for grn in record.grns:
+GRN: ${grn.grn}
+% endfor
 % for si in record.services_used:
 Template: ${si.cfg_path}
 % endfor
