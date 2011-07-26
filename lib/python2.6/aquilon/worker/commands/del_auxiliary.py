@@ -32,7 +32,7 @@
 from aquilon.exceptions_ import ArgumentError, ProcessException
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.processes import DSDBRunner
-from aquilon.worker.locks import lock_queue, DeleteKey
+from aquilon.worker.locks import DeleteKey
 from aquilon.worker.templates.machine import PlenaryMachineInfo
 from aquilon.worker.dbwrappers.dns import delete_dns_record
 from aquilon.aqdb.model import ARecord
@@ -43,10 +43,8 @@ class CommandDelAuxiliary(BrokerCommand):
     required_parameters = ["auxiliary"]
 
     def render(self, session, logger, auxiliary, **arguments):
-        key = DeleteKey("system", logger=logger)
         dbmachine = None
-        try:
-            lock_queue.acquire(key)
+        with DeleteKey("system", logger=logger) as key:
             # Check dependencies, translate into user-friendly message
             dbauxiliary = ARecord.get_unique(session, fqdn=auxiliary,
                                              compel=True)
@@ -84,8 +82,6 @@ class CommandDelAuxiliary(BrokerCommand):
             # probably not much of an issue if writing the plenary failed.
             # Commit the session so that we can free the delete lock.
             session.commit()
-        finally:
-            lock_queue.release(key)
 
         if dbmachine:
             plenary_info = PlenaryMachineInfo(dbmachine, logger=logger)

@@ -34,7 +34,7 @@ from aquilon.aqdb.model import Switch
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.dns import delete_dns_record
 from aquilon.worker.processes import DSDBRunner
-from aquilon.worker.locks import lock_queue, DeleteKey
+from aquilon.worker.locks import DeleteKey
 
 
 class CommandDelSwitch(BrokerCommand):
@@ -56,13 +56,9 @@ class CommandDelSwitch(BrokerCommand):
                                 "delete them first: {1}.".format
                                 (dbswitch, ", ".join(addrs)))
 
-        key = DeleteKey("system", logger=logger)
-        try:
-            lock_queue.acquire(key)
+        with DeleteKey("system", logger=logger) as key:
             self.del_switch(session, logger, dbswitch)
             session.commit()
-        finally:
-            lock_queue.release(key)
         return
 
     def del_switch(self, session, logger, dbswitch):

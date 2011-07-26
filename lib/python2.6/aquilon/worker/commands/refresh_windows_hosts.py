@@ -37,7 +37,7 @@ from aquilon.worker.dbwrappers.dns import delete_dns_record
 from aquilon.worker.dbwrappers.host import get_host_dependencies
 from aquilon.worker.templates.base import PlenaryCollection
 from aquilon.worker.templates.cluster import PlenaryCluster
-from aquilon.worker.locks import lock_queue, SyncKey
+from aquilon.worker.locks import SyncKey
 from aquilon.aqdb.model import (Host, Interface, Machine, Domain, Archetype,
                                 Personality, HostLifecycle, DnsDomain, DnsRecord,
                                 OperatingSystem, ReservedName, Fqdn)
@@ -50,10 +50,8 @@ class CommandRefreshWindowsHosts(BrokerCommand):
 
     def render(self, session, logger, dryrun, **arguments):
         clusters = set()
-        key = SyncKey(data="windows", logger=logger)
-        lock_queue.acquire(key)
         partial_error = None
-        try:
+        with SyncKey(data="windows", logger=logger) as key:
             try:
                 self.refresh_windows_hosts(session, logger, clusters)
                 if dryrun:
@@ -67,8 +65,7 @@ class CommandRefreshWindowsHosts(BrokerCommand):
                 # All errors were caught before hitting the session, so
                 # keep going with whatever was successful.
                 session.commit()
-        finally:
-            lock_queue.release(key)
+
         if clusters:
             plenaries = PlenaryCollection(logger=logger)
             for dbcluster in clusters:

@@ -35,7 +35,7 @@ from aquilon.aqdb.model import ARecord, Fqdn, DnsEnvironment
 from aquilon.aqdb.model.dns_domain import parse_fqdn
 from aquilon.exceptions_ import (UnimplementedError, ArgumentError,
                                  NotFoundException)
-from aquilon.worker.locks import lock_queue, DeleteKey
+from aquilon.worker.locks import DeleteKey
 from aquilon.worker.processes import DSDBRunner
 from aquilon.worker.dbwrappers.dns import delete_dns_record
 
@@ -48,10 +48,7 @@ class CommandDelAddressDNSEnvironment(BrokerCommand):
         dbdns_env = DnsEnvironment.get_unique(session, dns_environment,
                                               compel=True)
 
-        key = DeleteKey("system", logger=logger)
-        try:
-            lock_queue.acquire(key)
-
+        with DeleteKey("system", logger=logger) as key:
             # We can't use get_unique() here, since we always want to filter by
             # DNS environment, even if no FQDN was given
             q = session.query(ARecord)
@@ -112,6 +109,4 @@ class CommandDelAddressDNSEnvironment(BrokerCommand):
                 dsdb_runner.delete_host_details(dbaddress.ip)
 
             session.commit()
-        finally:
-            lock_queue.release(key)
         return

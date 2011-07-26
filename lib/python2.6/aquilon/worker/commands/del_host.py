@@ -41,7 +41,7 @@ from aquilon.worker.templates.base import PlenaryCollection
 from aquilon.worker.templates.index import build_index
 from aquilon.worker.templates.host import PlenaryHost
 from aquilon.worker.templates.service import PlenaryServiceInstanceServer
-from aquilon.worker.locks import lock_queue, DeleteKey, CompileKey
+from aquilon.worker.locks import DeleteKey, CompileKey
 
 
 class CommandDelHost(BrokerCommand):
@@ -62,9 +62,7 @@ class CommandDelHost(BrokerCommand):
 
         # Any service bindings that we need to clean up afterwards
         bindings = PlenaryCollection()
-        key = DeleteKey("system", logger=logger)
-        try:
-            lock_queue.acquire(key)
+        with DeleteKey("system", logger=logger) as key:
             # Check dependencies, translate into user-friendly message
             dbhost = hostname_to_host(session, hostname)
             ph = PlenaryHost(dbhost, logger=logger)
@@ -117,17 +115,13 @@ class CommandDelHost(BrokerCommand):
             # Past the point of no return... commit the transaction so
             # that we can free the delete lock.
             session.commit()
-        finally:
-            lock_queue.release(key)
 
         # Only if we got here with no exceptions do we clean the template
         # Trying to clean up after any errors here is really difficult
         # since the changes to dsdb have already been made.
         if (delplenary):
             key = ph.get_remove_key()
-            key = CompileKey.merge([key, bindings.get_write_key()])
-            try:
-                lock_queue.acquire(key)
+            with CompileKey.merge([key, bindings.get_write_key()]) as key:
                 ph.cleanup(domain, locked=True)
                 # And we also want to remove the profile itself
                 profiles = self.config.get("broker", "profilesdir")
@@ -143,8 +137,6 @@ class CommandDelHost(BrokerCommand):
                                          "objects", fqdn + ".tpl"),
                             logger=logger)
                 bindings.write(locked=True)
-            finally:
-                lock_queue.release(key)
 
             build_index(self.config, session, profiles, logger=logger)
 

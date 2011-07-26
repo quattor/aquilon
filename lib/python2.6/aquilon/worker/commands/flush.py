@@ -40,7 +40,7 @@ from aquilon.worker.templates.machine import PlenaryMachineInfo
 from aquilon.worker.templates.host import PlenaryHost
 from aquilon.worker.templates.city import PlenaryCity
 from aquilon.worker.templates.resource import PlenaryResource
-from aquilon.worker.locks import lock_queue, CompileKey
+from aquilon.worker.locks import CompileKey
 from aquilon.exceptions_ import PartialError, IncompleteError
 
 
@@ -54,10 +54,7 @@ class CommandFlush(BrokerCommand):
         failed = []
         written = 0
 
-        key = CompileKey(logger=logger)
-        try:
-            lock_queue.acquire(key)
-
+        with CompileKey(logger=logger) as key:
             if locations or all:
                 logger.client_info("Flushing locations.")
                 for dbloc in session.query(City).all():
@@ -172,8 +169,5 @@ class CommandFlush(BrokerCommand):
                                (written, written + len(failed)))
             if failed:
                 raise PartialError(success, failed)
-
-        finally:
-            lock_queue.release(key)
 
         return
