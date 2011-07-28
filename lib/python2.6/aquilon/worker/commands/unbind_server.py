@@ -36,7 +36,6 @@ from aquilon.worker.dbwrappers.service_instance import get_service_instance
 from aquilon.worker.templates.base import PlenaryCollection
 from aquilon.worker.templates.service import PlenaryServiceInstance
 
-
 class CommandUnbindServer(BrokerCommand):
 
     required_parameters = ["hostname", "service"]
@@ -44,8 +43,10 @@ class CommandUnbindServer(BrokerCommand):
     def render(self, session, logger, hostname, service, instance, **arguments):
         dbhost = hostname_to_host(session, hostname)
         dbservice = Service.get_unique(session, service, compel=True)
+        msg = "Service %s" % service
         if instance:
             dbinstances = [get_service_instance(session, dbservice, instance)]
+            msg = "Service %s, instance %s" % (service, instance)
         else:
             q = session.query(ServiceInstance)
             q = q.filter_by(service=dbservice)
@@ -54,6 +55,11 @@ class CommandUnbindServer(BrokerCommand):
             dbinstances = q.all()
         for dbinstance in dbinstances:
             if dbhost in dbinstance.server_hosts:
+                if (dbinstance.client_count > 0 and 
+                    len(dbinstance.server_hosts) <= 1):
+                    logger.warning("WARNING: Server %s, is the last server "
+                        "bound to %s which still has clients" % (hostname, msg))
+
                 dbinstance.server_hosts.remove(dbhost)
                 session.expire(dbhost, ['_services_provided'])
         session.flush()
