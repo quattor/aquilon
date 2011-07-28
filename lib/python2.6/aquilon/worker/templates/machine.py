@@ -124,21 +124,25 @@ class PlenaryMachineInfo(Plenary):
         disks = {}
         for disk in self.dbmachine.disks:
             devname = disk.device_name
+            params = {"capacity": PanMetric(disk.capacity, "GB"),
+                      "interface": disk.controller_type}
+            if disk.bootable:
+                params["boot"] = True
+
             if disk.disk_type == 'local':
                 relpath = "hardware/harddisk/generic/%s" % disk.controller_type
-                params = {"capacity": PanMetric(disk.capacity, "GB")}
                 if disk.controller_type == 'cciss':
                     devname = "cciss/" + devname
             elif disk.disk_type == 'nas' and disk.service_instance:
                 relpath = "service/nas_disk_share/%s/client/nasinfo" % \
                     disk.service_instance.name
-                diskpath = "%s/%s.vmdk" % (self.machine, disk.device_name)
-                params = {"capacity": PanMetric(disk.capacity, "GB"),
-                          "interface": disk.controller_type,
-                          "address": disk.address,
-                          "path": diskpath}
+                params["path"] = "%s/%s.vmdk" % (self.machine, disk.device_name)
+                params["address"] = disk.address
+            else:  # pragma: no cover
+                relpath = None
 
-            disks[PanEscape(devname)] = StructureTemplate(relpath, params)
+            if relpath:
+                disks[PanEscape(devname)] = StructureTemplate(relpath, params)
 
         managers = {}
         interfaces = {}
