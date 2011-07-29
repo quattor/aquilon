@@ -70,7 +70,7 @@ class TestUpdateModel(TestBrokerCommand):
         self.matchoutput(out, "Cpu: utcpu x 1", command)
         self.matchoutput(out, "Memory: 4096 MB", command)
         self.matchoutput(out, "NIC count: 1", command)
-        self.matchoutput(out, "Disk: sda 45 GB DiskType scsi [nas]", command)
+        self.matchoutput(out, "Disk: sda 45 GB scsi (nas)", command)
 
     def test_120_verifymachine(self):
         command = ["cat", "--machine=evm1"]
@@ -109,7 +109,7 @@ class TestUpdateModel(TestBrokerCommand):
         self.matchoutput(out, "Cpu: xeon_2660 x 1", command)
         self.matchoutput(out, "Memory: 4096 MB", command)
         self.matchoutput(out, "NIC count: 1", command)
-        self.matchoutput(out, "Disk: sda 45 GB DiskType scsi [local]", command)
+        self.matchoutput(out, "Disk: sda 45 GB scsi (local)", command)
 
     def test_230_verifymachine(self):
         command = ["cat", "--machine=evm1"]
@@ -226,7 +226,7 @@ class TestUpdateModel(TestBrokerCommand):
         self.matchoutput(out, "Cpu: utcpu x 2", command)
         self.matchoutput(out, "Memory: 8192 MB", command)
         self.matchoutput(out, "NIC count: 2", command)
-        self.matchoutput(out, "Disk: sda 30 GB DiskType scsi [local]", command)
+        self.matchoutput(out, "Disk: sda 30 GB scsi (local)", command)
 
 
 if __name__=='__main__':

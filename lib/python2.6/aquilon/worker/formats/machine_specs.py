@@ -41,7 +41,7 @@ class MachineSpecsFormatter(ObjectFormatter):
             machine_specs.cpu_quantity))
         details.append(indent + "  Memory: %d MB" % machine_specs.memory)
         details.append(indent + "  NIC count: %d" % machine_specs.nic_count)
-        details.append(indent + "  Disk: %s %d GB DiskType %s [%s]" %
+        details.append(indent + "  Disk: %s %d GB %s (%s)" %
                        (machine_specs.disk_name,
                         machine_specs.disk_capacity,
                         machine_specs.controller_type,
