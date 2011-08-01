@@ -186,11 +186,6 @@ class TestUnbindServer(TestBrokerCommand):
                 (out, err) = self.successtest(command)
                 self.assertEmptyOut(out, command)
 
-                #self.matchoutput(err,
-                #                 SRVINST_MSG % (server,service,instance),
-                #                 command)
-
-
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestUnbindServer)
     unittest.TextTestRunner(verbosity=2).run(suite)
