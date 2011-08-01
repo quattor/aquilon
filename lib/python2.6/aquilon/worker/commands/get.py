@@ -33,6 +33,7 @@ import os
 
 from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import Sandbox
+from aquilon.aqdb.column_types import AqStr
 from aquilon.worker.processes import run_command, remove_dir
 from aquilon.exceptions_ import ArgumentError, ProcessException
 from aquilon.worker.formats.branch import RemoteSandbox
@@ -85,13 +86,14 @@ class CommandGet(BrokerCommand):
                              dbsandbox.name, userdir)
 
     def force_my_sandbox(self, session, logger, dbuser, sandbox):
+        sandbox = AqStr.normalize(sandbox)
         (author, slash, name) = sandbox.partition('/')
         if not slash:
             return sandbox
         # User used the name/branch syntax - that's fine.  They can't
         # do anything on behalf of anyone else, though, so error if the
         # user given is anyone else.
-        if author.strip().lower() != dbuser.name:
+        if AqStr.normalize(author) != dbuser.name:
             raise ArgumentError("User '%s' cannot add or get a sandbox on "
                                 "behalf of '%s'." %
                                 (dbuser.name, author))

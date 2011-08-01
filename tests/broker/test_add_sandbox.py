@@ -104,6 +104,40 @@ class TestAddSandbox(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Sandbox: changetest2", command)
 
+    def testuppercase1(self):
+        # For testing mixed-case add.
+        command = ["add", "sandbox", "--sandbox", "CamelCaseTest1"]
+        out = self.commandtest(command)
+        sandboxdir = os.path.join(self.sandboxdir, "camelcasetest1")
+        self.matchoutput(out, "Created sandbox: %s" % sandboxdir, command)
+        self.failUnless(os.path.exists(sandboxdir),
+                        "Expected directory '%s' to exist" % sandboxdir)
+
+    def testuppercase2(self):
+        # For testing deletion of a sandbox added with mixed case.
+        command = ["add", "sandbox", "--sandbox", "CamelCaseTest2"]
+        out = self.commandtest(command)
+        sandboxdir = os.path.join(self.sandboxdir, "camelcasetest2")
+        self.matchoutput(out, "Created sandbox: %s" % sandboxdir, command)
+        self.failUnless(os.path.exists(sandboxdir),
+                        "Expected directory '%s' to exist" % sandboxdir)
+
+    def testverifylowerbranchname(self):
+        command = ['branch', '-r']
+        sandboxdir = os.path.join(self.sandboxdir, "camelcasetest1")
+        (out, err) = self.gitcommand(command, cwd=sandboxdir)
+        self.matchoutput(out, "origin/camelcasetest1", command)
+
+    def testverifyshowmixedcase(self):
+        command = "show sandbox --sandbox CamelCaseTest1"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Sandbox: camelcasetest1", command)
+
+    def testverifyshowlowercase(self):
+        command = "show sandbox --sandbox camelcasetest1"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Sandbox: camelcasetest1", command)
+
     def testaddbaduser(self):
         command = ["add", "sandbox",
                    "--sandbox", "user-does-not-exist/badbranch"]
