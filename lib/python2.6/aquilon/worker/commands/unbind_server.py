@@ -55,10 +55,10 @@ class CommandUnbindServer(BrokerCommand):
             dbinstances = q.all()
         for dbinstance in dbinstances:
             if dbhost in dbinstance.server_hosts:
-                if (dbinstance.client_count > 0 and 
+                if (dbinstance.client_count > 0 and
                     len(dbinstance.server_hosts) <= 1):
                     logger.warning("WARNING: Server %s, is the last server "
-                        "bound to %s which still has clients" % (hostname, msg))
+                                   "bound to %s which still has clients" % (hostname, msg))
 
                 dbinstance.server_hosts.remove(dbhost)
                 session.expire(dbhost, ['_services_provided'])

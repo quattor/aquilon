@@ -247,9 +247,9 @@ class TestRefreshWindowsHosts(TestBrokerCommand):
         self.assertEmptyOut(out, command)
 
         self.matchoutput(err, "WARNING: Server %s, is the last server bound to " \
-            "Service %s, instance %s which still has clients" 
-            % ("desktop3.msad.ms.com","utsvc","utsi1"),
-            command)
+                         "Service %s, instance %s which still has clients"
+                         % ("desktop3.msad.ms.com","utsvc","utsi1"),
+                         command)
 
     def test_410_cleanrun(self):
         command = ["refresh_windows_hosts"]
