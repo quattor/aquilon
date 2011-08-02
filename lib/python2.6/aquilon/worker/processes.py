@@ -392,7 +392,7 @@ class DSDBRunner(object):
             except ProcessException, e:
                 if e.out and BUILDING_NOT_FOUND.search(e.out):
                     self.logger.info("DSDB does not have a building %s defined, "
-                                  "proceeding with aqdb command." % building)
+                                     "proceeding with aqdb command." % building)
                     return
                 raise
         else:

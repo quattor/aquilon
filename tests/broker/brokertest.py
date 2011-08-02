@@ -527,7 +527,6 @@ class TestBrokerCommand(unittest.TestCase):
             with open(expected_name, "a") as fp:
                 fp.write(errstr)
                 fp.write("\n")
-            
 
     def dsdb_expect_add(self, hostname, ip, interface=None, mac=None,
                         primary=None, fail=False):

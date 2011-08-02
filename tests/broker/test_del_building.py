@@ -55,9 +55,9 @@ class TestDelBuilding(TestBrokerCommand):
         command = "del building --building cards"
         self.noouttest(command.split(" "))
         self.dsdb_verify()
-    
+
     def testdelbunotindsdb(self):
-        ## add building 
+        ## add building
 
         test_building = "bz"
         self.dsdb_expect("add_building_aq -building_name bz -city ex "
