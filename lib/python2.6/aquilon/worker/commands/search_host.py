@@ -190,10 +190,10 @@ class CommandSearchHost(BrokerCommand):
             q = q.reset_joinpoint()
 
         if server_of_service:
-            dbserver_service = Service.get_unique(session, server_of_service, 
+            dbserver_service = Service.get_unique(session, server_of_service,
                 compel=True)
             if server_of_instance:
-                dbssi = get_service_instance(session, dbserver_service, 
+                dbssi = get_service_instance(session, dbserver_service,
                    server_of_instance)
                 q = q.join ('_services_provided')
                 q = q.filter_by (service_instance=dbssi)

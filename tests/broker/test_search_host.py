@@ -298,13 +298,13 @@ class TestSearchHost(TestBrokerCommand):
 
     def testserverofservice00(self):
         """search host by server of service provided """
-        self.noouttest(["add", "service", "--service", "foo", 
+        self.noouttest(["add", "service", "--service", "foo",
             "--instance", "fooinst1"])
 
-        self.noouttest(["add", "service", "--service", "foo", 
+        self.noouttest(["add", "service", "--service", "foo",
             "--instance", "fooinst2"])
 
-        self.noouttest(["add", "service", "--service", "baa", 
+        self.noouttest(["add", "service", "--service", "baa",
             "--instance", "fooinst1"])
 
         self.noouttest(["bind", "server",
@@ -371,8 +371,6 @@ class TestSearchHost(TestBrokerCommand):
 
         self.noouttest(["search", "host", "--server_of_instance", "fooinst2"])
 
-
-
     def testserverofservice05(self):
         """search host for a defined service but no servers assigned """
         self.noouttest(["unbind", "server",
@@ -395,7 +393,7 @@ class TestSearchHost(TestBrokerCommand):
             "--service", "foo", "--instance", "fooinst2"])
 
         self.noouttest(["del", "service", "--service", "foo"])
-    
+
         self.noouttest(["del", "service",
             "--service", "baa", "--instance", "fooinst1"])
 
