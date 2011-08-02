@@ -299,25 +299,25 @@ class TestSearchHost(TestBrokerCommand):
     def testserverofservice00(self):
         """search host by server of service provided """
         self.noouttest(["add", "service", "--service", "foo",
-            "--instance", "fooinst1"])
+                        "--instance", "fooinst1"])
 
         self.noouttest(["add", "service", "--service", "foo",
-            "--instance", "fooinst2"])
+                        "--instance", "fooinst2"])
 
         self.noouttest(["add", "service", "--service", "baa",
-            "--instance", "fooinst1"])
+                        "--instance", "fooinst1"])
 
         self.noouttest(["bind", "server",
-            "--hostname", "unittest00.one-nyp.ms.com",
-            "--service", "foo", "--instance", "fooinst1"])
+                        "--hostname", "unittest00.one-nyp.ms.com",
+                        "--service", "foo", "--instance", "fooinst1"])
 
         self.noouttest(["bind", "server",
-            "--hostname", "unittest01.one-nyp.ms.com",
-            "--service", "foo", "--instance", "fooinst2"])
+                        "--hostname", "unittest01.one-nyp.ms.com",
+                        "--service", "foo", "--instance", "fooinst2"])
 
         self.noouttest(["bind", "server",
-            "--hostname", "unittest02.one-nyp.ms.com",
-            "--service", "baa", "--instance", "fooinst1"])
+                        "--hostname", "unittest02.one-nyp.ms.com",
+                        "--service", "baa", "--instance", "fooinst1"])
 
         command = "search host --server_of_service foo"
         out = self.commandtest(command.split(" "))
@@ -367,35 +367,35 @@ class TestSearchHost(TestBrokerCommand):
             "--service", "foo", "--instance", "fooinst2"])
 
         self.noouttest(["search", "host",
-            "--server_of_service",  "foo", "--server_of_instance", "fooinst2"])
+                        "--server_of_service",  "foo", "--server_of_instance", "fooinst2"])
 
         self.noouttest(["search", "host", "--server_of_instance", "fooinst2"])
 
     def testserverofservice05(self):
         """search host for a defined service but no servers assigned """
         self.noouttest(["unbind", "server",
-            "--hostname", "unittest00.one-nyp.ms.com",
-            "--service", "foo", "--instance", "fooinst1"])
+                        "--hostname", "unittest00.one-nyp.ms.com",
+                        "--service", "foo", "--instance", "fooinst1"])
 
         self.noouttest(["unbind", "server",
-            "--hostname", "unittest02.one-nyp.ms.com",
-            "--service", "baa", "--instance", "fooinst1"])
+                        "--hostname", "unittest02.one-nyp.ms.com",
+                        "--service", "baa", "--instance", "fooinst1"])
 
         command = "search host --server_of_service foo"
 
         self.noouttest(command.split(" "))
 
         ## cleanup
-        self.noouttest(["del", "service",
-            "--service", "foo", "--instance", "fooinst1"])
+        self.noouttest(["del", "service","--service",
+                        "foo", "--instance", "fooinst1"])
 
-        self.noouttest(["del", "service",
-            "--service", "foo", "--instance", "fooinst2"])
+        self.noouttest(["del", "service", "--service",
+                        "foo", "--instance", "fooinst2"])
 
         self.noouttest(["del", "service", "--service", "foo"])
 
-        self.noouttest(["del", "service",
-            "--service", "baa", "--instance", "fooinst1"])
+        self.noouttest(["del", "service", "--service",
+                        "baa", "--instance", "fooinst1"])
 
         self.noouttest(["del", "service", "--service", "baa"])
 
