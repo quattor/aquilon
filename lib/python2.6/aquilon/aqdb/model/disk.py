@@ -71,7 +71,8 @@ class Disk(Base):
     machine = relation(Machine, backref=backref('disks', cascade='all',
                                                 order_by=[device_name]))
 
-    __mapper_args__ = {'polymorphic_on': disk_type}
+    __mapper_args__ = {'polymorphic_on': disk_type,
+                       'with_polymorphic': '*'}
 
     def __repr__(self):
         # The default __repr__() is too long
