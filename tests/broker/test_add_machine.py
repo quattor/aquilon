@@ -271,7 +271,7 @@ class TestAddMachine(TestBrokerCommand):
         self.matchoutput(out, "Vendor: hp Model: utccissmodel", command)
         self.matchoutput(out, "Cpu: xeon_2500 x 2", command)
         self.matchoutput(out, "Memory: 49152 MB", command)
-        self.matchoutput(out, "Disk: c0d0 466 GB cciss", command)
+        self.matchoutput(out, "Disk: c0d0 466 GB cciss (local) [boot]", command)
 
     def testverifycatut3c1n8(self):
         command = "cat --machine ut3c1n8"
@@ -487,6 +487,6 @@ class TestAddMachine(TestBrokerCommand):
     # Note: More regression tests are in the test_add_virtual_hardware module.
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddMachine)
     unittest.TextTestRunner(verbosity=2).run(suite)

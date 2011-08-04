@@ -48,16 +48,6 @@ class CommandAddDisk(BrokerCommand):
 
     REGEX_CAPACITY = re.compile("\d+:\d+$")
 
-    def _verify_params(self, dbdisks, machine, disk, controller):
-        
-        if (len(dbdisks) != 0):
-            raise ArgumentError("Machine %s already has a disk named %s." %
-                                (machine, disk))
-        if controller not in controller_types:
-            raise ArgumentError("%s is not a valid controller type, use one "
-                                "of: %s." % (controller,
-                                             ", ".join(controller_types)))
-
     def _get_nasassign_obj(self, machine, dbmachine, disk, dbuser, size):
         """request an auto share assignment from Resource Pool"""
         uname = str(dbuser.name)
@@ -71,7 +61,7 @@ class CommandAddDisk(BrokerCommand):
         return nasassign_obj
 
     def _verify_share(self, session, share, autoshare, address):
-        """get share (NAS) objects from aqdb"""        
+        """get share (NAS) objects from aqdb"""
         dbservice = Service.get_unique(session, "nas_disk_share",
                                        compel=InternalError)
         dbshare = get_service_instance(session, dbservice, share)
@@ -86,7 +76,7 @@ class CommandAddDisk(BrokerCommand):
         else:
             self._check_capacity(dbshare, address)
         return dbshare
-                
+
     def _check_capacity(self, dbshare, address):
         """capacity tracking for manually managed shares (not resource pool)"""
         if dbshare.manager != 'aqd':
@@ -103,23 +93,13 @@ class CommandAddDisk(BrokerCommand):
                                 (dbshare.name, current_clients,
                                  max_clients))
 
-    def _flush_and_validate(self, session, dbdisk, dbmetacluster):
-        """insert disk object into db"""        
-        try:
-            session.add(dbdisk)
-            session.flush()
-            if dbmetacluster:
-                dbmetacluster.validate()
-        except InvalidRequestError, e:
-            raise ArgumentError("Could not add disk: %s" % e)
-
     def _write_plenary_info(self, dbmachine, logger):
         """write template files"""
         plenary_info = PlenaryMachineInfo(dbmachine, logger=logger)
         plenary_info.write()
 
     def render(self, session, logger, machine, disk, controller, share,
-               autoshare, address, comments, dbuser, size, **kw):
+               autoshare, address, comments, dbuser, size, boot, **kw):
 
         # Handle deprecated arguments
         if kw.get("type"):
@@ -134,15 +114,33 @@ class CommandAddDisk(BrokerCommand):
             raise ArgumentError("Please specify both --size "
                                 "and --controller.")
 
+        if controller not in controller_types:
+            raise ArgumentError("%s is not a valid controller type, use one "
+                                "of: %s." % (controller,
+                                             ", ".join(controller_types)))
+
         dbmachine = Machine.get_unique(session, machine, compel=True)
-        dbdisks = session.query(Disk).filter_by(machine=dbmachine,
-                                                device_name=disk).all()
+        for dbdisk in dbmachine.disks:
+            if dbdisk.device_name == disk:
+                raise ArgumentError("Machine %s already has a disk named %s." %
+                                    (machine, disk))
+            if dbdisk.bootable:
+                if boot is None:
+                    boot = False
+                elif boot:
+                    raise ArgumentError("Machine %s already has a boot disk." %
+                                        machine)
+
+        if boot is None:
+            # Backward compatibility: "sda"/"c0d0" is bootable, except if there
+            # is already a boot disk
+            boot = (disk == "sda" or disk == "c0d0")
+
         if dbmachine.cluster:
             dbmetacluster = dbmachine.cluster.metacluster
         else:
             dbmetacluster = None
-        self._verify_params(dbdisks, machine, disk, controller)
-            
+
         if autoshare:
             nasassign_obj = self._get_nasassign_obj(machine, dbmachine, disk, dbuser, size)
             share = nasassign_obj.create()
@@ -150,15 +148,18 @@ class CommandAddDisk(BrokerCommand):
         try:
             if share:
                 dbshare = self._verify_share(session, share, autoshare, address)
-                dbdisk = NasDisk(machine=dbmachine, device_name=disk,
-                                 controller_type=controller,
-                                 service_instance=dbshare, capacity=size,
-                                 address=address, comments=comments)
+                dbdisk = NasDisk(device_name=disk, controller_type=controller,
+                                 bootable=boot, service_instance=dbshare,
+                                 capacity=size, address=address,
+                                 comments=comments)
             else:
-                dbdisk = LocalDisk(machine=dbmachine, device_name=disk,
-                                   controller_type=controller, capacity=size,
+                dbdisk = LocalDisk(device_name=disk, controller_type=controller,
+                                   capacity=size, bootable=boot,
                                    comments=comments)
-            self._flush_and_validate(session, dbdisk, dbmetacluster)
+            dbmachine.disks.append(dbdisk)
+            if dbmetacluster:
+                dbmetacluster.validate()
+
             self._write_plenary_info(dbmachine, logger)
         except Exception, outer:
             if autoshare:

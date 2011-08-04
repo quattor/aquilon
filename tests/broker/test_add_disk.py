@@ -53,11 +53,25 @@ class TestAddDisk(TestBrokerCommand):
                          "controller type",
                          command)
 
+    def testfailduplicatedisk(self):
+        command = ["add", "disk", "--machine", "ut3c5n10", "--disk", "sdb",
+                   "--controller", "scsi", "--size", "34"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Machine ut3c5n10 already has a disk named sdb.",
+                         command)
+
+    def testfailextrabootdisk(self):
+        command = ["add", "disk", "--machine", "ut3c5n10", "--disk", "sdc",
+                   "--controller", "scsi", "--size", "34", "--boot"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Machine ut3c5n10 already has a boot disk.",
+                         command)
+
     def testverifyaddut3c5n10disk(self):
         command = "show machine --machine ut3c5n10"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Disk: sda 68 GB scsi", command)
-        self.matchoutput(out, "Disk: sdb 34 GB scsi", command)
+        self.matchoutput(out, "Disk: sda 68 GB scsi (local) [boot]", command)
+        self.searchoutput(out, r"Disk: sdb 34 GB scsi \(local\)$", command)
 
     def testverifycatut3c5n10disk(self):
         command = "cat --machine ut3c5n10"
@@ -65,9 +79,12 @@ class TestAddDisk(TestBrokerCommand):
         self.searchoutput(out,
                           r'"harddisks" = nlist\(\s*"sda", '
                           r'create\("hardware/harddisk/generic/scsi",\s*'
-                          r'"capacity", 68\*GB\s*\),\s*'
+                          r'"boot", true,\s*'
+                          r'"capacity", 68\*GB,\s*'
+                          r'"interface", "scsi"\s*\),\s*'
                           r'"sdb", create\("hardware/harddisk/generic/scsi",\s*'
-                          r'"capacity", 34\*GB\s*\)\s*\);',
+                          r'"capacity", 34\*GB,\s*'
+                          r'"interface", "scsi"\s*\)\s*\);',
                           command)
 
     def testaddut3c1n3disk(self):
@@ -82,8 +99,8 @@ class TestAddDisk(TestBrokerCommand):
     def testverifyaddut3c1n3disk(self):
         command = "show machine --machine ut3c1n3"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Disk: sda 68 GB scsi", command)
-        self.matchoutput(out, "Disk: c0d0 34 GB cciss", command)
+        self.matchoutput(out, "Disk: sda 68 GB scsi (local) [boot]", command)
+        self.searchoutput(out, r"Disk: c0d0 34 GB cciss \(local\)$", command)
 
     def testverifycatut3c1n3disk(self):
         command = "cat --machine ut3c1n3"
@@ -91,12 +108,15 @@ class TestAddDisk(TestBrokerCommand):
         self.searchoutput(out,
                           r'"harddisks" = nlist\(\s*escape\("cciss/c0d0"\), '
                           r'create\("hardware/harddisk/generic/cciss",\s*'
-                          r'"capacity", 34\*GB\s*\),\s*'
+                          r'"capacity", 34\*GB,\s*'
+                          r'"interface", "cciss"\s*\),\s*'
                           r'"sda", create\("hardware/harddisk/generic/scsi",\s*'
-                          r'"capacity", 68\*GB\s*\)\s*\);',
+                          r'"boot", true,\s*'
+                          r'"capacity", 68\*GB,\s*'
+                          r'"interface", "scsi"\s*\)\s*\);',
                           command)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddDisk)
     unittest.TextTestRunner(verbosity=2).run(suite)

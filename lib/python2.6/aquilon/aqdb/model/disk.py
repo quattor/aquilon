@@ -30,7 +30,7 @@
 
 from datetime import datetime
 
-from sqlalchemy import (Column, Integer, DateTime, Sequence, String,
+from sqlalchemy import (Column, Integer, DateTime, Sequence, String, Boolean,
                         ForeignKey, UniqueConstraint)
 from sqlalchemy.orm import relation, backref, column_property
 from sqlalchemy.sql import select, func
@@ -62,6 +62,9 @@ class Disk(Base):
                                             name='disk_machine_fk',
                                             ondelete='CASCADE'),
                         nullable=False)
+
+    bootable = Column(Boolean(name="%s_bootable_ck" % _TN), nullable=False,
+                      default=False)
 
     creation_date = Column(DateTime, default=datetime.now, nullable=False)
     comments = Column(String(255), nullable=True)

@@ -102,7 +102,7 @@ def create_machine(session, machine, dblocation, dbmodel, cpuname=None,
         specs = dbmodel.machine_specs
         dbdisk = LocalDisk(machine=dbmachine, device_name=specs.disk_name,
                            controller_type=specs.controller_type,
-                           capacity=specs.disk_capacity)
+                           capacity=specs.disk_capacity, bootable=True)
         session.add(dbdisk)
 
     session.flush()

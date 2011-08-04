@@ -694,6 +694,7 @@
       </optgroup>
       <optgroup name="optional_opts">
          <option name="comments" type="string">Comments</option>
+         <option name="boot" type="boolean">Mark the disk as bootable</option>
       </optgroup>
       <transport method="put" path="machine/%(machine)s/disk/%(disk)s" />
    </command>

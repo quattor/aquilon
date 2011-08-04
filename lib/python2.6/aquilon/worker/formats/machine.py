@@ -117,9 +117,13 @@ class MachineFormatter(ObjectFormatter):
             extra = d.disk_type
             if d.disk_type == "nas" and d.service_instance:
                 extra = extra + " from " + d.service_instance.name
-            details.append(indent + "  Disk: %s %d GB %s (%s)"
-                    % (d.device_name, d.capacity, d.controller_type,
-                       extra))
+            if d.bootable:
+                flags = " [boot]"
+            else:
+                flags = ""
+            details.append(indent + "  Disk: %s %d GB %s (%s)%s" %
+                           (d.device_name, d.capacity, d.controller_type,
+                            extra, flags))
         for i in machine.interfaces:
             details.append(self.redirect_raw(i, indent + "  "))
         if machine.comments:
