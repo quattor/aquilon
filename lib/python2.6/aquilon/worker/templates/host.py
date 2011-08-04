@@ -58,6 +58,20 @@ def select_router(dbmachine, routers):
 
     return gateway
 
+def is_default_route(dbinterface):
+    """ Check if the given interface should provide the default route
+
+    The default route should point to a given interface if:
+    - it is the boot interface
+    - it is a bonding/bridge and one of the members is the boot interface
+    """
+    if dbinterface.bootable:
+        return True
+    for slave in dbinterface.slaves:
+        if is_default_route(slave):
+            return True
+    return False
+
 
 class PlenaryHost(PlenaryCollection):
     """
@@ -200,7 +214,7 @@ class PlenaryToplevelHost(Plenary):
                     else:
                         # Fudge the gateway as the first available ip
                         gateway = net.network[1]
-                    if not default_gateway and dbinterface.bootable:
+                    if not default_gateway and is_default_route(dbinterface):
                         default_gateway = gateway
 
                     ifdesc["ip"] = addr.ip

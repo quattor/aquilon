@@ -160,6 +160,19 @@ class TestMake(TestBrokerCommand):
                           (eth1_broadcast, eth1_1_ip, eth1_netmask,
                            eth1_broadcast, eth1_gateway, eth1_ip, eth1_netmask),
                           command)
+        self.matchoutput(out, "'/system/network/default_gateway' = \"%s\";" %
+                         eth0_gateway, command)
+
+    def testmakeunittest21(self):
+        command = ["make", "--hostname", "unittest21.aqd-unittest.ms.com"]
+        (out, err) = self.successtest(command)
+        self.matchoutput(err, "1/1 compiled", command)
+
+    def testverifyunittest21gateway(self):
+        command = ["cat", "--hostname", "unittest21.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "'/system/network/default_gateway' = \"%s\";" %
+                         self.net.unknown[11].gateway, command)
 
     def testmakeunittest23(self):
         command = ["make", "--hostname", "unittest23.aqd-unittest.ms.com"]
@@ -183,6 +196,8 @@ class TestMake(TestBrokerCommand):
                           r'"netmask", "%s"\s*\)' %
                           (net.broadcast, router, ip, net.netmask),
                           command)
+        self.matchoutput(out, "'/system/network/default_gateway' = \"%s\";" %
+                         router, command)
 
     def testmakeunittest24(self):
         command = ["make", "--hostname", "unittest24.aqd-unittest.ms.com"]
@@ -206,6 +221,8 @@ class TestMake(TestBrokerCommand):
                           r'"netmask", "%s"\s*\)' %
                           (net.broadcast, router, ip, net.netmask),
                           command)
+        self.matchoutput(out, "'/system/network/default_gateway' = \"%s\";" %
+                         router, command)
 
     def testmakeunittest25(self):
         command = ["make", "--hostname", "unittest25.aqd-unittest.ms.com"]
