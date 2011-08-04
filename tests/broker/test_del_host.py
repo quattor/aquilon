@@ -142,6 +142,13 @@ class TestDelHost(TestBrokerCommand):
         self.assertEmptyOut(out, command)
         self.dsdb_verify()
 
+    def testdelunittest26(self):
+        self.dsdb_expect_delete(self.net.unknown[0].usable[23])
+        command = "del host --hostname unittest26.aqd-unittest.ms.com"
+        (out, err) = self.successtest(command.split(" "))
+        self.assertEmptyOut(out, command)
+        self.dsdb_verify()
+
     def testdelaurorawithnode(self):
         command = "del host --hostname %s.ms.com" % self.aurora_with_node
         (out, err) = self.successtest(command.split(" "))

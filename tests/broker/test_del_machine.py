@@ -187,6 +187,9 @@ class TestDelMachine(TestBrokerCommand):
     def testdelut3c5n7(self):
         self.noouttest(["del", "machine", "--machine", "ut3c5n7"])
 
+    def testdelut3c5n8(self):
+        self.noouttest(["del", "machine", "--machine", "ut3c5n8"])
+
 
 if __name__ == '__main__':
     import aquilon.aqdb.depends

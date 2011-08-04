@@ -56,6 +56,7 @@ from aquilon.aqdb.model.desk import Desk
 from aquilon.aqdb.model.dns_environment import DnsEnvironment
 from aquilon.aqdb.model.network_environment import NetworkEnvironment
 from aquilon.aqdb.model.network import Network
+from aquilon.aqdb.model.static_route import StaticRoute
 from aquilon.aqdb.model.dns_domain import DnsDomain
 from aquilon.aqdb.model.dns_map import DnsMap
 from aquilon.aqdb.model.fqdn import Fqdn

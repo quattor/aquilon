@@ -136,6 +136,12 @@ class NetworkFormatter(ObjectFormatter):
         if ranges:
             details.append(indent + "  Dynamic Ranges: %s" % ", ".join(ranges))
 
+        for route in sorted(network.static_routes):
+            details.append(indent + "  Static Route: %s gateway %s" %
+                           (route.destination, route.gateway_ip))
+            if route.comments:
+                details.append(indent + "    Comments: %s" % route.comments)
+
         return "\n".join(details)
 
     def format_proto(self, network, skeleton=None):

@@ -674,6 +674,10 @@ class DummyNetworks(object):
         # Zebra/bonding/bridge: virtual interface addresses
         self.unknown.append(NetworkInfo("4.2.12.128/26", "unknown"))
 
+        # Static routing tests
+        self.unknown.append(NetworkInfo("4.2.14.0/25", "unknown"))
+        self.unknown.append(NetworkInfo("4.2.14.128/25", "unknown"))
+
         self.tor_net.append(NetworkInfo("4.2.1.128/26", "tor_net"))
         self.tor_net.append(NetworkInfo("4.2.1.192/26", "tor_net"))
         self.tor_net.append(NetworkInfo("4.2.2.0/26", "tor_net"))

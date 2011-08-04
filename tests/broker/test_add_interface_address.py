@@ -348,6 +348,17 @@ class TestAddInterfaceAddress(TestBrokerCommand):
                           '    Network Environment: utcolo',
                           command)
 
+    def testaddunittest26(self):
+        ip = self.net.unknown[14].usable[0]
+        fqdn = "unittest26-e1.aqd-unittest.ms.com"
+        self.dsdb_expect_add(fqdn, ip, "eth1", ip.mac,
+                             primary="unittest26.aqd-unittest.ms.com")
+        command = ["add", "interface", "address",
+                   "--machine", "unittest26.aqd-unittest.ms.com",
+                   "--interface", "eth1", "--ip", ip, "--fqdn", fqdn]
+        self.noouttest(command)
+        self.dsdb_verify()
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddInterfaceAddress)

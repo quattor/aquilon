@@ -105,6 +105,7 @@ from test_add_aurora_host import TestAddAuroraHost
 from test_add_auxiliary import TestAddAuxiliary
 from test_add_interface_address import TestAddInterfaceAddress
 from test_add_manager import TestAddManager
+from test_add_static_route import TestAddStaticRoute
 from test_map_service import TestMapService
 from test_bind_client import TestBindClient
 from test_prebind_server import TestPrebindServer
@@ -184,6 +185,7 @@ from test_del_10gig_hardware import TestDel10GigHardware
 from test_del_virtual_hardware import TestDelVirtualHardware
 from test_unbind_esx_cluster import TestUnbindESXCluster
 from test_uncluster import TestUncluster
+from test_del_static_route import TestDelStaticRoute
 from test_del_dynamic_range import TestDelDynamicRange
 from test_del_alias import TestDelAlias
 from test_del_address import TestDelAddress
@@ -271,6 +273,7 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestMakeAquilon, TestMakeCluster, TestCluster,
                 TestBindESXCluster, TestChangeClusterStatus, TestRebindESXCluster,
                 TestMake,
+                TestAddStaticRoute,
                 TestRebindMetaCluster,
                 TestAddVirtualHardware, TestAdd10GigHardware,
                 TestUnbindClient, TestRebindClient, TestReconfigure,
@@ -310,6 +313,7 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestUnbindServer, TestUnmapService,
                 TestDel10GigHardware, TestDelVirtualHardware,
                 TestUnbindESXCluster, TestUncluster,
+                TestDelStaticRoute,
                 TestDelInterfaceAddress,
                 TestDelDynamicRange, TestDelAlias, TestDelAddress, TestDelNSRecord,
                 TestDelManager, TestDelAuxiliary, TestDelHost,
