@@ -69,6 +69,12 @@ class TestDelInterfaceAddress(TestBrokerCommand):
                          "cannot be removed.",
                          command)
 
+    def testbadmachine(self):
+        command = ["del", "interface", "address", "--machine", "no-such-machine",
+                   "--interface", "eth0", "--ip", "192.168.0.1"]
+        out = self.notfoundtest(command)
+        self.matchoutput(out, "Machine no-such-machine not found.", command)
+
     def testverifykeepdns(self):
         command = ["search", "dns",
                    "--fqdn", "unittest20-e1.aqd-unittest.ms.com"]

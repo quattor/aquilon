@@ -60,7 +60,7 @@ class CommandDelInterfaceAddress(BrokerCommand):
             hwname = switch
 
         dbhw_ent = HardwareEntity.get_unique(session, hwname,
-                                             hardware_type=hwtype)
+                                             hardware_type=hwtype, compel=True)
         dbinterface = get_interface(session, interface, dbhw_ent, None)
         dbnet_env = NetworkEnvironment.get_unique_or_default(session,
                                                              network_environment)
