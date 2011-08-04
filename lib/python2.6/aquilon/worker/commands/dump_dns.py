@@ -42,6 +42,7 @@ class CommandDumpDns(BrokerCommand):
 
     default_style = "djb"
     requires_format = True
+    requires_readonly = True
 
     def render(self, session, dns_domain, dns_environment, **arguments):
         dbdns_env = DnsEnvironment.get_unique_or_default(session,
