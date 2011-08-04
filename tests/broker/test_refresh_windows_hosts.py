@@ -240,9 +240,16 @@ class TestRefreshWindowsHosts(TestBrokerCommand):
             self.notfoundtest(["show_host", "--hostname", host])
 
     def test_390_unbindhost(self):
-        self.noouttest(["unbind", "server",
-                        "--hostname", "desktop3.msad.ms.com",
-                        "--service", "utsvc", "--instance", "utsi1"])
+        command = ["unbind", "server",
+                   "--hostname", "desktop3.msad.ms.com",
+                   "--service", "utsvc", "--instance", "utsi1"]
+        (out, err) = self.successtest(command)
+        self.assertEmptyOut(out, command)
+
+        self.matchoutput(err, "WARNING: Server %s, is the last server bound to " \
+                         "Service %s, instance %s which still has clients"
+                         % ("desktop3.msad.ms.com","utsvc","utsi1"),
+                         command)
 
     def test_410_cleanrun(self):
         command = ["refresh_windows_hosts"]
@@ -275,6 +282,6 @@ class TestRefreshWindowsHosts(TestBrokerCommand):
             self.notfoundtest(["show_host", "--hostname", host])
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestRefreshWindowsHosts)
     unittest.TextTestRunner(verbosity=2).run(suite)
