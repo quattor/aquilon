@@ -90,6 +90,11 @@ class AuthorizationBroker(object):
             if action not in ['add_host', 'add_windows_host', 'make_cluster',
                               'reconfigure']:
                 self.raise_auth_error(principal, action, resource)
+        if dbuser.role.name == 'winops_server':
+            if action not in ['add_windows_host', 'del_windows_host',
+                              'add_alias', 'del_alias',
+                              'make_cluster', 'reconfigure']:
+                self.raise_auth_error(principal, action, resource)
         if dbuser.role.name == 'resource_pool':
             if action not in ['add_address', 'del_address']:
                 self.raise_auth_error(principal, action, resource)
