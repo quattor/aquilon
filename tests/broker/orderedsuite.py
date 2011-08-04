@@ -190,6 +190,7 @@ from test_del_address import TestDelAddress
 from test_del_city import TestDelCity
 from test_del_manager import TestDelManager
 from test_del_auxiliary import TestDelAuxiliary
+from test_del_windows_host import TestDelWindowsHost
 from test_del_host import TestDelHost
 from test_del_interface import TestDelInterface
 from test_del_interface_address import TestDelInterfaceAddress
@@ -312,7 +313,8 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestUnbindESXCluster, TestUncluster,
                 TestDelInterfaceAddress,
                 TestDelDynamicRange, TestDelAlias, TestDelAddress, TestDelNSRecord,
-                TestDelManager, TestDelAuxiliary, TestDelHost,
+                TestDelManager, TestDelAuxiliary,
+                TestDelWindowsHost, TestDelHost,
                 TestDelInterface, TestDelDisk, TestDelMachine, TestDelChassis,
                 TestDelSwitch,
                 TestDelESXClusterAlignedService,
