@@ -310,6 +310,8 @@
 	    <option name="rack" type="string">Rack</option>
 	    <option name="desk" type="string">Desk</option>
          </optgroup>
+         <option name="server_of_service" type="string">server of service (single service only)</option>
+         <option name="server_of_instance" type="string">server of service instance (single instance only)</option>
          <option name="exact_location" type="flag">match the location exactly</option>
          <option name="all" type="flag">list all systems</option>
       </optgroup>
