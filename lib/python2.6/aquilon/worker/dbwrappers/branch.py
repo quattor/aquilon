@@ -28,6 +28,7 @@
 # TERMS THAT MAY APPLY.
 """Wrapper to make getting a branch simpler."""
 
+import re
 
 from sqlalchemy.orm.session import object_session
 
@@ -37,6 +38,8 @@ from aquilon.worker.dbwrappers.user_principal import get_user_principal
 from aquilon.worker.processes import remove_dir, run_git
 from aquilon.worker.locks import lock_queue, CompileKey
 from aquilon.worker.templates.domain import TemplateDomain
+
+VERSION_RE = re.compile(r'^[-_.a-zA-Z0-9]*$')
 
 
 def get_branch_and_author(session, logger,
@@ -100,3 +103,21 @@ def remove_branch(config, logger, dbbranch):
     except ProcessException, e:
         logger.warning("Error removing branch %s from template-king, "
                        "proceeding anyway: %s", dbbranch.name, e)
+
+def search_branch_query(config, session, cls, owner=None, compiler_version=None,
+                        autosync=None, validated=None, **arguments):
+    q = session.query(cls)
+    if owner:
+        dbowner = get_user_principal(session, owner)
+        q = q.filter_by(owner=dbowner)
+    if compiler_version:
+        if not VERSION_RE.match(compiler_version):
+            raise ArgumentError("Invalid characters in compiler version")
+        compiler = config.get("panc", "pan_compiler", raw=True) % {
+            'version': compiler_version}
+        q = q.filter_by(compiler=compiler)
+    if autosync is not None:
+        q = q.filter_by(autosync=autosync)
+    if validated is not None:
+        q = q.filter_by(is_sync_valid=validated)
+    return q

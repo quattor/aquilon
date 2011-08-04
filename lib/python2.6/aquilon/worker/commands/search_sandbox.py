@@ -1,6 +1,6 @@
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 #
-# Copyright (C) 2008,2009,2010,2011  Contributor
+# Copyright (C) 2009,2010,2011  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -26,14 +26,22 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-"""Contains the logic for `aq show sandbox --all`."""
+"""Contains the logic for `aq search sandbox`."""
 
-
-from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import Sandbox
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.dbwrappers.branch import search_branch_query
+from aquilon.worker.formats.list import StringList
 
 
-class CommandShowSandboxAll(BrokerCommand):
+class CommandSearchSandbox(BrokerCommand):
 
-    def render(self, session, **arguments):
-        return session.query(Sandbox).order_by(Sandbox.name).all()
+    def render(self, session, fullinfo, **arguments):
+        q = search_branch_query(self.config, session, Sandbox, **arguments)
+        q = q.order_by(Sandbox.name)
+        result = q.all()
+
+        if fullinfo:
+            return result
+        else:
+            return StringList(result)

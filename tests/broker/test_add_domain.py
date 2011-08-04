@@ -105,6 +105,26 @@ class TestAddDomain(TestBrokerCommand):
         self.matchoutput(out, "Domain: deployable", command)
         self.matchclean(out, "Tracking:", command)
 
+    def test_210_verifysearchtrack(self):
+        command = ["search", "domain", "--track", "utsandbox"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "unittest", command)
+        self.matchclean(out, "ut-prod", command)
+
+    def test_210_verifysearchchm(self):
+        command = ["search", "domain", "--change_manager"]
+        self.noouttest(command)
+
+    def test_210_verifysearchowner(self):
+        user = self.config.get("unittest", "user")
+        command = ["search", "domain", "--owner", user]
+        out = self.commandtest(command)
+        self.matchoutput(out, "unittest", command)
+        self.matchoutput(out, "prod", command)
+        self.matchoutput(out, "ut-prod", command)
+        self.matchoutput(out, "deployable", command)
+        self.matchclean(out, "utsandbox", command)
+
     def test_900_verifyall(self):
         command = ["show_domain", "--all"]
         out = self.commandtest(command)
