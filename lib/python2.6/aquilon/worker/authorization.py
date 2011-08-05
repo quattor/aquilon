@@ -47,10 +47,10 @@ class AuthorizationBroker(object):
         self.config = Config()
 
     def raise_auth_error(self, principal, action, resource):
-        auth_group = self.config.get("broker", "authorization_mailgroup")
+        auth_msg = self.config.get("broker", "authorization_error")
         raise AuthorizationException("Unauthorized access attempt by %s to %s "
-                                     "on %s.  Request permission from '%s'." %
-                                     (principal, action, resource, auth_group))
+                                     "on %s.  %s" %
+                                     (principal, action, resource, auth_msg))
 
     # FIXME: Hard coded check for now.
     def check(self, principal, dbuser, action, resource):
