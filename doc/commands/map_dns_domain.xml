@@ -47,8 +47,8 @@
 	    The DNS search path for a given machine is constructed by walking the location tree,
 	    starting from the machine's physical location and moving from each node to its parent.
 	    At every step, the DNS domains mapped to the given location are appended to the list. If
-	    a DNS domain appears multiple times in the list, only the first occurance is retained,
-	    any further occurances are removed.
+	    a DNS domain appears multiple times in the list, only the first occurrence is retained,
+	    any further occurrences are removed.
 	</para>
 	<para>
 	    The 
@@ -89,7 +89,7 @@
 		    <para>
 			The position of <replaceable>DOMAIN</replaceable> in the list of domains
 			mapped to the same location, if there are more than one such domains. The
-			numberig starts from zero.
+			numbering starts from zero.
 		    </para>
 		</listitem>
 	    </varlistentry>

@@ -69,7 +69,7 @@
 	<para>
 	    The default network environment is defined by the <literal>default_network_environment</literal>
 	    key in the <literal>site</literal> section of the broker's configuration. All commands
-	    will operate inside this environment unless explicitely directed otherwise.
+	    will operate inside this environment unless explicitly directed otherwise.
 	</para>
     </refsect1>
 

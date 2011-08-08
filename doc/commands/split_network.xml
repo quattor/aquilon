@@ -85,7 +85,7 @@
 		</term>
 		<listitem>
 		    <para>
-			The new prefix lenght of the network. It must be strictly larger than the
+			The new prefix length of the network. It must be strictly larger than the
 			old prefix length. Exactly one of <option>--netmask</option> and
 			<option>--prefixlen</option> must be specified.
 		    </para>

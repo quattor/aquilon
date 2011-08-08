@@ -43,7 +43,7 @@
 	    a larger network. Existing address assignments will be updated to point to the new network.
 	</para>
 	<para>
-	    <replaceable>IP</replaceable> must identify an existing network. It is not neccessary to
+	    <replaceable>IP</replaceable> must identify an existing network. It is not necessary to
 	    specify the first subnet, however the new network will inherit its name, location and
 	    side from the subnet specified.
 	</para>
@@ -81,7 +81,7 @@
 		</term>
 		<listitem>
 		    <para>
-			The new prefix lenght of the network. It must be strictly smaller than the
+			The new prefix length of the network. It must be strictly smaller than the
 			old prefix length. Exactly one of <option>--netmask</option> and
 			<option>--prefixlen</option> must be specified.
 		    </para>

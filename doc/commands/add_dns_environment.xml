@@ -39,13 +39,13 @@
 	</para>
 	<para>
 	    DNS environments are independent views of DNS information. The same FQDN may exist in
-	    one environment and not in an other; or if it exists in both, it may resolve to a
+	    one environment and not in another; or if it exists in both, it may resolve to a
 	    different resource record.
 	</para>
 	<para>
 	    The default DNS environment is defined by the <literal>default_dns_environment</literal>
 	    key in the <literal>site</literal> section of the broker's configuration. All commands
-	    will operate inside this environment unless explicitely directed otherwise.
+	    will operate inside this environment unless explicitly directed otherwise.
 	</para>
 
     </refsect1>
