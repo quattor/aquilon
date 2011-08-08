@@ -249,8 +249,8 @@ class TestBrokerCommand(unittest.TestCase):
                              (command, out))
         return err
 
-    def unauthorizedtest(self, command, **kwargs):
-        (p, out, err) = self.runcommand(command, auth=False, **kwargs)
+    def unauthorizedtest(self, command, auth=False, **kwargs):
+        (p, out, err) = self.runcommand(command, auth=auth, **kwargs)
         self.assertEqual(p.returncode, 4,
                          "Return code for %s was %d instead of %d"
                          "\nSTDOUT:\n@@@\n'%s'\n@@@"
@@ -263,7 +263,8 @@ class TestBrokerCommand(unittest.TestCase):
                         "STDERR for %s did not include Unauthorized:"
                         "\n@@@\n'%s'\n@@@\n" %
                         (command, err))
-        self.matchoutput(err, "Unauthorized anonymous access attempt", command)
+        self.searchoutput(err, r"Unauthorized (anonymous )?access attempt",
+                          command)
         return err
 
     def internalerrortest(self, command, **kwargs):

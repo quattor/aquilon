@@ -36,6 +36,7 @@ that the 'permission' and 'show principal' commands work as expected.
 
 import unittest
 import re
+import os
 from subprocess import Popen, PIPE
 
 if __name__ == "__main__":
@@ -211,6 +212,34 @@ class TestPermission(TestBrokerCommand):
         self.matchoutput(out,
                          "DNS Domain aqd-unittest.ms.com not found.",
                          command)
+
+    def testautherror(self):
+        # Need to demote the current user to test an auth failure.
+        principal = self.config.get('unittest', 'principal')
+        user = self.config.get('unittest', 'user')
+        realm = self.config.get('unittest', 'realm')
+        command = ["permission", "--role=nobody", "--principal", principal]
+        self.noouttest(command)
+
+        command = ["permission", "--role=aqd_admin", "--principal", principal]
+        err = self.unauthorizedtest(command, auth=True)
+        message = self.config.get("broker", "authorization_error")
+        self.matchoutput(err,
+                         "Unauthorized access attempt by %s to permission on "
+                         "/principal/%s%%40%s/role.  %s" %
+                         (principal, user, realm, message),
+                         command)
+
+        # Now fix it.
+        srcdir = self.config.get("broker", "srcdir")
+        add_admin = os.path.join(srcdir, "tests", "aqdb", "add_admin.py")
+        env = os.environ.copy()
+        env['AQDCONF'] = self.config.baseconfig
+        p = Popen([add_admin], stdout=PIPE, stderr=PIPE)
+        (out, err) = p.communicate()
+        self.assertEqual(p.returncode, 0,
+                         "Failed to restore admin privs '%s', '%s'." %
+                         (out, err))
 
 
 if __name__=='__main__':
