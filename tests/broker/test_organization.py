@@ -41,30 +41,52 @@ from brokertest import TestBrokerCommand
 class TestOrganization(TestBrokerCommand):
 
     def testaddexorg(self):
-        command = "add organization --organization example --fullname 'Example, Inc'"
-        self.noouttest(command.split(" "))
+        command = ["add", "organization", "--organization", "example",
+                   "--fullname", "Example, Inc"]
+        self.noouttest(command)
 
-    def testverifyaddexorg(self):
         command = "show organization --organization example"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Organization: example", command)
 
-    def testdelexorg(self):
+    def testdelexorg2(self):
         command = "del organization --organization example"
         self.noouttest(command.split(" "))
 
     def testdelexorgagain(self):
         command = "del organization --organization example"
         out = self.notfoundtest(command.split(" "))
-        self.matchoutput(out, "Organization example not found.", command)
+        self.matchoutput(out, "Company example not found.", command)
 
     def testverifydelexorg(self):
         command = "show organization --organization example"
         out = self.notfoundtest(command.split(" "))
-        self.matchoutput(out, "Organization example not found.", command)
+        self.matchoutput(out, "Company example not found.", command)
+
+    def testdelexorg1(self):
+        test_org = "example"
+
+        # add network to org
+        self.noouttest(["add_network", "--ip", "192.176.6.0",
+                        "--network", "test_warn_network",
+                        "--netmask", "255.255.255.0",
+                        "--organization", test_org,
+                        "--type", "unknown",
+                        "--comments", "Made-up network"])
 
 
-if __name__=='__main__':
-    suite = unittest.TestLoader().loadTestsFromTestCase(TestAddRoom)
+        # try delete org
+        command = "del organization --organization %s" % test_org
+        err = self.badrequesttest(command.split(" "))
+        self.matchoutput(err,"Bad Request: Could not delete company %s."
+                             " Networks were found using this location."
+                         % test_org, command)
+
+        # delete network
+        self.noouttest(["del_network", "--ip", "192.176.6.0"])
+
+
+if __name__ == '__main__':
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestOrganization)
     unittest.TextTestRunner(verbosity=2).run(suite)
 

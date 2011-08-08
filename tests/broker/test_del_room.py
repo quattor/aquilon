@@ -54,8 +54,30 @@ class TestDelRoom(TestBrokerCommand):
         out = self.notfoundtest(command.split(" "))
         self.matchoutput(out, "Room room-does-not-exist not found.", command)
 
+    def testdelroomnetwork(self):
+        test_room = "utroom1"
 
-if __name__=='__main__':
+        # add network to room
+        self.noouttest(["add_network", "--ip", "192.176.6.0",
+                        "--network", "test_warn_network",
+                        "--netmask", "255.255.255.0",
+                        "--room", test_room,
+                        "--type", "unknown",
+                        "--comments", "Made-up network"])
+
+
+        # try delete room
+        command = "del room --room %s" % test_room
+        err = self.badrequesttest(command.split(" "))
+        self.matchoutput(err,"Bad Request: Could not delete room %s."
+                             " Networks were found using this location."
+                         % test_room, command)
+
+        # delete network
+        self.noouttest(["del_network", "--ip", "192.176.6.0"])
+
+
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelRoom)
     unittest.TextTestRunner(verbosity=2).run(suite)
 

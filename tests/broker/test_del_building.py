@@ -56,14 +56,34 @@ class TestDelBuilding(TestBrokerCommand):
         self.noouttest(command.split(" "))
         self.dsdb_verify()
 
-    def testdelnettest(self):
+    def testdelnettest02(self):
         self.dsdb_expect("delete_building_aq -building nettest")
         command = "del building --building nettest"
         self.noouttest(command.split(" "))
         self.dsdb_verify()
 
+    def testdelnettest01(self):
+        test_bu = "nettest"
 
-if __name__=='__main__':
+        # add network to building
+        self.noouttest(["add_network", "--ip", "192.176.6.0",
+                        "--network", "test_warn_network",
+                        "--netmask", "255.255.255.0",
+                        "--building", test_bu,
+                        "--type", "unknown",
+                        "--comments", "Made-up network"])
+
+
+        # try delete building
+        command = "del building --building %s" % test_bu
+        err = self.badrequesttest(command.split(" "))
+        self.matchoutput(err,"Bad Request: Could not delete building %s."
+                             " Networks were found using this location."
+                         % test_bu, command)
+        # delete network
+        self.noouttest(["del_network", "--ip", "192.176.6.0"])
+
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelBuilding)
     unittest.TextTestRunner(verbosity=2).run(suite)
 
