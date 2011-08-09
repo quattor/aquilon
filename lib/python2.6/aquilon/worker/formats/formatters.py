@@ -264,6 +264,10 @@ class ObjectFormatter(object):
             host_msg.sysloc = str(hwent.location.sysloc())
             host_msg.machine.location.name = str(hwent.location.name)
             host_msg.machine.location.location_type = str(hwent.location.location_type)
+            for parent in hwent.location.parents:
+                p = host_msg.machine.location.parents.add()
+                p.name = str(parent.name)
+                p.location_type = str(parent.location_type)
         host_msg.machine.model.name = str(hwent.model.name)
         host_msg.machine.model.vendor = str(hwent.model.vendor.name)
 
