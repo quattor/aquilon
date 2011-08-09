@@ -78,16 +78,7 @@ class TestDelHost(TestBrokerCommand):
         self.matchclean(out, "Provides:", command)
         self.matchclean(out, str(self.net.unknown[0].usable[2]), command)
 
-    def testdelunittest01(self):
-        self.dsdb_expect_delete(self.net.unknown[0].usable[10])
-        command = "del host --hostname unittest01.one-nyp.ms.com"
-        (out, err) = self.successtest(command.split(" "))
-        self.assertEmptyOut(out, command)
-        self.dsdb_verify()
-
-    def testverifydelunittest01(self):
-        command = "show host --hostname unittest01.one-nyp.ms.com"
-        self.notfoundtest(command.split(" "))
+    # unittest01.one-nyp.ms.com gets deleted in test_del_windows_host.
 
     def testdelunittest12(self):
         self.dsdb_expect_delete(self.net.unknown[0].usable[7])

@@ -1824,6 +1824,15 @@
       <transport method="delete" path="host/%(hostname)s" />
    </command>
 
+   <command name="del_windows_host">
+      Delete a host with the windows archetype.  This is a simple wrapper
+      over del_host and only exists for handling entitlements.
+      <optgroup name="del_windows_host_opts" mandatory="True" fields="all">
+         <option name="hostname" type="string">Host name</option>
+      </optgroup>
+      <transport method="delete" path="windows_host/%(hostname)s" />
+   </command>
+
    <command name="pxeswitch">
       Change the way the host boots.  At boot, the host may either reboot
       from local disk (--localboot), or it can reinstall (--install). The
