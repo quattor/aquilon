@@ -235,7 +235,7 @@ class TestPermission(TestBrokerCommand):
         add_admin = os.path.join(srcdir, "tests", "aqdb", "add_admin.py")
         env = os.environ.copy()
         env['AQDCONF'] = self.config.baseconfig
-        p = Popen([add_admin], stdout=PIPE, stderr=PIPE)
+        p = Popen([add_admin], stdout=PIPE, stderr=PIPE, env=env)
         (out, err) = p.communicate()
         self.assertEqual(p.returncode, 0,
                          "Failed to restore admin privs '%s', '%s'." %
