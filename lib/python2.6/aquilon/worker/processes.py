@@ -340,6 +340,10 @@ IP_NOT_DEFINED_RE = re.compile("Host with IP address "
                                "[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}"
                                " is not defined")
 
+BUILDING_NOT_FOUND = re.compile("bldg [a-zA-Z0-9]{2} doesn't exists")
+
+DNS_DOMAIN_NOT_FOUND = re.compile ("DNS domain ([-\w\.\d]+) doesn't exists")
+
 class DSDBRunner(object):
 
     def __init__(self, logger=LOGGER):
@@ -383,7 +387,14 @@ class DSDBRunner(object):
     def del_building(self, building):
         cmd = [self.dsdb, "delete_building_aq", "-building", building]
         if self.location_sync:
-            out = run_command(cmd, env=self.getenv(), logger=self.logger)
+            try:
+                out = run_command(cmd, env=self.getenv(), logger=self.logger)
+            except ProcessException, e:
+                if e.out and BUILDING_NOT_FOUND.search(e.out):
+                    self.logger.info("DSDB does not have a building %s defined, "
+                                     "proceeding with aqdb command." % building)
+                    return
+                raise
         else:
             self.logger.debug(
                 "Would have called '%s' if location sync was enabled" % cmd)
@@ -409,7 +420,7 @@ class DSDBRunner(object):
             command.extend(["-ethernet_address", mac])
         if primary and str(primary) != str(fqdn):
             command.extend(["-primary_host_name", primary])
-        out = run_command(command,env=self.getenv())
+        out = run_command(command, env=self.getenv())
         return
 
     def update_host_mac(self, fqdn, mac):
@@ -622,8 +633,11 @@ class DSDBRunner(object):
                     "delete", "dns_domain", "-domain_name", dns_domain],
                     env=self.getenv())
         except ProcessException, e:
-            self.logger.info("Encountered a problem removing the DNS domain "
-                             "%s from DSDB, continuing: %s" % (dns_domain, e))
+            if e.out and DNS_DOMAIN_NOT_FOUND.search(e.out):
+                self.logger.info("The DNS domain %s does not exist in DSDB, "
+                                 "proceeding with aqdb command." % dns_domain)
+                return
+            raise
         else:
             self.logger.info("Removed DNS domain %s from DSDB." % dns_domain)
         return
