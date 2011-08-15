@@ -168,11 +168,17 @@ class TestMake(TestBrokerCommand):
         (out, err) = self.successtest(command)
         self.matchoutput(err, "1/1 compiled", command)
 
-    def testverifyunittest21gateway(self):
+    def testverifyunittest21(self):
+        net = self.net.unknown[11]
         command = ["cat", "--hostname", "unittest21.aqd-unittest.ms.com"]
         out = self.commandtest(command)
         self.matchoutput(out, "'/system/network/default_gateway' = \"%s\";" %
-                         self.net.unknown[11].gateway, command)
+                         net.gateway, command)
+        self.searchoutput(out,
+                          r'"/system/network/routers" = nlist\(\s*'
+                          r'"bond0", list\(\s*'
+                          r'"%s",\s*"%s"\s*\)\s*\);' % (net[1], net[2]),
+                          command)
 
     def testmakeunittest23(self):
         command = ["make", "--hostname", "unittest23.aqd-unittest.ms.com"]
@@ -198,6 +204,10 @@ class TestMake(TestBrokerCommand):
                           command)
         self.matchoutput(out, "'/system/network/default_gateway' = \"%s\";" %
                          router, command)
+        self.searchoutput(out,
+                          r'"/system/network/routers" = nlist\(\s*'
+                          r'"eth0", list\(\s*"%s"\s*\)\s*\);' % router,
+                          command)
 
     def testmakeunittest24(self):
         command = ["make", "--hostname", "unittest24.aqd-unittest.ms.com"]
@@ -223,6 +233,10 @@ class TestMake(TestBrokerCommand):
                           command)
         self.matchoutput(out, "'/system/network/default_gateway' = \"%s\";" %
                          router, command)
+        self.searchoutput(out,
+                          r'"/system/network/routers" = nlist\(\s*'
+                          r'"eth0", list\(\s*"%s"\s*\)\s*\);' % router,
+                          command)
 
     def testmakeunittest25(self):
         command = ["make", "--hostname", "unittest25.aqd-unittest.ms.com"]

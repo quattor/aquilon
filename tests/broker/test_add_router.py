@@ -87,7 +87,7 @@ class TestAddRouter(TestBrokerCommand):
                 rtr = "ut3gd1r0%d-v%d-hsrp.aqd-unittest.ms.com" % (net_idx + 1,
                                                                    rtr_idx + 109)
                 command = ["add", "router", "--ip", net[rtr_idx + 1],
-                           "--fqdn", rtr, "--building", "ut"]
+                           "--fqdn", rtr]
                 self.noouttest(command)
 
     def testaddvplsrouters(self):
