@@ -205,6 +205,11 @@ class CommandAddHost(BrokerCommand):
         dbdns_rec = parse_primary_name(session, hostname, ip)
         dbmachine.primary_name = dbdns_rec
 
+        # Reset the routing configuration
+        for iface in dbmachine.interfaces:
+            if iface.default_route:
+                iface.default_route = False
+
         for name in zebra_interfaces.split(","):
             dbinterface = None
             for iface in dbmachine.interfaces:
@@ -220,3 +225,6 @@ class CommandAddHost(BrokerCommand):
                                     "{1}.".format(dbmachine, name))
             assign_address(dbinterface, ip, dbdns_rec.network, label="hostname",
                            usage="zebra")
+
+            # Transits should be providers of the default route
+            dbinterface.default_route = True

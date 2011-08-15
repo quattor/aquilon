@@ -138,9 +138,15 @@ class TestAddAquilonHost(TestBrokerCommand):
 
     def testverifyunittest20(self):
         ip = self.net.unknown[13].usable[2]
+        eth0_ip = self.net.unknown[11].usable[0]
+        eth1_ip = self.net.unknown[12].usable[0]
         command = ["show", "host", "--hostname",
                    "unittest20.aqd-unittest.ms.com"]
         out = self.commandtest(command)
+        self.searchoutput(out, r"Interface: eth0 %s \[boot, default_route\]" %
+                          eth0_ip.mac, command)
+        self.searchoutput(out, r"Interface: eth1 %s \[default_route\]" %
+                          eth1_ip.mac, command)
         self.matchoutput(out,
                          "Provides: unittest20.aqd-unittest.ms.com [%s] "
                          "(label: hostname, usage: zebra)" % ip,
