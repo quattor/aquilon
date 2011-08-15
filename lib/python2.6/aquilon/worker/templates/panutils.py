@@ -28,6 +28,7 @@
 # TERMS THAT MAY APPLY.
 
 import re
+from collections import Iterable, Mapping
 from numbers import Number
 
 # See the definition of a "term" in the "Path Literals" section of the Pan
@@ -40,7 +41,23 @@ def pan(obj, indent=0):
 
     spaces = "  " * (indent + 1)
     accumulator = list()
-    if isinstance(obj, dict):
+
+    if isinstance(obj, basestring):
+        quote = '"'
+        if '"' in obj:
+            quote = "'"
+        accumulator.append("%s%s%s" % (quote, obj, quote))
+
+    elif isinstance(obj, bool):
+        accumulator.append(str(obj).lower())
+
+    elif isinstance(obj, int):
+        accumulator.append("%d" % obj)
+
+    elif isinstance(obj, PanObject):
+        accumulator.append(obj.format(indent))
+
+    elif isinstance(obj, Mapping):
         accumulator.append("nlist(")
         # Enforce a deterministic order to avoid recompilations due to change in
         # ordering. This also helps with the testsuite.
@@ -59,7 +76,7 @@ def pan(obj, indent=0):
         accumulator[-1] = accumulator[-1].rstrip(",")
         accumulator.append("%s)" % ("  " * indent))
 
-    elif isinstance(obj, list):
+    elif isinstance(obj, Iterable):
         accumulator.append("list(")
         for item in obj:
             val = pan(item, indent + 1)
@@ -67,21 +84,6 @@ def pan(obj, indent=0):
         # remove the last comma
         accumulator[-1] = accumulator[-1].rstrip(",")
         accumulator.append("%s)" % ("  " * indent))
-
-    elif isinstance(obj, basestring):
-        quote = '"'
-        if '"' in obj:
-            quote = "'"
-        accumulator.append("%s%s%s" % (quote, obj, quote))
-
-    elif isinstance(obj, bool):
-        accumulator.append(str(obj).lower())
-
-    elif isinstance(obj, int):
-        accumulator.append("%d" % obj)
-
-    elif isinstance(obj, PanObject):
-        accumulator.append(obj.format(indent))
 
     else:
         accumulator.append(pan(str(obj)))
