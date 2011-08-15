@@ -61,14 +61,12 @@ class CommandUpdateRack(BrokerCommand):
                                     "while {2} is in {3}.".format(
                                         dbroom, dbroom.building,
                                         dbrack, dbrack.building))
-            # FIXME: this relation is now view-only
-            dbrack.parent = dbroom
+            dbrack.update_parent(session, parent=dbroom)
         if clearroom:
             if not dbrack.room:
                 raise ArgumentError("{0} does not have room information "
                                     "to clear.".format(dbrack))
-            # FIXME: this relation is now view-only
-            dbrack.parent = dbrack.room.parent
+            dbrack.update_parent(session, parent=dbrack.room.parent)
 
         session.flush()
 

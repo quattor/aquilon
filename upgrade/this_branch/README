@@ -1,0 +1,23 @@
+Migration procedure
+========================
+
+1. Add table location link
+-----------------------------
+
+As cdb, run from this directory:
+
+sqlplus /@NYPO_AQUILON_11 @location_link.sql
+
+2. Migrate data from old format to links
+----------------------------------------
+
+As cdb, run from this directory:
+
+./populate_location_link.py
+
+3. Remove column parent_id from location
+----------------------------------------
+
+As cdb, run from this directory:
+
+sqlplus /@NYPO_AQUILON_11 @alter_location.sql

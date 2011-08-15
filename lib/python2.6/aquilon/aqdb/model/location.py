@@ -29,17 +29,15 @@
 """ How we represent location data in Aquilon """
 
 from datetime import datetime
-from collections import deque
-
 from sqlalchemy import (Integer, DateTime, Sequence, String, Column,
-                        ForeignKey, UniqueConstraint, text)
+                        ForeignKey, UniqueConstraint)
 
 from sqlalchemy.orm import relation, backref, object_session
 from sqlalchemy.sql import and_, or_, desc
 
 from aquilon.aqdb.model import Base
 from aquilon.aqdb.column_types import AqStr
-
+from aquilon.exceptions_ import AquilonError
 
 class Location(Base):
     """ How we represent location data in Aquilon """
@@ -160,6 +158,33 @@ class Location(Base):
 
         super(Location, self).__init__(**kwargs)
 
+    def update_parent(self, session, parent=None):
+
+        if parent is not None:
+            if not object_session(parent):
+                raise AquilonError("The parent must be persistent")
+
+        ## delete old location links
+        flush_state = session.autoflush
+        session.autoflush = False
+
+        session.query(LocationLink).filter(LocationLink.child_id == self.id).all()
+        for link in self._parent_links:
+            q = session.query(LocationLink)
+            q = q.filter(and_(LocationLink.child_id==self.id,
+                              LocationLink.parent_id==link.parent.id))
+            dblink = q.first()
+            session.delete(dblink)
+
+        if parent is not None:
+            for link in parent._parent_links:
+                session.add(LocationLink(child=self, parent=link.parent,
+                                         distance=link.distance + 1))
+            session.add(LocationLink(child=self, parent=parent, distance=1))
+            session.expire(parent, ["_child_links", "children"])
+
+        session.autoflush = flush_state
+
 
 location = Location.__table__  # pylint: disable-msg=C0103, E1101
 
@@ -194,8 +219,8 @@ class LocationLink(Base):
                                       cascade="all, delete-orphan",
                                       passive_deletes=True))
 
-
-# Make these relations view-only, to make sure the distance is managed explicitely
+# Make these relations view-only, to make sure
+# the distance is managed explicitely
 Location.parents = relation(Location, lazy=True,
                             secondary=LocationLink.__table__,
                             primaryjoin=Location.id == LocationLink.child_id,
