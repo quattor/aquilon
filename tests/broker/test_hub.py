@@ -41,16 +41,16 @@ from brokertest import TestBrokerCommand
 class TestHub(TestBrokerCommand):
 
     def testaddhub(self):
-        command = ["add","hub","--hub","hub1","--fullname",
+        command = ["add", "hub", "--hub", "hub1", "--fullname",
                    "hub1 example", "--comments", "test hub1"]
         self.noouttest(command)
 
-        command = ["add","organization","--organization","example",
+        command = ["add", "organization", "--organization", "example",
                    "--fullname", "Example, Inc"]
         self.noouttest(command)
 
-        command = ["add","hub","--hub","hub2","--fullname", "hub2 example",
-                   "--organization","example","--comments", "test hub2"];
+        command = ["add", "hub", "--hub", "hub2", "--fullname", "hub2 example",
+                   "--organization", "example", "--comments", "test hub2"];
         self.noouttest(command)
 
     def testaddhubshow(self):
@@ -66,7 +66,8 @@ class TestHub(TestBrokerCommand):
         self.matchoutput(out, "Hub: hub2", command)
         self.matchoutput(out, "  Fullname: hub2 example", command)
         self.matchoutput(out, "  Comments: test hub2", command)
-        self.matchoutput(out, "  Location Parents: [Organization example]", command)
+        self.matchoutput(out, "  Location Parents: [Organization example]",
+                         command)
 
         command = "show hub --all"
         out = self.commandtest(command.split(" "))
@@ -103,9 +104,10 @@ class TestHub(TestBrokerCommand):
         # try delete hub
         command = "del hub --hub %s" % test_hub
         err = self.badrequesttest(command.split(" "))
-        self.matchoutput(err,"Bad Request: Could not delete hub %s."
-                             " Networks were found using this location."
-                         % test_hub, command)
+        self.matchoutput(err,
+                         "Bad Request: Could not delete hub %s. Networks "
+                         "were found using this location." % test_hub,
+                         command)
 
         # delete network
         self.noouttest(["del_network", "--ip", "192.176.6.0"])

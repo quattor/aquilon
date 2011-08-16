@@ -67,9 +67,10 @@ class TestDelCity(TestBrokerCommand):
         # try delete city
         command = "del_city --city %s" % test_city
         err = self.badrequesttest(command.split(" "))
-        self.matchoutput(err,"Bad Request: Could not delete city %s."
-                             " Networks were found using this location."
-                         % test_city, command)
+        self.matchoutput(err,
+                         "Bad Request: Could not delete city %s. Networks "
+                         "were found using this location." % test_city,
+                         command)
         # delete network
         self.noouttest(["del_network", "--ip", "192.176.6.0"])
 

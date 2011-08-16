@@ -45,7 +45,7 @@ class CommandDelCity(CommandDelLocation):
         label = dbcity.name
         plenary = PlenaryCity(dbcity, logger=logger)
         CommandDelLocation.render(self, session=session, name=city,
-                                           type='city', **arguments)
+                                  type='city', **arguments)
         session.flush()
 
         key = plenary.get_remove_key()

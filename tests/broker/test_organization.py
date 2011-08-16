@@ -78,9 +78,10 @@ class TestOrganization(TestBrokerCommand):
         # try delete org
         command = "del organization --organization %s" % test_org
         err = self.badrequesttest(command.split(" "))
-        self.matchoutput(err,"Bad Request: Could not delete company %s."
-                             " Networks were found using this location."
-                         % test_org, command)
+        self.matchoutput(err,
+                         "Bad Request: Could not delete company %s. Networks "
+                         "were found using this location." % test_org,
+                         command)
 
         # delete network
         self.noouttest(["del_network", "--ip", "192.176.6.0"])

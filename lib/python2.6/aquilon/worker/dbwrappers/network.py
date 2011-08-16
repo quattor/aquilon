@@ -33,8 +33,8 @@ from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 from sqlalchemy.sql import and_, update
 
 from aquilon.exceptions_ import NotFoundException, ArgumentError
-from aquilon.aqdb.model import (Network, AddressAssignment, ARecord,
-                                NetworkEnvironment)
+from aquilon.aqdb.model import Network, AddressAssignment, ARecord
+
 
 def get_network_byname(session, netname, environment):
     try:
@@ -87,15 +87,3 @@ def fix_foreign_links(session, oldnet, newnet):
     )
     session.expire(oldnet, ['dns_records'])
     session.expire(newnet, ['dns_records'])
-
-def get_network_by_location(session, dblocation, network_environment=None):
-    """ helper function to get networks by location info """
-    networks = []
-
-    dbnet_env = NetworkEnvironment.get_unique_or_default(session,
-                   network_environment)
-    q = session.query(Network)
-    q = q.filter_by(network_environment=dbnet_env)
-    q = q.filter_by(location=dblocation)
-    networks.extend(q.all())
-    return networks

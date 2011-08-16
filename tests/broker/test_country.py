@@ -42,8 +42,8 @@ class TestCountry(TestBrokerCommand):
 
     def testadd(self):
 
-        command = ["add","country","--country","ct","--fullname",
-                   "country example","--continent", "na", 
+        command = ["add", "country", "--country", "ct", "--fullname",
+                   "country example", "--continent", "na",
                    "--comments", "test country"]
         self.noouttest(command)
 
@@ -54,7 +54,10 @@ class TestCountry(TestBrokerCommand):
         self.matchoutput(out, "Country: ct", command)
         self.matchoutput(out, "  Fullname: country example", command)
         self.matchoutput(out, "  Comments: test country", command)
-        self.matchoutput(out, "  Location Parents: [Organization ms, Hub ny, Continent na]", command)
+        self.matchoutput(out,
+                         "  Location Parents: [Organization ms, Hub ny, "
+                         "Continent na]",
+                         command)
 
         command = "show country --all"
         out = self.commandtest(command.split(" "))
@@ -82,12 +85,13 @@ class TestCountry(TestBrokerCommand):
                         "--comments", "Made-up network"])
 
 
-        # try delete country 
+        # try delete country
         command = "del country --country %s" % test_country
         err = self.badrequesttest(command.split(" "))
-        self.matchoutput(err,"Bad Request: Could not delete country %s."
-                             " Networks were found using this location."
-                         % test_country, command)
+        self.matchoutput(err,
+                         "Bad Request: Could not delete country %s. Networks "
+                         "were found using this location." % test_country,
+                         command)
 
         # delete network
         self.noouttest(["del_network", "--ip", "192.176.6.0"])

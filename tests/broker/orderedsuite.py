@@ -251,7 +251,7 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestMergeConflicts,
                 TestAddArchetype, TestAddOS, TestAddPersonality,
                 TestAddService, TestUpdateService, TestAddRequiredService,
-                TestCountry,TestOrganization,TestHub,
+                TestCountry, TestOrganization, TestHub,
                 TestAddCity,
                 TestAddBuilding, TestAddRoom, TestAddLocation,
                 TestAddRack, TestAddVendor, TestAddCpu, TestAddModel,
