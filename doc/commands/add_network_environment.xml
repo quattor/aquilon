@@ -1,0 +1,147 @@
+<?xml version="1.0"?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V5.0//EN"
+"http://docbook.org/xml/5.0/dtd/docbook.dtd" [
+<!ENTITY aqd_version SYSTEM "../version.txt">
+]>
+<refentry xml:id="add_network_environment"
+	  xmlns:xi="http://www.w3.org/2001/XInclude">
+    <refmeta>
+        <refentrytitle>add_network_environment</refentrytitle>
+        <manvolnum>1</manvolnum>
+        <refmiscinfo class="version">&aqd_version;</refmiscinfo>
+        <refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
+    </refmeta>
+
+    <refnamediv>
+        <refname>add network environment</refname>
+        <refpurpose>
+	    Create a new network environment
+        </refpurpose>
+	<refclass>Aquilon</refclass>
+    </refnamediv>
+
+    <refsynopsisdiv>
+	<cmdsynopsis>
+	    <command>aq add network environment</command>
+	    <group>
+		<synopfragmentref linkend="global-options">Global options</synopfragmentref>
+	    </group>
+	    <arg choice="plain"><option>--network_environment <replaceable>NETENV</replaceable></option></arg>
+	    <arg choice="plain"><option>--dns_environment <replaceable>DNSENV</replaceable></option></arg>
+	    <arg choice="opt"><option>--building <replaceable>NAME</replaceable></option></arg>
+	    <arg choice="opt"><option>--comments <replaceable>COMMENTS</replaceable></option></arg>
+	    <xi:include href="../common/global_options.xml"/>
+	</cmdsynopsis>
+    </refsynopsisdiv>
+
+    <refsect1>
+        <title>Description</title>
+	<para>
+	    The <command>aq add network environment</command> command creates a new network
+	    environment.
+	</para>
+	<para>
+	    Network environments represent distinct administrative domains for the IPv4 Private
+	    Address Space, as defined by RFC 1918. Inside the same network environment, the use
+	    of RFC 1918 address ranges must be coherent and non-overlapping. A different network
+	    environment however may re-use the same address ranges for a different purpose.
+	</para>
+	<para>
+	    Let's consider IP address 192.168.0.1 is in use somewhere in the organization. Assume
+	    you want to place a new server at an external hosting provider. This server has a public
+	    IP address that is connected to the internet, but it also has a direct link to some
+	    dedicated 3rd-party service. The provider of this service requires the use of the
+	    IP address 192.168.0.1 to access the service. This presents a problem, since the same
+	    IP address is now used by two different entities.
+	</para>
+	<para>
+	    The problem can be solved by creating a new network environment for said 3rd-party
+	    service provider, and registering the service address inside this environment. Therefore
+	    the broker knows that although the IP address is the same, the two users of the address
+	    are different, and the broker can select the right network parameters for both users.
+	</para>
+	<para>
+	    Note that when there is an overlap between the addresses defined in two network
+	    environments, then hosts in those environments may not be able to communicate with each
+	    other directly. Setting up routing, NAT etc. to make such communication possible is out
+	    of scope for the broker.
+	</para>
+	<para>
+	    The default network environment is defined by the <literal>default_network_environment</literal>
+	    key in the <literal>site</literal> section of the broker's configuration. All commands
+	    will operate inside this environment unless explicitly directed otherwise.
+	</para>
+    </refsect1>
+
+    <refsect1>
+        <title>Options</title>
+	<variablelist>
+	    <title>Command-specific options</title>
+	    <varlistentry>
+	        <term>
+		    <option>--network_environment <replaceable>NETENV</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			The name of the network environment. The name must contain only alphanumeric characters, '_', '.' and '-'.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--dns_environment <replaceable>DNSENV</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			The name of the DNS environment that will be bound to this network
+			environment. Any command that registers an address in
+			<replaceable>NETENV</replaceable> and allows specifying an FQDN, will
+			register that FQDN in <replaceable>DNSENV</replaceable>. If there is a real
+			DNS server that serves the view <replaceable>DNSENV</replaceable>, then e.g.
+			reverse address resolution will give you answers that are valid for
+			<replaceable>NETENV</replaceable>, but not for any other network
+			environment. If there is no real DNS server serving
+			<replaceable>DNSENV</replaceable>, then it is still possible to populate
+			<filename>/etc/hosts</filename> from the data stored in
+			<replaceable>DNSENV</replaceable>.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--building <replaceable>NAME</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Specify if the given network environment is bound to a single physical
+			building. Currently this option is for informational purposes only.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--comments <replaceable>COMMENTS</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Short description of the purpose of the network environment.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	</variablelist>
+	<xi:include href="../common/global_options_desc.xml"/>
+    </refsect1>
+
+    <refsect1>
+	<title>See also</title>
+	<para>
+	    <citerefentry><refentrytitle>del_network_environment</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>update_network_environment</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>search_network_environment</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>show_network_environment</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>add_dns_environment</refentrytitle><manvolnum>1</manvolnum></citerefentry>
+	</para>
+    </refsect1>
+</refentry>
+
+<!-- vim: set ai sw=4: -->

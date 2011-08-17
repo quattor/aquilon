@@ -1,0 +1,112 @@
+<?xml version="1.0"?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V5.0//EN"
+	"http://docbook.org/xml/5.0/dtd/docbook.dtd" []>
+
+<variablelist>
+    <title>Location options</title>
+    <varlistentry>
+    <term>
+	<option>--organization <replaceable>ORGANIZATION</replaceable></option>
+    </term>
+    <listitem>
+	<para>
+	    The name of the organization.
+	</para>
+    </listitem>
+    </varlistentry>
+    <varlistentry>
+    <term>
+	<option>--hub <replaceable>HUB</replaceable></option>
+    </term>
+    <listitem>
+	<para>
+	    The name of the hub. The hub is the center of an organizational region.
+	    For example, the "europe" organizational region will have a hub of "ln".
+	</para>
+    </listitem>
+    </varlistentry>
+    <varlistentry>
+    <term>
+	<option>--continent <replaceable>CONTINENT</replaceable></option>
+    </term>
+    <listitem>
+	<para>
+	    The named continent. Continent names are short codes (e.g. "na" for North America).
+	</para>
+    </listitem>
+    </varlistentry>
+    <varlistentry>
+    <term>
+	<option>--country <replaceable>COUNTRY</replaceable></option>
+    </term>
+    <listitem>
+	<para>
+	    The named country. Country names are short codes (e.g. "gb").
+	</para>
+    </listitem>
+    </varlistentry>
+    <varlistentry>
+    <term>
+	<option>--campus <replaceable>CAMPUS</replaceable></option>
+    </term>
+    <listitem>
+	<para>
+	    The named campus. Campus names are typically short codes (e.g. "ln").
+	</para>
+    </listitem>
+    </varlistentry>
+    <varlistentry>
+    <term>
+	<option>--city <replaceable>CITY</replaceable></option>
+    </term>
+    <listitem>
+	<para>
+	    The named city. City names are typically short codes (e.g. "ln").
+	</para>
+    </listitem>
+    </varlistentry>
+    <varlistentry>
+    <term>
+	<option>--building <replaceable>BUILDING</replaceable></option>
+    </term>
+    <listitem>
+	<para>
+	    The named building. Building codes are typically short alphanumeric (e.g. "cw").
+	</para>
+    </listitem>
+    </varlistentry>
+    <varlistentry>
+    <term>
+	<option>--room <replaceable>ROOM</replaceable></option>
+    </term>
+    <listitem>
+	<para>
+	    The named room. Room codes are typically short alphanumeric with
+	    a building prefix (e.g. "cw102").
+	</para>
+    </listitem>
+    </varlistentry>
+    <varlistentry>
+    <term>
+	<option>--rack <replaceable>RACK</replaceable></option>
+    </term>
+    <listitem>
+	<para>
+	    The named rack. Rack codes are typically short alphanumeric with
+	    a building prefix combined with a row/column designation (e.g. "cw1a").
+	</para>
+    </listitem>
+    </varlistentry>
+    <varlistentry>
+    <term>
+	<option>--desk <replaceable>DESK</replaceable></option>
+    </term>
+    <listitem>
+	<para>
+	    The named desk location.
+	</para>
+    </listitem>
+    </varlistentry>
+</variablelist>
+
+<!-- vim: set ai sw=4: -->

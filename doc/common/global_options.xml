@@ -38,7 +38,7 @@
     <!-- FIXME: - -slowstatus: do we need it documented? -->
     <arg choice="opt"><option>--aqport <replaceable>PORT</replaceable></option></arg>
     <arg choice="opt"><option>--aqhost <replaceable>FQDN</replaceable></option></arg>
-    <arg choice="opt"><option>--aquser <replaceable>USER</replaceable></option></arg>
+    <arg choice="opt"><option>--aqservice <replaceable>SERVICE</replaceable></option></arg>
 </synopfragment>
 
 <!-- vim: set ai sw=4: -->
