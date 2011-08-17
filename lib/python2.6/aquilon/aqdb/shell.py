@@ -54,11 +54,12 @@ from ipaddr import IPv4Address, IPv4Network
 db = DbFactory()
 Base.metadata.bind = db.engine
 
-temp_dir_name = None
-if not(os.access(os.environ['HOME'], os.W_OK)):
+base_dir = os.environ['HOME']
+if "IPYTHONDIR" in os.environ:
+    base_dir = os.environ["IPYTHONDIR"]
+if not(os.access(base_dir, os.W_OK)):
     #we can't write to our home directory, ipython can't handle this
-    msg = "%s is not writable, ipython would crash. Set $IPYTHONDIR" % (
-        os.environ['HOME'])
+    msg = "%s is not writable, ipython would crash. Set $IPYTHONDIR" % base_dir
     raise EnvironmentError(msg)
 
 
