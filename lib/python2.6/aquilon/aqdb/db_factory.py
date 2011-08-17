@@ -38,12 +38,15 @@ from StringIO import StringIO
 
 from aquilon.aqdb import depends
 from aquilon.config import Config
-from aquilon.utils import confirm
+from aquilon.utils import confirm, monkeypatch
 
 from sqlalchemy import MetaData, create_engine, text
+from sqlalchemy.ext.compiler import compiles
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.exceptions import SQLError, DatabaseError as SaDBError
 from sqlalchemy.interfaces import PoolListener
+from sqlalchemy.schema import CreateIndex
+from sqlalchemy.dialects.oracle.base import OracleDDLCompiler
 
 import ms.modulecmd as modcmd
 
@@ -57,6 +60,46 @@ assert config, 'No configuration in db_factory'
 
 if config.has_option("database", "module"):
     modcmd.load(config.get("database", "module"))
+
+
+# Add support for Oracle-specific index extensions
+@compiles(CreateIndex, 'oracle')
+def visit_create_index(create, compiler, **kw):
+    index = create.element
+    preparer = compiler.preparer
+
+    text = "CREATE "
+    if index.unique:
+        text += "UNIQUE "
+    if index.kwargs.get("oracle_bitmap", False):
+        text += "BITMAP "
+
+    # FIXME: this is really a per-column property, but Index.__init__ does not
+    # accept column expressions like "sqlalchemy.sql.desc(some_table.c.col)"
+    if index.kwargs.get("oracle_desc", False):
+        dirtxt = " DESC"
+    else:
+        dirtxt = ""
+
+    text += "INDEX %s ON %s (%s)" \
+            % (preparer.quote(compiler._index_identifier(index.name),
+                              index.quote),
+               preparer.format_table(index.table),
+               ', '.join(preparer.quote(c.name, c.quote) + dirtxt
+                         for c in index.columns))
+
+    if index.kwargs.get("oracle_compress", False):
+        text += " COMPRESS"
+
+    return text
+
+
+# Add support for table compression
+@monkeypatch(OracleDDLCompiler)
+def post_create_table(self, table):
+    if table.kwargs.get("oracle_compress", False):
+        return " COMPRESS"
+    return ""
 
 
 class ForeignKeySQLiteListener(PoolListener):
