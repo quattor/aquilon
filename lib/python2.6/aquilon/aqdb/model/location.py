@@ -158,12 +158,13 @@ class Location(Base):
 
         super(Location, self).__init__(**kwargs)
 
-    def update_parent(self, session, parent=None):
+    def update_parent(self, parent=None):
 
         if parent is not None:
             if not object_session(parent):
                 raise AquilonError("The parent must be persistent")
 
+        session = object_session(this)
         ## delete old location links
         flush_state = session.autoflush
         session.autoflush = False
@@ -184,7 +185,6 @@ class Location(Base):
             session.expire(parent, ["_child_links", "children"])
 
         session.autoflush = flush_state
-
 
 location = Location.__table__  # pylint: disable-msg=C0103, E1101
 

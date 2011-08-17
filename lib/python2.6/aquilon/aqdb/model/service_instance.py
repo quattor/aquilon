@@ -286,25 +286,25 @@ service_instance.info['unique_fields'] = ['name', 'service']
 # This was duplicated for personality_service_map below.
 ORACLE_SERVICE_MAP_EXISTS = """EXISTS (
 SELECT 1
-FROM service_instance si1, location l1, service_map sm1, service s1
+FROM service_instance si1, location_link l1, service_map sm1, service s1
 WHERE si1.service_id = s1.id
 AND service_instance.id = si1.id
 AND s1.id IS NOT NULL
 AND sm1.service_instance_id = si1.id
-AND sm1.location_id = l1.id
-AND l1.id in (
-    SELECT l2.id FROM location l2
-    WHERE LEVEL = (
-        SELECT MIN(LEVEL) FROM location l3
+AND sm1.location_id = l1.child_id
+AND l1.child_id in (
+    SELECT l2.child_id FROM location_link l2
+    WHERE distance = (
+        SELECT MIN(l3.distance) FROM location_link l3
         WHERE EXISTS (
             SELECT 1 FROM service_map sm4, service_instance si4
-            WHERE sm4.location_id = l3.id
+            WHERE sm4.location_id = l3.child_id
             AND sm4.service_instance_id = si4.id
             AND si4.service_id = s1.id
         )
-        CONNECT BY l3.id = PRIOR l3.parent_id START WITH l3.id = :location_id
+        CONNECT BY l3.child_id = PRIOR l3.parent_id START WITH l3.child_id = :location_id
     )
-    CONNECT BY l2.id = PRIOR l2.parent_id START WITH l2.id = :location_id
+    CONNECT BY l2.child_id = PRIOR l2.parent_id START WITH l2.child_id = :location_id
 )
 )"""
 
@@ -313,27 +313,27 @@ AND l1.id in (
 # service_map, which requires personality_id as an additional parameter.
 ORACLE_PERSONALITY_SERVICE_MAP_EXISTS = """EXISTS (
 SELECT 1
-FROM service_instance si1, location l1, personality_service_map sm1, service s1
+FROM service_instance si1, location_link l1, personality_service_map sm1, service s1
 WHERE si1.service_id = s1.id
 AND service_instance.id = si1.id
 AND s1.id IS NOT NULL
 AND sm1.service_instance_id = si1.id
-AND sm1.location_id = l1.id
+AND sm1.location_id = l1.child_id
 AND sm1.personality_id = :personality_id
-AND l1.id in (
-    SELECT l2.id FROM location l2
-    WHERE LEVEL = (
-        SELECT MIN(LEVEL) FROM location l3
+AND l1.child_id in (
+    SELECT l2.child_id FROM location_link l2
+    WHERE distance = (
+        SELECT MIN(l3.distance) FROM location_link l3
         WHERE EXISTS (
             SELECT 1 FROM personality_service_map sm4, service_instance si4
-            WHERE sm4.location_id = l3.id
+            WHERE sm4.location_id = l3.child_id
             AND sm4.service_instance_id = si4.id
             AND si4.service_id = s1.id
             AND sm4.personality_id = :personality_id
         )
-        CONNECT BY l3.id = PRIOR l3.parent_id START WITH l3.id = :location_id
+        CONNECT BY l3.child_id = PRIOR l3.parent_id START WITH l3.child_id = :location_id
     )
-    CONNECT BY l2.id = PRIOR l2.parent_id START WITH l2.id = :location_id
+    CONNECT BY l2.child_id = PRIOR l2.parent_id START WITH l2.child_id = :location_id
 )
 )"""
 
