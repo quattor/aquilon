@@ -71,8 +71,6 @@ class CommandAddSandbox(CommandGet):
                             comments=comments)
         session.add(dbsandbox)
         session.flush()
-        # Get the cleaned up version...
-        sandbox = dbsandbox.name
 
         # Currently this will fail if the branch already exists...
         # That seems like the right behavior.  It's an internal

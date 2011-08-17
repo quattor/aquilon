@@ -89,6 +89,20 @@ class TestDelSandbox(TestBrokerCommand):
         command = "show sandbox --sandbox changetest2"
         self.notfoundtest(command.split(" "))
 
+    def testdelcamelcasetest1sandbox(self):
+        command = "del sandbox --sandbox CamelCaseTest1"
+        (out, err) = self.successtest(command.split(" "))
+        self.assertEmptyOut(out, command)
+        sandboxdir = os.path.join(self.sandboxdir, "camelcasetest1")
+        self.matchoutput(err, "please `rm -rf %s`" % sandboxdir, command)
+
+    def testdelcamelcasetest2sandbox(self):
+        command = "del sandbox --sandbox camelcasetest2"
+        (out, err) = self.successtest(command.split(" "))
+        self.assertEmptyOut(out, command)
+        sandboxdir = os.path.join(self.sandboxdir, "camelcasetest2")
+        self.matchoutput(err, "please `rm -rf %s`" % sandboxdir, command)
+
     def testdelnonexisting(self):
         command = "del sandbox --sandbox sandbox-does-not-exist"
         (p, out, err) = self.runcommand(command.split(" "))
