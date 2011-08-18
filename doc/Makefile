@@ -46,13 +46,14 @@ clean:
 	-rm -rf man
 	-rm -f version.txt
 
+# MANIFEST generation is broken, using find instead...
 install-man: man
-	for file in `cat MAN.MANIFEST`; do \
+	for file in `find man -type f`; do \
 		install -m 644 -D "$$file" "$(DESTDIR)/$$file"; \
 	done
 
 install-html: html
-	for file in `cat HTML.MANIFEST`; do \
+	for file in `find html -type f`; do \
 		install -m 644 -D "$$file" "$(DESTDIR)/$$file"; \
 	done
 
