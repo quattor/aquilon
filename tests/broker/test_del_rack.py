@@ -108,6 +108,29 @@ class TestDelRack(TestBrokerCommand):
         command = "show rack --rack cards1"
         self.notfoundtest(command.split(" "))
 
+    def testdelracknetwork(self):
+        test_rack = "ut9"
+
+        # add network to rack
+        self.noouttest(["add_network", "--ip", "192.176.6.0",
+                        "--network", "test_warn_network",
+                        "--netmask", "255.255.255.0",
+                        "--rack", test_rack,
+                        "--type", "unknown",
+                        "--comments", "Made-up network"])
+
+
+        # try delete rack
+        command = "del rack --rack %s" % test_rack
+        err = self.badrequesttest(command.split(" "))
+        self.matchoutput(err,
+                         "Bad Request: Could not delete rack %s. Networks "
+                         "were found using this location." % test_rack,
+                         command)
+
+        # delete network
+        self.noouttest(["del_network", "--ip", "192.176.6.0"])
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelRack)

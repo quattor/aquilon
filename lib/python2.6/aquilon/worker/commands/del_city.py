@@ -34,8 +34,9 @@ from aquilon.worker.processes import DSDBRunner
 from aquilon.worker.dbwrappers.location import get_location
 from aquilon.worker.templates.city import PlenaryCity
 from aquilon.worker.locks import lock_queue
+from aquilon.worker.commands.del_location import CommandDelLocation
 
-class CommandDelCity(BrokerCommand):
+class CommandDelCity(CommandDelLocation):
 
     required_parameters = ["city"]
 
@@ -43,7 +44,8 @@ class CommandDelCity(BrokerCommand):
         dbcity = get_location(session, city=city)
         label = dbcity.name
         plenary = PlenaryCity(dbcity, logger=logger)
-        session.delete(dbcity)
+        CommandDelLocation.render(self, session=session, name=city,
+                                  type='city', **arguments)
         session.flush()
 
         key = plenary.get_remove_key()

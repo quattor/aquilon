@@ -27,7 +27,7 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-"""Module for testing the del room command."""
+"""Module for testing the add/del/show country command."""
 
 import unittest
 
@@ -38,47 +38,74 @@ if __name__ == "__main__":
 from brokertest import TestBrokerCommand
 
 
-class TestDelRoom(TestBrokerCommand):
+class TestCountry(TestBrokerCommand):
 
-    def testdelutroom1(self):
-        command = "del room --room utroom1"
-        self.noouttest(command.split(" "))
+    def testadd(self):
 
-    def testverifydelutroom1(self):
-        command = "show room --room utroom1"
+        command = ["add", "country", "--country", "ct", "--fullname",
+                   "country example", "--continent", "na",
+                   "--comments", "test country"]
+        self.noouttest(command)
+
+
+    def testaddshow(self):
+        command = "show country --country ct"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Country: ct", command)
+        self.matchoutput(out, "  Fullname: country example", command)
+        self.matchoutput(out, "  Comments: test country", command)
+        self.matchoutput(out,
+                         "  Location Parents: [Organization ms, Hub ny, "
+                         "Continent na]",
+                         command)
+
+        command = "show country --all"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Country: ct", command)
+
+    def testverifydel(self):
+        command = "show country --country ct"
         out = self.notfoundtest(command.split(" "))
-        self.matchoutput(out, "Room utroom1 not found.", command)
+        self.matchoutput(out, "Country ct not found.", command)
 
-    def testdelroomnotexist(self):
-        command = "del room --room room-does-not-exist"
-        out = self.notfoundtest(command.split(" "))
-        self.matchoutput(out, "Room room-does-not-exist not found.", command)
+        command = "show country --all"
+        out = self.commandtest(command.split(" "))
+        self.matchclean(out, "Country: ct", command)
 
-    def testdelroomnetwork(self):
-        test_room = "utroom1"
 
-        # add network to room
+    def testdel(self):
+        test_country = "ct"
+
+        # add network to hub
         self.noouttest(["add_network", "--ip", "192.176.6.0",
                         "--network", "test_warn_network",
                         "--netmask", "255.255.255.0",
-                        "--room", test_room,
+                        "--country", test_country,
                         "--type", "unknown",
                         "--comments", "Made-up network"])
 
 
-        # try delete room
-        command = "del room --room %s" % test_room
+        # try delete country
+        command = "del country --country %s" % test_country
         err = self.badrequesttest(command.split(" "))
         self.matchoutput(err,
-                         "Bad Request: Could not delete room %s. Networks "
-                         "were found using this location." % test_room,
+                         "Bad Request: Could not delete country %s. Networks "
+                         "were found using this location." % test_country,
                          command)
 
         # delete network
         self.noouttest(["del_network", "--ip", "192.176.6.0"])
 
+    def testdel01(self):
+        command = "del country --country ct"
+        self.noouttest(command.split(" "))
+
+        ## delete country again
+        command = "del country --country ct"
+        out = self.notfoundtest(command.split(" "))
+        self.matchoutput(out, "Country ct not found.", command)
 
 if __name__ == '__main__':
-    suite = unittest.TestLoader().loadTestsFromTestCase(TestDelRoom)
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestCountry)
     unittest.TextTestRunner(verbosity=2).run(suite)
 

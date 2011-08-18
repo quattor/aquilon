@@ -31,9 +31,9 @@
 
 from sqlalchemy.orm.exc import NoResultFound
 
-from aquilon.exceptions_ import NotFoundException
+from aquilon.exceptions_ import NotFoundException, ArgumentError
 from aquilon.worker.broker import BrokerCommand
-from aquilon.aqdb.model import Location
+from aquilon.aqdb.model import Location, Network
 
 
 class CommandDelLocation(BrokerCommand):
@@ -47,5 +47,10 @@ class CommandDelLocation(BrokerCommand):
         except NoResultFound:
             raise NotFoundException("%s %s not found." %
                                     (type.capitalize(), name))
+        q = session.query(Network).filter_by(location=dblocation)
+        if q.count():
+            raise ArgumentError("Could not delete %s %s."
+                                " Networks were found using this location."
+                                % (type,name))
         session.delete(dblocation)
         return

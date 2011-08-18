@@ -43,7 +43,7 @@ from brokertest import TestBrokerCommand
 class TestDelCity(TestBrokerCommand):
     """ test delete city functionality """
 
-    def test_delex(self):
+    def test_delex_02(self):
         command = ["del_city", "--city=ex"]
         self.dsdb_expect("delete_city_aq -city ex")
         self.successtest(command)
@@ -52,6 +52,28 @@ class TestDelCity(TestBrokerCommand):
                                "site", "americas", "ex", "config.tpl")
         self.failIf(os.path.exists(plenary), "plenary still there after del")
 
+
+    def test_delex_01(self):
+        test_city = "ex"
+
+        # add network to city
+        self.noouttest(["add_network", "--ip", "192.176.6.0",
+                        "--network", "test_warn_network",
+                        "--netmask", "255.255.255.0",
+                        "--city", test_city,
+                        "--type", "unknown",
+                        "--comments", "Made-up network"])
+
+
+        # try delete city
+        command = "del_city --city %s" % test_city
+        err = self.badrequesttest(command.split(" "))
+        self.matchoutput(err,
+                         "Bad Request: Could not delete city %s. Networks "
+                         "were found using this location." % test_city,
+                         command)
+        # delete network
+        self.noouttest(["del_network", "--ip", "192.176.6.0"])
 
 
 if __name__ == '__main__':

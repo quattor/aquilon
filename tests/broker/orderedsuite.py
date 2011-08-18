@@ -69,7 +69,9 @@ from test_add_personality import TestAddPersonality
 from test_add_service import TestAddService
 from test_update_service import TestUpdateService
 from test_add_required_service import TestAddRequiredService
+from test_country import TestCountry
 from test_organization import TestOrganization
+from test_hub import TestHub
 from test_add_building import TestAddBuilding
 from test_add_city import TestAddCity
 from test_add_room import TestAddRoom
@@ -252,6 +254,7 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestMergeConflicts,
                 TestAddArchetype, TestAddOS, TestAddPersonality,
                 TestAddService, TestUpdateService, TestAddRequiredService,
+                TestCountry, TestOrganization, TestHub,
                 TestAddCity,
                 TestAddBuilding, TestAddRoom, TestAddLocation,
                 TestAddRack, TestAddVendor, TestAddCpu, TestAddModel,
@@ -337,6 +340,6 @@ class BrokerTestSuite(unittest.TestSuite):
             self.addTest(unittest.TestLoader().loadTestsFromTestCase(test))
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = BrokerTestSuite()
     unittest.TextTestRunner(verbosity=2).run(suite)
