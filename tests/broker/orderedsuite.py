@@ -245,7 +245,7 @@ class BrokerTestSuite(unittest.TestSuite):
     def __init__(self, *args, **kwargs):
         unittest.TestSuite.__init__(self, *args, **kwargs)
         for test in [TestBrokerStart,
-                TestPing, TestStatus, TestShowActiveCommands,
+                TestPing, TestStatus,
                 TestPermission,
                 TestAddDnsDomain, TestAddDnsEnvironment,
                 TestAddSandbox, TestAddDomain, TestUpdateBranch,
@@ -335,7 +335,7 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestDelPersonality, TestDelOS, TestDelArchetype,
                 TestDelDomain, TestDelSandbox,
                 TestDelDnsEnvironment, TestDelDnsDomain,
-                TestClientFailure, TestAudit,
+                TestClientFailure, TestAudit, TestShowActiveCommands,
                 TestBrokerStop]:
             self.addTest(unittest.TestLoader().loadTestsFromTestCase(test))
 
