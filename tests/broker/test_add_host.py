@@ -36,7 +36,7 @@ if __name__ == "__main__":
     import utils
     utils.import_depends()
 
-from brokertest import TestBrokerCommand
+from brokertest import TestBrokerCommand, DummyIP
 
 
 class TestAddHost(TestBrokerCommand):
@@ -423,6 +423,18 @@ class TestAddHost(TestBrokerCommand):
         self.matchoutput(out, "Template: windows/os/windows/generic/config.tpl",
                          command)
 
+    def testaddf5(self):
+        # The IP address is also a /32 network
+        ip = self.net.unknown[16].ip
+        self.dsdb_expect_add("f5test.aqd-unittest.ms.com", ip, "eth0",
+                             DummyIP(ip).mac)
+        command = ["add", "host", "--hostname", "f5test.aqd-unittest.ms.com",
+                   "--machine", "f5test", "--ip", ip,
+                   "--archetype", "f5", "--domain", "unittest",
+                   "--osname", "f5", "--osversion", "generic"]
+        self.noouttest(command)
+        self.dsdb_verify()
+
     def testverifyhostall(self):
         command = ["show", "host", "--all"]
         out = self.commandtest(command)
@@ -436,6 +448,8 @@ class TestAddHost(TestBrokerCommand):
         self.matchoutput(out, "evh51.aqd-unittest.ms.com", command)
         self.matchoutput(out, "test-aurora-default-os.ms.com", command)
         self.matchoutput(out, "test-windows-default-os.msad.ms.com", command)
+        self.matchoutput(out, "f5test.aqd-unittest.ms.com", command)
+
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddHost)

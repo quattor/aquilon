@@ -96,21 +96,21 @@ def check_ip_restrictions(dbnetwork, ip):
     if ip < dbnetwork.ip or ip > dbnetwork.broadcast:  # pragma: no cover
         raise InternalError("IP address {0!s} is outside "
                             "{1:l}.".format(ip, dbnetwork))
-    if ip == dbnetwork.ip:
-        raise ArgumentError("IP address %s is the address of network %s." %
-                            (ip, dbnetwork.name))
-    if ip == dbnetwork.broadcast:
-        raise ArgumentError("IP address %s is the broadcast address of "
-                            "network %s." % (ip, dbnetwork.name))
+    if dbnetwork.network.numhosts >= 4:
+        # Skip these checks for /32 and /31 networks
+        if ip == dbnetwork.ip:
+            raise ArgumentError("IP address %s is the address of network %s." %
+                                (ip, dbnetwork.name))
+        if ip == dbnetwork.broadcast:
+            raise ArgumentError("IP address %s is the broadcast address of "
+                                "network %s." % (ip, dbnetwork.name))
 
-    if dbnetwork.network.numhosts < 8:
-        # This network doesn't have enough addresses, the test is irrelevant.
-        return
-
-    if int(ip) - int(dbnetwork.ip) in dbnetwork.reserved_offsets:
-        raise ArgumentError("The IP address %s is reserved for dynamic "
-                            "DHCP for a switch on subnet %s." %
-                            (ip, dbnetwork.ip))
+    if dbnetwork.network.numhosts >= 8:
+        # If this network doesn't have enough addresses, the test is irrelevant.
+        if int(ip) - int(dbnetwork.ip) in dbnetwork.reserved_offsets:
+            raise ArgumentError("The IP address %s is reserved for dynamic "
+                                "DHCP for a switch on subnet %s." %
+                                (ip, dbnetwork.ip))
     return
 
 def generate_ip(session, dbinterface, ip=None, ipfromip=None,

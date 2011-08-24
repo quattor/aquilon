@@ -35,7 +35,7 @@ if __name__ == "__main__":
     import utils
     utils.import_depends()
 
-from brokertest import TestBrokerCommand
+from brokertest import TestBrokerCommand, DummyIP
 
 
 class TestAddInterface(TestBrokerCommand):
@@ -708,7 +708,13 @@ class TestAddInterface(TestBrokerCommand):
         self.searchoutput(out, r"\s+Comments: interface for jack",
                           command)
 
+    def testaddf5iface(self):
+        ip = DummyIP(self.net.unknown[16].ip)
+        command = ["add", "interface", "--machine", "f5test",
+                   "--interface", "eth0", "--mac", ip.mac]
+        self.noouttest(command)
 
-if __name__=='__main__':
+
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddInterface)
     unittest.TextTestRunner(verbosity=2).run(suite)
