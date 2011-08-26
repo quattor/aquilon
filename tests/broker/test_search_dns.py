@@ -93,8 +93,8 @@ class TestSearchDns(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out, "Reserved Name: %s" % self.aurora_with_node,
                          command)
-        self.matchclean(out, "DNS Record", command)
-        self.matchclean(out, "Alias", command)
+        self.matchclean(out, "DNS Record:", command)
+        self.matchclean(out, "Alias:", command)
 
     def testbytarget(self):
         command = ["search", "dns", "--target", "arecord13.aqd-unittest.ms.com",

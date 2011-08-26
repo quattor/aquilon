@@ -63,8 +63,8 @@ class TestUpdateAlias(TestBrokerCommand):
                    "--target", "no-such-name.aqd-unittest.ms.com"]
         out = self.notfoundtest(command)
         self.matchoutput(out,
-                         "Fqdn no-such-name, DNS environment internal, DNS "
-                         "domain aqd-unittest.ms.com not found.",
+                         "Target FQDN no-such-name.aqd-unittest.ms.com "
+                         "does not exist.",
                          command)
 
     def test_210_not_an_alias(self):
@@ -101,6 +101,44 @@ class TestUpdateAlias(TestBrokerCommand):
         self.matchoutput(out, "Aliases: alias.ms.com, "
                          "alias2alias.aqd-unittest.ms.com, "
                          "alias2host.aqd-unittest.ms.com", command)
+
+    def test_400_repoint_restrict1(self):
+        command = ["update", "alias", "--fqdn", "restrict1.aqd-unittest.ms.com",
+                   "--target", "target2.restrict.aqd-unittest.ms.com"]
+        self.noouttest(command)
+
+    def test_410_verify_target(self):
+        command = ["search", "dns", "--fullinfo",
+                   "--fqdn", "target.restrict.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.searchoutput(out, r'Aliases: restrict2.aqd-unittest.ms.com$',
+                          command)
+
+    def test_410_verify_target2(self):
+        command = ["search", "dns", "--fullinfo",
+                   "--fqdn", "target2.restrict.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.searchoutput(out, r'Aliases: restrict1.aqd-unittest.ms.com$',
+                          command)
+
+    def test_420_repoint_restrict2(self):
+        command = ["update", "alias", "--fqdn", "restrict2.aqd-unittest.ms.com",
+                   "--target", "target2.restrict.aqd-unittest.ms.com"]
+        self.noouttest(command)
+
+    def test_430_verify_target_gone(self):
+        command = ["search", "dns", "--fullinfo",
+                   "--fqdn", "target.restrict.aqd-unittest.ms.com"]
+        self.notfoundtest(command)
+
+    def test_430_verify_target2(self):
+        command = ["search", "dns", "--fullinfo",
+                   "--fqdn", "target2.restrict.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out,
+                         "Aliases: restrict1.aqd-unittest.ms.com, "
+                         "restrict2.aqd-unittest.ms.com",
+                         command)
 
 
 if __name__ == '__main__':

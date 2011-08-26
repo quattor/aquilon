@@ -65,7 +65,29 @@ class TestDelAlias(TestBrokerCommand):
         self.noouttest(command)
         self.dsdb_verify()
 
+    def test_300_del_restrict1(self):
+        command = ["del", "alias", "--fqdn", "restrict1.aqd-unittest.ms.com"]
+        self.noouttest(command)
 
-if __name__=='__main__':
+    def test_301_verify_target(self):
+        # There was a second alias, so the target must still exist
+        command = ["search", "dns", "--fullinfo",
+                   "--fqdn", "target2.restrict.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out,
+                         "Reserved Name: target2.restrict.aqd-unittest.ms.com",
+                         command)
+
+    def test_310_del_autotarget(self):
+        command = ["del", "alias", "--fqdn", "restrict2.aqd-unittest.ms.com"]
+        self.noouttest(command)
+
+    def test_311_verify_target_gone(self):
+        command = ["search", "dns", "--fullinfo",
+                   "--fqdn", "target2.restrict.aqd-unittest.ms.com"]
+        self.notfoundtest(command)
+
+
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelAlias)
     unittest.TextTestRunner(verbosity=2).run(suite)

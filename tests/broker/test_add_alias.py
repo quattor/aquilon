@@ -81,6 +81,24 @@ class TestAddAlias(TestBrokerCommand):
                          "restricted, aliases are not allowed.",
                          cmd)
 
+    def test_200_autocreate_target(self):
+        cmd = ["add", "alias", "--fqdn", "restrict1.aqd-unittest.ms.com",
+               "--target", "target.restrict.aqd-unittest.ms.com"]
+        self.noouttest(cmd)
+
+    def test_201_verify_autocreate(self):
+        cmd = ["search", "dns", "--fullinfo",
+               "--fqdn", "target.restrict.aqd-unittest.ms.com"]
+        out = self.commandtest(cmd)
+        self.matchoutput(out,
+                         "Reserved Name: target.restrict.aqd-unittest.ms.com",
+                         cmd)
+
+    def test_210_autocreate_second_alias(self):
+        cmd = ["add", "alias", "--fqdn", "restrict2.aqd-unittest.ms.com",
+               "--target", "target.restrict.aqd-unittest.ms.com"]
+        self.noouttest(cmd)
+
     def test_400_verify_alias2host(self):
         cmd = "show alias --fqdn alias2host.aqd-unittest.ms.com"
         out = self.commandtest(cmd.split(" "))
@@ -119,14 +137,7 @@ class TestAddAlias(TestBrokerCommand):
                          "alias2host.aqd-unittest.ms.com",
                          cmd)
 
-    #def test_610_verify_alias2alias_djb(self):
-    #    cmd = "show alias --fqdn alias2alias.aqd-unittest.ms.com"
-    #    out = self.commandtest(cmd.split(" "))
-    #    self.matchoutput(out,
-    #                     'Calias2alias.aqd-unittest.ms.com:alias2host.aqd-unittest.ms.com:::',
-    #                     cmd)
 
-
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddAlias)
     unittest.TextTestRunner(verbosity=2).run(suite)
