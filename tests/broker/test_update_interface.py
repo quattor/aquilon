@@ -136,6 +136,8 @@ class TestUpdateInterface(TestBrokerCommand):
                           r'"gateway", "%s",\s*'
                           r'"ip", "%s",\s*'
                           r'"netmask", "%s",\s*'
+                          r'"network_environment", "internal",\s*'
+                          r'"network_type", "unknown",\s*'
                           r'"route", list\(\s*'
                           r'nlist\(\s*'
                           r'"address", "250.250.0.0",\s*'
@@ -153,7 +155,9 @@ class TestUpdateInterface(TestBrokerCommand):
                           r'"broadcast", "%s",\s*'
                           r'"gateway", "%s",\s*'
                           r'"ip", "%s",\s*'
-                          r'"netmask", "%s"\s*\)' %
+                          r'"netmask", "%s",\s*'
+                          r'"network_environment", "internal",\s*'
+                          r'"network_type", "unknown"\s*\)\s*' %
                           (net.broadcast, net.gateway,
                            eth1ip, net.netmask),
                           command)

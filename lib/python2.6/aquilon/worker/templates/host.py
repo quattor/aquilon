@@ -223,6 +223,8 @@ class PlenaryToplevelHost(Plenary):
                     ifdesc["netmask"] = net.netmask
                     ifdesc["broadcast"] = net.broadcast
                     ifdesc["gateway"] = gateway
+                    ifdesc["network_type"] = net.network_type
+                    ifdesc["network_environment"] = net.network_environment.name
                     if addr.dns_records:
                         ifdesc["fqdn"] = addr.dns_records[0]
                 else:

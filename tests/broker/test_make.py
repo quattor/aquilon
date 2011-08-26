@@ -140,7 +140,9 @@ class TestMake(TestBrokerCommand):
                           r'"fqdn", "unittest20-e0.aqd-unittest.ms.com",\s*'
                           r'"gateway", "%s",\s*'
                           r'"ip", "%s",\s*'
-                          r'"netmask", "%s"\s*\)' %
+                          r'"netmask", "%s",\s*'
+                          r'"network_environment", "internal",\s*'
+                          r'"network_type", "unknown"\s*\)\s*' %
                           (eth0_broadcast, eth0_gateway, eth0_ip, eth0_netmask),
                           command)
         self.searchoutput(out,
@@ -156,7 +158,9 @@ class TestMake(TestBrokerCommand):
                           r'"fqdn", "unittest20-e1.aqd-unittest.ms.com",\s*'
                           r'"gateway", "%s",\s*'
                           r'"ip", "%s",\s*'
-                          r'"netmask", "%s"\s*\)' %
+                          r'"netmask", "%s",\s*'
+                          r'"network_environment", "internal",\s*'
+                          r'"network_type", "unknown"\s*\)\s*' %
                           (eth1_broadcast, eth1_1_ip, eth1_netmask,
                            eth1_broadcast, eth1_gateway, eth1_ip, eth1_netmask),
                           command)
@@ -193,7 +197,9 @@ class TestMake(TestBrokerCommand):
                           r'"fqdn", "unittest23.aqd-unittest.ms.com",\s*'
                           r'"gateway", "%s",\s*'
                           r'"ip", "%s",\s*'
-                          r'"netmask", "%s"\s*\)' %
+                          r'"netmask", "%s",\s*'
+                          r'"network_environment", "internal",\s*'
+                          r'"network_type", "vpls"\s*\)\s*' %
                           (net.broadcast, router, ip, net.netmask),
                           command)
         self.matchoutput(out, "'/system/network/default_gateway' = \"%s\";" %
@@ -218,7 +224,9 @@ class TestMake(TestBrokerCommand):
                           r'"fqdn", "unittest24.aqd-unittest.ms.com",\s*'
                           r'"gateway", "%s",\s*'
                           r'"ip", "%s",\s*'
-                          r'"netmask", "%s"\s*\)' %
+                          r'"netmask", "%s",\s*'
+                          r'"network_environment", "internal",\s*'
+                          r'"network_type", "vpls"\s*\)\s*' %
                           (net.broadcast, router, ip, net.netmask),
                           command)
         self.matchoutput(out, "'/system/network/default_gateway' = \"%s\";" %
@@ -243,7 +251,9 @@ class TestMake(TestBrokerCommand):
                           r'"fqdn", "unittest25-e1.utcolo.aqd-unittest.ms.com",\s*'
                           r'"gateway", "%s",\s*'
                           r'"ip", "%s",\s*'
-                          r'"netmask", "%s"\s*\)' %
+                          r'"netmask", "%s",\s*'
+                          r'"network_environment", "utcolo",\s*'
+                          r'"network_type", "unknown"\s*\)\s*' %
                           (net.broadcast, router, ip, net.netmask),
                           command)
 

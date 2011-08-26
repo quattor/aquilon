@@ -91,7 +91,9 @@ class TestDelStaticRoute(TestBrokerCommand):
                           r'"fqdn", "unittest26-e1.aqd-unittest.ms.com",\s*'
                           r'"gateway", "%s",\s*'
                           r'"ip", "%s",\s*'
-                          r'"netmask", "%s"\s*\)' %
+                          r'"netmask", "%s",\s*'
+                          r'"network_environment", "internal",\s*'
+                          r'"network_type", "unknown"\s*\)' %
                           (net.broadcast, net.gateway, ip, net.netmask),
                           command)
 

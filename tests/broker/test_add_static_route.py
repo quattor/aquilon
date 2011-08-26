@@ -109,7 +109,9 @@ class TestAddStaticRoute(TestBrokerCommand):
                           r'"fqdn", "unittest26.aqd-unittest.ms.com",\s*'
                           r'"gateway", "%s",\s*'
                           r'"ip", "%s",\s*'
-                          r'"netmask", "%s"\s*\)' %
+                          r'"netmask", "%s",\s*'
+                          r'"network_environment", "internal",\s*'
+                          r'"network_type", "unknown"\s*\)' %
                           (eth0_net.broadcast, eth0_net.gateway, eth0_ip,
                            eth0_net.netmask),
                           command)
@@ -121,6 +123,8 @@ class TestAddStaticRoute(TestBrokerCommand):
                           r'"gateway", "%s",\s*'
                           r'"ip", "%s",\s*'
                           r'"netmask", "%s",\s*'
+                          r'"network_environment", "internal",\s*'
+                          r'"network_type", "unknown",\s*'
                           r'"route", list\(\s*'
                           r'nlist\(\s*'
                           r'"address", "192.168.250.0",\s*'
@@ -150,7 +154,9 @@ class TestAddStaticRoute(TestBrokerCommand):
                           r'"fqdn", "unittest02.one-nyp.ms.com",\s*'
                           r'"gateway", "%s",\s*'
                           r'"ip", "%s",\s*'
-                          r'"netmask", "%s"\s*\)' %
+                          r'"netmask", "%s",\s*'
+                          r'"network_environment", "internal",\s*'
+                          r'"network_type", "unknown"\s*\)\s*' %
                           (net.broadcast, net.gateway,
                            eth0ip, net.netmask),
                           command)
