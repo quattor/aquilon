@@ -98,6 +98,20 @@ class TestAdd10GigHardware(TestBrokerCommand):
             self.noouttest(["update_esx_cluster", "--cluster=npecl%d" % i,
                             "--switch=np01ga2s03.one-nyp.ms.com"])
 
+    def test_095_unused_pg(self):
+        # If
+        # - the machine has a host defined,
+        # - the host is in a cluster,
+        # - and the cluster has a switch,
+        # then setting an invalid port group is an error.
+        # TODO: why is this not an error if the above conditions do not hold?
+        command = ["add", "interface", "--machine", "evh51.aqd-unittest.ms.com",
+                   "--interface", "eth2", "--pg", "unused-v999"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "VLAN 999 not found for switch ut01ga2s01.aqd-unittest.ms.com.",
+                         command)
+
     def test_100_addinterfaces(self):
         # Skip index 8 and 17 - these will fail.
         for i in range(0, 8) + range(9, 17):
@@ -341,6 +355,15 @@ class TestAdd10GigHardware(TestBrokerCommand):
                        "--osname=linux", "--osversion=4.0.1-x86_64"]
             (out, err) = self.successtest(command)
         self.dsdb_verify()
+
+    def test_710_bad_pg(self):
+        command = ["add", "interface", "--machine", "ivirt1.aqd-unittest.ms.com",
+                   "--interface", "eth1", "--pg", "unused-v999"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "Cannot verify port group availability: no record "
+                         "for VLAN 999 on switch ut01ga2s01.aqd-unittest.ms.com.",
+                         command)
 
     # This is verifying test_700, so logic applies for determing
     # the IP addresses autoIP will give out

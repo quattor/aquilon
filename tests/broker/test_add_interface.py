@@ -632,10 +632,8 @@ class TestAddInterface(TestBrokerCommand):
                           % self.net.vm_storage_net[0].usable[0].mac,
                           command)
 
-
     # This does not test the offset functionality. These commands fail b/c
     # the interface already has an address.
-    #
     #def testbadtornetoffset(self):
     #    """ ensure we can't use the reserved address space in tor_net4 """
     #    for i in range(0,16):

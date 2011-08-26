@@ -287,10 +287,10 @@ def verify_port_group(dbmachine, port_group):
         except NoResultFound:
             raise ArgumentError("Cannot verify port group availability: "
                                 "no record for VLAN {0} on "
-                                "{1:l}.".format(vlan_id, dbswitch))
+                                "{1:l}.".format(dbvi.vlan_id, dbswitch))
         except MultipleResultsFound:
             raise InternalError("Too many subnets found for VLAN {0} "
-                                "on {1:l}.".format(vlan_id, dbswitch))
+                                "on {1:l}.".format(dbvi.vlan_id, dbswitch))
         if dbobserved_vlan.is_at_guest_capacity:
             raise ArgumentError("Port group {0} is full for "
                                 "{1:l}.".format(dbvi.port_group,
