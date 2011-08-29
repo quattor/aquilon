@@ -74,7 +74,7 @@ from aquilon.worker.broker import BrokerCommand, ERROR_TO_CODE
 from aquilon.worker import commands
 from aquilon.worker.processes import cache_version
 from aquilon.utils import (force_int, force_float, force_boolean, force_ipv4,
-                           force_mac)
+                           force_mac, force_ascii)
 
 
 class ResponsePage(resource.Resource):
@@ -372,7 +372,9 @@ class RestServer(ResponsePage):
                         elif paramtype == "mac":
                             myinstance.parameter_checks[option_name] = force_mac
                         elif paramtype == "string" or paramtype == "file":
-                            pass
+                            # Current twisted can't handle unicode output, so
+                            # do not allow non-ASCII input either
+                            myinstance.parameter_checks[option_name] = force_ascii
                         else:  # pragma: no cover
                             log.msg("Warning: unknown option type %s" % paramtype)
                     else:  # pragma: no cover
