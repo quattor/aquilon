@@ -47,17 +47,13 @@ class CommandAddDisk(BrokerCommand):
 
     REGEX_CAPACITY = re.compile("\d+:\d+$")
 
-    def _get_nasassign_obj(self, machine, dbmachine, disk, dbuser, size):
+    def _get_nasassign_obj(self, dbmachine, disk, dbuser, size):
         """request an auto share assignment from Resource Pool"""
-        uname = str(dbuser.name)
-        if dbmachine.location.rack:
-            rack = dbmachine.location.rack.name
-        else:
-            raise ArgumentError("Machine %s is not associated with a rack."
-                                % machine)
-        nasassign_obj = NASAssign(machine=machine, disk=disk,
-                                  owner=uname, rack=rack, size=size)
-        return nasassign_obj
+        if not dbmachine.location.rack:
+            raise ArgumentError("{0} is not associated with a rack."
+                                .format(dbmachine))
+        return NASAssign(machine=dbmachine.label, disk=disk, owner=dbuser.name,
+                         rack=dbmachine.location.rack.name, size=size)
 
     def _verify_share(self, session, share, autoshare, address):
         """get share (NAS) objects from aqdb"""
@@ -141,7 +137,7 @@ class CommandAddDisk(BrokerCommand):
             dbmetacluster = None
 
         if autoshare:
-            nasassign_obj = self._get_nasassign_obj(machine, dbmachine, disk, dbuser, size)
+            nasassign_obj = self._get_nasassign_obj(dbmachine, disk, dbuser, size)
             share = nasassign_obj.create()
 
         try:
