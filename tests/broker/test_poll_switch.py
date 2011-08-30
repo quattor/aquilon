@@ -42,10 +42,27 @@ from brokertest import TestBrokerCommand
 
 class TestPollSwitch(TestBrokerCommand):
 
+    # test_prebind_server runs too late...
+    def testbindpollhelper(self):
+        service = self.config.get("broker", "poll_helper_service")
+        self.noouttest(["bind", "server", "--service", service,
+                        "--instance", "unittest",
+                        "--hostname", "nyaqd1.ms.com"])
+
+    # test_map_service runs too late...
+    def testmappollhelper(self):
+        service = self.config.get("broker", "poll_helper_service")
+        self.noouttest(["map", "service", "--service", service,
+                        "--instance", "unittest", "--building", "ut"])
+
     def testpollnp06bals03(self):
         # Issues deprecated warning.
-        self.successtest(["poll", "tor_switch",
-                          "--tor_switch", "np06bals03.ms.com"])
+        command = ["poll", "tor_switch", "--tor_switch", "np06bals03.ms.com"]
+        (out, err) = self.successtest(command)
+        self.matchoutput(err, "Command poll_tor_switch is deprecated, please "
+                         "use poll_switch instead.", command)
+        self.matchoutput(err, "No jump host for np06bals03.ms.com, calling "
+                         "CheckNet directly.", command)
 
     # Tests re-polling np06bals03 and polls np06fals01
     def testpollnp7(self):
@@ -139,6 +156,13 @@ class TestPollSwitch(TestBrokerCommand):
                          "714, because network bitmask value 24 differs from "
                          "prefixlen 26 of network 4.2.6.192.",
                          command)
+        service = self.config.get("broker", "poll_helper_service")
+        self.matchoutput(err,
+                         "Using jump host nyaqd1.ms.com from service instance "
+                         "%s/unittest, mapped to building ut to run CheckNet "
+                         "for switch ut01ga2s01.aqd-unittest.ms.com." %
+                         (service),
+                         command)
 
     def testverifypollut01ga2s01(self):
         command = "show tor_switch --tor_switch ut01ga2s01.aqd-unittest.ms.com"
@@ -160,10 +184,17 @@ class TestPollSwitch(TestBrokerCommand):
         self.matchoutput(out, "VLAN 713: %s" % self.net.unknown[5].ip, command)
         self.matchclean(out, "VLAN 714", command)
 
+    def testverifyut11s01p1(self):
+        command = "show machine --machine ut11s01p1"
+        out = self.commandtest(command.split())
+        self.matchoutput(out,
+                         "Last switch poll: "
+                         "ut01ga2s01.aqd-unittest.ms.com port 1 [",
+                         command)
+
     def testpollut01ga2s02(self):
-        # Issues deprecated warning.
-        self.successtest(["poll", "tor_switch", "--vlan",
-                          "--tor_switch", "ut01ga2s02.aqd-unittest.ms.com"])
+        self.successtest(["poll", "switch", "--vlan",
+                          "--switch", "ut01ga2s02.aqd-unittest.ms.com"])
 
     def testverifypollut01ga2s02(self):
         command = "show tor_switch --tor_switch ut01ga2s02.aqd-unittest.ms.com"

@@ -219,7 +219,12 @@ class TestUnmapService(TestBrokerCommand):
         out = self.badoptiontest(command)
         self.matchoutput(out, "Not all mandatory options specified!", command)
 
+    def testunmappollhelper(self):
+        service = self.config.get("broker", "poll_helper_service")
+        self.noouttest(["unmap", "service", "--building", "ut",
+                        "--service", service, "--instance", "unittest"])
 
-if __name__=='__main__':
+
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestUnmapService)
     unittest.TextTestRunner(verbosity=2).run(suite)

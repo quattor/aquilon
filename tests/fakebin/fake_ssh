@@ -1,0 +1,26 @@
+#! /bin/sh
+
+error () {
+    echo "$@" 1>&2
+    exit 1
+}
+
+# Skip anything that looks like an ssh option
+while true; do
+	case "$1" in
+		-[bcDeFiLlmopRS]) shift 2;;
+		-[1246AaCfgkMNnqsTtVvXxY]) shift;;
+		-*) error "I don't know anything about option $1";;
+		*) break;;
+	esac
+done
+
+# Skip the remote host name
+test -n "$1" || error "Missing host name"
+shift
+
+# Check if there's anything to run
+test -n "$1" || error "Interactive use is not supported, please specify a command"
+
+# Execute the command locally
+exec "$@"

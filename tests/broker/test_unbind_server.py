@@ -186,6 +186,12 @@ class TestUnbindServer(TestBrokerCommand):
                 (out, err) = self.successtest(command)
                 self.assertEmptyOut(out, command)
 
+    def testunbindpollhelper(self):
+        service = self.config.get("broker", "poll_helper_service")
+        self.successtest(["unbind", "server", "--hostname", "nyaqd1.ms.com",
+                          "--service", service, "--instance", "unittest"])
+
+
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestUnbindServer)
     unittest.TextTestRunner(verbosity=2).run(suite)
