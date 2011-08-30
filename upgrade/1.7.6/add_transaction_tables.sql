@@ -42,3 +42,5 @@ GRANT SELECT, INSERT on XTN_END to cdb;
 
 COMMENT ON COLUMN XTN.START_TIME IS 'The start_date column is forced to UTC by the broker';
 COMMENT ON COLUMN XTN_END.END_TIME IS 'The end_date column is forced to UTC by the broker';
+
+QUIT;

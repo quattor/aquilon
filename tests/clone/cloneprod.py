@@ -120,6 +120,7 @@ class Cloner(object):
         self.do_create = True
         self.do_clear = True
         self.do_restore = True
+        self.do_audit = True
         self.do_schemaonly = False
         self.do_rsync = True
         self.warnings = []
@@ -134,6 +135,9 @@ class Cloner(object):
             self.target_schema = args.touser.upper()
         else:
             self.target_schema = self.config.get('database', 'user').upper()
+        self.audit_schema = os.path.join(self.config.get('database', 'srcdir'),
+                                         'upgrade', '1.7.6',
+                                         'add_transaction_tables.sql')
 
         self.dbdir = self.config.get('database', 'dbdir')
         self.dumpfile = os.path.join(self.dbdir, 'clone.dmp')
@@ -143,12 +147,14 @@ class Cloner(object):
         self.rsync_filter = os.path.join(BINDIR, 'broker_sync.filter')
 
         if args.touser:
+            self.do_audit = False
             self.warnings.append("Sync'd data to: %s" % self.target_dir)
 
         if args.finishfrom:
             self.do_create = False
             self.do_clear = False
             self.do_restore = False
+            self.do_audit = True
             self.source_dir = args.finishfrom
 
         if args.schemaonly:
@@ -157,6 +163,10 @@ class Cloner(object):
             self.do_restore = True
             self.do_schemaonly = True
             self.do_rsync = False
+
+        if self.do_audit and not os.path.exists(self.audit_schema):
+            print >>sys.stderr, "Audit schema %s missing." % self.audit_schema
+            sys.exit(1)
 
         if not self.target_dsn.startswith('oracle'):
             print >>sys.stderr, 'Can only copy into an Oracle database.'
@@ -171,6 +181,7 @@ class Cloner(object):
         self.create_dumpfile()
         self.clear_target()
         self.restore_dumpfile()
+        self.add_audit()
         self.run_rsync()
         if self.warnings:
             print >>sys.stderr, "/n".join(self.warnings)
@@ -207,6 +218,16 @@ class Cloner(object):
         p.communicate()
         if p.returncode != 0:
             print >>sys.stderr, "imp to %s failed!" % self.target_imp
+            sys.exit(p.returncode)
+
+    def add_audit(self):
+        if not self.do_audit:
+            return
+        p = Popen(['sqlplus', self.target_imp, '@%s' % self.audit_schema],
+                  stdout=1, stderr=2)
+        p.communicate()
+        if p.returncode != 0:
+            print >>sys.stderr, "sqlplus to %s failed!" % self.target_imp
             sys.exit(p.returncode)
 
     def run_rsync(self):
