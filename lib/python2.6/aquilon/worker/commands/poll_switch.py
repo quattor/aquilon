@@ -32,6 +32,7 @@
 from csv import DictReader, Error as CSVError
 from StringIO import StringIO
 from datetime import datetime
+from random import choice
 
 from aquilon.exceptions_ import (AquilonError, ArgumentError, InternalError,
                                  NotFoundException, ProcessException)
@@ -40,8 +41,8 @@ from aquilon.worker.dbwrappers.location import get_location
 from aquilon.worker.dbwrappers.observed_mac import (
     update_or_create_observed_mac)
 from aquilon.worker.processes import run_command
-from aquilon.aqdb.model import (Switch, HardwareEntity, ObservedMac,
-                                ObservedVlan, Network, NetworkEnvironment)
+from aquilon.aqdb.model import (Switch, ObservedMac, ObservedVlan, Network,
+                                NetworkEnvironment, Service, ServiceInstance)
 from aquilon.utils import force_ipv4
 
 
@@ -77,10 +78,19 @@ class CommandPollSwitch(BrokerCommand):
     def poll(self, session, logger, switches, clear, vlan):
         now = datetime.now()
         failed_vlan = 0
+        default_ssh_args = self.determine_helper_args()
         for switch in switches:
             if clear:
                 self.clear(session, logger, switch)
-            self.poll_mac(session, logger, switch, now)
+
+            hostname = self.determine_helper_hostname(session, logger, switch)
+            if hostname:
+                ssh_args = default_ssh_args[:]
+                ssh_args.append(hostname)
+            else:
+                ssh_args = []
+
+            self.poll_mac(session, logger, switch, now, ssh_args)
             if vlan:
                 if switch.switch_type != "tor":
                     logger.client_info("Skipping VLAN probing on {0:l}, it's "
@@ -88,7 +98,7 @@ class CommandPollSwitch(BrokerCommand):
                     continue
 
                 try:
-                    self.poll_vlan(session, logger, switch, now)
+                    self.poll_vlan(session, logger, switch, now, ssh_args)
                 except ProcessException, e:
                     failed_vlan += 1
                     logger.client_info("Failed getting VLAN info for {0:l}: "
@@ -97,8 +107,44 @@ class CommandPollSwitch(BrokerCommand):
             raise ArgumentError("Failed getting VLAN info.")
         return
 
-    def poll_mac(self, session, logger, switch, now):
-        out = self.run_checknet(logger, switch)
+    def determine_helper_args(self):
+        ssh_command = self.config.get("broker", "poll_ssh").strip()
+        if not ssh_command:  # pragma: no cover
+            return []
+        ssh_args = [ssh_command]
+        ssh_options = self.config.get("broker", "poll_ssh_options")
+        ssh_args.extend(ssh_options.strip().split())
+        return ssh_args
+
+    def determine_helper_hostname(self, session, logger, switch):
+        """Try to figure out a useful helper from the mappings.
+        """
+        helper_name = self.config.get("broker", "poll_helper_service")
+        if not helper_name:  # pragma: no cover
+            return
+        helper_service = Service.get_unique(session, helper_name,
+                                            compel=InternalError)
+        # TODO: eventually we should use the Chooser here
+        for loc in switch.location.parents:
+            q = session.query(ServiceInstance)
+            q = q.filter_by(service=helper_service)
+            q = q.join(['service_map'])
+            q = q.filter_by(location=loc)
+            dbsi = q.first()
+            if dbsi and dbsi.server_hosts:
+                # Poor man's load balancing...
+                jump = choice(dbsi.server_hosts).fqdn
+                logger.client_info("Using jump host {0} from {1:l}, mapped to "
+                                   "{2:l} to run CheckNet for {3:l}.".format(
+                                       jump, dbsi, loc, switch))
+                return jump
+
+        logger.client_info("No jump host for %s, calling CheckNet directly." %
+                           switch)
+        return None
+
+    def poll_mac(self, session, logger, switch, now, ssh_args):
+        out = self.run_checknet(logger, switch, ssh_args)
         macports = self.parse_ports(logger, out)
         for (mac, port) in macports:
             update_or_create_observed_mac(session, switch, port, mac, now)
@@ -107,17 +153,19 @@ class CommandPollSwitch(BrokerCommand):
         session.query(ObservedMac).filter_by(switch=switch).delete()
         session.flush()
 
-    def run_checknet(self, logger, switch):
+    def run_checknet(self, logger, switch, ssh_args):
         if not switch.primary_name:
             hostname = switch.label
         elif switch.primary_name.fqdn.dns_domain.name == 'ms.com':
             hostname = switch.primary_name.fqdn.name
         else:
             hostname = switch.fqdn
-        return run_command([self.config.get("broker", "CheckNet"),
-                            "-ho", hostname, "camtable", "-nobanner",
-                            "-table", "1", "-noprompt"],
-                           logger=logger)
+        args = []
+        if ssh_args:
+            args.extend(ssh_args)
+        args.extend([self.config.get("broker", "CheckNet"), "-ho", hostname,
+                     "camtable", "-nobanner", "-table", "1", "-noprompt"])
+        return run_command(args, logger=logger)
 
     def parse_ports(self, logger, results):
         """ This method could require switch and have hard-coded field
@@ -169,7 +217,7 @@ class CommandPollSwitch(BrokerCommand):
             raise AquilonError("Error parsing CheckNet results: %s" % e)
         return macports
 
-    def poll_vlan(self, session, logger, switch, now):
+    def poll_vlan(self, session, logger, switch, now, ssh_args):
         if not switch.primary_ip:
             raise ArgumentError("Cannot poll VLAN info for {0:l} without "
                                 "a registered IP address.".format(switch))
@@ -179,8 +227,14 @@ class CommandPollSwitch(BrokerCommand):
         # Restrict operations to the internal network
         dbnet_env = NetworkEnvironment.get_unique_or_default(session)
 
-        out = run_command([self.config.get("broker", "vlan2net"),
-                           "-ip", switch.primary_ip])
+        args = []
+        if ssh_args:
+            args.extend(ssh_args)
+        args.append(self.config.get("broker", "vlan2net"))
+        args.append("-ip")
+        args.append(switch.primary_ip)
+        out = run_command(args)
+
         try:
             reader = DictReader(StringIO(out))
             for row in reader:

@@ -609,10 +609,6 @@ class TestAddInterface(TestBrokerCommand):
     def testverifypg(self):
         command = "show machine --machine ut11s01p1"
         out = self.commandtest(command.split())
-        self.matchoutput(out,
-                         "Last switch poll: "
-                         "ut01ga2s01.aqd-unittest.ms.com port 1 [",
-                         command)
         self.matchoutput(out, "Port Group: storage-v701", command)
 
     def testverifycatpg(self):

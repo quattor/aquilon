@@ -391,6 +391,12 @@ class TestAddService(TestBrokerCommand):
         self.noouttest(["add", "service", "--service", "utnotify",
                         "--instance", "localhost"])
 
+    def testaddpollhelper(self):
+        service = self.config.get("broker", "poll_helper_service")
+        self.noouttest(["add", "service", "--service", service])
+        self.noouttest(["add", "service", "--service", service,
+                        "--instance", "unittest"])
+
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddService)

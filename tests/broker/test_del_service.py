@@ -178,6 +178,12 @@ class TestDelService(TestBrokerCommand):
                             "--instance=test_share_%s" % i])
         self.noouttest(["del_service", "--service=nas_disk_share"])
 
+    def testdelpollhelper(self):
+        service = self.config.get("broker", "poll_helper_service")
+        self.noouttest(["del", "service", "--service", service,
+                        "--instance", "unittest"])
+        self.noouttest(["del", "service", "--service", service])
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelService)

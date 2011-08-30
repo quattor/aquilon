@@ -167,6 +167,12 @@ qip_dump_subnetdata = /ms/dist/3rd/qip/usr/sbin/qip-dump-subnetdata
 # Default and maximum numbers of audit (xtn table) rows returned by search audit
 default_audit_rows = 5000
 max_audit_rows = 20000
+# When running aq poll switch, these control how to use and contact
+# jump servers.  This functionality might make more sense integrated
+# with aii-shellfe.
+poll_helper_service = poll_helper
+poll_ssh = /ms/dist/sec/PROJ/openssh/prod/bin/ssh
+poll_ssh_options = -o StrictHostKeyChecking=no -o BatchMode=yes
 
 [panc]
 default_version = prod
