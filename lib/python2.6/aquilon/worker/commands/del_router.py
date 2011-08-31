@@ -40,9 +40,11 @@ class CommandDelRouter(BrokerCommand):
 
     required_parameters = []
 
-    def render(self, session, ip, fqdn, network_environment, **arguments):
+    def render(self, session, dbuser,
+               ip, fqdn, network_environment, **arguments):
         dbnet_env = NetworkEnvironment.get_unique_or_default(session,
                                                              network_environment)
+        self.az.check_network_environment(dbuser, dbnet_env)
         if fqdn:
             dbdns_rec = ARecord.get_unique(session, fqdn=fqdn,
                                            dns_environment=dbnet_env.dns_environment,

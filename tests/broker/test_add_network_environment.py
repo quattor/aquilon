@@ -54,6 +54,13 @@ class TestAddNetworkEnvironment(TestBrokerCommand):
                    "--comments", "Unit test colo environment"]
         self.noouttest(command)
 
+    def testaddcardenv(self):
+        command = ["add", "network", "environment",
+                   "--network_environment", "cardenv",
+                   "--dns_environment", "ut-env",
+                   "--comments", "Card network environment"]
+        self.noouttest(command)
+
     def testaddbadname(self):
         command = ["add", "network", "environment",
                    "--dns_environment", "ut-env",

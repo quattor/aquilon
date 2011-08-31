@@ -42,7 +42,8 @@ class CommandAddNetwork(BrokerCommand):
 
     required_parameters = ["network", "ip"]
 
-    def render(self, session, network, ip, network_environment, discovered,
+    def render(self, session, dbuser,
+               network, ip, network_environment, discovered,
                discoverable, type, side, comments, logger, **arguments):
 
         # Handle the different ways of specifying the netmask
@@ -76,6 +77,7 @@ class CommandAddNetwork(BrokerCommand):
 
         dbnet_env = NetworkEnvironment.get_unique_or_default(session,
                                                              network_environment)
+        self.az.check_network_environment(dbuser, dbnet_env)
 
         # Check if the name is free. Network names are not unique in QIP and
         # there is no uniqueness constraint in AQDB, so only warn if the name is

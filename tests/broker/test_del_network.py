@@ -71,6 +71,30 @@ class TestDelNetwork(TestBrokerCommand):
         command = ["del_network", "--ip=192.168.1.0"]
         self.noouttest(command)
 
+    def test_autherror_100(self):
+        self.demote_current_user("operations")
+
+    def test_autherror_200(self):
+        # 192.168.2.0 was never actually created, but that check happens
+        # after the auth check.
+        command = ["del_network", "--ip", "192.168.2.0"]
+        out = self.unauthorizedtest(command, auth=True, msgcheck=False)
+        allowed_roles = self.config.get("site", "change_default_netenv_roles")
+        role_list = allowed_roles.strip().split()
+        default_ne = self.config.get("site", "default_network_environment")
+        self.matchoutput(out,
+                         "Only users with %s can modify networks in the %s "
+                         "network environment." % (role_list, default_ne),
+                         command)
+
+    def test_autherror_300(self):
+        command = ["del_network", "--ip", "192.168.3.0",
+                   "--network_environment", "cardenv"]
+        self.noouttest(command)
+
+    def test_autherror_900(self):
+        self.promote_current_user()
+
     def testdellocalnet(self):
         self.noouttest(["del", "network", "--ip", "127.0.0.0"])
 

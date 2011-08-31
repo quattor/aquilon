@@ -91,6 +91,36 @@ class TestAddNetwork(TestBrokerCommand):
                         "--type", "unknown",
                         "--comments", "Made-up network"])
 
+    def test_autherror_100(self):
+        self.demote_current_user("operations")
+
+    def test_autherror_200(self):
+        # Another entirely fictitious network
+        command = ["add_network", "--ip", "192.168.2.0",
+                   "--network", "cardnetwork2", "--netmask", "255.255.255.0",
+                   "--building", "cards", "--side", "a", "--type", "unknown",
+                   "--comments", "Made-up network"]
+        out = self.unauthorizedtest(command, auth=True, msgcheck=False)
+        allowed_roles = self.config.get("site", "change_default_netenv_roles")
+        role_list = allowed_roles.strip().split()
+        default_ne = self.config.get("site", "default_network_environment")
+        self.matchoutput(out,
+                         "Only users with %s can modify networks in the %s "
+                         "network environment." % (role_list, default_ne),
+                         command)
+
+    def test_autherror_300(self):
+        # Yet another entirely fictitious network
+        command = ["add_network", "--ip", "192.168.3.0",
+                   "--network_environment", "cardenv",
+                   "--network", "cardnetwork3", "--netmask", "255.255.255.0",
+                   "--building", "cards", "--side", "a", "--type", "unknown",
+                   "--comments", "Made-up network"]
+        self.noouttest(command)
+
+    def test_autherror_900(self):
+        self.promote_current_user()
+
     def testaddexcx(self):
         net = self.net.unknown[0]
         subnet = net.subnet()[0]

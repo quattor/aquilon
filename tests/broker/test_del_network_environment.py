@@ -50,6 +50,11 @@ class TestDelNetworkEnvironment(TestBrokerCommand):
                    "--network_environment", "utcolo"]
         self.noouttest(command)
 
+    def testdelcardenv(self):
+        command = ["del", "network", "environment",
+                   "--network_environment", "cardenv"]
+        self.noouttest(command)
+
     def testdelinternal(self):
         command = ["del", "network", "environment",
                    "--network_environment", "internal"]

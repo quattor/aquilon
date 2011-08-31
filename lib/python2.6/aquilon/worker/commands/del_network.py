@@ -37,9 +37,11 @@ class CommandDelNetwork(BrokerCommand):
 
     required_parameters = ["ip"]
 
-    def render(self, session, ip, network_environment, **arguments):
+    def render(self, session, dbuser, ip, network_environment, **arguments):
         dbnet_env = NetworkEnvironment.get_unique_or_default(session,
                                                              network_environment)
+        self.az.check_network_environment(dbuser, dbnet_env)
+
         dbnetwork = Network.get_unique(session, network_environment=dbnet_env,
                                        ip=ip, compel=True)
 
