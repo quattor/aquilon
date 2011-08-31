@@ -38,6 +38,7 @@ from aquilon.aqdb.model import Host, Cluster, ServiceInstance
 from aquilon.worker.templates.service import PlenaryServiceInstanceServer
 from aquilon.worker.templates.cluster import PlenaryCluster
 from aquilon.worker.templates.host import PlenaryHost
+from aquilon.worker.templates.machine import PlenaryMachineInfo
 from aquilon.worker.templates.base import PlenaryCollection
 
 
@@ -533,6 +534,13 @@ class HostChooser(Chooser):
         plenary_host = PlenaryHost(self.dbhost, logger=self.logger)
         plenary_host.stash()
         self.plenaries.append(plenary_host)
+        # This may be too much action at a distance... however, if
+        # we are potentially re-writing a host plenary, it seems like
+        # a good idea to also verify known dependencies.
+        plenary_machine = PlenaryMachineInfo(self.dbhost.machine,
+                                             logger=self.logger)
+        plenary_machine.stash()
+        self.plenaries.append(plenary_machine)
 
 
 class ClusterChooser(Chooser):
