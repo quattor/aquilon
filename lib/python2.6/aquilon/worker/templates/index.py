@@ -166,6 +166,16 @@ def build_index(config, session, profilesdir, clientNotify=True,
     write_file(index_path, "\n".join(content), logger=logger,
                compress=compress)
 
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
+    if config.has_option("broker", "bind_address"):
+        bind_address = socket.gethostbyname(config.get("broker", "bind_address"))
+        if config.has_option("broker", "cdp_send_port"):  # pragma: no cover
+            port = config.get_int("broker", "cdp_send_port")
+        else:
+            port = 0
+        sock.bind((bind_address, port))
+
     if config.has_option("broker", "server_notifications"):
         service_modules = {}
         for service in config.get("broker", "server_notifications").split():
@@ -179,19 +189,20 @@ def build_index(config, session, profilesdir, clientNotify=True,
                 except Exception, e:
                     logger.info("failed to lookup up server module %s: %s" %
                                 (service, e))
-        count = send_notification(CDB_NOTIF, service_modules.keys(),
+        count = send_notification(CDB_NOTIF, service_modules.keys(), sock=sock,
                                   logger=logger)
         logger.log(CLIENT_INFO, "sent %d server notifications" % count)
 
     if (config.has_option("broker", "client_notifications")
         and config.getboolean("broker", "client_notifications")
         and clientNotify):  # pragma: no cover
-        count = send_notification(CCM_NOTIF, modified_index.keys(),
+        count = send_notification(CCM_NOTIF, modified_index.keys(), sock=sock,
                                   logger=logger)
         logger.log(CLIENT_INFO, "sent %d client notifications" % count)
 
+    sock.close()
 
-def send_notification(ntype, modified, logger=LOGGER):
+def send_notification(ntype, modified, sock=None, logger=LOGGER):
     '''send CDP notification messages to a list of hosts.
 
     This are sent synchronously, but we don't wait (or care) for any
@@ -217,7 +228,6 @@ def send_notification(ntype, modified, logger=LOGGER):
             # notification goes to the right place.
             ip = socket.gethostbyname(host)
             packet = NOTIFICATION_TYPES[ntype] + "\0" + str(int(time.time()))
-            sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
             sock.sendto(packet, (ip, CDPPORT))
             success = success + 1
 

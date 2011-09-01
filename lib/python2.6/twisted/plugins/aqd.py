@@ -231,10 +231,17 @@ class AQDMaker(object):
         if options["usesock"]:
             return strports.service("unix:%s/aqdsock" % sockdir, openSite)
 
-        # Return before firing up knc.
         openport = config.get("broker", "openport")
+        if config.has_option("broker", "bind_address"):
+            bind_address = config.get("broker", "bind_address").strip()
+            openaddr = "tcp:%s:interface=%s" % (openport, bind_address)
+        else:  # pragma: no cover
+            bind_address = None
+            openaddr = openport
+
+        # Return before firing up knc.
         if options["noauth"]:
-            return strports.service(openport, openSite)
+            return strports.service(openaddr, openSite)
 
         sockname = os.path.join(sockdir, "kncsock")
         # This flag controls whether or not this process will start up
@@ -247,11 +254,14 @@ class AQDMaker(object):
             # and/or verify that the keytab file exists.
             if config.getboolean("broker", "run_knc"):
                 keytab = config.get("broker", "keytab")
-                mon.addProcess("knc",
-                               ["/usr/bin/env",
-                                "KRB5_KTNAME=FILE:%s" % keytab,
-                                config.get("kerberos", "knc"), "-lS", sockname,
-                                config.get("broker", "kncport")])
+                knc_args = ["/usr/bin/env",
+                            "KRB5_KTNAME=FILE:%s" % keytab,
+                            config.get("kerberos", "knc"), "-lS", sockname]
+                if bind_address:
+                    knc_args.append("-a")
+                    knc_args.append(bind_address)
+                knc_args.append(config.get("broker", "kncport"))
+                mon.addProcess("knc", knc_args)
             if config.getboolean("broker", "run_git_daemon"):
                 # The git daemon *must* be invoked using the form 'git-daemon'
                 # instead of invoking git with a 'daemon' argument.  The latter
@@ -265,6 +275,8 @@ class AQDMaker(object):
                         config.get("broker", "git_daemon_basedir")]
                 if config.has_option("broker", "git_port"):
                     args.append("--port=%s" % config.get("broker", "git_port"))
+                if bind_address:
+                    args.append("--listen=%s" % bind_address)
                 args.append(config.get("broker", "kingdir"))
                 mon.addProcess("git-daemon", args)
             mon.startService()
@@ -286,7 +298,7 @@ class AQDMaker(object):
         multiService = MultiService()
         multiService.addService(strports.service(unixsocket, kncSite))
         if not options["authonly"]:
-            multiService.addService(strports.service(openport, openSite))
+            multiService.addService(strports.service(openaddr, openSite))
         return multiService
 
 serviceMaker = AQDMaker()
