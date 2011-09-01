@@ -32,6 +32,7 @@
 import re
 import unittest
 from time import sleep
+import socket
 
 if __name__ == "__main__":
     import utils
@@ -62,7 +63,7 @@ class TestPollSwitch(TestBrokerCommand):
         self.matchoutput(err, "Command poll_tor_switch is deprecated, please "
                          "use poll_switch instead.", command)
         self.matchoutput(err, "No jump host for np06bals03.ms.com, calling "
-                         "CheckNet directly.", command)
+                         "CheckNet from %s." % socket.gethostname(), command)
 
     # Tests re-polling np06bals03 and polls np06fals01
     def testpollnp7(self):
