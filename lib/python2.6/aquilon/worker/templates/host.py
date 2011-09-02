@@ -40,6 +40,9 @@ from aquilon.worker.templates.base import Plenary, PlenaryCollection
 from aquilon.worker.templates.machine import PlenaryMachineInfo
 from aquilon.worker.templates.cluster import PlenaryClusterClient
 from aquilon.worker.templates.panutils import pan, StructureTemplate
+from aquilon.worker.dbwrappers.feature import (model_features,
+                                               personality_features,
+                                               interface_features)
 
 LOGGER = logging.getLogger(__name__)
 
@@ -157,12 +160,20 @@ class PlenaryToplevelHost(Plenary):
         transit_interfaces = []
         routers = {}
         default_gateway = None
+        iface_features = {}
+
+        pers = self.dbhost.personality
+        arch = pers.archetype
 
         # FIXME: Enforce that one of the interfaces is marked boot?
         for dbinterface in self.dbhost.machine.interfaces:
             # Management interfaces are not configured at the host level
             if dbinterface.interface_type == 'management':
                 continue
+
+            featlist = interface_features(dbinterface, arch, pers)
+            if featlist:
+                iface_features[dbinterface.name] = featlist
 
             ifdesc = {}
 
@@ -274,8 +285,7 @@ class PlenaryToplevelHost(Plenary):
         os_template = self.dbhost.operating_system.cfg_path + '/config'
 
         services = []
-        required_services = set(self.dbhost.archetype.services +
-                                self.dbhost.personality.services)
+        required_services = set(arch.services + pers.services)
 
         for si in self.dbhost.services_used:
             required_services.discard(si.service)
@@ -295,34 +305,49 @@ class PlenaryToplevelHost(Plenary):
         templates = []
         templates.append("archetype/base")
         templates.append(os_template)
+
+        for feature in model_features(self.dbhost.machine.model, arch, pers):
+            templates.append("%s/config" % feature.cfg_path)
+
         templates.extend(services)
         templates.extend(provides)
+
+        (pre_features, post_features) = personality_features(pers)
+        for feature in pre_features:
+            templates.append("%s/config" % feature.cfg_path)
+
         templates.append(personality_template)
+
         if self.dbhost.cluster:
             clplenary = PlenaryClusterClient(self.dbhost.cluster)
             templates.append(clplenary.plenary_template)
-        elif self.dbhost.personality.cluster_required:
+        elif pers.cluster_required:
             raise IncompleteError("Host %s personality %s requires cluster "
-                                  "membership." %
-                                  (self.name, self.dbhost.personality.name))
+                                  "membership." % (self.name, pers.name))
+
+        for feature in post_features:
+            templates.append("%s/config" % feature.cfg_path)
 
         templates.append("archetype/final")
 
         eon_id_set = set([grn.eon_id for grn in self.dbhost.grns])
-        eon_id_set |= set([grn.eon_id for grn in self.dbhost.personality.grns])
+        eon_id_set |= set([grn.eon_id for grn in pers.grns])
         eon_id_list = list(eon_id_set)
         eon_id_list.sort()
 
         # Okay, here's the real content
-        arcdir = self.dbhost.archetype.name
-        lines.append("# this is an %s host, so all templates should be sourced from there" % self.dbhost.archetype.name)
+        arcdir = arch.name
+        lines.append("# this is an %s host, so all templates should be sourced from there" % arch.name)
         lines.append("variable LOADPATH = %s;" % pan([arcdir]))
         lines.append("")
         lines.append("include { 'pan/units' };")
         lines.append("include { 'pan/functions' };")
+        lines.append("")
         pmachine = PlenaryMachineInfo(self.dbhost.machine)
         lines.append("'/hardware' = %s;" %
                      pan(StructureTemplate(pmachine.plenary_template)))
+
+        lines.append("")
         lines.append("'/system/network/interfaces' = %s;" % pan(interfaces))
         lines.append("'/system/network/primary_ip' = %s;" %
                      pan(self.dbhost.machine.primary_ip))
@@ -334,6 +359,14 @@ class PlenaryToplevelHost(Plenary):
         if routers:
             lines.append('"/system/network/routers" = %s;' % pan(routers))
         lines.append("")
+
+        for iface in sorted(iface_features.keys()):
+            lines.append('variable CURRENT_INTERFACE = "%s";' % iface)
+            for feature in iface_features[iface]:
+                # Same forgiveness for interface model features
+                lines.append('include { "%s/config" };' % feature.cfg_path)
+            lines.append("")
+
         lines.append("'/system/build' = %s;" % pan(self.dbhost.status.name))
         if eon_id_list:
             lines.append('"/system/eon_ids" = %s;' % pan(eon_id_list))

@@ -15,6 +15,18 @@ ${desc} Archetype: ${record.name}${flagstr}
 % for service in record.services:
   Required Service: ${service.name}
 % endfor
+% for link in record.features:
+<%
+      if link.feature.post_call:
+          flagstr = ' [post_call]'
+      else:
+          flagstr = ''
+%>\
+  ${"{0:c}: {0.name}{1}".format(link.feature, flagstr)}
+% if link.model:
+    Vendor: ${link.model.vendor.name} Model: ${link.model.name}
+% endif
+% endfor
 % if record.comments:
   Comments: ${record.comments}
 % endif

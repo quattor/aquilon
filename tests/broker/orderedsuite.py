@@ -113,6 +113,9 @@ from test_add_auxiliary import TestAddAuxiliary
 from test_add_interface_address import TestAddInterfaceAddress
 from test_add_manager import TestAddManager
 from test_add_static_route import TestAddStaticRoute
+from test_add_feature import TestAddFeature
+from test_bind_feature import TestBindFeature
+from test_unbind_feature import TestUnbindFeature
 from test_map_service import TestMapService
 from test_bind_client import TestBindClient
 from test_prebind_server import TestPrebindServer
@@ -241,6 +244,7 @@ from test_del_ns_record import TestDelNSRecord
 from test_unmap_dns_domain import TestUnmapDnsDomain
 from test_del_dns_domain import TestDelDnsDomain
 from test_del_dns_environment import TestDelDnsEnvironment
+from test_del_feature import TestDelFeature
 from test_client_failure import TestClientFailure
 from test_client_bypass import TestClientBypass
 from test_audit import TestAudit
@@ -276,6 +280,7 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestAddBuilding, TestAddRoom, TestAddLocation,
                 TestAddRack, TestAddDesk,
                 TestAddVendor, TestAddCpu, TestAddModel,
+                TestAddFeature,
                 TestAddNetworkEnvironment, TestAddNetwork,
                 TestAddNSRecord, TestMapDnsDomain,
                 TestAddMetaCluster, TestAddESXCluster,
@@ -332,6 +337,7 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestUpdateInterface, TestUpdateMachine, TestUpdateModel,
                 TestUpdateRack,
                 TestUpdateAlias, TestUpdateSrvRecord,
+                TestBindFeature, TestUnbindFeature,
                 TestRefreshNetwork, TestUpdateNetwork, TestSplitMergeNetwork,
                 TestUpdateNetworkEnvironment,
                 TestUpdateArchetype,
@@ -356,6 +362,7 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestDelESXCluster, TestDelMetaCluster,
                 TestDelRouter, TestDelNetwork, TestDelNetworkEnvironment,
                 TestDelModel, TestDelCpu, TestDelVendor,
+                TestDelFeature,
                 TestUnmapDnsDomain,
                 TestDelDesk, TestDelRack, TestDelRoom,
                 TestDelBuilding, TestDelRequiredService, TestDelService,

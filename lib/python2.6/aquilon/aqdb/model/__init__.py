@@ -100,6 +100,10 @@ from aquilon.aqdb.model.interface import (Interface, PublicInterface,
                                           BridgeInterface)
 from aquilon.aqdb.model.address_assignment import AddressAssignment
 
+#FEATURES
+from aquilon.aqdb.model.feature import (Feature, FeatureLink, HostFeature,
+                                        HardwareFeature, InterfaceFeature)
+
 #SERVICE
 from aquilon.aqdb.model.service import (Service, ServiceListItem,
                                         PersonalityServiceListItem)

@@ -1,6 +1,6 @@
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 #
-# Copyright (C) 2008,2009,2010,2011  Contributor
+# Copyright (C) 2011  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -26,34 +26,41 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-"""Model formatter."""
-
+"""Feature formatter."""
 
 from aquilon.worker.formats.formatters import ObjectFormatter
-from aquilon.aqdb.model import Model
+from aquilon.aqdb.model import (Feature, HostFeature, HardwareFeature,
+                                InterfaceFeature)
 
 
-class ModelFormatter(ObjectFormatter):
-    def format_raw(self, model, indent=""):
-        details = [indent + "Vendor: %s Model: %s" %
-                            (model.vendor.name, model.name)]
-        details.append(indent + "  Type: %s" % model.machine_type)
-        for link in model.features:
-            details.append(indent + "  {0:c}: {0.name}".format(link.feature))
+class FeatureFormatter(ObjectFormatter):
+
+    def format_raw(self, feature, indent=""):
+        details = []
+        details.append(indent + "{0:c}: {0.name}".format(feature))
+        if feature.post_call_allowed:
+            details.append(indent + "  Post Call: %s" % feature.post_call)
+        details.append(indent + "  Template: %s" % feature.cfg_path)
+
+        for link in feature.links:
+            opts = []
+            if link.model:
+                opts.append(format(link.model))
             if link.archetype:
-                details.append(indent + "    {0:c}: {0.name}"
-                               .format(link.archetype))
+                opts.append(format(link.archetype))
             if link.personality:
-                details.append(indent + "    {0:c}: {0.name} {1:c}: {1.name}"
-                               .format(link.personality,
-                                       link.personality.archetype))
+                opts.append(format(link.personality))
             if link.interface_name:
-                details.append(indent + "    Interface: %s" %
-                               link.interface_name)
-        if model.comments:
-            details.append(indent + "  Comments: %s" % model.comments)
-        if model.machine_specs:
-            details.append(self.redirect_raw(model.machine_specs, indent + "  "))
+                opts.append("Interface %s" % link.interface_name)
+
+            details.append(indent + "  Bound to: %s" % ", ".join(opts))
+
+        if feature.comments:
+            details.append(indent + "  Comments: %s" % feature.comments)
+
         return "\n".join(details)
 
-ObjectFormatter.handlers[Model] = ModelFormatter()
+ObjectFormatter.handlers[Feature] = FeatureFormatter()
+ObjectFormatter.handlers[HostFeature] = FeatureFormatter()
+ObjectFormatter.handlers[HardwareFeature] = FeatureFormatter()
+ObjectFormatter.handlers[InterfaceFeature] = FeatureFormatter()

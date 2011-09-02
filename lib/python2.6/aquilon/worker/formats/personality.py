@@ -87,6 +87,20 @@ class PersonalityFormatter(ObjectFormatter):
             details.append(indent + "  Requires clustered hosts")
         for service in personality.services:
             details.append(indent + "  Required Service: %s" % service.name)
+        for link in personality.features:
+            if link.feature.post_call:
+                flagstr = " [post_call]"
+            else:
+                flagstr = ""
+
+            details.append(indent + "  {0:c}: {0.name}{1}"
+                           .format(link.feature, flagstr))
+            if link.model:
+                details.append(indent + "    {0:c}: {0.name} {1:c}: {1.name}"
+                               .format(link.model.vendor, link.model))
+            if link.interface_name:
+                details.append(indent + "    Interface: %s" %
+                               link.interface_name)
         if personality.comments:
             details.append(indent + "  Comments: %s" % personality.comments)
         for cltype, info in personality.cluster_infos.items():

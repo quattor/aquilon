@@ -1,6 +1,6 @@
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 #
-# Copyright (C) 2008,2009,2010,2011  Contributor
+# Copyright (C) 2011  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -26,34 +26,16 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-"""Model formatter."""
+
+from aquilon.worker.broker import BrokerCommand
+from aquilon.aqdb.model import Feature
 
 
-from aquilon.worker.formats.formatters import ObjectFormatter
-from aquilon.aqdb.model import Model
+class CommandShowFeature(BrokerCommand):
 
+    required_parameters = ['feature', 'type']
 
-class ModelFormatter(ObjectFormatter):
-    def format_raw(self, model, indent=""):
-        details = [indent + "Vendor: %s Model: %s" %
-                            (model.vendor.name, model.name)]
-        details.append(indent + "  Type: %s" % model.machine_type)
-        for link in model.features:
-            details.append(indent + "  {0:c}: {0.name}".format(link.feature))
-            if link.archetype:
-                details.append(indent + "    {0:c}: {0.name}"
-                               .format(link.archetype))
-            if link.personality:
-                details.append(indent + "    {0:c}: {0.name} {1:c}: {1.name}"
-                               .format(link.personality,
-                                       link.personality.archetype))
-            if link.interface_name:
-                details.append(indent + "    Interface: %s" %
-                               link.interface_name)
-        if model.comments:
-            details.append(indent + "  Comments: %s" % model.comments)
-        if model.machine_specs:
-            details.append(self.redirect_raw(model.machine_specs, indent + "  "))
-        return "\n".join(details)
-
-ObjectFormatter.handlers[Model] = ModelFormatter()
+    def render(self, session, feature, type, **arguments):
+        Feature.validate_type(type)
+        cls = Feature.__mapper__.polymorphic_map[type].class_
+        return cls.get_unique(session, name=feature, compel=True)

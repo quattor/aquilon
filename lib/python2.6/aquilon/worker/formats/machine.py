@@ -29,9 +29,11 @@
 """Machine formatter."""
 
 from aquilon import const
+from aquilon.aqdb.model import Machine
 from aquilon.worker.formats.formatters import ObjectFormatter, shift
 from aquilon.worker.formats.list import ListFormatter
-from aquilon.aqdb.model import Machine
+from aquilon.worker.dbwrappers.feature import (model_features,
+                                               personality_features)
 
 
 class MachineInterfacePair(tuple):
@@ -63,7 +65,6 @@ ObjectFormatter.handlers[MachineInterfacePair] = MachineInterfacePairFormatter()
 
 class MachineFormatter(ObjectFormatter):
     def format_raw(self, machine, indent=""):
-        # TODO: convert this formatter to mako
         details = [indent + "%s: %s" % (machine.model.machine_type.capitalize(),
                                         machine.label)]
         if machine.primary_name:
@@ -129,10 +130,41 @@ class MachineFormatter(ObjectFormatter):
         if machine.comments:
             details.append(indent + "  Comments: %s" % machine.comments)
         if machine.host:
-            template = self.lookup_raw.get_template("host.mako")
-            details.append(shift(template.render(record=machine.host,
-                                                 formatter=self),
-                                 indent=indent + "  ").rstrip())
+            host = machine.host
+            if host.cluster:
+                details.append(indent + "  Member of {0:c}: {0.name}"
+                               .format(host.cluster))
+            for resource in host.resources:
+                details.append(self.redirect_raw(resource, indent + "  "))
+
+            # TODO: supress features when redirecting personality/archetype
+            details.append(self.redirect_raw(host.personality, indent + "  "))
+            details.append(self.redirect_raw(host.archetype, indent + "  "))
+
+            details.append(self.redirect_raw(host.operating_system, indent + "  "))
+            details.append(indent + "  {0:c}: {1}"
+                           .format(host.branch, host.authored_branch))
+            details.append(self.redirect_raw(host.status, indent + "  "))
+
+            for grn in host.grns:
+                details.append(indent + "  {0:c}: {0.grn}".format(grn))
+
+            for feature in model_features(machine.model,
+                                          host.personality.archetype,
+                                          host.personality):
+                details.append(indent + "  {0:c}: {0.name}".format(feature))
+            (pre, post) = personality_features(host.personality)
+            for feature in pre:
+                details.append(indent + "  {0:c}: {0.name}".format(feature))
+            for feature in post:
+                details.append(indent + "  {0:c}: {0.name}".format(feature))
+
+            for si in host.services_used:
+                details.append(indent + "  Template: %s" % si.cfg_path)
+            for si in host.services_provided:
+                details.append(indent + "  Provides: %s" % si.cfg_path)
+            if host.comments:
+                details.append(indent + "  Comments: %s" % host.comments)
         return "\n".join(details)
 
     def csv_tolist(self, machine):
