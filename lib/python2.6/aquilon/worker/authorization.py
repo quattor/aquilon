@@ -121,7 +121,7 @@ class AuthorizationBroker(object):
                               'update_interface_machine']:
                 self.raise_auth_error(principal, action, resource)
         if dbuser.role.name == 'unixops_l2':
-            if action not in ['add_host',
+            if action not in ['add_host', 'add_windows_host',
                               'compile', 'compile_hostname',
                               'reconfigure', 'change_status',
                               'reconfigure_list', 'reconfigure_hostlist',
