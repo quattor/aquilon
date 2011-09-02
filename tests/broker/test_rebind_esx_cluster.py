@@ -27,7 +27,7 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-"""Module for testing the rebind esx cluster command."""
+"""Module for testing using the cluster command to move between clusters."""
 
 import unittest
 
@@ -38,11 +38,16 @@ if __name__ == "__main__":
 from brokertest import TestBrokerCommand
 
 
+# Note, this used to test the rebind_esx_cluster, however I've
+# deco'ed that command. I've kept this test here in order to preserve
+# the state of all the previous and subsequent tests that assume the
+# state of evh1 (it's a tangled web of statefulness going on here!)
+
 class TestRebindESXCluster(TestBrokerCommand):
 
     # Failure test is in add_virtual_hardware.
     def testrebindevh1(self):
-        self.successtest(["rebind_esx_cluster",
+        self.successtest(["cluster",
                           "--hostname", "evh1.aqd-unittest.ms.com",
                           "--cluster", "utecl2"])
 

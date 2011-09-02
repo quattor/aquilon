@@ -86,9 +86,8 @@ class TestAdd10GigHardware(TestBrokerCommand):
 
     def test_090_addswitch(self):
         for i in range(5, 8):
-            # Deprecated.
             self.successtest(["update_esx_cluster", "--cluster=utecl%d" % i,
-                              "--tor_switch=ut01ga2s01.aqd-unittest.ms.com"])
+                              "--switch=ut01ga2s01.aqd-unittest.ms.com"])
         for i in range(8, 11):
             self.noouttest(["update_esx_cluster", "--cluster=utecl%d" % i,
                             "--switch=ut01ga2s02.aqd-unittest.ms.com"])
@@ -352,7 +351,7 @@ class TestAdd10GigHardware(TestBrokerCommand):
             command = ["add_host", "--hostname", hostname,
                        "--machine", machine, "--autoip", "--domain=unittest",
                        "--archetype=aquilon", "--personality=inventory",
-                       "--osname=linux", "--osversion=4.0.1-x86_64"]
+                       "--osname=linux", "--osversion=5.0.1-x86_64"]
             (out, err) = self.successtest(command)
         self.dsdb_verify()
 

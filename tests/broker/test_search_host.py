@@ -239,7 +239,7 @@ class TestSearchHost(TestBrokerCommand):
         self.noouttest(command.split(" "))
 
     def testosavailable(self):
-        command = "search host --osname linux --osversion 4.0.1-x86_64 --archetype aquilon"
+        command = "search host --osname linux --osversion 5.0.1-x86_64 --archetype aquilon"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "unittest02.one-nyp.ms.com", command)
         self.matchoutput(out, "unittest00.one-nyp.ms.com", command)
@@ -256,7 +256,7 @@ class TestSearchHost(TestBrokerCommand):
         self.matchoutput(out, "unittest02.one-nyp.ms.com", command)
 
     def testosversiononly(self):
-        command = "search host --osversion 4.0.1-x86_64"
+        command = "search host --osversion 5.0.1-x86_64"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "unittest00.one-nyp.ms.com", command)
 

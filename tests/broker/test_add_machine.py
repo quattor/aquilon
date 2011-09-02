@@ -136,6 +136,14 @@ class TestAddMachine(TestBrokerCommand):
                         "--cpuname", "xeon", "--cpuspeed", "2660",
                         "--memory", "8192"])
 
+    # Used for filer - a fake machine for now
+    def testaddfiler(self):
+        self.noouttest(["add", "machine", "--machine", "filer1",
+                        "--rack", "ut3", "--model", "hs21-8853l5u",
+                        "--cpucount", "2", "--cpuvendor", "intel",
+                        "--cpuname", "xeon", "--cpuspeed", "2660",
+                        "--memory", "8192"])
+
     # Used for VPLS network tests
     def testaddut3c5n5(self):
         self.noouttest(["add", "machine", "--machine", "ut3c5n5",

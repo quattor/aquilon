@@ -35,6 +35,7 @@ from aquilon.worker.templates.machine import PlenaryMachineInfo
 from aquilon.worker.templates.panutils import pan, StructureTemplate
 from aquilon.worker.locks import CompileKey
 
+
 LOGGER = logging.getLogger(__name__)
 
 
@@ -80,12 +81,37 @@ class PlenaryClusterObject(Plenary):
         lines.append("")
 
         lines.append("include { 'pan/units' };")
+        lines.append("include { 'pan/functions' };")
         lines.append("")
         lines.append('"/system/cluster/name" = %s;' % pan(self.name))
         lines.append('"/system/cluster/type" = %s;' %
                         pan(self.dbcluster.cluster_type))
+
+        campus = self.dbcluster.location_constraint.campus
+        if campus:
+            lines.append('"/system/cluster/campus" = %s;' % pan(campus.name))
+
+        lines.append('"/system/cluster/down_hosts_threshold" = %d;' %
+                     self.dbcluster.dht_value)
         lines.append("")
-        lines.append("include { 'archetype/cluster/base' };")
+        # Only use system names here to avoid circular dependencies.
+        # Other templates that needs to look up the underlying values use:
+        # foreach(idx; host; value("/system/cluster/members")) {
+        #     v = value("//" + host + "/system/foo/bar/baz");
+        # );
+        lines.append('"/system/cluster/members" = %s;' %
+                     pan(sorted([member.fqdn for member in
+                                 self.dbcluster.hosts])))
+
+        lines.append("")
+        for resource in sorted(self.dbcluster.resources):
+            lines.append("'/system/resources/%s' = push(%s);" % (
+                         resource.resource_type,
+                         pan(StructureTemplate(resource.template_base +
+                                               '/config'))))
+        lines.append("")
+
+        lines.append("include { 'archetype/base' };");
         fname = "body_%s" % self.dbcluster.cluster_type
         if hasattr(self, fname):
             getattr(self, fname)(lines)
@@ -93,33 +119,20 @@ class PlenaryClusterObject(Plenary):
         lines.append("include { 'personality/%s/config' };" %
                      self.dbcluster.personality.name)
         lines.append("")
-        lines.append("include { 'archetype/cluster/final' };")
+        lines.append("include { 'archetype/final' };");
 
     def body_esx(self, lines):
         if self.metacluster:
             lines.append('"/system/metacluster/name" = %s;' %
                          pan(self.metacluster))
-        campus = self.dbcluster.location_constraint.campus
-        if campus:
-            lines.append('"/system/cluster/campus" = %s;' % pan(campus.name))
         lines.append('"/system/cluster/ratio" = %s;' % pan([
                             self.dbcluster.vm_count,
                             self.dbcluster.host_count]))
         lines.append('"/system/cluster/max_hosts" = %d;' %
                      self.dbcluster.max_hosts)
-        lines.append('"/system/cluster/down_hosts_threshold" = %d;' %
-                     self.dbcluster.down_hosts_threshold)
-        lines.append('')
-        # Only use system names here to avoid circular dependencies.
-        # Other templates that needs to look up the underlying values use:
-        # foreach(idx; host; value("/system/cluster/members")) {
-        #     v = value("//" + host + "/system/foo/bar/baz");
-        # );
-        lines.append('"/system/cluster/members" = %s;' %
-                     pan([member.fqdn for member in self.dbcluster.hosts]))
         lines.append('')
         machines = {}
-        for machine in self.dbcluster.machines:
+        for machine in sorted(self.dbcluster.machines):
             if not machine.interfaces or not machine.disks:
                 # Do not bother creating entries for VMs that are incomplete.
                 continue
@@ -129,7 +142,7 @@ class PlenaryClusterObject(Plenary):
             # One day we may get to the point where this will be required.
             if (machine.host):
                 # we fill this in manually instead of just assigning
-                # 'system' = value("//hostname/system")
+                # 'system' = value("hostname:/system")
                 # because the target host might not actually have a profile.
                 arch = machine.host.archetype
                 os = machine.host.operating_system
@@ -143,7 +156,7 @@ class PlenaryClusterObject(Plenary):
             machines[machine.label] = macdesc
         lines.append('"/system/cluster/machines" = %s;' % pan(machines))
 
-        for servinst in self.dbcluster.service_bindings:
+        for servinst in sorted(self.dbcluster.service_bindings):
             lines.append("include { 'service/%s/%s/client/config' };" % \
                          (servinst.service.name, servinst.name))
 
@@ -167,3 +180,17 @@ class PlenaryClusterClient(Plenary):
 
     def body(self, lines):
         lines.append('"/system/cluster/name" = %s;' % pan(self.name))
+        # we could just use a PAN external reference to pull in this
+        # value from the cluster template, i.e. using
+        #  value('clusters/'+value('/system/cluster/name')+':/system/resources')
+        # but since we know that these templates are always in sync,
+        # we can duplicate the content here to avoid the possibility of
+        # circular external references.
+        for resource in sorted(self.dbobj.resources):
+            lines.append("'/system/cluster/resources/%s' = push(%s);" % (
+                         resource.resource_type,
+                         pan(StructureTemplate(resource.template_base +
+                                               '/config'))))
+        lines.append("include { if_exists('features/' + value('/system/archetype/name') + '/%s/%s/config') };"
+                     % (self.dbobj.personality.archetype.name,
+                        self.dbobj.personality.name))

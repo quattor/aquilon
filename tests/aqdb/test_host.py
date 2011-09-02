@@ -65,7 +65,7 @@ assert isinstance(DOMAIN, Domain), 'no ny-prod domain @ %s' % func_name()
 ARCH = Archetype.get_unique(sess, 'aquilon')
 assert isinstance(ARCH, Archetype), 'No archetype @ %s' % func_name()
 
-OS = OperatingSystem.get_unique(sess, name='linux', version='5.0-x86_64',
+OS = OperatingSystem.get_unique(sess, name='linux', version='5.0.1-x86_64',
                                 archetype=ARCH)
 assert isinstance(OS, OperatingSystem), 'No os @ %s' % func_name()
 

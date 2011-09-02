@@ -53,9 +53,10 @@ _MCM = 'metacluster_member'
 
 class MetaCluster(Base):
     """
-        A metacluster is a grouping of two or more clusters grouped together for
-        wide-area failover scenarios (So far only for vmware based clusters).
-        Network is nullable for metaclusters that do not utilize IP failover.
+        A metacluster is a grouping of two or more clusters grouped
+        together for wide-area failover scenarios (So far only for
+        vmware based clusters).  Network is nullable for metaclusters
+        that do not utilize IP failover.
     """
 
     __tablename__ = _MCT

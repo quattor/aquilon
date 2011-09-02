@@ -31,7 +31,7 @@
 
 from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import (Service, Machine, Host, Branch, Personality,
-                                Cluster, City)
+                                Cluster, City, Resource)
 from aquilon.worker.templates.personality import PlenaryPersonality
 from aquilon.worker.templates.cluster import PlenaryCluster
 from aquilon.worker.templates.service import (PlenaryService,
@@ -39,6 +39,7 @@ from aquilon.worker.templates.service import (PlenaryService,
 from aquilon.worker.templates.machine import PlenaryMachineInfo
 from aquilon.worker.templates.host import PlenaryHost
 from aquilon.worker.templates.city import PlenaryCity
+from aquilon.worker.templates.resource import PlenaryResource
 from aquilon.worker.locks import lock_queue, CompileKey
 from aquilon.exceptions_ import PartialError, IncompleteError
 
@@ -47,7 +48,7 @@ class CommandFlush(BrokerCommand):
 
     def render(self, session, logger, user, 
                services, personalities, machines, clusters, hosts,
-               locations, all,
+               locations, resources, all,
                **arguments):
         success = []
         failed = []
@@ -154,6 +155,15 @@ class CommandFlush(BrokerCommand):
                         written += plenary.write(locked=True)
                     except Exception, e:
                         failed.append("{0} failed: {1}".format(clus, e))
+
+            if resources or all:
+                logger.client_info("Flushing resources.")
+                for dbresource in session.query(Resource).all():
+                    try:
+                        plenary = PlenaryResource(dbresource)
+                        written += plenary.write(locked=True)
+                    except Exception, e:
+                        failed.append("{0} failed: {1}".format(dbresource, e))
 
             # written + len(failed) isn't actually the total that should
             # have been done, but it's the easiest to implement for this

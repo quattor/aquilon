@@ -38,6 +38,8 @@ class CommandShowActiveLocks(BrokerCommand):
     requires_transaction = False
     requires_azcheck = False
     defer_to_thread = False
+    # Even though this class imports lock_queue, it doesn't take any locks!
+    _is_lock_free = True
 
     def render(self, debug, **arguments):
         retval = []

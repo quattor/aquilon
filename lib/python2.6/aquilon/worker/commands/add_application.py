@@ -1,6 +1,6 @@
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 #
-# Copyright (C) 2008,2009,2010,2011  Contributor
+# Copyright (C) 2009,2010  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -28,25 +28,25 @@
 # TERMS THAT MAY APPLY.
 
 
-from aquilon.exceptions_ import ArgumentError
-from aquilon.worker.broker import BrokerCommand
-from aquilon.aqdb.model import Service, ClusterAlignedService
+from aquilon.aqdb.model import Application
+from aquilon.worker.broker import BrokerCommand, validate_basic
+from aquilon.worker.dbwrappers.resources import (add_resource,
+                                                 get_resource_holder)
 
+class CommandAddApplication(BrokerCommand):
 
-class CommandAddESXClusterAlignedService(BrokerCommand):
+    required_parameters = ["application", "eonid"]
 
-    required_parameters = ["service"]
+    def render(self, session, logger, application, eonid,
+               hostname, cluster,
+               comments, **arguments):
 
-    def render(self, session, service, comments, **arguments):
-        cluster_type = 'esx'
-        dbservice = Service.get_unique(session, name=service, compel=True)
-        if cluster_type in dbservice.aligned_cluster_types:
-            raise ArgumentError("{0} is already aligned to ESX clusters."
-                                .format(dbservice))
+        validate_basic("application", application)
+        holder = get_resource_holder(session, hostname, cluster, compel=False)
 
-        dbcas = ClusterAlignedService(service=dbservice,
-                                      cluster_type=cluster_type,
-                                      comments=comments)
-        session.add(dbcas)
-        session.flush()
-        return
+        app = Application.get_unique(session, name=application,
+                                     holder_id=holder.id,
+                                     preclude=True)
+
+        dbapp = Application(name=application, comments=comments, eonid=eonid)
+        return add_resource(session, logger, holder, dbapp)

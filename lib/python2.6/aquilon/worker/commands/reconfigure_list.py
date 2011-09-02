@@ -63,12 +63,23 @@ class CommandReconfigureList(BrokerCommand):
         if not dbhosts:
             raise ArgumentError("Empty list.")
 
+        self.reconfigure_list(session, logger, dbhosts, archetype, personality,
+                              buildstatus, osname, osversion, os, **arguments)
+
+
+    def reconfigure_list(self, session, logger, dbhosts, archetype,
+                         personality, buildstatus, osname, osversion, os,
+                         **arguments):
+        failed = []
         # Check all the parameters up front.
         # Some of these could be more intelligent about defaults
         # (either by checking for unique entries or relying on the list)
         # - starting simple.
         if archetype:
             dbarchetype = Archetype.get_unique(session, archetype, compel=True)
+            if dbarchetype.cluster_type is not None:
+                raise ArgumentError("Archetype %s is a cluster archetype" %
+                                    dbarchetype.name)
             # TODO: Once OS is a first class object this block needs
             # to check that either OS is also being reset or that the
             # OS is valid for the new archetype.
@@ -104,6 +115,7 @@ class CommandReconfigureList(BrokerCommand):
             dbstatus = HostLifecycle.get_unique(session, buildstatus,
                                                 compel=True)
 
+        personalities = {}
         branches = {}
         authors = {}
         # Do any final cross-list or dependency checks before entering
@@ -117,11 +129,7 @@ class CommandReconfigureList(BrokerCommand):
                 authors[dbhost.sandbox_author].append(dbhost)
             else:
                 authors[dbhost.sandbox_author] = [dbhost]
-            if personality and dbhost.cluster and \
-               dbhost.cluster.personality != dbpersonality:
-                failed.append("{0}: Cannot change personality of host "
-                              "while it is a member of "
-                              "{1:l}.".format(dbhost.fqdn, dbhost.cluster))
+
             if dbos and not dbarchetype and dbhost.archetype != dbos.archetype:
                 failed.append("{0}: Cannot change operating system because it "
                               "needs {1:l} instead of "
@@ -132,6 +140,29 @@ class CommandReconfigureList(BrokerCommand):
                 failed.append("{0}: Cannot change archetype because {1:l} needs "
                               "{2:l}.".format(dbhost.fqdn, dbhost.operating_system,
                                               dbhost.operating_system.archetype))
+            if (personality and dbhost.cluster and
+                len(dbhost.cluster.allowed_personalities) > 0 and
+                dbhost.personality not in
+                dbhost.cluster.allowed_personalities):
+                failed.append("%s: The personality %s "
+                              "is not allowed by cluster %s. "
+                              "Specify one of %s." %
+                              (dbhost.fqdn, dbhost.personality,
+                               dbhost.cluster.name,
+                               ", ".join([x.name for x in
+                                          dbhost.cluster.allowed_personalities]
+                                        )))
+            if personality:
+                personalities[dbhost.fqdn] = dbpersonality
+            elif archetype:
+                personalities[dbhost.fqdn] = Personality.get_unique(session,
+                        name=dbhost.personality.name, archetype=dbarchetype)
+                if not personalities[dbhost.fqdn]:
+                    failed.append("%s: No personality %s found for archetype "
+                                  "%s." %
+                                  (dbhost.fqdn, dbhost.personality.name,
+                                   dbarchetype.name))
+
         if failed:
             raise ArgumentError("Cannot modify the following hosts:\n%s" %
                                 "\n".join(failed))
@@ -157,8 +188,8 @@ class CommandReconfigureList(BrokerCommand):
         failed = []
         choosers = []
         for dbhost in dbhosts:
-            if personality:
-                dbhost.personality = dbpersonality
+            if dbhost.fqdn in personalities:
+                dbhost.personality = personalities[dbhost.fqdn]
                 session.add(dbhost)
             if osversion:
                 dbhost.operating_system = dbos

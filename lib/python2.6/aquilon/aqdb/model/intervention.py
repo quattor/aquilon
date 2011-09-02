@@ -1,7 +1,6 @@
-#!/usr/bin/env python2.6
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 #
-# Copyright (C) 2009,2010  Contributor
+# Copyright (C) 2008,2009,2010  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -27,32 +26,43 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-"""Module for testing constraints in the make command."""
+
+from datetime import datetime
+
+from sqlalchemy import (Integer, DateTime, Sequence, String, Column,
+                        UniqueConstraint, ForeignKey)
+
+from aquilon.aqdb.model import Resource
+from aquilon.aqdb.column_types.aqstr import AqStr
+
+_TN = 'intervention'
 
 
-import re
-import unittest
+class Intervention(Resource):
+    """ time-based resource """
+    __tablename__ = _TN
+    __mapper_args__ = {'polymorphic_identity': 'intervention'}
 
-if __name__ == "__main__":
-    import utils
-    utils.import_depends()
+    id = Column(Integer, ForeignKey('resource.id',
+                                    name='iv_resource_fk',
+                                    ondelete='CASCADE'),
+                                    primary_key=True)
 
-from brokertest import TestBrokerCommand
+    start_date = Column(DateTime, default=datetime.now, nullable=False)
+    expiry_date = Column(DateTime, default=datetime.now, nullable=False)
+    justification = Column(String(255), nullable=True)
+
+    # what users/groups to allow access during the intervention
+    # this as a string will go away and become association proxies
+    # once we have users/groups in the system.
+    users = Column(String(255), nullable=True)
+    groups = Column(String(255), nullable=True)
+
+    # actions to disable/enable (e.g. scheduled-reboot)
+    disabled = Column(String(255), nullable=True)
+    enabled = Column(String(255), nullable=True)
 
 
-class TestMakeConstraints(TestBrokerCommand):
-
-    def testfailchangepersonalityclusterhost(self):
-        # This is not a realistic OS for this archetype, but that's not
-        # what the test is checking...
-        command = ["make", "--hostname", "evh1.aqd-unittest.ms.com",
-                   "--os", "linux/4.0.1-x86_64", "--buildstatus", "ready",
-                   "--archetype", "vmhost", "--personality", "esx_server"]
-        out = self.badrequesttest(command)
-        self.matchoutput(out, "Cannot change personality of host", command)
-        self.matchoutput(out, "while it is a member of ESX cluster", command)
-
-
-if __name__=='__main__':
-    suite = unittest.TestLoader().loadTestsFromTestCase(TestMake)
-    unittest.TextTestRunner(verbosity=2).run(suite)
+intervention = Intervention.__table__
+intervention.primary_key.name = '%s_pk' % (_TN)
+intervention.info['unique_fields'] = ['name', 'holder_id']

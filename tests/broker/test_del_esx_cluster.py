@@ -43,7 +43,7 @@ class TestDelESXCluster(TestBrokerCommand):
 
     def testdelutecl1(self):
         command = ["del_esx_cluster", "--cluster=utecl1"]
-        self.noouttest(command)
+        self.successtest(command)
 
     def testverifydelutecl1(self):
         command = ["show_esx_cluster", "--cluster=utecl1"]
@@ -51,7 +51,7 @@ class TestDelESXCluster(TestBrokerCommand):
 
     def testdelutecl2(self):
         command = ["del_esx_cluster", "--cluster=utecl2"]
-        self.noouttest(command)
+        self.successtest(command)
 
     def testverifydelutecl2(self):
         command = ["show_esx_cluster", "--cluster=utecl2"]
@@ -59,7 +59,7 @@ class TestDelESXCluster(TestBrokerCommand):
 
     def testdelutecl3(self):
         command = ["del_esx_cluster", "--cluster=utecl3"]
-        self.noouttest(command)
+        self.successtest(command)
 
     def testverifydelutecl3(self):
         command = ["show_esx_cluster", "--cluster=utecl3"]
@@ -67,7 +67,7 @@ class TestDelESXCluster(TestBrokerCommand):
 
     def testdelutecl4(self):
         command = ["del_esx_cluster", "--cluster=utecl4"]
-        self.noouttest(command)
+        self.successtest(command)
 
     def testverifydelutecl4(self):
         command = ["show_esx_cluster", "--cluster=utecl4"]
@@ -76,15 +76,15 @@ class TestDelESXCluster(TestBrokerCommand):
     def testdelutmc4(self):
         for i in range(5, 11):
             command = ["del_esx_cluster", "--cluster=utecl%d" % i]
-            self.noouttest(command)
+            self.successtest(command)
 
     def testdelutmc5(self):
-        self.noouttest(["del_esx_cluster", "--cluster=utecl11"])
-        self.noouttest(["del_esx_cluster", "--cluster=npecl11"])
+        self.successtest(["del_esx_cluster", "--cluster=utecl11"])
+        self.successtest(["del_esx_cluster", "--cluster=npecl11"])
 
     def testdelutmc6(self):
-        self.noouttest(["del_esx_cluster", "--cluster=utecl12"])
-        self.noouttest(["del_esx_cluster", "--cluster=npecl12"])
+        self.successtest(["del_esx_cluster", "--cluster=utecl12"])
+        self.successtest(["del_esx_cluster", "--cluster=npecl12"])
 
     def testverifyall(self):
         command = ["show_esx_cluster", "--all"]

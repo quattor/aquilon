@@ -32,6 +32,11 @@ client_notifications = no
 environment = dev
 mean = %(srcdir)s/tests/fakebin/fake_mean
 
+[panc]
+version = beta
+pan_compiler = /ms/dist/elfms/PROJ/panc/%(version)s/lib/panc.jar
+
+
 [unittest]
 scratchdir = %(basedir)s/scratch
 

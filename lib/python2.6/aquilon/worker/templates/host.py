@@ -307,10 +307,10 @@ class PlenaryToplevelHost(Plenary):
         if self.dbhost.cluster:
             clplenary = PlenaryClusterClient(self.dbhost.cluster)
             templates.append(clplenary.plenary_template)
-        elif self.dbhost.archetype.cluster_required:
-            raise IncompleteError("Host %s archetype %s requires cluster "
+        elif self.dbhost.personality.cluster_required:
+            raise IncompleteError("Host %s personality %s requires cluster "
                                   "membership." %
-                                  (self.name, self.dbhost.archetype.name))
+                                  (self.name, self.dbhost.personality.name))
 
         templates.append("archetype/final")
 
@@ -320,6 +320,7 @@ class PlenaryToplevelHost(Plenary):
         lines.append("variable LOADPATH = %s;" % pan([arcdir]))
         lines.append("")
         lines.append("include { 'pan/units' };")
+        lines.append("include { 'pan/functions' };")
         pmachine = PlenaryMachineInfo(self.dbhost.machine)
         lines.append("'/hardware' = %s;" %
                      pan(StructureTemplate(pmachine.plenary_template)))
@@ -334,14 +335,15 @@ class PlenaryToplevelHost(Plenary):
         if routers:
             lines.append('"/system/network/routers" = %s;' % pan(routers))
         lines.append("")
-        # XXX: remove!
-        # We put in a default function: this will be overridden by the
-        # personality with a more suitable value, we just leave this here
-        # for paranoia's sake.
-        lines.append("'/system/function' = 'grid';")
         lines.append("'/system/build' = %s;" % pan(self.dbhost.status.name))
         if self.dbhost.cluster:
             lines.append("'/system/cluster/name' = %s;" % pan(self.dbhost.cluster.name))
+        lines.append("")
+        for resource in sorted(self.dbhost.resources):
+            lines.append("'/system/resources/%s' = push(%s);" % (
+                         resource.resource_type,
+                         pan(StructureTemplate(resource.template_base +
+                                               '/config'))))
         lines.append("")
         for template in templates:
             lines.append("include { %s };" % pan(template))

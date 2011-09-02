@@ -55,6 +55,25 @@ class TestAddArchetype(TestBrokerCommand):
         out = self.badrequesttest(command.split(" "))
         self.matchoutput(out, "Archetype name 'oops@!' is not valid", command)
 
+    def testaddgridarchetype(self):
+        command = ["add_archetype", "--archetype=gridcluster", "--cluster=compute",
+                   "--compilable", "--description=Grid"]
+        self.noouttest(command)
+        command = "show archetype --archetype gridcluster"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Cluster Archetype: gridcluster", command)
+        self.matchoutput(out, "compilable", command)
+
+    def testaddhaarchetype(self):
+        command = ["add_archetype", "--archetype=hacluster",
+                   "--cluster=compute", "--compilable",
+                   "--description=High Availability"]
+        self.noouttest(command)
+        command = "show archetype --archetype hacluster"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Cluster Archetype: hacluster", command)
+        self.matchoutput(out, "compilable", command)
+
     def testaddutarchetype1(self):
         command = "add archetype --archetype utarchetype1"
         self.noouttest(command.split(" "))
@@ -81,6 +100,7 @@ class TestAddArchetype(TestBrokerCommand):
     def testnotfoundarchetype(self):
         command = "show archetype --archetype archetype-does-not-exist"
         self.notfoundtest(command.split(" "))
+
 
 
 if __name__=='__main__':

@@ -67,7 +67,7 @@ def add_rack(building, rackid, netid, aqservice, aqhost, aqport):
                           "--ip", network.get_ip(offset)])
             print "make aquilon for host %s" % host
             rc = aq.wait(["make", "aquilon", "--hostname", host,
-                          "--os", "linux/4.0.1-x86_64",
+                          "--os", "linux/5.0.1-x86_64",
                           "--personality", "compileserver"])
 
 

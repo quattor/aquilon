@@ -152,6 +152,8 @@ esx_cluster_max_members_default = 8
 esx_cluster_vm_to_host_ratio = 16:1
 metacluster_max_members_default = 32
 metacluster_max_shares_default = 32
+hacluster_max_members_default = 2
+gridcluster_max_members_default = 2000
 ant = /ms/dist/ossjava/PROJ/ant/1.7.1/bin/ant
 namespaced_host_profiles = False
 flat_host_profiles = True
@@ -209,7 +211,7 @@ sqlalchemy.orm    = WARNING
 aquilon = INFO
 
 [protocols]
-directory = /ms/dist/aquilon/PROJ/protocols/1.7/common/lib/python
+directory = /ms/dist/aquilon/PROJ/protocols/1.8/common/lib/python
 
 [nasassign]
 #PROD

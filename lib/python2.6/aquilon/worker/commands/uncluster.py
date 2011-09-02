@@ -32,7 +32,7 @@ from aquilon.exceptions_ import ArgumentError, IncompleteError
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.host import hostname_to_host
 from aquilon.worker.locks import lock_queue, CompileKey
-from aquilon.aqdb.model import Cluster
+from aquilon.aqdb.model import Cluster, Personality
 from aquilon.worker.templates.base import PlenaryCollection
 from aquilon.worker.templates.host import PlenaryHost
 from aquilon.worker.templates.cluster import PlenaryCluster
@@ -42,7 +42,8 @@ class CommandUncluster(BrokerCommand):
 
     required_parameters = ["hostname", "cluster"]
 
-    def render(self, session, logger, hostname, cluster, **arguments):
+    def render(self, session, logger, hostname, cluster,
+               personality, **arguments):
         dbcluster = Cluster.get_unique(session, cluster, compel=True)
         dbhost = hostname_to_host(session, hostname)
         if not dbhost.cluster:
@@ -50,6 +51,22 @@ class CommandUncluster(BrokerCommand):
         if dbhost.cluster != dbcluster:
             raise ArgumentError("{0} is bound to {1:l}, not {2:l}.".format(
                                 dbhost, dbhost.cluster, dbcluster))
+
+        if personality:
+            dbpersonality = Personality.get_unique(session, name=personality,
+                                                   archetype=dbhost.archetype,
+                                                   compel=True)
+            if dbpersonality.cluster_required:
+                raise ArgumentError("Cannot switch host to personality %s "
+                                    "because that personality requires a "
+                                    "cluster" % personality)
+            dbhost.personality = dbpersonality
+        elif dbhost.personality.cluster_required:
+            raise ArgumentError("Host personality %s requires a cluster, "
+                                "use --personality to change personality "
+                                "when leaving the cluster." %
+                                dbhost.personality.name)
+
         dbcluster.hosts.remove(dbhost)
         session.flush()
         session.expire(dbhost, ['_cluster'])

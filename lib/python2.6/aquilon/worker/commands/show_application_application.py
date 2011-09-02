@@ -1,6 +1,6 @@
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 #
-# Copyright (C) 2008,2009,2010,2011  Contributor
+# Copyright (C) 2009,2010  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -28,12 +28,14 @@
 # TERMS THAT MAY APPLY.
 
 
+from sqlalchemy.orm import aliased
+from sqlalchemy.sql.expression import and_
+
+from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.commands.cluster import CommandCluster
-from aquilon.worker.dbwrappers.host import hostname_to_host
+from aquilon.worker.commands.show_application import CommandShowApplication
 
+class CommandShowApplicationApplication(CommandShowApplication):
 
-class CommandRebindESXClusterHostname(CommandCluster):
+    required_parameters = ["application"]
 
-    def render(self, **arguments):
-        return CommandCluster.render(self, **arguments)

@@ -69,7 +69,11 @@ class PersonalityFormatter(ObjectFormatter):
             maintenance_threshold = personality.maintenance_threshold
             has_threshold = True
             personality = personality.dbpersonality
-        details = [indent + "Personality: %s" % personality.name +
+        description = "Host"
+        if personality.is_cluster:
+            description = "Cluster"
+        details = [indent + "%s Personality: %s" % (description,
+                                                    personality.name) +
                    " Archetype: %s" % personality.archetype.name]
         details.append(indent + "  Template: %s/personality/%s/config.tpl" %
                        (personality.archetype.name, personality.name))
@@ -77,6 +81,8 @@ class PersonalityFormatter(ObjectFormatter):
             details.append(indent + "  Threshold: %s" % threshold)
             details.append(indent + "  Maintenance Threshold: %s" %
                            maintenance_threshold)
+        if personality.cluster_required:
+            details.append(indent + "  Requires clustered hosts")
         for service in personality.services:
             details.append(indent + "  Required Service: %s" % service.name)
         if personality.comments:

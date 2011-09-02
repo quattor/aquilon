@@ -371,6 +371,11 @@ class TestBrokerCommand(unittest.TestCase):
                                     'hosts',
                                     msg, expect)
 
+    def parse_clusters_msg(self, msg, expect=None):
+        return self.parse_proto_msg(aqdsystems_pb2.ClusterList,
+                                    'clusters',
+                                    msg, expect)
+
     def parse_location_msg(self, msg, expect=None):
         return self.parse_proto_msg(aqdlocations_pb2.LocationList,
                                     'locations',

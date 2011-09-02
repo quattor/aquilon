@@ -27,10 +27,11 @@
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
 """ tables/classes applying to clusters """
+import re
 from datetime import datetime
 
-from sqlalchemy import (Column, Integer, String, DateTime, Sequence, ForeignKey,
-                        UniqueConstraint)
+from sqlalchemy import (Column, Integer, Boolean, String, DateTime, Sequence,
+                        ForeignKey, UniqueConstraint)
 
 from sqlalchemy.orm import (relation, backref, object_session, deferred,
                             column_property)
@@ -46,6 +47,7 @@ from aquilon.aqdb.model import (Base, Host, Service, Location,
                                 ServiceInstance, Machine, Branch, Switch,
                                 UserPrincipal, VlanInfo, ObservedVlan,
                                 Interface, HardwareEntity)
+from aquilon.config import Config
 
 # List of functions allowed to be used in vmhost_capacity_function
 restricted_builtins = {'None': None,
@@ -97,6 +99,7 @@ def _mcm_machine_creator(machine):
 def _csb_svcinst_creator(service_instance):
     return ClusterServiceBinding(service_instance=service_instance)
 
+_CAP = 'clstr_allow_per'
 
 class Cluster(Base):
     """
@@ -128,6 +131,18 @@ class Cluster(Base):
 
     #esx cluster __init__ method overrides this default
     max_hosts = Column(Integer, default=2, nullable=True)
+    # N+M clusters are defined by setting down_hosts_threshold to M
+    # Simple 2-node clusters would have down_hosts_threshold of 0
+    down_hosts_threshold = Column(Integer, nullable=False)
+    # And that tolerance can be relaxed even further in maintenance windows
+    down_maint_threshold = Column(Integer, nullable=True)
+    # Some clusters (e.g. grid) don't want fixed N+M down_hosts_threshold, but
+    # use percentage goals (i.e. don't alert until 5% of the population dies)
+    down_hosts_percent = Column(Boolean(name="%s_down_hosts_ck" % _TN),
+                                default=False, nullable=False)
+    down_maint_percent = Column(Boolean(name="%s_maint_hosts_ck" % _TN),
+                                default=False, nullable=False)
+
     creation_date = Column(DateTime, default=datetime.now, nullable=False)
     status_id = Column(Integer, ForeignKey('clusterlifecycle.id',
                                               name='cluster_status_fk'),
@@ -146,11 +161,38 @@ class Cluster(Base):
     sandbox_author = relation(UserPrincipal, uselist=False)
 
     hosts = association_proxy('_hosts', 'host', creator=_hcm_host_creator)
+
+    allowed_personalities = association_proxy('_allowed_pers', 'personality',
+            creator=lambda pers: ClusterAllowedPersonality(personality=pers))
+
+    @property
+    def title(self):
+        if self.personality.archetype.outputdesc is not None:
+            return self.personality.archetype.outputdesc
+        return self.personality.archetype.name.capitalize() + " Cluster"
+
+    @property
+    def dht_value(self):
+        if not self.down_hosts_percent:
+            return self.down_hosts_threshold
+        return int((self.down_hosts_threshold * len(self.hosts))/100)
+
+    @staticmethod
+    def parse_threshold(threshold):
+        is_percent = False
+        percent = re.search('(\d+)(%)?', threshold)
+        thresh_value = int(percent.group(1))
+        if percent.group(2):
+            is_percent = True
+        return (is_percent, thresh_value)
+
     machines = association_proxy('_machines', 'machine',
                                  creator=_mcm_machine_creator)
+
     service_bindings = association_proxy('_cluster_svc_binding',
                                          'service_instance',
                                          creator=_csb_svcinst_creator)
+
 
     _metacluster = None
     metacluster = association_proxy('_metacluster', 'metacluster')
@@ -170,6 +212,25 @@ class Cluster(Base):
         else:
             return None
 
+    def validate_membership(self, host, error=ArgumentError, **kwargs):
+        if host.machine.location != self.location_constraint and \
+               self.location_constraint not in \
+               host.machine.location.parents:
+            raise error("Host location {0} is not within cluster "
+                        "location {1}.".format(host.machine.location,
+                                               self.location_constraint))
+
+        if host.branch != self.branch or \
+               host.sandbox_author != self.sandbox_author:
+            raise ArgumentError("{0} {1} {2} does not match {3:l} {4} "
+                                "{5}.".format(host,
+                                              host.branch.branch_type,
+                                              host.authored_branch,
+                                              self,
+                                              self.branch.branch_type,
+                                              self.authored_branch))
+
+
     def validate(self, max_hosts=None, error=ArgumentError, **kwargs):
         if max_hosts is None:
             max_hosts = self.max_hosts
@@ -179,11 +240,58 @@ class Cluster(Base):
         if self.metacluster:
             self.metacluster.validate()
 
+
 cluster = Cluster.__table__  # pylint: disable-msg=C0103, E1101
 cluster.primary_key.name = 'cluster_pk'
 cluster.append_constraint(UniqueConstraint('name', name='cluster_uk'))
 cluster.info['unique_fields'] = ['name']
 
+class ComputeCluster(Cluster):
+    """
+        A cluster containing computers - no special characteristics
+    """
+    __tablename__ = 'compute_cluster'
+    __mapper_args__ = {'polymorphic_identity': 'compute'}
+    _class_label = 'Compute Cluster'
+
+    id = Column(Integer, ForeignKey('%s.id' % _TN,
+                                    name='compute_cluster_fk',
+                                    ondelete='CASCADE'),
+                                    primary_key=True)
+
+compute_cluster = ComputeCluster.__table__  # pylint: disable-msg=C0103, E1101
+compute_cluster.primary_key.name = 'compute_cluster_pk'
+compute_cluster.info['unique_fields'] = ['name']
+
+
+class StorageCluster(Cluster):
+    """
+        A cluster of storage devices
+    """
+    __tablename__ = 'storage_cluster'
+    __mapper_args__ = {'polymorphic_identity': 'storage'}
+    _class_label = 'Storage Cluster'
+
+    id = Column(Integer, ForeignKey('%s.id' % _TN,
+                                    name='storage_cluster_fk',
+                                    ondelete='CASCADE'),
+                                    primary_key=True)
+
+    def validate_membership(self, host, error=ArgumentError, **kwargs):
+        super(StorageCluster, self).validate_membership(host=host, error=error,
+                                                        **kwargs)
+        if host.archetype.name != "filer":
+            raise error("only hosts with archetype 'filer' can be added "
+                        "to a storage cluster. The host %s is of archetype %s"
+                        % (host.fqdn, host.archetype))
+
+storage_cluster = StorageCluster.__table__  # pylint: disable-msg=C0103, E1101
+storage_cluster.primary_key.name = 'storage_cluster_pk'
+storage_cluster.info['unique_fields'] = ['name']
+
+
+# ESX Cluster is really a Grid Cluster, but we have
+# specific broker-level behaviours we need to enforce
 
 class EsxCluster(Cluster):
     """
@@ -201,7 +309,6 @@ class EsxCluster(Cluster):
 
     vm_count = Column(Integer, default=16, nullable=True)
     host_count = Column(Integer, default=1, nullable=False)
-    down_hosts_threshold = Column(Integer, nullable=False)
 
     # Memory capacity override
     memory_capacity = Column(Integer, nullable=True)
@@ -258,6 +365,8 @@ class EsxCluster(Cluster):
             down_hosts_threshold = self.down_hosts_threshold
 
         if len(self.hosts) <= down_hosts_threshold:
+            if self.memory_capacity is not None:
+                return {'memory' : self.memory_capacity}
             return {'memory': 0}
 
         func = self.vmhost_capacity_function
@@ -332,6 +441,7 @@ class EsxCluster(Cluster):
 
     def validate(self, vm_part=None, host_part=None, current_vm_count=None,
                  current_host_count=None, down_hosts_threshold=None,
+                 down_hosts_percent=None,
                  error=ArgumentError, **kwargs):
         super(EsxCluster, self).validate(error=error, **kwargs)
 
@@ -345,6 +455,8 @@ class EsxCluster(Cluster):
             current_host_count = len(self.hosts)
         if down_hosts_threshold is None:
             down_hosts_threshold = self.down_hosts_threshold
+        if down_hosts_percent is None:
+            down_hosts_percent = self.down_hosts_percent
 
         # It doesn't matter how many vmhosts we have if there are no
         # virtual machines.
@@ -357,13 +469,18 @@ class EsxCluster(Cluster):
 
         # For calculations, assume that down_hosts_threshold vmhosts
         # are not available from the number currently configured.
-        adjusted_host_count = current_host_count - down_hosts_threshold
+        if down_hosts_percent:
+            adjusted_host_count = current_host_count - \
+                int(down_hosts_threshold*current_host_count/100)
+            dhtstr = "%d%%" % down_hosts_threshold
+        else:
+            adjusted_host_count = current_host_count - down_hosts_threshold
+            dhtstr = "%d" % down_hosts_threshold
 
         if adjusted_host_count <= 0:
             raise error("%s cannot support VMs with %s "
                         "vmhosts and a down_hosts_threshold of %s" %
-                        (format(self), current_host_count,
-                         down_hosts_threshold))
+                        (format(self), current_host_count, dhtstr))
 
         # The current ratio must be less than the requirement...
         # cur_vm / cur_host <= vm_part / host_part
@@ -373,7 +490,7 @@ class EsxCluster(Cluster):
             raise error("%s VMs:%s hosts in %s violates "
                         "ratio %s:%s with down_hosts_threshold %s" %
                         (current_vm_count, current_host_count, format(self),
-                         vm_part, host_part, down_hosts_threshold))
+                         vm_part, host_part, dhtstr))
 
         capacity = self.get_total_capacity()
         usage = self.get_total_usage()
@@ -458,6 +575,35 @@ hcm.append_constraint(
 hcm.info['unique_fields'] = ['cluster', 'host']
 
 Host.cluster = association_proxy('_cluster', 'cluster')
+
+class ClusterAllowedPersonality(Base):
+    __tablename__ = _CAP
+    cluster_id = Column(Integer, ForeignKey('%s.id' % _TN,
+                                            name='clstr_allowed_pers_c_fk',
+                                            ondelete='CASCADE'),
+                        primary_key=True)
+
+    personality_id = Column(Integer, ForeignKey('personality.id',
+                                                name='clstr_allowed_pers_p_fk',
+                                                ondelete='CASCADE'),
+                            primary_key=True)
+
+    creation_date = Column(DateTime, default=datetime.now, nullable=False)
+
+    cluster = relation(Cluster, uselist=False, lazy=False,
+                       backref=backref('_allowed_pers', cascade='all, delete-orphan'))
+
+    personality = relation(Personality, lazy=False,
+                           backref=backref('_clusters_allowing', uselist=False,
+                                           cascade='all, delete-orphan'))
+
+    __mapper_args__ = {'extension': ValidateCluster()}
+
+
+cap = ClusterAllowedPersonality.__table__  # pylint: disable-msg=C0103, E1101
+cap.primary_key.name = '%s_pk' % _CAP
+cap.info['unique_fields'] = ['cluster', 'personality']
+cap.cluster = association_proxy('_cluster', 'cluster')
 
 
 class MachineClusterMember(Base):

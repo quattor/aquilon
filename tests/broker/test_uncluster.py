@@ -53,14 +53,34 @@ class TestUncluster(TestBrokerCommand):
                          "ESX cluster utecl2, not ESX cluster utecl1.",
                          command)
 
+    def testunclusterpersonality(self):
+        command = ["uncluster",
+                   "--hostname", "evh1.aqd-unittest.ms.com",
+                   "--cluster", "utecl2",
+                   "--personality", "esx_server"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "Cannot switch host to personality "
+                         "esx_server because that personality "
+                         "requires a cluster",
+                         command)
+
+        command = ["uncluster",
+                   "--hostname", "evh1.aqd-unittest.ms.com",
+                   "--cluster", "utecl2",
+                   "--personality", "esx_standalone"]
+        self.successtest(command)
+
     def testunbindutecl1(self):
         for i in range(2, 5):
             hostname = 'evh%s.aqd-unittest.ms.com' %i
             self.verify_buildfiles('utsandbox', hostname, want_exist=True,
                                    command='uncluster')
-            self.noouttest(['uncluster',
+            self.noouttest(['uncluster', '--personality', 'generic',
                             '--hostname', hostname, '--cluster', 'utecl1'])
-            self.verify_buildfiles('utsandbox', hostname, want_exist=False,
+            # We declare that personality generic is OK without a cluster,
+            # so the build files should still be there.
+            self.verify_buildfiles('utsandbox', hostname, want_exist=True,
                                    command='uncluster')
 
     def testverifycat(self):
@@ -69,10 +89,8 @@ class TestUncluster(TestBrokerCommand):
         self.searchoutput(out, r'"/system/cluster/members" = list\(\s*\);', command)
 
     def testunbindutecl2(self):
-        for i in [1, 5]:
-            self.noouttest(["uncluster",
-                            "--hostname", "evh%s.aqd-unittest.ms.com" % i,
-                            "--cluster", "utecl2"])
+        self.noouttest(["uncluster", "--hostname", "evh5.aqd-unittest.ms.com",
+                        "--cluster", "utecl2", "--personality", "generic"])
 
     def testverifyunbindhosts(self):
         for i in range(1, 6):
@@ -101,8 +119,14 @@ class TestUncluster(TestBrokerCommand):
         for i in range(1, 25):
             host = "evh%s.aqd-unittest.ms.com" % (i + 50)
             cluster = "utecl%d" % (5 + ((i - 1) / 4))
-            self.noouttest(["uncluster",
+            self.noouttest(["uncluster", "--personality", "generic",
                             "--hostname", host, "--cluster", cluster])
+
+    def testunbindutstorage1(self):
+        command = ["uncluster",
+                   "--hostname=filer1.ms.com",
+                   "--cluster=utstorage1"]
+        self.successtest(command)
 
 
 if __name__=='__main__':

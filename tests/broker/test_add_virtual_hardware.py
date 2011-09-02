@@ -335,7 +335,7 @@ class TestAddVirtualHardware(TestBrokerCommand):
         self.matchoutput(out, "Current vm_to_host_ratio: 8:3", command)
         self.matchoutput(out, "Virtual Machine count: 8", command)
         self.matchoutput(out, "ESX VMHost count: 3", command)
-        self.matchoutput(out, "Personality: esx_desktop Archetype: vmhost",
+        self.matchoutput(out, "Personality: esx_desktop Archetype: esx_cluster",
                          command)
         self.matchoutput(out, "Domain: unittest", command)
 
@@ -422,16 +422,14 @@ class TestAddVirtualHardware(TestBrokerCommand):
     # FIXME: Missing a test for add_interface non-esx automac.  (Might not
     # be possible to test with the current command set.)
 
-    # Can't test this as there is no way to add a cluster without
-    # an archetype of vmhost - yet.
-#   def testfailaddnonvirtualcluster(self):
-#       command = ["add", "machine", "--machine", "ut9s03p51",
-#                  "--cluster", "utecl1", "--model", "utmedium"]
-#       out = self.badrequesttest(command)
-#       self.matchoutput(out,
-#                        "Can only add virtual machines to "
-#                        "clusters with archetype vmhost.",
-#                        command)
+    def testfailaddnonvirtualcluster(self):
+        command = ["add", "machine", "--machine", "ut9s03p51",
+                   "--cluster", "utgrid1", "--model", "utmedium"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "Can only add virtual machines to "
+                         "clusters with archetype esx_cluster.",
+                         command)
 
     def testfailaddmissingcluster(self):
         command = ["add_machine", "--machine=ut9s03p51",
@@ -439,10 +437,6 @@ class TestAddVirtualHardware(TestBrokerCommand):
         out = self.badrequesttest(command)
         self.matchoutput(out, "Cluster cluster-does-not-exist not found",
                          command)
-
-    # FIXME: Add a test for add_machine that tries to use a non vmhost cluster.
-    # This may not be possible yet as only esx clusters can be created and aqdb
-    # constrains them to be vmhost.
 
     def testfailaddnonvirtual(self):
         command = ["add_machine", "--machine=ut3c1n1", "--model=utmedium",

@@ -28,20 +28,41 @@
 # TERMS THAT MAY APPLY.
 
 
+from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.broker import BrokerCommand
-from aquilon.aqdb.model import Archetype
+from aquilon.aqdb.model import Archetype, Cluster, Host
 
 
 class CommandUpdateArchetype(BrokerCommand):
 
     required_parameters = ["archetype"]
 
-    def render(self, session, archetype, compilable, cluster_required,
-               **kwargs):
+    def render(self, session, archetype, compilable, cluster_type,
+               description, **kwargs):
         dbarchetype = Archetype.get_unique(session, archetype, compel=True)
 
         if compilable is not None:
             dbarchetype.is_compileable = compilable
-        if cluster_required is not None:
-            dbarchetype.cluster_required = cluster_required
+
+        if description is not None:
+            dbarchetype.outputdesc = description
+
+        if cluster_type is not None and \
+            dbarchetype.cluster_type != cluster_type:
+            if dbarchetype.cluster_type is None:
+                q = session.query(Host)
+            else:
+                q = session.query(Cluster)
+            q = q.join('personality').filter_by(archetype=dbarchetype)
+            if q.count() > 0:
+                raise ArgumentError("The %s archetype is currently in use - "
+                                    "the cluster status cannot be "
+                                    "changed." %
+                                    dbarchetype.name)
+
+            if cluster_type == "":
+                dbarchetype.cluster_type = None
+            else:
+                dbarchetype.cluster_type = cluster_type
+
         return

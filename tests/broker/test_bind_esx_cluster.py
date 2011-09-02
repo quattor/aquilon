@@ -40,18 +40,6 @@ from brokertest import TestBrokerCommand
 
 class TestBindESXCluster(TestBrokerCommand):
 
-    def testdeprecation(self):
-        # This same test exists in the test_cluster module, and can be
-        # removed here if/when the bind_esx_cluster --hostname option is
-        # removed.
-        command = ["bind_esx_cluster", "--hostname=evh9.aqd-unittest.ms.com",
-                   "--cluster", "cluster-does-not-exist"]
-        (p, out, err) = self.runcommand(command)
-        self.matchoutput(err,
-                         "The --hostname option is deprecated.  "
-                         "Please use the 'cluster' command instead.",
-                         command)
-
     def testfailbindservicemissingcluster(self):
         command = ["bind_esx_cluster", "--cluster=cluster-does-not-exist",
                    "--service=esx_management_server", "--instance=ut.a"]

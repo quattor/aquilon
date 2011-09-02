@@ -86,8 +86,11 @@ from test_add_ns_record import TestAddNSRecord
 from test_add_router import TestAddRouter
 from test_add_metacluster import TestAddMetaCluster
 from test_add_esx_cluster import TestAddESXCluster
-from test_add_esx_cluster_aligned_service import (
-    TestAddESXClusterAlignedService)
+from test_add_cluster import TestAddCluster
+from test_update_cluster import TestUpdateCluster
+from test_del_cluster import TestDelCluster
+from test_add_cluster_aligned_service import (
+    TestAddClusterAlignedService)
 from test_early_constraints_cluster import TestClusterEarlyConstraints
 from test_add_tor_switch import TestAddTorSwitch
 from test_add_switch import TestAddSwitch
@@ -115,6 +118,7 @@ from test_make_aquilon import TestMakeAquilon
 from test_make import TestMake
 from test_make_cluster import TestMakeCluster
 from test_cluster import TestCluster
+from test_add_allowed_personality import TestAddAllowedPersonality
 from test_bind_esx_cluster import TestBindESXCluster
 from test_change_status_cluster import TestChangeClusterStatus
 from test_rebind_esx_cluster import TestRebindESXCluster
@@ -131,6 +135,9 @@ from test_flush import TestFlush
 from test_compile import TestCompile
 from test_profile import TestProfile
 from test_bind_server import TestBindServer
+from test_add_filesystem import TestAddFilesystem
+from test_add_application import TestAddApplication
+from test_add_intervention import TestAddIntervention
 from test_constraints_bind_client import TestBindClientConstraints
 from test_constraints_bind_server import TestBindServerConstraints
 from test_constraints_archetype import TestArchetypeConstraints
@@ -141,7 +148,6 @@ from test_constraints_vendor import TestVendorConstraints
 from test_constraints_machine import TestMachineConstraints
 from test_constraints_interface import TestInterfaceConstraints
 from test_constraints_switch import TestSwitchConstraints
-from test_constraints_make import TestMakeConstraints
 from test_constraints_cluster import TestClusterConstraints
 from test_constraints_metacluster import TestMetaClusterConstraints
 from test_constraints_location import TestLocationConstraints
@@ -186,6 +192,7 @@ from test_unmap_service import TestUnmapService
 from test_del_10gig_hardware import TestDel10GigHardware
 from test_del_virtual_hardware import TestDelVirtualHardware
 from test_unbind_esx_cluster import TestUnbindESXCluster
+from test_del_allowed_personality import TestDelAllowedPersonality
 from test_uncluster import TestUncluster
 from test_del_static_route import TestDelStaticRoute
 from test_del_dynamic_range import TestDelDynamicRange
@@ -202,8 +209,8 @@ from test_del_disk import TestDelDisk
 from test_del_machine import TestDelMachine
 from test_del_chassis import TestDelChassis
 from test_del_switch import TestDelSwitch
-from test_del_esx_cluster_aligned_service import (
-    TestDelESXClusterAlignedService)
+from test_del_cluster_aligned_service import (
+    TestDelClusterAlignedService)
 from test_del_esx_cluster import TestDelESXCluster
 from test_del_metacluster import TestDelMetaCluster
 from test_del_router import TestDelRouter
@@ -229,6 +236,7 @@ from test_del_dns_environment import TestDelDnsEnvironment
 from test_client_failure import TestClientFailure
 from test_client_bypass import TestClientBypass
 from test_audit import TestAudit
+from test_usecase_database import TestUsecaseDatabase
 from test_stop import TestBrokerStop
 
 
@@ -261,7 +269,8 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestAddNetworkEnvironment, TestAddNetwork,
                 TestAddNSRecord, TestMapDnsDomain,
                 TestAddMetaCluster, TestAddESXCluster,
-                TestAddESXClusterAlignedService,
+                TestAddCluster,
+                TestAddClusterAlignedService,
                 TestClusterEarlyConstraints,
                 TestAddTorSwitch, TestAddSwitch, TestUpdateSwitch,
                 TestAddChassis, TestAddMachine, TestAddDisk, TestAddInterface,
@@ -276,6 +285,8 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestServiceConstraints,
                 TestFlush,
                 TestMakeAquilon, TestMakeCluster, TestCluster,
+                TestAddAllowedPersonality,
+                TestDelAllowedPersonality,
                 TestBindESXCluster, TestChangeClusterStatus, TestRebindESXCluster,
                 TestMake,
                 TestAddStaticRoute,
@@ -288,12 +299,12 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestCompile,
                 TestProfile,
                 TestBindServer,
+                TestAddFilesystem, TestAddApplication, TestAddIntervention,
                 TestBindClientConstraints, TestBindServerConstraints,
                 TestArchetypeConstraints, TestPersonalityConstraints,
                 TestDomainConstraints, TestVendorConstraints,
                 TestMachineConstraints, TestSwitchConstraints,
                 TestInterfaceConstraints,
-                TestMakeConstraints,
                 TestUpdatePersonality,
                 TestClusterConstraints, TestMetaClusterConstraints,
                 TestLocationConstraints,
@@ -312,7 +323,9 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestUpdateNetworkEnvironment,
                 TestUpdateArchetype,
                 TestUpdateMetaCluster, TestUpdateESXCluster,
+                TestUpdateCluster,
                 TestPxeswitch, TestManage,
+                TestUsecaseDatabase,
                 TestClientBypass,
                 TestUmaskConstraints,
                 TestUnbindServer, TestUnmapService,
@@ -325,7 +338,8 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestDelWindowsHost, TestDelHost,
                 TestDelInterface, TestDelDisk, TestDelMachine, TestDelChassis,
                 TestDelSwitch,
-                TestDelESXClusterAlignedService,
+                TestDelClusterAlignedService,
+                TestDelCluster,
                 TestDelESXCluster, TestDelMetaCluster,
                 TestDelRouter, TestDelNetwork, TestDelNetworkEnvironment,
                 TestDelModel, TestDelCpu, TestDelVendor,

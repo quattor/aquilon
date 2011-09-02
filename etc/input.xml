@@ -92,6 +92,7 @@
          <option name="personalities" type="boolean">flush the personality templates</option>
          <option name="clusters" type="boolean">flush the cluster templates</option>
          <option name="services" type="boolean">flush the service templates</option>
+         <option name="resources" type="boolean">flush the resource templates</option>
          <option name="locations" type="boolean">flush templates related to locations. This is only cities for now.</option>
          <option name="all" type="flag">flush all templates</option>
       </optgroup>
@@ -452,9 +453,10 @@
       sandbox, or only for the specified host.  Only out of date profiles
       will be compiled.
       <optgroup name="compile_input" mandatory="True" fields="any">
-         <option name="domain" type="string" conflicts="sandbox hostname">Domain name</option>
-         <option name="sandbox" type="string" conflicts="domain hostname">Name of the sandbox (given as 'author/branch')</option>
-         <option name="hostname" type="string" conflicts="domain sandbox">FQDN</option>
+         <option name="domain" type="string" conflicts="sandbox hostname cluster">Domain name</option>
+         <option name="sandbox" type="string" conflicts="domain hostname cluster">Name of the sandbox (given as 'author/branch')</option>
+         <option name="hostname" type="string" conflicts="domain sandbox cluster">FQDN</option>
+         <option name="cluster" type="string" conflicts="domain sandbox hostname">Name of cluster</option>
       </optgroup>
       <optgroup name="compile_optional" mandatory="False" fields="any">
          <option name="pancinclude" type="string" conflicts="pancdebug">Regex for templates to include in debug output (None included by default)</option>
@@ -464,6 +466,7 @@
       </optgroup>
       <transport method="post" path="compile"/>
       <transport trigger="hostname" method="post" path="host/%(hostname)s/command/compile" />
+      <transport trigger="cluster" method="post" path="cluster/%(cluster)s/command/compile" />
    </command>
 
    <command name="show_domain">
@@ -1876,9 +1879,10 @@
       for the personality or the archetype are dropped unless the
       --keepbindings flag is specified.
       <optgroup name="reconfigure_options" mandatory="True" fields="any">
-         <option name="hostname" type="string" conflicts="hostlist list">Host name</option>
-         <option name="hostlist" type="file" conflicts="hostname list">[Deprecated] File with one host per line</option>
-         <option name="list" type="file" conflicts="hostname hostlist">File with one host per line</option>
+         <option name="hostname" type="string" conflicts="hostlist list memberof">Host name</option>
+         <option name="hostlist" type="file" conflicts="hostname list memberof">[Deprecated] File with one host per line</option>
+         <option name="list" type="file" conflicts="hostname hostlist memberof">File with one host per line</option>
+         <option name="membersof" type="string" conflicts="hostlist list hostname">Hosts which are members of the specified cluster</option>
       </optgroup>
       <optgroup name="reconfigure_optional" mandatory="False">
          <option name="osname" type="string">name of the OS to assign to the host (linux, windows, esx, etc.)</option>
@@ -1892,6 +1896,7 @@
       <transport method="post" path="host/%(hostname)s/command/reconfigure" />
       <transport trigger="list" method="post" path="command/reconfigure/list" />
       <transport trigger="hostlist" method="post" path="command/reconfigure/hostlist" />
+      <transport trigger="membersof" method="post" path="command/reconfigure/membersof/%(membersof)s" />
    </command>
 
    <command name="change_status">
@@ -1954,8 +1959,9 @@
          <option name="archetype" type="string">Name of the archetype</option>
       </optgroup>
       <optgroup name="update_archetype_options" mandatory="False">
-         <option name="compilable" type="boolean">Can hosts be compiled?</option>
-         <option name="cluster_required" type="boolean">Do hosts require membership in a cluster to be compiled?</option>
+         <option name="compilable" type="boolean">Can profiles be compiled?</option>
+         <option name="description" type="string">A human-readable description of the archetype name</option>
+         <option name="cluster_type" type="string">Only for cluster archetypes - what type of cluster is this?</option>
       </optgroup>
       <transport method="post" path="archetype/%(archetype)s" />
    </command>
@@ -2133,14 +2139,22 @@
       that template generated on-demand in this way will be incomplete
       (especially if it cannot be compiled) and is purely provided for debugging.
       <optgroup name="cat selector" mandatory="True" fields="any">
-         <option name="hostname" type="string" conflicts="machine cluster service instance default nasinfo city">Name of the host</option>
-         <option name="machine" type="string" conflicts="hostname cluster service instance default nasinfo city">Name of the machine</option>
-         <option name="cluster" type="string" conflicts="hostname machine service instance default nasinfo city">Name of the machine</option>
-         <option name="service" type="string" conflicts="hostname machine cluster nasinfo city">Name of the service</option>
-         <option name="instance" type="string" conflicts="hostname machine cluster nasinfo city">Name of the service instance</option>
-	 <option name="default" type="flag" conflicts="hostname machine cluster nasinfo city">Show the default client config for the service/instance</option>
-	 <option name="nasinfo" type="string" conflicts="hostname machine cluster service instance default city">Show the default client config for the service/instance</option>
-	 <option name="city" type="string" conflicts="hostname machine cluster service instance default nasinfo">Name of the city</option>
+         <option name="hostname" type="string" conflicts="machine cluster service instance default nasinfo city resource">Name of the host</option>
+         <option name="machine" type="string" conflicts="hostname cluster service instance default nasinfo city resource">Name of the machine</option>
+         <option name="cluster" type="string" conflicts="hostname machine service instance default nasinfo city resource">Name of the cluster</option>
+         <option name="service" type="string" conflicts="hostname machine cluster nasinfo city resource">Name of the service</option>
+         <option name="instance" type="string" conflicts="hostname machine cluster nasinfo city resource">Name of the service instance</option>
+	 <option name="default" type="flag" conflicts="hostname machine cluster nasinfo city resource">Show the default client config for the service/instance</option>
+	 <option name="nasinfo" type="string" conflicts="hostname machine cluster service instance default city resource">Show the default client config for the service/instance</option>
+	 <option name="city" type="string" conflicts="hostname machine cluster service instance default nasinfo resource">Name of the city</option>
+         <optgroup name="resopts" fields="all">
+	   <option name="resource" type="string" conflicts="hostname machine cluster service instance default nasinfo">Name of the resource</option>
+	   <option name="restype" type="string" conflicts="reshost">The resource type</option>
+	   <optgroup name="resplacement" fields="any">
+             <option name="reshostname" type="string" conflicts="rescluster">The resource host</option>
+             <option name="rescluster" type="string" conflicts="reshost">The resource cluster</option>
+            </optgroup>
+          </optgroup>
       </optgroup>
       <optgroup name="cat options" fields="any">
           <option name="generate" type="boolean">Show the plenary template as it would be generated</option>
@@ -2152,6 +2166,7 @@
       <transport trigger="cluster" method="get" path="cluster/any/%(cluster)s/plenary" />
       <transport trigger="nasinfo" method="get" path="nasinfo/%(nasinfo)s/plenary" />
       <transport trigger="city" method="get" path="city/%(city)s/plenary" />
+      <transport trigger="resource" method="get" path="resource/%(resource)s/plenary" />
    </command>
 
    <command name="sync">
@@ -2584,6 +2599,11 @@
       <optgroup name="mandatory_options" mandatory="True" fields="all">
          <option name="archetype" type="string">The name to create</option>
       </optgroup>
+      <optgroup name="options">
+         <option name="compilable" type="boolean" default='False'>Does this archetype produce profiles?</option>
+         <option name="description" type="string">A human readable description of the archetype name</option>
+         <option name="cluster_type" type="string">For cluster archetypes - what kind of cluster is this?</option>
+      </optgroup>
       <transport method="put" path="archetype/%(archetype)s" />
   </command>
 
@@ -2606,6 +2626,7 @@
          <option name="archetype" type="string">Which archetype to use</option>
       </optgroup>
       <optgroup name="add_personality_optional" mandatory="False">
+         <option name="cluster_required" type="boolean" default='False'>Does this personality require hosts to be clustered?</option>
          <option name="comments" type="string">Comments</option>
       </optgroup>
       <transport method="put" path="personality/%(archetype)s/%(personality)s" />
@@ -2693,6 +2714,7 @@
       <optgroup name="update_personality_opt" mandatory="False">
 	 <option name="vmhost_capacity_function" type="string">Function for calculating VM host capacity units</option>
 	 <option name="vmhost_overcommit_memory" type="float">Memory overcommit factor for VM hosts</option>
+         <option name="cluster_required" type="boolean" default='False'>Does this personality require hosts to be clustered?</option>
       </optgroup>
       <transport method="post" path="personality/%(archetype)s/%(personality)s" />
   </command>
@@ -3259,6 +3281,19 @@
       <transport method="delete" path="metacluster/%(metacluster)s" />
    </command>
 
+   <command name="show_cluster">
+      Show details for a cluster.
+      <optgroup name="show_cluster_req" mandatory="True" fields="any">
+         <option name="cluster" type="string" conflicts="all">Name of the cluster</option>
+         <option name="all" type="flag" conflicts="cluster">Show all clusters</option>
+      </optgroup>
+      <optgroup name="show_cluster_opt">
+          <option name="archetype" type="string">Filter only clusters of the given archetype</option>
+      </optgroup>
+      <transport trigger="cluster" method="get" path="cluster/%(cluster)s" />
+      <transport trigger="all" method="get" path="cluster/" />
+   </command>
+
    <command name="add_esx_cluster">
       Add a new ESX cluster.
       <p/>
@@ -3284,12 +3319,13 @@
       <optgroup name="add_esx_cluster_req" mandatory="True" fields="all">
          <option name="cluster" type="string">Name of the new esx_cluster</option>
          <option name="metacluster" type="string">Name of the metacluster containing this cluster</option>
-         <option name="down_hosts_threshold" type="int">Number of vmhosts that can be down before monitoring alarms trigger</option>
+         <option name="down_hosts_threshold" type="string">Number of vmhosts that can be down before monitoring alarms trigger</option>
          <optgroup name="add_cluster_location_opts" fields="any">
             <option name="organization" type="string">Organization</option>
             <option name="hub" type="string">Hub</option>
             <option name="continent" type="string">Continent</option>
             <option name="country" type="string">Country</option>
+            <option name="campus" type="string">Campus</option>
             <option name="city" type="string">City</option>
             <option name="building" type="string">Building</option>
             <option name="room" type="string">Room</option>
@@ -3304,10 +3340,10 @@
          </optgroup>
       </optgroup>
       <optgroup name="add_esx_cluster_options" mandatory="False">
+         <option name="maint_threshold" type="string">Down hosts threshold for maintenance windows</option>
          <option name="max_members" type="int">Comments</option>
          <option name="vm_to_host_ratio" type="string">Ratio of virtual machines to ESX servers</option>
-         <option name="tor_switch" type="string" conflicts="switch">(Deprecated) ToR switch in use by the cluster</option>
-         <option name="switch" type="string" conflicts="tor_switch">switch in use by the cluster</option>
+         <option name="switch" type="string">switch in use by the cluster</option>
          <option name="buildstatus" type="string">Build status of the cluster (defaults to 'build')</option>
          <option name="comments" type="string">Comments</option>
       </optgroup>
@@ -3315,7 +3351,7 @@
    </command>
 
    <command name="show_esx_cluster">
-      Show details for an ESX cluster.
+      Show details for an ESX cluster. DEPRECATED
       <optgroup name="show_cluster_req" mandatory="True" fields="any">
          <option name="cluster" type="string" conflicts="all">Name of the cluster</option>
          <option name="all" type="flag" conflicts="cluster">Show all clusters</option>
@@ -3334,13 +3370,13 @@
          <option name="cluster" type="string">Name of the ESX cluster</option>
       </optgroup>
       <optgroup name="update_esx_cluster_options" mandatory="False">
-         <option name="archetype" type="string">Archetype Name</option>
          <option name="personality" type="string">Personality Name</option>
-         <option name="down_hosts_threshold" type="int">Down hosts threshold</option>
+         <option name="down_hosts_threshold" type="string">Down hosts threshold</option>
+         <option name="maint_threshold" type="string">Down hosts threshold for maintenance windows</option>
          <option name="max_members" type="int">Max allowed vmhost members</option>
          <option name="vm_to_host_ratio" type="string">Ratio of virtual machines to ESX servers</option>
-         <option name="tor_switch" type="string" conflicts="switch">(Deprecated.) Set the switch in use by the cluster.  An empty string removes the setting.</option>
          <option name="switch" type="string" conflicts="tor_switch">Set the switch in use by the cluster.  An empty string removes the setting.</option>
+         <option name="tor_switch" type="string" conflicts="switch">[DEPRECATED] Set the switch in use by the cluster.  An empty string removes the setting.</option>
          <option name="fix_location" type="flag">Set the location based on cluster membership.</option>
          <option name="comments" type="string">Comments</option>
          <option name="memory_capacity" type="int" conflicts="clear_overrides">Override the computed memory capacity</option>
@@ -3350,6 +3386,7 @@
 	    <option name="hub" type="string">Hub</option>
 	    <option name="continent" type="string">Continent</option>
 	    <option name="country" type="string">Country</option>
+	    <option name="campus" type="string">Campus</option>
 	    <option name="city" type="string">City</option>
 	    <option name="building" type="string">Building</option>
 	    <option name="room" type="string">Room</option>
@@ -3368,6 +3405,103 @@
       <transport method="delete" path="cluster/esx/%(cluster)s" />
    </command>
 
+   <command name="add_cluster">
+      Add a new cluster.
+      <optgroup name="add_cluster_req" mandatory="True" fields="all">
+         <option name="cluster" type="string">Name of the new cluster</option>
+         <option name="down_hosts_threshold" type="string">Number of hosts that can be down before monitoring alarms trigger</option>
+         <optgroup name="add_cluster_location_opts" fields="any">
+            <option name="organization" type="string">Organization</option>
+            <option name="hub" type="string">Hub</option>
+            <option name="continent" type="string">Continent</option>
+            <option name="country" type="string">Country</option>
+            <option name="campus" type="string">Campus</option>
+            <option name="city" type="string">City</option>
+            <option name="building" type="string">Building</option>
+            <option name="room" type="string">Room</option>
+            <option name="rack" type="string">Rack</option>
+            <option name="desk" type="string">Desk</option>
+         </optgroup>
+         <option name="archetype" type="string">Archetype name</option>
+         <option name="personality" type="string">Personality name</option>
+         <optgroup name="branch_opts" fields="any">
+            <option name="domain" type="string" conflicts="sandbox">Name of template domain</option>
+            <option name="sandbox" type="string" conflicts="domain">Name of the sandbox (given as 'author/branch')</option>
+         </optgroup>
+      </optgroup>
+      <optgroup name="add_cluster_options" mandatory="False">
+         <option name="metacluster" type="string">Name of the metacluster containing this cluster</option>
+         <option name="maint_threshold" type="string">Down hosts threshold for maintenance windows</option>
+         <option name="max_members" type="int">Comments</option>
+         <option name="vm_to_host_ratio" type="string">Ratio of virtual machines to ESX servers</option>
+         <option name="switch" type="string">switch in use by the cluster</option>
+         <option name="buildstatus" type="string">Build status of the cluster (defaults to 'build')</option>
+         <option name="comments" type="string">Comments</option>
+      </optgroup>
+      <transport method="put" path="cluster/%(cluster)s" />
+   </command>
+
+   <command name="update_cluster">
+      Update a cluster.
+      <optgroup name="update_cluster_req" mandatory="True" fields="all">
+         <option name="cluster" type="string">Name of the cluster</option>
+      </optgroup>
+      <optgroup name="update_cluster_options" mandatory="False">
+         <option name="personality" type="string">Personality Name</option>
+         <option name="down_hosts_threshold" type="string">Down hosts threshold</option>
+         <option name="maint_threshold" type="string">Down hosts threshold for maintenance windows</option>
+         <option name="max_members" type="int">Max allowed host members</option>
+         <option name="vm_to_host_ratio" type="string">Ratio of virtual machines to ESX servers</option>
+         <option name="tor_switch" type="string" conflicts="switch">DEPRECATED Set the switch in use by the cluster.  An empty string removes the setting.</option>
+         <option name="switch" type="string" conflicts="tor_switch">Set the switch in use by the cluster.  An empty string removes the setting.</option>
+         <option name="fix_location" type="flag">Set the location based on cluster membership.</option>
+         <option name="comments" type="string">Comments</option>
+         <option name="memory_capacity" type="int" conflicts="clear_overrides">Override the computed memory capacity</option>
+         <option name="clear_overrides" type="flag" conflicts="override_memory_capacity">Clear capacity overrides</option>
+         <optgroup name="update_cluster_location_opts" fields="any">
+	    <option name="organization" type="string">Organization</option>
+	    <option name="hub" type="string">Hub</option>
+	    <option name="continent" type="string">Continent</option>
+	    <option name="country" type="string">Country</option>
+	    <option name="campus" type="string">Campus</option>
+	    <option name="city" type="string">City</option>
+	    <option name="building" type="string">Building</option>
+	    <option name="room" type="string">Room</option>
+	    <option name="rack" type="string">Rack</option>
+	    <option name="desk" type="string">Desk</option>
+         </optgroup>
+      </optgroup>
+      <transport method="post" path="cluster/%(cluster)s" />
+   </command>
+
+   <command name="del_cluster">
+      Delete the cluster.
+      <optgroup name="del_cluster_req" mandatory="True" fields="all">
+         <option name="cluster" type="string">Name of the cluster</option>
+      </optgroup>
+      <transport method="delete" path="cluster/%(cluster)s" />
+   </command>
+
+   <command name="add_allowed_personality">
+      add a personality to the allowed list of a cluster
+      <optgroup name="add_allow_req" mandatory="True" fields="all">
+         <option name="cluster" type="string">Name of the cluster</option>
+         <option name="archetype" type="string">Name of the archetype</option>
+         <option name="personality" type="string">Name of the personality</option>
+      </optgroup>
+      <transport method="put" path="cluster/%(cluster)s/allowed/%(archetype)s/%(personality)s" />
+   </command>
+
+   <command name="del_allowed_personality">
+      delete a personality from the allowed list of a cluster
+      <optgroup name="del_allow_req" mandatory="True" fields="all">
+         <option name="cluster" type="string">Name of the cluster</option>
+         <option name="archetype" type="string">Name of the archetype</option>
+         <option name="personality" type="string">Name of the personality</option>
+      </optgroup>
+      <transport method="delete" path="cluster/%(cluster)s/allowed/%(archetype)s/%(personality)s" />
+   </command>
+
    <command name="rebind_metacluster">
       Change metacluster bindings.
       <p/>
@@ -3382,30 +3516,22 @@
    <command name="bind_esx_cluster">
       Bind a service instance to the named cluster.
       <p/>
-      The option to bind a vmhost to a cluster is deprecated.  Please use
-      the cluster command instead.
-      <p/>
       If binding a service instance for a service that is already bound to
       a different instance this command will fail.
       <optgroup name="bind_esx_cluster_opts" mandatory="True" fields="all">
          <option name="cluster" type="string">Cluster name</option>
          <optgroup name="bind_esx_cluster_object" mandatory="True" fields="any">
             <optgroup name="bind_esx_cluster_service" mandatory="False" fields="all">
-               <option name="service" type="string" conflicts="hostname">Service name</option>
+               <option name="service" type="string">Service name</option>
                <option name="instance" type="string">Service Instance</option>
             </optgroup>
-            <option name="hostname" type="string" conflicts="service">[Deprecated] Server name</option>
          </optgroup>
       </optgroup>
-      <transport method="put" trigger="hostname" path="cluster/esx/%(cluster)s/host/%(hostname)s" />
       <transport method="put" trigger="service" path="cluster/esx/%(cluster)s/service/%(service)s/%(instance)s" />
    </command>
 
    <command name="rebind_esx_cluster">
       Bind a service instance to the named cluster.
-      <p/>
-      The option to bind a vmhost to a cluster is deprecated.  Please use
-      the cluster command instead.
       <p/>
       If binding a service instance for a service that is already bound to
       a different instance the old binding will be removed.
@@ -3413,32 +3539,24 @@
          <option name="cluster" type="string">Cluster name</option>
 	 <optgroup name="rebind_esx_cluster_object" mandatory="True" fields="any">
 	    <optgroup name="rebind_esx_cluster_service" fields="all">
-               <option name="service" type="string" conflicts="hostname">Service name</option>
+               <option name="service" type="string">Service name</option>
                <option name="instance" type="string">Service Instance</option>
             </optgroup>
-            <option name="hostname" type="string" conflicts="service">[Deprecated] Server name</option>
          </optgroup>
       </optgroup>
-      <transport method="post" trigger="hostname" path="cluster/esx/%(cluster)s/host/%(hostname)s" />
       <transport method="post" trigger="service" path="cluster/esx/%(cluster)s/service/%(service)s/%(instance)s" />
    </command>
 
    <command name="unbind_esx_cluster">
       Remove the binding of the service instance from the named cluster.
-      <p/>
-      Use of this command to remove a host from a cluster is deprecated,
-      please use uncluster.
+
       <optgroup name="unbind_esx_cluster_opts" mandatory="True" fields="all">
          <option name="cluster" type="string">Cluster name</option>
-	 <optgroup name="unbind_esx_cluster_object" mandatory="True" fields="any">
 	    <optgroup name="unbind_esx_cluster_service" mandatory="False" fields="all">
-               <option name="service" type="string" conflicts="hostname">Service name</option>
+               <option name="service" type="string">Service name</option>
                <option name="instance" type="string">Service Instance</option>
-            </optgroup>
-            <option name="hostname" type="string" conflicts="service">[Deprecated] Server name</option>
          </optgroup>
       </optgroup>
-      <transport method="delete" trigger="hostname" path="cluster/esx/%(cluster)s/host/%(hostname)s" />
       <transport method="delete" trigger="service" path="cluster/esx/%(cluster)s/service/%(service)s/%(instance)s" />
    </command>
 
@@ -3446,39 +3564,47 @@
       Cluster a host.
       <p/>
       This adds the given host into the given cluster.  This is a potentially
-      destructive operation as the host will be given the personality of the
-      cluster.
+      destructive operation as any previous cluster membership of the host
+      will be revoked.
       <p/>
-      If the host is already a member of a cluster the previous membership
-      will be removed.
-      <optgroup name="cluster_opts" mandatory="True" fields="all">
+      If the personality is specified then the named personality will be
+      assigned to the host on entry to the cluster.
+      <optgroup name="cluster_mandatory" mandatory="True" fields="all">
          <option name="hostname" type="string">Server name</option>
          <option name="cluster" type="string">Cluster name</option>
+      </optgroup>
+      <optgroup name="cluster_opts">
+         <option name="personality" type="string">New personality of host</option>
       </optgroup>
       <transport method="put" path="cluster/%(cluster)s/host/%(hostname)s" />
    </command>
 
    <command name="uncluster">
-      Remove the host from the named cluster.
+      Remove the host from the named cluster. If the personality is specified
+      then the new personality is applied to the host on exit from the cluster.
       <optgroup name="uncluster_opts" mandatory="True" fields="all">
          <option name="hostname" type="string">Server name</option>
          <option name="cluster" type="string">Cluster name</option>
       </optgroup>
+      <optgroup name="cluster_opts">
+         <option name="personality" type="string">New personality of host</option>
+      </optgroup>
       <transport method="delete" path="cluster/%(cluster)s/host/%(hostname)s" />
    </command>
 
-   <command name="add_esx_cluster_aligned_service">
-      Mark a service as aligned for ESX clusters.  All the members within an
-      ESX cluster will be required to use the same service instance for the
-      service.  Different ESX clusters can still have different service
+   <command name="add_cluster_aligned_service">
+      Mark a service as aligned for a cluster type.  All the members within a
+      cluster will be required to use the same service instance for the
+      service.  Different clusters can still have different service
       instances for the service.
       <optgroup name="add_aligned_service_opts" mandatory="True" fields="all">
          <option name="service" type="string" mandatory="True">service name</option>
+         <option name="cluster_type" type="string" mandatory="True">type of cluster</option>
       </optgroup>
       <optgroup name="optional_opts">
          <option name="comments" type="string">Comments</option>
       </optgroup>
-      <transport method="put" path="service/%(service)s/aligned_for/cluster_type/esx" />
+      <transport method="put" path="service/%(service)s/aligned_for/cluster_type/%(cluster_type)s" />
    </command>
 
    <command name="show_cluster_type">
@@ -3492,15 +3618,16 @@
       <transport trigger="all" method="get" path="cluster_type" />
    </command>
 
-   <command name="del_esx_cluster_aligned_service">
-      Delete a service from the list of aligned services for the esx
+   <command name="del_cluster_aligned_service">
+      Delete a service from the list of aligned services for the
       cluster_type.  Cluster members which are already bound to a
       service because it used to be aligned will be unmodified. If
       you wish to unbind those clients, they must be reconfigured.
       <optgroup name="del_aligned_service_opts" mandatory="True" fields="all">
          <option name="service" type="string" mandatory="True">service name</option>
+         <option name="cluster_type" type="string" mandatory="True">type of cluster</option>
       </optgroup>
-      <transport method="delete" path="service/%(service)s/aligned_for/cluster_type/esx" />
+      <transport method="delete" path="service/%(service)s/aligned_for/cluster_type/%(cluster_type)s" />
    </command>
 
    <command name="add_dynamic_range">
@@ -3817,5 +3944,138 @@
       </optgroup>
       <transport method="get" path="find/audit" />
    </command>
+
+   <command name="add_filesystem">
+      Add a new filesystem resource.
+      <optgroup name="add_fs_opts" mandatory="True" fields="all">
+         <option name="filesystem" type="string">name</option>
+         <option name="type" type="string">type</option>
+         <option name="mountpoint" type="string">mountpoint</option>
+         <option name="blockdevice" type="string">blockdevice</option>
+         <option name="bootmount" type="boolean">immediately mount on boot</option>
+      </optgroup>
+      <optgroup name="optional_opts">
+         <option name="dumpfreq" type="int" default='0'>dump frequency</option>
+         <option name="fsckpass" type="int" default='2'>fsck passno</option>
+         <option name="options" type="string">mountoptions</option>
+         <option name="comments" type="string">Comments</option>
+      </optgroup>
+      <optgroup name="resource_mapping_opts" mandatory="True" fields="any">
+         <option name="hostname" type="string">Hostname to apply resource</option>
+         <option name="cluster" type="string">Cluster to apply resource</option>
+      </optgroup>
+      <transport method="put" path="resource/filesystem/%(filesystem)s" />
+   </command>
+
+   <command name="del_filesystem">
+      Delete a filesystem resource.
+      <optgroup name="del_fs_opts" mandatory="True" fields="all">
+         <option name="filesystem" type="string">name</option>
+      </optgroup>
+      <optgroup name="resource_mapping_opts" mandatory="True" fields="any">
+        <option name="hostname" type="string">Hostname of resource</option>
+        <option name="cluster" type="string">Cluster of resource</option>
+      </optgroup>
+      <transport method="delete" path="resource/filesystem/%(filesystem)s" />
+   </command>
+
+   <command name="show_filesystem">
+      Show filesystems based on filtering for host/cluster association
+      <optgroup name="show_resource_opts" mandatory="True" fields="any">
+         <option name="cluster" type="string">cluster name</option>
+         <option name="hostname" type="string">hostname</option>
+         <option name="filesystem" type="string">filesystem name</option>
+         <option name="all" type="flag">list all hardware</option>
+      </optgroup>
+      <transport method="get" trigger="filesystem" path="resource/filesystem/%(filesystem)s" />
+      <transport method="get" path="find/resource/filesystem" />
+   </command>
+
+   <command name="add_application">
+      Add a new application resource.
+      <optgroup name="add_app_opts" mandatory="True" fields="all">
+         <option name="application" type="string">Name of applicaiton</option>
+         <option name="eonid" type="int">EON identity</option>
+      </optgroup>
+      <optgroup name="optional_opts">
+         <option name="comments" type="string">Comments</option>
+      </optgroup>
+      <optgroup name="resource_mapping_opts" mandatory="True" fields="any">
+         <option name="hostname" type="string">Hostname to apply resource</option>
+         <option name="cluster" type="string">Cluster to apply resource</option>
+      </optgroup>
+      <transport method="put" path="resource/application/%(application)s" />
+   </command>
+
+   <command name="del_application">
+      Delete an application resource.
+      <optgroup name="del_app_opts" mandatory="True" fields="all">
+         <option name="application" type="string">name</option>
+      </optgroup>
+      <optgroup name="resource_mapping_opts" mandatory="True" fields="any">
+        <option name="hostname" type="string">Hostname of resource</option>
+        <option name="cluster" type="string">Cluster of resource</option>
+      </optgroup>
+      <transport method="delete" path="resource/application/%(application)s" />
+   </command>
+
+   <command name="show_application">
+      Show applications based on filtering for host/cluster association
+      <optgroup name="show_resource_opts" mandatory="True" fields="any">
+         <option name="cluster" type="string">cluster name</option>
+         <option name="hostname" type="string">hostname</option>
+         <option name="application" type="string">application name</option>
+         <option name="eonid" type="int">EON id</option>
+         <option name="all" type="flag">list all hardware</option>
+      </optgroup>
+      <transport method="get" trigger="application" path="resource/application/%(application)s" />
+      <transport method="get" path="find/resource/application" />
+   </command>
+
+   <command name="add_intervention">
+      Add a new intervention resource.
+      <optgroup name="add_iv_opts" mandatory="True" fields="all">
+         <option name="expiry" type="string">when to expire this intervention</option>
+         <option name="intervention" type="string">the name of the intervention</option>
+         <option name="justification" type="string">the reason for the intervention</option>
+      </optgroup>
+      <optgroup name="optional_opts">
+         <option name="comments" type="string">Comments</option>
+         <option name="allowusers" type="string">Additional users allowed access</option>
+         <option name="allowgroups" type="string">Additional groups allowed access</option>
+         <option name="disabled_actions" type="string">Disabled actions</option>
+         <option name="start_time" type="string">when to start this intervention (default=now)</option>
+      </optgroup>
+      <optgroup name="optional_binding" fields="any">
+         <option name="hostname" type="string">Host</option>
+         <option name="cluster" type="string">Cluster</option>
+      </optgroup>
+      <transport method="post" path="resource/intervention/%(intervention)s" />
+   </command>
+
+   <command name="show_intervention">
+      Display the attributes of an existing intervention resource.
+      <optgroup name="add_iv_opts" mandatory="True" fields="any">
+         <option name="intervention" type="string">the name of the intervention</option>
+         <option name="cluster" type="string">cluster name</option>
+         <option name="hostname" type="string">hostname</option>
+         <option name="all" type="flag">list all hardware</option>
+      </optgroup>
+      <transport method="get" trigger="intervention" path="resource/intervention/%(intervention)s" />
+      <transport method="get" path="find/resource/intervention" />
+   </command>
+
+   <command name="del_intervention">
+      Delete an intervention resource.
+      <optgroup name="del_iv_opts" mandatory="True" fields="all">
+         <option name="intervention" type="string">name</option>
+      </optgroup>
+      <optgroup name="resource_mapping_opts" mandatory="True" fields="any">
+        <option name="hostname" type="string">Hostname of resource</option>
+        <option name="cluster" type="string">Cluster of resource</option>
+      </optgroup>
+      <transport method="delete" path="resource/intervention/%(intervention)s" />
+   </command>
+
 
 </commandline>

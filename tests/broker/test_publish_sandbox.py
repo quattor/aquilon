@@ -250,13 +250,99 @@ class TestPublishSandbox(TestBrokerCommand):
 "manufacturer" = "Intel";
 "vendor" = "Intel";
 "model" = "utcpu";
-"speed" = "1000*MHz";
+"speed" = 1000*MHz;
 "arch" = "x86_64";
                 """)
         finally:
             f.close()
         self.gitcommand(["add", "utcpu.tpl"], cwd=cpudir)
         self.gitcommand(["commit", "-a", "-m", "added cpu utcpu"],
+                        cwd=sandboxdir)
+
+    def testaddesxcluster(self):
+        templates = {}
+        templates['cluster.tpl'] = """
+template personality/generic/cluster;
+
+include { "components/esxclusterconfig/config" };
+"/software/components/esxclusterconfig/esx/drsConfig" = nlist(
+        "defaultVmBehavior", nlist("val", "fullyAutomated"),
+        "enabled", 1,
+        "vmotionRate", 3,
+);
+"""
+        templates['config.tpl'] = """
+template personality/generic/config;
+
+variable PERSONALITY = "generic";
+include { "personality/config" };
+"""
+        templates['espinfo.tpl'] = """
+structure template personality/generic/espinfo;
+
+"description" = "Generic ESX Cluster";
+"class" = "INFRASTRUCTURE";
+"function" = "production";
+"""
+        templates['windows.tpl'] = """
+structure template personality/generic/windows;
+
+"windows" = list( nlist("day", "Fri", "start", "23:00", "duration", 48), );
+"""
+        sandboxdir = os.path.join(self.sandboxdir, 'utsandbox')
+        pdir = os.path.join(sandboxdir,
+                            'esx_cluster', 'personality', 'generic')
+        if not os.path.exists(pdir):
+            os.makedirs(pdir)
+        for (name, contents) in templates.items():
+            template = os.path.join(pdir, name)
+            with open(template, 'w') as f:
+                f.writelines(contents)
+            self.gitcommand(["add", name], cwd=pdir)
+        self.gitcommand(["commit", "-a", "-m", "added generic esx_cluster"],
+                        cwd=sandboxdir)
+
+    def testaddesxdesktop(self):
+        templates = {}
+        templates['cluster.tpl'] = """
+template personality/esx_desktop/cluster;
+
+include { "components/esxclusterconfig/config" };
+"/software/components/esxclusterconfig/esx/drsConfig" = nlist(
+        "defaultVmBehavior", nlist("val", "fullyAutomated"),
+        "enabled", 1,
+        "vmotionRate", 3,
+);
+"""
+        templates['config.tpl'] = """
+template personality/esx_desktop/config;
+
+variable PERSONALITY = "esx_desktop";
+include { "personality/config" };
+"""
+        templates['espinfo.tpl'] = """
+structure template personality/esx_desktop/espinfo;
+
+"description" = "ESX Cluster for virtual desktops";
+"class" = "INFRASTRUCTURE";
+"function" = "production";
+"""
+        templates['windows.tpl'] = """
+structure template personality/esx_desktop/windows;
+
+"windows" = list( nlist("day", "Fri", "start", "23:00", "duration", 48), );
+"""
+        sandboxdir = os.path.join(self.sandboxdir, 'utsandbox')
+        pdir = os.path.join(sandboxdir,
+                            'esx_cluster', 'personality', 'esx_desktop')
+        if not os.path.exists(pdir):
+            os.makedirs(pdir)
+        for (name, contents) in templates.items():
+            template = os.path.join(pdir, name)
+            with open(template, 'w') as f:
+                f.writelines(contents)
+            self.gitcommand(["add", name], cwd=pdir)
+        self.gitcommand(["commit", "-a", "-m", "added esx_desktop files"],
                         cwd=sandboxdir)
 
     def testpublishutsandbox(self):

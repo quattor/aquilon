@@ -37,17 +37,23 @@ class CommandAddArchetype(BrokerCommand):
 
     required_parameters = ["archetype"]
 
-    def render(self, session, archetype, **kwargs):
+    def render(self, session, archetype, cluster_type, compilable,
+               description, **kwargs):
         valid = re.compile('^[a-zA-Z0-9_-]+$')
         if (not valid.match(archetype)):
             raise ArgumentError("Archetype name '%s' is not valid." % archetype)
         if archetype in ["hardware", "machine", "pan", "t",
-                    "service", "servicedata"]:
+                         "service", "servicedata", "clusters"]:
             raise ArgumentError("Archetype name %s is reserved." % archetype)
 
         Archetype.get_unique(session, archetype, preclude=True)
 
-        dbarch = Archetype(name=archetype)
+        if description is None:
+            outputdesc = archetype
+        dbarch = Archetype(name=archetype,
+                           cluster_type=cluster_type,
+                           outputdesc=description,
+                           is_compileable=bool(compilable))
 
         session.add(dbarch)
         session.flush()

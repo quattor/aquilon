@@ -1,6 +1,6 @@
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 #
-# Copyright (C) 2009,2010,2011  Contributor
+# Copyright (C) 2009,2010  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -28,13 +28,22 @@
 # TERMS THAT MAY APPLY.
 
 
-from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.commands.cluster import CommandCluster
+from aquilon.aqdb.model import Application
+from aquilon.worker.broker import BrokerCommand, validate_basic
+from aquilon.worker.dbwrappers.resources import (del_resource,
+                                                 get_resource_holder)
 
+class CommandDelApplication(BrokerCommand):
 
-class CommandBindESXClusterHostname(CommandCluster):
+    required_parameters = ["application"]
 
-    def render(self, **arguments):
-        self.deprecated_option("hostname", "Please use the 'cluster' command "
-                               "instead.", **arguments)
-        return CommandCluster.render(self, **arguments)
+    def render(self, session, logger, hostname, cluster,
+               application, **arguments):
+
+        validate_basic("application", application)
+        holder = get_resource_holder(session, hostname, cluster)
+        dbapp = Application.get_unique(session, name=application,
+                                       holder_id=holder.id,
+                                       compel=True)
+        del_resource(session, logger, dbapp)
+        return

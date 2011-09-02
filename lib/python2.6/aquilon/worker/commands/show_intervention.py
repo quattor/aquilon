@@ -1,6 +1,6 @@
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 #
-# Copyright (C) 2008,2009,2010,2011  Contributor
+# Copyright (C) 2009,2010  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -28,21 +28,14 @@
 # TERMS THAT MAY APPLY.
 
 
-from aquilon.exceptions_ import NotFoundException
+from aquilon.aqdb.model import Intervention
 from aquilon.worker.broker import BrokerCommand
-from aquilon.aqdb.model import Service, ClusterAlignedService
+from aquilon.worker.commands.show_resource import show_resource
 
 
-class CommandDelESXClusterAlignedService(BrokerCommand):
+class CommandShowIntervention(BrokerCommand):
 
-    required_parameters = ["service"]
-
-    def render(self, session, service, **arguments):
-        cluster_type = 'esx'
-        dbservice = Service.get_unique(session, name=service, compel=True)
-        dbcas = ClusterAlignedService.get_unique(session,
-                                                 service=dbservice,
-                                                 cluster_type=cluster_type,
-                                                 compel=True)
-        session.delete(dbcas)
-        return
+    def render(self, session, intervention,
+               hostname, cluster, all, **arguments):
+        return show_resource(session, hostname, cluster, all,
+                             intervention, Intervention)

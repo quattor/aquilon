@@ -48,6 +48,7 @@ from aquilon.aqdb.model.xtn import start_xtn, end_xtn
 from aquilon.worker.formats.formatters import ResponseFormatter
 from aquilon.worker.dbwrappers.user_principal import (
         get_or_create_user_principal)
+from aquilon.worker.dbwrappers.resources import add_resource, del_resource
 from aquilon.worker.locks import lock_queue
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
 from aquilon.worker.templates.domain import TemplateDomain
@@ -429,8 +430,8 @@ class BrokerCommand(object):
         #log.msg("Checking %s" % cls.__module__)
         for (key, item) in sys.modules[cls.__module__].__dict__.items():
             #log.msg("  Checking %s" % item)
-            if item == lock_queue or item == sync_domain or \
-               item == TemplateDomain:
+            if item in [lock_queue, sync_domain, TemplateDomain,
+                        add_resource, del_resource]:
                 return False
             if not isclass(item):
                 continue

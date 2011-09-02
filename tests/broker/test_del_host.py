@@ -267,7 +267,7 @@ class TestDelHost(TestBrokerCommand):
             self.assertEmptyOut(out, command)
         self.dsdb_verify()
 
-    def testdelhaclusterhosts(self):
+    def testdel_esx_bcp_clusterhosts(self):
         for i in range(25, 49):
             port = i - 24
             self.dsdb_expect_delete(self.net.tor_net2[3].usable[port])
@@ -290,6 +290,15 @@ class TestDelHost(TestBrokerCommand):
         self.assertEmptyOut(out, command)
         self.dsdb_verify()
         command = "show host --hostname jack.cards.example.ms.com"
+        self.notfoundtest(command.split(" "))
+
+    def testdelfiler(self):
+        self.dsdb_expect_delete(self.net.vm_storage_net[0].usable[25])
+        command = "del host --hostname filer1.ms.com"
+        (out, err) = self.successtest(command.split(" "))
+        self.assertEmptyOut(out, command)
+        self.dsdb_verify()
+        command = "show host --hostname filer1.ms.com"
         self.notfoundtest(command.split(" "))
 
     def testdelnotify(self):

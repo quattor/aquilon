@@ -29,6 +29,7 @@
 
 
 from aquilon.exceptions_ import NotFoundException
+from aquilon.aqdb.model import Cluster
 from aquilon.worker.formats.cluster_type import ClusterType
 from aquilon.worker.broker import BrokerCommand
 
@@ -36,11 +37,15 @@ from aquilon.worker.broker import BrokerCommand
 class CommandShowClusterTypeAll(BrokerCommand):
 
     def render(self, session, cluster_type, **arguments):
-        if cluster_type:
-            if cluster_type.lower() != 'esx':
+        if cluster_type is not None:
+            cluster_type = cluster_type.lower()
+            if cluster_type not in Cluster.__mapper__.polymorphic_map:
                 raise NotFoundException("Cluster type %s not found." %
                                         cluster_type)
-        cluster_types = [ClusterType('esx')]
+            cluster_types = [ClusterType(cluster_type)]
+        else:
+            cluster_types = [ClusterType(x) for x in
+                             Cluster.__mapper__.polymorphic_map]
         for ct in cluster_types:
             ct.populate(session)
         return cluster_types
