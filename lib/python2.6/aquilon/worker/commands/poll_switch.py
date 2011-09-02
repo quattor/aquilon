@@ -139,8 +139,8 @@ class CommandPollSwitch(BrokerCommand):
                                        jump, dbsi, loc, switch))
                 return jump
 
-        logger.client_info("No jump host for %s, calling CheckNet directly." %
-                           switch)
+        logger.client_info("No jump host for %s, calling CheckNet from %s." %
+                           (switch, self.config.get("broker", "hostname")))
         return None
 
     def poll_mac(self, session, logger, switch, now, ssh_args):
