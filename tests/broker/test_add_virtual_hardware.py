@@ -460,6 +460,15 @@ class TestAddVirtualHardware(TestBrokerCommand):
                          "Only virtual machines can have a cluster attribute.",
                          command)
 
+    def testpgnoswitch(self):
+        command = ["add", "interface", "--machine", "evm1",
+                   "--interface", "eth1", "--pg", "unused-v999"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "Cannot verify port group availability: no switch "
+                         "record for ESX Cluster utecl1.",
+                         command)
+
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddVirtualHardware)
