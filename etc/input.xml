@@ -3137,7 +3137,7 @@
 
    <command name="permission">
       Modify the entitlements for a user.
-      <optgroup name="permission_opts" mandatory="True">
+      <optgroup name="permission_opts" mandatory="True" fields="all">
          <option name="principal" type="string">User Principal (e.g. njw@is1.morgan) to change</option>
          <option name="role" type="string">Role to use</option>
       </optgroup>
