@@ -90,13 +90,19 @@ class TestClientBypass(TestBrokerCommand):
         out = self.badrequesttest(path, all="not-a-bool")
         self.matchoutput(out, "Expected a boolean value for --all.", path)
 
-    def testfloatarg(self):
-        # update personality
-        path = "/personality/vmhost/esx_desktop"
-        out = self.badrequesttest(path, post=True, archetype="vmhost",
-                                  personality="esx_desktop",
-                                  vmhost_overcommit_memory="not-a-float")
-        self.matchoutput(out, "Expected an floating point", path)
+    # Can't test this here because the permission check happens first,
+    # and update_personality will not work unauthenticated.
+    # Thus there is no coverage on this block of broker code, as the
+    # client will catch the error first.
+    # If we ever have a search command that takes a float, that should
+    # be used here.
+#   def testfloatarg(self):
+#       # update personality
+#       path = "/personality/vmhost/esx_desktop"
+#       out = self.badrequesttest(path, post=True, archetype="vmhost",
+#                                 personality="esx_desktop",
+#                                 vmhost_overcommit_memory="not-a-float")
+#       self.matchoutput(out, "Expected an floating point", path)
 
 
 if __name__=='__main__':

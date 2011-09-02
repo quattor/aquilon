@@ -242,10 +242,6 @@ class BrokerCommand(object):
             principal = kwargs["user"]
             request = kwargs["request"]
             logger = kwargs["logger"]
-            for key in kwargs.keys():
-                if key in self.parameter_checks:
-                    kwargs[key] = self.parameter_checks[key]("--" + key,
-                                                             kwargs[key])
             raising_exception = None
             try:
                 if self.requires_transaction or self.requires_azcheck:
@@ -274,6 +270,10 @@ class BrokerCommand(object):
                     raise UnimplementedError("Command %s not available on "
                                              "a %s broker." %
                                              (self.command, self.badmode))
+                for key in kwargs.keys():
+                    if key in self.parameter_checks:
+                        kwargs[key] = self.parameter_checks[key]("--" + key,
+                                                                 kwargs[key])
                 # Command is an instance method already having self...
                 retval = command(*args, **kwargs)
                 if self.requires_format:

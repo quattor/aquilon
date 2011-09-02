@@ -45,6 +45,10 @@ class TestShowActiveCommands(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out, "aq show_active_commands", command)
         self.matchclean(out, "aq status", command)
+        lines = out.splitlines()
+        self.assertEqual(1, len(lines),
+                         "Expected only a single line, got %s:\n%s" %
+                         (len(lines), out))
 
 
 if __name__=='__main__':
