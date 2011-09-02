@@ -697,7 +697,7 @@ class DSDBRunner(object):
             comments = ""
         run_command([self.config.get("broker", "dsdb"),
                      "update", "host", "alias", "-alias", alias,
-                     "-new_host", target, "-comments", comments],
+                     "-new_host", target, "-new_comments", comments],
                     env=self.getenv())
 
 
