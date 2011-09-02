@@ -54,7 +54,7 @@ class HostLifecycle(StateEngine, Base):
                'ready'        : ['almostready', 'rebuild', 'reinstall',
                                  'failed', 'decommissioned'],
                'reinstall'    : ['rebuild', 'failed', 'decommissioned'],
-               'rebuild'      : ['almostready', 'ready', 'failed',
+               'rebuild'      : ['almostready', 'ready', 'reinstall', 'failed',
                                  'decommissioned'],
                'failed'       : ['rebuild', 'reinstall', 'decommissioned'],
                'decommissioned' : [],
