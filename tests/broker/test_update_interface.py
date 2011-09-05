@@ -44,7 +44,8 @@ class TestUpdateInterface(TestBrokerCommand):
         mac = self.net.unknown[0].usable[11].mac
         self.dsdb_expect_update("unittest02.one-nyp.ms.com", mac)
         self.noouttest(["update", "interface", "--interface", "eth0",
-                        "--machine", "ut3c5n10", "--mac", mac])
+                        "--machine", "ut3c5n10", "--mac", mac,
+                        "--comments", "Updated interface comments"])
         self.dsdb_verify()
 
     def testupdatebadmac(self):
@@ -87,6 +88,7 @@ class TestUpdateInterface(TestBrokerCommand):
         command = "show host --hostname unittest02.one-nyp.ms.com"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Blade: ut3c5n10", command)
+        self.matchoutput(out, "Comments: Updated interface comments", command)
         self.searchoutput(out, r"Interface: eth0 %s$" %
                           self.net.unknown[0].usable[11].mac.lower(), command)
         self.matchoutput(out, "Provides: unittest02.one-nyp.ms.com [%s]" %
@@ -249,6 +251,17 @@ class TestUpdateInterface(TestBrokerCommand):
                          self.net.unknown[0].usable[20].mac, command)
         self.matchoutput(out, "Interface: eth1 %s [default_route]" %
                          self.net.unknown[0].usable[21].mac, command)
+
+    def testbreakbond(self):
+        command = ["update", "interface", "--machine", "ut3c5n3",
+                   "--interface", "eth1", "--clear_master"]
+        self.noouttest(command)
+        # Should fail the second time
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "Public Interface eth1 of machine "
+                         "unittest21.aqd-unittest.ms.com is not a slave.",
+                         command)
 
 
 if __name__ == '__main__':

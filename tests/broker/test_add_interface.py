@@ -79,6 +79,13 @@ class TestAddInterface(TestBrokerCommand):
                          "smaller than 4096.",
                          command)
 
+    def testfailbadvlanformat(self):
+        command = ["add", "interface", "--interface", "eth1.foo",
+                   "--machine", "ut3c5n10", "--type", "vlan"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Invalid VLAN interface name 'eth1.foo'.",
+                         command)
+
     def testaddut3c5n10eth1again(self):
         command = ["add", "interface", "--interface", "eth1",
                    "--machine", "ut3c5n10",
@@ -382,6 +389,15 @@ class TestAddInterface(TestBrokerCommand):
                    "--chassis", "ut3c5.aqd-unittest.ms.com"]
         self.noouttest(command)
         self.dsdb_verify()
+
+    def testaddinterfaceut3c5again(self):
+        ip = self.net.unknown[0].usable[-1]
+        command = ["add", "interface", "--interface", "oa",
+                   "--mac", ip.mac, "--ip", ip,
+                   "--chassis", "ut3c5.aqd-unittest.ms.com"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "On-board Admin Interface oa of chassis "
+                         "ut3c5.aqd-unittest.ms.com already exists.", command)
 
     def testverifyaddinterfaceut3c5(self):
         command = "show chassis --chassis ut3c5.aqd-unittest.ms.com"
@@ -716,7 +732,20 @@ class TestAddInterface(TestBrokerCommand):
         self.noouttest(["update", "interface", "--machine", "filer1",
                         "--interface", "v0", "--boot"])
 
+    def testfailunknowntype(self):
+        command = ["add", "interface", "--machine", "ut3c1n3",
+                   "--interface", "eth2", "--type", "no-such-type"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Invalid interface type 'no-such-type'.", command)
 
-if __name__=='__main__':
+    def testfailbadtype(self):
+        command = ["add", "interface", "--machine", "ut3c1n3",
+                   "--interface", "eth2", "--type", "oa"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Interface type 'oa' is not valid for machines.",
+                         command)
+
+
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddInterface)
     unittest.TextTestRunner(verbosity=2).run(suite)
