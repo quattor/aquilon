@@ -178,6 +178,8 @@
          <option name="vendor" type="string">vendor name</option>
          <option name="mac" type="mac">MAC address of an attached interface</option>
          <option name="pg" type="string">port group of an attached interface</option>
+         <option name="interface_model" type="string">Having an interface of the given model</option>
+         <option name="interface_vendor" type="string">Having an interface of the given vendor</option>
          <option name="serial" type="string">serial number</option>
          <optgroup name="search_hardware_location_opts" fields="any">
 	    <option name="organization" type="string">Organization</option>
@@ -220,6 +222,8 @@
          <option name="machine_type" type="string">machine type for the model (blade, virtual_machine, etc.)</option>
          <option name="vendor" type="string">vendor name</option>
          <option name="mac" type="mac">MAC address of an attached interface</option>
+         <option name="interface_model" type="string">Having an interface of the given model</option>
+         <option name="interface_vendor" type="string">Having an interface of the given vendor</option>
          <option name="pg" type="string">port group of an attached interface</option>
          <option name="serial" type="string">serial number</option>
          <option name="share" type="string">nas_disk_share in use by a virtual machine</option>
