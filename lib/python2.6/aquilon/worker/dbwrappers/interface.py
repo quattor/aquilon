@@ -449,6 +449,10 @@ def get_or_create_interface(session, dbhw_ent, name=None, mac=None,
     if not model and not vendor:
         model = "generic_nic"
         vendor = "generic"
+    elif not cls.model_allowed:
+        raise ArgumentError("Model/vendor can not be set for a %s." %
+                            cls._get_class_label(tolower=True))
+
     dbmodel = Model.get_unique(session, name=model, vendor=vendor,
                                machine_type="nic", compel=True)
 

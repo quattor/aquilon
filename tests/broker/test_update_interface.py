@@ -84,6 +84,20 @@ class TestUpdateInterface(TestBrokerCommand):
         self.notfoundtest(["update", "interface", "--interface", "eth0",
                            "--machine", "unittest02.one-nyp.ms.com"])
 
+    def testupdatevlanmodel(self):
+        command = ["update", "interface", "--machine", "ut3c5n10",
+                   "--interface", "eth1.2", "--model", "e1000"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Model/vendor can not be set for a VLAN "
+                         "interface", command)
+
+    def testupdatebondingmodel(self):
+        command = ["update", "interface", "--machine", "ut3c5n3",
+                   "--interface", "bond0", "--model", "e1000"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Model/vendor can not be set for a bonding "
+                         "interface", command)
+
     def testverifyupdateut3c5n10interfaces(self):
         command = "show host --hostname unittest02.one-nyp.ms.com"
         out = self.commandtest(command.split(" "))

@@ -66,6 +66,9 @@ class Interface(Base):
     # Name syntax restrictions
     name_check = None
 
+    # Allows setting model/vendor
+    model_allowed = False
+
     # The Natural (and composite) pk is HW_ENT_ID/NAME.
     # But is it the "correct" pk in this case???. The surrogate key is here
     # only because it's easier to have a single target FK in the address
@@ -199,6 +202,8 @@ class PublicInterface(Interface):
     extra_fields = ['bootable', 'port_group']
 
     name_check = re.compile(r"^[a-z]+\d+[a-z]?$")
+
+    model_allowed = True
 
 
 class ManagementInterface(Interface):

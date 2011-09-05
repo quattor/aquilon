@@ -79,6 +79,15 @@ class TestAddInterface(TestBrokerCommand):
                          "smaller than 4096.",
                          command)
 
+    def testfailvlanmodel(self):
+        mac = self.net.unknown[0].usable[-1].mac
+        command = ["add", "interface", "--interface", "eth1.3",
+                   "--machine", "ut3c5n10", "--model", "e1000"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "Model/vendor can not be set for a VLAN interface.",
+                         command)
+
     def testaddut3c5n10eth1again(self):
         command = ["add", "interface", "--interface", "eth1",
                    "--machine", "ut3c5n10",

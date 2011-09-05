@@ -167,6 +167,10 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
             dbinterface.mac = mac
 
         if model or vendor:
+            if not dbinterface.model_allowed:
+                raise ArgumentError("Model/vendor can not be set for a {0:lc}."
+                                    .format(dbinterface))
+
             dbmodel = Model.get_unique(session, name=model, vendor=vendor,
                                        machine_type='nic', compel=True)
             dbinterface.model = dbmodel
