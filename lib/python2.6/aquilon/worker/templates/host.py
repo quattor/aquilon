@@ -44,17 +44,27 @@ from aquilon.worker.templates.panutils import pan, StructureTemplate
 LOGGER = logging.getLogger(__name__)
 
 
-# VPLS support: Select the closest (right now, in the same building) router(s)
 def select_routers(dbmachine, routers):
     filtered = []
 
+    # Networks stretched between two buildings may have two routers, one in each
+    # building. If a host wants to talk to some other host in the same building,
+    # but uses the router in the remote building, then the data travels between
+    # the buildings twice. To avoid this case, we filter out routers that are
+    # not in the same building where the host is.
+    #
+    # If the routers are not inside a building, then we assume that either the
+    # network is not stretched or this problem is dealt with using some other
+    # mechanism (e.g. VRRP), and we consider the routers as equal.
     dbbuilding = dbmachine.location and dbmachine.location.building or None
     for router in routers:
         if not router.location or not router.location.building or \
            router.location.building == dbbuilding:
             filtered.append(router.ip)
 
-    if not filtered:
+    # If the location information is wrong, we still want to have a router.
+    # Pick one since we have no better information.
+    if not filtered and routers:
         filtered.append(routers[0].ip)
     return filtered
 
