@@ -2814,6 +2814,11 @@
    <command name="add_machine">
       Create a new machine at a given location.
       <p/>
+      The machine name can be auto-created based on a given prefix.  This
+      makes the machine name generation and creation atomic.  See the
+      search_next command for information on how the next number is
+      determined.
+      <p/>
       If the model was created with machine specifications (values for
       cpuname, cpuvendor, cpuspeed, cpucount, memory) they do not need
       to be given to this command - the model info will be used as a default.
@@ -2824,8 +2829,11 @@
       indicate the location indirectly.  Whether or not hardware is
       virtual is indicated by the machine type of the model.
       <optgroup name="add_machine_opts" mandatory="True" fields="all">
-         <option name="machine" type="string">machine name</option>
          <option name="model" type="string">machine model</option>
+         <optgroup name="add_machine_name" mandatory="True" fields="any">
+            <option name="machine" type="string" conflicts="prefix">machine name</option>
+            <option name="prefix" type="string" conflicts="machine">machine prefix</option>
+         </optgroup>
       </optgroup>
       <optgroup name="add_machine_specs_opts" mandatory="False">
 	 <option name="vendor" type="string">Machine vendor. Needed if the model name is not unique</option>
@@ -2851,6 +2859,7 @@
 	 <option name="comments" type="string">Comments</option>
       </optgroup>
       <transport method="put" path="machine/%(machine)s" />
+      <transport method="post" trigger="prefix" path="next_machine/%(prefix)s" />
    </command>
 
    <command name="update_machine">
