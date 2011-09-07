@@ -10,7 +10,7 @@ UPDATE interface SET default_route = 1 WHERE interface.id IN (
 		address_assignment.label = 'hostname'
 );
 
-ALTER TABLE interface MODIFY (default_route CONSTRAINT "INTERFACE_DEFAULT_ROUTE_NN" NOT NULL);
+ALTER TABLE interface MODIFY (default_route CONSTRAINT "IFACE_DEFAULT_ROUTE_NN" NOT NULL);
 ALTER TABLE interface ADD CONSTRAINT "IFACE_DEFAULT_ROUTE_CK" CHECK (default_route IN (0, 1));
 
 QUIT;
