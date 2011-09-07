@@ -84,7 +84,7 @@ class Interface(Base):
     mac = Column(AqMac(17), nullable=True)
 
     model_id = Column(Integer, ForeignKey('model.id',
-                                          name='%s_model_fk' % _TN),
+                                          name='%s_model_fk' % _ABV),
                       nullable=False)
 
     # PXE boot control. Does not affect how the OS configures the interface.
