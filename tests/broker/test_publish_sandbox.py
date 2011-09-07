@@ -372,7 +372,35 @@ structure template personality/esx_desktop/windows;
                               env=self.gitenv(), cwd=sandboxdir)
         # FIXME: verify that changes made it to unittest
 
+    def testrebase(self):
+        utsandboxdir = os.path.join(self.sandboxdir, "utsandbox")
+        (out, err) = self.gitcommand(["rev-list", "--skip=1", "--max-count=1",
+                                      "HEAD"], cwd=utsandboxdir)
+        self.ignoreoutputtest(["add", "sandbox", "--sandbox", "rebasetest",
+                               "--start", "utsandbox"])
 
-if __name__=='__main__':
+        # Skip the last commit
+        sandboxdir = os.path.join(self.sandboxdir, "rebasetest")
+        self.gitcommand(["reset", "--hard", "HEAD^"], cwd=sandboxdir)
+
+        # Add some new content
+        with open(os.path.join(sandboxdir, "TEST"), "w") as f:
+            f.writelines(["Added test file"])
+        self.gitcommand(["add", "TEST"], cwd=sandboxdir)
+        self.gitcommand(["commit", "-m", "Added test file"], cwd=sandboxdir)
+
+        # Try to publish it
+        command = ["publish", "--branch", "rebasetest"]
+        out = self.badrequesttest(command, env=self.gitenv(), cwd=sandboxdir,
+                                  ignoreout=True)
+        # This string comes from git, so it may change if git is upgraded
+        self.matchoutput(out, "non-fast-forward", command)
+
+        # Publish with rebasing enabled
+        command.append("--rebase")
+        self.ignoreoutputtest(command, env=self.gitenv(), cwd=sandboxdir)
+
+
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestPublishSandbox)
     unittest.TextTestRunner(verbosity=2).run(suite)
