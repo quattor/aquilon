@@ -47,7 +47,8 @@ class CommandUpdateMachine(BrokerCommand):
     required_parameters = ["machine"]
 
     def render(self, session, logger, machine, model, vendor, serial,
-               chassis, slot, clearchassis, multislot, cluster,
+               chassis, slot, clearchassis, multislot,
+               cluster, allow_metacluster_change,
                cpuname, cpuvendor, cpuspeed, cpucount, memory,
                **arguments):
         dbmachine = Machine.get_unique(session, machine, compel=True)
@@ -150,7 +151,8 @@ class CommandUpdateMachine(BrokerCommand):
                 raise ArgumentError("Cannot add an existing machine to "
                                     "a cluster.")
             dbcluster = Cluster.get_unique(session, name=cluster, compel=True)
-            if dbcluster.metacluster != dbmachine.cluster.metacluster:
+            if dbcluster.metacluster != dbmachine.cluster.metacluster \
+               and not allow_metacluster_change:
                 raise ArgumentError("Cannot move machine to a new "
                                     "metacluster: Current {0:l} does not match "
                                     "new {1:l}.".format(dbmachine.cluster.metacluster,
@@ -171,6 +173,8 @@ class CommandUpdateMachine(BrokerCommand):
         # requiremets
         if dbmachine.cluster:
             dbmachine.cluster.validate()
+            if allow_metacluster_change:
+                dbmachine.cluster.metacluster.validate()
         if dbmachine.host and dbmachine.host.cluster:
             dbmachine.host.cluster.validate()
 

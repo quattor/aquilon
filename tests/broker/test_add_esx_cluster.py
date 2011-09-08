@@ -339,6 +339,14 @@ class TestAddESXCluster(TestBrokerCommand):
                    "--personality=esx_desktop"]
         self.noouttest(command)
 
+    def testaddutmc7(self):
+        command = ["add_esx_cluster", "--cluster=utecl13",
+                   "--metacluster=utmc7", "--building=ut",
+                   "--domain=unittest", "--down_hosts_threshold=0",
+                   "--archetype=esx_cluster",
+                   "--personality=esx_desktop"]
+        self.noouttest(command)
+
     def testfailcatmissingcluster(self):
         command = "cat --cluster=cluster-does-not-exist"
         out = self.notfoundtest(command.split(" "))

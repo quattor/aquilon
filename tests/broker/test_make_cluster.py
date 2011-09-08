@@ -124,6 +124,11 @@ class TestMakeCluster(TestBrokerCommand):
             self.successtest(["make_cluster", "--cluster", "utecl%d" % i])
             self.successtest(["make_cluster", "--cluster", "npecl%d" % i])
 
+    def testmakeutmc7(self):
+        for i in [13]:
+            command = ["make_cluster", "--cluster", "utecl%d" % i]
+            (out, err) = self.successtest(command)
+
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestMakeCluster)
     unittest.TextTestRunner(verbosity=2).run(suite)

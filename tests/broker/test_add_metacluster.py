@@ -110,6 +110,11 @@ class TestAddMetaCluster(TestBrokerCommand):
                    "--max_members=6", "--max_shares=6"]
         self.noouttest(command)
 
+    def testaddutmc7(self):
+        # Test moving machines between metaclusters
+        command = ["add_metacluster", "--metacluster=utmc7"]
+        self.noouttest(command)
+
     def testverifyshowall(self):
         command = "show metacluster --all"
         out = self.commandtest(command.split(" "))

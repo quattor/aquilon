@@ -268,10 +268,21 @@ class TestAddHost(TestBrokerCommand):
         self.dsdb_verify()
 
     def testpopulateverarirackhosts(self):
-        # This gives us evh1.aqd-unittest.ms.com through evh10
-        # and leaves the other 40 machines for future use.
+        # These are used in add_virtual_hardware:
+        # evh1.aqd-unittest.ms.com
+        # evh2.aqd-unittest.ms.com
+        # evh3.aqd-unittest.ms.com
+        # evh4.aqd-unittest.ms.com
+        # evh5.aqd-unittest.ms.com
+        # evh6.aqd-unittest.ms.com
+        # evh7.aqd-unittest.ms.com
+        # evh8.aqd-unittest.ms.com
+        # evh9.aqd-unittest.ms.com
+        # This is used for utmc7 and update_machine testing:
+        # evh10.aqd-unittest.ms.com
+        # The other hosts are left for future use.
         net = self.net.tor_net[2]
-        for i in range(101, 110):
+        for i in range(101, 111):
             port = i - 100
             hostname = "evh%d.aqd-unittest.ms.com" % port
             self.dsdb_expect_add(hostname, net.usable[port], "eth0",
