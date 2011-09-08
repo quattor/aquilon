@@ -148,7 +148,7 @@ class Cloner(object):
 
         if args.touser:
             self.do_audit = False
-            self.warnings.append("Sync'd data to: %s" % self.target_dir)
+            self.warnings.append("Sync'd data to: %s/" % self.target_dir)
 
         if args.finishfrom:
             self.do_create = False
