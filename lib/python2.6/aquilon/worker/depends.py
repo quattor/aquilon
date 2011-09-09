@@ -39,9 +39,9 @@ import ms.version
 
 ms.version.addpkg('setuptools', '0.6c11')
 ms.version.addpkg('protobuf', '2.3.0')
-ms.version.addpkg('zope.interface', '3.5.2')
+ms.version.addpkg('zope.interface', '3.6.1')
 ms.version.addpkg('twisted', '8.2.0-ms1')
-ms.version.addpkg('coverage', '3.3.1')
+ms.version.addpkg('coverage', '3.4')
 ms.version.addpkg('ipaddr', '2.1.4')
-ms.version.addpkg('mako', '0.3.2')
+ms.version.addpkg('mako', '0.4.0')
 ms.version.addpkg('yaml', '3.09')

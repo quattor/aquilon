@@ -58,7 +58,7 @@ class CommandSearchESXCluster(BrokerCommand):
         if metacluster:
             dbmetacluster = MetaCluster.get_unique(session, metacluster,
                                                    compel=True)
-            q = q.join(['_metacluster'])
+            q = q.join('_metacluster')
             q = q.filter_by(metacluster=dbmetacluster)
             q = q.reset_joinpoint()
         if esx_hostname:
@@ -73,7 +73,7 @@ class CommandSearchESXCluster(BrokerCommand):
             q = q.reset_joinpoint()
         if guest:
             dbguest = hostname_to_host(session, guest)
-            q = q.join(['_machines', 'machine'])
+            q = q.join('_machines', 'machine')
             q = q.filter_by(host=dbguest)
             q = q.reset_joinpoint()
         if capacity_override:
@@ -125,7 +125,7 @@ class CommandSearchESXCluster(BrokerCommand):
                 q = q.filter_by(service=dbservice)
                 q = q.reset_joinpoint()
         elif instance:
-            q = q.join(['_cluster_svc_binding', 'service_instance'])
+            q = q.join('_cluster_svc_binding', 'service_instance')
             q = q.filter_by(name=instance)
             q = q.reset_joinpoint()
 
@@ -136,8 +136,8 @@ class CommandSearchESXCluster(BrokerCommand):
                                                  service=nas_disk_share,
                                                  compel=True)
             NasAlias = aliased(NasDisk)
-            q = q.join(['_machines', 'machine', 'disks',
-                        (NasAlias, NasAlias.id == Disk.id)])
+            q = q.join('_machines', 'machine', 'disks',
+                       (NasAlias, NasAlias.id == Disk.id))
             q = q.filter_by(service_instance=dbshare)
             q = q.reset_joinpoint()
 

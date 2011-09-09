@@ -69,7 +69,7 @@ clusterlifecycle.info['unique_fields'] = ['name']
 
 @monkeypatch(clusterlifecycle)
 def populate(sess, *args, **kw):  # pragma: no cover
-    from sqlalchemy.exceptions import IntegrityError
+    from sqlalchemy.exc import IntegrityError
 
     statuslist = ClusterLifecycle.transitions.keys()
 

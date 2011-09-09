@@ -29,7 +29,7 @@
 """Contains the logic for `aq add disk`."""
 import re
 
-from sqlalchemy.exceptions import InvalidRequestError
+from sqlalchemy.exc import InvalidRequestError
 
 from aquilon.exceptions_ import ArgumentError, AquilonError, InternalError
 from aquilon.worker.broker import BrokerCommand

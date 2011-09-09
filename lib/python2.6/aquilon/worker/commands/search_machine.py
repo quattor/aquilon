@@ -70,7 +70,7 @@ class CommandSearchMachine(BrokerCommand):
                                                  service=nas_disk_share,
                                                  compel=True)
             NasAlias = aliased(NasDisk)
-            q = q.join(['disks', (NasAlias, NasAlias.id==Disk.id)])
+            q = q.join('disks', (NasAlias, NasAlias.id==Disk.id))
             q = q.filter_by(service_instance=dbshare)
             q = q.reset_joinpoint()
         if fullinfo:

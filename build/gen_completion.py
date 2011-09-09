@@ -32,7 +32,7 @@
 '''
 
 import ms.version
-ms.version.addpkg('Cheetah', '2.4.1')
+ms.version.addpkg('Cheetah', '2.4.4')
 
 import os
 import sys

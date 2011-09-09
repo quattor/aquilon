@@ -65,7 +65,7 @@ class CommandShowMap(BrokerCommand):
         elif archetype:
             # Alternately, this could throw an error and ask for personality.
             q = session.query(PersonalityServiceMap)
-            q = q.join(['personality', 'archetype']).filter_by(name=archetype)
+            q = q.join('personality', 'archetype').filter_by(name=archetype)
             q = q.reset_joinpoint()
             queries.append(q)
         else:

@@ -45,5 +45,5 @@ class CommandShowCpu(BrokerCommand):
         if speed is not None:
             q = q.filter_by(speed=speed)
         q = q.join(Vendor)
-        q = q.order_by([Vendor.name, Cpu.name])
+        q = q.order_by(Vendor.name, Cpu.name)
         return q.all()

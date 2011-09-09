@@ -80,7 +80,7 @@ class CommandSearchNetwork(BrokerCommand):
                 vlans = [VlanInfo.get_vlan_id(session, i.port_group)
                          for i in dbmachine.interfaces if i.port_group]
                 if vlans:
-                    q = q.join(['observed_vlans'])
+                    q = q.join('observed_vlans')
                     q = q.filter_by(switch=dbmachine.cluster.switch)
                     q = q.filter(ObservedVlan.vlan_id.in_(vlans))
                     q = q.reset_joinpoint()
@@ -106,7 +106,7 @@ class CommandSearchNetwork(BrokerCommand):
         if cluster:
             dbcluster = Cluster.get_unique(session, cluster, compel=True)
             if dbcluster.switch:
-                q = q.join(['observed_vlans'])
+                q = q.join('observed_vlans')
                 q = q.filter_by(switch=dbcluster.switch)
                 q = q.reset_joinpoint()
             else:
@@ -116,7 +116,7 @@ class CommandSearchNetwork(BrokerCommand):
                 q = q.filter(Network.id.in_(net_ids))
         if pg:
             vlan = VlanInfo.get_vlan_id(session, pg, compel=ArgumentError)
-            q = q.join(['observed_vlans'])
+            q = q.join('observed_vlans')
             q = q.filter_by(vlan_id=vlan)
             q = q.reset_joinpoint()
         dblocation = get_location(session, **arguments)
