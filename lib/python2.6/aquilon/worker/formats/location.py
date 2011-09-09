@@ -51,6 +51,8 @@ class LocationFormatter(ObjectFormatter):
         if isinstance(location, Rack):
             details.append(indent + "  Row: %s" % location.rack_row)
             details.append(indent + "  Column: %s" % location.rack_column)
+        elif isinstance(location, Building):
+            details.append(indent + "  Address: %s" % location.address)
         if location.comments:
             details.append(indent + "  Comments: %s" % location.comments)
         if location.parents:

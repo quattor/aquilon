@@ -52,7 +52,7 @@ class TestAddBuilding(TestBrokerCommand):
         command = "show building --building bu"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Building: bu", command)
-
+        self.matchoutput(out, "Address: 12 Cherry Lane", command)
 
     def testaddbucards(self):
         self.dsdb_expect("add_building_aq -building_name cards -city ex "
@@ -66,6 +66,7 @@ class TestAddBuilding(TestBrokerCommand):
         command = "show building --building cards"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Building: cards", command)
+        self.matchoutput(out, "Address: Nowhere", command)
 
     def testverifyaddbuproto(self):
         command = "show building --building bu --format proto"
@@ -93,6 +94,6 @@ class TestAddBuilding(TestBrokerCommand):
         self.dsdb_verify()
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddBuilding)
     unittest.TextTestRunner(verbosity=2).run(suite)
