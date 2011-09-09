@@ -140,7 +140,8 @@ if profile:
 if mirror:
     # Copy the source directory and exec from it.
     env = os.environ.copy()
-    env['AQDCONF'] = config.baseconfig
+    if 'AQDCONF' in env:
+        env.pop('AQDCONF')
     srcdir = config.get('unittest', 'srcdir')
     mirrordir = config.get('unittest', 'mirrordir')
     if not os.path.exists(mirrordir):
