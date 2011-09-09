@@ -83,7 +83,9 @@ class TestReconfigure(TestBrokerCommand):
                           r'"fqdn", "unittest02.one-nyp.ms.com",\s*'
                           r'"gateway", "%s",\s*'
                           r'"ip", "%s",\s*'
-                          r'"netmask", "%s"\s*\)' %
+                          r'"netmask", "%s",\s*'
+                          r'"network_environment", "internal",\s*'
+                          r'"network_type", "unknown"\s*\)' %
                           (self.net.unknown[0].broadcast,
                            self.net.unknown[0].gateway,
                            self.net.unknown[0].usable[0],
@@ -136,7 +138,9 @@ class TestReconfigure(TestBrokerCommand):
                           r'"fqdn", "unittest00.one-nyp.ms.com",\s*'
                           r'"gateway", "%s",\s*'
                           r'"ip", "%s",\s*'
-                          r'"netmask", "%s"\s*\),' %
+                          r'"netmask", "%s",\s*'
+                          r'"network_environment", "internal",\s*'
+                          r'"network_type", "unknown"\s*\),' %
                           (self.net.unknown[0].broadcast,
                            self.net.unknown[0].gateway,
                            self.net.unknown[0].usable[2],
@@ -149,7 +153,9 @@ class TestReconfigure(TestBrokerCommand):
                           r'"fqdn", "unittest00-e1.one-nyp.ms.com",\s*'
                           r'"gateway", "%s",\s*'
                           r'"ip", "%s",\s*'
-                          r'"netmask", "%s"\s*\)\s*\);' %
+                          r'"netmask", "%s",\s*'
+                          r'"network_environment", "internal",\s*'
+                          r'"network_type", "unknown"\s*\)\s*\);' %
                           (self.net.unknown[0].broadcast,
                            self.net.unknown[0].gateway,
                            self.net.unknown[0].usable[3],
