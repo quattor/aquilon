@@ -177,13 +177,13 @@ class TestAddInterface(TestBrokerCommand):
         command = "show machine --machine ut3c5n2"
         out = self.commandtest(command.split(" "))
         self.searchoutput(out,
-                          r"Interface: eth0 %s boot=True"
+                          r"Interface: eth0 %s \[boot, default_route\]"
                           r"\s+Type: public"
                           r"\s+Vendor: intel Model: e1000" %
                           self.net.unknown[11].usable[0].mac.lower(),
                           command)
         self.searchoutput(out,
-                          r"Interface: eth1 %s boot=False"
+                          r"Interface: eth1 %s$"
                           r"\s+Type: public"
                           r"\s+Vendor: intel Model: e1000" %
                           self.net.unknown[12].usable[0].mac.lower(),
