@@ -143,6 +143,8 @@ if mirror:
     env['AQDCONF'] = config.baseconfig
     srcdir = config.get('unittest', 'srcdir')
     mirrordir = config.get('unittest', 'mirrordir')
+    if not os.path.exists(mirrordir):
+        os.makedirs(mirrordir)
     p = Popen(['rsync', '-avP', '--delete', srcdir + '/', mirrordir],
               stdout=1, stderr=2)
     p.communicate()
