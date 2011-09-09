@@ -1,0 +1,4 @@
+# For this to be useful, add the following to .git/config or ~/.gitconfig:
+#[diff "aq_commands"]
+#	xfuncname = "(command name=.*)>"
+etc/input.xml diff=aq_commands
