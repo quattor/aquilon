@@ -1439,6 +1439,10 @@
       and any other interface attached to the machine will have the bootable
       flag set to false.
       <p/>
+      The default_route flag may be set on multiple interfaces to indicate that they should be used
+      with equal cost. Note that for compatibility reasons, setting the boot flag also sets the
+      default_route flag, and removes it from any other interfaces.
+      <p/>
       For this change to take affect at the host level, run aq reconfigure.
       <optgroup name="update_interface_opts" mandatory="True" fields="all">
          <option name="interface" type="string">Interface name</option>
@@ -1452,6 +1456,7 @@
          <option name="mac" type="mac">MAC address</option>
          <option name="ip" type="ipv4" conflicts="master">IP address</option>
          <option name="boot" type="flag">Mark the interface as bootable</option>
+         <option name="default_route" type="boolean">Mark that the interface provides the default route</option>
          <option name="pg" type="string" conflicts="autopg">portgroup, or an empty string to clear</option>
          <option name="autopg" type="flag" conflicts="pg">choose portgroup based on switch</option>
          <option name="comments" type="string">Comments</option>

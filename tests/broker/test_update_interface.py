@@ -44,7 +44,8 @@ class TestUpdateInterface(TestBrokerCommand):
         mac = self.net.unknown[0].usable[11].mac
         self.dsdb_expect_update("unittest02.one-nyp.ms.com", mac)
         self.noouttest(["update", "interface", "--interface", "eth0",
-                        "--machine", "ut3c5n10", "--mac", mac])
+                        "--machine", "ut3c5n10", "--mac", mac,
+                        "--comments", "Updated interface comments"])
         self.dsdb_verify()
 
     def testupdatebadmac(self):
@@ -87,12 +88,13 @@ class TestUpdateInterface(TestBrokerCommand):
         command = "show host --hostname unittest02.one-nyp.ms.com"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Blade: ut3c5n10", command)
-        self.matchoutput(out, "Interface: eth0 %s boot=False" %
-                         self.net.unknown[0].usable[11].mac.lower(), command)
+        self.matchoutput(out, "Comments: Updated interface comments", command)
+        self.searchoutput(out, r"Interface: eth0 %s$" %
+                          self.net.unknown[0].usable[11].mac.lower(), command)
         self.matchoutput(out, "Provides: unittest02.one-nyp.ms.com [%s]" %
                          self.net.unknown[0].usable[11], command)
-        self.matchoutput(out, "Interface: eth1 %s boot=True" %
-                         self.net.unknown[0].usable[12].mac.lower(), command)
+        self.searchoutput(out, r"Interface: eth1 %s \[boot, default_route\]" %
+                          self.net.unknown[0].usable[12].mac.lower(), command)
         self.matchoutput(out, "Provides: unknown [%s]" %
                          self.net.unknown[0].usable[12], command)
         # Verify that the primary name got updated
@@ -221,8 +223,48 @@ class TestUpdateInterface(TestBrokerCommand):
         out = self.badrequesttest(command)
         self.matchoutput(out, "but is not a switch", command)
 
+    def testfliproute1(self):
+        command = ["update", "interface", "--interface", "eth0",
+                   "--machine", "unittest25.aqd-unittest.ms.com",
+                   "--nodefault_route"]
+        (out, err) = self.successtest(command)
+        self.matchoutput(err, "Warning: machine unittest25.aqd-unittest.ms.com "
+                         "has no default route, hope that's ok.", command)
 
-if __name__=='__main__':
+    def testfliproute2(self):
+        command = ["update", "interface", "--interface", "eth1",
+                   "--machine", "unittest25.aqd-unittest.ms.com",
+                   "--default_route"]
+        self.noouttest(command)
+
+    def testverifyfliproutecat(self):
+        command = ["cat", "--hostname", "unittest25.aqd-unittest.ms.com",
+                   "--generate"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "'/system/network/default_gateway' = \"%s\";" %
+                         self.net.unknown[1][2], command)
+
+    def testverifyfliprouteshow(self):
+        command = ["show", "host", "--hostname", "unittest25.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Interface: eth0 %s [boot]" %
+                         self.net.unknown[0].usable[20].mac, command)
+        self.matchoutput(out, "Interface: eth1 %s [default_route]" %
+                         self.net.unknown[0].usable[21].mac, command)
+
+    def testbreakbond(self):
+        command = ["update", "interface", "--machine", "ut3c5n3",
+                   "--interface", "eth1", "--clear_master"]
+        self.noouttest(command)
+        # Should fail the second time
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "Public Interface eth1 of machine "
+                         "unittest21.aqd-unittest.ms.com is not a slave.",
+                         command)
+
+
+if __name__ == '__main__':
     import aquilon.aqdb.depends
     import nose
 

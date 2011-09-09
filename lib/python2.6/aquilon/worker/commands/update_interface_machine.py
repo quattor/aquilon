@@ -42,6 +42,7 @@ from aquilon.worker.templates.machine import PlenaryMachineInfo
 from aquilon.worker.processes import DSDBRunner
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.aqdb.model import ReservedName, Machine, Interface
+from aquilon.utils import first_of
 
 
 class CommandUpdateInterfaceMachine(BrokerCommand):
@@ -49,7 +50,8 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
     required_parameters = ["interface", "machine"]
 
     def render(self, session, logger, interface, machine, mac, ip, boot,
-               pg, autopg, comments, master, clear_master, **arguments):
+               pg, autopg, comments, master, clear_master, default_route,
+               **arguments):
         """This command expects to locate an interface based only on name
         and machine - all other fields, if specified, are meant as updates.
 
@@ -146,12 +148,18 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
             # Should we also transfer the primary IP to the new boot interface?
             # That could get tricky if the new interface already has an IP
             # address...
-            for i in dbinterface.hardware_entity.interfaces:
+            for i in dbhw_ent.interfaces:
                 if i == dbinterface:
                     i.bootable = True
-                elif i.bootable:
+                    i.default_route = True
+                else:
                     i.bootable = False
-                    session.add(i)
+                    i.default_route = False
+        if default_route is not None:
+            dbinterface.default_route = default_route
+            if not first_of(dbhw_ent.interfaces, lambda x: x.default_route):
+                logger.client_info("Warning: {0:l} has no default route, hope "
+                                   "that's ok.".format(dbhw_ent))
 
         #Set this mac address last so that you can update to a bootable
         #interface *before* adding a mac address. This is so the validation

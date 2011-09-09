@@ -44,19 +44,29 @@ from aquilon.worker.templates.panutils import pan, StructureTemplate
 LOGGER = logging.getLogger(__name__)
 
 
-# Select the closest (i.e. in the same building) router
-def select_router(dbmachine, routers):
-    # Safe default
-    gateway = routers[0].ip
+def select_routers(dbmachine, routers):
+    filtered = []
 
+    # Networks stretched between two buildings may have two routers, one in each
+    # building. If a host wants to talk to some other host in the same building,
+    # but uses the router in the remote building, then the data travels between
+    # the buildings twice. To avoid this case, we filter out routers that are
+    # not in the same building where the host is.
+    #
+    # If the routers are not inside a building, then we assume that either the
+    # network is not stretched or this problem is dealt with using some other
+    # mechanism (e.g. VRRP), and we consider the routers as equal.
     dbbuilding = dbmachine.location and dbmachine.location.building or None
     for router in routers:
-        if router.location and router.location.building and \
+        if not router.location or not router.location.building or \
            router.location.building == dbbuilding:
-            gateway = router.ip
-            break
+            filtered.append(router.ip)
 
-    return gateway
+    # If the location information is wrong, we still want to have a router.
+    # Pick one since we have no better information.
+    if not filtered and routers:
+        filtered.append(routers[0].ip)
+    return filtered
 
 def is_default_route(dbinterface):
     """ Check if the given interface should provide the default route
@@ -65,7 +75,7 @@ def is_default_route(dbinterface):
     - it is the boot interface
     - it is a bonding/bridge and one of the members is the boot interface
     """
-    if dbinterface.bootable:
+    if dbinterface.default_route:
         return True
     for slave in dbinterface.slaves:
         if is_default_route(slave):
@@ -212,10 +222,16 @@ class PlenaryToplevelHost(Plenary):
 
                 if addr.label == "":
                     if net.routers:
-                        gateway = select_router(self.dbhost.machine, net.routers)
+                        local_rtrs = select_routers(self.dbhost.machine, net.routers)
+                        gateway = local_rtrs[0]
+                        if is_default_route(dbinterface):
+                            routers[dbinterface.name] = local_rtrs
                     else:
                         # Fudge the gateway as the first available ip
                         gateway = net.network[1]
+
+                    # TODO: generate appropriate routing policy if there are
+                    # multiple interfaces marked as default_route
                     if not default_gateway and is_default_route(dbinterface):
                         default_gateway = gateway
 
@@ -251,29 +267,6 @@ class PlenaryToplevelHost(Plenary):
                     del ifdesc["route"]
 
             interfaces[dbinterface.name] = ifdesc
-
-        # If the host uses Zebra, get the list of routers
-        if vips:
-            for addr in self.dbhost.machine.all_addresses():
-                # Ignore non-transit interfaces
-                if addr.interface.name not in transit_interfaces:
-                    continue
-                # Ignore aliases
-                if addr.label != "" or addr.usage != "system":
-                    continue
-
-                # Note: addr.network is a @property and its value is not kept
-                # persistent. The association proxy only keeps a weak reference
-                # on its parent, so addr.network.routers can be garbage
-                # collected while iterating router_ips, which makes the
-                # association proxy upset. Storing addr.network in a variable
-                # creates a reference and fixes the issue.
-                net = addr.network
-
-                for router_ip in net.router_ips:
-                    if addr.interface.name not in routers:
-                        routers[addr.interface.name] = []
-                    routers[addr.interface.name].append(router_ip)
 
         personality_template = "personality/%s/config" % \
                 self.dbhost.personality.name

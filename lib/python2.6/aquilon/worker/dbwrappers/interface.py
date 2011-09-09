@@ -288,7 +288,7 @@ def verify_port_group(dbmachine, port_group):
             raise ArgumentError("Cannot verify port group availability: "
                                 "no record for VLAN {0} on "
                                 "{1:l}.".format(dbvi.vlan_id, dbswitch))
-        except MultipleResultsFound:
+        except MultipleResultsFound:  # pragma: no cover
             raise InternalError("Too many subnets found for VLAN {0} "
                                 "on {1:l}.".format(dbvi.vlan_id, dbswitch))
         if dbobserved_vlan.is_at_guest_capacity:
@@ -440,8 +440,10 @@ def get_or_create_interface(session, dbhw_ent, name=None, mac=None,
         raise ArgumentError("Invalid interface type '%s'." % interface_type)
 
     extra_args = {}
+    default_route = False
     if bootable is not None:
         extra_args["bootable"] = bootable
+        default_route = bootable
     if port_group is not None:
         extra_args["port_group"] = port_group
 
@@ -468,12 +470,12 @@ def get_or_create_interface(session, dbhw_ent, name=None, mac=None,
 
     for key in extra_args.keys():
         if key not in cls.extra_fields:
-            raise ArgumentError("Parameter %s is not valid for %s "
+            raise InternalError("Parameter %s is not valid for %s "
                                 "interfaces." % (key, interface_type))
 
     try:
         dbinterface = cls(name=name, mac=mac, comments=comments,
-                          **extra_args)
+                          default_route=default_route, **extra_args)
     except ValueError, err:
         raise ArgumentError(err)
 
