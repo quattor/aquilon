@@ -42,9 +42,15 @@ from brokertest import TestBrokerCommand
 class TestAddVirtualHardware(TestBrokerCommand):
 
     def test_000_addmachines(self):
-        for i in range(1, 10):
+        for i in range(1, 9):
             self.noouttest(["add", "machine", "--machine", "evm%s" % i,
                             "--cluster", "utecl1", "--model", "utmedium"])
+
+    def test_001_addnextmachine(self):
+        command = ["add", "machine", "--prefix", "evm" ,
+                   "--cluster", "utecl1", "--model", "utmedium"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "evm9", command)
 
     def test_005_showmachinenorack(self):
         # The only way to test show machine with a machine that's not in
