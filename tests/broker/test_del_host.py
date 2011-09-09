@@ -312,6 +312,13 @@ class TestDelHost(TestBrokerCommand):
         self.matchoutput(err, "sent 0 server notifications", command)
         self.dsdb_verify()
 
+    def testdelf5test(self):
+        self.dsdb_expect_delete(self.net.unknown[16].ip)
+        command = ["del", "host", "--hostname", "f5test.aqd-unittest.ms.com"]
+        (out, err) = self.successtest(command)
+        self.assertEmptyOut(out, command)
+        self.dsdb_verify()
+
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelHost)

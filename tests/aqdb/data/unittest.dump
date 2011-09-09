@@ -127,6 +127,7 @@ Archetype(name="storagecluster", cluster_type="storage", outputdesc="Storage")
 Archetype(name="vmhost", is_compileable=True)
 Archetype(name="esx_cluster", is_compileable=True, cluster_type="esx", outputdesc="ESX")
 Archetype(name="windows")
+Archetype(name="f5")
 
 # Define some macros for later use
 @aquilon Archetype(name="aquilon")
@@ -153,6 +154,7 @@ OperatingSystem(archetype=@windows, name="windows", version="nt61e")
 OperatingSystem(archetype=@vmhost, name="esxi", version="4.0.0")
 OperatingSystem(archetype=@vmhost, name="esxi", version="4.1.0-u1")
 OperatingSystem(archetype=Archetype(name="filer"), name="ontap", version="7.3.3p1")
+OperatingSystem(archetype=Archetype(name="f5"), name="f5", version="generic")
 
 Personality(archetype=Archetype(name="aegis"), name="generic")
 Personality(archetype=@aquilon, name="generic")
@@ -162,6 +164,7 @@ Personality(archetype=@vmhost, name="generic")
 Personality(archetype=@esxcluster, name="generic")
 Personality(archetype=@windows, name="generic")
 Personality(archetype=@vmhost, name="vulcan-10g-desktop-prod")
+Personality(archetype=Archetype(name="f5"), name="generic")
 
 Personality(archetype=Archetype(name="storagecluster"), name="metrocluster")
 
@@ -208,6 +211,7 @@ Vendor(name="bnt")
 Vendor(name="cisco")
 Vendor(name="netapp")
 Vendor(name="aurora_vendor")
+Vendor(name="f5")
 
 @amd Vendor(name="amd")
 @intel Vendor(name="intel")
@@ -238,6 +242,7 @@ Cpu(vendor=Vendor(name="sun"), name="ultrasparc_iii_i_1300", speed=1300)
 Cpu(vendor=Vendor(name="sun"), name="ultrasparc_iii_i_1600", speed=1600)
 Cpu(vendor=Vendor(name="aurora_vendor"), name="aurora_cpu", speed=0)
 Cpu(vendor=Vendor(name="virtual"), name="virtual_cpu", speed=0)
+Cpu(vendor=Vendor(name="f5"), name="f5_cpu", speed=0)
 
 Model(vendor=Vendor(name="generic"), name="generic_nic", machine_type="nic")
 Model(vendor=@intel, name="e1000", machine_type="nic")
@@ -275,6 +280,7 @@ Model(vendor=Vendor(name="generic"), name="temp_switch", machine_type="switch")
 Model(vendor=Vendor(name="aurora_vendor"), name="aurora_chassis_model", machine_type="aurora_chassis")
 Model(vendor=Vendor(name="aurora_vendor"), name="aurora_model", machine_type="aurora_node")
 Model(vendor=Vendor(name="virtual"), name="vm", machine_type="virtual_machine")
+Model(vendor=Vendor(name="f5"), name="f5_model", machine_type="rackmount")
 
 MachineSpecs(model=Model(name="hs20-884345u"),
              cpu=Cpu(name="xeon_2660"), cpu_quantity=2, memory=8192,
@@ -303,6 +309,9 @@ MachineSpecs(model=Model(name="v3160"),
 MachineSpecs(model=Model(name="v3170"),
              cpu=Cpu(name="opteron_2600"), cpu_quantity=2, memory=16384,
              controller_type="fibrechannel", disk_type="local", disk_capacity=0, nic_count=8)
+MachineSpecs(model=Model(name="f5_model"),
+             cpu=Cpu(name="f5_cpu"), cpu_quantity=0, memory=0,
+             controller_type="scsi", disk_type="local", disk_capacity=0, nic_count=0)
 
 VlanInfo(vlan_id=701, port_group="storage-v701", vlan_type="storage")
 VlanInfo(vlan_id=702, port_group="vmotion-v702", vlan_type="vmotion")

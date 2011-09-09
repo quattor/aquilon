@@ -488,6 +488,11 @@ class TestAddMachine(TestBrokerCommand):
                                 "--machine", "%ss03p%d" % (rack, port),
                                 "--rack", rack, "--model", "vb1205xm"])
 
+    def testaddf5test(self):
+        command = ["add", "machine", "--machine", "f5test", "--vendor", "f5",
+                   "--model", "f5_model", "--rack", "ut3"]
+        self.noouttest(command)
+
     def testverifymachineall(self):
         command = ["show", "machine", "--all"]
         out = self.commandtest(command)
@@ -500,6 +505,7 @@ class TestAddMachine(TestBrokerCommand):
         self.matchoutput(out, "ut9s03p1", command)
         self.matchoutput(out, "ut10s04p1", command)
         self.matchoutput(out, "ut11s01p1", command)
+        self.matchoutput(out, "f5test", command)
 
     # FIXME: Missing a test for adding a macihne to a chassis where the
     # fqdn given for the chassis isn't *actually* a chassis.

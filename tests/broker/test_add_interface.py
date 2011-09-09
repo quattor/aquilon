@@ -35,7 +35,7 @@ if __name__ == "__main__":
     import utils
     utils.import_depends()
 
-from brokertest import TestBrokerCommand
+from brokertest import TestBrokerCommand, DummyIP
 
 
 class TestAddInterface(TestBrokerCommand):
@@ -786,6 +786,12 @@ class TestAddInterface(TestBrokerCommand):
         out = self.badrequesttest(command)
         self.matchoutput(out, "Interface type 'oa' is not valid for machines.",
                          command)
+
+    def testaddf5iface(self):
+        ip = DummyIP(self.net.unknown[16].ip)
+        command = ["add", "interface", "--machine", "f5test",
+                   "--interface", "eth0", "--mac", ip.mac]
+        self.noouttest(command)
 
 
 if __name__ == '__main__':
