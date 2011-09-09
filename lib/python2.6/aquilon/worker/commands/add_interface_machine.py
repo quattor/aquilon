@@ -55,7 +55,7 @@ class CommandAddInterfaceMachine(BrokerCommand):
     required_parameters = ["interface", "machine"]
 
     def render(self, session, logger, interface, machine, mac, automac,
-               pg, autopg, type, comments, **arguments):
+               model, vendor, pg, autopg, type, comments, **arguments):
         dbmachine = Machine.get_unique(session, machine, compel=True)
         oldinfo = DSDBRunner.snapshot_hw(dbmachine)
 
@@ -144,6 +144,7 @@ class CommandAddInterfaceMachine(BrokerCommand):
 
         dbinterface = get_or_create_interface(session, dbmachine,
                                               name=interface,
+                                              vendor=vendor, model=model,
                                               interface_type=type, mac=mac,
                                               bootable=bootable,
                                               port_group=port_group,

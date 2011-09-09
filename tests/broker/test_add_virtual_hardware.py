@@ -296,7 +296,7 @@ class TestAddVirtualHardware(TestBrokerCommand):
                               command)
             self.searchoutput(out,
                               r'"cards/nic" = nlist\(\s*'
-                              r'"eth0", nlist\(\s*'
+                              r'"eth0", create\("hardware/nic/generic/generic_nic",\s*'
                               r'"boot", true,\s*'
                               r'"hwaddr", "00:50:56:01:20:%02x"\s*\)\s*\);'
                               % (i - 1),
@@ -370,7 +370,7 @@ class TestAddVirtualHardware(TestBrokerCommand):
                           command)
         self.searchoutput(out,
                           r'"cards/nic" = nlist\(\s*'
-                          r'"eth0", nlist\(\s*'
+                          r'"eth0", create\("hardware/nic/generic/generic_nic",\s*'
                           r'"boot", true,\s*'
                           r'"hwaddr", "00:50:56:01:20:00"\s*\)\s*\);',
                           command)

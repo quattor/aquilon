@@ -28,11 +28,12 @@
 # TERMS THAT MAY APPLY.
 """Wrappers to make getting and using hardware entities simpler."""
 
+from sqlalchemy.orm import aliased
 
 from aquilon.exceptions_ import AquilonError, ArgumentError, NotFoundException
 from aquilon.aqdb.model import (HardwareEntity, Model, DnsRecord, ARecord,
                                 ReservedName, AddressAssignment, Fqdn,
-                                NetworkEnvironment, Network)
+                                NetworkEnvironment, Network, Interface, Vendor)
 from aquilon.aqdb.model.dns_domain import parse_fqdn
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.worker.dbwrappers.location import get_location
@@ -40,33 +41,45 @@ from aquilon.worker.dbwrappers.interface import check_ip_restrictions
 
 
 def search_hardware_entity_query(session, hardware_type=HardwareEntity,
-                                 subquery=False, **kwargs):
+                                 subquery=False,
+                                 model=None, vendor=None, machine_type=None,
+                                 exact_location=False,
+                                 mac=None, pg=None, serial=None,
+                                 interface_model=None, interface_vendor=None,
+                                 **kwargs):
     q = session.query(hardware_type)
     if hardware_type is HardwareEntity:
         q = q.with_polymorphic('*')
     dblocation = get_location(session, **kwargs)
     if dblocation:
-        if kwargs.get('exact_location'):
+        if exact_location:
             q = q.filter_by(location=dblocation)
         else:
             childids = dblocation.offspring_ids()
             q = q.filter(HardwareEntity.location_id.in_(childids))
-    model = kwargs.get('model', None)
-    vendor = kwargs.get('vendor', None)
-    machine_type = kwargs.get('machine_type', None)
     if model or vendor or machine_type:
         subq = Model.get_matching_query(session, name=model, vendor=vendor,
                                         machine_type=machine_type, compel=True)
         q = q.filter(HardwareEntity.model_id.in_(subq))
-    if kwargs.get('mac') or kwargs.get('pg'):
+    if mac or pg or interface_vendor or interface_model:
         q = q.join('interfaces')
-        if kwargs.get('mac'):
-            q = q.filter_by(mac=kwargs['mac'])
-        if kwargs.get('pg'):
-            q = q.filter_by(port_group=kwargs['pg'])
+        if mac:
+            q = q.filter_by(mac=mac)
+        if pg:
+            q = q.filter_by(port_group=pg)
+        if interface_model or interface_vendor:
+            # HardwareEntity also has a .model relation, so we have to be
+            # explicit here
+            q = q.join(Interface.model)
+            if interface_model:
+                q = q.filter_by(name=interface_model)
+            if interface_vendor:
+                a_vendor = aliased(Vendor)
+                q = q.join(a_vendor)
+                q = q.filter_by(name=interface_vendor)
         q = q.reset_joinpoint()
-    if kwargs.get('serial', None):
-        q = q.filter_by(serial_no=kwargs['serial'])
+    if serial:
+        q = q.filter_by(serial_no=serial)
     if not subquery:
         # Oracle does not like "ORDER BY" in a sub-select, so we have to
         # suppress it if we want to use this query as a subquery

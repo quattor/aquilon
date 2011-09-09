@@ -51,7 +51,7 @@ class TestVendorConstraints(TestBrokerCommand):
         self.matchoutput(out, "Vendor: hp", command)
 
     def testdelvendorwithcpu(self):
-        command = "del vendor --vendor intel"
+        command = "del vendor --vendor amd"
         out = self.badrequesttest(command.split(" "))
         self.matchoutput(out, "in use by a CPU", command)
 

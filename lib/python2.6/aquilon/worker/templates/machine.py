@@ -147,6 +147,8 @@ class PlenaryMachineInfo(Plenary):
         managers = {}
         interfaces = {}
         for interface in self.dbmachine.interfaces:
+            path = "hardware/nic/%s/%s" % (interface.model.vendor,
+                                            interface.model)
             if interface.interface_type == 'public':
                 ifinfo = {}
                 if interface.mac:
@@ -155,7 +157,7 @@ class PlenaryMachineInfo(Plenary):
                     ifinfo["port_group"] = interface.port_group
                 if interface.bootable:
                     ifinfo["boot"] = interface.bootable
-                interfaces[interface.name] = ifinfo
+                interfaces[interface.name] = StructureTemplate(path, ifinfo)
             elif interface.interface_type == 'management':
                 has_addr = False
                 for addr in interface.assignments:
@@ -170,7 +172,8 @@ class PlenaryMachineInfo(Plenary):
                 # Bonding interfaces need an entry under /hardware/cards/nic
                 # only if the MAC address has been explicitely set
                 if interface.mac:
-                    interfaces[interface.name] = {"hwaddr": interface.mac}
+                    ifinfo = {"hwaddr": interface.mac}
+                    interfaces[interface.name] = StructureTemplate(path, ifinfo)
 
         # Firstly, location
         lines.append('"location" = %s;' % pan(self.sysloc))

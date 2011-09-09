@@ -239,6 +239,9 @@ Cpu(vendor=Vendor(name="sun"), name="ultrasparc_iii_i_1600", speed=1600)
 Cpu(vendor=Vendor(name="aurora_vendor"), name="aurora_cpu", speed=0)
 Cpu(vendor=Vendor(name="virtual"), name="virtual_cpu", speed=0)
 
+Model(vendor=Vendor(name="generic"), name="generic_nic", machine_type="nic")
+Model(vendor=@intel, name="e1000", machine_type="nic")
+
 Model(vendor=@ibm, name="hs20-884345u", machine_type="blade")
 Model(vendor=@ibm, name="ls20-8850pap", machine_type="blade")
 Model(vendor=@ibm, name="hs21-8853l5u", machine_type="blade")

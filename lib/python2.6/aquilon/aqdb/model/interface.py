@@ -43,7 +43,7 @@ from sqlalchemy.sql.expression import desc, case
 
 from aquilon.exceptions_ import InternalError
 from aquilon.aqdb.column_types import AqMac, AqStr
-from aquilon.aqdb.model import Base, HardwareEntity, ObservedMac
+from aquilon.aqdb.model import Base, HardwareEntity, ObservedMac, Model
 
 from aquilon.aqdb.model.vlan import MAX_VLANS
 
@@ -66,6 +66,9 @@ class Interface(Base):
     # Name syntax restrictions
     name_check = None
 
+    # Allows setting model/vendor
+    model_allowed = False
+
     # The Natural (and composite) pk is HW_ENT_ID/NAME.
     # But is it the "correct" pk in this case???. The surrogate key is here
     # only because it's easier to have a single target FK in the address
@@ -79,6 +82,10 @@ class Interface(Base):
     name = Column(AqStr(32), nullable=False)  # like e0, hme1, etc.
 
     mac = Column(AqMac(17), nullable=True)
+
+    model_id = Column(Integer, ForeignKey('model.id',
+                                          name='%s_model_fk' % _ABV),
+                      nullable=False)
 
     # PXE boot control. Does not affect how the OS configures the interface.
     # FIXME: move to PublicInterface
@@ -110,6 +117,8 @@ class Interface(Base):
 
     hardware_entity = relation(HardwareEntity, lazy=False, innerjoin=True,
                                backref=backref('interfaces', cascade='all'))
+
+    model = relation(Model, lazy=True, innerjoin=True)
 
     master = relation('Interface', uselist=False, lazy=True,
                       remote_side=id,
@@ -196,6 +205,8 @@ class PublicInterface(Interface):
     extra_fields = ['bootable', 'port_group']
 
     name_check = re.compile(r"^[a-z]+\d+[a-z]?$")
+
+    model_allowed = True
 
 
 class ManagementInterface(Interface):

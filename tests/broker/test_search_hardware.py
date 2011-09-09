@@ -149,6 +149,14 @@ class TestSearchHardware(TestBrokerCommand):
         self.matchoutput(out, "Rackmount: ut3s01p1", command)
         self.matchoutput(out, "Aurora_node: ny00l4as01", command)
 
+    def testsearchinterface(self):
+        command = ["search", "hardware", "--interface_model", "e1000"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "ut3c5n2", command)
+        self.matchclean(out, "ut3c5n1", command)
+        self.matchclean(out, "ut3c5n3", command)
+        self.matchclean(out, "ut3gd1r01", command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestSearchHardware)

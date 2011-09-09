@@ -41,7 +41,7 @@ from aquilon.worker.locks import lock_queue
 from aquilon.worker.templates.machine import PlenaryMachineInfo
 from aquilon.worker.processes import DSDBRunner
 from aquilon.aqdb.model.network import get_net_id_from_ip
-from aquilon.aqdb.model import ReservedName, Machine, Interface
+from aquilon.aqdb.model import ReservedName, Machine, Interface, Model
 from aquilon.utils import first_of
 
 
@@ -49,9 +49,9 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
 
     required_parameters = ["interface", "machine"]
 
-    def render(self, session, logger, interface, machine, mac, ip, boot,
-               pg, autopg, comments, master, clear_master, default_route,
-               **arguments):
+    def render(self, session, logger, interface, machine, mac, model, vendor,
+               ip, boot, pg, autopg, comments, master, clear_master,
+               default_route, **arguments):
         """This command expects to locate an interface based only on name
         and machine - all other fields, if specified, are meant as updates.
 
@@ -173,7 +173,15 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
                                     "{1:l}.".format(mac, other))
             dbinterface.mac = mac
 
-        session.add(dbinterface)
+        if model or vendor:
+            if not dbinterface.model_allowed:
+                raise ArgumentError("Model/vendor can not be set for a {0:lc}."
+                                    .format(dbinterface))
+
+            dbmodel = Model.get_unique(session, name=model, vendor=vendor,
+                                       machine_type='nic', compel=True)
+            dbinterface.model = dbmodel
+
         session.flush()
         session.refresh(dbhw_ent)
 

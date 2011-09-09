@@ -305,7 +305,7 @@ class TestAdd10GigHardware(TestBrokerCommand):
                               command)
             self.searchoutput(out,
                               r'"cards/nic" = nlist\(\s*'
-                              r'"eth0", nlist\(\s*'
+                              r'"eth0", create\("hardware/nic/generic/generic_nic",\s*'
                               r'"boot", true,\s*'
                               r'"hwaddr", "00:50:56:[0-9a-f:]{8}",\s*'
                               r'"port_group", "%s"\s*\)\s*\);'

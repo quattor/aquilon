@@ -45,12 +45,18 @@ from aquilon.worker.processes import DSDBRunner
 class CommandAddInterfaceChassis(BrokerCommand):
 
     required_parameters = ["interface", "chassis", "mac"]
+    invalid_parameters = ["automac", "pg", "autopg", "model", "vendor"]
 
     def render(self, session, logger, interface, chassis, mac, type, comments,
                **arguments):
         if type and type != "oa":
             raise ArgumentError("Only 'oa' is allowed as the interface type "
                                 "for chassis.")
+
+        for arg in self.invalid_parameters:
+            if arguments.get(arg) is not None:
+                raise ArgumentError("Cannot use argument --%s when adding an "
+                                    "interface to a chassis." % arg)
 
         dbchassis = Chassis.get_unique(session, chassis, compel=True)
 
