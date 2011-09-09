@@ -505,6 +505,49 @@ class TestReconfigure(TestBrokerCommand):
         self.matchoutput(out, "host.domain-does-not-exist.ms.com:", command)
         self.matchclean(out, "aquilon91.aqd-unittest.ms.com:", command)
 
+    # Need easy ordering for these, so using numbers...
+    # If we end up fixing map dns domain, it may be harder to do this test.
+    # Also, these tests would just "keep working", but they wouldn't
+    # actually be testing anything...
+    def test_100_reconfigure_aquilon95(self):
+        command = ["reconfigure", "--hostname=aquilon95.aqd-unittest.ms.com"]
+        self.successtest(command)
+
+    def test_110_map_dns_domain(self):
+        out = self.successtest(['map_dns_domain', '--building=ut',
+                                '--dns_domain=aqd-unittest.ms.com'])
+
+    def test_120_reconfigure_aquilon95(self):
+        command = ["reconfigure", "--hostname=aquilon95.aqd-unittest.ms.com"]
+        (out, err) = self.successtest(command)
+        self.matchoutput(err, "1/1 object template", command)
+
+    def test_130_verify_machine_plenary(self):
+        command = ["cat", "--machine=ut9s03p45"]
+        out = self.commandtest(command)
+        self.searchoutput(out,
+                          r'"sysloc/dns_search_domains" = '
+                          r'list\(\s*"aqd-unittest.ms.com",\s*'
+                          r'"new-york.ms.com"\s*\);',
+                          command)
+
+    def test_140_unmap_dns_domain(self):
+        out = self.successtest(['unmap_dns_domain', '--building=ut',
+                                '--dns_domain=aqd-unittest.ms.com'])
+
+    def test_150_reconfigure_aquilon95(self):
+        command = ["reconfigure", "--hostname=aquilon95.aqd-unittest.ms.com"]
+        (out, err) = self.successtest(command)
+        self.matchoutput(err, "1/1 object template", command)
+
+    def test_160_verify_machine_plenary(self):
+        command = ["cat", "--machine=ut9s03p45"]
+        out = self.commandtest(command)
+        self.searchoutput(out,
+                          r'"sysloc/dns_search_domains" = '
+                          r'list\(\s*"new-york.ms.com"\s*\);',
+                          command)
+
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestReconfigure)
