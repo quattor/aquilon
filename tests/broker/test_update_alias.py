@@ -53,7 +53,7 @@ class TestUpdateAlias(TestBrokerCommand):
         self.dsdb_expect("update host alias "
                          "-alias alias.ms.com "
                          "-new_host arecord14.aqd-unittest.ms.com "
-                         "-comments ")
+                         "-new_comments ")
         self.noouttest(command)
         self.dsdb_verify()
 
