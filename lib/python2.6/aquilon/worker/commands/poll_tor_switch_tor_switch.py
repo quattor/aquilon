@@ -42,4 +42,5 @@ class CommandPollTorSwitchTorSwitch(CommandPollSwitchSwitch):
         logger.client_info("Command poll_tor_switch is deprecated, please use "
                            "poll_switch instead.")
         return CommandPollSwitchSwitch.render(self, logger=logger,
-                                              switch=tor_switch, **arguments)
+                                              switch=tor_switch, type='tor',
+                                              **arguments)

@@ -39,4 +39,4 @@ class CommandPollTorSwitch(CommandPollSwitch):
     def render(self, **arguments):
         self.deprecated_command("Command poll_tor_switch is deprecated, please "
                                 "use poll_switch instead.", **arguments)
-        return CommandPollSwitch.render(self, **arguments)
+        return CommandPollSwitch.render(self, type='tor', **arguments)

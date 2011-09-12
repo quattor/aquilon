@@ -235,7 +235,34 @@ class TestPollSwitch(TestBrokerCommand):
                          "ut3gd1r01.aqd-unittest.ms.com, it's not a ToR switch.",
                          command)
 
+    def testpolltype(self):
+        # We make use of poll_switch reporting the (lack of the) jump host for
+        # every switch it touches
+        command = ["poll", "switch", "--rack", "ut3", "--type", "bor"]
+        (out, err) = self.successtest(command)
+        self.matchoutput(err, "ut3gd1r01.aqd-unittest.ms.com", command)
+        # update_switch changes the type of ut3gd1r04 to 'bor'
+        self.matchoutput(err, "ut3gd1r04.aqd-unittest.ms.com", command)
+        self.matchoutput(err, "ut3gd1r07.aqd-unittest.ms.com", command)
+        self.matchclean(err, "ut3gd1r05.aqd-unittest.ms.com", command)
+        self.matchclean(err, "ut3gd1r06.aqd-unittest.ms.com", command)
 
-if __name__=='__main__':
+    def testtypemismatch(self):
+        command = ["poll", "switch", "--type", "tor",
+                   "--switch", "ut3gd1r01.aqd-unittest.ms.com"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "Switch ut3gd1r01.aqd-unittest.ms.com is not "
+                         "a tor switch.",
+                         command)
+
+    def testbadtype(self):
+        command = ["poll", "switch", "--type", "no-such-type",
+                   "--switch", "ut3gd1r01.aqd-unittest.ms.com"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Unknown switch type 'no-such-type'.", command)
+
+
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestPollSwitch)
     unittest.TextTestRunner(verbosity=2).run(suite)

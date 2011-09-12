@@ -29,6 +29,7 @@
 """Contains the logic for `aq poll switch --switch`."""
 
 
+from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.commands.poll_switch import CommandPollSwitch
 from aquilon.aqdb.model import Switch
@@ -38,6 +39,10 @@ class CommandPollSwitchSwitch(CommandPollSwitch):
 
     required_parameters = ["switch"]
 
-    def render(self, session, logger, switch, clear, vlan, **arguments):
+    def render(self, session, logger, switch, type, clear, vlan, **arguments):
+        Switch.check_type(type)
         dbswitch = Switch.get_unique(session, switch, compel=True)
+        if type is not None and dbswitch.switch_type != type:
+            raise ArgumentError("{0} is not a {1} switch.".format(dbswitch,
+                                                                  type))
         return self.poll(session, logger, [dbswitch], clear, vlan)
