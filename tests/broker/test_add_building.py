@@ -100,6 +100,14 @@ class TestAddBuilding(TestBrokerCommand):
         self.matchoutput(out, "Only ASCII characters are allowed for --address.",
                          command)
 
+    def testnonasciiaudit(self):
+        command = ["search", "audit", "--keyword", "nonascii"]
+        out = self.commandtest(command)
+        self.matchoutput(out,
+                         "400 aq add_building --address='<Non-ASCII value>' "
+                         "--building='nonascii' --city='ny'",
+                         command)
+
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddBuilding)
