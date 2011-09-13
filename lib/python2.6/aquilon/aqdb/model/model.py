@@ -33,8 +33,9 @@ from datetime import datetime
 from sqlalchemy import (Integer, DateTime, Sequence, String, Column, ForeignKey,
                         UniqueConstraint)
 
-from sqlalchemy.orm import relation
+from sqlalchemy.orm import relation, object_session
 
+from aquilon.exceptions_ import AquilonError
 from aquilon.aqdb.model import Base, Vendor
 from aquilon.aqdb.column_types.aqstr import AqStr
 
@@ -59,6 +60,20 @@ class Model(Base):
     def __format__(self, format_spec):
         instance = "%s/%s" % (self.vendor.name, self.name)
         return self.format_helper(format_spec, instance)
+
+    @classmethod
+    def default_nic_model(cls, session):
+        # TODO: make this configurable
+        return cls.get_unique(session, machine_type='nic', name='generic_nic',
+                              vendor='generic', compel=AquilonError)
+
+    @property
+    def nic_model(self):
+        if self.machine_specs:
+            return self.machine_specs.nic_model
+
+        session = object_session(self)
+        return self.default_nic_model(session)
 
 
 model = Model.__table__  # pylint: disable-msg=C0103, E1101

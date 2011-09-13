@@ -259,6 +259,27 @@ class TestPublishSandbox(TestBrokerCommand):
         self.gitcommand(["commit", "-a", "-m", "added cpu utcpu"],
                         cwd=sandboxdir)
 
+    def testaddutvirt(self):
+        sandboxdir = os.path.join(self.sandboxdir, "utsandbox")
+        modeldir = os.path.join(sandboxdir, "hardware", "nic", "utvirt")
+        if not os.path.exists(modeldir):
+            os.makedirs(modeldir)
+        template = os.path.join(modeldir, "default.tpl")
+        f = open(template, 'w')
+        try:
+            f.writelines(
+                """structure template hardware/nic/utvirt/default;
+
+"boot"   = false;
+"media"  = "Ethernet";
+"name"   = "Generic Virt Interface";
+                """)
+        finally:
+            f.close()
+        self.gitcommand(["add", "default.tpl"], cwd=modeldir)
+        self.gitcommand(["commit", "-a", "-m", "added model utvirt/default"],
+                        cwd=sandboxdir)
+
     def testaddesxcluster(self):
         templates = {}
         templates['cluster.tpl'] = """

@@ -40,31 +40,39 @@ from brokertest import TestBrokerCommand
 
 class TestDelModel(TestBrokerCommand):
 
-    def testdeluttorswitch(self):
+    def test_100_deluttorswitch(self):
         command = "del model --model uttorswitch --vendor hp"
         self.noouttest(command.split(" "))
 
-    def testverifydeluttorswitch(self):
+    def test_100_verifydeluttorswitch(self):
         command = "show model --model uttorswitch"
         self.notfoundtest(command.split(" "))
 
-    def testdelutblade(self):
+    def test_100_delutblade(self):
         command = "del model --model utblade --vendor aurora_vendor"
         self.noouttest(command.split(" "))
 
-    def testverifydelutblade(self):
+    def test_100_verifydelutblade(self):
         command = "show model --model utblade"
         self.notfoundtest(command.split(" "))
 
-    def testdelutmedium(self):
+    def test_100_delutvirt(self):
+        command = ["del", "model", "--model", "default", "--vendor", "utvirt"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "Model utvirt/default is still referenced by "
+                         "machine models and cannot be deleted.",
+                         command)
+
+    def test_110_delutmedium(self):
         command = ["del_model", "--model=utmedium", "--vendor=utvendor"]
         self.noouttest(command)
 
-    def testverifydelutmedium(self):
+    def test_120_verifydelutmedium(self):
         command = "show model --model utmedium"
         self.notfoundtest(command.split(" "))
 
-    def testdelutlarge(self):
+    def test_110_delutlarge(self):
         command = ["del_model", "--model=utlarge", "--vendor=utvendor"]
         self.noouttest(command)
 

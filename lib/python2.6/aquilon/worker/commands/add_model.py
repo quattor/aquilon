@@ -39,7 +39,8 @@ class CommandAddModel(BrokerCommand):
     required_parameters = ["model", "vendor", "type"]
 
     def render(self, session, model, vendor, type, cpuname, cpuvendor, cpuspeed,
-               cpunum, memory, disktype, diskcontroller, disksize, nics,
+               cpunum, memory, disktype, diskcontroller, disksize,
+               nics, nicmodel, nicvendor,
                comments, **arguments):
         dbvendor = Vendor.get_unique(session, vendor, compel=True)
         Model.get_unique(session, name=model, vendor=dbvendor, preclude=True)
@@ -66,11 +67,17 @@ class CommandAddModel(BrokerCommand):
         if cpuname or cpuvendor or cpuspeed is not None:
             dbcpu = Cpu.get_unique(session, name=cpuname, vendor=cpuvendor,
                                    speed=cpuspeed, compel=True)
+            if nicmodel or nicvendor:
+                dbnic = Model.get_unique(session, machine_type='nic',
+                                         name=nicmodel, vendor=nicvendor,
+                                         compel=True)
+            else:
+                dbnic = Model.default_nic_model(session)
             dbmachine_specs = MachineSpecs(model=dbmodel, cpu=dbcpu,
                                            cpu_quantity=cpunum, memory=memory,
                                            disk_type=disktype,
                                            controller_type=diskcontroller,
                                            disk_capacity=disksize,
-                                           nic_count=nics)
+                                           nic_count=nics, nic_model=dbnic)
             session.add(dbmachine_specs)
         return

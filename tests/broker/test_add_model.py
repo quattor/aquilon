@@ -40,7 +40,7 @@ from brokertest import TestBrokerCommand
 
 class TestAddModel(TestBrokerCommand):
 
-    def testadduttorswitch(self):
+    def test_100_adduttorswitch(self):
         command = ["add_model", "--model=uttorswitch", "--vendor=hp",
                    "--type=switch", "--cpuname=xeon_2500", "--cpunum=1",
                    "--memory=8192", "--disktype=local", "--diskcontroller=scsi",
@@ -48,7 +48,7 @@ class TestAddModel(TestBrokerCommand):
                    "--comments", "Some model comments"]
         self.noouttest(command)
 
-    def testverifyadduttorswitch(self):
+    def test_200_verifyadduttorswitch(self):
         command = "show model --model uttorswitch"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Vendor: hp Model: uttorswitch", command)
@@ -60,60 +60,71 @@ class TestAddModel(TestBrokerCommand):
         self.matchoutput(out, "Disk: sda 36 GB scsi (local)", command)
         self.matchoutput(out, "Comments: Some model comments", command)
 
-    def testverifyshowtypetorswitch(self):
+    def test_200_verifyshowtypetorswitch(self):
         command = "show model --type switch"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Vendor: hp Model: uttorswitch", command)
 
-    def testverifyshowtypeblade(self):
+    def test_200_verifyshowtypeblade(self):
         command = "show model --type blade"
         out = self.commandtest(command.split(" "))
         self.matchclean(out, "Vendor: hp Model: uttorswitch", command)
 
-    def testverifyshowvendorhp(self):
+    def test_200_verifyshowvendorhp(self):
         command = "show model --vendor hp"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Vendor: hp Model: uttorswitch", command)
 
-    def testverifyshowvendoribm(self):
+    def test_200_verifyshowvendoribm(self):
         command = "show model --vendor ibm"
         out = self.commandtest(command.split(" "))
         self.matchclean(out, "Vendor: hp Model: uttorswitch", command)
 
-    def testverifyshowall(self):
+    def test_200_verifyshowall(self):
         command = "show model --all"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Vendor: hp Model: uttorswitch", command)
 
-    def testaddutchassis(self):
+    def test_100_addutchassis(self):
         command = "add model --model utchassis --vendor aurora_vendor --type chassis"
         self.noouttest(command.split(" "))
 
-    def testverifyaddutchassis(self):
+    def test_200_verifyaddutchassis(self):
         command = "show model --model utchassis"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Vendor: aurora_vendor Model: utchassis", command)
         self.matchoutput(out, "Type: chassis", command)
 
-    def testaddutblade(self):
+    def test_100_addutblade(self):
         command = "add model --model utblade --vendor aurora_vendor --type blade"
         self.noouttest(command.split(" "))
 
-    def testverifyaddutblade(self):
+    def test_200_verifyaddutblade(self):
         command = "show model --model utblade"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Vendor: aurora_vendor Model: utblade", command)
         self.matchoutput(out, "Type: blade", command)
 
-    def testaddutmedium(self):
+    def test_100_adde1000(self):
+        command = ["add", "model", "--type", "nic", "--model", "e1000",
+                   "--vendor", "intel"]
+        self.noouttest(command)
+
+    def test_100_addvmnic(self):
+        command = ["add", "model", "--type", "nic", "--model", "default",
+                   "--vendor", "utvirt"]
+        self.noouttest(command)
+
+    def test_110_addutmedium(self):
         # Use the old --mem name here
         command = ["add_model", "--model=utmedium", "--vendor=utvendor",
                    "--type=virtual_machine", "--cpuname=xeon_2500",
                    "--cpunum=1", "--mem=8192", "--disktype=nas",
-                   "--diskcontroller=sata", "--disksize=15", "--nics=1"]
+                   "--diskcontroller=sata", "--disksize=15", "--nics=1",
+                   "--nicmodel", "default", "--nicvendor", "utvirt"]
         self.noouttest(command)
 
-    def testaddutlarge(self):
+    def test_100_addutlarge(self):
         # This test still use --cputype to test backwards compatibility
         command = ["add_model", "--model=utlarge", "--vendor=utvendor",
                    "--type=virtual_machine", "--cputype=xeon_2660",
@@ -124,27 +135,28 @@ class TestAddModel(TestBrokerCommand):
         self.matchoutput(err, "The --cputype option is deprecated.  "
                          "Please use --cpuname instead.", command)
 
-    def testverifyaddutmedium(self):
+    def test_200_verifyaddutmedium(self):
         command = "show model --model utmedium"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Vendor: utvendor Model: utmedium", command)
         self.matchoutput(out, "Type: virtual_machine", command)
+        self.matchoutput(out, "NIC Vendor: utvirt Model: default", command)
 
-    def testfailauroranode(self):
+    def test_300_failauroranode(self):
         command = ["add_model", "--model=invalid", "--vendor=aurora_vendor",
                    "--type=aurora_node"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "The model's machine type must be one of",
                          command)
 
-    def testfailduplicate(self):
+    def test_300_failduplicate(self):
         command = ["add_model", "--model=utblade", "--vendor=aurora_vendor",
                    "--type=blade"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Model utblade, vendor aurora_vendor already "
                          "exists.", command)
 
-    def testaddutccissmodel(self):
+    def test_100_addutccissmodel(self):
         command = ["add_model", "--model=utccissmodel", "--vendor=hp",
                    "--type=rackmount", "--cpuname=xeon_2500", "--cpunum=2",
                    "--memory=49152", "--disktype=local",
@@ -152,7 +164,7 @@ class TestAddModel(TestBrokerCommand):
                    "--disksize=466", "--nics=2"]
         self.noouttest(command)
 
-    def testverifyaddutccissmodel(self):
+    def test_200_verifyaddutccissmodel(self):
         command = "show model --model utccissmodel"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Vendor: hp Model: utccissmodel", command)
@@ -165,6 +177,6 @@ class TestAddModel(TestBrokerCommand):
                          command)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddModel)
     unittest.TextTestRunner(verbosity=2).run(suite)

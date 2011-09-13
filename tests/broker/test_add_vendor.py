@@ -72,8 +72,12 @@ class TestAddVendor(TestBrokerCommand):
         command = "show vendor --vendor vendor-does-not-exist"
         self.notfoundtest(command.split(" "))
 
+    def testaddutvirt(self):
+        command = ["add", "vendor", "--vendor", "utvirt"]
+        self.noouttest(command)
 
-if __name__=='__main__':
+
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddVendor)
     unittest.TextTestRunner(verbosity=2).run(suite)
 
