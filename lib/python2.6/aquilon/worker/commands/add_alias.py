@@ -86,7 +86,8 @@ def create_target_if_needed(session, target, dbdns_env):
         dbtarget = q.one()
     except NoResultFound:
         if not target_domain.restricted:
-            raise NotFoundException("Target FQDN %s does not exist." % target)
+            raise NotFoundException("Target FQDN {0} does not exist in {1:l}."
+                                    .format(target, dbdns_env))
 
         dbtarget = Fqdn(name=name, dns_domain=target_domain,
                         dns_environment=dbdns_env)

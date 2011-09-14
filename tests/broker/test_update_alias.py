@@ -64,7 +64,7 @@ class TestUpdateAlias(TestBrokerCommand):
         out = self.notfoundtest(command)
         self.matchoutput(out,
                          "Target FQDN no-such-name.aqd-unittest.ms.com "
-                         "does not exist.",
+                         "does not exist in DNS environment internal.",
                          command)
 
     def test_210_not_an_alias(self):
