@@ -126,7 +126,7 @@ class Plenary(object):
         self.body(lines)
         return "\n".join(lines) + "\n"
 
-    def write(self, dir=None, user=None, locked=False, content=None):
+    def write(self, dir=None, locked=False, content=None):
         """Write out the template.
 
         If the content is unchanged, then the file will not be modified
@@ -141,7 +141,6 @@ class Plenary(object):
 
         if dir is not None:
             self.dir = dir
-        # user is simply left for compatibility: it's no longer used
 
         if content is None:
             if not self.new_content:
@@ -355,7 +354,7 @@ class PlenaryCollection(object):
         for plen in self.plenaries:
             plen.restore_stash()
 
-    def write(self, dir=None, user=None, locked=False, content=None):
+    def write(self, dir=None, locked=False, content=None):
         # If locked is True, assume error handling happens higher
         # in the stack.
         total = 0
@@ -372,8 +371,7 @@ class PlenaryCollection(object):
                 # IncompleteError is almost pointless in this context, but
                 # it has the nice side effect of not updating the total.
                 try:
-                    total += plen.write(dir=dir, user=user, locked=True,
-                                        content=content)
+                    total += plen.write(dir=dir, locked=True, content=content)
                 except IncompleteError:
                     pass
         except:
