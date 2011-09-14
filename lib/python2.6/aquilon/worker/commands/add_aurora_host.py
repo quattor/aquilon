@@ -175,5 +175,7 @@ class CommandAddAuroraHost(CommandAddHost):
         kwargs['buildstatus'] = buildstatus
         kwargs['ip'] = None
         kwargs['zebra_interfaces'] = None
+        kwargs['grn'] = None
+        kwargs['eon_id'] = None
         # The superclass already contains the rest of the logic to handle this.
         return CommandAddHost.render(self, **kwargs)

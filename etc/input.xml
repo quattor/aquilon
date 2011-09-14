@@ -804,6 +804,8 @@
          <option name="ipalgorithm" type="string">Algorithm for automatically choosing an IP.</option>
          <option name="zebra_interfaces" type="string">Interfaces to configure Zebra on</option>
          <option name="comments" type="string">Comments</option>
+         <option name="grn" type="string" conflicts="eon_id">GRN as string</option>
+         <option name="eon_id" type="int" conflicts="grn">Numeric EON ID</option>
       </optgroup>
       <transport method="put" path="host/%(hostname)s" />
    </command>
@@ -844,6 +846,8 @@
          <option name="personality" type="string">Personality name.  Defaults to 'inventory'.</option>
          <option name="ipalgorithm" type="string">Algorithm for automatically choosing an IP.</option>
          <option name="zebra_interfaces" type="string">Interfaces to configure Zebra on</option>
+         <option name="grn" type="string" conflicts="eon_id">GRN as string</option>
+         <option name="eon_id" type="int" conflicts="grn">Numeric EON ID</option>
       </optgroup>
       <transport method="put" path="aquilon_host/%(hostname)s" />
    </command>
@@ -881,6 +885,8 @@
             <option name="ipfromsystem" type="string" conflicts="ip ipfromip autoip">choose IP address in subnet of system</option>
             <option name="autoip" type="flag" conflicts="ip ipfromip ipfromsystem">choose IP address based on mac/switch</option>
          </optgroup>
+         <option name="grn" type="string" conflicts="eon_id">GRN as string</option>
+         <option name="eon_id" type="int" conflicts="grn">Numeric EON ID</option>
       </optgroup>
       <transport method="put" path="windows_host/%(hostname)s" />
    </command>
