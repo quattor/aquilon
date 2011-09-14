@@ -28,9 +28,7 @@
 # TERMS THAT MAY APPLY.
 
 
-import os
-
-from aquilon.exceptions_ import ArgumentError, NotFoundException
+from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import EsxCluster
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.commands.del_cluster import CommandDelCluster

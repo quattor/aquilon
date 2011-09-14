@@ -29,7 +29,6 @@
 """Contains the logic for `aq bind client`."""
 
 
-from aquilon.exceptions_ import IncompleteError
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.host import hostname_to_host
 from aquilon.worker.dbwrappers.service_instance import get_service_instance

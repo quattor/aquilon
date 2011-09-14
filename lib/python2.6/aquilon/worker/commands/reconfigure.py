@@ -31,9 +31,6 @@
 
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.commands.make import CommandMake
-from aquilon.worker.dbwrappers.host import hostname_to_host
-from aquilon.aqdb.model import HostLifecycle, Archetype, Personality
-from aquilon.exceptions_ import ArgumentError
 
 
 class CommandReconfigure(CommandMake):

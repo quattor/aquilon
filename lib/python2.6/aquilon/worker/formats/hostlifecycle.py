@@ -30,7 +30,7 @@
 
 
 from aquilon.worker.formats.formatters import ObjectFormatter
-from aquilon.aqdb.model import HostLifecycle, StateEngine
+from aquilon.aqdb.model import HostLifecycle
 
 from aquilon.aqdb.model.hostlifecycle import (Ready, Almostready, Build,
                                               Rebuild, Decommissioned,

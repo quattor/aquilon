@@ -37,7 +37,7 @@ from aquilon.worker.dbwrappers.interface import (check_ip_restrictions,
 from aquilon.worker.dbwrappers.hardware_entity import convert_primary_name_to_arecord
 from aquilon.worker.processes import DSDBRunner
 from aquilon.aqdb.model import (Interface, Model, Switch, AddressAssignment,
-                                ReservedName, ARecord, Fqdn)
+                                ReservedName)
 from aquilon.aqdb.model.network import get_net_id_from_ip
 
 

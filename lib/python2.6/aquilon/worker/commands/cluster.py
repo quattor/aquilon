@@ -32,8 +32,7 @@
 from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.host import hostname_to_host
-from aquilon.aqdb.model import (Cluster, HostClusterMember, HostLifecycle,
-                                Archetype, Personality)
+from aquilon.aqdb.model import Cluster, HostLifecycle, Personality
 from aquilon.worker.templates.cluster import PlenaryCluster
 from aquilon.worker.services import Chooser
 from aquilon.worker.locks import lock_queue, CompileKey
@@ -45,7 +44,6 @@ class CommandCluster(BrokerCommand):
 
     def render(self, session, logger, hostname, cluster,
                personality, **arguments):
-        plenaries = []
         dbhost = hostname_to_host(session, hostname)
         dbcluster = Cluster.get_unique(session, cluster, compel=True)
 

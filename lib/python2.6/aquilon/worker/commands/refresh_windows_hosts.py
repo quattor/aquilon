@@ -39,7 +39,7 @@ from aquilon.worker.templates.base import PlenaryCollection
 from aquilon.worker.templates.cluster import PlenaryCluster
 from aquilon.worker.locks import lock_queue, SyncKey
 from aquilon.aqdb.model import (Host, Interface, Machine, Domain, Archetype,
-                                Personality, HostLifecycle, DnsDomain, DnsRecord,
+                                Personality, HostLifecycle, DnsRecord,
                                 OperatingSystem, ReservedName, Fqdn)
 from aquilon.aqdb.model.dns_domain import parse_fqdn
 

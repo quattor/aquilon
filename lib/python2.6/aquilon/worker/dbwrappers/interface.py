@@ -43,10 +43,9 @@ from sqlalchemy.sql import select
 from aquilon.exceptions_ import ArgumentError, InternalError, NotFoundException
 from aquilon.aqdb.model import (Interface, HardwareEntity, ObservedMac,
                                 ARecord, VlanInfo, ObservedVlan, Network,
-                                AddressAssignment, DnsEnvironment, Model)
+                                AddressAssignment, Model)
 from aquilon.aqdb.model.address_assignment import ADDR_USAGES
 from aquilon.aqdb.model.network import get_net_id_from_ip
-from aquilon.utils import force_mac
 
 
 _vlan_re = re.compile(r'^(.*)\.(\d+)$')

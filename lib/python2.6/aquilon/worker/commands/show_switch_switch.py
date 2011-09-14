@@ -37,5 +37,5 @@ class CommandShowSwitchSwitch(BrokerCommand):
 
     required_parameters = ["switch"]
 
-    def render(self, session, logger, switch, **arguments):
+    def render(self, session, switch, **arguments):
         return Switch.get_unique(session, switch, compel=True)

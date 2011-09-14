@@ -49,7 +49,7 @@ class CommandAddArchetype(BrokerCommand):
         Archetype.get_unique(session, archetype, preclude=True)
 
         if description is None:
-            outputdesc = archetype
+            description = archetype
         dbarch = Archetype(name=archetype,
                            cluster_type=cluster_type,
                            outputdesc=description,

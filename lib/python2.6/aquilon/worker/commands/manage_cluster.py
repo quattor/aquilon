@@ -35,7 +35,6 @@ from aquilon.worker.templates.cluster import PlenaryCluster
 from aquilon.worker.templates.host import PlenaryHost
 from aquilon.worker.templates.base import PlenaryCollection
 from aquilon.worker.locks import lock_queue, CompileKey
-from aquilon.exceptions_ import IncompleteError, NotFoundException
 
 
 class CommandManageCluster(BrokerCommand):

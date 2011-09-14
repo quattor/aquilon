@@ -29,13 +29,12 @@
 """Contains the logic for `aq add host`."""
 
 
-from aquilon.exceptions_ import (ArgumentError, ProcessException, AquilonError,
-                                 InternalError)
+from aquilon.exceptions_ import ArgumentError, ProcessException, AquilonError
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.branch import get_branch_and_author
 from aquilon.worker.dbwrappers.hardware_entity import parse_primary_name
 from aquilon.worker.dbwrappers.interface import generate_ip, assign_address
-from aquilon.aqdb.model import (Domain, Host, OperatingSystem, Archetype,
+from aquilon.aqdb.model import (Host, OperatingSystem, Archetype,
                                 HostLifecycle, Machine, Personality)
 from aquilon.worker.templates.base import PlenaryCollection
 from aquilon.worker.templates.machine import PlenaryMachineInfo
@@ -76,7 +75,7 @@ class CommandAddHost(BrokerCommand):
                 osname = 'linux'
             if not osversion:
                 osversion = '5.0.1-x86_64'
-        elif dbarchetype.name =='aurora':
+        elif dbarchetype.name == 'aurora':
             if not osname:
                 #no solaris yet
                 osname = 'linux'
@@ -138,7 +137,7 @@ class CommandAddHost(BrokerCommand):
                 # For aurora, check that DSDB has a record of the host.
                 if not skip_dsdb_check:
                     try:
-                        fields = dsdb_runner.show_host(hostname)
+                        dsdb_runner.show_host(hostname)
                     except ProcessException, e:
                         raise ArgumentError("Could not find host in DSDB: %s" % e)
             elif not dbmachine.primary_ip:

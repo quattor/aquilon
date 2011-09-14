@@ -37,7 +37,7 @@ from aquilon.aqdb.model import (Switch, PrimaryNameAssociation, DnsRecord,
 
 class CommandShowSwitchAll(BrokerCommand):
 
-    def render(self, session, logger, **arguments):
+    def render(self, session, **arguments):
         q = session.query(Switch)
 
         q = q.options(subqueryload_all('location'))

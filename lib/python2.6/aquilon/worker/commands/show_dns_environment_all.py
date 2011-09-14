@@ -34,6 +34,6 @@ from aquilon.aqdb.model import DnsEnvironment
 
 class CommandShowDnsEnvironmentAll(BrokerCommand):
 
-    def render(self, session, logger, dns_environment, **arguments):
+    def render(self, session, **arguments):
         q = session.query(DnsEnvironment)
         return q.all()

@@ -33,7 +33,7 @@ import re
 from sqlalchemy.orm.session import object_session
 
 from aquilon.exceptions_ import ArgumentError, ProcessException
-from aquilon.aqdb.model import Domain, Sandbox, Branch, UserPrincipal
+from aquilon.aqdb.model import Domain, Sandbox, Branch
 from aquilon.worker.dbwrappers.user_principal import get_user_principal
 from aquilon.worker.processes import remove_dir, run_git
 from aquilon.worker.locks import lock_queue, CompileKey

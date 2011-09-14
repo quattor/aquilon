@@ -28,7 +28,6 @@
 # TERMS THAT MAY APPLY.
 
 
-import os
 import logging
 
 from aquilon.worker.templates.base import Plenary

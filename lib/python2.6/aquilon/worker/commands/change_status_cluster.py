@@ -29,13 +29,13 @@
 """Contains the logic for `aq change status`."""
 
 
-from aquilon.exceptions_ import ArgumentError
+from aquilon.exceptions_ import IncompleteError
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.templates.domain import TemplateDomain
 from aquilon.worker.templates.cluster import PlenaryCluster
 from aquilon.worker.templates.host import PlenaryHost
 from aquilon.worker.locks import lock_queue, CompileKey
-from aquilon.aqdb.model import Cluster, HostLifecycle, ClusterLifecycle
+from aquilon.aqdb.model import Cluster, ClusterLifecycle
 
 class CommandChangeClusterStatus(BrokerCommand):
 
@@ -80,7 +80,7 @@ class CommandChangeClusterStatus(BrokerCommand):
 
             td = TemplateDomain(dbcluster.branch, dbcluster.sandbox_author,
                                 logger=logger)
-            out = td.compile(session, " ".join(compilelist), locked=True)
+            td.compile(session, " ".join(compilelist), locked=True)
 
         except:
             for tpl in plenaries:

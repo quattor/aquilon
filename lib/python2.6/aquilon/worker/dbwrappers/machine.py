@@ -29,9 +29,7 @@
 """Wrapper to make getting a machine simpler."""
 
 
-from sqlalchemy.orm.exc import NoResultFound
-
-from aquilon.exceptions_ import ArgumentError, NotFoundException
+from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Cpu, LocalDisk, Machine
 
 

@@ -28,24 +28,15 @@
 # TERMS THAT MAY APPLY.
 
 
-from sqlalchemy.orm import aliased
-from sqlalchemy.sql.expression import and_
-
-from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import (Resource, Cluster,
-                                ClusterResource, HostResource)
 from aquilon.worker.formats.resource import ResourceList
 from aquilon.worker.dbwrappers.resources import get_resource_holder
 
 
-
 def show_resource(session, hostname, cluster,
                   all, name, resource_class):
-    if all:
-        q = session.query(resource_class)
-        return ResourceList(q.all())
-
     q = session.query(resource_class)
+    if all:
+        return ResourceList(q.all())
     if name:
         q = q.filter_by(name=name)
 

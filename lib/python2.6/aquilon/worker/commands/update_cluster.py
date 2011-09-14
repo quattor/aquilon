@@ -28,8 +28,6 @@
 # TERMS THAT MAY APPLY.
 
 
-import re
-
 from aquilon.aqdb.model import Cluster, Personality, Switch
 from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.broker import BrokerCommand

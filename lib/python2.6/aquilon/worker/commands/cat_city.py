@@ -31,7 +31,6 @@
 
 from aquilon.aqdb.model import City
 from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.processes import read_file
 from aquilon.worker.templates.city import PlenaryCity
 
 

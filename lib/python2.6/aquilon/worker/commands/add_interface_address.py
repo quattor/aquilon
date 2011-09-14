@@ -31,8 +31,7 @@
 from aquilon.worker.broker import BrokerCommand, validate_basic
 from aquilon.exceptions_ import ArgumentError, ProcessException, IncompleteError
 from aquilon.aqdb.model import (ARecord, HardwareEntity, DynamicStub,
-                                AddressAssignment, DnsEnvironment, Fqdn,
-                                NetworkEnvironment)
+                                AddressAssignment, Fqdn, NetworkEnvironment)
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.worker.dbwrappers.interface import (get_interface,
                                                  generate_ip,

@@ -34,7 +34,7 @@ import re
 from tempfile import mkdtemp
 
 from aquilon.exceptions_ import (ProcessException, ArgumentError,
-                                 AuthorizationException, InternalError)
+                                 AuthorizationException)
 from aquilon.aqdb.model import Domain, Branch
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.processes import run_git, remove_dir, sync_domain

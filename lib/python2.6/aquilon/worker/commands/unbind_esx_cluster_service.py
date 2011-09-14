@@ -28,7 +28,7 @@
 # TERMS THAT MAY APPLY.
 
 
-from aquilon.exceptions_ import NotFoundException, ArgumentError
+from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import EsxCluster, ClusterServiceBinding, Service
 from aquilon.worker.dbwrappers.service_instance import get_service_instance
@@ -40,7 +40,6 @@ class CommandUnbindESXClusterService(BrokerCommand):
     required_parameters = ["cluster", "service", "instance"]
 
     def render(self, session, logger, cluster, service, instance, **arguments):
-        cluster_type = 'esx'
         dbservice = Service.get_unique(session, service, compel=True)
         dbinstance = get_service_instance(session, dbservice, instance)
         dbcluster = EsxCluster.get_unique(session, cluster, compel=True)

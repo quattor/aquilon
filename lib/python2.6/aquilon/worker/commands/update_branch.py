@@ -41,8 +41,8 @@ class CommandUpdateBranch(BrokerCommand):
 
     required_parameters = ["branch"]
 
-    def render(self, session, logger, dbuser, branch, comments,
-               compiler_version, autosync, change_manager, **arguments):
+    def render(self, session, dbuser, branch, comments, compiler_version,
+               autosync, change_manager, **arguments):
         dbbranch = Branch.get_unique(session, branch, compel=True)
 
         # FIXME: proper authorization

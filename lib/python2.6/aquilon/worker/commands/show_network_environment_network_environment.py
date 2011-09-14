@@ -29,7 +29,6 @@
 """Contains the logic for `aq show network_environment`."""
 
 
-from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import NetworkEnvironment
 

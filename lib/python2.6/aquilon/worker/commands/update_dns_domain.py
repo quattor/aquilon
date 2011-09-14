@@ -29,7 +29,6 @@
 """Contains the logic for `aq update dns domain`."""
 
 
-from aquilon.exceptions_ import ArgumentError, ProcessException
 from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import DnsDomain
 

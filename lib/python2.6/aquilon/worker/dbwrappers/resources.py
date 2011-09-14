@@ -29,14 +29,11 @@
 """Wrappers to make getting and using systems simpler."""
 
 
-from aquilon.exceptions_ import (ArgumentError, IncompleteError,
-                                 NotFoundException)
-from aquilon.aqdb.model import (Resource, Cluster, Host,
-                                ClusterResource, HostResource)
+from aquilon.exceptions_ import IncompleteError, NotFoundException
+from aquilon.aqdb.model import Cluster, ClusterResource, HostResource
 from aquilon.worker.templates.resource import PlenaryResource
 from aquilon.worker.templates.host import PlenaryHost
 from aquilon.worker.templates.cluster import PlenaryCluster
-from aquilon.worker.templates.base import PlenaryCollection
 from aquilon.worker.dbwrappers.host import hostname_to_host
 from aquilon.worker.locks import lock_queue, CompileKey
 
@@ -58,11 +55,10 @@ def get_resource_holder(session, hostname, cluster, compel=True):
     if cluster is not None:
         dbcluster = Cluster.get_unique(session, cluster, compel=True)
         who = dbcluster.resholder
-        label = "cluster %s" % dbcluster.name
         if who is None:
             if compel:
                 raise NotFoundException("cluster %s has no resources" %
-                                    dbcluster.name)
+                                        dbcluster.name)
             dbcluster.resholder = ClusterResource(cluster=dbcluster)
             session.add(dbcluster.resholder)
             session.flush()
@@ -90,7 +86,7 @@ def del_resource(session, logger, dbresource):
         plenary.remove(locked=True)
         try:
             holder_plenary.write(locked=True)
-        except IncompleteError, e:
+        except IncompleteError:
             holder_plenary.cleanup(domain, locked=True)
     except:
         holder_plenary.restore_stash()
@@ -101,7 +97,7 @@ def del_resource(session, logger, dbresource):
 
     return
 
-def add_resource(session, logger, holder, dbresource, **args):
+def add_resource(session, logger, holder, dbresource):
     dbresource.holder = holder
     session.add(dbresource)
     session.flush()
@@ -122,7 +118,7 @@ def add_resource(session, logger, holder, dbresource, **args):
         res_plenary.write(locked=True)
         try:
             holder_plenary.write(locked=True)
-        except IncompleteError, e:
+        except IncompleteError:
             holder_plenary.cleanup(domain, locked=True)
     except:
         res_plenary.restore_stash()

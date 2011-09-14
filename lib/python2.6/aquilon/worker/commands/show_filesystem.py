@@ -28,13 +28,10 @@
 # TERMS THAT MAY APPLY.
 
 
-from sqlalchemy.orm import aliased
-from sqlalchemy.sql.expression import and_
-
-from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import Filesystem, Resource, Cluster
+from aquilon.aqdb.model import Filesystem
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.commands.show_resource import show_resource
+
 
 class CommandShowFilesystem(BrokerCommand):
 
@@ -45,4 +42,3 @@ class CommandShowFilesystem(BrokerCommand):
 
         return show_resource(session, hostname, cluster, all,
                              filesystem, Filesystem)
-

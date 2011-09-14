@@ -31,7 +31,6 @@
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.processes import DSDBRunner
 from aquilon.aqdb.model import (DnsEnvironment, RouterAddress,
                                 AddressAssignment, Fqdn)
 
@@ -40,7 +39,7 @@ class CommandDelDnsEnvironment(BrokerCommand):
 
     required_parameters = ["dns_environment"]
 
-    def render(self, session, logger, dns_environment, **arguments):
+    def render(self, session, dns_environment, **arguments):
         db_dnsenv = DnsEnvironment.get_unique(session, dns_environment,
                                               compel=True)
 

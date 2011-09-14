@@ -29,12 +29,9 @@
 """Location formatter."""
 
 
-from inspect import isclass
-
 from aquilon.worker.formats.formatters import ObjectFormatter
 from aquilon.worker.formats.list import ListFormatter
-from aquilon.aqdb.model import (Location, Company, Hub, Continent, Country,
-                                Campus, City, Building, Room, Rack, Desk)
+from aquilon.aqdb.model import Location, Rack, Building
 
 
 class LocationFormatter(ObjectFormatter):
@@ -117,11 +114,7 @@ class LocationListFormatter(ListFormatter):
 
         return loclist_msg.SerializeToString()
 
-# Laziness... grab any imported Location classes and handle them above.
-for location_type in globals().values():
-    if not isclass(location_type):
-        continue
-    if issubclass(location_type, Location):
-        ObjectFormatter.handlers[location_type] = LocationFormatter()
+for location_type, mapper in Location.__mapper__.polymorphic_map.items():
+    ObjectFormatter.handlers[mapper.class_] = LocationFormatter()
 
 ObjectFormatter.handlers[LocationList] = LocationListFormatter()

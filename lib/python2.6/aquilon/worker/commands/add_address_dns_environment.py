@@ -27,8 +27,7 @@
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
 
-from aquilon.exceptions_ import (UnimplementedError, ArgumentError,
-                                 ProcessException)
+from aquilon.exceptions_ import ArgumentError, ProcessException
 from aquilon.aqdb.model import DnsRecord, ARecord, DnsEnvironment, Fqdn
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.worker.broker import BrokerCommand

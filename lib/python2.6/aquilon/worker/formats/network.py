@@ -28,17 +28,11 @@
 # TERMS THAT MAY APPLY.
 """Host formatter."""
 
-from sqlalchemy.sql import bindparam
-from sqlalchemy.orm import (contains_eager, aliased, joinedload, subqueryload,
-                            lazyload)
 from sqlalchemy.orm.session import object_session
 
 from aquilon.worker.formats.formatters import ObjectFormatter
 from aquilon.worker.formats.list import ListFormatter
-from aquilon.aqdb.model import (Network, AddressAssignment, DnsRecord,
-                                ARecord, DynamicStub,
-                                PrimaryNameAssociation, DnsDomain,
-                                Interface, HardwareEntity, Fqdn)
+from aquilon.aqdb.model import Network, DynamicStub
 
 def summarize_ranges(addrlist):
     """ Convert a list like [1,2,3,5] to ["1-3", "5"], but with IP addresses """

@@ -30,7 +30,7 @@
 
 
 from aquilon.exceptions_ import ArgumentError, ProcessException
-from aquilon.aqdb.model import DnsEnvironment, Alias, Fqdn
+from aquilon.aqdb.model import DnsEnvironment, Alias
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.dns import delete_dns_record
 from aquilon.worker.processes import DSDBRunner

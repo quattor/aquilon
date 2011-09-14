@@ -29,8 +29,7 @@
 """Contains the logic for `aq add interface --machine`."""
 
 
-from sqlalchemy import String
-from sqlalchemy.sql.expression import asc, desc, bindparam
+from sqlalchemy.sql.expression import asc, desc
 
 from aquilon.exceptions_ import (ArgumentError, ProcessException,
                                  AquilonError, UnimplementedError)
@@ -180,9 +179,10 @@ class CommandAddInterfaceMachine(BrokerCommand):
             except AquilonError, err:
                 raise ArgumentError("Could not update host in DSDB: %s" % err)
 
-        except Exception, e:
+        except:
             plenaries.restore_stash()
             pending_removals.restore_stash()
+            raise
         finally:
             lock_queue.release(key)
 

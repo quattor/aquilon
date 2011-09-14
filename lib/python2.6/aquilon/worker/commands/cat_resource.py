@@ -32,7 +32,6 @@
 from aquilon.exceptions_ import NotFoundException
 from aquilon.aqdb.model import Resource
 from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.processes import read_file
 from aquilon.worker.templates.resource import PlenaryResource
 from aquilon.worker.dbwrappers.resources import get_resource_holder
 

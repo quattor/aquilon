@@ -33,7 +33,7 @@ from sqlalchemy.orm import undefer
 
 from aquilon.exceptions_ import InternalError
 from aquilon.worker.broker import BrokerCommand
-from aquilon.aqdb.model import Service, ServiceInstance, NasDisk
+from aquilon.aqdb.model import Service, ServiceInstance
 from aquilon.worker.formats.service_instance import Share
 
 

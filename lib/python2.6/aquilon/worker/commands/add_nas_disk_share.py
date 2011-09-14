@@ -28,7 +28,7 @@
 # TERMS THAT MAY APPLY.
 """Contains the logic for `aq add service`."""
 
-from aquilon.exceptions_ import ArgumentError, NotFoundException, InternalError
+from aquilon.exceptions_ import InternalError
 from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import Service, ServiceInstance
 from aquilon.worker.templates.base import PlenaryCollection

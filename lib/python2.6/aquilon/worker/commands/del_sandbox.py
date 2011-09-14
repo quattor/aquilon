@@ -32,7 +32,6 @@
 import os
 
 from aquilon.exceptions_ import NotFoundException
-from aquilon.aqdb.model import Sandbox
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.sandbox import get_sandbox
 from aquilon.worker.dbwrappers.branch import remove_branch
@@ -46,7 +45,7 @@ class CommandDelSandbox(BrokerCommand):
         dbauthor = None
         try:
             (dbsandbox, dbauthor) = get_sandbox(session, logger, sandbox)
-        except NotFoundException, e:
+        except NotFoundException:
             self.cleanup_notify(logger, sandbox, dbauthor, dbuser)
             raise NotFoundException("No aqdb record for sandbox %s was found."
                                     % sandbox)

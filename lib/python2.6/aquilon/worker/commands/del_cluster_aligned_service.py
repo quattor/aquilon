@@ -28,7 +28,6 @@
 # TERMS THAT MAY APPLY.
 
 
-from aquilon.exceptions_ import NotFoundException
 from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import Service, ClusterAlignedService
 

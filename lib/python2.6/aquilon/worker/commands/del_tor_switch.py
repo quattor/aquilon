@@ -29,12 +29,8 @@
 """Contains the logic for `aq del tor_switch`."""
 
 
-from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import Switch
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.commands.del_switch import CommandDelSwitch
-from aquilon.worker.processes import DSDBRunner
-from aquilon.worker.locks import lock_queue, DeleteKey
 
 
 class CommandDelTorSwitch(CommandDelSwitch):

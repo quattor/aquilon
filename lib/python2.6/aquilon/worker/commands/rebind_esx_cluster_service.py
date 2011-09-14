@@ -31,7 +31,6 @@
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.commands.bind_esx_cluster_service import (
     CommandBindESXClusterService)
-from aquilon.worker.dbwrappers.host import hostname_to_host
 
 
 class CommandRebindESXClusterService(CommandBindESXClusterService):

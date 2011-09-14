@@ -29,8 +29,6 @@
 """Contains the logic for `aq search next --cluster`."""
 
 
-import re
-
 from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import Cluster
 from aquilon.worker.dbwrappers.search import search_next
