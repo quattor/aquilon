@@ -94,6 +94,7 @@ class Resource(Base):
 
 resource = Resource.__table__ # pylint: disable-msg=C0103, E1101
 resource.primary_key.name = '%s_pk' % _TN
+resource.info['unique_fields'] = ['name', 'holder']
 
 
 class ResourceHolder(Base):

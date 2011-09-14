@@ -48,7 +48,7 @@ class CommandCatResource(BrokerCommand):
         who = get_resource_holder(session, reshostname, rescluster)
         q = session.query(Resource).filter_by(name=resource)
         q = q.filter_by(resource_type=restype)
-        q = q.filter_by(holder_id=who.id)
+        q = q.filter_by(holder=who)
         dbresource = q.first()
         if not dbresource:
             raise NotFoundException("resource %s not found" % resource)

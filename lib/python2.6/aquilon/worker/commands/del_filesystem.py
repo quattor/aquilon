@@ -42,7 +42,7 @@ class CommandDelFilesystem(BrokerCommand):
 
         validate_basic("filesystem", filesystem)
         holder = get_resource_holder(session, hostname, cluster)
-        dbfs = Filesystem.get_unique(session, name=filesystem,
-                                     holder_id=holder.id, compel=True)
+        dbfs = Filesystem.get_unique(session, name=filesystem, holder=holder,
+                                     compel=True)
         del_resource(session, logger, dbfs)
         return

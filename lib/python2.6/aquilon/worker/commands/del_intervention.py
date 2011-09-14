@@ -43,7 +43,6 @@ class CommandDelIntervention(BrokerCommand):
         validate_basic("intervention", intervention)
         holder = get_resource_holder(session, hostname, cluster)
         dbapp = Intervention.get_unique(session, name=intervention,
-                                       holder_id=holder.id,
-                                       compel=True)
+                                        holder=holder, compel=True)
         del_resource(session, logger, dbapp)
         return

@@ -44,9 +44,8 @@ class CommandAddApplication(BrokerCommand):
         validate_basic("application", application)
         holder = get_resource_holder(session, hostname, cluster, compel=False)
 
-        app = Application.get_unique(session, name=application,
-                                     holder_id=holder.id,
-                                     preclude=True)
+        Application.get_unique(session, name=application, holder=holder,
+                               preclude=True)
 
         dbapp = Application(name=application, comments=comments, eonid=eonid)
         return add_resource(session, logger, holder, dbapp)

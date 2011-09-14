@@ -65,4 +65,4 @@ class Intervention(Resource):
 
 intervention = Intervention.__table__
 intervention.primary_key.name = '%s_pk' % (_TN)
-intervention.info['unique_fields'] = ['name', 'holder_id']
+intervention.info['unique_fields'] = ['name', 'holder']

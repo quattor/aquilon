@@ -51,6 +51,6 @@ def show_resource(session, hostname, cluster,
 
     if hostname or cluster:
         who = get_resource_holder(session, hostname, cluster)
-        q = q.filter_by(holder_id=who.id)
+        q = q.filter_by(holder=who)
 
     return ResourceList(q.all())

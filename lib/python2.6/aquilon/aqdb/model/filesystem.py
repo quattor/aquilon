@@ -60,4 +60,4 @@ class Filesystem(Resource):
 
 filesystem = Filesystem.__table__
 filesystem.primary_key.name = '%s_pk' % (_TN)
-filesystem.info['unique_fields'] = ['name', 'holder_id']
+filesystem.info['unique_fields'] = ['name', 'holder']

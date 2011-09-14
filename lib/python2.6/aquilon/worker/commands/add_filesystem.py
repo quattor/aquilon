@@ -47,9 +47,8 @@ class CommandAddFilesystem(BrokerCommand):
         validate_basic("filesystem", filesystem)
         holder = get_resource_holder(session, hostname, cluster, compel=False)
 
-        fs = Filesystem.get_unique(session, name=filesystem,
-                                   holder_id=holder.id,
-                                   preclude=True)
+        Filesystem.get_unique(session, name=filesystem, holder=holder,
+                              preclude=True)
 
         if dumpfreq is None:
             dumpfreq = 0

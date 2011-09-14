@@ -66,9 +66,8 @@ class CommandAddIntervention(BrokerCommand):
 
         holder = get_resource_holder(session, hostname, cluster, compel=False)
 
-        prevent_existing = Intervention.get_unique(session, name=intervention,
-                                   holder_id=holder.id,
-                                   preclude=True)
+        Intervention.get_unique(session, name=intervention, holder=holder,
+                                preclude=True)
 
         dbiv = Intervention(name=intervention,
                             expiry_date=expire_when,
