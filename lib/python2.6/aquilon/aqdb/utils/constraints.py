@@ -73,7 +73,7 @@ _long_nms['CONTROLLER_TYPE'] = 'CNTRLR_TYPE'
 _long_nms['CREATION_DATE']           = 'CR_DATE'
 _long_nms['USER_PRINCIPAL_ID']       = 'USR_PRNC_ID'
 _long_nms['OPERATING_SYSTEM'] = 'OS'
-_long_nms['DOWN_HOSTS_THRESHOLD'] = 'THRSH'
+_long_nms['DOWN_HOSTS_THRESHOLD'] = 'DOWN_HOSTS_THR'
 _long_nms['PERSONALITY_CLUSTER_INFO'] = 'PERS_CLSTR'
 _long_nms['PERSONALITY_CLUSTER_INFO_ID'] = 'PERS_CLSTRID'
 _long_nms['PERSONALITY_ESX_CLUSTER_INFO'] = 'PERS_ESXCLSTR'
@@ -88,7 +88,7 @@ _long_nms['NETWORK_ENVIRONMENT_ID'] = 'NET_ENV_ID'
 _long_nms['REQUIRES_CHANGE_MANAGER'] = 'REQ_CHG_MGR'
 
 
-def rename_sys_pks(db, *args, **kw):
+def rename_sys_pks(db, debug=False):
     stmt = """
     SELECT C.constraint_name  con,
            C.table_name       tab,
@@ -102,11 +102,16 @@ def rename_sys_pks(db, *args, **kw):
     if cons:
         for i in cons:
             #print i
-            nm = '%s_pk'%(i[1])
+            nm = '%s_pk' % i[1]
+            nm = nm.upper()
             rename = 'ALTER TABLE "%s" RENAME CONSTRAINT "%s" to "%s"' % (
                 i[1], i[0], nm)
-            dbf.debug(rename)
+            rename_idx = 'ALTER INDEX "%s" RENAME TO "%s"' % (i[0], nm)
+            if debug:
+                print rename
+                print rename_idx
             db.safe_execute(rename)
+            db.safe_execute(rename_idx)
     else:
         print 'PKs are all properly named'
 

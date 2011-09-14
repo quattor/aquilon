@@ -1,0 +1,5 @@
+After running the sql scripts, fire up the DB shell, and enter the following
+two commands at the prompt:
+
+	from aquilon.aqdb.utils import constraints
+	constraints.rename_sys_pks(db)
