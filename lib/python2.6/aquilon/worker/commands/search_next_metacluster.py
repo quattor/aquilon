@@ -38,8 +38,7 @@ class CommandSearchNextMetaCluster(BrokerCommand):
 
     required_parameters = ['metacluster']
 
-    def render(self, session, metacluster, start, number, fullname, pack,
-               **arguments):
+    def render(self, session, metacluster, start, number, pack, **arguments):
         result = search_next(session=session, cls=MetaCluster,
                              attr=MetaCluster.name, value=metacluster,
                              start=start, pack=pack)

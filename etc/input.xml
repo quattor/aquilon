@@ -442,7 +442,6 @@
       </optgroup>
       <optgroup name="search_system_prefs" mandatory="False">
          <option name="number" type="flag">show only the next number</option>
-         <option name="fullname" type="flag">show the next available full name (default)</option>
          <option name="pack" type="flag">Return first free value</option>
          <option name="start" type="string">Start counting at a different number than one</option>
       </optgroup>
