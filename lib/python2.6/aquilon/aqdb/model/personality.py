@@ -41,7 +41,7 @@ _ABV = 'prsnlty'
 _TN = 'personality'
 
 _PGN = 'personality_grn_map'
-_PGNABV = 'prsnlty_grns'
+_PGNABV = 'pers_grn_map'
 
 
 class Personality(Base):
@@ -86,7 +86,7 @@ class PersonalityGrnMap(Base):
     __tablename__ = _PGN
 
     personality_id = Column(Integer, ForeignKey('%s.id' % _TN,
-                                                name='%s_pers_fk' % _PGNABV),
+                                                name='%s_personality_fk' % _PGNABV),
                             primary_key=True)
 
     eon_id = Column(Integer, ForeignKey('grn.eon_id',

@@ -134,7 +134,7 @@ class HostGrnMap(Base):
     __tablename__ = _HOSTGRN
 
     host_id = Column(Integer, ForeignKey("%s.machine_id" % _TN,
-                                         name="%s_host_id_fk" % _HOSTGRN),
+                                         name="%s_host_fk" % _HOSTGRN),
                      primary_key=True)
 
     eon_id = Column(Integer, ForeignKey('grn.eon_id',

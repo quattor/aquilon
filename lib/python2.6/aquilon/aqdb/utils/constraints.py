@@ -86,6 +86,7 @@ _long_nms['DNS_ENVIRONMENT_ID'] = 'DNS_ENV_ID'
 _long_nms['NETWORK_ENVIRONMENT'] = 'NET_ENV'
 _long_nms['NETWORK_ENVIRONMENT_ID'] = 'NET_ENV_ID'
 _long_nms['REQUIRES_CHANGE_MANAGER'] = 'REQ_CHG_MGR'
+_long_nms['PERSONALITY_GRN_MAP'] = 'PERS_GRN_MAP'
 
 
 def rename_sys_pks(db, *args, **kw):
