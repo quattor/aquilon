@@ -31,7 +31,7 @@
 from sqlalchemy.orm import joinedload_all
 
 from aquilon.exceptions_ import NotFoundException
-from aquilon.aqdb.model import MetaCluster, MetaClusterMember, Cluster, EsxCluster
+from aquilon.aqdb.model import MetaCluster
 from aquilon.worker.broker import BrokerCommand
 
 

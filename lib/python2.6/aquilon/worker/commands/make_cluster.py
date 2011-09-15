@@ -29,7 +29,7 @@
 """Contains the logic for `aq make cluster`."""
 
 
-from aquilon.exceptions_ import ArgumentError, NotFoundException
+from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import Cluster
 from aquilon.worker.templates.domain import TemplateDomain
@@ -66,7 +66,7 @@ class CommandMakeCluster(BrokerCommand):
 
             td = TemplateDomain(dbcluster.branch, dbcluster.sandbox_author,
                                 logger=logger)
-            out = td.compile(session, only=" ".join(profile_list), locked=True)
+            td.compile(session, only=" ".join(profile_list), locked=True)
 
         except:
             chooser.restore_stash()

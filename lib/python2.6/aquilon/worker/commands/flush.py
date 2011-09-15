@@ -46,7 +46,7 @@ from aquilon.exceptions_ import PartialError, IncompleteError
 
 class CommandFlush(BrokerCommand):
 
-    def render(self, session, logger, user, 
+    def render(self, session, logger,
                services, personalities, machines, clusters, hosts,
                locations, resources, all,
                **arguments):

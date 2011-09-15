@@ -30,16 +30,6 @@
 
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.commands.update_cluster import CommandUpdateCluster
-from aquilon.aqdb.model import EsxCluster, Personality, Switch
-from aquilon.exceptions_ import ArgumentError
-from aquilon.worker.dbwrappers.location import get_location
-from aquilon.worker.templates.machine import (PlenaryMachineInfo,
-                                              machine_plenary_will_move)
-from aquilon.worker.templates.host import PlenaryHost
-from aquilon.worker.templates.cluster import PlenaryCluster
-from aquilon.worker.templates.base import PlenaryCollection
-from aquilon.worker.locks import lock_queue, CompileKey
-from aquilon.utils import force_ratio
 
 
 class CommandUpdateESXCluster(CommandUpdateCluster):

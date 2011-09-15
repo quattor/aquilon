@@ -36,5 +36,5 @@ class CommandShowDnsEnvironmentDnsEnvironment(BrokerCommand):
 
     required_parameters = ["dns_environment"]
 
-    def render(self, session, logger, dns_environment, **arguments):
+    def render(self, session, dns_environment, **arguments):
         return DnsEnvironment.get_unique(session, dns_environment, compel=True)

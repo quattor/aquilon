@@ -27,7 +27,6 @@
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
 
-import re
 import math
 from ipaddr import IPv4Network, AddressValueError, NetmaskValueError
 

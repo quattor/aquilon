@@ -32,7 +32,7 @@ from datetime import datetime
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Intervention
-from aquilon.worker.broker import BrokerCommand, validate_basic
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.resources import (add_resource,
                                                  get_resource_holder)
 
@@ -66,9 +66,8 @@ class CommandAddIntervention(BrokerCommand):
 
         holder = get_resource_holder(session, hostname, cluster, compel=False)
 
-        prevent_existing = Intervention.get_unique(session, name=intervention,
-                                   holder_id=holder.id,
-                                   preclude=True)
+        Intervention.get_unique(session, name=intervention, holder=holder,
+                                preclude=True)
 
         dbiv = Intervention(name=intervention,
                             expiry_date=expire_when,

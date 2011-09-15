@@ -29,8 +29,6 @@
 """Contains the logic for `aq sync`."""
 
 
-import os
-
 from aquilon.worker.broker import BrokerCommand
 from aquilon.exceptions_ import ProcessException, ArgumentError
 from aquilon.aqdb.model import Domain

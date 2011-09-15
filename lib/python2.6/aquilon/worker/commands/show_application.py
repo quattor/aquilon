@@ -28,13 +28,10 @@
 # TERMS THAT MAY APPLY.
 
 
-from sqlalchemy.orm import aliased
-from sqlalchemy.sql.expression import and_
-
-from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Application
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.commands.show_resource import show_resource
+
 
 class CommandShowApplication(BrokerCommand):
 
@@ -48,5 +45,3 @@ class CommandShowApplication(BrokerCommand):
 
         return show_resource(session, hostname, cluster, all,
                              application, Application)
-
-

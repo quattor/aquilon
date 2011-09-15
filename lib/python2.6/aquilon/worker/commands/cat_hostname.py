@@ -31,7 +31,6 @@
 
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.host import hostname_to_host
-from aquilon.worker.processes import read_file
 from aquilon.worker.templates.host import PlenaryToplevelHost
 
 

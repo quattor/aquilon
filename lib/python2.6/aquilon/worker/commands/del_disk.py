@@ -28,8 +28,7 @@
 # TERMS THAT MAY APPLY.
 """Contains the logic for `aq del disk`."""
 
-from aquilon.exceptions_ import (ArgumentError, NotFoundException,
-                                 ProcessException, AquilonError)
+from aquilon.exceptions_ import ArgumentError, NotFoundException, AquilonError
 from aquilon.aqdb.model import Disk, Machine
 from aquilon.aqdb.model.disk import controller_types
 from aquilon.worker.broker import BrokerCommand

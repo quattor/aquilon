@@ -31,8 +31,7 @@
 from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.dns import delete_dns_record
-from aquilon.aqdb.model import (ARecord, RouterAddress, DnsEnvironment,
-                                NetworkEnvironment)
+from aquilon.aqdb.model import ARecord, NetworkEnvironment
 from aquilon.aqdb.model.network import get_net_id_from_ip
 
 

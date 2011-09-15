@@ -31,7 +31,7 @@
 
 from sqlalchemy.exc import InvalidRequestError
 
-from aquilon.exceptions_ import ArgumentError, NotFoundException
+from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import Cpu
 

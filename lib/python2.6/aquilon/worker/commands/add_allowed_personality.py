@@ -31,7 +31,7 @@
 from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import Personality, Cluster
 from aquilon.exceptions_ import ArgumentError
-import re
+
 
 class CommandAddAllowedPersonality(BrokerCommand):
 

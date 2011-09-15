@@ -29,8 +29,6 @@
 """Contains the logic for `aq add location`."""
 
 
-from sqlalchemy.orm.exc import NoResultFound
-
 from aquilon import const
 from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.broker import BrokerCommand
@@ -56,8 +54,7 @@ def add_location(session, name, fullname, type, parent_name, parent_type,
             raise ArgumentError("%s is not a known location type." %
                                 value.capitalize())
 
-    loc = Location.get_unique(session, name=name,
-                              location_type=type, preclude=True)
+    Location.get_unique(session, name=name, location_type=type, preclude=True)
 
     parent = Location.get_unique(session, name=parent_name,
                                  location_type=parent_type, compel=True)
@@ -74,8 +71,8 @@ def add_location(session, name, fullname, type, parent_name, parent_type,
     if not fullname:
         fullname = name
 
-    kw={'name': name, 'fullname': fullname, 'parent': parent,
-        'comments': comments}
+    kw = {'name': name, 'fullname': fullname, 'parent': parent,
+          'comments': comments}
 
     if type == 'building':
         kw['address'] = address

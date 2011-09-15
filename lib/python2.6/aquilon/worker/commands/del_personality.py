@@ -30,7 +30,7 @@
 
 from aquilon.worker.broker import BrokerCommand
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import Personality, Archetype, Host
+from aquilon.aqdb.model import Personality, Host
 from aquilon.worker.templates.personality import PlenaryPersonality
 
 

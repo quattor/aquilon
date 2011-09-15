@@ -50,12 +50,6 @@ class TestSearchNext(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out, "aquilon100.aqd-unittest.ms.com", command)
 
-    def testshortfullname(self):
-        command = ["search_next", "--fullname", "--short=aquilon",
-                   "--dns_domain=aqd-unittest.ms.com"]
-        out = self.commandtest(command)
-        self.matchoutput(out, "aquilon100.aqd-unittest.ms.com", command)
-
     def testshortnumber(self):
         command = ["search_next", "--number", "--short=aquilon",
                    "--dns_domain=aqd-unittest.ms.com"]
@@ -66,12 +60,6 @@ class TestSearchNext(TestBrokerCommand):
 
     def testshortdefaultmissing(self):
         command = ["search_next", "--short=newseries",
-                   "--dns_domain=aqd-unittest.ms.com"]
-        out = self.commandtest(command)
-        self.matchoutput(out, "newseries1.aqd-unittest.ms.com", command)
-
-    def testshortfullnamemissing(self):
-        command = ["search_next", "--fullname", "--short=newseries",
                    "--dns_domain=aqd-unittest.ms.com"]
         out = self.commandtest(command)
         self.matchoutput(out, "newseries1.aqd-unittest.ms.com", command)
@@ -89,11 +77,6 @@ class TestSearchNext(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out, "evm123", command)
 
-    def testmachinefullname(self):
-        command = ["search_next", "--fullname", "--machine=evm"]
-        out = self.commandtest(command)
-        self.matchoutput(out, "evm123", command)
-
     def testmachinenumber(self):
         command = ["search_next", "--number", "--machine=evm"]
         out = self.commandtest(command)
@@ -102,11 +85,6 @@ class TestSearchNext(TestBrokerCommand):
 
     def testmachinedefaultmissing(self):
         command = ["search_next", "--machine=newseries"]
-        out = self.commandtest(command)
-        self.matchoutput(out, "newseries1", command)
-
-    def testmachinefullnamemissing(self):
-        command = ["search_next", "--fullname", "--machine=newseries"]
         out = self.commandtest(command)
         self.matchoutput(out, "newseries1", command)
 
@@ -121,11 +99,6 @@ class TestSearchNext(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out, "utecl14", command)
 
-    def testclusterfullname(self):
-        command = ["search_next", "--fullname", "--cluster=utecl"]
-        out = self.commandtest(command)
-        self.matchoutput(out, "utecl14", command)
-
     def testclusternumber(self):
         command = ["search_next", "--number", "--cluster=utecl"]
         out = self.commandtest(command)
@@ -134,11 +107,6 @@ class TestSearchNext(TestBrokerCommand):
 
     def testclusterdefaultmissing(self):
         command = ["search_next", "--cluster=newseries"]
-        out = self.commandtest(command)
-        self.matchoutput(out, "newseries1", command)
-
-    def testclusterfullnamemissing(self):
-        command = ["search_next", "--fullname", "--cluster=newseries"]
         out = self.commandtest(command)
         self.matchoutput(out, "newseries1", command)
 
@@ -153,11 +121,6 @@ class TestSearchNext(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out, "utmc8", command)
 
-    def testmetaclusterfullname(self):
-        command = ["search_next", "--fullname", "--metacluster=utmc"]
-        out = self.commandtest(command)
-        self.matchoutput(out, "utmc8", command)
-
     def testmetaclusternumber(self):
         command = ["search_next", "--number", "--metacluster=utmc"]
         out = self.commandtest(command)
@@ -166,11 +129,6 @@ class TestSearchNext(TestBrokerCommand):
 
     def testmetaclusterdefaultmissing(self):
         command = ["search_next", "--metacluster=newseries"]
-        out = self.commandtest(command)
-        self.matchoutput(out, "newseries1", command)
-
-    def testmetaclusterfullnamemissing(self):
-        command = ["search_next", "--fullname", "--metacluster=newseries"]
         out = self.commandtest(command)
         self.matchoutput(out, "newseries1", command)
 

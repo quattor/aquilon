@@ -28,7 +28,6 @@
 # TERMS THAT MAY APPLY.
 """ Provides adding dns_evironment functionality """
 
-from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.broker import BrokerCommand, validate_basic
 from aquilon.aqdb.model import DnsEnvironment
 
@@ -36,7 +35,7 @@ class CommandAddDnsEnvironment(BrokerCommand):
 
     required_parameters = ["dns_environment"]
 
-    def render(self, session, logger, dns_environment, comments, **arguments):
+    def render(self, session, dns_environment, comments, **arguments):
         validate_basic("DNS environment", dns_environment)
         DnsEnvironment.get_unique(session, dns_environment, preclude=True)
 

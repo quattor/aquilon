@@ -30,7 +30,6 @@
 
 
 from aquilon.worker.formats.formatters import ObjectFormatter
-from aquilon.worker.formats.list import ListFormatter
 from aquilon.worker.formats.resource import ResourceFormatter
 from aquilon.aqdb.model import Filesystem
 

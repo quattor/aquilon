@@ -80,7 +80,7 @@ class CommandPublish(BrokerCommand):
             run_git(["push", "origin", dbsandbox.name],
                     path=temprepo, logger=logger)
         except ProcessException, e:
-            raise ArgumentError("\n%s%s" % (e.out,e.err))
+            raise ArgumentError("\n%s%s" % (e.out, e.err))
         finally:
             remove_file(filename, logger=logger)
             remove_dir(tempdir, logger=logger)

@@ -45,8 +45,8 @@ class CommandSearchAudit(BrokerCommand):
 
     required_parameters = []
 
-    def render(self, session, logger, keyword, username, command,
-               before, after, return_code, limit, oldest_first, **arguments):
+    def render(self, session, keyword, username, command, before, after,
+               return_code, limit, oldest_first, **arguments):
 
         q = session.query(Xtn)
 

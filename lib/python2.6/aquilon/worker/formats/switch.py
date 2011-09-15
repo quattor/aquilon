@@ -29,7 +29,6 @@
 """Switch formatter."""
 
 
-from aquilon import const
 from aquilon.worker.formats.formatters import ObjectFormatter
 from aquilon.worker.formats.list import ListFormatter
 from aquilon.aqdb.model import Switch

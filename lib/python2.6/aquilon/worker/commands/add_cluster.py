@@ -28,22 +28,14 @@
 # TERMS THAT MAY APPLY.
 
 
-import re
-
-from sqlalchemy.orm.exc import NoResultFound
-
-from aquilon import const
 from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.broker import BrokerCommand, validate_basic
 from aquilon.worker.dbwrappers.branch import get_branch_and_author
 from aquilon.worker.dbwrappers.location import get_location
 from aquilon.worker.templates.cluster import PlenaryCluster
 from aquilon.utils import force_ratio
-from aquilon.aqdb.model import (Personality,
-                                ClusterLifecycle,
-                                MetaCluster, Switch,
-                                Cluster, ComputeCluster,
-                                StorageCluster, EsxCluster)
+from aquilon.aqdb.model import (Personality, ClusterLifecycle, MetaCluster,
+                                Switch, Cluster)
 
 class CommandAddCluster(BrokerCommand):
 
@@ -78,7 +70,7 @@ class CommandAddCluster(BrokerCommand):
                                                      sandbox=sandbox,
                                                      compel=True)
 
-        dbloc= get_location(session, **arguments)
+        dbloc = get_location(session, **arguments)
         if not dbloc:
             raise ArgumentError("Adding a cluster requires a location "
                                 "constraint.")
@@ -90,7 +82,7 @@ class CommandAddCluster(BrokerCommand):
             if self.config.has_option("broker", opt):
                 max_members = self.config.getint("broker", opt)
 
-        clus = Cluster.get_unique(session, cluster, preclude=True)
+        Cluster.get_unique(session, cluster, preclude=True)
         clus_type = Cluster.__mapper__.polymorphic_map[ctype].class_
 
         (down_hosts_pct, dht) = Cluster.parse_threshold(down_hosts_threshold)

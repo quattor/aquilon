@@ -30,7 +30,7 @@
 
 from sqlalchemy.orm import contains_eager
 
-from aquilon.exceptions_ import ArgumentError, UnimplementedError
+from aquilon.exceptions_ import UnimplementedError
 from aquilon.aqdb.model import (DnsDomain, DnsRecord, Fqdn, ARecord,
                                 DnsEnvironment, NetworkEnvironment)
 from aquilon.aqdb.model.dns_domain import parse_fqdn

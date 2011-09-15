@@ -38,7 +38,7 @@ class CommandSearchNextShort(BrokerCommand):
 
     required_parameters = ['short', 'dns_domain']
 
-    def render(self, session, short, dns_domain, start, number, fullname, pack,
+    def render(self, session, short, dns_domain, start, number, pack,
                **arguments):
         dbdns_domain = DnsDomain.get_unique(session, dns_domain, compel=True)
         result = search_next(session=session, cls=Fqdn, attr=Fqdn.name,

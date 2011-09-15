@@ -66,7 +66,7 @@ ObjectFormatter.handlers[ARecord] = ARecordFormatter()
 ObjectFormatter.handlers[Alias] = AliasFormatter()
 
 
-def inaddr_ptr(ip, absolute=False):
+def inaddr_ptr(ip):
     octets = str(ip).split('.')
     octets.reverse()
     return "%s.in-addr.arpa" % '.'.join(octets)

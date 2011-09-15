@@ -33,9 +33,9 @@ from csv import DictReader
 
 import cdb
 
-from aquilon.exceptions_ import ArgumentError, NotFoundException, AquilonError
+from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.aqdb.model import Grn
-from aquilon.worker.locks import lock_queue, SyncKey
+from aquilon.worker.locks import SyncKey
 
 
 def lookup_by_name(config, grn):

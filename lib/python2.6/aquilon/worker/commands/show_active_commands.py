@@ -29,7 +29,6 @@
 """Contains the logic for `aq show active commands`."""
 
 
-import os
 import re
 from logging import DEBUG, INFO
 

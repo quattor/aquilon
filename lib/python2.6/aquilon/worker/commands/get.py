@@ -31,11 +31,12 @@
 
 import os
 
+from aquilon.exceptions_ import (ArgumentError, ProcessException,
+                                 AuthorizationException)
 from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import Sandbox
 from aquilon.aqdb.column_types import AqStr
 from aquilon.worker.processes import run_command, remove_dir
-from aquilon.exceptions_ import ArgumentError, ProcessException
 from aquilon.worker.formats.branch import RemoteSandbox
 
 

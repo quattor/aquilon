@@ -62,8 +62,8 @@ class CommandChangeStatus(BrokerCommand):
             plenary.write(locked=True)
             td = TemplateDomain(dbhost.branch, dbhost.sandbox_author,
                                 logger=logger)
-            out = td.compile(session, only=dbhost.fqdn, locked=True)
-        except IncompleteError, e:
+            td.compile(session, only=dbhost.fqdn, locked=True)
+        except IncompleteError:
             raise ArgumentError("Run aq make for host %s first." % dbhost.fqdn)
         except:
             plenary.restore_stash()

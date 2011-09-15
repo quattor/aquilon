@@ -32,7 +32,7 @@ from sqlalchemy.orm import subqueryload
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.broker import BrokerCommand
-from aquilon.aqdb.model import DnsDomain, DnsMap
+from aquilon.aqdb.model import DnsDomain
 from aquilon.worker.dbwrappers.location import get_location
 
 

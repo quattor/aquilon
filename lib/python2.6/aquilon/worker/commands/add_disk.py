@@ -27,14 +27,13 @@
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
 """Contains the logic for `aq add disk`."""
+
 import re
 
-from sqlalchemy.exc import InvalidRequestError
-
-from aquilon.exceptions_ import ArgumentError, AquilonError, InternalError
+from aquilon.exceptions_ import ArgumentError, InternalError
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.service_instance import get_service_instance
-from aquilon.aqdb.model import Disk, LocalDisk, NasDisk, Service, Machine
+from aquilon.aqdb.model import LocalDisk, NasDisk, Service, Machine
 from aquilon.aqdb.model.disk import controller_types
 from aquilon.worker.templates.machine import PlenaryMachineInfo
 from aquilon.worker.processes import NASAssign

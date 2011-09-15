@@ -29,15 +29,14 @@
 """Contains the logic for `aq show hostiplist`."""
 
 
-from sqlalchemy.orm import (contains_eager, aliased, subqueryload, joinedload,
+from sqlalchemy.orm import (contains_eager, subqueryload, joinedload,
                             lazyload)
 from sqlalchemy.sql import and_
 
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.formats.host import HostIPList
 from aquilon.aqdb.model import (AddressAssignment, Interface, HardwareEntity,
-                                Personality, Machine, Host, Archetype,
-                                PrimaryNameAssociation, ARecord, DnsRecord,
+                                Personality, Machine, Host, Archetype, ARecord,
                                 Fqdn, DnsDomain, NetworkEnvironment, Network)
 
 

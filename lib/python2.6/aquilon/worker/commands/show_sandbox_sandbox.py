@@ -29,10 +29,7 @@
 """Contains the logic for `aq show sandbox --sandbox`."""
 
 
-import os
-
 from aquilon.worker.broker import BrokerCommand
-from aquilon.aqdb.model import Sandbox
 from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.dbwrappers.sandbox import get_sandbox
 from aquilon.worker.formats.branch import AuthoredSandbox

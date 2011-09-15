@@ -33,8 +33,7 @@ from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import ARecord, Fqdn, DnsEnvironment
 from aquilon.aqdb.model.dns_domain import parse_fqdn
-from aquilon.exceptions_ import (UnimplementedError, ArgumentError,
-                                 NotFoundException)
+from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.worker.locks import DeleteKey
 from aquilon.worker.processes import DSDBRunner
 from aquilon.worker.dbwrappers.dns import delete_dns_record
@@ -71,7 +70,7 @@ class CommandDelAddressDNSEnvironment(BrokerCommand):
                     parts.append("ip %s" % ip)
                 raise NotFoundException("DNS Record %s not found." %
                                         ", ".join(parts))
-            except MultipleResutsFound:
+            except MultipleResultsFound:
                 parts = []
                 if fqdn:
                     parts.append(fqdn)

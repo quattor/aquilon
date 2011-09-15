@@ -28,11 +28,9 @@
 # TERMS THAT MAY APPLY.
 """Contains the logic for `aq show hostmachinelist`."""
 
-from sqlalchemy.sql import select
-
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.formats.host import HostMachineList
-from aquilon.aqdb.model import Host, Archetype, Personality
+from aquilon.aqdb.model import Host, Archetype
 
 
 class CommandShowHostMachineList(BrokerCommand):

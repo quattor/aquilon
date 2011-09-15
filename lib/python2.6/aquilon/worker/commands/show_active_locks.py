@@ -41,7 +41,7 @@ class CommandShowActiveLocks(BrokerCommand):
     # Even though this class imports lock_queue, it doesn't take any locks!
     _is_lock_free = True
 
-    def render(self, debug, **arguments):
+    def render(self, **arguments):
         retval = []
         for key in lock_queue.queue[:]:
             description = "Defunct lock: "

@@ -30,7 +30,7 @@
 
 import os
 
-from aquilon.exceptions_ import ArgumentError, NotFoundException
+from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Cluster
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.templates.index import build_index

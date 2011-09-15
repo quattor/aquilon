@@ -33,7 +33,6 @@ from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.host import hostname_to_host
 from aquilon.worker.locks import lock_queue, CompileKey
 from aquilon.aqdb.model import Cluster, Personality
-from aquilon.worker.templates.base import PlenaryCollection
 from aquilon.worker.templates.host import PlenaryHost
 from aquilon.worker.templates.cluster import PlenaryCluster
 
@@ -82,7 +81,7 @@ class CommandUncluster(BrokerCommand):
             cluster_plenary.write(locked=True)
             try:
                 host_plenary.write(locked=True)
-            except IncompleteError, e:
+            except IncompleteError:
                 host_plenary.cleanup(domain=dbhost.branch.name, locked=True)
         except:
             cluster_plenary.restore_stash()

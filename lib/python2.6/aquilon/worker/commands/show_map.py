@@ -29,7 +29,7 @@
 """Contains the logic for `aq show map`."""
 
 
-from aquilon.exceptions_ import UnimplementedError, NotFoundException
+from aquilon.exceptions_ import NotFoundException
 from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import (Personality, Service, ServiceMap,
                                 PersonalityServiceMap)

@@ -31,8 +31,7 @@
 from aquilon.worker.broker import BrokerCommand
 from aquilon.exceptions_ import ArgumentError, ProcessException, IncompleteError
 from aquilon.aqdb.model import (HardwareEntity, AddressAssignment, ARecord,
-                                Fqdn, DnsEnvironment, Network,
-                                NetworkEnvironment)
+                                Fqdn, NetworkEnvironment)
 from aquilon.worker.dbwrappers.dns import delete_dns_record
 from aquilon.worker.dbwrappers.interface import get_interface
 from aquilon.worker.templates.host import PlenaryHost

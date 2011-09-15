@@ -29,7 +29,6 @@
 """Contains the logic for `aq cat --cluster`."""
 
 
-from aquilon.exceptions_ import NotFoundException
 from aquilon.aqdb.model import Cluster
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.templates.cluster import PlenaryClusterObject

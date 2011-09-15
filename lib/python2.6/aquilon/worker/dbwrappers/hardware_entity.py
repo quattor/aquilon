@@ -30,11 +30,10 @@
 
 from sqlalchemy.orm import aliased
 
-from aquilon.exceptions_ import AquilonError, ArgumentError, NotFoundException
+from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import (HardwareEntity, Model, DnsRecord, ARecord,
                                 ReservedName, AddressAssignment, Fqdn,
                                 NetworkEnvironment, Network, Interface, Vendor)
-from aquilon.aqdb.model.dns_domain import parse_fqdn
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.worker.dbwrappers.location import get_location
 from aquilon.worker.dbwrappers.interface import check_ip_restrictions

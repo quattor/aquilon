@@ -53,4 +53,4 @@ class Application(Resource):
 
 application = Application.__table__
 application.primary_key.name = '%s_pk' % (_TN)
-application.info['unique_fields'] = ['name', 'holder_id']
+application.info['unique_fields'] = ['name', 'holder']

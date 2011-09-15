@@ -28,7 +28,6 @@
 # TERMS THAT MAY APPLY.
 
 from ipaddr import IPv4Network
-from sqlalchemy.sql import or_
 
 from aquilon.exceptions_ import ArgumentError, AquilonError
 from aquilon.worker.broker import BrokerCommand

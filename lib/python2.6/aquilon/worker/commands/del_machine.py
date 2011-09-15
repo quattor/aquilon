@@ -40,7 +40,7 @@ class CommandDelMachine(BrokerCommand):
 
     required_parameters = ["machine"]
 
-    def render(self, session, logger, machine, user, dbuser, **arguments):
+    def render(self, session, logger, machine, dbuser, **arguments):
         dbmachine = Machine.get_unique(session, machine, compel=True)
         plenary_machine = PlenaryMachineInfo(dbmachine, logger=logger)
         dbcluster = dbmachine.cluster

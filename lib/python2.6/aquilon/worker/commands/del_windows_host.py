@@ -41,7 +41,6 @@ class CommandDelWindowsHost(CommandDelHost):
 
     def render(self, *args, **kwargs):
         session = kwargs['session']
-        logger = kwargs['logger']
         hostname = kwargs['hostname']
         dbhost = hostname_to_host(session, hostname)
         if dbhost.archetype.name != 'windows':

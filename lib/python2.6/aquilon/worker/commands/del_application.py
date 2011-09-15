@@ -42,8 +42,7 @@ class CommandDelApplication(BrokerCommand):
 
         validate_basic("application", application)
         holder = get_resource_holder(session, hostname, cluster)
-        dbapp = Application.get_unique(session, name=application,
-                                       holder_id=holder.id,
+        dbapp = Application.get_unique(session, name=application, holder=holder,
                                        compel=True)
         del_resource(session, logger, dbapp)
         return

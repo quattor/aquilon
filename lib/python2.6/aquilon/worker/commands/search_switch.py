@@ -31,16 +31,15 @@
 
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.formats.switch import SimpleSwitchList
-from aquilon.aqdb.model import Switch, Model
+from aquilon.aqdb.model import Switch
 from aquilon.worker.dbwrappers.hardware_entity import search_hardware_entity_query
-from aquilon.worker.dbwrappers.location import get_location
 
 
 class CommandSearchSwitch(BrokerCommand):
 
     required_parameters = []
 
-    def render(self, session, logger, switch, type, fullinfo, **arguments):
+    def render(self, session, switch, type, fullinfo, **arguments):
         q = search_hardware_entity_query(session, hardware_type=Switch,
                                          **arguments)
         if type:

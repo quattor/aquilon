@@ -29,7 +29,7 @@
 """Wrappers to make getting and using hosts simpler."""
 
 
-from aquilon.exceptions_ import ArgumentError, NotFoundException
+from aquilon.exceptions_ import NotFoundException
 from aquilon.aqdb.model import Machine
 from aquilon.aqdb.model.dns_domain import parse_fqdn
 
@@ -67,10 +67,10 @@ def get_host_dependencies(session, dbhost):
     if dbhost.cluster and hasattr(dbhost.cluster, 'vm_to_host_ratio') and \
        dbhost.cluster.host_count * len(dbhost.cluster.machines) > \
        dbhost.cluster.vm_count * (len(dbhost.cluster.hosts) - 1):
-           ret.append("Removing vmhost %s from %s cluster %s would exceed "
-                      "vm_to_host_ratio %s (%s VMs:%s hosts)" %
-                      (dbhost.fqdn, dbhost.cluster.cluster_type,
-                       dbhost.cluster.name, dbhost.cluster.vm_to_host_ratio,
-                       len(dbhost.cluster.machines),
-                       len(dbhost.cluster.hosts) - 1))
+        ret.append("Removing vmhost %s from %s cluster %s would exceed "
+                   "vm_to_host_ratio %s (%s VMs:%s hosts)" %
+                   (dbhost.fqdn, dbhost.cluster.cluster_type,
+                    dbhost.cluster.name, dbhost.cluster.vm_to_host_ratio,
+                    len(dbhost.cluster.machines),
+                    len(dbhost.cluster.hosts) - 1))
     return ret

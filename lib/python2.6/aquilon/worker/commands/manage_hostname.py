@@ -34,7 +34,6 @@ from aquilon.worker.dbwrappers.host import hostname_to_host
 from aquilon.worker.templates.host import PlenaryHost
 from aquilon.worker.locks import lock_queue, CompileKey
 from aquilon.exceptions_ import IncompleteError, ArgumentError
-from aquilon.aqdb.model import Domain
 
 
 class CommandManageHostname(BrokerCommand):
@@ -74,7 +73,7 @@ class CommandManageHostname(BrokerCommand):
             # with which we can create a template
             try:
                 plenary_host.write(locked=True)
-            except IncompleteError, e:
+            except IncompleteError:
                 # This template cannot be written, we leave it alone
                 # It would be nice to flag the state in the the host?
                 pass
