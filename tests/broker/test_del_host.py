@@ -250,7 +250,7 @@ class TestDelHost(TestBrokerCommand):
 
     def testdelverarirackhosts(self):
         servers = 0
-        for i in range(101, 110):
+        for i in range(101, 111):
             self.dsdb_expect_delete(self.net.tor_net[2].usable[i - 100])
             hostname = "evh%d.aqd-unittest.ms.com" % (i - 100)
             command = ["del", "host", "--hostname", hostname]

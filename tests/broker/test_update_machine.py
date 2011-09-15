@@ -421,13 +421,29 @@ class TestUpdateMachine(TestBrokerCommand):
                          command)
 
     def testfailchangemetacluster(self):
-        command = ["update_machine", "--machine=evm1", "--cluster=utecl4"]
+        command = ["update_machine", "--machine=evm1", "--cluster=utecl13"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "Cannot move machine to a new "
                          "metacluster: Current metacluster utmc1 "
-                         "does not match new metacluster utmc2",
+                         "does not match new metacluster utmc7",
                          command)
+
+    def testallowchangemetacluster_10(self):
+        command = ["update_machine", "--machine=evm1", "--cluster=utecl13",
+                   "--allow_metacluster_change"]
+        out = self.commandtest(command)
+
+    def testallowchangemetacluster_20(self):
+        command = ["search_machine", "--machine=evm1", "--cluster=utecl13"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "evm1", command)
+
+    def testallowchangemetacluster_30(self):
+        command = ["update_machine", "--machine=evm1", "--cluster=utecl1",
+                   "--allow_metacluster_change"]
+        # restore
+        out = self.commandtest(command)
 
     def testfailfullcluster(self):
         command = ["update_machine", "--machine=evm1", "--cluster=utecl3"]

@@ -240,6 +240,11 @@ class TestCluster(TestBrokerCommand):
             hostfromproto = filter(lambda x: x.fqdn == host, clustobj.hosts)
             self.assertEqual(len(hostfromproto), 1)
 
+    def testclusterutmc7(self):
+        host = "evh10.aqd-unittest.ms.com"
+        cluster = "utecl13"
+        self.successtest(["cluster", "--hostname", host, "--cluster", cluster])
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestCluster)
