@@ -141,6 +141,9 @@ class AuthorizationBroker(object):
                               'poll_switch_switch', 'poll_tor_switch',
                               'make', 'make_cluster']:
                 self.raise_auth_error(principal, action, resource)
+        if dbuser.role.name == 'alias_manager':
+            if action not in ['add_alias', 'del_alias', 'update_alias']:
+                self.raise_auth_error(principal, action, resource)
         return True
 
     def _check_aquilonhost(self, principal, dbuser, action, resource):

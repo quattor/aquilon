@@ -30,7 +30,7 @@
 
 
 from aquilon.exceptions_ import ArgumentError, ProcessException
-from aquilon.aqdb.model import DnsEnvironment, Alias, Fqdn
+from aquilon.aqdb.model import DnsEnvironment, Alias, Fqdn, ReservedName
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.dns import delete_dns_record
 from aquilon.worker.processes import DSDBRunner
@@ -44,10 +44,12 @@ class CommandDelAlias(BrokerCommand):
         dbdns_env = DnsEnvironment.get_unique_or_default(session,
                                                          dns_environment)
         dbdns_rec = Alias.get_unique(session, fqdn=fqdn,
-                                     dns_environment=dbdns_env,
-                                     compel=True)
+                                     dns_environment=dbdns_env, compel=True)
         domain = dbdns_rec.fqdn.dns_domain.name
+
+        old_target = dbdns_rec.target
         delete_dns_record(dbdns_rec)
+        delete_target_if_needed(session, old_target)
 
         session.flush()
 
@@ -59,3 +61,21 @@ class CommandDelAlias(BrokerCommand):
                 raise ArgumentError("Could not delete alias from DSDB: %s" % e)
 
         return
+
+
+def delete_target_if_needed(session, dbtarget):
+    if not dbtarget.dns_domain.restricted:
+        return
+
+    # Make sure the original alias is gone before we reference alias_cnt below
+    session.flush()
+
+    delete_target_fqdn = True
+    for rec in dbtarget.dns_records:
+        if not isinstance(rec, ReservedName) or rec.alias_cnt > 0:
+            delete_target_fqdn = False
+        else:
+            session.delete(rec)
+    if delete_target_fqdn:
+        session.flush()
+        session.delete(dbtarget)

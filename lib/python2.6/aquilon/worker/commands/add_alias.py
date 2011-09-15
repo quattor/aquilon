@@ -28,8 +28,12 @@
 # TERMS THAT MAY APPLY.
 """Contains the logic for `aq add alias`."""
 
-from aquilon.exceptions_ import ArgumentError, ProcessException
-from aquilon.aqdb.model import DnsRecord, Alias, Fqdn, DnsEnvironment
+from sqlalchemy.orm.exc import NoResultFound
+
+from aquilon.exceptions_ import (ArgumentError, ProcessException,
+                                 NotFoundException)
+from aquilon.aqdb.model import (DnsRecord, Alias, Fqdn, DnsEnvironment,
+                                ReservedName)
 from aquilon.aqdb.model.dns_domain import parse_fqdn
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.processes import DSDBRunner
@@ -53,8 +57,7 @@ class CommandAddAlias(BrokerCommand):
 
         DnsRecord.get_unique(session, fqdn=dbfqdn, preclude=True)
 
-        dbtarget = Fqdn.get_unique(session, fqdn=target, compel=True)
-
+        dbtarget = create_target_if_needed(session, target, dbdns_env)
         try:
             db_record = Alias(fqdn=dbfqdn, target=dbtarget, comments=comments)
             session.add(db_record)
@@ -71,3 +74,25 @@ class CommandAddAlias(BrokerCommand):
                 raise ArgumentError("Could not add alias to DSDB: %s" % e)
 
         return
+
+
+def create_target_if_needed(session, target, dbdns_env):
+    (name, target_domain) = parse_fqdn(session, target)
+    q = session.query(Fqdn)
+    q = q.filter_by(dns_environment=dbdns_env)
+    q = q.filter_by(dns_domain=target_domain)
+    q = q.filter_by(name=name)
+    try:
+        dbtarget = q.one()
+    except NoResultFound:
+        if not target_domain.restricted:
+            raise NotFoundException("Target FQDN {0} does not exist in {1:l}."
+                                    .format(target, dbdns_env))
+
+        dbtarget = Fqdn(name=name, dns_domain=target_domain,
+                        dns_environment=dbdns_env)
+        dbtarget_rec = ReservedName(fqdn=dbtarget)
+        session.add(dbtarget)
+        session.add(dbtarget_rec)
+
+    return dbtarget

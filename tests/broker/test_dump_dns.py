@@ -65,6 +65,9 @@ class TestDumpDns(TestBrokerCommand):
         self.matchoutput(out,
                          "Calias2host.aqd-unittest.ms.com:arecord13.aqd-unittest.ms.com",
                          command)
+        self.matchoutput(out,
+                         "Calias2alias.aqd-unittest.ms.com:alias2host.aqd-unittest.ms.com",
+                         command)
         self.matchclean(out, "utcolo", command)
 
     def test_djb_domain(self):
@@ -106,6 +109,9 @@ class TestDumpDns(TestBrokerCommand):
         # CNAME
         self.matchoutput(out,
                          'alias2host.aqd-unittest.ms.com.\tIN\tCNAME\tarecord13.aqd-unittest.ms.com.',
+                         command)
+        self.matchoutput(out,
+                         'alias2alias.aqd-unittest.ms.com.\tIN\tCNAME\talias2host.aqd-unittest.ms.com.',
                          command)
         self.matchclean(out, "utcolo", command)
 

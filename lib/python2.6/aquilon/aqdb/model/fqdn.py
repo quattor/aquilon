@@ -124,19 +124,22 @@ class Fqdn(Base):
         if len(name) + 1 + len(dns_domain.name) > 253:
             raise ArgumentError('The fully qualified domain name is too long.')
 
-    def __init__(self, session=None, name=None, dns_domain=None, fqdn=None,
-                 dns_environment=None, **kwargs):
+    def _check_session(self, session):
         if not session or not isinstance(session, Session):  # pragma: no cover
             raise InternalError("%s needs a session." % self._get_class_label())
 
+    def __init__(self, session=None, name=None, dns_domain=None, fqdn=None,
+                 dns_environment=None, **kwargs):
         if fqdn:
             if name or dns_domain:  # pragma: no cover
                 raise TypeError("fqdn and name/dns_domain should not be mixed")
+            self._check_session(session)
             (name, dns_domain) = parse_fqdn(session, fqdn)
 
         self.check_name(name, dns_domain)
 
         if not isinstance(dns_environment, DnsEnvironment):
+            self._check_session(session)
             dns_environment = DnsEnvironment.get_unique_or_default(session,
                                                                    dns_environment)
 
