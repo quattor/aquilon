@@ -39,7 +39,7 @@ from twisted.python import log
 from aquilon.config import Config
 from aquilon.exceptions_ import (ArgumentError, AuthorizationException,
                                  NotFoundException, UnimplementedError,
-                                 PartialError)
+                                 PartialError, AquilonError)
 from aquilon.worker.authorization import AuthorizationBroker
 from aquilon.worker.messages import StatusCatalog
 from aquilon.worker.logger import RequestLogger
