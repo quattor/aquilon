@@ -271,7 +271,9 @@ class TestAddVirtualHardware(TestBrokerCommand):
             self.matchoutput(out, "Cpu: xeon_2500 x 1", command)
             self.matchoutput(out, "Memory: 8192 MB", command)
             self.searchoutput(out,
-                              r"Interface: eth0 00:50:56:01:20:%02x \[boot, default_route\]" %
+                              r"Interface: eth0 00:50:56:01:20:%02x \[boot, default_route\]"
+                              r"\s+Type: public"
+                              r"\s+Vendor: utvirt Model: default" %
                               (i - 1),
                               command)
 
@@ -296,7 +298,7 @@ class TestAddVirtualHardware(TestBrokerCommand):
                               command)
             self.searchoutput(out,
                               r'"cards/nic" = nlist\(\s*'
-                              r'"eth0", create\("hardware/nic/generic/generic_nic",\s*'
+                              r'"eth0", create\("hardware/nic/utvirt/default",\s*'
                               r'"boot", true,\s*'
                               r'"hwaddr", "00:50:56:01:20:%02x"\s*\)\s*\);'
                               % (i - 1),
@@ -368,6 +370,8 @@ class TestAddVirtualHardware(TestBrokerCommand):
                           r'create\("hardware/cpu/intel/xeon_2500"\),\s*'
                           r'create\("hardware/cpu/intel/xeon_2500"\)\s*\);',
                           command)
+        # Updating the model of the machine changes the NIC model from
+        # utvirt/default to generic/generic_nic
         self.searchoutput(out,
                           r'"cards/nic" = nlist\(\s*'
                           r'"eth0", create\("hardware/nic/generic/generic_nic",\s*'
@@ -392,6 +396,14 @@ class TestAddVirtualHardware(TestBrokerCommand):
         command = ["update_machine", "--machine=evm1", "--model=utmedium",
                    "--cpucount=1", "--memory=8192"]
         self.noouttest(command)
+
+    def test_560_del_nic_model(self):
+        command = ["del", "model", "--model", "default", "--vendor", "utvirt"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "Model utvirt/default is still in use and cannot be "
+                         "deleted.",
+                         command)
 
     def test_600_makecluster(self):
         command = ["make_cluster", "--cluster=utecl1"]

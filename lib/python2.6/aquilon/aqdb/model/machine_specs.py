@@ -70,13 +70,19 @@ class MachineSpecs(Base):
     controller_type = Column(Enum(64, controller_types), nullable=False)
 
     nic_count = Column(Integer, nullable=False, default=2)
+    nic_model_id = Column(Integer, ForeignKey('model.id',
+                                              name='mach_spec_nic_model_fk'),
+                          nullable=False)
 
     creation_date = Column('creation_date', DateTime, default=datetime.now)
     comments = Column('comments', String(255), nullable=True)
 
     model = relation(Model, innerjoin=True,
+                     primaryjoin=model_id == Model.id,
                      backref=backref('machine_specs', uselist=False))
     cpu = relation(Cpu, innerjoin=True)
+    nic_model = relation(Model,
+                         primaryjoin=nic_model_id == Model.id)
 
     @property
     def disk_name(self):

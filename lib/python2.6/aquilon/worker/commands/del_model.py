@@ -29,9 +29,10 @@
 """Contains the logic for `aq del model`."""
 
 
-from aquilon.exceptions_ import ArgumentError, NotFoundException
+from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.broker import BrokerCommand
-from aquilon.aqdb.model import Vendor, Model, HardwareEntity
+from aquilon.aqdb.model import (Vendor, Model, HardwareEntity, MachineSpecs,
+                                Interface)
 
 
 class CommandDelModel(BrokerCommand):
@@ -43,10 +44,25 @@ class CommandDelModel(BrokerCommand):
         dbmodel = Model.get_unique(session, name=model, vendor=dbvendor,
                                    compel=True)
 
-        hw = session.query(HardwareEntity).filter_by(model=dbmodel).first()
-        if hw:
-            raise ArgumentError("Model %s is still in use and cannot be "
-                                "deleted." % dbmodel.name)
+
+        if dbmodel.machine_type == 'nic':
+            q = session.query(Interface)
+            q = q.filter_by(model=dbmodel)
+            if q.first():
+                raise ArgumentError("{0} is still in use and cannot be "
+                                    "deleted.".format(dbmodel))
+            q = session.query(MachineSpecs)
+            q = q.filter_by(nic_model=dbmodel)
+            if q.first():
+                raise ArgumentError("{0} is still referenced by machine models and "
+                                    "cannot be deleted.".format(dbmodel))
+        else:
+            q = session.query(HardwareEntity)
+            q = q.filter_by(model=dbmodel)
+            if q.first():
+                raise ArgumentError("{0} is still in use and cannot be "
+                                    "deleted.".format(dbmodel))
+
         if dbmodel.machine_specs:
             # FIXME: Log some details...
             logger.info("Before deleting model %s %s '%s', "

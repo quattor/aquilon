@@ -65,8 +65,8 @@ class TestAddMachine(TestBrokerCommand):
         # more machines defined...
         command = "del model --model hs21-8853l5u --vendor ibm"
         out = self.badrequesttest(command.split(" "))
-        self.matchoutput(out, "Model hs21-8853l5u is still in use and cannot "
-                         "be deleted.", command)
+        self.matchoutput(out, "Model ibm/hs21-8853l5u is still in use and "
+                         "cannot be deleted.", command)
 
     def testverifycatut3c5n10(self):
         command = "cat --machine ut3c5n10"

@@ -127,6 +127,14 @@ class CommandUpdateMachine(BrokerCommand):
                 raise ArgumentError("Cannot change machine from %s to %s." %
                                     (dbmachine.model.machine_type,
                                      dbmodel.machine_type))
+
+            old_nic_model = dbmachine.model.nic_model
+            new_nic_model = dbmodel.nic_model
+            if old_nic_model != new_nic_model:
+                for iface in dbmachine.interfaces:
+                    if iface.model == old_nic_model:
+                        iface.model = new_nic_model
+
             dbmachine.model = dbmodel
 
         if cpuname or cpuvendor or cpuspeed is not None:

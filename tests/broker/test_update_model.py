@@ -59,7 +59,8 @@ class TestUpdateModel(TestBrokerCommand):
     def test_100_updateexisting(self):
         command = ["update_model", "--model=utmedium", "--vendor=utvendor",
                    "--cpuname=utcpu", "--cpunum=1", "--memory=4096", "--nics=1",
-                   "--disksize=45", "--diskcontroller=scsi"]
+                   "--disksize=45", "--diskcontroller=scsi",
+                   "--comments", "New model comments"]
         self.noouttest(command)
 
     def test_110_verifyspecs(self):
@@ -71,6 +72,7 @@ class TestUpdateModel(TestBrokerCommand):
         self.matchoutput(out, "Memory: 4096 MB", command)
         self.matchoutput(out, "NIC count: 1", command)
         self.matchoutput(out, "Disk: sda 45 GB scsi (nas)", command)
+        self.matchoutput(out, "Comments: New model comments", command)
 
     def test_120_verifymachine(self):
         command = ["cat", "--machine=evm1"]
@@ -200,6 +202,44 @@ class TestUpdateModel(TestBrokerCommand):
                          "include { 'hardware/machine/utvendor/utmedium' }",
                          command)
 
+    def test_340_evm1_utlarge(self):
+        command = ["update", "machine", "--machine", "evm1", "--model", "utlarge"]
+        self.noouttest(command)
+
+    def test_341_verify_update(self):
+        command = ["cat", "--machine", "evm1"]
+        out = self.commandtest(command)
+        self.searchoutput(out,
+                          r'"cards/nic" = nlist\(\s*'
+                          r'"eth0", create\("hardware/nic/generic/generic_nic",\s*'
+                          r'"boot", true,\s*'
+                          r'"hwaddr", "00:50:56:01:20:00"\s*\)\s*\);',
+                          command)
+
+    def test_342_update_nic(self):
+        command = ["update", "model", "--model", "utlarge", "--vendor", "utvendor",
+                   "--nicvendor", "utvirt", "--nicmodel", "default"]
+        self.noouttest(command)
+
+    def test_343_verify_model_update(self):
+        command = ["show", "model", "--model", "utlarge"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "NIC Vendor: utvirt Model: default", command)
+
+    def test_343_verify_machine(self):
+        command = ["cat", "--machine", "evm1"]
+        out = self.commandtest(command)
+        self.searchoutput(out,
+                          r'"cards/nic" = nlist\(\s*'
+                          r'"eth0", create\("hardware/nic/utvirt/default",\s*'
+                          r'"boot", true,\s*'
+                          r'"hwaddr", "00:50:56:01:20:00"\s*\)\s*\);',
+                          command)
+
+    def test_344_change_evm1_back(self):
+        command = ["update", "machine", "--machine", "evm1", "--model", "utmedium"]
+        self.noouttest(command)
+
     def test_700_failnospecs(self):
         command = ["update_model", "--model=utblade", "--vendor=aurora_vendor",
                    "--memory=8192"]
@@ -214,8 +254,9 @@ class TestUpdateModel(TestBrokerCommand):
     def test_800_addspecs(self):
         command = ["update_model", "--model=utblade", "--vendor=aurora_vendor",
                    "--cpuname=utcpu", "--cpunum=2", "--memory=8192",
-                   "--disktype=local", "--diskcontroller=scsi",
-                   "--disksize=30", "--nics=2", "--leave_existing"]
+                   "--disktype=local", "--diskcontroller=scsi", "--disksize=30",
+                   "--nics=2", "--nicmodel=generic_nic", "--nicvendor=generic",
+                   "--leave_existing"]
         self.noouttest(command)
 
     def test_810_verifyspecs(self):

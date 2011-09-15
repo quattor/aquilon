@@ -33,7 +33,8 @@ from sqlalchemy.orm.session import object_session
 
 from aquilon.exceptions_ import ArgumentError, UnimplementedError
 from aquilon.worker.broker import BrokerCommand
-from aquilon.aqdb.model import Vendor, Model, Cpu, MachineSpecs, Machine, Disk
+from aquilon.aqdb.model import (Vendor, Model, Cpu, MachineSpecs, Machine, Disk,
+                                HardwareEntity, Interface)
 from aquilon.worker.templates.base import PlenaryCollection
 from aquilon.worker.templates.machine import PlenaryMachineInfo
 
@@ -44,11 +45,12 @@ class CommandUpdateModel(BrokerCommand):
 
     # Quick hash of the arguments this method takes to the corresponding
     # aqdb label.
-    argument_lookup = {'cpuname':'name', 'cpuvendor':'vendor',
-                       'cpuspeed':'speed', 'cpunum':'cpu_quantity',
-                       'memory':'memory', 'disktype':'disk_type',
+    argument_lookup = {'cpuname': 'name', 'cpuvendor': 'vendor',
+                       'cpuspeed': 'speed', 'cpunum': 'cpu_quantity',
+                       'memory': 'memory', 'disktype': 'disk_type',
                        'diskcontroller': 'controller_type',
-                       'disksize': 'disk_capacity', 'nics':'nic_count'}
+                       'disksize': 'disk_capacity', 'nics':'nic_count',
+                       'nicmodel': 'name', 'nicvendor': 'vendor'}
 
     def render(self, session, logger, model, vendor, newmodel, newvendor,
                comments, leave_existing, **arguments):
@@ -57,7 +59,8 @@ class CommandUpdateModel(BrokerCommand):
             # for simple equality checks below and removes the need to
             # call refresh().
             if arg in ['newmodel', 'newvendor', 'machine_type',
-                       'cpuname', 'cpuvendor', 'disktype', 'diskcontroller']:
+                       'cpuname', 'cpuvendor', 'disktype', 'diskcontroller',
+                       'nicmodel', 'nicvendor']:
                 if value is not None:
                     arguments[arg] = value.lower().strip()
 
@@ -108,6 +111,10 @@ class CommandUpdateModel(BrokerCommand):
         cpu_info = dict([(self.argument_lookup[arg], arguments[arg])
                          for arg in cpu_args])
         cpu_values = [v for v in cpu_info.values() if v is not None]
+        nic_args = ['nicmodel', 'nicvendor']
+        nic_info = dict([(self.argument_lookup[arg], arguments[arg])
+                         for arg in nic_args])
+        nic_values = [v for v in nic_info.values() if v is not None]
         spec_args = ['cpunum', 'memory', 'disktype', 'diskcontroller',
                      'disksize', 'nics']
         specs = dict([(self.argument_lookup[arg], arguments[arg])
@@ -115,15 +122,20 @@ class CommandUpdateModel(BrokerCommand):
         spec_values = [v for v in specs.values() if v is not None]
 
         if not dbmodel.machine_specs:
-            if cpu_values or spec_values:
+            if cpu_values or nic_values or spec_values:
                 if not cpu_values or len(spec_values) < len(spec_args):
                     raise ArgumentError("Missing required parameters to store "
                                         "machine specs for the model.  Please "
                                         "give all CPU, disk, RAM, and NIC "
                                         "count information.")
                 dbcpu = Cpu.get_unique(session, compel=True, **cpu_info)
+                if nic_values:
+                    dbnic = Model.get_unique(session, compel=True,
+                                             machine_type='nic', **nic_info)
+                else:
+                    dbnic = Model.default_nic_model(session)
                 dbmachine_specs = MachineSpecs(model=dbmodel, cpu=dbcpu,
-                                               **specs)
+                                               nic_model=dbnic, **specs)
                 session.add(dbmachine_specs)
 
         # Anything below that updates specs should have been verified above.
@@ -154,6 +166,11 @@ class CommandUpdateModel(BrokerCommand):
                                        attr=self.argument_lookup[arg],
                                        value=arguments[arg],
                                        fix_existing=fix_existing)
+
+        if nic_values:
+            dbnic = Model.get_unique(session, compel=True, **nic_info)
+            self.update_interface_specs(model=dbmodel, dbmachines=dbmachines,
+                                        value=dbnic, fix_existing=fix_existing)
 
         if arguments['nics'] is not None:
             dbmodel.machine_specs.nic_count = arguments['nics']
@@ -197,3 +214,20 @@ class CommandUpdateModel(BrokerCommand):
                 dbmachines.add(dbdisk.machine)
 
         setattr(model.machine_specs, attr, value)
+
+    def update_interface_specs(self, model, dbmachines, value=None,
+                               fix_existing=False):
+        session = object_session(model)
+        if fix_existing:
+            old_nic_model = model.machine_specs.nic_model
+            q = session.query(Interface)
+            # Skip interfaces where the model was set explicitely to something
+            # other than the default
+            q = q.filter(Interface.model == old_nic_model)
+            q = q.join(HardwareEntity)
+            q = q.filter(HardwareEntity.model == model)
+            for dbiface in q.all():
+                dbiface.model = value
+                dbmachines.add(dbiface.hardware_entity)
+
+        model.machine_specs.nic_model = value

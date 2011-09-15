@@ -1070,6 +1070,8 @@
       <optgroup name="optional_opts">
          <option name="cpuvendor" type="string">CPU vendor, if the name is not unique</option>
          <option name="cpuspeed" type="int">CPU speed, if the name is not unique</option>
+         <option name="nicmodel" type="string">Default model of network interfaces</option>
+         <option name="nicvendor" type="string">NIC vendor, if the model name is not unique</option>
          <option name="comments" type="string">Comments</option>
       </optgroup>
       <transport method="put" path="hardware/model/%(vendor)s/%(model)s" />
@@ -1108,6 +1110,8 @@
          <option name="diskcontroller" type="string">controller type (sata, scsi, etc.)</option>
          <option name="disksize" type="int">installed disk capacity (GB)</option>
          <option name="nics" type="int">number of NIC interfaces</option>
+         <option name="nicmodel" type="string">NIC model name</option>
+         <option name="nicvendor" type="string">NIC vendor</option>
          <option name="comments" type="string">Comments</option>
          <option name="leave_existing" type="boolean">Do not update machines using the old defaults to the new values</option>
       </optgroup>
