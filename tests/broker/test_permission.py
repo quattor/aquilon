@@ -226,13 +226,13 @@ class TestPermission(TestBrokerCommand):
                          "DNS Domain aqd-unittest.ms.com not found.",
                          command)
 
-    def testautherror(self):
-        # Need to demote the current user to test an auth failure.
+    def test_autherror_100(self):
+        self.demote_current_user()
+
+    def test_autherror_200(self):
         principal = self.config.get('unittest', 'principal')
         user = self.config.get('unittest', 'user')
         realm = self.config.get('unittest', 'realm')
-        command = ["permission", "--role=nobody", "--principal", principal]
-        self.noouttest(command)
 
         command = ["permission", "--role=aqd_admin", "--principal", principal]
         err = self.unauthorizedtest(command, auth=True)
@@ -243,16 +243,8 @@ class TestPermission(TestBrokerCommand):
                          (principal, user, realm, message),
                          command)
 
-        # Now fix it.
-        srcdir = self.config.get("broker", "srcdir")
-        add_admin = os.path.join(srcdir, "tests", "aqdb", "add_admin.py")
-        env = os.environ.copy()
-        env['AQDCONF'] = self.config.baseconfig
-        p = Popen([add_admin], stdout=PIPE, stderr=PIPE, env=env)
-        (out, err) = p.communicate()
-        self.assertEqual(p.returncode, 0,
-                         "Failed to restore admin privs '%s', '%s'." %
-                         (out, err))
+    def test_autherror_900(self):
+        self.promote_current_user()
 
 
 if __name__=='__main__':

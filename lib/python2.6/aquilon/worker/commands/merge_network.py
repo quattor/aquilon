@@ -42,8 +42,8 @@ class CommandMergeNetwork(BrokerCommand):
 
     requierd_parameters = ["ip"]
 
-    def render(self, session, ip, netmask, prefixlen, network_environment,
-               **arguments):
+    def render(self, session, dbuser,
+               ip, netmask, prefixlen, network_environment, **arguments):
         if netmask:
             # There must me a faster way, but this is the easy one
             net = IPv4Network("127.0.0.0/%s" % netmask)
@@ -53,6 +53,7 @@ class CommandMergeNetwork(BrokerCommand):
 
         dbnet_env = NetworkEnvironment.get_unique_or_default(session,
                                                              network_environment)
+        self.az.check_network_environment(dbuser, dbnet_env)
 
         dbnetwork = get_net_id_from_ip(session, ip,
                                        network_environment=dbnet_env)

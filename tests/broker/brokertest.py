@@ -250,7 +250,7 @@ class TestBrokerCommand(unittest.TestCase):
                              (command, out))
         return err
 
-    def unauthorizedtest(self, command, auth=False, **kwargs):
+    def unauthorizedtest(self, command, auth=False, msgcheck=True, **kwargs):
         (p, out, err) = self.runcommand(command, auth=auth, **kwargs)
         self.assertEqual(p.returncode, 4,
                          "Return code for %s was %d instead of %d"
@@ -264,8 +264,9 @@ class TestBrokerCommand(unittest.TestCase):
                         "STDERR for %s did not include Unauthorized:"
                         "\n@@@\n'%s'\n@@@\n" %
                         (command, err))
-        self.searchoutput(err, r"Unauthorized (anonymous )?access attempt",
-                          command)
+        if msgcheck:
+            self.searchoutput(err, r"Unauthorized (anonymous )?access attempt",
+                              command)
         return err
 
     def internalerrortest(self, command, **kwargs):
@@ -614,6 +615,21 @@ class TestBrokerCommand(unittest.TestCase):
                             "Not expecting %s to exist after running %s." %
                             (f, command))
 
+    def demote_current_user(self, role="nobody"):
+        principal = self.config.get('unittest', 'principal')
+        command = ["permission", "--role", role, "--principal", principal]
+        self.noouttest(command)
+
+    def promote_current_user(self):
+        srcdir = self.config.get("broker", "srcdir")
+        add_admin = os.path.join(srcdir, "tests", "aqdb", "add_admin.py")
+        env = os.environ.copy()
+        env['AQDCONF'] = self.config.baseconfig
+        p = Popen([add_admin], stdout=PIPE, stderr=PIPE, env=env)
+        (out, err) = p.communicate()
+        self.assertEqual(p.returncode, 0,
+                         "Failed to restore admin privs '%s', '%s'." %
+                         (out, err))
 
 class DummyIP(IPv4Address):
     def __init__(self, *args, **kwargs):

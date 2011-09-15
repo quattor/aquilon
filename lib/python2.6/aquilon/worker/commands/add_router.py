@@ -40,10 +40,11 @@ class CommandAddRouter(BrokerCommand):
 
     required_parameters = ["fqdn"]
 
-    def render(self, session, fqdn, building, ip, network_environment, comments,
-               **arguments):
+    def render(self, session, dbuser,
+               fqdn, building, ip, network_environment, comments, **arguments):
         dbnet_env = NetworkEnvironment.get_unique_or_default(session,
                                                              network_environment)
+        self.az.check_network_environment(dbuser, dbnet_env)
 
         if building:
             dbbuilding = Building.get_unique(session, building, compel=True)

@@ -85,9 +85,7 @@ class AuthorizationBroker(object):
                 raise AuthorizationException(
                     "Must have the gatekeeper or aqd_admin role to %s." %
                     action)
-        if action in ['flush', 'add_network', 'del_network',
-                      'split_network', 'merge_network',
-                      'add_router', 'del_router']:
+        if action in ['flush']:
             if dbuser.role.name not in ['aqd_admin']:
                 raise AuthorizationException(
                     "Must have the aqd_admin role to %s." % action)
@@ -157,3 +155,27 @@ class AuthorizationBroker(object):
         if resource.startswith("/host/%s/" % m.group(1)):
             return True
         return False
+
+    def check_network_environment(self, dbuser, dbnet_env):
+        """More hacky authorization code.
+
+        This bit is a helper for restricting people from touching networks
+        that are maintained in other systems.  That restriction can be
+        overridden for a configured list of roles (like aqd_admin) for
+        emergencies.
+
+        Something saner should be done here when we have better entitlements.
+
+        """
+        if not dbnet_env.is_default:
+            # rely on standard authorization for all other environments
+            return
+        default = self.config.get("site", "default_network_environment")
+        conf_value = self.config.get("site", "change_default_netenv_roles")
+        allowed_roles = conf_value.strip().split()
+        if dbuser.role.name not in allowed_roles:
+            raise AuthorizationException("Only users with %s can modify "
+                                         "networks in the %s network "
+                                         "environment." %
+                                         (allowed_roles, default))
+        return

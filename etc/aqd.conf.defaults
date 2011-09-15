@@ -200,6 +200,8 @@ klist = /ms/dist/aurora/bin/klist
 # Site specific settings
 default_dns_environment = internal
 default_network_environment = internal
+# Space-separated list of user roles that can add and delete internal networks
+change_default_netenv_roles = aqd_admin
 
 # This can be used for any components that use python logging
 # Valid values are INFO, DEBUG, and WARNING
