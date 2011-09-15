@@ -67,17 +67,27 @@ class TestAddHost(TestBrokerCommand):
                         "--personality", "compileserver"])
         self.dsdb_verify()
 
+    def testaddjackgrn(self):
+        command = ["add", "grn", "--grn", "grn:/example/cards",
+                   "--eon_id", "4"]
+        self.noouttest(command)
+
     def testaddjackhost(self):
         ip = self.net.unknown[0].usable[17]
         self.dsdb_expect_add("jack.cards.example.com", ip, "eth0", ip.mac)
         self.noouttest(["add", "host",
                         "--hostname", "jack.cards.example.com",
-                        "--ip", ip,
+                        "--ip", ip, "--grn", "grn:/example/cards",
                         "--machine", "jack", "--domain", "unittest",
                         "--buildstatus", "build", "--archetype", "aquilon",
                         "--osname", "linux", "--osversion", "5.0.1-x86_64",
                         "--personality", "compileserver"])
         self.dsdb_verify()
+
+    def testverifyjackgrn(self):
+        command = "show host --hostname jack.cards.example.com"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "GRN: grn:/example/cards", command)
 
     def testmachinereuse(self):
         ip = self.net.unknown[0].usable[-1]

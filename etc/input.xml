@@ -318,6 +318,8 @@
          <option name="server_of_service" type="string">server of service (single service only)</option>
          <option name="server_of_instance" type="string">server of service instance (single instance only)</option>
          <option name="exact_location" type="flag">match the location exactly</option>
+         <option name="grn" type="string">match by GRN</option>
+         <option name="eon_id" type="int">match by EON ID</option>
          <option name="all" type="flag">list all systems</option>
       </optgroup>
       <optgroup name="search_host_prefs" mandatory="False">
@@ -802,6 +804,8 @@
          <option name="ipalgorithm" type="string">Algorithm for automatically choosing an IP.</option>
          <option name="zebra_interfaces" type="string">Interfaces to configure Zebra on</option>
          <option name="comments" type="string">Comments</option>
+         <option name="grn" type="string" conflicts="eon_id">GRN as string</option>
+         <option name="eon_id" type="int" conflicts="grn">Numeric EON ID</option>
       </optgroup>
       <transport method="put" path="host/%(hostname)s" />
    </command>
@@ -842,6 +846,8 @@
          <option name="personality" type="string">Personality name.  Defaults to 'inventory'.</option>
          <option name="ipalgorithm" type="string">Algorithm for automatically choosing an IP.</option>
          <option name="zebra_interfaces" type="string">Interfaces to configure Zebra on</option>
+         <option name="grn" type="string" conflicts="eon_id">GRN as string</option>
+         <option name="eon_id" type="int" conflicts="grn">Numeric EON ID</option>
       </optgroup>
       <transport method="put" path="aquilon_host/%(hostname)s" />
    </command>
@@ -879,6 +885,8 @@
             <option name="ipfromsystem" type="string" conflicts="ip ipfromip autoip">choose IP address in subnet of system</option>
             <option name="autoip" type="flag" conflicts="ip ipfromip ipfromsystem">choose IP address based on mac/switch</option>
          </optgroup>
+         <option name="grn" type="string" conflicts="eon_id">GRN as string</option>
+         <option name="eon_id" type="int" conflicts="grn">Numeric EON ID</option>
       </optgroup>
       <transport method="put" path="windows_host/%(hostname)s" />
    </command>
@@ -4104,5 +4112,96 @@
       <transport method="delete" path="resource/intervention/%(intervention)s" />
    </command>
 
+   <command name="add_grn">
+      Add a new GRN.
+      <optgroup name="add_grn_required" mandatory="true" fields="all">
+         <option name="grn" type="string">GRN as string</option>
+         <option name="eon_id" type="int">Numeric EON ID</option>
+      </optgroup>
+      <optgroup name="add_grn_optional" mandatory="false" fields="any">
+         <option name="disabled" type="flag">GRN is disabled and cannot be added to new systems</option>
+      </optgroup>
+
+      <transport method="put" path="grn/%(eon_id)s/%(grn)s" />
+   </command>
+
+   <command name="del_grn">
+      Delete a GRN.
+      <optgroup name="del_grn_required" mandatory="true" fields="any">
+         <option name="grn" type="string" conflicts="eon_id">GRN to delete</option>
+         <option name="eon_id" type="int" conflicts="grn">Numeric EON ID to delete</option>
+      </optgroup>
+
+      <transport method="delete" path="grn" />
+   </command>
+
+   <command name="update_grn">
+      Update a GRN.
+      <optgroup name="update_grn_required" mandatory="true" fields="any">
+         <option name="grn" type="string" conflicts="eon_id">GRN to update</option>
+         <option name="eon_id" type="int" conflicts="grn">Numeric EON ID to update</option>
+      </optgroup>
+
+      <optgroup name="update_grn_optional" mandatory="false" fields="any">
+         <option name="disabled" type="boolean">GRN is disabled and cannot be mapped to new systems</option>
+	 <option name="rename_to" type="string">Rename GRN</option>
+      </optgroup>
+
+      <transport method="post" path="grn" />
+   </command>
+
+   <command name="show_grn">
+      Display a GRN.
+      <optgroup name="update_grn_required" mandatory="true" fields="any">
+         <option name="grn" type="string">GRN to display</option>
+         <option name="eon_id" type="int">Numeric EON ID to display</option>
+         <option name="all" type="flag">Show all GRNs</option>
+      </optgroup>
+
+      <transport method="get" path="grn" />
+   </command>
+
+   <command name="refresh_grns">
+      Refresh the mapping from GRNs to EON IDs.
+      <transport method="post" path="grn/command/refresh"/>
+   </command>
+
+   <command name="map_grn">
+      Map a given GRN to a host or a personality. The affected host(s) must be
+      recompiled for the changes to take effect.
+      <optgroup name="map_grn_grn" mandatory="true" fields="any">
+         <option name="grn" type="string" conflicts="eon_id">GRN as string</option>
+         <option name="eon_id" type="int" conflicts="grn">Numeric EON ID</option>
+      </optgroup>
+      <optgroup name="map_grn_target" mandatory="true" fields="any">
+         <option name="hostname" type="string" conflicts="list personality">Host</option>
+         <option name="list" type="file" conflicts="hostname personality">List of hosts</option>
+         <option name="personality" type="string" conflicts="hostname list">Personality</option>
+      </optgroup>
+      <optgroup name="map_grn_optional" mandatory="false" fields="any">
+         <option name="archetype" type="string">Archetype of the personality</option>
+      </optgroup>
+
+      <transport method="post" path="grn/command/map"/>
+   </command>
+
+   <command name="unmap_grn">
+      Unmap a given GRN from a host or a personality. The affected host(s) must be
+      recompiled for the changes to take effect.
+      <optgroup name="unmap_grn_grn" mandatory="true" fields="any">
+         <option name="grn" type="string" conflicts="eon_id">GRN as string</option>
+         <option name="eon_id" type="int" conflicts="grn">Numeric EON ID</option>
+      </optgroup>
+      <optgroup name="unmap_grn_target" mandatory="true" fields="any">
+         <option name="hostname" type="string" conflicts="list personality">Host</option>
+         <option name="list" type="file" conflicts="hostname personality">List of hosts</option>
+         <option name="personality" type="string" conflicts="hostname list">Personality</option>
+      </optgroup>
+      <optgroup name="unmap_grn_optional" mandatory="false" fields="any">
+         <option name="archetype" type="string">Archetype of the personality</option>
+      </optgroup>
+
+      <transport method="post" path="grn/command/unmap"/>
+   </command>
 
 </commandline>

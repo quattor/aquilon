@@ -78,7 +78,8 @@ class CompileKey(LockKey):
         elif self.profile:
             raise InternalError("Compile lock request for %s missing domain." %
                                 self.profile)
-        LockKey.__init__(self, components, logger=logger, loglevel=loglevel)
+        LockKey.__init__(self, components, logger=logger, loglevel=loglevel,
+                         lock_queue=lock_queue)
 
 
 class DeleteKey(LockKey):
@@ -88,7 +89,8 @@ class DeleteKey(LockKey):
         components = ["delete"]
         if self.group:
             components.append(self.group)
-        LockKey.__init__(self, components, logger=logger, loglevel=loglevel)
+        LockKey.__init__(self, components, logger=logger, loglevel=loglevel,
+                         lock_queue=lock_queue)
 
 
 class SyncKey(LockKey):
@@ -98,4 +100,5 @@ class SyncKey(LockKey):
         components = ["sync"]
         if self.data:
             components.append(self.data)
-        LockKey.__init__(self, components, logger=logger, loglevel=loglevel)
+        LockKey.__init__(self, components, logger=logger, loglevel=loglevel,
+                         lock_queue=lock_queue)

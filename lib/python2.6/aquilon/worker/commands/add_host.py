@@ -33,6 +33,7 @@ from aquilon.exceptions_ import (ArgumentError, ProcessException, AquilonError,
                                  InternalError)
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.branch import get_branch_and_author
+from aquilon.worker.dbwrappers.grn import lookup_grn
 from aquilon.worker.dbwrappers.hardware_entity import parse_primary_name
 from aquilon.worker.dbwrappers.interface import generate_ip, assign_address
 from aquilon.aqdb.model import (Domain, Host, OperatingSystem, Archetype,
@@ -50,7 +51,8 @@ class CommandAddHost(BrokerCommand):
 
     def render(self, session, logger, hostname, machine, archetype, domain,
                sandbox, osname, osversion, buildstatus, personality, comments,
-               zebra_interfaces, skip_dsdb_check=False, **arguments):
+               zebra_interfaces, grn, eon_id, skip_dsdb_check=False,
+               **arguments):
         (dbbranch, dbauthor) = get_branch_and_author(session, logger,
                                                      domain=domain,
                                                      sandbox=sandbox,
@@ -118,6 +120,12 @@ class CommandAddHost(BrokerCommand):
                       sandbox_author=dbauthor, personality=dbpersonality,
                       status=dbstatus, operating_system=dbos, comments=comments)
         session.add(dbhost)
+
+        if grn or eon_id:
+            dbgrn = lookup_grn(session, grn, eon_id, logger=logger,
+                               config=self.config)
+            dbhost.grns.append(dbgrn)
+
         session.flush()
 
         plenaries = PlenaryCollection(logger=logger)

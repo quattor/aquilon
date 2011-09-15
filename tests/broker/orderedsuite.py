@@ -237,6 +237,7 @@ from test_client_failure import TestClientFailure
 from test_client_bypass import TestClientBypass
 from test_audit import TestAudit
 from test_usecase_database import TestUsecaseDatabase
+from test_grns import TestGrns
 from test_stop import TestBrokerStop
 
 
@@ -290,6 +291,7 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestBindESXCluster, TestChangeClusterStatus, TestRebindESXCluster,
                 TestMake,
                 TestAddStaticRoute,
+                TestGrns,
                 TestRebindMetaCluster,
                 TestAddVirtualHardware, TestAdd10GigHardware,
                 TestUnbindClient, TestRebindClient, TestReconfigure,

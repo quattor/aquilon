@@ -49,7 +49,7 @@ from aquilon.worker.formats.formatters import ResponseFormatter
 from aquilon.worker.dbwrappers.user_principal import (
         get_or_create_user_principal)
 from aquilon.worker.dbwrappers.resources import add_resource, del_resource
-from aquilon.worker.locks import lock_queue
+from aquilon.locks import LockKey
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
 from aquilon.worker.templates.domain import TemplateDomain
 from aquilon.worker.services import Chooser
@@ -417,7 +417,7 @@ class BrokerCommand(object):
     # enough for most commands to set the _is_lock_free flag used
     # above.
     #
-    # If the module has a Plenary class or the lock_queue imported it
+    # If the module has a Plenary class or a LockKey class imported it
     # is a good indication that a lock will be taken.
     #
     # This can be overridden per-command if general heuristics are not
@@ -430,12 +430,13 @@ class BrokerCommand(object):
         #log.msg("Checking %s" % cls.__module__)
         for (key, item) in sys.modules[cls.__module__].__dict__.items():
             #log.msg("  Checking %s" % item)
-            if item in [lock_queue, sync_domain, TemplateDomain,
+            if item in [sync_domain, TemplateDomain,
                         add_resource, del_resource]:
                 return False
             if not isclass(item):
                 continue
             if issubclass(item, Plenary) or issubclass(item, Chooser) or \
+               issubclass(item, LockKey) or \
                issubclass(item, PlenaryCollection):
                 return False
             if item != cls and item != BrokerCommand and \

@@ -1,0 +1,3 @@
+To generate the CDB files from the CSV, run:
+
+/ms/dist/appmw/PROJ/eon/prod/bin/csv2cdb -csv eon_catalog.csv -cdb_byid eon_catalog_by_id.cdb -cdb_byname eon_catalog_by_name.cdb

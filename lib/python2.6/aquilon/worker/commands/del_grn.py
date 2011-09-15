@@ -1,6 +1,6 @@
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 #
-# Copyright (C) 2009,2010,2011  Contributor
+# Copyright (C) 2011  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -26,36 +26,32 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
+"""Contains the logic for `aq del grn`."""
 
-
-from sqlalchemy.sql.expression import asc
-
-from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.commands.del_dynamic_range import CommandDelDynamicRange
-from aquilon.aqdb.model import DynamicStub, Network, NetworkEnvironment
 from aquilon.exceptions_ import ArgumentError
-from aquilon.worker.locks import DeleteKey
+from aquilon.aqdb.model import HostGrnMap, PersonalityGrnMap
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.dbwrappers.grn import lookup_grn
 
 
-class CommandDelDynamicRangeClearnetwork(CommandDelDynamicRange):
+class CommandDelGrn(BrokerCommand):
 
-    required_parameters = ["clearnetwork"]
+    def render(self, session, logger, grn, eon_id, **arguments):
+        dbgrn = lookup_grn(session, grn, eon_id, logger=logger,
+                           config=self.config, usable_only=False)
 
-    def render(self, session, logger, clearnetwork, **arguments):
-        with DeleteKey("system", logger=logger) as key:
-            self.del_dynamic_network(session, logger, clearnetwork)
-            session.commit()
+        q = session.query(HostGrnMap)
+        q = q.filter_by(grn=dbgrn)
+        if q.first():
+            raise ArgumentError("GRN %s is still mapped to hosts, and "
+                                "cannot be deleted." % dbgrn.grn)
+
+        q = session.query(PersonalityGrnMap)
+        q = q.filter_by(grn=dbgrn)
+        if q.first():
+            raise ArgumentError("GRN %s is still mapped to personalities, "
+                                "and cannot be deleted." % dbgrn.grn)
+
+        session.delete(dbgrn)
+        session.flush()
         return
-
-    def del_dynamic_network(self, session, logger, network):
-        dbnet_env = NetworkEnvironment.get_unique_or_default(session)
-        dbnetwork = Network.get_unique(session, network,
-                                       network_environment=dbnet_env,
-                                       compel=True)
-        q = session.query(DynamicStub)
-        q = q.filter_by(network=dbnetwork)
-        q = q.order_by(asc(DynamicStub.ip))
-        existing = q.all()
-        if not existing:
-            raise ArgumentError("No dynamic stubs found on network.")
-        self.del_dynamic_stubs(session, logger, existing)

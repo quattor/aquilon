@@ -36,7 +36,7 @@ from aquilon.exceptions_ import ArgumentError, ProcessException
 from aquilon.aqdb.model import Domain, Sandbox, Branch, UserPrincipal
 from aquilon.worker.dbwrappers.user_principal import get_user_principal
 from aquilon.worker.processes import remove_dir, run_git
-from aquilon.worker.locks import lock_queue, CompileKey
+from aquilon.worker.locks import CompileKey
 from aquilon.worker.templates.domain import TemplateDomain
 
 VERSION_RE = re.compile(r'^[-_.a-zA-Z0-9]*$')
@@ -87,14 +87,10 @@ def remove_branch(config, logger, dbbranch):
     session.delete(dbbranch)
 
     domain = TemplateDomain(dbbranch, logger=logger)
-    key = CompileKey(domain=dbbranch.name, logger=logger)
     # Can this fail?  Is recovery needed?
-    try:
-        lock_queue.acquire(key)
+    with CompileKey(domain=dbbranch.name, logger=logger) as key:
         for dir in domain.directories():
             remove_dir(dir, logger=logger)
-    finally:
-        lock_queue.release(key)
 
     kingdir = config.get("broker", "kingdir")
     try:

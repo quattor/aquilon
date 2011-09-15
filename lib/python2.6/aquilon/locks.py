@@ -109,11 +109,13 @@ class LockKey(object):
 
     """
 
-    def __init__(self, components, logger=LOGGER, loglevel=logging.INFO):
+    def __init__(self, components, logger=LOGGER, loglevel=logging.INFO,
+                 lock_queue=None):
         self.components = components
         self.logger = logger
         self.loglevel = loglevel
         self.blocker_count = None
+        self.lock_queue = lock_queue
         self.transition("initialized", debug=True)
 
     def __str__(self):
@@ -123,6 +125,15 @@ class LockKey(object):
             return '%s lock' % self.components[0]
         return '%s lock for %s' % (self.components[0],
                                    "/".join(self.components[1:]))
+
+    def __enter__(self):
+        if not self.lock_queue:  # pragma: no cover
+            raise InternalError("Using the 'with' statement requires a lock "
+                                "queue")
+        self.lock_queue.acquire(self)
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.lock_queue.release(self)
 
     def log(self, *args, **kwargs):
         self.logger.log(self.loglevel, *args, **kwargs)
@@ -181,10 +192,13 @@ class LockKey(object):
         # Assume logger/loglevel is consistent across the list.
         logger = keylist[0].logger
         loglevel = keylist[0].loglevel
+        lock_queue = keylist[0].lock_queue
         for position in zip(*[key.components for key in keylist]):
             unique_elements = set(position)
             if len(unique_elements) == 1:
                 components.append(unique_elements.pop())
             else:
-                return LockKey(components, logger=logger, loglevel=loglevel)
-        return LockKey(components, logger=logger, loglevel=loglevel)
+                return LockKey(components, logger=logger, loglevel=loglevel,
+                               lock_queue=lock_queue)
+        return LockKey(components, logger=logger, loglevel=loglevel,
+                       lock_queue=lock_queue)

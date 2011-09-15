@@ -32,7 +32,7 @@ from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import ARecord, NetworkEnvironment
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.exceptions_ import ArgumentError, ProcessException
-from aquilon.worker.locks import lock_queue, DeleteKey
+from aquilon.worker.locks import DeleteKey
 from aquilon.worker.processes import DSDBRunner
 from aquilon.worker.dbwrappers.dns import delete_dns_record
 
@@ -42,13 +42,9 @@ class CommandDelDynamicRange(BrokerCommand):
     required_parameters = ["startip", "endip"]
 
     def render(self, session, logger, startip, endip, **arguments):
-        key = DeleteKey("system", logger=logger)
-        try:
-            lock_queue.acquire(key)
+        with DeleteKey("system", logger=logger) as key:
             self.del_dynamic_range(session, logger, startip, endip)
             session.commit()
-        finally:
-            lock_queue.release(key)
         return
 
     def del_dynamic_range(self, session, logger, startip, endip):

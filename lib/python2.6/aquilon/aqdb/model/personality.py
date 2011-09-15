@@ -34,11 +34,14 @@ from sqlalchemy import (Column, Integer, Boolean, DateTime, Sequence, String,
 from sqlalchemy.orm import relation
 from sqlalchemy.ext.associationproxy import association_proxy
 
-from aquilon.aqdb.model import Base, Archetype
+from aquilon.aqdb.model import Base, Archetype, Grn
 from aquilon.aqdb.column_types.aqstr import AqStr
 
 _ABV = 'prsnlty'
 _TN = 'personality'
+
+_PGN = 'personality_grn_map'
+_PGNABV = 'pers_grn_map'
 
 
 class Personality(Base):
@@ -71,9 +74,31 @@ class Personality(Base):
 
 personality = Personality.__table__   # pylint: disable-msg=C0103, E1101
 
-personality.primary_key.name = '%s_pk' % (_ABV)
+personality.primary_key.name = '%s_pk' % _ABV
 personality.append_constraint(UniqueConstraint('name', 'archetype_id',
-                                               name='%s_uk' % (_TN)))
+                                               name='%s_uk' % _TN))
 personality.info['unique_fields'] = ['name', 'archetype']
 
 Index('%s_arch_idx' % _ABV, personality.c.archetype_id)
+
+
+class PersonalityGrnMap(Base):
+    __tablename__ = _PGN
+
+    personality_id = Column(Integer, ForeignKey('%s.id' % _TN,
+                                                name='%s_personality_fk' % _PGNABV),
+                            primary_key=True)
+
+    eon_id = Column(Integer, ForeignKey('grn.eon_id',
+                                        name='%s_grn_fk' % _PGNABV),
+                    primary_key=True)
+
+    personality = relation(Personality)
+    grn = relation(Grn)
+
+
+pgn = PersonalityGrnMap.__table__  # pylint: disable-msg=C0103, E1101
+pgn.primary_key.name = '%s_pk' % _PGN
+
+Personality.grns = relation(Grn, secondary=PersonalityGrnMap.__table__,
+                            backref='personalities')
