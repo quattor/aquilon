@@ -185,10 +185,6 @@ class ServiceInstance(Base):
     def get_mapped_instance_cache(cls, dbpersonality, dblocation, dbservices):
         """Returns dict of requested services to closest mapped instances."""
         session = object_session(dbpersonality)
-        if session.connection().dialect.name == 'oracle':
-            return cls._oracle_get_mapped_instance_cache(dbpersonality,
-                                                         dblocation,
-                                                         dbservices)
         return cls._universal_get_mapped_instance_cache(dbpersonality,
                                                         dblocation, dbservices)
 
@@ -236,25 +232,50 @@ class ServiceInstance(Base):
         # Can't import these on init as ServiceInstance is a dependency.
         # Could think about moving this method definition out to one of
         # these classes.
-        from aquilon.aqdb.model import ServiceMap, PersonalityServiceMap
+        from aquilon.aqdb.model import ServiceMap, PersonalityServiceMap, Location
         session = object_session(dbpersonality)
         cache = {}
-        for dbservice in dbservices:
-            for map_type in [PersonalityServiceMap, ServiceMap]:
-                current_location = dblocation
-                last_location = None
-                while(not cache.get(dbservice) and
-                      current_location is not None and
-                      current_location != last_location):
-                    q = session.query(map_type)
-                    if map_type == PersonalityServiceMap:
-                        q = q.filter_by(personality=dbpersonality)
-                    q = q.filter_by(location=current_location)
-                    q = q.join('service_instance').filter_by(service=dbservice)
-                    cache[dbservice] = [map.service_instance
-                                            for map in q.all()]
-                    last_location = current_location
-                    current_location = current_location.parent
+
+        ## all relevant locations
+        location_ids = []
+        location_ids.append(dblocation.id)
+        for loc in reversed(dblocation.parents):
+            location_ids.append(loc.id)
+
+        for map_type in [PersonalityServiceMap, ServiceMap]:
+            # search only for missing ids
+            missing_ids = []
+            for dbservice in dbservices:
+                if not cache.get(dbservice):
+                    missing_ids.append(dbservice.id)
+
+            ## get map by locations
+            q = session.query(map_type)
+            if map_type == PersonalityServiceMap:
+                q = q.filter_by(personality=dbpersonality)
+            q = q.join('service_instance').filter(ServiceInstance.service_id.in_(missing_ids))
+            q = q.reset_joinpoint()
+            q = q.join('location').filter(Location.id.in_(location_ids))
+
+            # convert results in dict
+            m_dict = {}
+            for map in q.all():
+                key = "%s/%s" % (map.service.name,map.location.id)
+                if not m_dict.get(key):
+                    m_dict[key] = []
+                m_dict[key].append(map.service_instance)
+
+            if not m_dict:
+                continue
+
+            # choose based on proximity
+            for dbservice in dbservices:
+                for lid in location_ids:
+                    key = "%s/%s" % (dbservice.name,lid)
+                    if m_dict.get(key):
+                        cache[dbservice] = []
+                        cache[dbservice].extend(m_dict.get(key))
+                        break
         return cache
 
 

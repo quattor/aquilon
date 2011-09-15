@@ -45,7 +45,7 @@ from aquilon.aqdb.db_factory import DbFactory
 
 db = DbFactory()
 
-LINK_INS = """insert into location_link (child_id,parent_id,distance) values (%d,%d,%d) """
+LINK_INS = "insert into location_link (child_id,parent_id,distance) values (:cid,:pid,:dist) "
 SELECT = """select id,name,parent_id,location_type from location """
 Base.metadata.bind = db.engine
 
@@ -75,7 +75,7 @@ def main():
             print ("Adding child [%s/%s = %d], parent [%s/%s =%d], dist=%d"
                   % (child['type'], child['name'], child_id, parent['type'],
                      parent['name'], parent_id, dist))
-            db.engine.execute(LINK_INS % (child_id, parent_id, dist))
+            db.engine.execute(LINK_INS, {'cid' : child_id, 'pid' : parent_id, 'dist' : dist})
             parent_id = parent['pid']
 
     session.commit()

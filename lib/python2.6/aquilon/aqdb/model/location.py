@@ -160,11 +160,11 @@ class Location(Base):
 
     def update_parent(self, parent=None):
 
-        if parent is not None:
-            if not object_session(parent):
-                raise AquilonError("The parent must be persistent")
+        session = object_session(self)
+        if parent is None:  # pragma: no cover
+            raise AquilonError("Parent location can be updated but not removed")
 
-        session = object_session(this)
+        session = object_session(self)
         ## delete old location links
         flush_state = session.autoflush
         session.autoflush = False
