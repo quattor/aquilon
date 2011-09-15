@@ -62,11 +62,19 @@ def usage():
     --coverage  generate code coverage metrics for the broker
                 in logs/coverage.
     --profile   generate profile information in logs/aqd.profile
+    --verbose   list each test name as it runs
+    --quiet     do not print module names during tests
+    --mirror    copy source into an alternate directory and re-exec
 
     Note that:
     %s
     will be used by default, and setting the AQDCONF environment variable
     will *not* work to pass in a config.
+
+    The mirror option can be used to continue work in your local tree
+    without breaking the in-progress tests.  It copies all the source
+    code into the directory given in the mirrordir option of the unittest
+    section of the config and then re-launches the tests from there.
     """ % (sys.argv[0], default_configfile)
 
 def force_yes(msg):
@@ -140,9 +148,12 @@ if profile:
 if mirror:
     # Copy the source directory and exec from it.
     env = os.environ.copy()
-    env['AQDCONF'] = config.baseconfig
+    if 'AQDCONF' in env:
+        env.pop('AQDCONF')
     srcdir = config.get('unittest', 'srcdir')
     mirrordir = config.get('unittest', 'mirrordir')
+    if not os.path.exists(mirrordir):
+        os.makedirs(mirrordir)
     p = Popen(['rsync', '-avP', '--delete', srcdir + '/', mirrordir],
               stdout=1, stderr=2)
     p.communicate()
