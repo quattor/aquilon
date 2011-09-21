@@ -399,6 +399,28 @@ class TestReconfigure(TestBrokerCommand):
                        "--hostname", "evh%s.aqd-unittest.ms.com" % i]
             (out, err) = self.successtest(command)
 
+    def testfailpersonalitynotallowed(self):
+        command = ["reconfigure", "--hostname=evh2.aqd-unittest.ms.com",
+                   "--personality=esx_server"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "The personality vmhost/esx_server is not allowed by "
+                         "ESX Cluster utecl1.  Specify one of "
+                         "['vmhost/esx_desktop'].",
+                         command)
+
+    def testfailpersonalitynotallowedlist(self):
+        hosts = ["evh2.aqd-unittest.ms.com"]
+        scratchfile = self.writescratch("persnotallowed", "".join(hosts))
+        command = ["reconfigure", "--list", scratchfile,
+                   "--archetype=vmhost", "--personality=esx_server"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "evh2.aqd-unittest.ms.com: The personality "
+                         "vmhost/esx_server is not allowed by ESX Cluster "
+                         "utecl1.  Specify one of ['vmhost/esx_desktop'].",
+                         command)
+
     def testverifyalignedservice(self):
         # Check that utecl1 is now aligned to a service and that
         # all of its members are aligned to the same service.

@@ -78,9 +78,13 @@ class CommandMake(BrokerCommand):
                                                    archetype=dbarchetype,
                                                    compel=True)
             if dbhost.cluster and dbhost.cluster.allowed_personalities and \
-               dbhost.personality not in dbhost.cluster_allowed_personalities:
-                raise ArgumentError("The personality %s is not allowed by "
-                                    "cluster %s.  Specify one of %s")
+               dbpersonality not in dbhost.cluster.allowed_personalities:
+                allowed = ["%s/%s" % (p.archetype.name, p.name) for p in
+                           dbhost.cluster.allowed_personalities]
+                raise ArgumentError("The {0:l} is not allowed by {1}.  "
+                                    "Specify one of {2}.".format(
+                                        dbpersonality, dbhost.cluster,
+                                        allowed))
 
             dbhost.personality = dbpersonality
 

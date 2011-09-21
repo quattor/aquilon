@@ -142,16 +142,13 @@ class CommandReconfigureList(BrokerCommand):
                                               dbhost.operating_system.archetype))
             if (personality and dbhost.cluster and
                 len(dbhost.cluster.allowed_personalities) > 0 and
-                dbhost.personality not in
-                dbhost.cluster.allowed_personalities):
-                failed.append("%s: The personality %s "
-                              "is not allowed by cluster %s. "
-                              "Specify one of %s." %
-                              (dbhost.fqdn, dbhost.personality,
-                               dbhost.cluster.name,
-                               ", ".join([x.name for x in
-                                          dbhost.cluster.allowed_personalities]
-                                        )))
+                dbpersonality not in dbhost.cluster.allowed_personalities):
+                allowed = ["%s/%s" % (p.archetype.name, p.name) for p in
+                           dbhost.cluster.allowed_personalities]
+                failed.append("{0}: The {1:l} is not allowed by {2}.  "
+                              "Specify one of {3}.".format(
+                                  dbhost.fqdn, dbpersonality,
+                                  dbhost.cluster, allowed))
             if personality:
                 personalities[dbhost.fqdn] = dbpersonality
             elif archetype:
