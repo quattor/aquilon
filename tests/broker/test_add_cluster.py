@@ -47,7 +47,7 @@ class TestAddCluster(TestBrokerCommand):
                    "--building=ut",
                    "--domain=unittest", "--down_hosts_threshold=0",
                    "--maint_threshold=1",
-                   "--archetype=hacluster", "--personality=vcs"]
+                   "--archetype=hacluster", "--personality=vcs-msvcs"]
         self.noouttest(command)
 
     def test_10_verify_utvcs1(self):
@@ -61,7 +61,7 @@ class TestAddCluster(TestBrokerCommand):
         self.matchoutput(out, "Down Hosts Threshold: 0", command)
         self.matchoutput(out, "Maintenance Threshold: 1", command)
         self.matchoutput(out, "Build Status: build", command)
-        self.matchoutput(out, "Personality: vcs Archetype: hacluster",
+        self.matchoutput(out, "Personality: vcs-msvcs Archetype: hacluster",
                          command)
         self.matchoutput(out, "Domain: unittest", command)
         self.matchclean(out, "Comments", command)
@@ -72,7 +72,7 @@ class TestAddCluster(TestBrokerCommand):
         self.matchoutput(out, "object template clusters/utvcs1;", command)
         self.matchoutput(out, '"/system/cluster/name" = "utvcs1";', command)
         self.matchclean(out, "include { 'service", command)
-        self.matchoutput(out, "include { 'personality/vcs/config' };",
+        self.matchoutput(out, "include { 'personality/vcs-msvcs/config' };",
                          command)
 
     def test_20_fail_add_existing(self):
@@ -80,7 +80,7 @@ class TestAddCluster(TestBrokerCommand):
                    "--building=ut",
                    "--buildstatus=build",
                    "--domain=unittest", "--down_hosts_threshold=0",
-                   "--archetype=hacluster", "--personality=vcs"]
+                   "--archetype=hacluster", "--personality=vcs-msvcs"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Cluster utvcs1 already exists", command)
 

@@ -121,7 +121,7 @@ class TestUsecaseDatabase(TestBrokerCommand):
         command = ["add_cluster", "--cluster=nydb1",
                    "--campus=ny",
                    "--domain=unittest", "--down_hosts_threshold=0",
-                   "--archetype=hacluster", "--personality=vcs"]
+                   "--archetype=hacluster", "--personality=vcs-msvcs"]
         self.successtest(command)
 
         command = ["cluster", "--cluster=nydb1",

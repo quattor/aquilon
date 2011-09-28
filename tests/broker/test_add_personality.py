@@ -425,7 +425,7 @@ class TestAddPersonality(TestBrokerCommand):
 
     def testaddhapersonality(self):
         command = ["add_personality",
-                   "--personality=vcs", "--archetype=hacluster"]
+                   "--personality=vcs-msvcs", "--archetype=hacluster"]
         self.noouttest(command)
 
 
