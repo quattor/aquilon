@@ -87,9 +87,20 @@ class PlenaryClusterObject(Plenary):
         lines.append('"/system/cluster/type" = %s;' %
                         pan(self.dbcluster.cluster_type))
 
-        campus = self.dbcluster.location_constraint.campus
-        if campus:
-            lines.append('"/system/cluster/campus" = %s;' % pan(campus.name))
+        dbloc = self.dbcluster.location_constraint
+        lines.append('"/system/cluster/sysloc/location" = %s;' % pan(dbloc.sysloc()))
+        if dbloc.continent:
+            lines.append('"/system/cluster/sysloc/continent" = %s;' % pan(dbloc.continent.name))
+        if dbloc.city:
+            lines.append('"/system/cluster/sysloc/city" = %s;' % pan(dbloc.city.name))
+        if dbloc.campus:
+            lines.append('"/system/cluster/sysloc/campus" = %s;' % pan(dbloc.campus.name))
+        if dbloc.building:
+            lines.append('"/system/cluster/sysloc/building" = %s;' % pan(dbloc.building.name))
+        if dbloc.rack:
+            lines.append('"/system/cluster/rack/row" = %s;' % pan(dbloc.rack.rack_row))
+            lines.append('"/system/cluster/rack/column" = %s;' % pan(dbloc.rack.rack_column))
+            lines.append('"/system/cluster/rack/name" = %s;' % pan(dbloc.rack.name))
 
         lines.append('"/system/cluster/down_hosts_threshold" = %d;' %
                      self.dbcluster.dht_value)
@@ -109,6 +120,11 @@ class PlenaryClusterObject(Plenary):
                          resource.resource_type,
                          pan(StructureTemplate(resource.template_base +
                                                '/config'))))
+        lines.append('"/system/build" = %s;' % pan(self.dbcluster.status.name))
+        if self.dbcluster.allowed_personalities:
+            lines.append('"/system/cluster/allowed_personalities" = %s;' %
+                         pan (sorted([persona.name for persona in
+                                      self.dbcluster.allowed_personalities])))
         lines.append("")
 
         lines.append("include { 'archetype/base' };");
