@@ -187,29 +187,16 @@ instead.""" % (os.environ["AQDCONF"], opts.configfile)
     # This syncs the *contents* of the remote "template-king" by
     # appending a slash, so the remote could be any path that rsync
     # can parse that leads to a git repository.
-    p = Popen(("rsync", "-aqP", "-e", "ssh", "--delete",
-               "--exclude=.git/config",
-               os.path.join(config.get("unittest", "template_king_path"), ""),
-               config.get("broker", "kingdir")),
-              stdout=1, stderr=2)
-    rc = p.wait()
-    # FIXME: check rc
+    rsync(os.path.join(config.get("unittest", "template_king_path"), ""),
+          config.get("broker", "kingdir"))
     # Need the actual king's config file for merges to work.
-    p = Popen(("rsync", "-aqP", "-e", "ssh",
-               config.get("unittest", "template_king_config"),
-               os.path.join(config.get("broker", "kingdir"), ".git")),
-              stdout=1, stderr=2)
-    rc = p.wait()
-    # FIXME: check rc
+    rsync(config.get("unittest", "template_king_config"),
+          os.path.join(config.get("broker", "kingdir"), ".git")),
 
     swrep_repository_host = config.get("unittest", "swrep_repository_host")
     # The swrep/repository is currently *only* synced here at the top level.
-    p = Popen(("rsync", "-aqP", "-e", "ssh", "--delete",
-        "%s:/var/quattor/swrep/repository" % swrep_repository_host,
-        config.get("broker", "swrepdir")),
-        stdout=1, stderr=2)
-    rc = p.wait()
-    # FIXME: check rc
+    rsync("%s:/var/quattor/swrep/repository" % swrep_repository_host,
+          config.get("broker", "swrepdir")),
 
     suite = nose.suite.LazySuite()
 
@@ -225,6 +212,16 @@ instead.""" % (os.environ["AQDCONF"], opts.configfile)
 
     nose.run(suite=suite,
         testRunner=VerboseTextTestRunner(verbosity=opts.verbosity))
+
+
+def rsync(source, target):
+    p = Popen(("rsync", "-aqP", "-e", "ssh -q -o StrictHostKeyChecking=no " +
+               "-o UserKnownHostsFile=/dev/null -o BatchMode=yes", "--delete",
+               "--exclude=.git/config",
+               source, target), stdout=1, stderr=2)
+    rc = p.wait()
+    if rc != 0:
+        raise Exception("rsync returned non-zero")
 
 
 if __name__ == '__main__':

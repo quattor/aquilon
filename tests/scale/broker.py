@@ -133,7 +133,9 @@ class AQBroker(object):
         
         # FIXME: Maybe make a new perftest section in the conf...
         swrep_base = self.config.get("database", "password_base")
-        p = Popen(("rsync", "-avP", "--delete",
+        p = Popen(("rsync", "-avP", "--delete", "-e",
+                   "ssh -q -o StrictHostKeyChecking=no " +
+                   "-o UserKnownHostsFile=/dev/null -o BatchMode=yes",
                    os.path.join(swrep_base, "swrep", "repository"),
                    self.config.get("broker", "swrepdir")),
                   stdout=1, stderr=2)

@@ -139,7 +139,9 @@ class TestBrokerStart(unittest.TestCase):
         config = Config()
         swrep_repository_host = config.get("unittest", "swrep_repository_host")
         # The swrep/repository is currently *only* synced here at the top level.
-        p = Popen(("rsync", "-avP", "-e", "ssh", "--delete",
+        p = Popen(("rsync", "-avP", "-e", "ssh -q -o StrictHostKeyChecking=no" \
+                    + " -o UserKnownHostsFile=/dev/null -o BatchMode=yes",
+                   "--delete",
                    "%s:/var/quattor/swrep/repository" % swrep_repository_host,
                    config.get("broker", "swrepdir")),
                   stdout=PIPE, stderr=PIPE)
