@@ -156,6 +156,14 @@ class TestBindServer(TestBrokerCommand):
                          'include { "service/utsvc/utsi2/server/config" };',
                          command)
 
+    def testverifyshowunittest00(self):
+        command = "show host --hostname unittest00.one-nyp.ms.com"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Primary Name: unittest00.one-nyp.ms.com",
+                         command)
+        self.matchoutput(out, "Provides: service/utsvc/utsi1", command)
+        self.matchoutput(out, "Provides: service/utsvc/utsi2", command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestBindServer)

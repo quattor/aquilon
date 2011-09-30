@@ -19,6 +19,9 @@ GRN: ${grn.grn}
 % for si in record.services_used:
 Template: ${si.cfg_path}
 % endfor
+% for si in record.services_provided:
+Provides: ${si.cfg_path}
+% endfor
 % if record.comments:
 Comments: ${record.comments}
 % endif
