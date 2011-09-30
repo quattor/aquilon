@@ -138,6 +138,14 @@ class TestAddNetwork(TestBrokerCommand):
                    "--network_environment", "utcolo"]
         self.noouttest(command)
 
+    def testbadip(self):
+        command = ["add_network", "--ip", "10.0.0.1",
+                   "--network", "bad-address", "--netmask", "255.255.255.0",
+                   "--building", "ut", "--side", "a", "--type", "unknown"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "IP address 10.0.0.1 is not a network address.  "
+                         "Maybe you meant 10.0.0.0?", command)
+
     def testshownetwork(self):
         for network in self.net.all:
             command = "show network --ip %s" % network.ip
