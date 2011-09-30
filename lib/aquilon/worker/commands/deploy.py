@@ -84,7 +84,7 @@ class CommandDeploy(BrokerCommand):
         if not dbtarget.is_sync_valid:
             dbtarget.is_sync_valid = True
 
-        if dbtarget.requires_change_manager:
+        if dbtarget.requires_change_manager and not dryrun:
             if not justification:
                 raise AuthorizationException(
                     "{0} is under change management control.  Please specify "

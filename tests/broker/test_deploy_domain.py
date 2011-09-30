@@ -61,6 +61,20 @@ class TestDeployDomain(TestBrokerCommand):
                          "Please specify --justification.",
                          command)
 
+    def test_120_deploydryrun(self):
+        kingdir = self.config.get("broker", "kingdir")
+        (old_prod, err) = self.gitcommand(["rev-list", "--max-count=1", "prod"],
+                                          cwd=kingdir)
+
+        command = ["deploy", "--source", "changetest1",
+                   "--target", "prod", "--dryrun"]
+        self.successtest(command)
+
+        (new_prod, err) = self.gitcommand(["rev-list", "--max-count=1", "prod"],
+                                          cwd=kingdir)
+        self.assertEqual(old_prod, new_prod,
+                         "Domain prod changed despite --dryrun")
+
     def test_120_deploybadjustification(self):
         command = ["deploy", "--source", "changetest1", "--target", "prod",
                    "--justification", "I felt like deploying changes."]
