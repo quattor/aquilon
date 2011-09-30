@@ -50,16 +50,7 @@ class IPV4(sqlalchemy.types.TypeDecorator):
         if value is None:
             return None
         else:
-            # The explicit cast to int() is needed due to bug
-            # http://code.google.com/p/ipaddr-py/issues/detail?id=70
-            #
-            # Background: when an IPv4Address object is initialized with a
-            # string, the _ip field becomes an int(). However the database can
-            # sometimes return the value as a long(), and although
-            # IPv4Address(int(x)) == IPv4Address(long(x)), their hash() values
-            # differ. Which means if one of the objects is used as a dictionary
-            # key, using the other to do a lookup will fail.
-            return IPv4Address(int(value))
+            return IPv4Address(value)
 
     def copy(self):
         return IPV4(self.impl.length)

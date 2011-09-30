@@ -41,7 +41,7 @@ from aquilon.aqdb.model import (Host, FutureARecord, Domain, Machine, Archetype,
 
 #FIXME: import server.depends from utils.load_server_classpath()
 import ms.version
-ms.version.addpkg('ipaddr', '2.0.0')
+ms.version.addpkg('ipaddr', '2.1.9')
 from ipaddr import IPv4Address as IPAddr
 
 from nose.tools import eq_
