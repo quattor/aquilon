@@ -26,50 +26,44 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-"""Contains the logic for `aq show dns record`."""
+"""Contains the logic for `aq add srv record`."""
 
-
+from aquilon.exceptions_ import ArgumentError
+from aquilon.aqdb.model import Fqdn, SrvRecord, DnsDomain, DnsEnvironment
 from aquilon.worker.broker import BrokerCommand
-from aquilon.exceptions_ import ArgumentError, NotFoundException
-from aquilon.aqdb.model import (DnsRecord, ARecord, Alias, SrvRecord,
-                                DnsEnvironment, Fqdn)
 
 
-DNS_RRTYPE_MAP = {'a': ARecord,
-                  'cname': Alias,
-                  'srv': SrvRecord}
+class CommandAddSrvRecord(BrokerCommand):
 
-class CommandShowDnsRecord(BrokerCommand):
+    required_parameters = ["service", "protocol", "dns_domain",
+                           "priority", "weight", "target", "port"]
 
-    required_parameters = ["fqdn"]
-
-    def render(self, session, fqdn, record_type, dns_environment, **arguments):
+    def render(self, session, service, protocol, dns_domain, priority, weight,
+               target, port, dns_environment, comments, **kwargs):
         dbdns_env = DnsEnvironment.get_unique_or_default(session,
                                                          dns_environment)
-        # No compel here. query(DnsRecord).filter_by(fqdn=None) will fail if the
-        # FQDN is invalid, and that will give a better error message.
-        dbfqdn = Fqdn.get_unique(session, fqdn=fqdn,
-                                 dns_environment=dbdns_env)
+        dbdns_domain = DnsDomain.get_unique(session, dns_domain, compel=True)
+        if dbdns_domain.restricted:
+            raise ArgumentError("{0} is restricted, SRV records are not allowed."
+                                .format(dbdns_domain))
 
-        cls = DnsRecord
-        if record_type:
-            if record_type in DNS_RRTYPE_MAP:
-                cls = DNS_RRTYPE_MAP[record_type]
-            elif record_type not in DnsRecord.__mapper__.polymorphic_map:
-                raise ArgumentError("Unknown DNS record type '%s'." %
-                                    record_type)
-            else:
-                cls = DnsRecord.__mapper__.polymorphic_map[record_type].class_
+        # TODO: we could try looking up the port based on the service, but there
+        # are some caveats:
+        # - the protocol name used in SRV record may not match the name used in
+        #   /etc/services
+        # - socket.getservent() may return bogus information (like it does for
+        #   e.g. 'kerberos')
 
-        # We want to query(ARecord) instead of
-        # query(DnsRecord).filter_by(record_type='a_record'), because the former
-        # works for DynamicStub as well
-        q = session.query(cls)
-        if cls == DnsRecord:
-            q = q.with_polymorphic('*')
-        q = q.filter_by(fqdn=dbfqdn)
-        result = q.all()
-        if not result:
-            raise NotFoundException("%s %s not found." %
-                                    (cls._get_class_label(), fqdn))
-        return result
+        service = service.strip().lower()
+        target = target.strip().lower()
+
+        dbtarget = Fqdn.get_unique(session, target, compel=True)
+        dbsrv_rec = SrvRecord(service=service, protocol=protocol,
+                              priority=priority, weight=weight, target=dbtarget,
+                              port=port, dns_domain=dbdns_domain,
+                              dns_environment=dbdns_env, comments=comments)
+        session.add(dbsrv_rec)
+
+        session.flush()
+
+        return

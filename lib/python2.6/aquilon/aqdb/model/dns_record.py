@@ -46,12 +46,16 @@ _TN = "dns_record"
 # This relation must be symmetric, i.e. whenever "x in _rr_conflict_map[y]" is
 # True, "y in _rr_conflict_map[x]" must also be true.
 _rr_conflict_map = {
-    'a_record': frozenset(['alias', 'dynamic_stub', 'reserved_name']),
-    'alias': frozenset(['a_record', 'alias', 'dynamic_stub', 'reserved_name']),
+    'a_record': frozenset(['alias', 'dynamic_stub', 'reserved_name',
+                           'srv_record']),
+    'alias': frozenset(['a_record', 'alias', 'dynamic_stub', 'reserved_name',
+                        'srv_record']),
     'dynamic_stub': frozenset(['a_record', 'alias', 'dynamic_stub',
-                               'reserved_name']),
+                               'reserved_name', 'srv_record']),
     'reserved_name': frozenset(['a_record', 'alias', 'dynamic_stub',
-                                'reserved_name'])
+                                'reserved_name', 'srv_record']),
+    'srv_record': frozenset(['alias', 'dynamic_stub', 'reserved_name',
+                             'a_record']),
 }
 
 
@@ -77,6 +81,7 @@ class DnsRecord(Base):
                     backref=backref('dns_records'))
 
     aliases = association_proxy('fqdn', 'aliases')
+    srv_records = association_proxy('fqdn', 'srv_records')
 
     __mapper_args__ = {'polymorphic_on': dns_record_type,
                        'polymorphic_identity': 'dns_record'}

@@ -26,50 +26,38 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-"""Contains the logic for `aq show dns record`."""
+"""Contains the logic for `aq show srv record`."""
 
 
+from sqlalchemy.orm import contains_eager
+
+from aquilon.exceptions_ import NotFoundException
 from aquilon.worker.broker import BrokerCommand
-from aquilon.exceptions_ import ArgumentError, NotFoundException
-from aquilon.aqdb.model import (DnsRecord, ARecord, Alias, SrvRecord,
-                                DnsEnvironment, Fqdn)
+from aquilon.aqdb.model import SrvRecord, DnsDomain, DnsEnvironment, Fqdn
 
 
-DNS_RRTYPE_MAP = {'a': ARecord,
-                  'cname': Alias,
-                  'srv': SrvRecord}
+class CommandShowSrvRecord(BrokerCommand):
 
-class CommandShowDnsRecord(BrokerCommand):
+    required_parameters = ["service", "protocol", "dns_domain"]
 
-    required_parameters = ["fqdn"]
-
-    def render(self, session, fqdn, record_type, dns_environment, **arguments):
+    def render(self, session, service, protocol, dns_domain, dns_environment,
+               **kwargs):
         dbdns_env = DnsEnvironment.get_unique_or_default(session,
                                                          dns_environment)
-        # No compel here. query(DnsRecord).filter_by(fqdn=None) will fail if the
-        # FQDN is invalid, and that will give a better error message.
-        dbfqdn = Fqdn.get_unique(session, fqdn=fqdn,
-                                 dns_environment=dbdns_env)
+        dbdns_domain = DnsDomain.get_unique(session, dns_domain, compel=True)
 
-        cls = DnsRecord
-        if record_type:
-            if record_type in DNS_RRTYPE_MAP:
-                cls = DNS_RRTYPE_MAP[record_type]
-            elif record_type not in DnsRecord.__mapper__.polymorphic_map:
-                raise ArgumentError("Unknown DNS record type '%s'." %
-                                    record_type)
-            else:
-                cls = DnsRecord.__mapper__.polymorphic_map[record_type].class_
+        name = "_%s._%s" % (service.strip().lower(), protocol.strip().lower())
 
-        # We want to query(ARecord) instead of
-        # query(DnsRecord).filter_by(record_type='a_record'), because the former
-        # works for DynamicStub as well
-        q = session.query(cls)
-        if cls == DnsRecord:
-            q = q.with_polymorphic('*')
-        q = q.filter_by(fqdn=dbfqdn)
+        q = session.query(SrvRecord)
+        q = q.join((Fqdn, SrvRecord.fqdn_id == Fqdn.id))
+        q = q.options(contains_eager('fqdn'))
+        q = q.filter_by(dns_domain=dbdns_domain)
+        q = q.filter_by(name=name)
+        q = q.filter_by(dns_environment=dbdns_env)
         result = q.all()
         if not result:
-            raise NotFoundException("%s %s not found." %
-                                    (cls._get_class_label(), fqdn))
+            raise NotFoundException("%s for service %s, protocol %s in DNS "
+                                    "domain %s not found." %
+                                    (SrvRecord._get_class_label(), service,
+                                     protocol, dns_domain))
         return result

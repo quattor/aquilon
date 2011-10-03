@@ -68,6 +68,13 @@ class TestDumpDns(TestBrokerCommand):
         self.matchoutput(out,
                          "Calias2alias.aqd-unittest.ms.com:alias2host.aqd-unittest.ms.com",
                          command)
+        # SRV
+        self.matchoutput(out,
+                         r":_kerberos._tcp.aqd-unittest.ms.com:33:\000\012\000\024\000\130\011arecord14\014aqd-unittest\002ms\003com\000",
+                         command)
+        self.matchoutput(out,
+                         r":_kerberos._tcp.aqd-unittest.ms.com:33:\000\012\000\024\000\130\011arecord15\014aqd-unittest\002ms\003com\000",
+                         command)
         self.matchclean(out, "utcolo", command)
 
     def test_djb_domain(self):
@@ -112,6 +119,15 @@ class TestDumpDns(TestBrokerCommand):
                          command)
         self.matchoutput(out,
                          'alias2alias.aqd-unittest.ms.com.\tIN\tCNAME\talias2host.aqd-unittest.ms.com.',
+                         command)
+        # SRV
+        self.matchoutput(out,
+                         "_kerberos._tcp.aqd-unittest.ms.com.\tIN\tSRV\t"
+                         "10 20 88 arecord14.aqd-unittest.ms.com.",
+                         command)
+        self.matchoutput(out,
+                         "_kerberos._tcp.aqd-unittest.ms.com.\tIN\tSRV\t"
+                         "10 20 88 arecord15.aqd-unittest.ms.com.",
                          command)
         self.matchclean(out, "utcolo", command)
 

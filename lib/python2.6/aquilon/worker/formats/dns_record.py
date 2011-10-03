@@ -31,7 +31,7 @@
 
 from aquilon.worker.formats.formatters import ObjectFormatter
 from aquilon.aqdb.model import (DnsRecord, DynamicStub, ARecord, Alias,
-                                ReservedName)
+                                ReservedName, SrvRecord)
 
 
 class DnsRecordFormatter(ObjectFormatter):
@@ -56,6 +56,14 @@ class AliasFormatter(ObjectFormatter):
         return (dns_record.fqdn, dns_record.fqdn.dns_environment.name,
                 'CNAME', dns_record.target)
 
+class SrvRecordFormatter(ObjectFormatter):
+    template_raw = "srv_record.mako"
+
+    def csv_fields(self, dns_record):
+        return (dns_record.fqdn, dns_record.fqdn.dns_environment.name,
+                'SRV', dns_record.priority, dns_record.weight,
+                dns_record.target, dns_record.port)
+
 # The DnsRecord entry should never get invoked, we always have a subclass.
 ObjectFormatter.handlers[DnsRecord] = DnsRecordFormatter()
 ObjectFormatter.handlers[ReservedName] = DnsRecordFormatter()
@@ -65,11 +73,22 @@ ObjectFormatter.handlers[ARecord] = ARecordFormatter()
 
 ObjectFormatter.handlers[Alias] = AliasFormatter()
 
+ObjectFormatter.handlers[SrvRecord] = SrvRecordFormatter()
+
 
 def inaddr_ptr(ip):
     octets = str(ip).split('.')
     octets.reverse()
     return "%s.in-addr.arpa" % '.'.join(octets)
+
+def octal16(value):
+    return "\\%03o\\%03o" % (value >> 8, value & 0xff)
+
+def str8(text):
+    return "\\%03o" % len(text) + text.replace(':', '\\072')
+
+def nstr(text):
+    return "".join(str8(p) for p in (text + ".").split('.'))
 
 
 class DnsDump(list):
@@ -109,6 +128,12 @@ class DnsDumpFormatter(ObjectFormatter):
                 # Mind the dot!
                 result.append("%s.\tIN\tCNAME\t%s." % (record.fqdn,
                                                        record.target.fqdn))
+            elif isinstance(record, SrvRecord):
+                result.append("%s.\tIN\tSRV\t%d %d %d %s." % (record.fqdn,
+                                                              record.priority,
+                                                              record.weight,
+                                                              record.port,
+                                                              record.target.fqdn))
         return "\n".join(result)
 
     def format_djb(self, dump):
@@ -127,6 +152,13 @@ class DnsDumpFormatter(ObjectFormatter):
                 pass
             elif isinstance(record, Alias):
                 result.append("C%s:%s" % (record.fqdn, record.target.fqdn))
+            elif isinstance(record, SrvRecord):
+                # djbdns does not have native support for SRV records
+                result.append(":%s:33:%s%s%s%s" % (record.fqdn,
+                                                   octal16(record.priority),
+                                                   octal16(record.weight),
+                                                   octal16(record.port),
+                                                   nstr(record.target.fqdn)))
         return "\n".join(result)
 
 
