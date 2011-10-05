@@ -131,6 +131,7 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
                     session.flush()
                     session.expire(assignment, ['dns_records'])
                 assignment.ip = ip
+                assignment.network = dbnetwork
             else:
                 assign_address(dbinterface, ip, dbnetwork)
 
