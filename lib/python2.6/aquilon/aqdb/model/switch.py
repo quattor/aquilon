@@ -31,6 +31,7 @@ from datetime import datetime
 
 from sqlalchemy import Column, Integer, ForeignKey, DateTime
 
+from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import HardwareEntity
 from aquilon.aqdb.column_types import Enum
 
@@ -51,6 +52,12 @@ class Switch(HardwareEntity):
     switch_type = Column(Enum(16, SWITCH_TYPES), nullable=False)
 
     last_poll = Column(DateTime, nullable=False, default=datetime.now)
+
+    @classmethod
+    def check_type(cls, type):
+        if type is not None and type not in SWITCH_TYPES:
+            raise ArgumentError("Unknown switch type '%s'." % type)
+
 
 switch = Switch.__table__  # pylint: disable-msg=C0103, E1101
 switch.primary_key.name = 'switch_pk'

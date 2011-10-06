@@ -66,10 +66,13 @@ class CommandPollSwitch(BrokerCommand):
 
     required_parameters = ["rack"]
 
-    def render(self, session, logger, rack, clear, vlan, **arguments):
+    def render(self, session, logger, rack, type, clear, vlan, **arguments):
         dblocation = get_location(session, rack=rack)
+        Switch.check_type(type)
         q = session.query(Switch)
-        q = q.filter(Switch.location_id==dblocation.id)
+        q = q.filter_by(location=dblocation)
+        if type:
+            q = q.filter_by(switch_type=type)
         switches = q.all()
         if not switches:
             raise NotFoundException("No switch found.")
