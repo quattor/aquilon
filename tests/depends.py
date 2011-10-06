@@ -39,6 +39,6 @@ ms.version.addpkg('nose', '1.0.0')
 
 ms.version.addpkg('lxml', '2.2.8')
 
-ms.version.addpkg('ipaddr', '2.1.4')
+ms.version.addpkg('ipaddr', '2.1.9')
 
 ms.version.addpkg('dateutil', '1.2')

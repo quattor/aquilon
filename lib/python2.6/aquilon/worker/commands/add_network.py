@@ -68,6 +68,10 @@ class CommandAddNetwork(BrokerCommand):
         except NetmaskValueError, e:
             raise ArgumentError("Failed to parse the netmask: %s" % e)
 
+        if ip != address.network:
+            raise ArgumentError("IP address %s is not a network address.  "
+                                "Maybe you meant %s?" % (ip, address.network))
+
         location = get_location(session, **arguments)
         if not type:
             type = 'unknown'
