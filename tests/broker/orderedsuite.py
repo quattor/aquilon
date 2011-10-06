@@ -77,6 +77,7 @@ from test_add_city import TestAddCity
 from test_add_room import TestAddRoom
 from test_add_location import TestAddLocation
 from test_add_rack import TestAddRack
+from test_add_desk import TestAddDesk
 from test_add_vendor import TestAddVendor
 from test_add_cpu import TestAddCpu
 from test_add_model import TestAddModel
@@ -222,6 +223,7 @@ from test_del_network_environment import TestDelNetworkEnvironment
 from test_del_model import TestDelModel
 from test_del_cpu import TestDelCpu
 from test_del_vendor import TestDelVendor
+from test_del_desk import TestDelDesk
 from test_del_rack import TestDelRack
 from test_del_room import TestDelRoom
 from test_del_building import TestDelBuilding
@@ -269,7 +271,8 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestCountry, TestOrganization, TestHub,
                 TestAddCity,
                 TestAddBuilding, TestAddRoom, TestAddLocation,
-                TestAddRack, TestAddVendor, TestAddCpu, TestAddModel,
+                TestAddRack, TestAddDesk,
+                TestAddVendor, TestAddCpu, TestAddModel,
                 TestAddNetworkEnvironment, TestAddNetwork,
                 TestAddNSRecord, TestMapDnsDomain,
                 TestAddMetaCluster, TestAddESXCluster,
@@ -349,7 +352,7 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestDelRouter, TestDelNetwork, TestDelNetworkEnvironment,
                 TestDelModel, TestDelCpu, TestDelVendor,
                 TestUnmapDnsDomain,
-                TestDelRack, TestDelRoom,
+                TestDelDesk, TestDelRack, TestDelRoom,
                 TestDelBuilding, TestDelRequiredService, TestDelService,
                 TestDelCity,
                 TestDelPersonality, TestDelOS, TestDelArchetype,

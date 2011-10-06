@@ -86,7 +86,11 @@ class Xtn(Base):
         msg = [self.start_time.strftime('%Y-%m-%d %H:%M:%S%z'),
                str(self.username), str(return_code), 'aq', str(self.command)]
         for arg in self.args:
-            msg.append("--%s=%r" % (arg.name, str(arg.value)))
+            # TODO: remove the str() once we can handle Unicode
+            try:
+                msg.append("--%s=%r" % (arg.name, str(arg.value)))
+            except UnicodeEncodeError:  # pragma: no cover
+                msg.append("--%s=<Non-ASCII value>" % arg.name)
         return " ".join(msg)
 
 

@@ -284,6 +284,14 @@ class TestAdd10GigHardware(TestBrokerCommand):
         for i in [18, 27]:
             self.noouttest(["del", "machine", "--machine", "evm%d" % i])
 
+    def test_400_norack(self):
+        command = ["add", "disk", "--machine", "utnorack", "--disk", "sdb",
+                   "--capacity", "150", "--controller", "scsi",
+                   "--address", "0:0", "--autoshare"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Machine utnorack is not associated with a rack.",
+                         command)
+
     def test_500_verifycatmachines(self):
         for i in range(0, 8):
             command = "cat --machine evm%s" % (10 + i)

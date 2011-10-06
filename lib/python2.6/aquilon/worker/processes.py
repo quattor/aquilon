@@ -704,10 +704,10 @@ class DSDBRunner(object):
 class NASAssign(object):
     
     def __init__(self, machine, disk, owner, rack=None, size=None):
-        self.machine = machine
-        self.disk = disk
-        self.owner = owner
-        self.rack = rack
+        self.machine = str(machine)
+        self.disk = str(disk)
+        self.owner = str(owner)
+        self.rack = str(rack)
         self.size = size
         self.config = Config()
         if self.config.getboolean('nasassign', 'use_dev_db'):

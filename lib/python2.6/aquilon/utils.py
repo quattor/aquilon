@@ -174,6 +174,15 @@ def force_mac(label, value):
     raise ArgumentError("Expected a MAC address like 00:1a:2b:3c:0d:55, "
                         "001a2b3c0d55 or 0:1a:2b:3c:d:55 for %s." % label)
 
+def force_ascii(label, value):
+    if value is None:
+        return None
+    try:
+        value = value.decode('ascii')
+    except UnicodeDecodeError:
+        raise ArgumentError("Only ASCII characters are allowed for %s." % label)
+    return value
+
 def first_of(iterable, function):
     """
     Return the first matching element of an iterable

@@ -447,6 +447,10 @@ class TestAddMachine(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Blade: ut8s02p5", command)
 
+    def testaddutnorack(self):
+        # A machine that's not in a rack
+        self.noouttest(["add", "machine", "--machine", "utnorack",
+            "--desk", "utdesk1", "--model", "poweredge_6650"])
 
     # This test should look very different, but these were needed for
     # testing chassis updates...

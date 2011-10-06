@@ -403,7 +403,10 @@ class BrokerCommand(object):
             # not being able to store the concept of a non-NULL empty string.
             if v == '':
                 v = '-'
-            details[k] = str(v)
+            try:
+                details[k] = str(v).decode('ascii')
+            except UnicodeDecodeError:
+                details[k] = '<Non-ASCII value>'
         audit_msg['details'] = details
         start_xtn(session, audit_msg, self.parameters_by_type.get('file'))
 

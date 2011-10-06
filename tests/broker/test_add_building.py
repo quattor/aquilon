@@ -93,6 +93,21 @@ class TestAddBuilding(TestBrokerCommand):
         self.noouttest(command)
         self.dsdb_verify()
 
+    def testnonascii(self):
+        command = ["add", "building", "--building", "nonascii", "--city", "ny",
+                   "--address", "\xe1\xe9\xed\xf3\xfa"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Only ASCII characters are allowed for --address.",
+                         command)
+
+    def testnonasciiaudit(self):
+        command = ["search", "audit", "--keyword", "nonascii"]
+        out = self.commandtest(command)
+        self.matchoutput(out,
+                         "400 aq add_building --address='<Non-ASCII value>' "
+                         "--building='nonascii' --city='ny'",
+                         command)
+
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddBuilding)
