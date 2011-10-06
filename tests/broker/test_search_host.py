@@ -175,14 +175,35 @@ class TestSearchHost(TestBrokerCommand):
         self.matchoutput(out, "Network with address 199.98.16.0 not found",
                          command)
 
+    # utility methods for deprecation check
+    MAC_DEPR_STR = "The --mac option is deprecated.  Please use search machine --mac instead."
+    SERIAL_DEPR_STR = "The --serial option is deprecated.  Please use search machine --serial instead."
+
+    def assert_deprecation(self, depr_str, testfunc):
+         # Let's seek to the end of it, matching only against the relevant part.
+        logfile = open(self.config.get("broker", "logfile"), "r")
+        logfile.seek(0, 2)
+
+        testfunc()
+
+        depr_log = logfile.xreadlines()
+        self.assertTrue([elem for elem in depr_log if depr_str in elem])
+        logfile.close()
+
     def testmacavailable(self):
-        command = "search host --mac %s" % self.net.unknown[0].usable[2].mac
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "unittest00.one-nyp.ms.com", command)
+        def testfunc():
+            command = "search host --mac %s" % self.net.unknown[0].usable[2].mac
+            out = self.commandtest(command.split(" "))
+            self.matchoutput(out, "unittest00.one-nyp.ms.com", command)
+
+        self.assert_deprecation(TestSearchHost.MAC_DEPR_STR, testfunc)
 
     def testmacunavailable(self):
-        command = "search host --mac 02:02:c7:62:10:04"
-        self.noouttest(command.split(" "))
+        def testfunc():
+            command = "search host --mac 02:02:c7:62:10:04"
+            self.noouttest(command.split(" "))
+
+        self.assert_deprecation(TestSearchHost.MAC_DEPR_STR, testfunc)
 
     def testall(self):
         command = "search host --all"
@@ -386,7 +407,7 @@ class TestSearchHost(TestBrokerCommand):
         self.noouttest(command.split(" "))
 
         ## cleanup
-        self.noouttest(["del", "service","--service",
+        self.noouttest(["del", "service", "--service",
                         "foo", "--instance", "fooinst1"])
 
         self.noouttest(["del", "service", "--service",
@@ -455,13 +476,19 @@ class TestSearchHost(TestBrokerCommand):
                          "machine_type-does-not-exist not found.", command)
 
     def testserialavailable(self):
-        command = "search host --serial 99C5553"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "unittest02.one-nyp.ms.com", command)
+        def testfunc():
+            command = "search host --serial 99C5553"
+            out = self.commandtest(command.split(" "))
+            self.matchoutput(out, "unittest02.one-nyp.ms.com", command)
+
+        self.assert_deprecation(TestSearchHost.SERIAL_DEPR_STR, testfunc)
 
     def testserialunavailable(self):
-        command = "search host --serial serial-does-not-exist"
-        self.noouttest(command.split(" "))
+        def testfunc():
+            command = "search host --serial serial-does-not-exist"
+            self.noouttest(command.split(" "))
+
+        self.assert_deprecation(TestSearchHost.SERIAL_DEPR_STR, testfunc)
 
     def testlocationavailable(self):
         command = "search host --rack ut3"
