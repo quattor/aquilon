@@ -45,6 +45,8 @@ class CommandAddOrganization(BrokerCommand):
             if org:
                 raise ArgumentError("Organization %s already exists." %
                                     organization)
+        if not fullname:
+            fullname=organization
 
         dborg = Company(name=organization, fullname=fullname, comments=comments)
         session.add(dborg)

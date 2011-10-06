@@ -49,8 +49,19 @@ class TestOrganization(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Organization: example", command)
 
+    def testaddexorg2(self):
+        command = ["add", "organization", "--organization", "example2"]
+        self.noouttest(command)
+
+        command = "show organization --organization example2"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Organization: example2", command)
+
     def testdelexorg2(self):
         command = "del organization --organization example"
+        self.noouttest(command.split(" "))
+
+        command = "del organization --organization example2"
         self.noouttest(command.split(" "))
 
     def testdelexorgagain(self):
