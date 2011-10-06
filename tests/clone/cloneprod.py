@@ -235,7 +235,9 @@ class Cloner(object):
             return
         if not os.path.exists(self.target_dir):
             os.makedirs(self.target_dir)
-        p = Popen(['rsync', '-avP', '-e', 'ssh', '--delete',
+        p = Popen(['rsync', '-avP', '--delete', '-e',
+                   'ssh -q -o StrictHostKeyChecking=no -o ' +
+                   'UserKnownHostsFile=/dev/null -o BatchMode=yes',
                    '--filter=merge %s' % self.rsync_filter,
                    self.source_dir, self.target_dir],
                   stdout=1, stderr=2)
