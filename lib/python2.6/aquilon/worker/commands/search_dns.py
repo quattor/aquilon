@@ -30,16 +30,19 @@
 
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import (DnsRecord, ARecord, Alias, Fqdn, DnsDomain,
-                                DnsEnvironment, Network, NetworkEnvironment)
+from aquilon.aqdb.model import (DnsRecord, ARecord, Alias, SrvRecord, Fqdn,
+                                DnsDomain, DnsEnvironment, Network,
+                                NetworkEnvironment)
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.formats.list import StringAttributeList
 
 from sqlalchemy.orm import contains_eager, undefer, subqueryload, joinedload
+from sqlalchemy.sql import or_
 
 # Map standard DNS record types to our internal types
 DNS_RRTYPE_MAP = {'a': 'a_record',
-                  'cname': 'alias'}
+                  'cname': 'alias',
+                  'srv': 'srv_record'}
 
 
 class CommandSearchDns(BrokerCommand):
@@ -99,7 +102,8 @@ class CommandSearchDns(BrokerCommand):
         if target:
             dbtarget = Fqdn.get_unique(session, fqdn=target,
                                        dns_environment=dbdns_env, compel=True)
-            q = q.filter(Alias.target == dbtarget)
+            q = q.filter(or_(Alias.target == dbtarget,
+                             SrvRecord.target == dbtarget))
 
         if fullinfo:
             q = q.options(undefer('comments'))

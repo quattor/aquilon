@@ -91,7 +91,7 @@ class Fqdn(Base):
 
     @classmethod
     def get_or_create(cls, session, dns_environment=None, preclude=False,
-                      **kwargs):
+                      ignore_name_check=False, **kwargs):
         fqdn = cls.get_unique(session, dns_environment=dns_environment, **kwargs)
         if fqdn:
             if preclude:
@@ -102,13 +102,14 @@ class Fqdn(Base):
             dns_environment = DnsEnvironment.get_unique_or_default(session,
                                                                    dns_environment)
 
-        fqdn = cls(session=session, dns_environment=dns_environment, **kwargs)
+        fqdn = cls(session=session, dns_environment=dns_environment,
+                   ignore_name_check=ignore_name_check, **kwargs)
         session.add(fqdn)
         session.flush()
         return fqdn
 
     @classmethod
-    def check_name(cls, name, dns_domain):
+    def check_name(cls, name, dns_domain, ignore_name_check=False):
         """ Validate the name parameter """
 
         if not isinstance(name, basestring):  # pragma: no cover
@@ -116,7 +117,9 @@ class Fqdn(Base):
         if not isinstance(dns_domain, DnsDomain):  # pragma: no cover
             raise TypeError("%s: dns_domain must be a DnsDomain." % cls.name)
 
-        DnsDomain.check_label(name)
+        # Allow SRV records to opt out from this test
+        if not ignore_name_check:
+            DnsDomain.check_label(name)
 
         # The limit for DNS name length is 255, assuming wire format. This
         # translates to 253 for simple ASCII text; see:
@@ -129,14 +132,14 @@ class Fqdn(Base):
             raise InternalError("%s needs a session." % self._get_class_label())
 
     def __init__(self, session=None, name=None, dns_domain=None, fqdn=None,
-                 dns_environment=None, **kwargs):
+                 dns_environment=None, ignore_name_check=False, **kwargs):
         if fqdn:
             if name or dns_domain:  # pragma: no cover
                 raise TypeError("fqdn and name/dns_domain should not be mixed")
             self._check_session(session)
             (name, dns_domain) = parse_fqdn(session, fqdn)
 
-        self.check_name(name, dns_domain)
+        self.check_name(name, dns_domain, ignore_name_check)
 
         if not isinstance(dns_environment, DnsEnvironment):
             self._check_session(session)

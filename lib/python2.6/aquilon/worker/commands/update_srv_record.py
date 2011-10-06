@@ -26,45 +26,32 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-""" Helpers for managing DNS-related objects """
+"""Contains the logic for `aq update srv record`."""
 
-from sqlalchemy.orm import object_session
-
-from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import Fqdn, DnsRecord
+from aquilon.aqdb.model import SrvRecord
+from aquilon.worker.broker import BrokerCommand
 
 
-def delete_dns_record(dbdns_rec):
-    """
-    Delete a DNS record 
+class CommandUpdateSrvRecord(BrokerCommand):
 
-    Deleting a DNS record is a bit tricky because we do not want to keep
-    orphaned FQDN entries.
-    """
+    required_parameters = ["service", "protocol", "dns_domain", "target"]
 
-    session = object_session(dbdns_rec)
+    def render(self, session, service, protocol, dns_domain, target,
+               priority, weight, port, comments, dns_environment, **kwargs):
+        name = "_%s._%s" % (service.strip().lower(), protocol.strip().lower())
+        dbsrv_rec = SrvRecord.get_unique(session, name=name,
+                                         dns_domain=dns_domain,
+                                         dns_environment=dns_environment,
+                                         target=target, compel=True)
 
-    if dbdns_rec.aliases:
-        raise ArgumentError("{0} still has aliases, delete them "
-                            "first.".format(dbdns_rec))
-    if dbdns_rec.srv_records:
-        raise ArgumentError("{0} is still in use by SRV records, delete them "
-                            "first.".format(dbdns_rec))
+        if priority:
+            dbsrv_rec.priority = priority
+        if weight:
+            dbsrv_rec.weight = weight
+        if port:
+            dbsrv_rec.port = port
+        if comments is not None:
+            dbsrv_rec.comments = comments
 
-    # Lock the FQDN
-    q = session.query(Fqdn)
-    q = q.filter_by(id=dbdns_rec.fqdn_id)
-    q = q.with_lockmode('update')
-    dbfqdn = q.one()
-
-    # Delete the DNS record
-    session.delete(dbdns_rec)
-    session.flush()
-
-    # Delete the FQDN if it is orphaned
-    q = session.query(DnsRecord)
-    q = q.filter_by(fqdn_id=dbfqdn.id)
-    if q.count() == 0:
-        session.delete(dbfqdn)
-    else:
-        session.expire(dbfqdn, ['dns_records'])
+        session.flush()
+        return

@@ -3854,6 +3854,71 @@
       <transport method="post" path="alias/%(fqdn)s" />
    </command>
 
+   <command name="add_srv_record">
+      Add a DNS SRV record to the database.
+      <optgroup name="add_srv_record_opts" mandatory="True" fields="all">
+         <option name="service" type="string">The name of the service</option>
+         <option name="protocol" type="string">The name of the protocol (tcp, udp)</option>
+         <option name="dns_domain" type="string">The name of the DNS domain</option>
+         <option name="priority" type="int">The priority of the record</option>
+         <option name="weight" type="int">The weight of the record</option>
+         <option name="target" type="string">The target of the SRV record</option>
+	 <option name="port" type="int">The port on the target where the service listens</option>
+      </optgroup>
+      <optgroup name="add_srv_record_optional" mandatory="False">
+         <option name="comments" type="string">Comments</option>
+         <option name="dns_environment" type="string">The name of the environment the address is in (defaults to 'internal')</option>
+      </optgroup>
+      <transport method="put" path="srv_record/%(dns_domain)s/%(protocol)s/%(service)s" />
+   </command>
+
+   <command name="del_srv_record">
+      Delete a DNS SRV from the database.
+      <p/>
+      If --target is not specified, then all matching SRV records are deleted.
+      <optgroup name="del_srv_record_opts" mandatory="True" fields="all">
+         <option name="service" type="string">The name of the service</option>
+         <option name="protocol" type="string">The name of the protocol (tcp, udp)</option>
+         <option name="dns_domain" type="string">The name of the DNS domain</option>
+      </optgroup>
+      <optgroup name="del_srv_record_optional" mandatory="False">
+         <option name="dns_environment" type="string">The name of the environment the address is in (defaults to 'internal')</option>
+         <option name="target" type="string">The target of the SRV record</option>
+      </optgroup>
+      <transport method="delete" path="srv_record/%(dns_domain)s/%(protocol)s/%(service)s" />
+   </command>
+
+   <command name="show_srv_record">
+      Show DNS SRV records.
+      <optgroup name="show_srv_record_opts" mandatory="True" fields="all">
+         <option name="service" type="string">The name of the service</option>
+         <option name="protocol" type="string">The name of the protocol (tcp, udp)</option>
+         <option name="dns_domain" type="string">The name of the DNS domain</option>
+      </optgroup>
+      <optgroup name="show_srv_record_optional" mandatory="False">
+         <option name="dns_environment" type="string">The name of the environment the srv_record is in (defaults to 'internal')</option>
+      </optgroup>
+      <transport method="get" path="srv_record/%(dns_domain)s/%(protocol)s/%(service)s" />
+   </command>
+
+   <command name="update_srv_record">
+      Update a DNS SRV record.
+      <optgroup name="update_srv_record_opts" mandatory="True" fields="all">
+         <option name="service" type="string">The name of the service</option>
+         <option name="protocol" type="string">The name of the protocol (tcp, udp)</option>
+         <option name="dns_domain" type="string">The name of the DNS domain</option>
+         <option name="target" type="string">The target of the SRV record</option>
+      </optgroup>
+      <optgroup name="update_srv_record_optional" mandatory="False">
+         <option name="priority" type="int">The new priority of the record</option>
+         <option name="weight" type="int">The new weight of the record</option>
+         <option name="port" type="int">The new port on the target where the service listens</option>
+         <option name="comments" type="string">Comments</option>
+         <option name="dns_environment" type="string">The name of the environment the address is in (defaults to 'internal')</option>
+      </optgroup>
+      <transport method="post" path="srv_record/%(dns_domain)s/%(protocol)s/%(service)s" />
+   </command>
+
    <command name='search_dns'>
       Search DNS records in the database.
       <p/>

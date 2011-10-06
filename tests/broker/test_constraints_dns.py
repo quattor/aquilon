@@ -54,6 +54,30 @@ class TestDnsConstraints(TestBrokerCommand):
                          "locations and cannot be deleted.",
                          command)
 
+    def testdelaliasedaddress(self):
+        command = ["del", "address", "--fqdn", "arecord13.aqd-unittest.ms.com"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "DNS Record arecord13.aqd-unittest.ms.com still has "
+                         "aliases, delete them first.",
+                         command)
+
+    def testdelaliasedalias(self):
+        command = ["del", "alias", "--fqdn", "alias2host.aqd-unittest.ms.com"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "Alias alias2host.aqd-unittest.ms.com still has "
+                         "aliases, delete them first.",
+                         command)
+
+    def testdelsrvtarget(self):
+        command = ["del", "address", "--fqdn", "arecord15.aqd-unittest.ms.com"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "DNS Record arecord15.aqd-unittest.ms.com is still in "
+                         "use by SRV records, delete them first.",
+                         command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(
