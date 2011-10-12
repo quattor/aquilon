@@ -43,6 +43,7 @@ from aquilon.aqdb.model import (Base, Service, Host, DnsRecord, DnsDomain, Machi
                                 PrimaryNameAssociation, Fqdn)
 from aquilon.aqdb.column_types.aqstr import AqStr
 from aquilon.aqdb.column_types import Enum
+from collections import defaultdict
 
 _TN = 'service_instance'
 _ABV = 'svc_inst'
@@ -215,11 +216,9 @@ class ServiceInstance(Base):
             q = q.join('location').filter(Location.id.in_(location_ids))
 
             # convert results in dict
-            m_dict = {}
+            m_dict = defaultdict(list)
             for map in q.all():
-                key = "%s/%s" % (map.service.name,map.location.id)
-                if not m_dict.get(key):
-                    m_dict[key] = []
+                key = (map.service.id, map.location.id)
                 m_dict[key].append(map.service_instance)
 
             if not m_dict:
@@ -228,11 +227,11 @@ class ServiceInstance(Base):
             # choose based on proximity
             for dbservice in dbservices:
                 for lid in location_ids:
-                    key = "%s/%s" % (dbservice.name,lid)
-                    if m_dict.get(key):
-                        cache[dbservice] = []
-                        cache[dbservice].extend(m_dict.get(key))
+                    key = (dbservice.id, lid)
+                    if key in m_dict:
+                        cache[dbservice] = m_dict[key][:]
                         break
+
         return cache
 
 
