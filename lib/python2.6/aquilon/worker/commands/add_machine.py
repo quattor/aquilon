@@ -37,7 +37,7 @@ from aquilon.worker.dbwrappers.machine import create_machine
 from aquilon.worker.templates.base import PlenaryCollection
 from aquilon.worker.templates.machine import PlenaryMachineInfo
 from aquilon.worker.templates.cluster import PlenaryCluster
-from aquilon.aqdb.model import (Chassis, ChassisSlot, Cluster, Model, Machine)
+from aquilon.aqdb.model import Chassis, ChassisSlot, Cluster, Model, Machine
 
 
 class CommandAddMachine(BrokerCommand):

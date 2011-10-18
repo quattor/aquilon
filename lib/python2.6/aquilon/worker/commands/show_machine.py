@@ -49,10 +49,7 @@ class CommandShowMachine(BrokerCommand):
             # In the future, this should be clearly separated as 'show machine'
             # and 'search machine'.
             machine = AqStr.normalize(machine)
-            # This check is good for warning the user who might try
-            # looking for foo.example.com (a host).
-            if not Machine.valid_label(machine):
-                raise ArgumentError("Illegal hardware label '%s'." % machine)
+            Machine.check_label(machine)
             Machine.get_unique(session, machine, compel=True)
             q = q.filter_by(label=machine)
         dblocation = get_location(session, **arguments)

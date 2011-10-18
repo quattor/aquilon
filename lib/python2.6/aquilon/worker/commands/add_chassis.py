@@ -50,7 +50,9 @@ class CommandAddChassis(BrokerCommand):
         dbdns_rec = parse_primary_name(session, chassis, ip)
         if not label:
             label = dbdns_rec.fqdn.name
-            if not Chassis.valid_label(label):
+            try:
+                Chassis.check_label(label)
+            except ArgumentError:
                 raise ArgumentError("Could not deduce a valid hardware label "
                                     "from the chassis name.  Please specify "
                                     "--label.")

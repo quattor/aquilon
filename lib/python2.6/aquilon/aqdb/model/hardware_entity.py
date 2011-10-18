@@ -34,7 +34,7 @@ import re
 
 from sqlalchemy import (Column, Integer, Sequence, ForeignKey, UniqueConstraint,
                         Index, String, DateTime)
-from sqlalchemy.orm import relation, backref, lazyload
+from sqlalchemy.orm import relation, backref, lazyload, validates
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.orm.attributes import set_committed_value
 
@@ -87,16 +87,21 @@ class HardwareEntity(Base):  # pylint: disable-msg=W0232, R0903
     _label_check = re.compile("^[a-z][a-z0-9]{,62}$")
 
     @classmethod
-    def valid_label(cls, label):
-        return cls._label_check.match(label)
+    def check_label(cls, label):
+        if not cls._label_check.match(label):
+            raise ArgumentError("Illegal hardware label format '%s'. Only "
+                                "alphanumeric characters are allowed, and "
+                                "the first character must be a letter." % label)
+
+    @validates('label')
+    def validate_label(self, key, value):
+        self.check_label(value)
+        return value
 
     def __init__(self, label=None, **kwargs):
         label = AqStr.normalize(label)
         if not label:
             raise ArgumentError("HardwareEntity needs a label.")
-        elif not self.valid_label(label):
-            raise ArgumentError("Illegal hardware label format '%s'. Only "
-                                "alphanumeric characters are allowed." % label)
         super(HardwareEntity, self).__init__(label=label, **kwargs)
 
     def __lt__(self, other):
@@ -145,6 +150,11 @@ class HardwareEntity(Base):  # pylint: disable-msg=W0232, R0903
             if 'polymorphic_identity' in cls.__mapper_args__:
                 hardware_type = cls.__mapper_args__['polymorphic_identity']
             clslabel = cls._get_class_label()
+
+        # The automagic DNS lookup does not really make sense with preclude=True
+        if preclude:
+            name = AqStr.normalize(name)
+            cls.check_label(name)
 
         q = sess.query(cls)
         if "." in name:

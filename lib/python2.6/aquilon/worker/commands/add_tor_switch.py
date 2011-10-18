@@ -77,7 +77,9 @@ class CommandAddTorSwitch(BrokerCommand):
         dbdns_rec = parse_primary_name(session, tor_switch, ip)
         if not label:
             label = dbdns_rec.fqdn.name
-            if not Switch.valid_label(label):
+            try:
+                Switch.check_label(label)
+            except ArgumentError:
                 raise ArgumentError("Could not deduce a valid hardware label "
                                     "from the switch name.  Please specify "
                                     "--label.")
