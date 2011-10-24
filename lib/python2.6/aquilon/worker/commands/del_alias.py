@@ -48,12 +48,13 @@ class CommandDelAlias(BrokerCommand):
         domain = dbdns_rec.fqdn.dns_domain.name
 
         old_target = dbdns_rec.target
+        target_is_restricted = old_target.dns_domain.restricted
         delete_dns_record(dbdns_rec)
         delete_target_if_needed(session, old_target)
 
         session.flush()
 
-        if dbdns_env.is_default and domain == "ms.com":
+        if dbdns_env.is_default and domain == "ms.com" and not target_is_restricted:
             dsdb_runner = DSDBRunner(logger=logger)
             try:
                 dsdb_runner.del_alias(fqdn)
