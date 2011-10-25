@@ -102,6 +102,10 @@ class AuthorizationBroker(object):
         if dbuser.role.name == 'resource_pool':
             if action not in ['add_address', 'del_address']:
                 self.raise_auth_error(principal, action, resource)
+        if dbuser.role.name == 'hpevelo':
+            if action not in ['reconfigure', 'pxeswitch',
+                              'add_disk', 'del_disk', 'del_disk_disk']:
+                self.raise_auth_error(principal, action, resource)
         if dbuser.role.name == 'location_admin':
             if action not in ['add_location', 'del_location',
                               'add_building', 'del_building',
