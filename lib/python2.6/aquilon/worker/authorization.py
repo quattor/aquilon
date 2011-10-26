@@ -74,7 +74,6 @@ class AuthorizationBroker(object):
                       'add_os', 'del_os',
                       'add_model', 'update_model', 'del_model',
                       'add_organization', 'del_organization',
-                      'add_dns_environment', 'del_dns_environment',
                       'add_grn', 'del_grn', 'update_grn',
                       'rollback']:
             if dbuser.role.name not in ['engineering', 'aqd_admin']:
