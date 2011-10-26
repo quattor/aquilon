@@ -31,20 +31,17 @@
 from sqlalchemy.orm import joinedload_all
 
 from aquilon.exceptions_ import NotFoundException
-from aquilon.aqdb.model import Cluster, Archetype
+from aquilon.aqdb.model import Cluster
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.formats.cluster import ClusterList
 
 
 class CommandShowClusterAll(BrokerCommand):
 
-    def render(self, session, cluster, archetype, **arguments):
+    def render(self, session, cluster, **arguments):
         q = session.query(Cluster)
         if cluster:
             q = q.filter_by(name=cluster)
-        if archetype:
-            dbarchetype = Archetype.get_unique(session, archetype, compel=True)
-            q = q.filter_by(archetype=dbarchetype)
 
         q = q.options(joinedload_all('_hosts.host.machine'))
         q = q.order_by(Cluster.name)

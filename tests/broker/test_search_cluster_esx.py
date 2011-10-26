@@ -27,7 +27,8 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-"""Module for testing the search esx cluster command."""
+"""Module for testing the search cluster command
+(former search esx cluster queries)."""
 
 import unittest
 
@@ -38,21 +39,22 @@ if __name__ == "__main__":
 from brokertest import TestBrokerCommand
 
 
-class TestSearchESXCluster(TestBrokerCommand):
+class TestSearchClusterESX(TestBrokerCommand):
 
     def testclusteravailable(self):
-        command = "search esx cluster --cluster utecl1"
+        command = "search cluster --cluster_type esx --cluster utecl1"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "utecl1", command)
         self.matchclean(out, "Metacluster: utmc1", command)
         self.matchclean(out, "Building: ut", command)
 
     def testclusterunavailable(self):
-        command = "search esx cluster --cluster cluster-does-not-exist"
-        self.notfoundtest(command.split(" "))
+        command = ['search', 'cluster', '--cluster_type', 'esx',
+                   '--cluster', 'cluster-does-not-exist']
+        self.notfoundtest(command)
 
     def testmetaclusteravailable(self):
-        command = "search esx cluster --metacluster utmc1"
+        command = "search cluster --cluster_type esx --esx_metacluster utmc1"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "utecl1", command)
         self.matchoutput(out, "utecl2", command)
@@ -60,28 +62,31 @@ class TestSearchESXCluster(TestBrokerCommand):
         self.matchclean(out, "utecl4", command)
 
     def testmetaclusterunavailable(self):
-        command = "search esx cluster --metacluster metacluster-does-not-exist"
-        out = self.notfoundtest(command.split(" "))
+        command = ['search', 'cluster', '--cluster_type', 'esx',
+                   '--esx_metacluster', 'metacluster-does-not-exist']
+        out = self.notfoundtest(command)
         self.matchoutput(out,
                          "Metacluster metacluster-does-not-exist not found.",
                          command)
 
     def testclusteravailablefull(self):
-        command = "search esx cluster --cluster utecl1 --fullinfo"
-        out = self.commandtest(command.split(" "))
+        command = ['search', 'cluster', '--cluster_type', 'esx', '--cluster',
+                   'utecl1', '--fullinfo']
+        out = self.commandtest(command)
         self.matchoutput(out, "ESX Cluster: utecl1", command)
         self.matchoutput(out, "Metacluster: utmc1", command)
         self.matchoutput(out, "Building: ut", command)
 
     def testesxhostavailable(self):
-        command = "search esx cluster --esx_hostname evh1.aqd-unittest.ms.com"
-        out = self.commandtest(command.split(" "))
+        command = ['search', 'cluster', '--cluster_type', 'esx',
+                   '--member_hostname', 'evh1.aqd-unittest.ms.com']
+        out = self.commandtest(command)
         self.matchoutput(out, "utecl2", command)
         self.matchclean(out, "utecl1", command)
 
     def testesxhostunavailable(self):
-        command = ["search_esx_cluster",
-                   "--esx_hostname=host-does-not-exist.aqd-unittest.ms.com"]
+        command = ["search_cluster", "--cluster_type=esx",
+                   "--member_hostname=host-does-not-exist.aqd-unittest.ms.com"]
         out = self.notfoundtest(command)
         self.matchoutput(out,
                          "Host host-does-not-exist.aqd-unittest.ms.com "
@@ -89,90 +94,99 @@ class TestSearchESXCluster(TestBrokerCommand):
                          command)
 
     def testvmavailable(self):
-        command = "search esx cluster --virtual_machine evm1"
+        command = "search cluster --cluster_type esx --esx_virtual_machine evm1"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "utecl1", command)
 
     def testvmunavailable(self):
-        command = "search esx cluster --virtual_machine machine-does-not-exist"
-        out = self.notfoundtest(command.split(" "))
+        command = ['search', 'cluster', '--cluster_type', 'esx',
+                   '--esx_virtual_machine', 'machine-does-not-exist']
+        out = self.notfoundtest(command)
         self.matchoutput(out, "Machine machine-does-not-exist not found",
                          command)
 
     def testguestavailable(self):
-        command = "search esx cluster --guest aqddesk1.msad.ms.com"
-        out = self.commandtest(command.split(" "))
+        command = ['search', 'cluster', '--cluster_type', 'esx',
+                   '--esx_guest', 'aqddesk1.msad.ms.com']
+        out = self.commandtest(command)
         self.matchoutput(out, "utecl1", command)
 
     def testguestunavailable(self):
-        command = ["search_esx_cluster",
-                   "--guest=host-does-not-exist.aqd-unittest.ms.com"]
+        command = ["search_cluster", "--cluster_type=esx",
+                   "--esx_guest=host-does-not-exist.aqd-unittest.ms.com"]
         out = self.notfoundtest(command)
         self.matchoutput(out,
                          "Host host-does-not-exist.aqd-unittest.ms.com "
                          "not found",
                          command)
 
+    # TODO we have an almost duplicate
     def testdomainavailable(self):
-        command = "search esx cluster --domain unittest"
+        command = "search cluster --cluster_type esx --domain unittest"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "utecl1", command)
         self.matchoutput(out, "utecl2", command)
         self.matchoutput(out, "utecl3", command)
         self.matchoutput(out, "utecl4", command)
 
-    def testdomainunavailable(self):
-        command = "search esx cluster --domain domain-does-not-exist"
-        out = self.notfoundtest(command.split(" "))
-        self.matchoutput(out, "Domain domain-does-not-exist not found.",
-                         command)
+#    def testdomainunavailable(self):
+#        command = ['search', 'cluster', '--cluster_type', 'esx',
+#                   '--domain', 'domain-does-not-exist']
+#        out = self.notfoundtest(command)
+#        self.matchoutput(out, "Domain domain-does-not-exist not found.",
+#                         command)
 
     def testarchetypeavailable(self):
-        command = "search esx cluster --archetype esx_cluster"
+        command = "search cluster --cluster_type esx --archetype esx_cluster"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "utecl1", command)
         self.matchoutput(out, "utecl2", command)
         self.matchoutput(out, "utecl3", command)
         self.matchoutput(out, "utecl4", command)
 
-    def testarchetypeunavailable(self):
-        command = "search esx cluster --archetype archetype-does-not-exist"
-        out = self.notfoundtest(command.split(" "))
-        self.matchoutput(out, "Archetype archetype-does-not-exist not found",
-                         command)
+#    def testarchetypeunavailable(self):
+#        command = ['search', 'cluster', '--cluster_type', 'esx',
+#                   '--archetype', 'archetype-does-not-exist']
+#        out = self.notfoundtest(command)
+#        self.matchoutput(out, "Archetype archetype-does-not-exist not found",
+#                         command)
 
+    # TODO we have similar test
     def testpersonalityavailable(self):
-        command = "search esx cluster --personality esx_desktop"
+        command = "search cluster --cluster_type esx --personality esx_desktop"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "utecl1", command)
         self.matchoutput(out, "utecl2", command)
         self.matchoutput(out, "utecl3", command)
         self.matchoutput(out, "utecl4", command)
 
+    # TODO we have similar test
     def testpersonalityavailable2(self):
-        command = ["search_esx_cluster", "--archetype=esx_cluster",
-                   "--personality=esx_desktop"]
+        command = ["search_cluster", "--cluster_type=esx",
+                   "--archetype=esx_cluster", "--personality=esx_desktop"]
         out = self.commandtest(command)
         self.matchoutput(out, "utecl1", command)
         self.matchoutput(out, "utecl2", command)
         self.matchoutput(out, "utecl3", command)
         self.matchoutput(out, "utecl4", command)
 
-    def testpersonalityunavailable(self):
-        # Will only get this error if archetype is specified
-        command = ["search_esx_cluster", "--archetype=vmhost",
-                   "--personality=personality-does-not-exist"]
-        out = self.notfoundtest(command)
-        self.matchoutput(out, "Personality personality-does-not-exist, "
-                         "archetype vmhost not found.", command)
+#    def testpersonalityunavailable(self):
+#        # Will only get this error if archetype is specified
+#        command = ["search_cluster", "--cluster_type=esx",
+#                   "--archetype=vmhost",
+#                   "--personality=personality-does-not-exist"]
+#        out = self.notfoundtest(command)
+#        self.matchoutput(out, "Personality personality-does-not-exist, "
+#                         "archetype vmhost not found.", command)
 
-    def testpersonalityunavailable2(self):
-        # Will only get an error if archetype is specified
-        command = "search esx cluster --personality personality-does-not-exist"
-        self.noouttest(command.split(" "))
+#    def testpersonalityunavailable2(self):
+#        # Will only get an error if archetype is specified
+#        command = ['search', 'cluster', '--cluster_type', 'esx',
+#                   '--personality', 'personality-does-not-exist']
+#        self.noouttest(command)
 
     def testall(self):
-        command = "search esx cluster --all"
+        command = "search cluster --cluster_type esx --all"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "utecl1", command)
         self.matchoutput(out, "utecl2", command)
@@ -180,7 +194,7 @@ class TestSearchESXCluster(TestBrokerCommand):
         self.matchoutput(out, "utecl4", command)
 
     def testallfull(self):
-        command = "search esx cluster --all --fullinfo"
+        command = "search cluster --cluster_type esx --all --fullinfo"
         out = self.commandtest(command.split(" "))
         # This is a good sampling, but not the full output
         self.matchoutput(out, "ESX Cluster: utecl1", command)
@@ -192,35 +206,38 @@ class TestSearchESXCluster(TestBrokerCommand):
         self.matchoutput(out, "Building: ut", command)
 
     def testserviceavailable(self):
-        command = "search esx cluster --service esx_management_server"
-        out = self.commandtest(command.split(" "))
+        command = ['search', 'cluster', '--cluster_type', 'esx',
+                   '--service', 'esx_management_server']
+        out = self.commandtest(command)
         self.matchoutput(out, "utecl1", command)
         self.matchoutput(out, "utecl2", command)
         self.matchclean(out, "utecl3", command)
         self.matchclean(out, "utecl4", command)
 
     def testserviceunavailable(self):
-        command = "search esx cluster --service service-does-not-exist"
-        out = self.notfoundtest(command.split(" "))
+        command = ['search', 'cluster', '--cluster_type', 'esx',
+                   '--service', 'service-does-not-exist']
+        out = self.notfoundtest(command)
         self.matchoutput(out,
                          "Service service-does-not-exist not found",
                          command)
 
     def testserviceinstanceavailable(self):
-        command = ["search_esx_cluster", "--service=esx_management_server",
-                   "--instance=ut.a"]
+        command = ["search_cluster", "--cluster_type=esx",
+                   "--service=esx_management_server", "--instance=ut.a"]
         out = self.commandtest(command)
-        command = ["search_esx_cluster", "--service=esx_management_server",
-                   "--instance=ut.b"]
+        command = ["search_cluster", "--cluster_type=esx",
+                   "--service=esx_management_server", "--instance=ut.b"]
         out += self.commandtest(command)
         # Which clusters are bound to either particular instance is
         # non-deterministic, but they should all be bound to one or the other.
         self.matchoutput(out, "utecl", command)
 
     def testserviceinstanceunavailable(self):
-        command = "search esx cluster --service esx_management_server " \
-                  "--instance service-instance-does-not-exist"
-        out = self.notfoundtest(command.split(" "))
+        command = ['search', 'cluster', '--cluster_type', 'esx',
+                   '--service', 'esx_management_server',
+                   '--instance', 'service-instance-does-not-exist']
+        out = self.notfoundtest(command)
         self.matchoutput(out,
                          "Service Instance "
                          "service-instance-does-not-exist, "
@@ -228,21 +245,21 @@ class TestSearchESXCluster(TestBrokerCommand):
                          command)
 
     def testinstanceavailable(self):
-        command = "search esx cluster --instance ut.a"
+        command = "search cluster --cluster_type esx --instance ut.a"
         out = self.commandtest(command.split(" "))
-        command = "search esx cluster --instance ut.b"
+        command = "search cluster --cluster_type esx --instance ut.b"
         out += self.commandtest(command.split(" "))
         # Which clusters are bound to either particular instance is
         # non-deterministic, but they should all be bound to one or the other.
         self.matchoutput(out, "utecl", command)
 
     def testinstanceunavailable(self):
-        command = ["search_esx_cluster",
+        command = ["search_cluster", "--cluster_type=esx",
                    "--instance=service-instance-does-not-exist"]
         self.noouttest(command)
 
     def testshareavailable(self):
-        command = "search esx cluster --share test_share_1"
+        command = "search cluster --cluster_type esx --esx_share test_share_1"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "utecl1", command)
         self.matchclean(out, "utecl2", command)
@@ -250,30 +267,33 @@ class TestSearchESXCluster(TestBrokerCommand):
         self.matchclean(out, "utecl4", command)
 
     def testshareunavailable(self):
-        command = "search esx cluster --share share-does-not-exist"
-        out = self.notfoundtest(command.split(" "))
+        command = ['search', 'cluster', '--cluster_type', 'esx',
+                   '--esx_share', 'share-does-not-exist']
+        out = self.notfoundtest(command)
         self.matchoutput(out,
                          "Service Instance share-does-not-exist, service "
                          "nas_disk_share not found.",
                          command)
 
-    def testclusterlocationavailable(self):
-        command = "search esx cluster --cluster_building ut"
+    # Kept it since the output is different from testclusterlocationavailable
+    def testesxclusterlocationavailable(self):
+        command = "search cluster --cluster_type esx --cluster_building ut"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "utecl1", command)
         self.matchoutput(out, "utecl2", command)
         self.matchoutput(out, "utecl3", command)
         self.matchoutput(out, "utecl4", command)
 
-    def testclusterlocationunavailable(self):
-        command = ["search_esx_cluster",
-                   "--cluster_building=building-does-not-exist"]
-        out = self.notfoundtest(command)
-        self.matchoutput(out, "Building building-does-not-exist not found",
-                         command)
+    # Removed, we have duplicate
+#    def testclusterlocationunavailable(self):
+#        command = ["search_cluster", "--cluster_type=esx",
+#                   "--cluster_building=building-does-not-exist"]
+#        out = self.notfoundtest(command)
+#        self.matchoutput(out, "Building building-does-not-exist not found",
+#                         command)
 
     def testvmhostlocationavailable(self):
-        command = "search esx cluster --vmhost_rack ut10"
+        command = "search cluster --cluster_type esx --member_rack ut10"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "utecl1", command)
         self.matchoutput(out, "utecl2", command)
@@ -281,7 +301,7 @@ class TestSearchESXCluster(TestBrokerCommand):
         self.matchclean(out, "utecl4", command)
 
     def testvmhostlocationbuilding(self):
-        command = "search esx cluster --vmhost_building ut"
+        command = "search cluster --cluster_type esx --member_building ut"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "utecl1", command)
         self.matchoutput(out, "utecl2", command)
@@ -289,19 +309,22 @@ class TestSearchESXCluster(TestBrokerCommand):
         self.matchclean(out, "utecl4", command)
 
     def testvmhostlocationunavailable(self):
-        command = ["search_esx_cluster",
-                   "--vmhost_rack=rack-does-not-exist"]
+        command = ["search_cluster", "--cluster_type=esx",
+                   "--member_rack=rack-does-not-exist"]
         out = self.notfoundtest(command)
         self.matchoutput(out, "Rack rack-does-not-exist not found",
                          command)
 
+    # TODO we have an almost duplicate, do we want this?
     def testbuildstatuspos(self):
-        command = ['search_esx_cluster', '--buildstatus=build']
+        command = ['search_cluster', '--cluster_type=esx',
+                   '--buildstatus=build']
         out = self.commandtest(command)
         self.matchoutput(out, "utecl4", command)
 
     def testbuildstatusneg(self):
-        command = ['search_esx_cluster', '--buildstatus=decommissioned']
+        command = ['search_cluster', '--cluster_type=esx',
+                   '--buildstatus=decommissioned']
         self.noouttest(command)
 
 
