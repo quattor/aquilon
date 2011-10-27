@@ -99,6 +99,12 @@ class TestAddAlias(TestBrokerCommand):
                "--target", "target.restrict.aqd-unittest.ms.com"]
         self.noouttest(cmd)
 
+    def test_220_restricted_alias_no_dsdb(self):
+        cmd = ["add", "alias", "--fqdn", "restrict.ms.com",
+               "--target", "no-dsdb.restrict.aqd-unittest.ms.com"]
+        self.noouttest(cmd)
+        self.dsdb_verify(empty=True)
+
     def test_400_verify_alias2host(self):
         cmd = "show alias --fqdn alias2host.aqd-unittest.ms.com"
         out = self.commandtest(cmd.split(" "))

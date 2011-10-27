@@ -87,6 +87,11 @@ class TestDelAlias(TestBrokerCommand):
                    "--fqdn", "target2.restrict.aqd-unittest.ms.com"]
         self.notfoundtest(command)
 
+    def test_320_restricted_alias_no_dsdb(self):
+        command = ["del", "alias", "--fqdn", "restrict.ms.com"]
+        self.noouttest(command)
+        self.dsdb_verify(empty=True)
+
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelAlias)

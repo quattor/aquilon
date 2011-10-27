@@ -66,7 +66,8 @@ class CommandAddAlias(BrokerCommand):
 
         session.flush()
 
-        if dbdns_env.is_default and dbfqdn.dns_domain.name == "ms.com":
+        if dbdns_env.is_default and dbfqdn.dns_domain.name == "ms.com" and \
+           not dbtarget.dns_domain.restricted:
             dsdb_runner = DSDBRunner(logger=logger)
             try:
                 dsdb_runner.add_alias(fqdn, target, comments)
