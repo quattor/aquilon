@@ -74,7 +74,6 @@ class AuthorizationBroker(object):
                       'add_os', 'del_os',
                       'add_model', 'update_model', 'del_model',
                       'add_organization', 'del_organization',
-                      'add_dns_environment', 'del_dns_environment',
                       'add_grn', 'del_grn', 'update_grn',
                       'rollback']:
             if dbuser.role.name not in ['engineering', 'aqd_admin']:
@@ -101,6 +100,10 @@ class AuthorizationBroker(object):
                 self.raise_auth_error(principal, action, resource)
         if dbuser.role.name == 'resource_pool':
             if action not in ['add_address', 'del_address']:
+                self.raise_auth_error(principal, action, resource)
+        if dbuser.role.name == 'hpevelo':
+            if action not in ['reconfigure', 'pxeswitch',
+                              'add_disk', 'del_disk', 'del_disk_disk']:
                 self.raise_auth_error(principal, action, resource)
         if dbuser.role.name == 'location_admin':
             if action not in ['add_location', 'del_location',
@@ -138,6 +141,9 @@ class AuthorizationBroker(object):
                               'cluster', 'change_status_cluster',
                               'add_manager', 'add_dynamic_range', 'add_disk',
                               'add_auxiliary',
+                              'add_service_instance',
+                              'update_service_instance',
+                              'add_nas_disk_share',
                               'poll_switch', 'poll_tor_switch_tor_switch',
                               'poll_switch_switch', 'poll_tor_switch',
                               'make', 'make_cluster']:
