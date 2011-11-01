@@ -31,6 +31,7 @@
 
 from aquilon.exceptions_ import IncompleteError, NotFoundException
 from aquilon.aqdb.model import Cluster, ClusterResource, HostResource
+from aquilon.aqdb.model import ResourceGroup, BundleResource
 from aquilon.worker.templates.resource import PlenaryResource
 from aquilon.worker.templates.host import PlenaryHost
 from aquilon.worker.templates.cluster import PlenaryCluster
@@ -38,7 +39,8 @@ from aquilon.worker.dbwrappers.host import hostname_to_host
 from aquilon.worker.locks import lock_queue, CompileKey
 
 
-def get_resource_holder(session, hostname, cluster, compel=True):
+def get_resource_holder(session, hostname, cluster, resgroup=None,
+                        compel=True):
     who = None
     if hostname is not None:
         dbhost = hostname_to_host(session, hostname)
@@ -62,7 +64,20 @@ def get_resource_holder(session, hostname, cluster, compel=True):
             session.flush()
             who = dbcluster.resholder
 
+    if resgroup is not None:
+        dbrg = ResourceGroup.get_unique(session, resgroup, compel=True)
+        who = dbrg.resholder
+        if who is None:
+            if compel:
+                raise NotFoundException("resourcegroup %s has no resources" %
+                                        dbrg)
+            dbrg.resholder = BundleResource(resourcegroup=dbrg)
+            session.add(dbrg.resholder)
+            session.flush()
+            who = dbrg.resholder
+
     return who
+
 
 def del_resource(session, logger, dbresource):
     if dbresource.holder.holder_type == 'host':
@@ -95,6 +110,7 @@ def del_resource(session, logger, dbresource):
 
     return
 
+
 def add_resource(session, logger, holder, dbresource):
     dbresource.holder = holder
     session.add(dbresource)
@@ -108,6 +124,9 @@ def add_resource(session, logger, holder, dbresource):
     if holder.holder_type == 'cluster':
         holder_plenary = PlenaryCluster(holder.cluster)
         domain = holder.cluster.branch.name
+    if holder.holder_type == 'resourcegroup':
+        holder_plenary = PlenaryResource(holder.resourcegroup)
+        #domain =
 
     key = CompileKey.merge([res_plenary.get_write_key(),
                             holder_plenary.get_write_key()])
@@ -126,5 +145,3 @@ def add_resource(session, logger, holder, dbresource):
         lock_queue.release(key)
 
     return
-
-

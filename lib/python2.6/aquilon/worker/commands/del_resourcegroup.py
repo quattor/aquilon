@@ -28,14 +28,23 @@
 # TERMS THAT MAY APPLY.
 
 
-from aquilon.aqdb.model import Intervention
-from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.commands.show_resource import show_resource
+from aquilon.aqdb.model import ResourceGroup
+from aquilon.worker.broker import BrokerCommand, validate_basic
+from aquilon.worker.dbwrappers.resources import (del_resource,
+                                                 get_resource_holder)
 
 
-class CommandShowIntervention(BrokerCommand):
+class CommandDelResourceGroup(BrokerCommand):
 
-    def render(self, session, intervention,
-               hostname, cluster, resourcegroup, all, **arguments):
-        return show_resource(session, hostname, cluster, resourcegroup, all,
-                             intervention, Intervention)
+    required_parameters = ["resourcegroup"]
+
+    def render(self, session, logger, resourcegroup,
+               hostname, cluster, **arguments):
+
+        validate_basic("resourcegroup", resourcegroup)
+        holder = get_resource_holder(session, hostname, cluster)
+        dbrg = ResourceGroup.get_unique(session, name=resourcegroup,
+                                        #holder=holder,
+                                        compel=True)
+        del_resource(session, logger, dbrg)
+        return

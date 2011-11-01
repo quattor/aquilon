@@ -26,16 +26,42 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
+"""Filesystem Resource formatter."""
 
 
-from aquilon.aqdb.model import Intervention
-from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.commands.show_resource import show_resource
+from aquilon.worker.formats.formatters import ObjectFormatter
+from aquilon.worker.formats.resource import ResourceFormatter
+from aquilon.aqdb.model import ResourceGroup, Resource
 
 
-class CommandShowIntervention(BrokerCommand):
+class ResourceGroupFormatter(ResourceFormatter):
+    #protocol = "aqdsystems_pb2"
 
-    def render(self, session, intervention,
-               hostname, cluster, resourcegroup, all, **arguments):
-        return show_resource(session, hostname, cluster, resourcegroup, all,
-                             intervention, Intervention)
+    def format_raw(self, rg, indent=""):
+        details = []
+        details.append(indent + "  SystemList: %s" % rg.systemlist)
+        details.append(indent + "  AutoStartList: %s" % rg.autostartlist)
+        for resource in rg.resources:
+            details.append(indent + "  Resource: %s (%s)" % (
+                    resource.name, resource.resource_type))
+
+        return super(ResourceGroupFormatter, self).format_raw(rg, indent) + \
+               "\n" + "\n".join(details)
+
+    def format_proto(self, fs, skeleton=None):
+        return None
+        # container = skeleton
+        # if not container:
+        #     container = self.loaded_protocols[self.protocol].ResourceList()
+        #     skeleton = container.resources.add()
+        # skeleton.fsdata.mount = fs.mount
+        # skeleton.fsdata.fstype = str(fs.fstype)
+        # skeleton.fsdata.blockdevice = str(fs.blockdev)
+        # skeleton.fsdata.mountpoint = str(fs.mountpoint)
+        # skeleton.fsdata.opts = str(fs.mountoptions)
+        # skeleton.fsdata.freq = fs.dumpfreq
+        # skeleton.fsdata.passno = fs.passno
+        # return super(FilesystemFormatter, self).format_proto(fs, skeleton)
+
+
+ObjectFormatter.handlers[ResourceGroup] = ResourceGroupFormatter()

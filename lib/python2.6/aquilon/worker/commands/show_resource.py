@@ -32,7 +32,7 @@ from aquilon.worker.formats.resource import ResourceList
 from aquilon.worker.dbwrappers.resources import get_resource_holder
 
 
-def show_resource(session, hostname, cluster,
+def show_resource(session, hostname, cluster, resourcegroup,
                   all, name, resource_class):
     q = session.query(resource_class)
     if all:
@@ -40,8 +40,8 @@ def show_resource(session, hostname, cluster,
     if name:
         q = q.filter_by(name=name)
 
-    if hostname or cluster:
-        who = get_resource_holder(session, hostname, cluster)
+    if hostname or cluster or resourcegroup:
+        who = get_resource_holder(session, hostname, cluster, resourcegroup)
         q = q.filter_by(holder=who)
 
     return ResourceList(q.all())

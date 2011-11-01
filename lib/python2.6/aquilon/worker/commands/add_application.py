@@ -38,11 +38,12 @@ class CommandAddApplication(BrokerCommand):
     required_parameters = ["application", "eonid"]
 
     def render(self, session, logger, application, eonid,
-               hostname, cluster,
+               hostname, cluster, resourcegroup,
                comments, **arguments):
 
         validate_basic("application", application)
-        holder = get_resource_holder(session, hostname, cluster, compel=False)
+        holder = get_resource_holder(session, hostname, cluster,
+                                     resourcegroup, compel=False)
 
         Application.get_unique(session, name=application, holder=holder,
                                preclude=True)

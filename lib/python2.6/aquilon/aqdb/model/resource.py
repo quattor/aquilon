@@ -31,7 +31,7 @@ from datetime import datetime
 import re
 
 from sqlalchemy import (Column, Integer, String, DateTime, ForeignKey,
-                        Sequence, UniqueConstraint)
+                        Sequence, UniqueConstraint, CheckConstraint)
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import relation, backref, object_session
 
@@ -124,6 +124,7 @@ class ResourceHolder(Base):
 
 
 Resource.holder = relation(ResourceHolder, uselist=False, lazy='subquery',
+                           primaryjoin=Resource.holder_id==ResourceHolder.id,
                            backref=backref('resources',
                                            cascade='all, delete-orphan'))
 

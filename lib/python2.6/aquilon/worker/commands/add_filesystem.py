@@ -38,14 +38,15 @@ class CommandAddFilesystem(BrokerCommand):
     required_parameters = ["filesystem", "mountpoint", "blockdevice",
                            "type", "bootmount"]
 
-    def render(self, session, logger, filesystem, type, mountpoint, 
+    def render(self, session, logger, filesystem, type, mountpoint,
                blockdevice, bootmount,
                dumpfreq, fsckpass, options,
-               hostname, cluster,
+               hostname, cluster, resourcegroup,
                comments, **arguments):
 
         validate_basic("filesystem", filesystem)
-        holder = get_resource_holder(session, hostname, cluster, compel=False)
+        holder = get_resource_holder(session, hostname, cluster, resourcegroup,
+                                     compel=False)
 
         Filesystem.get_unique(session, name=filesystem, holder=holder,
                               preclude=True)

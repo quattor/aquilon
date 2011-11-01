@@ -28,14 +28,21 @@
 # TERMS THAT MAY APPLY.
 
 
-from aquilon.aqdb.model import Intervention
+from sqlalchemy.orm import aliased
+from sqlalchemy.sql.expression import and_
+
+from aquilon.exceptions_ import ArgumentError
+from aquilon.aqdb.model import ResourceGroup
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.commands.show_resource import show_resource
 
 
-class CommandShowIntervention(BrokerCommand):
+class CommandShowResourceGroup(BrokerCommand):
 
-    def render(self, session, intervention,
-               hostname, cluster, resourcegroup, all, **arguments):
-        return show_resource(session, hostname, cluster, resourcegroup, all,
-                             intervention, Intervention)
+    required_parameters = []
+
+    def render(self, session, hostname, cluster, all, resourcegroup,
+               **arguments):
+
+        return show_resource(session, hostname, cluster, None, all,
+                             resourcegroup, ResourceGroup)
