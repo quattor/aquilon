@@ -231,5 +231,5 @@ class TestAddCluster(TestBrokerCommand):
 
 
 if __name__=='__main__':
-    suite = unittest.TestLoader().loadTestsFromTestCase(TestAddESXCluster)
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestAddCluster)
     unittest.TextTestRunner(verbosity=2).run(suite)

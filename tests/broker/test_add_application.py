@@ -89,6 +89,6 @@ class TestAddApplication(TestBrokerCommand):
 
 
 if __name__=='__main__':
-    suite = unittest.TestLoader().loadTestsFromTestCase(TestAddArchetype)
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestAddApplication)
     unittest.TextTestRunner(verbosity=2).run(suite)
 
