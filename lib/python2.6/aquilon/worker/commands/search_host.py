@@ -81,6 +81,8 @@ class CommandSearchHost(BrokerCommand):
         use_addrq = False
         addrq = session.query(Interface.id)
         if mac:
+            self.deprecated_option("mac", "Please use search machine --mac instead.",
+                logger=logger, **arguments)
             addrq = addrq.filter(Interface.mac == mac)
             use_addrq = True
         addrq = addrq.join(AddressAssignment, Network)
@@ -123,6 +125,8 @@ class CommandSearchHost(BrokerCommand):
             q = q.filter(Machine.model_id.in_(subq))
 
         if serial:
+            self.deprecated_option("serial", "Please use search machine --serial instead.",
+                logger=logger, **arguments)
             q = q.filter_by(serial_no=serial)
 
         if use_addrq:
