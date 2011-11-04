@@ -43,6 +43,7 @@ from aquilon.aqdb.model import (Base, Service, Host, DnsRecord, DnsDomain, Machi
                                 PrimaryNameAssociation, Fqdn)
 from aquilon.aqdb.column_types.aqstr import AqStr
 from aquilon.aqdb.column_types import Enum
+from collections import defaultdict
 
 _TN = 'service_instance'
 _ABV = 'svc_inst'
@@ -185,76 +186,52 @@ class ServiceInstance(Base):
     def get_mapped_instance_cache(cls, dbpersonality, dblocation, dbservices):
         """Returns dict of requested services to closest mapped instances."""
         session = object_session(dbpersonality)
-        if session.connection().dialect.name == 'oracle':
-            return cls._oracle_get_mapped_instance_cache(dbpersonality,
-                                                         dblocation,
-                                                         dbservices)
-        return cls._universal_get_mapped_instance_cache(dbpersonality,
-                                                        dblocation, dbservices)
 
-    @classmethod
-    def _oracle_get_mapped_instance_cache(cls, dbpersonality, dblocation,
-                                          dbservices):
-        session = object_session(dbpersonality)
-
-        q = session.query(ServiceInstance)
-        # The in_ method does not work for relations in sqlalchemy 0.5.
-        service_ids = [dbservice.id for dbservice in dbservices]
-        q = q.filter(ServiceInstance.service_id.in_(service_ids))
-        q = q.filter(ORACLE_PERSONALITY_SERVICE_MAP_EXISTS)
-        q = q.params(location_id=dblocation.id,
-                     personality_id=dbpersonality.id)
-
-        cache = {}
-        for dbsi in q.all():
-            if not cache.get(dbsi.service):
-                cache[dbsi.service] = []
-            cache[dbsi.service].append(dbsi)
-
-        missing_ids = []
-        for dbservice in dbservices:
-            if not cache.get(dbservice):
-                missing_ids.append(dbservice.id)
-
-        if not missing_ids:
-            return cache
-
-        q = session.query(ServiceInstance)
-        q = q.filter(ServiceInstance.service_id.in_(missing_ids))
-        q = q.filter(ORACLE_SERVICE_MAP_EXISTS)
-        q = q.params(location_id=dblocation.id)
-        for dbsi in q.all():
-            if not cache.get(dbsi.service):
-                cache[dbsi.service] = []
-            cache[dbsi.service].append(dbsi)
-
-        return cache
-
-    @classmethod
-    def _universal_get_mapped_instance_cache(cls, dbpersonality, dblocation,
-                                             dbservices):
         # Can't import these on init as ServiceInstance is a dependency.
         # Could think about moving this method definition out to one of
         # these classes.
-        from aquilon.aqdb.model import ServiceMap, PersonalityServiceMap
+        from aquilon.aqdb.model import ServiceMap, PersonalityServiceMap, Location
         session = object_session(dbpersonality)
         cache = {}
-        for dbservice in dbservices:
-            for map_type in [PersonalityServiceMap, ServiceMap]:
-                current_location = dblocation
-                last_location = None
-                while(not cache.get(dbservice) and
-                      current_location is not None and
-                      current_location != last_location):
-                    q = session.query(map_type)
-                    if map_type == PersonalityServiceMap:
-                        q = q.filter_by(personality=dbpersonality)
-                    q = q.filter_by(location=current_location)
-                    q = q.join('service_instance').filter_by(service=dbservice)
-                    cache[dbservice] = [map.service_instance
-                                            for map in q.all()]
-                    last_location = current_location
-                    current_location = current_location.parent
+
+        ## all relevant locations
+        location_ids = []
+        location_ids.append(dblocation.id)
+        for loc in reversed(dblocation.parents):
+            location_ids.append(loc.id)
+
+        for map_type in [PersonalityServiceMap, ServiceMap]:
+            # search only for missing ids
+            missing_ids = []
+            for dbservice in dbservices:
+                if not cache.get(dbservice):
+                    missing_ids.append(dbservice.id)
+
+            ## get map by locations
+            q = session.query(map_type)
+            if map_type == PersonalityServiceMap:
+                q = q.filter_by(personality=dbpersonality)
+            q = q.join('service_instance').filter(ServiceInstance.service_id.in_(missing_ids))
+            q = q.reset_joinpoint()
+            q = q.join('location').filter(Location.id.in_(location_ids))
+
+            # convert results in dict
+            m_dict = defaultdict(list)
+            for map in q.all():
+                key = (map.service.id, map.location.id)
+                m_dict[key].append(map.service_instance)
+
+            if not m_dict:
+                continue
+
+            # choose based on proximity
+            for dbservice in dbservices:
+                for lid in location_ids:
+                    key = (dbservice.id, lid)
+                    if key in m_dict:
+                        cache[dbservice] = m_dict[key][:]
+                        break
+
         return cache
 
 
@@ -265,78 +242,6 @@ service_instance.append_constraint(
     UniqueConstraint('service_id', 'name', name='svc_inst_uk'))
 service_instance.info['abrev'] = _ABV
 service_instance.info['unique_fields'] = ['name', 'service']
-
-# This highly optimized filter is used to implement the logic in
-# ServiceInstance._universal_get_archetype_map().
-#
-# It is best read inside-out starting at the deepest nesting.
-# The numbers in the table aliases represent nesting level.
-# The innermost (#4) select determines the hierarchy level for the locations
-# of any service map entries for the given service instance.
-# Layer #3 picks out the level of the most granular location available.
-# Layer #2 gets the id for that location.
-# The outermost layer selects all service instances for all archetype
-# required services that are in the service map.  It filters on the
-# location information to only pull the closest entries.
-#
-# Of note is that it assumes the standard table name of service_instance
-# from the main query.  (It's the unaliased reference in the first AND
-# clause.)
-#
-# This was duplicated for personality_service_map below.
-ORACLE_SERVICE_MAP_EXISTS = """EXISTS (
-SELECT 1
-FROM service_instance si1, location l1, service_map sm1, service s1
-WHERE si1.service_id = s1.id
-AND service_instance.id = si1.id
-AND s1.id IS NOT NULL
-AND sm1.service_instance_id = si1.id
-AND sm1.location_id = l1.id
-AND l1.id in (
-    SELECT l2.id FROM location l2
-    WHERE LEVEL = (
-        SELECT MIN(LEVEL) FROM location l3
-        WHERE EXISTS (
-            SELECT 1 FROM service_map sm4, service_instance si4
-            WHERE sm4.location_id = l3.id
-            AND sm4.service_instance_id = si4.id
-            AND si4.service_id = s1.id
-        )
-        CONNECT BY l3.id = PRIOR l3.parent_id START WITH l3.id = :location_id
-    )
-    CONNECT BY l2.id = PRIOR l2.parent_id START WITH l2.id = :location_id
-)
-)"""
-
-# See comments for ORACLE_SERVICE_MAP_EXISTS
-# This is the same except personality_service_map is used instead of
-# service_map, which requires personality_id as an additional parameter.
-ORACLE_PERSONALITY_SERVICE_MAP_EXISTS = """EXISTS (
-SELECT 1
-FROM service_instance si1, location l1, personality_service_map sm1, service s1
-WHERE si1.service_id = s1.id
-AND service_instance.id = si1.id
-AND s1.id IS NOT NULL
-AND sm1.service_instance_id = si1.id
-AND sm1.location_id = l1.id
-AND sm1.personality_id = :personality_id
-AND l1.id in (
-    SELECT l2.id FROM location l2
-    WHERE LEVEL = (
-        SELECT MIN(LEVEL) FROM location l3
-        WHERE EXISTS (
-            SELECT 1 FROM personality_service_map sm4, service_instance si4
-            WHERE sm4.location_id = l3.id
-            AND sm4.service_instance_id = si4.id
-            AND si4.service_id = s1.id
-            AND sm4.personality_id = :personality_id
-        )
-        CONNECT BY l3.id = PRIOR l3.parent_id START WITH l3.id = :location_id
-    )
-    CONNECT BY l2.id = PRIOR l2.parent_id START WITH l2.id = :location_id
-)
-)"""
-
 
 class BuildItem(Base):
     """ Identifies the service_instance bindings of a machine. """

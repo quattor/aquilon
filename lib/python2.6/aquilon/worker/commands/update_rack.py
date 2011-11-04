@@ -61,12 +61,12 @@ class CommandUpdateRack(BrokerCommand):
                                     "while {2} is in {3}.".format(
                                         dbroom, dbroom.building,
                                         dbrack, dbrack.building))
-            dbrack.parent = dbroom
+            dbrack.update_parent(parent=dbroom)
         if clearroom:
             if not dbrack.room:
                 raise ArgumentError("{0} does not have room information "
                                     "to clear.".format(dbrack))
-            dbrack.parent = dbrack.room.parent
+            dbrack.update_parent(parent=dbrack.room.parent)
 
         session.flush()
 

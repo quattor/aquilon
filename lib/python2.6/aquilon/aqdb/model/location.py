@@ -29,16 +29,15 @@
 """ How we represent location data in Aquilon """
 
 from datetime import datetime
-from collections import deque
-
 from sqlalchemy import (Integer, DateTime, Sequence, String, Column,
-                        ForeignKey, UniqueConstraint, text)
+                        ForeignKey, UniqueConstraint)
 
 from sqlalchemy.orm import relation, backref, object_session
+from sqlalchemy.sql import and_, or_, desc
 
 from aquilon.aqdb.model import Base
 from aquilon.aqdb.column_types import AqStr
-
+from aquilon.exceptions_ import AquilonError
 
 class Location(Base):
     """ How we represent location data in Aquilon """
@@ -47,11 +46,6 @@ class Location(Base):
     id = Column(Integer, Sequence('location_id_seq'), primary_key=True)
 
     name = Column(AqStr(16), nullable=False)
-
-    #code = Column(AqStr(16), nullable=False) #how to override the __init__?
-
-    parent_id = Column(Integer, ForeignKey(
-        'location.id', name='loc_parent_fk'), nullable=True)
 
     location_type = Column(AqStr(32), nullable=False)
 
@@ -63,44 +57,11 @@ class Location(Base):
 
     __mapper_args__ = {'polymorphic_on': location_type}
 
-    def get_parents(self):
-        # Cache the results since e.g. self.sysloc calls this method multiple
-        # times. Since there is currently no way to change the parent, we don't
-        # have to worry about invalidation.
-        if hasattr(self, "_parents"):
-            return self._parents
-
-        session = object_session(self)
-        if session.connection().dialect.name == 'oracle':
-            s = text("""SELECT * FROM location
-                        WHERE id != :loc_id
-                        CONNECT BY id = PRIOR parent_id
-                        START WITH id = :loc_id""")
-            pl = session.query(Location).from_statement(s)
-            pl = pl.params(loc_id=self.id).all()
-        else:
-            pl = []
-            p_node = self.parent
-            if not p_node:
-                return pl
-            while p_node.parent is not None and p_node.parent != p_node:
-                pl.append(p_node)
-                p_node = p_node.parent
-            pl.append(p_node)
-
-        pl.reverse()
-        setattr(self, "_parents", pl)
-        return pl
-
     def get_p_dict(self):
         d = {str(self.location_type): self}
-        for p_node in self.get_parents():
+        for p_node in self.parents:
             d[str(p_node.location_type)] = p_node
         return d
-
-    @property
-    def parents(self):
-        return self.get_parents()
 
     @property
     def p_dict(self):
@@ -142,35 +103,14 @@ class Location(Base):
     def chassis(self):
         return self.p_dict.get('chassis', None)
 
-    @property
-    def append(self, node):
-        if isinstance(node, Location):
-            node.parent = self
-            self.sublocations[node] = node
-
-    def offspring_ids(self, exclude_self=False):
+    def offspring_ids(self):
         session = object_session(self)
-        # We have two implementations here: the first is fast but
-        # Oracle-specific, the second is slower but works with any database
-        if session.connection().dialect.name == 'oracle':
-            where = "WHERE id != %d" % self.id if exclude_self else ""
-            s = text("""SELECT id FROM location
-                        %s
-                        CONNECT BY parent_id = PRIOR id
-                        START WITH id = %d""" % (where, self.id))
-            return s
-        else:
-            queue = deque([self.id])
-            offsprings = []
-            while queue:
-                node_id = queue.popleft()
-                offsprings.append(node_id)
-                q = session.query(Location.id).filter_by(parent_id=node_id)
-                children = [item.id for item in q.all()]
-                queue.extend(children)
-            if exclude_self:
-                offsprings.remove(self.id)
-            return offsprings
+        q = session.query(Location.id)
+        q = q.join((LocationLink, Location.id == LocationLink.child_id))
+        # Include self as well
+        q = q.filter(or_(Location.id == self.id,
+                         LocationLink.parent_id == self.id))
+        return q.subquery()
 
     def sysloc(self):
         components = ['building', 'city', 'continent']
@@ -196,6 +136,58 @@ class Location(Base):
             merged = self_part
         return merged
 
+    def __init__(self, parent=None, **kwargs):
+        # Keep compatibility with the old behavior of the "parent" attribute
+        # when creating new objects. Note that both the location manipulation
+        # commands and the data loader in the unittest suite depends on this.
+        if parent is not None:
+            session = object_session(parent)
+            if not session:
+                raise AquilonError("The parent must be persistent")
+
+            # We have to disable autoflush in case parent._parent_links needs
+            # loading, since self is not ready to be pushed to the DB yet
+            flush_state = session.autoflush
+            session.autoflush = False
+            for link in parent._parent_links:
+                session.add(LocationLink(child=self, parent=link.parent,
+                                         distance=link.distance + 1))
+            session.add(LocationLink(child=self, parent=parent, distance=1))
+            session.expire(parent, ["_child_links", "children"])
+            session.autoflush = flush_state
+
+        super(Location, self).__init__(**kwargs)
+
+    def update_parent(self, parent=None):
+        # The update parent only handles cases when a child is moved
+        # from one parent to another. It does not handle the cases
+        # when children under the parents are moved. A update_children
+        # method will have to be implemented for that
+
+        session = object_session(self)
+        if parent is None:  # pragma: no cover
+            raise AquilonError("Parent location can be updated but not removed")
+
+        session = object_session(self)
+        ## delete old location links
+        flush_state = session.autoflush
+        session.autoflush = False
+
+        for link in self._parent_links:
+            q = session.query(LocationLink)
+            q = q.filter(and_(LocationLink.child_id==self.id,
+                              LocationLink.parent_id==link.parent.id))
+            dblink = q.first()
+            session.delete(dblink)
+
+        if parent is not None:
+            for link in parent._parent_links:
+                session.add(LocationLink(child=self, parent=link.parent,
+                                         distance=link.distance + 1))
+            session.add(LocationLink(child=self, parent=parent, distance=1))
+            session.expire(parent, ["_child_links", "children"])
+
+        session.autoflush = flush_state
 
 location = Location.__table__  # pylint: disable-msg=C0103, E1101
 
@@ -205,6 +197,51 @@ location.info['unique_fields'] = ['name', 'location_type']
 location.append_constraint(
     UniqueConstraint('name', 'location_type', name='loc_name_type_uk'))
 
-Location.sublocations = relation('Location',
-                                 backref=backref('parent',
-                                                 remote_side=[location.c.id]))
+
+class LocationLink(Base):
+    __tablename__ = 'location_link'
+
+    child_id = Column(Integer, ForeignKey('location.id', ondelete='CASCADE'),
+                      primary_key=True)
+
+    parent_id = Column(Integer, ForeignKey('location.id', ondelete='CASCADE'),
+                       primary_key=True)
+
+    # Distance from the given parent. 1 means direct child.
+    distance = Column(Integer, nullable=False)
+
+    child = relation(Location, innerjoin=True,
+                     primaryjoin=child_id == Location.id,
+                     backref=backref("_parent_links",
+                                     cascade="all, delete-orphan",
+                                     passive_deletes=True))
+
+    parent = relation(Location, innerjoin=True,
+                      primaryjoin=parent_id == Location.id,
+                      backref=backref("_child_links",
+                                      cascade="all, delete-orphan",
+                                      passive_deletes=True))
+
+# Make these relations view-only, to make sure
+# the distance is managed explicitely
+Location.parents = relation(Location, lazy=True,
+                            secondary=LocationLink.__table__,
+                            primaryjoin=Location.id == LocationLink.child_id,
+                            secondaryjoin=Location.id == LocationLink.parent_id,
+                            order_by=[desc(LocationLink.distance)],
+                            viewonly=True)
+
+# FIXME: this should be dropped when multiple parents are allowed
+Location.parent = relation(Location, lazy=True, uselist=False,
+                           secondary=LocationLink.__table__,
+                           primaryjoin=and_(Location.id == LocationLink.child_id,
+                                            LocationLink.distance == 1),
+                           secondaryjoin=Location.id == LocationLink.parent_id,
+                           viewonly=True)
+
+Location.children = relation(Location, lazy=True,
+                             secondary=LocationLink.__table__,
+                             primaryjoin=Location.id == LocationLink.parent_id,
+                             secondaryjoin=Location.id == LocationLink.child_id,
+                             order_by=[LocationLink.distance],
+                             viewonly=True)
