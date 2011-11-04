@@ -22,8 +22,7 @@ database_section = database_oracle
 
 [broker]
 quattordir = %(basedir)s/quattor
-templateport = %(openport)s
-git_templates_url = http://%(servername)s:%(templateport)s/templates
+git_templates_url = http://%(servername)s:%(openport)s/templates
 dsdb_use_testdb = True
 run_knc = True
 run_git_daemon = True

@@ -105,9 +105,12 @@ mode = readwrite
 umask = 0022
 kncport = 6900
 openport = 6901
+# Force binding to a specific IP address/host name. Only a single address is supported
+#bind_address =
+# Using a fix port for sending out notifications makes it easier to configure firewalls
+#cdp_send_port =
 git_port = 9418
 gzip_level = 9
-templateport = %(openport)s
 git_templates_url = git://%(servername)s:%(git_port)s/quattor/template-king
 git_daemon_basedir = %(basedir)s
 run_git_daemon = False
