@@ -30,12 +30,13 @@
 
 from datetime import datetime
 
-from sqlalchemy import (Integer, DateTime, String, Column, ForeignKey,
+from sqlalchemy import (Integer, Boolean, DateTime, String, Column, ForeignKey,
                         UniqueConstraint, Index)
 from sqlalchemy.orm import relation, backref
 
 from aquilon.aqdb.model import (Base, Branch, Machine, HostLifecycle, Grn,
                                 Personality, OperatingSystem, UserPrincipal)
+from aquilon.aqdb.column_types import Enum
 
 _TN = 'host'
 _HOSTGRN = 'host_grn_map'
@@ -104,6 +105,9 @@ class Host(Base):
     status = relation(HostLifecycle, innerjoin=True, backref='hosts')
     operating_system = relation(OperatingSystem, uselist=False, innerjoin=True,
                                 backref='hosts')
+    # something to retain the advertised status of the host
+    advertise_status = Column(Boolean(name="%s_advertise_status_valid_ck" % _TN),
+                           nullable=False, default=False)
 
     @property
     def fqdn(self):

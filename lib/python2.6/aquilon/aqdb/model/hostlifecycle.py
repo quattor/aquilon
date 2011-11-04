@@ -141,7 +141,8 @@ class Ready(HostLifecycle):
                                                'almostready',
                                                compel=True)
             obj.status.transition(obj, dbstate)
-
+        else:
+            obj.advertise_status = True
 
 class Almostready(HostLifecycle):
     __mapper_args__ = {'polymorphic_identity': 'almostready'}
@@ -158,10 +159,8 @@ class Build(HostLifecycle):
 class Rebuild(HostLifecycle):
     __mapper_args__ = {'polymorphic_identity': 'rebuild'}
 
-
 class Reinstall(HostLifecycle):
     __mapper_args__ = {'polymorphic_identity': 'reinstall'}
-
 
 class Failed(HostLifecycle):
     __mapper_args__ = {'polymorphic_identity': 'failed'}

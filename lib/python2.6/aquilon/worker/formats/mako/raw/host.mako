@@ -25,3 +25,4 @@ Provides: ${si.cfg_path}
 % if record.comments:
 Comments: ${record.comments}
 % endif
+Advertise Status: ${str(record.advertise_status).lower()}

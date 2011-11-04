@@ -114,6 +114,7 @@ class TestAddHost(TestBrokerCommand):
         self.matchoutput(out, "Build Status: build", command)
         self.matchoutput(out, "Operating System: linux", command)
         self.matchoutput(out, "Version: 5.0.1-x86_64", command)
+        self.matchoutput(out, "Advertise Status: false", command)
 
     def testverifyunittest02machine(self):
         command = "show machine --machine ut3c5n10"

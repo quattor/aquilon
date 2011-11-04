@@ -61,6 +61,7 @@ class TestAddWindowsHost(TestBrokerCommand):
         self.matchoutput(out, "Personality: generic", command)
         self.matchoutput(out, "Domain: ny-prod", command)
         self.matchoutput(out, "Build Status: build", command)
+        self.matchoutput(out, "Advertise Status: false", command)
         self.matchoutput(out, "Operating System: windows", command)
         self.matchoutput(out, "Version: generic", command)
         self.matchoutput(out,
