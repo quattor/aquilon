@@ -69,7 +69,17 @@ class TestAddCluster(TestBrokerCommand):
     def test_10_verify_cat_utvcs1(self):
         command = ["cat", "--cluster=utvcs1"]
         out = self.commandtest(command)
-        self._verify_cat_on_clusters("utvcs1", "vcs-msvcs", "compute", out, command)
+        self.verify_cat_clusters("utvcs1", "vcs-msvcs", "compute", out, command)
+        self.matchoutput(out, '"/system/cluster/down_hosts_threshold" = 0;',
+                         command)
+        self.matchoutput(out, '"/system/cluster/down_maint_threshold" = 1;',
+                         command)
+        self.matchclean(out, '"/system/cluster/down_hosts_as_percent"',
+                        command)
+        self.matchclean(out, '"/system/cluster/down_maint_as_percent"',
+                        command)
+        self.matchclean(out, '"/system/cluster/down_hosts_percent"', command)
+        self.matchclean(out, '"/system/cluster/down_maint_percent"', command)
 
     def test_20_fail_add_existing(self):
         command = ["add_cluster", "--cluster=utvcs1",
@@ -103,6 +113,7 @@ class TestAddCluster(TestBrokerCommand):
         command = ["add_cluster", "--cluster=utgrid1",
                    "--building=ut",
                    "--domain=unittest", "--down_hosts_threshold=5%",
+                   "--maint_threshold=6%",
                    "--archetype=gridcluster", "--personality=hadoop"]
         self.noouttest(command)
 
@@ -114,6 +125,7 @@ class TestAddCluster(TestBrokerCommand):
         self.matchoutput(out, "Grid Cluster: utgrid1", command)
         self.matchoutput(out, "Building: ut", command)
         self.matchoutput(out, "Down Hosts Threshold: 0 (5%)", command)
+        self.matchoutput(out, "Maintenance Threshold: 0 (6%)", command)
         self.matchoutput(out, "Build Status: build", command)
         self.matchoutput(out, "Cluster Personality: hadoop Archetype: gridcluster",
                          command)
@@ -123,7 +135,20 @@ class TestAddCluster(TestBrokerCommand):
     def test_42_verifycatutgrid1(self):
         command = ["cat", "--cluster=utgrid1"]
         out = self.commandtest(command)
-        self._verify_cat_on_clusters("utgrid1", "hadoop", "compute", out, command)
+        self.verify_cat_clusters("utgrid1", "hadoop", "compute", out, command)
+        self.matchoutput(out, '"/system/cluster/down_hosts_threshold" = 0;',
+                         command)
+        self.matchoutput(out, '"/system/cluster/down_maint_threshold" = 0;',
+                         command)
+        self.matchoutput(out, '"/system/cluster/down_hosts_as_percent" = true;',
+                         command)
+        self.matchoutput(out, '"/system/cluster/down_maint_as_percent" = true;',
+                         command)
+        self.matchoutput(out, '"/system/cluster/down_hosts_percent" = 5;',
+                         command)
+        self.matchoutput(out, '"/system/cluster/down_maint_percent" = 6;',
+                         command)
+
 
     def test_43_verifyshowutgrid1proto(self):
         command = ["show_cluster", "--cluster=utgrid1", "--format=proto"]
@@ -174,7 +199,8 @@ class TestAddCluster(TestBrokerCommand):
     def test_52_verifycatutstorage1(self):
         command = ["cat", "--cluster=utstorage1"]
         out = self.commandtest(command)
-        self._verify_cat_on_clusters("utstorage1", "metrocluster", "storage", out, command)
+        self.verify_cat_clusters("utstorage1", "metrocluster", "storage",
+                                 out, command)
 
     def test_53_verifyshowutstorage1proto(self):
         command = ["show_cluster", "--cluster=utstorage1", "--format=proto"]
@@ -213,17 +239,27 @@ class TestAddCluster(TestBrokerCommand):
     def test_56_verifycatutstorage2(self):
         command = ["cat", "--cluster=utstorage2"]
         out = self.commandtest(command)
-        self._verify_cat_on_clusters("utstorage2", "metrocluster", "storage", out, command)
+        self.verify_cat_clusters("utstorage2", "metrocluster", "storage",
+                                 out, command)
 
-    def _verify_cat_on_clusters(self, name, persona, type, out, command):
-        self.matchoutput(out, "object template clusters/%s;" % name, command)
-        self.matchoutput(out, '"/system/cluster/name" = "%s";' % name, command)
-        self.matchoutput(out, '"/system/cluster/type" = "%s";' % type, command)
-        self.matchoutput(out, '"/system/cluster/sysloc/continent" = "na";', command)
-        self.matchoutput(out, '"/system/cluster/sysloc/city" = "ny";', command)
-        self.matchoutput(out, '"/system/cluster/sysloc/campus" = "ny";', command)
-        self.matchoutput(out, '"/system/cluster/sysloc/building" = "ut";', command)
-        self.matchoutput(out, '"/system/cluster/sysloc/location" = "ut.ny.na";', command)
+    def verify_cat_clusters(self, name, persona, ctype, out, command):
+        """ generic method to verify common attributes for cat on clusters """
+        self.matchoutput(out, "object template clusters/%s;" % name,
+                         command)
+        self.matchoutput(out, '"/system/cluster/name" = "%s";' % name,
+                         command)
+        self.matchoutput(out, '"/system/cluster/type" = "%s";' % ctype,
+                         command)
+        self.matchoutput(out, '"/system/cluster/sysloc/continent" = "na";',
+                         command)
+        self.matchoutput(out, '"/system/cluster/sysloc/city" = "ny";',
+                         command)
+        self.matchoutput(out, '"/system/cluster/sysloc/campus" = "ny";',
+                         command)
+        self.matchoutput(out, '"/system/cluster/sysloc/building" = "ut";',
+                         command)
+        self.matchoutput(out, '"/system/cluster/sysloc/location" = "ut.ny.na";',
+                         command)
         self.matchoutput(out, '"/system/build" = "build";', command)
         self.matchclean(out, '"/system/cluster/rack/row"', command)
         self.matchclean(out, '"/system/cluster/rack/column"', command)
@@ -236,6 +272,6 @@ class TestAddCluster(TestBrokerCommand):
 
 
 
-if __name__=='__main__':
-    suite = unittest.TestLoader().loadTestsFromTestCase(TestAddESXCluster)
+if __name__ == '__main__':
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestAddCluster)
     unittest.TextTestRunner(verbosity=2).run(suite)

@@ -95,7 +95,8 @@ class TestMakeCluster(TestBrokerCommand):
 
         self.searchoutput(out,
                           r'"/system/cluster/allowed_personalities" = list\(\s*' +
-                          '"esx_desktop",' + r'\s*' + '"generic"' + r'\s*\);',
+                          '"vmhost/esx_desktop",' + r'\s*' +
+                          '"vmhost/generic"' + r'\s*\);',
                           command)
 
         self.successtest(["del_allowed_personality",

@@ -177,6 +177,13 @@ class Cluster(Base):
             return self.down_hosts_threshold
         return int((self.down_hosts_threshold * len(self.hosts))/100)
 
+    @property
+    def dmt_value(self):
+        if not self.down_maint_percent:
+            return self.down_maint_threshold
+        return int((self.down_maint_threshold * len(self.hosts))/100)
+
+
     @staticmethod
     def parse_threshold(threshold):
         is_percent = False

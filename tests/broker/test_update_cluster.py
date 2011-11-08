@@ -48,7 +48,7 @@ class TestUpdateCluster(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Grid Cluster: utgrid1", command)
         self.matchoutput(out, "Down Hosts Threshold: 0 (2%)", command)
-        self.matchclean(out, "Maintenance Threshold", command)
+        self.matchoutput(out, "Maintenance Threshold: 0 (6%)", command)
 
     def test_200_updateutgrid1(self):
         command = ["update_cluster", "--cluster=utgrid1",
@@ -58,8 +58,8 @@ class TestUpdateCluster(TestBrokerCommand):
         command = "show cluster --cluster utgrid1"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Grid Cluster: utgrid1", command)
-        self.matchoutput(out, "Down Hosts Threshold: 2",command)
-        self.matchclean(out, "Maintenance Threshold", command)
+        self.matchoutput(out, "Down Hosts Threshold: 2", command)
+        self.matchoutput(out, "Maintenance Threshold: 0 (6%)", command)
 
     def test_300_update_maint_threshold(self):
         command = ["update_cluster", "--cluster=utgrid1",
@@ -83,8 +83,8 @@ class TestUpdateCluster(TestBrokerCommand):
         command = "show cluster --cluster utgrid1"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Grid Cluster: utgrid1", command)
-        self.matchoutput(out, "Down Hosts Threshold: 2",command)
-        self.matchoutput(out, "Maintenance Threshold: 50",command)
+        self.matchoutput(out, "Down Hosts Threshold: 2", command)
+        self.matchoutput(out, "Maintenance Threshold: 50", command)
 
         command = ["update_cluster", "--cluster=utgrid1",
                    "--maint_threshold=0%"]
@@ -93,10 +93,10 @@ class TestUpdateCluster(TestBrokerCommand):
         command = "show cluster --cluster utgrid1"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Grid Cluster: utgrid1", command)
-        self.matchoutput(out, "Down Hosts Threshold: 2",command)
-        self.matchoutput(out, "Maintenance Threshold: 0 (0%)",command)
+        self.matchoutput(out, "Down Hosts Threshold: 2", command)
+        self.matchoutput(out, "Maintenance Threshold: 0 (0%)", command)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestUpdateCluster)
     unittest.TextTestRunner(verbosity=2).run(suite)
