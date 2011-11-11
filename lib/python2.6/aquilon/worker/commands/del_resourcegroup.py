@@ -44,7 +44,7 @@ class CommandDelResourceGroup(BrokerCommand):
         validate_basic("resourcegroup", resourcegroup)
         holder = get_resource_holder(session, hostname, cluster)
         dbrg = ResourceGroup.get_unique(session, name=resourcegroup,
-                                        #holder=holder,
+                                        holder=holder,
                                         compel=True)
         del_resource(session, logger, dbrg)
         return

@@ -83,9 +83,4 @@ class PlenaryResource(Plenary):
 
     def body_resourcegroup(self, lines):
         lines.append('"name" = %s;' % pan(self.resource.name))
-        lines.append('"foo" = bar;')
-        if self.resource.systemlist:
-            lines.append('"systemlist" = %s;' % pan(self.resource.systemlist))
-        if self.resource.autostartlist:
-            lines.append('"autostartlist" = %s;' %
-                         pan(self.resource.autostartlist))
+

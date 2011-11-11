@@ -38,16 +38,16 @@ class CommandAddResourceGroup(BrokerCommand):
 
     required_parameters = ["resourcegroup"]
 
-    def render(self, session, logger, resourcegroup, systemlist, autostartlist,
+    def render(self, session, logger, resourcegroup,
                hostname, cluster, **arguments):
 
         validate_basic("resourcegroup", resourcegroup)
         holder = get_resource_holder(session, hostname, cluster, compel=False)
 
-        rg = ResourceGroup.get_unique(session, name=resourcegroup,
-                                      #holder_id=holder.id,
-                                      preclude=True)
+        # Ensure that resourcegroup name is unique within its holder
+        ResourceGroup.get_unique(session, name=resourcegroup,
+                                 holder=holder,
+                                 preclude=True)
 
-        dbrg = ResourceGroup(name=resourcegroup, systemlist=systemlist,
-                             autostartlist=autostartlist)
+        dbrg = ResourceGroup(name=resourcegroup)
         return add_resource(session, logger, holder, dbrg)

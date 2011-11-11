@@ -4280,10 +4280,6 @@
       <optgroup name="add_rg_opts" mandatory="True" fields="all">
         <option name="resourcegroup" type="string">name</option>
       </optgroup>
-      <optgroup name="optional_opts">
-         <option name="systemlist" type="string">system list</option>
-         <option name="autostartlist" type="string">autostartlist</option>
-      </optgroup>
       <optgroup name="resource_mapping_opts" mandatory="True" fields="any">
          <option name="hostname" type="string">Hostname to apply resource group</option>
          <option name="cluster" type="string">Cluster to apply resource group</option>

@@ -52,16 +52,12 @@ class ResourceGroup(Resource):
                                     ondelete='CASCADE'),
                                     primary_key=True)
 
-    # set per-group properties here
-    systemlist = Column(String(255), nullable=True)
-    autostartlist = Column(String(255), nullable=True)
+    # set any per-group properties here
 
 
 resourcegroup = ResourceGroup.__table__
 resourcegroup.primary_key.name = '%s_pk' % (_TN)
-# unlike other resources which are namespaced to their holder,
-# resourcegroups must be uniquely named (this is a MS-specific constraint)
-resourcegroup.info['unique_fields'] = ['name']
+resourcegroup.info['unique_fields'] = ['name', 'holder']
 
 
 class BundleResource(ResourceHolder):

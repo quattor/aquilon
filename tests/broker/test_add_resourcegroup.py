@@ -42,16 +42,13 @@ class TestAddResourceGroup(TestBrokerCommand):
 
     def test_00_add_rg_to_cluster(self):
         command = ["add_resourcegroup", "--resourcegroup=utvcs1as1",
-                   "--cluster=utvcs1", "--systemlist=host1,host2",
-                   "--autostartlist=host1"]
+                   "--cluster=utvcs1"]
         self.successtest(command)
 
         command = ["show_resourcegroup", "--cluster=utvcs1"]
         out = self.commandtest(command)
         self.matchoutput(out, "Resourcegroup: utvcs1as1", command)
         self.matchoutput(out, "Bound to Cluster: utvcs1", command)
-        self.matchoutput(out, "SystemList: host1,host2", command)
-        self.matchoutput(out, "AutoStartList: host1", command)
 
         command = ["show_resourcegroup", "--all"]
         out = self.commandtest(command)

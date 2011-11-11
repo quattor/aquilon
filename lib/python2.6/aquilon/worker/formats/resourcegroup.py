@@ -26,7 +26,7 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-"""Filesystem Resource formatter."""
+"""ResourceGroup Resource formatter."""
 
 
 from aquilon.worker.formats.formatters import ObjectFormatter
@@ -35,12 +35,10 @@ from aquilon.aqdb.model import ResourceGroup, Resource
 
 
 class ResourceGroupFormatter(ResourceFormatter):
-    #protocol = "aqdsystems_pb2"
+    protocol = "aqdsystems_pb2"
 
     def format_raw(self, rg, indent=""):
         details = []
-        details.append(indent + "  SystemList: %s" % rg.systemlist)
-        details.append(indent + "  AutoStartList: %s" % rg.autostartlist)
         for resource in rg.resources:
             details.append(indent + "  Resource: %s (%s)" % (
                     resource.name, resource.resource_type))
@@ -48,20 +46,17 @@ class ResourceGroupFormatter(ResourceFormatter):
         return super(ResourceGroupFormatter, self).format_raw(rg, indent) + \
                "\n" + "\n".join(details)
 
-    def format_proto(self, fs, skeleton=None):
-        return None
-        # container = skeleton
-        # if not container:
-        #     container = self.loaded_protocols[self.protocol].ResourceList()
-        #     skeleton = container.resources.add()
-        # skeleton.fsdata.mount = fs.mount
-        # skeleton.fsdata.fstype = str(fs.fstype)
-        # skeleton.fsdata.blockdevice = str(fs.blockdev)
-        # skeleton.fsdata.mountpoint = str(fs.mountpoint)
-        # skeleton.fsdata.opts = str(fs.mountoptions)
-        # skeleton.fsdata.freq = fs.dumpfreq
-        # skeleton.fsdata.passno = fs.passno
-        # return super(FilesystemFormatter, self).format_proto(fs, skeleton)
+    def format_proto(self, rg, skeleton=None):
+        container = skeleton
+        if not container:
+            container = self.loaded_protocols[self.protocol].ResourceList()
+            skeleton = container.resources.add()
+        ## uncomment when we have a protocol version which knows about RGs
+        # if len(rg.resources) > 0:
+        #     for resource in rg.resources:
+        #         r = skeleton.resources.add()
+        #         self.redirect_proto(resource, r)
+        return super(ResourceGroupFormatter, self).format_proto(rg, skeleton)
 
 
 ObjectFormatter.handlers[ResourceGroup] = ResourceGroupFormatter()
