@@ -45,6 +45,11 @@ class TestDelNetwork(TestBrokerCommand):
             command = ["del_network", "--ip=%s" % network.ip]
             self.noouttest(command)
 
+    def testdelauroranetwork(self):
+        for ip in ["144.14.174.0", "10.184.155.0"]:
+            command = ["del_network", "--ip=%s" % ip]
+            self.noouttest(command)
+
     def testdelnetworkdup(self):
         ip = "192.168.10.0"
         self.noouttest(["del", "network", "--ip", ip])

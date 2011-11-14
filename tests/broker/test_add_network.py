@@ -48,6 +48,18 @@ class TestAddNetwork(TestBrokerCommand):
                        "--building=ut", "--type=%s" % network.nettype]
             self.noouttest(command)
 
+    def testaddauroranetwork(self):
+        self.noouttest(["add_network", "--ip", "144.14.174.0",
+                        "--network", "pissp1_aur",
+                        "--netmask", "255.255.255.0",
+                        "--building", "ut", "--side", "a", "--type", "unknown",
+                        "--comments", "Test aurora net"])
+        self.noouttest(["add_network", "--ip", "10.184.155.0",
+                        "--network", "ny00l4as01_aur",
+                        "--netmask", "255.255.255.0",
+                        "--building", "np", "--side", "a", "--type", "unknown",
+                        "--comments", "Test aurora net"])
+
     def testaddextranetwork(self):
         # These were previously pulled from DSDB
         self.noouttest(["add_network", "--ip", "172.31.64.64",

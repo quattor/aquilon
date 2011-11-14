@@ -34,11 +34,15 @@ import re
 from aquilon.exceptions_ import ProcessException, ArgumentError
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.commands.add_host import CommandAddHost
-from aquilon.worker.processes import DSDBRunner, run_command
+from aquilon.worker.processes import DSDBRunner
 from aquilon.worker.dbwrappers.machine import create_machine
 from aquilon.aqdb.model import (Building, Rack, Chassis, ChassisSlot, Model,
                                 Machine, DnsDomain, ReservedName, Fqdn)
-
+from aquilon.aqdb.model.network_environment import NetworkEnvironment
+from aquilon.aqdb.model.network import get_net_id_from_ip
+from socket import gaierror, gethostbyname
+from ipaddr import IPv4Address
+from aquilon.utils import get_host_ip
 
 class CommandAddAuroraHost(CommandAddHost):
 
@@ -46,10 +50,6 @@ class CommandAddAuroraHost(CommandAddHost):
 
     # Look for node name like <building><rack_id>c<chassis_id>n<node_num>
     nodename_re = re.compile(r'^\s*([a-zA-Z]+)(\d+)c(\d+)n(\d+)\s*$')
-    # Look for sys_loc output like "machine <building>.<city>.<region>",
-    # but account for longer syslocs like "machine <extra>.<floor>.<b>.<c>.<r>"
-    sys_loc_re = re.compile(
-            r'^[-\.\w]+\s*(?:[-\.\w]*\.)?(\w+)\.(\w+)\.(\w+)\b$', re.M)
 
     def render(self, session, logger, hostname, osname, osversion, **kwargs):
         # Pull relevant info out of dsdb...
@@ -125,35 +125,16 @@ class CommandAddAuroraHost(CommandAddHost):
                                          slot_number=nodenum)
                     session.add(dbslot)
             else:
+                dbnet_env = NetworkEnvironment.get_unique_or_default(session)
+
                 try:
-                    out = run_command([self.config.get("broker", "sys_loc"),
-                                       dsdb_lookup],
-                                      logger=logger)
-                except ProcessException, e:
-                    # Shouldn't happen, sys_loc returns 0 even for failures
-                    raise ArgumentError("Using sys_loc to find a building for "
-                                        "node %s failed, please add an Aurora "
-                                        "machine manually and follow with "
-                                        "add_host: %s" %
-                                        (dsdb_lookup, e))
-                m = self.sys_loc_re.search(out)
-                if m:
-                    (building, city, region) = m.groups()
-                    dbbuilding = session.query(Building).filter_by(
-                            name=building).first()
-                    if not dbbuilding:
-                        raise ArgumentError("Failed to find building %s for "
-                                            "node %s, please add an Aurora "
-                                            "machine manually and follow "
-                                            "with add_host." %
-                                            (building, dsdb_lookup))
-                else:
-                    raise ArgumentError("Failed to determine building from "
-                                        "sys_loc output for %s, please add "
-                                        "an Aurora machine manually and "
-                                        "follow with add_host: %s" %
-                                        (dsdb_lookup, out))
-                dblocation = dbbuilding
+                    host_ip = get_host_ip(hostname, self.config)
+                except gaierror, e:
+                    raise ArgumentError("Error when looking up host: %d, %s" %
+                                        (e.errno, e.strerror))
+
+                dbnetwork = get_net_id_from_ip(session, IPv4Address(host_ip), dbnet_env)
+                dblocation = dbnetwork.location.building
 
             dbmachine = create_machine(session, machine, dblocation, dbmodel)
             # create_machine already does a save and a flush

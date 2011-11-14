@@ -33,6 +33,7 @@ pan_compiler = /ms/dist/elfms/PROJ/panc/%(version)s/lib/panc.jar
 
 [unittest]
 scratchdir = %(basedir)s/scratch
+fake_hosts_location = %(srcdir)s/tests/fakebin/dsdb.d/show_host_-host_name_
 
 # This can be used for any components that use python logging
 # Valid values are INFO, DEBUG, and WARNING
