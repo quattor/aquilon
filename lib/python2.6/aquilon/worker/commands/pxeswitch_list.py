@@ -49,6 +49,11 @@ class CommandPxeswitchList(BrokerCommand):
                    'firmware':'--firmwarelist', 'blindbuild':'--livecdlist'}
 
     def render(self, session, logger, list, **arguments):
+        # The default is now --configure, but that does not play nice with
+        # --status. Turn --configure off if --status is present
+        if arguments.get("status", False):
+            arguments["configure"] = None
+
         user = self.config.get("broker", "installfe_user")
         command = self.config.get("broker", "installfe")
         args = [command]
