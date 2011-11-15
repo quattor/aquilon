@@ -76,8 +76,7 @@ class TestAddResourceGroup(TestBrokerCommand):
         self.matchoutput(out, "Comments: testing", command)
 
     def test_del_resourcegroup(self):
-        command = ["del_resourcegroup", "--resourcegroup=utvcs1as1",
-                   "--cluster=utvcs1"]
+        command = ["del_resourcegroup", "--resourcegroup=utvcs1as1"]
         self.successtest(command)
 
 

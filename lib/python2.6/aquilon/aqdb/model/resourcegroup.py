@@ -57,7 +57,10 @@ class ResourceGroup(Resource):
 
 resourcegroup = ResourceGroup.__table__
 resourcegroup.primary_key.name = '%s_pk' % (_TN)
-resourcegroup.info['unique_fields'] = ['name', 'holder']
+# resources are namespaced by their holder, but holders are uniquely named.
+# Since resourcegroups are both we have to decide which pattern to follow.
+# We choose to make the names globally unique
+resourcegroup.info['unique_fields'] = ['name']
 
 
 class BundleResource(ResourceHolder):

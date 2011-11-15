@@ -86,6 +86,14 @@ def del_resource(session, logger, dbresource):
     if dbresource.holder.holder_type == 'cluster':
         holder_plenary = PlenaryCluster(dbresource.holder.cluster)
         domain = dbresource.holder.cluster.branch.name
+    if dbresource.holder.holder_type == 'resourcegroup':
+        holder_plenary = PlenaryResource(dbresource.holder.resourcegroup)
+        # now recurse up to next level to obtain the domain
+        rg_holder = dbresource.holder.resourcegroup.holder
+        if rg_holder.holder_type == 'host':
+            domain = rg_holder.host.branch.name
+        if rg_holder.holder_type == 'cluster':
+            domain = rg_holder.cluster.branch.name
     plenary = PlenaryResource(dbresource, logger=logger)
 
     session.delete(dbresource)
@@ -126,7 +134,12 @@ def add_resource(session, logger, holder, dbresource):
         domain = holder.cluster.branch.name
     if holder.holder_type == 'resourcegroup':
         holder_plenary = PlenaryResource(holder.resourcegroup)
-        #domain =
+        # now recurse up to next level to obtain the domain
+        rg_holder = holder.resourcegroup.holder
+        if rg_holder.holder_type == 'host':
+            domain = rg_holder.host.branch.name
+        if rg_holder.holder_type == 'cluster':
+            domain = rg_holder.cluster.branch.name
 
     key = CompileKey.merge([res_plenary.get_write_key(),
                             holder_plenary.get_write_key()])
