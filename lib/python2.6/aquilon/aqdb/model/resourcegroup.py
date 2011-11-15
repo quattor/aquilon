@@ -34,7 +34,7 @@ from sqlalchemy import (Integer, DateTime, Sequence, String, Column, Boolean,
 
 from aquilon.aqdb.model import Resource, ResourceHolder
 from aquilon.aqdb.column_types.aqstr import AqStr
-from sqlalchemy.orm import relation, backref, object_session
+from sqlalchemy.orm import relation, backref, object_session, validates
 
 
 _TN = 'resourcegroup'
@@ -52,7 +52,15 @@ class ResourceGroup(Resource):
                                     ondelete='CASCADE'),
                                     primary_key=True)
 
-    # set any per-group properties here
+    # declare any per-group attributes here (none for now)
+
+    # make sure this is not held by another resourcegroup
+    @validates('holder')
+    def validate_holder(self, key, value):
+        raise ValueError('testing!')
+        if value is isinstance(value, BundleResource):
+            raise ValueError("ResourceGroups must not be held by other ResourceGroups")
+        return value
 
 
 resourcegroup = ResourceGroup.__table__
@@ -80,10 +88,6 @@ class BundleResource(ResourceHolder):
                                              cascade='all, delete-orphan',
                                              uselist=False))
 
-
-# It is not possible to write a constraint in the database that
-# prevents a resourcegroup from holding another resourcegroup.  This
-# is enforced via the command line instead.
 
 resholder = ResourceHolder.__table__
 ResourceGroup.resources = relation(

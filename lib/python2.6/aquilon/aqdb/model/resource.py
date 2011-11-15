@@ -31,7 +31,7 @@ from datetime import datetime
 import re
 
 from sqlalchemy import (Column, Integer, String, DateTime, ForeignKey,
-                        Sequence, UniqueConstraint, CheckConstraint)
+                        Sequence, UniqueConstraint)
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import relation, backref, object_session
 
