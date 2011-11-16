@@ -34,7 +34,7 @@ from sqlalchemy import (Integer, DateTime, Sequence, String, Column, Boolean,
 
 from aquilon.aqdb.model import Resource, ResourceHolder
 from aquilon.aqdb.column_types.aqstr import AqStr
-from sqlalchemy.orm import relation, backref, object_session, validates
+from sqlalchemy.orm import relation, backref, object_session
 
 
 _TN = 'resourcegroup'
@@ -53,14 +53,6 @@ class ResourceGroup(Resource):
                                     primary_key=True)
 
     # declare any per-group attributes here (none for now)
-
-    # make sure this is not held by another resourcegroup
-    @validates('holder')
-    def validate_holder(self, key, value):
-        raise ValueError('testing!')
-        if value is isinstance(value, BundleResource):
-            raise ValueError("ResourceGroups must not be held by other ResourceGroups")
-        return value
 
 
 resourcegroup = ResourceGroup.__table__
