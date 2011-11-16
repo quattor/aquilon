@@ -43,7 +43,9 @@ class TestAddFilesystem(TestBrokerCommand):
     def test_00_basic_filesystem(self):
         command = ["show_filesystem", "--hostname=server1.aqd-unittest.ms.com"]
         out = self.notfoundtest(command)
-        self.matchoutput(out, "host server1.aqd-unittest.ms.com has no resources", command)
+        self.matchoutput(out,
+                         "Host server1.aqd-unittest.ms.com has no resources.",
+                         command)
 
         command = ["add_filesystem", "--filesystem=fs1", "--type=ext3",
                    "--mountpoint=/mnt", "--blockdevice=/dev/foo/bar",
@@ -149,7 +151,9 @@ class TestAddFilesystem(TestBrokerCommand):
     def test_50_add_to_cluster(self):
         command = ["show_filesystem", "--cluster=utvcs1"]
         out = self.notfoundtest(command)
-        self.matchoutput(out, "cluster utvcs1 has no resources", command)
+        self.matchoutput(out,
+                         "Compute Cluster utvcs1 has no resources.",
+                         command)
 
         command = ["add_filesystem", "--filesystem=fsshared", "--type=ext3",
                    "--mountpoint=/mnt", "--blockdevice=/dev/foo/bar",
