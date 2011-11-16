@@ -58,7 +58,7 @@ class TestAddFilesystem(TestBrokerCommand):
         command = ["show_filesystem", "--filesystem=fs1"]
         out = self.commandtest(command)
         self.matchoutput(out, "Filesystem: fs1", command)
-        self.matchoutput(out, "Bound to Host: server1.aqd-unittest.ms.com",
+        self.matchoutput(out, "Bound to: Host server1.aqd-unittest.ms.com",
                          command)
         self.matchoutput(out, "Block Device: /dev/foo/bar", command)
         self.matchoutput(out, "Mount at boot: True", command)
@@ -127,8 +127,8 @@ class TestAddFilesystem(TestBrokerCommand):
     def test_30_checkthehost(self):
         command = ["show_host", "--host=server1.aqd-unittest.ms.com"]
         out = self.commandtest(command)
-        self.matchoutput(out, "Resource: fs1 (filesystem)", command)
-        self.matchoutput(out, "Resource: fs2 (filesystem)", command)
+        self.matchoutput(out, "Filesystem: fs1", command)
+        self.matchoutput(out, "Filesystem: fs2", command)
 
         command = ["make", "--hostname=server1.aqd-unittest.ms.com"]
         out = self.successtest(command)
@@ -166,7 +166,7 @@ class TestAddFilesystem(TestBrokerCommand):
         command = ["show_filesystem", "--cluster=utvcs1"]
         out = self.commandtest(command)
         self.matchoutput(out, "Filesystem: fsshared", command)
-        self.matchoutput(out, "Bound to Cluster: utvcs1",
+        self.matchoutput(out, "Bound to: Compute Cluster utvcs1",
                          command)
         self.matchoutput(out, "Block Device: /dev/foo/bar", command)
         self.matchoutput(out, "Mount at boot: False", command)

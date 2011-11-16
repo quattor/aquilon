@@ -124,7 +124,7 @@ class ClusterFormatter(ObjectFormatter):
                                cluster.down_maint_threshold)
 
         for resource in cluster.resources:
-            details.append(indent + "  Resource: %s (%s)" % (resource.name, resource.resource_type))
+            details.append(indent + "  {0:c}: {0.name}".format(resource))
 
         if cluster.cluster_type == 'esx':
             details.append(indent + "  Max vm_to_host_ratio: %s" %
