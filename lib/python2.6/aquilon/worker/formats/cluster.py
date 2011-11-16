@@ -98,7 +98,7 @@ class ClusterFormatter(ObjectFormatter):
 
 
     def format_raw(self, cluster, indent=""):
-        details = [indent + "{0.title} Cluster: {0.name}".format(cluster)]
+        details = [indent + "{0:c}: {0.name}".format(cluster)]
         if cluster.metacluster:
             details.append(indent + \
                            "  {0:c}: {0.name}".format(cluster.metacluster))

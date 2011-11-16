@@ -240,6 +240,28 @@ class Cluster(Base):
         if self.metacluster:
             self.metacluster.validate()
 
+    def format_helper(self, format_spec, instance):
+        # Based on format_helper() and _get_class_label() in Base
+        lowercase = False
+        class_only = False
+        passthrough = ""
+        for letter in format_spec:
+            if letter == "l":
+                lowercase = True
+            elif letter == "c":
+                class_only = True
+            else:
+                passthrough += letter
+
+        clsname = self.title + " Cluster"
+        if lowercase:
+            parts = clsname.split()
+            clsname = ' '.join(map(lambda x: x if x[:-1].isupper() else x.lower(), parts))
+        if class_only:
+            return clsname.__format__(passthrough)
+        val = "%s %s" % (clsname, instance)
+        return val.__format__(passthrough)
+
 
 cluster = Cluster.__table__  # pylint: disable-msg=C0103, E1101
 cluster.primary_key.name = 'cluster_pk'

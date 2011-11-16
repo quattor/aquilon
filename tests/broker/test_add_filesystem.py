@@ -152,7 +152,7 @@ class TestAddFilesystem(TestBrokerCommand):
         command = ["show_filesystem", "--cluster=utvcs1"]
         out = self.notfoundtest(command)
         self.matchoutput(out,
-                         "Compute Cluster utvcs1 has no resources.",
+                         "High Availability Cluster utvcs1 has no resources.",
                          command)
 
         command = ["add_filesystem", "--filesystem=fsshared", "--type=ext3",
@@ -166,7 +166,7 @@ class TestAddFilesystem(TestBrokerCommand):
         command = ["show_filesystem", "--cluster=utvcs1"]
         out = self.commandtest(command)
         self.matchoutput(out, "Filesystem: fsshared", command)
-        self.matchoutput(out, "Bound to: Compute Cluster utvcs1",
+        self.matchoutput(out, "Bound to: High Availability Cluster utvcs1",
                          command)
         self.matchoutput(out, "Block Device: /dev/foo/bar", command)
         self.matchoutput(out, "Mount at boot: False", command)
