@@ -141,6 +141,8 @@ from test_add_filesystem import TestAddFilesystem
 from test_add_application import TestAddApplication
 from test_add_intervention import TestAddIntervention
 from test_add_resourcegroup import TestAddResourceGroup
+from test_add_reboot_schedule import TestAddRebootSchedule
+from test_add_reboot_intervention import TestAddRebootIntervention
 from test_constraints_bind_client import TestBindClientConstraints
 from test_constraints_bind_server import TestBindServerConstraints
 from test_constraints_archetype import TestArchetypeConstraints
@@ -310,6 +312,7 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestBindServer,
                 TestAddFilesystem, TestAddApplication, TestAddIntervention,
                 TestAddResourceGroup,
+                TestAddRebootSchedule, TestAddRebootIntervention,
                 TestBindClientConstraints, TestBindServerConstraints,
                 TestArchetypeConstraints, TestPersonalityConstraints,
                 TestDomainConstraints, TestVendorConstraints,

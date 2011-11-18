@@ -2190,7 +2190,7 @@
       <transport trigger="cluster" method="get" path="cluster/any/%(cluster)s/plenary" />
       <transport trigger="nasinfo" method="get" path="nasinfo/%(nasinfo)s/plenary" />
       <transport trigger="city" method="get" path="city/%(city)s/plenary" />
-      <transport trigger="resource" method="get" path="resource/%(resource)s/plenary" />
+      <transport trigger="resource" method="get" path="resource/plenary/%(resource)s" />
    </command>
 
    <command name="sync">
@@ -4042,6 +4042,102 @@
          <option name="oldest_first" type="boolean">Order results with oldest records first (defaults to false, or newest info first)</option>
       </optgroup>
       <transport method="get" path="find/audit" />
+   </command>
+
+   <command name="show_reboot_schedule">
+      Show reboot_schedule based on filtering for host/cluster association
+      <optgroup name="show_resource_opts" mandatory="True" fields="any">
+         <option name="cluster" type="string">cluster name</option>
+         <option name="hostname" type="string">hostname</option>
+         <option name="all" type="flag">list all schedules</option>
+      </optgroup>
+      <transport method="get" path="resource/reboot_schedule/reboot_schedule" />
+   </command>
+
+   <command name="add_reboot_schedule">
+      Add a new reboot schedule to a host or cluster.
+      <p/>
+      WW must match personality maintenance window. Preferred time (if
+      specified) must be in WW. Time is always the host region's local
+      time.
+      <p/>
+      For schedule to take affect the server must be bound to reboot
+      service instance 'scheduled'. A warning will be printed if not.
+      <optgroup name="add_res_opts" mandatory="True" fields="all">
+         <option name="week" type="string" default="all">Comma separated week (1-5 or all)</option>
+         <option name="day" type="string" default="Sun">Week day (Sun,Mon...Sat) maching maintenance WW</option>
+      </optgroup>
+      <optgroup name="optional_opts">
+         <option name="time" type="string">Preferred time (omit for anytime within WW)</option>
+         <option name="comments" type="string">Comments</option>
+      </optgroup>
+      <optgroup name="resource_mapping_opts" mandatory="True" fields="any">
+         <option name="hostname" type="string">Hostname to apply resource</option>
+         <option name="cluster" type="string">Cluster to apply resource</option>
+      </optgroup>
+      <transport method="put" path="resource/reboot_schedule" />
+   </command>
+
+   <command name="del_reboot_schedule">
+      Delete the reboot schedule resource.
+      <p/>
+      For a host bound to reboot service instance 'scheduled' a warning
+      will printed at compile time if no schedule exists. The host will
+      not reboot.
+      <optgroup name="resource_mapping_opts" mandatory="True" fields="any">
+         <option name="hostname" type="string">Hostname to apply resource</option>
+         <option name="cluster" type="string">Cluster to apply resource</option>
+      </optgroup>
+      <transport method="delete" path="resource/reboot_schedule" />
+   </command>
+
+   <command name="show_reboot_intervention">
+      Show reboot_intervention based on filtering for host/cluster association
+      <optgroup name="show_resource_opts" mandatory="True" fields="any">
+         <option name="cluster" type="string">cluster name</option>
+         <option name="hostname" type="string">hostname</option>
+         <option name="all" type="flag">list all interventions</option>
+      </optgroup>
+      <transport method="get" path="resource/reboot_intervention" />
+   </command>
+
+   <command name="add_reboot_intervention">
+      Add a new reboot intervention resource.
+
+      <p/> The intervention will apply after host compilation and NCM
+      update and so should be done in plenty of time before the
+      scheduled reboot is to take place.
+
+      <p/> This intervention treats date as the whole day inclusive to
+      expiry. Time of the intervention is ignored.
+
+      <p/> Only a single reboot intervention can be in place at once.
+
+      <optgroup name="add_riv_opts" mandatory="True" fields="all">
+         <option name="expiry" type="string">when to expire this intervention</option>
+         <option name="justification" type="string">the reason for the intervention</option>
+      </optgroup>
+      <optgroup name="optional_opts">
+         <option name="comments" type="string">Comments</option>
+         <option name="start_time" type="string">when to start this intervention (default=now)</option>
+      </optgroup>
+      <optgroup name="optional_binding" fields="any">
+         <option name="hostname" type="string">Host</option>
+         <option name="cluster" type="string">Cluster</option>
+      </optgroup>
+      <transport method="post" path="resource/reboot_intervention" />
+   </command>
+
+   <command name="del_reboot_intervention">
+      Delete the reboot intervention resource.
+
+      <p/> The intervention will be removed after host compilation and NCM
+      update.
+      <optgroup name="resource_mapping_opts" mandatory="True" fields="any">
+         <option name="hostname" type="string">Hostname to apply resource</option>
+         <option name="cluster" type="string">Cluster to apply resource</option>
+      </optgroup>
+      <transport method="delete" path="resource/reboot_intervention" />
    </command>
 
    <command name="add_filesystem">

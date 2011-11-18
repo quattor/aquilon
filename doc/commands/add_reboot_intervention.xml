@@ -1,0 +1,168 @@
+<?xml version="1.0"?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V5.0//EN"
+"http://docbook.org/xml/5.0/dtd/docbook.dtd" [
+<!ENTITY aqd_version SYSTEM "../version.txt">
+]>
+<refentry xml:id="add_reboot_intervention"
+	  xmlns:xi="http://www.w3.org/2001/XInclude">
+    <refmeta>
+        <refentrytitle>add_reboot_intervention</refentrytitle>
+        <manvolnum>1</manvolnum>
+        <refmiscinfo class="version">&aqd_version;</refmiscinfo>
+        <refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
+    </refmeta>
+
+    <refnamediv>
+        <refname>add reboot intervention</refname>
+        <refpurpose>
+	    Add a reboot intervention resource onto a host or cluster.
+        </refpurpose>
+	<refclass>Aquilon</refclass>
+    </refnamediv>
+
+    <refsynopsisdiv>
+	<cmdsynopsis>
+	    <command>aq add reboot intervention </command>
+	    <group>
+	      <arg choice="req"><option>--hostname <replaceable>HOSTNAME</replaceable></option></arg>
+	      <arg choice="req"><option>--cluster <replaceable>CLUSTER</replaceable></option></arg>
+            </group>
+	    <arg choice="req"><option>--expiry <replaceable>WHEN</replaceable></option></arg>
+	    <arg choice="req"><option>--justification <replaceable>REASON</replaceable></option></arg>
+	    <arg choice="opt"><option>--start_time <replaceable>WHEN</replaceable></option></arg>
+	    <arg choice="opt"><option>--comments <replaceable>COMMENTS</replaceable></option></arg>
+	    <group>
+		<synopfragmentref linkend="global-options">Global options</synopfragmentref>
+	    </group>
+	    <xi:include href="../common/global_options.xml"/>
+	</cmdsynopsis>
+    </refsynopsisdiv>
+
+    <refsect1>
+        <title>Description</title>
+	<para>
+	    The <command>aq add_reboot_intervention</command> command adds a
+	    reboot intervention resource onto a host or a cluster. This
+	    is a temporary modification of host configuration to prevent
+	    scheduled reboots.
+	</para>
+	<para>
+	    The intervention will apply after host compilation and
+	    NCM update and so should be done in plenty of time before
+	    the scheduled reboot is to take place.
+	</para>
+	<para>
+	    Only a single reboot intervention can be in place at once.
+	</para>
+    </refsect1>
+
+    <refsect1>
+        <title>Entitlements</title>
+        <para>Requires "operations" or "unixops_l2" role</para>
+    </refsect1>
+
+    <refsect1>
+        <title>Templates</title>
+        <para>
+      This command will modify the templates for the host or
+      cluster (depending on which option was given) and the resource
+      template for the intervention itself.
+	</para>
+    </refsect1>
+
+    <refsect1>
+        <title>Options</title>
+	<variablelist>
+	    <title>Command-specific options</title>
+	    <varlistentry>
+	        <term>
+		    <option>--hostname <replaceable>HOSTNAME</replaceable></option>,
+		</term>
+		<listitem>
+		    <para>
+		        Specify the target host for the intervention.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--cluster <replaceable>CLUSTER</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			The name of the target cluster for the intervention.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--expiry <replaceable>WHEN</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+	    A date when the intervention should expire. The date format
+	    is anything that the python library dateutil.parser can understand.
+	    This treats treats the date as the whole day inclusive to
+	    expiry. Time of the expiry is ignored.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--justification <replaceable>WHY</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+	    Extra authorization tokens (e.g. change management reference ID) to with which the system can validate or correlate the request.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--start_time <replaceable>WHEN</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+	    A date when the intervention should start. The date format
+	    is anything that the python library dateutil.parser can understand.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--comments <replaceable>WHY</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+	    Any additional notes for the intervention.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	</variablelist>
+	<xi:include href="../common/global_options_desc.xml"/>
+    </refsect1>
+
+    <refsect1>
+	<title>Examples</title>
+	<example>
+	    <title>Suspending reboot</title>
+	    <programlisting>
+aq add reboot intervention --hostname foo.example.com \
+	--justification tcm=6001234 --expiry 1/1/2012
+	    </programlisting>
+	    <para>
+	    Which results in no scheduled reboots for the host until
+	    January 1, 2012.
+	    </para>
+	</example>
+    </refsect1>
+
+    <refsect1>
+	<title>See also</title>
+	<para>
+	    <citerefentry><refentrytitle>del_reboot_intervention</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	</para>
+    </refsect1>
+</refentry>
+
+<!-- vim: set ai sw=4: -->
