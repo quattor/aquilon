@@ -80,6 +80,14 @@ class BundleResource(ResourceHolder):
                                              cascade='all, delete-orphan',
                                              uselist=False))
 
+    @property
+    def holder_name(self):
+        return self.resourcegroup.name
+
+    @property
+    def holder_object(self):
+        return self.resourcegroup
+
 
 resholder = ResourceHolder.__table__
 ResourceGroup.resources = relation(
