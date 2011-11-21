@@ -54,7 +54,7 @@ class TestAddResourceGroup(TestBrokerCommand):
 
         command = ["show_resourcegroup", "--all"]
         out = self.commandtest(command)
-        self.matchoutput(out, "Resourcegroup: utvcs1as1", command)
+        self.matchoutput(out, "ResourceGroup: utvcs1as1", command)
 
     def test_add_fs_to_rg(self):
         command = ["add_filesystem", "--filesystem=fs1", "--type=ext3",
