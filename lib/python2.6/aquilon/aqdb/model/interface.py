@@ -134,6 +134,11 @@ class Interface(Base):
         return self.format_helper(format_spec, instance)
 
     @validates('mac')
+    def _validate_mac(self, key, value):
+        # Due to how decorators work, we have to do a level of indirection to
+        # make polymorphism work
+        return self.validate_mac(key, value)
+
     def validate_mac(self, key, value):
         if self.bootable and not value:
             raise ValueError("Bootable interfaces require a MAC address.")
@@ -218,7 +223,6 @@ class ManagementInterface(Interface):
 
     name_check = re.compile(r"^[a-z]+\d*$")
 
-    @validates('mac')
     def validate_mac(self, key, value):
         if not value:
             raise ValueError("Management interfaces require a MAC address.")
@@ -266,7 +270,6 @@ class VlanInterface(Interface):
                              "0 and smaller than %s." % (value, MAX_VLANS))
         return value
 
-    @validates('mac')
     def validate_mac(self, key, value):
         if value is not None:
             raise ValueError("VLAN interfaces can not have a distinct MAC address.")
@@ -305,7 +308,6 @@ class BridgeInterface(Interface):
     # enforce this naming
     name_check = re.compile(r'^br\d+$')
 
-    @validates('mac')
     def validate_mac(self, key, value):
         if value is not None:
             raise ValueError("Bridge interfaces can not have a distinct MAC address.")
