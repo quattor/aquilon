@@ -159,6 +159,9 @@ class DbFactory(object):
                 self.engine = create_engine(self.dsn, **self.pool_options)
                 connection = self.engine.connect()
                 connection.close()
+            # This should be slightly more database agnostic, it's really
+            # "any real database" (i.e. not sqlite.)
+            self.no_lock_engine = create_engine(self.dsn, **self.pool_options)
 
         #SQLITE
         elif self.dsn.startswith('sqlite'):
@@ -209,8 +212,6 @@ class DbFactory(object):
             try:
                 connection = self.engine.connect()
                 connection.close()
-                self.no_lock_engine = create_engine(self.dsn,
-                                                    **self.pool_options)
                 return
             except SaDBError, e:
                 errs.append(e)
