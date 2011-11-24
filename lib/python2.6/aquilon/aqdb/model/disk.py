@@ -133,7 +133,7 @@ class NasDisk(Disk):
     def __repr__(self):
         return "<%s %s (%s) of machine %s, %d GB, provided by %s>" % \
                 (self._get_class_label(), self.device_name,
-                 self.controller_type, self.machine.name, self.capacity,
+                 self.controller_type, self.machine.label, self.capacity,
                  self.service_instance.name)
 
 
