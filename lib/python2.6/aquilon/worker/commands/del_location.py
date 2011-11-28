@@ -33,7 +33,8 @@ from sqlalchemy.orm.exc import NoResultFound
 
 from aquilon.exceptions_ import NotFoundException, ArgumentError
 from aquilon.worker.broker import BrokerCommand
-from aquilon.aqdb.model import Location, Network
+from aquilon.aqdb.model import (Location, Network, NetworkEnvironment, Cluster,
+                                HardwareEntity)
 
 
 class CommandDelLocation(BrokerCommand):
@@ -41,16 +42,29 @@ class CommandDelLocation(BrokerCommand):
     required_parameters = ["name", "type"]
 
     def render(self, session, name, type, **arguments):
-        try:
-            dblocation = session.query(Location).filter_by(name=name,
-                    location_type=type).one()
-        except NoResultFound:
-            raise NotFoundException("%s %s not found." %
-                                    (type.capitalize(), name))
+        dblocation = Location.get_unique(session, name=name, location_type=type,
+                                         compel=True)
+
         q = session.query(Network).filter_by(location=dblocation)
         if q.count():
-            raise ArgumentError("Could not delete %s %s."
-                                " Networks were found using this location."
-                                % (type,name))
+            raise ArgumentError("Could not delete {0:l}, networks were found "
+                                "using this location.".format(dblocation))
+
+        q = session.query(NetworkEnvironment).filter_by(location=dblocation)
+        if q.count():
+            raise ArgumentError("Could not delete {0:l}, network environments "
+                                "were found using this location."
+                                .format(dblocation))
+
+        q = session.query(Cluster).filter_by(location_constraint=dblocation)
+        if q.count():
+            raise ArgumentError("Could not delete {0:l}, clusters were found "
+                                "using this location.".format(dblocation))
+
+        q = session.query(HardwareEntity).filter_by(location=dblocation)
+        if q.count():
+            raise ArgumentError("Could not delete {0:l}, hardware objects were "
+                                "found using this location.".format(dblocation))
+
         session.delete(dblocation)
         return
