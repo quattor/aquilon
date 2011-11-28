@@ -64,7 +64,7 @@ class CommandDelCluster(BrokerCommand):
             profiles = self.config.get("broker", "profilesdir")
             # Only one of these should exist, but it doesn't hurt
             # to try to clean up both.
-            xmlfile = os.path.join(profiles, "cluster", cluster + ".xml")
+            xmlfile = os.path.join(profiles, "clusters", cluster + ".xml")
             remove_file(xmlfile, logger=logger)
             xmlgzfile = xmlfile + ".gz"
             remove_file(xmlgzfile, logger=logger)
