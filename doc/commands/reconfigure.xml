@@ -51,29 +51,35 @@
       rebuild of the configuration of the specified hosts. This
       includes the tasks of:
     </para>
-      <variablelist>
-	<varlistentry>
-	  <term>re-evaluating all the service bindings</term>
-	  <listitem>
-	    <para>
-	      All service bindings will be re-evaluated and possible
-	      changed to new defaults unless the
-	      <option>--keepbindings</option> flag is used. Also, any
-	      services that are not listed as required will be dropped
-	      unless the <option>--keepbindings</option> flag is used.
-	    </para>
-	  </listitem>
-	</varlistentry>
-	<varlistentry>
-	  <term>re-writing the plenary template files for the hosts</term>
-	</varlistentry>
-	<varlistentry>
-	  <term>rebuilding the configuration files on AII bootservers</term>
-	</varlistentry>
-	<varlistentry>
-	  <term>updating downstream datawarehouses</term>
-	</varlistentry>
-      </variablelist>
+        <itemizedlist>
+	    <listitem>
+	        <para>
+		    re-evaluating all the service bindings
+		</para>
+		<para>
+		    All service bindings will be re-evaluated and possible
+		    changed to new defaults unless the
+		    <option>--keepbindings</option> flag is used. Also, any
+		    services that are not listed as required will be dropped
+		    unless the <option>--keepbindings</option> flag is used.
+		</para>
+	    </listitem>
+	    <listitem>
+		<para>
+		    re-writing the plenary template files for the hosts
+		</para>
+	    </listitem>
+	    <listitem>
+		<para>
+		    rebuilding the configuration files on AII bootservers
+		</para>
+	    </listitem>
+	    <listitem>
+		<para>
+		    updating downstream datawarehouses
+		</para>
+	    </listitem>
+      </itemizedlist>
   </refsect1>
 
   <refsect1>

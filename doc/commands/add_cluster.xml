@@ -32,7 +32,7 @@
 	      <arg choice="plain"><option>--sandbox <replaceable>SANDBOX</replaceable></option></arg>
 	    </group>
 	    <group choice="req">
-	    <xi:include href="../common/location_options.xml"/>
+		<synopfragmentref linkend="location-options">Location options</synopfragmentref>
 	    </group>
 	    <arg choice="opt"><option>--maint_threshold <replaceable>THRESHOLD</replaceable></option></arg>
 	    <arg choice="opt"><option>--max_members <replaceable>LIMIT</replaceable></option></arg>
@@ -42,6 +42,7 @@
 		<synopfragmentref linkend="global-options">Global options</synopfragmentref>
 	    </group>
 	    <xi:include href="../common/global_options.xml"/>
+	    <xi:include href="../common/location_options.xml"/>
 	</cmdsynopsis>
     </refsynopsisdiv>
 
