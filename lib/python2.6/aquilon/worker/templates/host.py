@@ -353,8 +353,10 @@ class PlenaryToplevelHost(Plenary):
         return
 
     def write(self, *args, **kwargs):
-        # Don't bother writing plenary files for dummy aurora hardware.
-        if self.dbhost.machine.model.machine_type == 'aurora_node':
+        # Don't bother writing plenary files for dummy aurora hardware or for
+        # non-compilable archetypes.
+        if self.dbhost.machine.model.machine_type == 'aurora_node' or \
+           not self.dbhost.archetype.is_compileable:
             return 0
         return Plenary.write(self, *args, **kwargs)
 
