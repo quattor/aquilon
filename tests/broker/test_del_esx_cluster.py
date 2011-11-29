@@ -111,6 +111,14 @@ class TestDelESXCluster(TestBrokerCommand):
             self.failIf(os.path.exists(plenary),
                         "Plenary file '%s' still exists" % plenary)
 
+    def verifyprofileclusterclient(self):
+        profilesdir = self.config.get("broker", "profilesdir")
+        for i in range(1, 5):
+            cluster = "utecl%s" % i
+            profile = os.path.join(profilesdir, "clusters", cluster + ".xml")
+            self.failIf(os.path.exists(profile),
+                        "Profile file '%s' still exists" % profile)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelESXCluster)
