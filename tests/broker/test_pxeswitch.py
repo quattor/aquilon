@@ -74,6 +74,24 @@ class TestPxeswitch(TestBrokerCommand):
                          "--servers %s@server9.aqd-unittest.ms.com" % user,
                          command)
 
+    def testinstallunittest02noconf(self):
+        command = ["pxeswitch", "--hostname", "unittest02.one-nyp.ms.com",
+                   "--install", "--noconfigure"]
+        (out, err) = self.successtest(command)
+        self.matchoutput(err, "--install", command)
+        self.matchclean(err, "--configure", command)
+        self.matchclean(err, "--status", command)
+        self.matchclean(err, "--rescue", command)
+        self.matchclean(err, "--boot", command)
+        self.matchclean(err, "--firmware", command)
+        self.matchclean(err, "--livecd", command)
+        sshdir = self.config.get("broker", "installfe_sshdir")
+        self.matchoutput(err, "--sshdir %s" % sshdir, command)
+        user = self.config.get("broker", "installfe_user")
+        self.matchoutput(err,
+                         "--servers %s@server9.aqd-unittest.ms.com" % user,
+                         command)
+
     def testlocalbootunittest02(self):
         command = "pxeswitch --hostname unittest02.one-nyp.ms.com --localboot"
         (out, err) = self.successtest(command.split(" "))
@@ -156,6 +174,16 @@ class TestPxeswitch(TestBrokerCommand):
             command = "pxeswitch --list %s --rescue" % f.name
             (out, err) = self.successtest(command.split(" "))
             self.matchoutput(err, "--configurelist", command)
+            self.matchoutput(err, "--rescuelist", command)
+
+    def testrescuelistnoconf(self):
+        with NamedTemporaryFile() as f:
+            f.writelines(["unittest02.one-nyp.ms.com\n",
+                          "unittest00.one-nyp.ms.com\n"])
+            f.flush()
+            command = "pxeswitch --list %s --rescue --noconfigure" % f.name
+            (out, err) = self.successtest(command.split(" "))
+            self.matchclean(err, "--configurelist", command)
             self.matchoutput(err, "--rescuelist", command)
 
 # --configure is the default now, so this is no longer a conflict
