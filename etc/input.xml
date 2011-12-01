@@ -1956,9 +1956,11 @@
       <optgroup name="reset_advertised_status" mandatory="True" fields="all">
          <optgroup name='what_to_change' mandatory="True" fields="any">
                 <option name="hostname" type="string">Host name</option>
+                <option name="list" type="file" conflicts="hostname">File with one host per line</option>
          </optgroup>
       </optgroup>
-      <transport method="put" path="host/%(hostname)s/resetadvertisedstatus" />
+      <transport method="post" path="host/%(hostname)s/command/resetadvertisedstatus" />
+      <transport trigger="list" method="post" path="command/resetadvertisedstatus/list" />
    </command>
 
 

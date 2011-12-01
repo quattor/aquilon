@@ -159,8 +159,10 @@ class Build(HostLifecycle):
 class Rebuild(HostLifecycle):
     __mapper_args__ = {'polymorphic_identity': 'rebuild'}
 
+
 class Reinstall(HostLifecycle):
     __mapper_args__ = {'polymorphic_identity': 'reinstall'}
+
 
 class Failed(HostLifecycle):
     __mapper_args__ = {'polymorphic_identity': 'failed'}

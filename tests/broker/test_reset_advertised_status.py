@@ -29,51 +29,122 @@
 # TERMS THAT MAY APPLY.
 """Module for testing the reset advertised status command."""
 
-import re
 import unittest
 
 if __name__ == "__main__":
-    import utils
-    utils.import_depends()
+    import broker.utils
+    broker.utils.import_depends()
 
-from brokertest import TestBrokerCommand
+from broker.brokertest import TestBrokerCommand
 
 
 class TestResetAdvertisedStatus(TestBrokerCommand):
+    """ test reset advertised status """
 
-    def testunittest02(self):
+    def testunittest01(self):
+        """ test reset advertised status on various build status """
+
+        hostname = "unittest02.one-nyp.ms.com"
         # we start off as "ready", so each of these transitions (in order)
         # should be valid
         for status in ['failed', 'reinstall', 'rebuild', 'ready']:
-            advertise_status = "false"
+            advertise_status = "False"
 
             ## change status
-            command = ["change_status", "--hostname=unittest02.one-nyp.ms.com",
+            command = ["change_status", "--hostname", hostname,
                        "--buildstatus", status]
             (out, err) = self.successtest(command)
 
             ## reset advertised state to build
-            command = ["reset_advertised_status", "--hostname=unittest02.one-nyp.ms.com"]
+            command = ["reset_advertised_status", "--hostname" , hostname]
 
             if (status == "ready"):
-                advertise_status = "true"
-                advertised_status = "ready"
+                advertise_status = "True"
                 out = self.badrequesttest(command)
-                self.matchoutput(out, "advertised status can be reset only when host is in non ready state", command)
+                self.matchoutput(out, "advertised status can be reset only "
+                                 "when host is in non ready state", command)
             else:
                 (out, err) = self.successtest(command)
 
 
-            command = "show host --hostname unittest02.one-nyp.ms.com"
+            command = "show host --hostname %s" % hostname
             out = self.commandtest(command.split(" "))
             self.matchoutput(out, "Build Status: %s" % status, command)
-            self.matchoutput(out, "Advertise Status: %s" % advertise_status, command)
+            self.matchoutput(out, "Advertise Status: %s" % advertise_status,
+                             command)
 
-            command = "cat --hostname unittest02.one-nyp.ms.com"
+            command = "cat --hostname %s"  % hostname
             out = self.commandtest(command.split(" "))
-            self.matchoutput(out, """'/system/build' = "%s";""" % status, command)
-            self.matchoutput(out, "'/system/advertise_status' = %s" % advertise_status, command)
+            self.matchoutput(out, """'/system/build' = "%s";""" % status,
+                             command)
+            self.matchoutput(out, "'/system/advertise_status' = %s" %
+                             advertise_status.lower(), command)
 
+    def testunittest02(self):
+        """ test reset advertised status on various build status """
+
+        hostname = "unittest02.one-nyp.ms.com";
+        hosts = [hostname]
+        scratchfile = self.writescratch("hostlist", "".join(hosts))
+
+        # we start off as "ready", so each of these transitions (in order)
+        # should be valid
+        for status in ['failed', 'reinstall', 'rebuild', 'ready']:
+            advertise_status = "False"
+
+            ## change status
+            command = ["change_status", "--hostname", hostname,
+                       "--buildstatus", status]
+            (out, err) = self.successtest(command)
+
+            ## reset advertised state to build
+            command = ["reset_advertised_status", "--list", scratchfile]
+
+            if (status == "ready"):
+                advertise_status = "True"
+                out = self.badrequesttest(command)
+                self.matchoutput(out, "advertised status can be reset only "
+                                 "when host is in non ready state", command)
+            else:
+                (out, err) = self.successtest(command)
+
+
+            command = "show host --hostname %s"  % hostname
+            out = self.commandtest(command.split(" "))
+            self.matchoutput(out, "Build Status: %s" % status, command)
+            self.matchoutput(out, "Advertise Status: %s" % advertise_status,
+                             command)
+
+            command = "cat --hostname %s"  % hostname
+            out = self.commandtest(command.split(" "))
+            self.matchoutput(out, """'/system/build' = "%s";""" % status,
+                             command)
+            self.matchoutput(out, "'/system/advertise_status' = %s" %
+                             advertise_status.lower(), command)
+
+    def testunittest03(self):
+        """ test for mismatch of sandbox/domains """
+
+        hosts = ["unittest02.one-nyp.ms.com\n", "aquilon62.aqd-unittest.ms.com"]
+        scratchfile = self.writescratch("hostlist", "".join(hosts))
+
+        for host in hosts:
+            ## change status
+            command = ["change_status", "--hostname", host,
+                       "--buildstatus", "rebuild"]
+            (out, err) = self.successtest(command)
+
+        ## reset advertised state to build
+        command = ["reset_advertised_status", "--list", scratchfile]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Bad Request: All hosts must be in the same domain or sandbox:",
+                         command)
+        ## reset the status
+        for host in hosts:
+            ## change status
+            command = ["change_status", "--hostname", host,
+                       "--buildstatus", "ready"]
+            (out, err) = self.successtest(command)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestResetAdvertisedStatus)

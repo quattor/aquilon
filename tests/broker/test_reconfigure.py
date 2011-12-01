@@ -74,7 +74,7 @@ class TestReconfigure(TestBrokerCommand):
         command = "show host --hostname unittest02.one-nyp.ms.com"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Build Status: ready", command)
-        self.matchoutput(out, "Advertise Status: true", command)
+        self.matchoutput(out, "Advertise Status: True", command)
 
     def testverifycatunittest02(self):
         command = "cat --hostname unittest02.one-nyp.ms.com"
@@ -249,7 +249,7 @@ class TestReconfigure(TestBrokerCommand):
         self.matchoutput(out, "Build Status: ready", command)
         self.matchoutput(out, "Operating System: windows", command)
         self.matchoutput(out, "Version: nt61e", command)
-        self.matchoutput(out, "Advertise Status: true", command)
+        self.matchoutput(out, "Advertise Status: True", command)
 
     def testreconfigureos(self):
         command = ["reconfigure",

@@ -161,7 +161,7 @@ class TestMakeAquilon(TestBrokerCommand):
         command = "show host --hostname unittest00.one-nyp.ms.com"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Build Status: blind", command)
-        self.matchoutput(out, "Advertise Status: false", command)
+        self.matchoutput(out, "Advertise Status: False", command)
 
     def testverifybindautoafs(self):
         command = "show host --hostname unittest00.one-nyp.ms.com"

@@ -26,7 +26,7 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-"""Contains the logic for `aq reset advertised status`."""
+"""Contains the logic for `aq reset advertised status --hostname`."""
 
 
 from aquilon.exceptions_ import ArgumentError, IncompleteError
@@ -38,13 +38,14 @@ from aquilon.worker.locks import lock_queue, CompileKey
 
 
 class CommandResetAdvertisedStatus(BrokerCommand):
+    """ reset advertised status for single host """
 
     required_parameters = ["hostname"]
 
     def render(self, session, logger, hostname, **arguments):
         dbhost = hostname_to_host(session, hostname)
         if dbhost.status.name == 'ready':
-           raise ArgumentError("{0:l} is in ready status, "
+            raise ArgumentError("{0:l} is in ready status, "
                                "advertised status can be reset only "
                                "when host is in non ready state".format(dbhost))
 
@@ -53,6 +54,13 @@ class CommandResetAdvertisedStatus(BrokerCommand):
         session.add(dbhost)
         session.flush()
 
+        if dbhost.archetype.is_compileable:
+            return self.compile(session, logger, dbhost)
+
+        return
+
+    def compile(self, session, logger, dbhost):
+        """ compile plenary templates """
         plenary = PlenaryHost(dbhost, logger=logger)
         # Force a host lock as pan might overwrite the profile...
         key = CompileKey(domain=dbhost.branch.name, profile=dbhost.fqdn,

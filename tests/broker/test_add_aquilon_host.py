@@ -62,7 +62,7 @@ class TestAddAquilonHost(TestBrokerCommand):
         self.matchoutput(out, "Personality: inventory", command)
         self.matchoutput(out, "Domain: unittest", command)
         self.matchoutput(out, "Build Status: blind", command)
-        self.matchoutput(out, "Advertise Status: false", command)
+        self.matchoutput(out, "Advertise Status: False", command)
 
     def testverifyshowmanagermissing(self):
         command = "show manager --missing"
