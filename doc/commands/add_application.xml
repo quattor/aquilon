@@ -26,7 +26,8 @@
 	    <group>
 	      <arg choice="req"><option>--hostname <replaceable>HOSTNAME</replaceable></option></arg>
 	      <arg choice="req"><option>--cluster <replaceable>CLUSTER</replaceable></option></arg>
-            </group>
+	      <arg choice="req"><option>--resourcegroup <replaceable>RESOURCEGROUP</replaceable></option></arg>
+        </group>
 	    <arg choice="req"><option>--application <replaceable>NAME</replaceable></option></arg>
 	    <arg choice="req"><option>--eonid <replaceable>EONID</replaceable></option></arg>
 	    <arg choice="opt"><option>--comments <replaceable>COMMENTS</replaceable></option></arg>
@@ -86,6 +87,18 @@
 		    </para>
 		</listitem>
 	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--resourcegroup
+		    <replaceable>RESOURCEGROUP</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			The name of the target resourcegroup for the application.
+		    </para>
+		</listitem>
+	    </varlistentry>
+
 	    <varlistentry>
 	        <term>
 		    <option>--eonid <replaceable>EONID</replaceable></option>
