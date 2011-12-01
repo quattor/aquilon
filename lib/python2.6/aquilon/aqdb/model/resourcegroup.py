@@ -48,7 +48,7 @@ class ResourceGroup(Resource):
     __mapper_args__ = {'polymorphic_identity': 'resourcegroup'}
 
     id = Column(Integer, ForeignKey('resource.id',
-                                    name='fs_resource_fk',
+                                    name='rg_resource_fk',
                                     ondelete='CASCADE'),
                                     primary_key=True)
 
