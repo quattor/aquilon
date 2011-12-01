@@ -80,16 +80,18 @@ def get_resource_holder(session, hostname, cluster, resgroup=None,
 
 
 def del_resource(session, logger, dbresource):
-    if dbresource.holder.holder_type == 'host':
+    if isinstance(dbresource.holder, HostResource):
         holder_plenary = PlenaryHost(dbresource.holder.host)
         domain = dbresource.holder.host.branch.name
-    if dbresource.holder.holder_type == 'cluster':
+    elif isinstance(dbresource.holder, ClusterResource):
         holder_plenary = PlenaryCluster(dbresource.holder.cluster)
         domain = dbresource.holder.cluster.branch.name
-    if dbresource.holder.holder_type == 'resourcegroup':
+    elif isinstance(dbresource.holder, BundleResource):
         holder_plenary = PlenaryResource(dbresource.holder.resourcegroup)
         # now recurse up to next level to obtain the domain
         domain = dbresource.holder.holder_object.holder.holder_object.branch.name
+    else:
+        raise TypeError('Unknown ResourceHolder %s' % type(dbresource.holder))
 
     plenary = PlenaryResource(dbresource, logger=logger)
 
@@ -123,16 +125,19 @@ def add_resource(session, logger, holder, dbresource):
     session.refresh(dbresource)
     res_plenary = PlenaryResource(dbresource, logger=logger)
 
-    if holder.holder_type == 'host':
+    if isinstance(dbresource.holder, HostResource):
         holder_plenary = PlenaryHost(holder.host)
         domain = holder.host.branch.name
-    if holder.holder_type == 'cluster':
+    elif isinstance(dbresource.holder, ClusterResource):
         holder_plenary = PlenaryCluster(holder.cluster)
         domain = holder.cluster.branch.name
-    if holder.holder_type == 'resourcegroup':
+    elif isinstance(dbresource.holder, BundleResource):
         holder_plenary = PlenaryResource(holder.resourcegroup)
         # now recurse up to next level to obtain the domain
         domain = dbresource.holder.holder_object.holder.holder_object.branch.name
+    else:
+        raise TypeError('Unknown ResourceHolder %s' % type(dbresource.holder))
+
 
     key = CompileKey.merge([res_plenary.get_write_key(),
                             holder_plenary.get_write_key()])
