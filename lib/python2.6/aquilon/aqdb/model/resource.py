@@ -85,7 +85,7 @@ class Resource(Base):
         '''
         #raise ValueError(self.resource_type, self.holder.holder_type, value)
         if value == 'resourcegroup' and \
-                self.holder.holder_type == 'resourcegroup':
+                self.holder.holder_type == 'bundle':
             raise ValueError("ResourceGroups must not be held by other " +
                              "ResourceGroups")
         return value
