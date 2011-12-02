@@ -45,8 +45,7 @@ def get_resource_holder(session, hostname, cluster, compel=True):
         who = dbhost.resholder
         if who is None:
             if compel:
-                raise NotFoundException("host %s has no resources" %
-                                        dbhost.fqdn)
+                raise NotFoundException("{0} has no resources.".format(dbhost))
             dbhost.resholder = HostResource(host=dbhost)
             session.add(dbhost.resholder)
             session.flush()
@@ -57,8 +56,7 @@ def get_resource_holder(session, hostname, cluster, compel=True):
         who = dbcluster.resholder
         if who is None:
             if compel:
-                raise NotFoundException("cluster %s has no resources" %
-                                        dbcluster.name)
+                raise NotFoundException("{0} has no resources.".format(dbcluster))
             dbcluster.resholder = ClusterResource(cluster=dbcluster)
             session.add(dbcluster.resholder)
             session.flush()

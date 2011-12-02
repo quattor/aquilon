@@ -43,7 +43,9 @@ class TestAddFilesystem(TestBrokerCommand):
     def test_00_basic_filesystem(self):
         command = ["show_filesystem", "--hostname=server1.aqd-unittest.ms.com"]
         out = self.notfoundtest(command)
-        self.matchoutput(out, "host server1.aqd-unittest.ms.com has no resources", command)
+        self.matchoutput(out,
+                         "Host server1.aqd-unittest.ms.com has no resources.",
+                         command)
 
         command = ["add_filesystem", "--filesystem=fs1", "--type=ext3",
                    "--mountpoint=/mnt", "--blockdevice=/dev/foo/bar",
@@ -56,7 +58,7 @@ class TestAddFilesystem(TestBrokerCommand):
         command = ["show_filesystem", "--filesystem=fs1"]
         out = self.commandtest(command)
         self.matchoutput(out, "Filesystem: fs1", command)
-        self.matchoutput(out, "Bound to Host: server1.aqd-unittest.ms.com",
+        self.matchoutput(out, "Bound to: Host server1.aqd-unittest.ms.com",
                          command)
         self.matchoutput(out, "Block Device: /dev/foo/bar", command)
         self.matchoutput(out, "Mount at boot: True", command)
@@ -125,8 +127,8 @@ class TestAddFilesystem(TestBrokerCommand):
     def test_30_checkthehost(self):
         command = ["show_host", "--host=server1.aqd-unittest.ms.com"]
         out = self.commandtest(command)
-        self.matchoutput(out, "Resource: fs1 (filesystem)", command)
-        self.matchoutput(out, "Resource: fs2 (filesystem)", command)
+        self.matchoutput(out, "Filesystem: fs1", command)
+        self.matchoutput(out, "Filesystem: fs2", command)
 
         command = ["make", "--hostname=server1.aqd-unittest.ms.com"]
         out = self.successtest(command)
@@ -149,7 +151,9 @@ class TestAddFilesystem(TestBrokerCommand):
     def test_50_add_to_cluster(self):
         command = ["show_filesystem", "--cluster=utvcs1"]
         out = self.notfoundtest(command)
-        self.matchoutput(out, "cluster utvcs1 has no resources", command)
+        self.matchoutput(out,
+                         "High Availability Cluster utvcs1 has no resources.",
+                         command)
 
         command = ["add_filesystem", "--filesystem=fsshared", "--type=ext3",
                    "--mountpoint=/mnt", "--blockdevice=/dev/foo/bar",
@@ -162,7 +166,7 @@ class TestAddFilesystem(TestBrokerCommand):
         command = ["show_filesystem", "--cluster=utvcs1"]
         out = self.commandtest(command)
         self.matchoutput(out, "Filesystem: fsshared", command)
-        self.matchoutput(out, "Bound to Cluster: utvcs1",
+        self.matchoutput(out, "Bound to: High Availability Cluster utvcs1",
                          command)
         self.matchoutput(out, "Block Device: /dev/foo/bar", command)
         self.matchoutput(out, "Mount at boot: False", command)

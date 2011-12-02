@@ -39,15 +39,12 @@ class ResourceFormatter(ObjectFormatter):
 
     def format_raw(self, resource, indent=""):
         details = []
-        details.append("%s%s: %s" % (indent,
-                                     resource.resource_type.capitalize(),
-                                     resource.name))
+        details.append(indent + "{0:c}: {0.name}".format(resource))
         if resource.comments:
             details.append(indent + "  Comments: %s" % resource.comments)
 
-        details.append(indent + "  Bound to %s: %s" %
-                       (resource.holder.holder_type.capitalize(),
-                        resource.holder.holder_name))
+        details.append(indent + "  Bound to: {0}"
+                       .format(resource.holder.holder_object))
         return "\n".join(details)
 
     def format_proto(self, resource, skeleton=None):

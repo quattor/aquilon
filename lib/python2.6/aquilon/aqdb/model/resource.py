@@ -116,10 +116,11 @@ class ResourceHolder(Base):
 
     @property
     def holder_name(self):
-        if self.holder_type == 'host':
-            return self.host.fqdn
-        if self.holder_type == 'cluster':
-            return self.cluster.name
+        return None
+
+    @property
+    def holder_object(self):
+        return None
 
 
 Resource.holder = relation(ResourceHolder, uselist=False, lazy='subquery',
@@ -143,6 +144,14 @@ class HostResource(ResourceHolder):
                                     cascade='all, delete-orphan',
                                     uselist=False))
 
+    @property
+    def holder_name(self):
+        return self.host.fqdn
+
+    @property
+    def holder_object(self):
+        return self.host
+
 
 class ClusterResource(ResourceHolder):
     __mapper_args__ = {'polymorphic_identity': 'cluster'}
@@ -156,6 +165,14 @@ class ClusterResource(ResourceHolder):
                        backref=backref('resholder',
                                        cascade='all, delete-orphan',
                                        uselist=False))
+
+    @property
+    def holder_name(self):
+        return self.cluster.name
+
+    @property
+    def holder_object(self):
+        return self.cluster
 
 
 Host.resources = relation(

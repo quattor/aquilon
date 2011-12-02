@@ -50,7 +50,7 @@ class TestAddApplication(TestBrokerCommand):
                    "--host=server1.aqd-unittest.ms.com"]
         out = self.commandtest(command)
         self.matchoutput(out, "Application: app1", command)
-        self.matchoutput(out, "Bound to Host: server1.aqd-unittest.ms.com",
+        self.matchoutput(out, "Bound to: Host server1.aqd-unittest.ms.com",
                          command)
         self.matchoutput(out, "EON id: 42", command)
         self.matchoutput(out, "Comments: testing", command)
@@ -68,7 +68,7 @@ class TestAddApplication(TestBrokerCommand):
     def test_30_checkhost(self):
         command = ["show_host", "--host=server1.aqd-unittest.ms.com"]
         out = self.commandtest(command)
-        self.matchoutput(out, "Resource: app1 (application)", command)
+        self.matchoutput(out, "Application: app1", command)
 
         command = ["show_host", "--hostname=server1.aqd-unittest.ms.com",
                    "--format=proto"]

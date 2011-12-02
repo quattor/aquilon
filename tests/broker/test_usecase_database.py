@@ -60,8 +60,8 @@ class TestUsecaseDatabase(TestBrokerCommand):
 
         command = ["show_host", "--hostname=server1.aqd-unittest.ms.com"]
         out = self.commandtest(command)
-        self.matchoutput(out, "Resource: nydb1 (application)", command)
-        self.matchoutput(out, "Resource: gnr.0 (filesystem)", command)
+        self.matchoutput(out, "Application: nydb1", command)
+        self.matchoutput(out, "Filesystem: gnr.0", command)
 
         command = ["cat", "--hostname=server1.aqd-unittest.ms.com"]
         out = self.commandtest(command)
@@ -90,10 +90,10 @@ class TestUsecaseDatabase(TestBrokerCommand):
 
         command = ["show_host", "--hostname=server1.aqd-unittest.ms.com"]
         out = self.commandtest(command)
-        self.matchoutput(out, "Resource: nydb1 (application)", command)
-        self.matchoutput(out, "Resource: gnr.0 (filesystem)", command)
-        self.matchoutput(out, "Resource: utdb2 (application)", command)
-        self.matchoutput(out, "Resource: gnr.1 (filesystem)", command)
+        self.matchoutput(out, "Application: nydb1", command)
+        self.matchoutput(out, "Filesystem: gnr.0", command)
+        self.matchoutput(out, "Application: utdb2", command)
+        self.matchoutput(out, "Filesystem: gnr.1", command)
 
         command = ["cat", "--hostname=server1.aqd-unittest.ms.com"]
         out = self.commandtest(command)
@@ -145,8 +145,8 @@ class TestUsecaseDatabase(TestBrokerCommand):
 
         command = ["show_cluster", "--cluster=nydb1"]
         out = self.commandtest(command)
-        self.matchoutput(out, "Resource: nydb1 (application)", command)
-        self.matchoutput(out, "Resource: gnr.0 (filesystem)", command)
+        self.matchoutput(out, "Application: nydb1", command)
+        self.matchoutput(out, "Filesystem: gnr.0", command)
         self.matchoutput(out, "Member: server1.aqd-unittest.ms.com", command)
 
         command = ["cat", "--cluster=nydb1"]
