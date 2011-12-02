@@ -36,6 +36,6 @@ from aquilon.worker.commands.show_resource import show_resource
 class CommandShowIntervention(BrokerCommand):
 
     def render(self, session, intervention,
-               hostname, cluster, all, **arguments):
-        return show_resource(session, hostname, cluster, all,
+               hostname, cluster, resourcegroup, all, **arguments):
+        return show_resource(session, hostname, cluster, resourcegroup, all,
                              intervention, Intervention)

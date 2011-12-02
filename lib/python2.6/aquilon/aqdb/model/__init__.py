@@ -144,3 +144,4 @@ from aquilon.aqdb.model.resource import (Resource, ResourceHolder,
 from aquilon.aqdb.model.filesystem import Filesystem
 from aquilon.aqdb.model.application import Application
 from aquilon.aqdb.model.intervention import Intervention
+from aquilon.aqdb.model.resourcegroup import ResourceGroup, BundleResource

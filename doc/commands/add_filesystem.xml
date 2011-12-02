@@ -26,6 +26,7 @@
 	    <group>
 	      <arg choice="req"><option>--hostname <replaceable>HOSTNAME</replaceable></option></arg>
 	      <arg choice="req"><option>--cluster <replaceable>CLUSTER</replaceable></option></arg>
+	      <arg choice="req"><option>--resourcegroup <replaceable>RESOURCEGROUP</replaceable></option></arg>
             </group>
 	    <arg choice="req"><option>--filesystem <replaceable>NAME</replaceable></option></arg>
 	    <arg choice="req"><option>--type <replaceable>TYPE</replaceable></option></arg>
@@ -97,6 +98,16 @@
 		<listitem>
 		    <para>
 			The name of the target cluster for the filesystem.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--resourcegroup <replaceable>RESOURCEGROUP</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			The name of the target resourcegroup for the filesystem.
 		    </para>
 		</listitem>
 	    </varlistentry>

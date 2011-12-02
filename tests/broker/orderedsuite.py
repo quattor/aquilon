@@ -140,6 +140,7 @@ from test_bind_server import TestBindServer
 from test_add_filesystem import TestAddFilesystem
 from test_add_application import TestAddApplication
 from test_add_intervention import TestAddIntervention
+from test_add_resourcegroup import TestAddResourceGroup
 from test_constraints_bind_client import TestBindClientConstraints
 from test_constraints_bind_server import TestBindServerConstraints
 from test_constraints_archetype import TestArchetypeConstraints
@@ -308,6 +309,7 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestProfile,
                 TestBindServer,
                 TestAddFilesystem, TestAddApplication, TestAddIntervention,
+                TestAddResourceGroup,
                 TestBindClientConstraints, TestBindServerConstraints,
                 TestArchetypeConstraints, TestPersonalityConstraints,
                 TestDomainConstraints, TestVendorConstraints,

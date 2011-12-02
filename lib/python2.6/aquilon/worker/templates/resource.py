@@ -80,3 +80,7 @@ class PlenaryResource(Plenary):
         if self.resource.disabled:
             lines.append('"disabled" = %s;' %
                          pan(self.resource.disabled.split(",")))
+
+    def body_resourcegroup(self, lines):
+        lines.append('"name" = %s;' % pan(self.resource.name))
+

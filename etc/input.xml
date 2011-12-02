@@ -4061,6 +4061,7 @@
       </optgroup>
       <optgroup name="resource_mapping_opts" mandatory="True" fields="any">
          <option name="hostname" type="string">Hostname to apply resource</option>
+         <option name="resourcegroup" type="string">Resourcegroup to apply resource</option>
          <option name="cluster" type="string">Cluster to apply resource</option>
       </optgroup>
       <transport method="put" path="resource/filesystem/%(filesystem)s" />
@@ -4073,6 +4074,7 @@
       </optgroup>
       <optgroup name="resource_mapping_opts" mandatory="True" fields="any">
         <option name="hostname" type="string">Hostname of resource</option>
+         <option name="resourcegroup" type="string">Resourcegroup to apply resource</option>
         <option name="cluster" type="string">Cluster of resource</option>
       </optgroup>
       <transport method="delete" path="resource/filesystem/%(filesystem)s" />
@@ -4081,6 +4083,7 @@
    <command name="show_filesystem">
       Show filesystems based on filtering for host/cluster association
       <optgroup name="show_resource_opts" mandatory="True" fields="any">
+         <option name="resourcegroup" type="string">resourcegroup name</option>
          <option name="cluster" type="string">cluster name</option>
          <option name="hostname" type="string">hostname</option>
          <option name="filesystem" type="string">filesystem name</option>
@@ -4100,6 +4103,7 @@
          <option name="comments" type="string">Comments</option>
       </optgroup>
       <optgroup name="resource_mapping_opts" mandatory="True" fields="any">
+         <option name="resourcegroup" type="string">Resourcegroup to apply resource</option>
          <option name="hostname" type="string">Hostname to apply resource</option>
          <option name="cluster" type="string">Cluster to apply resource</option>
       </optgroup>
@@ -4112,6 +4116,7 @@
          <option name="application" type="string">name</option>
       </optgroup>
       <optgroup name="resource_mapping_opts" mandatory="True" fields="any">
+         <option name="resourcegroup" type="string">Resourcegroup to apply resource</option>
         <option name="hostname" type="string">Hostname of resource</option>
         <option name="cluster" type="string">Cluster of resource</option>
       </optgroup>
@@ -4123,6 +4128,7 @@
       <optgroup name="show_resource_opts" mandatory="True" fields="any">
          <option name="cluster" type="string">cluster name</option>
          <option name="hostname" type="string">hostname</option>
+         <option name="resourcegroup" type="string">resourcegroup</option>
          <option name="application" type="string">application name</option>
          <option name="eonid" type="int">EON id</option>
          <option name="all" type="flag">list all hardware</option>
@@ -4158,6 +4164,7 @@
          <option name="intervention" type="string">the name of the intervention</option>
          <option name="cluster" type="string">cluster name</option>
          <option name="hostname" type="string">hostname</option>
+         <option name="resourcegroup" type="string">resource group</option>
          <option name="all" type="flag">list all hardware</option>
       </optgroup>
       <transport method="get" trigger="intervention" path="resource/intervention/%(intervention)s" />
@@ -4266,6 +4273,38 @@
       </optgroup>
 
       <transport method="post" path="grn/command/unmap"/>
+   </command>
+
+   <command name="add_resourcegroup">
+      Add a new resource group.
+      <optgroup name="add_rg_opts" mandatory="True" fields="all">
+        <option name="resourcegroup" type="string">name</option>
+      </optgroup>
+      <optgroup name="resource_mapping_opts" mandatory="True" fields="any">
+         <option name="hostname" type="string">Hostname to apply resource group</option>
+         <option name="cluster" type="string">Cluster to apply resource group</option>
+      </optgroup>
+      <transport method="put" path="resource/resourcegroup/%(resourcegroup)s" />
+   </command>
+
+   <command name="del_resourcegroup">
+      Delete a resource group.
+      <optgroup name="del_rg_opts" mandatory="True" fields="all">
+         <option name="resourcegroup" type="string">name</option>
+      </optgroup>
+      <transport method="delete" path="resource/resourcegroup/%(resourcegroup)s" />
+   </command>
+
+   <command name="show_resourcegroup">
+      Show resource groups based on filtering for host/cluster association.
+      <optgroup name="show_resource_opts" mandatory="True" fields="any">
+         <option name="cluster" type="string">cluster name</option>
+         <option name="hostname" type="string">hostname</option>
+         <option name="resourcegroup" type="string">resource group name</option>
+         <option name="all" type="flag">list all hardware</option>
+      </optgroup>
+      <transport method="get" trigger="resourcegroup" path="resource/resourcegroup/%(resourcegroup)s" />
+      <transport method="get" path="find/resource/resourcegroup" />
    </command>
 
 </commandline>

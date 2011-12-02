@@ -33,7 +33,7 @@ import re
 from sqlalchemy import (Column, Integer, String, DateTime, ForeignKey,
                         Sequence, UniqueConstraint)
 from sqlalchemy.ext.associationproxy import association_proxy
-from sqlalchemy.orm import relation, backref, object_session
+from sqlalchemy.orm import relation, backref, object_session, validates
 
 from aquilon.aqdb.column_types import AqStr, Enum
 from aquilon.aqdb.model import Base, Cluster, Host
@@ -78,6 +78,18 @@ class Resource(Base):
                                          self.holder.holder_name,
                                          self.name)
 
+    @validates('resource_type')
+    def validate_resource_type(self, key, value):
+        '''The resource_type is not set until after the holder is set so
+           we must validate the resource_type rather than the resource_holder
+        '''
+        #raise ValueError(self.resource_type, self.holder.holder_type, value)
+        if value == 'resourcegroup' and \
+                self.holder.holder_type == 'bundle':
+            raise ValueError("ResourceGroups must not be held by other " +
+                             "ResourceGroups")
+        return value
+
     def __lt__(self, other):
         # Quick optimizations to not have to evaluate the name.
         if self.holder != other.holder:
@@ -92,7 +104,7 @@ class Resource(Base):
         return "<%s Resource %s>" % (self.resource_type, self.id)
 
 
-resource = Resource.__table__ # pylint: disable-msg=C0103, E1101
+resource = Resource.__table__  # pylint: disable-msg=C0103, E1101
 resource.primary_key.name = '%s_pk' % _TN
 resource.info['unique_fields'] = ['name', 'holder']
 
@@ -124,6 +136,7 @@ class ResourceHolder(Base):
 
 
 Resource.holder = relation(ResourceHolder, uselist=False, lazy='subquery',
+                           primaryjoin=Resource.holder_id==ResourceHolder.id,
                            backref=backref('resources',
                                            cascade='all, delete-orphan'))
 

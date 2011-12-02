@@ -28,21 +28,21 @@
 # TERMS THAT MAY APPLY.
 
 
-from aquilon.aqdb.model import Filesystem
-from aquilon.worker.broker import BrokerCommand, validate_basic
-from aquilon.worker.dbwrappers.resources import (del_resource,
-                                                 get_resource_holder)
+from sqlalchemy.orm import aliased
+from sqlalchemy.sql.expression import and_
 
-class CommandDelFilesystem(BrokerCommand):
+from aquilon.exceptions_ import ArgumentError
+from aquilon.aqdb.model import ResourceGroup
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.commands.show_resource import show_resource
 
-    required_parameters = ["filesystem"]
 
-    def render(self, session, logger, filesystem,
-               hostname, cluster, resourcegroup, **arguments):
+class CommandShowResourceGroup(BrokerCommand):
 
-        validate_basic("filesystem", filesystem)
-        holder = get_resource_holder(session, hostname, cluster, resourcegroup)
-        dbfs = Filesystem.get_unique(session, name=filesystem, holder=holder,
-                                     compel=True)
-        del_resource(session, logger, dbfs)
-        return
+    required_parameters = []
+
+    def render(self, session, hostname, cluster, all, resourcegroup,
+               **arguments):
+
+        return show_resource(session, hostname, cluster, None, all,
+                             resourcegroup, ResourceGroup)

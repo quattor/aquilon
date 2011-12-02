@@ -1,6 +1,6 @@
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 #
-# Copyright (C) 2008,2009,2010,2011  Contributor
+# Copyright (C) 2009,2010,2011  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -28,21 +28,25 @@
 # TERMS THAT MAY APPLY.
 
 
-from aquilon.aqdb.model import Filesystem
+from aquilon.aqdb.model import ResourceGroup
 from aquilon.worker.broker import BrokerCommand, validate_basic
-from aquilon.worker.dbwrappers.resources import (del_resource,
+from aquilon.worker.dbwrappers.resources import (add_resource,
                                                  get_resource_holder)
 
-class CommandDelFilesystem(BrokerCommand):
 
-    required_parameters = ["filesystem"]
+class CommandAddResourceGroup(BrokerCommand):
 
-    def render(self, session, logger, filesystem,
-               hostname, cluster, resourcegroup, **arguments):
+    required_parameters = ["resourcegroup"]
 
-        validate_basic("filesystem", filesystem)
-        holder = get_resource_holder(session, hostname, cluster, resourcegroup)
-        dbfs = Filesystem.get_unique(session, name=filesystem, holder=holder,
-                                     compel=True)
-        del_resource(session, logger, dbfs)
-        return
+    def render(self, session, logger, resourcegroup,
+               hostname, cluster, **arguments):
+
+        validate_basic("resourcegroup", resourcegroup)
+        holder = get_resource_holder(session, hostname, cluster, compel=False)
+
+        ResourceGroup.get_unique(session, name=resourcegroup,
+                                 #holder=holder,
+                                 preclude=True)
+
+        dbrg = ResourceGroup(name=resourcegroup)
+        return add_resource(session, logger, holder, dbrg)

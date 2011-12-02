@@ -37,8 +37,8 @@ class CommandShowFilesystem(BrokerCommand):
 
     required_parameters = []
 
-    def render(self, session, hostname, cluster, all, filesystem,
-               **arguments):
+    def render(self, session, hostname, cluster, resourcegroup, all,
+               filesystem, **arguments):
 
-        return show_resource(session, hostname, cluster, all,
+        return show_resource(session, hostname, cluster, resourcegroup, all,
                              filesystem, Filesystem)
