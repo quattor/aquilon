@@ -201,10 +201,14 @@ location.append_constraint(
 class LocationLink(Base):
     __tablename__ = 'location_link'
 
-    child_id = Column(Integer, ForeignKey('location.id', ondelete='CASCADE'),
+    child_id = Column(Integer, ForeignKey('location.id',
+                                          name='location_link_child_fk',
+                                          ondelete='CASCADE'),
                       primary_key=True)
 
-    parent_id = Column(Integer, ForeignKey('location.id', ondelete='CASCADE'),
+    parent_id = Column(Integer, ForeignKey('location.id',
+                                           name='location_link_parent_fk',
+                                           ondelete='CASCADE'),
                        primary_key=True)
 
     # Distance from the given parent. 1 means direct child.
@@ -221,6 +225,10 @@ class LocationLink(Base):
                       backref=backref("_child_links",
                                       cascade="all, delete-orphan",
                                       passive_deletes=True))
+
+
+llink = LocationLink.__table__  # pylint: disable-msg=C0103, E1101
+llink.primary_key.name = 'location_link_pk'
 
 # Make these relations view-only, to make sure
 # the distance is managed explicitely
