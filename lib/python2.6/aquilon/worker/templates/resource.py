@@ -66,7 +66,15 @@ class PlenaryResource(Plenary):
         lines.append('"name" = %s;' % pan(self.resource.name))
         lines.append('"eonid" = %s;' % pan(self.resource.eonid))
 
+    def body_reboot_schedule(self, lines):
+        lines.append('"name" = %s;' % pan(self.resource.name))
+        lines.append('"time" = %s;' % pan(self.resource.time))
+        lines.append('"week" = %s;' % pan(self.resource.week))
+        lines.append('"day" = %s;' % pan(self.resource.day))
+
     def body_intervention(self, lines):
+        lines.append('"start" = %s;' %
+                     pan(self.resource.start_date.isoformat()))
         lines.append('"expiry" = %s;' %
                      pan(self.resource.expiry_date.isoformat()))
 
@@ -84,3 +92,7 @@ class PlenaryResource(Plenary):
     def body_resourcegroup(self, lines):
         lines.append('"name" = %s;' % pan(self.resource.name))
 
+    def body_reboot_iv(self, lines):
+        lines.append('"name" = %s;' % pan(self.resource.name))
+        lines.append('"justification" = %s;' % pan(self.resource.justification))
+        self.body_intervention(lines)
