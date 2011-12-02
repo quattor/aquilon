@@ -127,19 +127,16 @@ class CommandPollSwitch(BrokerCommand):
             return
         helper_service = Service.get_unique(session, helper_name,
                                             compel=InternalError)
-        # TODO: eventually we should use the Chooser here
-        for loc in switch.location.parents:
-            q = session.query(ServiceInstance)
-            q = q.filter_by(service=helper_service)
-            q = q.join(['service_map'])
-            q = q.filter_by(location=loc)
-            dbsi = q.first()
-            if dbsi and dbsi.server_hosts:
+        mapped_instances = ServiceInstance.get_mapped_instance_cache(
+            dbpersonality=None, dblocation=switch.location,
+            dbservices=[helper_service])
+        for dbsi in mapped_instances.get(helper_service, []):
+            if dbsi.server_hosts:
                 # Poor man's load balancing...
                 jump = choice(dbsi.server_hosts).fqdn
-                logger.client_info("Using jump host {0} from {1:l}, mapped to "
-                                   "{2:l} to run CheckNet for {3:l}.".format(
-                                       jump, dbsi, loc, switch))
+                logger.client_info("Using jump host {0} from {1:l} "
+                                   "to run CheckNet for {2:l}.".format(
+                                       jump, dbsi, switch))
                 return jump
 
         logger.client_info("No jump host for %s, calling CheckNet from %s." %

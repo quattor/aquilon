@@ -160,7 +160,7 @@ class TestPollSwitch(TestBrokerCommand):
         service = self.config.get("broker", "poll_helper_service")
         self.matchoutput(err,
                          "Using jump host nyaqd1.ms.com from service instance "
-                         "%s/unittest, mapped to building ut to run CheckNet "
+                         "%s/unittest to run CheckNet "
                          "for switch ut01ga2s01.aqd-unittest.ms.com." %
                          (service),
                          command)

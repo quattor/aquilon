@@ -185,13 +185,12 @@ class ServiceInstance(Base):
     @classmethod
     def get_mapped_instance_cache(cls, dbpersonality, dblocation, dbservices):
         """Returns dict of requested services to closest mapped instances."""
-        session = object_session(dbpersonality)
-
         # Can't import these on init as ServiceInstance is a dependency.
         # Could think about moving this method definition out to one of
         # these classes.
-        from aquilon.aqdb.model import ServiceMap, PersonalityServiceMap, Location
-        session = object_session(dbpersonality)
+        from aquilon.aqdb.model import (ServiceMap, PersonalityServiceMap,
+                                        Location)
+        session = object_session(dblocation)
         cache = {}
 
         ## all relevant locations
@@ -200,7 +199,11 @@ class ServiceInstance(Base):
         for loc in reversed(dblocation.parents):
             location_ids.append(loc.id)
 
-        for map_type in [PersonalityServiceMap, ServiceMap]:
+        search_maps = []
+        if dbpersonality:
+            search_maps.append(PersonalityServiceMap)
+        search_maps.append(ServiceMap)
+        for map_type in search_maps:
             # search only for missing ids
             missing_ids = []
             for dbservice in dbservices:
@@ -211,7 +214,8 @@ class ServiceInstance(Base):
             q = session.query(map_type)
             if map_type == PersonalityServiceMap:
                 q = q.filter_by(personality=dbpersonality)
-            q = q.join('service_instance').filter(ServiceInstance.service_id.in_(missing_ids))
+            q = q.join('service_instance').filter(
+                ServiceInstance.service_id.in_(missing_ids))
             q = q.reset_joinpoint()
             q = q.join('location').filter(Location.id.in_(location_ids))
 
