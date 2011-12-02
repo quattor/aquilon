@@ -143,11 +143,17 @@ class TestUpdateMachine(TestBrokerCommand):
         self.noouttest(["update", "machine", "--machine", "ut3c1n4",
             "--cpuname", "xeon_3000"])
 
+    def testupdateut3c1n4rack(self):
+        # Changing the rack will hit the machine_plenary_will_move logic so we
+        # can test if the host profile gets written
+        self.noouttest(["update", "machine", "--machine", "ut3c1n4",
+            "--rack", "ut4"])
+
     def testverifyupdateut3c1n4(self):
         command = "show machine --machine ut3c1n4"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Blade: ut3c1n4", command)
-        self.matchoutput(out, "Rack: ut3", command)
+        self.matchoutput(out, "Rack: ut4", command)
         self.matchoutput(out, "Vendor: ibm Model: hs21-8853l5u", command)
         self.matchoutput(out, "Cpu: xeon_3000 x 2", command)
         self.matchoutput(out, "Memory: 8192 MB", command)
@@ -175,6 +181,13 @@ class TestUpdateMachine(TestBrokerCommand):
                           r'create\("hardware/cpu/intel/xeon_3000"\),\s*'
                           r'create\("hardware/cpu/intel/xeon_3000"\s*\)\s*\);',
                           command)
+
+    def testverifycatunittest01(self):
+        # There should be no host template present after the update_machine
+        # command
+        command = ["cat", "--hostname", "unittest01.one-nyp.ms.com"]
+        out = self.internalerrortest(command)
+        self.matchoutput(out, "No such file or directory", command)
 
     def testclearchassis(self):
         command = ["update", "machine", "--machine", "ut9s03p1",
