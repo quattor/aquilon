@@ -61,6 +61,30 @@ class TestPxeswitch(TestBrokerCommand):
         # one.
         (out, err) = self.successtest(command.split(" "))
         self.matchoutput(err, "--install", command)
+        self.matchoutput(err, "--configure", command)
+        self.matchclean(err, "--status", command)
+        self.matchclean(err, "--rescue", command)
+        self.matchclean(err, "--boot", command)
+        self.matchclean(err, "--firmware", command)
+        self.matchclean(err, "--livecd", command)
+        sshdir = self.config.get("broker", "installfe_sshdir")
+        self.matchoutput(err, "--sshdir %s" % sshdir, command)
+        user = self.config.get("broker", "installfe_user")
+        self.matchoutput(err,
+                         "--servers %s@server9.aqd-unittest.ms.com" % user,
+                         command)
+
+    def testinstallunittest02noconf(self):
+        command = ["pxeswitch", "--hostname", "unittest02.one-nyp.ms.com",
+                   "--install", "--noconfigure"]
+        (out, err) = self.successtest(command)
+        self.matchoutput(err, "--install", command)
+        self.matchclean(err, "--configure", command)
+        self.matchclean(err, "--status", command)
+        self.matchclean(err, "--rescue", command)
+        self.matchclean(err, "--boot", command)
+        self.matchclean(err, "--firmware", command)
+        self.matchclean(err, "--livecd", command)
         sshdir = self.config.get("broker", "installfe_sshdir")
         self.matchoutput(err, "--sshdir %s" % sshdir, command)
         user = self.config.get("broker", "installfe_user")
@@ -71,31 +95,36 @@ class TestPxeswitch(TestBrokerCommand):
     def testlocalbootunittest02(self):
         command = "pxeswitch --hostname unittest02.one-nyp.ms.com --localboot"
         (out, err) = self.successtest(command.split(" "))
+        self.matchoutput(err, "--configure", command)
         self.matchoutput(err, "--boot", command)
 
     def teststatusunittest02(self):
         command = "pxeswitch --hostname unittest02.one-nyp.ms.com --status"
         (out, err) = self.successtest(command.split(" "))
+        self.matchclean(err, "--configure", command)
         self.matchoutput(err, "--status", command)
 
     def testfirmwareunittest02(self):
         command = "pxeswitch --hostname unittest02.one-nyp.ms.com --firmware"
         (out, err) = self.successtest(command.split(" "))
+        self.matchoutput(err, "--configure", command)
         self.matchoutput(err, "--firmware", command)
 
     def testconfigureunittest02(self):
-        command = "pxeswitch --hostname unittest02.one-nyp.ms.com --configure"
+        command = "pxeswitch --hostname unittest02.one-nyp.ms.com"
         (out, err) = self.successtest(command.split(" "))
         self.matchoutput(err, "--configure", command)
 
     def testblindbuildunittest02(self):
         command = "pxeswitch --hostname unittest02.one-nyp.ms.com --blindbuild"
         (out, err) = self.successtest(command.split(" "))
+        self.matchoutput(err, "--configure", command)
         self.matchoutput(err, "--livecd", command)
 
     def testrescueunittest02(self):
         command = "pxeswitch --hostname unittest02.one-nyp.ms.com --rescue"
         (out, err) = self.successtest(command.split(" "))
+        self.matchoutput(err, "--configure", command)
         self.matchoutput(err, "--rescue", command)
 
     def testconfigurelist(self):
@@ -103,9 +132,9 @@ class TestPxeswitch(TestBrokerCommand):
             f.writelines(["unittest02.one-nyp.ms.com\n",
                           "unittest00.one-nyp.ms.com\n"])
             f.flush()
-            command = "pxeswitch --list %s --configure" % f.name
+            command = "pxeswitch --list %s" % f.name
             (out, err) = self.successtest(command.split(" "))
-            self.matchoutput(err, "--configure", command)
+            self.matchoutput(err, "--configurelist", command)
             # We would like to test more of the output... we need something
             # special for aii-shellfe however...
 
@@ -134,6 +163,7 @@ class TestPxeswitch(TestBrokerCommand):
             f.flush()
             command = "pxeswitch --list %s --blindbuild" % f.name
             (out, err) = self.successtest(command.split(" "))
+            self.matchoutput(err, "--configurelist", command)
             self.matchoutput(err, "--livecdlist", command)
 
     def testrescuelist(self):
@@ -143,12 +173,24 @@ class TestPxeswitch(TestBrokerCommand):
             f.flush()
             command = "pxeswitch --list %s --rescue" % f.name
             (out, err) = self.successtest(command.split(" "))
+            self.matchoutput(err, "--configurelist", command)
             self.matchoutput(err, "--rescuelist", command)
 
-    def teststatusconflictconfigure(self):
-        command = ["pxeswitch", "--hostname=unittest02.one-nyp.ms.com",
-                   "--status", "--configure"]
-        self.badoptiontest(command)
+    def testrescuelistnoconf(self):
+        with NamedTemporaryFile() as f:
+            f.writelines(["unittest02.one-nyp.ms.com\n",
+                          "unittest00.one-nyp.ms.com\n"])
+            f.flush()
+            command = "pxeswitch --list %s --rescue --noconfigure" % f.name
+            (out, err) = self.successtest(command.split(" "))
+            self.matchclean(err, "--configurelist", command)
+            self.matchoutput(err, "--rescuelist", command)
+
+# --configure is the default now, so this is no longer a conflict
+#    def teststatusconflictconfigure(self):
+#        command = ["pxeswitch", "--hostname=unittest02.one-nyp.ms.com",
+#                   "--status", "--configure"]
+#        self.badoptiontest(command)
 
     def teststatusconflictinstall(self):
         command = ["pxeswitch", "--hostname=unittest02.one-nyp.ms.com",
@@ -186,6 +228,6 @@ class TestPxeswitch(TestBrokerCommand):
             self.matchclean(err, "--firmware", command)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestPxeswitch)
     unittest.TextTestRunner(verbosity=2).run(suite)

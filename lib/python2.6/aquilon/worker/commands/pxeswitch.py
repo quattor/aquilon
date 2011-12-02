@@ -46,6 +46,11 @@ class CommandPxeswitch(BrokerCommand):
                    'firmware':'--firmware', 'blindbuild':'--livecd'}
 
     def render(self, session, logger, hostname, **arguments):
+        # The default is now --configure, but that does not play nice with
+        # --status. Turn --configure off if --status is present
+        if arguments.get("status", False):
+            arguments["configure"] = None
+
         dbhost = hostname_to_host(session, hostname)
         # Find what "bootserver" instance we're bound to
         dbservice = Service.get_unique(session, "bootserver", compel=True)
