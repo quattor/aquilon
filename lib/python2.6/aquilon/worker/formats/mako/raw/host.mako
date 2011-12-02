@@ -2,7 +2,7 @@
 Member of ${"{0:c}".format(record.cluster)}: ${record.cluster.name}
 % endif
 % for resource in record.resources:
-${"{0:c}: {0.name}".format(resource)}
+${formatter.redirect_raw(resource)}
 %endfor
 ${formatter.redirect_raw(record.personality)}
 ${formatter.redirect_raw(record.archetype)}
