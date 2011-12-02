@@ -188,6 +188,6 @@ class TestAddFilesystem(TestBrokerCommand):
 
 
 if __name__=='__main__':
-    suite = unittest.TestLoader().loadTestsFromTestCase(TestAddArchetype)
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestAddFilesystem)
     unittest.TextTestRunner(verbosity=2).run(suite)
 

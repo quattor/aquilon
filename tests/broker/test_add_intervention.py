@@ -210,6 +210,6 @@ class TestAddIntervention(TestBrokerCommand):
 
 
 if __name__=='__main__':
-    suite = unittest.TestLoader().loadTestsFromTestCase(TestAddArchetype)
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestAddIntervention)
     unittest.TextTestRunner(verbosity=2).run(suite)
 
