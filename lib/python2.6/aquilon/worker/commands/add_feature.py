@@ -41,7 +41,8 @@ class CommandAddFeature(BrokerCommand):
 
     required_parameters = ['feature', 'type']
 
-    def render(self, session, feature, type, post_call, comments, **arguments):
+    def render(self, session, feature, type, post_personality, comments,
+               **arguments):
         Feature.validate_type(type)
 
         if _name_re.search(feature):
@@ -50,13 +51,14 @@ class CommandAddFeature(BrokerCommand):
 
         cls = Feature.__mapper__.polymorphic_map[type].class_
 
-        if post_call and not cls.post_call_allowed:
-            raise UnimplementedError("The post-call attribute is only "
-                                     "implemented for host features.")
+        if post_personality and not cls.post_personality_allowed:
+            raise UnimplementedError("The post_personality attribute is "
+                                     "implemented only for host features.")
 
         cls.get_unique(session, name=feature, preclude=True)
 
-        dbfeature = cls(name=feature, post_call=post_call, comments=comments)
+        dbfeature = cls(name=feature, post_personality=post_personality,
+                        comments=comments)
         session.add(dbfeature)
 
         session.flush()

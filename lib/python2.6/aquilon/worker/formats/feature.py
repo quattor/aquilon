@@ -38,8 +38,9 @@ class FeatureFormatter(ObjectFormatter):
     def format_raw(self, feature, indent=""):
         details = []
         details.append(indent + "{0:c}: {0.name}".format(feature))
-        if feature.post_call_allowed:
-            details.append(indent + "  Post Call: %s" % feature.post_call)
+        if feature.post_personality_allowed:
+            details.append(indent + "  Post Personality: %s" %
+                           feature.post_personality)
         details.append(indent + "  Template: %s" % feature.cfg_path)
 
         for link in feature.links:

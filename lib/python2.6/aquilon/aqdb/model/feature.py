@@ -49,13 +49,13 @@ _LINK = 'feature_link'
 class Feature(Base):
     __tablename__ = _TN
 
-    post_call_allowed = False
+    post_personality_allowed = False
 
     id = Column(Integer, Sequence("%s_id_seq" % _TN), primary_key=True)
     name = Column(String(128), nullable=False)
     feature_type = Column(AqStr(16), nullable=False)
-    post_call = Column(Boolean(name="%s_post_call_ck" % _TN), nullable=False,
-                       default=False)
+    post_personality = Column(Boolean(name="%s_post_personality_ck" % _TN),
+                              nullable=False, default=False)
 
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
@@ -94,7 +94,7 @@ class HostFeature(Feature):
 
     __mapper_args__ = {'polymorphic_identity': 'host'}
 
-    post_call_allowed = True
+    post_personality_allowed = True
 
     @property
     def cfg_path(self):

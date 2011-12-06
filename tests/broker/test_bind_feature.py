@@ -84,7 +84,7 @@ class TestBindFeature(TestBrokerCommand):
     def test_101_verify_show_archetype(self):
         command = ["show", "archetype", "--archetype", "aquilon"]
         out = self.commandtest(command)
-        self.matchoutput(out, "Host Feature: pre_host", command)
+        self.matchoutput(out, "Host Feature: pre_host [pre_personality]", command)
 
     def test_101_verify_show_feature(self):
         command = ["show", "feature", "--feature", "pre_host", "--type", "host"]
@@ -96,7 +96,9 @@ class TestBindFeature(TestBrokerCommand):
         out = self.commandtest(command)
         # Make sure we don't match the feature listed as part of the archetype
         # definition
-        self.searchoutput(out, r'^  Host Feature: pre_host$', command)
+        self.searchoutput(out,
+                          r'^  Host Feature: pre_host \[pre_personality\]$',
+                          command)
 
     def test_101_verify_cat_host(self):
         command = ["cat", "--hostname", "unittest00.one-nyp.ms.com"]
@@ -116,7 +118,8 @@ class TestBindFeature(TestBrokerCommand):
     def test_111_verify_show_personality(self):
         command = ["show", "personality", "--personality", "inventory"]
         out = self.commandtest(command)
-        self.matchoutput(out, "Host Feature: post_host [post_call]", command)
+        self.matchoutput(out, "Host Feature: post_host [post_personality]",
+                         command)
 
     def test_111_verify_show_feature(self):
         command = ["show", "feature", "--feature", "post_host", "--type", "host"]

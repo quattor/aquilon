@@ -4411,7 +4411,7 @@
          <option name="type" type="string">Type of the feature: host, hardware or interface</option>
       </optgroup>
       <optgroup name="add_feature_optional" mandatory="False" fields="any">
-         <option name="post_call" type="flag">Call the feature after the persoality</option>
+         <option name="post_personality" type="flag">Call the feature after the personality</option>
          <option name="comments" type="string">Comments</option>
       </optgroup>
 

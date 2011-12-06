@@ -45,7 +45,7 @@ def personality_features(dbpersonality):
     for link in dbpersonality.archetype.features:
         if link.model or link.interface_name:
             continue
-        if link.feature.post_call:
+        if link.feature.post_personality:
             post.append(link.feature)
         else:
             pre.append(link.feature)
@@ -53,7 +53,7 @@ def personality_features(dbpersonality):
     for link in dbpersonality.features:
         if link.model or link.interface_name:
             continue
-        if link.feature.post_call:
+        if link.feature.post_personality:
             if link.feature in post:
                 continue
             post.append(link.feature)

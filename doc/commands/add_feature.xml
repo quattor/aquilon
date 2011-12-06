@@ -29,7 +29,7 @@
 	    <arg choice="plain"><option>--feature <replaceable>NAME</replaceable></option></arg>
 	    <arg choice="plain"><option>--type <replaceable>TYPE</replaceable></option></arg>
 	    <arg choice="opt"><option>--comments <replaceable>COMMENTS</replaceable></option></arg>
-	    <arg choice="opt"><option>--post_call</option></arg>
+	    <arg choice="opt"><option>--post_personality</option></arg>
 	    <xi:include href="../common/global_options.xml"/>
 	</cmdsynopsis>
     </refsynopsisdiv>
@@ -55,7 +55,7 @@
 	    Host features are the most generic, and usually control software that gets installed on the host.
 	    If a host template is active, then
 	    <filename>features/<replaceable>NAME</replaceable>/config.tpl</filename>
-	    will be included either before or after the personality template. If the <option>--post_call</option>
+	    will be included either before or after the personality template. If the <option>--post_personality</option>
 	    option is specified, then the feature template will be included after the personality template; if
 	    this option is missing, then the feature template will be included before the personality template.
 	</para>
@@ -118,7 +118,7 @@
 	    </varlistentry>
 	    <varlistentry>
 	        <term>
-		    <option>--post_call</option>
+		    <option>--post_personality</option>
 		</term>
 		<listitem>
 		    <para>

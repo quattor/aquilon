@@ -28,6 +28,7 @@
 # TERMS THAT MAY APPLY.
 
 from sqlalchemy.orm import undefer, subqueryload, joinedload
+from sqlalchemy.sql import desc
 
 from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import Feature
@@ -44,5 +45,6 @@ class CommandShowFeatureAll(BrokerCommand):
                       subqueryload('links.archetype'),
                       subqueryload('links.personality'),
                       subqueryload('links.model'))
-        q = q.order_by(Feature.feature_type, Feature.name)
+        q = q.order_by(Feature.feature_type, Feature.post_personality,
+                       Feature.name)
         return q.all()

@@ -49,7 +49,7 @@ class TestAddFeature(TestBrokerCommand):
 
     def test_100_add_host_post(self):
         command = ["add", "feature", "--feature", "post_host",
-                   "--type", "host", "--post_call"]
+                   "--type", "host", "--post_personality"]
         self.noouttest(command)
 
     def test_100_add_hw(self):
@@ -73,7 +73,7 @@ class TestAddFeature(TestBrokerCommand):
         self.matchoutput(out, "Host Feature: pre_host", command)
         self.matchoutput(out, "Template: features/pre_host", command)
         self.matchoutput(out, "Comments: Test comment", command)
-        self.matchoutput(out, "Post Call: False", command)
+        self.matchoutput(out, "Post Personality: False", command)
         self.matchclean(out, "Bound to", command)
 
     def test_110_verify_post(self):
@@ -81,7 +81,7 @@ class TestAddFeature(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out, "Host Feature: post_host", command)
         self.matchoutput(out, "Template: features/post_host", command)
-        self.matchoutput(out, "Post Call: True", command)
+        self.matchoutput(out, "Post Personality: True", command)
         self.matchclean(out, "Comments", command)
         self.matchclean(out, "Bound to", command)
 
@@ -91,7 +91,7 @@ class TestAddFeature(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out, "Hardware Feature: bios_setup", command)
         self.matchoutput(out, "Template: features/hardware/bios_setup", command)
-        self.matchclean(out, "Post Call", command)
+        self.matchclean(out, "Post Personality", command)
         self.matchclean(out, "Comments", command)
         self.matchclean(out, "Bound to", command)
 
@@ -101,7 +101,7 @@ class TestAddFeature(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out, "Interface Feature: src_route", command)
         self.matchoutput(out, "Template: features/interface/src_route", command)
-        self.matchclean(out, "Post Call", command)
+        self.matchclean(out, "Post Personality", command)
         self.matchclean(out, "Comments", command)
         self.matchclean(out, "Bound to", command)
 
@@ -115,17 +115,17 @@ class TestAddFeature(TestBrokerCommand):
 
     def test_200_post_hw(self):
         command = ["add", "feature", "--feature", "post_hw",
-                   "--type", "hardware", "--post_call"]
+                   "--type", "hardware", "--post_personality"]
         out = self.unimplementederrortest(command)
-        self.matchoutput(out, "The post-call attribute is only implemented "
-                         "for host features.", command)
+        self.matchoutput(out, "The post_personality attribute is implemented "
+                         "only for host features.", command)
 
     def test_200_post_iface(self):
         command = ["add", "feature", "--feature", "post_iface",
-                   "--type", "interface", "--post_call"]
+                   "--type", "interface", "--post_personality"]
         out = self.unimplementederrortest(command)
-        self.matchoutput(out, "The post-call attribute is only implemented "
-                         "for host features.", command)
+        self.matchoutput(out, "The post_personality attribute is implemented "
+                         "only for host features.", command)
 
     def test_200_hw_prefix(self):
         command = ["add", "feature", "--feature", "hardware/host",

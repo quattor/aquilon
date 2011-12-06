@@ -155,9 +155,11 @@ class MachineFormatter(ObjectFormatter):
                 details.append(indent + "  {0:c}: {0.name}".format(feature))
             (pre, post) = personality_features(host.personality)
             for feature in pre:
-                details.append(indent + "  {0:c}: {0.name}".format(feature))
+                details.append(indent + "  {0:c}: {0.name} [pre_personality]"
+                               .format(feature))
             for feature in post:
-                details.append(indent + "  {0:c}: {0.name}".format(feature))
+                details.append(indent + "  {0:c}: {0.name} [post_personality]"
+                               .format(feature))
 
             for si in host.services_used:
                 details.append(indent + "  Template: %s" % si.cfg_path)

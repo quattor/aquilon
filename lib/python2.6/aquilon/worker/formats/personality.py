@@ -87,9 +87,17 @@ class PersonalityFormatter(ObjectFormatter):
             details.append(indent + "  Requires clustered hosts")
         for service in personality.services:
             details.append(indent + "  Required Service: %s" % service.name)
-        for link in personality.features:
-            if link.feature.post_call:
-                flagstr = " [post_call]"
+
+        features = personality.features[:]
+        features.sort(key=lambda x: (x.feature.feature_type,
+                                     x.feature.post_personality,
+                                     x.feature.name))
+
+        for link in features:
+            if link.feature.post_personality:
+                flagstr = " [post_personality]"
+            elif link.feature.post_personality_allowed:
+                flagstr = " [pre_personality]"
             else:
                 flagstr = ""
 
@@ -101,6 +109,7 @@ class PersonalityFormatter(ObjectFormatter):
             if link.interface_name:
                 details.append(indent + "    Interface: %s" %
                                link.interface_name)
+
         if personality.comments:
             details.append(indent + "  Comments: %s" % personality.comments)
         for cltype, info in personality.cluster_infos.items():

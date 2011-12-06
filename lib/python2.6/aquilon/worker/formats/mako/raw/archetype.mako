@@ -17,8 +17,10 @@ ${desc} Archetype: ${record.name}${flagstr}
 % endfor
 % for link in record.features:
 <%
-      if link.feature.post_call:
-          flagstr = ' [post_call]'
+      if link.feature.post_personality:
+          flagstr = ' [post_personality]'
+      elif link.feature.post_personality_allowed:
+          flagstr = ' [pre_personality]'
       else:
           flagstr = ''
 %>\
