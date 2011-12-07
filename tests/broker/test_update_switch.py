@@ -103,11 +103,8 @@ class TestUpdateSwitch(TestBrokerCommand):
 
     # FIXME: "without interface" is no longer true
     def testupdatewithoutinterface(self):
-        oldip = self.net.tor_net[6].usable[0]
         newip = self.net.tor_net[6].usable[1]
-        self.dsdb_expect_delete(oldip)
-        self.dsdb_expect_add("ut3gd1r04.aqd-unittest.ms.com", newip, "xge49",
-                             oldip.mac)
+        self.dsdb_expect_update_ip("ut3gd1r04.aqd-unittest.ms.com", "xge49", newip)
         command = ["update", "switch", "--type", "bor",
                    "--switch", "ut3gd1r04.aqd-unittest.ms.com",
                    "--ip", newip, "--model", "uttorswitch",
@@ -139,29 +136,14 @@ class TestUpdateSwitch(TestBrokerCommand):
         self.dsdb_verify()
 
     def testupdatewithinterface(self):
-        oldip = self.net.tor_net[8].usable[0]
         newip = self.net.tor_net[8].usable[1]
-        self.dsdb_expect_delete(oldip)
-        self.dsdb_expect_add("ut3gd1r06.aqd-unittest.ms.com", newip, "xge49",
-                             newip.mac)
+        self.dsdb_expect_update_ip("ut3gd1r06.aqd-unittest.ms.com", "xge49", newip)
         command = ["update", "switch",
                    "--switch", "ut3gd1r06.aqd-unittest.ms.com",
                    "--ip", newip]
         self.noouttest(command)
         self.dsdb_verify()
 
-    def testdsdbrollback(self):
-        oldip = self.net.tor_net[9].usable[0]
-        newip = self.net.tor_net[9].usable[1]
-        self.dsdb_expect_delete(oldip)
-        self.dsdb_expect_add("ut3gd1r07.aqd-unittest.ms.com", newip, "xge",
-                             fail=True)
-        self.dsdb_expect_add("ut3gd1r07.aqd-unittest.ms.com", oldip, "xge")
-        command = ["update", "switch", "--switch", "ut3gd1r07.aqd-unittest.ms.com",
-                   "--ip", newip]
-        out = self.badrequesttest(command)
-        self.matchoutput(out, "Could not update switch in DSDB", command)
-        self.dsdb_verify()
 
     def testverifyupdatewithoutinterface(self):
         self.verifyswitch("ut3gd1r04.aqd-unittest.ms.com", "hp", "uttorswitch",

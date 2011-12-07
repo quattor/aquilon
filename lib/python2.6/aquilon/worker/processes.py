@@ -399,6 +399,7 @@ class DSDBRunner(object):
             self.logger.debug(
                 "Would have called '%s' if location sync was enabled" % cmd)
 
+    # For switches only.
     def add_host(self, dbinterface):
         session = object_session(dbinterface)
         primary = dbinterface.hardware_entity.fqdn
@@ -427,6 +428,18 @@ class DSDBRunner(object):
         command = [self.config.get("broker", "dsdb"),
                    "update", "host", "-host_name", fqdn, "-status", "aq",
                    "-ethernet_address", mac]
+        return run_command(command, env=self.getenv(), logger=self.logger)
+
+    def update_host_ip(self, name, fqdn, ip):
+        command = [self.config.get("broker", "dsdb"),
+                   "update", "aqd", "host", "-host_name", fqdn, "-interface_name", name,
+                   "-ip_address", ip]
+        return run_command(command, env=self.getenv(), logger=self.logger)
+
+    def update_host_name(self,ifname, fqdn, fqdn_new):
+        command = [self.config.get("broker", "dsdb"),
+                   "update", "aqd", "host", "-host_name", fqdn, "-interface_name", ifname,
+                   "-primary_host_name", fqdn_new]
         return run_command(command, env=self.getenv(), logger=self.logger)
 
     def delete_host_details(self, ip):
@@ -534,13 +547,15 @@ class DSDBRunner(object):
         """Update a dsdb host entry.
 
         The calling code (the aq update_interface command) treats the
-        hostname and interface name as unchanging.  There is an
-        update_host dsdb command that lets the mac address (and comments,
-        if we kept them) change.
+        hostname and interface name (except for zebra hosts!) as unchanging .
+        There is an update_host dsdb command that lets the mac address,
+        ip address (and comments, if we kept them) change.
 
         Any other changes have to be done by removing the old DSDB
         entry and adding a new one.
 
+        Please note that in case of zebra interfaces adding a new ip address
+        to the same interface may result in adding/removing DSDB entries.
         """
         newinfo = self.snapshot_hw(dbhw_ent)
 
@@ -550,17 +565,23 @@ class DSDBRunner(object):
         deletes = []
         adds = []
         mac_update = None
+        ip_update = None
+        hostname_update = None
 
         # Construct the list of operations
         for key, attrs in oldinfo.items():
             if key not in newinfo:
                 deletes.append(attrs)
-            elif attrs['ip'] != newinfo[key]['ip'] or \
-                    attrs['primary'] != newinfo[key]['primary']:
+            elif attrs['primary'] != newinfo[key]['primary'] or attrs['fqdn'] != newinfo[key]['fqdn']:
                 deletes.append(attrs)
                 adds.append(newinfo[key])
+            elif attrs['ip'] != newinfo[key]['ip']:
+                ip_update = {"fqdn": attrs['fqdn'], "name": attrs['name'], "oldip": attrs['ip'], "newip": newinfo[key]['ip']}
             elif attrs['mac'] != newinfo[key]['mac']:
-                mac_update = newinfo[key]
+                mac_update = {"fqdn": attrs['fqdn'], "oldmac": attrs['mac'], "newmac": newinfo[key]['mac']}
+            elif attrs['fqdn'] != newinfo[key]['fqdn']:
+                hostname_update = {"ifname" : attrs['name'], "oldfqdn": attrs['fqdn'], "newfqdn" : newinfo[key]['fqdn']}
+
         for key, attrs in newinfo.items():
             if key not in oldinfo:
                 adds.append(attrs)
@@ -577,13 +598,20 @@ class DSDBRunner(object):
             for attrs in deletes:
                 self.delete_host_details(attrs['ip'])
                 rollback_deletes.append(attrs)
+
+            if mac_update:
+                self.update_host_mac(mac_update['fqdn'], mac_update['newmac'])
+            if ip_update:
+                self.update_host_ip(ip_update['name'], ip_update['fqdn'], ip_update['newip'])
+            if hostname_update:
+                self.update_host_name(hostname_update['ifname'],hostname_update['oldfqdn'],hostname_update['newfqdn'])
+
             for attrs in adds:
                 self.add_host_details(attrs['fqdn'], attrs['ip'],
                                       attrs['name'], attrs['mac'],
                                       attrs['primary'])
                 rollback_adds.append(attrs)
-            if mac_update:
-                self.update_host_mac(mac_update['fqdn'], mac_update['mac'])
+
         except ProcessException, e:
             self.logger.info("Failed updating DSDB entry for {0:l}: "
                              "{1!s}".format(dbhw_ent, e))
@@ -593,6 +621,23 @@ class DSDBRunner(object):
                     self.delete_host_details(attrs['ip'])
                 except Exception, err:
                     rollback_failures.append(str(err))
+
+            if mac_update:
+                try:
+                    self.update_host_mac(mac_update['fqdn'], mac_update['oldmac'])
+                except Exception, err:
+                    rollback_failures.append(str(err))
+            if ip_update:
+                try:
+                    self.update_host_ip(ip_update['name'], ip_update['fqdn'], ip_update['oldip'])
+                except Exception, err:
+                    rollback_failures.append(str(err))
+            if hostname_update:
+                try:
+                    self.update_host_name(hostname_update['ifname'],hostname_update['newfqdn'],hostname_update['oldfqdn'])
+                except Exception, err:
+                    rollback_failures.append(str(err))
+
             for attrs in rollback_deletes:
                 try:
                     self.add_host_details(attrs['fqdn'], attrs['ip'],
@@ -600,6 +645,7 @@ class DSDBRunner(object):
                                           attrs['primary'])
                 except Exception, err:
                     rollback_failures.append(str(err))
+
             msg = "DSDB update failed: %s" % e
             if rollback_failures:
                 msg += "\n\nRollback also failed, DSDB state is inconsistent:" + \

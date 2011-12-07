@@ -40,7 +40,24 @@ from brokertest import TestBrokerCommand
 
 class TestUpdateInterface(TestBrokerCommand):
 
-    def testupdateut3c5n10eth0mac(self):
+    badhost = "unittest02.one-nyp.ms.com"
+
+    def testupdateut3c5n10eth0macbad(self):
+        # see testaddunittest02
+        oldmac = self.net.unknown[0].usable[0].mac
+        mac = self.net.unknown[0].usable[11].mac
+        self.dsdb_expect_update(self.badhost, mac, fail=True)
+        command = ["update", "interface", "--interface", "eth0",
+                        "--machine", "ut3c5n10", "--mac", mac,
+                        "--comments", "Updated interface comments"]
+        out = self.badrequesttest(command)
+        self.dsdb_verify()
+        self.matchoutput(out, "DSDB update failed", command)
+
+        out = self.commandtest(["show", "host", "--hostname", self.badhost])
+        self.matchoutput(out, "Interface: eth0 %s" % oldmac, command)
+
+    def testupdateut3c5n10eth0macgood(self):
         mac = self.net.unknown[0].usable[11].mac
         self.dsdb_expect_update("unittest02.one-nyp.ms.com", mac)
         self.noouttest(["update", "interface", "--interface", "eth0",
@@ -59,12 +76,25 @@ class TestUpdateInterface(TestBrokerCommand):
                          "ut3gd1r04.aqd-unittest.ms.com" % mac,
                          command)
 
-    def testupdateut3c5n10eth0ip(self):
+    def testupdateut3c5n10eth0ipbad(self):
         oldip = self.net.unknown[0].usable[0]
         newip = self.net.unknown[0].usable[11]
-        self.dsdb_expect_delete(oldip)
-        self.dsdb_expect_add("unittest02.one-nyp.ms.com", newip, "eth0",
-                             oldip.mac)
+        self.dsdb_expect_update_ip(self.badhost, "eth0", newip, fail=True)
+        command = ["update", "interface", "--interface", "eth0",
+                        "--machine", "ut3c5n10", "--ip", newip]
+
+        out = self.badrequesttest(command)
+        self.dsdb_verify()
+        self.matchoutput(out, "DSDB update failed", command)
+
+        out = self.commandtest(["show", "host", "--hostname", self.badhost])
+        self.matchoutput(out, "Primary Name: %s [%s]" % (self.badhost, oldip), command)
+
+    def testupdateut3c5n10eth0ipgood(self):
+        oldip = self.net.unknown[0].usable[0]
+        newip = self.net.unknown[0].usable[11]
+        self.dsdb_expect_update_ip(self.badhost, "eth0", newip)
+
         self.noouttest(["update", "interface", "--interface", "eth0",
                         "--machine", "ut3c5n10", "--ip", newip])
         self.dsdb_verify()
