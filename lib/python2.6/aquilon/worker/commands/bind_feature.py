@@ -57,12 +57,14 @@ class CommandBindFeature(BrokerCommand):
 
         justification_required = False
 
+        # TODO: add more eager-loading options
         q = session.query(Host)
         q = q.join(Machine)
         q = q.join(Interface)
-        q = q.options(contains_eager('machine'),
-                      contains_eager('machine.interfaces'))
-        # TODO: add eager-loading options
+        q = q.options(contains_eager('machine'))
+        # Note: machine.interfaces cannot appear in contains.eager() because we
+        # do filtering on the interface name, and doing so would cause the
+        # host.machine.interfaces list not to be populated properly
         q = q.reset_joinpoint()
 
         dbarchetype = None
