@@ -91,6 +91,10 @@ class Host(Base):
 
     comments = Column(String(255), nullable=True)
 
+    # something to retain the advertised status of the host
+    advertise_status = Column(Boolean(name="%s_advertise_status_valid_ck" % _TN),
+                                      nullable=False, default=False)
+
     # Deletion of a machine deletes the host. When this is 'machine profile'
     # this should no longer be the case as it will be many to one as opposed to
     # one to one as it stands now. Could do innerjoin now...
@@ -104,9 +108,6 @@ class Host(Base):
     status = relation(HostLifecycle, innerjoin=True, backref='hosts')
     operating_system = relation(OperatingSystem, uselist=False, innerjoin=True,
                                 backref='hosts')
-    # something to retain the advertised status of the host
-    advertise_status = Column(Boolean(name="%s_advertise_status_valid_ck" % _TN),
-                                      nullable=False, default=False)
 
     @property
     def fqdn(self):

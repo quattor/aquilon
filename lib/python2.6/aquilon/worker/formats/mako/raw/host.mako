@@ -13,6 +13,7 @@ Domain: ${record.branch.name}
 Sandbox: ${record.sandbox_author.name}/${record.branch.name}
 % endif
 ${formatter.redirect_raw(record.status)}
+Advertise Status: ${str(record.advertise_status)}
 % for grn in record.grns:
 GRN: ${grn.grn}
 % endfor
@@ -25,4 +26,3 @@ Provides: ${si.cfg_path}
 % if record.comments:
 Comments: ${record.comments}
 % endif
-Advertise Status: ${str(record.advertise_status)}

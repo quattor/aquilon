@@ -34,6 +34,10 @@ from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.host import hostname_to_host
 from aquilon.worker.commands.reset_advertised_status \
      import CommandResetAdvertisedStatus
+from aquilon.worker.templates.domain import TemplateDomain
+from aquilon.worker.templates.base import PlenaryCollection
+from aquilon.worker.templates.host import PlenaryHost
+from aquilon.worker.locks import lock_queue, CompileKey
 
 
 class CommandResetAdvertisedStatusList(CommandResetAdvertisedStatus):
@@ -67,16 +71,22 @@ class CommandResetAdvertisedStatusList(CommandResetAdvertisedStatus):
         branches = {}
         authors = {}
         failed = []
+        compileable =[]
         # Do any cross-list or dependency checks
         for dbhost in dbhosts:
-            if dbhost.branch in branches:
-                branches[dbhost.branch].append(dbhost)
-            else:
-                branches[dbhost.branch] = [dbhost]
-            if dbhost.sandbox_author in authors:
-                authors[dbhost.sandbox_author].append(dbhost)
-            else:
-                authors[dbhost.sandbox_author] = [dbhost]
+            ## if archetype is compileable only then
+            ## validate for branches and domains
+            if (dbhost.archetype.is_compileable):
+                compileable.append(dbhost.fqdn)
+                if dbhost.branch in branches:
+                    branches[dbhost.branch].append(dbhost)
+                else:
+                    branches[dbhost.branch] = [dbhost]
+                if dbhost.sandbox_author in authors:
+                    authors[dbhost.sandbox_author].append(dbhost)
+                else:
+                    authors[dbhost.sandbox_author] = [dbhost]
+
 
             if dbhost.status.name == 'ready':
                 failed.append ("{0:l} is in ready status, "
@@ -85,7 +95,6 @@ class CommandResetAdvertisedStatusList(CommandResetAdvertisedStatus):
         if failed:
             raise ArgumentError("Cannot modify the following hosts:\n%s" %
                                 "\n".join(failed))
-
         if len(branches) > 1:
             keys = branches.keys()
             branch_sort = lambda x, y: cmp(len(branches[x]), len(branches[y]))
@@ -104,15 +113,27 @@ class CommandResetAdvertisedStatusList(CommandResetAdvertisedStatus):
             raise ArgumentError("All hosts must be managed by the same "
                                 "sandbox author:\n%s" % "\n".join(stats))
 
+        plenaries = PlenaryCollection(logger=logger)
         for dbhost in dbhosts:
             dbhost.advertise_status = False
             session.add(dbhost)
+            plenaries.append(PlenaryHost(dbhost, logger=logger))
+
         session.flush()
 
-        for dbhost in dbhosts:
-            if dbhost.archetype.is_compileable:
-                CommandResetAdvertisedStatus.compile(self, session,
-                                                     logger, dbhost)
+        dbbranch = branches.keys()[0]
+        dbauthor = authors.keys()[0]
+        key = CompileKey.merge([plenaries.get_write_key()]);
+        try:
+            lock_queue.acquire(key)
+            plenaries.stash()
+            plenaries.write(locked=True)
+            td = TemplateDomain(dbbranch, dbauthor, logger=logger)
+            td.compile(session, only=" ".join(compileable), locked=True)
+        except:
+            plenaries.restore_stash()
+            raise
+        finally:
+            lock_queue.release(key)
 
         return
-
