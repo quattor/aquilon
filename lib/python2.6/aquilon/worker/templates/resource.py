@@ -73,6 +73,7 @@ class PlenaryResource(Plenary):
         lines.append('"day" = %s;' % pan(self.resource.day))
 
     def body_intervention(self, lines):
+        lines.append('"name" = %s;' % pan(self.resource.name))
         lines.append('"start" = %s;' %
                      pan(self.resource.start_date.isoformat()))
         lines.append('"expiry" = %s;' %
