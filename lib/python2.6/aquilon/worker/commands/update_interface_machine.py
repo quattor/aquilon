@@ -133,7 +133,8 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
                 assignment.ip = ip
                 assignment.network = dbnetwork
             else:
-                assign_address(dbinterface, ip, dbnetwork)
+                raise ArgumentError("Please use aq add_interface_address to "
+                                    "add a new IP address to the interface.")
 
             # Fix up the primary name if needed
             if dbinterface.bootable and \

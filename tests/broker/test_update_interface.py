@@ -69,12 +69,22 @@ class TestUpdateInterface(TestBrokerCommand):
                         "--machine", "ut3c5n10", "--ip", newip])
         self.dsdb_verify()
 
+    def testfailaddip(self):
+        command = ["update", "interface", "--interface", "eth1",
+                   "--hostname", "unittest02.one-nyp.ms.com",
+                   "--mac", self.net.unknown[0].usable[12].mac,
+                   "--ip", self.net.unknown[0].usable[12]]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "Please use aq add_interface_address to add "
+                         "a new IP address to the interface.",
+                         command)
+
     def testupdateut3c5n10eth1(self):
         self.noouttest(["update", "interface", "--interface", "eth1",
                         "--hostname", "unittest02.one-nyp.ms.com",
                         "--mac", self.net.unknown[0].usable[12].mac,
-                        "--ip", self.net.unknown[0].usable[12], "--boot",
-                        "--model", "e1000"])
+                        "--boot", "--model", "e1000"])
 
     def testupdateut3c5n10eth2(self):
         self.notfoundtest(["update", "interface", "--interface", "eth2",
@@ -110,8 +120,6 @@ class TestUpdateInterface(TestBrokerCommand):
                          self.net.unknown[0].usable[11], command)
         self.searchoutput(out, r"Interface: eth1 %s \[boot, default_route\]" %
                           self.net.unknown[0].usable[12].mac.lower(), command)
-        self.matchoutput(out, "Provides: unknown [%s]" %
-                         self.net.unknown[0].usable[12], command)
         # Verify that the primary name got updated
         self.matchoutput(out, "Primary Name: unittest02.one-nyp.ms.com [%s]" %
                          self.net.unknown[0].usable[11], command)
@@ -164,19 +172,7 @@ class TestUpdateInterface(TestBrokerCommand):
                           (net.broadcast, net.gateway,
                            eth0ip, net.netmask),
                           command)
-        # No "fqdn" here as "update interface --interface eth1 --boot" does not
-        # transfer the primary IP. It is a question if it should...
-        self.searchoutput(out,
-                          r'"eth1", nlist\(\s*'
-                          r'"bootproto", "static",\s*'
-                          r'"broadcast", "%s",\s*'
-                          r'"gateway", "%s",\s*'
-                          r'"ip", "%s",\s*'
-                          r'"netmask", "%s",\s*'
-                          r'"network_environment", "internal",\s*'
-                          r'"network_type", "unknown"\s*\)\s*' %
-                          (net.broadcast, net.gateway,
-                           eth1ip, net.netmask),
+        self.searchoutput(out, r'"eth1", nlist\(\s*"bootproto", "none"\s*\)',
                           command)
         self.searchoutput(out,
                           r'"eth1\.2", nlist\(\s*'
