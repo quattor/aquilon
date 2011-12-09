@@ -176,6 +176,8 @@ from test_dump_dns import TestDumpDns
 from test_search_system import TestSearchSystem
 from test_search_host import TestSearchHost
 from test_search_esx_cluster import TestSearchESXCluster
+from test_search_cluster_esx import TestSearchClusterESX
+from test_search_cluster import TestSearchCluster
 from test_search_observed_mac import TestSearchObservedMac
 from test_search_next import TestSearchNext
 from test_search_network import TestSearchNetwork
@@ -334,6 +336,7 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestSearchHardware, TestSearchMachine, TestShowMachine,
                 TestSearchDns, TestDumpDns,
                 TestSearchSystem, TestSearchHost, TestSearchESXCluster,
+                TestSearchClusterESX, TestSearchCluster,
                 TestSearchObservedMac, TestSearchNext, TestSearchNetwork,
                 TestUpdateInterface, TestUpdateMachine, TestUpdateModel,
                 TestUpdateRack,

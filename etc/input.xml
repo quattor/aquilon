@@ -268,6 +268,72 @@
       <transport method="get" path="find/system" />
    </command>
 
+   <command name="search_cluster">
+      Shows any information available for the matching clusters.
+      <p/>
+      <optgroup name="search_cluster_opts" mandatory="True" fields="any">
+         <option name="archetype" type="string">archetype (aquilon, windows, aurora)</option>
+         <option name="buildstatus" type="string">buildstatus (blind, build, ready)</option>
+         <option name="cluster_type" type="string">cluster type of archetype (compute)</option>
+         <option name="personality" type="string">personality</option>
+         <option name="allowed_archetype" type="string">allowed_archetype</option>
+         <option name="allowed_personality" type="string">allowed_personality</option>
+         <option name="down_hosts_threshold" type="string">down_hosts_threshold</option>
+         <option name="down_maint_threshold" type="string">down_maint_threshold</option>
+         <option name="max_members" type="int">max_members</option>
+         <option name="member_archetype" type="string">member_archetype</option>
+         <option name="member_hostname" type="string">member_hostname</option>
+         <option name="member_personality" type="string">member_personality</option>
+         <optgroup name="search_cluster_branch" fields="any">
+            <option name="domain" type="string" conflicts="sandbox branch">template domain</option>
+            <option name="sandbox" type="string" conflicts="domain branch">Name of the sandbox (given as 'author/branch')</option>
+            <option name="branch" type="string" conflicts="domain sandbox">template branch (either a domain or a sandbox)</option>
+         </optgroup>
+         <optgroup name="search_esx_opts" fields="any">
+           <option name="cluster" type="string">cluster name</option>
+           <option name="esx_metacluster" type="string">metacluster name</option>
+           <option name="esx_virtual_machine" type="string">virtual machine label (evm1)</option>
+           <option name="esx_guest" type="string">fully qualified host name of a virtual machine</option>
+           <option name="service" type="string">client of service (single service only)</option>
+           <option name="instance" type="string">client of service instance (single instance only)</option>
+           <option name="esx_share" type="string">nas_disk_share in use by an virtual machine on the cluster</option>
+           <option name="capacity_override" type="flag">Select clusters with capacity overrides</option>
+           <option name="esx_switch" type="string">Select clusters bound to the given switch</option>
+         </optgroup>
+         <optgroup name="search_cluster_location_opts" fields="any">
+            <option name="cluster_organization" type="string">Cluster Organization</option>
+            <option name="cluster_hub" type="string">Cluster Hub</option>
+            <option name="cluster_continent" type="string">Cluster Continent</option>
+            <option name="cluster_country" type="string">Cluster Country</option>
+            <option name="cluster_campus" type="string">Cluster Campus</option>
+            <option name="cluster_city" type="string">Cluster City</option>
+            <option name="cluster_building" type="string">Cluster Building</option>
+            <option name="cluster_room" type="string">Cluster Room</option>
+            <option name="cluster_rack" type="string">Cluster Rack</option>
+            <option name="cluster_desk" type="string">Cluster Desk</option>
+         </optgroup>
+         <option name="cluster_exact_location" type="flag">match the cluster location exactly</option>
+         <optgroup name="search_vmhost_location_opts" fields="any">
+            <option name="member_organization" type="string">member Organization</option>
+            <option name="member_hub" type="string">member Hub</option>
+            <option name="member_continent" type="string">member Continent</option>
+            <option name="member_country" type="string">member Country</option>
+            <option name="member_campus" type="string">member Campus</option>
+            <option name="member_city" type="string">member City</option>
+            <option name="member_building" type="string">member Building</option>
+            <option name="member_room" type="string">member Room</option>
+            <option name="member_rack" type="string">member Rack</option>
+            <option name="member_desk" type="string">member Desk</option>
+         </optgroup>
+         <option name="member_exact_location" type="flag">match the member location exactly</option>
+         <option name="all" type="flag">list all systems</option>
+      </optgroup>
+      <optgroup name="search_cluster_prefs" mandatory="False">
+         <option name="fullinfo" type="flag">show full information for the matching hosts</option>
+      </optgroup>
+      <transport method="get" path="find/cluster" />
+   </command>
+
    <command name="search_host">
       Shows any information available for the matching hosts.
       <p/>
@@ -3340,9 +3406,6 @@
       <optgroup name="show_cluster_req" mandatory="True" fields="any">
          <option name="cluster" type="string" conflicts="all">Name of the cluster</option>
          <option name="all" type="flag" conflicts="cluster">Show all clusters</option>
-      </optgroup>
-      <optgroup name="show_cluster_opt">
-          <option name="archetype" type="string">Filter only clusters of the given archetype</option>
       </optgroup>
       <transport trigger="cluster" method="get" path="cluster/%(cluster)s" />
       <transport trigger="all" method="get" path="cluster/" />

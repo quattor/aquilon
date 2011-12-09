@@ -103,6 +103,13 @@ class TestDelCluster(TestBrokerCommand):
         command = ["show_cluster", "--cluster=utstorage2"]
         self.notfoundtest(command)
 
+    def test_300_delutstorages2(self):
+        command = ["del_cluster", "--cluster=utstorages2"]
+        self.successtest(command)
+
+    def test_300_verifydelutstorages2(self):
+        command = ["show_cluster", "--cluster=utstorages2"]
+        self.notfoundtest(command)
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelCluster)

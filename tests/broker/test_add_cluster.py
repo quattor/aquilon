@@ -269,6 +269,17 @@ class TestAddCluster(TestBrokerCommand):
         self.matchoutput(out, "include { 'personality/%s/config' };" % persona,
                          command)
 
+    def test_57_addutstorages2(self):
+        user = self.config.get("unittest", "user")
+        command = ["add_cluster", "--cluster=utstorages2",
+                   "--building=bu",
+                   "--buildstatus=ready",
+                   "--archetype=storagecluster", "--personality=metrocluster",
+                   "--sandbox=%s/utsandbox" % user, "--down_hosts_threshold=1",
+                   "--max_members=2",
+                   "--comments=Test storage cluster for sandbox"]
+        self.noouttest(command)
+
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddCluster)

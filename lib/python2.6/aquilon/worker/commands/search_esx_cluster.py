@@ -29,148 +29,39 @@
 """Contains the logic for `aq search esx cluster`."""
 
 
-from sqlalchemy.orm import aliased
-
 from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.formats.cluster import SimpleClusterList
-from aquilon.aqdb.model import (EsxCluster, MetaCluster, Archetype,
-                                Personality, Machine, Switch, ClusterLifecycle,
-                                Service, ServiceInstance, NasDisk, Disk)
-from aquilon.worker.dbwrappers.host import hostname_to_host
-from aquilon.worker.dbwrappers.branch import get_branch_and_author
-from aquilon.worker.dbwrappers.location import get_location
+from aquilon.worker.commands.search_cluster import CommandSearchCluster
 
-
-class CommandSearchESXCluster(BrokerCommand):
+class CommandSearchESXCluster(CommandSearchCluster):
 
     required_parameters = []
 
-    def render(self, session, logger, cluster, metacluster,
-               esx_hostname, virtual_machine, guest,
-               archetype, personality, service, instance, share, switch,
-               domain, sandbox, branch,
-               capacity_override, buildstatus,
-               fullinfo, **arguments):
-        q = session.query(EsxCluster)
-        if cluster:
-            dbcluster = EsxCluster.get_unique(session, cluster, compel=True)
-            q = q.filter_by(id=dbcluster.id)
-        if metacluster:
-            dbmetacluster = MetaCluster.get_unique(session, metacluster,
-                                                   compel=True)
-            q = q.join('_metacluster')
-            q = q.filter_by(metacluster=dbmetacluster)
-            q = q.reset_joinpoint()
-        if esx_hostname:
-            dbvmhost = hostname_to_host(session, esx_hostname)
-            q = q.join('_hosts')
-            q = q.filter_by(host=dbvmhost)
-            q = q.reset_joinpoint()
-        if virtual_machine:
-            dbvm = Machine.get_unique(session, virtual_machine, compel=True)
-            q = q.join('_machines')
-            q = q.filter_by(machine=dbvm)
-            q = q.reset_joinpoint()
-        if guest:
-            dbguest = hostname_to_host(session, guest)
-            q = q.join('_machines', 'machine')
-            q = q.filter_by(host=dbguest)
-            q = q.reset_joinpoint()
-        if capacity_override:
-            q = q.filter(EsxCluster.memory_capacity != None)
-        if switch:
-            dbswitch = Switch.get_unique(session, switch, compel=True)
-            q = q.filter_by(switch=dbswitch)
-        if buildstatus:
-            dbstatus = ClusterLifecycle.get_unique(session, buildstatus,
-                                                   compel=True)
-            q = q.filter_by(status=dbstatus)
+    def render(self, **arguments):
+        gen_arguments = {}
 
-        (dbbranch, dbauthor) = get_branch_and_author(session, logger,
-                                                     domain=domain,
-                                                     sandbox=sandbox,
-                                                     branch=branch)
-        if dbbranch:
-            q = q.filter_by(branch=dbbranch)
-        if dbauthor:
-            q = q.filter_by(sandbox_author=dbauthor)
+        esx_hostname = None
 
-        if archetype:
-            # Added to the searches as appropriate below.
-            dbarchetype = Archetype.get_unique(session, archetype, compel=True)
-        if personality and archetype:
-            dbpersonality = Personality.get_unique(session,
-                                                   archetype=dbarchetype,
-                                                   name=personality,
-                                                   compel=True)
-            q = q.filter_by(personality=dbpersonality)
-        elif personality:
-            q = q.join('personality').filter_by(name=personality)
-            q = q.reset_joinpoint()
-        elif archetype:
-            q = q.join('personality').filter_by(archetype=dbarchetype)
-            q = q.reset_joinpoint()
-
-        if service:
-            dbservice = Service.get_unique(session, name=service, compel=True)
-            if instance:
-                dbsi = ServiceInstance.get_unique(session, name=instance,
-                                                  service=dbservice,
-                                                  compel=True)
-                q = q.join('_cluster_svc_binding')
-                q = q.filter_by(service_instance=dbsi)
-                q = q.reset_joinpoint()
+        # translate option names for search cluster command.
+        for key in arguments:
+            # change locations prefix
+            if key.startswith('vmhost_'):
+                gen_arguments[key.replace('vmhost_', 'member_')] = \
+                    arguments[key]
+            # esx_hostname > member_hostname
+            elif key == 'esx_hostname':
+                esx_hostname = arguments[key]
+            # 'esx_' prefix to these options.
+            elif key in [
+                'metacluster', 'guest', 'share', 'switch', 'virtual_machine']:
+                gen_arguments["esx_%s" % key] = arguments[key]
             else:
-                q = q.join('_cluster_svc_binding', 'service_instance')
-                q = q.filter_by(service=dbservice)
-                q = q.reset_joinpoint()
-        elif instance:
-            q = q.join('_cluster_svc_binding', 'service_instance')
-            q = q.filter_by(name=instance)
-            q = q.reset_joinpoint()
+                gen_arguments[key] = arguments[key]
 
-        if share:
-            nas_disk_share = Service.get_unique(session, name='nas_disk_share',
-                                                compel=True)
-            dbshare = ServiceInstance.get_unique(session, name=share,
-                                                 service=nas_disk_share,
-                                                 compel=True)
-            NasAlias = aliased(NasDisk)
-            q = q.join('_machines', 'machine', 'disks',
-                       (NasAlias, NasAlias.id == Disk.id))
-            q = q.filter_by(service_instance=dbshare)
-            q = q.reset_joinpoint()
+        return CommandSearchCluster.render(self, cluster_type='esx',
+            allowed_archetype=None, allowed_personality=None,
+            down_hosts_threshold=None,
+            down_maint_threshold=None, #fullinfo=None,
+            location=None, max_members=None, member_archetype=None,
+            member_hostname=esx_hostname, member_personality=None,
+            **gen_arguments)
 
-        # Go through the arguments and make special dicts for each
-        # specific set of location arguments that are stripped of the
-        # given prefix.
-        location_args = {'cluster_': {}, 'vmhost_': {}}
-        for prefix in location_args.keys():
-            for (k, v) in arguments.items():
-                if k.startswith(prefix):
-                    # arguments['cluster_building'] = 'dd'
-                    # becomes
-                    # location_args['cluster_']['building'] = 'dd'
-                    location_args[prefix][k.replace(prefix, '')] = v
-
-        dblocation = get_location(session, **location_args['cluster_'])
-        if dblocation:
-            if location_args['cluster_']['exact_location']:
-                q = q.filter_by(location_constraint=dblocation)
-            else:
-                childids = dblocation.offspring_ids()
-                q = q.filter(EsxCluster.location_constraint_id.in_(childids))
-        dblocation = get_location(session, **location_args['vmhost_'])
-        if dblocation:
-            q = q.join('_hosts', 'host', 'machine')
-            if location_args['vmhost_']['exact_location']:
-                q = q.filter_by(location=dblocation)
-            else:
-                childids = dblocation.offspring_ids()
-                q = q.filter(Machine.location_id.in_(childids))
-            q = q.reset_joinpoint()
-
-        q = q.order_by(EsxCluster.name)
-        if fullinfo:
-            return q.all()
-        return SimpleClusterList(q.all())
