@@ -94,9 +94,12 @@ class AuthorizationBroker(object):
                               'reconfigure']:
                 self.raise_auth_error(principal, action, resource)
         if dbuser.role.name == 'winops_server':
+            # Only need add/update_cluster for hacluster VCenters
             if action not in ['add_windows_host', 'del_windows_host',
                               'add_alias', 'del_alias',
-                              'make_cluster', 'reconfigure']:
+                              'reconfigure',
+                              'add_cluster', 'make_cluster', 'update_cluster',
+                              'change_status', 'change_status_cluster']:
                 self.raise_auth_error(principal, action, resource)
         if dbuser.role.name == 'resource_pool':
             if action not in ['add_address', 'del_address']:
