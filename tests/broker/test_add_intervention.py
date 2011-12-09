@@ -41,7 +41,8 @@ from brokertest import TestBrokerCommand
 
 
 when = datetime.utcnow().replace(microsecond=0) + timedelta(days=1)
-when = when.isoformat().replace("T", " ")
+EXPIRY = when.isoformat()
+when = EXPIRY.replace("T", " ")
 
 class TestAddIntervention(TestBrokerCommand):
 
@@ -181,6 +182,24 @@ class TestAddIntervention(TestBrokerCommand):
         command = "show intervention --intervention id-does-not-exist"
         self.notfoundtest(command.split(" "))
 
+    def test_20_catintervention(self):
+        command = ["cat", "--resource=i1", "--restype=intervention",
+                   "--reshost=server1.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out,
+                         "structure template resource/intervention"
+                         "/host/server1.aqd-unittest.ms.com"
+                         "/i1/config;",
+                         command)
+        self.matchoutput(out, '"name" = "i1";', command)
+        self.matchoutput(out, '"start" =', command)
+        self.matchoutput(out, '"expiry" = "%s"' % EXPIRY, command)
+
+    def test_25_compile(self):
+        command = ["reconfigure", "--hostname=server1.aqd-unittest.ms.com"]
+        # Just want to know that a compile with the new resource works.
+        self.successtest(command)
+
     def test_30_checkhost(self):
         command = ["show_host", "--hostname=server1.aqd-unittest.ms.com"]
         out = self.commandtest(command)
@@ -206,6 +225,11 @@ class TestAddIntervention(TestBrokerCommand):
 
         command = ["del_intervention", "--intervention=disable",
                    "--hostname=server1.aqd-unittest.ms.com"]
+        self.successtest(command)
+
+    def test_35_compile(self):
+        command = ["reconfigure", "--hostname=server1.aqd-unittest.ms.com"]
+        # Generate a profile without interventions.
         self.successtest(command)
 
 
