@@ -76,6 +76,39 @@ class TestMakeCluster(TestBrokerCommand):
                           r"client/config' };",
                           command)
 
+    def testverifycatutecl1_2(self):
+        self.successtest(["add_allowed_personality",
+                          "--archetype", "vmhost",
+                          "--personality=esx_desktop",
+                          "--cluster", "utecl1"])
+
+        self.successtest(["add_allowed_personality",
+                          "--archetype", "vmhost",
+                          "--personality=generic",
+                          "--cluster", "utecl1"])
+
+        command = ["make_cluster", "--cluster", "utecl1"]
+        (out, err) = self.successtest(command)
+
+        command = "cat --cluster=utecl1"
+        out = self.commandtest(command.split(" "))
+
+        self.searchoutput(out,
+                          r'"/system/cluster/allowed_personalities" = list\(\s*' +
+                          '"vmhost/esx_desktop",' + r'\s*' +
+                          '"vmhost/generic"' + r'\s*\);',
+                          command)
+
+        self.successtest(["del_allowed_personality",
+                          "--archetype", "vmhost",
+                          "--personality=generic",
+                          "--cluster=utecl1"])
+
+        self.successtest(["del_allowed_personality",
+                          "--archetype", "vmhost",
+                          "--personality=esx_desktop",
+                          "--cluster", "utecl1"])
+
     def testmakeutecl2(self):
         command = ["make_cluster", "--cluster", "utecl2"]
         (out, err) = self.successtest(command)

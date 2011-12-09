@@ -87,12 +87,49 @@ class PlenaryClusterObject(Plenary):
         lines.append('"/system/cluster/type" = %s;' %
                         pan(self.dbcluster.cluster_type))
 
-        campus = self.dbcluster.location_constraint.campus
-        if campus:
-            lines.append('"/system/cluster/campus" = %s;' % pan(campus.name))
+        dbloc = self.dbcluster.location_constraint
+        lines.append('"/system/cluster/sysloc/location" = %s;' %
+                     pan(dbloc.sysloc()))
+        if dbloc.continent:
+            lines.append('"/system/cluster/sysloc/continent" = %s;' %
+                         pan(dbloc.continent.name))
+        if dbloc.city:
+            lines.append('"/system/cluster/sysloc/city" = %s;' %
+                         pan(dbloc.city.name))
+        if dbloc.campus:
+            lines.append('"/system/cluster/sysloc/campus" = %s;' %
+                         pan(dbloc.campus.name))
+            ## maintaining this so templates dont break
+            ## during transtion period.. should be DEPRECATED
+            lines.append('"/system/cluster/campus" = %s;' %
+                         pan(dbloc.campus.name))
+        if dbloc.building:
+            lines.append('"/system/cluster/sysloc/building" = %s;' %
+                         pan(dbloc.building.name))
+        if dbloc.rack:
+            lines.append('"/system/cluster/rack/row" = %s;' %
+                         pan(dbloc.rack.rack_row))
+            lines.append('"/system/cluster/rack/column" = %s;' %
+                         pan(dbloc.rack.rack_column))
+            lines.append('"/system/cluster/rack/name" = %s;' %
+                         pan(dbloc.rack.name))
 
         lines.append('"/system/cluster/down_hosts_threshold" = %d;' %
                      self.dbcluster.dht_value)
+        dmt_value = self.dbcluster.dmt_value
+        if (dmt_value is not None):
+            lines.append('"/system/cluster/down_maint_threshold" = %d;' %
+                         dmt_value)
+        if (self.dbcluster.down_hosts_percent):
+            lines.append('"/system/cluster/down_hosts_percent" = %d;' %
+                         self.dbcluster.down_hosts_threshold)
+            lines.append('"/system/cluster/down_hosts_as_percent" = %s;' %
+                         pan(self.dbcluster.down_hosts_percent))
+        if (self.dbcluster.down_maint_percent):
+            lines.append('"/system/cluster/down_maint_percent" = %d;' %
+                         self.dbcluster.down_maint_threshold)
+            lines.append('"/system/cluster/down_maint_as_percent" = %s;' %
+                         pan(self.dbcluster.down_maint_percent))
         lines.append("")
         # Only use system names here to avoid circular dependencies.
         # Other templates that needs to look up the underlying values use:
@@ -109,9 +146,14 @@ class PlenaryClusterObject(Plenary):
                          resource.resource_type,
                          pan(StructureTemplate(resource.template_base +
                                                '/config'))))
+        lines.append('"/system/build" = %s;' % pan(self.dbcluster.status.name))
+        if self.dbcluster.allowed_personalities:
+            lines.append('"/system/cluster/allowed_personalities" = %s;' %
+                         pan (sorted(["%s/%s" % (p.archetype.name, p.name)
+                                      for p in self.dbcluster.allowed_personalities])))
         lines.append("")
 
-        lines.append("include { 'archetype/base' };");
+        lines.append("include { 'archetype/base' };")
         fname = "body_%s" % self.dbcluster.cluster_type
         if hasattr(self, fname):
             getattr(self, fname)(lines)
@@ -119,7 +161,7 @@ class PlenaryClusterObject(Plenary):
         lines.append("include { 'personality/%s/config' };" %
                      self.dbcluster.personality.name)
         lines.append("")
-        lines.append("include { 'archetype/final' };");
+        lines.append("include { 'archetype/final' };")
 
     def body_esx(self, lines):
         if self.metacluster:

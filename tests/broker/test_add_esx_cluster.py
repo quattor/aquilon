@@ -48,6 +48,7 @@ class TestAddESXCluster(TestBrokerCommand):
         command = ["add_esx_cluster", "--cluster=utecl1",
                    "--metacluster=utmc1", "--building=ut",
                    "--domain=unittest", "--down_hosts_threshold=2",
+                   "--maint_threshold=2",
                    "--archetype=esx_cluster",
                    "--personality=esx_desktop"]
         self.noouttest(command)
@@ -65,6 +66,7 @@ class TestAddESXCluster(TestBrokerCommand):
         self.matchoutput(out, "Max members: %s" % default_max, command)
         self.matchoutput(out, "vm_to_host_ratio: %s" % default_ratio, command)
         self.matchoutput(out, "Down Hosts Threshold: 2", command)
+        self.matchoutput(out, "Maintenance Threshold: 2", command)
         self.matchoutput(out, "Virtual Machine count: 0", command)
         self.matchoutput(out, "Build Status: build", command)
         self.matchoutput(out, "Personality: esx_desktop Archetype: esx_cluster",
@@ -75,20 +77,23 @@ class TestAddESXCluster(TestBrokerCommand):
     def testverifycatutecl1(self):
         command = ["cat", "--cluster=utecl1"]
         out = self.commandtest(command)
-        self.matchoutput(out, "object template clusters/utecl1;", command)
-        self.matchoutput(out, '"/system/cluster/name" = "utecl1";', command)
-        self.matchoutput(out, '"/system/metacluster/name" = "utmc1";', command)
+        self.verify_cat_clusters("utecl1", "esx_desktop", "esx", "utmc1",
+                                 out, command)
         default_ratio = self.config.get("broker",
                                         "esx_cluster_vm_to_host_ratio")
         default_ratio = re.sub(r"(\d+):(\d+)", r"\1,\\s*\2", default_ratio)
 
         self.searchoutput(out, r'"/system/cluster/ratio" = list\(\s*' +
                           default_ratio + r'\s*\);', command)
-        self.searchoutput(out, r'"/system/cluster/machines" = nlist\(\s*\);',
-                          command)
-        self.matchclean(out, "include { 'service", command)
-        self.matchoutput(out, "include { 'personality/esx_desktop/config' };",
+        self.matchoutput(out, '"/system/cluster/down_hosts_threshold" = 2;',
                          command)
+        self.matchoutput(out, '"/system/cluster/down_maint_threshold" = 2;',
+                         command)
+        self.matchclean(out, '"/system/cluster/down_hosts_as_percent"', command)
+        self.matchclean(out, '"/system/cluster/down_maint_as_percent"', command)
+        self.matchclean(out, '"/system/cluster/down_hosts_percent"', command)
+        self.matchclean(out, '"/system/cluster/down_maint_percent"', command)
+
 
     def testaddutecl2(self):
         command = ["add_esx_cluster", "--cluster=utecl2",
@@ -120,12 +125,10 @@ class TestAddESXCluster(TestBrokerCommand):
     def testverifycatutecl2(self):
         command = ["cat", "--cluster=utecl2"]
         out = self.commandtest(command)
-        self.matchoutput(out, "object template clusters/utecl2;", command)
-        self.matchoutput(out, '"/system/cluster/name" = "utecl2";', command)
-        self.matchoutput(out, '"/system/metacluster/name" = "utmc1";', command)
-        self.searchoutput(out, r'"/system/cluster/machines" = nlist\(\s*\);',
-                          command)
-        self.matchclean(out, "include { 'service", command)
+        self.verify_cat_clusters("utecl2", "esx_desktop", "esx", "utmc1",
+                                 out, command)
+        self.matchoutput(out, '"/system/cluster/down_hosts_threshold" = 1;',
+                         command)
 
     def testfailaddexisting(self):
         command = ["add_esx_cluster", "--cluster=utecl1",
@@ -240,12 +243,8 @@ class TestAddESXCluster(TestBrokerCommand):
     def testverifycatutecl3(self):
         command = ["cat", "--cluster=utecl3"]
         out = self.commandtest(command)
-        self.matchoutput(out, "object template clusters/utecl3;", command)
-        self.matchoutput(out, '"/system/cluster/name" = "utecl3";', command)
-        self.matchoutput(out, '"/system/metacluster/name" = "utmc2";', command)
-        self.searchoutput(out, r'"/system/cluster/machines" = nlist\(\s*\);',
-                          command)
-        self.matchclean(out, "include { 'service", command)
+        self.verify_cat_clusters("utecl3", "esx_desktop", "esx",
+                                 "utmc2", out, command)
 
     def testaddutecl4(self):
         # Bog standard - used for some noop tests
@@ -278,12 +277,8 @@ class TestAddESXCluster(TestBrokerCommand):
     def testverifycatutecl4(self):
         command = ["cat", "--cluster=utecl4"]
         out = self.commandtest(command)
-        self.matchoutput(out, "object template clusters/utecl4;", command)
-        self.matchoutput(out, '"/system/cluster/name" = "utecl4";', command)
-        self.matchoutput(out, '"/system/metacluster/name" = "utmc2";', command)
-        self.searchoutput(out, r'"/system/cluster/machines" = nlist\(\s*\);',
-                          command)
-        self.matchclean(out, "include { 'service", command)
+        self.verify_cat_clusters("utecl4", "esx_desktop", "esx",
+                                 "utmc2", out, command)
 
     def testverifyplenaryclusterclient(self):
         for i in range(1, 5):
@@ -323,6 +318,12 @@ class TestAddESXCluster(TestBrokerCommand):
                    "--personality=esx_desktop"]
         self.noouttest(command)
 
+    def testverifyutecl11(self):
+        command = ["cat", "--cluster=utecl11"]
+        out = self.commandtest(command)
+        self.verify_cat_clusters("utecl11", "esx_desktop", "esx", "utmc5",
+                                 out, command, on_rack=True)
+
     def testaddutmc6(self):
         command = ["add_esx_cluster", "--cluster=utecl12",
                    "--metacluster=utmc6", "--rack=ut13",
@@ -339,6 +340,12 @@ class TestAddESXCluster(TestBrokerCommand):
                    "--personality=esx_desktop"]
         self.noouttest(command)
 
+    def testverifyutecl12(self):
+        command = ["cat", "--cluster=utecl12"]
+        out = self.commandtest(command)
+        self.verify_cat_clusters("utecl12", "esx_desktop", "esx", "utmc6",
+                                 out, command, on_rack=True)
+
     def testaddutmc7(self):
         command = ["add_esx_cluster", "--cluster=utecl13",
                    "--metacluster=utmc7", "--building=ut",
@@ -353,8 +360,46 @@ class TestAddESXCluster(TestBrokerCommand):
         self.matchoutput(out, "Cluster cluster-does-not-exist not found.",
                          command)
 
+    def verify_cat_clusters(self, name, persona, ctype, metacluster,
+                            out, command, on_rack=False):
+        self.matchoutput(out, "object template clusters/%s;" % name,
+                         command)
+        self.matchoutput(out, '"/system/cluster/name" = "%s";' % name,
+                         command)
+        self.matchoutput(out, '"/system/cluster/type" = "%s";' % ctype,
+                         command)
+        self.matchoutput(out, '"/system/cluster/sysloc/continent" = "na";',
+                         command)
+        self.matchoutput(out, '"/system/cluster/sysloc/city" = "ny";',
+                         command)
+        self.matchoutput(out, '"/system/cluster/sysloc/campus" = "ny";',
+                         command)
+        self.matchoutput(out, '"/system/cluster/sysloc/building" = "ut";',
+                         command)
+        self.matchoutput(out, '"/system/cluster/sysloc/location" = "ut.ny.na";',
+                         command)
+        self.matchoutput(out, '"/system/metacluster/name" = "%s";' %
+                         metacluster, command)
+        self.matchoutput(out, '"/system/build" = "build";', command)
+        if on_rack:
+            self.matchoutput(out, '"/system/cluster/rack/name" = "ut13"',
+                             command)
+            self.matchoutput(out, '"/system/cluster/rack/row" = "k"',
+                             command)
+            self.matchoutput(out, '"/system/cluster/rack/column" = "3"',
+                             command)
+        else:
+            self.matchclean(out, '"/system/cluster/rack/name"', command)
+            self.matchclean(out, '"/system/cluster/rack/row"', command)
+            self.matchclean(out, '"/system/cluster/rack/column"', command)
+        self.matchclean(out, '"/system/cluster/allowed_personalities"', command)
+        self.matchclean(out, "include { 'service", command)
+        self.matchoutput(out, "include { 'personality/%s/config' };" % persona,
+                         command)
+        self.searchoutput(out, r'"/system/cluster/machines" = nlist\(\s*\);',
+                          command)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddESXCluster)
     unittest.TextTestRunner(verbosity=2).run(suite)

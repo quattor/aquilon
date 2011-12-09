@@ -293,6 +293,40 @@ class TestUpdateESXCluster(TestBrokerCommand):
         self.matchoutput(out, "Cluster cluster-does-not-exist not found",
                          command)
 
+    def test_600_updatethreshold(self):
+        cname = "utecl7"
+        command = ["update_esx_cluster", "--cluster=%s" % cname,
+                   "--down_hosts_threshold=1%",
+                   "--maint_threshold=50%"]
+        out = self.successtest(command)
+
+        ## verify show
+        command = "show esx_cluster --cluster %s" % cname
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Down Hosts Threshold: 0 (1%)", command)
+        self.matchoutput(out, "Maintenance Threshold: 2 (50%)", command)
+
+        ## verify cat
+        command = "cat --cluster=%s" % cname
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, '"/system/cluster/down_hosts_threshold" = 0;',
+                         command)
+        self.matchoutput(out, '"/system/cluster/down_maint_threshold" = 2;',
+                         command)
+        self.matchoutput(out, '"/system/cluster/down_hosts_as_percent" = true;',
+                         command)
+        self.matchoutput(out, '"/system/cluster/down_maint_as_percent" = true;',
+                         command)
+        self.matchoutput(out, '"/system/cluster/down_hosts_percent" = 1;',
+                         command)
+        self.matchoutput(out, '"/system/cluster/down_maint_percent" = 50;',
+                         command)
+
+    def test_605_compileforthreshold(self):
+        cname = "utecl7"
+        command = "compile --cluster=%s" % cname
+        out = self.successtest(command.split(" "))
+
     # FIXME: Need tests for plenary templates
     # FIXME: Include test that machine plenary moved correctly
 
