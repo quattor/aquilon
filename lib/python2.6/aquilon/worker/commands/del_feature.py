@@ -1,7 +1,6 @@
-#!/usr/bin/env python2.6
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 #
-# Copyright (C) 2008,2009,2010,2011  Contributor
+# Copyright (C) 2011  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -27,33 +26,26 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-"""Module for testing constraints in commands involving locations."""
 
-import unittest
-
-if __name__ == "__main__":
-    import utils
-    utils.import_depends()
-
-from brokertest import TestBrokerCommand
+from aquilon.worker.broker import BrokerCommand
+from aquilon.aqdb.model import Feature
+from aquilon.exceptions_ import ArgumentError
 
 
-class TestLocationConstraints(TestBrokerCommand):
+class CommandDelFeature(BrokerCommand):
 
-    def testdelut3(self):
-        command = ["del", "rack", "--rack", "ut3"]
-        out = self.badrequesttest(command)
-        self.matchoutput(out, "Could not delete rack ut3, hardware objects "
-                         "were found using this location.", command)
+    required_parameters = ['feature', 'type']
 
-    def testbadtype(self):
-        command = ["show", "location", "--type", "bad-type",
-                   "--name", "no-such-location"]
-        out = self.badrequesttest(command)
-        self.matchoutput(out, "Unknown location type 'bad-type'.", command)
+    def render(self, session, feature, type, **arguments):
+        Feature.validate_type(type)
 
+        dbfeature = Feature.get_unique(session, name=feature, feature_type=type,
+                                       compel=True)
 
-if __name__ == '__main__':
-    suite = unittest.TestLoader().loadTestsFromTestCase(
-        TestLocationConstraints)
-    unittest.TextTestRunner(verbosity=2).run(suite)
+        if dbfeature.links:
+            raise ArgumentError("{0} is still in use and cannot be deleted."
+                                .format(dbfeature))
+
+        session.delete(dbfeature)
+        session.flush()
+        return

@@ -124,7 +124,7 @@ class TestDelRack(TestBrokerCommand):
         command = "del rack --rack %s" % test_rack
         err = self.badrequesttest(command.split(" "))
         self.matchoutput(err,
-                         "Bad Request: Could not delete rack %s. Networks "
+                         "Bad Request: Could not delete rack %s, networks "
                          "were found using this location." % test_rack,
                          command)
 

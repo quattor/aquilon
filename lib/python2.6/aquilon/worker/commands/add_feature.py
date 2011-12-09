@@ -1,7 +1,6 @@
-#!/usr/bin/env python2.6
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 #
-# Copyright (C) 2008,2009,2010,2011  Contributor
+# Copyright (C) 2011  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -27,33 +26,41 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-"""Module for testing constraints in commands involving locations."""
 
-import unittest
+import re
 
-if __name__ == "__main__":
-    import utils
-    utils.import_depends()
+from aquilon.worker.broker import BrokerCommand
+from aquilon.aqdb.model import Feature
+from aquilon.exceptions_ import ArgumentError, UnimplementedError
 
-from brokertest import TestBrokerCommand
+# Do not allow path components to start with '.' to avoid games like "../foo" or
+# hidden directories like ".foo/bar"
+_name_re = re.compile(r'^\.|[/\\]\.')
 
+class CommandAddFeature(BrokerCommand):
 
-class TestLocationConstraints(TestBrokerCommand):
+    required_parameters = ['feature', 'type']
 
-    def testdelut3(self):
-        command = ["del", "rack", "--rack", "ut3"]
-        out = self.badrequesttest(command)
-        self.matchoutput(out, "Could not delete rack ut3, hardware objects "
-                         "were found using this location.", command)
+    def render(self, session, feature, type, post_personality, comments,
+               **arguments):
+        Feature.validate_type(type)
 
-    def testbadtype(self):
-        command = ["show", "location", "--type", "bad-type",
-                   "--name", "no-such-location"]
-        out = self.badrequesttest(command)
-        self.matchoutput(out, "Unknown location type 'bad-type'.", command)
+        if _name_re.search(feature):
+            raise ArgumentError("Path components in the feature name must not "
+                                "start with a dot.")
 
+        cls = Feature.__mapper__.polymorphic_map[type].class_
 
-if __name__ == '__main__':
-    suite = unittest.TestLoader().loadTestsFromTestCase(
-        TestLocationConstraints)
-    unittest.TextTestRunner(verbosity=2).run(suite)
+        if post_personality and not cls.post_personality_allowed:
+            raise UnimplementedError("The post_personality attribute is "
+                                     "implemented only for host features.")
+
+        cls.get_unique(session, name=feature, preclude=True)
+
+        dbfeature = cls(name=feature, post_personality=post_personality,
+                        comments=comments)
+        session.add(dbfeature)
+
+        session.flush()
+
+        return

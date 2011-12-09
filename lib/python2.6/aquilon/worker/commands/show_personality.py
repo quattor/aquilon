@@ -32,7 +32,7 @@
 import os
 import re
 
-from sqlalchemy.orm import joinedload, contains_eager
+from sqlalchemy.orm import joinedload, subqueryload, contains_eager
 
 from aquilon.aqdb.model import Archetype, Personality
 from aquilon.worker.broker import BrokerCommand
@@ -65,10 +65,13 @@ class CommandShowPersonality(BrokerCommand):
         if personality:
             q = q.filter_by(name=personality)
         q = q.join(Archetype)
-        q = q.options(contains_eager('archetype'))
         q = q.order_by(Archetype.name, Personality.name)
-        q = q.options(joinedload('_services'))
-        q = q.options(joinedload('cluster_infos'))
+        q = q.options(contains_eager('archetype'),
+                      subqueryload('_services'),
+                      subqueryload('grns'),
+                      subqueryload('features'),
+                      joinedload('features.feature'),
+                      joinedload('cluster_infos'))
         results = PersonalityList()
         if not dbbranch:
             results.extend(q.all())

@@ -40,7 +40,7 @@ from brokertest import TestBrokerCommand
 
 class TestOrganization(TestBrokerCommand):
 
-    def testaddexorg(self):
+    def test_100_addexorg(self):
         command = ["add", "organization", "--organization", "example",
                    "--fullname", "Example, Inc"]
         self.noouttest(command)
@@ -49,7 +49,7 @@ class TestOrganization(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Organization: example", command)
 
-    def testaddexorg2(self):
+    def test_100_addexorg2(self):
         command = ["add", "organization", "--organization", "example2"]
         self.noouttest(command)
 
@@ -57,24 +57,21 @@ class TestOrganization(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Organization: example2", command)
 
-    def testdelexorg2(self):
-        command = "del organization --organization example"
-        self.noouttest(command.split(" "))
-
+    def test_110_delexorg2(self):
         command = "del organization --organization example2"
         self.noouttest(command.split(" "))
 
-    def testdelexorgagain(self):
-        command = "del organization --organization example"
+    def test_120_delexorg2again(self):
+        command = "del organization --organization example2"
         out = self.notfoundtest(command.split(" "))
-        self.matchoutput(out, "Company example not found.", command)
+        self.matchoutput(out, "Organization example2 not found.", command)
 
-    def testverifydelexorg(self):
-        command = "show organization --organization example"
+    def test_130_verifydelexorg2(self):
+        command = "show organization --organization example2"
         out = self.notfoundtest(command.split(" "))
-        self.matchoutput(out, "Company example not found.", command)
+        self.matchoutput(out, "Organization example2 not found.", command)
 
-    def testdelexorg1(self):
+    def test_140_delexorginuse(self):
         test_org = "example"
 
         # add network to org
@@ -85,17 +82,20 @@ class TestOrganization(TestBrokerCommand):
                         "--type", "unknown",
                         "--comments", "Made-up network"])
 
-
         # try delete org
         command = "del organization --organization %s" % test_org
         err = self.badrequesttest(command.split(" "))
         self.matchoutput(err,
-                         "Bad Request: Could not delete company %s. Networks "
-                         "were found using this location." % test_org,
+                         "Bad Request: Could not delete organization %s, "
+                         "networks were found using this location." % test_org,
                          command)
 
         # delete network
         self.noouttest(["del_network", "--ip", "192.176.6.0"])
+
+    def test_150_delexorg1(self):
+        command = "del organization --organization example"
+        self.noouttest(command.split(" "))
 
 
 if __name__ == '__main__':

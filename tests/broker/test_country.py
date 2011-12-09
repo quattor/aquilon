@@ -89,7 +89,7 @@ class TestCountry(TestBrokerCommand):
         command = "del country --country %s" % test_country
         err = self.badrequesttest(command.split(" "))
         self.matchoutput(err,
-                         "Bad Request: Could not delete country %s. Networks "
+                         "Bad Request: Could not delete country %s, networks "
                          "were found using this location." % test_country,
                          command)
 

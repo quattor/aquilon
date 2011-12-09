@@ -4423,4 +4423,95 @@
       <transport method="get" path="find/resource/resourcegroup" />
    </command>
 
+   <command name="add_feature">
+      Add a new feature. A feature is a template under &lt;archetype&gt;/features which
+      gets included by the plenaries.
+      <optgroup name="add_feature_opts" mandatory="True" fields="all">
+         <option name="feature" type="string">The name of the feature</option>
+         <option name="type" type="string">Type of the feature: host, hardware or interface</option>
+      </optgroup>
+      <optgroup name="add_feature_optional" mandatory="False" fields="any">
+         <option name="post_personality" type="flag">Call the feature after the personality</option>
+         <option name="comments" type="string">Comments</option>
+      </optgroup>
+
+      <transport method="put" path="feature/%(type)s/%(feature)s"/>
+   </command>
+
+   <command name="del_feature">
+      Delete a feature.
+      <optgroup name="del_feature_opts" mandatory="True" fields="all">
+         <option name="feature" type="string">The name of the feature</option>
+         <option name="type" type="string">Type of the feature: host, hardware or interface</option>
+      </optgroup>
+
+      <transport method="delete" path="feature/%(type)s/%(feature)s"/>
+   </command>
+
+   <command name="show_feature">
+      Display a single feature or all features.
+      <optgroup name="show_feature_opts" mandatory="True" fields="any">
+         <optgroup name="name_type" mandatory="False" fields="all">
+            <option name="feature" type="string" conflicts="all">The name of the feature</option>
+            <option name="type" type="string" conflicts="all">The type of the feature</option>
+         </optgroup>
+         <option name="all" type="flag" conflicts="feature type">Show all features</option>
+      </optgroup>
+
+      <transport trigger="all" method="get" path="feature"/>
+      <transport method="get" path="feature/%(type)s/%(feature)s"/>
+   </command>
+
+   <command name="bind_feature">
+      Bind a feature to a given object.
+      <p/>
+      Affected host plenaries will be refreshed unless the --noflush option has been specified.
+      The hosts however are not compiled; that has to be done manually.
+      <p/>
+      Changing feature links for a whole archetype require --justification and a valid TCM.
+
+      <optgroup name="bind_feature_opts" mandatory="True" fields="all">
+         <option name="feature" type="string">Name of the feature</option>
+         <optgroup name="target" mandatory="True" fields="any">
+            <option name="personality" type="string">Name of a personality</option>
+            <option name="archetype" type="string">Archetype</option>
+            <option name="model" type="string">Name of a hardware model</option>
+            <option name="interface" type="string">Interface of a machine</option>
+         </optgroup>
+      </optgroup>
+      <optgroup name="bind_feature_optional" mandatory="False" fields="any">
+         <option name="vendor" type="string">Vendor name, if the model name is not unique</option>
+         <option name="justification" type="string">Extra authorization tokens (e.g. TCM number) to validate the request</option>
+         <option name="flush" type="boolean" default="True">Enable flushing the affected host plenaries</option>
+      </optgroup>
+
+      <transport method="post" path="commands/bind_feature"/>
+   </command>
+
+   <command name="unbind_feature">
+      Unbind a feature from a given object.
+      <p/>
+      Affected host plenaries will be refreshed unless the --noflush option has been specified.
+      The hosts however are not compiled; that has to be done manually.
+      <p/>
+      Changing feature links for a whole archetype require --justification and a valid TCM.
+
+      <optgroup name="unbind_feature_opts" mandatory="True" fields="all">
+         <option name="feature" type="string">Name of the feature</option>
+         <optgroup name="target" mandatory="True" fields="any">
+            <option name="personality" type="string">Name of a personality</option>
+            <option name="archetype" type="string">Archetype</option>
+            <option name="model" type="string">Name of a hardware model</option>
+            <option name="interface" type="string">Interface of a machine</option>
+         </optgroup>
+      </optgroup>
+      <optgroup name="unbind_feature_optional" mandatory="False" fields="any">
+         <option name="vendor" type="string">Vendor name, if the model name is not unique</option>
+         <option name="justification" type="string">Extra authorization tokens (e.g. TCM number) to validate the request</option>
+         <option name="flush" type="boolean" default="True">Enable flushing the affected host plenaries</option>
+      </optgroup>
+
+      <transport method="post" path="commands/unbind_feature"/>
+   </command>
+
 </commandline>

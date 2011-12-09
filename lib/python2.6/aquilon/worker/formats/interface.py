@@ -29,11 +29,12 @@
 """Interface formatter."""
 
 
-from aquilon.worker.formats.formatters import ObjectFormatter
-from aquilon.worker.formats.list import ListFormatter
 from aquilon.aqdb.model import (Interface, PublicInterface, ManagementInterface,
                                 OnboardInterface, VlanInterface,
                                 BondingInterface, BridgeInterface)
+from aquilon.worker.formats.formatters import ObjectFormatter
+from aquilon.worker.formats.list import ListFormatter
+from aquilon.worker.dbwrappers.feature import interface_features
 
 
 class InterfaceFormatter(ObjectFormatter):
@@ -105,6 +106,17 @@ class InterfaceFormatter(ObjectFormatter):
                            .format(route.destination, route.gateway_ip))
             if route.comments:
                 details.append(indent + "    Comments: %s" % route.comments)
+
+        if hasattr(interface.hardware_entity, 'host') and \
+           interface.hardware_entity.host:
+            pers = interface.hardware_entity.host.personality
+            arch = pers.archetype
+        else:
+            pers = None
+            arch = None
+
+        for feature in interface_features(interface, arch, pers):
+            details.append(indent + "  Template: %s" % feature.cfg_path)
 
         if interface.comments:
             details.append(indent + "  Comments: %s" % interface.comments)

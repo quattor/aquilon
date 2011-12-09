@@ -1,0 +1,155 @@
+<?xml version="1.0"?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V5.0//EN"
+"http://docbook.org/xml/5.0/dtd/docbook.dtd" [
+<!ENTITY aqd_version SYSTEM "../version.txt">
+]>
+<refentry xml:id="add_feature"
+	  xmlns:xi="http://www.w3.org/2001/XInclude">
+    <refmeta>
+        <refentrytitle>add_feature</refentrytitle>
+        <manvolnum>1</manvolnum>
+        <refmiscinfo class="version">&aqd_version;</refmiscinfo>
+        <refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
+    </refmeta>
+
+    <refnamediv>
+        <refname>add feature</refname>
+        <refpurpose>
+	    Add a feature
+        </refpurpose>
+	<refclass>Aquilon</refclass>
+    </refnamediv>
+
+    <refsynopsisdiv>
+	<cmdsynopsis>
+	    <command>aq add feature</command>
+	    <group>
+		<synopfragmentref linkend="global-options">Global options</synopfragmentref>
+	    </group>
+	    <arg choice="plain"><option>--feature <replaceable>NAME</replaceable></option></arg>
+	    <arg choice="plain"><option>--type <replaceable>TYPE</replaceable></option></arg>
+	    <arg choice="opt"><option>--comments <replaceable>COMMENTS</replaceable></option></arg>
+	    <arg choice="opt"><option>--post_personality</option></arg>
+	    <xi:include href="../common/global_options.xml"/>
+	</cmdsynopsis>
+    </refsynopsisdiv>
+
+    <refsect1>
+        <title>Description</title>
+	<para>
+	    The <command>aq add feature</command> command creates a new feature.
+	</para>
+	<para>
+	    Features are templates which get included from the host plenary template. There
+	    are 3 kind of features: hardware, host and interface.
+	</para>
+	<para>
+	    Hardware features are meant to perform hardware-related changes like turning off hyperthreading,
+	    applying certain firmware settings or controlling power saving modes. When a hardware feature is
+	    activated, the host plenary will include
+	    <filename>features/hardware/<replaceable>NAME</replaceable>/config.tpl</filename>
+	    just after the OS template. Therefore hardware features have access to the hardware description and
+	    operating system information, but nothing else.
+	</para>
+	<para>
+	    Host features are the most generic, and usually control software that gets installed on the host.
+	    If a host template is active, then
+	    <filename>features/<replaceable>NAME</replaceable>/config.tpl</filename>
+	    will be included either before or after the personality template. If the <option>--post_personality</option>
+	    option is specified, then the feature template will be included after the personality template; if
+	    this option is missing, then the feature template will be included before the personality template.
+	</para>
+	<para>
+	    The position where the feature template gets included depends on how the feature is implemented.
+	    A feature template included before the personality template cannot take parameters, but the
+	    personality template may override any settings made by the feature template. On the other hand,
+	    if the feature template is included after the personality template, then it may take parameters
+	    e.g. in the form of global variables set by the personality template, and the personality
+	    template has no way to override the effects of the feature template.
+	</para>
+	<para>
+	    The third kind of features are interface features. Contrary to hardware and host features which
+	    apply to the host as a whole, interface features are meant to control the parameters of just a
+	    single interface. When an interface feature is active, the
+	    <filename>features/interface/<replaceable>NAME</replaceable>/config.tpl</filename>
+	    template will be included once for every affected interface. The name of the interface to act on
+	    is passed in the <varname>CURRENT_INTERFACE</varname> global variable.
+	</para>
+	<para>
+	    To avoid template name collisions, the name of host features must not start with the
+	    prefixes <filename>hardware/</filename> or <filename>interface/</filename>.
+	</para>
+	<para>
+	    After adding a feature, the <command>aq bind feature</command> command should be used to bind
+	    it to models/archetypes/personalities. A feature will be activated if the parameters of a given
+	    host match one of the bindings.
+	</para>
+    </refsect1>
+
+    <refsect1>
+        <title>Options</title>
+	<variablelist>
+	    <title>Command-specific options</title>
+	    <varlistentry>
+	        <term>
+		    <option>--feature <replaceable>NAME</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			The name of the feature. The name is allowed to contain slashes (/) to allow
+			using subdirectories in the templates, but path components are not allowed to
+			start with a dot.
+		    </para>
+		    <para>
+			Feature names must be unique for any given type.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--type <replaceable>TYPE</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			The type of the feature. See above for the description of the possible
+			values and their meaning.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--post_personality</option>
+		</term>
+		<listitem>
+		    <para>
+			Indicate that the feature template should be included after the personality
+			template. This option may be specified for host features only.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--comments <replaceable>COMMENTS</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Feature comments.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	</variablelist>
+	<xi:include href="../common/global_options_desc.xml"/>
+    </refsect1>
+
+    <refsect1>
+	<title>See also</title>
+	<para>
+	    <citerefentry><refentrytitle>bind_feature</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>unbind_feature</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>del_feature</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>show_feature</refentrytitle><manvolnum>1</manvolnum></citerefentry>
+	</para>
+    </refsect1>
+</refentry>
+
+<!-- vim: set ai sw=4: -->

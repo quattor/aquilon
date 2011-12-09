@@ -105,7 +105,7 @@ class TestHub(TestBrokerCommand):
         command = "del hub --hub %s" % test_hub
         err = self.badrequesttest(command.split(" "))
         self.matchoutput(err,
-                         "Bad Request: Could not delete hub %s. Networks "
+                         "Bad Request: Could not delete hub %s, networks "
                          "were found using this location." % test_hub,
                          command)
 

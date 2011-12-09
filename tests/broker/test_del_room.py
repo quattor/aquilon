@@ -70,7 +70,7 @@ class TestDelRoom(TestBrokerCommand):
         command = "del room --room %s" % test_room
         err = self.badrequesttest(command.split(" "))
         self.matchoutput(err,
-                         "Bad Request: Could not delete room %s. Networks "
+                         "Bad Request: Could not delete room %s, networks "
                          "were found using this location." % test_room,
                          command)
 

@@ -1,7 +1,6 @@
-#!/usr/bin/env python2.6
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 #
-# Copyright (C) 2008,2009,2010,2011  Contributor
+# Copyright (C) 2011  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -27,33 +26,18 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-"""Module for testing constraints in commands involving locations."""
 
-import unittest
-
-if __name__ == "__main__":
-    import utils
-    utils.import_depends()
-
-from brokertest import TestBrokerCommand
+from aquilon.exceptions_ import ArgumentError
+from aquilon.aqdb.model import FeatureLink
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.commands.bind_feature import CommandBindFeature
 
 
-class TestLocationConstraints(TestBrokerCommand):
+class CommandUnBindFeature(CommandBindFeature):
 
-    def testdelut3(self):
-        command = ["del", "rack", "--rack", "ut3"]
-        out = self.badrequesttest(command)
-        self.matchoutput(out, "Could not delete rack ut3, hardware objects "
-                         "were found using this location.", command)
+    required_parameters = ['feature']
 
-    def testbadtype(self):
-        command = ["show", "location", "--type", "bad-type",
-                   "--name", "no-such-location"]
-        out = self.badrequesttest(command)
-        self.matchoutput(out, "Unknown location type 'bad-type'.", command)
-
-
-if __name__ == '__main__':
-    suite = unittest.TestLoader().loadTestsFromTestCase(
-        TestLocationConstraints)
-    unittest.TextTestRunner(verbosity=2).run(suite)
+    def do_link(self, session, logger, dbfeature, params):
+        dblink = FeatureLink.get_unique(session, feature=dbfeature, compel=True,
+                                        **params)
+        dbfeature.links.remove(dblink)

@@ -30,8 +30,9 @@
 
 
 from sqlalchemy.orm.exc import NoResultFound
+from sqlalchemy.orm import subqueryload
 
-from aquilon.exceptions_ import NotFoundException
+from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import Location
 from aquilon.worker.formats.location import LocationList
@@ -41,17 +42,20 @@ class CommandShowLocationType(BrokerCommand):
     required_parameters = ["type"]
 
     def render(self, session, type, name, **arguments):
-        query = session.query(Location)
-        query = query.with_polymorphic('*')
-        if type:
-            query = query.filter_by(location_type=type)
+        if type not in Location.__mapper__.polymorphic_map:
+            raise ArgumentError("Unknown location type '%s'." % type)
+
+        cls = Location.__mapper__.polymorphic_map[type].class_
+        query = session.query(cls)
+        query = query.options(subqueryload('parents'))
+
         if name:
             query = query.filter_by(name=name)
-        if name and type:
             try:
                 return query.one()
             except NoResultFound:
                 raise NotFoundException("%s %s not found." %
-                                        (type.capitalize(), name))
+                                        (cls._get_class_label(), name))
+
         return LocationList(query.order_by(Location.location_type,
                                            Location.name).all())
