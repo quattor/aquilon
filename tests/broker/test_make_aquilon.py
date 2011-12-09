@@ -131,6 +131,7 @@ class TestMakeAquilon(TestBrokerCommand):
         self.matchoutput(out,
             """include { "archetype/final" };""",
             command)
+        self.matchoutput(out,"'/system/advertise_status' = false",command)
 
     def testmakeunittest00(self):
         command = ["make", "aquilon",
@@ -160,6 +161,7 @@ class TestMakeAquilon(TestBrokerCommand):
         command = "show host --hostname unittest00.one-nyp.ms.com"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Build Status: blind", command)
+        self.matchoutput(out, "Advertise Status: False", command)
 
     def testverifybindautoafs(self):
         command = "show host --hostname unittest00.one-nyp.ms.com"
@@ -252,6 +254,7 @@ class TestMakeAquilon(TestBrokerCommand):
         self.matchoutput(out,
             """include { "archetype/final" };""",
             command)
+        self.matchoutput(out,"'/system/advertise_status' = false",command)
 
     def testverifyshowservicebyclient(self):
         command = "show service --client unittest00.one-nyp.ms.com"

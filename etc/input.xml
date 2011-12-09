@@ -1944,6 +1944,26 @@
       <transport method="put" trigger="cluster" path="cluster/%(cluster)s/buildstatus/%(buildstatus)s" />
    </command>
 
+   <command name="reset_advertised_status">
+      Reset the advertised status for a host to build and recompile its profile.
+      This command does not verify the service bindings of the host. The advertise
+      status will automaticlaly flip to true once the host status changes to 'ready'.
+
+      Changing the advertised may cause the configuration to be different
+      (for example, while hosts are in "build" status, they are not available
+      for general login access) and so any affected profiles will be recompiled.
+
+      <optgroup name="reset_advertised_status" mandatory="True" fields="all">
+         <optgroup name='what_to_change' mandatory="True" fields="any">
+                <option name="hostname" type="string">Host name</option>
+                <option name="list" type="file" conflicts="hostname">File with one host per line</option>
+         </optgroup>
+      </optgroup>
+      <transport method="post" path="host/%(hostname)s/command/resetadvertisedstatus" />
+      <transport trigger="list" method="post" path="command/resetadvertisedstatus/list" />
+   </command>
+
+
    <command name="add_domain">
       Add a new server-managed template domain.  Updates to these domains
       can only be made through the broker.  A domain can either allow new

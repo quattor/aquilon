@@ -141,7 +141,8 @@ class Ready(HostLifecycle):
                                                'almostready',
                                                compel=True)
             obj.status.transition(obj, dbstate)
-
+        else:
+            obj.advertise_status = True
 
 class Almostready(HostLifecycle):
     __mapper_args__ = {'polymorphic_identity': 'almostready'}

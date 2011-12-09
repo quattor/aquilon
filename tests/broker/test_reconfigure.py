@@ -51,7 +51,7 @@ class TestReconfigure(TestBrokerCommand):
     # it should now be set to q.ln.ms.com.  The reconfigure will
     # force it *back* to using a correct service map entry, in
     # this case q.ny.ms.com.
-    def testreconfigureunittest02(self):
+    def testreconfigureunittest02_1(self):
         command = ["reconfigure", "--hostname", "unittest02.one-nyp.ms.com",
                    "--buildstatus", "ready"]
         (out, err) = self.successtest(command)
@@ -65,10 +65,16 @@ class TestReconfigure(TestBrokerCommand):
                          command)
         self.matchoutput(err, "sent 1 server notifications", command)
 
+    ## verify status before reconfigure
+    def testreconfigureunittest02_0(self):
+        command = "cat --hostname unittest02.one-nyp.ms.com"
+        out = self.commandtest(command.split(" "))
+
     def testverifybuildstatus(self):
         command = "show host --hostname unittest02.one-nyp.ms.com"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Build Status: ready", command)
+        self.matchoutput(out, "Advertise Status: True", command)
 
     def testverifycatunittest02(self):
         command = "cat --hostname unittest02.one-nyp.ms.com"
@@ -115,6 +121,7 @@ class TestReconfigure(TestBrokerCommand):
         self.matchoutput(out,
             """include { "archetype/final" };""",
             command)
+        self.matchoutput(out, "'/system/advertise_status' = true;", command)
 
     # These settings have not changed - the command should still succeed.
     def testreconfigureunittest00(self):
@@ -185,6 +192,7 @@ class TestReconfigure(TestBrokerCommand):
         self.matchoutput(out,
             """include { "archetype/final" };""",
             command)
+        self.matchoutput(out, "'/system/advertise_status' = false;", command)
 
     def testreconfigurewindowsstatus(self):
         self.noouttest(["reconfigure",
@@ -241,6 +249,7 @@ class TestReconfigure(TestBrokerCommand):
         self.matchoutput(out, "Build Status: ready", command)
         self.matchoutput(out, "Operating System: windows", command)
         self.matchoutput(out, "Version: nt61e", command)
+        self.matchoutput(out, "Advertise Status: True", command)
 
     def testreconfigureos(self):
         command = ["reconfigure",

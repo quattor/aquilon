@@ -30,7 +30,7 @@
 
 from datetime import datetime
 
-from sqlalchemy import (Integer, DateTime, String, Column, ForeignKey,
+from sqlalchemy import (Integer, Boolean, DateTime, String, Column, ForeignKey,
                         UniqueConstraint, Index)
 from sqlalchemy.orm import relation, backref
 
@@ -90,6 +90,10 @@ class Host(Base):
     creation_date = Column(DateTime, default=datetime.now, nullable=False)
 
     comments = Column(String(255), nullable=True)
+
+    # something to retain the advertised status of the host
+    advertise_status = Column(Boolean(name="%s_advertise_status_valid_ck" % _TN),
+                                      nullable=False, default=False)
 
     # Deletion of a machine deletes the host. When this is 'machine profile'
     # this should no longer be the case as it will be many to one as opposed to
