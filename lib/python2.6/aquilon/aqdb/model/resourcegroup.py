@@ -54,6 +54,12 @@ class ResourceGroup(Resource):
 
     # declare any per-group attributes here (none for now)
 
+    def validate_holder(self, key, value):
+        if isinstance(value, BundleResource):
+            raise ValueError("ResourceGroups must not be held by other " +
+                             "ResourceGroups")
+        return value
+
 
 resourcegroup = ResourceGroup.__table__
 resourcegroup.primary_key.name = '%s_pk' % (_TN)
