@@ -66,11 +66,10 @@ class PlenaryResource(Plenary):
         lines.append('"name" = %s;' % pan(self.resource.name))
         lines.append('"eonid" = %s;' % pan(self.resource.eonid))
 
-    def body_reboot_schedule(self, lines):
+    def body_hostlink(self, lines):
         lines.append('"name" = %s;' % pan(self.resource.name))
-        lines.append('"time" = %s;' % pan(self.resource.time))
-        lines.append('"week" = %s;' % pan(self.resource.week))
-        lines.append('"day" = %s;' % pan(self.resource.day))
+        lines.append('"target" = %s;' % pan(self.resource.target))
+        lines.append('"owner" = %s;' % pan(self.resource.owner))
 
     def body_intervention(self, lines):
         lines.append('"name" = %s;' % pan(self.resource.name))
@@ -89,6 +88,12 @@ class PlenaryResource(Plenary):
         if self.resource.disabled:
             lines.append('"disabled" = %s;' %
                          pan(self.resource.disabled.split(",")))
+
+    def body_reboot_schedule(self, lines):
+        lines.append('"name" = %s;' % pan(self.resource.name))
+        lines.append('"time" = %s;' % pan(self.resource.time))
+        lines.append('"week" = %s;' % pan(self.resource.week))
+        lines.append('"day" = %s;' % pan(self.resource.day))
 
     def body_resourcegroup(self, lines):
         lines.append('"name" = %s;' % pan(self.resource.name))

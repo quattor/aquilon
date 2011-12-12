@@ -4316,6 +4316,53 @@
       <transport method="get" path="find/resource/application" />
    </command>
 
+   <command name="add_hostlink">
+      Add a new hostlink resource.
+      <optgroup name="add_app_opts" mandatory="True" fields="all">
+         <option name="hostlink" type="string">Name of hostlink</option>
+         <option name="target" type="string">Target path of link</option>
+         <option name="owner" type="string">Username to be owner of the
+         target directory</option>
+      </optgroup>
+      <optgroup name="optional_opts">
+         <option name="comments" type="string">Comments</option>
+      </optgroup>
+      <optgroup name="resource_mapping_opts" mandatory="True" fields="any">
+        <option name="resourcegroup" type="string">Resourcegroup to apply resource</option>
+         <option name="hostname" type="string">Hostname to apply resource</option>
+         <option name="cluster" type="string">Cluster to apply resource</option>
+      </optgroup>
+      <transport method="put" path="resource/hostlink/%(hostlink)s" />
+   </command>
+
+   <command name="del_hostlink">
+      Delete an hostlink resource.
+      <optgroup name="del_app_opts" mandatory="True" fields="all">
+         <option name="hostlink" type="string">name</option>
+      </optgroup>
+      <optgroup name="resource_mapping_opts" mandatory="True" fields="any">
+        <option name="resourcegroup" type="string">Resourcegroup to apply resource</option>
+        <option name="hostname" type="string">Hostname of resource</option>
+        <option name="cluster" type="string">Cluster of resource</option>
+      </optgroup>
+      <transport method="delete" path="resource/hostlink/%(hostlink)s" />
+   </command>
+
+   <command name="show_hostlink">
+      Show hostlinks based on filtering for host/cluster association
+      <optgroup name="show_resource_opts" mandatory="True" fields="any">
+         <option name="cluster" type="string">cluster name</option>
+         <option name="hostname" type="string">hostname</option>
+         <option name="resourcegroup" type="string">resourcegroup</option>
+         <option name="hostlink" type="string">hostlink name</option>
+         <option name="owner" type="string">username</option>
+         <option name="all" type="flag">list all hostlinks</option>
+      </optgroup>
+      <transport method="get" trigger="hostlink" path="resource/hostlink/%(hostlink)s" />
+      <transport method="get" path="find/resource/hostlink" />
+   </command>
+
+
    <command name="add_intervention">
       Add a new intervention resource.
       <optgroup name="add_iv_opts" mandatory="True" fields="all">
