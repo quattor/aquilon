@@ -66,7 +66,7 @@ resourcegroup.info['unique_fields'] = ['name']
 class BundleResource(ResourceHolder):
     '''Allow ResourceGroups to hold other types of resource. '''
     __mapper_args__ = {'polymorphic_identity': 'bundle'}
-    resourcegroup_id = Column(Integer, ForeignKey('resource.id',
+    resourcegroup_id = Column(Integer, ForeignKey('resourcegroup.id',
                                            name='%s_bundle_fk' % _RESHOLDER,
                                            ondelete='CASCADE',
                                            use_alter=True),
