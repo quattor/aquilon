@@ -411,6 +411,11 @@ class TestBrokerCommand(unittest.TestCase):
         return self.parse_proto_msg(aqdaudit_pb2.TransactionList,
                                     'transactions', msg, expect)
 
+    def parse_resourcelist_msg(self, msg, expect=None):
+        return self.parse_proto_msg(aqdsystems_pb2.ResourceList,
+                                    'resources',
+                                    msg, expect)
+
     def gitenv(self, env=None):
         git_path = self.config.get("broker", "git_path")
         newenv = {}

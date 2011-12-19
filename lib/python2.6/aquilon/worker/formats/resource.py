@@ -77,7 +77,7 @@ class ResourceListFormatter(ListFormatter):
         if not skeleton:
             skeleton = self.loaded_protocols[self.protocol].ResourceList()
         for resource in reslist:
-            self.redirect_proto(resource, skeleton.resource.add())
+            self.redirect_proto(resource, skeleton.resources.add())
         return skeleton
 
 
