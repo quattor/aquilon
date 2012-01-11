@@ -65,7 +65,7 @@ class CommandMakeCluster(BrokerCommand):
 
             td = TemplateDomain(dbcluster.branch, dbcluster.sandbox_author,
                                 logger=logger)
-            td.compile(session, only=" ".join(profile_list), locked=True)
+            td.compile(session, only=profile_list, locked=True)
 
         except:
             chooser.restore_stash()

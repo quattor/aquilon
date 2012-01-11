@@ -73,7 +73,7 @@ class CommandCompileCluster(BrokerCommand):
 
         profile_list = add_cluster_data(dbclus)
 
-        dom.compile(session, only=" ".join(profile_list),
+        dom.compile(session, only=profile_list,
                     panc_debug_include=pancinclude,
                     panc_debug_exclude=pancexclude,
                     cleandeps=cleandeps)

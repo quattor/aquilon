@@ -48,7 +48,7 @@ class CommandCompileHostname(BrokerCommand):
             pancexclude = r'components/spma/functions'
         dom = TemplateDomain(dbhost.branch, dbhost.sandbox_author,
                              logger=logger)
-        dom.compile(session, only=dbhost.fqdn,
+        dom.compile(session, only=[dbhost.fqdn],
                     panc_debug_include=pancinclude,
                     panc_debug_exclude=pancexclude,
                     cleandeps=cleandeps)
