@@ -75,14 +75,19 @@ class TestAddHostlink(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out, "Hostlink: app1", command)
 
-        # command = ["show_host", "--hostname=server1.aqd-unittest.ms.com",
-        #            "--format=proto"]
-        # out = self.commandtest(command)
-        # hostlist = self.parse_hostlist_msg(out, expect=1)
-        # host = hostlist.hosts[0]
-        # for resource in host.resources:
-        #     if resource.name == "app1" and resource.type == "hostlink":
-        #         self.assertEqual(resource.appdata.eonid, 42)
+        command = ["show_host", "--hostname=server1.aqd-unittest.ms.com",
+                   "--format=proto"]
+        out = self.commandtest(command)
+        hostlist = self.parse_hostlist_msg(out, expect=1)
+        host = hostlist.hosts[0]
+        hostlinkfound = False
+        for resource in host.resources:
+            if resource.name == "app1" and resource.type == "hostlink":
+                # there is not yet a hostlink protobuf definition so just
+                # check that it is found
+                hostlinkfound = True
+        self.assertTrue(hostlinkfound,
+                        "Hostlink resource not found in protocol output")
 
         command = ["cat", "--generate", "--host=server1.aqd-unittest.ms.com"]
         out = self.commandtest(command)
