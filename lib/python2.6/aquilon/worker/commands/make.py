@@ -28,8 +28,8 @@
 # TERMS THAT MAY APPLY.
 """Contains the logic for `aq make`."""
 
-
 from aquilon.exceptions_ import ArgumentError
+
 from aquilon.aqdb.model import (Archetype, HostLifecycle,
                                 OperatingSystem, Personality)
 from aquilon.worker.broker import BrokerCommand
@@ -114,18 +114,22 @@ class CommandMake(BrokerCommand):
         chooser.set_required()
         chooser.flush_changes()
 
+        hosts = chooser.changed_server_fqdns()
+        hosts.add(dbhost.fqdn)
+
         # Force a host lock as pan might overwrite the profile...
-        key = CompileKey.merge([chooser.get_write_key(),
-                                CompileKey(domain=dbhost.branch.name,
-                                           profile=dbhost.fqdn,
-                                           logger=logger)])
+        key = chooser.get_write_key()
+        for fqdn in hosts:
+            key = CompileKey.merge([key, CompileKey(domain=dbhost.branch.name,
+                                                    profile=fqdn,
+                                                    logger=logger)])
         try:
             lock_queue.acquire(key)
             chooser.write_plenary_templates(locked=True)
 
             td = TemplateDomain(dbhost.branch, dbhost.sandbox_author,
                                 logger=logger)
-            td.compile(session, only=[dbhost.fqdn], locked=True)
+            td.compile(session, only=hosts, locked=True)
 
         except:
             if chooser:

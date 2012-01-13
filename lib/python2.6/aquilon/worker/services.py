@@ -29,6 +29,7 @@
 """Provides various utilities around services."""
 
 
+from itertools import chain
 from random import choice
 
 from sqlalchemy.orm.session import object_session
@@ -438,6 +439,18 @@ class Chooser(object):
 
     def restore_stash(self):
         self.plenaries.restore_stash()
+
+    def changed_server_fqdns(self):
+        hosts = set()
+        for instance in chain(self.instances_bound, self.instances_unbound):
+            for srv in instance.servers:
+                # Skip servers that do not have a profile
+                if not srv.host.personality.archetype.is_compileable:
+                    continue
+                if (srv.host.branch == self.dbobj.branch and
+                    srv.host.sandbox_author_id == self.dbobj.sandbox_author_id):
+                    hosts.add(str(srv.host.fqdn))
+        return hosts
 
 
 class HostChooser(Chooser):
