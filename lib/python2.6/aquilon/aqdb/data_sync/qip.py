@@ -387,8 +387,9 @@ class QIPRefresh(object):
                 # integrity
 
                 startip = min(aqnet.ip, qipinfo.address.ip)
-                prefixlen = max(aqnet.cidr, qipinfo.address.prefixlen)
+                prefixlen = min(aqnet.cidr, qipinfo.address.prefixlen)
                 supernet = IPv4Network("%s/%s" % (startip, prefixlen))
+                orig_net = aqnet.network
 
                 # Always deleting & possibly recreating aqnet would make things
                 # simpler, but we can't do that due to the unique constraint on
@@ -410,7 +411,7 @@ class QIPRefresh(object):
                 # Here we rely heavily on network sizes being a power of two, so
                 # supernet is either equal to aqnet or to qipinfo - partial
                 # overlap is not possible
-                if aqnet.network == supernet:
+                if orig_net == supernet:
                     # Split:
                     #  AQ:  ******** (one big network)
                     #  QIP: --**++++ (smaller networks, some may be missing)
@@ -421,7 +422,7 @@ class QIPRefresh(object):
                     else:
                         # The first subnet was deleted
                         pass
-                    while qipinfo and qipinfo.address.ip in aqnet.network:
+                    while qipinfo and qipinfo.address.ip in orig_net:
                         newnet = self.add_network(qipinfo)
                         # Redirect addresses from the split network to the new
                         # subnet
