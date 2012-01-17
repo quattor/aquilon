@@ -58,8 +58,9 @@
                  <arg choice="opt"><option>--capacity_override <replaceable>CAPACITY</replaceable></option></arg>
                  <arg choice="opt"><option>--esx_switch <replaceable>ESX_SWITCH</replaceable></option></arg>
             </group>
-            <group choice="opt"></group>
-            <arg choice="opt"><option>--fullinfo <replaceable>FULLINFO</replaceable></option></arg>
+            <group choice="opt">
+                <arg choice="opt"><option>--fullinfo <replaceable>FULLINFO</replaceable></option></arg>
+            </group>
         <group>
         <synopfragmentref linkend="location-options">cluster location options (with cluster prefix before any of them)</synopfragmentref>
         </group>
@@ -82,10 +83,8 @@
     <refsect1>
         <title>Options</title>
         <variablelist>
-            <title>Command-specific options</title>
-        </variablelist>
-
-        <varlistentry>
+          <title>Command-specific options</title>
+          <varlistentry>
             <term>
             <option>--archetype <replaceable>ARCHETYPE</replaceable></option>
             <option>--personality <replaceable>PERSONALITY</replaceable></option>
@@ -170,10 +169,10 @@
             The maximum hosts that can be added to the cluster.
             </para></listitem>
         </varlistentry>
+        </variablelist>
 
         <variablelist>
             <title>Domain/sandbox options</title>
-        </variablelist>
 
         <varlistentry>
             <term>
@@ -186,9 +185,9 @@
             </para></listitem>
         </varlistentry>
 
+        </variablelist>
         <variablelist>
             <title>ESX specific options</title>
-        </variablelist>
 
         <varlistentry>
             <term><option>--cluster <replaceable>CLUSTER</replaceable></option></term>
@@ -239,6 +238,7 @@
             <term><option>--fullinfo <replaceable>FULLINFO</replaceable></option></term>
             <listitem><para>Show full information of the matching clusters.</para></listitem>
         </varlistentry>
+        </variablelist>
 
         <xi:include href="../common/global_options_desc.xml"/>
     </refsect1>
