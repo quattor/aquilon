@@ -33,12 +33,13 @@ from aquilon.worker.broker import BrokerCommand, validate_basic
 from aquilon.worker.dbwrappers.resources import (add_resource,
                                                  get_resource_holder)
 
+
 class CommandAddHostlink(BrokerCommand):
 
     required_parameters = ["hostlink", "target", "owner"]
 
     def render(self, session, logger, hostlink, target, owner,
-               hostname, cluster, resourcegroup,
+               group, hostname, cluster, resourcegroup,
                comments, **arguments):
 
         validate_basic("hostlink", hostlink)
@@ -49,5 +50,5 @@ class CommandAddHostlink(BrokerCommand):
                                preclude=True)
 
         dbhl = Hostlink(name=hostlink, comments=comments, target=target,
-                        owner=owner)
+                        owner_user=owner, owner_group=group)
         return add_resource(session, logger, holder, dbhl)

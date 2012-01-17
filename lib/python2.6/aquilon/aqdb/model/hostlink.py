@@ -31,6 +31,7 @@ from datetime import datetime
 
 from sqlalchemy import (Integer, DateTime, Sequence, String, Column, Boolean,
                         UniqueConstraint, ForeignKey)
+from sqlalchemy.orm import validates
 
 from aquilon.aqdb.model import Resource
 from aquilon.aqdb.column_types.aqstr import AqStr
@@ -49,7 +50,14 @@ class Hostlink(Resource):
                                     primary_key=True)
 
     target = Column(String(255), nullable=False)
-    owner = Column(String(32), default='root', nullable=False)
+    owner_user = Column(String(32), default='root', nullable=False)
+    owner_group = Column(String(32), nullable=True)
+
+    @validates(owner_user, owner_group)
+    def validate_owner(self, key, value):
+        if ':' in value:
+            raise ValueError("%s cannot contain the ':' character" % key)
+        return value
 
 
 hostlink = Hostlink.__table__

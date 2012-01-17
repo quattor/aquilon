@@ -40,7 +40,8 @@ class HostlinkFormatter(ResourceFormatter):
     def format_raw(self, hostlink, indent=""):
         details = []
         details.append(indent + "  Target Path: %s" % hostlink.target)
-        details.append(indent + "  Owner: %s" % hostlink.owner)
+        details.append(indent + "  Owner: %s" % hostlink.owner_user)
+        details.append(indent + "  Group: %s" % hostlink.owner_group)
         return super(HostlinkFormatter, self).format_raw(hostlink, indent) + \
                "\n" + "\n".join(details)
 
@@ -55,4 +56,3 @@ class HostlinkFormatter(ResourceFormatter):
 
 
 ObjectFormatter.handlers[Hostlink] = HostlinkFormatter()
-

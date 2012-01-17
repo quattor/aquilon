@@ -35,6 +35,7 @@ from aquilon.worker.templates.panutils import pan
 
 LOGGER = logging.getLogger('aquilon.server.templates.resource')
 
+
 class PlenaryResource(Plenary):
     def __init__(self, dbresource, logger=LOGGER):
         Plenary.__init__(self, dbresource, logger=logger)
@@ -69,7 +70,12 @@ class PlenaryResource(Plenary):
     def body_hostlink(self, lines):
         lines.append('"name" = %s;' % pan(self.resource.name))
         lines.append('"target" = %s;' % pan(self.resource.target))
-        lines.append('"owner" = %s;' % pan(self.resource.owner))
+        owner_string = '"owner" = %s;'
+        if self.resource.owner_group:
+            lines.append(owner_string % pan(self.resource.owner_user + ':' +
+                                            self.resource.owner_group))
+        else:
+            lines.append(owner_string % pan(self.resource.owner_user))
 
     def body_intervention(self, lines):
         lines.append('"name" = %s;' % pan(self.resource.name))

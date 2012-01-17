@@ -11,11 +11,18 @@
         <refmiscinfo class="version">&aqd_version;</refmiscinfo>
         <refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
     </refmeta>
-
+    <!--Tried to use this fix the warnings, but it just created another set!
+    <info>
+      <author>
+        <personname><firstname>Nathan</firstname>
+        <surname>Dimmock</surname></personname>
+      </author>
+      <author><orgname>Morgan Stanley</orgname></author>
+    </info>-->
     <refnamediv>
         <refname>add hostlink</refname>
         <refpurpose>
-	    Add a hostlink resource onto a host or cluster
+          Add a hostlink resource onto a host or cluster
         </refpurpose>
 	<refclass>Aquilon</refclass>
     </refnamediv>
@@ -30,7 +37,8 @@
         </group>
 	    <arg choice="req"><option>--hostlink <replaceable>NAME</replaceable></option></arg>
 	    <arg choice="req"><option>--target <replaceable>PATH</replaceable></option></arg>
-	    <arg choice="req"><option>--owner <replaceable>USER[:GROUP]</replaceable></option></arg>
+	    <arg choice="req"><option>--owner <replaceable>USER</replaceable></option></arg>
+	    <arg choice="opt"><option>--group <replaceable>GROUP</replaceable></option></arg>
 	    <arg choice="opt"><option>--comments <replaceable>COMMENTS</replaceable></option></arg>
 	    <group>
 		<synopfragmentref linkend="global-options">Global options</synopfragmentref>
@@ -100,7 +108,18 @@
 		    </para>
 		</listitem>
 	    </varlistentry>
-
+	    <varlistentry>
+	        <term>
+		    <option>--group <replaceable>GROUP</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+              The group owner of the target directory. If not
+              specified then the owner user's default group will be
+              used.
+		    </para>
+		</listitem>
+	    </varlistentry>
 	    <varlistentry>
 	        <term>
 		    <option>--hostlink <replaceable>NAME</replaceable></option>
@@ -115,13 +134,11 @@
 	    </varlistentry>
 	    <varlistentry>
 	        <term>
-		    <option>--owner <replaceable>USER[:GROUP]</replaceable></option>
+		    <option>--owner <replaceable>USER</replaceable></option>
 		</term>
 		<listitem>
 		    <para>
-              The owner information of the target directory. The
-              :GROUP information may be ommitted in which case the
-              USER's default group will be used.
+              The username of the owner of the target directory.
 		    </para>
 		</listitem>
 	    </varlistentry>
@@ -156,7 +173,7 @@ aq add hostlink --hostname foo.example.com \
 aq add hostlink --cluster ny01vv \
 	--hostlink nyqsanless1  \
 	--target /var/spool/hostlinks/nyqsanless1 \
-    --owner zeti:fwpbatch
+    --owner zeti --group fwpbatch
 	    </programlisting>
 	</example>
     </refsect1>

@@ -33,6 +33,7 @@ from aquilon.worker.broker import BrokerCommand, validate_basic
 from aquilon.worker.dbwrappers.resources import (del_resource,
                                                  get_resource_holder)
 
+
 class CommandDelHostlink(BrokerCommand):
 
     required_parameters = ["hostlink"]

@@ -4325,6 +4325,8 @@
          target directory</option>
       </optgroup>
       <optgroup name="optional_opts">
+         <option name="group" type="string">Group owner of the target
+         directory</option>
          <option name="comments" type="string">Comments</option>
       </optgroup>
       <optgroup name="resource_mapping_opts" mandatory="True" fields="any">
@@ -4349,13 +4351,12 @@
    </command>
 
    <command name="show_hostlink">
-      Show hostlinks based on filtering for host/cluster association
+      Show a hostlink resource.
       <optgroup name="show_resource_opts" mandatory="True" fields="any">
          <option name="cluster" type="string">cluster name</option>
          <option name="hostname" type="string">hostname</option>
          <option name="resourcegroup" type="string">resourcegroup</option>
          <option name="hostlink" type="string">hostlink name</option>
-         <option name="owner" type="string">username</option>
          <option name="all" type="flag">list all hostlinks</option>
       </optgroup>
       <transport method="get" trigger="hostlink" path="resource/hostlink/%(hostlink)s" />
