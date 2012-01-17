@@ -41,7 +41,8 @@ class HostlinkFormatter(ResourceFormatter):
         details = []
         details.append(indent + "  Target Path: %s" % hostlink.target)
         details.append(indent + "  Owner: %s" % hostlink.owner_user)
-        details.append(indent + "  Group: %s" % hostlink.owner_group)
+        if hostlink.owner_group is not None:
+            details.append(indent + "  Group: %s" % hostlink.owner_group)
         return super(HostlinkFormatter, self).format_raw(hostlink, indent) + \
                "\n" + "\n".join(details)
 
