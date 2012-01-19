@@ -180,6 +180,10 @@ class TestAddFilesystem(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out, "Filesystem: fsshared", command)
 
+    def test_60_show_all_proto(self):
+        command = ["show", "filesystem", "--all", "--format", "proto"]
+        out = self.commandtest(command)
+        self.parse_resourcelist_msg(out, expect=3)
 
     def test_del_filesystem(self):
         command = ["del_filesystem", "--filesystem=fs2",
@@ -191,7 +195,7 @@ class TestAddFilesystem(TestBrokerCommand):
         self.successtest(command)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddFilesystem)
     unittest.TextTestRunner(verbosity=2).run(suite)
 

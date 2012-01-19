@@ -53,6 +53,18 @@ class Chooser(object):
         else:
             # Just assume the consumer invoked the right subclass...
             chooser = super(Chooser, cls).__new__(cls)
+
+        # Lock the owner in the DB to avoid problems with parallel runs
+        session = object_session(dbobj)
+        # Everything has a creation_date field...
+        q = session.query(dbobj.__class__.creation_date)
+        # ... but the name of the primary key is different, so we have to figure
+        # it out
+        for col in dbobj.__class__.__table__.primary_key.columns:
+            q = q.filter(col == dbobj.__getattribute__(col.name))
+        q = q.with_lockmode('update')
+        q.one()
+
         return chooser
 
     # Technically apply_changes is a method, but whatever...
