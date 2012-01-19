@@ -26,51 +26,51 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-"""Contains the logic for `aq update machine`."""
+"""Contains the logic for `aq update network`."""
 
 from aquilon.exceptions_ import NotFoundException
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.location import get_location
-from aquilon.worker.dbwrappers.network import get_network_byname, get_network_byip
 from aquilon.aqdb.model import Network, NetworkEnvironment
 
 
 class CommandUpdateNetwork(BrokerCommand):
 
-    def render(self, session, network, ip, network_environment, discovered,
-               discoverable, type=False, **arguments):
-
-        networks = []
+    def render(self, session, dbuser, network, ip, network_environment, type,
+               side, comments, **arguments):
 
         dbnet_env = NetworkEnvironment.get_unique_or_default(session,
                                                              network_environment)
+        self.az.check_network_environment(dbuser, dbnet_env)
 
-        if network or ip:
-            dbnetwork = network and get_network_byname(session, network,
-                                                       dbnet_env) or None
-            dbnetwork = ip and get_network_byip(session, ip, dbnet_env) or dbnetwork
-            if not dbnetwork:
-                raise NotFoundException('No valid network supplied.')
-            networks.append(dbnetwork)
-        else:
-            q = session.query(Network)
-            q = q.filter_by(network_environment=dbnet_env)
+        if not network and not ip:
+            raise ArgumentError("Please specify either --network or --ip.")
+
+        q = session.query(Network)
+        q = q.filter_by(network_environment=dbnet_env)
+        if network:
+            q = q.filter_by(name=network)
+        if ip:
+            q = q.filter_by(ip=ip)
+
+        networks = q.all()
+        if not networks:
+            raise NotFoundException("No matching network was found.")
+
+        dblocation = get_location(session, **arguments)
+
+        for dbnetwork in q.all():
             if type:
-                q = q.filter_by(network_type = type)
-            dblocation = get_location(session, **arguments)
+                dbnetwork.network_type = type
+            if side:
+                dbnetwork.side = side
             if dblocation:
-                q = q.filter_by(location=dblocation)
-            networks.extend(q.all())
-            if len(networks) <= 0:
-                raise NotFoundException("No existing networks found with the "
-                                        "specified network type or location.")
-
-        for net in networks:
-            if discoverable is not None:
-                net.is_discoverable = discoverable
-            if discovered is not None:
-                net.is_discovered = discovered
-            session.add(net)
+                dbnetwork.location = dblocation
+            if comments is not None:
+                if comments.strip() == "":
+                    dbnetwork.comments = None
+                else:
+                    dbnetwork.comments = comments
 
         session.flush()
         return
