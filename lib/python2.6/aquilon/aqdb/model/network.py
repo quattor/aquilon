@@ -88,11 +88,6 @@ class Network(Base):
     ip = Column(IPV4, nullable=False)
     side = Column(AqStr(4), nullable=True, default='a')
 
-    is_discoverable = Column(Boolean(name="%s_is_discoverable_ck" % _TN),
-                             nullable=False, default=False)
-    is_discovered = Column(Boolean(name="%s_is_discovered_ck" % _TN),
-                           nullable=False, default=False)
-
     creation_date = Column(DateTime, default=datetime.now, nullable=False)
     comments = Column(String(255), nullable=True)
 

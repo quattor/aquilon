@@ -42,8 +42,8 @@ class CommandAddNetwork(BrokerCommand):
     required_parameters = ["network", "ip"]
 
     def render(self, session, dbuser,
-               network, ip, network_environment, discovered,
-               discoverable, type, side, comments, logger, **arguments):
+               network, ip, network_environment, type, side, comments, logger,
+               **arguments):
 
         # Handle the different ways of specifying the netmask
         mask_options = ["netmask", "prefixlen", "mask"]
@@ -106,11 +106,6 @@ class CommandAddNetwork(BrokerCommand):
         net = Network(name=network, network=address,
                       network_environment=dbnet_env, network_type=type,
                       side=side, location=location, comments=comments)
-
-        if discoverable is not None:
-            net.is_discoverable = discoverable
-        if discovered is not None:
-            net.is_discovered = discovered
 
         session.add(net)
         session.flush()

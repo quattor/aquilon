@@ -612,8 +612,6 @@
          <optgroup name="show_network_options" fields="any">
             <option name="type" type="string">Network type</option>
             <option name="hosts" type="flag">Hosts</option>
-            <option name="discoverable" type="boolean">Discoverable</option>
-            <option name="discovered" type="boolean">Discovered</option>
          </optgroup>
          <optgroup name="show_network_location_opts" fields="any">
 	    <option name="organization" type="string">Organization</option>
@@ -650,8 +648,6 @@
          <option name="network" type="string">Network name</option>
          <option name="ip" type="ipv4">IP address of the network or contained in the network</option>
          <option name="type" type="string">Network type</option>
-         <option name="discoverable" type="boolean">Discoverable</option>
-         <option name="discovered" type="boolean">Discovered</option>
          <option name="machine" type="string">Networks the machine is attached to</option>
          <option name="fqdn" type="string">Network that contains the IP address for this fully qualified domain name</option>
          <option name="cluster" type="string">Networks in use by the cluster switch</option>
@@ -1340,8 +1336,6 @@
 
       <optgroup name="add_network_modifiers" mandatory="False" fields="any">
          <option name="network_environment" type="string">Network environment (default: internal)</option>
-         <option name="discoverable" type="boolean">Set network(s) updateable</option>
-         <option name="discovered" type="boolean">Set network(s) updated</option>
          <option name="type" type="string">Network type, defaults to 'unknown'</option>
          <option name="side" type="string">Network side, defaults to 'a'</option>
          <option name="comments" type="string">Comments</option>

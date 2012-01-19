@@ -81,7 +81,6 @@ class CommandMergeNetwork(BrokerCommand):
         else:
             # Create a new network, copying the parameters from the one
             # specified on the command line
-            # TODO: what to do with the discovered/discoverable flags?
             dbsuper = Network(name=dbnetwork.name, network=supernet,
                               network_environment=dbnet_env,
                               location=dbnetwork.location,

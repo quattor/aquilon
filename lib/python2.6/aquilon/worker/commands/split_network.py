@@ -120,7 +120,6 @@ class CommandSplitNetwork(BrokerCommand):
                                        "name in a reasonable time, bailing out")
 
             # Inherit location & side from the supernet
-            # TODO: what to do with the discovered/discoverable flags?
             newnet = Network(name=name, network=subnet,
                              network_environment=dbnet_env,
                              location=dbnetwork.location, side=dbnetwork.side,

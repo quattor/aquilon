@@ -159,8 +159,6 @@ class TestAddNetwork(TestBrokerCommand):
             self.matchoutput(out, "Side: a", command)
             self.matchoutput(out, "Network Type: %s" % network.nettype,
                              command)
-            self.matchoutput(out, "Discoverable: False", command)
-            self.matchoutput(out, "Discovered: False", command)
 
     def testshownetworkcomments(self):
         command = "show network --network np06bals03_v103"
