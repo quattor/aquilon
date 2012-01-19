@@ -35,6 +35,7 @@ from aquilon.worker.templates.panutils import pan
 
 LOGGER = logging.getLogger('aquilon.server.templates.resource')
 
+
 class PlenaryResource(Plenary):
     def __init__(self, dbresource, logger=LOGGER):
         Plenary.__init__(self, dbresource, logger=logger)
@@ -66,11 +67,15 @@ class PlenaryResource(Plenary):
         lines.append('"name" = %s;' % pan(self.resource.name))
         lines.append('"eonid" = %s;' % pan(self.resource.eonid))
 
-    def body_reboot_schedule(self, lines):
+    def body_hostlink(self, lines):
         lines.append('"name" = %s;' % pan(self.resource.name))
-        lines.append('"time" = %s;' % pan(self.resource.time))
-        lines.append('"week" = %s;' % pan(self.resource.week))
-        lines.append('"day" = %s;' % pan(self.resource.day))
+        lines.append('"target" = %s;' % pan(self.resource.target))
+        owner_string = '"owner" = %s;'
+        if self.resource.owner_group:
+            lines.append(owner_string % pan(self.resource.owner_user + ':' +
+                                            self.resource.owner_group))
+        else:
+            lines.append(owner_string % pan(self.resource.owner_user))
 
     def body_intervention(self, lines):
         lines.append('"name" = %s;' % pan(self.resource.name))
@@ -89,6 +94,12 @@ class PlenaryResource(Plenary):
         if self.resource.disabled:
             lines.append('"disabled" = %s;' %
                          pan(self.resource.disabled.split(",")))
+
+    def body_reboot_schedule(self, lines):
+        lines.append('"name" = %s;' % pan(self.resource.name))
+        lines.append('"time" = %s;' % pan(self.resource.time))
+        lines.append('"week" = %s;' % pan(self.resource.week))
+        lines.append('"day" = %s;' % pan(self.resource.day))
 
     def body_resourcegroup(self, lines):
         lines.append('"name" = %s;' % pan(self.resource.name))
