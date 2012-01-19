@@ -68,6 +68,13 @@ class TestRefreshNetwork(TestBrokerCommand):
             filtered.append(line)
         return "".join("%s\n" % line for line in filtered)
 
+    def check_network(self, addr, net_name, net_ip, prefix):
+        name = "test-%s.aqd-unittest.ms.com" % addr.replace('.', '-')
+        command = ["show", "address", "--fqdn", name]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Network: %s [%s/%d]" % (net_name, net_ip,
+                                                       prefix), command)
+
     # 100 sync up building np
     def test_100_syncfirst(self):
         command = "refresh network --building np"
@@ -160,6 +167,17 @@ class TestRefreshNetwork(TestBrokerCommand):
                             "--ip", ipnet.ip, "--prefixlen", ipnet.prefixlen,
                             "--building", "nettest"])
 
+    def test_255_add_addresses(self):
+        ips = ["0.1.2.1", "0.1.2.193",
+               "0.1.3.65", "0.1.3.129",
+               "0.1.4.1", "0.1.4.193",
+               "0.1.5.129", "0.1.5.193"]
+        for ip in ips:
+            name = "test-%s.aqd-unittest.ms.com" % ip.replace('.', '-')
+            self.dsdb_expect_add(name, ip)
+            self.noouttest(["add", "address", "--ip", ip, "--fqdn", name])
+        self.dsdb_verify()
+
     def test_260_test_split_merge(self):
         command = ["refresh", "network", "--building", "nettest"]
         (out, err) = self.successtest(command)
@@ -200,6 +218,16 @@ class TestRefreshNetwork(TestBrokerCommand):
         self.matchoutput(err, "Adding router 0.1.5.193 to network split_4",
                          command)
         self.matchoutput(err, "Deleting network 0.1.5.0", command)
+
+    def test_270_check_addresses(self):
+        self.check_network("0.1.2.1", "merge_1", "0.1.2.0", 24)
+        self.check_network("0.1.2.193", "merge_1", "0.1.2.0", 24)
+        self.check_network("0.1.3.65", "merge_2", "0.1.3.0", 24)
+        self.check_network("0.1.3.129", "merge_2", "0.1.3.0", 24)
+        self.check_network("0.1.4.1", "split_1", "0.1.4.0", 25)
+        self.check_network("0.1.4.193", "split_2", "0.1.4.192", 26)
+        self.check_network("0.1.5.129", "split_3", "0.1.5.128", 26)
+        self.check_network("0.1.5.193", "split_4", "0.1.5.192", 26)
 
     # 300 add a small dynamic range to 0.1.1.0
     def test_300_adddynamicrange(self):
@@ -269,6 +297,17 @@ class TestRefreshNetwork(TestBrokerCommand):
             self.dsdb_expect_delete(IPv4Address(ip))
         command = ["del_dynamic_range", "--startip=0.1.1.4", "--endip=0.1.1.8"]
         self.successtest(command)
+        self.dsdb_verify()
+
+    def test_670_cleanup_addresses(self):
+        ips = ["0.1.2.1", "0.1.2.193",
+               "0.1.3.65", "0.1.3.129",
+               "0.1.4.1", "0.1.4.193",
+               "0.1.5.129", "0.1.5.193"]
+        for ip in ips:
+            name = "test-%s.aqd-unittest.ms.com" % ip.replace('.', '-')
+            self.dsdb_expect_delete(ip)
+            self.noouttest(["del", "address", "--ip", ip, "--fqdn", name])
         self.dsdb_verify()
 
     def test_680_cleanup_nettest(self):
