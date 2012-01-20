@@ -389,6 +389,7 @@ class QIPRefresh(object):
                 startip = min(aqnet.ip, qipinfo.address.ip)
                 prefixlen = min(aqnet.cidr, qipinfo.address.prefixlen)
                 supernet = IPv4Network("%s/%s" % (startip, prefixlen))
+                # We may modify aqnet.network below, so save the original value
                 orig_net = aqnet.network
 
                 # Always deleting & possibly recreating aqnet would make things
