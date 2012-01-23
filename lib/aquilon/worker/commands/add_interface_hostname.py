@@ -29,6 +29,6 @@ class CommandAddInterfaceHostname(CommandAddInterfaceMachine):
 
     def render(self, session, hostname, **arguments):
         dbhost = hostname_to_host(session, hostname)
-        arguments['machine'] = dbhost.machine.label
+        arguments['machine'] = dbhost.hardware_entity.label
         return CommandAddInterfaceMachine.render(self, session=session,
                                                  **arguments)

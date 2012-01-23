@@ -316,12 +316,12 @@ class ObjectFormatter(object):
             raise InternalError("add_host_data was called with {0} instead of "
                                 "a Host.".format(host))
         host_msg.type = "host"  # FIXME: is hardcoding this ok?
-        host_msg.hostname = str(host.machine.primary_name.fqdn.name)
-        host_msg.fqdn = str(host.machine.primary_name.fqdn)
-        host_msg.dns_domain = str(host.machine.primary_name.fqdn.dns_domain.name)
-        if host.machine.primary_ip:
-            host_msg.ip = str(host.machine.primary_ip)
-        for iface in host.machine.interfaces:
+        host_msg.hostname = str(host.hardware_entity.primary_name.fqdn.name)
+        host_msg.fqdn = str(host.hardware_entity.primary_name.fqdn)
+        host_msg.dns_domain = str(host.hardware_entity.primary_name.fqdn.dns_domain.name)
+        if host.hardware_entity.primary_ip:
+            host_msg.ip = str(host.hardware_entity.primary_ip)
+        for iface in host.hardware_entity.interfaces:
             if iface.interface_type != 'public' or not iface.bootable:
                 continue
             host_msg.mac = str(iface.mac)
@@ -338,7 +338,7 @@ class ObjectFormatter(object):
         self.add_personality_data(host_msg.personality, host.personality)
         self.add_archetype_data(host_msg.archetype, host.archetype)
         self.add_os_data(host_msg.operating_system, host.operating_system)
-        self.add_hardware_data(host_msg, host.machine)
+        self.add_hardware_data(host_msg, host.hardware_entity)
 
     def add_dns_domain_data(self, dns_domain_msg, dns_domain):
         dns_domain_msg.name = str(dns_domain.name)

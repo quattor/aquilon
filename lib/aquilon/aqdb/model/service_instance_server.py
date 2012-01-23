@@ -39,7 +39,7 @@ class ServiceInstanceServer(Base):
                                                      ondelete='CASCADE'),
                                  nullable=False)
 
-    host_id = Column(Integer, ForeignKey('host.machine_id',
+    host_id = Column(Integer, ForeignKey('host.hardware_entity_id',
                                          name='sis_host_fk',
                                          ondelete='CASCADE'),
                      nullable=False)

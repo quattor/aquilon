@@ -38,7 +38,7 @@ class CommandShowMetaClusterAll(BrokerCommand):
                       joinedload('_clusters.cluster'),
                       subqueryload('_clusters.cluster._hosts'),
                       joinedload('_clusters.cluster._hosts.host'),
-                      joinedload('_clusters.cluster._hosts.host.machine'),
+                      joinedload('_clusters.cluster._hosts.host.hardware_entity'),
                       joinedload('_clusters.cluster.resholder'),
                       subqueryload('_clusters.cluster.resholder.resources'))
         # TODO: eager load virtual machines

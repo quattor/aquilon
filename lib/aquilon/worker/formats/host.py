@@ -37,7 +37,7 @@ class HostFormatter(ObjectFormatter):
             srv_msg.instance = si.name
 
     def format_raw(self, host, indent=""):
-        return self.redirect_raw(host.machine, indent)
+        return self.redirect_raw(host.hardware_entity, indent)
 
 ObjectFormatter.handlers[Host] = HostFormatter()
 
@@ -51,9 +51,9 @@ class GrnHostListFormatter(ListFormatter):
     def format_raw(self, shlist, indent=""):
         details = []
         for host in shlist:
-            if host.machine.primary_name:
+            if host.hardware_entity.primary_name:
                 details.append(indent + "Primary Name: "
-                                        "{0:a}".format(host.machine.primary_name))
+                                        "{0:a}".format(host.hardware_entity.primary_name))
             hstr = "  Owned by {0:c}: {0.grn}".format(host.effective_owner_grn)
 
             if host.effective_owner_grn == host.owner_grn:
@@ -77,7 +77,7 @@ class GrnHostListFormatter(ListFormatter):
     def format_proto(self, hostlist, container):
         for host in hostlist:
             msg = container.hosts.add()
-            msg.hostname = str(host.machine.primary_name)
+            msg.hostname = str(host.hardware_entity.primary_name)
             msg.domain.name = str(host.branch.name)
             msg.domain.owner = str(host.branch.owner.name)
             msg.status = str(host.status.name)
@@ -124,6 +124,6 @@ class HostMachineList(list):
 
 class HostMachineListFormatter(ListFormatter):
     def csv_fields(self, host):
-        return (host.fqdn, host.machine.label)
+        return (host.fqdn, host.hardware_entity.label)
 
 ObjectFormatter.handlers[HostMachineList] = HostMachineListFormatter()

@@ -453,12 +453,12 @@ class HostChooser(Chooser):
             raise InternalError("HostChooser can only choose services for "
                                 "hosts, got %r (%s)" % (dbhost, type(dbhost)))
         super(HostChooser, self).__init__(dbhost, *args, **kwargs)
-        self.location = dbhost.machine.location
+        self.location = dbhost.hardware_entity.location
 
         # If the primary name is a ReservedName, then it does not have a network
         # attribute
-        if hasattr(dbhost.machine.primary_name, 'network'):
-            self.network = dbhost.machine.primary_name.network
+        if hasattr(dbhost.hardware_entity.primary_name, 'network'):
+            self.network = dbhost.hardware_entity.primary_name.network
         else:
             self.network = None
 
@@ -569,7 +569,7 @@ class HostChooser(Chooser):
         # This may be too much action at a distance... however, if
         # we are potentially re-writing a host plenary, it seems like
         # a good idea to also verify and refresh known dependencies.
-        self.plenaries.append(Plenary.get_plenary(self.dbobj.machine))
+        self.plenaries.append(Plenary.get_plenary(self.dbobj.hardware_entity))
         if self.dbobj.resholder:
             for dbres in self.dbobj.resholder.resources:
                 self.plenaries.append(Plenary.get_plenary(dbres))

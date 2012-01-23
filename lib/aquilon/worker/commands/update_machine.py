@@ -219,7 +219,7 @@ class CommandUpdateMachine(BrokerCommand):
                 dbmachine.location = new_holder.location_constraint
             else:
                 # vmhost
-                dbmachine.location = new_holder.machine.location
+                dbmachine.location = new_holder.hardware_entity.location
 
         session.flush()
 

@@ -132,7 +132,7 @@ class PlenaryHostData(StructurePlenary):
         default_gateway = None
 
         # FIXME: Enforce that one of the interfaces is marked boot?
-        for dbinterface in self.dbobj.machine.interfaces:
+        for dbinterface in self.dbobj.hardware_entity.interfaces:
             # Management interfaces are not configured at the host level
             if dbinterface.interface_type == 'management':
                 continue
@@ -172,7 +172,7 @@ class PlenaryHostData(StructurePlenary):
 
                 if addr.label == "":
                     if net.routers:
-                        local_rtrs = select_routers(self.dbobj.machine,
+                        local_rtrs = select_routers(self.dbobj.hardware_entity,
                                                     net.routers)
                         gateway = local_rtrs[0]
                         if is_default_route(dbinterface):
@@ -223,13 +223,13 @@ class PlenaryHostData(StructurePlenary):
             interfaces[dbinterface.name] = ifdesc
 
         # Okay, here's the real content
-        path = PlenaryMachineInfo.template_name(self.dbobj.machine)
+        path = PlenaryMachineInfo.template_name(self.dbobj.hardware_entity)
         pan_assign(lines, "hardware", StructureTemplate(path))
 
         lines.append("")
         pan_assign(lines, "system/network/interfaces", interfaces)
         pan_assign(lines, "system/network/primary_ip",
-                   self.dbobj.machine.primary_ip)
+                   self.dbobj.hardware_entity.primary_ip)
         if default_gateway:
             pan_assign(lines, "system/network/default_gateway",
                        default_gateway)
@@ -323,7 +323,7 @@ class PlenaryToplevelHost(ObjectPlenary):
         arch = pers.archetype
 
         # FIXME: Enforce that one of the interfaces is marked boot?
-        for dbinterface in self.dbobj.machine.interfaces:
+        for dbinterface in self.dbobj.hardware_entity.interfaces:
             # Management interfaces are not configured at the host level
             if dbinterface.interface_type == 'management':
                 continue

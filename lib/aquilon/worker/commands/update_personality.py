@@ -131,7 +131,7 @@ class CommandUpdatePersonality(BrokerCommand):
         # pre-load everything
         q = q.options(subqueryload('_hosts'),
                       joinedload('_hosts.host'),
-                      joinedload('_hosts.host.machine'),
+                      joinedload('_hosts.host.hardware_entity'),
                       joinedload('resholder'),
                       subqueryload('resholder.resources'))
         # TODO: preload virtual machines

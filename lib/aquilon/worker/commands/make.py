@@ -36,10 +36,6 @@ class CommandMake(BrokerCommand):
                **arguments):
         dbhost = hostname_to_host(session, hostname)
 
-        # Currently, for the Host to be created it *must* be associated with
-        # a Machine already.  If that ever changes, need to check here and
-        # bail if dbhost.machine does not exist.
-
         if archetype and archetype != dbhost.archetype.name:
             if not personality:
                 raise ArgumentError("Changing archetype also requires "

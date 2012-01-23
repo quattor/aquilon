@@ -81,7 +81,7 @@ class CommandAddMachine(BrokerCommand):
             if cluster:
                 container_loc = vmholder.holder_object.location_constraint
             else:
-                container_loc = vmholder.holder_object.machine.location
+                container_loc = vmholder.holder_object.hardware_entity.location
 
             if dblocation and dblocation != container_loc:
                 raise ArgumentError("Cannot override container location {0} "

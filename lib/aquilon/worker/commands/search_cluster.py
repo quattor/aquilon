@@ -124,7 +124,7 @@ class CommandSearchCluster(BrokerCommand):
                 q = q.filter(Cluster.location_constraint_id.in_(childids))
         dblocation = get_location(session, **location_args['member_'])
         if dblocation:
-            q = q.join('_hosts', 'host', 'machine')
+            q = q.join('_hosts', 'host', 'hardware_entity')
             if location_args['member_']['exact_location']:
                 q = q.filter_by(location=dblocation)
             else:

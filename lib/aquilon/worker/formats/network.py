@@ -174,11 +174,12 @@ class NetworkFormatter(ObjectFormatter):
             # TODO: once we refactor Host to be an FK to HardwareEntity instead
             # of Machine, this could be converted to a single joinedload('host')
             q = session.query(Host)
-            q = q.options(lazyload('machine'))
-            q = q.filter(Host.machine_id.in_(hw_ids))
+            q = q.options(lazyload('hardware_entity'))
+            q = q.filter(Host.hardware_entity_id.in_(hw_ids))
             for host in q.all():
-                set_committed_value(hwent_by_id[host.machine_id], "host", host)
-                set_committed_value(host, "machine", hwent_by_id[host.machine_id])
+                set_committed_value(hwent_by_id[host.hardware_entity_id], "host", host)
+                set_committed_value(host, "hardware_entity",
+                                    hwent_by_id[host.hardware_entity_id])
 
         # Add interfaces that have addresses in this network
         for addr in net.assignments:

@@ -160,10 +160,10 @@ def update_cluster_location(session, logger, dbcluster,
 
         if dbcluster.cluster_type != 'meta':
             for host in dbcluster.hosts:
-                if host.machine.location != dblocation and \
-                   dblocation not in host.machine.location.parents:
+                if host.hardware_entity.location != dblocation and \
+                   dblocation not in host.hardware_entity.location.parents:
                     errors.append("{0} has location {1}."
-                                  .format(host, host.machine.location))
+                                  .format(host, host.hardware_entity.location))
         else:
             for cluster in dbcluster.members:
                 if cluster.location_constraint != dblocation and \

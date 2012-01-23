@@ -199,11 +199,11 @@ class Cluster(Base):
         return mach
 
     def validate_membership(self, host, error=ArgumentError, **kwargs):
-        if host.machine.location != self.location_constraint and \
+        if host.hardware_entity.location != self.location_constraint and \
                 self.location_constraint not in \
-                host.machine.location.parents:
+                host.hardware_entity.location.parents:
             raise error("Host location {0} is not within cluster "
-                        "location {1}.".format(host.machine.location,
+                        "location {1}.".format(host.hardware_entity.location,
                                                self.location_constraint))
 
         if host.branch != self.branch or \
@@ -219,7 +219,7 @@ class Cluster(Base):
         q = session.query(HostClusterMember)
         q = q.filter_by(cluster=self)
         q = q.options(joinedload('host'),
-                      joinedload('host.machine'))
+                      joinedload('host.hardware_entity'))
         members = q.all()
         set_committed_value(self, '_hosts', members)
 
@@ -365,9 +365,9 @@ class EsxCluster(Cluster):
         location = None
         for host in self.hosts:
             if location:
-                location = location.merge(host.machine.location)
+                location = location.merge(host.hardware_entity.location)
             else:
-                location = host.machine.location
+                location = host.hardware_entity.location
         return location
 
     @property
@@ -408,7 +408,7 @@ class EsxCluster(Cluster):
         for host in self.hosts:
             # This is the list of variables we want to pass to the capacity
             # function
-            local_vars = {'memory': host.machine.memory}
+            local_vars = {'memory': host.hardware_entity.memory}
             if func:
                 rec = eval(func, global_vars, local_vars)
             else:
@@ -564,7 +564,7 @@ class HostClusterMember(Base):
                         #if the cluster is deleted, so is membership
                         nullable=False)
 
-    host_id = Column(Integer, ForeignKey('host.machine_id',
+    host_id = Column(Integer, ForeignKey('host.hardware_entity_id',
                                          name='hst_clstr_mmbr_hst_fk',
                                          ondelete='CASCADE'),
                      #if the host is deleted, so is the membership

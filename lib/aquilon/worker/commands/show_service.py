@@ -57,7 +57,7 @@ class CommandShowService(BrokerCommand):
             q = q.options(subqueryload('instances.personality_service_map'))
             q = q.options(subqueryload('instances.servers'))
             q = q.options(joinedload('instances.servers.host'))
-            q = q.options(joinedload('instances.servers.host.machine'))
+            q = q.options(joinedload('instances.servers.host.hardware_entity'))
             q = q.options(subqueryload('instances.service_map'))
             q = q.options(joinedload('instances.service_map.location'))
             q = q.options(subqueryload('instances.personality_service_map'))

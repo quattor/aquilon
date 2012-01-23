@@ -26,7 +26,8 @@ from aquilon.aqdb.model import (Host, Cluster, Archetype, Personality,
                                 Share, VirtualNasDisk, Disk, Machine, Model,
                                 DnsRecord, ARecord, Fqdn, DnsDomain, Interface,
                                 AddressAssignment, NetworkEnvironment, Network,
-                                MetaCluster, VirtualMachine, ClusterResource)
+                                MetaCluster, VirtualMachine, ClusterResource,
+                                HardwareEntity)
 from aquilon.aqdb.model.dns_domain import parse_fqdn
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.formats.list import StringAttributeList
@@ -56,22 +57,22 @@ class CommandSearchHost(BrokerCommand):
 
         if machine:
             dbmachine = Machine.get_unique(session, machine, compel=True)
-            q = q.filter_by(machine=dbmachine)
+            q = q.filter_by(hardware_entity=dbmachine)
 
         # Add the machine definition and the primary name. Use aliases to make
         # sure the end result will be ordered by primary name.
         PriDns = aliased(DnsRecord)
         PriFqdn = aliased(Fqdn)
         PriDomain = aliased(DnsDomain)
-        q = q.join(Machine,
+        q = q.join(HardwareEntity,
                    (PriDns, PriDns.id == Machine.primary_name_id),
                    (PriFqdn, PriDns.fqdn_id == PriFqdn.id),
                    (PriDomain, PriFqdn.dns_domain_id == PriDomain.id))
         q = q.order_by(PriFqdn.name, PriDomain.name)
-        q = q.options(contains_eager('machine'),
-                      contains_eager('machine.primary_name', alias=PriDns),
-                      contains_eager('machine.primary_name.fqdn', alias=PriFqdn),
-                      contains_eager('machine.primary_name.fqdn.dns_domain',
+        q = q.options(contains_eager('hardware_entity'),
+                      contains_eager('hardware_entity.primary_name', alias=PriDns),
+                      contains_eager('hardware_entity.primary_name.fqdn', alias=PriFqdn),
+                      contains_eager('hardware_entity.primary_name.fqdn.dns_domain',
                                      alias=PriDomain))
         q = q.reset_joinpoint()
 
@@ -79,22 +80,22 @@ class CommandSearchHost(BrokerCommand):
         dblocation = get_location(session, **arguments)
         if dblocation:
             if exact_location:
-                q = q.filter(Machine.location == dblocation)
+                q = q.filter(HardwareEntity.location == dblocation)
             else:
                 childids = dblocation.offspring_ids()
-                q = q.filter(Machine.location_id.in_(childids))
+                q = q.filter(HardwareEntity.location_id.in_(childids))
 
         if model or vendor or machine_type:
             subq = Model.get_matching_query(session, name=model, vendor=vendor,
                                             machine_type=machine_type,
                                             compel=True)
-            q = q.filter(Machine.model_id.in_(subq))
+            q = q.filter(HardwareEntity.model_id.in_(subq))
 
         if serial:
             self.deprecated_option("serial",
                                    "Please use search machine --serial instead.",
                                    logger=logger, **arguments)
-            q = q.filter(Machine.serial_no == serial)
+            q = q.filter(HardwareEntity.serial_no == serial)
 
         # DNS IP address related filters
         if mac or ip or networkip or hostname or dns_domain or shortname:
@@ -240,7 +241,8 @@ class CommandSearchHost(BrokerCommand):
             # TODO: this does not handle metaclusters according to Wes
             dbcluster = Cluster.get_unique(session, guest_on_cluster,
                                            compel=True)
-            q = q.join('machine', VirtualMachine, ClusterResource)
+            q = q.join(Host.hardware_entity.of_type(Machine),
+                       VirtualMachine, ClusterResource)
             q = q.filter_by(cluster=dbcluster)
             q = q.reset_joinpoint()
         if guest_on_share:
@@ -251,7 +253,8 @@ class CommandSearchHost(BrokerCommand):
                                         .format(guest_on_share))
 
             NasAlias = aliased(VirtualNasDisk)
-            q = q.join('machine', 'disks', (NasAlias, NasAlias.id == Disk.id))
+            q = q.join(Host.hardware_entity.of_type(Machine),
+                       Disk, (NasAlias, NasAlias.id == Disk.id))
             q = q.filter(
                 NasAlias.share_id.in_(map(lambda s: s[0], v2shares)))
             q = q.reset_joinpoint()

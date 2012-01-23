@@ -313,9 +313,9 @@ class CommandFlush(BrokerCommand):
                 cnt = session.query(Host).count()
                 idx = 0
                 q = session.query(Host)
-                q = q.options(joinedload("machine"),
-                              joinedload("machine.primary_name"),
-                              joinedload("machine.primary_name.fqdn"),
+                q = q.options(joinedload("hardware_entity"),
+                              joinedload("hardware_entity.primary_name"),
+                              joinedload("hardware_entity.primary_name.fqdn"),
                               subqueryload("_grns"),
                               joinedload("resholder"),
                               subqueryload("resholder.resources"),
@@ -338,8 +338,8 @@ class CommandFlush(BrokerCommand):
 
                     # TODO: this is redundant when machines are flushed as well,
                     # but should not hurt
-                    set_committed_value(h.machine, 'interfaces',
-                                        interfaces_by_hwent.get(h.machine.id, None))
+                    set_committed_value(h.hardware_entity, 'interfaces',
+                                        interfaces_by_hwent.get(h.hardware_entity.id, None))
 
                     try:
                         plenary_host = Plenary.get_plenary(h, logger=logger)
@@ -356,7 +356,7 @@ class CommandFlush(BrokerCommand):
                 q = q.with_polymorphic('*')
                 q = q.options(subqueryload('_hosts'),
                               joinedload('_hosts.host'),
-                              joinedload('_hosts.host.machine'),
+                              joinedload('_hosts.host.hardware_entity'),
                               subqueryload('_metacluster'),
                               joinedload('_metacluster.metacluster'),
                               joinedload('resholder'),

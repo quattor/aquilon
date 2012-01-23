@@ -30,7 +30,7 @@ from sqlalchemy.orm import (relation, contains_eager, column_property, backref,
 from sqlalchemy.sql import select, func, or_
 
 from aquilon.aqdb.model import (Base, Service, Host, DnsRecord, DnsDomain,
-                                Machine, Fqdn)
+                                HardwareEntity, Fqdn)
 from aquilon.aqdb.column_types.aqstr import AqStr
 
 _TN = 'service_instance'
@@ -119,7 +119,7 @@ class ServiceInstance(Base):
     def client_fqdns(self):
         session = object_session(self)
         q = session.query(DnsRecord)
-        q = q.join(Machine, Host)
+        q = q.join(HardwareEntity, Host)
         q = q.filter(Host.services_used.contains(self))
         q = q.reset_joinpoint()
         # Due to aliases we have to explicitely tell how do we link to Fqdn
@@ -134,7 +134,7 @@ class ServiceInstance(Base):
         from aquilon.aqdb.model import ServiceInstanceServer
         session = object_session(self)
         q = session.query(DnsRecord)
-        q = q.join(Machine, Host, ServiceInstanceServer)
+        q = q.join(HardwareEntity, Host, ServiceInstanceServer)
         q = q.filter_by(service_instance=self)
         q = q.reset_joinpoint()
         # Due to aliases we have to explicitely tell how do we link to Fqdn
@@ -149,7 +149,7 @@ class ServiceInstance(Base):
         from aquilon.aqdb.model import ServiceInstanceServer
         session = object_session(self)
         q = session.query(DnsRecord)
-        q = q.join(Machine, Host, ServiceInstanceServer)
+        q = q.join(HardwareEntity, Host, ServiceInstanceServer)
         q = q.filter_by(service_instance=self)
         q = q.reset_joinpoint()
         # Due to aliases we have to explicitely tell how do we link to Fqdn
@@ -255,7 +255,7 @@ class BuildItem(Base):
     """ Identifies the service_instance bindings of a machine. """
     __tablename__ = 'build_item'
 
-    host_id = Column('host_id', Integer, ForeignKey('host.machine_id',
+    host_id = Column('host_id', Integer, ForeignKey('host.hardware_entity_id',
                                                     ondelete='CASCADE',
                                                     name='build_item_host_fk'),
                      nullable=False)

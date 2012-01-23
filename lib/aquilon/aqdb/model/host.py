@@ -23,7 +23,7 @@ from sqlalchemy import (Integer, Boolean, DateTime, String, Column, ForeignKey,
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import relation, backref, deferred
 
-from aquilon.aqdb.model import (Base, Branch, Machine, HostLifecycle, Grn,
+from aquilon.aqdb.model import (Base, Branch, HardwareEntity, HostLifecycle, Grn,
                                 Personality, OperatingSystem, UserPrincipal)
 
 from aquilon.aqdb.column_types import AqStr
@@ -58,9 +58,9 @@ class Host(Base):
     __tablename__ = _TN
     _instance_label = 'fqdn'
 
-    machine_id = Column(Integer, ForeignKey('machine.machine_id',
-                                            name='host_machine_fk'),
-                        primary_key=True)
+    hardware_entity_id = Column(Integer, ForeignKey('hardware_entity.id',
+                                                    name='host_hwent_fk'),
+                                primary_key=True)
 
     branch_id = Column(Integer, ForeignKey('branch.id',
                                            name='host_branch_fk'),
@@ -96,13 +96,11 @@ class Host(Base):
 
     comments = Column(String(255), nullable=True)
 
-    # Deletion of a machine deletes the host. When this is 'machine profile'
-    # this should no longer be the case as it will be many to one as opposed to
-    # one to one as it stands now.
     # This is a one-to-one relation, so we need uselist=False on the backref
-    machine = relation(Machine, lazy=False, innerjoin=True,
-                       backref=backref('host', uselist=False, lazy=False,
-                                       cascade='all, delete-orphan'))
+    hardware_entity = relation(HardwareEntity, lazy=False, innerjoin=True,
+                               backref=backref('host', uselist=False,
+                                               lazy=False,
+                                               cascade='all, delete-orphan'))
 
     branch = relation(Branch, innerjoin=True, backref='hosts')
     sandbox_author = relation(UserPrincipal)
@@ -117,7 +115,7 @@ class Host(Base):
 
     @property
     def fqdn(self):
-        return self.machine.fqdn
+        return self.hardware_entity.fqdn
 
     @property
     def archetype(self):
@@ -170,7 +168,7 @@ class Host(Base):
 class HostGrnMap(Base):
     __tablename__ = _HOSTGRN
 
-    host_id = Column(Integer, ForeignKey("%s.machine_id" % _TN,
+    host_id = Column(Integer, ForeignKey("%s.hardware_entity_id" % _TN,
                                          name="%s_host_fk" % _HOSTGRN,
                                          ondelete="CASCADE"),
                      nullable=False)
