@@ -126,6 +126,13 @@ class Ready(ClusterLifecycle):
             if dbhost.status.name == 'almostready':
                 dbhost.status.transition(dbhost, dbready)
 
+    def onLeave(self, dbcluster):
+        dbalmostready = HostLifecycle.get_unique(object_session(dbcluster),
+                                                 "almostready", compel=True)
+        for dbhost in dbcluster.hosts:
+            if dbhost.status.name == 'ready':
+                dbhost.status.transition(dbhost, dbalmostready)
+
 
 class Rebuild(ClusterLifecycle):
     __mapper_args__ = {'polymorphic_identity': 'rebuild'}
