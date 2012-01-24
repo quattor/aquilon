@@ -40,7 +40,6 @@ class PlenaryResource(Plenary):
     def __init__(self, dbresource, logger=LOGGER):
         Plenary.__init__(self, dbresource, logger=logger)
         self.type = dbresource.resource_type
-        self.resource = dbresource
         self.name = dbresource.name
         self.plenary_core = dbresource.template_base
         self.plenary_template = self.plenary_core + "/config"
@@ -52,59 +51,59 @@ class PlenaryResource(Plenary):
             getattr(self, fname)(lines)
 
     def body_filesystem(self, lines):
-        lines.append('"type" = %s;' % pan(self.resource.fstype))
-        lines.append('"mountpoint" = %s;' % pan(self.resource.mountpoint))
-        lines.append('"mount" = %s;' % pan(self.resource.mount))
-        lines.append('"block_device_path" = %s;' % pan(self.resource.blockdev))
+        lines.append('"type" = %s;' % pan(self.dbobj.fstype))
+        lines.append('"mountpoint" = %s;' % pan(self.dbobj.mountpoint))
+        lines.append('"mount" = %s;' % pan(self.dbobj.mount))
+        lines.append('"block_device_path" = %s;' % pan(self.dbobj.blockdev))
         opts = ""
-        if self.resource.mountoptions:
-            opts = self.resource.mountoptions
+        if self.dbobj.mountoptions:
+            opts = self.dbobj.mountoptions
         lines.append('"mountopts" = %s;' % pan(opts))
-        lines.append('"freq" = %s;' % pan(self.resource.dumpfreq))
-        lines.append('"pass" = %s;' % pan(self.resource.passno))
+        lines.append('"freq" = %s;' % pan(self.dbobj.dumpfreq))
+        lines.append('"pass" = %s;' % pan(self.dbobj.passno))
 
     def body_application(self, lines):
-        lines.append('"name" = %s;' % pan(self.resource.name))
-        lines.append('"eonid" = %s;' % pan(self.resource.eonid))
+        lines.append('"name" = %s;' % pan(self.dbobj.name))
+        lines.append('"eonid" = %s;' % pan(self.dbobj.eonid))
 
     def body_hostlink(self, lines):
-        lines.append('"name" = %s;' % pan(self.resource.name))
-        lines.append('"target" = %s;' % pan(self.resource.target))
+        lines.append('"name" = %s;' % pan(self.dbobj.name))
+        lines.append('"target" = %s;' % pan(self.dbobj.target))
         owner_string = '"owner" = %s;'
-        if self.resource.owner_group:
-            lines.append(owner_string % pan(self.resource.owner_user + ':' +
-                                            self.resource.owner_group))
+        if self.dbobj.owner_group:
+            lines.append(owner_string % pan(self.dbobj.owner_user + ':' +
+                                            self.dbobj.owner_group))
         else:
-            lines.append(owner_string % pan(self.resource.owner_user))
+            lines.append(owner_string % pan(self.dbobj.owner_user))
 
     def body_intervention(self, lines):
-        lines.append('"name" = %s;' % pan(self.resource.name))
+        lines.append('"name" = %s;' % pan(self.dbobj.name))
         lines.append('"start" = %s;' %
-                     pan(self.resource.start_date.isoformat()))
+                     pan(self.dbobj.start_date.isoformat()))
         lines.append('"expiry" = %s;' %
-                     pan(self.resource.expiry_date.isoformat()))
+                     pan(self.dbobj.expiry_date.isoformat()))
 
-        if self.resource.users:
+        if self.dbobj.users:
             lines.append('"users" = %s;' %
-                         pan(self.resource.users.split(",")))
-        if self.resource.groups:
+                         pan(self.dbobj.users.split(",")))
+        if self.dbobj.groups:
             lines.append('"groups" = %s;' %
-                         pan(self.resource.groups.split(",")))
+                         pan(self.dbobj.groups.split(",")))
 
-        if self.resource.disabled:
+        if self.dbobj.disabled:
             lines.append('"disabled" = %s;' %
-                         pan(self.resource.disabled.split(",")))
+                         pan(self.dbobj.disabled.split(",")))
 
     def body_reboot_schedule(self, lines):
-        lines.append('"name" = %s;' % pan(self.resource.name))
-        lines.append('"time" = %s;' % pan(self.resource.time))
-        lines.append('"week" = %s;' % pan(self.resource.week))
-        lines.append('"day" = %s;' % pan(self.resource.day))
+        lines.append('"name" = %s;' % pan(self.dbobj.name))
+        lines.append('"time" = %s;' % pan(self.dbobj.time))
+        lines.append('"week" = %s;' % pan(self.dbobj.week))
+        lines.append('"day" = %s;' % pan(self.dbobj.day))
 
     def body_resourcegroup(self, lines):
-        lines.append('"name" = %s;' % pan(self.resource.name))
+        lines.append('"name" = %s;' % pan(self.dbobj.name))
 
     def body_reboot_iv(self, lines):
-        lines.append('"name" = %s;' % pan(self.resource.name))
-        lines.append('"justification" = %s;' % pan(self.resource.justification))
+        lines.append('"name" = %s;' % pan(self.dbobj.name))
+        lines.append('"justification" = %s;' % pan(self.dbobj.justification))
         self.body_intervention(lines)

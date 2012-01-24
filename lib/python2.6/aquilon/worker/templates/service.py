@@ -43,6 +43,7 @@ class PlenaryService(PlenaryCollection):
     """
     def __init__(self, dbservice, logger=LOGGER):
         PlenaryCollection.__init__(self, logger=logger)
+        self.dbobj = dbservice
         self.plenaries.append(PlenaryServiceToplevel(dbservice, logger=logger))
         self.plenaries.append(PlenaryServiceClientDefault(dbservice,
                                                           logger=logger))
@@ -139,7 +140,6 @@ class PlenaryServiceInstanceToplevel(Plenary):
     """
     def __init__(self, dbservice, dbinstance, logger=LOGGER):
         Plenary.__init__(self, dbinstance, logger=logger)
-        self.dbinstance = dbinstance
         self.service = dbservice.name
         self.name = dbinstance.name
         self.plenary_core = "servicedata/%(service)s/%(name)s" % self.__dict__
@@ -151,9 +151,9 @@ class PlenaryServiceInstanceToplevel(Plenary):
         lines.append("include { 'servicedata/%(service)s/config' };" % self.__dict__)
         lines.append("")
         lines.append('"instance" = %s;' % pan(self.name))
-        lines.append('"servers" = %s;' % pan(self.dbinstance.server_fqdns))
+        lines.append('"servers" = %s;' % pan(self.dbobj.server_fqdns))
         if self.service == 'dns':
-            lines.append('"server_ips" = %s;' % pan(self.dbinstance.server_ips))
+            lines.append('"server_ips" = %s;' % pan(self.dbobj.server_ips))
 
 
 class PlenaryServiceInstanceServer(Plenary):
@@ -167,7 +167,6 @@ class PlenaryServiceInstanceServer(Plenary):
     """
     def __init__(self, dbservice, dbinstance, logger=LOGGER):
         Plenary.__init__(self, dbinstance, logger=logger)
-        self.dbinstance = dbinstance
         self.service = dbservice.name
         self.name = dbinstance.name
         self.plenary_core = "servicedata/%(service)s/%(name)s" % self.__dict__
@@ -177,7 +176,7 @@ class PlenaryServiceInstanceServer(Plenary):
 
     def body(self, lines):
         lines.append('"instance" = %s;' % pan(self.name))
-        lines.append('"clients" = %s;' % pan(self.dbinstance.client_fqdns))
+        lines.append('"clients" = %s;' % pan(self.dbobj.client_fqdns))
 
 
 class PlenaryServiceInstanceClientDefault(Plenary):

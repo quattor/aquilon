@@ -102,6 +102,7 @@ class PlenaryHost(PlenaryCollection):
             raise InternalError("PlenaryHost called with %s instead of Host" %
                                 dbhost.__class__.name)
         PlenaryCollection.__init__(self, logger=logger)
+        self.dbobj = dbhost
         self.config = Config()
         if self.config.getboolean("broker", "namespaced_host_profiles"):
             self.plenaries.append(PlenaryNamespacedHost(dbhost, logger=logger))
@@ -124,7 +125,6 @@ class PlenaryToplevelHost(Plenary):
     """
     def __init__(self, dbhost, logger=LOGGER):
         Plenary.__init__(self, dbhost, logger=logger)
-        self.dbhost = dbhost
         # Store the branch separately so get_key() works even after the dbhost
         # object has been deleted
         self.branch = dbhost.branch.name
@@ -162,11 +162,11 @@ class PlenaryToplevelHost(Plenary):
         default_gateway = None
         iface_features = {}
 
-        pers = self.dbhost.personality
+        pers = self.dbobj.personality
         arch = pers.archetype
 
         # FIXME: Enforce that one of the interfaces is marked boot?
-        for dbinterface in self.dbhost.machine.interfaces:
+        for dbinterface in self.dbobj.machine.interfaces:
             # Management interfaces are not configured at the host level
             if dbinterface.interface_type == 'management':
                 continue
@@ -232,7 +232,7 @@ class PlenaryToplevelHost(Plenary):
 
                 if addr.label == "":
                     if net.routers:
-                        local_rtrs = select_routers(self.dbhost.machine, net.routers)
+                        local_rtrs = select_routers(self.dbobj.machine, net.routers)
                         gateway = local_rtrs[0]
                         if is_default_route(dbinterface):
                             routers[dbinterface.name] = local_rtrs
@@ -281,13 +281,13 @@ class PlenaryToplevelHost(Plenary):
             interfaces[dbinterface.name] = ifdesc
 
         personality_template = "personality/%s/config" % \
-                self.dbhost.personality.name
-        os_template = self.dbhost.operating_system.cfg_path + '/config'
+                self.dbobj.personality.name
+        os_template = self.dbobj.operating_system.cfg_path + '/config'
 
         services = []
         required_services = set(arch.services + pers.services)
 
-        for si in self.dbhost.services_used:
+        for si in self.dbobj.services_used:
             required_services.discard(si.service)
             services.append(si.cfg_path + '/client/config')
         if required_services:
@@ -295,7 +295,7 @@ class PlenaryToplevelHost(Plenary):
                                   (self.name, required_services))
 
         provides = []
-        for si in self.dbhost.services_provided:
+        for si in self.dbobj.services_provided:
             provides.append('%s/server/config' % si.cfg_path)
 
         # Ensure used/provided services have a stable order
@@ -306,7 +306,7 @@ class PlenaryToplevelHost(Plenary):
         templates.append("archetype/base")
         templates.append(os_template)
 
-        for feature in model_features(self.dbhost.machine.model, arch, pers):
+        for feature in model_features(self.dbobj.machine.model, arch, pers):
             templates.append("%s/config" % feature.cfg_path)
 
         templates.extend(services)
@@ -318,8 +318,8 @@ class PlenaryToplevelHost(Plenary):
 
         templates.append(personality_template)
 
-        if self.dbhost.cluster:
-            clplenary = PlenaryClusterClient(self.dbhost.cluster)
+        if self.dbobj.cluster:
+            clplenary = PlenaryClusterClient(self.dbobj.cluster)
             templates.append(clplenary.plenary_template)
         elif pers.cluster_required:
             raise IncompleteError("Host %s personality %s requires cluster "
@@ -330,7 +330,7 @@ class PlenaryToplevelHost(Plenary):
 
         templates.append("archetype/final")
 
-        eon_id_set = set([grn.eon_id for grn in self.dbhost.grns])
+        eon_id_set = set([grn.eon_id for grn in self.dbobj.grns])
         eon_id_set |= set([grn.eon_id for grn in pers.grns])
         eon_id_list = list(eon_id_set)
         eon_id_list.sort()
@@ -343,14 +343,14 @@ class PlenaryToplevelHost(Plenary):
         lines.append("include { 'pan/units' };")
         lines.append("include { 'pan/functions' };")
         lines.append("")
-        pmachine = PlenaryMachineInfo(self.dbhost.machine)
+        pmachine = PlenaryMachineInfo(self.dbobj.machine)
         lines.append("'/hardware' = %s;" %
                      pan(StructureTemplate(pmachine.plenary_template)))
 
         lines.append("")
         lines.append("'/system/network/interfaces' = %s;" % pan(interfaces))
         lines.append("'/system/network/primary_ip' = %s;" %
-                     pan(self.dbhost.machine.primary_ip))
+                     pan(self.dbobj.machine.primary_ip))
         if default_gateway:
             lines.append("'/system/network/default_gateway' = %s;" %
                          pan(default_gateway))
@@ -367,14 +367,14 @@ class PlenaryToplevelHost(Plenary):
                 lines.append('include { "%s/config" };' % feature.cfg_path)
             lines.append("")
 
-        lines.append("'/system/build' = %s;" % pan(self.dbhost.status.name))
-        lines.append("'/system/advertise_status' = %s;" % pan(self.dbhost.advertise_status))
+        lines.append("'/system/build' = %s;" % pan(self.dbobj.status.name))
+        lines.append("'/system/advertise_status' = %s;" % pan(self.dbobj.advertise_status))
         if eon_id_list:
             lines.append('"/system/eon_ids" = %s;' % pan(eon_id_list))
-        if self.dbhost.cluster:
-            lines.append("'/system/cluster/name' = %s;" % pan(self.dbhost.cluster.name))
+        if self.dbobj.cluster:
+            lines.append("'/system/cluster/name' = %s;" % pan(self.dbobj.cluster.name))
         lines.append("")
-        for resource in sorted(self.dbhost.resources):
+        for resource in sorted(self.dbobj.resources):
             lines.append("'/system/resources/%s' = push(%s);" % (
                          resource.resource_type,
                          pan(StructureTemplate(resource.template_base +
@@ -389,8 +389,8 @@ class PlenaryToplevelHost(Plenary):
     def write(self, *args, **kwargs):
         # Don't bother writing plenary files for dummy aurora hardware or for
         # non-compilable archetypes.
-        if self.dbhost.machine.model.machine_type == 'aurora_node' or \
-           not self.dbhost.archetype.is_compileable:
+        if self.dbobj.machine.model.machine_type == 'aurora_node' or \
+           not self.dbobj.archetype.is_compileable:
             return 0
         return Plenary.write(self, *args, **kwargs)
 

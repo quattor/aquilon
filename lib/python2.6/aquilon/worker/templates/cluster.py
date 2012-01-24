@@ -45,6 +45,7 @@ class PlenaryCluster(PlenaryCollection):
     """
     def __init__(self, dbcluster, logger=LOGGER):
         PlenaryCollection.__init__(self, logger=LOGGER)
+        self.dbobj = dbcluster
         self.plenaries.append(PlenaryClusterObject(dbcluster, logger=logger))
         self.plenaries.append(PlenaryClusterClient(dbcluster, logger=logger))
 
@@ -59,7 +60,6 @@ class PlenaryClusterObject(Plenary):
     def __init__(self, dbcluster, logger=LOGGER):
         Plenary.__init__(self, dbcluster, logger=logger)
         self.template_type = 'object'
-        self.dbcluster = dbcluster
         self.name = dbcluster.name
         self.metacluster = "global"
         if dbcluster.metacluster:
@@ -70,11 +70,11 @@ class PlenaryClusterObject(Plenary):
                     "/domains/%s/profiles" % dbcluster.branch.name
 
     def get_key(self):
-        return CompileKey(domain=self.dbcluster.branch.name,
+        return CompileKey(domain=self.dbobj.branch.name,
                           profile=self.plenary_template, logger=self.logger)
 
     def body(self, lines):
-        arcdir = self.dbcluster.personality.archetype.name
+        arcdir = self.dbobj.personality.archetype.name
         lines.append("# this is an %s cluster, so all templates "
                      "should be sourced from there" % arcdir)
         lines.append("variable LOADPATH = %s;" % pan([arcdir]))
@@ -85,9 +85,9 @@ class PlenaryClusterObject(Plenary):
         lines.append("")
         lines.append('"/system/cluster/name" = %s;' % pan(self.name))
         lines.append('"/system/cluster/type" = %s;' %
-                        pan(self.dbcluster.cluster_type))
+                        pan(self.dbobj.cluster_type))
 
-        dbloc = self.dbcluster.location_constraint
+        dbloc = self.dbobj.location_constraint
         lines.append('"/system/cluster/sysloc/location" = %s;' %
                      pan(dbloc.sysloc()))
         if dbloc.continent:
@@ -115,21 +115,21 @@ class PlenaryClusterObject(Plenary):
                          pan(dbloc.rack.name))
 
         lines.append('"/system/cluster/down_hosts_threshold" = %d;' %
-                     self.dbcluster.dht_value)
-        dmt_value = self.dbcluster.dmt_value
+                     self.dbobj.dht_value)
+        dmt_value = self.dbobj.dmt_value
         if (dmt_value is not None):
             lines.append('"/system/cluster/down_maint_threshold" = %d;' %
                          dmt_value)
-        if (self.dbcluster.down_hosts_percent):
+        if (self.dbobj.down_hosts_percent):
             lines.append('"/system/cluster/down_hosts_percent" = %d;' %
-                         self.dbcluster.down_hosts_threshold)
+                         self.dbobj.down_hosts_threshold)
             lines.append('"/system/cluster/down_hosts_as_percent" = %s;' %
-                         pan(self.dbcluster.down_hosts_percent))
-        if (self.dbcluster.down_maint_percent):
+                         pan(self.dbobj.down_hosts_percent))
+        if (self.dbobj.down_maint_percent):
             lines.append('"/system/cluster/down_maint_percent" = %d;' %
-                         self.dbcluster.down_maint_threshold)
+                         self.dbobj.down_maint_threshold)
             lines.append('"/system/cluster/down_maint_as_percent" = %s;' %
-                         pan(self.dbcluster.down_maint_percent))
+                         pan(self.dbobj.down_maint_percent))
         lines.append("")
         # Only use system names here to avoid circular dependencies.
         # Other templates that needs to look up the underlying values use:
@@ -138,28 +138,28 @@ class PlenaryClusterObject(Plenary):
         # );
         lines.append('"/system/cluster/members" = %s;' %
                      pan(sorted([member.fqdn for member in
-                                 self.dbcluster.hosts])))
+                                 self.dbobj.hosts])))
 
         lines.append("")
-        for resource in sorted(self.dbcluster.resources):
+        for resource in sorted(self.dbobj.resources):
             lines.append("'/system/resources/%s' = push(%s);" % (
                          resource.resource_type,
                          pan(StructureTemplate(resource.template_base +
                                                '/config'))))
-        lines.append('"/system/build" = %s;' % pan(self.dbcluster.status.name))
-        if self.dbcluster.allowed_personalities:
+        lines.append('"/system/build" = %s;' % pan(self.dbobj.status.name))
+        if self.dbobj.allowed_personalities:
             lines.append('"/system/cluster/allowed_personalities" = %s;' %
                          pan (sorted(["%s/%s" % (p.archetype.name, p.name)
-                                      for p in self.dbcluster.allowed_personalities])))
+                                      for p in self.dbobj.allowed_personalities])))
         lines.append("")
 
         lines.append("include { 'archetype/base' };")
-        fname = "body_%s" % self.dbcluster.cluster_type
+        fname = "body_%s" % self.dbobj.cluster_type
         if hasattr(self, fname):
             getattr(self, fname)(lines)
         lines.append("")
         lines.append("include { 'personality/%s/config' };" %
-                     self.dbcluster.personality.name)
+                     self.dbobj.personality.name)
         lines.append("")
         lines.append("include { 'archetype/final' };")
 
@@ -168,13 +168,13 @@ class PlenaryClusterObject(Plenary):
             lines.append('"/system/metacluster/name" = %s;' %
                          pan(self.metacluster))
         lines.append('"/system/cluster/ratio" = %s;' % pan([
-                            self.dbcluster.vm_count,
-                            self.dbcluster.host_count]))
+                            self.dbobj.vm_count,
+                            self.dbobj.host_count]))
         lines.append('"/system/cluster/max_hosts" = %d;' %
-                     self.dbcluster.max_hosts)
+                     self.dbobj.max_hosts)
         lines.append('')
         machines = {}
-        for machine in sorted(self.dbcluster.machines):
+        for machine in sorted(self.dbobj.machines):
             if not machine.interfaces or not machine.disks:
                 # Do not bother creating entries for VMs that are incomplete.
                 continue
@@ -198,7 +198,7 @@ class PlenaryClusterObject(Plenary):
             machines[machine.label] = macdesc
         lines.append('"/system/cluster/machines" = %s;' % pan(machines))
 
-        for servinst in sorted(self.dbcluster.service_bindings):
+        for servinst in sorted(self.dbobj.service_bindings):
             lines.append("include { 'service/%s/%s/client/config' };" % \
                          (servinst.service.name, servinst.name))
 

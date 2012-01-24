@@ -43,7 +43,6 @@ LOGGER = logging.getLogger(__name__)
 class PlenaryMachineInfo(Plenary):
     def __init__(self, dbmachine, logger=LOGGER):
         Plenary.__init__(self, dbmachine, logger=logger)
-        self.dbmachine = dbmachine
         self.machine = dbmachine.label
 
         loc = dbmachine.location
@@ -86,12 +85,12 @@ class PlenaryMachineInfo(Plenary):
         return
 
     def get_key(self):
-        host = self.dbmachine.host
-        cluster = self.dbmachine.cluster
+        host = self.dbobj.host
+        cluster = self.dbobj.cluster
         # Need a compile key if:
         # - There is a non-aurora host attached.
         # - This is a virtual machine in a cluster.
-        if ((not host or self.dbmachine.model.machine_type == 'aurora_node')
+        if ((not host or self.dbobj.model.machine_type == 'aurora_node')
                 and (not cluster)):
             return None
         # We have at least host or cluster, maybe both...
@@ -113,16 +112,16 @@ class PlenaryMachineInfo(Plenary):
 
     def body(self, lines):
         ram = [StructureTemplate("hardware/ram/generic",
-                                 {"size": PanMetric(self.dbmachine.memory, "MB")})]
+                                 {"size": PanMetric(self.dbobj.memory, "MB")})]
         cpus = []
-        for cpu_num in range(self.dbmachine.cpu_quantity):
+        for cpu_num in range(self.dbobj.cpu_quantity):
             cpu = StructureTemplate("hardware/cpu/%s/%s" %
-                                    (self.dbmachine.cpu.vendor.name,
-                                     self.dbmachine.cpu.name))
+                                    (self.dbobj.cpu.vendor.name,
+                                     self.dbobj.cpu.name))
             cpus.append(cpu)
 
         disks = {}
-        for disk in self.dbmachine.disks:
+        for disk in self.dbobj.disks:
             devname = disk.device_name
             params = {"capacity": PanMetric(disk.capacity, "GB"),
                       "interface": disk.controller_type}
@@ -146,7 +145,7 @@ class PlenaryMachineInfo(Plenary):
 
         managers = {}
         interfaces = {}
-        for interface in self.dbmachine.interfaces:
+        for interface in self.dbobj.interfaces:
             path = "hardware/nic/%s/%s" % (interface.model.vendor,
                                             interface.model)
             if interface.interface_type == 'public':
@@ -187,8 +186,8 @@ class PlenaryMachineInfo(Plenary):
             lines.append('"rack/room" = %s;' % pan(self.room))
 
         # And a chassis location?
-        if self.dbmachine.chassis_slot:
-            slot = self.dbmachine.chassis_slot[0]
+        if self.dbobj.chassis_slot:
+            slot = self.dbobj.chassis_slot[0]
             lines.append('"chassis" = %s;' % pan(slot.chassis.fqdn))
             lines.append('"slot" = %d;' % slot.slot_number)
 
@@ -202,12 +201,12 @@ class PlenaryMachineInfo(Plenary):
 
         # Now describe the hardware
         lines.append("")
-        if self.dbmachine.serial_no:
-            lines.append('"serialnumber" = %s;' % pan(self.dbmachine.serial_no))
+        if self.dbobj.serial_no:
+            lines.append('"serialnumber" = %s;' % pan(self.dbobj.serial_no))
         lines.append('"nodename" = %s;' % pan(self.machine))
         lines.append("include { 'hardware/machine/%s/%s' };\n" %
-                     (self.dbmachine.model.vendor.name,
-                      self.dbmachine.model.name))
+                     (self.dbobj.model.vendor.name,
+                      self.dbobj.model.name))
 
         lines.append("")
         lines.append('"ram" = %s;' % pan(ram))
@@ -225,7 +224,7 @@ class PlenaryMachineInfo(Plenary):
 
     def write(self, *args, **kwargs):
         # Don't bother writing plenary files for dummy aurora hardware.
-        if self.dbmachine.model.machine_type == 'aurora_node':
+        if self.dbobj.model.machine_type == 'aurora_node':
             return 0
         return Plenary.write(self, *args, **kwargs)
 
