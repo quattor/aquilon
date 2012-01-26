@@ -101,6 +101,9 @@ class AuthorizationBroker(object):
                               'add_cluster', 'make_cluster', 'update_cluster',
                               'change_status', 'change_status_cluster']:
                 self.raise_auth_error(principal, action, resource)
+        if dbuser.role.name == 'mssb_unixops':
+            if action not in ['add_address', 'del_address']:
+                self.raise_auth_error(principal, action, resource)
         if dbuser.role.name == 'resource_pool':
             if action not in ['add_address', 'del_address']:
                 self.raise_auth_error(principal, action, resource)
