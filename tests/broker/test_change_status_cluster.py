@@ -46,7 +46,7 @@ class TestChangeClusterStatus(TestBrokerCommand):
     # This class is invoked after test_bind_esx_cluster, so we
     # know that we have a cluster (utecl1) which has 5 member hosts,
     # each of which are in "build" status.
-    def testBlockPromotion(self):
+    def test_100_BlockPromotion(self):
         self.successtest(["change_status",
                           "--hostname", "evh1.aqd-unittest.ms.com",
                           "--buildstatus", "ready"])
@@ -56,7 +56,7 @@ class TestChangeClusterStatus(TestBrokerCommand):
 
         self.matchoutput(out, "Build Status: almostready", command)
 
-    def testPromoteCluster(self):
+    def test_110_PromoteCluster(self):
         self.successtest(["change_status", "--cluster", "utecl1",
                           "--buildstatus", "ready"])
 
@@ -71,7 +71,7 @@ class TestChangeClusterStatus(TestBrokerCommand):
         self.matchoutput(out, "Build Status: build", command)
 
 
-    def testZBindDemotion(self):
+    def test_120_BindDemotion(self):
         self.successtest(["cluster",
                           "--hostname", "evh1.aqd-unittest.ms.com",
                           "--cluster", "utecl2"])
@@ -93,8 +93,22 @@ class TestChangeClusterStatus(TestBrokerCommand):
 
         self.matchoutput(out, "Build Status: ready", command)
 
+    def test_130_DemoteCluster(self):
+        self.successtest(["change_status", "--cluster", "utecl1",
+                          "--buildstatus", "rebuild"])
 
-if __name__=='__main__':
-    suite = unittest.TestLoader().loadTestsFromTestCase(TestBindESXCluster)
+        # the ready host should be demoted
+        command = "show host --hostname evh1.aqd-unittest.ms.com"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Build Status: almostready", command)
+
+        # the build host should be unchanged
+        command = "show host --hostname evh2.aqd-unittest.ms.com"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Build Status: build", command)
+
+
+if __name__ == '__main__':
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestChangeClusterStatus)
     unittest.TextTestRunner(verbosity=2).run(suite)
 

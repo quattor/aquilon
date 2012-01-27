@@ -76,7 +76,9 @@ class CommandChangeClusterStatus(BrokerCommand):
                     tpl.write(locked=True)
                 except IncompleteError:
                     # some hosts may not be built yet
-                    pass
+                    logger.client_info("Failed to refresh the plenary of {0:l}; "
+                                       "please run 'reconfigure'."
+                                       .format(tpl.dbobj))
 
             td = TemplateDomain(dbcluster.branch, dbcluster.sandbox_author,
                                 logger=logger)
