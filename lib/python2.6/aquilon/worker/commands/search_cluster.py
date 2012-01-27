@@ -197,18 +197,18 @@ class CommandSearchCluster(BrokerCommand):
             dbaa = Archetype.get_unique(session, allowed_archetype,
                                         compel=True)
         if allowed_personality and allowed_archetype:
-            q = q.join(['_allowed_pers'])
+            q = q.join('_allowed_pers')
             dbap = Personality.get_unique(session, archetype=dbaa,
                                           name=allowed_personality,
                                           compel=True)
             q = q.filter_by(personality=dbap)
             q = q.reset_joinpoint()
         elif allowed_personality:
-            q = q.join(['_allowed_pers', 'personality'])
+            q = q.join('_allowed_pers', 'personality')
             q = q.filter_by(name=allowed_personality)
             q = q.reset_joinpoint()
         elif allowed_archetype:
-            q = q.join(['_allowed_pers', 'personality'])
+            q = q.join('_allowed_pers', 'personality')
             q = q.filter_by(archetype=dbaa)
             q = q.reset_joinpoint()
 
@@ -222,17 +222,17 @@ class CommandSearchCluster(BrokerCommand):
             # Added to the searches as appropriate below.
             dbma = Archetype.get_unique(session, member_archetype, compel=True)
         if member_personality and member_archetype:
-            q = q.join(['_hosts','host'])
+            q = q.join('_hosts','host')
             dbmp = Personality.get_unique(session, archetype=dbma,
                                           name=member_personality, compel=True)
             q = q.filter_by(personality=dbmp)
             q = q.reset_joinpoint()
         elif member_personality:
-            q = q.join(['_hosts', 'host', 'personality'])
+            q = q.join('_hosts', 'host', 'personality')
             q = q.filter_by(name=member_personality)
             q = q.reset_joinpoint()
         elif member_archetype:
-            q = q.join(['_hosts', 'host', 'personality'])
+            q = q.join('_hosts', 'host', 'personality')
             q = q.filter_by(archetype=dbma)
             q = q.reset_joinpoint()
 

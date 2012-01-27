@@ -78,16 +78,11 @@ class Resource(Base):
                                          self.holder.holder_name,
                                          self.name)
 
-    @validates('resource_type')
-    def validate_resource_type(self, key, value):
-        '''The resource_type is not set until after the holder is set so
-           we must validate the resource_type rather than the resource_holder
-        '''
-        #raise ValueError(self.resource_type, self.holder.holder_type, value)
-        if value == 'resourcegroup' and \
-                self.holder.holder_type == 'bundle':
-            raise ValueError("ResourceGroups must not be held by other " +
-                             "ResourceGroups")
+    @validates('holder')
+    def _validate_holder(self, key, value):
+        return self.validate_holder(key, value)
+
+    def validate_holder(self, key, value):
         return value
 
     def __lt__(self, other):

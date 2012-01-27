@@ -30,8 +30,8 @@
 
 import ms.version
 
-ms.version.addpkg('sqlalchemy', '0.6.6')
-ms.version.addpkg('cx_Oracle', '5.0.4-11.2.0.1.0')
+ms.version.addpkg('sqlalchemy', '0.7.3')
+ms.version.addpkg('cx_Oracle', '5.1-11.2.0.1.0')
 ms.version.addpkg('ipython', '0.10.1')
 ms.version.addpkg('argparse', '1.1')
 ms.version.addpkg('ms.modulecmd', '1.0.4')

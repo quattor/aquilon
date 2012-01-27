@@ -54,6 +54,12 @@ class ResourceGroup(Resource):
 
     # declare any per-group attributes here (none for now)
 
+    def validate_holder(self, key, value):
+        if isinstance(value, BundleResource):
+            raise ValueError("ResourceGroups must not be held by other " +
+                             "ResourceGroups")
+        return value
+
 
 resourcegroup = ResourceGroup.__table__
 resourcegroup.primary_key.name = '%s_pk' % (_TN)
@@ -66,7 +72,7 @@ resourcegroup.info['unique_fields'] = ['name']
 class BundleResource(ResourceHolder):
     '''Allow ResourceGroups to hold other types of resource. '''
     __mapper_args__ = {'polymorphic_identity': 'bundle'}
-    resourcegroup_id = Column(Integer, ForeignKey('resource.id',
+    resourcegroup_id = Column(Integer, ForeignKey('resourcegroup.id',
                                            name='%s_bundle_fk' % _RESHOLDER,
                                            ondelete='CASCADE',
                                            use_alter=True),
