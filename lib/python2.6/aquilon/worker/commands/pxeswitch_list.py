@@ -74,13 +74,6 @@ class CommandPxeswitchList(BrokerCommand):
                 continue
             try:
                 dbhost = hostname_to_host(session, host)
-
-                if arguments.get("install", None) and (dbhost.status.name == "ready" or
-                                                       dbhost.status.name == "almostready"):
-                    failed.append("%s: You should change the build status "
-                                  "before switching the PXE link to install." %
-                                  host)
-
                 # Find what "bootserver" instance we're bound to
                 dbservice = Service.get_unique(session, "bootserver",
                                                compel=True)

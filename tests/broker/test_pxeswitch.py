@@ -53,8 +53,8 @@ class TestPxeswitch(TestBrokerCommand):
 
     """
 
-    def testinstallunittest00(self):
-        command = "pxeswitch --hostname unittest00.one-nyp.ms.com --install"
+    def testinstallunittest02(self):
+        command = "pxeswitch --hostname unittest02.one-nyp.ms.com --install"
         # This relies on the tests being configured to use /bin/echo instead
         # of the actual aii-installfe.  It would be better to have a fake
         # version of aii-installfe that returned output closer to the real
@@ -74,8 +74,8 @@ class TestPxeswitch(TestBrokerCommand):
                          "--servers %s@server9.aqd-unittest.ms.com" % user,
                          command)
 
-    def testinstallunittest00noconf(self):
-        command = ["pxeswitch", "--hostname", "unittest00.one-nyp.ms.com",
+    def testinstallunittest02noconf(self):
+        command = ["pxeswitch", "--hostname", "unittest02.one-nyp.ms.com",
                    "--install", "--noconfigure"]
         (out, err) = self.successtest(command)
         self.matchoutput(err, "--install", command)
@@ -91,13 +91,6 @@ class TestPxeswitch(TestBrokerCommand):
         self.matchoutput(err,
                          "--servers %s@server9.aqd-unittest.ms.com" % user,
                          command)
-
-    def testinstallunittest02(self):
-        command = ["pxeswitch", "--hostname", "unittest02.one-nyp.ms.com",
-                   "--install"]
-        out = self.badrequesttest(command)
-        self.matchoutput(out, "You should change the build status before "
-                         "switching the PXE link to install.", command)
 
     def testlocalbootunittest02(self):
         command = "pxeswitch --hostname unittest02.one-nyp.ms.com --localboot"
@@ -163,18 +156,6 @@ class TestPxeswitch(TestBrokerCommand):
             self.matchoutput(out, "pissp1.ms.com: Host has no bootserver.",
                              command)
 
-    def testinstallisterror(self):
-        with NamedTemporaryFile() as f:
-            f.writelines(["unittest02.one-nyp.ms.com\n",
-                          "unittest00.one-nyp.ms.com\n"])
-            f.flush()
-            command = "pxeswitch --install --list %s" % f.name
-            out = self.badrequesttest(command.split(" "))
-            self.matchoutput(out, "unittest02.one-nyp.ms.com: You should "
-                             "change the build status before switching the "
-                             "PXE link to install.", command)
-            self.matchclean(out, "unittest00.one-nyp.ms.com", command)
-
     def testblindbuildlist(self):
         with NamedTemporaryFile() as f:
             f.writelines(["unittest02.one-nyp.ms.com\n",
@@ -227,11 +208,11 @@ class TestPxeswitch(TestBrokerCommand):
         self.badoptiontest(command)
 
     def testallowconfigureinstall(self):
-        command = ["pxeswitch", "--hostname=unittest00.one-nyp.ms.com",
+        command = ["pxeswitch", "--hostname=unittest02.one-nyp.ms.com",
                    "--configure", "--install"]
         (out, err) = self.successtest(command)
-        self.matchoutput(err, "--configure unittest00.one-nyp.ms.com", command)
-        self.matchoutput(err, "--install unittest00.one-nyp.ms.com", command)
+        self.matchoutput(err, "--configure unittest02.one-nyp.ms.com", command)
+        self.matchoutput(err, "--install unittest02.one-nyp.ms.com", command)
         self.matchclean(err, "--firmware", command)
 
     def testallowconfigureblindbuildlist(self):
