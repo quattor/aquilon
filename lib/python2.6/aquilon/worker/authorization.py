@@ -101,11 +101,14 @@ class AuthorizationBroker(object):
                               'add_cluster', 'make_cluster', 'update_cluster',
                               'change_status', 'change_status_cluster']:
                 self.raise_auth_error(principal, action, resource)
+        if dbuser.role.name == 'mssb_unixops':
+            if action not in ['add_address', 'del_address']:
+                self.raise_auth_error(principal, action, resource)
         if dbuser.role.name == 'resource_pool':
             if action not in ['add_address', 'del_address']:
                 self.raise_auth_error(principal, action, resource)
         if dbuser.role.name == 'hpevelo':
-            if action not in ['reconfigure', 'pxeswitch',
+            if action not in ['reconfigure', 'pxeswitch', 'change_status',
                               'add_disk', 'del_disk', 'del_disk_disk']:
                 self.raise_auth_error(principal, action, resource)
         if dbuser.role.name == 'location_admin':
@@ -151,6 +154,7 @@ class AuthorizationBroker(object):
                               'add_service_instance',
                               'update_service_instance',
                               'add_nas_disk_share',
+                              'add_alias',
                               'poll_switch', 'poll_tor_switch_tor_switch',
                               'poll_switch_switch', 'poll_tor_switch',
                               'make', 'make_cluster']:
