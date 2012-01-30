@@ -268,6 +268,9 @@ class TestAddCluster(TestBrokerCommand):
         self.matchclean(out, "include { 'service", command)
         self.matchoutput(out, "include { 'personality/%s/config' };" % persona,
                          command)
+        self.matchoutput(out, '"/metadata/template/branch/name" = \"unittest\";', command)
+        self.matchoutput(out, '"/metadata/template/branch/type" = \"domain\";', command)
+        self.matchclean(out, '"/metadata/template/branch/author"', command)
 
     def test_57_addutstorages2(self):
         user = self.config.get("unittest", "user")
@@ -279,7 +282,6 @@ class TestAddCluster(TestBrokerCommand):
                    "--max_members=2",
                    "--comments=Test storage cluster for sandbox"]
         self.noouttest(command)
-
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddCluster)

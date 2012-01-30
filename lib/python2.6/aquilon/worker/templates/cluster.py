@@ -152,6 +152,13 @@ class PlenaryClusterObject(Plenary):
                          pan (sorted(["%s/%s" % (p.archetype.name, p.name)
                                       for p in self.dbobj.allowed_personalities])))
         lines.append("")
+        lines.append('"/metadata/template/branch/name" = %s;' %
+                     pan(self.dbobj.branch.name))
+        lines.append('"/metadata/template/branch/type" = %s;' %
+                     pan(self.dbobj.branch.branch_type))
+        if self.dbobj.branch.branch_type == 'sandbox':
+            lines.append('"/metadata/template/branch/author" = %s;' %
+                         pan(self.dbobj.sandbox_author.name))
 
         lines.append("include { 'archetype/base' };")
         fname = "body_%s" % self.dbobj.cluster_type

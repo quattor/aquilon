@@ -50,6 +50,11 @@ class TestManage(TestBrokerCommand):
                         "--sandbox", "%s/changetest1" % user])
         self.verify_buildfiles("unittest", "unittest02.one-nyp.ms.com",
                                want_exist=False)
+        command = ["cat", "--hostname", "unittest02.one-nyp.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "'/metadata/template/branch/name' = \"changetest1\";", command)
+        self.matchoutput(out, "'/metadata/template/branch/type' = \"sandbox\";", command)
+        self.matchoutput(out, "'/metadata/template/branch/author' = \"%s\";" % user, command)
 
     def testverifymanageunittest02(self):
         user = self.config.get("unittest", "user")
@@ -61,6 +66,10 @@ class TestManage(TestBrokerCommand):
     def testmanageserver1(self):
         self.noouttest(["manage", "--hostname", "server1.aqd-unittest.ms.com",
                         "--domain", "unittest"])
+        command = ["cat", "--hostname", "server1.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "'/metadata/template/branch/name' = \"unittest\";", command)
+        self.matchoutput(out, "'/metadata/template/branch/type' = \"domain\";", command)
 
     def testverifymanageserver1(self):
         command = "show host --hostname server1.aqd-unittest.ms.com"
@@ -141,6 +150,12 @@ class TestManage(TestBrokerCommand):
         command = ["show_esx_cluster", "--cluster=utecl1"]
         out = self.commandtest(command)
         self.matchoutput(out, "Sandbox: %s/utsandbox" % user, command)
+
+        command = ["cat", "--cluster", "utecl1"]
+        out = self.commandtest(command)
+        self.matchoutput(out, '"/metadata/template/branch/name" = \"utsandbox\";', command)
+        self.matchoutput(out, '"/metadata/template/branch/type" = \"sandbox\";', command)
+        self.matchoutput(out, '"/metadata/template/branch/author" = \"%s\";' % user, command)
 
         command = ["search_host", "--cluster=utecl1"]
         out = self.commandtest(command)

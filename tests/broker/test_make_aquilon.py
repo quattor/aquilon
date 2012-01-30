@@ -107,6 +107,9 @@ class TestMakeAquilon(TestBrokerCommand):
                           command)
         self.matchoutput(out, "'/system/network/default_gateway' = \"%s\";" %
                          self.net.unknown[0].gateway, command)
+        self.matchoutput(out, "'/metadata/template/branch/name' = \"unittest\";", command)
+        self.matchoutput(out, "'/metadata/template/branch/type' = \"domain\";", command)
+        self.matchclean(out, '"/metadata/template/branch/author"', command)
         self.matchoutput(out,
             """include { "archetype/base" };""",
             command)
@@ -230,6 +233,9 @@ class TestMakeAquilon(TestBrokerCommand):
                            self.net.unknown[0].usable[3],
                            self.net.unknown[0].netmask),
                           command)
+        self.matchoutput(out, "'/metadata/template/branch/name' = \"unittest\";", command)
+        self.matchoutput(out, "'/metadata/template/branch/type' = \"domain\";", command)
+        self.matchclean(out, '"/metadata/template/branch/author"', command)
         self.matchoutput(out,
             """include { "archetype/base" };""",
             command)

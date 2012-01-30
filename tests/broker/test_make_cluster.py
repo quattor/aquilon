@@ -69,6 +69,8 @@ class TestMakeCluster(TestBrokerCommand):
         self.matchoutput(out, "object template clusters/utecl1;", command)
         self.matchoutput(out, '"/system/cluster/name" = "utecl1";', command)
         self.matchoutput(out, '"/system/metacluster/name" = "utmc1";', command)
+        self.matchoutput(out, '"/metadata/template/branch/name" = \"unittest\";', command)
+        self.matchoutput(out, '"/metadata/template/branch/type" = \"domain\";', command)
         self.searchoutput(out, r'"/system/cluster/machines" = nlist\(\s*\);',
                           command)
         self.searchoutput(out,
@@ -109,6 +111,24 @@ class TestMakeCluster(TestBrokerCommand):
                           "--personality=esx_desktop",
                           "--cluster", "utecl1"])
 
+    def testverifygridcluster(self):
+        command = "make_cluster --cluster utgrid1"
+        (out, err) = self.successtest(command.split(" "))
+
+        command = "cat --cluster=utgrid1"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, '"/metadata/template/branch/name" = \"unittest\";', command)
+        self.matchoutput(out, '"/metadata/template/branch/type" = \"domain\";', command)
+
+    def testverifyhacluster(self):
+        command = "make_cluster --cluster utvcs1"
+        (out, err) = self.successtest(command.split(" "))
+
+        command = "cat --cluster=utvcs1"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, '"/metadata/template/branch/name" = \"unittest\";', command)
+        self.matchoutput(out, '"/metadata/template/branch/type" = \"domain\";', command)
+
     def testmakeutecl2(self):
         command = ["make_cluster", "--cluster", "utecl2"]
         (out, err) = self.successtest(command)
@@ -134,6 +154,8 @@ class TestMakeCluster(TestBrokerCommand):
         self.matchoutput(out, "object template clusters/utecl2;", command)
         self.matchoutput(out, '"/system/cluster/name" = "utecl2";', command)
         self.matchoutput(out, '"/system/metacluster/name" = "utmc1";', command)
+        self.matchoutput(out, '"/metadata/template/branch/name" = \"unittest\";', command)
+        self.matchoutput(out, '"/metadata/template/branch/type" = \"domain\";', command)
         self.searchoutput(out, r'"/system/cluster/machines" = nlist\(\s*\);',
                           command)
         self.searchoutput(out,
