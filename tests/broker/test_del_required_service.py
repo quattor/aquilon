@@ -44,6 +44,11 @@ class TestDelRequiredService(TestBrokerCommand):
         command = "del required service --service afs --archetype aquilon"
         self.noouttest(command.split(" "))
 
+    def testdelrequirednetmap(self):
+        command = ["del_required_service", "--service=netmap",
+                   "--personality=eaitools", "--archetype=aquilon"]
+        self.noouttest(command)
+
     def testdelrequiredafsagain(self):
         command = "del required service --service afs --archetype aquilon"
         self.notfoundtest(command.split(" "))

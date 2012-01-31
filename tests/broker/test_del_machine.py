@@ -48,6 +48,24 @@ class TestDelMachine(TestBrokerCommand):
         command = "show machine --machine ut3c5n10"
         self.notfoundtest(command.split(" "))
 
+    # Copy of ut3c5n10, for network based service mappings
+    def testdelut3c5n11(self):
+        command = "del machine --machine ut3c5n11"
+        self.noouttest(command.split(" "))
+
+    def testverifydelut3c5n11(self):
+        command = "show machine --machine ut3c5n11"
+        self.notfoundtest(command.split(" "))
+
+    # Copy of ut3c5n10, for network / pers based service mappings
+    def testdelut3c5n12(self):
+        command = "del machine --machine ut3c5n12"
+        self.noouttest(command.split(" "))
+
+    def testverifydelut3c5n12(self):
+        command = "show machine --machine ut3c5n12"
+        self.notfoundtest(command.split(" "))
+
     def testdelut3c1n3(self):
         command = "del machine --machine ut3c1n3"
         self.noouttest(command.split(" "))

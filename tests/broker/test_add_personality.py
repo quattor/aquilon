@@ -64,6 +64,12 @@ class TestAddPersonality(TestBrokerCommand):
                         "Template: aquilon/personality/inventory/config.tpl",
                         command)
 
+    def testaddeaipersonality(self):
+        command = ["add_personality", "--personality=eaitools",
+                   "--archetype=aquilon",
+                   "--comments", "Existing personality for netperssvcmap tests"]
+        self.noouttest(command)
+
     def testverifyutpersonalitynothreshold(self):
         user = self.config.get("unittest", "user")
         command = ["show_personality", "--sandbox=%s/changetest1" % user,

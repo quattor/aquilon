@@ -42,6 +42,142 @@ from brokertest import TestBrokerCommand
 
 class TestMake(TestBrokerCommand):
 
+    # network based service mappings
+    def testmakeafsbynet_1_checkloc(self):
+        # Must by issued before map service.
+        command = ["make", "--hostname", "afs-by-net.aqd-unittest.ms.com"]
+        (out, err) = self.successtest(command)
+
+        command = "show host --hostname afs-by-net.aqd-unittest.ms.com"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Template: service/afs/q.ny.ms.com", command)
+
+    def testmakeafsbynet_2_mapservice(self):
+        ip = self.net.netsvcmap.subnet()[0].ip
+
+        self.noouttest(["map", "service", "--networkip", ip,
+                        "--service", "afs", "--instance", "afs-by-net"])
+        self.noouttest(["map", "service", "--networkip", ip,
+                        "--service", "afs", "--instance", "afs-by-net2"])
+
+    def testmakeafsbynet_3_verifymapservice(self):
+        ip = self.net.netsvcmap.subnet()[0].ip
+
+        command = ["show_map", "--service=afs", "--instance=afs-by-net",
+                   "--networkip=%s" % ip]
+        out = self.commandtest(command)
+        self.matchoutput(out,
+                         "Archetype: aquilon Service: afs "
+                         "Instance: afs-by-net Map: Network netsvcmap",
+                         command)
+
+    def testmakeafsbynet_3_verifymapservice_proto(self):
+        ip = self.net.netsvcmap.subnet()[0].ip
+
+        command = ["show_map", "--service=afs", "--instance=afs-by-net",
+                   "--networkip=%s" % ip, "--format=proto"]
+        out = self.commandtest(command)
+        servicemaplist = self.parse_servicemap_msg(out, expect=1)
+        service_map = servicemaplist.servicemaps[0]
+        self.failUnlessEqual(service_map.network.ip, str(ip))
+        self.failUnlessEqual(service_map.network.env_name, 'internal')
+        self.failUnlessEqual(service_map.service.name, 'afs')
+        self.failUnlessEqual(service_map.service.serviceinstances[0].name,
+                             'afs-by-net')
+
+    def testmakeafsbynet_4_make(self):
+        command = ["make", "--hostname", "afs-by-net.aqd-unittest.ms.com"]
+        (out, err) = self.successtest(command)
+
+        command = "show host --hostname afs-by-net.aqd-unittest.ms.com"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Template: service/afs/afs-by-net", command)
+
+    def testmakeafsbynet_5_mapconflicts(self):
+        ip = self.net.netsvcmap.subnet()[0].ip
+
+        command = ["map", "service", "--networkip", ip,
+                        "--service", "afs", "--instance", "afs-by-net",
+                        "--building", "whatever"]
+        out = self.badoptiontest(command)
+
+        self.matchoutput(out, "networkip conflicts with building", command)
+
+    # network / personality based service mappings
+
+    def testmakenetmappers_1_maplocsvc_nopers(self):
+        """Maps a location based service map just to be overridden by a location
+        based personality service map"""
+        self.noouttest(["map", "service", "--building", "ut",
+                        "--service", "netmap", "--instance", "q.ny.ms.com"])
+
+        command = ["make", "--hostname", "netmap-pers.aqd-unittest.ms.com"]
+        (out, err) = self.successtest(command)
+
+        command = "show host --hostname netmap-pers.aqd-unittest.ms.com"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Template: service/netmap/q.ny.ms.com", command)
+
+    def testmakenetmappers_2_maplocsvc_pers(self):
+        """Maps a location based personality service map to be overridden by a
+        network based personality service map"""
+        self.noouttest(["map", "service", "--building", "ut", "--personality",
+                        "eaitools", "--archetype", "aquilon",
+                        "--service", "netmap", "--instance", "p-q.ny.ms.com"])
+
+        command = ["make", "--hostname", "netmap-pers.aqd-unittest.ms.com"]
+        (out, err) = self.successtest(command)
+
+        command = "show host --hostname netmap-pers.aqd-unittest.ms.com"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Template: service/netmap/p-q.ny.ms.com", command)
+
+    def testmakenetmappers_3_mapservice(self):
+        ip = self.net.netperssvcmap.subnet()[0].ip
+
+        self.noouttest(["map", "service", "--networkip", ip,
+                        "--service", "netmap", "--instance", "netmap-pers",
+                        "--personality", "eaitools",
+                        "--archetype", "aquilon"])
+
+    def testmakenetmappers_4_verifymapservice(self):
+        ip = self.net.netperssvcmap.subnet()[0].ip
+
+        command = ["show_map", "--service=netmap", "--instance=netmap-pers",
+                   "--networkip=%s" % ip, "--personality", "eaitools",
+                   "--archetype", "aquilon"]
+        out = self.commandtest(command)
+        self.matchoutput(out,
+                         "Archetype: aquilon Personality: eaitools "
+                         "Service: netmap "
+                         "Instance: netmap-pers Map: Network netperssvcmap",
+                         command)
+
+    def testmakenetmappers_5_verifymapservice_proto(self):
+        ip = self.net.netperssvcmap.subnet()[0].ip
+
+        command = ["show_map", "--service=netmap", "--instance=netmap-pers",
+                   "--networkip=%s" % ip, "--personality", "eaitools",
+                   "--archetype", "aquilon", "--format=proto"]
+        out = self.commandtest(command)
+        servicemaplist = self.parse_servicemap_msg(out, expect=1)
+        service_map = servicemaplist.servicemaps[0]
+        self.failUnlessEqual(service_map.network.ip, str(ip))
+        self.failUnlessEqual(service_map.network.env_name, 'internal')
+        self.failUnlessEqual(service_map.service.name, 'netmap')
+        self.failUnlessEqual(service_map.service.serviceinstances[0].name,
+                             'netmap-pers')
+        self.failUnlessEqual(service_map.personality.name, 'eaitools')
+        self.failUnlessEqual(service_map.personality.archetype.name, 'aquilon')
+
+    def testmakenetmappers_6_make(self):
+        command = ["make", "--hostname", "netmap-pers.aqd-unittest.ms.com"]
+        (out, err) = self.successtest(command)
+
+        command = "show host --hostname netmap-pers.aqd-unittest.ms.com"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Template: service/netmap/netmap-pers", command)
+
     def testmakevmhosts(self):
         for i in range(1, 6):
             command = ["make", "--hostname", "evh%s.aqd-unittest.ms.com" % i,

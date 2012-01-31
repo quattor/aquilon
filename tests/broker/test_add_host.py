@@ -67,6 +67,32 @@ class TestAddHost(TestBrokerCommand):
                         "--personality", "compileserver"])
         self.dsdb_verify()
 
+    def testaddafsbynet(self):
+        ip = self.net.netsvcmap.usable[0]
+        self.dsdb_expect_add("afs-by-net.aqd-unittest.ms.com", ip, "eth0",
+                             ip.mac)
+        self.noouttest(["add", "host",
+                        "--hostname", "afs-by-net.aqd-unittest.ms.com",
+                        "--ip", ip,
+                        "--machine", "ut3c5n11", "--domain", "unittest",
+                        "--buildstatus", "build", "--archetype", "aquilon",
+                        "--osname", "linux", "--osversion", "5.0.1-x86_64",
+                        "--personality", "compileserver"])
+        self.dsdb_verify()
+
+    def testaddnetmappers(self):
+        ip = self.net.netperssvcmap.usable[0]
+        self.dsdb_expect_add("netmap-pers.aqd-unittest.ms.com", ip, "eth0",
+                             ip.mac)
+        self.noouttest(["add", "host",
+                        "--hostname", "netmap-pers.aqd-unittest.ms.com",
+                        "--ip", ip,
+                        "--machine", "ut3c5n12", "--domain", "unittest",
+                        "--buildstatus", "build", "--archetype", "aquilon",
+                        "--osname", "linux", "--osversion", "5.0.1-x86_64",
+                        "--personality", "eaitools"])
+        self.dsdb_verify()
+
     def testaddjackgrn(self):
         command = ["add", "grn", "--grn", "grn:/example/cards",
                    "--eon_id", "4"]
@@ -116,12 +142,44 @@ class TestAddHost(TestBrokerCommand):
         self.matchoutput(out, "Version: 5.0.1-x86_64", command)
         self.matchoutput(out, "Advertise Status: False", command)
 
+    def testverifyaddafsbynet(self):
+        command = "show host --hostname afs-by-net.aqd-unittest.ms.com"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out,
+                         "Primary Name: afs-by-net.aqd-unittest.ms.com [%s]" %
+                         self.net.netsvcmap.usable[0],
+                         command)
+        self.matchoutput(out, "Blade: ut3c5n11", command)
+        self.matchoutput(out, "Archetype: aquilon", command)
+        self.matchoutput(out, "Personality: compileserver", command)
+        self.matchoutput(out, "Domain: unittest", command)
+        self.matchoutput(out, "Build Status: build", command)
+        self.matchoutput(out, "Operating System: linux", command)
+        self.matchoutput(out, "Version: 5.0.1-x86_64", command)
+        self.matchoutput(out, "Advertise Status: False", command)
+
     def testverifyunittest02machine(self):
         command = "show machine --machine ut3c5n10"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
                          "Primary Name: unittest02.one-nyp.ms.com [%s]" %
                          self.net.unknown[0].usable[0],
+                         command)
+
+    def testverifyaddafsbynetmachine(self):
+        command = "show machine --machine ut3c5n11"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out,
+                         "Primary Name: afs-by-net.aqd-unittest.ms.com [%s]" %
+                         self.net.netsvcmap.usable[0],
+                         command)
+
+    def testverifyaddafsbynetmachine(self):
+        command = "show machine --machine ut3c5n12"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out,
+                         "Primary Name: netmap-pers.aqd-unittest.ms.com [%s]" %
+                         self.net.netperssvcmap.usable[0],
                          command)
 
     def testverifyhostdns(self):
@@ -470,6 +528,7 @@ class TestAddHost(TestBrokerCommand):
     def testverifyhostall(self):
         command = ["show", "host", "--all"]
         out = self.commandtest(command)
+        self.matchoutput(out, "afs-by-net.aqd-unittest.ms.com", command)
         self.matchoutput(out, "unittest02.one-nyp.ms.com", command)
         self.matchoutput(out, "unittest15.aqd-unittest.ms.com", command)
         self.matchoutput(out, "unittest16.aqd-unittest.ms.com", command)

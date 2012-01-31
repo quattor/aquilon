@@ -45,6 +45,16 @@ class TestAddInterface(TestBrokerCommand):
                         "--machine", "ut3c5n10",
                         "--mac", self.net.unknown[0].usable[0].mac.upper()])
 
+    def testaddut3c5n11eth0_mac(self):
+        self.noouttest(["add", "interface", "--interface", "eth0",
+                        "--machine", "ut3c5n11",
+                        "--mac", self.net.netsvcmap.usable[0].mac.upper()])
+
+    def testaddut3c5n12eth0_mac(self):
+        self.noouttest(["add", "interface", "--interface", "eth0",
+                        "--machine", "ut3c5n12",
+                        "--mac", self.net.netperssvcmap.usable[0].mac.upper()])
+
     def testaddut3c5n10eth1(self):
         self.noouttest(["add", "interface", "--interface", "eth1",
                         "--machine", "ut3c5n10",

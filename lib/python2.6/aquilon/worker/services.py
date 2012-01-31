@@ -208,7 +208,7 @@ class Chooser(object):
 
     def cache_service_maps(self, dbservices):
         self.service_maps = ServiceInstance.get_mapped_instance_cache(
-            self.personality, self.location, dbservices)
+            self.personality, self.location, dbservices, self.network)
 
     def find_service_instances(self, dbservice):
         """This finds the "closest" service instances, based on the known maps.
@@ -466,6 +466,12 @@ class HostChooser(Chooser):
         self.archetype = self.dbhost.archetype
         self.personality = self.dbhost.personality
         self.required_services = set()
+
+        self.network = self.dbhost.machine.primary_name.network
+
+        # all of them would be self. but that should be optimized
+        # dbhost.machine.interfaces[x].assignments[y].network
+
         """Stores interim service instance lists."""
         for service in self.archetype.services:
             self.required_services.add(service)
@@ -569,6 +575,8 @@ class ClusterChooser(Chooser):
         self.archetype = self.dbcluster.personality.archetype
         self.personality = self.dbcluster.personality
         self.required_services = set()
+        # TODO Should be calculated from member host's network membership.
+        self.network = None
         """Stores interim service instance lists."""
         for item in self.dbcluster.required_services:
             self.required_services.add(item.service)

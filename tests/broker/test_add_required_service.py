@@ -124,6 +124,17 @@ class TestAddRequiredService(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out, "Service: utsvc", command)
 
+    def testaddrequirednetmap(self):
+        command = ["add_required_service", "--personality=eaitools",
+                   "--service=netmap", "--archetype=aquilon"]
+        self.noouttest(command)
+
+    def testverifyaddrequirednetmap(self):
+        command = ["show_personality", "--archetype=aquilon",
+                   "--personality=eaitools"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Service: netmap", command)
+
     def testaddrequiredbadservice(self):
         command = ["add_required_service", "--service=badservice",
                    "--personality=badpersonality2", "--archetype=aquilon"]

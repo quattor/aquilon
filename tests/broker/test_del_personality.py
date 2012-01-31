@@ -45,6 +45,11 @@ class TestDelPersonality(TestBrokerCommand):
                    "--archetype=aquilon"]
         self.noouttest(command)
 
+    def testdeleaipersonality(self):
+        command = ["del_personality", "--personality=eaitools",
+                   "--archetype=aquilon"]
+        self.noouttest(command)
+
     def testverifydelutpersonality(self):
         command = ["show_personality", "--personality=utpersonality",
                    "--archetype=aquilon"]

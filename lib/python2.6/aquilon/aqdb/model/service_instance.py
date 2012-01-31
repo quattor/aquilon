@@ -183,13 +183,14 @@ class ServiceInstance(Base):
         return self.service.max_clients
 
     @classmethod
-    def get_mapped_instance_cache(cls, dbpersonality, dblocation, dbservices):
+    def get_mapped_instance_cache(cls, dbpersonality, dblocation, dbservices,
+                                  dbnetwork=None):
         """Returns dict of requested services to closest mapped instances."""
         # Can't import these on init as ServiceInstance is a dependency.
         # Could think about moving this method definition out to one of
         # these classes.
         from aquilon.aqdb.model import (ServiceMap, PersonalityServiceMap,
-                                        Location)
+                                        Location, Network)
         session = object_session(dblocation)
         cache = {}
 
@@ -216,25 +217,44 @@ class ServiceInstance(Base):
                 q = q.filter_by(personality=dbpersonality)
             q = q.join('service_instance').filter(
                 ServiceInstance.service_id.in_(missing_ids))
-            q = q.reset_joinpoint()
-            q = q.join('location').filter(Location.id.in_(location_ids))
+
+            if dbnetwork:
+                q = q.reset_joinpoint()
+                q = q.outerjoin('location')
+                q = q.reset_joinpoint()
+                q = q.outerjoin('network')
+                q = q.filter(or_(Location.id.in_(location_ids),
+                                 Network.id==dbnetwork.id))
+            else:
+                q = q.reset_joinpoint()
+                q = q.join('location')
+                q = q.filter(Location.id.in_(location_ids))
 
             # convert results in dict
             m_dict = defaultdict(list)
-            for map in q.all():
-                key = (map.service.id, map.location.id)
-                m_dict[key].append(map.service_instance)
+            n_dict = defaultdict(list)
+            for service_map in q.all():
+                if service_map.location_id:
+                    key = (service_map.service.id, service_map.location.id)
+                    m_dict[key].append(service_map.service_instance)
+                else:
+                    key = service_map.service.id
+                    n_dict[key].append(service_map.service_instance)
 
-            if not m_dict:
+            if not m_dict and not n_dict:
                 continue
 
             # choose based on proximity
             for dbservice in dbservices:
-                for lid in location_ids:
-                    key = (dbservice.id, lid)
-                    if key in m_dict:
-                        cache[dbservice] = m_dict[key][:]
-                        break
+                if dbservice.id in n_dict:
+                    key = dbservice.id
+                    cache[dbservice] = n_dict[key][:]
+                else:
+                    for lid in location_ids:
+                        key = (dbservice.id, lid)
+                        if key in m_dict:
+                            cache[dbservice] = m_dict[key][:]
+                            break
 
         return cache
 

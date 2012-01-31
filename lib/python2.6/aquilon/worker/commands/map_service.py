@@ -31,41 +31,56 @@
 from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import (Personality, Service, ServiceMap,
-                                PersonalityServiceMap)
+                                 PersonalityServiceMap,
+                                NetworkEnvironment)
 from aquilon.worker.dbwrappers.location import get_location
 from aquilon.worker.dbwrappers.service_instance import get_service_instance
+from aquilon.worker.dbwrappers.network import get_network_byip
 
 
 class CommandMapService(BrokerCommand):
 
     required_parameters = ["service", "instance"]
 
-    def render(self, session, service, instance, archetype, personality, **kwargs):
+    def render(self, session, service, instance, archetype, personality,
+               networkip, **kwargs):
+
         dbservice = Service.get_unique(session, service, compel=True)
         dblocation = get_location(session, **kwargs)
         dbinstance = get_service_instance(session, dbservice, instance)
+
+        if networkip:
+            dbnet_env = NetworkEnvironment.get_unique_or_default(session)
+            dbnetwork = get_network_byip(session, networkip, dbnet_env)
+        else:
+            dbnetwork = None
 
         if archetype is None and personality:
             # Can't get here with the standard aq client.
             raise ArgumentError("Specifying --personality requires you to "
                                 "also specify --archetype.")
 
-        if archetype is not None and personality is not None:
+        kwargs = {}
+        if archetype and personality:
             dbpersona = Personality.get_unique(session, name=personality,
                                                archetype=archetype, compel=True)
-            dbmap = session.query(PersonalityServiceMap)
-            dbmap = dbmap.filter_by(personality=dbpersona).filter_by(
-                location=dblocation, service_instance=dbinstance).first()
-            if not dbmap:
-                dbmap = PersonalityServiceMap(personality=dbpersona,
-                                              service_instance=dbinstance,
-                                              location=dblocation)
 
+            map_class = PersonalityServiceMap
+            query = session.query(map_class).filter_by(personality=dbpersona)
+
+            kwargs["personality"] = dbpersona
         else:
-            dbmap = session.query(ServiceMap).filter_by(location=dblocation,
-                service_instance=dbinstance).first()
-            if not dbmap:
-                dbmap = ServiceMap(service_instance=dbinstance, location=dblocation)
+            map_class = ServiceMap
+            query = session.query(map_class)
+
+        dbmap = query.filter_by(location=dblocation,
+                                service_instance=dbinstance,
+                                network=dbnetwork).first()
+
+        if not dbmap:
+            dbmap = map_class(service_instance=dbinstance,
+                              location=dblocation,
+                              network=dbnetwork, **kwargs)
 
         session.add(dbmap)
         session.flush()

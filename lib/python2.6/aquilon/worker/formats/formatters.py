@@ -370,9 +370,17 @@ class ObjectFormatter(object):
         #    self.add_host_msg(si_msg.clients.add(), client.host)
 
     def add_service_map_msg(self, sm_msg, service_map):
-        sm_msg.location.name = str(service_map.location.name)
-        sm_msg.location.location_type = str(service_map.location.location_type)
-        self.add_service_msg(sm_msg.service, service_map.service, service_map.service_instance)
+        if service_map.location:
+            sm_msg.location.name = str(service_map.location.name)
+            sm_msg.location.location_type = \
+                    str(service_map.location.location_type)
+        else:
+            sm_msg.network.ip = str(service_map.network.ip)
+            sm_msg.network.env_name = \
+                    service_map.network.network_environment.name
+
+        self.add_service_msg(sm_msg.service,
+                             service_map.service, service_map.service_instance)
         if hasattr(service_map, "personality"):
             sm_msg.personality.name = str(service_map.personality.name)
             sm_msg.personality.archetype.name = \

@@ -34,7 +34,10 @@ from sqlalchemy import (Column, Integer, Sequence, String, DateTime, ForeignKey,
                         UniqueConstraint)
 from sqlalchemy.orm import relation, deferred, backref
 
-from aquilon.aqdb.model import Base, Location, ServiceInstance
+from aquilon.aqdb.model import Base, Location, ServiceInstance, Network
+
+_TN = 'service_map'
+_ABV = 'svc_map'
 
 
 class ServiceMap(Base):
@@ -43,38 +46,65 @@ class ServiceMap(Base):
         default that clients can choose as their provider during service
         autoconfiguration. """
 
-    __tablename__ = 'service_map'
+    __tablename__ = _TN
 
     id = Column(Integer, Sequence('service_map_id_seq'), primary_key=True)
-    service_instance_id = Column(Integer, ForeignKey('service_instance.id',
-                                                     name='svc_map_svc_inst_fk',
-                                                     ondelete='CASCADE'),
+
+    service_instance_id = Column(Integer,
+                                 ForeignKey('service_instance.id',
+                                            name='%s_svc_inst_fk' % _ABV,
+                                            ondelete='CASCADE'),
                                  nullable=False)
 
     location_id = Column(Integer, ForeignKey('location.id',
                                              ondelete='CASCADE',
-                                             name='svc_map_loc_fk'),
-                         nullable=False)
+                                             name='%s_loc_fk' % _ABV),
+                         nullable=True)
+
+    network_id = Column(Integer, ForeignKey('network.id', ondelete='CASCADE',
+                                             name='%s_net_fk' % _ABV),
+                         nullable=True)
 
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
     comments = deferred(Column(String(255), nullable=True))
 
-    location = relation(Location, innerjoin=True,
-                        backref=backref('service_maps', lazy=True,
+    location = relation(Location,
+                        backref=backref('service_maps',
                                         cascade="all, delete-orphan"))
     service_instance = relation(ServiceInstance, innerjoin=True,
                                 backref=backref('service_map', lazy=True,
+                                                cascade="all, delete-orphan"))
+    network = relation(Network, backref=backref('service_map',
                                                 cascade="all, delete-orphan"))
 
     @property
     def service(self):
         return self.service_instance.service
 
+    @property
+    def mapped_to(self):
+        if self.location:
+            mapped_to = self.location
+        else:
+            mapped_to = self.network
+
+        return mapped_to
+
+    def __init__(self, network=None, location=None, **kwargs):
+        super(ServiceMap, self).__init__(network=network, location=location,
+                                         **kwargs)
+        if network and location:  # pragma: no cover
+            raise ValueError("A service can't be mapped to a Network and a "
+                             "Location at the same time")
+
+        if network is None and location is None:  # pragma: no cover
+            raise ValueError("A service should by mapped to a Network or a "
+                             "Location")
 
 service_map = ServiceMap.__table__  # pylint: disable-msg=C0103, E1101
 service_map.primary_key.name = 'service_map_pk'
 
 service_map.append_constraint(
-    UniqueConstraint('service_instance_id', 'location_id',
-                     name='svc_map_loc_inst_uk'))
+    UniqueConstraint('service_instance_id', 'location_id', 'network_id',
+                     name='%s_loc_net_inst_uk' % _ABV))

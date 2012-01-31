@@ -40,7 +40,7 @@ class ServiceMapFormatter(ObjectFormatter):
     def format_raw(self, sm, indent=""):
         return indent + \
                 "Archetype: aquilon Service: %s Instance: %s Map: %s" % (
-                sm.service.name, sm.service_instance.name, format(sm.location))
+                sm.service.name, sm.service_instance.name, format(sm.mapped_to))
 
     def format_proto(self, sm, skeleton=None):
         smlf = ServiceMapListFormatter()
@@ -55,7 +55,7 @@ class PersonalityServiceMapFormatter(ServiceMapFormatter):
                "Service: %s Instance: %s Map: %s" % (
                    indent, sm.personality.archetype.name, sm.personality.name,
                    sm.service.name, sm.service_instance.name,
-                   format(sm.location))
+                   format(sm.mapped_to))
 
 ObjectFormatter.handlers[PersonalityServiceMap] = \
         PersonalityServiceMapFormatter()

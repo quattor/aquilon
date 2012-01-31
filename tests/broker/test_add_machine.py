@@ -60,6 +60,37 @@ class TestAddMachine(TestBrokerCommand):
         self.matchoutput(out, "Comments: Some machine comments", command)
         self.matchclean(out, "Primary Name:", command)
 
+    # Copy of ut3c5n10, for network based service mappings
+    def testaddut3c5n11(self):
+        self.noouttest(["add", "machine", "--machine", "ut3c5n11",
+                        "--rack", "ut3", "--model", "hs21-8853l5u",
+                        "--cpucount", "2", "--cpuvendor", "intel",
+                        "--cpuname", "xeon", "--cpuspeed", "2660",
+                        "--memory", "8192", "--serial", "99C5553",
+                        "--comments", "For network based service mappings"])
+
+    # Copy of ut3c5n10, for network based service mappings
+    def testaddut3c5n12(self):
+        self.noouttest(["add", "machine", "--machine", "ut3c5n12",
+                        "--rack", "ut3", "--model", "hs21-8853l5u",
+                        "--cpucount", "2", "--cpuvendor", "intel",
+                        "--cpuname", "xeon", "--cpuspeed", "2660",
+                        "--memory", "8192", "--serial", "99C5553",
+                        "--comments", "For net/pers based service mappings"])
+
+    def testverifyaddut3c5n11(self):
+        command = "show machine --machine ut3c5n11"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Blade: ut3c5n11", command)
+        self.matchoutput(out, "Rack: ut3", command)
+        self.matchoutput(out, "Vendor: ibm Model: hs21-8853l5u", command)
+        self.matchoutput(out, "Cpu: xeon_2660 x 2", command)
+        self.matchoutput(out, "Memory: 8192 MB", command)
+        self.matchoutput(out, "Serial: 99C5553", command)
+        self.matchoutput(out, "Comments: For network based service mappings",
+                         command)
+        self.matchclean(out, "Primary Name:", command)
+
     def testverifydelmodel(self):
         # This should be in test_del_model.py but when that is run there are no
         # more machines defined...
