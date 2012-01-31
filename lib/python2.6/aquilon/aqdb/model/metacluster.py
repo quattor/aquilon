@@ -206,11 +206,11 @@ class MetaClusterMember(Base):
         and their links also causes deleteion of clusters (BAD)
     """
 
-    metacluster = relation(MetaCluster, lazy='subquery', uselist=False,
-                           innerjoin=True,
+    metacluster = relation(MetaCluster, lazy='subquery', innerjoin=True,
                            backref=backref('_clusters',
                                            cascade='all, delete-orphan'))
 
+    # This is a one-to-one relation, so we need uselist=False on the backref
     cluster = relation(Cluster, lazy='subquery', innerjoin=True,
                        backref=backref('_metacluster', uselist=False,
                                        cascade='all, delete-orphan'))

@@ -56,7 +56,7 @@ class OperatingSystem(Base):
                                     nullable=False))
     comments = Column(String(255), nullable=True)
 
-    archetype = relation(Archetype, backref='os', uselist=False, lazy=False,
+    archetype = relation(Archetype, backref='os', lazy=False,
                          innerjoin=True)
 
     def __format__(self, format_spec):

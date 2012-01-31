@@ -95,9 +95,8 @@ class AddressAssignment(Base):
 
     comments = deferred(Column(String(255), nullable=True))
 
-    interface = relation(Interface, lazy=False, uselist=False, innerjoin=True,
-                         backref=backref('assignments', uselist=True,
-                                         order_by=[_label],
+    interface = relation(Interface, lazy=False, innerjoin=True,
+                         backref=backref('assignments', order_by=[_label],
                                          cascade='all, delete-orphan'))
 
     dns_environment = relation(DnsEnvironment, innerjoin=True,

@@ -57,8 +57,8 @@ class UserPrincipal(Base):
 
     comments = Column('comments', String(255), nullable=True)
 
-    role = relation(Role, uselist=False, innerjoin=True)
-    realm = relation(Realm, uselist=False, innerjoin=True)
+    role = relation(Role, innerjoin=True)
+    realm = relation(Realm, innerjoin=True)
 
     def __str__(self):
         return '@'.join([self.name, self.realm.name])

@@ -151,15 +151,11 @@ class Cluster(Base):
     comments = Column(String(255))
 
     status = relation(ClusterLifecycle, innerjoin=True, backref='clusters')
-    location_constraint = relation(Location,
-                                   uselist=False,
-                                   lazy=False)
+    location_constraint = relation(Location, lazy=False)
 
-    personality = relation(Personality, uselist=False, lazy=False,
-                           innerjoin=True)
-    branch = relation(Branch, uselist=False, lazy=False, innerjoin=True,
-                      backref='clusters')
-    sandbox_author = relation(UserPrincipal, uselist=False)
+    personality = relation(Personality, lazy=False, innerjoin=True)
+    branch = relation(Branch, lazy=False, innerjoin=True, backref='clusters')
+    sandbox_author = relation(UserPrincipal)
 
     hosts = association_proxy('_hosts', 'host', creator=_hcm_host_creator)
 
@@ -348,7 +344,7 @@ class EsxCluster(Cluster):
                                   name='esx_cluster_switch_fk'),
                        nullable=True)
 
-    switch = relation(Switch, uselist=False, lazy=False,
+    switch = relation(Switch, lazy=False,
                       backref=backref('esx_clusters'))
 
     @property
@@ -589,9 +585,10 @@ class HostClusterMember(Base):
         cascade='all' on the forward mapper here, else deletion of clusters
         and their links also causes deleteion of hosts (BAD)
     """
-    cluster = relation(Cluster, uselist=False, lazy=False, innerjoin=True,
+    cluster = relation(Cluster, lazy=False, innerjoin=True,
                        backref=backref('_hosts', cascade='all, delete-orphan'))
 
+    # This is a one-to-one relation, so we need uselist=False on the backref
     host = relation(Host, lazy=False, innerjoin=True,
                     backref=backref('_cluster', uselist=False,
                                     cascade='all, delete-orphan'))
@@ -621,11 +618,11 @@ class ClusterAllowedPersonality(Base):
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
 
-    cluster = relation(Cluster, uselist=False, lazy=False,
+    cluster = relation(Cluster, lazy=False,
                        backref=backref('_allowed_pers', cascade='all, delete-orphan'))
 
     personality = relation(Personality, lazy=False,
-                           backref=backref('_clusters_allowing', uselist=False,
+                           backref=backref('_clusters_allowing',
                                            cascade='all, delete-orphan'))
 
     __mapper_args__ = {'extension': ValidateCluster()}
@@ -655,9 +652,10 @@ class MachineClusterMember(Base):
                                     nullable=False))
 
     """ See comments for HostClusterMembers relations """
-    cluster = relation(Cluster, uselist=False, lazy=False, innerjoin=True,
+    cluster = relation(Cluster, lazy=False, innerjoin=True,
                        backref=backref('_machines', cascade='all, delete-orphan'))
 
+    # This is a one-to-one relation, so we need uselist=False on the backref
     machine = relation(Machine, lazy=False, innerjoin=True,
                   backref=backref('_cluster', uselist=False,
                                   cascade='all, delete-orphan'))
@@ -714,7 +712,7 @@ class ClusterAlignedService(Base):
                                     nullable=False))
     comments = deferred(Column(String(255)))
 
-    service = relation(Service, uselist=False, lazy=False, innerjoin=True,
+    service = relation(Service, lazy=False, innerjoin=True,
                        backref=backref('_clusters', cascade='all'))
     #cascade deleted services to delete their being required to cluster_types
 
@@ -750,7 +748,7 @@ class ClusterServiceBinding(Base):
                                     nullable=False))
     comments = deferred(Column(String(255)))
 
-    cluster = relation(Cluster, uselist=False, lazy=False, innerjoin=True,
+    cluster = relation(Cluster, lazy=False, innerjoin=True,
                        backref=backref('_cluster_svc_binding',
                                        cascade='all, delete-orphan'))
 

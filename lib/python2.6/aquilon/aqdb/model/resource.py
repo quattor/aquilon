@@ -149,7 +149,8 @@ class HostResource(ResourceHolder):
                                          ondelete='CASCADE'),
                      nullable=True)
 
-    host = relation(Host, uselist=False, lazy='subquery',
+    # This is a one-to-one relation, so we need uselist=False on the backref
+    host = relation(Host, lazy='subquery',
                     backref=backref('resholder',
                                     cascade='all, delete-orphan',
                                     uselist=False))
@@ -171,7 +172,8 @@ class ClusterResource(ResourceHolder):
                                             ondelete='CASCADE'),
                         nullable=True)
 
-    cluster = relation(Cluster, uselist=False, lazy='subquery',
+    # This is a one-to-one relation, so we need uselist=False on the backref
+    cluster = relation(Cluster, lazy='subquery',
                        backref=backref('resholder',
                                        cascade='all, delete-orphan',
                                        uselist=False))

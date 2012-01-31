@@ -56,7 +56,7 @@ class PersonalityClusterInfo(Base):
                             nullable=False)
     cluster_type = Column(AqStr(16), nullable=False)
 
-    personality = relation(Personality, uselist=False, lazy=False,
+    personality = relation(Personality, lazy=False,
                            innerjoin=True,
                            backref=backref("cluster_infos",
                                            collection_class=column_mapped_collection(cluster_type),

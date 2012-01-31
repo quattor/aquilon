@@ -60,7 +60,7 @@ class Personality(Base):
                                     nullable=False))
     comments = Column(String(255), nullable=True)
 
-    archetype = relation(Archetype, backref='personality', uselist=False)
+    archetype = relation(Archetype, backref='personality')
 
     services = association_proxy('_services', 'service')
 

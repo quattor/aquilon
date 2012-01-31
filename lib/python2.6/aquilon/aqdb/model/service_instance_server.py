@@ -59,13 +59,13 @@ class ServiceInstanceServer(Base):
                                     nullable=False))
     comments = deferred(Column(String(255), nullable=True))
 
-    service_instance = relation(ServiceInstance, uselist=False, innerjoin=True,
+    service_instance = relation(ServiceInstance, innerjoin=True,
                                 backref=backref("servers",
                                                 cascade="all, delete-orphan",
                                                 collection_class=ordering_list('position'),
                                                 order_by=[position]))
 
-    host = relation(Host, uselist=False, innerjoin=True,
+    host = relation(Host, innerjoin=True,
                     backref=backref('_services_provided',
                                     cascade="all, delete-orphan"))
 

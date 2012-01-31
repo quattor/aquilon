@@ -73,7 +73,7 @@ class Branch(Base):
 
     comments = Column(String(255), nullable=True)
 
-    owner = relation(UserPrincipal, uselist=False, backref='domain')
+    owner = relation(UserPrincipal, backref='domain')
 
     __mapper_args__ = {'polymorphic_on': branch_type}
 
@@ -108,7 +108,7 @@ class Domain(Branch):
 domain = Domain.__table__  # pylint: disable=C0103, E1101
 domain.primary_key.name = '%s_pk' % _DMN
 domain.info['unique_fields'] = ['name']
-Domain.tracked_branch = relation(Branch, uselist=False, backref='trackers',
+Domain.tracked_branch = relation(Branch, backref='trackers',
         primaryjoin=Domain.tracked_branch_id == Branch.id)
 
 

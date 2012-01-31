@@ -124,10 +124,10 @@ class ServiceListItem(Base):
                                     nullable=False))
     comments = deferred(Column(String(255), nullable=True))
 
-    archetype = relation(Archetype, uselist=False, lazy=False, innerjoin=True,
+    archetype = relation(Archetype, lazy=False, innerjoin=True,
                          backref=backref('_services',
                                          cascade='all, delete-orphan'))
-    service = relation(Service, uselist=False, lazy=False, innerjoin=True,
+    service = relation(Service, lazy=False, innerjoin=True,
                        backref=backref('_archetypes',
                                        cascade='all, delete-orphan'))
 
@@ -162,11 +162,11 @@ class PersonalityServiceListItem(Base):
                                     nullable=False))
     comments = deferred(Column(String(255), nullable=True))
 
-    personality = relation(Personality, uselist=False, lazy=False,
+    personality = relation(Personality, lazy=False,
                            innerjoin=True,
                            backref=backref('_services',
                                            cascade='all, delete-orphan'))
-    service = relation(Service, uselist=False, lazy=False, innerjoin=True,
+    service = relation(Service, lazy=False, innerjoin=True,
                        backref=backref('_personalities',
                                        cascade='all, delete-orphan'))
 

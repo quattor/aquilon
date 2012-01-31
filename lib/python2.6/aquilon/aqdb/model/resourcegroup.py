@@ -78,7 +78,8 @@ class BundleResource(ResourceHolder):
                                            use_alter=True),
                         nullable=True)
 
-    resourcegroup = relation(ResourceGroup, uselist=False, lazy='subquery',
+    # This is a one-to-one relation, so we need uselist=False on the backref
+    resourcegroup = relation(ResourceGroup, lazy='subquery',
                              primaryjoin=resourcegroup_id==ResourceGroup.id,
                              backref=backref('resholder',
                                              cascade='all, delete-orphan',

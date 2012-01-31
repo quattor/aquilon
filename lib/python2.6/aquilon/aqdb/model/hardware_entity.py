@@ -74,14 +74,14 @@ class HardwareEntity(Base):  # pylint: disable=W0232, R0903
                                     nullable=False))
     comments = Column(String(255), nullable=True)
 
-    location = relation(Location, uselist=False)
-    model = relation(Model, uselist=False)
+    location = relation(Location)
+    model = relation(Model)
 
     # When working with machines the primary name always crops up, so load it
     # eagerly
+    # This is a one-to-one relation, so we need uselist=False on the backref
     primary_name = relation(DnsRecord, lazy=False,
-                            backref=backref('hardware_entity',
-                                            uselist=False))
+                            backref=backref('hardware_entity', uselist=False))
 
     __mapper_args__ = {'polymorphic_on': hardware_type}
 

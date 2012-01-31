@@ -54,7 +54,7 @@ class Machine(HardwareEntity):  # pylint: disable=W0232, R0903
 
     memory = Column(Integer, nullable=False, default=512)
 
-    cpu = relation(Cpu, uselist=False)
+    cpu = relation(Cpu)
 
 
 machine = Machine.__table__  # pylint: disable=C0103, E1101

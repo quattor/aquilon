@@ -78,6 +78,7 @@ class MachineSpecs(Base):
                                     nullable=False))
     comments = Column('comments', String(255), nullable=True)
 
+    # This is a one-to-one relation, so we need uselist=False on the backref
     model = relation(Model, innerjoin=True,
                      primaryjoin=model_id == Model.id,
                      backref=backref('machine_specs', uselist=False))
