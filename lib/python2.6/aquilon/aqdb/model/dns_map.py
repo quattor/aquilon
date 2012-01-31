@@ -72,13 +72,13 @@ class DnsMap(Base):
     comments = deferred(Column(String(255), nullable=True))
 
     location = relation(Location, lazy=False, innerjoin=True,
-                        backref=backref('dns_maps', lazy=True,
+                        backref=backref('dns_maps',
                                         collection_class=ordering_list('position'),
                                         order_by=[position],
                                         cascade='all, delete-orphan'))
 
     dns_domain = relation(DnsDomain, lazy=False, innerjoin=True,
-                          backref=backref('dns_maps', lazy=True, cascade='all'))
+                          backref=backref('dns_maps', cascade='all'))
 
     def __repr__(self):
         return '<%s %s at %s>' % (self.__class__.__name__,

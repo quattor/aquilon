@@ -122,7 +122,7 @@ class ObservedVlan(Base):
                                                 passive_deletes=True,
                                                 order_by=[vlan_id]))
 
-    vlan = relation(VlanInfo, lazy=True, uselist=False,
+    vlan = relation(VlanInfo, uselist=False,
                     primaryjoin=vlan_id == VlanInfo.vlan_id,
                     foreign_keys=[VlanInfo.vlan_id],
                     viewonly=True)

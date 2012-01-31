@@ -119,12 +119,12 @@ class Interface(Base):
     hardware_entity = relation(HardwareEntity, lazy=False, innerjoin=True,
                                backref=backref('interfaces', cascade='all'))
 
-    model = relation(Model, lazy=True, innerjoin=True)
+    model = relation(Model, innerjoin=True)
 
-    master = relation('Interface', uselist=False, lazy=True,
+    master = relation('Interface', uselist=False,
                       remote_side=id,
                       primaryjoin=master_id == id,
-                      backref=backref('slaves', lazy=True))
+                      backref=backref('slaves'))
 
     __mapper_args__ = {'polymorphic_on': interface_type}
     # Interfaces also have the property 'assignments' which is defined in
@@ -258,10 +258,10 @@ class VlanInterface(Interface):
 
     vlan_id = Column(Integer)
 
-    parent = relation(Interface, uselist=False, lazy=True,
+    parent = relation(Interface, uselist=False,
                       remote_side=Interface.id,
                       primaryjoin=parent_id == Interface.id,
-                      backref=backref('vlans', lazy=True,
+                      backref=backref('vlans',
                                       collection_class=attribute_mapped_collection('vlan_id')))
 
     @validates('vlan_id')

@@ -106,7 +106,7 @@ class AddressAssignment(Base):
     # Setting viewonly is very important here as we do not want the removal of
     # an AddressAssignment record to change the linked DNS record(s)
     # Can't use backref or back_populates due to the different mappers
-    dns_records = relation(dns_fqdn_mapper, lazy=True, uselist=True,
+    dns_records = relation(dns_fqdn_mapper, uselist=True,
                            primaryjoin=and_(ip == ARecord.ip,
                                             dns_environment_id == Fqdn.dns_environment_id),
                            foreign_keys=[ARecord.ip, Fqdn.dns_environment_id],

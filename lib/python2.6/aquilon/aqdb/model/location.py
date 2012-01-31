@@ -233,7 +233,7 @@ llink.primary_key.name = 'location_link_pk'
 
 # Make these relations view-only, to make sure
 # the distance is managed explicitely
-Location.parents = relation(Location, lazy=True,
+Location.parents = relation(Location,
                             secondary=LocationLink.__table__,
                             primaryjoin=Location.id == LocationLink.child_id,
                             secondaryjoin=Location.id == LocationLink.parent_id,
@@ -241,14 +241,14 @@ Location.parents = relation(Location, lazy=True,
                             viewonly=True)
 
 # FIXME: this should be dropped when multiple parents are allowed
-Location.parent = relation(Location, lazy=True, uselist=False,
+Location.parent = relation(Location, uselist=False,
                            secondary=LocationLink.__table__,
                            primaryjoin=and_(Location.id == LocationLink.child_id,
                                             LocationLink.distance == 1),
                            secondaryjoin=Location.id == LocationLink.parent_id,
                            viewonly=True)
 
-Location.children = relation(Location, lazy=True,
+Location.children = relation(Location,
                              secondary=LocationLink.__table__,
                              primaryjoin=Location.id == LocationLink.parent_id,
                              secondaryjoin=Location.id == LocationLink.child_id,

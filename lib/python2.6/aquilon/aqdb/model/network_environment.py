@@ -75,11 +75,10 @@ class NetworkEnvironment(Base):
 
     comments = deferred(Column(String(255), nullable=True))
 
-    location = relation(Location, backref=backref('network_environments', lazy=True))
+    location = relation(Location, backref=backref('network_environments'))
 
     dns_environment = relation(DnsEnvironment,
-                               backref=backref('network_environments',
-                                               lazy=True))
+                               backref=backref('network_environments'))
 
     @property
     def is_default(self):

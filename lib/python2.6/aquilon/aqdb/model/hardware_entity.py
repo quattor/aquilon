@@ -81,7 +81,7 @@ class HardwareEntity(Base):  # pylint: disable=W0232, R0903
     # eagerly
     primary_name = relation(DnsRecord, lazy=False,
                             backref=backref('hardware_entity',
-                                            lazy=True, uselist=False))
+                                            uselist=False))
 
     __mapper_args__ = {'polymorphic_on': hardware_type}
 

@@ -156,6 +156,5 @@ dynstub.primary_key.name = 'dynamic_stub_pk'
 dynstub.info['unique_fields'] = ['fqdn']
 dynstub.info['extra_search_fields'] = ['ip', 'network']
 
-Network.dynamic_stubs = relation(DynamicStub, lazy=True,
-                                 order_by=[DynamicStub.ip],
+Network.dynamic_stubs = relation(DynamicStub, order_by=[DynamicStub.ip],
                                  viewonly=True)

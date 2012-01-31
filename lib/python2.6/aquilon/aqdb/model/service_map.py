@@ -73,7 +73,7 @@ class ServiceMap(Base):
                         backref=backref('service_maps',
                                         cascade="all, delete-orphan"))
     service_instance = relation(ServiceInstance, innerjoin=True,
-                                backref=backref('service_map', lazy=True,
+                                backref=backref('service_map',
                                                 cascade="all, delete-orphan"))
     network = relation(Network, backref=backref('service_map',
                                                 cascade="all, delete-orphan"))

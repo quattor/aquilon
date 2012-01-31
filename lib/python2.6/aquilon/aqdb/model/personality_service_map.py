@@ -83,10 +83,9 @@ class PersonalityServiceMap(Base):
                                         cascade="all, delete-orphan"))
     service_instance = relation(ServiceInstance, innerjoin=True,
                                 backref=backref('personality_service_map',
-                                                lazy=True,
                                                 cascade="all, delete-orphan"))
     personality = relation(Personality, uselist=False, innerjoin=True,
-                           backref=backref('maps', lazy=True,
+                           backref=backref('maps',
                                            cascade="all, delete-orphan"))
     network = relation(Network, backref=backref('personality_service_map',
                                                 cascade="all, delete-orphan"))

@@ -52,9 +52,8 @@ class Alias(DnsRecord):
                                            name='%s_target_fk' % _TN),
                        nullable=False)
 
-    target = relation(Fqdn, lazy=True,
-                      primaryjoin=target_id == Fqdn.id,
-                      backref=backref('aliases', lazy=True))
+    target = relation(Fqdn, primaryjoin=target_id == Fqdn.id,
+                      backref=backref('aliases'))
 
     # The same name may resolve to multiple RRs
     target_rrs = association_proxy('target', 'dns_records')

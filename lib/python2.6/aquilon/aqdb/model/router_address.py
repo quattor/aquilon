@@ -80,7 +80,7 @@ class RouterAddress(Base):
 
     location = relation(Location)
 
-    dns_records = relation(dns_fqdn_mapper, lazy=True, uselist=True,
+    dns_records = relation(dns_fqdn_mapper, uselist=True,
                            primaryjoin=and_(ip == ARecord.ip,
                                             dns_environment_id == Fqdn.dns_environment_id),
                            foreign_keys=[ARecord.ip, Fqdn.dns_environment_id],

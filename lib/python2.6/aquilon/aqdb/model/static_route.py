@@ -65,8 +65,8 @@ class StaticRoute(Base):
                                     nullable=False))
     comments = deferred(Column(String(255), nullable=True))
 
-    network = relation(Network, innerjoin=True, lazy=True,
-                       backref=backref("static_routes", lazy=True,
+    network = relation(Network, innerjoin=True,
+                       backref=backref("static_routes",
                                        cascade="all, delete-orphan"))
 
     @property
