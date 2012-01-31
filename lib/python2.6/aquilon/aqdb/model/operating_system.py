@@ -56,8 +56,7 @@ class OperatingSystem(Base):
                                     nullable=False))
     comments = Column(String(255), nullable=True)
 
-    archetype = relation(Archetype, backref='os', lazy=False,
-                         innerjoin=True)
+    archetype = relation(Archetype, lazy=False, innerjoin=True)
 
     def __format__(self, format_spec):
         instance = "%s/%s-%s" % (self.archetype.name, self.name, self.version)

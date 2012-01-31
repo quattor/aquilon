@@ -92,8 +92,8 @@ def create_target_if_needed(session, target, dbdns_env):
 
         dbtarget = Fqdn(name=name, dns_domain=target_domain,
                         dns_environment=dbdns_env)
-        dbtarget_rec = ReservedName(fqdn=dbtarget)
         session.add(dbtarget)
+        dbtarget_rec = ReservedName(fqdn=dbtarget)
         session.add(dbtarget_rec)
 
     return dbtarget

@@ -93,9 +93,9 @@ class Network(Base):
 
     comments = Column(String(255), nullable=True)
 
-    network_environment = relation(NetworkEnvironment, backref='networks')
+    network_environment = relation(NetworkEnvironment)
 
-    location = relation(Location, backref='networks')
+    location = relation(Location)
 
     # The routers relation is defined in router_address.py
     router_ips = association_proxy("routers", "ip")

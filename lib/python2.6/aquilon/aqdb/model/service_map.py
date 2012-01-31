@@ -69,14 +69,11 @@ class ServiceMap(Base):
                                     nullable=False))
     comments = deferred(Column(String(255), nullable=True))
 
-    location = relation(Location,
-                        backref=backref('service_maps',
-                                        cascade="all, delete-orphan"))
+    location = relation(Location)
     service_instance = relation(ServiceInstance, innerjoin=True,
                                 backref=backref('service_map',
                                                 cascade="all, delete-orphan"))
-    network = relation(Network, backref=backref('service_map',
-                                                cascade="all, delete-orphan"))
+    network = relation(Network)
 
     @property
     def service(self):

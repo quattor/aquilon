@@ -73,7 +73,7 @@ class Branch(Base):
 
     comments = Column(String(255), nullable=True)
 
-    owner = relation(UserPrincipal, backref='domain')
+    owner = relation(UserPrincipal)
 
     __mapper_args__ = {'polymorphic_on': branch_type}
 

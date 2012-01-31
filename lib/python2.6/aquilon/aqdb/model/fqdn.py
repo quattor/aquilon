@@ -32,7 +32,7 @@ from datetime import datetime
 
 from sqlalchemy import (Integer, DateTime, Sequence, Column, ForeignKey,
                         UniqueConstraint)
-from sqlalchemy.orm import relation, deferred, backref
+from sqlalchemy.orm import relation, deferred
 from sqlalchemy.orm.session import Session
 
 from aquilon.exceptions_ import InternalError, ArgumentError
@@ -64,10 +64,9 @@ class Fqdn(Base):
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
 
-    dns_domain = relation(DnsDomain, innerjoin=True, backref=backref("fqdns"))
+    dns_domain = relation(DnsDomain, innerjoin=True)
 
-    dns_environment = relation(DnsEnvironment, innerjoin=True,
-                               backref=backref("fqdns"))
+    dns_environment = relation(DnsEnvironment, innerjoin=True)
 
     @property
     def fqdn(self):

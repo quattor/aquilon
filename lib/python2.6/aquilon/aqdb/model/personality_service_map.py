@@ -78,18 +78,13 @@ class PersonalityServiceMap(Base):
                                     nullable=False))
     comments = deferred(Column(String(255), nullable=True))
 
-    location = relation(Location,
-                        backref=backref('personality_service_maps',
-                                        cascade="all, delete-orphan"))
+
+    location = relation(Location)
     service_instance = relation(ServiceInstance, innerjoin=True,
                                 backref=backref('personality_service_map',
                                                 cascade="all, delete-orphan"))
-    personality = relation(Personality, innerjoin=True,
-                           backref=backref('maps',
-                                           cascade="all, delete-orphan"))
-    network = relation(Network, backref=backref('personality_service_map',
-                                                cascade="all, delete-orphan"))
-
+    personality = relation(Personality, innerjoin=True)
+    network = relation(Network)
 
     #Archetype probably shouldn't be exposed at this table/object: This isn't
     #intended for use with Archetype, but I'm not 100% sure yet

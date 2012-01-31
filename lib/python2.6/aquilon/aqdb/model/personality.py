@@ -60,7 +60,7 @@ class Personality(Base):
                                     nullable=False))
     comments = Column(String(255), nullable=True)
 
-    archetype = relation(Archetype, backref='personality')
+    archetype = relation(Archetype)
 
     services = association_proxy('_services', 'service')
 
@@ -101,5 +101,4 @@ class PersonalityGrnMap(Base):
 pgn = PersonalityGrnMap.__table__  # pylint: disable=C0103, E1101
 pgn.primary_key.name = '%s_pk' % _PGN
 
-Personality.grns = relation(Grn, secondary=PersonalityGrnMap.__table__,
-                            backref='personalities')
+Personality.grns = relation(Grn, secondary=PersonalityGrnMap.__table__)

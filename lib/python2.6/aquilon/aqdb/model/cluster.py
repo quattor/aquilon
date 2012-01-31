@@ -150,7 +150,7 @@ class Cluster(Base):
                           nullable=False)
     comments = Column(String(255))
 
-    status = relation(ClusterLifecycle, innerjoin=True, backref='clusters')
+    status = relation(ClusterLifecycle, innerjoin=True)
     location_constraint = relation(Location, lazy=False)
 
     personality = relation(Personality, lazy=False, innerjoin=True)

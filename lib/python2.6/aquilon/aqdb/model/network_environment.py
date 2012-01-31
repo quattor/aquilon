@@ -32,7 +32,7 @@ from datetime import datetime
 
 from sqlalchemy import (Column, Integer, DateTime, Sequence, String,
                         ForeignKey, UniqueConstraint)
-from sqlalchemy.orm import deferred, relation, backref
+from sqlalchemy.orm import deferred, relation
 
 from aquilon.exceptions_ import InternalError
 from aquilon.aqdb.model import Base, Location, DnsEnvironment
@@ -75,10 +75,9 @@ class NetworkEnvironment(Base):
 
     comments = deferred(Column(String(255), nullable=True))
 
-    location = relation(Location, backref=backref('network_environments'))
+    location = relation(Location)
 
-    dns_environment = relation(DnsEnvironment,
-                               backref=backref('network_environments'))
+    dns_environment = relation(DnsEnvironment)
 
     @property
     def is_default(self):

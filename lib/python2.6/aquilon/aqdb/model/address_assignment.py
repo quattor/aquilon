@@ -99,8 +99,7 @@ class AddressAssignment(Base):
                          backref=backref('assignments', order_by=[_label],
                                          cascade='all, delete-orphan'))
 
-    dns_environment = relation(DnsEnvironment, innerjoin=True,
-                               backref=backref('assignments'))
+    dns_environment = relation(DnsEnvironment, innerjoin=True)
 
     # Setting viewonly is very important here as we do not want the removal of
     # an AddressAssignment record to change the linked DNS record(s)

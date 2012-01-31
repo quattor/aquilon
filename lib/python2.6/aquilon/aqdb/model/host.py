@@ -105,11 +105,10 @@ class Host(Base):
                                        cascade='all'))
 
     branch = relation(Branch, innerjoin=True, backref='hosts')
-    sandbox_author = relation(UserPrincipal, backref='sandboxed_hosts')
-    personality = relation(Personality, innerjoin=True, backref='hosts')
-    status = relation(HostLifecycle, innerjoin=True, backref='hosts')
-    operating_system = relation(OperatingSystem, innerjoin=True,
-                                backref='hosts')
+    sandbox_author = relation(UserPrincipal)
+    personality = relation(Personality, innerjoin=True)
+    status = relation(HostLifecycle, innerjoin=True)
+    operating_system = relation(OperatingSystem, innerjoin=True)
 
     @property
     def fqdn(self):
@@ -154,4 +153,4 @@ class HostGrnMap(Base):
 hostgrns = HostGrnMap.__table__  # pylint: disable=C0103, E1101
 hostgrns.primary_key.name = "%s_pk" % _HOSTGRN
 
-Host.grns = relation(Grn, secondary=HostGrnMap.__table__, backref='hosts')
+Host.grns = relation(Grn, secondary=HostGrnMap.__table__)

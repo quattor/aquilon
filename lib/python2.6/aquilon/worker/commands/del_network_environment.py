@@ -31,7 +31,7 @@
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.broker import BrokerCommand
-from aquilon.aqdb.model import NetworkEnvironment
+from aquilon.aqdb.model import NetworkEnvironment, Network
 
 
 class CommandDelNetworkEnvironment(BrokerCommand):
@@ -46,7 +46,7 @@ class CommandDelNetworkEnvironment(BrokerCommand):
             raise ArgumentError("{0} is the default network environment, "
                                 "therefore it cannot be deleted."
                                 .format(dbnet_env))
-        if dbnet_env.networks:
+        if session.query(Network).filter_by(network_environment=dbnet_env).first():
             raise ArgumentError("{0} still has networks defined, delete them "
                                 "first.".format(dbnet_env))
         session.delete(dbnet_env)
