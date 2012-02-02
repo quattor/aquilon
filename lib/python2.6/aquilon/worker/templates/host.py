@@ -127,13 +127,13 @@ class PlenaryToplevelHost(Plenary):
         Plenary.__init__(self, dbhost, logger=logger)
         # Store the branch separately so get_key() works even after the dbhost
         # object has been deleted
-        self.branch = dbhost.branch.name
+        self.branch = dbhost.branch
         self.name = dbhost.fqdn
         self.plenary_core = ""
         self.plenary_template = "%(name)s" % self.__dict__
         self.template_type = "object"
         self.dir = "%s/domains/%s/profiles" % (
-            self.config.get("broker", "builddir"), self.branch)
+            self.config.get("broker", "builddir"), self.branch.name)
 
     def will_change(self):
         # Need to override to handle IncompleteError...
@@ -151,7 +151,7 @@ class PlenaryToplevelHost(Plenary):
         # Going with self.name instead of self.plenary_template seems like
         # the right decision here - easier to predict behavior when meshing
         # with other CompileKey generators like PlenaryMachine.
-        return CompileKey(domain=self.branch, profile=self.name,
+        return CompileKey(domain=self.branch.name, profile=self.name,
                           logger=self.logger)
 
     def body(self, lines):
@@ -380,6 +380,12 @@ class PlenaryToplevelHost(Plenary):
                          pan(StructureTemplate(resource.template_base +
                                                '/config'))))
         lines.append("")
+        lines.append("'/metadata/template/branch/name' = %s;" % pan(self.branch.name))
+        lines.append("'/metadata/template/branch/type' = %s;" %
+                      pan(self.branch.branch_type))
+        if self.branch.branch_type == 'sandbox':
+            lines.append("'/metadata/template/branch/author' = %s;" %
+                         pan(self.dbobj.sandbox_author.name))
         for template in templates:
             lines.append("include { %s };" % pan(template))
         lines.append("")
