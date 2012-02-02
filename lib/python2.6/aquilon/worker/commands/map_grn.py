@@ -28,7 +28,6 @@
 # TERMS THAT MAY APPLY.
 """Contains the logic for `aq map grn`."""
 
-from aquilon.exceptions_ import NotFoundException, ArgumentError
 from aquilon.aqdb.model import Personality
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.grn import lookup_grn

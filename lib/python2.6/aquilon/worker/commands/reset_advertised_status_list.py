@@ -29,7 +29,7 @@
 """Contains the logic for `aq reset advertised status --list`."""
 
 
-from aquilon.exceptions_ import ArgumentError, NotFoundException
+from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.host import hostlist_to_hosts
 from aquilon.worker.commands.reset_advertised_status \
@@ -55,7 +55,7 @@ class CommandResetAdvertisedStatusList(CommandResetAdvertisedStatus):
         branches = {}
         authors = {}
         failed = []
-        compileable =[]
+        compileable = []
         # Do any cross-list or dependency checks
         for dbhost in dbhosts:
             ## if archetype is compileable only then
@@ -107,7 +107,7 @@ class CommandResetAdvertisedStatusList(CommandResetAdvertisedStatus):
 
         dbbranch = branches.keys()[0]
         dbauthor = authors.keys()[0]
-        key = CompileKey.merge([plenaries.get_write_key()]);
+        key = CompileKey.merge([plenaries.get_write_key()])
         try:
             lock_queue.acquire(key)
             plenaries.stash()

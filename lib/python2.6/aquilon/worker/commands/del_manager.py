@@ -44,7 +44,7 @@ class CommandDelManager(BrokerCommand):
 
     def render(self, session, logger, manager, **arguments):
         dbmachine = None
-        with DeleteKey("system", logger=logger) as key:
+        with DeleteKey("system", logger=logger):
             # Check dependencies, translate into user-friendly message
             dbmanager = ARecord.get_unique(session, fqdn=manager, compel=True)
 

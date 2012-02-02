@@ -30,7 +30,7 @@
 
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.worker.commands import BrokerCommand
+from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import Location, Company
 
 
@@ -46,7 +46,7 @@ class CommandAddOrganization(BrokerCommand):
                 raise ArgumentError("Organization %s already exists." %
                                     organization)
         if not fullname:
-            fullname=organization
+            fullname = organization
 
         dborg = Company(name=organization, fullname=fullname, comments=comments)
         session.add(dborg)

@@ -29,9 +29,7 @@
 """Contains the logic for `aq del location`."""
 
 
-from sqlalchemy.orm.exc import NoResultFound
-
-from aquilon.exceptions_ import NotFoundException, ArgumentError
+from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import (Location, Network, NetworkEnvironment, Cluster,
                                 HardwareEntity)

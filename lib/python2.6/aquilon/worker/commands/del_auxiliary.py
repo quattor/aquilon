@@ -44,7 +44,7 @@ class CommandDelAuxiliary(BrokerCommand):
 
     def render(self, session, logger, auxiliary, **arguments):
         dbmachine = None
-        with DeleteKey("system", logger=logger) as key:
+        with DeleteKey("system", logger=logger):
             # Check dependencies, translate into user-friendly message
             dbauxiliary = ARecord.get_unique(session, fqdn=auxiliary,
                                              compel=True)

@@ -29,8 +29,7 @@
 
 
 from aquilon.aqdb.model import RebootIntervention
-from aquilon.worker.broker import BrokerCommand, validate_basic
-from aquilon.worker.commands.del_intervention import CommandDelIntervention
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.resources import (del_resource,
                                                  get_resource_holder)
 

@@ -28,10 +28,8 @@
 # TERMS THAT MAY APPLY.
 
 import re
-from string import capitalize
 
 from dateutil.parser import parse
-from datetime import datetime
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import RebootSchedule
@@ -92,7 +90,7 @@ class CommandAddRebootSchedule(BrokerCommand):
 
                         dups[sub] = 1
 
-        """ enforce order to comma separated values """
+        # enforce order to comma separated values
         if "day" in arguments:
             arguments["day"] = self._fix_parameter_order("day",
                                                          arguments["day"])
@@ -102,7 +100,7 @@ class CommandAddRebootSchedule(BrokerCommand):
                                                           arguments["week"])
 
         if "week" in arguments and arguments["week"] == "1,2,3,4,5":
-            arguments["week"] = "all";
+            arguments["week"] = "all"
 
         return arguments
 
@@ -113,14 +111,14 @@ class CommandAddRebootSchedule(BrokerCommand):
         arguments = self._validate_args(logger, **arguments)
 
         time = arguments["time"]
-        week = capitalize(arguments["week"])
-        day = capitalize(arguments["day"])
+        week = arguments["week"].capitalize()
+        day = arguments["day"].capitalize()
         hostname = arguments["hostname"]
         cluster = arguments["cluster"]
         comments = arguments["comments"]
         if time is not None:
             try:
-                start_when = parse(time)
+                parse(time)
             except ValueError, e:
                 raise ArgumentError("the preferred time '%s' could not be "
                                     "interpreted: %s" % (time, e))

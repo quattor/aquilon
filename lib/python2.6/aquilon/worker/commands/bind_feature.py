@@ -30,8 +30,8 @@
 from sqlalchemy.orm import contains_eager
 from sqlalchemy.sql import or_
 
-from aquilon.exceptions_ import (ArgumentError, NotFoundException, PartialError,
-                                 IncompleteError, AuthorizationException,
+from aquilon.exceptions_ import (ArgumentError, PartialError, IncompleteError,
+                                 InternalError, AuthorizationException,
                                  UnimplementedError)
 from aquilon.aqdb.model import (Feature, FeatureLink, Archetype, Personality,
                                 Model, Machine, Host, Interface)
@@ -39,7 +39,6 @@ from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.locks import CompileKey
 from aquilon.worker.templates.host import PlenaryHost
 from aquilon.worker.commands.deploy import validate_justification
-from aquilon.utils import first_of
 
 
 class CommandBindFeature(BrokerCommand):
@@ -173,7 +172,7 @@ class CommandBindFeature(BrokerCommand):
         successful = []
         failed = []
 
-        with CompileKey(logger=logger) as key:
+        with CompileKey(logger=logger):
             hosts = q.all()
 
             logger.client_info("Flushing %d hosts." % len(hosts))

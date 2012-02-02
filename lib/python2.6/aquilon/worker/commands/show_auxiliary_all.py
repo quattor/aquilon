@@ -29,7 +29,6 @@
 """Contains the logic for `aq show auxiliary --all`."""
 
 from sqlalchemy.orm import contains_eager, aliased
-from sqlalchemy.sql import exists
 
 from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import (Interface, AddressAssignment, HardwareEntity,
