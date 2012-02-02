@@ -55,6 +55,6 @@ class ReservedName(DnsRecord):
         super(ReservedName, self).__init__(**kwargs)
 
 
-resname = ReservedName.__table__  # pylint: disable-msg=C0103, E1101
+resname = ReservedName.__table__  # pylint: disable=C0103, E1101
 resname.primary_key.name = 'reserved_name_pk'
 resname.info['unique_fields'] = ['fqdn']

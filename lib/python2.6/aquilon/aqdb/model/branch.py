@@ -76,7 +76,7 @@ class Branch(Base):
 
     __mapper_args__ = {'polymorphic_on': branch_type}
 
-branch = Branch.__table__  # pylint: disable-msg=C0103, E1101
+branch = Branch.__table__  # pylint: disable=C0103, E1101
 branch.primary_key.name = '%s_pk' % _TN
 branch.append_constraint(UniqueConstraint('name', name='%s_uk' % _TN))
 branch.info['unique_fields'] = ['name']
@@ -104,7 +104,7 @@ class Domain(Branch):
     __mapper_args__ = {'polymorphic_identity': _DMN,
                        'inherit_condition': domain_id == Branch.id}
 
-domain = Domain.__table__  # pylint: disable-msg=C0103, E1101
+domain = Domain.__table__  # pylint: disable=C0103, E1101
 domain.primary_key.name = '%s_pk' % _DMN
 domain.info['unique_fields'] = ['name']
 Domain.tracked_branch = relation(Branch, uselist=False, backref='trackers',
@@ -123,6 +123,6 @@ class Sandbox(Branch):
                                             ondelete='CASCADE'),
                         primary_key=True)
 
-sandbox = Sandbox.__table__  # pylint: disable-msg=C0103, E1101
+sandbox = Sandbox.__table__  # pylint: disable=C0103, E1101
 sandbox.primary_key.name = '%s_pk' % _SBX
 sandbox.info['unique_fields'] = ['name']

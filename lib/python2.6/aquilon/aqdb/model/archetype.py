@@ -62,7 +62,7 @@ class Archetype(Base):
 
     services = association_proxy('_services', 'service')
 
-archetype = Archetype.__table__  # pylint: disable-msg=C0103, E1101
+archetype = Archetype.__table__  # pylint: disable=C0103, E1101
 archetype.info['unique_fields'] = ['name']
 
 archetype.primary_key.name = '%s_pk' % _TN

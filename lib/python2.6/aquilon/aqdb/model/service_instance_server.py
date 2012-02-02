@@ -84,5 +84,5 @@ Host.services_provided = association_proxy('_services_provided',
                                            'service_instance',
                                            creator=_sis_si_creator)
 
-sis = ServiceInstanceServer.__table__  # pylint: disable-msg=C0103, E1101
+sis = ServiceInstanceServer.__table__  # pylint: disable=C0103, E1101
 sis.primary_key.name = 'service_instance_server_pk'

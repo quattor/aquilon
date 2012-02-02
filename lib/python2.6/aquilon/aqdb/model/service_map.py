@@ -72,7 +72,7 @@ class ServiceMap(Base):
         return self.service_instance.service
 
 
-service_map = ServiceMap.__table__  # pylint: disable-msg=C0103, E1101
+service_map = ServiceMap.__table__  # pylint: disable=C0103, E1101
 service_map.primary_key.name = 'service_map_pk'
 
 service_map.append_constraint(

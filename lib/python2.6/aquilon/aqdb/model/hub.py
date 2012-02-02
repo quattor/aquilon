@@ -57,6 +57,6 @@ class Hub(Location):
                                     ondelete='CASCADE'),
                 primary_key=True)
 
-hub = Hub.__table__  # pylint: disable-msg=C0103, E1101
+hub = Hub.__table__  # pylint: disable=C0103, E1101
 hub.primary_key.name = 'hub_pk'
 hub.info['unique_fields'] = ['name']

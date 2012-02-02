@@ -76,7 +76,7 @@ class Alias(DnsRecord):
             raise ValueError("Maximum alias depth exceeded")
 
 
-alias = Alias.__table__  # pylint: disable-msg=C0103, E1101
+alias = Alias.__table__  # pylint: disable=C0103, E1101
 alias.primary_key.name = '%s_pk' % _TN
 alias.info['unique_fields'] = ['fqdn']
 alias.info['extra_search_fields'] = ['target']

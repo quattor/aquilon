@@ -45,6 +45,6 @@ class City(Location):
     timezone = Column(String(64), nullable=True, default='UTC')
 
 
-city = City.__table__  # pylint: disable-msg=C0103, E1101
+city = City.__table__  # pylint: disable=C0103, E1101
 city.primary_key.name = 'city_pk'
 city.info['unique_fields'] = ['name']

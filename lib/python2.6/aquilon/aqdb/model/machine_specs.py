@@ -91,7 +91,7 @@ class MachineSpecs(Base):
         return 'sda'
 
 
-machine_specs = MachineSpecs.__table__  # pylint: disable-msg=C0103, E1101
+machine_specs = MachineSpecs.__table__  # pylint: disable=C0103, E1101
 machine_specs.primary_key.name = 'machine_specs_pk'
 
 #for now, need a UK on model_id. WILL be a name AND a model_id as UK.

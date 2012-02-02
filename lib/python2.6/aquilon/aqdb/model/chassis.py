@@ -51,5 +51,5 @@ class Chassis(HardwareEntity):
                                 primary_key=True)
 
 
-chassis = Chassis.__table__  # pylint: disable-msg=C0103, E1101
+chassis = Chassis.__table__  # pylint: disable=C0103, E1101
 chassis.primary_key.name = '%s_pk' % _TN

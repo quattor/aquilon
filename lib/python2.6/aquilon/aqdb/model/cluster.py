@@ -270,7 +270,7 @@ class Cluster(Base):
         return val.__format__(passthrough)
 
 
-cluster = Cluster.__table__  # pylint: disable-msg=C0103, E1101
+cluster = Cluster.__table__  # pylint: disable=C0103, E1101
 cluster.primary_key.name = 'cluster_pk'
 cluster.append_constraint(UniqueConstraint('name', name='cluster_uk'))
 cluster.info['unique_fields'] = ['name']
@@ -288,7 +288,7 @@ class ComputeCluster(Cluster):
                                     ondelete='CASCADE'),
                                     primary_key=True)
 
-compute_cluster = ComputeCluster.__table__  # pylint: disable-msg=C0103, E1101
+compute_cluster = ComputeCluster.__table__  # pylint: disable=C0103, E1101
 compute_cluster.primary_key.name = 'compute_cluster_pk'
 compute_cluster.info['unique_fields'] = ['name']
 
@@ -314,7 +314,7 @@ class StorageCluster(Cluster):
                         "to a storage cluster. The host %s is of archetype %s"
                         % (host.fqdn, host.archetype))
 
-storage_cluster = StorageCluster.__table__  # pylint: disable-msg=C0103, E1101
+storage_cluster = StorageCluster.__table__  # pylint: disable=C0103, E1101
 storage_cluster.primary_key.name = 'storage_cluster_pk'
 storage_cluster.info['unique_fields'] = ['name']
 
@@ -538,7 +538,7 @@ class EsxCluster(Cluster):
             kw['max_hosts'] = 8
         super(EsxCluster, self).__init__(**kw)
 
-esx_cluster = EsxCluster.__table__  # pylint: disable-msg=C0103, E1101
+esx_cluster = EsxCluster.__table__  # pylint: disable=C0103, E1101
 esx_cluster.primary_key.name = 'esx_cluster_pk'
 esx_cluster.info['unique_fields'] = ['name']
 
@@ -597,7 +597,7 @@ class HostClusterMember(Base):
 
     __mapper_args__ = {'extension': ValidateCluster()}
 
-hcm = HostClusterMember.__table__  # pylint: disable-msg=C0103, E1101
+hcm = HostClusterMember.__table__  # pylint: disable=C0103, E1101
 hcm.primary_key.name = '%s_pk' % _HCM
 hcm.append_constraint(
     UniqueConstraint('host_id', name='host_cluster_member_host_uk'))
@@ -629,7 +629,7 @@ class ClusterAllowedPersonality(Base):
     __mapper_args__ = {'extension': ValidateCluster()}
 
 
-cap = ClusterAllowedPersonality.__table__  # pylint: disable-msg=C0103, E1101
+cap = ClusterAllowedPersonality.__table__  # pylint: disable=C0103, E1101
 cap.primary_key.name = '%s_pk' % _CAP
 cap.info['unique_fields'] = ['cluster', 'personality']
 cap.cluster = association_proxy('_cluster', 'cluster')
@@ -662,7 +662,7 @@ class MachineClusterMember(Base):
 
     __mapper_args__ = {'extension': ValidateCluster()}
 
-mcm = MachineClusterMember.__table__  # pylint: disable-msg=C0103, E1101
+mcm = MachineClusterMember.__table__  # pylint: disable=C0103, E1101
 mcm.primary_key.name = '%s_pk' % _MCM
 mcm.append_constraint(UniqueConstraint('machine_id',
                                        name='machine_cluster_member_uk'))
@@ -716,7 +716,7 @@ class ClusterAlignedService(Base):
                        backref=backref('_clusters', cascade='all'))
     #cascade deleted services to delete their being required to cluster_types
 
-cas = ClusterAlignedService.__table__  # pylint: disable-msg=C0103, E1101
+cas = ClusterAlignedService.__table__  # pylint: disable=C0103, E1101
 cas.primary_key.name = '%s_pk' % _CASABV
 cas.info['unique_fields'] = ['cluster_type', 'service']
 
@@ -772,6 +772,6 @@ class ClusterServiceBinding(Base):
     def cfg_path(self):
         return self.service_instance.cfg_path
 
-csb = ClusterServiceBinding.__table__  # pylint: disable-msg=C0103, E1101
+csb = ClusterServiceBinding.__table__  # pylint: disable=C0103, E1101
 csb.primary_key.name = '%s_pk' % _CSB
 csb.info['unique_fields'] = ['cluster', 'service_instance']

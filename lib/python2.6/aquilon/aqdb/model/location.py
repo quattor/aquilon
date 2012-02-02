@@ -189,7 +189,7 @@ class Location(Base):
 
         session.autoflush = flush_state
 
-location = Location.__table__  # pylint: disable-msg=C0103, E1101
+location = Location.__table__  # pylint: disable=C0103, E1101
 
 location.primary_key.name = 'location_pk'
 location.info['unique_fields'] = ['name', 'location_type']
@@ -227,7 +227,7 @@ class LocationLink(Base):
                                       passive_deletes=True))
 
 
-llink = LocationLink.__table__  # pylint: disable-msg=C0103, E1101
+llink = LocationLink.__table__  # pylint: disable=C0103, E1101
 llink.primary_key.name = 'location_link_pk'
 
 # Make these relations view-only, to make sure

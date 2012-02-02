@@ -255,7 +255,7 @@ class Network(Base):
         return msg
 
 
-network = Network.__table__  # pylint: disable-msg=C0103, E1101
+network = Network.__table__  # pylint: disable=C0103, E1101
 network.primary_key.name = '%s_pk' % _TN
 
 network.append_constraint(UniqueConstraint('network_environment_id', 'ip',

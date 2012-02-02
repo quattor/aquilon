@@ -67,7 +67,7 @@ class PersonalityClusterInfo(Base):
 
     __mapper_args__ = {'polymorphic_on': cluster_type}
 
-pci = PersonalityClusterInfo.__table__  # pylint: disable-msg=C0103, E1101
+pci = PersonalityClusterInfo.__table__  # pylint: disable=C0103, E1101
 pci.primary_key.name = "%s_pk" % _PCIABV
 pci.append_constraint(UniqueConstraint("personality_id", "cluster_type",
                                        name="%s_pc_uk" % _PCIABV))
@@ -122,5 +122,5 @@ class PersonalityESXClusterInfo(PersonalityClusterInfo):
         self._compiled_vmhost = None
 
 
-pcei = PersonalityESXClusterInfo.__table__  # pylint: disable-msg=C0103, E1101
+pcei = PersonalityESXClusterInfo.__table__  # pylint: disable=C0103, E1101
 pcei.primary_key.name = "%s_pk" % _PECIABV

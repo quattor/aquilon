@@ -57,7 +57,7 @@ class Grn(Base):
     creation_date = Column(DateTime, default=datetime.now, nullable=False)
 
 
-grn= Grn.__table__  # pylint: disable-msg=C0103, E1101
+grn= Grn.__table__  # pylint: disable=C0103, E1101
 
 grn.primary_key.name = '%s_pk' % _TN
 grn.append_constraint(

@@ -99,7 +99,7 @@ class Resource(Base):
         return "<%s Resource %s>" % (self.resource_type, self.id)
 
 
-resource = Resource.__table__  # pylint: disable-msg=C0103, E1101
+resource = Resource.__table__  # pylint: disable=C0103, E1101
 resource.primary_key.name = '%s_pk' % _TN
 resource.info['unique_fields'] = ['name', 'holder']
 
@@ -135,7 +135,7 @@ Resource.holder = relation(ResourceHolder, uselist=False, lazy='subquery',
                            backref=backref('resources',
                                            cascade='all, delete-orphan'))
 
-resholder = ResourceHolder.__table__  # pylint: disable-msg=C0103, E1101
+resholder = ResourceHolder.__table__  # pylint: disable=C0103, E1101
 resholder.primary_key.name = '%s_pk' % _RESHOLDER
 
 

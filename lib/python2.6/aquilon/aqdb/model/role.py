@@ -52,7 +52,7 @@ class Role(Base):
     comments = Column('comments', String(255), nullable=True)
 
 
-role = Role.__table__  # pylint: disable-msg=C0103, E1101
+role = Role.__table__  # pylint: disable=C0103, E1101
 
 role.primary_key.name = 'role_pk'
 role.append_constraint(UniqueConstraint('name', name='role_uk'))

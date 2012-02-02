@@ -91,7 +91,7 @@ class DnsMap(Base):
         super(DnsMap, self).__init__(**kwargs)
 
 
-dnsmap = DnsMap.__table__  # pylint: disable-msg=C0103, E1101
+dnsmap = DnsMap.__table__  # pylint: disable=C0103, E1101
 dnsmap.primary_key.name = '%s_pk' % _TN
 dnsmap.info['unique_fields'] = ['location', 'dns_domain']
 

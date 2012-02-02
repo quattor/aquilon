@@ -239,7 +239,7 @@ class ServiceInstance(Base):
         return cache
 
 
-service_instance = ServiceInstance.__table__  # pylint: disable-msg=C0103, E1101
+service_instance = ServiceInstance.__table__  # pylint: disable=C0103, E1101
 
 service_instance.primary_key.name = 'svc_inst_pk'
 service_instance.append_constraint(
@@ -282,7 +282,7 @@ def _build_item_si_creator(service_instance):
 Host.services_used = association_proxy('_services_used', 'service_instance',
                                        creator=_build_item_si_creator)
 
-build_item = BuildItem.__table__  # pylint: disable-msg=C0103, E1101
+build_item = BuildItem.__table__  # pylint: disable=C0103, E1101
 
 build_item.primary_key.name = 'build_item_pk'
 

@@ -42,6 +42,6 @@ class Continent(Location):
                                     ondelete='CASCADE'),
                 primary_key=True)
 
-continent = Continent.__table__  # pylint: disable-msg=C0103, E1101
+continent = Continent.__table__  # pylint: disable=C0103, E1101
 continent.primary_key.name = 'continent_pk'
 continent.info['unique_fields'] = ['name']

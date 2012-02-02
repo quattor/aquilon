@@ -87,7 +87,7 @@ class RouterAddress(Base):
                            viewonly=True)
 
 
-rtaddr = RouterAddress.__table__  # pylint: disable-msg=C0103, E1101
+rtaddr = RouterAddress.__table__  # pylint: disable=C0103, E1101
 rtaddr.primary_key.name = '%s_pk' % _TN
 rtaddr.info['unique_fields'] = ['ip', 'network']
 rtaddr.info['extra_search_fields'] = ['dns_environment']

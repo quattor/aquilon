@@ -14,9 +14,9 @@ import aquilon.client.depends
 
 # Any of the above may override the default location for ms.version...
 import ms.version
-ms.version.addpkg("pylint", "0.20.0")
-ms.version.addpkg("logilab.astng", "0.20.0")
-ms.version.addpkg("logilab.common", "0.49.0")
+ms.version.addpkg("pylint", "0.23.0")
+ms.version.addpkg("logilab.astng", "0.21.1")
+ms.version.addpkg("logilab.common", "0.55.0")
 
 from pylint import lint
 
