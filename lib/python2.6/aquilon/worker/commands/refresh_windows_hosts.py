@@ -51,7 +51,7 @@ class CommandRefreshWindowsHosts(BrokerCommand):
     def render(self, session, logger, dryrun, **arguments):
         clusters = set()
         partial_error = None
-        with SyncKey(data="windows", logger=logger) as key:
+        with SyncKey(data="windows", logger=logger):
             try:
                 self.refresh_windows_hosts(session, logger, clusters)
                 if dryrun:

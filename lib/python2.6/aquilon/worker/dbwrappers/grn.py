@@ -58,7 +58,7 @@ def lookup_autoupdate(config, session, logger, grn, eon_id):
     elif eon_id and not lookup_by_id(config, eon_id):
         return None
 
-    with SyncKey(data="grn", logger=logger) as lock:
+    with SyncKey(data="grn", logger=logger):
         # Try again in case a concurrent process have already updated the cache
         # by the time we got the lock
         dbgrn = Grn.get_unique(session, grn=grn, eon_id=eon_id)

@@ -39,6 +39,5 @@ class CommandShowRebootSchedule(BrokerCommand):
     def render(self, session, hostname, cluster, all,
                **arguments):
 
-        resource=None
         return show_resource(session, hostname, cluster, None, all,
-                             resource, RebootSchedule)
+                             None, RebootSchedule)

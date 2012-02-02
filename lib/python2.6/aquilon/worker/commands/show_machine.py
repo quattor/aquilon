@@ -29,7 +29,6 @@
 """Contains the logic for `aq show machine`."""
 
 
-from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.location import get_location
 from aquilon.aqdb.column_types import AqStr

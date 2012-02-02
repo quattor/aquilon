@@ -56,7 +56,7 @@ class CommandDelSwitch(BrokerCommand):
                                 "delete them first: {1}.".format
                                 (dbswitch, ", ".join(addrs)))
 
-        with DeleteKey("system", logger=logger) as key:
+        with DeleteKey("system", logger=logger):
             self.del_switch(session, logger, dbswitch)
             session.commit()
         return

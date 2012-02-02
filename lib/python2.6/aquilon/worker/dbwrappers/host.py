@@ -29,7 +29,7 @@
 """Wrappers to make getting and using hosts simpler."""
 
 
-from aquilon.exceptions_ import NotFoundException
+from aquilon.exceptions_ import NotFoundException, ArgumentError
 from aquilon.aqdb.model import Machine
 from aquilon.aqdb.model.dns_domain import parse_fqdn
 
@@ -49,6 +49,23 @@ def hostname_to_host(session, hostname):
         raise NotFoundException("{0} does not have a host "
                                 "assigned.".format(dbmachine))
     return dbmachine.host
+
+def hostlist_to_hosts(session, hostlist):
+    dbhosts = []
+    failed = []
+    for host in hostlist:
+        try:
+            dbhosts.append(hostname_to_host(session, host))
+        except NotFoundException, nfe:
+            failed.append("%s: %s" % (host, nfe))
+        except ArgumentError, ae:
+            failed.append("%s: %s" % (host, ae))
+    if failed:
+        raise ArgumentError("Invalid hosts in list:\n%s" %
+                            "\n".join(failed))
+    if not dbhosts:
+        raise ArgumentError("Empty list.")
+    return dbhosts
 
 def get_host_bound_service(dbhost, dbservice):
     for si in dbhost.services_used:

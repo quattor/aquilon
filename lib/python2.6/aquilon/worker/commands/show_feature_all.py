@@ -27,8 +27,7 @@
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
 
-from sqlalchemy.orm import undefer, subqueryload, joinedload
-from sqlalchemy.sql import desc
+from sqlalchemy.orm import undefer, subqueryload
 
 from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import Feature

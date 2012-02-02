@@ -29,7 +29,7 @@
 """Contains the logic for `aq search host`."""
 
 
-from sqlalchemy.orm import aliased, joinedload_all, contains_eager
+from sqlalchemy.orm import aliased, contains_eager
 from sqlalchemy.sql import or_
 
 from aquilon.worker.broker import BrokerCommand

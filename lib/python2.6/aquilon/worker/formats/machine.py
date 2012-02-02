@@ -30,7 +30,7 @@
 
 from aquilon import const
 from aquilon.aqdb.model import Machine
-from aquilon.worker.formats.formatters import ObjectFormatter, shift
+from aquilon.worker.formats.formatters import ObjectFormatter
 from aquilon.worker.formats.list import ListFormatter
 from aquilon.worker.dbwrappers.feature import (model_features,
                                                personality_features)

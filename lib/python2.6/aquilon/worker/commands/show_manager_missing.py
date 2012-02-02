@@ -29,7 +29,6 @@
 """Contains the logic for `aq show manager --missing`."""
 
 from sqlalchemy.orm import contains_eager
-from sqlalchemy.sql import exists
 
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.formats.interface import MissingManagersList

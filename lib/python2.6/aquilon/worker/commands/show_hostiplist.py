@@ -29,8 +29,7 @@
 """Contains the logic for `aq show hostiplist`."""
 
 
-from sqlalchemy.orm import (contains_eager, subqueryload, joinedload,
-                            lazyload)
+from sqlalchemy.orm import contains_eager, joinedload
 from sqlalchemy.sql import and_
 
 from aquilon.worker.broker import BrokerCommand

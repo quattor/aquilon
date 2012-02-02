@@ -88,7 +88,7 @@ def remove_branch(config, logger, dbbranch):
 
     domain = TemplateDomain(dbbranch, logger=logger)
     # Can this fail?  Is recovery needed?
-    with CompileKey(domain=dbbranch.name, logger=logger) as key:
+    with CompileKey(domain=dbbranch.name, logger=logger):
         for dir in domain.directories():
             remove_dir(dir, logger=logger)
 

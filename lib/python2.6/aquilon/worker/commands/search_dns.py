@@ -36,7 +36,7 @@ from aquilon.aqdb.model import (DnsRecord, ARecord, Alias, SrvRecord, Fqdn,
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.formats.list import StringAttributeList
 
-from sqlalchemy.orm import contains_eager, undefer, subqueryload, joinedload
+from sqlalchemy.orm import contains_eager, undefer, subqueryload
 from sqlalchemy.sql import or_
 
 # Map standard DNS record types to our internal types

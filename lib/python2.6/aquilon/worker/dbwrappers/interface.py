@@ -501,7 +501,7 @@ def assign_address(dbinterface, ip, dbnetwork, label=None, usage=None):
         raise ArgumentError("Slave interfaces cannot hold addresses.")
 
     if usage and usage not in ADDR_USAGES:
-            raise ArgumentError("Illegal address usage '%s'." % usage)
+        raise ArgumentError("Illegal address usage '%s'." % usage)
 
     for addr in dbinterface.assignments:
         if not label and not addr.label:

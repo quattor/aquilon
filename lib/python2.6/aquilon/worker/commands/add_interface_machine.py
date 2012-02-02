@@ -257,7 +257,7 @@ class CommandAddInterfaceMachine(BrokerCommand):
             return
         if not dbmachine.host:
             logger.client_info("Machine %s is not linked to a host, not "
-                               "auto-creating manager for %s with IP address "
+                               "auto-creating manager with IP address "
                                "%s." % (dbmachine.label, old_ip))
             return
         manager = "%sr.%s" % (dbmachine.primary_name.fqdn.name,

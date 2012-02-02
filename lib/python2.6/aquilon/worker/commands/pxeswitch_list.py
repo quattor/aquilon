@@ -68,10 +68,7 @@ class CommandPxeswitchList(BrokerCommand):
         servers = dict()
         groups = dict()
         failed = []
-        for host in list.splitlines():
-            host = host.strip()
-            if not host or host.startswith('#'):
-                continue
+        for host in list:
             try:
                 dbhost = hostname_to_host(session, host)
                 # Find what "bootserver" instance we're bound to

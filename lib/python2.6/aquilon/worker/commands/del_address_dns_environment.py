@@ -47,7 +47,7 @@ class CommandDelAddressDNSEnvironment(BrokerCommand):
         dbdns_env = DnsEnvironment.get_unique(session, dns_environment,
                                               compel=True)
 
-        with DeleteKey("system", logger=logger) as key:
+        with DeleteKey("system", logger=logger):
             # We can't use get_unique() here, since we always want to filter by
             # DNS environment, even if no FQDN was given
             q = session.query(ARecord)

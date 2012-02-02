@@ -32,7 +32,6 @@
 import os
 import csv
 import cStringIO
-from string import rstrip
 
 from mako.lookup import TemplateLookup
 
@@ -176,8 +175,8 @@ class ObjectFormatter(object):
     def format_raw(self, result, indent=""):
         if hasattr(self, "template_raw"):
             template = self.lookup_raw.get_template(self.template_raw)
-            return rstrip(shift(template.render(record=result, formatter=self),
-                                indent=indent))
+            return shift(template.render(record=result, formatter=self),
+                         indent=indent).rstrip()
         return indent + str(result)
 
     def csv_fields(self, result):

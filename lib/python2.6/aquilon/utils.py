@@ -54,11 +54,11 @@ def kill_from_pid_file(pid_file):  # pragma: no cover
         p = f.read()
         f.close()
         pid = int(p)
-        print 'killing pid %s'%(pid)
+        print 'Killing pid %s' % pid
         try:
             os.kill(pid, signal.SIGQUIT)
-        except Exception,e:
-            pass
+        except OSError, err:
+            print 'Failed to kill %s: %s' % (pid, err.strerror)
 
 def monkeypatch(cls):
     def decorator(func):
@@ -121,7 +121,7 @@ def force_int(label, value):
         return None
     try:
         result = int(value)
-    except ValueError, e:
+    except ValueError:
         raise ArgumentError("Expected an integer for %s." % label)
     return result
 
@@ -131,7 +131,7 @@ def force_float(label, value):
         return None
     try:
         result = float(value)
-    except ValueError, e:
+    except ValueError:
         raise ArgumentError("Expected an floating point number for %s." % label)
     return result
 
@@ -182,6 +182,17 @@ def force_ascii(label, value):
     except UnicodeDecodeError:
         raise ArgumentError("Only ASCII characters are allowed for %s." % label)
     return value
+
+def force_list(label, value):
+    """
+    Convert a value containing embedded newlines to a list.
+
+    The function also removes empty lines and lines starting with '#'.
+    """
+    if value is None:
+        return None
+    lines = map(lambda x: force_ascii('line', x.strip()), value.splitlines())
+    return filter(lambda x: x and not x.startswith("#"), lines)
 
 def first_of(iterable, function):
     """

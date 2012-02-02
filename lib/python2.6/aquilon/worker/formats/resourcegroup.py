@@ -31,7 +31,7 @@
 
 from aquilon.worker.formats.formatters import ObjectFormatter
 from aquilon.worker.formats.resource import ResourceFormatter
-from aquilon.aqdb.model import ResourceGroup, Resource
+from aquilon.aqdb.model import ResourceGroup
 
 
 class ResourceGroupFormatter(ResourceFormatter):

@@ -411,7 +411,7 @@ class BrokerCommand(object):
             except UnicodeDecodeError:
                 details[k] = '<Non-ASCII value>'
         audit_msg['details'] = details
-        start_xtn(session, audit_msg, self.parameters_by_type.get('file'))
+        start_xtn(session, audit_msg, self.parameters_by_type.get('list'))
 
     @property
     def is_lock_free(self):

@@ -28,10 +28,6 @@
 # TERMS THAT MAY APPLY.
 
 
-from sqlalchemy.orm import aliased
-from sqlalchemy.sql.expression import and_
-
-from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.commands.show_resourcegroup import CommandShowResourceGroup
 

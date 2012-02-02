@@ -36,7 +36,7 @@ from aquilon.worker.locks import SyncKey
 class CommandRefreshGrns(BrokerCommand):
 
     def render(self, session, logger, **arguments):
-        with SyncKey(data="grn", logger=logger) as lock:
+        with SyncKey(data="grn", logger=logger):
             update_grn_map(self.config, session, logger)
 
         return

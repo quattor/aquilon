@@ -39,6 +39,5 @@ class CommandShowRebootIntervention(BrokerCommand):
     def render(self, session, hostname, cluster, all,
                **arguments):
 
-        resource=None
         return show_resource(session, hostname, cluster, None, all,
-                             resource, RebootIntervention)
+                             None, RebootIntervention)

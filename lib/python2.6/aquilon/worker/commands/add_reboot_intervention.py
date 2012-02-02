@@ -31,10 +31,9 @@ from dateutil.parser import parse
 from datetime import datetime
 
 from aquilon.exceptions_ import ArgumentError
-from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
+from sqlalchemy.orm.exc import NoResultFound
 
 from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.commands.add_intervention import CommandAddIntervention
 from aquilon.worker.dbwrappers.resources import (add_resource,
                                                  get_resource_holder)
 from aquilon.aqdb.model import RebootIntervention
@@ -48,9 +47,9 @@ class CommandAddRebootIntervention(BrokerCommand):
                comments, justification, hostname, cluster,
                **arguments):
 
-        allowusers=None
-        allowgroups=None
-        disabled_actions=None
+        allowusers = None
+        allowgroups = None
+        disabled_actions = None
 
         # Name for the plenary and show_host output
         intervention = 'reboot_intervention'
@@ -78,7 +77,7 @@ class CommandAddRebootIntervention(BrokerCommand):
         q = session.query(RebootSchedule)
         try:
             who = get_resource_holder(session, hostname, cluster)
-            reboot_schedule = q.filter_by(holder=who).one()
+            q.filter_by(holder=who).one()
         except NoResultFound, e:
             raise ArgumentError("there is no reboot_schedule defined")
 

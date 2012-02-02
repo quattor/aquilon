@@ -54,7 +54,7 @@ class CommandFlush(BrokerCommand):
         failed = []
         written = 0
 
-        with CompileKey(logger=logger) as key:
+        with CompileKey(logger=logger):
             if locations or all:
                 logger.client_info("Flushing locations.")
                 for dbloc in session.query(City).all():
