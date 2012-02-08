@@ -34,4 +34,4 @@ from aquilon.worker.commands.add_interface_address import CommandAddInterfaceAdd
 
 class CommandAddInterfaceAddressSwitch(CommandAddInterfaceAddress):
 
-    required_parameters = ['switch', 'interface', 'fqdn']
+    required_parameters = ['switch', 'interface']
