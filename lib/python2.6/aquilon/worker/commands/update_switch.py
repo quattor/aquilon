@@ -103,7 +103,7 @@ class CommandUpdateSwitch(BrokerCommand):
         session.add(dbswitch)
         session.flush()
 
-        if ip and ip != old_ip:
+        if ip and ip != old_ip or comments is not None:
             dsdb_runner = DSDBRunner(logger=logger)
             try:
                 dsdb_runner.update_host(dbswitch, oldinfo)

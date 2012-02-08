@@ -565,6 +565,10 @@ class TestBrokerCommand(unittest.TestCase):
         self.dsdb_expect("update aqd host -host_name %s -interface_name %s "
                          "-ip_address %s" % (fqdn, iface, ip), fail=fail)
 
+    def dsdb_expect_update_comment(self, fqdn, comments, fail=False):
+        self.dsdb_expect("update host -host_name %s -status aq -comments %s" %
+                         (fqdn, comments), fail=fail)
+
     def dsdb_verify(self, empty=False):
         dsdb_coverage_dir = os.path.join(self.config.get("unittest", "scratchdir"),
                                          "dsdb_coverage")

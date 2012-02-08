@@ -105,6 +105,8 @@ class TestUpdateSwitch(TestBrokerCommand):
     def testupdatewithoutinterface(self):
         newip = self.net.tor_net[6].usable[1]
         self.dsdb_expect_update_ip("ut3gd1r04.aqd-unittest.ms.com", "xge49", newip)
+        self.dsdb_expect_update_comment("ut3gd1r04.aqd-unittest.ms.com",
+                                        "Some new switch comments")
         command = ["update", "switch", "--type", "bor",
                    "--switch", "ut3gd1r04.aqd-unittest.ms.com",
                    "--ip", newip, "--model", "uttorswitch",

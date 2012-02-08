@@ -430,6 +430,15 @@ class DSDBRunner(object):
                    "-ethernet_address", mac]
         return run_command(command, env=self.getenv(), logger=self.logger)
 
+    def update_host_comments(self, fqdn, comments):
+        if comments is None:
+            comments = ''
+
+        command = [self.config.get("broker", "dsdb"),
+                   "update", "host", "-host_name", fqdn, "-status", "aq",
+                   "-comments", comments]
+        return run_command(command, env=self.getenv(), logger=self.logger)
+
     def update_host_ip(self, name, fqdn, ip):
         command = [self.config.get("broker", "dsdb"),
                    "update", "aqd", "host", "-host_name", fqdn, "-interface_name", name,
@@ -475,6 +484,13 @@ class DSDBRunner(object):
         """
 
         status = {}
+
+        # TODO: This works for switches, but for hosts we eventually want to
+        # propagate dbhwent.host.comments instead of dbhw_ent.comments. On the
+        # other hand we have plans to attach Host objects to switches; if we do
+        # that, then we may switch to using dbhwent.host.comments
+        # unconditionally.
+        status["__comments__"] = dbhw_ent.comments
 
         real_primary = dbhw_ent.fqdn
 
@@ -567,11 +583,14 @@ class DSDBRunner(object):
         mac_update = None
         ip_update = None
         hostname_update = None
+        comment_update = None
 
         # Construct the list of operations
         for key, attrs in oldinfo.items():
             if key not in newinfo:
                 deletes.append(attrs)
+            elif key.startswith("__"):
+                continue
             elif attrs['primary'] != newinfo[key]['primary'] or attrs['fqdn'] != newinfo[key]['fqdn']:
                 deletes.append(attrs)
                 adds.append(newinfo[key])
@@ -583,7 +602,12 @@ class DSDBRunner(object):
                 hostname_update = {"ifname" : attrs['name'], "oldfqdn": attrs['fqdn'], "newfqdn" : newinfo[key]['fqdn']}
 
         for key, attrs in newinfo.items():
-            if key not in oldinfo:
+            if key == "__comments__":
+                if key not in oldinfo or oldinfo[key] != attrs:
+                    comment_update = attrs
+            elif key.startswith("__"):
+                continue
+            elif key not in oldinfo:
                 adds.append(attrs)
 
         # Add the primary address first, and delete it last. The primary address
@@ -611,6 +635,9 @@ class DSDBRunner(object):
                                       attrs['name'], attrs['mac'],
                                       attrs['primary'])
                 rollback_adds.append(attrs)
+
+            if comment_update:
+                self.update_host_comments(dbhw_ent.primary_name, comment_update)
 
         except ProcessException, e:
             self.logger.info("Failed updating DSDB entry for {0:l}: "
