@@ -1604,6 +1604,7 @@
          <option name="ipfromsystem" type="string" conflicts="ip ipfromip autoip">choose IP address in subnet of system</option>
          <option name="autoip" type="flag" conflicts="ip ipfromip ipfromsystem">choose IP address based on MAC/switch</option>
       </optgroup>
+      <transport method="put" trigger="switch" path="switch/%(switch)s/interface/%(interface)s/address"/>
       <transport method="put" path="interface_address"/>
    </command>
 
@@ -1626,6 +1627,7 @@
          <option name="ip" type="ipv4" conflicts="fqdn">IP address</option>
          <option name="label" type="string" conflicts="fqdn">Interface alias</option>
       </optgroup>
+      <transport method="delete" trigger="switch" path="switch/%(switch)s/interface/%(interface)s/address"/>
       <transport method="delete" path="interface_address"/>
    </command>
 
