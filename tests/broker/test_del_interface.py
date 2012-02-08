@@ -80,8 +80,18 @@ class TestDelInterface(TestBrokerCommand):
         self.matchclean(out, "eth0", command)
         self.matchclean(out, "eth1", command)
 
+    def testdelut3gd1r04vlan110(self):
+        command = ["del", "interface", "--interface", "vlan110",
+                   "--switch", "ut3gd1r04.aqd-unittest.ms.com"]
+        self.noouttest(command)
 
-if __name__=='__main__':
+    def testverifydelut3gd1r04vlan110(self):
+        command = ["show", "switch", "--switch", "ut3gd1r04.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchclean(out, "vlan110", command)
+
+
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelInterface)
     unittest.TextTestRunner(verbosity=2).run(suite)
 
