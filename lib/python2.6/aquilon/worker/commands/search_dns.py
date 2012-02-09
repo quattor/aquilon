@@ -36,7 +36,7 @@ from aquilon.aqdb.model import (DnsRecord, ARecord, Alias, SrvRecord, Fqdn,
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.formats.list import StringAttributeList
 
-from sqlalchemy.orm import contains_eager, undefer, subqueryload
+from sqlalchemy.orm import contains_eager, undefer, subqueryload, aliased
 from sqlalchemy.sql import or_
 
 # Map standard DNS record types to our internal types
@@ -50,8 +50,8 @@ class CommandSearchDns(BrokerCommand):
     required_parameters = []
 
     def render(self, session, fqdn, dns_environment, dns_domain, shortname,
-               record_type, ip, network, network_environment, target, fullinfo,
-               style, **kwargs):
+               record_type, ip, network, network_environment, target,
+               target_domain, fullinfo, style, **kwargs):
         q = session.query(DnsRecord)
         q = q.with_polymorphic('*')
         if record_type:
@@ -88,6 +88,10 @@ class CommandSearchDns(BrokerCommand):
         if shortname:
             q = q.filter_by(name=shortname)
 
+        q = q.join(DnsDomain)
+        q = q.options(contains_eager('fqdn.dns_domain'))
+        q = q.order_by(Fqdn.name, DnsDomain.name)
+
         q = q.reset_joinpoint()
 
         if ip:
@@ -104,6 +108,14 @@ class CommandSearchDns(BrokerCommand):
                                        dns_environment=dbdns_env, compel=True)
             q = q.filter(or_(Alias.target == dbtarget,
                              SrvRecord.target == dbtarget))
+        if target_domain:
+            dbdns_domain = DnsDomain.get_unique(session, target_domain,
+                                                compel=True)
+            TargetFqdn = aliased(Fqdn)
+            q = q.join((TargetFqdn, or_(Alias.target_id == TargetFqdn.id,
+                                        SrvRecord.target_id == TargetFqdn.id)))
+            q = q.filter(TargetFqdn.dns_domain == dbdns_domain)
+            q = q.reset_joinpoint()
 
         if fullinfo:
             q = q.options(undefer('comments'))

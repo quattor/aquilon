@@ -105,6 +105,20 @@ class TestSearchDns(TestBrokerCommand):
                          command)
         self.matchoutput(out, "Target: arecord13.aqd-unittest.ms.com", command)
 
+    def testbytargetdomain(self):
+        command = ["search", "dns", "--target_domain", "aqd-unittest.ms.com",
+                   "--fullinfo"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Alias: alias.ms.com", command)
+        self.matchoutput(out, "Alias: alias2host.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "Alias: alias2alias.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "SRV Record: _kerberos._tcp.aqd-unittest.ms.com",
+                         command)
+        self.matchoutput(out, "SRV Record: _kerberos._tcp.aqd-unittest.ms.com",
+                         command)
+        self.matchoutput(out, "SRV Record: _ldap._tcp.aqd-unittest.ms.com",
+                         command)
+
     def testbynetwork(self):
         command = ["search", "dns", "--network", self.net.unknown[0].ip]
         out = self.commandtest(command)
