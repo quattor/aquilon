@@ -75,9 +75,9 @@ class TestAddChassis(TestBrokerCommand, VerifyChassisMixin):
     def testverifychassisall(self):
         command = ["show", "chassis", "--all"]
         out = self.commandtest(command)
-        self.matchoutput(out, "Chassis: ut3c5", command)
-        self.matchoutput(out, "Chassis: ut3c1", command)
-        self.matchoutput(out, "Chassis: ut9c1", command)
+        self.matchoutput(out, "ut3c5.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "ut3c1.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "ut9c1.aqd-unittest.ms.com", command)
 
     def testrejectbadlabelimplicit(self):
         command = ["add", "chassis", "--chassis", "not-alnum.aqd-unittest.ms.com",

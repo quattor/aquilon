@@ -19,32 +19,34 @@
 
 from sqlalchemy.orm import subqueryload, joinedload, lazyload, contains_eager
 
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.aqdb.model import Chassis, DnsRecord, DnsDomain, Fqdn
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.formats.list import StringAttributeList
 
 
 class CommandShowChassisAll(BrokerCommand):
 
     required_parameters = []
 
-    def render(self, session, **arguments):
+    def render(self, session, fullinfo, **arguments):
         q = session.query(Chassis)
 
-        q = q.options(subqueryload('model'),
-                      joinedload('model.machine_specs'),
-                      subqueryload('location'),
-                      joinedload('slots'),
-                      subqueryload('slots.machine'),
+        if fullinfo:
+            q = q.options(subqueryload('model'),
+                          joinedload('model.machine_specs'),
+                          subqueryload('location'),
+                          joinedload('slots'),
+                          subqueryload('slots.machine'),
 
-                      # A rare case when we don't need primary name/host
-                      lazyload('slots.machine.primary_name'),
-                      lazyload('slots.machine.host'),
+                          # A rare case when we don't need primary name/host
+                          lazyload('slots.machine.primary_name'),
+                          lazyload('slots.machine.host'),
 
-                      subqueryload('interfaces'),
-                      lazyload('interfaces.hardware_entity'),
-                      joinedload('interfaces.assignments'),
-                      joinedload('interfaces.assignments.network'),
-                      joinedload('interfaces.assignments.dns_records'))
+                          subqueryload('interfaces'),
+                          lazyload('interfaces.hardware_entity'),
+                          joinedload('interfaces.assignments'),
+                          joinedload('interfaces.assignments.network'),
+                          joinedload('interfaces.assignments.dns_records'))
 
         # Prefer the primary name for ordering
         q = q.outerjoin(DnsRecord, (Fqdn, DnsRecord.fqdn_id == Fqdn.id),
@@ -53,4 +55,7 @@ class CommandShowChassisAll(BrokerCommand):
                       contains_eager('primary_name.fqdn'),
                       contains_eager('primary_name.fqdn.dns_domain'))
         q = q.order_by(Fqdn.name, DnsDomain.name, Chassis.label)
-        return q.all()
+        if fullinfo:
+            return q.all()
+        else:
+            return StringAttributeList(q.all(), "fqdn")

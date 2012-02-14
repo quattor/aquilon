@@ -2443,6 +2443,9 @@
          <option name="chassis" type="string" conflicts="all">Chassis name</option>
          <option name="all" type="flag" conflicts="chassis">Select all</option>
       </optgroup>
+      <optgroup name="show_chassis_prefs" mandatory="False">
+         <option name="fullinfo" type="flag">Show full information for the matching hardware</option>
+      </optgroup>
       <transport trigger="all" method="get" path="chassis" />
       <transport trigger="chassis" method="get" path="chassis/%(chassis)s" />
    </command>
