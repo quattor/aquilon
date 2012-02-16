@@ -30,13 +30,14 @@
 
 from sqlalchemy.orm import aliased
 
-from aquilon.exceptions_ import ArgumentError
+from aquilon.exceptions_ import ArgumentError, AquilonError
 from aquilon.aqdb.model import (HardwareEntity, Model, DnsRecord, ARecord,
                                 ReservedName, AddressAssignment, Fqdn,
                                 NetworkEnvironment, Network, Interface, Vendor)
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.worker.dbwrappers.location import get_location
-from aquilon.worker.dbwrappers.interface import check_ip_restrictions
+from aquilon.worker.dbwrappers.interface import (check_ip_restrictions,
+                                                 assign_address)
 
 
 def search_hardware_entity_query(session, hardware_type=HardwareEntity,
@@ -164,3 +165,29 @@ def convert_primary_name_to_arecord(session, dbhw_ent, ip, dbnetwork):
                         comments=comments)
     session.add(dbdns_rec)
     dbhw_ent.primary_name = dbdns_rec
+
+def update_primary_ip(session, dbhw_ent, ip):
+    old_ip = dbhw_ent.primary_ip
+    dbnetwork = get_net_id_from_ip(session, ip)
+    # Hmm... should this check apply to the switch's own network?
+    check_ip_restrictions(dbnetwork, ip)
+
+    # Convert ReservedName to ARecord if needed
+    if isinstance(dbhw_ent.primary_name, ReservedName):
+        convert_primary_name_to_arecord(session, dbhw_ent, ip, dbnetwork)
+    else:
+        dbhw_ent.primary_name.ip = ip
+        dbhw_ent.primary_name.network = dbnetwork
+
+    q = session.query(AddressAssignment)
+    q = q.filter_by(network=dbnetwork)
+    q = q.filter_by(ip=old_ip)
+    q = q.join(Interface)
+    q = q.filter_by(hardware_entity=dbhw_ent)
+    addr = q.first()
+    if addr:
+        addr.ip = ip
+    else:
+        # This should only happen if the switch did not have an IP
+        # address before
+        assign_address(dbhw_ent.interfaces[0], ip, dbnetwork)

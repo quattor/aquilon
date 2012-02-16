@@ -32,13 +32,9 @@
 from aquilon.exceptions_ import ArgumentError, AquilonError
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.location import get_location
-from aquilon.worker.dbwrappers.interface import (check_ip_restrictions,
-                                                 assign_address)
-from aquilon.worker.dbwrappers.hardware_entity import convert_primary_name_to_arecord
+from aquilon.worker.dbwrappers.hardware_entity import update_primary_ip
 from aquilon.worker.processes import DSDBRunner
-from aquilon.aqdb.model import (Interface, Model, Switch, AddressAssignment,
-                                ReservedName)
-from aquilon.aqdb.model.network import get_net_id_from_ip
+from aquilon.aqdb.model import Model, Switch
 
 
 class CommandUpdateSwitch(BrokerCommand):
@@ -71,31 +67,7 @@ class CommandUpdateSwitch(BrokerCommand):
             dbswitch.switch_type = type
 
         if ip:
-            old_ip = dbswitch.primary_ip
-            dbnetwork = get_net_id_from_ip(session, ip)
-            # Hmm... should this check apply to the switch's own network?
-            check_ip_restrictions(dbnetwork, ip)
-
-            # Convert ReservedName to ARecord if needed
-            if isinstance(dbswitch.primary_name, ReservedName):
-                convert_primary_name_to_arecord(session, dbswitch, ip,
-                                                dbnetwork)
-            else:
-                dbswitch.primary_name.ip = ip
-                dbswitch.primary_name.network = dbnetwork
-
-            q = session.query(AddressAssignment)
-            q = q.filter_by(network=dbnetwork)
-            q = q.filter_by(ip=old_ip)
-            q = q.join(Interface)
-            q = q.filter_by(hardware_entity=dbswitch)
-            addr = q.first()
-            if addr:
-                addr.ip = ip
-            else:
-                # This should only happen if the switch did not have an IP
-                # address before
-                assign_address(dbswitch.interfaces[0], ip, dbnetwork)
+            update_primary_ip(session, dbswitch, ip)
 
         if comments is not None:
             dbswitch.comments = comments
@@ -103,10 +75,9 @@ class CommandUpdateSwitch(BrokerCommand):
         session.add(dbswitch)
         session.flush()
 
-        if ip and ip != old_ip or comments is not None:
-            dsdb_runner = DSDBRunner(logger=logger)
-            try:
-                dsdb_runner.update_host(dbswitch, oldinfo)
-            except AquilonError, err:
-                raise ArgumentError("Could not update switch in DSDB: %s" % err)
+        dsdb_runner = DSDBRunner(logger=logger)
+        try:
+            dsdb_runner.update_host(dbswitch, oldinfo)
+        except AquilonError, err:
+            raise ArgumentError("Could not update switch in DSDB: %s" % err)
         return
