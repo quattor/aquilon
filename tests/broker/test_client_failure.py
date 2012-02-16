@@ -64,9 +64,9 @@ class TestClientFailure(TestBrokerCommand):
 
     def testconflictingoptions(self):
         command = "add interface --mac 02:02:02:02:02:02 --interface eth0 " \
-                  "--machine does-not-exist --ip 2.2.2.2"
+                  "--machine does-not-exist --switch does-not-exist-either"
         (p, out, err) = self.runcommand(command.split(" "))
-        s = "error: Option or option group machine conflicts with ip"
+        s = "error: Option or option group switch conflicts with machine"
         self.assert_(err.find(s) >= 0,
                 "STDERR for %s did not include '%s':\n@@@\n'%s'\n@@@\n"
                 % (command, s, err))

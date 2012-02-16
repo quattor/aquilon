@@ -1225,19 +1225,14 @@
          <option name="automac" type="flag" conflicts="mac">Automatically generate MAC for virtual hardware</option>
       </optgroup>
       <optgroup name="add_interface_hw" mandatory="True" fields="any">
-         <option name="machine" type="string" conflicts="hostname chassis switch ip ipfromip ipfromsystem autoip">Machine (node) name</option>
-         <option name="hostname" type="string" conflicts="machine chassis switch ip ipfromip ipfromsystem autoip">Hostname</option>
+         <option name="machine" type="string" conflicts="hostname chassis switch">Machine (node) name</option>
+         <option name="hostname" type="string" conflicts="machine chassis switch">Hostname</option>
          <option name="chassis" type="string" conflicts="machine hostname switch">Chassis name</option>
          <option name="switch" type="string" conflicts="machine hostname chassis">Switch name</option>
       </optgroup>
       <optgroup name="add_interface_optional" mandatory="False" fields="none">
          <option name="type" type="string">Interface type: public, management, oa, vlan</option>
          <option name="comments" type="string">Comments</option>
-         <option name="ip" type="ipv4" conflicts="hostname ipfromip ipfromsystem autoip">IP address</option>
-         <option name="ipfromip" type="ipv4" conflicts="hostname ip ipfromsystem autoip">choose IP address in subnet</option>
-         <option name="ipfromsystem" type="string" conflicts="hostname ip ipfromip autoip">choose IP address in subnet of system</option>
-         <option name="autoip" type="flag" conflicts="hostname ip ipfromip ipfromsystem">choose IP address based on mac/switch</option>
-         <option name="ipalgorithm" type="string">Algorithm for automatically choosing an IP.</option>
          <option name="pg" type="string" conflicts="autopg">portgroup</option>
          <option name="autopg" type="flag" conflicts="pg">choose portgroup based on switch</option>
          <option name="model" type="string">Interface model name. Default is 'generic_nic'.</option>
