@@ -501,6 +501,22 @@ class TestAddInterface(TestBrokerCommand):
                          self.net.tor_net[0].usable[0].mac,
                          command)
 
+    def testfailaddinterfaceud3dg1r01model(self):
+        command = ["add", "interface", "--interface", "xge49",
+                   "--model", "e1000",
+                   "--switch", "ut3gd1r01.aqd-unittest.ms.com"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Cannot use argument --model when adding an "
+                         "interface to a switch.", command)
+
+    def testfailaddinterfaceud3dg1r01type(self):
+        command = ["add", "interface", "--interface", "xge49",
+                   "--type", "vlan",
+                   "--switch", "ut3gd1r01.aqd-unittest.ms.com"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Only 'oa' is allowed as the interface type "
+                         "for switches.", command)
+
     def testverifyfailaddinterfaceut3dg1r01(self):
         command = "show tor_switch --tor_switch ut3gd1r01.aqd-unittest.ms.com"
         out = self.commandtest(command.split(" "))
