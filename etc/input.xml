@@ -1590,9 +1590,9 @@
             <option name="switch" type="string" conflicts="machine chassis">Switch name</option>
          </optgroup>
          <option name="interface" type="string">Name of the interface.</option>
-         <option name="fqdn" type="string">FQDN of the new address</option>
       </optgroup>
       <optgroup name="add_interface_address_opt" mandatory="False" fields="any">
+	 <option name="fqdn" type="string">FQDN of the new address</option>
 	 <option name="network_environment" type="string">Network environment (default: internal)</option>
 	 <option name="label" type="string">Interface alias of the new address</option>
 	 <option name="usage" type="string">Use of the new address (default: system)</option>
@@ -1604,6 +1604,7 @@
          <option name="ipfromsystem" type="string" conflicts="ip ipfromip autoip">choose IP address in subnet of system</option>
          <option name="autoip" type="flag" conflicts="ip ipfromip ipfromsystem">choose IP address based on MAC/switch</option>
       </optgroup>
+      <transport method="put" trigger="switch" path="switch/%(switch)s/interface/%(interface)s/address"/>
       <transport method="put" path="interface_address"/>
    </command>
 
@@ -1626,6 +1627,7 @@
          <option name="ip" type="ipv4" conflicts="fqdn">IP address</option>
          <option name="label" type="string" conflicts="fqdn">Interface alias</option>
       </optgroup>
+      <transport method="delete" trigger="switch" path="switch/%(switch)s/interface/%(interface)s/address"/>
       <transport method="delete" path="interface_address"/>
    </command>
 

@@ -359,7 +359,28 @@ class TestAddInterfaceAddress(TestBrokerCommand):
         self.noouttest(command)
         self.dsdb_verify()
 
+    def testaddut3gd1r04vlan110(self):
+        ip = self.net.tor_net[12].usable[1]
+        self.dsdb_expect_add("ut3gd1r04-vlan110.aqd-unittest.ms.com", ip,
+                             "vlan110", primary="ut3gd1r04.aqd-unittest.ms.com")
+        command = ["add", "interface", "address",
+                   "--switch", "ut3gd1r04.aqd-unittest.ms.com",
+                   "--interface", "vlan110", "--ip", ip]
+        self.noouttest(command)
+        self.dsdb_verify()
 
-if __name__=='__main__':
+    def testverifyut3gd1r04(self):
+        command = ["show", "switch", "--switch", "ut3gd1r04.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.searchoutput(out,
+                          r"Interface: vlan110 \(no MAC addr\)$"
+                          r"\s+Type: oa$"
+                          r"\s+Network Environment: internal$"
+                          r"\s+Provides: ut3gd1r04-vlan110.aqd-unittest.ms.com \[%s\]$"
+                          % self.net.tor_net[12].usable[1],
+                          command)
+
+
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddInterfaceAddress)
     unittest.TextTestRunner(verbosity=2).run(suite)

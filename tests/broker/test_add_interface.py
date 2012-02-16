@@ -511,6 +511,20 @@ class TestAddInterface(TestBrokerCommand):
                          command)
         self.matchclean(out, "Interface: xge49", command)
 
+    def testaddvirtualswitchinterface(self):
+        command = ["add", "interface", "--interface", "vlan110",
+                   "--switch", "ut3gd1r04.aqd-unittest.ms.com"]
+        self.noouttest(command)
+
+    def testverifyvirtualswitchinterface(self):
+        command = ["show", "switch", "--switch",
+                   "ut3gd1r04.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out,
+                         "Interface: xge49 %s" % self.net.tor_net[6].usable[0].mac,
+                         command)
+        self.matchoutput(out, "Interface: vlan110 (no MAC addr)", command)
+
     # These two will eventually be created when testing the addition
     # of a whole rack of machines based on a CheckNet sweep.
     def testaddut3s01p1aeth0(self):

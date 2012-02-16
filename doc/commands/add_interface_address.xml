@@ -32,7 +32,7 @@
 	        <arg choice="plain"><option>--switch <replaceable>SWITCH</replaceable></option></arg>
 	    </group>
 	    <arg choice="plain"><option>--interface <replaceable>IFACE</replaceable></option></arg>
-	    <arg choice="plain"><option>--fqdn <replaceable>FQDN</replaceable></option></arg>
+	    <arg choice="opt"><option>--fqdn <replaceable>FQDN</replaceable></option></arg>
 	    <arg choice="opt"><option>--label <replaceable>LABEL</replaceable></option></arg>
 	    <arg choice="opt"><option>--usage <replaceable>USAGE</replaceable></option></arg>
 	    <arg choice="opt"><option>--network_environment <replaceable>NETENV</replaceable></option></arg>
@@ -103,6 +103,10 @@
 			FQDN will be looked up/created in the DNS environment bound to
 			<replaceable>NETENV</replaceable>. Otherwise the default DNS environment is
 			used.
+		    </para>
+		    <para>
+			If <option>--fqdn</option> is not specified, then the value is generated from the local part of the primary name of the
+			hardware and the name of the interface separated by a dash, in the same DNS domain as the primary name of the hardware.
 		    </para>
 		</listitem>
 	    </varlistentry>
@@ -222,6 +226,17 @@ aq add interface address --machine foo.one-nyp.ms.com \
 			 --fqdn foo-bar.one-nyp.ms.com \
 			 --ip 10.10.1.12
 	    </programlisting>
+	</example>
+	<example>
+	    <title>Let the broker auto-generate the DNS entry</title>
+	    <programlisting>
+aq add interface address --switch foo.one-nyp.ms.com \
+			 --interface vlan110 \
+			 --ip 10.10.1.1
+	    </programlisting>
+	    <para>
+		The broker will add foo-vlan110.one-nyp.ms.com to the DNS using IP address 10.10.1.1.
+	    </para>
 	</example>
     </refsect1>
 

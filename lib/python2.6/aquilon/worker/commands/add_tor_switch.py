@@ -109,7 +109,7 @@ class CommandAddTorSwitch(BrokerCommand):
         if ip:
             dsdb_runner = DSDBRunner(logger=logger)
             try:
-                dsdb_runner.add_host(dbinterface)
+                dsdb_runner.update_host(dbtor_switch, None)
             except ProcessException, e:
                 raise ArgumentError("Could not add ToR switch to DSDB: %s" % e)
         return

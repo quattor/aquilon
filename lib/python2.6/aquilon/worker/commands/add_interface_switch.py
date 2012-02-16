@@ -39,7 +39,7 @@ from aquilon.worker.processes import DSDBRunner
 
 class CommandAddInterfaceSwitch(BrokerCommand):
 
-    required_parameters = ["interface", "switch", "mac"]
+    required_parameters = ["interface", "switch"]
     invalid_parameters = ["automac", "ip", "ipfromip", "ipfromsystem",
                           "autoip", "ipalgorithm", "pg", "autopg",
                           "model", "vendor"]

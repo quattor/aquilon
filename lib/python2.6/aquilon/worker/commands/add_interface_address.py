@@ -44,7 +44,7 @@ from aquilon.worker.processes import DSDBRunner
 
 class CommandAddInterfaceAddress(BrokerCommand):
 
-    required_parameters = ['fqdn', 'interface']
+    required_parameters = ['interface']
 
     def render(self, session, logger, machine, chassis, switch, fqdn, interface,
                label, usage, network_environment, **kwargs):
@@ -72,6 +72,15 @@ class CommandAddInterfaceAddress(BrokerCommand):
         ip = generate_ip(session, dbinterface, **kwargs)
         dbnetwork = get_net_id_from_ip(session, ip, dbnet_env)
         check_ip_restrictions(dbnetwork, ip)
+
+        if not fqdn:
+            if not dbhw_ent.primary_name:
+                raise ArgumentError("{0} has no primary name, can not "
+                                    "auto-generate the DNS record.  "
+                                    "Please specify --fqdn.".format(dbhw_ent))
+            fqdn = "%s-%s.%s" % (dbhw_ent.primary_name.fqdn.name,
+                                 interface,
+                                 dbhw_ent.primary_name.fqdn.dns_domain)
 
         if label is None:
             label = ""

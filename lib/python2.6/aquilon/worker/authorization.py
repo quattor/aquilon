@@ -120,6 +120,9 @@ class AuthorizationBroker(object):
             if action not in ['add_rack', 'add_switch', 'add_tor_switch',
                               'update_rack', 'update_switch',
                               'del_rack', 'del_switch', 'del_tor_switch',
+                              'add_interface_switch', 'del_interface_switch',
+                              'add_interface_address_switch',
+                              'del_interface_address_switch',
                               'update_router']:
                 self.raise_auth_error(principal, action, resource)
         if dbuser.role.name == 'maintech':
