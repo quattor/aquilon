@@ -36,70 +36,20 @@ if __name__ == "__main__":
     utils.import_depends()
 
 from brokertest import TestBrokerCommand
+from chassistest import VerifyChassisMixin
 
 
-class TestAddChassis(TestBrokerCommand):
-
-    def verifychassis(self, chassis, vendor, model, rack, rackrow, rackcol,
-                      serial=None, ip=None, mac=None, interface=None,
-                      comments=None):
-        command = "show chassis --chassis %s" % chassis
-        out = self.commandtest(command.split(" "))
-        (short, dot, dns_domain) = chassis.partition(".")
-        self.matchoutput(out, "Chassis: %s" % short, command)
-        if dns_domain:
-            if ip:
-                # Check both the primary name...
-                self.matchoutput(out, "Primary Name: %s [%s]" %
-                                 (chassis, ip), command)
-                # ... and the AddressAssignment record
-                self.matchoutput(out, "Provides: %s [%s]" %
-                                 (chassis, ip), command)
-            else:
-                self.matchoutput(out, "Primary Name: %s" % chassis, command)
-        self.matchoutput(out, "Rack: %s" % rack, command)
-        self.matchoutput(out, "Row: %s" % rackrow, command)
-        self.matchoutput(out, "Column: %s" % rackcol, command)
-        self.matchoutput(out, "Vendor: %s Model: %s" % (vendor, model),
-                         command)
-        if serial:
-            self.matchoutput(out, "Serial: %s" % serial, command)
-        else:
-            self.matchclean(out, "Serial:", command)
-
-        # Careful about indentation, do not mix chassis comments with interface
-        # comments
-        if comments:
-            self.matchoutput(out, "\n  Comments: %s" % comments, command)
-        else:
-            self.matchclean(out, "\n  Comments:", command)
-
-        if interface:
-            self.matchclean(out, "\n    Comments: Created automatically",
-                            command)
-        else:
-            # FIXME: eventually this should be part of the model
-            interface = "oa"
-            self.matchoutput(out, "\n    Comments: Created automatically "
-                             "by add_chassis", command)
-        if mac:
-            self.searchoutput(out, r"Interface: %s %s$" % (interface, mac),
-                              command)
-        else:
-            self.searchoutput(out, r"Interface: %s \(no MAC addr\)$" %
-                              interface, command)
-
-        return (out, command)
+class TestAddChassis(TestBrokerCommand, VerifyChassisMixin):
 
     def testaddut3c5(self):
         command = ["add", "chassis", "--chassis", "ut3c5.aqd-unittest.ms.com",
-                   "--rack", "ut3", "--model", "utchassis",
+                   "--rack", "np3", "--model", "utchassis",
                    "--serial", "ABC1234", "--comments", "Some chassis comments"]
         self.noouttest(command)
 
     def testverifyaddut3c5(self):
         self.verifychassis("ut3c5.aqd-unittest.ms.com", "aurora_vendor",
-                           "utchassis", "ut3", "a", "3", "ABC1234",
+                           "utchassis", "np3", "a", "3", "ABC1234",
                            comments="Some chassis comments")
 
     def testaddut3c1(self):
@@ -157,7 +107,7 @@ class TestAddChassis(TestBrokerCommand):
                          command)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddChassis)
     unittest.TextTestRunner(verbosity=2).run(suite)
 

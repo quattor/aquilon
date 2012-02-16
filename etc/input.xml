@@ -2370,6 +2370,23 @@
       <transport method="delete" path="chassis/%(chassis)s" />
    </command>
 
+   <command name="update_chassis">
+      Update chassis information.  Requires the chassis name.  All
+      other fields can be updated.
+      <optgroup name="update_chassis_mandatory" mandatory="True" fields="all">
+         <option name="chassis" type="string">Chassis name</option>
+      </optgroup>
+      <optgroup name="update_chassis_optional" mandatory="False">
+         <option name="model" type="string">Chassis model</option>
+         <option name="rack" type="string">Rack name</option>
+         <option name="ip" type="ipv4">Primary IP address</option>
+	 <option name="vendor" type="string">Chassis vendor. Needed if the model name is not unique</option>
+	 <option name="serial" type="string">Serial Number</option>
+	 <option name="comments" type="string">Comments</option>
+      </optgroup>
+      <transport method="post" path="chassis/%(chassis)s" />
+   </command>
+
    <command name="add_rack">
       Add a new rack to the database.  To add a rack named dd120 on tile H13,
       use --building=dd --rackid=120 --row=H --column=13.  The rackid
