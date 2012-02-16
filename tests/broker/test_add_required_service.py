@@ -183,7 +183,7 @@ class TestAddRequiredService(TestBrokerCommand):
         self.matchoutput(out, "Service: esx_management_server", command)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddRequiredService)
     unittest.TextTestRunner(verbosity=2).run(suite)
 

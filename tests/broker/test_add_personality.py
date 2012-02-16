@@ -435,7 +435,7 @@ class TestAddPersonality(TestBrokerCommand):
         self.noouttest(command)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddPersonality)
     unittest.TextTestRunner(verbosity=2).run(suite)
 

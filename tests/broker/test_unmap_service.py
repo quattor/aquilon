@@ -207,13 +207,14 @@ class TestUnmapService(TestBrokerCommand):
                                 "--service", service, "--instance", instance])
 
     def testunmapwithpersona(self):
-        self.noouttest(["unmap", "service", "--organization", "ms", "--service", "utsvc",
-                        "--instance", "utsi2", "--archetype", "aquilon",
-                        "--personality", "lemon-collector-oracle"])
+        self.noouttest(["unmap", "service", "--organization", "ms", "--service",
+                        "utsvc", "--instance", "utsi2", "--archetype",
+                        "aquilon", "--personality", "lemon-collector-oracle"])
 
     def testverifyunmapwithpersona(self):
-        command = "show map --archetype aquilon --personality lemon-collector-oracle --service utsvc"
-        out = self.commandtest(command.split(" "))
+        command = ["show_map", "--archetype=aquilon",
+                   "--personality=lemon-collector-oracle", "--service=utsvc"]
+        out = self.commandtest(command)
         self.matchoutput(out, "", command)
 
     # TODO: If/when there is another mapped personality, explicitly skip

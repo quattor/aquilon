@@ -49,7 +49,7 @@ class TestDelNetwork(TestBrokerCommand):
         ip = "192.168.10.0"
         self.noouttest(["del", "network", "--ip", ip])
 
-    def testshownetwork(self):
+    def testshownetworkall(self):
         for network in self.net.all:
             command = "show network --ip %s" % network.ip
             out = self.notfoundtest(command.split(" "))

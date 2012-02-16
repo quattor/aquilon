@@ -140,7 +140,7 @@ class TestDelRequiredService(TestBrokerCommand):
                    "--archetype=vmhost", "--personality=esx_desktop"]
         self.noouttest(command)
 
-    def testverifydelrequiredvmhost(self):
+    def testverifydelrequiredesx(self):
         command = ["show_personality",
                    "--archetype=vmhost", "--personality=esx_desktop"]
         out = self.commandtest(command)
@@ -152,6 +152,6 @@ class TestDelRequiredService(TestBrokerCommand):
         self.matchclean(out, "Service: esx_management_server", command)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelRequiredService)
     unittest.TextTestRunner(verbosity=2).run(suite)

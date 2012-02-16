@@ -197,7 +197,7 @@ class TestDelService(TestBrokerCommand):
                             "--instance=npecl%d_share" % i])
 
     def testdelmgdshares(self):
-        for i in range(13,15):
+        for i in range(13, 15):
             self.noouttest(["del_service", "--service=nas_disk_share",
                             "--instance=utecl%d_share" % i])
 
@@ -214,7 +214,7 @@ class TestDelService(TestBrokerCommand):
         self.noouttest(["del", "service", "--service", service])
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelService)
     unittest.TextTestRunner(verbosity=2).run(suite)
 
