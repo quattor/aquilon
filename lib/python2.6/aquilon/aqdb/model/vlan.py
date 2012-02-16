@@ -78,7 +78,7 @@ class VlanInfo(Base):
             self.__class__.__name__, self.vlan_id, self.port_group,
             self.vlan_type)
 
-vlaninfo = VlanInfo.__table__  # pylint: disable-msg=C0103, E1101
+vlaninfo = VlanInfo.__table__  # pylint: disable=C0103, E1101
 vlaninfo.primary_key.name = '%s_pk' % _VTN
 vlaninfo.append_constraint(
     UniqueConstraint('port_group', name='%s_port_group_uk' % _VTN))
@@ -158,7 +158,7 @@ class ObservedVlan(Base):
         return nets[0].network
 
 
-obsvlan = ObservedVlan.__table__  # pylint: disable-msg=C0103, E1101
+obsvlan = ObservedVlan.__table__  # pylint: disable=C0103, E1101
 obsvlan.primary_key.name = '%s_pk' % _TN
 
 #CheckConstraint doesn't upper case names by default

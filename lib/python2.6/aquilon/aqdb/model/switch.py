@@ -59,5 +59,5 @@ class Switch(HardwareEntity):
             raise ArgumentError("Unknown switch type '%s'." % type)
 
 
-switch = Switch.__table__  # pylint: disable-msg=C0103, E1101
+switch = Switch.__table__  # pylint: disable=C0103, E1101
 switch.primary_key.name = 'switch_pk'

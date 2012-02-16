@@ -117,7 +117,7 @@ class DnsDomain(Base):
         super(DnsDomain, self).__init__(*args, **kwargs)
 
 
-dnsdomain = DnsDomain.__table__  # pylint: disable-msg=C0103, E1101
+dnsdomain = DnsDomain.__table__  # pylint: disable=C0103, E1101
 
 dnsdomain.primary_key.name = '%s_pk' % (_TN)
 dnsdomain.append_constraint(UniqueConstraint('name', name='%s_uk' % (_TN)))

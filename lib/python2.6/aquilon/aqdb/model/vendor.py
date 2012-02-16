@@ -49,7 +49,7 @@ class Vendor(Base):
     comments = Column(String(255), nullable=True)
 
 
-vendor = Vendor.__table__  # pylint: disable-msg=C0103, E1101
+vendor = Vendor.__table__  # pylint: disable=C0103, E1101
 
 vendor.primary_key.name = '%s_pk' % _TN
 vendor.append_constraint(

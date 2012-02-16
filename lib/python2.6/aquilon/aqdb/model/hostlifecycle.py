@@ -73,7 +73,7 @@ class HostLifecycle(StateEngine, Base):
         return str(self.name)
 
 
-hostlifecycle = HostLifecycle.__table__  # pylint: disable-msg=C0103, E1101
+hostlifecycle = HostLifecycle.__table__  # pylint: disable=C0103, E1101
 hostlifecycle.primary_key.name = '%s_pk' % _TN
 hostlifecycle.append_constraint(UniqueConstraint('name', name='%s_uk' % _TN))
 hostlifecycle.info['unique_fields'] = ['name']

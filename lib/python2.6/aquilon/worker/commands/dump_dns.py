@@ -64,7 +64,7 @@ class CommandDumpDns(BrokerCommand):
         else:
             # Preload DNS domains, and keep a reference to prevent them being
             # evicted from the session's cache
-            dns_domains = session.query(DnsDomain).all()  # pylint: disable-msg=W0612
+            dns_domains = session.query(DnsDomain).all()  # pylint: disable=W0612
 
         results = q.all()
 

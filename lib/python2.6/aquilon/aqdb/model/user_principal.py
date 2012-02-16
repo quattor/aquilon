@@ -63,7 +63,7 @@ class UserPrincipal(Base):
         return '@'.join([self.name, self.realm.name])
 
 
-user_principal = UserPrincipal.__table__  # pylint: disable-msg=C0103, E1101
+user_principal = UserPrincipal.__table__  # pylint: disable=C0103, E1101
 user_principal.primary_key.name = 'user_principal_pk'
 user_principal.append_constraint(
     UniqueConstraint('name', 'realm_id', name='user_principal_realm_uk'))

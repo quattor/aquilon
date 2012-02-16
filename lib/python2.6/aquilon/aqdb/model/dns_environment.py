@@ -74,7 +74,7 @@ class DnsEnvironment(Base):
                                   compel=InternalError)
 
 
-dnsenv = DnsEnvironment.__table__  # pylint: disable-msg=C0103, E1101
+dnsenv = DnsEnvironment.__table__  # pylint: disable=C0103, E1101
 
 dnsenv.primary_key.name = '%s_pk' % _TN
 dnsenv.append_constraint(UniqueConstraint('name', name='%s_name_uk' % _TN))

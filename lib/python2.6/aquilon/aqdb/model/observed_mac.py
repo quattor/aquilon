@@ -67,5 +67,5 @@ class ObservedMac(Base):
                                               order_by=[slot, port_number]))
 
 
-observedmac = ObservedMac.__table__  # pylint: disable-msg=C0103, E1101
+observedmac = ObservedMac.__table__  # pylint: disable=C0103, E1101
 observedmac.primary_key.name = '%s_pk' % _TN

@@ -171,7 +171,7 @@ class AddressAssignment(Base):
                                           self.logical_name)
 
 
-address = AddressAssignment.__table__  # pylint: disable-msg=C0103, E1101
+address = AddressAssignment.__table__  # pylint: disable=C0103, E1101
 address.primary_key.name = '%s_pk' % _TN
 address.append_constraint(
     UniqueConstraint("interface_id", "ip", name="%s_iface_ip_uk" % _ABV))

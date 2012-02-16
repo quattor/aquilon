@@ -69,7 +69,7 @@ def fix_foreign_links(session, oldnet, newnet):
     as it has already been updated when this function gets called.
     """
     session.execute(
-        update(AddressAssignment.__table__,  # pylint: disable-msg=E1101
+        update(AddressAssignment.__table__,  # pylint: disable=E1101
                values={'network_id': newnet.id})
         .where(and_(AddressAssignment.network_id == oldnet.id,
                     AddressAssignment.ip >= newnet.ip,
@@ -79,7 +79,7 @@ def fix_foreign_links(session, oldnet, newnet):
     session.expire(newnet, ['assignments'])
 
     session.execute(
-        update(ARecord.__table__,  # pylint: disable-msg=E1101
+        update(ARecord.__table__,  # pylint: disable=E1101
                values={'network_id': newnet.id})
         .where(and_(ARecord.network_id == oldnet.id,
                     ARecord.ip >= newnet.ip,

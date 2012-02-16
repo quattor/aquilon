@@ -90,7 +90,7 @@ class Service(Base):
     def cfg_path(self):
         return 'service/%s' % (self.name)
 
-service = Service.__table__  # pylint: disable-msg=C0103, E1101
+service = Service.__table__  # pylint: disable=C0103, E1101
 
 service.primary_key.name = 'service_pk'
 service.append_constraint(UniqueConstraint('name', name='svc_name_uk'))
@@ -130,7 +130,7 @@ class ServiceListItem(Base):
                        backref=backref('_archetypes',
                                        cascade='all, delete-orphan'))
 
-sli = ServiceListItem.__table__  # pylint: disable-msg=C0103, E1101
+sli = ServiceListItem.__table__  # pylint: disable=C0103, E1101
 sli.primary_key.name = 'svc_list_item_pk'
 sli.append_constraint(UniqueConstraint('archetype_id', 'service_id',
                                        name='svc_list_svc_uk'))
@@ -169,7 +169,7 @@ class PersonalityServiceListItem(Base):
                        backref=backref('_personalities',
                                        cascade='all, delete-orphan'))
 
-psli = PersonalityServiceListItem.__table__  # pylint: disable-msg=C0103, E1101
+psli = PersonalityServiceListItem.__table__  # pylint: disable=C0103, E1101
 psli.primary_key.name = '%s_pk' % _ABV
 psli.info['unique_fields'] = ['personality', 'service']
 

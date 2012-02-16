@@ -75,7 +75,7 @@ class NsRecord(Base):
         return "{0:a} of {1:l}".format(self.a_record, self.dns_domain)
 
 
-nsrecord = NsRecord.__table__  # pylint: disable-msg=C0103, E1101
+nsrecord = NsRecord.__table__  # pylint: disable=C0103, E1101
 nsrecord.info['unique_fields'] = ['a_record', 'dns_domain']
 nsrecord.primary_key.name = '%s_pk' % _TN
 

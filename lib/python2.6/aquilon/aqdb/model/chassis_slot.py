@@ -36,7 +36,7 @@ from aquilon.aqdb.model import Base, Machine, Chassis
 _TN = 'chassis_slot'
 
 
-class ChassisSlot(Base):  # pylint: disable-msg=W0232, R0903
+class ChassisSlot(Base):  # pylint: disable=W0232, R0903
     """ ChassisSlot allows a Machine to be assigned to each unique position
         within a Chassis. """
 
@@ -65,5 +65,5 @@ class ChassisSlot(Base):  # pylint: disable-msg=W0232, R0903
                        backref=backref('chassis_slot', cascade='all'))
 
 
-chassis_slot = ChassisSlot.__table__  # pylint: disable-msg=C0103, E1101
-chassis_slot.primary_key.name = '%s_pk' % _TN  # pylint: disable-msg=E1101, C0301
+chassis_slot = ChassisSlot.__table__  # pylint: disable=C0103, E1101
+chassis_slot.primary_key.name = '%s_pk' % _TN  # pylint: disable=E1101, C0301

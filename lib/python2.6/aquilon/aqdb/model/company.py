@@ -43,6 +43,6 @@ class Company(Location):
                                     ondelete='CASCADE'),
                 primary_key=True)
 
-company = Company.__table__  # pylint: disable-msg=C0103, E1101
+company = Company.__table__  # pylint: disable=C0103, E1101
 company.primary_key.name = 'company_pk'
 company.info['unique_fields'] = ['name']

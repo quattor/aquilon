@@ -90,7 +90,7 @@ class PersonalityServiceMap(Base):
         return self.service_instance.service
 
 
-psm = PersonalityServiceMap.__table__  # pylint: disable-msg=C0103, E1101
+psm = PersonalityServiceMap.__table__  # pylint: disable=C0103, E1101
 psm.primary_key.name = 'prsnlty_svc_map_pk'
 
 #TODO: reconsider the surrogate primary key?
