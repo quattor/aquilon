@@ -163,14 +163,9 @@ def populate_network(session, dsdb, logger, view):
             missed += 1
             continue
 
-        if network_type == 'tor_net' or network_type == 'grid_access':
-            is_discoverable = True
-        else:
-            is_discoverable = False
-
         network = model.Network(name=net_name, network=network_addr,
                                 network_type=network_type, location=building,
-                                is_discoverable=is_discoverable, side=side)
+                                side=side)
         session.add(network)
         imported += 1
         if imported % 3000 == 0:

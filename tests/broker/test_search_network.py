@@ -66,14 +66,6 @@ class TestSearchNetwork(TestBrokerCommand):
         for tor_net2 in self.net.tor_net2:
             self.matchclean(out, str(tor_net2), command)
 
-    def testdiscovered(self):
-        command = ["search_network", "--discovered", "--building=ut"]
-        self.noouttest(command)
-
-    def testdiscoverable(self):
-        command = ["search_network", "--discoverable", "--building=ut"]
-        self.noouttest(command)
-
     def testphysicalmachine(self):
         # unittest15.aqd-unittest.ms.com
         command = ["search_network", "--machine=ut8s02p1"]

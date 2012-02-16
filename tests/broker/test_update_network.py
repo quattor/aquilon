@@ -40,40 +40,27 @@ from brokertest import TestBrokerCommand
 
 class TestUpdateNetwork(TestBrokerCommand):
 
-    def test_100_update_discoverable(self):
-        self.noouttest(["update", "network", "--ip", "10.184.78.224",
-                        "--discoverable"])
-
-    def test_110_verify_discoverable(self):
-        command = "show network --ip 10.184.78.224"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Discoverable: True", command)
-
-    def test_200_update_nodiscoverable(self):
-        self.noouttest(["update", "network", "--ip", "10.184.78.224",
-                        "--nodiscoverable"])
-
-    def test_210_verify_nodiscoverable(self):
-        command = "show network --ip 10.184.78.224"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Discoverable: False", command)
-
-    def test_300_update_noenv(self):
+    def test_100_update(self):
         command = ["update", "network", "--network", "excx-net",
-                   "--discoverable"]
-        out = self.notfoundtest(command)
-        self.matchoutput(out, "Network excx-net not found.", command)
-
-    def test_310_update_withenv(self):
-        command = ["update", "network", "--network", "excx-net",
-                   "--discoverable", "--network_environment", "excx"]
+                   "--network_environment", "excx",
+                   "--building", "ut", "--type", "dmz-net",
+                   "--side", "b", "--comments", "Test comments"]
         self.noouttest(command)
 
-    def test_315_verify(self):
+    def test_110_verify(self):
         command = ["show", "network", "--network", "excx-net",
                    "--network_environment", "excx"]
         out = self.commandtest(command)
-        self.matchoutput(out, "Discoverable: True", command)
+        self.matchoutput(out, "Comments: Test comments", command)
+        self.matchoutput(out, "Sysloc: ut.ny.na", command)
+        self.matchoutput(out, "Network Type: dmz-net", command)
+        self.matchoutput(out, "Side: b", command)
+
+    def test_200_update_wrong_env(self):
+        command = ["update", "network", "--network", "excx-net",
+                   "--comments", "Test comments"]
+        out = self.notfoundtest(command)
+        self.matchoutput(out, "No matching network was found.", command)
 
     # There should be a test_constraint_network.py one day...
     def test_900_delinuse(self):
@@ -83,7 +70,7 @@ class TestUpdateNetwork(TestBrokerCommand):
         self.matchoutput(out, "Network %s is still in use" % net.ip, command)
 
 
-if __name__=='__main__':
-    suite = unittest.TestLoader().loadTestsFromTestCase(TestUpdateDomain)
+if __name__ == '__main__':
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestUpdateNetwork)
     unittest.TextTestRunner(verbosity=2).run(suite)
 

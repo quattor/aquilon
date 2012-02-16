@@ -110,8 +110,6 @@ class NetworkFormatter(ObjectFormatter):
         details.append(indent + "  Country: %s" % str(network.location.country.name))
         details.append(indent + "  Side: %s" % network.side)
         details.append(indent + "  Network Type: %s" % network.network_type)
-        details.append(indent + "  Discoverable: %s" % str(network.is_discoverable))
-        details.append(indent + "  Discovered: %s" % str(network.is_discovered))
         if network.comments:
             details.append(indent + "  Comments: %s" % network.comments)
 
@@ -202,8 +200,8 @@ class SimpleNetworkListFormatter(ListFormatter):
                                                    str(network.location.country),
                                                    network.side,
                                                    network.network_type,
-                                                   str(network.is_discoverable),
-                                                   str(network.is_discovered),
+                                                   "False",
+                                                   "False",
                                                    str(network.comments)])))
         return "\n".join(details)
 
@@ -225,8 +223,6 @@ class SimpleNetworkListFormatter(ListFormatter):
         net_msg.location.name = str(net.location.name)
         net_msg.location.location_type = str(net.location.location_type)
         net_msg.type = str(net.network_type)
-        net_msg.discoverable = net.is_discoverable
-        net_msg.discovered = net.is_discovered
 
         # Add interfaces that have addresses in this network
         for addr in net.assignments:
