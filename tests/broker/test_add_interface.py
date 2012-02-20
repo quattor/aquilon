@@ -470,6 +470,15 @@ class TestAddInterface(TestBrokerCommand):
                          "to a chassis.",
                          command)
 
+    def testfailaddinterfaceut3c1type(self):
+        command = ["add", "interface", "--interface", "oa2",
+                   "--mac", self.net.unknown[0].usable[-1].mac,
+                   "--type", "vlan",
+                   "--chassis", "ut3c1.aqd-unittest.ms.com"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Only 'oa' is allowed as the interface type "
+                         "for chassis.", command)
+
     def testaddinterfacenp997gd1r04(self):
         command = ["add", "interface", "--interface", "xge49",
                    "--mac", self.net.tor_net[3].usable[0].mac,

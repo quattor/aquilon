@@ -106,6 +106,16 @@ class TestAddChassis(TestBrokerCommand, VerifyChassisMixin):
         self.matchoutput(out, "Illegal hardware label format 'not-alnum'.",
                          command)
 
+    def testprimaryreuse(self):
+        command = ["add", "chassis", "--chassis",
+                   "ut3gd1r01.aqd-unittest.ms.com",
+                   "--rack", "ut3", "--model", "utchassis"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "ut3gd1r01.aqd-unittest.ms.com already exists as the "
+                         "primary name of switch ut3gd1r01.",
+                         command)
+
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddChassis)

@@ -124,13 +124,13 @@ def parse_primary_name(session, fqdn, ip):
         # Do not use isinstance() here, as DynDnsStub is a child of
         # ARecord
         if dbdns_rec.dns_record_type != 'a_record':
-            raise ArgumentError("%s already exists as a(n) %s." %
-                                (fqdn, dbdns_rec._get_class_label()))
+            raise ArgumentError("{0} cannot be used as a primary name."
+                                .format(dbdns_rec))
 
         # Make sure the primary name does not resolve to multiple addresses
         if ip and dbdns_rec.ip != ip:
             raise ArgumentError("%s already exists, but points to %s "
-                                "instead of %s. A pimary name is not "
+                                "instead of %s. A primary name is not "
                                 "allowed to point to multiple addresses." %
                                 (fqdn, dbdns_rec.ip, ip))
 
