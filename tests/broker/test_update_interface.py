@@ -80,8 +80,7 @@ class TestUpdateInterface(TestBrokerCommand):
         oldip = self.net.unknown[0].usable[0]
         newip = self.net.unknown[0].usable[11]
         self.dsdb_expect_update_ip(self.badhost, "eth0", newip, fail=True)
-        command = ["update", "interface", "--interface", "eth0",
-                        "--machine", "ut3c5n10", "--ip", newip]
+        command = ["update", "machine", "--machine", "ut3c5n10", "--ip", newip]
 
         out = self.badrequesttest(command)
         self.dsdb_verify()
@@ -95,8 +94,8 @@ class TestUpdateInterface(TestBrokerCommand):
         newip = self.net.unknown[0].usable[11]
         self.dsdb_expect_update_ip(self.badhost, "eth0", newip)
 
-        self.noouttest(["update", "interface", "--interface", "eth0",
-                        "--machine", "ut3c5n10", "--ip", newip])
+        self.noouttest(["update", "machine", "--machine", "ut3c5n10",
+                        "--ip", newip])
         self.dsdb_verify()
 
     def testfailaddip(self):
@@ -104,10 +103,11 @@ class TestUpdateInterface(TestBrokerCommand):
                    "--hostname", "unittest02.one-nyp.ms.com",
                    "--mac", self.net.unknown[0].usable[12].mac,
                    "--ip", self.net.unknown[0].usable[12]]
-        out = self.badrequesttest(command)
+        out = self.unimplementederrortest(command)
         self.matchoutput(out,
-                         "Please use aq add_interface_address to add "
-                         "a new IP address to the interface.",
+                         "Please use update_machine to update the primary IP, "
+                         "or add_interface_address to add a new auxiliary "
+                         "address to the interface.",
                          command)
 
     def testupdateut3c5n10eth1(self):

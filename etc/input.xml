@@ -1515,6 +1515,10 @@
       default_route flag, and removes it from any other interfaces.
       <p/>
       For this change to take affect at the host level, run aq reconfigure.
+      <p/>
+      Note that updating the IP address is no longer supported. Use the add_interface_address and
+      del_interface_address commands to manage auxiliary IP address allocations. Use the
+      update_switch, update_chassis and update_machine commands if you wish to change the primary IP address.
       <optgroup name="update_interface_opts" mandatory="True" fields="all">
          <option name="interface" type="string">Interface name</option>
       </optgroup>
@@ -3008,6 +3012,7 @@
          <option name="serial" type="string">serial number</option>
          <option name="cluster" type="string">Cluster name</option>
          <option name="allow_metacluster_change" type="boolean">when changing clusters, allow the cluster to be in a different metacluster</option>
+         <option name="ip" type="ipv4">New primary IP address</option>
       </optgroup>
       <transport method="post" trigger="hostname" path="host/%(hostname)s/command/update_hardware" />
       <transport method="post" path="machine/%(machine)s/command/update" />

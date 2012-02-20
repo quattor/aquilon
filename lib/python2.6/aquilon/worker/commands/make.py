@@ -30,10 +30,10 @@
 
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.dbwrappers.host import hostname_to_host
 from aquilon.aqdb.model import (Archetype, HostLifecycle,
                                 OperatingSystem, Personality)
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.dbwrappers.host import hostname_to_host
 from aquilon.worker.templates.domain import TemplateDomain
 from aquilon.worker.locks import lock_queue, CompileKey
 from aquilon.worker.services import Chooser
