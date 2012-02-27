@@ -46,8 +46,19 @@ class TestAddManager(TestBrokerCommand):
                    "--hostname", "unittest00.one-nyp.ms.com"]
         out = self.badrequesttest(command)
         self.matchoutput (out,
-                          "IP address %s is already in use by public interface "
-                          "eth0 of machine unittest00.one-nyp.ms.com" % ip,
+                          "IP address %s is already in use by DNS record "
+                          "unittest00.one-nyp.ms.com." % ip,
+                          command)
+
+    def testaddaddrmismatch(self):
+        ip = self.net.unknown[0].usable[-1]
+        command = ["add", "manager", "--ip", ip,
+                   "--manager", "unittest02.one-nyp.ms.com",
+                   "--hostname", "unittest00.one-nyp.ms.com"]
+        out = self.badrequesttest(command)
+        self.matchoutput (out,
+                          "DNS Record unittest02.one-nyp.ms.com points to a "
+                          "different IP address.",
                           command)
 
     # Note: If changing this, also change testverifyshowmissingmanager

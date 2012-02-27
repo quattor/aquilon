@@ -33,11 +33,10 @@ from aquilon.exceptions_ import ArgumentError, AquilonError
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.host import hostname_to_host
 from aquilon.worker.dbwrappers.interface import (generate_ip,
-                                                 check_ip_restrictions,
                                                  get_or_create_interface,
                                                  assign_address)
-from aquilon.aqdb.model.network import get_net_id_from_ip
-from aquilon.aqdb.model import Machine, ARecord, Fqdn
+from aquilon.aqdb.model import Machine
+from aquilon.worker.dbwrappers.dns import grab_address
 from aquilon.worker.templates.machine import PlenaryMachineInfo
 from aquilon.worker.locks import lock_queue
 from aquilon.worker.processes import DSDBRunner
@@ -60,12 +59,6 @@ class CommandAddAuxiliary(BrokerCommand):
 
         oldinfo = DSDBRunner.snapshot_hw(dbmachine)
 
-        dbfqdn = Fqdn.get_or_create(session, fqdn=auxiliary, preclude=True)
-
-        if dbfqdn.dns_domain.restricted:
-            raise ArgumentError("{0} is restricted, auxiliary addresses "
-                                "are not allowed.".format(dbfqdn.dns_domain))
-
         dbinterface = get_or_create_interface(session, dbmachine,
                                               name=interface, mac=mac,
                                               interface_type='public',
@@ -80,13 +73,12 @@ class CommandAddAuxiliary(BrokerCommand):
                                 "{1}.".format(dbinterface, addrs))
 
         ip = generate_ip(session, dbinterface, compel=True, **arguments)
-        dbnetwork = get_net_id_from_ip(session, ip)
-        check_ip_restrictions(dbnetwork, ip)
 
-        dbdns_rec = ARecord(fqdn=dbfqdn, ip=ip, network=dbnetwork,
-                            comments=comments)
-        session.add(dbdns_rec)
-        assign_address(dbinterface, ip, dbnetwork)
+        dbdns_rec, newly_created = grab_address(session, auxiliary, ip,
+                                                comments=comments,
+                                                preclude=True)
+
+        assign_address(dbinterface, ip, dbdns_rec.network)
 
         session.flush()
 

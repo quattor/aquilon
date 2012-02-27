@@ -28,11 +28,9 @@
 # TERMS THAT MAY APPLY.
 
 from aquilon.exceptions_ import ArgumentError, ProcessException
-from aquilon.aqdb.model import DnsRecord, ARecord, DnsEnvironment, Fqdn
-from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.dbwrappers.interface import (generate_ip,
-                                                 check_ip_restrictions)
+from aquilon.worker.dbwrappers.dns import grab_address
+from aquilon.worker.dbwrappers.interface import generate_ip
 from aquilon.worker.processes import DSDBRunner
 
 
@@ -42,30 +40,19 @@ class CommandAddAddressDNSEnvironment(BrokerCommand):
 
     def render(self, session, logger, fqdn, dns_environment, comments,
                **arguments):
-        dbdns_env = DnsEnvironment.get_unique(session, dns_environment,
-                                              compel=True)
-
-        dbfqdn = Fqdn.get_or_create(session, dns_environment=dbdns_env,
-                                    fqdn=fqdn)
-
-        if dbfqdn.dns_domain.restricted:
-            raise ArgumentError("{0} is restricted, standalone A records "
-                                "are not allowed.".format(dbfqdn.dns_domain))
-
-        DnsRecord.get_unique(session, fqdn=dbfqdn, preclude=True)
-
         ip = generate_ip(session, compel=True, dbinterface=None, **arguments)
-        ipnet = get_net_id_from_ip(session, ip)
-        check_ip_restrictions(ipnet, ip)
-        dbaddress = ARecord(fqdn=dbfqdn, ip=ip, network=ipnet, comments=comments)
-        session.add(dbaddress)
+        dbdns_rec, newly_created = grab_address(session, fqdn, ip,
+                                                None, # network_environment,
+                                                dns_environment,
+                                                comments=comments,
+                                                preclude=True)
 
         session.flush()
 
-        if dbdns_env.is_default:
+        if dbdns_rec.fqdn.dns_environment.is_default:
             dsdb_runner = DSDBRunner(logger=logger)
             try:
-                dsdb_runner.add_host_details(fqdn=dbaddress.fqdn, ip=dbaddress.ip,
+                dsdb_runner.add_host_details(fqdn=dbdns_rec.fqdn, ip=ip,
                                              name=None, mac=None,
                                              comments=comments)
             except ProcessException, e:

@@ -101,11 +101,12 @@ class CommandAddInterfaceAddress(BrokerCommand):
         if not usage:
             usage = "system"
 
-        dbdns_rec, delete_old_dsdb_entry = grab_address(session, fqdn, ip,
-                                                        network_environment,
-                                                        usage, relaxed=relaxed)
+        dbdns_rec, newly_created = grab_address(session, fqdn, ip,
+                                                network_environment,
+                                                usage=usage, relaxed=relaxed)
         ip = dbdns_rec.ip
         dbnetwork = dbdns_rec.network
+        delete_old_dsdb_entry = not newly_created and not dbdns_rec.assignments
 
         # Check that the network ranges assigned to different interfaces
         # do not overlap even if the network environments are different, because

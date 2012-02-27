@@ -137,14 +137,25 @@ class TestAddDynamicRange(TestBrokerCommand):
             self.failUnless(dynname(ip) in hosts, "%s is missing from network"
                             "protobuf output" % dynname(ip))
 
-    def testfailalreadytaken(self):
+    def testfailipalreadytaken(self):
+        command = ["add_dynamic_range",
+                   "--startip", self.net.tor_net[12].usable[0],
+                   "--endip", self.net.tor_net[12].usable[1],
+                   "--prefix=oops",
+                   "--dns_domain=aqd-unittest.ms.com"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "the following IP addresses are already in use",
+                         command)
+        self.matchoutput(out, str(self.net.tor_net[12].usable[0]), command)
+
+    def testfaildnsalreadytaken(self):
         command = ["add_dynamic_range",
                    "--startip", self.net.tor_net2[0].usable[2],
                    "--endip", self.net.tor_net2[0].usable[3],
                    "--prefix=oops",
                    "--dns_domain=aqd-unittest.ms.com"]
         out = self.badrequesttest(command)
-        self.matchoutput(out, "the following hosts already exist", command)
+        self.matchoutput(out, "the following DNS records already exist", command)
         self.matchoutput(out, "%s [%s]" %
                          (dynname(self.net.tor_net2[0].usable[2]),
                           self.net.tor_net2[0].usable[2]), command)

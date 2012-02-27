@@ -54,15 +54,25 @@ class TestAddInterfaceAddress(TestBrokerCommand):
         self.dsdb_verify()
 
     def testaddunittest20e0again(self):
-        # No label, different IP
+        # No label, different FQDN, different IP
         ip = self.net.unknown[11].usable[-1]
-        fqdn = "unittest20-e0.aqd-unittest.ms.com"
+        fqdn = "unittest20-e0-1.aqd-unittest.ms.com"
         command = ["add", "interface", "address", "--machine", "ut3c5n2",
                    "--interface", "eth0", "--fqdn", fqdn, "--ip", ip]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Public Interface eth0 of machine "
                          "unittest20.aqd-unittest.ms.com already "
                          "has an IP address.", command)
+
+    def testaddunittest20e0ipmismatch(self):
+        # No label, same FQDN, different IP
+        ip = self.net.unknown[11].usable[-1]
+        fqdn = "unittest20-e0.aqd-unittest.ms.com"
+        command = ["add", "interface", "address", "--machine", "ut3c5n2",
+                   "--interface", "eth0", "--fqdn", fqdn, "--ip", ip]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "DNS Record unittest20-e0.aqd-unittest.ms.com "
+                         "points to a different IP address.", command)
 
     def testaddunittest20e1(self):
         ip = self.net.unknown[12].usable[0]
@@ -118,7 +128,10 @@ class TestAddInterfaceAddress(TestBrokerCommand):
                    "--fqdn", "unittest01.one-nyp.ms.com",
                    "--ip", self.net.unknown[0].usable[10]]
         out = self.badrequesttest(command)
-        self.matchoutput(out, "is already used as a primary name", command)
+        self.matchoutput(out,
+                         "DNS Record unittest01.one-nyp.ms.com is already used "
+                         "as the primary name of machine ut3c1n4.",
+                         command)
 
     def testrejectnumericlabel(self):
         command = ["add", "interface", "address", "--machine", "ut3c5n2",
@@ -184,7 +197,7 @@ class TestAddInterfaceAddress(TestBrokerCommand):
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "DNS Domain restrict.aqd-unittest.ms.com is "
-                         "restricted, auxiliary addresses are not allowed.",
+                         "restricted, adding extra addresses is not allowed.",
                          command)
 
     def testsystemzebramix(self):
