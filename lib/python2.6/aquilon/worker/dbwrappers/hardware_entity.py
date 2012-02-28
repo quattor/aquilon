@@ -152,10 +152,8 @@ def parse_primary_name(session, fqdn, ip):
 def convert_primary_name_to_arecord(session, dbhw_ent, ip, dbnetwork):
     # Lock the FQDN, so nothing can steal it while there is no DNS record
     # associated with it
-    q = session.query(Fqdn)
-    q = q.filter_by(id=dbhw_ent.primary_name.fqdn_id)
-    q = q.with_lockmode('update')
-    dbfqdn = q.one()
+    dbfqdn = dbhw_ent.primary_name.fqdn
+    dbfqdn.lock_row()
 
     comments = dbhw_ent.primary_name.comments
     session.delete(dbhw_ent.primary_name)

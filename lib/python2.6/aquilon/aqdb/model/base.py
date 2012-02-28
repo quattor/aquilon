@@ -31,7 +31,8 @@ import sys
 from inspect import isclass
 
 from sqlalchemy.schema import CreateTable
-from sqlalchemy.orm.session import Session
+from sqlalchemy.orm import object_mapper
+from sqlalchemy.orm.session import Session, object_session
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 from sqlalchemy.orm.properties import RelationProperty, ColumnProperty
@@ -303,6 +304,26 @@ class Base(object):
                 msg = "%s %s not found." % (clslabel, ", ".join(desc))
                 _raise_custom(compel, NotFoundException, msg)
         return query.subquery()
+
+    def lock_row(self):
+        """
+        Lock an object in the database.
+
+        The function works by issuing a SELECT ... FOR UPDATE query.
+        """
+
+        session = object_session(self)
+        if not session:  # pragma: no cover
+            raise InternalError("lock_row() called on a detached object %r" %
+                                self)
+
+        pk = object_mapper(self).primary_key
+        q = session.query(*pk)
+        for col in pk:
+            q = q.filter(col == getattr(self, col.key))
+
+        q = q.with_lockmode("update")
+        return q.one()
 
     @classmethod
     def ddl(self):  # pragma: no cover

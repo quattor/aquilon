@@ -52,10 +52,8 @@ def delete_dns_record(dbdns_rec):
                             "first.".format(dbdns_rec))
 
     # Lock the FQDN
-    q = session.query(Fqdn)
-    q = q.filter_by(id=dbdns_rec.fqdn_id)
-    q = q.with_lockmode('update')
-    dbfqdn = q.one()
+    dbfqdn = dbdns_rec.fqdn
+    dbfqdn.lock_row()
 
     # Delete the DNS record
     session.delete(dbdns_rec)
