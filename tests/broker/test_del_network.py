@@ -51,7 +51,7 @@ class TestDelNetwork(TestBrokerCommand):
 
     def testshownetworkall(self):
         for network in self.net.all:
-            command = "show network --ip %s" % network.ip
+            command = "show network --ip %s --hosts" % network.ip
             out = self.notfoundtest(command.split(" "))
 
     def testshownetwork(self):
