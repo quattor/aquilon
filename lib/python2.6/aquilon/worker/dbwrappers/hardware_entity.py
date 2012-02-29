@@ -35,6 +35,7 @@ from aquilon.aqdb.model import (HardwareEntity, Model, DnsRecord, ARecord,
                                 ReservedName, AddressAssignment, Fqdn,
                                 NetworkEnvironment, Network, Interface, Vendor)
 from aquilon.aqdb.model.network import get_net_id_from_ip
+from aquilon.worker.dbwrappers.dns import convert_reserved_to_arecord
 from aquilon.worker.dbwrappers.location import get_location
 from aquilon.worker.dbwrappers.interface import (check_ip_restrictions,
                                                  assign_address)
@@ -149,22 +150,6 @@ def parse_primary_name(session, fqdn, ip):
 
     return dbdns_rec
 
-def convert_primary_name_to_arecord(session, dbhw_ent, ip, dbnetwork):
-    # Lock the FQDN, so nothing can steal it while there is no DNS record
-    # associated with it
-    dbfqdn = dbhw_ent.primary_name.fqdn
-    dbfqdn.lock_row()
-
-    comments = dbhw_ent.primary_name.comments
-    session.delete(dbhw_ent.primary_name)
-    session.flush()
-    session.expire(dbhw_ent, ['primary_name'])
-    session.expire(dbfqdn, ['dns_records'])
-    dbdns_rec = ARecord(fqdn=dbfqdn, ip=ip, network=dbnetwork,
-                        comments=comments)
-    session.add(dbdns_rec)
-    dbhw_ent.primary_name = dbdns_rec
-
 def update_primary_ip(session, dbhw_ent, ip):
     dbnetwork = get_net_id_from_ip(session, ip)
     check_ip_restrictions(dbnetwork, ip)
@@ -180,7 +165,8 @@ def update_primary_ip(session, dbhw_ent, ip):
 
     # Convert ReservedName to ARecord if needed
     if isinstance(dbhw_ent.primary_name, ReservedName):
-        convert_primary_name_to_arecord(session, dbhw_ent, ip, dbnetwork)
+        convert_reserved_to_arecord(session, dbhw_ent.primary_name, dbnetwork,
+                                    ip)
 
         # When converting a ReservedName to an ARecord, we have to bind the
         # primary address to an interface. Try to pick one.

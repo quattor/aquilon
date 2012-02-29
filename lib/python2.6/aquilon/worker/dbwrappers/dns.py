@@ -31,7 +31,7 @@
 from sqlalchemy.orm import object_session
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import Fqdn, DnsRecord
+from aquilon.aqdb.model import Fqdn, DnsRecord, ARecord
 
 
 def delete_dns_record(dbdns_rec):
@@ -66,3 +66,20 @@ def delete_dns_record(dbdns_rec):
         session.delete(dbfqdn)
     else:
         session.expire(dbfqdn, ['dns_records'])
+
+def convert_reserved_to_arecord(session, dbdns_rec, dbnetwork, ip):
+    comments = dbdns_rec.comments
+    dbhw_ent = dbdns_rec.hardware_entity
+    dbfqdn = dbdns_rec.fqdn
+
+    session.delete(dbdns_rec)
+    session.flush()
+    session.expire(dbhw_ent, ['primary_name'])
+    session.expire(dbfqdn, ['dns_records'])
+    dbdns_rec = ARecord(fqdn=dbfqdn, ip=ip, network=dbnetwork,
+                        comments=comments)
+    session.add(dbdns_rec)
+    if dbhw_ent:
+        dbhw_ent.primary_name = dbdns_rec
+
+    return dbdns_rec
