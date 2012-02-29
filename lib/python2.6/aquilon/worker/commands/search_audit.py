@@ -46,7 +46,7 @@ class CommandSearchAudit(BrokerCommand):
     required_parameters = []
 
     def render(self, session, keyword, username, command, before, after,
-               return_code, limit, oldest_first, **arguments):
+               return_code, limit, reverse_order, **arguments):
 
         q = session.query(Xtn)
 
@@ -101,10 +101,12 @@ class CommandSearchAudit(BrokerCommand):
             q = q.join(XtnDetail).filter_by(value=keyword)
             q = q.reset_joinpoint()
 
-        # Set an order by when searching for the records.
-        if oldest_first:
-            q = q.order_by(asc(Xtn.start_time))
+        # Set an order by when searching for the records, this controls
+        # which records are selected by the limit.
+        if reverse_order:
+            q = q.order_by(asc(Xtn.start_time))  # N oldest records
         else:
+            # default: N most recent
             q = q.order_by(desc(Xtn.start_time))
 
         # Limit the ordered results.
@@ -115,11 +117,11 @@ class CommandSearchAudit(BrokerCommand):
                                 self.config.get('broker', 'max_audit_rows'))
         q = q.limit(limit)
 
-        # Now make sure the limited output is ordered after the outer joins
-        # are applied to pull in details and end information.
-        if oldest_first:
-            q = q.from_self().order_by(asc(Xtn.start_time))
-        else:
+        # Now apply the user preference to the limited output after
+        # the outer joins are applied to pull in details and end information.
+        if reverse_order:
             q = q.from_self().order_by(desc(Xtn.start_time))
+        else:
+            q = q.from_self().order_by(asc(Xtn.start_time))
 
         return TransactionList(q.all())

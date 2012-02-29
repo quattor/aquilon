@@ -103,10 +103,12 @@ class TestAddBuilding(TestBrokerCommand):
     def testnonasciiaudit(self):
         command = ["search", "audit", "--keyword", "nonascii"]
         out = self.commandtest(command)
-        self.matchoutput(out,
-                         "400 aq add_building --address='<Non-ASCII value>' "
-                         "--building='nonascii' --city='ny'",
-                         command)
+        self.searchoutput(out,
+                          r"400 aq add_building .*"
+                          r"--address='<Non-ASCII value>'",
+                          command)
+        self.searchoutput(out, r"400 aq add_building .*--building='nonascii'",
+                          command)
 
 
 if __name__ == '__main__':

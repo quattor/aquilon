@@ -33,7 +33,7 @@
             <arg choice="plain"><option>--before <replaceable>DATE/TIME</replaceable></option></arg>
             <arg choice="plain"><option>--after <replaceable>DATE/TIME</replaceable></option></arg>
             <arg choice="plain"><option>--limit <replaceable>LIMIT</replaceable></option></arg>
-            <arg choice="plain"><option>--oldest_first</option></arg>
+            <arg choice="plain"><option>--reverse_order</option></arg>
 	    <xi:include href="../common/global_options.xml"/>
         </cmdsynopsis>
     </refsynopsisdiv>
@@ -167,13 +167,17 @@
 
             <varlistentry>
                 <term>
-                    <option>--oldest_first</option>
+                    <option>--reverse_order</option>
                 </term>
                 <listitem>
                     <para>
-                        Order results with the oldest results first. This
-			overrides the default behavior of ordering results
-			from newest to oldest.
+                        Order results with the newer results before
+                        older results. This overrides the default
+                        behaviour of ordering results from old to
+                        new. If the number of records returned would
+                        exceed the `limit' then this option will also
+                        cause the oldest N rows to be returned instead
+                        of the N newest.
                     </para>
                 </listitem>
             </varlistentry>

@@ -62,7 +62,7 @@ class TestAudit(TestBrokerCommand):
         """ get the oldest row in the xtn table"""
         global start_time
         command = ["search_audit", "--command", "all", "--limit", "1",
-                   "--oldest_first"]
+                   '--reverse_order']
         out = self.commandtest(command)
         m = self.searchoutput(out, AUDIT_RAW_RE, command)
         start_time = parse(m.group('datetime'))

@@ -4140,7 +4140,10 @@
          <option name="after" type="string">Search for transactions started after a specific date/time</option>
          <option name="return_code" type="int">Search by an HTTP response code (200-505)</option>
          <option name="limit" type="int">Limit the number of rows returned. (Default 5000/Max 20000)</option>
-         <option name="oldest_first" type="boolean">Order results with oldest records first (defaults to false, or newest info first)</option>
+         <option name="reverse_order" type="boolean">Output records in
+         reverse chronological order. Also causes the --limit
+         parameter to find the oldest records and not the newest.
+         </option>
       </optgroup>
       <transport method="get" path="find/audit" />
    </command>
