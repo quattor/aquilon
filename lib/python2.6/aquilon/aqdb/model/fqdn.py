@@ -90,8 +90,9 @@ class Fqdn(Base):
 
     @classmethod
     def get_or_create(cls, session, dns_environment=None, preclude=False,
-                      ignore_name_check=False, **kwargs):
-        fqdn = cls.get_unique(session, dns_environment=dns_environment, **kwargs)
+                      ignore_name_check=False, query_options=None, **kwargs):
+        fqdn = cls.get_unique(session, dns_environment=dns_environment,
+                              query_options=query_options, **kwargs)
         if fqdn:
             if preclude:
                 _raise_custom(preclude, ArgumentError, "{0} already exists.")
