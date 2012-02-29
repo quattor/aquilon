@@ -31,7 +31,10 @@
 from sqlalchemy.orm import object_session
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import Fqdn, DnsRecord, ARecord
+from aquilon.aqdb.model import (Fqdn, DnsRecord, ARecord, DynamicStub,
+                                AddressAssignment, NetworkEnvironment)
+from aquilon.aqdb.model.network import get_net_id_from_ip
+from aquilon.worker.dbwrappers.interface import check_ip_restrictions
 
 
 def delete_dns_record(dbdns_rec):
@@ -83,3 +86,79 @@ def convert_reserved_to_arecord(session, dbdns_rec, dbnetwork, ip):
         dbhw_ent.primary_name = dbdns_rec
 
     return dbdns_rec
+
+def grab_address(session, fqdn, ip, network_environment=None,
+                 usage='system', relaxed=False):
+    dbnet_env = NetworkEnvironment.get_unique_or_default(session,
+                                                         network_environment)
+
+    dbnetwork = get_net_id_from_ip(session, ip, dbnet_env)
+    check_ip_restrictions(dbnetwork, ip, relaxed=relaxed)
+
+    delete_old_dsdb_entry = False
+    dbfqdn = Fqdn.get_or_create(session, fqdn=fqdn,
+                                dns_environment=dbnet_env.dns_environment)
+    if dbfqdn.dns_domain.restricted:
+        raise ArgumentError("{0} is restricted, auxiliary addresses "
+                            "are not allowed.".format(dbfqdn.dns_domain))
+    if ip:
+        # TODO: move this check to the model
+        q = session.query(DynamicStub)
+        q = q.filter_by(network=dbnetwork)
+        q = q.filter_by(ip=ip)
+        dbdns_rec = q.first()
+        if dbdns_rec:
+            raise ArgumentError("Address {0:a} is reserved for dynamic "
+                                "DHCP.".format(dbdns_rec))
+
+        dbdns_rec = ARecord.get_unique(session, fqdn=dbfqdn, ip=ip,
+                                       network=dbnetwork)
+        if dbdns_rec:
+            # If it was just a pure DNS placeholder, then delete & re-add it
+            if not dbdns_rec.assignments:
+                delete_old_dsdb_entry = True
+        else:
+            dbdns_rec = ARecord(fqdn=dbfqdn, ip=ip, network=dbnetwork)
+            session.add(dbdns_rec)
+    else:
+        dbdns_rec = ARecord.get_unique(session, fqdn=dbfqdn, compel=True)
+        if isinstance(dbdns_rec, DynamicStub):
+            raise ArgumentError("Address {0:a} is reserved for dynamic "
+                                "DHCP.".format(dbdns_rec))
+        ip = dbdns_rec.ip
+        dbnetwork = dbdns_rec.network
+
+        if dbnetwork.network_environment != dbnet_env:
+            raise ArgumentError("Address {0:a} lives in {1:l}, not in "
+                                "{2:l}.  Use the --network_environment "
+                                "option to select the correct environment."
+                                .format(dbdns_rec,
+                                        dbnetwork.network_environment,
+                                        dbnet_env))
+
+        # If it was just a pure DNS placeholder, then delete & re-add it
+        if not dbdns_rec.assignments:
+            delete_old_dsdb_entry = True
+
+    # Sanity checks
+    if dbdns_rec.hardware_entity:
+        raise ArgumentError("Address {0:a} is already used as a primary name."
+                            .format(dbdns_rec))
+
+    q = session.query(AddressAssignment)
+    q = q.filter_by(network=dbnetwork)
+    q = q.filter_by(ip=ip)
+    other_uses = q.all()
+    if usage == "system":
+        if other_uses:
+            raise ArgumentError("IP address {0} is already in use. Non-zebra "
+                                "addresses cannot be assigned to multiple "
+                                "machines/interfaces.".format(ip))
+    elif usage == "zebra":
+        for addr in other_uses:
+            if addr.usage != "zebra":
+                raise ArgumentError("IP address {0} is already used by {1:l} "
+                                    "and is not configured for "
+                                    "Zebra.".format(ip, addr.interface))
+
+    return dbdns_rec, delete_old_dsdb_entry

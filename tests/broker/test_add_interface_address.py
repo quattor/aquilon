@@ -118,7 +118,7 @@ class TestAddInterfaceAddress(TestBrokerCommand):
                    "--fqdn", "unittest01.one-nyp.ms.com",
                    "--ip", self.net.unknown[0].usable[10]]
         out = self.badrequesttest(command)
-        self.matchoutput(out, "is used as a primary name", command)
+        self.matchoutput(out, "is already used as a primary name", command)
 
     def testrejectnumericlabel(self):
         command = ["add", "interface", "address", "--machine", "ut3c5n2",
