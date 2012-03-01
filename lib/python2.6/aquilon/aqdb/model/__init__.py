@@ -150,3 +150,4 @@ from aquilon.aqdb.model.intervention import Intervention
 from aquilon.aqdb.model.resourcegroup import ResourceGroup, BundleResource
 from aquilon.aqdb.model.reboot_schedule import (RebootSchedule,
                                                 RebootIntervention)
+from aquilon.aqdb.model.service_address import ServiceAddress

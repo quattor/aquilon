@@ -151,7 +151,8 @@ def del_resource(session, logger, dbresource, dsdb_callback=None, **arguments):
 
 def add_resource(session, logger, holder, dbresource, dsdb_callback=None,
                  **arguments):
-    holder.resources.append(dbresource)
+    if dbresource not in holder.resources:
+        holder.resources.append(dbresource)
 
     holder_plenary = Plenary.get_plenary(holder.holder_object, logger=logger)
     res_plenary = Plenary.get_plenary(dbresource, logger=logger)

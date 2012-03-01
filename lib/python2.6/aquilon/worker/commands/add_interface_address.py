@@ -45,7 +45,7 @@ class CommandAddInterfaceAddress(BrokerCommand):
     required_parameters = ['interface']
 
     def render(self, session, logger, machine, chassis, switch, fqdn, interface,
-               label, usage, network_environment, **kwargs):
+               label, network_environment, **kwargs):
 
         if machine:
             hwtype = 'machine'
@@ -98,12 +98,9 @@ class CommandAddInterfaceAddress(BrokerCommand):
         if label:
             validate_basic("label", label)
 
-        if not usage:
-            usage = "system"
-
         dbdns_rec, newly_created = grab_address(session, fqdn, ip,
                                                 network_environment,
-                                                usage=usage, relaxed=relaxed)
+                                                relaxed=relaxed)
         ip = dbdns_rec.ip
         dbnetwork = dbdns_rec.network
         delete_old_dsdb_entry = not newly_created and not dbdns_rec.assignments
@@ -124,7 +121,7 @@ class CommandAddInterfaceAddress(BrokerCommand):
                                                     dbnetwork,
                                                     dbnetwork.network_environment))
 
-        assign_address(dbinterface, ip, dbnetwork, label=label, usage=usage)
+        assign_address(dbinterface, ip, dbnetwork, label=label)
         session.flush()
 
         dbhost = getattr(dbhw_ent, "host", None)

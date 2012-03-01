@@ -78,11 +78,11 @@ class MachineFormatter(ObjectFormatter):
         managers = []
         auxiliaries = []
         for addr in machine.all_addresses():
-            if addr.ip == machine.primary_ip:
+            if addr.ip == machine.primary_ip or addr.service_address_id:
                 continue
-            if addr.interface.interface_type == 'management':
+            elif addr.interface.interface_type == 'management':
                 managers.append(([str(fqdn) for fqdn in addr.fqdns], addr.ip))
-            elif addr.usage == 'system':
+            else:
                 auxiliaries.append(([str(fqdn) for fqdn in addr.fqdns], addr.ip))
 
         for mgr in managers:

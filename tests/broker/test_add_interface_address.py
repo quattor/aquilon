@@ -54,6 +54,17 @@ class TestAddInterfaceAddress(TestBrokerCommand):
         self.dsdb_verify()
 
     def testaddunittest20e0again(self):
+        ip = self.net.unknown[11].usable[0]
+        fqdn = "unittest20-e0.aqd-unittest.ms.com"
+        command = ["add", "interface", "address", "--machine", "ut3c5n2",
+                   "--interface", "eth0", "--fqdn", fqdn, "--ip", ip]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "IP address %s is already in use by public interface "
+                         "eth0 of machine unittest20.aqd-unittest.ms.com." % ip,
+                         command)
+
+    def testaddunittest20e0namemismatch(self):
         # No label, different FQDN, different IP
         ip = self.net.unknown[11].usable[-1]
         fqdn = "unittest20-e0-1.aqd-unittest.ms.com"
@@ -133,6 +144,17 @@ class TestAddInterfaceAddress(TestBrokerCommand):
                          "as the primary name of machine ut3c1n4.",
                          command)
 
+    def testrejecthostnamelabel(self):
+        command = ["add", "interface", "address", "--machine", "ut3c1n3",
+                   "--interface", "eth1", "--label", "hostname",
+                   "--fqdn", "hostname-label.one-nyp.ms.com",
+                   "--ip", self.net.unknown[0].usable[-1]]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "The 'hostname' label can only be managed by "
+                         "add_host/del_host.",
+                         command)
+
     def testrejectnumericlabel(self):
         command = ["add", "interface", "address", "--machine", "ut3c5n2",
                    "--interface", "eth1", "--label", "1",
@@ -148,12 +170,15 @@ class TestAddInterfaceAddress(TestBrokerCommand):
         self.matchoutput(out, "already has an alias named", command)
 
     def testrejectduplicateuse(self):
+        ip = self.net.unknown[0].usable[3]
         command = ["add", "interface", "address", "--machine", "ut3c5n2",
                    "--interface", "eth1", "--label", "e2",
                    "--fqdn", "unittest00-e1.one-nyp.ms.com"]
         out = self.badrequesttest(command)
-        self.matchoutput(out, "Non-zebra addresses cannot be assigned to "
-                         "multiple machines/interfaces.", command)
+        self.matchoutput(out,
+                         "IP address %s is already in use by public interface "
+                         "eth1 of machine unittest00.one-nyp.ms.com." % ip,
+                         command)
 
     def testrejectdyndns(self):
         # Dynamic DHCP address, set up using add_dynamic_range
@@ -180,15 +205,6 @@ class TestAddInterfaceAddress(TestBrokerCommand):
                          (ip, self.net.tor_net2[0].ip),
                          command)
 
-    def testrejectbadusage(self):
-        ip = self.net.tor_net2[0].usable[-1]
-        command = ["add", "interface", "address", "--machine", "ut3c5n2",
-                   "--interface", "eth1", "--label", "e3",
-                   "--fqdn", "badusage.aqd-unittest.ms.com", "--ip", ip,
-                   "--usage", "badusage"]
-        out = self.badrequesttest(command)
-        self.matchoutput(out, "Illegal address usage 'badusage'.", command)
-
     def testrejectrestricteddomain(self):
         ip = self.net.tor_net2[0].usable[-1]
         command = ["add", "interface", "address", "--machine", "ut3c5n2",
@@ -200,64 +216,6 @@ class TestAddInterfaceAddress(TestBrokerCommand):
                          "restricted, adding extra addresses is not allowed.",
                          command)
 
-    def testsystemzebramix(self):
-        ip = self.net.unknown[0].usable[3]
-        command = ["add", "interface", "address", "--machine", "ut3c5n2",
-                   "--interface", "eth1", "--label", "e2",
-                   "--usage", "zebra",
-                   "--fqdn", "unittest00-e1.one-nyp.ms.com"]
-        out = self.badrequesttest(command)
-        self.matchoutput(out,
-                         "IP address %s is already used by public interface "
-                         "eth1 of machine unittest00.one-nyp.ms.com and is "
-                         "not configured for Zebra." % ip,
-                         command)
-
-    def testaddzebra2eth0(self):
-        # Use an address that is smaller than the primary IP to verify that the
-        # primary IP is not removed
-        ip = self.net.unknown[13].usable[1]
-        self.dsdb_expect_add("zebra2.aqd-unittest.ms.com", ip, "le1",
-                             primary="unittest20.aqd-unittest.ms.com")
-        command = ["add", "interface", "address", "--machine", "ut3c5n2",
-                   "--interface", "eth0", "--label", "zebra2",
-                   "--usage", "zebra",
-                   "--fqdn", "zebra2.aqd-unittest.ms.com", "--ip", ip]
-        self.noouttest(command)
-        self.dsdb_verify()
-
-    def testaddzebra2eth1(self):
-        ip = self.net.unknown[13].usable[1]
-        command = ["add", "interface", "address", "--machine", "ut3c5n2",
-                   "--interface", "eth1", "--label", "zebra2",
-                   "--usage", "zebra",
-                   "--fqdn", "zebra2.aqd-unittest.ms.com", "--ip", ip]
-        self.noouttest(command)
-
-    def testaddzebra3eth0(self):
-        # Adding an even lower IP should cause zebra2 to be renumbered in DSDB
-        zebra2_ip = self.net.unknown[13].usable[1]
-        zebra3_ip = self.net.unknown[13].usable[0]
-        self.dsdb_expect_delete(zebra2_ip)
-        self.dsdb_expect_add("zebra3.aqd-unittest.ms.com", zebra3_ip, "le1",
-                             primary="unittest20.aqd-unittest.ms.com")
-        self.dsdb_expect_add("zebra2.aqd-unittest.ms.com", zebra2_ip, "le2",
-                             primary="unittest20.aqd-unittest.ms.com")
-        command = ["add", "interface", "address", "--machine", "ut3c5n2",
-                   "--interface", "eth0", "--label", "zebra3",
-                   "--usage", "zebra",
-                   "--fqdn", "zebra3.aqd-unittest.ms.com", "--ip", zebra3_ip]
-        self.noouttest(command)
-        self.dsdb_verify()
-
-    def testaddzebra3eth1(self):
-        ip = self.net.unknown[13].usable[0]
-        command = ["add", "interface", "address", "--machine", "ut3c5n2",
-                   "--interface", "eth1", "--label", "zebra3",
-                   "--usage", "zebra",
-                   "--fqdn", "zebra3.aqd-unittest.ms.com", "--ip", ip]
-        self.noouttest(command)
-
     def test_failslaveaddress(self):
         # eth1 is enslaved to bond0
         command = ["add", "interface", "address", "--machine", "ut3c5n3",
@@ -266,23 +224,6 @@ class TestAddInterfaceAddress(TestBrokerCommand):
         out = self.badrequesttest(command)
         self.matchoutput(out, "Slave interfaces cannot hold addresses.",
                          command)
-
-    def testverifyunittest20(self):
-        zebra2_ip = self.net.unknown[13].usable[1]
-        zebra3_ip = self.net.unknown[13].usable[0]
-        command = ["show", "host", "--hostname",
-                   "unittest20.aqd-unittest.ms.com"]
-        out = self.commandtest(command)
-        self.matchoutput(out,
-                         "Provides: zebra2.aqd-unittest.ms.com [%s] "
-                         "(label: zebra2, usage: zebra)" % zebra2_ip,
-                         command)
-        self.matchoutput(out,
-                         "Provides: zebra3.aqd-unittest.ms.com [%s] "
-                         "(label: zebra3, usage: zebra)" % zebra3_ip,
-                         command)
-        self.matchclean(out, "Auxiliary: zebra2.aqd-unittest.ms.com", command)
-        self.matchclean(out, "Auxiliary: zebra3.aqd-unittest.ms.com", command)
 
     def testmixenvironments(self):
         net = self.net.unknown[1]

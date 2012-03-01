@@ -84,7 +84,10 @@ class AddressAssignment(Base):
                                             name='%s_network_fk' % _TN),
                         nullable=False)
 
-    usage = Column(Enum(16, ADDR_USAGES), nullable=False, default="system")
+    service_address_id = Column(Integer, ForeignKey('service_address.resource_id',
+                                                    name='%s_srv_addr_id' % _ABV,
+                                                    ondelete="CASCADE"),
+                                nullable=True)
 
     dns_environment_id = Column(Integer, ForeignKey('dns_environment.id',
                                                     name='%s_dns_env_fk' %

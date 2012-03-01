@@ -80,10 +80,16 @@ class CommandDelAddressDNSEnvironment(BrokerCommand):
                                         ", ".join(parts))
 
             if dbaddress.hardware_entity:
-                raise ArgumentError("DNS record {0:a} is the primary name of "
+                raise ArgumentError("DNS Record {0:a} is the primary name of "
                                     "{1:l}, therefore it cannot be "
                                     "deleted.".format(dbaddress,
                                                       dbaddress.hardware_entity))
+
+            if dbaddress.service_address:
+                # TODO: print the holder object
+                raise ArgumentError("DNS Record {0:a} is used as a service "
+                                    "address, therefore it cannot be deleted."
+                                    .format(dbaddress))
 
             # Do not allow deleting the DNS record if the IP address is still in
             # use - except if there are other DNS records having the same

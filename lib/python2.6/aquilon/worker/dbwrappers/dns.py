@@ -110,9 +110,9 @@ def _forbid_dyndns(dbdns_rec):
 # - Locking the DNS domain ensures exclusive access to the name
 # - Locking the network ensures exclusive access to the IP address allocation
 def grab_address(session, fqdn, ip, network_environment=None,
-                 dns_environment=None, usage="system", comments=None,
-                 allow_restricted_domain=False, allow_reserved=False,
-                 relaxed=False, preclude=False):
+                 dns_environment=None, comments=None,
+                 allow_restricted_domain=False,
+                 allow_reserved=False, relaxed=False, preclude=False):
     """
     Take ownership of an address.
 
@@ -271,17 +271,9 @@ def grab_address(session, fqdn, ip, network_environment=None,
     if ip:
         q = session.query(AddressAssignment)
         q = q.filter_by(ip=ip, network=dbnetwork)
-        other_uses = q.all()
-        if usage == "system":
-            if other_uses:
-                raise ArgumentError("IP address {0} is already in use. Non-zebra "
-                                    "addresses cannot be assigned to multiple "
-                                    "machines/interfaces.".format(ip))
-        elif usage == "zebra":
-            for addr in other_uses:
-                if addr.usage != "zebra":
-                    raise ArgumentError("IP address {0} is already used by {1:l} "
-                                        "and is not configured for "
-                                        "Zebra.".format(ip, addr.interface))
+        addr = q.first()
+        if addr:
+            raise ArgumentError("IP address {0} is already in use by "
+                                "{1:l}.".format(ip, addr.interface))
 
     return (existing_record, newly_created)

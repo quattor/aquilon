@@ -1575,10 +1575,6 @@
       If you specify only --fqdn, and none of the IP generation options, then
       the appropriate DNS record must already exist. If you specify both --fqdn
       and an IP generation option, then a new DNS record will be created.
-      <p/>
-      Valid values for the --usage option are: "system" and "zebra". To
-      configure Zebra, the same IP address with the same label and with
-      "--usage zebra" must be added to multiple physical interfaces.
       <optgroup name="add_interface_address_req" mandatory="True" fields="all">
          <optgroup name="add_interface_address_hw_opts" mandatory="True" fields="any">
             <option name="machine" type="string" conflicts="chassis switch">Machine name</option>
@@ -1591,7 +1587,6 @@
 	 <option name="fqdn" type="string">FQDN of the new address</option>
 	 <option name="network_environment" type="string">Network environment (default: internal)</option>
 	 <option name="label" type="string">Interface alias of the new address</option>
-	 <option name="usage" type="string">Use of the new address (default: system)</option>
          <option name="ipalgorithm" type="string">Algorithm for automatically choosing an IP.</option>
       </optgroup>
       <optgroup name="add_interface_address_ip_opts" mandatory="False" fields="any">
@@ -2273,6 +2268,7 @@
          <option name="intervention" type="string" conflicts="machine service instance default nasinfo data">Name of an intervention</option>
          <option name="reboot_intervention" type="string" conflicts="machine service instance default nasinfo data">Name of a reboot intervention</option>
          <option name="reboot_schedule" type="string" conflicts="machine service instance default nasinfo data">Name of a reboot schedule</option>
+         <option name="service_address" type="string" conflicts="machine service instance default nasinfo data">Name of a service address</option>
       </optgroup>
       <transport trigger="machine" method="get" path="machine/%(machine)s/plenary" />
       <transport trigger="hostname" method="get" path="host/%(hostname)s/plenary" />
@@ -4477,6 +4473,55 @@
          <option name="cluster" type="string">Cluster of resource</option>
       </optgroup>
       <transport method="delete" path="resource/intervention/%(intervention)s" />
+   </command>
+
+   <command name="add_service_address">
+      Add a new service address resource.
+      <optgroup name="add_srv_addr_opts" mandatory="True" fields="all">
+         <option name="service_address" type="string">Fully qualified name to register in the DNS</option>
+         <option name="name" type="string">Logical name of the service address</option>
+         <option name="interfaces" type="string">Comma separed list of interfaces</option>
+      </optgroup>
+      <optgroup name="resource_mapping_opts" mandatory="True" fields="any">
+         <option name="resourcegroup" type="string">Resourcegroup to apply resource</option>
+         <option name="hostname" type="string">Hostname to apply resource</option>
+         <option name="cluster" type="string">Cluster to apply resource</option>
+      </optgroup>
+      <optgroup name="optional_opts" mandatory="False" fields="any">
+         <option name="ip" type="ipv4">IP address</option>
+         <option name="network_environment" type="string">Network environment (default: internal)</option>
+         <option name="comments" type="string">Comments</option>
+      </optgroup>
+      <transport method="put" path="resource/service_address/%(name)s" />
+   </command>
+
+   <command name="del_service_address">
+      Delete a service address resource.
+      <optgroup name="del_srv_addr_opts" mandatory="True" fields="all">
+         <option name="name" type="string">Logical name of the service address</option>
+      </optgroup>
+      <optgroup name="resource_mapping_opts" mandatory="True" fields="any">
+         <option name="resourcegroup" type="string">Resourcegroup to apply resource</option>
+         <option name="hostname" type="string">Hostname of resource</option>
+         <option name="cluster" type="string">Cluster of resource</option>
+      </optgroup>
+      <optgroup name="del_srv_addr_optional" mandatory="False" fields="any">
+         <option name="keep_dns" type="flag">Keep the DNS record</option>
+      </optgroup>
+      <transport method="delete" path="resource/service_address/%(name)s" />
+   </command>
+
+   <command name="show_service_address">
+      Show service addresss based on filtering for host/cluster association
+      <optgroup name="show_srv_addr_opts" mandatory="True" fields="any">
+         <option name="cluster" type="string">cluster name</option>
+         <option name="hostname" type="string">hostname</option>
+         <option name="resourcegroup" type="string">resourcegroup</option>
+         <option name="name" type="string">service address name</option>
+         <option name="all" type="flag">list all service addresses</option>
+      </optgroup>
+      <transport method="get" trigger="name" path="resource/service_address/%(name)s" />
+      <transport method="get" path="find/resource/service_address" />
    </command>
 
    <command name="add_grn">

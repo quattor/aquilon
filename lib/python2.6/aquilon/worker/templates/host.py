@@ -147,8 +147,6 @@ class PlenaryHostData(Plenary):
 
     def body(self, lines):
         interfaces = dict()
-        vips = dict()
-        transit_interfaces = []
         routers = {}
         default_gateway = None
 
@@ -187,30 +185,8 @@ class PlenaryHostData(Plenary):
             static_routes = set()
 
             for addr in dbinterface.assignments:
-                if addr.usage == "zebra":
-                    if addr.label not in vips:
-                        vips[addr.label] = {"ip": addr.ip,
-                                            "interfaces": [dbinterface.name]}
-                        if addr.dns_records:
-                            vips[addr.label]["fqdn"] = addr.dns_records[0]
-                    else:
-                        # Sanity check
-                        if vips[addr.label]["ip"] != addr.ip:
-                            raise ArgumentError("Zebra configuration mismatch: "
-                                                "label %s has IP %s on "
-                                                "interface %s, but IP %s on "
-                                                "interface %s." %
-                                                (addr.label, addr.ip,
-                                                 dbinterface.name,
-                                                 vips[addr.label]["ip"],
-                                                 vips[addr.label]["interfaces"][0].name))
-                        vips[addr.label]["interfaces"].append(dbinterface.name)
-
-                    if dbinterface.name not in transit_interfaces:
-                        transit_interfaces.append(dbinterface.name)
-
-                    continue
-                elif addr.usage != "system":
+                # Service addresses will be handled as resources
+                if addr.service_address:
                     continue
 
                 net = addr.network
@@ -284,8 +260,6 @@ class PlenaryHostData(Plenary):
         if default_gateway:
             pan_assign(lines, "/system/network/default_gateway",
                        default_gateway)
-        if vips:
-            pan_assign(lines, "/system/network/vips", vips)
         if routers:
             pan_assign(lines, "/system/network/routers", routers)
         lines.append("")

@@ -125,7 +125,20 @@ class TestAddAquilonHost(TestBrokerCommand):
         self.matchoutput(out, "Domain: unittest", command)
         self.matchoutput(out, "Build Status: blind", command)
 
-    def testaddunittest20(self):
+    def testaddunittest20bad(self):
+        ip = self.net.unknown[13].usable[2]
+        command = ["add", "aquilon", "host",
+                   "--hostname", "unittest20.aqd-unittest.ms.com",
+                   "--ip", ip, "--buildstatus", "build",
+                   "--zebra_interfaces", "eth0,eth2",
+                   "--machine", "ut3c5n2", "--domain", "unittest",
+                   "--osname", "linux", "--osversion", "5.0.1-x86_64",
+                   "--personality", "compileserver"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Machine unittest20.aqd-unittest.ms.com does not "
+                         "have an interface named eth2.", command)
+
+    def testaddunittest20good(self):
         ip = self.net.unknown[13].usable[2]
         self.dsdb_expect_add("unittest20.aqd-unittest.ms.com", ip, "le0")
         self.noouttest(["add", "aquilon", "host",
@@ -150,8 +163,20 @@ class TestAddAquilonHost(TestBrokerCommand):
                           eth1_ip.mac, command)
         self.matchoutput(out,
                          "Provides: unittest20.aqd-unittest.ms.com [%s] "
-                         "(label: hostname, usage: zebra)" % ip,
+                         "(label: hostname, service_holder: host)" % ip,
                          command)
+
+    def testverifyunittest20hostname(self):
+        ip = self.net.unknown[13].usable[2]
+        command = ["show", "service", "address", "--name", "hostname",
+                   "--hostname", "unittest20.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Service Address: hostname", command)
+        self.matchoutput(out, "Bound to: Host unittest20.aqd-unittest.ms.com",
+                         command)
+        self.matchoutput(out, "Address: unittest20.aqd-unittest.ms.com [%s]" % ip,
+                         command)
+        self.matchoutput(out, "Interfaces: eth0, eth1", command)
 
     def testaddunittest21(self):
         ip = self.net.unknown[11].usable[1]

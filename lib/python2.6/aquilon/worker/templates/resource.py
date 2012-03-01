@@ -32,7 +32,7 @@ import logging
 
 from aquilon.aqdb.model import (Application, Filesystem, Intervention,
                                 ResourceGroup, Hostlink, RebootSchedule,
-                                RebootIntervention)
+                                RebootIntervention, ServiceAddress)
 from aquilon.worker.templates.base import Plenary
 from aquilon.worker.templates.panutils import (StructureTemplate, pan_assign,
                                                pan_push)
@@ -111,6 +111,12 @@ class PlenaryResource(Plenary):
         pan_assign(lines, "justification", self.dbobj.justification)
         self.body_intervention(lines)
 
+    def body_service_address(self, lines):
+        pan_assign(lines, "name", self.dbobj.name)
+        pan_assign(lines, "ip", str(self.dbobj.dns_record.ip))
+        pan_assign(lines, "fqdn", str(self.dbobj.dns_record.fqdn))
+        pan_assign(lines, "interfaces", self.dbobj.interfaces)
+
 
 Plenary.handlers[Application] = PlenaryResource
 Plenary.handlers[Filesystem] = PlenaryResource
@@ -119,3 +125,4 @@ Plenary.handlers[ResourceGroup] = PlenaryResource
 Plenary.handlers[Hostlink] = PlenaryResource
 Plenary.handlers[RebootSchedule] = PlenaryResource
 Plenary.handlers[RebootIntervention] = PlenaryResource
+Plenary.handlers[ServiceAddress] = PlenaryResource

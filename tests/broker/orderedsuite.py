@@ -113,6 +113,7 @@ from test_add_windows_host import TestAddWindowsHost
 from test_add_aurora_host import TestAddAuroraHost
 from test_add_auxiliary import TestAddAuxiliary
 from test_add_interface_address import TestAddInterfaceAddress
+from test_add_service_address import TestAddServiceAddress
 from test_add_manager import TestAddManager
 from test_add_static_route import TestAddStaticRoute
 from test_add_feature import TestAddFeature
@@ -220,6 +221,7 @@ from test_del_auxiliary import TestDelAuxiliary
 from test_del_windows_host import TestDelWindowsHost
 from test_del_host import TestDelHost
 from test_del_interface import TestDelInterface
+from test_del_service_address import TestDelServiceAddress
 from test_del_interface_address import TestDelInterfaceAddress
 from test_del_disk import TestDelDisk
 from test_del_machine import TestDelMachine
@@ -304,6 +306,7 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestPollSwitch,
                 TestAddHost,
                 TestAddAuxiliary, TestAddManager, TestAddInterfaceAddress,
+                TestAddServiceAddress,
                 TestAddAlias, TestAddSrvRecord,
                 TestMapService, TestBindClient, TestPrebindServer,
                 TestServiceConstraints,
@@ -361,7 +364,7 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestDel10GigHardware, TestDelVirtualHardware,
                 TestUnbindESXCluster, TestUncluster,
                 TestDelStaticRoute,
-                TestDelInterfaceAddress,
+                TestDelServiceAddress, TestDelInterfaceAddress,
                 TestDelDynamicRange, TestDelAlias, TestDelSrvRecord,
                 TestDelAddress, TestDelNSRecord,
                 TestDelManager, TestDelAuxiliary, TestDelWindowsHost, TestDelHost,
