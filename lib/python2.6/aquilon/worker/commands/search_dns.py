@@ -32,7 +32,7 @@
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import (DnsRecord, ARecord, Alias, SrvRecord, Fqdn,
                                 DnsDomain, DnsEnvironment, Network,
-                                NetworkEnvironment)
+                                NetworkEnvironment, AddressAssignment)
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.formats.list import StringAttributeList
 
@@ -51,7 +51,7 @@ class CommandSearchDns(BrokerCommand):
 
     def render(self, session, fqdn, dns_environment, dns_domain, shortname,
                record_type, ip, network, network_environment, target,
-               target_domain, fullinfo, style, **kwargs):
+               target_domain, primary_name, used, fullinfo, style, **kwargs):
         q = session.query(DnsRecord)
         q = q.with_polymorphic('*')
         if record_type:
@@ -115,6 +115,21 @@ class CommandSearchDns(BrokerCommand):
             q = q.join((TargetFqdn, or_(Alias.target_id == TargetFqdn.id,
                                         SrvRecord.target_id == TargetFqdn.id)))
             q = q.filter(TargetFqdn.dns_domain == dbdns_domain)
+        if primary_name is not None:
+            if primary_name:
+                q = q.filter(DnsRecord.hardware_entity.has())
+            else:
+                q = q.filter(~DnsRecord.hardware_entity.has())
+        if used is not None:
+            if used:
+                q = q.join(AddressAssignment,
+                           ARecord.ip == AddressAssignment.ip and
+                           ARecord.network == AddressAssignment.network)
+            else:
+                q = q.outerjoin(AddressAssignment,
+                                ARecord.ip == AddressAssignment.ip and
+                                ARecord.network == AddressAssignment.network)
+                q = q.filter(AddressAssignment.id == None)
             q = q.reset_joinpoint()
 
         if fullinfo:

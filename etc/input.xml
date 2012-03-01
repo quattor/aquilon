@@ -4038,6 +4038,8 @@
          <option name="target_domain">The DNS domain of the target of an alias or service</option>
          <!-- <option name="service" type="string">The symbolic name of the service (for SRV records)</option> -->
          <option name="dns_domain" type="string">Name of the DNS domain the record lives in</option>
+         <option name="primary_name" type="boolean">The DNS record is used as a primary name</option>
+         <option name="used" type="boolean" reverse="unused">The IP address is in use</option>
       </optgroup>
       <optgroup name="search_dns_optional" mandatory="False" fields="any">
          <option name="dns_environment" type="string" conflicts="network_environment">The name of an environment the address is in (default: internal)</option>

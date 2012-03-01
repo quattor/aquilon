@@ -94,6 +94,12 @@ class TestAddAlias(TestBrokerCommand):
                          "Reserved Name: target.restrict.aqd-unittest.ms.com",
                          cmd)
 
+    def test_201_verify_noprimary(self):
+        cmd = ["search", "dns", "--noprimary_name",
+               "--record_type", "reserved_name"]
+        out = self.commandtest(cmd)
+        self.matchoutput(out, "target.restrict.aqd-unittest.ms.com", cmd)
+
     def test_210_autocreate_second_alias(self):
         cmd = ["add", "alias", "--fqdn", "restrict2.aqd-unittest.ms.com",
                "--target", "target.restrict.aqd-unittest.ms.com"]
