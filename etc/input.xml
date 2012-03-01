@@ -1563,6 +1563,7 @@
          <option name="chassis" type="string">Chassis name</option>
          <option name="mac" type="mac">MAC address</option>
       </optgroup>
+      <transport method="post" trigger="switch" path="switch/%(switch)s/interface/command/del" />
       <transport method="post" path="interface/command/del" />
    </command>
 
