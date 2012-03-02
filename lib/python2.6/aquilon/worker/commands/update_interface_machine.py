@@ -29,19 +29,16 @@
 """Contains the logic for `aq update interface --machine`."""
 
 
-from aquilon.exceptions_ import ArgumentError, AquilonError
+from aquilon.exceptions_ import ArgumentError, AquilonError, UnimplementedError
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.interface import (get_interface,
-                                                 check_ip_restrictions,
                                                  verify_port_group,
                                                  choose_port_group,
                                                  assign_address)
-from aquilon.worker.dbwrappers.hardware_entity import convert_primary_name_to_arecord
 from aquilon.worker.locks import lock_queue
 from aquilon.worker.templates.machine import PlenaryMachineInfo
 from aquilon.worker.processes import DSDBRunner
-from aquilon.aqdb.model.network import get_net_id_from_ip
-from aquilon.aqdb.model import ReservedName, Machine, Interface, Model
+from aquilon.aqdb.model import Machine, Interface, Model
 from aquilon.utils import first_of
 
 
@@ -109,40 +106,10 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
             dbinterface.master = None
 
         if ip:
-            if len(dbinterface.addresses) > 1:
-                raise ArgumentError("{0} has multiple addresses, "
-                                    "update_interface can't handle "
-                                    "that.".format(dbinterface))
-
-            dbnetwork = get_net_id_from_ip(session, ip)
-            check_ip_restrictions(dbnetwork, ip)
-
-            if dbinterface.master:
-                raise ArgumentError("Slave interfaces cannot hold addresses.")
-
-            if dbinterface.assignments:
-                assignment = dbinterface.assignments[0]
-                if assignment.ip != dbhw_ent.primary_ip:
-                    raise ArgumentError("update_interface can not update "
-                                        "auxiliary addresses.")
-                if assignment.dns_records:
-                    assignment.dns_records[0].network = dbnetwork
-                    assignment.dns_records[0].ip = ip
-                    session.flush()
-                    session.expire(assignment, ['dns_records'])
-                assignment.ip = ip
-                assignment.network = dbnetwork
-            else:
-                raise ArgumentError("Please use aq add_interface_address to "
-                                    "add a new IP address to the interface.")
-
-            # Fix up the primary name if needed
-            if dbinterface.bootable and \
-               dbinterface.interface_type == 'public' and \
-               dbhw_ent.primary_name and isinstance(dbhw_ent.primary_name,
-                                                    ReservedName):
-                convert_primary_name_to_arecord(session, dbhw_ent, ip,
-                                                dbnetwork)
+            raise UnimplementedError("Please use update_machine to update the "
+                                     "primary IP, or add_interface_address to "
+                                     "add a new auxiliary address to the "
+                                     "interface.")
 
         if comments:
             dbinterface.comments = comments

@@ -77,8 +77,30 @@ class TestSwitchConstraints(TestBrokerCommand):
         out = self.badrequesttest(command)
         self.matchoutput(out, "holds the primary address", command)
 
+    def testprimaryalias(self):
+        command = ["add", "switch", "--switch", "alias2host.aqd-unittest.ms.com",
+                   "--type", "misc", "--rack", "ut3", "--model", "uttorswitch",
+                   "--ip", self.net.unknown[0].usable[-1]]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Alias alias2host.aqd-unittest.ms.com cannot be "
+                         "used as a primary name.", command)
 
-if __name__=='__main__':
+    def testprimarybadip(self):
+        good_ip = self.net.unknown[0].usable[13]
+        bad_ip = self.net.unknown[0].usable[14]
+        command = ["add", "switch", "--switch", "arecord13.aqd-unittest.ms.com",
+                   "--type", "misc", "--rack", "ut3", "--model", "uttorswitch",
+                   "--ip", bad_ip]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "arecord13.aqd-unittest.ms.com already exists, but "
+                         "points to %s instead of %s. A primary name is not "
+                         "allowed to point to multiple addresses." %
+                         (good_ip, bad_ip),
+                         command)
+
+
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestSwitchConstraints)
     unittest.TextTestRunner(verbosity=2).run(suite)
 

@@ -27,7 +27,7 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-"""Module for testing the add switch command."""
+"""Module for testing the update switch command."""
 
 import unittest
 
@@ -101,8 +101,7 @@ class TestUpdateSwitch(TestBrokerCommand):
                          "machine_type switch not found.",
                          command)
 
-    # FIXME: "without interface" is no longer true
-    def testupdatewithoutinterface(self):
+    def testupdateut3gd1r04(self):
         newip = self.net.tor_net[6].usable[1]
         self.dsdb_expect_update_ip("ut3gd1r04.aqd-unittest.ms.com", "xge49", newip)
         self.dsdb_expect_update_comment("ut3gd1r04.aqd-unittest.ms.com",
@@ -113,6 +112,17 @@ class TestUpdateSwitch(TestBrokerCommand):
                    "--comments", "Some new switch comments"]
         self.noouttest(command)
         self.dsdb_verify()
+
+    def testupdatebadip(self):
+        ip = self.net.tor_net[12].usable[0]
+        command = ["update", "switch", "--ip", ip,
+                   "--switch", "ut3gd1r04.aqd-unittest.ms.com"]
+        out = self.badrequesttest(command)
+        self.matchoutput (out,
+                          "IP address %s is already in use by on-board admin "
+                          "interface xge of switch "
+                          "ut3gd1r01.aqd-unittest.ms.com." % ip,
+                          command)
 
     def testupdatemisc(self):
         command = ["update", "switch",
@@ -173,6 +183,6 @@ class TestUpdateSwitch(TestBrokerCommand):
                           ip=self.net.tor_net[9].usable[0])
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestUpdateSwitch)
     unittest.TextTestRunner(verbosity=2).run(suite)

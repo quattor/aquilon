@@ -423,17 +423,15 @@ class TestAddInterface(TestBrokerCommand):
 
     def testaddinterfaceut3c5(self):
         ip = self.net.unknown[0].usable[6]
-        self.dsdb_expect_add("ut3c5.aqd-unittest.ms.com", ip, "oa", ip.mac)
-        command = ["add", "interface", "--interface", "oa",
-                   "--mac", ip.mac, "--ip", ip,
+        self.dsdb_expect_update("ut3c5.aqd-unittest.ms.com", ip.mac)
+        command = ["add", "interface", "--interface", "oa", "--mac", ip.mac,
                    "--chassis", "ut3c5.aqd-unittest.ms.com"]
         self.noouttest(command)
         self.dsdb_verify()
 
     def testaddinterfaceut3c5again(self):
         ip = self.net.unknown[0].usable[-1]
-        command = ["add", "interface", "--interface", "oa",
-                   "--mac", ip.mac, "--ip", ip,
+        command = ["add", "interface", "--interface", "oa", "--mac", ip.mac,
                    "--chassis", "ut3c5.aqd-unittest.ms.com"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "On-board Admin Interface oa of chassis "
@@ -456,7 +454,6 @@ class TestAddInterface(TestBrokerCommand):
     def testfailaddinterfaceut3c1(self):
         command = ["add", "interface", "--interface", "oa2",
                    "--mac", self.net.unknown[0].usable[6].mac,
-                   "--ip", self.net.unknown[0].usable[6],
                    "--chassis", "ut3c1.aqd-unittest.ms.com"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
@@ -475,7 +472,6 @@ class TestAddInterface(TestBrokerCommand):
     def testfailaddinterfaceut3c1model(self):
         command = ["add", "interface", "--interface", "oa2",
                    "--mac", self.net.unknown[0].usable[-1].mac,
-                   "--ip", self.net.unknown[0].usable[-1],
                    "--model", "e1000",
                    "--chassis", "ut3c1.aqd-unittest.ms.com"]
         out = self.badrequesttest(command)
@@ -484,10 +480,18 @@ class TestAddInterface(TestBrokerCommand):
                          "to a chassis.",
                          command)
 
+    def testfailaddinterfaceut3c1type(self):
+        command = ["add", "interface", "--interface", "oa2",
+                   "--mac", self.net.unknown[0].usable[-1].mac,
+                   "--type", "vlan",
+                   "--chassis", "ut3c1.aqd-unittest.ms.com"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Only 'oa' is allowed as the interface type "
+                         "for chassis.", command)
+
     def testaddinterfacenp997gd1r04(self):
         command = ["add", "interface", "--interface", "xge49",
                    "--mac", self.net.tor_net[3].usable[0].mac,
-#                  "--ip", self.net.tor_net[3].usable[0],
                    "--switch", "np997gd1r04.aqd-unittest.ms.com"]
         self.noouttest(command)
 
@@ -512,6 +516,22 @@ class TestAddInterface(TestBrokerCommand):
                          "MAC address %s is already in use: " %
                          self.net.tor_net[0].usable[0].mac,
                          command)
+
+    def testfailaddinterfaceud3dg1r01model(self):
+        command = ["add", "interface", "--interface", "xge49",
+                   "--model", "e1000",
+                   "--switch", "ut3gd1r01.aqd-unittest.ms.com"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Cannot use argument --model when adding an "
+                         "interface to a switch.", command)
+
+    def testfailaddinterfaceud3dg1r01type(self):
+        command = ["add", "interface", "--interface", "xge49",
+                   "--type", "vlan",
+                   "--switch", "ut3gd1r01.aqd-unittest.ms.com"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Only 'oa' is allowed as the interface type "
+                         "for switches.", command)
 
     def testverifyfailaddinterfaceut3dg1r01(self):
         command = "show tor_switch --tor_switch ut3gd1r01.aqd-unittest.ms.com"
@@ -709,16 +729,6 @@ class TestAddInterface(TestBrokerCommand):
                           r'"port_group", "storage-v701"\s*\)\s*\);'
                           % self.net.vm_storage_net[0].usable[0].mac,
                           command)
-
-    # This does not test the offset functionality. These commands fail b/c
-    # the interface already has an address.
-    #def testbadtornetoffset(self):
-    #    """ ensure we can't use the reserved address space in tor_net4 """
-    #    for i in range(0,16):
-    #        cmd = ["add", "interface", "--interface", "eth1",
-    #           "--tor_switch", "ut3gd1r01.aqd-unittest.ms.com",
-    #           "--ip",  "4.2.8.%s" % i]
-    #        out = self.badrequesttest(cmd)
 
     def testaddharackinterfaces(self):
         for port in range(1, 25):

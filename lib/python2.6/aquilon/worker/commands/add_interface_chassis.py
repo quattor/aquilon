@@ -31,14 +31,9 @@
 
 
 from aquilon.exceptions_ import ArgumentError, ProcessException
-from aquilon.aqdb.model import Chassis, ReservedName
-from aquilon.aqdb.model.network import get_net_id_from_ip
+from aquilon.aqdb.model import Chassis
 from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.dbwrappers.interface import (generate_ip,
-                                                 check_ip_restrictions,
-                                                 get_or_create_interface,
-                                                 assign_address)
-from aquilon.worker.dbwrappers.hardware_entity import convert_primary_name_to_arecord
+from aquilon.worker.dbwrappers.interface import get_or_create_interface
 from aquilon.worker.processes import DSDBRunner
 
 
@@ -66,24 +61,12 @@ class CommandAddInterfaceChassis(BrokerCommand):
                                               interface_type='oa',
                                               comments=comments, preclude=True)
 
-        ip = generate_ip(session, dbinterface, compel=True, **arguments)
-        dbnetwork = get_net_id_from_ip(session, ip)
-        check_ip_restrictions(dbnetwork, ip)
-
-        if ip:
-            assign_address(dbinterface, ip, dbnetwork)
-
-            # Convert ReservedName to ARecord if needed
-            if isinstance(dbchassis.primary_name, ReservedName):
-                convert_primary_name_to_arecord(session, dbchassis, ip,
-                                                dbnetwork)
-
         session.flush()
 
-        if ip:
-            dsdb_runner = DSDBRunner(logger=logger)
-            try:
-                dsdb_runner.update_host(dbchassis, oldinfo)
-            except ProcessException, e:
-                raise ArgumentError("Could not add chassis to DSDB: %s" % e)
+        dsdb_runner = DSDBRunner(logger=logger)
+        try:
+            dsdb_runner.update_host(dbchassis, oldinfo)
+        except ProcessException, err:
+            raise ArgumentError("Could not update chassis in DSDB: %s" % err)
+
         return

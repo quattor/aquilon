@@ -1,6 +1,6 @@
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 #
-# Copyright (C) 2010,2011,2012  Contributor
+# Copyright (C) 2010,2011  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -26,7 +26,7 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-"""Contains the logic for `aq update switch`."""
+"""Contains the logic for `aq update chassis`."""
 
 
 from aquilon.exceptions_ import ArgumentError, AquilonError
@@ -34,50 +34,45 @@ from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.location import get_location
 from aquilon.worker.dbwrappers.hardware_entity import update_primary_ip
 from aquilon.worker.processes import DSDBRunner
-from aquilon.aqdb.model import Model, Switch
+from aquilon.aqdb.model import Model, Chassis
 
 
-class CommandUpdateSwitch(BrokerCommand):
+class CommandUpdateChassis(BrokerCommand):
 
-    required_parameters = ["switch"]
+    required_parameters = ["chassis"]
 
-    def render(self, session, logger, switch, model, rack, type, ip,
-               vendor, serial, comments, **arguments):
-        dbswitch = Switch.get_unique(session, switch, compel=True)
+    def render(self, session, logger, chassis, model, rack, ip, vendor, serial,
+               comments, **arguments):
+        dbchassis = Chassis.get_unique(session, chassis, compel=True)
 
-        oldinfo = DSDBRunner.snapshot_hw(dbswitch)
+        oldinfo = DSDBRunner.snapshot_hw(dbchassis)
 
         if vendor and not model:
-            model = dbswitch.model.name
+            model = dbchassis.model.name
         if model:
             dbmodel = Model.get_unique(session, name=model, vendor=vendor,
-                                       machine_type='switch', compel=True)
-            dbswitch.model = dbmodel
+                                       machine_type='chassis', compel=True)
+            dbchassis.model = dbmodel
 
         dblocation = get_location(session, rack=rack)
         if dblocation:
-            dbswitch.location = dblocation
+            dbchassis.location = dblocation
 
         if serial is not None:
-            dbswitch.serial_no = serial
-
-        # FIXME: What do the error messages for an invalid enum (switch_type)
-        # look like?
-        if type:
-            dbswitch.switch_type = type
+            dbchassis.serial_no = serial
 
         if ip:
-            update_primary_ip(session, dbswitch, ip)
+            update_primary_ip(session, dbchassis, ip)
 
         if comments is not None:
-            dbswitch.comments = comments
+            dbchassis.comments = comments
 
-        session.add(dbswitch)
+        session.add(dbchassis)
         session.flush()
 
         dsdb_runner = DSDBRunner(logger=logger)
         try:
-            dsdb_runner.update_host(dbswitch, oldinfo)
+            dsdb_runner.update_host(dbchassis, oldinfo)
         except AquilonError, err:
-            raise ArgumentError("Could not update switch in DSDB: %s" % err)
+            raise ArgumentError("Could not update chassis in DSDB: %s" % err)
         return

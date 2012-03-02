@@ -29,8 +29,9 @@
 """Contains the logic for `aq update machine`."""
 
 
-from aquilon.exceptions_ import ArgumentError
+from aquilon.exceptions_ import ArgumentError, AquilonError
 from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.dbwrappers.hardware_entity import update_primary_ip
 from aquilon.worker.dbwrappers.location import get_location
 from aquilon.worker.templates.machine import (PlenaryMachineInfo,
                                               machine_plenary_will_move)
@@ -38,6 +39,7 @@ from aquilon.worker.templates.cluster import PlenaryCluster
 from aquilon.worker.templates.host import PlenaryHost
 from aquilon.worker.templates.base import PlenaryCollection
 from aquilon.worker.locks import lock_queue, CompileKey
+from aquilon.worker.processes import DSDBRunner
 from aquilon.aqdb.model import (Cpu, Chassis, ChassisSlot, Model, Cluster,
                                 Machine)
 
@@ -49,10 +51,11 @@ class CommandUpdateMachine(BrokerCommand):
     def render(self, session, logger, machine, model, vendor, serial,
                chassis, slot, clearchassis, multislot,
                cluster, allow_metacluster_change,
-               cpuname, cpuvendor, cpuspeed, cpucount, memory,
+               cpuname, cpuvendor, cpuspeed, cpucount, memory, ip,
                **arguments):
         dbmachine = Machine.get_unique(session, machine, compel=True)
         plenaries = PlenaryCollection(logger=logger)
+        oldinfo = DSDBRunner.snapshot_hw(dbmachine)
 
         if clearchassis:
             del dbmachine.chassis_slot[:]
@@ -149,6 +152,9 @@ class CommandUpdateMachine(BrokerCommand):
         if serial:
             dbmachine.serial_no = serial
 
+        if ip:
+            update_primary_ip(session, dbmachine, ip)
+
         # FIXME: For now, if a machine has its interface(s) in a portgroup
         # this command will need to be followed by an update_interface to
         # re-evaluate the portgroup for overflow.
@@ -205,6 +211,12 @@ class CommandUpdateMachine(BrokerCommand):
             if dbmachine.host:
                 # XXX: May need to reconfigure.
                 pass
+
+            dsdb_runner = DSDBRunner(logger=logger)
+            try:
+                dsdb_runner.update_host(dbmachine, oldinfo)
+            except AquilonError, err:
+                raise ArgumentError("Could not update machine in DSDB: %s" % err)
         except:
             plenaries.restore_stash()
             remove_plenaries.restore_stash()

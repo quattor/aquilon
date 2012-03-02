@@ -32,54 +32,33 @@
 from aquilon.exceptions_ import ArgumentError, AquilonError
 from aquilon.aqdb.model import Switch
 from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.dbwrappers.interface import (get_or_create_interface,
-                                                 assign_address)
+from aquilon.worker.dbwrappers.interface import get_or_create_interface
 from aquilon.worker.processes import DSDBRunner
 
 
 class CommandAddInterfaceSwitch(BrokerCommand):
 
     required_parameters = ["interface", "switch"]
-    invalid_parameters = ["automac", "ip", "ipfromip", "ipfromsystem",
-                          "autoip", "ipalgorithm", "pg", "autopg",
-                          "model", "vendor"]
+    invalid_parameters = ["automac", "pg", "autopg", "model", "vendor"]
 
     def render(self, session, logger, interface, switch, mac, type, comments,
                **arguments):
-        """This command can handle three cases:
-
-        1) Switch is old-style, and has no IP address.  In that case,
-        update_switch has to handle adding an IP, and this command can
-        add the interface either now or later.
-
-        2) Switch has an IP address with no interfaces.  Tie this interface
-        in as providing the IP.  Not going to worry about propogating the
-        extra information into DSDB.
-
-        3) Switch has an IP address and an interface tied to that address.
-        In this case, just record the new interface.
-
-        """
         if type and type != "oa":
             raise ArgumentError("Only 'oa' is allowed as the interface type "
                                 "for switches.")
 
-        dbswitch = Switch.get_unique(session, switch, compel=True)
-        oldinfo = DSDBRunner.snapshot_hw(dbswitch)
-
         for arg in self.invalid_parameters:
             if arguments.get(arg) is not None:
                 raise ArgumentError("Cannot use argument --%s when adding an "
-                                    "interface to a switch" % arg)
+                                    "interface to a switch." % arg)
+
+        dbswitch = Switch.get_unique(session, switch, compel=True)
+        oldinfo = DSDBRunner.snapshot_hw(dbswitch)
 
         dbinterface = get_or_create_interface(session, dbswitch,
                                               name=interface, mac=mac,
                                               interface_type='oa',
                                               comments=comments, preclude=True)
-
-        if dbswitch.primary_ip and not dbswitch.primary_name.assignments:
-            assign_address(dbinterface, dbswitch.primary_ip,
-                           dbswitch.primary_name.network)
 
         session.flush()
 

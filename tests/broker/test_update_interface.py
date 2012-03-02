@@ -80,8 +80,7 @@ class TestUpdateInterface(TestBrokerCommand):
         oldip = self.net.unknown[0].usable[0]
         newip = self.net.unknown[0].usable[11]
         self.dsdb_expect_update_ip(self.badhost, "eth0", newip, fail=True)
-        command = ["update", "interface", "--interface", "eth0",
-                        "--machine", "ut3c5n10", "--ip", newip]
+        command = ["update", "machine", "--machine", "ut3c5n10", "--ip", newip]
 
         out = self.badrequesttest(command)
         self.dsdb_verify()
@@ -95,8 +94,8 @@ class TestUpdateInterface(TestBrokerCommand):
         newip = self.net.unknown[0].usable[11]
         self.dsdb_expect_update_ip(self.badhost, "eth0", newip)
 
-        self.noouttest(["update", "interface", "--interface", "eth0",
-                        "--machine", "ut3c5n10", "--ip", newip])
+        self.noouttest(["update", "machine", "--machine", "ut3c5n10",
+                        "--ip", newip])
         self.dsdb_verify()
 
     def testfailaddip(self):
@@ -104,10 +103,11 @@ class TestUpdateInterface(TestBrokerCommand):
                    "--hostname", "unittest02.one-nyp.ms.com",
                    "--mac", self.net.unknown[0].usable[12].mac,
                    "--ip", self.net.unknown[0].usable[12]]
-        out = self.badrequesttest(command)
+        out = self.unimplementederrortest(command)
         self.matchoutput(out,
-                         "Please use aq add_interface_address to add "
-                         "a new IP address to the interface.",
+                         "Please use update_machine to update the primary IP, "
+                         "or add_interface_address to add a new auxiliary "
+                         "address to the interface.",
                          command)
 
     def testupdateut3c5n10eth1(self):
@@ -234,6 +234,20 @@ class TestUpdateInterface(TestBrokerCommand):
                          "not found",
                          command)
 
+    def testfailswitchmodel(self):
+        command = ["update", "interface", "--switch", "ut3gd1r01",
+                   "--interface", "xge", "--model", "e1000"]
+        out = self.unimplementederrortest(command)
+        self.matchoutput(out, "update_interface --switch cannot use the "
+                         "--model option.", command)
+
+    def testfailchassismodel(self):
+        command = ["update", "interface", "--chassis", "ut3c5",
+                   "--interface", "oa", "--model", "e1000"]
+        out = self.unimplementederrortest(command)
+        self.matchoutput(out, "update_interface --chassis cannot use the "
+                         "--model option.", command)
+
     def testupdateswitch(self):
         mac = self.net.tor_net[8].usable[0].mac
         self.dsdb_expect_update("ut3gd1r06.aqd-unittest.ms.com", mac)
@@ -305,6 +319,38 @@ class TestUpdateInterface(TestBrokerCommand):
                          "Public Interface eth1 of machine "
                          "unittest21.aqd-unittest.ms.com is not a slave.",
                          command)
+
+    def testfailbadifacechassis(self):
+        command = ["update", "interface", "--chassis", "ut3c5",
+                   "--interface", "eth0", "--comments", "bad-interface"]
+        out = self.notfoundtest(command)
+        self.matchoutput(out, "Interface eth0 of ut3c5.aqd-unittest.ms.com "
+                         "not found.", command)
+
+    def testfaildinvalidchassisoption(self):
+        command = ["update", "interface", "--chassis", "ut3c5",
+                   "--interface", "oa", "--autopg"]
+        out = self.unimplementederrortest(command)
+        self.matchoutput(out, "update_interface --chassis cannot use the "
+                         "--autopg option.", command)
+
+    def testupdatechassis(self):
+        mac = self.net.unknown[0].usable[24].mac
+        self.dsdb_expect_update("ut3c5.aqd-unittest.ms.com", mac)
+        command = ["update", "interface", "--chassis", "ut3c5",
+                   "--interface", "oa", "--mac", mac,
+                   "--comments", "Chassis interface comments"]
+        self.noouttest(command)
+        self.dsdb_verify()
+
+    def testverifychassis(self):
+        old_mac = self.net.unknown[0].usable[6].mac
+        new_mac = self.net.unknown[0].usable[24].mac
+        command = ["show", "chassis", "--chassis", "ut3c5"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Interface: oa %s" % new_mac, command)
+        self.matchclean(out, old_mac, command)
+        self.matchoutput(out, "Comments: Chassis interface comments", command)
 
 
 if __name__ == '__main__':

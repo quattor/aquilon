@@ -98,6 +98,7 @@ from test_add_switch import TestAddSwitch
 from test_update_switch import TestUpdateSwitch
 from test_poll_switch import TestPollSwitch
 from test_add_chassis import TestAddChassis
+from test_update_chassis import TestUpdateChassis
 from test_add_machine import TestAddMachine
 from test_add_disk import TestAddDisk
 from test_add_interface import TestAddInterface
@@ -292,7 +293,8 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestAddClusterAlignedService,
                 TestClusterEarlyConstraints,
                 TestAddTorSwitch, TestAddSwitch, TestUpdateSwitch,
-                TestAddChassis, TestAddMachine, TestAddDisk, TestAddInterface,
+                TestAddChassis, TestUpdateChassis,
+                TestAddMachine, TestAddDisk, TestAddInterface,
                 TestAddAddress,
                 TestAddRouter, TestAddDynamicRange,
                 TestAddAquilonHost, TestAddWindowsHost, TestAddAuroraHost,
