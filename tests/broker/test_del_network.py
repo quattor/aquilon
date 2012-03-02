@@ -49,7 +49,7 @@ class TestDelNetwork(TestBrokerCommand):
         ip = "192.168.10.0"
         self.noouttest(["del", "network", "--ip", ip])
 
-    def testshownetwork(self):
+    def testshownetworkall(self):
         for network in self.net.all:
             command = "show network --ip %s" % network.ip
             out = self.notfoundtest(command.split(" "))
@@ -104,6 +104,16 @@ class TestDelNetwork(TestBrokerCommand):
                    "--network_environment", "excx"]
         self.noouttest(command)
 
+    def testdelnetsvcmap(self):
+        net = self.net.netsvcmap
+        command = ["del", "network", "--ip", net.ip]
+        self.noouttest(command)
+
+    def testdelnetperssvcmap(self):
+        net = self.net.netperssvcmap
+        command = ["del", "network", "--ip", net.ip]
+        self.noouttest(command)
+
     def testdelutcolo(self):
         net = self.net.unknown[1]
         command = ["del", "network", "--ip", net.ip,
@@ -115,6 +125,13 @@ class TestDelNetwork(TestBrokerCommand):
         command = ["search", "network", "--all", "--network_environment", "excx"]
         out = self.commandtest(command)
         self.matchclean(out, "excx-net", command)
+        self.matchclean(out, str(net.ip), command)
+
+    def testverifynetsvcmap(self):
+        net = self.net.netsvcmap
+        command = ["search", "network", "--all"]
+        out = self.commandtest(command)
+        self.matchclean(out, "netsvcmap", command)
         self.matchclean(out, str(net.ip), command)
 
     def testverifyutcolo(self):

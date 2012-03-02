@@ -751,3 +751,8 @@ class DummyNetworks(object):
         self.all.extend(self.tor_net4)
         self.all.extend(self.vm_storage_net)
         self.all.extend(self.vpls)
+
+        # network base svc maps, deliberately not in self.all
+        self.netsvcmap = NetworkInfo("4.2.16.0/26", "unknown")
+        self.netperssvcmap = NetworkInfo("4.2.17.0/26", "unknown")
+

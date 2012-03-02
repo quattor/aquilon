@@ -52,6 +52,28 @@ class TestDelHost(TestBrokerCommand):
         command = "show host --hostname unittest02.one-nyp.ms.com"
         self.notfoundtest(command.split(" "))
 
+    def testdelafsbynet(self):
+        self.dsdb_expect_delete(self.net.netsvcmap.usable[0])
+        command = "del host --hostname afs-by-net.aqd-unittest.ms.com"
+        (out, err) = self.successtest(command.split(" "))
+        self.assertEmptyOut(out, command)
+        self.dsdb_verify()
+
+    def testverifydelafsbynet(self):
+        command = "show host --hostname afs-by-net.aqd-unittest.ms.com"
+        self.notfoundtest(command.split(" "))
+
+    def testdelnetmappers(self):
+        self.dsdb_expect_delete(self.net.netperssvcmap.usable[0])
+        command = "del host --hostname netmap-pers.aqd-unittest.ms.com"
+        (out, err) = self.successtest(command.split(" "))
+        self.assertEmptyOut(out, command)
+        self.dsdb_verify()
+
+    def testverifydelnetmappers(self):
+        command = "show host --hostname netmap-pers.aqd-unittest.ms.com"
+        self.notfoundtest(command.split(" "))
+
     def testdelunittest00(self):
         self.dsdb_expect_delete(self.net.unknown[0].usable[2])
         command = "del host --hostname unittest00.one-nyp.ms.com"

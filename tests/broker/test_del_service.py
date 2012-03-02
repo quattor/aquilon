@@ -49,6 +49,35 @@ class TestDelService(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchclean(out, "Service: afs Instance: q.ny.ms.com", command)
 
+    def testdelafsbynetinstance(self):
+        command = "del service --service afs --instance afs-by-net"
+        self.noouttest(command.split(" "))
+
+        command = "del service --service afs --instance afs-by-net2"
+        self.noouttest(command.split(" "))
+
+    def testverifydelafsbynetinstance(self):
+        command = "show service --service afs"
+        out = self.commandtest(command.split(" "))
+        self.matchclean(out, "Service: afs Instance: afs-by-net", command)
+
+    def testdelnetmappersinstance(self):
+        command = "del service --service netmap --instance netmap-pers"
+        self.noouttest(command.split(" "))
+
+        command = "del service --service netmap --instance q.ny.ms.com"
+        self.noouttest(command.split(" "))
+
+        command = "del service --service netmap --instance p-q.ny.ms.com"
+        self.noouttest(command.split(" "))
+
+    def testverifydelnetmappersinstance(self):
+        command = "show service --service netmap"
+        out = self.commandtest(command.split(" "))
+        self.matchclean(out, "Service: netmap Instance: netmap-pers", command)
+        self.matchclean(out, "Service: netmap Instance: q.ny.ms.com", command)
+        self.matchclean(out, "Service: netmap Instance: p-q.ny.ms.com", command)
+
     def testdelextraafsinstance(self):
         command = "del service --service afs --instance q.ln.ms.com"
         self.notfoundtest(command.split(" "))
@@ -168,7 +197,7 @@ class TestDelService(TestBrokerCommand):
                             "--instance=npecl%d_share" % i])
 
     def testdelmgdshares(self):
-        for i in range(13,15):
+        for i in range(13, 15):
             self.noouttest(["del_service", "--service=nas_disk_share",
                             "--instance=utecl%d_share" % i])
 
@@ -185,7 +214,7 @@ class TestDelService(TestBrokerCommand):
         self.noouttest(["del", "service", "--service", service])
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelService)
     unittest.TextTestRunner(verbosity=2).run(suite)
 

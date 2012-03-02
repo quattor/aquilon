@@ -34,7 +34,8 @@ from sqlalchemy import (Column, Integer, Sequence, String, DateTime, ForeignKey,
                         UniqueConstraint)
 from sqlalchemy.orm import relation, deferred, backref
 
-from aquilon.aqdb.model import Base, Location, Personality, ServiceInstance
+from aquilon.aqdb.model import (Base, Location, Personality, ServiceInstance,
+                                Network)
 
 _TN = 'personality_service_map'
 _ABV = 'prsnlty_svc_map'
@@ -51,25 +52,34 @@ class PersonalityServiceMap(Base):
 
     id = Column(Integer, Sequence('%s_seq' % _ABV), primary_key=True)
 
-    service_instance_id = Column(Integer, ForeignKey('service_instance.id',
-                                                     name='%s_svc_inst_fk' % _ABV,
-                                                     ondelete='CASCADE'),
+    service_instance_id = Column(Integer,
+                                 ForeignKey('service_instance.id',
+                                            name='%s_svc_inst_fk' % _ABV,
+                                            ondelete='CASCADE'),
                                  nullable=False)
 
-    location_id = Column(Integer, ForeignKey('location.id', ondelete='CASCADE',
-                                             name='%s_loc_fk' % _ABV),
-                         nullable=False)
+    location_id = Column(Integer,
+                         ForeignKey('location.id',
+                                    ondelete='CASCADE',
+                                    name='%s_loc_fk' % _ABV),
+                         nullable=True)
 
-    personality_id = Column(Integer, ForeignKey('personality.id',
-                                                name='personality',
-                                                ondelete='CASCADE'),
+    personality_id = Column(Integer,
+                            ForeignKey('personality.id',
+                                       name='personality',
+                                       ondelete='CASCADE'),
                             nullable=False)
 
-    creation_date = deferred(Column(DateTime, default=datetime.now, nullable=False))
+    network_id = Column(Integer, ForeignKey('network.id', ondelete='CASCADE',
+                                             name='%s_net_fk' % _ABV),
+                         nullable=True)
+
+    creation_date = deferred(Column(DateTime, default=datetime.now,
+                                    nullable=False))
     comments = deferred(Column(String(255), nullable=True))
 
-    location = relation(Location, innerjoin=True,
-                        backref=backref('personality_service_maps', lazy=True,
+    location = relation(Location,
+                        backref=backref('personality_service_maps',
                                         cascade="all, delete-orphan"))
     service_instance = relation(ServiceInstance, innerjoin=True,
                                 backref=backref('personality_service_map',
@@ -78,6 +88,9 @@ class PersonalityServiceMap(Base):
     personality = relation(Personality, uselist=False, innerjoin=True,
                            backref=backref('maps', lazy=True,
                                            cascade="all, delete-orphan"))
+    network = relation(Network, backref=backref('personality_service_map',
+                                                cascade="all, delete-orphan"))
+
 
     #Archetype probably shouldn't be exposed at this table/object: This isn't
     #intended for use with Archetype, but I'm not 100% sure yet
@@ -89,6 +102,25 @@ class PersonalityServiceMap(Base):
     def service(self):
         return self.service_instance.service
 
+    @property
+    def mapped_to(self):
+        if self.location:
+            mapped_to = self.location
+        else:
+            mapped_to = self.network
+
+        return mapped_to
+
+    def __init__(self, network=None, location=None, **kwargs):
+        super(PersonalityServiceMap, self).__init__(network=network,
+                                         location=location, **kwargs)
+        if network and location:  # pragma: no cover
+            raise ValueError("A service can't be mapped to a Network and a "
+                             "Location at the same time")
+
+        if network is None and location is None:  # pragma: no cover
+            raise ValueError("A service should by mapped to a Network or a "
+                             "Location")
 
 psm = PersonalityServiceMap.__table__  # pylint: disable=C0103, E1101
 psm.primary_key.name = 'prsnlty_svc_map_pk'
@@ -96,4 +128,4 @@ psm.primary_key.name = 'prsnlty_svc_map_pk'
 #TODO: reconsider the surrogate primary key?
 psm.append_constraint(
     UniqueConstraint('personality_id', 'service_instance_id', 'location_id',
-                     name='%s_loc_inst_uk' % _ABV))
+                     'network_id', name='%s_loc_net_ins_uk' % _ABV))

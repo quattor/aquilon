@@ -32,8 +32,10 @@
 from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import (ServiceMap, PersonalityServiceMap, Service,
-                                ServiceInstance, Archetype, Personality)
+                                ServiceInstance, Archetype, Personality,
+                                NetworkEnvironment)
 from aquilon.worker.dbwrappers.location import get_location
+from aquilon.worker.dbwrappers.network import get_network_byip
 
 
 class CommandUnmapService(BrokerCommand):
@@ -41,11 +43,17 @@ class CommandUnmapService(BrokerCommand):
     required_parameters = ["service", "instance"]
 
     def render(self, session, service, instance, archetype, personality,
-               **arguments):
+               networkip, **arguments):
         dbservice = Service.get_unique(session, service, compel=True)
         dbinstance = ServiceInstance.get_unique(session, service=dbservice,
                                                 name=instance, compel=True)
         dblocation = get_location(session, **arguments)
+
+        if networkip:
+            dbnet_env = NetworkEnvironment.get_unique_or_default(session)
+            dbnetwork = get_network_byip(session, networkip, dbnet_env)
+        else:
+            dbnetwork = None
 
         if personality:
             if not archetype:
@@ -63,7 +71,8 @@ class CommandUnmapService(BrokerCommand):
         else:
             q = session.query(ServiceMap)
 
-        q = q.filter_by(location=dblocation, service_instance=dbinstance)
+        q = q.filter_by(location=dblocation, service_instance=dbinstance,
+                        network=dbnetwork)
         dbmap = q.first()
 
         if dbmap:

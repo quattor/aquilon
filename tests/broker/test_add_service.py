@@ -46,6 +46,34 @@ class TestAddService(TestBrokerCommand):
                    "--comments", "Some instance comments"]
         self.noouttest(command)
 
+    def testaddafsbynetinstance(self):
+        command = ["add", "service", "--service", "afs",
+                   "--instance", "afs-by-net",
+                   "--comments", "For network based maps"]
+        self.noouttest(command)
+
+    def testaddafsbynetdupinstance(self):
+        command = ["add", "service", "--service", "afs",
+                   "--instance", "afs-by-net2",
+                   "--comments", "afs-by-net duplicate"]
+        self.noouttest(command)
+
+    def testaddnetmappersinstances(self):
+        command = ["add", "service", "--service", "netmap",
+                   "--instance", "q.ny.ms.com",
+                   "--comments", "For location based maps"]
+        self.noouttest(command)
+
+        command = ["add", "service", "--service", "netmap",
+                   "--instance", "p-q.ny.ms.com",
+                   "--comments", "For location based maps with personality"]
+        self.noouttest(command)
+
+        command = ["add", "service", "--service", "netmap",
+                   "--instance", "netmap-pers",
+                   "--comments", "For network based maps"]
+        self.noouttest(command)
+
     def testaddduplicateservice(self):
         command = "add service --service afs"
         self.badrequesttest(command.split(" "))
@@ -58,6 +86,11 @@ class TestAddService(TestBrokerCommand):
         command = "show service --service afs"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Service: afs Instance: q.ny.ms.com", command)
+
+    def testverifiyaddafsbynetinstance(self):
+        command = "show service --service afs"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Service: afs Instance: afs-by-net", command)
 
     def testaddextraafsinstance(self):
         command = "add service --service afs --instance q.ln.ms.com"

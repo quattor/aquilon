@@ -1848,6 +1848,7 @@
         <option name="room" type="string">Room</option>
         <option name="rack" type="string">Rack</option>
         <option name="desk" type="string">Desk</option>
+        <option name="networkip" type="ipv4" conflicts="organization hub continent country campus city building room rack desk">Network IP address</option>
       </optgroup>
       <transport method="post" path="service/%(service)s/instance/%(instance)s/command/map" />
    </command>
@@ -1871,6 +1872,7 @@
             <option name="rack" type="string">Rack</option>
             <option name="desk" type="string">Desk</option>
          </optgroup>
+         <option name="networkip" type="ipv4">Network IP address</option>
          <option name="all" type="flag">show all maps</option>
       </optgroup>
       <transport method="get" path="show/map" />
@@ -1898,6 +1900,7 @@
          <option name="room" type="string">Room</option>
          <option name="rack" type="string">Rack</option>
          <option name="desk" type="string">Desk</option>
+         <option name="networkip" type="ipv4" conflicts="organization hub continent country campus city building room rack desk">Network IP address</option>
       </optgroup>
       <transport method="post" path="service/%(service)s/instance/%(instance)s/command/unmap" />
    </command>

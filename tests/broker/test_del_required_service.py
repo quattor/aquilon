@@ -44,6 +44,11 @@ class TestDelRequiredService(TestBrokerCommand):
         command = "del required service --service afs --archetype aquilon"
         self.noouttest(command.split(" "))
 
+    def testdelrequirednetmap(self):
+        command = ["del_required_service", "--service=netmap",
+                   "--personality=eaitools", "--archetype=aquilon"]
+        self.noouttest(command)
+
     def testdelrequiredafsagain(self):
         command = "del required service --service afs --archetype aquilon"
         self.notfoundtest(command.split(" "))
@@ -135,7 +140,7 @@ class TestDelRequiredService(TestBrokerCommand):
                    "--archetype=vmhost", "--personality=esx_desktop"]
         self.noouttest(command)
 
-    def testverifydelrequiredvmhost(self):
+    def testverifydelrequiredesx(self):
         command = ["show_personality",
                    "--archetype=vmhost", "--personality=esx_desktop"]
         out = self.commandtest(command)
@@ -147,6 +152,6 @@ class TestDelRequiredService(TestBrokerCommand):
         self.matchclean(out, "Service: esx_management_server", command)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelRequiredService)
     unittest.TextTestRunner(verbosity=2).run(suite)

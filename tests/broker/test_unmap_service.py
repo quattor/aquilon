@@ -56,6 +56,50 @@ class TestUnmapService(TestBrokerCommand):
         command = ["show_map", "--service=afs", "--instance=q.ny.ms.com"]
         self.noouttest(command)
 
+    def testunmapafsbynet(self):
+        ip = self.net.netsvcmap.subnet()[0].ip
+        self.noouttest(["unmap", "service", "--networkip", ip,
+                        "--service", "afs", "--instance", "afs-by-net"])
+
+    def testverifyunmapafsbynet(self):
+        ip = self.net.netsvcmap.subnet()[0].ip
+        command = ["show_map",
+                   "--service=afs", "--instance=afs-by-net",
+                   "--networkip=%s" % ip]
+        self.notfoundtest(command)
+
+        command = ["show_map", "--service=afs", "--instance=afs-by-net"]
+        self.noouttest(command)
+
+    def testunmapafsbynetpers(self):
+        ip = self.net.netperssvcmap.subnet()[0].ip
+        self.noouttest(["unmap", "service", "--networkip", ip,
+                        "--service", "netmap", "--instance", "netmap-pers",
+                        "--personality", "eaitools",
+                        "--archetype", "aquilon"])
+
+        self.noouttest(["unmap", "service", "--building", "ut",
+                        "--service", "netmap", "--instance", "p-q.ny.ms.com",
+                        "--personality", "eaitools",
+                        "--archetype", "aquilon"])
+
+        self.noouttest(["unmap", "service", "--building", "ut",
+                        "--service", "netmap", "--instance", "q.ny.ms.com"])
+
+    def testverifyunmapafsbynetpers(self):
+        ip = self.net.netperssvcmap.subnet()[0].ip
+        command = ["show_map",
+                   "--service=netmap", "--instance=netmap-pers",
+                   "--networkip=%s" % ip, "--personality", "compileserver",
+                   "--archetype", "aquilon"]
+        self.notfoundtest(command)
+
+        command = ["show_map", "--service=netmap", "--instance=netmap-pers"]
+        self.noouttest(command)
+
+        command = ["show_map", "--service=netmap", "--instance=q.ny.ms.com"]
+        self.noouttest(command)
+
     def testunmapdns(self):
         self.noouttest(["unmap", "service", "--hub", "ny",
                         "--service", "dns", "--instance", "utdnsinstance"])
@@ -163,13 +207,14 @@ class TestUnmapService(TestBrokerCommand):
                                 "--service", service, "--instance", instance])
 
     def testunmapwithpersona(self):
-        self.noouttest(["unmap", "service", "--organization", "ms", "--service", "utsvc",
-                        "--instance", "utsi2", "--archetype", "aquilon",
-                        "--personality", "lemon-collector-oracle"])
+        self.noouttest(["unmap", "service", "--organization", "ms", "--service",
+                        "utsvc", "--instance", "utsi2", "--archetype",
+                        "aquilon", "--personality", "lemon-collector-oracle"])
 
     def testverifyunmapwithpersona(self):
-        command = "show map --archetype aquilon --personality lemon-collector-oracle --service utsvc"
-        out = self.commandtest(command.split(" "))
+        command = ["show_map", "--archetype=aquilon",
+                   "--personality=lemon-collector-oracle", "--service=utsvc"]
+        out = self.commandtest(command)
         self.matchoutput(out, "", command)
 
     # TODO: If/when there is another mapped personality, explicitly skip

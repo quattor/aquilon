@@ -130,6 +130,22 @@ class TestAddNetwork(TestBrokerCommand):
                    "--network_environment", "excx"]
         self.noouttest(command)
 
+    def testaddnetsvcmap(self):
+        net = self.net.netsvcmap
+        subnet = net.subnet()[0]
+        command = ["add", "network", "--network", "netsvcmap",
+                   "--ip", subnet.ip, "--netmask", subnet.netmask,
+                   "--building", "ut", "--type", net.nettype]
+        self.noouttest(command)
+
+    def testaddnetperssvcmap(self):
+        net = self.net.netperssvcmap
+        subnet = net.subnet()[0]
+        command = ["add", "network", "--network", "netperssvcmap",
+                   "--ip", subnet.ip, "--netmask", subnet.netmask,
+                   "--building", "ut", "--type", net.nettype]
+        self.noouttest(command)
+
     def testaddutcolo(self):
         net = self.net.unknown[1]
         command = ["add", "network", "--network", "utcolo-net",
@@ -198,6 +214,8 @@ class TestAddNetwork(TestBrokerCommand):
         command = "show network --building ut"
         out = self.commandtest(command.split(" "))
         self.matchclean(out, "utcolo-net", command)
+        self.matchoutput(out, "netsvcmap", command)
+        self.matchoutput(out, "netperssvcmap", command)
 
     def testshownetworkwithenv(self):
         command = "show network --building np --network_environment excx"

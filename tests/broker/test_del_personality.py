@@ -45,6 +45,11 @@ class TestDelPersonality(TestBrokerCommand):
                    "--archetype=aquilon"]
         self.noouttest(command)
 
+    def testdeleaipersonality(self):
+        command = ["del_personality", "--personality=eaitools",
+                   "--archetype=aquilon"]
+        self.noouttest(command)
+
     def testverifydelutpersonality(self):
         command = ["show_personality", "--personality=utpersonality",
                    "--archetype=aquilon"]
@@ -88,7 +93,7 @@ class TestDelPersonality(TestBrokerCommand):
         self.noouttest(command)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelPersonality)
     unittest.TextTestRunner(verbosity=2).run(suite)
 
