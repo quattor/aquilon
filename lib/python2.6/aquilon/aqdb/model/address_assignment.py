@@ -37,6 +37,7 @@ from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import relation, backref, object_session, deferred
 from sqlalchemy.sql import and_
 
+from aquilon.exceptions_ import InternalError
 from aquilon.aqdb.column_types import IPV4, AqStr, Enum
 from aquilon.aqdb.model import (Base, Interface, ARecord, DnsEnvironment, Fqdn,
                                 Network)
@@ -157,8 +158,8 @@ class AddressAssignment(Base):
 
         # Right now network_id is nullable due to how refresh_network works, so
         # verify the network here
-        if not network:
-            raise ValueError("AddressAssignment needs a network")
+        if not network:  # pragma: no cover
+            raise InternalError("AddressAssignment needs a network")
 
         super(AddressAssignment, self).__init__(_label=label, network=network,
                                                 **kwargs)
