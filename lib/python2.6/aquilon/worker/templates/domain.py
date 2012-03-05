@@ -152,8 +152,14 @@ class TemplateDomain(object):
         if (len(objectlist) == 0):
             return 'no hosts: nothing to do'
 
-        panc_env = {"PATH": "%s:%s" % (config.get("broker", "javadir"),
-                                       os_environ.get("PATH", ""))}
+        # The ant wrapper is silly and it may pick up the wrong set of .jars if
+        # ANT_HOME is not set
+        panc_env = {"PATH": "%s/bin:%s" % (config.get("broker", "java_home"),
+                                           os_environ.get("PATH", "")),
+                    "ANT_HOME": config.get("broker", "ant_home"),
+                    "JAVA_HOME": config.get("broker", "java_home")}
+        if config.has_option("broker", "ant_options"):
+            panc_env["ANT_OPTS"] = config.get("broker", "ant_options")
 
         args = [config.get("broker", "ant")]
         args.append("--noconfig")
