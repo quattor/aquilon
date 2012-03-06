@@ -182,3 +182,18 @@ def add_resource(session, logger, holder, dbresource, dsdb_callback=None,
         lock_queue.release(key)
 
     return
+
+def walk_resources(dbobj):
+    """
+    Walk all resources of a resource holder
+
+    Resource groups are expanded in a depth-first manner.
+    """
+
+    if not dbobj.resholder:
+        return
+    for res in dbobj.resholder.resources:
+        if isinstance(res, ResourceGroup):
+            walk_resources(res)
+        else:
+            yield res

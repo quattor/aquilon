@@ -30,7 +30,7 @@
 
 from aquilon.exceptions_ import (ArgumentError, UnimplementedError,
                                  ProcessException)
-from aquilon.aqdb.model import ServiceAddress, Host
+from aquilon.aqdb.model import ServiceAddress, Cluster, Host, ResourceGroup
 from aquilon.worker.broker import BrokerCommand, validate_basic
 from aquilon.worker.dbwrappers.interface import assign_address
 from aquilon.worker.dbwrappers.dns import grab_address
@@ -40,7 +40,7 @@ from aquilon.worker.processes import DSDBRunner
 
 
 def add_srv_dsdb_callback(session, logger, dbsrv, real_holder=None,
-                          oldinfo=None, newly_created=None):
+                          oldinfo=None, newly_created=None, comments=None):
     try:
         dsdb_runner = DSDBRunner(logger=logger)
         # FIXME: this is not rolled back if the following operations fail
@@ -50,7 +50,7 @@ def add_srv_dsdb_callback(session, logger, dbsrv, real_holder=None,
             dsdb_runner.update_host(real_holder.machine, oldinfo)
         else:
             dsdb_runner.add_host_details(str(dbsrv.dns_record.fqdn),
-                                         dbsrv.dns_rec.ip, None, None,
+                                         dbsrv.dns_record.ip, None, None,
                                          comments=comments)
     except ProcessException, e:
         raise ArgumentError("Could not add host to DSDB: %s" % e)
@@ -107,7 +107,17 @@ class CommandAddServiceAddress(BrokerCommand):
                                comments=comments)
         holder.resources.append(dbsrv)
 
-        if isinstance(real_holder, Host):
+        oldinfo = None
+        if isinstance(real_holder, Cluster):
+            if not real_holder.hosts:
+                # The interface names are only stored in the AddressAssignment
+                # objects, so we can't handle a cluster with no hosts and thus
+                # no interfaces
+                raise ArgumentError("Cannot assign a service address to a "
+                                    "cluster that has no members.")
+            for host in real_holder.hosts:
+                apply_service_address(host, ifnames, dbsrv)
+        elif isinstance(real_holder, Host):
             oldinfo = DSDBRunner.snapshot_hw(real_holder.machine)
             apply_service_address(real_holder, ifnames, dbsrv)
         else:  # pragma: no cover
@@ -119,7 +129,7 @@ class CommandAddServiceAddress(BrokerCommand):
         add_resource(session, logger, holder, dbsrv,
                      dsdb_callback=add_srv_dsdb_callback,
                      real_holder=real_holder, oldinfo=oldinfo,
-                     newly_created=newly_created)
+                     newly_created=newly_created, comments=comments)
 
         return
 

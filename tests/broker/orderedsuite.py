@@ -258,6 +258,7 @@ from test_client_failure import TestClientFailure
 from test_client_bypass import TestClientBypass
 from test_audit import TestAudit
 from test_usecase_database import TestUsecaseDatabase
+from test_usecase_hacluster import TestUsecaseHACluster
 from test_grns import TestGrns
 from test_stop import TestBrokerStop
 from test_reset_advertised_status import TestResetAdvertisedStatus
@@ -357,7 +358,7 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestUpdateMetaCluster, TestUpdateESXCluster,
                 TestUpdateCluster,
                 TestPxeswitch, TestManage,
-                TestUsecaseDatabase,
+                TestUsecaseDatabase, TestUsecaseHACluster,
                 TestClientBypass,
                 TestUmaskConstraints,
                 TestUnbindServer, TestUnmapService,
