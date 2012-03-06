@@ -33,11 +33,11 @@ from aquilon.exceptions_ import ArgumentError, ProcessException
 from aquilon.aqdb.model import Switch, Model
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.dbwrappers.dns import grab_address
 from aquilon.worker.dbwrappers.location import get_location
 from aquilon.worker.dbwrappers.rack import get_or_create_rack
 from aquilon.worker.dbwrappers.interface import (get_or_create_interface,
                                                  assign_address)
-from aquilon.worker.dbwrappers.hardware_entity import parse_primary_name
 from aquilon.worker.processes import DSDBRunner
 
 
@@ -74,7 +74,10 @@ class CommandAddTorSwitch(BrokerCommand):
                                 "provide --rackid, --rackrow and --rackcolumn "
                                 "along with --building or --room.")
 
-        dbdns_rec = parse_primary_name(session, tor_switch, ip)
+        dbdns_rec, newly_created = grab_address(session, tor_switch, ip,
+                                                allow_restricted_domain=True,
+                                                allow_reserved=True,
+                                                preclude=True)
         if not label:
             label = dbdns_rec.fqdn.name
             try:

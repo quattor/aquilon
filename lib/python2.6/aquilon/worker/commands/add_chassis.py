@@ -33,8 +33,8 @@ from aquilon.exceptions_ import ArgumentError, AquilonError
 from aquilon.aqdb.model import Chassis, Model
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.dbwrappers.dns import grab_address
 from aquilon.worker.dbwrappers.location import get_location
-from aquilon.worker.dbwrappers.hardware_entity import parse_primary_name
 from aquilon.worker.dbwrappers.interface import (get_or_create_interface,
                                                  check_ip_restrictions,
                                                  assign_address)
@@ -47,7 +47,10 @@ class CommandAddChassis(BrokerCommand):
 
     def render(self, session, logger, chassis, label, rack, model, vendor,
                ip, interface, mac, serial, comments, **arguments):
-        dbdns_rec = parse_primary_name(session, chassis, ip)
+        dbdns_rec, newly_created = grab_address(session, chassis, ip,
+                                                allow_restricted_domain=True,
+                                                allow_reserved=True,
+                                                preclude=True)
         if not label:
             label = dbdns_rec.fqdn.name
             try:

@@ -83,7 +83,7 @@ class TestSwitchConstraints(TestBrokerCommand):
                    "--ip", self.net.unknown[0].usable[-1]]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Alias alias2host.aqd-unittest.ms.com cannot be "
-                         "used as a primary name.", command)
+                         "used for address assignment.", command)
 
     def testprimarybadip(self):
         good_ip = self.net.unknown[0].usable[13]
@@ -93,10 +93,8 @@ class TestSwitchConstraints(TestBrokerCommand):
                    "--ip", bad_ip]
         out = self.badrequesttest(command)
         self.matchoutput(out,
-                         "arecord13.aqd-unittest.ms.com already exists, but "
-                         "points to %s instead of %s. A primary name is not "
-                         "allowed to point to multiple addresses." %
-                         (good_ip, bad_ip),
+                         "IP address %s is already in use by DNS record "
+                         "arecord14.aqd-unittest.ms.com." % bad_ip,
                          command)
 
 

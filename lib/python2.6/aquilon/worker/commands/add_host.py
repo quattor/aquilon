@@ -32,8 +32,8 @@
 from aquilon.exceptions_ import ArgumentError, ProcessException, AquilonError
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.branch import get_branch_and_author
+from aquilon.worker.dbwrappers.dns import grab_address
 from aquilon.worker.dbwrappers.grn import lookup_grn
-from aquilon.worker.dbwrappers.hardware_entity import parse_primary_name
 from aquilon.worker.dbwrappers.interface import generate_ip, assign_address
 from aquilon.aqdb.model import (Host, OperatingSystem, Archetype,
                                 HostLifecycle, Machine, Personality)
@@ -180,10 +180,13 @@ class CommandAddHost(BrokerCommand):
         # bypassing the aq client and posting a request directly.
         ip = generate_ip(session, dbinterface, **arguments)
 
-        # FIXME: This should be in generic code, but parse_primary_name()
+        # FIXME: This should be in generic code, but grab_address()
         # currently has to be called after the IP have been generated but
         # before the AddressAssignment record is created
-        dbdns_rec = parse_primary_name(session, hostname, ip)
+        dbdns_rec, newly_created = grab_address(session, hostname, ip,
+                                                allow_restricted_domain=True,
+                                                allow_reserved=True,
+                                                preclude=True)
         dbmachine.primary_name = dbdns_rec
 
         if ip:
@@ -204,10 +207,12 @@ class CommandAddHost(BrokerCommand):
         if ip is None:
             raise ArgumentError("Zebra configuration requires an IP address.")
 
-        # FIXME: This should be in generic code, but parse_primary_name()
+        # FIXME: This should be in generic code, but grab_address()
         # currently has to be called after the IP have been generated but before
         # the AddressAssignment records are created
-        dbdns_rec = parse_primary_name(session, hostname, ip)
+        dbdns_rec, newly_created = grab_address(session, hostname, ip,
+                                                allow_restricted_domain=True,
+                                                preclude=True)
         dbmachine.primary_name = dbdns_rec
 
         # Reset the routing configuration

@@ -112,8 +112,8 @@ class TestAddChassis(TestBrokerCommand, VerifyChassisMixin):
                    "--rack", "ut3", "--model", "utchassis"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
-                         "ut3gd1r01.aqd-unittest.ms.com already exists as the "
-                         "primary name of switch ut3gd1r01.",
+                         "DNS Record ut3gd1r01.aqd-unittest.ms.com is already "
+                         "used as the primary name of switch ut3gd1r01.",
                          command)
 
 
