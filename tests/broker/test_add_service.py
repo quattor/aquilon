@@ -383,6 +383,8 @@ class TestAddService(TestBrokerCommand):
         self.matchoutput(out, "Mountpoint: /vol/lnn30f1v1/test_share_1",
                          command)
         self.matchoutput(out, "Disk Count: 0", command)
+        self.matchoutput(out, "Maximum Disk Count: Default (Unlimited)",
+                         command)
         self.matchoutput(out, "Machine Count: 0", command)
         self.matchclean(out, "Comments", command)
         self.matchclean(out, "NAS Disk Share: test_share_2", command)

@@ -53,14 +53,8 @@ class ServiceInstanceFormatter(ObjectFormatter):
                            (format(pmap.mapped_to),
                             pmap.personality.archetype.name,
                             pmap.personality.name))
-        max_clients = si.max_clients
-        if max_clients is None:
-            if si.service.max_clients is None:
-                max_clients = "Default (Unlimited)"
-            else:
-                max_clients = "Default (%s)" % si.service.max_clients
         details.append(indent + "  Maximum Client Count: %s" %
-                       max_clients)
+                       ServiceInstanceFormatter.get_max_client_count(si))
         details.append(indent + "  Client Count: %d" % si.client_count)
         if si.service.name == 'nas_disk_share':
             details.append(indent + "  Disk Count: %d" % si.nas_disk_count)
@@ -71,6 +65,18 @@ class ServiceInstanceFormatter(ObjectFormatter):
     def format_proto(self, si, skeleton=None):
         silf = ServiceInstanceListFormatter()
         return silf.format_proto([si], skeleton)
+
+    # Applies to service_instance/share as well.
+    @classmethod
+    def get_max_client_count(cls, si):
+        max_clients = si.max_clients
+        if max_clients is None:
+            if si.service.max_clients is None:
+                max_clients = "Default (Unlimited)"
+            else:
+                max_clients = "Default (%s)" % si.service.max_clients
+
+        return max_clients
 
 ObjectFormatter.handlers[ServiceInstance] = ServiceInstanceFormatter()
 
@@ -106,6 +112,8 @@ class ShareFormatter(ObjectFormatter):
         details.append(indent + "  Server: %s" % plenary.server)
         details.append(indent + "  Mountpoint: %s" % plenary.mount)
         details.append(indent + "  Disk Count: %d" % dbshare.nas_disk_count)
+        details.append(indent + "  Maximum Disk Count: %s" %
+                       ServiceInstanceFormatter.get_max_client_count(dbshare))
         details.append(indent + "  Machine Count: %d" %
                        dbshare.nas_machine_count)
         if dbshare.comments:

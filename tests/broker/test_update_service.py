@@ -137,6 +137,20 @@ class TestUpdateService(TestBrokerCommand):
         self.matchoutput(out, "Service: utsvc Instance: utsi2", command)
         self.matchoutput(out, "Maximum Client Count: Default (1100)", command)
 
+    def test_910_updatetestshare1(self):
+        command = ["update_service", "--service=nas_disk_share",
+        "--instance=test_share_1", "--max_clients=100"]
+        self.noouttest(command)
+
+    def test_910_verifypdatetestshare1(self):
+        command = ["show_service", "--service=nas_disk_share",
+                   "--instance=test_share_1"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Maximum Client Count: 100", command)
+
+        command = ["show_nas_disk_share", "--share=test_share_1"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Maximum Disk Count: 100", command)
     # FIXME: Missing functionality and tests for plenaries.
 
 
