@@ -156,6 +156,7 @@ class TemplateDomain(object):
                                        os_environ.get("PATH", ""))}
 
         args = [config.get("broker", "ant")]
+        args.append("--noconfig")
         args.append("-f")
         args.append("%s/build.xml" %
                     config.get("broker", "compiletooldir"))
