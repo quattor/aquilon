@@ -78,9 +78,12 @@ class CommandAddInterfaceAddress(BrokerCommand):
                 raise ArgumentError("{0} has no primary name, can not "
                                     "auto-generate the DNS record.  "
                                     "Please specify --fqdn.".format(dbhw_ent))
-            fqdn = "%s-%s.%s" % (dbhw_ent.primary_name.fqdn.name,
-                                 interface,
-                                 dbhw_ent.primary_name.fqdn.dns_domain)
+            if label:
+                name = "%s-%s-%s" % (dbhw_ent.primary_name.fqdn.name, interface,
+                                     label)
+            else:
+                name = "%s-%s" % (dbhw_ent.primary_name.fqdn.name, interface)
+            fqdn = "%s.%s" % (name, dbhw_ent.primary_name.fqdn.dns_domain)
 
         if label is None:
             label = ""

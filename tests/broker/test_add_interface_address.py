@@ -370,6 +370,17 @@ class TestAddInterfaceAddress(TestBrokerCommand):
         self.noouttest(command)
         self.dsdb_verify()
 
+    def testaddut3gd1r04vlan110hsrp(self):
+        ip = self.net.tor_net[12].usable[2]
+        self.dsdb_expect_add("ut3gd1r04-vlan110-hsrp.aqd-unittest.ms.com", ip,
+                             "vlan110_hsrp", primary="ut3gd1r04.aqd-unittest.ms.com",
+                             comments="Some new switch comments")
+        command = ["add", "interface", "address",
+                   "--switch", "ut3gd1r04.aqd-unittest.ms.com",
+                   "--interface", "vlan110", "--label", "hsrp", "--ip", ip]
+        self.noouttest(command)
+        self.dsdb_verify()
+
     def testverifyut3gd1r04(self):
         command = ["show", "switch", "--switch", "ut3gd1r04.aqd-unittest.ms.com"]
         out = self.commandtest(command)
@@ -378,7 +389,9 @@ class TestAddInterfaceAddress(TestBrokerCommand):
                           r"\s+Type: oa$"
                           r"\s+Network Environment: internal$"
                           r"\s+Provides: ut3gd1r04-vlan110.aqd-unittest.ms.com \[%s\]$"
-                          % self.net.tor_net[12].usable[1],
+                          r"\s+Provides: ut3gd1r04-vlan110-hsrp.aqd-unittest.ms.com \[%s\] \(label: hsrp\)$"
+                          % (self.net.tor_net[12].usable[1],
+                             self.net.tor_net[12].usable[2]),
                           command)
 
 
