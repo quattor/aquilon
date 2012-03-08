@@ -46,7 +46,8 @@ class TestUpdateInterface(TestBrokerCommand):
         # see testaddunittest02
         oldmac = self.net.unknown[0].usable[0].mac
         mac = self.net.unknown[0].usable[11].mac
-        self.dsdb_expect_update(self.badhost, mac, fail=True)
+        self.dsdb_expect_update(self.badhost, mac, fail=True,
+                                comments="Updated interface comments")
         command = ["update", "interface", "--interface", "eth0",
                         "--machine", "ut3c5n10", "--mac", mac,
                         "--comments", "Updated interface comments"]
@@ -59,7 +60,8 @@ class TestUpdateInterface(TestBrokerCommand):
 
     def testupdateut3c5n10eth0macgood(self):
         mac = self.net.unknown[0].usable[11].mac
-        self.dsdb_expect_update("unittest02.one-nyp.ms.com", mac)
+        self.dsdb_expect_update("unittest02.one-nyp.ms.com", mac,
+                                comments="Updated interface comments")
         self.noouttest(["update", "interface", "--interface", "eth0",
                         "--machine", "ut3c5n10", "--mac", mac,
                         "--comments", "Updated interface comments"])
@@ -250,7 +252,8 @@ class TestUpdateInterface(TestBrokerCommand):
 
     def testupdateswitch(self):
         mac = self.net.tor_net[8].usable[0].mac
-        self.dsdb_expect_update("ut3gd1r06.aqd-unittest.ms.com", mac)
+        self.dsdb_expect_update("ut3gd1r06.aqd-unittest.ms.com", mac,
+                                comments="Some interface comments")
         command = ["update_interface", "--interface=xge49",
                    "--comments=Some interface comments",
                    "--mac", mac, "--switch=ut3gd1r06.aqd-unittest.ms.com"]
@@ -336,7 +339,8 @@ class TestUpdateInterface(TestBrokerCommand):
 
     def testupdatechassis(self):
         mac = self.net.unknown[0].usable[24].mac
-        self.dsdb_expect_update("ut3c5.aqd-unittest.ms.com", mac)
+        self.dsdb_expect_update("ut3c5.aqd-unittest.ms.com", mac,
+                                comments="Chassis interface comments")
         command = ["update", "interface", "--chassis", "ut3c5",
                    "--interface", "oa", "--mac", mac,
                    "--comments", "Chassis interface comments"]

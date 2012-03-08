@@ -51,9 +51,7 @@ class TestAddSwitch(TestBrokerCommand):
     def testaddut3gd1r04(self):
         ip = self.net.tor_net[6].usable[0]
         self.dsdb_expect_add("ut3gd1r04.aqd-unittest.ms.com", ip, "xge49",
-                             ip.mac)
-        self.dsdb_expect_update_comment("ut3gd1r04.aqd-unittest.ms.com",
-                                        "Some switch comments")
+                             ip.mac, comments="Some switch comments")
         self.successtest(["add", "switch", "--type", "tor",
                           "--switch", "ut3gd1r04.aqd-unittest.ms.com",
                           "--ip", ip, "--mac", ip.mac, "--interface", "xge49",

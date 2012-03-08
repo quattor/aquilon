@@ -43,9 +43,8 @@ class TestUpdateChassis(TestBrokerCommand, VerifyChassisMixin):
 
     def test_100_update_ut3c5(self):
         ip = self.net.unknown[0].usable[6]
-        self.dsdb_expect_add("ut3c5.aqd-unittest.ms.com", ip, "oa")
-        self.dsdb_expect_update_comment("ut3c5.aqd-unittest.ms.com",
-                                        "Some new chassis comments")
+        self.dsdb_expect_add("ut3c5.aqd-unittest.ms.com", ip, "oa",
+                             comments="Some new chassis comments")
         command = ["update", "chassis", "--chassis", "ut3c5.aqd-unittest.ms.com",
                    "--rack", "ut3", "--serial", "ABC5678",
                    "--model", "c-class", "--ip", ip,

@@ -66,7 +66,8 @@ class CommandAddAddressDNSEnvironment(BrokerCommand):
             dsdb_runner = DSDBRunner(logger=logger)
             try:
                 dsdb_runner.add_host_details(fqdn=dbaddress.fqdn, ip=dbaddress.ip,
-                                             name=None, mac=None)
+                                             name=None, mac=None,
+                                             comments=comments)
             except ProcessException, e:
                 raise ArgumentError("Could not add address to DSDB: %s" % e)
 

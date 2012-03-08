@@ -399,7 +399,7 @@ class DSDBRunner(object):
             self.logger.debug(
                 "Would have called '%s' if location sync was enabled" % cmd)
 
-    def add_host_details(self, fqdn, ip, name, mac, primary=None):
+    def add_host_details(self, fqdn, ip, name, mac, primary=None, comments=None):
         # DSDB does not accept '/' as valid in an interface name.
         command = [self.config.get("broker", "dsdb"),
                     "add", "host", "-host_name", fqdn,
@@ -411,22 +411,18 @@ class DSDBRunner(object):
             command.extend(["-ethernet_address", mac])
         if primary and str(primary) != str(fqdn):
             command.extend(["-primary_host_name", primary])
+        if comments:
+            command.extend(["-comments", comments])
         out = run_command(command, env=self.getenv())
         return
 
-    def update_host_mac(self, fqdn, mac):
+    def update_host_details(self, fqdn, mac=None, comments=None):
         command = [self.config.get("broker", "dsdb"),
-                   "update", "host", "-host_name", fqdn, "-status", "aq",
-                   "-ethernet_address", mac]
-        return run_command(command, env=self.getenv(), logger=self.logger)
-
-    def update_host_comments(self, fqdn, comments):
-        if comments is None:
-            comments = ''
-
-        command = [self.config.get("broker", "dsdb"),
-                   "update", "host", "-host_name", fqdn, "-status", "aq",
-                   "-comments", comments]
+                   "update", "host", "-host_name", fqdn, "-status", "aq"]
+        if mac:
+            command.extend(["-ethernet_address", mac])
+        if comments:
+            command.extend(["-comments", comments])
         return run_command(command, env=self.getenv(), logger=self.logger)
 
     def update_host_ip(self, name, fqdn, ip):
@@ -454,16 +450,6 @@ class DSDBRunner(object):
             raise
         return
 
-    # Not generally useful, because we have already run session.delete()
-    # on the dbhost object.
-#    def delete_host(self, dbhost):
-#        for interface in dbhost.machine.interfaces:
-#            if not interface.boot:
-#                continue
-#            self.delete_host_details(interface.ip)
-#            return
-#        raise ArgumentError("No boot interface found for host to delete from dsdb.")
-
     @classmethod
     def snapshot_hw(cls, dbhw_ent):
         """
@@ -471,16 +457,22 @@ class DSDBRunner(object):
 
         update_host() will use this snapshot to decide what has changed and
         what DSDB commands have to be executed.
+
+        Comment handling is a bit complicated, because we have more ways to
+        store comments in Aquilon than in DSDB. The rules are:
+
+        - If the interface has a comment, use that.
+
+          Exception: dummy interfaces created by add_switch/add_chassis; we
+          don't want to propagate the "Created automatically ..." comment
+
+        - Otherwise take the comment from the hardware entity.
+
+          Exception: management interfaces
         """
 
         status = {}
 
-        # TODO: This works for switches, but for hosts we eventually want to
-        # propagate dbhwent.host.comments instead of dbhw_ent.comments. On the
-        # other hand we have plans to attach Host objects to switches; if we do
-        # that, then we may switch to using dbhwent.host.comments
-        # unconditionally.
-        status["__comments__"] = dbhw_ent.comments
 
         real_primary = dbhw_ent.fqdn
 
@@ -510,6 +502,17 @@ class DSDBRunner(object):
             else:
                 continue
 
+            if addr.interface.interface_type != 'management':
+                # TODO: This works for switches, but for hosts we eventually
+                # want to propagate dbhwent.host.comments instead of
+                # dbhw_ent.comments. On the other hand we have plans to attach
+                # Host objects to switches; if we do that, then we may switch to
+                # using dbhwent.host.comments unconditionally.
+                comments = dbhw_ent.comments
+            else:
+                # Do not propagate machine comments to managers
+                comments = None
+
             # Zebra: in AQDB the address is assigned to multiple existing
             # interfaces. In DSDB however, we need just a single virtual
             # interface
@@ -517,6 +520,9 @@ class DSDBRunner(object):
                 ifname = "le%d" % zebra_ips.index(addr.ip)
             else:
                 ifname = addr.logical_name
+                if addr.interface.comments and not \
+                   addr.interface.comments.startswith("Created automatically"):
+                    comments = addr.interface.comments
 
             # FIXME: Using dbhw_ent.id here is not that nice, but the blind
             # build magic in "add_interface --machine" renames the machine, so
@@ -540,7 +546,8 @@ class DSDBRunner(object):
             status[key] = {'name': ifname,
                            'ip': addr.ip,
                            'fqdn': fqdn,
-                           'primary': primary}
+                           'primary': primary,
+                           'comments': comments}
 
             # Exclude the MAC address for aliases
             if addr.label:
@@ -570,34 +577,40 @@ class DSDBRunner(object):
 
         deletes = []
         adds = []
-        mac_update = None
-        ip_update = None
+        updates = []
+        ip_updates = []
         hostname_update = None
-        comment_update = None
 
         # Construct the list of operations
         for key, attrs in oldinfo.items():
             if key not in newinfo:
                 deletes.append(attrs)
-            elif key.startswith("__"):
-                continue
             elif attrs['primary'] != newinfo[key]['primary'] or attrs['fqdn'] != newinfo[key]['fqdn']:
                 deletes.append(attrs)
                 adds.append(newinfo[key])
-            elif attrs['ip'] != newinfo[key]['ip']:
-                ip_update = {"fqdn": attrs['fqdn'], "name": attrs['name'], "oldip": attrs['ip'], "newip": newinfo[key]['ip']}
-            elif attrs['mac'] != newinfo[key]['mac']:
-                mac_update = {"fqdn": attrs['fqdn'], "oldmac": attrs['mac'], "newmac": newinfo[key]['mac']}
-            elif attrs['fqdn'] != newinfo[key]['fqdn']:
-                hostname_update = {"ifname" : attrs['name'], "oldfqdn": attrs['fqdn'], "newfqdn" : newinfo[key]['fqdn']}
+            else:
+                if attrs['ip'] != newinfo[key]['ip']:
+                    ip_updates.append({"fqdn": attrs['fqdn'],
+                                       "name": attrs['name'],
+                                       "oldip": attrs['ip'],
+                                       "newip": newinfo[key]['ip']})
+                if attrs['mac'] != newinfo[key]['mac'] or \
+                        attrs['comments'] != newinfo[key]['comments']:
+                    update = {'fqdn': attrs['fqdn']}
+                    if attrs['mac'] != newinfo[key]['mac']:
+                        update['oldmac'] = attrs['mac']
+                        update['newmac'] = newinfo[key]['mac']
+                    if attrs['comments'] != newinfo[key]['comments']:
+                        update['oldcomments'] = attrs['comments']
+                        update['newcomments'] = newinfo[key]['comments']
+                    updates.append(update)
+                if attrs['fqdn'] != newinfo[key]['fqdn']:
+                    hostname_update = {"ifname": attrs['name'],
+                                       "oldfqdn": attrs['fqdn'],
+                                       "newfqdn": newinfo[key]['fqdn']}
 
         for key, attrs in newinfo.items():
-            if key == "__comments__":
-                if key not in oldinfo or oldinfo[key] != attrs:
-                    comment_update = attrs
-            elif key.startswith("__"):
-                continue
-            elif key not in oldinfo:
+            if key not in oldinfo:
                 adds.append(attrs)
 
         # Add the primary address first, and delete it last. The primary address
@@ -608,26 +621,33 @@ class DSDBRunner(object):
 
         rollback_adds = []
         rollback_deletes = []
+        rollback_updates = []
+        rollback_ip_updates = []
         try:
             for attrs in deletes:
                 self.delete_host_details(attrs['ip'])
                 rollback_deletes.append(attrs)
 
-            if mac_update:
-                self.update_host_mac(mac_update['fqdn'], mac_update['newmac'])
-            if ip_update:
-                self.update_host_ip(ip_update['name'], ip_update['fqdn'], ip_update['newip'])
+            for attrs in updates:
+                self.update_host_details(attrs['fqdn'],
+                                         mac=attrs.get('newmac', None),
+                                         comments=attrs.get('newcomments', None))
+                rollback_updates.append({'fqdn': attrs['fqdn'],
+                                         'mac': attrs.get('oldmac', None),
+                                         'comments': attrs.get('oldcomments', None)})
+            for attrs in ip_updates:
+                self.update_host_ip(attrs['name'], attrs['fqdn'], attrs['newip'])
+                rollback_ip_updates.append({'fqdn': attrs['fqdn'],
+                                            'name': attrs['name'],
+                                            'ip': attrs['oldip']})
             if hostname_update:
                 self.update_host_name(hostname_update['ifname'],hostname_update['oldfqdn'],hostname_update['newfqdn'])
 
             for attrs in adds:
                 self.add_host_details(attrs['fqdn'], attrs['ip'],
                                       attrs['name'], attrs['mac'],
-                                      attrs['primary'])
+                                      attrs['primary'], attrs['comments'])
                 rollback_adds.append(attrs)
-
-            if comment_update:
-                self.update_host_comments(dbhw_ent.primary_name, comment_update)
 
         except ProcessException, e:
             self.logger.info("Failed updating DSDB entry for {0:l}: "
@@ -638,28 +658,26 @@ class DSDBRunner(object):
                     self.delete_host_details(attrs['ip'])
                 except Exception, err:
                     rollback_failures.append(str(err))
-
-            if mac_update:
-                try:
-                    self.update_host_mac(mac_update['fqdn'], mac_update['oldmac'])
-                except Exception, err:
-                    rollback_failures.append(str(err))
-            if ip_update:
-                try:
-                    self.update_host_ip(ip_update['name'], ip_update['fqdn'], ip_update['oldip'])
-                except Exception, err:
-                    rollback_failures.append(str(err))
             if hostname_update:
                 try:
                     self.update_host_name(hostname_update['ifname'],hostname_update['newfqdn'],hostname_update['oldfqdn'])
                 except Exception, err:
                     rollback_failures.append(str(err))
-
+            for attrs in rollback_ip_updates:
+                try:
+                    self.update_host_ip(**attrs)
+                except Exception, err:
+                    rollback_failures.append(str(err))
+            for attrs in rollback_updates:
+                try:
+                    self.update_host_details(**attrs)
+                except Exception, err:
+                    rollback_failures.append(str(err))
             for attrs in rollback_deletes:
                 try:
                     self.add_host_details(attrs['fqdn'], attrs['ip'],
                                           attrs['name'], attrs['mac'],
-                                          attrs['primary'])
+                                          attrs['primary'], attrs['comments'])
                 except Exception, err:
                     rollback_failures.append(str(err))
 
@@ -765,7 +783,7 @@ class DSDBRunner(object):
 
 
 class NASAssign(object):
-    
+
     def __init__(self, machine, disk, owner, rack=None, size=None):
         self.machine = str(machine)
         self.disk = str(disk)
@@ -819,7 +837,7 @@ class NASAssign(object):
                                         "Supported sizes are: %s" % sizes )
             raise AquilonError("Received unexpected output from nasassign "
                                "/ resource pool: %s" % error)
-            
+
     def delete(self):
         args = self.args[:]
         args.extend(['delete', '-'])

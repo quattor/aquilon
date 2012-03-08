@@ -58,7 +58,8 @@ class TestAddHost(TestBrokerCommand):
 
     def testaddunittest02(self):
         ip = self.net.unknown[0].usable[0]
-        self.dsdb_expect_add("unittest02.one-nyp.ms.com", ip, "eth0", ip.mac)
+        self.dsdb_expect_add("unittest02.one-nyp.ms.com", ip, "eth0", ip.mac,
+                             comments="Some machine comments")
         self.noouttest(["add", "host",
                         "--hostname", "unittest02.one-nyp.ms.com", "--ip", ip,
                         "--machine", "ut3c5n10", "--domain", "unittest",
@@ -69,8 +70,8 @@ class TestAddHost(TestBrokerCommand):
 
     def testaddafsbynet(self):
         ip = self.net.netsvcmap.usable[0]
-        self.dsdb_expect_add("afs-by-net.aqd-unittest.ms.com", ip, "eth0",
-                             ip.mac)
+        self.dsdb_expect_add("afs-by-net.aqd-unittest.ms.com", ip, "eth0", ip.mac,
+                             comments="For network based service mappings")
         self.noouttest(["add", "host",
                         "--hostname", "afs-by-net.aqd-unittest.ms.com",
                         "--ip", ip,
@@ -82,8 +83,8 @@ class TestAddHost(TestBrokerCommand):
 
     def testaddnetmappers(self):
         ip = self.net.netperssvcmap.usable[0]
-        self.dsdb_expect_add("netmap-pers.aqd-unittest.ms.com", ip, "eth0",
-                             ip.mac)
+        self.dsdb_expect_add("netmap-pers.aqd-unittest.ms.com", ip, "eth0", ip.mac,
+                             comments="For net/pers based service mappings")
         self.noouttest(["add", "host",
                         "--hostname", "netmap-pers.aqd-unittest.ms.com",
                         "--ip", ip,
@@ -100,7 +101,8 @@ class TestAddHost(TestBrokerCommand):
 
     def testaddjackhost(self):
         ip = self.net.unknown[0].usable[17]
-        self.dsdb_expect_add("jack.cards.example.com", ip, "eth0", ip.mac)
+        self.dsdb_expect_add("jack.cards.example.com", ip, "eth0", ip.mac,
+                             comments="interface for jack")
         self.noouttest(["add", "host",
                         "--hostname", "jack.cards.example.com",
                         "--ip", ip, "--grn", "grn:/example/cards",

@@ -362,7 +362,8 @@ class TestAddInterfaceAddress(TestBrokerCommand):
     def testaddut3gd1r04vlan110(self):
         ip = self.net.tor_net[12].usable[1]
         self.dsdb_expect_add("ut3gd1r04-vlan110.aqd-unittest.ms.com", ip,
-                             "vlan110", primary="ut3gd1r04.aqd-unittest.ms.com")
+                             "vlan110", primary="ut3gd1r04.aqd-unittest.ms.com",
+                             comments="Some new switch comments")
         command = ["add", "interface", "address",
                    "--switch", "ut3gd1r04.aqd-unittest.ms.com",
                    "--interface", "vlan110", "--ip", ip]
