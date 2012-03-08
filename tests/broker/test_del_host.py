@@ -324,7 +324,7 @@ class TestDelHost(TestBrokerCommand):
         self.notfoundtest(command.split(" "))
 
     def testdelnotify(self):
-        hostname = socket.getfqdn()
+        hostname = self.config.get("unittest", "hostname")
         self.noouttest(["unbind", "server", "--service", "utnotify",
                         "--instance", "localhost", "--hostname", hostname])
 

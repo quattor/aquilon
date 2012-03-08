@@ -42,7 +42,7 @@ from brokertest import TestBrokerCommand, DummyIP
 class TestAddHost(TestBrokerCommand):
 
     def testaddutnotify(self):
-        hostname = socket.getfqdn()
+        hostname = self.config.get("unittest", "hostname")
         # We _could_ also look up the real address of the host...
         self.dsdb_expect_add(hostname, "127.0.0.1", "eth0",
                              self.net.unknown[0].usable[19].mac)
