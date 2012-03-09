@@ -47,14 +47,14 @@ class TestAddResourceGroup(TestBrokerCommand):
 
         command = ["show_resourcegroup", "--cluster=utvcs1"]
         out = self.commandtest(command)
-        self.matchoutput(out, "ResourceGroup: utvcs1as1", command)
+        self.matchoutput(out, "Resource Group: utvcs1as1", command)
         self.matchoutput(out,
                          "Bound to: High Availability Cluster utvcs1",
                          command)
 
         command = ["show_resourcegroup", "--all"]
         out = self.commandtest(command)
-        self.matchoutput(out, "ResourceGroup: utvcs1as1", command)
+        self.matchoutput(out, "Resource Group: utvcs1as1", command)
 
     def test_add_fs_to_rg(self):
         command = ["add_filesystem", "--filesystem=fs1", "--type=ext3",
@@ -68,7 +68,7 @@ class TestAddResourceGroup(TestBrokerCommand):
         command = ["show_filesystem", "--filesystem=fs1"]
         out = self.commandtest(command)
         self.matchoutput(out, "Filesystem: fs1", command)
-        self.matchoutput(out, "Bound to: ResourceGroup utvcs1as1", command)
+        self.matchoutput(out, "Bound to: Resource Group utvcs1as1", command)
         self.matchoutput(out, "Block Device: /dev/foo/bar", command)
         self.matchoutput(out, "Mount at boot: True", command)
         self.matchoutput(out, "Mountopts: ro", command)

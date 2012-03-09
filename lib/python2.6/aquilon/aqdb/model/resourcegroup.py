@@ -46,6 +46,7 @@ class ResourceGroup(Resource):
         (e.g. a VCS Service Group) """
     __tablename__ = _TN
     __mapper_args__ = {'polymorphic_identity': 'resourcegroup'}
+    _class_label = 'Resource Group'
 
     id = Column(Integer, ForeignKey('resource.id',
                                     name='rg_resource_fk',

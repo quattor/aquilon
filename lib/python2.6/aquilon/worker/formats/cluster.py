@@ -123,8 +123,10 @@ class ClusterFormatter(ObjectFormatter):
                 details.append(indent + "  Maintenance Threshold: %s" %
                                cluster.down_maint_threshold)
 
+        if cluster.resources:
+            details.append(indent + "  Resources:")
         for resource in cluster.resources:
-            details.append(indent + "  {0:c}: {0.name}".format(resource))
+            details.append(self.redirect_raw(resource, indent + "    "))
 
         if cluster.cluster_type == 'esx':
             details.append(indent + "  Max vm_to_host_ratio: %s" %
