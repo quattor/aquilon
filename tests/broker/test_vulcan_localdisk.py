@@ -120,7 +120,9 @@ class TestVulcanLocalDisk(VerifyNotificationsMixin, MachineTestMixin,
 
         macs = ["02:02:04:02:12:06", "02:02:04:02:12:07"]
         for i in range(0, 2):
-            self.matchoutput(out, "Port et1-%d: %s" % (i + 1, macs[i]), command)
+            self.searchoutput(out,
+                              r"Port: et1-%d\s*MAC: %s," % (i + 1, macs[i]),
+                              command)
 
     def test_030_addswitch(self):
         for i in range(0, 2):

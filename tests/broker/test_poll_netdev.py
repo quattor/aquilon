@@ -17,9 +17,12 @@
 # limitations under the License.
 """Module for testing the poll network device command."""
 
+import json
+import os
 import re
-from time import sleep
 import socket
+from collections import defaultdict
+from time import sleep
 
 if __name__ == "__main__":
     import utils
@@ -30,6 +33,11 @@ from brokertest import TestBrokerCommand
 
 
 class TestPollNetworkDevice(TestBrokerCommand):
+    def getmacdata(self, switchfile):
+        dir = os.path.dirname(os.path.realpath(__file__))
+        out = open(os.path.join(dir, "..", "fakebin", "macdata.d", switchfile),
+                   'r').read()
+        return re.sub(r"\s+", " ", "".join(out))
 
     # test_prebind_server runs too late...
     def testbindpollhelper(self):
@@ -46,7 +54,7 @@ class TestPollNetworkDevice(TestBrokerCommand):
 
     def testpollnp06bals03(self):
         command = ["poll", "network_device", "--network_device", "np06bals03.ms.com"]
-        (out, err) = self.successtest(command)
+        err = self.statustest(command)
         self.matchoutput(err, "No jump host for np06bals03.ms.com, running "
                          "discovery from %s." % socket.gethostname(), command)
 
@@ -70,60 +78,35 @@ class TestPollNetworkDevice(TestBrokerCommand):
     def testverifypollnp06bals03(self):
         command = "show network_device --network_device np06bals03.ms.com"
         out = self.commandtest(command.split(" "))
-        r = re.compile(r'^\s*Created:\s*(.*?)\s*Last Seen:\s*(.*?)\s*$', re.M)
+        r = re.compile(r'created:\s*(.*?),\s*last seen:\s*(.*?)\s*$', re.M)
         m = self.searchoutput(out, r, command)
         self.failIf(m.group(1) == m.group(2),
                     "Expected creation date '%s' to be different from "
                     "last seen '%s' in output:\n%s" %
                     (m.group(1), m.group(2), out))
-        self.matchoutput(out, "Port 17: 00:30:48:66:3a:62", command)
-        self.matchoutput(out, "Port 2: 00:1f:29:c4:39:ba", command)
-        self.matchoutput(out, "Port 22: 00:30:48:66:38:e6", command)
-        self.matchoutput(out, "Port 4: 00:1f:29:c4:29:ca", command)
-        self.matchoutput(out, "Port 5: 00:1f:29:68:53:ca", command)
-        self.matchoutput(out, "Port 27: 00:30:48:66:3a:28", command)
-        self.matchoutput(out, "Port 20: 00:30:48:66:38:da", command)
-        self.matchoutput(out, "Port 39: 00:30:48:98:4d:a3", command)
-        self.matchoutput(out, "Port 24: 00:30:48:66:3a:2a", command)
-        self.matchoutput(out, "Port 14: 00:1f:29:c4:39:12", command)
-        self.matchoutput(out, "Port 3: 00:1f:29:c4:09:ee", command)
-        self.matchoutput(out, "Port 49: 00:1a:6c:9e:e3:1e", command)
-        self.matchoutput(out, "Port 21: 00:30:48:66:3a:2e", command)
-        self.matchoutput(out, "Port 11: 00:1f:29:68:93:e0", command)
-        self.matchoutput(out, "Port 31: 00:30:48:98:4d:0a", command)
-        self.matchoutput(out, "Port 7: 00:1f:29:c4:19:d0", command)
-        self.matchoutput(out, "Port 8: 00:1f:29:c4:59:b0", command)
-        self.matchoutput(out, "Port 12: 00:1f:29:c4:19:f2", command)
-        self.matchoutput(out, "Port 50: 00:1d:71:73:55:40", command)
-        self.matchoutput(out, "Port 40: 00:30:48:98:4d:cc", command)
-        self.matchoutput(out, "Port 34: 00:30:48:98:4d:83", command)
-        self.matchoutput(out, "Port 50: 00:1a:6c:9e:de:8e", command)
-        self.matchoutput(out, "Port 29: 00:30:48:98:4d:5b", command)
-        self.matchoutput(out, "Port 10: 00:1f:29:c4:39:14", command)
-        self.matchoutput(out, "Port 37: 00:30:48:98:4d:96", command)
-        self.matchoutput(out, "Port 49: 00:1d:71:73:53:80", command)
-        self.matchoutput(out, "Port 33: 00:30:48:98:4d:97", command)
-        self.matchoutput(out, "Port 36: 00:30:48:98:4d:98", command)
-        self.matchoutput(out, "Port 49: 00:00:0c:07:ac:01", command)
-        self.matchoutput(out, "Port 9: 00:1f:29:c4:29:6a", command)
-        self.matchoutput(out, "Port 35: 00:30:48:98:4d:8a", command)
-        self.matchoutput(out, "Port 50: 00:00:0c:07:ac:02", command)
-        self.matchoutput(out, "Port 32: 00:30:48:98:4d:8b", command)
-        self.matchoutput(out, "Port 28: 00:30:48:66:3a:22", command)
-        self.matchoutput(out, "Port 18: 00:30:48:66:3a:36", command)
-        self.matchoutput(out, "Port 19: 00:30:48:66:3a:46", command)
-        self.matchoutput(out, "Port 16: 00:1f:29:68:83:4c", command)
-        self.matchoutput(out, "Port 25: 00:30:48:66:3a:38", command)
-        self.matchoutput(out, "Port 15: 00:1f:29:c4:59:fe", command)
-        self.matchoutput(out, "Port 30: 00:30:48:98:4d:c6", command)
-        self.matchoutput(out, "Port 6: 00:1f:29:68:63:ec", command)
-        self.matchoutput(out, "Port 23: 00:30:48:66:3a:60", command)
+
+        colon_re = re.compile(r"([0-9a-f]{2})(?=.)")
+
+        port_to_mac = defaultdict(list)
+        for mac, port in json.loads(self.getmacdata("np06bals03")):
+            # We have to add the separator colons
+            port_to_mac[port].append(colon_re.sub(r"\1:", mac.lower()))
+
+        for port, addrs in port_to_mac.items():
+            pattern = r"Port: %s\n" % port
+            pattern = pattern + "".join(r"\s+MAC: %s,.*\n" % mac
+                                        for mac in sorted(addrs))
+            self.searchoutput(out, pattern, command)
+
+        for port in range(1, 50):
+            if str(port) not in port_to_mac:
+                self.searchclean(out, r"Port: %s\n" % port, command)
 
     def testverifypollnp06fals01(self):
         command = "show network_device --network_device np06fals01.ms.com"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Port 49: 00:15:2c:1f:40:00", command)
-        r = re.compile(r'^\s*Created:\s*(.*?)\s*Last Seen:\s*(.*?)\s*$', re.M)
+        self.searchoutput(out, r"Port: 49$\s+MAC: 00:15:2c:1f:40:00", command)
+        r = re.compile(r'created:\s*(.*?),\s*last seen:\s*(.*?)\s*$', re.M)
         m = self.searchoutput(out, r, command)
         self.failIf(m.group(1) != m.group(2),
                     "Expected creation date '%s' to be the same as "
@@ -134,7 +117,7 @@ class TestPollNetworkDevice(TestBrokerCommand):
         # Issues deprecated warning.
         command = ["poll", "network_device", "--vlan", "--network_device",
                    "ut01ga2s01.aqd-unittest.ms.com"]
-        (out, err) = self.successtest(command)
+        err = self.statustest(command)
         net = self.net["vmotion_net"]
         self.matchoutput(err,
                          "Switch ut01ga2s01.aqd-unittest.ms.com: skipping VLAN "
@@ -153,10 +136,10 @@ class TestPollNetworkDevice(TestBrokerCommand):
         command = "show network_device --network_device ut01ga2s01.aqd-unittest.ms.com"
         out = self.commandtest(command.split(" "))
         for i in range(1, 13):
-            self.matchoutput(out,
-                             "Port %d: %s" %
-                             (i, self.net["vmotion_net"].usable[i + 1].mac),
-                             command)
+            self.searchoutput(out,
+                              r"Port: %d\s+MAC: %s" %
+                              (i, self.net["vmotion_net"].usable[i + 1].mac),
+                              command)
         self.matchoutput(out, "VLAN 701: %s" % self.net["vm_storage_net"].ip,
                          command)
         # I was lazy... really this should be some separate non-routeable
@@ -185,9 +168,9 @@ class TestPollNetworkDevice(TestBrokerCommand):
         command = "show network_device --network_device ut01ga2s02.aqd-unittest.ms.com"
         out = self.commandtest(command.split(" "))
         for i in range(13, 25):
-            self.matchoutput(out,
-                             "Port %d: %s" %
-                             (i - 12, self.net["vmotion_net"].usable[i + 1].mac),
+            self.searchoutput(out,
+                              r"Port: %d\s+MAC: %s" %
+                              (i - 12, self.net["vmotion_net"].usable[i + 1].mac),
                              command)
         self.matchoutput(out, "VLAN 701: %s" % self.net["vm_storage_net"].ip,
                          command)
@@ -219,7 +202,7 @@ class TestPollNetworkDevice(TestBrokerCommand):
     def testpollbor(self):
         command = ["poll", "network_device", "--vlan",
                    "--network_device", "ut3gd1r01.aqd-unittest.ms.com"]
-        (out, err) = self.successtest(command)
+        err = self.statustest(command)
         self.matchoutput(err,
                          "Skipping VLAN probing on switch "
                          "ut3gd1r01.aqd-unittest.ms.com, it's "
@@ -230,7 +213,7 @@ class TestPollNetworkDevice(TestBrokerCommand):
         # We make use of poll_switch reporting the (lack of the) jump host for
         # every switch it touches
         command = ["poll", "network_device", "--rack", "ut3", "--type", "bor"]
-        (out, err) = self.successtest(command)
+        err = self.statustest(command)
         self.matchoutput(err, "ut3gd1r01.aqd-unittest.ms.com", command)
         # update_switch changes the type of ut3gd1r04 to 'bor'
         self.matchoutput(err, "ut3gd1r04.aqd-unittest.ms.com", command)

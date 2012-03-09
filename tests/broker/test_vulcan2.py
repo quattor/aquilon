@@ -130,7 +130,7 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
             # For Nexus switches we have if names, not snmp ids.
             command = "show network_device --network_device utpgsw%d.aqd-unittest.ms.com" % i
             out = self.commandtest(command.split(" "))
-            self.matchoutput(out, "Port et1-1: %s" % macs[i], command)
+            self.searchoutput(out, r"Port: et1-1\s*MAC: %s," % macs[i], command)
 
     # for each cluster's hosts
     def test_060_add10gigracks(self):

@@ -16,6 +16,9 @@
 # limitations under the License.
 """NetworkDevice formatter."""
 
+from collections import defaultdict
+from operator import attrgetter
+
 from aquilon.aqdb.model import NetworkDevice
 from aquilon.worker.formats.formatters import ObjectFormatter
 from aquilon.worker.formats.hardware_entity import HardwareEntityFormatter
@@ -27,11 +30,18 @@ class NetworkDeviceFormatter(HardwareEntityFormatter):
 
     def format_raw(self, device, indent=""):
         details = [super(NetworkDeviceFormatter, self).format_raw(device, indent)]
+
+        ports = defaultdict(list)
         for om in device.observed_macs:
-            details.append(indent + "  Port %s: %s" %
-                           (om.port, om.mac_address))
-            details.append(indent + "    Created: %s Last Seen: %s" %
-                           (om.creation_date, om.last_seen))
+            ports[om.port].append(om)
+
+        for port in sorted(ports.keys()):
+            # Show most recent data first
+            ports[port].sort(key=attrgetter('last_seen'), reverse=True)
+            details.append(indent + "  Port: %s" % port)
+            for om in ports[port]:
+                details.append(indent + "    MAC: %s, created: %s, last seen: %s" %
+                               (om.mac_address, om.creation_date, om.last_seen))
         for ov in device.observed_vlans:
             details.append(indent + "  VLAN %d: %s" %
                            (ov.vlan_id, ov.network.ip))
