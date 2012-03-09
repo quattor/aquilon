@@ -34,7 +34,7 @@ from aquilon.aqdb.model import (Application, Filesystem, Intervention,
                                 ResourceGroup, Hostlink, RebootSchedule,
                                 RebootIntervention)
 from aquilon.worker.templates.base import Plenary
-from aquilon.worker.templates.panutils import pan
+from aquilon.worker.templates.panutils import pan, StructureTemplate
 
 LOGGER = logging.getLogger('aquilon.server.templates.resource')
 
@@ -105,6 +105,11 @@ class PlenaryResource(Plenary):
 
     def body_resourcegroup(self, lines):
         lines.append('"name" = %s;' % pan(self.dbobj.name))
+        for resource in self.dbobj.resources:
+            lines.append('"resources/%s" = push(%s);' %
+                         (resource.resource_type,
+                          pan(StructureTemplate(resource.template_base +
+                                                "/config"))))
 
     def body_reboot_iv(self, lines):
         lines.append('"name" = %s;' % pan(self.dbobj.name))

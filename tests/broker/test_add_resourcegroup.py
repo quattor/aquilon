@@ -40,7 +40,7 @@ from brokertest import TestBrokerCommand
 
 class TestAddResourceGroup(TestBrokerCommand):
 
-    def test_00_add_rg_to_cluster(self):
+    def test_100_add_rg_to_cluster(self):
         command = ["add_resourcegroup", "--resourcegroup=utvcs1as1",
                    "--cluster=utvcs1"]
         self.successtest(command)
@@ -56,7 +56,7 @@ class TestAddResourceGroup(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out, "Resource Group: utvcs1as1", command)
 
-    def test_add_fs_to_rg(self):
+    def test_110_add_fs_to_rg(self):
         command = ["add_filesystem", "--filesystem=fs1", "--type=ext3",
                    "--mountpoint=/mnt", "--blockdevice=/dev/foo/bar",
                    "--bootmount",
@@ -77,7 +77,30 @@ class TestAddResourceGroup(TestBrokerCommand):
         self.matchoutput(out, "Fsck Pass: 3", command)
         self.matchoutput(out, "Comments: testing", command)
 
-    def test_del_resourcegroup(self):
+    def test_200_show_rg(self):
+        command = ["show", "resourcegroup", "--resourcegroup", "utvcs1as1"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Filesystem: fs1", command)
+
+    def test_210_cat_cluster(self):
+        command = ["cat", "--cluster", "utvcs1"]
+        out = self.commandtest(command)
+        self.matchoutput(out,
+                         "'/system/resources/resourcegroup' = "
+                         "push(create(\"resource/cluster/utvcs1/resourcegroup/utvcs1as1/config\"));",
+                         command)
+
+    def test_210_cat_rg(self):
+        command = ["cat", "--resource", "utvcs1as1",
+                   "--restype", "resourcegroup", "--rescluster", "utvcs1"]
+        out = self.commandtest(command)
+        # TODO: Rename "bundle" to "resourcegroup"
+        self.matchoutput(out,
+                         '"resources/filesystem" = '
+                         'push(create("resource/cluster/utvcs1/bundle/utvcs1as1/filesystem/fs1/config"));',
+                         command)
+
+    def test_300_del_resourcegroup(self):
         command = ["del_resourcegroup", "--resourcegroup=utvcs1as1"]
         self.successtest(command)
 
