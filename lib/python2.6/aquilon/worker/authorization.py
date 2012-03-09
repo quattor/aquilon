@@ -159,6 +159,7 @@ class AuthorizationBroker(object):
                               'update_service_instance',
                               'add_nas_disk_share',
                               'add_alias',
+                              'add_filesystem',
                               'poll_switch', 'poll_tor_switch_tor_switch',
                               'poll_switch_switch', 'poll_tor_switch',
                               'make', 'make_cluster']:
