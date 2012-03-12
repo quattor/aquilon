@@ -176,7 +176,7 @@ class Resource(Base):
         return self.name < other.name
 
     def __repr__(self):
-        return "<%s Resource %s>" % (self.resource_type, self.id)
+        return "<{0:c} Resource {0.name} of {1}>".format(self, self.holder)
 
 
 resource = Resource.__table__  # pylint: disable=C0103, E1101
