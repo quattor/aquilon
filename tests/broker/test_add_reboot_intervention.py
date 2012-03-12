@@ -79,9 +79,9 @@ class TestAddRebootIntervention(TestBrokerCommand):
                    "--reshost=server1.aqd-unittest.ms.com"]
         out = self.commandtest(command)
         self.matchoutput(out,
-                         "structure template resource/reboot_iv"
+                         "structure template resource"
                          "/host/server1.aqd-unittest.ms.com"
-                         "/reboot_intervention/config;",
+                         "/reboot_iv/reboot_intervention/config;",
                          command)
         self.matchoutput(out, "\"name\" = \"reboot_intervention\";", command)
         self.matchoutput(out, "\"start\" =", command)
@@ -124,9 +124,9 @@ class TestAddRebootIntervention(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out,
                          "'/system/resources/reboot_iv' = "
-                         "push(create(\"resource/reboot_iv"
+                         "push(create(\"resource"
                          "/host/server1.aqd-unittest.ms.com"
-                         "/reboot_intervention/config\"))",
+                         "/reboot_iv/reboot_intervention/config\"))",
                          command)
 
         command = ["show_host", "--hostname=server1.aqd-unittest.ms.com",

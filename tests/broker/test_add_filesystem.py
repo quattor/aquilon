@@ -71,7 +71,7 @@ class TestAddFilesystem(TestBrokerCommand):
         command = ["cat", "--resource=fs1", "--restype=filesystem",
                    "--reshost=server1.aqd-unittest.ms.com"]
         out = self.commandtest(command)
-        self.matchoutput(out, "structure template resource/filesystem/host/server1.aqd-unittest.ms.com/fs1/config;", command)
+        self.matchoutput(out, "structure template resource/host/server1.aqd-unittest.ms.com/filesystem/fs1/config;", command)
         self.matchoutput(out, "\"type\" = \"ext3\";", command)
         self.matchoutput(out, "\"mountpoint\" = \"/mnt\";", command)
         self.matchoutput(out, "\"mount\" = true;", command)
@@ -135,8 +135,8 @@ class TestAddFilesystem(TestBrokerCommand):
 
         command = ["cat", "--generate", "--host=server1.aqd-unittest.ms.com"]
         out = self.commandtest(command)
-        self.matchoutput(out, "'/system/resources/filesystem' = push(create(\"resource/filesystem/host/server1.aqd-unittest.ms.com/fs1/config\"))", command)
-        self.matchoutput(out, "'/system/resources/filesystem' = push(create(\"resource/filesystem/host/server1.aqd-unittest.ms.com/fs2/config\"))", command)
+        self.matchoutput(out, "'/system/resources/filesystem' = push(create(\"resource/host/server1.aqd-unittest.ms.com/filesystem/fs1/config\"))", command)
+        self.matchoutput(out, "'/system/resources/filesystem' = push(create(\"resource/host/server1.aqd-unittest.ms.com/filesystem/fs2/config\"))", command)
 
         command = ["show_host", "--hostname=server1.aqd-unittest.ms.com",
                    "--format=proto"]

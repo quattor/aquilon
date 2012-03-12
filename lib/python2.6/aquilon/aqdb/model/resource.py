@@ -69,6 +69,9 @@ class ResourceHolder(Base):
     def holder_object(self):  # pragma: no cover
         raise InternalError("Abstract base method called")
 
+    @property
+    def holder_path(self):
+        return "%s/%s" % (self.holder_type, self.holder_name)
 
 resholder = ResourceHolder.__table__  # pylint: disable=C0103, E1101
 resholder.primary_key.name = '%s_pk' % _RESHOLDER
@@ -153,10 +156,9 @@ class Resource(Base):
 
     @property
     def template_base(self):
-        return "resource/%s/%s/%s/%s" % (self.resource_type,
-                                         self.holder.holder_type,
-                                         self.holder.holder_name,
-                                         self.name)
+        return "resource/%s/%s/%s" % (self.holder.holder_path,
+                                      self.resource_type,
+                                      self.name)
 
     @validates('holder')
     def _validate_holder(self, key, value):

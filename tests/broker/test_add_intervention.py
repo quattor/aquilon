@@ -187,9 +187,9 @@ class TestAddIntervention(TestBrokerCommand):
                    "--reshost=server1.aqd-unittest.ms.com"]
         out = self.commandtest(command)
         self.matchoutput(out,
-                         "structure template resource/intervention"
+                         "structure template resource"
                          "/host/server1.aqd-unittest.ms.com"
-                         "/i1/config;",
+                         "/intervention/i1/config;",
                          command)
         self.matchoutput(out, '"name" = "i1";', command)
         self.matchoutput(out, '"start" =', command)
@@ -208,7 +208,7 @@ class TestAddIntervention(TestBrokerCommand):
         command = ["cat", "--generate",
                    "--hostname=server1.aqd-unittest.ms.com"]
         out = self.commandtest(command)
-        self.matchoutput(out, "'/system/resources/intervention' = push(create(\"resource/intervention/host/server1.aqd-unittest.ms.com/i1/config\"))",
+        self.matchoutput(out, "'/system/resources/intervention' = push(create(\"resource/host/server1.aqd-unittest.ms.com/intervention/i1/config\"))",
                          command)
 
         command = ["del_intervention", "--intervention=i1",
