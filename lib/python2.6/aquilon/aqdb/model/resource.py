@@ -85,10 +85,9 @@ class HostResource(ResourceHolder):
                                          ondelete='CASCADE'),
                      nullable=True)
 
-    host = relation(Host, uselist=False, lazy='subquery',
-                    backref=backref('resholder',
-                                    cascade='all, delete-orphan',
-                                    uselist=False))
+    host = relation(Host,
+                    backref=backref('resholder', uselist=False,
+                                    cascade='all, delete-orphan'))
 
     @property
     def holder_name(self):
@@ -107,10 +106,9 @@ class ClusterResource(ResourceHolder):
                                             ondelete='CASCADE'),
                         nullable=True)
 
-    cluster = relation(Cluster, uselist=False, lazy='subquery',
-                       backref=backref('resholder',
-                                       cascade='all, delete-orphan',
-                                       uselist=False))
+    cluster = relation(Cluster,
+                       backref=backref('resholder', uselist=False,
+                                       cascade='all, delete-orphan'))
 
     @property
     def holder_name(self):
@@ -140,10 +138,10 @@ class Resource(Base):
     comments = Column(String(255), nullable=True)
     holder_id = Column(Integer, ForeignKey('%s.id' % _RESHOLDER,
                                            name='%s_resholder_fk' % _TN,
-                                           ondelete='CASCADE'))
+                                           ondelete='CASCADE'),
+                       nullable=False)
 
-    holder = relation(ResourceHolder, uselist=False, lazy='subquery',
-                      primaryjoin=Resource.holder_id==ResourceHolder.id,
+    holder = relation(ResourceHolder, innerjoin=True,
                       backref=backref('resources',
                                       cascade='all, delete-orphan'))
 
@@ -188,12 +186,12 @@ resource.info['unique_fields'] = ['name', 'holder']
 
 Host.resources = relation(
     Resource, secondary=resholder,
-    primaryjoin=Host.machine_id==HostResource.host_id,
-    secondaryjoin=ResourceHolder.id==Resource.holder_id,
+    primaryjoin=Host.machine_id == HostResource.host_id,
+    secondaryjoin=ResourceHolder.id == Resource.holder_id,
     viewonly=True)
 
 Cluster.resources = relation(
     Resource, secondary=resholder,
-    primaryjoin=Cluster.id==ClusterResource.cluster_id,
-    secondaryjoin=ResourceHolder.id==Resource.holder_id,
+    primaryjoin=Cluster.id == ClusterResource.cluster_id,
+    secondaryjoin=ResourceHolder.id == Resource.holder_id,
     viewonly=True)
