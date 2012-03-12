@@ -30,6 +30,7 @@
 """Module for testing how a logical DB might be configured."""
 
 import unittest
+import os.path
 
 if __name__ == "__main__":
     import utils
@@ -155,19 +156,30 @@ class TestUsecaseDatabase(TestBrokerCommand):
         self.matchoutput(out, "'/system/resources/application' = push(create(\"resource/cluster/nydb1/application/nydb1/config\"))", command)
 
     def test_59_cleanup_cluster(self):
-        command = ["del_filesystem", "--filesystem=gnr.0",
-                   "--cluster=nydb1"]
-        self.successtest(command)
-        command = ["del_application", "--application=nydb1", "--cluster=nydb1"]
-        self.successtest(command)
+        # Check that the plenaries of contained resources get cleaned up
+        plenarydir = self.config.get("broker", "plenarydir")
+        cluster_res_dir = os.path.join(plenarydir, "resource", "cluster", "nydb1")
+        fs_plenary = os.path.join(cluster_res_dir, "filesystem", "gnr.0", "config.tpl")
+        app_plenary = os.path.join(cluster_res_dir, "application", "nydb1", "config.tpl")
+
+        # Verify that we got the paths right
+        self.failUnless(os.path.exists(fs_plenary),
+                        "Plenary '%s' does not exist" % fs_plenary)
+        self.failUnless(os.path.exists(app_plenary),
+                        "Plenary '%s' does not exist" % app_plenary)
+
         command = ["uncluster", "--hostname=server1.aqd-unittest.ms.com",
                    "--cluster=nydb1"]
         self.successtest(command)
         command = ["del_cluster", "--cluster=nydb1"]
         self.successtest(command)
 
+        # The resource plenaries should be gone
+        self.failIf(os.path.exists(fs_plenary),
+                    "Plenary '%s' still exists" % fs_plenary)
+        self.failIf(os.path.exists(app_plenary),
+                    "Plenary '%s' still exists" % app_plenary)
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestUsecaseDatabase)
     unittest.TextTestRunner(verbosity=2).run(suite)
-

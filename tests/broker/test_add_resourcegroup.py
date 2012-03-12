@@ -30,6 +30,7 @@
 """Module for testing the add resourcegroup command."""
 
 import unittest
+import os.path
 
 if __name__ == "__main__":
     import utils
@@ -101,8 +102,29 @@ class TestAddResourceGroup(TestBrokerCommand):
                          command)
 
     def test_300_del_resourcegroup(self):
+        # Check that the plenaries of contained resources get cleaned up
+        plenarydir = self.config.get("broker", "plenarydir")
+        fs_plenary = os.path.join(plenarydir, "resource", "cluster", "utvcs1",
+                                  "bundle", "utvcs1as1", "filesystem", "fs1",
+                                  "config.tpl")
+        rg_dir = os.path.join(plenarydir, "resource", "cluster", "utvcs1",
+                              "bundle", "utvcs1as1")
+        rg_plenary = os.path.join(rg_dir, "config.tpl")
+
+        # Verify that we got the paths right
+        self.failUnless(os.path.exists(fs_plenary),
+                        "Plenary '%s' does not exist" % fs_plenary)
+        self.failUnless(os.path.exists(rg_plenary),
+                        "Plenary '%s' does not exist" % rg_plenary)
+
         command = ["del_resourcegroup", "--resourcegroup=utvcs1as1"]
         self.successtest(command)
+
+        # The resource plenaries should be gone
+        self.failIf(os.path.exists(fs_plenary),
+                    "Plenary '%s' still exists" % fs_plenary)
+        self.failIf(os.path.exists(rg_plenary),
+                    "Plenary '%s' still exists" % rg_plenary)
 
 
 if __name__ == '__main__':

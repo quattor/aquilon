@@ -31,10 +31,10 @@
 import os
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import Cluster
+from aquilon.aqdb.model import Cluster, ResourceGroup
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.templates.index import build_index
-from aquilon.worker.templates.cluster import PlenaryCluster
+from aquilon.worker.templates.base import Plenary, PlenaryCollection
 from aquilon.worker.processes import remove_file
 from aquilon.worker.locks import lock_queue
 
@@ -50,16 +50,21 @@ class CommandDelCluster(BrokerCommand):
             hosts = ", ".join([h.fqdn for h in  dbcluster.hosts])
             raise ArgumentError("%s is still in use by hosts: %s." %
                                 (format(dbcluster), hosts))
-        plenary = PlenaryCluster(dbcluster, logger=logger)
+        cluster_plenary = Plenary.get_plenary(dbcluster, logger=logger)
+        resources = PlenaryCollection(logger=logger)
+        for res in dbcluster.resources:
+            resources.append(Plenary.get_plenary(res))
+            if isinstance(res, ResourceGroup):
+                resources.extend([Plenary.get_plenary(res2)
+                                  for res2 in res.resources])
         domain = dbcluster.branch.name
         session.delete(dbcluster)
 
         session.flush()
 
-        key = plenary.get_remove_key()
-        try:
-            lock_queue.acquire(key)
-            plenary.cleanup(domain, locked=True)
+        key = cluster_plenary.get_remove_key()
+        with CompileKey.merge([key, resources.get_remove_key()]):
+            cluster_plenary.cleanup(domain, locked=True)
             # And we also want to remove the profile itself
             profiles = self.config.get("broker", "profilesdir")
             # Only one of these should exist, but it doesn't hurt
@@ -74,9 +79,7 @@ class CommandDelCluster(BrokerCommand):
                                      "objects", "clusters",
                                      cluster + ".tpl"),
                         logger=logger)
-            plenary.remove(locked=True)
-        finally:
-            lock_queue.release(key)
+            resources.remove(locked=True)
 
         build_index(self.config, session, profiles, logger=logger)
 

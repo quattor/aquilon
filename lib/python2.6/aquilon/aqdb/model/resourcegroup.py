@@ -61,6 +61,10 @@ class ResourceGroup(Resource):
                              "ResourceGroups")
         return value
 
+    @property
+    def branch(self):
+        return self.holder.holder_object.branch
+
 
 resourcegroup = ResourceGroup.__table__
 resourcegroup.primary_key.name = '%s_pk' % (_TN)
