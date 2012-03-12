@@ -35,6 +35,7 @@ from sqlalchemy import (Column, Integer, String, DateTime, ForeignKey,
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import relation, backref, object_session, validates
 
+from aquilon.exceptions_ import InternalError
 from aquilon.aqdb.column_types import AqStr, Enum
 from aquilon.aqdb.model import Base, Cluster, Host
 
@@ -61,12 +62,12 @@ class ResourceHolder(Base):
     __mapper_args__ = {'polymorphic_on': holder_type}
 
     @property
-    def holder_name(self):
-        return None
+    def holder_name(self):  # pragma: no cover
+        raise InternalError("Abstract base method called")
 
     @property
-    def holder_object(self):
-        return None
+    def holder_object(self):  # pragma: no cover
+        raise InternalError("Abstract base method called")
 
 
 resholder = ResourceHolder.__table__  # pylint: disable=C0103, E1101
