@@ -95,20 +95,19 @@ class TestAddResourceGroup(TestBrokerCommand):
         command = ["cat", "--resource", "utvcs1as1",
                    "--restype", "resourcegroup", "--rescluster", "utvcs1"]
         out = self.commandtest(command)
-        # TODO: Rename "bundle" to "resourcegroup"
         self.matchoutput(out,
                          '"resources/filesystem" = '
-                         'push(create("resource/cluster/utvcs1/bundle/utvcs1as1/filesystem/fs1/config"));',
+                         'push(create("resource/cluster/utvcs1/resourcegroup/utvcs1as1/filesystem/fs1/config"));',
                          command)
 
     def test_300_del_resourcegroup(self):
         # Check that the plenaries of contained resources get cleaned up
         plenarydir = self.config.get("broker", "plenarydir")
         fs_plenary = os.path.join(plenarydir, "resource", "cluster", "utvcs1",
-                                  "bundle", "utvcs1as1", "filesystem", "fs1",
-                                  "config.tpl")
+                                  "resourcegroup", "utvcs1as1",
+                                  "filesystem", "fs1", "config.tpl")
         rg_dir = os.path.join(plenarydir, "resource", "cluster", "utvcs1",
-                              "bundle", "utvcs1as1")
+                              "resourcegroup", "utvcs1as1")
         rg_plenary = os.path.join(rg_dir, "config.tpl")
 
         # Verify that we got the paths right

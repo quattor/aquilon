@@ -76,7 +76,13 @@ resourcegroup.info['unique_fields'] = ['name']
 
 class BundleResource(ResourceHolder):
     '''Allow ResourceGroups to hold other types of resource. '''
-    __mapper_args__ = {'polymorphic_identity': 'bundle'}
+    # Note: the polymorphic identity of ResourceGroup and BundleResource should
+    # be the same, because plenary paths sometimes use one or the other,
+    # depending on the context. These two classes should really be one if there
+    # was a sane way to support multiple inheritance in the DB, so their
+    # identities should at least be the same.
+    __mapper_args__ = {'polymorphic_identity': 'resourcegroup'}
+
     resourcegroup_id = Column(Integer, ForeignKey('resourcegroup.id',
                                            name='%s_bundle_fk' % _RESHOLDER,
                                            ondelete='CASCADE',
