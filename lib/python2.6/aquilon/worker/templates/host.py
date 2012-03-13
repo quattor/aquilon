@@ -127,6 +127,9 @@ class PlenaryToplevelHost(Plenary):
     """
     A plenary template for a host, stored at the toplevel of the profiledir
     """
+
+    template_type = "object"
+
     def __init__(self, dbhost, logger=LOGGER):
         Plenary.__init__(self, dbhost, logger=logger)
         # Store the branch separately so get_key() works even after the dbhost
@@ -135,9 +138,6 @@ class PlenaryToplevelHost(Plenary):
         self.name = dbhost.fqdn
         self.plenary_core = ""
         self.plenary_template = "%(name)s" % self.__dict__
-        self.template_type = "object"
-        self.dir = "%s/domains/%s/profiles" % (
-            self.config.get("broker", "builddir"), self.branch.name)
 
     def will_change(self):
         # Need to override to handle IncompleteError...

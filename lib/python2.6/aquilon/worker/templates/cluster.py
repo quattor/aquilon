@@ -65,17 +65,16 @@ class PlenaryClusterObject(Plenary):
     are contained inside the cluster (via an include of the clusterdata plenary)
     """
 
+    template_type = "object"
+
     def __init__(self, dbcluster, logger=LOGGER):
         Plenary.__init__(self, dbcluster, logger=logger)
-        self.template_type = 'object'
         self.name = dbcluster.name
         self.metacluster = "global"
         if dbcluster.metacluster:
             self.metacluster = dbcluster.metacluster.name
         self.plenary_core = "clusters"
         self.plenary_template = "%(plenary_core)s/%(name)s" % self.__dict__
-        self.dir = self.config.get("broker", "builddir") + \
-                    "/domains/%s/profiles" % dbcluster.branch.name
 
     def get_key(self):
         return CompileKey(domain=self.dbobj.branch.name,
@@ -223,13 +222,14 @@ class PlenaryClusterClient(Plenary):
     A host that is a member of a cluster will include the cluster client
     plenary template. This just names the cluster and nothing more.
     """
+
+    template_type = ""
+
     def __init__(self, dbcluster, logger=LOGGER):
         Plenary.__init__(self, dbcluster, logger=logger)
         self.name = dbcluster.name
         self.plenary_core = "cluster/%(name)s" % self.__dict__
         self.plenary_template = "%(plenary_core)s/client" % self.__dict__
-        self.template_type = ''
-        self.dir = self.config.get("broker", "plenarydir")
 
     def get_key(self):
         # This takes a domain lock because it could affect all clients...

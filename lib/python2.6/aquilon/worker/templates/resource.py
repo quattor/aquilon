@@ -40,13 +40,15 @@ LOGGER = logging.getLogger('aquilon.server.templates.resource')
 
 
 class PlenaryResource(Plenary):
+
+    template_type = "structure"
+
     def __init__(self, dbresource, logger=LOGGER):
         Plenary.__init__(self, dbresource, logger=logger)
         self.type = dbresource.resource_type
         self.name = dbresource.name
         self.plenary_core = dbresource.template_base
         self.plenary_template = self.plenary_core + "/config"
-        self.dir = self.config.get("broker", "plenarydir")
 
     def body(self, lines):
         fname = "body_%s" % self.type

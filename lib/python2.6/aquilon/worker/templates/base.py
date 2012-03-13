@@ -41,8 +41,11 @@ LOGGER = logging.getLogger(__name__)
 
 
 class Plenary(object):
-    handlers = {}
 
+    template_type = None
+    """ Specifies the PAN template type to generate """
+
+    handlers = {}
     """ The handlers dictionary should have an entry for every subclass.
         Typically this will be defined immediately after defining the
         subclass.
@@ -52,7 +55,22 @@ class Plenary(object):
         self.config = Config()
         self.dbobj = dbobj
         self.logger = logger
-        self.template_type = 'structure'
+
+        if self.template_type is None:
+            raise InternalError("Plenary class %s did not set the template "
+                                "type" % self.__class__.__name__)
+
+        # Object templates live under the branch-specific build directory.
+        # Everything else lives under the common plenary directory.
+        if self.template_type == "object":
+            if not dbobj or not hasattr(dbobj, "branch"):
+                raise InternalError("Plenaries meant to be compiled need a DB "
+                                    "object that has a branch; got: %r" % dbobj)
+            self.dir = os.path.join(self.config.get("broker", "builddir"),
+                                    "domains", dbobj.branch.name, "profiles")
+        else:
+            self.dir = self.config.get("broker", "plenarydir")
+
         self.plenary_template = None
         self.plenary_core = None
         self.servername = self.config.get("broker", "servername")

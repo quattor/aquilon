@@ -42,6 +42,9 @@ LOGGER = logging.getLogger(__name__)
 
 
 class PlenaryMachineInfo(Plenary):
+
+    template_type = "structure"
+
     def __init__(self, dbmachine, logger=LOGGER):
         Plenary.__init__(self, dbmachine, logger=logger)
         self.machine = dbmachine.label
@@ -82,8 +85,6 @@ class PlenaryMachineInfo(Plenary):
         self.plenary_core = (
                 "machine/%(hub)s/%(building)s/%(rack)s" % self.__dict__)
         self.plenary_template = ("%(plenary_core)s/%(machine)s" % self.__dict__)
-        self.dir = self.config.get("broker", "plenarydir")
-        return
 
     def get_key(self):
         host = self.dbobj.host

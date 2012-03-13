@@ -38,15 +38,16 @@ LOGGER = logging.getLogger(__name__)
 
 
 class PlenaryCity(Plenary):
+
+    template_type = ""
+
     def __init__(self, dbcity, logger=LOGGER):
         Plenary.__init__(self, dbcity, logger=logger)
-        self.template_type = ""
         self.name = dbcity.name
         self.hub = dbcity.hub.fullname.lower()
         self.timezone = dbcity.timezone
         self.plenary_core = "site/%(hub)s/%(name)s" % self.__dict__
         self.plenary_template = self.plenary_core + "/config"
-        self.dir = self.config.get("broker", "plenarydir")
 
     def body(self, lines):
         lines.append("variable TIMEZONE = %s;" % pan(self.timezone))

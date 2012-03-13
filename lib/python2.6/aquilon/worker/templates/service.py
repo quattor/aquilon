@@ -65,12 +65,14 @@ class PlenaryServiceToplevel(Plenary):
     configuration common to both clients and servers, and is applicable
     to all instances.
     """
+
+    template_type = "structure"
+
     def __init__(self, dbservice, logger=LOGGER):
         Plenary.__init__(self, dbservice, logger=logger)
         self.name = dbservice.name
         self.plenary_core = "servicedata/%(name)s" % self.__dict__
         self.plenary_template = "%(plenary_core)s/config" % self.__dict__
-        self.dir = self.config.get("broker", "plenarydir")
 
 
 class PlenaryServiceClientDefault(Plenary):
@@ -82,13 +84,14 @@ class PlenaryServiceClientDefault(Plenary):
     defines configuration for clients only, but is applicable
     to all instances of the service.
     """
+
+    template_type = ""
+
     def __init__(self, dbservice, logger=LOGGER):
         Plenary.__init__(self, dbservice, logger=logger)
         self.name = dbservice.name
         self.plenary_core = "service/%(name)s/client" % self.__dict__
         self.plenary_template = "%(plenary_core)s/config" % self.__dict__
-        self.template_type = ''
-        self.dir = self.config.get("broker", "plenarydir")
 
 
 class PlenaryServiceServerDefault(Plenary):
@@ -100,13 +103,14 @@ class PlenaryServiceServerDefault(Plenary):
     defines configuration for servers only, but is applicable
     to all instances of the service.
     """
+
+    template_type = ""
+
     def __init__(self, dbservice, logger=LOGGER):
         Plenary.__init__(self, dbservice, logger=logger)
         self.name = dbservice.name
         self.plenary_core = "service/%(name)s/server" % self.__dict__
         self.plenary_template = "%(plenary_core)s/config" % self.__dict__
-        self.template_type = ''
-        self.dir = self.config.get("broker", "plenarydir")
 
 
 class PlenaryServiceInstance(PlenaryCollection):
@@ -140,14 +144,15 @@ class PlenaryServiceInstanceToplevel(Plenary):
     while still having access to generated data here (the list of
     servers and the instance name)
     """
+
+    template_type = "structure"
+
     def __init__(self, dbinstance, logger=LOGGER):
         Plenary.__init__(self, dbinstance, logger=logger)
         self.service = dbinstance.service.name
         self.name = dbinstance.name
         self.plenary_core = "servicedata/%(service)s/%(name)s" % self.__dict__
         self.plenary_template = self.plenary_core + "/config"
-        self.template_type = 'structure'
-        self.dir = self.config.get("broker", "plenarydir")
 
     def body(self, lines):
         lines.append("include { 'servicedata/%(service)s/config' };" % self.__dict__)
@@ -167,14 +172,15 @@ class PlenaryServiceInstanceServer(Plenary):
     while still having access to the generated data here (the list
     of clients and the instance name)
     """
+
+    template_type = "structure"
+
     def __init__(self, dbinstance, logger=LOGGER):
         Plenary.__init__(self, dbinstance, logger=logger)
         self.service = dbinstance.service.name
         self.name = dbinstance.name
         self.plenary_core = "servicedata/%(service)s/%(name)s" % self.__dict__
         self.plenary_template = self.plenary_core + "/srvconfig"
-        self.template_type = 'structure'
-        self.dir = self.config.get("broker", "plenarydir")
 
     def body(self, lines):
         lines.append('"instance" = %s;' % pan(self.name))
@@ -191,14 +197,15 @@ class PlenaryServiceInstanceClientDefault(Plenary):
     This template defines configuration for clients only, and
     is specific to the instance.
     """
+
+    template_type = ""
+
     def __init__(self, dbinstance, logger=LOGGER):
         Plenary.__init__(self, dbinstance, logger=logger)
         self.service = dbinstance.service.name
         self.name = dbinstance.name
         self.plenary_core = "service/%(service)s/%(name)s/client" % self.__dict__
         self.plenary_template = self.plenary_core + "/config"
-        self.template_type = ''
-        self.dir = self.config.get("broker", "plenarydir")
 
     def body(self, lines):
         lines.append('"/system/services/%s" = %s;' %
@@ -217,14 +224,15 @@ class PlenaryServiceInstanceServerDefault(Plenary):
     sufficient. The template defines configuration for servers
     only and is specific to the service instance.
     """
+
+    template_type = ""
+
     def __init__(self, dbinstance, logger=LOGGER):
         Plenary.__init__(self, dbinstance, logger=logger)
         self.service = dbinstance.service.name
         self.name = dbinstance.name
         self.plenary_core = "service/%(service)s/%(name)s/server" % self.__dict__
         self.plenary_template = self.plenary_core + "/config"
-        self.template_type = ''
-        self.dir = self.config.get("broker", "plenarydir")
 
     def body(self, lines):
         lines.append('"/system/provides/%s" = %s;' %
@@ -241,14 +249,15 @@ class PlenaryInstanceNasDiskShare(Plenary):
     sufficient information to be able to know whence to mount the disk.
     This class needs to be in sync with the consumer PlenaryMachine
     """
+
+    template_type = "structure"
+
     def __init__(self, dbinstance, logger=LOGGER):
         Plenary.__init__(self, dbinstance, logger=logger)
         self.service = dbinstance.service.name
         self.name = dbinstance.name
         self.plenary_core = "service/%(service)s/%(name)s/client" % self.__dict__
         self.plenary_template = self.plenary_core + "/nasinfo"
-        self.template_type = 'structure'
-        self.dir = self.config.get("broker", "plenarydir")
         self.server = ""
         self.mount = ""
 
