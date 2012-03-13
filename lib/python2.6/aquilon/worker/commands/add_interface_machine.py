@@ -42,10 +42,8 @@ from aquilon.worker.dbwrappers.interface import (get_or_create_interface,
                                                  verify_port_group,
                                                  choose_port_group,
                                                  assign_address)
-from aquilon.worker.templates.base import PlenaryCollection
+from aquilon.worker.templates.base import Plenary, PlenaryCollection
 from aquilon.worker.locks import lock_queue
-from aquilon.worker.templates.machine import PlenaryMachineInfo
-from aquilon.worker.templates.host import PlenaryHost
 from aquilon.worker.processes import DSDBRunner
 
 
@@ -158,12 +156,12 @@ class CommandAddInterfaceMachine(BrokerCommand):
         session.flush()
 
         plenaries = PlenaryCollection(logger=logger)
-        plenaries.append(PlenaryMachineInfo(dbmachine, logger=logger))
+        plenaries.append(Plenary.get_plenary(dbmachine))
         if pending_removals and dbmachine.host:
             # Not an exact test, but the file won't be re-written
             # if the contents are the same so calling too often is
             # not a major expense.
-            plenaries.append(PlenaryHost(dbmachine.host, logger=logger))
+            plenaries.append(Plenary.get_plenary(dbmachine.host))
         # Even though there may be removals going on the write key
         # should be sufficient here.
         key = plenaries.get_write_key()
@@ -200,13 +198,14 @@ class CommandAddInterfaceMachine(BrokerCommand):
                     "and interface '%s'" %
                     (prev.hardware_entity.fqdn, prev.hardware_entity.label,
                      prev.name))
-        host_plenary_info = PlenaryHost(prev.hardware_entity.host, logger=logger)
+        host_plenary_info = Plenary.get_plenary(prev.hardware_entity.host,
+                                                logger=logger)
         # FIXME: Should really do everything that del_host.py does, not
         # just remove the host plenary but adjust all the service
         # plenarys and dependency files.
         pending_removals.append(host_plenary_info)
         dbmachine = prev.hardware_entity
-        machine_plenary_info = PlenaryMachineInfo(dbmachine, logger=logger)
+        machine_plenary_info = Plenary.get_plenary(dbmachine, logger=logger)
         pending_removals.append(machine_plenary_info)
         # This will cascade to prev & the host
         if dbmachine.primary_name:
@@ -244,7 +243,7 @@ class CommandAddInterfaceMachine(BrokerCommand):
             return
         logger.client_info("Renaming machine %s to %s." %
                            (dbmachine.label, short))
-        pending_removals.append(PlenaryMachineInfo(dbmachine, logger=logger))
+        pending_removals.append(Plenary.get_plenary(dbmachine))
         dbmachine.label = short
         session.add(dbmachine)
         session.flush()

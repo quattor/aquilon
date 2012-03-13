@@ -44,11 +44,10 @@ class CommandCatInstance(BrokerCommand):
         dbservice = Service.get_unique(session, service, compel=True)
         dbsi = get_service_instance(session, dbservice, instance)
         if default:
-            plenary_info = PlenaryServiceInstanceClientDefault(dbservice, dbsi,
+            plenary_info = PlenaryServiceInstanceClientDefault(dbsi,
                                                                logger=logger)
         else:
-            plenary_info = PlenaryServiceInstanceToplevel(dbservice, dbsi,
-                                                          logger=logger)
+            plenary_info = PlenaryServiceInstanceToplevel(dbsi, logger=logger)
 
         if generate:
             return plenary_info._generate_content()

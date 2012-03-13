@@ -36,10 +36,7 @@ from sqlalchemy.orm.session import object_session
 from aquilon.exceptions_ import ArgumentError, InternalError
 from aquilon.aqdb.model import Host, Cluster, ServiceInstance
 from aquilon.worker.templates.service import PlenaryServiceInstanceServer
-from aquilon.worker.templates.cluster import PlenaryCluster
-from aquilon.worker.templates.host import PlenaryHost
-from aquilon.worker.templates.machine import PlenaryMachineInfo
-from aquilon.worker.templates.base import PlenaryCollection
+from aquilon.worker.templates.base import Plenary, PlenaryCollection
 
 
 class Chooser(object):
@@ -431,8 +428,7 @@ class Chooser(object):
 
     def stash_services(self):
         for instance in self.instances_bound.union(self.instances_unbound):
-            plenary = PlenaryServiceInstanceServer(instance.service, instance,
-                                                   logger=self.logger)
+            plenary = PlenaryServiceInstanceServer(instance, logger=self.logger)
             plenary.stash()
             self.plenaries.append(plenary)
 
@@ -549,14 +545,14 @@ class HostChooser(Chooser):
             self.dbhost.services_used.remove(instance)
 
     def prestash_primary(self):
-        plenary_host = PlenaryHost(self.dbhost, logger=self.logger)
+        plenary_host = Plenary.get_plenary(self.dbhost, logger=self.logger)
         plenary_host.stash()
         self.plenaries.append(plenary_host)
         # This may be too much action at a distance... however, if
         # we are potentially re-writing a host plenary, it seems like
         # a good idea to also verify known dependencies.
-        plenary_machine = PlenaryMachineInfo(self.dbhost.machine,
-                                             logger=self.logger)
+        plenary_machine = Plenary.get_plenary(self.dbhost.machine,
+                                              logger=self.logger)
         plenary_machine.stash()
         self.plenaries.append(plenary_machine)
 
@@ -627,10 +623,10 @@ class ClusterChooser(Chooser):
                 # Note, host plenary will be written later.
 
     def prestash_primary(self):
-        plenary_cluster = PlenaryCluster(self.dbcluster, logger=self.logger)
+        plenary_cluster = Plenary.get_plenary(self.dbcluster, logger=self.logger)
         plenary_cluster.stash()
         self.plenaries.append(plenary_cluster)
         for dbhost in self.dbcluster.hosts:
-            host_plenary = PlenaryHost(dbhost, logger=self.logger)
+            host_plenary = Plenary.get_plenary(dbhost, logger=self.logger)
             host_plenary.stash()
             self.plenaries.append(host_plenary)

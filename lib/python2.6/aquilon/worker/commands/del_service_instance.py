@@ -32,7 +32,7 @@ from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.service_instance import get_service_instance
 from aquilon.aqdb.model import Service
-from aquilon.worker.templates.service import PlenaryServiceInstance
+from aquilon.worker.templates.base import Plenary
 
 
 class CommandDelServiceInstance(BrokerCommand):
@@ -56,7 +56,7 @@ class CommandDelServiceInstance(BrokerCommand):
         session.delete(dbsi)
         session.flush()
 
-        plenary_info = PlenaryServiceInstance(dbservice, dbsi, logger=logger)
+        plenary_info = Plenary.get_plenary(dbsi, logger=logger)
         plenary_info.remove()
 
         return

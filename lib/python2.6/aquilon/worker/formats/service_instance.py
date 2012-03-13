@@ -101,7 +101,7 @@ class ShareFormatter(ObjectFormatter):
     def format_raw(self, share, indent=""):
         dbshare = share.dbshare
         details = [indent + "NAS Disk Share: %s" % dbshare.name]
-        plenary = PlenaryInstanceNasDiskShare(dbshare.service, dbshare)
+        plenary = PlenaryInstanceNasDiskShare(dbshare)
         plenary.lookup()
         details.append(indent + "  Server: %s" % plenary.server)
         details.append(indent + "  Mountpoint: %s" % plenary.mount)

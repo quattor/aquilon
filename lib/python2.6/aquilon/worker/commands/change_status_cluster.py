@@ -32,8 +32,7 @@
 from aquilon.exceptions_ import IncompleteError
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.templates.domain import TemplateDomain
-from aquilon.worker.templates.cluster import PlenaryCluster
-from aquilon.worker.templates.host import PlenaryHost
+from aquilon.worker.templates.base import Plenary
 from aquilon.worker.locks import lock_queue, CompileKey
 from aquilon.aqdb.model import Cluster, ClusterLifecycle
 
@@ -55,14 +54,14 @@ class CommandChangeClusterStatus(BrokerCommand):
         session.flush()
 
         plenaries = []
-        plenary = PlenaryCluster(dbcluster, logger=logger)
+        plenary = Plenary.get_plenary(dbcluster, logger=logger)
         plenaries.append(plenary)
 
         # recompile all of the hosts associated with the cluster
         compilelist = []
         compilelist.append("cluster/" + dbcluster.name)
         for dbhost in dbcluster.hosts:
-            hostfile = PlenaryHost(dbhost, logger=logger)
+            hostfile = Plenary.get_plenary(dbhost, logger=logger)
             plenaries.append(hostfile)
             compilelist.append(dbhost.fqdn)
 

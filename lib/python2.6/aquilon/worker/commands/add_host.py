@@ -37,9 +37,7 @@ from aquilon.worker.dbwrappers.hardware_entity import parse_primary_name
 from aquilon.worker.dbwrappers.interface import generate_ip, assign_address
 from aquilon.aqdb.model import (Host, OperatingSystem, Archetype,
                                 HostLifecycle, Machine, Personality)
-from aquilon.worker.templates.base import PlenaryCollection
-from aquilon.worker.templates.machine import PlenaryMachineInfo
-from aquilon.worker.templates.cluster import PlenaryCluster
+from aquilon.worker.templates.base import Plenary, PlenaryCollection
 from aquilon.worker.locks import lock_queue
 from aquilon.worker.processes import DSDBRunner
 
@@ -128,9 +126,9 @@ class CommandAddHost(BrokerCommand):
         session.flush()
 
         plenaries = PlenaryCollection(logger=logger)
-        plenaries.append(PlenaryMachineInfo(dbmachine, logger=logger))
+        plenaries.append(Plenary.get_plenary(dbmachine))
         if dbmachine.cluster:
-            plenaries.append(PlenaryCluster(dbmachine.cluster, logger=logger))
+            plenaries.append(Plenary.get_plenary(dbmachine.cluster))
 
         key = plenaries.get_write_key()
         try:

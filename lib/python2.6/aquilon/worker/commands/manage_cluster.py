@@ -31,9 +31,7 @@
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.branch import get_branch_and_author
 from aquilon.aqdb.model import Cluster
-from aquilon.worker.templates.cluster import PlenaryCluster
-from aquilon.worker.templates.host import PlenaryHost
-from aquilon.worker.templates.base import PlenaryCollection
+from aquilon.worker.templates.base import Plenary, PlenaryCollection
 from aquilon.worker.locks import lock_queue, CompileKey
 
 
@@ -54,12 +52,12 @@ class CommandManageCluster(BrokerCommand):
         dbcluster.sandbox_author = dbauthor
         session.add(dbcluster)
         plenaries = PlenaryCollection(logger=logger)
-        plenaries.append(PlenaryCluster(dbcluster, logger=logger))
+        plenaries.append(Plenary.get_plenary(dbcluster))
         for dbhost in dbcluster.hosts:
             dbhost.branch = dbbranch
             dbhost.sandbox_author = dbauthor
             session.add(dbhost)
-            plenaries.append(PlenaryHost(dbhost, logger=logger))
+            plenaries.append(Plenary.get_plenary(dbhost))
 
         session.flush()
 

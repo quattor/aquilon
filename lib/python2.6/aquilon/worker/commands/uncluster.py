@@ -33,8 +33,7 @@ from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.host import hostname_to_host
 from aquilon.worker.locks import lock_queue, CompileKey
 from aquilon.aqdb.model import Cluster, Personality
-from aquilon.worker.templates.host import PlenaryHost
-from aquilon.worker.templates.cluster import PlenaryCluster
+from aquilon.worker.templates.base import Plenary
 
 
 class CommandUncluster(BrokerCommand):
@@ -73,8 +72,8 @@ class CommandUncluster(BrokerCommand):
         # Will need to write a cluster plenary and either write or
         # remove a host plenary.  Grab the domain key since the two
         # must be in the same domain.
-        host_plenary = PlenaryHost(dbhost, logger=logger)
-        cluster_plenary = PlenaryCluster(dbcluster, logger=logger)
+        host_plenary = Plenary.get_plenary(dbhost, logger=logger)
+        cluster_plenary = Plenary.get_plenary(dbcluster, logger=logger)
         key = CompileKey(domain=dbcluster.branch.name, logger=logger)
         try:
             lock_queue.acquire(key)

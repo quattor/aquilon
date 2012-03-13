@@ -82,8 +82,7 @@ class CommandDelHost(BrokerCommand):
             fqdn = dbmachine.fqdn
 
             for si in dbhost.services_used:
-                plenary = PlenaryServiceInstanceServer(si.service, si,
-                                                       logger=logger)
+                plenary = PlenaryServiceInstanceServer(si, logger=logger)
                 bindings.append(plenary)
                 logger.info("Before deleting host '%s', removing binding '%s'"
                             % (fqdn, si.cfg_path))

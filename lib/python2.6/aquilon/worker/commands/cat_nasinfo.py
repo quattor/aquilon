@@ -43,8 +43,7 @@ class CommandCatNasinfo(BrokerCommand):
                                        compel=True)
         dbsi = ServiceInstance.get_unique(session, service=dbservice,
                                           name=nasinfo, compel=True)
-        plenary_info = PlenaryInstanceNasDiskShare(dbservice, dbsi,
-                                                   logger=logger)
+        plenary_info = PlenaryInstanceNasDiskShare(dbsi, logger=logger)
 
         if generate:
             return plenary_info._generate_content()

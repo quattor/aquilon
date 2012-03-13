@@ -34,7 +34,7 @@ from aquilon.aqdb.model import Service
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.host import hostname_to_host
 from aquilon.worker.dbwrappers.service_instance import get_service_instance
-from aquilon.worker.templates.service import PlenaryServiceInstance
+from aquilon.worker.templates.base import Plenary
 
 
 class CommandBindServer(BrokerCommand):
@@ -61,8 +61,7 @@ class CommandBindServer(BrokerCommand):
 
         session.flush()
 
-        plenary_info = PlenaryServiceInstance(dbservice, dbinstance,
-                                              logger=logger)
+        plenary_info = Plenary.get_plenary(dbinstance, logger=logger)
         plenary_info.write()
 
         # XXX: Need to recompile...

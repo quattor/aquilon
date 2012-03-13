@@ -32,14 +32,14 @@
 from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import Service, ServiceInstance
-from aquilon.worker.templates.service import PlenaryServiceInstance
+from aquilon.worker.templates.base import Plenary
 
 
 class CommandUpdateServiceInstance(BrokerCommand):
 
     required_parameters = ["service", "instance"]
 
-    def render(self, session, service, instance, max_clients, default,
+    def render(self, session, logger, service, instance, max_clients, default,
                **arguments):
         dbservice = Service.get_unique(session, name=service, compel=True)
         dbsi = ServiceInstance.get_unique(session, service=dbservice,
@@ -55,7 +55,7 @@ class CommandUpdateServiceInstance(BrokerCommand):
         session.add(dbsi)
         session.flush()
 
-        plenary = PlenaryServiceInstance(dbservice, dbsi)
+        plenary = Plenary.get_plenary(dbsi, logger=logger)
         plenary.write()
 
         return

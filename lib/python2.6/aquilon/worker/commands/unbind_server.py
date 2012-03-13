@@ -33,8 +33,7 @@ from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import Service, ServiceInstance
 from aquilon.worker.dbwrappers.host import hostname_to_host
 from aquilon.worker.dbwrappers.service_instance import get_service_instance
-from aquilon.worker.templates.base import PlenaryCollection
-from aquilon.worker.templates.service import PlenaryServiceInstance
+from aquilon.worker.templates.base import Plenary, PlenaryCollection
 
 class CommandUnbindServer(BrokerCommand):
 
@@ -66,8 +65,7 @@ class CommandUnbindServer(BrokerCommand):
 
         plenaries = PlenaryCollection(logger=logger)
         for dbinstance in dbinstances:
-            plenaries.append(PlenaryServiceInstance(dbservice, dbinstance,
-                                                    logger=logger))
+            plenaries.append(Plenary.get_plenary(dbinstance))
         plenaries.write()
 
         # XXX: Need to recompile...
