@@ -184,14 +184,12 @@ resource.primary_key.name = '%s_pk' % _TN
 resource.info['unique_fields'] = ['name', 'holder']
 
 
-Host.resources = relation(
-    Resource, secondary=resholder,
-    primaryjoin=Host.machine_id == HostResource.host_id,
-    secondaryjoin=ResourceHolder.id == Resource.holder_id,
-    viewonly=True)
+# Proxy the resource list to the holder object for Host and Cluster objects
+def _resource_getter(self):
+    if self.resholder is not None:
+        return self.resholder.resources
+    else:
+        return []
 
-Cluster.resources = relation(
-    Resource, secondary=resholder,
-    primaryjoin=Cluster.id == ClusterResource.cluster_id,
-    secondaryjoin=ResourceHolder.id == Resource.holder_id,
-    viewonly=True)
+Host.resources = property(_resource_getter)
+Cluster.resources = property(_resource_getter)
