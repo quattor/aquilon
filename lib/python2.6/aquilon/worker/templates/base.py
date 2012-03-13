@@ -41,6 +41,13 @@ LOGGER = logging.getLogger(__name__)
 
 
 class Plenary(object):
+    handlers = {}
+
+    """ The handlers dictionary should have an entry for every subclass.
+        Typically this will be defined immediately after defining the
+        subclass.
+
+    """
     def __init__(self, dbobj=None, logger=LOGGER):
         self.config = Config()
         self.dbobj = dbobj
@@ -278,6 +285,13 @@ class Plenary(object):
             self.write(locked=True, content=self.old_content)
             atime = os.stat(self.pathname()).st_atime
             os.utime(self.pathname(), (atime, self.old_mtime))
+
+    @staticmethod
+    def get_plenary(dbobj, logger=LOGGER):
+        if dbobj.__class__ not in Plenary.handlers:
+            raise InternalError("Class %s does not have a plenary handler" %
+                                dbobj.__class__.__name__)
+        return Plenary.handlers[dbobj.__class__](dbobj, logger=logger)
 
 
 class PlenaryCollection(object):

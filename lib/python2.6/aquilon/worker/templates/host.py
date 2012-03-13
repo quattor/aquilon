@@ -71,6 +71,7 @@ def select_routers(dbmachine, routers):
         filtered.append(routers[0].ip)
     return filtered
 
+
 def is_default_route(dbinterface):
     """ Check if the given interface should provide the default route
 
@@ -117,6 +118,9 @@ class PlenaryHost(PlenaryCollection):
         for plenary in self.plenaries:
             total += plenary.write(dir=dir, locked=locked, content=content)
         return total
+
+
+Plenary.handlers[Host] = PlenaryHost
 
 
 class PlenaryToplevelHost(Plenary):

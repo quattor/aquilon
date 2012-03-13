@@ -31,6 +31,7 @@
 
 import logging
 
+from aquilon.aqdb.model import Machine
 from aquilon.worker.locks import CompileKey
 from aquilon.worker.templates.base import Plenary
 from aquilon.worker import templates
@@ -227,6 +228,9 @@ class PlenaryMachineInfo(Plenary):
         if self.dbobj.model.machine_type == 'aurora_node':
             return 0
         return Plenary.write(self, *args, **kwargs)
+
+
+Plenary.handlers[Machine] = PlenaryMachineInfo
 
 
 def machine_plenary_will_move(old, new):

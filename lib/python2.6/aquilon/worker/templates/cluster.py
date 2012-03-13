@@ -30,6 +30,8 @@
 
 import logging
 
+from aquilon.aqdb.model import (Cluster, EsxCluster, ComputeCluster,
+                                StorageCluster)
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
 from aquilon.worker.templates.machine import PlenaryMachineInfo
 from aquilon.worker.templates.panutils import pan, StructureTemplate
@@ -48,6 +50,12 @@ class PlenaryCluster(PlenaryCollection):
         self.dbobj = dbcluster
         self.plenaries.append(PlenaryClusterObject(dbcluster, logger=logger))
         self.plenaries.append(PlenaryClusterClient(dbcluster, logger=logger))
+
+
+Plenary.handlers[Cluster] = PlenaryCluster
+Plenary.handlers[ComputeCluster] = PlenaryCluster
+Plenary.handlers[EsxCluster] = PlenaryCluster
+Plenary.handlers[StorageCluster] = PlenaryCluster
 
 
 class PlenaryClusterObject(Plenary):
@@ -149,8 +157,8 @@ class PlenaryClusterObject(Plenary):
         lines.append('"/system/build" = %s;' % pan(self.dbobj.status.name))
         if self.dbobj.allowed_personalities:
             lines.append('"/system/cluster/allowed_personalities" = %s;' %
-                         pan (sorted(["%s/%s" % (p.archetype.name, p.name)
-                                      for p in self.dbobj.allowed_personalities])))
+                         pan(sorted(["%s/%s" % (p.archetype.name, p.name)
+                                     for p in self.dbobj.allowed_personalities])))
         lines.append("")
         lines.append('"/metadata/template/branch/name" = %s;' %
                      pan(self.dbobj.branch.name))

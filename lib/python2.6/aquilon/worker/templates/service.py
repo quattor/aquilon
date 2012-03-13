@@ -30,6 +30,7 @@
 
 import logging
 
+from aquilon.aqdb.model import Service, ServiceInstance
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
 from aquilon.worker.templates.panutils import pan, StructureTemplate
 from aquilon.exceptions_ import NotFoundException
@@ -49,6 +50,9 @@ class PlenaryService(PlenaryCollection):
                                                           logger=logger))
         self.plenaries.append(PlenaryServiceServerDefault(dbservice,
                                                           logger=logger))
+
+
+Plenary.handlers[Service] = PlenaryService
 
 
 class PlenaryServiceToplevel(Plenary):
@@ -109,24 +113,22 @@ class PlenaryServiceInstance(PlenaryCollection):
     """
     A facade for the variety of PlenaryServiceInstance subsidiary files
     """
-    def __init__(self, dbservice, dbinstance, logger=LOGGER):
+    def __init__(self, dbinstance, logger=LOGGER):
         PlenaryCollection.__init__(self, logger=logger)
-        self.plenaries.append(PlenaryServiceInstanceToplevel(dbservice,
-                                                             dbinstance,
+        self.plenaries.append(PlenaryServiceInstanceToplevel(dbinstance,
                                                              logger=logger))
-        self.plenaries.append(PlenaryServiceInstanceClientDefault(dbservice,
-                                                                  dbinstance,
+        self.plenaries.append(PlenaryServiceInstanceClientDefault(dbinstance,
                                                                   logger=logger))
-        self.plenaries.append(PlenaryServiceInstanceServer(dbservice,
-                                                           dbinstance,
+        self.plenaries.append(PlenaryServiceInstanceServer(dbinstance,
                                                            logger=logger))
-        self.plenaries.append(PlenaryServiceInstanceServerDefault(dbservice,
-                                                                  dbinstance,
+        self.plenaries.append(PlenaryServiceInstanceServerDefault(dbinstance,
                                                                   logger=logger))
-        if dbservice.name == 'nas_disk_share':
-            self.plenaries.append(PlenaryInstanceNasDiskShare(dbservice,
-                                                              dbinstance,
+        if dbinstance.service.name == 'nas_disk_share':
+            self.plenaries.append(PlenaryInstanceNasDiskShare(dbinstance,
                                                               logger=logger))
+
+
+Plenary.handlers[ServiceInstance] = PlenaryServiceInstance
 
 
 class PlenaryServiceInstanceToplevel(Plenary):
@@ -138,9 +140,9 @@ class PlenaryServiceInstanceToplevel(Plenary):
     while still having access to generated data here (the list of
     servers and the instance name)
     """
-    def __init__(self, dbservice, dbinstance, logger=LOGGER):
+    def __init__(self, dbinstance, logger=LOGGER):
         Plenary.__init__(self, dbinstance, logger=logger)
-        self.service = dbservice.name
+        self.service = dbinstance.service.name
         self.name = dbinstance.name
         self.plenary_core = "servicedata/%(service)s/%(name)s" % self.__dict__
         self.plenary_template = self.plenary_core + "/config"
@@ -165,9 +167,9 @@ class PlenaryServiceInstanceServer(Plenary):
     while still having access to the generated data here (the list
     of clients and the instance name)
     """
-    def __init__(self, dbservice, dbinstance, logger=LOGGER):
+    def __init__(self, dbinstance, logger=LOGGER):
         Plenary.__init__(self, dbinstance, logger=logger)
-        self.service = dbservice.name
+        self.service = dbinstance.service.name
         self.name = dbinstance.name
         self.plenary_core = "servicedata/%(service)s/%(name)s" % self.__dict__
         self.plenary_template = self.plenary_core + "/srvconfig"
@@ -189,9 +191,9 @@ class PlenaryServiceInstanceClientDefault(Plenary):
     This template defines configuration for clients only, and
     is specific to the instance.
     """
-    def __init__(self, dbservice, dbinstance, logger=LOGGER):
+    def __init__(self, dbinstance, logger=LOGGER):
         Plenary.__init__(self, dbinstance, logger=logger)
-        self.service = dbservice.name
+        self.service = dbinstance.service.name
         self.name = dbinstance.name
         self.plenary_core = "service/%(service)s/%(name)s/client" % self.__dict__
         self.plenary_template = self.plenary_core + "/config"
@@ -215,9 +217,9 @@ class PlenaryServiceInstanceServerDefault(Plenary):
     sufficient. The template defines configuration for servers
     only and is specific to the service instance.
     """
-    def __init__(self, dbservice, dbinstance, logger=LOGGER):
+    def __init__(self, dbinstance, logger=LOGGER):
         Plenary.__init__(self, dbinstance, logger=logger)
-        self.service = dbservice.name
+        self.service = dbinstance.service.name
         self.name = dbinstance.name
         self.plenary_core = "service/%(service)s/%(name)s/server" % self.__dict__
         self.plenary_template = self.plenary_core + "/config"
@@ -239,9 +241,9 @@ class PlenaryInstanceNasDiskShare(Plenary):
     sufficient information to be able to know whence to mount the disk.
     This class needs to be in sync with the consumer PlenaryMachine
     """
-    def __init__(self, dbservice, dbinstance, logger=LOGGER):
+    def __init__(self, dbinstance, logger=LOGGER):
         Plenary.__init__(self, dbinstance, logger=logger)
-        self.service = dbservice.name
+        self.service = dbinstance.service.name
         self.name = dbinstance.name
         self.plenary_core = "service/%(service)s/%(name)s/client" % self.__dict__
         self.plenary_template = self.plenary_core + "/nasinfo"

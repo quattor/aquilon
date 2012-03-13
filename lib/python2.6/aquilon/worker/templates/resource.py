@@ -30,6 +30,9 @@
 
 import logging
 
+from aquilon.aqdb.model import (Application, Filesystem, Intervention,
+                                ResourceGroup, Hostlink, RebootSchedule,
+                                RebootIntervention)
 from aquilon.worker.templates.base import Plenary
 from aquilon.worker.templates.panutils import pan
 
@@ -107,3 +110,12 @@ class PlenaryResource(Plenary):
         lines.append('"name" = %s;' % pan(self.dbobj.name))
         lines.append('"justification" = %s;' % pan(self.dbobj.justification))
         self.body_intervention(lines)
+
+
+Plenary.handlers[Application] = PlenaryResource
+Plenary.handlers[Filesystem] = PlenaryResource
+Plenary.handlers[Intervention] = PlenaryResource
+Plenary.handlers[ResourceGroup] = PlenaryResource
+Plenary.handlers[Hostlink] = PlenaryResource
+Plenary.handlers[RebootSchedule] = PlenaryResource
+Plenary.handlers[RebootIntervention] = PlenaryResource
