@@ -110,13 +110,13 @@ class PlenaryHost(PlenaryCollection):
         if self.config.getboolean("broker", "flat_host_profiles"):
             self.plenaries.append(PlenaryToplevelHost(dbhost, logger=logger))
 
-    def write(self, dir=None, locked=False, content=None):
+    def write(self, locked=False, content=None):
         # Standard PlenaryCollection swallows IncompleteError.  If/when
         # the Host plenaries no longer raise that error this override
         # should be removed.
         total = 0
         for plenary in self.plenaries:
-            total += plenary.write(dir=dir, locked=locked, content=content)
+            total += plenary.write(locked=locked, content=content)
         return total
 
 

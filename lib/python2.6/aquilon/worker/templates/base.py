@@ -133,7 +133,7 @@ class Plenary(object):
         self.body(lines)
         return "\n".join(lines) + "\n"
 
-    def write(self, dir=None, locked=False, content=None):
+    def write(self, locked=False, content=None):
         """Write out the template.
 
         If the content is unchanged, then the file will not be modified
@@ -145,9 +145,6 @@ class Plenary(object):
         higher in the call stack.
 
         """
-
-        if dir is not None:
-            self.dir = dir
 
         if content is None:
             if not self.new_content:
@@ -185,20 +182,15 @@ class Plenary(object):
 
         return 1
 
-    def read(self, dir=None):
-        if dir is not None:
-            self.dir = dir
+    def read(self):
         # FIXME: Dupes some logic from pathname()
         return read_file(self.dir, self.plenary_template + ".tpl",
                          logger=self.logger)
 
-    def remove(self, dir=None, locked=False):
+    def remove(self, locked=False):
         """
         remove this plenary template
         """
-
-        if dir is not None:
-            self.dir = dir
 
         key = None
         try:
@@ -389,7 +381,7 @@ class PlenaryCollection(object):
         for plen in self.plenaries:
             plen.restore_stash()
 
-    def write(self, dir=None, locked=False, content=None):
+    def write(self, locked=False, content=None):
         # If locked is True, assume error handling happens higher
         # in the stack.
         total = 0
@@ -406,7 +398,7 @@ class PlenaryCollection(object):
                 # IncompleteError is almost pointless in this context, but
                 # it has the nice side effect of not updating the total.
                 try:
-                    total += plen.write(dir=dir, locked=True, content=content)
+                    total += plen.write(locked=True, content=content)
                 except IncompleteError:
                     pass
         except:
@@ -418,7 +410,7 @@ class PlenaryCollection(object):
                 lock_queue.release(key)
         return total
 
-    def remove(self, dir=None, locked=False):
+    def remove(self, locked=False):
         self.stash()
         key = None
         try:
@@ -426,7 +418,7 @@ class PlenaryCollection(object):
                 key = self.get_remove_key()
                 lock_queue.acquire(key)
             for plen in self.plenaries:
-                plen.remove(dir, locked=True)
+                plen.remove(locked=True)
         except:
             if not locked:
                 self.restore_stash()
