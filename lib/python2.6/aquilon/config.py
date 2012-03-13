@@ -49,7 +49,7 @@ global_defaults = {
             # scripts that want to execute stand-alone.
             "srcdir"   : os.path.realpath(os.path.join(
                             os.path.dirname(__file__), "..", "..", "..")),
-            "hostname" : socket.gethostname(),
+            "hostname" : socket.getfqdn(),
         }
 
 
