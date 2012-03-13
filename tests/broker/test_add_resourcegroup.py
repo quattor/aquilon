@@ -126,6 +126,10 @@ class TestAddResourceGroup(TestBrokerCommand):
         self.failIf(os.path.exists(rg_plenary),
                     "Plenary '%s' still exists" % rg_plenary)
 
+        # The directory should be gone
+        self.failIf(os.path.exists(rg_dir),
+                    "Plenary directory '%s' still exists" % rg_dir)
+
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddResourceGroup)

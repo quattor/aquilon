@@ -36,7 +36,7 @@ from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.templates.index import build_index
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
 from aquilon.worker.processes import remove_file
-from aquilon.worker.locks import lock_queue
+from aquilon.worker.locks import CompileKey
 
 
 class CommandDelCluster(BrokerCommand):

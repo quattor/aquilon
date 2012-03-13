@@ -30,6 +30,7 @@
 """Module for testing the add reboot_schedule command."""
 
 import unittest
+import os.path
 
 if __name__ == "__main__":
     import utils
@@ -136,7 +137,14 @@ class TestAddRebootSchedule(TestBrokerCommand):
                    "--hostname=server1.aqd-unittest.ms.com"]
         self.successtest(command)
 
+    def test_verify_reboot_schedule_plenary(self):
+        dir = os.path.join(self.config.get("broker", "plenarydir"),
+                           "resource", "host", "server1.aqd-unittest.ms.com",
+                           "reboot_schedule")
+        self.failIf(os.path.exists(dir),
+                    "Plenary directory '%s' still exists" % dir)
 
-if __name__=='__main__':
+
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddRebootSchedule)
     unittest.TextTestRunner(verbosity=2).run(suite)

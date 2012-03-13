@@ -158,6 +158,7 @@ class TestUsecaseDatabase(TestBrokerCommand):
     def test_59_cleanup_cluster(self):
         # Check that the plenaries of contained resources get cleaned up
         plenarydir = self.config.get("broker", "plenarydir")
+        cluster_dir = os.path.join(plenarydir, "cluster", "nydb1")
         cluster_res_dir = os.path.join(plenarydir, "resource", "cluster", "nydb1")
         fs_plenary = os.path.join(cluster_res_dir, "filesystem", "gnr.0", "config.tpl")
         app_plenary = os.path.join(cluster_res_dir, "application", "nydb1", "config.tpl")
@@ -179,6 +180,12 @@ class TestUsecaseDatabase(TestBrokerCommand):
                     "Plenary '%s' still exists" % fs_plenary)
         self.failIf(os.path.exists(app_plenary),
                     "Plenary '%s' still exists" % app_plenary)
+
+        # The directories should be gone as well
+        self.failIf(os.path.exists(cluster_res_dir),
+                    "Plenary directory '%s' still exists" % cluster_res_dir)
+        self.failIf(os.path.exists(cluster_dir),
+                    "Plenary directory '%s' still exists" % cluster_dir)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestUsecaseDatabase)

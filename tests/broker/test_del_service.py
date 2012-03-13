@@ -30,6 +30,7 @@
 """Module for testing the del service command."""
 
 import unittest
+import os.path
 
 if __name__ == "__main__":
     import utils
@@ -114,6 +115,12 @@ class TestDelService(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchclean(out, "Service: dns Instance: utdnsinstance", command)
 
+    def testverifydnsinstanceplenary(self):
+        dir = os.path.join(self.config.get("broker", "plenarydir"),
+                           "service", "dns", "utdnsinstance")
+        self.failIf(os.path.exists(dir),
+                    "Plenary directory '%s' still exists" % dir)
+
     # At this point, pa.ny.na still is still mapped.  del_service
     # should silently remove the mappings.
     def testdelntpinstance(self):
@@ -146,6 +153,12 @@ class TestDelService(TestBrokerCommand):
     def testverifydelutsvc2(self):
         command = "show service --service utsvc2"
         self.notfoundtest(command.split(" "))
+
+    def tetverifydelutsvc2plenary(self):
+        dir = os.path.join(self.config.get("broker", "plenarydir"),
+                           "service", "utsvc2")
+        self.failIf(os.path.exists(dir),
+                    "Plenary directory '%s' still exists" % dir)
 
     def testdelunmappedservice(self):
         command = "del service --service unmapped --instance instance1"

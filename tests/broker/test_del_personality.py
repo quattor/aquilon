@@ -30,6 +30,7 @@
 """Module for testing the del personality command."""
 
 import unittest
+import os.path
 
 if __name__ == "__main__":
     import utils
@@ -44,6 +45,12 @@ class TestDelPersonality(TestBrokerCommand):
         command = ["del_personality", "--personality=utpersonality",
                    "--archetype=aquilon"]
         self.noouttest(command)
+
+    def testverifyplenarydir(self):
+        dir = os.path.join(self.config.get("broker", "plenarydir"),
+                           "aquilon", "personality", "utpersonality")
+        self.failIf(os.path.exists(dir),
+                    "Plenary directory '%s' still exists" % dir)
 
     def testdeleaipersonality(self):
         command = ["del_personality", "--personality=eaitools",

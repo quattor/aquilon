@@ -30,6 +30,7 @@
 """Module for testing the del machine command."""
 
 import unittest
+import os.path
 
 if __name__ == "__main__":
     import utils
@@ -198,6 +199,14 @@ class TestDelMachine(TestBrokerCommand):
 
     def testdeljack(self):
         self.noouttest(["del", "machine", "--machine", "jack"])
+
+    def testverifyjackplenary(self):
+        # This was the only machine in the building, so the plenary directory
+        # should be gone
+        dir = os.path.join(self.config.get("broker", "plenarydir"),
+                           "machine", "americas", "cards")
+        self.failIf(os.path.exists(dir),
+                    "Plenary directory '%s' still exists" % dir)
 
     def testdelut3c5n6(self):
         self.noouttest(["del", "machine", "--machine", "ut3c5n6"])

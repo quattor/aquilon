@@ -207,6 +207,10 @@ class Plenary(object):
                 lock_queue.acquire(key)
             self.stash()
             remove_file(self.pathname(), logger=self.logger)
+            try:
+                os.removedirs(os.path.dirname(self.pathname()))
+            except OSError:
+                pass
             self.removed = True
         # Most of the error handling routines would restore_stash...
         # but there's no need here if the remove failed. :)
@@ -225,8 +229,9 @@ class Plenary(object):
             if not locked:
                 key = self.get_remove_key()
                 lock_queue.acquire(key)
-            # Can't call remove() here because it relies on the new domain.
-            if self.template_type == "object" and hasattr(self, 'name'):
+
+            if self.template_type == "object":
+                # Can't call remove() here because it relies on the new domain.
                 qdir = self.config.get("broker", "quattordir")
                 # Only one or the other of .xml/.xml.gz should be there...
                 # it doesn't hurt to clean up both.
@@ -238,11 +243,24 @@ class Plenary(object):
                 depfile = os.path.join(qdir, "build", "xml", domain,
                                        self.plenary_template + ".xml.dep")
                 remove_file(depfile, logger=self.logger)
+                try:
+                    os.removedirs(os.path.dirname(xmlfile))
+                except OSError:
+                    pass
+
                 builddir = self.config.get("broker", "builddir")
                 mainfile = os.path.join(builddir, "domains", domain,
                                         "profiles",
                                         self.plenary_template + ".tpl")
                 remove_file(mainfile, logger=self.logger)
+                try:
+                    os.removedirs(os.path.dirname(mainfile))
+                except OSError:
+                    pass
+            else:
+                # Non-object templates do not depend on the domain, so calling
+                # remove() is fine
+                self.remove(locked=True)
         except:
             if not locked:
                 self.restore_stash()
