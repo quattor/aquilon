@@ -73,7 +73,6 @@ class Plenary(object):
 
         self.plenary_template = None
         self.plenary_core = None
-        self.servername = self.config.get("broker", "servername")
         self.new_content = None
         # The following attributes are for stash/restore_stash
         self.old_content = None
