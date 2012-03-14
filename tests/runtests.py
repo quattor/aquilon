@@ -213,7 +213,7 @@ for label in ["quattordir", "kingdir", "swrepdir", ]:
 # FIXME: Need to be careful about attempting to nuke templatesdir...
 dirs = [config.get("database", "dbdir"), config.get("unittest", "scratchdir")]
 for label in ["templatesdir", "domainsdir", "rundir", "logdir", "profilesdir",
-              "depsdir", "hostsdir", "plenarydir", "builddir"]:
+              "plenarydir", "builddir"]:
     dirs.append(config.get("broker", label))
 
 if configfile != default_configfile:

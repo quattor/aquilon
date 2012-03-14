@@ -106,7 +106,7 @@ class AQBroker(object):
         
         dirs = [self.config.get("database", "dbdir")]
         for label in ["domainsdir", "kingdir", "rundir", "profilesdir",
-                      "depsdir", "hostsdir", "plenarydir", "logdir"]:
+                      "plenarydir", "logdir"]:
             dirs.append(self.config.get("broker", label))
         
         for dir in dirs:

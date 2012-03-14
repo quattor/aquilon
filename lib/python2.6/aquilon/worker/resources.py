@@ -423,8 +423,7 @@ class RestServer(ResponsePage):
         reactor.suggestThreadPoolSize(int(pool_size))
 
     def make_required_dirs(self):
-        for d in ["basedir", "profilesdir", "depsdir", "hostsdir",
-                "plenarydir", "rundir"]:
+        for d in ["basedir", "profilesdir", "plenarydir", "rundir"]:
             dir = self.config.get("broker", d)
             if os.path.exists(dir):
                 continue
