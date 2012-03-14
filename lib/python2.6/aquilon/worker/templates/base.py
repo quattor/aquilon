@@ -36,6 +36,7 @@ from aquilon.exceptions_ import InternalError, IncompleteError
 from aquilon.config import Config
 from aquilon.worker.locks import lock_queue, CompileKey
 from aquilon.worker.processes import write_file, read_file, remove_file
+from aquilon.worker.templates.panutils import pan
 
 LOGGER = logging.getLogger(__name__)
 
@@ -66,13 +67,15 @@ class Plenary(object):
             if not dbobj or not hasattr(dbobj, "branch"):
                 raise InternalError("Plenaries meant to be compiled need a DB "
                                     "object that has a branch; got: %r" % dbobj)
-            self.dir = os.path.join(self.config.get("broker", "builddir"),
-                                    "domains", dbobj.branch.name, "profiles")
+            self.dir = "%s/domains/%s/profiles" % (
+                self.config.get("broker", "builddir"), dbobj.branch.name)
         else:
             self.dir = self.config.get("broker", "plenarydir")
 
+        self.loadpath = None
         self.plenary_template = None
         self.plenary_core = None
+
         self.new_content = None
         # The following attributes are for stash/restore_stash
         self.old_content = None
@@ -101,8 +104,26 @@ class Plenary(object):
         """For debug output."""
         return "Plenary(%s)" % self.dbobj
 
-    def pathname(self):
-        return os.path.join(self.dir, self.plenary_template + ".tpl")
+    @property
+    def plenary_directory(self):
+        """ Directory where the plenary template lives """
+        if self.loadpath and self.template_type != "object":
+            return "%s/%s/%s" % (self.dir, self.loadpath, self.plenary_core)
+        else:
+            return "%s/%s" % (self.dir, self.plenary_core)
+
+    @property
+    def plenary_file(self):
+        """ Full absolute path name of the plenary template """
+        return "%s/%s.tpl" % (self.plenary_directory, self.plenary_template)
+
+    @property
+    def plenary_template_name(self):
+        """ Name of the template as used by PAN, relative to the load path """
+        if self.plenary_core:
+            return "%s/%s" % (self.plenary_core, self.plenary_template)
+        else:
+            return self.plenary_template
 
     def body(self, lines):
         """
@@ -145,8 +166,11 @@ class Plenary(object):
         type = self.template_type
         if type is not None and type is not "":
             type = type + " "
-        lines.append("%stemplate %s;" % (type, self.plenary_template))
+        lines.append("%stemplate %s;" % (type, self.plenary_template_name))
         lines.append("")
+        if self.template_type == "object" and self.loadpath:
+            lines.append("variable LOADPATH = %s;" % pan([self.loadpath]))
+            lines.append("")
         self.body(lines)
         return "\n".join(lines) + "\n"
 
@@ -168,9 +192,6 @@ class Plenary(object):
                 self.new_content = self._generate_content()
             content = self.new_content
 
-        plenary_path = os.path.join(self.dir, self.plenary_core)
-        plenary_file = self.pathname()
-
         self.stash()
         if self.old_content == content and \
            not self.removed and not self.changed:
@@ -183,9 +204,9 @@ class Plenary(object):
             if not locked:
                 key = self.get_write_key()
                 lock_queue.acquire(key)
-            if not os.path.exists(plenary_path):
-                os.makedirs(plenary_path)
-            write_file(plenary_file, content, logger=self.logger)
+            if not os.path.exists(self.plenary_directory):
+                os.makedirs(self.plenary_directory)
+            write_file(self.plenary_file, content, logger=self.logger)
             self.removed = False
             if self.old_content != content:
                 self.changed = True
@@ -200,9 +221,7 @@ class Plenary(object):
         return 1
 
     def read(self):
-        # FIXME: Dupes some logic from pathname()
-        return read_file(self.dir, self.plenary_template + ".tpl",
-                         logger=self.logger)
+        return read_file("", self.plenary_file, logger=self.logger)
 
     def remove(self, locked=False):
         """
@@ -215,9 +234,9 @@ class Plenary(object):
                 key = self.get_remove_key()
                 lock_queue.acquire(key)
             self.stash()
-            remove_file(self.pathname(), logger=self.logger)
+            remove_file(self.plenary_file, logger=self.logger)
             try:
-                os.removedirs(os.path.dirname(self.pathname()))
+                os.removedirs(self.plenary_directory)
             except OSError:
                 pass
             self.removed = True
@@ -244,26 +263,26 @@ class Plenary(object):
                 qdir = self.config.get("broker", "quattordir")
                 # Only one or the other of .xml/.xml.gz should be there...
                 # it doesn't hurt to clean up both.
-                xmlfile = os.path.join(qdir, "build", "xml", domain,
-                                       self.plenary_template + ".xml")
+                xmldir = os.path.join(qdir, "build", "xml", domain,
+                                      self.plenary_core)
+                xmlfile = os.path.join(xmldir, self.plenary_template + ".xml")
                 remove_file(xmlfile, logger=self.logger)
                 xmlgzfile = xmlfile + ".gz"
                 remove_file(xmlgzfile, logger=self.logger)
-                depfile = os.path.join(qdir, "build", "xml", domain,
-                                       self.plenary_template + ".xml.dep")
+                depfile = xmlfile + ".dep"
                 remove_file(depfile, logger=self.logger)
                 try:
-                    os.removedirs(os.path.dirname(xmlfile))
+                    os.removedirs(xmldir)
                 except OSError:
                     pass
 
                 builddir = self.config.get("broker", "builddir")
-                mainfile = os.path.join(builddir, "domains", domain,
-                                        "profiles",
-                                        self.plenary_template + ".tpl")
+                maindir = os.path.join(builddir, "domains", domain,
+                                       "profiles", self.plenary_core)
+                mainfile = os.path.join(maindir, self.plenary_template + ".tpl")
                 remove_file(mainfile, logger=self.logger)
                 try:
-                    os.removedirs(os.path.dirname(mainfile))
+                    os.removedirs(maindir)
                 except OSError:
                     pass
             else:
@@ -288,7 +307,7 @@ class Plenary(object):
             return
         try:
             self.old_content = self.read()
-            self.old_mtime = os.stat(self.pathname()).st_atime
+            self.old_mtime = os.stat(self.plenary_file).st_atime
         except IOError:
             self.old_content = None
         self.stashed = True
@@ -301,7 +320,7 @@ class Plenary(object):
         """
         if not self.stashed:
             self.logger.info("Attempt to restore plenary '%s' "
-                             "without having saved state." % self.pathname())
+                             "without having saved state." % self.plenary_file)
             return
         # Should this optimization be in use?
         # if not self.changed and not self.removed:
@@ -310,8 +329,8 @@ class Plenary(object):
             self.remove(locked=True)
         else:
             self.write(locked=True, content=self.old_content)
-            atime = os.stat(self.pathname()).st_atime
-            os.utime(self.pathname(), (atime, self.old_mtime))
+            atime = os.stat(self.plenary_file).st_atime
+            os.utime(self.plenary_file, (atime, self.old_mtime))
 
     @staticmethod
     def get_plenary(dbobj, logger=LOGGER):

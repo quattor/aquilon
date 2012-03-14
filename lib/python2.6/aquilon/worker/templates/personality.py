@@ -28,7 +28,6 @@
 # TERMS THAT MAY APPLY.
 
 
-import os
 import logging
 
 from aquilon.aqdb.model import Personality
@@ -45,10 +44,10 @@ class PlenaryPersonality(Plenary):
     def __init__(self, dbpersonality, logger=LOGGER):
         Plenary.__init__(self, dbpersonality, logger=logger)
         self.name = dbpersonality.name
-        self.archetype = dbpersonality.archetype.name
-        self.plenary_core = "personality/%(name)s" % self.__dict__
-        self.plenary_template = self.plenary_core + "/config"
-        self.dir = os.path.join(self.dir, self.archetype)
+
+        self.loadpath = dbpersonality.archetype.name
+        self.plenary_core = "personality/%s" % dbpersonality.name
+        self.plenary_template = "config"
 
     def body(self, lines):
         lines.append("variable PERSONALITY = %s;" % pan(self.name))

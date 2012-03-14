@@ -70,23 +70,19 @@ class PlenaryClusterObject(Plenary):
     def __init__(self, dbcluster, logger=LOGGER):
         Plenary.__init__(self, dbcluster, logger=logger)
         self.name = dbcluster.name
-        self.metacluster = "global"
         if dbcluster.metacluster:
             self.metacluster = dbcluster.metacluster.name
+        else:
+            self.metacluster = "global"
+        self.loadpath = dbcluster.personality.archetype.name
         self.plenary_core = "clusters"
-        self.plenary_template = "%(plenary_core)s/%(name)s" % self.__dict__
+        self.plenary_template = dbcluster.name
 
     def get_key(self):
         return CompileKey(domain=self.dbobj.branch.name,
-                          profile=self.plenary_template, logger=self.logger)
+                          profile=self.plenary_template_name, logger=self.logger)
 
     def body(self, lines):
-        arcdir = self.dbobj.personality.archetype.name
-        lines.append("# this is an %s cluster, so all templates "
-                     "should be sourced from there" % arcdir)
-        lines.append("variable LOADPATH = %s;" % pan([arcdir]))
-        lines.append("")
-
         lines.append("include { 'pan/units' };")
         lines.append("include { 'pan/functions' };")
         lines.append("")
@@ -193,7 +189,7 @@ class PlenaryClusterObject(Plenary):
                 # Do not bother creating entries for VMs that are incomplete.
                 continue
             pmac = PlenaryMachineInfo(machine)
-            macdesc = {'hardware': StructureTemplate(pmac.plenary_template)}
+            macdesc = {'hardware': StructureTemplate(pmac.plenary_template_name)}
 
             # One day we may get to the point where this will be required.
             if (machine.host):
@@ -228,8 +224,8 @@ class PlenaryClusterClient(Plenary):
     def __init__(self, dbcluster, logger=LOGGER):
         Plenary.__init__(self, dbcluster, logger=logger)
         self.name = dbcluster.name
-        self.plenary_core = "cluster/%(name)s" % self.__dict__
-        self.plenary_template = "%(plenary_core)s/client" % self.__dict__
+        self.plenary_core = "cluster/%s" % self.name
+        self.plenary_template = "client"
 
     def get_key(self):
         # This takes a domain lock because it could affect all clients...

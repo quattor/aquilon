@@ -82,9 +82,8 @@ class PlenaryMachineInfo(Plenary):
         self.sysloc = loc.sysloc()
 
         # If this changes need to update machine_plenary_will_move() to match.
-        self.plenary_core = (
-                "machine/%(hub)s/%(building)s/%(rack)s" % self.__dict__)
-        self.plenary_template = ("%(plenary_core)s/%(machine)s" % self.__dict__)
+        self.plenary_core = "machine/%(hub)s/%(building)s/%(rack)s" % self.__dict__
+        self.plenary_template = self.machine
 
     def get_key(self):
         host = self.dbobj.host

@@ -70,9 +70,8 @@ class PlenaryServiceToplevel(Plenary):
 
     def __init__(self, dbservice, logger=LOGGER):
         Plenary.__init__(self, dbservice, logger=logger)
-        self.name = dbservice.name
-        self.plenary_core = "servicedata/%(name)s" % self.__dict__
-        self.plenary_template = "%(plenary_core)s/config" % self.__dict__
+        self.plenary_core = "servicedata/%s" % dbservice.name
+        self.plenary_template = "config"
 
 
 class PlenaryServiceClientDefault(Plenary):
@@ -89,9 +88,8 @@ class PlenaryServiceClientDefault(Plenary):
 
     def __init__(self, dbservice, logger=LOGGER):
         Plenary.__init__(self, dbservice, logger=logger)
-        self.name = dbservice.name
-        self.plenary_core = "service/%(name)s/client" % self.__dict__
-        self.plenary_template = "%(plenary_core)s/config" % self.__dict__
+        self.plenary_core = "service/%s/client" % dbservice.name
+        self.plenary_template = "config"
 
 
 class PlenaryServiceServerDefault(Plenary):
@@ -108,9 +106,8 @@ class PlenaryServiceServerDefault(Plenary):
 
     def __init__(self, dbservice, logger=LOGGER):
         Plenary.__init__(self, dbservice, logger=logger)
-        self.name = dbservice.name
-        self.plenary_core = "service/%(name)s/server" % self.__dict__
-        self.plenary_template = "%(plenary_core)s/config" % self.__dict__
+        self.plenary_core = "service/%s/server" % dbservice.name
+        self.plenary_template = "config"
 
 
 class PlenaryServiceInstance(PlenaryCollection):
@@ -152,7 +149,7 @@ class PlenaryServiceInstanceToplevel(Plenary):
         self.service = dbinstance.service.name
         self.name = dbinstance.name
         self.plenary_core = "servicedata/%(service)s/%(name)s" % self.__dict__
-        self.plenary_template = self.plenary_core + "/config"
+        self.plenary_template = "config"
 
     def body(self, lines):
         lines.append("include { 'servicedata/%(service)s/config' };" % self.__dict__)
@@ -180,7 +177,7 @@ class PlenaryServiceInstanceServer(Plenary):
         self.service = dbinstance.service.name
         self.name = dbinstance.name
         self.plenary_core = "servicedata/%(service)s/%(name)s" % self.__dict__
-        self.plenary_template = self.plenary_core + "/srvconfig"
+        self.plenary_template = "srvconfig"
 
     def body(self, lines):
         lines.append('"instance" = %s;' % pan(self.name))
@@ -205,7 +202,7 @@ class PlenaryServiceInstanceClientDefault(Plenary):
         self.service = dbinstance.service.name
         self.name = dbinstance.name
         self.plenary_core = "service/%(service)s/%(name)s/client" % self.__dict__
-        self.plenary_template = self.plenary_core + "/config"
+        self.plenary_template = "config"
 
     def body(self, lines):
         lines.append('"/system/services/%s" = %s;' %
@@ -232,7 +229,7 @@ class PlenaryServiceInstanceServerDefault(Plenary):
         self.service = dbinstance.service.name
         self.name = dbinstance.name
         self.plenary_core = "service/%(service)s/%(name)s/server" % self.__dict__
-        self.plenary_template = self.plenary_core + "/config"
+        self.plenary_template = "config"
 
     def body(self, lines):
         lines.append('"/system/provides/%s" = %s;' %
@@ -257,7 +254,7 @@ class PlenaryInstanceNasDiskShare(Plenary):
         self.service = dbinstance.service.name
         self.name = dbinstance.name
         self.plenary_core = "service/%(service)s/%(name)s/client" % self.__dict__
-        self.plenary_template = self.plenary_core + "/nasinfo"
+        self.plenary_template = "nasinfo"
         self.server = ""
         self.mount = ""
 

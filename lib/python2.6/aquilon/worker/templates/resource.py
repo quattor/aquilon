@@ -48,7 +48,7 @@ class PlenaryResource(Plenary):
         self.type = dbresource.resource_type
         self.name = dbresource.name
         self.plenary_core = dbresource.template_base
-        self.plenary_template = self.plenary_core + "/config"
+        self.plenary_template = "config"
 
     def body(self, lines):
         fname = "body_%s" % self.type

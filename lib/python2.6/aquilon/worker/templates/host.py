@@ -136,8 +136,9 @@ class PlenaryToplevelHost(Plenary):
         # object has been deleted
         self.branch = dbhost.branch
         self.name = dbhost.fqdn
+        self.loadpath = dbhost.personality.archetype.name
         self.plenary_core = ""
-        self.plenary_template = "%(name)s" % self.__dict__
+        self.plenary_template = self.name
 
     def will_change(self):
         # Need to override to handle IncompleteError...
@@ -152,7 +153,7 @@ class PlenaryToplevelHost(Plenary):
         return self.old_content != self.new_content
 
     def get_key(self):
-        # Going with self.name instead of self.plenary_template seems like
+        # Going with self.name instead of self.plenary_template_name seems like
         # the right decision here - easier to predict behavior when meshing
         # with other CompileKey generators like PlenaryMachine.
         return CompileKey(domain=self.branch.name, profile=self.name,
@@ -324,7 +325,7 @@ class PlenaryToplevelHost(Plenary):
 
         if self.dbobj.cluster:
             clplenary = PlenaryClusterClient(self.dbobj.cluster)
-            templates.append(clplenary.plenary_template)
+            templates.append(clplenary.plenary_template_name)
         elif pers.cluster_required:
             raise IncompleteError("Host %s personality %s requires cluster "
                                   "membership." % (self.name, pers.name))
@@ -340,16 +341,12 @@ class PlenaryToplevelHost(Plenary):
         eon_id_list.sort()
 
         # Okay, here's the real content
-        arcdir = arch.name
-        lines.append("# this is an %s host, so all templates should be sourced from there" % arch.name)
-        lines.append("variable LOADPATH = %s;" % pan([arcdir]))
-        lines.append("")
         lines.append("include { 'pan/units' };")
         lines.append("include { 'pan/functions' };")
         lines.append("")
         pmachine = PlenaryMachineInfo(self.dbobj.machine)
         lines.append("'/hardware' = %s;" %
-                     pan(StructureTemplate(pmachine.plenary_template)))
+                     pan(StructureTemplate(pmachine.plenary_template_name)))
 
         lines.append("")
         lines.append("'/system/network/interfaces' = %s;" % pan(interfaces))
@@ -411,6 +408,4 @@ class PlenaryNamespacedHost(PlenaryToplevelHost):
     """
     def __init__(self, dbhost, logger=LOGGER):
         PlenaryToplevelHost.__init__(self, dbhost, logger=logger)
-        self.name = dbhost.fqdn
-        self.plenary_core = dbhost.machine.primary_name.fqdn.dns_domain.name
-        self.plenary_template = "%(plenary_core)s/%(name)s" % self.__dict__
+        self.plenary_core = dbhost.fqdn.dns_domain.name
