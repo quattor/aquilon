@@ -293,6 +293,9 @@ class Plenary(object):
                                 dbobj.__class__.__name__)
         return Plenary.handlers[dbobj.__class__](dbobj, logger=logger)
 
+    def set_logger(self, logger):
+        self.logger = logger
+
 
 class PlenaryCollection(object):
     """
@@ -436,6 +439,15 @@ class PlenaryCollection(object):
         # just in-case, since the Plenary method is inappropriate.
         raise InternalError("read called on PlenaryCollection")
 
+    def set_logger(self, logger):
+        for plen in self.plenaries:
+            plen.set_logger(logger)
+
     def append(self, plenary):
-        plenary.logger = self.logger
+        plenary.set_logger(self.logger)
         self.plenaries.append(plenary)
+
+    def extend(self, iterable):
+        for plenary in iterable:
+            plenary.set_logger(self.logger)
+            self.plenaries.append(plenary)
