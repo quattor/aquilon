@@ -50,10 +50,10 @@ class TestUmaskConstraints(TestBrokerCommand):
                             ).st_mode & stat.S_IROTH)
 
     # Check that directory created by the broker has the proper
-    # permissions.  This gets created as part of test_compile.
+    # permissions.  This gets created as part of test_make_aquilon.
     def testdirpermission(self):
-        builddir = self.config.get('broker', 'builddir')
-        dirstat = os.stat(os.path.join(builddir, 'domains', 'out_of_date'))
+        qdir = self.config.get('broker', 'quattordir')
+        dirstat = os.stat(os.path.join(qdir, 'build', 'xml', 'unittest'))
         self.assert_(dirstat.st_mode & stat.S_IROTH)
 
 

@@ -32,9 +32,7 @@
 from aquilon.exceptions_ import IncompleteError, NotFoundException
 from aquilon.aqdb.model import Cluster, ClusterResource, HostResource
 from aquilon.aqdb.model import ResourceGroup, BundleResource
-from aquilon.worker.templates.resource import PlenaryResource
-from aquilon.worker.templates.host import PlenaryHost
-from aquilon.worker.templates.cluster import PlenaryCluster
+from aquilon.worker.templates.base import Plenary, PlenaryCollection
 from aquilon.worker.dbwrappers.host import hostname_to_host
 from aquilon.worker.locks import lock_queue, CompileKey
 
@@ -80,37 +78,32 @@ def get_resource_holder(session, hostname, cluster, resgroup=None,
 
 
 def del_resource(session, logger, dbresource):
-    if isinstance(dbresource.holder, HostResource):
-        holder_plenary = PlenaryHost(dbresource.holder.host)
-        domain = dbresource.holder.host.branch.name
-    elif isinstance(dbresource.holder, ClusterResource):
-        holder_plenary = PlenaryCluster(dbresource.holder.cluster)
-        domain = dbresource.holder.cluster.branch.name
-    elif isinstance(dbresource.holder, BundleResource):
-        holder_plenary = PlenaryResource(dbresource.holder.resourcegroup)
-        # now recurse up to next level to obtain the domain
-        domain = dbresource.holder.holder_object.holder.holder_object.branch.name
-    else:
-        raise TypeError('Unknown ResourceHolder %s' % type(dbresource.holder))
+    holder = dbresource.holder
+    holder_plenary = Plenary.get_plenary(holder.holder_object, logger=logger)
+    remove_plenaries = PlenaryCollection(logger=logger)
+    remove_plenaries.append(Plenary.get_plenary(dbresource))
+    if isinstance(dbresource, ResourceGroup):
+        for res in dbresource.resources:
+            remove_plenaries.append(Plenary.get_plenary(res))
 
-    plenary = PlenaryResource(dbresource, logger=logger)
+    domain = holder.holder_object.branch.name
 
-    session.delete(dbresource)
+    holder.resources.remove(dbresource)
     session.flush()
 
-    key = CompileKey.merge([plenary.get_remove_key(),
+    key = CompileKey.merge([remove_plenaries.get_remove_key(),
                             holder_plenary.get_write_key()])
     try:
         lock_queue.acquire(key)
-        plenary.stash()
-        plenary.remove(locked=True)
+        remove_plenaries.stash()
+        remove_plenaries.remove(locked=True)
         try:
             holder_plenary.write(locked=True)
         except IncompleteError:
             holder_plenary.cleanup(domain, locked=True)
     except:
         holder_plenary.restore_stash()
-        plenary.restore_stash()
+        remove_plenaries.restore_stash()
         raise
     finally:
         lock_queue.release(key)
@@ -119,25 +112,14 @@ def del_resource(session, logger, dbresource):
 
 
 def add_resource(session, logger, holder, dbresource):
-    dbresource.holder = holder
-    session.add(dbresource)
+    holder.resources.append(dbresource)
+
+    holder_plenary = Plenary.get_plenary(holder.holder_object, logger=logger)
+    res_plenary = Plenary.get_plenary(dbresource, logger=logger)
+
+    domain = holder.holder_object.branch.name
+
     session.flush()
-    session.refresh(dbresource)
-    res_plenary = PlenaryResource(dbresource, logger=logger)
-
-    if isinstance(dbresource.holder, HostResource):
-        holder_plenary = PlenaryHost(holder.host)
-        domain = holder.host.branch.name
-    elif isinstance(dbresource.holder, ClusterResource):
-        holder_plenary = PlenaryCluster(holder.cluster)
-        domain = holder.cluster.branch.name
-    elif isinstance(dbresource.holder, BundleResource):
-        holder_plenary = PlenaryResource(holder.resourcegroup)
-        # now recurse up to next level to obtain the domain
-        domain = dbresource.holder.holder_object.holder.holder_object.branch.name
-    else:
-        raise TypeError('Unknown ResourceHolder %s' % type(dbresource.holder))
-
 
     key = CompileKey.merge([res_plenary.get_write_key(),
                             holder_plenary.get_write_key()])

@@ -71,6 +71,7 @@ def select_routers(dbmachine, routers):
         filtered.append(routers[0].ip)
     return filtered
 
+
 def is_default_route(dbinterface):
     """ Check if the given interface should provide the default route
 
@@ -109,31 +110,35 @@ class PlenaryHost(PlenaryCollection):
         if self.config.getboolean("broker", "flat_host_profiles"):
             self.plenaries.append(PlenaryToplevelHost(dbhost, logger=logger))
 
-    def write(self, dir=None, locked=False, content=None):
+    def write(self, locked=False, content=None):
         # Standard PlenaryCollection swallows IncompleteError.  If/when
         # the Host plenaries no longer raise that error this override
         # should be removed.
         total = 0
         for plenary in self.plenaries:
-            total += plenary.write(dir=dir, locked=locked, content=content)
+            total += plenary.write(locked=locked, content=content)
         return total
+
+
+Plenary.handlers[Host] = PlenaryHost
 
 
 class PlenaryToplevelHost(Plenary):
     """
     A plenary template for a host, stored at the toplevel of the profiledir
     """
+
+    template_type = "object"
+
     def __init__(self, dbhost, logger=LOGGER):
         Plenary.__init__(self, dbhost, logger=logger)
         # Store the branch separately so get_key() works even after the dbhost
         # object has been deleted
         self.branch = dbhost.branch
         self.name = dbhost.fqdn
+        self.loadpath = dbhost.personality.archetype.name
         self.plenary_core = ""
-        self.plenary_template = "%(name)s" % self.__dict__
-        self.template_type = "object"
-        self.dir = "%s/domains/%s/profiles" % (
-            self.config.get("broker", "builddir"), self.branch.name)
+        self.plenary_template = self.name
 
     def will_change(self):
         # Need to override to handle IncompleteError...
@@ -148,7 +153,7 @@ class PlenaryToplevelHost(Plenary):
         return self.old_content != self.new_content
 
     def get_key(self):
-        # Going with self.name instead of self.plenary_template seems like
+        # Going with self.name instead of self.plenary_template_name seems like
         # the right decision here - easier to predict behavior when meshing
         # with other CompileKey generators like PlenaryMachine.
         return CompileKey(domain=self.branch.name, profile=self.name,
@@ -320,7 +325,7 @@ class PlenaryToplevelHost(Plenary):
 
         if self.dbobj.cluster:
             clplenary = PlenaryClusterClient(self.dbobj.cluster)
-            templates.append(clplenary.plenary_template)
+            templates.append(clplenary.plenary_template_name)
         elif pers.cluster_required:
             raise IncompleteError("Host %s personality %s requires cluster "
                                   "membership." % (self.name, pers.name))
@@ -336,16 +341,12 @@ class PlenaryToplevelHost(Plenary):
         eon_id_list.sort()
 
         # Okay, here's the real content
-        arcdir = arch.name
-        lines.append("# this is an %s host, so all templates should be sourced from there" % arch.name)
-        lines.append("variable LOADPATH = %s;" % pan([arcdir]))
-        lines.append("")
         lines.append("include { 'pan/units' };")
         lines.append("include { 'pan/functions' };")
         lines.append("")
         pmachine = PlenaryMachineInfo(self.dbobj.machine)
         lines.append("'/hardware' = %s;" %
-                     pan(StructureTemplate(pmachine.plenary_template)))
+                     pan(StructureTemplate(pmachine.plenary_template_name)))
 
         lines.append("")
         lines.append("'/system/network/interfaces' = %s;" % pan(interfaces))
@@ -407,6 +408,4 @@ class PlenaryNamespacedHost(PlenaryToplevelHost):
     """
     def __init__(self, dbhost, logger=LOGGER):
         PlenaryToplevelHost.__init__(self, dbhost, logger=logger)
-        self.name = dbhost.fqdn
-        self.plenary_core = dbhost.machine.primary_name.fqdn.dns_domain.name
-        self.plenary_template = "%(plenary_core)s/%(name)s" % self.__dict__
+        self.plenary_core = dbhost.fqdn.dns_domain.name

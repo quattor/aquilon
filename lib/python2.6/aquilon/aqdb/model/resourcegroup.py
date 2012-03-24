@@ -46,6 +46,7 @@ class ResourceGroup(Resource):
         (e.g. a VCS Service Group) """
     __tablename__ = _TN
     __mapper_args__ = {'polymorphic_identity': 'resourcegroup'}
+    _class_label = 'Resource Group'
 
     id = Column(Integer, ForeignKey('resource.id',
                                     name='rg_resource_fk',
@@ -60,6 +61,10 @@ class ResourceGroup(Resource):
                              "ResourceGroups")
         return value
 
+    @property
+    def branch(self):
+        return self.holder.holder_object.branch
+
 
 resourcegroup = ResourceGroup.__table__
 resourcegroup.primary_key.name = '%s_pk' % (_TN)
@@ -71,7 +76,13 @@ resourcegroup.info['unique_fields'] = ['name']
 
 class BundleResource(ResourceHolder):
     '''Allow ResourceGroups to hold other types of resource. '''
-    __mapper_args__ = {'polymorphic_identity': 'bundle'}
+    # Note: the polymorphic identity of ResourceGroup and BundleResource should
+    # be the same, because plenary paths sometimes use one or the other,
+    # depending on the context. These two classes should really be one if there
+    # was a sane way to support multiple inheritance in the DB, so their
+    # identities should at least be the same.
+    __mapper_args__ = {'polymorphic_identity': 'resourcegroup'}
+
     resourcegroup_id = Column(Integer, ForeignKey('resourcegroup.id',
                                            name='%s_bundle_fk' % _RESHOLDER,
                                            ondelete='CASCADE',
@@ -93,6 +104,11 @@ class BundleResource(ResourceHolder):
     def holder_object(self):
         return self.resourcegroup
 
+    @property
+    def holder_path(self):
+        return "%s/%s/%s" % (self.resourcegroup.holder.holder_path,
+                             self.holder_type,
+                             self.holder_name)
 
 resholder = ResourceHolder.__table__
 ResourceGroup.resources = relation(

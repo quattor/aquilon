@@ -33,11 +33,8 @@ from aquilon.exceptions_ import ArgumentError, AquilonError
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.hardware_entity import update_primary_ip
 from aquilon.worker.dbwrappers.location import get_location
-from aquilon.worker.templates.machine import (PlenaryMachineInfo,
-                                              machine_plenary_will_move)
-from aquilon.worker.templates.cluster import PlenaryCluster
-from aquilon.worker.templates.host import PlenaryHost
-from aquilon.worker.templates.base import PlenaryCollection
+from aquilon.worker.templates.machine import machine_plenary_will_move
+from aquilon.worker.templates.base import Plenary, PlenaryCollection
 from aquilon.worker.locks import lock_queue, CompileKey
 from aquilon.worker.processes import DSDBRunner
 from aquilon.aqdb.model import (Cpu, Chassis, ChassisSlot, Model, Cluster,
@@ -65,8 +62,7 @@ class CommandUpdateMachine(BrokerCommand):
             dbchassis = Chassis.get_unique(session, chassis, compel=True)
             if machine_plenary_will_move(old=dbmachine.location,
                                          new=dbchassis.location):
-                remove_plenaries.append(PlenaryMachineInfo(dbmachine,
-                                                           logger=logger))
+                remove_plenaries.append(Plenary.get_plenary(dbmachine))
             dbmachine.location = dbchassis.location
             if slot is None:
                 raise ArgumentError("Option --chassis requires --slot "
@@ -102,8 +98,7 @@ class CommandUpdateMachine(BrokerCommand):
                 del dbmachine.chassis_slot[:]
             if machine_plenary_will_move(old=dbmachine.location,
                                          new=dblocation):
-                remove_plenaries.append(PlenaryMachineInfo(dbmachine,
-                                                           logger=logger))
+                remove_plenaries.append(Plenary.get_plenary(dbmachine))
             dbmachine.location = dblocation
 
         if model or vendor:
@@ -177,8 +172,8 @@ class CommandUpdateMachine(BrokerCommand):
             dbcluster.machines.append(dbmachine)
             session.flush()
             session.expire(dbmachine, ['_cluster'])
-            plenaries.append(PlenaryCluster(old_cluster, logger=logger))
-            plenaries.append(PlenaryCluster(dbcluster, logger=logger))
+            plenaries.append(Plenary.get_plenary(old_cluster))
+            plenaries.append(Plenary.get_plenary(dbcluster))
 
         session.add(dbmachine)
         session.flush()
@@ -196,9 +191,9 @@ class CommandUpdateMachine(BrokerCommand):
         # dummy aurora hardware is within the call to write().  This way
         # it is consistent without altering (and forgetting to alter)
         # all the calls to the method.
-        plenaries.append(PlenaryMachineInfo(dbmachine, logger=logger))
+        plenaries.append(Plenary.get_plenary(dbmachine))
         if remove_plenaries.plenaries and dbmachine.host:
-            plenaries.append(PlenaryHost(dbmachine.host, logger=logger))
+            plenaries.append(Plenary.get_plenary(dbmachine.host))
 
         key = CompileKey.merge([plenaries.get_write_key(),
                                 remove_plenaries.get_remove_key()])

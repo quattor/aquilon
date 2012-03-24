@@ -40,8 +40,7 @@ class ResourceGroupFormatter(ResourceFormatter):
     def format_raw(self, rg, indent=""):
         details = []
         for resource in rg.resources:
-            details.append(indent + "  Resource: %s (%s)" % (
-                    resource.name, resource.resource_type))
+            details.append(self.redirect_raw(resource, indent + "  "))
 
         return super(ResourceGroupFormatter, self).format_raw(rg, indent) + \
                "\n" + "\n".join(details)

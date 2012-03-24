@@ -91,7 +91,7 @@ class TestAddHostlink(TestBrokerCommand):
 
         command = ["cat", "--generate", "--host=server1.aqd-unittest.ms.com"]
         out = self.commandtest(command)
-        self.matchoutput(out, "'/system/resources/hostlink' = push(create(\"resource/hostlink/host/server1.aqd-unittest.ms.com/app1/config\"))", command)
+        self.matchoutput(out, "'/system/resources/hostlink' = push(create(\"resource/host/server1.aqd-unittest.ms.com/hostlink/app1/config\"))", command)
 
         command = ["del_hostlink", "--hostlink=app1",
                    "--hostname=server1.aqd-unittest.ms.com"]

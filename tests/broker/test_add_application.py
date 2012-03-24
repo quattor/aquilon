@@ -81,7 +81,7 @@ class TestAddApplication(TestBrokerCommand):
 
         command = ["cat", "--generate", "--host=server1.aqd-unittest.ms.com"]
         out = self.commandtest(command)
-        self.matchoutput(out, "'/system/resources/application' = push(create(\"resource/application/host/server1.aqd-unittest.ms.com/app1/config\"))", command)
+        self.matchoutput(out, "'/system/resources/application' = push(create(\"resource/host/server1.aqd-unittest.ms.com/application/app1/config\"))", command)
 
         command = ["del_application", "--application=app1",
                    "--hostname=server1.aqd-unittest.ms.com"]

@@ -32,14 +32,7 @@
 from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import (Service, Machine, Host, Branch, Personality,
                                 Cluster, City, Resource)
-from aquilon.worker.templates.personality import PlenaryPersonality
-from aquilon.worker.templates.cluster import PlenaryCluster
-from aquilon.worker.templates.service import (PlenaryService,
-                                              PlenaryServiceInstance)
-from aquilon.worker.templates.machine import PlenaryMachineInfo
-from aquilon.worker.templates.host import PlenaryHost
-from aquilon.worker.templates.city import PlenaryCity
-from aquilon.worker.templates.resource import PlenaryResource
+from aquilon.worker.templates.base import Plenary
 from aquilon.worker.locks import CompileKey
 from aquilon.exceptions_ import PartialError, IncompleteError
 
@@ -59,7 +52,7 @@ class CommandFlush(BrokerCommand):
                 logger.client_info("Flushing locations.")
                 for dbloc in session.query(City).all():
                     try:
-                        plenary = PlenaryCity(dbloc)
+                        plenary = Plenary.get_plenary(dbloc, logger=logger)
                         written += plenary.write(locked=True)
                     except Exception, e:
                         failed.append("City %s failed: %s" %
@@ -70,7 +63,8 @@ class CommandFlush(BrokerCommand):
                 logger.client_info("Flushing services.")
                 for dbservice in session.query(Service).all():
                     try:
-                        plenary_info = PlenaryService(dbservice)
+                        plenary_info = Plenary.get_plenary(dbservice,
+                                                           logger=logger)
                         written += plenary_info.write(locked=True)
                     except Exception, e:
                         failed.append("Service %s failed: %s" %
@@ -79,7 +73,8 @@ class CommandFlush(BrokerCommand):
 
                     for dbinst in dbservice.instances:
                         try:
-                            plenary_info = PlenaryServiceInstance(dbservice, dbinst)
+                            plenary_info = Plenary.get_plenary(dbinst,
+                                                               logger=logger)
                             written += plenary_info.write(locked=True)
                         except Exception, e:
                             failed.append("Service %s instance %s failed: %s" %
@@ -90,7 +85,8 @@ class CommandFlush(BrokerCommand):
                 logger.client_info("Flushing personalities.")
                 for persona in session.query(Personality).all():
                     try:
-                        plenary_info = PlenaryPersonality(persona)
+                        plenary_info = Plenary.get_plenary(persona,
+                                                           logger=logger)
                         written += plenary_info.write(locked=True)
                     except Exception, e:
                         failed.append("Personality %s failed: %s" %
@@ -107,7 +103,8 @@ class CommandFlush(BrokerCommand):
                         logger.client_info("Processing machine %d of %d..." %
                                            (idx, cnt))
                     try:
-                        plenary_info = PlenaryMachineInfo(machine)
+                        plenary_info = Plenary.get_plenary(machine,
+                                                           logger=logger)
                         written += plenary_info.write(locked=True)
                     except Exception, e:
                         label = machine.label
@@ -130,7 +127,7 @@ class CommandFlush(BrokerCommand):
                         if not h.archetype.is_compileable:
                             continue
                         try:
-                            plenary_host = PlenaryHost(h)
+                            plenary_host = Plenary.get_plenary(h, logger=logger)
                             written += plenary_host.write(locked=True)
                         except IncompleteError, e:
                             pass
@@ -148,7 +145,7 @@ class CommandFlush(BrokerCommand):
                         logger.client_info("Processing cluster %d of %d..." %
                                            (idx, cnt))
                     try:
-                        plenary = PlenaryCluster(clus)
+                        plenary = Plenary.get_plenary(clus, logger=logger)
                         written += plenary.write(locked=True)
                     except Exception, e:
                         failed.append("{0} failed: {1}".format(clus, e))
@@ -157,7 +154,7 @@ class CommandFlush(BrokerCommand):
                 logger.client_info("Flushing resources.")
                 for dbresource in session.query(Resource).all():
                     try:
-                        plenary = PlenaryResource(dbresource)
+                        plenary = Plenary.get_plenary(dbresource, logger=logger)
                         written += plenary.write(locked=True)
                     except Exception, e:
                         failed.append("{0} failed: {1}".format(dbresource, e))

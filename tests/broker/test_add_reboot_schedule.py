@@ -30,6 +30,7 @@
 """Module for testing the add reboot_schedule command."""
 
 import unittest
+import os.path
 
 if __name__ == "__main__":
     import utils
@@ -68,9 +69,9 @@ class TestAddRebootSchedule(TestBrokerCommand):
                    "--reshost=server1.aqd-unittest.ms.com"]
         out = self.commandtest(command)
         self.matchoutput(out,
-                         "structure template resource/reboot_schedule"
+                         "structure template resource"
                          "/host/server1.aqd-unittest.ms.com"
-                         "/reboot_schedule/config;",
+                         "/reboot_schedule/reboot_schedule/config;",
                          command)
         self.matchoutput(out, "\"name\" = \"reboot_schedule\";", command)
         self.matchoutput(out, "\"time\" = \"08:00\";", command)
@@ -114,9 +115,9 @@ class TestAddRebootSchedule(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out,
                          "'/system/resources/reboot_schedule' = "
-                         "push(create(\"resource/reboot_schedule"
+                         "push(create(\"resource"
                          "/host/server1.aqd-unittest.ms.com"
-                         "/reboot_schedule/config\"))",
+                         "/reboot_schedule/reboot_schedule/config\"))",
                          command)
 
         command = ["show_host", "--hostname=server1.aqd-unittest.ms.com",
@@ -136,7 +137,14 @@ class TestAddRebootSchedule(TestBrokerCommand):
                    "--hostname=server1.aqd-unittest.ms.com"]
         self.successtest(command)
 
+    def test_verify_reboot_schedule_plenary(self):
+        dir = os.path.join(self.config.get("broker", "plenarydir"),
+                           "resource", "host", "server1.aqd-unittest.ms.com",
+                           "reboot_schedule")
+        self.failIf(os.path.exists(dir),
+                    "Plenary directory '%s' still exists" % dir)
 
-if __name__=='__main__':
+
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddRebootSchedule)
     unittest.TextTestRunner(verbosity=2).run(suite)

@@ -32,14 +32,14 @@
 import os
 
 from aquilon.exceptions_ import ArgumentError, ProcessException
+from aquilon.aqdb.model import ResourceGroup
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.host import (hostname_to_host,
                                             get_host_dependencies)
 from aquilon.worker.dbwrappers.dns import delete_dns_record
 from aquilon.worker.processes import (DSDBRunner, remove_file)
-from aquilon.worker.templates.base import PlenaryCollection
+from aquilon.worker.templates.base import Plenary, PlenaryCollection
 from aquilon.worker.templates.index import build_index
-from aquilon.worker.templates.host import PlenaryHost
 from aquilon.worker.templates.service import PlenaryServiceInstanceServer
 from aquilon.worker.locks import DeleteKey, CompileKey
 
@@ -61,11 +61,12 @@ class CommandDelHost(BrokerCommand):
         delplenary = False
 
         # Any service bindings that we need to clean up afterwards
-        bindings = PlenaryCollection()
+        bindings = PlenaryCollection(logger=logger)
+        resources = PlenaryCollection(logger=logger)
         with DeleteKey("system", logger=logger) as key:
             # Check dependencies, translate into user-friendly message
             dbhost = hostname_to_host(session, hostname)
-            ph = PlenaryHost(dbhost, logger=logger)
+            host_plenary =  Plenary.get_plenary(dbhost, logger=logger)
             domain = dbhost.branch.name
             deps = get_host_dependencies(session, dbhost)
             if (len(deps) != 0):
@@ -82,13 +83,18 @@ class CommandDelHost(BrokerCommand):
             fqdn = dbmachine.fqdn
 
             for si in dbhost.services_used:
-                plenary = PlenaryServiceInstanceServer(si.service, si,
-                                                       logger=logger)
+                plenary = PlenaryServiceInstanceServer(si)
                 bindings.append(plenary)
                 logger.info("Before deleting host '%s', removing binding '%s'"
                             % (fqdn, si.cfg_path))
 
             del dbhost.services_used[:]
+
+            for res in dbhost.resources:
+                resources.append(Plenary.get_plenary(res))
+                if isinstance(res, ResourceGroup):
+                    resources.extend([Plenary.get_plenary(res2)
+                                             for res2 in res.resources])
 
             # In case of Zebra, the IP may be configured on multiple interfaces
             for iface in dbmachine.interfaces:
@@ -120,9 +126,10 @@ class CommandDelHost(BrokerCommand):
         # Trying to clean up after any errors here is really difficult
         # since the changes to dsdb have already been made.
         if (delplenary):
-            key = ph.get_remove_key()
-            with CompileKey.merge([key, bindings.get_write_key()]) as key:
-                ph.cleanup(domain, locked=True)
+            key = host_plenary.get_remove_key()
+            with CompileKey.merge([key, bindings.get_write_key(),
+                                   resources.get_remove_key()]) as key:
+                host_plenary.cleanup(domain, locked=True)
                 # And we also want to remove the profile itself
                 profiles = self.config.get("broker", "profilesdir")
                 # Only one of these should exist, but it doesn't hurt
@@ -137,6 +144,7 @@ class CommandDelHost(BrokerCommand):
                                          "objects", fqdn + ".tpl"),
                             logger=logger)
                 bindings.write(locked=True)
+                resources.remove(locked=True)
 
             build_index(self.config, session, profiles, logger=logger)
 

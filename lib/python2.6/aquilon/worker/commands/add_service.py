@@ -32,9 +32,7 @@
 from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import Service, ServiceInstance
-from aquilon.worker.templates.base import PlenaryCollection
-from aquilon.worker.templates.service import (PlenaryService,
-                                              PlenaryServiceInstance)
+from aquilon.worker.templates.base import Plenary, PlenaryCollection
 
 
 class CommandAddService(BrokerCommand):
@@ -59,7 +57,7 @@ class CommandAddService(BrokerCommand):
             session.add(dbservice)
 
         plenaries = PlenaryCollection(logger=logger)
-        plenaries.append(PlenaryService(dbservice, logger=logger))
+        plenaries.append(Plenary.get_plenary(dbservice))
 
         if instance:
             ServiceInstance.get_unique(session, service=dbservice,
@@ -67,8 +65,7 @@ class CommandAddService(BrokerCommand):
             dbsi = ServiceInstance(service=dbservice, name=instance,
                                    comments=comments)
             session.add(dbsi)
-            plenaries.append(PlenaryServiceInstance(dbservice, dbsi,
-                                                    logger=logger))
+            plenaries.append(Plenary.get_plenary(dbsi))
 
         session.flush()
         plenaries.write()

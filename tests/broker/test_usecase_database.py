@@ -30,6 +30,7 @@
 """Module for testing how a logical DB might be configured."""
 
 import unittest
+import os.path
 
 if __name__ == "__main__":
     import utils
@@ -65,8 +66,8 @@ class TestUsecaseDatabase(TestBrokerCommand):
 
         command = ["cat", "--hostname=server1.aqd-unittest.ms.com"]
         out = self.commandtest(command)
-        self.matchoutput(out, "'/system/resources/filesystem' = push(create(\"resource/filesystem/host/server1.aqd-unittest.ms.com/gnr.0/config\"))", command)
-        self.matchoutput(out, "'/system/resources/application' = push(create(\"resource/application/host/server1.aqd-unittest.ms.com/nydb1/config\"))", command)
+        self.matchoutput(out, "'/system/resources/filesystem' = push(create(\"resource/host/server1.aqd-unittest.ms.com/filesystem/gnr.0/config\"))", command)
+        self.matchoutput(out, "'/system/resources/application' = push(create(\"resource/host/server1.aqd-unittest.ms.com/application/nydb1/config\"))", command)
 
     def test_10_standalone_two_dbserver(self):
         command = ["add_filesystem", "--filesystem=gnr.1", "--type=ext3",
@@ -97,10 +98,10 @@ class TestUsecaseDatabase(TestBrokerCommand):
 
         command = ["cat", "--hostname=server1.aqd-unittest.ms.com"]
         out = self.commandtest(command)
-        self.matchoutput(out, "'/system/resources/filesystem' = push(create(\"resource/filesystem/host/server1.aqd-unittest.ms.com/gnr.0/config\"))", command)
-        self.matchoutput(out, "'/system/resources/application' = push(create(\"resource/application/host/server1.aqd-unittest.ms.com/nydb1/config\"))", command)
-        self.matchoutput(out, "'/system/resources/filesystem' = push(create(\"resource/filesystem/host/server1.aqd-unittest.ms.com/gnr.1/config\"))", command)
-        self.matchoutput(out, "'/system/resources/application' = push(create(\"resource/application/host/server1.aqd-unittest.ms.com/utdb2/config\"))", command)
+        self.matchoutput(out, "'/system/resources/filesystem' = push(create(\"resource/host/server1.aqd-unittest.ms.com/filesystem/gnr.0/config\"))", command)
+        self.matchoutput(out, "'/system/resources/application' = push(create(\"resource/host/server1.aqd-unittest.ms.com/application/nydb1/config\"))", command)
+        self.matchoutput(out, "'/system/resources/filesystem' = push(create(\"resource/host/server1.aqd-unittest.ms.com/filesystem/gnr.1/config\"))", command)
+        self.matchoutput(out, "'/system/resources/application' = push(create(\"resource/host/server1.aqd-unittest.ms.com/application/utdb2/config\"))", command)
 
     def test_49_cleanup_standalone(self):
         command = ["del_filesystem", "--filesystem=gnr.0",
@@ -151,23 +152,41 @@ class TestUsecaseDatabase(TestBrokerCommand):
 
         command = ["cat", "--cluster=nydb1"]
         out = self.commandtest(command)
-        self.matchoutput(out, "'/system/resources/filesystem' = push(create(\"resource/filesystem/cluster/nydb1/gnr.0/config\"))", command)
-        self.matchoutput(out, "'/system/resources/application' = push(create(\"resource/application/cluster/nydb1/nydb1/config\"))", command)
+        self.matchoutput(out, "'/system/resources/filesystem' = push(create(\"resource/cluster/nydb1/filesystem/gnr.0/config\"))", command)
+        self.matchoutput(out, "'/system/resources/application' = push(create(\"resource/cluster/nydb1/application/nydb1/config\"))", command)
 
     def test_59_cleanup_cluster(self):
-        command = ["del_filesystem", "--filesystem=gnr.0",
-                   "--cluster=nydb1"]
-        self.successtest(command)
-        command = ["del_application", "--application=nydb1", "--cluster=nydb1"]
-        self.successtest(command)
+        # Check that the plenaries of contained resources get cleaned up
+        plenarydir = self.config.get("broker", "plenarydir")
+        cluster_dir = os.path.join(plenarydir, "cluster", "nydb1")
+        cluster_res_dir = os.path.join(plenarydir, "resource", "cluster", "nydb1")
+        fs_plenary = os.path.join(cluster_res_dir, "filesystem", "gnr.0", "config.tpl")
+        app_plenary = os.path.join(cluster_res_dir, "application", "nydb1", "config.tpl")
+
+        # Verify that we got the paths right
+        self.failUnless(os.path.exists(fs_plenary),
+                        "Plenary '%s' does not exist" % fs_plenary)
+        self.failUnless(os.path.exists(app_plenary),
+                        "Plenary '%s' does not exist" % app_plenary)
+
         command = ["uncluster", "--hostname=server1.aqd-unittest.ms.com",
                    "--cluster=nydb1"]
         self.successtest(command)
         command = ["del_cluster", "--cluster=nydb1"]
         self.successtest(command)
 
+        # The resource plenaries should be gone
+        self.failIf(os.path.exists(fs_plenary),
+                    "Plenary '%s' still exists" % fs_plenary)
+        self.failIf(os.path.exists(app_plenary),
+                    "Plenary '%s' still exists" % app_plenary)
 
-if __name__=='__main__':
+        # The directories should be gone as well
+        self.failIf(os.path.exists(cluster_res_dir),
+                    "Plenary directory '%s' still exists" % cluster_res_dir)
+        self.failIf(os.path.exists(cluster_dir),
+                    "Plenary directory '%s' still exists" % cluster_dir)
+
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestUsecaseDatabase)
     unittest.TextTestRunner(verbosity=2).run(suite)
-

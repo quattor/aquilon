@@ -30,20 +30,25 @@
 
 import logging
 
+from aquilon.aqdb.model import (Application, Filesystem, Intervention,
+                                ResourceGroup, Hostlink, RebootSchedule,
+                                RebootIntervention)
 from aquilon.worker.templates.base import Plenary
-from aquilon.worker.templates.panutils import pan
+from aquilon.worker.templates.panutils import pan, StructureTemplate
 
 LOGGER = logging.getLogger('aquilon.server.templates.resource')
 
 
 class PlenaryResource(Plenary):
+
+    template_type = "structure"
+
     def __init__(self, dbresource, logger=LOGGER):
         Plenary.__init__(self, dbresource, logger=logger)
         self.type = dbresource.resource_type
         self.name = dbresource.name
         self.plenary_core = dbresource.template_base
-        self.plenary_template = self.plenary_core + "/config"
-        self.dir = self.config.get("broker", "plenarydir")
+        self.plenary_template = "config"
 
     def body(self, lines):
         fname = "body_%s" % self.type
@@ -102,8 +107,22 @@ class PlenaryResource(Plenary):
 
     def body_resourcegroup(self, lines):
         lines.append('"name" = %s;' % pan(self.dbobj.name))
+        for resource in self.dbobj.resources:
+            lines.append('"resources/%s" = push(%s);' %
+                         (resource.resource_type,
+                          pan(StructureTemplate(resource.template_base +
+                                                "/config"))))
 
     def body_reboot_iv(self, lines):
         lines.append('"name" = %s;' % pan(self.dbobj.name))
         lines.append('"justification" = %s;' % pan(self.dbobj.justification))
         self.body_intervention(lines)
+
+
+Plenary.handlers[Application] = PlenaryResource
+Plenary.handlers[Filesystem] = PlenaryResource
+Plenary.handlers[Intervention] = PlenaryResource
+Plenary.handlers[ResourceGroup] = PlenaryResource
+Plenary.handlers[Hostlink] = PlenaryResource
+Plenary.handlers[RebootSchedule] = PlenaryResource
+Plenary.handlers[RebootIntervention] = PlenaryResource

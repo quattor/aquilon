@@ -34,9 +34,7 @@ from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.location import get_location
 from aquilon.worker.dbwrappers.machine import create_machine
-from aquilon.worker.templates.base import PlenaryCollection
-from aquilon.worker.templates.machine import PlenaryMachineInfo
-from aquilon.worker.templates.cluster import PlenaryCluster
+from aquilon.worker.templates.base import Plenary, PlenaryCollection
 from aquilon.aqdb.model import Chassis, ChassisSlot, Cluster, Model, Machine
 
 
@@ -112,9 +110,9 @@ class CommandAddMachine(BrokerCommand):
         session.flush()
 
         plenaries = PlenaryCollection(logger=logger)
-        plenaries.append(PlenaryMachineInfo(dbmachine, logger=logger))
+        plenaries.append(Plenary.get_plenary(dbmachine))
         if cluster:
-            plenaries.append(PlenaryCluster(dbcluster, logger=logger))
+            plenaries.append(Plenary.get_plenary(dbcluster))
 
         # The check to make sure a plenary file is not written out for
         # dummy aurora hardware is within the call to write().  This way

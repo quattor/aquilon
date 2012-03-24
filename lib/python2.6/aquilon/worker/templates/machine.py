@@ -31,6 +31,7 @@
 
 import logging
 
+from aquilon.aqdb.model import Machine
 from aquilon.worker.locks import CompileKey
 from aquilon.worker.templates.base import Plenary
 from aquilon.worker import templates
@@ -41,6 +42,9 @@ LOGGER = logging.getLogger(__name__)
 
 
 class PlenaryMachineInfo(Plenary):
+
+    template_type = "structure"
+
     def __init__(self, dbmachine, logger=LOGGER):
         Plenary.__init__(self, dbmachine, logger=logger)
         self.machine = dbmachine.label
@@ -78,11 +82,8 @@ class PlenaryMachineInfo(Plenary):
         self.sysloc = loc.sysloc()
 
         # If this changes need to update machine_plenary_will_move() to match.
-        self.plenary_core = (
-                "machine/%(hub)s/%(building)s/%(rack)s" % self.__dict__)
-        self.plenary_template = ("%(plenary_core)s/%(machine)s" % self.__dict__)
-        self.dir = self.config.get("broker", "plenarydir")
-        return
+        self.plenary_core = "machine/%(hub)s/%(building)s/%(rack)s" % self.__dict__
+        self.plenary_template = self.machine
 
     def get_key(self):
         host = self.dbobj.host
@@ -227,6 +228,9 @@ class PlenaryMachineInfo(Plenary):
         if self.dbobj.model.machine_type == 'aurora_node':
             return 0
         return Plenary.write(self, *args, **kwargs)
+
+
+Plenary.handlers[Machine] = PlenaryMachineInfo
 
 
 def machine_plenary_will_move(old, new):

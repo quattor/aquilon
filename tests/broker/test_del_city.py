@@ -48,9 +48,10 @@ class TestDelCity(TestBrokerCommand):
         self.dsdb_expect("delete_city_aq -city ex")
         self.successtest(command)
         self.dsdb_verify()
-        plenary = os.path.join(self.config.get("broker", "plenarydir"),
-                               "site", "americas", "ex", "config.tpl")
-        self.failIf(os.path.exists(plenary), "plenary still there after del")
+        dir = os.path.join(self.config.get("broker", "plenarydir"),
+                           "site", "americas", "ex")
+        self.failIf(os.path.exists(dir),
+                    "Plenary directory '%s' still exists" % dir)
 
 
     def test_delex_01(self):

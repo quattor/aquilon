@@ -32,10 +32,8 @@ from aquilon.aqdb.model import Cluster, Personality, Switch
 from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.location import get_location
-from aquilon.worker.templates.machine import (PlenaryMachineInfo,
-                                              machine_plenary_will_move)
-from aquilon.worker.templates.cluster import PlenaryCluster
-from aquilon.worker.templates.base import PlenaryCollection
+from aquilon.worker.templates.machine import machine_plenary_will_move
+from aquilon.worker.templates.base import Plenary, PlenaryCollection
 from aquilon.worker.locks import lock_queue, CompileKey
 from aquilon.utils import force_ratio
 
@@ -129,13 +127,12 @@ class CommandUpdateCluster(BrokerCommand):
                                              new=dblocation):
                     for dbmachine in dbcluster.machines:
                         # This plenary will have a path to the old location.
-                        plenary = PlenaryMachineInfo(dbmachine, logger=logger)
+                        plenary = Plenary.get_plenary(dbmachine, logger=logger)
                         remove_plenaries.append(plenary)
                         dbmachine.location = dblocation
                         session.add(dbmachine)
                         # This plenary will have a path to the new location.
-                        plenaries.append(PlenaryMachineInfo(dbmachine,
-                                                            logger=logger))
+                        plenaries.append(Plenary.get_plenary(dbmachine))
                 dbcluster.location_constraint = dblocation
                 cluster_updated = True
 
@@ -182,7 +179,7 @@ class CommandUpdateCluster(BrokerCommand):
         session.add(dbcluster)
         session.flush()
 
-        plenaries.append(PlenaryCluster(dbcluster, logger=logger))
+        plenaries.append(Plenary.get_plenary(dbcluster))
         key = CompileKey.merge([plenaries.get_write_key(),
                                 remove_plenaries.get_remove_key()])
         try:

@@ -30,6 +30,8 @@
 
 import logging
 
+from aquilon.aqdb.model import (Cluster, EsxCluster, ComputeCluster,
+                                StorageCluster)
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
 from aquilon.worker.templates.machine import PlenaryMachineInfo
 from aquilon.worker.templates.panutils import pan, StructureTemplate
@@ -50,6 +52,12 @@ class PlenaryCluster(PlenaryCollection):
         self.plenaries.append(PlenaryClusterClient(dbcluster, logger=logger))
 
 
+Plenary.handlers[Cluster] = PlenaryCluster
+Plenary.handlers[ComputeCluster] = PlenaryCluster
+Plenary.handlers[EsxCluster] = PlenaryCluster
+Plenary.handlers[StorageCluster] = PlenaryCluster
+
+
 class PlenaryClusterObject(Plenary):
     """
     A cluster has its own output profile, so the plenary cluster template
@@ -57,29 +65,24 @@ class PlenaryClusterObject(Plenary):
     are contained inside the cluster (via an include of the clusterdata plenary)
     """
 
+    template_type = "object"
+
     def __init__(self, dbcluster, logger=LOGGER):
         Plenary.__init__(self, dbcluster, logger=logger)
-        self.template_type = 'object'
         self.name = dbcluster.name
-        self.metacluster = "global"
         if dbcluster.metacluster:
             self.metacluster = dbcluster.metacluster.name
+        else:
+            self.metacluster = "global"
+        self.loadpath = dbcluster.personality.archetype.name
         self.plenary_core = "clusters"
-        self.plenary_template = "%(plenary_core)s/%(name)s" % self.__dict__
-        self.dir = self.config.get("broker", "builddir") + \
-                    "/domains/%s/profiles" % dbcluster.branch.name
+        self.plenary_template = dbcluster.name
 
     def get_key(self):
         return CompileKey(domain=self.dbobj.branch.name,
-                          profile=self.plenary_template, logger=self.logger)
+                          profile=self.plenary_template_name, logger=self.logger)
 
     def body(self, lines):
-        arcdir = self.dbobj.personality.archetype.name
-        lines.append("# this is an %s cluster, so all templates "
-                     "should be sourced from there" % arcdir)
-        lines.append("variable LOADPATH = %s;" % pan([arcdir]))
-        lines.append("")
-
         lines.append("include { 'pan/units' };")
         lines.append("include { 'pan/functions' };")
         lines.append("")
@@ -149,8 +152,8 @@ class PlenaryClusterObject(Plenary):
         lines.append('"/system/build" = %s;' % pan(self.dbobj.status.name))
         if self.dbobj.allowed_personalities:
             lines.append('"/system/cluster/allowed_personalities" = %s;' %
-                         pan (sorted(["%s/%s" % (p.archetype.name, p.name)
-                                      for p in self.dbobj.allowed_personalities])))
+                         pan(sorted(["%s/%s" % (p.archetype.name, p.name)
+                                     for p in self.dbobj.allowed_personalities])))
         lines.append("")
         lines.append('"/metadata/template/branch/name" = %s;' %
                      pan(self.dbobj.branch.name))
@@ -186,7 +189,7 @@ class PlenaryClusterObject(Plenary):
                 # Do not bother creating entries for VMs that are incomplete.
                 continue
             pmac = PlenaryMachineInfo(machine)
-            macdesc = {'hardware': StructureTemplate(pmac.plenary_template)}
+            macdesc = {'hardware': StructureTemplate(pmac.plenary_template_name)}
 
             # One day we may get to the point where this will be required.
             if (machine.host):
@@ -215,13 +218,14 @@ class PlenaryClusterClient(Plenary):
     A host that is a member of a cluster will include the cluster client
     plenary template. This just names the cluster and nothing more.
     """
+
+    template_type = ""
+
     def __init__(self, dbcluster, logger=LOGGER):
         Plenary.__init__(self, dbcluster, logger=logger)
         self.name = dbcluster.name
-        self.plenary_core = "cluster/%(name)s" % self.__dict__
-        self.plenary_template = "%(plenary_core)s/client" % self.__dict__
-        self.template_type = ''
-        self.dir = self.config.get("broker", "plenarydir")
+        self.plenary_core = "cluster/%s" % self.name
+        self.plenary_template = "client"
 
     def get_key(self):
         # This takes a domain lock because it could affect all clients...

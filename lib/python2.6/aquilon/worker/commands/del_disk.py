@@ -32,8 +32,7 @@ from aquilon.exceptions_ import ArgumentError, NotFoundException, AquilonError
 from aquilon.aqdb.model import Disk, Machine
 from aquilon.aqdb.model.disk import controller_types
 from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.templates.machine import PlenaryMachineInfo
-from aquilon.worker.templates.cluster import PlenaryCluster
+from aquilon.worker.templates.base import Plenary
 from aquilon.worker.processes import NASAssign
 from aquilon.worker.locks import lock_queue, CompileKey
 
@@ -97,11 +96,11 @@ class CommandDelDisk(BrokerCommand):
         session.flush()
         session.expire(dbmachine, ['disks'])
 
-        plenary_machine = PlenaryMachineInfo(dbmachine, logger=logger)
+        plenary_machine = Plenary.get_plenary(dbmachine, logger=logger)
         key = plenary_machine.get_write_key()
         dbcluster = dbmachine.cluster
         if dbcluster:
-            plenary_cluster = PlenaryCluster(dbcluster, logger=logger)
+            plenary_cluster = Plenary.get_plenary(dbcluster, logger=logger)
             key = CompileKey.merge([key, plenary_cluster.get_write_key()])
         try:
             lock_queue.acquire(key)

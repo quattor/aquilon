@@ -28,9 +28,9 @@
 # TERMS THAT MAY APPLY.
 
 
-import os
 import logging
 
+from aquilon.aqdb.model import Personality
 from aquilon.worker.templates.base import Plenary
 from aquilon.worker.templates.panutils import pan
 
@@ -38,15 +38,20 @@ LOGGER = logging.getLogger(__name__)
 
 
 class PlenaryPersonality(Plenary):
+
+    template_type = ""
+
     def __init__(self, dbpersonality, logger=LOGGER):
         Plenary.__init__(self, dbpersonality, logger=logger)
         self.name = dbpersonality.name
-        self.plenary_core = "personality/%(name)s" % self.__dict__
-        self.plenary_template = self.plenary_core + "/config"
-        self.template_type = ''
-        self.dir = os.path.join(self.config.get("broker", "plenarydir"),
-                                dbpersonality.archetype.name)
+
+        self.loadpath = dbpersonality.archetype.name
+        self.plenary_core = "personality/%s" % dbpersonality.name
+        self.plenary_template = "config"
 
     def body(self, lines):
         lines.append("variable PERSONALITY = %s;" % pan(self.name))
         lines.append("include { 'personality/config' };")
+
+
+Plenary.handlers[Personality] = PlenaryPersonality

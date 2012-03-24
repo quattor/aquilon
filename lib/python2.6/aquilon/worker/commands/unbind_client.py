@@ -59,8 +59,7 @@ class CommandUnbindClient(BrokerCommand):
 
             plenaries = PlenaryCollection(logger=logger)
             plenaries.append(PlenaryHost(dbhost, logger=logger))
-            plenaries.append(PlenaryServiceInstanceServer(dbservice, si,
-                                                          logger=logger))
+            plenaries.append(PlenaryServiceInstanceServer(si, logger=logger))
             plenaries.write()
 
         return

@@ -30,6 +30,7 @@
 """Module for testing the add resourcegroup command."""
 
 import unittest
+import os.path
 
 if __name__ == "__main__":
     import utils
@@ -40,23 +41,23 @@ from brokertest import TestBrokerCommand
 
 class TestAddResourceGroup(TestBrokerCommand):
 
-    def test_00_add_rg_to_cluster(self):
+    def test_100_add_rg_to_cluster(self):
         command = ["add_resourcegroup", "--resourcegroup=utvcs1as1",
                    "--cluster=utvcs1"]
         self.successtest(command)
 
         command = ["show_resourcegroup", "--cluster=utvcs1"]
         out = self.commandtest(command)
-        self.matchoutput(out, "ResourceGroup: utvcs1as1", command)
+        self.matchoutput(out, "Resource Group: utvcs1as1", command)
         self.matchoutput(out,
                          "Bound to: High Availability Cluster utvcs1",
                          command)
 
         command = ["show_resourcegroup", "--all"]
         out = self.commandtest(command)
-        self.matchoutput(out, "ResourceGroup: utvcs1as1", command)
+        self.matchoutput(out, "Resource Group: utvcs1as1", command)
 
-    def test_add_fs_to_rg(self):
+    def test_110_add_fs_to_rg(self):
         command = ["add_filesystem", "--filesystem=fs1", "--type=ext3",
                    "--mountpoint=/mnt", "--blockdevice=/dev/foo/bar",
                    "--bootmount",
@@ -68,7 +69,7 @@ class TestAddResourceGroup(TestBrokerCommand):
         command = ["show_filesystem", "--filesystem=fs1"]
         out = self.commandtest(command)
         self.matchoutput(out, "Filesystem: fs1", command)
-        self.matchoutput(out, "Bound to: ResourceGroup utvcs1as1", command)
+        self.matchoutput(out, "Bound to: Resource Group utvcs1as1", command)
         self.matchoutput(out, "Block Device: /dev/foo/bar", command)
         self.matchoutput(out, "Mount at boot: True", command)
         self.matchoutput(out, "Mountopts: ro", command)
@@ -77,9 +78,56 @@ class TestAddResourceGroup(TestBrokerCommand):
         self.matchoutput(out, "Fsck Pass: 3", command)
         self.matchoutput(out, "Comments: testing", command)
 
-    def test_del_resourcegroup(self):
+    def test_200_show_rg(self):
+        command = ["show", "resourcegroup", "--resourcegroup", "utvcs1as1"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Filesystem: fs1", command)
+
+    def test_210_cat_cluster(self):
+        command = ["cat", "--cluster", "utvcs1"]
+        out = self.commandtest(command)
+        self.matchoutput(out,
+                         "'/system/resources/resourcegroup' = "
+                         "push(create(\"resource/cluster/utvcs1/resourcegroup/utvcs1as1/config\"));",
+                         command)
+
+    def test_210_cat_rg(self):
+        command = ["cat", "--resource", "utvcs1as1",
+                   "--restype", "resourcegroup", "--rescluster", "utvcs1"]
+        out = self.commandtest(command)
+        self.matchoutput(out,
+                         '"resources/filesystem" = '
+                         'push(create("resource/cluster/utvcs1/resourcegroup/utvcs1as1/filesystem/fs1/config"));',
+                         command)
+
+    def test_300_del_resourcegroup(self):
+        # Check that the plenaries of contained resources get cleaned up
+        plenarydir = self.config.get("broker", "plenarydir")
+        fs_plenary = os.path.join(plenarydir, "resource", "cluster", "utvcs1",
+                                  "resourcegroup", "utvcs1as1",
+                                  "filesystem", "fs1", "config.tpl")
+        rg_dir = os.path.join(plenarydir, "resource", "cluster", "utvcs1",
+                              "resourcegroup", "utvcs1as1")
+        rg_plenary = os.path.join(rg_dir, "config.tpl")
+
+        # Verify that we got the paths right
+        self.failUnless(os.path.exists(fs_plenary),
+                        "Plenary '%s' does not exist" % fs_plenary)
+        self.failUnless(os.path.exists(rg_plenary),
+                        "Plenary '%s' does not exist" % rg_plenary)
+
         command = ["del_resourcegroup", "--resourcegroup=utvcs1as1"]
         self.successtest(command)
+
+        # The resource plenaries should be gone
+        self.failIf(os.path.exists(fs_plenary),
+                    "Plenary '%s' still exists" % fs_plenary)
+        self.failIf(os.path.exists(rg_plenary),
+                    "Plenary '%s' still exists" % rg_plenary)
+
+        # The directory should be gone
+        self.failIf(os.path.exists(rg_dir),
+                    "Plenary directory '%s' still exists" % rg_dir)
 
 
 if __name__ == '__main__':

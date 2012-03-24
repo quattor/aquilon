@@ -36,74 +36,13 @@ from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import (relation, backref, object_session, validates,
                             deferred)
 
+from aquilon.exceptions_ import InternalError
 from aquilon.aqdb.column_types import AqStr, Enum
 from aquilon.aqdb.model import Base, Cluster, Host
 
 _TN = 'resource'
 _ABV = 'res'
 _RESHOLDER = 'resholder'
-
-
-class Resource(Base):
-    """
-        Abstraction of specific tables (e.g. VM or Filesystem) into a resource
-
-        A resource is a generic bundle that can be attached to hosts or
-        clusters. The resource can take on different shapes such as a VM
-        or a filesystem, but there are many common operations we want
-        to perform on them and therefore we map the specific types of
-        bundles into this Resource class.
-    """
-    __tablename__ = _TN
-
-    id = Column(Integer, Sequence('%s_seq' % _TN), primary_key=True)
-    resource_type = Column(AqStr(16), nullable=False)
-    name = Column(AqStr(64), nullable=False)
-    creation_date = deferred(Column(DateTime, default=datetime.now,
-                                    nullable=False))
-    comments = Column(String(255), nullable=True)
-    holder_id = Column(Integer, ForeignKey('%s.id' % _RESHOLDER,
-                                           name='%s_resholder_fk' % _TN,
-                                           ondelete='CASCADE'))
-
-    # Uniqueness over just the resource name and holder_id - you can't
-    # have filesystem 'foo' and intervention 'foo' attached to the same
-    # host.  Done for sanity.
-    UniqueConstraint('name', 'holder_id', name='%s_uk' % _TN)
-
-    __mapper_args__ = {'polymorphic_on': resource_type}
-
-    @property
-    def template_base(self):
-        return "resource/%s/%s/%s/%s" % (self.resource_type,
-                                         self.holder.holder_type,
-                                         self.holder.holder_name,
-                                         self.name)
-
-    @validates('holder')
-    def _validate_holder(self, key, value):
-        return self.validate_holder(key, value)
-
-    def validate_holder(self, key, value):
-        return value
-
-    def __lt__(self, other):
-        # Quick optimizations to not have to evaluate the name.
-        if self.holder != other.holder:
-            if self.holder.holder_type != other.holder.holder_type:
-                return self.holder.holder_type < other.holder.holder_type
-            return self.holder.holder_name < other.holder.holder_name
-        if self.resource_type != other.resource_type:
-            return self.resource_type < other.resource_type
-        return self.name < other.name
-
-    def __repr__(self):
-        return "<%s Resource %s>" % (self.resource_type, self.id)
-
-
-resource = Resource.__table__  # pylint: disable=C0103, E1101
-resource.primary_key.name = '%s_pk' % _TN
-resource.info['unique_fields'] = ['name', 'holder']
 
 
 class ResourceHolder(Base):
@@ -124,18 +63,16 @@ class ResourceHolder(Base):
     __mapper_args__ = {'polymorphic_on': holder_type}
 
     @property
-    def holder_name(self):
-        return None
+    def holder_name(self):  # pragma: no cover
+        raise InternalError("Abstract base method called")
 
     @property
-    def holder_object(self):
-        return None
+    def holder_object(self):  # pragma: no cover
+        raise InternalError("Abstract base method called")
 
-
-Resource.holder = relation(ResourceHolder, uselist=False, lazy='subquery',
-                           primaryjoin=Resource.holder_id==ResourceHolder.id,
-                           backref=backref('resources',
-                                           cascade='all, delete-orphan'))
+    @property
+    def holder_path(self):
+        return "%s/%s" % (self.holder_type, self.holder_name)
 
 resholder = ResourceHolder.__table__  # pylint: disable=C0103, E1101
 resholder.primary_key.name = '%s_pk' % _RESHOLDER
@@ -150,10 +87,9 @@ class HostResource(ResourceHolder):
                      nullable=True)
 
     # This is a one-to-one relation, so we need uselist=False on the backref
-    host = relation(Host, lazy='subquery',
-                    backref=backref('resholder',
-                                    cascade='all, delete-orphan',
-                                    uselist=False))
+    host = relation(Host,
+                    backref=backref('resholder', uselist=False,
+                                    cascade='all, delete-orphan'))
 
     @property
     def holder_name(self):
@@ -173,10 +109,9 @@ class ClusterResource(ResourceHolder):
                         nullable=True)
 
     # This is a one-to-one relation, so we need uselist=False on the backref
-    cluster = relation(Cluster, lazy='subquery',
-                       backref=backref('resholder',
-                                       cascade='all, delete-orphan',
-                                       uselist=False))
+    cluster = relation(Cluster,
+                       backref=backref('resholder', uselist=False,
+                                       cascade='all, delete-orphan'))
 
     @property
     def holder_name(self):
@@ -187,14 +122,77 @@ class ClusterResource(ResourceHolder):
         return self.cluster
 
 
-Host.resources = relation(
-    Resource, secondary=resholder,
-    primaryjoin=Host.machine_id==HostResource.host_id,
-    secondaryjoin=ResourceHolder.id==Resource.holder_id,
-    viewonly=True)
+class Resource(Base):
+    """
+        Abstraction of specific tables (e.g. VM or Filesystem) into a resource
 
-Cluster.resources = relation(
-    Resource, secondary=resholder,
-    primaryjoin=Cluster.id==ClusterResource.cluster_id,
-    secondaryjoin=ResourceHolder.id==Resource.holder_id,
-    viewonly=True)
+        A resource is a generic bundle that can be attached to hosts or
+        clusters. The resource can take on different shapes such as a VM
+        or a filesystem, but there are many common operations we want
+        to perform on them and therefore we map the specific types of
+        bundles into this Resource class.
+    """
+    __tablename__ = _TN
+
+    id = Column(Integer, Sequence('%s_seq' % _TN), primary_key=True)
+    resource_type = Column(AqStr(16), nullable=False)
+    name = Column(AqStr(64), nullable=False)
+    creation_date = Column(DateTime, default=datetime.now, nullable=False)
+    comments = Column(String(255), nullable=True)
+    holder_id = Column(Integer, ForeignKey('%s.id' % _RESHOLDER,
+                                           name='%s_resholder_fk' % _TN,
+                                           ondelete='CASCADE'),
+                       nullable=False)
+
+    holder = relation(ResourceHolder, innerjoin=True,
+                      backref=backref('resources',
+                                      cascade='all, delete-orphan'))
+
+    # Uniqueness over just the resource name and holder_id - you can't
+    # have filesystem 'foo' and intervention 'foo' attached to the same
+    # host.  Done for sanity.
+    UniqueConstraint('name', 'holder_id', name='%s_uk' % _TN)
+
+    __mapper_args__ = {'polymorphic_on': resource_type}
+
+    @property
+    def template_base(self):
+        return "resource/%s/%s/%s" % (self.holder.holder_path,
+                                      self.resource_type,
+                                      self.name)
+
+    @validates('holder')
+    def _validate_holder(self, key, value):
+        return self.validate_holder(key, value)
+
+    def validate_holder(self, key, value):
+        return value
+
+    def __lt__(self, other):
+        # Quick optimizations to not have to evaluate the name.
+        if self.holder != other.holder:
+            if self.holder.holder_type != other.holder.holder_type:
+                return self.holder.holder_type < other.holder.holder_type
+            return self.holder.holder_name < other.holder.holder_name
+        if self.resource_type != other.resource_type:
+            return self.resource_type < other.resource_type
+        return self.name < other.name
+
+    def __repr__(self):
+        return "<{0:c} Resource {0.name} of {1}>".format(self, self.holder)
+
+
+resource = Resource.__table__  # pylint: disable=C0103, E1101
+resource.primary_key.name = '%s_pk' % _TN
+resource.info['unique_fields'] = ['name', 'holder']
+
+
+# Proxy the resource list to the holder object for Host and Cluster objects
+def _resource_getter(self):
+    if self.resholder is not None:
+        return self.resholder.resources
+    else:
+        return []
+
+Host.resources = property(_resource_getter)
+Cluster.resources = property(_resource_getter)
