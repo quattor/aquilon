@@ -110,7 +110,7 @@ def main(*args, **kw):
         db.meta.bind.echo = True
 
     if opts.delete_db == True:
-        if db.vendor is 'oracle':
+        if db.engine.dialect.name == 'oracle':
             log.debug('dropping oracle database')
             db.drop_all_tables_and_sequences(no_confirm = opts.delete_db)
         else:
@@ -122,7 +122,7 @@ def main(*args, **kw):
         s = db.Session()
         assert s, "No Session in build_db.py populate"
 
-    #Create all tables upfront
+    # Create all tables upfront
     Base.metadata.create_all(checkfirst=True)
 
     if opts.populate:
@@ -135,7 +135,7 @@ def main(*args, **kw):
         if rc != 0:
             log.warn("Failed to add current user as administrator.")
 
-    #New loop: over sorted tables in Base.metadata.
+    # New loop: over sorted tables in Base.metadata.
     for tbl in Base.metadata.sorted_tables:
         #this might be a place to set schema if needed (for DB2)
 
@@ -143,8 +143,8 @@ def main(*args, **kw):
             #log.debug('populating %s' % tbl.name)
             tbl.populate(s)
 
-    #CONSTRAINTS
-    if db.dsn.startswith('oracle'):
+    # CONSTRAINTS
+    if db.engine.dialect.name == 'oracle':
         #TODO: rename should be able to dump DDL to a file
         log.debug('renaming constraints...')
         cnst.rename_non_null_check_constraints(db)

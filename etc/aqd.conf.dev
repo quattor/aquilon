@@ -12,11 +12,6 @@ basedir = /var/tmp/%(user)s
 dbdir = %(basedir)s/aquilondb
 dblogfile = %(dbdir)s/aqdb.log
 
-[database_oracle]
-dbuser = USER
-server = SERVER
-environment = ENV
-
 [database]
 database_section = database_sqlite
 

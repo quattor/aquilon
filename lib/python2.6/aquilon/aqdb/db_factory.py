@@ -39,6 +39,7 @@ from StringIO import StringIO
 from aquilon.aqdb import depends
 from aquilon.config import Config
 from aquilon.utils import confirm, monkeypatch
+from aquilon.exceptions_ import AquilonError
 
 from sqlalchemy import MetaData, create_engine, text, event
 from sqlalchemy.ext.compiler import compiles
@@ -120,7 +121,6 @@ class DbFactory(object):
         self.__started = True
 
         self.dsn = config.get('database', 'dsn')
-        assert self.dsn, 'No DSN in db_factory'
 
         self.pool_options = {}
         self.pool_options["pool_size"] = config.getint(
@@ -135,33 +135,18 @@ class DbFactory(object):
         log = logging.getLogger('aqdb.db_factory')
         log.info("Database engine using pool options %s" % self.pool_options)
 
-        #ORACLE
+        passwds = self._get_password_list()
+
+        # ORACLE
         if self.dsn.startswith('oracle'):
             import cx_Oracle
-            self.vendor = 'oracle'
-            self.schema = config.get('database','dbuser')
 
-            if self.schema != '':
-                passwds = self._get_password_list()
+            self.login(passwds)
 
-                if not passwds:
-                    msg = "No passwords found for %s." % self.dsn
-                    print >> sys.stderr, msg
-                    sys.exit(0)
-                self.login(passwds)
-            else:
-                #we're kerberized
-                self.kerberized = True
-                self.engine = create_engine(self.dsn, **self.pool_options)
-                connection = self.engine.connect()
-                connection.close()
-            # This should be slightly more database agnostic, it's really
-            # "any real database" (i.e. not sqlite.)
-            self.no_lock_engine = create_engine(self.dsn, **self.pool_options)
-
-        #SQLITE
+        # SQLITE
         elif self.dsn.startswith('sqlite'):
             self.engine = create_engine(self.dsn)
+            self.no_lock_engine = None
             event.listen(self.engine, "connect", sqlite_foreign_keys)
             if config.has_option("database", "disable_fsync") and \
                config.getboolean("database", "disable_fsync"):
@@ -170,17 +155,13 @@ class DbFactory(object):
                 log.info("SQLite is operating in unsafe mode!")
             connection = self.engine.connect()
             connection.close()
-            self.vendor = 'sqlite'
         else:
             msg = "supported database datasources are sqlite and oracle.\n"
             msg += "yours is '%s' "% (self.dsn)
             sys.stderr.write(msg)
             sys.exit(9)
 
-        assert self.dsn, 'No dsn in DbFactory.__init__'
-        assert self.engine, 'No engine in DbFactory.__init__'
-
-        self.meta   = MetaData(self.engine)
+        self.meta = MetaData(self.engine)
         assert self.meta
 
         self.Session = scoped_session(sessionmaker(bind=self.engine))
@@ -189,7 +170,7 @@ class DbFactory(object):
         # For database types that support concurrent connections, we
         # create a separate thread pool for connections that promise
         # not to wait on locks.
-        if hasattr(self, "no_lock_engine"):
+        if self.no_lock_engine:
             self.NLSession = scoped_session(sessionmaker(
                 bind=self.no_lock_engine))
         else:
@@ -200,9 +181,14 @@ class DbFactory(object):
         pswd_re = re.compile('PASSWORD')
         dsn_copy = self.dsn
 
+        if not passwds:
+            raise AquilonError("At least one password must be specified, even "
+                               "if that's empty.")
+
         for p in passwds:
             self.dsn = re.sub(pswd_re, p, dsn_copy)
             self.engine = create_engine(self.dsn, **self.pool_options)
+            self.no_lock_engine = create_engine(self.dsn, **self.pool_options)
 
             try:
                 connection = self.engine.connect()
@@ -211,37 +197,33 @@ class DbFactory(object):
             except SaDBError, e:
                 errs.append(e)
 
-        if len(errs) >= 1:
+        if errs:
             raise errs.pop()
         else:
-            msg = 'unknown issue connecting to %s'% (self.dsn)
-            raise SaDBError(msg)
+            raise AquilonError('Failed to connect to %s')
 
     def _get_password_list(self):
-        """ searches through PTS protected directory structure for file,
-            which is multiline list of *all* passwords in age order descending
-            (i.e. newest on top). It will try them sequentially, finally
-            giving up and throwing an exception """
+        """
+        Read a password file containing one password per line. The passwords
+        will be tried in the order they appear in the file.
+        """
 
-        if config.has_option("database", "dbpassword"):
-            #TODO: RAISE WARNING: we'd like to get out of that buisness I think
-            return [config.get("database", "dbpassword")]
-        else:
-            passwd_file = config.get("database", "password_file")
-            passwds = []
+        # Default: no password
+        if not config.has_option("database", "password_file"):
+            return [""]
 
-            try:
-                f = open(passwd_file)
-                passwds = f.readlines()
-                if len(passwds) < 1:
-                    msg = "No lines in %s"% (passwd_file)
-                    raise ValueError(msg)
-                else:
-                    return [passwd.strip() for passwd in passwds]
-            # Fallback for testing when password file may not exist.
-            except IOError, e:
-                print e
-                return None
+        passwd_file = config.get("database", "password_file")
+        if not os.path.exists(passwd_file):
+            raise AquilonError("The password file '%s' does not exist." %
+                               passwd_file)
+
+        passwds = ""
+        with open(passwd_file) as f:
+            passwds = f.readlines()
+            if not passwds:
+                raise AquilonError("Password file %s is empty." % passwd_file)
+
+        return [passwd.strip() for passwd in passwds]
 
     def safe_execute(self, stmt, **kw):
         """ convenience wrapper """
@@ -250,21 +232,11 @@ class DbFactory(object):
         except DBAPIError, e:
             print >> sys.stderr, e
 
-    def get_id(self, table, key, value):
-        """ convenience wrapper """
-        res = self.safe_execute("SELECT id from %s where %s = :value"
-                % (table, key), value=value)
-        if res:
-            rows = res.fetchall()
-            if rows:
-                return rows[0][0]
-        return
-
     def get_tables(self):
         """ return a list of table names from the current databases public
         schema """
 
-        if self.vendor is 'oracle':
+        if self.engine.dialect.name == 'oracle':
             sql = 'select table_name from user_tables'
             return [name for (name, ) in self.safe_execute(sql)]
 
@@ -278,13 +250,14 @@ class DbFactory(object):
     def drop_all_tables_and_sequences(self, no_confirm=False):  # pragma: no cover
         """ MetaData.drop_all() doesn't play nice with db's that have sequences.
             you're alternative is to call this """
-        if self.vendor is 'sqlite':
+        if self.engine.dialect.name == 'sqlite':
             dbfile = config.get("database", "dbfile")
             if os.path.exists(dbfile):
                 os.unlink(dbfile)
 
-        elif self.vendor is not 'oracle':
-            raise ValueError('can not drop %s databases'%(self.vendor))
+        elif self.engine.dialect.name != 'oracle':
+            raise ValueError('can not drop %s databases' %
+                             self.engine.dialect.name)
 
         if is_prod_ora_instance(self.dsn):
             msg = 'drop_all_tables not permitted on the production database'

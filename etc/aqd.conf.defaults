@@ -58,23 +58,21 @@ dbdir = %(quattordir)s/aquilondb
 dblogfile = %(dbdir)s/aqdb.log
 
 [database_oracle]
-vendor = oracle
-server = LNPO_AQUILON_NY
-dbuser = USER
+server = LNTO_AQUILON_NY
+# Set the username to empty to use Kerberos
+#dbuser = %(user)s
+dbuser =
 # Schema the xtn_log tables exist in, if separate from the rest of the tables.
 # There is no default - the value is only used if set.
-#audit_schema = USER
+#audit_schema = %(user)
 dsn = oracle://%(dbuser)s:PASSWORD@%(server)s
-connect_str = %(dbuser)s/%(dbuser)s@%(server)s
-dumpfile = %(dbdir)s/%(dbuser)s.dmp
-password_base = /ms/dist/aquilon/PROJ/aqdbpasswd/incr
-password_file = %(password_base)s/%(environment)s/%(dbuser)s
+#password_base = /ms/dist/aquilon/PROJ/aqdbpasswd/incr
+#password_file = %(password_base)s/%(environment)s/%(dbuser)s
 module = orcl/client/11.2.0.1.0
 
 [database_sqlite]
 dbfile = %(dbdir)s/aquilon.db
 dsn = sqlite:///%(dbfile)s
-vendor = sqlite
 
 [database]
 # Unfortunately, the code hack for this means any database defaults
