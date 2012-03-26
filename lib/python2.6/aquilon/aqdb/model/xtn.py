@@ -56,8 +56,8 @@ class Xtn(Base):
     command = Column(String(64), nullable=False)
     # This column is *massively* redundant, but we're fully denormalized
     is_readonly = Column(Boolean(name="XTN_IS_READONLY"), nullable=False)
-    # Note this column is forced to be UTC by the column type. The timezone is
-    # not explicitly stored as data in the table
+    # Force the use of UTC if the underlying data type does not handle time zone
+    # information correctly
     start_time = Column(UTCDateTime(timezone=True),
                         default=utcnow, nullable=False)
 
