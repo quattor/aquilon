@@ -314,7 +314,8 @@ class BrokerCommand(object):
         self.render = instancemethod(updated_render, self, BrokerCommand)
 
     def _set_readonly(self, session):
-        if session.bind.dialect.name == "oracle":
+        if session.bind.dialect.name == "oracle" or \
+           session.bind.dialect.name == "postgresql":
             session.commit()
             session.execute(text("set transaction read only"))
 

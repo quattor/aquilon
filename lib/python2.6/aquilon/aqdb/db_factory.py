@@ -143,6 +143,12 @@ class DbFactory(object):
 
             self.login(passwds)
 
+        # POSTGRESQL
+        elif self.dsn.startswith('postgresql'):
+            import psycopg2
+
+            self.login(passwds)
+
         # SQLITE
         elif self.dsn.startswith('sqlite'):
             self.engine = create_engine(self.dsn)
@@ -156,8 +162,8 @@ class DbFactory(object):
             connection = self.engine.connect()
             connection.close()
         else:
-            msg = "supported database datasources are sqlite and oracle.\n"
-            msg += "yours is '%s' "% (self.dsn)
+            msg = "Supported database datasources are postgresql, oracle and sqlite.\n"
+            msg += "yours is '%s' " % self.dsn
             sys.stderr.write(msg)
             sys.exit(9)
 
@@ -239,6 +245,10 @@ class DbFactory(object):
         if self.engine.dialect.name == 'oracle':
             sql = 'select table_name from user_tables'
             return [name for (name, ) in self.safe_execute(sql)]
+        elif self.engine.dialect.name == 'postgresql':
+            sql = "select table_name from information_schema.tables " \
+                    "where table_schema='public'"
+            return [name for (name, ) in self.safe_execute(sql)]
 
     def get_sequences(self):
         """ return a list of the sequence names from the current databases
@@ -246,6 +256,10 @@ class DbFactory(object):
 
         if self.engine.dialect.name == 'oracle':
             sql = 'select sequence_name from user_sequences'
+            return [name for (name, ) in self.safe_execute(sql)]
+        elif self.engine.dialect.name == 'postgresql':
+            sql = "select sequence_name from information_schema.sequences " \
+                    "where sequence_schema='public'"
             return [name for (name, ) in self.safe_execute(sql)]
 
     def drop_all_tables_and_sequences(self, no_confirm=False):  # pragma: no cover
@@ -273,6 +287,20 @@ class DbFactory(object):
                     self.safe_execute('DROP SEQUENCE "%s"' % seq)
 
                 self.safe_execute('PURGE RECYCLEBIN')
+        elif self.engine.dialect.name == 'postgresql':
+            # Don't show the password
+            dbname = re.sub(':.*@', '@', self.dsn)
+            msg = ("\nYou've asked to wipe out the \n%s\ndatabase.  Please confirm."
+                   % dbname)
+
+            if no_confirm or confirm(prompt=msg, resp=False):
+                for table in self.get_tables():
+                    self.safe_execute('DROP TABLE "%s" CASCADE' % table)
+
+                for seq in self.get_sequences():
+                    self.safe_execute('DROP SEQUENCE "%s" CASCADE' % seq)
+
+                # Should we issue VACUUM?
         else:
             raise ValueError('can not drop %s databases' %
                              self.engine.dialect.name)
