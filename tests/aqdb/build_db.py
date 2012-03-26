@@ -110,13 +110,8 @@ def main(*args, **kw):
         db.meta.bind.echo = True
 
     if opts.delete_db == True:
-        if db.engine.dialect.name == 'oracle':
-            log.debug('dropping oracle database')
-            db.drop_all_tables_and_sequences(no_confirm = opts.delete_db)
-        else:
-            Base.metadata.reflect()
-            for table in reversed(Base.metadata.sorted_tables):
-                table.drop(checkfirst=True)
+        log.debug('Dropping database')
+        db.drop_all_tables_and_sequences(no_confirm=True)
 
     if opts.populate:
         s = db.Session()

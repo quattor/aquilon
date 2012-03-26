@@ -244,8 +244,9 @@ class DbFactory(object):
         """ return a list of the sequence names from the current databases
             public schema  """
 
-        sql = 'select sequence_name from user_sequences'
-        return [name for (name, ) in self.safe_execute(sql)]
+        if self.engine.dialect.name == 'oracle':
+            sql = 'select sequence_name from user_sequences'
+            return [name for (name, ) in self.safe_execute(sql)]
 
     def drop_all_tables_and_sequences(self, no_confirm=False):  # pragma: no cover
         """ MetaData.drop_all() doesn't play nice with db's that have sequences.
@@ -254,28 +255,27 @@ class DbFactory(object):
             dbfile = config.get("database", "dbfile")
             if os.path.exists(dbfile):
                 os.unlink(dbfile)
+        elif self.engine.dialect.name == 'oracle':
+            if is_prod_ora_instance(self.dsn):
+                msg = 'drop_all_tables not permitted on the production database'
+                raise ValueError(msg)
 
-        elif self.engine.dialect.name != 'oracle':
+            # Don't show the password
+            dbname = re.sub(':.*@', '@', self.dsn)
+            msg = ("\nYou've asked to wipe out the \n%s\ndatabase.  Please confirm."
+                   % dbname)
+
+            if no_confirm or confirm(prompt=msg, resp=False):
+                for table in self.get_tables():
+                    self.safe_execute('DROP TABLE "%s" CASCADE CONSTRAINTS' % table)
+
+                for seq in self.get_sequences():
+                    self.safe_execute('DROP SEQUENCE "%s"' % seq)
+
+                self.safe_execute('PURGE RECYCLEBIN')
+        else:
             raise ValueError('can not drop %s databases' %
                              self.engine.dialect.name)
-
-        if is_prod_ora_instance(self.dsn):
-            msg = 'drop_all_tables not permitted on the production database'
-            raise ValueError(msg)
-
-        # Don't show the password
-        dbname = re.sub(':.*@', '@', self.dsn)
-        msg = ("\nYou've asked to wipe out the \n%s\ndatabase.  Please confirm."
-               % dbname)
-
-        if no_confirm or confirm(prompt=msg, resp=False):
-            for table in self.get_tables():
-                self.safe_execute('DROP TABLE "%s" CASCADE CONSTRAINTS' % table)
-
-            for seq in self.get_sequences():
-                self.safe_execute('DROP SEQUENCE "%s"' % seq)
-
-            self.safe_execute('PURGE RECYCLEBIN')
 
 def is_prod_ora_instance(dsn):  # pragma: no cover
     prod_re = re.compile('@NYPO_AQUILON', re.IGNORECASE)
