@@ -142,7 +142,18 @@ class TestSearchNetwork(TestBrokerCommand):
         self.matchoutput(out, "Netmask: %s" % subnet.netmask, command)
         self.matchclean(out, "Netmask: %s" % net.netmask, command)
 
+    def testdynrange(self):
+        command = ["search", "network", "--has_dynamic_ranges"]
+        out = self.commandtest(command)
+        expect = [self.net.tor_net2[0], self.net.tor_net2[1],
+                  self.net.tor_net2[5]]
+        for net in self.net.all:
+            if net in expect:
+                self.matchoutput(out, str(net), command)
+            else:
+                self.matchclean(out, str(net), command)
 
-if __name__=='__main__':
+
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestSearchNetwork)
     unittest.TextTestRunner(verbosity=2).run(suite)
