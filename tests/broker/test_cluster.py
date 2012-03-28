@@ -157,6 +157,17 @@ class TestCluster(TestBrokerCommand):
                    "--hostname=aquilon61.aqd-unittest.ms.com"]
         self.successtest(command)
 
+        # Check that both cluster plenaries were updated
+        command = ["cat", "--cluster", "utecl1"]
+        out = self.commandtest(command)
+        self.matchclean(out, "aquilon61.aqd-unittest.ms.com", command)
+        command = ["cat", "--cluster", "utecl2"]
+        out = self.commandtest(command)
+        self.searchoutput(out,
+                          r'"/system/cluster/members" = list\('
+                          r'[^)]*"aquilon61.aqd-unittest.ms.com"[^)]*\);',
+                          command)
+
         # Now try to uncluster it...
         command = ["uncluster", "--cluster=utecl2",
                    "--hostname=aquilon61.aqd-unittest.ms.com"]
@@ -246,6 +257,6 @@ class TestCluster(TestBrokerCommand):
         self.successtest(["cluster", "--hostname", host, "--cluster", cluster])
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestCluster)
     unittest.TextTestRunner(verbosity=2).run(suite)
