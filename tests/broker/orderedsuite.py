@@ -73,6 +73,7 @@ from test_country import TestCountry
 from test_organization import TestOrganization
 from test_hub import TestHub
 from test_add_building import TestAddBuilding
+from test_add_campus import TestAddCampus
 from test_add_city import TestAddCity
 from test_add_room import TestAddRoom
 from test_add_location import TestAddLocation
@@ -213,6 +214,7 @@ from test_del_alias import TestDelAlias
 from test_del_srv_record import TestDelSrvRecord
 from test_del_address import TestDelAddress
 from test_del_city import TestDelCity
+from test_del_campus import TestDelCampus
 from test_del_manager import TestDelManager
 from test_del_auxiliary import TestDelAuxiliary
 from test_del_windows_host import TestDelWindowsHost
@@ -236,6 +238,7 @@ from test_del_vendor import TestDelVendor
 from test_del_desk import TestDelDesk
 from test_del_rack import TestDelRack
 from test_del_room import TestDelRoom
+from test_update_building import TestUpdateBuilding
 from test_del_building import TestDelBuilding
 from test_del_required_service import TestDelRequiredService
 from test_del_service import TestDelService
@@ -281,7 +284,7 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestAddArchetype, TestAddOS, TestAddPersonality,
                 TestAddService, TestUpdateService, TestAddRequiredService,
                 TestCountry, TestOrganization, TestHub,
-                TestAddCity,
+                TestAddCampus, TestAddCity,
                 TestAddBuilding, TestAddRoom, TestAddLocation,
                 TestAddRack, TestAddDesk,
                 TestAddVendor, TestAddCpu, TestAddModel,
@@ -372,8 +375,9 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestDelFeature,
                 TestUnmapDnsDomain,
                 TestDelDesk, TestDelRack, TestDelRoom,
+                TestUpdateBuilding,
                 TestDelBuilding, TestDelRequiredService, TestDelService,
-                TestDelCity,
+                TestDelCity, TestDelCampus,
                 TestDelPersonality, TestDelOS, TestDelArchetype,
                 TestDelDomain, TestDelSandbox,
                 TestDelDnsEnvironment, TestDelDnsDomain,

@@ -43,9 +43,13 @@ class TestAddBuilding(TestBrokerCommand):
     def testaddbu(self):
         self.dsdb_expect("add_building_aq -building_name bu -city ny "
                          "-building_addr 12 Cherry Lane")
+        self.dsdb_expect("add_campus_building_aq -campus_name ny "
+                         "-building_name bu")
         command = ["add", "building", "--building", "bu", "--city", "ny",
                    "--address", "12 Cherry Lane"]
-        self.noouttest(command)
+        out,err = self.successtest(command)
+        self.matchoutput(err, "Action: adding building bu to campus ny "
+                         "in DSDB.", command)
         self.dsdb_verify()
 
     def testverifyaddbu(self):
@@ -57,9 +61,15 @@ class TestAddBuilding(TestBrokerCommand):
     def testaddbucards(self):
         self.dsdb_expect("add_building_aq -building_name cards -city ex "
                          "-building_addr Nowhere")
+        # No campus for city ex
+#        self.dsdb_expect("add_campus_building_aq -campus_name ny "
+#                         "-building_name bu")
         command = ["add", "building", "--building", "cards", "--city", "ex",
                    "--address", "Nowhere"]
-        self.noouttest(command)
+        out,err = self.successtest(command)
+        self.matchoutput(err, "WARNING: There's no campus for city %s of "
+                               "building %s. dsdb add_campus_building will "
+                               "not be executed." % ("ex", "cards"), command)
         self.dsdb_verify()
 
     def testverifyaddbucards(self):
@@ -88,14 +98,21 @@ class TestAddBuilding(TestBrokerCommand):
     def testaddnettest(self):
         self.dsdb_expect("add_building_aq -building_name nettest -city ny "
                          "-building_addr Nowhere")
+        self.dsdb_expect("add_campus_building_aq -campus_name ny "
+                         "-building_name nettest")
         command = ["add", "building", "--building", "nettest", "--city", "ny",
                    "--address", "Nowhere"]
-        self.noouttest(command)
+        out,err = self.successtest(command)
+        self.matchoutput(err, "Action: adding building nettest to campus ny "
+                         "in DSDB.", command)
+
         self.dsdb_verify()
 
     def testnonascii(self):
         command = ["add", "building", "--building", "nonascii", "--city", "ny",
                    "--address", "\xe1\xe9\xed\xf3\xfa"]
+        self.dsdb_expect("add_campus_building_aq -campus_name ny "
+                         "-building_name nonascii")
         out = self.badrequesttest(command)
         self.matchoutput(out, "Only ASCII characters are allowed for --address.",
                          command)

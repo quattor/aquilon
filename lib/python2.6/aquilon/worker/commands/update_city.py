@@ -32,6 +32,7 @@
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Machine
 from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.processes import DSDBRunner
 from aquilon.worker.dbwrappers.location import get_location
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
 
@@ -62,6 +63,8 @@ class CommandUpdateCity(BrokerCommand):
 
             dbcity.update_parent(parent=dbcampus)
             update_machines = True
+            dsdb_runner = DSDBRunner(logger=logger)
+            dsdb_runner.update_city(city, dbcampus.name)
 
         session.flush()
 
@@ -77,5 +80,3 @@ class CommandUpdateCity(BrokerCommand):
 
         count = plenaries.write()
         logger.client_info("Flushed %d templates." % count)
-
-        return

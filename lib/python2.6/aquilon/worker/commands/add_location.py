@@ -85,8 +85,24 @@ class CommandAddLocation(BrokerCommand):
                            "parenttype"]
 
     def render(self, session, name, fullname, type, parentname, parenttype,
-               comments, **arguments):
+               comments=None, address=None, **arguments):
 
-        session.add(add_location(session, name, fullname, type, parentname,
-                                 parenttype, comments))
+        new_loc = add_location(session, name, fullname, type, parentname,
+                                 parenttype, comments, address)
+
+        self.before_flush(session, new_loc, **arguments)
+
+        session.add(new_loc)
+        session.flush()
+
+        self.after_flush(session, new_loc, **arguments)
+
         return
+
+    def before_flush(self, session, new_loc, **arguments):
+        "preparing steps for CommandAddLocation subclasses"
+        pass
+
+    def after_flush(self, session, new_loc, **arguments):
+        "post operations steps for CommandAddLocation subclasses"
+        pass
