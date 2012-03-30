@@ -190,7 +190,21 @@ class Location(Base):
 
         session.autoflush = flush_state
 
-location = Location.__table__  # pylint: disable=C0103, E1101
+    def update_heirarchy(self, location=None, parent=None):
+        # allows to insert a location in the heirarchy
+        # e.g adding a existing city to a existing campus
+
+        if location is None:
+            location = self
+        location.update_parent(parent)
+
+        ## only update immediate children
+        for child in location.children:
+            if child.parent == location:
+                self.update_heirarchy(child, location)
+
+
+location = Location.__table__  # pylint: disable-msg=C0103, E1101
 
 location.primary_key.name = 'location_pk'
 location.info['unique_fields'] = ['name', 'location_type']

@@ -36,12 +36,25 @@ from aquilon.worker.templates.city import PlenaryCity
 
 class CommandUpdateCity(BrokerCommand):
 
-    required_parameters = ["city", "timezone"]
+    required_parameters = ["city"]
 
-    def render(self, session, logger, city, timezone, **arguments):
+    def render(self, session, logger, city, timezone, campus, **arguments):
         dbcity = get_location(session, city=city)
         if timezone is not None:
             dbcity.timezone = timezone
+
+        if campus is not None:
+            dbcampus = get_location(session, campus=campus)
+            # This one would change the template's locations hence forbidden
+            if dbcampus.hub != dbcity.hub:
+                # Doing this both to reduce user error and to limit
+                # testing required.
+                raise ArgumentError("Cannot change campus.  {0} is in hub {1} "
+                                    "while {2} is in {3}.".format(
+                                        dbcampus, dbroom.hub,
+                                        dbcity, dbcity.hub))
+
+            dbcity.update_heirarchy(parent=dbcampus)
 
         session.flush()
 

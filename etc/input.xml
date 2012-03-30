@@ -2559,7 +2559,10 @@
       Update the timezone of an existing city. See also add_city.
       <optgroup name="update_city_options" mandatory="True" fields="all">
          <option name="city" type="string">Name of the new city</option>
+      </optgroup>
+      <optgroup name="optional_opts" mandatory="False" fields="any">
          <option name="timezone" type="string">Timezone of the city (e.g. Europe/London)</option>
+	 <option name="campus" type="string">Campus (should be in the same hub)</option>
       </optgroup>
       <transport method="post" path="location/city/%(city)s" />
    </command>

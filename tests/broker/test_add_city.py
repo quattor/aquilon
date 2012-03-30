@@ -112,6 +112,40 @@ class TestAddCity(TestBrokerCommand):
         self.matchoutput(out, "city,ex,country,us,,,EDT,Exampleton",
                          command)
 
+    def testupdatecitycampus(self):
+        ## add city
+        self.dsdb_expect("add_city_aq -city_symbol e4 " +
+                         "-country_symbol us -city_name Exampleby")
+        command = ["add", "city", "--city", "e4", "--country", "us",
+                   "--fullname", "Exampleby"]
+        self.noouttest(command)
+        self.dsdb_verify()
+
+        ## add building
+        self.dsdb_expect("add_building_aq -building_name bx -city e4 "
+                         "-building_addr Nowhere")
+        command = ["add", "building", "--building", "bx", "--city", "e4",
+                   "--address", "Nowhere"]
+        self.noouttest(command)
+        self.dsdb_verify()
+
+        ## add campus
+        command = ["add", "location", "--type", "campus", "--name", "na",
+                   "--parenttype", "country", "--parentname", "us",
+                   "--fullname", "test campus"]
+        self.noouttest(command)
+
+        command = ["update", "city", "--city", "e4", "--campus", "na"]
+        self.noouttest(command)
+
+        command = "show city --city e4"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Location Parents: [Organization ms, Hub ny, Continent na, Country us, Campus na]", command)
+
+        command = "show building --building bx"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Location Parents: [Organization ms, Hub ny, Continent na, Country us, Campus na, City e4]", command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddCity)
