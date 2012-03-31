@@ -169,39 +169,44 @@ class Location(Base):
         if parent is None:  # pragma: no cover
             raise AquilonError("Parent location can be updated but not removed")
 
-        session = object_session(self)
-        ## delete old location links
+        # Disable autoflush. We'll make use of SQLA's ability to replace
+        # DELETE + INSERT for the same LocationLink with an UPDATE of the
+        # distance column.
         flush_state = session.autoflush
         session.autoflush = False
 
-        for link in self._parent_links:
+        # Delete links to our old parent and its ancestors
+        for plink in self._parent_links:
             q = session.query(LocationLink)
-            q = q.filter(and_(LocationLink.child_id==self.id,
-                              LocationLink.parent_id==link.parent.id))
-            dblink = q.first()
-            session.delete(dblink)
+            q = q.filter(and_(LocationLink.child_id.in_(self.offspring_ids()),
+                              LocationLink.parent_id==plink.parent.id))
+            # See above: we depend on the caching ability of the session, so
+            # we can't use q.delete()
+            for clink in q.all():
+                session.delete(clink)
 
-        if parent is not None:
-            for link in parent._parent_links:
-                session.add(LocationLink(child=self, parent=link.parent,
-                                         distance=link.distance + 1))
-            session.add(LocationLink(child=self, parent=parent, distance=1))
-            session.expire(parent, ["_child_links", "children"])
+        # Add links to the new parent
+        session.add(LocationLink(child=self, parent=parent, distance=1))
+        for clink in self._child_links:
+            session.add(LocationLink(child_id=clink.child_id,
+                                     parent=parent,
+                                     distance=clink.distance + 1))
+
+        # Add links to the new parent's ancestors
+        for plink in parent._parent_links:
+            session.add(LocationLink(child=self, parent_id=plink.parent_id,
+                                     distance=plink.distance + 1))
+            for clink in self._child_links:
+                session.add(LocationLink(child_id=clink.child_id,
+                                         parent_id=plink.parent_id,
+                                         distance=plink.distance +
+                                         clink.distance + 1))
+
+        session.flush()
+        session.expire(parent, ["_child_links", "children"])
+        session.expire(self, ["_parent_links", "parent", "parents"])
 
         session.autoflush = flush_state
-
-    def update_heirarchy(self, location=None, parent=None):
-        # allows to insert a location in the heirarchy
-        # e.g adding a existing city to a existing campus
-
-        if location is None:
-            location = self
-        location.update_parent(parent)
-
-        ## only update immediate children
-        for child in location.children:
-            if child.parent == location:
-                self.update_heirarchy(child, location)
 
 
 location = Location.__table__  # pylint: disable-msg=C0103, E1101

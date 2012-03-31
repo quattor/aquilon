@@ -54,7 +54,7 @@ class CommandUpdateCity(BrokerCommand):
                                         dbcampus, dbroom.hub,
                                         dbcity, dbcity.hub))
 
-            dbcity.update_heirarchy(parent=dbcampus)
+            dbcity.update_parent(parent=dbcampus)
 
         session.flush()
 
