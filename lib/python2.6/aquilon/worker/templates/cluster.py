@@ -78,6 +78,9 @@ class PlenaryClusterData(Plenary):
                           profile=self.plenary_template_name, logger=self.logger)
 
     def body(self, lines):
+        lines.append("include { 'pan/units' };")
+        lines.append("include { 'pan/functions' };")
+        lines.append("")
         lines.append('"/system/cluster/name" = %s;' % pan(self.name))
         lines.append('"/system/cluster/type" = %s;' %
                         pan(self.dbobj.cluster_type))

@@ -270,6 +270,9 @@ class PlenaryHostData(Plenary):
         eon_id_list.sort()
 
         # Okay, here's the real content
+        lines.append("include { 'pan/units' };")
+        lines.append("include { 'pan/functions' };")
+        lines.append("")
         pmachine = PlenaryMachineInfo(self.dbobj.machine)
         lines.append("'/hardware' = %s;" %
                      pan(StructureTemplate(pmachine.plenary_template_name)))
