@@ -49,6 +49,7 @@ class PlenaryCluster(PlenaryCollection):
         PlenaryCollection.__init__(self, logger=LOGGER)
         self.dbobj = dbcluster
         self.plenaries.append(PlenaryClusterObject(dbcluster, logger=logger))
+        self.plenaries.append(PlenaryClusterData(dbcluster, logger=logger))
         self.plenaries.append(PlenaryClusterClient(dbcluster, logger=logger))
 
 
@@ -58,14 +59,9 @@ Plenary.handlers[EsxCluster] = PlenaryCluster
 Plenary.handlers[StorageCluster] = PlenaryCluster
 
 
-class PlenaryClusterObject(Plenary):
-    """
-    A cluster has its own output profile, so the plenary cluster template
-    is an object template that includes the data about which machines
-    are contained inside the cluster (via an include of the clusterdata plenary)
-    """
+class PlenaryClusterData(Plenary):
 
-    template_type = "object"
+    template_type = ""
 
     def __init__(self, dbcluster, logger=LOGGER):
         Plenary.__init__(self, dbcluster, logger=logger)
@@ -74,8 +70,7 @@ class PlenaryClusterObject(Plenary):
             self.metacluster = dbcluster.metacluster.name
         else:
             self.metacluster = "global"
-        self.loadpath = dbcluster.personality.archetype.name
-        self.plenary_core = "clusters"
+        self.plenary_core = "clusterdata"
         self.plenary_template = dbcluster.name
 
     def get_key(self):
@@ -83,9 +78,6 @@ class PlenaryClusterObject(Plenary):
                           profile=self.plenary_template_name, logger=self.logger)
 
     def body(self, lines):
-        lines.append("include { 'pan/units' };")
-        lines.append("include { 'pan/functions' };")
-        lines.append("")
         lines.append('"/system/cluster/name" = %s;' % pan(self.name))
         lines.append('"/system/cluster/type" = %s;' %
                         pan(self.dbobj.cluster_type))
@@ -163,15 +155,9 @@ class PlenaryClusterObject(Plenary):
             lines.append('"/metadata/template/branch/author" = %s;' %
                          pan(self.dbobj.sandbox_author.name))
 
-        lines.append("include { 'archetype/base' };")
         fname = "body_%s" % self.dbobj.cluster_type
         if hasattr(self, fname):
             getattr(self, fname)(lines)
-        lines.append("")
-        lines.append("include { 'personality/%s/config' };" %
-                     self.dbobj.personality.name)
-        lines.append("")
-        lines.append("include { 'archetype/final' };")
 
     def body_esx(self, lines):
         if self.metacluster:
@@ -208,6 +194,48 @@ class PlenaryClusterObject(Plenary):
             machines[machine.label] = macdesc
         lines.append('"/system/cluster/machines" = %s;' % pan(machines))
 
+
+class PlenaryClusterObject(Plenary):
+    """
+    A cluster has its own output profile, so the plenary cluster template
+    is an object template that includes the data about which machines
+    are contained inside the cluster (via an include of the clusterdata plenary)
+    """
+
+    template_type = "object"
+
+    def __init__(self, dbcluster, logger=LOGGER):
+        Plenary.__init__(self, dbcluster, logger=logger)
+        self.name = dbcluster.name
+        if dbcluster.metacluster:
+            self.metacluster = dbcluster.metacluster.name
+        else:
+            self.metacluster = "global"
+        self.loadpath = dbcluster.personality.archetype.name
+        self.plenary_core = "clusters"
+        self.plenary_template = dbcluster.name
+
+    def get_key(self):
+        return CompileKey(domain=self.dbobj.branch.name,
+                          profile=self.plenary_template_name, logger=self.logger)
+
+    def body(self, lines):
+        lines.append("include { 'pan/units' };")
+        lines.append("include { 'pan/functions' };")
+        lines.append("")
+        lines.append("include { 'clusterdata/%s' };" % self.name)
+
+        lines.append("include { 'archetype/base' };")
+        fname = "body_%s" % self.dbobj.cluster_type
+        if hasattr(self, fname):
+            getattr(self, fname)(lines)
+        lines.append("")
+        lines.append("include { 'personality/%s/config' };" %
+                     self.dbobj.personality.name)
+        lines.append("")
+        lines.append("include { 'archetype/final' };")
+
+    def body_esx(self, lines):
         for servinst in sorted(self.dbobj.service_bindings):
             lines.append("include { 'service/%s/%s/client/config' };" % \
                          (servinst.service.name, servinst.name))
