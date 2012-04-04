@@ -195,7 +195,7 @@ class TestVulcan20(TestBrokerCommand):
         self.matchoutput(out, "Resource Group: utmc8as1", command)
         self.matchoutput(out, "Resource Group: utmc8as2", command)
 
-    def test_102_cat_cluster(self):
+    def test_102_cat_metacluster(self):
         command = ["cat", "--cluster", "utmc8"]
         out = self.commandtest(command)
         self.matchoutput(out,
@@ -265,6 +265,12 @@ class TestVulcan20(TestBrokerCommand):
                          command)
         self.matchoutput(out, '"latency" = 5;', command)
 
+    def test_107_cat_switch(self):
+        for i in range(0, 2):
+            command = ["cat", "--switch", "utpgsw%d" % i]
+
+            out = self.commandtest(command)
+            self.matchoutput(out, '"user-v710", nlist(', command)
 
     def test_108_addutpgm0disk(self):
         self.noouttest(["add", "disk", "--machine", "utpgm0",

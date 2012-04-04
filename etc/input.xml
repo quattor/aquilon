@@ -94,6 +94,7 @@
          <option name="services" type="boolean">flush the service templates</option>
          <option name="resources" type="boolean">flush the resource templates</option>
          <option name="locations" type="boolean">flush templates related to locations. This is only cities for now.</option>
+         <option name="switches" type="boolean">flush templates related to switches.</option>
          <option name="all" type="flag">flush all templates</option>
       </optgroup>
       <transport method="post" path="flush" />
@@ -2280,10 +2281,10 @@
          <option name="switch" type="string" conflicts="hostname machine cluster service instance default nasinfo">Name of the switch</option>
       </optgroup>
       <optgroup name="cat_options" mandatory="False" fields="any">
-         <option name="default" type="flag" conflicts="hostname machine cluster nasinfo city">Show the default client config for the service/instance</option>
-         <option name="server" type="flag" conflicts="hostname machine cluster nasinfo city">Show the server config for the service/instance</option>
-         <option name="data" type="flag" conflicts="machine service nasinfo city">Show the data template for the host/cluster</option>
-         <option name="instance" type="string" conflicts="hostname machine cluster nasinfo city">Name of the service instance</option>
+         <option name="default" type="flag" conflicts="hostname machine cluster nasinfo city switch">Show the default client config for the service/instance</option>
+         <option name="server" type="flag" conflicts="hostname machine cluster nasinfo city switch">Show the server config for the service/instance</option>
+         <option name="data" type="flag" conflicts="machine service nasinfo city switch">Show the data template for the host/cluster</option>
+         <option name="instance" type="string" conflicts="hostname machine cluster nasinfo city switch">Name of the service instance</option>
          <option name="generate" type="boolean">Show the plenary template as it would be generated</option>
       </optgroup>
       <optgroup name="cat_resource_options" mandatory="False" fields="any">

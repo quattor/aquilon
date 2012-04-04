@@ -33,7 +33,8 @@ from aquilon.worker.templates.cluster import (PlenaryCluster,
                                               PlenaryClusterData,
                                               PlenaryClusterObject,
                                               PlenaryClusterClient)
-from aquilon.worker.templates.metacluster import (PlenaryMetaCluster
+from aquilon.worker.templates.metacluster import PlenaryMetaCluster
+from aquilon.worker.templates.switch import PlenarySwitch
 from aquilon.worker.templates.host import (PlenaryHost, PlenaryHostData,
                                            PlenaryToplevelHost,
                                            PlenaryNamespacedHost)

@@ -38,6 +38,7 @@ from aquilon.worker.dbwrappers.location import get_location
 from aquilon.worker.dbwrappers.interface import (get_or_create_interface,
                                                  assign_address)
 from aquilon.worker.processes import DSDBRunner
+from aquilon.worker.templates.switch import PlenarySwitch
 
 
 class CommandAddSwitch(BrokerCommand):
@@ -96,4 +97,8 @@ class CommandAddSwitch(BrokerCommand):
             dsdb_runner.update_host(dbswitch, None)
         except AquilonError, err:
             raise ArgumentError("Could not add switch to DSDB: %s" % err)
-        return
+
+        plenary = PlenarySwitch(dbswitch, logger=logger)
+        plenary.write()
+
+

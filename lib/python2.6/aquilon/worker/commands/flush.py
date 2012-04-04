@@ -41,7 +41,7 @@ from aquilon.aqdb.model import (Service, Machine, Chassis, Host, Branch,
                                 ResourceHolder, HostResource, ClusterResource,
                                 VirtualMachine, Filesystem, RebootSchedule,
                                 Disk, Interface, AddressAssignment,
-                                ServiceInstance)
+                                ServiceInstance, Switch)
 from aquilon.worker.templates.base import Plenary
 from aquilon.worker.locks import CompileKey
 from aquilon.exceptions_ import PartialError, IncompleteError
@@ -51,7 +51,7 @@ class CommandFlush(BrokerCommand):
 
     def render(self, session, logger,
                services, personalities, machines, clusters, hosts,
-               locations, resources, all,
+               locations, resources, switches, all,
                **arguments):
         success = []
         failed = []
@@ -380,6 +380,15 @@ class CommandFlush(BrokerCommand):
                         written += plenary.write(locked=True)
                     except Exception, e:
                         failed.append("{0} failed: {1}".format(dbresource, e))
+
+            if switches or all:
+                logger.client_info("Flushing switches.")
+                for dbswitch in session.query(Switch).all():
+                    try:
+                        plenary = Plenary.get_plenary(dbswitch, logger=logger)
+                        written += plenary.write(locked=True)
+                    except Exception, e:
+                        failed.append("{0} failed: {1}".format(dbswitch, e))
 
             # written + len(failed) isn't actually the total that should
             # have been done, but it's the easiest to implement for this

@@ -39,6 +39,7 @@ from aquilon.worker.dbwrappers.rack import get_or_create_rack
 from aquilon.worker.dbwrappers.interface import (get_or_create_interface,
                                                  assign_address)
 from aquilon.worker.processes import DSDBRunner
+from aquilon.worker.templates.switch import PlenarySwitch
 
 
 class CommandAddTorSwitch(BrokerCommand):
@@ -115,4 +116,6 @@ class CommandAddTorSwitch(BrokerCommand):
                 dsdb_runner.update_host(dbtor_switch, None)
             except ProcessException, e:
                 raise ArgumentError("Could not add ToR switch to DSDB: %s" % e)
-        return
+
+        plenary = PlenarySwitch(dbtor_switch, logger=logger)
+        plenary.write()
