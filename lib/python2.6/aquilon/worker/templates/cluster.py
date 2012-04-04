@@ -222,23 +222,17 @@ class PlenaryClusterObject(Plenary):
     def body(self, lines):
         lines.append("include { 'pan/units' };")
         lines.append("include { 'pan/functions' };")
-        lines.append("")
         lines.append("include { 'clusterdata/%s' };" % self.name)
-
         lines.append("include { 'archetype/base' };")
-        fname = "body_%s" % self.dbobj.cluster_type
-        if hasattr(self, fname):
-            getattr(self, fname)(lines)
-        lines.append("")
-        lines.append("include { 'personality/%s/config' };" %
-                     self.dbobj.personality.name)
-        lines.append("")
-        lines.append("include { 'archetype/final' };")
 
-    def body_esx(self, lines):
         for servinst in sorted(self.dbobj.service_bindings):
             lines.append("include { 'service/%s/%s/client/config' };" % \
                          (servinst.service.name, servinst.name))
+
+        lines.append("include { 'personality/%s/config' };" %
+                     self.dbobj.personality.name)
+        lines.append("include { 'archetype/final' };")
+
 
 
 class PlenaryClusterClient(Plenary):
