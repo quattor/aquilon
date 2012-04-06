@@ -32,7 +32,7 @@
 from aquilon.exceptions_ import IncompleteError
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.templates.domain import TemplateDomain
-from aquilon.worker.templates.base import Plenary
+from aquilon.worker.templates.base import Plenary, PlenaryCollection
 from aquilon.worker.locks import lock_queue, CompileKey
 from aquilon.aqdb.model import Cluster, ClusterLifecycle
 
@@ -53,23 +53,18 @@ class CommandChangeClusterStatus(BrokerCommand):
 
         session.flush()
 
-        plenaries = []
-        plenary = Plenary.get_plenary(dbcluster, logger=logger)
-        plenaries.append(plenary)
+        plenaries = PlenaryCollection(logger=logger)
+        plenaries.append(Plenary.get_plenary(dbcluster))
 
-        # recompile all of the hosts associated with the cluster
-        compilelist = []
-        compilelist.append("cluster/" + dbcluster.name)
         for dbhost in dbcluster.hosts:
-            hostfile = Plenary.get_plenary(dbhost, logger=logger)
-            plenaries.append(hostfile)
-            compilelist.append(dbhost.fqdn)
+            plenaries.append(Plenary.get_plenary(dbhost))
 
         # Force a host lock as pan might overwrite the profile...
         key = CompileKey(domain=dbcluster.branch.name, logger=logger)
         try:
             lock_queue.acquire(key)
 
+            plenaries.stash()
             for tpl in plenaries:
                 try:
                     tpl.write(locked=True)
@@ -81,11 +76,10 @@ class CommandChangeClusterStatus(BrokerCommand):
 
             td = TemplateDomain(dbcluster.branch, dbcluster.sandbox_author,
                                 logger=logger)
-            td.compile(session, " ".join(compilelist), locked=True)
+            td.compile(session, " ".join(plenaries.object_templates), locked=True)
 
         except:
-            for tpl in plenaries:
-                tpl.restore_stash()
+            plenaries.restore_stash()
             raise
         finally:
             lock_queue.release(key)
