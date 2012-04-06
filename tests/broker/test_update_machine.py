@@ -311,7 +311,13 @@ class TestUpdateMachine(TestBrokerCommand):
         self.noouttest(command)
         command = ["update", "machine", "--machine", "ut9s03p9",
                    "--rack", "ut8"]
-        self.noouttest(command)
+        (out, err) = self.successtest(command)
+        self.matchoutput(err,
+                         "Warning: Host server9.aqd-unittest.ms.com is missing "
+                         "the following required services, please run 'aq "
+                         "reconfigure': afs, aqd, bootserver, dns, lemon, "
+                         "ntp.",
+                         command)
 
     def testverifydifferentrack(self):
         command = ["show", "machine", "--machine", "ut9s03p9"]

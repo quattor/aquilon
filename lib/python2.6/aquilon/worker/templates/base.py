@@ -448,8 +448,8 @@ class PlenaryCollection(object):
                 # it has the nice side effect of not updating the total.
                 try:
                     total += plen.write(locked=True, content=content)
-                except IncompleteError:
-                    pass
+                except IncompleteError, err:
+                    self.logger.client_info("Warning: %s" % err)
         except:
             if not locked:
                 self.restore_stash()

@@ -130,7 +130,12 @@ class TestCluster(TestBrokerCommand):
         command = ["reconfigure", "--hostname=aquilon61.aqd-unittest.ms.com",
                    "--personality=esx_server", "--archetype=vmhost",
                    "--os=esxi/4.0.0", "--buildstatus=rebuild"]
-        self.successtest(command)
+        (out, err) = self.successtest(command)
+        self.matchoutput(err,
+                         "Warning: Host aquilon61.aqd-unittest.ms.com "
+                         "personality esx_server requires cluster membership, "
+                         "please run 'aq cluster'.",
+                         command)
         command = ["cluster", "--cluster=utecl1",
                    "--personality=esx_desktop",
                    "--hostname=aquilon61.aqd-unittest.ms.com"]

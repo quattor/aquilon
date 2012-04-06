@@ -64,20 +64,10 @@ class CommandChangeClusterStatus(BrokerCommand):
         try:
             lock_queue.acquire(key)
 
-            plenaries.stash()
-            for tpl in plenaries:
-                try:
-                    tpl.write(locked=True)
-                except IncompleteError:
-                    # some hosts may not be built yet
-                    logger.client_info("Failed to refresh the plenary of {0:l}; "
-                                       "please run 'reconfigure'."
-                                       .format(tpl.dbobj))
-
+            plenaries.write(locked=True)
             td = TemplateDomain(dbcluster.branch, dbcluster.sandbox_author,
                                 logger=logger)
             td.compile(session, " ".join(plenaries.object_templates), locked=True)
-
         except:
             plenaries.restore_stash()
             raise
