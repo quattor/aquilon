@@ -59,8 +59,22 @@ class TestRebindClient(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Template: service/afs/q.ln.ms.com", command)
 
+    def testverifyqny(self):
+        command = ["cat", "--service", "afs", "--instance", "q.ny.ms.com",
+                   "--server"]
+        out = self.commandtest(command)
+        self.matchclean(out, "unittest02.one-nyp.ms.com", command)
 
-if __name__=='__main__':
+    def testverifyqln(self):
+        command = ["cat", "--service", "afs", "--instance", "q.ln.ms.com",
+                   "--server"]
+        out = self.commandtest(command)
+        self.searchoutput(out,
+                          r'"clients" = list\(\s*"unittest02.one-nyp.ms.com"\s*\);',
+                          command)
+
+
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestRebindClient)
     unittest.TextTestRunner(verbosity=2).run(suite)
 

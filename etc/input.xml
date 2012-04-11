@@ -2259,6 +2259,7 @@
       </optgroup>
       <optgroup name="cat_options" mandatory="False" fields="any">
          <option name="default" type="flag" conflicts="hostname machine cluster nasinfo city">Show the default client config for the service/instance</option>
+         <option name="server" type="flag" conflicts="hostname machine cluster nasinfo city">Show the server config for the service/instance</option>
          <option name="data" type="flag" conflicts="machine service nasinfo city">Show the data template for the host/cluster</option>
          <option name="instance" type="string" conflicts="hostname machine cluster nasinfo city">Name of the service instance</option>
          <option name="generate" type="boolean">Show the plenary template as it would be generated</option>

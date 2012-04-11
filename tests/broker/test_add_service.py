@@ -160,6 +160,11 @@ class TestAddService(TestBrokerCommand):
         command = "add service --service utsvc --instance utsi1"
         self.noouttest(command.split(" "))
 
+    def testcatutsvcserverdefault(self):
+        command = ["cat", "--service", "utsvc", "--server", "--default"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "template service/utsvc/server/config;", command)
+
     def testcatutsi1(self):
         command = "cat --service utsvc --instance utsi1"
         out = self.commandtest(command.split(" "))
@@ -180,6 +185,28 @@ class TestAddService(TestBrokerCommand):
                          '"/system/services/utsvc" = create("servicedata/utsvc/utsi1/config");',
                          command)
         self.matchoutput(out, "include { 'service/utsvc/client/config' };",
+                         command)
+
+    def testcatutsi1uiserver(self):
+        command = "cat --service utsvc --instance utsi1 --server"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out,
+                         "structure template servicedata/utsvc/utsi1/srvconfig;",
+                         command)
+        self.matchoutput(out, '"instance" = "utsi1";', command)
+        self.searchoutput(out, r'"clients" = list\(\s*\);', command)
+
+    def testcatutsi1uiserverdefault(self):
+        command = "cat --service utsvc --instance utsi1 --server --default"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out,
+                         "template service/utsvc/utsi1/server/config;",
+                         command)
+        self.matchoutput(out,
+                         '"/system/provides/utsvc" = create("servicedata/utsvc/utsi1/srvconfig");',
+                         command)
+        self.matchoutput(out,
+                         'include { "service/utsvc/server/config" };',
                          command)
 
     def testaddutsi2instance(self):
