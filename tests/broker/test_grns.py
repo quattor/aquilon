@@ -178,7 +178,7 @@ class TestGrns(TestBrokerCommand):
         self.matchclean(out, "acquiring", command)
 
     def test_500_verify_unittest00(self):
-        command = ["cat", "--hostname", "unittest00.one-nyp.ms.com",
+        command = ["cat", "--hostname", "unittest00.one-nyp.ms.com", "--data",
                    "--generate"]
         out = self.commandtest(command)
         # The GRN is mapped to both the host and the personality; verify it is
@@ -186,14 +186,14 @@ class TestGrns(TestBrokerCommand):
         self.searchoutput(out, r'"/system/eon_ids" = list\(\s+2\s+\);', command)
 
     def test_510_verify_unittest20(self):
-        command = ["cat", "--hostname", "unittest00.one-nyp.ms.com",
+        command = ["cat", "--hostname", "unittest00.one-nyp.ms.com", "--data",
                    "--generate"]
         out = self.commandtest(command)
         # The GRN is mapped to the personality only
         self.searchoutput(out, r'"/system/eon_ids" = list\(\s+2\s+\);', command)
 
     def test_520_verify_unittest12(self):
-        command = ["cat", "--hostname", "unittest00.one-nyp.ms.com",
+        command = ["cat", "--hostname", "unittest00.one-nyp.ms.com", "--data",
                    "--generate"]
         out = self.commandtest(command)
         # The GRN is mapped to the host only

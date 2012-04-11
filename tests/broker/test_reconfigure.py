@@ -77,8 +77,11 @@ class TestReconfigure(TestBrokerCommand):
         self.matchoutput(out, "Advertise Status: True", command)
 
     def testverifycatunittest02(self):
-        command = "cat --hostname unittest02.one-nyp.ms.com"
+        command = "cat --hostname unittest02.one-nyp.ms.com --data"
         out = self.commandtest(command.split(" "))
+        self.matchoutput(out,
+                         "template hostdata/unittest02.one-nyp.ms.com;",
+                         command)
         self.matchoutput(out,
             """'/hardware' = create("machine/americas/ut/ut3/ut3c5n10");""",
             command)
@@ -97,8 +100,22 @@ class TestReconfigure(TestBrokerCommand):
                            self.net.unknown[0].usable[0],
                            self.net.unknown[0].netmask),
                           command)
+        self.matchoutput(out, "'/system/advertise_status' = true;", command)
+
+        command = "cat --hostname unittest02.one-nyp.ms.com"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out,
+                         "object template unittest02.one-nyp.ms.com;",
+                         command)
+        self.searchoutput(out,
+                          r'variable LOADPATH = list\(\s*"aquilon"\s*\);',
+                          command)
+
         self.matchoutput(out,
             """include { "archetype/base" };""",
+            command)
+        self.matchoutput(out,
+            """include { "hostdata/unittest02.one-nyp.ms.com" };""",
             command)
         self.matchoutput(out,
             """include { "os/linux/5.0.1-x86_64/config" };""",
@@ -121,7 +138,6 @@ class TestReconfigure(TestBrokerCommand):
         self.matchoutput(out,
             """include { "archetype/final" };""",
             command)
-        self.matchoutput(out, "'/system/advertise_status' = true;", command)
 
     # These settings have not changed - the command should still succeed.
     def testreconfigureunittest00(self):
@@ -133,8 +149,11 @@ class TestReconfigure(TestBrokerCommand):
         self.matchoutput(err, "sent 1 server notifications", command)
 
     def testverifycatunittest00(self):
-        command = "cat --hostname unittest00.one-nyp.ms.com"
+        command = "cat --hostname unittest00.one-nyp.ms.com --data"
         out = self.commandtest(command.split(" "))
+        self.matchoutput(out,
+                         "template hostdata/unittest00.one-nyp.ms.com;",
+                         command)
         self.matchoutput(out,
             """'/hardware' = create("machine/americas/ut/ut3/ut3c1n3");""",
             command)
@@ -168,8 +187,15 @@ class TestReconfigure(TestBrokerCommand):
                            self.net.unknown[0].usable[3],
                            self.net.unknown[0].netmask),
                           command)
+        self.matchoutput(out, "'/system/advertise_status' = false;", command)
+
+        command = "cat --hostname unittest00.one-nyp.ms.com"
+        out = self.commandtest(command.split(" "))
         self.matchoutput(out,
             """include { "archetype/base" };""",
+            command)
+        self.matchoutput(out,
+            """include { "hostdata/unittest00.one-nyp.ms.com" };""",
             command)
         self.matchoutput(out,
             """include { "os/linux/5.0.1-x86_64/config" };""",
@@ -192,7 +218,6 @@ class TestReconfigure(TestBrokerCommand):
         self.matchoutput(out,
             """include { "archetype/final" };""",
             command)
-        self.matchoutput(out, "'/system/advertise_status' = false;", command)
 
     def testreconfigurewindowsstatus(self):
         self.noouttest(["reconfigure",
@@ -356,16 +381,25 @@ class TestReconfigure(TestBrokerCommand):
             self.noouttest(command)
 
     def testverifyremovebindingscat(self):
+        command = "cat --hostname aquilon87.aqd-unittest.ms.com --data"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out,
+                         "template hostdata/aquilon87.aqd-unittest.ms.com;",
+                         command)
+        self.matchoutput(out,
+            """'/hardware' = create("machine/americas/ut/ut9/ut9s03p37");""",
+            command)
+
         command = "cat --hostname aquilon87.aqd-unittest.ms.com"
         out = self.commandtest(command.split(" "))
         self.matchclean(out, "chooser1", command)
         self.matchclean(out, "chooser2", command)
         self.matchclean(out, "chooser3", command)
         self.matchoutput(out,
-            """'/hardware' = create("machine/americas/ut/ut9/ut9s03p37");""",
+            """include { "archetype/base" };""",
             command)
         self.matchoutput(out,
-            """include { "archetype/base" };""",
+            """include { "hostdata/aquilon87.aqd-unittest.ms.com" };""",
             command)
         self.matchoutput(out,
             """include { "os/linux/5.0.1-x86_64/config" };""",

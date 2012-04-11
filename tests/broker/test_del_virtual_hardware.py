@@ -86,17 +86,20 @@ class TestDelVirtualHardware(TestBrokerCommand):
         command = "cat --cluster=utecl1"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "object template clusters/utecl1;", command)
-        self.matchoutput(out, '"/system/cluster/name" = "utecl1";', command)
-        self.matchoutput(out, '"/system/metacluster/name" = "utmc1";', command)
-        self.searchoutput(out, r'"/system/cluster/machines" = nlist\(\s*\);',
-                          command)
         self.searchoutput(out,
                           r"include { 'service/esx_management_server/ut.[ab]/"
                           r"client/config' };",
                           command)
 
+        command = "cat --cluster=utecl1 --data"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, '"/system/cluster/name" = "utecl1";', command)
+        self.matchoutput(out, '"/system/metacluster/name" = "utmc1";', command)
+        self.searchoutput(out, r'"/system/cluster/machines" = nlist\(\s*\);',
+                          command)
 
-if __name__=='__main__':
+
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelVirtualHardware)
     unittest.TextTestRunner(verbosity=2).run(suite)
 

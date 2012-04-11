@@ -67,15 +67,18 @@ class TestMakeCluster(TestBrokerCommand):
         command = "cat --cluster=utecl1"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "object template clusters/utecl1;", command)
+        self.searchoutput(out,
+                          r"include { 'service/esx_management_server/ut.[ab]/"
+                          r"client/config' };",
+                          command)
+
+        command = "cat --cluster=utecl1 --data"
+        out = self.commandtest(command.split(" "))
         self.matchoutput(out, '"/system/cluster/name" = "utecl1";', command)
         self.matchoutput(out, '"/system/metacluster/name" = "utmc1";', command)
         self.matchoutput(out, '"/metadata/template/branch/name" = \"unittest\";', command)
         self.matchoutput(out, '"/metadata/template/branch/type" = \"domain\";', command)
         self.searchoutput(out, r'"/system/cluster/machines" = nlist\(\s*\);',
-                          command)
-        self.searchoutput(out,
-                          r"include { 'service/esx_management_server/ut.[ab]/"
-                          r"client/config' };",
                           command)
 
     def testverifycatutecl1_2(self):
@@ -92,7 +95,7 @@ class TestMakeCluster(TestBrokerCommand):
         command = ["make_cluster", "--cluster", "utecl1"]
         (out, err) = self.successtest(command)
 
-        command = "cat --cluster=utecl1"
+        command = "cat --cluster=utecl1 --data"
         out = self.commandtest(command.split(" "))
 
         self.searchoutput(out,
@@ -115,7 +118,7 @@ class TestMakeCluster(TestBrokerCommand):
         command = "make_cluster --cluster utgrid1"
         (out, err) = self.successtest(command.split(" "))
 
-        command = "cat --cluster=utgrid1"
+        command = "cat --cluster=utgrid1 --data"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, '"/metadata/template/branch/name" = \"unittest\";', command)
         self.matchoutput(out, '"/metadata/template/branch/type" = \"domain\";', command)
@@ -124,7 +127,7 @@ class TestMakeCluster(TestBrokerCommand):
         command = "make_cluster --cluster utvcs1"
         (out, err) = self.successtest(command.split(" "))
 
-        command = "cat --cluster=utvcs1"
+        command = "cat --cluster=utvcs1 --data"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, '"/metadata/template/branch/name" = \"unittest\";', command)
         self.matchoutput(out, '"/metadata/template/branch/type" = \"domain\";', command)
@@ -152,15 +155,18 @@ class TestMakeCluster(TestBrokerCommand):
         command = "cat --cluster=utecl2"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "object template clusters/utecl2;", command)
+        self.searchoutput(out,
+                          r"include { 'service/esx_management_server/ut.[ab]/"
+                          r"client/config' };",
+                          command)
+
+        command = "cat --cluster=utecl2 --data"
+        out = self.commandtest(command.split(" "))
         self.matchoutput(out, '"/system/cluster/name" = "utecl2";', command)
         self.matchoutput(out, '"/system/metacluster/name" = "utmc1";', command)
         self.matchoutput(out, '"/metadata/template/branch/name" = \"unittest\";', command)
         self.matchoutput(out, '"/metadata/template/branch/type" = \"domain\";', command)
         self.searchoutput(out, r'"/system/cluster/machines" = nlist\(\s*\);',
-                          command)
-        self.searchoutput(out,
-                          r"include { 'service/esx_management_server/ut.[ab]/"
-                          r"client/config' };",
                           command)
 
     def testfailmissingcluster(self):

@@ -75,7 +75,7 @@ class TestMakeAquilon(TestBrokerCommand):
                                  "unittest02.one-nyp.ms.com")
 
     def testverifycatunittest02(self):
-        command = "cat --hostname unittest02.one-nyp.ms.com"
+        command = "cat --hostname unittest02.one-nyp.ms.com --data"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
             """'/hardware' = create("machine/americas/ut/ut3/ut3c5n10");""",
@@ -110,6 +110,11 @@ class TestMakeAquilon(TestBrokerCommand):
         self.matchoutput(out, "'/metadata/template/branch/name' = \"unittest\";", command)
         self.matchoutput(out, "'/metadata/template/branch/type' = \"domain\";", command)
         self.matchclean(out, '"/metadata/template/branch/author"', command)
+        self.matchoutput(out, "'/system/advertise_status' = false", command)
+
+        command = "cat --hostname unittest02.one-nyp.ms.com"
+        out = self.commandtest(command.split(" "))
+
         self.matchoutput(out,
             """include { "archetype/base" };""",
             command)
@@ -134,7 +139,6 @@ class TestMakeAquilon(TestBrokerCommand):
         self.matchoutput(out,
             """include { "archetype/final" };""",
             command)
-        self.matchoutput(out,"'/system/advertise_status' = false",command)
 
     def testmakeunittest00(self):
         command = ["make", "aquilon",
@@ -198,7 +202,7 @@ class TestMakeAquilon(TestBrokerCommand):
         self.failUnlessEqual(host.personality.archetype.name, 'aquilon')
 
     def testverifycatunittest00(self):
-        command = "cat --hostname unittest00.one-nyp.ms.com"
+        command = "cat --hostname unittest00.one-nyp.ms.com --data"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
             """'/hardware' = create("machine/americas/ut/ut3/ut3c1n3");""",
@@ -236,6 +240,10 @@ class TestMakeAquilon(TestBrokerCommand):
         self.matchoutput(out, "'/metadata/template/branch/name' = \"unittest\";", command)
         self.matchoutput(out, "'/metadata/template/branch/type' = \"domain\";", command)
         self.matchclean(out, '"/metadata/template/branch/author"', command)
+        self.matchoutput(out, "'/system/advertise_status' = false", command)
+
+        command = "cat --hostname unittest00.one-nyp.ms.com"
+        out = self.commandtest(command.split(" "))
         self.matchoutput(out,
             """include { "archetype/base" };""",
             command)
@@ -260,7 +268,6 @@ class TestMakeAquilon(TestBrokerCommand):
         self.matchoutput(out,
             """include { "archetype/final" };""",
             command)
-        self.matchoutput(out,"'/system/advertise_status' = false",command)
 
     def testverifyshowservicebyclient(self):
         command = "show service --client unittest00.one-nyp.ms.com"

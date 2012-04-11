@@ -79,7 +79,8 @@ class TestAddApplication(TestBrokerCommand):
             if resource.name == "app1" and resource.type == "application":
                 self.assertEqual(resource.appdata.eonid, 42)
 
-        command = ["cat", "--generate", "--host=server1.aqd-unittest.ms.com"]
+        command = ["cat", "--generate",
+                   "--hostname", "server1.aqd-unittest.ms.com", "--data"]
         out = self.commandtest(command)
         self.matchoutput(out, "'/system/resources/application' = push(create(\"resource/host/server1.aqd-unittest.ms.com/application/app1/config\"))", command)
 
@@ -88,7 +89,7 @@ class TestAddApplication(TestBrokerCommand):
         self.successtest(command)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddApplication)
     unittest.TextTestRunner(verbosity=2).run(suite)
 

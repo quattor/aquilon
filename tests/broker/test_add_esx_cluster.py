@@ -75,24 +75,24 @@ class TestAddESXCluster(TestBrokerCommand):
         self.matchclean(out, "Comments", command)
 
     def testverifycatutecl1(self):
-        command = ["cat", "--cluster=utecl1"]
-        out = self.commandtest(command)
-        self.verify_cat_clusters("utecl1", "esx_desktop", "esx", "utmc1",
-                                 out, command)
+        obj_cmd, obj, data_cmd, data = self.verify_cat_clusters("utecl1",
+                                                                "esx_desktop",
+                                                                "esx", "utmc1")
+
         default_ratio = self.config.get("broker",
                                         "esx_cluster_vm_to_host_ratio")
         default_ratio = re.sub(r"(\d+):(\d+)", r"\1,\\s*\2", default_ratio)
 
-        self.searchoutput(out, r'"/system/cluster/ratio" = list\(\s*' +
-                          default_ratio + r'\s*\);', command)
-        self.matchoutput(out, '"/system/cluster/down_hosts_threshold" = 2;',
-                         command)
-        self.matchoutput(out, '"/system/cluster/down_maint_threshold" = 2;',
-                         command)
-        self.matchclean(out, '"/system/cluster/down_hosts_as_percent"', command)
-        self.matchclean(out, '"/system/cluster/down_maint_as_percent"', command)
-        self.matchclean(out, '"/system/cluster/down_hosts_percent"', command)
-        self.matchclean(out, '"/system/cluster/down_maint_percent"', command)
+        self.searchoutput(data, r'"/system/cluster/ratio" = list\(\s*' +
+                          default_ratio + r'\s*\);', data_cmd)
+        self.matchoutput(data, '"/system/cluster/down_hosts_threshold" = 2;',
+                         data_cmd)
+        self.matchoutput(data, '"/system/cluster/down_maint_threshold" = 2;',
+                         data_cmd)
+        self.matchclean(data, '"/system/cluster/down_hosts_as_percent"', data_cmd)
+        self.matchclean(data, '"/system/cluster/down_maint_as_percent"', data_cmd)
+        self.matchclean(data, '"/system/cluster/down_hosts_percent"', data_cmd)
+        self.matchclean(data, '"/system/cluster/down_maint_percent"', data_cmd)
 
 
     def testaddutecl2(self):
@@ -123,12 +123,12 @@ class TestAddESXCluster(TestBrokerCommand):
         self.matchoutput(out, "Comments: Another test ESX cluster", command)
 
     def testverifycatutecl2(self):
-        command = ["cat", "--cluster=utecl2"]
-        out = self.commandtest(command)
-        self.verify_cat_clusters("utecl2", "esx_desktop", "esx", "utmc1",
-                                 out, command)
-        self.matchoutput(out, '"/system/cluster/down_hosts_threshold" = 1;',
-                         command)
+        obj_cmd, obj, data_cmd, data = self.verify_cat_clusters("utecl2",
+                                                                "esx_desktop",
+                                                                "esx", "utmc1")
+
+        self.matchoutput(data, '"/system/cluster/down_hosts_threshold" = 1;',
+                         data_cmd)
 
     def testfailaddexisting(self):
         command = ["add_esx_cluster", "--cluster=utecl1",
@@ -241,10 +241,7 @@ class TestAddESXCluster(TestBrokerCommand):
         self.matchclean(out, "Comments", command)
 
     def testverifycatutecl3(self):
-        command = ["cat", "--cluster=utecl3"]
-        out = self.commandtest(command)
-        self.verify_cat_clusters("utecl3", "esx_desktop", "esx",
-                                 "utmc2", out, command)
+        self.verify_cat_clusters("utecl3", "esx_desktop", "esx", "utmc2")
 
     def testaddutecl4(self):
         # Bog standard - used for some noop tests
@@ -275,10 +272,7 @@ class TestAddESXCluster(TestBrokerCommand):
         self.matchclean(out, "Comments", command)
 
     def testverifycatutecl4(self):
-        command = ["cat", "--cluster=utecl4"]
-        out = self.commandtest(command)
-        self.verify_cat_clusters("utecl4", "esx_desktop", "esx",
-                                 "utmc2", out, command)
+        self.verify_cat_clusters("utecl4", "esx_desktop", "esx", "utmc2")
 
     def testverifyplenaryclusterclient(self):
         for i in range(1, 5):
@@ -319,10 +313,8 @@ class TestAddESXCluster(TestBrokerCommand):
         self.noouttest(command)
 
     def testverifyutecl11(self):
-        command = ["cat", "--cluster=utecl11"]
-        out = self.commandtest(command)
         self.verify_cat_clusters("utecl11", "esx_desktop", "esx", "utmc5",
-                                 out, command, on_rack=True)
+                                 on_rack=True)
 
     def testaddutmc6(self):
         command = ["add_esx_cluster", "--cluster=utecl12",
@@ -341,10 +333,8 @@ class TestAddESXCluster(TestBrokerCommand):
         self.noouttest(command)
 
     def testverifyutecl12(self):
-        command = ["cat", "--cluster=utecl12"]
-        out = self.commandtest(command)
         self.verify_cat_clusters("utecl12", "esx_desktop", "esx", "utmc6",
-                                 out, command, on_rack=True)
+                                 on_rack=True)
 
     def testaddutmc7(self):
         command = ["add_esx_cluster", "--cluster=utecl13",
@@ -361,43 +351,58 @@ class TestAddESXCluster(TestBrokerCommand):
                          command)
 
     def verify_cat_clusters(self, name, persona, ctype, metacluster,
-                            out, command, on_rack=False):
-        self.matchoutput(out, "object template clusters/%s;" % name,
-                         command)
-        self.matchoutput(out, '"/system/cluster/name" = "%s";' % name,
-                         command)
-        self.matchoutput(out, '"/system/cluster/type" = "%s";' % ctype,
-                         command)
-        self.matchoutput(out, '"/system/cluster/sysloc/continent" = "na";',
-                         command)
-        self.matchoutput(out, '"/system/cluster/sysloc/city" = "ny";',
-                         command)
-        self.matchoutput(out, '"/system/cluster/sysloc/campus" = "ny";',
-                         command)
-        self.matchoutput(out, '"/system/cluster/sysloc/building" = "ut";',
-                         command)
-        self.matchoutput(out, '"/system/cluster/sysloc/location" = "ut.ny.na";',
-                         command)
-        self.matchoutput(out, '"/system/metacluster/name" = "%s";' %
-                         metacluster, command)
-        self.matchoutput(out, '"/system/build" = "build";', command)
+                            on_rack=False):
+        object_command = ["cat", "--cluster", name]
+        object = self.commandtest(object_command)
+
+        self.matchoutput(object, "object template clusters/%s;" % name,
+                         object_command)
+        self.searchoutput(object,
+                          r'variable LOADPATH = list\(\s*"esx_cluster"\s*\);',
+                          object_command)
+        self.matchoutput(object, "include { 'clusterdata/%s' };" % name,
+                         object_command)
+        self.matchclean(object, "include { 'service", object_command)
+        self.matchoutput(object, "include { 'personality/%s/config' };" % persona,
+                         object_command)
+
+        data_command = ["cat", "--cluster", name, "--data"]
+        data = self.commandtest(data_command)
+
+        self.matchoutput(data, "template clusterdata/%s;" % name, data_command)
+        self.matchoutput(data, '"/system/cluster/name" = "%s";' % name,
+                         data_command)
+        self.matchoutput(data, '"/system/cluster/type" = "%s";' % ctype,
+                         data_command)
+        self.matchoutput(data, '"/system/cluster/sysloc/continent" = "na";',
+                         data_command)
+        self.matchoutput(data, '"/system/cluster/sysloc/city" = "ny";',
+                         data_command)
+        self.matchoutput(data, '"/system/cluster/sysloc/campus" = "ny";',
+                         data_command)
+        self.matchoutput(data, '"/system/cluster/sysloc/building" = "ut";',
+                         data_command)
+        self.matchoutput(data, '"/system/cluster/sysloc/location" = "ut.ny.na";',
+                         data_command)
+        self.matchoutput(data, '"/system/metacluster/name" = "%s";' %
+                         metacluster, data_command)
+        self.matchoutput(data, '"/system/build" = "build";', data_command)
         if on_rack:
-            self.matchoutput(out, '"/system/cluster/rack/name" = "ut13"',
-                             command)
-            self.matchoutput(out, '"/system/cluster/rack/row" = "k"',
-                             command)
-            self.matchoutput(out, '"/system/cluster/rack/column" = "3"',
-                             command)
+            self.matchoutput(data, '"/system/cluster/rack/name" = "ut13"',
+                             data_command)
+            self.matchoutput(data, '"/system/cluster/rack/row" = "k"',
+                             data_command)
+            self.matchoutput(data, '"/system/cluster/rack/column" = "3"',
+                             data_command)
         else:
-            self.matchclean(out, '"/system/cluster/rack/name"', command)
-            self.matchclean(out, '"/system/cluster/rack/row"', command)
-            self.matchclean(out, '"/system/cluster/rack/column"', command)
-        self.matchclean(out, '"/system/cluster/allowed_personalities"', command)
-        self.matchclean(out, "include { 'service", command)
-        self.matchoutput(out, "include { 'personality/%s/config' };" % persona,
-                         command)
-        self.searchoutput(out, r'"/system/cluster/machines" = nlist\(\s*\);',
-                          command)
+            self.matchclean(data, '"/system/cluster/rack/name"', data_command)
+            self.matchclean(data, '"/system/cluster/rack/row"', data_command)
+            self.matchclean(data, '"/system/cluster/rack/column"', data_command)
+        self.matchclean(data, '"/system/cluster/allowed_personalities"', data_command)
+        self.searchoutput(data, r'"/system/cluster/machines" = nlist\(\s*\);',
+                          data_command)
+
+        return object_command, object, data_command, data
 
 
 if __name__ == '__main__':

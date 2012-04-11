@@ -84,7 +84,7 @@ class TestAddResourceGroup(TestBrokerCommand):
         self.matchoutput(out, "Filesystem: fs1", command)
 
     def test_210_cat_cluster(self):
-        command = ["cat", "--cluster", "utvcs1"]
+        command = ["cat", "--cluster", "utvcs1", "--data"]
         out = self.commandtest(command)
         self.matchoutput(out,
                          "'/system/resources/resourcegroup' = "
@@ -92,13 +92,21 @@ class TestAddResourceGroup(TestBrokerCommand):
                          command)
 
     def test_210_cat_rg(self):
-        command = ["cat", "--resource", "utvcs1as1",
-                   "--restype", "resourcegroup", "--rescluster", "utvcs1"]
+        command = ["cat", "--resourcegroup", "utvcs1as1", "--cluster", "utvcs1"]
         out = self.commandtest(command)
         self.matchoutput(out,
                          '"resources/filesystem" = '
                          'push(create("resource/cluster/utvcs1/resourcegroup/utvcs1as1/filesystem/fs1/config"));',
                          command)
+
+    def test_210_cat_fs(self):
+        command = ["cat", "--cluster", "utvcs1", "--resourcegroup", "utvcs1as1",
+                   "--filesystem", "fs1"]
+        out = self.commandtest(command)
+        self.matchoutput(out,
+                         "structure template resource/cluster/utvcs1/resourcegroup/utvcs1as1/filesystem/fs1/config;",
+                         command)
+        self.matchoutput(out, '"block_device_path" = "/dev/foo/bar";', command)
 
     def test_300_del_resourcegroup(self):
         # Check that the plenaries of contained resources get cleaned up

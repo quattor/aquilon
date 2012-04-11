@@ -82,7 +82,7 @@ class TestDelStaticRoute(TestBrokerCommand):
         net = self.net.unknown[14]
         ip = net.usable[0]
         command = ["cat", "--hostname", "unittest26.aqd-unittest.ms.com",
-                   "--generate"]
+                   "--data", "--generate"]
         out = self.commandtest(command)
         self.searchoutput(out,
                           r'"eth1", nlist\(\s*'

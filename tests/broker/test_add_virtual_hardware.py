@@ -128,7 +128,7 @@ class TestAddVirtualHardware(TestBrokerCommand):
 
     def test_096_clusterplenary(self):
         # The cluster plenary should not have VMs.
-        command = ["cat", "--cluster=utecl1"]
+        command = ["cat", "--cluster=utecl1", "--data"]
         out = self.commandtest(command)
         self.searchoutput(out, r'"/system/cluster/machines" = nlist\(\s*\);',
                           command)
@@ -160,7 +160,7 @@ class TestAddVirtualHardware(TestBrokerCommand):
 
     def test_127_clusterplenary(self):
         # The cluster plenary should not have VMs.
-        command = ["cat", "--cluster=utecl1"]
+        command = ["cat", "--cluster=utecl1", "--data"]
         out = self.commandtest(command)
         self.searchoutput(out, r'"/system/cluster/machines" = nlist\(\s*\);',
                           command)
@@ -305,9 +305,9 @@ class TestAddVirtualHardware(TestBrokerCommand):
                               command)
 
     def test_500_verifycatcluster(self):
-        command = "cat --cluster=utecl1"
+        command = "cat --cluster=utecl1 --data"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "object template clusters/utecl1;", command)
+        self.matchoutput(out, "template clusterdata/utecl1;", command)
         self.matchoutput(out, '"/system/cluster/name" = "utecl1";', command)
         self.matchoutput(out, '"/system/metacluster/name" = "utmc1";', command)
         self.matchoutput(out, '"/system/cluster/machines" = nlist(', command)
@@ -325,6 +325,10 @@ class TestAddVirtualHardware(TestBrokerCommand):
                               % (machine, machine),
                               command)
         self.matchclean(out, "evm9", command)
+
+        command = "cat --cluster=utecl1"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "object template clusters/utecl1;", command)
         self.searchoutput(out,
                           r"include { 'service/esx_management_server/ut.[ab]/"
                           r"client/config' };",
@@ -425,7 +429,7 @@ class TestAddVirtualHardware(TestBrokerCommand):
         self.matchoutput(out, "Comments: Windows Virtual Desktop", command)
 
     def test_810_verifycatcluster(self):
-        command = "cat --cluster=utecl1"
+        command = "cat --cluster=utecl1 --data"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, '"name", "windows"', command)
         self.matchoutput(out, '"os", "windows"', command)

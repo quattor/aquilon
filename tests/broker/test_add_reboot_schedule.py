@@ -64,9 +64,8 @@ class TestAddRebootSchedule(TestBrokerCommand):
         self.matchoutput(out, "Day: Sun", command)
         self.matchoutput(out, "Time: 08:00", command)
 
-        command = ["cat", "--resource=reboot_schedule",
-                   "--restype=reboot_schedule",
-                   "--reshost=server1.aqd-unittest.ms.com"]
+        command = ["cat", "--reboot_schedule=reboot_schedule",
+                   "--hostname=server1.aqd-unittest.ms.com"]
         out = self.commandtest(command)
         self.matchoutput(out,
                          "structure template resource"
@@ -78,9 +77,8 @@ class TestAddRebootSchedule(TestBrokerCommand):
         self.matchoutput(out, "\"week\" = \"All\"", command)
         self.matchoutput(out, "\"day\" = \"Sun\"", command)
 
-        command = ["cat", "--resource=reboot_schedule",
-                   "--restype=reboot_schedule",
-                   "--reshost=server1.aqd-unittest.ms.com",
+        command = ["cat", "--reboot_schedule=reboot_schedule",
+                   "--hostname=server1.aqd-unittest.ms.com",
                    "--generate"]
         newout = self.commandtest(command)
         self.assertEqual(out, newout)
@@ -97,9 +95,8 @@ class TestAddRebootSchedule(TestBrokerCommand):
         self.matchoutput(out, "already exists", command)
 
     def test_15_notfoundresource(self):
-        command = ["cat", "--resource=schedule-does-not-exist",
-                   "--reshostname=server1.aqd-unittest.ms.com",
-                   "--restype=reboot_schedule"]
+        command = ["cat", "--reboot_schedule=schedule-does-not-exist",
+                   "--hostname=server1.aqd-unittest.ms.com"]
         self.notfoundtest(command)
 
     def test_30_checkthehost(self):
@@ -111,7 +108,8 @@ class TestAddRebootSchedule(TestBrokerCommand):
         command = ["make", "--hostname=server1.aqd-unittest.ms.com"]
         out = self.successtest(command)
 
-        command = ["cat", "--generate", "--host=server1.aqd-unittest.ms.com"]
+        command = ["cat", "--generate",
+                   "--hostname", "server1.aqd-unittest.ms.com", "--data"]
         out = self.commandtest(command)
         self.matchoutput(out,
                          "'/system/resources/reboot_schedule' = "

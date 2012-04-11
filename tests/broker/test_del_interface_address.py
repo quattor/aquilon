@@ -136,7 +136,8 @@ class TestDelInterfaceAddress(TestBrokerCommand):
 
     def testverifyunittest20(self):
         ip = self.net.unknown[13].usable[2]
-        command = ["cat", "--hostname", "unittest20.aqd-unittest.ms.com"]
+        command = ["cat", "--hostname", "unittest20.aqd-unittest.ms.com",
+                   "--data"]
         out = self.commandtest(command)
         self.searchoutput(out,
                           r'"/system/network/vips" = nlist\(\s*'

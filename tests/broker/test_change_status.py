@@ -53,7 +53,7 @@ class TestChangeStatus(TestBrokerCommand):
             out = self.commandtest(command.split(" "))
             self.matchoutput(out, "Build Status: %s" % status, command)
 
-            command = "cat --hostname unittest02.one-nyp.ms.com"
+            command = "cat --hostname unittest02.one-nyp.ms.com --data"
             out = self.commandtest(command.split(" "))
             self.matchoutput(out, """'/system/build' = "%s";""" % status, command)
 

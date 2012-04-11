@@ -74,9 +74,8 @@ class TestAddRebootIntervention(TestBrokerCommand):
         self.matchoutput(out, "Start: ", command)
         self.matchoutput(out, "Expiry: ", command)
 
-        command = ["cat", "--resource=reboot_intervention",
-                   "--restype=reboot_iv",
-                   "--reshost=server1.aqd-unittest.ms.com"]
+        command = ["cat", "--reboot_intervention=reboot_intervention",
+                   "--hostname=server1.aqd-unittest.ms.com"]
         out = self.commandtest(command)
         self.matchoutput(out,
                          "structure template resource"
@@ -87,9 +86,8 @@ class TestAddRebootIntervention(TestBrokerCommand):
         self.matchoutput(out, "\"start\" =", command)
         self.matchoutput(out, "\"expiry\" =", command)
 
-        command = ["cat", "--resource=reboot_intervention",
-                   "--restype=reboot_iv",
-                   "--reshost=server1.aqd-unittest.ms.com",
+        command = ["cat", "--reboot_intervention=reboot_intervention",
+                   "--hostname=server1.aqd-unittest.ms.com",
                    "--generate"]
         newout = self.commandtest(command)
         self.assertEqual(out, newout)
@@ -107,9 +105,8 @@ class TestAddRebootIntervention(TestBrokerCommand):
         self.matchoutput(out, "already exists", command)
 
     def test_15_notfoundri(self):
-        command = ["cat", "--resource=ri-does-not-exist",
-                   "--reshostname=server1.aqd-unittest.ms.com",
-                   "--restype=reboot_intervention"]
+        command = ["cat", "--reboot_intervention=ri-does-not-exist",
+                   "--hostname=server1.aqd-unittest.ms.com"]
         self.notfoundtest(command)
 
     def test_30_checkthehost(self):
@@ -120,7 +117,8 @@ class TestAddRebootIntervention(TestBrokerCommand):
         command = ["make", "--hostname=server1.aqd-unittest.ms.com"]
         out = self.successtest(command)
 
-        command = ["cat", "--generate", "--host=server1.aqd-unittest.ms.com"]
+        command = ["cat", "--generate",
+                   "--hostname", "server1.aqd-unittest.ms.com", "--data"]
         out = self.commandtest(command)
         self.matchoutput(out,
                          "'/system/resources/reboot_iv' = "
