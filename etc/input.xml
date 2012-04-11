@@ -2249,35 +2249,36 @@
       plenary template does not exist yet because it cannot be compiled. Note
       that template generated on-demand in this way will be incomplete
       (especially if it cannot be compiled) and is purely provided for debugging.
-      <optgroup name="cat selector" mandatory="True" fields="any">
-         <option name="hostname" type="string" conflicts="machine cluster service instance default nasinfo city resource">Name of the host</option>
-         <option name="machine" type="string" conflicts="hostname cluster service instance default nasinfo city resource">Name of the machine</option>
-         <option name="cluster" type="string" conflicts="hostname machine service instance default nasinfo city resource">Name of the cluster</option>
-         <option name="service" type="string" conflicts="hostname machine cluster nasinfo city resource">Name of the service</option>
-         <option name="instance" type="string" conflicts="hostname machine cluster nasinfo city resource">Name of the service instance</option>
-	 <option name="default" type="flag" conflicts="hostname machine cluster nasinfo city resource">Show the default client config for the service/instance</option>
-	 <option name="nasinfo" type="string" conflicts="hostname machine cluster service instance default city resource">Show the default client config for the service/instance</option>
-	 <option name="city" type="string" conflicts="hostname machine cluster service instance default nasinfo resource">Name of the city</option>
-         <optgroup name="resopts" fields="all">
-	   <option name="resource" type="string" conflicts="hostname machine cluster service instance default nasinfo">Name of the resource</option>
-	   <option name="restype" type="string" conflicts="reshost">The resource type</option>
-	   <optgroup name="resplacement" fields="any">
-             <option name="reshostname" type="string" conflicts="rescluster">The resource host</option>
-             <option name="rescluster" type="string" conflicts="reshost">The resource cluster</option>
-            </optgroup>
-          </optgroup>
+      <optgroup name="cat_selector" mandatory="True" fields="any">
+         <option name="machine" type="string" conflicts="hostname cluster service instance default nasinfo city">Name of the machine</option>
+         <option name="hostname" type="string" conflicts="machine cluster service instance default nasinfo city">Name of the host</option>
+         <option name="cluster" type="string" conflicts="hostname machine service instance default nasinfo city">Name of the cluster</option>
+         <option name="service" type="string" conflicts="hostname machine cluster nasinfo city">Name of the service</option>
+         <option name="nasinfo" type="string" conflicts="hostname machine cluster service instance default city">Show the default client config for the service/instance</option>
+         <option name="city" type="string" conflicts="hostname machine cluster service instance default nasinfo">Name of the city</option>
       </optgroup>
-      <optgroup name="cat options" fields="any">
-          <option name="generate" type="boolean">Show the plenary template as it would be generated</option>
+      <optgroup name="cat_options" mandatory="False" fields="any">
+         <option name="default" type="flag" conflicts="hostname machine cluster nasinfo city">Show the default client config for the service/instance</option>
+         <option name="data" type="flag" conflicts="machine service nasinfo city">Show the data template for the host/cluster</option>
+         <option name="instance" type="string" conflicts="hostname machine cluster nasinfo city">Name of the service instance</option>
+         <option name="generate" type="boolean">Show the plenary template as it would be generated</option>
       </optgroup>
-      <transport trigger="hostname" method="get" path="host/%(hostname)s/plenary" />
+      <optgroup name="cat_resource_options" mandatory="False" fields="any">
+         <option name="resourcegroup" type="string" conflicts="machine service instance default nasinfo data">Name of a resource group</option>
+         <option name="application" type="string" conflicts="machine service instance default nasinfo data">Name of an application</option>
+         <option name="filesystem" type="string" conflicts="machine service instance default nasinfo data">Name of a file system</option>
+         <option name="hostlink" type="string" conflicts="machine service instance default nasinfo data">Name of a hostlink</option>
+         <option name="intervention" type="string" conflicts="machine service instance default nasinfo data">Name of an intervention</option>
+         <option name="reboot_intervention" type="string" conflicts="machine service instance default nasinfo data">Name of a reboot intervention</option>
+         <option name="reboot_schedule" type="string" conflicts="machine service instance default nasinfo data">Name of a reboot schedule</option>
+      </optgroup>
       <transport trigger="machine" method="get" path="machine/%(machine)s/plenary" />
+      <transport trigger="hostname" method="get" path="host/%(hostname)s/plenary" />
+      <transport trigger="cluster" method="get" path="cluster/any/%(cluster)s/plenary" />
       <transport trigger="service" method="get" path="service/%(service)s/plenary" />
       <transport trigger="instance" method="get" path="service/%(service)s/instance/%(instance)s/plenary" />
-      <transport trigger="cluster" method="get" path="cluster/any/%(cluster)s/plenary" />
       <transport trigger="nasinfo" method="get" path="nasinfo/%(nasinfo)s/plenary" />
       <transport trigger="city" method="get" path="city/%(city)s/plenary" />
-      <transport trigger="resource" method="get" path="resource/plenary/%(resource)s" />
    </command>
 
    <command name="sync">
