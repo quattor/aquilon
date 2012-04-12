@@ -308,10 +308,6 @@ class PlenaryHostData(Plenary):
         if self.branch.branch_type == 'sandbox':
             pan_assign(lines, "/metadata/template/branch/author",
                        self.dbobj.sandbox_author.name)
-        lines.append("")
-
-        return
-
 
 
 class PlenaryToplevelHost(Plenary):
@@ -386,41 +382,8 @@ class PlenaryToplevelHost(Plenary):
         services.sort()
         provides.sort()
 
-        templates = []
-        templates.append("hostdata/%s" % self.name)
-        templates.append("archetype/base")
-        templates.append(self.dbobj.operating_system.cfg_path + '/config')
-
-        for feature in model_features(self.dbobj.machine.model, arch, pers):
-            templates.append("%s/config" % feature.cfg_path)
-
-        templates.extend(services)
-        templates.extend(provides)
-
-        (pre_features, post_features) = personality_features(pers)
-        for feature in pre_features:
-            templates.append("%s/config" % feature.cfg_path)
-
-        personality_template = "personality/%s/config" % \
-                self.dbobj.personality.name
-        templates.append(personality_template)
-
-        if self.dbobj.cluster:
-            clplenary = PlenaryClusterClient(self.dbobj.cluster)
-            templates.append(clplenary.plenary_template_name)
-        elif pers.cluster_required:
-            raise IncompleteError("Host %s personality %s requires cluster "
-                                  "membership, please run 'aq cluster'." %
-                                  (self.name, pers.name))
-
-        for feature in post_features:
-            templates.append("%s/config" % feature.cfg_path)
-
-        templates.append("archetype/final")
-
         # Okay, here's the real content
-        pan_include(lines, "pan/units")
-        pan_include(lines, "pan/functions")
+        pan_include(lines, ["pan/units", "pan/functions"])
         lines.append("")
 
         for iface in sorted(iface_features.keys()):
@@ -430,12 +393,36 @@ class PlenaryToplevelHost(Plenary):
                 pan_include(lines, "%s/config" % feature.cfg_path)
             lines.append("")
 
-        for template in templates:
-            pan_include(lines, template)
+        pan_include(lines, "hostdata/%s" % self.name)
+        pan_include(lines, "archetype/base")
+        pan_include(lines, self.dbobj.operating_system.cfg_path + '/config')
 
-        lines.append("")
+        for feature in model_features(self.dbobj.machine.model, arch, pers):
+            pan_include(lines, "%s/config" % feature.cfg_path)
 
-        return
+        pan_include(lines, services)
+        pan_include(lines, provides)
+
+        (pre_features, post_features) = personality_features(pers)
+        for feature in pre_features:
+            pan_include(lines, "%s/config" % feature.cfg_path)
+
+        personality_template = "personality/%s/config" % \
+                self.dbobj.personality.name
+        pan_include(lines, personality_template)
+
+        if self.dbobj.cluster:
+            clplenary = PlenaryClusterClient(self.dbobj.cluster)
+            pan_include(lines, clplenary.plenary_template_name)
+        elif pers.cluster_required:
+            raise IncompleteError("Host %s personality %s requires cluster "
+                                  "membership, please run 'aq cluster'." %
+                                  (self.name, pers.name))
+
+        for feature in post_features:
+            pan_include(lines, "%s/config" % feature.cfg_path)
+
+        pan_include(lines, "archetype/final")
 
     def write(self, *args, **kwargs):
         # Don't bother writing plenary files for dummy aurora hardware or for
