@@ -160,11 +160,6 @@ class Location(Base):
         super(Location, self).__init__(**kwargs)
 
     def update_parent(self, parent=None):
-        # The update parent only handles cases when a child is moved
-        # from one parent to another. It does not handle the cases
-        # when children under the parents are moved. A update_children
-        # method will have to be implemented for that
-
         session = object_session(self)
         if parent is None:  # pragma: no cover
             raise AquilonError("Parent location can be updated but not removed")
