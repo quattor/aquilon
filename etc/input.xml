@@ -4320,9 +4320,9 @@
          <option name="filesystem" type="string">name</option>
       </optgroup>
       <optgroup name="resource_mapping_opts" mandatory="True" fields="any">
-        <option name="hostname" type="string">Hostname of resource</option>
+         <option name="hostname" type="string">Hostname of resource</option>
          <option name="resourcegroup" type="string">Resourcegroup to apply resource</option>
-        <option name="cluster" type="string">Cluster of resource</option>
+         <option name="cluster" type="string">Cluster of resource</option>
       </optgroup>
       <transport method="delete" path="resource/filesystem/%(filesystem)s" />
    </command>
@@ -4364,8 +4364,8 @@
       </optgroup>
       <optgroup name="resource_mapping_opts" mandatory="True" fields="any">
          <option name="resourcegroup" type="string">Resourcegroup to apply resource</option>
-        <option name="hostname" type="string">Hostname of resource</option>
-        <option name="cluster" type="string">Cluster of resource</option>
+         <option name="hostname" type="string">Hostname of resource</option>
+         <option name="cluster" type="string">Cluster of resource</option>
       </optgroup>
       <transport method="delete" path="resource/application/%(application)s" />
    </command>
@@ -4398,7 +4398,7 @@
          <option name="comments" type="string">Comments</option>
       </optgroup>
       <optgroup name="resource_mapping_opts" mandatory="True" fields="any">
-        <option name="resourcegroup" type="string">Resourcegroup to apply resource</option>
+         <option name="resourcegroup" type="string">Resourcegroup to apply resource</option>
          <option name="hostname" type="string">Hostname to apply resource</option>
          <option name="cluster" type="string">Cluster to apply resource</option>
       </optgroup>
@@ -4411,9 +4411,9 @@
          <option name="hostlink" type="string">name</option>
       </optgroup>
       <optgroup name="resource_mapping_opts" mandatory="True" fields="any">
-        <option name="resourcegroup" type="string">Resourcegroup to apply resource</option>
-        <option name="hostname" type="string">Hostname of resource</option>
-        <option name="cluster" type="string">Cluster of resource</option>
+         <option name="resourcegroup" type="string">Resourcegroup to apply resource</option>
+         <option name="hostname" type="string">Hostname of resource</option>
+         <option name="cluster" type="string">Cluster of resource</option>
       </optgroup>
       <transport method="delete" path="resource/hostlink/%(hostlink)s" />
    </command>
@@ -4472,8 +4472,8 @@
          <option name="intervention" type="string">name</option>
       </optgroup>
       <optgroup name="resource_mapping_opts" mandatory="True" fields="any">
-        <option name="hostname" type="string">Hostname of resource</option>
-        <option name="cluster" type="string">Cluster of resource</option>
+         <option name="hostname" type="string">Hostname of resource</option>
+         <option name="cluster" type="string">Cluster of resource</option>
       </optgroup>
       <transport method="delete" path="resource/intervention/%(intervention)s" />
    </command>
@@ -4573,7 +4573,7 @@
    <command name="add_resourcegroup">
       Add a new resource group.
       <optgroup name="add_rg_opts" mandatory="True" fields="all">
-        <option name="resourcegroup" type="string">name</option>
+         <option name="resourcegroup" type="string">Name of the resource group</option>
       </optgroup>
       <optgroup name="resource_mapping_opts" mandatory="True" fields="any">
          <option name="hostname" type="string">Hostname to apply resource group</option>
@@ -4585,7 +4585,11 @@
    <command name="del_resourcegroup">
       Delete a resource group.
       <optgroup name="del_rg_opts" mandatory="True" fields="all">
-         <option name="resourcegroup" type="string">name</option>
+         <option name="resourcegroup" type="string">Name of the resource group</option>
+      </optgroup>
+      <optgroup name="resource_mapping_opts" mandatory="True" fields="any">
+         <option name="hostname" type="string">Hostname of the resource group</option>
+         <option name="cluster" type="string">Cluster of the resource group</option>
       </optgroup>
       <transport method="delete" path="resource/resourcegroup/%(resourcegroup)s" />
    </command>

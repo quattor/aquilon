@@ -124,7 +124,8 @@ class TestAddResourceGroup(TestBrokerCommand):
         self.failUnless(os.path.exists(rg_plenary),
                         "Plenary '%s' does not exist" % rg_plenary)
 
-        command = ["del_resourcegroup", "--resourcegroup=utvcs1as1"]
+        command = ["del_resourcegroup", "--resourcegroup=utvcs1as1",
+                   "--cluster=utvcs1"]
         self.successtest(command)
 
         # The resource plenaries should be gone

@@ -63,12 +63,12 @@ def get_resource_holder(session, hostname, cluster, resgroup=None,
             who = dbcluster.resholder
 
     if resgroup is not None:
-        dbrg = ResourceGroup.get_unique(session, resgroup, compel=True)
+        dbrg = ResourceGroup.get_unique(session, name=resgroup, holder=who,
+                                        compel=True)
         who = dbrg.resholder
         if who is None:
             if compel:
-                raise NotFoundException("resourcegroup %s has no resources" %
-                                        dbrg)
+                raise NotFoundException("{0} has no resources.".format(dbrg))
             dbrg.resholder = BundleResource(resourcegroup=dbrg)
             session.add(dbrg.resholder)
             session.flush()

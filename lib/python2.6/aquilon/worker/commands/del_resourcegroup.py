@@ -30,19 +30,20 @@
 
 from aquilon.aqdb.model import ResourceGroup
 from aquilon.worker.broker import BrokerCommand, validate_basic
-from aquilon.worker.dbwrappers.resources import del_resource
+from aquilon.worker.dbwrappers.resources import (del_resource,
+                                                 get_resource_holder)
 
 
 class CommandDelResourceGroup(BrokerCommand):
 
     required_parameters = ["resourcegroup"]
 
-    def render(self, session, logger, resourcegroup,
+    def render(self, session, logger, resourcegroup, hostname, cluster,
                **arguments):
 
         validate_basic("resourcegroup", resourcegroup)
+        holder = get_resource_holder(session, hostname, cluster, compel=True)
         dbrg = ResourceGroup.get_unique(session, name=resourcegroup,
-                                        #holder=holder,
-                                        compel=True)
+                                        holder=holder, compel=True)
         del_resource(session, logger, dbrg)
         return
