@@ -306,8 +306,13 @@ class TestMake(TestBrokerCommand):
                           command)
         self.matchoutput(out, '"/system/network/default_gateway" = \"%s\";' %
                          eth0_gateway, command)
-        self.matchoutput(out, '"/metadata/template/branch/name" = \"unittest\";', command)
-        self.matchoutput(out, '"/metadata/template/branch/type" = \"domain\";', command)
+
+        command = ["cat", "--hostname", "unittest20.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out, '"/metadata/template/branch/name" = "unittest";',
+                         command)
+        self.matchoutput(out, '"/metadata/template/branch/type" = "domain";',
+                         command)
         self.matchclean(out, '"/metadata/template/branch/author"', command)
 
     def testmakeunittest21(self):

@@ -301,13 +301,6 @@ class PlenaryHostData(Plenary):
         for resource in sorted(self.dbobj.resources):
             pan_push(lines, "/system/resources/%s" % resource.resource_type,
                      StructureTemplate(resource.template_base + '/config'))
-        lines.append("")
-        pan_assign(lines, "/metadata/template/branch/name", self.branch.name)
-        pan_assign(lines, "/metadata/template/branch/type",
-                   self.branch.branch_type)
-        if self.branch.branch_type == 'sandbox':
-            pan_assign(lines, "/metadata/template/branch/author",
-                       self.dbobj.sandbox_author.name)
 
 
 class PlenaryToplevelHost(Plenary):

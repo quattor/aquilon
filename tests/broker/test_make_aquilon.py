@@ -107,9 +107,6 @@ class TestMakeAquilon(TestBrokerCommand):
                           command)
         self.matchoutput(out, '"/system/network/default_gateway" = "%s";' %
                          self.net.unknown[0].gateway, command)
-        self.matchoutput(out, '"/metadata/template/branch/name" = "unittest";', command)
-        self.matchoutput(out, '"/metadata/template/branch/type" = "domain";', command)
-        self.matchclean(out, '"/metadata/template/branch/author"', command)
         self.matchoutput(out, '"/system/advertise_status" = false', command)
 
         command = "cat --hostname unittest02.one-nyp.ms.com"
@@ -139,6 +136,12 @@ class TestMakeAquilon(TestBrokerCommand):
         self.matchoutput(out,
             """include { "archetype/final" };""",
             command)
+
+        self.matchoutput(out, '"/metadata/template/branch/name" = "unittest";',
+                         command)
+        self.matchoutput(out, '"/metadata/template/branch/type" = "domain";',
+                         command)
+        self.matchclean(out, '"/metadata/template/branch/author"', command)
 
     def testmakeunittest00(self):
         command = ["make", "aquilon",
@@ -237,9 +240,6 @@ class TestMakeAquilon(TestBrokerCommand):
                            self.net.unknown[0].usable[3],
                            self.net.unknown[0].netmask),
                           command)
-        self.matchoutput(out, '"/metadata/template/branch/name" = "unittest";', command)
-        self.matchoutput(out, '"/metadata/template/branch/type" = "domain";', command)
-        self.matchclean(out, '"/metadata/template/branch/author"', command)
         self.matchoutput(out, '"/system/advertise_status" = false', command)
 
         command = "cat --hostname unittest00.one-nyp.ms.com"
@@ -268,6 +268,11 @@ class TestMakeAquilon(TestBrokerCommand):
         self.matchoutput(out,
             """include { "archetype/final" };""",
             command)
+        self.matchoutput(out, '"/metadata/template/branch/name" = "unittest";',
+                         command)
+        self.matchoutput(out, '"/metadata/template/branch/type" = "domain";',
+                         command)
+        self.matchclean(out, '"/metadata/template/branch/author"', command)
 
     def testverifyshowservicebyclient(self):
         command = "show service --client unittest00.one-nyp.ms.com"

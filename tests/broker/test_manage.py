@@ -50,7 +50,7 @@ class TestManage(TestBrokerCommand):
                         "--sandbox", "%s/changetest1" % user])
         self.verify_buildfiles("unittest", "unittest02.one-nyp.ms.com",
                                want_exist=False)
-        command = ["cat", "--hostname", "unittest02.one-nyp.ms.com", "--data"]
+        command = ["cat", "--hostname", "unittest02.one-nyp.ms.com"]
         out = self.commandtest(command)
         self.matchoutput(out, '"/metadata/template/branch/name" = "changetest1";', command)
         self.matchoutput(out, '"/metadata/template/branch/type" = "sandbox";', command)
@@ -66,7 +66,7 @@ class TestManage(TestBrokerCommand):
     def testmanageserver1(self):
         self.noouttest(["manage", "--hostname", "server1.aqd-unittest.ms.com",
                         "--domain", "unittest"])
-        command = ["cat", "--hostname", "server1.aqd-unittest.ms.com", "--data"]
+        command = ["cat", "--hostname", "server1.aqd-unittest.ms.com"]
         out = self.commandtest(command)
         self.matchoutput(out, '"/metadata/template/branch/name" = "unittest";', command)
         self.matchoutput(out, '"/metadata/template/branch/type" = "domain";', command)
@@ -151,7 +151,7 @@ class TestManage(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out, "Sandbox: %s/utsandbox" % user, command)
 
-        command = ["cat", "--cluster", "utecl1", "--data"]
+        command = ["cat", "--cluster", "utecl1"]
         out = self.commandtest(command)
         self.matchoutput(out, '"/metadata/template/branch/name" = "utsandbox";', command)
         self.matchoutput(out, '"/metadata/template/branch/type" = "sandbox";', command)

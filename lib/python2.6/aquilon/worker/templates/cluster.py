@@ -139,14 +139,6 @@ class PlenaryClusterData(Plenary):
             pan_assign(lines, "/system/cluster/allowed_personalities",
                        sorted(["%s/%s" % (p.archetype.name, p.name)
                                for p in self.dbobj.allowed_personalities]))
-        lines.append("")
-        pan_assign(lines, "/metadata/template/branch/name",
-                   self.dbobj.branch.name)
-        pan_assign(lines, "/metadata/template/branch/type",
-                   self.dbobj.branch.branch_type)
-        if self.dbobj.branch.branch_type == 'sandbox':
-            pan_assign(lines, "/metadata/template/branch/author",
-                       self.dbobj.sandbox_author.name)
 
         fname = "body_%s" % self.dbobj.cluster_type
         if hasattr(self, fname):

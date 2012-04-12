@@ -256,6 +256,16 @@ class TestAddCluster(TestBrokerCommand):
         self.matchoutput(object, 'include { "personality/%s/config" };' % persona,
                          object_command)
 
+        self.matchoutput(object,
+                         '"/metadata/template/branch/name" = "unittest";',
+                         object_command)
+        self.matchoutput(object,
+                         '"/metadata/template/branch/type" = "domain";',
+                         object_command)
+        self.matchclean(object,
+                        '"/metadata/template/branch/author"',
+                        object_command)
+
         data_command = ["cat", "--cluster", name, "--data"]
         data = self.commandtest(data_command)
 
@@ -280,9 +290,6 @@ class TestAddCluster(TestBrokerCommand):
         self.matchclean(data, '"/system/cluster/rack/column"', data_command)
         self.matchclean(data, '"/system/cluster/rack/name"', data_command)
         self.matchclean(data, '"/system/cluster/allowed_personalities"', data_command)
-        self.matchoutput(data, '"/metadata/template/branch/name" = \"unittest\";', data_command)
-        self.matchoutput(data, '"/metadata/template/branch/type" = \"domain\";', data_command)
-        self.matchclean(data, '"/metadata/template/branch/author"', data_command)
 
         return object_command, object, data_command, data
 
