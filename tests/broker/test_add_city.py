@@ -53,10 +53,10 @@ class TestAddCity(TestBrokerCommand):
     def testaddupdateexample(self):
         command = ["update", "city", "--city", "ex",
                    "--timezone", "EDT"]
-        self.noouttest(command)
+        self.ignoreoutputtest(command)
         # For a difference, let's use raw this time
         command = "show city --city ex"
-        out = self.commandtest(command.split(" "))
+        (out, err) = self.successtest(command.split(" "))
         self.matchoutput(out, "Timezone: EDT", command)
 
     def testaddexamplefail(self):
@@ -136,7 +136,7 @@ class TestAddCity(TestBrokerCommand):
         self.noouttest(command)
 
         command = ["update", "city", "--city", "e4", "--campus", "na"]
-        self.noouttest(command)
+        self.ignoreoutputtest(command)
 
         command = "show city --city e4"
         out = self.commandtest(command.split(" "))
