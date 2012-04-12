@@ -35,8 +35,8 @@ from sqlalchemy.orm.session import object_session
 
 from aquilon.exceptions_ import ArgumentError, InternalError
 from aquilon.aqdb.model import Host, Cluster, ServiceInstance
-from aquilon.worker.templates.service import PlenaryServiceInstanceServer
-from aquilon.worker.templates.base import Plenary, PlenaryCollection
+from aquilon.worker.templates import (Plenary, PlenaryCollection,
+                                      PlenaryServiceInstanceServer)
 
 
 class Chooser(object):

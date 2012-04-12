@@ -37,7 +37,6 @@ from aquilon.aqdb.model import (Host, VlanInterface, BondingInterface,
                                 BridgeInterface)
 from aquilon.worker.locks import CompileKey
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
-from aquilon.worker.templates.machine import PlenaryMachineInfo
 from aquilon.worker.templates.cluster import PlenaryClusterClient
 from aquilon.worker.templates.panutils import (StructureTemplate, pan_assign,
                                                pan_push, pan_include,
@@ -274,7 +273,7 @@ class PlenaryHostData(Plenary):
         # Okay, here's the real content
         pan_include(lines, ["pan/units", "pan/functions"])
         lines.append("")
-        pmachine = PlenaryMachineInfo(self.dbobj.machine)
+        pmachine = Plenary.get_plenary(self.dbobj.machine, logger=self.logger)
         pan_assign(lines, "/hardware",
                    StructureTemplate(pmachine.plenary_template_name))
 

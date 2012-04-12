@@ -34,7 +34,7 @@ import logging
 from aquilon.aqdb.model import Machine
 from aquilon.worker.locks import CompileKey
 from aquilon.worker.templates.base import Plenary
-from aquilon.worker import templates
+from aquilon.worker.templates.cluster import PlenaryClusterObject
 from aquilon.worker.templates.panutils import (StructureTemplate, pan_assign,
                                                pan_include, PanMetric,
                                                PanEscape)
@@ -99,10 +99,10 @@ class PlenaryMachineInfo(Plenary):
         if host:
             # PlenaryHost is actually a PlenaryCollection... can't call
             # get_key() directly, so using get_remove_key().
-            ph = templates.host.PlenaryHost(host, self.logger)
+            ph = Plenary.get_plenary(host, logger=self.logger)
             host_key = ph.get_remove_key()
         if cluster:
-            pc = templates.cluster.PlenaryClusterObject(cluster, self.logger)
+            pc = PlenaryClusterObject(cluster, logger=self.logger)
             cluster_key = pc.get_key()
         if not cluster:
             return host_key

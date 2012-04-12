@@ -33,7 +33,6 @@ import logging
 from aquilon.aqdb.model import (Cluster, EsxCluster, ComputeCluster,
                                 StorageCluster)
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
-from aquilon.worker.templates.machine import PlenaryMachineInfo
 from aquilon.worker.templates.panutils import (StructureTemplate, pan_assign,
                                                pan_include, pan_push)
 from aquilon.worker.locks import CompileKey
@@ -157,7 +156,7 @@ class PlenaryClusterData(Plenary):
             if not machine.interfaces or not machine.disks:
                 # Do not bother creating entries for VMs that are incomplete.
                 continue
-            pmac = PlenaryMachineInfo(machine)
+            pmac = Plenary.get_plenary(machine, logger=self.logger)
             macdesc = {'hardware': StructureTemplate(pmac.plenary_template_name)}
 
             # One day we may get to the point where this will be required.
