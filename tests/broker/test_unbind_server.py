@@ -83,7 +83,7 @@ class TestUnbindServer(TestBrokerCommand):
         self.matchoutput(out,
                          "structure template servicedata/utsvc/utsi1/config;",
                          command)
-        self.matchoutput(out, "include { 'servicedata/utsvc/config' };",
+        self.matchoutput(out, 'include { "servicedata/utsvc/config" };',
                          command)
         self.matchoutput(out, '"instance" = "utsi1";', command)
         self.searchoutput(out, r'"servers" = list\(\s*\);', command)
@@ -112,7 +112,7 @@ class TestUnbindServer(TestBrokerCommand):
         self.matchoutput(out,
                          "structure template servicedata/utsvc/utsi2/config;",
                          command)
-        self.matchoutput(out, "include { 'servicedata/utsvc/config' };",
+        self.matchoutput(out, 'include { "servicedata/utsvc/config" };',
                          command)
         self.matchoutput(out, '"instance" = "utsi2";', command)
         self.searchoutput(out, r'"servers" = list\(\s*\);', command)

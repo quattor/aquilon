@@ -87,8 +87,8 @@ class TestAddResourceGroup(TestBrokerCommand):
         command = ["cat", "--cluster", "utvcs1", "--data"]
         out = self.commandtest(command)
         self.matchoutput(out,
-                         "'/system/resources/resourcegroup' = "
-                         "push(create(\"resource/cluster/utvcs1/resourcegroup/utvcs1as1/config\"));",
+                         '"/system/resources/resourcegroup" = '
+                         'push(create("resource/cluster/utvcs1/resourcegroup/utvcs1as1/config"));',
                          command)
 
     def test_210_cat_rg(self):

@@ -66,8 +66,8 @@ class TestUsecaseDatabase(TestBrokerCommand):
 
         command = ["cat", "--hostname=server1.aqd-unittest.ms.com", "--data"]
         out = self.commandtest(command)
-        self.matchoutput(out, "'/system/resources/filesystem' = push(create(\"resource/host/server1.aqd-unittest.ms.com/filesystem/gnr.0/config\"))", command)
-        self.matchoutput(out, "'/system/resources/application' = push(create(\"resource/host/server1.aqd-unittest.ms.com/application/nydb1/config\"))", command)
+        self.matchoutput(out, '"/system/resources/filesystem" = push(create("resource/host/server1.aqd-unittest.ms.com/filesystem/gnr.0/config"))', command)
+        self.matchoutput(out, '"/system/resources/application" = push(create("resource/host/server1.aqd-unittest.ms.com/application/nydb1/config"))', command)
 
     def test_10_standalone_two_dbserver(self):
         command = ["add_filesystem", "--filesystem=gnr.1", "--type=ext3",
@@ -98,10 +98,10 @@ class TestUsecaseDatabase(TestBrokerCommand):
 
         command = ["cat", "--hostname=server1.aqd-unittest.ms.com", "--data"]
         out = self.commandtest(command)
-        self.matchoutput(out, "'/system/resources/filesystem' = push(create(\"resource/host/server1.aqd-unittest.ms.com/filesystem/gnr.0/config\"))", command)
-        self.matchoutput(out, "'/system/resources/application' = push(create(\"resource/host/server1.aqd-unittest.ms.com/application/nydb1/config\"))", command)
-        self.matchoutput(out, "'/system/resources/filesystem' = push(create(\"resource/host/server1.aqd-unittest.ms.com/filesystem/gnr.1/config\"))", command)
-        self.matchoutput(out, "'/system/resources/application' = push(create(\"resource/host/server1.aqd-unittest.ms.com/application/utdb2/config\"))", command)
+        self.matchoutput(out, '"/system/resources/filesystem" = push(create("resource/host/server1.aqd-unittest.ms.com/filesystem/gnr.0/config"))', command)
+        self.matchoutput(out, '"/system/resources/application" = push(create("resource/host/server1.aqd-unittest.ms.com/application/nydb1/config"))', command)
+        self.matchoutput(out, '"/system/resources/filesystem" = push(create("resource/host/server1.aqd-unittest.ms.com/filesystem/gnr.1/config"))', command)
+        self.matchoutput(out, '"/system/resources/application" = push(create("resource/host/server1.aqd-unittest.ms.com/application/utdb2/config"))', command)
 
     def test_49_cleanup_standalone(self):
         command = ["del_filesystem", "--filesystem=gnr.0",
@@ -152,8 +152,8 @@ class TestUsecaseDatabase(TestBrokerCommand):
 
         command = ["cat", "--cluster=nydb1", "--data"]
         out = self.commandtest(command)
-        self.matchoutput(out, "'/system/resources/filesystem' = push(create(\"resource/cluster/nydb1/filesystem/gnr.0/config\"))", command)
-        self.matchoutput(out, "'/system/resources/application' = push(create(\"resource/cluster/nydb1/application/nydb1/config\"))", command)
+        self.matchoutput(out, '"/system/resources/filesystem" = push(create("resource/cluster/nydb1/filesystem/gnr.0/config"))', command)
+        self.matchoutput(out, '"/system/resources/application" = push(create("resource/cluster/nydb1/application/nydb1/config"))', command)
 
     def test_59_cleanup_cluster(self):
         # Check that the plenaries of contained resources get cleaned up

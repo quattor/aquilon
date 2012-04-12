@@ -250,10 +250,10 @@ class TestAddCluster(TestBrokerCommand):
         self.searchoutput(object,
                           r'variable LOADPATH = list\(\s*"%s"\s*\);' % archetype,
                           object_command)
-        self.matchoutput(object, "include { 'clusterdata/%s' };" % name,
+        self.matchoutput(object, 'include { "clusterdata/%s" };' % name,
                          object_command)
-        self.matchclean(object, "include { 'service", object_command)
-        self.matchoutput(object, "include { 'personality/%s/config' };" % persona,
+        self.matchclean(object, 'include { "service', object_command)
+        self.matchoutput(object, 'include { "personality/%s/config" };' % persona,
                          object_command)
 
         data_command = ["cat", "--cluster", name, "--data"]

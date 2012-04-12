@@ -301,7 +301,7 @@ class TestUpdateInterface(TestBrokerCommand):
         command = ["cat", "--hostname", "unittest25.aqd-unittest.ms.com",
                    "--data", "--generate"]
         out = self.commandtest(command)
-        self.matchoutput(out, "'/system/network/default_gateway' = \"%s\";" %
+        self.matchoutput(out, '"/system/network/default_gateway" = "%s";' %
                          self.net.unknown[1][2], command)
 
     def testverifyfliprouteshow(self):

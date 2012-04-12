@@ -102,12 +102,8 @@ class TestAddMachine(TestBrokerCommand):
     def testverifycatut3c5n10(self):
         command = "cat --machine ut3c5n10"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out,
-            """"location" = "ut.ny.na";""",
-            command)
-        self.matchoutput(out,
-            """"serialnumber" = "99C5553";""",
-            command)
+        self.matchoutput(out, '"location" = "ut.ny.na";', command)
+        self.matchoutput(out, '"serialnumber" = "99C5553";', command)
         # DNS maps:
         # - aqd-unittest.ms.com comes from rack ut3
         # - utroom1 also has aqd-unittest.ms.com mapped _after_ td1 and td2,
@@ -122,8 +118,8 @@ class TestAddMachine(TestBrokerCommand):
                           r'"new-york.ms.com"\s*\);',
                           command)
         self.matchoutput(out,
-            """include { 'hardware/machine/ibm/hs21-8853l5u' };""",
-            command)
+                         'include { "hardware/machine/ibm/hs21-8853l5u" };',
+                         command)
         self.searchoutput(out,
                           r'"ram" = list\(\s*'
                           r'create\("hardware/ram/generic",\s*'
@@ -255,19 +251,15 @@ class TestAddMachine(TestBrokerCommand):
     def testverifycatut3c1n3(self):
         command = "cat --machine ut3c1n3"
         out = self.commandtest(command.split(" "))
+        self.matchoutput(out, '"location" = "ut.ny.na";', command)
+        self.matchoutput(out, '"rack/name" = "ut3";', command)
+        self.matchoutput(out, '"rack/row" = "a";', command)
+        self.matchoutput(out, '"rack/column" = "3";', command)
+        self.matchoutput(out, '"rack/room" = "UT pod1";', command)
+        self.matchoutput(out, '"serialnumber" = "KPDZ406";', command)
         self.matchoutput(out,
-            """"location" = "ut.ny.na";""",
-            command)
-        self.matchoutput(out, """"rack/name" = "ut3";""", command)
-        self.matchoutput(out, """"rack/row" = "a";""", command)
-        self.matchoutput(out, """"rack/column" = "3";""", command)
-        self.matchoutput(out, """"rack/room" = "UT pod1";""", command)
-        self.matchoutput(out,
-            """"serialnumber" = "KPDZ406";""",
-            command)
-        self.matchoutput(out,
-            """include { 'hardware/machine/ibm/hs21-8853l5u' };""",
-            command)
+                         'include { "hardware/machine/ibm/hs21-8853l5u" };',
+                         command)
         self.searchoutput(out,
                           r'"ram" = list\(\s*'
                           r'create\("hardware/ram/generic",\s*'
@@ -296,15 +288,11 @@ class TestAddMachine(TestBrokerCommand):
     def testverifycatut3c1n4(self):
         command = "cat --machine ut3c1n4"
         out = self.commandtest(command.split(" "))
+        self.matchoutput(out, '"location" = "ut.ny.na";', command)
+        self.matchoutput(out, '"serialnumber" = "KPDZ407";', command)
         self.matchoutput(out,
-            """"location" = "ut.ny.na";""",
-            command)
-        self.matchoutput(out,
-            """"serialnumber" = "KPDZ407";""",
-            command)
-        self.matchoutput(out,
-            """include { 'hardware/machine/ibm/hs21-8853l5u' };""",
-            command)
+                         'include { "hardware/machine/ibm/hs21-8853l5u" };',
+                         command)
         self.searchoutput(out,
                           r'"ram" = list\(\s*'
                           r'create\("hardware/ram/generic",\s*'
@@ -333,9 +321,9 @@ class TestAddMachine(TestBrokerCommand):
     def testverifycatut3c1n8(self):
         command = "cat --machine ut3c1n8"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, """"location" = "ut.ny.na";""", command)
+        self.matchoutput(out, '"location" = "ut.ny.na";', command)
         self.matchoutput(out,
-                         "include { 'hardware/machine/hp/utccissmodel' };",
+                         'include { "hardware/machine/hp/utccissmodel" };',
                          command)
         self.matchoutput(out,
                          'escape("cciss/c0d0"), '

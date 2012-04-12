@@ -126,6 +126,28 @@ def pan_create(path, params=None, indent=0):
     return "\n".join(("%s" % x) for x in accumulator)
 
 
+def pan_assign(lines, path, value):
+    lines.append('"%s" = %s;' % (path, pan(value)))
+
+
+def pan_push(lines, path, value):
+    lines.append('"%s" = push(%s);' % (path, pan(value)))
+
+
+def pan_include(lines, templates):
+    if not isinstance(templates, list):
+        templates = [templates]
+    for tpl in templates:
+        lines.append('include { "%s" };' % tpl)
+
+
+def pan_variable(lines, variable, value, final=False):
+    if final:
+        lines.append('final variable %s = %s;' % (variable, pan(value)))
+    else:
+        lines.append('variable %s = %s;' % (variable, pan(value)))
+
+
 class PanObject(object):
     def format(self, indent=0):
         pass

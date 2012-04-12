@@ -87,8 +87,7 @@ class TestDelVirtualHardware(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "object template clusters/utecl1;", command)
         self.searchoutput(out,
-                          r"include { 'service/esx_management_server/ut.[ab]/"
-                          r"client/config' };",
+                          r'include { "service/esx_management_server/ut.[ab]/client/config" };',
                           command)
 
         command = "cat --cluster=utecl1 --data"

@@ -32,7 +32,7 @@ import logging
 
 from aquilon.aqdb.model import City
 from aquilon.worker.templates.base import Plenary
-from aquilon.worker.templates.panutils import pan
+from aquilon.worker.templates.panutils import pan_variable
 
 LOGGER = logging.getLogger(__name__)
 
@@ -48,6 +48,6 @@ class PlenaryCity(Plenary):
         self.plenary_template = "config"
 
     def body(self, lines):
-        lines.append("variable TIMEZONE = %s;" % pan(self.dbobj.timezone))
+        pan_variable(lines, "TIMEZONE", self.dbobj.timezone)
 
 Plenary.handlers[City] = PlenaryCity

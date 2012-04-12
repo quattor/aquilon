@@ -208,7 +208,7 @@ class TestAddIntervention(TestBrokerCommand):
         command = ["cat", "--generate",
                    "--hostname=server1.aqd-unittest.ms.com", "--data"]
         out = self.commandtest(command)
-        self.matchoutput(out, "'/system/resources/intervention' = push(create(\"resource/host/server1.aqd-unittest.ms.com/intervention/i1/config\"))",
+        self.matchoutput(out, '"/system/resources/intervention" = push(create("resource/host/server1.aqd-unittest.ms.com/intervention/i1/config"))',
                          command)
 
         command = ["del_intervention", "--intervention=i1",

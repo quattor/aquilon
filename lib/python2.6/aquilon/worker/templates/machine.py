@@ -35,8 +35,9 @@ from aquilon.aqdb.model import Machine
 from aquilon.worker.locks import CompileKey
 from aquilon.worker.templates.base import Plenary
 from aquilon.worker import templates
-from aquilon.worker.templates.panutils import (pan, StructureTemplate,
-                                               PanMetric, PanEscape)
+from aquilon.worker.templates.panutils import (StructureTemplate, pan_assign,
+                                               pan_include, PanMetric,
+                                               PanEscape)
 
 LOGGER = logging.getLogger(__name__)
 
@@ -176,52 +177,50 @@ class PlenaryMachineInfo(Plenary):
                     interfaces[interface.name] = StructureTemplate(path, ifinfo)
 
         # Firstly, location
-        lines.append('"location" = %s;' % pan(self.sysloc))
+        pan_assign(lines, "location", self.sysloc)
         if self.rack:
-            lines.append('"rack/name" = %s;' % pan(self.rack))
+            pan_assign(lines, "rack/name", self.rack)
             if self.rackrow:
-                lines.append('"rack/row" = %s;' % pan(self.rackrow))
+                pan_assign(lines, "rack/row", self.rackrow)
             if self.rackcol:
-                lines.append('"rack/column" = %s;' % pan(self.rackcol))
+                pan_assign(lines, "rack/column", self.rackcol)
         if self.room:
-            lines.append('"rack/room" = %s;' % pan(self.room))
+            pan_assign(lines, "rack/room", self.room)
 
         # And a chassis location?
         if self.dbobj.chassis_slot:
             slot = self.dbobj.chassis_slot[0]
-            lines.append('"chassis" = %s;' % pan(slot.chassis.fqdn))
-            lines.append('"slot" = %d;' % slot.slot_number)
+            pan_assign(lines, "chassis", slot.chassis.fqdn)
+            pan_assign(lines, "slot", slot.slot_number)
 
         #if self.hub:
-        #    lines.append('"sysloc/hub" = "%s";' % self.hub)
+        #    pan_assign(lines, "sysloc/hub", self.hub)
         if self.campus:
-            lines.append('"sysloc/campus" = %s;' % pan(self.campus))
+            pan_assign(lines, "sysloc/campus", self.campus)
         if self.dns_search_domains:
-            lines.append('"sysloc/dns_search_domains" = %s;' %
-                         pan(self.dns_search_domains))
+            pan_assign(lines, "sysloc/dns_search_domains",
+                       self.dns_search_domains)
 
         # Now describe the hardware
         lines.append("")
         if self.dbobj.serial_no:
-            lines.append('"serialnumber" = %s;' % pan(self.dbobj.serial_no))
-        lines.append('"nodename" = %s;' % pan(self.machine))
-        lines.append("include { 'hardware/machine/%s/%s' };\n" %
-                     (self.dbobj.model.vendor.name,
-                      self.dbobj.model.name))
+            pan_assign(lines, "serialnumber", self.dbobj.serial_no)
+        pan_assign(lines, "nodename", self.machine)
+        pan_include(lines, "hardware/machine/%s/%s" %
+                    (self.dbobj.model.vendor.name, self.dbobj.model.name))
 
         lines.append("")
-        lines.append('"ram" = %s;' % pan(ram))
-        lines.append('"cpu" = %s;' % pan(cpus))
+        pan_assign(lines, "ram", ram)
+        pan_assign(lines, "cpu", cpus)
         if disks:
-            lines.append('"harddisks" = %s;' % pan(disks))
+            pan_assign(lines, "harddisks", disks)
         if interfaces:
-            lines.append('"cards/nic" = %s;' % pan(interfaces))
+            pan_assign(lines, "cards/nic", interfaces)
 
-        # /hardware/console needs "preferred" to be set, so we can't just use
-        # pan() for the whole thing
+        # /hardware/console/preferred must be set, so we can't assign to
+        # "/console" directly
         for manager in sorted(managers.keys()):
-            params = managers[manager]
-            lines.append('"console/%s" = %s;' % (manager, pan(params)))
+            pan_assign(lines, "console/%s" % manager, managers[manager])
 
     def write(self, *args, **kwargs):
         # Don't bother writing plenary files for dummy aurora hardware.

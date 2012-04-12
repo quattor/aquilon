@@ -32,7 +32,8 @@ import logging
 
 from aquilon.aqdb.model import Service, ServiceInstance
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
-from aquilon.worker.templates.panutils import pan, StructureTemplate
+from aquilon.worker.templates.panutils import (StructureTemplate, pan_assign,
+                                               pan_include)
 from aquilon.exceptions_ import NotFoundException
 
 LOGGER = logging.getLogger(__name__)
@@ -152,12 +153,12 @@ class PlenaryServiceInstanceToplevel(Plenary):
         self.plenary_template = "config"
 
     def body(self, lines):
-        lines.append("include { 'servicedata/%(service)s/config' };" % self.__dict__)
+        pan_include(lines, "servicedata/%s/config" % self.service)
         lines.append("")
-        lines.append('"instance" = %s;' % pan(self.name))
-        lines.append('"servers" = %s;' % pan(self.dbobj.server_fqdns))
+        pan_assign(lines, "instance", self.name)
+        pan_assign(lines, "servers", self.dbobj.server_fqdns)
         if self.service == 'dns':
-            lines.append('"server_ips" = %s;' % pan(self.dbobj.server_ips))
+            pan_assign(lines, "server_ips", self.dbobj.server_ips)
 
 
 class PlenaryServiceInstanceServer(Plenary):
@@ -180,8 +181,8 @@ class PlenaryServiceInstanceServer(Plenary):
         self.plenary_template = "srvconfig"
 
     def body(self, lines):
-        lines.append('"instance" = %s;' % pan(self.name))
-        lines.append('"clients" = %s;' % pan(self.dbobj.client_fqdns))
+        pan_assign(lines, "instance", self.name)
+        pan_assign(lines, "clients", self.dbobj.client_fqdns)
 
 
 class PlenaryServiceInstanceClientDefault(Plenary):
@@ -205,11 +206,10 @@ class PlenaryServiceInstanceClientDefault(Plenary):
         self.plenary_template = "config"
 
     def body(self, lines):
-        lines.append('"/system/services/%s" = %s;' %
-                     (self.service, pan(StructureTemplate('servicedata/%s/%s/config' %
-                                                          (self.service,
-                                                           self.name)))))
-        lines.append("include { 'service/%s/client/config' };" % self.service)
+        pan_assign(lines, "/system/services/%s" % self.service,
+                   StructureTemplate('servicedata/%s/%s/config' % (self.service,
+                                                                   self.name)))
+        pan_include(lines, "service/%s/client/config" % self.service)
 
 
 class PlenaryServiceInstanceServerDefault(Plenary):
@@ -232,11 +232,10 @@ class PlenaryServiceInstanceServerDefault(Plenary):
         self.plenary_template = "config"
 
     def body(self, lines):
-        lines.append('"/system/provides/%s" = %s;' %
-                     (self.service, pan(StructureTemplate('servicedata/%s/%s/srvconfig' %
-                                                          (self.service,
-                                                           self.name)))))
-        lines.append("include { 'service/%s/server/config' };" % self.service)
+        pan_assign(lines, "/system/provides/%s" % self.service,
+                   StructureTemplate('servicedata/%s/%s/srvconfig' %
+                                     (self.service, self.name)))
+        pan_include(lines, "service/%s/server/config" % self.service)
 
 
 class PlenaryInstanceNasDiskShare(Plenary):
@@ -273,9 +272,9 @@ class PlenaryInstanceNasDiskShare(Plenary):
             # beyond me). We need a CSV parser...
             raise NotFoundException("Share %s cannot be found in NAS maps." %
                                     self.name)
-        lines.append('"sharename" = %s;' % pan(self.name))
-        lines.append('"server" = %s;' % pan(self.server))
-        lines.append('"mountpoint" = %s;' % pan(self.mount))
+        pan_assign(lines, "sharename", self.name)
+        pan_assign(lines, "server", self.server)
+        pan_assign(lines, "mountpoint", self.mount)
 
     def lookup(self):
         with open(self.config.get("broker", "sharedata")) as sharedata:

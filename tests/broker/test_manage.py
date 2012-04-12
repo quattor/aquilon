@@ -52,9 +52,9 @@ class TestManage(TestBrokerCommand):
                                want_exist=False)
         command = ["cat", "--hostname", "unittest02.one-nyp.ms.com", "--data"]
         out = self.commandtest(command)
-        self.matchoutput(out, "'/metadata/template/branch/name' = \"changetest1\";", command)
-        self.matchoutput(out, "'/metadata/template/branch/type' = \"sandbox\";", command)
-        self.matchoutput(out, "'/metadata/template/branch/author' = \"%s\";" % user, command)
+        self.matchoutput(out, '"/metadata/template/branch/name" = "changetest1";', command)
+        self.matchoutput(out, '"/metadata/template/branch/type" = "sandbox";', command)
+        self.matchoutput(out, '"/metadata/template/branch/author" = "%s";' % user, command)
 
     def testverifymanageunittest02(self):
         user = self.config.get("unittest", "user")
@@ -68,8 +68,8 @@ class TestManage(TestBrokerCommand):
                         "--domain", "unittest"])
         command = ["cat", "--hostname", "server1.aqd-unittest.ms.com", "--data"]
         out = self.commandtest(command)
-        self.matchoutput(out, "'/metadata/template/branch/name' = \"unittest\";", command)
-        self.matchoutput(out, "'/metadata/template/branch/type' = \"domain\";", command)
+        self.matchoutput(out, '"/metadata/template/branch/name" = "unittest";', command)
+        self.matchoutput(out, '"/metadata/template/branch/type" = "domain";', command)
 
     def testverifymanageserver1(self):
         command = "show host --hostname server1.aqd-unittest.ms.com"
@@ -153,9 +153,9 @@ class TestManage(TestBrokerCommand):
 
         command = ["cat", "--cluster", "utecl1", "--data"]
         out = self.commandtest(command)
-        self.matchoutput(out, '"/metadata/template/branch/name" = \"utsandbox\";', command)
-        self.matchoutput(out, '"/metadata/template/branch/type" = \"sandbox\";', command)
-        self.matchoutput(out, '"/metadata/template/branch/author" = \"%s\";' % user, command)
+        self.matchoutput(out, '"/metadata/template/branch/name" = "utsandbox";', command)
+        self.matchoutput(out, '"/metadata/template/branch/type" = "sandbox";', command)
+        self.matchoutput(out, '"/metadata/template/branch/author" = "%s";' % user, command)
 
         command = ["search_host", "--cluster=utecl1"]
         out = self.commandtest(command)

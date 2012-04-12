@@ -304,10 +304,10 @@ class TestMake(TestBrokerCommand):
                           (eth1_broadcast, eth1_1_ip, eth1_netmask,
                            eth1_broadcast, eth1_gateway, eth1_ip, eth1_netmask),
                           command)
-        self.matchoutput(out, "'/system/network/default_gateway' = \"%s\";" %
+        self.matchoutput(out, '"/system/network/default_gateway" = \"%s\";' %
                          eth0_gateway, command)
-        self.matchoutput(out, "'/metadata/template/branch/name' = \"unittest\";", command)
-        self.matchoutput(out, "'/metadata/template/branch/type' = \"domain\";", command)
+        self.matchoutput(out, '"/metadata/template/branch/name" = \"unittest\";', command)
+        self.matchoutput(out, '"/metadata/template/branch/type" = \"domain\";', command)
         self.matchclean(out, '"/metadata/template/branch/author"', command)
 
     def testmakeunittest21(self):
@@ -320,7 +320,7 @@ class TestMake(TestBrokerCommand):
         command = ["cat", "--hostname", "unittest21.aqd-unittest.ms.com",
                    "--data"]
         out = self.commandtest(command)
-        self.matchoutput(out, "'/system/network/default_gateway' = \"%s\";" %
+        self.matchoutput(out, '"/system/network/default_gateway" = \"%s\";' %
                          net.gateway, command)
         self.searchoutput(out,
                           r'"/system/network/routers" = nlist\(\s*'
@@ -353,7 +353,7 @@ class TestMake(TestBrokerCommand):
                           r'"network_type", "vpls"\s*\)\s*' %
                           (net.broadcast, router, ip, net.netmask),
                           command)
-        self.matchoutput(out, "'/system/network/default_gateway' = \"%s\";" %
+        self.matchoutput(out, '"/system/network/default_gateway" = \"%s\";' %
                          router, command)
         self.searchoutput(out,
                           r'"/system/network/routers" = nlist\(\s*'
@@ -385,7 +385,7 @@ class TestMake(TestBrokerCommand):
                           r'"network_type", "vpls"\s*\)\s*' %
                           (net.broadcast, router, ip, net.netmask),
                           command)
-        self.matchoutput(out, "'/system/network/default_gateway' = \"%s\";" %
+        self.matchoutput(out, '"/system/network/default_gateway" = \"%s\";' %
                          router, command)
         self.searchoutput(out,
                           r'"/system/network/routers" = nlist\(\s*'
@@ -417,7 +417,7 @@ class TestMake(TestBrokerCommand):
                           r'"network_type", "unknown"\s*\)\s*' %
                           (net.broadcast, router, ip, net.netmask),
                           command)
-        self.matchoutput(out, "'/system/network/default_gateway' = \"%s\";" %
+        self.matchoutput(out, '"/system/network/default_gateway" = "%s";' %
                          self.net.unknown[0].gateway, command)
 
 

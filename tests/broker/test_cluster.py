@@ -82,8 +82,7 @@ class TestCluster(TestBrokerCommand):
         cat_cluster_command = "cat --cluster utecl1"
         cat_cluster_out = self.commandtest(cat_cluster_command.split())
         m = self.searchoutput(cat_cluster_out,
-                              r"include { '(service/esx_management_server/"
-                              r"ut.[ab]/client/config)' };",
+                              r'include { "(service/esx_management_server/ut.[ab]/client/config)" };',
                               cat_cluster_command)
         template = m.group(1)
         cat_cluster_command = "cat --cluster utecl1 --data"
@@ -99,19 +98,19 @@ class TestCluster(TestBrokerCommand):
             cat_host_command = ["cat", "--hostname", host]
             cat_host_out = self.commandtest(cat_host_command)
             self.matchoutput(cat_host_out,
-                             """include { "%s" };""" % template,
+                             'include { "%s" };' % template,
                              cat_host_command)
 
         for i in range(1, 5):
             command = "cat --hostname evh%s.aqd-unittest.ms.com" % i
             out = self.commandtest(command.split())
             self.searchoutput(out,
-                              "include { \"cluster/utecl1/client\" };",
+                              'include { "cluster/utecl1/client" };',
                               command)
             command = "cat --hostname evh%s.aqd-unittest.ms.com --data" % i
             out = self.commandtest(command.split())
             self.searchoutput(out,
-                              "'/system/cluster/name' = \"utecl1\";",
+                              '"/system/cluster/name" = "utecl1";',
                               command)
 
     def testfailmissingcluster(self):

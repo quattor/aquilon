@@ -75,9 +75,9 @@ class TestResetAdvertisedStatus(TestBrokerCommand):
 
             command = "cat --hostname %s --data"  % hostname
             out = self.commandtest(command.split(" "))
-            self.matchoutput(out, """'/system/build' = "%s";""" % status,
+            self.matchoutput(out, '"/system/build" = "%s";' % status,
                              command)
-            self.matchoutput(out, "'/system/advertise_status' = %s" %
+            self.matchoutput(out, '"/system/advertise_status" = %s' %
                              advertise_status.lower(), command)
 
     def testunittest02(self):
@@ -117,9 +117,9 @@ class TestResetAdvertisedStatus(TestBrokerCommand):
 
             command = "cat --hostname %s --data"  % hostname
             out = self.commandtest(command.split(" "))
-            self.matchoutput(out, """'/system/build' = "%s";""" % status,
+            self.matchoutput(out, '"/system/build" = "%s";' % status,
                              command)
-            self.matchoutput(out, "'/system/advertise_status' = %s" %
+            self.matchoutput(out, '"/system/advertise_status" = %s' %
                              advertise_status.lower(), command)
 
     def testunittest03(self):

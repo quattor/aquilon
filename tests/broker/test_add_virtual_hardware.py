@@ -282,10 +282,9 @@ class TestAddVirtualHardware(TestBrokerCommand):
         for i in range(1, 9):
             command = "cat --machine evm%s" % i
             out = self.commandtest(command.split(" "))
-            self.matchoutput(out, """"location" = "ut.ny.na";""", command)
+            self.matchoutput(out, '"location" = "ut.ny.na";', command)
             self.matchoutput(out,
-                             """include { """
-                             """'hardware/machine/utvendor/utmedium' };""",
+                             'include { "hardware/machine/utvendor/utmedium" };',
                              command)
             self.searchoutput(out,
                               r'"ram" = list\(\s*'
@@ -330,8 +329,7 @@ class TestAddVirtualHardware(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "object template clusters/utecl1;", command)
         self.searchoutput(out,
-                          r"include { 'service/esx_management_server/ut.[ab]/"
-                          r"client/config' };",
+                          r'include { "service/esx_management_server/ut.[ab]/client/config" };',
                           command)
 
     def test_500_verifyshow(self):
@@ -359,10 +357,9 @@ class TestAddVirtualHardware(TestBrokerCommand):
     def test_551_verifycatupdate(self):
         command = "cat --machine evm1"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, """"location" = "ut.ny.na";""", command)
+        self.matchoutput(out, '"location" = "ut.ny.na";', command)
         self.matchoutput(out,
-                         """include { """
-                         """'hardware/machine/utvendor/utlarge' };""",
+                         'include { "hardware/machine/utvendor/utlarge" };',
                          command)
         self.searchoutput(out,
                           r'"ram" = list\(\s*'

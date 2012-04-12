@@ -39,7 +39,9 @@ from aquilon.worker.locks import CompileKey
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
 from aquilon.worker.templates.machine import PlenaryMachineInfo
 from aquilon.worker.templates.cluster import PlenaryClusterClient
-from aquilon.worker.templates.panutils import pan, StructureTemplate
+from aquilon.worker.templates.panutils import (StructureTemplate, pan_assign,
+                                               pan_push, pan_include,
+                                               pan_variable)
 from aquilon.worker.dbwrappers.feature import (model_features,
                                                personality_features,
                                                interface_features)
@@ -270,45 +272,42 @@ class PlenaryHostData(Plenary):
         eon_id_list.sort()
 
         # Okay, here's the real content
-        lines.append("include { 'pan/units' };")
-        lines.append("include { 'pan/functions' };")
+        pan_include(lines, ["pan/units", "pan/functions"])
         lines.append("")
         pmachine = PlenaryMachineInfo(self.dbobj.machine)
-        lines.append("'/hardware' = %s;" %
-                     pan(StructureTemplate(pmachine.plenary_template_name)))
+        pan_assign(lines, "/hardware",
+                   StructureTemplate(pmachine.plenary_template_name))
 
         lines.append("")
-        lines.append("'/system/network/interfaces' = %s;" % pan(interfaces))
-        lines.append("'/system/network/primary_ip' = %s;" %
-                     pan(self.dbobj.machine.primary_ip))
+        pan_assign(lines, "/system/network/interfaces", interfaces)
+        pan_assign(lines, "/system/network/primary_ip",
+                   self.dbobj.machine.primary_ip)
         if default_gateway:
-            lines.append("'/system/network/default_gateway' = %s;" %
-                         pan(default_gateway))
+            pan_assign(lines, "/system/network/default_gateway",
+                       default_gateway)
         if vips:
-            lines.append('"/system/network/vips" = %s;' % pan(vips))
+            pan_assign(lines, "/system/network/vips", vips)
         if routers:
-            lines.append('"/system/network/routers" = %s;' % pan(routers))
+            pan_assign(lines, "/system/network/routers", routers)
         lines.append("")
 
-        lines.append("'/system/build' = %s;" % pan(self.dbobj.status.name))
-        lines.append("'/system/advertise_status' = %s;" % pan(self.dbobj.advertise_status))
+        pan_assign(lines, "/system/build", self.dbobj.status.name)
+        pan_assign(lines, "/system/advertise_status", self.dbobj.advertise_status)
         if eon_id_list:
-            lines.append('"/system/eon_ids" = %s;' % pan(eon_id_list))
+            pan_assign(lines, "/system/eon_ids", eon_id_list)
         if self.dbobj.cluster:
-            lines.append("'/system/cluster/name' = %s;" % pan(self.dbobj.cluster.name))
+            pan_assign(lines, "/system/cluster/name", self.dbobj.cluster.name)
         lines.append("")
         for resource in sorted(self.dbobj.resources):
-            lines.append("'/system/resources/%s' = push(%s);" % (
-                         resource.resource_type,
-                         pan(StructureTemplate(resource.template_base +
-                                               '/config'))))
+            pan_push(lines, "/system/resources/%s" % resource.resource_type,
+                     StructureTemplate(resource.template_base + '/config'))
         lines.append("")
-        lines.append("'/metadata/template/branch/name' = %s;" % pan(self.branch.name))
-        lines.append("'/metadata/template/branch/type' = %s;" %
-                      pan(self.branch.branch_type))
+        pan_assign(lines, "/metadata/template/branch/name", self.branch.name)
+        pan_assign(lines, "/metadata/template/branch/type",
+                   self.branch.branch_type)
         if self.branch.branch_type == 'sandbox':
-            lines.append("'/metadata/template/branch/author' = %s;" %
-                         pan(self.dbobj.sandbox_author.name))
+            pan_assign(lines, "/metadata/template/branch/author",
+                       self.dbobj.sandbox_author.name)
         lines.append("")
 
         return
@@ -420,19 +419,19 @@ class PlenaryToplevelHost(Plenary):
         templates.append("archetype/final")
 
         # Okay, here's the real content
-        lines.append("include { 'pan/units' };")
-        lines.append("include { 'pan/functions' };")
+        pan_include(lines, "pan/units")
+        pan_include(lines, "pan/functions")
         lines.append("")
 
         for iface in sorted(iface_features.keys()):
-            lines.append('variable CURRENT_INTERFACE = "%s";' % iface)
+            pan_variable(lines, "CURRENT_INTERFACE", iface)
             for feature in iface_features[iface]:
                 # Same forgiveness for interface model features
-                lines.append('include { "%s/config" };' % feature.cfg_path)
+                pan_include(lines, "%s/config" % feature.cfg_path)
             lines.append("")
 
         for template in templates:
-            lines.append("include { %s };" % pan(template))
+            pan_include(lines, template)
 
         lines.append("")
 

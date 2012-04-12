@@ -83,8 +83,8 @@ class TestReconfigure(TestBrokerCommand):
                          "template hostdata/unittest02.one-nyp.ms.com;",
                          command)
         self.matchoutput(out,
-            """'/hardware' = create("machine/americas/ut/ut3/ut3c5n10");""",
-            command)
+                         '"/hardware" = create("machine/americas/ut/ut3/ut3c5n10");',
+                         command)
         self.searchoutput(out,
                           r'"eth0", nlist\(\s*'
                           r'"bootproto", "static",\s*'
@@ -100,7 +100,7 @@ class TestReconfigure(TestBrokerCommand):
                            self.net.unknown[0].usable[0],
                            self.net.unknown[0].netmask),
                           command)
-        self.matchoutput(out, "'/system/advertise_status' = true;", command)
+        self.matchoutput(out, '"/system/advertise_status" = true;', command)
 
         command = "cat --hostname unittest02.one-nyp.ms.com"
         out = self.commandtest(command.split(" "))
@@ -155,8 +155,8 @@ class TestReconfigure(TestBrokerCommand):
                          "template hostdata/unittest00.one-nyp.ms.com;",
                          command)
         self.matchoutput(out,
-            """'/hardware' = create("machine/americas/ut/ut3/ut3c1n3");""",
-            command)
+                         '"/hardware" = create("machine/americas/ut/ut3/ut3c1n3");',
+                         command)
         self.searchoutput(out,
                           r'"eth0", nlist\(\s*'
                           r'"bootproto", "static",\s*'
@@ -187,7 +187,7 @@ class TestReconfigure(TestBrokerCommand):
                            self.net.unknown[0].usable[3],
                            self.net.unknown[0].netmask),
                           command)
-        self.matchoutput(out, "'/system/advertise_status' = false;", command)
+        self.matchoutput(out, '"/system/advertise_status" = false;', command)
 
         command = "cat --hostname unittest00.one-nyp.ms.com"
         out = self.commandtest(command.split(" "))
@@ -387,8 +387,8 @@ class TestReconfigure(TestBrokerCommand):
                          "template hostdata/aquilon87.aqd-unittest.ms.com;",
                          command)
         self.matchoutput(out,
-            """'/hardware' = create("machine/americas/ut/ut9/ut9s03p37");""",
-            command)
+                         '"/hardware" = create("machine/americas/ut/ut9/ut9s03p37");',
+                         command)
 
         command = "cat --hostname aquilon87.aqd-unittest.ms.com"
         out = self.commandtest(command.split(" "))
