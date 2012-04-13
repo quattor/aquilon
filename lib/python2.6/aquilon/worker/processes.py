@@ -44,6 +44,7 @@ from subprocess import Popen, PIPE
 from tempfile import mkstemp
 from threading import Thread
 from cStringIO import StringIO
+from functools import wraps
 
 from sqlalchemy.orm.session import object_session
 import yaml
@@ -347,6 +348,7 @@ CAMPUS_NOT_FOUND = re.compile("campus [a-zA-Z0-9]{2} doesn't exist")
 DNS_DOMAIN_NOT_FOUND = re.compile ("DNS domain ([-\w\.\d]+) doesn't exists")
 
 def rollback_decorator(fn):
+    @wraps(fn)
     def tracer(*args, **kwargs):
         try:
             dself = args[0]
@@ -355,8 +357,11 @@ def rollback_decorator(fn):
                 dself.logger.info("Action: " + dself.action)
             dself.action = None
 
-            if "revert" in kwargs:
+            if "revert" in kwargs and kwargs["revert"] is not None:
                 dself.rollbacks.append(kwargs["revert"])
+            else:
+                dself.logger.debug("%s.%s called with no rollback info." %
+                                   (dself.__class__.__name__, fn.__name__))
         except AquilonError, err:
             failed_action = dself.action
             dself.logger.client_info("Rolling back: " + failed_action)
