@@ -652,6 +652,7 @@
          <option name="fqdn" type="string">Network that contains the IP address for this fully qualified domain name</option>
          <option name="cluster" type="string">Networks in use by the cluster switch</option>
          <option name="pg" type="string">Networks assigned to the given portgroup</option>
+         <option name="has_dynamic_ranges" type="flag">Matches networks containing dynamic DHCP ranges</option>
          <option name="exact_location" type="flag">match the location exactly</option>
          <option name="all" type="flag">All</option>
          <optgroup name="search_network_location_opts" fields="any">

@@ -28,11 +28,13 @@
 # TERMS THAT MAY APPLY.
 """Contains the logic for `aq search network`."""
 
+from sqlalchemy.sql import exists
 
 from aquilon.worker.broker import BrokerCommand
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import (Network, Machine, VlanInfo, ObservedVlan,
-                                Cluster, ARecord, Fqdn, NetworkEnvironment)
+                                Cluster, ARecord, DynamicStub, Fqdn,
+                                NetworkEnvironment)
 from aquilon.aqdb.model.dns_domain import parse_fqdn
 from aquilon.worker.dbwrappers.location import get_location
 from aquilon.worker.formats.network import ShortNetworkList
@@ -44,7 +46,7 @@ class CommandSearchNetwork(BrokerCommand):
     required_parameters = []
 
     def render(self, session, network, network_environment, ip, type, machine,
-               fqdn, cluster, pg, fullinfo, **arguments):
+               fqdn, cluster, pg, has_dynamic_ranges, fullinfo, **arguments):
         """Return a network matching the parameters.
 
         Some of the search terms can only return a unique network.  For
@@ -121,6 +123,10 @@ class CommandSearchNetwork(BrokerCommand):
             else:
                 childids = dblocation.offspring_ids()
                 q = q.filter(Network.location_id.in_(childids))
+        if has_dynamic_ranges:
+            q = q.filter(exists([DynamicStub.dns_record_id],
+                                from_obj=DynamicStub.__table__.join(ARecord.__table__))
+                         .where(Network.id == DynamicStub.network_id))
         q = q.order_by(Network.ip)
         if fullinfo:
             return q.all()
