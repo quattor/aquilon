@@ -61,12 +61,22 @@ class CommandUpdateCity(BrokerCommand):
                                         dbcampus, dbcampus.hub,
                                         dbcity, dbcity.hub))
 
+            update_kwargs = {}
+            if dbcity.campus:
+                update_kwargs['revert'] = (dsdb_runner.update_city,
+                                           dbcity.campus.name)
+            else:
+                # XXX: There is no way to revert to an empty campus.
+                update_kwargs['revert'] = (logger.client_info,
+                        "Campus assignment updated in DSDB and not reverted.")
             dbcity.update_parent(parent=dbcampus)
             update_machines = True
-            dsdb_runner = DSDBRunner(logger=logger)
-            dsdb_runner.update_city(city, dbcampus.name)
 
         session.flush()
+
+        if campus is not None:
+            dsdb_runner = DSDBRunner(logger=logger)
+            dsdb_runner.update_city(city, dbcampus.name, **update_kwargs)
 
         plenaries = PlenaryCollection(logger=logger)
         plenaries.append(Plenary.get_plenary(dbcity))
@@ -78,5 +88,9 @@ class CommandUpdateCity(BrokerCommand):
             for dbmachine in q:
                 plenaries.append(Plenary.get_plenary(dbmachine))
 
-        count = plenaries.write()
+        try:
+            count = plenaries.write()
+        except:
+            dsdb_runner.rollback()
+            raise
         logger.client_info("Flushed %d templates." % count)

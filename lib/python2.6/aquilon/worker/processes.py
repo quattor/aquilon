@@ -429,7 +429,7 @@ class DSDBRunner(object):
                "-country_symbol", country, "-city_name", fullname])
 
     @rollback_decorator
-    def update_city(self, city, campus):
+    def update_city(self, city, campus, revert=None):
         self.action = "updating campus of city %s to %s in DSDB." % (city,
                                                                      campus)
 
