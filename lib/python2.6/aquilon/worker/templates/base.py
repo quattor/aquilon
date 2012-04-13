@@ -393,6 +393,10 @@ class PlenaryCollection(object):
         return "PlenaryCollection(%s)" % ", ".join([str(plenary) for plenary
                                                     in self.plenaries])
 
+    def __iter__(self):
+        for plen in self.plenaries:
+            yield plen
+
     def get_write_key(self):
         keylist = []
         for plen in self.plenaries:
@@ -417,6 +421,15 @@ class PlenaryCollection(object):
         for plen in self.plenaries:
             plen.restore_stash()
 
+    @property
+    def object_templates(self):
+        for plen in self.plenaries:
+            if isinstance(plen, PlenaryCollection):
+                for obj in plen.object_templates:
+                    yield obj
+            elif plen.template_type == 'object':
+                yield plen.plenary_template_name
+
     def write(self, locked=False, content=None):
         # If locked is True, assume error handling happens higher
         # in the stack.
@@ -435,8 +448,8 @@ class PlenaryCollection(object):
                 # it has the nice side effect of not updating the total.
                 try:
                     total += plen.write(locked=True, content=content)
-                except IncompleteError:
-                    pass
+                except IncompleteError, err:
+                    self.logger.client_info("Warning: %s" % err)
         except:
             if not locked:
                 self.restore_stash()

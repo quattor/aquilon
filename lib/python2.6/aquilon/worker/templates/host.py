@@ -296,8 +296,10 @@ class PlenaryToplevelHost(Plenary):
             required_services.discard(si.service)
             services.append(si.cfg_path + '/client/config')
         if required_services:
-            raise IncompleteError("Host %s is missing required services %s." %
-                                  (self.name, required_services))
+            missing = ", ".join(sorted([srv.name for srv in required_services]))
+            raise IncompleteError("Host %s is missing the following required "
+                                  "services, please run 'aq reconfigure': %s." %
+                                  (self.name, missing))
 
         provides = []
         for si in self.dbobj.services_provided:
@@ -328,7 +330,8 @@ class PlenaryToplevelHost(Plenary):
             templates.append(clplenary.plenary_template_name)
         elif pers.cluster_required:
             raise IncompleteError("Host %s personality %s requires cluster "
-                                  "membership." % (self.name, pers.name))
+                                  "membership, please run 'aq cluster'." %
+                                  (self.name, pers.name))
 
         for feature in post_features:
             templates.append("%s/config" % feature.cfg_path)

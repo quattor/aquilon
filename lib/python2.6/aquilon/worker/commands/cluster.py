@@ -30,10 +30,10 @@
 
 
 from aquilon.exceptions_ import ArgumentError
+from aquilon.aqdb.model import Cluster, HostLifecycle, Personality
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.host import hostname_to_host
-from aquilon.aqdb.model import Cluster, HostLifecycle, Personality
-from aquilon.worker.templates.cluster import PlenaryCluster
+from aquilon.worker.templates.base import Plenary, PlenaryCollection
 from aquilon.worker.services import Chooser
 from aquilon.worker.locks import lock_queue, CompileKey
 
@@ -78,14 +78,16 @@ class CommandCluster(BrokerCommand):
         # if this is a valid membership change
         dbcluster.validate_membership(dbhost)
 
+        plenaries = PlenaryCollection(logger=logger)
+        plenaries.append(Plenary.get_plenary(dbcluster))
+
         if dbhost.cluster and dbhost.cluster != dbcluster:
             logger.client_info("Removing {0:l} from {1:l}.".format(dbhost,
                                                                    dbhost.cluster))
             old_cluster = dbhost.cluster
             old_cluster.hosts.remove(dbhost)
-            session.flush()
-            session.refresh(dbhost)
-            session.refresh(old_cluster)
+            session.expire(dbhost, ['_cluster'])
+            plenaries.append(Plenary.get_plenary(old_cluster))
 
         if dbhost.cluster:
             if personality_change:
@@ -98,9 +100,6 @@ class CommandCluster(BrokerCommand):
 
         # Check for max_members happens in aqdb layer
         dbcluster.hosts.append(dbhost)
-        session.flush()
-        session.refresh(dbcluster)
-        clusplenary = PlenaryCluster(dbcluster, logger=logger)
 
         # demote a host when switching clusters
         # promote a host when switching clusters
@@ -109,14 +108,16 @@ class CommandCluster(BrokerCommand):
                 dbalmost = HostLifecycle.get_unique(session, 'almostready',
                                                     compel=True)
                 dbhost.status.transition(dbhost, dbalmost)
+                plenaries.append(Plenary.get_plenary(dbhost))
         elif dbhost.status.name == 'almostready':
             if dbcluster.status.name == 'ready':
                 dbready = HostLifecycle.get_unique(session, 'ready',
                                                    compel=True)
                 dbhost.status.transition(dbhost, dbready)
+                plenaries.append(Plenary.get_plenary(dbhost))
 
         session.flush()
-        session.refresh(dbhost)
+
         # Enforce that service instances are set correctly for the
         # new cluster association.
         chooser = Chooser(dbhost, logger=logger)
@@ -124,15 +125,15 @@ class CommandCluster(BrokerCommand):
         chooser.flush_changes()
         # the chooser will include the host plenary
         key = CompileKey.merge([chooser.get_write_key(),
-                                clusplenary.get_write_key()])
+                                plenaries.get_write_key()])
 
         try:
             lock_queue.acquire(key)
             chooser.write_plenary_templates(locked=True)
-            clusplenary.write(locked=True)
+            plenaries.write(locked=True)
         except:
             chooser.restore_stash()
-            clusplenary.restore_stash()
+            plenaries.restore_stash()
             raise
         finally:
             lock_queue.release(key)

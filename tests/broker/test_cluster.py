@@ -130,7 +130,12 @@ class TestCluster(TestBrokerCommand):
         command = ["reconfigure", "--hostname=aquilon61.aqd-unittest.ms.com",
                    "--personality=esx_server", "--archetype=vmhost",
                    "--os=esxi/4.0.0", "--buildstatus=rebuild"]
-        self.successtest(command)
+        (out, err) = self.successtest(command)
+        self.matchoutput(err,
+                         "Warning: Host aquilon61.aqd-unittest.ms.com "
+                         "personality esx_server requires cluster membership, "
+                         "please run 'aq cluster'.",
+                         command)
         command = ["cluster", "--cluster=utecl1",
                    "--personality=esx_desktop",
                    "--hostname=aquilon61.aqd-unittest.ms.com"]
@@ -156,6 +161,17 @@ class TestCluster(TestBrokerCommand):
         command = ["cluster", "--cluster=utecl2",
                    "--hostname=aquilon61.aqd-unittest.ms.com"]
         self.successtest(command)
+
+        # Check that both cluster plenaries were updated
+        command = ["cat", "--cluster", "utecl1"]
+        out = self.commandtest(command)
+        self.matchclean(out, "aquilon61.aqd-unittest.ms.com", command)
+        command = ["cat", "--cluster", "utecl2"]
+        out = self.commandtest(command)
+        self.searchoutput(out,
+                          r'"/system/cluster/members" = list\('
+                          r'[^)]*"aquilon61.aqd-unittest.ms.com"[^)]*\);',
+                          command)
 
         # Now try to uncluster it...
         command = ["uncluster", "--cluster=utecl2",
@@ -246,6 +262,6 @@ class TestCluster(TestBrokerCommand):
         self.successtest(["cluster", "--hostname", host, "--cluster", cluster])
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestCluster)
     unittest.TextTestRunner(verbosity=2).run(suite)
