@@ -99,8 +99,9 @@ class CommandUpdateBuilding(BrokerCommand):
                                 (oldcity.campus, building)))
 
             if dbcity.campus and (oldcity.campus != dbcity.campus):
-                # no revert, it's the last dsdb operation of this command.
-                dsdb_runner.add_campus_building(dbcity.campus, building)
+                dsdb_runner.add_campus_building(dbcity.campus, building,
+                            revert=(dsdb_runner.del_campus_building,
+                                (dbcity.campus, building)))
 
         else:
             if address is not None:
@@ -115,5 +116,8 @@ class CommandUpdateBuilding(BrokerCommand):
 
             for dbmachine in query:
                 plenaries.append(PlenaryMachineInfo(dbmachine, logger=logger))
-            plenaries.write()
-
+            try:
+                plenaries.write()
+            except:
+                dsdb_runner.rollback()
+                raise
