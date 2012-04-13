@@ -379,8 +379,11 @@ class DSDBRunner(object):
     def rollback(self):
         self.rollbacks.reverse()
         for r in self.rollbacks:
-            args = r[1]
-            r[0](*args)
+            (action, args) = (r[0], r[1])
+            try:
+                action(*args)
+            except AquilonError, err:
+                self.logger.warn("Error rolling back: %s" % err)
 
         self.rollbacks = []
 
