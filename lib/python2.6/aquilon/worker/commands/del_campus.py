@@ -41,12 +41,13 @@ class CommandDelCampus(CommandDelLocation):
 
     def render(self, session, logger, campus, **arguments):
         dbcampus = get_location(session, campus=campus)
+        name = dbcampus.name
 
-        result = CommandDelLocation.render(self, session=session, name=campus,
+        result = CommandDelLocation.render(self, session=session, name=name,
                                            type='campus', **arguments)
         session.flush()
 
         dsdb_runner = DSDBRunner(logger=logger)
-        dsdb_runner.del_campus(campus.strip().lower())
+        dsdb_runner.del_campus(name)
 
         return result
