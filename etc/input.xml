@@ -2584,7 +2584,7 @@
       </optgroup>
       <optgroup name="add_city_location_options" mandatory="True" fields="any">
          <option name="country" conflicts="campus" type="string">Name of the country that contains the city</option>
-         <option name="campus" conflicts="country" type="string">Campus (should be in the same hub)</option>
+         <option name="campus" conflicts="country" type="string">Campus</option>
       </optgroup>
       <optgroup name="optional_opts">
          <option name="fullname" type="string">Full, descriptive name</option>
