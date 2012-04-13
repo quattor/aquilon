@@ -104,15 +104,14 @@ class TestDelBuilding(TestBrokerCommand):
                         "--comments", "Made-up network"])
 
         # try delete building
-        self.dsdb_expect("delete_campus_building_aq -campus_name ny -building_name %s" % test_bu)
-#        self.dsdb_expect("delete_building_aq -building_name %s" % test_bu)
         command = "del building --building %s" % test_bu
         err = self.badrequesttest(command.split(" "))
         self.matchoutput(err,
                          "Bad Request: Could not delete building %s, "
                          "networks were found using this location." % test_bu,
                          command)
-        self.dsdb_verify()
+        self.dsdb_verify(empty=True)
+
         # delete network
         self.noouttest(["del_network", "--ip", "192.176.6.0"])
 
