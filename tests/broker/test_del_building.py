@@ -41,6 +41,8 @@ from brokertest import TestBrokerCommand
 class TestDelBuilding(TestBrokerCommand):
 
     def testdelbu(self):
+        self.dsdb_expect("delete_campus_building_aq -campus_name ny "
+                         "-building_name bu")
         self.dsdb_expect("delete_building_aq -building bu")
         command = "del building --building bu"
         self.noouttest(command.split(" "))
@@ -64,7 +66,10 @@ class TestDelBuilding(TestBrokerCommand):
                          "-building_addr Nowhere")
         command = ["add", "building", "--building", test_building, "--city", "ex",
                    "--address", "Nowhere"]
-        self.noouttest(command)
+        (out, err) = self.successtest(command)
+        self.matchoutput(err, "WARNING: There's no campus for city ex of "
+                         "building bz. dsdb add_campus_building will not be "
+                         "executed.", command)
         self.dsdb_verify()
 
 
@@ -77,6 +82,8 @@ class TestDelBuilding(TestBrokerCommand):
         self.dsdb_verify()
 
     def testdelnettest02(self):
+        self.dsdb_expect("delete_campus_building_aq -campus_name ny "
+                         "-building_name nettest")
         self.dsdb_expect("delete_building_aq -building nettest")
         command = "del building --building nettest"
         self.noouttest(command.split(" "))
@@ -100,6 +107,8 @@ class TestDelBuilding(TestBrokerCommand):
                          "Bad Request: Could not delete building %s, "
                          "networks were found using this location." % test_bu,
                          command)
+        self.dsdb_verify(empty=True)
+
         # delete network
         self.noouttest(["del_network", "--ip", "192.176.6.0"])
 

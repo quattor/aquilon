@@ -53,6 +53,7 @@ class CommandUpdateRack(BrokerCommand):
             dbrack.comments = comments
         if room:
             dbroom = get_location(session, room=room)
+            # This one would change the template's locations hence forbidden
             if dbroom.building != dbrack.building:
                 # Doing this both to reduce user error and to limit
                 # testing required.
@@ -75,7 +76,3 @@ class CommandUpdateRack(BrokerCommand):
         for dbmachine in q:
             plenaries.append(Plenary.get_plenary(dbmachine))
         plenaries.write()
-
-        # XXX: Reconfigure/compile here?
-
-        return

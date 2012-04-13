@@ -31,8 +31,7 @@
 
 from aquilon.worker.processes import DSDBRunner
 from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.commands.add_location import (CommandAddLocation,
-                                                  add_location)
+from aquilon.worker.commands.add_location import CommandAddLocation
 
 
 class CommandAddBuilding(CommandAddLocation):
@@ -42,13 +41,28 @@ class CommandAddBuilding(CommandAddLocation):
     def render(self, session, logger, building, city, fullname, comments,
                address, **arguments):
 
-        new_loc = add_location(session, building, fullname, 'building', city,
-                               'city', comments, address)
+        return CommandAddLocation.render(self, session, building,
+                                         fullname, 'building', city, 'city',
+                                         comments, address, logger=logger,
+                                         **arguments)
 
-        session.add(new_loc)
-        session.flush()
+    def after_flush(self, session, new_loc, **arguments):
+        logger = arguments["logger"]
+
+        building, city, address = (new_loc.name,
+                                   new_loc.city.name, new_loc.address)
 
         dsdb_runner = DSDBRunner(logger=logger)
-        dsdb_runner.add_building(building, city, address)
 
-        return
+        dsdb_runner.add_building(building, city, address,
+                                revert=(dsdb_runner.del_building,(building,)))
+
+        newcity = new_loc.city
+
+        if newcity.campus:
+            dsdb_runner.add_campus_building(newcity.campus, building)
+
+        else:
+            logger.client_info("WARNING: There's no campus for city %s of "
+                               "building %s. dsdb add_campus_building will "
+                               "not be executed." % (city, building))

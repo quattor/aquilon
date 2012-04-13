@@ -44,6 +44,7 @@ from subprocess import Popen, PIPE
 from tempfile import mkstemp
 from threading import Thread
 from cStringIO import StringIO
+from functools import wraps
 
 from sqlalchemy.orm.session import object_session
 import yaml
@@ -342,7 +343,32 @@ IP_NOT_DEFINED_RE = re.compile("Host with IP address "
 
 BUILDING_NOT_FOUND = re.compile("bldg [a-zA-Z0-9]{2} doesn't exists")
 
+CAMPUS_NOT_FOUND = re.compile("campus [a-zA-Z0-9]{2} doesn't exist")
+
 DNS_DOMAIN_NOT_FOUND = re.compile ("DNS domain ([-\w\.\d]+) doesn't exists")
+
+def rollback_decorator(fn):
+    @wraps(fn)
+    def tracer(*args, **kwargs):
+        try:
+            dself = args[0]
+            fn(*args, **kwargs)
+            if dself.action:
+                dself.logger.info("Action: " + dself.action)
+            dself.action = None
+
+            if "revert" in kwargs and kwargs["revert"] is not None:
+                dself.rollbacks.append(kwargs["revert"])
+            else:
+                dself.logger.debug("%s.%s called with no rollback info." %
+                                   (dself.__class__.__name__, fn.__name__))
+        except AquilonError, err:
+            failed_action = dself.action
+            dself.logger.client_info("Rolling back: " + failed_action)
+            dself.rollback()
+            raise ArgumentError("Error while " + failed_action + ": %s" % err)
+
+    return tracer
 
 class DSDBRunner(object):
 
@@ -352,52 +378,122 @@ class DSDBRunner(object):
         self.dsdb = self.config.get("broker", "dsdb")
         self.location_sync = self.config.getboolean(
             "broker", "dsdb_location_sync")
+        self.rollbacks = []
+        self.action = None
+
+    def rollback(self):
+        self.rollbacks.reverse()
+        for r in self.rollbacks:
+            (action, args) = (r[0], r[1])
+            try:
+                action(*args)
+            except AquilonError, err:
+                self.logger.warn("Error rolling back: %s" % err)
+
+        self.rollbacks = []
 
     def getenv(self):
         if self.config.getboolean("broker", "dsdb_use_testdb"):
             return {"DSDB_USE_TESTDB": "true"}
         return None
 
+    def run_if_sync(self, cmd):
+        if self.location_sync:
+            out = run_command(cmd, env=self.getenv(), logger=self.logger)
+        else:
+            self.logger.debug(
+                "Would have called '%s' if location sync was enabled" % cmd)
+
+    @rollback_decorator
+    def add_campus(self, campus, comments):
+        self.action = "adding new campus %s to DSDB." % campus
+
+        command = [self.dsdb, "add_campus_aq", "-campus_name", campus]
+        if comments:
+            command.extend(["-comments", comments])
+        self.run_if_sync(command)
+
+    @rollback_decorator
+    def del_campus(self, campus):
+        self.action = "removing campus %s from DSDB." % campus
+
+        try:
+            self.run_if_sync([self.dsdb, "delete_campus_aq", "-campus", campus])
+        except ProcessException, e:
+            if e.out and CAMPUS_NOT_FOUND.search(e.out):
+                self.logger.info("DSDB does not have a campus %s defined, "
+                                 "proceeding with aqdb command." % campus)
+                return
+            raise
+
+    @rollback_decorator
     def add_city(self, city, country, fullname):
-        cmd = [self.dsdb, "add_city_aq", "-city_symbol", city,
-               "-country_symbol", country, "-city_name", fullname]
-        if self.location_sync:
-            out = run_command(cmd, env=self.getenv(), logger=self.logger)
-        else:
-            self.logger.debug(
-                "Would have called '%s' if location sync was enabled" % cmd)
+        self.action = "adding new city %s to DSDB." % (city)
 
+        self.run_if_sync([self.dsdb, "add_city_aq", "-city_symbol", city,
+               "-country_symbol", country, "-city_name", fullname])
+
+    @rollback_decorator
+    def update_city(self, city, campus, revert=None):
+        self.action = "updating campus of city %s to %s in DSDB." % (city,
+                                                                     campus)
+
+        self.run_if_sync([self.dsdb, "update_city_aq", "-city", city,
+               "-campus", campus])
+
+    @rollback_decorator
     def del_city(self, city):
-        cmd = [self.dsdb, "delete_city_aq", "-city", city]
+        self.action = "removing city %s to DSDB." % (city)
+        self.run_if_sync([self.dsdb, "delete_city_aq", "-city", city])
+
+    @rollback_decorator
+    def add_campus_building(self, campus, building, revert=None):
+        self.action = "adding building %s to campus %s in DSDB." % (building,
+                                                               campus)
+        cmd = [self.dsdb, "add_campus_building_aq", "-campus_name", campus,
+               "-building_name", building]
         if self.location_sync:
             out = run_command(cmd, env=self.getenv(), logger=self.logger)
         else:
             self.logger.debug(
                 "Would have called '%s' if location sync was enabled" % cmd)
 
-    def add_building(self, building, city, building_addr):
-        cmd = [self.dsdb, "add_building_aq", "-building_name", building,
-               "-city", city, "-building_addr", building_addr]
-        if self.location_sync:
-            out = run_command(cmd, env=self.getenv(), logger=self.logger)
-        else:
-            self.logger.debug(
-                "Would have called '%s' if location sync was enabled" % cmd)
+    @rollback_decorator
+    def add_building(self, building, city, building_addr, revert=None):
+        self.action = "adding new building %s to DSDB." % building
 
-    def del_building(self, building):
-        cmd = [self.dsdb, "delete_building_aq", "-building", building]
-        if self.location_sync:
-            try:
-                out = run_command(cmd, env=self.getenv(), logger=self.logger)
-            except ProcessException, e:
-                if e.out and BUILDING_NOT_FOUND.search(e.out):
-                    self.logger.info("DSDB does not have a building %s defined, "
-                                     "proceeding with aqdb command." % building)
-                    return
-                raise
-        else:
-            self.logger.debug(
-                "Would have called '%s' if location sync was enabled" % cmd)
+        self.run_if_sync([self.dsdb, "add_building_aq",
+                          "-building_name", building,
+                          "-city", city, "-building_addr", building_addr])
+
+    @rollback_decorator
+    def del_campus_building(self, campus, building, revert=None):
+        self.action = "removing building %s from campus %s in DSDB." % (building,
+                                                                   campus)
+        self.run_if_sync([self.dsdb, "delete_campus_building_aq",
+               "-campus_name", campus, "-building_name", building])
+
+    @rollback_decorator
+    def del_building(self, building, revert=None):
+        self.action = "removing building %s from DSDB." % building
+
+        try:
+            self.run_if_sync([self.dsdb, "delete_building_aq",
+                              "-building", building])
+        except ProcessException, e:
+            if e.out and BUILDING_NOT_FOUND.search(e.out):
+                self.logger.info("DSDB does not have a building %s defined, "
+                                 "proceeding with aqdb command." % building)
+                return
+            raise
+
+    @rollback_decorator
+    def update_building(self, building, building_addr, revert=None):
+        self.action = "set address of building %s to %s in DSDB." % \
+            (building, building_addr)
+        self.run_if_sync([self.dsdb, "update_building_aq",
+                          "-building_name", building,
+                          "-building_addr", building_addr])
 
     def add_host_details(self, fqdn, ip, name, mac, primary=None, comments=None):
         # DSDB does not accept '/' as valid in an interface name.

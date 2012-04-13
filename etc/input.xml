@@ -2330,7 +2330,7 @@
          <option name="name" type="string">Short name of new location</option>
          <option name="type" type="string">Location type</option>
       </optgroup>
-      <transport method="delete" path="location/%(type)s/%(name)s" />
+      <transport method="delete" path="location/generic/%(type)s/%(name)s" />
    </command>
 
    <command name="add_chassis">
@@ -2472,6 +2472,20 @@
       <transport method="put" path="location/building/%(building)s" />
    </command>
 
+   <command name="update_building">
+      Update the address parameter and city for a building.
+      <optgroup name="update_building_input" mandatory="True" fields="all">
+         <option name="building" type="string">Name of the building</option>
+      </optgroup>
+      <optgroup name="optional_opts">
+         <option name="address" type="string">Address of the building</option>
+         <option name="city" type="string">Name of the city the building is in</option>
+         <option name="fullname" type="string">Full, descriptive name</option>
+         <option name="comments" type="string">Comments</option>
+      </optgroup>
+      <transport method="post" path="location/building/%(building)s" />
+   </command>
+
    <command name="show_building">
       Show the building list, or details about a particular building.
       <p/>
@@ -2491,6 +2505,27 @@
          <option name="building" type="string">building name</option>
       </optgroup>
       <transport method="delete" path="location/building/%(building)s" />
+   </command>
+
+   <command name="add_campus">
+      Add a new campus to the database. See also add_location.
+      <optgroup name="add_campus_input" mandatory="True" fields="all">
+         <option name="campus" type="string">Name of the new campus</option>
+         <option name="country" type="string">Name of the country that contains the campus</option>
+      </optgroup>
+      <optgroup name="optional_opts">
+         <option name="fullname" type="string">Full, descriptive name</option>
+         <option name="comments" type="string">Comments</option>
+      </optgroup>
+      <transport method="put" path="location/campus/%(campus)s" />
+   </command>
+
+   <command name="del_campus">
+      Delete a campus. See also del_location.
+      <optgroup name="del_campus_opts" mandatory="True" fields="all">
+         <option name="campus" type="string">campus name</option>
+      </optgroup>
+      <transport method="delete" path="location/campus/%(campus)s" />
    </command>
 
    <command name="add_room">
@@ -2546,12 +2581,15 @@
       Cities have a plenary template named site/$region/$city/config. The timezone of the city will be available in this template as the global variable TIMEZONE.
       <optgroup name="add_city_options" mandatory="True" fields="all">
          <option name="city" type="string">Name of the new city</option>
-         <option name="country" type="string">Name of the country that contains the city</option>
+         <option name="timezone" type="string">Timezone of the city (e.g. Europe/London)</option>
+      </optgroup>
+      <optgroup name="add_city_location_options" mandatory="True" fields="any">
+         <option name="country" conflicts="campus" type="string">Name of the country that contains the city</option>
+         <option name="campus" conflicts="country" type="string">Campus</option>
       </optgroup>
       <optgroup name="optional_opts">
          <option name="fullname" type="string">Full, descriptive name</option>
          <option name="comments" type="string">Comments</option>
-         <option name="timezone" type="string">Timezone of the city (e.g. Europe/London)</option>
       </optgroup>
       <transport method="put" path="location/city/%(city)s" />
    </command>
@@ -2559,11 +2597,11 @@
    <command name="update_city">
       Update the timezone of an existing city. See also add_city.
       <optgroup name="update_city_options" mandatory="True" fields="all">
-         <option name="city" type="string">Name of the new city</option>
+         <option name="city" type="string">Name of the city</option>
       </optgroup>
       <optgroup name="optional_opts" mandatory="False" fields="any">
          <option name="timezone" type="string">Timezone of the city (e.g. Europe/London)</option>
-	 <option name="campus" type="string">Campus (should be in the same hub)</option>
+         <option name="campus" type="string">Campus (should be in the same hub)</option>
       </optgroup>
       <transport method="post" path="location/city/%(city)s" />
    </command>

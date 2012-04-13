@@ -73,7 +73,7 @@ class TestAddCity(TestBrokerCommand):
         self.dsdb_expect("add_city_aq -city_symbol e3 " +
                          "-country_symbol us -city_name Exampleby")
         command = ["add", "city", "--city", "e3", "--country", "us",
-                   "--fullname", "Exampleby"]
+                   "--fullname", "Exampleby", "--timezone", "UTC"]
         self.noouttest(command)
         self.dsdb_verify()
 
@@ -117,7 +117,7 @@ class TestAddCity(TestBrokerCommand):
         self.dsdb_expect("add_city_aq -city_symbol e4 " +
                          "-country_symbol us -city_name Exampleby")
         command = ["add", "city", "--city", "e4", "--country", "us",
-                   "--fullname", "Exampleby"]
+                   "--fullname", "Exampleby", "--timezone", "US/Eastern"]
         self.noouttest(command)
         self.dsdb_verify()
 
@@ -126,7 +126,10 @@ class TestAddCity(TestBrokerCommand):
                          "-building_addr Nowhere")
         command = ["add", "building", "--building", "bx", "--city", "e4",
                    "--address", "Nowhere"]
-        self.noouttest(command)
+        out, err = self.successtest(command)
+        self.matchoutput(err, "WARNING: There's no campus for city e4 of "
+                         "building bx. dsdb add_campus_building "
+                         "will not be executed.", command)
         self.dsdb_verify()
 
         ## add campus
@@ -135,16 +138,30 @@ class TestAddCity(TestBrokerCommand):
                    "--fullname", "test campus"]
         self.noouttest(command)
 
+        # update city
+        self.dsdb_expect("update_city_aq -city e4 -campus na")
         command = ["update", "city", "--city", "e4", "--campus", "na"]
         self.ignoreoutputtest(command)
+        self.dsdb_verify()
 
         command = "show city --city e4"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Location Parents: [Organization ms, Hub ny, Continent na, Country us, Campus na]", command)
+        self.matchoutput(out, "Location Parents: [Organization ms, Hub ny, "
+                         "Continent na, Country us, Campus na]", command)
 
         command = "show building --building bx"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Location Parents: [Organization ms, Hub ny, Continent na, Country us, Campus na, City e4]", command)
+        self.matchoutput(out, "Location Parents: [Organization ms, Hub ny, "
+                    "Continent na, Country us, Campus na, City e4]", command)
+
+    def testaddcitycampus(self):
+        ## add city
+        self.dsdb_expect("add_city_aq -city_symbol e5 " +
+                         "-country_symbol us -city_name Examplefive")
+        command = ["add", "city", "--city", "e5", "--campus", "ta",
+                   "--fullname", "Examplefive", "--timezone",   "US/Eastern"]
+        self.noouttest(command)
+        self.dsdb_verify()
 
 
 if __name__=='__main__':

@@ -26,35 +26,27 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-"""Contains the logic for `aq del building`."""
+"""Contains the logic for `aq add campus`."""
 
 
-from aquilon.exceptions_ import ArgumentError, AquilonError
 from aquilon.worker.processes import DSDBRunner
 from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.commands.del_location import CommandDelLocation
-from aquilon.worker.dbwrappers.location import get_location
+from aquilon.worker.commands.add_location import CommandAddLocation
 
 
-class CommandDelBuilding(CommandDelLocation):
+class CommandAddCampus(CommandAddLocation):
 
-    required_parameters = ["building"]
+    required_parameters = ["country", "campus"]
 
-    def render(self, session, logger, building, **arguments):
+    def render(self, session, logger, campus, country, fullname, comments,
+               **arguments):
 
-        dbbuilding = get_location(session, building=building)
-        campus = dbbuilding.campus
+        return CommandAddLocation.render(self, session, campus,
+                                         fullname, 'campus', country, 'country',
+                                         comments, logger=logger, **arguments)
 
-        result = CommandDelLocation.render(self, session=session, name=building,
-                                           type='building', **arguments)
-        session.flush()
+    def after_flush(self, session, new_loc, **arguments):
+        logger = arguments["logger"]
 
         dsdb_runner = DSDBRunner(logger=logger)
-
-        if campus:
-            dsdb_runner.del_campus_building(campus, building,
-                revert=(dsdb_runner.add_campus_building,(campus, building)))
-
-        dsdb_runner.del_building(building)
-
-        return result
+        dsdb_runner.add_campus(new_loc.name, new_loc.comments)

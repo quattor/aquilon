@@ -26,35 +26,28 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-"""Contains the logic for `aq del building`."""
+"""Contains the logic for `aq del campus`."""
 
 
-from aquilon.exceptions_ import ArgumentError, AquilonError
 from aquilon.worker.processes import DSDBRunner
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.commands.del_location import CommandDelLocation
 from aquilon.worker.dbwrappers.location import get_location
 
 
-class CommandDelBuilding(CommandDelLocation):
+class CommandDelCampus(CommandDelLocation):
 
-    required_parameters = ["building"]
+    required_parameters = ["campus"]
 
-    def render(self, session, logger, building, **arguments):
+    def render(self, session, logger, campus, **arguments):
+        dbcampus = get_location(session, campus=campus)
+        name = dbcampus.name
 
-        dbbuilding = get_location(session, building=building)
-        campus = dbbuilding.campus
-
-        result = CommandDelLocation.render(self, session=session, name=building,
-                                           type='building', **arguments)
+        result = CommandDelLocation.render(self, session=session, name=name,
+                                           type='campus', **arguments)
         session.flush()
 
         dsdb_runner = DSDBRunner(logger=logger)
-
-        if campus:
-            dsdb_runner.del_campus_building(campus, building,
-                revert=(dsdb_runner.add_campus_building,(campus, building)))
-
-        dsdb_runner.del_building(building)
+        dsdb_runner.del_campus(name)
 
         return result

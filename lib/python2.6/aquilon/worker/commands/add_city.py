@@ -29,29 +29,43 @@
 """Contains the logic for `aq add city`."""
 
 
-from aquilon.exceptions_ import ArgumentError, AquilonError
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.processes import DSDBRunner
 from aquilon.worker.locks import lock_queue
 from aquilon.worker.templates.city import PlenaryCity
-from aquilon.worker.commands.add_location import (CommandAddLocation,
-                                                  add_location)
+from aquilon.worker.commands.add_location import CommandAddLocation
 
 
 class CommandAddCity(CommandAddLocation):
 
-    required_parameters = ["city", "country"]
+    required_parameters = ["city", "timezone"]
 
     def render(self, session, logger, city, country, fullname, comments,
-               timezone,
+               timezone, campus,
                **arguments):
 
-        new_loc = add_location(session, city, fullname, 'city', country,
-                               'country', comments)
-        if timezone is not None:
-            new_loc.timezone = timezone
-        session.add(new_loc)
-        session.flush()
+        if country:
+            parentname = country
+            parenttype = 'country'
+        else:
+            parentname = campus
+            parenttype = 'campus'
+
+        return CommandAddLocation.render(self, session, city, fullname, 'city',
+                                         parentname, parenttype, comments,
+                                         logger=logger, timezone=timezone,
+                                         campus=campus, **arguments)
+
+    def before_flush(self, session, new_loc, **arguments):
+
+        if "timezone" in arguments:
+            new_loc.timezone = arguments["timezone"]
+
+    def after_flush(self, session, new_loc, **arguments):
+        logger = arguments["logger"]
+
+        city, country, fullname = (new_loc.name, new_loc.country.name,
+                                   new_loc.fullname)
 
         plenary = PlenaryCity(new_loc, logger=logger)
         key = plenary.get_write_key()
@@ -60,15 +74,10 @@ class CommandAddCity(CommandAddLocation):
             plenary.write(locked=True)
 
             dsdb_runner = DSDBRunner(logger=logger)
-            try:
-                dsdb_runner.add_city(city, country, fullname)
-            except AquilonError, err:
-                raise ArgumentError("Could not add city to DSDB: %s" % err)
+            dsdb_runner.add_city(city, country, fullname)
 
         except:
             plenary.restore_stash()
             raise
         finally:
             lock_queue.release(key)
-
-        return

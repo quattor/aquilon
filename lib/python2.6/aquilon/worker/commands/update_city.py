@@ -32,6 +32,7 @@
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Machine
 from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.processes import DSDBRunner
 from aquilon.worker.dbwrappers.location import get_location
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
 
@@ -60,10 +61,22 @@ class CommandUpdateCity(BrokerCommand):
                                         dbcampus, dbcampus.hub,
                                         dbcity, dbcity.hub))
 
+            update_kwargs = {}
+            if dbcity.campus:
+                update_kwargs['revert'] = (dsdb_runner.update_city,
+                                           dbcity.campus.name)
+            else:
+                # XXX: There is no way to revert to an empty campus.
+                update_kwargs['revert'] = (logger.client_info,
+                        "Campus assignment updated in DSDB and not reverted.")
             dbcity.update_parent(parent=dbcampus)
             update_machines = True
 
         session.flush()
+
+        if campus is not None:
+            dsdb_runner = DSDBRunner(logger=logger)
+            dsdb_runner.update_city(city, dbcampus.name, **update_kwargs)
 
         plenaries = PlenaryCollection(logger=logger)
         plenaries.append(Plenary.get_plenary(dbcity))
@@ -75,7 +88,9 @@ class CommandUpdateCity(BrokerCommand):
             for dbmachine in q:
                 plenaries.append(Plenary.get_plenary(dbmachine))
 
-        count = plenaries.write()
+        try:
+            count = plenaries.write()
+        except:
+            dsdb_runner.rollback()
+            raise
         logger.client_info("Flushed %d templates." % count)
-
-        return

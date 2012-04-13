@@ -1,3 +1,4 @@
+#!/usr/bin/env python2.6
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 #
 # Copyright (C) 2008,2009,2010,2011  Contributor
@@ -26,35 +27,49 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-"""Contains the logic for `aq del building`."""
+"""Module for testing the del campus command."""
+
+import unittest
+
+if __name__ == "__main__":
+    import utils
+    utils.import_depends()
+
+from brokertest import TestBrokerCommand
 
 
-from aquilon.exceptions_ import ArgumentError, AquilonError
-from aquilon.worker.processes import DSDBRunner
-from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.commands.del_location import CommandDelLocation
-from aquilon.worker.dbwrappers.location import get_location
+class TestDelCampus(TestBrokerCommand):
+
+    def testdelte(self):
+        self.dsdb_expect("delete_campus_aq -campus ta")
+        command = "del campus --campus ta"
+        self.noouttest(command.split(" "))
+        self.dsdb_verify()
+
+    def testverifydelte(self):
+        command = "show campus --campus ta"
+        self.notfoundtest(command.split(" "))
 
 
-class CommandDelBuilding(CommandDelLocation):
+    def testdelbunotindsdb(self):
+        ## add campus
 
-    required_parameters = ["building"]
+        test_campus = "bz"
+        self.dsdb_expect("add_campus_aq -campus_name bz")
+        command = ["add", "campus", "--campus", test_campus, "--country", "us"]
+        self.successtest(command)
+        self.dsdb_verify()
 
-    def render(self, session, logger, building, **arguments):
 
-        dbbuilding = get_location(session, building=building)
-        campus = dbbuilding.campus
+        dsdb_command = "delete_campus_aq -campus %s" % test_campus
+        errstr = "campus %s doesn't exist" % test_campus
+        self.dsdb_expect(dsdb_command, True, errstr)
+        command = "del campus --campus %s" % test_campus
+        (out, err) = self.successtest(command.split(" "))
+        self.assertEmptyOut(out, command)
+        self.dsdb_verify()
 
-        result = CommandDelLocation.render(self, session=session, name=building,
-                                           type='building', **arguments)
-        session.flush()
 
-        dsdb_runner = DSDBRunner(logger=logger)
-
-        if campus:
-            dsdb_runner.del_campus_building(campus, building,
-                revert=(dsdb_runner.add_campus_building,(campus, building)))
-
-        dsdb_runner.del_building(building)
-
-        return result
+if __name__ == '__main__':
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestDelCampus)
+    unittest.TextTestRunner(verbosity=2).run(suite)
