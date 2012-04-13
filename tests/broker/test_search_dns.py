@@ -105,6 +105,20 @@ class TestSearchDns(TestBrokerCommand):
                          command)
         self.matchoutput(out, "Target: arecord13.aqd-unittest.ms.com", command)
 
+    def testbytargetdomain(self):
+        command = ["search", "dns", "--target_domain", "aqd-unittest.ms.com",
+                   "--fullinfo"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Alias: alias.ms.com", command)
+        self.matchoutput(out, "Alias: alias2host.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "Alias: alias2alias.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "SRV Record: _kerberos._tcp.aqd-unittest.ms.com",
+                         command)
+        self.matchoutput(out, "SRV Record: _kerberos._tcp.aqd-unittest.ms.com",
+                         command)
+        self.matchoutput(out, "SRV Record: _ldap._tcp.aqd-unittest.ms.com",
+                         command)
+
     def testbynetwork(self):
         command = ["search", "dns", "--network", self.net.unknown[0].ip]
         out = self.commandtest(command)
@@ -157,7 +171,74 @@ class TestSearchDns(TestBrokerCommand):
                          command)
         self.matchclean(out, "utcolo", command)
 
+    def testused(self):
+        command = ["search", "dns", "--used"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "unittest00.one-nyp.ms.com", command)
+        self.matchoutput(out, "unittest00r.one-nyp.ms.com", command)
+        self.matchoutput(out, "unittest20-e1.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "zebra2.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "zebra3.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "np999gd1r01.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "ut9c1.aqd-unittest.ms.com", command)
+        self.matchclean(out, "np997gd1r04.aqd-unittest.ms.com", command)
+        self.matchclean(out, "ut3c1.aqd-unittest.ms.com", command)
+        self.matchclean(out, "arecord13.aqd-unittest.ms.com", command)
+        self.matchclean(out, "alias2host.aqd-unittest.ms.com", command)
+        self.matchclean(out, "_kerberos._tcp.aqd-unittest.ms.com", command)
 
-if __name__=='__main__':
+    def testunused(self):
+        command = ["search", "dns", "--unused"]
+        out = self.commandtest(command)
+        self.matchclean(out, "unittest00.one-nyp.ms.com", command)
+        self.matchclean(out, "unittest00r.one-nyp.ms.com", command)
+        self.matchclean(out, "unittest20-e1.aqd-unittest.ms.com", command)
+        self.matchclean(out, "zebra2.aqd-unittest.ms.com", command)
+        self.matchclean(out, "zebra3.aqd-unittest.ms.com", command)
+        self.matchclean(out, "np999gd1r01.aqd-unittest.ms.com", command)
+        self.matchclean(out, "ut9c1.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "np997gd1r04.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "ut3c1.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "arecord13.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "alias2host.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "_kerberos._tcp.aqd-unittest.ms.com", command)
+
+    def testprimary(self):
+        command = ["search", "dns", "--primary_name"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "np998gd1r01.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "np997gd1r04.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "ut3c1.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "ut9c1.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "unittest00.one-nyp.ms.com", command)
+        self.matchclean(out, "unittest00r.one-nyp.ms.com", command)
+        self.matchoutput(out, "unittest20.aqd-unittest.ms.com", command)
+        self.matchclean(out, "unittest20-e0.aqd-unittest.ms.com", command)
+        self.matchclean(out, "arecord13.aqd-unittest.ms.com", command)
+        self.matchclean(out, "alias2host.aqd-unittest.ms.com", command)
+        self.matchclean(out, "_kerberos._tcp.aqd-unittest.ms.com", command)
+
+    def testnoprimary(self):
+        command = ["search", "dns", "--noprimary_name"]
+        out = self.commandtest(command)
+        self.matchclean(out, "np998gd1r01.aqd-unittest.ms.com", command)
+        self.matchclean(out, "np997gd1r04.aqd-unittest.ms.com", command)
+        self.matchclean(out, "ut3c1.aqd-unittest.ms.com", command)
+        self.matchclean(out, "ut9c1.aqd-unittest.ms.com", command)
+        self.matchclean(out, "unittest00.one-nyp.ms.com", command)
+        self.matchoutput(out, "unittest00r.one-nyp.ms.com", command)
+        self.matchclean(out, "unittest20.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "unittest20-e0.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "arecord13.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "alias2host.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "_kerberos._tcp.aqd-unittest.ms.com", command)
+
+    def testbadtype(self):
+        command = ["search", "dns", "--record_type", "no-such-rr"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Unknown DNS record type 'no-such-rr'.", command)
+
+
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestSearchDns)
     unittest.TextTestRunner(verbosity=2).run(suite)

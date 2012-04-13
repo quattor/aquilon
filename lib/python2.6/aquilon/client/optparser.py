@@ -360,6 +360,17 @@ class Option(Element):
         else:
             self.type = 'string'
 
+        if "reverse" in node.attrib:
+            if self.type != "boolean":
+                raise ParsingError("The reverse attribute only makes sense "
+                                   "for boolean options.")
+            self.reverse = node.attrib["reverse"]
+        else:
+            if self.type == "boolean":
+                self.reverse = "no" + self.name
+            else:
+                self.reverse = None
+
         if "short" in node.attrib:
             self.short = node.attrib["short"]
         else:
@@ -422,7 +433,7 @@ class Option(Element):
         if self.type == 'boolean':
             parser.add_option(*names, dest=self.name, action="store_true",
                               **extra_args)
-            parser.add_option("--no" + self.name, dest=self.name,
+            parser.add_option("--" + self.reverse, dest=self.name,
                               action="store_false")
         elif self.type == "flag":
             parser.add_option(*names, dest=self.name, action="store_true",
@@ -455,7 +466,10 @@ class Option(Element):
 
     def shortHelp(self):
         if self.type == "boolean":
-            return "--[no]" + self.name
+            if self.reverse == "no" + self.name:
+                return "--[no]" + self.name
+            else:
+                return "--%s|--%s" % (self.name, self.reverse)
         elif self.type in ["string", "file", "list", "int"]:
             return "--" + self.name + " " + self.name.upper()
         else:
