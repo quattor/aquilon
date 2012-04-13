@@ -47,9 +47,7 @@ class TestAddBuilding(TestBrokerCommand):
                          "-building_name bu")
         command = ["add", "building", "--building", "bu", "--city", "ny",
                    "--address", "12 Cherry Lane"]
-        out,err = self.successtest(command)
-        self.matchoutput(err, "Action: adding building bu to campus ny "
-                         "in DSDB.", command)
+        self.noouttest(command)
         self.dsdb_verify()
 
     def testverifyaddbu(self):
@@ -66,7 +64,7 @@ class TestAddBuilding(TestBrokerCommand):
 #                         "-building_name bu")
         command = ["add", "building", "--building", "cards", "--city", "ex",
                    "--address", "Nowhere"]
-        out,err = self.successtest(command)
+        err = self.statustest(command)
         self.matchoutput(err, "WARNING: There's no campus for city %s of "
                                "building %s. dsdb add_campus_building will "
                                "not be executed." % ("ex", "cards"), command)
@@ -102,10 +100,7 @@ class TestAddBuilding(TestBrokerCommand):
                          "-building_name nettest")
         command = ["add", "building", "--building", "nettest", "--city", "ny",
                    "--address", "Nowhere"]
-        out,err = self.successtest(command)
-        self.matchoutput(err, "Action: adding building nettest to campus ny "
-                         "in DSDB.", command)
-
+        self.noouttest(command)
         self.dsdb_verify()
 
     def testnonascii(self):

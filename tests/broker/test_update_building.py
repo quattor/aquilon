@@ -48,12 +48,7 @@ class TestUpdateBuilding(TestBrokerCommand):
                          "-building_name tu")
         command = ["add", "building", "--building", "tu", "--city", "ny",
                    "--address", "14 Test Lane"]
-        out, err = self.successtest(command)
-
-        self.matchoutput(err, "Action: adding new building tu to DSDB.",
-                         command)
-        self.matchoutput(err, "Action: adding building tu to campus ny "
-                         "in DSDB.", command)
+        self.noouttest(command)
         self.dsdb_verify()
 
     def test_101_verifyaddbu(self):
@@ -67,9 +62,7 @@ class TestUpdateBuilding(TestBrokerCommand):
                          "-building_addr 24 Cherry Lane")
         command = ["update", "building", "--building", "tu",
                    "--address", "24 Cherry Lane"]
-        out, err = self.successtest(command)
-        self.matchoutput(err, "Action: set address of building tu to 24 "
-                         "Cherry Lane in DSDB.", command)
+        self.noouttest(command)
         self.dsdb_verify()
 
     def test_103_verifyupdateaddress(self):
@@ -106,14 +99,6 @@ class TestUpdateBuilding(TestBrokerCommand):
                          "old location of the (city ny), "
                          "please review and manually update mappings for "
                          "the new location as needed.", command)
-
-        self.matchoutput(err, "Action: set address of building tu to 20 "
-                         "Penny Lane in DSDB.", command)
-        self.matchoutput(err, "Action: removing building tu from campus ny in "
-                         "DSDB.", command)
-        self.matchoutput(err, "Action: adding building tu to campus ta in "
-                         "DSDB.", command)
-
         self.dsdb_verify()
 
     def test_107_verifyupdatecity(self):
@@ -128,12 +113,7 @@ class TestUpdateBuilding(TestBrokerCommand):
                          "-building_name tu")
         self.dsdb_expect("delete_building_aq -building tu")
         command = "del building --building tu"
-        out,err = self.successtest(command.split(" "))
-
-        self.matchoutput(err, "Action: removing building tu from campus ta in "
-                         "DSDB.", command)
-        self.matchoutput(err, "Action: removing building tu from DSDB.",
-                         command)
+        self.noouttest(command.split(" "))
         self.dsdb_verify()
 
     def test_109_verifydelete(self):

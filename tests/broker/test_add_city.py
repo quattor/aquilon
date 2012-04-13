@@ -47,8 +47,7 @@ class TestAddCity(TestBrokerCommand):
         command = ["add", "city", "--city", "ex", "--country", "us",
                    "--fullname", "Exampleton", "--timezone",
                    "US/Eastern"]
-        out, err = self.successtest(command)
-        self.matchoutput(err, "Action: adding new city ex to DSDB.", command)
+        self.noouttest(command)
         self.dsdb_verify()
 
     def testaddupdateexample(self):
@@ -75,8 +74,7 @@ class TestAddCity(TestBrokerCommand):
                          "-country_symbol us -city_name Exampleby")
         command = ["add", "city", "--city", "e3", "--country", "us",
                    "--fullname", "Exampleby", "--timezone", "UTC"]
-        out, err = self.successtest(command)
-        self.matchoutput(err, "Action: adding new city e3 to DSDB.", command)
+        self.noouttest(command)
         self.dsdb_verify()
 
     def testplenary(self):
@@ -120,8 +118,7 @@ class TestAddCity(TestBrokerCommand):
                          "-country_symbol us -city_name Exampleby")
         command = ["add", "city", "--city", "e4", "--country", "us",
                    "--fullname", "Exampleby", "--timezone", "US/Eastern"]
-        out, err = self.successtest(command)
-        self.matchoutput(err, "Action: adding new city e4 to DSDB.", command)
+        self.noouttest(command)
         self.dsdb_verify()
 
         ## add building
@@ -144,9 +141,7 @@ class TestAddCity(TestBrokerCommand):
         # update city
         self.dsdb_expect("update_city_aq -city e4 -campus na")
         command = ["update", "city", "--city", "e4", "--campus", "na"]
-        out, err = self.successtest(command)
-        self.matchoutput(err,"Action: updating campus of city e4 to na "
-                         "in DSDB.", command)
+        self.ignoreoutputtest(command)
         self.dsdb_verify()
 
         command = "show city --city e4"
@@ -165,9 +160,9 @@ class TestAddCity(TestBrokerCommand):
                          "-country_symbol us -city_name Examplefive")
         command = ["add", "city", "--city", "e5", "--campus", "ta",
                    "--fullname", "Examplefive", "--timezone",   "US/Eastern"]
-        out, err = self.successtest(command)
-        self.matchoutput(err, "Action: adding new city e5 to DSDB.", command)
+        self.noouttest(command)
         self.dsdb_verify()
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddCity)

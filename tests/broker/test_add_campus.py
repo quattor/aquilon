@@ -44,8 +44,7 @@ class TestAddCampus(TestBrokerCommand):
         self.dsdb_expect("add_campus_aq -campus_name ta -comments Test Comment")
         command = ["add", "campus", "--campus", "ta", "--country", "us",
                    "--comments", "Test Comment", "--fullname", "Test Campus"]
-        out, err = self.successtest(command)
-        self.matchoutput(err, "Action: adding new campus ta to DSDB.", command)
+        self.noouttest(command)
         self.dsdb_verify()
 
     def testverifyaddte(self):

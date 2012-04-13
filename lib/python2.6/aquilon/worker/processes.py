@@ -352,7 +352,7 @@ def rollback_decorator(fn):
             dself = args[0]
             fn(*args, **kwargs)
             if dself.action:
-                dself.logger.client_info("Action: " + dself.action)
+                dself.logger.info("Action: " + dself.action)
             dself.action = None
 
             if "revert" in kwargs:

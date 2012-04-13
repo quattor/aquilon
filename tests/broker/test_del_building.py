@@ -45,9 +45,7 @@ class TestDelBuilding(TestBrokerCommand):
                          "-building_name bu")
         self.dsdb_expect("delete_building_aq -building bu")
         command = "del building --building bu"
-        out, err = self.successtest(command.split(" "))
-        self.matchoutput(err, "Deleted building bu from campus ny with dsdb "
-                         "del_campus_building.", command)
+        self.noouttest(command.split(" "))
         self.dsdb_verify()
 
     def testverifydelbu(self):
@@ -88,8 +86,7 @@ class TestDelBuilding(TestBrokerCommand):
                          "-building_name nettest")
         self.dsdb_expect("delete_building_aq -building nettest")
         command = "del building --building nettest"
-        out, err = self.successtest(command.split(" "))
-        self.matchoutput(err, "Deleted building nettest from campus ny with dsdb del_campus_building.", command)
+        self.noouttest(command.split(" "))
         self.dsdb_verify()
 
     def testdelnettest01(self):
