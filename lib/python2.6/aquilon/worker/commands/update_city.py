@@ -29,23 +29,53 @@
 """Contains the logic for `aq update city`."""
 
 
+from aquilon.exceptions_ import ArgumentError
+from aquilon.aqdb.model import Machine
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.location import get_location
-from aquilon.worker.templates.city import PlenaryCity
+from aquilon.worker.templates.base import Plenary, PlenaryCollection
 
 
 class CommandUpdateCity(BrokerCommand):
 
-    required_parameters = ["city", "timezone"]
+    required_parameters = ["city"]
 
-    def render(self, session, logger, city, timezone, **arguments):
+    def render(self, session, logger, city, timezone, campus, **arguments):
         dbcity = get_location(session, city=city)
+
+        # Updating machine templates is expensive, so only do that if needed
+        update_machines = False
+
         if timezone is not None:
             dbcity.timezone = timezone
 
+        if campus is not None:
+            dbcampus = get_location(session, campus=campus)
+            # This one would change the template's locations hence forbidden
+            if dbcampus.hub != dbcity.hub:
+                # Doing this both to reduce user error and to limit
+                # testing required.
+                raise ArgumentError("Cannot change campus.  {0} is in {1:l}, "
+                                    "while {2:l} is in {3:l}.".format(
+                                        dbcampus, dbcampus.hub,
+                                        dbcity, dbcity.hub))
+
+            dbcity.update_parent(parent=dbcampus)
+            update_machines = True
+
         session.flush()
 
-        plenary = PlenaryCity(dbcity, logger=logger)
-        plenary.write()
+        plenaries = PlenaryCollection(logger=logger)
+        plenaries.append(Plenary.get_plenary(dbcity))
+
+        if update_machines:
+            q = session.query(Machine)
+            q = q.filter(Machine.location_id.in_(dbcity.offspring_ids()))
+            logger.client_info("Updating %d machines..." % q.count())
+            for dbmachine in q:
+                plenaries.append(Plenary.get_plenary(dbmachine))
+
+        count = plenaries.write()
+        logger.client_info("Flushed %d templates." % count)
 
         return
