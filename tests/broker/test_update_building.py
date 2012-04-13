@@ -80,10 +80,6 @@ class TestUpdateBuilding(TestBrokerCommand):
                          "Hub ln while Building tu is in Hub ny.",
                          command)
 
-    def test_105_adde5city(self):
-        self.noouttest(["map", "service", "--city", "ny",
-                        "--service", "afs", "--instance", "q.ny.ms.com"])
-
     def test_106_updatecity(self):
         self.dsdb_expect("update_building_aq -building_name tu "
                          "-building_addr 20 Penny Lane")
@@ -95,7 +91,7 @@ class TestUpdateBuilding(TestBrokerCommand):
         command = ["update", "building", "--building", "tu",
                    "--address", "20 Penny Lane", "--city", "e5"]
         err = self.statustest(command)
-        self.matchoutput(err, "There are 2 service(s) mapped to the "
+        self.matchoutput(err, "There are 1 service(s) mapped to the "
                          "old location of the (city ny), "
                          "please review and manually update mappings for "
                          "the new location as needed.", command)
@@ -119,10 +115,6 @@ class TestUpdateBuilding(TestBrokerCommand):
     def test_109_verifydelete(self):
         command = "show building --building tu"
         self.notfoundtest(command.split(" "))
-
-    def test_110_unmapafs(self):
-        self.noouttest(["unmap", "service", "--city", "ny",
-                        "--service", "afs", "--instance", "q.ny.ms.com"])
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestUpdateBuilding)
