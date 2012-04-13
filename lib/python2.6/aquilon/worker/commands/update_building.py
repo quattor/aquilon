@@ -79,10 +79,10 @@ class CommandUpdateBuilding(BrokerCommand):
 
             if maps > 0:
                 logger.client_info("There are {0} service(s) mapped to the "
-                                   "current location of the building ({1}), "
-                                   "they should manually reconfigured to "
-                                   "the new location".format(maps,
-                                                             dbbuilding.city))
+                                   "old location of the ({1:l}), please "
+                                   "review and manually update mappings for "
+                                   "the new location as needed.".format(
+                                       maps, dbbuilding.city))
 
             dbbuilding.update_parent(parent=dbcity)
             session.flush()

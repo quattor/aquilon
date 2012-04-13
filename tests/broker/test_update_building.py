@@ -101,11 +101,11 @@ class TestUpdateBuilding(TestBrokerCommand):
 
         command = ["update", "building", "--building", "tu",
                    "--address", "20 Penny Lane", "--city", "e5"]
-        out, err = self.successtest(command)
+        err = self.statustest(command)
         self.matchoutput(err, "There are 2 service(s) mapped to the "
-                         "current location of the building (City ny), "
-                         "they should manually reconfigured to "
-                         "the new location", command)
+                         "old location of the (city ny), "
+                         "please review and manually update mappings for "
+                         "the new location as needed.", command)
 
         self.matchoutput(err, "Action: set address of building tu to 20 "
                          "Penny Lane in DSDB.", command)
