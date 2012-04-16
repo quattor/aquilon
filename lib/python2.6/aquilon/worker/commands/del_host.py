@@ -31,6 +31,8 @@
 
 import os
 
+from sqlalchemy.orm.attributes import set_committed_value
+
 from aquilon.exceptions_ import ArgumentError, ProcessException
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.host import (hostname_to_host,
@@ -97,6 +99,12 @@ class CommandDelHost(BrokerCommand):
             for iface in dbmachine.interfaces:
                 if ip in iface.addresses:
                     iface.addresses.remove(ip)
+
+            if dbhost.cluster:
+                dbcluster = dbhost.cluster
+                dbcluster.hosts.remove(dbhost)
+                set_committed_value(dbhost, '_cluster', None)
+                dbcluster.validate()
 
             session.delete(dbhost)
             delete_dns_record(dbmachine.primary_name)

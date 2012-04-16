@@ -68,6 +68,8 @@ class CommandUncluster(BrokerCommand):
 
         dbcluster.hosts.remove(dbhost)
         remove_service_addresses(dbcluster, dbhost)
+        dbcluster.validate()
+
         session.flush()
         session.expire(dbhost, ['_cluster'])
 

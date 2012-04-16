@@ -230,7 +230,6 @@ class Cluster(Base):
                                               self.branch.branch_type,
                                               self.authored_branch))
 
-
     def validate(self, max_hosts=None, error=ArgumentError, **kwargs):
         if max_hosts is None:
             max_hosts = self.max_hosts
@@ -536,24 +535,6 @@ esx_cluster.primary_key.name = 'esx_cluster_pk'
 esx_cluster.info['unique_fields'] = ['name']
 
 
-class ValidateCluster(MapperExtension):
-    """ Helper class to perform validation on cluster membership changes """
-
-    def after_insert(self, mapper, connection, instance):
-        instance.cluster.validate()
-
-    def after_delete(self, mapper, connection, instance):
-        # This is a little tricky. If the instance got deleted through an
-        # association proxy, then instance.cluster will be None (although
-        # instance.cluster_id still has the right value).
-        if instance.cluster:
-            cluster = instance.cluster
-        else:
-            state = instance_state(instance)
-            cluster = state.committed_state['cluster']
-        cluster.validate()
-
-
 class HostClusterMember(Base):
     """ Specific Class for EsxCluster vmhosts """
     __tablename__ = _HCM
@@ -589,7 +570,6 @@ class HostClusterMember(Base):
                     backref=backref('_cluster', uselist=False,
                                     cascade='all, delete-orphan'))
 
-    __mapper_args__ = {'extension': ValidateCluster()}
 
 hcm = HostClusterMember.__table__  # pylint: disable=C0103, E1101
 hcm.primary_key.name = '%s_pk' % _HCM
@@ -620,8 +600,6 @@ class ClusterAllowedPersonality(Base):
     personality = relation(Personality, lazy=False,
                            backref=backref('_clusters_allowing',
                                            cascade='all, delete-orphan'))
-
-    __mapper_args__ = {'extension': ValidateCluster()}
 
 
 cap = ClusterAllowedPersonality.__table__  # pylint: disable=C0103, E1101
