@@ -19,7 +19,7 @@
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.aqdb.model import Cpu, MachineSpecs, Model, Vendor
+from aquilon.aqdb.model import Cpu, MachineSpecs, Model, Vendor, Machine
 
 
 class CommandDelCpu(BrokerCommand):
@@ -30,6 +30,13 @@ class CommandDelCpu(BrokerCommand):
         dbcpu = Cpu.get_unique(session, name=cpu, vendor=vendor, speed=speed,
                                compel=True)
 
+        q = session.query(Machine.machine_id)
+        q = q.filter_by(cpu=dbcpu)
+        cnt = q.count()
+        if cnt:
+            raise ArgumentError("{0} is still used by {1} machines, and "
+                                "cannot be deleted.".format(dbcpu, cnt))
+
         q = session.query(MachineSpecs)
         q = q.filter_by(cpu=dbcpu)
         q = q.join((Model, MachineSpecs.model_id == Model.id), Vendor)
@@ -38,7 +45,7 @@ class CommandDelCpu(BrokerCommand):
             models = ", ".join(["%s/%s" % (spec.model.vendor.name,
                                            spec.model.name) for spec in q])
             raise ArgumentError("{0} is still used by the following models, "
-                                "and cannot be deleted: {1!s}"
+                                "and cannot be deleted: {1!s}."
                                 .format(dbcpu, models))
 
         session.delete(dbcpu)
