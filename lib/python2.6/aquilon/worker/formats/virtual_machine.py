@@ -1,6 +1,6 @@
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 #
-# Copyright (C) 2009,2010,2011  Contributor
+# Copyright (C) 2012  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -26,30 +26,35 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
+"""VirtualMachine Resource formatter."""
 
 
-from sqlalchemy.orm import joinedload, subqueryload
-
-from aquilon.exceptions_ import NotFoundException
-from aquilon.aqdb.model import EsxCluster, VirtualMachine
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.formats.formatters import ObjectFormatter
+from aquilon.worker.formats.resource import ResourceFormatter
+from aquilon.aqdb.model import VirtualMachine
 
 
-class CommandShowESXClusterAll(BrokerCommand):
+class VirtualMachineFormatter(ResourceFormatter):
+    protocol = "aqdsystems_pb2"
 
-    def render(self, session, cluster, **arguments):
-        # TODO: preload virtual machines
-        q = session.query(EsxCluster)
-        if cluster:
-            q = q.filter_by(name=cluster)
-        q = q.options(subqueryload('_hosts'),
-                      joinedload('_hosts.host'),
-                      joinedload('_hosts.host.machine'),
-                      subqueryload('_metacluster'),
-                      joinedload('_metacluster.metacluster'),
-                      joinedload('resholder'))
-        q = q.order_by(EsxCluster.name)
-        dbclusters = q.all()
-        if cluster and not dbclusters:
-            raise NotFoundException("ESX Cluster %s not found." % cluster)
-        return dbclusters
+    def format_raw(self, vm, indent=""):
+        # There will be a lot of VMs attached to a cluster, so be terse.
+        dbmachine = vm.machine
+        if dbmachine.primary_name:
+            name = dbmachine.primary_name.fqdn
+        else:
+            name = "no hostname"
+
+        # TODO: report GB instead of MB?
+        return indent + "%s: %s (%s, %d MB)" % (
+            vm._get_class_label(), dbmachine.label, name, dbmachine.memory)
+
+    def format_proto(self, vm, skeleton=None):
+        container = skeleton
+        if not container:
+            container = self.loaded_protocols[self.protocol].ResourceList()
+            skeleton = container.resources.add()
+        return super(VirtualMachineFormatter, self).format_proto(vm, skeleton)
+
+
+ObjectFormatter.handlers[VirtualMachine] = VirtualMachineFormatter()

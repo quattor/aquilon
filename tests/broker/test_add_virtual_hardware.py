@@ -126,12 +126,12 @@ class TestAddVirtualHardware(TestBrokerCommand):
         command = ["make_cluster", "--cluster=utecl1"]
         (out, err) = self.successtest(command)
 
-    def test_096_clusterplenary(self):
-        # The cluster plenary should not have VMs.
-        command = ["cat", "--cluster=utecl1", "--data"]
-        out = self.commandtest(command)
-        self.searchoutput(out, r'"/system/cluster/machines" = nlist\(\s*\);',
-                          command)
+    # Resource definitions are generated even if the VM definition is incomplete
+    #def test_096_clusterplenary(self):
+    #    # The cluster plenary should not have VMs.
+    #    command = ["cat", "--cluster=utecl1", "--data"]
+    #    out = self.commandtest(command)
+    #    self.matchclean(out, "resources/virtual_machine", command)
 
     def test_100_addinterfaces(self):
         for i in range(1, 8):
@@ -158,12 +158,12 @@ class TestAddVirtualHardware(TestBrokerCommand):
         command = ["make_cluster", "--cluster=utecl1"]
         (out, err) = self.successtest(command)
 
-    def test_127_clusterplenary(self):
-        # The cluster plenary should not have VMs.
-        command = ["cat", "--cluster=utecl1", "--data"]
-        out = self.commandtest(command)
-        self.searchoutput(out, r'"/system/cluster/machines" = nlist\(\s*\);',
-                          command)
+    # Resource definitions are generated even if the VM definition is incomplete
+    #def test_127_clusterplenary(self):
+    #    # The cluster plenary should not have VMs.
+    #    command = ["cat", "--cluster=utecl1", "--data"]
+    #    out = self.commandtest(command)
+    #    self.matchclean(out, "resources/virtual_machine", command)
 
     def test_130_adddisks(self):
         # The first 8 shares should work...
@@ -265,7 +265,7 @@ class TestAddVirtualHardware(TestBrokerCommand):
             command = "show machine --machine evm%s" % i
             out = self.commandtest(command.split(" "))
             self.matchoutput(out, "Virtual_machine: evm%s" % i, command)
-            self.matchoutput(out, "Hosted by ESX Cluster: utecl1", command)
+            self.matchoutput(out, "Hosted by: ESX Cluster utecl1", command)
             self.matchoutput(out, "Building: ut", command)
             self.matchoutput(out, "Vendor: utvendor Model: utmedium", command)
             self.matchoutput(out, "Cpu: xeon_5150 x 1", command)
@@ -309,7 +309,6 @@ class TestAddVirtualHardware(TestBrokerCommand):
         self.matchoutput(out, "template clusterdata/utecl1;", command)
         self.matchoutput(out, '"/system/cluster/name" = "utecl1";', command)
         self.matchoutput(out, '"/system/metacluster/name" = "utmc1";', command)
-        self.matchoutput(out, '"/system/cluster/machines" = nlist(', command)
         self.searchoutput(out, '"/system/cluster/ratio" = list\(\s*16,\s*1\s*\);',
                           command)
         self.matchoutput(out, '"/system/cluster/max_hosts" = 8;', command)
@@ -319,9 +318,9 @@ class TestAddVirtualHardware(TestBrokerCommand):
         for i in range(1, 9):
             machine = "evm%s" % i
             self.searchoutput(out,
-                              r'"%s", nlist\(\s*"hardware", create\('
-                              r'"machine/americas/ut/None/%s"\)\s*\)'
-                              % (machine, machine),
+                              r'"/system/resources/virtual_machine" = '
+                              r'push\(create\("resource/cluster/utecl1/virtual_machine/%s/config"\)\);'
+                              % machine,
                               command)
         self.matchclean(out, "evm9", command)
 
@@ -331,6 +330,18 @@ class TestAddVirtualHardware(TestBrokerCommand):
         self.searchoutput(out,
                           r'include { "service/esx_management_server/ut.[ab]/client/config" };',
                           command)
+
+    def test_500_verifycatresource(self):
+        for i in range(1, 9):
+            machine = "evm%s" % i
+            command = ["cat", "--cluster", "utecl1",
+                       "--virtual_machine", machine]
+            out = self.commandtest(command)
+            self.searchoutput(out,
+                              r'"hardware" = create\("machine/americas/ut/None/%s"\);' %
+                              machine,
+                              command)
+            self.matchclean(out, "system", command)
 
     def test_500_verifyshow(self):
         command = "show esx_cluster --cluster utecl1"
@@ -348,6 +359,10 @@ class TestAddVirtualHardware(TestBrokerCommand):
         self.matchoutput(out, "Personality: esx_desktop Archetype: esx_cluster",
                          command)
         self.matchoutput(out, "Domain: unittest", command)
+        for i in range(1, 9):
+            machine = "evm%s" % i
+            self.matchoutput(out, "Virtual Machine: %s (no hostname, 8192 MB)" %
+                             machine, command)
 
     def test_550_updatemachine(self):
         command = ["update_machine", "--machine=evm1", "--model=utlarge",
@@ -384,7 +399,7 @@ class TestAddVirtualHardware(TestBrokerCommand):
         command = "show machine --machine evm1"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Virtual_machine: evm1", command)
-        self.matchoutput(out, "Hosted by ESX Cluster: utecl1", command)
+        self.matchoutput(out, "Hosted by: ESX Cluster utecl1", command)
         self.matchoutput(out, "Building: ut", command)
         self.matchoutput(out, "Vendor: utvendor Model: utlarge", command)
         self.matchoutput(out, "Cpu: xeon_5150 x 2", command)
@@ -426,7 +441,7 @@ class TestAddVirtualHardware(TestBrokerCommand):
         self.matchoutput(out, "Comments: Windows Virtual Desktop", command)
 
     def test_810_verifycatcluster(self):
-        command = "cat --cluster=utecl1 --data"
+        command = "cat --cluster=utecl1 --virtual_machine evm1"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, '"name", "windows"', command)
         self.matchoutput(out, '"os", "windows"', command)

@@ -34,7 +34,8 @@ from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.formats.cluster import SimpleClusterList
 from aquilon.aqdb.model import (Cluster, EsxCluster, MetaCluster, Archetype,
                                 Personality, Machine, Switch, ClusterLifecycle,
-                                Service, ServiceInstance, NasDisk, Disk)
+                                Service, ServiceInstance, NasDisk, Disk,
+                                ClusterResource, VirtualMachine)
 from aquilon.worker.dbwrappers.host import hostname_to_host
 from aquilon.worker.dbwrappers.branch import get_branch_and_author
 from aquilon.worker.dbwrappers.location import get_location
@@ -141,12 +142,14 @@ class CommandSearchCluster(BrokerCommand):
             q = q.reset_joinpoint()
         if esx_virtual_machine:
             dbvm = Machine.get_unique(session, esx_virtual_machine, compel=True)
-            q = q.join('_machines')
+            # TODO: support VMs inside resource groups?
+            q = q.join(ClusterResource, VirtualMachine)
             q = q.filter_by(machine=dbvm)
             q = q.reset_joinpoint()
         if esx_guest:
             dbguest = hostname_to_host(session, esx_guest)
-            q = q.join('_machines', 'machine')
+            # TODO: support VMs inside resource groups?
+            q = q.join(ClusterResource, VirtualMachine, Machine)
             q = q.filter_by(host=dbguest)
             q = q.reset_joinpoint()
         if capacity_override:
@@ -180,7 +183,7 @@ class CommandSearchCluster(BrokerCommand):
                                                  service=nas_disk_share,
                                                  compel=True)
             NasAlias = aliased(NasDisk)
-            q = q.join('_machines', 'machine', 'disks',
+            q = q.join(ClusterResource, VirtualMachine, Machine, 'disks',
                        (NasAlias, NasAlias.id == Disk.id))
             q = q.filter_by(service_instance=dbshare)
             q = q.reset_joinpoint()

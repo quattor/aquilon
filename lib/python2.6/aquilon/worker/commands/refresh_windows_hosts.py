@@ -35,8 +35,7 @@ from aquilon.exceptions_ import PartialError, InternalError, AquilonError
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.dns import delete_dns_record
 from aquilon.worker.dbwrappers.host import get_host_dependencies
-from aquilon.worker.templates.base import PlenaryCollection
-from aquilon.worker.templates.cluster import PlenaryCluster
+from aquilon.worker.templates.base import Plenary, PlenaryCollection
 from aquilon.worker.locks import SyncKey
 from aquilon.aqdb.model import (Host, Interface, Machine, Domain, Archetype,
                                 Personality, HostLifecycle, DnsRecord,
@@ -49,11 +48,11 @@ class CommandRefreshWindowsHosts(BrokerCommand):
     required_parameters = []
 
     def render(self, session, logger, dryrun, **arguments):
-        clusters = set()
+        containers = set()
         partial_error = None
         with SyncKey(data="windows", logger=logger):
             try:
-                self.refresh_windows_hosts(session, logger, clusters)
+                self.refresh_windows_hosts(session, logger, containers)
                 if dryrun:
                     session.rollback()
                     return
@@ -66,16 +65,16 @@ class CommandRefreshWindowsHosts(BrokerCommand):
                 # keep going with whatever was successful.
                 session.commit()
 
-        if clusters:
+        if containers:
             plenaries = PlenaryCollection(logger=logger)
-            for dbcluster in clusters:
-                plenaries.append(PlenaryCluster(dbcluster, logger=logger))
+            for container in containers:
+                plenaries.append(Plenary.get_plenary(container))
             plenaries.write()
         if partial_error:
             raise partial_error
         return
 
-    def refresh_windows_hosts(self, session, logger, clusters):
+    def refresh_windows_hosts(self, session, logger, containers):
         conn = sqlite3.connect(self.config.get("broker", "windows_host_info"))
         # Enable dictionary-style access to the rows.
         conn.row_factory = sqlite3.Row
@@ -120,8 +119,8 @@ class CommandRefreshWindowsHosts(BrokerCommand):
             dbmachine = dbhost.machine
             success.append("Removed host entry for %s (%s)" %
                            (dbmachine.label, dbmachine.fqdn))
-            if dbmachine.cluster:
-                clusters.add(dbmachine.cluster)
+            if dbmachine.vm_container:
+                containers.add(dbmachine.vm_container)
             session.delete(dbhost)
             delete_dns_record(dbmachine.primary_name)
             session.expire(dbmachine, ['primary_name'])
@@ -218,8 +217,8 @@ class CommandRefreshWindowsHosts(BrokerCommand):
             dbmachine.primary_name = dbdns_rec
             success.append("Added host entry for %s (%s)." %
                            (dbmachine.label, dbdns_rec.fqdn))
-            if dbmachine.cluster:
-                clusters.add(dbmachine.cluster)
+            if dbmachine.vm_container:
+                containers.add(dbmachine.vm_container)
             session.flush()
 
         session.flush()

@@ -38,7 +38,7 @@ from aquilon.worker.templates.base import Plenary, PlenaryCollection
 from aquilon.worker.locks import lock_queue, CompileKey
 from aquilon.worker.processes import DSDBRunner
 from aquilon.aqdb.model import (Cpu, Chassis, ChassisSlot, Model, Cluster,
-                                Machine)
+                                Machine, ClusterResource)
 
 
 class CommandUpdateMachine(BrokerCommand):
@@ -167,13 +167,20 @@ class CommandUpdateMachine(BrokerCommand):
                                     "new {1:l}.".format(dbmachine.cluster.metacluster,
                                                         dbcluster.metacluster))
             old_cluster = dbmachine.cluster
-            old_cluster.machines.remove(dbmachine)
+            if not dbcluster.resholder:
+                dbcluster.resholder = ClusterResource(cluster=dbcluster)
+                # We need the ID of the resholder object...
+                session.flush()
+            remove_plenaries.append(Plenary.get_plenary(dbmachine.vm_container))
+            dbmachine.vm_container.holder_id = dbcluster.resholder.id
+            session.expire(dbmachine.vm_container, ["holder"])
             dbmachine.location = dbcluster.location_constraint
-            dbcluster.machines.append(dbmachine)
             session.flush()
-            session.expire(dbmachine, ['_cluster'])
             plenaries.append(Plenary.get_plenary(old_cluster))
             plenaries.append(Plenary.get_plenary(dbcluster))
+
+        if dbmachine.vm_container:
+            plenaries.append(Plenary.get_plenary(dbmachine.vm_container))
 
         session.add(dbmachine)
         session.flush()

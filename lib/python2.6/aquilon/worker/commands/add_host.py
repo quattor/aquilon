@@ -172,8 +172,8 @@ class CommandAddHost(BrokerCommand):
 
         plenaries = PlenaryCollection(logger=logger)
         plenaries.append(Plenary.get_plenary(dbmachine))
-        if dbmachine.cluster:
-            plenaries.append(Plenary.get_plenary(dbmachine.cluster))
+        if dbmachine.vm_container:
+            plenaries.append(Plenary.get_plenary(dbmachine.vm_container))
         if dbsrv_addr:
             plenaries.append(Plenary.get_plenary(dbsrv_addr))
 

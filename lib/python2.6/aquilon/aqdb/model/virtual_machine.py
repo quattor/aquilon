@@ -1,6 +1,6 @@
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 #
-# Copyright (C) 2009,2010,2011  Contributor
+# Copyright (C) 2012  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -27,29 +27,39 @@
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
 
+from sqlalchemy import Integer, Column, ForeignKey, UniqueConstraint
+from sqlalchemy.orm import relation, backref
+from sqlalchemy.ext.associationproxy import association_proxy
 
-from sqlalchemy.orm import joinedload, subqueryload
+from aquilon.aqdb.model import Resource, Machine
 
-from aquilon.exceptions_ import NotFoundException
-from aquilon.aqdb.model import EsxCluster, VirtualMachine
-from aquilon.worker.broker import BrokerCommand
+_TN = 'virtual_machine'
 
 
-class CommandShowESXClusterAll(BrokerCommand):
+class VirtualMachine(Resource):
+    """ Virtual machine resources """
+    __tablename__ = _TN
+    __mapper_args__ = {'polymorphic_identity': 'virtual_machine'}
+    _class_label = 'Virtual Machine'
 
-    def render(self, session, cluster, **arguments):
-        # TODO: preload virtual machines
-        q = session.query(EsxCluster)
-        if cluster:
-            q = q.filter_by(name=cluster)
-        q = q.options(subqueryload('_hosts'),
-                      joinedload('_hosts.host'),
-                      joinedload('_hosts.host.machine'),
-                      subqueryload('_metacluster'),
-                      joinedload('_metacluster.metacluster'),
-                      joinedload('resholder'))
-        q = q.order_by(EsxCluster.name)
-        dbclusters = q.all()
-        if cluster and not dbclusters:
-            raise NotFoundException("ESX Cluster %s not found." % cluster)
-        return dbclusters
+    resource_id = Column(Integer, ForeignKey('resource.id',
+                                             name='%s_resource_fk' % _TN,
+                                             ondelete='CASCADE'),
+                         primary_key=True)
+
+    machine_id = Column(Integer, ForeignKey('machine.machine_id',
+                                            name='%s_machine_fk' % _TN,
+                                            ondelete='CASCADE'),
+                        nullable=False)
+
+    machine = relation(Machine, innerjoin=True,
+                       backref=backref('vm_container', uselist=False,
+                                       cascade='all'))
+
+    # A machine can be assigned to one holder only.
+    UniqueConstraint('machine_id', name='%s_machine_uk' % _TN)
+
+
+vm = VirtualMachine.__table__
+vm.primary_key.name = '%s_pk' % _TN
+vm.info['unique_fields'] = ['name', 'holder']

@@ -42,7 +42,7 @@ class CommandShowMetaClusterAll(BrokerCommand):
         if metacluster:
             q = q.filter_by(name=metacluster)
         q = q.options(joinedload_all('_clusters.cluster._hosts.host.machine'))
-        q = q.options(joinedload_all('_clusters.cluster._machines.machine'))
+        # TODO: eager load virtual machines
         # TODO: eager load EsxCluster.host_count
         dbmetaclusters = q.order_by(MetaCluster.name).all()
         if metacluster and not dbmetaclusters:

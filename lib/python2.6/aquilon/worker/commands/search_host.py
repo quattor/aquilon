@@ -39,7 +39,8 @@ from aquilon.aqdb.model import (Host, Cluster, Archetype, Personality,
                                 HostLifecycle, OperatingSystem, Service,
                                 ServiceInstance, NasDisk, Disk, Machine, Model,
                                 ARecord, Fqdn, DnsDomain, Interface,
-                                AddressAssignment, NetworkEnvironment, Network)
+                                AddressAssignment, NetworkEnvironment, Network,
+                                VirtualMachine, ClusterResource)
 from aquilon.aqdb.model.dns_domain import parse_fqdn
 from aquilon.worker.dbwrappers.service_instance import get_service_instance
 from aquilon.worker.dbwrappers.branch import get_branch_and_author
@@ -223,7 +224,7 @@ class CommandSearchHost(BrokerCommand):
         if guest_on_cluster:
             dbcluster = Cluster.get_unique(session, guest_on_cluster,
                                            compel=True)
-            q = q.join('machine', '_cluster')
+            q = q.join('machine', VirtualMachine, ClusterResource)
             q = q.filter_by(cluster=dbcluster)
             q = q.reset_joinpoint()
         if guest_on_share:
@@ -244,8 +245,8 @@ class CommandSearchHost(BrokerCommand):
                                                  service=nas_disk_share,
                                                  compel=True)
             NasAlias = aliased(NasDisk)
-            q = q.join('_cluster', 'cluster', '_machines', 'machine',
-                       'disks', (NasAlias, NasAlias.id==Disk.id))
+            q = q.join('_cluster', 'cluster', 'resholder', VirtualMachine,
+                       'machine', 'disks', (NasAlias, NasAlias.id==Disk.id))
             q = q.filter_by(service_instance=dbshare)
             q = q.reset_joinpoint()
 

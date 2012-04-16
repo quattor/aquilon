@@ -104,6 +104,9 @@ class CommandDelHost(BrokerCommand):
             session.expire(dbmachine, ['host', 'primary_name'])
             delplenary = True
 
+            if dbmachine.vm_container:
+                bindings.append(Plenary.get_plenary(dbmachine.vm_container))
+
             if archetype != 'aurora' and ip is not None:
                 try:
                     dsdb_runner = DSDBRunner(logger=logger)

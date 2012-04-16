@@ -103,7 +103,7 @@ class CommandUpdatePersonality(BrokerCommand):
         # The validation will touch all member hosts/machines, so it's better to
         # pre-load everything
         q = q.options(joinedload_all('_hosts.host.machine'))
-        q = q.options(joinedload_all('_machines.machine'))
+        # TODO: preload virtual machines
         q = q.filter_by(personality=dbpersona)
         clusters = q.all()
         failures = []

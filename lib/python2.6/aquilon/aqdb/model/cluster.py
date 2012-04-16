@@ -33,21 +33,16 @@ from datetime import datetime
 from sqlalchemy import (Column, Integer, Boolean, String, DateTime, Sequence,
                         ForeignKey, UniqueConstraint)
 
-from sqlalchemy.orm import (relation, backref, object_session, deferred,
-                            column_property)
+from sqlalchemy.orm import relation, backref, deferred
 from sqlalchemy.orm.attributes import instance_state
 from sqlalchemy.orm.interfaces import MapperExtension
 from sqlalchemy.ext.associationproxy import association_proxy
-from sqlalchemy.sql import select, func, and_
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.column_types import AqStr
-from aquilon.aqdb.model import (Base, Host, Service, Location,
-                                Personality, ClusterLifecycle,
-                                ServiceInstance, Machine, Branch, Switch,
-                                UserPrincipal, VlanInfo, ObservedVlan,
-                                Interface, HardwareEntity)
-from aquilon.config import Config
+from aquilon.aqdb.model import (Base, Host, Service, Location, Personality,
+                                ClusterLifecycle, ServiceInstance, Branch,
+                                Switch, UserPrincipal)
 
 # List of functions allowed to be used in vmhost_capacity_function
 restricted_builtins = {'None': None,
@@ -81,7 +76,6 @@ def convert_resources(resources):
 # Cluster is a reserved word in Oracle
 _TN = 'clstr'
 _HCM = 'host_cluster_member'
-_MCM = 'machine_cluster_member'
 _CAS = 'cluster_aligned_service'
 _CASABV = 'clstr_alnd_svc'
 _CSB = 'cluster_service_binding'
@@ -90,10 +84,6 @@ _CSBABV = 'clstr_svc_bndg'
 
 def _hcm_host_creator(host):
     return HostClusterMember(host=host)
-
-
-def _mcm_machine_creator(machine):
-    return MachineClusterMember(machine=machine)
 
 
 def _csb_svcinst_creator(service_instance):
@@ -162,6 +152,15 @@ class Cluster(Base):
     allowed_personalities = association_proxy('_allowed_pers', 'personality',
             creator=lambda pers: ClusterAllowedPersonality(personality=pers))
 
+    service_bindings = association_proxy('_cluster_svc_binding',
+                                         'service_instance',
+                                         creator=_csb_svcinst_creator)
+
+
+    metacluster = association_proxy('_metacluster', 'metacluster')
+
+    __mapper_args__ = {'polymorphic_on': cluster_type}
+
     @property
     def title(self):
         if self.personality.archetype.outputdesc is not None:
@@ -190,19 +189,6 @@ class Cluster(Base):
             is_percent = True
         return (is_percent, thresh_value)
 
-    machines = association_proxy('_machines', 'machine',
-                                 creator=_mcm_machine_creator)
-
-    service_bindings = association_proxy('_cluster_svc_binding',
-                                         'service_instance',
-                                         creator=_csb_svcinst_creator)
-
-
-    _metacluster = None
-    metacluster = association_proxy('_metacluster', 'metacluster')
-
-    __mapper_args__ = {'polymorphic_on': cluster_type}
-
     @property
     def authored_branch(self):
         if self.sandbox_author:
@@ -215,6 +201,16 @@ class Cluster(Base):
             return self.personality.cluster_infos[self.cluster_type]
         else:
             return None
+
+    @property
+    def machines(self):
+        mach = []
+        if self.resholder:
+            for res in self.resholder.resources:
+                # TODO: support virtual machines inside resource groups?
+                if res.resource_type == "virtual_machine":
+                    mach.append(res.machine)
+        return mach
 
     def validate_membership(self, host, error=ArgumentError, **kwargs):
         if host.machine.location != self.location_constraint and \
@@ -632,61 +628,6 @@ cap = ClusterAllowedPersonality.__table__  # pylint: disable=C0103, E1101
 cap.primary_key.name = '%s_pk' % _CAP
 cap.info['unique_fields'] = ['cluster', 'personality']
 cap.cluster = association_proxy('_cluster', 'cluster')
-
-
-class MachineClusterMember(Base):
-    """ Binds machines into clusters """
-    __tablename__ = _MCM
-
-    cluster_id = Column(Integer, ForeignKey('%s.id' % _TN,
-                                                name='mchn_clstr_mmbr_clstr_fk',
-                                                ondelete='CASCADE'),
-                            primary_key=True)
-
-    machine_id = Column(Integer, ForeignKey('machine.machine_id',
-                                            name='mchn_clstr_mmbr_mchn_fk',
-                                            ondelete='CASCADE'),
-                        primary_key=True)
-
-    creation_date = deferred(Column(DateTime, default=datetime.now,
-                                    nullable=False))
-
-    """ See comments for HostClusterMembers relations """
-    cluster = relation(Cluster, lazy=False, innerjoin=True,
-                       backref=backref('_machines', cascade='all, delete-orphan'))
-
-    # This is a one-to-one relation, so we need uselist=False on the backref
-    machine = relation(Machine, lazy=False, innerjoin=True,
-                  backref=backref('_cluster', uselist=False,
-                                  cascade='all, delete-orphan'))
-
-    __mapper_args__ = {'extension': ValidateCluster()}
-
-mcm = MachineClusterMember.__table__  # pylint: disable=C0103, E1101
-mcm.primary_key.name = '%s_pk' % _MCM
-mcm.append_constraint(UniqueConstraint('machine_id',
-                                       name='machine_cluster_member_uk'))
-mcm.info['unique_fields'] = ['cluster', 'machine']
-
-Machine.cluster = association_proxy('_cluster', 'cluster')
-
-# Defined here to avoid circular dependencies
-ObservedVlan.guest_count = column_property(
-    select([func.count()],
-           and_(
-                # Select VMs on clusters that belong to the given switch
-                EsxCluster.switch_id == ObservedVlan.switch_id,
-                Cluster.id == EsxCluster.esx_cluster_id,
-                MachineClusterMember.cluster_id == Cluster.id,
-                Machine.machine_id == MachineClusterMember.machine_id,
-                # Select interfaces with the right port group
-                HardwareEntity.id == Machine.machine_id,
-                Interface.hardware_entity_id == HardwareEntity.id,
-                Interface.port_group == VlanInfo.port_group,
-                VlanInfo.vlan_id == ObservedVlan.vlan_id
-               )
-          ).label('guest_count'),
-    deferred=True)
 
 
 class ClusterAlignedService(Base):

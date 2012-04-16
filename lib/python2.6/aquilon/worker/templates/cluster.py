@@ -152,30 +152,6 @@ class PlenaryClusterData(Plenary):
         pan_assign(lines, "/system/cluster/max_hosts",
                    self.dbobj.max_hosts)
         lines.append("")
-        machines = {}
-        for machine in sorted(self.dbobj.machines):
-            if not machine.interfaces or not machine.disks:
-                # Do not bother creating entries for VMs that are incomplete.
-                continue
-            pmac = Plenary.get_plenary(machine, logger=self.logger)
-            macdesc = {'hardware': StructureTemplate(pmac.plenary_template_name)}
-
-            # One day we may get to the point where this will be required.
-            if (machine.host):
-                # we fill this in manually instead of just assigning
-                # 'system' = value("hostname:/system")
-                # because the target host might not actually have a profile.
-                arch = machine.host.archetype
-                os = machine.host.operating_system
-                pn = machine.primary_name.fqdn
-                macdesc["system"] = {'archetype': {'name': arch.name,
-                                                   'os': os.name,
-                                                   'osversion': os.version},
-                                     'network': {'hostname': pn.name,
-                                                 'domainname': pn.dns_domain}}
-
-            machines[machine.label] = macdesc
-        pan_assign(lines, "/system/cluster/machines", machines)
 
 
 class PlenaryClusterObject(Plenary):
@@ -206,6 +182,7 @@ class PlenaryClusterObject(Plenary):
         pan_include(lines, ["pan/units", "pan/functions"])
         pan_include(lines, "clusterdata/%s" % self.name)
         pan_include(lines, "archetype/base")
+
 
         for servinst in sorted(self.dbobj.service_bindings):
             pan_include(lines, "service/%s/%s/client/config" %

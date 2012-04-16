@@ -399,8 +399,7 @@ class TestAddESXCluster(TestBrokerCommand):
             self.matchclean(data, '"/system/cluster/rack/row"', data_command)
             self.matchclean(data, '"/system/cluster/rack/column"', data_command)
         self.matchclean(data, '"/system/cluster/allowed_personalities"', data_command)
-        self.searchoutput(data, r'"/system/cluster/machines" = nlist\(\s*\);',
-                          data_command)
+        self.matchclean(data, "resources/virtual_machine", data_command)
 
         return object_command, object, data_command, data
 

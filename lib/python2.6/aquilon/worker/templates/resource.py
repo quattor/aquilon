@@ -32,7 +32,8 @@ import logging
 
 from aquilon.aqdb.model import (Application, Filesystem, Intervention,
                                 ResourceGroup, Hostlink, RebootSchedule,
-                                RebootIntervention, ServiceAddress)
+                                RebootIntervention, ServiceAddress,
+                                VirtualMachine)
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
 from aquilon.worker.templates.panutils import (StructureTemplate, pan_assign,
                                                pan_push)
@@ -118,6 +119,31 @@ class PlenaryResource(Plenary):
         pan_assign(lines, "fqdn", str(self.dbobj.dns_record.fqdn))
         pan_assign(lines, "interfaces", self.dbobj.interfaces)
 
+    def body_virtual_machine(self, lines):
+        pan_assign(lines, "name", self.dbobj.name)
+
+        machine = self.dbobj.machine
+        pmac = Plenary.get_plenary(machine)
+        pan_assign(lines, "hardware",
+                   StructureTemplate(pmac.plenary_template_name))
+
+        # One day we may get to the point where this will be required.
+        # FIXME: read the data from the host data template
+        if (machine.host):
+            # we fill this in manually instead of just assigning
+            # 'system' = value("hostname:/system")
+            # because the target host might not actually have a profile.
+            arch = machine.host.archetype
+            os = machine.host.operating_system
+            pn = machine.primary_name.fqdn
+
+            system = {'archetype': {'name': arch.name,
+                                    'os': os.name,
+                                    'osversion': os.version},
+                      'network': {'hostname': pn.name,
+                                  'domainname': pn.dns_domain}}
+            pan_assign(lines, "system", system)
+
 
 Plenary.handlers[Application] = PlenaryResource
 Plenary.handlers[Filesystem] = PlenaryResource
@@ -126,6 +152,7 @@ Plenary.handlers[Hostlink] = PlenaryResource
 Plenary.handlers[RebootSchedule] = PlenaryResource
 Plenary.handlers[RebootIntervention] = PlenaryResource
 Plenary.handlers[ServiceAddress] = PlenaryResource
+Plenary.handlers[VirtualMachine] = PlenaryResource
 
 
 class PlenaryResourceGroup(PlenaryCollection):

@@ -74,8 +74,7 @@ class TestRebindMetaCluster(TestBrokerCommand):
         self.matchoutput(out, "template clusterdata/utecl3;", command)
         self.matchoutput(out, '"/system/cluster/name" = "utecl3";', command)
         self.matchoutput(out, '"/system/metacluster/name" = "utmc1";', command)
-        self.searchoutput(out, r'"/system/cluster/machines" = nlist\(\s*\);',
-                          command)
+        self.matchclean(out, "resources/virtual_machine", command)
 
 
 if __name__ == '__main__':

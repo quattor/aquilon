@@ -56,6 +56,13 @@ class Machine(HardwareEntity):  # pylint: disable=W0232, R0903
 
     cpu = relation(Cpu)
 
+    @property
+    def cluster(self):
+        if self.vm_container and hasattr(self.vm_container.holder, 'cluster'):
+            return self.vm_container.holder.holder_object
+        else:
+            return None
+
 
 machine = Machine.__table__  # pylint: disable=C0103, E1101
 machine.primary_key.name = 'machine_pk'

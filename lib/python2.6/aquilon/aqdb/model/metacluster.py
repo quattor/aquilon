@@ -83,8 +83,9 @@ class MetaCluster(Base):
 
     @property
     def shares(self):
+        from aquilon.aqdb.model import VirtualMachine, ClusterResource
         q = object_session(self).query(ServiceInstance)
-        q = q.join('nas_disks', 'machine', '_cluster', 'cluster',
+        q = q.join('nas_disks', 'machine', VirtualMachine, ClusterResource, 'cluster',
                    '_metacluster')
         q = q.filter_by(metacluster=self)
         return q.all()

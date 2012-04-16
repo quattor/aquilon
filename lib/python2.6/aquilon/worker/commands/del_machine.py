@@ -31,7 +31,7 @@
 from aquilon.exceptions_ import ArgumentError, AquilonError
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.locks import lock_queue, CompileKey
-from aquilon.worker.templates.base import Plenary
+from aquilon.worker.templates.base import Plenary, PlenaryCollection
 from aquilon.aqdb.model import Machine
 from aquilon.worker.processes import NASAssign
 
@@ -41,8 +41,14 @@ class CommandDelMachine(BrokerCommand):
 
     def render(self, session, logger, machine, dbuser, **arguments):
         dbmachine = Machine.get_unique(session, machine, compel=True)
-        plenary_machine = Plenary.get_plenary(dbmachine, logger=logger)
-        dbcluster = dbmachine.cluster
+
+        remove_plenaries = PlenaryCollection(logger=logger)
+        remove_plenaries.append(Plenary.get_plenary(dbmachine))
+        if dbmachine.vm_container:
+            remove_plenaries.append(Plenary.get_plenary(dbmachine.vm_container))
+            dbcontainer = dbmachine.vm_container.holder.holder_object
+        else:
+            dbcontainer = None
 
         if dbmachine.host:
             raise ArgumentError("{0} is still in use by {1:l} and cannot be "
@@ -77,24 +83,26 @@ class CommandDelMachine(BrokerCommand):
                         (dbmachine.label, dbdisk.device_name))
             #session.delete(dbdisk)
         session.delete(dbmachine)
+
         session.flush()
 
-        key = plenary_machine.get_remove_key()
-        if dbcluster:
-            plenary_cluster = Plenary.get_plenary(dbcluster, logger=logger)
-            key = CompileKey.merge([key, plenary_cluster.get_write_key()])
+
+        key = remove_plenaries.get_remove_key()
+        if dbcontainer:
+            plenary_container = Plenary.get_plenary(dbcontainer, logger=logger)
+            key = CompileKey.merge([key, plenary_container.get_write_key()])
         try:
             lock_queue.acquire(key)
-            plenary_machine.stash()
-            if dbcluster:
-                plenary_cluster.write(locked=True)
-            plenary_machine.remove(locked=True)
+            remove_plenaries.stash()
+            if dbcontainer:
+                plenary_container.write(locked=True)
+            remove_plenaries.remove(locked=True)
             if to_remove_from_rp:
                 self._remove_from_rp(to_remove_from_rp)
         except:
-            plenary_machine.restore_stash()
-            if dbcluster:
-                plenary_cluster.restore_stash()
+            remove_plenaries.restore_stash()
+            if dbcontainer:
+                plenary_container.restore_stash()
             raise
         finally:
             lock_queue.release(key)
