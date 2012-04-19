@@ -215,7 +215,8 @@ class DbFactory(object):
         """
 
         # Default: no password
-        if not config.has_option("database", "password_file"):
+        if not config.has_option("database", "password_file") or \
+           not config.get("database", "password_file").strip():
             return [""]
 
         passwd_file = config.get("database", "password_file")
