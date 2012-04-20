@@ -79,9 +79,9 @@ class CommandAddInterfaceMachine(BrokerCommand):
             if '.' in interface:
                 type = 'vlan'
 
-        if type == "oa":
-            raise ArgumentError("Interface type 'oa' is not valid for "
-                                "machines.")
+        if type == "oa" or type == "loopback":
+            raise ArgumentError("Interface type '%s' is not valid for "
+                                "machines." % type)
 
         bootable = None
         if type == 'public':
