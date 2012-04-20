@@ -33,7 +33,7 @@ import re
 
 from aquilon.utils import force_int
 
-int_re = re.compile(r'(\d+)')
+int_re = re.compile(r'^(\d+)')
 
 def search_next(session, cls, attr, value, start, pack, **filters):
     q = session.query(cls).filter(attr.startswith(value))
@@ -43,17 +43,17 @@ def search_next(session, cls, attr, value, start, pack, **filters):
         start = force_int("start", start)
     else:
         start = 1
-    entries = []
+    entries = set()
     for (attrvalue,) in q.values(attr):
         m = int_re.match(attrvalue[len(value):])
         if m:
             n = int(m.group(1))
             # Only remember entries that we care about...
             if n >= start:
-                entries.append(n)
+                entries.add(n)
     if not entries:
         return start
-    entries.sort()
+    entries = sorted(entries)
     if pack:
         expecting = start
         for current in entries:
