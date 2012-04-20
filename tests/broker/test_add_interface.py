@@ -530,8 +530,8 @@ class TestAddInterface(TestBrokerCommand):
                    "--type", "vlan",
                    "--switch", "ut3gd1r01.aqd-unittest.ms.com"]
         out = self.badrequesttest(command)
-        self.matchoutput(out, "Only 'oa' is allowed as the interface type "
-                         "for switches.", command)
+        self.matchoutput(out, "Interface type vlan is not allowed for "
+                         "switches.", command)
 
     def testverifyfailaddinterfaceut3dg1r01(self):
         command = "show tor_switch --tor_switch ut3gd1r01.aqd-unittest.ms.com"
@@ -546,7 +546,20 @@ class TestAddInterface(TestBrokerCommand):
                    "--switch", "ut3gd1r04.aqd-unittest.ms.com"]
         self.noouttest(command)
 
-    def testverifyvirtualswitchinterface(self):
+    def testaddloopback(self):
+        command = ["add", "interface", "--interface", "loop0",
+                   "--switch", "ut3gd1r04.aqd-unittest.ms.com"]
+        self.noouttest(command)
+
+    def testfailloopbackmac(self):
+        command = ["add", "interface", "--interface", "loop1",
+                   "--switch", "ut3gd1r04.aqd-unittest.ms.com",
+                   "--mac", self.net.unknown[17][0].mac]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Loopback interfaces cannot have a MAC address.",
+                         command)
+
+    def testverifyut3gd1r04(self):
         command = ["show", "switch", "--switch",
                    "ut3gd1r04.aqd-unittest.ms.com"]
         out = self.commandtest(command)
@@ -554,6 +567,8 @@ class TestAddInterface(TestBrokerCommand):
                          "Interface: xge49 %s" % self.net.tor_net[6].usable[0].mac,
                          command)
         self.matchoutput(out, "Interface: vlan110 (no MAC addr)", command)
+        self.matchoutput(out, "Interface: loop0 (no MAC addr)", command)
+        self.matchclean(out, "loop1", command)
 
     # These two will eventually be created when testing the addition
     # of a whole rack of machines based on a CheckNet sweep.

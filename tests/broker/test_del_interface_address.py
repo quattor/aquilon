@@ -187,6 +187,15 @@ class TestDelInterfaceAddress(TestBrokerCommand):
         self.noouttest(command)
         self.dsdb_verify()
 
+    def testdelut3gd1r04loop0(self):
+        ip = self.net.unknown[17][0]
+        self.dsdb_expect_delete(ip)
+        command = ["del", "interface", "address",
+                   "--switch", "ut3gd1r04.aqd-unittest.ms.com",
+                   "--interface", "loop0", "--ip", ip]
+        self.noouttest(command)
+        self.dsdb_verify()
+
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelInterfaceAddress)

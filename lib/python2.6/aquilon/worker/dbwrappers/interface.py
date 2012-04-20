@@ -77,13 +77,15 @@ def get_interface(session, interface, dbhw_ent, mac):
                             " ".join(errmsg))
     return dbinterface
 
-def check_ip_restrictions(dbnetwork, ip):
+def check_ip_restrictions(dbnetwork, ip, relaxed=False):
     """ given a network and ip addr, raise an exception if the ip is reserved
 
         Used during ip assignment as a check against grabbing an ip address
         that we have reserved as a dynamic dhcp pool for switches (and
         potentially other assorted devices) The remainder of addresses are to
         be used for static assignment (for telco gear only).
+
+        Setting relaxed to true means checking only the most obvious problems.
     """
 
     #TODO: if the network type doesn't have any applicable offsets, we
@@ -95,7 +97,7 @@ def check_ip_restrictions(dbnetwork, ip):
     if ip < dbnetwork.ip or ip > dbnetwork.broadcast:  # pragma: no cover
         raise InternalError("IP address {0!s} is outside "
                             "{1:l}.".format(ip, dbnetwork))
-    if dbnetwork.network.numhosts >= 4:
+    if dbnetwork.network.numhosts >= 4 and not relaxed:
         # Skip these checks for /32 and /31 networks
         if ip == dbnetwork.ip:
             raise ArgumentError("IP address %s is the address of network %s." %
@@ -104,7 +106,7 @@ def check_ip_restrictions(dbnetwork, ip):
             raise ArgumentError("IP address %s is the broadcast address of "
                                 "network %s." % (ip, dbnetwork.name))
 
-    if dbnetwork.network.numhosts >= 8:
+    if dbnetwork.network.numhosts >= 8 and not relaxed:
         # If this network doesn't have enough addresses, the test is irrelevant.
         if int(ip) - int(dbnetwork.ip) in dbnetwork.reserved_offsets:
             raise ArgumentError("The IP address %s is reserved for dynamic "
