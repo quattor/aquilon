@@ -45,7 +45,7 @@ class CommandPublish(BrokerCommand):
 
     required_parameters = ["branch", "bundle"]
 
-    def render(self, session, logger, branch, bundle, sync, **arguments):
+    def render(self, session, logger, branch, bundle, sync, rebase, **arguments):
         # Most of the logic here is duplicated in deploy
         dbsandbox = Sandbox.get_unique(session, branch, compel=True)
 
@@ -61,6 +61,10 @@ class CommandPublish(BrokerCommand):
         if not dbsandbox.is_sync_valid:
             dbsandbox.is_sync_valid = True
 
+        if rebase and dbsandbox.trackers:
+            raise ArgumentError("{0} has trackers, rebasing is not allowed."
+                                .format(dbsandbox))
+
         kingdir = self.config.get("broker", "kingdir")
         rundir = self.config.get("broker", "rundir")
 
@@ -74,10 +78,16 @@ class CommandPublish(BrokerCommand):
             run_git(["bundle", "verify", filename],
                     path=temprepo, logger=logger)
             ref = "HEAD:%s" % (dbsandbox.name)
-            run_git(["pull", filename, ref], path=temprepo,
-                    logger=logger, loglevel=CLIENT_INFO)
+            command = ["pull", filename, ref]
+            if rebase:
+                command.append("--force")
+            run_git(command, path=temprepo, logger=logger, loglevel=CLIENT_INFO)
             # FIXME: Run tests before pushing back to template-king
-            run_git(["push", "origin", dbsandbox.name],
+            if rebase:
+                target_ref = "+" + dbsandbox.name
+            else:
+                target_ref = dbsandbox.name
+            run_git(["push", "origin", target_ref],
                     path=temprepo, logger=logger)
         except ProcessException, e:
             raise ArgumentError("\n%s%s" % (e.out, e.err))

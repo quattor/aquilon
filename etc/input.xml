@@ -2148,6 +2148,7 @@
       </optgroup>
       <optgroup name="publish optional" mandatory="False">
          <option name="sync" type="boolean" default="True">Automatically sync tracking domains</option>
+         <option name="rebase" type="flag">Allow rebasing the branch</option>
       </optgroup>
       <transport method="post" path="branch/%(branch)s/command/publish" custom="create_bundle" expect="command"/>
    </command>
