@@ -112,7 +112,7 @@ class TestAddCity(TestBrokerCommand):
         self.matchoutput(out, "city,ex,country,us,,,EDT,Exampleton",
                          command)
 
-    def testupdatecitycampus(self):
+    def testupdatecity00(self):
         ## add city
         self.dsdb_expect("add_city_aq -city_symbol e4 " +
                          "-country_symbol us -city_name Exampleby")
@@ -163,6 +163,43 @@ class TestAddCity(TestBrokerCommand):
         self.noouttest(command)
         self.dsdb_verify()
 
+    def testupdatecity10(self):
+        ## update city bad campus
+        command = ["update", "city", "--city", "e4", "--campus", "xx"]
+        out = self.notfoundtest(command)
+        self.matchoutput(out, "Campus xx not found", command)
+
+        command = "show city --city e4"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Location Parents: [Organization ms, Hub ny, "
+                         "Continent na, Country us, Campus na]", command)
+
+    def testupdatecity20(self):
+        ## update city dsdb error
+        self.dsdb_expect("update_city_aq -city e4 -campus ta", fail=True)
+        command = ["update", "city", "--city", "e4", "--campus", "ta"]
+        out = self.badrequesttest(command)
+        self.dsdb_verify()
+
+        command = "show city --city e4"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Location Parents: [Organization ms, Hub ny, "
+                         "Continent na, Country us, Campus na]", command)
+
+    def testupdatecity30(self):
+
+        ## add city
+        self.dsdb_expect("add_city_aq -city_symbol e6 " +
+                         "-country_symbol gb -city_name ExampleSix")
+
+        command = ["add", "city", "--city", "e6", "--country", "gb",
+                   "--fullname", "ExampleSix", "--timezone",   "Europe/London"]
+        self.noouttest(command)
+
+        ## update city bad campus
+        command = ["update", "city", "--city", "e6", "--campus", "na"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Cannot change campus.  Campus na is in hub ny, while city e6 is in hub ln", command)
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddCity)

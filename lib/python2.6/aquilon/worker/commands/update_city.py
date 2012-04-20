@@ -47,9 +47,13 @@ class CommandUpdateCity(BrokerCommand):
         # Updating machine templates is expensive, so only do that if needed
         update_machines = False
 
+
         if timezone is not None:
             dbcity.timezone = timezone
 
+        prev_campus = None
+        dsdb_runner = None
+        dbcampus = None
         if campus is not None:
             dbcampus = get_location(session, campus=campus)
             # This one would change the template's locations hence forbidden
@@ -61,21 +65,23 @@ class CommandUpdateCity(BrokerCommand):
                                         dbcampus, dbcampus.hub,
                                         dbcity, dbcity.hub))
 
-            update_kwargs = {}
             if dbcity.campus:
-                update_kwargs['revert'] = (dsdb_runner.update_city,
-                                           dbcity.campus.name)
-            else:
-                # XXX: There is no way to revert to an empty campus.
-                update_kwargs['revert'] = (logger.client_info,
-                        "Campus assignment updated in DSDB and not reverted.")
+                prev_campus = dbcity.campus
             dbcity.update_parent(parent=dbcampus)
             update_machines = True
 
         session.flush()
 
         if campus is not None:
+            update_kwargs = {}
             dsdb_runner = DSDBRunner(logger=logger)
+            if prev_campus:
+                update_kwargs['revert'] = (dsdb_runner.update_city,
+                                           (city, prev_campus.name))
+            else:
+                # XXX: There is no way to revert to an empty campus.
+                update_kwargs['revert'] = (logger.client_info,
+                        "Campus assignment updated in DSDB and not reverted.")
             dsdb_runner.update_city(city, dbcampus.name, **update_kwargs)
 
         plenaries = PlenaryCollection(logger=logger)
@@ -91,6 +97,7 @@ class CommandUpdateCity(BrokerCommand):
         try:
             count = plenaries.write()
         except:
-            dsdb_runner.rollback()
+            if campus is not None:
+                dsdb_runner.rollback()
             raise
         logger.client_info("Flushed %d templates." % count)
