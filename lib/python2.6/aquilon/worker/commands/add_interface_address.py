@@ -71,7 +71,14 @@ class CommandAddInterfaceAddress(BrokerCommand):
 
         ip = generate_ip(session, dbinterface, **kwargs)
         dbnetwork = get_net_id_from_ip(session, ip, dbnet_env)
-        check_ip_restrictions(dbnetwork, ip)
+
+        if dbinterface.interface_type == "loopback":
+            # Switch loopback interfaces may use e.g. the network address as an
+            # IP address
+            relaxed = True
+        else:
+            relaxed = False
+        check_ip_restrictions(dbnetwork, ip, relaxed=relaxed)
 
         if not fqdn:
             if not dbhw_ent.primary_name:

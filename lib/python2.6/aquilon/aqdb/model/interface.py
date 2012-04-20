@@ -315,6 +315,21 @@ class BridgeInterface(Interface):
         return value
 
 
+class LoopbackInterface(Interface):
+    """ Virtual loopback interface, primarily for switches """
+
+    _class_label = "Loopback Interface"
+
+    __mapper_args__ = {'polymorphic_identity': 'loopback'}
+
+    name_check = re.compile(r'^loop\d+$')
+
+    def validate_mac(self, key, value):
+        if value is not None:
+            raise ValueError("Loopback interfaces cannot have a MAC address.")
+        return value
+
+
 interface = Interface.__table__  # pylint: disable=C0103, E1101
 interface.primary_key.name = '%s_pk' % _TN
 interface.info['unique_fields'] = ['name', 'hardware_entity']

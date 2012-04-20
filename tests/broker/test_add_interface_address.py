@@ -381,6 +381,18 @@ class TestAddInterfaceAddress(TestBrokerCommand):
         self.noouttest(command)
         self.dsdb_verify()
 
+    def testaddut3gd1r04loop0(self):
+        # Use the network address
+        ip = self.net.unknown[17][0]
+        self.dsdb_expect_add("ut3gd1r04-loop0.aqd-unittest.ms.com", ip,
+                             "loop0", primary="ut3gd1r04.aqd-unittest.ms.com",
+                             comments="Some new switch comments")
+        command = ["add", "interface", "address",
+                   "--switch", "ut3gd1r04.aqd-unittest.ms.com",
+                   "--interface", "loop0", "--ip", ip]
+        self.noouttest(command)
+        self.dsdb_verify()
+
     def testverifyut3gd1r04(self):
         command = ["show", "switch", "--switch", "ut3gd1r04.aqd-unittest.ms.com"]
         out = self.commandtest(command)
@@ -392,6 +404,13 @@ class TestAddInterfaceAddress(TestBrokerCommand):
                           r"\s+Provides: ut3gd1r04-vlan110-hsrp.aqd-unittest.ms.com \[%s\] \(label: hsrp\)$"
                           % (self.net.tor_net[12].usable[1],
                              self.net.tor_net[12].usable[2]),
+                          command)
+        self.searchoutput(out,
+                          r"Interface: loop0 \(no MAC addr\)$"
+                          r"\s+Type: loopback$"
+                          r"\s+Network Environment: internal$"
+                          r"\s+Provides: ut3gd1r04-loop0.aqd-unittest.ms.com \[%s\]$"
+                          % self.net.unknown[17][0],
                           command)
 
 

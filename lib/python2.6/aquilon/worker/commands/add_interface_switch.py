@@ -40,12 +40,19 @@ class CommandAddInterfaceSwitch(BrokerCommand):
 
     required_parameters = ["interface", "switch"]
     invalid_parameters = ["automac", "pg", "autopg", "model", "vendor"]
+    valid_interface_types = ["oa", "loopback"]
 
     def render(self, session, logger, interface, switch, mac, type, comments,
                **arguments):
-        if type and type != "oa":
-            raise ArgumentError("Only 'oa' is allowed as the interface type "
-                                "for switches.")
+        if type and type not in self.valid_interface_types:
+            raise ArgumentError("Interface type %s is not allowed for "
+                                "switches." % type)
+
+        if not type:
+            if interface.lower().startswith("loop"):
+                type = "loopback"
+            else:
+                type = "oa"
 
         for arg in self.invalid_parameters:
             if arguments.get(arg) is not None:
@@ -57,7 +64,7 @@ class CommandAddInterfaceSwitch(BrokerCommand):
 
         dbinterface = get_or_create_interface(session, dbswitch,
                                               name=interface, mac=mac,
-                                              interface_type='oa',
+                                              interface_type=type,
                                               comments=comments, preclude=True)
 
         session.flush()

@@ -31,7 +31,8 @@
 
 from aquilon.aqdb.model import (Interface, PublicInterface, ManagementInterface,
                                 OnboardInterface, VlanInterface,
-                                BondingInterface, BridgeInterface)
+                                BondingInterface, BridgeInterface,
+                                LoopbackInterface)
 from aquilon.worker.formats.formatters import ObjectFormatter
 from aquilon.worker.formats.list import ListFormatter
 from aquilon.worker.dbwrappers.feature import interface_features
@@ -129,6 +130,7 @@ ObjectFormatter.handlers[OnboardInterface] = InterfaceFormatter()
 ObjectFormatter.handlers[VlanInterface] = InterfaceFormatter()
 ObjectFormatter.handlers[BondingInterface] = InterfaceFormatter()
 ObjectFormatter.handlers[BridgeInterface] = InterfaceFormatter()
+ObjectFormatter.handlers[LoopbackInterface] = InterfaceFormatter()
 
 
 class MissingManagersList(list):

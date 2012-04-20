@@ -69,16 +69,21 @@ class CommandAddSwitch(BrokerCommand):
         dbswitch.primary_name = dbdns_rec
 
         # FIXME: get default name from the model
+        iftype = "oa"
         if not interface:
             interface = "xge"
             ifcomments = "Created automatically by add_switch"
         else:
             ifcomments = None
+            if interface.lower().startswith("loop"):
+                iftype = "loopback"
+
         dbinterface = get_or_create_interface(session, dbswitch,
                                               name=interface, mac=mac,
-                                              interface_type="oa",
+                                              interface_type=iftype,
                                               comments=ifcomments)
         dbnetwork = get_net_id_from_ip(session, ip)
+        # TODO: should we call check_ip_restrictions() here?
         assign_address(dbinterface, ip, dbnetwork)
 
         session.flush()
