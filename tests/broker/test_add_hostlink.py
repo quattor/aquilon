@@ -89,9 +89,10 @@ class TestAddHostlink(TestBrokerCommand):
         self.assertTrue(hostlinkfound,
                         "Hostlink resource not found in protocol output")
 
-        command = ["cat", "--generate", "--host=server1.aqd-unittest.ms.com"]
+        command = ["cat", "--generate",
+                   "--hostname", "server1.aqd-unittest.ms.com", "--data"]
         out = self.commandtest(command)
-        self.matchoutput(out, "'/system/resources/hostlink' = push(create(\"resource/host/server1.aqd-unittest.ms.com/hostlink/app1/config\"))", command)
+        self.matchoutput(out, '"/system/resources/hostlink" = push(create("resource/host/server1.aqd-unittest.ms.com/hostlink/app1/config"))', command)
 
         command = ["del_hostlink", "--hostlink=app1",
                    "--hostname=server1.aqd-unittest.ms.com"]

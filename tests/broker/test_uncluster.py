@@ -84,7 +84,7 @@ class TestUncluster(TestBrokerCommand):
                                    command='uncluster')
 
     def testverifycat(self):
-        command = "cat --cluster utecl1"
+        command = "cat --cluster utecl1 --data"
         out = self.commandtest(command.split())
         self.searchoutput(out, r'"/system/cluster/members" = list\(\s*\);', command)
 

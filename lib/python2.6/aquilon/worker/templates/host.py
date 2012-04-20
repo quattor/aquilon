@@ -37,9 +37,10 @@ from aquilon.aqdb.model import (Host, VlanInterface, BondingInterface,
                                 BridgeInterface)
 from aquilon.worker.locks import CompileKey
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
-from aquilon.worker.templates.machine import PlenaryMachineInfo
 from aquilon.worker.templates.cluster import PlenaryClusterClient
-from aquilon.worker.templates.panutils import pan, StructureTemplate
+from aquilon.worker.templates.panutils import (StructureTemplate, pan_assign,
+                                               pan_push, pan_include,
+                                               pan_variable)
 from aquilon.worker.dbwrappers.feature import (model_features,
                                                personality_features,
                                                interface_features)
@@ -106,9 +107,10 @@ class PlenaryHost(PlenaryCollection):
         self.dbobj = dbhost
         self.config = Config()
         if self.config.getboolean("broker", "namespaced_host_profiles"):
-            self.plenaries.append(PlenaryNamespacedHost(dbhost, logger=logger))
+            self.plenaries.append(PlenaryNamespacedHost(dbhost))
         if self.config.getboolean("broker", "flat_host_profiles"):
-            self.plenaries.append(PlenaryToplevelHost(dbhost, logger=logger))
+            self.plenaries.append(PlenaryToplevelHost(dbhost))
+        self.plenaries.append(PlenaryHostData(dbhost))
 
     def write(self, locked=False, content=None):
         # Standard PlenaryCollection swallows IncompleteError.  If/when
@@ -123,12 +125,9 @@ class PlenaryHost(PlenaryCollection):
 Plenary.handlers[Host] = PlenaryHost
 
 
-class PlenaryToplevelHost(Plenary):
-    """
-    A plenary template for a host, stored at the toplevel of the profiledir
-    """
+class PlenaryHostData(Plenary):
 
-    template_type = "object"
+    template_type = ""
 
     def __init__(self, dbhost, logger=LOGGER):
         Plenary.__init__(self, dbhost, logger=logger)
@@ -136,21 +135,8 @@ class PlenaryToplevelHost(Plenary):
         # object has been deleted
         self.branch = dbhost.branch
         self.name = dbhost.fqdn
-        self.loadpath = dbhost.personality.archetype.name
-        self.plenary_core = ""
+        self.plenary_core = "hostdata"
         self.plenary_template = self.name
-
-    def will_change(self):
-        # Need to override to handle IncompleteError...
-        self.stash()
-        if not self.new_content:
-            try:
-                self.new_content = self._generate_content()
-            except IncompleteError:
-                # Attempting to have IncompleteError thrown later by
-                # not caching the return
-                return self.old_content is None
-        return self.old_content != self.new_content
 
     def get_key(self):
         # Going with self.name instead of self.plenary_template_name seems like
@@ -165,20 +151,14 @@ class PlenaryToplevelHost(Plenary):
         transit_interfaces = []
         routers = {}
         default_gateway = None
-        iface_features = {}
 
         pers = self.dbobj.personality
-        arch = pers.archetype
 
         # FIXME: Enforce that one of the interfaces is marked boot?
         for dbinterface in self.dbobj.machine.interfaces:
             # Management interfaces are not configured at the host level
             if dbinterface.interface_type == 'management':
                 continue
-
-            featlist = interface_features(dbinterface, arch, pers)
-            if featlist:
-                iface_features[dbinterface.name] = featlist
 
             ifdesc = {}
 
@@ -285,9 +265,94 @@ class PlenaryToplevelHost(Plenary):
 
             interfaces[dbinterface.name] = ifdesc
 
-        personality_template = "personality/%s/config" % \
-                self.dbobj.personality.name
-        os_template = self.dbobj.operating_system.cfg_path + '/config'
+        eon_id_set = set([grn.eon_id for grn in self.dbobj.grns])
+        eon_id_set |= set([grn.eon_id for grn in pers.grns])
+        eon_id_list = list(eon_id_set)
+        eon_id_list.sort()
+
+        # Okay, here's the real content
+        pan_include(lines, ["pan/units", "pan/functions"])
+        lines.append("")
+        pmachine = Plenary.get_plenary(self.dbobj.machine, logger=self.logger)
+        pan_assign(lines, "/hardware",
+                   StructureTemplate(pmachine.plenary_template_name))
+
+        lines.append("")
+        pan_assign(lines, "/system/network/interfaces", interfaces)
+        pan_assign(lines, "/system/network/primary_ip",
+                   self.dbobj.machine.primary_ip)
+        if default_gateway:
+            pan_assign(lines, "/system/network/default_gateway",
+                       default_gateway)
+        if vips:
+            pan_assign(lines, "/system/network/vips", vips)
+        if routers:
+            pan_assign(lines, "/system/network/routers", routers)
+        lines.append("")
+
+        pan_assign(lines, "/system/build", self.dbobj.status.name)
+        pan_assign(lines, "/system/advertise_status", self.dbobj.advertise_status)
+        if eon_id_list:
+            pan_assign(lines, "/system/eon_ids", eon_id_list)
+        if self.dbobj.cluster:
+            pan_assign(lines, "/system/cluster/name", self.dbobj.cluster.name)
+        lines.append("")
+        for resource in sorted(self.dbobj.resources):
+            pan_push(lines, "/system/resources/%s" % resource.resource_type,
+                     StructureTemplate(resource.template_base + '/config'))
+
+
+class PlenaryToplevelHost(Plenary):
+    """
+    A plenary template for a host, stored at the toplevel of the profiledir
+    """
+
+    template_type = "object"
+
+    def __init__(self, dbhost, logger=LOGGER):
+        Plenary.__init__(self, dbhost, logger=logger)
+        # Store the branch separately so get_key() works even after the dbhost
+        # object has been deleted
+        self.branch = dbhost.branch
+        self.name = dbhost.fqdn
+        self.loadpath = dbhost.personality.archetype.name
+        self.plenary_core = ""
+        self.plenary_template = self.name
+
+    def will_change(self):
+        # Need to override to handle IncompleteError...
+        self.stash()
+        if not self.new_content:
+            try:
+                self.new_content = self._generate_content()
+            except IncompleteError:
+                # Attempting to have IncompleteError thrown later by
+                # not caching the return
+                return self.old_content is None
+        return self.old_content != self.new_content
+
+    def get_key(self):
+        # Going with self.name instead of self.plenary_template_name seems like
+        # the right decision here - easier to predict behavior when meshing
+        # with other CompileKey generators like PlenaryMachine.
+        return CompileKey(domain=self.branch.name, profile=self.name,
+                          logger=self.logger)
+
+    def body(self, lines):
+        iface_features = {}
+
+        pers = self.dbobj.personality
+        arch = pers.archetype
+
+        # FIXME: Enforce that one of the interfaces is marked boot?
+        for dbinterface in self.dbobj.machine.interfaces:
+            # Management interfaces are not configured at the host level
+            if dbinterface.interface_type == 'management':
+                continue
+
+            featlist = interface_features(dbinterface, arch, pers)
+            if featlist:
+                iface_features[dbinterface.name] = featlist
 
         services = []
         required_services = set(arch.services + pers.services)
@@ -309,92 +374,47 @@ class PlenaryToplevelHost(Plenary):
         services.sort()
         provides.sort()
 
-        templates = []
-        templates.append("archetype/base")
-        templates.append(os_template)
+        # Okay, here's the real content
+        pan_include(lines, ["pan/units", "pan/functions"])
+        lines.append("")
+
+        for iface in sorted(iface_features.keys()):
+            pan_variable(lines, "CURRENT_INTERFACE", iface)
+            for feature in iface_features[iface]:
+                # Same forgiveness for interface model features
+                pan_include(lines, "%s/config" % feature.cfg_path)
+            lines.append("")
+
+        pan_include(lines, "hostdata/%s" % self.name)
+        pan_include(lines, "archetype/base")
+        pan_include(lines, self.dbobj.operating_system.cfg_path + '/config')
 
         for feature in model_features(self.dbobj.machine.model, arch, pers):
-            templates.append("%s/config" % feature.cfg_path)
+            pan_include(lines, "%s/config" % feature.cfg_path)
 
-        templates.extend(services)
-        templates.extend(provides)
+        pan_include(lines, services)
+        pan_include(lines, provides)
 
         (pre_features, post_features) = personality_features(pers)
         for feature in pre_features:
-            templates.append("%s/config" % feature.cfg_path)
+            pan_include(lines, "%s/config" % feature.cfg_path)
 
-        templates.append(personality_template)
+        personality_template = "personality/%s/config" % \
+                self.dbobj.personality.name
+        pan_include(lines, personality_template)
 
         if self.dbobj.cluster:
             clplenary = PlenaryClusterClient(self.dbobj.cluster)
-            templates.append(clplenary.plenary_template_name)
+            pan_include(lines, clplenary.plenary_template_name)
         elif pers.cluster_required:
             raise IncompleteError("Host %s personality %s requires cluster "
                                   "membership, please run 'aq cluster'." %
                                   (self.name, pers.name))
 
         for feature in post_features:
-            templates.append("%s/config" % feature.cfg_path)
+            pan_include(lines, "%s/config" % feature.cfg_path)
 
-        templates.append("archetype/final")
-
-        eon_id_set = set([grn.eon_id for grn in self.dbobj.grns])
-        eon_id_set |= set([grn.eon_id for grn in pers.grns])
-        eon_id_list = list(eon_id_set)
-        eon_id_list.sort()
-
-        # Okay, here's the real content
-        lines.append("include { 'pan/units' };")
-        lines.append("include { 'pan/functions' };")
-        lines.append("")
-        pmachine = PlenaryMachineInfo(self.dbobj.machine)
-        lines.append("'/hardware' = %s;" %
-                     pan(StructureTemplate(pmachine.plenary_template_name)))
-
-        lines.append("")
-        lines.append("'/system/network/interfaces' = %s;" % pan(interfaces))
-        lines.append("'/system/network/primary_ip' = %s;" %
-                     pan(self.dbobj.machine.primary_ip))
-        if default_gateway:
-            lines.append("'/system/network/default_gateway' = %s;" %
-                         pan(default_gateway))
-        if vips:
-            lines.append('"/system/network/vips" = %s;' % pan(vips))
-        if routers:
-            lines.append('"/system/network/routers" = %s;' % pan(routers))
-        lines.append("")
-
-        for iface in sorted(iface_features.keys()):
-            lines.append('variable CURRENT_INTERFACE = "%s";' % iface)
-            for feature in iface_features[iface]:
-                # Same forgiveness for interface model features
-                lines.append('include { "%s/config" };' % feature.cfg_path)
-            lines.append("")
-
-        lines.append("'/system/build' = %s;" % pan(self.dbobj.status.name))
-        lines.append("'/system/advertise_status' = %s;" % pan(self.dbobj.advertise_status))
-        if eon_id_list:
-            lines.append('"/system/eon_ids" = %s;' % pan(eon_id_list))
-        if self.dbobj.cluster:
-            lines.append("'/system/cluster/name' = %s;" % pan(self.dbobj.cluster.name))
-        lines.append("")
-        for resource in sorted(self.dbobj.resources):
-            lines.append("'/system/resources/%s' = push(%s);" % (
-                         resource.resource_type,
-                         pan(StructureTemplate(resource.template_base +
-                                               '/config'))))
-        lines.append("")
-        lines.append("'/metadata/template/branch/name' = %s;" % pan(self.branch.name))
-        lines.append("'/metadata/template/branch/type' = %s;" %
-                      pan(self.branch.branch_type))
-        if self.branch.branch_type == 'sandbox':
-            lines.append("'/metadata/template/branch/author' = %s;" %
-                         pan(self.dbobj.sandbox_author.name))
-        for template in templates:
-            lines.append("include { %s };" % pan(template))
-        lines.append("")
-
-        return
+        pan_include(lines, "archetype/final")
 
     def write(self, *args, **kwargs):
         # Don't bother writing plenary files for dummy aurora hardware or for

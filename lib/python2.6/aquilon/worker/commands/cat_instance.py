@@ -32,7 +32,9 @@
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.service_instance import get_service_instance
 from aquilon.worker.templates.service import (PlenaryServiceInstanceToplevel,
-                                        PlenaryServiceInstanceClientDefault)
+                                              PlenaryServiceInstanceClientDefault,
+                                              PlenaryServiceInstanceServer,
+                                              PlenaryServiceInstanceServerDefault)
 from aquilon.aqdb.model import Service
 
 
@@ -40,14 +42,23 @@ class CommandCatInstance(BrokerCommand):
 
     required_parameters = ["service", "instance"]
 
-    def render(self, session, logger, service, instance, default, generate, **kwargs):
+    def render(self, session, logger, service, instance, default, server,
+               generate, **kwargs):
         dbservice = Service.get_unique(session, service, compel=True)
         dbsi = get_service_instance(session, dbservice, instance)
         if default:
-            plenary_info = PlenaryServiceInstanceClientDefault(dbsi,
-                                                               logger=logger)
+            if server:
+                plenary_info = PlenaryServiceInstanceServerDefault(dbsi,
+                                                                   logger=logger)
+            else:
+                plenary_info = PlenaryServiceInstanceClientDefault(dbsi,
+                                                                   logger=logger)
         else:
-            plenary_info = PlenaryServiceInstanceToplevel(dbsi, logger=logger)
+            if server:
+                plenary_info = PlenaryServiceInstanceServer(dbsi, logger=logger)
+            else:
+                plenary_info = PlenaryServiceInstanceToplevel(dbsi,
+                                                              logger=logger)
 
         if generate:
             return plenary_info._generate_content()

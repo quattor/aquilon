@@ -29,18 +29,29 @@
 """Contains the logic for `aq cat --cluster`."""
 
 
+from aquilon.exceptions_ import NotFoundException
 from aquilon.aqdb.model import Cluster
 from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.templates.cluster import PlenaryClusterObject
+from aquilon.worker.dbwrappers.resources import get_resource
+from aquilon.worker.templates.base import Plenary
+from aquilon.worker.templates.cluster import (PlenaryClusterObject,
+                                              PlenaryClusterData)
 
 
 class CommandCatCluster(BrokerCommand):
 
     required_parameters = ["cluster"]
 
-    def render(self, generate, session, logger, cluster, **kwargs):
+    def render(self, session, logger, cluster, data, generate, **arguments):
         dbcluster = Cluster.get_unique(session, cluster, compel=True)
-        plenary_info = PlenaryClusterObject(dbcluster, logger=logger)
+        dbresource = get_resource(session, dbcluster, **arguments)
+        if dbresource:
+            plenary_info = Plenary.get_plenary(dbresource, logger=logger)
+        else:
+            if data:
+                plenary_info = PlenaryClusterData(dbcluster, logger=logger)
+            else:
+                plenary_info = PlenaryClusterObject(dbcluster, logger=logger)
 
         if generate:
             return plenary_info._generate_content()

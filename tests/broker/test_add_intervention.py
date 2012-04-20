@@ -183,8 +183,8 @@ class TestAddIntervention(TestBrokerCommand):
         self.notfoundtest(command.split(" "))
 
     def test_20_catintervention(self):
-        command = ["cat", "--resource=i1", "--restype=intervention",
-                   "--reshost=server1.aqd-unittest.ms.com"]
+        command = ["cat", "--intervention=i1",
+                   "--hostname=server1.aqd-unittest.ms.com"]
         out = self.commandtest(command)
         self.matchoutput(out,
                          "structure template resource"
@@ -206,9 +206,9 @@ class TestAddIntervention(TestBrokerCommand):
         self.matchoutput(out, "Intervention: i1", command)
 
         command = ["cat", "--generate",
-                   "--hostname=server1.aqd-unittest.ms.com"]
+                   "--hostname=server1.aqd-unittest.ms.com", "--data"]
         out = self.commandtest(command)
-        self.matchoutput(out, "'/system/resources/intervention' = push(create(\"resource/host/server1.aqd-unittest.ms.com/intervention/i1/config\"))",
+        self.matchoutput(out, '"/system/resources/intervention" = push(create("resource/host/server1.aqd-unittest.ms.com/intervention/i1/config"))',
                          command)
 
         command = ["del_intervention", "--intervention=i1",

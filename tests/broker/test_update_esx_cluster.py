@@ -307,7 +307,7 @@ class TestUpdateESXCluster(TestBrokerCommand):
         self.matchoutput(out, "Maintenance Threshold: 2 (50%)", command)
 
         ## verify cat
-        command = "cat --cluster=%s" % cname
+        command = "cat --cluster=%s --data" % cname
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, '"/system/cluster/down_hosts_threshold" = 0;',
                          command)

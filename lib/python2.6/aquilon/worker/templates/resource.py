@@ -34,7 +34,8 @@ from aquilon.aqdb.model import (Application, Filesystem, Intervention,
                                 ResourceGroup, Hostlink, RebootSchedule,
                                 RebootIntervention)
 from aquilon.worker.templates.base import Plenary
-from aquilon.worker.templates.panutils import pan, StructureTemplate
+from aquilon.worker.templates.panutils import (StructureTemplate, pan_assign,
+                                               pan_push)
 
 LOGGER = logging.getLogger('aquilon.server.templates.resource')
 
@@ -56,66 +57,58 @@ class PlenaryResource(Plenary):
             getattr(self, fname)(lines)
 
     def body_filesystem(self, lines):
-        lines.append('"type" = %s;' % pan(self.dbobj.fstype))
-        lines.append('"mountpoint" = %s;' % pan(self.dbobj.mountpoint))
-        lines.append('"mount" = %s;' % pan(self.dbobj.mount))
-        lines.append('"block_device_path" = %s;' % pan(self.dbobj.blockdev))
+        pan_assign(lines, "type", self.dbobj.fstype)
+        pan_assign(lines, "mountpoint", self.dbobj.mountpoint)
+        pan_assign(lines, "mount", self.dbobj.mount)
+        pan_assign(lines, "block_device_path", self.dbobj.blockdev)
         opts = ""
         if self.dbobj.mountoptions:
             opts = self.dbobj.mountoptions
-        lines.append('"mountopts" = %s;' % pan(opts))
-        lines.append('"freq" = %s;' % pan(self.dbobj.dumpfreq))
-        lines.append('"pass" = %s;' % pan(self.dbobj.passno))
+        pan_assign(lines, "mountopts", opts)
+        pan_assign(lines, "freq", self.dbobj.dumpfreq)
+        pan_assign(lines, "pass", self.dbobj.passno)
 
     def body_application(self, lines):
-        lines.append('"name" = %s;' % pan(self.dbobj.name))
-        lines.append('"eonid" = %s;' % pan(self.dbobj.eonid))
+        pan_assign(lines, "name", self.dbobj.name)
+        pan_assign(lines, "eonid", self.dbobj.eonid)
 
     def body_hostlink(self, lines):
-        lines.append('"name" = %s;' % pan(self.dbobj.name))
-        lines.append('"target" = %s;' % pan(self.dbobj.target))
-        owner_string = '"owner" = %s;'
+        pan_assign(lines, "name", self.dbobj.name)
+        pan_assign(lines, "target", self.dbobj.target)
         if self.dbobj.owner_group:
-            lines.append(owner_string % pan(self.dbobj.owner_user + ':' +
-                                            self.dbobj.owner_group))
+            owner_string = self.dbobj.owner_user + ':' + self.dbobj.owner_group
         else:
-            lines.append(owner_string % pan(self.dbobj.owner_user))
+            owner_string = self.dbobj.owner_user
+        pan_assign(lines, "owner", owner_string)
 
     def body_intervention(self, lines):
-        lines.append('"name" = %s;' % pan(self.dbobj.name))
-        lines.append('"start" = %s;' %
-                     pan(self.dbobj.start_date.isoformat()))
-        lines.append('"expiry" = %s;' %
-                     pan(self.dbobj.expiry_date.isoformat()))
+        pan_assign(lines, "name", self.dbobj.name)
+        pan_assign(lines, "start", self.dbobj.start_date.isoformat())
+        pan_assign(lines, "expiry", self.dbobj.expiry_date.isoformat())
 
         if self.dbobj.users:
-            lines.append('"users" = %s;' %
-                         pan(self.dbobj.users.split(",")))
+            pan_assign(lines, "users", self.dbobj.users.split(","))
         if self.dbobj.groups:
-            lines.append('"groups" = %s;' %
-                         pan(self.dbobj.groups.split(",")))
+            pan_assign(lines, "groups", self.dbobj.groups.split(","))
 
         if self.dbobj.disabled:
-            lines.append('"disabled" = %s;' %
-                         pan(self.dbobj.disabled.split(",")))
+            pan_assign(lines, "disabled", self.dbobj.disabled.split(","))
 
     def body_reboot_schedule(self, lines):
-        lines.append('"name" = %s;' % pan(self.dbobj.name))
-        lines.append('"time" = %s;' % pan(self.dbobj.time))
-        lines.append('"week" = %s;' % pan(self.dbobj.week))
-        lines.append('"day" = %s;' % pan(self.dbobj.day))
+        pan_assign(lines, "name", self.dbobj.name)
+        pan_assign(lines, "time", self.dbobj.time)
+        pan_assign(lines, "week", self.dbobj.week)
+        pan_assign(lines, "day", self.dbobj.day)
 
     def body_resourcegroup(self, lines):
-        lines.append('"name" = %s;' % pan(self.dbobj.name))
+        pan_assign(lines, "name", self.dbobj.name)
         for resource in self.dbobj.resources:
-            lines.append('"resources/%s" = push(%s);' %
-                         (resource.resource_type,
-                          pan(StructureTemplate(resource.template_base +
-                                                "/config"))))
+            pan_push(lines, "resources/%s" % resource.resource_type,
+                     StructureTemplate(resource.template_base + "/config"))
 
     def body_reboot_iv(self, lines):
-        lines.append('"name" = %s;' % pan(self.dbobj.name))
-        lines.append('"justification" = %s;' % pan(self.dbobj.justification))
+        pan_assign(lines, "name", self.dbobj.name)
+        pan_assign(lines, "justification", self.dbobj.justification)
         self.body_intervention(lines)
 
 

@@ -239,8 +239,12 @@ class TestMake(TestBrokerCommand):
         zebra2_ip = self.net.unknown[13].usable[1]
         zebra3_ip = self.net.unknown[13].usable[0]
 
-        command = ["cat", "--hostname", "unittest20.aqd-unittest.ms.com"]
+        command = ["cat", "--hostname", "unittest20.aqd-unittest.ms.com",
+                   "--data"]
         out = self.commandtest(command)
+        self.matchoutput(out,
+                         "template hostdata/unittest20.aqd-unittest.ms.com;",
+                         command)
         self.searchoutput(out,
                           r'"/system/network/vips" = nlist\(\s*'
                           r'"hostname", nlist\(\s*'
@@ -300,10 +304,15 @@ class TestMake(TestBrokerCommand):
                           (eth1_broadcast, eth1_1_ip, eth1_netmask,
                            eth1_broadcast, eth1_gateway, eth1_ip, eth1_netmask),
                           command)
-        self.matchoutput(out, "'/system/network/default_gateway' = \"%s\";" %
+        self.matchoutput(out, '"/system/network/default_gateway" = \"%s\";' %
                          eth0_gateway, command)
-        self.matchoutput(out, "'/metadata/template/branch/name' = \"unittest\";", command)
-        self.matchoutput(out, "'/metadata/template/branch/type' = \"domain\";", command)
+
+        command = ["cat", "--hostname", "unittest20.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out, '"/metadata/template/branch/name" = "unittest";',
+                         command)
+        self.matchoutput(out, '"/metadata/template/branch/type" = "domain";',
+                         command)
         self.matchclean(out, '"/metadata/template/branch/author"', command)
 
     def testmakeunittest21(self):
@@ -313,9 +322,10 @@ class TestMake(TestBrokerCommand):
 
     def testverifyunittest21(self):
         net = self.net.unknown[11]
-        command = ["cat", "--hostname", "unittest21.aqd-unittest.ms.com"]
+        command = ["cat", "--hostname", "unittest21.aqd-unittest.ms.com",
+                   "--data"]
         out = self.commandtest(command)
-        self.matchoutput(out, "'/system/network/default_gateway' = \"%s\";" %
+        self.matchoutput(out, '"/system/network/default_gateway" = \"%s\";' %
                          net.gateway, command)
         self.searchoutput(out,
                           r'"/system/network/routers" = nlist\(\s*'
@@ -330,7 +340,8 @@ class TestMake(TestBrokerCommand):
 
     def testverifyunittest23(self):
         # Verify that the host chooses the closest router
-        command = ["cat", "--hostname", "unittest23.aqd-unittest.ms.com"]
+        command = ["cat", "--hostname", "unittest23.aqd-unittest.ms.com",
+                   "--data"]
         out = self.commandtest(command)
         net = self.net.vpls[0]
         ip = net.usable[1]
@@ -347,7 +358,7 @@ class TestMake(TestBrokerCommand):
                           r'"network_type", "vpls"\s*\)\s*' %
                           (net.broadcast, router, ip, net.netmask),
                           command)
-        self.matchoutput(out, "'/system/network/default_gateway' = \"%s\";" %
+        self.matchoutput(out, '"/system/network/default_gateway" = \"%s\";' %
                          router, command)
         self.searchoutput(out,
                           r'"/system/network/routers" = nlist\(\s*'
@@ -361,7 +372,8 @@ class TestMake(TestBrokerCommand):
 
     def testverifyunittest24(self):
         # Verify that the host chooses the closest router
-        command = ["cat", "--hostname", "unittest24.aqd-unittest.ms.com"]
+        command = ["cat", "--hostname", "unittest24.aqd-unittest.ms.com",
+                   "--data"]
         out = self.commandtest(command)
         net = self.net.vpls[0]
         ip = net.usable[2]
@@ -378,7 +390,7 @@ class TestMake(TestBrokerCommand):
                           r'"network_type", "vpls"\s*\)\s*' %
                           (net.broadcast, router, ip, net.netmask),
                           command)
-        self.matchoutput(out, "'/system/network/default_gateway' = \"%s\";" %
+        self.matchoutput(out, '"/system/network/default_gateway" = \"%s\";' %
                          router, command)
         self.searchoutput(out,
                           r'"/system/network/routers" = nlist\(\s*'
@@ -392,7 +404,8 @@ class TestMake(TestBrokerCommand):
 
     def testverifyunittest25(self):
         # Verify that the host chooses the closest router
-        command = ["cat", "--hostname", "unittest25.aqd-unittest.ms.com"]
+        command = ["cat", "--hostname", "unittest25.aqd-unittest.ms.com",
+                   "--data"]
         out = self.commandtest(command)
         net = self.net.unknown[1]
         ip = net[4]
@@ -409,7 +422,7 @@ class TestMake(TestBrokerCommand):
                           r'"network_type", "unknown"\s*\)\s*' %
                           (net.broadcast, router, ip, net.netmask),
                           command)
-        self.matchoutput(out, "'/system/network/default_gateway' = \"%s\";" %
+        self.matchoutput(out, '"/system/network/default_gateway" = "%s";' %
                          self.net.unknown[0].gateway, command)
 
 

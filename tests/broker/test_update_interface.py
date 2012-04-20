@@ -181,7 +181,7 @@ class TestUpdateInterface(TestBrokerCommand):
         eth1ip = net.usable[12]
         # Use --generate as update_interface does not update the on-disk
         # templates
-        command = "cat --hostname unittest02.one-nyp.ms.com --generate"
+        command = "cat --hostname unittest02.one-nyp.ms.com --data --generate"
         out = self.commandtest(command.split(" "))
         # After flipping the boot flag, the static route should now appear on
         # eth0
@@ -299,9 +299,9 @@ class TestUpdateInterface(TestBrokerCommand):
 
     def testverifyfliproutecat(self):
         command = ["cat", "--hostname", "unittest25.aqd-unittest.ms.com",
-                   "--generate"]
+                   "--data", "--generate"]
         out = self.commandtest(command)
-        self.matchoutput(out, "'/system/network/default_gateway' = \"%s\";" %
+        self.matchoutput(out, '"/system/network/default_gateway" = "%s";' %
                          self.net.unknown[1][2], command)
 
     def testverifyfliprouteshow(self):

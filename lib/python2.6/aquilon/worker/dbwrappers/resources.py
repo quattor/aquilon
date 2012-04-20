@@ -30,9 +30,9 @@
 
 
 from aquilon.exceptions_ import IncompleteError, NotFoundException
-from aquilon.aqdb.model import Cluster, ClusterResource, HostResource
-from aquilon.aqdb.model import ResourceGroup, BundleResource
-from aquilon.worker.templates.base import Plenary, PlenaryCollection
+from aquilon.aqdb.model import (Cluster, ClusterResource, HostResource,
+                                Resource, ResourceGroup, BundleResource)
+from aquilon.worker.templates import Plenary, PlenaryCollection
 from aquilon.worker.dbwrappers.host import hostname_to_host
 from aquilon.worker.locks import lock_queue, CompileKey
 
@@ -63,18 +63,53 @@ def get_resource_holder(session, hostname, cluster, resgroup=None,
             who = dbcluster.resholder
 
     if resgroup is not None:
-        dbrg = ResourceGroup.get_unique(session, resgroup, compel=True)
+        dbrg = ResourceGroup.get_unique(session, name=resgroup, holder=who,
+                                        compel=True)
         who = dbrg.resholder
         if who is None:
             if compel:
-                raise NotFoundException("resourcegroup %s has no resources" %
-                                        dbrg)
+                raise NotFoundException("{0} has no resources.".format(dbrg))
             dbrg.resholder = BundleResource(resourcegroup=dbrg)
             session.add(dbrg.resholder)
             session.flush()
             who = dbrg.resholder
 
     return who
+
+
+def get_resource(session, holder, **arguments_in):
+    # Filter out arguments that are not resources
+    arguments = dict()
+    for key, value in arguments_in.items():
+        if key in Resource.__mapper__.polymorphic_map and value is not None:
+            arguments[key] = value
+        elif key == "reboot_intervention" and value is not None:
+            # Sigh... Abbreviations are bad.
+            arguments["reboot_iv"] = value
+
+    # Resource groups are act both as resource and as holder. If there's another
+    # resource type specified, then use it as a holder; if it is specified
+    # alone, then use it as a resource.
+    if "resourcegroup" in arguments and len(arguments) > 1:
+        rg_name = arguments.pop("resourcegroup")
+        if not holder.resholder:
+            raise NotFoundException("{0} has no resources.".format(holder))
+        dbrg = ResourceGroup.get_unique(session, name=rg_name,
+                                        holder=holder.resholder, compel=True)
+        holder = dbrg
+
+    if arguments:
+        if len(arguments) > 1:
+            raise ArgumentError("Only one resource type should be specified.")
+
+        if not holder.resholder:
+            raise NotFoundException("{0} has no resources.".format(holder))
+
+        res_type, res_name = arguments.popitem()
+        cls = Resource.__mapper__.polymorphic_map[res_type].class_
+        return cls.get_unique(session, name=res_name, holder=holder.resholder,
+                              compel=True)
+    return None
 
 
 def del_resource(session, logger, dbresource):

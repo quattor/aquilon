@@ -299,8 +299,7 @@ class TestAdd10GigHardware(TestBrokerCommand):
             out = self.commandtest(command.split(" "))
             self.matchoutput(out, """"location" = "ut.ny.na";""", command)
             self.matchoutput(out,
-                             """include { """
-                             """'hardware/machine/utvendor/utmedium' };""",
+                             'include { "hardware/machine/utvendor/utmedium" };',
                              command)
             self.searchoutput(out,
                               r'"ram" = list\(\s*'

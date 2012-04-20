@@ -29,18 +29,28 @@
 """Contains the logic for `aq cat --hostname`."""
 
 
+from aquilon.exceptions_ import NotFoundException
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.host import hostname_to_host
-from aquilon.worker.templates.host import PlenaryToplevelHost
+from aquilon.worker.dbwrappers.resources import get_resource
+from aquilon.worker.templates.base import Plenary
+from aquilon.worker.templates.host import PlenaryToplevelHost, PlenaryHostData
 
 
 class CommandCatHostname(BrokerCommand):
 
     required_parameters = ["hostname"]
 
-    def render(self, generate, session, logger, hostname, **kwargs):
+    def render(self, session, logger, hostname, data, generate, **arguments):
         dbhost = hostname_to_host(session, hostname)
-        plenary_info = PlenaryToplevelHost(dbhost, logger=logger)
+        dbresource = get_resource(session, dbhost, **arguments)
+        if dbresource:
+            plenary_info = Plenary.get_plenary(dbresource, logger=logger)
+        else:
+            if data:
+                plenary_info = PlenaryHostData(dbhost, logger=logger)
+            else:
+                plenary_info = PlenaryToplevelHost(dbhost, logger=logger)
 
         if generate:
             return plenary_info._generate_content()

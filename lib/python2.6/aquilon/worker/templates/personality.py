@@ -32,7 +32,7 @@ import logging
 
 from aquilon.aqdb.model import Personality
 from aquilon.worker.templates.base import Plenary
-from aquilon.worker.templates.panutils import pan
+from aquilon.worker.templates.panutils import pan_include, pan_variable
 
 LOGGER = logging.getLogger(__name__)
 
@@ -50,8 +50,8 @@ class PlenaryPersonality(Plenary):
         self.plenary_template = "config"
 
     def body(self, lines):
-        lines.append("variable PERSONALITY = %s;" % pan(self.name))
-        lines.append("include { 'personality/config' };")
+        pan_variable(lines, "PERSONALITY", self.name)
+        pan_include(lines, "personality/config")
 
 
 Plenary.handlers[Personality] = PlenaryPersonality

@@ -69,16 +69,16 @@ class TestRebindMetaCluster(TestBrokerCommand):
         self.noouttest(command)
 
     def testverifyrebindutecl3(self):
-        command = ["cat", "--cluster=utecl3"]
+        command = ["cat", "--cluster=utecl3", "--data"]
         out = self.commandtest(command)
-        self.matchoutput(out, "object template clusters/utecl3;", command)
+        self.matchoutput(out, "template clusterdata/utecl3;", command)
         self.matchoutput(out, '"/system/cluster/name" = "utecl3";', command)
         self.matchoutput(out, '"/system/metacluster/name" = "utmc1";', command)
         self.searchoutput(out, r'"/system/cluster/machines" = nlist\(\s*\);',
                           command)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestRebindMetaCluster)
     unittest.TextTestRunner(verbosity=2).run(suite)
 

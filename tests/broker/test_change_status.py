@@ -53,9 +53,9 @@ class TestChangeStatus(TestBrokerCommand):
             out = self.commandtest(command.split(" "))
             self.matchoutput(out, "Build Status: %s" % status, command)
 
-            command = "cat --hostname unittest02.one-nyp.ms.com"
+            command = "cat --hostname unittest02.one-nyp.ms.com --data"
             out = self.commandtest(command.split(" "))
-            self.matchoutput(out, """'/system/build' = "%s";""" % status, command)
+            self.matchoutput(out, '"/system/build" = "%s";' % status, command)
 
         # And a transition that should be illegal from the final state above (ready)
         command = ["change_status", "--hostname=unittest02.one-nyp.ms.com",

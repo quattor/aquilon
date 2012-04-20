@@ -67,19 +67,21 @@ class TestAddCluster(TestBrokerCommand):
         self.matchclean(out, "Comments", command)
 
     def test_10_verify_cat_utvcs1(self):
-        command = ["cat", "--cluster=utvcs1"]
-        out = self.commandtest(command)
-        self.verify_cat_clusters("utvcs1", "vcs-msvcs", "compute", out, command)
-        self.matchoutput(out, '"/system/cluster/down_hosts_threshold" = 0;',
-                         command)
-        self.matchoutput(out, '"/system/cluster/down_maint_threshold" = 1;',
-                         command)
-        self.matchclean(out, '"/system/cluster/down_hosts_as_percent"',
-                        command)
-        self.matchclean(out, '"/system/cluster/down_maint_as_percent"',
-                        command)
-        self.matchclean(out, '"/system/cluster/down_hosts_percent"', command)
-        self.matchclean(out, '"/system/cluster/down_maint_percent"', command)
+        obj_cmd, obj, data_cmd, data = self.verify_cat_clusters("utvcs1",
+                                                                "hacluster",
+                                                                "vcs-msvcs",
+                                                                "compute")
+
+        self.matchoutput(data, '"/system/cluster/down_hosts_threshold" = 0;',
+                         data_cmd)
+        self.matchoutput(data, '"/system/cluster/down_maint_threshold" = 1;',
+                         data_cmd)
+        self.matchclean(data, '"/system/cluster/down_hosts_as_percent"',
+                        data_cmd)
+        self.matchclean(data, '"/system/cluster/down_maint_as_percent"',
+                        data_cmd)
+        self.matchclean(data, '"/system/cluster/down_hosts_percent"', data_cmd)
+        self.matchclean(data, '"/system/cluster/down_maint_percent"', data_cmd)
 
     def test_20_fail_add_existing(self):
         command = ["add_cluster", "--cluster=utvcs1",
@@ -133,22 +135,23 @@ class TestAddCluster(TestBrokerCommand):
         self.matchclean(out, "Comments", command)
 
     def test_42_verifycatutgrid1(self):
-        command = ["cat", "--cluster=utgrid1"]
-        out = self.commandtest(command)
-        self.verify_cat_clusters("utgrid1", "hadoop", "compute", out, command)
-        self.matchoutput(out, '"/system/cluster/down_hosts_threshold" = 0;',
-                         command)
-        self.matchoutput(out, '"/system/cluster/down_maint_threshold" = 0;',
-                         command)
-        self.matchoutput(out, '"/system/cluster/down_hosts_as_percent" = true;',
-                         command)
-        self.matchoutput(out, '"/system/cluster/down_maint_as_percent" = true;',
-                         command)
-        self.matchoutput(out, '"/system/cluster/down_hosts_percent" = 5;',
-                         command)
-        self.matchoutput(out, '"/system/cluster/down_maint_percent" = 6;',
-                         command)
+        obj_cmd, obj, data_cmd, data = self.verify_cat_clusters("utgrid1",
+                                                                "gridcluster",
+                                                                "hadoop",
+                                                                "compute")
 
+        self.matchoutput(data, '"/system/cluster/down_hosts_threshold" = 0;',
+                         data_cmd)
+        self.matchoutput(data, '"/system/cluster/down_maint_threshold" = 0;',
+                         data_cmd)
+        self.matchoutput(data, '"/system/cluster/down_hosts_as_percent" = true;',
+                         data_cmd)
+        self.matchoutput(data, '"/system/cluster/down_maint_as_percent" = true;',
+                         data_cmd)
+        self.matchoutput(data, '"/system/cluster/down_hosts_percent" = 5;',
+                         data_cmd)
+        self.matchoutput(data, '"/system/cluster/down_maint_percent" = 6;',
+                         data_cmd)
 
     def test_43_verifyshowutgrid1proto(self):
         command = ["show_cluster", "--cluster=utgrid1", "--format=proto"]
@@ -197,10 +200,7 @@ class TestAddCluster(TestBrokerCommand):
         self.matchclean(out, "Comments", command)
 
     def test_52_verifycatutstorage1(self):
-        command = ["cat", "--cluster=utstorage1"]
-        out = self.commandtest(command)
-        self.verify_cat_clusters("utstorage1", "metrocluster", "storage",
-                                 out, command)
+        self.verify_cat_clusters("utstorage1", "storagecluster", "metrocluster", "storage")
 
     def test_53_verifyshowutstorage1proto(self):
         command = ["show_cluster", "--cluster=utstorage1", "--format=proto"]
@@ -237,40 +237,61 @@ class TestAddCluster(TestBrokerCommand):
         self.matchoutput(out, "Comments: Another test storage cluster", command)
 
     def test_56_verifycatutstorage2(self):
-        command = ["cat", "--cluster=utstorage2"]
-        out = self.commandtest(command)
-        self.verify_cat_clusters("utstorage2", "metrocluster", "storage",
-                                 out, command)
+        self.verify_cat_clusters("utstorage2", "storagecluster", "metrocluster",
+                                 "storage")
 
-    def verify_cat_clusters(self, name, persona, ctype, out, command):
+    def verify_cat_clusters(self, name, archetype, persona, ctype):
         """ generic method to verify common attributes for cat on clusters """
-        self.matchoutput(out, "object template clusters/%s;" % name,
-                         command)
-        self.matchoutput(out, '"/system/cluster/name" = "%s";' % name,
-                         command)
-        self.matchoutput(out, '"/system/cluster/type" = "%s";' % ctype,
-                         command)
-        self.matchoutput(out, '"/system/cluster/sysloc/continent" = "na";',
-                         command)
-        self.matchoutput(out, '"/system/cluster/sysloc/city" = "ny";',
-                         command)
-        self.matchoutput(out, '"/system/cluster/sysloc/campus" = "ny";',
-                         command)
-        self.matchoutput(out, '"/system/cluster/sysloc/building" = "ut";',
-                         command)
-        self.matchoutput(out, '"/system/cluster/sysloc/location" = "ut.ny.na";',
-                         command)
-        self.matchoutput(out, '"/system/build" = "build";', command)
-        self.matchclean(out, '"/system/cluster/rack/row"', command)
-        self.matchclean(out, '"/system/cluster/rack/column"', command)
-        self.matchclean(out, '"/system/cluster/rack/name"', command)
-        self.matchclean(out, '"/system/cluster/allowed_personalities"', command)
-        self.matchclean(out, "include { 'service", command)
-        self.matchoutput(out, "include { 'personality/%s/config' };" % persona,
-                         command)
-        self.matchoutput(out, '"/metadata/template/branch/name" = \"unittest\";', command)
-        self.matchoutput(out, '"/metadata/template/branch/type" = \"domain\";', command)
-        self.matchclean(out, '"/metadata/template/branch/author"', command)
+        object_command = ["cat", "--cluster", name]
+        object = self.commandtest(object_command)
+
+        self.matchoutput(object, "object template clusters/%s;" % name,
+                         object_command)
+        self.searchoutput(object,
+                          r'variable LOADPATH = list\(\s*"%s"\s*\);' % archetype,
+                          object_command)
+        self.matchoutput(object, 'include { "clusterdata/%s" };' % name,
+                         object_command)
+        self.matchclean(object, 'include { "service', object_command)
+        self.matchoutput(object, 'include { "personality/%s/config" };' % persona,
+                         object_command)
+
+        self.matchoutput(object,
+                         '"/metadata/template/branch/name" = "unittest";',
+                         object_command)
+        self.matchoutput(object,
+                         '"/metadata/template/branch/type" = "domain";',
+                         object_command)
+        self.matchclean(object,
+                        '"/metadata/template/branch/author"',
+                        object_command)
+
+        data_command = ["cat", "--cluster", name, "--data"]
+        data = self.commandtest(data_command)
+
+        self.matchoutput(data, "template clusterdata/%s" % name,
+                         data_command)
+        self.matchoutput(data, '"/system/cluster/name" = "%s";' % name,
+                         data_command)
+        self.matchoutput(data, '"/system/cluster/type" = "%s";' % ctype,
+                         data_command)
+        self.matchoutput(data, '"/system/cluster/sysloc/continent" = "na";',
+                         data_command)
+        self.matchoutput(data, '"/system/cluster/sysloc/city" = "ny";',
+                         data_command)
+        self.matchoutput(data, '"/system/cluster/sysloc/campus" = "ny";',
+                         data_command)
+        self.matchoutput(data, '"/system/cluster/sysloc/building" = "ut";',
+                         data_command)
+        self.matchoutput(data, '"/system/cluster/sysloc/location" = "ut.ny.na";',
+                         data_command)
+        self.matchoutput(data, '"/system/build" = "build";', data_command)
+        self.matchclean(data, '"/system/cluster/rack/row"', data_command)
+        self.matchclean(data, '"/system/cluster/rack/column"', data_command)
+        self.matchclean(data, '"/system/cluster/rack/name"', data_command)
+        self.matchclean(data, '"/system/cluster/allowed_personalities"', data_command)
+
+        return object_command, object, data_command, data
 
     def test_57_addutstorages2(self):
         user = self.config.get("unittest", "user")

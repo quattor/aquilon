@@ -27,7 +27,7 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-"""Module for testing the update machine command."""
+'Module for testing the update machine command.'
 
 import unittest
 
@@ -58,15 +58,11 @@ class TestUpdateMachine(TestBrokerCommand):
     def testverifycatut3c1n3(self):
         command = "cat --machine ut3c1n3"
         out = self.commandtest(command.split(" "))
+        self.matchoutput(out, '"location" = "ut.ny.na";', command)
+        self.matchoutput(out, '"serialnumber" = "USN99C5553";', command)
         self.matchoutput(out,
-            """"location" = "ut.ny.na";""",
-            command)
-        self.matchoutput(out,
-            """"serialnumber" = "USN99C5553";""",
-            command)
-        self.matchoutput(out,
-            """include { 'hardware/machine/ibm/hs21-8853l5u' };""",
-            command)
+                         'include { "hardware/machine/ibm/hs21-8853l5u" };',
+                         command)
         self.searchoutput(out,
                           r'"ram" = list\(\s*'
                           r'create\("hardware/ram/generic",\s*'
@@ -107,15 +103,11 @@ class TestUpdateMachine(TestBrokerCommand):
     def testverifycatut3c5n10(self):
         command = "cat --machine ut3c5n10"
         out = self.commandtest(command.split(" "))
+        self.matchoutput(out, '"location" = "ut.ny.na";', command)
+        self.matchoutput(out, '"serialnumber" = "99C5553";', command)
         self.matchoutput(out,
-            """"location" = "ut.ny.na";""",
-            command)
-        self.matchoutput(out,
-            """"serialnumber" = "99C5553";""",
-            command)
-        self.matchoutput(out,
-            """include { 'hardware/machine/ibm/hs21-8853l5u' };""",
-            command)
+                         'include { "hardware/machine/ibm/hs21-8853l5u" };',
+                         command)
         self.searchoutput(out,
                           r'"ram" = list\(\s*'
                           r'create\("hardware/ram/generic",\s*'
@@ -162,15 +154,11 @@ class TestUpdateMachine(TestBrokerCommand):
     def testverifycatut3c1n4(self):
         command = "cat --machine ut3c1n4"
         out = self.commandtest(command.split(" "))
+        self.matchoutput(out, '"location" = "ut.ny.na";', command)
+        self.matchoutput(out, '"serialnumber" = "USNKPDZ407";', command)
         self.matchoutput(out,
-            """"location" = "ut.ny.na";""",
-            command)
-        self.matchoutput(out,
-            """"serialnumber" = "USNKPDZ407";""",
-            command)
-        self.matchoutput(out,
-            """include { 'hardware/machine/ibm/hs21-8853l5u' };""",
-            command)
+                         'include { "hardware/machine/ibm/hs21-8853l5u" };',
+                         command)
         self.searchoutput(out,
                           r'"ram" = list\(\s*'
                           r'create\("hardware/ram/generic",\s*'

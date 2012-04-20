@@ -67,6 +67,9 @@ class CommandManageHostname(BrokerCommand):
         try:
             lock_queue.acquire(key)
 
+            plenary_host.stash()
+            plenary_host.cleanup(old_branch, locked=True)
+
             # Now we recreate the plenary to ensure that the domain is ready
             # to compile, however (esp. if there was no existing template), we
             # have to be aware that there might not be enough information yet
@@ -77,8 +80,6 @@ class CommandManageHostname(BrokerCommand):
                 # This template cannot be written, we leave it alone
                 # It would be nice to flag the state in the the host?
                 pass
-
-            plenary_host.cleanup(old_branch, locked=True)
         except:
             # This will not restore the cleaned up files.  That's OK.
             # They will be recreated as needed.

@@ -68,21 +68,21 @@ class TestAddFilesystem(TestBrokerCommand):
         self.matchoutput(out, "Fsck Pass: 3", command)
         self.matchoutput(out, "Comments: testing", command)
 
-        command = ["cat", "--resource=fs1", "--restype=filesystem",
-                   "--reshost=server1.aqd-unittest.ms.com"]
+        command = ["cat", "--filesystem=fs1",
+                   "--hostname=server1.aqd-unittest.ms.com"]
         out = self.commandtest(command)
         self.matchoutput(out, "structure template resource/host/server1.aqd-unittest.ms.com/filesystem/fs1/config;", command)
-        self.matchoutput(out, "\"type\" = \"ext3\";", command)
-        self.matchoutput(out, "\"mountpoint\" = \"/mnt\";", command)
-        self.matchoutput(out, "\"mount\" = true;", command)
-        self.matchoutput(out, "\"block_device_path\" = \"/dev/foo/bar\"",
+        self.matchoutput(out, '"type" = "ext3";', command)
+        self.matchoutput(out, '"mountpoint" = "/mnt";', command)
+        self.matchoutput(out, '"mount" = true;', command)
+        self.matchoutput(out, '"block_device_path" = "/dev/foo/bar"',
                          command)
-        self.matchoutput(out, "\"mountopts\" = \"ro\";", command)
-        self.matchoutput(out, "\"freq\" = 1;", command)
-        self.matchoutput(out, "\"pass\" = 3;", command)
+        self.matchoutput(out, '"mountopts" = "ro";', command)
+        self.matchoutput(out, '"freq" = 1;', command)
+        self.matchoutput(out, '"pass" = 3;', command)
 
-        command = ["cat", "--resource=fs1", "--restype=filesystem",
-                   "--reshost=server1.aqd-unittest.ms.com",
+        command = ["cat", "--filesystem=fs1",
+                   "--hostname=server1.aqd-unittest.ms.com",
                    "--generate"]
         newout = self.commandtest(command)
         self.assertEqual(out, newout)
@@ -119,9 +119,8 @@ class TestAddFilesystem(TestBrokerCommand):
         command = ["show_filesystem", "--filesystem=fs-does-not-exist"]
         self.notfoundtest(command)
 
-        command = ["cat", "--resource=fs-does-not-exist",
-                   "--reshostname=server1.aqd-unittest.ms.com",
-                   "--restype=filesystem"]
+        command = ["cat", "--filesystem=fs-does-not-exist",
+                   "--hostname=server1.aqd-unittest.ms.com"]
         self.notfoundtest(command)
 
     def test_30_checkthehost(self):
@@ -133,10 +132,11 @@ class TestAddFilesystem(TestBrokerCommand):
         command = ["make", "--hostname=server1.aqd-unittest.ms.com"]
         out = self.successtest(command)
 
-        command = ["cat", "--generate", "--host=server1.aqd-unittest.ms.com"]
+        command = ["cat", "--generate",
+                   "--hostname", "server1.aqd-unittest.ms.com", "--data"]
         out = self.commandtest(command)
-        self.matchoutput(out, "'/system/resources/filesystem' = push(create(\"resource/host/server1.aqd-unittest.ms.com/filesystem/fs1/config\"))", command)
-        self.matchoutput(out, "'/system/resources/filesystem' = push(create(\"resource/host/server1.aqd-unittest.ms.com/filesystem/fs2/config\"))", command)
+        self.matchoutput(out, '"/system/resources/filesystem" = push(create("resource/host/server1.aqd-unittest.ms.com/filesystem/fs1/config"))', command)
+        self.matchoutput(out, '"/system/resources/filesystem" = push(create("resource/host/server1.aqd-unittest.ms.com/filesystem/fs2/config"))', command)
 
         command = ["show_host", "--hostname=server1.aqd-unittest.ms.com",
                    "--format=proto"]

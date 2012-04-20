@@ -44,8 +44,7 @@ class CommandAddResourceGroup(BrokerCommand):
         validate_basic("resourcegroup", resourcegroup)
         holder = get_resource_holder(session, hostname, cluster, compel=False)
 
-        ResourceGroup.get_unique(session, name=resourcegroup,
-                                 #holder=holder,
+        ResourceGroup.get_unique(session, name=resourcegroup, holder=holder,
                                  preclude=True)
 
         dbrg = ResourceGroup(name=resourcegroup)

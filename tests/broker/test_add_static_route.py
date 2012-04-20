@@ -100,7 +100,7 @@ class TestAddStaticRoute(TestBrokerCommand):
         eth1_ip = eth1_net.usable[0]
         eth1_gw = eth1_net.usable[-1]
         command = ["cat", "--hostname", "unittest26.aqd-unittest.ms.com",
-                   "--generate"]
+                   "--data", "--generate"]
         out = self.commandtest(command)
         self.searchoutput(out,
                           r'"eth0", nlist\(\s*'
@@ -144,7 +144,8 @@ class TestAddStaticRoute(TestBrokerCommand):
     def test_240_verify_cat_unittest02(self):
         net = self.net.unknown[0]
         eth0ip = net.usable[0]
-        command = ["cat", "--hostname", "unittest02.one-nyp.ms.com", "--generate"]
+        command = ["cat", "--hostname", "unittest02.one-nyp.ms.com", "--data",
+                   "--generate"]
         out = self.commandtest(command)
         # No routes should be listed here, because the gw is the default gw
         self.searchoutput(out,

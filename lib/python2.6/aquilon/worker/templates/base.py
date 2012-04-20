@@ -36,7 +36,7 @@ from aquilon.exceptions_ import InternalError, IncompleteError
 from aquilon.config import Config
 from aquilon.worker.locks import lock_queue, CompileKey
 from aquilon.worker.processes import write_file, read_file, remove_file
-from aquilon.worker.templates.panutils import pan
+from aquilon.worker.templates.panutils import pan_assign, pan_variable
 
 LOGGER = logging.getLogger(__name__)
 
@@ -166,12 +166,25 @@ class Plenary(object):
         type = self.template_type
         if type is not None and type is not "":
             type = type + " "
+
         lines.append("%stemplate %s;" % (type, self.plenary_template_name))
         lines.append("")
-        if self.template_type == "object" and self.loadpath:
-            lines.append("variable LOADPATH = %s;" % pan([self.loadpath]))
+
+        if self.template_type == "object":
+            if self.loadpath:
+                pan_variable(lines, "LOADPATH", [self.loadpath])
+                lines.append("")
+            pan_assign(lines, "/metadata/template/branch/name",
+                       self.dbobj.branch.name)
+            pan_assign(lines, "/metadata/template/branch/type",
+                       self.dbobj.branch.branch_type)
+            if self.dbobj.branch.branch_type == 'sandbox':
+                pan_assign(lines, "/metadata/template/branch/author",
+                           self.dbobj.sandbox_author.name)
             lines.append("")
+
         self.body(lines)
+
         return "\n".join(lines) + "\n"
 
     def write(self, locked=False, content=None):

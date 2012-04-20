@@ -64,6 +64,14 @@ class TestBindClient(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Template: service/afs/q.ny.ms.com", command)
 
+    def testverifycatafs(self):
+        command = ["cat", "--service", "afs", "--instance", "q.ny.ms.com",
+                   "--server"]
+        out = self.commandtest(command)
+        self.searchoutput(out,
+                          r'"clients" = list\(\s*"unittest02.one-nyp.ms.com"\s*\);',
+                          command)
+
     def testbinddns(self):
         command = ["bind", "client", "--hostname", "unittest02.one-nyp.ms.com",
                    "--service", "dns", "--instance", "utdnsinstance"]

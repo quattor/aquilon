@@ -33,8 +33,8 @@ import logging
 from aquilon.aqdb.model import (Cluster, EsxCluster, ComputeCluster,
                                 StorageCluster)
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
-from aquilon.worker.templates.machine import PlenaryMachineInfo
-from aquilon.worker.templates.panutils import pan, StructureTemplate
+from aquilon.worker.templates.panutils import (StructureTemplate, pan_assign,
+                                               pan_include, pan_push)
 from aquilon.worker.locks import CompileKey
 
 
@@ -49,6 +49,7 @@ class PlenaryCluster(PlenaryCollection):
         PlenaryCollection.__init__(self, logger=LOGGER)
         self.dbobj = dbcluster
         self.plenaries.append(PlenaryClusterObject(dbcluster, logger=logger))
+        self.plenaries.append(PlenaryClusterData(dbcluster, logger=logger))
         self.plenaries.append(PlenaryClusterClient(dbcluster, logger=logger))
 
 
@@ -56,6 +57,124 @@ Plenary.handlers[Cluster] = PlenaryCluster
 Plenary.handlers[ComputeCluster] = PlenaryCluster
 Plenary.handlers[EsxCluster] = PlenaryCluster
 Plenary.handlers[StorageCluster] = PlenaryCluster
+
+
+class PlenaryClusterData(Plenary):
+
+    template_type = ""
+
+    def __init__(self, dbcluster, logger=LOGGER):
+        Plenary.__init__(self, dbcluster, logger=logger)
+        self.name = dbcluster.name
+        if dbcluster.metacluster:
+            self.metacluster = dbcluster.metacluster.name
+        else:
+            self.metacluster = "global"
+        self.plenary_core = "clusterdata"
+        self.plenary_template = dbcluster.name
+
+    def get_key(self):
+        return CompileKey(domain=self.dbobj.branch.name,
+                          profile=self.plenary_template_name, logger=self.logger)
+
+    def body(self, lines):
+        pan_include(lines, ["pan/units", "pan/functions"])
+        lines.append("")
+        pan_assign(lines, "/system/cluster/name", self.name)
+        pan_assign(lines, "/system/cluster/type", self.dbobj.cluster_type)
+
+        dbloc = self.dbobj.location_constraint
+        pan_assign(lines, "/system/cluster/sysloc/location", dbloc.sysloc())
+        if dbloc.continent:
+            pan_assign(lines, "/system/cluster/sysloc/continent",
+                       dbloc.continent.name)
+        if dbloc.city:
+            pan_assign(lines, "/system/cluster/sysloc/city", dbloc.city.name)
+        if dbloc.campus:
+            pan_assign(lines, "/system/cluster/sysloc/campus",
+                       dbloc.campus.name)
+            ## maintaining this so templates dont break
+            ## during transtion period.. should be DEPRECATED
+            pan_assign(lines, "/system/cluster/campus", dbloc.campus.name)
+        if dbloc.building:
+            pan_assign(lines, "/system/cluster/sysloc/building",
+                       dbloc.building.name)
+        if dbloc.rack:
+            pan_assign(lines, "/system/cluster/rack/row", dbloc.rack.rack_row)
+            pan_assign(lines, "/system/cluster/rack/column",
+                       dbloc.rack.rack_column)
+            pan_assign(lines, "/system/cluster/rack/name", dbloc.rack.name)
+
+        pan_assign(lines, "/system/cluster/down_hosts_threshold",
+                   self.dbobj.dht_value)
+        if self.dbobj.dmt_value is not None:
+            pan_assign(lines, "/system/cluster/down_maint_threshold",
+                       self.dbobj.dmt_value)
+        if self.dbobj.down_hosts_percent:
+            pan_assign(lines, "/system/cluster/down_hosts_percent",
+                         self.dbobj.down_hosts_threshold)
+            pan_assign(lines, "/system/cluster/down_hosts_as_percent",
+                       self.dbobj.down_hosts_percent)
+        if self.dbobj.down_maint_percent:
+            pan_assign(lines, "/system/cluster/down_maint_percent",
+                       self.dbobj.down_maint_threshold)
+            pan_assign(lines, "/system/cluster/down_maint_as_percent",
+                       self.dbobj.down_maint_percent)
+        lines.append("")
+        # Only use system names here to avoid circular dependencies.
+        # Other templates that needs to look up the underlying values use:
+        # foreach(idx; host; value("/system/cluster/members")) {
+        #     v = value("//" + host + "/system/foo/bar/baz");
+        # );
+        pan_assign(lines, "/system/cluster/members",
+                   sorted([member.fqdn for member in self.dbobj.hosts]))
+
+        lines.append("")
+        for resource in sorted(self.dbobj.resources):
+            pan_push(lines, "/system/resources/%s" % resource.resource_type,
+                     StructureTemplate(resource.template_base + '/config'))
+        pan_assign(lines, "/system/build", self.dbobj.status.name)
+        if self.dbobj.allowed_personalities:
+            pan_assign(lines, "/system/cluster/allowed_personalities",
+                       sorted(["%s/%s" % (p.archetype.name, p.name)
+                               for p in self.dbobj.allowed_personalities]))
+
+        fname = "body_%s" % self.dbobj.cluster_type
+        if hasattr(self, fname):
+            getattr(self, fname)(lines)
+
+    def body_esx(self, lines):
+        if self.metacluster:
+            pan_assign(lines, "/system/metacluster/name", self.metacluster)
+        pan_assign(lines, "/system/cluster/ratio", [self.dbobj.vm_count,
+                                                    self.dbobj.host_count])
+        pan_assign(lines, "/system/cluster/max_hosts",
+                   self.dbobj.max_hosts)
+        lines.append("")
+        machines = {}
+        for machine in sorted(self.dbobj.machines):
+            if not machine.interfaces or not machine.disks:
+                # Do not bother creating entries for VMs that are incomplete.
+                continue
+            pmac = Plenary.get_plenary(machine, logger=self.logger)
+            macdesc = {'hardware': StructureTemplate(pmac.plenary_template_name)}
+
+            # One day we may get to the point where this will be required.
+            if (machine.host):
+                # we fill this in manually instead of just assigning
+                # 'system' = value("hostname:/system")
+                # because the target host might not actually have a profile.
+                arch = machine.host.archetype
+                os = machine.host.operating_system
+                pn = machine.primary_name.fqdn
+                macdesc["system"] = {'archetype': {'name': arch.name,
+                                                   'os': os.name,
+                                                   'osversion': os.version},
+                                     'network': {'hostname': pn.name,
+                                                 'domainname': pn.dns_domain}}
+
+            machines[machine.label] = macdesc
+        pan_assign(lines, "/system/cluster/machines", machines)
 
 
 class PlenaryClusterObject(Plenary):
@@ -83,134 +202,17 @@ class PlenaryClusterObject(Plenary):
                           profile=self.plenary_template_name, logger=self.logger)
 
     def body(self, lines):
-        lines.append("include { 'pan/units' };")
-        lines.append("include { 'pan/functions' };")
-        lines.append("")
-        lines.append('"/system/cluster/name" = %s;' % pan(self.name))
-        lines.append('"/system/cluster/type" = %s;' %
-                        pan(self.dbobj.cluster_type))
-
-        dbloc = self.dbobj.location_constraint
-        lines.append('"/system/cluster/sysloc/location" = %s;' %
-                     pan(dbloc.sysloc()))
-        if dbloc.continent:
-            lines.append('"/system/cluster/sysloc/continent" = %s;' %
-                         pan(dbloc.continent.name))
-        if dbloc.city:
-            lines.append('"/system/cluster/sysloc/city" = %s;' %
-                         pan(dbloc.city.name))
-        if dbloc.campus:
-            lines.append('"/system/cluster/sysloc/campus" = %s;' %
-                         pan(dbloc.campus.name))
-            ## maintaining this so templates dont break
-            ## during transtion period.. should be DEPRECATED
-            lines.append('"/system/cluster/campus" = %s;' %
-                         pan(dbloc.campus.name))
-        if dbloc.building:
-            lines.append('"/system/cluster/sysloc/building" = %s;' %
-                         pan(dbloc.building.name))
-        if dbloc.rack:
-            lines.append('"/system/cluster/rack/row" = %s;' %
-                         pan(dbloc.rack.rack_row))
-            lines.append('"/system/cluster/rack/column" = %s;' %
-                         pan(dbloc.rack.rack_column))
-            lines.append('"/system/cluster/rack/name" = %s;' %
-                         pan(dbloc.rack.name))
-
-        lines.append('"/system/cluster/down_hosts_threshold" = %d;' %
-                     self.dbobj.dht_value)
-        dmt_value = self.dbobj.dmt_value
-        if (dmt_value is not None):
-            lines.append('"/system/cluster/down_maint_threshold" = %d;' %
-                         dmt_value)
-        if (self.dbobj.down_hosts_percent):
-            lines.append('"/system/cluster/down_hosts_percent" = %d;' %
-                         self.dbobj.down_hosts_threshold)
-            lines.append('"/system/cluster/down_hosts_as_percent" = %s;' %
-                         pan(self.dbobj.down_hosts_percent))
-        if (self.dbobj.down_maint_percent):
-            lines.append('"/system/cluster/down_maint_percent" = %d;' %
-                         self.dbobj.down_maint_threshold)
-            lines.append('"/system/cluster/down_maint_as_percent" = %s;' %
-                         pan(self.dbobj.down_maint_percent))
-        lines.append("")
-        # Only use system names here to avoid circular dependencies.
-        # Other templates that needs to look up the underlying values use:
-        # foreach(idx; host; value("/system/cluster/members")) {
-        #     v = value("//" + host + "/system/foo/bar/baz");
-        # );
-        lines.append('"/system/cluster/members" = %s;' %
-                     pan(sorted([member.fqdn for member in
-                                 self.dbobj.hosts])))
-
-        lines.append("")
-        for resource in sorted(self.dbobj.resources):
-            lines.append("'/system/resources/%s' = push(%s);" % (
-                         resource.resource_type,
-                         pan(StructureTemplate(resource.template_base +
-                                               '/config'))))
-        lines.append('"/system/build" = %s;' % pan(self.dbobj.status.name))
-        if self.dbobj.allowed_personalities:
-            lines.append('"/system/cluster/allowed_personalities" = %s;' %
-                         pan(sorted(["%s/%s" % (p.archetype.name, p.name)
-                                     for p in self.dbobj.allowed_personalities])))
-        lines.append("")
-        lines.append('"/metadata/template/branch/name" = %s;' %
-                     pan(self.dbobj.branch.name))
-        lines.append('"/metadata/template/branch/type" = %s;' %
-                     pan(self.dbobj.branch.branch_type))
-        if self.dbobj.branch.branch_type == 'sandbox':
-            lines.append('"/metadata/template/branch/author" = %s;' %
-                         pan(self.dbobj.sandbox_author.name))
-
-        lines.append("include { 'archetype/base' };")
-        fname = "body_%s" % self.dbobj.cluster_type
-        if hasattr(self, fname):
-            getattr(self, fname)(lines)
-        lines.append("")
-        lines.append("include { 'personality/%s/config' };" %
-                     self.dbobj.personality.name)
-        lines.append("")
-        lines.append("include { 'archetype/final' };")
-
-    def body_esx(self, lines):
-        if self.metacluster:
-            lines.append('"/system/metacluster/name" = %s;' %
-                         pan(self.metacluster))
-        lines.append('"/system/cluster/ratio" = %s;' % pan([
-                            self.dbobj.vm_count,
-                            self.dbobj.host_count]))
-        lines.append('"/system/cluster/max_hosts" = %d;' %
-                     self.dbobj.max_hosts)
-        lines.append('')
-        machines = {}
-        for machine in sorted(self.dbobj.machines):
-            if not machine.interfaces or not machine.disks:
-                # Do not bother creating entries for VMs that are incomplete.
-                continue
-            pmac = PlenaryMachineInfo(machine)
-            macdesc = {'hardware': StructureTemplate(pmac.plenary_template_name)}
-
-            # One day we may get to the point where this will be required.
-            if (machine.host):
-                # we fill this in manually instead of just assigning
-                # 'system' = value("hostname:/system")
-                # because the target host might not actually have a profile.
-                arch = machine.host.archetype
-                os = machine.host.operating_system
-                pn = machine.primary_name.fqdn
-                macdesc["system"] = {'archetype': {'name': arch.name,
-                                                   'os': os.name,
-                                                   'osversion': os.version},
-                                     'network': {'hostname': pn.name,
-                                                 'domainname': pn.dns_domain}}
-
-            machines[machine.label] = macdesc
-        lines.append('"/system/cluster/machines" = %s;' % pan(machines))
+        pan_include(lines, ["pan/units", "pan/functions"])
+        pan_include(lines, "clusterdata/%s" % self.name)
+        pan_include(lines, "archetype/base")
 
         for servinst in sorted(self.dbobj.service_bindings):
-            lines.append("include { 'service/%s/%s/client/config' };" % \
-                         (servinst.service.name, servinst.name))
+            pan_include(lines, "service/%s/%s/client/config" %
+                        (servinst.service.name, servinst.name))
+
+        pan_include(lines, "personality/%s/config" %
+                    self.dbobj.personality.name)
+        pan_include(lines, "archetype/final")
 
 
 class PlenaryClusterClient(Plenary):
@@ -232,7 +234,7 @@ class PlenaryClusterClient(Plenary):
         return CompileKey(domain=self.dbobj.branch.name, logger=self.logger)
 
     def body(self, lines):
-        lines.append('"/system/cluster/name" = %s;' % pan(self.name))
+        pan_assign(lines, "/system/cluster/name", self.name)
         # we could just use a PAN external reference to pull in this
         # value from the cluster template, i.e. using
         #  value('clusters/'+value('/system/cluster/name')+':/system/resources')
@@ -240,10 +242,9 @@ class PlenaryClusterClient(Plenary):
         # we can duplicate the content here to avoid the possibility of
         # circular external references.
         for resource in sorted(self.dbobj.resources):
-            lines.append("'/system/cluster/resources/%s' = push(%s);" % (
-                         resource.resource_type,
-                         pan(StructureTemplate(resource.template_base +
-                                               '/config'))))
+            pan_push(lines, "/system/cluster/resources/%s" %
+                     resource.resource_type,
+                     StructureTemplate(resource.template_base + '/config'))
         lines.append("include { if_exists('features/' + value('/system/archetype/name') + '/%s/%s/config') };"
                      % (self.dbobj.personality.archetype.name,
                         self.dbobj.personality.name))
