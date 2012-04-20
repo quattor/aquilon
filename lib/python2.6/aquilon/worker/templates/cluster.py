@@ -153,6 +153,11 @@ class PlenaryClusterData(Plenary):
                    self.dbobj.max_hosts)
         lines.append("")
 
+        lines.append("")
+        if isinstance(self.dbobj, EsxCluster) and self.dbobj.switch:
+            pan_assign(lines, "/system/cluster/switch",
+                       self.dbobj.switch.primary_name)
+
 
 class PlenaryClusterObject(Plenary):
     """

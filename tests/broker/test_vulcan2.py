@@ -196,12 +196,12 @@ class TestVulcan20(TestBrokerCommand):
         self.matchoutput(out, "Resource Group: utmc8as2", command)
 
     def test_102_cat_metacluster(self):
-        command = ["cat", "--cluster", "utmc8"]
+        command = ["cat", "--cluster", "utmc8", "--data"]
         out = self.commandtest(command)
         self.matchoutput(out,
-                         "'/system/resources/resourcegroup' = "
-                         "push(create(\"resource/cluster/utmc8/resourcegroup"
-                         "/utmc8as1/config\"));",
+                         '"/system/resources/resourcegroup" = '
+                         'push(create("resource/cluster/utmc8/'
+                         'resourcegroup/utmc8as1/config"));',
                          command)
 
 

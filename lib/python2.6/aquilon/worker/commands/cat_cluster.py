@@ -36,7 +36,8 @@ from aquilon.worker.dbwrappers.resources import get_resource
 from aquilon.worker.templates.base import Plenary
 from aquilon.worker.templates.cluster import (PlenaryClusterObject,
                                               PlenaryClusterData)
-from aquilon.worker.templates.metacluster import PlenaryMetaCluster
+from aquilon.worker.templates.metacluster import (PlenaryMetaClusterObject,
+                                              PlenaryMetaClusterData)
 
 class CommandCatCluster(BrokerCommand):
 
@@ -50,11 +51,9 @@ class CommandCatCluster(BrokerCommand):
         else:
             if isinstance(dbcluster, MetaCluster):
                 if data:
-                    # TODO
-                    raise RuntimeError("PlenaryMetaClusterData not implemented")
-                    #plenary_info = PlenaryMetaClusterData(dbcluster, logger=logger)
+                    plenary_info = PlenaryMetaClusterData(dbcluster, logger=logger)
                 else:
-                    plenary_info = PlenaryMetaCluster(dbcluster, logger=logger)
+                    plenary_info = PlenaryMetaClusterObject(dbcluster, logger=logger)
             else:
                 if data:
                     plenary_info = PlenaryClusterData(dbcluster, logger=logger)

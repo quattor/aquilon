@@ -30,16 +30,92 @@
 
 import logging
 
-from aquilon.worker.templates.base import Plenary
-from aquilon.worker.templates.panutils import pan, StructureTemplate
-from aquilon.worker.locks import CompileKey
 from aquilon.aqdb.model import MetaCluster
+from aquilon.worker.templates.base import Plenary, PlenaryCollection
+from aquilon.worker.templates.panutils import (StructureTemplate, pan_assign,
+                                               pan_include, pan_push,
+                                               pan_variable)
+from aquilon.worker.locks import CompileKey
 
 
 LOGGER = logging.getLogger(__name__)
 
 
-class PlenaryMetaCluster(Plenary):
+class PlenaryMetaCluster(PlenaryCollection):
+    """
+    A facade for the variety of PlenaryMetaCluster subsidiary files
+    """
+    def __init__(self, dbcluster, logger=LOGGER):
+        PlenaryCollection.__init__(self, logger=LOGGER)
+        self.dbobj = dbcluster
+        self.plenaries.append(PlenaryMetaClusterObject(dbcluster, logger=logger))
+        self.plenaries.append(PlenaryMetaClusterData(dbcluster, logger=logger))
+
+class PlenaryMetaClusterData(Plenary):
+    """
+    TODO
+    """
+
+    template_type = ""
+
+    def __init__(self, dbmetacluster, logger=LOGGER):
+        Plenary.__init__(self, dbmetacluster, logger=logger)
+        self.name = dbmetacluster.name
+
+        # TODO maybe metaclusterdata
+        self.plenary_core = "clusterdata"
+        self.plenary_template = dbmetacluster.name
+
+    def get_key(self):
+        return CompileKey(domain=self.dbobj.branch.name,
+                          profile=self.plenary_template, logger=self.logger)
+
+    def body(self, lines):
+        pan_include(lines, ["pan/units", "pan/functions"])
+        lines.append("")
+        pan_assign(lines, "/system/metacluster/name", self.name)
+        pan_assign(lines, "/system/metacluster/type", self.dbobj.cluster_type)
+
+        dbloc = self.dbobj.location_constraint
+        pan_assign(lines, "/system/metacluster/sysloc/location", dbloc.sysloc())
+        if dbloc.continent:
+            pan_assign(lines, "/system/metacluster/sysloc/continent",
+                       dbloc.continent.name)
+        if dbloc.city:
+            pan_assign(lines, "/system/metacluster/sysloc/city", dbloc.city.name)
+        if dbloc.campus:
+            pan_assign(lines, "/system/metacluster/sysloc/campus",
+                       dbloc.campus.name)
+            ## maintaining this so templates dont break
+            ## during transtion period.. should be DEPRECATED
+            pan_assign(lines, "/system/metacluster/campus", dbloc.campus.name)
+        if dbloc.building:
+            pan_assign(lines, "/system/metacluster/sysloc/building",
+                       dbloc.building.name)
+        if dbloc.rack:
+            pan_assign(lines, "/system/metacluster/rack/row",
+                       dbloc.rack.rack_row)
+            pan_assign(lines, "/system/metacluster/rack/column",
+                       dbloc.rack.rack_column)
+            pan_assign(lines, "/system/metacluster/rack/name",
+                       dbloc.rack.name)
+
+        lines.append("")
+
+        pan_assign(lines, "/system/metacluster/members",
+                   [member.name for member in self.dbobj.members])
+
+        lines.append("")
+
+        pan_assign(lines, "/system/build", self.dbobj.status.name)
+
+        lines.append("")
+        if self.dbobj.resholder:
+            for resource in sorted(self.dbobj.resholder.resources):
+                pan_push(lines, "/system/resources/%s" % resource.resource_type,
+                         StructureTemplate(resource.template_base + '/config'))
+
+class PlenaryMetaClusterObject(Plenary):
     """
     TODO
     """
@@ -48,9 +124,9 @@ class PlenaryMetaCluster(Plenary):
 
     def __init__(self, dbmetacluster, logger=LOGGER):
         Plenary.__init__(self, dbmetacluster, logger=logger)
-        self.dbobj = dbmetacluster
         self.name = dbmetacluster.name
 
+        self.loadpath = self.dbobj.personality.archetype.name
         self.plenary_core = "clusters"
         self.plenary_template = dbmetacluster.name
 
@@ -59,83 +135,18 @@ class PlenaryMetaCluster(Plenary):
                           profile=self.plenary_template, logger=self.logger)
 
     def body(self, lines):
-        arcdir = self.dbobj.personality.archetype.name
-        lines.append("# this is an %s metacluster, so all templates "
-                     "should be sourced from there" % arcdir)
-        lines.append("variable LOADPATH = %s;" % pan([arcdir]))
-        lines.append("")
-
-        lines.append("include { 'pan/units' };")
-        lines.append("include { 'pan/functions' };")
-        lines.append("")
-        lines.append('"/system/metacluster/name" = %s;' % pan(self.name))
-        lines.append('"/system/metacluster/type" = %s;' %
-                        pan(self.dbobj.cluster_type))
-
-        dbloc = self.dbobj.location_constraint
-        lines.append('"/system/metacluster/sysloc/location" = %s;' %
-                     pan(dbloc.sysloc()))
-        if dbloc.continent:
-            lines.append('"/system/metacluster/sysloc/continent" = %s;' %
-                         pan(dbloc.continent.name))
-        if dbloc.city:
-            lines.append('"/system/metacluster/sysloc/city" = %s;' %
-                         pan(dbloc.city.name))
-        if dbloc.campus:
-            lines.append('"/system/metacluster/sysloc/campus" = %s;' %
-                         pan(dbloc.campus.name))
-            ## maintaining this so templates dont break
-            ## during transtion period.. should be DEPRECATED
-            lines.append('"/system/metacluster/campus" = %s;' %
-                         pan(dbloc.campus.name))
-        if dbloc.building:
-            lines.append('"/system/metacluster/sysloc/building" = %s;' %
-                         pan(dbloc.building.name))
-        if dbloc.rack:
-            lines.append('"/system/metacluster/rack/row" = %s;' %
-                         pan(dbloc.rack.rack_row))
-            lines.append('"/system/metacluster/rack/column" = %s;' %
-                         pan(dbloc.rack.rack_column))
-            lines.append('"/system/metacluster/rack/name" = %s;' %
-                         pan(dbloc.rack.name))
-
-        lines.append("")
-
-        lines.append('"/system/metacluster/members" = %s;' %
-                     pan([member.name for member in self.dbobj.members]))
-
-        lines.append("")
-
-        lines.append('"/system/build" = %s;' % pan(self.dbobj.status.name))
-
-        lines.append("")
-        lines.append('"/metadata/template/branch/name" = %s;' %
-                     pan(self.dbobj.branch.name))
-        lines.append('"/metadata/template/branch/type" = %s;' %
-                     pan(self.dbobj.branch.branch_type))
-        if self.dbobj.branch.branch_type == 'sandbox':
-            lines.append('"/metadata/template/branch/author" = %s;' %
-                         pan(self.dbobj.sandbox_author.name))
-
-        lines.append("include { 'archetype/base' };")
-
-        lines.append("")
-        for resource in sorted(self.dbobj.resources):
-            lines.append("'/system/resources/%s' = push(%s);" % (
-                         resource.resource_type,
-                         pan(StructureTemplate(resource.template_base +
-                                               '/config'))))
+        pan_include(lines, ["pan/units", "pan/functions"])
+        pan_include(lines, "clusterdata/%s" % self.name)
+        pan_include(lines, "archetype/base")
 
         #for esx_management_server
         for servinst in sorted(self.dbobj.service_bindings):
-            lines.append("include { 'service/%s/%s/client/config' };" % \
-                         (servinst.service.name, servinst.name))
+            pan_include(lines, "service/%s/%s/client/config" %
+                        (servinst.service.name, servinst.name))
 
-        lines.append("")
-        lines.append("include { 'personality/%s/config' };" %
-                     self.dbobj.personality.name)
-        lines.append("")
-        lines.append("include { 'archetype/final' };")
+        pan_include(lines, "personality/%s/config" %
+                    self.dbobj.personality.name)
+        pan_include(lines, "archetype/final")
 
 
 Plenary.handlers[MetaCluster] = PlenaryMetaCluster
