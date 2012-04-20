@@ -29,28 +29,36 @@
 """ Translates dotted quad strings into long integers """
 import sqlalchemy
 from ipaddr import IPv4Address
+from sqlalchemy.dialects.postgresql import INET
 
 
 class IPV4(sqlalchemy.types.TypeDecorator):
     """ A type to wrap IP addresses to and from the DB """
 
-    impl = sqlalchemy.types.Integer
-    impl.length = 9  # hardcoding for now, TODO: figure it out and fix
+    # Placeholder only
+    impl = sqlalchemy.types.TypeEngine
 
-    def process_bind_param(self, value, engine):
+    def load_dialect_impl(self, dialect):
+        if dialect.name == 'postgresql':
+            return dialect.type_descriptor(INET())  # pragma: no cover
+        else:
+            return dialect.type_descriptor(sqlalchemy.types.Integer())
+
+    def process_bind_param(self, value, dialect):
         if value is None:
-            ip = None
-        elif isinstance(value, IPv4Address):
-            ip = int(value)
-        else:  # pragma: no cover
-            raise TypeError("Unknown input type for IPv4 column: %s" % repr(value))
-        return ip
+            return None
+        if isinstance(value, IPv4Address):
+            if dialect.name == 'postgresql':
+                return str(value)  # pragma: no cover
+            else:
+                return int(value)
+        raise TypeError("Unknown input type for IPv4 column: %s" % repr(value))
 
-    def process_result_value(self, value, engine):
+    def process_result_value(self, value, dialect):
         if value is None:
             return None
         else:
             return IPv4Address(value)
 
     def copy(self):
-        return IPV4(self.impl.length)
+        return IPV4()

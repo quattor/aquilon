@@ -188,7 +188,7 @@ if prod_python and sys.executable.find(prod_python) < 0:
     force_yes("Running with %s but prod is %s" % (sys.executable, prod_python))
 
 production_database = "NYPO_AQUILON"
-if (config.get("database", "vendor") == "oracle" and
+if (config.get("database", "dsn").startswith("oracle") and
         config.get("database", "server") == production_database):
     force_yes("About to run against the production database %s" %
             production_database)

@@ -84,13 +84,12 @@ vlaninfo.append_constraint(
     UniqueConstraint('port_group', name='%s_port_group_uk' % _VTN))
 vlaninfo.info['unique_fields'] = ['port_group']
 
-#CheckConstraint doesn't upper case names by default
 vlaninfo.append_constraint(
-    CheckConstraint(('"vlan_id" < %s' % MAX_VLANS).upper(),
-                    name=('%s_max_vlan_id_ck' % _VTN).upper()))
+    CheckConstraint('vlan_id < %d' % MAX_VLANS,
+                    name='%s_max_vlan_id_ck' % _VTN))
 vlaninfo.append_constraint(
-    CheckConstraint(('"vlan_id" >= 0').upper(),
-                    name=('%s_min_vlan_id_ck' % _VTN).upper()))
+    CheckConstraint('vlan_id >= 0',
+                    name='%s_min_vlan_id_ck' % _VTN))
 
 _TN = 'observed_vlan'
 _ABV = 'obs_vlan'
@@ -161,10 +160,9 @@ class ObservedVlan(Base):
 obsvlan = ObservedVlan.__table__  # pylint: disable=C0103, E1101
 obsvlan.primary_key.name = '%s_pk' % _TN
 
-#CheckConstraint doesn't upper case names by default
 obsvlan.append_constraint(
-    CheckConstraint(('"vlan_id" < %s' % MAX_VLANS).upper(),
-                    name=('%s_max_vlan_id_ck' % _TN).upper()))
+    CheckConstraint('vlan_id < %d' % MAX_VLANS,
+                    name='%s_max_vlan_id_ck' % _TN))
 obsvlan.append_constraint(
-    CheckConstraint(('"vlan_id" >= 0').upper(),
-                    name=('%s_min_vlan_id_ck' % _TN).upper()))
+    CheckConstraint('vlan_id >= 0',
+                    name='%s_min_vlan_id_ck' % _TN))

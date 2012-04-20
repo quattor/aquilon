@@ -33,7 +33,7 @@ from ipaddr import IPv4Address, IPv4Network
 
 from sqlalchemy import (Column, Integer, Sequence, String, Boolean, DateTime,
                         ForeignKey, UniqueConstraint, CheckConstraint, Index,
-                        func)
+                        desc)
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import relation, deferred
 
@@ -283,12 +283,13 @@ def get_net_id_from_ip(session, ip, network_environment=None):
     # Query the last network having an address smaller than the given ip. There
     # is no guarantee that the returned network does in fact contain the given
     # ip, so this must be checked separately.
-    subq = session.query(func.max(Network.ip).label('net_ip'))
+    subq = session.query(Network.ip)
     subq = subq.filter_by(network_environment=dbnet_env)
     subq = subq.filter(Network.ip <= ip)
+    subq = subq.order_by(desc(Network.ip)).limit(1)
     q = session.query(Network)
     q = q.filter_by(network_environment=dbnet_env)
-    q = q.filter(Network.ip == subq.subquery().c.net_ip)
+    q = q.filter(Network.ip == subq.as_scalar())
     net = q.first()
     if not net or not ip in net.network:
         raise NotFoundException("Could not determine network containing IP "

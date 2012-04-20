@@ -46,6 +46,16 @@ class UTCDateTime(types.TypeDecorator):
 
     def process_result_value(self, value, engine):
         if value is not None:
-            return datetime(value.year, value.month, value.day,
-                            value.hour, value.minute, value.second,
-                            value.microsecond, tzinfo=tzutc())
+            # If the underlying data type used for implementing DateTime handles
+            # time zone (like PostgreSQL), then just convert it to UTC. If SQLA
+            # uses a native type that does handle time zones (Oracle, SQLite),
+            # pretend the returned value is UTC.
+            # Using TIMESTAMP instead of DateTime for self.impl would make
+            # Oracle use "TIMESTAMP WITH TIME ZONE" instead of "DATE", meaning
+            # it would match the behavior of PostgreSQL.
+            if value.tzinfo:
+                return value.astimezone(tzutc())
+            else:
+                return datetime(value.year, value.month, value.day, value.hour,
+                                value.minute, value.second, value.microsecond,
+                                tzinfo=tzutc())

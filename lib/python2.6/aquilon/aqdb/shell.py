@@ -69,7 +69,8 @@ else:
     # couldn't use the underlying dbapi connection.current_schema
     # from the engine as it too is ''
     user = db.engine.url.username or os.environ.get("USER")
-    prompt = '%s@%s' % (user, db.engine.url.host)
+    host = db.engine.url.host or 'LOCALHOST'
+    prompt = '%s@%s' % (user, host)
     if db.engine.url.database:
         prompt += '/%s'
 prompt += '>'
