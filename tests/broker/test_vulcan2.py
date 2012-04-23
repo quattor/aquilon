@@ -313,6 +313,12 @@ class TestVulcan20(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Share: test_v2_share", command)
 
+    def test_114_share(self):
+        command = ["search_machine", "--share=test_v2_share"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "utpgm0", command)
+        self.matchclean(out, "evm2", command)
+        self.matchclean(out, "evm10", command)
 
 #    Storage group related deletes
 
