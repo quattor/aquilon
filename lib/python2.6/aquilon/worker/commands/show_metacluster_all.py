@@ -28,7 +28,7 @@
 # TERMS THAT MAY APPLY.
 
 
-from sqlalchemy.orm import joinedload_all
+from sqlalchemy.orm import joinedload, subqueryload
 
 from aquilon.exceptions_ import NotFoundException
 from aquilon.aqdb.model import MetaCluster
@@ -41,7 +41,13 @@ class CommandShowMetaClusterAll(BrokerCommand):
         q = session.query(MetaCluster)
         if metacluster:
             q = q.filter_by(name=metacluster)
-        q = q.options(joinedload_all('_clusters.cluster._hosts.host.machine'))
+        q = q.options(subqueryload('_clusters'),
+                      joinedload('_clusters.cluster'),
+                      subqueryload('_clusters.cluster._hosts'),
+                      joinedload('_clusters.cluster._hosts.host'),
+                      joinedload('_clusters.cluster._hosts.host.machine'),
+                      joinedload('_clusters.cluster.resholder'),
+                      subqueryload('_clusters.cluster.resholder.resources'))
         # TODO: eager load virtual machines
         # TODO: eager load EsxCluster.host_count
         dbmetaclusters = q.order_by(MetaCluster.name).all()

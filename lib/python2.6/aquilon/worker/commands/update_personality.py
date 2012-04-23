@@ -28,7 +28,7 @@
 # TERMS THAT MAY APPLY.
 """Contains the logic for `aq update personality`."""
 
-from sqlalchemy.orm import joinedload_all
+from sqlalchemy.orm import joinedload, subqueryload
 
 from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import (Personality, PersonalityESXClusterInfo,
@@ -102,7 +102,11 @@ class CommandUpdatePersonality(BrokerCommand):
         q = q.with_polymorphic("*")
         # The validation will touch all member hosts/machines, so it's better to
         # pre-load everything
-        q = q.options(joinedload_all('_hosts.host.machine'))
+        q = q.options(subqueryload('_hosts'),
+                      joinedload('_hosts.host'),
+                      joinedload('_hosts.host.machine'),
+                      joinedload('resholder'),
+                      subqueryload('resholder.resources'))
         # TODO: preload virtual machines
         q = q.filter_by(personality=dbpersona)
         clusters = q.all()
