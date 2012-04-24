@@ -3179,9 +3179,8 @@
          </optgroup>
          <option name="rack" type="string">Rack name</option>
          <option name="desk" type="string">Desk name</option>
-         <optgroup name="add_machine_cluster_opts" fields="all">
-            <option name="cluster" type="string" conflicts="chassis rack desk">Cluster name</option>
-         </optgroup>
+         <option name="cluster" type="string" conflicts="chassis rack desk vmhost">Cluster name</option>
+         <option name="vmhost" type="string" conflicts="chassis rack desk cluster">Host where the VM lives</option>
       </optgroup>
       <optgroup name="add_machine_optional">
 	 <option name="serial" type="string">Serial number</option>
