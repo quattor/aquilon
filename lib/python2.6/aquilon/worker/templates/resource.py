@@ -33,7 +33,7 @@ import logging
 from aquilon.aqdb.model import (Application, Filesystem, Intervention,
                                 ResourceGroup, Hostlink, RebootSchedule,
                                 RebootIntervention, ServiceAddress)
-from aquilon.worker.templates.base import Plenary
+from aquilon.worker.templates.base import Plenary, PlenaryCollection
 from aquilon.worker.templates.panutils import (StructureTemplate, pan_assign,
                                                pan_push)
 
@@ -121,8 +121,25 @@ class PlenaryResource(Plenary):
 Plenary.handlers[Application] = PlenaryResource
 Plenary.handlers[Filesystem] = PlenaryResource
 Plenary.handlers[Intervention] = PlenaryResource
-Plenary.handlers[ResourceGroup] = PlenaryResource
 Plenary.handlers[Hostlink] = PlenaryResource
 Plenary.handlers[RebootSchedule] = PlenaryResource
 Plenary.handlers[RebootIntervention] = PlenaryResource
 Plenary.handlers[ServiceAddress] = PlenaryResource
+
+
+class PlenaryResourceGroup(PlenaryCollection):
+    def __init__(self, dbresource, logger=LOGGER):
+        PlenaryCollection.__init__(self, logger=logger)
+        self.dbobj = dbresource
+        self.real_plenary = PlenaryResource(dbresource)
+
+        self.plenaries.append(self.real_plenary)
+        for res in dbresource.resources:
+            self.plenaries.append(PlenaryResource(res))
+
+    def read(self):
+        # This is used by the cat command
+        return self.real_plenary.read()
+
+
+Plenary.handlers[ResourceGroup] = PlenaryResourceGroup

@@ -117,9 +117,6 @@ def del_resource(session, logger, dbresource, dsdb_callback=None, **arguments):
     holder_plenary = Plenary.get_plenary(holder.holder_object, logger=logger)
     remove_plenaries = PlenaryCollection(logger=logger)
     remove_plenaries.append(Plenary.get_plenary(dbresource))
-    if isinstance(dbresource, ResourceGroup):
-        for res in dbresource.resources:
-            remove_plenaries.append(Plenary.get_plenary(res))
 
     domain = holder.holder_object.branch.name
 
