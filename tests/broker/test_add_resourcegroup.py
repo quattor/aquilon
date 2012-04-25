@@ -76,7 +76,7 @@ class TestAddResourceGroup(TestBrokerCommand):
                    "--bootmount",
                    "--dumpfreq=1", "--fsckpass=3", "--options=ro",
                    "--comments=testing",
-                   "--resourcegroup=utvcs1as1"]
+                   "--resourcegroup=utvcs1as1", "--cluster=utvcs1"]
         self.successtest(command)
 
         command = ["show_filesystem", "--filesystem=fs1"]
