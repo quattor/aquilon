@@ -30,9 +30,6 @@
 
 import os
 import sys
-import logging
-from logging import Handler
-from signal import SIGTERM, SIGKILL
 
 # This is done by the wrapper script.
 #import aquilon.worker.depends
@@ -43,11 +40,12 @@ from twisted.python import usage, log
 from twisted.plugin import IPlugin
 from twisted.application import strports
 from twisted.application.service import IServiceMaker, MultiService
-from twisted.runner.procmon import ProcessMonitor
-from twisted.internet import reactor, process
+from twisted.internet import reactor
 from ms.modulecmd import Modulecmd, ModulecmdExecError
 
 from aquilon.config import Config
+from aquilon.twisted_patches import (GracefulProcessMonitor,
+                                     integrate_logging, _parseUNIX)
 from aquilon.worker.kncwrappers import KNCSite
 from aquilon.worker.anonwrappers import AnonSite
 
@@ -65,12 +63,6 @@ class Options(usage.Options):
                      ["coveragerc", None, None, "Coverage test config file."]]
 
 
-class BridgeLogHandler(Handler):
-    """Allow python logging messages to be funneled into the twisted log."""
-    def emit(self, record):
-        log.msg(record.getMessage())
-
-
 def log_module_load(cmd, mod):
     """Wrapper for logging Modulecmd actions and errors."""
     try:
@@ -81,44 +73,7 @@ def log_module_load(cmd, mod):
         log.msg("Failed loading module %s, return code %d and stderr '%s'." %
                 (mod, e.exitcode, e.stderr))
 
-# Fix a deprecation warning in twisted 8.2.0 - mode should not be passed
-def _parseUNIX(factory, address, mode='666', backlog=50, lockfile=True):
-    return ((address, factory), {'backlog': int(backlog),
-                                 'wantPID': bool(int(lockfile))})
 strports._funcs["unix"] = _parseUNIX
-
-# Replacement for ProcessMonitor.stopProcess and a helper.  The
-# original does not take into account that (at least in twisted 8.2.0)
-# the callLater method to send SIGKILL
-# will never be called since stopProcess is invoked as a shutdown hook.
-# Taking the opportunity to add some logging.
-def killProcess(name, proc):
-    if not proc.pid:
-        return
-    try:
-        log.msg("Sending SIGKILL to %s [%s]" % (name, proc.pid))
-        proc.signalProcess(SIGKILL)
-    except process.ProcessExitedAlready:
-        pass
-
-def stopProcess(self, name):
-    if not self.protocols.has_key(name):
-        log.msg("No record of %s to stop, ignoring." % name)
-        return
-    proc = self.protocols[name].transport
-    del self.protocols[name]
-    try:
-        log.msg("Sending SIGTERM to %s [%s]" % (name, proc.pid))
-        proc.signalProcess(SIGTERM)
-    except process.ProcessExitedAlready:
-        log.msg("Process %s [%s] marked as exited already" % (name, proc.pid))
-    else:
-        # Hard-wire some actions for the final phase of shutdown,
-        # assuming this method is scheduled to run 'before' 'shutdown'.
-        reactor.addSystemEventTrigger('after', 'shutdown', killProcess,
-                                      name, proc)
-
-ProcessMonitor.stopProcess = stopProcess
 
 
 class AQDMaker(object):
@@ -178,20 +133,7 @@ class AQDMaker(object):
         sys.path.append(config.get("protocols", "directory"))
 
         # Set this up before the aqdb libs get imported...
-        rootlog = logging.getLogger()
-        rootlog.addHandler(BridgeLogHandler())
-        rootlog.setLevel(logging.NOTSET)
-        for logname in config.options("logging"):
-            logvalue = config.get("logging", logname)
-            # Complain if a config value is out of whack...
-            if logvalue not in logging._levelNames:
-                # ...but ignore it if it is a default (accidently
-                # polluting the section).
-                if not config.defaults().has_key(logname):
-                    log.msg("For config [logging]/%s, "
-                            "%s not a valid log level." % (logname, logvalue))
-                continue
-            logging.getLogger(logname).setLevel(logging._levelNames[logvalue])
+        integrate_logging(config)
 
         progname = os.path.split(sys.argv[0])[1]
         if progname == 'aqd':
@@ -249,7 +191,7 @@ class AQDMaker(object):
         # but this process doesn't have to be the thing that starts it up.
         if config.getboolean("broker", "run_knc") or \
            config.getboolean("broker", "run_git_daemon"):
-            mon = ProcessMonitor()
+            mon = GracefulProcessMonitor()
             # FIXME: Should probably run krb5_keytab here as well.
             # and/or verify that the keytab file exists.
             if config.getboolean("broker", "run_knc"):
