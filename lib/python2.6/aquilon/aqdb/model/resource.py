@@ -38,7 +38,7 @@ from sqlalchemy.orm import (relation, backref, object_session, validates,
 
 from aquilon.exceptions_ import InternalError
 from aquilon.aqdb.column_types import AqStr, Enum
-from aquilon.aqdb.model import Base, Cluster, Host
+from aquilon.aqdb.model import Base, Cluster, Host, MetaCluster
 
 _TN = 'resource'
 _ABV = 'res'
@@ -69,6 +69,13 @@ class ResourceHolder(Base):
     @property
     def holder_object(self):  # pragma: no cover
         raise InternalError("Abstract base method called")
+
+    @validates('resources')
+    def _validate_resources(self, key, value):
+        return self.validate_resources(key, value)
+
+    def validate_resources(self, key, value):
+        return value
 
     @property
     def holder_path(self):

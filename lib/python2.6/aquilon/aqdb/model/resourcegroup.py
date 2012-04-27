@@ -34,6 +34,7 @@ from sqlalchemy import (Integer, DateTime, Sequence, String, Column, Boolean,
 
 from aquilon.aqdb.model import Resource, ResourceHolder
 from aquilon.aqdb.column_types.aqstr import AqStr
+from aquilon.exceptions_ import ArgumentError
 from sqlalchemy.orm import relation, backref, object_session
 
 
@@ -43,7 +44,7 @@ _RESHOLDER = 'resholder'
 
 class ResourceGroup(Resource):
     """ A collection of resources which operate together
-        (e.g. a VCS Service Group) """
+        (e.g. a VCS Service Group)."""
     __tablename__ = _TN
     __mapper_args__ = {'polymorphic_identity': 'resourcegroup'}
     _class_label = 'Resource Group'
@@ -54,6 +55,9 @@ class ResourceGroup(Resource):
                                     primary_key=True)
 
     # declare any per-group attributes here (none for now)
+
+    # This is to enforce the same type of resources in the group
+    required_type = Column(AqStr(32), nullable=True)
 
     def validate_holder(self, key, value):
         if isinstance(value, BundleResource):
@@ -92,6 +96,14 @@ class BundleResource(ResourceHolder):
                              backref=backref('resholder',
                                              cascade='all, delete-orphan',
                                              uselist=False))
+
+    def validate_resources(self, key, value):
+        rg = self.resourcegroup
+        if rg.required_type and rg.required_type != value.resource_type:
+            raise ArgumentError("Resource's %s type differs from the requested"
+                                " %s" % (value.resource_type, rg.required_type))
+
+        return value
 
     @property
     def holder_name(self):
