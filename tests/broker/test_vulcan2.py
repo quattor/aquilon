@@ -153,6 +153,26 @@ class TestVulcan20(TestBrokerCommand):
             self.successtest(["update_esx_cluster", "--cluster=utpgcl%d" % i,
                               "--switch=utpgsw%d.aqd-unittest.ms.com" % i])
 
+    # Autopg test
+    def test_100_addinterfaces(self):
+        # These ones fit the 2 address net
+        for i in range(0, 2):
+            machine = "utpgm%d" % i
+            self.noouttest(["add", "interface", "--machine", machine,
+                            "--interface", "eth0", "--automac", "--autopg"])
+
+        # The third one shall fail
+        command = ["add", "interface", "--machine", "utpgm%d" % 2,
+                   "--interface", "eth0", "--automac", "--autopg"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "No available user port groups on switch "
+                         "utpgsw1.aqd-unittest.ms.com",
+                         command)
+
+
+
+
 #    Storage group / resource tests
 
 

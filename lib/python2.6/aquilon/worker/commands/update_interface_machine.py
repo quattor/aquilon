@@ -83,7 +83,7 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
                 dbinterface.hardware_entity, pg)
         elif autopg:
             dbinterface.port_group = choose_port_group(
-                dbinterface.hardware_entity)
+                session, dbinterface.hardware_entity)
 
         if master:
             if dbinterface.addresses:

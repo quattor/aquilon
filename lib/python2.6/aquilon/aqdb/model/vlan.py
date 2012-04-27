@@ -161,10 +161,6 @@ class ObservedVlan(Base):
             VlanInfo.vlan_id == self.vlan_id))
         return q.scalar()
 
-    @property
-    def is_at_guest_capacity(self):
-        return self.guest_count >= self.network.available_ip_count
-
     @classmethod
     def get_network(cls, session, switch, vlan_id, compel=NotFoundException):
         q = session.query(cls).filter_by(switch=switch, vlan_id=vlan_id)
