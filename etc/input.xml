@@ -3446,11 +3446,32 @@
    <command name="add_metacluster">
       Add a new metacluster.
       <optgroup name="add_metacluster_req" mandatory="True" fields="all">
-         <option name="metacluster" type="string">Name of the new metacluster</option>
+        <option name="metacluster" type="string">Name of the new metacluster</option>
       </optgroup>
+        <optgroup name="add_metacluster_location_opts" fields="any">
+           <option name="organization" type="string">Organization</option>
+           <option name="hub" type="string">Hub</option>
+           <option name="continent" type="string">Continent</option>
+           <option name="country" type="string">Country</option>
+           <option name="campus" type="string">Campus</option>
+           <option name="city" type="string">City</option>
+           <option name="building" type="string">Building</option>
+           <option name="room" type="string">Room</option>
+           <option name="rack" type="string">Rack</option>
+           <option name="desk" type="string">Desk</option>
+        </optgroup>
+        <optgroup name="personality_opts" mandatory="False">
+           <option name="archetype" type="string" default="metacluster-old">Archetype name</option>
+           <option name="personality" type="string" default="metacluster-old">Personality name</option>
+        </optgroup>
+        <optgroup name="branch_opts" fields="any">
+           <option name="domain" type="string" conflicts="sandbox">Name of template domain</option>
+           <option name="sandbox" type="string" conflicts="domain">Name of the sandbox (given as 'author/branch')</option>
+        </optgroup>
       <optgroup name="add_metacluster_options" mandatory="False">
          <option name="max_members" type="int">Comments</option>
          <option name="max_shares" type="int">Comments</option>
+         <option name="buildstatus" type="string">Build status of the metacluster (defaults to 'build')</option>
          <option name="comments" type="string">Comments</option>
       </optgroup>
       <transport method="put" path="metacluster/%(metacluster)s" />

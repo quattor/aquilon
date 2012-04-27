@@ -35,6 +35,8 @@ from aquilon.aqdb.model import MetaCluster
 class MetaClusterFormatter(ObjectFormatter):
     def format_raw(self, metacluster, indent=""):
         details = [indent + "MetaCluster: %s" % metacluster.name]
+        details.append(self.redirect_raw(metacluster.location_constraint,
+                                         indent + "  "))
         details.append(indent + "  Max members: %s" % metacluster.max_clusters)
         details.append(indent + "  Max shares: %s" % metacluster.max_shares)
         details.append(indent + "  High availability enabled: %s" %
@@ -53,10 +55,15 @@ class MetaClusterFormatter(ObjectFormatter):
         else:
             usagestr = None
         details.append(indent + "  Resources used by VMs: %s" % usagestr)
+        details.append(self.redirect_raw(metacluster.personality, indent + "  "))
         for cluster in metacluster.members:
             details.append(indent + "  Member: {0}".format(cluster))
-        for share in metacluster.shares:
-            details.append(indent + "  Share: %s" % share.name)
+
+        if metacluster.resholder and metacluster.resholder.resources:
+            details.append(indent + "  Resources:")
+            for resource in metacluster.resholder.resources:
+                details.append(self.redirect_raw(resource, indent + "    "))
+
         if metacluster.comments:
             details.append(indent + "  Comments: %s" % metacluster.comments)
         return "\n".join(details)

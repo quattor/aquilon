@@ -29,7 +29,9 @@
 
 
 from aquilon.worker.broker import BrokerCommand, validate_basic
-from aquilon.aqdb.model import MetaCluster
+from aquilon.worker.dbwrappers.branch import get_branch_and_author
+from aquilon.worker.dbwrappers.location import get_location
+from aquilon.aqdb.model import (MetaCluster, Personality, ClusterLifecycle)
 from aquilon.exceptions_ import ArgumentError
 
 
@@ -37,13 +39,39 @@ class CommandAddMetaCluster(BrokerCommand):
 
     required_parameters = ["metacluster"]
 
-    def render(self, session, metacluster, max_members, max_shares, comments,
+    def render(self, session, logger,
+               metacluster, archetype, personality,
+               domain, sandbox,
+               max_members, max_shares,
+               buildstatus, comments,
                **arguments):
-        validate_basic("metacluster", metacluster)
-        if metacluster.strip().lower() == 'global':
-            raise ArgumentError("Metacluster name global is reserved.")
 
-        MetaCluster.get_unique(session, metacluster, preclude=True)
+        validate_basic("metacluster", metacluster)
+
+        dbpersonality = Personality.get_unique(session, name=personality,
+                                               archetype=archetype, compel=True)
+        if not dbpersonality.is_cluster:
+            raise ArgumentError("%s is not a cluster personality." %
+                                personality)
+
+        ctype = "meta" # dbpersonality.archetype.cluster_type
+
+        if not buildstatus:
+            buildstatus = "build"
+        dbstatus = ClusterLifecycle.get_unique(session, buildstatus,
+                                               compel=True)
+
+        (dbbranch, dbauthor) = get_branch_and_author(session, logger,
+                                                     domain=domain,
+                                                     sandbox=sandbox,
+                                                     compel=False)
+
+        dbloc = get_location(session, **arguments)
+        if not dbloc:
+            raise ArgumentError("Adding a cluster requires a location "
+                                "constraint.")
+        if not dbloc.campus:
+            raise ArgumentError("{0} is not within a campus.".format(dbloc))
 
         if max_members is None:
             max_members = self.config.getint("broker",
@@ -53,8 +81,21 @@ class CommandAddMetaCluster(BrokerCommand):
             max_shares = self.config.getint("broker",
                                             "metacluster_max_shares_default")
 
-        dbmetacluster = MetaCluster(name=metacluster, max_clusters=max_members,
-                                    max_shares=max_shares, comments=comments)
-        session.add(dbmetacluster)
+        if metacluster.strip().lower() == 'global':
+            raise ArgumentError("Metacluster name global is reserved.")
+
+        MetaCluster.get_unique(session, metacluster, preclude=True)
+        clus_type = MetaCluster #Cluster.__mapper__.polymorphic_map[ctype].class_
+
+        kw = {}
+
+        dbcluster = MetaCluster(name=metacluster, location_constraint=dbloc,
+                                personality=dbpersonality,
+                                max_clusters=max_members, max_shares=max_shares,
+                                branch=dbbranch, sandbox_author=dbauthor,
+                                status=dbstatus, comments=comments)
+
+        session.add(dbcluster)
+        session.flush()
 
         return

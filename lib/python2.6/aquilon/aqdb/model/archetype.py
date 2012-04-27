@@ -38,7 +38,7 @@ from aquilon.aqdb.column_types import AqStr, Enum
 
 _TN = 'archetype'
 
-CLUSTER_TYPES = ('esx', 'storage', 'compute')
+CLUSTER_TYPES = ('esx', 'storage', 'compute', 'meta')
 
 
 class Archetype(Base):

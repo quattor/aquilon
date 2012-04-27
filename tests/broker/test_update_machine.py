@@ -431,9 +431,9 @@ class TestUpdateMachine(TestBrokerCommand):
         command = ["update_machine", "--machine=evm1", "--cluster=utecl13"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
-                         "Cannot move machine to a new "
-                         "metacluster: Current metacluster utmc1 "
-                         "does not match new metacluster utmc7",
+                         "Cannot move machine to a new metacluster: "
+                         "Current ESX metacluster utmc1 does not match "
+                         "new ESX metacluster utmc7.",
                          command)
 
     def testallowchangemetacluster_10(self):

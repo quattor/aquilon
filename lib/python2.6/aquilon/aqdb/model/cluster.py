@@ -115,15 +115,15 @@ class Cluster(Base):
     max_hosts = Column(Integer, default=2, nullable=True)
     # N+M clusters are defined by setting down_hosts_threshold to M
     # Simple 2-node clusters would have down_hosts_threshold of 0
-    down_hosts_threshold = Column(Integer, nullable=False)
+    down_hosts_threshold = Column(Integer, nullable=True)
     # And that tolerance can be relaxed even further in maintenance windows
     down_maint_threshold = Column(Integer, nullable=True)
     # Some clusters (e.g. grid) don't want fixed N+M down_hosts_threshold, but
     # use percentage goals (i.e. don't alert until 5% of the population dies)
     down_hosts_percent = Column(Boolean(name="%s_down_hosts_ck" % _TN),
-                                default=False, nullable=False)
+                                default=False, nullable=True)
     down_maint_percent = Column(Boolean(name="%s_maint_hosts_ck" % _TN),
-                                default=False, nullable=False)
+                                default=False, nullable=True)
 
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
@@ -213,6 +213,22 @@ class Cluster(Base):
                                               self.authored_branch))
 
     def validate(self, max_hosts=None, error=ArgumentError, **kwargs):
+        if self.cluster_type != 'meta':
+            for i in [
+                    "down_hosts_threshold",
+                    "down_hosts_percent",
+                    "down_maint_percent",
+                    "personality_id"
+                    #"branch_id"
+                ]:
+                if getattr(self, i, None) is None:
+                    raise ValueError("%s attribute must be set for a %s cluster"
+                                     % (i, self.cluster_type))
+        else:
+            if self.metacluster:
+                raise ValueError("Metaclusters can't contain metaclusters")
+
+
         if max_hosts is None:
             max_hosts = self.max_hosts
         if len(self.hosts) > self.max_hosts:
@@ -234,7 +250,11 @@ class Cluster(Base):
             else:
                 passthrough += letter
 
-        clsname = self.title + " Cluster"
+        if self.cluster_type == 'meta':
+            clsname = self.title + " Metacluster"
+        else:
+            clsname = self.title + " Cluster"
+
         if lowercase:
             parts = clsname.split()
             clsname = ' '.join(map(lambda x: x if x[:-1].isupper() else x.lower(), parts))
@@ -242,7 +262,6 @@ class Cluster(Base):
             return clsname.__format__(passthrough)
         val = "%s %s" % (clsname, instance)
         return val.__format__(passthrough)
-
 
 cluster = Cluster.__table__  # pylint: disable=C0103, E1101
 cluster.primary_key.name = 'cluster_pk'
