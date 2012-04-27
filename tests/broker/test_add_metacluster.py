@@ -139,9 +139,9 @@ class TestAddMetaCluster(TestBrokerCommand):
     def testverifyshowall(self):
         command = "show metacluster --all"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "MetaCluster: utmc1", command)
-        self.matchoutput(out, "MetaCluster: utmc2", command)
-        self.matchoutput(out, "MetaCluster: utmc3", command)
+        self.matchoutput(out, "utmc1", command)
+        self.matchoutput(out, "utmc2", command)
+        self.matchoutput(out, "utmc3", command)
 
     def testnotfoundmetacluster(self):
         command = "show metacluster --metacluster metacluster-does-not-exist"

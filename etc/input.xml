@@ -3506,7 +3506,7 @@
       Show details for a metacluster.
       <optgroup name="show_metacluster_req" mandatory="True" fields="any">
          <option name="metacluster" type="string" conflicts="all">Name of the metacluster</option>
-         <option name="all" type="flag" conflicts="metacluster">Show all</option>
+         <option name="all" type="flag" conflicts="metacluster">Show all. Returns only the names of the metaclusters.</option>
       </optgroup>
       <transport trigger="all" method="get" path="metacluster" />
       <transport trigger="metacluster" method="get" path="metacluster/%(metacluster)s" />
