@@ -44,8 +44,7 @@ from twisted.internet import reactor
 from ms.modulecmd import Modulecmd, ModulecmdExecError
 
 from aquilon.config import Config
-from aquilon.twisted_patches import (GracefulProcessMonitor,
-                                     integrate_logging, _parseUNIX)
+from aquilon.twisted_patches import (GracefulProcessMonitor, integrate_logging)
 from aquilon.worker.kncwrappers import KNCSite
 from aquilon.worker.anonwrappers import AnonSite
 
@@ -72,8 +71,6 @@ def log_module_load(cmd, mod):
     except ModulecmdExecError, e:
         log.msg("Failed loading module %s, return code %d and stderr '%s'." %
                 (mod, e.exitcode, e.stderr))
-
-strports._funcs["unix"] = _parseUNIX
 
 
 class AQDMaker(object):
@@ -179,7 +176,7 @@ class AQDMaker(object):
             openaddr = "tcp:%s:interface=%s" % (openport, bind_address)
         else:  # pragma: no cover
             bind_address = None
-            openaddr = openport
+            openaddr = "tcp:%s" % openport
 
         # Return before firing up knc.
         if options["noauth"]:
