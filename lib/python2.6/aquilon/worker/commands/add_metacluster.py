@@ -32,6 +32,7 @@ from aquilon.worker.broker import BrokerCommand, validate_basic
 from aquilon.worker.dbwrappers.branch import get_branch_and_author
 from aquilon.worker.dbwrappers.location import get_location
 from aquilon.aqdb.model import (MetaCluster, Personality, ClusterLifecycle)
+from aquilon.worker.templates.metacluster import PlenaryMetaCluster
 from aquilon.exceptions_ import ArgumentError
 
 
@@ -97,5 +98,8 @@ class CommandAddMetaCluster(BrokerCommand):
 
         session.add(dbcluster)
         session.flush()
+
+        plenary = PlenaryMetaCluster(dbcluster, logger=logger)
+        plenary.write()
 
         return

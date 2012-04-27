@@ -31,8 +31,10 @@
 import logging
 
 from aquilon.aqdb.model import (Cluster, EsxCluster, ComputeCluster,
-                                StorageCluster)
+                                StorageCluster, MetaCluster)
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
+from aquilon.worker.templates.machine import PlenaryMachineInfo
+from aquilon.worker.templates.metacluster import PlenaryMetaCluster
 from aquilon.worker.templates.panutils import (StructureTemplate, pan_assign,
                                                pan_include, pan_push)
 from aquilon.worker.locks import CompileKey
@@ -57,6 +59,7 @@ Plenary.handlers[Cluster] = PlenaryCluster
 Plenary.handlers[ComputeCluster] = PlenaryCluster
 Plenary.handlers[EsxCluster] = PlenaryCluster
 Plenary.handlers[StorageCluster] = PlenaryCluster
+Plenary.handlers[MetaCluster] = PlenaryMetaCluster
 
 
 class PlenaryClusterData(Plenary):

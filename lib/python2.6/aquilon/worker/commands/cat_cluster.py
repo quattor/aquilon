@@ -30,13 +30,13 @@
 
 
 from aquilon.exceptions_ import NotFoundException
-from aquilon.aqdb.model import Cluster
+from aquilon.aqdb.model import Cluster, MetaCluster
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.resources import get_resource
 from aquilon.worker.templates.base import Plenary
 from aquilon.worker.templates.cluster import (PlenaryClusterObject,
                                               PlenaryClusterData)
-
+from aquilon.worker.templates.metacluster import PlenaryMetaCluster
 
 class CommandCatCluster(BrokerCommand):
 
@@ -48,10 +48,18 @@ class CommandCatCluster(BrokerCommand):
         if dbresource:
             plenary_info = Plenary.get_plenary(dbresource, logger=logger)
         else:
-            if data:
-                plenary_info = PlenaryClusterData(dbcluster, logger=logger)
+            if isinstance(dbcluster, MetaCluster):
+                if data:
+                    # TODO
+                    raise RuntimeError("PlenaryMetaClusterData not implemented")
+                    #plenary_info = PlenaryMetaClusterData(dbcluster, logger=logger)
+                else:
+                    plenary_info = PlenaryMetaCluster(dbcluster, logger=logger)
             else:
-                plenary_info = PlenaryClusterObject(dbcluster, logger=logger)
+                if data:
+                    plenary_info = PlenaryClusterData(dbcluster, logger=logger)
+                else:
+                    plenary_info = PlenaryClusterObject(dbcluster, logger=logger)
 
         if generate:
             return plenary_info._generate_content()
