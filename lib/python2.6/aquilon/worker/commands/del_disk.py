@@ -29,7 +29,7 @@
 """Contains the logic for `aq del disk`."""
 
 from aquilon.exceptions_ import ArgumentError, NotFoundException, AquilonError
-from aquilon.aqdb.model import Disk, Machine
+from aquilon.aqdb.model import Disk, Machine, VirtualDisk
 from aquilon.aqdb.model.disk import controller_types
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.templates.base import Plenary
@@ -83,16 +83,15 @@ class CommandDelDisk(BrokerCommand):
                                         % " ,".join(to_remove_from_rp))
                 else:
                     to_remove_from_rp = na_obj
-        if len(results) == 1:
-            session.delete(results[0])
-        elif len(results) == 0:
+
+        if len(results) == 0:
             raise NotFoundException("No disks found.")
-        elif all:
-            for result in results:
-                session.delete(result)
-        else:
+        elif len(results) > 1 and not all:
             raise ArgumentError("More than one matching disks found.  "
                                 "Use --all to delete them all.")
+        for result in results:
+            session.delete(result)
+
         session.flush()
         session.expire(dbmachine, ['disks'])
 

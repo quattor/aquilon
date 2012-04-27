@@ -33,7 +33,8 @@ import logging
 from aquilon.aqdb.model import (Application, Filesystem, Intervention,
                                 ResourceGroup, Hostlink, RebootSchedule,
                                 RebootIntervention, ServiceAddress,
-                                VirtualMachine)
+                                VirtualMachine, Share)
+from aquilon.aqdb.model.disk import find_storage_data
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
 from aquilon.worker.templates.panutils import (StructureTemplate, pan_assign,
                                                pan_push)
@@ -56,6 +57,15 @@ class PlenaryResource(Plenary):
         fname = "body_%s" % self.type
         if hasattr(self, fname):
             getattr(self, fname)(lines)
+
+    def body_share(self, lines):
+
+        share_info = find_storage_data(self)
+
+        pan_assign(lines, "name", self.name)
+        pan_assign(lines, "server", share_info["server"])
+        pan_assign(lines, "mountpoint", share_info["mount"])
+        pan_assign(lines, "latency", self.dbobj.latency)
 
     def body_filesystem(self, lines):
         pan_assign(lines, "type", self.dbobj.fstype)
@@ -152,6 +162,7 @@ Plenary.handlers[Hostlink] = PlenaryResource
 Plenary.handlers[RebootSchedule] = PlenaryResource
 Plenary.handlers[RebootIntervention] = PlenaryResource
 Plenary.handlers[ServiceAddress] = PlenaryResource
+Plenary.handlers[Share] = PlenaryResource
 Plenary.handlers[VirtualMachine] = PlenaryResource
 
 

@@ -32,6 +32,7 @@
 from aquilon.worker.formats.formatters import ObjectFormatter
 from aquilon.worker.formats.list import ListFormatter
 from aquilon.aqdb.model import ServiceInstance
+from aquilon.aqdb.model.disk import find_storage_data
 from aquilon.worker.templates.service import PlenaryInstanceNasDiskShare
 
 
@@ -107,10 +108,11 @@ class ShareFormatter(ObjectFormatter):
     def format_raw(self, share, indent=""):
         dbshare = share.dbshare
         details = [indent + "NAS Disk Share: %s" % dbshare.name]
-        plenary = PlenaryInstanceNasDiskShare(dbshare)
-        plenary.lookup()
-        details.append(indent + "  Server: %s" % plenary.server)
-        details.append(indent + "  Mountpoint: %s" % plenary.mount)
+
+        share_info = find_storage_data(dbshare)
+
+        details.append(indent + "  Server: %s" % share_info["server"])
+        details.append(indent + "  Mountpoint: %s" % share_info["mount"])
         details.append(indent + "  Disk Count: %d" % dbshare.nas_disk_count)
         details.append(indent + "  Maximum Disk Count: %s" %
                        ServiceInstanceFormatter.get_max_client_count(dbshare))

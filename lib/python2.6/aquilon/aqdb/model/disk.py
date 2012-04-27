@@ -32,13 +32,14 @@ from datetime import datetime
 
 from sqlalchemy import (Column, Integer, DateTime, Sequence, String, Boolean,
                         ForeignKey, UniqueConstraint)
-from sqlalchemy.orm import relation, backref, column_property, deferred
+from sqlalchemy.orm import relation, backref, column_property, deferred, synonym
 from sqlalchemy.sql import select, func
 
 from aquilon.aqdb.model import Base, Machine, ServiceInstance
 from aquilon.aqdb.column_types import AqStr, Enum
+from aquilon.config import Config
 
-disk_types = ['local', 'nas', 'san']
+disk_types = ['local', 'nas', 'san', 'virtual_disk']
 controller_types = ['cciss', 'ide', 'sas', 'sata', 'scsi', 'flash',
                     'fibrechannel']
 
@@ -57,6 +58,14 @@ class Disk(Base):
     capacity = Column(Integer, nullable=False)
     device_name = Column(AqStr(128), nullable=False, default='sda')
     controller_type = Column(Enum(64, controller_types), nullable=False)
+
+    """
+    We need to know the bus address of each disk.
+    This isn't really nullable, but single-table inheritance means
+    that the base class will end up with the column and the base class
+    wants it to be nullable. We enforce this via __init__ instead.
+    """
+    address = Column("address", AqStr(128), nullable=True)
 
     machine_id = Column(Integer, ForeignKey('machine.machine_id',
                                             name='disk_machine_fk',
@@ -107,14 +116,6 @@ class NasDisk(Disk):
     __mapper_args__ = {'polymorphic_identity': 'nas'}
 
     """
-    We need to know the bus address of each disk.
-    This isn't really nullable, but single-table inheritance means
-    that the base class will end up with the column and the base class
-    wants it to be nullable. We enforce this via __init__ instead.
-    """
-    address = Column(AqStr(128), nullable=True)
-
-    """
         No cascade delete here: we want to restrict any attempt to delete
         any service instance that has client dependencies.
     """
@@ -128,7 +129,7 @@ class NasDisk(Disk):
     service_instance = relation(ServiceInstance, backref='nas_disks')
 
     def __init__(self, **kw):
-        if 'address' not in kw:
+        if 'address' not in kw or kw['address'] is None:
             raise ValueError("address is mandatory for nas disks")
         super(NasDisk, self).__init__(**kw)
 
@@ -155,3 +156,66 @@ ServiceInstance.nas_machine_count = column_property(
 #service instance name is the share name
 
 #max_shares to metacluster
+
+
+# Utility functions for service / resource based disk mounts
+
+# This should come from some external API...?
+def find_storage_data(dbshare):
+    """
+    Scan a storeng-style data file, checking each line as we go
+
+    Storeng-style data files are blocks of data. Each block starts
+    with a comment describing the fields for all subsequent lines. A
+    block can start at any time. Fields are separated by '|'.
+    This function will invoke the function after parsing every data
+    line. The function will be called with a dict of the fields. If the
+    function returns True, then we stop scanning the file, else we continue
+    on until there is nothing left to parse.
+
+    dbshare can be a Share or a ServiceInstance which is a nas_disk_share
+    """
+
+    # TODO should check here 
+    # isinstance(dbshare, PlenaryResource and dbshare.type == share)
+    # or (isinstance(dbshare, PlenaryInstanceNasDiskShare)
+
+    config = Config()
+    with open(config.get("broker", "sharedata")) as datafile:
+        share_info = {"server": None, "mount": None}
+
+        def check_nas_line(info):
+            """
+            Search for the pshare info that refers to this plenary
+            """
+            # silently discard lines that don't have all of our reqd info.
+            for k in ["objtype", "pshare", "server", "dg"]:
+                if k not in info:
+                    return False
+
+            if info["objtype"] == "pshare" and info["pshare"] == dbshare.name:
+                share_info["server"] = info["server"]
+                share_info["mount"] = "/vol/%(dg)s/%(pshare)s" % (info)
+
+                return True
+            else:
+                return False
+
+        for line in datafile:
+            line = line.rstrip()
+
+            if line[0] == '#':
+                # A header line
+                hdr = line[1:].split('|')
+            else:
+                fields = line.split('|')
+                if len(fields) == len(hdr):  # silently ignore invalid lines
+                    info = dict()
+                    for i in range(0, len(hdr)):
+                        info[hdr[i]] = fields[i]
+
+                    if check_nas_line(info):
+                        break
+
+        return share_info
+

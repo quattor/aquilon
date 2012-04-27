@@ -31,7 +31,7 @@
 from aquilon.worker.formats.formatters import ObjectFormatter
 from aquilon.aqdb.model import MetaCluster
 
-
+# TODO add extra data based on cluster.py(formats)
 class MetaClusterFormatter(ObjectFormatter):
     def format_raw(self, metacluster, indent=""):
         details = [indent + "MetaCluster: %s" % metacluster.name]
@@ -63,6 +63,10 @@ class MetaClusterFormatter(ObjectFormatter):
             details.append(indent + "  Resources:")
             for resource in metacluster.resholder.resources:
                 details.append(self.redirect_raw(resource, indent + "    "))
+
+        # for v1 shares
+        for share_name in metacluster.shares:
+            details.append(indent + "  Share: %s" % share_name)
 
         if metacluster.comments:
             details.append(indent + "  Comments: %s" % metacluster.comments)
