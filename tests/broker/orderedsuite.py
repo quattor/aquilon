@@ -139,6 +139,7 @@ from test_reconfigure import TestReconfigure
 from test_change_status import TestChangeStatus
 from test_refresh_windows_hosts import TestRefreshWindowsHosts
 from test_constraints_chooser import TestChooserConstraints
+from test_vulcan2 import TestVulcan20
 from test_flush import TestFlush
 from test_compile import TestCompile
 from test_profile import TestProfile
@@ -311,6 +312,7 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestAddAlias, TestAddSrvRecord,
                 TestMapService, TestBindClient, TestPrebindServer,
                 TestServiceConstraints,
+                TestVulcan20,
                 TestFlush,
                 TestMakeAquilon, TestMakeCluster, TestCluster,
                 TestAddAllowedPersonality,
