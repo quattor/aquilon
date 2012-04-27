@@ -39,14 +39,124 @@ from brokertest import TestBrokerCommand
 
 class TestVulcan20(TestBrokerCommand):
 
+
+    # Metacluster / cluster / Switch tests
+
+
     def test_000_addutmc8(self):
         command = ["add_metacluster", "--metacluster=utmc8",
                    "--personality=metacluster", "--archetype=metacluster",
-                   "--domain=unittest", "--building=ut", "--domain=unittest"]
+                   "--domain=unittest", "--building=ut", "--domain=unittest",
+                   "--comments=autopg_v2_tests"]
 
         self.noouttest(command)
 
-    def test_001_add_rg_to_cluster(self):
+    # see testaddutmc4
+    def test_001_addutpgcl(self):
+        # Allocate utecl5 - utecl10 for utmc4 (autopg testing)
+        for i in range(0, 2):
+            command = ["add_esx_cluster", "--cluster=utpgcl%d" % i,
+                       "--metacluster=utmc8", "--building=ut",
+                       "--buildstatus=build",
+                       "--domain=unittest", "--down_hosts_threshold=0",
+                       "--archetype=esx_cluster",
+                       "--personality=esx_desktop"]
+            self.noouttest(command)
+
+    # see     def testaddut01ga2s02(self):
+    def test_002_addutpgsw(self):
+        # Deprecated.
+
+        for i in range(0, 2):
+            ip = self.net.unknown[17].usable[i]
+            hostname = "utpgsw%d.aqd-unittest.ms.com" % i
+
+            self.dsdb_expect_add(hostname, ip, "xge49",
+                                 ip.mac)
+            command = ["add", "tor_switch",
+                       "--tor_switch", hostname,
+                       "--building", "ut", "--rackid", "12",
+                       "--rackrow", "k", "--rackcol", "2",
+                       "--model", "rs g8000", "--interface", "xge49",
+                       "--mac", ip.mac, "--ip", ip]
+            (out, err) = self.successtest(command)
+        self.dsdb_verify()
+
+    # see     def testverifypollut01ga2s01(self):
+    # see fakevlan2net
+    def test_003_pollutpgsw(self):
+        # Issues deprecated warning.
+        for i in range(0, 2):
+            command = ["poll", "switch", "--vlan", "--switch",
+                       "utpgsw%d.aqd-unittest.ms.com" % i]
+            (out, err) = self.successtest(command)
+
+            service = self.config.get("broker", "poll_helper_service")
+            self.matchoutput(err,
+                             "Using jump host nyaqd1.ms.com from service "
+                             "instance %s/unittest to run CheckNet "
+                             "for switch utpgsw%d.aqd-unittest.ms.com" %
+                             (service, i),
+                             command)
+
+    # for each cluster's hosts
+    def test_004_add10gigracks(self):
+        for port in range(0, 2):
+            self.noouttest(["add", "machine", "--machine", "utpgs01p%d" % port,
+                            "--rack", "ut11", "--model", "vb1205xm"])
+
+    def test_005_add10gigrackinterfaces(self):
+        for i in range(0, 2):
+            ip = self.net.unknown[18].usable[i]
+            machine = "utpgs01p%d" % i
+
+            self.noouttest(["add", "interface", "--interface", "eth0",
+                            "--machine", machine,
+                            "--mac", ip.mac])
+
+
+    def test_006_populate10gigrackhosts(self):
+        for i in range(0, 2):
+            ip = self.net.unknown[18].usable[i]
+            hostname = "utpgh%d.aqd-unittest.ms.com" % i
+            machine = "utpgs01p%d" % i
+
+            self.dsdb_expect_add(hostname, ip, "eth0", ip.mac)
+            command = ["add", "host", "--hostname", hostname, "--ip", ip,
+                       "--machine", machine,
+                       "--domain", "unittest", "--buildstatus", "build",
+                       "--osname", "esxi", "--osversion", "4.0.0",
+                       "--archetype", "vmhost", "--personality", "esx_desktop"]
+            self.noouttest(command)
+        self.dsdb_verify()
+
+    def test_007_bindutmc8(self):
+        for i in range(0, 2):
+
+            host = "utpgh%s.aqd-unittest.ms.com" % i
+            cluster = "utpgcl%d" % i
+            self.successtest(["make", "cluster", "--cluster", cluster])
+
+            self.successtest(["cluster",
+                              "--hostname", host, "--cluster", cluster])
+
+    def test_008_addmachines(self):
+        for i in range(0, 3):
+            cluster = "utpgcl%d" % (i / 2)
+            machine = "utpgm%d" % i
+
+            self.noouttest(["add", "machine", "--machine", machine,
+                            "--cluster", cluster, "--model", "utmedium"])
+
+    def test_009_addswitch(self):
+        for i in range(0, 2):
+            self.successtest(["update_esx_cluster", "--cluster=utpgcl%d" % i,
+                              "--switch=utpgsw%d.aqd-unittest.ms.com" % i])
+
+#    Storage group / resource tests
+
+
+    def test_101_add_rg_to_cluster(self):
         command = ["add_resourcegroup", "--resourcegroup=utmc8as1",
                    "--cluster=utmc8", "--required_type=share"]
         self.successtest(command)
@@ -65,7 +175,7 @@ class TestVulcan20(TestBrokerCommand):
         self.matchoutput(out, "Resource Group: utmc8as1", command)
         self.matchoutput(out, "Resource Group: utmc8as2", command)
 
-    def test_002_cat_cluster(self):
+    def test_102_cat_cluster(self):
         command = ["cat", "--cluster", "utmc8"]
         out = self.commandtest(command)
         self.matchoutput(out,
@@ -75,7 +185,7 @@ class TestVulcan20(TestBrokerCommand):
                          command)
 
 
-    def test_003_add_share_to_rg(self):
+    def test_103_add_share_to_rg(self):
         command = ["add_share", "--resourcegroup=utmc8as1",
                    "--cluster=utmc8", "--share=test_v2_share",
                    "--latency=5"]
@@ -99,15 +209,14 @@ class TestVulcan20(TestBrokerCommand):
         self.matchoutput(out, "Bound to: Resource Group utmc8as1", command)
         self.matchoutput(out, "Bound to: Resource Group utmc8as2", command)
 
-    def test_003_add_same_share_name_fail(self):
-        command = ["add_share", "--resourcegroup=utmc8as1",
-                   "--metacluster=utmc8", "--share=test_v2_share",
-                   "--latency=5"]
+    def test_104_add_same_share_name_fail(self):
+        command = ["add_share", "--resourcegroup=utmc8as2",
+                   "--share=test_v2_share", "--latency=5"]
         err = self.badrequesttest(command)
         self.matchoutput(err, "Bad Request: Share test_v2_share, "
                          "bundleresource instance already exists.", command)
 
-    def test_004_cat_rg(self):
+    def test_105_cat_rg(self):
         command = ["cat", "--resourcegroup=utmc8as1", "--cluster=utmc8",
                    "--generate"]
         out = self.commandtest(command)
@@ -123,20 +232,39 @@ class TestVulcan20(TestBrokerCommand):
 
         # TODO no resources, waiting for big resource branch
 
-    def test_005_cat_share(self):
+    def test_106_cat_share(self):
         command = ["cat", "--share=test_v2_share", "--resourcegroup=utmc8as1",
                    "--cluster=utmc8", "--generate"]
         out = self.commandtest(command)
         self.matchoutput(out, "structure template resource/cluster/utmc8/"
                          "resourcegroup/utmc8as1/share/test_v2_share/config;",
                          command)
-        self.matchoutput(out, '"sharename" = "test_v2_share";', command)
+        self.matchoutput(out, '"name" = "test_v2_share";', command)
         self.matchoutput(out, '"server" = "lnn30f1";', command)
         self.matchoutput(out, '"mountpoint" = "/vol/lnn30f1v1/test_v2_share";',
                          command)
         self.matchoutput(out, '"latency" = 5;', command)
 
-    def test_010_addfilesystemfail(self):
+
+    def test_108_addutpgm0disk(self):
+        self.noouttest(["add", "disk", "--machine", "utpgm0",
+            "--disk", "sdb", "--controller", "scsi", "--share", "test_v2_share",
+            "--size", "34", "--resourcegroup", "utmc8as1", "--address", "0:0"])
+
+    def test_109_verifyaddutpgm0disk(self):
+        command = "show machine --machine utpgm0"
+        out = self.commandtest(command.split(" "))
+        self.searchoutput(out, r"Disk: sdb 34 GB scsi "
+                          "\(virtual_disk from test_v2_share\)$", command)
+
+        command = ["show_share", "--resourcegroup=utmc8as1",
+                   "--cluster=utmc8", "--share=test_v2_share"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Share: test_v2_share", command)
+        self.matchoutput(out, "Bound to: Resource Group utmc8as1", command)
+        self.searchoutput(out, r"Disk: sdb 34 GB \(Machine: utpgm0\)$", command)
+
+    def test_111_addfilesystemfail(self):
         command = ["add_filesystem", "--filesystem=fs1", "--type=ext3",
                    "--mountpoint=/mnt", "--blockdevice=/dev/foo/bar",
                    "--bootmount",
@@ -148,19 +276,26 @@ class TestVulcan20(TestBrokerCommand):
                          "differs from the requested share",
                          command)
 
-    def test_011_verify_rg(self):
+    def test_112_verify_rg(self):
         command = ["show_resourcegroup", "--cluster=utmc8"]
         out = self.commandtest(command)
         self.matchoutput(out, "Resource Group: utmc8as1", command)
         self.matchoutput(out, "Share: test_v2_share", command)
 
-    def test_012_verifyutmc8(self):
+    def test_113_verifyutmc8(self):
         command = "show metacluster --metacluster utmc8"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Share: test_v2_share", command)
 
-    # TODO renumber
-    def test_104_delresourcegroup(self):
+
+#    Storage group related deletes
+
+
+    def test_202_delutpgm0disk(self):
+        self.noouttest(["del", "disk", "--machine", "utpgm0",
+            "--controller", "scsi", "--disk", "sdb"])
+
+    def test_204_delresourcegroup(self):
         command = ["del_share", "--resourcegroup=utmc8as1",
                    "--cluster=utmc8", "--share=test_v2_share"]
         self.successtest(command)
@@ -177,7 +312,47 @@ class TestVulcan20(TestBrokerCommand):
                    "--cluster=utmc8"]
         self.successtest(command)
 
-    def test_105_delutmc8(self):
+
+    # Metacluster / cluster / Switch deletes
+
+
+    def test_306_delmachines(self):
+        for i in range(0, 3):
+            machine = "utpgm%d" % i
+
+            self.noouttest(["del", "machine", "--machine", machine])
+
+    def test_307_del10gigrackhosts(self):
+        for i in range(0, 2):
+            ip = self.net.unknown[18].usable[i]
+            hostname = "utpgh%d.aqd-unittest.ms.com" % i
+
+            self.dsdb_expect_delete(ip)
+            command = ["del", "host", "--hostname", hostname]
+            (out, err) = self.successtest(command)
+            self.matchoutput(err, "sent 1 server notifications", command)
+        self.dsdb_verify()
+
+    def test_307_del10gigracks(self):
+        for port in range(0, 2):
+            self.noouttest(["del", "machine", "--machine",
+                            "utpgs01p%d" % port])
+
+    def test_308_delutpgsw(self):
+        for i in range(0, 2):
+            ip = self.net.unknown[17].usable[i]
+
+            self.dsdb_expect_delete(ip)
+            command = "del switch --switch utpgsw%d.aqd-unittest.ms.com" % i
+            self.noouttest(command.split(" "))
+        self.dsdb_verify()
+
+    def test_309_delutpgcl(self):
+        for i in range(0, 2):
+            command = ["del_esx_cluster", "--cluster=utpgcl%d" % i]
+            self.successtest(command)
+
+    def test_310_delutmc8(self):
         command = ["del_metacluster", "--metacluster=utmc8"]
         self.noouttest(command)
 
