@@ -31,7 +31,29 @@
 
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.templates.domain import TemplateDomain
-from aquilon.aqdb.model import Cluster
+from aquilon.aqdb.model import Cluster, MetaCluster, EsxCluster
+
+
+def add_cluster_data(dbclus):
+    def add_esx_cluster_data(c, profile_list):
+        for h in c.hosts:
+            profile_list.append(h.fqdn)
+
+        if isinstance(c, EsxCluster) and c.switch:
+            profile_list.append("switchdata/%s" % c.switch.primary_name)
+
+    if isinstance(dbclus, MetaCluster):
+        profile_list = ["clusters/%s" % dbclus.name]
+        for c in dbclus.members:
+            profile_list.append("clusters/%s" % c.name)
+            add_esx_cluster_data(c, profile_list)
+
+    # esx
+    else:
+        profile_list = ["clusters/%s" % dbclus.name]
+        add_esx_cluster_data(dbclus, profile_list)
+
+    return profile_list
 
 
 class CommandCompileCluster(BrokerCommand):
@@ -49,9 +71,7 @@ class CommandCompileCluster(BrokerCommand):
         dom = TemplateDomain(dbclus.branch, dbclus.sandbox_author,
                              logger=logger)
 
-        profile_list = ["clusters/%s" % dbclus.name]
-        for h in dbclus.hosts:
-            profile_list.append(h.fqdn)
+        profile_list = add_cluster_data(dbclus)
 
         dom.compile(session, only=" ".join(profile_list),
                     panc_debug_include=pancinclude,

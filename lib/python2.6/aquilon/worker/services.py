@@ -34,7 +34,7 @@ from random import choice
 from sqlalchemy.orm.session import object_session
 
 from aquilon.exceptions_ import ArgumentError, InternalError
-from aquilon.aqdb.model import Host, Cluster, ServiceInstance
+from aquilon.aqdb.model import Host, Cluster, ServiceInstance, MetaCluster, EsxCluster
 from aquilon.worker.templates import (Plenary, PlenaryCollection,
                                       PlenaryServiceInstanceServer)
 
@@ -630,15 +630,39 @@ class ClusterChooser(Chooser):
                 # Note, host plenary will be written later.
 
     def prestash_primary(self):
+        def add_cluster_data(cluster, logger):
+            for dbhost in cluster.hosts:
+                host_plenary = Plenary.get_plenary(dbhost, logger=self.logger)
+                host_plenary.stash()
+                self.plenaries.append(host_plenary)
+
+            if cluster.resholder:
+                for dbres in cluster.resholder.resources:
+                    resource_plenary = Plenary.get_plenary(dbres, logger=self.logger)
+                    resource_plenary.stash()
+                    self.plenaries.append(resource_plenary)
+
+            if isinstance(cluster, EsxCluster) and cluster.switch:
+                sw_plenary = Plenary.get_plenary(cluster.switch, logger=self.logger)
+                sw_plenary.stash()
+                self.plenaries.append(sw_plenary)
+
         plenary_cluster = Plenary.get_plenary(self.dbcluster, logger=self.logger)
         plenary_cluster.stash()
         self.plenaries.append(plenary_cluster)
-        for dbhost in self.dbcluster.hosts:
-            host_plenary = Plenary.get_plenary(dbhost, logger=self.logger)
-            host_plenary.stash()
-            self.plenaries.append(host_plenary)
+
         if self.dbcluster.resholder:
             for dbres in self.dbcluster.resholder.resources:
                 resource_plenary = Plenary.get_plenary(dbres, logger=self.logger)
                 resource_plenary.stash()
                 self.plenaries.append(resource_plenary)
+
+        if isinstance(self.dbcluster, MetaCluster):
+            for c in self.dbcluster.members:
+                plenary_cluster = Plenary.get_plenary(c,
+                                                      logger=self.logger)
+                plenary_cluster.stash()
+                self.plenaries.append(plenary_cluster)
+                add_cluster_data(c, self.logger)
+        else:
+            add_cluster_data(self.dbcluster, self.logger)

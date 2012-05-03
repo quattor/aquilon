@@ -140,6 +140,8 @@ class TestVulcan20(TestBrokerCommand):
             self.successtest(["cluster",
                               "--hostname", host, "--cluster", cluster])
 
+        self.successtest(["make", "cluster", "--cluster", "utmc8"])
+
     def test_008_addmachines(self):
         for i in range(0, 3):
             cluster = "utpgcl%d" % (i / 2)
