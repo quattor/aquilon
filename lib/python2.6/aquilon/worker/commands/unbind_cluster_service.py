@@ -1,6 +1,6 @@
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 #
-# Copyright (C) 2009,2010,2011  Contributor
+# Copyright (C) 2008,2009,2010,2011,2012  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -28,15 +28,39 @@
 # TERMS THAT MAY APPLY.
 
 
+from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.commands.bind_cluster_service import CommandBindClusterService
+from aquilon.aqdb.model import Cluster, Service
+from aquilon.worker.dbwrappers.service_instance import get_service_instance
+from aquilon.worker.templates.base import Plenary
 
 
-class CommandBindESXClusterService(CommandBindClusterService):
+class CommandUnbindClusterService(BrokerCommand):
 
-    #required_parameters = ["cluster", "service", "instance"]
+    required_parameters = ["cluster", "service", "instance"]
 
-    def render(self, session, **arguments):
+    def render(self, session, logger, cluster, service, instance,
+               cluster_type=None, **arguments):
 
-        return CommandBindClusterService.render(self, session,
-                                            cluster_type = "esx", **arguments)
+        if cluster_type:
+            ctype = Cluster.__mapper__.polymorphic_map[cluster_type].class_
+        else:
+            ctype = Cluster
+
+        dbservice = Service.get_unique(session, service, compel=True)
+        dbinstance = get_service_instance(session, dbservice, instance)
+        dbcluster = ctype.get_unique(session, cluster, compel=True)
+        if dbinstance not in dbcluster.service_bindings:
+            raise NotFoundException("{0} is not bound to {1:l}."
+                                    .format(dbinstance, dbcluster))
+        if dbservice in [cas.service for cas in dbcluster.required_services]:
+            raise ArgumentError("Cannot remove cluster service instance "
+                                "binding for %s cluster aligned service %s." %
+                                (dbcluster.cluster_type, dbservice.name))
+        dbcluster.service_bindings.remove(dbinstance)
+
+        session.flush()
+
+        plenary = Plenary.get_plenary(dbcluster, logger=logger)
+        plenary.write()
+        return

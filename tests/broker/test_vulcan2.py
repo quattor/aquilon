@@ -320,6 +320,94 @@ class TestVulcan20(TestBrokerCommand):
         self.matchclean(out, "evm2", command)
         self.matchclean(out, "evm10", command)
 
+
+#    metacluster aligned svc tests
+
+    def test_150_addvcenterservices(self):
+        command = ["add", "service", "--service", "vcenter", "--instance", "ut"]
+        self.noouttest(command)
+
+        command = ["add", "service", "--service", "vcenter", "--instance", "np"]
+        self.noouttest(command)
+
+        command = ["add_required_service", "--service", "vcenter",
+                   "--archetype", "vmhost", "--personality", "esx_desktop"]
+        self.noouttest(command)
+
+        command = ["add_cluster_aligned_service", "--cluster_type", "meta",
+                   "--service", "vcenter"]
+        self.noouttest(command)
+
+    def test_151_mapvcenterservices(self):
+        command = ["map", "service", "--service", "vcenter", "--instance", "ut",
+                   "--building", "ut", "--personality", "esx_desktop",
+                   "--archetype", "vmhost"]
+        self.noouttest(command)
+
+        command = ["map", "service", "--service", "vcenter", "--instance", "np",
+                   "--building", "np", "--personality", "esx_desktop",
+                   "--archetype", "vmhost"]
+        self.noouttest(command)
+
+
+    def test_152_bindvcenterservices(self):
+        command = ["bind_cluster", "--cluster", "utmc8", "--service", "vcenter",
+                   "--instance", "ut", "--cluster_type", "meta"]
+        err = self.statustest(command)
+        self.matchoutput(err, "Metacluster utmc8 adding binding for "
+                         "service vcenter instance ut", command)
+
+        command = ["make", "--hostname", "utpgh0.aqd-unittest.ms.com"]
+        err = self.statustest(command)
+        self.matchoutput(err, "Host utpgh0.aqd-unittest.ms.com adding binding "
+                         "for service vcenter instance ut", command)
+
+        command = ["show", "host", "--hostname", "utpgh0.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Template: service/vcenter/ut", command)
+
+    def test_153_unbindvcenterservices(self):
+        command = ["del_cluster_aligned_service", "--cluster_type", "meta",
+                   "--service", "vcenter"]
+        self.noouttest(command)
+
+        command = ["del_required_service", "--service", "vcenter",
+                   "--archetype", "vmhost", "--personality", "esx_desktop"]
+        self.noouttest(command)
+
+        command = ["unbind_cluster", "--cluster", "utmc8",
+                   "--service", "vcenter", "--instance", "ut",
+                   "--cluster_type", "meta"]
+        self.noouttest(command)
+
+    def test_154_unmapvcenterservices(self):
+        command = ["unmap", "service", "--service", "vcenter",
+                   "--instance", "ut", "--building", "ut",
+                   "--personality", "esx_desktop", "--archetype", "vmhost"]
+        self.noouttest(command)
+
+        command = ["unmap", "service", "--service", "vcenter",
+                   "--instance", "np", "--building", "np",
+                   "--personality", "esx_desktop", "--archetype", "vmhost"]
+        self.noouttest(command)
+
+        command = ["make", "--hostname", "utpgh0.aqd-unittest.ms.com"]
+        err = self.statustest(command)
+        self.matchoutput(err, "Host utpgh0.aqd-unittest.ms.com removing "
+                         "binding for service vcenter instance ut", command)
+
+        command = ["show", "host", "--hostname", "utpgh0.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchclean(out, "Template: service/vcenter/ut", command)
+
+    def test_155_delvcenterservices(self):
+        command = ["del", "service", "--service", "vcenter", "--instance", "ut"]
+        self.noouttest(command)
+
+        command = ["del", "service", "--service", "vcenter", "--instance", "np"]
+        self.noouttest(command)
+
+
 #    Storage group related deletes
 
 

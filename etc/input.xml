@@ -3744,6 +3744,62 @@
       <transport method="post" path="metacluster/%(metacluster)s/cluster/%(cluster)s/rebind" />
    </command>
 
+   <command name="bind_cluster">
+      Bind a service instance to the named cluster.
+      <p/>
+      If binding a service instance for a service that is already bound to
+      a different instance this command will fail.
+      <optgroup name="bind_cluster_opts" mandatory="True" fields="all">
+         <option name="cluster" type="string">Cluster name</option>
+         <optgroup name="bind_cluster_object" mandatory="True" fields="any">
+            <optgroup name="bind_cluster_service" mandatory="False" fields="all">
+               <option name="service" type="string">Service name</option>
+               <option name="instance" type="string">Service Instance</option>
+            </optgroup>
+         </optgroup>
+         <optgroup name="bind_cluster_type">
+            <option name="cluster_type" type="string">Cluster type, esx or meta</option>
+         </optgroup>
+      </optgroup>
+      <transport method="put" trigger="service" path="cluster/%(cluster)s/service/%(service)s/%(instance)s" />
+   </command>
+
+   <command name="rebind_cluster">
+      Bind a service instance to the named cluster.
+      <p/>
+      If binding a service instance for a service that is already bound to
+      a different instance the old binding will be removed.
+      <optgroup name="rebind_cluster_opts" mandatory="True" fields="all">
+         <option name="cluster" type="string">Cluster name</option>
+     <optgroup name="rebind_cluster_object" mandatory="True" fields="any">
+        <optgroup name="rebind_cluster_service" fields="all">
+               <option name="service" type="string">Service name</option>
+               <option name="instance" type="string">Service Instance</option>
+            </optgroup>
+         </optgroup>
+         <optgroup name="rebind_cluster_type">
+            <option name="cluster_type" type="string">Cluster type, esx or meta</option>
+         </optgroup>
+      </optgroup>
+      <transport method="post" trigger="service" path="cluster/%(cluster)s/service/%(service)s/%(instance)s" />
+   </command>
+
+   <command name="unbind_cluster">
+      Remove the binding of the service instance from the named cluster.
+
+      <optgroup name="unbind_cluster_opts" mandatory="True" fields="all">
+         <option name="cluster" type="string">Cluster name</option>
+        <optgroup name="unbind_cluster_service" mandatory="False" fields="all">
+               <option name="service" type="string">Service name</option>
+               <option name="instance" type="string">Service Instance</option>
+         </optgroup>
+         <optgroup name="unbind_cluster_type">
+            <option name="cluster_type" type="string">Cluster type, esx or meta</option>
+         </optgroup>
+      </optgroup>
+      <transport method="delete" trigger="service" path="cluster/%(cluster)s/service/%(service)s/%(instance)s" />
+   </command>
+
    <command name="bind_esx_cluster">
       Bind a service instance to the named cluster.
       <p/>

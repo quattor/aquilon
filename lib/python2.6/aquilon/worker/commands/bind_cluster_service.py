@@ -28,15 +28,34 @@
 # TERMS THAT MAY APPLY.
 
 
+from aquilon.aqdb.model import Cluster, Service
 from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.commands.bind_cluster_service import CommandBindClusterService
+from aquilon.worker.services import Chooser
+from aquilon.worker.dbwrappers.service_instance import get_service_instance
 
 
-class CommandBindESXClusterService(CommandBindClusterService):
+class CommandBindClusterService(BrokerCommand):
 
-    #required_parameters = ["cluster", "service", "instance"]
+    required_parameters = ["cluster", "service", "instance"]
 
-    def render(self, session, **arguments):
+    def render(self, session, logger, cluster, service, instance, force=False,
+               cluster_type=None, **arguments):
+        # generalized backward compat for bind_esx_cluster.
+        if cluster_type:
+            ctype = Cluster.__mapper__.polymorphic_map[cluster_type].class_
+        else:
+            ctype = Cluster
 
-        return CommandBindClusterService.render(self, session,
-                                            cluster_type = "esx", **arguments)
+        dbcluster = ctype.get_unique(session, cluster, compel=True)
+        dbservice = Service.get_unique(session, service, compel=True)
+        chooser = Chooser(dbcluster, logger=logger, required_only=False)
+        if instance:
+            dbinstance = get_service_instance(session, dbservice, instance)
+            chooser.set_single(dbservice, dbinstance, force=force)
+        else:
+            chooser.set_single(dbservice, force=force)
+
+        chooser.flush_changes()
+        chooser.write_plenary_templates()
+
+        return

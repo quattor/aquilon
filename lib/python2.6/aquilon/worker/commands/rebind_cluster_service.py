@@ -1,6 +1,6 @@
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 #
-# Copyright (C) 2009,2010,2011  Contributor
+# Copyright (C) 2008,2009,2010,2011,2012  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -29,14 +29,14 @@
 
 
 from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.commands.bind_cluster_service import CommandBindClusterService
+from aquilon.worker.commands.bind_cluster_service import (
+    CommandBindClusterService)
 
 
-class CommandBindESXClusterService(CommandBindClusterService):
+class CommandRebindClusterService(CommandBindClusterService):
 
-    #required_parameters = ["cluster", "service", "instance"]
+    required_parameters = ["cluster", "service", "instance"]
 
     def render(self, session, **arguments):
-
-        return CommandBindClusterService.render(self, session,
-                                            cluster_type = "esx", **arguments)
+        arguments["force"] = True
+        return CommandBindClusterService.render(self, session, **arguments)

@@ -491,6 +491,16 @@ class HostChooser(Chooser):
                 # personalities.
                 #self.required_services.add(item.service)
 
+            if self.dbhost.cluster.metacluster:
+                mc = self.dbhost.cluster.metacluster
+                for si in mc.service_bindings:
+                    self.cluster_aligned_services[si.service] = si
+                for item in mc.required_services:
+                    if item.service not in self.cluster_aligned_services:
+                        # Don't just error here because the error() call
+                        # has not yet been set up.  Will error out later.
+                        self.cluster_aligned_services[item.service] = None
+
     def generate_description(self):
         return format(self.dbhost)
 
