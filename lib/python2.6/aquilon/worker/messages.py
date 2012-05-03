@@ -29,12 +29,15 @@
 """Pub/sub mechanism for status messages."""
 
 
-import uuid
 from threading import Lock
 from collections import deque
 from logging import DEBUG
 
 from twisted.internet import reactor
+
+from aquilon.python_patches import load_uuid_quickly
+
+uuid = load_uuid_quickly()  # pylint: disable=C0103
 
 
 # Some requests can generate many debug messages.  After this limit is

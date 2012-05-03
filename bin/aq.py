@@ -43,7 +43,6 @@ import re
 import subprocess
 import socket
 import httplib
-import uuid
 import csv
 from time import sleep
 from threading import Thread
@@ -59,6 +58,7 @@ from aquilon.client import depends
 from aquilon.client.knchttp import KNCHTTPConnection
 from aquilon.client.chunked import ChunkedHTTPConnection
 from aquilon.client.optparser import OptParser, ParsingError
+from aquilon.python_patches import load_uuid_quickly
 
 # Stolen from aquilon.worker.formats.fomatters
 csv.register_dialect('aquilon', delimiter=',', quoting=csv.QUOTE_MINIMAL,
@@ -351,6 +351,7 @@ if __name__ == "__main__":
     if globalOptions.get("debug", None):
         commandOptions["debug"] = str(globalOptions["debug"])
     if command != "show_request" and globalOptions.get("verbose"):
+        uuid = load_uuid_quickly()
         commandOptions["requestid"] = str(uuid.uuid1())
 
     # Quote options so that they can be safely included in the URI
