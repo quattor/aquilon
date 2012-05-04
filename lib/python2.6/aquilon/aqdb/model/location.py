@@ -35,7 +35,7 @@ from sqlalchemy import (Integer, DateTime, Sequence, String, Column,
 from sqlalchemy.orm import relation, backref, object_session, deferred
 from sqlalchemy.sql import and_, or_, desc
 
-from aquilon.aqdb.model import Base
+from aquilon.aqdb.model import Base, DnsDomain
 from aquilon.aqdb.column_types import AqStr
 from aquilon.exceptions_ import AquilonError
 
@@ -51,12 +51,19 @@ class Location(Base):
 
     fullname = Column(String(255), nullable=False)
 
+    default_dns_domain_id = Column(Integer, ForeignKey('dns_domain.id',
+                                                       name='location_dns_domain_fk',
+                                                       ondelete='SET NULL'),
+                                   nullable=True)
+
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
 
     comments = Column(String(255), nullable=True)
 
     __mapper_args__ = {'polymorphic_on': location_type}
+
+    default_dns_domain = relation(DnsDomain)
 
     def get_p_dict(self):
         d = {str(self.location_type): self}

@@ -201,6 +201,17 @@ class TestAddCity(TestBrokerCommand):
         out = self.badrequesttest(command)
         self.matchoutput(out, "Cannot change campus.  Campus na is in hub ny, while city e6 is in hub ln", command)
 
-if __name__=='__main__':
+    def testupdatedefaultdns(self):
+        command = ["update", "city", "--city", "ny",
+                   "--default_dns_domain", "one-nyp.ms.com"]
+        self.successtest(command)
+
+    def testverifydefaultdns(self):
+        command = ["show", "city", "--city", "ny"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Default DNS Domain: one-nyp.ms.com", command)
+
+
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddCity)
     unittest.TextTestRunner(verbosity=2).run(suite)

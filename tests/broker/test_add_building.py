@@ -122,6 +122,22 @@ class TestAddBuilding(TestBrokerCommand):
         self.searchoutput(out, r"400 aq add_building .*--building='nonascii'",
                           command)
 
+    def test_addtu(self):
+        self.dsdb_expect("add_building_aq -building_name tu -city ny "
+                         "-building_addr 14 Test Lane")
+        self.dsdb_expect("add_campus_building_aq -campus_name ny "
+                         "-building_name tu")
+        command = ["add", "building", "--building", "tu", "--city", "ny",
+                   "--address", "14 Test Lane"]
+        self.noouttest(command)
+        self.dsdb_verify()
+
+    def test_verifyaddtu(self):
+        command = "show building --building tu"
+        out, err = self.successtest(command.split(" "))
+        self.matchoutput(out, "Building: tu", command)
+        self.matchoutput(out, "Address: 14 Test Lane", command)
+
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddBuilding)

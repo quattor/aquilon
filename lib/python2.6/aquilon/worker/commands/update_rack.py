@@ -30,7 +30,7 @@
 
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import Machine
+from aquilon.aqdb.model import Machine, DnsDomain
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.location import get_location
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
@@ -41,7 +41,7 @@ class CommandUpdateRack(BrokerCommand):
     required_parameters = ["rack"]
 
     def render(self, session, logger, rack, row, column, room, clearroom,
-               fullname, comments, **arguments):
+               fullname, default_dns_domain, comments, **arguments):
         dbrack = get_location(session, rack=rack)
         if row is not None:
             dbrack.rack_row = row
@@ -51,6 +51,13 @@ class CommandUpdateRack(BrokerCommand):
             dbrack.fullname = fullname
         if comments is not None:
             dbrack.comments = comments
+        if default_dns_domain is not None:
+            if default_dns_domain:
+                dbdns_domain = DnsDomain.get_unique(session, default_dns_domain,
+                                                    compel=True)
+                dbrack.default_dns_domain = dbdns_domain
+            else:
+                dbrack.default_dns_domain = None
         if room:
             dbroom = get_location(session, room=room)
             # This one would change the template's locations hence forbidden

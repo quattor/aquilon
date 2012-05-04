@@ -2436,6 +2436,7 @@
          <option name="clearroom" type="boolean" conflicts="room">Clear room information for the rack</option>
          <option name="fullname" type="string">Full, descriptive name</option>
          <option name="comments" type="string">Comments</option>
+         <option name="default_dns_domain" type="string">Default DNS domain for new machines</option>
       </optgroup>
       <transport method="post" path="location/rack/%(rack)s" />
    </command>
@@ -2484,6 +2485,7 @@
          <option name="address" type="string">Address of the building</option>
          <option name="city" type="string">Name of the city the building is in</option>
          <option name="fullname" type="string">Full, descriptive name</option>
+         <option name="default_dns_domain" type="string">Default DNS domain for new machines</option>
          <option name="comments" type="string">Comments</option>
       </optgroup>
       <transport method="post" path="location/building/%(building)s" />
@@ -2605,6 +2607,7 @@
       <optgroup name="optional_opts" mandatory="False" fields="any">
          <option name="timezone" type="string">Timezone of the city (e.g. Europe/London)</option>
          <option name="campus" type="string">Campus (should be in the same hub)</option>
+         <option name="default_dns_domain" type="string">Default DNS domain for new machines</option>
       </optgroup>
       <transport method="post" path="location/city/%(city)s" />
    </command>

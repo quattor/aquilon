@@ -30,7 +30,8 @@
 
 
 from aquilon.exceptions_ import ArgumentError, AquilonError
-from aquilon.aqdb.model import Machine, ServiceMap, PersonalityServiceMap
+from aquilon.aqdb.model import (Machine, ServiceMap, PersonalityServiceMap,
+                                DnsDomain)
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.location import get_location
 from aquilon.worker.processes import DSDBRunner
@@ -44,7 +45,7 @@ class CommandUpdateBuilding(BrokerCommand):
     required_parameters = ["building"]
 
     def render(self, session, logger, building, city, address,
-               fullname, comments, **arguments):
+               fullname, default_dns_domain, comments, **arguments):
         dbbuilding = get_location(session, building=building)
 
         old_address = dbbuilding.address
@@ -56,6 +57,13 @@ class CommandUpdateBuilding(BrokerCommand):
             dbbuilding.fullname = fullname
         if comments is not None:
             dbbuilding.comments = comments
+        if default_dns_domain is not None:
+            if default_dns_domain:
+                dbdns_domain = DnsDomain.get_unique(session, default_dns_domain,
+                                                    compel=True)
+                dbbuilding.default_dns_domain = dbdns_domain
+            else:
+                dbbuilding.default_dns_domain = None
 
         dsdb_runner = DSDBRunner(logger=logger)
 

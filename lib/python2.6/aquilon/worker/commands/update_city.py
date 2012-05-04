@@ -30,7 +30,7 @@
 
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import Machine
+from aquilon.aqdb.model import Machine, DnsDomain
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.processes import DSDBRunner
 from aquilon.worker.dbwrappers.location import get_location
@@ -41,15 +41,22 @@ class CommandUpdateCity(BrokerCommand):
 
     required_parameters = ["city"]
 
-    def render(self, session, logger, city, timezone, campus, **arguments):
+    def render(self, session, logger, city, timezone, campus,
+               default_dns_domain, **arguments):
         dbcity = get_location(session, city=city)
 
         # Updating machine templates is expensive, so only do that if needed
         update_machines = False
 
-
         if timezone is not None:
             dbcity.timezone = timezone
+        if default_dns_domain is not None:
+            if default_dns_domain:
+                dbdns_domain = DnsDomain.get_unique(session, default_dns_domain,
+                                                    compel=True)
+                dbcity.default_dns_domain = dbdns_domain
+            else:
+                dbcity.default_dns_domain = None
 
         prev_campus = None
         dsdb_runner = None

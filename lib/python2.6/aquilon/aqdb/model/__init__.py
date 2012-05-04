@@ -39,6 +39,9 @@ from aquilon.aqdb.model.role import Role
 from aquilon.aqdb.model.realm import Realm
 from aquilon.aqdb.model.user_principal import UserPrincipal
 
+#DNS DOMAINS
+from aquilon.aqdb.model.dns_domain import DnsDomain
+
 #LOCATION
 from aquilon.aqdb.model.location import Location
 from aquilon.aqdb.model.company import Company
@@ -57,7 +60,6 @@ from aquilon.aqdb.model.dns_environment import DnsEnvironment
 from aquilon.aqdb.model.network_environment import NetworkEnvironment
 from aquilon.aqdb.model.network import Network
 from aquilon.aqdb.model.static_route import StaticRoute
-from aquilon.aqdb.model.dns_domain import DnsDomain
 from aquilon.aqdb.model.dns_map import DnsMap
 from aquilon.aqdb.model.fqdn import Fqdn
 from aquilon.aqdb.model.dns_record import DnsRecord

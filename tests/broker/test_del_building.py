@@ -112,6 +112,18 @@ class TestDelBuilding(TestBrokerCommand):
         # delete network
         self.noouttest(["del_network", "--ip", "192.176.6.0"])
 
+    def test_deletetu(self):
+        self.dsdb_expect("delete_campus_building_aq -campus_name ta "
+                         "-building_name tu")
+        self.dsdb_expect("delete_building_aq -building tu")
+        command = "del building --building tu"
+        self.noouttest(command.split(" "))
+        self.dsdb_verify()
+
+    def test_verify_deletetu(self):
+        command = "show building --building tu"
+        self.notfoundtest(command.split(" "))
+
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelBuilding)

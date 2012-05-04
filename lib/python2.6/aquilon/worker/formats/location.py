@@ -55,6 +55,9 @@ class LocationFormatter(ObjectFormatter):
         if location.parents:
             details.append(indent + "  Location Parents: [%s]" %
                     ", ".join(format(p) for p in location.parents))
+        if location.default_dns_domain:
+            details.append(indent + "  Default DNS Domain: %s" %
+                           location.default_dns_domain)
         return "\n".join(details)
 
     def format_proto(self, loc, skeleton=None):
