@@ -335,10 +335,11 @@ class TestAdd10GigHardware(TestBrokerCommand):
     # evm19 -> self.net.unknown[6].usable[0]
     # and the above pattern repeats
     def test_700_add_hosts(self):
-        # Skip index 8 and 17 - these don't have interfaces.
+        # Skip index 8 and 17 - these don't have interfaces. Index 16 will be
+        # used for --prefix testing.
         mac_prefix = "00:50:56:01:20"
         mac_idx = 60
-        for i in range(0, 8) + range(9, 17):
+        for i in range(0, 8) + range(9, 16):
             machine = "evm%d" % (10 + i)
             hostname = "ivirt%d.aqd-unittest.ms.com" % (1 + i)
 
@@ -360,6 +361,20 @@ class TestAdd10GigHardware(TestBrokerCommand):
                        "--archetype=aquilon", "--personality=inventory",
                        "--osname=linux", "--osversion=5.0.1-x86_64"]
             (out, err) = self.successtest(command)
+        self.dsdb_verify()
+
+    def test_705_add_nexthost(self):
+        ip = self.net.unknown[9].usable[1]
+        mac = "00:50:56:01:20:4b"
+        self.dsdb_expect_add("ivirt17.aqd-unittest.ms.com", ip, "eth0", mac)
+        command = ["add", "host", "--prefix", "ivirt", "--machine", "evm26",
+                   "--autoip", "--domain", "unittest",
+                   "--archetype", "aquilon", "--personality", "inventory",
+                   "--osname", "linux", "--osversion", "5.0.1-x86_64"]
+        out = self.commandtest(command)
+        # This also verifies that we use the mapping for the building, not the
+        # city
+        self.matchoutput(out, "ivirt17.aqd-unittest.ms.com", command)
         self.dsdb_verify()
 
     def test_710_bad_pg(self):
