@@ -322,6 +322,19 @@ class TestVulcan20(TestBrokerCommand):
         self.matchclean(out, "evm2", command)
         self.matchclean(out, "evm10", command)
 
+    def test_115_search_host_by_metacluster(self):
+        command = "search host --cluster utmc8"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "utpgh0.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "utpgh1.aqd-unittest.ms.com", command)
+
+    def test_116_search_machine_by_metacluster(self):
+        command = "search machine --cluster utmc8"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "utpgm0", command)
+        self.matchoutput(out, "utpgm1", command)
+        self.matchoutput(out, "utpgm2", command)
+        self.matchclean(out, "utpgs01p0", command)
 
 #    metacluster aligned svc tests
 

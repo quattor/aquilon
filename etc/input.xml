@@ -218,7 +218,7 @@
          <option name="cpuspeed" type="int">cpu speed</option>
          <option name="cpucount" type="int">cpu count</option>
          <option name="memory" type="int">memory in MB</option>
-         <option name="cluster" type="string">cluster name</option>
+         <option name="cluster" type="string">cluster or metacluster name</option>
          <option name="model" type="string">model name</option>
          <option name="machine_type" type="string">machine type for the model (blade, virtual_machine, etc.)</option>
          <option name="vendor" type="string">vendor name</option>
@@ -361,7 +361,7 @@
          <option name="machine_type" type="string">machine type for the model (blade, virtual_machine, etc.)</option>
          <option name="vendor" type="string">machine vendor name</option>
          <option name="serial" type="string">machine serial number</option>
-         <option name="cluster" type="string">cluster name</option>
+         <option name="cluster" type="string">cluster or metacluster name</option>
          <option name="guest_on_cluster" type="string">host is a virtual machine guest on this cluster</option>
          <option name="guest_on_share" type="string">host is a virtual machine using this nas_disk_share</option>
          <option name="member_cluster_share" type="string">host is a member of a cluster with machines using this nas_disk_share</option>

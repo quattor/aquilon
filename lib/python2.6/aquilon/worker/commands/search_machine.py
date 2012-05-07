@@ -35,8 +35,7 @@ from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.formats.machine import SimpleMachineList
 from aquilon.aqdb.model import (Machine, Cpu, Cluster, Service, ServiceInstance,
                                 NasDisk, Disk, ClusterResource,
-                                Share, VirtualDisk, Disk)
-
+                                Share, VirtualDisk, Disk, MetaCluster)
 from aquilon.worker.dbwrappers.hardware_entity import (
     search_hardware_entity_query)
 
@@ -64,8 +63,12 @@ class CommandSearchMachine(BrokerCommand):
             q = q.filter_by(memory=memory)
         if cluster:
             dbcluster = Cluster.get_unique(session, cluster, compel=True)
-            q = q.join('vm_container', ClusterResource)
-            q = q.filter_by(cluster=dbcluster)
+            if isinstance(dbcluster,MetaCluster):
+                q = q.join('vm_container', ClusterResource, Cluster)
+                q = q.filter_by(metacluster=dbcluster)
+            else:
+                q = q.join('vm_container', ClusterResource)
+                q = q.filter_by(cluster=dbcluster)
             q = q.reset_joinpoint()
         if share:
             #v2

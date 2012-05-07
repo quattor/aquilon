@@ -40,7 +40,7 @@ from aquilon.aqdb.model import (Host, Cluster, Archetype, Personality,
                                 ServiceInstance, NasDisk, Disk, Machine, Model,
                                 ARecord, Fqdn, DnsDomain, Interface,
                                 AddressAssignment, NetworkEnvironment, Network,
-                                VirtualMachine, ClusterResource)
+                                MetaCluster, VirtualMachine, ClusterResource)
 from aquilon.aqdb.model.dns_domain import parse_fqdn
 from aquilon.worker.dbwrappers.service_instance import get_service_instance
 from aquilon.worker.dbwrappers.branch import get_branch_and_author
@@ -216,7 +216,11 @@ class CommandSearchHost(BrokerCommand):
 
         if cluster:
             dbcluster = Cluster.get_unique(session, cluster, compel=True)
-            q = q.filter_by(cluster=dbcluster)
+            if isinstance(dbcluster,MetaCluster):
+                q = q.join('cluster')
+                q = q.filter_by(metacluster=dbcluster)
+            else:
+                q = q.filter_by(cluster=dbcluster)
             q = q.reset_joinpoint()
         if guest_on_cluster:
             dbcluster = Cluster.get_unique(session, guest_on_cluster,
