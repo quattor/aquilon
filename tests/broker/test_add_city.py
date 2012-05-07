@@ -46,13 +46,14 @@ class TestAddCity(TestBrokerCommand):
                          "-country_symbol us -city_name Exampleton")
         command = ["add", "city", "--city", "ex", "--country", "us",
                    "--fullname", "Exampleton", "--timezone",
-                   "US/Eastern"]
+                   "US/Eastern", "--comments", "Example city comment"]
         self.noouttest(command)
         self.dsdb_verify()
 
     def testaddupdateexample(self):
         command = ["update", "city", "--city", "ex",
-                   "--timezone", "EDT"]
+                   "--timezone", "EDT",
+                   "--comments", "Exampleton city comment"]
         self.ignoreoutputtest(command)
         # For a difference, let's use raw this time
         command = "show city --city ex"
@@ -87,12 +88,13 @@ class TestAddCity(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out, 'variable TIMEZONE = "UTC";', command)
 
-    def testverifyaddbu(self):
+    def testverifyex(self):
         command = "show city --city ex"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "City: ex", command)
+        self.matchoutput(out, "Comments: Exampleton city comment", command)
 
-    def testverifyaddbuproto(self):
+    def testverifyexproto(self):
         command = "show city --city ex --format proto"
         out = self.commandtest(command.split(" "))
         locs = self.parse_location_msg(out, 1)

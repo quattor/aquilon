@@ -2608,6 +2608,7 @@
          <option name="timezone" type="string">Timezone of the city (e.g. Europe/London)</option>
          <option name="campus" type="string">Campus (should be in the same hub)</option>
          <option name="default_dns_domain" type="string">Default DNS domain for new machines</option>
+         <option name="comments" type="string">Comments</option>
       </optgroup>
       <transport method="post" path="location/city/%(city)s" />
    </command>

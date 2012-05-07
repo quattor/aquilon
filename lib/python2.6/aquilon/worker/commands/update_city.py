@@ -42,7 +42,7 @@ class CommandUpdateCity(BrokerCommand):
     required_parameters = ["city"]
 
     def render(self, session, logger, city, timezone, campus,
-               default_dns_domain, **arguments):
+               default_dns_domain, comments, **arguments):
         dbcity = get_location(session, city=city)
 
         # Updating machine templates is expensive, so only do that if needed
@@ -50,6 +50,8 @@ class CommandUpdateCity(BrokerCommand):
 
         if timezone is not None:
             dbcity.timezone = timezone
+        if comments is not None:
+            dbcity.comments = comments
         if default_dns_domain is not None:
             if default_dns_domain:
                 dbdns_domain = DnsDomain.get_unique(session, default_dns_domain,
