@@ -58,8 +58,8 @@ class CommandShowClusterAll(BrokerCommand):
                       joinedload('_metacluster.metacluster'),
                       joinedload('resholder'),
                       subqueryload('resholder.resources'),
-                      subqueryload('_cluster_svc_binding'),
-                      subqueryload('_allowed_pers'))
+                      subqueryload('service_bindings'),
+                      subqueryload('allowed_personalities'))
         q = q.order_by(Cluster.name)
         dbclusters = q.all()
         if cluster and not dbclusters:

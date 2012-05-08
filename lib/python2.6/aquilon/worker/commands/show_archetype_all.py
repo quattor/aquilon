@@ -39,7 +39,7 @@ class CommandShowArchetypeAll(BrokerCommand):
     def render(self, session, **arguments):
         q = session.query(Archetype)
         q = q.options(undefer(Archetype.comments),
-                      subqueryload('_services'),
+                      subqueryload('services'),
                       subqueryload('features'),
                       joinedload('features.feature'))
         q = q.order_by(Archetype.name)

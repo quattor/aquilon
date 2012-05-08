@@ -60,8 +60,8 @@ class CommandShowESXClusterAll(BrokerCommand):
                       subqueryload('switch'),
                       joinedload('switch.primary_name'),
                       joinedload('switch.primary_name.fqdn'),
-                      subqueryload('_cluster_svc_binding'),
-                      subqueryload('_allowed_pers'))
+                      subqueryload('service_bindings'),
+                      subqueryload('allowed_personalities'))
         q = q.order_by(EsxCluster.name)
         dbclusters = q.all()
         if cluster and not dbclusters:

@@ -32,7 +32,6 @@ from datetime import datetime
 from sqlalchemy import (Column, Integer, DateTime, Sequence, String,
                         UniqueConstraint, Boolean)
 from sqlalchemy.orm import deferred
-from sqlalchemy.ext.associationproxy import association_proxy
 
 from aquilon.aqdb.model import Base
 from aquilon.aqdb.column_types import AqStr, Enum
@@ -40,6 +39,7 @@ from aquilon.aqdb.column_types import AqStr, Enum
 _TN = 'archetype'
 
 CLUSTER_TYPES = ('esx', 'storage', 'compute')
+
 
 class Archetype(Base):
     """ Archetype names """
@@ -60,7 +60,6 @@ class Archetype(Base):
 
     comments = deferred(Column(String(255), nullable=True))
 
-    services = association_proxy('_services', 'service')
 
 archetype = Archetype.__table__  # pylint: disable=C0103, E1101
 archetype.info['unique_fields'] = ['name']

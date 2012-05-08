@@ -56,16 +56,6 @@ _PSLI = 'personality_service_list_item'
 _ABV = 'prsnlty_sli'
 
 
-def _service_archetype_creator(archetype):
-    """ creator function for ServiceItemList """
-    return ServiceListItem(archetype=archetype)
-
-
-def _service_personality_creator(personality):
-    """ creator function for ServiceItemList """
-    return PersonalityServiceListItem(personality=personality)
-
-
 class Service(Base):
     """ SERVICE: composed of a simple name of a service consumable by
         OTHER hosts. Applications that run on a system like ssh are
@@ -79,11 +69,6 @@ class Service(Base):
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
     comments = Column(String(255), nullable=True)
-
-    archetypes = association_proxy('_archetypes', 'archetype',
-                                   creator=_service_archetype_creator)
-    personalities = association_proxy('_personalities', 'personality',
-                                      creator=_service_personality_creator)
 
     aligned_cluster_types = association_proxy('_clusters', 'cluster_type')
 
@@ -107,37 +92,24 @@ class ServiceListItem(Base):
     __tablename__ = _SLI
     _class_label = 'Required Service'
 
-    id = Column(Integer, Sequence('service_list_item_id_seq'),
-                           primary_key=True)
-
     service_id = Column(Integer, ForeignKey('%s.id' % (_TN),
                                             name='sli_svc_fk',
                                             ondelete='CASCADE'),
-                        nullable=False)
+                        primary_key=True)
 
     archetype_id = Column(Integer, ForeignKey('archetype.id',
                                               name='sli_arctype_fk',
                                               ondelete='CASCADE'),
-                          nullable=False)
+                          primary_key=True)
 
-    creation_date = deferred(Column(DateTime, default=datetime.now,
-                                    nullable=False))
-    comments = deferred(Column(String(255), nullable=True))
-
-    archetype = relation(Archetype, lazy=False, innerjoin=True,
-                         backref=backref('_services',
-                                         cascade='all, delete-orphan'))
-    service = relation(Service, lazy=False, innerjoin=True,
-                       backref=backref('_archetypes',
-                                       cascade='all, delete-orphan'))
 
 sli = ServiceListItem.__table__  # pylint: disable=C0103, E1101
-sli.primary_key.name = 'svc_list_item_pk'
-sli.append_constraint(UniqueConstraint('archetype_id', 'service_id',
-                                       name='svc_list_svc_uk'))
-sli.info['unique_fields'] = ['archetype', 'service']
+sli.primary_key.name = '%s_pk' % _SLI
 
 Index('srvlst_archtyp_idx', sli.c.archetype_id)
+
+Service.archetypes = relation(Archetype, secondary=sli,
+                              backref=backref("services"))
 
 
 class PersonalityServiceListItem(Base):
@@ -158,20 +130,10 @@ class PersonalityServiceListItem(Base):
                                                  ondelete='CASCADE'),
                              primary_key=True)
 
-    creation_date = deferred(Column(DateTime, default=datetime.now,
-                                    nullable=False))
-    comments = deferred(Column(String(255), nullable=True))
-
-    personality = relation(Personality, lazy=False,
-                           innerjoin=True,
-                           backref=backref('_services',
-                                           cascade='all, delete-orphan'))
-    service = relation(Service, lazy=False, innerjoin=True,
-                       backref=backref('_personalities',
-                                       cascade='all, delete-orphan'))
-
 psli = PersonalityServiceListItem.__table__  # pylint: disable=C0103, E1101
 psli.primary_key.name = '%s_pk' % _ABV
-psli.info['unique_fields'] = ['personality', 'service']
 
 Index('%s_prsnlty_idx' % _ABV, psli.c.personality_id)
+
+Service.personalities = relation(Personality, secondary=psli,
+                                 backref=backref("services"))

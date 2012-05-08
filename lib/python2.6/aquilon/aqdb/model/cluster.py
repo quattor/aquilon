@@ -83,10 +83,6 @@ _CSBABV = 'clstr_svc_bndg'
 _CAP = 'clstr_allow_per'
 
 
-def _csb_svcinst_creator(service_instance):
-    return ClusterServiceBinding(service_instance=service_instance)
-
-
 class Cluster(Base):
     """
         A group of two or more hosts for high availablility or grid capabilities
@@ -142,14 +138,6 @@ class Cluster(Base):
     personality = relation(Personality, lazy=False, innerjoin=True)
     branch = relation(Branch, lazy=False, innerjoin=True, backref='clusters')
     sandbox_author = relation(UserPrincipal)
-
-    allowed_personalities = association_proxy('_allowed_pers', 'personality',
-            creator=lambda pers: ClusterAllowedPersonality(personality=pers))
-
-    service_bindings = association_proxy('_cluster_svc_binding',
-                                         'service_instance',
-                                         creator=_csb_svcinst_creator)
-
 
     metacluster = association_proxy('_metacluster', 'metacluster')
 
@@ -260,6 +248,7 @@ cluster = Cluster.__table__  # pylint: disable=C0103, E1101
 cluster.primary_key.name = 'cluster_pk'
 cluster.append_constraint(UniqueConstraint('name', name='cluster_uk'))
 cluster.info['unique_fields'] = ['name']
+
 
 class ComputeCluster(Cluster):
     """
@@ -567,21 +556,11 @@ class ClusterAllowedPersonality(Base):
                                                 ondelete='CASCADE'),
                             primary_key=True)
 
-    creation_date = deferred(Column(DateTime, default=datetime.now,
-                                    nullable=False))
-
-    cluster = relation(Cluster, lazy=False,
-                       backref=backref('_allowed_pers', cascade='all, delete-orphan'))
-
-    personality = relation(Personality, lazy=False,
-                           backref=backref('_clusters_allowing',
-                                           cascade='all, delete-orphan'))
-
 
 cap = ClusterAllowedPersonality.__table__  # pylint: disable=C0103, E1101
 cap.primary_key.name = '%s_pk' % _CAP
-cap.info['unique_fields'] = ['cluster', 'personality']
-cap.cluster = association_proxy('_cluster', 'cluster')
+
+Cluster.allowed_personalities = relation(Personality, secondary=cap)
 
 
 class ClusterAlignedService(Base):
@@ -615,7 +594,6 @@ cas = ClusterAlignedService.__table__  # pylint: disable=C0103, E1101
 cas.primary_key.name = '%s_pk' % _CASABV
 cas.info['unique_fields'] = ['cluster_type', 'service']
 
-
 Cluster.required_services = relation(ClusterAlignedService,
     primaryjoin=ClusterAlignedService.cluster_type == Cluster.cluster_type,
     foreign_keys=[ClusterAlignedService.cluster_type],
@@ -639,34 +617,8 @@ class ClusterServiceBinding(Base):
                                             name='%s_srv_inst_fk' % _CSBABV),
                                  primary_key=True)
 
-    creation_date = deferred(Column(DateTime, default=datetime.now,
-                                    nullable=False))
-    comments = deferred(Column(String(255)))
-
-    cluster = relation(Cluster, lazy=False, innerjoin=True,
-                       backref=backref('_cluster_svc_binding',
-                                       cascade='all, delete-orphan'))
-
-    """
-        backref name != forward reference name intentional as it seems more
-        readable for the following reason:
-        If you instantiate a ClusterServiceBinding, you do it with
-                ClusterServiceBinding(cluster=foo, service_instance=bar)
-        But if you append to the association_proxy
-                cluster.service_bindings.append(svc_inst)
-    """
-    service_instance = relation(ServiceInstance, lazy=False, innerjoin=True,
-                                backref=backref('service_instances',
-                                                cascade="all, delete-orphan"))
-
-    """
-        cfg_path will die soon. using service instance here to
-        ease later transition.
-    """
-    @property
-    def cfg_path(self):
-        return self.service_instance.cfg_path
 
 csb = ClusterServiceBinding.__table__  # pylint: disable=C0103, E1101
 csb.primary_key.name = '%s_pk' % _CSB
-csb.info['unique_fields'] = ['cluster', 'service_instance']
+
+Cluster.service_bindings = relation(ServiceInstance, secondary=csb)

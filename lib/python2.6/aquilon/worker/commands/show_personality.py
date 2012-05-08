@@ -67,7 +67,7 @@ class CommandShowPersonality(BrokerCommand):
         q = q.join(Archetype)
         q = q.order_by(Archetype.name, Personality.name)
         q = q.options(contains_eager('archetype'),
-                      subqueryload('_services'),
+                      subqueryload('services'),
                       subqueryload('grns'),
                       subqueryload('features'),
                       joinedload('features.feature'),

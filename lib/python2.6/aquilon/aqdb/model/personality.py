@@ -32,7 +32,6 @@ from datetime import datetime
 from sqlalchemy import (Column, Integer, Boolean, DateTime, Sequence, String,
                         ForeignKey, UniqueConstraint, Index)
 from sqlalchemy.orm import relation, deferred
-from sqlalchemy.ext.associationproxy import association_proxy
 
 from aquilon.aqdb.model import Base, Archetype, Grn
 from aquilon.aqdb.column_types.aqstr import AqStr
@@ -61,8 +60,6 @@ class Personality(Base):
     comments = Column(String(255), nullable=True)
 
     archetype = relation(Archetype)
-
-    services = association_proxy('_services', 'service')
 
     @property
     def is_cluster(self):

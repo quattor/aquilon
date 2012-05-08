@@ -97,7 +97,7 @@ class ServiceInstance(Base):
         as though max_members are bound.  The tricky bit is de-duplication.
 
         """
-        from aquilon.aqdb.model import (ClusterServiceBinding, Cluster)
+        from aquilon.aqdb.model import Cluster
         session = object_session(self)
 
         cluster_types = self.service.aligned_cluster_types
@@ -107,8 +107,7 @@ class ServiceInstance(Base):
 
         q = session.query(func.sum(Cluster.max_hosts))
         q = q.filter(Cluster.cluster_type.in_(cluster_types))
-        q = q.join(ClusterServiceBinding)
-        q = q.filter_by(service_instance=self)
+        q = q.filter(Cluster.service_bindings.contains(self))
         # Make sure it's a number
         adjusted_count = q.scalar() or 0
 

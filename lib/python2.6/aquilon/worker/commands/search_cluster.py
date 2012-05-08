@@ -164,15 +164,13 @@ class CommandSearchCluster(BrokerCommand):
                 dbsi = ServiceInstance.get_unique(session, name=instance,
                                                   service=dbservice,
                                                   compel=True)
-                q = q.join('_cluster_svc_binding')
-                q = q.filter_by(service_instance=dbsi)
-                q = q.reset_joinpoint()
+                q = q.filter(Cluster.service_bindings.contains(dbsi))
             else:
-                q = q.join('_cluster_svc_binding', 'service_instance')
+                q = q.join('service_bindings')
                 q = q.filter_by(service=dbservice)
                 q = q.reset_joinpoint()
         elif instance:
-            q = q.join('_cluster_svc_binding', 'service_instance')
+            q = q.join('service_bindings')
             q = q.filter_by(name=instance)
             q = q.reset_joinpoint()
 
@@ -206,18 +204,16 @@ class CommandSearchCluster(BrokerCommand):
             dbaa = Archetype.get_unique(session, allowed_archetype,
                                         compel=True)
         if allowed_personality and allowed_archetype:
-            q = q.join('_allowed_pers')
             dbap = Personality.get_unique(session, archetype=dbaa,
                                           name=allowed_personality,
                                           compel=True)
-            q = q.filter_by(personality=dbap)
-            q = q.reset_joinpoint()
+            q = q.filter(Cluster.allowed_personalities.contains(dbap))
         elif allowed_personality:
-            q = q.join('_allowed_pers', 'personality')
+            q = q.join('allowed_personalities')
             q = q.filter_by(name=allowed_personality)
             q = q.reset_joinpoint()
         elif allowed_archetype:
-            q = q.join('_allowed_pers', 'personality')
+            q = q.join('allowed_personalities')
             q = q.filter_by(archetype=dbaa)
             q = q.reset_joinpoint()
 
