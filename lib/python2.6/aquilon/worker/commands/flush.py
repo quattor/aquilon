@@ -312,7 +312,7 @@ class CommandFlush(BrokerCommand):
                               joinedload("machine.primary_name.fqdn"),
                               subqueryload("grns"),
                               subqueryload("resholder"),
-                              subqueryload("_services_used"),
+                              subqueryload("services_used"),
                               subqueryload("_services_provided"),
                               subqueryload("_cluster"),
                               lazyload("_cluster.host"),

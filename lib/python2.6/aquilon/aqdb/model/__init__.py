@@ -107,7 +107,7 @@ from aquilon.aqdb.model.feature import (Feature, FeatureLink, HostFeature,
 #SERVICE
 from aquilon.aqdb.model.service import (Service, ServiceListItem,
                                         PersonalityServiceListItem)
-from aquilon.aqdb.model.service_instance import ServiceInstance, BuildItem
+from aquilon.aqdb.model.service_instance import ServiceInstance
 from aquilon.aqdb.model.service_instance_server import ServiceInstanceServer
 from aquilon.aqdb.model.service_map import ServiceMap
 from aquilon.aqdb.model.personality_service_map import PersonalityServiceMap

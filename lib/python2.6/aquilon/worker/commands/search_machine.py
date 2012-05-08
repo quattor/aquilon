@@ -84,7 +84,7 @@ class CommandSearchMachine(BrokerCommand):
                           subqueryload('chassis_slot.chassis'),
                           subqueryload('disks'),
                           subqueryload('host'),
-                          subqueryload('host._services_used'),
+                          subqueryload('host.services_used'),
                           subqueryload('host._cluster'))
             return q.all()
         return SimpleMachineList(q.all())
