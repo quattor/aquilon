@@ -43,7 +43,7 @@ class TestUpdateBranch(TestBrokerCommand):
     # FIXME: Verify against sandboxes
 
     def testupdatedomain(self):
-        self.noouttest(["update", "branch", "--branch", "deployable",
+        self.noouttest(["update", "domain", "--domain", "deployable",
                         "--comments", "Updated Comments",
                         "--compiler_version=8.2.7"])
 
@@ -58,28 +58,30 @@ class TestUpdateBranch(TestBrokerCommand):
         self.matchoutput(out, "Comments: Updated Comments", command)
 
     def testbadcompilerversioncharacters(self):
-        command = ["update_branch", "--branch=changetest1",
+        command = ["update_sandbox", "--sandbox=changetest1",
                    "--compiler_version=version!with@bad#characters"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Invalid characters in compiler version",
                          command)
 
     def testbadcompilerversion(self):
-        command = ["update_branch", "--branch=changetest1",
+        command = ["update_sandbox", "--sandbox=changetest1",
                    "--compiler_version=version-does-not-exist"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Compiler not found at", command)
 
-    def testchangemanagerforsandbox(self):
-        command = ["update_branch", "--branch=changetest1", "--change_manager"]
-        out = self.badrequesttest(command)
-        self.matchoutput(out,
-                         "Change management can only be controlled for "
-                         "domains.",
-                         command)
+    def testnotadomain(self):
+        command = ["update_domain", "--domain=changetest1", "--change_manager"]
+        out = self.notfoundtest(command)
+        self.matchoutput(out, "Domain changetest1 not found.", command)
+
+    def testnotasandbox(self):
+        command = ["update_sandbox", "--sandbox=unittest", "--autosync"]
+        out = self.notfoundtest(command)
+        self.matchoutput(out, "Sandbox unittest not found.", command)
 
     def testchangemanagerfortracked(self):
-        command = ["update_branch", "--branch=ut-prod", "--change_manager"]
+        command = ["update_domain", "--domain=ut-prod", "--change_manager"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "Cannot enforce a change manager for tracking "
@@ -87,17 +89,25 @@ class TestUpdateBranch(TestBrokerCommand):
                          command)
 
     def testupdateprod(self):
-        self.noouttest(["update", "branch", "--branch", "prod",
-                        "--change_manager", "--allow_manage"])
+        self.noouttest(["update", "domain", "--domain", "prod",
+                        "--change_manager"])
 
     def testverifyprod(self):
         command = ["show", "domain", "--domain", "prod"]
         out = self.commandtest(command)
         self.matchoutput(out, "Requires Change Manager: True", command)
+
+    def testupdateunittest(self):
+        self.noouttest(["update", "domain", "--domain", "unittest",
+                        "--allow_manage"])
+
+    def testverifyunittest(self):
+        command = ["show", "domain", "--domain", "unittest"]
+        out = self.commandtest(command)
         self.matchoutput(out, "May Contain Hosts/Clusters: True", command)
 
     def testupdatenomanage(self):
-        command = ["update", "branch", "--branch", "nomanage",
+        command = ["update", "domain", "--domain", "nomanage",
                    "--disallow_manage"]
         self.noouttest(command)
 

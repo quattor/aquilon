@@ -28,6 +28,7 @@
 # TERMS THAT MAY APPLY.
 """Wrapper to make getting a branch simpler."""
 
+import os
 import re
 
 from sqlalchemy.orm.session import object_session
@@ -117,3 +118,12 @@ def search_branch_query(config, session, cls, owner=None, compiler_version=None,
     if validated is not None:
         q = q.filter_by(is_sync_valid=validated)
     return q
+
+def expand_compiler(config, compiler_version):
+    if not VERSION_RE.match(compiler_version):
+        raise ArgumentError("Invalid characters in compiler version")
+    compiler = config.get("panc", "pan_compiler", raw=True) % {
+        'version':compiler_version}
+    if not os.path.exists(compiler):
+        raise ArgumentError("Compiler not found at '%s'" % compiler)
+    return compiler

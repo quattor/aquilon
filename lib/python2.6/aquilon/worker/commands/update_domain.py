@@ -26,54 +26,41 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-"""Contains the logic for `aq update branch`."""
+"""Contains the logic for `aq update domain`."""
 
-
-import os
 
 from aquilon.exceptions_ import ArgumentError, AuthorizationException
-from aquilon.aqdb.model import Branch, Domain
+from aquilon.aqdb.model import Domain
 from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.dbwrappers.branch import VERSION_RE
+from aquilon.worker.dbwrappers.branch import expand_compiler
 
 
-class CommandUpdateBranch(BrokerCommand):
+class CommandUpdateDomain(BrokerCommand):
 
-    required_parameters = ["branch"]
+    required_parameters = ["domain"]
 
-    def render(self, session, dbuser, branch, comments, compiler_version,
+    def render(self, session, dbuser, domain, comments, compiler_version,
                autosync, change_manager, allow_manage, **arguments):
-        dbbranch = Branch.get_unique(session, branch, compel=True)
+        dbdomain = Domain.get_unique(session, domain, compel=True)
 
         # FIXME: proper authorization
-        if dbbranch.owner != dbuser and dbuser.role.name != 'aqd_admin':
+        if dbdomain.owner != dbuser and dbuser.role.name != 'aqd_admin':
             raise AuthorizationException("Only the owner or an AQD admin can "
-                                         "update a branch.")
+                                         "update a domain.")
 
         if comments:
-            dbbranch.comments = comments
+            dbdomain.comments = comments
         if compiler_version:
-            if not VERSION_RE.match(compiler_version):
-                raise ArgumentError("Invalid characters in compiler version")
-            compiler = self.config.get("panc", "pan_compiler", raw=True) % {
-                'version':compiler_version}
-            if not os.path.exists(compiler):
-                raise ArgumentError("Compiler not found at '%s'" % compiler)
-            dbbranch.compiler = compiler
+            dbdomain.compiler = expand_compiler(self.config, compiler_version)
         if autosync is not None:
-            dbbranch.autosync = autosync
+            dbdomain.autosync = autosync
         if change_manager is not None:
-            if not isinstance(dbbranch, Domain):
-                raise ArgumentError("Change management can only be controlled "
-                                    "for domains.")
-            if dbbranch.tracked_branch:
+            if dbdomain.tracked_branch:
                 raise ArgumentError("Cannot enforce a change manager for "
                                     "tracking domains.")
-            dbbranch.requires_change_manager = bool(change_manager)
+            dbdomain.requires_change_manager = change_manager
         if allow_manage is not None:
-            if not isinstance(dbbranch, Domain):
-                raise ArgumentError("Manage control is valid only for domains.")
-            dbbranch.allow_manage = allow_manage
+            dbdomain.allow_manage = allow_manage
 
         session.flush()
         return

@@ -129,7 +129,11 @@ class CustomAction(object):
             print >>sys.stderr, "Not ready to publish, found:\n%s" % out
             sys.exit(1)
 
-        revlist = "origin/%s..HEAD" % commandOptions["branch"]
+        if "sandbox" in commandOptions:
+            branch = commandOptions["sandbox"]
+        else:
+            branch = commandOptions["branch"]
+        revlist = "origin/%s..HEAD" % branch
         p = Popen(("git", "log", revlist), stdout=PIPE, stderr=2)
         (out,err) = p.communicate()
 
