@@ -42,7 +42,7 @@ class CommandUpdateBranch(BrokerCommand):
     required_parameters = ["branch"]
 
     def render(self, session, dbuser, branch, comments, compiler_version,
-               autosync, change_manager, **arguments):
+               autosync, change_manager, allow_manage, **arguments):
         dbbranch = Branch.get_unique(session, branch, compel=True)
 
         # FIXME: proper authorization
@@ -70,6 +70,10 @@ class CommandUpdateBranch(BrokerCommand):
                 raise ArgumentError("Cannot enforce a change manager for "
                                     "tracking domains.")
             dbbranch.requires_change_manager = bool(change_manager)
-        session.add(dbbranch)
+        if allow_manage is not None:
+            if not isinstance(dbbranch, Domain):
+                raise ArgumentError("Manage control is valid only for domains.")
+            dbbranch.allow_manage = allow_manage
+
         session.flush()
         return

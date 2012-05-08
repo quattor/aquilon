@@ -60,7 +60,8 @@ class TestAddDomain(TestBrokerCommand):
 
     def test_100_addunittest(self):
         command = ["add_domain", "--domain=unittest", "--track=utsandbox",
-                   "--comments", "aqd unit test tracking domain"]
+                   "--comments", "aqd unit test tracking domain",
+                   "--disallow_manage"]
         self.successtest(command)
         self.failUnless(os.path.exists(os.path.join(
             self.config.get("broker", "domainsdir"), "unittest")))
@@ -85,6 +86,10 @@ class TestAddDomain(TestBrokerCommand):
                          "Cannot enforce a change manager for tracking domain",
                          command)
 
+    def test_100_nomanage(self):
+        command = ["add_domain", "--domain", "nomanage"]
+        self.successtest(command)
+
     def test_200_verifyunittest(self):
         command = ["show_domain", "--domain=unittest"]
         out = self.commandtest(command)
@@ -92,6 +97,7 @@ class TestAddDomain(TestBrokerCommand):
         self.matchoutput(out, "Tracking: sandbox utsandbox", command)
         self.matchoutput(out, "Comments: aqd unit test tracking domain",
                          command)
+        self.matchoutput(out, "May Contain Hosts/Clusters: False", command)
 
     def test_200_verifyutprod(self):
         command = ["show_domain", "--domain=ut-prod"]
@@ -104,6 +110,12 @@ class TestAddDomain(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out, "Domain: deployable", command)
         self.matchclean(out, "Tracking:", command)
+
+    def test_200_verifynomanage(self):
+        command = ["show_domain", "--domain=nomanage"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Domain: nomanage", command)
+        self.matchoutput(out, "May Contain Hosts/Clusters: True", command)
 
     def test_210_verifysearchtrack(self):
         command = ["search", "domain", "--track", "utsandbox"]

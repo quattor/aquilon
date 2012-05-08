@@ -2058,6 +2058,7 @@
          <option name="start" type="string" conflicts="track">Branch to use as a starting point (default: prod)</option>
          <option name="comments" type="string">Comments</option>
          <option name="change_manager" type="boolean">Require a change manager for the domain</option>
+         <option name="allow_manage" reverse="disallow_manage" type="boolean">Control managing hosts to the domain</option>
       </optgroup>
       <transport method="put" path="domain/%(domain)s" />
    </command>
@@ -2093,6 +2094,7 @@
          <option name="compiler_version" type="string">Version of panc to use</option>
          <option name="autosync" type="boolean">Set the autosync flag</option>
          <option name="change_manager" type="boolean">Require a change manager for the domain</option>
+         <option name="allow_manage" reverse="disallow_manage" type="boolean">Control managing hosts to the domain</option>
       </optgroup>
       <transport method="post" path="branch/%(branch)s" />
    </command>

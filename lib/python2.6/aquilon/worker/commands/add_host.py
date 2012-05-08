@@ -54,6 +54,11 @@ class CommandAddHost(BrokerCommand):
                                                      domain=domain,
                                                      sandbox=sandbox,
                                                      compel=True)
+
+        if hasattr(dbbranch, "allow_manage") and not dbbranch.allow_manage:
+            raise ArgumentError("Adding hosts to {0:l} is not allowed."
+                                .format(dbbranch))
+
         if not buildstatus:
             buildstatus = 'build'
         dbstatus = HostLifecycle.get_unique(session, buildstatus, compel=True)

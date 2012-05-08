@@ -88,12 +88,23 @@ class TestUpdateBranch(TestBrokerCommand):
 
     def testupdateprod(self):
         self.noouttest(["update", "branch", "--branch", "prod",
-                        "--change_manager"])
+                        "--change_manager", "--allow_manage"])
 
     def testverifyprod(self):
         command = ["show", "domain", "--domain", "prod"]
         out = self.commandtest(command)
         self.matchoutput(out, "Requires Change Manager: True", command)
+        self.matchoutput(out, "May Contain Hosts/Clusters: True", command)
+
+    def testupdatenomanage(self):
+        command = ["update", "branch", "--branch", "nomanage",
+                   "--disallow_manage"]
+        self.noouttest(command)
+
+    def testverifynomanage(self):
+        command = ["show", "domain", "--domain", "nomanage"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "May Contain Hosts/Clusters: False", command)
 
     def testverifysearchchm(self):
         command = ["search", "domain", "--change_manager"]

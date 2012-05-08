@@ -43,8 +43,8 @@ class CommandAddDomain(BrokerCommand):
 
     required_parameters = ["domain"]
 
-    def render(self, session, logger, dbuser,
-               domain, track, start, change_manager, comments, **arguments):
+    def render(self, session, logger, dbuser, domain, track, start,
+               change_manager, comments, allow_manage, **arguments):
         if not dbuser:
             raise AuthorizationException("Cannot create a domain without "
                                          "an authenticated connection.")
@@ -79,6 +79,8 @@ class CommandAddDomain(BrokerCommand):
                           requires_change_manager=bool(change_manager),
                           comments=comments)
         session.add(dbdomain)
+        if allow_manage is not None:
+            dbdomain.allow_manage = allow_manage
         session.flush()
 
         domainsdir = self.config.get("broker", "domainsdir")

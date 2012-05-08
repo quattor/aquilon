@@ -28,9 +28,10 @@
 # TERMS THAT MAY APPLY.
 
 
+from aquilon.exceptions_ import ArgumentError
+from aquilon.aqdb.model import Cluster
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.branch import get_branch_and_author
-from aquilon.aqdb.model import Cluster
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
 from aquilon.worker.locks import lock_queue, CompileKey
 
@@ -44,6 +45,11 @@ class CommandManageCluster(BrokerCommand):
                                                      domain=domain,
                                                      sandbox=sandbox,
                                                      compel=True)
+
+        if hasattr(dbbranch, "allow_manage") and not dbbranch.allow_manage:
+            raise ArgumentError("Managing clusters to {0:l} is not allowed."
+                                .format(dbbranch))
+
         dbcluster = Cluster.get_unique(session, cluster, compel=True)
 
         old_branch = dbcluster.branch.name

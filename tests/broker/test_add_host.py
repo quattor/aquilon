@@ -250,6 +250,18 @@ class TestAddHost(TestBrokerCommand):
                          "not-an-ip-address",
                          command)
 
+    def testaddunittest16baddomain(self):
+        net = self.net.tor_net[0]
+        command = ["add", "host", "--hostname", "unittest16.aqd-unittest.ms.com",
+                   "--ipfromip", net.usable[0], "--ipalgorithm", "lowest",
+                   "--machine", "ut8s02p2", "--domain", "nomanage",
+                   "--buildstatus", "build", "--archetype", "aquilon",
+                   "--osname", "linux", "--osversion", "5.0.1-x86_64",
+                   "--personality", "compileserver"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Adding hosts to domain nomanage "
+                         "is not allowed.", command)
+
     def testaddunittest16good(self):
         net = self.net.tor_net[0]
         self.dsdb_expect_add("unittest16.aqd-unittest.ms.com", net.usable[2],

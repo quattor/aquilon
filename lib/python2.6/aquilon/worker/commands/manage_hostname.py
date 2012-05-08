@@ -28,12 +28,12 @@
 # TERMS THAT MAY APPLY.
 
 
+from aquilon.exceptions_ import IncompleteError, ArgumentError
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.branch import get_branch_and_author
 from aquilon.worker.dbwrappers.host import hostname_to_host
 from aquilon.worker.templates.host import PlenaryHost
 from aquilon.worker.locks import lock_queue, CompileKey
-from aquilon.exceptions_ import IncompleteError, ArgumentError
 
 
 class CommandManageHostname(BrokerCommand):
@@ -45,6 +45,10 @@ class CommandManageHostname(BrokerCommand):
                                                      domain=domain,
                                                      sandbox=sandbox,
                                                      compel=True)
+
+        if hasattr(dbbranch, "allow_manage") and not dbbranch.allow_manage:
+            raise ArgumentError("Managing hosts to {0:l} is not allowed."
+                                .format(dbbranch))
 
         dbhost = hostname_to_host(session, hostname)
         if dbhost.cluster:
