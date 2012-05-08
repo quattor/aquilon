@@ -314,9 +314,7 @@ class CommandFlush(BrokerCommand):
                               subqueryload("resholder"),
                               subqueryload("services_used"),
                               subqueryload("_services_provided"),
-                              subqueryload("_cluster"),
-                              lazyload("_cluster.host"),
-                              lazyload("_cluster.cluster"))
+                              subqueryload("cluster"))
                 for h in q:
                     idx += 1
                     if idx % 1000 == 0:  # pragma: no cover
@@ -345,9 +343,8 @@ class CommandFlush(BrokerCommand):
             if clusters:
                 logger.client_info("Flushing clusters.")
                 q = session.query(Cluster)
-                q = q.options(subqueryload('_hosts'),
-                              joinedload('_hosts.host'),
-                              joinedload('_hosts.host.machine'),
+                q = q.options(subqueryload('hosts'),
+                              joinedload('hosts.machine'),
                               subqueryload('_metacluster'),
                               joinedload('_metacluster.metacluster'),
                               joinedload('resholder'),

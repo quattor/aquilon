@@ -102,9 +102,8 @@ class CommandUpdatePersonality(BrokerCommand):
         q = q.with_polymorphic("*")
         # The validation will touch all member hosts/machines, so it's better to
         # pre-load everything
-        q = q.options(subqueryload('_hosts'),
-                      joinedload('_hosts.host'),
-                      joinedload('_hosts.host.machine'),
+        q = q.options(subqueryload('hosts'),
+                      joinedload('hosts.machine'),
                       joinedload('resholder'),
                       subqueryload('resholder.resources'))
         # TODO: preload virtual machines

@@ -43,9 +43,8 @@ class CommandShowMetaClusterAll(BrokerCommand):
             q = q.filter_by(name=metacluster)
         q = q.options(subqueryload('_clusters'),
                       joinedload('_clusters.cluster'),
-                      subqueryload('_clusters.cluster._hosts'),
-                      joinedload('_clusters.cluster._hosts.host'),
-                      joinedload('_clusters.cluster._hosts.host.machine'),
+                      subqueryload('_clusters.cluster.hosts'),
+                      joinedload('_clusters.cluster.hosts.machine'),
                       joinedload('_clusters.cluster.resholder'),
                       subqueryload('_clusters.cluster.resholder.resources'))
         # TODO: eager load virtual machines

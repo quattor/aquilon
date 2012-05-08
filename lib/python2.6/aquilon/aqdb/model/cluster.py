@@ -80,16 +80,12 @@ _CAS = 'cluster_aligned_service'
 _CASABV = 'clstr_alnd_svc'
 _CSB = 'cluster_service_binding'
 _CSBABV = 'clstr_svc_bndg'
-
-
-def _hcm_host_creator(host):
-    return HostClusterMember(host=host)
+_CAP = 'clstr_allow_per'
 
 
 def _csb_svcinst_creator(service_instance):
     return ClusterServiceBinding(service_instance=service_instance)
 
-_CAP = 'clstr_allow_per'
 
 class Cluster(Base):
     """
@@ -146,8 +142,6 @@ class Cluster(Base):
     personality = relation(Personality, lazy=False, innerjoin=True)
     branch = relation(Branch, lazy=False, innerjoin=True, backref='clusters')
     sandbox_author = relation(UserPrincipal)
-
-    hosts = association_proxy('_hosts', 'host', creator=_hcm_host_creator)
 
     allowed_personalities = association_proxy('_allowed_pers', 'personality',
             creator=lambda pers: ClusterAllowedPersonality(personality=pers))
@@ -551,33 +545,15 @@ class HostClusterMember(Base):
                         #if the host is deleted, so is the membership
                         primary_key=True)
 
-    creation_date = deferred(Column(DateTime, default=datetime.now,
-                                    nullable=False))
-
-    """
-        Association Proxy and relation cascading:
-        We need cascade=all on backrefs so that deletion propagates to avoid
-        AssertionError: Dependency rule tried to blank-out primary key column on
-        deletion of the Cluster and it's links. On the contrary do not have
-        cascade='all' on the forward mapper here, else deletion of clusters
-        and their links also causes deleteion of hosts (BAD)
-    """
-    cluster = relation(Cluster, lazy=False, innerjoin=True,
-                       backref=backref('_hosts', cascade='all, delete-orphan'))
-
-    # This is a one-to-one relation, so we need uselist=False on the backref
-    host = relation(Host, lazy=False, innerjoin=True,
-                    backref=backref('_cluster', uselist=False,
-                                    cascade='all, delete-orphan'))
-
 
 hcm = HostClusterMember.__table__  # pylint: disable=C0103, E1101
 hcm.primary_key.name = '%s_pk' % _HCM
 hcm.append_constraint(
     UniqueConstraint('host_id', name='host_cluster_member_host_uk'))
-hcm.info['unique_fields'] = ['cluster', 'host']
 
-Host.cluster = association_proxy('_cluster', 'cluster')
+Cluster.hosts = relation(Host, secondary=hcm,
+                         backref=backref("cluster", uselist=False))
+
 
 class ClusterAllowedPersonality(Base):
     __tablename__ = _CAP

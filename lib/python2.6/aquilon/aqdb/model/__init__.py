@@ -130,7 +130,6 @@ with warnings.catch_warnings():
 
 from aquilon.aqdb.model.cluster import (Cluster, EsxCluster,
                                         ComputeCluster, StorageCluster,
-                                        HostClusterMember,
                                         ClusterAlignedService,
                                         ClusterServiceBinding)
 from aquilon.aqdb.model.personality_cluster_info import (PersonalityClusterInfo,

@@ -92,7 +92,7 @@ class CommandCluster(BrokerCommand):
             old_cluster.hosts.remove(dbhost)
             remove_service_addresses(old_cluster, dbhost)
             old_cluster.validate()
-            session.expire(dbhost, ['_cluster'])
+            session.expire(dbhost, ['cluster'])
             plenaries.append(Plenary.get_plenary(old_cluster))
 
         # Apply the service addresses to the new member

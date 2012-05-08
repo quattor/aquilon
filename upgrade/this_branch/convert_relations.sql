@@ -6,4 +6,6 @@ ALTER TABLE build_item DROP COLUMN creation_date;
 ALTER TABLE build_item DROP COLUMN comments;
 ALTER TABLE build_item ADD CONSTRAINT build_item_pk PRIMARY KEY (host_id, service_instance_id);
 
+ALTER TABLE host_cluster_member DROP COLUMN creation_date;
+
 QUIT;

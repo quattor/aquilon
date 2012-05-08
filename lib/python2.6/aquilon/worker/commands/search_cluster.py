@@ -123,7 +123,7 @@ class CommandSearchCluster(BrokerCommand):
                 q = q.filter(Cluster.location_constraint_id.in_(childids))
         dblocation = get_location(session, **location_args['member_'])
         if dblocation:
-            q = q.join('_hosts', 'host', 'machine')
+            q = q.join('hosts', 'machine')
             if location_args['member_']['exact_location']:
                 q = q.filter_by(location=dblocation)
             else:
@@ -223,25 +223,23 @@ class CommandSearchCluster(BrokerCommand):
 
         if member_hostname:
             dbhost = hostname_to_host(session, member_hostname)
-            q = q.join('_hosts')
-            q = q.filter_by(host=dbhost)
-            q = q.reset_joinpoint()
+            q = q.filter(Cluster.hosts.contains(dbhost))
 
         if member_archetype:
             # Added to the searches as appropriate below.
             dbma = Archetype.get_unique(session, member_archetype, compel=True)
         if member_personality and member_archetype:
-            q = q.join('_hosts','host')
+            q = q.join('hosts')
             dbmp = Personality.get_unique(session, archetype=dbma,
                                           name=member_personality, compel=True)
             q = q.filter_by(personality=dbmp)
             q = q.reset_joinpoint()
         elif member_personality:
-            q = q.join('_hosts', 'host', 'personality')
+            q = q.join('hosts', 'personality')
             q = q.filter_by(name=member_personality)
             q = q.reset_joinpoint()
         elif member_archetype:
-            q = q.join('_hosts', 'host', 'personality')
+            q = q.join('hosts', 'personality')
             q = q.filter_by(archetype=dbma)
             q = q.reset_joinpoint()
 

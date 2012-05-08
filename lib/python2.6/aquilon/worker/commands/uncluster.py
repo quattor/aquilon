@@ -71,7 +71,7 @@ class CommandUncluster(BrokerCommand):
         dbcluster.validate()
 
         session.flush()
-        session.expire(dbhost, ['_cluster'])
+        session.expire(dbhost, ['cluster'])
 
         # Will need to write a cluster plenary and either write or
         # remove a host plenary.  Grab the domain key since the two
