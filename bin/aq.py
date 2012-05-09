@@ -129,6 +129,27 @@ class CustomAction(object):
             print >>sys.stderr, "Not ready to publish, found:\n%s" % out
             sys.exit(1)
 
+        # Locate the top of the sandbox for the purposes of executing the
+        # unit tests in the t directory
+        p = Popen(('git', 'rev-parse', '--show-toplevel'), stdout=PIPE)
+        (sandbox_dir, err) = p.communicate()
+        sandbox_dir = sandbox_dir.strip()
+        if p.returncode != 0:
+            print >>sys.stderr, "Failed to find toplevel of sandbox, aborting"
+            sys.exit(1)
+        # Prevent the branch being published unless the unit tests pass
+        testdir = os.path.join(sandbox_dir, 't')
+        if os.path.exists(os.path.join(testdir, 'Makefile')):
+            testenv = {'PATH': '/bin:/usr/bin'}
+            for var in ['USER', 'KRB5CCNAME']:
+                testenv[var] = os.environ.get(var)
+            p = Popen(['/usr/bin/make', 'test'], cwd=testdir, env=testenv)
+            p.wait()
+            if p.returncode != 0:
+                print >>sys.stderr, "\nUnit tests failed, publish prohibited.",
+                print >>sys.stderr, '(Do you need to run a "make clean test"?)'
+                sys.exit(1)
+
         if "sandbox" in commandOptions:
             branch = commandOptions["sandbox"]
         else:

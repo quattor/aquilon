@@ -30,6 +30,7 @@
 
 import os
 import sys
+import time
 import unittest
 from subprocess import Popen, PIPE
 import re
@@ -140,6 +141,8 @@ class TestBrokerCommand(unittest.TestCase):
             for (key, value) in os.environ.items():
                 if key.find("KRB") == 0 and key not in env:
                     env[key] = value
+            if 'USER' not in env:
+                env['USER'] = os.environ.get('USER', '')
             kwargs["env"] = env
         p = Popen(args, stdout=PIPE, stderr=PIPE, **kwargs)
         (out, err) = p.communicate()
@@ -417,10 +420,12 @@ class TestBrokerCommand(unittest.TestCase):
                                     msg, expect)
 
     def gitenv(self, env=None):
+        """Configure a known sanitised environment"""
         git_path = self.config.get("broker", "git_path")
         newenv = {}
+        newenv["USER"] = os.environ.get('USER', '')
         if env:
-            for (key, value) in env:
+            for (key, value) in env.iteritems():
                 newenv[key] = value
         if newenv.has_key("PATH"):
             newenv["PATH"] = "%s:%s" % (git_path, newenv["PATH"])
