@@ -77,6 +77,7 @@ class SandboxFormatter(ObjectFormatter):
         details.append(indent + "  Validated: %s" % sandbox.is_sync_valid)
         details.append(indent + "  Owner: %s" % sandbox.owner.name)
         details.append(indent + "  Compiler: %s" % sandbox.compiler)
+        details.append(indent + "  Base Commit: %s" % sandbox.base_commit)
         if hasattr(sandbox, 'path'):
             details.append(indent + "  Path: %s" % sandbox.path)
         if sandbox.comments:

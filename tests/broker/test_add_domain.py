@@ -78,6 +78,10 @@ class TestAddDomain(TestBrokerCommand):
         self.failUnless(os.path.exists(os.path.join(
             self.config.get("broker", "domainsdir"), "deployable")))
 
+    def test_100_addleftbehind(self):
+        command = ["add_domain", "--domain=leftbehind", "--start=prod"]
+        self.successtest(command)
+
     def test_100_invalidtrack(self):
         command = ["add_domain", "--domain=notvalid-prod", "--track=prod",
                    "--change_manager"]

@@ -35,7 +35,7 @@ from tempfile import mkdtemp
 
 from aquilon.exceptions_ import (ProcessException, ArgumentError,
                                  AuthorizationException)
-from aquilon.aqdb.model import Domain, Branch
+from aquilon.aqdb.model import Domain, Branch, Sandbox
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.processes import run_git, remove_dir, sync_domain
 from aquilon.worker.logger import CLIENT_INFO
@@ -98,6 +98,17 @@ class CommandDeploy(BrokerCommand):
                     "{0} is under change management control.  Please specify "
                     "--justification.".format(dbtarget))
             validate_justification(user, justification)
+
+        if isinstance(dbsource, Sandbox):
+            domainsdir = self.config.get('broker', 'domainsdir')
+            targetdir = os.path.join(domainsdir, dbtarget.name)
+            filterre = re.compile('^' + dbsource.base_commit + '$')
+            found = run_git(['rev-list', 'HEAD'], path=targetdir,
+                            logger=logger, filterre=filterre)
+            if not found:
+                raise ArgumentError("You're trying to deploy a sandbox to a "
+                                    "domain that does not contain the commit "
+                                    "where the sandbox was branched from.")
 
         kingdir = self.config.get("broker", "kingdir")
         rundir = self.config.get("broker", "rundir")

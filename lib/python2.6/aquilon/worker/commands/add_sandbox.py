@@ -66,17 +66,20 @@ class CommandAddSandbox(CommandGet):
             start = self.config.get("broker", "default_domain_start")
         dbstart = Branch.get_unique(session, start, compel=True)
 
+        kingdir = self.config.get("broker", "kingdir")
+        base_commit = run_git(["show-ref", "--hash", "refs/heads/" +
+                               dbstart.name], logger=logger, path=kingdir)
+
         compiler = self.config.get("panc", "pan_compiler")
         dbsandbox = Sandbox(name=sandbox, owner=dbuser, compiler=compiler,
-                            comments=comments)
+                            base_commit=base_commit, comments=comments)
         session.add(dbsandbox)
         session.flush()
 
         # Currently this will fail if the branch already exists...
         # That seems like the right behavior.  It's an internal
         # consistency issue that would need to be addressed explicitly.
-        run_git(["branch", sandbox, dbstart.name],
-                logger=logger, path=self.config.get("broker", "kingdir"))
+        run_git(["branch", sandbox, dbstart.name], logger=logger, path=kingdir)
 
         if get == False:
             # The client knows to interpret an empty response as no action.
