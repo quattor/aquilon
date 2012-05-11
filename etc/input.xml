@@ -1796,6 +1796,7 @@
       </optgroup>
       <optgroup name="optional_opts">
          <option name="personality" type="string">personality name</option>
+         <option name="justification" type="string">Extra authorization tokens (e.g. TCM number) to validate the request</option>
       </optgroup>
       <transport method="put" path="service/%(service)s/required_for/archetype/%(archetype)s" />
       <transport trigger="personality" method="put" path="service/%(service)s/required_for/personality/%(archetype)s/%(personality)s" />
@@ -1822,6 +1823,7 @@
       </optgroup>
       <optgroup name="del_required_service_optional">
          <option name="personality" type="string" mandatory="True">personality name</option>
+         <option name="justification" type="string">Extra authorization tokens (e.g. TCM number) to validate the request</option>
       </optgroup>
       <transport method="delete" path="service/%(service)s/required_for/archetype/%(archetype)s" />
       <transport trigger="personality" method="delete" path="service/%(service)s/required_for/personality/%(archetype)s/%(personality)s" />

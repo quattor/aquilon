@@ -42,31 +42,47 @@ class TestAddRequiredService(TestBrokerCommand):
 
     def testaddrequiredafs(self):
         command = "add required service --service afs --archetype aquilon"
+        command += " --justification tcm=12345678"
         self.noouttest(command.split(" "))
 
     def testaddrequiredafsduplicate(self):
         command = "add required service --service afs --archetype aquilon"
+        command += " --justification tcm=12345678"
         self.badrequesttest(command.split(" "))
+
+    def testaddrequiredafsnojustification(self):
+        command = "add required service --service afs --archetype aquilon"
+        out = self.unauthorizedtest(command.split(" "), auth=True,
+                                    msgcheck=False)
+        self.matchoutput(out,
+                         "Changing the required services of an archetype "
+                         "requires --justification.",
+                         command)
 
     def testaddrequireddns(self):
         command = "add required service --service dns --archetype aquilon"
+        command += " --justification tcm=12345678"
         self.noouttest(command.split(" "))
 
     def testaddrequiredaqd(self):
         command = "add required service --service aqd --archetype aquilon"
+        command += " --justification tcm=12345678"
         self.noouttest(command.split(" "))
 
     def testaddrequiredntp(self):
         command = "add required service --service ntp --archetype aquilon"
+        command += " --justification tcm=12345678"
         self.noouttest(command.split(" "))
 
     def testaddrequiredbootserver(self):
         command = ["add_required_service",
-                   "--service=bootserver", "--archetype=aquilon"]
+                   "--service=bootserver", "--archetype=aquilon",
+                   "--justification", "tcm=12345678"]
         self.noouttest(command)
 
     def testaddrequiredlemon(self):
         command = "add required service --service lemon --archetype aquilon"
+        command += " --justification tcm=12345678"
         self.noouttest(command.split(" "))
 
     def testverifyaddrequiredservices(self):
@@ -148,8 +164,10 @@ class TestAddRequiredService(TestBrokerCommand):
 
     def testaddrequiredvmhost(self):
         command = "add required service --service dns --archetype vmhost"
+        command += " --justification tcm=12345678"
         self.noouttest(command.split(" "))
         command = "add required service --service ntp --archetype vmhost"
+        command += " --justification tcm=12345678"
         self.noouttest(command.split(" "))
 
     def testverifyaddrequiredvmhost(self):
