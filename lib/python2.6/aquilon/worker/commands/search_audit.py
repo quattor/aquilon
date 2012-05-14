@@ -45,8 +45,8 @@ class CommandSearchAudit(BrokerCommand):
 
     required_parameters = []
 
-    def render(self, session, keyword, username, command, before, after,
-               return_code, limit, reverse_order, **arguments):
+    def render(self, session, keyword, argument, username, command, before,
+               after, return_code, limit, reverse_order, **arguments):
 
         q = session.query(Xtn)
 
@@ -98,7 +98,10 @@ class CommandSearchAudit(BrokerCommand):
                 q = q.reset_joinpoint()
 
         if keyword is not None:
-            q = q.join(XtnDetail).filter_by(value=keyword)
+            q = q.join(XtnDetail)
+            q = q.filter_by(value=keyword)
+            if argument:
+                q = q.filter_by(name=argument)
             q = q.reset_joinpoint()
 
         # Set an order by when searching for the records, this controls
