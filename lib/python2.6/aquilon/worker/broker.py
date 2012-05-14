@@ -215,6 +215,15 @@ class BrokerCommand(object):
         #free = "True " if self.is_lock_free else "False"
         #log.msg("is_lock_free = %s [%s]" % (free, self.command))
 
+    def audit_result(self, session, result, **arguments):
+        # We need a place to store the result somewhere until we can finish the
+        # audit record. Use the request object for now.
+        request = arguments["request"]
+        if not hasattr(request, "_audit_result"):
+            request._audit_result = []
+
+        request._audit_result.append(result)
+
     def render(self, **arguments):  # pragma: no cover
         """ Implement this method to create a functional broker command.
 
@@ -299,9 +308,11 @@ class BrokerCommand(object):
                 # will create a new one.
                 if "session" in kwargs:
                     # Complete the transaction
-                    end_xtn(session, {'xtn_id': kwargs['requestid'],
-                                      'return_code': get_code_for_error_class(
-                                        raising_exception.__class__)})
+                    request = kwargs['request']
+                    end_xtn(session, kwargs['requestid'],
+                            get_code_for_error_class(
+                                raising_exception.__class__),
+                            getattr(request, '_audit_result', None))
                     if self.is_lock_free:
                         self.dbf.NLSession.remove()
                     else:
@@ -391,12 +402,6 @@ class BrokerCommand(object):
             logger.close_handlers()
 
     def _record_xtn(self, session, status):
-        audit_msg = dict()
-        audit_msg['xtn_id'] = status.requestid
-        audit_msg['username'] = status.user
-        audit_msg['command'] = status.command
-        audit_msg['readonly'] = self.requires_readonly
-
         details = dict()
         for k, v in status.kwargs.items():
             # Skip uber-redundant raw format parameter
@@ -411,8 +416,9 @@ class BrokerCommand(object):
                 details[k] = str(v).decode('ascii')
             except UnicodeDecodeError:
                 details[k] = '<Non-ASCII value>'
-        audit_msg['details'] = details
-        start_xtn(session, audit_msg, self.parameters_by_type.get('list'))
+        start_xtn(session, status.requestid, status.user, status.command,
+                  self.requires_readonly, details,
+                  self.parameters_by_type.get('list'))
 
     @property
     def is_lock_free(self):

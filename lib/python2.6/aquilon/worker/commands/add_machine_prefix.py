@@ -46,4 +46,6 @@ class CommandAddMachinePrefix(CommandAddMachine):
         machine = '%s%d' % (prefix, result)
         args['machine'] = machine
         CommandAddMachine.render(self, session, **args)
+
+        self.audit_result(session, machine, **args)
         return machine

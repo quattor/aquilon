@@ -85,12 +85,19 @@ class Xtn(Base):
 
         msg = [self.start_time.strftime('%Y-%m-%d %H:%M:%S%z'),
                str(self.username), str(return_code), 'aq', str(self.command)]
+        results = []
         for arg in self.args:
+            if arg.name == "__RESULT__":
+                results.append(arg.value)
+                continue
+
             # TODO: remove the str() once we can handle Unicode
             try:
                 msg.append("--%s=%r" % (arg.name, str(arg.value)))
             except UnicodeEncodeError:  # pragma: no cover
                 msg.append("--%s=<Non-ASCII value>" % arg.name)
+        if results:
+            msg.append("[Result: " + " ".join(results) + "]")
         return " ".join(msg)
 
 
@@ -146,7 +153,8 @@ if config.has_option('database', 'audit_schema'):  # pragma: no cover
     xtn_detail.schema = schema
 
 
-def start_xtn(session, record, options_to_split=None):
+def start_xtn(session, xtn_id, username, command, is_readonly, details,
+              options_to_split=None):
     """ Wrapper to log the start of a transaction (or running command).
 
     Takes a dictionary with the transaction parameters.  The keys are
@@ -159,32 +167,11 @@ def start_xtn(session, record, options_to_split=None):
 
     """
 
-    log.debug('start_xtn: recieved %s', record)
-    xtn_id = record.pop('xtn_id')
-
     # TODO: (maybe) use sql inserts instead of objects to avoid added overhead?
     # We would be able to exploit executemany() for all the xtn_detail rows
-    x = Xtn(xtn_id=xtn_id,
-            command=record.pop('command'),
-            username=record.pop('username'),
-            is_readonly=record.pop('readonly'))
+    x = Xtn(xtn_id=xtn_id, command=command, username=username,
+            is_readonly=is_readonly)
     session.add(x)
-    # Force a commit here to work around behavior in sqlalchemy 0.6.
-    # Should be fixed in 0.7.0:
-    # http://www.sqlalchemy.org/trac/ticket/2082
-    # http://www.mail-archive.com/sqlalchemy@googlegroups.com/msg23124.html
-    try:
-        session.commit()
-    except Exception, e:  # pragma: no cover
-        session.rollback()
-        log.error(e)
-        # Abort the command if a log entry cannot be created.
-        raise
-
-    log.debug('start_xtn: %s committed', x)
-
-    # Only thing left in the record are the details...
-    details = record.pop('details', dict())
 
     if options_to_split:
         for option in options_to_split:
@@ -198,11 +185,8 @@ def start_xtn(session, record, options_to_split=None):
                 x = XtnDetail(xtn_id=xtn_id, name=option, value=item)
                 session.add(x)
 
-    log.debug("start_xtn: finished list processing")
-
     if len(details.keys()) > 0:
         for k, v in details.iteritems():
-            log.debug("start_xtn: '%s' = '%s'", k, v)
             x = XtnDetail(xtn_id=xtn_id, name=k, value=v)
             session.add(x)
     try:
@@ -214,14 +198,15 @@ def start_xtn(session, record, options_to_split=None):
         raise
 
 
-def end_xtn(session, record):
+def end_xtn(session, xtn_id, return_code, results=None):
     """ Take an audit message and commit the transaction completion. """
 
-    log.debug("completing transaction %s", record)
-    end = XtnEnd(xtn_id=record['xtn_id'],
-                 return_code=record['return_code'])
+    session.add(XtnEnd(xtn_id=xtn_id, return_code=return_code))
+    if results:
+        for result in results:
+            session.add(XtnDetail(xtn_id=xtn_id, name='__RESULT__',
+                                  value=result))
 
-    session.add(end)
     try:
         session.commit()
     except Exception, e:  # pragma: no cover
