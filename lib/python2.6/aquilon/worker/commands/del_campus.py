@@ -49,5 +49,6 @@ class CommandDelCampus(CommandDelLocation):
 
         dsdb_runner = DSDBRunner(logger=logger)
         dsdb_runner.del_campus(name)
+        dsdb_runner.commit_or_rollback()
 
         return result

@@ -44,7 +44,6 @@ from subprocess import Popen, PIPE
 from tempfile import mkstemp
 from threading import Thread
 from cStringIO import StringIO
-from functools import wraps
 
 from sqlalchemy.orm.session import object_session
 import yaml
@@ -350,29 +349,6 @@ DNS_DOMAIN_NOT_FOUND = re.compile (r"DNS domain ([-\w\.\d]+) doesn't exists")
 DNS_DOMAIN_EXISTS = re.compile(r"DNS domain [-\w\.\d]+ already defined")
 
 
-def rollback_decorator(fn):
-    @wraps(fn)
-    def tracer(*args, **kwargs):
-        try:
-            dself = args[0]
-            fn(*args, **kwargs)
-            if dself.action:
-                dself.logger.info("Action: " + dself.action)
-            dself.action = None
-
-            if "revert" in kwargs and kwargs["revert"] is not None:
-                dself.rollbacks.append(kwargs["revert"])
-            else:
-                dself.logger.debug("%s.%s called with no rollback info." %
-                                   (dself.__class__.__name__, fn.__name__))
-        except AquilonError, err:
-            failed_action = dself.action
-            dself.logger.client_info("Rolling back: " + failed_action)
-            dself.rollback()
-            raise ArgumentError("Error while " + failed_action + ": %s" % err)
-
-    return tracer
-
 class DSDBRunner(object):
 
     def __init__(self, logger=LOGGER):
@@ -381,129 +357,173 @@ class DSDBRunner(object):
         self.dsdb = config.get("broker", "dsdb")
         self.dsdb_use_testdb = config.getboolean("broker", "dsdb_use_testdb")
         self.location_sync = config.getboolean("broker", "dsdb_location_sync")
-        self.rollbacks = []
-        self.action = None
+        self.actions = []
+        self.rollback_list = []
+
+    def commit(self):
+        for args, rollback, error_filter, ignore_msg in self.actions:
+            cmd = [self.dsdb]
+            cmd.extend(args)
+
+            try:
+                run_command(cmd, env=self.getenv(), logger=self.logger)
+            except ProcessException, err:
+                if error_filter and err.out and error_filter.search(err.out):
+                    self.logger.warn(ignore_msg)
+                else:
+                    raise
+
+            if rollback:
+                self.rollback_list.append(rollback)
 
     def rollback(self):
-        self.rollbacks.reverse()
-        for r in self.rollbacks:
-            (action, args) = (r[0], r[1])
+        self.rollback_list.reverse()
+        rollback_failures = []
+        for args in self.rollback_list:
+            cmd = [self.dsdb]
+            cmd.extend(args)
             try:
-                action(*args)
-            except AquilonError, err:
-                self.logger.warn("Error rolling back: %s" % err)
+                run_command(cmd, env=self.getenv(), logger=self.logger)
+            except ProcessException, err:
+                rollback_failures.append(str(err))
 
-        self.rollbacks = []
+        did_something = bool(self.rollback_list)
+        del self.rollback_list[:]
+
+        if rollback_failures:
+            raise AquilonError("DSDB rollback failed, DSDB state is "
+                               "inconsistent: " + "\n".join(rollback_failures))
+        elif did_something:
+            self.logger.client_info("DSDB rollback completed.")
+
+    def commit_or_rollback(self, error_msg=None):
+        try:
+            self.commit()
+        except ProcessException, err:
+            if not error_msg:
+                error_msg = "DSDB update failed"
+            self.logger.warn(str(err))
+            self.rollback()
+            raise ArgumentError(error_msg)
+
+    def add_action(self, command_args, rollback_args, error_filter=None,
+                   ignore_msg=False):
+        """
+        Register an action to execute and it's rollback counterpart.
+
+        command_args: the DSDB command to execute
+        rollback_args: the DSDB command to execute on rollback
+        error_filter: regexp of error messages in the output of dsdb that should be ignored
+        ignore_msg: message to log if the error_filter matched
+        """
+        if error_filter and not ignore_msg:
+            raise InternalError("Specifying an error filter needs the message "
+                                "specified as well.")
+        self.actions.append((command_args, rollback_args, error_filter,
+                             ignore_msg))
 
     def getenv(self):
         if self.dsdb_use_testdb:
             return {"DSDB_USE_TESTDB": "true"}
         return None
 
-    def run_if_sync(self, cmd):
-        if self.location_sync:
-            out = run_command(cmd, env=self.getenv(), logger=self.logger)
-        else:
-            self.logger.debug(
-                "Would have called '%s' if location sync was enabled" % cmd)
-
-    @rollback_decorator
     def add_campus(self, campus, comments):
-        self.action = "adding new campus %s to DSDB." % campus
+        if not self.location_sync:
+            return
 
-        command = [self.dsdb, "add_campus_aq", "-campus_name", campus]
+        command = ["add_campus_aq", "-campus_name", campus]
         if comments:
             command.extend(["-comments", comments])
-        self.run_if_sync(command)
+        rollback = ["delete_campus_aq", "-campus", campus]
+        self.add_action(command, rollback)
 
-    @rollback_decorator
     def del_campus(self, campus):
-        self.action = "removing campus %s from DSDB." % campus
+        if not self.location_sync:
+            return
+        command = ["delete_campus_aq", "-campus", campus]
+        rollback = ["add_campus_aq", "-campus_name", campus]
+        self.add_action(command, rollback, CAMPUS_NOT_FOUND,
+                        "DSDB does not have campus %s defined, proceeding.")
 
-        try:
-            self.run_if_sync([self.dsdb, "delete_campus_aq", "-campus", campus])
-        except ProcessException, e:
-            if e.out and CAMPUS_NOT_FOUND.search(e.out):
-                self.logger.info("DSDB does not have a campus %s defined, "
-                                 "proceeding with aqdb command." % campus)
-                return
-            raise
-
-    @rollback_decorator
     def add_city(self, city, country, fullname):
-        self.action = "adding new city %s to DSDB." % (city)
+        if not self.location_sync:
+            return
+        command = ["add_city_aq", "-city_symbol", city, "-country_symbol",
+                   country, "-city_name", fullname]
+        rollback = ["delete_city_aq", "-city", city]
+        self.add_action(command, rollback)
 
-        self.run_if_sync([self.dsdb, "add_city_aq", "-city_symbol", city,
-               "-country_symbol", country, "-city_name", fullname])
-
-    @rollback_decorator
-    def update_city(self, city, campus, revert=None):
-        self.action = "updating campus of city %s to %s in DSDB." % (city,
-                                                                     campus)
-
-        self.run_if_sync([self.dsdb, "update_city_aq", "-city", city,
-               "-campus", campus])
-
-    @rollback_decorator
-    def del_city(self, city):
-        self.action = "removing city %s to DSDB." % (city)
-        self.run_if_sync([self.dsdb, "delete_city_aq", "-city", city])
-
-    @rollback_decorator
-    def add_campus_building(self, campus, building, revert=None):
-        self.action = "adding building %s to campus %s in DSDB." % (building,
-                                                               campus)
-        cmd = [self.dsdb, "add_campus_building_aq", "-campus_name", campus,
-               "-building_name", building]
-        if self.location_sync:
-            out = run_command(cmd, env=self.getenv(), logger=self.logger)
+    def update_city(self, city, campus, prev_campus):
+        if not self.location_sync:
+            return
+        command = ["update_city_aq", "-city", city,  "-campus", campus]
+        # We can't revert to an empty campus
+        if prev_campus:
+            rollback = ["update_city_aq", "-city", city, "-campus", prev_campus]
         else:
-            self.logger.debug(
-                "Would have called '%s' if location sync was enabled" % cmd)
+            rollback = None
+        self.add_action(command, rollback)
 
-    @rollback_decorator
-    def add_building(self, building, city, building_addr, revert=None):
-        self.action = "adding new building %s to DSDB." % building
+    def del_city(self, city, old_country, old_fullname):
+        if not self.location_sync:
+            return
+        command = ["delete_city_aq", "-city", city]
+        rollback = ["add_city_aq", "-city_symbol", city, "-country_symbol",
+                    old_country, "-city_name", old_fullname]
+        self.add_action(command, rollback)
 
-        self.run_if_sync([self.dsdb, "add_building_aq",
-                          "-building_name", building,
-                          "-city", city, "-building_addr", building_addr])
+    def add_campus_building(self, campus, building):
+        if not self.location_sync:
+            return
+        command = ["add_campus_building_aq", "-campus_name", campus,
+                   "-building_name", building]
+        rollback = ["delete_campus_building_aq",  "-campus_name", campus,
+                    "-building_name", building]
+        self.add_action(command, rollback)
 
-    @rollback_decorator
-    def del_campus_building(self, campus, building, revert=None):
-        self.action = "removing building %s from campus %s in DSDB." % (building,
-                                                                   campus)
-        self.run_if_sync([self.dsdb, "delete_campus_building_aq",
-               "-campus_name", campus, "-building_name", building])
+    def add_building(self, building, city, building_addr):
+        if not self.location_sync:
+            return
+        command = ["add_building_aq", "-building_name", building, "-city", city,
+                   "-building_addr", building_addr]
+        rollback = ["delete_building_aq", "-building", building]
+        self.add_action(command, rollback)
 
-    @rollback_decorator
-    def del_building(self, building, revert=None):
-        self.action = "removing building %s from DSDB." % building
+    def del_campus_building(self, campus, building):
+        if not self.location_sync:
+            return
+        command = ["delete_campus_building_aq", "-campus_name", campus,
+                   "-building_name", building]
+        rollback = ["add_campus_building_aq", "-campus_name", campus,
+                    "-building_name", building]
+        self.add_action(command, rollback)
 
-        try:
-            self.run_if_sync([self.dsdb, "delete_building_aq",
-                              "-building", building])
-        except ProcessException, e:
-            if e.out and BUILDING_NOT_FOUND.search(e.out):
-                self.logger.info("DSDB does not have a building %s defined, "
-                                 "proceeding with aqdb command." % building)
-                return
-            raise
+    def del_building(self, building, old_city, old_addr):
+        if not self.location_sync:
+            return
+        command = ["delete_building_aq", "-building", building]
+        rollback = ["add_building_aq", "-building_name", building,
+                    "-city", old_city,"-building_addr", old_addr]
+        self.add_action(command, rollback, BUILDING_NOT_FOUND,
+                        "DSDB does not have building %s defined, "
+                        "proceeding." % building)
 
-    @rollback_decorator
-    def update_building(self, building, building_addr, revert=None):
-        self.action = "set address of building %s to %s in DSDB." % \
-            (building, building_addr)
-        self.run_if_sync([self.dsdb, "update_building_aq",
-                          "-building_name", building,
-                          "-building_addr", building_addr])
+    def update_building(self, building, address, old_addr):
+        if not self.location_sync:
+            return
+        command = ["update_building_aq", "-building_name", building,
+                    "-building_addr", address]
+        rollback = ["update_building_aq", "-building_name", building,
+                    "-building_addr", old_addr]
+        self.add_action(command, rollback)
 
-    def add_host_details(self, fqdn, ip, name, mac, primary=None, comments=None):
-        # DSDB does not accept '/' as valid in an interface name.
-        command = [self.dsdb, "add_host", "-host_name", fqdn,
+    def add_host_details(self, fqdn, ip, interface=None, mac=None, primary=None,
+                         comments=None):
+        command = ["add_host", "-host_name", fqdn,
                     "-ip_address", ip, "-status", "aq"]
-        if name:
-            interface = str(name).replace('/', '_').replace(':', '_')
+        if interface:
+            # DSDB does not accept '/' as valid in an interface name.
+            interface = str(interface).replace('/', '_').replace(':', '_')
             command.extend(["-interface_name", interface])
         if mac:
             command.extend(["-ethernet_address", mac])
@@ -511,38 +531,57 @@ class DSDBRunner(object):
             command.extend(["-primary_host_name", primary])
         if comments:
             command.extend(["-comments", comments])
-        out = run_command(command, env=self.getenv())
-        return
 
-    def update_host_details(self, fqdn, mac=None, comments=None):
-        command = [self.dsdb, "update_host", "-host_name", fqdn, "-status", "aq"]
+        rollback = ["delete_host", "-ip_address", ip]
+        self.add_action(command, rollback)
+
+    def update_host_details(self, fqdn, mac=None, comments=None, old_mac=None,
+                            old_comments=None):
+        command = ["update_host", "-host_name", fqdn, "-status", "aq"]
         if mac:
             command.extend(["-ethernet_address", mac])
         if comments:
             command.extend(["-comments", comments])
-        return run_command(command, env=self.getenv(), logger=self.logger)
 
-    def update_host_ip(self, name, fqdn, ip):
-        command = [self.dsdb, "update_aqd_host", "-host_name", fqdn,
-                   "-interface_name", name, "-ip_address", ip]
-        return run_command(command, env=self.getenv(), logger=self.logger)
+        rollback = ["update_host", "-host_name", fqdn, "-status", "aq"]
+        if old_mac:
+            rollback.extend(["-ethernet_address", old_mac])
+        if old_comments:
+            rollback.extend(["-comments", old_comments])
+        self.add_action(command, rollback)
 
-    def update_host_name(self,ifname, fqdn, fqdn_new):
-        command = [self.dsdb, "update_aqd_host", "-host_name", fqdn,
-                   "-interface_name", ifname, "-primary_host_name", fqdn_new]
-        return run_command(command, env=self.getenv(), logger=self.logger)
+    def update_host_ip(self, fqdn, iface, ip, old_ip):
+        command = ["update_aqd_host", "-host_name", fqdn,
+                   "-interface_name", iface, "-ip_address", ip]
+        rollback = ["update_aqd_host", "-host_name", fqdn,
+                    "-interface_name", iface, "-ip_address", old_ip]
+        self.add_action(command, rollback)
 
-    def delete_host_details(self, ip):
-        try:
-            out = run_command([self.dsdb, "delete_host", "-ip_address", ip],
-                              env=self.getenv())
-        except ProcessException, e:
-            if e.out and IP_NOT_DEFINED_RE.search(e.out):
-                self.logger.info("DSDB did not have a host with this IP "
-                                 "address, proceeding with aqdb command.")
-                return
-            raise
-        return
+    def update_host_name(self, fqdn, fqdn_new, iface):
+        command = ["update_aqd_host", "-host_name", fqdn, "-interface_name", iface,
+                   "-primary_host_name", fqdn_new]
+        rollback = ["update_aqd_host", "-host_name", fqdn_new,
+                    "-interface_name", iface, "-primary_host_name", fqdn]
+        self.add_action(command, rollback)
+
+    def delete_host_details(self, fqdn, ip, iface=None, mac=None, primary=None,
+                            comments=None):
+        command = ["delete_host", "-ip_address", ip]
+        rollback = ["add_host", "-host_name", fqdn,
+                    "-ip_address", ip, "-status", "aq"]
+        if iface:
+            interface = str(iface).replace('/', '_').replace(':', '_')
+            rollback.extend(["-interface_name", interface])
+        if mac:
+            rollback.extend(["-ethernet_address", mac])
+        if primary and str(primary) != str(fqdn):
+            rollback.extend(["-primary_host_name", primary])
+        if comments:
+            rollback.extend(["-comments", comments])
+
+        self.add_action(command, rollback, IP_NOT_DEFINED_RE,
+                        "DSDB did not have a host with this IP address, "
+                        "proceeding.")
 
     @classmethod
     def snapshot_hw(cls, dbhw_ent):
@@ -718,102 +757,50 @@ class DSDBRunner(object):
         adds.sort(lambda x, y: cmp(x['primary'] or "", y['primary'] or ""))
         deletes.sort(lambda x, y: cmp(x['primary'] or "", y['primary'] or ""), reverse=True)
 
-        rollback_adds = []
-        rollback_deletes = []
-        rollback_updates = []
-        rollback_ip_updates = []
-        try:
-            for attrs in deletes:
-                self.delete_host_details(attrs['ip'])
-                rollback_deletes.append(attrs)
+        for attrs in deletes:
+            self.delete_host_details(attrs['fqdn'], attrs['ip'],
+                                     attrs['name'], attrs['mac'],
+                                     attrs['primary'], attrs['comments'])
 
-            for attrs in updates:
-                self.update_host_details(attrs['fqdn'],
-                                         mac=attrs.get('newmac', None),
-                                         comments=attrs.get('newcomments', None))
-                rollback_updates.append({'fqdn': attrs['fqdn'],
-                                         'mac': attrs.get('oldmac', None),
-                                         'comments': attrs.get('oldcomments', None)})
-            for attrs in ip_updates:
-                self.update_host_ip(attrs['name'], attrs['fqdn'], attrs['newip'])
-                rollback_ip_updates.append({'fqdn': attrs['fqdn'],
-                                            'name': attrs['name'],
-                                            'ip': attrs['oldip']})
-            if hostname_update:
-                self.update_host_name(hostname_update['ifname'],hostname_update['oldfqdn'],hostname_update['newfqdn'])
+        for attrs in updates:
+            self.update_host_details(attrs['fqdn'],
+                                     mac=attrs.get('newmac', None),
+                                     comments=attrs.get('newcomments',
+                                                        None),
+                                     old_mac=attrs.get('oldmac', None),
+                                     old_comments=attrs.get('oldcomments',
+                                                            None))
+        for attrs in ip_updates:
+            self.update_host_ip(attrs['fqdn'], attrs['name'],
+                                attrs['newip'], attrs['oldip'])
+        if hostname_update:
+            self.update_host_name(hostname_update['ifname'],
+                                  hostname_update['oldfqdn'],
+                                  hostname_update['newfqdn'])
 
-            for attrs in adds:
-                self.add_host_details(attrs['fqdn'], attrs['ip'],
-                                      attrs['name'], attrs['mac'],
-                                      attrs['primary'], attrs['comments'])
-                rollback_adds.append(attrs)
-
-        except ProcessException, e:
-            self.logger.info("Failed updating DSDB entry for {0:l}: "
-                             "{1!s}".format(dbhw_ent, e))
-            rollback_failures = []
-            for attrs in rollback_adds:
-                try:
-                    self.delete_host_details(attrs['ip'])
-                except Exception, err:
-                    rollback_failures.append(str(err))
-            if hostname_update:
-                try:
-                    self.update_host_name(hostname_update['ifname'],hostname_update['newfqdn'],hostname_update['oldfqdn'])
-                except Exception, err:
-                    rollback_failures.append(str(err))
-            for attrs in rollback_ip_updates:
-                try:
-                    self.update_host_ip(**attrs)
-                except Exception, err:
-                    rollback_failures.append(str(err))
-            for attrs in rollback_updates:
-                try:
-                    self.update_host_details(**attrs)
-                except Exception, err:
-                    rollback_failures.append(str(err))
-            for attrs in rollback_deletes:
-                try:
-                    self.add_host_details(attrs['fqdn'], attrs['ip'],
-                                          attrs['name'], attrs['mac'],
-                                          attrs['primary'], attrs['comments'])
-                except Exception, err:
-                    rollback_failures.append(str(err))
-
-            msg = "DSDB update failed: %s" % e
-            if rollback_failures:
-                msg += "\n\nRollback also failed, DSDB state is inconsistent:" + \
-                        "\n".join(rollback_failures)
-            raise AquilonError(msg)
-        return
+        for attrs in adds:
+            self.add_host_details(attrs['fqdn'], attrs['ip'],
+                                  attrs['name'], attrs['mac'],
+                                  attrs['primary'], attrs['comments'])
 
     def add_dns_domain(self, dns_domain, comments):
         if not comments:
+            # DSDB requires the comments field, even if it is empty
             comments = ""
-        try:
-            out = run_command([self.dsdb, "add_dns_domain",
-                               "-domain_name", dns_domain,
-                               "-comments", comments], env=self.getenv())
-        except ProcessException, e:
-            if e.out and DNS_DOMAIN_EXISTS.search(e.out):
-                self.logger.info("The DNS domain %s already exists in DSDB, "
-                                 "continuing." % dns_domain)
-                return
-            raise
+        command = ["add_dns_domain", "-domain_name", dns_domain,
+                   "-comments", comments]
+        rollback = ["delete_dns_domain", "-domain_name", dns_domain]
+        self.add_action(command, rollback, DNS_DOMAIN_EXISTS,
+                        "The DNS domain %s already exists in DSDB, "
+                        "proceeding." % dns_domain)
 
-    def delete_dns_domain(self, dns_domain):
-        try:
-            out = run_command([self.dsdb, "delete_dns_domain",
-                               "-domain_name", dns_domain], env=self.getenv())
-        except ProcessException, e:
-            if e.out and DNS_DOMAIN_NOT_FOUND.search(e.out):
-                self.logger.info("The DNS domain %s does not exist in DSDB, "
-                                 "proceeding with aqdb command." % dns_domain)
-                return
-            raise
-        else:
-            self.logger.info("Removed DNS domain %s from DSDB." % dns_domain)
-        return
+    def delete_dns_domain(self, dns_domain, old_comments):
+        command = ["delete_dns_domain", "-domain_name", dns_domain]
+        rollback = ["add_dns_domain", "-domain_name", dns_domain,
+                    "-comments", old_comments]
+        self.add_action(command, rollback, DNS_DOMAIN_NOT_FOUND,
+                        "The DNS domain %s does not exist in DSDB, "
+                        "proceeding." % dns_domain)
 
     primary_re = re.compile(r'^Primary Name:\s*\b([-\w]+)\b$', re.M)
     node_re = re.compile(r'^Node:\s*\b([-\w]+)\b$', re.M)
@@ -855,20 +842,29 @@ class DSDBRunner(object):
     def add_alias(self, alias, target, comments):
         if not comments:
             comments = ""
-        run_command([self.dsdb, "add_host_alias", "-host_name", target,
-                     "-alias_name", alias, "-comments", comments],
-                    env=self.getenv())
+        command = ["add_host_alias", "-host_name", target,
+                   "-alias_name", alias, "-comments", comments]
+        rollback = ["delete_host_alias", "-alias_name", alias]
+        self.add_action(command, rollback)
 
-    def del_alias(self, alias):
-        run_command([self.dsdb, "delete_host_alias", "-alias_name", alias],
-                    env=self.getenv())
+    def del_alias(self, alias, old_target, old_comments):
+        if not old_comments:
+            old_comments = ""
+        command = ["delete_host_alias", "-alias_name", alias]
+        rollback = ["add_host_alias", "-host_name", old_target,
+                    "-alias_name", alias, "-comments", old_comments]
+        self.add_action(command, rollback)
 
-    def update_alias(self, alias, target, comments):
+    def update_alias(self, alias, target, comments, old_target, old_comments):
         if not comments:
             comments = ""
-        run_command([self.dsdb, "update_host_alias", "-alias", alias,
-                     "-new_host", target, "-new_comments", comments],
-                    env=self.getenv())
+        if not old_comments:
+            old_comments = ""
+        command = ["update_host_alias", "-alias", alias,
+                   "-new_host", target, "-new_comments", comments]
+        rollback = ["update_host_alias", "-alias", alias,
+                    "-new_host", old_target, "-new_comments", old_comments]
+        self.add_action(command, rollback)
 
 
 class NASAssign(object):

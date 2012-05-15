@@ -29,7 +29,7 @@
 """Contains the logic for `aq add auxiliary`."""
 
 
-from aquilon.exceptions_ import ArgumentError, AquilonError
+from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.host import hostname_to_host
 from aquilon.worker.dbwrappers.interface import (generate_ip,
@@ -89,10 +89,8 @@ class CommandAddAuxiliary(BrokerCommand):
             plenary_info.write(locked=True)
 
             dsdb_runner = DSDBRunner(logger=logger)
-            try:
-                dsdb_runner.update_host(dbmachine, oldinfo)
-            except AquilonError, err:
-                raise ArgumentError("Could not add host to DSDB: %s" % err)
+            dsdb_runner.update_host(dbmachine, oldinfo)
+            dsdb_runner.commit_or_rollback("Could not add host to DSDB")
         except:
             plenary_info.restore_stash()
             raise

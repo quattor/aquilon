@@ -33,7 +33,7 @@ from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import (DynamicStub, ARecord, DnsDomain, Fqdn,
                                 AddressAssignment, NetworkEnvironment)
 from aquilon.aqdb.model.network import get_net_id_from_ip
-from aquilon.exceptions_ import ArgumentError, ProcessException
+from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.dbwrappers.interface import check_ip_restrictions
 from aquilon.worker.processes import DSDBRunner
 
@@ -83,7 +83,7 @@ class CommandAddDynamicRange(BrokerCommand):
                                 "following DNS records already exist:\n" +
                                 "\n".join([format(c, "a") for c in conflicts]))
 
-        stubs = []
+        dsdb_runner = DSDBRunner(logger=logger)
         for ipint in range(int(startip), int(endip) + 1):
             ip = IPv4Address(ipint)
             check_ip_restrictions(startnet, ip)
@@ -92,29 +92,9 @@ class CommandAddDynamicRange(BrokerCommand):
                                         dns_domain=dbdns_domain, preclude=True)
             dbdynamic_stub = DynamicStub(fqdn=dbfqdn, ip=ip, network=startnet)
             session.add(dbdynamic_stub)
-            stubs.append(dbdynamic_stub)
-
-        if not stubs:
-            return
+            dsdb_runner.add_host_details(dbfqdn, ip)
 
         session.flush()
+        dsdb_runner.commit_or_rollback("Could not add addresses to DSDB")
 
-        dsdb_runner = DSDBRunner(logger=logger)
-        stubs_added = []
-        try:
-            for dbstub in stubs:
-                logger.client_info("Adding {0:a} to DSDB.".format(dbstub))
-                dsdb_runner.add_host_details(fqdn=dbstub.fqdn, ip=dbstub.ip,
-                                             name=None, mac=None)
-                stubs_added.append(dbstub)
-        except ProcessException, err:
-            # Try to roll back anything that had succeeded...
-            for dbstub in stubs_added:
-                try:
-                    dsdb_runner.delete_host_details(dbstub.ip)
-                except ProcessException, pe2:
-                    logger.client_info("Failed rolling back DSDB entry for "
-                                       "%s with IP address %s: %s" %
-                                       (dbstub.fqdn, dbstub.ip, pe2))
-            raise ArgumentError("Could not add addresses to DSDB: %s" % err)
         return

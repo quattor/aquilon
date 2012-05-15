@@ -29,7 +29,7 @@
 """Contains the logic for `aq del auxiliary`."""
 
 
-from aquilon.exceptions_ import ArgumentError, ProcessException
+from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.processes import DSDBRunner
 from aquilon.worker.locks import DeleteKey
@@ -72,12 +72,10 @@ class CommandDelAuxiliary(BrokerCommand):
             session.flush()
             session.expire(dbmachine)
 
-            try:
-                dsdb_runner = DSDBRunner(logger=logger)
-                dsdb_runner.update_host(dbmachine, oldinfo)
-            except ProcessException, e:
-                raise ArgumentError("Could not remove host %s from DSDB: %s" %
-                            (auxiliary, e))
+            dsdb_runner = DSDBRunner(logger=logger)
+            dsdb_runner.update_host(dbmachine, oldinfo)
+            dsdb_runner.commit_or_rollback("Could not remove host %s from DSDB"
+                                           % auxiliary)
             # Past the point of no return here (DSDB has been updated)...
             # probably not much of an issue if writing the plenary failed.
             # Commit the session so that we can free the delete lock.

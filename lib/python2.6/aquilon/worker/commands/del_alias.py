@@ -29,7 +29,7 @@
 """Contains the logic for `aq del alias`."""
 
 
-from aquilon.exceptions_ import ArgumentError, ProcessException
+from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import DnsEnvironment, Alias, ReservedName
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.dns import delete_dns_record
@@ -48,6 +48,7 @@ class CommandDelAlias(BrokerCommand):
         domain = dbdns_rec.fqdn.dns_domain.name
 
         old_target = dbdns_rec.target
+        old_comments = dbdns_rec.comments
         target_is_restricted = old_target.dns_domain.restricted
         delete_dns_record(dbdns_rec)
         delete_target_if_needed(session, old_target)
@@ -56,10 +57,8 @@ class CommandDelAlias(BrokerCommand):
 
         if dbdns_env.is_default and domain == "ms.com" and not target_is_restricted:
             dsdb_runner = DSDBRunner(logger=logger)
-            try:
-                dsdb_runner.del_alias(fqdn)
-            except ProcessException, e:
-                raise ArgumentError("Could not delete alias from DSDB: %s" % e)
+            dsdb_runner.del_alias(fqdn, old_target, old_comments)
+            dsdb_runner.commit_or_rollback("Could not delete alias from DSDB")
 
         return
 

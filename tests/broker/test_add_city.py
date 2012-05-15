@@ -128,10 +128,7 @@ class TestAddCity(TestBrokerCommand):
                          "-building_addr Nowhere")
         command = ["add", "building", "--building", "bx", "--city", "e4",
                    "--address", "Nowhere"]
-        out, err = self.successtest(command)
-        self.matchoutput(err, "WARNING: There's no campus for city e4 of "
-                         "building bx. dsdb add_campus_building "
-                         "will not be executed.", command)
+        self.noouttest(command)
         self.dsdb_verify()
 
         ## add campus

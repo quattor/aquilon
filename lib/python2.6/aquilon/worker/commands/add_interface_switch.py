@@ -29,7 +29,7 @@
 """ Contains the logic for `aq add interface --switch`."""
 
 
-from aquilon.exceptions_ import ArgumentError, AquilonError
+from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Switch
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.interface import get_or_create_interface
@@ -70,9 +70,7 @@ class CommandAddInterfaceSwitch(BrokerCommand):
         session.flush()
 
         dsdb_runner = DSDBRunner(logger=logger)
-        try:
-            dsdb_runner.update_host(dbswitch, oldinfo)
-        except AquilonError, err:
-            raise ArgumentError("Could not update switch in DSDB: %s" % err)
+        dsdb_runner.update_host(dbswitch, oldinfo)
+        dsdb_runner.commit_or_rollback("Could not update switch in DSDB")
 
         return

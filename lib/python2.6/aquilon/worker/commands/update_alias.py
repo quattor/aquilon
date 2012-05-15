@@ -28,7 +28,6 @@
 # TERMS THAT MAY APPLY.
 """Contains the logic for `aq update alias`."""
 
-from aquilon.exceptions_ import ArgumentError, ProcessException
 from aquilon.aqdb.model import Alias, DnsEnvironment
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.processes import DSDBRunner
@@ -47,6 +46,9 @@ class CommandUpdateAlias(BrokerCommand):
         dbalias = Alias.get_unique(session, fqdn=fqdn,
                                    dns_environment=dbdns_env, compel=True)
 
+        old_target_fqdn = str(dbalias.target.fqdn)
+        old_comments = dbalias.comments
+
         if target:
             old_target = dbalias.target
             dbalias.target = create_target_if_needed(session, logger,
@@ -60,10 +62,9 @@ class CommandUpdateAlias(BrokerCommand):
 
         if dbdns_env.is_default and dbalias.fqdn.dns_domain.name == "ms.com":
             dsdb_runner = DSDBRunner(logger=logger)
-            try:
-                dsdb_runner.update_alias(fqdn, dbalias.target.fqdn,
-                                         dbalias.comments)
-            except ProcessException, e:
-                raise ArgumentError("Could not update alias in DSDB: %s" % e)
+            dsdb_runner.update_alias(fqdn, dbalias.target.fqdn,
+                                     dbalias.comments, old_target_fqdn,
+                                     old_comments)
+            dsdb_runner.commit_or_rollback("Could not update alias in DSDB")
 
         return

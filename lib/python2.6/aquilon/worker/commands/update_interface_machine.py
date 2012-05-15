@@ -163,6 +163,7 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
             if dbhw_ent.host and dbhw_ent.host.archetype.name != "aurora":
                 dsdb_runner = DSDBRunner(logger=logger)
                 dsdb_runner.update_host(dbhw_ent, oldinfo)
+                dsdb_runner.commit_or_rollback()
         except AquilonError, err:
             plenary_info.restore_stash()
             raise ArgumentError(err)

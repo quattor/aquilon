@@ -29,7 +29,7 @@
 """Contains the logic for `aq add tor_switch`."""
 
 
-from aquilon.exceptions_ import ArgumentError, ProcessException
+from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Switch, Model
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.worker.broker import BrokerCommand
@@ -110,12 +110,17 @@ class CommandAddTorSwitch(BrokerCommand):
 
         session.flush()
 
-        if ip:
-            dsdb_runner = DSDBRunner(logger=logger)
-            try:
-                dsdb_runner.update_host(dbtor_switch, None)
-            except ProcessException, e:
-                raise ArgumentError("Could not add ToR switch to DSDB: %s" % e)
-
         plenary = PlenarySwitch(dbtor_switch, logger=logger)
-        plenary.write()
+        with plenary.get_write_key() as key:
+            plenary.stash()
+            try:
+                plenary.write(locked=True)
+                if ip:
+                    dsdb_runner = DSDBRunner(logger=logger)
+                    dsdb_runner.update_host(dbtor_switch, None)
+                    dsdb_runner.commit_or_rollback("Could not add ToR switch to DSDB")
+            except:
+                plenary.restore_stash()
+                raise
+
+        return

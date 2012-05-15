@@ -28,7 +28,7 @@
 # TERMS THAT MAY APPLY.
 
 
-from aquilon.exceptions_ import ArgumentError, ProcessException
+from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import (ServiceAddress, ResourceGroup,
                                 AddressAssignment, Host)
 from aquilon.worker.broker import BrokerCommand, validate_basic
@@ -44,18 +44,16 @@ def del_srv_dsdb_callback(session, logger, holder, dbsrv_addr, oldinfo,
         real_holder = real_holder.holder.holder_object
 
     dsdb_runner = DSDBRunner(logger=logger)
-    try:
-        if isinstance(real_holder, Host):
-            dsdb_runner.update_host(real_holder.machine, oldinfo)
-            if keep_dns:
-                dsdb_runner.add_host_details(fqdn=dbsrv_addr.dns_record.fqdn,
-                                             ip=dbsrv_addr.dns_record.ip,
-                                             name=None, mac=None,
-                                             comments=dbsrv_addr.dns_record.comments)
-        elif not keep_dns:
-            dsdb_runner.delete_host_details(dbsrv_addr.dns_record.ip)
-    except ProcessException, e:
-        raise ArgumentError("Could not delete host from DSDB: %s" % e)
+    if isinstance(real_holder, Host):
+        dsdb_runner.update_host(real_holder.machine, oldinfo)
+        if keep_dns:
+            dsdb_runner.add_host_details(dbsrv_addr.dns_record.fqdn,
+                                         dbsrv_addr.dns_record.ip,
+                                         comments=dbsrv_addr.dns_record.comments)
+    elif not keep_dns:
+        dsdb_runner.delete_host_details(str(dbsrv_addr.dns_record.fqdn),
+                                        dbsrv_addr.dns_record.ip)
+    dsdb_runner.commit_or_rollback("Could not delete host from DSDB")
 
 
 class CommandDelServiceAddress(BrokerCommand):

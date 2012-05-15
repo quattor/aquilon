@@ -64,10 +64,7 @@ class TestAddBuilding(TestBrokerCommand):
 #                         "-building_name bu")
         command = ["add", "building", "--building", "cards", "--city", "ex",
                    "--address", "Nowhere"]
-        err = self.statustest(command)
-        self.matchoutput(err, "WARNING: There's no campus for city %s of "
-                               "building %s. dsdb add_campus_building will "
-                               "not be executed." % ("ex", "cards"), command)
+        self.noouttest(command)
         self.dsdb_verify()
 
     def testverifyaddbucards(self):

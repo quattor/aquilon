@@ -42,7 +42,11 @@ class CommandDelCity(CommandDelLocation):
 
     def render(self, session, logger, city, **arguments):
         dbcity = get_location(session, city=city)
-        label = dbcity.name
+
+        name = dbcity.name
+        country = dbcity.country.name
+        fullname = dbcity.fullname
+
         plenary = PlenaryCity(dbcity, logger=logger)
         CommandDelLocation.render(self, session=session, name=city,
                                   type='city', **arguments)
@@ -53,7 +57,8 @@ class CommandDelCity(CommandDelLocation):
             lock_queue.acquire(key)
             plenary.remove(locked=True)
             dsdb_runner = DSDBRunner(logger=logger)
-            dsdb_runner.del_city(label)
+            dsdb_runner.del_city(name, country, fullname)
+            dsdb_runner.commit_or_rollback()
         except:
             plenary.restore_stash()
             raise

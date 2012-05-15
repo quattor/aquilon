@@ -29,7 +29,7 @@
 """Contains the logic for `aq add host`."""
 
 
-from aquilon.exceptions_ import ArgumentError, ProcessException, AquilonError
+from aquilon.exceptions_ import ArgumentError, ProcessException
 from aquilon.aqdb.model import (Host, OperatingSystem, Archetype,
                                 HostLifecycle, Machine, Personality,
                                 ServiceAddress, HostResource)
@@ -196,10 +196,8 @@ class CommandAddHost(BrokerCommand):
             elif not dbmachine.primary_ip:
                 logger.info("No IP for %s, not adding to DSDB." % dbmachine.fqdn)
             else:
-                try:
-                    dsdb_runner.update_host(dbmachine, oldinfo)
-                except AquilonError, err:
-                    raise ArgumentError("Could not add host to DSDB: %s" % err)
+                dsdb_runner.update_host(dbmachine, oldinfo)
+                dsdb_runner.commit_or_rollback("Could not add host to DSDB")
         except:
             plenaries.restore_stash()
             raise

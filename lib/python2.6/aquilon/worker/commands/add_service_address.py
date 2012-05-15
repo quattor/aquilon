@@ -28,8 +28,7 @@
 # TERMS THAT MAY APPLY.
 
 
-from aquilon.exceptions_ import (ArgumentError, UnimplementedError,
-                                 ProcessException)
+from aquilon.exceptions_ import ArgumentError, UnimplementedError
 from aquilon.aqdb.model import ServiceAddress, Cluster, Host, ResourceGroup
 from aquilon.worker.broker import BrokerCommand, validate_basic
 from aquilon.worker.dbwrappers.interface import assign_address
@@ -41,19 +40,17 @@ from aquilon.worker.processes import DSDBRunner
 
 def add_srv_dsdb_callback(session, logger, dbsrv, real_holder=None,
                           oldinfo=None, newly_created=None, comments=None):
-    try:
-        dsdb_runner = DSDBRunner(logger=logger)
-        # FIXME: this is not rolled back if the following operations fail
-        if not newly_created:
-            dsdb_runner.delete_host_details(dbsrv.dns_record.ip)
-        if isinstance(real_holder, Host):
-            dsdb_runner.update_host(real_holder.machine, oldinfo)
-        else:
-            dsdb_runner.add_host_details(str(dbsrv.dns_record.fqdn),
-                                         dbsrv.dns_record.ip, None, None,
-                                         comments=comments)
-    except ProcessException, e:
-        raise ArgumentError("Could not add host to DSDB: %s" % e)
+    dsdb_runner = DSDBRunner(logger=logger)
+
+    if not newly_created:
+        dsdb_runner.delete_host_details(dbsrv.dns_record.fqdn, dbsrv.dns_record.ip)
+    if isinstance(real_holder, Host):
+        dsdb_runner.update_host(real_holder.machine, oldinfo)
+    else:
+        dsdb_runner.add_host_details(dbsrv.dns_record.fqdn,
+                                     dbsrv.dns_record.ip, comments=comments)
+
+    dsdb_runner.commit_or_rollback("Could not add host to DSDB")
 
 
 class CommandAddServiceAddress(BrokerCommand):

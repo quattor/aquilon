@@ -51,18 +51,12 @@ class CommandAddBuilding(CommandAddLocation):
 
         building, city, address = (new_loc.name,
                                    new_loc.city.name, new_loc.address)
-
-        dsdb_runner = DSDBRunner(logger=logger)
-
-        dsdb_runner.add_building(building, city, address,
-                                revert=(dsdb_runner.del_building,(building,)))
-
         newcity = new_loc.city
 
+        dsdb_runner = DSDBRunner(logger=logger)
+        dsdb_runner.add_building(building, city, address)
         if newcity.campus:
             dsdb_runner.add_campus_building(newcity.campus, building)
+        dsdb_runner.commit_or_rollback()
 
-        else:
-            logger.client_info("WARNING: There's no campus for city %s of "
-                               "building %s. dsdb add_campus_building will "
-                               "not be executed." % (city, building))
+        return

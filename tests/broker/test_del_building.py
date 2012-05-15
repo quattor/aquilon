@@ -66,19 +66,17 @@ class TestDelBuilding(TestBrokerCommand):
                          "-building_addr Nowhere")
         command = ["add", "building", "--building", test_building, "--city", "ex",
                    "--address", "Nowhere"]
-        (out, err) = self.successtest(command)
-        self.matchoutput(err, "WARNING: There's no campus for city ex of "
-                         "building bz. dsdb add_campus_building will not be "
-                         "executed.", command)
+        self.noouttest(command)
         self.dsdb_verify()
-
 
         dsdb_command = "delete_building_aq -building %s" % test_building
         errstr = "bldg %s doesn't exists" % test_building
         self.dsdb_expect(dsdb_command, True, errstr)
         command = "del building --building %s" % test_building
-        (out, err) = self.successtest(command.split(" "))
-        self.assertEmptyOut(out, command)
+        out, err = self.successtest(command.split(" "))
+        self.matchoutput(err,
+                         "DSDB does not have building bz defined, proceeding.",
+                         command)
         self.dsdb_verify()
 
     def testdelnettest02(self):
