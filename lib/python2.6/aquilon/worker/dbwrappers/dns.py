@@ -111,7 +111,7 @@ def _forbid_dyndns(dbdns_rec):
 # - Locking the network ensures exclusive access to the IP address allocation
 def grab_address(session, fqdn, ip, network_environment=None,
                  dns_environment=None, comments=None,
-                 allow_restricted_domain=False,
+                 allow_restricted_domain=False, allow_multi=False,
                  allow_reserved=False, relaxed=False, preclude=False):
     """
     Take ownership of an address.
@@ -129,6 +129,8 @@ def grab_address(session, fqdn, ip, network_environment=None,
         comments: any comments to attach to the DNS record if it is created as new
         allow_restricted_domain: if False, adding entries to restricted DNS
             domains is disallowed
+        allow_multi: if True, allow the same fqdn to be added multiple times with
+            different IP addresses
         allow_rederved: if True, allow creating a ReservedName instead of an
             ARecord if no IP address was specified
         preclude: if True, abort if a suitable DNS record does not exist already
@@ -209,7 +211,7 @@ def grab_address(session, fqdn, ip, network_environment=None,
                 _check_netenv_compat(dbdns_rec, network_environment)
                 if dbdns_rec.ip == ip and dbdns_rec.network == dbnetwork:
                     existing_record = dbdns_rec
-                else:
+                elif not allow_multi:
                     raise ArgumentError("{0} points to a different IP address."
                                         .format(dbdns_rec))
 

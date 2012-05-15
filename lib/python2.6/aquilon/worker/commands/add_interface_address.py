@@ -98,6 +98,7 @@ class CommandAddInterfaceAddress(BrokerCommand):
         if label:
             validate_basic("label", label)
 
+        # TODO: add allow_multi=True
         dbdns_rec, newly_created = grab_address(session, fqdn, ip,
                                                 network_environment,
                                                 relaxed=relaxed)

@@ -93,7 +93,8 @@ class CommandAddServiceAddress(BrokerCommand):
                                   preclude=True)
 
         dbdns_rec, newly_created = grab_address(session, service_address, ip,
-                                                network_environment)
+                                                network_environment,
+                                                allow_multi=True)
         ip = dbdns_rec.ip
         dbnetwork = dbdns_rec.network
 

@@ -161,9 +161,41 @@ class TestUsecaseHACluster(TestBrokerCommand):
                             "Plenary '%s' does not exist" % plenary)
         self.dsdb_verify()
 
+    def test_130_add_lb(self):
+        # Multi-A record pointing to two different service IPs
+        ips = [self.net.unknown[0].usable[30],
+               self.net.unknown[0].usable[31]]
+        plenarydir = self.config.get("broker", "plenarydir")
+        for cl in range(1, 3):
+            cluster_res_dir = os.path.join(plenarydir, "resource", "cluster",
+                                           "hacl%d" % cl)
+            rg_dir = os.path.join(cluster_res_dir, "resourcegroup",
+                                  "hacl%dg2" % cl)
+            plenary = os.path.join(rg_dir, "service_address",
+                                   "hacl%dg2addr" % cl, "config.tpl")
+
+            self.dsdb_expect_add("hashared.aqd-unittest.ms.com", ips[cl - 1])
+            self.successtest(["add", "service", "address",
+                              "--cluster", "hacl%d" % cl,
+                              "--resourcegroup", "hacl%dg2" % cl,
+                              "--service_address", "hashared.aqd-unittest.ms.com",
+                              "--name", "hacl%dg2addr" % cl,
+                              "--ip", ips[cl - 1], "--interfaces", "eth0"])
+            self.failUnless(os.path.exists(plenary),
+                            "Plenary '%s' does not exist" % plenary)
+        self.dsdb_verify()
+
     def test_200_make_cluster(self):
         self.successtest(["make", "cluster", "--cluster", "hacl1"])
         self.successtest(["make", "cluster", "--cluster", "hacl2"])
+
+    def test_300_check_dns(self):
+        ips = [self.net.unknown[0].usable[30],
+               self.net.unknown[0].usable[31]]
+        command = ["show", "fqdn", "--fqdn", "hashared.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "IP: %s" % ips[0], command)
+        self.matchoutput(out, "IP: %s" % ips[1], command)
 
     def test_900_try_del_hacl1g1(self):
         command = ["del", "resourcegroup", "--cluster", "hacl1",
@@ -224,6 +256,30 @@ class TestUsecaseHACluster(TestBrokerCommand):
     def test_920_del_hacl2g1(self):
         self.successtest(["del", "resourcegroup", "--resourcegroup", "hacl2g1",
                           "--cluster", "hacl2"])
+
+    def test_930_del_hashared(self):
+        ips = [self.net.unknown[0].usable[30],
+               self.net.unknown[0].usable[31]]
+        self.dsdb_expect_delete(ips[0])
+        self.successtest(["del", "service", "address", "--cluster", "hacl1",
+                          "--resourcegroup", "hacl1g2",
+                          "--name", "hacl1g2addr"])
+        self.dsdb_expect_delete(ips[1])
+
+        command = ["search", "dns", "--fqdn", "hashared.aqd-unittest.ms.com",
+                   "--fullinfo"]
+        out = self.commandtest(command)
+        self.matchoutput(out, str(ips[1]), command)
+        self.matchclean(out, str(ips[0]), command)
+
+        self.successtest(["del", "service", "address", "--cluster", "hacl2",
+                          "--resourcegroup", "hacl2g2",
+                          "--name", "hacl2g2addr"])
+
+        command = ["search", "dns", "--fqdn", "hashared.aqd-unittest.ms.com"]
+        self.notfoundtest(command)
+
+        self.dsdb_verify()
 
     def test_940_hacl1g2(self):
         self.successtest(["del", "resourcegroup", "--resourcegroup", "hacl1g2",
