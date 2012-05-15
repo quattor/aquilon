@@ -148,6 +148,7 @@ class AuthorizationBroker(object):
                               'add_interface_chassis',
                               'add_interface_hostname',
                               'add_interface_machine',
+                              'add_interface_address',
                               'add_reboot_intervention',
                               'add_reboot_schedule',
                               'del_reboot_intervention',
