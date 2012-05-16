@@ -3219,6 +3219,7 @@
 	 <option name="vendor" type="string">Switch vendor. Needed if the model name is not unique</option>
 	 <option name="serial" type="string">Serial Number</option>
 	 <option name="comments" type="string">Comments</option>
+	 <option name="rename_to" type="string">New name of the switch</option>
       </optgroup>
       <transport method="post" path="switch/%(switch)s" />
    </command>
