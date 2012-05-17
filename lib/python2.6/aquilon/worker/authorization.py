@@ -180,6 +180,8 @@ class AuthorizationBroker(object):
                               'del_filesystem',
                               'poll_switch', 'poll_tor_switch_tor_switch',
                               'poll_switch_switch', 'poll_tor_switch',
+                              'add_rack', 'add_rack_room', 'add_chassis',
+                              'del_rack', 'del_chassis',
                               'make', 'make_cluster']:
                 self.raise_auth_error(principal, action, resource)
         if dbuser.role.name == 'alias_manager':
