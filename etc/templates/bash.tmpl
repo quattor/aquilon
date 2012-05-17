@@ -19,47 +19,52 @@ def option_has_parameter(opt):
 global_options_with_params = filter(option_has_parameter, global_options)
 %>
 
-_aq_sqlite="/ms/dist/fsf/PROJ/sqlite/3.5.4/bin/sqlite3"
-_aq_datawarehouse="/ms/dist/aquilon/PROJ/datawarehouse/incr"
+_aq_sqlite="/ms/dist/fsf/PROJ/sqlite/3.7.4/bin/sqlite3"
+_aq_datawarehouse="/ms/dist/aquilon/PROJ/datawarehouse/dumpv3"
 
 _aq_complete_hostname ()
 {
     $_aq_sqlite $_aq_datawarehouse/hostdata.db "select hostname from hosts where hostname glob '$1*'"
 }
 
+_aq_complete_cluster ()
+{
+    $_aq_sqlite $_aq_datawarehouse/clusters.db "select name from cluster where name glob '$1*'"
+}
+
 _aq_complete_building ()
 {
-    $_aq_sqlite $_aq_datawarehouse/hostdata.db "select distinct building from hosts"
+    $_aq_sqlite $_aq_datawarehouse/geography.db "select name from geography where loctype = 'building' and name glob '$1*'"
 }
 
 _aq_complete_region ()
 {
-    $_aq_sqlite $_aq_datawarehouse/hostdata.db "select distinct region from hosts"
+    $_aq_sqlite $_aq_datawarehouse/geography.db "select name from geography where loctype = 'continent' and name glob '$1*'"
 }
 
 _aq_complete_city ()
 {
-    $_aq_sqlite $_aq_datawarehouse/hostdata.db "select distinct city from hosts"
+    $_aq_sqlite $_aq_datawarehouse/geography.db "select name from geography where loctype = 'city' and name glob '$1*'"
 }
 
 _aq_complete_archetype ()
 {
-    $_aq_sqlite $_aq_datawarehouse/hostdata.db "select distinct archetype from hosts"
+    $_aq_sqlite $_aq_datawarehouse/personality.db "select distinct archetype from personality where archetype glob '$1*'"
 }
 
 _aq_complete_personality ()
 {
-    $_aq_sqlite $_aq_datawarehouse/hostdata.db "select distinct personality from hosts"
+    $_aq_sqlite $_aq_datawarehouse/personality.db "select distinct name from personality where name glob '$1*'"
 }
 
 _aq_complete_service ()
 {
-    $_aq_sqlite $_aq_datawarehouse/servers.db "select distinct service from servers"
+    $_aq_sqlite $_aq_datawarehouse/servers.db "select distinct service from servers where service glob '$1*'"
 }
 
 _aq_complete_instance ()
 {
-    $_aq_sqlite $_aq_datawarehouse/servers.db "select distinct instance from servers"
+    $_aq_sqlite $_aq_datawarehouse/servers.db "select distinct instance from servers where instance glob '$1*'"
 }
 
 _aq ()
