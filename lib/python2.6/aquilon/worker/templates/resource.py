@@ -141,5 +141,8 @@ class PlenaryResourceGroup(PlenaryCollection):
         # This is used by the cat command
         return self.real_plenary.read()
 
+    def _generate_content(self):
+        return self.real_plenary._generate_content()
+
 
 Plenary.handlers[ResourceGroup] = PlenaryResourceGroup
