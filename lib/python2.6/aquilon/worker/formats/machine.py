@@ -134,10 +134,10 @@ class MachineFormatter(ObjectFormatter):
             if host.cluster:
                 details.append(indent + "  Member of {0:c}: {0.name}"
                                .format(host.cluster))
-            if host.resources:
+            if host.resholder and host.resholder.resources:
                 details.append(indent + "  Resources:")
-            for resource in host.resources:
-                details.append(self.redirect_raw(resource, indent + "    "))
+                for resource in host.resholder.resources:
+                    details.append(self.redirect_raw(resource, indent + "    "))
 
             # TODO: supress features when redirecting personality/archetype
             details.append(self.redirect_raw(host.personality, indent + "  "))

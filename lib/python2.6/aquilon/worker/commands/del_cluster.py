@@ -52,8 +52,9 @@ class CommandDelCluster(BrokerCommand):
                                 (format(dbcluster), hosts))
         cluster_plenary = Plenary.get_plenary(dbcluster, logger=logger)
         resources = PlenaryCollection(logger=logger)
-        for res in dbcluster.resources:
-            resources.append(Plenary.get_plenary(res))
+        if dbcluster.resholder:
+            for res in dbcluster.resholder.resources:
+                resources.append(Plenary.get_plenary(res))
         domain = dbcluster.branch.name
         session.delete(dbcluster)
 

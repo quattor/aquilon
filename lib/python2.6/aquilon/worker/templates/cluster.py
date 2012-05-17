@@ -130,9 +130,10 @@ class PlenaryClusterData(Plenary):
                    sorted([member.fqdn for member in self.dbobj.hosts]))
 
         lines.append("")
-        for resource in sorted(self.dbobj.resources):
-            pan_push(lines, "/system/resources/%s" % resource.resource_type,
-                     StructureTemplate(resource.template_base + '/config'))
+        if self.dbobj.resholder:
+            for resource in sorted(self.dbobj.resholder.resources):
+                pan_push(lines, "/system/resources/%s" % resource.resource_type,
+                         StructureTemplate(resource.template_base + '/config'))
         pan_assign(lines, "/system/build", self.dbobj.status.name)
         if self.dbobj.allowed_personalities:
             pan_assign(lines, "/system/cluster/allowed_personalities",
@@ -241,10 +242,11 @@ class PlenaryClusterClient(Plenary):
         # but since we know that these templates are always in sync,
         # we can duplicate the content here to avoid the possibility of
         # circular external references.
-        for resource in sorted(self.dbobj.resources):
-            pan_push(lines, "/system/cluster/resources/%s" %
-                     resource.resource_type,
-                     StructureTemplate(resource.template_base + '/config'))
+        if self.dbobj.resholder:
+            for resource in sorted(self.dbobj.resholder.resources):
+                pan_push(lines, "/system/cluster/resources/%s" %
+                         resource.resource_type,
+                         StructureTemplate(resource.template_base + '/config'))
         lines.append("include { if_exists('features/' + value('/system/archetype/name') + '/%s/%s/config') };"
                      % (self.dbobj.personality.archetype.name,
                         self.dbobj.personality.name))

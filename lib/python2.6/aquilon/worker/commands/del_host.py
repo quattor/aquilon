@@ -89,8 +89,9 @@ class CommandDelHost(BrokerCommand):
 
             del dbhost.services_used[:]
 
-            for res in dbhost.resources:
-                resources.append(Plenary.get_plenary(res))
+            if dbhost.resholder:
+                for res in dbhost.resholder.resources:
+                    resources.append(Plenary.get_plenary(res))
 
             # In case of Zebra, the IP may be configured on multiple interfaces
             for iface in dbmachine.interfaces:
