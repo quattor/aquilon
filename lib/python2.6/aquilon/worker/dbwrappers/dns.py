@@ -125,15 +125,17 @@ def grab_address(session, fqdn, ip, network_environment=None,
         fqdn: the name to allocate/take over
         ip: the IP address to allocate/take over
         network_environment: where the IP address lives
-        dns_enviromnent: where the fqdn lives
+        dns_enviromnent: where the FQDN lives
         comments: any comments to attach to the DNS record if it is created as new
-        allow_restricted_domain: if False, adding entries to restricted DNS
-            domains is disallowed
-        allow_multi: if True, allow the same fqdn to be added multiple times with
-            different IP addresses
-        allow_rederved: if True, allow creating a ReservedName instead of an
-            ARecord if no IP address was specified
-        preclude: if True, abort if a suitable DNS record does not exist already
+        allow_restricted_domain: if True, adding entries to restricted DNS
+            domains is allowed, otherwise it is denied. Default is False.
+        allow_multi: if True, allow the same FQDN to be added multiple times with
+            different IP addresses. Deault is False.
+        allow_reserved: if True, allow creating a ReservedName instead of an
+            ARecord if no IP address was specified. Default is False.
+        preclude: if True, forbid taking over an existing DNS record, even if it
+            is not referenced by any AddressAssignment records. Default is
+            False.
     """
     if not isinstance(network_environment, NetworkEnvironment):
         network_environment = NetworkEnvironment.get_unique_or_default(session,
