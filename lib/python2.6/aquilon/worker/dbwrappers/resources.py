@@ -115,30 +115,30 @@ def get_resource(session, holder, **arguments_in):
 def del_resource(session, logger, dbresource, dsdb_callback=None, **arguments):
     holder = dbresource.holder
     holder_plenary = Plenary.get_plenary(holder.holder_object, logger=logger)
-    remove_plenaries = PlenaryCollection(logger=logger)
-    remove_plenaries.append(Plenary.get_plenary(dbresource))
+    remove_plenary = Plenary.get_plenary(dbresource)
 
     domain = holder.holder_object.branch.name
 
     holder.resources.remove(dbresource)
     session.flush()
 
-    key = CompileKey.merge([remove_plenaries.get_remove_key(),
+    key = CompileKey.merge([remove_plenary.get_remove_key(),
                             holder_plenary.get_write_key()])
     try:
         lock_queue.acquire(key)
-        remove_plenaries.stash()
-        remove_plenaries.remove(locked=True)
+        remove_plenary.stash()
         try:
             holder_plenary.write(locked=True)
         except IncompleteError:
             holder_plenary.cleanup(domain, locked=True)
 
+        remove_plenary.remove(locked=True)
+
         if dsdb_callback:
             dsdb_callback(session, logger, holder, dbresource, **arguments)
     except:
         holder_plenary.restore_stash()
-        remove_plenaries.restore_stash()
+        remove_plenary.restore_stash()
         raise
     finally:
         lock_queue.release(key)
