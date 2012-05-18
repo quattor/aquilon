@@ -47,7 +47,8 @@ class CommandShowLocationType(BrokerCommand):
 
         cls = Location.__mapper__.polymorphic_map[type].class_
         query = session.query(cls)
-        query = query.options(subqueryload('parents'))
+        query = query.options(subqueryload('parents'),
+                              subqueryload('default_dns_domain'))
 
         if name:
             query = query.filter_by(name=name)

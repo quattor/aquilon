@@ -41,22 +41,6 @@ from brokertest import TestBrokerCommand
 
 class TestUpdateBuilding(TestBrokerCommand):
 
-    def test_100_addbu(self):
-        self.dsdb_expect("add_building_aq -building_name tu -city ny "
-                         "-building_addr 14 Test Lane")
-        self.dsdb_expect("add_campus_building_aq -campus_name ny "
-                         "-building_name tu")
-        command = ["add", "building", "--building", "tu", "--city", "ny",
-                   "--address", "14 Test Lane"]
-        self.noouttest(command)
-        self.dsdb_verify()
-
-    def test_101_verifyaddbu(self):
-        command = "show building --building tu"
-        out, err = self.successtest(command.split(" "))
-        self.matchoutput(out, "Building: tu", command)
-        self.matchoutput(out, "Address: 14 Test Lane", command)
-
     def test_102_updateaddress(self):
         self.dsdb_expect("update_building_aq -building_name tu "
                          "-building_addr 24 Cherry Lane")
@@ -99,22 +83,44 @@ class TestUpdateBuilding(TestBrokerCommand):
 
     def test_107_verifyupdatecity(self):
         command = "show building --building tu"
-        out,err = self.successtest(command.split(" "))
+        out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Building: tu", command)
         self.matchoutput(out, "Address: 20 Penny Lane", command)
         self.matchoutput(out, "City e5", command)
 
-    def test_108_delte(self):
-        self.dsdb_expect("delete_campus_building_aq -campus_name ta "
-                         "-building_name tu")
-        self.dsdb_expect("delete_building_aq -building tu")
-        command = "del building --building tu"
-        self.noouttest(command.split(" "))
-        self.dsdb_verify()
+    def test_110_update_ut_dnsdomain(self):
+        command = ["update", "building", "--building", "ut",
+                   "--default_dns_domain", "aqd-unittest.ms.com"]
+        self.noouttest(command)
 
-    def test_109_verifydelete(self):
-        command = "show building --building tu"
-        self.notfoundtest(command.split(" "))
+    def test_115_verify_ut_dnsdomain(self):
+        command = ["show", "building", "--building", "ut"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Default DNS Domain: aqd-unittest.ms.com",
+                         command)
+
+    def test_110_update_tu_dnsdomain(self):
+        command = ["update", "building", "--building", "tu",
+                   "--default_dns_domain", "aqd-unittest.ms.com"]
+        self.noouttest(command)
+
+    def test_115_verify_tu_dnsdomain(self):
+        command = ["show", "building", "--building", "tu"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Default DNS Domain: aqd-unittest.ms.com",
+                         command)
+
+    def test_120_update_tu_nodnsdomain(self):
+        command = ["update", "building", "--building", "tu",
+                   "--default_dns_domain", ""]
+        self.noouttest(command)
+
+    def test_125_verify_tu_dnsdomain_gone(self):
+        command = ["show", "building", "--building", "tu"]
+        out = self.commandtest(command)
+        self.matchclean(out, "Default DNS Domain", command)
+        self.matchclean(out, "aqd-unittest.ms.com", command)
+
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestUpdateBuilding)

@@ -844,7 +844,10 @@
       by Zebra. The argument of the option is a comma-separated list of interface names, where
       Zebra should be configured.
       <optgroup name="add_host_opts" mandatory="True" fields="all">
-         <option name="hostname" type="string">Fully qualified Host name</option>
+         <optgroup name="add_host_name_gen" mandatory="True" fields="any">
+            <option name="hostname" type="string">Fully qualified Host name</option>
+            <option name="prefix" type="string">Prefix for generating the host name</option>
+         </optgroup>
          <option name="machine" type="string">Machine (Node) name</option>
          <option name="archetype" type="string">Archetype name</option>
          <optgroup name="add_host_branch" mandatory="True" fields="any">
@@ -868,8 +871,10 @@
          <option name="comments" type="string">Comments</option>
          <option name="grn" type="string" conflicts="eon_id">GRN as string</option>
          <option name="eon_id" type="int" conflicts="grn">Numeric EON ID</option>
+         <option name="dns_domain" type="string">Override the default DNS domain for --prefix</option>
       </optgroup>
       <transport method="put" path="host/%(hostname)s" />
+      <transport method="put" trigger="prefix" path="next_host/%(prefix)s"/>
    </command>
 
    <command name="add_aquilon_host">
@@ -2436,6 +2441,7 @@
          <option name="clearroom" type="boolean" conflicts="room">Clear room information for the rack</option>
          <option name="fullname" type="string">Full, descriptive name</option>
          <option name="comments" type="string">Comments</option>
+         <option name="default_dns_domain" type="string">Default DNS domain for new machines</option>
       </optgroup>
       <transport method="post" path="location/rack/%(rack)s" />
    </command>
@@ -2484,6 +2490,7 @@
          <option name="address" type="string">Address of the building</option>
          <option name="city" type="string">Name of the city the building is in</option>
          <option name="fullname" type="string">Full, descriptive name</option>
+         <option name="default_dns_domain" type="string">Default DNS domain for new machines</option>
          <option name="comments" type="string">Comments</option>
       </optgroup>
       <transport method="post" path="location/building/%(building)s" />
@@ -2605,6 +2612,8 @@
       <optgroup name="optional_opts" mandatory="False" fields="any">
          <option name="timezone" type="string">Timezone of the city (e.g. Europe/London)</option>
          <option name="campus" type="string">Campus (should be in the same hub)</option>
+         <option name="default_dns_domain" type="string">Default DNS domain for new machines</option>
+         <option name="comments" type="string">Comments</option>
       </optgroup>
       <transport method="post" path="location/city/%(city)s" />
    </command>
@@ -3031,7 +3040,7 @@
 	 <option name="comments" type="string">Comments</option>
       </optgroup>
       <transport method="put" path="machine/%(machine)s" />
-      <transport method="post" trigger="prefix" path="next_machine/%(prefix)s" />
+      <transport method="put" trigger="prefix" path="next_machine/%(prefix)s" />
    </command>
 
    <command name="update_machine">

@@ -197,8 +197,7 @@ def generate_ip(session, dbinterface, ip=None, ipfromip=None,
     # generation within a network will be serialized, while operations on
     # different networks can still run in parallel. The lock will be released by
     # COMMIT or ROLLBACK.
-    session.execute(select([Network.id], Network.id == dbnetwork.id,
-                           for_update=True)).fetchall()
+    dbnetwork.lock_row()
 
     startip = dbnetwork.first_usable_host
 

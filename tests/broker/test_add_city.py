@@ -46,13 +46,14 @@ class TestAddCity(TestBrokerCommand):
                          "-country_symbol us -city_name Exampleton")
         command = ["add", "city", "--city", "ex", "--country", "us",
                    "--fullname", "Exampleton", "--timezone",
-                   "US/Eastern"]
+                   "US/Eastern", "--comments", "Example city comment"]
         self.noouttest(command)
         self.dsdb_verify()
 
     def testaddupdateexample(self):
         command = ["update", "city", "--city", "ex",
-                   "--timezone", "EDT"]
+                   "--timezone", "EDT",
+                   "--comments", "Exampleton city comment"]
         self.ignoreoutputtest(command)
         # For a difference, let's use raw this time
         command = "show city --city ex"
@@ -87,12 +88,13 @@ class TestAddCity(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out, 'variable TIMEZONE = "UTC";', command)
 
-    def testverifyaddbu(self):
+    def testverifyex(self):
         command = "show city --city ex"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "City: ex", command)
+        self.matchoutput(out, "Comments: Exampleton city comment", command)
 
-    def testverifyaddbuproto(self):
+    def testverifyexproto(self):
         command = "show city --city ex --format proto"
         out = self.commandtest(command.split(" "))
         locs = self.parse_location_msg(out, 1)
@@ -201,6 +203,17 @@ class TestAddCity(TestBrokerCommand):
         out = self.badrequesttest(command)
         self.matchoutput(out, "Cannot change campus.  Campus na is in hub ny, while city e6 is in hub ln", command)
 
-if __name__=='__main__':
+    def testupdatedefaultdns(self):
+        command = ["update", "city", "--city", "ny",
+                   "--default_dns_domain", "one-nyp.ms.com"]
+        self.successtest(command)
+
+    def testverifydefaultdns(self):
+        command = ["show", "city", "--city", "ny"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Default DNS Domain: one-nyp.ms.com", command)
+
+
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddCity)
     unittest.TextTestRunner(verbosity=2).run(suite)
