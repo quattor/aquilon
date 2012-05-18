@@ -185,14 +185,3 @@ class Resource(Base):
 resource = Resource.__table__  # pylint: disable=C0103, E1101
 resource.primary_key.name = '%s_pk' % _TN
 resource.info['unique_fields'] = ['name', 'holder']
-
-
-# Proxy the resource list to the holder object for Host and Cluster objects
-def _resource_getter(self):
-    if self.resholder is not None:
-        return self.resholder.resources
-    else:
-        return []
-
-Host.resources = property(_resource_getter)
-Cluster.resources = property(_resource_getter)

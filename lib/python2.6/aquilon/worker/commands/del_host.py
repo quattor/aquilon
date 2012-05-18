@@ -32,7 +32,6 @@
 import os
 
 from aquilon.exceptions_ import ArgumentError, ProcessException
-from aquilon.aqdb.model import ResourceGroup
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.host import (hostname_to_host,
                                             get_host_dependencies)
@@ -90,11 +89,9 @@ class CommandDelHost(BrokerCommand):
 
             del dbhost.services_used[:]
 
-            for res in dbhost.resources:
-                resources.append(Plenary.get_plenary(res))
-                if isinstance(res, ResourceGroup):
-                    resources.extend([Plenary.get_plenary(res2)
-                                             for res2 in res.resources])
+            if dbhost.resholder:
+                for res in dbhost.resholder.resources:
+                    resources.append(Plenary.get_plenary(res))
 
             # In case of Zebra, the IP may be configured on multiple interfaces
             for iface in dbmachine.interfaces:

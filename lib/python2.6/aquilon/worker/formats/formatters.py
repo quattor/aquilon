@@ -338,8 +338,8 @@ class ObjectFormatter(object):
                 continue
             host_msg.mac = str(iface.mac)
 
-        if len(host.resources) > 0:
-            for resource in host.resources:
+        if host.resholder and len(host.resholder.resources) > 0:
+            for resource in host.resholder.resources:
                 r = host_msg.resources.add()
                 self.redirect_proto(resource, r)
 

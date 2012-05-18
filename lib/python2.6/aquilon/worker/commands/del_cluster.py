@@ -31,7 +31,7 @@
 import os
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import Cluster, ResourceGroup
+from aquilon.aqdb.model import Cluster
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.templates.index import build_index
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
@@ -52,11 +52,9 @@ class CommandDelCluster(BrokerCommand):
                                 (format(dbcluster), hosts))
         cluster_plenary = Plenary.get_plenary(dbcluster, logger=logger)
         resources = PlenaryCollection(logger=logger)
-        for res in dbcluster.resources:
-            resources.append(Plenary.get_plenary(res))
-            if isinstance(res, ResourceGroup):
-                resources.extend([Plenary.get_plenary(res2)
-                                  for res2 in res.resources])
+        if dbcluster.resholder:
+            for res in dbcluster.resholder.resources:
+                resources.append(Plenary.get_plenary(res))
         domain = dbcluster.branch.name
         session.delete(dbcluster)
 

@@ -547,6 +547,11 @@ class HostChooser(Chooser):
                                               logger=self.logger)
         plenary_machine.stash()
         self.plenaries.append(plenary_machine)
+        if self.dbhost.resholder:
+            for dbres in self.dbhost.resholder.resources:
+                resource_plenary = Plenary.get_plenary(dbres, logger=self.logger)
+                resource_plenary.stash()
+                self.plenaries.append(resource_plenary)
 
 
 class ClusterChooser(Chooser):
@@ -622,3 +627,8 @@ class ClusterChooser(Chooser):
             host_plenary = Plenary.get_plenary(dbhost, logger=self.logger)
             host_plenary.stash()
             self.plenaries.append(host_plenary)
+        if self.dbcluster.resholder:
+            for dbres in self.dbcluster.resholder.resources:
+                resource_plenary = Plenary.get_plenary(dbres, logger=self.logger)
+                resource_plenary.stash()
+                self.plenaries.append(resource_plenary)

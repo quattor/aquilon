@@ -58,8 +58,8 @@ class ClusterFormatter(ObjectFormatter):
         for host in sorted(cluster.hosts, key=lambda x : x.fqdn):
             self.add_host_msg(skeleton.hosts.add(), host)
 
-        if len(cluster.resources) > 0:
-            for resource in cluster.resources:
+        if cluster.resholder and len(cluster.resholder.resources) > 0:
+            for resource in cluster.resholder.resources:
                 r = skeleton.resources.add()
                 self.redirect_proto(resource, r)
 
@@ -123,10 +123,10 @@ class ClusterFormatter(ObjectFormatter):
                 details.append(indent + "  Maintenance Threshold: %s" %
                                cluster.down_maint_threshold)
 
-        if cluster.resources:
+        if cluster.resholder and cluster.resholder.resources:
             details.append(indent + "  Resources:")
-        for resource in cluster.resources:
-            details.append(self.redirect_raw(resource, indent + "    "))
+            for resource in cluster.resholder.resources:
+                details.append(self.redirect_raw(resource, indent + "    "))
 
         if cluster.cluster_type == 'esx':
             details.append(indent + "  Max vm_to_host_ratio: %s" %

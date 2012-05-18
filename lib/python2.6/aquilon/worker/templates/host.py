@@ -270,10 +270,11 @@ class PlenaryHostData(Plenary):
             pan_assign(lines, "/system/eon_ids", eon_id_list)
         if self.dbobj.cluster:
             pan_assign(lines, "/system/cluster/name", self.dbobj.cluster.name)
-        lines.append("")
-        for resource in sorted(self.dbobj.resources):
-            pan_push(lines, "/system/resources/%s" % resource.resource_type,
-                     StructureTemplate(resource.template_base + '/config'))
+        if self.dbobj.resholder:
+            lines.append("")
+            for resource in sorted(self.dbobj.resholder.resources):
+                pan_push(lines, "/system/resources/%s" % resource.resource_type,
+                         StructureTemplate(resource.template_base + '/config'))
 
 
 class PlenaryToplevelHost(Plenary):
