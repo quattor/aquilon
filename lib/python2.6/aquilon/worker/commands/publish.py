@@ -43,11 +43,14 @@ from aquilon.worker.logger import CLIENT_INFO
 
 class CommandPublish(BrokerCommand):
 
-    required_parameters = ["branch", "bundle"]
+    required_parameters = ["bundle"]
 
-    def render(self, session, logger, branch, bundle, sync, rebase, **arguments):
+    def render(self, session, logger, branch, sandbox, bundle, sync, rebase,
+               **arguments):
         # Most of the logic here is duplicated in deploy
-        dbsandbox = Sandbox.get_unique(session, branch, compel=True)
+        if branch:
+            sandbox = branch
+        dbsandbox = Sandbox.get_unique(session, sandbox, compel=True)
 
         (handle, filename) = mkstemp()
         contents = b64decode(bundle)

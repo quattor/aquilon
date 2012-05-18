@@ -70,6 +70,10 @@ class CommandAddCluster(BrokerCommand):
                                                      sandbox=sandbox,
                                                      compel=True)
 
+        if hasattr(dbbranch, "allow_manage") and not dbbranch.allow_manage:
+            raise ArgumentError("Adding clusters to {0:l} is not allowed."
+                                .format(dbbranch))
+
         dbloc = get_location(session, **arguments)
         if not dbloc:
             raise ArgumentError("Adding a cluster requires a location "

@@ -101,6 +101,16 @@ class TestAddCluster(TestBrokerCommand):
         command = "show cluster --cluster cluster-does-not-exist"
         self.notfoundtest(command.split(" "))
 
+    def test_20_fail_nomanage(self):
+        command = ["add_cluster", "--cluster=utvcs2",
+                   "--building=ut",
+                   "--domain=nomanage", "--down_hosts_threshold=0",
+                   "--maint_threshold=1",
+                   "--archetype=hacluster", "--personality=vcs-msvcs"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Adding clusters to domain nomanage "
+                         "is not allowed.", command)
+
     def test_30_verify_plenary_ha_clusterclient(self):
         cluster = "utvcs1"
         plenary = os.path.join(self.config.get("broker", "plenarydir"),

@@ -56,6 +56,13 @@ class TestManage(TestBrokerCommand):
         self.matchoutput(out, '"/metadata/template/branch/type" = "sandbox";', command)
         self.matchoutput(out, '"/metadata/template/branch/author" = "%s";' % user, command)
 
+    def testfailmanageunittest02(self):
+        command = ["manage", "--hostname", "unittest02.one-nyp.ms.com",
+                   "--domain", "nomanage"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Managing hosts to domain nomanage is "
+                         "not allowed.", command)
+
     def testverifymanageunittest02(self):
         user = self.config.get("unittest", "user")
         command = "show host --hostname unittest02.one-nyp.ms.com"
@@ -145,6 +152,12 @@ class TestManage(TestBrokerCommand):
         for host in hosts:
             self.verify_buildfiles("utsandbox", host, want_exist=True)
 
+    def testfailmanagecluster(self):
+        command = ["manage", "--cluster", "utecl1", "--domain", "nomanage"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Managing clusters to domain nomanage is "
+                         "not allowed.", command)
+
     def testverifymanagecluster(self):
         user = self.config.get("unittest", "user")
         command = ["show_esx_cluster", "--cluster=utecl1"]
@@ -173,6 +186,6 @@ class TestManage(TestBrokerCommand):
                              "sandbox utsandbox (%s)." % (members, aligned))
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddHost)
     unittest.TextTestRunner(verbosity=2).run(suite)

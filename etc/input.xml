@@ -2063,6 +2063,7 @@
          <option name="start" type="string" conflicts="track">Branch to use as a starting point (default: prod)</option>
          <option name="comments" type="string">Comments</option>
          <option name="change_manager" type="boolean">Require a change manager for the domain</option>
+         <option name="allow_manage" reverse="disallow_manage" type="boolean">Control managing hosts to the domain</option>
       </optgroup>
       <transport method="put" path="domain/%(domain)s" />
    </command>
@@ -2082,24 +2083,38 @@
       <transport method="post" path="archetype/%(archetype)s" />
    </command>
 
-   <command name="update_branch">
-      Update the meta-information for a template branch.  This includes
-      comments about the domain, the version of the pan compiler to use,
+   <command name="update_sandbox">
+      Update the meta-information for a template sandbox.  This includes
+      comments about the sandbox, the version of the pan compiler to use,
       and whether to automatically sync deployed or published changes
       to tracking domains.
-      <p/>
-      The only value allowed right now for --change_manager is "tcm", which
-      means "aq deploy" requires a valid TCM.
       <optgroup name="update_branch_mandatory" mandatory="True" fields="all">
-         <option name="branch" type="string">Name of the template branch (domain or sandbox)</option>
+         <option name="sandbox" type="string">Name of the template sandbox</option>
       </optgroup>
       <optgroup name="update_branch_options" mandatory="True" fields="any">
          <option name="comments" type="string">Comments on the branch</option>
          <option name="compiler_version" type="string">Version of panc to use</option>
          <option name="autosync" type="boolean">Set the autosync flag</option>
-         <option name="change_manager" type="boolean">Require a change manager for the domain</option>
       </optgroup>
-      <transport method="post" path="branch/%(branch)s" />
+      <transport method="post" path="sandbox/%(sandbox)s" />
+   </command>
+
+   <command name="update_domain">
+      Update the meta-information for a template domain.  This includes
+      comments about the domain, the version of the pan compiler to use,
+      and whether to automatically sync deployed or published changes
+      to tracking domains.
+      <optgroup name="update_domain_mandatory" mandatory="True" fields="all">
+         <option name="domain" type="string">Name of the template domain</option>
+      </optgroup>
+      <optgroup name="update_domain_options" mandatory="True" fields="any">
+         <option name="comments" type="string">Comments on the domain</option>
+         <option name="compiler_version" type="string">Version of panc to use</option>
+         <option name="autosync" type="boolean">Set the autosync flag</option>
+         <option name="change_manager" type="boolean">Require a change manager for the domain</option>
+         <option name="allow_manage" reverse="disallow_manage" type="boolean">Control managing hosts to the domain</option>
+      </optgroup>
+      <transport method="post" path="domain/%(domain)s" />
    </command>
 
    <command name="del_domain">
@@ -2148,14 +2163,15 @@
       available to others for review and for the deploy command.
       The manage and compile commands can be used before running
       publish to test the changes.
-      <optgroup name="publish options" mandatory="True" fields="all">
-         <option name="branch" type="string">Name of the sandbox branch to update</option>
+      <optgroup name="publish options" mandatory="True" fields="any">
+         <option name="branch" type="string" conflicts="sandbox">Name of the sandbox update</option>
+         <option name="sandbox" type="string" conflicts="branch">Name of the sandbox update</option>
       </optgroup>
       <optgroup name="publish optional" mandatory="False">
          <option name="sync" type="boolean" default="True">Automatically sync tracking domains</option>
          <option name="rebase" type="flag">Allow rebasing the branch</option>
       </optgroup>
-      <transport method="post" path="branch/%(branch)s/command/publish" custom="create_bundle" expect="command"/>
+      <transport method="post" path="command/publish" custom="create_bundle" expect="command"/>
    </command>
 
    <command name="deploy">

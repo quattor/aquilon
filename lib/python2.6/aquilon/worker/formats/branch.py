@@ -50,6 +50,8 @@ class DomainFormatter(ObjectFormatter):
         details.append(indent + "  Compiler: %s" % domain.compiler)
         details.append(indent + "  Requires Change Manager: %s" %
                        domain.requires_change_manager)
+        details.append(indent + "  May Contain Hosts/Clusters: %s" %
+                       domain.allow_manage)
         if domain.comments:
             details.append(indent + "  Comments: %s" % domain.comments)
         return "\n".join(details)

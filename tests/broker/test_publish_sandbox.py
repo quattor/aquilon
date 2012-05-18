@@ -368,7 +368,7 @@ structure template personality/esx_desktop/windows;
 
     def testpublishutsandbox(self):
         sandboxdir = os.path.join(self.sandboxdir, "utsandbox")
-        self.ignoreoutputtest(["publish", "--branch", "utsandbox"],
+        self.ignoreoutputtest(["publish", "--sandbox", "utsandbox"],
                               env=self.gitenv(), cwd=sandboxdir)
         # FIXME: verify that changes made it to unittest
 
@@ -390,7 +390,7 @@ structure template personality/esx_desktop/windows;
         self.gitcommand(["commit", "-m", "Added test file"], cwd=sandboxdir)
 
         # Try to publish it
-        command = ["publish", "--branch", "rebasetest"]
+        command = ["publish", "--sandbox", "rebasetest"]
         out = self.badrequesttest(command, env=self.gitenv(), cwd=sandboxdir,
                                   ignoreout=True)
         # This string comes from git, so it may change if git is upgraded
