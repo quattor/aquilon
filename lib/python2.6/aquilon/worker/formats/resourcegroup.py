@@ -39,8 +39,9 @@ class ResourceGroupFormatter(ResourceFormatter):
 
     def format_raw(self, rg, indent=""):
         details = []
-        for resource in rg.resources:
-            details.append(self.redirect_raw(resource, indent + "  "))
+        if rg.resholder:
+            for resource in rg.resholder.resources:
+                details.append(self.redirect_raw(resource, indent + "  "))
 
         return super(ResourceGroupFormatter, self).format_raw(rg, indent) + \
                "\n" + "\n".join(details)
@@ -51,8 +52,8 @@ class ResourceGroupFormatter(ResourceFormatter):
             container = self.loaded_protocols[self.protocol].ResourceList()
             skeleton = container.resources.add()
         ## uncomment when we have a protocol version which knows about RGs
-        # if len(rg.resources) > 0:
-        #     for resource in rg.resources:
+        # if rg.resholder and rg.resholder.resources:
+        #     for resource in rg.resholder.resources:
         #         r = skeleton.resources.add()
         #         self.redirect_proto(resource, r)
         return super(ResourceGroupFormatter, self).format_proto(rg, skeleton)

@@ -48,10 +48,11 @@ class CommandDelResourceGroup(BrokerCommand):
                                         holder=holder, compel=True)
 
         # Deleting service addresses can't be done with just cascading
-        for res in dbrg.resources:
-            if isinstance(res, ServiceAddress):
-                raise ArgumentError("{0} contains {1:l}, please delete "
-                                    "it first.".format(dbrg, res))
+        if dbrg.resholder:
+            for res in dbrg.resholder.resources:
+                if isinstance(res, ServiceAddress):
+                    raise ArgumentError("{0} contains {1:l}, please delete "
+                                        "it first.".format(dbrg, res))
 
         del_resource(session, logger, dbrg)
         return

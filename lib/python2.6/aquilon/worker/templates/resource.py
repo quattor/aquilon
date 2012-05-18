@@ -102,9 +102,10 @@ class PlenaryResource(Plenary):
 
     def body_resourcegroup(self, lines):
         pan_assign(lines, "name", self.dbobj.name)
-        for resource in self.dbobj.resources:
-            pan_push(lines, "resources/%s" % resource.resource_type,
-                     StructureTemplate(resource.template_base + "/config"))
+        if self.dbobj.resholder:
+            for resource in self.dbobj.resholder.resources:
+                pan_push(lines, "resources/%s" % resource.resource_type,
+                         StructureTemplate(resource.template_base + "/config"))
 
     def body_reboot_iv(self, lines):
         pan_assign(lines, "name", self.dbobj.name)
@@ -134,8 +135,9 @@ class PlenaryResourceGroup(PlenaryCollection):
         self.real_plenary = PlenaryResource(dbresource)
 
         self.plenaries.append(self.real_plenary)
-        for res in dbresource.resources:
-            self.plenaries.append(PlenaryResource(res))
+        if dbresource.resholder:
+            for res in dbresource.resholder.resources:
+                self.plenaries.append(PlenaryResource(res))
 
     def read(self):
         # This is used by the cat command

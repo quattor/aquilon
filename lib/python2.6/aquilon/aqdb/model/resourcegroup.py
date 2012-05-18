@@ -106,11 +106,3 @@ class BundleResource(ResourceHolder):
         return "%s/%s/%s" % (self.resourcegroup.holder.holder_path,
                              self.holder_type,
                              self.holder_name)
-
-resholder = ResourceHolder.__table__
-ResourceGroup.resources = relation(
-     Resource, secondary=resholder,
-     primaryjoin=ResourceGroup.id==BundleResource.resourcegroup_id,
-     secondaryjoin=ResourceHolder.id==Resource.holder_id,
-     foreign_keys=[resholder.c.resourcegroup_id, resholder.c.id],
-     viewonly=True, single_parent=True)
