@@ -42,7 +42,17 @@ class TestDelRequiredService(TestBrokerCommand):
 
     def testdelrequiredafs(self):
         command = "del required service --service afs --archetype aquilon"
+        command += " --justification tcm=12345678"
         self.noouttest(command.split(" "))
+
+    def testdelrequiredafsnojustification(self):
+        command = "del required service --service afs --archetype aquilon"
+        out = self.unauthorizedtest(command.split(" "), auth=True,
+                                    msgcheck=False)
+        self.matchoutput(out,
+                         "Changing the required services of an archetype "
+                         "requires --justification.",
+                         command)
 
     def testdelrequirednetmap(self):
         command = ["del_required_service", "--service=netmap",
@@ -51,27 +61,33 @@ class TestDelRequiredService(TestBrokerCommand):
 
     def testdelrequiredafsagain(self):
         command = "del required service --service afs --archetype aquilon"
+        command += " --justification tcm=12345678"
         self.notfoundtest(command.split(" "))
 
     def testdelrequireddns(self):
         command = "del required service --service dns --archetype aquilon"
+        command += " --justification tcm=12345678"
         self.noouttest(command.split(" "))
 
     def testdelrequiredaqd(self):
         command = "del required service --service aqd --archetype aquilon"
+        command += " --justification tcm=12345678"
         self.noouttest(command.split(" "))
 
     def testdelrequiredlemon(self):
         command = "del required service --service lemon --archetype aquilon"
+        command += " --justification tcm=12345678"
         self.noouttest(command.split(" "))
 
     def testdelrequiredntp(self):
         command = "del required service --service ntp --archetype aquilon"
+        command += " --justification tcm=12345678"
         self.noouttest(command.split(" "))
 
     def testdelrequiredbootserver(self):
         command = ["del_required_service",
-                   "--service=bootserver", "--archetype=aquilon"]
+                   "--service=bootserver", "--archetype=aquilon",
+                   "--justification", "tcm=12345678"]
         self.noouttest(command)
 
     def testverifydelrequiredservices(self):
@@ -116,10 +132,12 @@ class TestDelRequiredService(TestBrokerCommand):
 
     def testdelrequiredvmhost(self):
         command = ["del_required_service",
-                   "--service=dns", "--archetype=vmhost"]
+                   "--service=dns", "--archetype=vmhost",
+                   "--justification=tcm=12345678"]
         self.noouttest(command)
         command = ["del_required_service",
-                   "--service=ntp", "--archetype=vmhost"]
+                   "--service=ntp", "--archetype=vmhost",
+                   "--justification=tcm=12345678"]
         self.noouttest(command)
 
     def testverifydelrequiredvmhost(self):

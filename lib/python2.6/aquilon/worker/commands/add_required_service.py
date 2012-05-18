@@ -29,16 +29,23 @@
 """Contains the logic for `aq add required service`."""
 
 
-from aquilon.exceptions_ import ArgumentError
-from aquilon.worker.broker import BrokerCommand
+from aquilon.exceptions_ import ArgumentError, AuthorizationException
 from aquilon.aqdb.model import Archetype, Service
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.commands.deploy import validate_justification
 
 
 class CommandAddRequiredService(BrokerCommand):
 
     required_parameters = ["service", "archetype"]
 
-    def render(self, session, service, archetype, **arguments):
+    def render(self, session, service, archetype, justification, user,
+               **arguments):
+        if not justification:
+            raise AuthorizationException("Changing the required services of "
+                                         "an archetype requires "
+                                         "--justification.")
+        validate_justification(user, justification)
         dbarchetype = Archetype.get_unique(session, archetype, compel=True)
         dbservice = Service.get_unique(session, name=service, compel=True)
         if dbarchetype in dbservice.archetypes:
