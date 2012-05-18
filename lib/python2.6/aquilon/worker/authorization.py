@@ -130,6 +130,7 @@ class AuthorizationBroker(object):
                               'update_interface_switch',
                               'add_interface_address_switch',
                               'del_interface_address_switch',
+                              'add_alias', 'del_alias',
                               'update_router']:
                 self.raise_auth_error(principal, action, resource)
         if dbuser.role.name == 'maintech':
@@ -140,6 +141,7 @@ class AuthorizationBroker(object):
                 self.raise_auth_error(principal, action, resource)
         if dbuser.role.name == 'unixops_l2':
             if action not in ['add_host', 'add_windows_host',
+                              'del_host', 'del_windows_host',
                               'compile', 'compile_hostname',
                               'reconfigure', 'change_status',
                               'reconfigure_list', 'reconfigure_hostlist',
@@ -147,6 +149,9 @@ class AuthorizationBroker(object):
                               'add_interface_chassis',
                               'add_interface_hostname',
                               'add_interface_machine',
+                              'add_interface_address',
+                              'del_interface',
+                              'del_interface_address',
                               'add_reboot_intervention',
                               'add_reboot_schedule',
                               'del_reboot_intervention',
@@ -154,20 +159,29 @@ class AuthorizationBroker(object):
                               'update_interface_hostname',
                               'update_interface_machine',
                               'add_machine',
+                              'del_machine',
                               'update_machine', 'update_machine_hostname',
+                              'add_cluster', 'del_cluster',
                               'add_esx_cluster', 'update_esx_cluster',
+                              'del_esx_cluster',
                               'bind_esx_cluster_hostname',
                               'rebind_esx_cluster_hostname',
                               'cluster', 'change_status_cluster',
                               'add_manager', 'add_dynamic_range', 'add_disk',
                               'add_auxiliary',
+                              'del_manager', 'del_disk', 'del_auxiliary',
                               'add_service_instance',
                               'update_service_instance',
+                              'del_service_instance',
                               'add_nas_disk_share',
                               'add_alias',
+                              'del_alias',
                               'add_filesystem',
+                              'del_filesystem',
                               'poll_switch', 'poll_tor_switch_tor_switch',
                               'poll_switch_switch', 'poll_tor_switch',
+                              'add_rack', 'add_rack_room', 'add_chassis',
+                              'del_rack', 'del_chassis',
                               'make', 'make_cluster']:
                 self.raise_auth_error(principal, action, resource)
         if dbuser.role.name == 'alias_manager':
