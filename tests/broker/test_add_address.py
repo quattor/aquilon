@@ -177,7 +177,7 @@ class TestAddAddress(TestBrokerCommand):
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "DNS Domain restrict.aqd-unittest.ms.com is "
-                         "restricted, standalone A records are not allowed.",
+                         "restricted, adding extra addresses is not allowed.",
                          command)
 
     def test_500_addunittest20eth1(self):

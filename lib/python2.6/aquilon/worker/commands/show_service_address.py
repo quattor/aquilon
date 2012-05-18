@@ -1,6 +1,6 @@
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 #
-# Copyright (C) 2008,2009,2010,2011,2012  Contributor
+# Copyright (C) 2011,2012  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -27,36 +27,18 @@
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
 
-from aquilon.exceptions_ import ArgumentError, ProcessException
+
+from aquilon.aqdb.model import ServiceAddress
 from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.dbwrappers.dns import grab_address
-from aquilon.worker.dbwrappers.interface import generate_ip
-from aquilon.worker.processes import DSDBRunner
+from aquilon.worker.commands.show_resource import show_resource
 
 
-class CommandAddAddressDNSEnvironment(BrokerCommand):
+class CommandShowServiceAddress(BrokerCommand):
 
-    required_parameters = ["fqdn", "dns_environment"]
+    required_parameters = []
 
-    def render(self, session, logger, fqdn, dns_environment, comments,
-               **arguments):
-        ip = generate_ip(session, compel=True, dbinterface=None, **arguments)
-        # TODO: add allow_multi=True
-        dbdns_rec, newly_created = grab_address(session, fqdn, ip,
-                                                None, # network_environment,
-                                                dns_environment,
-                                                comments=comments,
-                                                preclude=True)
+    def render(self, session, hostname, cluster, resourcegroup, all,
+               name, **arguments):
 
-        session.flush()
-
-        if dbdns_rec.fqdn.dns_environment.is_default:
-            dsdb_runner = DSDBRunner(logger=logger)
-            try:
-                dsdb_runner.add_host_details(fqdn=dbdns_rec.fqdn, ip=ip,
-                                             name=None, mac=None,
-                                             comments=comments)
-            except ProcessException, e:
-                raise ArgumentError("Could not add address to DSDB: %s" % e)
-
-        return
+        return show_resource(session, hostname, cluster, resourcegroup, all,
+                             name, ServiceAddress)

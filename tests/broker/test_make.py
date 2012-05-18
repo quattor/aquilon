@@ -246,23 +246,16 @@ class TestMake(TestBrokerCommand):
                          "template hostdata/unittest20.aqd-unittest.ms.com;",
                          command)
         self.searchoutput(out,
-                          r'"/system/network/vips" = nlist\(\s*'
-                          r'"hostname", nlist\(\s*'
-                          r'"fqdn", "unittest20.aqd-unittest.ms.com",\s*'
-                          r'"interfaces", list\(\s*'
-                          r'"eth0",\s*"eth1"\s*\),\s*'
-                          r'"ip", "%s"\s*\),\s*'
-                          r'"zebra2", nlist\(\s*'
-                          r'"fqdn", "zebra2.aqd-unittest.ms.com",\s*'
-                          r'"interfaces", list\(\s*'
-                          r'"eth0",\s*"eth1"\s*\),\s*'
-                          r'"ip", "%s"\s*\),\s*'
-                          r'"zebra3", nlist\(\s*'
-                          r'"fqdn", "zebra3.aqd-unittest.ms.com",\s*'
-                          r'"interfaces", list\(\s*'
-                          r'"eth0",\s*"eth1"\s*\),\s*'
-                          r'"ip", "%s"\s*\)\s*'
-                          r'\);' % (hostname_ip, zebra2_ip, zebra3_ip),
+                          r'"/system/resources/service_address" = '
+                          r'push\(create\("resource/host/unittest20.aqd-unittest.ms.com/service_address/hostname/config"\)\);',
+                          command)
+        self.searchoutput(out,
+                          r'"/system/resources/service_address" = '
+                          r'push\(create\("resource/host/unittest20.aqd-unittest.ms.com/service_address/zebra2/config"\)\);',
+                          command)
+        self.searchoutput(out,
+                          r'"/system/resources/service_address" = '
+                          r'push\(create\("resource/host/unittest20.aqd-unittest.ms.com/service_address/zebra3/config"\)\);',
                           command)
         self.searchoutput(out,
                           r'"/system/network/routers" = nlist\(\s*'
@@ -314,6 +307,40 @@ class TestMake(TestBrokerCommand):
         self.matchoutput(out, '"/metadata/template/branch/type" = "domain";',
                          command)
         self.matchclean(out, '"/metadata/template/branch/author"', command)
+
+        command = ["cat", "--service_address", "hostname",
+                   "--hostname", "unittest20.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out, '"name" = "hostname";', command)
+        self.matchoutput(out, '"ip" = "%s";' % hostname_ip, command)
+        self.searchoutput(out,
+                          r'"interfaces" = list\(\s*"eth0",\s*"eth1"\s*\);',
+                          command)
+        self.matchoutput(out, '"fqdn" = "unittest20.aqd-unittest.ms.com";',
+                         command)
+
+        command = ["cat", "--service_address", "zebra2",
+                   "--hostname", "unittest20.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out, '"name" = "zebra2";', command)
+        self.matchoutput(out, '"ip" = "%s";' % zebra2_ip, command)
+        self.searchoutput(out,
+                          r'"interfaces" = list\(\s*"eth0",\s*"eth1"\s*\);',
+                          command)
+        self.matchoutput(out, '"fqdn" = "zebra2.aqd-unittest.ms.com";',
+                         command)
+
+        command = ["cat", "--service_address", "zebra3",
+                   "--hostname", "unittest20.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out, '"name" = "zebra3";', command)
+        self.matchoutput(out, '"ip" = "%s";' % zebra3_ip, command)
+        self.searchoutput(out,
+                          r'"interfaces" = list\(\s*"eth0",\s*"eth1"\s*\);',
+                          command)
+        self.matchoutput(out, '"fqdn" = "zebra3.aqd-unittest.ms.com";',
+                         command)
+
 
     def testmakeunittest21(self):
         command = ["make", "--hostname", "unittest21.aqd-unittest.ms.com"]

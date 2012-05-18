@@ -28,7 +28,7 @@
 # TERMS THAT MAY APPLY.
 """Contains the logic for `aq update network`."""
 
-from aquilon.exceptions_ import NotFoundException
+from aquilon.exceptions_ import NotFoundException, ArgumentError
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.location import get_location
 from aquilon.aqdb.model import Network, NetworkEnvironment

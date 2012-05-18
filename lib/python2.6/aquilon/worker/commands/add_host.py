@@ -30,16 +30,31 @@
 
 
 from aquilon.exceptions_ import ArgumentError, ProcessException, AquilonError
+from aquilon.aqdb.model import (Host, OperatingSystem, Archetype,
+                                HostLifecycle, Machine, Personality,
+                                ServiceAddress, HostResource)
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.branch import get_branch_and_author
+from aquilon.worker.dbwrappers.dns import grab_address
 from aquilon.worker.dbwrappers.grn import lookup_grn
-from aquilon.worker.dbwrappers.hardware_entity import parse_primary_name
 from aquilon.worker.dbwrappers.interface import generate_ip, assign_address
-from aquilon.aqdb.model import (Host, OperatingSystem, Archetype,
-                                HostLifecycle, Machine, Personality)
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
 from aquilon.worker.locks import lock_queue
 from aquilon.worker.processes import DSDBRunner
+
+
+def get_boot_interface(dbmachine):
+    dbinterface = None
+    # Look up the boot interface
+    for iface in dbmachine.interfaces:
+        if iface.bootable:
+            dbinterface = iface
+            # If the boot interface is enslaved in a bonding/bridge setup,
+            # then assign the address to the master instead
+            while dbinterface.master:
+                dbinterface = dbinterface.master
+            break
+    return dbinterface
 
 
 class CommandAddHost(BrokerCommand):
@@ -111,13 +126,6 @@ class CommandAddHost(BrokerCommand):
             raise ArgumentError("{0:c} {0.label} is already allocated to "
                                 "{1:l}.".format(dbmachine, dbmachine.host))
 
-        if zebra_interfaces:
-            self.assign_zebra_address(session, dbmachine, hostname,
-                                      zebra_interfaces, **arguments)
-        else:
-            self.assign_normal_address(session, dbmachine, hostname,
-                                       **arguments)
-
         dbhost = Host(machine=dbmachine, branch=dbbranch,
                       sandbox_author=dbauthor, personality=dbpersonality,
                       status=dbstatus, operating_system=dbos, comments=comments)
@@ -128,12 +136,46 @@ class CommandAddHost(BrokerCommand):
                                config=self.config)
             dbhost.grns.append(dbgrn)
 
+        if zebra_interfaces:
+            # --autoip does not make sense for Zebra (at least not the way it's
+            # implemented currently)
+            dbinterface = None
+        else:
+            dbinterface = get_boot_interface(dbmachine)
+
+        # This method is allowed to return None. This can only happen
+        # (currently) using add_aurora_host, add_windows_host, or possibly by
+        # bypassing the aq client and posting a request directly.
+        ip = generate_ip(session, dbinterface, **arguments)
+
+        dbdns_rec, newly_created = grab_address(session, hostname, ip,
+                                                allow_restricted_domain=True,
+                                                allow_reserved=True,
+                                                preclude=True)
+        dbmachine.primary_name = dbdns_rec
+
+        if zebra_interfaces:
+            if not ip:
+                raise ArgumentError("Zebra configuration requires an IP address.")
+            dbsrv_addr = self.assign_zebra_address(session, dbmachine, dbdns_rec,
+                                                   zebra_interfaces)
+        else:
+            if ip:
+                if not dbinterface:
+                    raise ArgumentError("You have specified an IP address for the "
+                                        "host, but {0:l} does not have a bootable "
+                                        "interface.".format(dbmachine))
+                assign_address(dbinterface, ip, dbdns_rec.network)
+            dbsrv_addr = None
+
         session.flush()
 
         plenaries = PlenaryCollection(logger=logger)
         plenaries.append(Plenary.get_plenary(dbmachine))
         if dbmachine.cluster:
             plenaries.append(Plenary.get_plenary(dbmachine.cluster))
+        if dbsrv_addr:
+            plenaries.append(Plenary.get_plenary(dbsrv_addr))
 
         key = plenaries.get_write_key()
         try:
@@ -166,75 +208,40 @@ class CommandAddHost(BrokerCommand):
 
         return
 
-    def assign_normal_address(self, session, dbmachine, hostname, **arguments):
-        """ Assign an IP address to the boot interface """
-
-        dbinterface = None
-        # Look up the boot interface
-        for iface in dbmachine.interfaces:
-            if iface.bootable:
-                dbinterface = iface
-                # If the boot interface is enslaved in a bonding/bridge setup,
-                # then assign the address to the master instead
-                while dbinterface.master:
-                    dbinterface = dbinterface.master
-                break
-
-        # This method is allowed to return None. This can only happen
-        # (currently) using add_aurora_host, add_windows_host, or possibly by
-        # bypassing the aq client and posting a request directly.
-        ip = generate_ip(session, dbinterface, **arguments)
-
-        # FIXME: This should be in generic code, but parse_primary_name()
-        # currently has to be called after the IP have been generated but
-        # before the AddressAssignment record is created
-        dbdns_rec = parse_primary_name(session, hostname, ip)
-        dbmachine.primary_name = dbdns_rec
-
-        if ip:
-            if not dbinterface:
-                raise ArgumentError("You have specified an IP address for the "
-                                    "host, but {0:l} does not have a bootable "
-                                    "interface.".format(dbmachine))
-            if ip not in dbinterface.addresses:
-                assign_address(dbinterface, ip, dbdns_rec.network)
-
-    def assign_zebra_address(self, session, dbmachine, hostname,
-                             zebra_interfaces, **arguments):
+    def assign_zebra_address(self, session, dbmachine, dbdns_rec,
+                             zebra_interfaces):
         """ Assign a Zebra-managed address to multiple interfaces """
-
-        # --autoip does not make sense with Zebra, so no need to pass an
-        # interface
-        ip = generate_ip(session, None, **arguments)
-        if ip is None:
-            raise ArgumentError("Zebra configuration requires an IP address.")
-
-        # FIXME: This should be in generic code, but parse_primary_name()
-        # currently has to be called after the IP have been generated but before
-        # the AddressAssignment records are created
-        dbdns_rec = parse_primary_name(session, hostname, ip)
-        dbmachine.primary_name = dbdns_rec
 
         # Reset the routing configuration
         for iface in dbmachine.interfaces:
             if iface.default_route:
                 iface.default_route = False
 
+        # Disable autoflush, since the ServiceAddress object won't be complete
+        # until add_resource() is called
+        # TODO: In SQLA 0.7.6, we'd be able to use "with session.no_autoflush:"
+        saved_autoflush = session.autoflush
+        session.autoflush = False
+
+        resholder = HostResource(host=dbmachine.host)
+        session.add(resholder)
+        dbsrv_addr = ServiceAddress(name="hostname", dns_record=dbdns_rec)
+        resholder.resources.append(dbsrv_addr)
+
         for name in zebra_interfaces.split(","):
             dbinterface = None
             for iface in dbmachine.interfaces:
                 if iface.name == name:
                     dbinterface = iface
-                    # If the interface is enslaved in a bonding/bridge setup,
-                    # then assign the address to the master instead
-                    while dbinterface.master:
-                        dbinterface = dbinterface.master
-                    break
             if not dbinterface:
                 raise ArgumentError("{0} does not have an interface named "
                                     "{1}.".format(dbmachine, name))
-            assign_address(dbinterface, ip, dbdns_rec.network, label="hostname",
-                           usage="zebra")
+            assign_address(dbinterface, dbdns_rec.ip, dbdns_rec.network,
+                           label="hostname", resource=dbsrv_addr)
 
             # Transits should be providers of the default route
             dbinterface.default_route = True
+
+        session.autoflush = saved_autoflush
+
+        return dbsrv_addr

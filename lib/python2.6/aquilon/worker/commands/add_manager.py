@@ -32,12 +32,10 @@
 from aquilon.exceptions_ import ArgumentError, AquilonError
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.host import hostname_to_host
+from aquilon.worker.dbwrappers.dns import grab_address
 from aquilon.worker.dbwrappers.interface import (generate_ip,
-                                                 check_ip_restrictions,
                                                  get_or_create_interface,
                                                  assign_address)
-from aquilon.aqdb.model import ARecord, AddressAssignment, Fqdn
-from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.worker.locks import lock_queue
 from aquilon.worker.templates.machine import PlenaryMachineInfo
 from aquilon.worker.processes import DSDBRunner
@@ -57,8 +55,6 @@ class CommandAddManager(BrokerCommand):
             manager = "%sr.%s" % (dbmachine.primary_name.fqdn.name,
                                   dbmachine.primary_name.fqdn.dns_domain.name)
 
-        dbfqdn = Fqdn.get_or_create(session, fqdn=manager, preclude=True)
-
         dbinterface = get_or_create_interface(session, dbmachine,
                                               name=interface, mac=mac,
                                               interface_type='management')
@@ -70,23 +66,12 @@ class CommandAddManager(BrokerCommand):
                                 "{1}.".format(dbinterface, addrs))
 
         ip = generate_ip(session, dbinterface, compel=True, **arguments)
-        dbnetwork = get_net_id_from_ip(session, ip)
-        check_ip_restrictions(dbnetwork, ip)
 
-        # Do not allow assigning an address which is already in use to a
-        # management interface
-        q = session.query(AddressAssignment)
-        q = q.filter_by(network=dbnetwork)
-        q = q.filter_by(ip=ip)
-        addr = q.first()
-        if (addr):
-            raise ArgumentError("IP address {0!s} is already in use by "
-                                "{1:l}.".format(addr.ip, addr.interface))
+        dbdns_rec, newly_created = grab_address(session, manager, ip,
+                                                comments=comments,
+                                                preclude=True)
 
-        dbdns_rec = ARecord(fqdn=dbfqdn, ip=ip, network=dbnetwork,
-                            comments=comments)
-        session.add(dbdns_rec)
-        assign_address(dbinterface, ip, dbnetwork)
+        assign_address(dbinterface, ip, dbdns_rec.network)
 
         session.flush()
 

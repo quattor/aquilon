@@ -1,6 +1,6 @@
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 #
-# Copyright (C) 2008,2009,2010,2011,2012  Contributor
+# Copyright (C) 2011,2012  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -26,37 +26,34 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-
-from aquilon.exceptions_ import ArgumentError, ProcessException
-from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.dbwrappers.dns import grab_address
-from aquilon.worker.dbwrappers.interface import generate_ip
-from aquilon.worker.processes import DSDBRunner
+"""Service Address Resource formatter."""
 
 
-class CommandAddAddressDNSEnvironment(BrokerCommand):
+from aquilon.worker.formats.formatters import ObjectFormatter
+from aquilon.worker.formats.resource import ResourceFormatter
+from aquilon.aqdb.model import ServiceAddress
 
-    required_parameters = ["fqdn", "dns_environment"]
 
-    def render(self, session, logger, fqdn, dns_environment, comments,
-               **arguments):
-        ip = generate_ip(session, compel=True, dbinterface=None, **arguments)
-        # TODO: add allow_multi=True
-        dbdns_rec, newly_created = grab_address(session, fqdn, ip,
-                                                None, # network_environment,
-                                                dns_environment,
-                                                comments=comments,
-                                                preclude=True)
+class ServiceAddressFormatter(ResourceFormatter):
+    protocol = "aqdsystems_pb2"
 
-        session.flush()
+    def format_raw(self, srv, indent=""):
+        details = []
+        details.append(indent + "  Address: {0:a}".format(srv.dns_record))
+        details.append(indent + "  Interfaces: %s" % ", ".join(srv.interfaces))
+        return super(ServiceAddressFormatter, self).format_raw(srv, indent) + \
+               "\n" + "\n".join(details)
 
-        if dbdns_rec.fqdn.dns_environment.is_default:
-            dsdb_runner = DSDBRunner(logger=logger)
-            try:
-                dsdb_runner.add_host_details(fqdn=dbdns_rec.fqdn, ip=ip,
-                                             name=None, mac=None,
-                                             comments=comments)
-            except ProcessException, e:
-                raise ArgumentError("Could not add address to DSDB: %s" % e)
+    def format_proto(self, srv, skeleton=None):
+        container = skeleton
+        if not container:
+            container = self.loaded_protocols[self.protocol].ResourceList()
+            skeleton = container.resources.add()
+        # FIXME
+        #skeleton.service_address.ip = srv.ip
+        #skeleton.service_address.interfaces = srv.interfaces
+        return super(ServiceAddressFormatter, self).format_proto(srv, skeleton)
 
-        return
+
+ObjectFormatter.handlers[ServiceAddress] = ServiceAddressFormatter()
+

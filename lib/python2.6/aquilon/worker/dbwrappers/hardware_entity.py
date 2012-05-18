@@ -31,10 +31,10 @@
 from sqlalchemy.orm import aliased
 
 from aquilon.exceptions_ import ArgumentError, AquilonError
-from aquilon.aqdb.model import (HardwareEntity, Model, DnsRecord, ARecord,
-                                ReservedName, AddressAssignment, Fqdn,
-                                NetworkEnvironment, Network, Interface, Vendor)
+from aquilon.aqdb.model import (HardwareEntity, Model, ReservedName,
+                                AddressAssignment, Interface, Vendor)
 from aquilon.aqdb.model.network import get_net_id_from_ip
+from aquilon.worker.dbwrappers.dns import convert_reserved_to_arecord
 from aquilon.worker.dbwrappers.location import get_location
 from aquilon.worker.dbwrappers.interface import (check_ip_restrictions,
                                                  assign_address)
@@ -87,84 +87,6 @@ def search_hardware_entity_query(session, hardware_type=HardwareEntity,
         q = q.order_by(HardwareEntity.label)
     return q
 
-def parse_primary_name(session, fqdn, ip):
-    """
-    Parse & verify a primary name.
-
-    The name may already be registered in the DNS, in which case it must not be
-    a primary name of some other hardware. Otherwise, a new DNS record is
-    created. If the name already exists as a reserved name and an IP address is
-    given, then it is converted to an A record.
-    """
-
-    dbfqdn = Fqdn.get_or_create(session, fqdn=fqdn)
-    dbdns_rec = DnsRecord.get_unique(session, fqdn=dbfqdn)
-    dbnet_env = NetworkEnvironment.get_unique_or_default(session)
-
-    if dbdns_rec and dbdns_rec.hardware_entity:
-        raise ArgumentError("{0} already exists as the primary name of {1:cl} "
-                            "{1.label}.".format(fqdn, dbdns_rec.hardware_entity))
-    if ip:
-        q = session.query(AddressAssignment)
-        q = q.filter_by(ip=ip)
-        q = q.join(Network)
-        q = q.filter_by(network_environment=dbnet_env)
-        addr = q.first()
-        if addr:
-            raise ArgumentError("IP address {0} is already in use by "
-                                "{1:l}.".format(ip, addr.interface))
-
-    if dbdns_rec and isinstance(dbdns_rec, ReservedName) and ip:
-        session.delete(dbdns_rec)
-        session.flush()
-        dbdns_rec = None
-
-    if dbdns_rec:
-        # Exclude any other subclasses of DnsRecord except ARecord.
-        # Do not use isinstance() here, as DynDnsStub is a child of
-        # ARecord
-        if dbdns_rec.dns_record_type != 'a_record':
-            raise ArgumentError("{0} cannot be used as a primary name."
-                                .format(dbdns_rec))
-
-        # Make sure the primary name does not resolve to multiple addresses
-        if ip and dbdns_rec.ip != ip:
-            raise ArgumentError("%s already exists, but points to %s "
-                                "instead of %s. A primary name is not "
-                                "allowed to point to multiple addresses." %
-                                (fqdn, dbdns_rec.ip, ip))
-
-    if not dbdns_rec:
-        if ip:
-            dbnetwork = get_net_id_from_ip(session, ip, dbnet_env)
-            check_ip_restrictions(dbnetwork, ip)
-            dbdns_rec = ARecord(fqdn=dbfqdn, ip=ip, network=dbnetwork)
-        else:
-            dbdns_rec = ReservedName(fqdn=dbfqdn)
-        session.add(dbdns_rec)
-        session.flush()
-    elif hasattr(dbdns_rec, 'ip'):
-        dbnetwork = get_net_id_from_ip(session, dbdns_rec.ip, dbnet_env)
-        check_ip_restrictions(dbnetwork, dbdns_rec.ip)
-
-    return dbdns_rec
-
-def convert_primary_name_to_arecord(session, dbhw_ent, ip, dbnetwork):
-    # Lock the FQDN, so nothing can steal it while there is no DNS record
-    # associated with it
-    dbfqdn = dbhw_ent.primary_name.fqdn
-    dbfqdn.lock_row()
-
-    comments = dbhw_ent.primary_name.comments
-    session.delete(dbhw_ent.primary_name)
-    session.flush()
-    session.expire(dbhw_ent, ['primary_name'])
-    session.expire(dbfqdn, ['dns_records'])
-    dbdns_rec = ARecord(fqdn=dbfqdn, ip=ip, network=dbnetwork,
-                        comments=comments)
-    session.add(dbdns_rec)
-    dbhw_ent.primary_name = dbdns_rec
-
 def update_primary_ip(session, dbhw_ent, ip):
     dbnetwork = get_net_id_from_ip(session, ip)
     check_ip_restrictions(dbnetwork, ip)
@@ -180,7 +102,8 @@ def update_primary_ip(session, dbhw_ent, ip):
 
     # Convert ReservedName to ARecord if needed
     if isinstance(dbhw_ent.primary_name, ReservedName):
-        convert_primary_name_to_arecord(session, dbhw_ent, ip, dbnetwork)
+        convert_reserved_to_arecord(session, dbhw_ent.primary_name, dbnetwork,
+                                    ip)
 
         # When converting a ReservedName to an ARecord, we have to bind the
         # primary address to an interface. Try to pick one.

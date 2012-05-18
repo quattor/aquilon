@@ -108,7 +108,7 @@ class TestDelAddress(TestBrokerCommand):
                    "unittest00.one-nyp.ms.com"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
-                         "DNS record unittest00.one-nyp.ms.com [%s] is the "
+                         "DNS Record unittest00.one-nyp.ms.com [%s] is the "
                          "primary name of machine unittest00.one-nyp.ms.com, "
                          "therefore it cannot be deleted." % ip,
                          command)
@@ -131,7 +131,15 @@ class TestDelAddress(TestBrokerCommand):
         self.noouttest(command)
         self.dsdb_verify()
 
+    def testdelzebra3(self):
+        ip = self.net.unknown[13].usable[0]
+        self.dsdb_expect_delete(ip)
+        command = ["del", "address", "--ip", ip,
+                   "--fqdn", "zebra3.aqd-unittest.ms.com"]
+        self.noouttest(command)
+        self.dsdb_verify()
 
-if __name__=='__main__':
+
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelAddress)
     unittest.TextTestRunner(verbosity=2).run(suite)

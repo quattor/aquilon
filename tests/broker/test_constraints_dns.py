@@ -78,6 +78,16 @@ class TestDnsConstraints(TestBrokerCommand):
                          "use by SRV records, delete them first.",
                          command)
 
+    def testdelserviceaddress(self):
+        ip = self.net.unknown[13].usable[1]
+        command = ["del", "address", "--fqdn", "zebra2.aqd-unittest.ms.com"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "DNS Record zebra2.aqd-unittest.ms.com [%s] is used "
+                         "as a service address, therefore it cannot be "
+                         "deleted." % ip,
+                         command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(

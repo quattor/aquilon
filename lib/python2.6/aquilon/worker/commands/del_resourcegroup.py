@@ -28,7 +28,8 @@
 # TERMS THAT MAY APPLY.
 
 
-from aquilon.aqdb.model import ResourceGroup
+from aquilon.exceptions_ import ArgumentError
+from aquilon.aqdb.model import ResourceGroup, ServiceAddress
 from aquilon.worker.broker import BrokerCommand, validate_basic
 from aquilon.worker.dbwrappers.resources import (del_resource,
                                                  get_resource_holder)
@@ -45,5 +46,12 @@ class CommandDelResourceGroup(BrokerCommand):
         holder = get_resource_holder(session, hostname, cluster, compel=True)
         dbrg = ResourceGroup.get_unique(session, name=resourcegroup,
                                         holder=holder, compel=True)
+
+        # Deleting service addresses can't be done with just cascading
+        for res in dbrg.resources:
+            if isinstance(res, ServiceAddress):
+                raise ArgumentError("{0} contains {1:l}, please delete "
+                                    "it first.".format(dbrg, res))
+
         del_resource(session, logger, dbrg)
         return

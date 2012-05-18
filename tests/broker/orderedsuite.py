@@ -113,6 +113,7 @@ from test_add_windows_host import TestAddWindowsHost
 from test_add_aurora_host import TestAddAuroraHost
 from test_add_auxiliary import TestAddAuxiliary
 from test_add_interface_address import TestAddInterfaceAddress
+from test_add_service_address import TestAddServiceAddress
 from test_add_manager import TestAddManager
 from test_add_static_route import TestAddStaticRoute
 from test_add_feature import TestAddFeature
@@ -220,6 +221,7 @@ from test_del_auxiliary import TestDelAuxiliary
 from test_del_windows_host import TestDelWindowsHost
 from test_del_host import TestDelHost
 from test_del_interface import TestDelInterface
+from test_del_service_address import TestDelServiceAddress
 from test_del_interface_address import TestDelInterfaceAddress
 from test_del_disk import TestDelDisk
 from test_del_machine import TestDelMachine
@@ -256,6 +258,7 @@ from test_client_failure import TestClientFailure
 from test_client_bypass import TestClientBypass
 from test_audit import TestAudit
 from test_usecase_database import TestUsecaseDatabase
+from test_usecase_hacluster import TestUsecaseHACluster
 from test_grns import TestGrns
 from test_stop import TestBrokerStop
 from test_reset_advertised_status import TestResetAdvertisedStatus
@@ -304,6 +307,7 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestPollSwitch,
                 TestAddHost,
                 TestAddAuxiliary, TestAddManager, TestAddInterfaceAddress,
+                TestAddServiceAddress,
                 TestAddAlias, TestAddSrvRecord,
                 TestMapService, TestBindClient, TestPrebindServer,
                 TestServiceConstraints,
@@ -355,14 +359,14 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestUpdateMetaCluster, TestUpdateESXCluster,
                 TestUpdateCluster,
                 TestPxeswitch, TestManage,
-                TestUsecaseDatabase,
+                TestUsecaseDatabase, TestUsecaseHACluster,
                 TestClientBypass,
                 TestUmaskConstraints,
                 TestUnbindServer, TestUnmapService,
                 TestDel10GigHardware, TestDelVirtualHardware,
                 TestUnbindESXCluster, TestUncluster,
                 TestDelStaticRoute,
-                TestDelInterfaceAddress,
+                TestDelServiceAddress, TestDelInterfaceAddress,
                 TestDelDynamicRange, TestDelAlias, TestDelSrvRecord,
                 TestDelAddress, TestDelNSRecord,
                 TestDelManager, TestDelAuxiliary, TestDelWindowsHost, TestDelHost,

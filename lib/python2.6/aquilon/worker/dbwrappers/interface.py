@@ -493,16 +493,13 @@ def get_or_create_interface(session, dbhw_ent, name=None, mac=None,
     session.flush()
     return dbinterface
 
-def assign_address(dbinterface, ip, dbnetwork, label=None, usage=None):
+def assign_address(dbinterface, ip, dbnetwork, label=None, resource=None):
     assert isinstance(dbinterface, Interface)
 
     dns_environment = dbnetwork.network_environment.dns_environment
 
     if dbinterface.master:
         raise ArgumentError("Slave interfaces cannot hold addresses.")
-
-    if usage and usage not in ADDR_USAGES:
-        raise ArgumentError("Illegal address usage '%s'." % usage)
 
     for addr in dbinterface.assignments:
         if not label and not addr.label:
@@ -521,5 +518,6 @@ def assign_address(dbinterface, ip, dbnetwork, label=None, usage=None):
                                 "configured.".format(dbinterface, ip))
 
     dbinterface.assignments.append(AddressAssignment(ip=ip, network=dbnetwork,
-                                                     label=label, usage=usage,
+                                                     label=label,
+                                                     service_address=resource,
                                                      dns_environment=dns_environment))

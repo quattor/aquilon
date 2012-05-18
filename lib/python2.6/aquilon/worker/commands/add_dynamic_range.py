@@ -31,7 +31,7 @@ from ipaddr import IPv4Address
 
 from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import (DynamicStub, ARecord, DnsDomain, Fqdn,
-                                NetworkEnvironment)
+                                AddressAssignment, NetworkEnvironment)
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.exceptions_ import ArgumentError, ProcessException
 from aquilon.worker.dbwrappers.interface import check_ip_restrictions
@@ -54,6 +54,24 @@ class CommandAddDynamicRange(BrokerCommand):
                                 "the same subnet." %
                                 (startip, startnet.ip, endip, endnet.ip))
         dbdns_domain = DnsDomain.get_unique(session, dns_domain, compel=True)
+
+        dbdns_domain.lock_row()
+        startnet.lock_row()
+
+        q = session.query(AddressAssignment.ip)
+        q = q.filter_by(network=startnet)
+        q = q.filter(AddressAssignment.ip >= startip)
+        q = q.filter(AddressAssignment.ip <= endip)
+        q = q.order_by(AddressAssignment.ip)
+        conflicts = q.all()
+        if conflicts:
+            raise ArgumentError("Cannot allocate the address range because the "
+                                "following IP addresses are already in use:\n" +
+                                ", ".join([str(c.ip) for c in conflicts]))
+
+        # No filtering on DNS environment. If an address is dynamic in one
+        # environment, it should not be considered static in a different
+        # environment.
         q = session.query(ARecord)
         q = q.filter_by(network=startnet)
         q = q.filter(ARecord.ip >= startip)
@@ -61,8 +79,8 @@ class CommandAddDynamicRange(BrokerCommand):
         q = q.order_by(ARecord.ip)
         conflicts = q.all()
         if conflicts:
-            raise ArgumentError("Cannot allocate IP address range because the "
-                                "following hosts already exist:\n" +
+            raise ArgumentError("Cannot allocate the address range because the "
+                                "following DNS records already exist:\n" +
                                 "\n".join([format(c, "a") for c in conflicts]))
 
         stubs = []

@@ -582,7 +582,9 @@ class DSDBRunner(object):
         for addr in dbhw_ent.all_addresses():
             if not addr.network.is_internal:
                 continue
-            if addr.usage != "zebra" or addr.ip in zebra_ips:
+            if not addr.service_address or \
+               addr.service_address.holder.holder_type != 'host' or \
+               addr.ip in zebra_ips:
                 continue
             zebra_ips.append(addr.ip)
         zebra_ips.sort()
@@ -612,8 +614,10 @@ class DSDBRunner(object):
             # Zebra: in AQDB the address is assigned to multiple existing
             # interfaces. In DSDB however, we need just a single virtual
             # interface
-            if addr.usage == "zebra":
+            if addr.ip in zebra_ips:
                 ifname = "le%d" % zebra_ips.index(addr.ip)
+            elif addr.service_address:
+                continue
             else:
                 ifname = addr.logical_name
                 if addr.interface.comments and not \
