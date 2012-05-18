@@ -140,10 +140,8 @@ class CustomAction(object):
         # Prevent the branch being published unless the unit tests pass
         testdir = os.path.join(sandbox_dir, 't')
         if os.path.exists(os.path.join(testdir, 'Makefile')):
-            testenv = {'PATH': '/bin:/usr/bin'}
-            for var in ['USER', 'KRB5CCNAME']:
-                testenv[var] = os.environ.get(var)
-            p = Popen(['/usr/bin/make', 'test'], cwd=testdir, env=testenv)
+            p = Popen(['/usr/bin/make', 'PWD=%s' % testdir, 'test'],
+                        cwd=testdir)
             p.wait()
             if p.returncode != 0:
                 print >>sys.stderr, "\nUnit tests failed, publish prohibited.",

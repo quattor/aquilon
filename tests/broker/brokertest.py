@@ -430,7 +430,7 @@ class TestBrokerCommand(unittest.TestCase):
         if newenv.has_key("PATH"):
             newenv["PATH"] = "%s:%s" % (git_path, newenv["PATH"])
         else:
-            newenv["PATH"] = git_path
+            newenv["PATH"] = "%s:%s" % (git_path, '/bin:/usr/bin')
         return newenv
 
     def gitcommand_raw(self, command, **kwargs):
