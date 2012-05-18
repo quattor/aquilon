@@ -57,9 +57,8 @@
 		    re-evaluating all the service bindings
 		</para>
 		<para>
-		    All service bindings will be re-evaluated and possible
-		    changed to new defaults unless the
-		    <option>--keepbindings</option> flag is used. Also, any
+		    All service bindings will be re-evaluated and possibly
+		    changed to new defaults.  Also, any
 		    services that are not listed as required will be dropped
 		    unless the <option>--keepbindings</option> flag is used.
 		</para>
@@ -84,7 +83,10 @@
 
   <refsect1>
     <title>Entitlements</title>
-    <para>Requires "operations" role</para>
+    <para>
+      Requires one of the following roles: operations, engineering, winops,
+      winops_server, unixops_l2.
+    </para>
   </refsect1>
 
   <refsect1>
@@ -113,22 +115,101 @@
 	</term>
 	<listitem>
 	  <para>
-	    A list of hosts will be read from <replaceable>FILENAME</replaceable> and the given reconfiguration options will be applied equally to all hosts. The format of the file is one hostname per line. Lines that are blank or begin with "#" will be skipped.
+            A list of hosts will be read from
+            <replaceable>FILENAME</replaceable> and the given reconfiguration
+            options will be applied equally to all hosts. The format of the
+            file is one hostname per line. Lines that are blank or begin with
+            "#" will be skipped.  All hosts must be in the same domain, and
+            after applying all changes the full domain will be compiled.
 	  </para>
 	</listitem>
       </varlistentry>
       <varlistentry>
-	<term>
-	  <option>--personality <replaceable>PERSONALITY</replaceable></option>
-	</term>
-	<listitem>
-	  <para>
-	    The name of the personality that should be given to
-	    the host.
-	    If the operation fails,
-	    then the previous personality will remain on the host.
-	  </para>
-	</listitem>
+        <term>
+          <option>--membersof <replaceable>CLUSTER</replaceable></option>
+        </term>
+        <listitem>
+          <para>
+            Behaves like --list, except the hosts to be reconfigured are
+            the members of <replaceable>CLUSTER</replaceable>.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <option>--osname <replaceable>OSNAME</replaceable></option>
+        </term>
+        <listitem>
+          <para>
+            Name of the OS family to assign to the host (linux, windows,
+            esx, etc.).  Generally the osversion will need to be specified
+            as well.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <option>--osversion <replaceable>OSVERSION</replaceable></option>
+        </term>
+        <listitem>
+          <para>
+            Version of the operating system to run.  May require use of the
+            osname parameter if there is ambiguity.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <option>--archetype <replaceable>ARCHETYPE</replaceable></option>
+        </term>
+        <listitem>
+          <para>
+            To change the archetype of a host, a new OS and personality
+            will need to be given.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <option>--personality <replaceable>PERSONALITY</replaceable></option>
+        </term>
+        <listitem>
+          <para>
+            The name of the personality that should be given to the host.
+            If the operation fails, then the previous personality will remain
+            on the host.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <option>--buildstatus <replaceable>BUILDSTATUS</replaceable></option>
+        </term>
+        <listitem>
+          <para>
+            A host lifecycle tends to go from build to ready to decommissioned.
+            After ready, the host might also transition to rebuild.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <option>--keepbindings</option>, <option>--nokeepbindings</option>
+        </term>
+        <listitem>
+          <para>
+            When <option>--keepbindings</option> is passed, any bindings
+            which have been added manually with bind_client and are not
+            listed as required for the archetype or personality of the host
+            will be kept.  The default behavior is
+            <option>--nokeepbindings</option>, which removes any services
+            that are not required.
+          </para>
+          <para>
+            This option will not change the behavior of enforcing the
+            service maps for required services.
+          </para>
+        </listitem>
       </varlistentry>
     </variablelist>
     <xi:include href="../common/global_options_desc.xml"/>
