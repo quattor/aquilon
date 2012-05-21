@@ -252,6 +252,7 @@ class TestPublishSandbox(TestBrokerCommand):
 "model" = "utcpu";
 "speed" = 1000*MHz;
 "arch" = "x86_64";
+"cores" = 1;
                 """)
         finally:
             f.close()

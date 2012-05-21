@@ -118,7 +118,7 @@ class TestAddModel(TestBrokerCommand):
     def test_110_addutmedium(self):
         # Use the old --mem name here
         command = ["add_model", "--model=utmedium", "--vendor=utvendor",
-                   "--type=virtual_machine", "--cpuname=xeon_2500",
+                   "--type=virtual_machine", "--cpuname=xeon_5150",
                    "--cpunum=1", "--mem=8192", "--disktype=nas",
                    "--diskcontroller=sata", "--disksize=15", "--nics=1",
                    "--nicmodel", "default", "--nicvendor", "utvirt"]
@@ -127,7 +127,7 @@ class TestAddModel(TestBrokerCommand):
     def test_100_addutlarge(self):
         # This test still use --cputype to test backwards compatibility
         command = ["add_model", "--model=utlarge", "--vendor=utvendor",
-                   "--type=virtual_machine", "--cputype=xeon_2660",
+                   "--type=virtual_machine", "--cputype=xeon_5150",
                    "--cpunum=4", "--memory=16384", "--disktype=nas",
                    "--diskcontroller=sata", "--disksize=45", "--nics=1"]
         (out, err) = self.successtest(command)

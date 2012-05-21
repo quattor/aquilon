@@ -168,6 +168,15 @@ class TestUnmapService(TestBrokerCommand):
                   "--service=ntp", "--instance=pa.ny.na", "--city=ex"]
        self.notfoundtest(command)
 
+    def testunmapsyslogng(self):
+        self.noouttest(["unmap", "service", "--campus", "ny",
+                        "--service", "syslogng", "--instance", "ny-prod"])
+
+    def testverifyunmapsyslogng(self):
+       command = ["show_map", "--archetype=aquilon",
+                  "--service=syslogng", "--instance=ny-prod", "--campus=ny"]
+       self.notfoundtest(command)
+
     def testunmaputsi1(self):
         self.noouttest(["unmap", "service", "--building", "ut",
                         "--service", "utsvc", "--instance", "utsi1"])

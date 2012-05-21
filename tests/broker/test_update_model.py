@@ -51,7 +51,7 @@ class TestUpdateModel(TestBrokerCommand):
                           command)
         self.searchoutput(out,
                           r'"cpu" = list\(\s*'
-                          r'create\("hardware/cpu/intel/xeon_2500"\)\s*\);',
+                          r'create\("hardware/cpu/intel/xeon_5150"\)\s*\);',
                           command)
         self.matchoutput(out, '"capacity", 15*GB,', command)
         self.matchoutput(out, '"interface", "sata",', command)

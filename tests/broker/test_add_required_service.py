@@ -169,12 +169,16 @@ class TestAddRequiredService(TestBrokerCommand):
         command = "add required service --service ntp --archetype vmhost"
         command += " --justification tcm=12345678"
         self.noouttest(command.split(" "))
+        command = "add required service --service syslogng --archetype vmhost"
+        command += " --justification tcm=12345678"
+        self.noouttest(command.split(" "))
 
     def testverifyaddrequiredvmhost(self):
         command = "show archetype --archetype vmhost"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Service: dns", command)
         self.matchoutput(out, "Service: ntp", command)
+        self.matchoutput(out, "Service: syslogng", command)
         self.matchclean(out, "Service: afs", command)
 
     def testaddrequiredesx(self):

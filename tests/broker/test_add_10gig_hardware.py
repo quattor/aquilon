@@ -308,7 +308,7 @@ class TestAdd10GigHardware(TestBrokerCommand):
                               command)
             self.searchoutput(out,
                               r'"cpu" = list\(\s*'
-                              r'create\("hardware/cpu/intel/xeon_2500"\)\s*\);',
+                              r'create\("hardware/cpu/intel/xeon_5150"\)\s*\);',
                               command)
             self.searchoutput(out,
                               r'"cards/nic" = nlist\(\s*'

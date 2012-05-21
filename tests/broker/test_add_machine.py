@@ -372,7 +372,7 @@ class TestAddMachine(TestBrokerCommand):
     def testrejectmissingmemory(self):
         command = ["add", "machine", "--machine", "ut3c1n6",
             "--rack", "ut3", "--model", "utblade", "--cpucount", "2",
-            "--cpuvendor", "intel", "--cpuname", "xeon", "--cpuspeed", "2660",
+            "--cpuvendor", "intel", "--cpuname", "xeon", "--cpuspeed", "2500",
             "--serial", "AAAAAAA"]
         out = self.badrequesttest(command)
         self.matchoutput(out,

@@ -155,6 +155,21 @@ class TestUnbindServer(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchclean(out, "Server: nyaqd1.ms.com", command)
 
+    def testunbindsyslogng(self):
+        command = ["unbind", "server", "--hostname", "nyaqd1.ms.com",
+                   "--service", "syslogng", "--all"]
+
+        (out, err) = self.successtest(command)
+        self.assertEmptyOut(out, command)
+
+        self.matchoutput(err, SRV_MSG % ("nyaqd1.ms.com", "syslogng"),
+                         command)
+
+    def testverifyunbindsyslogng(self):
+        command = "show service --service syslogng"
+        out = self.commandtest(command.split(" "))
+        self.matchclean(out, "Server: nyaqd1.ms.com", command)
+
     def testunbindbootserver(self):
         command = ["unbind_server",
                    "--hostname=server9.aqd-unittest.ms.com",
@@ -195,4 +210,3 @@ class TestUnbindServer(TestBrokerCommand):
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestUnbindServer)
     unittest.TextTestRunner(verbosity=2).run(suite)
-

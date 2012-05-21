@@ -268,7 +268,7 @@ class TestAddVirtualHardware(TestBrokerCommand):
             self.matchoutput(out, "Hosted by ESX Cluster: utecl1", command)
             self.matchoutput(out, "Building: ut", command)
             self.matchoutput(out, "Vendor: utvendor Model: utmedium", command)
-            self.matchoutput(out, "Cpu: xeon_2500 x 1", command)
+            self.matchoutput(out, "Cpu: xeon_5150 x 1", command)
             self.matchoutput(out, "Memory: 8192 MB", command)
             self.searchoutput(out,
                               r"Interface: eth0 00:50:56:01:20:%02x \[boot, default_route\]"
@@ -293,7 +293,7 @@ class TestAddVirtualHardware(TestBrokerCommand):
                               command)
             self.searchoutput(out,
                               r'"cpu" = list\(\s*'
-                              r'create\("hardware/cpu/intel/xeon_2500"\)\s*\);',
+                              r'create\("hardware/cpu/intel/xeon_5150"\)\s*\);',
                               command)
             self.searchoutput(out,
                               r'"cards/nic" = nlist\(\s*'
@@ -368,8 +368,8 @@ class TestAddVirtualHardware(TestBrokerCommand):
                           command)
         self.searchoutput(out,
                           r'"cpu" = list\(\s*'
-                          r'create\("hardware/cpu/intel/xeon_2500"\),\s*'
-                          r'create\("hardware/cpu/intel/xeon_2500"\)\s*\);',
+                          r'create\("hardware/cpu/intel/xeon_5150"\),\s*'
+                          r'create\("hardware/cpu/intel/xeon_5150"\)\s*\);',
                           command)
         # Updating the model of the machine changes the NIC model from
         # utvirt/default to generic/generic_nic
@@ -387,7 +387,7 @@ class TestAddVirtualHardware(TestBrokerCommand):
         self.matchoutput(out, "Hosted by ESX Cluster: utecl1", command)
         self.matchoutput(out, "Building: ut", command)
         self.matchoutput(out, "Vendor: utvendor Model: utlarge", command)
-        self.matchoutput(out, "Cpu: xeon_2500 x 2", command)
+        self.matchoutput(out, "Cpu: xeon_5150 x 2", command)
         self.matchoutput(out, "Memory: 12288 MB", command)
         self.searchoutput(out,
                           "Interface: eth0 00:50:56:01:20:00 \[boot, default_route\]",

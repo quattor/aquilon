@@ -62,6 +62,15 @@ class TestPrebindServer(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Server: nyaqd1.ms.com", command)
 
+    def testbindsyslogngserver(self):
+        self.noouttest(["bind", "server", "--hostname", "nyaqd1.ms.com",
+                        "--service", "syslogng", "--instance", "ny-prod"])
+
+    def testverifybindsyslogng(self):
+        command = "show service --service syslogng --instance ny-prod"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Server: nyaqd1.ms.com", command)
+
     def testbindbootserver(self):
         self.noouttest(["bind_server",
                         "--hostname=server9.aqd-unittest.ms.com",

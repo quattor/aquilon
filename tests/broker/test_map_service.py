@@ -149,6 +149,19 @@ class TestMapService(TestBrokerCommand):
                          "Instance: pa.ny.na Map: City ex",
                          command)
 
+    def testmapsyslogng(self):
+        self.noouttest(["map", "service", "--campus", "ny",
+                        "--service", "syslogng", "--instance", "ny-prod"])
+
+    def testverifymapsyslogng(self):
+        command = ["show_map",
+                   "--service=syslogng", "--instance=ny-prod"]
+        out = self.commandtest(command)
+        self.matchoutput(out,
+                         "Archetype: aquilon Service: syslogng "
+                         "Instance: ny-prod Map: Campus ny",
+                         command)
+
     def testmaputsi1(self):
         self.noouttest(["map", "service", "--building", "ut",
                         "--service", "utsvc", "--instance", "utsi1"])
