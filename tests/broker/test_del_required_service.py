@@ -139,6 +139,10 @@ class TestDelRequiredService(TestBrokerCommand):
                    "--service=ntp", "--archetype=vmhost",
                    "--justification=tcm=12345678"]
         self.noouttest(command)
+        command = ["del_required_service",
+                   "--service=syslogng", "--archetype=vmhost",
+                   "--justification=tcm=12345678"]
+        self.noouttest(command)
 
     def testverifydelrequiredvmhost(self):
         command = "show archetype --archetype vmhost"
@@ -146,6 +150,7 @@ class TestDelRequiredService(TestBrokerCommand):
         self.matchclean(out, "Service: afs", command)
         self.matchclean(out, "Service: dns", command)
         self.matchclean(out, "Service: ntp", command)
+        self.matchclean(out, "Service: syslogng", command)
 
     def testdelrequiredesx(self):
         command = ["del_required_service", "--service=esx_management_server",

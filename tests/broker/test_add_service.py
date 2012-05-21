@@ -156,6 +156,15 @@ class TestAddService(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Service: lemon Instance: ny-prod", command)
 
+    def testaddsyslognginstance(self):
+        command = "add service --service syslogng --instance ny-prod"
+        self.noouttest(command.split(" "))
+
+    def testverifyaddsyslognginstance(self):
+        command = "show service --service syslogng"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Service: syslogng Instance: ny-prod", command)
+
     def testaddutsi1instance(self):
         command = "add service --service utsvc --instance utsi1"
         self.noouttest(command.split(" "))
