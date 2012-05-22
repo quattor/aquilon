@@ -19,15 +19,13 @@
 import logging
 
 from aquilon.aqdb.model import City
-from aquilon.worker.templates.base import Plenary
+from aquilon.worker.templates import Plenary
 from aquilon.worker.templates.panutils import pan_variable
 
 LOGGER = logging.getLogger(__name__)
 
 
 class PlenaryCity(Plenary):
-
-    template_type = ""
 
     def __init__(self, dbcity, logger=LOGGER):
         super(PlenaryCity, self).__init__(dbcity, logger=logger)

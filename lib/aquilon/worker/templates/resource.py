@@ -22,16 +22,15 @@ from aquilon.aqdb.model import (Application, Filesystem, Intervention,
                                 ResourceGroup, Hostlink, RebootSchedule,
                                 RebootIntervention, ServiceAddress,
                                 VirtualMachine, Share)
-from aquilon.worker.templates.base import Plenary, PlenaryCollection
+from aquilon.worker.templates import (Plenary, StructurePlenary,
+                                      PlenaryCollection)
 from aquilon.worker.templates.panutils import (StructureTemplate, pan_assign,
                                                pan_append)
 
 LOGGER = logging.getLogger('aquilon.server.templates.resource')
 
 
-class PlenaryResource(Plenary):
-
-    template_type = "structure"
+class PlenaryResource(StructurePlenary):
 
     def __init__(self, dbresource, logger=LOGGER):
         super(PlenaryResource, self).__init__(dbresource, logger=logger)
@@ -150,7 +149,7 @@ class PlenaryResourceGroup(PlenaryCollection):
         super(PlenaryResourceGroup, self).__init__(logger=logger)
 
         self.dbobj = dbresource
-        self.real_plenary = PlenaryResource(dbresource)
+        self.real_plenary = PlenaryResource(dbresource, logger=logger)
 
         self.plenaries.append(self.real_plenary)
         if dbresource.resholder:

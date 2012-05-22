@@ -21,16 +21,14 @@ import logging
 
 from aquilon.aqdb.model import Machine
 from aquilon.worker.locks import CompileKey
-from aquilon.worker.templates.base import Plenary
+from aquilon.worker.templates import Plenary, StructurePlenary
 from aquilon.worker.templates.panutils import (StructureTemplate, pan_assign,
                                                pan_include, PanMetric)
 
 LOGGER = logging.getLogger(__name__)
 
 
-class PlenaryMachineInfo(Plenary):
-
-    template_type = "structure"
+class PlenaryMachineInfo(StructurePlenary):
 
     def __init__(self, dbmachine, logger=LOGGER):
         super(PlenaryMachineInfo, self).__init__(dbmachine, logger=logger)

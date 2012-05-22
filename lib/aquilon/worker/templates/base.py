@@ -37,7 +37,7 @@ TEMPLATE_EXTENSION = _config.get("panc", "template_extension")
 
 class Plenary(object):
 
-    template_type = None
+    template_type = ""
     """ Specifies the PAN template type to generate """
 
     handlers = {}
@@ -46,27 +46,17 @@ class Plenary(object):
         subclass.
 
     """
-    def __init__(self, dbobj=None, logger=LOGGER):
+    def __init__(self, dbobj, logger=LOGGER):
         super(Plenary, self).__init__()
+
+        if not dbobj:
+            raise ValueError("A plenary instance must be bound to a DB object.")
 
         self.config = Config()
         self.dbobj = dbobj
         self.logger = logger
 
-        if self.template_type is None:
-            raise InternalError("Plenary class %s did not set the template "
-                                "type" % self.__class__.__name__)
-
-        # Object templates live under the branch-specific build directory.
-        # Everything else lives under the common plenary directory.
-        if self.template_type == "object":
-            if not dbobj or not hasattr(dbobj, "branch"):
-                raise InternalError("Plenaries meant to be compiled need a DB "
-                                    "object that has a branch; got: %r" % dbobj)
-            self.dir = "%s/domains/%s/profiles" % (
-                self.config.get("broker", "builddir"), dbobj.branch.name)
-        else:
-            self.dir = self.config.get("broker", "plenarydir")
+        self.dir = self.config.get("broker", "plenarydir")
 
         self.loadpath = None
         self.plenary_template = None
@@ -96,9 +86,9 @@ class Plenary(object):
             return False
         return self.dbobj == other.dbobj
 
-    def __str__(self):
+    def __repr__(self):
         """For debug output."""
-        return "Plenary(%s)" % self.dbobj
+        return "%s(%s)" % (self.__class__.__name__, self.dbobj)
 
     @property
     def plenary_directory(self):
@@ -158,27 +148,13 @@ class Plenary(object):
         return CompileKey(logger=self.logger)
 
     def _generate_content(self):
-        """Not meant to be overridden or called directly."""
         lines = []
         type = self.template_type
-        if type is not None and type is not "":
+        if type:
             type = type + " "
 
         lines.append("%stemplate %s;" % (type, self.plenary_template_name))
         lines.append("")
-
-        if self.template_type == "object":
-            if self.loadpath:
-                pan_variable(lines, "LOADPATH", [self.loadpath])
-                lines.append("")
-            pan_assign(lines, "/metadata/template/branch/name",
-                       self.dbobj.branch.name)
-            pan_assign(lines, "/metadata/template/branch/type",
-                       self.dbobj.branch.branch_type)
-            if self.dbobj.branch.branch_type == 'sandbox':
-                pan_assign(lines, "/metadata/template/branch/author",
-                           self.dbobj.sandbox_author.name)
-            lines.append("")
 
         self.body(lines)
 
@@ -273,44 +249,7 @@ class Plenary(object):
             if not locked:
                 key = self.get_remove_key()
                 lock_queue.acquire(key)
-
-            if self.template_type == "object":
-                # Can't call remove() here because it relies on the new domain.
-                qdir = self.config.get("broker", "quattordir")
-                # Only one or the other of .xml/.xml.gz should be there...
-                # it doesn't hurt to clean up both.
-                xmldir = os.path.join(qdir, "build", "xml", domain,
-                                      self.plenary_core)
-                xmlfile = os.path.join(xmldir, self.plenary_template + ".xml")
-                remove_file(xmlfile, logger=self.logger)
-                xmlgzfile = xmlfile + ".gz"
-                remove_file(xmlgzfile, logger=self.logger)
-                # Name used up to and including panc 9.2
-                depfile = xmlfile + ".dep"
-                remove_file(depfile, logger=self.logger)
-                # Name used by panc 9.4 and higher
-                depfile = os.path.join(xmldir, self.plenary_template + ".dep")
-                remove_file(depfile, logger=self.logger)
-                try:
-                    os.removedirs(xmldir)
-                except OSError:
-                    pass
-
-                builddir = self.config.get("broker", "builddir")
-                maindir = os.path.join(builddir, "domains", domain,
-                                       "profiles", self.plenary_core)
-                mainfile = os.path.join(maindir, self.plenary_template +
-                                        TEMPLATE_EXTENSION)
-                remove_file(mainfile, logger=self.logger)
-                try:
-                    os.removedirs(maindir)
-                except OSError:
-                    pass
-                self.removed = True
-            else:
-                # Non-object templates do not depend on the domain, so calling
-                # remove() is fine
-                self.remove(locked=True)
+            self.remove(locked=True)
         except:
             if not locked:
                 self.restore_stash()
@@ -363,6 +302,98 @@ class Plenary(object):
 
     def set_logger(self, logger):
         self.logger = logger
+
+
+class StructurePlenary(Plenary):
+
+    template_type = "structure"
+
+
+class ObjectPlenary(Plenary):
+
+    template_type = "object"
+
+    def __init__(self, dbobj=None, logger=LOGGER):
+        if not dbobj or not hasattr(dbobj, "branch"):
+            raise InternalError("Plenaries meant to be compiled need a DB "
+                                "object that has a branch; got: %r" % dbobj)
+
+        super(ObjectPlenary, self).__init__(dbobj, logger)
+
+        self.dir = os.path.join(self.config.get("broker", "builddir"),
+                                "domains", dbobj.branch.name, "profiles")
+
+    def _generate_content(self):
+        lines = []
+        lines.append("object template %s;" % self.plenary_template_name)
+        lines.append("")
+
+        if self.loadpath:
+            pan_variable(lines, "LOADPATH", [self.loadpath])
+            lines.append("")
+        pan_assign(lines, "/metadata/template/branch/name",
+                   self.dbobj.branch.name)
+        pan_assign(lines, "/metadata/template/branch/type",
+                   self.dbobj.branch.branch_type)
+        if self.dbobj.branch.branch_type == 'sandbox':
+            pan_assign(lines, "/metadata/template/branch/author",
+                       self.dbobj.sandbox_author.name)
+        lines.append("")
+
+        self.body(lines)
+
+        return "\n".join(lines) + "\n"
+
+    def cleanup(self, domain, locked=False):
+        """
+        remove all files related to an object template including
+        any intermediate build files
+        """
+        key = None
+        try:
+            if not locked:
+                key = self.get_remove_key()
+                lock_queue.acquire(key)
+
+            # Can't call remove() here because it relies on the new domain.
+            qdir = self.config.get("broker", "quattordir")
+            # Only one or the other of .xml/.xml.gz should be there...
+            # it doesn't hurt to clean up both.
+            xmldir = os.path.join(qdir, "build", "xml", domain,
+                                  self.plenary_core)
+            xmlfile = os.path.join(xmldir, self.plenary_template + ".xml")
+            remove_file(xmlfile, logger=self.logger)
+            xmlgzfile = xmlfile + ".gz"
+            remove_file(xmlgzfile, logger=self.logger)
+            # Name used up to and including panc 9.2
+            depfile = xmlfile + ".dep"
+            remove_file(depfile, logger=self.logger)
+            # Name used by panc 9.4 and higher
+            depfile = os.path.join(xmldir, self.plenary_template + ".dep")
+            remove_file(depfile, logger=self.logger)
+            try:
+                os.removedirs(xmldir)
+            except OSError:
+                pass
+
+            builddir = self.config.get("broker", "builddir")
+            maindir = os.path.join(builddir, "domains", domain,
+                                   "profiles", self.plenary_core)
+            mainfile = os.path.join(maindir, self.plenary_template +
+                                    TEMPLATE_EXTENSION)
+            remove_file(mainfile, logger=self.logger)
+            try:
+                os.removedirs(maindir)
+            except OSError:
+                pass
+            self.removed = True
+        except:
+            if not locked:
+                self.restore_stash()
+            raise
+        finally:
+            if not locked:
+                lock_queue.release(key)
 
 
 class PlenaryCollection(object):

@@ -19,7 +19,8 @@ from operator import attrgetter
 import logging
 
 from aquilon.aqdb.model import MetaCluster
-from aquilon.worker.templates.base import Plenary, PlenaryCollection
+from aquilon.worker.templates import (Plenary, ObjectPlenary, StructurePlenary,
+                                      PlenaryCollection)
 from aquilon.worker.templates.panutils import (StructureTemplate, PanValue,
                                                pan_assign, pan_include,
                                                pan_append)
@@ -41,9 +42,7 @@ class PlenaryMetaCluster(PlenaryCollection):
         self.plenaries.append(PlenaryMetaClusterData(dbcluster, logger=logger))
 
 
-class PlenaryMetaClusterData(Plenary):
-
-    template_type = "structure"
+class PlenaryMetaClusterData(StructurePlenary):
 
     def __init__(self, dbmetacluster, logger=LOGGER):
         super(PlenaryMetaClusterData, self).__init__(dbmetacluster,
@@ -109,9 +108,7 @@ class PlenaryMetaClusterData(Plenary):
                                              '/config'))
 
 
-class PlenaryMetaClusterObject(Plenary):
-
-    template_type = "object"
+class PlenaryMetaClusterObject(ObjectPlenary):
 
     def __init__(self, dbmetacluster, logger=LOGGER):
         super(PlenaryMetaClusterObject, self).__init__(dbmetacluster,

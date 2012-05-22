@@ -19,15 +19,14 @@ import logging
 from collections import defaultdict
 
 from aquilon.aqdb.model import Personality, Parameter
-from aquilon.worker.templates.base import (Plenary, TemplateFormatter,
-                                           PlenaryCollection)
+from aquilon.worker.templates.base import (Plenary, StructurePlenary,
+                                           TemplateFormatter, PlenaryCollection)
 from aquilon.worker.templates.panutils import (pan_include, pan_variable,
                                                pan_assign, pan_append,
                                                pan_include_if_exists)
 from aquilon.worker.dbwrappers.parameter import (validate_value,
                                                  get_parameters)
 from sqlalchemy.orm import object_session
-from collections import defaultdict
 
 LOGGER = logging.getLogger(__name__)
 
@@ -126,8 +125,6 @@ def get_parameters_by_tmpl(dbpersonality):
 
 class PlenaryPersonality(PlenaryCollection):
 
-    template_type = ""
-
     def __init__(self, dbpersonality, logger=LOGGER):
         super(PlenaryPersonality, self).__init__(logger=logger)
 
@@ -154,9 +151,6 @@ class FeatureTemplate(TemplateFormatter):
 
 
 class PlenaryPersonalityBase(Plenary):
-
-    template_type = ''
-
     def __init__(self, dbpersonality, logger=LOGGER):
         super(PlenaryPersonalityBase, self).__init__(dbpersonality,
                                                      logger=logger)
@@ -220,9 +214,6 @@ class PlenaryPersonalityBase(Plenary):
 
 
 class PlenaryPersonalityPreFeature(Plenary):
-
-    template_type = ""
-
     def __init__(self, dbpersonality, logger=LOGGER):
         super(PlenaryPersonalityPreFeature, self).__init__(dbpersonality,
                                                            logger=logger)
@@ -251,9 +242,6 @@ class PlenaryPersonalityPreFeature(Plenary):
 
 
 class PlenaryPersonalityPostFeature(Plenary):
-
-    template_type = ""
-
     def __init__(self, dbpersonality, logger=LOGGER):
         super(PlenaryPersonalityPostFeature, self).__init__(dbpersonality,
                                                             logger=logger)
@@ -268,10 +256,7 @@ class PlenaryPersonalityPostFeature(Plenary):
                 helper_feature_template(feat_tmpl, link, lines)
 
 
-class PlenaryPersonalityParameter(Plenary):
-
-    template_type = "structure"
-
+class PlenaryPersonalityParameter(StructurePlenary):
     def __init__(self, dbpersonality, template, parameters, logger=LOGGER):
         super(PlenaryPersonalityParameter, self).__init__(dbpersonality,
                                                           logger=logger)

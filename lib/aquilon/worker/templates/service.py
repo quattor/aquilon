@@ -19,10 +19,10 @@
 import logging
 
 from aquilon.aqdb.model import Service, ServiceInstance
-from aquilon.worker.templates.base import Plenary, PlenaryCollection
+from aquilon.worker.templates import (Plenary, StructurePlenary,
+                                      PlenaryCollection)
 from aquilon.worker.templates.panutils import (StructureTemplate, pan_assign,
                                                pan_include)
-from aquilon.exceptions_ import NotFoundException
 
 LOGGER = logging.getLogger(__name__)
 
@@ -45,7 +45,7 @@ class PlenaryService(PlenaryCollection):
 Plenary.handlers[Service] = PlenaryService
 
 
-class PlenaryServiceToplevel(Plenary):
+class PlenaryServiceToplevel(StructurePlenary):
     """
     The top-level service template does nothing. It is really
     a placeholder which can be overridden by the library
@@ -55,8 +55,6 @@ class PlenaryServiceToplevel(Plenary):
     configuration common to both clients and servers, and is applicable
     to all instances.
     """
-
-    template_type = "structure"
 
     def __init__(self, dbservice, logger=LOGGER):
         super(PlenaryServiceToplevel, self).__init__(dbservice, logger=logger)
@@ -75,8 +73,6 @@ class PlenaryServiceClientDefault(Plenary):
     to all instances of the service.
     """
 
-    template_type = ""
-
     def __init__(self, dbservice, logger=LOGGER):
         super(PlenaryServiceClientDefault, self).__init__(dbservice,
                                                           logger=logger)
@@ -94,8 +90,6 @@ class PlenaryServiceServerDefault(Plenary):
     defines configuration for servers only, but is applicable
     to all instances of the service.
     """
-
-    template_type = ""
 
     def __init__(self, dbservice, logger=LOGGER):
         super(PlenaryServiceServerDefault, self).__init__(dbservice,
@@ -125,7 +119,7 @@ class PlenaryServiceInstance(PlenaryCollection):
 Plenary.handlers[ServiceInstance] = PlenaryServiceInstance
 
 
-class PlenaryServiceInstanceToplevel(Plenary):
+class PlenaryServiceInstanceToplevel(StructurePlenary):
     """
     This structure template provides information for the template
     specific to the service instance and for use by the client.
@@ -134,8 +128,6 @@ class PlenaryServiceInstanceToplevel(Plenary):
     while still having access to generated data here (the list of
     servers and the instance name)
     """
-
-    template_type = "structure"
 
     def __init__(self, dbinstance, logger=LOGGER):
         super(PlenaryServiceInstanceToplevel, self).__init__(dbinstance,
@@ -155,7 +147,7 @@ class PlenaryServiceInstanceToplevel(Plenary):
             pan_assign(lines, "server_ips", self.dbobj.server_ips)
 
 
-class PlenaryServiceInstanceServer(Plenary):
+class PlenaryServiceInstanceServer(StructurePlenary):
     """
     This structure template provides information for the template
     specific to the service instance and for use by the server.
@@ -164,8 +156,6 @@ class PlenaryServiceInstanceServer(Plenary):
     while still having access to the generated data here (the list
     of clients and the instance name)
     """
-
-    template_type = "structure"
 
     def __init__(self, dbinstance, logger=LOGGER):
         super(PlenaryServiceInstanceServer, self).__init__(dbinstance,
@@ -192,8 +182,6 @@ class PlenaryServiceInstanceClientDefault(Plenary):
     is specific to the instance.
     """
 
-    template_type = ""
-
     def __init__(self, dbinstance, logger=LOGGER):
         super(PlenaryServiceInstanceClientDefault, self).__init__(dbinstance,
                                                                   logger=logger)
@@ -219,8 +207,6 @@ class PlenaryServiceInstanceServerDefault(Plenary):
     sufficient. The template defines configuration for servers
     only and is specific to the service instance.
     """
-
-    template_type = ""
 
     def __init__(self, dbinstance, logger=LOGGER):
         super(PlenaryServiceInstanceServerDefault, self).__init__(dbinstance,

@@ -26,8 +26,8 @@ from aquilon.exceptions_ import IncompleteError, InternalError
 from aquilon.aqdb.model import (Host, VlanInterface, BondingInterface,
                                 BridgeInterface)
 from aquilon.worker.locks import CompileKey
-from aquilon.worker.templates.base import Plenary, PlenaryCollection
-from aquilon.worker.templates.cluster import PlenaryClusterClient
+from aquilon.worker.templates import (Plenary, ObjectPlenary, StructurePlenary,
+                                      PlenaryCollection, PlenaryClusterClient)
 from aquilon.worker.templates.panutils import (StructureTemplate, PanValue,
                                                pan_assign, pan_append,
                                                pan_include)
@@ -117,9 +117,7 @@ class PlenaryHost(PlenaryCollection):
 Plenary.handlers[Host] = PlenaryHost
 
 
-class PlenaryHostData(Plenary):
-
-    template_type = "structure"
+class PlenaryHostData(StructurePlenary):
 
     def __init__(self, dbhost, logger=LOGGER):
         super(PlenaryHostData, self).__init__(dbhost, logger=logger)
@@ -302,12 +300,10 @@ class PlenaryHostData(Plenary):
                                              '/config'))
 
 
-class PlenaryToplevelHost(Plenary):
+class PlenaryToplevelHost(ObjectPlenary):
     """
     A plenary template for a host, stored at the toplevel of the profiledir
     """
-
-    template_type = "object"
 
     def __init__(self, dbhost, logger=LOGGER):
         super(PlenaryToplevelHost, self).__init__(dbhost, logger=logger)

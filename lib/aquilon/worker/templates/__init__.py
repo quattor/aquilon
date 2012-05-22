@@ -15,7 +15,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from aquilon.worker.templates.base import Plenary, PlenaryCollection
+from aquilon.worker.templates.base import (Plenary, StructurePlenary,
+                                           ObjectPlenary, PlenaryCollection)
 from aquilon.worker.templates.city import PlenaryCity
 from aquilon.worker.templates.cluster import (PlenaryCluster,
                                               PlenaryClusterData,

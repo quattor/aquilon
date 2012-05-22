@@ -20,7 +20,8 @@ from operator import attrgetter
 
 from aquilon.aqdb.model import (Cluster, EsxCluster, ComputeCluster,
                                 StorageCluster)
-from aquilon.worker.templates.base import Plenary, PlenaryCollection
+from aquilon.worker.templates import (Plenary, ObjectPlenary, StructurePlenary,
+                                      PlenaryCollection)
 from aquilon.worker.templates.panutils import (StructureTemplate, PanValue,
                                                pan_assign, pan_include,
                                                pan_append)
@@ -49,9 +50,7 @@ Plenary.handlers[EsxCluster] = PlenaryCluster
 Plenary.handlers[StorageCluster] = PlenaryCluster
 
 
-class PlenaryClusterData(Plenary):
-
-    template_type = "structure"
+class PlenaryClusterData(StructurePlenary):
 
     def __init__(self, dbcluster, logger=LOGGER):
         super(PlenaryClusterData, self).__init__(dbcluster, logger=logger)
@@ -154,14 +153,12 @@ class PlenaryClusterData(Plenary):
                        self.dbobj.switch.primary_name)
 
 
-class PlenaryClusterObject(Plenary):
+class PlenaryClusterObject(ObjectPlenary):
     """
     A cluster has its own output profile, so the plenary cluster template
     is an object template that includes the data about which machines
     are contained inside the cluster (via an include of the clusterdata plenary)
     """
-
-    template_type = "object"
 
     def __init__(self, dbcluster, logger=LOGGER):
         super(PlenaryClusterObject, self).__init__(dbcluster, logger=logger)
@@ -196,8 +193,6 @@ class PlenaryClusterClient(Plenary):
     A host that is a member of a cluster will include the cluster client
     plenary template. This just names the cluster and nothing more.
     """
-
-    template_type = ""
 
     def __init__(self, dbcluster, logger=LOGGER):
         super(PlenaryClusterClient, self).__init__(dbcluster, logger=logger)
