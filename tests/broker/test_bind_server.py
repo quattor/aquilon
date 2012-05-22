@@ -148,8 +148,12 @@ class TestBindServer(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Primary Name: unittest00.one-nyp.ms.com",
                          command)
-        self.matchoutput(out, "Provides: service/utsvc/utsi1", command)
-        self.matchoutput(out, "Provides: service/utsvc/utsi2", command)
+        self.matchoutput(out,
+                         "Provides Service: utsvc Instance: utsi1",
+                         command)
+        self.matchoutput(out,
+                         "Provides Service: utsvc Instance: utsi2",
+                         command)
 
     def testverifyshowunittest00proto(self):
         command = "show host --hostname unittest00.one-nyp.ms.com --format proto"

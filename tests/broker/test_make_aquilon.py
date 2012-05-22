@@ -171,12 +171,16 @@ class TestMakeAquilon(VerifyNotificationsMixin, TestBrokerCommand):
     def testverifybindautoafs(self):
         command = "show host --hostname unittest00.one-nyp.ms.com"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Template: service/afs/q.ny.ms.com", command)
+        self.matchoutput(out,
+                         "Uses Service: afs Instance: q.ny.ms.com",
+                         command)
 
     def testverifybindautodns(self):
         command = "show host --hostname unittest00.one-nyp.ms.com"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Template: service/dns/utdnsinstance", command)
+        self.matchoutput(out,
+                         "Uses Service: dns Instance: utdnsinstance",
+                         command)
 
     def testverifyproto(self):
         command = ["show", "host", "--hostname=unittest00.one-nyp.ms.com",

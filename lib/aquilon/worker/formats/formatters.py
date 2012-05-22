@@ -344,7 +344,6 @@ class ObjectFormatter(object):
         """Adds a service message, will either nest the given service_instance in the message,
         or will add all the service instances which are available as a backref from a service object"""
         service_msg.name = str(service.name)
-        service_msg.template = str(service.cfg_path)
         if service_instance:
             self.add_service_instance_msg(service_msg.serviceinstances.add(), service_instance)
         else:
@@ -353,7 +352,6 @@ class ObjectFormatter(object):
 
     def add_service_instance_msg(self, si_msg, service_instance):
         si_msg.name = str(service_instance.name)
-        si_msg.template = str(service_instance.cfg_path)
         for host in service_instance.server_hosts:
             self.add_host_msg(si_msg.servers.add(), host)
         # TODO: make this conditional to avoid performance problems

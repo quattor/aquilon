@@ -30,7 +30,6 @@ class ServiceInstanceFormatter(ObjectFormatter):
     def format_raw(self, si, indent=""):
         details = [indent + "Service: %s Instance: %s"
                 % (si.service.name, si.name)]
-        details.append(indent + "  Template: %s" % si.cfg_path)
         for host in si.server_hosts:
             details.append(indent + "  Server: %s" % host.fqdn)
         for map in si.service_map:

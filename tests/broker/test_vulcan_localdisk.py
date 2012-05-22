@@ -245,7 +245,7 @@ class TestVulcanLocalDisk(VerifyNotificationsMixin, TestBrokerCommand):
 
         command = ["show", "host", "--hostname", "utpgh0.aqd-unittest.ms.com"]
         out = self.commandtest(command)
-        self.matchclean(out, "Template: service/vcenter/ut", command)
+        self.matchclean(out, "Uses Sertice: vcenter Instance: ut", command)
 
 
     def check_path_exclusive(self, path, wrongpath):

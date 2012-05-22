@@ -17,15 +17,14 @@
 """Service formatter."""
 
 
+from aquilon.aqdb.model import Service
 from aquilon.worker.formats.formatters import ObjectFormatter
 from aquilon.worker.formats.list import ListFormatter
-from aquilon.aqdb.model import Service
 
 
 class ServiceFormatter(ObjectFormatter):
     def format_raw(self, service, indent=""):
         details = [indent + "Service: %s" % service.name]
-        details.append(indent + "  Template: %s" % service.cfg_path)
         max_clients = service.max_clients
         if max_clients is None:
             max_clients = "Unlimited"

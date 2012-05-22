@@ -59,9 +59,6 @@ class Service(Base):
 
     __table_args__ = (UniqueConstraint(name, name='svc_name_uk'),)
 
-    @property
-    def cfg_path(self):
-        return 'service/%s' % (self.name)
 
 service = Service.__table__  # pylint: disable=C0103
 service.info['unique_fields'] = ['name']
