@@ -59,24 +59,15 @@ class Plenary(object):
         self.dbobj = dbobj
         self.logger = logger
 
-        self.dir = self.config.get("broker", "plenarydir")
-
-        self.plenary_template = None
-        self.plenary_core = None
-
         self.new_content = None
+
         # The following attributes are for stash/restore_stash
+        self.old_path = self.full_path(dbobj)
         self.old_content = None
         self.old_mtime = None
         self.stashed = False
         self.removed = False
         self.changed = False
-
-    @property
-    def old_path(self):
-        # FIXME: this should be just a simple field, but self.plenary_file
-        # cannot be called inside __init__()
-        return self.plenary_file
 
     def __hash__(self):
         """Since equality is based on dbobj, just hash on it."""
@@ -109,14 +100,21 @@ class Plenary(object):
         """ Return the LOADPATH the template is relative to """
         return ""
 
-    @property
-    def plenary_file(self):
-        loadpath = self.loadpath(self.dbobj)
-        if loadpath and self.template_type != "object":
-            dir = "%s/%s/%s" % (self.dir, loadpath, self.plenary_core)
+    @classmethod
+    def base_dir(cls, dbobj):  # pylint: disable=W0613
+        """ Base directory of the plenary template """
+        return _config.get("broker", "plenarydir")
+
+    @classmethod
+    def full_path(cls, dbobj):
+        """ Full absolute path name of the plenary template """
+        loadpath = cls.loadpath(dbobj)
+        if loadpath:
+            return "%s/%s/%s%s" % (cls.base_dir(dbobj), loadpath,
+                                   cls.template_name(dbobj), TEMPLATE_EXTENSION)
         else:
-            dir = "%s/%s" % (self.dir, self.plenary_core)
-        return "%s/%s%s" % (dir, self.plenary_template, TEMPLATE_EXTENSION)
+            return "%s/%s%s" % (cls.base_dir(dbobj), cls.template_name(dbobj),
+                                TEMPLATE_EXTENSION)
 
     def body(self, lines):
         """
@@ -221,11 +219,12 @@ class Plenary(object):
                 # if nothing is actually changed
                 return 0
 
-            dirname = os.path.dirname(self.plenary_file)
+            path = self.full_path(self.dbobj)
+            dirname = os.path.dirname(path)
             if not os.path.exists(dirname):
                 os.makedirs(dirname)
 
-            write_file(self.plenary_file, content, logger=self.logger)
+            write_file(path, content, logger=self.logger)
             self.removed = False
             if self.old_content != content:
                 self.changed = True
@@ -355,13 +354,24 @@ class ObjectPlenary(Plenary):
 
         super(ObjectPlenary, self).__init__(dbobj, logger)
 
-        self.dir = os.path.join(self.config.get("broker", "builddir"),
-                                "domains", dbobj.branch.name, "profiles")
+        self.old_name = self.template_name(dbobj)
 
     @classmethod
     def loadpath(cls, dbobj):
         """ Return the default LOADPATH for this object profile """
         return dbobj.personality.archetype.name
+
+    @classmethod
+    def base_dir(cls, dbobj):
+        return os.path.join(_config.get("broker", "builddir"),
+                            "domains", dbobj.branch.name, "profiles")
+
+    @classmethod
+    def full_path(cls, dbobj):
+        # loadpath is interpreted differently for object templates, it's not
+        # parth of the full path
+        return "%s/%s%s" % (cls.base_dir(dbobj), cls.template_name(dbobj),
+                            TEMPLATE_EXTENSION)
 
     def _generate_content(self):
         lines = []
@@ -402,26 +412,23 @@ class ObjectPlenary(Plenary):
             # it doesn't hurt to clean up both.
             # .xml.dep is used up to and including panc 9.2
             # .dep is used by panc 9.4 and higher
-            xmldir = os.path.join(qdir, "build", "xml", domain,
-                                  self.plenary_core)
-            basename = os.path.join(xmldir, self.plenary_template)
+            basename = os.path.join(qdir, "build", "xml", domain, self.old_name)
             for ext in (".xml", ".xml.gz", ".xml.dep", ".dep"):
                 remove_file(basename + ext, logger=self.logger)
             try:
-                os.removedirs(xmldir)
+                os.removedirs(os.path.dirname(basename))
             except OSError:
                 pass
 
-            # This is almost self.plenary_file, except we're using the domain
+            # This is almost self.full_path(), except we're using the domain
             # passed by the caller
             builddir = self.config.get("broker", "builddir")
-            maindir = os.path.join(builddir, "domains", domain,
-                                   "profiles", self.plenary_core)
-            mainfile = os.path.join(maindir, self.plenary_template +
-                                    TEMPLATE_EXTENSION)
+            mainfile = os.path.join(builddir, "domains", domain, "profiles",
+                                    self.old_name + TEMPLATE_EXTENSION)
+
             remove_file(mainfile, logger=self.logger)
             try:
-                os.removedirs(maindir)
+                os.removedirs(os.path.dirname(mainfile))
             except OSError:
                 pass
             self.removed = True

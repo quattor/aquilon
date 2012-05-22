@@ -66,8 +66,6 @@ class PlenaryClusterData(StructurePlenary):
             self.metacluster = dbcluster.metacluster.name
         else:
             self.metacluster = None
-        self.plenary_core = "clusterdata"
-        self.plenary_template = dbcluster.name
 
     def get_key(self):
         return CompileKey(domain=self.dbobj.branch.name,
@@ -171,13 +169,6 @@ class PlenaryClusterObject(ObjectPlenary):
     def template_name(cls, dbcluster):
         return "clusters/" + dbcluster.name
 
-    def __init__(self, dbcluster, logger=LOGGER):
-        super(PlenaryClusterObject, self).__init__(dbcluster, logger=logger)
-
-        self.name = dbcluster.name
-        self.plenary_core = "clusters"
-        self.plenary_template = dbcluster.name
-
     def get_key(self):
         return CompileKey(domain=self.dbobj.branch.name,
                           profile=self.template_name(self.dbobj),
@@ -210,19 +201,12 @@ class PlenaryClusterClient(Plenary):
     def template_name(cls, dbcluster):
         return "cluster/%s/client" % dbcluster.name
 
-    def __init__(self, dbcluster, logger=LOGGER):
-        super(PlenaryClusterClient, self).__init__(dbcluster, logger=logger)
-
-        self.name = dbcluster.name
-        self.plenary_core = "cluster/%s" % self.name
-        self.plenary_template = "client"
-
     def get_key(self):
         # This takes a domain lock because it could affect all clients...
         return CompileKey(domain=self.dbobj.branch.name, logger=self.logger)
 
     def body(self, lines):
-        pan_assign(lines, "/system/cluster/name", self.name)
+        pan_assign(lines, "/system/cluster/name", self.dbobj.name)
         # We could just use a PAN external reference to pull in this value from
         # the cluster template, but since we know that these templates are
         # always in sync, we can duplicate the content here to avoid the

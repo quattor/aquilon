@@ -36,18 +36,10 @@ class PlenaryResource(StructurePlenary):
     def template_name(cls, dbresource):
         return dbresource.template_base + "/config"
 
-    def __init__(self, dbresource, logger=LOGGER):
-        super(PlenaryResource, self).__init__(dbresource, logger=logger)
-
-        self.type = dbresource.resource_type
-        self.name = dbresource.name
-        self.plenary_core = dbresource.template_base
-        self.plenary_template = "config"
-
     def body(self, lines):
-        pan_assign(lines, "name", self.name)
+        pan_assign(lines, "name", self.dbobj.name)
 
-        fname = "body_%s" % self.type
+        fname = "body_%s" % self.dbobj.resource_type
         if hasattr(self, fname):
             getattr(self, fname)(lines)
 

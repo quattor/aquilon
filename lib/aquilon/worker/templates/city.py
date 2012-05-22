@@ -31,13 +31,6 @@ class PlenaryCity(Plenary):
     def template_name(cls, dbcity):
         return "site/%s/%s/config" % (dbcity.hub.fullname.lower(), dbcity.name)
 
-    def __init__(self, dbcity, logger=LOGGER):
-        super(PlenaryCity, self).__init__(dbcity, logger=logger)
-
-        self.plenary_core = "site/%s/%s" % (
-            dbcity.hub.fullname.lower(), dbcity.name)
-        self.plenary_template = "config"
-
     def body(self, lines):
         pan_variable(lines, "TIMEZONE", self.dbobj.timezone)
 

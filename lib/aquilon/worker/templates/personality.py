@@ -18,6 +18,7 @@
 import logging
 from collections import defaultdict
 
+from aquilon.config import Config
 from aquilon.aqdb.model import Personality, Parameter
 from aquilon.worker.templates.base import (Plenary, StructurePlenary,
                                            TemplateFormatter, PlenaryCollection)
@@ -29,6 +30,8 @@ from aquilon.worker.dbwrappers.parameter import (validate_value,
 from sqlalchemy.orm import object_session
 
 LOGGER = logging.getLogger(__name__)
+
+_config = Config()
 
 
 def string_to_list(data):
@@ -172,17 +175,8 @@ class PlenaryPersonalityBase(Plenary):
     def loadpath(cls, dbpersonality):
         return dbpersonality.archetype.name
 
-    def __init__(self, dbpersonality, logger=LOGGER):
-        super(PlenaryPersonalityBase, self).__init__(dbpersonality,
-                                                     logger=logger)
-
-        self.name = str(dbpersonality)
-
-        self.plenary_core = "personality/%s" % self.name
-        self.plenary_template = "config"
-
     def body(self, lines):
-        pan_variable(lines, "PERSONALITY", self.name)
+        pan_variable(lines, "PERSONALITY", self.dbobj.name)
 
         ## process grns
         eon_id_map = defaultdict(set)
@@ -220,7 +214,7 @@ class PlenaryPersonalityBase(Plenary):
 
         ## process parameter templates
         pan_include_if_exists(lines, "personality/config")
-        pan_assign(lines, "/system/personality/name", self.name)
+        pan_assign(lines, "/system/personality/name", self.dbobj.name)
         pan_assign(lines, "/system/personality/host_environment",
                    self.dbobj.host_environment)
 
@@ -245,12 +239,6 @@ class PlenaryPersonalityPreFeature(Plenary):
     @classmethod
     def loadpath(cls, dbpersonality):
         return dbpersonality.archetype.name
-
-    def __init__(self, dbpersonality, logger=LOGGER):
-        super(PlenaryPersonalityPreFeature, self).__init__(dbpersonality,
-                                                           logger=logger)
-        self.plenary_core = "personality/%s" % dbpersonality
-        self.plenary_template = "pre_feature"
 
     def body(self, lines):
         feat_tmpl = FeatureTemplate()
@@ -282,12 +270,6 @@ class PlenaryPersonalityPostFeature(Plenary):
     def loadpath(cls, dbpersonality):
         return dbpersonality.archetype.name
 
-    def __init__(self, dbpersonality, logger=LOGGER):
-        super(PlenaryPersonalityPostFeature, self).__init__(dbpersonality,
-                                                            logger=logger)
-        self.plenary_core = "personality/%s" % dbpersonality
-        self.plenary_template = "post_feature"
-
     def body(self, lines):
         feat_tmpl = FeatureTemplate()
         for link in self.dbobj.archetype.features + self.dbobj.features:
@@ -308,8 +290,6 @@ class PlenaryPersonalityParameter(StructurePlenary):
     def __init__(self, ptmpl, logger=LOGGER):
         super(PlenaryPersonalityParameter, self).__init__(ptmpl,
                                                           logger=logger)
-        self.plenary_core = "personality/%s" % ptmpl.personality
-        self.plenary_template = ptmpl.template
         self.parameters = ptmpl.values
 
     def body(self, lines):

@@ -134,8 +134,6 @@ class PlenaryHostData(StructurePlenary):
         # object has been deleted
         self.branch = dbhost.branch
         self.name = dbhost.fqdn
-        self.plenary_core = "hostdata"
-        self.plenary_template = self.name
 
     def get_key(self):
         # Going with self.name instead of self.template_name() seems like
@@ -323,8 +321,6 @@ class PlenaryToplevelHost(ObjectPlenary):
         # object has been deleted
         self.branch = dbhost.branch
         self.name = dbhost.fqdn
-        self.plenary_core = ""
-        self.plenary_template = self.name
 
     def will_change(self):
         # Need to override to handle IncompleteError...
@@ -412,8 +408,3 @@ class PlenaryNamespacedHost(PlenaryToplevelHost):
     @classmethod
     def template_name(cls, dbhost):
         return "%s/%s" % (dbhost.fqdn.dns_domain.name, dbhost.fqdn)
-
-    def __init__(self, dbhost, logger=LOGGER):
-        super(PlenaryNamespacedHost, self).__init__(dbhost, logger=logger)
-
-        self.plenary_core = dbhost.fqdn.dns_domain.name

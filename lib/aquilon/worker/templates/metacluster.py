@@ -50,22 +50,13 @@ class PlenaryMetaClusterData(StructurePlenary):
     def template_name(cls, dbmetacluster):
         return "clusterdata/" + dbmetacluster.name
 
-    def __init__(self, dbmetacluster, logger=LOGGER):
-        super(PlenaryMetaClusterData, self).__init__(dbmetacluster,
-                                                     logger=logger)
-
-        self.name = dbmetacluster.name
-
-        # TODO maybe metaclusterdata
-        self.plenary_core = "clusterdata"
-        self.plenary_template = dbmetacluster.name
-
     def get_key(self):
         return CompileKey(domain=self.dbobj.branch.name,
-                          profile=self.plenary_template, logger=self.logger)
+                          profile=self.template_name(self.dbobj),
+                          logger=self.logger)
 
     def body(self, lines):
-        pan_assign(lines, "system/metacluster/name", self.name)
+        pan_assign(lines, "system/metacluster/name", self.dbobj.name)
         pan_assign(lines, "system/metacluster/type", self.dbobj.cluster_type)
 
         dbloc = self.dbobj.location_constraint
@@ -120,23 +111,15 @@ class PlenaryMetaClusterObject(ObjectPlenary):
     def template_name(cls, dbmetacluster):
         return "clusters/" + dbmetacluster.name
 
-    def __init__(self, dbmetacluster, logger=LOGGER):
-        super(PlenaryMetaClusterObject, self).__init__(dbmetacluster,
-                                                       logger=logger)
-
-        self.name = dbmetacluster.name
-
-        self.plenary_core = "clusters"
-        self.plenary_template = dbmetacluster.name
-
     def get_key(self):
         return CompileKey(domain=self.dbobj.branch.name,
-                          profile=self.plenary_template, logger=self.logger)
+                          profile=self.template_name(self.dbobj),
+                          logger=self.logger)
 
     def body(self, lines):
         pan_include(lines, ["pan/units", "pan/functions"])
         pan_assign(lines, "/",
-                   StructureTemplate("clusterdata/%s" % self.name,
+                   StructureTemplate("clusterdata/%s" % self.dbobj.name,
                                      {"metadata": PanValue("/metadata")}))
         pan_include(lines, "archetype/base")
 

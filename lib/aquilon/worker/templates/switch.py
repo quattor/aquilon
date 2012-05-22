@@ -38,10 +38,7 @@ class PlenarySwitch(StructurePlenary):
     def __init__(self, dbswitch, logger=LOGGER):
         super(PlenarySwitch, self).__init__(dbswitch, logger=logger)
 
-        self.dbobj = dbswitch
         self.name = str(dbswitch.primary_name)
-        self.plenary_core = "switchdata"
-        self.plenary_template = self.name
 
     def body(self, lines):
 
