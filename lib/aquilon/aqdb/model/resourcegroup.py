@@ -103,9 +103,3 @@ class BundleResource(ResourceHolder):
     @property
     def holder_object(self):
         return self.resourcegroup
-
-    @property
-    def holder_path(self):
-        return "%s/%s/%s" % (self.resourcegroup.holder.holder_path,
-                             self.holder_type,
-                             self.holder_name)

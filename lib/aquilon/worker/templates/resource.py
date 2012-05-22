@@ -17,11 +17,12 @@
 
 
 import logging
+import os.path
 
 from aquilon.aqdb.model import (Application, Filesystem, Intervention,
                                 ResourceGroup, Hostlink, RebootSchedule,
                                 RebootIntervention, ServiceAddress,
-                                VirtualMachine, Share)
+                                VirtualMachine, Share, BundleResource)
 from aquilon.worker.templates import (Plenary, StructurePlenary,
                                       PlenaryCollection, PlenaryMachineInfo)
 from aquilon.worker.templates.panutils import (StructureTemplate, pan_assign,
@@ -34,7 +35,19 @@ class PlenaryResource(StructurePlenary):
 
     @classmethod
     def template_name(cls, dbresource):
-        return dbresource.template_base + "/config"
+        holder = dbresource.holder
+        components = ["resource"]
+
+        if isinstance(holder, BundleResource):
+            parent_holder = holder.resourcegroup.holder
+            components.extend([parent_holder.holder_type,
+                               parent_holder.holder_name])
+
+        components.extend([holder.holder_type, holder.holder_name,
+                           dbresource.resource_type, dbresource.name,
+                           "config"])
+
+        return os.path.join(*components)
 
     def body(self, lines):
         pan_assign(lines, "name", self.dbobj.name)
