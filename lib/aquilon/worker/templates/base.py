@@ -59,6 +59,9 @@ class Plenary(object):
 
         self.new_content = None
 
+        # We may no longer be able to calculate this during remove()
+        self.debug_name = str(dbobj)
+
         # The following attributes are for stash/restore_stash
         self.old_path = self.full_path(dbobj)
         self.old_content = None
@@ -85,7 +88,7 @@ class Plenary(object):
 
     def __repr__(self):
         """For debug output."""
-        return "%s(%s)" % (self.__class__.__name__, self.dbobj)
+        return "%s(%s)" % (self.__class__.__name__, self.debug_name)
 
     @classmethod
     def template_name(cls, dbobj):  # pylint: disable=W0613
@@ -222,6 +225,8 @@ class Plenary(object):
             if not os.path.exists(dirname):
                 os.makedirs(dirname)
 
+            self.logger.debug("Writing %r [%s]" % (self, path))
+
             write_file(path, content, logger=self.logger)
             self.removed = False
             if self.old_content != content:
@@ -251,11 +256,13 @@ class Plenary(object):
                 lock_queue.acquire(key)
             self.stash()
 
+            self.logger.debug("Removing %r [%s]" % (self, self.old_path))
             remove_file(self.old_path, logger=self.logger)
             try:
                 os.removedirs(os.path.dirname(self.old_path))
             except OSError:
                 pass
+
             self.removed = True
         # Most of the error handling routines would restore_stash...
         # but there's no need here if the remove failed. :)
@@ -292,6 +299,7 @@ class Plenary(object):
         # Should this optimization be in use?
         # if not self.changed and not self.removed:
         #    return
+        self.logger.debug("Restoring %r [%s]" % (self, self.old_path))
         dirname = os.path.dirname(self.old_path)
         if self.old_content is None:
             remove_file(self.old_path, logger=self.logger)
@@ -476,8 +484,9 @@ class PlenaryCollection(object):
 
     def __str__(self):
         """For debug output."""
-        return "PlenaryCollection(%s)" % ", ".join([str(plenary) for plenary
-                                                    in self.plenaries])
+        return "%s(%s)" % (self.__class__.__name__,
+                           ", ".join([str(plenary)
+                                      for plenary in self.plenaries]))
 
     def __iter__(self):
         for plen in self.plenaries:

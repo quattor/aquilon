@@ -111,7 +111,15 @@ class PlenaryServiceInstance(PlenaryCollection):
 Plenary.handlers[ServiceInstance] = PlenaryServiceInstance
 
 
-class PlenaryServiceInstanceToplevel(StructurePlenary):
+class SIHelperMixin(object):
+    def __repr__(self):
+        # The service instance name is not necessarily unique, so include the
+        # name of the service too
+        return "%s(%s/%s)" % (self.__class__.__name__, self.dbobj.service.name,
+                              self.dbobj.name)
+
+
+class PlenaryServiceInstanceToplevel(SIHelperMixin, StructurePlenary):
     """
     This structure template provides information for the template
     specific to the service instance and for use by the client.
@@ -136,7 +144,7 @@ class PlenaryServiceInstanceToplevel(StructurePlenary):
             pan_assign(lines, "server_ips", self.dbobj.server_ips)
 
 
-class PlenaryServiceInstanceServer(StructurePlenary):
+class PlenaryServiceInstanceServer(SIHelperMixin, StructurePlenary):
     """
     This structure template provides information for the template
     specific to the service instance and for use by the server.
@@ -156,7 +164,7 @@ class PlenaryServiceInstanceServer(StructurePlenary):
         pan_assign(lines, "clients", self.dbobj.client_fqdns)
 
 
-class PlenaryServiceInstanceClientDefault(Plenary):
+class PlenaryServiceInstanceClientDefault(SIHelperMixin, Plenary):
     """
     Any client of the service will include this
     template based on service bindings: it will be directly
@@ -181,7 +189,7 @@ class PlenaryServiceInstanceClientDefault(Plenary):
         pan_include(lines, path)
 
 
-class PlenaryServiceInstanceServerDefault(Plenary):
+class PlenaryServiceInstanceServerDefault(SIHelperMixin, Plenary):
     """
     Any server of the servivce will include this
     template based on service bindings: it will be directly

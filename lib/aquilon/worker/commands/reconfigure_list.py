@@ -194,20 +194,12 @@ class CommandReconfigureList(BrokerCommand):
                               [CompileKey(domain=dbbranch.name,
                                           logger=logger)]):
             try:
-                logger.client_info("Writing %s plenary templates.",
-                                   len(templates))
-                # FIXME: if one of the templates raises IncompleteError (e.g. a
-                # host should be in a cluster, but it is not), then we return an
-                # InternalError to the client, which is not nice
                 for template in templates:
-                    logger.debug("Writing %s", template)
                     template.write(locked=True)
                 td = TemplateDomain(dbbranch, dbauthor, logger=logger)
                 td.compile(session, locked=True)
             except:
-                logger.client_info("Restoring plenary templates.")
                 for template in templates:
-                    logger.debug("Restoring %s", template)
                     template.restore_stash()
                 # Okay, cleaned up templates, make sure the caller knows
                 # we've aborted so that DB can be appropriately rollback'd.
