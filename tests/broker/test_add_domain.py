@@ -45,7 +45,7 @@ class TestAddDomain(TestBrokerCommand):
         proddir = os.path.join(self.config.get("broker", "domainsdir"), "prod")
         if not os.path.exists(proddir):
             kingdir = self.config.get("broker", "kingdir")
-            self.gitcommand(["clone", kingdir, proddir])
+            self.gitcommand(["clone", "--branch", "prod", kingdir, proddir])
 
     def test_000_fixnyprod(self):
         kingdir = self.config.get("broker", "kingdir")
@@ -56,7 +56,7 @@ class TestAddDomain(TestBrokerCommand):
         nydir = os.path.join(self.config.get("broker", "domainsdir"),
                              "ny-prod")
         if not os.path.exists(nydir):
-            self.gitcommand(["clone", kingdir, nydir])
+            self.gitcommand(["clone", "--branch", "ny-prod", kingdir, nydir])
 
     def test_100_addunittest(self):
         command = ["add_domain", "--domain=unittest", "--track=utsandbox",
