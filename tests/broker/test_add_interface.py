@@ -517,7 +517,7 @@ class TestAddInterface(TestBrokerCommand):
                          "switches.", command)
 
     def testverifyfailaddinterfaceut3dg1r01(self):
-        command = "show tor_switch --tor_switch ut3gd1r01.aqd-unittest.ms.com"
+        command = "show switch --switch ut3gd1r01.aqd-unittest.ms.com"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Switch: ut3gd1r01", command)
         self.matchoutput(out, "Primary Name: ut3gd1r01.aqd-unittest.ms.com",
@@ -682,7 +682,7 @@ class TestAddInterface(TestBrokerCommand):
             self.noouttest(["add", "interface", "--interface", "eth0",
                             "--machine", machine,
                             "--mac", self.net.tor_net[2].usable[port].mac])
-            # Didn't bother putting a tor_switch on this network, although
+            # Didn't bother putting a switch on this network, although
             # it wouldn't hurt.  At least the first ten (ESX servers) are
             # meant to be left dangling with no IP assigned to test some
             # edge cases.
@@ -695,7 +695,7 @@ class TestAddInterface(TestBrokerCommand):
             for (template, offset) in [('ut11s01p%d', 0), ('ut12s02p%d', 12)]:
                 machine = template % port
                 # Both counts would start at 0 except the tor_net has two
-                # tor_switches taking IPs.
+                # switches taking IPs.
                 i = port + 1 + offset
                 j = port - 1 + offset
                 self.noouttest(["add", "interface", "--interface", "eth0",

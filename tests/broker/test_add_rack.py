@@ -71,6 +71,30 @@ class TestAddRack(TestBrokerCommand):
         command = "add rack --rackid 4 --room utroom1 --row a --column 4"
         self.noouttest(command.split(" "))
 
+    def testaddut8(self):
+        command = "add rack --rackid 8 --building ut --row g --column 2"
+        self.noouttest(command.split(" "))
+
+    def testaddut9(self):
+        command = "add rack --rackid 9 --room utroom2 --row g --column 3"
+        self.noouttest(command.split(" "))
+
+    def testaddut10(self):
+        command = "add rack --rackid 10 --building ut --row g --column 4"
+        self.noouttest(command.split(" "))
+
+    def testaddut11(self):
+        command = "add rack --rackid 11 --building ut --row k --column 1"
+        self.noouttest(command.split(" "))
+
+    def testaddut12(self):
+        command = "add rack --rackid 12 --building ut --row k --column 2"
+        self.noouttest(command.split(" "))
+
+    def testaddnp7(self):
+        command = "add rack --rackid 7 --building np --row g --column 1"
+        self.noouttest(command.split(" "))
+
     def testaddnp997(self):
         command = "add rack --rackid np997 --building np --row ZZ --column 99"
         self.noouttest(command.split(" "))

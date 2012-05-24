@@ -44,13 +44,13 @@ class TestDelSwitch(TestBrokerCommand):
     def testdelut3gd1r01(self):
         # Deprecated usage.
         self.dsdb_expect_delete(self.net.tor_net[12].usable[0])
-        command = "del tor_switch --tor_switch ut3gd1r01.aqd-unittest.ms.com"
+        command = "del switch --switch ut3gd1r01.aqd-unittest.ms.com"
         self.successtest(command.split(" "))
         self.dsdb_verify()
 
     def testverifydelut3gd1r01(self):
         # Deprecated usage.
-        command = "show tor_switch --tor_switch ut3gd1r01.aqd-unittest.ms.com"
+        command = "show switch --switch ut3gd1r01.aqd-unittest.ms.com"
         self.notfoundtest(command.split(" "))
 
     def testdelut3gd1r04(self):

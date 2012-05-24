@@ -28,7 +28,7 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-"""Module for testing the poll tor_switch command."""
+"""Module for testing the poll switch command."""
 
 import re
 import unittest
@@ -58,11 +58,8 @@ class TestPollSwitch(TestBrokerCommand):
                         "--instance", "unittest", "--building", "ut"])
 
     def testpollnp06bals03(self):
-        # Issues deprecated warning.
-        command = ["poll", "tor_switch", "--tor_switch", "np06bals03.ms.com"]
+        command = ["poll", "switch", "--switch", "np06bals03.ms.com"]
         (out, err) = self.successtest(command)
-        self.matchoutput(err, "Command poll_tor_switch is deprecated, please "
-                         "use poll_switch instead.", command)
         self.matchoutput(err, "No jump host for np06bals03.ms.com, calling "
                          "CheckNet from %s." % socket.gethostname(), command)
 
@@ -72,19 +69,19 @@ class TestPollSwitch(TestBrokerCommand):
         # so sleep for 2 seconds here...
         sleep(2)
         # Issues deprecated warning.
-        self.successtest(["poll", "tor_switch", "--rack", "np7"])
+        self.successtest(["poll", "switch", "--rack", "np7", "--type", "tor"])
 
     def testrepollwithclear(self):
         # Forcing there to "normally" be a difference in last_seen and
         # creation_date to test that clear is working...
         sleep(2)
         # Issues deprecated warning.
-        self.successtest(["poll_tor_switch", "--tor_switch=np06fals01.ms.com",
+        self.successtest(["poll_switch", "--switch=np06fals01.ms.com",
                           "--clear"])
 
     # FIXME: Verify the poll and that last_seen != creation_date
     def testverifypollnp06bals03(self):
-        command = "show tor_switch --tor_switch np06bals03.ms.com"
+        command = "show switch --switch np06bals03.ms.com"
         out = self.commandtest(command.split(" "))
         r = re.compile(r'^\s*Created:\s*(.*?)\s*Last Seen:\s*(.*?)\s*$', re.M)
         m = self.searchoutput(out, r, command)
@@ -136,7 +133,7 @@ class TestPollSwitch(TestBrokerCommand):
         self.matchoutput(out, "Port 23: 00:30:48:66:3a:60", command)
 
     def testverifypollnp06fals01(self):
-        command = "show tor_switch --tor_switch np06fals01.ms.com"
+        command = "show switch --switch np06fals01.ms.com"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Port 49: 00:15:2c:1f:40:00", command)
         r = re.compile(r'^\s*Created:\s*(.*?)\s*Last Seen:\s*(.*?)\s*$', re.M)
@@ -148,11 +145,9 @@ class TestPollSwitch(TestBrokerCommand):
 
     def testpollut01ga2s01(self):
         # Issues deprecated warning.
-        command = ["poll", "tor_switch", "--vlan", "--tor_switch",
+        command = ["poll", "switch", "--vlan", "--switch",
                    "ut01ga2s01.aqd-unittest.ms.com"]
         (out, err) = self.successtest(command)
-        self.matchoutput(err, "Command poll_tor_switch is deprecated, please "
-                         "use poll_switch instead.", command)
         self.matchoutput(err,
                          "Switch ut01ga2s01.aqd-unittest.ms.com: skipping VLAN "
                          "714, because network bitmask value 24 differs from "
@@ -167,7 +162,7 @@ class TestPollSwitch(TestBrokerCommand):
                          command)
 
     def testverifypollut01ga2s01(self):
-        command = "show tor_switch --tor_switch ut01ga2s01.aqd-unittest.ms.com"
+        command = "show switch --switch ut01ga2s01.aqd-unittest.ms.com"
         out = self.commandtest(command.split(" "))
         for i in range(1, 13):
             self.matchoutput(out,
@@ -199,7 +194,7 @@ class TestPollSwitch(TestBrokerCommand):
                           "--switch", "ut01ga2s02.aqd-unittest.ms.com"])
 
     def testverifypollut01ga2s02(self):
-        command = "show tor_switch --tor_switch ut01ga2s02.aqd-unittest.ms.com"
+        command = "show switch --switch ut01ga2s02.aqd-unittest.ms.com"
         out = self.commandtest(command.split(" "))
         for i in range(13, 25):
             self.matchoutput(out,
@@ -218,14 +213,12 @@ class TestPollSwitch(TestBrokerCommand):
         self.matchoutput(out, "VLAN 713: %s" % self.net.unknown[9].ip, command)
 
     def testpollut01ga2s03(self):
-        # Issues deprecated warning.
-        self.successtest(["poll", "tor_switch",
-                          "--tor_switch", "ut01ga2s03.aqd-unittest.ms.com"])
+        self.successtest(["poll", "switch",
+                          "--switch", "ut01ga2s03.aqd-unittest.ms.com"])
 
     def testpollnp01ga2s03(self):
-        # Issues deprecated warning.
-        self.successtest(["poll", "tor_switch",
-                          "--tor_switch", "np01ga2s03.one-nyp.ms.com"])
+        self.successtest(["poll", "switch",
+                          "--switch", "np01ga2s03.one-nyp.ms.com"])
 
     def testpollbor(self):
         command = ["poll", "switch", "--vlan",

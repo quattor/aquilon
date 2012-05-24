@@ -75,12 +75,9 @@ class TestVulcan20(TestBrokerCommand):
 
             self.dsdb_expect_add(hostname, ip, "xge49",
                                  ip.mac)
-            command = ["add", "tor_switch",
-                       "--tor_switch", hostname,
-                       "--building", "ut", "--rackid", "12",
-                       "--rackrow", "k", "--rackcol", "2",
+            command = ["add", "switch", "--switch", hostname, "--rack", "ut12",
                        "--model", "rs g8000", "--interface", "xge49",
-                       "--mac", ip.mac, "--ip", ip]
+                       "--type", "tor", "--mac", ip.mac, "--ip", ip]
             (out, err) = self.successtest(command)
         self.dsdb_verify()
 

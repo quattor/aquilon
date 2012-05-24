@@ -81,7 +81,7 @@ class TestDelRack(TestBrokerCommand):
         command = "show rack --rack np999"
         self.notfoundtest(command.split(" "))
 
-    # FIXME: Maybe del_tor_switch should remove the rack if it is
+    # FIXME: Maybe del_switch should remove the rack if it is
     # otherwise empty.
     def testdelut8(self):
         command = "del rack --rack ut8"
