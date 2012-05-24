@@ -126,15 +126,11 @@ class TestAddModel(TestBrokerCommand):
         self.noouttest(command)
 
     def test_100_addutlarge(self):
-        # This test still use --cputype to test backwards compatibility
         command = ["add_model", "--model=utlarge", "--vendor=utvendor",
-                   "--type=virtual_machine", "--cputype=xeon_5150",
+                   "--type=virtual_machine", "--cpuname=xeon_5150",
                    "--cpunum=4", "--memory=16384", "--disktype=nas",
                    "--diskcontroller=sata", "--disksize=45", "--nics=1"]
-        (out, err) = self.successtest(command)
-        self.assertEmptyOut(out, command)
-        self.matchoutput(err, "The --cputype option is deprecated.  "
-                         "Please use --cpuname instead.", command)
+        self.noouttest(command)
 
     def test_200_verifyaddutmedium(self):
         command = "show model --model utmedium"

@@ -54,12 +54,6 @@ class CommandAddModel(BrokerCommand):
             raise ArgumentError("The model's machine type must be one of: %s." %
                                 ", ".join(allowed_types))
 
-        # Handle the deprecated cputype parameter
-        if arguments.get("cputype", None):
-            self.deprecated_option("cputype", "Please use --cpuname instead.",
-                                   **arguments)
-            cpuname = arguments["cputype"]
-
         dbmodel = Model(name=model, vendor=dbvendor, machine_type=type,
                         comments=comments)
         session.add(dbmodel)
