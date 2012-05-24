@@ -72,6 +72,9 @@ class CommandDumpDns(BrokerCommand):
         # lot of time by not loading all the objects along the path from the
         # address assignment to the primary FQDN, just the end points
         q = session.query(AddressAssignment.ip, Fqdn)
+        # The reverse of service addresses should not resolve to the primary
+        # name
+        q = q.filter(AddressAssignment.service_address_id == None)
         # Make sure we remain inside the DNS environment. If the auxiliary is in
         # a different DNS environment than the primary name, then the reverse
         # record should not point to the primary name
