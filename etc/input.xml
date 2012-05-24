@@ -470,8 +470,7 @@
       The 'csv' format contains the following fields, in this order:
       Switch FQDN, port, MAC address, Last Observation Date
       <optgroup name="search_observed_mac_opts" mandatory="True" fields="any">
-         <option name="tor_switch" type="string" conflicts="switch">(Deprecated.) FQDN of the switch</option>
-         <option name="switch" type="string" conflicts="tor_switch">FQDN of the switch</option>
+         <option name="switch" type="string">FQDN of the switch</option>
          <option name="port_number" type="int">Port number on the switch</option>
          <option name="mac" type="mac">MAC address to search for</option>
       </optgroup>
@@ -3579,8 +3578,7 @@
          <option name="maint_threshold" type="string">Down hosts threshold for maintenance windows</option>
          <option name="max_members" type="int">Max allowed vmhost members</option>
          <option name="vm_to_host_ratio" type="string">Ratio of virtual machines to ESX servers</option>
-         <option name="switch" type="string" conflicts="tor_switch">Set the switch in use by the cluster.  An empty string removes the setting.</option>
-         <option name="tor_switch" type="string" conflicts="switch">[DEPRECATED] Set the switch in use by the cluster.  An empty string removes the setting.</option>
+         <option name="switch" type="string">Set the switch in use by the cluster.  An empty string removes the setting.</option>
          <option name="fix_location" type="flag">Set the location based on cluster membership.</option>
          <option name="comments" type="string">Comments</option>
          <option name="memory_capacity" type="int" conflicts="clear_overrides">Override the computed memory capacity</option>
@@ -3656,8 +3654,7 @@
          <option name="maint_threshold" type="string">Down hosts threshold for maintenance windows</option>
          <option name="max_members" type="int">Max allowed host members</option>
          <option name="vm_to_host_ratio" type="string">Ratio of virtual machines to ESX servers</option>
-         <option name="tor_switch" type="string" conflicts="switch">DEPRECATED Set the switch in use by the cluster.  An empty string removes the setting.</option>
-         <option name="switch" type="string" conflicts="tor_switch">Set the switch in use by the cluster.  An empty string removes the setting.</option>
+         <option name="switch" type="string">Set the switch in use by the cluster.  An empty string removes the setting.</option>
          <option name="fix_location" type="flag">Set the location based on cluster membership.</option>
          <option name="comments" type="string">Comments</option>
          <option name="memory_capacity" type="int" conflicts="clear_overrides">Override the computed memory capacity</option>

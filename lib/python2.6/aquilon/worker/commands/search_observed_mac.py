@@ -39,13 +39,8 @@ class CommandSearchObservedMac(BrokerCommand):
     required_parameters = []
     default_style = "csv"
 
-    def render(self, session, tor_switch, switch, port_number, mac,
-               **arguments):
+    def render(self, session, switch, port_number, mac, **arguments):
         q = session.query(ObservedMac)
-        if tor_switch:
-            self.deprecated_option("tor_switch", "Please use --switch instead.",
-                                   **arguments)
-            switch = tor_switch
         if switch:
             dbswitch = Switch.get_unique(session, switch, compel=True)
             q = q.filter_by(switch=dbswitch)
