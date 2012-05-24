@@ -182,7 +182,8 @@ class TestMake(TestBrokerCommand):
     def testmakevmhosts(self):
         for i in range(1, 6):
             command = ["make", "--hostname", "evh%s.aqd-unittest.ms.com" % i,
-                       "--os", "esxi/4.0.0", "--buildstatus", "rebuild"]
+                       "--osname", "esxi", "--osversion", "4.0.0",
+                       "--buildstatus", "rebuild"]
             (out, err) = self.successtest(command)
             self.matchclean(err, "removing binding", command)
 
@@ -201,13 +202,6 @@ class TestMake(TestBrokerCommand):
                                         servicedir])
             self.failUnless(results, "No service plenary data that includes"
                                      "evh%s.aqd-unittest.ms.com" % i)
-
-    def testbados(self):
-        command = ["make", "--hostname", "evh1.aqd-unittest.ms.com",
-                   "--os", "bad-os-value"]
-        out = self.badrequesttest(command)
-        self.matchoutput(out, "Incorrect value for --os.  Please use "
-                         "--osname/--osversion instead.", command)
 
     def testmake10gighosts(self):
         for i in range(51, 75):

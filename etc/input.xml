@@ -1984,7 +1984,6 @@
          <option name="personality" type="string">Personality of the host</option>
          <option name="buildstatus" type="string">Update host buildstatus to 'build' or 'ready'</option>
          <option name="keepbindings" type="boolean">Preserve service bindings that are not required</option>
-         <option name="os" type="string">[Deprecated] OS to assign to host</option>
       </optgroup>
       <transport method="post" path="host/%(hostname)s/command/reconfigure" />
       <transport trigger="list" method="post" path="command/reconfigure/list" />
@@ -3000,7 +2999,6 @@
          <option name="personality" type="string">Personality of the host</option>
          <option name="buildstatus" type="string">Build Status can be updated to 'build' or 'ready'.</option>
          <option name="keepbindings" type="boolean">Preserve service bindings that are not required</option>
-         <option name="os" type="string">[Deprecated] OS to assign to host</option>
       </optgroup>
       <transport method="post" path="host/%(hostname)s/command/make" />
    </command>
@@ -3026,7 +3024,6 @@
          <option name="personality" type="string">Personality of the host</option>
          <option name="buildstatus" type="string">Build Status can be updated to 'build' or 'ready'.</option>
          <option name="keepbindings" type="boolean">Preserve service bindings that are not required</option>
-         <option name="os" type="string">[Deprecated] OS to assign to host</option>
       </optgroup>
       <transport method="post" path="host/%(hostname)s/command/make_aquilon" />
    </command>

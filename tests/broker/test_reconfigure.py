@@ -258,7 +258,7 @@ class TestReconfigure(TestBrokerCommand):
 
     def testreconfigurewindowswrongos(self):
         command = ["reconfigure", "--hostname", "unittest01.one-nyp.ms.com",
-                   "--os", "linux/5.0.1-x86_64"]
+                   "--osname", "linux", "--osversion", "5.0.1-x86_64"]
         err = self.notfoundtest(command)
         self.matchoutput(err,
                          "Operating System linux, version 5.0.1-x86_64, "
@@ -301,7 +301,7 @@ class TestReconfigure(TestBrokerCommand):
     def testreconfigureos(self):
         command = ["reconfigure",
                    "--hostname", "aquilon61.aqd-unittest.ms.com",
-                   "--os", "linux/5.0-x86_64"]
+                   "--osname", "linux", "--osversion", "5.0-x86_64"]
         (out, err) = self.successtest(command)
         self.matchoutput(err, "1/1 object template", command)
         self.matchclean(err, "removing binding", command)
@@ -517,17 +517,6 @@ class TestReconfigure(TestBrokerCommand):
 #       self.matchoutput(out, "All hosts must be in the same domain:", command)
 #       self.matchoutput(out, "1 hosts in domain changetest1", command)
 #       self.matchoutput(out, "1 hosts in domain unittest", command)
-
-    def testhostlistos(self):
-        hosts = ["aquilon91.aqd-unittest.ms.com"]
-        scratchfile = self.writescratch("bados", "".join(hosts))
-        command = ["reconfigure", "--list", scratchfile,
-                   "--os=os-does-not-exist"]
-        out = self.badrequesttest(command)
-        self.matchoutput(out,
-                         "Please use --osname and --osversion to "
-                         "specify a new OS.",
-                         command)
 
     def testhostlistnoosversion(self):
         hosts = ["aquilon91.aqd-unittest.ms.com"]

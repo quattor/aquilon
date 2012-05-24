@@ -45,7 +45,7 @@ class CommandMake(BrokerCommand):
     required_parameters = ["hostname"]
 
     def render(self, session, logger, hostname, osname, osversion,
-               archetype, personality, buildstatus, keepbindings, os,
+               archetype, personality, buildstatus, keepbindings,
                **arguments):
         dbhost = hostname_to_host(session, hostname)
 
@@ -67,7 +67,7 @@ class CommandMake(BrokerCommand):
             else:
                 dbarchetype = dbhost.archetype
 
-            if not os and not osname and not osversion and \
+            if not osname and not osversion and \
                dbhost.operating_system.archetype != dbarchetype:
                 raise ArgumentError("{0} belongs to {1:l}, not {2:l}.  Please "
                                     "specify --osname/--osversion."
@@ -89,13 +89,18 @@ class CommandMake(BrokerCommand):
 
             dbhost.personality = dbpersonality
 
-        if os:
-            self.deprecated_option("os", "Please use --osname/--osversion "
-                                   "instead.", logger=logger, **arguments)
-        dbos = self.get_os(session, dbhost, osname, osversion, os)
-        if dbos:
+        if not osname:
+            osname = dbhost.operating_system.name
+        if osname and osversion:
+            dbos = OperatingSystem.get_unique(session, name=osname,
+                                              version=osversion,
+                                              archetype=dbhost.archetype,
+                                              compel=True)
             # Hmm... no cluster constraint here...
             dbhost.operating_system = dbos
+        elif osname != dbhost.operating_system.name:
+            raise ArgumentError("Please specify a version to use for OS %s." %
+                                osname)
 
         if buildstatus:
             dbstatus = HostLifecycle.get_unique(session, buildstatus,
@@ -144,27 +149,3 @@ class CommandMake(BrokerCommand):
             lock_queue.release(key)
 
         return
-
-    def get_os(self, session, dbhost, osname, osversion, os):
-        """Wrapper for handling deprecated os argument."""
-        if os:
-            try:
-                (splitname, splitversion) = os.split('/')
-            except ValueError:
-                raise ArgumentError("Incorrect value for --os.  Please use "
-                                    "--osname/--osversion instead.")
-            if not osname:
-                osname = splitname
-            if not osversion:
-                osversion = splitversion
-        if not osname:
-            osname = dbhost.operating_system.name
-        if osname and osversion:
-            return OperatingSystem.get_unique(session, name=osname,
-                                              version=osversion,
-                                              archetype=dbhost.archetype,
-                                              compel=True)
-        elif osname != dbhost.operating_system.name:
-            raise ArgumentError("Please specify a version to use for OS %s." %
-                                osname)
-        return None

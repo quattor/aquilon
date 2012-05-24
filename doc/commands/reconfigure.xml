@@ -32,7 +32,6 @@
       </group>
       <arg choice="opt"><option>--osname <replaceable>OSNAME</replaceable></option></arg>
       <arg choice="opt"><option>--osversion <replaceable>OSVERSION</replaceable></option></arg>
-      <arg choice="opt"><option>--os <replaceable>OS</replaceable></option></arg>
       <arg choice="opt"><option>--archetype <replaceable>ARCHETYPE</replaceable></option></arg>
       <arg choice="opt"><option>--personality <replaceable>PERSONALITY</replaceable></option></arg>
       <arg choice="opt"><option>--buildstatus <replaceable>BUILDSTATUS</replaceable></option></arg>
@@ -163,18 +162,6 @@
           <para>
             Version of the operating system to run.  May require use of the
             osname parameter if there is ambiguity.
-          </para>
-        </listitem>
-      </varlistentry>
-      <varlistentry>
-        <term>
-          <option>--os <replaceable>OS</replaceable></option>
-        </term>
-        <listitem>
-          <para>
-	    Name and version of the operating system, separated by a slash. This option is
-	    deprecated, use the <option>--osname</option> and <option>--osversion</option>
-	    options instead.
           </para>
         </listitem>
       </varlistentry>

@@ -46,15 +46,15 @@ class CommandReconfigureList(BrokerCommand):
     required_parameters = ["list"]
 
     def render(self, session, logger, list, archetype, personality,
-               buildstatus, osname, osversion, os, **arguments):
+               buildstatus, osname, osversion, **arguments):
         check_hostlist_size(self.command, self.config, list)
         dbhosts = hostlist_to_hosts(session, list)
 
         self.reconfigure_list(session, logger, dbhosts, archetype, personality,
-                              buildstatus, osname, osversion, os, **arguments)
+                              buildstatus, osname, osversion, **arguments)
 
     def reconfigure_list(self, session, logger, dbhosts, archetype,
-                         personality, buildstatus, osname, osversion, os,
+                         personality, buildstatus, osname, osversion,
                          **arguments):
         failed = []
         # Check all the parameters up front.
@@ -75,9 +75,6 @@ class CommandReconfigureList(BrokerCommand):
             dbpersonality = Personality.get_unique(session, name=personality,
                                                    archetype=dbarchetype,
                                                    compel=True)
-        if os:
-            raise ArgumentError("Please use --osname and --osversion to "
-                                "specify a new OS.")
         if osname and not osversion:
             raise ArgumentError("Please specify --osversion for OS %s." %
                                 osname)

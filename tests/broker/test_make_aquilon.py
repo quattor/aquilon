@@ -50,7 +50,7 @@ class TestMakeAquilon(TestBrokerCommand):
     def testmakeunittest02(self):
         command = ["make", "aquilon",
                    "--hostname", "unittest02.one-nyp.ms.com",
-                   "--os", "linux/5.0.1-x86_64"]
+                   "--osname", "linux", "--osversion", "5.0.1-x86_64"]
         (out, err) = self.successtest(command)
         self.matchoutput(err,
                          "unittest02.one-nyp.ms.com adding binding for "
@@ -148,7 +148,7 @@ class TestMakeAquilon(TestBrokerCommand):
         command = ["make", "aquilon",
                    "--hostname", "unittest00.one-nyp.ms.com",
                    "--buildstatus", "blind", "--personality", "compileserver",
-                   "--os", "linux/5.0.1-x86_64"]
+                   "--osname", "linux", "--osversion", "5.0.1-x86_64"]
         (out, err) = self.successtest(command)
         self.matchoutput(err,
                          "unittest00.one-nyp.ms.com adding binding for "
@@ -336,7 +336,7 @@ class TestMakeAquilon(TestBrokerCommand):
         command = ["make", "aquilon",
                    "--hostname", "aquilon91.aqd-unittest.ms.com",
                    "--personality", "badpersonality2",
-                   "--os", "linux/5.0.1-x86_64"]
+                   "--osname", "linux", "--osversion", "5.0.1-x86_64"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Could not find a relevant service map", command)
 
@@ -344,7 +344,7 @@ class TestMakeAquilon(TestBrokerCommand):
         command = ["make", "aquilon", "--debug",
                    "--hostname", "aquilon92.aqd-unittest.ms.com",
                    "--personality", "badpersonality2",
-                   "--os", "linux/5.0.1-x86_64"]
+                   "--osname", "linux", "--osversion", "5.0.1-x86_64"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Creating service Chooser", command)
         self.matchoutput(out, "Could not find a relevant service map", command)
@@ -353,7 +353,7 @@ class TestMakeAquilon(TestBrokerCommand):
         command = ["make", "aquilon",
                    "--hostname", "aquilon93.aqd-unittest.ms.com",
                    "--personality", "badpersonality",
-                   "--os", "linux/5.0.1-x86_64"]
+                   "--osname", "linux", "--osversion", "5.0.1-x86_64"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "cannot locate template", command)
         self.failIf(os.path.exists(os.path.join(
@@ -375,7 +375,7 @@ class TestMakeAquilon(TestBrokerCommand):
     def testmakewithos(self):
         command = ["make", "aquilon",
                    "--hostname", "unittest17.aqd-unittest.ms.com",
-                   "--os", "linux/5.0.1-x86_64"]
+                   "--osname", "linux", "--osversion", "5.0.1-x86_64"]
         (out, err) = self.successtest(command)
 
     def testverifyunittest17(self):
