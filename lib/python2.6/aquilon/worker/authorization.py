@@ -166,7 +166,7 @@ class AuthorizationBroker(object):
                               'del_esx_cluster',
                               'bind_esx_cluster_hostname',
                               'rebind_esx_cluster_hostname',
-                              'cluster', 'change_status_cluster',
+                              'cluster', 'uncluster', 'change_status_cluster',
                               'add_manager', 'add_dynamic_range', 'add_disk',
                               'add_auxiliary',
                               'del_manager', 'del_disk', 'del_auxiliary',
