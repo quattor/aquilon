@@ -94,6 +94,7 @@
          <option name="services" type="boolean">flush the service templates</option>
          <option name="resources" type="boolean">flush the resource templates</option>
          <option name="locations" type="boolean">flush templates related to locations. This is only cities for now.</option>
+         <option name="switches" type="boolean">flush templates related to switches.</option>
          <option name="all" type="flag">flush all templates</option>
       </optgroup>
       <transport method="post" path="flush" />
@@ -217,7 +218,7 @@
          <option name="cpuspeed" type="int">cpu speed</option>
          <option name="cpucount" type="int">cpu count</option>
          <option name="memory" type="int">memory in MB</option>
-         <option name="cluster" type="string">cluster name</option>
+         <option name="cluster" type="string">cluster or metacluster name</option>
          <option name="model" type="string">model name</option>
          <option name="machine_type" type="string">machine type for the model (blade, virtual_machine, etc.)</option>
          <option name="vendor" type="string">vendor name</option>
@@ -360,7 +361,7 @@
          <option name="machine_type" type="string">machine type for the model (blade, virtual_machine, etc.)</option>
          <option name="vendor" type="string">machine vendor name</option>
          <option name="serial" type="string">machine serial number</option>
-         <option name="cluster" type="string">cluster name</option>
+         <option name="cluster" type="string">cluster or metacluster name</option>
          <option name="guest_on_cluster" type="string">host is a virtual machine guest on this cluster</option>
          <option name="guest_on_share" type="string">host is a virtual machine using this nas_disk_share</option>
          <option name="member_cluster_share" type="string">host is a member of a cluster with machines using this nas_disk_share</option>
@@ -777,10 +778,10 @@
       Examples of valid disk names: hda, hdb (IDE); sda, sdb (SCSI, SATA), c0d0 (CCISS).
       <optgroup name="add_disk_opts" mandatory="True" fields="all">
          <option name="machine" type="string">Machine name</option>
-	 <option name="disk" type="string">Disk/device name</option>
+         <option name="disk" type="string">Disk/device name</option>
          <optgroup name="controller_opts" fields="any">
             <option name="controller" type="string" conflicts="type">Type of the controller/interface</option>
-	    <option name="type" type="string" conflicts="controller">[Deprecated] Type of the controller/interface</option>
+            <option name="type" type="string" conflicts="controller">[Deprecated] Type of the controller/interface</option>
          </optgroup>
          <optgroup name="size_opts" fields="any">
             <option name="size" type="int" conflicts="capacity">Capacity of the disk (GB)</option>
@@ -789,8 +790,10 @@
       </optgroup>
       <optgroup name="nas_opts" fields="all">
          <optgroup name="share_opts" fields="any">
+            <!-- TODO find out conflicts we might have -->
             <option name="share" type="string" conflicts="autoshare">Share name (an instance of nas_disk_share service)</option>
             <option name="autoshare" type="flag" conflicts="share">Resource pool will pick an appropriate share</option>
+            <option name="resourcegroup" type="string">Resourcegroup to add share</option>
          </optgroup>
          <option name="address" type="string">Bus address (e.g. 0:0)</option>
       </optgroup>
@@ -2269,18 +2272,19 @@
       that template generated on-demand in this way will be incomplete
       (especially if it cannot be compiled) and is purely provided for debugging.
       <optgroup name="cat_selector" mandatory="True" fields="any">
-         <option name="machine" type="string" conflicts="hostname cluster service instance default nasinfo city">Name of the machine</option>
-         <option name="hostname" type="string" conflicts="machine cluster service instance default nasinfo city">Name of the host</option>
-         <option name="cluster" type="string" conflicts="hostname machine service instance default nasinfo city">Name of the cluster</option>
-         <option name="service" type="string" conflicts="hostname machine cluster nasinfo city">Name of the service</option>
-         <option name="nasinfo" type="string" conflicts="hostname machine cluster service instance default city">Show the default client config for the service/instance</option>
-         <option name="city" type="string" conflicts="hostname machine cluster service instance default nasinfo">Name of the city</option>
+         <option name="machine" type="string" conflicts="hostname cluster service instance default nasinfo city switch">Name of the machine</option>
+         <option name="hostname" type="string" conflicts="machine cluster service instance default nasinfo city switch">Name of the host</option>
+         <option name="cluster" type="string" conflicts="hostname machine service instance default nasinfo city switch">Name of the cluster</option>
+         <option name="service" type="string" conflicts="hostname machine cluster nasinfo city switch">Name of the service</option>
+         <option name="nasinfo" type="string" conflicts="hostname machine cluster service instance default city switch">Show the default client config for the service/instance</option>
+         <option name="city" type="string" conflicts="hostname machine cluster service instance default nasinfo switch">Name of the city</option>
+         <option name="switch" type="string" conflicts="hostname machine cluster service instance default nasinfo">Name of the switch</option>
       </optgroup>
       <optgroup name="cat_options" mandatory="False" fields="any">
-         <option name="default" type="flag" conflicts="hostname machine cluster nasinfo city">Show the default client config for the service/instance</option>
-         <option name="server" type="flag" conflicts="hostname machine cluster nasinfo city">Show the server config for the service/instance</option>
-         <option name="data" type="flag" conflicts="machine service nasinfo city">Show the data template for the host/cluster</option>
-         <option name="instance" type="string" conflicts="hostname machine cluster nasinfo city">Name of the service instance</option>
+         <option name="default" type="flag" conflicts="hostname machine cluster nasinfo city switch">Show the default client config for the service/instance</option>
+         <option name="server" type="flag" conflicts="hostname machine cluster nasinfo city switch">Show the server config for the service/instance</option>
+         <option name="data" type="flag" conflicts="machine service nasinfo city switch">Show the data template for the host/cluster</option>
+         <option name="instance" type="string" conflicts="hostname machine cluster nasinfo city switch">Name of the service instance</option>
          <option name="generate" type="boolean">Show the plenary template as it would be generated</option>
       </optgroup>
       <optgroup name="cat_resource_options" mandatory="False" fields="any">
@@ -2293,6 +2297,7 @@
          <option name="reboot_schedule" type="string" conflicts="machine service instance default nasinfo data">Name of a reboot schedule</option>
          <option name="virtual_machine" type="string" conflicts="machine service instance default nasinfo data">Name of a virtual machine</option>
          <option name="service_address" type="string" conflicts="machine service instance default nasinfo data">Name of a service address</option>
+         <option name="share" type="string" conflicts="machine service instance default nasinfo data">Name of a resource group</option>
       </optgroup>
       <transport trigger="machine" method="get" path="machine/%(machine)s/plenary" />
       <transport trigger="hostname" method="get" path="host/%(hostname)s/plenary" />
@@ -2301,6 +2306,7 @@
       <transport trigger="instance" method="get" path="service/%(service)s/instance/%(instance)s/plenary" />
       <transport trigger="nasinfo" method="get" path="nasinfo/%(nasinfo)s/plenary" />
       <transport trigger="city" method="get" path="city/%(city)s/plenary" />
+      <transport trigger="switch" method="get" path="switch/%(switch)s/plenary" />
    </command>
 
    <command name="sync">
@@ -3446,11 +3452,32 @@
    <command name="add_metacluster">
       Add a new metacluster.
       <optgroup name="add_metacluster_req" mandatory="True" fields="all">
-         <option name="metacluster" type="string">Name of the new metacluster</option>
+        <option name="metacluster" type="string">Name of the new metacluster</option>
       </optgroup>
+        <optgroup name="add_metacluster_location_opts" fields="any">
+           <option name="organization" type="string">Organization</option>
+           <option name="hub" type="string">Hub</option>
+           <option name="continent" type="string">Continent</option>
+           <option name="country" type="string">Country</option>
+           <option name="campus" type="string">Campus</option>
+           <option name="city" type="string">City</option>
+           <option name="building" type="string">Building</option>
+           <option name="room" type="string">Room</option>
+           <option name="rack" type="string">Rack</option>
+           <option name="desk" type="string">Desk</option>
+        </optgroup>
+        <optgroup name="personality_opts" mandatory="False">
+           <option name="archetype" type="string" default="metacluster-old">Archetype name</option>
+           <option name="personality" type="string" default="metacluster-old">Personality name</option>
+        </optgroup>
+        <optgroup name="branch_opts" fields="any">
+           <option name="domain" type="string" conflicts="sandbox">Name of template domain</option>
+           <option name="sandbox" type="string" conflicts="domain">Name of the sandbox (given as 'author/branch')</option>
+        </optgroup>
       <optgroup name="add_metacluster_options" mandatory="False">
          <option name="max_members" type="int">Comments</option>
          <option name="max_shares" type="int">Comments</option>
+         <option name="buildstatus" type="string">Build status of the metacluster (defaults to 'build')</option>
          <option name="comments" type="string">Comments</option>
       </optgroup>
       <transport method="put" path="metacluster/%(metacluster)s" />
@@ -3715,6 +3742,62 @@
          <option name="cluster" type="string">Cluster name</option>
       </optgroup>
       <transport method="post" path="metacluster/%(metacluster)s/cluster/%(cluster)s/rebind" />
+   </command>
+
+   <command name="bind_cluster">
+      Bind a service instance to the named cluster.
+      <p/>
+      If binding a service instance for a service that is already bound to
+      a different instance this command will fail.
+      <optgroup name="bind_cluster_opts" mandatory="True" fields="all">
+         <option name="cluster" type="string">Cluster name</option>
+         <optgroup name="bind_cluster_object" mandatory="True" fields="any">
+            <optgroup name="bind_cluster_service" mandatory="False" fields="all">
+               <option name="service" type="string">Service name</option>
+               <option name="instance" type="string">Service Instance</option>
+            </optgroup>
+         </optgroup>
+         <optgroup name="bind_cluster_type">
+            <option name="cluster_type" type="string">Cluster type, esx or meta</option>
+         </optgroup>
+      </optgroup>
+      <transport method="put" trigger="service" path="cluster/%(cluster)s/service/%(service)s/%(instance)s" />
+   </command>
+
+   <command name="rebind_cluster">
+      Bind a service instance to the named cluster.
+      <p/>
+      If binding a service instance for a service that is already bound to
+      a different instance the old binding will be removed.
+      <optgroup name="rebind_cluster_opts" mandatory="True" fields="all">
+         <option name="cluster" type="string">Cluster name</option>
+     <optgroup name="rebind_cluster_object" mandatory="True" fields="any">
+        <optgroup name="rebind_cluster_service" fields="all">
+               <option name="service" type="string">Service name</option>
+               <option name="instance" type="string">Service Instance</option>
+            </optgroup>
+         </optgroup>
+         <optgroup name="rebind_cluster_type">
+            <option name="cluster_type" type="string">Cluster type, esx or meta</option>
+         </optgroup>
+      </optgroup>
+      <transport method="post" trigger="service" path="cluster/%(cluster)s/service/%(service)s/%(instance)s" />
+   </command>
+
+   <command name="unbind_cluster">
+      Remove the binding of the service instance from the named cluster.
+
+      <optgroup name="unbind_cluster_opts" mandatory="True" fields="all">
+         <option name="cluster" type="string">Cluster name</option>
+        <optgroup name="unbind_cluster_service" mandatory="False" fields="all">
+               <option name="service" type="string">Service name</option>
+               <option name="instance" type="string">Service Instance</option>
+         </optgroup>
+         <optgroup name="unbind_cluster_type">
+            <option name="cluster_type" type="string">Cluster type, esx or meta</option>
+         </optgroup>
+      </optgroup>
+      <transport method="delete" trigger="service" path="cluster/%(cluster)s/service/%(service)s/%(instance)s" />
    </command>
 
    <command name="bind_esx_cluster">
@@ -4366,6 +4449,49 @@
       <transport method="get" path="find/resource/filesystem" />
    </command>
 
+   <command name="add_share">
+      Add a new share resource.
+      <optgroup name="add_share_opts" mandatory="True" fields="all">
+         <option name="share" type="string">name</option>
+      </optgroup>
+      <optgroup name="optional_opts">
+         <option name="comments" type="string">Comments</option>
+         <option name="latency" type="int">Latency</option>
+      </optgroup>
+      <optgroup name="resource_mapping_opts" mandatory="True" fields="any">
+         <option name="hostname" type="string">Hostname to add share</option>
+         <option name="resourcegroup" type="string">Resourcegroup name</option>
+         <option name="cluster" type="string">cluster to add share</option>
+      </optgroup>
+      <transport method="put" path="resource/share/%(share)s" />
+   </command>
+
+   <command name="del_share">
+      Delete a share resource.
+      <optgroup name="del_share_opts" mandatory="True" fields="all">
+         <option name="share" type="string">name</option>
+      </optgroup>
+      <optgroup name="resource_mapping_opts" mandatory="True" fields="any">
+         <option name="hostname" type="string">Hostname</option>
+         <option name="resourcegroup" type="string">Resourcegroup name</option>
+         <option name="cluster" type="string">cluster name</option>
+      </optgroup>
+      <transport method="delete" path="resource/share/%(share)s" />
+   </command>
+
+   <command name="show_share">
+      Show shares based on filtering for host/cluster association
+      <optgroup name="show_share_opts" mandatory="True" fields="any">
+         <option name="share" type="string">share name</option>
+         <option name="hostname" type="string">Hostname name</option>
+         <option name="resourcegroup" type="string">Resourcegroup name</option>
+         <option name="cluster" type="string">cluster name</option>
+         <option name="all" type="flag">list all hardware</option>
+      </optgroup>
+      <transport method="get" trigger="share" path="resource/share/%(share)s" />
+      <transport method="get" path="find/resource/share" />
+   </command>
+
    <command name="add_application">
       Add a new application resource.
       <optgroup name="add_app_opts" mandatory="True" fields="all">
@@ -4649,6 +4775,9 @@
       Add a new resource group.
       <optgroup name="add_rg_opts" mandatory="True" fields="all">
          <option name="resourcegroup" type="string">Name of the resource group</option>
+      </optgroup>
+      <optgroup name="add_rg_type_opts" mandatory="False" fields="any">
+        <option name="required_type" type="string">group members must have this type</option>
       </optgroup>
       <optgroup name="resource_mapping_opts" mandatory="True" fields="any">
          <option name="hostname" type="string">Hostname to apply resource group</option>

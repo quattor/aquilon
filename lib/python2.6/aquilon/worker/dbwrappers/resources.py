@@ -32,12 +32,12 @@
 from aquilon.exceptions_ import IncompleteError, NotFoundException
 from aquilon.aqdb.model import (Cluster, ClusterResource, HostResource,
                                 Resource, ResourceGroup, BundleResource)
-from aquilon.worker.templates import Plenary, PlenaryCollection
+from aquilon.worker.templates import Plenary
 from aquilon.worker.dbwrappers.host import hostname_to_host
 from aquilon.worker.locks import lock_queue, CompileKey
 
 
-def get_resource_holder(session, hostname, cluster, resgroup=None,
+def get_resource_holder(session, hostname=None, cluster=None, resgroup=None,
                         compel=True):
     who = None
     if hostname is not None:

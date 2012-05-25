@@ -95,7 +95,8 @@ class Fqdn(Base):
                               query_options=query_options, **kwargs)
         if fqdn:
             if preclude:
-                _raise_custom(preclude, ArgumentError, "{0} already exists.")
+                _raise_custom(preclude, ArgumentError,
+                              "{0} already exists.".format(fqdn))
             return fqdn
 
         if not isinstance(dns_environment, DnsEnvironment):

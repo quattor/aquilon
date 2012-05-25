@@ -34,7 +34,8 @@ from sqlalchemy.orm import aliased, subqueryload, joinedload
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.formats.machine import SimpleMachineList
 from aquilon.aqdb.model import (Machine, Cpu, Cluster, Service, ServiceInstance,
-                                NasDisk, Disk, ClusterResource)
+                                NasDisk, Disk, ClusterResource,
+                                Share, VirtualDisk, Disk, MetaCluster)
 from aquilon.worker.dbwrappers.hardware_entity import (
     search_hardware_entity_query)
 
@@ -62,19 +63,34 @@ class CommandSearchMachine(BrokerCommand):
             q = q.filter_by(memory=memory)
         if cluster:
             dbcluster = Cluster.get_unique(session, cluster, compel=True)
-            q = q.join('vm_container', ClusterResource)
-            q = q.filter_by(cluster=dbcluster)
+            if isinstance(dbcluster,MetaCluster):
+                q = q.join('vm_container', ClusterResource, Cluster)
+                q = q.filter_by(metacluster=dbcluster)
+            else:
+                q = q.join('vm_container', ClusterResource)
+                q = q.filter_by(cluster=dbcluster)
             q = q.reset_joinpoint()
         if share:
-            nas_disk_share = Service.get_unique(session, name='nas_disk_share',
-                                                compel=True)
-            dbshare = ServiceInstance.get_unique(session, name=share,
-                                                 service=nas_disk_share,
-                                                 compel=True)
-            NasAlias = aliased(NasDisk)
-            q = q.join('disks', (NasAlias, NasAlias.id==Disk.id))
-            q = q.filter_by(service_instance=dbshare)
-            q = q.reset_joinpoint()
+            #v2
+            v2shares = session.query(Share.id).filter_by(name=share).all()
+            if v2shares:
+                NasAlias = aliased(VirtualDisk)
+                q = q.join('disks', (NasAlias, NasAlias.id==Disk.id))
+                q = q.filter(
+                    NasAlias.share_id.in_(map(lambda s: s[0], v2shares)))
+                q = q.reset_joinpoint()
+
+            #v1
+            else:
+                nas_disk_share = Service.get_unique(session, name='nas_disk_share',
+                                                    compel=True)
+                dbshare = ServiceInstance.get_unique(session, name=share,
+                                                     service=nas_disk_share,
+                                                     compel=True)
+                NasAlias = aliased(NasDisk)
+                q = q.join('disks', (NasAlias, NasAlias.id==Disk.id))
+                q = q.filter_by(service_instance=dbshare)
+                q = q.reset_joinpoint()
         if fullinfo:
             q = q.options(joinedload('location'),
                           subqueryload('interfaces'),

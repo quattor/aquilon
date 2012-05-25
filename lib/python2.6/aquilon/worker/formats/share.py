@@ -1,6 +1,6 @@
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 #
-# Copyright (C) 2009,2010,2011,2012  Contributor
+# Copyright (C) 2011,2012  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -26,36 +26,33 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
+"""Share Resource formatter."""
 
 
-from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import ResourceGroup, Resource
-from aquilon.worker.broker import BrokerCommand, validate_basic
-from aquilon.worker.dbwrappers.resources import (add_resource,
-                                                 get_resource_holder)
+from aquilon.worker.formats.formatters import ObjectFormatter
+from aquilon.worker.formats.resource import ResourceFormatter
+from aquilon.aqdb.model import Share
 
 
-class CommandAddResourceGroup(BrokerCommand):
+class ShareFormatter(ResourceFormatter):
+    def format_raw(self, share, indent=""):
+        details = []
 
-    required_parameters = ["resourcegroup"]
+        # TODO some other data from svcinstance?
+        if share.latency:
+            details.append(indent + "  Latency: %s" % share.latency)
 
-    def render(self, session, logger, resourcegroup, required_type,
-               hostname, cluster, **arguments):
+        for disk in share.disks:
+            # see MachineSpecsFormatter
+            details.append(indent + "  Disk: %s %d GB (Machine: %s)" %
+                           (disk.device_name,
+                            disk.capacity,
+                            disk.machine.label))
 
-        validate_basic("resourcegroup", resourcegroup)
 
-        if required_type is not None:
-            if required_type not in Resource.__mapper__.polymorphic_map:
-                raise ArgumentError("{0} is not a valid resource type".
-                                    format(required_type))
-            elif required_type == "resourcegroup":
-                raise ArgumentError("A resourcegroup can't hold other "
-                                    "resourcegroups.")
+        return super(ShareFormatter, self).format_raw(share, indent) + \
+               "\n" + "\n".join(details)
 
-        holder = get_resource_holder(session, hostname, cluster, compel=False)
 
-        ResourceGroup.get_unique(session, name=resourcegroup, holder=holder,
-                                 preclude=True)
+ObjectFormatter.handlers[Share] = ShareFormatter()
 
-        dbrg = ResourceGroup(name=resourcegroup, required_type=required_type)
-        return add_resource(session, logger, holder, dbrg)

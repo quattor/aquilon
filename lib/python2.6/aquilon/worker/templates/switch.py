@@ -28,34 +28,46 @@
 # TERMS THAT MAY APPLY.
 
 
-from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import ResourceGroup, Resource
-from aquilon.worker.broker import BrokerCommand, validate_basic
-from aquilon.worker.dbwrappers.resources import (add_resource,
-                                                 get_resource_holder)
+import logging
+
+from aquilon.worker.templates.base import Plenary
+from aquilon.worker.templates.panutils import pan
+from aquilon.aqdb.model import Switch
 
 
-class CommandAddResourceGroup(BrokerCommand):
+LOGGER = logging.getLogger(__name__)
 
-    required_parameters = ["resourcegroup"]
 
-    def render(self, session, logger, resourcegroup, required_type,
-               hostname, cluster, **arguments):
+class PlenarySwitch(Plenary):
 
-        validate_basic("resourcegroup", resourcegroup)
+    template_type = ""
 
-        if required_type is not None:
-            if required_type not in Resource.__mapper__.polymorphic_map:
-                raise ArgumentError("{0} is not a valid resource type".
-                                    format(required_type))
-            elif required_type == "resourcegroup":
-                raise ArgumentError("A resourcegroup can't hold other "
-                                    "resourcegroups.")
+    """
+    A facade for the variety of PlenarySwitch subsidiary files
+    """
 
-        holder = get_resource_holder(session, hostname, cluster, compel=False)
+    def __init__(self, dbswitch, logger=LOGGER):
+        Plenary.__init__(self, dbswitch, logger=logger)
+        self.dbobj = dbswitch
+        self.name = dbswitch.primary_name
+        self.plenary_core = "switchdata"
+        self.plenary_template = self.name
 
-        ResourceGroup.get_unique(session, name=resourcegroup, holder=holder,
-                                 preclude=True)
+    def body(self, lines):
 
-        dbrg = ResourceGroup(name=resourcegroup, required_type=required_type)
-        return add_resource(session, logger, holder, dbrg)
+        vlans = {}
+        for ov in self.dbobj.observed_vlans:
+            vlan = {}
+
+            vlan["vlanid"] = pan(ov.vlan.vlan_id)
+            vlan["network_ip"] = ov.network.ip
+            vlan["netmask"] = ov.network.netmask
+            vlan["network_type"] = ov.network.network_type
+            vlan["network_environment"] = ov.network.network_environment.name
+
+            vlans[ov.vlan.port_group] = vlan
+
+        lines.append('"/system/network/vlans" = %s;' % pan(vlans))
+
+Plenary.handlers[Switch] = PlenarySwitch
+

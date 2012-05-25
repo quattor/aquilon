@@ -28,32 +28,14 @@
 # TERMS THAT MAY APPLY.
 
 
-from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.worker.broker import BrokerCommand
-from aquilon.aqdb.model import EsxCluster, Service
-from aquilon.worker.dbwrappers.service_instance import get_service_instance
-from aquilon.worker.templates.cluster import PlenaryCluster
+from aquilon.worker.commands.unbind_cluster_service import CommandUnbindClusterService
 
 
-class CommandUnbindESXClusterService(BrokerCommand):
+class CommandUnbindESXClusterService(CommandUnbindClusterService):
 
-    required_parameters = ["cluster", "service", "instance"]
+    #required_parameters = ["cluster", "service", "instance"]
 
-    def render(self, session, logger, cluster, service, instance, **arguments):
-        dbservice = Service.get_unique(session, service, compel=True)
-        dbinstance = get_service_instance(session, dbservice, instance)
-        dbcluster = EsxCluster.get_unique(session, cluster, compel=True)
-        if dbinstance not in dbcluster.service_bindings:
-            raise NotFoundException("{0} is not bound to {1:l}."
-                                    .format(dbinstance, dbcluster))
-        if dbservice in [cas.service for cas in dbcluster.required_services]:
-            raise ArgumentError("Cannot remove cluster service instance "
-                                "binding for %s cluster aligned service %s." %
-                                (dbcluster.cluster_type, dbservice.name))
-        dbcluster.service_bindings.remove(dbinstance)
-
-        session.flush()
-
-        plenary = PlenaryCluster(dbcluster, logger=logger)
-        plenary.write()
-        return
+    def render(self, session, **arguments):
+        return CommandUnbindClusterService.render(self, session,
+                                            cluster_type = "esx", **arguments)

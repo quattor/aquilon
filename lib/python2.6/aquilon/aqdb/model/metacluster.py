@@ -46,12 +46,14 @@ from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Base, Cluster, ServiceInstance
 from aquilon.aqdb.model.cluster import convert_resources
 from aquilon.aqdb.column_types.aqstr import AqStr
+from sqlalchemy.sql import func
 
+_TN = 'clstr'
 _MCT = 'metacluster'
 _MCM = 'metacluster_member'
 
 
-class MetaCluster(Base):
+class MetaCluster(Cluster):
     """
         A metacluster is a grouping of two or more clusters grouped
         together for wide-area failover scenarios (So far only for
@@ -60,11 +62,13 @@ class MetaCluster(Base):
     """
 
     __tablename__ = _MCT
+    __mapper_args__ = {'polymorphic_identity': 'meta'}
     _class_label = "Metacluster"
 
-    id = Column(Integer, Sequence('%s_seq' % _MCT), primary_key=True)
-
-    name = Column(AqStr(64), nullable=False)
+    id = Column(Integer, ForeignKey('%s.id' % _TN,
+                                    name='meta_cluster_fk',
+                                    ondelete='CASCADE'),
+                                    primary_key=True)
 
     max_clusters = Column(Integer, default=2, nullable=False)
 
@@ -73,14 +77,14 @@ class MetaCluster(Base):
     high_availability = Column(Boolean(name="%s_ha_ck" % _MCT), default=False,
                                nullable=False)
 
-    creation_date = deferred(Column(DateTime, default=datetime.now,
-                                    nullable=False))
-
-    comments = Column(String(255))
-
     members = association_proxy('_clusters', 'cluster',
                                 creator=lambda x: MetaClusterMember(cluster=x))
 
+    # resourcegroup, see resources relatio.
+
+    # Works for both Vulcan 1 and Vulcan 2.
+    # Abusing the fact that only length and retval[x].name is used of shares
+    # return value
     @property
     def shares(self):
         from aquilon.aqdb.model import VirtualMachine, ClusterResource
@@ -155,7 +159,6 @@ class MetaCluster(Base):
 
 metacluster = MetaCluster.__table__  # pylint: disable=C0103, E1101
 metacluster.primary_key.name = '%s_pk' % _MCT
-metacluster.append_constraint(UniqueConstraint('name', name='%s_uk' % _MCT))
 metacluster.info['unique_fields'] = ['name']
 
 
@@ -209,7 +212,9 @@ class MetaClusterMember(Base):
 
     metacluster = relation(MetaCluster, lazy='subquery', innerjoin=True,
                            backref=backref('_clusters',
-                                           cascade='all, delete-orphan'))
+                                           cascade='all, delete-orphan'),
+                           primaryjoin=(metacluster_id==MetaCluster.id)
+                           )
 
     # This is a one-to-one relation, so we need uselist=False on the backref
     cluster = relation(Cluster, lazy='subquery', innerjoin=True,

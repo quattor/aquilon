@@ -88,6 +88,7 @@ class CommandUpdateCluster(BrokerCommand):
             if switch:
                 # FIXME: Verify that any hosts are on the same network
                 dbswitch = Switch.get_unique(session, switch, compel=True)
+                plenaries.append(Plenary.get_plenary(dbswitch))
             else:
                 dbswitch = None
             dbcluster.switch = dbswitch

@@ -291,7 +291,7 @@ def verify_port_group(dbmachine, port_group):
         except MultipleResultsFound:  # pragma: no cover
             raise InternalError("Too many subnets found for VLAN {0} "
                                 "on {1:l}.".format(dbvi.vlan_id, dbswitch))
-        if dbobserved_vlan.is_at_guest_capacity:
+        if dbobserved_vlan.network.is_at_guest_capacity:
             raise ArgumentError("Port group {0} is full for "
                                 "{1:l}.".format(dbvi.port_group,
                                                 dbobserved_vlan.switch))
@@ -305,22 +305,34 @@ def verify_port_group(dbmachine, port_group):
                                 "{1:l}.".format(dbvi.vlan_id, dbswitch))
     return dbvi.port_group
 
-def choose_port_group(dbmachine):
+def choose_port_group(session, dbmachine):
     if dbmachine.model.machine_type != "virtual_machine":
         raise ArgumentError("Can only automatically generate "
                             "portgroup entry for virtual hardware.")
     if not dbmachine.cluster.switch:
         raise ArgumentError("Cannot automatically allocate port group: no "
                             "switch record for {0}.".format(dbmachine.cluster))
+
     selected_vlan = None
-    for dbobserved_vlan in dbmachine.cluster.switch.observed_vlans:
-        if dbobserved_vlan.vlan_type != 'user':
-            continue
-        if dbobserved_vlan.is_at_guest_capacity:
-            continue
+
+    sw = dbmachine.cluster.switch
+
+    # filter for user vlans only
+    networks = session.query(Network).\
+            join("observed_vlans", "vlan").\
+            filter(VlanInfo.vlan_type == "user").\
+            filter(ObservedVlan.switch == sw).all()
+
+    # then filter by capacity
+    networks = [nw for nw in networks
+                   if not nw.is_at_guest_capacity]
+
+    for dbobserved_vlan in [vlan for n in networks
+                 for vlan in n.observed_vlans if vlan.vlan_type == "user"]:
         if not selected_vlan or \
            selected_vlan.guest_count > dbobserved_vlan.guest_count:
             selected_vlan = dbobserved_vlan
+
     if selected_vlan:
         return selected_vlan.port_group
     raise ArgumentError("No available user port groups on "

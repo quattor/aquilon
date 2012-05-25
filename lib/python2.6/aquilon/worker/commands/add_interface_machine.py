@@ -135,7 +135,7 @@ class CommandAddInterfaceMachine(BrokerCommand):
         if pg is not None:
             port_group = verify_port_group(dbmachine, pg)
         elif autopg:
-            port_group = choose_port_group(dbmachine)
+            port_group = choose_port_group(session, dbmachine)
         else:
             port_group = None
 

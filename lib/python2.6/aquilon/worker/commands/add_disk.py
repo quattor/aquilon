@@ -30,13 +30,16 @@
 
 import re
 
-from aquilon.exceptions_ import ArgumentError, InternalError
+from aquilon.exceptions_ import ArgumentError, InternalError, NotFoundException
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.service_instance import get_service_instance
-from aquilon.aqdb.model import LocalDisk, NasDisk, Service, Machine
+from aquilon.aqdb.model import (LocalDisk, NasDisk, Service, Machine, Share,
+                                VirtualDisk, ResourceGroup)
 from aquilon.aqdb.model.disk import controller_types
 from aquilon.worker.templates.machine import PlenaryMachineInfo
 from aquilon.worker.processes import NASAssign
+from aquilon.worker.dbwrappers.resources import (add_resource,
+                                                 get_resource_holder)
 
 
 class CommandAddDisk(BrokerCommand):
@@ -93,8 +96,9 @@ class CommandAddDisk(BrokerCommand):
         plenary_info = PlenaryMachineInfo(dbmachine, logger=logger)
         plenary_info.write()
 
-    def render(self, session, logger, machine, disk, controller, share,
-               autoshare, address, comments, dbuser, size, boot, **kw):
+    def render(self, session, logger, machine, disk, controller,
+               share, autoshare, resourcegroup,
+               address, comments, dbuser, size, boot, **kw):
 
         # Handle deprecated arguments
         if kw.get("type"):
@@ -142,17 +146,57 @@ class CommandAddDisk(BrokerCommand):
             share = nasassign_obj.create()
 
         try:
-            if share:
-                dbshare = self._verify_share(session, share, autoshare, address)
-                dbdisk = NasDisk(device_name=disk, controller_type=controller,
-                                 bootable=boot, service_instance=dbshare,
-                                 capacity=size, address=address,
-                                 comments=comments)
+            if resourcegroup:
+
+                if not dbmachine.cluster or not dbmetacluster:
+                    raise ArgumentError("Machine %s should be contained by a "
+                                        "cluster")
+
+                dbrg = ResourceGroup.get_unique(session, name=resourcegroup,
+                                        holder=dbmachine.cluster.resholder,
+                                        compel=False)
+
+                if not dbrg:
+                    if dbmetacluster:
+                        dbrg = ResourceGroup.get_unique(session,
+                                        name=resourcegroup,
+                                        holder=dbmetacluster.resholder,
+                                        compel=True)
+                    else:
+                        raise NotFoundException("resourcegroup %s in %s "
+                                    "not found." %
+                                    (resourcegroup, dbmachine.cluster.name))
+
+                dbshare = Share.get_unique(session,
+                                           name=share,
+                                           holder=dbrg.resholder,
+                                           compel=True)
+
+                dbdisk = VirtualDisk(device_name=disk,
+                                     controller_type=controller,
+                                     bootable=boot,
+                                     capacity=size, address=address,
+                                     comments=comments)
+
+                dbmachine.disks.append(dbdisk)
+                dbshare.disks.append(dbdisk)
+
             else:
-                dbdisk = LocalDisk(device_name=disk, controller_type=controller,
-                                   capacity=size, bootable=boot,
-                                   comments=comments)
-            dbmachine.disks.append(dbdisk)
+                if share:
+                    dbshare = self._verify_share(session, share, autoshare,
+                                                 address)
+                    dbdisk = NasDisk(device_name=disk,
+                                     controller_type=controller,
+                                     bootable=boot, service_instance=dbshare,
+                                     capacity=size, address=address,
+                                     comments=comments)
+                else:
+                    dbdisk = LocalDisk(device_name=disk,
+                                       controller_type=controller,
+                                       capacity=size, bootable=boot,
+                                       comments=comments)
+                dbmachine.disks.append(dbdisk)
+
             if dbmetacluster:
                 dbmetacluster.validate()
 

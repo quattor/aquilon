@@ -1,6 +1,6 @@
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 #
-# Copyright (C) 2009,2010,2011,2012  Contributor
+# Copyright (C) 2008,2009,2010,2011,2012  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -26,36 +26,23 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
+"""Contains the logic for `aq cat --switch`."""
 
 
-from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import ResourceGroup, Resource
-from aquilon.worker.broker import BrokerCommand, validate_basic
-from aquilon.worker.dbwrappers.resources import (add_resource,
-                                                 get_resource_holder)
+from aquilon.aqdb.model import Switch
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.templates.switch import PlenarySwitch
 
 
-class CommandAddResourceGroup(BrokerCommand):
+class CommandCatSwitch(BrokerCommand):
 
-    required_parameters = ["resourcegroup"]
+    required_parameters = ["switch"]
 
-    def render(self, session, logger, resourcegroup, required_type,
-               hostname, cluster, **arguments):
+    def render(self, generate, session, logger, switch, **kwargs):
+        dbswitch = Switch.get_unique(session, switch, compel=True)
+        plenary_info = PlenarySwitch(dbswitch, logger=logger)
 
-        validate_basic("resourcegroup", resourcegroup)
-
-        if required_type is not None:
-            if required_type not in Resource.__mapper__.polymorphic_map:
-                raise ArgumentError("{0} is not a valid resource type".
-                                    format(required_type))
-            elif required_type == "resourcegroup":
-                raise ArgumentError("A resourcegroup can't hold other "
-                                    "resourcegroups.")
-
-        holder = get_resource_holder(session, hostname, cluster, compel=False)
-
-        ResourceGroup.get_unique(session, name=resourcegroup, holder=holder,
-                                 preclude=True)
-
-        dbrg = ResourceGroup(name=resourcegroup, required_type=required_type)
-        return add_resource(session, logger, holder, dbrg)
+        if generate:
+            return plenary_info._generate_content()
+        else:
+            return plenary_info.read()

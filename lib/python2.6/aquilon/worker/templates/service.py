@@ -31,6 +31,7 @@
 import logging
 
 from aquilon.aqdb.model import Service, ServiceInstance
+from aquilon.aqdb.model.disk import find_storage_data
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
 from aquilon.worker.templates.panutils import (StructureTemplate, pan_assign,
                                                pan_include)
@@ -254,8 +255,10 @@ class PlenaryInstanceNasDiskShare(Plenary):
         self.name = dbinstance.name
         self.plenary_core = "service/%(service)s/%(name)s/client" % self.__dict__
         self.plenary_template = "nasinfo"
-        self.server = ""
-        self.mount = ""
+        share_info = find_storage_data(dbinstance)
+
+        self.server = share_info["server"]
+        self.mount = share_info["mount"]
 
     def body(self, lines):
         """
@@ -263,8 +266,7 @@ class PlenaryInstanceNasDiskShare(Plenary):
         If the external lookup fails, this can raise a NotFoundException,
         a ProcessException or an IOError
         """
-        self.lookup()
-        if self.server == "":
+        if not self.server:
             # TODO: We should really invoke a realtime-check by running
             # the command defined in the broker config. The output
             # of "nasti show share --csv" is in CSV format (why it
@@ -276,50 +278,4 @@ class PlenaryInstanceNasDiskShare(Plenary):
         pan_assign(lines, "server", self.server)
         pan_assign(lines, "mountpoint", self.mount)
 
-    def lookup(self):
-        with open(self.config.get("broker", "sharedata")) as sharedata:
-            find_storage_data(sharedata, lambda inf: self.check_nas_line(inf))
 
-    def check_nas_line(self, inf):
-        """
-        Search for the pshare info that refers to this plenary
-        """
-        # silently discard lines that don't have all of our reqd info.
-        for k in ["objtype", "pshare", "server", "dg"]:
-            if k not in inf:
-                return False
-
-        if inf["objtype"] == "pshare" and inf["pshare"] == self.name:
-            self.server = inf["server"]
-            self.mount = "/vol/%(dg)s/%(pshare)s" % (inf)
-            return True
-        else:
-            return False
-
-
-# This should come from some external API...?
-def find_storage_data(datafile, fn):
-    """
-    Scan a storeng-style data file, checking each line as we go
-
-    Storeng-style data files are blocks of data. Each block starts
-    with a comment describing the fields for all subsequent lines. A
-    block can start at any time. Fields are separated by '|'.
-    This function will invoke the function after parsing every data
-    line. The function will be called with a dict of the fields. If the
-    function returns True, then we stop scanning the file, else we continue
-    on until there is nothing left to parse.
-    """
-    for line in datafile:
-        line = line.rstrip()
-        if line[0] == '#':
-            # A header line
-            hdr = line[1:].split('|')
-        else:
-            fields = line.split('|')
-            if len(fields) == len(hdr):  # silently ignore invalid lines
-                info = dict()
-                for i in range(0, len(hdr)):
-                    info[hdr[i]] = fields[i]
-                if (fn(info)):
-                    break

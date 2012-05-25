@@ -1,6 +1,6 @@
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 #
-# Copyright (C) 2009,2010,2011,2012  Contributor
+# Copyright (C) 2011,2012  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -27,35 +27,25 @@
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
 
+from sqlalchemy import (Integer, Column, ForeignKey)
+from aquilon.aqdb.model import Resource
 
-from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import ResourceGroup, Resource
-from aquilon.worker.broker import BrokerCommand, validate_basic
-from aquilon.worker.dbwrappers.resources import (add_resource,
-                                                 get_resource_holder)
+_TN = 'share'
+
+class Share(Resource):
+    """ Share resources """
+    __tablename__ = _TN
+    __mapper_args__ = {'polymorphic_identity': 'share'}
+
+    id = Column(Integer, ForeignKey('resource.id',
+                                    name='%s_resource_fk' % (_TN),
+                                    ondelete='CASCADE'),
+                                    primary_key=True)
+
+    # TODO what is latency? What's its unit? millisec?
+    latency = Column(Integer)
 
 
-class CommandAddResourceGroup(BrokerCommand):
-
-    required_parameters = ["resourcegroup"]
-
-    def render(self, session, logger, resourcegroup, required_type,
-               hostname, cluster, **arguments):
-
-        validate_basic("resourcegroup", resourcegroup)
-
-        if required_type is not None:
-            if required_type not in Resource.__mapper__.polymorphic_map:
-                raise ArgumentError("{0} is not a valid resource type".
-                                    format(required_type))
-            elif required_type == "resourcegroup":
-                raise ArgumentError("A resourcegroup can't hold other "
-                                    "resourcegroups.")
-
-        holder = get_resource_holder(session, hostname, cluster, compel=False)
-
-        ResourceGroup.get_unique(session, name=resourcegroup, holder=holder,
-                                 preclude=True)
-
-        dbrg = ResourceGroup(name=resourcegroup, required_type=required_type)
-        return add_resource(session, logger, holder, dbrg)
+share = Share.__table__
+share.primary_key.name = '%s_pk' % (_TN)
+share.info['unique_fields'] = ['name', 'holder']

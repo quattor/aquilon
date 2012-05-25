@@ -126,6 +126,7 @@ Archetype(name="filer", is_compileable=True)
 Archetype(name="storagecluster", cluster_type="storage", outputdesc="Storage")
 Archetype(name="vmhost", is_compileable=True)
 Archetype(name="esx_cluster", is_compileable=True, cluster_type="esx", outputdesc="ESX")
+
 Archetype(name="windows")
 Archetype(name="f5")
 
@@ -194,6 +195,12 @@ Personality(archetype=@aquilon, name="spg-rmi")
 Personality(archetype=@aquilon, name="sybase-test")
 Personality(archetype=@aquilon, name="train-prod")
 Personality(archetype=@aquilon, name="train-tu")
+
+# Vulcan2.0
+Archetype(name="metacluster", is_compileable=True, cluster_type="meta", outputdesc="ESX")
+Archetype(name="metacluster-old", cluster_type="meta", outputdesc="ESX")
+Personality(archetype=Archetype(name="metacluster-old"), name="metacluster-old")
+Personality(archetype=Archetype(name="metacluster"), name="metacluster")
 
 Vendor(name="amd")
 Vendor(name="intel")

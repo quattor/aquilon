@@ -251,6 +251,13 @@ class Network(Base):
             self.side, format(self.location), self.network_environment)
         return msg
 
+    @property
+    def vlans_guest_count(self):
+        return sum([vlan.guest_count for vlan in self.observed_vlans])
+
+    @property
+    def is_at_guest_capacity(self):
+        return self.vlans_guest_count >= self.available_ip_count
 
 network = Network.__table__  # pylint: disable=C0103, E1101
 network.primary_key.name = '%s_pk' % _TN
@@ -295,3 +302,4 @@ def get_net_id_from_ip(session, ip, network_environment=None):
         raise NotFoundException("Could not determine network containing IP "
                                 "address %s." % ip)
     return net
+

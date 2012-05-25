@@ -57,13 +57,26 @@ class TestAddResourceGroup(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out, "Resource Group: utvcs1as1", command)
 
+    def test_101_add_rg_to_cluster_fail(self):
+        command = ["add_resourcegroup", "--resourcegroup=utvcs1as1",
+                   "--cluster=utvcs1", "--required_type=non-existent-type"]
+        err = self.badrequesttest(command)
+        self.matchoutput(err, "Bad Request: non-existent-type is not a valid "
+                         "resource type", command)
+
+        command = ["add_resourcegroup", "--resourcegroup=utvcs1as1",
+                   "--cluster=utvcs1", "--required_type=resourcegroup"]
+        err = self.badrequesttest(command)
+        self.matchoutput(err, "Bad Request: A resourcegroup can't hold other "
+                         "resourcegroups.", command)
+
     def test_110_add_fs_to_rg(self):
         command = ["add_filesystem", "--filesystem=fs1", "--type=ext3",
                    "--mountpoint=/mnt", "--blockdevice=/dev/foo/bar",
                    "--bootmount",
                    "--dumpfreq=1", "--fsckpass=3", "--options=ro",
                    "--comments=testing",
-                   "--resourcegroup=utvcs1as1"]
+                   "--resourcegroup=utvcs1as1", "--cluster=utvcs1"]
         self.successtest(command)
 
         command = ["show_filesystem", "--filesystem=fs1"]

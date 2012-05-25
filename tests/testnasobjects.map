@@ -26,4 +26,5 @@ pshare|lnn30f1/utecl13_share|P|ln|lnn30|0|1|1228800||utecl13_share||primary||lnn
 pshare|lnn30f1/utecl14_share|P|ln|lnn30|0|1|1228800||utecl14_share||primary||lnn30f1v1|lnn30f1|utecl14_share
 pshare|lnn30f1/npecl11_share|P|ln|lnn30|0|1|1228800||npecl11_share||primary||lnn30f1v1|lnn30f1|npecl11_share
 pshare|lnn30f1/npecl12_share|P|ln|lnn30|0|1|1228800||npecl12_share||primary||lnn30f1v1|lnn30f1|npecl12_share
+pshare|lnn30f1/test_v2_share|P|ln|lnn30|0|1|1228800||test_v2_share||primary||lnn30f1v1|lnn30f1|test_v2_share
 # End of nasobjects.map

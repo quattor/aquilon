@@ -35,6 +35,7 @@ from aquilon.aqdb.model import Cluster
 from aquilon.worker.templates.domain import TemplateDomain
 from aquilon.worker.locks import lock_queue, CompileKey
 from aquilon.worker.services import Chooser
+from aquilon.worker.commands.compile_cluster import add_cluster_data
 
 
 class CommandMakeCluster(BrokerCommand):
@@ -60,9 +61,7 @@ class CommandMakeCluster(BrokerCommand):
             lock_queue.acquire(key)
             chooser.write_plenary_templates(locked=True)
 
-            profile_list = ["clusters/%s" % dbcluster.name]
-            for h in dbcluster.hosts:
-                profile_list.append(h.fqdn)
+            profile_list = add_cluster_data(dbcluster)
 
             td = TemplateDomain(dbcluster.branch, dbcluster.sandbox_author,
                                 logger=logger)

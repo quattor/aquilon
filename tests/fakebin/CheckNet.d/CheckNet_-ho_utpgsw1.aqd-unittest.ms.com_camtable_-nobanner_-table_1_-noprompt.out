@@ -1,0 +1,2 @@
+Device_Name,fdbMacAddr,fdbVlan,fdbVlanId,fdbSrcPort,fdbSrcTrunk,fdbState,fdbRefSps,fdbLearnedPort,fbStatus
+utpgsw0.aqd-unittest.ms.com,020204021206,710,710,1,0,forward,,0,notpermanent
