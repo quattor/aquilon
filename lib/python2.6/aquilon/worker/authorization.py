@@ -131,6 +131,7 @@ class AuthorizationBroker(object):
                               'add_interface_address_switch',
                               'del_interface_address_switch',
                               'add_alias', 'del_alias',
+                              'refresh_network',
                               'update_router']:
                 self.raise_auth_error(principal, action, resource)
         if dbuser.role.name == 'maintech':
