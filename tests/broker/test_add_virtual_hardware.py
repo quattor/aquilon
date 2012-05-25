@@ -52,6 +52,20 @@ class TestAddVirtualHardware(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out, "evm9", command)
 
+    def test_002_verify_audit(self):
+        command = ["search_audit", "--command", "add_machine", "--limit", 1,
+                   "--keyword", "evm", "--argument", "prefix"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "[Result: evm9]", command)
+
+    def test_002_verify_audit_argument(self):
+        command = ["search_audit", "--command", "add_machine",
+                   "--keyword", "evm9", "--argument", "__RESULT__"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "[Result: evm9]", command)
+        command = ["search_audit", "--keyword", "evm9", "--argument", "machine"]
+        self.noouttest(command)
+
     def test_005_showmachinenorack(self):
         # The only way to test show machine with a machine that's not in
         # a rack is to use virtual hardware...

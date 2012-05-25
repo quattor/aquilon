@@ -402,6 +402,12 @@ class TestAdd10GigHardware(TestBrokerCommand):
             out = self.commandtest(command.split(" "))
             self.matchoutput(out, hostname, command)
 
+    def test_810_verify_audit(self):
+        command = ["search", "audit", "--keyword",
+                   "ivirt17.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "[Result: ivirt17.aqd-unittest.ms.com]", command)
+
     def test_900_make_hosts(self):
         for i in range(0, 8) + range(9, 17):
             hostname = "ivirt%d.aqd-unittest.ms.com" % (1 + i)

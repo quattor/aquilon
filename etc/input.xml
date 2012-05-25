@@ -4205,6 +4205,7 @@
       in order to enhance performance and stability.
       <optgroup name="search_audit_opts" mandatory="True" fields="any">
          <option name="keyword" type="string">The value of any argument supplied to a command</option>
+         <option name="argument" type="string">Look at the value of the specified argument only</option>
          <option name="username" type="string">The user name who executed the command</option>
          <option name="command" type="string">The name of the command (see "Defaults")</option>
          <option name="before" type="string">Search for transactions started before a specific date/time</option>
