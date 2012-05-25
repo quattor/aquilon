@@ -52,4 +52,8 @@ class CommandDelAllowedPersonality(BrokerCommand):
 
         if dbpers in dbclus.allowed_personalities:
             dbclus.allowed_personalities.remove(dbpers)
+            dbclus.validate()
+
+        session.flush()
+
         return

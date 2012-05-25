@@ -28,9 +28,9 @@
 # TERMS THAT MAY APPLY.
 
 
-from aquilon.exceptions_ import ArgumentError
+from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.worker.broker import BrokerCommand
-from aquilon.aqdb.model import EsxCluster, ClusterServiceBinding, Service
+from aquilon.aqdb.model import EsxCluster, Service
 from aquilon.worker.dbwrappers.service_instance import get_service_instance
 from aquilon.worker.templates.cluster import PlenaryCluster
 
@@ -43,14 +43,14 @@ class CommandUnbindESXClusterService(BrokerCommand):
         dbservice = Service.get_unique(session, service, compel=True)
         dbinstance = get_service_instance(session, dbservice, instance)
         dbcluster = EsxCluster.get_unique(session, cluster, compel=True)
-        dbcsb = ClusterServiceBinding.get_unique(session, cluster=dbcluster,
-                                                 service_instance=dbinstance,
-                                                 compel=True)
+        if dbinstance not in dbcluster.service_bindings:
+            raise NotFoundException("{0} is not bound to {1:l}."
+                                    .format(dbinstance, dbcluster))
         if dbservice in [cas.service for cas in dbcluster.required_services]:
             raise ArgumentError("Cannot remove cluster service instance "
                                 "binding for %s cluster aligned service %s." %
                                 (dbcluster.cluster_type, dbservice.name))
-        session.delete(dbcsb)
+        dbcluster.service_bindings.remove(dbinstance)
 
         session.flush()
 

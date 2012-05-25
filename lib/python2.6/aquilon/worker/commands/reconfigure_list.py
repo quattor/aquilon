@@ -224,6 +224,9 @@ class CommandReconfigureList(BrokerCommand):
         try:
             lock_queue.acquire(key)
             logger.client_info("Writing %s plenary templates.", len(templates))
+            # FIXME: if one of the templates raises IncompleteError (e.g.
+            # a host should be in a cluster, but it is not), then we return an
+            # InternalError to the client, which is not nice
             for template in templates:
                 logger.debug("Writing %s", template)
                 template.write(locked=True)

@@ -98,6 +98,7 @@ class TestAddRebootIntervention(TestBrokerCommand):
                          command)
 
     def test_11_addexisting(self):
+        # FIXME: this fails if the test is run on Sunday
         command = ["add_reboot_intervention", "--expiry=Sun",
                    "--justification=test",
                    "--hostname=server1.aqd-unittest.ms.com"]

@@ -91,7 +91,8 @@ class CommandCluster(BrokerCommand):
             old_cluster = dbhost.cluster
             old_cluster.hosts.remove(dbhost)
             remove_service_addresses(old_cluster, dbhost)
-            session.expire(dbhost, ['_cluster'])
+            old_cluster.validate()
+            session.expire(dbhost, ['cluster'])
             plenaries.append(Plenary.get_plenary(old_cluster))
 
         # Apply the service addresses to the new member
@@ -109,8 +110,8 @@ class CommandCluster(BrokerCommand):
             # to do here.
             return
 
-        # Check for max_members happens in aqdb layer
         dbcluster.hosts.append(dbhost)
+        dbcluster.validate()
 
         # demote a host when switching clusters
         # promote a host when switching clusters

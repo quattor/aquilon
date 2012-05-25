@@ -131,8 +131,9 @@ class CommandAddDisk(BrokerCommand):
             # is already a boot disk
             boot = (disk == "sda" or disk == "c0d0")
 
-        if dbmachine.cluster:
-            dbmetacluster = dbmachine.cluster.metacluster
+        if dbmachine.vm_container and \
+           hasattr(dbmachine.vm_container.holder.holder_object, 'metacluster'):
+            dbmetacluster = dbmachine.vm_container.holder.holder_object.metacluster
         else:
             dbmetacluster = None
 

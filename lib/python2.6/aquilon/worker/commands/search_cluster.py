@@ -34,7 +34,8 @@ from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.formats.cluster import SimpleClusterList
 from aquilon.aqdb.model import (Cluster, EsxCluster, MetaCluster, Archetype,
                                 Personality, Machine, Switch, ClusterLifecycle,
-                                Service, ServiceInstance, NasDisk, Disk)
+                                Service, ServiceInstance, NasDisk, Disk,
+                                ClusterResource, VirtualMachine)
 from aquilon.worker.dbwrappers.host import hostname_to_host
 from aquilon.worker.dbwrappers.branch import get_branch_and_author
 from aquilon.worker.dbwrappers.location import get_location
@@ -122,7 +123,7 @@ class CommandSearchCluster(BrokerCommand):
                 q = q.filter(Cluster.location_constraint_id.in_(childids))
         dblocation = get_location(session, **location_args['member_'])
         if dblocation:
-            q = q.join('_hosts', 'host', 'machine')
+            q = q.join('hosts', 'machine')
             if location_args['member_']['exact_location']:
                 q = q.filter_by(location=dblocation)
             else:
@@ -141,12 +142,14 @@ class CommandSearchCluster(BrokerCommand):
             q = q.reset_joinpoint()
         if esx_virtual_machine:
             dbvm = Machine.get_unique(session, esx_virtual_machine, compel=True)
-            q = q.join('_machines')
+            # TODO: support VMs inside resource groups?
+            q = q.join(ClusterResource, VirtualMachine)
             q = q.filter_by(machine=dbvm)
             q = q.reset_joinpoint()
         if esx_guest:
             dbguest = hostname_to_host(session, esx_guest)
-            q = q.join('_machines', 'machine')
+            # TODO: support VMs inside resource groups?
+            q = q.join(ClusterResource, VirtualMachine, Machine)
             q = q.filter_by(host=dbguest)
             q = q.reset_joinpoint()
         if capacity_override:
@@ -161,15 +164,13 @@ class CommandSearchCluster(BrokerCommand):
                 dbsi = ServiceInstance.get_unique(session, name=instance,
                                                   service=dbservice,
                                                   compel=True)
-                q = q.join('_cluster_svc_binding')
-                q = q.filter_by(service_instance=dbsi)
-                q = q.reset_joinpoint()
+                q = q.filter(Cluster.service_bindings.contains(dbsi))
             else:
-                q = q.join('_cluster_svc_binding', 'service_instance')
+                q = q.join('service_bindings')
                 q = q.filter_by(service=dbservice)
                 q = q.reset_joinpoint()
         elif instance:
-            q = q.join('_cluster_svc_binding', 'service_instance')
+            q = q.join('service_bindings')
             q = q.filter_by(name=instance)
             q = q.reset_joinpoint()
 
@@ -180,7 +181,7 @@ class CommandSearchCluster(BrokerCommand):
                                                  service=nas_disk_share,
                                                  compel=True)
             NasAlias = aliased(NasDisk)
-            q = q.join('_machines', 'machine', 'disks',
+            q = q.join(ClusterResource, VirtualMachine, Machine, 'disks',
                        (NasAlias, NasAlias.id == Disk.id))
             q = q.filter_by(service_instance=dbshare)
             q = q.reset_joinpoint()
@@ -203,42 +204,38 @@ class CommandSearchCluster(BrokerCommand):
             dbaa = Archetype.get_unique(session, allowed_archetype,
                                         compel=True)
         if allowed_personality and allowed_archetype:
-            q = q.join('_allowed_pers')
             dbap = Personality.get_unique(session, archetype=dbaa,
                                           name=allowed_personality,
                                           compel=True)
-            q = q.filter_by(personality=dbap)
-            q = q.reset_joinpoint()
+            q = q.filter(Cluster.allowed_personalities.contains(dbap))
         elif allowed_personality:
-            q = q.join('_allowed_pers', 'personality')
+            q = q.join('allowed_personalities')
             q = q.filter_by(name=allowed_personality)
             q = q.reset_joinpoint()
         elif allowed_archetype:
-            q = q.join('_allowed_pers', 'personality')
+            q = q.join('allowed_personalities')
             q = q.filter_by(archetype=dbaa)
             q = q.reset_joinpoint()
 
         if member_hostname:
             dbhost = hostname_to_host(session, member_hostname)
-            q = q.join('_hosts')
-            q = q.filter_by(host=dbhost)
-            q = q.reset_joinpoint()
+            q = q.filter(Cluster.hosts.contains(dbhost))
 
         if member_archetype:
             # Added to the searches as appropriate below.
             dbma = Archetype.get_unique(session, member_archetype, compel=True)
         if member_personality and member_archetype:
-            q = q.join('_hosts','host')
+            q = q.join('hosts')
             dbmp = Personality.get_unique(session, archetype=dbma,
                                           name=member_personality, compel=True)
             q = q.filter_by(personality=dbmp)
             q = q.reset_joinpoint()
         elif member_personality:
-            q = q.join('_hosts', 'host', 'personality')
+            q = q.join('hosts', 'personality')
             q = q.filter_by(name=member_personality)
             q = q.reset_joinpoint()
         elif member_archetype:
-            q = q.join('_hosts', 'host', 'personality')
+            q = q.join('hosts', 'personality')
             q = q.filter_by(archetype=dbma)
             q = q.reset_joinpoint()
 

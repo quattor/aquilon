@@ -97,7 +97,7 @@ class ServiceInstance(Base):
         as though max_members are bound.  The tricky bit is de-duplication.
 
         """
-        from aquilon.aqdb.model import (ClusterServiceBinding, Cluster)
+        from aquilon.aqdb.model import Cluster
         session = object_session(self)
 
         cluster_types = self.service.aligned_cluster_types
@@ -107,15 +107,13 @@ class ServiceInstance(Base):
 
         q = session.query(func.sum(Cluster.max_hosts))
         q = q.filter(Cluster.cluster_type.in_(cluster_types))
-        q = q.join(ClusterServiceBinding)
-        q = q.filter_by(service_instance=self)
+        q = q.filter(Cluster.service_bindings.contains(self))
         # Make sure it's a number
         adjusted_count = q.scalar() or 0
 
-        q = session.query(BuildItem)
-        q = q.filter_by(service_instance=self)
-        q = q.join('host')
-        q = q.outerjoin('_cluster', 'cluster', from_joinpoint=True)
+        q = session.query(Host)
+        q = q.filter(Host.services_used.contains(self))
+        q = q.outerjoin('cluster')
         q = q.filter(or_(Cluster.id == None,
                          ~Cluster.cluster_type.in_(cluster_types)))
         adjusted_count += q.count()
@@ -125,8 +123,8 @@ class ServiceInstance(Base):
     def client_fqdns(self):
         session = object_session(self)
         q = session.query(DnsRecord)
-        q = q.join(Machine, Host, BuildItem)
-        q = q.filter_by(service_instance=self)
+        q = q.join(Machine, Host)
+        q = q.filter(Host.services_used.contains(self))
         q = q.reset_joinpoint()
         # Due to aliases we have to explicitely tell how do we link to Fqdn
         q = q.join((Fqdn, DnsRecord.fqdn_id == Fqdn.id), DnsDomain)
@@ -271,43 +269,22 @@ class BuildItem(Base):
     """ Identifies the service_instance bindings of a machine. """
     __tablename__ = 'build_item'
 
-    #FIXME: remove id column. PK is machine/svc_inst
-    id = Column(Integer, Sequence('build_item_id_seq'), primary_key=True)
-
     host_id = Column('host_id', Integer, ForeignKey('host.machine_id',
                                                      ondelete='CASCADE',
                                                      name='build_item_host_fk'),
-                     nullable=False)
+                     primary_key=True)
 
     service_instance_id = Column(Integer,
                                  ForeignKey('service_instance.id',
                                             name='build_item_svc_inst_fk'),
-                                 nullable=False)
+                                 primary_key=True)
 
-    creation_date = deferred(Column(DateTime, default=datetime.now,
-                                    nullable=False))
-    comments = deferred(Column(String(255), nullable=True))
-
-    service_instance = relation(ServiceInstance, innerjoin=True,
-                                backref=backref('clients'))
-
-    host = relation(Host, innerjoin=True,
-                    backref=backref('_services_used',
-                                    cascade="all, delete-orphan"))
-
-
-def _build_item_si_creator(service_instance):
-    return BuildItem(service_instance=service_instance)
-
-Host.services_used = association_proxy('_services_used', 'service_instance',
-                                       creator=_build_item_si_creator)
 
 build_item = BuildItem.__table__  # pylint: disable=C0103, E1101
-
 build_item.primary_key.name = 'build_item_pk'
 
-build_item.append_constraint(
-    UniqueConstraint('host_id', 'service_instance_id', name='build_item_uk'))
+ServiceInstance.clients = relation(Host, secondary=build_item,
+                                   backref=backref("services_used"))
 
 # Make this a column property so it can be undeferred on bulk loads
 ServiceInstance._client_count = column_property(

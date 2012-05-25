@@ -70,9 +70,9 @@ class MachineFormatter(ObjectFormatter):
         if machine.primary_name:
             details.append(indent + "  Primary Name: "
                            "{0:a}".format(machine.primary_name))
-        if machine.cluster:
-            details.append(indent + \
-                           "  Hosted by {0:c}: {0.name}".format(machine.cluster))
+        if machine.vm_container:
+            details.append(indent + "  Hosted by: {0}"
+                           .format(machine.vm_container.holder.holder_object))
 
         # FIXME: This is now somewhat redundant
         managers = []

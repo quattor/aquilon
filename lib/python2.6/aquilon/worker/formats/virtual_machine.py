@@ -1,6 +1,6 @@
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 #
-# Copyright (C) 2009,2010,2011  Contributor
+# Copyright (C) 2012  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -26,34 +26,35 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
+"""VirtualMachine Resource formatter."""
 
 
-from aquilon.worker.broker import BrokerCommand
-from aquilon.aqdb.model import Personality, Cluster
-from aquilon.exceptions_ import ArgumentError
+from aquilon.worker.formats.formatters import ObjectFormatter
+from aquilon.worker.formats.resource import ResourceFormatter
+from aquilon.aqdb.model import VirtualMachine
 
 
-class CommandAddAllowedPersonality(BrokerCommand):
+class VirtualMachineFormatter(ResourceFormatter):
+    protocol = "aqdsystems_pb2"
 
-    required_parameters = ["archetype", "personality", "cluster"]
+    def format_raw(self, vm, indent=""):
+        # There will be a lot of VMs attached to a cluster, so be terse.
+        dbmachine = vm.machine
+        if dbmachine.primary_name:
+            name = dbmachine.primary_name.fqdn
+        else:
+            name = "no hostname"
 
-    def render(self, session, archetype, personality, cluster,
-               **kwargs):
-        dbpers = Personality.get_unique(session, name=personality,
-                                        archetype=archetype, compel=True)
-        dbclus = Cluster.get_unique(session, cluster, compel=True)
-        if len(dbclus.allowed_personalities) == 0:
-            for host in dbclus.hosts:
-                if host.personality != dbpers:
-                    raise ArgumentError("The cluster member %s has a "
-                                        "personality of %s which is "
-                                        "incompatible with this constraint." %
-                                        (host.fqdn, host.personality))
+        # TODO: report GB instead of MB?
+        return indent + "%s: %s (%s, %d MB)" % (
+            vm._get_class_label(), dbmachine.label, name, dbmachine.memory)
 
-        if dbpers not in dbclus.allowed_personalities:
-            dbclus.allowed_personalities.append(dbpers)
-            dbclus.validate()
+    def format_proto(self, vm, skeleton=None):
+        container = skeleton
+        if not container:
+            container = self.loaded_protocols[self.protocol].ResourceList()
+            skeleton = container.resources.add()
+        return super(VirtualMachineFormatter, self).format_proto(vm, skeleton)
 
-        session.flush()
 
-        return
+ObjectFormatter.handlers[VirtualMachine] = VirtualMachineFormatter()

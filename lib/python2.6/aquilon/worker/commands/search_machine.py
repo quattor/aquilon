@@ -34,7 +34,7 @@ from sqlalchemy.orm import aliased, subqueryload, joinedload
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.formats.machine import SimpleMachineList
 from aquilon.aqdb.model import (Machine, Cpu, Cluster, Service, ServiceInstance,
-                                NasDisk, Disk)
+                                NasDisk, Disk, ClusterResource)
 from aquilon.worker.dbwrappers.hardware_entity import (
     search_hardware_entity_query)
 
@@ -62,7 +62,7 @@ class CommandSearchMachine(BrokerCommand):
             q = q.filter_by(memory=memory)
         if cluster:
             dbcluster = Cluster.get_unique(session, cluster, compel=True)
-            q = q.join('_cluster')
+            q = q.join('vm_container', ClusterResource)
             q = q.filter_by(cluster=dbcluster)
             q = q.reset_joinpoint()
         if share:
@@ -84,8 +84,7 @@ class CommandSearchMachine(BrokerCommand):
                           subqueryload('chassis_slot.chassis'),
                           subqueryload('disks'),
                           subqueryload('host'),
-                          subqueryload('host._services_used'),
-                          subqueryload('host._cluster'),
-                          subqueryload('_cluster'))
+                          subqueryload('host.services_used'),
+                          subqueryload('host.cluster'))
             return q.all()
         return SimpleMachineList(q.all())

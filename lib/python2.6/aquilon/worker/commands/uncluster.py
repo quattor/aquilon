@@ -68,8 +68,10 @@ class CommandUncluster(BrokerCommand):
 
         dbcluster.hosts.remove(dbhost)
         remove_service_addresses(dbcluster, dbhost)
+        dbcluster.validate()
+
         session.flush()
-        session.expire(dbhost, ['_cluster'])
+        session.expire(dbhost, ['cluster'])
 
         # Will need to write a cluster plenary and either write or
         # remove a host plenary.  Grab the domain key since the two

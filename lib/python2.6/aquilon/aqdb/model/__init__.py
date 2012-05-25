@@ -105,9 +105,8 @@ from aquilon.aqdb.model.feature import (Feature, FeatureLink, HostFeature,
                                         HardwareFeature, InterfaceFeature)
 
 #SERVICE
-from aquilon.aqdb.model.service import (Service, ServiceListItem,
-                                        PersonalityServiceListItem)
-from aquilon.aqdb.model.service_instance import ServiceInstance, BuildItem
+from aquilon.aqdb.model.service import Service
+from aquilon.aqdb.model.service_instance import ServiceInstance
 from aquilon.aqdb.model.service_instance_server import ServiceInstanceServer
 from aquilon.aqdb.model.service_map import ServiceMap
 from aquilon.aqdb.model.personality_service_map import PersonalityServiceMap
@@ -130,10 +129,7 @@ with warnings.catch_warnings():
 
 from aquilon.aqdb.model.cluster import (Cluster, EsxCluster,
                                         ComputeCluster, StorageCluster,
-                                        HostClusterMember,
-                                        MachineClusterMember,
-                                        ClusterAlignedService,
-                                        ClusterServiceBinding)
+                                        ClusterAlignedService)
 from aquilon.aqdb.model.personality_cluster_info import (PersonalityClusterInfo,
                                                          PersonalityESXClusterInfo)
 
@@ -152,4 +148,5 @@ from aquilon.aqdb.model.intervention import Intervention
 from aquilon.aqdb.model.resourcegroup import ResourceGroup, BundleResource
 from aquilon.aqdb.model.reboot_schedule import (RebootSchedule,
                                                 RebootIntervention)
+from aquilon.aqdb.model.virtual_machine import VirtualMachine
 from aquilon.aqdb.model.service_address import ServiceAddress

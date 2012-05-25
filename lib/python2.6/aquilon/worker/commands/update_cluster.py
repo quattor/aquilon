@@ -133,6 +133,9 @@ class CommandUpdateCluster(BrokerCommand):
                         session.add(dbmachine)
                         # This plenary will have a path to the new location.
                         plenaries.append(Plenary.get_plenary(dbmachine))
+                        # Update the path to the machine plenary in the
+                        # container resource
+                        plenaries.append(Plenary.get_plenary(dbmachine.vm_container))
                 dbcluster.location_constraint = dblocation
                 cluster_updated = True
 

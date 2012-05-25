@@ -34,7 +34,6 @@ import logging
 from aquilon.aqdb.model import Machine
 from aquilon.worker.locks import CompileKey
 from aquilon.worker.templates.base import Plenary
-from aquilon.worker.templates.cluster import PlenaryClusterObject
 from aquilon.worker.templates.panutils import (StructureTemplate, pan_assign,
                                                pan_include, PanMetric,
                                                PanEscape)
@@ -88,29 +87,27 @@ class PlenaryMachineInfo(Plenary):
 
     def get_key(self):
         host = self.dbobj.host
-        cluster = self.dbobj.cluster
+        container = self.dbobj.vm_container
         # Need a compile key if:
         # - There is a non-aurora host attached.
-        # - This is a virtual machine in a cluster.
+        # - This is a virtual machine in a container.
         if ((not host or self.dbobj.model.machine_type == 'aurora_node')
-                and (not cluster)):
+                and (not container)):
             return None
-        # We have at least host or cluster, maybe both...
+        # We have at least host or container, maybe both...
         if host:
             # PlenaryHost is actually a PlenaryCollection... can't call
             # get_key() directly, so using get_remove_key().
             ph = Plenary.get_plenary(host, logger=self.logger)
             host_key = ph.get_remove_key()
-        if cluster:
-            pc = PlenaryClusterObject(cluster, logger=self.logger)
-            cluster_key = pc.get_key()
-        if not cluster:
+        if container:
+            pc = Plenary.get_plenary(container, self.logger)
+            container_key = pc.get_key()
+        if not container:
             return host_key
         if not host:
-            return cluster_key
-        # Just to make life fun, keep in mind that a virtual machine's guest
-        # and the cluster may be in separate domains.
-        return CompileKey.merge([host_key, cluster_key])
+            return container_key
+        return CompileKey.merge([host_key, container_key])
 
     def body(self, lines):
         ram = [StructureTemplate("hardware/ram/generic",

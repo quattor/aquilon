@@ -33,21 +33,16 @@ from datetime import datetime
 from sqlalchemy import (Column, Integer, Boolean, String, DateTime, Sequence,
                         ForeignKey, UniqueConstraint)
 
-from sqlalchemy.orm import (relation, backref, object_session, deferred,
-                            column_property)
+from sqlalchemy.orm import relation, backref, deferred
 from sqlalchemy.orm.attributes import instance_state
 from sqlalchemy.orm.interfaces import MapperExtension
 from sqlalchemy.ext.associationproxy import association_proxy
-from sqlalchemy.sql import select, func, and_
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.column_types import AqStr
-from aquilon.aqdb.model import (Base, Host, Service, Location,
-                                Personality, ClusterLifecycle,
-                                ServiceInstance, Machine, Branch, Switch,
-                                UserPrincipal, VlanInfo, ObservedVlan,
-                                Interface, HardwareEntity)
-from aquilon.config import Config
+from aquilon.aqdb.model import (Base, Host, Service, Location, Personality,
+                                ClusterLifecycle, ServiceInstance, Branch,
+                                Switch, UserPrincipal)
 
 # List of functions allowed to be used in vmhost_capacity_function
 restricted_builtins = {'None': None,
@@ -81,25 +76,12 @@ def convert_resources(resources):
 # Cluster is a reserved word in Oracle
 _TN = 'clstr'
 _HCM = 'host_cluster_member'
-_MCM = 'machine_cluster_member'
 _CAS = 'cluster_aligned_service'
 _CASABV = 'clstr_alnd_svc'
 _CSB = 'cluster_service_binding'
 _CSBABV = 'clstr_svc_bndg'
-
-
-def _hcm_host_creator(host):
-    return HostClusterMember(host=host)
-
-
-def _mcm_machine_creator(machine):
-    return MachineClusterMember(machine=machine)
-
-
-def _csb_svcinst_creator(service_instance):
-    return ClusterServiceBinding(service_instance=service_instance)
-
 _CAP = 'clstr_allow_per'
+
 
 class Cluster(Base):
     """
@@ -157,10 +139,9 @@ class Cluster(Base):
     branch = relation(Branch, lazy=False, innerjoin=True, backref='clusters')
     sandbox_author = relation(UserPrincipal)
 
-    hosts = association_proxy('_hosts', 'host', creator=_hcm_host_creator)
+    metacluster = association_proxy('_metacluster', 'metacluster')
 
-    allowed_personalities = association_proxy('_allowed_pers', 'personality',
-            creator=lambda pers: ClusterAllowedPersonality(personality=pers))
+    __mapper_args__ = {'polymorphic_on': cluster_type}
 
     @property
     def title(self):
@@ -190,19 +171,6 @@ class Cluster(Base):
             is_percent = True
         return (is_percent, thresh_value)
 
-    machines = association_proxy('_machines', 'machine',
-                                 creator=_mcm_machine_creator)
-
-    service_bindings = association_proxy('_cluster_svc_binding',
-                                         'service_instance',
-                                         creator=_csb_svcinst_creator)
-
-
-    _metacluster = None
-    metacluster = association_proxy('_metacluster', 'metacluster')
-
-    __mapper_args__ = {'polymorphic_on': cluster_type}
-
     @property
     def authored_branch(self):
         if self.sandbox_author:
@@ -215,6 +183,16 @@ class Cluster(Base):
             return self.personality.cluster_infos[self.cluster_type]
         else:
             return None
+
+    @property
+    def machines(self):
+        mach = []
+        if self.resholder:
+            for res in self.resholder.resources:
+                # TODO: support virtual machines inside resource groups?
+                if res.resource_type == "virtual_machine":
+                    mach.append(res.machine)
+        return mach
 
     def validate_membership(self, host, error=ArgumentError, **kwargs):
         if host.machine.location != self.location_constraint and \
@@ -233,7 +211,6 @@ class Cluster(Base):
                                               self,
                                               self.branch.branch_type,
                                               self.authored_branch))
-
 
     def validate(self, max_hosts=None, error=ArgumentError, **kwargs):
         if max_hosts is None:
@@ -271,6 +248,7 @@ cluster = Cluster.__table__  # pylint: disable=C0103, E1101
 cluster.primary_key.name = 'cluster_pk'
 cluster.append_constraint(UniqueConstraint('name', name='cluster_uk'))
 cluster.info['unique_fields'] = ['name']
+
 
 class ComputeCluster(Cluster):
     """
@@ -540,24 +518,6 @@ esx_cluster.primary_key.name = 'esx_cluster_pk'
 esx_cluster.info['unique_fields'] = ['name']
 
 
-class ValidateCluster(MapperExtension):
-    """ Helper class to perform validation on cluster membership changes """
-
-    def after_insert(self, mapper, connection, instance):
-        instance.cluster.validate()
-
-    def after_delete(self, mapper, connection, instance):
-        # This is a little tricky. If the instance got deleted through an
-        # association proxy, then instance.cluster will be None (although
-        # instance.cluster_id still has the right value).
-        if instance.cluster:
-            cluster = instance.cluster
-        else:
-            state = instance_state(instance)
-            cluster = state.committed_state['cluster']
-        cluster.validate()
-
-
 class HostClusterMember(Base):
     """ Specific Class for EsxCluster vmhosts """
     __tablename__ = _HCM
@@ -574,34 +534,15 @@ class HostClusterMember(Base):
                         #if the host is deleted, so is the membership
                         primary_key=True)
 
-    creation_date = deferred(Column(DateTime, default=datetime.now,
-                                    nullable=False))
-
-    """
-        Association Proxy and relation cascading:
-        We need cascade=all on backrefs so that deletion propagates to avoid
-        AssertionError: Dependency rule tried to blank-out primary key column on
-        deletion of the Cluster and it's links. On the contrary do not have
-        cascade='all' on the forward mapper here, else deletion of clusters
-        and their links also causes deleteion of hosts (BAD)
-    """
-    cluster = relation(Cluster, lazy=False, innerjoin=True,
-                       backref=backref('_hosts', cascade='all, delete-orphan'))
-
-    # This is a one-to-one relation, so we need uselist=False on the backref
-    host = relation(Host, lazy=False, innerjoin=True,
-                    backref=backref('_cluster', uselist=False,
-                                    cascade='all, delete-orphan'))
-
-    __mapper_args__ = {'extension': ValidateCluster()}
 
 hcm = HostClusterMember.__table__  # pylint: disable=C0103, E1101
 hcm.primary_key.name = '%s_pk' % _HCM
 hcm.append_constraint(
     UniqueConstraint('host_id', name='host_cluster_member_host_uk'))
-hcm.info['unique_fields'] = ['cluster', 'host']
 
-Host.cluster = association_proxy('_cluster', 'cluster')
+Cluster.hosts = relation(Host, secondary=hcm,
+                         backref=backref("cluster", uselist=False))
+
 
 class ClusterAllowedPersonality(Base):
     __tablename__ = _CAP
@@ -615,78 +556,11 @@ class ClusterAllowedPersonality(Base):
                                                 ondelete='CASCADE'),
                             primary_key=True)
 
-    creation_date = deferred(Column(DateTime, default=datetime.now,
-                                    nullable=False))
-
-    cluster = relation(Cluster, lazy=False,
-                       backref=backref('_allowed_pers', cascade='all, delete-orphan'))
-
-    personality = relation(Personality, lazy=False,
-                           backref=backref('_clusters_allowing',
-                                           cascade='all, delete-orphan'))
-
-    __mapper_args__ = {'extension': ValidateCluster()}
-
 
 cap = ClusterAllowedPersonality.__table__  # pylint: disable=C0103, E1101
 cap.primary_key.name = '%s_pk' % _CAP
-cap.info['unique_fields'] = ['cluster', 'personality']
-cap.cluster = association_proxy('_cluster', 'cluster')
 
-
-class MachineClusterMember(Base):
-    """ Binds machines into clusters """
-    __tablename__ = _MCM
-
-    cluster_id = Column(Integer, ForeignKey('%s.id' % _TN,
-                                                name='mchn_clstr_mmbr_clstr_fk',
-                                                ondelete='CASCADE'),
-                            primary_key=True)
-
-    machine_id = Column(Integer, ForeignKey('machine.machine_id',
-                                            name='mchn_clstr_mmbr_mchn_fk',
-                                            ondelete='CASCADE'),
-                        primary_key=True)
-
-    creation_date = deferred(Column(DateTime, default=datetime.now,
-                                    nullable=False))
-
-    """ See comments for HostClusterMembers relations """
-    cluster = relation(Cluster, lazy=False, innerjoin=True,
-                       backref=backref('_machines', cascade='all, delete-orphan'))
-
-    # This is a one-to-one relation, so we need uselist=False on the backref
-    machine = relation(Machine, lazy=False, innerjoin=True,
-                  backref=backref('_cluster', uselist=False,
-                                  cascade='all, delete-orphan'))
-
-    __mapper_args__ = {'extension': ValidateCluster()}
-
-mcm = MachineClusterMember.__table__  # pylint: disable=C0103, E1101
-mcm.primary_key.name = '%s_pk' % _MCM
-mcm.append_constraint(UniqueConstraint('machine_id',
-                                       name='machine_cluster_member_uk'))
-mcm.info['unique_fields'] = ['cluster', 'machine']
-
-Machine.cluster = association_proxy('_cluster', 'cluster')
-
-# Defined here to avoid circular dependencies
-ObservedVlan.guest_count = column_property(
-    select([func.count()],
-           and_(
-                # Select VMs on clusters that belong to the given switch
-                EsxCluster.switch_id == ObservedVlan.switch_id,
-                Cluster.id == EsxCluster.esx_cluster_id,
-                MachineClusterMember.cluster_id == Cluster.id,
-                Machine.machine_id == MachineClusterMember.machine_id,
-                # Select interfaces with the right port group
-                HardwareEntity.id == Machine.machine_id,
-                Interface.hardware_entity_id == HardwareEntity.id,
-                Interface.port_group == VlanInfo.port_group,
-                VlanInfo.vlan_id == ObservedVlan.vlan_id
-               )
-          ).label('guest_count'),
-    deferred=True)
+Cluster.allowed_personalities = relation(Personality, secondary=cap)
 
 
 class ClusterAlignedService(Base):
@@ -720,7 +594,6 @@ cas = ClusterAlignedService.__table__  # pylint: disable=C0103, E1101
 cas.primary_key.name = '%s_pk' % _CASABV
 cas.info['unique_fields'] = ['cluster_type', 'service']
 
-
 Cluster.required_services = relation(ClusterAlignedService,
     primaryjoin=ClusterAlignedService.cluster_type == Cluster.cluster_type,
     foreign_keys=[ClusterAlignedService.cluster_type],
@@ -744,34 +617,8 @@ class ClusterServiceBinding(Base):
                                             name='%s_srv_inst_fk' % _CSBABV),
                                  primary_key=True)
 
-    creation_date = deferred(Column(DateTime, default=datetime.now,
-                                    nullable=False))
-    comments = deferred(Column(String(255)))
-
-    cluster = relation(Cluster, lazy=False, innerjoin=True,
-                       backref=backref('_cluster_svc_binding',
-                                       cascade='all, delete-orphan'))
-
-    """
-        backref name != forward reference name intentional as it seems more
-        readable for the following reason:
-        If you instantiate a ClusterServiceBinding, you do it with
-                ClusterServiceBinding(cluster=foo, service_instance=bar)
-        But if you append to the association_proxy
-                cluster.service_bindings.append(svc_inst)
-    """
-    service_instance = relation(ServiceInstance, lazy=False, innerjoin=True,
-                                backref=backref('service_instances',
-                                                cascade="all, delete-orphan"))
-
-    """
-        cfg_path will die soon. using service instance here to
-        ease later transition.
-    """
-    @property
-    def cfg_path(self):
-        return self.service_instance.cfg_path
 
 csb = ClusterServiceBinding.__table__  # pylint: disable=C0103, E1101
 csb.primary_key.name = '%s_pk' % _CSB
-csb.info['unique_fields'] = ['cluster', 'service_instance']
+
+Cluster.service_bindings = relation(ServiceInstance, secondary=csb)

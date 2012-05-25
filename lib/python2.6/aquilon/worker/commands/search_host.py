@@ -39,7 +39,8 @@ from aquilon.aqdb.model import (Host, Cluster, Archetype, Personality,
                                 HostLifecycle, OperatingSystem, Service,
                                 ServiceInstance, NasDisk, Disk, Machine, Model,
                                 ARecord, Fqdn, DnsDomain, Interface,
-                                AddressAssignment, NetworkEnvironment, Network)
+                                AddressAssignment, NetworkEnvironment, Network,
+                                VirtualMachine, ClusterResource)
 from aquilon.aqdb.model.dns_domain import parse_fqdn
 from aquilon.worker.dbwrappers.service_instance import get_service_instance
 from aquilon.worker.dbwrappers.branch import get_branch_and_author
@@ -185,15 +186,13 @@ class CommandSearchHost(BrokerCommand):
             dbservice = Service.get_unique(session, service, compel=True)
             if instance:
                 dbsi = get_service_instance(session, dbservice, instance)
-                q = q.join('_services_used')
-                q = q.filter_by(service_instance=dbsi)
-                q = q.reset_joinpoint()
+                q = q.filter(Host.services_used.contains(dbsi))
             else:
-                q = q.join('_services_used', 'service_instance')
+                q = q.join('services_used')
                 q = q.filter_by(service=dbservice)
                 q = q.reset_joinpoint()
         elif instance:
-            q = q.join('_services_used', 'service_instance')
+            q = q.join('services_used')
             q = q.filter_by(name=instance)
             q = q.reset_joinpoint()
 
@@ -217,13 +216,12 @@ class CommandSearchHost(BrokerCommand):
 
         if cluster:
             dbcluster = Cluster.get_unique(session, cluster, compel=True)
-            q = q.join('_cluster')
             q = q.filter_by(cluster=dbcluster)
             q = q.reset_joinpoint()
         if guest_on_cluster:
             dbcluster = Cluster.get_unique(session, guest_on_cluster,
                                            compel=True)
-            q = q.join('machine', '_cluster')
+            q = q.join('machine', VirtualMachine, ClusterResource)
             q = q.filter_by(cluster=dbcluster)
             q = q.reset_joinpoint()
         if guest_on_share:
@@ -244,8 +242,8 @@ class CommandSearchHost(BrokerCommand):
                                                  service=nas_disk_share,
                                                  compel=True)
             NasAlias = aliased(NasDisk)
-            q = q.join('_cluster', 'cluster', '_machines', 'machine',
-                       'disks', (NasAlias, NasAlias.id==Disk.id))
+            q = q.join('cluster', 'resholder', VirtualMachine,
+                       'machine', 'disks', (NasAlias, NasAlias.id==Disk.id))
             q = q.filter_by(service_instance=dbshare)
             q = q.reset_joinpoint()
 

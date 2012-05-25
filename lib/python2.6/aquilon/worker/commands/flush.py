@@ -29,9 +29,19 @@
 """Contains the logic for `aq flush`."""
 
 
+from collections import defaultdict
+from operator import attrgetter
+
+from sqlalchemy.orm import joinedload, subqueryload, lazyload, contains_eager
+from sqlalchemy.orm.attributes import set_committed_value
+
 from aquilon.worker.broker import BrokerCommand
-from aquilon.aqdb.model import (Service, Machine, Host, Branch, Personality,
-                                Cluster, City, Resource)
+from aquilon.aqdb.model import (Service, Machine, Chassis, Host, Branch,
+                                Personality, Cluster, City, Rack, Resource,
+                                ResourceHolder, HostResource, ClusterResource,
+                                VirtualMachine, Filesystem, RebootSchedule,
+                                Disk, Interface, AddressAssignment,
+                                ServiceInstance)
 from aquilon.worker.templates.base import Plenary
 from aquilon.worker.locks import CompileKey
 from aquilon.exceptions_ import PartialError, IncompleteError
@@ -47,8 +57,126 @@ class CommandFlush(BrokerCommand):
         failed = []
         written = 0
 
+        # Caches for keeping preloaded data pinned in memory, since the SQLA
+        # session holds a weak reference only
+        resource_by_id = {}
+        resholder_by_id = {}
+        service_instances = None
+        racks = None
+
+        # Object caches that are accessed directly
+        disks_by_machine = defaultdict(list)
+        interfaces_by_machine = defaultdict(list)
+        interfaces_by_id = {}
+
+        if all:
+            services = True
+            personalities = True
+            machines = True
+            clusters = True
+            hosts = True
+            locations = True
+            resources = True
+
         with CompileKey(logger=logger):
-            if locations or all:
+            logger.client_info("Loading data.")
+
+            # When flushing clusters/hosts, loading the resource holder is done
+            # as the query that loads those objects. But when flushing resources
+            # only, we need the holder and the object it belongs to.
+            if resources and not clusters:
+                q = session.query(ClusterResource)
+                # Using joinedload('cluster') would generate an outer join
+                q = q.join(Cluster)
+                q = q.options(contains_eager('cluster'))
+                for resholder in q:
+                    resholder_by_id[resholder.id] = resholder
+            if resources and not hosts:
+                q = session.query(HostResource)
+                # Using joinedload('host') would generate an outer join
+                q = q.join(Host)
+                q = q.options(contains_eager('host'))
+                for resholder in q:
+                    resholder_by_id[resholder.id] = resholder
+
+            if hosts or clusters or resources:
+                # Load the most common resource types. Using
+                # with_polymorphic('*') on Resource would generate a huge query,
+                # so do something more targeted. More resource subclasses may be
+                # added later if they become common.
+                preload_classes = {
+                    Filesystem: [],
+                    RebootSchedule: [],
+                    VirtualMachine: [joinedload('machine'),
+                                     joinedload('machine.primary_name'),
+                                     joinedload('machine.primary_name.fqdn')],
+                }
+
+                for cls, options in  preload_classes.items():
+                    q = session.query(cls)
+
+                    # If only hosts or only clusters are needed, don't load
+                    # resources of the other kind
+                    if hosts and not clusters and not resources:
+                        q = q.join(ResourceHolder)
+                        q = q.options(contains_eager('holder'))
+                        q = q.filter_by(holder_type='host')
+                    if clusters and not hosts and not resources:
+                        q = q.join(ResourceHolder)
+                        q = q.filter_by(holder_type='cluster')
+                        q = q.options(contains_eager('holder'))
+
+                    if options:
+                        q = q.options(*options)
+
+                    for res in q:
+                        resource_by_id[res.id] = res
+
+            if hosts or machines:
+                # Polymorphic loading cannot be applied to eager-loaded
+                # attributes, so load interfaces manually.
+                q = session.query(Interface)
+                q = q.with_polymorphic('*')
+                q = q.options(lazyload("hardware_entity"))
+                for iface in q:
+                    interfaces_by_machine[iface.hardware_entity_id].append(iface)
+                    interfaces_by_id[iface.id] = iface
+
+                if hosts:
+                    # subqueryload() and with_polymorphic() do not play nice
+                    # together, so do it by hand
+                    q = session.query(AddressAssignment)
+                    q = q.options(lazyload("interface"),
+                                  joinedload("network"),
+                                  joinedload("dns_records"))
+                    q = q.order_by(AddressAssignment._label)
+                    addrs_by_iface = defaultdict(list)
+                    for addr in q:
+                        addrs_by_iface[addr.interface_id].append(addr)
+                    for interface_id, addrs in addrs_by_iface.items():
+                        set_committed_value(interfaces_by_id[interface_id],
+                                            "assignments", addrs)
+
+                    q = session.query(Interface.id)
+                    q = q.filter(~Interface.assignments.any())
+                    for id in q.all():
+                        set_committed_value(interfaces_by_id[id[0]],
+                                            "assignments", None)
+
+            if hosts or services:
+                q = session.query(ServiceInstance)
+                q = q.options(subqueryload("service"))
+                service_instances = q.all()
+
+            if machines or clusters:
+                # Most machines are in racks...
+                q = session.query(Rack)
+                q = q.options(subqueryload("dns_maps"),
+                              subqueryload("parents"))
+                racks = q.all()
+
+
+            if locations:
                 logger.client_info("Flushing locations.")
                 for dbloc in session.query(City).all():
                     try:
@@ -59,9 +187,11 @@ class CommandFlush(BrokerCommand):
                                       dbloc, e)
                         continue
 
-            if services or all:
+            if services:
                 logger.client_info("Flushing services.")
-                for dbservice in session.query(Service).all():
+                q = session.query(Service)
+                q = q.options(subqueryload("instances"))
+                for dbservice in q:
                     try:
                         plenary_info = Plenary.get_plenary(dbservice,
                                                            logger=logger)
@@ -81,7 +211,7 @@ class CommandFlush(BrokerCommand):
                                           (dbservice.name, dbinst.name, e))
                             continue
 
-            if personalities or all:
+            if personalities:
                 logger.client_info("Flushing personalities.")
                 for persona in session.query(Personality).all():
                     try:
@@ -93,15 +223,64 @@ class CommandFlush(BrokerCommand):
                                       (persona.name, e))
                         continue
 
-            if machines or all:
+            if machines:
                 logger.client_info("Flushing machines.")
-                cnt = session.query(Machine).count()
+
+                # Polymorphic loading cannot be applied to eager-loaded
+                # attributes, so load disks manually
+                q = session.query(Disk)
+                q = q.with_polymorphic('*')
+                for disk in q:
+                    disks_by_machine[disk.machine_id].append(disk)
+
+                # Load chassis
+                q = session.query(Chassis)
+                q = q.options(joinedload("primary_name"),
+                              joinedload("primary_name.fqdn"))
+                chassis = q.all()
+
+                # Load manager addresses
+                # TODO: only if not hosts
+                manager_addrs = defaultdict(list)
+                q = session.query(AddressAssignment)
+                q = q.join(Interface)
+                q = q.filter_by(interface_type="management")
+                q = q.options(contains_eager("interface"),
+                              joinedload("dns_records"),
+                              lazyload("interface.hardware_entity"))
+                for addr in q:
+                    manager_addrs[addr.interface.id].append(addr)
+                for interface_id, addrs in manager_addrs.items():
+                    if interface_id not in interfaces_by_id:
+                        # Should not happen...
+                        continue
+                    addrs.sort(key=attrgetter("label"))
+                    set_committed_value(interfaces_by_id[interface_id],
+                                        "assignments", addrs)
+
+                q = session.query(Machine)
+                q = q.options(lazyload("host"),
+                              lazyload("primary_name"),
+                              subqueryload("chassis_slot"))
+
+                cnt = q.count()
                 idx = 0
-                for machine in session.query(Machine).all():
+                for machine in q:
                     idx += 1
                     if idx % 1000 == 0:  # pragma: no cover
                         logger.client_info("Processing machine %d of %d..." %
                                            (idx, cnt))
+
+                    if machine.id in disks_by_machine:
+                        disks_by_machine[machine.id].sort(key=attrgetter('device_name'))
+                        set_committed_value(machine, 'disks',
+                                            disks_by_machine[machine.id])
+
+                    if machine.id in interfaces_by_machine:
+                        interfaces_by_machine[machine.id].sort(key=attrgetter('name'))
+                        set_committed_value(machine, 'interfaces',
+                                            interfaces_by_machine[machine.id])
+
                     try:
                         plenary_info = Plenary.get_plenary(machine,
                                                            logger=logger)
@@ -114,32 +293,67 @@ class CommandFlush(BrokerCommand):
                         failed.append("Machine %s failed: %s" % (label, e))
                         continue
 
-            if hosts or all:
+            if hosts:
                 logger.client_info("Flushing hosts.")
+
+                q = session.query(Cluster)
+                q = q.options(subqueryload("_metacluster"),
+                              joinedload("_metacluster.metacluster"),
+                              lazyload("location_constraint"),
+                              lazyload("personality"),
+                              lazyload("branch"))
+                cluster_cache = q.all()
+
                 cnt = session.query(Host).count()
                 idx = 0
-                for b in session.query(Branch).all():
-                    for h in b.hosts:
-                        idx += 1
-                        if idx % 1000 == 0:  # pragma: no cover
-                            logger.client_info("Processing host %d of %d..." %
-                                               (idx, cnt))
-                        if not h.archetype.is_compileable:
-                            continue
-                        try:
-                            plenary_host = Plenary.get_plenary(h, logger=logger)
-                            written += plenary_host.write(locked=True)
-                        except IncompleteError, e:
-                            pass
-                            #logger.client_info("Not flushing host: %s" % e)
-                        except Exception, e:
-                            failed.append("{0} in {1:l} failed: {2}".format(h, b, e))
+                q = session.query(Host)
+                q = q.options(joinedload("machine"),
+                              joinedload("machine.primary_name"),
+                              joinedload("machine.primary_name.fqdn"),
+                              subqueryload("grns"),
+                              subqueryload("resholder"),
+                              subqueryload("services_used"),
+                              subqueryload("_services_provided"),
+                              subqueryload("cluster"))
+                for h in q:
+                    idx += 1
+                    if idx % 1000 == 0:  # pragma: no cover
+                        logger.client_info("Processing host %d of %d..." %
+                                           (idx, cnt))
 
-            if clusters or all:
+                    if not h.archetype.is_compileable:
+                        continue
+
+                    # TODO: this is redundant when machines are flushed as well,
+                    # but should not hurt
+                    if h.machine.id in interfaces_by_machine:
+                        interfaces_by_machine[h.machine.id].sort(key=attrgetter('name'))
+                        set_committed_value(h.machine, 'interfaces',
+                                            interfaces_by_machine[h.machine.id])
+
+                    try:
+                        plenary_host = Plenary.get_plenary(h, logger=logger)
+                        written += plenary_host.write(locked=True)
+                    except IncompleteError, e:
+                        pass
+                        #logger.client_info("Not flushing host: %s" % e)
+                    except Exception, e:
+                        failed.append("{0} in {1:l} failed: {2}".format(h, h.branch, e))
+
+            if clusters:
                 logger.client_info("Flushing clusters.")
-                cnt = session.query(Cluster).count()
+                q = session.query(Cluster)
+                q = q.options(subqueryload('hosts'),
+                              joinedload('hosts.machine'),
+                              subqueryload('_metacluster'),
+                              joinedload('_metacluster.metacluster'),
+                              joinedload('resholder'),
+                              subqueryload('resholder.resources'),
+                              subqueryload('service_bindings'),
+                              subqueryload('allowed_personalities'))
+                cnt = q.count()
                 idx = 0
-                for clus in session.query(Cluster).all():
+                for clus in q:
                     idx += 1
                     if idx % 20 == 0:  # pragma: no cover
                         logger.client_info("Processing cluster %d of %d..." %
@@ -150,9 +364,17 @@ class CommandFlush(BrokerCommand):
                     except Exception, e:
                         failed.append("{0} failed: {1}".format(clus, e))
 
-            if resources or all:
+            if resources:
                 logger.client_info("Flushing resources.")
-                for dbresource in session.query(Resource).all():
+
+                q = session.query(Resource)
+                cnt = q.count()
+                idx = 0
+                for dbresource in q:
+                    idx += 1
+                    if idx % 1000 == 0:  # pragma: no cover
+                        logger.client_info("Processing resource %d of %d..." %
+                                           (idx, cnt))
                     try:
                         plenary = Plenary.get_plenary(dbresource, logger=logger)
                         written += plenary.write(locked=True)

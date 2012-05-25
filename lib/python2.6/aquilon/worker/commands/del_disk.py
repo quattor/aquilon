@@ -98,21 +98,21 @@ class CommandDelDisk(BrokerCommand):
 
         plenary_machine = Plenary.get_plenary(dbmachine, logger=logger)
         key = plenary_machine.get_write_key()
-        dbcluster = dbmachine.cluster
-        if dbcluster:
-            plenary_cluster = Plenary.get_plenary(dbcluster, logger=logger)
-            key = CompileKey.merge([key, plenary_cluster.get_write_key()])
+        dbcontainer = dbmachine.vm_container
+        if dbcontainer:
+            plenary_container = Plenary.get_plenary(dbcontainer, logger=logger)
+            key = CompileKey.merge([key, plenary_container.get_write_key()])
         try:
             lock_queue.acquire(key)
-            if dbcluster:
-                plenary_cluster.write(locked=True)
+            if dbcontainer:
+                plenary_container.write(locked=True)
             plenary_machine.write(locked=True)
             if to_remove_from_rp:
                 self._remove_from_rp(to_remove_from_rp)
         except:
             plenary_machine.restore_stash()
-            if dbcluster:
-                plenary_cluster.restore_stash()
+            if dbcontainer:
+                plenary_container.restore_stash()
             raise
         finally:
             lock_queue.release(key)

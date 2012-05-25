@@ -81,13 +81,4 @@ def get_host_dependencies(session, dbhost):
     for si in dbhost.services_provided:
         ret.append("%s is bound as a server for service %s instance %s" %
                    (dbhost.fqdn, si.service.name, si.name))
-    if dbhost.cluster and hasattr(dbhost.cluster, 'vm_to_host_ratio') and \
-       dbhost.cluster.host_count * len(dbhost.cluster.machines) > \
-       dbhost.cluster.vm_count * (len(dbhost.cluster.hosts) - 1):
-        ret.append("Removing vmhost %s from %s cluster %s would exceed "
-                   "vm_to_host_ratio %s (%s VMs:%s hosts)" %
-                   (dbhost.fqdn, dbhost.cluster.cluster_type,
-                    dbhost.cluster.name, dbhost.cluster.vm_to_host_ratio,
-                    len(dbhost.cluster.machines),
-                    len(dbhost.cluster.hosts) - 1))
     return ret

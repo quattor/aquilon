@@ -2291,6 +2291,7 @@
          <option name="intervention" type="string" conflicts="machine service instance default nasinfo data">Name of an intervention</option>
          <option name="reboot_intervention" type="string" conflicts="machine service instance default nasinfo data">Name of a reboot intervention</option>
          <option name="reboot_schedule" type="string" conflicts="machine service instance default nasinfo data">Name of a reboot schedule</option>
+         <option name="virtual_machine" type="string" conflicts="machine service instance default nasinfo data">Name of a virtual machine</option>
          <option name="service_address" type="string" conflicts="machine service instance default nasinfo data">Name of a service address</option>
       </optgroup>
       <transport trigger="machine" method="get" path="machine/%(machine)s/plenary" />

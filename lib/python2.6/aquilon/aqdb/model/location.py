@@ -211,7 +211,7 @@ class Location(Base):
         session.autoflush = flush_state
 
 
-location = Location.__table__  # pylint: disable-msg=C0103, E1101
+location = Location.__table__  # pylint: disable=C0103, E1101
 
 location.primary_key.name = 'location_pk'
 location.info['unique_fields'] = ['name', 'location_type']

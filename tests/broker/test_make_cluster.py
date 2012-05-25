@@ -79,8 +79,7 @@ class TestMakeCluster(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, '"/system/cluster/name" = "utecl1";', command)
         self.matchoutput(out, '"/system/metacluster/name" = "utmc1";', command)
-        self.searchoutput(out, r'"/system/cluster/machines" = nlist\(\s*\);',
-                          command)
+        self.matchclean(out, "resources/virtual_machine", command)
 
     def testverifycatutecl1_2(self):
         self.successtest(["add_allowed_personality",
@@ -172,8 +171,7 @@ class TestMakeCluster(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, '"/system/cluster/name" = "utecl2";', command)
         self.matchoutput(out, '"/system/metacluster/name" = "utmc1";', command)
-        self.searchoutput(out, r'"/system/cluster/machines" = nlist\(\s*\);',
-                          command)
+        self.matchclean(out, "resources/virtual_machine", command)
 
     def testfailmissingcluster(self):
         command = ["make_cluster", "--cluster=cluster-does-not-exist"]
