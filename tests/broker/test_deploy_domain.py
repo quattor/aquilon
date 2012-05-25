@@ -42,12 +42,12 @@ from brokertest import TestBrokerCommand
 
 class TestDeployDomain(TestBrokerCommand):
 
-    def testdeploychangetest1domain(self):
+    def test_100_deploychangetest1domain(self):
         self.successtest(["deploy", "--source", "changetest1",
                           "--target", "deployable",
                           "--comments", "Test comment"])
 
-    def testverifydeploy(self):
+    def test_110_verifydeploy(self):
         domainsdir = self.config.get("broker", "domainsdir")
         ddir = os.path.join(domainsdir, "deployable")
         template = os.path.join(ddir, "aquilon", "archetype", "base.tpl")
@@ -55,7 +55,7 @@ class TestDeployDomain(TestBrokerCommand):
             contents = f.readlines()
         self.failUnlessEqual(contents[-1], "#Added by unittest\n")
 
-    def testverifydeploylog(self):
+    def test_110_verifydeploylog(self):
         kingdir = self.config.get("broker", "kingdir")
         command = ["log", "--no-color", "-n", "1", "deployable"]
         (out, err) = self.gitcommand(command, cwd=kingdir)
@@ -63,7 +63,7 @@ class TestDeployDomain(TestBrokerCommand):
         self.matchoutput(out, "Request ID:", command)
         self.matchoutput(out, "Comments: Test comment", command)
 
-    def testdeployfail(self):
+    def test_120_deployfail(self):
         command = ["deploy", "--source", "changetest1",
                    "--target", "prod"]
         (out, err) = self.failuretest(command, 4)
@@ -72,19 +72,19 @@ class TestDeployDomain(TestBrokerCommand):
                          "Please specify --justification.",
                          command)
 
-    def testdeploynosync(self):
-        self.successtest(["deploy", "--source", "changetest1",
-                          "--target", "prod", "--nosync",
-                          "--justification", "tcm=12345678",
-                          "--comments", "Test comment 2"])
-
-    def testdeploybadjustification(self):
+    def test_120_deploybadjustification(self):
         command = ["deploy", "--source", "changetest1", "--target", "prod",
                    "--justification", "I felt like deploying changes."]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Failed to parse the justification", command)
 
-    def testverifynosync(self):
+    def test_130_deploynosync(self):
+        self.successtest(["deploy", "--source", "changetest1",
+                          "--target", "prod", "--nosync",
+                          "--justification", "tcm=12345678",
+                          "--comments", "Test comment 2"])
+
+    def test_200_verifynosync(self):
         domainsdir = self.config.get("broker", "domainsdir")
         # The change should be in prod...
         ddir = os.path.join(domainsdir, "prod")
@@ -99,7 +99,7 @@ class TestDeployDomain(TestBrokerCommand):
             contents = f.readlines()
         self.failIfEqual(contents[-1], "#Added by unittest\n")
 
-    def testverifynosynclog(self):
+    def test_210_verifynosynclog(self):
         kingdir = self.config.get("broker", "kingdir")
 
         # Note: "prod" is a copy of the real thing so limit the amount of
@@ -115,6 +115,27 @@ class TestDeployDomain(TestBrokerCommand):
         command = ["log", "--no-color", "-n", "1", "ut-prod"]
         (out, err) = self.gitcommand(command, cwd=kingdir)
         self.matchclean(out, "tcm=12345678", command)
+
+    def test_300_addadvanced(self):
+        self.successtest(["add", "sandbox", "--sandbox", "advanced",
+                          "--start", "prod"])
+
+    def test_310_deploy_leftbehind(self):
+        command = ["deploy", "--source", "advanced", "--target", "leftbehind"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "You're trying to deploy a sandbox to a domain that "
+                         "does not contain the commit where the sandbox was "
+                         "branched from.",
+                         command)
+
+    def test_320_update_leftbehind(self):
+        command = ["deploy", "--source", "prod", "--target", "leftbehind"]
+        self.successtest(command)
+
+    def test_330_deploy_again(self):
+        command = ["deploy", "--source", "advanced", "--target", "leftbehind"]
+        self.successtest(command)
 
 
 if __name__=='__main__':

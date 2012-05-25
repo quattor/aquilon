@@ -50,11 +50,17 @@ class TestAddSandbox(TestBrokerCommand):
                     "Did not expect directory '%s' to exist" % sandboxdir)
 
     def testverifyaddunittestsandbox(self):
+        kingdir = self.config.get("broker", "kingdir")
+        (out, err) = self.gitcommand(["show-ref", "--hash", "refs/heads/prod"],
+                                     cwd=kingdir)
+        head = out.strip()
+
         command = "show sandbox --sandbox utsandbox"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Sandbox: utsandbox", command)
         self.matchoutput(out, "Comments: Sandbox used for aqd unit tests",
                          command)
+        self.matchoutput(out, "Base Commit: %s" % head, command)
         self.matchclean(out, "Path", command)
 
     def testverifyshowpath(self):

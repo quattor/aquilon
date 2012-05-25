@@ -108,6 +108,7 @@ class Domain(Branch):
     __mapper_args__ = {'polymorphic_identity': _DMN,
                        'inherit_condition': domain_id == Branch.id}
 
+
 domain = Domain.__table__  # pylint: disable=C0103, E1101
 domain.primary_key.name = '%s_pk' % _DMN
 domain.info['unique_fields'] = ['name']
@@ -126,6 +127,9 @@ class Sandbox(Branch):
     sandbox_id = Column(Integer, ForeignKey('branch.id', name='%s_fk' % _SBX,
                                             ondelete='CASCADE'),
                         primary_key=True)
+
+    base_commit = Column(AqStr(40), nullable=False)
+
 
 sandbox = Sandbox.__table__  # pylint: disable=C0103, E1101
 sandbox.primary_key.name = '%s_pk' % _SBX

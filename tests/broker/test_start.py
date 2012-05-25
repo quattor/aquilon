@@ -117,22 +117,33 @@ class TestBrokerStart(unittest.TestCase):
                          % (out, err))
         # This value can be used to test against a different branch/commit
         # than the current 'prod'.
-        if not config.has_option("unittest", "template_alternate_prod"):
-            return
-        new_prod = config.get("unittest", "template_alternate_prod")
-        if not new_prod:
-            return
-        for domain in ['prod', 'ny-prod']:
-            p = Popen(("git", "push", ".", '+%s:%s' % (new_prod, domain)),
-                      env=env, cwd=dest, stdout=PIPE, stderr=PIPE)
-            (out, err) = p.communicate()
-            # Ignore out/err unless we get a non-zero return code, then log it.
-            self.assertEqual(p.returncode, 0,
-                             "Non-zero return code while setting alternate "
-                             "'%s' branch locally to '%s':"
-                             "\nSTDOUT:\n@@@\n'%s'\n@@@\n"
-                             "\nSTDERR:\n@@@\n'%s'\n@@@\n"
-                             % (domain, new_prod, out, err))
+        new_prod = None
+        if config.has_option("unittest", "template_alternate_prod"):
+            new_prod = config.get("unittest", "template_alternate_prod")
+
+        if new_prod:
+            for domain in ['prod', 'ny-prod']:
+                p = Popen(("git", "push", ".", '+%s:%s' % (new_prod, domain)),
+                          env=env, cwd=dest, stdout=PIPE, stderr=PIPE)
+                (out, err) = p.communicate()
+                # Ignore out/err unless we get a non-zero return code, then log it.
+                self.assertEqual(p.returncode, 0,
+                                 "Non-zero return code while setting alternate "
+                                 "'%s' branch locally to '%s':"
+                                 "\nSTDOUT:\n@@@\n'%s'\n@@@\n"
+                                 "\nSTDERR:\n@@@\n'%s'\n@@@\n"
+                                 % (domain, new_prod, out, err))
+
+        # Set the default branch
+        p = Popen(("git", "symbolic-ref", "HEAD", "refs/heads/prod"),
+                  env=env, cwd=dest, stdout=PIPE, stderr=PIPE)
+        (out, err) = p.communicate()
+        self.assertEqual(p.returncode, 0,
+                         "Non-zero return code while setting HEAD "
+                         "to refs/heads/prod:"
+                         "\nSTDOUT:\n@@@\n'%s'\n@@@\n"
+                         "\nSTDERR:\n@@@\n'%s'\n@@@\n"
+                         % (out, err))
         return
 
     def testrsyncswrep(self):
