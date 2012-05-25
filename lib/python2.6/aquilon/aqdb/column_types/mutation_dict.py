@@ -1,6 +1,6 @@
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 #
-# Copyright (C) 2008,2009,2010,2011  Contributor
+# Copyright (C) 2011  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -26,11 +26,37 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-from aquilon.aqdb.column_types.aqstr import AqStr
-from aquilon.aqdb.column_types.aqmac import AqMac
-from aquilon.aqdb.column_types.IPV4 import IPV4
-from aquilon.aqdb.column_types.enum import Enum
-from aquilon.aqdb.column_types.guid import GUID
-from aquilon.aqdb.column_types.utc_datetime import UTCDateTime
-from aquilon.aqdb.column_types.json_dict import JSONEncodedDict
-from aquilon.aqdb.column_types.mutation_dict import MutationDict
+
+from sqlalchemy.ext.mutable import Mutable
+
+class MutationDict(Mutable, dict):
+    """ This tracks mutation on dict table
+        This currently only tracks a single level of mutation
+    """
+
+    @classmethod
+    def coerce(cls, key, value):
+        "Convert plain dictionaries to MutationDict."
+
+
+        if not isinstance(value, MutationDict):
+            if isinstance(value, dict):
+                return MutationDict(value)
+
+            # this call will raise ValueError
+            return Mutable.coerce(key, value)
+        else:
+            return value
+
+    def __setitem__(self, key, value):
+        "Detect dictionary set events and emit change events."
+
+        dict.__setitem__(self, key, value)
+        self.changed()
+
+    def __delitem__(self, key):
+        "Detect dictionary del events and emit change events."
+
+        dict.__delitem__(self, key)
+        self.changed()
+
