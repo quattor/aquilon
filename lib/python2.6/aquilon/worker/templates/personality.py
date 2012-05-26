@@ -27,31 +27,222 @@
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
 
-
 import logging
 
-from aquilon.aqdb.model import Personality
-from aquilon.worker.templates.base import Plenary
-from aquilon.worker.templates.panutils import pan_include, pan_variable
+from aquilon.aqdb.model import Personality, Parameter
+from aquilon.worker.templates.base import (Plenary, TemplateFormatter,
+                                           PlenaryCollection)
+from aquilon.worker.templates.panutils import (pan_include,
+                                               pan_variable,
+                                               pan_assign, pan_push,
+                                               pan_include_if_exists)
+from aquilon.worker.dbwrappers.parameter import (validate_value,
+                                                 get_param_definitions,
+                                                 get_parameters)
+from sqlalchemy.orm import object_session
+from collections import defaultdict
 
 LOGGER = logging.getLogger(__name__)
 
-
-class PlenaryPersonality(Plenary):
+class PlenaryPersonality(PlenaryCollection):
 
     template_type = ""
 
     def __init__(self, dbpersonality, logger=LOGGER):
-        Plenary.__init__(self, dbpersonality, logger=logger)
-        self.name = dbpersonality.name
+        PlenaryCollection.__init__(self, logger=LOGGER)
 
+        self.dbobj = dbpersonality
+
+        self.plenaries.append(PlenaryPersonalityBase(dbpersonality,
+                                                     logger=logger))
+        self.plenaries.append(PlenaryPersonalityPreFeature(dbpersonality,
+                                                           logger=logger))
+        self.plenaries.append(PlenaryPersonalityPostFeature(dbpersonality,
+                                                            logger=logger))
+
+        ## mulitple structure templates for parameters
+        self.param_templates = PlenaryPersonality.get_parameters_by_tmpl(dbpersonality)
+        for template in self.param_templates:
+            self.plenaries.append(
+                 PlenaryPersonalityParameter(template,
+                                             self.param_templates[template],
+                                             dbpersonality, logger=logger))
+    @staticmethod
+    def helper_feature_template(featuretemplate, dbfeaturelink, lines):
+
+        params = PlenaryPersonality.get_parameters_by_feature(dbfeaturelink)
+        for path in params:
+            pan_variable(lines, path, params[path])
+        lines.append(featuretemplate.format_raw(dbfeaturelink))
+
+    @staticmethod
+    def get_parameters_by_tmpl(dbpersonality):
+        ret = defaultdict(dict)
+
+        param_definitions = get_param_definitions(
+                                object_session(dbpersonality),
+                                archetype=dbpersonality.archetype)
+
+        parameters = get_parameters(object_session(dbpersonality),
+                                    personality=dbpersonality)
+
+        for param_def in param_definitions:
+            value = None
+            for param in parameters:
+                value = param.get_path(param_def.path, compel=False)
+                if not value and param_def.default:
+                    value = validate_value(
+                                "default for path=%s" % param_def.path,
+                                param_def.value_type, param_def.default)
+                if value is not None:
+                    ## coerce string list to list
+                    if param_def.value_type == 'list' :
+                        value = PlenaryPersonality.string_to_list(value)
+
+                    PlenaryPersonality.get_path_under_top(param_def.path, value,
+                                                       ret[param_def.template])
+
+            ## if all parameters are not defined still generate empty template
+            if param_def.template not in ret:
+                ret[param_def.template] = defaultdict()
+        return ret
+
+    @staticmethod
+    def get_path_under_top(path, value, ret):
+        """ input variable of type xx/yy would be printed as yy only in the
+            particular structure template """
+        pparts = Parameter.path_parts(path)
+        if not pparts:
+            return
+        pparts.pop(0)
+        if pparts:
+            ret[Parameter.topath(pparts)] = value
+        else:
+            for k in value:
+                ret[k] = value[k]
+
+    @staticmethod
+    def get_parameters_by_feature(dbfeaturelink):
+        ret = {}
+        param_definitions = get_param_definitions(object_session(dbfeaturelink),
+                                                  feature=dbfeaturelink.feature)
+        parameters = get_parameters(object_session(dbfeaturelink),
+                                    featurelink=dbfeaturelink)
+
+        for param_def in param_definitions:
+            value = None
+            for param in parameters:
+                value = param.get_path(param_def.path, compel=False)
+                if not value and param_def.default:
+                    value = validate_value(
+                                "default for path=%s" % param_def.path,
+                                param_def.value_type, param_def.default)
+                if value is not None:
+                    if param_def.value_type == 'list' :
+                        value = PlenaryPersonality.string_to_list(value)
+                    ret[param_def.path] = value
+        return ret
+
+    @staticmethod
+    def string_to_list(data):
+        ret = []
+        for val in data.split(','):
+            if isinstance(val, str):
+                val = val.strip()
+            ret.append(val)
+        return ret
+                
+Plenary.handlers[Personality] = PlenaryPersonality
+
+class FeatureTemplate(TemplateFormatter):
+    template_raw = "feature.mako"
+
+class ParameterTemplate(TemplateFormatter):
+    template_raw = "parameter.mako"
+
+
+class PlenaryPersonalityBase(Plenary):
+
+    template_type = ''
+
+    def __init__(self, dbpersonality, logger=LOGGER):
+        Plenary.__init__(self, dbpersonality, logger=logger)
+
+        self.name = dbpersonality.name
         self.loadpath = dbpersonality.archetype.name
-        self.plenary_core = "personality/%s" % dbpersonality.name
+
+        self.plenary_core = "personality/%s" % self.name
         self.plenary_template = "config"
+
 
     def body(self, lines):
         pan_variable(lines, "PERSONALITY", self.name)
-        pan_include(lines, "personality/config")
+
+        ## process grns
+        eon_id_list = [grn.eon_id for grn in self.dbobj.grns]
+        eon_id_list.sort()
+        for eon_id in eon_id_list:
+            pan_push(lines, "/system/eon_ids", eon_id)
+
+        ## include pre features
+        pan_include_if_exists(lines, "%s/pre_feature" % self.plenary_core)
+        ## process parameter templates
+        pan_include_if_exists(lines, "personality/config")
+        ## include post features
+        pan_include_if_exists(lines, "%s/post_feature" % self.plenary_core)
+
+        if self.dbobj.config_override:
+            pan_include(lines, "features/unixops/config_override/config")
 
 
-Plenary.handlers[Personality] = PlenaryPersonality
+class PlenaryPersonalityPreFeature(PlenaryPersonalityBase):
+
+    template_type = ""
+
+    def __init__(self, dbpersonality, logger=LOGGER):
+        PlenaryPersonalityBase.__init__(self, dbpersonality, logger=logger)
+        self.plenary_template = "pre_feature"
+
+    def body(self, lines):
+        feat_tmpl = FeatureTemplate()
+        model_feat = []
+        interface_feat = []
+        pre_feat = []
+        for link in self.dbobj.archetype.features + self.dbobj.features:
+            if link.model:
+                model_feat.append(link)
+                continue
+            if link.interface_name:
+                interface_feat.append(link)
+                continue
+            if not link.feature.post_personality:
+                pre_feat.append(link)
+
+        ## hardware features should precede host features
+        for link in model_feat + interface_feat + pre_feat :
+            PlenaryPersonality.helper_feature_template(feat_tmpl, link, lines)
+
+class PlenaryPersonalityPostFeature(PlenaryPersonalityBase):
+    template_type = ""
+
+    def __init__(self, dbpersonality, logger=LOGGER):
+        PlenaryPersonalityBase.__init__(self, dbpersonality, logger=logger)
+        self.plenary_template = "post_feature"
+
+    def body(self, lines):
+        feat_tmpl = FeatureTemplate()
+        for link in self.dbobj.archetype.features + self.dbobj.features:
+            if link.feature.post_personality:
+                PlenaryPersonality.helper_feature_template(feat_tmpl, link, lines)
+
+class PlenaryPersonalityParameter(PlenaryPersonalityBase):
+    template_type = "structure"
+
+    def __init__(self, template, parameters, dbpersonality, logger=LOGGER):
+        PlenaryPersonalityBase.__init__(self, dbpersonality, logger=logger)
+        self.plenary_template = template
+        self.parameters = parameters
+
+    def body(self, lines):
+        for path in self.parameters:
+            pan_assign(lines, path, self.parameters[path])

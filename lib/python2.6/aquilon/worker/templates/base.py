@@ -37,6 +37,8 @@ from aquilon.config import Config
 from aquilon.worker.locks import lock_queue, CompileKey
 from aquilon.worker.processes import write_file, read_file, remove_file
 from aquilon.worker.templates.panutils import pan_assign, pan_variable
+from mako.lookup import TemplateLookup
+from aquilon.worker.formats.formatters import ObjectFormatter
 
 LOGGER = logging.getLogger(__name__)
 
@@ -529,3 +531,17 @@ class PlenaryCollection(object):
         for plenary in iterable:
             plenary.set_logger(self.logger)
             self.plenaries.append(plenary)
+
+class TemplateFormatter(ObjectFormatter):
+
+    def __init__(self):
+        super(TemplateFormatter,self).__init__()
+        self.mako_dir = os.path.join(self.config.get("broker", "srcdir"), "lib", "python2.6",
+                            "aquilon", "worker", "templates", "mako")
+        self.lookup_raw = TemplateLookup(directories=[os.path.join(self.mako_dir, "raw")],
+                                imports=['from string import rstrip',
+                                         'from '
+                                         'aquilon.worker.formats.formatters '
+                                         'import shift'],
+                                default_filters=['unicode', 'rstrip'])
+
