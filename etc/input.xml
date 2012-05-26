@@ -4868,7 +4868,7 @@
    <command name="bind_feature">
       Bind a feature to a given object.
       <p/>
-      Affected host plenaries will be refreshed unless the --noflush option has been specified.
+      Affected personality plenaries will be refreshed.
       The hosts however are not compiled; that has to be done manually.
       <p/>
       Changing feature links for a whole archetype require --justification and a valid TCM.
@@ -4885,7 +4885,7 @@
       <optgroup name="bind_feature_optional" mandatory="False" fields="any">
          <option name="vendor" type="string">Vendor name, if the model name is not unique</option>
          <option name="justification" type="string">Extra authorization tokens (e.g. TCM number) to validate the request</option>
-         <option name="flush" type="boolean" default="True">Enable flushing the affected host plenaries</option>
+	 <option name="type" type="string">The type of the feature</option>
       </optgroup>
 
       <transport method="post" path="commands/bind_feature"/>

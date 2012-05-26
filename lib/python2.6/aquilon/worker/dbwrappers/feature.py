@@ -28,6 +28,8 @@
 # TERMS THAT MAY APPLY.
 """ Helper functions for managing features. """
 
+from aquilon.aqdb.model import FeatureLink, Personality
+
 
 def model_features(dbmodel, dbarch, dbpers, interface_name=None):
     features = []
@@ -86,3 +88,34 @@ def interface_features(dbinterface, dbarch, dbpers):
                 features.append(link.feature)
 
     return features
+
+def add_link(session, logger, dbfeature, params):
+    FeatureLink.get_unique(session, feature=dbfeature, preclude=True,
+                           **params)
+
+    # Binding a feature both at the personality and at the archetype level
+    # is not an error, as the templete generation will skip duplicates.
+    # Still it is worth to emit a warning so the user is aware of this case.
+    q = session.query(FeatureLink)
+    q = q.filter_by(feature=dbfeature,
+                    model=params.get("model", None))
+    if "personality" in params and "interface_name" not in params:
+        q = q.filter_by(archetype=params["personality"].archetype,
+                        personality=None)
+        if q.first():
+            logger.client_info("Warning: {0:l} is already bound to {1:l}; "
+                               "binding it to {2:l} is redundant."
+                               .format(dbfeature,
+                                       params["personality"].archetype,
+                                       params["personality"]))
+    elif "archetype" in params:
+        q = q.filter_by(interface_name=None)
+        q = q.join(Personality)
+        q = q.filter_by(archetype=params["archetype"])
+        for link in q.all():
+            logger.client_info("Warning: {0:l} is bound to {1:l} which "
+                               "is now redundant; consider removing it."
+                               .format(dbfeature, link.personality))
+
+    dbfeature.links.append(FeatureLink(**params))
+

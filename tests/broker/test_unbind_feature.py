@@ -38,46 +38,17 @@ if __name__ == "__main__":
 
 from brokertest import TestBrokerCommand
 
-aquilon_hosts = None
-inventory_hosts = None
-hs21_hosts = None
-
-
 class TestUnbindFeature(TestBrokerCommand):
 
     def setUp(self):
-        # We don't want to query these for every test executed...
-        global aquilon_hosts, inventory_hosts, hs21_hosts
-
         super(TestUnbindFeature, self).setUp()
-
-        if aquilon_hosts is None:
-            command = ["search", "host", "--archetype", "aquilon",
-                       "--format", "proto"]
-            out = self.commandtest(command)
-            hostlist = self.parse_hostlist_msg(out)
-            aquilon_hosts = len(hostlist.hosts)
-
-        if inventory_hosts is None:
-            command = ["search", "host", "--personality", "inventory",
-                       "--format", "proto"]
-            out = self.commandtest(command)
-            hostlist = self.parse_hostlist_msg(out)
-            inventory_hosts = len(hostlist.hosts)
-
-        if hs21_hosts is None:
-            command = ["search", "host", "--archetype", "aquilon",
-                       "--model", "hs21-8853l5u", "--format", "proto"]
-            out = self.commandtest(command)
-            hostlist = self.parse_hostlist_msg(out)
-            hs21_hosts = len(hostlist.hosts)
 
     def test_100_unbind_archetype(self):
         command = ["unbind", "feature", "--feature", "pre_host",
                    "--archetype", "aquilon",
                    "--justification", "tcm=12345678"]
         (out, err) = self.successtest(command)
-        self.matchoutput(err, "Flushing %d hosts." % aquilon_hosts, command)
+        self.matchoutput(err, "Flushed 31/31 templates.", command)
 
     def test_101_verify_archetype(self):
         command = ["show", "archetype", "--archetype", "aquilon"]
@@ -96,8 +67,8 @@ class TestUnbindFeature(TestBrokerCommand):
         # definition
         self.searchclean(out, r'^  Host Feature: pre_host$', command)
 
-    def test_101_verify_cat_host(self):
-        command = ["cat", "--hostname", "unittest00.one-nyp.ms.com"]
+    def test_101_verify_cat_personality(self):
+        command = ["cat", "--personality", "inventory", "--pre_feature" ]
         out = self.commandtest(command)
         self.matchclean(out, "pre_host", command)
 
@@ -105,7 +76,7 @@ class TestUnbindFeature(TestBrokerCommand):
         command = ["unbind", "feature", "--feature", "post_host",
                    "--personality", "inventory"]
         (out, err) = self.successtest(command)
-        self.matchoutput(err, "Flushing %d hosts." % inventory_hosts, command)
+        self.matchoutput(err, "Flushed 1/1 templates.", command)
 
     def test_130_unbind_model(self):
         command = ["unbind", "feature", "--feature", "bios_setup",
@@ -113,21 +84,12 @@ class TestUnbindFeature(TestBrokerCommand):
                    "--archetype", "aquilon",
                    "--justification", "tcm=12345678"]
         (out, err) = self.successtest(command)
-        self.matchoutput(err, "Flushing %d hosts." % hs21_hosts, command)
-
-    def test_130_unbind_model_no_justification_no_host(self):
-        # Changing an archetype without justification is allowed if it has no
-        # hosts
-        command = ["unbind", "feature", "--feature", "bios_setup",
-                   "--model", "hs21-8853l5u",
-                   "--archetype", "aurora"]
-        (out, err) = self.successtest(command)
-        self.matchoutput(err, "Flushing 0 hosts.", command)
+        self.matchoutput(err, "Flushed 31/31 templates." , command)
 
     def test_131_verify_show_model(self):
         command = ["show", "model", "--model", "hs21-8853l5u"]
         out = self.commandtest(command)
-        self.matchclean(out, "Hardware Feature: bios_setup", command)
+        self.matchclean(out, "bios_setup", command)
 
     def test_131_verify_show_feature(self):
         command = ["show", "feature", "--feature", "bios_setup",
@@ -142,8 +104,8 @@ class TestUnbindFeature(TestBrokerCommand):
         # definition (we don't do that now, but...)
         self.searchclean(out, r'^  Hardware Feature: bios_setup$', command)
 
-    def test_131_verify_cat_host(self):
-        command = ["cat", "--hostname", "unittest02.one-nyp.ms.com"]
+    def test_131_verify_cat_personality(self):
+        command = ["cat", "--personality", "compileserver", "--pre_feature"]
         out = self.commandtest(command)
         self.matchclean(out, "bios_setup", command)
 
@@ -176,10 +138,11 @@ class TestUnbindFeature(TestBrokerCommand):
                          r'^    Template: features/interface/src_route',
                          command)
 
-    def test_161_verify_cat_host(self):
-        command = ["cat", "--hostname", "unittest21.aqd-unittest.ms.com"]
+    def test_161_verify_cat_personality(self):
+        command = ["cat", "--personality", "compileserver", "--pre_feature"]
         out = self.commandtest(command)
-        self.matchclean(out, 'variable CURRENT_INTERFACE = "bond0";', command)
+        self.matchclean(out, 'bond0', command)
+        self.matchclean(out, 'src_route', command)
 
     def test_200_unbind_archetype_again(self):
         command = ["unbind", "feature", "--feature", "pre_host",
