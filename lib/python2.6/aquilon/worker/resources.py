@@ -74,7 +74,7 @@ from aquilon.worker.broker import BrokerCommand, ERROR_TO_CODE
 from aquilon.worker import commands
 from aquilon.worker.processes import cache_version
 from aquilon.utils import (force_int, force_float, force_boolean, force_ipv4,
-                           force_mac, force_ascii, force_list)
+                           force_mac, force_ascii, force_list, force_json_dict)
 
 
 class ResponsePage(resource.Resource):
@@ -377,6 +377,8 @@ class RestServer(ResponsePage):
                             myinstance.parameter_checks[option_name] = force_ascii
                         elif paramtype == "list":
                             myinstance.parameter_checks[option_name] = force_list
+                        elif paramtype == "json_string":
+                            myinstance.parameter_checks[option_name] = force_json_dict
                         else:  # pragma: no cover
                             log.msg("Warning: unknown option type %s" % paramtype)
                     else:  # pragma: no cover

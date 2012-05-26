@@ -35,6 +35,7 @@
 import os
 import signal
 import re
+import json
 
 from ipaddr import IPv4Address, AddressValueError
 from aquilon.exceptions_ import ArgumentError
@@ -193,6 +194,17 @@ def force_list(label, value):
         return None
     lines = map(lambda x: force_ascii('line', x.strip()), value.splitlines())
     return filter(lambda x: x and not x.startswith("#"), lines)
+
+def force_json_dict(label, value):
+    if value is None:
+        return None
+    try:
+        value = json.loads(value)
+    except ValueError, e:
+        raise ArgumentError("The json string specified for %s is invalid : %s"
+                            % (label, e))
+    return value
+
 
 def first_of(iterable, function):
     """

@@ -451,6 +451,9 @@ class Option(Element):
             # Need type?
             parser.add_option(*names, dest=self.name, action="callback",
                               callback=read_file, type="string")
+        elif self.type == 'json_string':
+            parser.add_option(*names, dest=self.name, action="store",
+                              **extra_args)
         elif self.type == 'multiple':
             parser.add_option(*names, dest=self.name, action="append")
         else:
@@ -470,7 +473,7 @@ class Option(Element):
                 return "--[no]" + self.name
             else:
                 return "--%s|--%s" % (self.name, self.reverse)
-        elif self.type in ["string", "file", "list", "int"]:
+        elif self.type in ["string", "file", "list", "int",  'json_string']:
             return "--" + self.name + " " + self.name.upper()
         else:
             return "--" + self.name
