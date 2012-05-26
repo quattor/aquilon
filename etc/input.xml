@@ -2272,13 +2272,20 @@
       that template generated on-demand in this way will be incomplete
       (especially if it cannot be compiled) and is purely provided for debugging.
       <optgroup name="cat_selector" mandatory="True" fields="any">
-         <option name="machine" type="string" conflicts="hostname cluster service instance default nasinfo city switch">Name of the machine</option>
-         <option name="hostname" type="string" conflicts="machine cluster service instance default nasinfo city switch">Name of the host</option>
-         <option name="cluster" type="string" conflicts="hostname machine service instance default nasinfo city switch">Name of the cluster</option>
-         <option name="service" type="string" conflicts="hostname machine cluster nasinfo city switch">Name of the service</option>
-         <option name="nasinfo" type="string" conflicts="hostname machine cluster service instance default city switch">Show the default client config for the service/instance</option>
-         <option name="city" type="string" conflicts="hostname machine cluster service instance default nasinfo switch">Name of the city</option>
-         <option name="switch" type="string" conflicts="hostname machine cluster service instance default nasinfo">Name of the switch</option>
+         <option name="machine" type="string" conflicts="hostname cluster service instance default nasinfo city switch personality">Name of the machine</option>
+         <option name="hostname" type="string" conflicts="machine cluster service instance default nasinfo city switch personality">Name of the host</option>
+         <option name="cluster" type="string" conflicts="hostname machine service instance default nasinfo city switch personality">Name of the cluster</option>
+         <option name="service" type="string" conflicts="hostname machine cluster nasinfo city switch personality">Name of the service</option>
+         <option name="nasinfo" type="string" conflicts="hostname machine cluster service instance default city switch personality">Show the default client config for the service/instance</option>
+         <option name="city" type="string" conflicts="hostname machine cluster service instance default nasinfo switch personality">Name of the city</option>
+         <option name="switch" type="string" conflicts="hostname machine cluster service instance default nasinfo personality">Name of the switch</option>
+	 <option name="personality" conflicts="hostname cluster service instance default nasinfo city switch machine" type="string">Name of personality</option>
+	 <optgroup name="persopts" fields="any">
+		<option name="archetype" conflicts="hostname cluster service instance default nasinfo city switch machine" type="string">Archetype</option>
+		<option name="pre_feature" conflicts="hostname cluster service instance default nasinfo city switch machine post_feature param_tmpl" type="flag">Pre feature template</option>
+		<option name="post_feature" conflicts="hostname cluster service instance default nasinfo city switch machine pre_feature param_tmpl" type="flag">Post feature template</option>
+		<option name="param_tmpl" conflicts="hostname cluster service instance default nasinfo city switch machine post_feature pre_feature" type="string">param templates</option>
+         </optgroup>
       </optgroup>
       <optgroup name="cat_options" mandatory="False" fields="any">
          <option name="default" type="flag" conflicts="hostname machine cluster nasinfo city switch">Show the default client config for the service/instance</option>
@@ -2307,6 +2314,8 @@
       <transport trigger="nasinfo" method="get" path="nasinfo/%(nasinfo)s/plenary" />
       <transport trigger="city" method="get" path="city/%(city)s/plenary" />
       <transport trigger="switch" method="get" path="switch/%(switch)s/plenary" />
+      <transport trigger="resource" method="get" path="resource/plenary/%(resource)s" />
+      <transport trigger="personality" method="get"  path="/personality/%(personality)s/plenary" />
    </command>
 
    <command name="sync">
