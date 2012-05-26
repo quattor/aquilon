@@ -41,10 +41,7 @@ from aquilon.worker.templates.cluster import PlenaryClusterClient
 from aquilon.worker.templates.panutils import (StructureTemplate, pan_assign,
                                                pan_push, pan_include,
                                                pan_variable)
-from aquilon.worker.dbwrappers.feature import (model_features,
-                                               personality_features,
-                                               interface_features)
-
+from aquilon.worker.dbwrappers.feature import model_features
 LOGGER = logging.getLogger(__name__)
 
 
@@ -199,7 +196,8 @@ class PlenaryHostData(Plenary):
 
                 if addr.label == "":
                     if net.routers:
-                        local_rtrs = select_routers(self.dbobj.machine, net.routers)
+                        local_rtrs = select_routers(self.dbobj.machine,
+                                                    net.routers)
                         gateway = local_rtrs[0]
                         if is_default_route(dbinterface):
                             routers[dbinterface.name] = local_rtrs
@@ -247,10 +245,6 @@ class PlenaryHostData(Plenary):
 
             interfaces[dbinterface.name] = ifdesc
 
-        eon_id_set = set([grn.eon_id for grn in self.dbobj.grns])
-        eon_id_set |= set([grn.eon_id for grn in pers.grns])
-        eon_id_list = list(eon_id_set)
-        eon_id_list.sort()
 
         # Okay, here's the real content
         pan_include(lines, ["pan/units", "pan/functions"])
@@ -272,8 +266,12 @@ class PlenaryHostData(Plenary):
 
         pan_assign(lines, "/system/build", self.dbobj.status.name)
         pan_assign(lines, "/system/advertise_status", self.dbobj.advertise_status)
+
+        eon_id_list = [grn.eon_id for grn in self.dbobj.grns]
+        eon_id_list.sort()
         if eon_id_list:
             pan_assign(lines, "/system/eon_ids", eon_id_list)
+
         if self.dbobj.cluster:
             pan_assign(lines, "/system/cluster/name", self.dbobj.cluster.name)
         if self.dbobj.resholder:
@@ -331,9 +329,7 @@ class PlenaryToplevelHost(Plenary):
             if dbinterface.interface_type == 'management':
                 continue
 
-            featlist = interface_features(dbinterface, arch, pers)
-            if featlist:
-                iface_features[dbinterface.name] = featlist
+        os_template = self.dbobj.operating_system.cfg_path + '/config'
 
         services = []
         required_services = set(arch.services + pers.services)
@@ -359,29 +355,16 @@ class PlenaryToplevelHost(Plenary):
         pan_include(lines, ["pan/units", "pan/functions"])
         lines.append("")
 
-        for iface in sorted(iface_features.keys()):
-            pan_variable(lines, "CURRENT_INTERFACE", iface)
-            for feature in iface_features[iface]:
-                # Same forgiveness for interface model features
-                pan_include(lines, "%s/config" % feature.cfg_path)
-            lines.append("")
-
         pan_include(lines, "hostdata/%s" % self.name)
         pan_include(lines, "archetype/base")
         pan_include(lines, self.dbobj.operating_system.cfg_path + '/config')
 
-        for feature in model_features(self.dbobj.machine.model, arch, pers):
-            pan_include(lines, "%s/config" % feature.cfg_path)
-
         pan_include(lines, services)
         pan_include(lines, provides)
 
-        (pre_features, post_features) = personality_features(pers)
-        for feature in pre_features:
-            pan_include(lines, "%s/config" % feature.cfg_path)
-
         personality_template = "personality/%s/config" % \
                 self.dbobj.personality.name
+
         pan_include(lines, personality_template)
 
         if self.dbobj.cluster:
@@ -391,10 +374,6 @@ class PlenaryToplevelHost(Plenary):
             raise IncompleteError("Host %s personality %s requires cluster "
                                   "membership, please run 'aq cluster'." %
                                   (self.name, pers.name))
-
-        for feature in post_features:
-            pan_include(lines, "%s/config" % feature.cfg_path)
-
         pan_include(lines, "archetype/final")
 
 
