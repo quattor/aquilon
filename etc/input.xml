@@ -4903,9 +4903,153 @@
          <option name="vendor" type="string">Vendor name, if the model name is not unique</option>
          <option name="justification" type="string">Extra authorization tokens (e.g. TCM number) to validate the request</option>
          <option name="flush" type="boolean" default="True">Enable flushing the affected host plenaries</option>
+	    <option name="type" type="string">The type of the feature</option>
       </optgroup>
 
       <transport method="post" path="commands/unbind_feature"/>
    </command>
+
+   <command name="show_parameter">
+      Display all parameters configured on a personality
+      <p/>
+      <optgroup name="show_parameter_options" mandatory="True" fields="any">
+         <optgroup name="by_personality" mandatory="True" fields="any">
+            <option name="personality" type="string">Name of  personality</option>
+            <option name="feature" type="string">Feature</option>
+         </optgroup>
+         <optgroup name="by_other_opts" mandatory="False" fields="any">
+             <option name="archetype" type="string">Archetype</option>
+         </optgroup>
+      </optgroup>
+      <transport method="get" trigger="feature" path="/feature/%(feature)s/parameters"/>
+      <transport method="get" path="/personality/%(personality)s/parameters"/>
+   </command>
+
+   <command name="validate_parameter">
+      Display all parameters configured on a personality
+      <p/>
+      <optgroup name="validate_parameter_options" mandatory="True" fields="any">
+         <optgroup name="target" mandatory="True" fields="any">
+            <option name="archetype" type="string">Archetype</option>
+            <option name="personality" type="string">Name of personality</option>
+	    <option name="feature" type="string">Feature</option>
+         </optgroup>
+      </optgroup>
+      <transport method="put" path="/validate/parameter/"/>
+   </command>
+
+
+   <command name="add_parameter">
+      add a parameter to a given object.
+      <optgroup name="add_parameter_opts" mandatory="True" fields="all">
+         <optgroup name="target" mandatory="True" fields="any">
+            <option name="archetype" type="string">Archetype</option>
+            <option name="personality" type="string">Name of personality</option>
+	    <option name="feature" type="string">Feature</option>
+         </optgroup>
+         <option name="path" type="string">Path of the parameter</option>
+      </optgroup>
+      <optgroup name="add_parameter_optional" mandatory="False" fields="any">
+         <option name="value" type="string">Value for the parameter, type depending on the parameter definition</option>
+         <option name="comments" type="string">Comments</option>
+      </optgroup>
+      <transport method="put" path="commands/add_parameter"/>
+   </command>
+
+   <command name="update_parameter">
+      update config parameter to a given object.
+      <optgroup name="upd_parameter_opts" mandatory="True" fields="all">
+         <optgroup name="target" mandatory="True" fields="any">
+            <option name="archetype" type="string">Archetype</option>
+            <option name="personality" type="string">Name of personality</option>
+	    <option name="feature" type="string">Feature</option>
+         </optgroup>
+         <option name="path" type="string">Path of the parameter</option>
+         <option name="value" type="string">Value for the parameter, type depending on the parameter definition</option>
+      </optgroup>
+      <optgroup name="upd_parameter_optional" mandatory="False" fields="any">
+         <option name="comments" type="string">Comments</option>
+      </optgroup>
+      <transport method="put" path="commands/upd_parameter"/>
+   </command>
+
+   <command name="del_parameter">
+      Delete config parameter of a given object.
+      <optgroup name="del_parameter_opts" mandatory="True" fields="all">
+         <optgroup name="target" mandatory="True" fields="any">
+            <option name="archetype" type="string">Archetype</option>
+            <option name="personality" type="string">Name of personality</option>
+	    <option name="feature" type="string">Feature</option>
+         </optgroup>
+         <option name="path" type="string">Path of the parameter</option>
+      </optgroup>
+      <transport method="put" path="commands/del_parameter"/>
+   </command>
+
+   <command name="show_diff">
+      Compare config parameter for two object.
+      <optgroup name="compare_param_opts" mandatory="True" fields="all">
+         <option name="archetype" type="string">Archetype</option>
+         <optgroup name="target" mandatory="True" fields="all">
+            <option name="personality" type="string">Name of personality</option>
+            <option name="other" type="string">Name of personality</option>
+         </optgroup>
+      </optgroup>
+      <optgroup name="compare_param_optional" mandatory="False" fields="any">
+         <option name="other_archetype" type="string">Archetype</option>
+      </optgroup>
+      <transport method="get" path="commands/show_diff"/>
+   </command>
+
+   <command name="add_parameter_definition">
+      add parameter definition for a parameter.
+      <optgroup name="target" mandatory="True" fields="any">
+         <option name="archetype" type="string" conflicts="feature feature_type">Archetype</option>
+         <option name="feature" type="string" conflicts="archetype template">Feature</option>
+      </optgroup>
+      <optgroup name="target_opts" mandatory="True" fields="any">
+         <option name="template" type="string" conflicts="feature">Name of structure template this parameter gets included in</option>
+         <option name="feature_type" type="string" conflicts="archetype">Type of the feature: host, hardware or interface</option>
+      </optgroup>
+      <optgroup name="add_parameter_validator_opts" mandatory="True" fields="all">
+         <option name="path" type="string">Path of the parameter can contain regexp</option>
+         <option name="value_type" type="string" default="string">Type of value for the parameter[string|numeric|list|json]</option>
+      </optgroup>
+      <optgroup name="add_parameter_validator_optional" mandatory="False" fields="any">
+         <option name="required" type="boolean" default="False">Is this parameter required for object compilation </option>
+         <option name="default" type="string">Default value </option>
+         <option name="description" type="string">Description</option>
+      </optgroup>
+      <transport method="put" path="commands/add_parameter_definition"/>
+   </command>
+
+   <command name="del_parameter_definition">
+      del parameter definition for a given object.
+      <optgroup name="target" mandatory="True" fields="any">
+         <option name="archetype" type="string" conflicts="feature feature_type">Archetype</option>
+         <option name="feature" type="string" conflicts="archetype">Feature</option>
+      </optgroup>
+      <optgroup name="target_opts" mandatory="False" fields="any">
+         <option name="feature_type" type="string" conflicts="archetype">Type of the feature: host, hardware or interface</option>
+      </optgroup>
+      <optgroup name="target_required_opts" mandatory="True" fields="any">
+         <option name="path" type="string">Path of the parameter</option>
+      </optgroup>
+      <transport method="put" path="commands/del_parameter_definition"/>
+   </command>
+
+   <command name="show_parameter_definition">
+      Display all parameter definition configured for a object
+      <p/>
+      <optgroup name="show_parameter_def_options" mandatory="True" fields="any">
+          <option name="archetype" type="string">Archetype</option>
+          <option name="feature" type="string">Feature</option>
+      </optgroup>
+      <transport method="get"  trigger="archetype" path="/archetype/%(archetype)s/parameter_definitions"/>
+      <transport method="get"  trigger="feature" path="/feature/%(feature)s/parameter_definitions"/>
+   </command>
+
+
+
 
 </commandline>
