@@ -61,7 +61,7 @@ class TestDelAlias(TestBrokerCommand):
 
     def test_220_del_mscom_alias(self):
         command = ["del", "alias", "--fqdn", "alias.ms.com"]
-        self.dsdb_expect("delete host alias -alias_name alias.ms.com")
+        self.dsdb_expect("delete_host_alias -alias_name alias.ms.com")
         self.noouttest(command)
         self.dsdb_verify()
 

@@ -376,11 +376,11 @@ def rollback_decorator(fn):
 class DSDBRunner(object):
 
     def __init__(self, logger=LOGGER):
-        self.config = Config()
+        config = Config()
         self.logger = logger
-        self.dsdb = self.config.get("broker", "dsdb")
-        self.location_sync = self.config.getboolean(
-            "broker", "dsdb_location_sync")
+        self.dsdb = config.get("broker", "dsdb")
+        self.dsdb_use_testdb = config.getboolean("broker", "dsdb_use_testdb")
+        self.location_sync = config.getboolean("broker", "dsdb_location_sync")
         self.rollbacks = []
         self.action = None
 
@@ -396,7 +396,7 @@ class DSDBRunner(object):
         self.rollbacks = []
 
     def getenv(self):
-        if self.config.getboolean("broker", "dsdb_use_testdb"):
+        if self.dsdb_use_testdb:
             return {"DSDB_USE_TESTDB": "true"}
         return None
 
@@ -500,8 +500,7 @@ class DSDBRunner(object):
 
     def add_host_details(self, fqdn, ip, name, mac, primary=None, comments=None):
         # DSDB does not accept '/' as valid in an interface name.
-        command = [self.config.get("broker", "dsdb"),
-                    "add", "host", "-host_name", fqdn,
+        command = [self.dsdb, "add_host", "-host_name", fqdn,
                     "-ip_address", ip, "-status", "aq"]
         if name:
             interface = str(name).replace('/', '_').replace(':', '_')
@@ -516,8 +515,7 @@ class DSDBRunner(object):
         return
 
     def update_host_details(self, fqdn, mac=None, comments=None):
-        command = [self.config.get("broker", "dsdb"),
-                   "update", "host", "-host_name", fqdn, "-status", "aq"]
+        command = [self.dsdb, "update_host", "-host_name", fqdn, "-status", "aq"]
         if mac:
             command.extend(["-ethernet_address", mac])
         if comments:
@@ -525,22 +523,19 @@ class DSDBRunner(object):
         return run_command(command, env=self.getenv(), logger=self.logger)
 
     def update_host_ip(self, name, fqdn, ip):
-        command = [self.config.get("broker", "dsdb"),
-                   "update", "aqd", "host", "-host_name", fqdn, "-interface_name", name,
-                   "-ip_address", ip]
+        command = [self.dsdb, "update_aqd_host", "-host_name", fqdn,
+                   "-interface_name", name, "-ip_address", ip]
         return run_command(command, env=self.getenv(), logger=self.logger)
 
     def update_host_name(self,ifname, fqdn, fqdn_new):
-        command = [self.config.get("broker", "dsdb"),
-                   "update", "aqd", "host", "-host_name", fqdn, "-interface_name", ifname,
-                   "-primary_host_name", fqdn_new]
+        command = [self.dsdb, "update_aqd_host", "-host_name", fqdn,
+                   "-interface_name", ifname, "-primary_host_name", fqdn_new]
         return run_command(command, env=self.getenv(), logger=self.logger)
 
     def delete_host_details(self, ip):
         try:
-            out = run_command([self.config.get("broker", "dsdb"),
-                    "delete", "host", "-ip_address", ip],
-                    env=self.getenv())
+            out = run_command([self.dsdb, "delete_host", "-ip_address", ip],
+                              env=self.getenv())
         except ProcessException, e:
             if e.out and IP_NOT_DEFINED_RE.search(e.out):
                 self.logger.info("DSDB did not have a host with this IP "
@@ -796,9 +791,9 @@ class DSDBRunner(object):
         if not comments:
             comments = ""
         try:
-            out = run_command([self.config.get("broker", "dsdb"),
-                    "add", "dns_domain", "-domain_name", dns_domain,
-                    "-comments", comments], env=self.getenv())
+            out = run_command([self.dsdb, "add_dns_domain",
+                               "-domain_name", dns_domain,
+                               "-comments", comments], env=self.getenv())
         except ProcessException, e:
             if e.out and DNS_DOMAIN_EXISTS.search(e.out):
                 self.logger.info("The DNS domain %s already exists in DSDB, "
@@ -808,9 +803,8 @@ class DSDBRunner(object):
 
     def delete_dns_domain(self, dns_domain):
         try:
-            out = run_command([self.config.get("broker", "dsdb"),
-                    "delete", "dns_domain", "-domain_name", dns_domain],
-                    env=self.getenv())
+            out = run_command([self.dsdb, "delete_dns_domain",
+                               "-domain_name", dns_domain], env=self.getenv())
         except ProcessException, e:
             if e.out and DNS_DOMAIN_NOT_FOUND.search(e.out):
                 self.logger.info("The DNS domain %s does not exist in DSDB, "
@@ -842,9 +836,9 @@ class DSDBRunner(object):
             fields["fqdn"] = hostname
             fields["dsdb_lookup"] = short
 
-        out = run_command([self.config.get("broker", "dsdb"),
-                "show", "host", "-host_name", fields["dsdb_lookup"]],
-                env=self.getenv())
+        out = run_command([self.dsdb, "show_host",
+                           "-host_name", fields["dsdb_lookup"]],
+                          env=self.getenv())
         primary = self.primary_re.search(out)
         node = self.node_re.search(out)
         dns = self.dns_re.search(out)
@@ -861,21 +855,18 @@ class DSDBRunner(object):
     def add_alias(self, alias, target, comments):
         if not comments:
             comments = ""
-        run_command([self.config.get("broker", "dsdb"),
-                     "add", "host", "alias", "-host_name", target,
+        run_command([self.dsdb, "add_host_alias", "-host_name", target,
                      "-alias_name", alias, "-comments", comments],
                     env=self.getenv())
 
     def del_alias(self, alias):
-        run_command([self.config.get("broker", "dsdb"),
-                     "delete", "host", "alias", "-alias_name", alias],
+        run_command([self.dsdb, "delete_host_alias", "-alias_name", alias],
                     env=self.getenv())
 
     def update_alias(self, alias, target, comments):
         if not comments:
             comments = ""
-        run_command([self.config.get("broker", "dsdb"),
-                     "update", "host", "alias", "-alias", alias,
+        run_command([self.dsdb, "update_host_alias", "-alias", alias,
                      "-new_host", target, "-new_comments", comments],
                     env=self.getenv())
 

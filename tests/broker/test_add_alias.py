@@ -52,7 +52,7 @@ class TestAddAlias(TestBrokerCommand):
     def test_110_mscom_alias(self):
         cmd = ['add', 'alias', '--fqdn', 'alias.ms.com',
                '--target', 'arecord13.aqd-unittest.ms.com']
-        self.dsdb_expect("add host alias "
+        self.dsdb_expect("add_host_alias "
                          "-host_name arecord13.aqd-unittest.ms.com "
                          "-alias_name alias.ms.com "
                          "-comments ")
