@@ -43,8 +43,6 @@ from brokertest import TestBrokerCommand
 class TestAddDnsDomain(TestBrokerCommand):
 
     def testaddaqdunittestdomain(self):
-        self.dsdb_expect("show dns_domains -domain_name aqd-unittest.ms.com",
-                         fail=True)
         self.dsdb_expect("add dns_domain -domain_name aqd-unittest.ms.com "
                          "-comments Some DNS domain comments")
         self.noouttest(["add", "dns_domain", "--dns_domain", "aqd-unittest.ms.com",
@@ -52,8 +50,6 @@ class TestAddDnsDomain(TestBrokerCommand):
         self.dsdb_verify()
 
     def testaddcardsdomain(self):
-        self.dsdb_expect("show dns_domains -domain_name cards.example.com",
-                         fail=True)
         self.dsdb_expect("add dns_domain -domain_name cards.example.com "
                          "-comments A pack of lies")
         self.noouttest(["add", "dns_domain",
@@ -62,8 +58,6 @@ class TestAddDnsDomain(TestBrokerCommand):
         self.dsdb_verify()
 
     def testaddrestricteddomain(self):
-        self.dsdb_expect("show dns_domains -domain_name restrict.aqd-unittest.ms.com",
-                         fail=True)
         self.dsdb_expect("add dns_domain -domain_name restrict.aqd-unittest.ms.com "
                          "-comments ")
         self.noouttest(["add", "dns_domain", "--dns_domain", "restrict.aqd-unittest.ms.com",
@@ -130,8 +124,6 @@ class TestAddDnsDomain(TestBrokerCommand):
                             "Domain %s not in list %s" % (domain, dns_names))
 
     def testaddtd1(self):
-        self.dsdb_expect("show dns_domains -domain_name td1.aqd-unittest.ms.com",
-                         fail=True)
         self.dsdb_expect("add dns_domain -domain_name td1.aqd-unittest.ms.com "
                          "-comments ")
         command = ["add", "dns", "domain",
@@ -140,8 +132,6 @@ class TestAddDnsDomain(TestBrokerCommand):
         self.dsdb_verify()
 
     def testaddtd2(self):
-        self.dsdb_expect("show dns_domains -domain_name td2.aqd-unittest.ms.com",
-                         fail=True)
         self.dsdb_expect("add dns_domain -domain_name td2.aqd-unittest.ms.com "
                          "-comments ")
         command = ["add", "dns", "domain",
@@ -149,16 +139,12 @@ class TestAddDnsDomain(TestBrokerCommand):
         self.noouttest(command)
 
     def testaddcolodomains(self):
-        self.dsdb_expect("show dns_domains -domain_name excx.aqd-unittest.ms.com",
-                         fail=True)
         self.dsdb_expect("add dns_domain -domain_name excx.aqd-unittest.ms.com "
                          "-comments ")
         command = ["add", "dns", "domain",
                    "--dns_domain", "excx.aqd-unittest.ms.com"]
         self.noouttest(command)
 
-        self.dsdb_expect("show dns_domains -domain_name utcolo.aqd-unittest.ms.com",
-                         fail=True)
         self.dsdb_expect("add dns_domain -domain_name utcolo.aqd-unittest.ms.com "
                          "-comments ")
         command = ["add", "dns", "domain",
@@ -174,7 +160,6 @@ class TestAddDnsDomain(TestBrokerCommand):
         (p, out, err) = self.runcommand(["show", "dns", "domain",
                                          "--dns_domain", domain])
         if domain and p.returncode == 4:
-            self.dsdb_expect("show dns_domains -domain_name %s" % domain, fail=True)
             self.dsdb_expect("add dns_domain -domain_name %s -comments " % domain)
             command = ["add", "dns", "domain", "--dns_domain", domain]
             self.noouttest(command)

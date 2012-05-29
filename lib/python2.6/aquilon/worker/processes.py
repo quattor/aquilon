@@ -337,15 +337,18 @@ def sync_domain(dbdomain, logger=LOGGER, locked=False):
         session.add(dbdomain)
 
 
-IP_NOT_DEFINED_RE = re.compile("Host with IP address "
-                               "[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}"
-                               " is not defined")
+IP_NOT_DEFINED_RE = re.compile(r"Host with IP address "
+                               r"[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}"
+                               r" is not defined")
 
-BUILDING_NOT_FOUND = re.compile("bldg [a-zA-Z0-9]{2} doesn't exists")
+BUILDING_NOT_FOUND = re.compile(r"bldg [a-zA-Z0-9]{2} doesn't exists")
 
-CAMPUS_NOT_FOUND = re.compile("campus [a-zA-Z0-9]{2} doesn't exist")
+CAMPUS_NOT_FOUND = re.compile(r"campus [a-zA-Z0-9]{2} doesn't exist")
 
-DNS_DOMAIN_NOT_FOUND = re.compile ("DNS domain ([-\w\.\d]+) doesn't exists")
+DNS_DOMAIN_NOT_FOUND = re.compile (r"DNS domain ([-\w\.\d]+) doesn't exists")
+
+DNS_DOMAIN_EXISTS = re.compile(r"DNS domain [-\w\.\d]+ already defined")
+
 
 def rollback_decorator(fn):
     @wraps(fn)
@@ -790,24 +793,18 @@ class DSDBRunner(object):
         return
 
     def add_dns_domain(self, dns_domain, comments):
-        try:
-            out = run_command([self.config.get("broker", "dsdb"),
-                    "show", "dns_domains", "-domain_name", dns_domain],
-                    env=self.getenv())
-        except ProcessException, e:
-            self.logger.info("The DNS domain %s does not exist in DSDB, "
-                             "adding it." % dns_domain)
-        else:
-            self.logger.info("The DNS domain %s already exists in DSDB, "
-                             "continuing." % dns_domain)
-            return
-
         if not comments:
             comments = ""
-        out = run_command([self.config.get("broker", "dsdb"),
-                "add", "dns_domain", "-domain_name", dns_domain,
-                "-comments", comments], env=self.getenv())
-        return
+        try:
+            out = run_command([self.config.get("broker", "dsdb"),
+                    "add", "dns_domain", "-domain_name", dns_domain,
+                    "-comments", comments], env=self.getenv())
+        except ProcessException, e:
+            if e.out and DNS_DOMAIN_EXISTS.search(e.out):
+                self.logger.info("The DNS domain %s already exists in DSDB, "
+                                 "continuing." % dns_domain)
+                return
+            raise
 
     def delete_dns_domain(self, dns_domain):
         try:
