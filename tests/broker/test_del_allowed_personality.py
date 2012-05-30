@@ -45,15 +45,15 @@ class TestDelAllowedPersonality(TestBrokerCommand):
 
     def test_10_delbadconstraint(self):
         command = ["del_allowed_personality", "--archetype", "vmhost",
-                   "--personality=esx_desktop", "--cluster=utecl1"]
+                   "--personality=vulcan-1g-desktop-prod", "--cluster=utecl1"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "The cluster member evh1.aqd-unittest.ms.com "
-                         "has a personality of esx_desktop which is "
+                         "has a personality of vulcan-1g-desktop-prod which is "
                          "incompatible", command)
 
     def test_12_failmissingcluster(self):
         command = ["del_allowed_personality", "--archetype", "vmhost",
-                   "--personality=esx_desktop", "--cluster=does-not-exist"]
+                   "--personality=vulcan-1g-desktop-prod", "--cluster=does-not-exist"]
         out = self.notfoundtest(command)
         self.matchoutput(out, "Cluster does-not-exist not found.", command)
 
@@ -79,7 +79,7 @@ class TestDelAllowedPersonality(TestBrokerCommand):
     def test_20_checkconstraint(self):
         command = ["show_cluster", "--cluster=utecl1"]
         out = self.commandtest(command)
-        self.matchoutput(out, "Allowed Personality: Personality vmhost/esx_desktop", command)
+        self.matchoutput(out, "Allowed Personality: Personality vmhost/vulcan-1g-desktop-prod", command)
         self.matchclean(out, "Allowed Personality: Personality vmhost/generic", command)
 
 

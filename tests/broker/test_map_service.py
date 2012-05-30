@@ -281,39 +281,39 @@ class TestMapService(TestBrokerCommand):
         self.noouttest(["map", "service", "--building", "ut",
                         "--service", "esx_management_server",
                         "--instance", "ut.a", "--archetype", "vmhost",
-                        "--personality", "esx_desktop"])
+                        "--personality", "vulcan-1g-desktop-prod"])
         self.noouttest(["map", "service", "--building", "ut",
                         "--service", "esx_management_server",
                         "--instance", "ut.a", "--archetype", "esx_cluster",
-                        "--personality", "esx_desktop"])
+                        "--personality", "vulcan-1g-desktop-prod"])
         self.noouttest(["map", "service", "--building", "ut",
                         "--service", "esx_management_server",
                         "--instance", "ut.b", "--archetype", "vmhost",
-                        "--personality", "esx_desktop"])
+                        "--personality", "vulcan-1g-desktop-prod"])
         self.noouttest(["map", "service", "--building", "ut",
                         "--service", "esx_management_server",
                         "--instance", "ut.b", "--archetype", "esx_cluster",
-                        "--personality", "esx_desktop"])
+                        "--personality", "vulcan-1g-desktop-prod"])
         self.noouttest(["map", "service", "--building", "np",
                         "--service", "esx_management_server",
                         "--instance", "np", "--archetype", "vmhost",
-                        "--personality", "esx_desktop"])
+                        "--personality", "vulcan-1g-desktop-prod"])
         self.noouttest(["map", "service", "--building", "np",
                         "--service", "esx_management_server",
                         "--instance", "np", "--archetype", "esx_cluster",
-                        "--personality", "esx_desktop"])
+                        "--personality", "vulcan-1g-desktop-prod"])
         self.noouttest(["map", "service", "--building", "ut",
                         "--service", "vmseasoning", "--instance", "salt",
                         "--archetype", "vmhost",
-                        "--personality", "esx_desktop"])
+                        "--personality", "vulcan-1g-desktop-prod"])
         self.noouttest(["map", "service", "--building", "ut",
                         "--service", "vmseasoning", "--instance", "pepper",
                         "--archetype", "vmhost",
-                        "--personality", "esx_desktop"])
+                        "--personality", "vulcan-1g-desktop-prod"])
         self.noouttest(["map", "service", "--building", "np",
                         "--service", "vmseasoning", "--instance", "sugar",
                         "--archetype", "vmhost",
-                        "--personality", "esx_desktop"])
+                        "--personality", "vulcan-1g-desktop-prod"])
 
     def testmapesxv2(self):
         self.noouttest(["map", "service", "--building", "ut",
@@ -327,25 +327,25 @@ class TestMapService(TestBrokerCommand):
 
     def testverifymapesx(self):
         command = ["show_map", "--archetype=vmhost",
-                   "--personality=esx_desktop", "--building=ut"]
+                   "--personality=vulcan-1g-desktop-prod", "--building=ut"]
         out = self.commandtest(command)
         self.matchoutput(out,
-                         "Archetype: vmhost Personality: esx_desktop "
+                         "Archetype: vmhost Personality: vulcan-1g-desktop-prod "
                          "Service: esx_management_server Instance: ut.a "
                          "Map: Building ut",
                          command)
         self.matchoutput(out,
-                         "Archetype: vmhost Personality: esx_desktop "
+                         "Archetype: vmhost Personality: vulcan-1g-desktop-prod "
                          "Service: esx_management_server Instance: ut.b "
                          "Map: Building ut",
                          command)
         self.matchoutput(out,
-                         "Archetype: vmhost Personality: esx_desktop "
+                         "Archetype: vmhost Personality: vulcan-1g-desktop-prod "
                          "Service: vmseasoning Instance: salt "
                          "Map: Building ut",
                          command)
         self.matchoutput(out,
-                         "Archetype: vmhost Personality: esx_desktop "
+                         "Archetype: vmhost Personality: vulcan-1g-desktop-prod "
                          "Service: vmseasoning Instance: pepper "
                          "Map: Building ut",
                          command)

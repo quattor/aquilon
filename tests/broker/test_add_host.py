@@ -375,7 +375,7 @@ class TestAddHost(TestBrokerCommand):
                        "--machine", "ut10s04p%d" % port,
                        "--domain", "unittest", "--buildstatus", "build",
                        "--osname", "esxi", "--osversion", "4.0.0",
-                       "--archetype", "vmhost", "--personality", "esx_desktop"]
+                       "--archetype", "vmhost", "--personality", "vulcan-1g-desktop-prod"]
             self.noouttest(command)
         self.dsdb_verify()
 
@@ -396,7 +396,7 @@ class TestAddHost(TestBrokerCommand):
                        "--machine", machine,
                        "--domain", "unittest", "--buildstatus", "build",
                        "--osname", "esxi", "--osversion", "4.0.0",
-                       "--archetype", "vmhost", "--personality", "esx_desktop"]
+                       "--archetype", "vmhost", "--personality", "vulcan-1g-desktop-prod"]
             self.noouttest(command)
         self.dsdb_verify()
 
@@ -414,7 +414,7 @@ class TestAddHost(TestBrokerCommand):
                        "--machine", machine,
                        "--domain", "unittest", "--buildstatus", "build",
                        "--osname", "esxi", "--osversion", "4.0.0",
-                       "--archetype", "vmhost", "--personality", "esx_desktop"]
+                       "--archetype", "vmhost", "--personality", "vulcan-1g-desktop-prod"]
             self.noouttest(command)
 
             hostname = "evh%d.one-nyp.ms.com" % (i + 50)
@@ -425,7 +425,7 @@ class TestAddHost(TestBrokerCommand):
                        "--machine", machine,
                        "--domain", "unittest", "--buildstatus", "build",
                        "--osname", "esxi", "--osversion", "4.0.0",
-                       "--archetype", "vmhost", "--personality", "esx_desktop"]
+                       "--archetype", "vmhost", "--personality", "vulcan-1g-desktop-prod"]
             self.noouttest(command)
         self.dsdb_verify()
 

@@ -154,10 +154,10 @@ class TestDelRequiredService(TestBrokerCommand):
 
     def testdelrequiredesx(self):
         command = ["del_required_service", "--service=esx_management_server",
-                   "--archetype=vmhost", "--personality=esx_desktop"]
+                   "--archetype=vmhost", "--personality=vulcan-1g-desktop-prod"]
         self.noouttest(command)
         command = ["del_required_service", "--service=esx_management_server",
-                   "--archetype=esx_cluster", "--personality=esx_desktop"]
+                   "--archetype=esx_cluster", "--personality=vulcan-1g-desktop-prod"]
         self.noouttest(command)
         command = ["del_required_service", "--service=esx_management_server",
                    "--archetype=vmhost", "--personality=vulcan2-10g-test"]
@@ -166,17 +166,17 @@ class TestDelRequiredService(TestBrokerCommand):
                    "--archetype=esx_cluster", "--personality=vulcan2-10g-test"]
         self.noouttest(command)
         command = ["del_required_service", "--service=vmseasoning",
-                   "--archetype=vmhost", "--personality=esx_desktop"]
+                   "--archetype=vmhost", "--personality=vulcan-1g-desktop-prod"]
         self.noouttest(command)
 
     def testverifydelrequiredesx(self):
         command = ["show_personality",
-                   "--archetype=vmhost", "--personality=esx_desktop"]
+                   "--archetype=vmhost", "--personality=vulcan-1g-desktop-prod"]
         out = self.commandtest(command)
         self.matchclean(out, "Service: esx_management_server", command)
         self.matchclean(out, "Service: vmseasoning", command)
         command = ["show_personality",
-                   "--archetype=esx_cluster", "--personality=esx_desktop"]
+                   "--archetype=esx_cluster", "--personality=vulcan-1g-desktop-prod"]
         out = self.commandtest(command)
         self.matchclean(out, "Service: esx_management_server", command)
 

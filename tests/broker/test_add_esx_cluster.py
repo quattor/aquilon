@@ -50,7 +50,7 @@ class TestAddESXCluster(TestBrokerCommand):
                    "--domain=unittest", "--down_hosts_threshold=2",
                    "--maint_threshold=2",
                    "--archetype=esx_cluster",
-                   "--personality=esx_desktop"]
+                   "--personality=vulcan-1g-desktop-prod"]
         self.noouttest(command)
 
     def testverifyutecl1(self):
@@ -69,14 +69,14 @@ class TestAddESXCluster(TestBrokerCommand):
         self.matchoutput(out, "Maintenance Threshold: 2", command)
         self.matchoutput(out, "Virtual Machine count: 0", command)
         self.matchoutput(out, "Build Status: build", command)
-        self.matchoutput(out, "Personality: esx_desktop Archetype: esx_cluster",
+        self.matchoutput(out, "Personality: vulcan-1g-desktop-prod Archetype: esx_cluster",
                          command)
         self.matchoutput(out, "Domain: unittest", command)
         self.matchclean(out, "Comments", command)
 
     def testverifycatutecl1(self):
         obj_cmd, obj, data_cmd, data = self.verify_cat_clusters("utecl1",
-                                                                "esx_desktop",
+                                                                "vulcan-1g-desktop-prod",
                                                                 "esx", "utmc1")
 
         default_ratio = self.config.get("broker",
@@ -100,7 +100,7 @@ class TestAddESXCluster(TestBrokerCommand):
                    "--metacluster=utmc1", "--building=ut",
                    "--buildstatus=build",
                    "--archetype=esx_cluster",
-                   "--personality=esx_desktop",
+                   "--personality=vulcan-1g-desktop-prod",
                    "--domain=unittest", "--down_hosts_threshold=1",
                    "--max_members=101", "--vm_to_host_ratio=1:1",
                    "--comments=Another test ESX cluster"]
@@ -117,14 +117,14 @@ class TestAddESXCluster(TestBrokerCommand):
         self.matchoutput(out, "Virtual Machine count: 0", command)
         self.matchoutput(out, "Down Hosts Threshold: 1", command)
         self.matchoutput(out, "Build Status: build", command)
-        self.matchoutput(out, "Personality: esx_desktop Archetype: esx_cluster",
+        self.matchoutput(out, "Personality: vulcan-1g-desktop-prod Archetype: esx_cluster",
                          command)
         self.matchoutput(out, "Domain: unittest", command)
         self.matchoutput(out, "Comments: Another test ESX cluster", command)
 
     def testverifycatutecl2(self):
         obj_cmd, obj, data_cmd, data = self.verify_cat_clusters("utecl2",
-                                                                "esx_desktop",
+                                                                "vulcan-1g-desktop-prod",
                                                                 "esx", "utmc1")
 
         self.matchoutput(data, '"/system/cluster/down_hosts_threshold" = 1;',
@@ -136,7 +136,7 @@ class TestAddESXCluster(TestBrokerCommand):
                    "--buildstatus=build",
                    "--domain=unittest", "--down_hosts_threshold=2",
                    "--archetype=esx_cluster",
-                   "--personality=esx_desktop"]
+                   "--personality=vulcan-1g-desktop-prod"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Cluster utecl1 already exists", command)
 
@@ -146,7 +146,7 @@ class TestAddESXCluster(TestBrokerCommand):
                    "--buildstatus=build",
                    "--domain=unittest", "--down_hosts_threshold=2",
                    "--archetype=esx_cluster",
-                   "--personality=esx_desktop"]
+                   "--personality=vulcan-1g-desktop-prod"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Country us is not within a campus", command)
 
@@ -156,7 +156,7 @@ class TestAddESXCluster(TestBrokerCommand):
                    "--buildstatus=build",
                    "--metacluster=metacluster-does-not-exist", "--building=ut",
                    "--archetype=esx_cluster",
-                   "--personality=esx_desktop"]
+                   "--personality=vulcan-1g-desktop-prod"]
         out = self.notfoundtest(command)
         self.matchoutput(out,
                          "Metacluster metacluster-does-not-exist not found",
@@ -168,7 +168,7 @@ class TestAddESXCluster(TestBrokerCommand):
                    "--buildstatus=wanting",
                    "--metacluster=utmc1", "--building=ut",
                    "--archetype=esx_cluster",
-                   "--personality=esx_desktop"]
+                   "--personality=vulcan-1g-desktop-prod"]
         out = self.notfoundtest(command)
         self.matchoutput(out,
                          "state wanting not found",
@@ -180,7 +180,7 @@ class TestAddESXCluster(TestBrokerCommand):
                    "--buildstatus=build",
                    "--metacluster=utmc1", "--building=ut",
                    "--archetype=esx_cluster",
-                   "--personality=esx_desktop"]
+                   "--personality=vulcan-1g-desktop-prod"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "'invalid?!?' is not a valid value for cluster",
                          command)
@@ -191,7 +191,7 @@ class TestAddESXCluster(TestBrokerCommand):
                    "--metacluster=utmc3", "--building=ut",
                    "--buildstatus=build",
                    "--archetype=esx_cluster",
-                   "--personality=esx_desktop"]
+                   "--personality=vulcan-1g-desktop-prod"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Metacluster utmc3 already has the maximum "
                          "number of clusters (0).", command)
@@ -221,7 +221,7 @@ class TestAddESXCluster(TestBrokerCommand):
                    "--buildstatus=build",
                    "--domain=unittest",
                    "--archetype=esx_cluster",
-                   "--personality=esx_desktop"]
+                   "--personality=vulcan-1g-desktop-prod"]
         self.noouttest(command)
 
     def testverifyutecl3(self):
@@ -235,13 +235,13 @@ class TestAddESXCluster(TestBrokerCommand):
         self.matchoutput(out, "Max members: 0", command)
         self.matchoutput(out, "vm_to_host_ratio: %s" % default_ratio, command)
         self.matchoutput(out, "Virtual Machine count: 0", command)
-        self.matchoutput(out, "Personality: esx_desktop Archetype: esx_cluster",
+        self.matchoutput(out, "Personality: vulcan-1g-desktop-prod Archetype: esx_cluster",
                          command)
         self.matchoutput(out, "Domain: unittest", command)
         self.matchclean(out, "Comments", command)
 
     def testverifycatutecl3(self):
-        self.verify_cat_clusters("utecl3", "esx_desktop", "esx", "utmc2")
+        self.verify_cat_clusters("utecl3", "vulcan-1g-desktop-prod", "esx", "utmc2")
 
     def testaddutecl4(self):
         # Bog standard - used for some noop tests
@@ -250,7 +250,7 @@ class TestAddESXCluster(TestBrokerCommand):
                    "--buildstatus=build",
                    "--domain=unittest", "--down_hosts_threshold=2",
                    "--archetype=esx_cluster",
-                   "--personality=esx_desktop"]
+                   "--personality=vulcan-1g-desktop-prod"]
         self.noouttest(command)
 
     def testverifyutecl4(self):
@@ -266,13 +266,13 @@ class TestAddESXCluster(TestBrokerCommand):
         self.matchoutput(out, "Max members: %s" % default_max, command)
         self.matchoutput(out, "vm_to_host_ratio: %s" % default_ratio, command)
         self.matchoutput(out, "Virtual Machine count: 0", command)
-        self.matchoutput(out, "Personality: esx_desktop Archetype: esx_cluster",
+        self.matchoutput(out, "Personality: vulcan-1g-desktop-prod Archetype: esx_cluster",
                          command)
         self.matchoutput(out, "Domain: unittest", command)
         self.matchclean(out, "Comments", command)
 
     def testverifycatutecl4(self):
-        self.verify_cat_clusters("utecl4", "esx_desktop", "esx", "utmc2")
+        self.verify_cat_clusters("utecl4", "vulcan-1g-desktop-prod", "esx", "utmc2")
 
     def testverifyplenaryclusterclient(self):
         for i in range(1, 5):
@@ -293,7 +293,7 @@ class TestAddESXCluster(TestBrokerCommand):
                        "--buildstatus=build",
                        "--domain=unittest", "--down_hosts_threshold=2",
                        "--archetype=esx_cluster",
-                       "--personality=esx_desktop"]
+                       "--personality=vulcan-1g-desktop-prod"]
             self.noouttest(command)
 
     def testaddutmc5(self):
@@ -302,18 +302,18 @@ class TestAddESXCluster(TestBrokerCommand):
                    "--domain=unittest", "--down_hosts_threshold=2",
                    "--max_members=15",
                    "--archetype=esx_cluster",
-                   "--personality=esx_desktop"]
+                   "--personality=vulcan-1g-desktop-prod"]
         self.noouttest(command)
         command = ["add_esx_cluster", "--cluster=npecl11",
                    "--metacluster=utmc5", "--rack=np13",
                    "--domain=unittest", "--down_hosts_threshold=2",
                    "--max_members=15",
                    "--archetype=esx_cluster",
-                   "--personality=esx_desktop"]
+                   "--personality=vulcan-1g-desktop-prod"]
         self.noouttest(command)
 
     def testverifyutecl11(self):
-        self.verify_cat_clusters("utecl11", "esx_desktop", "esx", "utmc5",
+        self.verify_cat_clusters("utecl11", "vulcan-1g-desktop-prod", "esx", "utmc5",
                                  on_rack=True)
 
     def testaddutmc6(self):
@@ -322,18 +322,18 @@ class TestAddESXCluster(TestBrokerCommand):
                    "--domain=unittest", "--down_hosts_threshold=2",
                    "--max_members=15",
                    "--archetype=esx_cluster",
-                   "--personality=esx_desktop"]
+                   "--personality=vulcan-1g-desktop-prod"]
         self.noouttest(command)
         command = ["add_esx_cluster", "--cluster=npecl12",
                    "--metacluster=utmc6", "--rack=np13",
                    "--domain=unittest", "--down_hosts_threshold=2",
                    "--max_members=15",
                    "--archetype=esx_cluster",
-                   "--personality=esx_desktop"]
+                   "--personality=vulcan-1g-desktop-prod"]
         self.noouttest(command)
 
     def testverifyutecl12(self):
-        self.verify_cat_clusters("utecl12", "esx_desktop", "esx", "utmc6",
+        self.verify_cat_clusters("utecl12", "vulcan-1g-desktop-prod", "esx", "utmc6",
                                  on_rack=True)
 
     def testaddutmc7(self):
@@ -341,7 +341,7 @@ class TestAddESXCluster(TestBrokerCommand):
                    "--metacluster=utmc7", "--building=ut",
                    "--domain=unittest", "--down_hosts_threshold=0",
                    "--archetype=esx_cluster",
-                   "--personality=esx_desktop"]
+                   "--personality=vulcan-1g-desktop-prod"]
         self.noouttest(command)
 
     def testfailcatmissingcluster(self):

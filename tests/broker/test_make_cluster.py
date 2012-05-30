@@ -84,7 +84,7 @@ class TestMakeCluster(TestBrokerCommand):
     def testverifycatutecl1_2(self):
         self.successtest(["add_allowed_personality",
                           "--archetype", "vmhost",
-                          "--personality=esx_desktop",
+                          "--personality=vulcan-1g-desktop-prod",
                           "--cluster", "utecl1"])
 
         self.successtest(["add_allowed_personality",
@@ -100,8 +100,8 @@ class TestMakeCluster(TestBrokerCommand):
 
         self.searchoutput(out,
                           r'"/system/cluster/allowed_personalities" = list\(\s*' +
-                          '"vmhost/esx_desktop",' + r'\s*' +
-                          '"vmhost/generic"' + r'\s*\);',
+                          '"vmhost/generic",' + r'\s*' +
+                          '"vmhost/vulcan-1g-desktop-prod"' + r'\s*\);',
                           command)
 
         self.successtest(["del_allowed_personality",
@@ -111,7 +111,7 @@ class TestMakeCluster(TestBrokerCommand):
 
         self.successtest(["del_allowed_personality",
                           "--archetype", "vmhost",
-                          "--personality=esx_desktop",
+                          "--personality=vulcan-1g-desktop-prod",
                           "--cluster", "utecl1"])
 
     def testverifygridcluster(self):

@@ -164,13 +164,13 @@ class TestPublishSandbox(TestBrokerCommand):
     def testaddesxserverpersonality(self):
         sandboxdir = os.path.join(self.sandboxdir, "utsandbox")
         personalitydir = os.path.join(sandboxdir, "vmhost",
-                                      "personality", "esx_desktop")
+                                      "personality", "vulcan-1g-desktop-prod")
         if not os.path.exists(personalitydir):
             os.makedirs(personalitydir)
         template = os.path.join(personalitydir, "espinfo.tpl")
         with open(template, 'w') as f:
             f.writelines(
-                """structure template personality/esx_desktop/espinfo;
+                """structure template personality/vulcan-1g-desktop-prod/espinfo;
 
 "description" = "Virtualisation Host running Server VMs";
 "class" = "INFRASTRUCTURE";
@@ -183,7 +183,7 @@ class TestPublishSandbox(TestBrokerCommand):
         template = os.path.join(personalitydir, "windows.tpl")
         with open(template, 'w') as f:
             f.writelines(
-                """structure template personality/esx_desktop/windows;
+                """structure template personality/vulcan-1g-desktop-prod/windows;
 
 "windows" = list(
                 nlist("day", "Fri", "start", "23:00", "duration", 48),
@@ -191,7 +191,7 @@ class TestPublishSandbox(TestBrokerCommand):
                 """)
         self.gitcommand(["add", "windows.tpl"], cwd=personalitydir)
         self.gitcommand(["commit", "-a", "-m",
-                         "added personality esx_desktop"],
+                         "added personality vulcan-1g-desktop-prod"],
                          cwd=sandboxdir)
 
     def testaddutmedium(self):
@@ -317,26 +317,26 @@ structure template personality/generic/windows;
     def testaddesxdesktop(self):
         templates = {}
         templates['config.tpl'] = """
-template personality/esx_desktop/config;
+template personality/vulcan-1g-desktop-prod/config;
 
-variable PERSONALITY = "esx_desktop";
+variable PERSONALITY = "vulcan-1g-desktop-prod";
 include { "personality/config" };
 """
         templates['espinfo.tpl'] = """
-structure template personality/esx_desktop/espinfo;
+structure template personality/vulcan-1g-desktop-prod/espinfo;
 
 "description" = "ESX Cluster for virtual desktops";
 "class" = "INFRASTRUCTURE";
 "function" = "production";
 """
         templates['windows.tpl'] = """
-structure template personality/esx_desktop/windows;
+structure template personality/vulcan-1g-desktop-prod/windows;
 
 "windows" = list( nlist("day", "Fri", "start", "23:00", "duration", 48), );
 """
         sandboxdir = os.path.join(self.sandboxdir, 'utsandbox')
         pdir = os.path.join(sandboxdir,
-                            'esx_cluster', 'personality', 'esx_desktop')
+                            'esx_cluster', 'personality', 'vulcan-1g-desktop-prod')
         if not os.path.exists(pdir):
             os.makedirs(pdir)
         for (name, contents) in templates.items():
@@ -344,7 +344,7 @@ structure template personality/esx_desktop/windows;
             with open(template, 'w') as f:
                 f.writelines(contents)
             self.gitcommand(["add", name], cwd=pdir)
-        self.gitcommand(["commit", "-a", "-m", "added esx_desktop files"],
+        self.gitcommand(["commit", "-a", "-m", "added vulcan-1g-desktop-prod files"],
                         cwd=sandboxdir)
 
     def testpublishutsandbox(self):
