@@ -283,16 +283,6 @@ class TestPublishSandbox(TestBrokerCommand):
 
     def testaddesxcluster(self):
         templates = {}
-        templates['cluster.tpl'] = """
-template personality/generic/cluster;
-
-include { "components/esxclusterconfig/config" };
-"/software/components/esxclusterconfig/esx/drsConfig" = nlist(
-        "defaultVmBehavior", nlist("val", "fullyAutomated"),
-        "enabled", 1,
-        "vmotionRate", 3,
-);
-"""
         templates['config.tpl'] = """
 template personality/generic/config;
 
@@ -326,16 +316,6 @@ structure template personality/generic/windows;
 
     def testaddesxdesktop(self):
         templates = {}
-        templates['cluster.tpl'] = """
-template personality/esx_desktop/cluster;
-
-include { "components/esxclusterconfig/config" };
-"/software/components/esxclusterconfig/esx/drsConfig" = nlist(
-        "defaultVmBehavior", nlist("val", "fullyAutomated"),
-        "enabled", 1,
-        "vmotionRate", 3,
-);
-"""
         templates['config.tpl'] = """
 template personality/esx_desktop/config;
 
