@@ -188,6 +188,12 @@ class TestAddRequiredService(TestBrokerCommand):
         command = ["add_required_service", "--service=esx_management_server",
                    "--archetype=esx_cluster", "--personality=esx_desktop"]
         self.noouttest(command)
+        command = ["add_required_service", "--service=esx_management_server",
+                   "--archetype=vmhost", "--personality=vulcan2-10g-test"]
+        self.noouttest(command)
+        command = ["add_required_service", "--service=esx_management_server",
+                   "--archetype=esx_cluster", "--personality=vulcan2-10g-test"]
+        self.noouttest(command)
         command = ["add_required_service", "--service=vmseasoning",
                    "--archetype=vmhost", "--personality=esx_desktop"]
         self.noouttest(command)

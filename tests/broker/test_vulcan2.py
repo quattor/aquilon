@@ -45,7 +45,7 @@ class TestVulcan20(TestBrokerCommand):
 
     def test_000_addutmc8(self):
         command = ["add_metacluster", "--metacluster=utmc8",
-                   "--personality=metacluster", "--archetype=metacluster",
+                   "--personality=vulcan2-test", "--archetype=metacluster",
                    "--domain=unittest", "--building=ut", "--domain=unittest",
                    "--comments=autopg_v2_tests"]
 
@@ -60,7 +60,7 @@ class TestVulcan20(TestBrokerCommand):
                        "--buildstatus=build",
                        "--domain=unittest", "--down_hosts_threshold=0",
                        "--archetype=esx_cluster",
-                       "--personality=esx_desktop"]
+                       "--personality=vulcan2-10g-test"]
             self.noouttest(command)
 
     # see     def testaddut01ga2s02(self):
@@ -114,7 +114,6 @@ class TestVulcan20(TestBrokerCommand):
                             "--machine", machine,
                             "--mac", ip.mac])
 
-
     def test_006_populate10gigrackhosts(self):
         for i in range(0, 2):
             ip = self.net.unknown[18].usable[i]
@@ -126,11 +125,11 @@ class TestVulcan20(TestBrokerCommand):
                        "--machine", machine,
                        "--domain", "unittest", "--buildstatus", "build",
                        "--osname", "esxi", "--osversion", "4.0.0",
-                       "--archetype", "vmhost", "--personality", "esx_desktop"]
+                       "--archetype", "vmhost", "--personality", "vulcan2-10g-test"]
             self.noouttest(command)
         self.dsdb_verify()
 
-    def test_007_bindutmc8(self):
+    def test_007_makeclusters(self):
         for i in range(0, 2):
 
             host = "utpgh%s.aqd-unittest.ms.com" % i
@@ -139,8 +138,6 @@ class TestVulcan20(TestBrokerCommand):
 
             self.successtest(["cluster",
                               "--hostname", host, "--cluster", cluster])
-
-        self.successtest(["make", "cluster", "--cluster", "utmc8"])
 
     def test_008_addmachines(self):
         for i in range(0, 3):
@@ -154,6 +151,25 @@ class TestVulcan20(TestBrokerCommand):
         for i in range(0, 2):
             self.successtest(["update_esx_cluster", "--cluster=utpgcl%d" % i,
                               "--switch=utpgsw%d.aqd-unittest.ms.com" % i])
+
+    def test_010_addstorageips(self):
+        # storage IPs
+        for i in range(0, 2):
+            ip = self.net.vm_storage_net[0].usable[i + 26]
+            machine = "utpgs01p%d" % i
+
+            self.noouttest(["add", "interface", "--interface", "eth1",
+                            "--machine", machine,
+                            "--mac", ip.mac])
+
+            self.dsdb_expect_add("utpgh%d-eth1.aqd-unittest.ms.com" % i,
+                                 ip, "eth1", ip.mac,
+                                 primary="utpgh%d.aqd-unittest.ms.com" % i)
+            command = ["add", "interface", "address", "--machine", machine,
+                       "--interface", "eth1", "--ip", ip]
+            self.noouttest(command)
+        self.dsdb_verify()
+
 
     # Autopg test
     def test_100_addinterfaces(self):
@@ -197,7 +213,9 @@ class TestVulcan20(TestBrokerCommand):
         self.matchoutput(out, "Resource Group: utmc8as1", command)
         self.matchoutput(out, "Resource Group: utmc8as2", command)
 
-    def test_102_cat_metacluster(self):
+    def test_102_verify_metacluster(self):
+        self.successtest(["make", "cluster", "--cluster", "utmc8"])
+
         command = ["cat", "--cluster", "utmc8", "--data"]
         out = self.commandtest(command)
         self.matchoutput(out,
@@ -346,7 +364,7 @@ class TestVulcan20(TestBrokerCommand):
         self.noouttest(command)
 
         command = ["add_required_service", "--service", "vcenter",
-                   "--archetype", "vmhost", "--personality", "esx_desktop"]
+                   "--archetype", "vmhost", "--personality", "vulcan2-10g-test"]
         self.noouttest(command)
 
         command = ["add_cluster_aligned_service", "--cluster_type", "meta",
@@ -355,12 +373,12 @@ class TestVulcan20(TestBrokerCommand):
 
     def test_151_mapvcenterservices(self):
         command = ["map", "service", "--service", "vcenter", "--instance", "ut",
-                   "--building", "ut", "--personality", "esx_desktop",
+                   "--building", "ut", "--personality", "vulcan2-10g-test",
                    "--archetype", "vmhost"]
         self.noouttest(command)
 
         command = ["map", "service", "--service", "vcenter", "--instance", "np",
-                   "--building", "np", "--personality", "esx_desktop",
+                   "--building", "np", "--personality", "vulcan2-10g-test",
                    "--archetype", "vmhost"]
         self.noouttest(command)
 
@@ -387,7 +405,7 @@ class TestVulcan20(TestBrokerCommand):
         self.noouttest(command)
 
         command = ["del_required_service", "--service", "vcenter",
-                   "--archetype", "vmhost", "--personality", "esx_desktop"]
+                   "--archetype", "vmhost", "--personality", "vulcan2-10g-test"]
         self.noouttest(command)
 
         command = ["unbind_cluster", "--cluster", "utmc8",
@@ -398,12 +416,12 @@ class TestVulcan20(TestBrokerCommand):
     def test_154_unmapvcenterservices(self):
         command = ["unmap", "service", "--service", "vcenter",
                    "--instance", "ut", "--building", "ut",
-                   "--personality", "esx_desktop", "--archetype", "vmhost"]
+                   "--personality", "vulcan2-10g-test", "--archetype", "vmhost"]
         self.noouttest(command)
 
         command = ["unmap", "service", "--service", "vcenter",
                    "--instance", "np", "--building", "np",
-                   "--personality", "esx_desktop", "--archetype", "vmhost"]
+                   "--personality", "vulcan2-10g-test", "--archetype", "vmhost"]
         self.noouttest(command)
 
         command = ["make", "--hostname", "utpgh0.aqd-unittest.ms.com"]
@@ -450,6 +468,20 @@ class TestVulcan20(TestBrokerCommand):
 
     # Metacluster / cluster / Switch deletes
 
+
+    def test_305_delinterfaces(self):
+        for i in range(0, 2):
+            ip = self.net.vm_storage_net[0].usable[i + 26]
+            machine = "utpgs01p%d" % i
+
+            self.dsdb_expect_delete(ip)
+            command = ["del", "interface", "address", "--machine", machine,
+                       "--interface", "eth1", "--ip", ip]
+            self.noouttest(command)
+
+            self.noouttest(["del", "interface", "--interface", "eth1",
+                            "--machine", machine])
+        self.dsdb_verify()
 
     def test_306_delmachines(self):
         for i in range(0, 3):

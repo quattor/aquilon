@@ -315,6 +315,16 @@ class TestMapService(TestBrokerCommand):
                         "--archetype", "vmhost",
                         "--personality", "esx_desktop"])
 
+    def testmapesxv2(self):
+        self.noouttest(["map", "service", "--building", "ut",
+                        "--service", "esx_management_server",
+                        "--instance", "ut.a", "--archetype", "vmhost",
+                        "--personality", "vulcan2-10g-test"])
+        self.noouttest(["map", "service", "--building", "ut",
+                        "--service", "esx_management_server",
+                        "--instance", "ut.a", "--archetype", "esx_cluster",
+                        "--personality", "vulcan2-10g-test"])
+
     def testverifymapesx(self):
         command = ["show_map", "--archetype=vmhost",
                    "--personality=esx_desktop", "--building=ut"]
