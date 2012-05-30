@@ -81,6 +81,11 @@ class TestDelMetaCluster(TestBrokerCommand):
         command = ["del_metacluster", "--metacluster=utmc7"]
         self.noouttest(command)
 
+    def testdelvulcan1(self):
+        command = ["del_metacluster", "--metacluster=vulcan1"]
+        err = self.statustest(command)
+        self.matchoutput(err, "sent 0 server notifications", command)
+
     def testverifyall(self):
         command = ["show_metacluster", "--all"]
         out = self.commandtest(command)

@@ -122,6 +122,11 @@ class TestAddMetaCluster(TestBrokerCommand):
                    "--domain=ut-prod"]
         self.noouttest(command)
 
+    def testaddvulcan1(self):
+        # this should be removed when virtbuild supports new options
+        command = ["add_metacluster", "--metacluster=vulcan1"]
+        self.noouttest(command)
+
     def testverifyshowall(self):
         command = "show metacluster --all"
         out = self.commandtest(command.split(" "))
@@ -139,6 +144,12 @@ class TestAddMetaCluster(TestBrokerCommand):
         out = self.badrequesttest(command)
         self.matchoutput(out, "name global is reserved", command)
 
+    def testbadlocation(self):
+        command = ["add_metacluster", "--metacluster=uscluster",
+                   "--country=us"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Country us is not within "
+                         "a campus.", command)
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddMetaCluster)

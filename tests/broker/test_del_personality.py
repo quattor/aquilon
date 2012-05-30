@@ -98,6 +98,10 @@ class TestDelPersonality(TestBrokerCommand):
         command = ["del_personality",
                    "--personality=esx_desktop", "--archetype=vmhost"]
         self.noouttest(command)
+        command = ["del_personality",
+                   "--personality=metacluster", "--archetype=metacluster"]
+        self.noouttest(command)
+
 
 
 if __name__ == '__main__':

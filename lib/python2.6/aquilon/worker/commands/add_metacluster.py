@@ -31,7 +31,8 @@
 from aquilon.worker.broker import BrokerCommand, validate_basic
 from aquilon.worker.dbwrappers.branch import get_branch_and_author
 from aquilon.worker.dbwrappers.location import get_location
-from aquilon.aqdb.model import (MetaCluster, Personality, ClusterLifecycle)
+from aquilon.aqdb.model import (MetaCluster, Personality, ClusterLifecycle,
+                                Location)
 from aquilon.worker.templates.metacluster import PlenaryMetaCluster
 from aquilon.exceptions_ import ArgumentError
 
@@ -49,6 +50,13 @@ class CommandAddMetaCluster(BrokerCommand):
 
         validate_basic("metacluster", metacluster)
 
+        # this should be reverted when virtbuild supports these options
+        if not archetype:
+            archetype = "metacluster"
+
+        if not personality:
+            personality = "metacluster"
+
         dbpersonality = Personality.get_unique(session, name=personality,
                                                archetype=archetype, compel=True)
         if not dbpersonality.is_cluster:
@@ -62,16 +70,25 @@ class CommandAddMetaCluster(BrokerCommand):
         dbstatus = ClusterLifecycle.get_unique(session, buildstatus,
                                                compel=True)
 
+        # this should be reverted when virtbuild supports these options
+        if not domain and not sandbox:
+                domain= self.config.get("broker", "metacluster_host_domain")
+
         (dbbranch, dbauthor) = get_branch_and_author(session, logger,
                                                      domain=domain,
                                                      sandbox=sandbox,
                                                      compel=False)
 
         dbloc = get_location(session, **arguments)
+
+        # this should be reverted when virtbuild supports this option
         if not dbloc:
-            raise ArgumentError("Adding a cluster requires a location "
-                                "constraint.")
-        if not dbloc.campus:
+            dbloc = Location.get_unique(session,
+                                        name=self.config.get("broker",
+                                                 "metacluster_location_name"),
+                                        location_type=self.config.get("broker",
+                                                  "metacluster_location_type"))
+        elif not dbloc.campus:
             raise ArgumentError("{0} is not within a campus.".format(dbloc))
 
         if max_members is None:

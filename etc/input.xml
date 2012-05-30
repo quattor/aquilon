@@ -3467,8 +3467,8 @@
            <option name="desk" type="string">Desk</option>
         </optgroup>
         <optgroup name="personality_opts" mandatory="False">
-           <option name="archetype" type="string" default="metacluster-old">Archetype name</option>
-           <option name="personality" type="string" default="metacluster-old">Personality name</option>
+           <option name="archetype" type="string">Archetype name</option>
+           <option name="personality" type="string">Personality name</option>
         </optgroup>
         <optgroup name="branch_opts" fields="any">
            <option name="domain" type="string" conflicts="sandbox">Name of template domain</option>
