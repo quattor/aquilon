@@ -3757,9 +3757,9 @@
                <option name="instance" type="string">Service Instance</option>
             </optgroup>
          </optgroup>
-         <optgroup name="bind_cluster_type">
-            <option name="cluster_type" type="string">Cluster type, esx or meta</option>
-         </optgroup>
+      </optgroup>
+      <optgroup name="bind_cluster_type">
+         <option name="cluster_type" type="string">Cluster type, esx or meta</option>
       </optgroup>
       <transport method="put" trigger="service" path="cluster/%(cluster)s/service/%(service)s/%(instance)s" />
    </command>
