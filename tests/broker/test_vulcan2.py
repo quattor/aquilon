@@ -483,13 +483,23 @@ class TestVulcan20(TestBrokerCommand):
         self.dsdb_verify()
 
     def test_309_delutpgcl(self):
+        command = ["del_metacluster", "--metacluster=utmc8"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "ESX Metacluster utmc8 is still in use by "
+                         "clusters: utpgcl0, utpgcl1.", command)
+
         for i in range(0, 2):
             command = ["del_esx_cluster", "--cluster=utpgcl%d" % i]
             self.successtest(command)
 
     def test_310_delutmc8(self):
         command = ["del_metacluster", "--metacluster=utmc8"]
-        self.noouttest(command)
+        err = self.statustest(command)
+        self.matchoutput(err, "sent 1 server notifications", command)
+
+        self.assertFalse(os.path.exists(os.path.join(
+            self.config.get("broker", "profilesdir"), "clusters",
+            "utmc8%s" % self.profile_suffix)))
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestVulcan20)

@@ -28,21 +28,17 @@
 # TERMS THAT MAY APPLY.
 
 
-from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import MetaCluster
 from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.commands.del_cluster import del_cluster
 
 
 class CommandDelMetaCluster(BrokerCommand):
 
     required_parameters = [ "metacluster" ]
 
-    def render(self, session, metacluster, **arguments):
+    def render(self, session, logger, metacluster, **arguments):
         dbmetacluster = MetaCluster.get_unique(session, metacluster,
                                                compel=True)
-        if dbmetacluster.members:
-            raise ArgumentError("%s is still in use by clusters: %s." %
-                                (format(dbmetacluster),
-                                 ", ".join([c.name for c in dbmetacluster.members])))
-        session.delete(dbmetacluster)
-        return
+        del_cluster(session, logger, dbmetacluster, self.config)
+
