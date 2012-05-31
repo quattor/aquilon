@@ -599,6 +599,8 @@ class ClusterChooser(Chooser):
         """If this cluster is bound to a service, how many hosts bind?"""
         cluster_types = instance.service.aligned_cluster_types
         if self.dbcluster.cluster_type in cluster_types:
+            if self.dbcluster.cluster_type == 'meta':
+                return 0
             return self.dbcluster.max_hosts
         return 0
 

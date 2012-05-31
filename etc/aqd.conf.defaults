@@ -165,6 +165,7 @@ esx_cluster_vm_to_host_ratio = 16:1
 metacluster_max_members_default = 32
 metacluster_max_shares_default = 32
 hacluster_max_members_default = 2
+storagecluster_max_members_default = 2
 gridcluster_max_members_default = 2000
 ant = /ms/dist/ossjava/PROJ/ant/1.8.2/bin/ant
 namespaced_host_profiles = False

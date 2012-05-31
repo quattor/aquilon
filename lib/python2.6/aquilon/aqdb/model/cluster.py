@@ -112,7 +112,7 @@ class Cluster(Base):
                                                name='cluster_location_fk'))
 
     #esx cluster __init__ method overrides this default
-    max_hosts = Column(Integer, default=2, nullable=True)
+    max_hosts = Column(Integer, nullable=True)
     # N+M clusters are defined by setting down_hosts_threshold to M
     # Simple 2-node clusters would have down_hosts_threshold of 0
     down_hosts_threshold = Column(Integer, nullable=True)

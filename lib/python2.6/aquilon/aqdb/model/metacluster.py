@@ -70,7 +70,7 @@ class MetaCluster(Cluster):
                                     ondelete='CASCADE'),
                                     primary_key=True)
 
-    max_clusters = Column(Integer, default=2, nullable=False)
+    max_clusters = Column(Integer, nullable=False)
 
     max_shares = Column(Integer, nullable=False)
 
