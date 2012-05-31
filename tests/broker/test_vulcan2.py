@@ -29,6 +29,7 @@
 # TERMS THAT MAY APPLY.
 """Module for testing the vulcan2 related commands."""
 
+import os
 import unittest
 
 if __name__ == "__main__":
@@ -510,8 +511,15 @@ class TestVulcan20(TestBrokerCommand):
             ip = self.net.unknown[17].usable[i]
 
             self.dsdb_expect_delete(ip)
-            command = "del switch --switch utpgsw%d.aqd-unittest.ms.com" % i
+            swname = "utpgsw%d.aqd-unittest.ms.com" % i
+            command = "del switch --switch %s" % swname
             self.noouttest(command.split(" "))
+
+            plenary = os.path.join(self.config.get("broker", "plenarydir"),
+                       "switchdata", "%s.tpl" % swname)
+            self.failIf(os.path.exists(plenary),
+                        "Plenary file '%s' still exists" % plenary)
+
         self.dsdb_verify()
 
     def test_309_delutpgcl(self):
