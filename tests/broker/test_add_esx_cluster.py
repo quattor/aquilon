@@ -53,6 +53,11 @@ class TestAddESXCluster(TestBrokerCommand):
                    "--personality=vulcan-1g-desktop-prod"]
         self.noouttest(command)
 
+    def testreconfigureutecl1members(self):
+        # Check if reconfiguring an empty list does nothing
+        command = ["reconfigure", "--membersof", "utecl1"]
+        self.noouttest(command)
+
     def testverifyutecl1(self):
         command = "show esx_cluster --cluster utecl1"
         out = self.commandtest(command.split(" "))
