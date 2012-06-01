@@ -25,9 +25,8 @@ from aquilon.worker.dbwrappers.hardware_entity import update_primary_ip
 from aquilon.worker.dbwrappers.location import get_location
 from aquilon.worker.dbwrappers.resources import (find_share,
                                                  get_resource_holder)
-from aquilon.worker.templates.machine import machine_plenary_will_move
-from aquilon.worker.templates.base import Plenary, PlenaryCollection
-from aquilon.worker.locks import CompileKey
+from aquilon.worker.templates import (Plenary, PlenaryCollection,
+                                      PlenaryHostData)
 from aquilon.worker.processes import DSDBRunner
 
 
@@ -41,18 +40,22 @@ class CommandUpdateMachine(BrokerCommand):
                cpuname, cpuvendor, cpuspeed, cpucount, memory, ip,
                **arguments):
         dbmachine = Machine.get_unique(session, machine, compel=True)
-        plenaries = PlenaryCollection(logger=logger)
         oldinfo = DSDBRunner.snapshot_hw(dbmachine)
+
+        plenaries = PlenaryCollection(logger=logger)
+        plenaries.append(Plenary.get_plenary(dbmachine))
+        if dbmachine.vm_container:
+            plenaries.append(Plenary.get_plenary(dbmachine.vm_container))
+        if dbmachine.host:
+            # Using PlenaryHostData directly, to avoid warnings if the host has
+            # not been configured yet
+            plenaries.append(PlenaryHostData.get_plenary(dbmachine.host))
 
         if clearchassis:
             del dbmachine.chassis_slot[:]
 
-        remove_plenaries = PlenaryCollection(logger=logger)
         if chassis:
             dbchassis = Chassis.get_unique(session, chassis, compel=True)
-            if machine_plenary_will_move(old=dbmachine.location,
-                                         new=dbchassis.location):
-                remove_plenaries.append(Plenary.get_plenary(dbmachine))
             dbmachine.location = dbchassis.location
             if slot is None:
                 raise ArgumentError("Option --chassis requires --slot "
@@ -87,18 +90,12 @@ class CommandUpdateMachine(BrokerCommand):
                         loc_clear_chassis = True
             if loc_clear_chassis:
                 del dbmachine.chassis_slot[:]
-            if machine_plenary_will_move(old=dbmachine.location,
-                                         new=dblocation):
-                remove_plenaries.append(Plenary.get_plenary(dbmachine))
             dbmachine.location = dblocation
 
             if dbmachine.host:
                 for vm in dbmachine.host.virtual_machines:
-                    if machine_plenary_will_move(old=vm.location,
-                                                 new=dbmachine.location):
-                        remove_plenaries.append(Plenary.get_plenary(vm))
-                    vm.location = dblocation
                     plenaries.append(Plenary.get_plenary(vm))
+                    vm.location = dblocation
 
         if model or vendor:
             # If overriding model, should probably overwrite default
@@ -178,7 +175,9 @@ class CommandUpdateMachine(BrokerCommand):
                                         .format(old_holder.metacluster,
                                                 new_holder.metacluster))
 
-            remove_plenaries.append(Plenary.get_plenary(dbmachine.vm_container))
+            plenaries.append(Plenary.get_plenary(old_holder))
+            plenaries.append(Plenary.get_plenary(new_holder))
+
             dbmachine.vm_container.holder = resholder
 
             for dbdisk in dbmachine.disks:
@@ -204,13 +203,6 @@ class CommandUpdateMachine(BrokerCommand):
             else:
                 dbmachine.location = new_holder.location
 
-            session.flush()
-            plenaries.append(Plenary.get_plenary(old_holder))
-            plenaries.append(Plenary.get_plenary(new_holder))
-
-        if dbmachine.vm_container:
-            plenaries.append(Plenary.get_plenary(dbmachine.vm_container))
-
         session.flush()
 
         # Check if the changed parameters still meet cluster capacity
@@ -226,27 +218,17 @@ class CommandUpdateMachine(BrokerCommand):
         # dummy aurora hardware is within the call to write().  This way
         # it is consistent without altering (and forgetting to alter)
         # all the calls to the method.
-        plenaries.append(Plenary.get_plenary(dbmachine))
-        if remove_plenaries.plenaries and dbmachine.host:
-            plenaries.append(Plenary.get_plenary(dbmachine.host))
 
-        with CompileKey.merge([plenaries.get_write_key(),
-                               remove_plenaries.get_remove_key()]):
-            remove_plenaries.stash()
+        with plenaries.get_write_key():
+            plenaries.stash()
             try:
                 plenaries.write(locked=True)
-                remove_plenaries.remove(locked=True)
-
-                if dbmachine.host:
-                    # XXX: May need to reconfigure.
-                    pass
 
                 dsdb_runner = DSDBRunner(logger=logger)
                 dsdb_runner.update_host(dbmachine, oldinfo)
                 dsdb_runner.commit_or_rollback("Could not update machine in DSDB")
             except:
                 plenaries.restore_stash()
-                remove_plenaries.restore_stash()
                 raise
 
         return

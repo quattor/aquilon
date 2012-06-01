@@ -17,6 +17,8 @@
 # limitations under the License.
 """Module for testing the manage --list command."""
 
+import os
+
 if __name__ == "__main__":
     import utils
     utils.import_depends()
@@ -29,11 +31,19 @@ class TestManageList(TestBrokerCommand):
 
     def test_100_forced_manage_list(self):
         user = self.config.get("unittest", "user")
-        hosts = ["aquilon65.aqd-unittest.ms.com\n",
-                 "aquilon66.aqd-unittest.ms.com\n"]
-        scratchfile = self.writescratch("managelist", "".join(hosts))
+        hosts = ["aquilon65.aqd-unittest.ms.com",
+                 "aquilon66.aqd-unittest.ms.com"]
+        for h in hosts:
+            self.successtest(["compile", "--hostname", h])
+            self.verify_buildfiles("utsandbox", h, want_exist=True)
+
+        scratchfile = self.writescratch("managelist", "\n".join(hosts))
         self.noouttest(["manage", "--list", scratchfile,
                         "--sandbox", "%s/managetest1" % user, "--force"])
+        for h in hosts:
+            self.verify_buildfiles("utsandbox", h, want_exist=False)
+            plen = self.build_profile_name(h, domain="managetest1")
+            self.failUnless(os.path.exists(plen), "%s does not exit." % plen)
 
     def test_101_verify_forced_manage_list(self):
         user = self.config.get("unittest", "user")
@@ -52,11 +62,19 @@ class TestManageList(TestBrokerCommand):
 
     def test_102_manage_list(self):
         user = self.config.get("unittest", "user")
-        hosts = ["aquilon65.aqd-unittest.ms.com\n",
-                 "aquilon66.aqd-unittest.ms.com\n"]
-        scratchfile = self.writescratch("managelist", "".join(hosts))
+        hosts = ["aquilon65.aqd-unittest.ms.com",
+                 "aquilon66.aqd-unittest.ms.com"]
+        for h in hosts:
+            self.successtest(["compile", "--hostname", h])
+            self.verify_buildfiles("managetest1", h, want_exist=True)
+
+        scratchfile = self.writescratch("managelist", "\n".join(hosts))
         self.noouttest(["manage", "--list", scratchfile,
                         "--sandbox", "%s/managetest2" % user])
+        for h in hosts:
+            self.verify_buildfiles("managetest1", h, want_exist=False)
+            plen = self.build_profile_name(h, domain="managetest2")
+            self.failUnless(os.path.exists(plen), "%s does not exit." % plen)
 
     def test_103_verify_manage_list(self):
         user = self.config.get("unittest", "user")
@@ -75,8 +93,8 @@ class TestManageList(TestBrokerCommand):
         self.matchoutput(out, "Sandbox: %s/managetest2" % user, command)
 
     def test_104_fail_manage_list_nomanage(self):
-        hosts = ["unittest02.one-nyp.ms.com\n"]
-        scratchfile = self.writescratch("managelist", "".join(hosts))
+        hosts = ["unittest02.one-nyp.ms.com"]
+        scratchfile = self.writescratch("managelist", "\n".join(hosts))
         command = ["manage", "--list", scratchfile, "--domain", "nomanage"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Managing hosts to domain nomanage is "
@@ -85,7 +103,7 @@ class TestManageList(TestBrokerCommand):
     def test_105_fail_manage_empty_list(self):
         user = self.config.get("unittest", "user")
         hosts = []
-        scratchfile = self.writescratch("managelist", "".join(hosts))
+        scratchfile = self.writescratch("managelist", "\n".join(hosts))
         command = ["manage", "--list", scratchfile, "--sandbox",
                    "%s/changetest1" % user]
         out = self.badrequesttest(command)
@@ -93,8 +111,8 @@ class TestManageList(TestBrokerCommand):
 
     def test_106_fail_manage_invalid_list(self):
         user = self.config.get("unittest", "user")
-        hosts = ["thishostdoesnotexist.aqd-unittest.ms.com\n"]
-        scratchfile = self.writescratch("managelist", "".join(hosts))
+        hosts = ["thishostdoesnotexist.aqd-unittest.ms.com"]
+        scratchfile = self.writescratch("managelist", "\n".join(hosts))
         command = ["manage", "--list", scratchfile, "--sandbox",
                    "%s/changetest1" % user]
         out = self.badrequesttest(command)
@@ -104,9 +122,9 @@ class TestManageList(TestBrokerCommand):
 
     def test_107_fail_manage_list_domain(self):
         user = self.config.get("unittest", "user")
-        hosts = ["server2.aqd-unittest.ms.com\n",
-                 "unittest02.one-nyp.ms.com\n"]
-        scratchfile = self.writescratch("managelist", "".join(hosts))
+        hosts = ["server2.aqd-unittest.ms.com",
+                 "unittest02.one-nyp.ms.com"]
+        scratchfile = self.writescratch("managelist", "\n".join(hosts))
         command = ["manage", "--list", scratchfile, "--sandbox",
                    "%s/changetest1" % user]
         out = self.badrequesttest(command)
@@ -116,8 +134,8 @@ class TestManageList(TestBrokerCommand):
 
     def test_108_fail_manage_list_cluster(self):
         user = self.config.get("unittest", "user")
-        hosts = ["evh1.aqd-unittest.ms.com\n"]
-        scratchfile = self.writescratch("managelist", "".join(hosts))
+        hosts = ["evh1.aqd-unittest.ms.com"]
+        scratchfile = self.writescratch("managelist", "\n".join(hosts))
         command = ["manage", "--list", scratchfile,
                    "--sandbox", "%s/changetest1" % user]
         out = self.badrequesttest(command)

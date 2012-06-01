@@ -64,6 +64,7 @@ class Plenary(object):
 
         # The following attributes are for stash/restore_stash
         self.old_path = self.full_path(dbobj)
+        self.new_path = None
         self.old_content = None
         self.old_mtime = None
         self.stashed = False
@@ -220,11 +221,19 @@ class Plenary(object):
                 # if nothing is actually changed
                 return 0
 
-            path = self.full_path(self.dbobj)
+            if not self.new_path:
+                raise InternalError("New path not set - likely write() is "
+                                    "called on deleted object.")
 
-            self.logger.debug("Writing %r [%s]" % (self, path))
+            # If the plenary has moved, then clean up any potential leftover
+            # files from the old location
+            if self.new_path != self.old_path:
+                self.remove(locked=True)
 
-            write_file(path, content, create_directory=True, logger=self.logger)
+            self.logger.debug("Writing %r [%s]" % (self, self.new_path))
+
+            write_file(self.new_path, content, create_directory=True,
+                       logger=self.logger)
             self.removed = False
             if self.old_content != content:
                 self.changed = True
@@ -272,6 +281,15 @@ class Plenary(object):
         """
         if self.stashed:
             return
+
+        if isinstance(self.dbobj, Base):
+            state = inspect(self.dbobj)
+            if not state.deleted:
+                self.new_path = self.full_path(self.dbobj)
+        else:
+            # Ouch. Personality parameters...
+            self.new_path = self.full_path(self.dbobj)
+
         try:
             self.old_content = self.read()
             self.old_mtime = os.stat(self.old_path).st_atime
@@ -292,6 +310,13 @@ class Plenary(object):
         # Should this optimization be in use?
         # if not self.changed and not self.removed:
         #    return
+
+        # If the plenary has moved, then we need to clean up the new location
+        if self.new_path and self.new_path != self.old_path:
+            self.logger.debug("Removing %r [%s]" % (self, self.new_path))
+            remove_file(self.new_path, cleanup_directory=True,
+                        logger=self.logger)
+
         self.logger.debug("Restoring %r [%s]" % (self, self.old_path))
         if self.old_content is None:
             remove_file(self.old_path, cleanup_directory=True,

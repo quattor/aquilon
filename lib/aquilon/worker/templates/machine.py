@@ -187,11 +187,3 @@ class PlenaryMachineInfo(StructurePlenary):
             pan_assign(lines, "console/%s" % manager, managers[manager])
 
 Plenary.handlers[Machine] = PlenaryMachineInfo
-
-
-def machine_plenary_will_move(old, new):
-    """Helper to see if updating a machine's location will move its plenary."""
-    if old.hub != new.hub or old.building != new.building or \
-       old.rack != new.rack:
-        return True
-    return False

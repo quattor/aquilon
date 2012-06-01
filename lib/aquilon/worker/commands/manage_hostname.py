@@ -135,18 +135,11 @@ class CommandManageHostname(BrokerCommand):
         with CompileKey(logger=logger):
             plenary_host.stash()
             try:
+                plenary_host.write(locked=True)
+            except IncompleteError:
+                # This template cannot be written, we leave it alone
+                # It would be nice to flag the state in the the host?
                 plenary_host.remove(locked=True)
-
-                # Now we recreate the plenary to ensure that the domain is ready
-                # to compile, however (esp. if there was no existing template),
-                # we have to be aware that there might not be enough information
-                # yet with which we can create a template
-                try:
-                    plenary_host.write(locked=True)
-                except IncompleteError:
-                    # This template cannot be written, we leave it alone
-                    # It would be nice to flag the state in the the host?
-                    pass
             except:
                 # This will not restore the cleaned up build files.  That's OK.
                 # They will be recreated as needed.

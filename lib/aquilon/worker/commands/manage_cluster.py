@@ -83,7 +83,6 @@ class CommandManageCluster(BrokerCommand):
         with CompileKey(logger=logger):
             plenaries.stash()
             try:
-                plenaries.remove(locked=True)
                 plenaries.write(locked=True)
             except:
                 plenaries.restore_stash()

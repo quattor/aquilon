@@ -15,14 +15,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 from aquilon.aqdb.model import Cluster, Personality, Switch
 from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.location import get_location
-from aquilon.worker.templates.machine import machine_plenary_will_move
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
-from aquilon.worker.locks import CompileKey
 from aquilon.utils import force_ratio
 
 
@@ -44,8 +41,9 @@ class CommandUpdateCluster(BrokerCommand):
                                 % format(dbcluster))
 
         cluster_updated = False
-        remove_plenaries = PlenaryCollection(logger=logger)
+
         plenaries = PlenaryCollection(logger=logger)
+        plenaries.append(Plenary.get_plenary(dbcluster))
 
         (vm_count, host_count) = force_ratio("vm_to_host_ratio",
                                              vm_to_host_ratio)
@@ -94,7 +92,6 @@ class CommandUpdateCluster(BrokerCommand):
 
         location_updated = update_cluster_location(session, logger, dbcluster,
                                                    fix_location, plenaries,
-                                                   remove_plenaries,
                                                    **arguments)
 
         if location_updated:
@@ -142,24 +139,13 @@ class CommandUpdateCluster(BrokerCommand):
 
         session.flush()
 
-        plenaries.append(Plenary.get_plenary(dbcluster))
-        with CompileKey.merge([plenaries.get_write_key(),
-                               remove_plenaries.get_remove_key()]):
-            remove_plenaries.stash()
-            try:
-                plenaries.write(locked=True)
-                remove_plenaries.remove(locked=True)
-            except:
-                remove_plenaries.restore_stash()
-                plenaries.restore_stash()
-                raise
+        plenaries.write(locked=False)
 
         return
 
 
 def update_cluster_location(session, logger, dbcluster,
-                            fix_location, plenaries, remove_plenaries,
-                            **arguments):
+                            fix_location, plenaries, **arguments):
     location_updated = False
     dblocation = get_location(session, **arguments)
     if fix_location:
@@ -191,18 +177,16 @@ def update_cluster_location(session, logger, dbcluster,
                                                    "\n".join(errors)))
 
         if dbcluster.location_constraint != dblocation:
-            if machine_plenary_will_move(old=dbcluster.location_constraint,
-                                         new=dblocation):
-                for dbmachine in dbcluster.virtual_machines:
-                    # This plenary will have a path to the old location.
-                    plenary = Plenary.get_plenary(dbmachine, logger=logger)
-                    remove_plenaries.append(plenary)
-                    dbmachine.location = dblocation
-                    # This plenary will have a path to the new location.
-                    plenaries.append(Plenary.get_plenary(dbmachine))
-                    # Update the path to the machine plenary in the
-                    # container resource
-                    plenaries.append(Plenary.get_plenary(dbmachine.vm_container))
+            for dbmachine in dbcluster.virtual_machines:
+                # The plenary objects should be created before changing the
+                # location, so they can track the change
+                plenaries.append(Plenary.get_plenary(dbmachine,
+                                                     logger=logger))
+                # Update the path to the machine plenary in the container
+                # resource
+                plenaries.append(Plenary.get_plenary(dbmachine.vm_container))
+                dbmachine.location = dblocation
+
             dbcluster.location_constraint = dblocation
             location_updated = True
 
