@@ -210,7 +210,12 @@ class TestAddCluster(TestBrokerCommand):
         self.matchclean(out, "Comments", command)
 
     def test_52_verifycatutstorage1(self):
-        self.verify_cat_clusters("utstorage1", "storagecluster", "metrocluster", "storage")
+        # This archetype is non-compilable and should not have a plenary!
+        #self.verify_cat_clusters("utstorage1", "storagecluster",
+        #                         "metrocluster", "storage")
+        command = ["cat", "--cluster", "utstorage1"]
+        err = self.internalerrortest(command)
+        self.matchoutput(err, "No such file or directory", command)
 
     def test_53_verifyshowutstorage1proto(self):
         command = ["show_cluster", "--cluster=utstorage1", "--format=proto"]
@@ -247,8 +252,12 @@ class TestAddCluster(TestBrokerCommand):
         self.matchoutput(out, "Comments: Another test storage cluster", command)
 
     def test_56_verifycatutstorage2(self):
-        self.verify_cat_clusters("utstorage2", "storagecluster", "metrocluster",
-                                 "storage")
+        # This archetype is non-compilable and should not have a plenary!
+        #self.verify_cat_clusters("utstorage2", "storagecluster",
+        #                         "metrocluster", "storage")
+        command = ["cat", "--cluster", "utstorage2"]
+        err = self.internalerrortest(command)
+        self.matchoutput(err, "No such file or directory", command)
 
     def verify_cat_clusters(self, name, archetype, persona, ctype):
         """ generic method to verify common attributes for cat on clusters """
