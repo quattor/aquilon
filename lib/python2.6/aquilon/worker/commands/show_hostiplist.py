@@ -81,7 +81,8 @@ class CommandShowHostIPList(BrokerCommand):
             # Only add the primary info for auxiliary addresses, not management
             # ones
             if hwent.primary_name and addr.ip != hwent.primary_ip and \
-               addr.interface.interface_type != 'management':
+               addr.interface.interface_type != 'management' and \
+               addr.service_address_id == None:
                 primary = hwent.fqdn
             else:
                 primary = None
