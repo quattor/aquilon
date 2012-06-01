@@ -200,6 +200,12 @@ class Plenary(object):
 
         """
 
+        if self.template_type == "object" and \
+           hasattr(self.dbobj, "personality") and \
+           self.dbobj.personality and \
+           not self.dbobj.personality.archetype.is_compileable:
+            return 0
+
         if content is None:
             if not self.new_content:
                 self.new_content = self._generate_content()

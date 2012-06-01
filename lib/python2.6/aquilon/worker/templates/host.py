@@ -113,6 +113,12 @@ class PlenaryHost(PlenaryCollection):
         self.plenaries.append(PlenaryHostData(dbhost))
 
     def write(self, locked=False, content=None):
+        # Don't bother writing plenary files for dummy aurora hardware or for
+        # non-compilable archetypes.
+        if self.dbobj.machine.model.machine_type == 'aurora_node' or \
+           not self.dbobj.archetype.is_compileable:
+            return 0
+
         # Standard PlenaryCollection swallows IncompleteError.  If/when
         # the Host plenaries no longer raise that error this override
         # should be removed.
@@ -390,14 +396,6 @@ class PlenaryToplevelHost(Plenary):
             pan_include(lines, "%s/config" % feature.cfg_path)
 
         pan_include(lines, "archetype/final")
-
-    def write(self, *args, **kwargs):
-        # Don't bother writing plenary files for dummy aurora hardware or for
-        # non-compilable archetypes.
-        if self.dbobj.machine.model.machine_type == 'aurora_node' or \
-           not self.dbobj.archetype.is_compileable:
-            return 0
-        return Plenary.write(self, *args, **kwargs)
 
 
 class PlenaryNamespacedHost(PlenaryToplevelHost):
