@@ -199,8 +199,6 @@ Personality(archetype=@aquilon, name="train-tu")
 # Vulcan2.0
 Archetype(name="metacluster", is_compileable=True, cluster_type="meta", outputdesc="ESX")
 Archetype(name="metacluster-old", cluster_type="meta", outputdesc="ESX")
-Personality(archetype=Archetype(name="metacluster-old"), name="metacluster-old")
-Personality(archetype=Archetype(name="metacluster"), name="metacluster")
 
 Vendor(name="amd")
 Vendor(name="intel")

@@ -3467,8 +3467,8 @@
            <option name="desk" type="string">Desk</option>
         </optgroup>
         <optgroup name="personality_opts" mandatory="False">
-           <option name="archetype" type="string" default="metacluster-old">Archetype name</option>
-           <option name="personality" type="string" default="metacluster-old">Personality name</option>
+           <option name="archetype" type="string">Archetype name</option>
+           <option name="personality" type="string">Personality name</option>
         </optgroup>
         <optgroup name="branch_opts" fields="any">
            <option name="domain" type="string" conflicts="sandbox">Name of template domain</option>
@@ -3757,9 +3757,9 @@
                <option name="instance" type="string">Service Instance</option>
             </optgroup>
          </optgroup>
-         <optgroup name="bind_cluster_type">
-            <option name="cluster_type" type="string">Cluster type, esx or meta</option>
-         </optgroup>
+      </optgroup>
+      <optgroup name="bind_cluster_type">
+         <option name="cluster_type" type="string">[Deprecated] Cluster type, esx or meta</option>
       </optgroup>
       <transport method="put" trigger="service" path="cluster/%(cluster)s/service/%(service)s/%(instance)s" />
    </command>
@@ -3778,7 +3778,7 @@
             </optgroup>
          </optgroup>
          <optgroup name="rebind_cluster_type">
-            <option name="cluster_type" type="string">Cluster type, esx or meta</option>
+            <option name="cluster_type" type="string">[Deprecated] Cluster type, esx or meta</option>
          </optgroup>
       </optgroup>
       <transport method="post" trigger="service" path="cluster/%(cluster)s/service/%(service)s/%(instance)s" />
@@ -3794,7 +3794,7 @@
                <option name="instance" type="string">Service Instance</option>
          </optgroup>
          <optgroup name="unbind_cluster_type">
-            <option name="cluster_type" type="string">Cluster type, esx or meta</option>
+            <option name="cluster_type" type="string">[Deprecated] Cluster type, esx or meta</option>
          </optgroup>
       </optgroup>
       <transport method="delete" trigger="service" path="cluster/%(cluster)s/service/%(service)s/%(instance)s" />

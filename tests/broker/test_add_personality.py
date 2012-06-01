@@ -407,12 +407,26 @@ class TestAddPersonality(TestBrokerCommand):
                    "--personality=esx_server", "--archetype=esx_cluster"]
         self.noouttest(command)
 
-    def testaddesxdesktop(self):
+    def testaddv1personalities(self):
         command = ["add_personality", "--cluster_required",
-                   "--personality=esx_desktop", "--archetype=vmhost"]
+                   "--personality=vulcan-1g-desktop-prod", "--archetype=vmhost"]
         self.noouttest(command)
         command = ["add_personality",
-                   "--personality=esx_desktop", "--archetype=esx_cluster"]
+                   "--personality=vulcan-1g-desktop-prod", "--archetype=esx_cluster"]
+        self.noouttest(command)
+        command = ["add_personality",
+                   "--personality=metacluster", "--archetype=metacluster"]
+        self.noouttest(command)
+
+    def testaddv2personalities(self):
+        command = ["add_personality", "--cluster_required",
+                   "--personality=vulcan2-10g-test", "--archetype=vmhost"]
+        self.noouttest(command)
+        command = ["add_personality",
+                   "--personality=vulcan2-10g-test", "--archetype=esx_cluster"]
+        self.noouttest(command)
+        command = ["add_personality",
+                   "--personality=vulcan2-test", "--archetype=metacluster"]
         self.noouttest(command)
 
     def testaddesxstandalone(self):

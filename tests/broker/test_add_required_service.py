@@ -183,24 +183,30 @@ class TestAddRequiredService(TestBrokerCommand):
 
     def testaddrequiredesx(self):
         command = ["add_required_service", "--service=esx_management_server",
-                   "--archetype=vmhost", "--personality=esx_desktop"]
+                   "--archetype=vmhost", "--personality=vulcan-1g-desktop-prod"]
         self.noouttest(command)
         command = ["add_required_service", "--service=esx_management_server",
-                   "--archetype=esx_cluster", "--personality=esx_desktop"]
+                   "--archetype=esx_cluster", "--personality=vulcan-1g-desktop-prod"]
+        self.noouttest(command)
+        command = ["add_required_service", "--service=esx_management_server",
+                   "--archetype=vmhost", "--personality=vulcan2-10g-test"]
+        self.noouttest(command)
+        command = ["add_required_service", "--service=esx_management_server",
+                   "--archetype=esx_cluster", "--personality=vulcan2-10g-test"]
         self.noouttest(command)
         command = ["add_required_service", "--service=vmseasoning",
-                   "--archetype=vmhost", "--personality=esx_desktop"]
+                   "--archetype=vmhost", "--personality=vulcan-1g-desktop-prod"]
         self.noouttest(command)
 
     def testverifyaddrequiredesx(self):
         command = ["show_personality",
-                   "--archetype=vmhost", "--personality=esx_desktop"]
+                   "--archetype=vmhost", "--personality=vulcan-1g-desktop-prod"]
         out = self.commandtest(command)
         self.matchoutput(out, "Service: esx_management_server", command)
         self.matchoutput(out, "Service: vmseasoning", command)
 
         command = ["show_personality",
-                   "--archetype=esx_cluster", "--personality=esx_desktop"]
+                   "--archetype=esx_cluster", "--personality=vulcan-1g-desktop-prod"]
         out = self.commandtest(command)
         self.matchoutput(out, "Service: esx_management_server", command)
 

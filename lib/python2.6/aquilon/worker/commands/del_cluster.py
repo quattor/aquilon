@@ -38,6 +38,50 @@ from aquilon.worker.templates.base import Plenary, PlenaryCollection
 from aquilon.worker.processes import remove_file
 from aquilon.worker.locks import CompileKey
 
+def del_cluster(session, logger, dbcluster, config):
+    cluster = str(dbcluster.name)
+
+    if hasattr(dbcluster, 'members') and dbcluster.members:
+        raise ArgumentError("%s is still in use by clusters: %s." %
+                            (format(dbcluster),
+                             ", ".join([c.name for c in dbcluster.members])))
+    elif dbcluster.hosts:
+        hosts = ", ".join([h.fqdn for h in  dbcluster.hosts])
+        raise ArgumentError("%s is still in use by hosts: %s." %
+                            (format(dbcluster), hosts))
+    cluster_plenary = Plenary.get_plenary(dbcluster, logger=logger)
+    resources = PlenaryCollection(logger=logger)
+    if dbcluster.resholder:
+        for res in dbcluster.resholder.resources:
+            resources.append(Plenary.get_plenary(res))
+    domain = dbcluster.branch.name
+    session.delete(dbcluster)
+
+    session.flush()
+
+    key = cluster_plenary.get_remove_key()
+    with CompileKey.merge([key, resources.get_remove_key()]):
+        cluster_plenary.cleanup(domain, locked=True)
+        # And we also want to remove the profile itself
+        profiles = config.get("broker", "profilesdir")
+        # Only one of these should exist, but it doesn't hurt
+        # to try to clean up both.
+        xmlfile = os.path.join(profiles, "clusters", cluster + ".xml")
+        remove_file(xmlfile, logger=logger)
+        xmlgzfile = xmlfile + ".gz"
+        remove_file(xmlgzfile, logger=logger)
+        # And the cached template created by ant
+        remove_file(os.path.join(config.get("broker",
+                                                 "quattordir"),
+                                 "objects", "clusters",
+                                 cluster + ".tpl"),
+                    logger=logger)
+        resources.remove(locked=True)
+
+    build_index(config, session, profiles, logger=logger)
+
+    return
+
 
 class CommandDelCluster(BrokerCommand):
 
@@ -45,40 +89,5 @@ class CommandDelCluster(BrokerCommand):
 
     def render(self, session, logger, cluster, **arguments):
         dbcluster = Cluster.get_unique(session, cluster, compel=True)
-        cluster = str(dbcluster.name)
-        if dbcluster.hosts:
-            hosts = ", ".join([h.fqdn for h in  dbcluster.hosts])
-            raise ArgumentError("%s is still in use by hosts: %s." %
-                                (format(dbcluster), hosts))
-        cluster_plenary = Plenary.get_plenary(dbcluster, logger=logger)
-        resources = PlenaryCollection(logger=logger)
-        if dbcluster.resholder:
-            for res in dbcluster.resholder.resources:
-                resources.append(Plenary.get_plenary(res))
-        domain = dbcluster.branch.name
-        session.delete(dbcluster)
+        del_cluster(session, logger, dbcluster, self.config)
 
-        session.flush()
-
-        key = cluster_plenary.get_remove_key()
-        with CompileKey.merge([key, resources.get_remove_key()]):
-            cluster_plenary.cleanup(domain, locked=True)
-            # And we also want to remove the profile itself
-            profiles = self.config.get("broker", "profilesdir")
-            # Only one of these should exist, but it doesn't hurt
-            # to try to clean up both.
-            xmlfile = os.path.join(profiles, "clusters", cluster + ".xml")
-            remove_file(xmlfile, logger=logger)
-            xmlgzfile = xmlfile + ".gz"
-            remove_file(xmlgzfile, logger=logger)
-            # And the cached template created by ant
-            remove_file(os.path.join(self.config.get("broker",
-                                                     "quattordir"),
-                                     "objects", "clusters",
-                                     cluster + ".tpl"),
-                        logger=logger)
-            resources.remove(locked=True)
-
-        build_index(self.config, session, profiles, logger=logger)
-
-        return

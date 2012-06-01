@@ -51,6 +51,11 @@ class CommandUpdateCluster(BrokerCommand):
                **arguments):
 
         dbcluster = Cluster.get_unique(session, cluster, compel=True)
+
+        if dbcluster.cluster_type == 'meta':
+            raise ArgumentError("%s should not be a metacluster."
+                                % format(dbcluster))
+
         cluster_updated = False
         remove_plenaries = PlenaryCollection(logger=logger)
         plenaries = PlenaryCollection(logger=logger)

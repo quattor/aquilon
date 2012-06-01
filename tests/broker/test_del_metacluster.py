@@ -43,7 +43,8 @@ class TestDelMetaCluster(TestBrokerCommand):
 
     def testdelutmc1(self):
         command = ["del_metacluster", "--metacluster=utmc1"]
-        self.noouttest(command)
+        err = self.statustest(command)
+        self.matchoutput(err, "sent 0 server notifications", command)
 
     def testverifydelutmc1(self):
         command = ["show_metacluster", "--metacluster=utmc1"]
@@ -51,7 +52,8 @@ class TestDelMetaCluster(TestBrokerCommand):
 
     def testdelutmc2(self):
         command = ["del_metacluster", "--metacluster=utmc2"]
-        self.noouttest(command)
+        err = self.statustest(command)
+        self.matchoutput(err, "sent 0 server notifications", command)
 
     def testverifydelutmc2(self):
         command = ["show_metacluster", "--metacluster=utmc2"]
@@ -59,7 +61,8 @@ class TestDelMetaCluster(TestBrokerCommand):
 
     def testdelutmc3(self):
         command = ["del_metacluster", "--metacluster=utmc3"]
-        self.noouttest(command)
+        err = self.statustest(command)
+        self.matchoutput(err, "sent 0 server notifications", command)
 
     def testverifydelutmc3(self):
         command = ["show_metacluster", "--metacluster=utmc3"]
@@ -67,19 +70,28 @@ class TestDelMetaCluster(TestBrokerCommand):
 
     def testdelutmc4(self):
         command = ["del_metacluster", "--metacluster=utmc4"]
-        self.noouttest(command)
+        err = self.statustest(command)
+        self.matchoutput(err, "sent 0 server notifications", command)
 
     def testdelutmc5(self):
         command = ["del_metacluster", "--metacluster=utmc5"]
-        self.noouttest(command)
+        err = self.statustest(command)
+        self.matchoutput(err, "sent 0 server notifications", command)
 
     def testdelutmc6(self):
         command = ["del_metacluster", "--metacluster=utmc6"]
-        self.noouttest(command)
+        err = self.statustest(command)
+        self.matchoutput(err, "sent 0 server notifications", command)
 
     def testdelutmc7(self):
         command = ["del_metacluster", "--metacluster=utmc7"]
-        self.noouttest(command)
+        err = self.statustest(command)
+        self.matchoutput(err, "sent 0 server notifications", command)
+
+    def testdelvulcan1(self):
+        command = ["del_metacluster", "--metacluster=vulcan1"]
+        err = self.statustest(command)
+        self.matchoutput(err, "sent 0 server notifications", command)
 
     def testverifyall(self):
         command = ["show_metacluster", "--all"]

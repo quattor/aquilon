@@ -47,7 +47,7 @@ class TestCluster(TestBrokerCommand):
         for i in range(1, 5):
             self.successtest(["cluster",
                               "--hostname", "evh%s.aqd-unittest.ms.com" % i,
-                              "--personality=esx_desktop",
+                              "--personality=vulcan-1g-desktop-prod",
                               "--cluster", "utecl1"])
 
     def testbindutecl2(self):
@@ -55,13 +55,13 @@ class TestCluster(TestBrokerCommand):
         for i in [5]:
             self.successtest(["cluster",
                               "--hostname", "evh%s.aqd-unittest.ms.com" % i,
-                              "--personality=esx_desktop",
+                              "--personality=vulcan-1g-desktop-prod",
                               "--cluster", "utecl2"])
 
     def testduplicatebindutecl1(self):
         self.successtest(["cluster",
                           "--hostname", "evh1.aqd-unittest.ms.com",
-                          "--personality=esx_desktop",
+                          "--personality=vulcan-1g-desktop-prod",
                           "--cluster", "utecl1"])
 
     def testverifybindutecl1(self):
@@ -124,9 +124,9 @@ class TestCluster(TestBrokerCommand):
     def test_switching_archetype(self):
         command = ["cluster", "--cluster=utecl1",
                    "--hostname=aquilon61.aqd-unittest.ms.com",
-                   "--personality=esx_desktop"]
+                   "--personality=vulcan-1g-desktop-prod"]
         # Currently aquilon61 will be an "aquilon" archetype. Which is
-        # incompatible with esx_desktop...
+        # incompatible with vulcan-1g-desktop-prod...
         out = self.notfoundtest(command)
 
         # So, make it a compatible archetype and try again
@@ -140,7 +140,7 @@ class TestCluster(TestBrokerCommand):
                          "please run 'aq cluster'.",
                          command)
         command = ["cluster", "--cluster=utecl1",
-                   "--personality=esx_desktop",
+                   "--personality=vulcan-1g-desktop-prod",
                    "--hostname=aquilon61.aqd-unittest.ms.com"]
         out = self.badrequesttest(command)
         user = self.config.get("unittest", "user")
@@ -157,7 +157,7 @@ class TestCluster(TestBrokerCommand):
 
         command = ["cluster", "--cluster=utecl1",
                    "--hostname=aquilon61.aqd-unittest.ms.com",
-                   "--personality=esx_desktop"]
+                   "--personality=vulcan-1g-desktop-prod"]
         self.successtest(command)
 
         # Restore the host.  Need to move to a more permissive cluster first.
@@ -181,7 +181,7 @@ class TestCluster(TestBrokerCommand):
                    "--hostname=aquilon61.aqd-unittest.ms.com"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
-                         "Host personality esx_desktop requires a cluster, "
+                         "Host personality vulcan-1g-desktop-prod requires a cluster, "
                          "use --personality to change personality when "
                          "leaving the cluster.",
                          command)

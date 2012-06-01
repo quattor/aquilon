@@ -449,7 +449,7 @@ class TestReconfigure(TestBrokerCommand):
         self.matchoutput(out,
                          "The personality vmhost/esx_server is not allowed by "
                          "ESX Cluster utecl1.  Specify one of "
-                         "['vmhost/esx_desktop'].",
+                         "['vmhost/vulcan-1g-desktop-prod'].",
                          command)
 
     def testfailpersonalitynotallowedlist(self):
@@ -461,7 +461,7 @@ class TestReconfigure(TestBrokerCommand):
         self.matchoutput(out,
                          "evh2.aqd-unittest.ms.com: The personality "
                          "vmhost/esx_server is not allowed by ESX Cluster "
-                         "utecl1.  Specify one of ['vmhost/esx_desktop'].",
+                         "utecl1.  Specify one of ['vmhost/vulcan-1g-desktop-prod'].",
                          command)
 
     def testverifyalignedservice(self):

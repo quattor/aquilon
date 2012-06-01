@@ -142,7 +142,7 @@ class TestSearchESXCluster(TestBrokerCommand):
                          command)
 
     def testpersonalityavailable(self):
-        command = "search esx cluster --personality esx_desktop"
+        command = "search esx cluster --personality vulcan-1g-desktop-prod"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "utecl1", command)
         self.matchoutput(out, "utecl2", command)
@@ -151,7 +151,7 @@ class TestSearchESXCluster(TestBrokerCommand):
 
     def testpersonalityavailable2(self):
         command = ["search_esx_cluster", "--archetype=esx_cluster",
-                   "--personality=esx_desktop"]
+                   "--personality=vulcan-1g-desktop-prod"]
         out = self.commandtest(command)
         self.matchoutput(out, "utecl1", command)
         self.matchoutput(out, "utecl2", command)

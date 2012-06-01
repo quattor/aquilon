@@ -46,21 +46,21 @@ class TestUpdatePersonality(TestBrokerCommand):
 
     def testinvalidfunction(self):
         """ Verify that the list of built-in functions is restricted """
-        command = ["update", "personality", "--personality", "esx_desktop",
+        command = ["update", "personality", "--personality", "vulcan-1g-desktop-prod",
                    "--archetype", "esx_cluster",
                    "--vmhost_capacity_function", "locals()"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "name 'locals' is not defined", command)
 
     def testinvalidtype(self):
-        command = ["update", "personality", "--personality", "esx_desktop",
+        command = ["update", "personality", "--personality", "vulcan-1g-desktop-prod",
                    "--archetype", "esx_cluster",
                    "--vmhost_capacity_function", "memory - 100"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "The function should return a dictonary.", command)
 
     def testinvaliddict(self):
-        command = ["update", "personality", "--personality", "esx_desktop",
+        command = ["update", "personality", "--personality", "vulcan-1g-desktop-prod",
                    "--archetype", "esx_cluster",
                    "--vmhost_capacity_function", "{'memory': 'bar'}"]
         out = self.badrequesttest(command)
@@ -70,7 +70,7 @@ class TestUpdatePersonality(TestBrokerCommand):
                          command)
 
     def testmissingmemory(self):
-        command = ["update", "personality", "--personality", "esx_desktop",
+        command = ["update", "personality", "--personality", "vulcan-1g-desktop-prod",
                    "--archetype", "esx_cluster",
                    "--vmhost_capacity_function", "{'foo': 5}"]
         out = self.badrequesttest(command)
@@ -79,7 +79,7 @@ class TestUpdatePersonality(TestBrokerCommand):
                          "dictionary.", command)
 
     def testnotenoughmemory(self):
-        command = ["update", "personality", "--personality", "esx_desktop",
+        command = ["update", "personality", "--personality", "vulcan-1g-desktop-prod",
                    "--archetype", "esx_cluster",
                    "--vmhost_capacity_function", "{'memory': memory / 4}"]
         out = self.badrequesttest(command)
@@ -91,19 +91,19 @@ class TestUpdatePersonality(TestBrokerCommand):
                          command)
 
     def testupdatecapacity(self):
-        command = ["update", "personality", "--personality", "esx_desktop",
+        command = ["update", "personality", "--personality", "vulcan-1g-desktop-prod",
                    "--archetype", "esx_cluster",
                    "--vmhost_capacity_function", "{'memory': (memory - 1500) * 0.94}"]
         self.noouttest(command)
 
     def testupdateovercommit(self):
-        command = ["update", "personality", "--personality", "esx_desktop",
+        command = ["update", "personality", "--personality", "vulcan-1g-desktop-prod",
                    "--archetype", "esx_cluster",
                    "--vmhost_overcommit_memory", 1.04]
         self.noouttest(command)
 
     def testverifyupdatecapacity(self):
-        command = ["show", "personality", "--personality", "esx_desktop",
+        command = ["show", "personality", "--personality", "vulcan-1g-desktop-prod",
                    "--archetype", "esx_cluster"]
         out = self.commandtest(command)
         self.matchoutput(out,
@@ -112,11 +112,11 @@ class TestUpdatePersonality(TestBrokerCommand):
         self.matchoutput(out, "VM host overcommit factor: 1.04", command)
 
     def testupdateclusterrequirement(self):
-        command = ["update", "personality", "--personality=esx_desktop",
+        command = ["update", "personality", "--personality=vulcan-1g-desktop-prod",
                    "--archetype=esx_cluster",
                    "--cluster"]
         out = self.badrequesttest(command)
-        self.matchoutput(out, "The personality esx_desktop is in use", command)
+        self.matchoutput(out, "The personality vulcan-1g-desktop-prod is in use", command)
 
         command = ["add", "personality", "--archetype=aquilon",
                    "--personality=unused"]

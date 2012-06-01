@@ -94,10 +94,25 @@ class TestDelPersonality(TestBrokerCommand):
         command = "del personality --personality esx_server --archetype vmhost"
         self.noouttest(command.split(" "))
 
-    def testdelesxdesktop(self):
+    def testdelv1personalities(self):
         command = ["del_personality",
-                   "--personality=esx_desktop", "--archetype=vmhost"]
+                   "--personality=vulcan-1g-desktop-prod", "--archetype=vmhost"]
         self.noouttest(command)
+        command = ["del_personality",
+                   "--personality=metacluster", "--archetype=metacluster"]
+        self.noouttest(command)
+
+    def testdelv2personalities(self):
+        command = ["del_personality",
+                   "--personality=vulcan2-10g-test", "--archetype=vmhost"]
+        self.noouttest(command)
+        command = ["del_personality",
+                   "--personality=vulcan2-10g-test", "--archetype=esx_cluster"]
+        self.noouttest(command)
+        command = ["del_personality",
+                   "--personality=vulcan2-test", "--archetype=metacluster"]
+        self.noouttest(command)
+
 
 
 if __name__ == '__main__':

@@ -33,9 +33,9 @@ from aquilon.exceptions_ import ArgumentError, ProcessException
 from aquilon.aqdb.model import Switch
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.dns import delete_dns_record
+from aquilon.worker.locks import lock_queue, CompileKey
 from aquilon.worker.processes import DSDBRunner
-from aquilon.worker.locks import DeleteKey
-
+from aquilon.worker.templates.base import Plenary, PlenaryCollection
 
 class CommandDelSwitch(BrokerCommand):
 
@@ -56,12 +56,6 @@ class CommandDelSwitch(BrokerCommand):
                                 "delete them first: {1}.".format
                                 (dbswitch, ", ".join(addrs)))
 
-        with DeleteKey("system", logger=logger):
-            self.del_switch(session, logger, dbswitch)
-            session.commit()
-        return
-
-    def del_switch(self, session, logger, dbswitch):
         dbdns_rec = dbswitch.primary_name
         ip = dbswitch.primary_ip
         session.delete(dbswitch)
@@ -73,10 +67,35 @@ class CommandDelSwitch(BrokerCommand):
         # Any switch ports hanging off this switch should be deleted with
         # the cascade delete of the switch.
 
-        if ip:
-            dsdb_runner = DSDBRunner(logger=logger)
-            try:
-                dsdb_runner.delete_host_details(ip)
-            except ProcessException, e:
-                raise ArgumentError("Could not remove switch from DSDB: %s" % e)
-        return
+        switch_plenary = Plenary.get_plenary(dbswitch, logger=logger)
+
+        # clusters connected to this switch
+        plenaries = PlenaryCollection(logger=logger)
+
+        for dbcluster in dbswitch.esx_clusters:
+            plenaries.append(Plenary.get_plenary(dbcluster))
+
+        key = CompileKey.merge([switch_plenary.get_remove_key(),
+                                plenaries.get_write_key()])
+
+        try:
+            lock_queue.acquire(key)
+            switch_plenary.stash()
+            plenaries.write(locked=True)
+            switch_plenary.remove(locked=True)
+
+            if ip:
+                dsdb_runner = DSDBRunner(logger=logger)
+                try:
+                    dsdb_runner.delete_host_details(ip)
+                except ProcessException, e:
+                    raise ArgumentError("Could not remove switch from DSDB: %s"
+                                        % e)
+            return
+
+        except:
+            plenaries.restore_stash()
+            switch_plenary.restore_stash()
+            raise
+        finally:
+            lock_queue.release(key)
