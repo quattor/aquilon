@@ -146,21 +146,24 @@ class TestBrokerStart(unittest.TestCase):
                          % (out, err))
         return
 
-    def testrsyncswrep(self):
+    def testcloneswrep(self):
         config = Config()
-        swrep_repository_host = config.get("unittest", "swrep_repository_host")
-        # The swrep/repository is currently *only* synced here at the top level.
-        p = Popen(("rsync", "-avP", "-e", "ssh -q -o StrictHostKeyChecking=no" \
-                    + " -o UserKnownHostsFile=/dev/null -o BatchMode=yes",
-                   "--delete",
-                   "%s:/var/quattor/swrep/repository" % swrep_repository_host,
-                   config.get("broker", "swrepdir")),
-                  stdout=PIPE, stderr=PIPE)
+        source = config.get("unittest", "swrep_repository")
+        dest = os.path.join(config.get("broker", "swrepdir"), "repository")
+        p = Popen(("/bin/rm", "-rf", dest), stdout=1, stderr=2)
         rc = p.wait()
+        self.assertEqual(rc, 0,
+                         "Failed to clear old swrep directory '%s'" %
+                         dest)
+        env = {}
+        env["PATH"] = "%s:%s" % (config.get("broker", "git_path"),
+                                 os.environ.get("PATH", ""))
+        p = Popen(("git", "clone", source, dest),
+                  env=env, stdout=PIPE, stderr=PIPE)
         (out, err) = p.communicate()
         # Ignore out/err unless we get a non-zero return code, then log it.
         self.assertEqual(p.returncode, 0,
-                         "Non-zero return code for rsync of template-king, "
+                         "Non-zero return code for clone of swrep, "
                          "STDOUT:\n@@@\n'%s'\n@@@\nSTDERR:\n@@@\n'%s'\n@@@\n"
                          % (out, err))
         return
