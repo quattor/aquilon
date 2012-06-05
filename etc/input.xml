@@ -1411,7 +1411,7 @@
       Merge multiple networks.  The merged network will inherit its parameters (like location)
       from the network specifyed by --ip.  Note that --ip does not need to specify the
       first network to be merged: e.g. if you want to merge 4 existing networks, then --ip may
-      point to the 2nd one; the IP address of the merged network will be calculated using 
+      point to the 2nd one; the IP address of the merged network will be calculated using
       --prefixlen.
       <optgroup name="merge_network_mandatory" mandatory="True" fields="all">
          <option name="ip" type="ipv4">Network address</option>
@@ -1659,7 +1659,7 @@
       </optgroup>
       <transport method="put" path="/nas_disk_share/instance/%(share)s" />
    </command>
-   
+
    <command name="show_service">
       Show the configuration of a service. All instances of the service will
       be listed, the number of clients bound to that service and any service mappings.
