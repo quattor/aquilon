@@ -263,6 +263,10 @@ from test_usecase_hacluster import TestUsecaseHACluster
 from test_grns import TestGrns
 from test_stop import TestBrokerStop
 from test_reset_advertised_status import TestResetAdvertisedStatus
+from test_parameter import TestParameter
+from test_parameter_feature import TestParameterFeature
+from test_parameter_definition import TestParameterDefinition
+from test_parameter_definition_feature import TestParameterDefinitionFeature
 
 
 class BrokerTestSuite(unittest.TestSuite):
@@ -286,13 +290,15 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestSyncDomain,
                 TestMergeConflicts,
                 TestAddArchetype, TestAddOS, TestAddPersonality,
+                TestParameterDefinition, TestParameter,
                 TestAddService, TestUpdateService, TestAddRequiredService,
                 TestCountry, TestOrganization, TestHub,
                 TestAddCampus, TestAddCity,
                 TestAddBuilding, TestAddRoom, TestAddLocation,
                 TestAddRack, TestAddDesk,
                 TestAddVendor, TestAddCpu, TestAddModel,
-                TestAddFeature,
+                TestAddFeature, TestParameterDefinitionFeature,
+                TestParameterFeature,
                 TestAddNetworkEnvironment, TestAddNetwork,
                 TestAddNSRecord, TestMapDnsDomain,
                 TestAddMetaCluster, TestAddESXCluster,
