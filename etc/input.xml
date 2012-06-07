@@ -2826,10 +2826,16 @@
       <optgroup name="mandatory_options" mandatory="True" fields="all">
          <option name="personality" type="string">The name to create</option>
          <option name="archetype" type="string">Which archetype to use</option>
+	 <optgroup name="grn_opts" mandatory="true" fields="any">
+            <option name="grn" type="string" conflicts="eon_id">GRN as string</option>
+            <option name="eon_id" type="int" conflicts="grn">Numeric EON ID</option>
+	 </optgroup>
       </optgroup>
       <optgroup name="add_personality_optional" mandatory="False">
          <option name="cluster_required" type="boolean" default='False'>Does this personality require hosts to be clustered?</option>
          <option name="comments" type="string">Comments</option>
+	 <option name="copy_from" type="string">Personality to copy parameters and features from</option>
+	 <option name="config_override" type="boolean" default='False'>Include external personality config override template</option>
       </optgroup>
       <transport method="put" path="personality/%(archetype)s/%(personality)s" />
   </command>
@@ -2917,6 +2923,7 @@
 	 <option name="vmhost_capacity_function" type="string">Function for calculating VM host capacity units</option>
 	 <option name="vmhost_overcommit_memory" type="float">Memory overcommit factor for VM hosts</option>
          <option name="cluster_required" type="boolean" default='False'>Does this personality require hosts to be clustered?</option>
+	 <option name="config_override" type="boolean" default='False'>Include external personality config override template</option>
       </optgroup>
       <transport method="post" path="personality/%(archetype)s/%(personality)s" />
   </command>

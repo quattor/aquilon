@@ -32,6 +32,7 @@
 from aquilon.worker.formats.formatters import ObjectFormatter
 from aquilon.worker.formats.list import ListFormatter
 from aquilon.aqdb.model import Personality
+import json
 
 
 class ThresholdedPersonality(object):
@@ -77,8 +78,13 @@ class PersonalityFormatter(ObjectFormatter):
                    " Archetype: %s" % personality.archetype.name]
         for grn in personality.grns:
             details.append(indent + "  GRN: %s" % grn)
+
+        if personality.config_override:
+            details.append(indent + "  config override: enabled")
+
         details.append(indent + "  Template: %s/personality/%s/config.tpl" %
                        (personality.archetype.name, personality.name))
+
         if has_threshold:
             details.append(indent + "  Threshold: %s" % threshold)
             details.append(indent + "  Maintenance Threshold: %s" %
@@ -112,6 +118,7 @@ class PersonalityFormatter(ObjectFormatter):
 
         if personality.comments:
             details.append(indent + "  Comments: %s" % personality.comments)
+
         for cltype, info in personality.cluster_infos.items():
             details.append(indent + "  Extra settings for %s clusters:" % cltype)
             if cltype == "esx":

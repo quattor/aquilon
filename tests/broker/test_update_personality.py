@@ -118,7 +118,7 @@ class TestUpdatePersonality(TestBrokerCommand):
         out = self.badrequesttest(command)
         self.matchoutput(out, "The personality vulcan-1g-desktop-prod is in use", command)
 
-        command = ["add", "personality", "--archetype=aquilon",
+        command = ["add", "personality", "--archetype=aquilon", "--grn=grn:/ms/ei/aquilon/aqd",
                    "--personality=unused"]
         self.successtest(command)
 
@@ -127,6 +127,55 @@ class TestUpdatePersonality(TestBrokerCommand):
         out = self.successtest(command)
 
         command = ["del", "personality", "--personality", "unused",
+                   "--archetype=aquilon"]
+        out = self.successtest(command)
+
+    def testupdateconfigoverride01(self):
+
+        command = ["add", "personality", "--archetype=aquilon", "--grn=grn:/ms/ei/aquilon/aqd",
+                   "--personality=testovrpersona"]
+        self.successtest(command)
+
+        command = ["show", "personality", "--personality=testovrpersona",
+                   "--archetype=aquilon"]
+        out = self.commandtest(command)
+        self.matchclean(out, "override", command)
+
+        command = ["cat", "--archetype=aquilon", "--personality=testovrpersona"]
+        out = self.commandtest(command)
+        self.matchclean(out, 'override', command)
+
+    def testupdateconfigoverride02(self):
+        command = ["update", "personality", "--personality=testovrpersona",
+                   "--archetype=aquilon", "--config_override",]
+        self.successtest(command)
+
+        command = ["show", "personality", "--personality=testovrpersona",
+                   "--archetype=aquilon"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "config override: enabled", command)
+
+        command = ["cat", "--archetype=aquilon", "--personality=testovrpersona"]
+        out = self.commandtest(command)
+        self.matchoutput(out, 'include { "features/unixops/config_override/config" }',
+                         command)
+
+    def testupdateconfigoverride03(self):
+
+        command = ["update", "personality", "--personality=testovrpersona",
+                   "--archetype=aquilon", "--noconfig_override",]
+        self.successtest(command)
+
+        command = ["show", "personality", "--personality=testovrpersona",
+                   "--archetype=aquilon"]
+        out = self.commandtest(command)
+        self.matchclean(out, "override", command)
+
+        command = ["cat", "--archetype=aquilon", "--personality=testovrpersona"]
+        self.matchclean(out, 'override', command)
+
+    def testupdateconfigoverride04(self):
+        command = ["del", "personality", "--personality=testovrpersona",
                    "--archetype=aquilon"]
         out = self.successtest(command)
 

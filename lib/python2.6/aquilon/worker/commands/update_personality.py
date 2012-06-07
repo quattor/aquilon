@@ -35,14 +35,15 @@ from aquilon.aqdb.model import (Personality, PersonalityESXClusterInfo,
                                 Cluster, Host)
 from aquilon.aqdb.model.cluster import restricted_builtins
 from aquilon.exceptions_ import ArgumentError
+from aquilon.worker.templates.personality import PlenaryPersonality
 
 
 class CommandUpdatePersonality(BrokerCommand):
 
     required_parameters = ["personality", "archetype"]
 
-    def render(self, session, personality, archetype, vmhost_capacity_function,
-               vmhost_overcommit_memory, cluster_required, **arguments):
+    def render(self, session, logger, personality, archetype, vmhost_capacity_function,
+               vmhost_overcommit_memory, cluster_required, config_override, **arguments):
         dbpersona = Personality.get_unique(session, name=personality,
                                            archetype=archetype, compel=True)
 
@@ -96,6 +97,12 @@ class CommandUpdatePersonality(BrokerCommand):
                                     "be modified" % dbpersona.name)
             dbpersona.cluster_required = cluster_required
 
+        write_plenary = None
+        if config_override is not None and \
+            dbpersona.config_override != config_override:
+           dbpersona.config_override = config_override
+           write_plenary = 1
+
         session.flush()
 
         q = session.query(Cluster)
@@ -118,4 +125,9 @@ class CommandUpdatePersonality(BrokerCommand):
         if len(failures):
             raise ArgumentError("Validation failed for the following "
                                 "clusters:\n%s" % "\n".join(failures))
+
+        if write_plenary:
+            plenary = PlenaryPersonality(dbpersona, logger=logger)
+            plenary.write()
+
         return

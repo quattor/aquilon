@@ -30,21 +30,29 @@
 
 
 from aquilon.worker.broker import BrokerCommand
-from aquilon.aqdb.model import Archetype, Personality
+from aquilon.aqdb.model import (Archetype, Personality,
+                                Parameter,
+                                PersonalityParameter)
 from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.templates.personality import PlenaryPersonality
+from aquilon.worker.dbwrappers.parameter import get_parameters
+from aquilon.worker.dbwrappers.feature import add_link
+from aquilon.worker.dbwrappers.grn import lookup_grn
 import re
 
 class CommandAddPersonality(BrokerCommand):
 
     required_parameters = ["personality", "archetype"]
 
-    def render(self, session, logger, personality, archetype, comments,
-               cluster_required, **arguments):
+    def render(self, session, logger, personality, archetype, grn, eon_id,
+               comments, cluster_required, copy_from, config_override, **arguments):
         valid = re.compile('^[a-zA-Z0-9_-]+$')
         if (not valid.match(personality)):
             raise ArgumentError("Personality name '%s' is not valid." %
                                 personality)
+        if not (grn or eon_id):
+            raise ArgumentError("Grn/EonId is required for adding personality")
+
         dbarchetype = Archetype.get_unique(session, archetype, compel=True)
         Personality.get_unique(session, archetype=dbarchetype,
                                name=personality,
@@ -54,7 +62,43 @@ class CommandAddPersonality(BrokerCommand):
                                 cluster_required=bool(cluster_required),
                                 comments=comments)
 
+        ##configuration override
+        dbpersona.config_override = config_override
         session.add(dbpersona)
+
+        ## add grn/eonid
+        dbgrn = lookup_grn(session, grn, eon_id, logger=logger,
+                           config=self.config)
+        dbpersona.grns.append(dbgrn)
+
+        if copy_from:
+            ## copy config data
+            dbfrom_persona = Personality.get_unique(session,
+                                                    archetype=dbarchetype,
+                                                    name=copy_from,
+                                                    compel=True)
+
+            src_parameters = get_parameters(session,
+                                            personality=dbfrom_persona)
+            db_param_holder = PersonalityParameter(personality=dbpersona)
+
+            for param in src_parameters:
+                dbparameter = Parameter(value=param.value,
+                                        comments=param.comments,
+                                        holder=db_param_holder)
+                session.add(dbparameter)
+
+
+            for link in dbfrom_persona.features:
+                params = {}
+                params["personality"] = dbpersona
+                if link.model:
+                    params["model"] = link.model
+                if link.interface_name:
+                    params["interface_name"] = link.interface_name
+
+                add_link (session, logger, link.feature, params)
+
         session.flush()
 
         plenary = PlenaryPersonality(dbpersona, logger=logger)
