@@ -255,7 +255,7 @@ class TestAddMachine(TestBrokerCommand):
         self.matchoutput(out, '"rack/name" = "ut3";', command)
         self.matchoutput(out, '"rack/row" = "a";', command)
         self.matchoutput(out, '"rack/column" = "3";', command)
-        self.matchoutput(out, '"rack/room" = "UT pod1";', command)
+        self.matchoutput(out, '"rack/room" = "utroom1";', command)
         self.matchoutput(out, '"serialnumber" = "KPDZ406";', command)
         self.matchoutput(out,
                          'include { "hardware/machine/ibm/hs21-8853l5u" };',
