@@ -36,61 +36,10 @@ if __name__ == "__main__":
     utils.import_depends()
 
 from brokertest import TestBrokerCommand
+from switchtest import VerifySwitchMixin
 
-class TestUpdateSwitch(TestBrokerCommand):
 
-    def verifyswitch(self, switch, vendor, model,
-                     rack, rackrow, rackcol,
-                     serial=None, switch_type=None, ip=None, mac=None,
-                     interface=None, comments=None):
-        command = "show switch --switch %s" % switch
-        out = self.commandtest(command.split(" "))
-        (short, dot, dns_domain) = switch.partition(".")
-        self.matchoutput(out, "Switch: %s" % short, command)
-        if dns_domain:
-            if ip:
-                # Check both the primary name...
-                self.matchoutput(out, "Primary Name: %s [%s]" % (switch, ip),
-                                 command)
-                # ... and the AddressAssignment record
-                self.matchoutput(out, "Provides: %s [%s]" % (switch, ip),
-                                 command)
-            else:
-                self.matchoutput(out, "Primary Name: %s" % switch, command)
-        if switch_type is None:
-            switch_type = 'tor'
-        self.matchoutput(out, "Switch Type: %s" % switch_type, command)
-        self.matchoutput(out, "Rack: %s" % rack, command)
-        self.matchoutput(out, "Row: %s" % rackrow, command)
-        self.matchoutput(out, "Column: %s" % rackcol, command)
-        self.matchoutput(out, "Vendor: %s Model: %s" % (vendor, model),
-                         command)
-        if serial:
-            self.matchoutput(out, "Serial: %s" % serial, command)
-        else:
-            self.matchclean(out, "Serial:", command)
-
-        # Careful about indentation, do not mistake switch comments with
-        # interface comments
-        if comments:
-            self.matchoutput(out, "\n  Comments: %s" % comments, command)
-        else:
-            self.matchclean(out, "\n  Comments:", command)
-
-        if not interface:
-            # FIXME: eventually this should be part of the model
-            interface = "xge"
-            self.matchoutput(out, "\n    Comments: Created automatically "
-                             "by add_switch", command)
-        if mac:
-            self.searchoutput(out, r"Interface: %s %s$" %
-                             (interface, mac), command)
-        else:
-            self.searchoutput(out, r"Interface: %s \(no MAC addr\)$" %
-                             interface, command)
-#        for port in range(1,49):
-#            self.matchoutput(out, "Switch Port %d" % port, command)
-        return (out, command)
+class TestUpdateSwitch(TestBrokerCommand, VerifySwitchMixin):
 
     def testfailnomodel(self):
         command = ["update", "switch", "--vendor", "generic",
