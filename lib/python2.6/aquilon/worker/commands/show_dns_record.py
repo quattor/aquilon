@@ -32,7 +32,8 @@
 from aquilon.worker.broker import BrokerCommand
 from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.aqdb.model import (DnsRecord, ARecord, Alias, SrvRecord,
-                                DnsEnvironment, Fqdn)
+                                DnsEnvironment, NetworkEnvironment,
+                                Fqdn)
 
 
 DNS_RRTYPE_MAP = {'a': ARecord,
@@ -43,7 +44,16 @@ class CommandShowDnsRecord(BrokerCommand):
 
     required_parameters = ["fqdn"]
 
-    def render(self, session, fqdn, record_type, dns_environment, **arguments):
+    def render(self, session, fqdn, record_type, dns_environment,
+               network_environment=None, **arguments):
+
+        if network_environment:
+            if not isinstance(network_environment, NetworkEnvironment):
+                network_environment = NetworkEnvironment.get_unique_or_default(session,
+                                                                               network_environment)
+            if not dns_environment:
+                dns_environment = network_environment.dns_environment
+
         dbdns_env = DnsEnvironment.get_unique_or_default(session,
                                                          dns_environment)
         # No compel here. query(DnsRecord).filter_by(fqdn=None) will fail if the

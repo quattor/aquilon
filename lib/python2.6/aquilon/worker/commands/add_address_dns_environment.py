@@ -38,12 +38,14 @@ class CommandAddAddressDNSEnvironment(BrokerCommand):
 
     required_parameters = ["fqdn", "dns_environment"]
 
-    def render(self, session, logger, fqdn, dns_environment, comments,
+    def render(self, session, logger, fqdn, dns_environment, network_environment, comments,
                **arguments):
-        ip = generate_ip(session, compel=True, dbinterface=None, **arguments)
+
+        ip = generate_ip(session, compel=True, dbinterface=None,
+                         network_environment=network_environment, **arguments)
         # TODO: add allow_multi=True
         dbdns_rec, newly_created = grab_address(session, fqdn, ip,
-                                                None, # network_environment,
+                                                network_environment, # network_environment,
                                                 dns_environment,
                                                 comments=comments,
                                                 preclude=True)

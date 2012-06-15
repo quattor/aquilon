@@ -270,6 +270,17 @@ class TestAddInterfaceAddress(TestBrokerCommand):
         # External IP addresses should not be added to DSDB
         self.dsdb_verify(empty=True)
 
+    def testaddunittest25utcolo2(self):
+        net = self.net.unknown[1]
+        command = ["add", "interface", "address", "--machine", "ut3c5n7",
+                   "--interface", "eth2", "--ipfromip", net.ip,
+                   "--fqdn", "unittest25-e2.utcolo.aqd-unittest.ms.com",
+                   "--network_environment", "utcolo"]
+        self.noouttest(command)
+        # External IP addresses should not be added to DSDB
+        self.dsdb_verify(empty=True)
+
+
     def testaddunittest25excx(self):
         net_internal = self.net.unknown[0]
         net_excx = self.net.unknown[0].subnet()[0]
@@ -298,6 +309,11 @@ class TestAddInterfaceAddress(TestBrokerCommand):
                           command)
         self.searchoutput(out,
                           'Interface: eth1 .*\n'
+                          '(?:    .*\n)*'
+                          '    Network Environment: utcolo',
+                          command)
+        self.searchoutput(out,
+                          'Interface: eth2 .*\n'
                           '(?:    .*\n)*'
                           '    Network Environment: utcolo',
                           command)

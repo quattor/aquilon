@@ -116,7 +116,7 @@ def check_ip_restrictions(dbnetwork, ip, relaxed=False):
 
 def generate_ip(session, dbinterface, ip=None, ipfromip=None,
                 ipfromsystem=None, autoip=None, ipalgorithm=None,
-                compel=False, **kwargs):
+                compel=False, network_environment=None, **kwargs):
     ip_options = [ip, ipfromip, ipfromsystem, autoip]
     numopts = sum([1 if opt else 0 for opt in ip_options])
     if numopts > 1:
@@ -185,7 +185,7 @@ def generate_ip(session, dbinterface, ip=None, ipfromip=None,
 
     if ipfromip:
         # determine network
-        dbnetwork = get_net_id_from_ip(session, ipfromip)
+        dbnetwork = get_net_id_from_ip(session, ipfromip, network_environment)
 
     if not dbnetwork:
         raise ArgumentError("Could not determine network to use for %s." %

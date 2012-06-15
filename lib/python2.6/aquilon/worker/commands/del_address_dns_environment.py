@@ -31,7 +31,8 @@ from sqlalchemy.orm import contains_eager
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 
 from aquilon.worker.broker import BrokerCommand
-from aquilon.aqdb.model import ARecord, Fqdn, DnsEnvironment
+from aquilon.aqdb.model import (ARecord, Fqdn, DnsEnvironment,
+                                NetworkEnvironment)
 from aquilon.aqdb.model.dns_domain import parse_fqdn
 from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.worker.locks import DeleteKey
@@ -43,7 +44,15 @@ class CommandDelAddressDNSEnvironment(BrokerCommand):
 
     required_parameters = ["dns_environment"]
 
-    def render(self, session, logger, fqdn, ip, dns_environment, **arguments):
+    def render(self, session, logger, fqdn, ip, dns_environment, network_environment, **arguments):
+
+        if network_environment:
+            if not isinstance(network_environment, NetworkEnvironment):
+                network_environment = NetworkEnvironment.get_unique_or_default(session,
+                                                                               network_environment)
+            if not dns_environment:
+                dns_environment = network_environment.dns_environment
+
         dbdns_env = DnsEnvironment.get_unique(session, dns_environment,
                                               compel=True)
 

@@ -188,6 +188,55 @@ class TestAddAddress(TestBrokerCommand):
         self.noouttest(command)
         self.dsdb_verify()
 
+    def test_600_addip_with_network_env(self):
+        ip = "192.168.3.1"
+        fqdn = "cardenvtest600.aqd-unittest.ms.com"
+        command = ["add", "address", "--ip", ip, "--fqdn", fqdn,
+                   "--network_environment", "cardenv"]
+        self.noouttest(command)
+        # External IP addresses should not be added to DSDB
+        self.dsdb_verify(empty=True)
+
+
+        command = ["show_address", "--fqdn=%s" % fqdn,
+                   "--network_environment", "cardenv"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "DNS Record: %s" % fqdn,
+                         command)
+        self.matchoutput(out, "IP: %s" % ip,
+                         command)
+        self.matchoutput(out, "DNS Environment: ut-env", command)
+        self.matchoutput(out, "Network Environment: cardenv", command)
+
+    def test_610_addipfromip_with_network_env(self):
+        fqdn = "cardenvtest610.aqd-unittest.ms.com"
+        command = ["add", "address", "--ipfromip", "192.168.3.0",
+                   "--fqdn", fqdn, "--network_environment", "cardenv"]
+        self.noouttest(command)
+        # External IP addresses should not be added to DSDB
+        self.dsdb_verify(empty=True)
+
+        command = ["show_address", "--fqdn=%s" % fqdn,
+                   "--network_environment", "cardenv"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "DNS Record: %s" % fqdn,
+                         command)
+        self.matchoutput(out, "IP: %s" % "192.168.3.5",
+                         command)
+        self.matchoutput(out, "DNS Environment: ut-env", command)
+        self.matchoutput(out, "Network Environment: cardenv", command)
+
+    def test_620_addexternalip_in_interanldns(self):
+        ip = "192.168.3.4"
+        fqdn = "cardenvtest620.aqd-unittest.ms.com"
+        default = self.config.get("site", "default_dns_environment")
+        command = ["add", "address", "--ip", ip, "--fqdn", fqdn,
+                   "--dns_environment", default,
+                   "--network_environment", "cardenv" ]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Entering external IP addresses to the internal DNS environment is not allowed", command)
+
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddAddress)

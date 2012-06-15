@@ -139,6 +139,31 @@ class TestDelAddress(TestBrokerCommand):
         self.noouttest(command)
         self.dsdb_verify()
 
+    def test_delip_with_network_env(self):
+        ip = "192.168.3.1"
+        fqdn = "cardenvtest600.aqd-unittest.ms.com"
+        command = ["del", "address", "--ip", ip,
+                   "--network_environment", "cardenv"]
+        self.noouttest(command)
+        # External IP addresses should not be added to DSDB
+        self.dsdb_verify(empty=True)
+
+
+        command = ["show_address", "--fqdn", fqdn,
+                   "--network_environment", "cardenv"]
+        out = self.notfoundtest(command)
+
+    def test_610_addipfromip_with_network_env(self):
+        fqdn = "cardenvtest610.aqd-unittest.ms.com"
+        command = ["del", "address",  "--fqdn", fqdn,
+                   "--network_environment", "cardenv"]
+        self.noouttest(command)
+        # External IP addresses should not be added to DSDB
+        self.dsdb_verify(empty=True)
+
+        command = ["show_address", "--fqdn=%s" % fqdn]
+        out = self.notfoundtest(command)
+
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelAddress)
