@@ -159,6 +159,12 @@ class TestAddSwitch(TestBrokerCommand):
                           "ut3", "a", "3", "SNgd1r01", switch_type='bor',
                           ip=self.net.tor_net[12].usable[0])
 
+        command = ["show", "switch", "--switch",
+                   "ut3gd1r01.aqd-unittest.ms.com", "--format", "csv"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "ut3gd1r01.aqd-unittest.ms.com,4.2.5.8,bor,"
+                         "ut3,ut,hp,uttorswitch,SNgd1r01,,", command)
+
     def testverifyaddut3gd1r04(self):
         self.verifyswitch("ut3gd1r04.aqd-unittest.ms.com", "generic",
                           "temp_switch", "ut3", "a", "3", switch_type='tor',
