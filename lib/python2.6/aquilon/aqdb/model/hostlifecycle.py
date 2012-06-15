@@ -57,7 +57,7 @@ class HostLifecycle(StateEngine, Base):
                'rebuild'      : ['almostready', 'ready', 'reinstall', 'failed',
                                  'decommissioned'],
                'failed'       : ['rebuild', 'reinstall', 'decommissioned'],
-               'decommissioned' : [],
+               'decommissioned' : ['rebuild'],
                }
 
     __tablename__ = _TN
