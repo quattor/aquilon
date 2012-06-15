@@ -28,6 +28,8 @@
 # TERMS THAT MAY APPLY.
 """Contains the logic for `aq add alias`."""
 
+import socket
+
 from sqlalchemy.orm.exc import NoResultFound
 
 from aquilon.exceptions_ import (ArgumentError, ProcessException,
@@ -57,7 +59,7 @@ class CommandAddAlias(BrokerCommand):
 
         DnsRecord.get_unique(session, fqdn=dbfqdn, preclude=True)
 
-        dbtarget = create_target_if_needed(session, target, dbdns_env)
+        dbtarget = create_target_if_needed(session, logger, target, dbdns_env)
         try:
             db_record = Alias(fqdn=dbfqdn, target=dbtarget, comments=comments)
             session.add(db_record)
@@ -77,7 +79,7 @@ class CommandAddAlias(BrokerCommand):
         return
 
 
-def create_target_if_needed(session, target, dbdns_env):
+def create_target_if_needed(session, logger, target, dbdns_env):
     (name, target_domain) = parse_fqdn(session, target)
     q = session.query(Fqdn)
     q = q.filter_by(dns_environment=dbdns_env)
@@ -92,6 +94,13 @@ def create_target_if_needed(session, target, dbdns_env):
 
         dbtarget = Fqdn(name=name, dns_domain=target_domain,
                         dns_environment=dbdns_env)
+
+        try:
+            socket.gethostbyname(dbtarget.fqdn)
+        except socket.gaierror, e:
+            logger.warning("WARNING: Will create alias for target {0.fqdn!s}, "
+                           "but {1.args[1]!s}.".format(dbtarget, e))
+
         session.add(dbtarget)
         dbtarget_rec = ReservedName(fqdn=dbtarget)
         session.add(dbtarget_rec)

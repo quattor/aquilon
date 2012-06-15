@@ -105,7 +105,11 @@ class TestUpdateAlias(TestBrokerCommand):
     def test_400_repoint_restrict1(self):
         command = ["update", "alias", "--fqdn", "restrict1.aqd-unittest.ms.com",
                    "--target", "target2.restrict.aqd-unittest.ms.com"]
-        self.noouttest(command)
+        out = self.statustest(command)
+        self.matchoutput(out,
+                         "WARNING: Will create alias for target "
+                         "target2.restrict.aqd-unittest.ms.com, but ",
+                         command)
 
     def test_410_verify_target(self):
         command = ["search", "dns", "--fullinfo",
