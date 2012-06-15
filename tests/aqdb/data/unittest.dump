@@ -69,7 +69,7 @@ NetworkEnvironment(name="internal", dns_environment=DnsEnvironment(name="interna
 DnsDomain(name="ms.com")
 DnsDomain(name="devin1.ms.com")
 DnsDomain(name="devin2.ms.com")
-DnsDomain(name="msad.ms.com")
+DnsDomain(name="msad.ms.com", restricted=True)
 DnsDomain(name="one-nyp.ms.com")
 DnsDomain(name="the-ha.ms.com")
 DnsDomain(name="new-york.ms.com")
