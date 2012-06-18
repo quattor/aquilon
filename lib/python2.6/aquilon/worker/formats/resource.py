@@ -37,6 +37,9 @@ from aquilon.aqdb.model import Resource
 class ResourceFormatter(ObjectFormatter):
     protocol = "aqdsystems_pb2"
 
+    def extra_details(self, share, indent=""):
+        return []
+
     def format_raw(self, resource, indent=""):
         details = []
         details.append(indent + "{0:c}: {0.name}".format(resource))
@@ -45,6 +48,7 @@ class ResourceFormatter(ObjectFormatter):
 
         details.append(indent + "  Bound to: {0}"
                        .format(resource.holder.holder_object))
+        details.extend(self.extra_details(resource, indent))
         return "\n".join(details)
 
     def format_proto(self, resource, skeleton=None):

@@ -35,7 +35,8 @@ from aquilon.aqdb.model import Share
 
 
 class ShareFormatter(ResourceFormatter):
-    def format_raw(self, share, indent=""):
+
+    def extra_details(self, share, indent=""):
         details = []
 
         # TODO some other data from svcinstance?
@@ -48,10 +49,7 @@ class ShareFormatter(ResourceFormatter):
                            (disk.device_name,
                             disk.capacity,
                             disk.machine.label))
-
-
-        return super(ShareFormatter, self).format_raw(share, indent) + \
-               "\n" + "\n".join(details)
+        return details
 
 
 ObjectFormatter.handlers[Share] = ShareFormatter()

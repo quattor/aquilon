@@ -37,14 +37,13 @@ from aquilon.aqdb.model import Hostlink
 class HostlinkFormatter(ResourceFormatter):
     protocol = "aqdsystems_pb2"
 
-    def format_raw(self, hostlink, indent=""):
+    def extra_details(self, hostlink, indent=""):
         details = []
         details.append(indent + "  Target Path: %s" % hostlink.target)
         details.append(indent + "  Owner: %s" % hostlink.owner_user)
         if hostlink.owner_group is not None:
             details.append(indent + "  Group: %s" % hostlink.owner_group)
-        return super(HostlinkFormatter, self).format_raw(hostlink, indent) + \
-               "\n" + "\n".join(details)
+        return details
 
     def format_proto(self, hostlink, skeleton=None):
         container = skeleton

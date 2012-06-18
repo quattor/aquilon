@@ -37,7 +37,7 @@ from aquilon.aqdb.model import Intervention
 
 class InterventionFormatter(ResourceFormatter):
 
-    def format_raw(self, intervention, indent=""):
+    def extra_details(self, intervention, indent=""):
         details = []
         details.append("  Start: %s" % intervention.start_date)
         details.append("  Expires: %s" % intervention.expiry_date)
@@ -48,9 +48,7 @@ class InterventionFormatter(ResourceFormatter):
             details.append("  Allow Groups: %s" % intervention.groups)
         if intervention.disabled:
             details.append("  Disabled Actions: %s" % intervention.disabled)
-        return super(InterventionFormatter, self).format_raw(intervention,
-                                                             indent) + \
-               "\n" + "\n".join(details)
+        return details
 
     def format_proto(self, resource, skeleton=None):
         container = skeleton
