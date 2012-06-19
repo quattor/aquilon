@@ -440,6 +440,58 @@ class TestVulcan20(TestBrokerCommand):
         command = ["del", "service", "--service", "vcenter", "--instance", "np"]
         self.noouttest(command)
 
+#
+##    service binding conflicts
+#
+    def test_170_add_mc_esx_service(self):
+        command = ["add", "service", "--service", "esx_management_server", "--instance", "ut.mc"]
+        self.noouttest(command)
+
+        command = ["add_required_service", "--service", "esx_management_server",
+                   "--archetype", "metacluster", "--personality", "vulcan2-test"]
+        self.noouttest(command)
+
+        command = ["map", "service", "--service", "esx_management_server", "--instance", "ut.mc",
+                   "--building", "ut", "--personality", "vulcan2-test",
+                   "--archetype", "metacluster"]
+        self.noouttest(command)
+
+        command = ["bind_cluster", "--cluster", "utmc8", "--service", "esx_management_server",
+                   "--instance", "ut.mc", "--cluster_type", "meta"]
+        err = self.statustest(command)
+        self.matchoutput(err, "Metacluster utmc8 adding binding for "
+                         "service esx_management_server instance ut.mc", command)
+
+    def test_170_fail_make_host(self):
+        command = ["make", "--hostname", "utpgh0.aqd-unittest.ms.com"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "Replacing ut.a instance with ut.mc (bound to "
+                         "ESX metacluster utmc8) for service esx_management_server",
+                         command)
+        self.matchoutput(out,
+                         "ESX Cluster utpgcl0 is set to use service instance "
+                         "esx_management_server/ut.mc, but that instance is "
+                         "not in a service map for utpgh0.aqd-unittest.ms.com.",
+                         command)
+
+    def test_170_remove_mc_esx_service(self):
+        command = ["unbind_cluster", "--cluster", "utmc8", "--service", "esx_management_server",
+                   "--instance", "ut.mc", "--cluster_type", "meta"]
+        self.noouttest(command)
+
+        command = ["unmap", "service", "--service", "esx_management_server", "--instance", "ut.mc",
+                   "--building", "ut", "--personality", "vulcan2-test",
+                   "--archetype", "metacluster"]
+        self.noouttest(command)
+
+        command = ["del_required_service", "--service", "esx_management_server",
+                   "--archetype", "metacluster", "--personality", "vulcan2-test"]
+        self.noouttest(command)
+
+        command = ["del", "service", "--service", "esx_management_server", "--instance", "ut.mc"]
+        self.noouttest(command)
+
 
 #    Storage group related deletes
 
