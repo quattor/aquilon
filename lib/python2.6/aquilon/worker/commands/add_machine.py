@@ -110,7 +110,6 @@ class CommandAddMachine(BrokerCommand):
                 dbcluster.resholder = ClusterResource(cluster=dbcluster)
             dbvm = VirtualMachine(machine=dbmachine, name=dbmachine.label,
                                   holder=dbcluster.resholder)
-            dbcluster.resholder.resources.append(dbvm)
             dbcluster.validate()
 
         session.flush()
