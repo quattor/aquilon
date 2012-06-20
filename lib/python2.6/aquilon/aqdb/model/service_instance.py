@@ -113,7 +113,7 @@ class ServiceInstance(Base):
 
         q = session.query(Host)
         q = q.filter(Host.services_used.contains(self))
-        q = q.outerjoin('cluster')
+        q = q.outerjoin('_cluster', 'cluster', from_joinpoint=True)
         q = q.filter(or_(Cluster.id == None,
                          ~Cluster.cluster_type.in_(cluster_types)))
         adjusted_count += q.count()
@@ -284,7 +284,8 @@ build_item = BuildItem.__table__  # pylint: disable=C0103, E1101
 build_item.primary_key.name = 'build_item_pk'
 
 ServiceInstance.clients = relation(Host, secondary=build_item,
-                                   backref=backref("services_used"))
+                                   backref=backref("services_used",
+                                                   cascade="all"))
 
 # Make this a column property so it can be undeferred on bulk loads
 ServiceInstance._client_count = column_property(

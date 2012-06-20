@@ -83,6 +83,10 @@ _CSBABV = 'clstr_svc_bndg'
 _CAP = 'clstr_allow_per'
 
 
+def _hcm_host_creator(host):
+    return HostClusterMember(host=host)
+
+
 class Cluster(Base):
     """
         A group of two or more hosts for high availablility or grid capabilities
@@ -138,6 +142,8 @@ class Cluster(Base):
     personality = relation(Personality, lazy=False, innerjoin=True)
     branch = relation(Branch, lazy=False, innerjoin=True, backref='clusters')
     sandbox_author = relation(UserPrincipal)
+
+    hosts = association_proxy('_hosts', 'host', creator=_hcm_host_creator)
 
     metacluster = association_proxy('_metacluster', 'metacluster')
 
@@ -554,14 +560,30 @@ class HostClusterMember(Base):
                         primary_key=True)
 
 
+    """
+        Association Proxy and relation cascading:
+        We need cascade=all on backrefs so that deletion propagates to avoid
+        AssertionError: Dependency rule tried to blank-out primary key column on
+        deletion of the Cluster and it's links. On the contrary do not have
+        cascade='all' on the forward mapper here, else deletion of clusters
+        and their links also causes deleteion of hosts (BAD)
+    """
+    cluster = relation(Cluster, lazy=False, innerjoin=True,
+                       backref=backref('_hosts', cascade='all, delete-orphan'))
+
+    # This is a one-to-one relation, so we need uselist=False on the backref
+    host = relation(Host, lazy=False, innerjoin=True,
+                    backref=backref('_cluster', uselist=False,
+                                    cascade='all, delete-orphan'))
+
+
 hcm = HostClusterMember.__table__  # pylint: disable=C0103, E1101
 hcm.primary_key.name = '%s_pk' % _HCM
 hcm.append_constraint(
     UniqueConstraint('host_id', name='host_cluster_member_host_uk'))
+hcm.info['unique_fields'] = ['cluster', 'host']
 
-Cluster.hosts = relation(Host, secondary=hcm,
-                         backref=backref("cluster", uselist=False))
-
+Host.cluster = association_proxy('_cluster', 'cluster')
 
 class ClusterAllowedPersonality(Base):
     __tablename__ = _CAP

@@ -101,6 +101,6 @@ class CommandSearchMachine(BrokerCommand):
                           subqueryload('disks'),
                           subqueryload('host'),
                           subqueryload('host.services_used'),
-                          subqueryload('host.cluster'))
+                          subqueryload('host._cluster'))
             return q.all()
         return SimpleMachineList(q.all())

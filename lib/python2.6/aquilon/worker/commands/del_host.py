@@ -103,7 +103,7 @@ class CommandDelHost(BrokerCommand):
             if dbhost.cluster:
                 dbcluster = dbhost.cluster
                 dbcluster.hosts.remove(dbhost)
-                set_committed_value(dbhost, 'cluster', None)
+                set_committed_value(dbhost, '_cluster', None)
                 dbcluster.validate()
 
             session.delete(dbhost)

@@ -52,8 +52,9 @@ class CommandShowClusterAll(BrokerCommand):
                             joinedload('machine.primary_name.fqdn'),
                             lazyload('machine.host'))
 
-        q = q.options(subqueryload('hosts'),
-                      joinedload('hosts.machine'),
+        q = q.options(subqueryload('_hosts'),
+                      joinedload('_hosts.host'),
+                      joinedload('_hosts.host.machine'),
                       subqueryload('_metacluster'),
                       joinedload('_metacluster.metacluster'),
                       joinedload('resholder'),
