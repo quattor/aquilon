@@ -174,8 +174,9 @@ class ClusterFormatter(ObjectFormatter):
                            (dbsi.service.name, dbsi.name))
         for personality in cluster.allowed_personalities:
             details.append(indent + "  Allowed Personality: {0}".format(personality))
-        for host in sorted(cluster.hosts, key=lambda x : x.fqdn):
-            details.append(indent + "  Member: %s" % host.fqdn)
+        for member in sorted(cluster._hosts, key=lambda x : x.host.fqdn):
+            details.append(indent + "  Member: %s [node_index: %d]" %
+                           (member.host.fqdn, member.node_index))
         if cluster.comments:
             details.append(indent + "  Comments: %s" % cluster.comments)
         return "\n".join(details)

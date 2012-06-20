@@ -83,8 +83,10 @@ _CSBABV = 'clstr_svc_bndg'
 _CAP = 'clstr_allow_per'
 
 
-def _hcm_host_creator(host):
-    return HostClusterMember(host=host)
+def _hcm_host_creator(tuple):
+    host = tuple[0]
+    node_index = tuple[1]
+    return HostClusterMember(host=host, node_index=node_index)
 
 
 class Cluster(Base):
@@ -559,6 +561,8 @@ class HostClusterMember(Base):
                         #if the host is deleted, so is the membership
                         primary_key=True)
 
+    node_index = Column(Integer, nullable=False)
+
 
     """
         Association Proxy and relation cascading:
@@ -581,6 +585,8 @@ hcm = HostClusterMember.__table__  # pylint: disable=C0103, E1101
 hcm.primary_key.name = '%s_pk' % _HCM
 hcm.append_constraint(
     UniqueConstraint('host_id', name='host_cluster_member_host_uk'))
+hcm.append_constraint(
+    UniqueConstraint('cluster_id', 'node_index', name='host_cluster_member_node_uk'))
 hcm.info['unique_fields'] = ['cluster', 'host']
 
 Host.cluster = association_proxy('_cluster', 'cluster')
