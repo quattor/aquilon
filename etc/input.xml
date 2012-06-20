@@ -1164,10 +1164,35 @@
    <command name="show_model">
       Show a model
       <optgroup name="show_model_opts" mandatory="True" fields="any">
+         <option name="model" type="string" conflicts="all">Name of the model</option>
+         <option name="vendor" type="string" conflicts="all">Vendor name</option>
+         <option name="type" type="string" conflicts="all">Machine type name</option>
+         <option name="all" type="flag" conflicts="model vendor">Show all models</option>
+      </optgroup>
+      <transport method="get" trigger="all" path="hardware/model" />
+      <!-- TODO: fix the URLs once the search-like functionality is removed -->
+      <transport method="get" path="find/hardware/show_model" />
+   </command>
+
+   <command name="search_model">
+      Search hardware models
+      <optgroup name="search_model_opts" mandatory="True" fields="any">
          <option name="model" type="string">Name of the model</option>
          <option name="vendor" type="string">Vendor name</option>
-         <option name="type" type="string">Machine type name</option>
-         <option name="all" type="flag">Show all models</option>
+         <option name="machine_type" type="string">Machine type name</option>
+         <option name="cpuname" type="string" conflicts="cputype">CPU type</option>
+         <option name="cpuvendor" type="string">CPU vendor</option>
+         <option name="cpuspeed" type="int">CPU speed</option>
+         <option name="cpunum" type="int">CPU count</option>
+         <option name="nicmodel" type="string">NIC model</option>
+         <option name="nicvendor" type="string">NIC vendor</option>
+         <option name="memory" type="int">Amount of installed memory (MB)</option>
+         <option name="disktype" type="string">Installed disk type (generally 'local', use 'nas' for virtual disks on NAS)</option>
+         <option name="diskcontroller" type="string">Controller type (sata, scsi, etc.)</option>
+         <option name="disksize" type="int">Installed disk capacity (GB)</option>
+      </optgroup>
+      <optgroup name="search_model_optional" mandatory="False">
+         <option name="fullinfo" type="flag">Show full information for the matching models</option>
       </optgroup>
       <transport method="get" path="find/hardware/model" />
    </command>

@@ -36,8 +36,14 @@ class CommandShowModel(BrokerCommand):
         if model is not None:
             q = q.filter(Model.name.like(model + '%'))
         if vendor is not None:
+            if not model:
+                self.deprecated_option("vendor alone", "Please use the "
+                                       "search_model command instead.",
+                                       **arguments)
             q = q.filter(Vendor.name.like(vendor + '%'))
         if type is not None:
+            self.deprecated_option("type", "Please use the search_model "
+                                   "command instead.", **arguments)
             q = q.filter(Model.machine_type.like(type + '%'))
         q = q.order_by(Vendor.name, Model.name)
         return q.all()
