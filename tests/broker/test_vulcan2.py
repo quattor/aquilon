@@ -49,7 +49,6 @@ class TestVulcan20(TestBrokerCommand):
                    "--personality=vulcan2-test", "--archetype=metacluster",
                    "--domain=unittest", "--building=ut", "--domain=unittest",
                    "--comments=autopg_v2_tests"]
-
         self.noouttest(command)
 
     # see testaddutmc4
@@ -399,6 +398,10 @@ class TestVulcan20(TestBrokerCommand):
         command = ["show", "host", "--hostname", "utpgh0.aqd-unittest.ms.com"]
         out = self.commandtest(command)
         self.matchoutput(out, "Template: service/vcenter/ut", command)
+
+        command = "show metacluster --metacluster utmc8"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Member Alignment: Service vcenter Instance ut", command)
 
     def test_153_unbindvcenterservices(self):
         command = ["del_cluster_aligned_service", "--cluster_type", "meta",

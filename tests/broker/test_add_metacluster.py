@@ -56,6 +56,8 @@ class TestAddMetaCluster(TestBrokerCommand):
         self.matchclean(out, "Comments", command)
         self.matchclean(out, "Member:", command)
         self.matchclean(out, "Share:", command)
+        self.matchoutput(out, "Domain: ut-prod", command)
+        self.matchoutput(out, "Build Status: build", command)
 
     def testfailaddexisting(self):
         command = ["add_metacluster", "--metacluster=utmc1",

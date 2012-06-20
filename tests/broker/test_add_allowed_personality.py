@@ -77,6 +77,10 @@ class TestAddAllowedPersonality(TestBrokerCommand):
                           "--archetype", "vmhost",
                           "--personality=generic",
                           "--cluster", "utecl1"])
+        self.successtest(["add_allowed_personality",
+                          "--archetype", "metacluster",
+                          "--personality=metacluster",
+                          "--cluster", "utmc1"])
 
     def test_20_checkconstraint(self):
         command = ["show_cluster", "--cluster=utecl1"]
@@ -84,6 +88,9 @@ class TestAddAllowedPersonality(TestBrokerCommand):
         self.matchoutput(out, "Allowed Personality: Personality vmhost/vulcan-1g-desktop-prod", command)
         self.matchoutput(out, "Allowed Personality: Personality vmhost/generic", command)
 
+        command = ["show_cluster", "--cluster=utmc1"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Allowed Personality: Personality metacluster/metacluster", command)
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddAllowedPersonality)
