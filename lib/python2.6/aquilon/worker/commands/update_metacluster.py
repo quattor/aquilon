@@ -31,16 +31,20 @@
 from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import MetaCluster
 from aquilon.exceptions_ import ArgumentError
-
+from aquilon.worker.commands.update_cluster import update_cluster_location
+from aquilon.worker.templates.base import Plenary, PlenaryCollection
+from aquilon.worker.locks import lock_queue, CompileKey
 
 class CommandUpdateMetaCluster(BrokerCommand):
 
     required_parameters = ["metacluster"]
 
-    def render(self, session, metacluster, max_members, max_shares,
-               high_availability, comments, **arguments):
+    def render(self, session, logger, metacluster, max_members, max_shares,
+               fix_location, high_availability, comments, **arguments):
         dbmetacluster = MetaCluster.get_unique(session, metacluster,
                                                compel=True)
+        cluster_updated = False
+
         if max_members is not None:
             current_members = len(dbmetacluster.members)
             if max_members < current_members:
@@ -49,6 +53,7 @@ class CommandUpdateMetaCluster(BrokerCommand):
                                     (format(dbmetacluster), current_members,
                                      max_members))
             dbmetacluster.max_clusters = max_members
+            cluster_updated = True
 
         if max_shares is not None:
             current_shares = len(dbmetacluster.shares)
@@ -58,15 +63,48 @@ class CommandUpdateMetaCluster(BrokerCommand):
                                     (format(dbmetacluster), current_shares,
                                      max_shares))
             dbmetacluster.max_shares = max_shares
+            cluster_updated = True
 
         if comments is not None:
             dbmetacluster.comments = comments
+            cluster_updated = True
 
         if high_availability is not None:
             dbmetacluster.high_availability = high_availability
+            cluster_updated = True
+
+        # TODO update_cluster_location would update VMs. Metaclusters
+        # will contain VMs in Vulcan2 model.
+        plenaries = PlenaryCollection(logger=logger)
+        remove_plenaries = PlenaryCollection(logger=logger)
+
+        location_updated = update_cluster_location(session, logger,
+                                          dbmetacluster,
+                                          fix_location,
+                                          plenaries, remove_plenaries,
+                                          **arguments)
+
+        if location_updated:
+            cluster_updated = True
+
+        if not cluster_updated:
+            return
 
         session.add(dbmetacluster)
         session.flush()
         dbmetacluster.validate()
+
+        plenary_info = Plenary.get_plenary(dbmetacluster)
+        key = plenary_info.get_write_key()
+
+        try:
+            lock_queue.acquire(key)
+
+            plenary_info.write(locked=True)
+        except:
+            plenary_info.restore_stash()
+            raise
+        finally:
+            lock_queue.release(key)
 
         return

@@ -94,6 +94,17 @@ class MetaCluster(Cluster):
         q = q.filter_by(metacluster=self)
         return q.all()
 
+    # see cluster.minimum_location
+    @property
+    def minimum_location(self):
+        location = None
+        for cluster in self.members:
+            if location:
+                location = location.merge(cluster.location_constraint)
+            else:
+                location = cluster.location_constraint
+        return location
+
     def get_total_capacity(self):
         # Key: building; value: list of cluster capacities inside that building
         building_capacity = {}

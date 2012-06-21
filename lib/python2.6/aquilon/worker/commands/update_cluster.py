@@ -109,41 +109,13 @@ class CommandUpdateCluster(BrokerCommand):
             dbcluster.validate()
             cluster_updated = True
 
-        dblocation = get_location(session, **arguments)
-        if fix_location:
-            dblocation = dbcluster.minimum_location
-            if not dblocation:
-                raise ArgumentError("Cannot infer the cluster location from "
-                                    "the host locations.")
-        if dblocation:
-            errors = []
-            if not dblocation.campus:
-                errors.append("{0} is not within a campus.".format(dblocation))
-            for host in dbcluster.hosts:
-                if host.machine.location != dblocation and \
-                   dblocation not in host.machine.location.parents:
-                    errors.append("{0} has location {1}.".format(host,
-                                                                 host.machine.location))
-            if errors:
-                raise ArgumentError("Cannot set {0} location constraint to "
-                                    "{1}:\n{2}".format(dbcluster, dblocation,
-                                                       "\n".join(errors)))
-            if dbcluster.location_constraint != dblocation:
-                if machine_plenary_will_move(old=dbcluster.location_constraint,
-                                             new=dblocation):
-                    for dbmachine in dbcluster.machines:
-                        # This plenary will have a path to the old location.
-                        plenary = Plenary.get_plenary(dbmachine, logger=logger)
-                        remove_plenaries.append(plenary)
-                        dbmachine.location = dblocation
-                        session.add(dbmachine)
-                        # This plenary will have a path to the new location.
-                        plenaries.append(Plenary.get_plenary(dbmachine))
-                        # Update the path to the machine plenary in the
-                        # container resource
-                        plenaries.append(Plenary.get_plenary(dbmachine.vm_container))
-                dbcluster.location_constraint = dblocation
-                cluster_updated = True
+        location_updated = update_cluster_location(session, logger,
+                                          dbcluster, fix_location,
+                                          plenaries, remove_plenaries,
+                                          **arguments)
+
+        if location_updated:
+            cluster_updated = True
 
         if personality:
             archetype = dbcluster.personality.archetype.name
@@ -205,3 +177,54 @@ class CommandUpdateCluster(BrokerCommand):
 
         return
 
+def update_cluster_location(session, logger, dbcluster,
+                            fix_location, plenaries, remove_plenaries,
+                            **arguments):
+    location_updated = False
+    dblocation = get_location(session, **arguments)
+    if fix_location:
+        dblocation = dbcluster.minimum_location
+        if not dblocation:
+            raise ArgumentError("Cannot infer the cluster location from "
+                                "the host locations.")
+    if dblocation:
+        errors = []
+        if not dblocation.campus:
+            errors.append("{0} is not within a campus.".format(dblocation))
+
+        if dbcluster.cluster_type != 'meta':
+            for host in dbcluster.hosts:
+                if host.machine.location != dblocation and \
+                   dblocation not in host.machine.location.parents:
+                    errors.append("{0} has location {1}.".format(host,
+                                                     host.machine.location))
+        else:
+            for cluster in dbcluster.members:
+                if cluster.location_constraint != dblocation and \
+                   dblocation not in cluster.location_constraint.parents:
+                    errors.append("{0} has location {1}.".format(cluster,
+                                                 cluster.location_constraint))
+
+        if errors:
+            raise ArgumentError("Cannot set {0} location constraint to "
+                                "{1}:\n{2}".format(dbcluster, dblocation,
+                                                   "\n".join(errors)))
+
+        if dbcluster.location_constraint != dblocation:
+            if machine_plenary_will_move(old=dbcluster.location_constraint,
+                                         new=dblocation):
+                for dbmachine in dbcluster.machines:
+                    # This plenary will have a path to the old location.
+                    plenary = Plenary.get_plenary(dbmachine, logger=logger)
+                    remove_plenaries.append(plenary)
+                    dbmachine.location = dblocation
+                    session.add(dbmachine)
+                    # This plenary will have a path to the new location.
+                    plenaries.append(Plenary.get_plenary(dbmachine))
+                    # Update the path to the machine plenary in the
+                    # container resource
+                    plenaries.append(Plenary.get_plenary(dbmachine.vm_container))
+            dbcluster.location_constraint = dblocation
+            location_updated = True
+
+    return location_updated

@@ -134,6 +134,34 @@ class TestUpdateMetaCluster(TestBrokerCommand):
 
     # FIXME: Need tests for plenary templates
 
+    def testupdatelocation(self):
+        # moving cluster from bu: ut to city ny, a parent of it.
+        command = ["update_metacluster", "--metacluster", "utmc1",
+                   "--city", "ny"]
+        self.noouttest(command)
+
+        command = ["show", "metacluster", "--metacluster", "utmc1"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "City: ny", command)
+
+        # reverting this move
+        command = ["update_metacluster", "--metacluster", "utmc1",
+                   "--fix_location"]
+        self.noouttest(command)
+
+        command = ["show", "metacluster", "--metacluster", "utmc1"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Building: ut", command)
+
+    def testfailupdatelocation(self):
+        command = ["update_metacluster", "--metacluster", "utmc1",
+                   "--building", "cards"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Building cards is not within a campus.", command)
+        self.matchoutput(out, "ESX Cluster utecl1 has location Building ut.",
+                         command)
+        self.matchoutput(out, "ESX Cluster utecl2 has location Building ut.",
+                         command)
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestUpdateMetaCluster)
