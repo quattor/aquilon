@@ -3,6 +3,9 @@
 #
 # The source backend is taken from $AQDCONF as usual, the destination backend
 # is taken from command line.
+#
+# Warning: making a copy will cause the sequences in the source database to
+# jump - there's no easy way around that.
 
 import ms.version
 ms.version.addpkg('sqlalchemy', '0.7.5')
@@ -59,14 +62,13 @@ if __name__ == '__main__':
     dest_session = sessionmaker(bind=dest_engine)()
 
     # The only operation on sequences that all DBs support is getting the next
-    # value.
+    # value. Unfortunately that means we have to alter the state of the source
+    # database here.
     for seq in Base.metadata._sequences.values():
         nextid = src_session.execute(seq)
         # Make sure the sequence is re-created with the right start index
         seq.drop(dest_engine, checkfirst=True)
         seq.start = nextid
-    # Revert changes to the sequences
-    src_session.rollback()
 
     Base.metadata.create_all(dest_engine, checkfirst=True)
 
@@ -77,6 +79,10 @@ if __name__ == '__main__':
             dest_session.execute(text('SET CONSTRAINTS ALL DEFERRED'))
         elif dest_engine.dialect.name == 'oracle':
             dest_session.execute(text('ALTER SESSION SET CONSTRAINTS = DEFERRED'))
+        elif dest_engine.dialect.name == 'sqlite':
+            # SQLite does not allow changing the deferred state at run-time, but
+            # it does allow disabling foreign keys entirely
+            dest_session.execute(text('PRAGMA foreign_keys = 0;'))
 
         columns = table.columns.keys()
 
