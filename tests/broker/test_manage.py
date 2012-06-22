@@ -120,6 +120,15 @@ class TestManage(TestBrokerCommand):
                          "Cluster nodes must be managed at the cluster level",
                          command)
 
+    def testfailmanageclusterwithmc(self):
+        user = self.config.get("unittest", "user")
+        command = ["manage", "--cluster", "utecl1",
+                   "--sandbox", "%s/utsandbox" % user]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "utecl1 is member of metacluster utmc1, it must be "
+                         "managed at metacluster level.", command)
+
     def testmanagemissingcluster(self):
         user = self.config.get("unittest", "user")
         command = ["manage", "--cluster", "cluster-does-not-exist",
@@ -139,7 +148,9 @@ class TestManage(TestBrokerCommand):
         for host in hosts:
             self.verify_buildfiles("unittest", host, want_exist=True)
         user = self.config.get("unittest", "user")
-        command = ["manage", "--cluster", "utecl1",
+
+        # we want to manage utecl1, but have to do it at metacluster level.
+        command = ["manage", "--cluster", "utmc1",
                    "--sandbox", "%s/utsandbox" % user]
         self.noouttest(command)
         self.verify_buildfiles("unittest", "clusters/utecl1", want_exist=False)

@@ -168,6 +168,19 @@ class MetaCluster(Cluster):
                                                                capacity[name]))
         return
 
+    # see cluster.validate_membership
+    def validate_membership(self, cluster, error=ArgumentError, **kwargs):
+
+        if cluster.branch != self.branch or \
+               cluster.sandbox_author != self.sandbox_author:
+            raise ArgumentError("{0} {1} {2} does not match {3:l} {4} "
+                                "{5}.".format(cluster,
+                                              cluster.branch.branch_type,
+                                              cluster.authored_branch,
+                                              self,
+                                              self.branch.branch_type,
+                                              self.authored_branch))
+
 metacluster = MetaCluster.__table__  # pylint: disable=C0103, E1101
 metacluster.primary_key.name = '%s_pk' % _MCT
 metacluster.info['unique_fields'] = ['name']

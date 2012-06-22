@@ -42,7 +42,7 @@ class TestAddMetaCluster(TestBrokerCommand):
 
     def testaddutmc1(self):
         command = ["add_metacluster", "--metacluster=utmc1", "--max_shares=8",
-                   "--domain=ut-prod", "--building=ut"]
+                   "--domain=unittest", "--building=ut"]
         self.noouttest(command)
 
     def testverifyutmc1(self):
@@ -56,19 +56,19 @@ class TestAddMetaCluster(TestBrokerCommand):
         self.matchclean(out, "Comments", command)
         self.matchclean(out, "Member:", command)
         self.matchclean(out, "Share:", command)
-        self.matchoutput(out, "Domain: ut-prod", command)
+        self.matchoutput(out, "Domain: unittest", command)
         self.matchoutput(out, "Build Status: build", command)
 
     def testfailaddexisting(self):
         command = ["add_metacluster", "--metacluster=utmc1",
-                   "--building=ut", "--domain=ut-prod"]
+                   "--building=ut", "--domain=unittest"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Metacluster utmc1 already exists.", command)
 
     def testaddutmc2(self):
         command = ["add_metacluster", "--metacluster=utmc2",
                    "--max_members=99", "--max_shares=89", "--building=ut",
-                   "--domain=ut-prod",
+                   "--domain=unittest",
                    "--comments", "MetaCluster with a comment"]
         self.noouttest(command)
 
@@ -82,7 +82,7 @@ class TestAddMetaCluster(TestBrokerCommand):
 
     def testaddutmc3(self):
         command = ["add_metacluster", "--metacluster=utmc3",
-                   "--max_members=0", "--building=ut", "--domain=ut-prod",
+                   "--max_members=0", "--building=ut", "--domain=unittest",
                    "--comments", "MetaCluster with no members allowed"]
         self.noouttest(command)
 
@@ -101,27 +101,34 @@ class TestAddMetaCluster(TestBrokerCommand):
         # Sort of a mini-10 Gig design for port group testing...
         command = ["add_metacluster", "--metacluster=utmc4",
                    "--max_members=6", "--max_shares=7", "--building=ut",
-                   "--domain=ut-prod"]
+                   "--domain=unittest"]
         self.noouttest(command)
 
     def testaddutmc5(self):
         # High availability testing
         command = ["add_metacluster", "--metacluster=utmc5",
                    "--max_members=6", "--max_shares=6", "--building=ut",
-                   "--domain=ut-prod"]
+                   "--domain=unittest"]
         self.noouttest(command)
 
     def testaddutmc6(self):
         # High availability testing
         command = ["add_metacluster", "--metacluster=utmc6",
                    "--max_members=6", "--max_shares=6", "--building=ut",
-                   "--domain=ut-prod"]
+                   "--domain=unittest"]
         self.noouttest(command)
 
     def testaddutmc7(self):
         # Test moving machines between metaclusters
         command = ["add_metacluster", "--metacluster=utmc7", "--building=ut",
-                   "--domain=ut-prod"]
+                   "--domain=unittest"]
+        self.noouttest(command)
+
+    def testaddutsandbox(self):
+        # Test moving machines between metaclusters
+        user = self.config.get("unittest", "user")
+        command = ["add_metacluster", "--metacluster=sandboxmc", "--building=ut",
+                   "--sandbox=%s/utsandbox" % user]
         self.noouttest(command)
 
     def testaddvulcan1(self):
@@ -142,7 +149,7 @@ class TestAddMetaCluster(TestBrokerCommand):
 
     def testfailglobal(self):
         command = ["add_metacluster", "--metacluster=global", "--building=ut",
-                   "--domain=ut-prod"]
+                   "--domain=unittest"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "name global is reserved", command)
 

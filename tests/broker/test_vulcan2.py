@@ -460,7 +460,7 @@ class TestVulcan20(TestBrokerCommand):
         self.noouttest(command)
 
         command = ["bind_cluster", "--cluster", "utmc8", "--service", "esx_management_server",
-                   "--instance", "ut.mc", "--cluster_type", "meta"]
+                   "--instance", "ut.mc"]
         err = self.statustest(command)
         self.matchoutput(err, "Metacluster utmc8 adding binding for "
                          "service esx_management_server instance ut.mc", command)
@@ -480,7 +480,7 @@ class TestVulcan20(TestBrokerCommand):
 
     def test_170_remove_mc_esx_service(self):
         command = ["unbind_cluster", "--cluster", "utmc8", "--service", "esx_management_server",
-                   "--instance", "ut.mc", "--cluster_type", "meta"]
+                   "--instance", "ut.mc"]
         self.noouttest(command)
 
         command = ["unmap", "service", "--service", "esx_management_server", "--instance", "ut.mc",
