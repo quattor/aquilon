@@ -476,13 +476,37 @@ class TestAddPersonality(TestBrokerCommand):
                                personality, command)
         self.matchoutput(out, "template personality/%s/config;" % personality,
                          command)
-        self.matchoutput(out, 'include { if_exists("personality/%s/post_feature") };' %
-                               personality, command)
         if config_override:
-            self.matchoutput(out, 'include { "features/unixops/config_override/config" }',
+            self.searchoutput(out, r'include { "features/personality/config_override/config" };\s*'
+                                   r'include { if_exists\("personality/utpersonality/post_feature"\) };',
                              command)
         else:
+            self.matchoutput(out, 'include { if_exists("personality/%s/post_feature") };' %
+                               personality, command)
             self.matchclean(out, 'config_override', command);
+
+    def testverifyshowdiff1(self):
+        command = ["show_diff", "--personality=utpersonality",
+                   "--archetype=aquilon", "--other=generic"]
+        out = self.commandtest(command)
+        self.searchoutput (out,
+                         r'missing Options Enabled in Personality aquilon/generic:\s+ConfigOverride',
+                         command)
+        self.searchoutput(out,
+                         r'missing Grns in Personality aquilon/generic:\s+GRN grn:/ms/ei/aquilon/aqd',
+                         command)
+
+    def testverifyshowdiff2(self):
+        command = ["show_diff", "--personality=utpersonality",
+                   "--archetype=aquilon", "--other=esx_server", "--other_archetype=vmhost"]
+        out = self.commandtest(command)
+        self.searchoutput (out,
+                         r'missing Options Enabled in Personality aquilon/utpersonality:\s+Cluster Required',
+                         command)
+        self.searchoutput (out,
+                         r'missing Options Enabled in Personality vmhost/esx_server:\s+ConfigOverride',
+                         command)
+
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddPersonality)

@@ -188,12 +188,12 @@ class PlenaryPersonalityBase(Plenary):
         pan_include_if_exists(lines, "%s/pre_feature" % self.plenary_core)
         ## process parameter templates
         pan_include_if_exists(lines, "personality/config")
-        ## include post features
-        pan_include_if_exists(lines, "%s/post_feature" % self.plenary_core)
 
         if self.dbobj.config_override:
-            pan_include(lines, "features/unixops/config_override/config")
+            pan_include(lines, "features/personality/config_override/config")
 
+        ## include post features
+        pan_include_if_exists(lines, "%s/post_feature" % self.plenary_core)
 
 class PlenaryPersonalityPreFeature(PlenaryPersonalityBase):
 

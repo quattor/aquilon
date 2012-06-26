@@ -82,6 +82,17 @@ class CommandShowDiff(BrokerCommand):
 
         smaps = dict(("{0} {1}".format(sm.service_instance, sm.location), True) for sm in q.all())
 
-        ret["ServiceMap"] [dtype] = smaps
+        ret["ServiceMap"][dtype] = smaps
 
+        ## grns
+        grns = dict((grn, True) for grn in dbpersona.grns)
+        ret["Grns"][dtype] = grns
 
+        ## options
+        enabled = defaultdict()
+        if dbpersona.config_override:
+            enabled["ConfigOverride"] = True
+        if dbpersona.cluster_required:
+            enabled["Cluster Required"] = True
+
+        ret["Options Enabled"][dtype] = enabled

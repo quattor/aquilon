@@ -157,7 +157,7 @@ class TestUpdatePersonality(TestBrokerCommand):
 
         command = ["cat", "--archetype=aquilon", "--personality=testovrpersona"]
         out = self.commandtest(command)
-        self.matchoutput(out, 'include { "features/unixops/config_override/config" }',
+        self.matchoutput(out, 'include { "features/personality/config_override/config" }',
                          command)
 
     def testupdateconfigoverride03(self):
