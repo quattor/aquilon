@@ -1,0 +1,2 @@
+ALTER TABLE parameter ALTER holder_id SET NOT NULL;
+ALTER TABLE param_definition ALTER holder_id SET NOT NULL;

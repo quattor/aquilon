@@ -1,0 +1,29 @@
+-- Add new node_index column to the host_cluster_member table
+
+ALTER TABLE host_cluster_member ADD node_index INTEGER;
+
+-- Now backfill values for all existing clusters
+CREATE OR REPLACE FUNCTION _init_node_indexes() RETURNS VOID LANGUAGE plpgsql AS $$
+DECLARE
+ hcm_curs CURSOR IS SELECT * FROM host_cluster_member 
+   WHERE node_index IS NULL FOR UPDATE;
+ BEGIN
+ FOR hcm IN hcm_curs LOOP
+    UPDATE host_cluster_member
+    SET node_index = 1 + (SELECT COALESCE(MAX(node_index), 0)
+	   FROM host_cluster_member
+           WHERE cluster_id = hcm.cluster_id)
+    WHERE CURRENT OF hcm_curs;
+ END LOOP;
+END
+$$;
+
+BEGIN;
+SELECT _init_node_indexes();
+COMMIT;
+DROP FUNCTION _init_node_indexes();
+
+-- Finally add the constraint to prevent it being null
+ALTER TABLE host_cluster_member ALTER node_index SET NOT NULL;
+
+ALTER TABLE host_cluster_member ADD CONSTRAINT host_cluster_member_node_uk UNIQUE (cluster_id, node_index);

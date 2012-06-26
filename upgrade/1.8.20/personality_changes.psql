@@ -1,0 +1,6 @@
+/* modify personality table for new field and constraint */
+ALTER TABLE PERSONALITY ADD config_override BOOLEAN;
+
+UPDATE PERSONALITY SET config_override = 'f';
+
+ALTER TABLE PERSONALITY ALTER config_override SET NOT NULL;
