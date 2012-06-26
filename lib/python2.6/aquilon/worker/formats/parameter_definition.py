@@ -40,15 +40,12 @@ class ParamDefinitionFormatter(ObjectFormatter):
         detail = "value type:{0.value_type}".format(paramdef)
         if paramdef.template:
             detail = detail + "  template:{0.template}".format(paramdef)
-        else:
-            detail = "value type:{0.value_type}".format(paramdef)
         if paramdef.default:
             detail = detail + "  default:{0.default}".format(paramdef)
         if paramdef.description:
             detail = detail + "  description: {0.description}". format(paramdef)
         details.append(indent + "parameter: {0.path}  {1}". format(paramdef, detail))
         return "\n".join(details)
-
 
 ObjectFormatter.handlers[ParamDefinition] = ParamDefinitionFormatter()
 
@@ -82,5 +79,13 @@ class ParamDefListFormatter(ListFormatter):
 
         return "\n".join(details)
 
+    def csv_fields(self, paramdef):
+        return [paramdef.holder.holder_name,
+                paramdef.path,
+                paramdef.value_type,
+                paramdef.default,
+                paramdef.description,
+                paramdef.template,
+                paramdef.required]
 
 ObjectFormatter.handlers[ParamDefList] = ParamDefListFormatter()

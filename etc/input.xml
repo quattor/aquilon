@@ -5050,6 +5050,10 @@
    <command name="show_parameter_definition">
       Display all parameter definition configured for a object
       <p/>
+      Supported options for --format: raw, csv.
+
+      The 'csv' format contains the following fields, in this order:
+      Definition Holder name, path, value type, default value, description, template, is_required
       <optgroup name="show_parameter_def_options" mandatory="True" fields="any">
           <option name="archetype" type="string">Archetype</option>
           <option name="feature" type="string">Feature</option>
