@@ -2315,7 +2315,7 @@
       <transport trigger="city" method="get" path="city/%(city)s/plenary" />
       <transport trigger="switch" method="get" path="switch/%(switch)s/plenary" />
       <transport trigger="resource" method="get" path="resource/plenary/%(resource)s" />
-      <transport trigger="personality" method="get"  path="/personality/%(personality)s/plenary" />
+      <transport trigger="personality" method="get"  path="personality/personality/%(personality)s/plenary" />
    </command>
 
    <command name="sync">
@@ -2846,7 +2846,7 @@
 	 <option name="copy_from" type="string">Personality to copy parameters and features from</option>
 	 <option name="config_override" type="boolean" default='False'>Include external personality config override template</option>
       </optgroup>
-      <transport method="put" path="personality/%(archetype)s/%(personality)s" />
+      <transport method="put" path="personality/archetype/%(archetype)s/personality/%(personality)s" />
   </command>
 
   <command name="add_vendor">
@@ -2919,7 +2919,7 @@
          <option name="personality" type="string">The name to delete</option>
          <option name="archetype" type="string">Which archetype to use</option>
       </optgroup>
-      <transport method="delete" path="personality/%(archetype)s/%(personality)s" />
+      <transport method="delete" path="personality/archetype/%(archetype)s/personality/%(personality)s" />
   </command>
 
   <command name="update_personality">
@@ -2932,9 +2932,9 @@
 	 <option name="vmhost_capacity_function" type="string">Function for calculating VM host capacity units</option>
 	 <option name="vmhost_overcommit_memory" type="float">Memory overcommit factor for VM hosts</option>
          <option name="cluster_required" type="boolean" default='False'>Does this personality require hosts to be clustered?</option>
-	 <option name="config_override" type="boolean" default='False'>Include external personality config override template</option>
+	 <option name="config_override" type="boolean">Include external personality config override template</option>
       </optgroup>
-      <transport method="post" path="personality/%(archetype)s/%(personality)s" />
+      <transport method="post" path="personality/archetype/%(archetype)s/personality/%(personality)s" />
   </command>
 
   <command name="show_personality">
@@ -4930,8 +4930,8 @@
              <option name="archetype" type="string">Archetype</option>
          </optgroup>
       </optgroup>
-      <transport method="get" trigger="feature" path="/feature/%(feature)s/parameters"/>
-      <transport method="get" path="/personality/%(personality)s/parameters"/>
+      <transport method="get" trigger="feature" path="/feature/feature/%(feature)s/parameters"/>
+      <transport method="get" path="/personality/personality/%(personality)s/parameters"/>
    </command>
 
    <command name="validate_parameter">
