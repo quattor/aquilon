@@ -143,7 +143,7 @@ class TestReconfigure(TestBrokerCommand):
     def testreconfigureunittest00(self):
         command = ["reconfigure", "--hostname", "unittest00.one-nyp.ms.com"]
         (out, err) = self.successtest(command)
-        self.matchoutput(err, "0/1 object template", command)
+        self.matchoutput(err, "1/1 object template", command)
         self.matchclean(err, "removing binding", command)
         self.matchclean(err, "adding binding", command)
         self.matchoutput(err, "sent 1 server notifications", command)

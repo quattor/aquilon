@@ -267,7 +267,9 @@ class PlenaryHostData(Plenary):
         pan_assign(lines, "/system/build", self.dbobj.status.name)
         pan_assign(lines, "/system/advertise_status", self.dbobj.advertise_status)
 
-        eon_id_list = [grn.eon_id for grn in self.dbobj.grns]
+        eon_id_set = set([grn.eon_id for grn in self.dbobj.grns])
+        eon_id_set |= set([grn.eon_id for grn in pers.grns])
+        eon_id_list = list(eon_id_set)
         eon_id_list.sort()
         if eon_id_list:
             pan_assign(lines, "/system/eon_ids", eon_id_list)

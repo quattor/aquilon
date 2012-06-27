@@ -111,6 +111,7 @@ class TestGrns(TestBrokerCommand):
                    "--personality", "compileserver"]
         (out, err) = self.successtest(command)
 
+    def test_405_map_personality(self):
         command = ["map", "grn", "--grn", "grn:/example/cards",
                    "--personality", "compileserver"]
         out = self.successtest(command)
@@ -186,7 +187,22 @@ class TestGrns(TestBrokerCommand):
                    "--generate"]
         out = self.commandtest(command)
         # The GRN is mapped to both the host and the personality; verify it is
-        # not duplicated
+        # not duplicated. Should print out both the host mapped
+        # personality mapped grns
+        self.searchoutput(out, r'"/system/eon_ids" = list\(\s+2,\s+4\s+\);', command)
+
+    def test_510_verify_unittest20(self):
+        command = ["cat", "--hostname", "unittest20.aqd-unittest.ms.com", "--data",
+                   "--generate"]
+        out = self.commandtest(command)
+        # The GRN is mapped to the personality only
+        self.searchoutput(out, r'"/system/eon_ids" = list\(\s+2,\s+4\s+\);', command)
+
+    def test_520_verify_unittest12(self):
+        command = ["cat", "--hostname", "unittest12.aqd-unittest.ms.com", "--data",
+                   "--generate"]
+        out = self.commandtest(command)
+        # The GRN is mapped to the host only
         self.searchoutput(out, r'"/system/eon_ids" = list\(\s+2\s+\);', command)
 
     def test_600_delete_used_byhost(self):
@@ -257,6 +273,28 @@ class TestGrns(TestBrokerCommand):
     def test_650_delete(self):
         command = ["del", "grn", "--grn", "grn:/example"]
         self.noouttest(command)
+
+    def test_700_verify_unittest00(self):
+        command = ["cat", "--hostname", "unittest00.one-nyp.ms.com", "--data",
+                   "--generate"]
+        out = self.commandtest(command)
+        # The GRN was mapped to both the host and the personality;
+        self.searchoutput(out, r'"/system/eon_ids" = list\(\s+2\s+\);', command)
+
+    def test_710_verify_unittest20(self):
+        command = ["cat", "--hostname", "unittest20.aqd-unittest.ms.com", "--data",
+                   "--generate"]
+        out = self.commandtest(command)
+        # The GRN was mapped to the personality only
+        self.searchoutput(out, r'"/system/eon_ids" = list\(\s+2\s+\);', command)
+
+    def test_720_verify_unittest12(self):
+        command = ["cat", "--hostname", "unittest12.aqd-unittest.ms.com", "--data",
+                   "--generate"]
+        out = self.commandtest(command)
+        # The GRN was mapped to the host only
+        self.searchclean(out, r'"/system/eon_ids"', command)
+
 
 
 if __name__ == '__main__':
