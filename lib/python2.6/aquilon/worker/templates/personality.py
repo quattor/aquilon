@@ -90,7 +90,7 @@ class PlenaryPersonality(PlenaryCollection):
             value = None
             for param in parameters:
                 value = param.get_path(param_def.path, compel=False)
-                if not value and param_def.default:
+                if (value is None) and param_def.default:
                     value = validate_value(
                                 "default for path=%s" % param_def.path,
                                 param_def.value_type, param_def.default)
@@ -110,16 +110,25 @@ class PlenaryPersonality(PlenaryCollection):
     @staticmethod
     def get_path_under_top(path, value, ret):
         """ input variable of type xx/yy would be printed as yy only in the
-            particular structure template """
+            particular structure template
+            if path is just xx and points to a dict
+                i.e action = {startup :{ a:b}}
+                then print as action/startup = pancized({a:b}
+            if path is just xx and points to non dict
+                ie xx = yy
+                then print xx = yy
+        """
         pparts = Parameter.path_parts(path)
         if not pparts:
             return
-        pparts.pop(0)
+        top = pparts.pop(0)
         if pparts:
             ret[Parameter.topath(pparts)] = value
-        else:
+        elif isinstance(value, dict):
             for k in value:
                 ret[k] = value[k]
+        else:
+            ret[top] = value
 
     @staticmethod
     def get_parameters_by_feature(dbfeaturelink):
@@ -156,10 +165,6 @@ Plenary.handlers[Personality] = PlenaryPersonality
 
 class FeatureTemplate(TemplateFormatter):
     template_raw = "feature.mako"
-
-class ParameterTemplate(TemplateFormatter):
-    template_raw = "parameter.mako"
-
 
 class PlenaryPersonalityBase(Plenary):
 
