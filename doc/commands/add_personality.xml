@@ -137,6 +137,119 @@
     </refsect1>
 
     <refsect1>
+        <title>Examples</title>
+
+        <example>
+	    <title>add a personality</title>
+	    <programlisting>
+		aq add personality --archetype aquilon --personality foo --grn grn:/ms/ei/aquilon/aqd
+	    </programlisting>
+	    <para>
+	          This adds personality <literal> foo</literal>.
+            </para>
+	    <programlisting>
+                aq show personality --personality foo
+		Host Personality: foo Archetype: aquilon
+		  GRN: grn:/ms/ei/aquilon/aqd
+		  Template: aquilon/personality/foo/config.tpl
+	    </programlisting>
+	    <para>
+                Following are generated templates
+	    </para>
+	    <programlisting>
+	    template personality/foo/config;
+
+	    variable PERSONALITY = "foo";
+	    "/system/eon_ids" = push(1156);
+	    include { if_exists("personality/foo/pre_feature") };
+	    include { if_exists("personality/config") };
+	    include { if_exists("personality/foo/post_feature") };
+	    </programlisting>
+        </example>
+
+        <example>
+	    <title>add a personality with config override option</title>
+	    <programlisting>
+		aq add personality --archetype aquilon --personality foo --grn grn:/ms/ei/aquilon/aqd
+		--config_override
+	    </programlisting>
+	    <para>
+	          This adds personality <literal> foo</literal> with config override option enabled.
+            </para>
+	    <programlisting>
+                aq show personality --personality foo
+		Host Personality: foo Archetype: aquilon
+		GRN: grn:/ms/ei/aquilon/aqd
+		config override: enabled
+		Template: aquilon/personality/foo/config.tpl
+	    </programlisting>
+	    <para>
+                Following are generated templates
+	    </para>
+	    <programlisting>
+	      aq cat --personality foo
+	      template personality/foo/config;
+
+	      variable PERSONALITY = "foo";
+	      "/system/eon_ids" = push(1156);
+	      include { if_exists("personality/foo/pre_feature") };
+	      include { if_exists("personality/config") };
+	      include { "features/personality/config_override/config" };
+	      include { if_exists("personality/foo/post_feature") };
+	    </programlisting>
+        </example>
+
+        <example>
+	    <title>add a personality as clone of other personality</title>
+	    <programlisting>
+		aq add personality --archetype aquilon --personality foo --grn grn:/ms/ei/aquilon/aqd --copy_from unixeng-test
+	    </programlisting>
+	    <para>
+	          This adds personality <literal>foo</literal> and will copy any parameters  and feature bindings defined for
+		  personality unixeng-test to personality foo.
+            </para>
+	    <programlisting>
+                aq show personality --personality unixeng-test
+		Host Personality: unixeng-test Archetype: aquilon
+		GRN: grn:/ms/ei/aquilon/aqd
+		Template: aquilon/personality/unixeng-test/config.tpl
+		  Required Service: reboot
+		  Required Service: monitor
+		  Host Feature: mq/misc [post_personality]
+
+               aq show parameter  --personality unixeng-test
+	       Archetype/Personality : aquilon/unixeng-test
+	       espinfo : {
+	                "function": "crash",
+			"description": "Personality to test new features/os/etc",
+			"systemgrn": "[\"grn:/ms/ei/aquilon/aqd\"]",
+		}
+
+            </programlisting>
+	    <para>
+		After running the above commands parameters, feature bindings will be copied. Required services
+		and other service mappings are not copied.
+	    </para>
+	    <programlisting>
+		aq show personality --personality foo
+		Host Personality: foo Archetype: aquilon
+		  GRN: grn:/ms/ei/aquilon/aqd
+		  Template: aquilon/personality/foo/config.tpl
+		  Host Feature: mq/misc [post_personality]
+
+               aq show parameter  --personality foo
+	        Archetype/Personality : aquilon/foo
+		espinfo : {
+                        "function": "crash",
+			"description": "Personality to test new features/os/etc",
+			"systemgrn": "[\"grn:/ms/ei/aquilon/aqd\"]",
+		}
+
+
+	    </programlisting>
+        </example>
+    </refsect1>
+    <refsect1>
 	<title>See also</title>
 	<para>
 	    <citerefentry><refentrytitle>del_personality</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
