@@ -1,0 +1,149 @@
+<?xml version="1.0"?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V5.0//EN"
+"http://docbook.org/xml/5.0/dtd/docbook.dtd" [
+<!ENTITY aqd_version SYSTEM "../version.txt">
+]>
+<refentry xml:id="add_personality"
+	  xmlns:xi="http://www.w3.org/2001/XInclude">
+    <refmeta>
+        <refentrytitle>add_personality</refentrytitle>
+        <manvolnum>1</manvolnum>
+        <refmiscinfo class="version">&aqd_version;</refmiscinfo>
+        <refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
+    </refmeta>
+
+    <refnamediv>
+        <refname>add personality</refname>
+        <refpurpose>
+	    Add a new personality
+        </refpurpose>
+	<refclass>Aquilon</refclass>
+    </refnamediv>
+
+    <refsynopsisdiv>
+	<cmdsynopsis>
+	    <command>aq add personality</command>
+	    <group>
+		<synopfragmentref linkend="global-options">Global options</synopfragmentref>
+	    </group>
+	    <arg choice="plain"><option>--personality <replaceable>PERSONALITY</replaceable></option></arg>
+	    <arg choice="plain"><option>--archetype <replaceable>ARCHETYPE</replaceable></option></arg>
+	    <arg choice="opt"><option>--grn <replaceable>GRN</replaceable></option></arg>
+	    <arg choice="opt"><option>--eon_id <replaceable>EON_ID</replaceable></option></arg>
+	    <arg choice="opt"><option>--cluster_required <replaceable>CLUSTER_REQUIRED</replaceable></option></arg>
+	    <arg choice="opt"><option>--comments <replaceable>COMMENTS</replaceable></option></arg>
+	    <arg choice="opt"><option>--copy_from <replaceable>COPY_FROM</replaceable></option></arg>
+	    <arg choice="opt"><option>--config_override <replaceable>CONFIG_OVERRIDE</replaceable></option></arg>
+	    <xi:include href="../common/global_options.xml"/>
+	</cmdsynopsis>
+    </refsynopsisdiv>
+
+    <refsect1>
+        <title>Description</title>
+	<para>
+	    The <command>aq add personality</command> Command creates a new personality.
+	    A default template will be created. This default templatie will be used for host plenary
+	    generation only if no personality templates have been defined within the template domain.
+	</para>
+    </refsect1>
+
+    <refsect1>
+        <title>Options</title>
+	<variablelist>
+	    <title>Command-specific options</title>
+	    <varlistentry>
+	        <term>
+		    <option>--personality <replaceable>PERSONALITY</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			The name of the personality to create.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+                    <option>--archetype <replaceable>ARCHETYPE</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+                        The name of the archteype.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--grn <replaceable>GRN</replaceable></option>
+		    <option>--eon_id <replaceable>EON_ID</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			The grn/eon_id of the personality to be created. Grn specification is required and
+			can be provided as grn or eon_id. The grn mapping to personality can be modified
+			using <command>aq map_grn</command> or <command>aq unmap_grn</command>. Multiple
+			grns can be mapped to the personality.  But unmapping of grn will require
+			atleast one grn mapping always to be present for a personality.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--cluster_required <replaceable>CLUSTER_REQUIRED</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+                        This flag specifies if this personality require hosts to be clustered.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--comments <replaceable>COMMENTS</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Short description of the purpose of this personality.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--copy_from <replaceable>COPY_FROM</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+                        This option takes a name of another personality within the archetype.
+			All parameters and feature bindings will be copied over from the
+			copy_from personality to the new personality being created. Other mappings
+			such as required services, service mappings etc are not copied.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--config_override <replaceable>CONFIG_OVERRIDE</replaceable></option>
+		</term>
+		<listitem>
+                    <para>
+		       If this option is specified a special feature 'personality/config_override' will be included
+		       in the aqdb generated personality configuration template. This feature
+		       effectively pulls in config_override.tpl from the personality templates in the template
+		       domain, if it exists.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	</variablelist>
+	<xi:include href="../common/global_options_desc.xml"/>
+    </refsect1>
+
+    <refsect1>
+	<title>See also</title>
+	<para>
+	    <citerefentry><refentrytitle>del_personality</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>upd_personality</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>show_personality</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	</para>
+    </refsect1>
+</refentry>
+
+<!-- vim: set ai sw=4: -->
