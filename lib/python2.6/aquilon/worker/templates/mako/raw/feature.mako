@@ -15,7 +15,7 @@ include {
 "/metadata/features"={
 	if ((value("/hardware/manufacturer") == "${record.model.vendor}") &&
             (value("/hardware/template_name") == "${record.model.name}")){
-		push("${record.feature}");
+		push("${record.feature.cfg_path}/config");
 	} else { SELF; };
 };
 % endif
@@ -24,5 +24,5 @@ variable CURRENT_INTERFACE = "${record.interface_name}";
 % endif
 % if not isinstance(record.feature, HardwareFeature):
 include { "${record.feature.cfg_path}/config" };
-"/metadata/features" = push("${record.feature}");
+"/metadata/features" = push("${record.feature.cfg_path}/config");
 % endif
