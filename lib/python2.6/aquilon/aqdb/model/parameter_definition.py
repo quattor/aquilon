@@ -136,10 +136,6 @@ class ArchetypeParamDef(ParamDefHolder):
     def holder_object(self):
         return self.archetype
 
-#Archetype.param_definitions = relation(ParamDefinition, secondary=param_definition_holder,
-#                                  primaryjoin=Archetype.id==ArchetypeParamDef.archetype_id,
-#                                  secondaryjoin=ParamDefHolder.id==ParamDefinition.holder_id,
-#                                  viewonly=True)
 
 class FeatureParamDef(ParamDefHolder):
     """ valid parameter paths which can be associated with this feature """
@@ -163,8 +159,3 @@ class FeatureParamDef(ParamDefHolder):
     @property
     def holder_object(self):
         return self.feature
-
-#Feature.param_definitions = relation(ParamDefinition, secondary=param_definition_holder,
-#                                  primaryjoin=Feature.id==FeatureParamDef.feature_id,
-#                                  secondaryjoin=ParamDefHolder.id==ParamDefinition.holder_id,
-#                                  viewonly=True)

@@ -29,7 +29,7 @@
 """ Configuration  Parameter data """
 from datetime import datetime
 from sqlalchemy import (Column, Integer, DateTime, Sequence, String,
-                        Boolean, ForeignKey)
+                        Boolean, ForeignKey, UniqueConstraint)
 from sqlalchemy.orm import (relation, backref, deferred)
 from sqlalchemy.sql import and_
 from aquilon.aqdb.column_types import Enum, JSONEncodedDict, MutationDict
@@ -70,7 +70,7 @@ class Parameter(Base):
 
     @staticmethod
     def path_parts(path):
-        """ converts parts of a specified path e.g path:/system/foo returns ['system','foo] """
+        """ converts parts of a specified path e.g path:/system/foo returns ['system','foo'] """
         pparts = path.split(PATH_SEP)
 
         # ignore the leading slash
@@ -80,30 +80,33 @@ class Parameter(Base):
 
     @staticmethod
     def topath(pparts):
-        """ converts dict keys to a path e.g [system][key] returns /system/key """
+        """ converts dict keys to a path e.g [system][key] returns system/key """
         return PATH_SEP.join(pparts)
 
-    def get_path(self, path, compel=True):
+    def get_path(self, path, compel=True, preclude=False):
         """ get value of paramter specified by path made of dict keys """
 
-        ret = None
+        ref = self.value
         try:
-            kstr = Parameter.tokey(path)
-            ret = eval("self.value%s" % kstr)
+            parts = Parameter.path_parts(path)
+            for part in parts:
+                ref = ref[part]
+            if ref is not None:
+                if preclude:
+                    raise ArgumentError("Parameter with path=%s already exists" % path)
+                return ref
         except KeyError:
             if compel:
                 raise NotFoundException(
                       "No parameter of path=%s defined" % path)
             else:
                 pass
-        return ret
+        return None
 
-    def set_path(self,  path, value, compel=False):
+    def set_path(self,  path, value, compel=False, preclude=False):
         """ add/or update a new parameter key, value in dict specified by path made of dict keys"""
 
-        retval = self.get_path(path, compel)
-        if not compel and retval:
-            raise ArgumentError("Parameter with path=%s already exists" % path)
+        retval = self.get_path(path, compel, preclude)
 
         pparts = Parameter.path_parts(path)
         lastnode = pparts.pop()
@@ -118,7 +121,7 @@ class Parameter(Base):
                 dref[ppart] = {}
             dref = dref[ppart]
 
-        Parameter.set_item(dref, lastnode, value)
+        dref[lastnode] = value
 
         ## coerce mutation of parameter since sqlalchemy
         ## cannot recognize parameter change
@@ -163,12 +166,6 @@ class Parameter(Base):
             self.value.changed() # pylint: disable=C0103, E1101
         except KeyError:
             raise NotFoundException("No parameter of path=%s defined" % path)
-
-    @staticmethod
-    def set_item(ref, node, value):
-        """ utility method to set value by specified type """
-
-        ref[node] = value
 
     @staticmethod
     def flatten(data, key="", path="", flattened=None):
@@ -233,6 +230,7 @@ class PersonalityParameter(ParameterHolder):
                     backref=backref('paramholder',
                                     cascade='all, delete-orphan',
                                     uselist=False))
+    UniqueConstraint('personality_id', "param_holder_persona_uk")
     @property
     def holder_name(self):
         return "%s/%s" % (self.personality.archetype.name,  # pylint: disable=C0103, E1101
@@ -241,15 +239,6 @@ class PersonalityParameter(ParameterHolder):
     @property
     def holder_object(self):
         return self.personality
-
-
-
-#Personality.parameters = relation(Parameter, secondary=paramholder,
-#                                  primaryjoin=Personality.id==PersonalityParameter.personality_id,
-#                                  secondaryjoin=ParameterHolder.id==Parameter.holder_id,
-#                                  viewonly=True)
-
-
 
 class FeatureLinkParameter(ParameterHolder):
     """ Parameters associated with features """
@@ -266,27 +255,22 @@ class FeatureLinkParameter(ParameterHolder):
                     backref=backref('paramholder',
                                     cascade='all, delete-orphan',
                                     uselist=False))
+
+    UniqueConstraint('featurelink_id', "param_holder_flink_uk")
+
     @property
     def holder_name(self):
-        ret = None
+        ret = []
         if (self.featurelink.personality):
-            ret = "%s/%s" % (self.featurelink.personality.archetype.name, # pylint: disable=C0103, E1101
-                             self.featurelink.personality.name)           # pylint: disable=C0103, E1101
+            ret.extend([self.featurelink.personality.archetype.name, # pylint: disable=C0103, E1101
+                       self.featurelink.personality.name])           # pylint: disable=C0103, E1101
         elif (self.featurelink.archetype):
-            ret = "%s" % self.featurelink.archetype                       # pylint: disable=C0103, E1101
+            ret.append(self.featurelink.archetype.name)                  # pylint: disable=C0103, E1101
         
-        if ret:
-            ret = "%s/%s" % (ret, self.featurelink.feature)               # pylint: disable=C0103, E1101
-        else:
-            ret = self.featurelink.feature                                # pylint: disable=C0103, E1101
+        ret.append(self.featurelink.feature.name)                        # pylint: disable=C0103, E1101
         
-        return ret
+        return "/".join(ret)
 
     @property
     def holder_object(self):
         return self.featurelink
-
-#FeatureLink.parameters = relation(Parameter, secondary=paramholder,
-#                                  primaryjoin=FeatureLink.id==FeatureLinkParameter.featurelink_id,
-#                                  secondaryjoin=ParameterHolder.id==Parameter.holder_id,
-#                                  viewonly=True)
