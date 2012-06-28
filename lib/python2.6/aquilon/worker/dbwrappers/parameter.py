@@ -91,7 +91,7 @@ def get_parameter_holder(session, archetype=None, personality=None,
     return db_param_holder
 
 
-def set_parameter(session, param_holder, path, value, compel=False):
+def set_parameter(session, param_holder, path, value, compel=False, preclude=False):
     """ handles add parameter as well as update parameter
     """
 
@@ -106,7 +106,7 @@ def set_parameter(session, param_holder, path, value, compel=False):
         dbparameter = Parameter(holder=param_holder, value={})
 
     retval, param_def = validate_parameter(session, path, value, param_holder)
-    dbparameter.set_path(path, retval, compel)
+    dbparameter.set_path(path, retval, compel, preclude)
     dbparameter.param_def = param_def
     return dbparameter
 

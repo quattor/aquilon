@@ -42,7 +42,8 @@ class CommandAddParameter(BrokerCommand):
 
     def process_parameter(self, session, param_holder, path, value, comments):
 
-        dbparameter = set_parameter(session, param_holder, path, value)
+        dbparameter = set_parameter(session, param_holder, path, value,
+                                    compel=False, preclude=True)
         if comments:
             dbparameter.comments = comments
 
@@ -83,30 +84,24 @@ class CommandAddParameter(BrokerCommand):
     def write_plenaries(self, logger, personalities):
         idx = 0
         successful = []
-        failed = []
 
         cnt = len(personalities)
-        with CompileKey(logger=logger):
-            for personality in personalities:
-                idx += 1
-                if idx % 1000 == 0:  # pragma: no cover
-                    logger.client_info("Processing personality %d of %d..." %
+        try:
+            with CompileKey(logger=logger):
+                for personality in personalities:
+                    idx += 1
+                    if idx % 1000 == 0:  # pragma: no cover
+                        logger.client_info("Processing personality %d of %d..." %
                                        (idx, cnt))
 
-                if not personality.archetype.is_compileable:  # pragma: no cover
-                    continue
+                    if not personality.archetype.is_compileable:  # pragma: no cover
+                        continue
 
-                try:
                     plenary_personality = PlenaryPersonality(personality)
                     plenary_personality.write(locked=True)
                     successful.append(plenary_personality)
-                except IncompleteError:
-                    pass
-                except Exception, err:  # pragma: no cover
-                    failed.append("{0} failed: {1}".format(personality, err))
-
-
-            if failed:  # pragma: no cover
-                for plenary in successful:
+        except:
+            logger.client_info("Restoring plenary templates.")
+            for plenary in successful:
                     plenary.restore_stash()
-                raise PartialError([], failed)
+            raise
