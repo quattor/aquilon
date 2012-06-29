@@ -30,10 +30,16 @@
 	    <arg choice="plain"><option>--archetype <replaceable>ARCHETYPE</replaceable></option></arg>
 	    <arg choice="opt"><option>--grn <replaceable>GRN</replaceable></option></arg>
 	    <arg choice="opt"><option>--eon_id <replaceable>EON_ID</replaceable></option></arg>
-	    <arg choice="opt"><option>--cluster_required <replaceable>CLUSTER_REQUIRED</replaceable></option></arg>
+	    <group choice="opt">
+	          <arg choice="plain"><option>--cluster_required</option></arg>
+	          <arg choice="plain"><option>--nocluster_required</option></arg>
+	    </group>
 	    <arg choice="opt"><option>--comments <replaceable>COMMENTS</replaceable></option></arg>
 	    <arg choice="opt"><option>--copy_from <replaceable>COPY_FROM</replaceable></option></arg>
-	    <arg choice="opt"><option>--config_override <replaceable>CONFIG_OVERRIDE</replaceable></option></arg>
+	    <group choice="opt">
+	          <arg choice="plain"><option>--config_override</option></arg>
+	          <arg choice="plain"><option>--noconfig_override</option></arg>
+	    </group>
 	    <xi:include href="../common/global_options.xml"/>
 	</cmdsynopsis>
     </refsynopsisdiv>
@@ -88,7 +94,7 @@
 	    </varlistentry>
 	    <varlistentry>
 	        <term>
-		    <option>--cluster_required <replaceable>CLUSTER_REQUIRED</replaceable></option>
+		    <option>--cluster_required</option>, <option>--nocluster_required</option>
 		</term>
 		<listitem>
 		    <para>
@@ -121,11 +127,11 @@
 	    </varlistentry>
 	    <varlistentry>
 	        <term>
-		    <option>--config_override <replaceable>CONFIG_OVERRIDE</replaceable></option>
+		    <option>--config_override</option>, <option>--noconfig_override</option>
 		</term>
 		<listitem>
                     <para>
-		       If this option is specified a special feature 'personality/config_override' will be included
+		       If this flag is specified a special feature 'personality/config_override' will be included
 		       in the aqdb generated personality configuration template. This feature
 		       effectively pulls in config_override.tpl from the personality templates in the template
 		       domain, if it exists.
@@ -142,7 +148,7 @@
         <example>
 	    <title>add a personality</title>
 	    <programlisting>
-		aq add personality --archetype aquilon --personality foo --grn grn:/ms/ei/aquilon/aqd
+		aq add personality --archetype aquilon --personality foo --grn grn:/some/grn
 	    </programlisting>
 	    <para>
 	          This adds personality <literal> foo</literal>.
@@ -150,7 +156,7 @@
 	    <programlisting>
                 aq show personality --personality foo
 		Host Personality: foo Archetype: aquilon
-		  GRN: grn:/ms/ei/aquilon/aqd
+		  GRN: grn:/some/grn
 		  Template: aquilon/personality/foo/config.tpl
 	    </programlisting>
 	    <para>
@@ -160,7 +166,7 @@
 	    template personality/foo/config;
 
 	    variable PERSONALITY = "foo";
-	    "/system/eon_ids" = push(1156);
+	    "/system/eon_ids" = push(1234);
 	    include { if_exists("personality/foo/pre_feature") };
 	    include { if_exists("personality/config") };
 	    include { if_exists("personality/foo/post_feature") };
@@ -170,7 +176,7 @@
         <example>
 	    <title>add a personality with config override option</title>
 	    <programlisting>
-		aq add personality --archetype aquilon --personality foo --grn grn:/ms/ei/aquilon/aqd
+		aq add personality --archetype aquilon --personality foo --grn grn:/some/grn
 		--config_override
 	    </programlisting>
 	    <para>
@@ -179,7 +185,7 @@
 	    <programlisting>
                 aq show personality --personality foo
 		Host Personality: foo Archetype: aquilon
-		GRN: grn:/ms/ei/aquilon/aqd
+		GRN: grn:/some/grn
 		config override: enabled
 		Template: aquilon/personality/foo/config.tpl
 	    </programlisting>
@@ -191,7 +197,7 @@
 	      template personality/foo/config;
 
 	      variable PERSONALITY = "foo";
-	      "/system/eon_ids" = push(1156);
+	      "/system/eon_ids" = push(1234);
 	      include { if_exists("personality/foo/pre_feature") };
 	      include { if_exists("personality/config") };
 	      include { "features/personality/config_override/config" };
@@ -202,7 +208,7 @@
         <example>
 	    <title>add a personality as clone of other personality</title>
 	    <programlisting>
-		aq add personality --archetype aquilon --personality foo --grn grn:/ms/ei/aquilon/aqd --copy_from unixeng-test
+		aq add personality --archetype aquilon --personality foo --grn grn:/some/grn --copy_from unixeng-test
 	    </programlisting>
 	    <para>
 	          This adds personality <literal>foo</literal> and will copy any parameters  and feature bindings defined for
@@ -211,18 +217,18 @@
 	    <programlisting>
                 aq show personality --personality unixeng-test
 		Host Personality: unixeng-test Archetype: aquilon
-		GRN: grn:/ms/ei/aquilon/aqd
+		GRN: grn:/some/grn
 		Template: aquilon/personality/unixeng-test/config.tpl
-		  Required Service: reboot
-		  Required Service: monitor
-		  Host Feature: mq/misc [post_personality]
+		  Required Service: service1
+		  Required Service: service2
+		  Host Feature: somefeat1 [post_personality]
 
                aq show parameter  --personality unixeng-test
 	       Archetype/Personality : aquilon/unixeng-test
 	       espinfo : {
 	                "function": "crash",
 			"description": "Personality to test new features/os/etc",
-			"systemgrn": "[\"grn:/ms/ei/aquilon/aqd\"]",
+			"systemgrn": "[\"grn:/some/grn\"]",
 		}
 
             </programlisting>
@@ -233,16 +239,16 @@
 	    <programlisting>
 		aq show personality --personality foo
 		Host Personality: foo Archetype: aquilon
-		  GRN: grn:/ms/ei/aquilon/aqd
+		  GRN: grn:/some/grn
 		  Template: aquilon/personality/foo/config.tpl
-		  Host Feature: mq/misc [post_personality]
+		  Host Feature: somefeat1 [post_personality]
 
                aq show parameter  --personality foo
 	        Archetype/Personality : aquilon/foo
 		espinfo : {
                         "function": "crash",
 			"description": "Personality to test new features/os/etc",
-			"systemgrn": "[\"grn:/ms/ei/aquilon/aqd\"]",
+			"systemgrn": "[\"grn:/some/grn\"]",
 		}
 
 
@@ -253,7 +259,7 @@
 	<title>See also</title>
 	<para>
 	    <citerefentry><refentrytitle>del_personality</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-	    <citerefentry><refentrytitle>upd_personality</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>update_personality</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
 	    <citerefentry><refentrytitle>show_personality</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
 	</para>
     </refsect1>

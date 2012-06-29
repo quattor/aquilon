@@ -3,17 +3,17 @@
 "http://docbook.org/xml/5.0/dtd/docbook.dtd" [
 <!ENTITY aqd_version SYSTEM "../version.txt">
 ]>
-<refentry xml:id="upd_personality"
+<refentry xml:id="update_personality"
 	  xmlns:xi="http://www.w3.org/2001/XInclude">
     <refmeta>
-        <refentrytitle>upd_personality</refentrytitle>
+        <refentrytitle>update_personality</refentrytitle>
         <manvolnum>1</manvolnum>
         <refmiscinfo class="version">&aqd_version;</refmiscinfo>
         <refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
     </refmeta>
 
     <refnamediv>
-        <refname>upd personality</refname>
+        <refname>update personality</refname>
         <refpurpose>
 	    update certain personality options
         </refpurpose>
@@ -22,14 +22,21 @@
 
     <refsynopsisdiv>
 	<cmdsynopsis>
-	    <command>aq upd personality</command>
+	    <command>aq update personality</command>
 	    <group>
 		<synopfragmentref linkend="global-options">Global options</synopfragmentref>
 	    </group>
 	    <arg choice="plain"><option>--personality <replaceable>PERSONALITY</replaceable></option></arg>
 	    <arg choice="plain"><option>--archetype <replaceable>ARCHETYPE</replaceable></option></arg>
 	    <arg choice="opt"><option>--cluster_required <replaceable>CLUSTER_REQUIRED</replaceable></option></arg>
-	    <arg choice="opt"><option>--config_override <replaceable>CONFIG_OVERRIDE</replaceable></option></arg>
+            <group choice="opt">
+	    	<arg choice="plain"><option>--cluster_required</option></arg>
+		<arg choice="plain"><option>--nocluster_required</option></arg>
+	    </group>
+            <group choice="opt">
+	    	<arg choice="plain"><option>--config_override</option></arg>
+		<arg choice="plain"><option>--noconfig_override</option></arg>
+	    </group>
 	    <arg choice="opt"><option>--vmhost_capacity_function <replaceable>VMHOST_CAPACITY_FUNCTION</replaceable></option></arg>
 	    <arg choice="opt"><option>--vmhost_overcommit_memory <replaceable>VMHOST_iOVERCOMMIT_MEMORY</replaceable></option></arg>
 	    <xi:include href="../common/global_options.xml"/>
@@ -69,7 +76,7 @@
 	    </varlistentry>
 	    <varlistentry>
 	        <term>
-		    <option>--cluster_required <replaceable>CLUSTER_REQUIRED</replaceable></option>
+		    <option>--cluster_required</option>, <option>--nocluster_required</option>
 		</term>
 		<listitem>
 		    <para>
@@ -79,11 +86,11 @@
 	    </varlistentry>
 	    <varlistentry>
 	        <term>
-		    <option>--config_override <replaceable>CONFIG_OVERRIDE</replaceable></option>
+		    <option>--config_override</option>, <option>--noconfig_override</option>
 		</term>
 		<listitem>
 		    <para>
-			If this option is specified a special feature 'personality/config_override' will
+			If this flag is specified a special feature 'personality/config_override' will
 			be included in the aqdb generated personality configuration template. This feature
 			effectively pulls in config_override.tpl from the personality templates in the
 			template domain, if it exists.
