@@ -1,46 +1,53 @@
 /* create tables */
 CREATE TABLE param_def_holder (
-        id INTEGER NOT NULL,
-        type VARCHAR(64) NOT NULL,
-        creation_date DATE NOT NULL,
+        id integer CONSTRAINT "PARAM_DEF_HOLDER_ID_NN" NOT NULL,
+        type VARCHAR(64) CONSTRAINT "PARAM_DEF_HOLDER_TYPE_NN" NOT NULL,
+        creation_date DATE CONSTRAINT "PARAM_DEF_HOLDER_CR_DATE_NN" NOT NULL,
         archetype_id INTEGER,
         feature_id INTEGER,
-        CONSTRAINT param_def_holder_pk PRIMARY KEY (id),
-        CONSTRAINT param_def_holder_archetype_fk FOREIGN KEY(archetype_id) REFERENCES archetype (id) ON DELETE CASCADE,
-        CONSTRAINT param_def_holder_feature_fk FOREIGN KEY(feature_id) REFERENCES feature (id) ON DELETE CASCADE
+	CONSTRAINT "PARAM_DEF_HOLDER_FEATURE_UK" UNIQUE (feature_id),
+	CONSTRAINT "PARAM_DEF_HOLDER_ARCHETYPE_UK" UNIQUE (archetype_id),
+	CONSTRAINT "PARAM_DEF_HOLDER_ARCHETYPE_FK" FOREIGN KEY (archetype_id) REFERENCES archetype (id) ON DELETE CASCADE,
+        CONSTRAINT "PARAM_DEF_HOLDER_FEATURE_FK" FOREIGN KEY (feature_id) REFERENCES feature (id) ON DELETE CASCADE,
+        CONSTRAINT "PARAM_DEF_HOLDER_PK" PRIMARY KEY (id)
 );
+
 CREATE TABLE param_definition (
-        id INTEGER NOT NULL,
-        path VARCHAR(255) NOT NULL,
+        id integer CONSTRAINT "PARAM_DEFINITION_ID_NN" NOT NULL,
+        path VARCHAR(255) CONSTRAINT "PARAM_DEFINITION_PATH_NN" NOT NULL,
         template VARCHAR(32),
-        required INTEGER NOT NULL,
-        value_type VARCHAR(16) NOT NULL,
+        required integer CONSTRAINT "PARAM_DEFINITION_REQUIRED_NN" NOT NULL,
+        value_type VARCHAR(16) CONSTRAINT "PARAM_DEFINITION_VALUE_TYPE_NN" NOT NULL,
         "default" CLOB,
         description VARCHAR(255),
         holder_id INTEGER,
-        creation_date DATE NOT NULL,
-        CONSTRAINT param_definition_pk PRIMARY KEY (id),
-        CONSTRAINT param_definition_paramdef_ck CHECK (required IN (0, 1)),
-        CONSTRAINT param_definition_holder_fk FOREIGN KEY(holder_id) REFERENCES param_def_holder (id) ON DELETE CASCADE
+        creation_date DATE CONSTRAINT "PARAM_DEFINITION_CR_DATE_NN" NOT NULL,
+	CONSTRAINT "PARAM_DEFINITION_HOLDER_FK" FOREIGN KEY (holder_id) REFERENCES param_def_holder (id) ON DELETE CASCADE,
+        CONSTRAINT "PARAM_DEFINITION_PK" PRIMARY KEY (id),
+        CONSTRAINT "PARAM_DEFINITION_PARAMDEF_CK" CHECK (required IN (0, 1))
 );
+
 CREATE TABLE param_holder (
-        id INTEGER NOT NULL,
-        creation_date DATE NOT NULL,
-        holder_type VARCHAR(64) NOT NULL,
+        id integer CONSTRAINT "PARAM_HOLDER_ID_NN" NOT NULL,
+        creation_date DATE CONSTRAINT "PARAM_HOLDER_CR_DATE_NN" NOT NULL,
+        holder_type VARCHAR(64) CONSTRAINT "PARAM_HOLDER_HOLDER_TYPE_NN" NOT NULL,
         personality_id INTEGER,
         featurelink_id INTEGER,
-        CONSTRAINT param_holder_pk PRIMARY KEY (id),
-        CONSTRAINT param_holder_persona_fk FOREIGN KEY(personality_id) REFERENCES personality (id) ON DELETE CASCADE,
-        CONSTRAINT param_holder_featurelink_fk FOREIGN KEY(featurelink_id) REFERENCES feature_link (id) ON DELETE CASCADE
+	CONSTRAINT "PARAM_HOLDER_FLINK_UK" UNIQUE (featurelink_id),
+	CONSTRAINT "PARAM_HOLDER_PERSONA_UK" UNIQUE (personality_id),
+	CONSTRAINT "PARAM_HOLDER_FEATURELINK_FK" FOREIGN KEY (featurelink_id) REFERENCES feature_link (id) ON DELETE CASCADE,
+        CONSTRAINT "PARAM_HOLDER_PERSONA_FK" FOREIGN KEY (personality_id) REFERENCES personality (id) ON DELETE CASCADE,
+        CONSTRAINT "PARAM_HOLDER_PK" PRIMARY KEY (id)
 );
+
 CREATE TABLE parameter (
-        id INTEGER NOT NULL,
+        id integer CONSTRAINT "PARAMETER_ID_NN" NOT NULL,
         value CLOB,
-        creation_date DATE NOT NULL,
+        creation_date DATE CONSTRAINT "PARAMETER_CR_DATE_NN" NOT NULL,
         comments VARCHAR(255),
         holder_id INTEGER,
-        CONSTRAINT parameter_pk PRIMARY KEY (id),
-        CONSTRAINT parameter_paramholder_fk FOREIGN KEY(holder_id) REFERENCES param_holder (id) ON DELETE CASCADE
+	CONSTRAINT "PARAMETER_PARAMHOLDER_FK" FOREIGN KEY (holder_id) REFERENCES param_holder (id) ON DELETE CASCADE,
+        CONSTRAINT "PARAMETER_PK" PRIMARY KEY (id)
 );
 
 CREATE SEQUENCE PARAMETER_SEQ;
