@@ -1411,7 +1411,7 @@
       Merge multiple networks.  The merged network will inherit its parameters (like location)
       from the network specifyed by --ip.  Note that --ip does not need to specify the
       first network to be merged: e.g. if you want to merge 4 existing networks, then --ip may
-      point to the 2nd one; the IP address of the merged network will be calculated using 
+      point to the 2nd one; the IP address of the merged network will be calculated using
       --prefixlen.
       <optgroup name="merge_network_mandatory" mandatory="True" fields="all">
          <option name="ip" type="ipv4">Network address</option>
@@ -1659,7 +1659,7 @@
       </optgroup>
       <transport method="put" path="/nas_disk_share/instance/%(share)s" />
    </command>
-   
+
    <command name="show_service">
       Show the configuration of a service. All instances of the service will
       be listed, the number of clients bound to that service and any service mappings.
@@ -2272,13 +2272,20 @@
       that template generated on-demand in this way will be incomplete
       (especially if it cannot be compiled) and is purely provided for debugging.
       <optgroup name="cat_selector" mandatory="True" fields="any">
-         <option name="machine" type="string" conflicts="hostname cluster service instance default nasinfo city switch">Name of the machine</option>
-         <option name="hostname" type="string" conflicts="machine cluster service instance default nasinfo city switch">Name of the host</option>
-         <option name="cluster" type="string" conflicts="hostname machine service instance default nasinfo city switch">Name of the cluster</option>
-         <option name="service" type="string" conflicts="hostname machine cluster nasinfo city switch">Name of the service</option>
-         <option name="nasinfo" type="string" conflicts="hostname machine cluster service instance default city switch">Show the default client config for the service/instance</option>
-         <option name="city" type="string" conflicts="hostname machine cluster service instance default nasinfo switch">Name of the city</option>
-         <option name="switch" type="string" conflicts="hostname machine cluster service instance default nasinfo">Name of the switch</option>
+         <option name="machine" type="string" conflicts="hostname cluster service instance default nasinfo city switch personality">Name of the machine</option>
+         <option name="hostname" type="string" conflicts="machine cluster service instance default nasinfo city switch personality">Name of the host</option>
+         <option name="cluster" type="string" conflicts="hostname machine service instance default nasinfo city switch personality">Name of the cluster</option>
+         <option name="service" type="string" conflicts="hostname machine cluster nasinfo city switch personality">Name of the service</option>
+         <option name="nasinfo" type="string" conflicts="hostname machine cluster service instance default city switch personality">Show the default client config for the service/instance</option>
+         <option name="city" type="string" conflicts="hostname machine cluster service instance default nasinfo switch personality">Name of the city</option>
+         <option name="switch" type="string" conflicts="hostname machine cluster service instance default nasinfo personality">Name of the switch</option>
+	 <option name="personality" conflicts="hostname cluster service instance default nasinfo city switch machine" type="string">Name of personality</option>
+	 <optgroup name="persopts" fields="any">
+		<option name="archetype" conflicts="hostname cluster service instance default nasinfo city switch machine" type="string">Archetype</option>
+		<option name="pre_feature" conflicts="hostname cluster service instance default nasinfo city switch machine post_feature param_tmpl" type="flag">Pre feature template</option>
+		<option name="post_feature" conflicts="hostname cluster service instance default nasinfo city switch machine pre_feature param_tmpl" type="flag">Post feature template</option>
+		<option name="param_tmpl" conflicts="hostname cluster service instance default nasinfo city switch machine post_feature pre_feature" type="string">param templates</option>
+         </optgroup>
       </optgroup>
       <optgroup name="cat_options" mandatory="False" fields="any">
          <option name="default" type="flag" conflicts="hostname machine cluster nasinfo city switch">Show the default client config for the service/instance</option>
@@ -2307,6 +2314,8 @@
       <transport trigger="nasinfo" method="get" path="nasinfo/%(nasinfo)s/plenary" />
       <transport trigger="city" method="get" path="city/%(city)s/plenary" />
       <transport trigger="switch" method="get" path="switch/%(switch)s/plenary" />
+      <transport trigger="resource" method="get" path="resource/plenary/%(resource)s" />
+      <transport trigger="personality" method="get"  path="personality/personality/%(personality)s/plenary" />
    </command>
 
    <command name="sync">
@@ -2826,12 +2835,18 @@
       <optgroup name="mandatory_options" mandatory="True" fields="all">
          <option name="personality" type="string">The name to create</option>
          <option name="archetype" type="string">Which archetype to use</option>
+	 <optgroup name="grn_opts" mandatory="true" fields="any">
+            <option name="grn" type="string" conflicts="eon_id">GRN as string</option>
+            <option name="eon_id" type="int" conflicts="grn">Numeric EON ID</option>
+	 </optgroup>
       </optgroup>
       <optgroup name="add_personality_optional" mandatory="False">
          <option name="cluster_required" type="boolean" default='False'>Does this personality require hosts to be clustered?</option>
          <option name="comments" type="string">Comments</option>
+	 <option name="copy_from" type="string">Personality to copy parameters and features from</option>
+	 <option name="config_override" type="boolean" default='False'>Include external personality config override template</option>
       </optgroup>
-      <transport method="put" path="personality/%(archetype)s/%(personality)s" />
+      <transport method="put" path="personality/archetype/%(archetype)s/personality/%(personality)s" />
   </command>
 
   <command name="add_vendor">
@@ -2904,7 +2919,7 @@
          <option name="personality" type="string">The name to delete</option>
          <option name="archetype" type="string">Which archetype to use</option>
       </optgroup>
-      <transport method="delete" path="personality/%(archetype)s/%(personality)s" />
+      <transport method="delete" path="personality/archetype/%(archetype)s/personality/%(personality)s" />
   </command>
 
   <command name="update_personality">
@@ -2917,8 +2932,9 @@
 	 <option name="vmhost_capacity_function" type="string">Function for calculating VM host capacity units</option>
 	 <option name="vmhost_overcommit_memory" type="float">Memory overcommit factor for VM hosts</option>
          <option name="cluster_required" type="boolean" default='False'>Does this personality require hosts to be clustered?</option>
+	 <option name="config_override" type="boolean">Include external personality config override template</option>
       </optgroup>
-      <transport method="post" path="personality/%(archetype)s/%(personality)s" />
+      <transport method="post" path="personality/archetype/%(archetype)s/personality/%(personality)s" />
   </command>
 
   <command name="show_personality">
@@ -4852,7 +4868,7 @@
    <command name="bind_feature">
       Bind a feature to a given object.
       <p/>
-      Affected host plenaries will be refreshed unless the --noflush option has been specified.
+      Affected personality plenaries will be refreshed.
       The hosts however are not compiled; that has to be done manually.
       <p/>
       Changing feature links for a whole archetype require --justification and a valid TCM.
@@ -4869,7 +4885,6 @@
       <optgroup name="bind_feature_optional" mandatory="False" fields="any">
          <option name="vendor" type="string">Vendor name, if the model name is not unique</option>
          <option name="justification" type="string">Extra authorization tokens (e.g. TCM number) to validate the request</option>
-         <option name="flush" type="boolean" default="True">Enable flushing the affected host plenaries</option>
       </optgroup>
 
       <transport method="post" path="commands/bind_feature"/>
@@ -4900,5 +4915,152 @@
 
       <transport method="post" path="commands/unbind_feature"/>
    </command>
+
+   <command name="show_parameter">
+      Display all parameters configured on a personality
+      <p/>
+      <optgroup name="show_parameter_options" mandatory="True" fields="any">
+         <optgroup name="by_personality" mandatory="True" fields="any">
+            <option name="personality" type="string">Name of  personality</option>
+            <option name="feature" type="string">Feature</option>
+         </optgroup>
+      </optgroup>
+       <optgroup name="by_other_opts" mandatory="False" fields="any">
+             <option name="archetype" type="string">Archetype</option>
+       </optgroup>
+      <transport method="get" trigger="feature" path="feature/feature/%(feature)s/parameters"/>
+      <transport method="get" path="personality/personality/%(personality)s/parameters"/>
+   </command>
+
+   <command name="validate_parameter">
+      Display all parameters configured on a personality
+      <p/>
+      <optgroup name="validate_parameter_options" mandatory="True" fields="any">
+         <optgroup name="target" mandatory="True" fields="any">
+            <option name="archetype" type="string">Archetype</option>
+            <option name="personality" type="string">Name of personality</option>
+	    <option name="feature" type="string">Feature</option>
+         </optgroup>
+      </optgroup>
+      <transport method="put" path="validate/parameter/"/>
+   </command>
+
+
+   <command name="add_parameter">
+      add a parameter to a given object.
+      <optgroup name="add_parameter_opts" mandatory="True" fields="all">
+         <optgroup name="target" mandatory="True" fields="any">
+            <option name="archetype" type="string">Archetype</option>
+            <option name="personality" type="string">Name of personality</option>
+	    <option name="feature" type="string">Feature</option>
+         </optgroup>
+         <option name="path" type="string">Path of the parameter</option>
+      </optgroup>
+      <optgroup name="add_parameter_optional" mandatory="False" fields="any">
+         <option name="value" type="string">Value for the parameter, type depending on the parameter definition</option>
+         <option name="comments" type="string">Comments</option>
+      </optgroup>
+      <transport method="put" path="commands/add_parameter"/>
+   </command>
+
+   <command name="update_parameter">
+      update config parameter to a given object.
+      <optgroup name="upd_parameter_opts" mandatory="True" fields="all">
+         <optgroup name="target" mandatory="True" fields="any">
+            <option name="archetype" type="string">Archetype</option>
+            <option name="personality" type="string">Name of personality</option>
+	    <option name="feature" type="string">Feature</option>
+         </optgroup>
+         <option name="path" type="string">Path of the parameter</option>
+         <option name="value" type="string">Value for the parameter, type depending on the parameter definition</option>
+      </optgroup>
+      <optgroup name="upd_parameter_optional" mandatory="False" fields="any">
+         <option name="comments" type="string">Comments</option>
+      </optgroup>
+      <transport method="put" path="commands/upd_parameter"/>
+   </command>
+
+   <command name="del_parameter">
+      Delete config parameter of a given object.
+      <optgroup name="del_parameter_opts" mandatory="True" fields="all">
+         <optgroup name="target" mandatory="True" fields="any">
+            <option name="archetype" type="string">Archetype</option>
+            <option name="personality" type="string">Name of personality</option>
+	    <option name="feature" type="string">Feature</option>
+         </optgroup>
+         <option name="path" type="string">Path of the parameter</option>
+      </optgroup>
+      <transport method="put" path="commands/del_parameter"/>
+   </command>
+
+   <command name="show_diff">
+      Compare config parameter for two object.
+      <optgroup name="compare_param_opts" mandatory="True" fields="all">
+         <option name="archetype" type="string">Archetype</option>
+         <optgroup name="target" mandatory="True" fields="all">
+            <option name="personality" type="string">Name of personality</option>
+            <option name="other" type="string">Name of personality</option>
+         </optgroup>
+      </optgroup>
+      <optgroup name="compare_param_optional" mandatory="False" fields="any">
+         <option name="other_archetype" type="string">Archetype</option>
+      </optgroup>
+      <transport method="get" path="commands/show_diff"/>
+   </command>
+
+   <command name="add_parameter_definition">
+      add parameter definition for a parameter.
+      <optgroup name="target" mandatory="True" fields="any">
+         <option name="archetype" type="string" conflicts="feature feature_type">Archetype</option>
+         <option name="feature" type="string" conflicts="archetype template">Feature</option>
+      </optgroup>
+      <optgroup name="target_opts" mandatory="True" fields="any">
+         <option name="template" type="string" conflicts="feature">Name of structure template this parameter gets included in</option>
+         <option name="feature_type" type="string" conflicts="archetype">Type of the feature: host, hardware or interface</option>
+      </optgroup>
+      <optgroup name="add_parameter_validator_opts" mandatory="True" fields="all">
+         <option name="path" type="string">Path of the parameter can contain regexp</option>
+         <option name="value_type" type="string" default="string">Type of value for the parameter[string|numeric|list|json]</option>
+      </optgroup>
+      <optgroup name="add_parameter_validator_optional" mandatory="False" fields="any">
+         <option name="required" type="boolean" default="False">Is this parameter required for object compilation </option>
+         <option name="default" type="string">Default value </option>
+         <option name="description" type="string">Description</option>
+      </optgroup>
+      <transport method="put" path="commands/add_parameter_definition"/>
+   </command>
+
+   <command name="del_parameter_definition">
+      del parameter definition for a given object.
+      <optgroup name="target" mandatory="True" fields="any">
+         <option name="archetype" type="string" conflicts="feature feature_type">Archetype</option>
+         <option name="feature" type="string" conflicts="archetype">Feature</option>
+      </optgroup>
+      <optgroup name="target_opts" mandatory="False" fields="any">
+         <option name="feature_type" type="string" conflicts="archetype">Type of the feature: host, hardware or interface</option>
+      </optgroup>
+      <optgroup name="target_required_opts" mandatory="True" fields="any">
+         <option name="path" type="string">Path of the parameter</option>
+      </optgroup>
+      <transport method="put" path="commands/del_parameter_definition"/>
+   </command>
+
+   <command name="show_parameter_definition">
+      Display all parameter definition configured for a object
+      <p/>
+      Supported options for --format: raw, csv.
+
+      The 'csv' format contains the following fields, in this order:
+      Definition Holder name, path, value type, default value, description, template, is_required
+      <optgroup name="show_parameter_def_options" mandatory="True" fields="any">
+          <option name="archetype" type="string">Archetype</option>
+          <option name="feature" type="string">Feature</option>
+      </optgroup>
+      <transport method="get"  trigger="archetype" path="/archetype/%(archetype)s/parameter_definitions"/>
+      <transport method="get"  trigger="feature" path="/feature/%(feature)s/parameter_definitions"/>
+   </command>
+
+
+
 
 </commandline>

@@ -26,11 +26,23 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-from aquilon.aqdb.column_types.aqstr import AqStr
-from aquilon.aqdb.column_types.aqmac import AqMac
-from aquilon.aqdb.column_types.IPV4 import IPV4
-from aquilon.aqdb.column_types.enum import Enum
-from aquilon.aqdb.column_types.guid import GUID
-from aquilon.aqdb.column_types.utc_datetime import UTCDateTime
-from aquilon.aqdb.column_types.json_dict import JSONEncodedDict
-from aquilon.aqdb.column_types.mutation_dict import MutationDict
+
+
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.formats.parameter_definition import ParamDefList
+from aquilon.exceptions_ import NotFoundException
+from aquilon.worker.dbwrappers.parameter import get_param_definitions
+
+class CommandShowParameterDefinitionFeature(BrokerCommand):
+
+    required_parameters = ["feature"]
+
+    def render(self, session, feature, **arguments):
+
+        dbobj = get_param_definitions(session, feature=feature)
+        if dbobj:
+            return ParamDefList(None, feature, dbobj)
+
+        raise NotFoundException("No parameter definitions found for feature {0}".format(feature))
+
+

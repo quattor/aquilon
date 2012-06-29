@@ -103,6 +103,10 @@ from aquilon.aqdb.model.address_assignment import AddressAssignment
 #FEATURES
 from aquilon.aqdb.model.feature import (Feature, FeatureLink, HostFeature,
                                         HardwareFeature, InterfaceFeature)
+from aquilon.aqdb.model.parameter_definition import (ParamDefinition, ParamDefHolder,
+                                                     ArchetypeParamDef, FeatureParamDef)
+from aquilon.aqdb.model.parameter import (Parameter, ParameterHolder,
+                                          PersonalityParameter, FeatureLinkParameter)
 
 #SERVICE
 from aquilon.aqdb.model.service import Service

@@ -61,6 +61,8 @@ class Personality(Base):
 
     archetype = relation(Archetype)
 
+    config_override = Column(Boolean(name="persona_cfg_override_ck"),
+                          default=False, nullable=False)
     @property
     def is_cluster(self):
         return self.archetype.cluster_type is not None

@@ -1,6 +1,6 @@
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 #
-# Copyright (C) 2008,2009,2010,2011  Contributor
+# Copyright (C) 2009,2010,2011  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -26,11 +26,36 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-from aquilon.aqdb.column_types.aqstr import AqStr
-from aquilon.aqdb.column_types.aqmac import AqMac
-from aquilon.aqdb.column_types.IPV4 import IPV4
-from aquilon.aqdb.column_types.enum import Enum
-from aquilon.aqdb.column_types.guid import GUID
-from aquilon.aqdb.column_types.utc_datetime import UTCDateTime
-from aquilon.aqdb.column_types.json_dict import JSONEncodedDict
-from aquilon.aqdb.column_types.mutation_dict import MutationDict
+
+
+from aquilon.worker.broker import BrokerCommand
+from aquilon.aqdb.model import ParamDefinition
+from aquilon.exceptions_ import ArgumentError
+from aquilon.worker.dbwrappers.parameter import get_param_def_holder
+
+
+class CommandDelParameterDefintion(BrokerCommand):
+
+    required_parameters = ["path"]
+
+    def render(self, session, archetype, feature, feature_type, path, **kwargs):
+
+        if not (archetype or feature):
+            raise ArgumentError ("Archetype or Feature must be specified for parameter definition")
+
+        db_paramdef_holder = get_param_def_holder(session, archetype,
+                                                  feature, feature_type,
+                                                  auto_include=False)
+        if db_paramdef_holder is None:
+            if archetype:
+                raise ArgumentError( "No parameter definitions found for archetype {0}".format(archetype))
+            elif feature:
+                raise ArgumentError( "No parameter definitions found for feature {0}".format(feature))
+
+        db_paramdef = ParamDefinition.get_unique(session, path=path,
+                                                 holder=db_paramdef_holder,
+                                                 compel=True)
+        session.delete(db_paramdef)
+        session.flush()
+
+        return

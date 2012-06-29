@@ -32,6 +32,7 @@ from aquilon.aqdb.model import Personality
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.grn import lookup_grn
 from aquilon.worker.dbwrappers.host import hostname_to_host, hostlist_to_hosts
+from aquilon.worker.templates.personality import PlenaryPersonality
 
 
 class CommandMapGrn(BrokerCommand):
@@ -59,4 +60,9 @@ class CommandMapGrn(BrokerCommand):
             self._update_dbobj(obj, dbgrn)
 
         session.flush()
+
+        if personality:
+            plenary = PlenaryPersonality(objs[0], logger=logger)
+            plenary.write()
+
         return

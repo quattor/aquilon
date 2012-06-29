@@ -81,7 +81,7 @@ class TestGrns(TestBrokerCommand):
     def test_200_refresh(self):
         command = ["refresh", "grns"]
         (out, err) = self.successtest(command)
-        self.matchoutput(err, "Added 2, updated 1, deleted 1 GRNs.", command)
+        self.matchoutput(err, "Added 1, updated 1, deleted 1 GRNs.", command)
 
     def test_210_verify_test1_renamed(self):
         command = ["show", "grn", "--eon_id", "1"]
@@ -106,20 +106,25 @@ class TestGrns(TestBrokerCommand):
         out = self.notfoundtest(command)
         self.matchoutput(out, "EON ID 987654321 not found.", command)
 
-    def test_300_delete(self):
-        command = ["del", "grn", "--grn", "grn:/ms/ei/aquilon/aqd"]
-        self.noouttest(command)
-
     def test_400_map_personality(self):
         command = ["map", "grn", "--grn", "grn:/ms/ei/aquilon/aqd",
                    "--personality", "compileserver"]
         (out, err) = self.successtest(command)
-        self.matchoutput(err, "Added 1, updated 0, deleted 0 GRNs.", command)
+
+    def test_405_map_personality(self):
+        command = ["map", "grn", "--grn", "grn:/example/cards",
+                   "--personality", "compileserver"]
+        out = self.successtest(command)
 
     def test_410_verify_personality(self):
         command = ["show", "personality", "--personality", "compileserver"]
         out = self.commandtest(command)
         self.matchoutput(out, "GRN: grn:/ms/ei/aquilon/aqd", command)
+
+        command =["cat", "--archetype=aquilon", "--personality=compileserver"]
+        out = self.commandtest(command)
+        self.matchoutput(out, '"/system/eon_ids" = push(2);', command)
+        self.matchoutput(out, '"/system/eon_ids" = push(4);', command)
 
     def test_420_verify_host(self):
         command = ["show", "host", "--hostname", "unittest20.aqd-unittest.ms.com"]
@@ -182,18 +187,19 @@ class TestGrns(TestBrokerCommand):
                    "--generate"]
         out = self.commandtest(command)
         # The GRN is mapped to both the host and the personality; verify it is
-        # not duplicated
-        self.searchoutput(out, r'"/system/eon_ids" = list\(\s+2\s+\);', command)
+        # not duplicated. Should print out both the host mapped
+        # personality mapped grns
+        self.searchoutput(out, r'"/system/eon_ids" = list\(\s+2,\s+4\s+\);', command)
 
     def test_510_verify_unittest20(self):
-        command = ["cat", "--hostname", "unittest00.one-nyp.ms.com", "--data",
+        command = ["cat", "--hostname", "unittest20.aqd-unittest.ms.com", "--data",
                    "--generate"]
         out = self.commandtest(command)
         # The GRN is mapped to the personality only
-        self.searchoutput(out, r'"/system/eon_ids" = list\(\s+2\s+\);', command)
+        self.searchoutput(out, r'"/system/eon_ids" = list\(\s+2,\s+4\s+\);', command)
 
     def test_520_verify_unittest12(self):
-        command = ["cat", "--hostname", "unittest00.one-nyp.ms.com", "--data",
+        command = ["cat", "--hostname", "unittest12.aqd-unittest.ms.com", "--data",
                    "--generate"]
         out = self.commandtest(command)
         # The GRN is mapped to the host only
@@ -248,9 +254,47 @@ class TestGrns(TestBrokerCommand):
                          "personalities, and cannot be deleted.", command)
 
     def test_640_unmap_personality(self):
-        command = ["unmap", "grn", "--grn", "grn:/ms/ei/aquilon/aqd",
+        command = ["unmap", "grn", "--grn", "grn:/example/cards",
                    "--personality", "compileserver"]
         self.noouttest(command)
+
+        command =["cat", "--archetype", "aquilon",
+                  "--personality", "compileserver"]
+        out = self.commandtest(command)
+        self.matchoutput(out, '"/system/eon_ids" = push(2);', command)
+        self.searchclean(out, '"/system/eon_ids" = push(4);', command)
+
+        command = ["unmap", "grn", "--grn", "grn:/ms/ei/aquilon/aqd",
+                   "--personality", "compileserver"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "GRN grn:/ms/ei/aquilon/aqd is the last grn on "
+                         "Personality aquilon/compileserver and cannot be removed", command)
+
+    def test_650_delete(self):
+        command = ["del", "grn", "--grn", "grn:/example"]
+        self.noouttest(command)
+
+    def test_700_verify_unittest00(self):
+        command = ["cat", "--hostname", "unittest00.one-nyp.ms.com", "--data",
+                   "--generate"]
+        out = self.commandtest(command)
+        # The GRN was mapped to both the host and the personality;
+        self.searchoutput(out, r'"/system/eon_ids" = list\(\s+2\s+\);', command)
+
+    def test_710_verify_unittest20(self):
+        command = ["cat", "--hostname", "unittest20.aqd-unittest.ms.com", "--data",
+                   "--generate"]
+        out = self.commandtest(command)
+        # The GRN was mapped to the personality only
+        self.searchoutput(out, r'"/system/eon_ids" = list\(\s+2\s+\);', command)
+
+    def test_720_verify_unittest12(self):
+        command = ["cat", "--hostname", "unittest12.aqd-unittest.ms.com", "--data",
+                   "--generate"]
+        out = self.commandtest(command)
+        # The GRN was mapped to the host only
+        self.searchclean(out, r'"/system/eon_ids"', command)
+
 
 
 if __name__ == '__main__':

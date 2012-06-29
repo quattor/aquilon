@@ -1,0 +1,268 @@
+<?xml version="1.0"?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V5.0//EN"
+"http://docbook.org/xml/5.0/dtd/docbook.dtd" [
+<!ENTITY aqd_version SYSTEM "../version.txt">
+]>
+<refentry xml:id="add_personality"
+	  xmlns:xi="http://www.w3.org/2001/XInclude">
+    <refmeta>
+        <refentrytitle>add_personality</refentrytitle>
+        <manvolnum>1</manvolnum>
+        <refmiscinfo class="version">&aqd_version;</refmiscinfo>
+        <refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
+    </refmeta>
+
+    <refnamediv>
+        <refname>add personality</refname>
+        <refpurpose>
+	    Add a new personality
+        </refpurpose>
+	<refclass>Aquilon</refclass>
+    </refnamediv>
+
+    <refsynopsisdiv>
+	<cmdsynopsis>
+	    <command>aq add personality</command>
+	    <group>
+		<synopfragmentref linkend="global-options">Global options</synopfragmentref>
+	    </group>
+	    <arg choice="plain"><option>--personality <replaceable>PERSONALITY</replaceable></option></arg>
+	    <arg choice="plain"><option>--archetype <replaceable>ARCHETYPE</replaceable></option></arg>
+	    <arg choice="opt"><option>--grn <replaceable>GRN</replaceable></option></arg>
+	    <arg choice="opt"><option>--eon_id <replaceable>EON_ID</replaceable></option></arg>
+	    <group choice="opt">
+	          <arg choice="plain"><option>--cluster_required</option></arg>
+	          <arg choice="plain"><option>--nocluster_required</option></arg>
+	    </group>
+	    <arg choice="opt"><option>--comments <replaceable>COMMENTS</replaceable></option></arg>
+	    <arg choice="opt"><option>--copy_from <replaceable>COPY_FROM</replaceable></option></arg>
+	    <group choice="opt">
+	          <arg choice="plain"><option>--config_override</option></arg>
+	          <arg choice="plain"><option>--noconfig_override</option></arg>
+	    </group>
+	    <xi:include href="../common/global_options.xml"/>
+	</cmdsynopsis>
+    </refsynopsisdiv>
+
+    <refsect1>
+        <title>Description</title>
+	<para>
+	    The <command>aq add personality</command> Command creates a new personality.
+	    A default template will be created. This default templatie will be used for host plenary
+	    generation only if no personality templates have been defined within the template domain.
+	</para>
+    </refsect1>
+
+    <refsect1>
+        <title>Options</title>
+	<variablelist>
+	    <title>Command-specific options</title>
+	    <varlistentry>
+	        <term>
+		    <option>--personality <replaceable>PERSONALITY</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			The name of the personality to create.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+                    <option>--archetype <replaceable>ARCHETYPE</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+                        The name of the archteype.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--grn <replaceable>GRN</replaceable></option>
+		    <option>--eon_id <replaceable>EON_ID</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			The grn/eon_id of the personality to be created. Grn specification is required and
+			can be provided as grn or eon_id. The grn mapping to personality can be modified
+			using <command>aq map_grn</command> or <command>aq unmap_grn</command>. Multiple
+			grns can be mapped to the personality.  But unmapping of grn will require
+			atleast one grn mapping always to be present for a personality.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--cluster_required</option>, <option>--nocluster_required</option>
+		</term>
+		<listitem>
+		    <para>
+                        This flag specifies if this personality require hosts to be clustered.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--comments <replaceable>COMMENTS</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Short description of the purpose of this personality.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--copy_from <replaceable>COPY_FROM</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+                        This option takes a name of another personality within the archetype.
+			All parameters and feature bindings will be copied over from the
+			copy_from personality to the new personality being created. Other mappings
+			such as required services, service mappings etc are not copied.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--config_override</option>, <option>--noconfig_override</option>
+		</term>
+		<listitem>
+                    <para>
+		       If this flag is specified a special feature 'personality/config_override' will be included
+		       in the aqdb generated personality configuration template. This feature
+		       effectively pulls in config_override.tpl from the personality templates in the template
+		       domain, if it exists.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	</variablelist>
+	<xi:include href="../common/global_options_desc.xml"/>
+    </refsect1>
+
+    <refsect1>
+        <title>Examples</title>
+
+        <example>
+	    <title>add a personality</title>
+	    <programlisting>
+		aq add personality --archetype aquilon --personality foo --grn grn:/some/grn
+	    </programlisting>
+	    <para>
+	          This adds personality <literal> foo</literal>.
+            </para>
+	    <programlisting>
+                aq show personality --personality foo
+		Host Personality: foo Archetype: aquilon
+		  GRN: grn:/some/grn
+		  Template: aquilon/personality/foo/config.tpl
+	    </programlisting>
+	    <para>
+                Following are generated templates
+	    </para>
+	    <programlisting>
+	    template personality/foo/config;
+
+	    variable PERSONALITY = "foo";
+	    "/system/eon_ids" = push(1234);
+	    include { if_exists("personality/foo/pre_feature") };
+	    include { if_exists("personality/config") };
+	    include { if_exists("personality/foo/post_feature") };
+	    </programlisting>
+        </example>
+
+        <example>
+	    <title>add a personality with config override option</title>
+	    <programlisting>
+		aq add personality --archetype aquilon --personality foo --grn grn:/some/grn
+		--config_override
+	    </programlisting>
+	    <para>
+	          This adds personality <literal> foo</literal> with config override option enabled.
+            </para>
+	    <programlisting>
+                aq show personality --personality foo
+		Host Personality: foo Archetype: aquilon
+		GRN: grn:/some/grn
+		config override: enabled
+		Template: aquilon/personality/foo/config.tpl
+	    </programlisting>
+	    <para>
+                Following are generated templates
+	    </para>
+	    <programlisting>
+	      aq cat --personality foo
+	      template personality/foo/config;
+
+	      variable PERSONALITY = "foo";
+	      "/system/eon_ids" = push(1234);
+	      include { if_exists("personality/foo/pre_feature") };
+	      include { if_exists("personality/config") };
+	      include { "features/personality/config_override/config" };
+	      include { if_exists("personality/foo/post_feature") };
+	    </programlisting>
+        </example>
+
+        <example>
+	    <title>add a personality as clone of other personality</title>
+	    <programlisting>
+		aq add personality --archetype aquilon --personality foo --grn grn:/some/grn --copy_from unixeng-test
+	    </programlisting>
+	    <para>
+	          This adds personality <literal>foo</literal> and will copy any parameters  and feature bindings defined for
+		  personality unixeng-test to personality foo.
+            </para>
+	    <programlisting>
+                aq show personality --personality unixeng-test
+		Host Personality: unixeng-test Archetype: aquilon
+		GRN: grn:/some/grn
+		Template: aquilon/personality/unixeng-test/config.tpl
+		  Required Service: service1
+		  Required Service: service2
+		  Host Feature: somefeat1 [post_personality]
+
+               aq show parameter  --personality unixeng-test
+	       Archetype/Personality : aquilon/unixeng-test
+	       espinfo : {
+	                "function": "crash",
+			"description": "Personality to test new features/os/etc",
+			"systemgrn": "[\"grn:/some/grn\"]",
+		}
+
+            </programlisting>
+	    <para>
+		After running the above commands parameters, feature bindings will be copied. Required services
+		and other service mappings are not copied.
+	    </para>
+	    <programlisting>
+		aq show personality --personality foo
+		Host Personality: foo Archetype: aquilon
+		  GRN: grn:/some/grn
+		  Template: aquilon/personality/foo/config.tpl
+		  Host Feature: somefeat1 [post_personality]
+
+               aq show parameter  --personality foo
+	        Archetype/Personality : aquilon/foo
+		espinfo : {
+                        "function": "crash",
+			"description": "Personality to test new features/os/etc",
+			"systemgrn": "[\"grn:/some/grn\"]",
+		}
+
+
+	    </programlisting>
+        </example>
+    </refsect1>
+    <refsect1>
+	<title>See also</title>
+	<para>
+	    <citerefentry><refentrytitle>del_personality</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>update_personality</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>show_personality</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	</para>
+    </refsect1>
+</refentry>
+
+<!-- vim: set ai sw=4: -->
