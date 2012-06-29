@@ -29,7 +29,7 @@
 """ Parameter data validation """
 from datetime import datetime
 from sqlalchemy import (Column, Integer, DateTime, Sequence, String,
-                        Boolean, ForeignKey)
+                        Boolean, ForeignKey, UniqueConstraint)
 from sqlalchemy.orm import (relation, backref, deferred)
 from aquilon.aqdb.model import Base, Archetype, Feature
 from aquilon.aqdb.column_types import Enum
@@ -159,3 +159,7 @@ class FeatureParamDef(ParamDefHolder):
     @property
     def holder_object(self):
         return self.feature
+
+param_definition_holder.append_constraint(UniqueConstraint('feature_id', name='param_def_holder_feature_uk'))
+param_definition_holder.append_constraint(UniqueConstraint('archetype_id', name='param_def_holder_archetype_uk'))
+

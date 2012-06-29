@@ -230,7 +230,6 @@ class PersonalityParameter(ParameterHolder):
                     backref=backref('paramholder',
                                     cascade='all, delete-orphan',
                                     uselist=False))
-    UniqueConstraint('personality_id', "param_holder_persona_uk")
     @property
     def holder_name(self):
         return "%s/%s" % (self.personality.archetype.name,  # pylint: disable=C0103, E1101
@@ -256,7 +255,6 @@ class FeatureLinkParameter(ParameterHolder):
                                     cascade='all, delete-orphan',
                                     uselist=False))
 
-    UniqueConstraint('featurelink_id', "param_holder_flink_uk")
 
     @property
     def holder_name(self):
@@ -274,3 +272,6 @@ class FeatureLinkParameter(ParameterHolder):
     @property
     def holder_object(self):
         return self.featurelink
+
+paramholder.append_constraint(UniqueConstraint('personality_id', name='param_holder_persona_uk'))
+paramholder.append_constraint(UniqueConstraint('featurelink_id', name='param_holder_flink_uk'))
