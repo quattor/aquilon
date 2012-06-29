@@ -46,7 +46,7 @@ class CommandBindFeature(BrokerCommand):
     required_parameters = ['feature']
 
     def render(self, session, logger, feature, archetype, personality, model,
-               vendor, interface, justification, user, type, **arguments):
+               vendor, interface, justification, user, **arguments):
 
         # Binding a feature to a named interface makes sense in the scope of a
         # personality, but not for a whole archetype.
@@ -58,9 +58,7 @@ class CommandBindFeature(BrokerCommand):
         q = session.query(Personality)
         dbarchetype = None
 
-        feature_type = type
-        if not feature_type:
-            feature_type = "host"
+        feature_type = "host"
 
         justification_required = True
 

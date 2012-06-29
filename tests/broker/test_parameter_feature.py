@@ -72,8 +72,7 @@ class TestParameterFeature(TestBrokerCommand):
         self.ignoreoutputtest(cmd)
 
     def test_010_bind_host_feature(self):
-        type = "host"
-        cmd = [ "bind_feature", "--feature", HOSTFEATURE, "--type", type,
+        cmd = [ "bind_feature", "--feature", HOSTFEATURE,
                "--personality", PERSONALITY ]
         self.ignoreoutputtest(cmd)
 
@@ -90,8 +89,7 @@ class TestParameterFeature(TestBrokerCommand):
         self.ignoreoutputtest(cmd)
 
     def test_040_bind_hardware_feature(self):
-        type = "hardware"
-        cmd = [ "bind_feature", "--feature", HARDWAREFEATURE, "--type", type,
+        cmd = [ "bind_feature", "--feature", HARDWAREFEATURE,
                "--archetype", ARCHETYPE, "--justification=tcm=12345678", "--model", "hs21-8853l5u" ]
         self.ignoreoutputtest(cmd)
 
@@ -108,8 +106,7 @@ class TestParameterFeature(TestBrokerCommand):
         self.ignoreoutputtest(cmd)
 
     def test_070_bind_interface_feature(self):
-        type = "interface"
-        cmd = [ "bind_feature", "--feature", INTERFACEFEATURE, "--type", type,
+        cmd = [ "bind_feature", "--feature", INTERFACEFEATURE,
                "--personality", PERSONALITY, "--interface", "eth0" ]
         self.ignoreoutputtest(cmd)
 
@@ -343,33 +340,29 @@ class TestParameterFeature(TestBrokerCommand):
 
 
     def test_910_del_host_featue(self):
-        type = "host"
-
-        cmd = [ "unbind_feature", "--feature", HOSTFEATURE, "--type", type,
+        cmd = [ "unbind_feature", "--feature", HOSTFEATURE,
                "--personality", PERSONALITY ]
         self.ignoreoutputtest(cmd)
 
-        cmd = [ "del_feature", "--feature", HOSTFEATURE, "--type", type ]
+        cmd = [ "del_feature", "--feature", HOSTFEATURE, "--type", "host" ]
         self.noouttest(cmd)
 
     def test_920_del_hardware_feature(self):
 
-        type = "hardware"
-        cmd = [ "unbind_feature", "--feature", HARDWAREFEATURE, "--type", type,
+        cmd = [ "unbind_feature", "--feature", HARDWAREFEATURE,
                "--archetype", ARCHETYPE, "--justification=tcm=12345678", "--model", "hs21-8853l5u" ]
         self.ignoreoutputtest(cmd)
 
-        cmd = [ "del_feature", "--feature", HARDWAREFEATURE, "--type", type ]
+        cmd = [ "del_feature", "--feature", HARDWAREFEATURE, "--type", "hardware" ]
         self.noouttest(cmd)
 
-    def test_del__interface_feature(self):
+    def test_del_interface_feature(self):
 
-        type = "interface"
-        cmd = [ "unbind_feature", "--feature", INTERFACEFEATURE, "--type", type,
+        cmd = [ "unbind_feature", "--feature", INTERFACEFEATURE,
                "--personality", PERSONALITY, "--interface", "eth0" ]
         self.ignoreoutputtest(cmd)
 
-        cmd = [ "del_feature", "--feature", INTERFACEFEATURE, "--type", type ]
+        cmd = [ "del_feature", "--feature", INTERFACEFEATURE, "--type", "interface" ]
         self.ignoreoutputtest(cmd)
 
 if __name__ == '__main__':
