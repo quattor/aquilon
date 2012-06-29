@@ -4924,12 +4924,12 @@
             <option name="personality" type="string">Name of  personality</option>
             <option name="feature" type="string">Feature</option>
          </optgroup>
-         <optgroup name="by_other_opts" mandatory="False" fields="any">
-             <option name="archetype" type="string">Archetype</option>
-         </optgroup>
       </optgroup>
-      <transport method="get" trigger="feature" path="/feature/feature/%(feature)s/parameters"/>
-      <transport method="get" path="/personality/personality/%(personality)s/parameters"/>
+       <optgroup name="by_other_opts" mandatory="False" fields="any">
+             <option name="archetype" type="string">Archetype</option>
+       </optgroup>
+      <transport method="get" trigger="feature" path="feature/feature/%(feature)s/parameters"/>
+      <transport method="get" path="personality/personality/%(personality)s/parameters"/>
    </command>
 
    <command name="validate_parameter">
@@ -4942,7 +4942,7 @@
 	    <option name="feature" type="string">Feature</option>
          </optgroup>
       </optgroup>
-      <transport method="put" path="/validate/parameter/"/>
+      <transport method="put" path="validate/parameter/"/>
    </command>
 
 
