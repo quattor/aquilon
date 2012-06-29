@@ -80,7 +80,7 @@ def get_parameter_holder(session, archetype=None, personality=None,
             raise NotFoundException("No feature binding found for feature = %s." % feature)
         db_param_holder = dbfeaturelink.paramholder
 
-    if db_param_holder is None:
+    if (db_param_holder is None) and auto_include:
         if dbfeaturelink:
             db_param_holder = FeatureLinkParameter(featurelink=dbfeaturelink)
         elif dbpersonality:
@@ -201,7 +201,7 @@ def get_param_def_holder (session, archetype=None,
                                            feature_type=feature_type, compel=True)
         db_paramdef_holder = dbfeature.paramdef_holder
 
-    if db_paramdef_holder is None:
+    if (db_paramdef_holder is None) and auto_include:
         if archetype:
             db_paramdef_holder = ArchetypeParamDef(archetype=dbarch)
         elif feature:
@@ -235,5 +235,7 @@ def get_parameters (session,
                                     feature=feature,
                                     featurelink=featurelink,
                                     auto_include=False)
+    if param_holder is None:
+        return []; 
     q = session.query(Parameter).filter_by(holder=param_holder)
     return q.all()
