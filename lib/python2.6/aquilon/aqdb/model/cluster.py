@@ -547,7 +547,7 @@ esx_cluster.info['unique_fields'] = ['name']
 
 
 class HostClusterMember(Base):
-    """ Association Proxy for clusters and their member hosts """
+    """ Association table for clusters and their member hosts """
     __tablename__ = _HCM
 
     cluster_id = Column(Integer, ForeignKey('%s.id' % _TN,
