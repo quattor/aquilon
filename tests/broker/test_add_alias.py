@@ -84,7 +84,11 @@ class TestAddAlias(TestBrokerCommand):
     def test_200_autocreate_target(self):
         cmd = ["add", "alias", "--fqdn", "restrict1.aqd-unittest.ms.com",
                "--target", "target.restrict.aqd-unittest.ms.com"]
-        self.noouttest(cmd)
+        out = self.statustest(cmd)
+        self.matchoutput(out,
+                         "WARNING: Will create alias for target "
+                         "target.restrict.aqd-unittest.ms.com, but ",
+                         cmd)
 
     def test_201_verify_autocreate(self):
         cmd = ["search", "dns", "--fullinfo",
@@ -108,7 +112,11 @@ class TestAddAlias(TestBrokerCommand):
     def test_220_restricted_alias_no_dsdb(self):
         cmd = ["add", "alias", "--fqdn", "restrict.ms.com",
                "--target", "no-dsdb.restrict.aqd-unittest.ms.com"]
-        self.noouttest(cmd)
+        out = self.statustest(cmd)
+        self.matchoutput(out,
+                         "WARNING: Will create alias for target "
+                         "no-dsdb.restrict.aqd-unittest.ms.com, but ",
+                         cmd)
         self.dsdb_verify(empty=True)
 
     def test_400_verify_alias2host(self):
