@@ -1,6 +1,6 @@
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 #
-# Copyright (C) 2008,2009,2010,2011,2012  Contributor
+# Copyright (C) 2012  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -26,49 +26,27 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-""" A platform independant GUID """
+"""Patches for stock python functionality."""
 
 
-from sqlalchemy.types import TypeDecorator, CHAR
-from sqlalchemy.dialects.postgresql import UUID
+def load_uuid_quickly():
+    """
+    Do evil stuff to reduce initial import time of the uuid module.
 
-from aquilon.python_patches import load_uuid_quickly
+    This is because it relies on ctypes.util.find_library, which does a
+    bunch of work to figure out that the 'uuid' library is available as
+    'libuuid.so'.  This module provides a helper to monkey-patch around
+    that.
 
-uuid = load_uuid_quickly()  # pylint: disable=C0103
-
-
-class GUID(TypeDecorator):
-    """ Platform-independent GUID type.
-
-        Uses Postgresql's UUID type, otherwise uses CHAR(32), storing as
-        stringified hex values. Based on a recipe found in
-        http://www.sqlalchemy.org/docs/core/types.html """
-
-    impl = CHAR
-
-    def __init__(self):
-        TypeDecorator.__init__(self, length=32)
-
-    def load_dialect_impl(self, dialect):
-        if dialect.name == 'postgresql':
-            return dialect.type_descriptor(UUID())  # pragma: no cover
-        else:
-            return dialect.type_descriptor(CHAR(32))
-
-    def process_bind_param(self, value, dialect):
-        if value is None:
-            return value  # pragma: no cover
-        elif dialect.name == 'postgresql':
-            return str(value)  # pragma: no cover
-        else:
-            if not isinstance(value, uuid.UUID):
-                return "%.32x" % uuid.UUID(value)
-            else:
-                # hexstring
-                return "%.32x" % value
-
-    def process_result_value(self, value, dialect):
-        if value is None:
-            return value
-        else:
-            return uuid.UUID(value)
+    Monkey-patch the ctype library finding code to be fast.  Load uuid
+    (which uses this code), and then restore.  Note that this is not
+    thread-safe.
+    """
+    import ctypes.util
+    def find_library(name):
+        return 'lib' + name + '.so'
+    old_find_library = ctypes.util.find_library
+    ctypes.util.find_library = find_library
+    import uuid
+    ctypes.util.find_library = old_find_library
+    return uuid

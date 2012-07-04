@@ -578,6 +578,14 @@ class TestReconfigure(TestBrokerCommand):
         command = ["reconfigure", "--hostname=aquilon95.aqd-unittest.ms.com"]
         self.successtest(command)
 
+    def test_105_verify_machine_plenary(self):
+        command = ["cat", "--machine=ut9s03p45"]
+        out = self.commandtest(command)
+        self.searchoutput(out,
+                          r'"sysloc/dns_search_domains" = '
+                          r'list\(\s*"new-york.ms.com"\s*\);',
+                          command)
+
     def test_110_map_dns_domain(self):
         out = self.successtest(['map_dns_domain', '--building=ut',
                                 '--dns_domain=aqd-unittest.ms.com'])

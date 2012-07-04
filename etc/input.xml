@@ -4203,7 +4203,7 @@
          <option name="ip" type="ipv4">An IP Address (for A records)</option>
          <option name="network" type="string">Network name or address (for A records)</option>
          <option name="target" type="string">The target of an alias or service (for CNAME records)</option>
-         <option name="target_domain">The DNS domain of the target of an alias or service</option>
+         <option name="target_domain" type="string">The DNS domain of the target of an alias or service</option>
          <!-- <option name="service" type="string">The symbolic name of the service (for SRV records)</option> -->
          <option name="dns_domain" type="string">Name of the DNS domain the record lives in</option>
          <option name="primary_name" type="boolean">The DNS record is used as a primary name</option>

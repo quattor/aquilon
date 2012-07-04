@@ -60,7 +60,7 @@ class AnonSite(server.Site):
                 request.getClientIP(),
                 # request.getUser() or "-", # the remote user is almost never important
                 "-",
-                http._logDateTime,
+                self._logDateTime,
                 '%s %s %s' % (self._escape(request.method),
                               self._escape(request.uri),
                               self._escape(request.clientproto)),
