@@ -32,56 +32,34 @@ import sys
 
 _DIR = os.path.dirname(os.path.realpath(__file__))
 _LIBDIR = os.path.join(_DIR, '..', '..')
-_TESTDIR = os.path.join(_DIR, '..', '..', '..', '..', 'tests', 'aqdb')
-
 if _LIBDIR not in sys.path:
     sys.path.insert(0, _LIBDIR)
 
-if _TESTDIR not in sys.path:
-    sys.path.insert(1, _TESTDIR)
-
 import aquilon.aqdb.depends
+
 import argparse
+
+from ipaddr import IPv4Address, IPv4Network
+
 import ms.modulecmd
+
+from IPython.config.loader import Config as IPyConfig
+from IPython.frontend.terminal.embed import InteractiveShellEmbed
 
 from aquilon.config import Config
 
 from aquilon.aqdb.model import *
 from aquilon.aqdb.dsdb import *
 from aquilon.aqdb.db_factory import DbFactory
-from ipaddr import IPv4Address, IPv4Network
 
 db = DbFactory()
 Base.metadata.bind = db.engine
+session = s = db.Session()
 
-base_dir = os.environ['HOME']
-if "IPYTHONDIR" in os.environ:
-    base_dir = os.environ["IPYTHONDIR"]
-if not(os.access(base_dir, os.W_OK)):
-    #we can't write to our home directory, ipython can't handle this
-    msg = "%s is not writable, ipython would crash. Set $IPYTHONDIR" % base_dir
-    raise EnvironmentError(msg)
-
-
-if db.engine.url.drivername == 'sqlite':
-    prompt = str(db.engine.url).split('///')[1]
-else:
-    # couldn't use the underlying dbapi connection.current_schema
-    # from the engine as it too is ''
-    user = db.engine.url.username or os.environ.get("USER")
-    host = db.engine.url.host or 'LOCALHOST'
-    prompt = '%s@%s' % (user, host)
-    if db.engine.url.database:
-        prompt += '/%s'
-prompt += '>'
-
-from IPython.Shell import IPShellEmbed
 _banner = '<<<Welcome to the Aquilon shell (courtesy of IPython). Ctrl-D to quit>>>\n'
-_args = ['-pi1', prompt, '-nosep', '-nomessages', '-pprint']
-ipshell = IPShellEmbed(_args, banner=_banner)
 
 
-def main(*args, **kw):
+def main():
     parser = argparse.ArgumentParser(
         description='An ipython shell, useful for testing and exploring aqdb')
 
@@ -92,10 +70,27 @@ def main(*args, **kw):
     if opts.verbose >= 1:
         db.engine.echo = True
 
-    s = db.Session()
+    if db.engine.url.drivername == 'sqlite':
+        prompt = str(db.engine.url).split('///')[1]
+    else:
+        # couldn't use the underlying dbapi connection.current_schema
+        # from the engine as it too is ''
+        user = db.engine.url.username or os.environ.get("USER")
+        host = db.engine.url.host or 'LOCALHOST'
+        prompt = '%s@%s' % (user, host)
+        if db.engine.url.database:
+            prompt += '/%s'
+    prompt += '> '
 
+    ipycfg = IPyConfig()
+    ipycfg.PromptManager.in_template = prompt
+    ipycfg.PlaintextFormatter.pprint = True
+    ipycfg.InteractiveShell.separate_in = ''
+    ipycfg.InteractiveShell.separate_out = ''
+    ipycfg.InteractiveShell.separate_out2 = ''
+    ipycfg.InteractiveShell.colors = 'Linux'
+    ipshell = InteractiveShellEmbed(config=ipycfg, banner1=_banner)
     ipshell()
-
 
 
 def graph_schema(db=db, file_name="/tmp/aqdb_schema"):
@@ -104,5 +99,6 @@ def graph_schema(db=db, file_name="/tmp/aqdb_schema"):
     s2d.write_schema_png(db.meta, "%s.png" % file_name)
     s2d.write_schema_dot(db.meta, "%s.dot" % file_name)
 
+
 if __name__ == '__main__':
-    main(sys.argv)
+    main()
