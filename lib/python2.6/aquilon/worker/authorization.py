@@ -134,6 +134,19 @@ class AuthorizationBroker(object):
                               'refresh_network',
                               'update_router']:
                 self.raise_auth_error(principal, action, resource)
+        if dbuser.role.name == 'edc':
+            if action not in ['add_rack', 'add_machine', 'add_host',
+                              'add_interface_machine',
+                              'add_interface_hostname',
+                              'add_interface_address',
+                              'add_alias', 'add_manager',
+                              'update_rack', 'update_machine', 'update_alias',
+                              'update_interface_hostname',
+                              'update_interface_machine',
+                              'del_rack', 'del_machine', 'del_host',
+                              'del_interface', 'del_interface_address',
+                              'del_alias', 'del_manager']:
+                self.raise_auth_error(principal, action, resource)
         if dbuser.role.name == 'maintech':
             if action not in ['pxeswitch', 'pxeswitch_list',
                               'compile', 'compile_hostname', 'change_status',
