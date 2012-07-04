@@ -124,6 +124,10 @@ class SwitchFormatter(ObjectFormatter):
         else:
             return [SwitchInterfaceTuple((switch, None))]
 
+    def csv_fields(self, item):
+        f = SwitchInterfaceTupleFormatter()
+        return f.csv_fields(item)
+
 ObjectFormatter.handlers[Switch] = SwitchFormatter()
 
 
