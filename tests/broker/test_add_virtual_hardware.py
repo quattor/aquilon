@@ -118,7 +118,7 @@ class TestAddVirtualHardware(TestBrokerCommand):
     def test_051_addutmc6machines(self):
         # 2 clusters, 12 vmhosts with 24G RAM each, down_hosts_threshold=2
         # The machines should not fit inside one cluster
-        for i in range(0, 13):
+        for i in range(0, 15):
             machine = "evm%d" % (i + 90)
             self.noouttest(["add", "machine", "--machine", machine,
                             "--cluster", "utecl12", "--model", "utmedium",
@@ -127,6 +127,27 @@ class TestAddVirtualHardware(TestBrokerCommand):
             self.noouttest(["add", "machine", "--machine", machine,
                             "--cluster", "npecl12", "--model", "utmedium",
                             "--memory", 16384])
+
+    def test_052_verify_capacity(self):
+        # Verify that we could fill the cluster completely
+        command = ["show", "esx", "cluster", "--cluster", "npecl12"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Capacity limits: memory: 245760", command)
+        self.matchoutput(out, "Resources used by VMs: memory: 245760", command)
+
+    def test_053_overcapacity(self):
+        command = ["add", "machine", "--machine", "evm105", "--cluster",
+                   "npecl12", "--model", "utmedium", "--memory", 16384]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "ESX Cluster npecl12 is over capacity regarding memory",
+                         command)
+
+    def test_054_make_room(self):
+        # Later tests need some room, so kill a few VMs
+        for i in range(13, 15):
+            self.noouttest(["del", "machine", "--machine", "evm%d" % (i + 90)])
+            self.noouttest(["del", "machine", "--machine", "evm%d" % (i + 110)])
 
     def test_090_verifyaddmachines(self):
         command = ["show_esx_cluster", "--cluster=utecl1"]
