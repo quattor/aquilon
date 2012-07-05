@@ -422,15 +422,19 @@ class TestBrokerCommand(unittest.TestCase):
     def gitenv(self, env=None):
         """Configure a known sanitised environment"""
         git_path = self.config.get("broker", "git_path")
+        # The "publish" test abuses gitenv(), and it needs the Python interpreter
+        # in the path, because it runs the template unit tests which in turn
+        # call the aq command
+        python_path = os.path.dirname(sys.executable)
         newenv = {}
         newenv["USER"] = os.environ.get('USER', '')
         if env:
             for (key, value) in env.iteritems():
                 newenv[key] = value
         if newenv.has_key("PATH"):
-            newenv["PATH"] = "%s:%s" % (git_path, newenv["PATH"])
+            newenv["PATH"] = "%s:%s:%s" % (git_path, python_path, newenv["PATH"])
         else:
-            newenv["PATH"] = "%s:%s" % (git_path, '/bin:/usr/bin')
+            newenv["PATH"] = "%s:%s:%s" % (git_path, python_path, '/bin:/usr/bin')
         return newenv
 
     def gitcommand_raw(self, command, **kwargs):

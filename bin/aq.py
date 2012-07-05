@@ -105,12 +105,18 @@ class CustomAction(object):
     Code here will run before the reactor starts, and can safely block.
     """
 
-    def __init__(self, action):
+    def __init__(self, action, options):
         m = getattr(self, action, None)
         if not m:
             raise AquilonError("Internal Error: Unknown action '%s' attempted"
                     % action)
         self.run = m
+
+        # Propagate some options to subprocesses
+        self.env = os.environ.copy()
+        self.env["AQHOST"] = options.get("aqhost")
+        self.env["AQSERVICE"] = options.get("aqservice")
+        self.env["AQPORT"] = str(options.get("aqport"))
 
     def create_bundle(self, commandOptions):
         from subprocess import Popen, PIPE
@@ -142,8 +148,11 @@ class CustomAction(object):
         # Prevent the branch being published unless the unit tests pass
         testdir = os.path.join(sandbox_dir, 't')
         if os.path.exists(os.path.join(testdir, 'Makefile')):
-            p = Popen(['/usr/bin/make', 'PWD=%s' % testdir, 'test'],
-                        cwd=testdir)
+            p = Popen(['/usr/bin/make', '-C', testdir, 'test',
+                       'AQCMD=%s' % os.path.realpath(sys.argv[0]),
+                       'AQBUILDXML=%s' % os.path.join(SRCDIR, "etc",
+                                                      "build.xml")
+                      ], cwd=testdir, env=self.env)
             p.wait()
             if p.returncode != 0:
                 print >>sys.stderr, "\nUnit tests failed, publish prohibited.",
@@ -361,6 +370,7 @@ if __name__ == "__main__":
     # Save these in case there are errors...
     globalOptions["aqhost"] = host
     globalOptions["aqport"] = port
+    globalOptions["aqservice"] = aqservice
 
     if transport is None:
         print >>sys.stderr, "Unimplemented command ", command
@@ -422,7 +432,7 @@ if __name__ == "__main__":
 
     # run custom command if there's one
     if transport.custom:
-        action = CustomAction(transport.custom)
+        action = CustomAction(transport.custom, globalOptions)
         action.run(commandOptions)
 
     status_thread = None
