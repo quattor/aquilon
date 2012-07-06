@@ -46,7 +46,7 @@ class PlenaryCluster(PlenaryCollection):
     A facade for the variety of PlenaryCluster subsidiary files
     """
     def __init__(self, dbcluster, logger=LOGGER):
-        PlenaryCollection.__init__(self, logger=LOGGER)
+        PlenaryCollection.__init__(self, logger=logger)
         self.dbobj = dbcluster
         self.plenaries.append(PlenaryClusterObject(dbcluster, logger=logger))
         self.plenaries.append(PlenaryClusterData(dbcluster, logger=logger))
