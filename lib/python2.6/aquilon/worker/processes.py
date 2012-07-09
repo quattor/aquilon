@@ -360,12 +360,15 @@ class DSDBRunner(object):
         self.actions = []
         self.rollback_list = []
 
-    def commit(self):
+    def commit(self, verbose=False):
         for args, rollback, error_filter, ignore_msg in self.actions:
             cmd = [self.dsdb]
             cmd.extend(args)
 
             try:
+                if verbose:
+                    self.logger.client_info("DSDB: %s" %
+                                            " ".join([str(a) for a in args]))
                 run_command(cmd, env=self.getenv(), logger=self.logger)
             except ProcessException, err:
                 if error_filter and err.out and error_filter.search(err.out):
@@ -376,13 +379,15 @@ class DSDBRunner(object):
             if rollback:
                 self.rollback_list.append(rollback)
 
-    def rollback(self):
+    def rollback(self, verbose=False):
         self.rollback_list.reverse()
         rollback_failures = []
         for args in self.rollback_list:
             cmd = [self.dsdb]
             cmd.extend(args)
             try:
+                self.logger.client_info("DSDB: %s" %
+                                        " ".join([str(a) for a in args]))
                 run_command(cmd, env=self.getenv(), logger=self.logger)
             except ProcessException, err:
                 rollback_failures.append(str(err))
@@ -396,14 +401,14 @@ class DSDBRunner(object):
         elif did_something:
             self.logger.client_info("DSDB rollback completed.")
 
-    def commit_or_rollback(self, error_msg=None):
+    def commit_or_rollback(self, error_msg=None, verbose=False):
         try:
-            self.commit()
+            self.commit(verbose=verbose)
         except ProcessException, err:
             if not error_msg:
                 error_msg = "DSDB update failed"
             self.logger.warn(str(err))
-            self.rollback()
+            self.rollback(verbose=verbose)
             raise ArgumentError(error_msg)
 
     def add_action(self, command_args, rollback_args, error_filter=None,

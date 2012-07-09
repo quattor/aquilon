@@ -95,6 +95,8 @@ class CommandAddDynamicRange(BrokerCommand):
             dsdb_runner.add_host_details(dbfqdn, ip)
 
         session.flush()
-        dsdb_runner.commit_or_rollback("Could not add addresses to DSDB")
+        # This may take some time if the range is big, so be verbose
+        dsdb_runner.commit_or_rollback("Could not add addresses to DSDB",
+                                       verbose=True)
 
         return

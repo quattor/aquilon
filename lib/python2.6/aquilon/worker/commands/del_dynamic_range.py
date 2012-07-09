@@ -80,4 +80,5 @@ class CommandDelDynamicRange(BrokerCommand):
             delete_dns_record(stub)
         session.flush()
 
-        dsdb_runner.commit_or_rollback()
+        # This may take some time if the range is big, so be verbose
+        dsdb_runner.commit_or_rollback(verbose=True)
