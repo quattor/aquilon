@@ -219,7 +219,6 @@ def first_of(iterable, function):
             return item
     return None
 
-
 # SQLA 0.7.6 will have "with session.no_autoflush:"
 class no_autoflush(object):
     def __init__(self, session):
@@ -231,23 +230,3 @@ class no_autoflush(object):
 
     def __exit__(self, type, value, traceback):
         self.session.autoflush = self.autoflush
-
-def get_host_ip(hostname, config):
-    if not config.has_section('unittest'):
-        return gethostbyname(hostname)
-
-    # faking hostip
-    hostfilename = config.get('unittest', 'fake_hosts_location') + hostname
-    hostfile = open(hostfilename).readlines()
-    primary_name = hostfile[0].split()[2]
-    ip_re = re.compile(r'^\s*([a-z0-9]+)\s+[a-z0-9]+\s+([0-9\.]+)')
-    host_ip = None
-    for line in hostfile:
-        m = ip_re.search(line)
-        if m and primary_name == m.group(1):
-            host_ip = m.group(2)
-            break
-
-    if host_ip == None:
-        raise gaierror("Name or service not known")
-    return host_ip

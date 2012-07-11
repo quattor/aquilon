@@ -42,7 +42,6 @@ from aquilon.aqdb.model.network_environment import NetworkEnvironment
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from socket import gaierror, gethostbyname
 from ipaddr import IPv4Address
-from aquilon.utils import get_host_ip
 
 class CommandAddAuroraHost(CommandAddHost):
 
@@ -128,7 +127,7 @@ class CommandAddAuroraHost(CommandAddHost):
                 dbnet_env = NetworkEnvironment.get_unique_or_default(session)
 
                 try:
-                    host_ip = get_host_ip(hostname, self.config)
+                    host_ip = gethostbyname(hostname)
                 except gaierror, e:
                     raise ArgumentError("Error when looking up host: %d, %s" %
                                         (e.errno, e.strerror))

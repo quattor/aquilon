@@ -57,7 +57,7 @@ class TestBrokerStart(unittest.TestCase):
 
         config = Config()
         twistd = os.path.join(config.get("broker", "srcdir"),
-                              "bin", "twistd.py")
+                              "lib", "python2.6", "aquilon", "unittest_patches.py")
         pidfile = os.path.join(config.get("broker", "rundir"), "aqd.pid")
         logfile = config.get("broker", "logfile")
 
