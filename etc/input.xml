@@ -3774,9 +3774,6 @@
             </optgroup>
          </optgroup>
       </optgroup>
-      <optgroup name="bind_cluster_type">
-         <option name="cluster_type" type="string">[Deprecated] Cluster type, esx or meta</option>
-      </optgroup>
       <transport method="put" trigger="service" path="cluster/%(cluster)s/service/%(service)s/%(instance)s" />
    </command>
 
@@ -3793,9 +3790,6 @@
                <option name="instance" type="string">Service Instance</option>
             </optgroup>
          </optgroup>
-         <optgroup name="rebind_cluster_type">
-            <option name="cluster_type" type="string">[Deprecated] Cluster type, esx or meta</option>
-         </optgroup>
       </optgroup>
       <transport method="post" trigger="service" path="cluster/%(cluster)s/service/%(service)s/%(instance)s" />
    </command>
@@ -3808,9 +3802,6 @@
         <optgroup name="unbind_cluster_service" mandatory="False" fields="all">
                <option name="service" type="string">Service name</option>
                <option name="instance" type="string">Service Instance</option>
-         </optgroup>
-         <optgroup name="unbind_cluster_type">
-            <option name="cluster_type" type="string">[Deprecated] Cluster type, esx or meta</option>
          </optgroup>
       </optgroup>
       <transport method="delete" trigger="service" path="cluster/%(cluster)s/service/%(service)s/%(instance)s" />

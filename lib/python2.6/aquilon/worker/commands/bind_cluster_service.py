@@ -39,14 +39,9 @@ class CommandBindClusterService(BrokerCommand):
     required_parameters = ["cluster", "service", "instance"]
 
     def render(self, session, logger, cluster, service, instance, force=False,
-               cluster_type=None, **arguments):
-        # generalized backward compat for bind_esx_cluster.
-        if cluster_type:
-            ctype = Cluster.__mapper__.polymorphic_map[cluster_type].class_
-        else:
-            ctype = Cluster
+               **arguments):
 
-        dbcluster = ctype.get_unique(session, cluster, compel=True)
+        dbcluster = Cluster.get_unique(session, cluster, compel=True)
         dbservice = Service.get_unique(session, service, compel=True)
         chooser = Chooser(dbcluster, logger=logger, required_only=False)
         if instance:

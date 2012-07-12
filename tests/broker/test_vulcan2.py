@@ -386,7 +386,7 @@ class TestVulcan20(TestBrokerCommand):
 
     def test_152_bindvcenterservices(self):
         command = ["bind_cluster", "--cluster", "utmc8", "--service", "vcenter",
-                   "--instance", "ut", "--cluster_type", "meta"]
+                   "--instance", "ut"]
         err = self.statustest(command)
         self.matchoutput(err, "Metacluster utmc8 adding binding for "
                          "service vcenter instance ut", command)
@@ -410,8 +410,7 @@ class TestVulcan20(TestBrokerCommand):
         self.noouttest(command)
 
         command = ["unbind_cluster", "--cluster", "utmc8",
-                   "--service", "vcenter", "--instance", "ut",
-                   "--cluster_type", "meta"]
+                   "--service", "vcenter", "--instance", "ut"]
         self.noouttest(command)
 
     def test_154_unmapvcenterservices(self):
