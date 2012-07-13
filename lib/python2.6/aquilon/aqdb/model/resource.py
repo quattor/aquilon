@@ -98,8 +98,6 @@ class HostResource(ResourceHolder):
                     backref=backref('resholder', uselist=False,
                                     cascade='all, delete-orphan'))
 
-    UniqueConstraint('host_id', name='%s_host_uk' % _RESHOLDER)
-
     @property
     def holder_name(self):
         return self.host.fqdn
@@ -107,6 +105,10 @@ class HostResource(ResourceHolder):
     @property
     def holder_object(self):
         return self.host
+
+
+resholder.append_constraint(UniqueConstraint('host_id',
+                                             name='%s_host_uk' % _RESHOLDER))
 
 
 class ClusterResource(ResourceHolder):
@@ -122,8 +124,6 @@ class ClusterResource(ResourceHolder):
                        backref=backref('resholder', uselist=False,
                                        cascade='all, delete-orphan'))
 
-    UniqueConstraint('cluster_id', name='%s_cluster_uk' % _RESHOLDER)
-
     @property
     def holder_name(self):
         return self.cluster.name
@@ -131,6 +131,10 @@ class ClusterResource(ResourceHolder):
     @property
     def holder_object(self):
         return self.cluster
+
+
+resholder.append_constraint(UniqueConstraint('cluster_id',
+                                             name='%s_cluster_uk' % _RESHOLDER))
 
 
 class Resource(Base):
