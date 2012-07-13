@@ -92,7 +92,7 @@ class CommandCluster(BrokerCommand):
             old_cluster.hosts.remove(dbhost)
             remove_service_addresses(old_cluster, dbhost)
             old_cluster.validate()
-            session.expire(dbhost, ['cluster'])
+            session.expire(dbhost, ['_cluster'])
             plenaries.append(Plenary.get_plenary(old_cluster))
 
         # Apply the service addresses to the new member
@@ -110,7 +110,13 @@ class CommandCluster(BrokerCommand):
             # to do here.
             return
 
-        dbcluster.hosts.append(dbhost)
+        # Calculate the node index: build a map of all possible values, remove
+        # the used ones, and pick the smallest remaining one
+        node_index_map = set(xrange(len(dbcluster._hosts) + 1))
+        for link in dbcluster._hosts:
+            node_index_map.remove(link.node_index)
+
+        dbcluster.hosts.append((dbhost, min(node_index_map)))
         dbcluster.validate()
 
         # demote a host when switching clusters

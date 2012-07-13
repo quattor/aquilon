@@ -216,13 +216,14 @@ class CommandSearchHost(BrokerCommand):
 
         if cluster:
             dbcluster = Cluster.get_unique(session, cluster, compel=True)
-            if isinstance(dbcluster,MetaCluster):
-                q = q.join('cluster')
+            if isinstance(dbcluster, MetaCluster):
+                q = q.join('_cluster', 'cluster', '_metacluster')
                 q = q.filter_by(metacluster=dbcluster)
             else:
                 q = q.filter_by(cluster=dbcluster)
             q = q.reset_joinpoint()
         if guest_on_cluster:
+            # TODO: this does not handle metaclusters according to Wes
             dbcluster = Cluster.get_unique(session, guest_on_cluster,
                                            compel=True)
             q = q.join('machine', VirtualMachine, ClusterResource)
@@ -246,7 +247,7 @@ class CommandSearchHost(BrokerCommand):
                                                  service=nas_disk_share,
                                                  compel=True)
             NasAlias = aliased(NasDisk)
-            q = q.join('cluster', 'resholder', VirtualMachine,
+            q = q.join('_cluster', 'cluster', 'resholder', VirtualMachine,
                        'machine', 'disks', (NasAlias, NasAlias.id==Disk.id))
             q = q.filter_by(service_instance=dbshare)
             q = q.reset_joinpoint()

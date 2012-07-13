@@ -83,10 +83,17 @@ _CSBABV = 'clstr_svc_bndg'
 _CAP = 'clstr_allow_per'
 
 
+def _hcm_host_creator(tuple):
+    host = tuple[0]
+    node_index = tuple[1]
+    return HostClusterMember(host=host, node_index=node_index)
+
+
 class Cluster(Base):
     """
-        A group of two or more hosts for high availablility or grid capabilities
-        Location constraint is nullable as it may or may not be used
+        A group of two or more hosts for high availablility or grid
+        capabilities.  Location constraint is nullable as it may or
+        may not be used.
     """
     __tablename__ = _TN
 
@@ -139,6 +146,8 @@ class Cluster(Base):
     branch = relation(Branch, lazy=False, innerjoin=True, backref='clusters')
     sandbox_author = relation(UserPrincipal)
 
+    hosts = association_proxy('_hosts', 'host', creator=_hcm_host_creator)
+
     metacluster = association_proxy('_metacluster', 'metacluster')
 
     __mapper_args__ = {'polymorphic_on': cluster_type}
@@ -153,14 +162,13 @@ class Cluster(Base):
     def dht_value(self):
         if not self.down_hosts_percent:
             return self.down_hosts_threshold
-        return int((self.down_hosts_threshold * len(self.hosts))/100)
+        return int((self.down_hosts_threshold * len(self.hosts)) / 100)
 
     @property
     def dmt_value(self):
         if not self.down_maint_percent:
             return self.down_maint_threshold
-        return int((self.down_maint_threshold * len(self.hosts))/100)
-
+        return int((self.down_maint_threshold * len(self.hosts)) / 100)
 
     @staticmethod
     def parse_threshold(threshold):
@@ -222,12 +230,12 @@ class Cluster(Base):
                     #"branch_id"
                 ]:
                 if getattr(self, i, None) is None:
-                    raise ValueError("%s attribute must be set for a %s cluster"
-                                     % (i, self.cluster_type))
+                    raise ValueError(
+                        "%s attribute must be set for a %s cluster" % (
+                            i, self.cluster_type))
         else:
             if self.metacluster:
                 raise ValueError("Metaclusters can't contain metaclusters")
-
 
         if max_hosts is None:
             max_hosts = self.max_hosts
@@ -257,7 +265,8 @@ class Cluster(Base):
 
         if lowercase:
             parts = clsname.split()
-            clsname = ' '.join(map(lambda x: x if x[:-1].isupper() else x.lower(), parts))
+            clsname = ' '.join(map(
+                    lambda x: x if x[:-1].isupper() else x.lower(), parts))
         if class_only:
             return clsname.__format__(passthrough)
         val = "%s %s" % (clsname, instance)
@@ -389,7 +398,7 @@ class EsxCluster(Cluster):
 
         if len(self.hosts) <= down_hosts_threshold:
             if self.memory_capacity is not None:
-                return {'memory' : self.memory_capacity}
+                return {'memory': self.memory_capacity}
             return {'memory': 0}
 
         func = self.vmhost_capacity_function
@@ -494,7 +503,7 @@ class EsxCluster(Cluster):
         # are not available from the number currently configured.
         if down_hosts_percent:
             adjusted_host_count = current_host_count - \
-                int(down_hosts_threshold*current_host_count/100)
+                int(down_hosts_threshold * current_host_count / 100)
             dhtstr = "%d%%" % down_hosts_threshold
         else:
             adjusted_host_count = current_host_count - down_hosts_threshold
@@ -538,7 +547,7 @@ esx_cluster.info['unique_fields'] = ['name']
 
 
 class HostClusterMember(Base):
-    """ Specific Class for EsxCluster vmhosts """
+    """ Association table for clusters and their member hosts """
     __tablename__ = _HCM
 
     cluster_id = Column(Integer, ForeignKey('%s.id' % _TN,
@@ -553,14 +562,34 @@ class HostClusterMember(Base):
                         #if the host is deleted, so is the membership
                         primary_key=True)
 
+    node_index = Column(Integer, nullable=False)
+
+    """
+        Association Proxy and relation cascading: We need cascade=all
+        on backrefs so that deletion propagates to avoid AssertionError:
+        Dependency rule tried to blank-out primary key column on deletion
+        of the Cluster and it's links. On the contrary do not have
+        cascade='all' on the forward mapper here, else deletion of
+        clusters and their links also causes deleteion of hosts (BAD)
+    """
+    cluster = relation(Cluster, lazy=False, innerjoin=True,
+                       backref=backref('_hosts', cascade='all, delete-orphan'))
+
+    # This is a one-to-one relation, so we need uselist=False on the backref
+    host = relation(Host, lazy=False, innerjoin=True,
+                    backref=backref('_cluster', uselist=False,
+                                    cascade='all, delete-orphan'))
+
 
 hcm = HostClusterMember.__table__  # pylint: disable=C0103, E1101
 hcm.primary_key.name = '%s_pk' % _HCM
 hcm.append_constraint(
     UniqueConstraint('host_id', name='host_cluster_member_host_uk'))
+hcm.append_constraint(UniqueConstraint('cluster_id', 'node_index',
+                                       name='host_cluster_member_node_uk'))
+hcm.info['unique_fields'] = ['cluster', 'host']
 
-Cluster.hosts = relation(Host, secondary=hcm,
-                         backref=backref("cluster", uselist=False))
+Host.cluster = association_proxy('_cluster', 'cluster')
 
 
 class ClusterAllowedPersonality(Base):
@@ -584,11 +613,11 @@ Cluster.allowed_personalities = relation(Personality, secondary=cap)
 
 class ClusterAlignedService(Base):
     """
-        Express services that must be the same for cluster types. As SQL Alchemy
-        doesn't yet support FK or functionally determined discrimators for
-        polymorphic inheritance, cluster_type is currently being expressed as a
-        string. As ESX is the only type for now, it's seems a reasonable corner
-        to cut.
+        Express services that must be the same for cluster types. As
+        SQL Alchemy doesn't yet support FK or functionally determined
+        discrimators for polymorphic inheritance, cluster_type is
+        currently being expressed as a string. As ESX is the only type
+        for now, it's seems a reasonable corner to cut.
     """
     __tablename__ = _CAS
     _class_label = 'Cluster Aligned Service'
