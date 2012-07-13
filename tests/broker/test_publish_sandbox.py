@@ -32,7 +32,7 @@
 
 import os
 import unittest
-from subprocess import Popen
+from subprocess import Popen, PIPE
 
 if __name__ == "__main__":
     import utils
@@ -42,6 +42,21 @@ from brokertest import TestBrokerCommand
 
 
 class TestPublishSandbox(TestBrokerCommand):
+
+    def test_001(self):
+        """Run "make clean" on templates before anything else.
+
+        Replace with setupClass when we move to Py2.7
+        """
+        p = Popen(('/usr/bin/make', 'clean'),
+                  cwd=os.path.join(self.sandboxdir, 'changetest1', 't'),
+                  env=self.gitenv(env={'PATH':'/bin:/usr/bin'}),
+                  stdout=PIPE, stderr=PIPE)
+        (out, err) = p.communicate()
+        self.assertEqual(p.returncode, 0,
+                         "Non-zero return code running make clean in sandbox,"+
+                         " STDOUT:\n@@@'%s'\n@@@\nSTDERR:\n@@@'%s'@@@\n"
+                         % (out, err))
 
     def testmakechange(self):
         sandboxdir = os.path.join(self.sandboxdir, "changetest1")

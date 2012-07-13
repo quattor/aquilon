@@ -64,6 +64,7 @@ from aquilon.python_patches import load_uuid_quickly
 csv.register_dialect('aquilon', delimiter=',', quoting=csv.QUOTE_MINIMAL,
                      doublequote=True, lineterminator='\n')
 
+
 class RESTResource(object):
     def __init__(self, httpconnection, uri):
         self.httpconnection = httpconnection
@@ -71,6 +72,7 @@ class RESTResource(object):
 
     def get(self):
         return self._sendRequest('GET')
+
     def post(self, **kwargs):
         postData = urllib.urlencode(kwargs)
         mimeType = 'application/x-www-form-urlencoded'
@@ -82,7 +84,7 @@ class RESTResource(object):
     def delete(self):
         return self._sendRequest('DELETE')
 
-    def _sendRequest(self, method, data = None, mimeType = None):
+    def _sendRequest(self, method, data=None, mimeType=None):
         headers = {}
         if mimeType:
             headers['Content-Type'] = mimeType
@@ -117,7 +119,7 @@ class CustomAction(object):
         from base64 import b64encode
 
         p = Popen(("git", "fetch"), stderr=2)
-        p.wait()  ## wait for return, but it's okay if this fails
+        p.wait()  # wait for return, but it's okay if this fails
         p = Popen(("git", "status", "--porcelain"), stdout=PIPE, stderr=2)
         (out, err) = p.communicate()
         if p.returncode:
@@ -129,21 +131,42 @@ class CustomAction(object):
             print >>sys.stderr, "Not ready to publish, found:\n%s" % out
             sys.exit(1)
 
+        # Locate the top of the sandbox for the purposes of executing the
+        # unit tests in the t directory
+        p = Popen(('git', 'rev-parse', '--show-toplevel'), stdout=PIPE)
+        (sandbox_dir, err) = p.communicate()
+        sandbox_dir = sandbox_dir.strip()
+        if p.returncode != 0:
+            print >>sys.stderr, "Failed to find toplevel of sandbox, aborting"
+            sys.exit(1)
+        # Prevent the branch being published unless the unit tests pass
+        testdir = os.path.join(sandbox_dir, 't')
+        if os.path.exists(os.path.join(testdir, 'Makefile')):
+            p = Popen(['/usr/bin/make', 'PWD=%s' % testdir, 'test'],
+                        cwd=testdir)
+            p.wait()
+            if p.returncode != 0:
+                print >>sys.stderr, "\nUnit tests failed, publish prohibited.",
+                print >>sys.stderr, '(Do you need to run a "make clean test"?)'
+                sys.exit(1)
+
         if "sandbox" in commandOptions:
             branch = commandOptions["sandbox"]
         else:
             branch = commandOptions["branch"]
         revlist = "origin/%s..HEAD" % branch
         p = Popen(("git", "log", revlist), stdout=PIPE, stderr=2)
-        (out,err) = p.communicate()
+        (out, err) = p.communicate()
 
         if out:
-            print >>sys.stdout, "\nThe following changes will be included in this push:\n"
+            print >>sys.stdout, \
+                "\nThe following changes will be included in this push:\n"
             print >>sys.stdout, "------------------------"
             print >>sys.stdout, str(out)
             print >>sys.stdout, "------------------------"
         else:
-            print >>sys.stdout, "\nYou haven't made any changes on this branch\n"
+            print >>sys.stdout, \
+                "\nYou haven't made any changes on this branch\n"
             sys.exit(0)
 
         (handle, filename) = mkstemp()
@@ -189,7 +212,8 @@ def create_sandbox(pageData, noexec=False):
         print " ".join(["'%s'" % c for c in cmd])
         return 0
     try:
-        p = subprocess.Popen(cmd, cwd=user_base, stdin=None, stdout=1, stderr=2)
+        p = subprocess.Popen(cmd, cwd=user_base, stdin=None,
+                             stdout=1, stderr=2)
     except OSError, e:
         print >>sys.stderr, "Could not execute %s: %s" % (cmd, e)
         return 1
@@ -274,7 +298,8 @@ class StatusThread(Thread):
 
 
 def quoteOptions(options):
-    return "&".join([ urllib.quote(k) + "=" + urllib.quote(v) for k, v in options.iteritems() ])
+    return "&".join([urllib.quote(k) + "=" + urllib.quote(v)
+                     for k, v in options.iteritems()])
 
 
 if __name__ == "__main__":
@@ -282,7 +307,7 @@ if __name__ == "__main__":
     # path, so we have to normalize it
     os.environ["MANPATH"] = os.path.realpath(MANDIR)
 
-    parser = OptParser( os.path.join( BINDIR, '..', 'etc', 'input.xml' ) )
+    parser = OptParser(os.path.join(BINDIR, '..', 'etc', 'input.xml'))
     try:
         (command, transport, commandOptions, globalOptions) = \
                 parser.parse(sys.argv[1:])
@@ -376,7 +401,7 @@ if __name__ == "__main__":
     # a query operator has been specified, otherwise it would just be
     # tacking on (for example) .html to the uri.
     # Do not apply any formatting for commands (transport.expect == 'command').
-    if globalOptions.has_key('format') and not transport.expect:
+    if 'format' in globalOptions and not transport.expect:
         extension = '.' + urllib.quote(globalOptions["format"])
 
         query_index = uri.find('?')
@@ -510,8 +535,8 @@ if __name__ == "__main__":
             print pageData
         else:
             try:
-                proc = subprocess.Popen(pageData, shell = True, stdin = sys.stdin,
-                                        stdout = sys.stdout, stderr = sys.stderr)
+                proc = subprocess.Popen(pageData, shell=True, stdin=sys.stdin,
+                                        stdout=sys.stdout, stderr=sys.stderr)
             except OSError, e:
                 print >>sys.stderr, e
                 sys.exit(1)
