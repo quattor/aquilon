@@ -47,8 +47,12 @@ class StatusWriter(StatusSubscriber):
         self.loglevel = loglevel
 
     def process(self, record):
-        if record.levelno >= self.loglevel and \
-           self.request.channel.transport.connected:
+        # TODO: As documented in the twisted http module, should
+        # instead register a notifyFinish callback to track clients
+        # disconnecting.
+        if self.request._disconnected:
+            return
+        if record.levelno >= self.loglevel:
             self.request.write(str(record.getMessage()))
 
     def finish(self):

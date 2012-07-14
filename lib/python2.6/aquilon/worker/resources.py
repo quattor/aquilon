@@ -233,11 +233,18 @@ class ResponsePage(resource.Resource):
     def finishRender(self, result, request):
         if result:
             request.setHeader('content-length', str(len(result)))
+            # TODO: When disconnected, why doesn't write() fail?
             request.write(result)
         else:
             request.setHeader('content-length', 0)
-        request.finish()
+        # TODO: As documented in the twisted http module, should
+        # instead register a notifyFinish callback to track clients
+        # disconnecting.
+        if not request._disconnected:
+            request.finish()
         if hasattr(request, 'aq_audit_id'):
+            if request._disconnected:
+                log.msg('Lost client for command #%d.' % request.aq_audit_id)
             log.msg('Command #%d finished.' % request.aq_audit_id)
             delattr(request, 'aq_audit_id')
         return
