@@ -35,12 +35,12 @@ from sqlalchemy.sql import or_
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.formats.host import SimpleHostList
 from aquilon.aqdb.model import (Host, Cluster, Archetype, Personality,
-                                PersonalityGrnMap, HostGrnMap,
-                                HostLifecycle, OperatingSystem, Service,
-                                ServiceInstance, NasDisk, Disk, Machine, Model,
-                                ARecord, Fqdn, DnsDomain, Interface,
-                                AddressAssignment, NetworkEnvironment, Network,
-                                MetaCluster, VirtualMachine, ClusterResource)
+                                PersonalityGrnMap, HostGrnMap, HostLifecycle,
+                                OperatingSystem, Service, ServiceInstance,
+                                NasDisk, Disk, Machine, Model, ARecord,
+                                DnsDomain, Interface, AddressAssignment,
+                                NetworkEnvironment, Network, MetaCluster,
+                                VirtualMachine, ClusterResource)
 from aquilon.aqdb.model.dns_domain import parse_fqdn
 from aquilon.worker.dbwrappers.service_instance import get_service_instance
 from aquilon.worker.dbwrappers.branch import get_branch_and_author
@@ -64,7 +64,7 @@ class CommandSearchHost(BrokerCommand):
         dbnet_env = NetworkEnvironment.get_unique_or_default(session,
                                                              network_environment)
         dnsq = session.query(ARecord.ip)
-        dnsq = dnsq.join(Fqdn)
+        dnsq = dnsq.join(ARecord.fqdn)
         use_dnsq = False
         if hostname:
             (short, dbdns_domain) = parse_fqdn(session, hostname)

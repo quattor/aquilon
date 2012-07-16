@@ -33,7 +33,7 @@ from sqlalchemy.sql import exists
 from aquilon.worker.broker import BrokerCommand
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import (Network, Machine, VlanInfo, ObservedVlan,
-                                Cluster, ARecord, DynamicStub, Fqdn,
+                                Cluster, ARecord, DynamicStub,
                                 NetworkEnvironment)
 from aquilon.aqdb.model.dns_domain import parse_fqdn
 from aquilon.worker.dbwrappers.location import get_location
@@ -94,7 +94,7 @@ class CommandSearchNetwork(BrokerCommand):
         if fqdn:
             (short, dbdns_domain) = parse_fqdn(session, fqdn)
             dnsq = session.query(ARecord.ip)
-            dnsq = dnsq.join(Fqdn)
+            dnsq = dnsq.join(ARecord.fqdn)
             dnsq = dnsq.filter_by(name=short)
             dnsq = dnsq.filter_by(dns_domain=dbdns_domain)
             networks = [get_net_id_from_ip(session, addr.ip, dbnet_env).id

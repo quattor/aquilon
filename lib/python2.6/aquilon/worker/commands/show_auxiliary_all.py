@@ -52,9 +52,8 @@ class CommandShowAuxiliaryAll(BrokerCommand):
         q = q.join(aliased(HardwareEntity))
         q = q.filter_by(hardware_type='machine')
         q = q.reset_joinpoint()
-        q = q.join(Fqdn, DnsDomain)
-        q = q.options(contains_eager('fqdn'))
-        q = q.options(contains_eager('fqdn.dns_domain'))
+        q = q.join(ARecord.fqdn, DnsDomain)
+        q = q.options(contains_eager('fqdn'), contains_eager('fqdn.dns_domain'))
         q = q.order_by(Fqdn.name, DnsDomain.name)
         fqdns = [rec.fqdn for rec in q.all()]
         return fqdns

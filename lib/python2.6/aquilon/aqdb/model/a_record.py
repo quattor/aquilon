@@ -29,32 +29,44 @@
 """ Representation of DNS A records """
 
 from sqlalchemy import Integer, Column, ForeignKey
-from sqlalchemy.orm import relation, backref, mapper, deferred, object_session
+from sqlalchemy.orm import (relation, backref, mapper, deferred, object_session,
+                            validates)
 from sqlalchemy.orm.attributes import instance_state
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Network, DnsRecord, Fqdn
 from aquilon.aqdb.column_types import IPV4
 
+_TN = 'a_record'
+
 
 class ARecord(DnsRecord):
-    __tablename__ = 'a_record'
-    __mapper_args__ = {'polymorphic_identity': 'a_record'}
+    __tablename__ = _TN
+    __mapper_args__ = {'polymorphic_identity': _TN}
     _class_label = 'DNS Record'
 
     dns_record_id = Column(Integer, ForeignKey('dns_record.id',
-                                               name='A_RECORD_DNS_RECORD_FK',
+                                               name='%s_dns_record_fk' % _TN,
                                                ondelete='CASCADE'),
                            primary_key=True)
 
     ip = Column(IPV4, nullable=False)
 
     network_id = Column(Integer, ForeignKey('network.id',
-                                            name='A_RECORD_NETWORK_FK'),
+                                            name='%s_network_fk' % _TN),
                         nullable=False)
+
+    reverse_ptr_id = Column(Integer, ForeignKey('fqdn.id',
+                                                name='%s_reverse_fk' % _TN,
+                                                ondelete='SET NULL'),
+                            nullable=True)
 
     network = relation(Network, backref=backref('dns_records',
                                                 passive_deletes=True))
+
+    reverse_ptr = relation(Fqdn, primaryjoin=reverse_ptr_id == Fqdn.id,
+                           backref=backref('reverse_entries',
+                                           passive_deletes=True))
 
     def __format__(self, format_spec):
         if format_spec != "a":
@@ -93,9 +105,19 @@ class ARecord(DnsRecord):
         super(ARecord, self).__init__(ip=ip, network=network, fqdn=fqdn,
                                       **kwargs)
 
+    @validates('reverse_ptr')
+    def _validate_reverse_ptr(self, key, value):
+        return self.validate_reverse_ptr(key, value)
+
+    def validate_reverse_ptr(self, key, value):
+        if value and self.fqdn.dns_environment != value.dns_environment:  # pragma: no cover
+            raise ValueError("DNS environment mismatch: %s != %s" %
+                             (self.fqdn.dns_environment, value.dns_environment))
+        return value
+
 
 arecord = ARecord.__table__  # pylint: disable=C0103
-arecord.primary_key.name = 'a_record_pk'
+arecord.primary_key.name = '%s_pk' % _TN
 # TODO: index on ip?
 
 arecord.info['unique_fields'] = ['fqdn']
@@ -105,7 +127,9 @@ dns_record = DnsRecord.__table__  # pylint: disable=C0103
 fqdn = Fqdn.__table__  # pylint: disable=C0103
 
 # Create a secondary mapper on the join of the DnsRecord and Fqdn tables
-dns_fqdn_mapper = mapper(ARecord, arecord.join(dns_record).join(fqdn),
+dns_fqdn_mapper = mapper(ARecord,
+                         arecord.join(dns_record)
+                         .join(fqdn, dns_record.c.fqdn_id == fqdn.c.id),
                          # DnsRecord has a column with the same name
                          exclude_properties=[fqdn.c.creation_date],
                          properties={
@@ -120,17 +144,12 @@ dns_fqdn_mapper = mapper(ARecord, arecord.join(dns_record).join(fqdn),
                              'comments': deferred(dns_record.c.comments),
                              # Make sure FQDNs are eager loaded when using this
                              # mapper
-                             'fqdn': relation(Fqdn, lazy=False, innerjoin=True)
+                             'fqdn': relation(Fqdn, lazy=False, innerjoin=True,
+                                              primaryjoin=ARecord.fqdn_id == Fqdn.id)
                          },
-                         polymorphic_identity="a_record",
+                         polymorphic_identity=_TN,
                          primary_key=arecord.c.dns_record_id,
                          non_primary=True)
-
-# The secondary mapper does not know about the class inheritance, so we have to
-# set the superclass explicitely
-# This is http://www.sqlalchemy.org/trac/ticket/2151 - this workaround can be
-# removed when we upgrade to SQLA 0.6.8
-dns_fqdn_mapper._identity_class = DnsRecord
 
 
 class DynamicStub(ARecord):
@@ -145,10 +164,17 @@ class DynamicStub(ARecord):
     __mapper_args__ = {'polymorphic_identity': 'dynamic_stub'}
     _class_label = 'Dynamic Stub'
 
-    dns_record_id = Column(Integer, ForeignKey('a_record.dns_record_id',
+    dns_record_id = Column(Integer, ForeignKey('%s.dns_record_id' % _TN,
                                                name='dynamic_stub_arecord_fk',
                                                ondelete='CASCADE'),
                            primary_key=True)
+
+    def validate_reverse_ptr(self, key, value):
+        super(DynamicStub, self).validate_reverse_ptr(key, value)
+        if value:
+            raise ValueError("The reverse PTR record cannot be set for "
+                             "DNS records used for dynamic DHCP.")
+        return value
 
 
 dynstub = DynamicStub.__table__  # pylint: disable=C0103
