@@ -33,7 +33,7 @@ import socket
 from sqlalchemy import (Column, Integer, Sequence, String, DateTime,
                         ForeignKey, UniqueConstraint)
 from sqlalchemy.orm import (relation, contains_eager, column_property, backref,
-                            deferred)
+                            deferred, undefer)
 from sqlalchemy.orm.session import object_session
 from sqlalchemy.sql.expression import or_
 from sqlalchemy.sql import select, func
@@ -239,6 +239,8 @@ class ServiceInstance(Base):
                 q = q.filter_by(personality=dbpersonality)
             q = q.join('service_instance').filter(
                 ServiceInstance.service_id.in_(missing_ids))
+            q = q.options(contains_eager('service_instance'),
+                          undefer('service_instance._client_count'))
 
             if dbnetwork:
                 q = q.reset_joinpoint()
