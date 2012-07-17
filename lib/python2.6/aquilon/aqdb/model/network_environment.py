@@ -98,3 +98,16 @@ netenv.primary_key.name = '%s_pk' % _TN
 
 netenv.append_constraint(UniqueConstraint('name', name='%s_name_uk' % _ABV))
 netenv.info['unique_fields'] = ['name']
+
+
+def get_net_dns_env(session, network_environment=None,
+                    dns_environment=None):
+    dbnet_env = NetworkEnvironment.get_unique_or_default(session,
+                                                         network_environment)
+    if dns_environment:
+        dbdns_env = DnsEnvironment.get_unique(session, dns_environment,
+                                              compel=True)
+    else:
+        dbdns_env = dbnet_env.dns_environment
+
+    return (dbnet_env, dbdns_env)

@@ -6,4 +6,7 @@ ${dns_common.dns_record_head(record)}\
 %if record.assignments:
   Assigned To: ${", ".join(["%s/%s" % (addr.interface.hardware_entity.label, addr.interface.name) for addr in record.assignments])}
 %endif
+%if record.reverse_ptr:
+  Reverse PTR: ${str(record.reverse_ptr)}
+%endif
 ${dns_common.dns_record_tail(record)}\

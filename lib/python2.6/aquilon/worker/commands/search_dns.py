@@ -51,7 +51,8 @@ class CommandSearchDns(BrokerCommand):
 
     def render(self, session, fqdn, dns_environment, dns_domain, shortname,
                record_type, ip, network, network_environment, target,
-               target_domain, primary_name, used, fullinfo, style, **kwargs):
+               target_domain, primary_name, used, reverse_override, reverse_ptr,
+               fullinfo, style, **kwargs):
         q = session.query(DnsRecord)
         q = q.with_polymorphic('*')
         if record_type:
@@ -131,6 +132,15 @@ class CommandSearchDns(BrokerCommand):
                                      ARecord.network_id == AddressAssignment.network_id))
                 q = q.filter(AddressAssignment.id == None)
             q = q.reset_joinpoint()
+        if reverse_override is not None:
+            if reverse_override:
+                q = q.filter(ARecord.reverse_ptr.has())
+            else:
+                q = q.filter(~ARecord.reverse_ptr.has())
+        if reverse_ptr:
+            dbtarget = Fqdn.get_unique(session, fqdn=reverse_ptr,
+                                       dns_environment=dbdns_env, compel=True)
+            q = q.filter(ARecord.reverse_ptr == dbtarget)
 
         if fullinfo:
             q = q.options(undefer('comments'))

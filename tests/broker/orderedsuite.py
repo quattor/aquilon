@@ -189,6 +189,7 @@ from test_search_network import TestSearchNetwork
 from test_refresh_network import TestRefreshNetwork
 from test_split_merge_network import TestSplitMergeNetwork
 from test_update_alias import TestUpdateAlias
+from test_update_address import TestUpdateAddress
 from test_update_srv_record import TestUpdateSrvRecord
 from test_update_interface import TestUpdateInterface
 from test_update_machine import TestUpdateMachine
@@ -360,7 +361,7 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestSearchObservedMac, TestSearchNext, TestSearchNetwork,
                 TestUpdateInterface, TestUpdateMachine, TestUpdateModel,
                 TestUpdateRack,
-                TestUpdateAlias, TestUpdateSrvRecord,
+                TestUpdateAlias, TestUpdateSrvRecord, TestUpdateAddress,
                 TestBindFeature, TestUnbindFeature,
                 TestRefreshNetwork, TestUpdateNetwork, TestSplitMergeNetwork,
                 TestUpdateNetworkEnvironment,

@@ -59,7 +59,7 @@ class CommandAddServiceAddress(BrokerCommand):
 
     def render(self, session, logger, service_address, ip, name, interfaces,
                hostname, cluster, resourcegroup,
-               network_environment, comments, **arguments):
+               network_environment, map_to_primary, comments, **arguments):
 
         validate_basic("name", name)
 
@@ -94,6 +94,12 @@ class CommandAddServiceAddress(BrokerCommand):
                                                 network_environment)
         ip = dbdns_rec.ip
         dbnetwork = dbdns_rec.network
+
+        if map_to_primary:
+            if not isinstance(real_holder, Host):
+                raise ArgumentError("The --map_to_primary option works only "
+                                    "for host-based service addresses.")
+            dbdns_rec.reverse_ptr = real_holder.machine.primary_name.fqdn
 
         # Disable autoflush, since the ServiceAddress object won't be complete
         # until add_resource() is called
