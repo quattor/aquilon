@@ -16,10 +16,8 @@
 # limitations under the License.
 """Contains the logic for `aq update service`."""
 
-
-from aquilon.exceptions_ import ArgumentError
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.aqdb.model import Service
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
 
 
@@ -28,18 +26,20 @@ class CommandUpdateService(BrokerCommand):
     required_parameters = ["service"]
 
     def render(self, session, logger, service, max_clients, default,
-               **arguments):
+               need_client_list, **arguments):
         dbservice = Service.get_unique(session, name=service, compel=True)
+
         if default:
             dbservice.max_clients = None
         elif max_clients is not None:
             dbservice.max_clients = max_clients
-        else:
-            raise ArgumentError("Missing --max_clients or --default argument "
-                                "to update service %s." % dbservice.name)
+
+        if need_client_list is not None:
+            dbservice.need_client_list = need_client_list
+
         session.flush()
 
-        plenaries = PlenaryCollection()
+        plenaries = PlenaryCollection(logger=logger)
         plenaries.append(Plenary.get_plenary(dbservice))
         for dbinstance in dbservice.instances:
             plenaries.append(Plenary.get_plenary(dbinstance))

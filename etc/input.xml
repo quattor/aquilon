@@ -1709,6 +1709,7 @@
       <optgroup name="optional_opts">
          <option name="comments" type="string">Comments</option>
          <option name="instance" type="string">Instance</option>
+         <option name="need_client_list" type="boolean">Need client list in templates</option>
       </optgroup>
       <transport method="put" path="service/%(service)s" />
       <transport trigger="instance" method="put" path="service/%(service)s/instance/%(instance)s" />
@@ -1755,6 +1756,7 @@
          <optgroup name="update_service_count" mandatory="True" fields="any">
             <option name="max_clients" type="int" conflicts="default">Maximum number of client bindings for an instance</option>
             <option name="default" type="flag" conflicts="max_clients">Restore default setting</option>
+            <option name="need_client_list" type="boolean">Need client list in templates</option>
          </optgroup>
       </optgroup>
       <optgroup name="optional_opts">

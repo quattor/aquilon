@@ -25,9 +25,11 @@ class CommandAddService(BrokerCommand):
 
     required_parameters = ["service"]
 
-    def render(self, session, logger, service, comments, **arguments):
+    def render(self, session, logger, service, need_client_list, comments,
+               **arguments):
         Service.get_unique(session, service, preclude=True)
-        dbservice = Service(name=service, comments=comments)
+        dbservice = Service(name=service, comments=comments,
+                            need_client_list=need_client_list)
         session.add(dbservice)
 
         plenaries = PlenaryCollection(logger=logger)

@@ -189,9 +189,12 @@ class TestAddService(TestBrokerCommand):
         self.matchoutput(out, "Service: afs Instance: q.ny.ms.com", command)
         self.matchoutput(out, "Service: afs Instance: afs-by-net", command)
         self.matchoutput(out, "Service: afs Instance: q.ln.ms.com", command)
+
         # Make sure the right object got the comments
         self.matchoutput(out, "    Comments: Some instance comments", command)
         self.searchclean(out, r"^  Comments:", command)
+
+        self.matchoutput(out, "Need Client List: True", command)
 
     def test_300_show_bootserver(self):
         command = "show service --service bootserver"

@@ -168,7 +168,8 @@ class PlenaryServiceInstanceServer(SIHelperMixin, StructurePlenary):
 
     def body(self, lines):
         pan_assign(lines, "instance", self.dbobj.name)
-        pan_assign(lines, "clients", self.dbobj.client_fqdns)
+        if self.dbobj.service.need_client_list:
+            pan_assign(lines, "clients", self.dbobj.client_fqdns)
 
 
 class PlenaryServiceInstanceClientDefault(SIHelperMixin, Plenary):

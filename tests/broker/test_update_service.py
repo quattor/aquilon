@@ -124,6 +124,32 @@ class TestUpdateService(TestBrokerCommand):
         self.matchoutput(out, "Service: utsvc Instance: utsi2", command)
         self.matchoutput(out, "Maximum Client Count: Default (1100)", command)
 
+    def test_140_check_clientlist(self):
+        command = ["cat", "--service", "support-group",
+                   "--instance", "ec-service", "--server"]
+        out = self.commandtest(command)
+        self.searchoutput(out,
+                          r'"clients" = list\(([^)]|\s)*"unittest00.one-nyp.ms.com"',
+                          command)
+
+    def test_141_no_clientlist(self):
+        command = ["update_service", "--service", "support-group",
+                   "--noneed_client_list"]
+        self.noouttest(command)
+
+    def test_145_check_clientlist(self):
+        command = ["cat", "--service", "support-group",
+                   "--instance", "ec-service", "--server"]
+        out = self.commandtest(command)
+        self.matchclean(out, "clients", command)
+        self.matchclean(out, "unittest00.one-nyp.ms.com", command)
+        self.matchclean(out, "unittest02.one-nyp.ms.com", command)
+
+    def test_145_verify_service(self):
+        command = ["show_service", "--service", "support-group"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Need Client List: False", command)
+
     # FIXME: Missing functionality and tests for plenaries.
 
 
