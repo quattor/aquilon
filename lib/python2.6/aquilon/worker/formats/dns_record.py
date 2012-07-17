@@ -92,8 +92,7 @@ def nstr(text):
 
 
 class DnsDump(list):
-    def __init__(self, records, aux_map, dns_domains):
-        self.aux_map = aux_map
+    def __init__(self, records, dns_domains):
         # Store a reference to the DNS domains to prevent them being evicted
         # from the session's cache
         self.dns_domains = dns_domains
@@ -111,17 +110,15 @@ class DnsDumpFormatter(ObjectFormatter):
         # but BIND should be able to digest it
         for record in dump:
             if isinstance(record, ARecord):
-                # If the record is for an auxiliary, then the reverse PTR record
-                # should point to the primary
-                if record.ip in dump.aux_map:
-                    primary = dump.aux_map[record.ip]
+                if record.reverse_ptr:
+                    reverse = record.reverse_ptr
                 else:
-                    primary = record.fqdn
+                    reverse = record.fqdn
 
                 # Mind the dot!
                 result.append("%s.\tIN\tA\t%s" % (record.fqdn, record.ip))
                 result.append("%s.\tIN\tPTR\t%s." % (inaddr_ptr(record.ip),
-                                                     primary))
+                                                     reverse))
             elif isinstance(record, ReservedName):
                 pass
             elif isinstance(record, Alias):
@@ -140,12 +137,10 @@ class DnsDumpFormatter(ObjectFormatter):
         result = []
         for record in dump:
             if isinstance(record, ARecord):
-                if record.ip in dump.aux_map:
-                    # If the record is for an auxiliary, then the reverse PTR
-                    # record should point to the primary
-                    primary = dump.aux_map[record.ip]
+                if record.reverse_ptr:
                     result.append("+%s:%s" % (record.fqdn, record.ip))
-                    result.append("^%s:%s" % (inaddr_ptr(record.ip), primary))
+                    result.append("^%s:%s" % (inaddr_ptr(record.ip),
+                                              record.reverse_ptr))
                 else:
                     result.append("=%s:%s" % (record.fqdn, record.ip))
             elif isinstance(record, ReservedName):
