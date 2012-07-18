@@ -99,7 +99,7 @@ arecord.primary_key.name = 'a_record_pk'
 # TODO: index on ip?
 
 arecord.info['unique_fields'] = ['fqdn']
-arecord.info['extra_search_fields'] = ['ip', 'network']
+arecord.info['extra_search_fields'] = ['ip', 'network', 'dns_environment']
 
 dns_record = DnsRecord.__table__  # pylint: disable=C0103
 fqdn = Fqdn.__table__  # pylint: disable=C0103
@@ -154,7 +154,7 @@ class DynamicStub(ARecord):
 dynstub = DynamicStub.__table__  # pylint: disable=C0103
 dynstub.primary_key.name = 'dynamic_stub_pk'
 dynstub.info['unique_fields'] = ['fqdn']
-dynstub.info['extra_search_fields'] = ['ip', 'network']
+dynstub.info['extra_search_fields'] = ['ip', 'network', 'dns_environment']
 
 Network.dynamic_stubs = relation(DynamicStub, order_by=[DynamicStub.ip],
                                  viewonly=True)

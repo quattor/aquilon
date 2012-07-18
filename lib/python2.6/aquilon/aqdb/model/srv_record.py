@@ -150,4 +150,4 @@ class SrvRecord(DnsRecord):
 srv_record = SrvRecord.__table__  # pylint: disable=C0103
 srv_record.primary_key.name = '%s_pk' % _TN
 srv_record.info["unique_fields"] = ["fqdn"]
-srv_record.info["extra_search_fields"] = ['target']
+srv_record.info["extra_search_fields"] = ['target', 'dns_environment']
