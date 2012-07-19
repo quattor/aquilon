@@ -71,7 +71,12 @@ class TestRefreshWindowsHosts(TestBrokerCommand):
     def test_105_setupbadalias(self):
         command = ["add_alias", "--fqdn=badhost6.ms.com",
                    "--target=badhost6.msad.ms.com"]
-        self.noouttest(command)
+        out, err = self.successtest(command)
+        self.matchoutput(err,
+                         "WARNING: Will create alias for target "
+                         "badhost6.msad.ms.com, but trying to resolve it "
+                         "resulted in an error: ",
+                         command)
 
     def test_110_dryrun(self):
         command = ["refresh_windows_hosts", "--dryrun"]

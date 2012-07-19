@@ -99,7 +99,8 @@ def create_target_if_needed(session, logger, target, dbdns_env):
             socket.gethostbyname(dbtarget.fqdn)
         except socket.gaierror, e:
             logger.warning("WARNING: Will create alias for target {0.fqdn!s}, "
-                           "but {1.args[1]!s}.".format(dbtarget, e))
+                           "but trying to resolve it resulted in an error: "
+                           "{1.strerror}.".format(dbtarget, e))
 
         session.add(dbtarget)
         dbtarget_rec = ReservedName(fqdn=dbtarget)
