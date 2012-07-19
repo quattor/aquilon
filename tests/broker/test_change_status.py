@@ -62,6 +62,29 @@ class TestChangeStatus(TestBrokerCommand):
                    "--buildstatus", "install"]
         self.badrequesttest(command)
 
+    def testchangeunittest03(self):
+        # we start off as "ready", so each of these transitions (in order)
+        # should be valid
+        for status in ['decommissioned', 'rebuild', 'ready']:
+            command = ["change_status", "--hostname=unittest02.one-nyp.ms.com",
+                       "--buildstatus", status]
+            (out, err) = self.successtest(command)
+            self.matchoutput(err, "1/1 object template", command)
+
+            command = "show host --hostname unittest02.one-nyp.ms.com"
+            out = self.commandtest(command.split(" "))
+            self.matchoutput(out, "Build Status: %s" % status, command)
+
+            command = "cat --hostname unittest02.one-nyp.ms.com --data"
+            out = self.commandtest(command.split(" "))
+            self.matchoutput(out, '"/system/build" = "%s";' % status, command)
+
+        # And a transition that should be illegal from the final state above (ready)
+        command = ["change_status", "--hostname=unittest02.one-nyp.ms.com",
+                   "--buildstatus", "install"]
+        self.badrequesttest(command)
+
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestChangeStatus)
