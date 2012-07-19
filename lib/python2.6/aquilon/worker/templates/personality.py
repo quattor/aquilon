@@ -45,6 +45,96 @@ from collections import defaultdict
 LOGGER = logging.getLogger(__name__)
 
 
+def string_to_list(data):
+    ret = []
+    for val in data.split(','):
+        if isinstance(val, str):
+            val = val.strip()
+        ret.append(val)
+    return ret
+
+
+def get_parameters_by_feature(dbfeaturelink):
+    ret = {}
+    param_definitions = get_param_definitions(object_session(dbfeaturelink),
+                                              feature=dbfeaturelink.feature)
+    parameters = get_parameters(object_session(dbfeaturelink),
+                                featurelink=dbfeaturelink)
+
+    for param_def in param_definitions:
+        value = None
+        for param in parameters:
+            value = param.get_path(param_def.path, compel=False)
+            if not value and param_def.default:
+                value = validate_value("default for path=%s" % param_def.path,
+                                       param_def.value_type, param_def.default)
+            if value is not None:
+                if param_def.value_type == 'list':
+                    value = string_to_list(value)
+                ret[param_def.path] = value
+    return ret
+
+
+def helper_feature_template(featuretemplate, dbfeaturelink, lines):
+
+    params = get_parameters_by_feature(dbfeaturelink)
+    for path in params:
+        pan_variable(lines, path, params[path])
+    lines.append(featuretemplate.format_raw(dbfeaturelink))
+
+
+def get_path_under_top(path, value, ret):
+    """ input variable of type xx/yy would be printed as yy only in the
+        particular structure template
+        if path is just xx and points to a dict
+            i.e action = {startup: {a: b}}
+            then print as action/startup = pancized({a: b}
+        if path is just xx and points to non dict
+            ie xx = yy
+            then print xx = yy
+    """
+    pparts = Parameter.path_parts(path)
+    if not pparts:
+        return
+    top = pparts.pop(0)
+    if pparts:
+        ret[Parameter.topath(pparts)] = value
+    elif isinstance(value, dict):
+        for k in value:
+            ret[k] = value[k]
+    else:
+        ret[top] = value
+
+
+def get_parameters_by_tmpl(dbpersonality):
+    ret = defaultdict(dict)
+
+    session = object_session(dbpersonality)
+    param_definitions = get_param_definitions(session,
+                                              archetype=dbpersonality.archetype)
+    parameters = get_parameters(session, personality=dbpersonality)
+
+    for param_def in param_definitions:
+        value = None
+        for param in parameters:
+            value = param.get_path(param_def.path, compel=False)
+            if (value is None) and param_def.default:
+                value = validate_value("default for path=%s" % param_def.path,
+                                       param_def.value_type, param_def.default)
+            if value is not None:
+                ## coerce string list to list
+                if param_def.value_type == 'list':
+                    value = string_to_list(value)
+
+                get_path_under_top(param_def.path, value,
+                                   ret[param_def.template])
+
+        ## if all parameters are not defined still generate empty template
+        if param_def.template not in ret:
+            ret[param_def.template] = defaultdict()
+    return ret
+
+
 class PlenaryPersonality(PlenaryCollection):
 
     template_type = ""
@@ -62,106 +152,12 @@ class PlenaryPersonality(PlenaryCollection):
                                                             logger=logger))
 
         ## mulitple structure templates for parameters
-        self.param_templates = PlenaryPersonality.get_parameters_by_tmpl(dbpersonality)
+        self.param_templates = get_parameters_by_tmpl(dbpersonality)
         for template in self.param_templates:
             self.plenaries.append(
                  PlenaryPersonalityParameter(template,
                                              self.param_templates[template],
                                              dbpersonality, logger=logger))
-
-    @staticmethod
-    def helper_feature_template(featuretemplate, dbfeaturelink, lines):
-
-        params = PlenaryPersonality.get_parameters_by_feature(dbfeaturelink)
-        for path in params:
-            pan_variable(lines, path, params[path])
-        lines.append(featuretemplate.format_raw(dbfeaturelink))
-
-    @staticmethod
-    def get_parameters_by_tmpl(dbpersonality):
-        ret = defaultdict(dict)
-
-        param_definitions = get_param_definitions(
-                                object_session(dbpersonality),
-                                archetype=dbpersonality.archetype)
-
-        parameters = get_parameters(object_session(dbpersonality),
-                                    personality=dbpersonality)
-
-        for param_def in param_definitions:
-            value = None
-            for param in parameters:
-                value = param.get_path(param_def.path, compel=False)
-                if (value is None) and param_def.default:
-                    value = validate_value(
-                                "default for path=%s" % param_def.path,
-                                param_def.value_type, param_def.default)
-                if value is not None:
-                    ## coerce string list to list
-                    if param_def.value_type == 'list':
-                        value = PlenaryPersonality.string_to_list(value)
-
-                    PlenaryPersonality.get_path_under_top(param_def.path, value,
-                                                       ret[param_def.template])
-
-            ## if all parameters are not defined still generate empty template
-            if param_def.template not in ret:
-                ret[param_def.template] = defaultdict()
-        return ret
-
-    @staticmethod
-    def get_path_under_top(path, value, ret):
-        """ input variable of type xx/yy would be printed as yy only in the
-            particular structure template
-            if path is just xx and points to a dict
-                i.e action = {startup: {a: b}}
-                then print as action/startup = pancized({a: b}
-            if path is just xx and points to non dict
-                ie xx = yy
-                then print xx = yy
-        """
-        pparts = Parameter.path_parts(path)
-        if not pparts:
-            return
-        top = pparts.pop(0)
-        if pparts:
-            ret[Parameter.topath(pparts)] = value
-        elif isinstance(value, dict):
-            for k in value:
-                ret[k] = value[k]
-        else:
-            ret[top] = value
-
-    @staticmethod
-    def get_parameters_by_feature(dbfeaturelink):
-        ret = {}
-        param_definitions = get_param_definitions(object_session(dbfeaturelink),
-                                                  feature=dbfeaturelink.feature)
-        parameters = get_parameters(object_session(dbfeaturelink),
-                                    featurelink=dbfeaturelink)
-
-        for param_def in param_definitions:
-            value = None
-            for param in parameters:
-                value = param.get_path(param_def.path, compel=False)
-                if not value and param_def.default:
-                    value = validate_value(
-                                "default for path=%s" % param_def.path,
-                                param_def.value_type, param_def.default)
-                if value is not None:
-                    if param_def.value_type == 'list':
-                        value = PlenaryPersonality.string_to_list(value)
-                    ret[param_def.path] = value
-        return ret
-
-    @staticmethod
-    def string_to_list(data):
-        ret = []
-        for val in data.split(','):
-            if isinstance(val, str):
-                val = val.strip()
-            ret.append(val)
-        return ret
 
 Plenary.handlers[Personality] = PlenaryPersonality
 
@@ -229,7 +225,7 @@ class PlenaryPersonalityPreFeature(PlenaryPersonalityBase):
 
         ## hardware features should precede host features
         for link in model_feat + interface_feat + pre_feat:
-            PlenaryPersonality.helper_feature_template(feat_tmpl, link, lines)
+            helper_feature_template(feat_tmpl, link, lines)
 
 
 class PlenaryPersonalityPostFeature(PlenaryPersonalityBase):
@@ -243,7 +239,7 @@ class PlenaryPersonalityPostFeature(PlenaryPersonalityBase):
         feat_tmpl = FeatureTemplate()
         for link in self.dbobj.archetype.features + self.dbobj.features:
             if link.feature.post_personality:
-                PlenaryPersonality.helper_feature_template(feat_tmpl, link, lines)
+                helper_feature_template(feat_tmpl, link, lines)
 
 
 class PlenaryPersonalityParameter(PlenaryPersonalityBase):
