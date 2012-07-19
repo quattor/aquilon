@@ -46,10 +46,10 @@ OTHER_PERSONALITY = 'eaitools'
 
 ## validation parameters by templates
 PARAM_DEFS = [
-    { "path" : "teststring",  "value_type" : "string",  "description" : "test string" },
-    { "path" : "testlist",    "value_type" : "list",    "description" : "test list"},
-    { "path" : "testrequired",   "value_type" : "string",   "description" : "test required", "required" : "true" },
-    { "path" : "testdefault",   "value_type" : "string",   "description" : "test required", "default" : "defaultval" },
+    { "path": "teststring",  "value_type": "string",  "description": "test string" },
+    { "path": "testlist",    "value_type": "list",    "description": "test list"},
+    { "path": "testrequired",   "value_type": "string",   "description": "test required", "required": "true" },
+    { "path": "testdefault",   "value_type": "string",   "description": "test required", "default": "defaultval" },
 ]
 
 SHOW_CMD = [ "show", "parameter" ]
@@ -146,8 +146,8 @@ class TestParameterFeature(TestBrokerCommand):
         type = "host"
         cmd = SHOW_CMD + [ "--feature", HOSTFEATURE, "--personality", PERSONALITY ]
         out = self.commandtest(cmd)
-        self.matchoutput(out, 'teststring : "host_feature"', cmd)
-        self.matchoutput(out, 'testlist : "host1,host2"', cmd)
+        self.matchoutput(out, 'teststring: "host_feature"', cmd)
+        self.matchoutput(out, 'testlist: "host1,host2"', cmd)
 
     def test_120_verify_cat_host_feature(self):
         cmd = CAT_CMD + ["--personality", PERSONALITY, "--post_feature"]
@@ -187,8 +187,8 @@ class TestParameterFeature(TestBrokerCommand):
         type = "interface"
         cmd = SHOW_CMD + [ "--feature", INTERFACEFEATURE, "--personality", PERSONALITY]
         out = self.commandtest(cmd)
-        self.matchoutput(out, 'teststring : "interface_feature"', cmd)
-        self.matchoutput(out, 'testlist : "intf1,intf2"', cmd)
+        self.matchoutput(out, 'teststring: "interface_feature"', cmd)
+        self.matchoutput(out, 'testlist: "intf1,intf2"', cmd)
 
     def test_220_verify_cat_interface_feature(self):
         cmd = CAT_CMD + ["--personality", PERSONALITY, "--pre_feature"]
@@ -251,9 +251,8 @@ class TestParameterFeature(TestBrokerCommand):
         type = "hardware"
         cmd = SHOW_CMD + [ "--feature", HARDWAREFEATURE, "--archetype", ARCHETYPE]
         out = self.commandtest(cmd)
-        self.matchoutput(out, 'FeatureLink : aquilon/hardwarefeature', cmd)
-        self.matchoutput(out, 'teststring : "hardware_feature"', cmd)
-        self.matchoutput(out, 'testlist : "hardware1,hardware2"', cmd)
+        self.matchoutput(out, 'teststring: "hardware_feature"', cmd)
+        self.matchoutput(out, 'testlist: "hardware1,hardware2"', cmd)
 
     def test_320_verify_cat_hardware_feature(self):
         cmd = CAT_CMD + ["--personality", PERSONALITY, "--pre_feature"]
@@ -314,9 +313,8 @@ class TestParameterFeature(TestBrokerCommand):
         type = "hardware"
         cmd = SHOW_CMD + [ "--feature", HARDWAREFEATURE, "--archetype", ARCHETYPE]
         out = self.commandtest(cmd)
-        self.matchoutput(out, 'FeatureLink : aquilon/hardwarefeature', cmd)
-        self.matchoutput(out, 'teststring : "hardware_newstring"', cmd)
-        self.matchoutput(out, 'testlist : "hardware1,hardware2"', cmd)
+        self.matchoutput(out, 'teststring: "hardware_newstring"', cmd)
+        self.matchoutput(out, 'testlist: "hardware1,hardware2"', cmd)
 
     def test_390_verify_cat_hardware_feature(self):
         cmd = CAT_CMD + ["--personality", PERSONALITY, "--pre_feature"]
@@ -332,13 +330,13 @@ class TestParameterFeature(TestBrokerCommand):
                "--other", OTHER_PERSONALITY]
 
         out = self.commandtest(cmd)
-        self.searchoutput (out, r'Differences for Required Services :\s*'
+        self.searchoutput (out, r'Differences for Required Services:\s*'
                                r'missing Required Services in Personality aquilon/unixeng-test:\s*'
                                r'netmap\s*'
                                r'missing Required Services in Personality aquilon/eaitools:\s*'
                                r'chooser1\s*chooser2\s*chooser3',
                          cmd)
-        self.searchoutput (out, r'Differences for Features :\s*'
+        self.searchoutput (out, r'Differences for Features:\s*'
                                r'missing Features in Personality aquilon/eaitools:\s*'
                                r'hostfeature\s*'
                                r'interfacefeature\s*',

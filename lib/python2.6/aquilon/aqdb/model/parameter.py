@@ -205,6 +205,8 @@ class ParameterHolder(Base):
     The dbobj with which this parameter is associaetd with.
     """
     __tablename__ = _PARAM_HOLDER
+    _class_label = 'Parameter Holder'
+    _instance_label = 'holder_name'
 
     id = Column(Integer, Sequence('%s_seq' % _PARAM_HOLDER), primary_key=True)
 

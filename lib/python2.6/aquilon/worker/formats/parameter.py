@@ -30,44 +30,21 @@
 
 import json
 
-from aquilon.aqdb.model import Parameter, FeatureLinkParameter
+from aquilon.aqdb.model import Parameter
 from aquilon.worker.formats.formatters import ObjectFormatter
-from aquilon.worker.formats.list import ListFormatter
 
 
 class ParameterFormatter(ObjectFormatter):
 
-    def format_json(self, param, indent=""):
+    def format_raw(self, param, indent=""):
         details = []
-        if isinstance(param.holder, FeatureLinkParameter):
-            details.append(indent + "FeatureLink : {0.holder_name}"
-                           .format(param.holder))
-        else:
-            details.append(indent + "Archetype/Personality : {0.holder_name}"
-                           .format(param.holder))
         for k in param.value:
             str_value = json.dumps(param.value[k], indent=4)
-            details.append("{0} : {1}".format(k, str_value))
+            details.append(indent + "{0}: {1}".format(k, str_value))
         return "\n".join(details)
 
 
 ObjectFormatter.handlers[Parameter] = ParameterFormatter()
-
-
-class ParameterList(list):
-    pass
-
-
-class ParameterListFormatter(ListFormatter):
-
-    def format_raw(self, paramlist, indent=""):
-        details = []
-        for param in paramlist:
-            details.append(self.redirect_json(param, indent))
-        return "\n".join(details)
-
-
-ObjectFormatter.handlers[ParameterList] = ParameterListFormatter()
 
 
 class DiffData(dict):
@@ -118,7 +95,7 @@ class DiffFormatter(ObjectFormatter):
                     details.append(indent + "    {0}".format(pp))
 
             if details:
-                ret.append("Differences for {0} :".format(k))
+                ret.append("Differences for {0}:".format(k))
                 ret.extend(details)
 
         return "\n".join(ret)
