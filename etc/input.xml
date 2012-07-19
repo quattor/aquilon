@@ -4000,6 +4000,7 @@
       </optgroup>
       <optgroup name="add_address_optional" mandatory="False">
          <option name="dns_environment" type="string">The name of the environment the address is in (defaults to 'internal')</option>
+	 <option name="network_environment" type="string">Name of the environment</option>
          <option name="ipalgorithm" type="string">Algorithm for automatically choosing an IP.</option>
          <option name="comments" type="string">Comments</option>
       </optgroup>
@@ -4015,6 +4016,7 @@
       </optgroup>
       <optgroup name="del_address_optional" mandatory="False">
          <option name="dns_environment" type="string">The name of the environment the address is in (defaults to 'internal')</option>
+	 <option name="network_environment" type="string">Name of the environment</option>
       </optgroup>
       <transport method="delete" path="address_default" />
       <transport method="delete" trigger="dns_environment" path="address/%(dns_environment)s" />
@@ -4027,6 +4029,7 @@
       </optgroup>
       <optgroup name="show_address_optional" mandatory="False">
          <option name="dns_environment" type="string">The name of the environment the address is in (defaults to 'internal')</option>
+	 <option name="network_environment" type="string">Name of the environment</option>
       </optgroup>
       <transport method="get" path="address_default/%(fqdn)s" />
       <transport method="get" trigger="dns_environment" path="address/%(dns_environment)s/%(fqdn)s" />

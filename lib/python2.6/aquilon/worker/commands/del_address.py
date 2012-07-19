@@ -37,9 +37,10 @@ class CommandDelAddress(CommandDelAddressDNSEnvironment):
 
     required_parameters = []
 
-    def render(self, dns_environment, **kwargs):
-        if not dns_environment:
+    def render(self, dns_environment, network_environment, **kwargs):
+        if not (network_environment or dns_environment):
             dns_environment = self.config.get("site", "default_dns_environment")
         return CommandDelAddressDNSEnvironment.render(self,
                                                       dns_environment=dns_environment,
+                                                      network_environment=network_environment,
                                                       **kwargs)
