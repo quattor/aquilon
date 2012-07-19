@@ -2314,7 +2314,6 @@
       <transport trigger="nasinfo" method="get" path="nasinfo/%(nasinfo)s/plenary" />
       <transport trigger="city" method="get" path="city/%(city)s/plenary" />
       <transport trigger="switch" method="get" path="switch/%(switch)s/plenary" />
-      <transport trigger="resource" method="get" path="resource/plenary/%(resource)s" />
       <transport trigger="personality" method="get"  path="personality/personality/%(personality)s/plenary" />
    </command>
 
