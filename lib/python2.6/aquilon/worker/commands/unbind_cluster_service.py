@@ -39,17 +39,11 @@ class CommandUnbindClusterService(BrokerCommand):
 
     required_parameters = ["cluster", "service", "instance"]
 
-    def render(self, session, logger, cluster, service, instance,
-               cluster_type=None, **arguments):
-
-        if cluster_type:
-            ctype = Cluster.__mapper__.polymorphic_map[cluster_type].class_
-        else:
-            ctype = Cluster
+    def render(self, session, logger, cluster, service, instance, **arguments):
 
         dbservice = Service.get_unique(session, service, compel=True)
         dbinstance = get_service_instance(session, dbservice, instance)
-        dbcluster = ctype.get_unique(session, cluster, compel=True)
+        dbcluster = Cluster.get_unique(session, cluster, compel=True)
         if dbinstance not in dbcluster.service_bindings:
             raise NotFoundException("{0} is not bound to {1:l}."
                                     .format(dbinstance, dbcluster))

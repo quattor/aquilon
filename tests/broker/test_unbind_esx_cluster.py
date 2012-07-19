@@ -45,7 +45,7 @@ class TestUnbindESXCluster(TestBrokerCommand):
                    "--service=esx_management_server", "--instance=ut.a"]
         out = self.notfoundtest(command)
         self.matchoutput(out,
-                         "ESX Cluster cluster-does-not-exist not found.",
+                         "Cluster cluster-does-not-exist not found.",
                          command)
 
     def testfailservicenotbound(self):

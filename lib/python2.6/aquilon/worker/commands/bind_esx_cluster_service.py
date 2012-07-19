@@ -38,5 +38,4 @@ class CommandBindESXClusterService(CommandBindClusterService):
 
     def render(self, session, **arguments):
 
-        return CommandBindClusterService.render(self, session,
-                                            cluster_type = "esx", **arguments)
+        return CommandBindClusterService.render(self, session, **arguments)
