@@ -217,3 +217,16 @@ def first_of(iterable, function):
         if function(item):
             return item
     return None
+
+
+# SQLA 0.7.6 will have "with session.no_autoflush:"
+class no_autoflush(object):
+    def __init__(self, session):
+        self.session = session
+        self.autoflush = session.autoflush
+
+    def __enter__(self):
+        self.session.autoflush = False
+
+    def __exit__(self, type, value, traceback):
+        self.session.autoflush = self.autoflush

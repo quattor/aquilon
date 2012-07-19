@@ -624,9 +624,10 @@ class DSDBRunner(object):
                    addr.interface.comments.startswith("Created automatically"):
                     comments = addr.interface.comments
 
-            # FIXME: Using dbhw_ent.id here is not that nice, but the blind
-            # build magic in "add_interface --machine" renames the machine, so
-            # we can't use dbhw_ent.label
+            # The blind build magic in "add_interface --machine" renames the
+            # machine, so we can't use dbhw_ent.label in the key. Renaming e.g.
+            # switches also depend on using a key that does not include the
+            # label.
             key = '%s:%s' % (dbhw_ent.id, ifname)
 
             if key in status:

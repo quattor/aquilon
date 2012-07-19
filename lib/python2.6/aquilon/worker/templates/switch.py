@@ -49,7 +49,7 @@ class PlenarySwitch(Plenary):
     def __init__(self, dbswitch, logger=LOGGER):
         Plenary.__init__(self, dbswitch, logger=logger)
         self.dbobj = dbswitch
-        self.name = dbswitch.primary_name
+        self.name = str(dbswitch.primary_name)
         self.plenary_core = "switchdata"
         self.plenary_template = self.name
 

@@ -30,11 +30,14 @@
 
 
 from aquilon.exceptions_ import ArgumentError, AquilonError
+from aquilon.aqdb.model import Model, Switch
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.location import get_location
-from aquilon.worker.dbwrappers.hardware_entity import update_primary_ip
+from aquilon.worker.dbwrappers.hardware_entity import (update_primary_ip,
+                                                       rename_hardware)
+from aquilon.worker.locks import lock_queue, CompileKey
 from aquilon.worker.processes import DSDBRunner
-from aquilon.aqdb.model import Model, Switch
+from aquilon.worker.templates.base import Plenary
 
 
 class CommandUpdateSwitch(BrokerCommand):
@@ -42,7 +45,7 @@ class CommandUpdateSwitch(BrokerCommand):
     required_parameters = ["switch"]
 
     def render(self, session, logger, switch, model, rack, type, ip,
-               vendor, serial, comments, **arguments):
+               vendor, serial, comments, rename_to, **arguments):
         dbswitch = Switch.get_unique(session, switch, compel=True)
 
         oldinfo = DSDBRunner.snapshot_hw(dbswitch)
@@ -72,12 +75,44 @@ class CommandUpdateSwitch(BrokerCommand):
         if comments is not None:
             dbswitch.comments = comments
 
-        session.add(dbswitch)
+        remove_plenary = None
+        if rename_to:
+            # Handling alias renaming would not be difficult in AQDB, but the
+            # DSDB synchronization would be painful, so don't do that for now.
+            # In theory we should check all configured IP addresses for aliases,
+            # but this is the most common case
+            if dbswitch.primary_name and dbswitch.primary_name.fqdn.aliases:
+                raise ArgumentError("The switch has aliases and it cannot be "
+                                    "renamed. Please remove all aliases first.")
+            remove_plenary = Plenary.get_plenary(dbswitch, logger=logger)
+            rename_hardware(session, dbswitch, rename_to)
+
         session.flush()
 
-        dsdb_runner = DSDBRunner(logger=logger)
+        switch_plenary = Plenary.get_plenary(dbswitch, logger=logger)
+
+        key = switch_plenary.get_write_key()
+        if remove_plenary:
+            key = CompileKey.merge([key, remove_plenary.get_remove_key()])
         try:
-            dsdb_runner.update_host(dbswitch, oldinfo)
-        except AquilonError, err:
-            raise ArgumentError("Could not update switch in DSDB: %s" % err)
+            lock_queue.acquire(key)
+            if remove_plenary:
+                remove_plenary.stash()
+                remove_plenary.remove(locked=True)
+            switch_plenary.write(locked=True)
+
+            dsdb_runner = DSDBRunner(logger=logger)
+            try:
+                dsdb_runner.update_host(dbswitch, oldinfo)
+            except AquilonError, err:
+                raise ArgumentError("Could not update switch in DSDB: %s" % err)
+            return
+        except:
+            if remove_plenary:
+                remove_plenary.restore_stash()
+            switch_plenary.restore_stash()
+            raise
+        finally:
+            lock_queue.release(key)
+
         return

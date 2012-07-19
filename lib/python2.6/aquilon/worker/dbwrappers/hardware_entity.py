@@ -32,13 +32,14 @@ from sqlalchemy.orm import aliased
 
 from aquilon.exceptions_ import ArgumentError, AquilonError
 from aquilon.aqdb.model import (HardwareEntity, Model, ReservedName,
-                                AddressAssignment, Interface, Vendor)
+                                AddressAssignment, Fqdn, Interface, Vendor)
+from aquilon.aqdb.model.dns_domain import parse_fqdn
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.worker.dbwrappers.dns import convert_reserved_to_arecord
 from aquilon.worker.dbwrappers.location import get_location
 from aquilon.worker.dbwrappers.interface import (check_ip_restrictions,
                                                  assign_address)
-from aquilon.utils import first_of
+from aquilon.utils import first_of, no_autoflush
 
 
 def search_hardware_entity_query(session, hardware_type=HardwareEntity,
@@ -135,3 +136,49 @@ def update_primary_ip(session, dbhw_ent, ip):
         for addr in addrs:
             addr.ip = ip
             addr.network = dbnetwork
+
+def rename_hardware(session, dbhw_ent, rename_to):
+    if "." in rename_to:
+        if not dbhw_ent.primary_name:
+            raise ArgumentError("{0} does not have a primary name, renaming "
+                                "using an FQDN is not possible."
+                                .format(dbhw_ent))
+        old_domain = dbhw_ent.primary_name.fqdn.dns_domain
+        dns_env = dbhw_ent.primary_name.fqdn.dns_environment
+        new_label, new_domain = parse_fqdn(session, rename_to)
+    else:
+        new_label = rename_to
+        if dbhw_ent.primary_name:
+            old_domain = new_domain = dbhw_ent.primary_name.fqdn.dns_domain
+            dns_env = dbhw_ent.primary_name.fqdn.dns_environment
+        else:
+            new_domain = None
+            dns_env = None
+
+    dbhw_ent.check_label(new_label)
+    HardwareEntity.get_unique(session, new_label, preclude=True)
+
+    old_label = dbhw_ent.label
+
+    fqdns = []
+    for addr in dbhw_ent.all_addresses():
+        fqdns.extend([dns_rec.fqdn for dns_rec in addr.dns_records])
+    # This case handles reserved names
+    if dbhw_ent.primary_name and dbhw_ent.primary_name.fqdn not in fqdns:
+        fqdns.append(dbhw_ent.primary_name.fqdn)
+
+    # Filter out unrelated FQDNs
+    fqdns = [fqdn for fqdn in fqdns if fqdn.name.startswith(old_label) and
+             fqdn.dns_domain == old_domain]
+
+    # Update all state in one go, so disable autoflush for now.
+    # TODO: change to "with session.no_autoflush" once upgrading to SQLA 0.7.6
+    with no_autoflush(session):
+        dbhw_ent.label = new_label
+
+        for dbfqdn in fqdns:
+            new_name = new_label + dbfqdn.name[len(old_label):]
+            Fqdn.get_unique(session, name=new_name, dns_domain=new_domain,
+                            dns_environment=dns_env, preclude=True)
+            dbfqdn.dns_domain = new_domain
+            dbfqdn.name = new_name
