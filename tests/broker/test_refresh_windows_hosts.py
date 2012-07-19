@@ -68,6 +68,11 @@ class TestRefreshWindowsHosts(TestBrokerCommand):
                                    "tests", "fakedw", "badmachines.sql")
         self.reset_machines_db(badmachines)
 
+    def test_105_setupbadalias(self):
+        command = ["add_alias", "--fqdn=badhost6.ms.com",
+                   "--target=badhost6.msad.ms.com"]
+        self.noouttest(command)
+
     def test_110_dryrun(self):
         command = ["refresh_windows_hosts", "--dryrun"]
         (p, out, err) = self.runcommand(command)
@@ -103,6 +108,10 @@ class TestRefreshWindowsHosts(TestBrokerCommand):
                          "already tied to unittest01.one-nyp.ms.com",
                          command)
         self.matchoutput(err,
+                         "Skipping host badhost6.msad.ms.com: "
+                         "It is not a primary name.",
+                         command)
+        self.matchoutput(err,
                          "Added host entry for evm3 (desktop1.msad.ms.com)",
                          command)
         self.matchoutput(err,
@@ -117,7 +126,7 @@ class TestRefreshWindowsHosts(TestBrokerCommand):
 
     def test_150_verify(self):
         for host in ["badhost3.msad.ms.com", "badhost4.msad.ms.com",
-                     "badhost5.msad.ms.com"]:
+                     "badhost5.msad.ms.com", "badhost6.msad.ms.com"]:
             self.notfoundtest(["show_host", "--hostname", host])
         for host in ["desktop1.msad.ms.com", "desktop2.msad.ms.com",
                      "desktop3.msad.ms.com", "desktop4.msad.ms.com"]:
@@ -158,6 +167,10 @@ class TestRefreshWindowsHosts(TestBrokerCommand):
                          "already tied to unittest01.one-nyp.ms.com",
                          command)
         self.matchoutput(err,
+                         "Skipping host badhost6.msad.ms.com: "
+                         "It is not a primary name.",
+                         command)
+        self.matchoutput(err,
                          "Added host entry for evm3 (desktop1.msad.ms.com)",
                          command)
         self.matchoutput(err,
@@ -172,13 +185,17 @@ class TestRefreshWindowsHosts(TestBrokerCommand):
 
     def test_250_verify(self):
         for host in ["badhost3.msad.ms.com", "badhost4.msad.ms.com",
-                     "badhost5.msad.ms.com"]:
+                     "badhost5.msad.ms.com", "badhost6.msad.ms.com"]:
             self.notfoundtest(["show_host", "--hostname", host])
         for host in ["desktop1.msad.ms.com", "desktop2.msad.ms.com",
                      "desktop3.msad.ms.com", "desktop4.msad.ms.com"]:
             command = ["show_host", "--hostname", host]
             out = self.commandtest(command)
             self.matchoutput(out, host, command)
+
+    def test_295_removebadalias(self):
+        command = ["del_alias", "--fqdn=badhost6.ms.com"]
+        self.noouttest(command)
 
     def test_300_setupdb(self):
         goodmachines = os.path.join(self.config.get("unittest", "srcdir"),

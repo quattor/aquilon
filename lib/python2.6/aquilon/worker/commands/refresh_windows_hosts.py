@@ -158,6 +158,7 @@ class CommandRefreshWindowsHosts(BrokerCommand):
                     msg = "Skipping host %s: It is not a primary name." % host
                     failed.append(msg)
                     logger.info(msg)
+                    continue
                 # If these are invalid there should have been a deletion
                 # attempt above.
                 if not existing.hardware_entity.interfaces:
