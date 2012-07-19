@@ -247,9 +247,14 @@ class TestParameter(TestBrokerCommand):
 
     def test_300_validate(self):
         out = self.badrequesttest(VAL_CMD)
-        self.searchoutput(out, r'Following required parameters have not been specified:\s*'
-                               r'parameter: esp/class  value type:string  template:espinfo\s*'
-                               r'parameter: esp/users  value type:string  template:espinfo',
+        self.searchoutput(out,
+                          r'Following required parameters have not been specified:\s*'
+                          r'Parameter Definition: esp/class \[required\]\s*'
+                          r'Type: string\s*'
+                          r'Template: espinfo\s*'
+                          r'Parameter Definition: esp/users \[required\]\s*'
+                          r'Type: string\s*'
+                          r'Template: espinfo',
                           VAL_CMD)
 
     def test_500_verify_diff(self):

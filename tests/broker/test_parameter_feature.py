@@ -164,8 +164,10 @@ class TestParameterFeature(TestBrokerCommand):
 
         out = self.badrequesttest(cmd)
 
-        self.searchoutput(out, r'Following required parameters have not been specified:\s*'
-                               r'parameter: testrequired  value type:string',
+        self.searchoutput(out,
+                          r'Following required parameters have not been specified:\s*'
+                          r'Parameter Definition: testrequired \[required\]\s*'
+                          r'Type: string',
                           cmd)
 
     def test_200_add_path_interface_feature(self):
@@ -204,8 +206,10 @@ class TestParameterFeature(TestBrokerCommand):
 
         out = self.badrequesttest(cmd)
 
-        self.searchoutput(out, r'Following required parameters have not been specified:\s*'
-                               r'parameter: testrequired  value type:string',
+        self.searchoutput(out,
+                          r'Following required parameters have not been specified:\s*'
+                          r'Parameter Definition: testrequired \[required\]\s*'
+                          r'Type: string',
                           cmd)
 
     def test_240_validate_argerror(self):
@@ -271,8 +275,10 @@ class TestParameterFeature(TestBrokerCommand):
 
         out = self.badrequesttest(cmd)
 
-        self.searchoutput(out, r'Following required parameters have not been specified:\s*'
-                               r'parameter: testrequired  value type:string',
+        self.searchoutput(out,
+                          r'Following required parameters have not been specified:\s*'
+                          r'Parameter Definition: testrequired \[required\]\s*'
+                          r'Type: string',
                           cmd)
 
     def test_340_validate_argerror(self):

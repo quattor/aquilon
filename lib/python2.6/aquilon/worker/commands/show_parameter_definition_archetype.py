@@ -29,7 +29,6 @@
 
 
 from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.formats.parameter_definition import ParamDefList
 from aquilon.exceptions_ import NotFoundException
 from aquilon.worker.dbwrappers.parameter import get_param_definitions
 
@@ -42,7 +41,7 @@ class CommandShowParameterDefinitionArchetype(BrokerCommand):
 
         dbobj = get_param_definitions(session, archetype=archetype)
         if dbobj:
-            return ParamDefList(archetype, None, dbobj)
+            return dbobj
 
         raise NotFoundException("No parameter definitions found for "
                                 "archetype {0}.".format(archetype))

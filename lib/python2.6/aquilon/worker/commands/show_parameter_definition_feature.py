@@ -29,7 +29,6 @@
 
 
 from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.formats.parameter_definition import ParamDefList
 from aquilon.exceptions_ import NotFoundException
 from aquilon.worker.dbwrappers.parameter import get_param_definitions
 
@@ -42,7 +41,7 @@ class CommandShowParameterDefinitionFeature(BrokerCommand):
 
         dbobj = get_param_definitions(session, feature=feature)
         if dbobj:
-            return ParamDefList(None, feature, dbobj)
+            return dbobj
 
         raise NotFoundException("No parameter definitions found for "
                                 "feature {0}.".format(feature))

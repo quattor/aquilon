@@ -58,7 +58,10 @@ class TestParameterDefinitionFeature(TestBrokerCommand):
                "--required", "--default=default"]
 
         err = self.badrequesttest(cmd)
-        self.matchoutput(err, "ParamDefinition path testpath, featureparamdef feature already exists", cmd)
+        self.matchoutput(err,
+                         "Parameter Definition testpath, parameter "
+                         "definition holder myfeature already exists.",
+                         cmd)
 
     def test_130_add_default_value_type(self):
         cmd = ["add_parameter_definition", "--feature", FEATURE, "--feature_type=host",
@@ -137,17 +140,36 @@ class TestParameterDefinitionFeature(TestBrokerCommand):
         cmd = ["show", "parameter_definition", "--feature", FEATURE ]
 
         out = self.commandtest(cmd)
-        self.matchoutput(out, "Required:\n  parameter: testpath  value type:string  default:default", cmd)
-        self.matchoutput(out, "parameter: testdefault  value type:string", cmd)
-        self.matchoutput(out, "parameter: testint  value type:int  default:60", cmd)
-        self.matchoutput(out, "parameter: testjson  value type:json  default:\"{'val1':'val2'}\"", cmd)
-        self.matchoutput(out, "parameter: testlist  value type:list  default:val1,val2", cmd)
+        self.searchoutput(out,
+                          r'Parameter Definition: testpath \[required\]\s*'
+                          r'Type: string\s*'
+                          r'Default: default',
+                          cmd)
+        self.searchoutput(out,
+                          r'Parameter Definition: testdefault\s*'
+                          r'Type: string',
+                          cmd)
+        self.searchoutput(out,
+                          r'Parameter Definition: testint\s*'
+                          r'Type: int\s*'
+                          r'Default: 60',
+                          cmd)
+        self.searchoutput(out,
+                          r'Parameter Definition: testjson\s*'
+                          r'Type: json\s*'
+                          r"Default: \"{'val1':'val2'}\"",
+                          cmd)
+        self.searchoutput(out,
+                          r'Parameter Definition: testlist\s*'
+                          r'Type: list\s*'
+                          r'Default: val1,val2',
+                          cmd)
 
     def test_150_del(self):
-
-        for path in ['testpath','testdefault','testint', 'testlist', 'testjson', 'testboolean', 'testfloat']:
-            cmd = ["del_parameter_definition", "--feature", FEATURE, "--feature_type=host",
-                   "--path=%s" % path ]
+        for path in ['testpath', 'testdefault', 'testint', 'testlist',
+                     'testjson', 'testboolean', 'testfloat']:
+            cmd = ["del_parameter_definition", "--feature", FEATURE,
+                   "--feature_type=host", "--path=%s" % path ]
             self.noouttest(cmd)
 
     def test_150_verify_delete(self):

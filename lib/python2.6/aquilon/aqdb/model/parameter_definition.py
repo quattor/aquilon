@@ -51,6 +51,8 @@ class ParamDefinition(Base):
 
     __tablename__ = _TN
     __table_args__ = {'oracle_compress': True}
+    _class_label = 'Parameter Definition'
+    _instance_label = 'path'
 
     id = Column(Integer, Sequence('%s_seq' % _TN), primary_key=True)
     path = Column(String(255), nullable=False)
@@ -89,6 +91,8 @@ class ParamDefHolder(Base):
     The dbobj with which this parameter paths are  associated with.
     """
     __tablename__ = _PARAM_DEF_HOLDER
+    _class_label = 'Parameter Definition Holder'
+    _instance_label = 'holder_name'
 
     id = Column(Integer, Sequence('%s_seq' % _PARAM_DEF_HOLDER), primary_key=True)
 
