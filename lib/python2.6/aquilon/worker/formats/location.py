@@ -117,7 +117,27 @@ class LocationListFormatter(ListFormatter):
 
         return loclist_msg.SerializeToString()
 
+
 for location_type, mapper in Location.__mapper__.polymorphic_map.items():
     ObjectFormatter.handlers[mapper.class_] = LocationFormatter()
 
 ObjectFormatter.handlers[LocationList] = LocationListFormatter()
+
+
+class SimpleLocationList(list):
+    """Holds a list of locations for which a location list will be formatted
+       in a simple (name-only) manner."""
+    pass
+
+
+class SimpleLocationListFormatter(LocationListFormatter):
+    template_html = "simple_location_list.mako"
+
+    def format_raw(self, result, indent=""):
+        return str("\n".join([indent + location.name for location in result]))
+
+    def csv_fields(self, location):
+        return (location.name,)
+
+
+ObjectFormatter.handlers[SimpleLocationList] = SimpleLocationListFormatter()

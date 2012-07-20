@@ -4224,6 +4224,31 @@
       <transport method="get" path="find/dns_record"/>
    </command>
 
+   <command name='search_rack'>
+      Search Rack records in the database.
+      <optgroup name="search_rack_opts" mandatory="True" fields="any">
+         <optgroup name="search_rack_loc_opts" mandatory="False" fields="any">
+            <option name="organization" type="string">Organization</option>
+            <option name="hub" type="string">Hub</option>
+            <option name="continent" type="string">Continent</option>
+            <option name="country" type="string">Country</option>
+            <option name="campus" type="string">Campus</option>
+            <option name="city" type="string">City</option>
+            <option name="building" type="string">Building</option>
+            <option name="room" type="string">Room</option>
+            <option name="rack" type="string">Rack</option>
+            <option name="desk" type="string">Desk</option>
+         </optgroup>
+         <option name="all" type="flag">list all systems</option>
+         <optgroup name="search_rack_optional" mandatory="False" fields="any">
+            <option name="row" type="string">Rack Row</option>
+            <option name="column" type="string">Rack Column</option>
+            <option name="fullinfo" type="flag">Show full information for the matching records</option>
+         </optgroup>
+      </optgroup>
+      <transport method="get" path="find/rack"/>
+   </command>
+
    <command name="map_dns_domain">
       Map a DNS domain to the given location.
       <optgroup name="map_dns_domain_opts" mandatory="True" fields="all">
