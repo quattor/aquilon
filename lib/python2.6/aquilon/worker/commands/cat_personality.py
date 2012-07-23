@@ -58,8 +58,9 @@ class CommandCatPersonality(BrokerCommand):
         if param_tmpl:
             param_templates = get_parameters_by_tmpl(dbpersonality)
             if param_tmpl in param_templates.keys():
-                plenary = PlenaryPersonalityParameter(param_tmpl, param_templates[param_tmpl],
-                                                      dbpersonality, logger=logger)
+                plenary = PlenaryPersonalityParameter(dbpersonality, param_tmpl,
+                                                      param_templates[param_tmpl],
+                                                      logger=logger)
             else:
                 raise NotFoundException("No parameter template %s.tpl found." %
                                         param_tmpl)

@@ -152,12 +152,10 @@ class PlenaryPersonality(PlenaryCollection):
                                                             logger=logger))
 
         ## mulitple structure templates for parameters
-        self.param_templates = get_parameters_by_tmpl(dbpersonality)
-        for template in self.param_templates:
-            self.plenaries.append(
-                 PlenaryPersonalityParameter(template,
-                                             self.param_templates[template],
-                                             dbpersonality, logger=logger))
+        for path, values in get_parameters_by_tmpl(dbpersonality).items():
+            plenary = PlenaryPersonalityParameter(dbpersonality, path, values,
+                                                  logger=logger)
+            self.plenaries.append(plenary)
 
 Plenary.handlers[Personality] = PlenaryPersonality
 
@@ -254,7 +252,7 @@ class PlenaryPersonalityParameter(Plenary):
 
     template_type = "structure"
 
-    def __init__(self, template, parameters, dbpersonality, logger=LOGGER):
+    def __init__(self, dbpersonality, template, parameters, logger=LOGGER):
         super(PlenaryPersonalityParameter, self).__init__(dbpersonality,
                                                           logger=logger)
         self.loadpath = dbpersonality.archetype.name
