@@ -55,14 +55,15 @@ class Personality(Base):
     cluster_required = Column(Boolean(name="%s_clstr_req_ck" % _TN),
                               default=False, nullable=False)
 
+    config_override = Column(Boolean(name="persona_cfg_override_ck"),
+                          default=False, nullable=False)
+
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
     comments = Column(String(255), nullable=True)
 
     archetype = relation(Archetype)
 
-    config_override = Column(Boolean(name="persona_cfg_override_ck"),
-                          default=False, nullable=False)
     @property
     def is_cluster(self):
         return self.archetype.cluster_type is not None

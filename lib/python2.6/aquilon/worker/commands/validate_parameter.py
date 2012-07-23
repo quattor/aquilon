@@ -36,27 +36,35 @@ from aquilon.worker.dbwrappers.parameter import (get_parameter_holder,
                                                  get_param_definitions)
 from aquilon.exceptions_ import ArgumentError
 
+
 class CommandValidateParameter(BrokerCommand):
 
-
-    def render(self, session, logger, personality, archetype, feature, **arguments):
+    def render(self, session, logger, personality, archetype, feature,
+               **arguments):
 
         if not personality:
             if not feature:
-                raise ArgumentError("Parameters can be validated for personality or feature")
+                raise ArgumentError("Parameters can be validated for "
+                                    "personality or feature.")
             if not archetype:
-                raise ArgumentError("Validating parameter on feature binding needs personality or archetype")
+                raise ArgumentError("Validating parameter on feature binding "
+                                    "needs personality or archetype.")
 
-        param_holder = get_parameter_holder(session, archetype, personality, feature)
+        param_holder = get_parameter_holder(session, archetype, personality,
+                                            feature)
         param_definitions = None
         parameters = None
 
         if isinstance(param_holder, FeatureLinkParameter):
-            param_definitions = get_param_definitions(session, feature=param_holder.featurelink.feature)
-            parameters = get_parameters(session, featurelink=param_holder.featurelink)
+            param_definitions = get_param_definitions(session,
+                                                      feature=param_holder.featurelink.feature)
+            parameters = get_parameters(session,
+                                        featurelink=param_holder.featurelink)
         elif isinstance(param_holder, PersonalityParameter):
-            param_definitions = get_param_definitions(session, archetype=param_holder.personality.archetype)
-            parameters = get_parameters(session, personality=param_holder.personality)
+            param_definitions = get_param_definitions(session,
+                                                      archetype=param_holder.personality.archetype)
+            parameters = get_parameters(session,
+                                        personality=param_holder.personality)
 
         errors = []
         formatter = ParamDefinitionFormatter()
@@ -78,7 +86,9 @@ class CommandValidateParameter(BrokerCommand):
                 errors.append(formatter.format_raw(param_def))
 
         if errors:
-            raise ArgumentError("Following required parameters have not been specified:\n" + "\n".join([error for error in errors]))
+            raise ArgumentError("Following required parameters have not been "
+                                "specified:\n" +
+                                "\n".join([error for error in errors]))
 
-        logger.client_info("All required parameters specified")
+        logger.client_info("All required parameters specified.")
         return

@@ -51,10 +51,9 @@ def get_parameter_holder(session, archetype=None, personality=None,
         if  isinstance(personality, Personality):
             dbpersonality = personality
         else:
-            dbpersonality = Personality.get_unique(session,
-                                           name=personality,
-                                           archetype=archetype,
-                                           compel=True)
+            dbpersonality = Personality.get_unique(session, name=personality,
+                                                   archetype=archetype,
+                                                   compel=True)
         db_param_holder = dbpersonality.paramholder
 
     if featurelink:
@@ -64,9 +63,7 @@ def get_parameter_holder(session, archetype=None, personality=None,
         if isinstance(feature, Feature):
             dbfeature = feature
         else:
-            dbfeature = Feature.get_unique(session,
-                                           name=feature,
-                                           compel=True)
+            dbfeature = Feature.get_unique(session, name=feature, compel=True)
         q = session.query(FeatureLink)
         q = q.filter_by(feature=dbfeature)
         if dbpersonality:
@@ -76,11 +73,12 @@ def get_parameter_holder(session, archetype=None, personality=None,
             q = q.filter_by(archetype=dbarch)
 
         dbfeaturelink = q.first()
-        if not dbfeaturelink :
-            raise NotFoundException("No feature binding found for feature = %s." % feature)
+        if not dbfeaturelink:
+            raise NotFoundException("No feature binding found for {0:l}."
+                                    .format(dbfeature))
         db_param_holder = dbfeaturelink.paramholder
 
-    if (db_param_holder is None) and auto_include:
+    if db_param_holder is None and auto_include:
         if dbfeaturelink:
             db_param_holder = FeatureLinkParameter(featurelink=dbfeaturelink)
         elif dbpersonality:
@@ -91,7 +89,8 @@ def get_parameter_holder(session, archetype=None, personality=None,
     return db_param_holder
 
 
-def set_parameter(session, param_holder, path, value, compel=False, preclude=False):
+def set_parameter(session, param_holder, path, value, compel=False,
+                  preclude=False):
     """ handles add parameter as well as update parameter
     """
 
@@ -101,7 +100,7 @@ def set_parameter(session, param_holder, path, value, compel=False, preclude=Fal
     ## create dbparameter if doesnt exist
     if not dbparameter:
         if compel:
-            raise NotFoundException("No parameter of path=%s defined" % path)
+            raise NotFoundException("No parameter of path=%s defined." % path)
 
         dbparameter = Parameter(holder=param_holder, value={})
 
@@ -110,18 +109,18 @@ def set_parameter(session, param_holder, path, value, compel=False, preclude=Fal
     dbparameter.param_def = param_def
     return dbparameter
 
-def del_parameter(session, path, param_holder):
 
+def del_parameter(session, path, param_holder):
     dbparameter = Parameter.get_unique(session, holder=param_holder,
                                        compel=True)
     dbparameter.del_path(path)
     return dbparameter
 
-def validate_value (label, value_type, value):
 
+def validate_value(label, value_type, value):
     retval = None
 
-    if (value_type == 'string' or value_type == 'list'):
+    if value_type == 'string' or value_type == 'list':
         retval = value
     elif value_type == 'int':
         retval = force_int(label, value)
@@ -133,13 +132,13 @@ def validate_value (label, value_type, value):
         retval = force_json_dict(label, value)
 
     if  retval == None:
-        raise ArgumentError("Value %s for path %s has to be of type %s" %
+        raise ArgumentError("Value %s for path %s has to be of type %s." %
                             (value, label, value_type))
 
     return retval
 
-def validate_parameter (session, path, value, param_holder):
 
+def validate_parameter(session, path, value, param_holder):
     archetype = None
     feature = None
     param_definitions = None
@@ -158,15 +157,16 @@ def validate_parameter (session, path, value, param_holder):
     ## The regexp is done only after all actual paths dont find a match
     ## e.g action/\w+/user will never be an actual match
     for paramdef in param_definitions:
-        if (path == paramdef.path):
+        if path == paramdef.path:
             match = paramdef
 
     if not match:
         for paramdef in param_definitions:
-            if re.match(paramdef.path+'$', path):
+            if re.match(paramdef.path + '$', path):
                 match = paramdef
     if not match:
-        raise ArgumentError("Parameter %s does not match any parameter definitions for the archetype" % path)
+        raise ArgumentError("Parameter %s does not match any parameter "
+                            "definitions for the archetype." % path)
 
     retval = None
 
@@ -175,15 +175,16 @@ def validate_parameter (session, path, value, param_holder):
         if match.default:
             value = match.default
         else:
-            raise ArgumentError("Parameter %s does not have any value defined " % path)
+            raise ArgumentError("Parameter %s does not have any value defined."
+                                % path)
 
     retval = validate_value(path, match.value_type, value)
 
     return retval, match
 
-def get_param_def_holder (session, archetype=None,
-                          feature=None, feature_type=None,
-                          auto_include=False):
+
+def get_param_def_holder(session, archetype=None, feature=None,
+                         feature_type=None, auto_include=False):
     db_paramdef_holder = None
     dbarch = None
     dbfeature = None
@@ -198,10 +199,11 @@ def get_param_def_holder (session, archetype=None,
             dbfeature = feature
         else:
             dbfeature = Feature.get_unique(session, name=feature,
-                                           feature_type=feature_type, compel=True)
+                                           feature_type=feature_type,
+                                           compel=True)
         db_paramdef_holder = dbfeature.paramdef_holder
 
-    if (db_paramdef_holder is None) and auto_include:
+    if db_paramdef_holder is None and auto_include:
         if archetype:
             db_paramdef_holder = ArchetypeParamDef(archetype=dbarch)
         elif feature:
@@ -212,8 +214,9 @@ def get_param_def_holder (session, archetype=None,
 
     return db_paramdef_holder
 
-def get_param_definitions (session, archetype=None,
-                           feature=None, feature_type=None):
+
+def get_param_definitions(session, archetype=None, feature=None,
+                          feature_type=None):
 
     param_def_holder = get_param_def_holder(session,
                                             archetype=archetype,
@@ -223,19 +226,16 @@ def get_param_definitions (session, archetype=None,
     q = session.query(ParamDefinition).filter_by(holder=param_def_holder)
     return q.all()
 
-def get_parameters (session,
-                    archetype=None,
-                    personality=None,
-                    feature=None,
-                    featurelink=None):
 
-    param_holder = get_parameter_holder(session,
-                                    archetype=archetype,
-                                    personality=personality,
-                                    feature=feature,
-                                    featurelink=featurelink,
-                                    auto_include=False)
+def get_parameters(session, archetype=None, personality=None, feature=None,
+                   featurelink=None):
+
+    param_holder = get_parameter_holder(session, archetype=archetype,
+                                        personality=personality,
+                                        feature=feature,
+                                        featurelink=featurelink,
+                                        auto_include=False)
     if param_holder is None:
-        return []; 
+        return []
     q = session.query(Parameter).filter_by(holder=param_holder)
     return q.all()

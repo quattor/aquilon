@@ -99,9 +99,9 @@ class CommandUpdatePersonality(BrokerCommand):
 
         write_plenary = None
         if config_override is not None and \
-            dbpersona.config_override != config_override:
-           dbpersona.config_override = config_override
-           write_plenary = 1
+           dbpersona.config_override != config_override:
+            dbpersona.config_override = config_override
+            write_plenary = 1
 
         session.flush()
 

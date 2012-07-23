@@ -31,9 +31,11 @@ from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.parameter import  del_parameter
 from aquilon.worker.commands.add_parameter import CommandAddParameter
 
+
 class CommandDelParameter(CommandAddParameter):
 
     required_parameters = ['path']
 
-    def process_parameter(self, session, param_holder, path, value=None, comments=None):
+    def process_parameter(self, session, param_holder, path, value=None,
+                          comments=None):
         return del_parameter(session, path, param_holder)

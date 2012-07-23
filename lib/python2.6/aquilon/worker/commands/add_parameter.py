@@ -33,8 +33,8 @@ from aquilon.worker.dbwrappers.parameter import (get_parameter_holder,
 from aquilon.aqdb.model import Personality, Archetype
 from aquilon.worker.templates.personality import PlenaryPersonality
 from aquilon.worker.locks import CompileKey
-from aquilon.exceptions_ import (IncompleteError, PartialError,
-                                 ArgumentError)
+from aquilon.exceptions_ import ArgumentError
+
 
 class CommandAddParameter(BrokerCommand):
 
@@ -54,14 +54,17 @@ class CommandAddParameter(BrokerCommand):
 
         if not personality:
             if not feature:
-                raise ArgumentError("Parameters can be added for personality or feature")
+                raise ArgumentError("Parameters can be added for personality "
+                                    "or feature.")
             if not archetype:
-                raise ArgumentError("Adding parameter on feature binding needs personality or archetype")
+                raise ArgumentError("Adding parameter on feature binding "
+                                    "needs personality or archetype")
 
         param_holder = get_parameter_holder(session, archetype, personality,
                                             feature, auto_include=True)
 
-        dbparameter = self.process_parameter(session, param_holder, path, value, comments)
+        dbparameter = self.process_parameter(session, param_holder, path, value,
+                                             comments)
         session.add(dbparameter)
         session.flush()
 
@@ -72,7 +75,8 @@ class CommandAddParameter(BrokerCommand):
             if personality:
                 q = q.filter_by(name=personality)
             elif archetype:
-                dbarchetype = Archetype.get_unique(session, archetype, compel=True)
+                dbarchetype = Archetype.get_unique(session, archetype,
+                                                   compel=True)
                 q = q.filter_by(archetype=dbarchetype)
             personalities = q.all()
         else:
@@ -103,5 +107,5 @@ class CommandAddParameter(BrokerCommand):
         except:
             logger.client_info("Restoring plenary templates.")
             for plenary in successful:
-                    plenary.restore_stash()
+                plenary.restore_stash()
             raise

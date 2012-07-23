@@ -44,6 +44,7 @@ from collections import defaultdict
 
 LOGGER = logging.getLogger(__name__)
 
+
 class PlenaryPersonality(PlenaryCollection):
 
     template_type = ""
@@ -67,6 +68,7 @@ class PlenaryPersonality(PlenaryCollection):
                  PlenaryPersonalityParameter(template,
                                              self.param_templates[template],
                                              dbpersonality, logger=logger))
+
     @staticmethod
     def helper_feature_template(featuretemplate, dbfeaturelink, lines):
 
@@ -96,7 +98,7 @@ class PlenaryPersonality(PlenaryCollection):
                                 param_def.value_type, param_def.default)
                 if value is not None:
                     ## coerce string list to list
-                    if param_def.value_type == 'list' :
+                    if param_def.value_type == 'list':
                         value = PlenaryPersonality.string_to_list(value)
 
                     PlenaryPersonality.get_path_under_top(param_def.path, value,
@@ -112,8 +114,8 @@ class PlenaryPersonality(PlenaryCollection):
         """ input variable of type xx/yy would be printed as yy only in the
             particular structure template
             if path is just xx and points to a dict
-                i.e action = {startup :{ a:b}}
-                then print as action/startup = pancized({a:b}
+                i.e action = {startup: {a: b}}
+                then print as action/startup = pancized({a: b}
             if path is just xx and points to non dict
                 ie xx = yy
                 then print xx = yy
@@ -147,7 +149,7 @@ class PlenaryPersonality(PlenaryCollection):
                                 "default for path=%s" % param_def.path,
                                 param_def.value_type, param_def.default)
                 if value is not None:
-                    if param_def.value_type == 'list' :
+                    if param_def.value_type == 'list':
                         value = PlenaryPersonality.string_to_list(value)
                     ret[param_def.path] = value
         return ret
@@ -160,11 +162,13 @@ class PlenaryPersonality(PlenaryCollection):
                 val = val.strip()
             ret.append(val)
         return ret
-                
+
 Plenary.handlers[Personality] = PlenaryPersonality
+
 
 class FeatureTemplate(TemplateFormatter):
     template_raw = "feature.mako"
+
 
 class PlenaryPersonalityBase(Plenary):
 
@@ -178,7 +182,6 @@ class PlenaryPersonalityBase(Plenary):
 
         self.plenary_core = "personality/%s" % self.name
         self.plenary_template = "config"
-
 
     def body(self, lines):
         pan_variable(lines, "PERSONALITY", self.name)
@@ -199,6 +202,7 @@ class PlenaryPersonalityBase(Plenary):
 
         ## include post features
         pan_include_if_exists(lines, "%s/post_feature" % self.plenary_core)
+
 
 class PlenaryPersonalityPreFeature(PlenaryPersonalityBase):
 
@@ -224,8 +228,9 @@ class PlenaryPersonalityPreFeature(PlenaryPersonalityBase):
                 pre_feat.append(link)
 
         ## hardware features should precede host features
-        for link in model_feat + interface_feat + pre_feat :
+        for link in model_feat + interface_feat + pre_feat:
             PlenaryPersonality.helper_feature_template(feat_tmpl, link, lines)
+
 
 class PlenaryPersonalityPostFeature(PlenaryPersonalityBase):
     template_type = ""
@@ -239,6 +244,7 @@ class PlenaryPersonalityPostFeature(PlenaryPersonalityBase):
         for link in self.dbobj.archetype.features + self.dbobj.features:
             if link.feature.post_personality:
                 PlenaryPersonality.helper_feature_template(feat_tmpl, link, lines)
+
 
 class PlenaryPersonalityParameter(PlenaryPersonalityBase):
     template_type = "structure"

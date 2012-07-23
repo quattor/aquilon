@@ -33,6 +33,7 @@ from aquilon.worker.formats.formatters import ObjectFormatter
 from aquilon.worker.formats.list import ListFormatter
 from aquilon.aqdb.model import ParamDefinition
 
+
 class ParamDefinitionFormatter(ObjectFormatter):
 
     def format_raw(self, paramdef, indent=""):
@@ -49,11 +50,13 @@ class ParamDefinitionFormatter(ObjectFormatter):
 
 ObjectFormatter.handlers[ParamDefinition] = ParamDefinitionFormatter()
 
+
 class ParamDefList(list):
     def __init__(self, archetype=None, feature=None, paramdeflist=None):
         self.archetype = archetype
         self.feature = feature
         super(ParamDefList, self).__init__(paramdeflist)
+
 
 class ParamDefListFormatter(ListFormatter):
     def format_raw(self, paramdeflist, indent=""):

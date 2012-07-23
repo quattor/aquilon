@@ -27,24 +27,23 @@
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
 """ Configuration  Parameter data """
+
 from datetime import datetime
+
 from sqlalchemy import (Column, Integer, DateTime, Sequence, String,
-                        Boolean, ForeignKey, UniqueConstraint)
-from sqlalchemy.orm import (relation, backref, deferred)
-from sqlalchemy.sql import and_
-from aquilon.aqdb.column_types import Enum, JSONEncodedDict, MutationDict
-from aquilon.aqdb.model import Base, Personality, ParamDefinition
-from aquilon.aqdb.model import Feature, FeatureLink
+                        ForeignKey, UniqueConstraint)
+from sqlalchemy.orm import relation, backref, deferred
+
+from aquilon.aqdb.column_types import JSONEncodedDict, MutationDict
+from aquilon.aqdb.model import Base, Personality, FeatureLink
 from aquilon.exceptions_ import NotFoundException, ArgumentError
 from aquilon.aqdb.column_types import AqStr
-import json
-
 
 
 _TN = 'parameter'
 _PARAM_HOLDER = 'param_holder'
-_PARAM_HOLDER_TYPES = ['personality', 'featurelink']
 PATH_SEP = '/'
+
 
 class Parameter(Base):
     """
@@ -61,16 +60,21 @@ class Parameter(Base):
     holder_id = Column(Integer, ForeignKey('%s.id' % _PARAM_HOLDER,
                                            name='%s_paramholder_fk' % _TN,
                                            ondelete='CASCADE'))
+
     @staticmethod
-    def tokey (path):
+    def tokey(path):
         """ converts path to dict keys ie. /system/key returns [system][key]"""
         parts = Parameter.path_parts(path)
-        key_str = ('["' + '"]["'.join(parts)+'"]')
+        key_str = ('["' + '"]["'.join(parts) + '"]')
         return key_str
 
     @staticmethod
     def path_parts(path):
-        """ converts parts of a specified path e.g path:/system/foo returns ['system','foo'] """
+        """
+        converts parts of a specified path
+
+        e.g path:/system/foo returns ['system','foo']
+        """
         pparts = path.split(PATH_SEP)
 
         # ignore the leading slash
@@ -80,7 +84,11 @@ class Parameter(Base):
 
     @staticmethod
     def topath(pparts):
-        """ converts dict keys to a path e.g [system][key] returns system/key """
+        """
+        converts dict keys to a path
+
+        e.g [system][key] returns system/key
+        """
         return PATH_SEP.join(pparts)
 
     def get_path(self, path, compel=True, preclude=False):
@@ -93,20 +101,25 @@ class Parameter(Base):
                 ref = ref[part]
             if ref is not None:
                 if preclude:
-                    raise ArgumentError("Parameter with path=%s already exists" % path)
+                    raise ArgumentError("Parameter with path=%s already exists."
+                                        % path)
                 return ref
         except KeyError:
             if compel:
                 raise NotFoundException(
-                      "No parameter of path=%s defined" % path)
+                      "No parameter of path=%s defined." % path)
             else:
                 pass
         return None
 
     def set_path(self,  path, value, compel=False, preclude=False):
-        """ add/or update a new parameter key, value in dict specified by path made of dict keys"""
+        """
+        add/or update a new parameter key
 
-        retval = self.get_path(path, compel, preclude)
+        value in dict specified by path made of dict keys
+        """
+
+        self.get_path(path, compel, preclude)
 
         pparts = Parameter.path_parts(path)
         lastnode = pparts.pop()
@@ -117,7 +130,7 @@ class Parameter(Base):
 
         dref = self.value
         for ppart in pparts:
-            if ppart not in dref.keys(): # pylint: disable=C0103, E1101
+            if ppart not in dref.keys():  # pylint: disable=C0103, E1101
                 dref[ppart] = {}
             dref = dref[ppart]
 
@@ -125,7 +138,7 @@ class Parameter(Base):
 
         ## coerce mutation of parameter since sqlalchemy
         ## cannot recognize parameter change
-        self.value.changed() # pylint: disable=C0103, E1101
+        self.value.changed()  # pylint: disable=C0103, E1101
 
     def __del_path(self, path):
         """ method to do the actual deletion """
@@ -138,14 +151,13 @@ class Parameter(Base):
                 dref = dref[ppart]
             del dref[lastnode]
         except KeyError:
-            raise NotFoundException("No parameter of path=%s defined" % path)
-
+            raise NotFoundException("No parameter of path=%s defined." % path)
 
     def del_path(self, path):
         """ delete parameter specified at a path """
 
         if not self.value:
-            raise NotFoundException("No parameter of path=%s defined" % path)
+            raise NotFoundException("No parameter of path=%s defined." % path)
         pparts = Parameter.path_parts(path)
         try:
             ## delete the specified path
@@ -163,9 +175,9 @@ class Parameter(Base):
 
             ## coerce mutation of parameter since sqlalchemy
             ## cannot recognize parameter change
-            self.value.changed() # pylint: disable=C0103, E1101
+            self.value.changed()  # pylint: disable=C0103, E1101
         except KeyError:
-            raise NotFoundException("No parameter of path=%s defined" % path)
+            raise NotFoundException("No parameter of path=%s defined." % path)
 
     @staticmethod
     def flatten(data, key="", path="", flattened=None):
@@ -173,10 +185,12 @@ class Parameter(Base):
             flattened = {}
         if isinstance(data, list):
             for i, item in enumerate(data):
-                Parameter.flatten(item, "%d" % i, path + PATH_SEP + key, flattened)
+                Parameter.flatten(item, "%d" % i, path + PATH_SEP + key,
+                                  flattened)
         elif isinstance(data, dict):
             for new_key, value in data.items():
-                Parameter.flatten(value, new_key, path + PATH_SEP + key, flattened)
+                Parameter.flatten(value, new_key, path + PATH_SEP + key,
+                                  flattened)
         else:
             flattened[((path + PATH_SEP) if path else "") + key] = data
         return flattened
@@ -185,7 +199,8 @@ parameter = Parameter.__table__  # pylint: disable=C0103, E1101
 parameter.primary_key.name = '%s_pk' % _TN
 parameter.info['unique_fields'] = ['holder']
 
-class ParameterHolder (Base):
+
+class ParameterHolder(Base):
     """
     The dbobj with which this parameter is associaetd with.
     """
@@ -212,9 +227,11 @@ class ParameterHolder (Base):
 paramholder = ParameterHolder.__table__  # pylint: disable=C0103, E1101
 paramholder.primary_key.name = '%s_pk' % _PARAM_HOLDER
 Parameter.holder = relation(ParameterHolder, uselist=False,
-                            primaryjoin=Parameter.holder_id==ParameterHolder.id,
+                            primaryjoin=Parameter.holder_id == ParameterHolder.id,
                             backref=backref('parameters',
                                             cascade='all, delete-orphan'))
+
+
 class PersonalityParameter(ParameterHolder):
     """ Association of parameters with Personality """
 
@@ -230,48 +247,51 @@ class PersonalityParameter(ParameterHolder):
                     backref=backref('paramholder',
                                     cascade='all, delete-orphan',
                                     uselist=False))
+
     @property
     def holder_name(self):
         return "%s/%s" % (self.personality.archetype.name,  # pylint: disable=C0103, E1101
-                          self.personality.name) # pylint: disable=C0103, E1101
+                          self.personality.name)  # pylint: disable=C0103, E1101
 
     @property
     def holder_object(self):
         return self.personality
+
 
 class FeatureLinkParameter(ParameterHolder):
     """ Parameters associated with features """
 
     __mapper_args__ = {'polymorphic_identity': 'featurelink'}
 
-    featurelink_id  = Column(Integer,
-                             ForeignKey('feature_link.id',
-                                        name='%s_featurelink_fk' % _PARAM_HOLDER,
-                                        ondelete='CASCADE'),
-                             nullable=True)
+    featurelink_id = Column(Integer,
+                            ForeignKey('feature_link.id',
+                                       name='%s_featurelink_fk' % _PARAM_HOLDER,
+                                       ondelete='CASCADE'),
+                            nullable=True)
 
     featurelink = relation(FeatureLink, uselist=False,
-                    backref=backref('paramholder',
-                                    cascade='all, delete-orphan',
-                                    uselist=False))
-
+                           backref=backref('paramholder', uselist=False,
+                                           cascade='all, delete-orphan'))
 
     @property
     def holder_name(self):
         ret = []
-        if (self.featurelink.personality):
-            ret.extend([self.featurelink.personality.archetype.name, # pylint: disable=C0103, E1101
-                       self.featurelink.personality.name])           # pylint: disable=C0103, E1101
-        elif (self.featurelink.archetype):
-            ret.append(self.featurelink.archetype.name)                  # pylint: disable=C0103, E1101
-        
-        ret.append(self.featurelink.feature.name)                        # pylint: disable=C0103, E1101
-        
+        # pylint: disable=E1101
+        if self.featurelink.personality:
+            ret.extend([self.featurelink.personality.archetype.name,
+                       self.featurelink.personality.name])
+        elif self.featurelink.archetype:
+            ret.append(self.featurelink.archetype.name)
+
+        ret.append(self.featurelink.feature.name)
+
         return "/".join(ret)
 
     @property
     def holder_object(self):
         return self.featurelink
 
-paramholder.append_constraint(UniqueConstraint('personality_id', name='param_holder_persona_uk'))
-paramholder.append_constraint(UniqueConstraint('featurelink_id', name='param_holder_flink_uk'))
+paramholder.append_constraint(UniqueConstraint('personality_id',
+                                               name='param_holder_persona_uk'))
+paramholder.append_constraint(UniqueConstraint('featurelink_id',
+                                               name='param_holder_flink_uk'))

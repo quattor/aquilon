@@ -28,20 +28,23 @@
 # TERMS THAT MAY APPLY.
 """Parameter formatter."""
 
+import json
 
+from aquilon.aqdb.model import Parameter, FeatureLinkParameter
 from aquilon.worker.formats.formatters import ObjectFormatter
 from aquilon.worker.formats.list import ListFormatter
-from aquilon.aqdb.model import Parameter, FeatureLinkParameter
-import json
+
 
 class ParameterFormatter(ObjectFormatter):
 
     def format_json(self, param, indent=""):
         details = []
         if isinstance(param.holder, FeatureLinkParameter):
-            details.append(indent + "FeatureLink : {0.holder_name}" .format(param.holder))
-        else :
-            details.append(indent + "Archetype/Personality : {0.holder_name}" .format(param.holder))
+            details.append(indent + "FeatureLink : {0.holder_name}"
+                           .format(param.holder))
+        else:
+            details.append(indent + "Archetype/Personality : {0.holder_name}"
+                           .format(param.holder))
         for k in param.value:
             str_value = json.dumps(param.value[k], indent=4)
             details.append("{0} : {1}".format(k, str_value))
@@ -49,6 +52,7 @@ class ParameterFormatter(ObjectFormatter):
 
 
 ObjectFormatter.handlers[Parameter] = ParameterFormatter()
+
 
 class ParameterList(list):
     pass
@@ -72,6 +76,7 @@ class DiffData(dict):
         self.other_obj = other_obj
         super(DiffData, self).__init__(diff)
 
+
 class DiffFormatter(ObjectFormatter):
 
     def format_raw(self, diff, indent=""):
@@ -88,23 +93,27 @@ class DiffFormatter(ObjectFormatter):
 
             missing = sorted(otherkeys - intersect)
             if missing:
-                details.append(indent + "  missing {0} in {1}:".format(k, diff.myobj))
+                details.append(indent + "  missing {0} in {1}:"
+                               .format(k, diff.myobj))
                 for pp in missing:
                     details.append(indent + "    {0}".format(pp))
 
             missing_other = sorted(mykeys - intersect)
             if missing_other:
-                details.append(indent + "  missing {0} in {1}:".format(k, diff.other_obj))
+                details.append(indent + "  missing {0} in {1}:"
+                               .format(k, diff.other_obj))
                 for pp in missing_other:
-                    details.append(indent  + "    {0}".format(pp))
+                    details.append(indent + "    {0}".format(pp))
 
             different_value = list()
             for pp in intersect:
-                if mydata[pp] != otherdata[pp] :
+                if mydata[pp] != otherdata[pp]:
                     different_value.append("{0} value={1}, othervalue={2}".
-                                           format(pp, mydata[pp], otherdata[pp]))
+                                           format(pp, mydata[pp],
+                                                  otherdata[pp]))
             if different_value:
-                details.append(indent + "  matching {0} with different values:".format(k))
+                details.append(indent + "  matching {0} with different values:"
+                               .format(k))
                 for pp in sorted(different_value):
                     details.append(indent + "    {0}".format(pp))
 

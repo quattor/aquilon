@@ -33,6 +33,7 @@ from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.parameter import get_parameters
 from aquilon.exceptions_ import ArgumentError, NotFoundException
 
+
 class CommandShowParameterFeature(BrokerCommand):
 
     required_parameters = ["feature"]

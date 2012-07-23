@@ -31,6 +31,7 @@ from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.commands.add_parameter import CommandAddParameter
 from aquilon.worker.dbwrappers.parameter import set_parameter
 
+
 class CommandUpdateParameter(CommandAddParameter):
 
     required_parameters = ['path']

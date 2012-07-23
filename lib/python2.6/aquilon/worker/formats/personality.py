@@ -28,11 +28,9 @@
 # TERMS THAT MAY APPLY.
 """ Personality formatter """
 
-
 from aquilon.worker.formats.formatters import ObjectFormatter
 from aquilon.worker.formats.list import ListFormatter
 from aquilon.aqdb.model import Personality
-import json
 
 
 class ThresholdedPersonality(object):

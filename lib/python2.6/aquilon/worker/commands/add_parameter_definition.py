@@ -34,18 +34,21 @@ from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.dbwrappers.parameter import (validate_value,
                                get_param_def_holder)
 
+
 class CommandAddParameterDefintion(BrokerCommand):
 
     required_parameters = ["path", "value_type"]
 
-    def render(self, session, archetype, feature, feature_type, template, path,  value_type, required,
-               default, description, **kwargs):
+    def render(self, session, archetype, feature, feature_type, template, path,
+               value_type, required, default, description, **kwargs):
 
         if archetype:
             if not template:
-                raise ArgumentError ("Template must be specified for archetype parameter definition")
+                raise ArgumentError("Template must be specified for archetype "
+                                    "parameter definition.")
         elif not feature:
-            raise ArgumentError ("Archetype or Feature must be specified for parameter definition")
+            raise ArgumentError("Archetype or Feature must be specified for "
+                                "parameter definition.")
 
         ParamDefinition.validate_type(value_type)
 
@@ -57,14 +60,12 @@ class CommandAddParameterDefintion(BrokerCommand):
                                                   auto_include=True)
 
         ParamDefinition.get_unique(session, path=path,
-                                    holder=db_paramdef_holder,
-                                    preclude=True)
+                                   holder=db_paramdef_holder, preclude=True)
 
         db_paramdef = ParamDefinition(path=path, holder=db_paramdef_holder,
                                       value_type=value_type, default=default,
-                                      required=required,
-                                      template=template,
-                                      description = description)
+                                      required=required, template=template,
+                                      description=description)
         session.add(db_paramdef)
         session.flush()
 

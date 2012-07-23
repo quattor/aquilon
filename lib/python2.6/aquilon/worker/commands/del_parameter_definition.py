@@ -41,16 +41,19 @@ class CommandDelParameterDefintion(BrokerCommand):
     def render(self, session, archetype, feature, feature_type, path, **kwargs):
 
         if not (archetype or feature):
-            raise ArgumentError ("Archetype or Feature must be specified for parameter definition")
+            raise ArgumentError("Archetype or feature must be specified for "
+                                 "parameter definition.")
 
         db_paramdef_holder = get_param_def_holder(session, archetype,
                                                   feature, feature_type,
                                                   auto_include=False)
         if db_paramdef_holder is None:
             if archetype:
-                raise ArgumentError( "No parameter definitions found for archetype {0}".format(archetype))
+                raise ArgumentError("No parameter definitions found for "
+                                    "archetype {0}.".format(archetype))
             elif feature:
-                raise ArgumentError( "No parameter definitions found for feature {0}".format(feature))
+                raise ArgumentError("No parameter definitions found for "
+                                    "feature {0}.".format(feature))
 
         db_paramdef = ParamDefinition.get_unique(session, path=path,
                                                  holder=db_paramdef_holder,
