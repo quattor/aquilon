@@ -27,13 +27,12 @@
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
 
+from aquilon.exceptions_ import ArgumentError
+from aquilon.aqdb.model import Personality, Archetype
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.parameter import (get_parameter_holder,
                                                  set_parameter)
-from aquilon.aqdb.model import Personality, Archetype
-from aquilon.worker.templates.personality import PlenaryPersonality
-from aquilon.worker.locks import CompileKey
-from aquilon.exceptions_ import ArgumentError
+from aquilon.worker.templates import Plenary, PlenaryCollection
 
 
 class CommandAddParameter(BrokerCommand):
@@ -68,7 +67,7 @@ class CommandAddParameter(BrokerCommand):
         session.add(dbparameter)
         session.flush()
 
-        personalities = []
+        plenaries = PlenaryCollection(logger=logger)
 
         if feature:
             q = session.query(Personality)
@@ -78,34 +77,9 @@ class CommandAddParameter(BrokerCommand):
                 dbarchetype = Archetype.get_unique(session, archetype,
                                                    compel=True)
                 q = q.filter_by(archetype=dbarchetype)
-            personalities = q.all()
+            for dbpers in q:
+                plenaries.append(Plenary.get_plenary(dbpers))
         else:
-            personalities.append(param_holder.holder_object)
+            plenaries.append(Plenary.get_plenary(param_holder.holder_object))
 
-        if personalities:
-            self.write_plenaries(logger, personalities)
-
-    def write_plenaries(self, logger, personalities):
-        idx = 0
-        successful = []
-
-        cnt = len(personalities)
-        try:
-            with CompileKey(logger=logger):
-                for personality in personalities:
-                    idx += 1
-                    if idx % 1000 == 0:  # pragma: no cover
-                        logger.client_info("Processing personality %d of %d..." %
-                                       (idx, cnt))
-
-                    if not personality.archetype.is_compileable:  # pragma: no cover
-                        continue
-
-                    plenary_personality = PlenaryPersonality(personality)
-                    plenary_personality.write(locked=True)
-                    successful.append(plenary_personality)
-        except:
-            logger.client_info("Restoring plenary templates.")
-            for plenary in successful:
-                plenary.restore_stash()
-            raise
+        plenaries.write()
