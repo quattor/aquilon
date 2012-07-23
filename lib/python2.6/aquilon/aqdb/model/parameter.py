@@ -153,9 +153,10 @@ class Parameter(Base):
     comments = deferred(Column(String(255), nullable=True))
     holder_id = Column(Integer, ForeignKey('%s.id' % _PARAM_HOLDER,
                                            name='%s_paramholder_fk' % _TN,
-                                           ondelete='CASCADE'))
+                                           ondelete='CASCADE'),
+                       nullable=False)
 
-    holder = relation(ParameterHolder,
+    holder = relation(ParameterHolder, innerjoin=True,
                       backref=backref('parameters',
                                       cascade='all, delete-orphan'))
 

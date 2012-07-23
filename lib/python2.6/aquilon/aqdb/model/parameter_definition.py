@@ -148,11 +148,12 @@ class ParamDefinition(Base):
     description = deferred(Column(String(255), nullable=True))
     holder_id = Column(Integer, ForeignKey('%s.id' % _PARAM_DEF_HOLDER,
                                            name='%s_holder_fk' % _TN,
-                                           ondelete='CASCADE'))
+                                           ondelete='CASCADE'),
+                       nullable=False)
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
 
-    holder = relation(ParamDefHolder,
+    holder = relation(ParamDefHolder, innerjoin=True,
                       backref=backref('param_definitions',
                                       cascade='all, delete-orphan'))
 
