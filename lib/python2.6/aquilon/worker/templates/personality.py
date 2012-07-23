@@ -140,7 +140,7 @@ class PlenaryPersonality(PlenaryCollection):
     template_type = ""
 
     def __init__(self, dbpersonality, logger=LOGGER):
-        PlenaryCollection.__init__(self, logger=LOGGER)
+        super(PlenaryPersonality, self).__init__(logger=logger)
 
         self.dbobj = dbpersonality
 
@@ -171,7 +171,8 @@ class PlenaryPersonalityBase(Plenary):
     template_type = ''
 
     def __init__(self, dbpersonality, logger=LOGGER):
-        Plenary.__init__(self, dbpersonality, logger=logger)
+        super(PlenaryPersonalityBase, self).__init__(dbpersonality,
+                                                     logger=logger)
 
         self.name = dbpersonality.name
         self.loadpath = dbpersonality.archetype.name
@@ -200,12 +201,15 @@ class PlenaryPersonalityBase(Plenary):
         pan_include_if_exists(lines, "%s/post_feature" % self.plenary_core)
 
 
-class PlenaryPersonalityPreFeature(PlenaryPersonalityBase):
+class PlenaryPersonalityPreFeature(Plenary):
 
     template_type = ""
 
     def __init__(self, dbpersonality, logger=LOGGER):
-        PlenaryPersonalityBase.__init__(self, dbpersonality, logger=logger)
+        super(PlenaryPersonalityPreFeature, self).__init__(dbpersonality,
+                                                           logger=logger)
+        self.loadpath = dbpersonality.archetype.name
+        self.plenary_core = "personality/%s" % dbpersonality.name
         self.plenary_template = "pre_feature"
 
     def body(self, lines):
@@ -228,11 +232,15 @@ class PlenaryPersonalityPreFeature(PlenaryPersonalityBase):
             helper_feature_template(feat_tmpl, link, lines)
 
 
-class PlenaryPersonalityPostFeature(PlenaryPersonalityBase):
+class PlenaryPersonalityPostFeature(Plenary):
+
     template_type = ""
 
     def __init__(self, dbpersonality, logger=LOGGER):
-        PlenaryPersonalityBase.__init__(self, dbpersonality, logger=logger)
+        super(PlenaryPersonalityPostFeature, self).__init__(dbpersonality,
+                                                            logger=logger)
+        self.loadpath = dbpersonality.archetype.name
+        self.plenary_core = "personality/%s" % dbpersonality.name
         self.plenary_template = "post_feature"
 
     def body(self, lines):
@@ -242,12 +250,17 @@ class PlenaryPersonalityPostFeature(PlenaryPersonalityBase):
                 helper_feature_template(feat_tmpl, link, lines)
 
 
-class PlenaryPersonalityParameter(PlenaryPersonalityBase):
+class PlenaryPersonalityParameter(Plenary):
+
     template_type = "structure"
 
     def __init__(self, template, parameters, dbpersonality, logger=LOGGER):
-        PlenaryPersonalityBase.__init__(self, dbpersonality, logger=logger)
+        super(PlenaryPersonalityParameter, self).__init__(dbpersonality,
+                                                          logger=logger)
+        self.loadpath = dbpersonality.archetype.name
+        self.plenary_core = "personality/%s" % dbpersonality.name
         self.plenary_template = template
+
         self.parameters = parameters
 
     def body(self, lines):
