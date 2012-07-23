@@ -44,48 +44,6 @@ _PARAM_DEF_HOLDER = 'param_def_holder'
 _PATH_TYPES = ['list', 'string', 'int', 'float', 'boolean', 'json']
 
 
-class ParamDefinition(Base):
-    """
-        define parameter paths
-    """
-
-    __tablename__ = _TN
-    __table_args__ = {'oracle_compress': True}
-    _class_label = 'Parameter Definition'
-    _instance_label = 'path'
-
-    id = Column(Integer, Sequence('%s_seq' % _TN), primary_key=True)
-    path = Column(String(255), nullable=False)
-    template = Column(String(32))
-    required = Column(Boolean(name="%s_paramdef_ck" % _TN), default=False,
-                      nullable=False)
-    value_type = Column(Enum(16, _PATH_TYPES), nullable=False, default="string")
-    default = Column(Text, nullable=True)
-    description = deferred(Column(String(255), nullable=True))
-    holder_id = Column(Integer, ForeignKey('%s.id' % _PARAM_DEF_HOLDER,
-                                           name='%s_holder_fk' % _TN,
-                                           ondelete='CASCADE'))
-    creation_date = deferred(Column(DateTime, default=datetime.now,
-                                    nullable=False))
-
-    @property
-    def template_base(self, base_object):
-        return "%s/%s" % (base_object.name, self.template)
-
-    @classmethod
-    def validate_type(cls, value_type):
-        """ Utility function for validating the value type """
-        if value_type in _PATH_TYPES:
-            return
-        valid_types = ", ".join(sorted(_PATH_TYPES))
-        raise ArgumentError("Unknown value type '%s'.  The valid types are: "
-                            "%s." % (value_type, valid_types))
-
-param_definition = ParamDefinition.__table__  # pylint: disable=C0103, E1101
-param_definition.primary_key.name = '%s_pk' % _TN
-param_definition.info['unique_fields'] = ['path', 'holder']
-
-
 class ParamDefHolder(Base):
     """
     The dbobj with which this parameter paths are  associated with.
@@ -115,10 +73,6 @@ class ParamDefHolder(Base):
 param_definition_holder = ParamDefHolder.__table__  # pylint: disable=C0103, E1101
 param_definition_holder.primary_key.name = '%s_pk' % _PARAM_DEF_HOLDER
 param_definition_holder.info['unique_fields'] = ['id']
-ParamDefinition.holder = relation(ParamDefHolder, uselist=False, lazy='subquery',
-                                  primaryjoin=ParamDefinition.holder_id == ParamDefHolder.id,
-                                  backref=backref('param_definitions',
-                                                  cascade='all, delete-orphan'))
 
 
 class ArchetypeParamDef(ParamDefHolder):
@@ -172,3 +126,49 @@ param_definition_holder.append_constraint(
     UniqueConstraint('feature_id', name='param_def_holder_feature_uk'))
 param_definition_holder.append_constraint(
     UniqueConstraint('archetype_id', name='param_def_holder_archetype_uk'))
+
+
+class ParamDefinition(Base):
+    """
+        define parameter paths
+    """
+
+    __tablename__ = _TN
+    __table_args__ = {'oracle_compress': True}
+    _class_label = 'Parameter Definition'
+    _instance_label = 'path'
+
+    id = Column(Integer, Sequence('%s_seq' % _TN), primary_key=True)
+    path = Column(String(255), nullable=False)
+    template = Column(String(32))
+    required = Column(Boolean(name="%s_paramdef_ck" % _TN), default=False,
+                      nullable=False)
+    value_type = Column(Enum(16, _PATH_TYPES), nullable=False, default="string")
+    default = Column(Text, nullable=True)
+    description = deferred(Column(String(255), nullable=True))
+    holder_id = Column(Integer, ForeignKey('%s.id' % _PARAM_DEF_HOLDER,
+                                           name='%s_holder_fk' % _TN,
+                                           ondelete='CASCADE'))
+    creation_date = deferred(Column(DateTime, default=datetime.now,
+                                    nullable=False))
+
+    holder = relation(ParamDefHolder,
+                      backref=backref('param_definitions',
+                                      cascade='all, delete-orphan'))
+
+    @property
+    def template_base(self, base_object):
+        return "%s/%s" % (base_object.name, self.template)
+
+    @classmethod
+    def validate_type(cls, value_type):
+        """ Utility function for validating the value type """
+        if value_type in _PATH_TYPES:
+            return
+        valid_types = ", ".join(sorted(_PATH_TYPES))
+        raise ArgumentError("Unknown value type '%s'.  The valid types are: "
+                            "%s." % (value_type, valid_types))
+
+param_definition = ParamDefinition.__table__  # pylint: disable=C0103, E1101
+param_definition.primary_key.name = '%s_pk' % _TN
+param_definition.info['unique_fields'] = ['path', 'holder']
