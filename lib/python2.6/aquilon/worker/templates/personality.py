@@ -37,7 +37,6 @@ from aquilon.worker.templates.panutils import (pan_include,
                                                pan_assign, pan_push,
                                                pan_include_if_exists)
 from aquilon.worker.dbwrappers.parameter import (validate_value,
-                                                 get_param_definitions,
                                                  get_parameters)
 from sqlalchemy.orm import object_session
 from collections import defaultdict
@@ -56,8 +55,11 @@ def string_to_list(data):
 
 def get_parameters_by_feature(dbfeaturelink):
     ret = {}
-    param_definitions = get_param_definitions(object_session(dbfeaturelink),
-                                              feature=dbfeaturelink.feature)
+    paramdef_holder = dbfeaturelink.feature.paramdef_holder
+    if not paramdef_holder:
+        return ret
+
+    param_definitions = paramdef_holder.param_definitions
     parameters = get_parameters(object_session(dbfeaturelink),
                                 featurelink=dbfeaturelink)
 
@@ -110,8 +112,11 @@ def get_parameters_by_tmpl(dbpersonality):
     ret = defaultdict(dict)
 
     session = object_session(dbpersonality)
-    param_definitions = get_param_definitions(session,
-                                              archetype=dbpersonality.archetype)
+    paramdef_holder = dbpersonality.archetype.paramdef_holder
+    if not paramdef_holder:
+        return ret
+
+    param_definitions = paramdef_holder.param_definitions
     parameters = get_parameters(session, personality=dbpersonality)
 
     for param_def in param_definitions:

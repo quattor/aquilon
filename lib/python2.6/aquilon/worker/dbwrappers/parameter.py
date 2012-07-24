@@ -36,10 +36,7 @@ from aquilon.utils import (force_json_dict, force_int, force_float,
 from aquilon.aqdb.model import (Archetype, Personality, Parameter,
                                 Feature, FeatureLink,
                                 PersonalityParameter,
-                                FeatureLinkParameter,
-                                ParamDefinition,
-                                ArchetypeParamDef,
-                                FeatureParamDef)
+                                FeatureLinkParameter)
 
 
 def get_parameter_holder(session, archetype=None, personality=None,
@@ -104,7 +101,7 @@ def set_parameter(session, param_holder, path, value, compel=False,
 
         dbparameter = Parameter(holder=param_holder, value={})
 
-    retval, param_def = validate_parameter(session, path, value, param_holder)
+    retval, param_def = validate_parameter(path, value, param_holder)
     dbparameter.set_path(path, retval, compel, preclude)
     dbparameter.param_def = param_def
     return dbparameter
@@ -138,19 +135,18 @@ def validate_value(label, value_type, value):
     return retval
 
 
-def validate_parameter(session, path, value, param_holder):
-    archetype = None
-    feature = None
+def validate_parameter(path, value, param_holder):
     param_definitions = None
     match = None
     if isinstance(param_holder, PersonalityParameter):
-        archetype = param_holder.personality.archetype
-        param_definitions = get_param_definitions(session,
-                                                  archetype=archetype)
+        paramdef_holder = param_holder.personality.archetype.paramdef_holder
     else:
-        feature = param_holder.featurelink.feature
-        param_definitions = get_param_definitions(session,
-                                                  feature=feature)
+        paramdef_holder = param_holder.featurelink.feature.paramdef_holder
+
+    if paramdef_holder:
+        param_definitions = paramdef_holder.param_definitions
+    else:
+        param_definitions = []
 
     ## the specified path of the parameter should either be an actual match
     ## or match input specified regexp.
@@ -181,50 +177,6 @@ def validate_parameter(session, path, value, param_holder):
     retval = validate_value(path, match.value_type, value)
 
     return retval, match
-
-
-def get_param_def_holder(session, archetype=None, feature=None,
-                         feature_type=None, auto_include=False):
-    db_paramdef_holder = None
-    dbarch = None
-    dbfeature = None
-    if archetype:
-        if isinstance(archetype, Archetype):
-            dbarch = archetype
-        else:
-            dbarch = Archetype.get_unique(session, archetype, compel=True)
-        db_paramdef_holder = dbarch.paramdef_holder
-    elif feature:
-        if isinstance(feature, Feature):
-            dbfeature = feature
-        else:
-            dbfeature = Feature.get_unique(session, name=feature,
-                                           feature_type=feature_type,
-                                           compel=True)
-        db_paramdef_holder = dbfeature.paramdef_holder
-
-    if db_paramdef_holder is None and auto_include:
-        if archetype:
-            db_paramdef_holder = ArchetypeParamDef(archetype=dbarch)
-        elif feature:
-            db_paramdef_holder = FeatureParamDef(feature=dbfeature)
-
-    if db_paramdef_holder and auto_include:
-        session.add(db_paramdef_holder)
-
-    return db_paramdef_holder
-
-
-def get_param_definitions(session, archetype=None, feature=None,
-                          feature_type=None):
-
-    param_def_holder = get_param_def_holder(session,
-                                            archetype=archetype,
-                                            feature=feature,
-                                            feature_type=feature_type,
-                                            auto_include=False)
-    q = session.query(ParamDefinition).filter_by(holder=param_def_holder)
-    return q.all()
 
 
 def get_parameters(session, archetype=None, personality=None, feature=None,

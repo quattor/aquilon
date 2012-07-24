@@ -28,37 +28,27 @@
 # TERMS THAT MAY APPLY.
 
 
-from aquilon.worker.broker import BrokerCommand
-from aquilon.aqdb.model import ParamDefinition
 from aquilon.exceptions_ import ArgumentError
-from aquilon.worker.dbwrappers.parameter import get_param_def_holder
+from aquilon.aqdb.model import ParamDefinition, Archetype
+from aquilon.worker.broker import BrokerCommand
 
 
-class CommandDelParameterDefintion(BrokerCommand):
+class CommandDelParameterDefintionArchetype(BrokerCommand):
 
-    required_parameters = ["path"]
+    required_parameters = ["path", "archetype"]
 
-    def render(self, session, archetype, feature, feature_type, path, **kwargs):
-
-        if not (archetype or feature):
-            raise ArgumentError("Archetype or feature must be specified for "
-                                 "parameter definition.")
-
-        db_paramdef_holder = get_param_def_holder(session, archetype,
-                                                  feature, feature_type,
-                                                  auto_include=False)
-        if db_paramdef_holder is None:
-            if archetype:
-                raise ArgumentError("No parameter definitions found for "
-                                    "archetype {0}.".format(archetype))
-            elif feature:
-                raise ArgumentError("No parameter definitions found for "
-                                    "feature {0}.".format(feature))
+    def render(self, session, archetype, path, **kwargs):
+        dbarchetype = Archetype.get_unique(session, archetype, compel=True)
+        if not dbarchetype.paramdef_holder:
+            raise ArgumentError("No parameter definitions found for {0}."
+                                .format(dbarchetype))
 
         db_paramdef = ParamDefinition.get_unique(session, path=path,
-                                                 holder=db_paramdef_holder,
+                                                 holder=dbarchetype.paramdef_holder,
                                                  compel=True)
         session.delete(db_paramdef)
         session.flush()
+
+        # FIXME: update personality templates
 
         return

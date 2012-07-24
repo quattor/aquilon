@@ -123,7 +123,7 @@ class TestParameterFeature(TestBrokerCommand):
     def load_paramdefs(self, feature, feature_type):
         for p in PARAM_DEFS:
             cmd = [ "add_parameter_definition", "--feature", feature,
-                   "--feature_type", feature_type, "--path", p[ "path" ],
+                   "--type", feature_type, "--path", p[ "path" ],
                        "--value_type", p[ "value_type" ]]
             if "required" in p:
                 cmd.append( "--required" )

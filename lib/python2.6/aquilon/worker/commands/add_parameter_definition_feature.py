@@ -1,6 +1,6 @@
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 #
-# Copyright (C) 2009,2010,2011,2012  Contributor
+# Copyright (C) 2012  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -28,49 +28,38 @@
 # TERMS THAT MAY APPLY.
 
 
+from aquilon.aqdb.model import Feature, FeatureParamDef, ParamDefinition
 from aquilon.worker.broker import BrokerCommand
-from aquilon.aqdb.model import ParamDefinition
-from aquilon.exceptions_ import ArgumentError
-from aquilon.worker.dbwrappers.parameter import (validate_value,
-                               get_param_def_holder)
+from aquilon.worker.dbwrappers.parameter import validate_value
 
 
-class CommandAddParameterDefintion(BrokerCommand):
+class CommandAddParameterDefintionFeature(BrokerCommand):
 
-    required_parameters = ["path", "value_type"]
+    required_parameters = ["feature", "type", "path", "value_type"]
 
-    def render(self, session, archetype, feature, feature_type, template, path,
-               value_type, required, default, description, **kwargs):
+    def render(self, session, feature, type, path, value_type, required,
+               default, description, **kwargs):
+        dbfeature = Feature.get_unique(session, name=feature, feature_type=type,
+                                       compel=True)
 
-        if archetype:
-            if not template:
-                raise ArgumentError("Template must be specified for archetype "
-                                    "parameter definition.")
-        elif not feature:
-            raise ArgumentError("Archetype or Feature must be specified for "
-                                "parameter definition.")
+        if not dbfeature.paramdef_holder:
+            dbfeature.paramdef_holder = FeatureParamDef()
 
         ParamDefinition.validate_type(value_type)
 
         if default:
             validate_value("default for path=%s" % path, value_type, default)
 
-        db_paramdef_holder = get_param_def_holder(session, archetype,
-                                                  feature, feature_type,
-                                                  auto_include=True)
-
-        if archetype and not db_paramdef_holder.holder_object.is_compileable:
-            raise ArgumentError("{0} is not compileable."
-                                .format(db_paramdef_holder.holder_object))
-
         ParamDefinition.get_unique(session, path=path,
-                                   holder=db_paramdef_holder, preclude=True)
+                                   holder=dbfeature.paramdef_holder, preclude=True)
 
-        db_paramdef = ParamDefinition(path=path, holder=db_paramdef_holder,
+        db_paramdef = ParamDefinition(path=path,
+                                      holder=dbfeature.paramdef_holder,
                                       value_type=value_type, default=default,
-                                      required=required, template=template,
+                                      required=required,
                                       description=description)
         session.add(db_paramdef)
+
         session.flush()
 
         return

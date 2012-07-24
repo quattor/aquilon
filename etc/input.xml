@@ -5016,40 +5016,44 @@
    </command>
 
    <command name="add_parameter_definition">
-      add parameter definition for a parameter.
+      Add parameter definition for a parameter.
       <optgroup name="target" mandatory="True" fields="any">
-         <option name="archetype" type="string" conflicts="feature feature_type">Archetype</option>
-         <option name="feature" type="string" conflicts="archetype template">Feature</option>
-      </optgroup>
-      <optgroup name="target_opts" mandatory="True" fields="any">
-         <option name="template" type="string" conflicts="feature">Name of structure template this parameter gets included in</option>
-         <option name="feature_type" type="string" conflicts="archetype">Type of the feature: host, hardware or interface</option>
+         <optgroup name="add_parameter_definition_archetype_opts" mandatory="False" fields="all">
+            <option name="archetype" type="string" conflicts="feature type">Archetype</option>
+            <option name="template" type="string" conflicts="feature">Name of structure template this parameter gets included in</option>
+         </optgroup>
+         <optgroup name="add_parameter_definition_feature_opts" mandatory="False" fields="all">
+            <option name="feature" type="string" conflicts="archetype template">Feature</option>
+            <option name="type" type="string" conflicts="archetype">Type of the feature: host, hardware or interface</option>
+         </optgroup>
       </optgroup>
       <optgroup name="add_parameter_validator_opts" mandatory="True" fields="all">
          <option name="path" type="string">Path of the parameter can contain regexp</option>
          <option name="value_type" type="string" default="string">Type of value for the parameter[string|numeric|list|json]</option>
       </optgroup>
       <optgroup name="add_parameter_validator_optional" mandatory="False" fields="any">
-         <option name="required" type="boolean" default="False">Is this parameter required for object compilation </option>
+         <option name="required" type="flag">Is this parameter required for object compilation </option>
          <option name="default" type="string">Default value </option>
          <option name="description" type="string">Description</option>
       </optgroup>
-      <transport method="put" path="commands/add_parameter_definition"/>
+      <transport method="put" trigger="archetype" path="archetype/%(archetype)s/parameter_definitions"/>
+      <transport method="put" trigger="feature" path="feature/%(type)s/%(feature)s/parameter_definitions"/>
    </command>
 
    <command name="del_parameter_definition">
-      del parameter definition for a given object.
+      Delete parameter definition for a given object.
       <optgroup name="target" mandatory="True" fields="any">
-         <option name="archetype" type="string" conflicts="feature feature_type">Archetype</option>
-         <option name="feature" type="string" conflicts="archetype">Feature</option>
-      </optgroup>
-      <optgroup name="target_opts" mandatory="False" fields="any">
-         <option name="feature_type" type="string" conflicts="archetype">Type of the feature: host, hardware or interface</option>
+         <option name="archetype" type="string" conflicts="feature type">Archetype</option>
+         <optgroup name="add_parameter_definition_feature_opts" mandatory="False" fields="all">
+            <option name="feature" type="string" conflicts="archetype template">Feature</option>
+            <option name="type" type="string" conflicts="archetype">Type of the feature: host, hardware or interface</option>
+         </optgroup>
       </optgroup>
       <optgroup name="target_required_opts" mandatory="True" fields="any">
          <option name="path" type="string">Path of the parameter</option>
       </optgroup>
-      <transport method="put" path="commands/del_parameter_definition"/>
+      <transport method="delete" trigger="archetype" path="archetype/%(archetype)s/parameter_definitions"/>
+      <transport method="delete" trigger="feature" path="feature/%(type)s/%(feature)s/parameter_definitions"/>
    </command>
 
    <command name="show_parameter_definition">
@@ -5069,8 +5073,5 @@
       <transport method="get" trigger="archetype" path="archetype/%(archetype)s/parameter_definitions"/>
       <transport method="get" trigger="feature" path="feature/%(type)s/%(feature)s/parameter_definitions"/>
    </command>
-
-
-
 
 </commandline>

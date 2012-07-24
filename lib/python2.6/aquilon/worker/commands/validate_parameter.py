@@ -32,8 +32,7 @@ from aquilon.worker.formats.parameter_definition import ParamDefinitionFormatter
 from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import FeatureLinkParameter, PersonalityParameter
 from aquilon.worker.dbwrappers.parameter import (get_parameter_holder,
-                                                 get_parameters,
-                                                 get_param_definitions)
+                                                 get_parameters)
 from aquilon.exceptions_ import ArgumentError
 
 
@@ -54,18 +53,21 @@ class CommandValidateParameter(BrokerCommand):
                                             feature)
 
         if isinstance(param_holder, FeatureLinkParameter):
-            param_definitions = get_param_definitions(session,
-                                                      feature=param_holder.featurelink.feature)
+            paramdef_holder = param_holder.featurelink.feature.paramdef_holder
             parameters = get_parameters(session,
                                         featurelink=param_holder.featurelink)
         elif isinstance(param_holder, PersonalityParameter):
-            param_definitions = get_param_definitions(session,
-                                                      archetype=param_holder.personality.archetype)
+            paramdef_holder = param_holder.personality.archetype.paramdef_holder
             parameters = get_parameters(session,
                                         personality=param_holder.personality)
         else:
-            param_definitions = []
+            paramdef_holder = None
             parameters = []
+
+        if paramdef_holder:
+            param_definitions = paramdef_holder.param_definitions
+        else:
+            param_definitions = []
 
         errors = []
         formatter = ParamDefinitionFormatter()

@@ -46,14 +46,14 @@ class TestParameterDefinitionFeature(TestBrokerCommand):
         self.noouttest(cmd)
 
     def test_100_add(self):
-        cmd = ["add_parameter_definition", "--feature", FEATURE, "--feature_type=host",
+        cmd = ["add_parameter_definition", "--feature", FEATURE, "--type=host",
                "--path=testpath", "--value_type=string", "--description=blaah",
                "--required", "--default=default"]
 
         self.noouttest(cmd)
 
     def test_110_add_existing(self):
-        cmd = ["add_parameter_definition", "--feature", FEATURE, "--feature_type=host",
+        cmd = ["add_parameter_definition", "--feature", FEATURE, "--type=host",
                "--path=testpath", "--value_type=string", "--description=blaah",
                "--required", "--default=default"]
 
@@ -64,20 +64,20 @@ class TestParameterDefinitionFeature(TestBrokerCommand):
                          cmd)
 
     def test_130_add_default_value_type(self):
-        cmd = ["add_parameter_definition", "--feature", FEATURE, "--feature_type=host",
+        cmd = ["add_parameter_definition", "--feature", FEATURE, "--type=host",
                "--path=testdefault", "--description=blaah" ]
 
         err = self.noouttest(cmd)
 
     def test_130_add_int_value_type(self):
-        cmd = ["add_parameter_definition", "--feature", FEATURE, "--feature_type=host",
+        cmd = ["add_parameter_definition", "--feature", FEATURE, "--type=host",
                "--path=testint", "--description=blaah",
                "--value_type=int", "--default=60"]
 
         err = self.noouttest(cmd)
 
     def test_130_add_invalid_int_value_type(self):
-        cmd = ["add_parameter_definition", "--feature", FEATURE, "--feature_type=host",
+        cmd = ["add_parameter_definition", "--feature", FEATURE, "--type=host",
                "--path=testbadint", "--description=blaah",
                "--value_type=int", "--default=foo"]
 
@@ -85,14 +85,14 @@ class TestParameterDefinitionFeature(TestBrokerCommand):
         self.matchoutput(err, "Expected an integer for default for path=testbadint", cmd)
 
     def test_130_add_float_value_type(self):
-        cmd = ["add_parameter_definition", "--feature", FEATURE, "--feature_type=host",
+        cmd = ["add_parameter_definition", "--feature", FEATURE, "--type=host",
                "--path=testfloat", "--description=blaah",
                "--value_type=float", "--default=100.100"]
 
         err = self.noouttest(cmd)
 
     def test_130_add_invalid_float_value_type(self):
-        cmd = ["add_parameter_definition", "--feature", FEATURE, "--feature_type=host",
+        cmd = ["add_parameter_definition", "--feature", FEATURE, "--type=host",
                "--path=testbadfloat", "--description=blaah",
                "--value_type=float", "--default=foo"]
 
@@ -100,14 +100,14 @@ class TestParameterDefinitionFeature(TestBrokerCommand):
         self.matchoutput(err, "Expected an floating point number for default for path=testbadfloat", cmd)
 
     def test_130_add_boolean_value_type(self):
-        cmd = ["add_parameter_definition", "--feature", FEATURE, "--feature_type=host",
+        cmd = ["add_parameter_definition", "--feature", FEATURE, "--type=host",
                "--path=testboolean", "--description=blaah",
                "--value_type=boolean", "--default=yes"]
 
         err = self.noouttest(cmd)
 
     def test_130_add_invalid_boolean_value_type(self):
-        cmd = ["add_parameter_definition", "--feature", FEATURE, "--feature_type=host",
+        cmd = ["add_parameter_definition", "--feature", FEATURE, "--type=host",
                "--path=testbadboolean", "--description=blaah",
                "--value_type=boolean", "--default=foo"]
 
@@ -115,21 +115,21 @@ class TestParameterDefinitionFeature(TestBrokerCommand):
         self.matchoutput(err, "Expected a boolean value for default for path=testbadboolean", cmd)
 
     def test_130_add_list_value_type(self):
-        cmd = ["add_parameter_definition", "--feature", FEATURE, "--feature_type=host",
+        cmd = ["add_parameter_definition", "--feature", FEATURE, "--type=host",
                "--path=testlist", "--description=blaah",
                "--value_type=list", "--default=val1,val2"]
 
         err = self.noouttest(cmd)
 
     def test_130_add_json_value_type(self):
-        cmd = ["add_parameter_definition", "--feature", FEATURE, "--feature_type=host",
+        cmd = ["add_parameter_definition", "--feature", FEATURE, "--type=host",
                "--path=testjson", "--description=blaah",
                "--value_type=json","--default=\"{'val1':'val2'}\""]
 
         err = self.noouttest(cmd)
 
     def test_130_add_invalid_json_value_type(self):
-        cmd = ["add_parameter_definition", "--feature", FEATURE, "--feature_type=host",
+        cmd = ["add_parameter_definition", "--feature", FEATURE, "--type=host",
                "--path=testbadjson", "--description=blaah",
                "--value_type=json","--default=foo"]
 
@@ -170,7 +170,7 @@ class TestParameterDefinitionFeature(TestBrokerCommand):
         for path in ['testpath', 'testdefault', 'testint', 'testlist',
                      'testjson', 'testboolean', 'testfloat']:
             cmd = ["del_parameter_definition", "--feature", FEATURE,
-                   "--feature_type=host", "--path=%s" % path ]
+                   "--type=host", "--path=%s" % path ]
             self.noouttest(cmd)
 
     def test_150_verify_delete(self):
