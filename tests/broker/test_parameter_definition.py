@@ -190,6 +190,13 @@ class TestParameterDefinition(TestBrokerCommand):
         err = self.badrequesttest(cmd)
         self.matchoutput(err, "The json string specified for default for path=testbadjson is invalid", cmd)
 
+    def test_130_add_noncompileable_arch(self):
+        cmd = ["add_parameter_definition", "--archetype", "windows",
+               "--path=testint", "--description=blaah",
+               "--template=foo", "--value_type=int", "--default=60"]
+        out = self.badrequesttest(cmd)
+        self.matchoutput(out, "Archetype windows is not compileable.", cmd)
+
     def test_140_verify_add(self):
         cmd = ["show", "parameter_definition", "--archetype", ARCHETYPE ]
 

@@ -59,6 +59,10 @@ class CommandAddParameterDefintion(BrokerCommand):
                                                   feature, feature_type,
                                                   auto_include=True)
 
+        if archetype and not db_paramdef_holder.holder_object.is_compileable:
+            raise ArgumentError("{0} is not compileable."
+                                .format(db_paramdef_holder.holder_object))
+
         ParamDefinition.get_unique(session, path=path,
                                    holder=db_paramdef_holder, preclude=True)
 

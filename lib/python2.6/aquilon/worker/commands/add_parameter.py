@@ -62,6 +62,11 @@ class CommandAddParameter(BrokerCommand):
         param_holder = get_parameter_holder(session, archetype, personality,
                                             feature, auto_include=True)
 
+        if isinstance(param_holder.holder_object, Personality) and \
+           not param_holder.holder_object.archetype.is_compileable:
+            raise ArgumentError("{0} is not compileable."
+                                .format(param_holder.holder_object.archetype))
+
         dbparameter = self.process_parameter(session, param_holder, path, value,
                                              comments)
         session.add(dbparameter)

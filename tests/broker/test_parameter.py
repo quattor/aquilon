@@ -122,6 +122,12 @@ class TestParameter(TestBrokerCommand):
         command = ADD_CMD + ["--path", path, "--value", "/bin/%s" % action]
         self.noouttest(command)
 
+    def test_100_add_noncompileable(self):
+        command = ["add", "parameter", "--path", "foo", "--value", "bar",
+                   "--archetype", "windows", "--personality", "generic"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Archetype windows is not compileable.", command)
+
     def test_120_add_existing_re_path(self):
         action = "testaction"
         path = "action/%s/user" % action
