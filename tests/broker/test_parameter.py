@@ -263,6 +263,13 @@ class TestParameter(TestBrokerCommand):
                           r'Template: espinfo',
                           VAL_CMD)
 
+    def test_300_validate_noparams(self):
+        # Validate a personality that has no parameters defined
+        command = ["validate", "parameter", "--personality", "utpersonality"]
+        out, err = self.successtest(command)
+        self.assertEmptyOut(out, command)
+        self.matchoutput(err, "All required parameters specified.", command)
+
     def test_500_verify_diff(self):
         cmd = ["show_diff", "--archetype", ARCHETYPE, "--personality", PERSONALITY,
                "--other", OTHER_PERSONALITY]

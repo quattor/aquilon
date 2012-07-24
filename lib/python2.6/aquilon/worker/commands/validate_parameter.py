@@ -52,8 +52,6 @@ class CommandValidateParameter(BrokerCommand):
 
         param_holder = get_parameter_holder(session, archetype, personality,
                                             feature)
-        param_definitions = None
-        parameters = None
 
         if isinstance(param_holder, FeatureLinkParameter):
             param_definitions = get_param_definitions(session,
@@ -65,6 +63,9 @@ class CommandValidateParameter(BrokerCommand):
                                                       archetype=param_holder.personality.archetype)
             parameters = get_parameters(session,
                                         personality=param_holder.personality)
+        else:
+            param_definitions = []
+            parameters = []
 
         errors = []
         formatter = ParamDefinitionFormatter()
