@@ -28,20 +28,21 @@
 # TERMS THAT MAY APPLY.
 
 
-from aquilon.worker.broker import BrokerCommand
 from aquilon.exceptions_ import NotFoundException
-from aquilon.worker.dbwrappers.parameter import get_param_definitions
+from aquilon.aqdb.model import Feature
+from aquilon.worker.broker import BrokerCommand
 
 
 class CommandShowParameterDefinitionFeature(BrokerCommand):
 
-    required_parameters = ["feature"]
+    required_parameters = ["feature", "type"]
 
-    def render(self, session, feature, **arguments):
-
-        dbobj = get_param_definitions(session, feature=feature)
-        if dbobj:
-            return dbobj
+    def render(self, session, feature, type, **arguments):
+        dbfeature = Feature.get_unique(session, name=feature, feature_type=type,
+                                       compel=True)
+        if dbfeature.paramdef_holder and \
+           dbfeature.paramdef_holder.param_definitions:
+            return dbfeature.paramdef_holder.param_definitions
 
         raise NotFoundException("No parameter definitions found for "
-                                "feature {0}.".format(feature))
+                                "{0:l}.".format(dbfeature))

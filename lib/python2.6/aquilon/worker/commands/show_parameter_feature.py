@@ -28,23 +28,28 @@
 # TERMS THAT MAY APPLY.
 
 
+from aquilon.exceptions_ import ArgumentError, NotFoundException
+from aquilon.aqdb.model import Feature
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.parameter import get_parameters
-from aquilon.exceptions_ import ArgumentError, NotFoundException
 
 
 class CommandShowParameterFeature(BrokerCommand):
 
-    required_parameters = ["feature"]
+    required_parameters = ["feature", "type"]
 
-    def render(self, session, feature, archetype, personality, **arguments):
+    def render(self, session, feature, type, archetype, personality,
+               **arguments):
         if not (personality or archetype):
             raise ArgumentError("Archetype or Personality must be specified")
+
+        dbfeature = Feature.get_unique(session, name=feature, feature_type=type,
+                                       compel=True)
 
         parameters = get_parameters(session,
                                     archetype=archetype,
                                     personality=personality,
-                                    feature=feature)
+                                    feature=dbfeature)
 
         if parameters:
             return parameters

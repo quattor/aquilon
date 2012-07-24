@@ -4925,17 +4925,17 @@
 
    <command name="show_parameter">
       Display all parameters configured on a personality
-      <p/>
       <optgroup name="show_parameter_options" mandatory="True" fields="any">
-         <optgroup name="by_personality" mandatory="True" fields="any">
-            <option name="personality" type="string">Name of  personality</option>
+         <option name="personality" type="string">Name of  personality</option>
+         <optgroup name="show_parameter_feature_options" mandatory="False" fields="all">
             <option name="feature" type="string">Feature</option>
+            <option name="type" type="string">Type of the feature: host, hardware or interface</option>
          </optgroup>
       </optgroup>
-       <optgroup name="by_other_opts" mandatory="False" fields="any">
-             <option name="archetype" type="string">Archetype</option>
-       </optgroup>
-      <transport method="get" trigger="feature" path="feature/feature/%(feature)s/parameters"/>
+      <optgroup name="by_other_opts" mandatory="False" fields="any">
+         <option name="archetype" type="string">Archetype</option>
+      </optgroup>
+      <transport method="get" trigger="feature" path="feature/%(type)s/%(feature)s/parameters"/>
       <transport method="get" path="personality/personality/%(personality)s/parameters"/>
    </command>
 
@@ -5060,11 +5060,14 @@
       The 'csv' format contains the following fields, in this order:
       Definition Holder name, path, value type, default value, description, template, is_required
       <optgroup name="show_parameter_def_options" mandatory="True" fields="any">
-          <option name="archetype" type="string">Archetype</option>
-          <option name="feature" type="string">Feature</option>
+         <option name="archetype" type="string" conflicts="feature type">Archetype</option>
+         <optgroup name="show_parameter_def_feature_options" mandatory="False" fields="all">
+            <option name="feature" type="string" conflicts="archetype">Feature</option>
+            <option name="type" type="string">Type of the feature: host, hardware or interface</option>
+         </optgroup>
       </optgroup>
-      <transport method="get"  trigger="archetype" path="/archetype/%(archetype)s/parameter_definitions"/>
-      <transport method="get"  trigger="feature" path="/feature/%(feature)s/parameter_definitions"/>
+      <transport method="get" trigger="archetype" path="archetype/%(archetype)s/parameter_definitions"/>
+      <transport method="get" trigger="feature" path="feature/%(type)s/%(feature)s/parameter_definitions"/>
    </command>
 
 

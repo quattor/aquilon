@@ -78,7 +78,8 @@ class TestParameterFeature(TestBrokerCommand):
 
     def test_020_verify_host_feature(self):
         type = "host"
-        cmd = SHOW_CMD + [ "--feature", HOSTFEATURE, "--personality", PERSONALITY ]
+        cmd = SHOW_CMD + [ "--feature", HOSTFEATURE, "--type", type,
+                          "--personality", PERSONALITY ]
         err = self.notfoundtest(cmd)
         self.matchoutput(err, "No parameters found for feature %s." % HOSTFEATURE, cmd)
         self.load_paramdefs(HOSTFEATURE, type)
@@ -95,7 +96,8 @@ class TestParameterFeature(TestBrokerCommand):
 
     def test_050_verify_hardware_feature(self):
         type = "hardware"
-        cmd = SHOW_CMD + [ "--feature", HARDWAREFEATURE, "--archetype", ARCHETYPE]
+        cmd = SHOW_CMD + [ "--feature", HARDWAREFEATURE, "--type", type,
+                          "--archetype", ARCHETYPE]
         err = self.notfoundtest(cmd)
         self.matchoutput(err, "No parameters found for feature %s." % HARDWAREFEATURE, cmd)
         self.load_paramdefs(HARDWAREFEATURE, type)
@@ -112,7 +114,8 @@ class TestParameterFeature(TestBrokerCommand):
 
     def test_080_verify_interface_feature(self):
         type = "interface"
-        cmd = SHOW_CMD + [ "--feature", INTERFACEFEATURE, "--personality", PERSONALITY]
+        cmd = SHOW_CMD + [ "--feature", INTERFACEFEATURE, "--type", type,
+                          "--personality", PERSONALITY]
         err = self.notfoundtest(cmd)
         self.matchoutput(err, "No parameters found for feature %s." % INTERFACEFEATURE, cmd)
         self.load_paramdefs(INTERFACEFEATURE, type)
@@ -144,7 +147,8 @@ class TestParameterFeature(TestBrokerCommand):
 
     def test_110_verify_host_feature(self):
         type = "host"
-        cmd = SHOW_CMD + [ "--feature", HOSTFEATURE, "--personality", PERSONALITY ]
+        cmd = SHOW_CMD + [ "--feature", HOSTFEATURE, "--type", type,
+                          "--personality", PERSONALITY ]
         out = self.commandtest(cmd)
         self.matchoutput(out, 'teststring: "host_feature"', cmd)
         self.matchoutput(out, 'testlist: "host1,host2"', cmd)
@@ -185,7 +189,8 @@ class TestParameterFeature(TestBrokerCommand):
 
     def test_210_verify_interface_feature(self):
         type = "interface"
-        cmd = SHOW_CMD + [ "--feature", INTERFACEFEATURE, "--personality", PERSONALITY]
+        cmd = SHOW_CMD + [ "--feature", INTERFACEFEATURE, "--type", type,
+                          "--personality", PERSONALITY]
         out = self.commandtest(cmd)
         self.matchoutput(out, 'teststring: "interface_feature"', cmd)
         self.matchoutput(out, 'testlist: "intf1,intf2"', cmd)
@@ -249,7 +254,8 @@ class TestParameterFeature(TestBrokerCommand):
 
     def test_310_verify_hardware_feature(self):
         type = "hardware"
-        cmd = SHOW_CMD + [ "--feature", HARDWAREFEATURE, "--archetype", ARCHETYPE]
+        cmd = SHOW_CMD + [ "--feature", HARDWAREFEATURE, "--type", type,
+                          "--archetype", ARCHETYPE]
         out = self.commandtest(cmd)
         self.matchoutput(out, 'teststring: "hardware_feature"', cmd)
         self.matchoutput(out, 'testlist: "hardware1,hardware2"', cmd)
@@ -311,7 +317,8 @@ class TestParameterFeature(TestBrokerCommand):
 
     def test_380_verify_hardware_feature(self):
         type = "hardware"
-        cmd = SHOW_CMD + [ "--feature", HARDWAREFEATURE, "--archetype", ARCHETYPE]
+        cmd = SHOW_CMD + [ "--feature", HARDWAREFEATURE, "--type", type,
+                          "--archetype", ARCHETYPE]
         out = self.commandtest(cmd)
         self.matchoutput(out, 'teststring: "hardware_newstring"', cmd)
         self.matchoutput(out, 'testlist: "hardware1,hardware2"', cmd)

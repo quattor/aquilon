@@ -137,7 +137,8 @@ class TestParameterDefinitionFeature(TestBrokerCommand):
         self.matchoutput(err, "The json string specified for default for path=testbadjson is invalid", cmd)
 
     def test_140_verify_add(self):
-        cmd = ["show", "parameter_definition", "--feature", FEATURE ]
+        cmd = ["show", "parameter_definition", "--feature", FEATURE,
+               "--type", "host"]
 
         out = self.commandtest(cmd)
         self.searchoutput(out,
@@ -173,10 +174,12 @@ class TestParameterDefinitionFeature(TestBrokerCommand):
             self.noouttest(cmd)
 
     def test_150_verify_delete(self):
-        cmd = ["show", "parameter_definition", "--feature", FEATURE ]
+        cmd = ["show", "parameter_definition", "--feature", FEATURE,
+               "--type", "host"]
 
         err = self.notfoundtest(cmd)
-        self.matchoutput(err, "Not Found: No parameter definitions found for feature myfeature", cmd)
+        self.matchoutput(err, "No parameter definitions found for host "
+                         "feature myfeature", cmd)
 
     def test_999_del(self):
         cmd = ["del_feature", "--feature", FEATURE, "--type=host" ]
