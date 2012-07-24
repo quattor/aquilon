@@ -36,7 +36,7 @@ from sqlalchemy.orm import relation, backref, deferred
 
 from aquilon.aqdb.column_types import JSONEncodedDict, MutationDict
 from aquilon.aqdb.model import Base, Personality, FeatureLink
-from aquilon.exceptions_ import NotFoundException, ArgumentError
+from aquilon.exceptions_ import NotFoundException, ArgumentError, InternalError
 from aquilon.aqdb.column_types import AqStr
 
 
@@ -63,12 +63,12 @@ class ParameterHolder(Base):
     __mapper_args__ = {'polymorphic_on': holder_type}
 
     @property
-    def holder_name(self):
-        return None
+    def holder_name(self):  # pragma: no cover
+        raise InternalError("Abstract base method called")
 
     @property
-    def holder_object(self):
-        return None
+    def holder_object(self):  # pragma: no cover
+        raise InternalError("Abstract base method called")
 
 paramholder = ParameterHolder.__table__  # pylint: disable=C0103, E1101
 paramholder.primary_key.name = '%s_pk' % _PARAM_HOLDER

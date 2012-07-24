@@ -36,7 +36,7 @@ from sqlalchemy.orm import (relation, backref, deferred)
 
 from aquilon.aqdb.model import Base, Archetype, Feature
 from aquilon.aqdb.column_types import Enum
-from aquilon.exceptions_ import ArgumentError
+from aquilon.exceptions_ import ArgumentError, InternalError
 from aquilon.aqdb.column_types import AqStr
 
 _TN = 'param_definition'
@@ -62,12 +62,12 @@ class ParamDefHolder(Base):
     __mapper_args__ = {'polymorphic_on': type}
 
     @property
-    def holder_name(self):
-        return None
+    def holder_name(self):  # pragma: no cover
+        raise InternalError("Abstract base method called")
 
     @property
-    def holder_object(self):
-        return None
+    def holder_object(self):  # pragma: no cover
+        raise InternalError("Abstract base method called")
 
 
 param_definition_holder = ParamDefHolder.__table__  # pylint: disable=C0103, E1101
