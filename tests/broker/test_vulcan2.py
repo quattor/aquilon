@@ -51,9 +51,9 @@ class TestVulcan20(TestBrokerCommand):
                    "--comments=autopg_v2_tests"]
         self.noouttest(command)
 
-    def add_utcluster(self, name):
+    def add_utcluster(self, name, metacluster):
         command = ["add_esx_cluster", "--cluster=%s" % name,
-                   "--metacluster=utmc8", "--building=ut",
+                   "--metacluster=%s" % metacluster, "--building=ut",
                    "--buildstatus=build",
                    "--domain=unittest", "--down_hosts_threshold=0",
                    "--archetype=esx_cluster",
@@ -64,7 +64,7 @@ class TestVulcan20(TestBrokerCommand):
     def test_001_addutpgcl(self):
         # Allocate utecl5 - utecl10 for utmc4 (autopg testing)
         for i in range(0, 2):
-            self.add_utcluster("utpgcl%d" % i)
+            self.add_utcluster("utpgcl%d" % i, "utmc8")
 
     # see     def testaddut01ga2s02(self):
     def test_002_addutpgsw(self):
@@ -382,15 +382,6 @@ class TestVulcan20(TestBrokerCommand):
                          "Service vcenter is already aligned to "
                          "ESX metaclusters.", command)
 
-    def test_150_failmixedalignment(self):
-        """Counterpart of testfailmixedalignment"""
-        command = ["add_cluster_aligned_service", "--cluster_type", "esx",
-                   "--service", "vcenter"]
-        out = self.badrequesttest(command)
-        self.matchoutput(out,
-                         "Service vcenter can't be aligned to "
-                         "both meta and non-meta cluster types.",
-                         command)
 
     def test_151_mapvcenterservices(self):
         command = ["map", "service", "--service", "vcenter", "--instance", "ut",
@@ -433,7 +424,7 @@ class TestVulcan20(TestBrokerCommand):
                    "--building", "ut"]
         self.noouttest(command)
 
-        self.add_utcluster("utpgcl2")
+        self.add_utcluster("utpgcl2", "utmc8")
 
         command = ["make", "cluster", "--cluster", "utmc8"]
         out = self.badrequesttest(command)
@@ -496,8 +487,8 @@ class TestVulcan20(TestBrokerCommand):
         command = ["add", "service", "--service", "esx_management_server", "--instance", "ut.mc"]
         self.noouttest(command)
 
-        command = ["add_required_service", "--service", "esx_management_server",
-                   "--archetype", "metacluster", "--personality", "vulcan2-test"]
+        command = ["add_cluster_aligned_service", "--service", "esx_management_server",
+                   "--cluster_type", "meta"]
         self.noouttest(command)
 
         command = ["map", "service", "--service", "esx_management_server", "--instance", "ut.mc",
@@ -524,7 +515,35 @@ class TestVulcan20(TestBrokerCommand):
                          "not in a service map for utpgh0.aqd-unittest.ms.com.",
                          command)
 
-    def test_170_remove_mc_esx_service(self):
+    def test_175_verify_client_count(self):
+        command = ["show_service", "--service=esx_management_server",
+                   "--instance=ut.mc"]
+        out = self.commandtest(command)
+        self.searchoutput(out, r"^  Client Count: 16$", command)
+
+    def test_175_verify_mixed_client_count(self):
+        self.add_utcluster("utpgcl3", "utmc8")
+        command = ["bind_cluster", "--cluster", "utpgcl3", "--service",
+                   "esx_management_server", "--instance", "ut.mc"]
+        err = self.statustest(command)
+        self.matchoutput(err, "ESX Cluster utpgcl3 adding binding for service "
+                         "esx_management_server instance ut.mc", command)
+
+        command = ["show_service", "--service=esx_management_server",
+                   "--instance=ut.mc"]
+        out = self.commandtest(command)
+        self.searchoutput(out, r"^  Client Count: 24$", command)
+
+        # Can't unbind an an aligned service here and don't want unalign it
+
+        command = ["del_esx_cluster", "--cluster=utpgcl3"]
+        self.successtest(command)
+
+    def test_180_remove_mc_esx_service(self):
+        command = ["del_cluster_aligned_service", "--service", "esx_management_server",
+                   "--cluster_type", "meta"]
+        self.noouttest(command)
+
         command = ["unbind_cluster", "--cluster", "utmc8", "--service", "esx_management_server",
                    "--instance", "ut.mc"]
         self.noouttest(command)
@@ -532,10 +551,6 @@ class TestVulcan20(TestBrokerCommand):
         command = ["unmap", "service", "--service", "esx_management_server", "--instance", "ut.mc",
                    "--building", "ut", "--personality", "vulcan2-test",
                    "--archetype", "metacluster"]
-        self.noouttest(command)
-
-        command = ["del_required_service", "--service", "esx_management_server",
-                   "--archetype", "metacluster", "--personality", "vulcan2-test"]
         self.noouttest(command)
 
         command = ["del", "service", "--service", "esx_management_server", "--instance", "ut.mc"]

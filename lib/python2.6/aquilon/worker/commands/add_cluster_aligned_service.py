@@ -44,11 +44,6 @@ class CommandAddClusterAlignedService(BrokerCommand):
             raise ArgumentError("{0} is already aligned to ESX {1}clusters."
                 .format(dbservice, 'meta' if cluster_type == 'meta' else ''))
 
-        if ((cluster_type == 'meta' and dbservice.aligned_cluster_types) or
-            ('meta' in dbservice.aligned_cluster_types)):
-            raise ArgumentError("{0} can't be aligned to both meta and non-meta "
-                                "cluster types.".format(dbservice))
-
         dbcas = ClusterAlignedService(service=dbservice,
                                       cluster_type=cluster_type,
                                       comments=comments)

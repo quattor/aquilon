@@ -110,26 +110,31 @@ class ServiceInstance(Base):
             # By far, the common case.
             return self._client_count
 
-        # Currently if meta then it's only meta.
-        if cluster_types[0] == 'meta':
+        clusters = {}
+        # Meta
+        if 'meta' in cluster_types:
 
             McAlias = aliased(MetaCluster)
-            q = session.query(func.sum(Cluster.max_hosts))
+            q = session.query(Cluster.name, Cluster.max_hosts)
 
             # Force orm to look for mc - service relation
             q = q.join('_metacluster', (McAlias,
                             MetaClusterMember.metacluster_id == McAlias.id))
             q = q.filter(McAlias.service_bindings.contains(self))
 
-            # Make sure it's a number
-            adjusted_count = q.scalar() or 0
+            for name, max_host in q.all():
+                clusters[name]=max_host
 
-        else:
-            q = session.query(func.sum(Cluster.max_hosts))
-            q = q.filter(Cluster.cluster_type.in_(cluster_types))
-            q = q.filter(Cluster.service_bindings.contains(self))
-            # Make sure it's a number
-            adjusted_count = q.scalar() or 0
+        # Esx et al.
+        q = session.query(Cluster.name, Cluster.max_hosts)
+        q = q.filter(Cluster.cluster_type.in_(cluster_types))
+        q = q.filter(Cluster.cluster_type != 'meta')
+        q = q.filter(Cluster.service_bindings.contains(self))
+
+        for name, max_host in q.all():
+            clusters[name]=max_host
+
+        adjusted_count = sum(clusters.itervalues())
 
         q = session.query(Host)
         q = q.filter(Host.services_used.contains(self))
