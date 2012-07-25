@@ -85,6 +85,15 @@ class TestAddClusterAlignedService(TestBrokerCommand):
                          "not found.",
                          command)
 
+    def testfailmixedalignment(self):
+        command = ["add_cluster_aligned_service", "--cluster_type=meta",
+                   "--service=esx_management_server"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "Service esx_management_server can't be aligned to "
+                         "both meta and non-meta cluster types.",
+                         command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(

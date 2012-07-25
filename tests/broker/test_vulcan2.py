@@ -51,17 +51,20 @@ class TestVulcan20(TestBrokerCommand):
                    "--comments=autopg_v2_tests"]
         self.noouttest(command)
 
+    def add_utcluster(self, name):
+        command = ["add_esx_cluster", "--cluster=%s" % name,
+                   "--metacluster=utmc8", "--building=ut",
+                   "--buildstatus=build",
+                   "--domain=unittest", "--down_hosts_threshold=0",
+                   "--archetype=esx_cluster",
+                   "--personality=vulcan2-10g-test"]
+        self.noouttest(command)
+
     # see testaddutmc4
     def test_001_addutpgcl(self):
         # Allocate utecl5 - utecl10 for utmc4 (autopg testing)
         for i in range(0, 2):
-            command = ["add_esx_cluster", "--cluster=utpgcl%d" % i,
-                       "--metacluster=utmc8", "--building=ut",
-                       "--buildstatus=build",
-                       "--domain=unittest", "--down_hosts_threshold=0",
-                       "--archetype=esx_cluster",
-                       "--personality=vulcan2-10g-test"]
-            self.noouttest(command)
+            self.add_utcluster("utpgcl%d" % i)
 
     # see     def testaddut01ga2s02(self):
     def test_002_addutpgsw(self):
@@ -371,6 +374,24 @@ class TestVulcan20(TestBrokerCommand):
                    "--service", "vcenter"]
         self.noouttest(command)
 
+    def test_150_failaddvcenteragain(self):
+        command = ["add_cluster_aligned_service", "--cluster_type", "meta",
+                   "--service", "vcenter"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "Service vcenter is already aligned to "
+                         "ESX metaclusters.", command)
+
+    def test_150_failmixedalignment(self):
+        """Counterpart of testfailmixedalignment"""
+        command = ["add_cluster_aligned_service", "--cluster_type", "esx",
+                   "--service", "vcenter"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "Service vcenter can't be aligned to "
+                         "both meta and non-meta cluster types.",
+                         command)
+
     def test_151_mapvcenterservices(self):
         command = ["map", "service", "--service", "vcenter", "--instance", "ut",
                    "--building", "ut", "--personality", "vulcan2-10g-test",
@@ -402,6 +423,31 @@ class TestVulcan20(TestBrokerCommand):
         command = "show metacluster --metacluster utmc8"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Member Alignment: Service vcenter Instance ut", command)
+
+    def test_152_failmaxclientcount(self):
+        command = ["update_service", "--service", "vcenter", "--instance", "ut",
+                   "--max_clients", "17"]
+        self.noouttest(command)
+
+        command = ["map", "service", "--service", "vcenter", "--instance", "ut",
+                   "--building", "ut"]
+        self.noouttest(command)
+
+        self.add_utcluster("utpgcl2")
+
+        command = ["make", "cluster", "--cluster", "utmc8"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "The available instances ['ut'] for service vcenter "
+                         "are at full capacity.",
+                         command)
+
+        command = ["unmap", "service", "--service", "vcenter",
+                   "--instance", "ut", "--building", "ut"]
+        self.noouttest(command)
+
+        command = ["del_esx_cluster", "--cluster=utpgcl2"]
+        self.successtest(command)
 
     def test_153_unbindvcenterservices(self):
         command = ["del_cluster_aligned_service", "--cluster_type", "meta",

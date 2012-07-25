@@ -97,7 +97,12 @@ class ServiceInstance(Base):
         as though max_members are bound.  The tricky bit is de-duplication.
 
         """
-        from aquilon.aqdb.model import Cluster
+        from aquilon.aqdb.model import Cluster, MetaCluster
+        from aquilon.aqdb.model.cluster import ClusterServiceBinding
+        from aquilon.aqdb.model.metacluster import MetaClusterMember
+        from sqlalchemy.sql import and_
+        from sqlalchemy.orm import aliased
+
         session = object_session(self)
 
         cluster_types = self.service.aligned_cluster_types
@@ -105,11 +110,26 @@ class ServiceInstance(Base):
             # By far, the common case.
             return self._client_count
 
-        q = session.query(func.sum(Cluster.max_hosts))
-        q = q.filter(Cluster.cluster_type.in_(cluster_types))
-        q = q.filter(Cluster.service_bindings.contains(self))
-        # Make sure it's a number
-        adjusted_count = q.scalar() or 0
+        # Currently if meta then it's only meta.
+        if cluster_types[0] == 'meta':
+
+            McAlias = aliased(MetaCluster)
+            q = session.query(func.sum(Cluster.max_hosts))
+
+            # Force orm to look for mc - service relation
+            q = q.join('_metacluster', (McAlias,
+                            MetaClusterMember.metacluster_id == McAlias.id))
+            q = q.filter(McAlias.service_bindings.contains(self))
+
+            # Make sure it's a number
+            adjusted_count = q.scalar() or 0
+
+        else:
+            q = session.query(func.sum(Cluster.max_hosts))
+            q = q.filter(Cluster.cluster_type.in_(cluster_types))
+            q = q.filter(Cluster.service_bindings.contains(self))
+            # Make sure it's a number
+            adjusted_count = q.scalar() or 0
 
         q = session.query(Host)
         q = q.filter(Host.services_used.contains(self))
