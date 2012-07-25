@@ -32,6 +32,9 @@
 import csv
 import cStringIO
 
+from sqlalchemy.orm.collections import InstrumentedList
+from sqlalchemy.orm.query import Query
+
 from aquilon.worker.formats.formatters import ObjectFormatter
 
 
@@ -82,6 +85,8 @@ class ListFormatter(ObjectFormatter):
         return "\n".join([self.redirect_djb(item) for item in result])
 
 ObjectFormatter.handlers[list] = ListFormatter()
+ObjectFormatter.handlers[Query] = ListFormatter()
+ObjectFormatter.handlers[InstrumentedList] = ListFormatter()
 
 
 class StringList(list):
