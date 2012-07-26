@@ -29,7 +29,6 @@
 """Contains the logic for `aq add location`."""
 
 
-from aquilon import const
 from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import Location
@@ -37,8 +36,8 @@ from aquilon.aqdb.model import Location
 # FIXME: This probably belongs in location.py
 # It's also broken, as campus is not strictly between country and city.
 # The list of imports above needs to include all of these entries.
-const.location_types = ("company", "hub", "continent", "country", "campus",
-                        "city", "building", "room", "rack", "desk")
+location_types = ("company", "hub", "continent", "country", "campus",
+                  "city", "building", "room", "rack", "desk")
 
 def add_location(session, name, fullname, type, parent_name, parent_type,
                  comments=None, address=None):
@@ -59,8 +58,8 @@ def add_location(session, name, fullname, type, parent_name, parent_type,
     parent = Location.get_unique(session, name=parent_name,
                                  location_type=parent_type, compel=True)
 
-    type_weight = const.location_types.index(type)
-    parent_weight = const.location_types.index(parent_type)
+    type_weight = location_types.index(type)
+    parent_weight = location_types.index(parent_type)
 
     if type_weight <= parent_weight:
         raise ArgumentError("Type %s cannot be a parent of %s." %
