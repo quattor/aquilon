@@ -28,17 +28,14 @@
 # TERMS THAT MAY APPLY.
 
 from datetime import datetime
-import re
 
 from sqlalchemy import (Column, Integer, String, DateTime, ForeignKey,
                         Sequence, UniqueConstraint)
-from sqlalchemy.ext.associationproxy import association_proxy
-from sqlalchemy.orm import (relation, backref, object_session, validates,
-                            deferred)
+from sqlalchemy.orm import relation, backref, validates
 
 from aquilon.exceptions_ import InternalError
-from aquilon.aqdb.column_types import AqStr, Enum
-from aquilon.aqdb.model import Base, Cluster, Host, MetaCluster
+from aquilon.aqdb.column_types import AqStr
+from aquilon.aqdb.model import Base, Cluster, Host
 
 _TN = 'resource'
 _ABV = 'res'

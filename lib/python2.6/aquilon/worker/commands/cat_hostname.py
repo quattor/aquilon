@@ -29,7 +29,6 @@
 """Contains the logic for `aq cat --hostname`."""
 
 
-from aquilon.exceptions_ import NotFoundException
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.host import hostname_to_host
 from aquilon.worker.dbwrappers.resources import get_resource

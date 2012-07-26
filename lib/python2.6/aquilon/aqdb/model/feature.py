@@ -32,13 +32,11 @@ from datetime import datetime
 
 from sqlalchemy import (Column, Integer, DateTime, Sequence, String, Boolean,
                         ForeignKey, UniqueConstraint)
-from sqlalchemy.orm import (relation, backref, deferred, column_property,
-                            validates)
+from sqlalchemy.orm import relation, backref, deferred, validates
 from sqlalchemy.orm.exc import NoResultFound
-from sqlalchemy.sql import select, func
 
 from aquilon.exceptions_ import ArgumentError, NotFoundException, InternalError
-from aquilon.aqdb.model import Base, Archetype, Personality, Model, Interface
+from aquilon.aqdb.model import Base, Archetype, Personality, Model
 from aquilon.aqdb.column_types import AqStr
 from aquilon.aqdb.model.base import _raise_custom
 

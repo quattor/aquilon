@@ -29,8 +29,6 @@
 """Contains a wrapper for `aq add host --prefix`."""
 
 
-from sqlalchemy.sql import select
-
 from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.commands.add_host import CommandAddHost

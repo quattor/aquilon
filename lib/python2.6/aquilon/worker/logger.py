@@ -28,7 +28,7 @@
 # TERMS THAT MAY APPLY.
 
 
-from logging import Logger, Handler, addLevelName, NOTSET, DEBUG, INFO
+from logging import Logger, Handler, addLevelName, NOTSET
 
 
 CLIENT_INFO = 25
@@ -114,5 +114,5 @@ class RequestLogger(Logger):
         """
         if self.manager.disable >= CLIENT_INFO:
             return
-        if CLIENT_INFO >=self.getEffectiveLevel():
+        if CLIENT_INFO >= self.getEffectiveLevel():
             apply(self._log, (CLIENT_INFO, msg, args), kwargs)

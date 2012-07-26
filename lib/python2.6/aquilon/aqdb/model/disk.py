@@ -32,7 +32,7 @@ from datetime import datetime
 
 from sqlalchemy import (Column, Integer, DateTime, Sequence, String, Boolean,
                         ForeignKey, UniqueConstraint)
-from sqlalchemy.orm import relation, backref, column_property, deferred, synonym
+from sqlalchemy.orm import relation, backref, column_property, deferred
 from sqlalchemy.sql import select, func
 
 from aquilon.aqdb.model import Base, Machine, ServiceInstance

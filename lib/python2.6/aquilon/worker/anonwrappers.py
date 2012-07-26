@@ -30,7 +30,6 @@
 
 
 from twisted.web import server, http
-from twisted.python import log
 
 
 class AnonHTTPChannel(http.HTTPChannel):

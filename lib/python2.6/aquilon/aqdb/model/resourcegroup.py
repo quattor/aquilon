@@ -27,15 +27,12 @@
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
 
-from datetime import datetime
-
-from sqlalchemy import (Integer, DateTime, Sequence, String, Column, Boolean,
-                        UniqueConstraint, CheckConstraint, ForeignKey)
+from sqlalchemy import Integer, Column, ForeignKey
 
 from aquilon.aqdb.model import Resource, ResourceHolder
 from aquilon.aqdb.column_types.aqstr import AqStr
 from aquilon.exceptions_ import ArgumentError
-from sqlalchemy.orm import relation, backref, object_session
+from sqlalchemy.orm import relation, backref
 
 
 _TN = 'resourcegroup'

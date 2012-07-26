@@ -63,7 +63,7 @@ class CommandSearchMachine(BrokerCommand):
             q = q.filter_by(memory=memory)
         if cluster:
             dbcluster = Cluster.get_unique(session, cluster, compel=True)
-            if isinstance(dbcluster,MetaCluster):
+            if isinstance(dbcluster, MetaCluster):
                 q = q.join('vm_container', ClusterResource, Cluster)
                 q = q.filter_by(metacluster=dbcluster)
             else:

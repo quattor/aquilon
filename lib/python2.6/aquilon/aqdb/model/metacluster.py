@@ -33,8 +33,8 @@
 
 from datetime import datetime
 
-from sqlalchemy import (Column, Integer, String, DateTime, Sequence,
-                        ForeignKey, UniqueConstraint, Boolean)
+from sqlalchemy import (Column, Integer, DateTime, Boolean, ForeignKey,
+                        UniqueConstraint)
 
 from sqlalchemy.orm import relation, backref, deferred
 from sqlalchemy.orm.attributes import instance_state
@@ -45,8 +45,6 @@ from sqlalchemy.ext.associationproxy import association_proxy
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Base, Cluster, ServiceInstance
 from aquilon.aqdb.model.cluster import convert_resources
-from aquilon.aqdb.column_types.aqstr import AqStr
-from sqlalchemy.sql import func
 
 _TN = 'clstr'
 _MCT = 'metacluster'

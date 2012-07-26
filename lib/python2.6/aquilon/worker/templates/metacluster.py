@@ -33,8 +33,7 @@ import logging
 from aquilon.aqdb.model import MetaCluster
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
 from aquilon.worker.templates.panutils import (StructureTemplate, pan_assign,
-                                               pan_include, pan_push,
-                                               pan_variable)
+                                               pan_include, pan_push)
 from aquilon.worker.locks import CompileKey
 
 

@@ -36,7 +36,7 @@ from sqlalchemy.orm import joinedload, subqueryload, lazyload, contains_eager
 from sqlalchemy.orm.attributes import set_committed_value
 
 from aquilon.worker.broker import BrokerCommand
-from aquilon.aqdb.model import (Service, Machine, Chassis, Host, Branch,
+from aquilon.aqdb.model import (Service, Machine, Chassis, Host,
                                 Personality, Cluster, City, Rack, Resource,
                                 ResourceHolder, HostResource, ClusterResource,
                                 VirtualMachine, Filesystem, RebootSchedule,

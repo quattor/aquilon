@@ -31,9 +31,8 @@
 from datetime import datetime
 from ipaddr import IPv4Address, IPv4Network
 
-from sqlalchemy import (Column, Integer, Sequence, String, Boolean, DateTime,
-                        ForeignKey, UniqueConstraint, CheckConstraint, Index,
-                        desc)
+from sqlalchemy import (Column, Integer, Sequence, String, DateTime, ForeignKey,
+                        UniqueConstraint, CheckConstraint, Index, desc)
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import relation, deferred
 
@@ -274,9 +273,6 @@ Index('%s_loc_id_idx' % _TN, network.c.location_id)
 
 
 def get_net_id_from_ip(session, ip, network_environment=None):
-    # Prevent circular dep
-    from aquilon.aqdb.model import NetworkEnvironment
-
     """Requires a session, and will return the Network for a given ip."""
     if ip is None:
         return None

@@ -27,17 +27,13 @@
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
 
-from sqlalchemy.orm import contains_eager
-from sqlalchemy.sql import or_
 from aquilon.exceptions_ import (ArgumentError, PartialError, IncompleteError,
                                  InternalError, AuthorizationException,
                                  UnimplementedError)
-from aquilon.aqdb.model import (Feature, Archetype, Personality, Model,
-                                Machine, Interface, Host)
+from aquilon.aqdb.model import Feature, Archetype, Personality, Model
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.locks import CompileKey
 from aquilon.worker.templates.personality import PlenaryPersonality
-from aquilon.worker.templates.host import PlenaryHost
 from aquilon.worker.commands.deploy import validate_justification
 from aquilon.worker.dbwrappers.feature import add_link
 

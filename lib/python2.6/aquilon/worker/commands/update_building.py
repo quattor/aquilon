@@ -29,7 +29,7 @@
 """Contains the logic for `aq update building`."""
 
 
-from aquilon.exceptions_ import ArgumentError, AquilonError
+from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import (Machine, ServiceMap, PersonalityServiceMap,
                                 DnsDomain)
 from aquilon.worker.broker import BrokerCommand
@@ -49,7 +49,7 @@ class CommandUpdateBuilding(BrokerCommand):
         dbbuilding = get_location(session, building=building)
 
         old_address = dbbuilding.address
-        oldcity=dbbuilding.city
+        oldcity = dbbuilding.city
 
         if address is not None:
             dbbuilding.address = address

@@ -33,7 +33,6 @@ from aquilon.worker.formats.formatters import ObjectFormatter
 from aquilon.worker.formats.list import ListFormatter
 from aquilon.aqdb.model import ServiceInstance
 from aquilon.aqdb.model.disk import find_storage_data
-from aquilon.worker.templates.service import PlenaryInstanceNasDiskShare
 
 
 class ServiceInstanceFormatter(ObjectFormatter):

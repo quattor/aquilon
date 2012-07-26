@@ -34,11 +34,11 @@ import re
 from sqlalchemy import (Column, Integer, String, DateTime, ForeignKey, Sequence,
                         UniqueConstraint)
 from sqlalchemy.ext.associationproxy import association_proxy
-from sqlalchemy.orm import relation, backref, object_session, deferred
+from sqlalchemy.orm import relation, backref, deferred
 from sqlalchemy.sql import and_
 
 from aquilon.exceptions_ import InternalError
-from aquilon.aqdb.column_types import IPV4, AqStr, Enum
+from aquilon.aqdb.column_types import IPV4, AqStr
 from aquilon.aqdb.model import (Base, Interface, ARecord, DnsEnvironment, Fqdn,
                                 Network)
 from aquilon.aqdb.model.a_record import dns_fqdn_mapper

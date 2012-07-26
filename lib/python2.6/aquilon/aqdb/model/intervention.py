@@ -29,11 +29,9 @@
 
 from datetime import datetime
 
-from sqlalchemy import (Integer, DateTime, Sequence, String, Column,
-                        UniqueConstraint, ForeignKey)
+from sqlalchemy import Integer, DateTime, String, Column, ForeignKey
 
 from aquilon.aqdb.model import Resource
-from aquilon.aqdb.column_types.aqstr import AqStr
 
 _TN = 'intervention'
 

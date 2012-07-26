@@ -27,19 +27,15 @@
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
 """ Configuration  Parameter data """
+
 from datetime import datetime
-from sqlalchemy import (Column, Integer, DateTime, Sequence, String,
-                        Boolean, ForeignKey, UniqueConstraint)
-from sqlalchemy.orm import (relation, backref, deferred)
-from sqlalchemy.sql import and_
-from aquilon.aqdb.column_types import Enum, JSONEncodedDict, MutationDict
-from aquilon.aqdb.model import Base, Personality, ParamDefinition
-from aquilon.aqdb.model import Feature, FeatureLink
+from sqlalchemy import (Column, Integer, DateTime, Sequence, String, ForeignKey,
+                        UniqueConstraint)
+from sqlalchemy.orm import relation, backref, deferred
+from aquilon.aqdb.column_types import JSONEncodedDict, MutationDict
+from aquilon.aqdb.model import Base, Personality, FeatureLink
 from aquilon.exceptions_ import NotFoundException, ArgumentError
 from aquilon.aqdb.column_types import AqStr
-import json
-
-
 
 _TN = 'parameter'
 _PARAM_HOLDER = 'param_holder'

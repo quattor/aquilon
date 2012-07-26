@@ -29,7 +29,8 @@
 """Wrappers to make getting and using systems simpler."""
 
 
-from aquilon.exceptions_ import IncompleteError, NotFoundException
+from aquilon.exceptions_ import (IncompleteError, NotFoundException,
+                                 ArgumentError)
 from aquilon.aqdb.model import (Cluster, ClusterResource, HostResource,
                                 Resource, ResourceGroup, BundleResource)
 from aquilon.worker.templates import Plenary

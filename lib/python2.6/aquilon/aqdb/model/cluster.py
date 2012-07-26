@@ -34,8 +34,6 @@ from sqlalchemy import (Column, Integer, Boolean, String, DateTime, Sequence,
                         ForeignKey, UniqueConstraint)
 
 from sqlalchemy.orm import relation, backref, deferred
-from sqlalchemy.orm.attributes import instance_state
-from sqlalchemy.orm.interfaces import MapperExtension
 from sqlalchemy.ext.associationproxy import association_proxy
 
 from aquilon.exceptions_ import ArgumentError

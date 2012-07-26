@@ -32,14 +32,14 @@ from ipaddr import (IPv4Address, IPv4Network, AddressValueError,
                     NetmaskValueError)
 import heapq
 
-from aquilon.exceptions_ import PartialError, ArgumentError
+from aquilon.exceptions_ import PartialError
 from aquilon.aqdb.model import (NetworkEnvironment, Network, RouterAddress,
                                 ARecord, DnsEnvironment, AddressAssignment,
                                 Building)
 from aquilon.worker.dbwrappers.dns import delete_dns_record
 from aquilon.worker.dbwrappers.network import fix_foreign_links
 
-from sqlalchemy.orm import subqueryload, lazyload, defer, contains_eager
+from sqlalchemy.orm import subqueryload
 from sqlalchemy.sql import update, and_, or_
 
 

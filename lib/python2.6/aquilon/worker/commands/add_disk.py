@@ -38,8 +38,6 @@ from aquilon.aqdb.model import (LocalDisk, NasDisk, Service, Machine, Share,
 from aquilon.aqdb.model.disk import controller_types
 from aquilon.worker.templates.machine import PlenaryMachineInfo
 from aquilon.worker.processes import NASAssign
-from aquilon.worker.dbwrappers.resources import (add_resource,
-                                                 get_resource_holder)
 
 
 class CommandAddDisk(BrokerCommand):

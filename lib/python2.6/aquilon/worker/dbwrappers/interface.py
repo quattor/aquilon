@@ -38,13 +38,11 @@ import re
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 from sqlalchemy.sql.expression import desc
 from sqlalchemy.orm import object_session
-from sqlalchemy.sql import select
 
 from aquilon.exceptions_ import ArgumentError, InternalError, NotFoundException
 from aquilon.aqdb.model import (Interface, HardwareEntity, ObservedMac,
                                 ARecord, VlanInfo, ObservedVlan, Network,
                                 AddressAssignment, Model)
-from aquilon.aqdb.model.address_assignment import ADDR_USAGES
 from aquilon.aqdb.model.network import get_net_id_from_ip
 
 

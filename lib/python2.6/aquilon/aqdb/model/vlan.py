@@ -33,7 +33,7 @@ from datetime import datetime
 from sqlalchemy import (Column, Integer, DateTime, ForeignKey, CheckConstraint,
                         UniqueConstraint)
 from sqlalchemy.orm import relation, backref, deferred, object_session
-from sqlalchemy.sql import select, func, and_
+from sqlalchemy.sql import func, and_
 
 from aquilon.exceptions_ import NotFoundException, InternalError
 from aquilon.aqdb.column_types import AqStr, Enum

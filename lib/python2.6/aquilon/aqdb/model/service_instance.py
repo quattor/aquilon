@@ -37,7 +37,6 @@ from sqlalchemy.orm import (relation, contains_eager, column_property, backref,
 from sqlalchemy.orm.session import object_session
 from sqlalchemy.sql.expression import or_
 from sqlalchemy.sql import select, func
-from sqlalchemy.ext.associationproxy import association_proxy
 
 from aquilon.aqdb.model import (Base, Service, Host, DnsRecord, DnsDomain,
                                 Machine, Fqdn)

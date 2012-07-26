@@ -26,7 +26,7 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-dispatch_tbl={}
+dispatch_tbl = {}
 
 dispatch_tbl['country'] = """
     SELECT country_symbol, country_name, continent

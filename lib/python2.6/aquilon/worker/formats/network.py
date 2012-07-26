@@ -30,7 +30,7 @@
 
 from aquilon.worker.formats.formatters import ObjectFormatter
 from aquilon.worker.formats.list import ListFormatter
-from aquilon.aqdb.model import Network, DynamicStub
+from aquilon.aqdb.model import Network
 
 def summarize_ranges(addrlist):
     """ Convert a list like [1,2,3,5] to ["1-3", "5"], but with IP addresses """

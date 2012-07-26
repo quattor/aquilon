@@ -33,9 +33,6 @@ import os
 import sys
 import logging
 
-from getpass import getpass
-from StringIO import StringIO
-
 from aquilon.aqdb import depends
 from aquilon.config import Config
 from aquilon.utils import confirm, monkeypatch
@@ -45,7 +42,6 @@ from sqlalchemy import MetaData, create_engine, text, event
 from sqlalchemy.ext.compiler import compiles
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.exc import DBAPIError, DatabaseError as SaDBError
-from sqlalchemy.interfaces import PoolListener
 from sqlalchemy.schema import CreateIndex
 from sqlalchemy.dialects.oracle.base import OracleDDLCompiler
 
@@ -139,13 +135,13 @@ class DbFactory(object):
 
         # ORACLE
         if self.dsn.startswith('oracle'):
-            import cx_Oracle
+            import cx_Oracle  # pylint: disable=W0612
 
             self.login(passwds)
 
         # POSTGRESQL
         elif self.dsn.startswith('postgresql'):
-            import psycopg2
+            import psycopg2  # pylint: disable=W0612
 
             self.login(passwds)
 

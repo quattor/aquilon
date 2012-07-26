@@ -29,7 +29,7 @@
 """Contains the logic for `aq update sandbox`."""
 
 
-from aquilon.exceptions_ import ArgumentError, AuthorizationException
+from aquilon.exceptions_ import AuthorizationException
 from aquilon.aqdb.model import Sandbox
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.branch import expand_compiler
