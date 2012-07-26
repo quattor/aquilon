@@ -10,13 +10,14 @@ persistent = no
 # R0913: Too many arguments (%s/%s)
 # R0914: Too many local variables (%s/%s)
 # R0915: Too many statements (%s/%s)
+# R0923: Interface not implemented
 # W0141: Used builtin function %r
 # W0142: Used * or ** magic
 # C0301: Line too long
 # C0111: Missing docstring
 # E0202: An attribute inherited from %s hide this method
 
-disable = R0903,R0904,R0912,R0913,R0914,R0915,W0141,W0142,C0301,C0111,E0202
+disable = R0903,R0904,R0912,R0913,R0914,R0915,R0923,W0141,W0142,C0301,C0111,E0202
 
 [BASIC]
 
@@ -24,7 +25,8 @@ good-names = e,i,ip,j,k,pg,q
 
 [TYPECHECK]
 
-generated-members = __mapper__
+generated-members = __mapper__, __table__
+ignored-classes = RelationshipProperty
 
 [REPORTS]
 
