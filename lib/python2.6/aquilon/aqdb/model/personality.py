@@ -72,7 +72,7 @@ class Personality(Base):
         return self.format_helper(format_spec, instance)
 
 
-personality = Personality.__table__   # pylint: disable=C0103, E1101
+personality = Personality.__table__   # pylint: disable=C0103
 
 personality.primary_key.name = '%s_pk' % _ABV
 personality.append_constraint(UniqueConstraint('name', 'archetype_id',
@@ -97,7 +97,7 @@ class PersonalityGrnMap(Base):
     grn = relation(Grn)
 
 
-pgn = PersonalityGrnMap.__table__  # pylint: disable=C0103, E1101
+pgn = PersonalityGrnMap.__table__  # pylint: disable=C0103
 pgn.primary_key.name = '%s_pk' % _PGN
 
 Personality.grns = relation(Grn, secondary=PersonalityGrnMap.__table__)

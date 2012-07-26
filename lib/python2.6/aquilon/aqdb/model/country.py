@@ -42,6 +42,6 @@ class Country(Location):
                                     ondelete='CASCADE'),
                 primary_key=True)
 
-country = Country.__table__  # pylint: disable=C0103, E1101
+country = Country.__table__  # pylint: disable=C0103
 country.primary_key.name = 'country_pk'
 country.info['unique_fields'] = ['name']

@@ -117,7 +117,7 @@ class Parameter(Base):
 
         dref = self.value
         for ppart in pparts:
-            if ppart not in dref.keys(): # pylint: disable=C0103, E1101
+            if ppart not in dref.keys(): # pylint: disable=E1101
                 dref[ppart] = {}
             dref = dref[ppart]
 
@@ -125,7 +125,7 @@ class Parameter(Base):
 
         ## coerce mutation of parameter since sqlalchemy
         ## cannot recognize parameter change
-        self.value.changed() # pylint: disable=C0103, E1101
+        self.value.changed() # pylint: disable=E1101
 
     def __del_path(self, path):
         """ method to do the actual deletion """
@@ -163,7 +163,7 @@ class Parameter(Base):
 
             ## coerce mutation of parameter since sqlalchemy
             ## cannot recognize parameter change
-            self.value.changed() # pylint: disable=C0103, E1101
+            self.value.changed() # pylint: disable=E1101
         except KeyError:
             raise NotFoundException("No parameter of path=%s defined" % path)
 
@@ -181,7 +181,7 @@ class Parameter(Base):
             flattened[((path + PATH_SEP) if path else "") + key] = data
         return flattened
 
-parameter = Parameter.__table__  # pylint: disable=C0103, E1101
+parameter = Parameter.__table__  # pylint: disable=C0103
 parameter.primary_key.name = '%s_pk' % _TN
 parameter.info['unique_fields'] = ['holder']
 
@@ -209,7 +209,7 @@ class ParameterHolder (Base):
         return None
 
 
-paramholder = ParameterHolder.__table__  # pylint: disable=C0103, E1101
+paramholder = ParameterHolder.__table__  # pylint: disable=C0103
 paramholder.primary_key.name = '%s_pk' % _PARAM_HOLDER
 Parameter.holder = relation(ParameterHolder, uselist=False,
                             primaryjoin=Parameter.holder_id==ParameterHolder.id,
@@ -232,8 +232,8 @@ class PersonalityParameter(ParameterHolder):
                                     uselist=False))
     @property
     def holder_name(self):
-        return "%s/%s" % (self.personality.archetype.name,  # pylint: disable=C0103, E1101
-                          self.personality.name) # pylint: disable=C0103, E1101
+        return "%s/%s" % (self.personality.archetype.name,  # pylint: disable=C0103
+                          self.personality.name) # pylint: disable=C0103
 
     @property
     def holder_object(self):
@@ -260,12 +260,12 @@ class FeatureLinkParameter(ParameterHolder):
     def holder_name(self):
         ret = []
         if (self.featurelink.personality):
-            ret.extend([self.featurelink.personality.archetype.name, # pylint: disable=C0103, E1101
-                       self.featurelink.personality.name])           # pylint: disable=C0103, E1101
+            ret.extend([self.featurelink.personality.archetype.name, # pylint: disable=C0103
+                       self.featurelink.personality.name])           # pylint: disable=C0103
         elif (self.featurelink.archetype):
-            ret.append(self.featurelink.archetype.name)                  # pylint: disable=C0103, E1101
+            ret.append(self.featurelink.archetype.name)                  # pylint: disable=C0103
         
-        ret.append(self.featurelink.feature.name)                        # pylint: disable=C0103, E1101
+        ret.append(self.featurelink.feature.name)                        # pylint: disable=C0103
         
         return "/".join(ret)
 

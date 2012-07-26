@@ -45,7 +45,7 @@ class Campus(Location):
                 primary_key=True)
 
 
-campus = Campus.__table__  # pylint: disable=C0103, E1101
+campus = Campus.__table__  # pylint: disable=C0103
 campus.primary_key.name = 'campus_pk'
 campus.info['unique_fields'] = ['name']
 

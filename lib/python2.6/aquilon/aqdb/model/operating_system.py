@@ -67,7 +67,7 @@ class OperatingSystem(Base):
         return 'os/%s/%s' % (self.name, self.version)
 
 
-operating_system = OperatingSystem.__table__  # pylint: disable=C0103, E1101
+operating_system = OperatingSystem.__table__  # pylint: disable=C0103
 
 operating_system.primary_key.name = '%s_pk' % _ABV
 operating_system.append_constraint(

@@ -257,7 +257,7 @@ class ServiceInstance(Base):
         return cache
 
 
-service_instance = ServiceInstance.__table__  # pylint: disable=C0103, E1101
+service_instance = ServiceInstance.__table__  # pylint: disable=C0103
 
 service_instance.primary_key.name = 'svc_inst_pk'
 service_instance.append_constraint(
@@ -280,7 +280,7 @@ class BuildItem(Base):
                                  primary_key=True)
 
 
-build_item = BuildItem.__table__  # pylint: disable=C0103, E1101
+build_item = BuildItem.__table__  # pylint: disable=C0103
 build_item.primary_key.name = 'build_item_pk'
 
 ServiceInstance.clients = relation(Host, secondary=build_item,

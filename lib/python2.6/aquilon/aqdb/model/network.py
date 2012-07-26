@@ -259,7 +259,7 @@ class Network(Base):
     def is_at_guest_capacity(self):
         return self.vlans_guest_count >= self.available_ip_count
 
-network = Network.__table__  # pylint: disable=C0103, E1101
+network = Network.__table__  # pylint: disable=C0103
 network.primary_key.name = '%s_pk' % _TN
 
 network.append_constraint(UniqueConstraint('network_environment_id', 'ip',

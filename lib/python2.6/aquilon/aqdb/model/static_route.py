@@ -88,5 +88,5 @@ class StaticRoute(Base):
         return self.destination.__lt__(other.destination)
 
 
-str = StaticRoute.__table__  # pylint: disable=C0103, E1101
+str = StaticRoute.__table__  # pylint: disable=C0103
 str.primary_key.name = '%s_pk' % _TN

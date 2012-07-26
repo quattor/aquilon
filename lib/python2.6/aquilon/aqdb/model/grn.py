@@ -59,7 +59,7 @@ class Grn(Base):
                                     nullable=False))
 
 
-grn= Grn.__table__  # pylint: disable=C0103, E1101
+grn = Grn.__table__  # pylint: disable=C0103
 
 grn.primary_key.name = '%s_pk' % _TN
 grn.append_constraint(

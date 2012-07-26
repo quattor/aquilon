@@ -94,15 +94,15 @@ class ARecord(DnsRecord):
                                       **kwargs)
 
 
-arecord = ARecord.__table__  # pylint: disable=C0103, E1101
+arecord = ARecord.__table__  # pylint: disable=C0103
 arecord.primary_key.name = 'a_record_pk'
 # TODO: index on ip?
 
 arecord.info['unique_fields'] = ['fqdn']
 arecord.info['extra_search_fields'] = ['ip', 'network']
 
-dns_record = DnsRecord.__table__  # pylint: disable=C0103, E1101
-fqdn = Fqdn.__table__  # pylint: disable=C0103, E1101
+dns_record = DnsRecord.__table__  # pylint: disable=C0103
+fqdn = Fqdn.__table__  # pylint: disable=C0103
 
 # Create a secondary mapper on the join of the DnsRecord and Fqdn tables
 dns_fqdn_mapper = mapper(ARecord, arecord.join(dns_record).join(fqdn),
@@ -151,7 +151,7 @@ class DynamicStub(ARecord):
                            primary_key=True)
 
 
-dynstub = DynamicStub.__table__  # pylint: disable=C0103, E1101
+dynstub = DynamicStub.__table__  # pylint: disable=C0103
 dynstub.primary_key.name = 'dynamic_stub_pk'
 dynstub.info['unique_fields'] = ['fqdn']
 dynstub.info['extra_search_fields'] = ['ip', 'network']

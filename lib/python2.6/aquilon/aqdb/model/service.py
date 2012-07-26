@@ -76,7 +76,7 @@ class Service(Base):
     def cfg_path(self):
         return 'service/%s' % (self.name)
 
-service = Service.__table__  # pylint: disable=C0103, E1101
+service = Service.__table__  # pylint: disable=C0103
 
 service.primary_key.name = 'service_pk'
 service.append_constraint(UniqueConstraint('name', name='svc_name_uk'))
@@ -103,7 +103,7 @@ class ServiceListItem(Base):
                           primary_key=True)
 
 
-sli = ServiceListItem.__table__  # pylint: disable=C0103, E1101
+sli = ServiceListItem.__table__  # pylint: disable=C0103
 sli.primary_key.name = '%s_pk' % _SLI
 
 Index('srvlst_archtyp_idx', sli.c.archetype_id)
@@ -130,7 +130,7 @@ class PersonalityServiceListItem(Base):
                                                  ondelete='CASCADE'),
                              primary_key=True)
 
-psli = PersonalityServiceListItem.__table__  # pylint: disable=C0103, E1101
+psli = PersonalityServiceListItem.__table__  # pylint: disable=C0103
 psli.primary_key.name = '%s_pk' % _ABV
 
 Index('%s_prsnlty_idx' % _ABV, psli.c.personality_id)

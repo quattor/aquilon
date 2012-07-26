@@ -81,7 +81,7 @@ class ResourceHolder(Base):
     def holder_path(self):
         return "%s/%s" % (self.holder_type, self.holder_name)
 
-resholder = ResourceHolder.__table__  # pylint: disable=C0103, E1101
+resholder = ResourceHolder.__table__  # pylint: disable=C0103
 resholder.primary_key.name = '%s_pk' % _RESHOLDER
 
 
@@ -197,6 +197,6 @@ class Resource(Base):
         return "<{0:c} Resource {0.name} of {1}>".format(self, self.holder)
 
 
-resource = Resource.__table__  # pylint: disable=C0103, E1101
+resource = Resource.__table__  # pylint: disable=C0103
 resource.primary_key.name = '%s_pk' % _TN
 resource.info['unique_fields'] = ['name', 'holder']

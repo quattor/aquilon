@@ -77,7 +77,7 @@ class Model(Base):
         return self.default_nic_model(session)
 
 
-model = Model.__table__  # pylint: disable=C0103, E1101
+model = Model.__table__  # pylint: disable=C0103
 model.primary_key.name = 'model_pk'
 
 model.append_constraint(UniqueConstraint('name', 'vendor_id',

@@ -43,6 +43,6 @@ class Desk(Location):
                 primary_key=True)
 
 
-desk = Desk.__table__  # pylint: disable=C0103, E1101
+desk = Desk.__table__  # pylint: disable=C0103
 desk.primary_key.name = 'desk_pk'
 desk.info['unique_fields'] = ['name']

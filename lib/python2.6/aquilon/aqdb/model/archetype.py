@@ -61,7 +61,7 @@ class Archetype(Base):
     comments = deferred(Column(String(255), nullable=True))
 
 
-archetype = Archetype.__table__  # pylint: disable=C0103, E1101
+archetype = Archetype.__table__  # pylint: disable=C0103
 archetype.info['unique_fields'] = ['name']
 
 archetype.primary_key.name = '%s_pk' % _TN

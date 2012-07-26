@@ -101,8 +101,8 @@ class Xtn(Base):
         return " ".join(msg)
 
 
-xtn = Xtn.__table__  # pylint: disable=C0103, E1101
-xtn.primary_key.name = 'XTN_PK'  # pylint: disable=C0103, E1101
+xtn = Xtn.__table__  # pylint: disable=C0103
+xtn.primary_key.name = 'XTN_PK'  # pylint: disable=C0103
 
 Index('XTN_USERNAME_IDX', xtn.c.username, oracle_compress=True)
 Index('XTN_COMMAND_IDX', xtn.c.command, oracle_compress=True)
@@ -140,7 +140,7 @@ class XtnDetail(Base):
     value = Column(String(255), default='True', primary_key=True)
 
 
-xtn_detail = XtnDetail.__table__  # pylint: disable=C0103, E1101
+xtn_detail = XtnDetail.__table__  # pylint: disable=C0103
 xtn_detail.primary_key.name = 'XTN_DTL_PK'
 
 Index('xtn_dtl_name_idx', xtn_detail.c.name, oracle_compress=True)

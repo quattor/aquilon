@@ -178,7 +178,7 @@ class Interface(Base):
         q = q.order_by(desc(ObservedMac.last_seen))
         return q.first()
 
-    def __init__(self, **kw):  # pylint: disable=E1002
+    def __init__(self, **kw):
         """ Overload the Base initializer to prevent null MAC addresses
             where the interface is bootable or is of type 'management'
         """
@@ -330,7 +330,7 @@ class LoopbackInterface(Interface):
         return value
 
 
-interface = Interface.__table__  # pylint: disable=C0103, E1101
+interface = Interface.__table__  # pylint: disable=C0103
 interface.primary_key.name = '%s_pk' % _TN
 interface.info['unique_fields'] = ['name', 'hardware_entity']
 

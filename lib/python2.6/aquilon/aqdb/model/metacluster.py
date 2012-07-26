@@ -157,7 +157,7 @@ class MetaCluster(Cluster):
                                                                capacity[name]))
         return
 
-metacluster = MetaCluster.__table__  # pylint: disable=C0103, E1101
+metacluster = MetaCluster.__table__  # pylint: disable=C0103
 metacluster.primary_key.name = '%s_pk' % _MCT
 metacluster.info['unique_fields'] = ['name']
 
@@ -223,7 +223,7 @@ class MetaClusterMember(Base):
 
     __mapper_args__ = {'extension': ValidateMetaCluster()}
 
-metamember = MetaClusterMember.__table__  # pylint: disable=C0103, E1101
+metamember = MetaClusterMember.__table__  # pylint: disable=C0103
 metamember.primary_key.name = '%s_pk' % _MCM
 metamember.append_constraint(
     UniqueConstraint('cluster_id', name='%s_uk' % _MCM))

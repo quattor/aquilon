@@ -96,7 +96,7 @@ class Disk(Base):
              self.machine.label, self.capacity)
 
 
-disk = Disk.__table__  # pylint: disable=C0103, E1101
+disk = Disk.__table__  # pylint: disable=C0103
 disk.primary_key.name = '%s_pk' % _TN
 disk.append_constraint(UniqueConstraint('machine_id', 'device_name',
                                         name='disk_mach_dev_name_uk'))
