@@ -56,8 +56,7 @@ class TestAddServiceAddress(TestBrokerCommand):
         # Use an address that is smaller than the primary IP to verify that the
         # primary IP is not removed
         ip = self.net.unknown[13].usable[1]
-        self.dsdb_expect_add("zebra2.aqd-unittest.ms.com", ip, "le1",
-                             primary="unittest20.aqd-unittest.ms.com")
+        self.dsdb_expect_add("zebra2.aqd-unittest.ms.com", ip, "le1")
         command = ["add", "service", "address",
                    "--hostname", "unittest20.aqd-unittest.ms.com",
                    "--service_address", "zebra2.aqd-unittest.ms.com",
@@ -83,10 +82,8 @@ class TestAddServiceAddress(TestBrokerCommand):
         zebra2_ip = self.net.unknown[13].usable[1]
         zebra3_ip = self.net.unknown[13].usable[0]
         self.dsdb_expect_delete(zebra2_ip)
-        self.dsdb_expect_add("zebra3.aqd-unittest.ms.com", zebra3_ip, "le1",
-                             primary="unittest20.aqd-unittest.ms.com")
-        self.dsdb_expect_add("zebra2.aqd-unittest.ms.com", zebra2_ip, "le2",
-                             primary="unittest20.aqd-unittest.ms.com")
+        self.dsdb_expect_add("zebra3.aqd-unittest.ms.com", zebra3_ip, "le1")
+        self.dsdb_expect_add("zebra2.aqd-unittest.ms.com", zebra2_ip, "le2")
         command = ["add", "service", "address",
                    "--hostname", "unittest20.aqd-unittest.ms.com",
                    "--service_address", "zebra3.aqd-unittest.ms.com",

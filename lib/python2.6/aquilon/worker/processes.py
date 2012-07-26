@@ -617,6 +617,7 @@ class DSDBRunner(object):
             if addr.ip in zebra_ips:
                 ifname = "le%d" % zebra_ips.index(addr.ip)
             elif addr.service_address:
+                # Skip cluster-bound service addresses
                 continue
             else:
                 ifname = addr.logical_name
@@ -633,13 +634,13 @@ class DSDBRunner(object):
             if key in status:
                 continue
 
-            if addr.interface.interface_type == "management":
-                # Do not use -primary_host_name for the management address
-                primary = None
-            elif fqdn == real_primary:
-                # Do not set the 'primary' key for the real primary name.
-                # update_host() uses this hint for issuing the operations in the
-                # correct order
+            # Do not use -primary_host_name:
+            # - for the management address
+            # - for the real primary name, because update_host() uses this hint
+            #   for issuing the operations in the correct order
+            # - for service addresses, because srvloc breaks otherwise
+            if addr.interface.interface_type == "management" or \
+               addr.service_address or fqdn == real_primary:
                 primary = None
             else:
                 primary = real_primary
