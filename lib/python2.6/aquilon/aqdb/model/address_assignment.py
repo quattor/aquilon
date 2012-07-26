@@ -46,11 +46,6 @@ from aquilon.aqdb.model.a_record import dns_fqdn_mapper
 _TN = 'address_assignment'
 _ABV = 'addr_assign'
 
-# Valid values:
-# - system: used/configured by the operating system
-# - zebra: used/configured by Zebra
-ADDR_USAGES = ['system', 'zebra']
-
 
 class AddressAssignment(Base):
     """
