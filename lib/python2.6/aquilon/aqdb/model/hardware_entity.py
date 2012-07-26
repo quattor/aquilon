@@ -40,9 +40,8 @@ from sqlalchemy.orm.attributes import set_committed_value
 
 from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.aqdb.model import Base, Location, Model, DnsRecord
-from aquilon.aqdb.column_types import AqStr, Enum
+from aquilon.aqdb.column_types import AqStr
 
-HARDWARE_TYPES = ['machine', 'switch', 'chassis']  # , 'netapp_filer']
 _TN = "hardware_entity"
 
 
@@ -54,7 +53,7 @@ class HardwareEntity(Base):
 
     label = Column(AqStr(63), nullable=False)
 
-    hardware_type = Column(Enum(64, HARDWARE_TYPES), nullable=False)
+    hardware_type = Column(AqStr(64), nullable=False)
 
     location_id = Column(Integer, ForeignKey('location.id',
                                             name='hw_ent_loc_fk'),
