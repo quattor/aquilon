@@ -1539,7 +1539,6 @@
       </optgroup>
       <optgroup name="update_interface_optional" mandatory="False" fields="none">
          <option name="mac" type="mac">MAC address</option>
-         <option name="ip" type="ipv4" conflicts="master">IP address</option>
          <option name="boot" type="flag">Mark the interface as bootable</option>
          <option name="default_route" type="boolean">Mark that the interface provides the default route</option>
          <option name="pg" type="string" conflicts="autopg">portgroup, or an empty string to clear</option>

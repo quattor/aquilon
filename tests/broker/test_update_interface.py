@@ -100,18 +100,6 @@ class TestUpdateInterface(TestBrokerCommand):
                         "--ip", newip])
         self.dsdb_verify()
 
-    def testfailaddip(self):
-        command = ["update", "interface", "--interface", "eth1",
-                   "--hostname", "unittest02.one-nyp.ms.com",
-                   "--mac", self.net.unknown[0].usable[12].mac,
-                   "--ip", self.net.unknown[0].usable[12]]
-        out = self.unimplementederrortest(command)
-        self.matchoutput(out,
-                         "Please use update_machine to update the primary IP, "
-                         "or add_interface_address to add a new auxiliary "
-                         "address to the interface.",
-                         command)
-
     def testupdateut3c5n10eth1(self):
         self.noouttest(["update", "interface", "--interface", "eth1",
                         "--hostname", "unittest02.one-nyp.ms.com",
@@ -218,13 +206,6 @@ class TestUpdateInterface(TestBrokerCommand):
                    "--switch=ut3gd1r01.aqd-unittest.ms.com"]
         out = self.unimplementederrortest(command)
         self.matchoutput(out, "cannot use the --boot option.", command)
-
-    def testfailswitchip(self):
-        command = ["update_interface", "--interface=xge49",
-                   "--ip", self.net.tor_net[0].usable[1],
-                   "--switch=ut3gd1r01.aqd-unittest.ms.com"]
-        out = self.unimplementederrortest(command)
-        self.matchoutput(out, "use update_switch to update the IP", command)
 
     def testfailnointerface(self):
         command = ["update_interface", "--interface=xge49",

@@ -40,14 +40,12 @@ class CommandUpdateInterfaceSwitch(BrokerCommand):
     required_parameters = ["interface", "switch"]
     invalid_parameters = ['autopg', 'pg', 'boot', 'model', 'vendor']
 
-    def render(self, session, logger, interface, switch, mac, comments, ip,
+    def render(self, session, logger, interface, switch, mac, comments,
                **arguments):
         for arg in self.invalid_parameters:
             if arguments.get(arg) is not None:
                 raise UnimplementedError("update_interface --switch cannot use "
                                          "the --%s option." % arg)
-        if ip:
-            raise UnimplementedError("use update_switch to update the IP")
 
         dbswitch = Switch.get_unique(session, switch, compel=True)
         q = session.query(Interface)

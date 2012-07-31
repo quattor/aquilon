@@ -29,7 +29,7 @@
 """Contains the logic for `aq update interface --machine`."""
 
 
-from aquilon.exceptions_ import ArgumentError, AquilonError, UnimplementedError
+from aquilon.exceptions_ import ArgumentError, AquilonError
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.interface import (get_interface,
                                                  verify_port_group,
@@ -47,8 +47,8 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
     required_parameters = ["interface", "machine"]
 
     def render(self, session, logger, interface, machine, mac, model, vendor,
-               ip, boot, pg, autopg, comments, master, clear_master,
-               default_route, **arguments):
+               boot, pg, autopg, comments, master, clear_master, default_route,
+               **arguments):
         """This command expects to locate an interface based only on name
         and machine - all other fields, if specified, are meant as updates.
 
@@ -104,12 +104,6 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
             if not dbinterface.master:
                 raise ArgumentError("{0} is not a slave.".format(dbinterface))
             dbinterface.master = None
-
-        if ip:
-            raise UnimplementedError("Please use update_machine to update the "
-                                     "primary IP, or add_interface_address to "
-                                     "add a new auxiliary address to the "
-                                     "interface.")
 
         if comments:
             dbinterface.comments = comments

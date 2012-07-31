@@ -40,14 +40,12 @@ class CommandUpdateInterfaceChassis(BrokerCommand):
     required_parameters = ["interface", "chassis"]
     invalid_parameters = ['autopg', 'pg', 'boot', 'model', 'vendor']
 
-    def render(self, session, logger, interface, chassis, mac, comments, ip,
+    def render(self, session, logger, interface, chassis, mac, comments,
                **arguments):
         for arg in self.invalid_parameters:
             if arguments.get(arg) is not None:
                 raise UnimplementedError("update_interface --chassis cannot use "
                                          "the --%s option." % arg)
-        if ip:
-            raise UnimplementedError("use update_chassis to update the IP")
 
         dbchassis = Chassis.get_unique(session, chassis, compel=True)
         q = session.query(Interface)
