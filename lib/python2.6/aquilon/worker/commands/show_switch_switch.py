@@ -30,19 +30,30 @@
 
 from sqlalchemy.orm import joinedload, subqueryload, undefer
 
-from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import Switch
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.dbwrappers.switch import discover_switch
+from aquilon.worker.formats.list import StringList
 
 
 class CommandShowSwitchSwitch(BrokerCommand):
 
     required_parameters = ["switch"]
 
-    def render(self, session, switch, **arguments):
-        options = [subqueryload('observed_vlans'),
-                   undefer('observed_vlans.creation_date'),
-                   joinedload('observed_vlans.network'),
-                   subqueryload('observed_macs'),
-                   undefer('observed_macs.creation_date')]
-        return Switch.get_unique(session, switch, compel=True,
-                                 query_options=options)
+    def render(self, session, logger, switch, discover, **arguments):
+        if discover:
+            options = []
+        else:
+            options = [subqueryload('observed_vlans'),
+                       undefer('observed_vlans.creation_date'),
+                       joinedload('observed_vlans.network'),
+                       subqueryload('observed_macs'),
+                       undefer('observed_macs.creation_date')]
+        dbswitch = Switch.get_unique(session, switch, compel=True,
+                                     query_options=options)
+        if discover:
+            results = discover_switch(session, logger, self.config, dbswitch,
+                                      True)
+            return StringList(results)
+        else:
+            return dbswitch

@@ -765,6 +765,9 @@ class DummyNetworks(object):
         # Switch loopback
         self.unknown.append(NetworkInfo("4.2.19.0/24", "unknown"))
 
+        # Switch sync testing
+        self.unknown.append(NetworkInfo("4.2.20.0/24", "unknown"))
+
         self.tor_net.append(NetworkInfo("4.2.1.128/26", "tor_net"))
         self.tor_net.append(NetworkInfo("4.2.1.192/26", "tor_net"))
         self.tor_net.append(NetworkInfo("4.2.2.0/26", "tor_net"))

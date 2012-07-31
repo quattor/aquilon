@@ -3244,6 +3244,7 @@
 	 <option name="serial" type="string">Serial Number</option>
 	 <option name="comments" type="string">Comments</option>
 	 <option name="rename_to" type="string">New name of the switch</option>
+	 <option name="discover" type="flag">Do automatic discovery</option>
       </optgroup>
       <transport method="post" path="switch/%(switch)s" />
    </command>
@@ -3286,6 +3287,9 @@
       <optgroup name="show_switch_opts" mandatory="True" fields="any">
          <option name="switch" type="string">switch fully qualified name</option>
          <option name="all" type="flag">show all</option>
+      </optgroup>
+      <optgroup name="show_switch_optional" mandatory="False" fields="any">
+         <option name="discover" type="flag" conflicts="all">Show differences to discovery data</option>
       </optgroup>
       <transport trigger="switch" method="get" path="switch/%(switch)s" />
       <transport trigger="all" method="get" path="switch" />

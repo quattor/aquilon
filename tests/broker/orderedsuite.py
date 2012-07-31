@@ -96,6 +96,7 @@ from test_add_tor_switch import TestAddTorSwitch
 from test_add_switch import TestAddSwitch
 from test_update_switch import TestUpdateSwitch
 from test_rename_switch import TestRenameSwitch
+from test_discover_switch import TestDiscoverSwitch
 from test_poll_switch import TestPollSwitch
 from test_add_chassis import TestAddChassis
 from test_update_chassis import TestUpdateChassis
@@ -313,7 +314,7 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestAddHost,
                 TestAddAuxiliary, TestAddManager, TestAddInterfaceAddress,
                 TestAddServiceAddress,
-                TestRenameSwitch,
+                TestRenameSwitch, TestDiscoverSwitch,
                 TestAddAlias, TestAddSrvRecord,
                 TestMapService, TestBindClient, TestPrebindServer,
                 TestServiceConstraints,
