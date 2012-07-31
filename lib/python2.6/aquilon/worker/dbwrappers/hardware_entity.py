@@ -155,6 +155,10 @@ def rename_hardware(session, dbhw_ent, rename_to):
             new_domain = None
             dns_env = None
 
+    old_domain.lock_row()
+    if new_domain != old_domain:
+        new_domain.lock_row()
+
     dbhw_ent.check_label(new_label)
     HardwareEntity.get_unique(session, new_label, preclude=True)
 
