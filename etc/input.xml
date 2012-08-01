@@ -3912,44 +3912,6 @@
       <transport method="delete" path="cluster/%(cluster)s/host/%(hostname)s" />
    </command>
 
-   <command name="add_cluster_aligned_service">
-      Mark a service as aligned for a cluster type.  All the members within a
-      cluster will be required to use the same service instance for the
-      service.  Different clusters can still have different service
-      instances for the service.
-      <optgroup name="add_aligned_service_opts" mandatory="True" fields="all">
-         <option name="service" type="string" mandatory="True">service name</option>
-         <option name="cluster_type" type="string" mandatory="True">type of cluster</option>
-      </optgroup>
-      <optgroup name="optional_opts">
-         <option name="comments" type="string">Comments</option>
-      </optgroup>
-      <transport method="put" path="service/%(service)s/aligned_for/cluster_type/%(cluster_type)s" />
-   </command>
-
-   <command name="show_cluster_type">
-      Show information about a cluster_type such as esx, including aligned
-      services.
-      <optgroup name="show_cluster_type_opts" mandatory="True" fields="any">
-         <option name="cluster_type" type="string">cluster_type name</option>
-         <option name="all" type="flag" conflicts="cluster_type">Select all cluster types</option>
-      </optgroup>
-      <transport trigger="cluster_type" method="get" path="cluster_type/%(cluster_type)s" />
-      <transport trigger="all" method="get" path="cluster_type" />
-   </command>
-
-   <command name="del_cluster_aligned_service">
-      Delete a service from the list of aligned services for the
-      cluster_type.  Cluster members which are already bound to a
-      service because it used to be aligned will be unmodified. If
-      you wish to unbind those clients, they must be reconfigured.
-      <optgroup name="del_aligned_service_opts" mandatory="True" fields="all">
-         <option name="service" type="string" mandatory="True">service name</option>
-         <option name="cluster_type" type="string" mandatory="True">type of cluster</option>
-      </optgroup>
-      <transport method="delete" path="service/%(service)s/aligned_for/cluster_type/%(cluster_type)s" />
-   </command>
-
    <command name="add_dynamic_range">
       Add the allocated range of dynamic hosts.  The start and end
       IP addresses are inclusive.  The IPs must be on the same network.

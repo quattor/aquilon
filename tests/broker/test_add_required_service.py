@@ -59,6 +59,15 @@ class TestAddRequiredService(TestBrokerCommand):
                          "requires --justification.",
                          command)
 
+    def testfailmissingservice(self):
+        command = ["add_required_service", "--service",
+                   "does-not-exist", "--archetype", "aquilon",
+                   "--justification", "tcm=12345678"]
+        out = self.notfoundtest(command)
+        self.matchoutput(out,
+                         "Service does-not-exist not found.",
+                         command)
+
     def testaddrequireddns(self):
         command = "add required service --service dns --archetype aquilon"
         command += " --justification tcm=12345678"

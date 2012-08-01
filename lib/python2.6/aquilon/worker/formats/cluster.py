@@ -64,6 +64,7 @@ class ClusterFormatter(ObjectFormatter):
                 self.redirect_proto(resource, r)
 
         for dbsi in cluster.service_bindings:
+            # Should be just 'services', but that would change the protocol.
             si = skeleton.aligned_services.add()
             si.service = dbsi.service.name
             si.instance = dbsi.name

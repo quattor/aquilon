@@ -370,18 +370,9 @@ class TestVulcan20(TestBrokerCommand):
                    "--archetype", "vmhost", "--personality", "vulcan2-10g-test"]
         self.noouttest(command)
 
-        command = ["add_cluster_aligned_service", "--cluster_type", "meta",
-                   "--service", "vcenter"]
+        command = ["add_required_service", "--service", "vcenter",
+                   "--archetype", "metacluster", "--personality", "vulcan2-test"]
         self.noouttest(command)
-
-    def test_150_failaddvcenteragain(self):
-        command = ["add_cluster_aligned_service", "--cluster_type", "meta",
-                   "--service", "vcenter"]
-        out = self.badrequesttest(command)
-        self.matchoutput(out,
-                         "Service vcenter is already aligned to "
-                         "ESX metaclusters.", command)
-
 
     def test_151_mapvcenterservices(self):
         command = ["map", "service", "--service", "vcenter", "--instance", "ut",
@@ -441,8 +432,8 @@ class TestVulcan20(TestBrokerCommand):
         self.successtest(command)
 
     def test_153_unbindvcenterservices(self):
-        command = ["del_cluster_aligned_service", "--cluster_type", "meta",
-                   "--service", "vcenter"]
+        command = ["del_required_service", "--service", "vcenter",
+                   "--archetype", "metacluster", "--personality", "vulcan2-test"]
         self.noouttest(command)
 
         command = ["del_required_service", "--service", "vcenter",
@@ -487,8 +478,8 @@ class TestVulcan20(TestBrokerCommand):
         command = ["add", "service", "--service", "esx_management_server", "--instance", "ut.mc"]
         self.noouttest(command)
 
-        command = ["add_cluster_aligned_service", "--service", "esx_management_server",
-                   "--cluster_type", "meta"]
+        command = ["add_required_service", "--service", "esx_management_server",
+                   "--archetype", "metacluster", "--personality", "vulcan2-test"]
         self.noouttest(command)
 
         command = ["map", "service", "--service", "esx_management_server", "--instance", "ut.mc",
@@ -540,8 +531,8 @@ class TestVulcan20(TestBrokerCommand):
         self.successtest(command)
 
     def test_180_remove_mc_esx_service(self):
-        command = ["del_cluster_aligned_service", "--service", "esx_management_server",
-                   "--cluster_type", "meta"]
+        command = ["del_required_service", "--service", "esx_management_server",
+                   "--archetype", "metacluster", "--personality", "vulcan2-test"]
         self.noouttest(command)
 
         command = ["unbind_cluster", "--cluster", "utmc8", "--service", "esx_management_server",

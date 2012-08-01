@@ -77,6 +77,5 @@ class CommandShowService(BrokerCommand):
             q = q.options(joinedload('instances.service_map.location'))
             q = q.options(subqueryload('instances.personality_service_map'))
             q = q.options(joinedload('instances.personality_service_map.location'))
-            q = q.options(subqueryload('_clusters'))
             q = q.order_by(Service.name, ServiceInstance.name)
             return ServiceList(q.all())

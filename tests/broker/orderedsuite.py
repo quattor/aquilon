@@ -91,8 +91,6 @@ from test_add_esx_cluster import TestAddESXCluster
 from test_add_cluster import TestAddCluster
 from test_update_cluster import TestUpdateCluster
 from test_del_cluster import TestDelCluster
-from test_add_cluster_aligned_service import (
-    TestAddClusterAlignedService)
 from test_early_constraints_cluster import TestClusterEarlyConstraints
 from test_add_tor_switch import TestAddTorSwitch
 from test_add_switch import TestAddSwitch
@@ -232,8 +230,6 @@ from test_del_disk import TestDelDisk
 from test_del_machine import TestDelMachine
 from test_del_chassis import TestDelChassis
 from test_del_switch import TestDelSwitch
-from test_del_cluster_aligned_service import (
-    TestDelClusterAlignedService)
 from test_del_esx_cluster import TestDelESXCluster
 from test_del_metacluster import TestDelMetaCluster
 from test_del_router import TestDelRouter
@@ -306,7 +302,6 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestAddNSRecord, TestMapDnsDomain,
                 TestAddMetaCluster, TestAddESXCluster,
                 TestAddCluster,
-                TestAddClusterAlignedService,
                 TestClusterEarlyConstraints,
                 TestAddTorSwitch, TestAddSwitch, TestUpdateSwitch,
                 TestAddChassis, TestUpdateChassis,
@@ -387,7 +382,6 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestDelManager, TestDelAuxiliary, TestDelWindowsHost, TestDelHost,
                 TestDelInterface, TestDelDisk, TestDelMachine, TestDelChassis,
                 TestDelSwitch,
-                TestDelClusterAlignedService,
                 TestDelCluster,
                 TestDelESXCluster, TestDelMetaCluster,
                 TestDelRouter, TestDelNetwork, TestDelNetworkEnvironment,

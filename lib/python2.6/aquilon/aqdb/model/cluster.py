@@ -74,8 +74,6 @@ def convert_resources(resources):
 # Cluster is a reserved word in Oracle
 _TN = 'clstr'
 _HCM = 'host_cluster_member'
-_CAS = 'cluster_aligned_service'
-_CASABV = 'clstr_alnd_svc'
 _CSB = 'cluster_service_binding'
 _CSBABV = 'clstr_svc_bndg'
 _CAP = 'clstr_allow_per'
@@ -607,43 +605,6 @@ cap = ClusterAllowedPersonality.__table__  # pylint: disable=C0103
 cap.primary_key.name = '%s_pk' % _CAP
 
 Cluster.allowed_personalities = relation(Personality, secondary=cap)
-
-
-class ClusterAlignedService(Base):
-    """
-        Express services that must be the same for cluster types. As
-        SQL Alchemy doesn't yet support FK or functionally determined
-        discrimators for polymorphic inheritance, cluster_type is
-        currently being expressed as a string. As ESX is the only type
-        for now, it's seems a reasonable corner to cut.
-    """
-    __tablename__ = _CAS
-    _class_label = 'Cluster Aligned Service'
-
-    service_id = Column(Integer, ForeignKey('service.id',
-                                            name='%s_svc_fk' % _CASABV,
-                                            ondelete='CASCADE'),
-                        #if the service is deleted, delete the link?
-                        primary_key=True)
-
-    cluster_type = Column(AqStr(16), primary_key=True)
-
-    creation_date = deferred(Column(DateTime, default=datetime.now,
-                                    nullable=False))
-    comments = deferred(Column(String(255)))
-
-    service = relation(Service, lazy=False, innerjoin=True,
-                       backref=backref('_clusters', cascade='all'))
-    #cascade deleted services to delete their being required to cluster_types
-
-cas = ClusterAlignedService.__table__  # pylint: disable=C0103
-cas.primary_key.name = '%s_pk' % _CASABV
-cas.info['unique_fields'] = ['cluster_type', 'service']
-
-Cluster.required_services = relation(ClusterAlignedService,
-    primaryjoin=ClusterAlignedService.cluster_type == Cluster.cluster_type,
-    foreign_keys=[ClusterAlignedService.cluster_type],
-    viewonly=True)
 
 
 class ClusterServiceBinding(Base):
