@@ -121,7 +121,8 @@ class Interface(Base):
     comments = Column('comments', String(255), nullable=True)
 
     hardware_entity = relation(HardwareEntity, lazy=False, innerjoin=True,
-                               backref=backref('interfaces', cascade='all'))
+                               backref=backref('interfaces',
+                                               cascade='all, delete-orphan'))
 
     model = relation(Model, innerjoin=True)
 

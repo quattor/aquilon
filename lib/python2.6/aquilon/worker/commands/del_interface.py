@@ -119,7 +119,7 @@ class CommandDelInterface(BrokerCommand):
                                 "configured, delete them first: "
                                 "{1}.".format(dbinterface, addrs))
 
-        session.delete(dbinterface)
+        dbhw_ent.interfaces.remove(dbinterface)
         session.flush()
 
         if dbhw_ent.hardware_type == 'machine':
