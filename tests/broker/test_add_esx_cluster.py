@@ -196,6 +196,18 @@ class TestAddESXCluster(TestBrokerCommand):
         self.matchoutput(out, "Metacluster utmc3 already has the maximum "
                          "number of clusters (0).", command)
 
+    def testfaildifferentdomain(self):
+        command = ["add_esx_cluster", "--cluster=newcluster",
+                   "--metacluster=utmc1", "--building=ut",
+                   "--domain=ut-prod", "--down_hosts_threshold=2",
+                   "--maint_threshold=2",
+                   "--archetype=esx_cluster",
+                   "--personality=vulcan-1g-desktop-prod"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "ESX Cluster newcluster domain ut-prod does "
+                         "not match ESX metacluster utmc1 domain unittest.",
+                         command)
+
     def testverifyshowall(self):
         command = "show esx_cluster --all"
         out = self.commandtest(command.split(" "))
@@ -340,6 +352,15 @@ class TestAddESXCluster(TestBrokerCommand):
         command = ["add_esx_cluster", "--cluster=utecl13",
                    "--metacluster=utmc7", "--building=ut",
                    "--domain=unittest", "--down_hosts_threshold=0",
+                   "--archetype=esx_cluster",
+                   "--personality=vulcan-1g-desktop-prod"]
+        self.noouttest(command)
+
+    def testaddsandboxmc(self):
+        user = self.config.get("unittest", "user")
+        command = ["add_esx_cluster", "--cluster=sandboxcl1",
+                   "--metacluster=sandboxmc", "--building=ut",
+                   "--sandbox=%s/utsandbox" % user, "--down_hosts_threshold=0",
                    "--archetype=esx_cluster",
                    "--personality=vulcan-1g-desktop-prod"]
         self.noouttest(command)

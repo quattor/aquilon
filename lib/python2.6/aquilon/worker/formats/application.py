@@ -37,11 +37,11 @@ from aquilon.aqdb.model import Application
 class ApplicationFormatter(ResourceFormatter):
     protocol = "aqdsystems_pb2"
 
-    def format_raw(self, app, indent=""):
+    def extra_details(self, app, indent=""):
         details = []
         details.append(indent + "  EON id: %s" % app.eonid)
-        return super(ApplicationFormatter, self).format_raw(app, indent) + \
-               "\n" + "\n".join(details)
+
+        return details
 
     def format_proto(self, app, skeleton=None):
         container = skeleton

@@ -88,6 +88,12 @@ class TestDelMetaCluster(TestBrokerCommand):
         err = self.statustest(command)
         self.matchoutput(err, "sent 0 server notifications", command)
 
+    def testdelutsandbox(self):
+        # Test moving machines between metaclusters
+        command = ["del_metacluster", "--metacluster=sandboxmc"]
+        err = self.statustest(command)
+        self.matchoutput(err, "sent 0 server notifications", command)
+
     def testdelvulcan1(self):
         command = ["del_metacluster", "--metacluster=vulcan1"]
         err = self.statustest(command)

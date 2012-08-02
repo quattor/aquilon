@@ -52,18 +52,37 @@ class CommandManageCluster(BrokerCommand):
 
         dbcluster = Cluster.get_unique(session, cluster, compel=True)
 
+        if dbcluster.metacluster:
+            raise ArgumentError("{0.name} is member of metacluster {1.name}, "
+                                "it must be managed at metacluster level.".
+                                format(dbcluster, dbcluster.metacluster))
+
         old_branch = dbcluster.branch.name
-        # Need to set the new branch *before* creating the plenary objects.
-        dbcluster.branch = dbbranch
-        dbcluster.sandbox_author = dbauthor
-        session.add(dbcluster)
         plenaries = PlenaryCollection(logger=logger)
-        plenaries.append(Plenary.get_plenary(dbcluster))
-        for dbhost in dbcluster.hosts:
-            dbhost.branch = dbbranch
-            dbhost.sandbox_author = dbauthor
-            session.add(dbhost)
-            plenaries.append(Plenary.get_plenary(dbhost))
+
+        # manage at metacluster level
+        if dbcluster.cluster_type == 'meta':
+            clusters = dbcluster.members
+
+            dbcluster.branch = dbbranch
+            dbcluster.sandbox_author = dbauthor
+            session.add(dbcluster)
+            plenaries.append(Plenary.get_plenary(dbcluster))
+        else:
+            clusters = [dbcluster]
+
+        for cluster in clusters:
+            # manage at cluster level
+            # Need to set the new branch *before* creating the plenary objects.
+            cluster.branch = dbbranch
+            cluster.sandbox_author = dbauthor
+            session.add(cluster)
+            plenaries.append(Plenary.get_plenary(cluster))
+            for dbhost in cluster.hosts:
+                dbhost.branch = dbbranch
+                dbhost.sandbox_author = dbauthor
+                session.add(dbhost)
+                plenaries.append(Plenary.get_plenary(dbhost))
 
         session.flush()
 

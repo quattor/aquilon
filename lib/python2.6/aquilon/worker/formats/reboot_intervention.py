@@ -37,14 +37,12 @@ from aquilon.aqdb.model import RebootIntervention
 class RebootInterventionFormatter(ResourceFormatter):
     protocol = "aqdsystems_pb2"
 
-    def format_raw(self, rs, indent=""):
+    def extra_details(self, rs, indent=""):
         details = []
         details.append(indent + "  Start: {0.start_date}".format(rs))
         details.append(indent + "  Expiry: {0.expiry_date}".format(rs))
         details.append(indent + "  Justification: {0.justification}".format(rs))
-
-        return super(RebootInterventionFormatter, self).format_raw(rs, indent) + \
-               "\n" + "\n".join(details)
+        return details
 
     def format_proto(self, rs, skeleton=None):
         container = skeleton

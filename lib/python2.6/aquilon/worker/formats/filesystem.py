@@ -37,7 +37,7 @@ from aquilon.aqdb.model import Filesystem
 class FilesystemFormatter(ResourceFormatter):
     protocol = "aqdsystems_pb2"
 
-    def format_raw(self, fs, indent=""):
+    def extra_details(self, fs, indent=""):
         details = []
         details.append(indent + "  Block Device: %s" % fs.blockdev)
         details.append(indent + "  FSType: %s" % fs.fstype)
@@ -46,9 +46,7 @@ class FilesystemFormatter(ResourceFormatter):
         details.append(indent + "  Mountpoint: %s" % fs.mountpoint)
         details.append(indent + "  Dump Freq: %d" % fs.dumpfreq)
         details.append(indent + "  Fsck Pass: %d" % fs.passno)
-
-        return super(FilesystemFormatter, self).format_raw(fs, indent) + \
-               "\n" + "\n".join(details)
+        return details
 
     def format_proto(self, fs, skeleton=None):
         container = skeleton

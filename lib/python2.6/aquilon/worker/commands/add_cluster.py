@@ -32,7 +32,6 @@ from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.broker import BrokerCommand, validate_basic
 from aquilon.worker.dbwrappers.branch import get_branch_and_author
 from aquilon.worker.dbwrappers.location import get_location
-from aquilon.worker.templates.cluster import PlenaryCluster
 from aquilon.utils import force_ratio
 from aquilon.aqdb.model import (Personality, ClusterLifecycle, MetaCluster,
                                 Switch, Cluster)
@@ -135,6 +134,8 @@ class CommandAddCluster(BrokerCommand):
             dbmetacluster = MetaCluster.get_unique(session,
                                                    metacluster,
                                                    compel=True)
+
+            dbmetacluster.validate_membership(dbcluster)
             dbmetacluster.members.append(dbcluster)
 
             plenaries.append(Plenary.get_plenary(dbmetacluster))

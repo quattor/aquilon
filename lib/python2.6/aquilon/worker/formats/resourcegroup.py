@@ -37,7 +37,7 @@ from aquilon.aqdb.model import ResourceGroup
 class ResourceGroupFormatter(ResourceFormatter):
     protocol = "aqdsystems_pb2"
 
-    def format_raw(self, rg, indent=""):
+    def extra_details(self, rg, indent=""):
         details = []
         if rg.required_type:
             details.append(indent + "  Type: %s" % rg.required_type)
@@ -46,8 +46,7 @@ class ResourceGroupFormatter(ResourceFormatter):
             for resource in rg.resholder.resources:
                 details.append(self.redirect_raw(resource, indent + "  "))
 
-        return super(ResourceGroupFormatter, self).format_raw(rg, indent) + \
-               "\n" + "\n".join(details)
+        return details
 
     def format_proto(self, rg, skeleton=None):
         container = skeleton

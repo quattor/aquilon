@@ -3520,6 +3520,19 @@
          <option name="max_shares" type="int">Maximum number of shares that virtual machines may use</option>
          <option name="comments" type="string">Comments</option>
          <option name="high_availability" type="boolean">Turn on high availaibility mode</option>
+         <option name="fix_location" type="flag">Sets the location of the metacluster based on the location of its member clusters.</option>
+         <optgroup name="update_metacluster_location_opts" fields="any">
+            <option name="organization" type="string">Organization</option>
+            <option name="hub" type="string">Hub</option>
+            <option name="continent" type="string">Continent</option>
+            <option name="country" type="string">Country</option>
+            <option name="campus" type="string">Campus</option>
+            <option name="city" type="string">City</option>
+            <option name="building" type="string">Building</option>
+            <option name="room" type="string">Room</option>
+            <option name="rack" type="string">Rack</option>
+            <option name="desk" type="string">Desk</option>
+         </optgroup>
       </optgroup>
       <transport method="post" path="metacluster/%(metacluster)s" />
    </command>

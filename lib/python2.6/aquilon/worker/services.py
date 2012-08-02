@@ -494,6 +494,12 @@ class HostChooser(Chooser):
             if self.dbhost.cluster.metacluster:
                 mc = self.dbhost.cluster.metacluster
                 for si in mc.service_bindings:
+                    if si.service in self.cluster_aligned_services:
+                        self.logger.client_info(
+                                "Replacing {0.name} instance with {1.name} "
+                                "(bound to {2:l}) for service {3.name}".format(
+                                self.cluster_aligned_services[si.service],
+                                 si, mc, si.service))
                     self.cluster_aligned_services[si.service] = si
                 for item in mc.required_services:
                     if item.service not in self.cluster_aligned_services:
