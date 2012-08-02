@@ -31,7 +31,7 @@
 from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import ARecord, NetworkEnvironment
 from aquilon.aqdb.model.network import get_net_id_from_ip
-from aquilon.exceptions_ import ArgumentError, ProcessException
+from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.locks import DeleteKey
 from aquilon.worker.processes import DSDBRunner
 from aquilon.worker.dbwrappers.dns import delete_dns_record
@@ -74,27 +74,11 @@ class CommandDelDynamicRange(BrokerCommand):
         self.del_dynamic_stubs(session, logger, existing)
 
     def del_dynamic_stubs(self, session, logger, dbstubs):
-        stubs = {}
+        dsdb_runner = DSDBRunner(logger=logger)
         for stub in dbstubs:
-            stubs[stub.fqdn] = dict(ip=stub.ip, label="{0:a}".format(stub))
+            dsdb_runner.delete_host_details(str(stub.fqdn), stub.ip)
             delete_dns_record(stub)
         session.flush()
 
-        dsdb_runner = DSDBRunner(logger=logger)
-        stubs_removed = {}
-        try:
-            for (fqdn, info) in stubs.items():
-                logger.client_info("Removing %s from DSDB.", info['label'])
-                dsdb_runner.delete_host_details(info['ip'])
-                stubs_removed[fqdn] = info['ip']
-        except ProcessException, e:
-            # Try to roll back anything that had succeeded...
-            for (fqdn, ip) in stubs_removed.items():
-                try:
-                    dsdb_runner.add_host_details(fqdn, ip, None, None)
-                except ProcessException, pe2:
-                    logger.client_info("Failed rolling back DSDB entry for "
-                                       "%s with IP Address %s: %s" %
-                                       (fqdn, ip, pe2))
-            raise e
-        return
+        # This may take some time if the range is big, so be verbose
+        dsdb_runner.commit_or_rollback(verbose=True)

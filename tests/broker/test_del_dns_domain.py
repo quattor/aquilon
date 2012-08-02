@@ -42,7 +42,7 @@ class TestDelDnsDomain(TestBrokerCommand):
     """ test delete dns functionality """
 
     def testdelaqdunittestdomain(self):
-        self.dsdb_expect("delete dns_domain -domain_name aqd-unittest.ms.com")
+        self.dsdb_expect("delete_dns_domain -domain_name aqd-unittest.ms.com")
         command = "del dns_domain --dns_domain aqd-unittest.ms.com"
         self.noouttest(command.split(" "))
         self.dsdb_verify()
@@ -75,14 +75,14 @@ class TestDelDnsDomain(TestBrokerCommand):
                         "Domain %s appears in list %s" % (domain, dns_names))
 
     def testdeltd1(self):
-        self.dsdb_expect("delete dns_domain -domain_name td1.aqd-unittest.ms.com")
+        self.dsdb_expect("delete_dns_domain -domain_name td1.aqd-unittest.ms.com")
         command = ["del", "dns", "domain",
                    "--dns_domain", "td1.aqd-unittest.ms.com"]
         self.noouttest(command)
         self.dsdb_verify()
 
     def testdeltd2(self):
-        self.dsdb_expect("delete dns_domain -domain_name td2.aqd-unittest.ms.com")
+        self.dsdb_expect("delete_dns_domain -domain_name td2.aqd-unittest.ms.com")
         command = ["del", "dns", "domain",
                    "--dns_domain", "td2.aqd-unittest.ms.com"]
         self.noouttest(command)
@@ -92,15 +92,19 @@ class TestDelDnsDomain(TestBrokerCommand):
         """ test delete domain with dsdb failure """
 
         test_domain = "td3.aqd-unittest.ms.com"
-        self.dsdb_expect("add dns_domain -domain_name %s -comments " % test_domain)
+        self.dsdb_expect("add_dns_domain -domain_name %s -comments " % test_domain)
         command = ["add", "dns", "domain", "--dns_domain", test_domain]
         self.noouttest(command)
         self.dsdb_verify()
 
         errstr = "DNS domain %s doesn't exists" % test_domain
-        self.dsdb_expect("delete dns_domain -domain_name %s" % test_domain, True, errstr)
+        self.dsdb_expect("delete_dns_domain -domain_name %s" % test_domain, True, errstr)
         command = ["del", "dns", "domain", "--dns_domain", test_domain]
-        self.noouttest(command)
+        out, err = self.successtest(command)
+        self.matchoutput(err,
+                         "The DNS domain td3.aqd-unittest.ms.com does not "
+                         "exist in DSDB, proceeding.",
+                         command)
         self.dsdb_verify()
 
 

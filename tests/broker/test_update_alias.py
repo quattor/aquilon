@@ -50,7 +50,7 @@ class TestUpdateAlias(TestBrokerCommand):
     def test_110_update_mscom(self):
         command = ["update", "alias", "--fqdn", "alias.ms.com",
                    "--target", "arecord14.aqd-unittest.ms.com"]
-        self.dsdb_expect("update host alias "
+        self.dsdb_expect("update_host_alias "
                          "-alias alias.ms.com "
                          "-new_host arecord14.aqd-unittest.ms.com "
                          "-new_comments ")

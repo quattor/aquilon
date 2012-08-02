@@ -29,7 +29,6 @@
 """Contains the logic for `aq del building`."""
 
 
-from aquilon.exceptions_ import ArgumentError, AquilonError
 from aquilon.worker.processes import DSDBRunner
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.commands.del_location import CommandDelLocation
@@ -43,6 +42,9 @@ class CommandDelBuilding(CommandDelLocation):
     def render(self, session, logger, building, **arguments):
 
         dbbuilding = get_location(session, building=building)
+
+        city = dbbuilding.city
+        address = dbbuilding.address
         campus = dbbuilding.campus
 
         result = CommandDelLocation.render(self, session=session, name=building,
@@ -52,9 +54,8 @@ class CommandDelBuilding(CommandDelLocation):
         dsdb_runner = DSDBRunner(logger=logger)
 
         if campus:
-            dsdb_runner.del_campus_building(campus, building,
-                revert=(dsdb_runner.add_campus_building,(campus, building)))
-
-        dsdb_runner.del_building(building)
+            dsdb_runner.del_campus_building(campus.name, building)
+        dsdb_runner.del_building(building, city.name, address)
+        dsdb_runner.commit_or_rollback()
 
         return result

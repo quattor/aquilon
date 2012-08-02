@@ -33,7 +33,7 @@ import os
 
 from sqlalchemy.orm.attributes import set_committed_value
 
-from aquilon.exceptions_ import ArgumentError, ProcessException
+from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.host import (hostname_to_host,
                                             get_host_dependencies)
@@ -116,12 +116,10 @@ class CommandDelHost(BrokerCommand):
                 bindings.append(Plenary.get_plenary(dbmachine.vm_container))
 
             if archetype != 'aurora' and ip is not None:
-                try:
-                    dsdb_runner = DSDBRunner(logger=logger)
-                    dsdb_runner.update_host(dbmachine, oldinfo)
-                except ProcessException, e:
-                    raise ArgumentError("Could not remove host %s from "
-                                        "DSDB: %s" % (hostname, e))
+                dsdb_runner = DSDBRunner(logger=logger)
+                dsdb_runner.update_host(dbmachine, oldinfo)
+                dsdb_runner.commit_or_rollback("Could not remove host %s from "
+                                               "DSDB" % hostname)
             if archetype == 'aurora':
                 logger.client_info("WARNING: removing host %s from AQDB and "
                                    "*not* changing DSDB." % hostname)

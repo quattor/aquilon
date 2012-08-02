@@ -29,7 +29,7 @@
 """Contains the logic for `aq del chassis`."""
 
 
-from aquilon.exceptions_ import ArgumentError, ProcessException
+from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import Chassis, ChassisSlot
 from aquilon.worker.processes import DSDBRunner
@@ -68,6 +68,8 @@ class CommandDelChassis(BrokerCommand):
         # Order matters here
         dbdns_rec = dbchassis.primary_name
         ip = dbchassis.primary_ip
+        old_fqdn = str(dbchassis.primary_name.fqdn)
+        old_comments = dbchassis.primary_name.comments
         session.delete(dbchassis)
         if dbdns_rec:
             delete_dns_record(dbdns_rec)
@@ -76,8 +78,7 @@ class CommandDelChassis(BrokerCommand):
 
         if ip:
             dsdb_runner = DSDBRunner(logger=logger)
-            try:
-                dsdb_runner.delete_host_details(ip)
-            except ProcessException, e:
-                raise ArgumentError("Could not remove chassis from DSDB: %s" % e)
+            dsdb_runner.delete_host_details(old_fqdn, ip, comments=old_comments)
+            dsdb_runner.commit_or_rollback("Could not remove chassis from DSDB")
+
         return

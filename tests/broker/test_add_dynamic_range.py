@@ -70,7 +70,8 @@ class TestAddDynamicRange(TestBrokerCommand):
             address = IPv4Address(ip)
             hostname = dynname(address)
             self.dsdb_expect_add(hostname, address)
-            messages.append("Adding %s [%s] to DSDB." % (hostname, address))
+            messages.append("DSDB: add_host -host_name %s -ip_address %s "
+                            "-status aq" % (hostname, address))
 
         command = ["add_dynamic_range",
                    "--startip=%s" % self.net.tor_net2[0].usable[2],
@@ -171,7 +172,9 @@ class TestAddDynamicRange(TestBrokerCommand):
         command = ["add_dynamic_range", "--startip", ip, "--endip", ip,
                    "--dns_domain=aqd-unittest.ms.com"]
         err = self.statustest(command)
-        self.matchoutput(err, "Adding %s [%s] to DSDB." % (hostname, ip),
+        self.matchoutput(err,
+                         "DSDB: add_host -host_name %s -ip_address %s "
+                         "-status aq" % (hostname, ip),
                          command)
         self.dsdb_verify()
 
@@ -210,7 +213,8 @@ class TestAddDynamicRange(TestBrokerCommand):
             address = IPv4Address(ip)
             hostname = dynname(address)
             self.dsdb_expect_add(hostname, address)
-            messages.append("Adding %s [%s] to DSDB." % (hostname, address))
+            messages.append("DSDB: add_host -host_name %s -ip_address %s "
+                            "-status aq" % (hostname, address))
         command = ["add_dynamic_range",
                    "--fillnetwork", self.net.tor_net2[5].ip,
                    "--dns_domain=aqd-unittest.ms.com"]
@@ -236,6 +240,6 @@ class TestAddDynamicRange(TestBrokerCommand):
         self.noouttest(command)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddDynamicRange)
     unittest.TextTestRunner(verbosity=2).run(suite)

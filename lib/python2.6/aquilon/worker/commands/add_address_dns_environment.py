@@ -27,7 +27,6 @@
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
 
-from aquilon.exceptions_ import ArgumentError, ProcessException
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.dns import grab_address
 from aquilon.worker.dbwrappers.interface import generate_ip
@@ -54,11 +53,7 @@ class CommandAddAddressDNSEnvironment(BrokerCommand):
 
         if dbdns_rec.fqdn.dns_environment.is_default:
             dsdb_runner = DSDBRunner(logger=logger)
-            try:
-                dsdb_runner.add_host_details(fqdn=dbdns_rec.fqdn, ip=ip,
-                                             name=None, mac=None,
-                                             comments=comments)
-            except ProcessException, e:
-                raise ArgumentError("Could not add address to DSDB: %s" % e)
+            dsdb_runner.add_host_details(dbdns_rec.fqdn, ip, comments=comments)
+            dsdb_runner.commit_or_rollback("Could not add address to DSDB")
 
         return

@@ -50,3 +50,4 @@ class CommandAddCampus(CommandAddLocation):
 
         dsdb_runner = DSDBRunner(logger=logger)
         dsdb_runner.add_campus(new_loc.name, new_loc.comments)
+        dsdb_runner.commit_or_rollback()

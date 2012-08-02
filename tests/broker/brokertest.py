@@ -547,7 +547,7 @@ class TestBrokerCommand(unittest.TestCase):
 
     def dsdb_expect_add(self, hostname, ip, interface=None, mac=None,
                         primary=None, comments=None, fail=False):
-        command = ["add", "host", "-host_name", hostname,
+        command = ["add_host", "-host_name", hostname,
                    "-ip_address", str(ip), "-status", "aq"]
         if interface:
             command.extend(["-interface_name",
@@ -562,10 +562,10 @@ class TestBrokerCommand(unittest.TestCase):
         self.dsdb_expect(" ".join(command), fail=fail)
 
     def dsdb_expect_delete(self, ip, fail=False):
-        self.dsdb_expect("delete host -ip_address %s" % ip, fail=fail)
+        self.dsdb_expect("delete_host -ip_address %s" % ip, fail=fail)
 
     def dsdb_expect_update(self, fqdn, mac=None, comments=None, fail=False):
-        command = ["update", "host", "-host_name", fqdn, "-status", "aq"]
+        command = ["update_host", "-host_name", fqdn, "-status", "aq"]
         if mac:
             command.extend(["-ethernet_address", str(mac)])
         if comments:
@@ -573,7 +573,7 @@ class TestBrokerCommand(unittest.TestCase):
         self.dsdb_expect(" ".join(command), fail=fail)
 
     def dsdb_expect_update_ip(self, fqdn, iface, ip, fail=False):
-        self.dsdb_expect("update aqd host -host_name %s -interface_name %s "
+        self.dsdb_expect("update_aqd_host -host_name %s -interface_name %s "
                          "-ip_address %s" % (fqdn, iface, ip), fail=fail)
 
     def dsdb_verify(self, empty=False):

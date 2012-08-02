@@ -29,7 +29,7 @@
 """Contains the logic for `aq del manager`."""
 
 
-from aquilon.exceptions_ import ArgumentError, ProcessException
+from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import ARecord
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.processes import DSDBRunner
@@ -67,12 +67,11 @@ class CommandDelManager(BrokerCommand):
             delete_dns_record(dbmanager)
             session.flush()
     
-            try:
-                dsdb_runner = DSDBRunner(logger=logger)
-                dsdb_runner.update_host(dbmachine, oldinfo)
-            except ProcessException, e:
-                raise ArgumentError("Could not remove host %s from DSDB: %s" %
-                            (manager, e))
+            dsdb_runner = DSDBRunner(logger=logger)
+            dsdb_runner.update_host(dbmachine, oldinfo)
+            dsdb_runner.commit_or_rollback("Could not remove host %s from DSDB"
+                                           % manager)
+
             # Past the point of no return here (DSDB has been updated)...
             # probably not much of an issue if writing the plenary failed.
             # Commit the session so that we can free the delete lock.

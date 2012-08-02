@@ -100,10 +100,8 @@ class TestDelDynamicRange(TestBrokerCommand):
         for ip in range(int(self.net.tor_net2[0].usable[2]),
                         int(self.net.tor_net2[0].usable[-3]) + 1):
             address = IPv4Address(ip)
-            hostname = dynname(address)
             self.dsdb_expect_delete(address)
-            messages.append("Removing %s [%s] from DSDB." %
-                            (hostname, address))
+            messages.append("DSDB: delete_host -ip_address %s" % address)
         command = ["del_dynamic_range",
                    "--startip", self.net.tor_net2[0].usable[2],
                    "--endip", self.net.tor_net2[0].usable[-3]]
@@ -121,9 +119,7 @@ class TestDelDynamicRange(TestBrokerCommand):
         self.dsdb_expect_delete(ip)
         command = ["del_dynamic_range", "--startip", ip, "--endip", ip]
         err = self.statustest(command)
-        self.matchoutput(err,
-                         "Removing %s [%s] from DSDB." % (dynname(ip), ip),
-                         command)
+        self.matchoutput(err, "DSDB: delete_host -ip_address %s" % ip, command)
         self.dsdb_verify()
 
     def testclearnetwork(self):
@@ -131,10 +127,8 @@ class TestDelDynamicRange(TestBrokerCommand):
         for ip in range(int(self.net.tor_net2[5].usable[0]),
                         int(self.net.tor_net2[5].usable[-1]) + 1):
             address = IPv4Address(ip)
-            hostname = dynname(address)
             self.dsdb_expect_delete(address)
-            messages.append("Removing %s [%s] from DSDB." %
-                            (hostname, address))
+            messages.append("DSDB: delete_host -ip_address %s" % address)
         command = ["del_dynamic_range",
                    "--clearnetwork", self.net.tor_net2[5].ip]
         err = self.statustest(command)
@@ -149,7 +143,7 @@ class TestDelDynamicRange(TestBrokerCommand):
         self.matchoutput(out, "No dynamic stubs found on network.", command)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelDynamicRange)
     unittest.TextTestRunner(verbosity=2).run(suite)
 

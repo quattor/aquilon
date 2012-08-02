@@ -29,7 +29,6 @@
 """Contains the logic for `aq update chassis`."""
 
 
-from aquilon.exceptions_ import ArgumentError, AquilonError
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.location import get_location
 from aquilon.worker.dbwrappers.hardware_entity import update_primary_ip
@@ -71,8 +70,7 @@ class CommandUpdateChassis(BrokerCommand):
         session.flush()
 
         dsdb_runner = DSDBRunner(logger=logger)
-        try:
-            dsdb_runner.update_host(dbchassis, oldinfo)
-        except AquilonError, err:
-            raise ArgumentError("Could not update chassis in DSDB: %s" % err)
+        dsdb_runner.update_host(dbchassis, oldinfo)
+        dsdb_runner.commit_or_rollback("Could not update chassis in DSDB")
+
         return

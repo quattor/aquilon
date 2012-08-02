@@ -86,7 +86,7 @@ class TestUpdateInterface(TestBrokerCommand):
 
         out = self.badrequesttest(command)
         self.dsdb_verify()
-        self.matchoutput(out, "DSDB update failed", command)
+        self.matchoutput(out, "Could not update machine in DSDB", command)
 
         out = self.commandtest(["show", "host", "--hostname", self.badhost])
         self.matchoutput(out, "Primary Name: %s [%s]" % (self.badhost, oldip), command)

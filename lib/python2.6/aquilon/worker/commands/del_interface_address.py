@@ -29,7 +29,7 @@
 """Contains the logic for `aq del interface address`."""
 
 from aquilon.worker.broker import BrokerCommand
-from aquilon.exceptions_ import ArgumentError, ProcessException, IncompleteError
+from aquilon.exceptions_ import ArgumentError, IncompleteError
 from aquilon.aqdb.model import (HardwareEntity, AddressAssignment, ARecord,
                                 Fqdn, NetworkEnvironment)
 from aquilon.worker.dbwrappers.dns import delete_dns_record
@@ -136,19 +136,16 @@ class CommandDelInterfaceAddress(BrokerCommand):
                     plenary_info.restore_stash()
 
                 dsdb_runner = DSDBRunner(logger=logger)
-                try:
-                    dsdb_runner.update_host(dbhw_ent, oldinfo)
+                dsdb_runner.update_host(dbhw_ent, oldinfo)
 
-                    # FIXME: update_host() is not rolled back if this fails
-                    if not other_uses and keep_dns:
-                        q = session.query(ARecord)
-                        q = q.filter_by(network=dbnetwork)
-                        q = q.filter_by(ip=ip)
-                        dbdns_rec = q.first()
-                        dsdb_runner.add_host_details(dbdns_rec.fqdn, ip, None,
-                                                     None)
-                except ProcessException, e:
-                    raise ArgumentError("Could not add host to DSDB: %s" % e)
+                if not other_uses and keep_dns:
+                    q = session.query(ARecord)
+                    q = q.filter_by(network=dbnetwork)
+                    q = q.filter_by(ip=ip)
+                    dbdns_rec = q.first()
+                    dsdb_runner.add_host_details(dbdns_rec.fqdn, ip)
+
+                dsdb_runner.commit_or_rollback("Could not add host to DSDB")
             except:
                 plenary_info.restore_stash()
                 raise
@@ -156,9 +153,7 @@ class CommandDelInterfaceAddress(BrokerCommand):
                 lock_queue.release(key)
         else:
             dsdb_runner = DSDBRunner(logger=logger)
-            try:
-                dsdb_runner.update_host(dbhw_ent, oldinfo)
-            except ProcessException, e:
-                raise ArgumentError("Could not add host to DSDB: %s" % e)
+            dsdb_runner.update_host(dbhw_ent, oldinfo)
+            dsdb_runner.commit_or_rollback("Could not add host to DSDB")
 
         return

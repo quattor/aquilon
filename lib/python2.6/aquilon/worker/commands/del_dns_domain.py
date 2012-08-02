@@ -52,10 +52,12 @@ class CommandDelDnsDomain(BrokerCommand):
             raise ArgumentError("{0} is still mapped to locations and cannot "
                                 "be deleted.".format(dbdns_domain))
 
+        comments = dbdns_domain.comments
         session.delete(dbdns_domain)
         session.flush()
 
         dsdb_runner = DSDBRunner(logger=logger)
-        dsdb_runner.delete_dns_domain(dns_domain)
+        dsdb_runner.delete_dns_domain(dns_domain, comments)
+        dsdb_runner.commit_or_rollback()
 
         return

@@ -31,8 +31,7 @@
 
 from sqlalchemy.sql.expression import asc, desc
 
-from aquilon.exceptions_ import (ArgumentError, ProcessException,
-                                 AquilonError, UnimplementedError)
+from aquilon.exceptions_ import ArgumentError, UnimplementedError
 from aquilon.aqdb.model import Interface, Machine, ARecord, Fqdn
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.worker.broker import BrokerCommand
@@ -92,6 +91,7 @@ class CommandAddInterfaceMachine(BrokerCommand):
 
         dbmanager = None
         pending_removals = PlenaryCollection()
+        dsdb_runner = DSDBRunner(logger=logger)
         if mac:
             prev = session.query(Interface).filter_by(mac=mac).first()
             if prev and prev.hardware_entity == dbmachine:
@@ -111,10 +111,14 @@ class CommandAddInterfaceMachine(BrokerCommand):
                 # to only aqd-admin and the host itself?
                 dummy_machine = prev.hardware_entity
                 dummy_ip = dummy_machine.primary_ip
+                old_fqdn = str(dummy_machine.primary_name)
+                old_iface = prev.name
+                old_mac = prev.mac
                 old_network = get_net_id_from_ip(session, dummy_ip)
                 self.remove_prev(session, logger, prev, pending_removals)
                 session.flush()
-                self.remove_dsdb(logger, dummy_ip)
+                dsdb_runner.delete_host_details(old_fqdn, dummy_ip, old_iface,
+                                                old_mac)
                 self.consolidate_names(session, logger, dbmachine,
                                        dummy_machine.label, pending_removals)
                 # It seems like a shame to throw away the IP address that
@@ -171,12 +175,8 @@ class CommandAddInterfaceMachine(BrokerCommand):
             plenaries.write(locked=True)
             pending_removals.remove(locked=True)
 
-            dsdb_runner = DSDBRunner(logger=logger)
-            try:
-                dsdb_runner.update_host(dbmachine, oldinfo)
-            except AquilonError, err:
-                raise ArgumentError("Could not update host in DSDB: %s" % err)
-
+            dsdb_runner.update_host(dbmachine, oldinfo)
+            dsdb_runner.commit_or_rollback("Could not update host in DSDB")
         except:
             plenaries.restore_stash()
             pending_removals.restore_stash()
@@ -213,16 +213,6 @@ class CommandAddInterfaceMachine(BrokerCommand):
             session.expire(dbmachine, ["primary_name"])
         session.delete(dbmachine)
         session.flush()
-
-    def remove_dsdb(self, logger, old_ip):
-        # If this is a host trying to update itself, this would be annoying.
-        # Hopefully whatever the problem is here, it's transient.
-        try:
-            dsdb_runner = DSDBRunner(logger=logger)
-            dsdb_runner.delete_host_details(old_ip)
-        except ProcessException, e:
-            raise ArgumentError("Could not remove host entry with IP address "
-                                "%s from DSDB: %s" % (old_ip, e))
 
     def consolidate_names(self, session, logger, dbmachine, dummy_machine_name,
                           pending_removals):

@@ -29,7 +29,7 @@
 """Contains the logic for `aq update machine`."""
 
 
-from aquilon.exceptions_ import ArgumentError, AquilonError
+from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.hardware_entity import update_primary_ip
 from aquilon.worker.dbwrappers.location import get_location
@@ -215,10 +215,8 @@ class CommandUpdateMachine(BrokerCommand):
                 pass
 
             dsdb_runner = DSDBRunner(logger=logger)
-            try:
-                dsdb_runner.update_host(dbmachine, oldinfo)
-            except AquilonError, err:
-                raise ArgumentError("Could not update machine in DSDB: %s" % err)
+            dsdb_runner.update_host(dbmachine, oldinfo)
+            dsdb_runner.commit_or_rollback("Could not update machine in DSDB")
         except:
             plenaries.restore_stash()
             remove_plenaries.restore_stash()

@@ -490,7 +490,7 @@ class TestAddHost(TestBrokerCommand):
     #test aurora and windows defaults now
     def testaddauroradefaultos(self):
         ip = self.net.tor_net[10].usable[-1]
-        self.dsdb_expect("show host -host_name test-aurora-default-os")
+        self.dsdb_expect("show_host -host_name test-aurora-default-os")
         self.noouttest(["add", "host", "--archetype", "aurora",
                         "--hostname", "test-aurora-default-os.ms.com",
                         "--ip", ip, "--domain", "ny-prod", "--machine",

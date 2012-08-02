@@ -115,12 +115,16 @@ class CommandDelAddressDNSEnvironment(BrokerCommand):
                                        last_use])
                     raise ArgumentError("IP address %s is still in use by %s." %
                                         (ip, users))
+            ip = dbaddress.ip
+            old_fqdn = str(dbaddress.fqdn)
+            old_comments = dbaddress.comments
             delete_dns_record(dbaddress)
             session.flush()
 
             if dbdns_env.is_default:
                 dsdb_runner = DSDBRunner(logger=logger)
-                dsdb_runner.delete_host_details(dbaddress.ip)
+                dsdb_runner.delete_host_details(old_fqdn, ip,
+                                                comments=old_comments)
+                dsdb_runner.commit_or_rollback()
 
-            session.commit()
         return

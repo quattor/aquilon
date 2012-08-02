@@ -30,7 +30,7 @@
     Duplicates logic used in `aq add interface --tor_switch`."""
 
 
-from aquilon.exceptions_ import ArgumentError, ProcessException
+from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Chassis
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.interface import get_or_create_interface
@@ -64,9 +64,7 @@ class CommandAddInterfaceChassis(BrokerCommand):
         session.flush()
 
         dsdb_runner = DSDBRunner(logger=logger)
-        try:
-            dsdb_runner.update_host(dbchassis, oldinfo)
-        except ProcessException, err:
-            raise ArgumentError("Could not update chassis in DSDB: %s" % err)
+        dsdb_runner.update_host(dbchassis, oldinfo)
+        dsdb_runner.commit_or_rollback("Could not update chassis in DSDB")
 
         return

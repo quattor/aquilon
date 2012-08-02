@@ -29,8 +29,7 @@
 """Contains the logic for `aq update interface --switch`."""
 
 
-from aquilon.exceptions_ import (UnimplementedError, NotFoundException,
-                                 AquilonError, ArgumentError)
+from aquilon.exceptions_ import UnimplementedError, NotFoundException
 from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import Interface, Switch
 from aquilon.worker.processes import DSDBRunner
@@ -68,8 +67,7 @@ class CommandUpdateInterfaceSwitch(BrokerCommand):
         session.flush()
 
         dsdb_runner = DSDBRunner(logger=logger)
-        try:
-            dsdb_runner.update_host(dbswitch, oldinfo)
-        except AquilonError, err:
-            raise ArgumentError("Could not update switch in DSDB: %s" % err)
+        dsdb_runner.update_host(dbswitch, oldinfo)
+        dsdb_runner.commit_or_rollback("Could not update switch in DSDB")
+
         return

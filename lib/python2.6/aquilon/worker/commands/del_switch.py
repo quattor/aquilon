@@ -29,7 +29,7 @@
 """Contains the logic for `aq del switch`."""
 
 
-from aquilon.exceptions_ import ArgumentError, ProcessException
+from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Switch
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.dns import delete_dns_record
@@ -58,6 +58,8 @@ class CommandDelSwitch(BrokerCommand):
 
         dbdns_rec = dbswitch.primary_name
         ip = dbswitch.primary_ip
+        old_fqdn = str(dbswitch.primary_name.fqdn)
+        old_comments = dbswitch.comments
         session.delete(dbswitch)
         if dbdns_rec:
             delete_dns_record(dbdns_rec)
@@ -86,11 +88,9 @@ class CommandDelSwitch(BrokerCommand):
 
             if ip:
                 dsdb_runner = DSDBRunner(logger=logger)
-                try:
-                    dsdb_runner.delete_host_details(ip)
-                except ProcessException, e:
-                    raise ArgumentError("Could not remove switch from DSDB: %s"
-                                        % e)
+                # FIXME: restore interface name/MAC on rollback
+                dsdb_runner.delete_host_details(old_fqdn, ip, comments=old_comments)
+                dsdb_runner.commit_or_rollback("Could not remove switch from DSDB")
             return
 
         except:

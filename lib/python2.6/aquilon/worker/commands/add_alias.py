@@ -32,8 +32,7 @@ import socket
 
 from sqlalchemy.orm.exc import NoResultFound
 
-from aquilon.exceptions_ import (ArgumentError, ProcessException,
-                                 NotFoundException)
+from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.aqdb.model import (DnsRecord, Alias, Fqdn, DnsEnvironment,
                                 ReservedName)
 from aquilon.aqdb.model.dns_domain import parse_fqdn
@@ -71,10 +70,8 @@ class CommandAddAlias(BrokerCommand):
         if dbdns_env.is_default and dbfqdn.dns_domain.name == "ms.com" and \
            not dbtarget.dns_domain.restricted:
             dsdb_runner = DSDBRunner(logger=logger)
-            try:
-                dsdb_runner.add_alias(fqdn, target, comments)
-            except ProcessException, e:
-                raise ArgumentError("Could not add alias to DSDB: %s" % e)
+            dsdb_runner.add_alias(fqdn, target, comments)
+            dsdb_runner.commit_or_rollback("Could not add alias to DSDB")
 
         return
 

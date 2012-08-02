@@ -29,8 +29,7 @@
 """Contains the logic for `aq update interface --chassis`."""
 
 
-from aquilon.exceptions_ import (UnimplementedError, NotFoundException,
-                                 AquilonError, ArgumentError)
+from aquilon.exceptions_ import UnimplementedError, NotFoundException
 from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import Interface, Chassis
 from aquilon.worker.processes import DSDBRunner
@@ -68,8 +67,7 @@ class CommandUpdateInterfaceChassis(BrokerCommand):
         session.flush()
 
         dsdb_runner = DSDBRunner(logger=logger)
-        try:
-            dsdb_runner.update_host(dbchassis, oldinfo)
-        except AquilonError, err:
-            raise ArgumentError("Could not update chassis in DSDB: %s" % err)
+        dsdb_runner.update_host(dbchassis, oldinfo)
+        dsdb_runner.commit_or_rollback("Could not update chassis in DSDB")
+
         return

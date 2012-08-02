@@ -29,7 +29,7 @@
 """Contains the logic for `aq update building`."""
 
 
-from aquilon.exceptions_ import ArgumentError, AquilonError
+from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import (Machine, ServiceMap, PersonalityServiceMap,
                                 DnsDomain)
 from aquilon.worker.broker import BrokerCommand
@@ -48,11 +48,15 @@ class CommandUpdateBuilding(BrokerCommand):
                fullname, default_dns_domain, comments, **arguments):
         dbbuilding = get_location(session, building=building)
 
-        old_address = dbbuilding.address
-        oldcity=dbbuilding.city
+        old_city = dbbuilding.city
+
+        dsdb_runner = DSDBRunner(logger=logger)
 
         if address is not None:
+            old_address = dbbuilding.address
             dbbuilding.address = address
+            dsdb_runner.update_building(dbbuilding.name, dbbuilding.address,
+                                        old_address)
         if fullname is not None:
             dbbuilding.fullname = fullname
         if comments is not None:
@@ -65,8 +69,7 @@ class CommandUpdateBuilding(BrokerCommand):
             else:
                 dbbuilding.default_dns_domain = None
 
-        dsdb_runner = DSDBRunner(logger=logger)
-
+        plenaries = PlenaryCollection(logger=logger)
         if city:
             dbcity = get_location(session, city=city)
 
@@ -83,7 +86,7 @@ class CommandUpdateBuilding(BrokerCommand):
             maps = 0
             for map_type in [ServiceMap, PersonalityServiceMap]:
                 maps = maps + session.query(map_type).\
-                    filter_by(location=oldcity).count()
+                    filter_by(location=old_city).count()
 
             if maps > 0:
                 logger.client_info("There are {0} service(s) mapped to the "
@@ -93,39 +96,30 @@ class CommandUpdateBuilding(BrokerCommand):
                                        maps, dbbuilding.city))
 
             dbbuilding.update_parent(parent=dbcity)
-            session.flush()
 
-            if address is not None:
-                dsdb_runner.update_building(dbbuilding.name, dbbuilding.address,
-                                            revert=(dsdb_runner.update_building,
-                                                (dbbuilding.name,old_address)))
+            if old_city.campus and (old_city.campus != dbcity.campus):
+                dsdb_runner.del_campus_building(old_city.campus, building)
 
-            if oldcity.campus and (oldcity.campus != dbcity.campus):
+            if dbcity.campus and (old_city.campus != dbcity.campus):
+                dsdb_runner.add_campus_building(dbcity.campus, building)
 
-                dsdb_runner.del_campus_building(oldcity.campus, building,
-                            revert=(dsdb_runner.add_campus_building,
-                                (oldcity.campus, building)))
-
-            if dbcity.campus and (oldcity.campus != dbcity.campus):
-                dsdb_runner.add_campus_building(dbcity.campus, building,
-                            revert=(dsdb_runner.del_campus_building,
-                                (dbcity.campus, building)))
-
-        else:
-            if address is not None:
-                dsdb_runner.update_building(dbbuilding.name, dbbuilding.address)
-
-        if city:
-            plenaries = PlenaryCollection(logger=logger)
             query = session.query(Machine)
-
-            query = query.filter(Machine.location_id.in_(
-                                                     dbcity.offspring_ids()))
+            query = query.filter(Machine.location_id.in_(dbcity.offspring_ids()))
 
             for dbmachine in query:
                 plenaries.append(PlenaryMachineInfo(dbmachine, logger=logger))
-            try:
-                plenaries.write()
-            except:
-                dsdb_runner.rollback()
-                raise
+
+        session.flush()
+
+        if plenaries.plenaries:
+            with plenaries.get_write_key() as key:
+                plenaries.stash()
+                try:
+                    plenaries.write(locked=True)
+                    dsdb_runner.commit_or_rollback()
+                except:
+                    plenaries.restore_stash()
+        else:
+            dsdb_runner.commit_or_rollback()
+
+        return

@@ -75,6 +75,7 @@ class CommandAddCity(CommandAddLocation):
 
             dsdb_runner = DSDBRunner(logger=logger)
             dsdb_runner.add_city(city, country, fullname)
+            dsdb_runner.commit_or_rollback()
 
         except:
             plenary.restore_stash()

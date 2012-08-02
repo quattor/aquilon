@@ -29,7 +29,7 @@
 """Contains the logic for `aq add interface address`."""
 
 from aquilon.worker.broker import BrokerCommand, validate_basic
-from aquilon.exceptions_ import ArgumentError, ProcessException, IncompleteError
+from aquilon.exceptions_ import ArgumentError, IncompleteError
 from aquilon.aqdb.model import HardwareEntity
 from aquilon.worker.dbwrappers.dns import grab_address
 from aquilon.worker.dbwrappers.interface import (get_interface,
@@ -142,14 +142,10 @@ class CommandAddInterfaceAddress(BrokerCommand):
                     plenary_info.restore_stash()
 
                 dsdb_runner = DSDBRunner(logger=logger)
-                try:
-                    # FIXME: this is not rolled back if update_host() fails
-                    if delete_old_dsdb_entry:
-                        dsdb_runner.delete_host_details(ip)
-
-                    dsdb_runner.update_host(dbhw_ent, oldinfo)
-                except ProcessException, e:
-                    raise ArgumentError("Could not add host to DSDB: %s" % e)
+                if delete_old_dsdb_entry:
+                    dsdb_runner.delete_host_details(dbdns_rec.fqdn, ip)
+                dsdb_runner.update_host(dbhw_ent, oldinfo)
+                dsdb_runner.commit_or_rollback("Could not add host to DSDB")
             except:
                 plenary_info.restore_stash()
                 raise
@@ -157,9 +153,7 @@ class CommandAddInterfaceAddress(BrokerCommand):
                 lock_queue.release(key)
         else:
             dsdb_runner = DSDBRunner(logger=logger)
-            try:
-                dsdb_runner.update_host(dbhw_ent, oldinfo)
-            except ProcessException, e:
-                raise ArgumentError("Could not add host to DSDB: %s" % e)
+            dsdb_runner.update_host(dbhw_ent, oldinfo)
+            dsdb_runner.commit_or_rollback("Could not add host to DSDB")
 
         return

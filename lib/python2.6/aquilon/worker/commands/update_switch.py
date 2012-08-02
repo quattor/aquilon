@@ -29,7 +29,7 @@
 """Contains the logic for `aq update switch`."""
 
 
-from aquilon.exceptions_ import ArgumentError, AquilonError
+from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Model, Switch
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.location import get_location
@@ -102,11 +102,8 @@ class CommandUpdateSwitch(BrokerCommand):
             switch_plenary.write(locked=True)
 
             dsdb_runner = DSDBRunner(logger=logger)
-            try:
-                dsdb_runner.update_host(dbswitch, oldinfo)
-            except AquilonError, err:
-                raise ArgumentError("Could not update switch in DSDB: %s" % err)
-            return
+            dsdb_runner.update_host(dbswitch, oldinfo)
+            dsdb_runner.commit_or_rollback("Could not update switch in DSDB")
         except:
             if remove_plenary:
                 remove_plenary.restore_stash()
