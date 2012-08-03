@@ -331,8 +331,6 @@ class LoopbackInterface(Interface):
 
     __mapper_args__ = {'polymorphic_identity': 'loopback'}
 
-    name_check = re.compile(r'^loop\d+$')
-
     def validate_mac(self, key, value):
         if value is not None:
             raise ValueError("Loopback interfaces cannot have a MAC address.")
