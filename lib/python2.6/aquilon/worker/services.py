@@ -500,11 +500,11 @@ class HostChooser(Chooser):
             # they are otherwise required by the archetype/personality.
             for si in self.dbhost.cluster.service_bindings:
                 self.cluster_aligned_services[si.service] = si
-            for item in self.dbhost.cluster.required_services:
-                if item.service not in self.cluster_aligned_services:
+            for service in self.dbhost.cluster.required_services:
+                if service not in self.cluster_aligned_services:
                     # Don't just error here because the error() call
                     # has not yet been set up.  Will error out later.
-                    self.cluster_aligned_services[item.service] = None
+                    self.cluster_aligned_services[service] = None
                 # Went back and forth on this... deciding not to force
                 # an aligned service as required.  This should give
                 # flexibility for multiple services to be aligned for
@@ -522,11 +522,11 @@ class HostChooser(Chooser):
                                 self.cluster_aligned_services[si.service],
                                  si, mc, si.service))
                     self.cluster_aligned_services[si.service] = si
-                for item in mc.required_services:
-                    if item.service not in self.cluster_aligned_services:
+                for service in mc.required_services:
+                    if service not in self.cluster_aligned_services:
                         # Don't just error here because the error() call
                         # has not yet been set up.  Will error out later.
-                        self.cluster_aligned_services[item.service] = None
+                        self.cluster_aligned_services[service] = None
 
     def generate_description(self):
         return format(self.dbhost)

@@ -189,6 +189,10 @@ class Cluster(Base):
             return None
 
     @property
+    def required_services(self):
+        return self.personality.services + self.personality.archetype.services
+
+    @property
     def machines(self):
         mach = []
         if self.resholder:
