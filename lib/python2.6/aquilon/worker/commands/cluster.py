@@ -114,7 +114,12 @@ class CommandCluster(BrokerCommand):
         # the used ones, and pick the smallest remaining one
         node_index_map = set(xrange(len(dbcluster._hosts) + 1))
         for link in dbcluster._hosts:
-            node_index_map.remove(link.node_index)
+            # The cluster may have been bigger in the past, so node indexes may
+            # be larger than the current cluster size
+            try:
+                node_index_map.remove(link.node_index)
+            except KeyError:
+                pass
 
         dbcluster.hosts.append((dbhost, min(node_index_map)))
         dbcluster.validate()

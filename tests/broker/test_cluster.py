@@ -75,8 +75,8 @@ class TestCluster(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "ESX Cluster: utecl1", command)
         for i in range(1, 5):
-            self.matchoutput(out, "Member: evh%s.aqd-unittest.ms.com" %i,
-                             command)
+            self.matchoutput(out, "Member: evh%d.aqd-unittest.ms.com "
+                             "[node_index: %d]" % (i, i - 1), command)
 
     def testverifycat(self):
         cat_cluster_command = "cat --cluster utecl1"
