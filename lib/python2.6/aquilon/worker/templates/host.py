@@ -235,8 +235,6 @@ class PlenaryHostData(Plenary):
                 if "route" not in ifdesc:
                     ifdesc["route"] = []
                 for route in static_routes:
-                    if route.gateway_ip == default_gateway:
-                        continue
                     ifdesc["route"].append({"address": route.destination.ip,
                                             "netmask": route.destination.netmask,
                                             "gateway": route.gateway_ip})

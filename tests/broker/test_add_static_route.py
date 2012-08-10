@@ -111,9 +111,15 @@ class TestAddStaticRoute(TestBrokerCommand):
                           r'"ip", "%s",\s*'
                           r'"netmask", "%s",\s*'
                           r'"network_environment", "internal",\s*'
-                          r'"network_type", "unknown"\s*\)' %
+                          r'"network_type", "unknown",\s*'
+                          r'"route", list\(\s*'
+                          r'nlist\(\s*'
+                          r'"address", "250.250.0.0",\s*'
+                          r'"gateway", "%s",\s*'
+                          r'"netmask", "255.255.0.0"\s*\)\s*'
+                          r'\)\s*\)' %
                           (eth0_net.broadcast, eth0_net.gateway, eth0_ip,
-                           eth0_net.netmask),
+                           eth0_net.netmask, eth0_net.gateway),
                           command)
         self.searchoutput(out,
                           r'"eth1", nlist\(\s*'
@@ -143,11 +149,10 @@ class TestAddStaticRoute(TestBrokerCommand):
 
     def test_240_verify_cat_unittest02(self):
         net = self.net.unknown[0]
-        eth0ip = net.usable[0]
+        eth0_ip = net.usable[0]
         command = ["cat", "--hostname", "unittest02.one-nyp.ms.com", "--data",
                    "--generate"]
         out = self.commandtest(command)
-        # No routes should be listed here, because the gw is the default gw
         self.searchoutput(out,
                           r'"eth0", nlist\(\s*'
                           r'"bootproto", "static",\s*'
@@ -157,9 +162,15 @@ class TestAddStaticRoute(TestBrokerCommand):
                           r'"ip", "%s",\s*'
                           r'"netmask", "%s",\s*'
                           r'"network_environment", "internal",\s*'
-                          r'"network_type", "unknown"\s*\)\s*' %
+                          r'"network_type", "unknown",\s*'
+                          r'"route", list\(\s*'
+                          r'nlist\(\s*'
+                          r'"address", "250.250.0.0",\s*'
+                          r'"gateway", "%s",\s*'
+                          r'"netmask", "255.255.0.0"\s*\)\s*'
+                          r'\)\s*\)' %
                           (net.broadcast, net.gateway,
-                           eth0ip, net.netmask),
+                           eth0_ip, net.netmask, net.gateway),
                           command)
 
 if __name__ == '__main__':
