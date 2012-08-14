@@ -96,10 +96,13 @@ class AuthorizationBroker(object):
         if dbuser.role.name == 'winops_server':
             # Only need add/update_cluster for hacluster VCenters
             if action not in ['add_windows_host', 'del_windows_host',
+                              'add_aurora_host',
                               'add_alias', 'del_alias',
                               'reconfigure',
                               'add_cluster', 'make_cluster', 'update_cluster',
-                              'change_status', 'change_status_cluster']:
+                              'change_status', 'change_status_cluster',
+                              'add_service_instance', 'map_service',
+                              'bind_server']:
                 self.raise_auth_error(principal, action, resource)
         if dbuser.role.name == 'mssb_unixops':
             if action not in ['add_machine',
