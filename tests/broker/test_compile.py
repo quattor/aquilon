@@ -167,8 +167,10 @@ class TestCompile(TestBrokerCommand):
                          command)
 
     def test_410_manage(self):
+        # using --force to bypass normal checks due to git status
+        # containing uncommitted files
         command = ['manage', '--hostname=unittest02.one-nyp.ms.com',
-                   '--sandbox=%s/out_of_date' % self.user]
+                   '--sandbox=%s/out_of_date' % self.user, '--force']
         self.successtest(command)
 
     def test_415_compilebehind(self):
@@ -195,8 +197,10 @@ class TestCompile(TestBrokerCommand):
                          command)
 
     def test_430_cleanup(self):
+        # using --force to bypass normal checks due to git status
+        # containing uncommitted files
         command = ['manage', '--hostname=unittest02.one-nyp.ms.com',
-                   '--domain=unittest']
+                   '--domain=unittest', '--force']
         self.successtest(command)
         command = ['compile', '--hostname=unittest02.one-nyp.ms.com']
         self.successtest(command)

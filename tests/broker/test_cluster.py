@@ -151,8 +151,10 @@ class TestCluster(TestBrokerCommand):
                          command)
 
         # Ah yes, we need it to be in the same sandbox
+        # using --force to bypass normal checks due to git status
+        # containing uncommitted files
         command = ["manage", "--domain=unittest",
-                   "--hostname=aquilon61.aqd-unittest.ms.com"]
+                   "--hostname=aquilon61.aqd-unittest.ms.com", "--force"]
         self.successtest(command)
 
         command = ["cluster", "--cluster=utecl1",
@@ -192,8 +194,10 @@ class TestCluster(TestBrokerCommand):
         out = self.successtest(command)
 
         user = self.config.get("unittest", "user")
+        # using --force to bypass normal checks due to git status
+        # containing uncommitted files
         command = ["manage", "--sandbox=%s/utsandbox" % user,
-                   "--hostname=aquilon61.aqd-unittest.ms.com"]
+                   "--hostname=aquilon61.aqd-unittest.ms.com", "--force"]
         out = self.commandtest(command)
 
         command = ["reconfigure", "--hostname=aquilon61.aqd-unittest.ms.com",

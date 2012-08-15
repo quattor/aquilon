@@ -2258,6 +2258,9 @@
             <option name="sandbox" type="string" conflicts="domain">Name of the sandbox (given as 'author/branch')</option>
          </optgroup>
       </optgroup>
+      <optgroup name="manage_optional_opts" fields="any" mandatory="False">
+         <option name="force" type="flag">bypasses git status and branch integrity checks (potentially dangerous)</option>
+      </optgroup>
       <transport method="post" path="command/manage_hostname" trigger="hostname" />
       <transport method="post" trigger="cluster" path="command/manage_cluster" />
    </command>

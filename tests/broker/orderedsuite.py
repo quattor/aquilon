@@ -203,6 +203,7 @@ from test_update_metacluster import TestUpdateMetaCluster
 from test_update_esx_cluster import TestUpdateESXCluster
 from test_pxeswitch import TestPxeswitch
 from test_manage import TestManage
+from test_manage_validate_branch import TestManageValidateBranch
 from test_constraints_umask import TestUmaskConstraints
 from test_unbind_server import TestUnbindServer
 from test_unmap_service import TestUnmapService
@@ -368,7 +369,7 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestUpdateArchetype,
                 TestUpdateMetaCluster, TestUpdateESXCluster,
                 TestUpdateCluster,
-                TestPxeswitch, TestManage,
+                TestPxeswitch, TestManage, TestManageValidateBranch,
                 TestUsecaseDatabase, TestUsecaseHACluster,
                 TestClientBypass,
                 TestUmaskConstraints,

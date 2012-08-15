@@ -31,6 +31,7 @@
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Cluster
 from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.commands.manage_hostname import validate_branch_commits
 from aquilon.worker.dbwrappers.branch import get_branch_and_author
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
 from aquilon.worker.locks import lock_queue, CompileKey
@@ -40,7 +41,8 @@ class CommandManageCluster(BrokerCommand):
 
     required_parameters = ["cluster"]
 
-    def render(self, session, logger, domain, sandbox, cluster, **arguments):
+    def render(self, session, logger, domain, sandbox, cluster, force,
+               **arguments):
         (dbbranch, dbauthor) = get_branch_and_author(session, logger,
                                                      domain=domain,
                                                      sandbox=sandbox,
@@ -51,6 +53,13 @@ class CommandManageCluster(BrokerCommand):
                                 .format(dbbranch))
 
         dbcluster = Cluster.get_unique(session, cluster, compel=True)
+        dbsource = dbcluster.branch
+        dbsource_author = dbcluster.sandbox_author
+        old_branch = dbcluster.branch.name
+
+        if not force:
+            validate_branch_commits(dbsource, dbsource_author,
+                                    dbbranch, dbauthor, logger, self.config)
 
         if dbcluster.metacluster:
             raise ArgumentError("{0.name} is member of metacluster {1.name}, "
