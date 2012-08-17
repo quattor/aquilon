@@ -105,7 +105,7 @@ class NetworkFormatter(ObjectFormatter):
         details.append(indent + "  IP: %s" % network.ip)
         details.append(indent + "  Netmask: %s" % netmask)
         details.append(indent + "  Sysloc: %s" % sysloc)
-        details.append(indent + "  Country: %s" % str(network.location.country.name))
+        details.append(self.redirect_raw(network.location, indent + "  "))
         details.append(indent + "  Side: %s" % network.side)
         details.append(indent + "  Network Type: %s" % network.network_type)
         if network.comments:
@@ -292,7 +292,7 @@ class SimpleNetworkListFormatter(ListFormatter):
 
     def csv_fields(self, network):
         return (network.name, network.ip, network.netmask,
-                network.location.sysloc(), network.location.country.name,
+                network.location.sysloc(), network.location.country,
                 network.side, network.network_type, network.comments)
 
     def format_html(self, nlist):

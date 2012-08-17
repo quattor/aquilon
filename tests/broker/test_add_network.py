@@ -171,7 +171,11 @@ class TestAddNetwork(TestBrokerCommand):
             self.matchoutput(out, "IP: %s" % network.ip, command)
             self.matchoutput(out, "Netmask: %s" % network.netmask, command)
             self.matchoutput(out, "Sysloc: ut.ny.na", command)
-            self.matchoutput(out, "Country: us", command)
+            self.matchoutput(out, "Building: ut", command)
+            self.matchoutput(out,
+                             "Location Parents: [Organization ms, Hub ny, "
+                             "Continent na, Country us, Campus ny, City ny]",
+                             command)
             self.matchoutput(out, "Side: a", command)
             self.matchoutput(out, "Network Type: %s" % network.nettype,
                              command)
