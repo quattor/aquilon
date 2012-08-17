@@ -34,22 +34,17 @@ import re
 from sqlalchemy import (Column, Integer, String, DateTime, ForeignKey, Sequence,
                         UniqueConstraint)
 from sqlalchemy.ext.associationproxy import association_proxy
-from sqlalchemy.orm import relation, backref, object_session, deferred
+from sqlalchemy.orm import relation, backref, deferred
 from sqlalchemy.sql import and_
 
 from aquilon.exceptions_ import InternalError
-from aquilon.aqdb.column_types import IPV4, AqStr, Enum
+from aquilon.aqdb.column_types import IPV4, AqStr
 from aquilon.aqdb.model import (Base, Interface, ARecord, DnsEnvironment, Fqdn,
                                 Network)
 from aquilon.aqdb.model.a_record import dns_fqdn_mapper
 
 _TN = 'address_assignment'
 _ABV = 'addr_assign'
-
-# Valid values:
-# - system: used/configured by the operating system
-# - zebra: used/configured by Zebra
-ADDR_USAGES = ['system', 'zebra']
 
 
 class AddressAssignment(Base):
@@ -173,7 +168,7 @@ class AddressAssignment(Base):
                                           self.logical_name)
 
 
-address = AddressAssignment.__table__  # pylint: disable=C0103, E1101
+address = AddressAssignment.__table__  # pylint: disable=C0103
 address.primary_key.name = '%s_pk' % _TN
 address.append_constraint(
     UniqueConstraint("interface_id", "ip", name="%s_iface_ip_uk" % _ABV))

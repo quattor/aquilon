@@ -116,7 +116,7 @@ class PersonalityServiceMap(Base):
             raise ValueError("A service should by mapped to a Network or a "
                              "Location")
 
-psm = PersonalityServiceMap.__table__  # pylint: disable=C0103, E1101
+psm = PersonalityServiceMap.__table__  # pylint: disable=C0103
 psm.primary_key.name = 'prsnlty_svc_map_pk'
 
 #TODO: reconsider the surrogate primary key?

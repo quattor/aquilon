@@ -58,7 +58,7 @@ class Cpu(Base):
     vendor = relation(Vendor)
 
 
-cpu = Cpu.__table__   # pylint: disable=C0103, E1101
+cpu = Cpu.__table__   # pylint: disable=C0103
 cpu.primary_key.name = '%s_pk' % _TN
 cpu.append_constraint(
     UniqueConstraint('vendor_id', 'name', 'speed', name='%s_nm_speed_uk' % _TN))

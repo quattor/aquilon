@@ -32,16 +32,15 @@
 import logging
 
 from aquilon.config import Config
-from aquilon.exceptions_ import IncompleteError, InternalError, ArgumentError
+from aquilon.exceptions_ import IncompleteError, InternalError
 from aquilon.aqdb.model import (Host, VlanInterface, BondingInterface,
                                 BridgeInterface)
 from aquilon.worker.locks import CompileKey
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
 from aquilon.worker.templates.cluster import PlenaryClusterClient
 from aquilon.worker.templates.panutils import (StructureTemplate, pan_assign,
-                                               pan_push, pan_include,
-                                               pan_variable)
-from aquilon.worker.dbwrappers.feature import model_features
+                                               pan_push, pan_include)
+
 LOGGER = logging.getLogger(__name__)
 
 

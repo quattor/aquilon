@@ -31,8 +31,7 @@
 from sqlalchemy.orm import joinedload, subqueryload, lazyload
 
 from aquilon.exceptions_ import NotFoundException
-from aquilon.aqdb.model import (Cluster, VirtualMachine, Resource,
-                                ClusterResource)
+from aquilon.aqdb.model import Cluster, VirtualMachine, ClusterResource
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.formats.cluster import ClusterList
 

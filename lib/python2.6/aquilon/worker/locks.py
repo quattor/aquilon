@@ -29,7 +29,6 @@
 
 
 import logging
-from threading import Condition, Lock
 
 from aquilon.locks import LockQueue, LockKey
 from aquilon.exceptions_ import InternalError

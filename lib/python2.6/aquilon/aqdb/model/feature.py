@@ -32,13 +32,11 @@ from datetime import datetime
 
 from sqlalchemy import (Column, Integer, DateTime, Sequence, String, Boolean,
                         ForeignKey, UniqueConstraint)
-from sqlalchemy.orm import (relation, backref, deferred, column_property,
-                            validates)
+from sqlalchemy.orm import relation, backref, deferred, validates
 from sqlalchemy.orm.exc import NoResultFound
-from sqlalchemy.sql import select, func
 
 from aquilon.exceptions_ import ArgumentError, NotFoundException, InternalError
-from aquilon.aqdb.model import Base, Archetype, Personality, Model, Interface
+from aquilon.aqdb.model import Base, Archetype, Personality, Model
 from aquilon.aqdb.column_types import AqStr
 from aquilon.aqdb.model.base import _raise_custom
 
@@ -82,7 +80,7 @@ class Feature(Base):
                             "%s." % (feature_type, valid_types))
 
 
-feature = Feature.__table__  # pylint: disable=C0103, E1101
+feature = Feature.__table__  # pylint: disable=C0103
 feature.primary_key.name = '%s_pk' % _TN
 feature.append_constraint(UniqueConstraint('name', 'feature_type',
                           name='%s_name_type_uk' % _TN))
@@ -250,7 +248,7 @@ class FeatureLink(Base):
         return result
 
 
-_lnk = FeatureLink.__table__  # pylint: disable=C0103, E1101
+_lnk = FeatureLink.__table__  # pylint: disable=C0103
 _lnk.primary_key.name = '%s_pk' % _LINK
 # The behavior of UNIQUE constraints in the presence of NULL columns is not
 # universal. We need the Oracle compatible behavior, meaning:

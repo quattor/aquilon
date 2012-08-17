@@ -27,14 +27,9 @@
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
 
-from string import capitalize
-from datetime import datetime
-
-from sqlalchemy import (Integer, DateTime, Sequence, String, Column, Boolean,
-                        UniqueConstraint, ForeignKey)
+from sqlalchemy import Integer, String, Column, ForeignKey
 
 from aquilon.aqdb.model import (Resource, Intervention)
-from aquilon.aqdb.column_types.aqstr import AqStr
 
 _TN_RES = 'reboot_schedule'
 

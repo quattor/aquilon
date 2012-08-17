@@ -32,7 +32,7 @@ from datetime import datetime
 
 from sqlalchemy import (Column, Integer, DateTime, Sequence, String, Boolean,
                         ForeignKey, UniqueConstraint)
-from sqlalchemy.orm import relation, backref, column_property, deferred, synonym
+from sqlalchemy.orm import relation, backref, column_property, deferred
 from sqlalchemy.sql import select, func
 
 from aquilon.aqdb.model import Base, Machine, ServiceInstance
@@ -96,7 +96,7 @@ class Disk(Base):
              self.machine.label, self.capacity)
 
 
-disk = Disk.__table__  # pylint: disable=C0103, E1101
+disk = Disk.__table__  # pylint: disable=C0103
 disk.primary_key.name = '%s_pk' % _TN
 disk.append_constraint(UniqueConstraint('machine_id', 'device_name',
                                         name='disk_mach_dev_name_uk'))

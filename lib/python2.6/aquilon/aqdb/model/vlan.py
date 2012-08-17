@@ -33,7 +33,7 @@ from datetime import datetime
 from sqlalchemy import (Column, Integer, DateTime, ForeignKey, CheckConstraint,
                         UniqueConstraint)
 from sqlalchemy.orm import relation, backref, deferred, object_session
-from sqlalchemy.sql import select, func, and_
+from sqlalchemy.sql import func, and_
 
 from aquilon.exceptions_ import NotFoundException, InternalError
 from aquilon.aqdb.column_types import AqStr, Enum
@@ -79,7 +79,7 @@ class VlanInfo(Base):
             self.__class__.__name__, self.vlan_id, self.port_group,
             self.vlan_type)
 
-vlaninfo = VlanInfo.__table__  # pylint: disable=C0103, E1101
+vlaninfo = VlanInfo.__table__  # pylint: disable=C0103
 vlaninfo.primary_key.name = '%s_pk' % _VTN
 vlaninfo.append_constraint(
     UniqueConstraint('port_group', name='%s_port_group_uk' % _VTN))
@@ -174,7 +174,7 @@ class ObservedVlan(Base):
         return nets[0].network
 
 
-obsvlan = ObservedVlan.__table__  # pylint: disable=C0103, E1101
+obsvlan = ObservedVlan.__table__  # pylint: disable=C0103
 obsvlan.primary_key.name = '%s_pk' % _TN
 
 obsvlan.append_constraint(

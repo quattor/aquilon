@@ -147,7 +147,7 @@ class SrvRecord(DnsRecord):
                                         port=port, target=target, **kwargs)
 
 
-srv_record = SrvRecord.__table__  # pylint: disable=C0103, E1101
+srv_record = SrvRecord.__table__  # pylint: disable=C0103
 srv_record.primary_key.name = '%s_pk' % _TN
 srv_record.info["unique_fields"] = ["fqdn"]
 srv_record.info["extra_search_fields"] = ['target']

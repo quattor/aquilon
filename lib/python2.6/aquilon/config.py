@@ -30,9 +30,7 @@
 """Basic config module for aqdb and the broker."""
 
 import os
-import sys
 import socket
-import re
 from ConfigParser import SafeConfigParser
 
 from exceptions_ import AquilonError
@@ -85,7 +83,7 @@ class Config(SafeConfigParser):
         # Allow a section to "pull in" another section, as though all the
         # values defined in the alternate were actually defined there.
         for section in self.sections():
-            section_option = "%s_section" %section
+            section_option = "%s_section" % section
             if self.has_option(section, section_option):
                 alternate_section = self.get(section, section_option)
                 if self.has_section(alternate_section):
@@ -93,7 +91,7 @@ class Config(SafeConfigParser):
                         self.set(section, name, value)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     config = Config()
     print "[DEFAULT]"
     for (name, value) in config.defaults().items():

@@ -535,7 +535,7 @@ class PlenaryCollection(object):
 class TemplateFormatter(ObjectFormatter):
 
     def __init__(self):
-        super(TemplateFormatter,self).__init__()
+        super(TemplateFormatter, self).__init__()
         self.mako_dir = os.path.join(self.config.get("broker", "srcdir"), "lib", "python2.6",
                             "aquilon", "worker", "templates", "mako")
         self.lookup_raw = TemplateLookup(directories=[os.path.join(self.mako_dir, "raw")],

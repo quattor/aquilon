@@ -37,7 +37,6 @@ from sqlalchemy.orm import (relation, contains_eager, column_property, backref,
 from sqlalchemy.orm.session import object_session
 from sqlalchemy.sql.expression import or_
 from sqlalchemy.sql import select, func
-from sqlalchemy.ext.associationproxy import association_proxy
 
 from aquilon.aqdb.model import (Base, Service, Host, DnsRecord, DnsDomain,
                                 Machine, Fqdn)
@@ -282,7 +281,7 @@ class ServiceInstance(Base):
         return cache
 
 
-service_instance = ServiceInstance.__table__  # pylint: disable=C0103, E1101
+service_instance = ServiceInstance.__table__  # pylint: disable=C0103
 
 service_instance.primary_key.name = 'svc_inst_pk'
 service_instance.append_constraint(
@@ -305,7 +304,7 @@ class BuildItem(Base):
                                  primary_key=True)
 
 
-build_item = BuildItem.__table__  # pylint: disable=C0103, E1101
+build_item = BuildItem.__table__  # pylint: disable=C0103
 build_item.primary_key.name = 'build_item_pk'
 
 ServiceInstance.clients = relation(Host, secondary=build_item,

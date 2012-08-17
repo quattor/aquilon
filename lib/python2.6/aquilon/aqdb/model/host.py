@@ -127,7 +127,7 @@ class Host(Base):
         return str(self.branch.name)
 
 
-host = Host.__table__  # pylint: disable=C0103, E1101
+host = Host.__table__  # pylint: disable=C0103
 host.primary_key.name = 'host_pk'
 host.append_constraint(
     UniqueConstraint('machine_id', 'branch_id', name='host_machine_branch_uk'))
@@ -150,7 +150,7 @@ class HostGrnMap(Base):
     grn = relation(Grn)
 
 
-hostgrns = HostGrnMap.__table__  # pylint: disable=C0103, E1101
+hostgrns = HostGrnMap.__table__  # pylint: disable=C0103
 hostgrns.primary_key.name = "%s_pk" % _HOSTGRN
 
 Host.grns = relation(Grn, secondary=HostGrnMap.__table__)

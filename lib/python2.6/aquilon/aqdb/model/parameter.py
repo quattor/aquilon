@@ -30,15 +30,14 @@
 
 from datetime import datetime
 
-from sqlalchemy import (Column, Integer, DateTime, Sequence, String,
-                        ForeignKey, UniqueConstraint)
+from sqlalchemy import (Column, Integer, DateTime, Sequence, String, ForeignKey,
+                        UniqueConstraint)
 from sqlalchemy.orm import relation, backref, deferred
 
 from aquilon.aqdb.column_types import JSONEncodedDict, MutationDict
 from aquilon.aqdb.model import Base, Personality, FeatureLink
 from aquilon.exceptions_ import NotFoundException, ArgumentError, InternalError
 from aquilon.aqdb.column_types import AqStr
-
 
 _TN = 'parameter'
 _PARAM_HOLDER = 'param_holder'
@@ -70,7 +69,7 @@ class ParameterHolder(Base):
     def holder_object(self):  # pragma: no cover
         raise InternalError("Abstract base method called")
 
-paramholder = ParameterHolder.__table__  # pylint: disable=C0103, E1101
+paramholder = ParameterHolder.__table__  # pylint: disable=C0103
 paramholder.primary_key.name = '%s_pk' % _PARAM_HOLDER
 
 
@@ -92,8 +91,8 @@ class PersonalityParameter(ParameterHolder):
 
     @property
     def holder_name(self):
-        return "%s/%s" % (self.personality.archetype.name,  # pylint: disable=C0103, E1101
-                          self.personality.name)  # pylint: disable=C0103, E1101
+        return "%s/%s" % (self.personality.archetype.name,  # pylint: disable=C0103
+                          self.personality.name)  # pylint: disable=C0103
 
     @property
     def holder_object(self):
@@ -118,7 +117,6 @@ class FeatureLinkParameter(ParameterHolder):
     @property
     def holder_name(self):
         ret = []
-        # pylint: disable=E1101
         if self.featurelink.personality:
             ret.extend([self.featurelink.personality.archetype.name,
                        self.featurelink.personality.name])
@@ -229,7 +227,7 @@ class Parameter(Base):
 
         dref = self.value
         for ppart in pparts:
-            if ppart not in dref.keys():  # pylint: disable=C0103, E1101
+            if ppart not in dref.keys():  # pylint: disable=E1101
                 dref[ppart] = {}
             dref = dref[ppart]
 
@@ -237,7 +235,7 @@ class Parameter(Base):
 
         ## coerce mutation of parameter since sqlalchemy
         ## cannot recognize parameter change
-        self.value.changed()  # pylint: disable=C0103, E1101
+        self.value.changed()  # pylint: disable=E1101
 
     def __del_path(self, path):
         """ method to do the actual deletion """
@@ -274,7 +272,7 @@ class Parameter(Base):
 
             ## coerce mutation of parameter since sqlalchemy
             ## cannot recognize parameter change
-            self.value.changed()  # pylint: disable=C0103, E1101
+            self.value.changed()  # pylint: disable=E1101
         except KeyError:
             raise NotFoundException("No parameter of path=%s defined." % path)
 
@@ -294,6 +292,6 @@ class Parameter(Base):
             flattened[((path + PATH_SEP) if path else "") + key] = data
         return flattened
 
-parameter = Parameter.__table__  # pylint: disable=C0103, E1101
+parameter = Parameter.__table__  # pylint: disable=C0103
 parameter.primary_key.name = '%s_pk' % _TN
 parameter.info['unique_fields'] = ['holder']

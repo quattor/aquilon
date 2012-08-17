@@ -48,8 +48,7 @@ from cStringIO import StringIO
 from sqlalchemy.orm.session import object_session
 import yaml
 
-from aquilon.exceptions_ import (ProcessException, AquilonError, ArgumentError,
-                                 InternalError)
+from aquilon.exceptions_ import ProcessException, AquilonError, ArgumentError
 from aquilon.config import Config
 from aquilon.worker.locks import lock_queue, CompileKey
 

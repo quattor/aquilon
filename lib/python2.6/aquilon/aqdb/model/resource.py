@@ -28,17 +28,14 @@
 # TERMS THAT MAY APPLY.
 
 from datetime import datetime
-import re
 
 from sqlalchemy import (Column, Integer, String, DateTime, ForeignKey,
                         Sequence, UniqueConstraint)
-from sqlalchemy.ext.associationproxy import association_proxy
-from sqlalchemy.orm import (relation, backref, object_session, validates,
-                            deferred)
+from sqlalchemy.orm import relation, backref, validates
 
 from aquilon.exceptions_ import InternalError
-from aquilon.aqdb.column_types import AqStr, Enum
-from aquilon.aqdb.model import Base, Cluster, Host, MetaCluster
+from aquilon.aqdb.column_types import AqStr
+from aquilon.aqdb.model import Base, Cluster, Host
 
 _TN = 'resource'
 _ABV = 'res'
@@ -81,7 +78,7 @@ class ResourceHolder(Base):
     def holder_path(self):
         return "%s/%s" % (self.holder_type, self.holder_name)
 
-resholder = ResourceHolder.__table__  # pylint: disable=C0103, E1101
+resholder = ResourceHolder.__table__  # pylint: disable=C0103
 resholder.primary_key.name = '%s_pk' % _RESHOLDER
 
 
@@ -197,6 +194,6 @@ class Resource(Base):
         return "<{0:c} Resource {0.name} of {1}>".format(self, self.holder)
 
 
-resource = Resource.__table__  # pylint: disable=C0103, E1101
+resource = Resource.__table__  # pylint: disable=C0103
 resource.primary_key.name = '%s_pk' % _TN
 resource.info['unique_fields'] = ['name', 'holder']

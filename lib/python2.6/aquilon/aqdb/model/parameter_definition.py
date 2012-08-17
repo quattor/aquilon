@@ -70,7 +70,7 @@ class ParamDefHolder(Base):
         raise InternalError("Abstract base method called")
 
 
-param_definition_holder = ParamDefHolder.__table__  # pylint: disable=C0103, E1101
+param_definition_holder = ParamDefHolder.__table__  # pylint: disable=C0103
 param_definition_holder.primary_key.name = '%s_pk' % _PARAM_DEF_HOLDER
 param_definition_holder.info['unique_fields'] = ['id']
 
@@ -92,7 +92,7 @@ class ArchetypeParamDef(ParamDefHolder):
 
     @property
     def holder_name(self):
-        return "%s" % self.archetype.name  # pylint: disable=C0103, E1101
+        return "%s" % self.archetype.name  # pylint: disable=C0103
 
     @property
     def holder_object(self):
@@ -116,7 +116,7 @@ class FeatureParamDef(ParamDefHolder):
 
     @property
     def holder_name(self):
-        return "%s" % self.feature.name  # pylint: disable=C0103, E1101
+        return "%s" % self.feature.name  # pylint: disable=C0103
 
     @property
     def holder_object(self):
@@ -170,6 +170,6 @@ class ParamDefinition(Base):
         raise ArgumentError("Unknown value type '%s'.  The valid types are: "
                             "%s." % (value_type, valid_types))
 
-param_definition = ParamDefinition.__table__  # pylint: disable=C0103, E1101
+param_definition = ParamDefinition.__table__  # pylint: disable=C0103
 param_definition.primary_key.name = '%s_pk' % _TN
 param_definition.info['unique_fields'] = ['path', 'holder']

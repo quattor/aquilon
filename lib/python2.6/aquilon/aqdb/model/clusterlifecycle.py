@@ -63,7 +63,7 @@ class ClusterLifecycle(StateEngine, Base):
         return str(self.name)
 
 
-clusterlifecycle = ClusterLifecycle.__table__  # pylint: disable=C0103, E1101
+clusterlifecycle = ClusterLifecycle.__table__  # pylint: disable=C0103
 clusterlifecycle.primary_key.name = '%s_pk' % _TN
 clusterlifecycle.append_constraint(UniqueConstraint('name', name='%s_uk' % _TN))
 clusterlifecycle.info['unique_fields'] = ['name']

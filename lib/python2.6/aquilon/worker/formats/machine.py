@@ -28,8 +28,7 @@
 # TERMS THAT MAY APPLY.
 """Machine formatter."""
 
-from aquilon import const
-from aquilon.aqdb.model import Machine
+from aquilon.aqdb.model import Machine, Location
 from aquilon.worker.formats.formatters import ObjectFormatter
 from aquilon.worker.formats.list import ListFormatter
 from aquilon.worker.dbwrappers.feature import (model_features,
@@ -95,7 +94,7 @@ class MachineFormatter(ObjectFormatter):
         # This is a bit of a hack.  Delegating out to the standard location
         # formatter now spews too much information about chassis.  Maybe
         # that will change when chassis has a corresponding hardware type.
-        for location_type in const.location_types:
+        for location_type in Location.__mapper__.polymorphic_map.keys():
             if getattr(machine.location, location_type, None) is not None:
                 loc = getattr(machine.location, location_type)
                 details.append(indent + "  {0:c}: {0.name}".format(loc))

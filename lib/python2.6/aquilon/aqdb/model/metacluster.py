@@ -33,8 +33,8 @@
 
 from datetime import datetime
 
-from sqlalchemy import (Column, Integer, String, DateTime, Sequence,
-                        ForeignKey, UniqueConstraint, Boolean)
+from sqlalchemy import (Column, Integer, DateTime, Boolean, ForeignKey,
+                        UniqueConstraint)
 
 from sqlalchemy.orm import relation, backref, deferred
 from sqlalchemy.orm.attributes import instance_state
@@ -45,8 +45,6 @@ from sqlalchemy.ext.associationproxy import association_proxy
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Base, Cluster, ServiceInstance
 from aquilon.aqdb.model.cluster import convert_resources
-from aquilon.aqdb.column_types.aqstr import AqStr
-from sqlalchemy.sql import func
 
 _TN = 'clstr'
 _MCT = 'metacluster'
@@ -181,7 +179,7 @@ class MetaCluster(Cluster):
                                               self.branch.branch_type,
                                               self.authored_branch))
 
-metacluster = MetaCluster.__table__  # pylint: disable=C0103, E1101
+metacluster = MetaCluster.__table__  # pylint: disable=C0103
 metacluster.primary_key.name = '%s_pk' % _MCT
 metacluster.info['unique_fields'] = ['name']
 
@@ -247,7 +245,7 @@ class MetaClusterMember(Base):
 
     __mapper_args__ = {'extension': ValidateMetaCluster()}
 
-metamember = MetaClusterMember.__table__  # pylint: disable=C0103, E1101
+metamember = MetaClusterMember.__table__  # pylint: disable=C0103
 metamember.primary_key.name = '%s_pk' % _MCM
 metamember.append_constraint(
     UniqueConstraint('cluster_id', name='%s_uk' % _MCM))

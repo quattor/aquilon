@@ -28,8 +28,8 @@
 # TERMS THAT MAY APPLY.
 """ Disk for share """
 
-from sqlalchemy import (Column, Integer, ForeignKey)
-from sqlalchemy.orm import relation, backref, synonym
+from sqlalchemy import Column, Integer, ForeignKey
+from sqlalchemy.orm import relation, backref
 
 from aquilon.aqdb.model import Disk, Share
 

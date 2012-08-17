@@ -29,7 +29,6 @@
 """Contains the logic for `aq change status`."""
 
 
-from aquilon.exceptions_ import IncompleteError
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.templates.domain import TemplateDomain
 from aquilon.worker.templates.base import Plenary, PlenaryCollection

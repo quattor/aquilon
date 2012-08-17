@@ -35,21 +35,22 @@ _LIBDIR = os.path.join(_DIR, '..', '..')
 if _LIBDIR not in sys.path:
     sys.path.insert(0, _LIBDIR)
 
-import aquilon.aqdb.depends
+import aquilon.aqdb.depends  # pylint: disable=W0611
 
 import argparse
 
-from ipaddr import IPv4Address, IPv4Network
+from ipaddr import IPv4Address, IPv4Network  # pylint: disable=W0611
 
 import ms.modulecmd
 
 from IPython.config.loader import Config as IPyConfig
 from IPython.frontend.terminal.embed import InteractiveShellEmbed
 
-from aquilon.config import Config
+from aquilon.config import Config  # pylint: disable=W0611
 
-from aquilon.aqdb.model import *
-from aquilon.aqdb.dsdb import *
+# pylint: disable=W0614
+from aquilon.aqdb.model import *  # pylint: disable=W0401
+from aquilon.aqdb.dsdb import *  # pylint: disable=W0401
 from aquilon.aqdb.db_factory import DbFactory
 
 db = DbFactory()

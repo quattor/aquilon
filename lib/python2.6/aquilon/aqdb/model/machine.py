@@ -34,7 +34,7 @@ from sqlalchemy.orm  import relation
 from aquilon.aqdb.model import Cpu, HardwareEntity
 
 
-class Machine(HardwareEntity):  # pylint: disable=W0232, R0903
+class Machine(HardwareEntity):
     """ Machines represents general purpose computers """
 
     __tablename__ = 'machine'
@@ -64,7 +64,7 @@ class Machine(HardwareEntity):  # pylint: disable=W0232, R0903
             return None
 
 
-machine = Machine.__table__  # pylint: disable=C0103, E1101
+machine = Machine.__table__  # pylint: disable=C0103
 machine.primary_key.name = 'machine_pk'
 
 

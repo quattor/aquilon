@@ -93,7 +93,7 @@ class NetworkEnvironment(Base):
                                   compel=InternalError)
 
 
-netenv = NetworkEnvironment.__table__  # pylint: disable=C0103, E1101
+netenv = NetworkEnvironment.__table__  # pylint: disable=C0103
 netenv.primary_key.name = '%s_pk' % _TN
 
 netenv.append_constraint(UniqueConstraint('name', name='%s_name_uk' % _ABV))

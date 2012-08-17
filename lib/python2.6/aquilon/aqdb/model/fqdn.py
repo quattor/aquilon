@@ -151,7 +151,7 @@ class Fqdn(Base):
                                    dns_environment=dns_environment, **kwargs)
 
 
-fqdn = Fqdn.__table__  # pylint: disable=C0103, E1101
+fqdn = Fqdn.__table__  # pylint: disable=C0103
 fqdn.primary_key.name = '%s_pk' % _TN
 fqdn.append_constraint(UniqueConstraint('name', 'dns_domain_id',
                                         'dns_environment_id',

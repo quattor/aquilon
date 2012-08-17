@@ -28,10 +28,8 @@
 # TERMS THAT MAY APPLY.
 """ This module implements the AqMac column_type. """
 
-import re
 import sqlalchemy
 
-from aquilon.exceptions_ import ArgumentError
 from aquilon.utils import force_mac
 
 

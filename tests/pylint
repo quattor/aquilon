@@ -3,9 +3,9 @@
 import os
 import sys
 
-src = os.path.realpath(os.path.join(os.path.dirname(__file__), '..',
-                                    'lib', 'python2.6'))
-sys.path.append(src)
+basedir = os.path.dirname(__file__)
+srcdir = os.path.realpath(os.path.join(basedir, '..', 'lib', 'python2.6'))
+sys.path.append(srcdir)
 
 import aquilon.aqdb.depends
 import aquilon.worker.depends
@@ -14,11 +14,11 @@ import aquilon.client.depends
 
 # Any of the above may override the default location for ms.version...
 import ms.version
-ms.version.addpkg("pylint", "0.23.0")
+ms.version.addpkg("pylint", "0.25.2")
 ms.version.addpkg("logilab.astng", "0.21.1")
 ms.version.addpkg("logilab.common", "0.55.0")
 
 from pylint import lint
 
-lint.Run(sys.argv[1:])
-
+pylintrc = os.path.join(basedir, "pylintrc")
+lint.Run(["--rcfile", pylintrc] + sys.argv[1:])

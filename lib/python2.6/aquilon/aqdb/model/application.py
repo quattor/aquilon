@@ -27,13 +27,9 @@
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
 
-from datetime import datetime
-
-from sqlalchemy import (Integer, DateTime, Sequence, String, Column, Boolean,
-                        UniqueConstraint, ForeignKey)
+from sqlalchemy import Integer, Column, ForeignKey
 
 from aquilon.aqdb.model import Resource
-from aquilon.aqdb.column_types.aqstr import AqStr
 
 _TN = 'application'
 
