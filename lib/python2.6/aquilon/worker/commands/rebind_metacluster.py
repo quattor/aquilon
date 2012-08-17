@@ -32,7 +32,7 @@ class CommandRebindMetaCluster(BrokerCommand):
                                                compel=True)
         old_metacluster = None
         if dbcluster.metacluster and dbcluster.metacluster != dbmetacluster:
-            if dbcluster.machines:
+            if dbcluster.virtual_machines:
                 raise ArgumentError("Cannot move cluster to a new metacluster "
                                     "while virtual machines are attached.")
             old_metacluster = dbcluster.metacluster

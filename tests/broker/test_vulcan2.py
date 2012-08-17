@@ -65,7 +65,7 @@ class TestVulcan20(TestBrokerCommand):
             command = ["add", "switch", "--switch", hostname, "--rack", "ut12",
                        "--model", "rs g8000", "--interface", "xge49",
                        "--type", "tor", "--mac", ip.mac, "--ip", ip]
-            (out, err) = self.successtest(command)
+            self.ignoreoutputtest(command)
         self.dsdb_verify()
 
     # see     def testverifypollut01ga2s01(self):
@@ -593,7 +593,7 @@ class TestVulcan20(TestBrokerCommand):
 
 
     def test_202_delutpgmdisk(self):
-        for i in range(0, 2):
+        for i in range(0, 3):
             self.noouttest(["del", "disk", "--machine", "utpgm%d" %i,
                 "--controller", "scsi", "--disk", "sda"])
 

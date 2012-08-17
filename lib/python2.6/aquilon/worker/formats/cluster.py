@@ -127,9 +127,9 @@ class ClusterFormatter(ObjectFormatter):
             details.append(indent + "  Max virtual machine count: %s" %
                            cluster.max_vm_count)
             details.append(indent + "  Current vm_to_host_ratio: %s:%s" %
-                           (len(cluster.machines), len(cluster.hosts)))
+                           (len(cluster.virtual_machines), len(cluster.hosts)))
             details.append(indent + "  Virtual Machine count: %s" %
-                           len(cluster.machines))
+                           len(cluster.virtual_machines))
             details.append(indent + "  ESX VMHost count: %s" %
                            len(cluster.hosts))
             if cluster.switch:

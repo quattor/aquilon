@@ -130,6 +130,17 @@ class Host(Base):
             return "%s/%s" % (self.sandbox_author.name, self.branch.name)
         return str(self.branch.name)
 
+    # see cluster.py
+    @property
+    def virtual_machines(self):
+        mach = []
+        if self.resholder:
+            for res in self.resholder.resources:
+                # TODO: support virtual machines inside resource groups?
+                if res.resource_type == "virtual_machine":
+                    mach.append(res.machine)
+        return mach
+
 
 class HostGrnMap(Base):
     __tablename__ = _HOSTGRN

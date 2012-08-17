@@ -112,12 +112,12 @@ class Decommissioned(ClusterLifecycle):
                                                     dbcluster,
                                                     archetype.name))
 
-        if dbcluster.machines:
+        if dbcluster.virtual_machines:
             raise ArgumentError("Cannot change state to {0}, as {1} has "
                                 "{2} VM(s).".format(
                                                     dbdecommissioned.name,
                                                     dbcluster,
-                                                    len(dbcluster.machines)))
+                                                    len(dbcluster.virtual_machines)))
 
         for dbhost in dbcluster.hosts:
             dbhost.status.transition(dbhost, dbdecommissioned)
