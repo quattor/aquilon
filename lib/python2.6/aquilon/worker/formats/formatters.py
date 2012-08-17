@@ -51,7 +51,7 @@ class ResponseFormatter(object):
         handlers and wrapped appropriately.
 
     """
-    formats = ["raw", "csv", "html", "proto", "djb", 'json']
+    formats = ["raw", "csv", "html", "proto", "djb"]
 
     def format(self, style, result, request):
         """The main entry point - it is expected that any consumers call
@@ -105,9 +105,6 @@ class ResponseFormatter(object):
         </html>
         """ % (title, msg)
         return str(retval)
-
-    def format_json(self, result, request, indent=""):
-        return ObjectFormatter.redirect_json(result)
 
 
 class ObjectFormatter(object):
@@ -259,12 +256,6 @@ class ObjectFormatter(object):
         handler = ObjectFormatter.handlers.get(result.__class__,
                 ObjectFormatter.default_handler)
         return handler.format_proto(result, skeleton)
-
-    @staticmethod
-    def redirect_json(result, indent=""):
-        handler = ObjectFormatter.handlers.get(result.__class__,
-                ObjectFormatter.default_handler)
-        return handler.format_json(result, indent)
 
     def add_hardware_data(self, host_msg, hwent):
         host_msg.machine.name = str(hwent.label)

@@ -1,6 +1,6 @@
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 #
-# Copyright (C) 2009,2010,2011,2012  Contributor
+# Copyright (C) 2012  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -28,34 +28,38 @@
 # TERMS THAT MAY APPLY.
 
 
+from aquilon.aqdb.model import Feature, FeatureParamDef, ParamDefinition
 from aquilon.worker.broker import BrokerCommand
-from aquilon.aqdb.model import ParamDefinition
-from aquilon.exceptions_ import ArgumentError
-from aquilon.worker.dbwrappers.parameter import get_param_def_holder
+from aquilon.worker.dbwrappers.parameter import validate_value
 
 
-class CommandDelParameterDefintion(BrokerCommand):
+class CommandAddParameterDefintionFeature(BrokerCommand):
 
-    required_parameters = ["path"]
+    required_parameters = ["feature", "type", "path", "value_type"]
 
-    def render(self, session, archetype, feature, feature_type, path, **kwargs):
+    def render(self, session, feature, type, path, value_type, required,
+               default, description, **kwargs):
+        dbfeature = Feature.get_unique(session, name=feature, feature_type=type,
+                                       compel=True)
 
-        if not (archetype or feature):
-            raise ArgumentError ("Archetype or Feature must be specified for parameter definition")
+        if not dbfeature.paramdef_holder:
+            dbfeature.paramdef_holder = FeatureParamDef()
 
-        db_paramdef_holder = get_param_def_holder(session, archetype,
-                                                  feature, feature_type,
-                                                  auto_include=False)
-        if db_paramdef_holder is None:
-            if archetype:
-                raise ArgumentError( "No parameter definitions found for archetype {0}".format(archetype))
-            elif feature:
-                raise ArgumentError( "No parameter definitions found for feature {0}".format(feature))
+        ParamDefinition.validate_type(value_type)
 
-        db_paramdef = ParamDefinition.get_unique(session, path=path,
-                                                 holder=db_paramdef_holder,
-                                                 compel=True)
-        session.delete(db_paramdef)
+        if default:
+            validate_value("default for path=%s" % path, value_type, default)
+
+        ParamDefinition.get_unique(session, path=path,
+                                   holder=dbfeature.paramdef_holder, preclude=True)
+
+        db_paramdef = ParamDefinition(path=path,
+                                      holder=dbfeature.paramdef_holder,
+                                      value_type=value_type, default=default,
+                                      required=required,
+                                      description=description)
+        session.add(db_paramdef)
+
         session.flush()
 
         return

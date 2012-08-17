@@ -43,31 +43,31 @@ OTHER_PERSONALITY = 'eaitools'
 
 ## validation parameters by templates
 PARAM_DEFS = {
-"access" : [
-    { "path" : "access/netgroup", "value_type" : "list",  "description" : "netgroups access" },
-    { "path" : "access/users",    "value_type" : "list",  "description" : "users access"},
+"access": [
+    { "path": "access/netgroup", "value_type": "list",  "description": "netgroups access" },
+    { "path": "access/users",    "value_type": "list",  "description": "users access"},
 ],
-"actions" : [
-    { "path" : "action/\w+/user", "value_type" : "string", "description" : "action user" },
-    { "path" : "action/\w+/command", "value_type" : "string", "description" : "action command" },
-    { "path" : "action/\w+",      "value_type" : "json",   "description" : "per action block" },
-    { "path" : "action",          "value_type" : "json",   "description" : "per action block" },
+"actions": [
+    { "path": "action/\w+/user", "value_type": "string", "description": "action user" },
+    { "path": "action/\w+/command", "value_type": "string", "description": "action command" },
+    { "path": "action/\w+",      "value_type": "json",   "description": "per action block" },
+    { "path": "action",          "value_type": "json",   "description": "per action block" },
 ],
-"startup" : [
-    { "path" : "startup/actions",  "value_type" : "list", "description" : "startup actions" },
+"startup": [
+    { "path": "startup/actions",  "value_type": "list", "description": "startup actions" },
 ],
-"shutdown" : [
-    { "path" : "shutdown/actions", "value_type" : "list", "description" : "shutdown actions" },
+"shutdown": [
+    { "path": "shutdown/actions", "value_type": "list", "description": "shutdown actions" },
 ],
-"espinfo" : [
-    { "path" : "esp/function", "value_type" : "string", "description" : "espinfo function", "required" : True },
-    { "path" : "esp/class",    "value_type" : "string", "description" : "espinfo class", "required" : True },
-    { "path" : "esp/users",    "value_type" : "string", "description" : "espinfo users", "required" : True },
-    { "path" : "esp/description",    "value_type" : "string", "description" : "espinfo desc" },
-    { "path" : "esp/threshold",    "value_type" : "int", "description" : "espinfo threshold" },
+"espinfo": [
+    { "path": "esp/function", "value_type": "string", "description": "espinfo function", "required": True },
+    { "path": "esp/class",    "value_type": "string", "description": "espinfo class", "required": True },
+    { "path": "esp/users",    "value_type": "string", "description": "espinfo users", "required": True },
+    { "path": "esp/description",    "value_type": "string", "description": "espinfo desc" },
+    { "path": "esp/threshold",    "value_type": "int", "description": "espinfo threshold" },
 ],
-"security" :[
-    { "path" : "security/security_class", "value_type" : "string", "description" : "security class", "default" : "internal-isg-relaxed", "required" : True },
+"security":[
+    { "path": "security/security_class", "value_type": "string", "description": "security class", "default": "internal-isg-relaxed", "required": True },
 ],
 }
 
@@ -122,6 +122,12 @@ class TestParameter(TestBrokerCommand):
         command = ADD_CMD + ["--path", path, "--value", "/bin/%s" % action]
         self.noouttest(command)
 
+    def test_100_add_noncompileable(self):
+        command = ["add", "parameter", "--path", "foo", "--value", "bar",
+                   "--archetype", "windows", "--personality", "generic"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Archetype windows is not compileable.", command)
+
     def test_120_add_existing_re_path(self):
         action = "testaction"
         path = "action/%s/user" % action
@@ -133,7 +139,7 @@ class TestParameter(TestBrokerCommand):
     def test_130_verify_re(self):
         action = "testaction"
         out = self.commandtest(SHOW_CMD)
-        expected = 'action : { "%s": { "command": "/bin/%s", "user": "user1" } }' % (action, action)
+        expected = 'action: { "%s": { "command": "/bin/%s", "user": "user1" } }' % (action, action)
         self.check_match(out, expected, SHOW_CMD)
 
     def test_140_update_existing_re_path(self):
@@ -143,7 +149,7 @@ class TestParameter(TestBrokerCommand):
         self.noouttest(command)
 
         out = self.commandtest(SHOW_CMD)
-        expected = 'action : { "%s": { "command": "/bin/%s", "user": "user2" } }' % (action, action)
+        expected = 'action: { "%s": { "command": "/bin/%s", "user": "user2" } }' % (action, action)
         self.check_match(out, expected, SHOW_CMD)
 
     def test_150_add_re_json_path(self):
@@ -215,7 +221,7 @@ class TestParameter(TestBrokerCommand):
 
     def test_240_verify_path(self):
         out = self.commandtest(SHOW_CMD)
-        self.check_match(out, 'esp : { "function": "Development", "threshold": 0 }', SHOW_CMD)
+        self.check_match(out, 'esp: { "function": "Development", "threshold": 0 }', SHOW_CMD)
         self.check_match(out, '"testaction": { "command": "/bin/testaction", "user": "user2" }', SHOW_CMD)
         self.check_match(out, '"testaction2": { "command": "/bin/testaction2", "user": "user1", "timeout": 100 } }', SHOW_CMD)
 
@@ -247,17 +253,29 @@ class TestParameter(TestBrokerCommand):
 
     def test_300_validate(self):
         out = self.badrequesttest(VAL_CMD)
-        self.searchoutput(out, r'Following required parameters have not been specified:\s*'
-                               r'parameter: esp/class  value type:string  template:espinfo\s*'
-                               r'parameter: esp/users  value type:string  template:espinfo',
+        self.searchoutput(out,
+                          r'Following required parameters have not been specified:\s*'
+                          r'Parameter Definition: esp/class \[required\]\s*'
+                          r'Type: string\s*'
+                          r'Template: espinfo\s*'
+                          r'Parameter Definition: esp/users \[required\]\s*'
+                          r'Type: string\s*'
+                          r'Template: espinfo',
                           VAL_CMD)
+
+    def test_300_validate_noparams(self):
+        # Validate a personality that has no parameters defined
+        command = ["validate", "parameter", "--personality", "utpersonality"]
+        out, err = self.successtest(command)
+        self.assertEmptyOut(out, command)
+        self.matchoutput(err, "All required parameters specified.", command)
 
     def test_500_verify_diff(self):
         cmd = ["show_diff", "--archetype", ARCHETYPE, "--personality", PERSONALITY,
                "--other", OTHER_PERSONALITY]
 
         out = self.commandtest(cmd)
-        self.searchoutput (out, r'Differences for Parameters :\s*'
+        self.searchoutput (out, r'Differences for Parameters:\s*'
                                r'missing Parameters in Personality aquilon/eaitools:\s*'
                                r'//action/testaction/command\s*'
                                r'//action/testaction/user\s*'

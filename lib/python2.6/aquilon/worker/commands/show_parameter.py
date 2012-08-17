@@ -28,10 +28,10 @@
 # TERMS THAT MAY APPLY.
 
 
-from aquilon.worker.formats.parameter import ParameterList
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.parameter import get_parameters
 from aquilon.exceptions_ import NotFoundException
+
 
 class CommandShowParameterPersonality(BrokerCommand):
 
@@ -44,6 +44,7 @@ class CommandShowParameterPersonality(BrokerCommand):
                                     personality=personality)
 
         if parameters:
-            return ParameterList(parameters)
+            return parameters
 
-        raise NotFoundException("No parameters found for personality %s." % personality)
+        raise NotFoundException("No parameters found for personality %s." %
+                                personality)

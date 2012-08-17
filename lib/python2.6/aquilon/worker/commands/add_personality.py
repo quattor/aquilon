@@ -29,6 +29,8 @@
 """Contains the logic for `aq add personality`."""
 
 
+import re
+
 from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import (Archetype, Personality,
                                 Parameter,
@@ -38,7 +40,7 @@ from aquilon.worker.templates.personality import PlenaryPersonality
 from aquilon.worker.dbwrappers.parameter import get_parameters
 from aquilon.worker.dbwrappers.feature import add_link
 from aquilon.worker.dbwrappers.grn import lookup_grn
-import re
+
 
 class CommandAddPersonality(BrokerCommand):
 
@@ -47,11 +49,12 @@ class CommandAddPersonality(BrokerCommand):
     def render(self, session, logger, personality, archetype, grn, eon_id,
                comments, cluster_required, copy_from, config_override, **arguments):
         valid = re.compile('^[a-zA-Z0-9_-]+$')
-        if (not valid.match(personality)):
+        if not valid.match(personality):
             raise ArgumentError("Personality name '%s' is not valid." %
                                 personality)
         if not (grn or eon_id):
-            raise ArgumentError("Grn/EonId is required for adding personality")
+            raise ArgumentError("GRN or EON ID is required for adding a "
+                                "personality.")
 
         dbarchetype = Archetype.get_unique(session, archetype, compel=True)
         Personality.get_unique(session, archetype=dbarchetype,
@@ -88,7 +91,6 @@ class CommandAddPersonality(BrokerCommand):
                                         holder=db_param_holder)
                 session.add(dbparameter)
 
-
             for link in dbfrom_persona.features:
                 params = {}
                 params["personality"] = dbpersona
@@ -97,7 +99,7 @@ class CommandAddPersonality(BrokerCommand):
                 if link.interface_name:
                     params["interface_name"] = link.interface_name
 
-                add_link (session, logger, link.feature, params)
+                add_link(session, logger, link.feature, params)
 
         session.flush()
 

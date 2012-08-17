@@ -1,6 +1,6 @@
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 #
-# Copyright (C) 2009,2010,2011,2012  Contributor
+# Copyright (C) 2012  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -27,15 +27,41 @@
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
 
+
+from aquilon.exceptions_ import ArgumentError
+from aquilon.aqdb.model import Archetype, ArchetypeParamDef, ParamDefinition
 from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.dbwrappers.parameter import  del_parameter
-from aquilon.worker.commands.add_parameter import CommandAddParameter
+from aquilon.worker.dbwrappers.parameter import validate_value
 
 
-class CommandDelParameter(CommandAddParameter):
+class CommandAddParameterDefintionArchetype(BrokerCommand):
 
-    required_parameters = ['path']
+    required_parameters = ["archetype", "template", "path", "value_type"]
 
-    def process_parameter(self, session, param_holder, path, value=None,
-                          comments=None):
-        return del_parameter(session, path, param_holder)
+    def render(self, session, archetype, template, path, value_type, required,
+               default, description, **kwargs):
+        dbarchetype = Archetype.get_unique(session, archetype, compel=True)
+        if not dbarchetype.is_compileable:
+            raise ArgumentError("{0} is not compileable.".format(dbarchetype))
+
+        if not dbarchetype.paramdef_holder:
+            dbarchetype.paramdef_holder = ArchetypeParamDef()
+
+        ParamDefinition.validate_type(value_type)
+
+        if default:
+            validate_value("default for path=%s" % path, value_type, default)
+
+        ParamDefinition.get_unique(session, path=path,
+                                   holder=dbarchetype.paramdef_holder, preclude=True)
+
+        db_paramdef = ParamDefinition(path=path,
+                                      holder=dbarchetype.paramdef_holder,
+                                      value_type=value_type, default=default,
+                                      required=required, template=template,
+                                      description=description)
+        session.add(db_paramdef)
+
+        session.flush()
+
+        return

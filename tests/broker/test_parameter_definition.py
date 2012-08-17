@@ -41,58 +41,58 @@ ARCHETYPE = 'aquilon'
 
 FEATURE = 'myfeature'
 
-PARAM_DEFS = [	{ "path" : "netgroup",
-                  "value_type" : "list",
-                  "description" : "netgroups access",
-                  "template" : "access"
+PARAM_DEFS = [	{ "path": "netgroup",
+                  "value_type": "list",
+                  "description": "netgroups access",
+                  "template": "access"
                 },
 
-		{ "path" : "users",
-                  "value_type" : "list",
-                  "description" : "users access",
-                  "template" : "access",
+		{ "path": "users",
+                  "value_type": "list",
+                  "description": "users access",
+                  "template": "access",
 		},
 
-		{ "path" : "lastacl",
-                  "value_type" : "list",
-                  "description" : "acl access",
-                  "template" : "access",
+		{ "path": "lastacl",
+                  "value_type": "list",
+                  "description": "acl access",
+                  "template": "access",
 		},
 
-		{ "path" : "action/\w+/user",
-                  "value_type" : "string",
-                  "description" : "action user",
-                  "template" : "actions",
+		{ "path": "action/\w+/user",
+                  "value_type": "string",
+                  "description": "action user",
+                  "template": "actions",
                 },
 
-		{ "path" : "action/\w+/command",
-                  "value_type" : "string",
-                  "description" : "action command",
-                  "template" : "actions",
+		{ "path": "action/\w+/command",
+                  "value_type": "string",
+                  "description": "action command",
+                  "template": "actions",
                 },
 
-		{ "path" : "function",
-                  "value_type" : "string",
-                  "description" : "espinfo function",
-                  "template" : "espinfo",
-		  "required" : True,
+		{ "path": "function",
+                  "value_type": "string",
+                  "description": "espinfo function",
+                  "template": "espinfo",
+		  "required": True,
 		},
 
-		{ "path" : "security_class",
-                  "value_type" : "string",
-                  "description" : "security class",
-                  "template" : "security",
-		  "required" : True,
-		  "default" : "internal-isg-relaxed",
-		  "required" : True,
+		{ "path": "security_class",
+                  "value_type": "string",
+                  "description": "security class",
+                  "template": "security",
+		  "required": True,
+		  "default": "internal-isg-relaxed",
+		  "required": True,
 		},
 
-		{ "path" : "filesystem_layout",
-                  "value_type" : "string",
-                  "description" : "filesystem layout",
-                  "template" : "security",
-		  "required" : True,
-		  "default" : "afs",
+		{ "path": "filesystem_layout",
+                  "value_type": "string",
+                  "description": "filesystem layout",
+                  "template": "security",
+		  "required": True,
+		  "default": "afs",
 		}
 ]
 
@@ -111,7 +111,10 @@ class TestParameterDefinition(TestBrokerCommand):
                "--template=foo", "--required", "--default=default"]
 
         err = self.badrequesttest(cmd)
-        self.matchoutput(err, "ParamDefinition path testpath, archetypeparamdef archetype already exists", cmd)
+        self.matchoutput(err,
+                         "Parameter Definition testpath, parameter "
+                         "definition holder aquilon already exists.",
+                         cmd)
 
     def test_130_add_default_value_type(self):
         cmd = ["add_parameter_definition", "--archetype", ARCHETYPE,
@@ -187,15 +190,46 @@ class TestParameterDefinition(TestBrokerCommand):
         err = self.badrequesttest(cmd)
         self.matchoutput(err, "The json string specified for default for path=testbadjson is invalid", cmd)
 
+    def test_130_add_noncompileable_arch(self):
+        cmd = ["add_parameter_definition", "--archetype", "windows",
+               "--path=testint", "--description=blaah",
+               "--template=foo", "--value_type=int", "--default=60"]
+        out = self.badrequesttest(cmd)
+        self.matchoutput(out, "Archetype windows is not compileable.", cmd)
+
     def test_140_verify_add(self):
         cmd = ["show", "parameter_definition", "--archetype", ARCHETYPE ]
 
         out = self.commandtest(cmd)
-        self.matchoutput(out, "Required:\n  parameter: testpath  value type:string  template:foo  default:default", cmd)
-        self.matchoutput(out, "parameter: testdefault  value type:string  template:foo", cmd)
-        self.matchoutput(out, "parameter: testint  value type:int  template:foo  default:60", cmd)
-        self.matchoutput(out, "parameter: testjson  value type:json  template:foo  default:\"{'val1':'val2'}\"", cmd)
-        self.matchoutput(out, "parameter: testlist  value type:list  template:foo  default:val1,val2 ", cmd)
+        self.searchoutput(out,
+                          r'Parameter Definition: testpath \[required\]\s*'
+                          r'Type: string\s*'
+                          r'Template: foo\s*'
+                          r'Default: default',
+                          cmd)
+        self.searchoutput(out,
+                          r'Parameter Definition: testdefault\s*'
+                          r'Type: string\s*'
+                          r'Template: foo',
+                          cmd)
+        self.searchoutput(out,
+                          r'Parameter Definition: testint\s*'
+                          r'Type: int\s*'
+                          r'Template: foo\s*'
+                          r'Default: 60',
+                          cmd)
+        self.searchoutput(out,
+                          r'Parameter Definition: testjson\s*'
+                          r'Type: json\s*'
+                          r'Template: foo\s*'
+                          r"Default: \"{'val1':'val2'}\"",
+                          cmd)
+        self.searchoutput(out,
+                          r'Parameter Definition: testlist\s*'
+                          r'Type: list\s*'
+                          r'Template: foo\s*'
+                          r'Default: val1,val2',
+                          cmd)
 
     def test_150_del(self):
 

@@ -28,44 +28,27 @@
 # TERMS THAT MAY APPLY.
 
 
-from aquilon.worker.broker import BrokerCommand
-from aquilon.aqdb.model import ParamDefinition
 from aquilon.exceptions_ import ArgumentError
-from aquilon.worker.dbwrappers.parameter import (validate_value,
-                               get_param_def_holder)
+from aquilon.aqdb.model import ParamDefinition, Archetype
+from aquilon.worker.broker import BrokerCommand
 
-class CommandAddParameterDefintion(BrokerCommand):
 
-    required_parameters = ["path", "value_type"]
+class CommandDelParameterDefintionArchetype(BrokerCommand):
 
-    def render(self, session, archetype, feature, feature_type, template, path,  value_type, required,
-               default, description, **kwargs):
+    required_parameters = ["path", "archetype"]
 
-        if archetype:
-            if not template:
-                raise ArgumentError ("Template must be specified for archetype parameter definition")
-        elif not feature:
-            raise ArgumentError ("Archetype or Feature must be specified for parameter definition")
+    def render(self, session, archetype, path, **kwargs):
+        dbarchetype = Archetype.get_unique(session, archetype, compel=True)
+        if not dbarchetype.paramdef_holder:
+            raise ArgumentError("No parameter definitions found for {0}."
+                                .format(dbarchetype))
 
-        ParamDefinition.validate_type(value_type)
-
-        if default:
-            validate_value("default for path=%s" % path, value_type, default)
-
-        db_paramdef_holder = get_param_def_holder(session, archetype,
-                                                  feature, feature_type,
-                                                  auto_include=True)
-
-        ParamDefinition.get_unique(session, path=path,
-                                    holder=db_paramdef_holder,
-                                    preclude=True)
-
-        db_paramdef = ParamDefinition(path=path, holder=db_paramdef_holder,
-                                      value_type=value_type, default=default,
-                                      required=required,
-                                      template=template,
-                                      description = description)
-        session.add(db_paramdef)
+        db_paramdef = ParamDefinition.get_unique(session, path=path,
+                                                 holder=dbarchetype.paramdef_holder,
+                                                 compel=True)
+        session.delete(db_paramdef)
         session.flush()
+
+        # FIXME: update personality templates
 
         return

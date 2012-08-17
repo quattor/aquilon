@@ -31,9 +31,11 @@
 
 from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import Personality
-from aquilon.worker.templates.personality import (PlenaryPersonality,
-            PlenaryPersonalityPreFeature, PlenaryPersonalityPostFeature,
-            PlenaryPersonalityParameter, PlenaryPersonalityBase)
+from aquilon.worker.templates.personality import (PlenaryPersonalityPreFeature,
+                                                  PlenaryPersonalityPostFeature,
+                                                  PlenaryPersonalityParameter,
+                                                  PlenaryPersonalityBase,
+                                                  get_parameters_by_tmpl)
 from aquilon.exceptions_ import NotFoundException
 
 
@@ -44,7 +46,7 @@ class CommandCatPersonality(BrokerCommand):
     def render(self, generate, session, logger, personality, archetype,
                pre_feature, post_feature, param_tmpl, **kwargs):
         dbpersonality = Personality.get_unique(session, archetype=archetype,
-                                              name=personality, compel=True)
+                                               name=personality, compel=True)
 
         plenary = PlenaryPersonalityBase(dbpersonality, logger=logger)
         if pre_feature:
@@ -54,12 +56,14 @@ class CommandCatPersonality(BrokerCommand):
             plenary = PlenaryPersonalityPostFeature(dbpersonality, logger=logger)
 
         if param_tmpl:
-            param_templates = PlenaryPersonality.get_parameters_by_tmpl(dbpersonality)
+            param_templates = get_parameters_by_tmpl(dbpersonality)
             if param_tmpl in param_templates.keys():
-                plenary = PlenaryPersonalityParameter(param_tmpl, param_templates[param_tmpl],
-                                                      dbpersonality, logger=logger)
+                plenary = PlenaryPersonalityParameter(dbpersonality, param_tmpl,
+                                                      param_templates[param_tmpl],
+                                                      logger=logger)
             else:
-                raise NotFoundException("No parameter template %s.tpl found" % param_tmpl)
+                raise NotFoundException("No parameter template %s.tpl found." %
+                                        param_tmpl)
 
         lines = []
         if generate:

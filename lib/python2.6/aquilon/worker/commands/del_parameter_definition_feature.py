@@ -27,15 +27,29 @@
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
 
+
+from aquilon.exceptions_ import ArgumentError
+from aquilon.aqdb.model import ParamDefinition, Feature
 from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.dbwrappers.parameter import  del_parameter
-from aquilon.worker.commands.add_parameter import CommandAddParameter
 
 
-class CommandDelParameter(CommandAddParameter):
+class CommandDelParameterDefintionFeature(BrokerCommand):
 
-    required_parameters = ['path']
+    required_parameters = ["path", "feature", "type"]
 
-    def process_parameter(self, session, param_holder, path, value=None,
-                          comments=None):
-        return del_parameter(session, path, param_holder)
+    def render(self, session, feature, type, path, **kwargs):
+        dbfeature = Feature.get_unique(session, name=feature, feature_type=type,
+                                       compel=True)
+        if not dbfeature.paramdef_holder:
+            raise ArgumentError("No parameter definitions found for {0:l}."
+                                .format(dbfeature))
+
+        db_paramdef = ParamDefinition.get_unique(session, path=path,
+                                                 holder=dbfeature.paramdef_holder,
+                                                 compel=True)
+        session.delete(db_paramdef)
+        session.flush()
+
+        # FIXME: update personality templates
+
+        return

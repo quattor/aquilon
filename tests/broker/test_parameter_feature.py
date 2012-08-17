@@ -46,10 +46,10 @@ OTHER_PERSONALITY = 'eaitools'
 
 ## validation parameters by templates
 PARAM_DEFS = [
-    { "path" : "teststring",  "value_type" : "string",  "description" : "test string" },
-    { "path" : "testlist",    "value_type" : "list",    "description" : "test list"},
-    { "path" : "testrequired",   "value_type" : "string",   "description" : "test required", "required" : "true" },
-    { "path" : "testdefault",   "value_type" : "string",   "description" : "test required", "default" : "defaultval" },
+    { "path": "teststring",  "value_type": "string",  "description": "test string" },
+    { "path": "testlist",    "value_type": "list",    "description": "test list"},
+    { "path": "testrequired",   "value_type": "string",   "description": "test required", "required": "true" },
+    { "path": "testdefault",   "value_type": "string",   "description": "test required", "default": "defaultval" },
 ]
 
 SHOW_CMD = [ "show", "parameter" ]
@@ -78,7 +78,8 @@ class TestParameterFeature(TestBrokerCommand):
 
     def test_020_verify_host_feature(self):
         type = "host"
-        cmd = SHOW_CMD + [ "--feature", HOSTFEATURE, "--personality", PERSONALITY ]
+        cmd = SHOW_CMD + [ "--feature", HOSTFEATURE, "--type", type,
+                          "--personality", PERSONALITY ]
         err = self.notfoundtest(cmd)
         self.matchoutput(err, "No parameters found for feature %s." % HOSTFEATURE, cmd)
         self.load_paramdefs(HOSTFEATURE, type)
@@ -95,7 +96,8 @@ class TestParameterFeature(TestBrokerCommand):
 
     def test_050_verify_hardware_feature(self):
         type = "hardware"
-        cmd = SHOW_CMD + [ "--feature", HARDWAREFEATURE, "--archetype", ARCHETYPE]
+        cmd = SHOW_CMD + [ "--feature", HARDWAREFEATURE, "--type", type,
+                          "--archetype", ARCHETYPE]
         err = self.notfoundtest(cmd)
         self.matchoutput(err, "No parameters found for feature %s." % HARDWAREFEATURE, cmd)
         self.load_paramdefs(HARDWAREFEATURE, type)
@@ -112,7 +114,8 @@ class TestParameterFeature(TestBrokerCommand):
 
     def test_080_verify_interface_feature(self):
         type = "interface"
-        cmd = SHOW_CMD + [ "--feature", INTERFACEFEATURE, "--personality", PERSONALITY]
+        cmd = SHOW_CMD + [ "--feature", INTERFACEFEATURE, "--type", type,
+                          "--personality", PERSONALITY]
         err = self.notfoundtest(cmd)
         self.matchoutput(err, "No parameters found for feature %s." % INTERFACEFEATURE, cmd)
         self.load_paramdefs(INTERFACEFEATURE, type)
@@ -120,7 +123,7 @@ class TestParameterFeature(TestBrokerCommand):
     def load_paramdefs(self, feature, feature_type):
         for p in PARAM_DEFS:
             cmd = [ "add_parameter_definition", "--feature", feature,
-                   "--feature_type", feature_type, "--path", p[ "path" ],
+                   "--type", feature_type, "--path", p[ "path" ],
                        "--value_type", p[ "value_type" ]]
             if "required" in p:
                 cmd.append( "--required" )
@@ -144,10 +147,11 @@ class TestParameterFeature(TestBrokerCommand):
 
     def test_110_verify_host_feature(self):
         type = "host"
-        cmd = SHOW_CMD + [ "--feature", HOSTFEATURE, "--personality", PERSONALITY ]
+        cmd = SHOW_CMD + [ "--feature", HOSTFEATURE, "--type", type,
+                          "--personality", PERSONALITY ]
         out = self.commandtest(cmd)
-        self.matchoutput(out, 'teststring : "host_feature"', cmd)
-        self.matchoutput(out, 'testlist : "host1,host2"', cmd)
+        self.matchoutput(out, 'teststring: "host_feature"', cmd)
+        self.matchoutput(out, 'testlist: "host1,host2"', cmd)
 
     def test_120_verify_cat_host_feature(self):
         cmd = CAT_CMD + ["--personality", PERSONALITY, "--post_feature"]
@@ -164,8 +168,10 @@ class TestParameterFeature(TestBrokerCommand):
 
         out = self.badrequesttest(cmd)
 
-        self.searchoutput(out, r'Following required parameters have not been specified:\s*'
-                               r'parameter: testrequired  value type:string',
+        self.searchoutput(out,
+                          r'Following required parameters have not been specified:\s*'
+                          r'Parameter Definition: testrequired \[required\]\s*'
+                          r'Type: string',
                           cmd)
 
     def test_200_add_path_interface_feature(self):
@@ -183,10 +189,11 @@ class TestParameterFeature(TestBrokerCommand):
 
     def test_210_verify_interface_feature(self):
         type = "interface"
-        cmd = SHOW_CMD + [ "--feature", INTERFACEFEATURE, "--personality", PERSONALITY]
+        cmd = SHOW_CMD + [ "--feature", INTERFACEFEATURE, "--type", type,
+                          "--personality", PERSONALITY]
         out = self.commandtest(cmd)
-        self.matchoutput(out, 'teststring : "interface_feature"', cmd)
-        self.matchoutput(out, 'testlist : "intf1,intf2"', cmd)
+        self.matchoutput(out, 'teststring: "interface_feature"', cmd)
+        self.matchoutput(out, 'testlist: "intf1,intf2"', cmd)
 
     def test_220_verify_cat_interface_feature(self):
         cmd = CAT_CMD + ["--personality", PERSONALITY, "--pre_feature"]
@@ -204,8 +211,10 @@ class TestParameterFeature(TestBrokerCommand):
 
         out = self.badrequesttest(cmd)
 
-        self.searchoutput(out, r'Following required parameters have not been specified:\s*'
-                               r'parameter: testrequired  value type:string',
+        self.searchoutput(out,
+                          r'Following required parameters have not been specified:\s*'
+                          r'Parameter Definition: testrequired \[required\]\s*'
+                          r'Type: string',
                           cmd)
 
     def test_240_validate_argerror(self):
@@ -245,11 +254,11 @@ class TestParameterFeature(TestBrokerCommand):
 
     def test_310_verify_hardware_feature(self):
         type = "hardware"
-        cmd = SHOW_CMD + [ "--feature", HARDWAREFEATURE, "--archetype", ARCHETYPE]
+        cmd = SHOW_CMD + [ "--feature", HARDWAREFEATURE, "--type", type,
+                          "--archetype", ARCHETYPE]
         out = self.commandtest(cmd)
-        self.matchoutput(out, 'FeatureLink : aquilon/hardwarefeature', cmd)
-        self.matchoutput(out, 'teststring : "hardware_feature"', cmd)
-        self.matchoutput(out, 'testlist : "hardware1,hardware2"', cmd)
+        self.matchoutput(out, 'teststring: "hardware_feature"', cmd)
+        self.matchoutput(out, 'testlist: "hardware1,hardware2"', cmd)
 
     def test_320_verify_cat_hardware_feature(self):
         cmd = CAT_CMD + ["--personality", PERSONALITY, "--pre_feature"]
@@ -271,8 +280,10 @@ class TestParameterFeature(TestBrokerCommand):
 
         out = self.badrequesttest(cmd)
 
-        self.searchoutput(out, r'Following required parameters have not been specified:\s*'
-                               r'parameter: testrequired  value type:string',
+        self.searchoutput(out,
+                          r'Following required parameters have not been specified:\s*'
+                          r'Parameter Definition: testrequired \[required\]\s*'
+                          r'Type: string',
                           cmd)
 
     def test_340_validate_argerror(self):
@@ -306,11 +317,11 @@ class TestParameterFeature(TestBrokerCommand):
 
     def test_380_verify_hardware_feature(self):
         type = "hardware"
-        cmd = SHOW_CMD + [ "--feature", HARDWAREFEATURE, "--archetype", ARCHETYPE]
+        cmd = SHOW_CMD + [ "--feature", HARDWAREFEATURE, "--type", type,
+                          "--archetype", ARCHETYPE]
         out = self.commandtest(cmd)
-        self.matchoutput(out, 'FeatureLink : aquilon/hardwarefeature', cmd)
-        self.matchoutput(out, 'teststring : "hardware_newstring"', cmd)
-        self.matchoutput(out, 'testlist : "hardware1,hardware2"', cmd)
+        self.matchoutput(out, 'teststring: "hardware_newstring"', cmd)
+        self.matchoutput(out, 'testlist: "hardware1,hardware2"', cmd)
 
     def test_390_verify_cat_hardware_feature(self):
         cmd = CAT_CMD + ["--personality", PERSONALITY, "--pre_feature"]
@@ -326,13 +337,13 @@ class TestParameterFeature(TestBrokerCommand):
                "--other", OTHER_PERSONALITY]
 
         out = self.commandtest(cmd)
-        self.searchoutput (out, r'Differences for Required Services :\s*'
+        self.searchoutput (out, r'Differences for Required Services:\s*'
                                r'missing Required Services in Personality aquilon/unixeng-test:\s*'
                                r'netmap\s*'
                                r'missing Required Services in Personality aquilon/eaitools:\s*'
                                r'chooser1\s*chooser2\s*chooser3',
                          cmd)
-        self.searchoutput (out, r'Differences for Features :\s*'
+        self.searchoutput (out, r'Differences for Features:\s*'
                                r'missing Features in Personality aquilon/eaitools:\s*'
                                r'hostfeature\s*'
                                r'interfacefeature\s*',

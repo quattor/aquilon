@@ -30,53 +30,26 @@
 
 
 from aquilon.worker.formats.formatters import ObjectFormatter
-from aquilon.worker.formats.list import ListFormatter
 from aquilon.aqdb.model import ParamDefinition
+
 
 class ParamDefinitionFormatter(ObjectFormatter):
 
     def format_raw(self, paramdef, indent=""):
         details = []
-        detail = "value type:{0.value_type}".format(paramdef)
+        if paramdef.required:
+            reqstr = " [required]"
+        else:
+            reqstr = ""
+
+        details.append(indent + "{0:c}: {0!s}{1}".format(paramdef, reqstr))
+        details.append(indent + "  Type: %s" % paramdef.value_type)
         if paramdef.template:
-            detail = detail + "  template:{0.template}".format(paramdef)
+            details.append(indent + "  Template: %s" % paramdef.template)
         if paramdef.default:
-            detail = detail + "  default:{0.default}".format(paramdef)
+            details.append(indent + "  Default: %s" % paramdef.default)
         if paramdef.description:
-            detail = detail + "  description: {0.description}". format(paramdef)
-        details.append(indent + "parameter: {0.path}  {1}". format(paramdef, detail))
-        return "\n".join(details)
-
-ObjectFormatter.handlers[ParamDefinition] = ParamDefinitionFormatter()
-
-class ParamDefList(list):
-    def __init__(self, archetype=None, feature=None, paramdeflist=None):
-        self.archetype = archetype
-        self.feature = feature
-        super(ParamDefList, self).__init__(paramdeflist)
-
-class ParamDefListFormatter(ListFormatter):
-    def format_raw(self, paramdeflist, indent=""):
-        details = []
-        if paramdeflist.archetype:
-            details.append(indent + "Archetype : {0}" .format(paramdeflist.archetype))
-        if paramdeflist.feature:
-            details.append(indent + "Feature : {0}" .format(paramdeflist.feature))
-
-        detailsr = []
-        detailso = []
-        for paramdef in paramdeflist:
-            if paramdef.required:
-                detailsr.append(self.redirect_raw(paramdef, "  "))
-            else:
-                detailso.append(self.redirect_raw(paramdef, "  "))
-        if detailsr:
-            details.append("Required:")
-            details.extend(detailsr)
-        if detailso:
-            details.append("Optional:")
-            details.extend(detailso)
-
+            details.append(indent + "  Description: %s" % paramdef.description)
         return "\n".join(details)
 
     def csv_fields(self, paramdef):
@@ -88,4 +61,4 @@ class ParamDefListFormatter(ListFormatter):
                 paramdef.template,
                 paramdef.required]
 
-ObjectFormatter.handlers[ParamDefList] = ParamDefListFormatter()
+ObjectFormatter.handlers[ParamDefinition] = ParamDefinitionFormatter()

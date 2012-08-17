@@ -28,21 +28,20 @@
 # TERMS THAT MAY APPLY.
 
 
-from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.formats.parameter_definition import ParamDefList
 from aquilon.exceptions_ import NotFoundException
-from aquilon.worker.dbwrappers.parameter import get_param_definitions
+from aquilon.aqdb.model import Archetype
+from aquilon.worker.broker import BrokerCommand
+
 
 class CommandShowParameterDefinitionArchetype(BrokerCommand):
 
     required_parameters = ["archetype"]
 
     def render(self, session, archetype, **arguments):
+        dbarchetype = Archetype.get_unique(session, archetype, compel=True)
+        if dbarchetype.paramdef_holder and \
+           dbarchetype.paramdef_holder.param_definitions:
+            return dbarchetype.paramdef_holder.param_definitions
 
-        dbobj = get_param_definitions(session, archetype=archetype)
-        if dbobj:
-            return ParamDefList(archetype, None, dbobj)
-
-        raise NotFoundException("No parameter definitions found for archetype {0}".format(archetype))
-
-
+        raise NotFoundException("No parameter definitions found for "
+                                "archetype {0}.".format(archetype))
