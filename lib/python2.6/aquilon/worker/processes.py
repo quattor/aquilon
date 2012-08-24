@@ -806,6 +806,25 @@ class DSDBRunner(object):
                         "The DNS domain %s does not exist in DSDB, "
                         "proceeding." % dns_domain)
 
+    rack_row_re = re.compile(r'^\s*Row:\s*\b([-\w]+)\b$', re.M)
+    rack_col_re = re.compile(r'^\s*Column:\s*\b([-\w]+)\b$', re.M)
+
+    def show_rack(self, rackname):
+
+        out = run_command([self.dsdb, "show_rack",
+                           "-rack_name", rackname],
+                          env=self.getenv())
+        rack_row = self.rack_row_re.search(out)
+        rack_col = self.rack_col_re.search(out)
+        fields = {}
+        fields["rack_row"] = rack_row and rack_row.group(1) or None
+        fields["rack_col"] = rack_col and rack_col.group(1) or None
+
+        if not fields["rack_row"] or not fields["rack_col"]:
+            raise ValueError("Rack %s is missing row and/or col data")
+
+        return fields
+
     primary_re = re.compile(r'^Primary Name:\s*\b([-\w]+)\b$', re.M)
     node_re = re.compile(r'^Node:\s*\b([-\w]+)\b$', re.M)
     dns_re = re.compile(r'^DNS Domain:\s*\b([-\w\.]+)\b$', re.M)

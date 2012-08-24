@@ -188,6 +188,21 @@ class TestDelHost(TestBrokerCommand):
         command = "show host --hostname %s.ms.com" % self.aurora_without_node
         self.notfoundtest(command.split(" "))
 
+    aurora_without_rack = "oy605c2n6"
+
+    def testdelaurorawithoutrack(self):
+        command = "del host --hostname %s.ms.com" % self.aurora_without_rack
+        (out, err) = self.successtest(command.split(" "))
+        self.assertEmptyOut(out, command)
+        self.matchoutput(err,
+                         "WARNING: removing host %s.ms.com from AQDB "
+                         "and *not* changing DSDB." % self.aurora_without_rack,
+                         command)
+
+    def testverifydelaurorawithoutrack(self):
+        command = "show host --hostname %s.ms.com" % self.aurora_without_rack
+        self.notfoundtest(command.split(" "))
+
     def testdelnyaqd1(self):
         command = "del host --hostname nyaqd1.ms.com"
         (out, err) = self.successtest(command.split(" "))
