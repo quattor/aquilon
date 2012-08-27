@@ -6,16 +6,23 @@
 #
 # Warning: making a copy will cause the sequences in the source database to
 # jump - there's no easy way around that.
+#
+# Examples:
+#    ./aqdb_migrate sqlite:////path/aquilon.db
+#    ./aqdb_migrate postgresql://<username>@/
 
-import ms.version
-ms.version.addpkg('sqlalchemy', '0.7.5')
-ms.version.addpkg('cx_Oracle', '5.1-11.2.0.1.0')
-ms.version.addpkg('psycopg2', '2.4.2-9.0.1', 'dev')
-ms.version.addpkg('argparse', '1.1')
-
-import getopt
 import sys
 import os
+
+_DIR = os.path.dirname(os.path.realpath(__file__))
+_LIBDIR = os.path.join(_DIR, "..", "lib", "python2.6")
+if _LIBDIR not in sys.path:
+    sys.path.insert(0, _LIBDIR)
+
+from aquilon.aqdb import depends
+
+import ms.version
+ms.version.addpkg('psycopg2', '2.4.2-9.0.1', 'dev')
 
 import argparse
 
@@ -23,11 +30,6 @@ from sqlalchemy import create_engine, Table
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.sql import text
-
-_DIR = os.path.dirname(os.path.realpath(__file__))
-_LIBDIR = os.path.join(_DIR, "..", "lib", "python2.6")
-if _LIBDIR not in sys.path:
-    sys.path.insert(0, _LIBDIR)
 
 from aquilon.aqdb.db_factory import DbFactory
 from aquilon.aqdb.model import Base
@@ -73,7 +75,10 @@ if __name__ == '__main__':
     Base.metadata.create_all(dest_engine, checkfirst=True)
 
     for table in Base.metadata.sorted_tables:
-        print 'Processing', table
+        total = db.engine.execute(table.count()).scalar()
+        print 'Processing %s (%d rows)' % (table, total),
+        sys.stdout.flush()
+        cnt = 0
 
         if dest_engine.dialect.name == 'postgresql':
             dest_session.execute(text('SET CONSTRAINTS ALL DEFERRED'))
@@ -88,6 +93,11 @@ if __name__ == '__main__':
 
         NewRecord = dummy_mapper(table)
         for record in db.engine.execute(table.select()):
+            cnt = cnt + 1
+            if not cnt % 15000:
+                print "... %d" % cnt,
+                sys.stdout.flush()
+
             data = dict(
                 [(str(column), getattr(record, column)) for column in columns]
             )
@@ -97,3 +107,4 @@ if __name__ == '__main__':
             dest_session.execute(table.insert().values(**data))
 
         dest_session.commit()
+        print
