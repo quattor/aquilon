@@ -42,6 +42,7 @@ class TestAddAuroraHost(TestBrokerCommand):
 
     def testaddaurorawithnode(self):
         self.dsdb_expect("show_host -host_name %s" % self.aurora_with_node)
+        self.dsdb_expect("show_rack -rack_name oy604")
         self.noouttest(["add", "aurora", "host",
                         "--osname", "linux", "--osversion", "5.0.1-x86_64",
                         "--hostname", self.aurora_with_node])
@@ -58,6 +59,10 @@ class TestAddAuroraHost(TestBrokerCommand):
         self.matchoutput(out, "Personality: generic", command)
         self.matchoutput(out, "Domain: ny-prod", command)
         self.matchoutput(out, "Status: ready", command)
+
+        # Rack data from DSDB supported.
+        self.matchoutput(out, "Row: b", command)
+        self.matchoutput(out, "Column: 04", command)
 
     def testaddaurorawithoutnode(self):
         self.dsdb_expect("show_host -host_name %s" % self.aurora_without_node)
@@ -85,6 +90,23 @@ class TestAddAuroraHost(TestBrokerCommand):
         out = self.badrequesttest(command)
         self.matchoutput(out, "Could not find not-in-dsdb in DSDB", command)
         self.dsdb_verify()
+
+    aurora_without_rack = "oy605c2n6"
+
+    def testdsdbrackmissing(self):
+        self.dsdb_expect("show_host -host_name %s" % self.aurora_without_rack)
+        self.dsdb_expect("show_rack -rack_name oy605", fail=True)
+        command = ["add", "aurora", "host",
+                   "--hostname", self.aurora_without_rack,
+                   "--osname", "linux", "--osversion", "5.0.1-x86_64"]
+        out = self.statustest(command)
+        self.matchoutput(out, "Rack oy605 not defined in DSDB.", command)
+        self.dsdb_verify()
+
+    def testverifydsdbrackmissing(self):
+        command = "show host --hostname %s.ms.com" % self.aurora_with_node
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Building: oy", command)
 
     def testaddnyaqd1(self):
         self.dsdb_expect("show_host -host_name nyaqd1")

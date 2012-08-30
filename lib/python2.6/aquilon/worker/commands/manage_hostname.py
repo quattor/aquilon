@@ -28,19 +28,89 @@
 # TERMS THAT MAY APPLY.
 
 
+import os
+
 from aquilon.exceptions_ import IncompleteError, ArgumentError
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.branch import get_branch_and_author
 from aquilon.worker.dbwrappers.host import hostname_to_host
 from aquilon.worker.templates.host import PlenaryHost
 from aquilon.worker.locks import lock_queue, CompileKey
+from aquilon.worker.processes import run_git
+from aquilon.aqdb.model import Sandbox
+from aquilon.worker.formats.branch import AuthoredSandbox
+from aquilon.exceptions_ import ProcessException
+
+
+def validate_branch_commits(dbsource, dbsource_author,
+                            dbtarget, dbtarget_author, logger, config):
+    domainsdir = config.get('broker', 'domainsdir')
+    if isinstance(dbsource, Sandbox):
+        authored_sandbox = AuthoredSandbox(dbsource, dbsource_author)
+        source_path = authored_sandbox.path
+    else:
+        source_path = os.path.join(domainsdir, dbsource.name)
+
+    if isinstance(dbtarget, Sandbox):
+        authored_sandbox = AuthoredSandbox(dbtarget, dbtarget_author)
+        target_path = authored_sandbox.path
+    else:
+        target_path = os.path.join(domainsdir, dbtarget.name)
+
+    # check if dbsource has anything uncommitted
+    git_status = run_git(["status", "--porcelain"],
+                         path=source_path,
+                         logger=logger)
+    if git_status:
+        raise ArgumentError("The source {0:l} contains uncommitted files."
+                            .format(dbsource))
+
+    # get latest source commit bit
+    dbsource_commit = run_git(['rev-list', '--max-count=1', 'HEAD'],
+                              path=source_path,
+                              logger=logger)
+    dbsource_commit = dbsource_commit.rstrip()
+    if not dbsource_commit:  # pragma: no cover
+        raise ArgumentError("Unable to retrieve the git commit history from "
+                            "source branch {0:l}.".format(dbsource))
+
+    # make sure all commits in the source have been published.
+    # we can check the latest commit bit from the source in template-king
+    # any results returned will mean that all commits has been published
+    kingdir = config.get("broker", "kingdir")
+    try:
+        found = run_git(['show', dbsource_commit, '--oneline'],
+                        path=kingdir, logger=logger)
+    except ProcessException as pe:
+        if pe.code != 128:
+            raise
+        else:
+            found = None
+    if not found:
+        raise ArgumentError("The source {0:l} latest commit has not been "
+                            "published to template-king yet.".format(dbsource))
+
+    # check if target branch has the latest source commit
+    try:
+        found = run_git(['show', dbsource_commit, '--oneline'],
+                        path=target_path, logger=logger)
+    except ProcessException as pe:
+        if pe.code != 128:
+            raise
+        else:
+            found = None
+    if not found:
+        raise ArgumentError("The target {0:l} does not contain the latest "
+                            "commit from source {1:l}.".format(dbtarget,
+                                                               dbsource))
 
 
 class CommandManageHostname(BrokerCommand):
 
     required_parameters = ["hostname"]
 
-    def render(self, session, logger, hostname, domain, sandbox, **arguments):
+    def render(self, session, logger, hostname, domain, sandbox, force,
+               **arguments):
         (dbbranch, dbauthor) = get_branch_and_author(session, logger,
                                                      domain=domain,
                                                      sandbox=sandbox,
@@ -51,12 +121,18 @@ class CommandManageHostname(BrokerCommand):
                                 .format(dbbranch))
 
         dbhost = hostname_to_host(session, hostname)
+        dbsource = dbhost.branch
+        dbsource_author = dbhost.sandbox_author
+        old_branch = dbhost.branch.name
+
         if dbhost.cluster:
             raise ArgumentError("Cluster nodes must be managed at the "
                                 "cluster level; this host is a member of "
                                 "{0}.".format(dbhost.cluster))
 
-        old_branch = dbhost.branch.name
+        if not force:
+            validate_branch_commits(dbsource, dbsource_author,
+                                    dbbranch, dbauthor, logger, self.config)
 
         dbhost.branch = dbbranch
         dbhost.sandbox_author = dbauthor

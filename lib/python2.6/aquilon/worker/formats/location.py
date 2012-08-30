@@ -104,7 +104,7 @@ class LocationListFormatter(ListFormatter):
             msg.name = str(loc.name)
             msg.location_type = str(loc.location_type)
             msg.fullname = str(loc.fullname)
-            if isinstance(loc, Rack):
+            if isinstance(loc, Rack) and loc.rack_row and loc.rack_column:
                 msg.row = loc.rack_row
                 msg.col = loc.rack_column
             if hasattr(loc, "timezone"):

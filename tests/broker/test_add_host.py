@@ -328,6 +328,8 @@ class TestAddHost(TestBrokerCommand):
         # as some of them rely on a clean IP space for testing the
         # auto-allocation algorithms.
         # I stole the last 2 hp rack hosts for default host
+        # aquilon63.aqd-unittest.ms.com & aquilon64.aqd-unittest.ms.com are
+        # reserved for manage tests.
         servers = 0
         user = self.config.get("unittest", "user")
         net = self.net.tor_net[1]

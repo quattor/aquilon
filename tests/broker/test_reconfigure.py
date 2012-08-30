@@ -94,11 +94,18 @@ class TestReconfigure(TestBrokerCommand):
                           r'"ip", "%s",\s*'
                           r'"netmask", "%s",\s*'
                           r'"network_environment", "internal",\s*'
-                          r'"network_type", "unknown"\s*\)' %
+                          r'"network_type", "unknown",\s*'
+                          r'"route", list\(\s*'
+                          r'nlist\(\s*'
+                          r'"address", "250.250.0.0",\s*'
+                          r'"gateway", "%s",\s*'
+                          r'"netmask", "255.255.0.0"\s*\)\s*'
+                          r'\)\s*\)' %
                           (self.net.unknown[0].broadcast,
                            self.net.unknown[0].gateway,
                            self.net.unknown[0].usable[0],
-                           self.net.unknown[0].netmask),
+                           self.net.unknown[0].netmask,
+                           self.net.unknown[0].gateway),
                           command)
         self.matchoutput(out, '"/system/advertise_status" = true;', command)
 
@@ -166,11 +173,18 @@ class TestReconfigure(TestBrokerCommand):
                           r'"ip", "%s",\s*'
                           r'"netmask", "%s",\s*'
                           r'"network_environment", "internal",\s*'
-                          r'"network_type", "unknown"\s*\),' %
+                          r'"network_type", "unknown",\s*'
+                          r'"route", list\(\s*'
+                          r'nlist\(\s*'
+                          r'"address", "250.250.0.0",\s*'
+                          r'"gateway", "%s",\s*'
+                          r'"netmask", "255.255.0.0"\s*\)\s*'
+                          r'\)\s*\)' %
                           (self.net.unknown[0].broadcast,
                            self.net.unknown[0].gateway,
                            self.net.unknown[0].usable[2],
-                           self.net.unknown[0].netmask),
+                           self.net.unknown[0].netmask,
+                           self.net.unknown[0].gateway),
                           command)
         self.searchoutput(out,
                           r'"eth1", nlist\(\s*'
@@ -181,11 +195,18 @@ class TestReconfigure(TestBrokerCommand):
                           r'"ip", "%s",\s*'
                           r'"netmask", "%s",\s*'
                           r'"network_environment", "internal",\s*'
-                          r'"network_type", "unknown"\s*\)\s*\);' %
+                          r'"network_type", "unknown",\s*'
+                          r'"route", list\(\s*'
+                          r'nlist\(\s*'
+                          r'"address", "250.250.0.0",\s*'
+                          r'"gateway", "%s",\s*'
+                          r'"netmask", "255.255.0.0"\s*\)\s*'
+                          r'\)\s*\)' %
                           (self.net.unknown[0].broadcast,
                            self.net.unknown[0].gateway,
                            self.net.unknown[0].usable[3],
-                           self.net.unknown[0].netmask),
+                           self.net.unknown[0].netmask,
+                           self.net.unknown[0].gateway),
                           command)
         self.matchoutput(out, '"/system/advertise_status" = false;', command)
 
