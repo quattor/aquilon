@@ -145,6 +145,15 @@ if coverage:
 if profile:
     config.set("unittest", "profile", "True")
 
+hostname = config.get("unittest", "hostname")
+if hostname.find(".") < 0:
+    print >>sys.stderr, """
+Some regression tests depend on the config value for hostname to be
+fully qualified.  Please set the config value manually since the default
+on this system (%s) is a short name.
+""" % hostname
+    sys.exit(1)
+
 if mirror:
     # Copy the source directory and exec from it.
     env = os.environ.copy()
