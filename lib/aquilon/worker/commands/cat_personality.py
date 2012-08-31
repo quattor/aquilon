@@ -24,6 +24,7 @@ from aquilon.worker.templates.personality import (PlenaryPersonalityPreFeature,
                                                   PlenaryPersonalityPostFeature,
                                                   PlenaryPersonalityParameter,
                                                   PlenaryPersonalityBase,
+                                                  ParameterTemplate,
                                                   get_parameters_by_tmpl)
 from aquilon.worker.templates.base import TEMPLATE_EXTENSION
 
@@ -47,9 +48,9 @@ class CommandCatPersonality(BrokerCommand):
         if param_tmpl:
             param_templates = get_parameters_by_tmpl(dbpersonality)
             if param_tmpl in param_templates.keys():
-                plenary = PlenaryPersonalityParameter(dbpersonality, param_tmpl,
-                                                      param_templates[param_tmpl],
-                                                      logger=logger)
+                ptmpl = ParameterTemplate(dbpersonality, param_tmpl,
+                                          param_templates[param_tmpl])
+                plenary = PlenaryPersonalityParameter(ptmpl, logger=logger)
             else:
                 raise NotFoundException("No parameter template %s%s found." %
                                         (param_tmpl, TEMPLATE_EXTENSION))

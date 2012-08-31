@@ -123,6 +123,19 @@ def get_parameters_by_tmpl(dbpersonality):
     return ret
 
 
+# Normally we have exactly one instance of every plenary class per DB object.
+# This class just wraps the (personality, template path) tuple to make parameter
+# plenaries behave the same way.
+class ParameterTemplate(object):
+    def __init__(self, dbpersonality, template, values):
+        self.personality = dbpersonality
+        self.template = template
+        self.values = values
+
+    def __str__(self):
+        return "%s/%s" % (self.personality.name, self.template)
+
+
 class PlenaryPersonality(PlenaryCollection):
 
     def __init__(self, dbpersonality, logger=LOGGER):
@@ -139,9 +152,8 @@ class PlenaryPersonality(PlenaryCollection):
 
         ## mulitple structure templates for parameters
         for path, values in get_parameters_by_tmpl(dbpersonality).items():
-            plenary = PlenaryPersonalityParameter(dbpersonality, path, values,
-                                                  logger=logger)
-            self.plenaries.append(plenary)
+            ptmpl = ParameterTemplate(dbpersonality, path, values)
+            self.plenaries.append(PlenaryPersonalityParameter(ptmpl))
 
 Plenary.handlers[Personality] = PlenaryPersonality
 
@@ -257,14 +269,13 @@ class PlenaryPersonalityPostFeature(Plenary):
 
 
 class PlenaryPersonalityParameter(StructurePlenary):
-    def __init__(self, dbpersonality, template, parameters, logger=LOGGER):
-        super(PlenaryPersonalityParameter, self).__init__(dbpersonality,
+    def __init__(self, ptmpl, logger=LOGGER):
+        super(PlenaryPersonalityParameter, self).__init__(ptmpl,
                                                           logger=logger)
-        self.loadpath = dbpersonality.archetype.name
-        self.plenary_core = "personality/%s" % dbpersonality
-        self.plenary_template = template
-
-        self.parameters = parameters
+        self.loadpath = ptmpl.personality.archetype.name
+        self.plenary_core = "personality/%s" % ptmpl.personality
+        self.plenary_template = ptmpl.template
+        self.parameters = ptmpl.values
 
     def body(self, lines):
         for path in self.parameters:
