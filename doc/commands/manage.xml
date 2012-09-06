@@ -1,0 +1,186 @@
+<?xml version="1.0"?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V5.0//EN"
+"http://docbook.org/xml/5.0/dtd/docbook.dtd" [
+<!ENTITY aqd_version SYSTEM "../version.txt">
+]>
+<refentry xml:id="manage"
+  xmlns:xi="http://www.w3.org/2001/XInclude">
+  <refmeta>
+    <refentrytitle>manage</refentrytitle>
+    <manvolnum>1</manvolnum>
+    <refmiscinfo class="version">&aqd_version;</refmiscinfo>
+    <refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
+  </refmeta>
+
+  <refnamediv>
+    <refname>manage</refname>
+    <refpurpose>
+      manage hosts
+    </refpurpose>
+    <refclass>Aquilon</refclass>
+  </refnamediv>
+
+  <refsynopsisdiv>
+    <cmdsynopsis>
+      <command>aq manage </command>
+      <group choice="req">
+	<arg choice="plain"><option>--hostname <replaceable>HOSTNAME</replaceable></option></arg>
+	<arg choice="plain"><option>--list <replaceable>FILENAME</replaceable></option></arg>
+	<arg choice="plain"><option>--cluster <replaceable>CLUSTER</replaceable></option></arg>
+      </group>
+      <group choice="req">
+	<arg choice="plain"><option>--domain <replaceable>DOMAIN</replaceable></option></arg>
+	<arg choice="plain"><option>--sandbox <replaceable>SANDBOX</replaceable></option></arg>
+      </group>
+      <group choice="opt">
+	<arg choice="plain"><option>--force</option></arg>
+      </group>
+      <group>
+	<synopfragmentref linkend="global-options">Global options</synopfragmentref>
+      </group>
+      <xi:include href="../common/global_options.xml"/>
+    </cmdsynopsis>
+  </refsynopsisdiv>
+
+  <refsect1>
+    <title>Description</title>
+    <para>
+      <command>aq manage</command>takes a host and make it build its
+      configuration using the specified template domain or sandbox.  This
+      allows you to test building hosts using alternate templates, or to move
+      a host back to a default production domain once testing has completed.
+    </para>
+        <itemizedlist>
+	    <listitem>
+	        <para>
+		</para>
+		<para>
+            <option>--force</option>--force flag bypasses git checks between
+            the source and target branch.
+		</para>
+	    </listitem>
+      </itemizedlist>
+  </refsect1>
+
+  <refsect1>
+    <title>Entitlements</title>
+    <para>
+      Requires one of the following roles: operations, engineering, unixops_l2.
+    </para>
+  </refsect1>
+
+    <refsect1>
+        <title>Templates</title>
+        <para>
+      This command will modify the templates for the host or
+      cluster (depending on which option was given).
+	</para>
+    </refsect1>
+
+  <refsect1>
+    <title>Options</title>
+    <variablelist>
+      <title>Command-specific options</title>
+      <varlistentry>
+	<term>
+	  <option>--hostname <replaceable>HOSTNAME</replaceable></option>,
+	</term>
+	<listitem>
+	  <para>
+	    Only the named <replaceable>HOSTNAME</replaceable> will be managed.
+	  </para>
+	</listitem>
+      </varlistentry>
+      <varlistentry>
+	<term>
+	  <option>--list <replaceable>FILENAME</replaceable></option>
+	</term>
+	<listitem>
+	  <para>
+            A list of hosts will be read from
+            <replaceable>FILENAME</replaceable> and the given reconfiguration
+            options will be applied equally to all hosts. The format of the
+            file is one hostname per line.   All hosts must be in the same domain, and
+            after applying all changes the full domain will be compiled.
+	  </para>
+	</listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <option>--cluster <replaceable>CLUSTER</replaceable></option>
+        </term>
+        <listitem>
+	  <para>
+	    Only the named <replaceable>CLUSTER</replaceable> will be managed.
+	  </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <option>--domain <replaceable>DOMAIN</replaceable></option>
+        </term>
+        <listitem>
+          <para>
+            Specifies the domain to manage the host(s) or cluster to.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <option>--sandbox <replaceable>SANDBOX</replaceable></option>
+        </term>
+        <listitem>
+          <para>
+            Specifies the user sandbox to manage the host(s) or cluster to.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <option>--force</option>
+        </term>
+        <listitem>
+          <para>
+            When <option>--force</option> is passed this will bypass git checks
+            between the source and target branch.
+          </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+    <xi:include href="../common/global_options_desc.xml"/>
+  </refsect1>
+
+   <refsect1>
+    <title>Examples</title>
+    <example>
+      <title>Manage host to user sandbox</title>
+      <programlisting>
+aq manage --hostname foo.example.com --sandbox user/mysandbox
+      </programlisting>
+    </example>
+   <example>
+      <title>Manage cluster to user sandbox</title>
+      <programlisting>
+aq manage --cluster mycluster --sandbox user/mysandbox
+      </programlisting>
+    </example>
+
+       <example>
+      <title>Manage a list of hosts user sandbox</title>
+      <programlisting>
+aq manage --list host.txt --sandbox user/mysandbox
+      </programlisting>
+    </example>
+
+
+  </refsect1>
+
+  <refsect1>
+    <title>See also</title>
+    <para>
+      <citerefentry><refentrytitle>compile</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+    </para>
+  </refsect1>
+</refentry>
+
+<!-- vim: set ai sw=4: -->

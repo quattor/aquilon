@@ -2248,10 +2248,19 @@
       template domain or sandbox.  This allows you to test building hosts
       using alternate templates, or to move a host back to a default
       production domain once testing has completed.
+
+      --list option requires a file containing one fqdn hostnames per line.
+      This is intended to group manage --hostname commands effeciently within
+      one batch. The --list option can not be used with cluster nodes and
+      all hosts are required to belong to the same domain or sandbox as well
+      as by the sandbox author.
+
+      --force option bypasses git checks between the source and target branch.
       <optgroup name="manage options" mandatory="True" fields="all">
          <optgroup name="host_or_cluster" fields="any" mandatory="True">
             <option name="hostname" type="string">Name of the host to manage</option>
             <option name="cluster" type="string">Name of the cluster to manage</option>
+            <option name="list" type="list">File with one host per line</option>
          </optgroup>
          <optgroup name="domain_or_sandbox" fields="any" mandatory="True">
             <option name="domain" type="string" conflicts="sandbox">Name of the domain</option>
@@ -2262,6 +2271,7 @@
          <option name="force" type="flag">bypasses git status and branch integrity checks (potentially dangerous)</option>
       </optgroup>
       <transport method="post" path="command/manage_hostname" trigger="hostname" />
+      <transport method="post" path="command/manage_list" trigger="list" />
       <transport method="post" trigger="cluster" path="command/manage_cluster" />
    </command>
 
