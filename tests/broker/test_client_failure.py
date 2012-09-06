@@ -53,10 +53,11 @@ class TestClientFailure(TestBrokerCommand):
     def testnotrunningaqhost(self):
         command = "status --aqhost=%s" % self.host_not_running_aqd
         (p, out, err) = self.runcommand(command.split(" "))
-        self.assertEqual(err,
-                "Failed to connect to %s port %s: Connection refused.\n"
-                % (self.host_not_running_aqd, 
-                    self.config.get("broker", "kncport")))
+        # This might be either 'Connection refused.' or 'Connection timed out.'
+        msg = "Failed to connect to %s port %s: " % (
+            self.host_not_running_aqd, self.config.get("broker", "kncport"))
+        self.assertTrue(err.startswith(msg),
+                        "Expected '%s' to start with '%s'" % (err, msg))
         self.assertEqual(out, "",
                 "STDOUT for %s was not empty:\n@@@\n'%s'\n@@@\n"
                 % (command, out))
