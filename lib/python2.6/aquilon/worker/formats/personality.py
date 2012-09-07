@@ -72,16 +72,17 @@ class PersonalityFormatter(ObjectFormatter):
         if personality.is_cluster:
             description = "Cluster"
         details = [indent + "%s Personality: %s" % (description,
-                                                    personality.name) +
-                   " Archetype: %s" % personality.archetype.name]
+                                                    personality) +
+                   " Archetype: %s" % personality.archetype]
+        details.append(indent + "  Environment: %s" %  personality.host_environment)
         for grn in personality.grns:
             details.append(indent + "  GRN: %s" % grn)
 
         if personality.config_override:
-            details.append(indent + "  config override: enabled")
+            details.append(indent + "  Config override: enabled")
 
         details.append(indent + "  Template: %s/personality/%s/config.tpl" %
-                       (personality.archetype.name, personality.name))
+                       (personality.archetype, personality))
 
         if has_threshold:
             details.append(indent + "  Threshold: %s" % threshold)
@@ -136,7 +137,7 @@ class PersonalityFormatter(ObjectFormatter):
         if hasattr(personality, "dbpersonality"):
             threshold = personality.threshold
             personality = personality.dbpersonality
-        skeleton.name = str(personality.name)
+        skeleton.name = str(personality)
         self.redirect_proto(personality.archetype, skeleton.archetype)
         # FIXME: Implement required services
         if threshold is not None:

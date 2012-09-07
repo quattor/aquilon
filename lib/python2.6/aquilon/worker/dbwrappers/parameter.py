@@ -187,7 +187,7 @@ def validate_rebuild_required (session, path, param_holder):
                             "Run 'aq search host --personality %s --buildstatus ready' "
                             "and 'aq search host --personality %s --buildstatus almostready' to "
                             "get the list of the affected hosts." %
-                            (path, personality.name, personality.name)  )
+                            (path, personality, personality)  )
 
 def get_parameters(session, archetype=None, personality=None, feature=None,
                    featurelink=None):

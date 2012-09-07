@@ -93,8 +93,8 @@ class CommandUpdatePersonality(BrokerCommand):
             q = q.filter_by(personality=dbpersona)
             # XXX: Ideally, filter based on hosts that are/arenot in cluster
             if q.count() > 0:
-                raise ArgumentError("The personality %s is in use and cannot "
-                                    "be modified" % dbpersona.name)
+                raise ArgumentError("The personality {0} is in use and cannot "
+                                    "be modified".format(str(dbpersona)))
             dbpersona.cluster_required = cluster_required
 
         write_plenary = None

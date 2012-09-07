@@ -89,7 +89,7 @@ class TestBindFeature(TestBrokerCommand):
                    "--archetype", "aquilon",
                    "--justification", "tcm=12345678"]
         (out, err) = self.successtest(command)
-        self.matchoutput(err, "Flushed 31/31 templates" , command)
+        self.matchoutput(err, "Flushed 10/10 templates" , command)
         # We can't easily check the number of templates that got refreshed since
         # there's no easy way to query if "make" was run for a host or not
 
@@ -203,7 +203,7 @@ class TestBindFeature(TestBrokerCommand):
                          "personality aquilon/inventory which is now "
                          "redundant; consider removing it.",
                          command)
-        self.matchoutput(err, "Flushed 31/31 templates", command)
+        self.matchoutput(err, "Flushed 10/10 templates", command)
 
     def test_126_verify_show_feature(self):
         command = ["show", "feature", "--feature", "post_host", "--type", "host"]
@@ -216,7 +216,7 @@ class TestBindFeature(TestBrokerCommand):
                    "--archetype", "aquilon",
                    "--justification", "tcm=12345678"]
         (out, err) = self.successtest(command)
-        self.matchoutput(err, "Flushed 31/31 templates", command)
+        self.matchoutput(err, "Flushed 10/10 templates", command)
 
     def test_128_verify_undo(self):
         command = ["show", "feature", "--feature", "post_host", "--type", "host"]
@@ -230,7 +230,7 @@ class TestBindFeature(TestBrokerCommand):
                    "--archetype", "aquilon",
                    "--justification", "tcm=12345678"]
         (out, err) = self.successtest(command)
-        self.matchoutput(err, "Flushed 31/31 templates.", command)
+        self.matchoutput(err, "Flushed 10/10 templates.", command)
 
     def test_131_verify_show_model(self):
         command = ["show", "model", "--model", "hs21-8853l5u"]

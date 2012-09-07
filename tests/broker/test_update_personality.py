@@ -46,21 +46,21 @@ class TestUpdatePersonality(TestBrokerCommand):
 
     def testinvalidfunction(self):
         """ Verify that the list of built-in functions is restricted """
-        command = ["update", "personality", "--personality", "vulcan-1g-desktop-prod",
+        command = ["update_personality", "--personality", "vulcan-1g-desktop-prod",
                    "--archetype", "esx_cluster",
                    "--vmhost_capacity_function", "locals()"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "name 'locals' is not defined", command)
 
     def testinvalidtype(self):
-        command = ["update", "personality", "--personality", "vulcan-1g-desktop-prod",
+        command = ["update_personality", "--personality", "vulcan-1g-desktop-prod",
                    "--archetype", "esx_cluster",
                    "--vmhost_capacity_function", "memory - 100"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "The function should return a dictonary.", command)
 
     def testinvaliddict(self):
-        command = ["update", "personality", "--personality", "vulcan-1g-desktop-prod",
+        command = ["update_personality", "--personality", "vulcan-1g-desktop-prod",
                    "--archetype", "esx_cluster",
                    "--vmhost_capacity_function", "{'memory': 'bar'}"]
         out = self.badrequesttest(command)
@@ -70,7 +70,7 @@ class TestUpdatePersonality(TestBrokerCommand):
                          command)
 
     def testmissingmemory(self):
-        command = ["update", "personality", "--personality", "vulcan-1g-desktop-prod",
+        command = ["update_personality", "--personality", "vulcan-1g-desktop-prod",
                    "--archetype", "esx_cluster",
                    "--vmhost_capacity_function", "{'foo': 5}"]
         out = self.badrequesttest(command)
@@ -79,7 +79,7 @@ class TestUpdatePersonality(TestBrokerCommand):
                          "dictionary.", command)
 
     def testnotenoughmemory(self):
-        command = ["update", "personality", "--personality", "vulcan-1g-desktop-prod",
+        command = ["update_personality", "--personality", "vulcan-1g-desktop-prod",
                    "--archetype", "esx_cluster",
                    "--vmhost_capacity_function", "{'memory': memory / 4}"]
         out = self.badrequesttest(command)
@@ -91,19 +91,19 @@ class TestUpdatePersonality(TestBrokerCommand):
                          command)
 
     def testupdatecapacity(self):
-        command = ["update", "personality", "--personality", "vulcan-1g-desktop-prod",
+        command = ["update_personality", "--personality", "vulcan-1g-desktop-prod",
                    "--archetype", "esx_cluster",
                    "--vmhost_capacity_function", "{'memory': (memory - 1500) * 0.94}"]
         self.noouttest(command)
 
     def testupdateovercommit(self):
-        command = ["update", "personality", "--personality", "vulcan-1g-desktop-prod",
+        command = ["update_personality", "--personality", "vulcan-1g-desktop-prod",
                    "--archetype", "esx_cluster",
                    "--vmhost_overcommit_memory", 1.04]
         self.noouttest(command)
 
     def testverifyupdatecapacity(self):
-        command = ["show", "personality", "--personality", "vulcan-1g-desktop-prod",
+        command = ["show_personality", "--personality", "vulcan-1g-desktop-prod",
                    "--archetype", "esx_cluster"]
         out = self.commandtest(command)
         self.matchoutput(out,
@@ -112,70 +112,70 @@ class TestUpdatePersonality(TestBrokerCommand):
         self.matchoutput(out, "VM host overcommit factor: 1.04", command)
 
     def testupdateclusterrequirement(self):
-        command = ["update", "personality", "--personality=vulcan-1g-desktop-prod",
+        command = ["update_personality", "--personality=vulcan-1g-desktop-prod",
                    "--archetype=esx_cluster",
                    "--cluster"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "The personality vulcan-1g-desktop-prod is in use", command)
 
-        command = ["add", "personality", "--archetype=aquilon", "--grn=grn:/ms/ei/aquilon/aqd",
-                   "--personality=unused"]
+        command = ["add_personality", "--archetype=aquilon", "--grn=grn:/ms/ei/aquilon/aqd",
+                   "--personality=unused" , "--host_environment=infra"]
         self.successtest(command)
 
-        command = ["update", "personality", "--personality", "unused",
+        command = ["update_personality", "--personality", "unused",
                    "--archetype=aquilon", "--cluster"]
         out = self.successtest(command)
 
-        command = ["del", "personality", "--personality", "unused",
+        command = ["del_personality", "--personality", "unused",
                    "--archetype=aquilon"]
         out = self.successtest(command)
 
     def testupdateconfigoverride01(self):
 
-        command = ["add", "personality", "--archetype=aquilon", "--grn=grn:/ms/ei/aquilon/aqd",
-                   "--personality=testovrpersona"]
+        command = ["add_personality", "--archetype=aquilon", "--grn=grn:/ms/ei/aquilon/aqd",
+                   "--personality=testovrpersona/dev", "--host_environment=dev"]
         self.successtest(command)
 
-        command = ["show", "personality", "--personality=testovrpersona",
+        command = ["show_personality", "--personality=testovrpersona/dev",
                    "--archetype=aquilon"]
         out = self.commandtest(command)
         self.matchclean(out, "override", command)
 
-        command = ["cat", "--archetype=aquilon", "--personality=testovrpersona"]
+        command = ["cat", "--archetype=aquilon", "--personality=testovrpersona/dev"]
         out = self.commandtest(command)
         self.matchclean(out, 'override', command)
 
     def testupdateconfigoverride02(self):
-        command = ["update", "personality", "--personality=testovrpersona",
+        command = ["update_personality", "--personality=testovrpersona/dev",
                    "--archetype=aquilon", "--config_override",]
         self.successtest(command)
 
-        command = ["show", "personality", "--personality=testovrpersona",
+        command = ["show_personality", "--personality=testovrpersona/dev",
                    "--archetype=aquilon"]
         out = self.commandtest(command)
-        self.matchoutput(out, "config override: enabled", command)
+        self.matchoutput(out, "Config override: enabled", command)
 
-        command = ["cat", "--archetype=aquilon", "--personality=testovrpersona"]
+        command = ["cat", "--archetype=aquilon", "--personality=testovrpersona/dev"]
         out = self.commandtest(command)
         self.matchoutput(out, 'include { "features/personality/config_override/config" }',
                          command)
 
     def testupdateconfigoverride03(self):
 
-        command = ["update", "personality", "--personality=testovrpersona",
+        command = ["update_personality", "--personality=testovrpersona/dev",
                    "--archetype=aquilon", "--noconfig_override",]
         self.successtest(command)
 
-        command = ["show", "personality", "--personality=testovrpersona",
+        command = ["show_personality", "--personality=testovrpersona/dev",
                    "--archetype=aquilon"]
         out = self.commandtest(command)
         self.matchclean(out, "override", command)
 
-        command = ["cat", "--archetype=aquilon", "--personality=testovrpersona"]
+        command = ["cat", "--archetype=aquilon", "--personality=testovrpersona/dev"]
         self.matchclean(out, 'override', command)
 
     def testupdateconfigoverride04(self):
-        command = ["del", "personality", "--personality=testovrpersona",
+        command = ["del_personality", "--personality=testovrpersona/dev",
                    "--archetype=aquilon"]
         out = self.successtest(command)
 

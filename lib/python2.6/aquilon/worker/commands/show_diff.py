@@ -95,4 +95,5 @@ class CommandShowDiff(BrokerCommand):
         if dbpersona.cluster_required:
             enabled["Cluster Required"] = True
 
-        ret["Options Enabled"][dtype] = enabled
+        enabled["Environment"] = dbpersona.host_environment.name
+        ret["Options"][dtype] = enabled

@@ -37,7 +37,8 @@ if __name__ == "__main__":
 
 from broker.brokertest import TestBrokerCommand
 
-PERSONALITY = 'testpersona'
+PERSONALITY = 'testpersona/dev'
+
 ARCHETYPE = 'aquilon'
 OTHER_PERSONALITY = 'eaitools'
 
@@ -105,7 +106,7 @@ class TestParameter(TestBrokerCommand):
     def test_000_verify_preload(self):
 
         cmd = ["add_personality", "--archetype", ARCHETYPE, "--personality", PERSONALITY,
-               "--eon_id=2", "--comment", "tests parameters"]
+               "--eon_id=2", "--host_environment=dev", "--comment", "tests parameters"]
         self.noouttest(cmd)
 
         err = self.notfoundtest(SHOW_CMD)
@@ -249,7 +250,7 @@ class TestParameter(TestBrokerCommand):
     def test_255_verify_espinfo(self):
         ESP_CAT_CMD = CAT_CMD + ["--param_tmpl=espinfo"]
         out = self.commandtest(ESP_CAT_CMD)
-        self.searchoutput(out, r'structure template personality/testpersona/espinfo;\s*'
+        self.searchoutput(out, r'structure template personality/testpersona/dev/espinfo;\s*'
                                r'"function" = "development";\s*'
                                r'"class" = "INFRASTRUCTURE";\s*'
                                r'"users" = list\(\s*'
@@ -259,7 +260,7 @@ class TestParameter(TestBrokerCommand):
 
     def test_300_validate_noparams(self):
         # Validate a personality that has no parameters defined
-        command = ["validate", "parameter", "--personality", "utpersonality"]
+        command = ["validate", "parameter", "--personality", "utpersonality/dev"]
         out, err = self.successtest(command)
         self.assertEmptyOut(out, command)
         self.matchoutput(err, "All required parameters specified.", command)
@@ -430,7 +431,7 @@ class TestParameter(TestBrokerCommand):
     def test_555_verify_espinfo(self):
         ESP_CAT_CMD = CAT_CMD + ["--param_tmpl=espinfo"]
         out = self.commandtest(ESP_CAT_CMD)
-        self.searchoutput(out, r'structure template personality/testpersona/espinfo;\s*', ESP_CAT_CMD)
+        self.searchoutput(out, r'structure template personality/testpersona/dev/espinfo;\s*', ESP_CAT_CMD)
         self.searchoutput(out, r'"function" = "development";', ESP_CAT_CMD)
         self.searchoutput(out, r'"threshold" = 0;', ESP_CAT_CMD)
         self.searchoutput(out, r'"class" = "INFRASTRUCTURE";', ESP_CAT_CMD)
@@ -440,7 +441,7 @@ class TestParameter(TestBrokerCommand):
         ##included by default
         SEC_CAT_CMD = CAT_CMD + ["--param_tmpl=windows"]
         out = self.commandtest(SEC_CAT_CMD)
-        self.searchoutput(out, r'structure template personality/testpersona/windows;\s*'
+        self.searchoutput(out, r'structure template personality/testpersona/dev/windows;\s*'
                                r'"windows" = list\(\s*nlist\(\s*"day", "Sun",\s*"duration", 8,\s*"start", "08:00"\s*\)\s*\);',
                           SEC_CAT_CMD)
 
@@ -492,7 +493,7 @@ class TestParameter(TestBrokerCommand):
         ##included by default
         SEC_CAT_CMD =  CAT_CMD + [ "--param_tmpl=windows" ]
         out = self.commandtest(SEC_CAT_CMD)
-        self.searchoutput(out, r'structure template personality/testpersona/windows;\s*'
+        self.searchoutput(out, r'structure template personality/testpersona/dev/windows;\s*'
                                r'"windows" = list\(\s*nlist\(\s*"day", "Sun",\s*"duration", 8,\s*"start", "08:00"\s*\)\s*\);',
                           SEC_CAT_CMD)
 

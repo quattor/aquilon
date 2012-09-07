@@ -73,6 +73,7 @@ from aquilon.aqdb.model.router_address import RouterAddress
 #CONFIG
 from aquilon.aqdb.model.grn import Grn
 from aquilon.aqdb.model.archetype import Archetype
+from aquilon.aqdb.model.host_environment import HostEnvironment
 from aquilon.aqdb.model.personality import Personality, PersonalityGrnMap
 from aquilon.aqdb.model.operating_system import OperatingSystem
 
