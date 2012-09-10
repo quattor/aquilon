@@ -37,7 +37,7 @@ if __name__ == "__main__":
 
 from broker.brokertest import TestBrokerCommand
 
-PERSONALITY = 'unixeng-test'
+PERSONALITY = 'testpersona'
 ARCHETYPE = 'aquilon'
 OTHER_PERSONALITY = 'eaitools'
 
@@ -59,15 +59,20 @@ PARAM_DEFS = {
 "shutdown": [
     { "path": "shutdown/actions", "value_type": "list", "description": "shutdown actions" },
 ],
+"maintenance": [
+    { "path": "maintenance/actions", "value_type": "list", "description": "maintenance actions" },
+],
+"monitoring": [
+    { "path": "monitoring/alert", "value_type": "json", "description": "monitoring " },
+],
 "espinfo": [
     { "path": "esp/function", "value_type": "string", "description": "espinfo function", "required": True },
     { "path": "esp/class",    "value_type": "string", "description": "espinfo class", "required": True },
-    { "path": "esp/users",    "value_type": "string", "description": "espinfo users", "required": True },
-    { "path": "esp/description",    "value_type": "string", "description": "espinfo desc" },
-    { "path": "esp/threshold",    "value_type": "int", "description": "espinfo threshold" },
+    { "path": "esp/users",    "value_type": "list", "description": "espinfo users", "required": True },
+    { "path": "esp/threshold", "value_type": "int", "description": "espinfo threshold", "required": True },
 ],
-"security":[
-    { "path": "security/security_class", "value_type": "string", "description": "security class", "default": "internal-isg-relaxed", "required": True },
+"windows": [
+    { "path": "windows/windows", "value_type": "json" , "required": True, "default": '[{"duration": 8, "start": "08:00", "day": "Sun"}]' }
 ],
 }
 
@@ -94,6 +99,11 @@ class TestParameter(TestBrokerCommand):
         self.matchclean(out, expected, command)
 
     def test_000_verify_preload(self):
+
+        cmd = ["add_personality", "--archetype", ARCHETYPE, "--personality", PERSONALITY,
+               "--eon_id=2", "--comment", "tests parameters"]
+        self.noouttest(cmd)
+
         err = self.notfoundtest(SHOW_CMD)
         self.matchoutput(err,
                          "No parameters found for personality %s." % PERSONALITY,  SHOW_CMD)
@@ -193,10 +203,15 @@ class TestParameter(TestBrokerCommand):
         command = ADD_CMD + ["--path", path, "--value", value]
         self.noouttest(command)
 
-        path = "esp/threshold"
-        value = 0
+        path = "esp/users"
+        value = "someusers"
         command = ADD_CMD + ["--path", path, "--value", value]
         self.noouttest(command)
+
+        path = "esp/class"
+        value = "INFRASTRUCTURE"
+        command = ADD_CMD + ["--path", path, "--value", value]
+        (out, err) = self.successtest(command)
 
     def test_210_add_existing_path(self):
         path = "esp/function"
@@ -207,13 +222,13 @@ class TestParameter(TestBrokerCommand):
 
     def test_220_upd_existing_path(self):
         path = "esp/function"
-        value = "Development"
+        value = "development"
         command = UPD_CMD + ["--path", path, "--value", value]
         self.noouttest(command)
 
     def test_230_upd_nonexisting_path(self):
         path = "esp/badpath"
-        value = "Development"
+        value = "somevalue"
         command = UPD_CMD + ["--path", path, "--value", value]
         err = self.badrequesttest(command)
         self.matchoutput(err,
@@ -221,47 +236,20 @@ class TestParameter(TestBrokerCommand):
 
     def test_240_verify_path(self):
         out = self.commandtest(SHOW_CMD)
-        self.check_match(out, 'esp: { "function": "Development", "threshold": 0 }', SHOW_CMD)
+        self.check_match(out, 'esp: { "function": "development", "users": "someusers", "class": "INFRASTRUCTURE" }', SHOW_CMD)
         self.check_match(out, '"testaction": { "command": "/bin/testaction", "user": "user2" }', SHOW_CMD)
         self.check_match(out, '"testaction2": { "command": "/bin/testaction2", "user": "user1", "timeout": 100 } }', SHOW_CMD)
-
-    def test_250_verify_actions(self):
-        ACT_CAT_CMD = CAT_CMD + ["--param_tmpl=actions"]
-        out = self.commandtest(ACT_CAT_CMD)
-
-        match_str1 = '"testaction" = nlist\(\s*"command", "/bin/testaction",\s*"user", "user2"\s*\)'
-        match_str2 = '"testaction2" = nlist\(\s*"command", "/bin/testaction2",\s*"timeout", 100,\s*"user", "user1"\s*\)\s*'
-
-        self.searchoutput(out, match_str1, ACT_CAT_CMD)
-        self.searchoutput(out, match_str2, ACT_CAT_CMD)
 
     def test_255_verify_espinfo(self):
         ESP_CAT_CMD = CAT_CMD + ["--param_tmpl=espinfo"]
         out = self.commandtest(ESP_CAT_CMD)
-        self.searchoutput(out, r'structure template personality/unixeng-test/espinfo;\s*'
-                               r'"function" = "Development";\s*'
-                               r'"threshold" = 0;',
+        self.searchoutput(out, r'structure template personality/testpersona/espinfo;\s*'
+                               r'"function" = "development";\s*'
+                               r'"class" = "INFRASTRUCTURE";\s*'
+                               r'"users" = list\(\s*'
+                               r'"someusers"\s*'
+                               r'\);',
                           ESP_CAT_CMD)
-
-    def test_260_verify_default(self):
-        ##included by default
-        SEC_CAT_CMD = CAT_CMD + ["--param_tmpl=security"]
-        out = self.commandtest(SEC_CAT_CMD)
-        self.searchoutput(out, r'structure template personality/unixeng-test/security;\s*'
-                               r'"security_class" = "internal-isg-relaxed";',
-                          SEC_CAT_CMD)
-
-    def test_300_validate(self):
-        out = self.badrequesttest(VAL_CMD)
-        self.searchoutput(out,
-                          r'Following required parameters have not been specified:\s*'
-                          r'Parameter Definition: esp/class \[required\]\s*'
-                          r'Type: string\s*'
-                          r'Template: espinfo\s*'
-                          r'Parameter Definition: esp/users \[required\]\s*'
-                          r'Type: string\s*'
-                          r'Template: espinfo',
-                          VAL_CMD)
 
     def test_300_validate_noparams(self):
         # Validate a personality that has no parameters defined
@@ -269,6 +257,39 @@ class TestParameter(TestBrokerCommand):
         out, err = self.successtest(command)
         self.assertEmptyOut(out, command)
         self.matchoutput(err, "All required parameters specified.", command)
+
+    def test_300_validate(self):
+        out = self.badrequesttest(VAL_CMD)
+        self.searchoutput(out,
+                          r'Following required parameters have not been specified:\s*'
+                          r'Parameter Definition: esp/threshold \[required\]\s*'
+                          r'Type: int\s*'
+                          r'Template: espinfo',
+                          VAL_CMD)
+
+    def test_310_reconfigurehost(self):
+        command = ["reconfigure", "--hostname", "unittest17.aqd-unittest.ms.com",
+                   "--personality", PERSONALITY]
+        (out, err) = self.failuretest(command, 4)
+        self.matchoutput (err, "record is missing required field: threshold", command)
+        self.matchoutput (err, "BUILD FAILED", command)
+
+    def test_320_add_all_required(self):
+        path = "esp/threshold"
+        value = 0
+        command = ADD_CMD + ["--path", path, "--value", value]
+        self.noouttest(command)
+
+    def test_325_validate_all_required(self):
+        # Validate a personality that has no parameters defined
+        out, err = self.successtest(VAL_CMD)
+        self.assertEmptyOut(out, VAL_CMD)
+        self.matchoutput(err, "All required parameters specified.", VAL_CMD)
+
+    def test_330_reconfigurehost(self):
+        command = ["reconfigure", "--hostname", "unittest17.aqd-unittest.ms.com",
+                   "--personality", PERSONALITY]
+        self.successtest(command)
 
     def test_500_verify_diff(self):
         cmd = ["show_diff", "--archetype", ARCHETYPE, "--personality", PERSONALITY,
@@ -282,9 +303,38 @@ class TestParameter(TestBrokerCommand):
                                r'//action/testaction2/command\s*'
                                r'//action/testaction2/timeout\s*'
                                r'//action/testaction2/user\s*'
+                               r'//esp/class\s*'
                                r'//esp/function\s*'
-                               r'//esp/threshold',
+                               r'//esp/threshold\s*'
+                               r'//esp/users',
                          cmd)
+
+    def test_550_verify_actions(self):
+        ACT_CAT_CMD = CAT_CMD + ["--param_tmpl=actions"]
+        out = self.commandtest(ACT_CAT_CMD)
+
+        match_str1 = '"testaction" = nlist\(\s*"command", "/bin/testaction",\s*"user", "user2"\s*\)'
+        match_str2 = '"testaction2" = nlist\(\s*"command", "/bin/testaction2",\s*"timeout", 100,\s*"user", "user1"\s*\)\s*'
+
+        self.searchoutput(out, match_str1, ACT_CAT_CMD)
+        self.searchoutput(out, match_str2, ACT_CAT_CMD)
+
+    def test_555_verify_espinfo(self):
+        ESP_CAT_CMD = CAT_CMD + ["--param_tmpl=espinfo"]
+        out = self.commandtest(ESP_CAT_CMD)
+        self.searchoutput(out, r'structure template personality/testpersona/espinfo;\s*', ESP_CAT_CMD)
+        self.searchoutput(out, r'"function" = "development";', ESP_CAT_CMD)
+        self.searchoutput(out, r'"threshold" = 0;', ESP_CAT_CMD)
+        self.searchoutput(out, r'"class" = "INFRASTRUCTURE";', ESP_CAT_CMD)
+        self.searchoutput(out, r'"users" = list\(\s*"someusers"\s*\);', ESP_CAT_CMD)
+
+    def test_560_verify_default(self):
+        ##included by default
+        SEC_CAT_CMD = CAT_CMD + ["--param_tmpl=windows"]
+        out = self.commandtest(SEC_CAT_CMD)
+        self.searchoutput(out, r'structure template personality/testpersona/windows;\s*'
+                               r'"windows" = list\(\s*nlist\(\s*"day", "Sun",\s*"duration", 8,\s*"start", "08:00"\s*\)\s*\);',
+                          SEC_CAT_CMD)
 
     def test_600_del_path(self):
         action = "testaction"
@@ -314,7 +364,6 @@ class TestParameter(TestBrokerCommand):
 
     def test_630_verify_show(self):
         out = self.commandtest(SHOW_CMD)
-        self.check_match_clean(out, 'function', SHOW_CMD)
         self.check_match_clean(out, 'testaction', SHOW_CMD)
         self.check_match_clean(out, 'testaction2', SHOW_CMD)
 
@@ -329,14 +378,31 @@ class TestParameter(TestBrokerCommand):
     def test_650_verify_esp(self):
         ESP_CAT_CMD =  CAT_CMD + [ "--param_tmpl=espinfo" ]
         err = self.commandtest(ESP_CAT_CMD)
-        self.searchclean(err, r'"function" = "Development";', ESP_CAT_CMD)
+        self.searchclean(err, r'"function" = "development";', ESP_CAT_CMD)
 
     def test_660_verify_default(self):
         ##included by default
-        SEC_CAT_CMD =  CAT_CMD + [ "--param_tmpl=security" ]
+        SEC_CAT_CMD =  CAT_CMD + [ "--param_tmpl=windows" ]
         out = self.commandtest(SEC_CAT_CMD)
-        self.searchoutput(out, r'"security_class" = "internal-isg-relaxed";', SEC_CAT_CMD)
+        self.searchoutput(out, r'structure template personality/testpersona/windows;\s*'
+                               r'"windows" = list\(\s*nlist\(\s*"day", "Sun",\s*"duration", 8,\s*"start", "08:00"\s*\)\s*\);',
+                          SEC_CAT_CMD)
 
+    def test_999_cleanup(self):
+        """ cleanup of all data created here """
+
+        command = ["reconfigure", "--hostname", "unittest17.aqd-unittest.ms.com",
+                   "--personality", "inventory"]
+        self.successtest(command)
+
+        cmd = ["del_personality", "--archetype", ARCHETYPE, "--personality", PERSONALITY]
+        self.noouttest(cmd)
+
+        for template in PARAM_DEFS:
+            paths = PARAM_DEFS[template]
+            for p in paths:
+                cmd = ["del_parameter_definition", "--archetype=aquilon", "--path", p["path"]]
+                self.noouttest(cmd)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestParameter)
