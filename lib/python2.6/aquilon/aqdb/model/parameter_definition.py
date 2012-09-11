@@ -152,7 +152,8 @@ class ParamDefinition(Base):
                        nullable=False)
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
-
+    rebuild_required = Column(Boolean(name="%s_rebuild_ck" % _TN),
+                                      nullable=False, default=False)
     holder = relation(ParamDefHolder, innerjoin=True,
                       backref=backref('param_definitions',
                                       cascade='all, delete-orphan'))

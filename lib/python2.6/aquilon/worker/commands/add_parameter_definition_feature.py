@@ -38,7 +38,7 @@ class CommandAddParameterDefintionFeature(BrokerCommand):
     required_parameters = ["feature", "type", "path", "value_type"]
 
     def render(self, session, feature, type, path, value_type, required,
-               default, description, **kwargs):
+               rebuild_required, default, description, **kwargs):
         dbfeature = Feature.get_unique(session, name=feature, feature_type=type,
                                        compel=True)
 
@@ -57,6 +57,7 @@ class CommandAddParameterDefintionFeature(BrokerCommand):
                                       holder=dbfeature.paramdef_holder,
                                       value_type=value_type, default=default,
                                       required=required,
+                                      rebuild_required=rebuild_required,
                                       description=description)
         session.add(db_paramdef)
 

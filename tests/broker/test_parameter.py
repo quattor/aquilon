@@ -74,6 +74,9 @@ PARAM_DEFS = {
 "windows": [
     { "path": "windows/windows", "value_type": "json" , "required": True, "default": '[{"duration": 8, "start": "08:00", "day": "Sun"}]' }
 ],
+"testrebuild": [
+    { "path" : "test/rebuild_required", "value_type": "string", "rebuild_required": True }
+],
 }
 
 SHOW_CMD = ["show", "parameter", "--personality", PERSONALITY ]
@@ -211,7 +214,7 @@ class TestParameter(TestBrokerCommand):
         path = "esp/class"
         value = "INFRASTRUCTURE"
         command = ADD_CMD + ["--path", path, "--value", value]
-        (out, err) = self.successtest(command)
+        self.successtest(command)
 
     def test_210_add_existing_path(self):
         path = "esp/function"
@@ -289,6 +292,94 @@ class TestParameter(TestBrokerCommand):
     def test_330_reconfigurehost(self):
         command = ["reconfigure", "--hostname", "unittest17.aqd-unittest.ms.com",
                    "--personality", PERSONALITY]
+        self.successtest(command)
+
+    def test_400_add_rebuild_required_ready (self):
+        command = ["change_status", "--hostname", "unittest17.aqd-unittest.ms.com",
+                   "--buildstatus", "almostready"]
+        self.successtest(command)
+
+        path = "test/rebuild_required"
+        value = "test"
+        command = ADD_CMD + ["--path", path, "--value", value]
+        err = self.badrequesttest(command)
+        self.searchoutput(err,
+                          r'Modifying parameter test/rebuild_required value needs a host rebuild. '
+                          r'There are hosts associated to the personality in non-ready state. '
+                          r'Please set these host to status of rebuild to continue.',
+                          command)
+
+    def test_405_add_rebuild_required_ready (self):
+        command = ["change_status", "--hostname", "unittest17.aqd-unittest.ms.com",
+                   "--buildstatus", "ready"]
+        self.successtest(command)
+
+        path = "test/rebuild_required"
+        value = "test"
+        command = ADD_CMD + ["--path", path, "--value", value]
+        err = self.badrequesttest(command)
+        self.searchoutput(err,
+                          r'Modifying parameter test/rebuild_required value needs a host rebuild. '
+                          r'There are hosts associated to the personality in non-ready state. '
+                          r'Please set these host to status of rebuild to continue.',
+                          command)
+
+    def test_410_add_rebuild_required_non_ready (self):
+        command = ["change_status", "--hostname", "unittest17.aqd-unittest.ms.com",
+                   "--buildstatus", "rebuild"]
+        self.successtest(command)
+
+        path = "test/rebuild_required"
+        value = "test"
+        command = ADD_CMD + ["--path", path, "--value", value]
+        self.successtest(command)
+
+    def test_420_upd_rebuild_required_ready (self):
+        command = ["change_status", "--hostname", "unittest17.aqd-unittest.ms.com",
+                   "--buildstatus", "ready"]
+        self.successtest(command)
+
+        path = "test/rebuild_required"
+        value = "test"
+        command = UPD_CMD + ["--path", path, "--value", value]
+        err = self.badrequesttest(command)
+        self.searchoutput(err,
+                          r'Modifying parameter test/rebuild_required value needs a host rebuild. '
+                          r'There are hosts associated to the personality in non-ready state. '
+                          r'Please set these host to status of rebuild to continue.',
+                          command)
+
+    def test_430_upd_rebuild_required_non_ready (self):
+        command = ["change_status", "--hostname", "unittest17.aqd-unittest.ms.com",
+                   "--buildstatus", "rebuild"]
+        self.successtest(command)
+
+        path = "test/rebuild_required"
+        value = "test"
+        command = UPD_CMD + ["--path", path, "--value", value]
+        self.successtest(command)
+
+    def test_440_del_rebuild_required_ready (self):
+        command = ["change_status", "--hostname", "unittest17.aqd-unittest.ms.com",
+                   "--buildstatus", "ready"]
+        self.successtest(command)
+
+        path = "test/rebuild_required"
+        command = DEL_CMD + ["--path", path]
+        err = self.badrequesttest(command)
+        self.searchoutput(err,
+                          r'Modifying parameter test/rebuild_required value needs a host rebuild. '
+                          r'There are hosts associated to the personality in non-ready state. '
+                          r'Please set these host to status of rebuild to continue.',
+                          command)
+
+    def test_450_del_rebuild_required_non_ready (self):
+        command = ["change_status", "--hostname", "unittest17.aqd-unittest.ms.com",
+                   "--buildstatus", "rebuild"]
+        self.successtest(command)
+
+        path = "test/rebuild_required"
+        command = DEL_CMD + ["--path", path]
         self.successtest(command)
 
     def test_500_verify_diff(self):

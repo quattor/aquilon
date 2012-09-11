@@ -33,8 +33,10 @@ from aquilon.exceptions_ import NotFoundException, ArgumentError
 from aquilon.utils import (force_json_dict, force_int, force_float,
                            force_boolean)
 
+from sqlalchemy.sql import or_
 from aquilon.aqdb.model import (Archetype, Personality, Parameter,
-                                Feature, FeatureLink,
+                                Feature, FeatureLink, Host,
+                                HostLifecycle,
                                 PersonalityParameter,
                                 FeatureLinkParameter)
 
@@ -101,7 +103,7 @@ def set_parameter(session, param_holder, path, value, compel=False,
 
         dbparameter = Parameter(holder=param_holder, value={})
 
-    retval, param_def = validate_parameter(path, value, param_holder)
+    retval, param_def = validate_parameter(session, path, value, param_holder)
     dbparameter.set_path(path, retval, compel, preclude)
     dbparameter.param_def = param_def
     return dbparameter
@@ -110,6 +112,8 @@ def set_parameter(session, param_holder, path, value, compel=False,
 def del_parameter(session, path, param_holder):
     dbparameter = Parameter.get_unique(session, holder=param_holder,
                                        compel=True)
+
+    validate_rebuild_required(session, path, param_holder)
     dbparameter.del_path(path)
     return dbparameter
 
@@ -135,7 +139,7 @@ def validate_value(label, value_type, value):
     return retval
 
 
-def validate_parameter(path, value, param_holder):
+def validate_parameter(session, path, value, param_holder):
     param_definitions = None
     match = None
     if isinstance(param_holder, PersonalityParameter):
@@ -176,8 +180,32 @@ def validate_parameter(path, value, param_holder):
 
     retval = validate_value(path, match.value_type, value)
 
+    validate_rebuild_required(session, path, param_holder)
+
     return retval, match
 
+def validate_rebuild_required (session, path, param_holder):
+    """ check if this parameter requires hosts to be in non-ready state
+    """
+    q = session.query(Host)
+    dbready = HostLifecycle.get_unique(session, "ready", compel=True)
+    dbalmostready = HostLifecycle.get_unique(session, "almostready", compel=True)
+    q = q.filter(or_(Host.status == dbready, Host.status == dbalmostready))
+    personality = ""
+    if isinstance(param_holder, PersonalityParameter):
+        personality = param_holder.personality
+    else:
+        personality = param_holder.featurelink.personality
+
+    q = q.filter_by(personality=personality)
+    if q.count():
+        raise ArgumentError("Modifying parameter %s value needs a host rebuild. "
+                            "There are hosts associated to the personality in non-ready state. "
+                            "Please set these host to status of rebuild to continue. "
+                            "Run 'aq search host --personality %s --buildstatus ready' "
+                            "and 'aq search host --personality %s --buildstatus almostready' to "
+                            "get the list of the affected hosts." %
+                            (path, personality.name, personality.name)  )
 
 def get_parameters(session, archetype=None, personality=None, feature=None,
                    featurelink=None):
