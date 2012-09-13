@@ -214,7 +214,6 @@ class AuthorizationBroker(object):
                               'add_service_instance',
                               'update_service_instance',
                               'del_service_instance',
-                              'add_nas_disk_share',
                               'add_alias',
                               'del_alias',
                               'add_filesystem',

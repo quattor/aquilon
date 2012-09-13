@@ -29,7 +29,7 @@
 # TERMS THAT MAY APPLY.
 
 
-from aquilon.aqdb.model import Share
+from aquilon.aqdb.model import Share, ClusterResource
 from aquilon.worker.broker import BrokerCommand, validate_basic
 from aquilon.worker.dbwrappers.resources import (add_resource,
                                                  get_resource_holder)
@@ -51,4 +51,15 @@ class CommandAddShare(BrokerCommand):
         Share.get_unique(session, name=share, holder=holder, preclude=True)
 
         dbshare = Share(name=share, comments=comments, latency=latency)
-        return add_resource(session, logger, holder, dbshare)
+        add_resource(session, logger, holder, dbshare)
+
+        # metacluster.validate for max_shares
+        if isinstance(holder, ClusterResource):
+            if holder.cluster.cluster_type == 'meta':
+                holder.cluster.validate()
+            elif holder.cluster.metacluster:
+                holder.cluster.metacluster.validate()
+
+        return
+
+

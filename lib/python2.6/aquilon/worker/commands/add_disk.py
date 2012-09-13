@@ -33,8 +33,7 @@ import re
 
 from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.dbwrappers.service_instance import get_service_instance
-from aquilon.aqdb.model import (LocalDisk, NasDisk, Service, Machine, Share,
+from aquilon.aqdb.model import (LocalDisk, Machine, Share,
                                 VirtualDisk, ResourceGroup)
 from aquilon.aqdb.model.disk import controller_types
 from aquilon.worker.templates.machine import PlenaryMachineInfo
@@ -103,6 +102,9 @@ class CommandAddDisk(BrokerCommand):
         else:
             dbmetacluster = None
 
+        # TODD This logic should be much cleaner when merged with
+        # vm_host(localdisk) branch
+        # v2 share
         if resourcegroup:
 
             if not dbmachine.cluster or not dbmetacluster:
@@ -129,6 +131,7 @@ class CommandAddDisk(BrokerCommand):
                                        holder=dbrg.resholder,
                                        compel=True)
 
+            self._check_disk_address(address)
             dbdisk = VirtualDisk(device_name=disk,
                                  controller_type=controller,
                                  bootable=boot,
@@ -139,27 +142,31 @@ class CommandAddDisk(BrokerCommand):
             dbshare.disks.append(dbdisk)
 
         else:
+            # v1 share - modded copy of v2 share logic.
             if share:
-                dbservice = Service.get_unique(session, "nas_disk_share",
-                                               compel=True)
-                dbshare = get_service_instance(session, dbservice, share)
+                if not dbmachine.cluster:
+                    raise ArgumentError("Machine %s should be contained by a "
+                                        "cluster")
+                dbshare = Share.get_unique(session,
+                                           name=share,
+                                           holder=dbmachine.cluster.resholder,
+                                           compel=True)
 
                 self._check_disk_address(address)
 
-                dbdisk = NasDisk(device_name=disk,
-                                 controller_type=controller,
-                                 bootable=boot, service_instance=dbshare,
-                                 capacity=size, address=address,
-                                 comments=comments)
+                dbdisk = VirtualDisk(device_name=disk,
+                                     controller_type=controller,
+                                     bootable=boot,
+                                     capacity=size, address=address,
+                                     comments=comments)
+
+                dbshare.disks.append(dbdisk)
             else:
                 dbdisk = LocalDisk(device_name=disk,
                                    controller_type=controller,
                                    capacity=size, bootable=boot,
                                    comments=comments)
             dbmachine.disks.append(dbdisk)
-
-        if dbmetacluster:
-            dbmetacluster.validate()
 
         self._write_plenary_info(dbmachine, logger)
         return

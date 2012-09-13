@@ -132,9 +132,10 @@ class PlenaryMachineInfo(Plenary):
                 relpath = "hardware/harddisk/generic/%s" % disk.controller_type
                 if disk.controller_type == 'cciss':
                     devname = "cciss/" + devname
-            elif disk.disk_type == 'nas' and disk.service_instance:
-                relpath = "service/nas_disk_share/%s/client/nasinfo" % \
-                    disk.service_instance.name
+            # TODO: this is for backward compatibility
+            # at plenary level the vm - disk connection would be lost
+            elif disk.disk_type == 'virtual_disk':
+                relpath = Plenary.get_plenary(disk.share).plenary_template_name
                 params["path"] = "%s/%s.vmdk" % (self.machine, disk.device_name)
                 params["address"] = disk.address
             else:  # pragma: no cover

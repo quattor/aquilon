@@ -72,7 +72,7 @@ class TestUpdateModel(TestBrokerCommand):
         self.matchoutput(out, "Cpu: utcpu x 1", command)
         self.matchoutput(out, "Memory: 4096 MB", command)
         self.matchoutput(out, "NIC count: 1", command)
-        self.matchoutput(out, "Disk: sda 45 GB scsi (nas)", command)
+        self.matchoutput(out, "Disk: sda 45 GB scsi (virtual_disk)", command)
         self.matchoutput(out, "Comments: New model comments", command)
 
     def test_120_verifymachine(self):

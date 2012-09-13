@@ -32,7 +32,6 @@
 import logging
 
 from aquilon.aqdb.model import Service, ServiceInstance
-from aquilon.aqdb.model.disk import find_storage_data
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
 from aquilon.worker.templates.panutils import (StructureTemplate, pan_assign,
                                                pan_include)
@@ -127,9 +126,6 @@ class PlenaryServiceInstance(PlenaryCollection):
                                                            logger=logger))
         self.plenaries.append(PlenaryServiceInstanceServerDefault(dbinstance,
                                                                   logger=logger))
-        if dbinstance.service.name == 'nas_disk_share':
-            self.plenaries.append(PlenaryInstanceNasDiskShare(dbinstance,
-                                                              logger=logger))
 
 
 Plenary.handlers[ServiceInstance] = PlenaryServiceInstance
@@ -238,43 +234,3 @@ class PlenaryServiceInstanceServerDefault(Plenary):
                    StructureTemplate('servicedata/%s/%s/srvconfig' %
                                      (self.service, self.name)))
         pan_include(lines, "service/%s/server/config" % self.service)
-
-
-class PlenaryInstanceNasDiskShare(Plenary):
-    """
-    A service instance of the nas_disk_share type wants to have a
-    struct template that can be imported into the disk definition to get
-    sufficient information to be able to know whence to mount the disk.
-    This class needs to be in sync with the consumer PlenaryMachine
-    """
-
-    template_type = "structure"
-
-    def __init__(self, dbinstance, logger=LOGGER):
-        Plenary.__init__(self, dbinstance, logger=logger)
-        self.service = dbinstance.service.name
-        self.name = dbinstance.name
-        self.plenary_core = "service/%(service)s/%(name)s/client" % self.__dict__
-        self.plenary_template = "nasinfo"
-        share_info = find_storage_data(dbinstance)
-
-        self.server = share_info["server"]
-        self.mount = share_info["mount"]
-
-    def body(self, lines):
-        """
-        dynamically produce content of template, based on external lookup.
-        If the external lookup fails, this can raise a NotFoundException,
-        a ProcessException or an IOError
-        """
-        if not self.server:
-            # TODO: We should really invoke a realtime-check by running
-            # the command defined in the broker config. The output
-            # of "nasti show share --csv" is in CSV format (why it
-            # doesn't provide the same format as the dumpfile is
-            # beyond me). We need a CSV parser...
-            raise NotFoundException("Share %s cannot be found in NAS maps." %
-                                    self.name)
-        pan_assign(lines, "sharename", self.name)
-        pan_assign(lines, "server", self.server)
-        pan_assign(lines, "mountpoint", self.mount)

@@ -319,9 +319,7 @@ class TestVulcan20(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out, "Share: test_v2_share", command)
         self.matchoutput(out, "Bound to: Resource Group utmc8as1", command)
-        self.searchoutput(out, r"Disk: sda 34 GB \(Machine: utpgm0\)$", command)
-        self.searchoutput(out, r"Disk: sda 34 GB \(Machine: utpgm1\)$", command)
-        self.searchoutput(out, r"Disk: sda 34 GB \(Machine: utpgm2\)$", command)
+        self.matchoutput(out, "Disk Count: 3", command)
 
     def test_111_addfilesystemfail(self):
         command = ["add_filesystem", "--filesystem=fs1", "--type=ext3",

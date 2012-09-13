@@ -48,9 +48,6 @@ from collections import defaultdict
 _TN = 'service_instance'
 _ABV = 'svc_inst'
 
-# list of possible external service managers to enable federated control to
-MANAGERS = ['aqd', 'resourcepool']
-
 
 class ServiceInstance(Base):
     """ Service instance captures the data around assignment of a host for a
@@ -68,13 +65,9 @@ class ServiceInstance(Base):
     max_clients = Column(Integer, nullable=True)  # null means 'no limit'
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
-    manager = Column(Enum(32, MANAGERS), default='aqd', nullable=False)
     comments = Column(String(255), nullable=True)
 
     service = relation(Service, lazy=False, innerjoin=True, backref='instances')
-
-    # _client_count is defined later in this file
-    # nas_disk_count and nas_machine_count are defined in disk.py
 
     def __format__(self, format_spec):
         instance = "%s/%s" % (self.service.name, self.name)

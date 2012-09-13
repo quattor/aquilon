@@ -219,29 +219,15 @@ class TestAddVirtualHardware(TestBrokerCommand):
     def test_150_failaddillegaldisk(self):
         command = ["add", "disk", "--machine", "evm9", "--disk", "sda",
                    "--controller", "sata", "--size", "15",
-                   "--share", "test_share_9", "--address", "badaddress"]
+                   "--share", "test_share_8", "--address", "badaddress"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Disk address 'badaddress' is not valid", command)
 
-    def test_160_failaddmaxshares(self):
-        # Number 9 should trip the limit.
-        command = ["add", "disk", "--machine", "evm9", "--disk", "sda",
-                   "--controller", "sata", "--size", "15",
-                   "--share", "test_share_9", "--address", "0:0"]
-        out = self.badrequesttest(command)
-        self.matchoutput(out, "Metacluster utmc1 already has the maximum "
-                         "number of shares (8).", command)
-
     def test_180_verifydiskcount(self):
-        command = ["show_service", "--service=nas_disk_share",
-                   "--instance=test_share_1"]
+        command = ["show_share", "--cluster=utecl1", "--share=test_share_1"]
         out = self.commandtest(command)
-        self.matchoutput(out, "Disk Count: 1", command)
 
-    def test_180_verifyshowshare(self):
-        command = ["show_nas_disk_share", "--share=test_share_1"]
-        out = self.commandtest(command)
-        self.matchoutput(out, "NAS Disk Share: test_share_1", command)
+        self.matchoutput(out, "Share: test_share_1", command)
         self.matchoutput(out, "Server: lnn30f1", command)
         self.matchoutput(out, "Mountpoint: /vol/lnn30f1v1/test_share_1",
                          command)

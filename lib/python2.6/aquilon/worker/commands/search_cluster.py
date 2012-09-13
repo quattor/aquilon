@@ -35,11 +35,12 @@ from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.formats.cluster import SimpleClusterList
 from aquilon.aqdb.model import (Cluster, EsxCluster, MetaCluster, Archetype,
                                 Personality, Machine, Switch, ClusterLifecycle,
-                                Service, ServiceInstance, NasDisk, Disk,
+                                Service, ServiceInstance, Share,
                                 ClusterResource, VirtualMachine)
 from aquilon.worker.dbwrappers.host import hostname_to_host
 from aquilon.worker.dbwrappers.branch import get_branch_and_author
 from aquilon.worker.dbwrappers.location import get_location
+from aquilon.worker.dbwrappers.resources import get_resource_holder
 
 
 class CommandSearchCluster(BrokerCommand):
@@ -177,15 +178,15 @@ class CommandSearchCluster(BrokerCommand):
             q = q.reset_joinpoint()
 
         if esx_share:
-            nas_disk_share = Service.get_unique(session, name='nas_disk_share',
-                                                compel=True)
-            dbshare = ServiceInstance.get_unique(session, name=esx_share,
-                                                 service=nas_disk_share,
-                                                 compel=True)
-            NasAlias = aliased(NasDisk)
-            q = q.join(ClusterResource, VirtualMachine, Machine, 'disks',
-                       (NasAlias, NasAlias.id == Disk.id))
-            q = q.filter_by(service_instance=dbshare)
+            holder = get_resource_holder(session,
+                                         None, cluster, None,
+                                         compel=False)
+
+            dbshare = Share.get_unique(session, name=esx_share, holder=holder,
+                             compel=True)
+
+            q = q.join(ClusterResource)
+            q = q.filter(ClusterResource.resources.contains(dbshare))
             q = q.reset_joinpoint()
 
         if max_members:

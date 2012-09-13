@@ -42,28 +42,20 @@ class TestDelShare(TestBrokerCommand):
 
     def testdel10gigshares(self):
         for i in range(5, 11):
-            self.noouttest(["del_service", "--service=nas_disk_share",
-                            "--instance=utecl%d_share" % i])
+            self.noouttest(["del_share", "--cluster=utecl%d" % i,
+                            "--share=utecl%d_share" % i])
 
     def testdelhashares(self):
         for i in range(11, 13):
-            self.noouttest(["del_service", "--service=nas_disk_share",
-                            "--instance=utecl%d_share" % i])
-            self.noouttest(["del_service", "--service=nas_disk_share",
-                            "--instance=npecl%d_share" % i])
-
-    # TODO this must be gone somewhere.
-    def testdelmgdshares(self):
-        for i in range(13, 15):
-            self.noouttest(["del_service", "--service=nas_disk_share",
-                            "--instance=utecl%d_share" % i])
+            self.noouttest(["del_share", "--cluster=utecl%d" % i,
+                            "--share=utecl%d_share" % i])
+            self.noouttest(["del_share", "--cluster=npecl%d" % i,
+                            "--share=npecl%d_share" % i])
 
     def testdelnasshares(self):
-        for i in range(1, 10):
-            self.noouttest(["del_service", "--service=nas_disk_share",
-                            "--instance=test_share_%s" % i])
-        self.noouttest(["del_service", "--service=nas_disk_share"])
-
+        for i in range(1, 9):
+            self.noouttest(["del_share", "--cluster=utecl1",
+                            "--share=test_share_%s" % i])
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelShare)

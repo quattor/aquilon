@@ -30,7 +30,8 @@
 """ Disk for share """
 
 from sqlalchemy import Column, Integer, ForeignKey
-from sqlalchemy.orm import relation, backref
+from sqlalchemy.orm import relation, backref, column_property, deferred
+from sqlalchemy.sql import select, func
 
 from aquilon.aqdb.model import Disk, Share
 
@@ -38,7 +39,7 @@ from aquilon.aqdb.model import Disk, Share
 _TN = 'disk'
 
 
-# NasDisk for Share class
+# Disk subclass for Share class
 class VirtualDisk(Disk):
     """To be done"""
     __mapper_args__ = {'polymorphic_identity': 'virtual_disk'}
@@ -61,3 +62,15 @@ class VirtualDisk(Disk):
                 (self._get_class_label(), self.device_name,
                  self.controller_type, self.machine.label, self.capacity,
                  (self.share.name if self.share else "no_share"))
+
+# The formatter code is interested in the count of disks/machines, and it is
+# cheaper to query the DB than to load all entities into memory
+Share.disk_count = column_property(
+    select([func.count()],
+           VirtualDisk.share_id == Share.id)
+    .label("disk_count"), deferred=True)
+
+Share.machine_count = column_property(
+    select([func.count(func.distinct(VirtualDisk.machine_id))],
+           VirtualDisk.share_id == Share.id)
+    .label("machine_count"), deferred=True)

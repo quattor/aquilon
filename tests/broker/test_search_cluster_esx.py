@@ -272,9 +272,7 @@ class TestSearchClusterESX(TestBrokerCommand):
                    '--esx_share', 'share-does-not-exist']
         out = self.notfoundtest(command)
         self.matchoutput(out,
-                         "Service Instance share-does-not-exist, service "
-                         "nas_disk_share not found.",
-                         command)
+                         "Share share-does-not-exist not found.", command)
 
     # Kept it since the output is different from testclusterlocationavailable
     def testesxclusterlocationavailable(self):
@@ -330,5 +328,5 @@ class TestSearchClusterESX(TestBrokerCommand):
 
 
 if __name__ == '__main__':
-    suite = unittest.TestLoader().loadTestsFromTestCase(TestSearchESXCluster)
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestSearchClusterESX)
     unittest.TextTestRunner(verbosity=2).run(suite)

@@ -27,25 +27,23 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-""" Polymorphic representation of disks which may be local, nas or san """
+""" Polymorphic representation of disks which may be local or san """
 
 from datetime import datetime
 
 from sqlalchemy import (Column, Integer, DateTime, Sequence, String, Boolean,
                         ForeignKey, UniqueConstraint)
-from sqlalchemy.orm import relation, backref, column_property, deferred
-from sqlalchemy.sql import select, func
+from sqlalchemy.orm import relation, backref, deferred
 
 from aquilon.aqdb.model import Base, Machine, ServiceInstance
 from aquilon.aqdb.column_types import AqStr, Enum
 from aquilon.config import Config
 
-disk_types = ['local', 'nas', 'san', 'virtual_disk']
+disk_types = ['local', 'san', 'virtual_disk']
 controller_types = ['cciss', 'ide', 'sas', 'sata', 'scsi', 'flash',
                     'fibrechannel']
 
 _TN = 'disk'
-_NDTN = 'nas_disk'
 
 
 class Disk(Base):
@@ -106,52 +104,6 @@ class LocalDisk(Disk):
     __mapper_args__ = {'polymorphic_identity': 'local'}
 
 
-class NasDisk(Disk):
-    """
-        Network attached disks required for root diskless machines, primarily
-        for virtual machines whose images are hosted on NFS shares. In the case
-        of ESX these are mounted by the host OS, not the guest OS.
-    """
-    __mapper_args__ = {'polymorphic_identity': 'nas'}
-
-    # No cascade delete here: we want to restrict any attempt to delete
-    # any service instance that has client dependencies.
-    service_instance_id = Column(Integer, ForeignKey('service_instance.id',
-                                                     name='%s_srv_inst_fk' % (
-                                                        _NDTN)),
-                                 nullable=True)
-
-    # TODO: double check property values on forward and backrefs before commit
-    # cascade ops too
-    service_instance = relation(ServiceInstance, backref='nas_disks')
-
-    def __init__(self, **kw):
-        if 'address' not in kw or kw['address'] is None:
-            raise ValueError("address is mandatory for nas disks")
-        super(NasDisk, self).__init__(**kw)
-
-    def __repr__(self):
-        return "<%s %s (%s) of machine %s, %d GB, provided by %s>" % \
-                (self._get_class_label(), self.device_name,
-                 self.controller_type, self.machine.label, self.capacity,
-                 self.service_instance.name)
-
-
-# The formatter code is interested in the count of disks/machines, and it is
-# cheaper to query the DB than to load all entities into memory
-ServiceInstance.nas_disk_count = column_property(
-    select([func.count()],
-           NasDisk.service_instance_id == ServiceInstance.id)
-    .label("nas_disk_count"), deferred=True)
-
-ServiceInstance.nas_machine_count = column_property(
-    select([func.count(func.distinct(NasDisk.machine_id))],
-           NasDisk.service_instance_id == ServiceInstance.id)
-    .label("nas_machine_count"), deferred=True)
-
-#machine_specs-> indicates the service instance for nas disk
-#service instance name is the share name
-
 #max_shares to metacluster
 
 
@@ -170,12 +122,8 @@ def find_storage_data(dbshare):
     function returns True, then we stop scanning the file, else we continue
     on until there is nothing left to parse.
 
-    dbshare can be a Share or a ServiceInstance which is a nas_disk_share
+    dbshare can be a Share
     """
-
-    # TODO should check here
-    # isinstance(dbshare, PlenaryResource and dbshare.type == share)
-    # or (isinstance(dbshare, PlenaryInstanceNasDiskShare)
 
     config = Config()
     with open(config.get("broker", "sharedata")) as datafile:
