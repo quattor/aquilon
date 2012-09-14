@@ -172,8 +172,8 @@ def rename_hardware(session, dbhw_ent, rename_to):
         fqdns.append(dbhw_ent.primary_name.fqdn)
 
     # Filter out unrelated FQDNs
-    fqdns = [fqdn for fqdn in fqdns if fqdn.name.startswith(old_label) and
-             fqdn.dns_domain == old_domain]
+    fqdns = [fqdn for fqdn in fqdns if fqdn.dns_domain == old_domain and
+             (fqdn.name == old_label or fqdn.name.startswith(old_label + "-"))]
 
     # Update all state in one go, so disable autoflush for now.
     # TODO: change to "with session.no_autoflush" once upgrading to SQLA 0.7.6
