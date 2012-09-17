@@ -44,11 +44,12 @@ from subprocess import Popen, PIPE
 from tempfile import mkstemp
 from threading import Thread
 from cStringIO import StringIO
-
-from sqlalchemy.orm.session import object_session
 import yaml
 
-from aquilon.exceptions_ import ProcessException, AquilonError, ArgumentError
+from sqlalchemy.orm.session import object_session
+
+from aquilon.exceptions_ import (ProcessException, AquilonError, ArgumentError,
+                                 InternalError)
 from aquilon.config import Config
 from aquilon.worker.locks import lock_queue, CompileKey
 
@@ -347,6 +348,9 @@ DNS_DOMAIN_NOT_FOUND = re.compile (r"DNS domain ([-\w\.\d]+) doesn't exists")
 
 DNS_DOMAIN_EXISTS = re.compile(r"DNS domain [-\w\.\d]+ already defined")
 
+# The regexp is taken from DSDB
+INVALID_NAME_RE = re.compile(r"[^A-Za-z0-9_.-]")
+
 
 class DSDBRunner(object):
 
@@ -358,6 +362,9 @@ class DSDBRunner(object):
         self.location_sync = config.getboolean("broker", "dsdb_location_sync")
         self.actions = []
         self.rollback_list = []
+
+    def normalize_iface(self, iface):
+        return INVALID_NAME_RE.sub("_", iface)
 
     def commit(self, verbose=False):
         for args, rollback, error_filter, ignore_msg in self.actions:
@@ -526,9 +533,7 @@ class DSDBRunner(object):
         command = ["add_host", "-host_name", fqdn,
                     "-ip_address", ip, "-status", "aq"]
         if interface:
-            # DSDB does not accept '/' as valid in an interface name.
-            interface = str(interface).replace('/', '_').replace(':', '_')
-            command.extend(["-interface_name", interface])
+            command.extend(["-interface_name", self.normalize_iface(interface)])
         if mac:
             command.extend(["-ethernet_address", mac])
         if primary and str(primary) != str(fqdn):
@@ -539,33 +544,42 @@ class DSDBRunner(object):
         rollback = ["delete_host", "-ip_address", ip]
         self.add_action(command, rollback)
 
-    def update_host_details(self, fqdn, mac=None, comments=None, old_mac=None,
+    def update_host_details(self, fqdn, iface, new_ip=None, new_mac=None,
+                            new_comments=None, old_ip=None, old_mac=None,
                             old_comments=None):
-        command = ["update_host", "-host_name", fqdn, "-status", "aq"]
-        if mac:
-            command.extend(["-ethernet_address", mac])
-        if comments:
-            command.extend(["-comments", comments])
-
-        rollback = ["update_host", "-host_name", fqdn, "-status", "aq"]
-        if old_mac:
-            rollback.extend(["-ethernet_address", old_mac])
-        if old_comments:
-            rollback.extend(["-comments", old_comments])
-        self.add_action(command, rollback)
-
-    def update_host_ip(self, fqdn, iface, ip, old_ip):
+        iface = self.normalize_iface(iface)
         command = ["update_aqd_host", "-host_name", fqdn,
-                   "-interface_name", iface, "-ip_address", ip]
-        rollback = ["update_aqd_host", "-host_name", fqdn,
-                    "-interface_name", iface, "-ip_address", old_ip]
+                   "-interface_name", iface]
+        rollback = command[:]
+
+        if new_ip and new_ip != old_ip:
+            command.extend(["-ip_address", new_ip])
+            rollback.extend(["-ip_address", old_ip])
+        if new_mac and new_mac != old_mac:
+            command.extend(["-ethernet_address", new_mac])
+            rollback.extend(["-ethernet_address", old_mac])
+        if new_comments and new_comments != old_comments:
+            command.extend(["-comments", new_comments])
+            rollback.extend(["-comments", old_comments])
+
         self.add_action(command, rollback)
 
-    def update_host_name(self, fqdn, fqdn_new, iface):
-        command = ["update_aqd_host", "-host_name", fqdn, "-interface_name", iface,
-                   "-primary_host_name", fqdn_new]
-        rollback = ["update_aqd_host", "-host_name", fqdn_new,
-                    "-interface_name", iface, "-primary_host_name", fqdn]
+    def update_host_iface_name(self, old_fqdn, new_fqdn, old_iface, new_iface):
+        old_iface = self.normalize_iface(old_iface)
+        new_iface = self.normalize_iface(new_iface)
+        command = ["update_aqd_host", "-host_name", old_fqdn]
+        rollback = ["update_aqd_host", "-host_name", new_fqdn]
+
+        if old_fqdn != new_fqdn:
+            # Yes, -primary_host_name sets the new host name...
+            command.extend(["-primary_host_name", new_fqdn])
+            rollback.extend(["-primary_host_name", old_fqdn])
+        if old_iface and old_iface != new_iface:
+            command.extend(["-interface_name", old_iface,
+                            "-new_interface_name", new_iface])
+            rollback.extend(["-interface_name", new_iface,
+                             "-new_interface_name", old_iface])
+
         self.add_action(command, rollback)
 
     def delete_host_details(self, fqdn, ip, iface=None, mac=None, primary=None,
@@ -574,8 +588,7 @@ class DSDBRunner(object):
         rollback = ["add_host", "-host_name", fqdn,
                     "-ip_address", ip, "-status", "aq"]
         if iface:
-            interface = str(iface).replace('/', '_').replace(':', '_')
-            rollback.extend(["-interface_name", interface])
+            rollback.extend(["-interface_name", self.normalize_iface(iface)])
         if mac:
             rollback.extend(["-ethernet_address", mac])
         if primary and str(primary) != str(fqdn):
@@ -608,10 +621,8 @@ class DSDBRunner(object):
           Exception: management interfaces
         """
 
-        status = {}
-
-
         real_primary = dbhw_ent.fqdn
+        status = {"by-ip": {}, "by-fqdn": {}, "primary": real_primary}
 
         # We need a stable index for generating virtual interface names for
         # DSDB. Sort the Zebra IPs and use the list index for this purpose.
@@ -666,37 +677,36 @@ class DSDBRunner(object):
                    addr.interface.comments.startswith("Created automatically"):
                     comments = addr.interface.comments
 
-            # The blind build magic in "add_interface --machine" renames the
-            # machine, so we can't use dbhw_ent.label in the key. Renaming e.g.
-            # switches also depend on using a key that does not include the
-            # label.
-            key = '%s:%s' % (dbhw_ent.id, ifname)
-
-            if key in status:
-                continue
-
-            # Do not use -primary_host_name:
-            # - for the management address
-            # - for the real primary name, because update_host() uses this hint
-            #   for issuing the operations in the correct order
-            # - for service addresses, because srvloc breaks otherwise
-            if addr.interface.interface_type == "management" or \
-               addr.service_address or fqdn == real_primary:
+            if addr.interface.interface_type == "management":
+                # Do not use -primary_host_name for the management address
+                primary = None
+            elif addr.service_address:
+                # Do not use -primary_host_name for service addresses, because
+                # srvloc does not like that
+                primary = None
+            elif fqdn == real_primary:
+                # Do not set the 'primary' key for the real primary name.
+                # update_host() uses this hint for issuing the operations in the
+                # correct order
                 primary = None
             else:
                 primary = real_primary
 
-            status[key] = {'name': ifname,
-                           'ip': addr.ip,
-                           'fqdn': fqdn,
-                           'primary': primary,
-                           'comments': comments}
+            statrec = {'name': ifname,
+                       'ip': addr.ip,
+                       'fqdn': fqdn,
+                       'primary': primary,
+                       'comments': comments}
 
             # Exclude the MAC address for aliases
             if addr.label:
-                status[key]["mac"] = None
+                statrec["mac"] = None
             else:
-                status[key]["mac"] = addr.interface.mac
+                statrec["mac"] = addr.interface.mac
+
+            status["by-ip"][statrec["ip"]] = statrec
+            status["by-fqdn"][statrec["fqdn"]] = statrec
+
         return status
 
     def update_host(self, dbhw_ent, oldinfo):
@@ -716,49 +726,60 @@ class DSDBRunner(object):
         newinfo = self.snapshot_hw(dbhw_ent)
 
         if not oldinfo:
-            oldinfo = {}
+            oldinfo = {"by-ip": {}, "by-fqdn": {}, "primary": None}
 
         deletes = []
         adds = []
+        # Host/interface names cannot be updated simultaneously with IP/MAC
+        # addresses or comments
         updates = []
-        ip_updates = []
-        hostname_update = None
+        name_updates = []
 
         # Construct the list of operations
-        for key, attrs in oldinfo.items():
-            if key not in newinfo:
-                deletes.append(attrs)
-            elif attrs['primary'] != newinfo[key]['primary'] or attrs['fqdn'] != newinfo[key]['fqdn']:
-                deletes.append(attrs)
-                adds.append(newinfo[key])
+        for key, attrs in oldinfo["by-fqdn"].items():
+            if key in newinfo["by-fqdn"]:
+                newattrs = newinfo["by-fqdn"][key]
+            elif attrs["ip"] in newinfo["by-ip"]:
+                newattrs = newinfo["by-ip"][attrs["ip"]]
             else:
-                if attrs['ip'] != newinfo[key]['ip']:
-                    ip_updates.append({"fqdn": attrs['fqdn'],
-                                       "name": attrs['name'],
-                                       "oldip": attrs['ip'],
-                                       "newip": newinfo[key]['ip']})
-                if attrs['mac'] != newinfo[key]['mac'] or \
-                        attrs['comments'] != newinfo[key]['comments']:
-                    update = {'fqdn': attrs['fqdn']}
-                    if attrs['mac'] != newinfo[key]['mac']:
-                        update['oldmac'] = attrs['mac']
-                        update['newmac'] = newinfo[key]['mac']
-                    if attrs['comments'] != newinfo[key]['comments']:
-                        update['oldcomments'] = attrs['comments']
-                        update['newcomments'] = newinfo[key]['comments']
-                    updates.append(update)
-                if attrs['fqdn'] != newinfo[key]['fqdn']:
-                    hostname_update = {"ifname": attrs['name'],
-                                       "oldfqdn": attrs['fqdn'],
-                                       "newfqdn": newinfo[key]['fqdn']}
+                newattrs = None
 
-        for key, attrs in newinfo.items():
-            if key not in oldinfo:
-                adds.append(attrs)
+            # If either the old or the new entry is bound to a primary name but
+            # the other is not, then we have to delete & re-add it.
+            if newattrs and bool(attrs["primary"]) != bool(newattrs["primary"]):
+                newattrs = None
+
+            if not newattrs:
+                deletes.append(attrs)
+            else:
+                if attrs['ip'] != newattrs['ip'] or \
+                   attrs['mac'] != newattrs['mac'] or \
+                   attrs['comments'] != newattrs['comments']:
+                    updates.append({'fqdn': attrs['fqdn'],
+                                    'iface': attrs['name'],
+                                    'oldip': attrs['ip'],
+                                    'newip': newattrs['ip'],
+                                    'oldmac': attrs['mac'],
+                                    'newmac': newattrs['mac'],
+                                    'oldcomments': attrs['comments'],
+                                    'newcomments': newattrs['comments']})
+
+                if attrs['fqdn'] != newattrs['fqdn'] or \
+                   attrs['name'] != newattrs['name']:
+                    name_updates.append({"oldfqdn": attrs['fqdn'],
+                                         "newfqdn": newattrs['fqdn'],
+                                         "oldiface": attrs['name'],
+                                         "newiface": newattrs['name']})
+
+                del newinfo["by-fqdn"][newattrs["fqdn"]]
+                del newinfo["by-ip"][newattrs["ip"]]
+
+        for key, attrs in newinfo["by-fqdn"].items():
+            adds.append(attrs)
 
         # Add the primary address first, and delete it last. The primary address
         # is identified by having an empty ['primary'] key (this is true for the
-        # management address as well, but it does not matter).
+        # management address as well, but that does not matter).
         adds.sort(lambda x, y: cmp(x['primary'] or "", y['primary'] or ""))
         deletes.sort(lambda x, y: cmp(x['primary'] or "", y['primary'] or ""), reverse=True)
 
@@ -768,20 +789,15 @@ class DSDBRunner(object):
                                      attrs['primary'], attrs['comments'])
 
         for attrs in updates:
-            self.update_host_details(attrs['fqdn'],
-                                     mac=attrs.get('newmac', None),
-                                     comments=attrs.get('newcomments',
-                                                        None),
-                                     old_mac=attrs.get('oldmac', None),
-                                     old_comments=attrs.get('oldcomments',
-                                                            None))
-        for attrs in ip_updates:
-            self.update_host_ip(attrs['fqdn'], attrs['name'],
-                                attrs['newip'], attrs['oldip'])
-        if hostname_update:
-            self.update_host_name(hostname_update['ifname'],
-                                  hostname_update['oldfqdn'],
-                                  hostname_update['newfqdn'])
+            self.update_host_details(attrs['fqdn'], attrs['iface'],
+                                     attrs['newip'], attrs['newmac'],
+                                     attrs['newcomments'],
+                                     attrs['oldip'], attrs['oldmac'],
+                                     attrs['oldcomments'])
+
+        for attrs in name_updates:
+            self.update_host_iface_name(attrs['oldfqdn'], attrs['newfqdn'],
+                                        attrs['oldiface'], attrs['newiface'])
 
         for attrs in adds:
             self.add_host_details(attrs['fqdn'], attrs['ip'],
