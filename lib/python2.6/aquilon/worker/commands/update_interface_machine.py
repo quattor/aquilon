@@ -31,8 +31,7 @@
 
 from aquilon.exceptions_ import ArgumentError, AquilonError
 from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.dbwrappers.interface import (get_interface,
-                                                 verify_port_group,
+from aquilon.worker.dbwrappers.interface import (verify_port_group,
                                                  choose_port_group,
                                                  assign_address)
 from aquilon.worker.locks import lock_queue
@@ -63,7 +62,8 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
         """
 
         dbhw_ent = Machine.get_unique(session, machine, compel=True)
-        dbinterface = get_interface(session, interface, dbhw_ent, None)
+        dbinterface = Interface.get_unique(session, hardware_entity=dbhw_ent,
+                                           name=interface, compel=True)
 
         oldinfo = DSDBRunner.snapshot_hw(dbhw_ent)
 
@@ -94,7 +94,8 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
                 # for now.
                 raise ArgumentError("Can not enslave {0:l} because it has "
                                     "addresses.".format(dbinterface))
-            dbmaster = get_interface(session, master, dbhw_ent, None)
+            dbmaster = Interface.get_unique(session, hardware_entity=dbhw_ent,
+                                            name=master, compel=True)
             if dbmaster in dbinterface.all_slaves():
                 raise ArgumentError("Enslaving {0:l} would create a circle, "
                                     "which is not allowed.".format(dbinterface))

@@ -213,7 +213,7 @@ class TestUpdateInterface(TestBrokerCommand):
                    "--switch=ut3gd1r01.aqd-unittest.ms.com"]
         out = self.notfoundtest(command)
         self.matchoutput(out,
-                         "Interface xge49 of ut3gd1r01.aqd-unittest.ms.com "
+                         "Interface xge49, switch ut3gd1r01.aqd-unittest.ms.com "
                          "not found",
                          command)
 
@@ -308,7 +308,7 @@ class TestUpdateInterface(TestBrokerCommand):
         command = ["update", "interface", "--chassis", "ut3c5",
                    "--interface", "eth0", "--comments", "bad-interface"]
         out = self.notfoundtest(command)
-        self.matchoutput(out, "Interface eth0 of ut3c5.aqd-unittest.ms.com "
+        self.matchoutput(out, "Interface eth0, chassis ut3c5.aqd-unittest.ms.com "
                          "not found.", command)
 
     def testfaildinvalidchassisoption(self):

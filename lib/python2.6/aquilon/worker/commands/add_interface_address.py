@@ -30,10 +30,9 @@
 
 from aquilon.worker.broker import BrokerCommand, validate_basic
 from aquilon.exceptions_ import ArgumentError, IncompleteError
-from aquilon.aqdb.model import HardwareEntity
+from aquilon.aqdb.model import HardwareEntity, Interface
 from aquilon.worker.dbwrappers.dns import grab_address
-from aquilon.worker.dbwrappers.interface import (get_interface,
-                                                 generate_ip,
+from aquilon.worker.dbwrappers.interface import (generate_ip,
                                                  assign_address)
 from aquilon.worker.templates.host import PlenaryHost
 from aquilon.worker.locks import lock_queue
@@ -59,8 +58,8 @@ class CommandAddInterfaceAddress(BrokerCommand):
 
         dbhw_ent = HardwareEntity.get_unique(session, hwname,
                                              hardware_type=hwtype, compel=True)
-
-        dbinterface = get_interface(session, interface, dbhw_ent, None)
+        dbinterface = Interface.get_unique(session, hardware_entity=dbhw_ent,
+                                           name=interface, compel=True)
 
         oldinfo = DSDBRunner.snapshot_hw(dbhw_ent)
 

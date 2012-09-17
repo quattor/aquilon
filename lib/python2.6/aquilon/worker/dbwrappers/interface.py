@@ -49,32 +49,6 @@ from aquilon.aqdb.model.network import get_net_id_from_ip
 _vlan_re = re.compile(r'^(.*)\.(\d+)$')
 
 
-# FIXME: interface type?
-# FIXME: replace me with a usable get_unique
-def get_interface(session, interface, dbhw_ent, mac):
-    q = session.query(Interface)
-    errmsg = []
-    if interface:
-        errmsg.append("named " + interface)
-        q = q.filter_by(name=interface)
-    if dbhw_ent:
-        errmsg.append("of {0:l} ".format(dbhw_ent))
-        q = q.join(HardwareEntity)
-        q = q.filter(HardwareEntity.id == dbhw_ent.id)
-        q = q.reset_joinpoint()
-    if mac:
-        errmsg.append("having MAC address " + mac)
-        q = q.filter_by(mac=mac)
-
-    try:
-        dbinterface = q.one()
-    except NoResultFound:
-        raise NotFoundException("Interface %s not found." % " ".join(errmsg))
-    except MultipleResultsFound:
-        raise ArgumentError("There are multiple interfaces %s." %
-                            " ".join(errmsg))
-    return dbinterface
-
 def check_ip_restrictions(dbnetwork, ip, relaxed=False):
     """ given a network and ip addr, raise an exception if the ip is reserved
 

@@ -29,9 +29,9 @@
 """Contains the logic for `aq update interface --chassis`."""
 
 
-from aquilon.exceptions_ import UnimplementedError, NotFoundException
+from aquilon.exceptions_ import UnimplementedError
+from aquilon.aqdb.model import Chassis, Interface
 from aquilon.worker.broker import BrokerCommand
-from aquilon.aqdb.model import Interface, Chassis
 from aquilon.worker.processes import DSDBRunner
 
 
@@ -48,12 +48,8 @@ class CommandUpdateInterfaceChassis(BrokerCommand):
                                          "the --%s option." % arg)
 
         dbchassis = Chassis.get_unique(session, chassis, compel=True)
-        q = session.query(Interface)
-        q = q.filter_by(name=interface, hardware_entity=dbchassis)
-        dbinterface = q.first()
-        if not dbinterface:
-            raise NotFoundException("Interface %s of %s not found." %
-                                    (interface, dbchassis.fqdn))
+        dbinterface = Interface.get_unique(session, hardware_entity=dbchassis,
+                                           name=interface, compel=True)
 
         oldinfo = DSDBRunner.snapshot_hw(dbchassis)
 

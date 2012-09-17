@@ -342,6 +342,7 @@ class LoopbackInterface(Interface):
 interface = Interface.__table__  # pylint: disable=C0103
 interface.primary_key.name = '%s_pk' % _TN
 interface.info['unique_fields'] = ['name', 'hardware_entity']
+interface.info['extra_search_fields'] = ['mac']
 
 interface.append_constraint(UniqueConstraint('mac', name='%s_mac_addr_uk' % _ABV))
 

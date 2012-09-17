@@ -29,9 +29,9 @@
 """Contains the logic for `aq update interface --switch`."""
 
 
-from aquilon.exceptions_ import UnimplementedError, NotFoundException
+from aquilon.exceptions_ import UnimplementedError
+from aquilon.aqdb.model import Switch, Interface
 from aquilon.worker.broker import BrokerCommand
-from aquilon.aqdb.model import Interface, Switch
 from aquilon.worker.processes import DSDBRunner
 
 
@@ -48,12 +48,8 @@ class CommandUpdateInterfaceSwitch(BrokerCommand):
                                          "the --%s option." % arg)
 
         dbswitch = Switch.get_unique(session, switch, compel=True)
-        q = session.query(Interface)
-        q = q.filter_by(name=interface, hardware_entity=dbswitch)
-        dbinterface = q.first()
-        if not dbinterface:
-            raise NotFoundException("Interface %s of %s not found." %
-                                    (interface, dbswitch.fqdn))
+        dbinterface = Interface.get_unique(session, hardware_entity=dbswitch,
+                                           name=interface, compel=True)
 
         oldinfo = DSDBRunner.snapshot_hw(dbswitch)
 
