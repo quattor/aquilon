@@ -32,6 +32,7 @@
 from aquilon.exceptions_ import UnimplementedError
 from aquilon.aqdb.model import Switch, Interface
 from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.dbwrappers.interface import rename_interface
 from aquilon.worker.processes import DSDBRunner
 
 
@@ -41,7 +42,7 @@ class CommandUpdateInterfaceSwitch(BrokerCommand):
     invalid_parameters = ['autopg', 'pg', 'boot', 'model', 'vendor']
 
     def render(self, session, logger, interface, switch, mac, comments,
-               **arguments):
+               rename_to, **arguments):
         for arg in self.invalid_parameters:
             if arguments.get(arg) is not None:
                 raise UnimplementedError("update_interface --switch cannot use "
@@ -57,6 +58,8 @@ class CommandUpdateInterfaceSwitch(BrokerCommand):
             dbinterface.comments = comments
         if mac:
             dbinterface.mac = mac
+        if rename_to:
+            rename_interface(session, dbinterface, rename_to)
 
         session.flush()
 

@@ -1548,6 +1548,7 @@
          <option name="clear_master" type="flag" conflicts="master">Clear the bonding</option>
          <option name="model" type="string">Interface model name</option>
          <option name="vendor" type="string">Interface vendor name</option>
+         <option name="rename_to" type="string">New name of the interface</option>
       </optgroup>
       <transport trigger="machine" method="post" path="machine/%(machine)s/interface/%(interface)s" />
       <transport trigger="hostname" method="post" path="host/%(hostname)s/interface/%(interface)s" />

@@ -144,6 +144,18 @@ class TestUpdateInterface(TestBrokerCommand):
                          "unittest21.aqd-unittest.ms.com is not a slave.",
                          command)
 
+    def test_160_rename(self):
+        command = ["update", "interface", "--switch", "ut3gd1r04",
+                   "--interface", "vlan110", "--rename_to", "vlan220"]
+        self.dsdb_expect_rename("ut3gd1r04-vlan110.aqd-unittest.ms.com",
+                                "ut3gd1r04-vlan220.aqd-unittest.ms.com",
+                                "vlan110", "vlan220")
+        self.dsdb_expect_rename("ut3gd1r04-vlan110-hsrp.aqd-unittest.ms.com",
+                                "ut3gd1r04-vlan220-hsrp.aqd-unittest.ms.com",
+                                "vlan110_hsrp", "vlan220_hsrp")
+        self.noouttest(command)
+        self.dsdb_verify()
+
     def test_200_update_bad_mac(self):
         mac = self.net.tor_net[6].usable[0].mac
         command = ["update", "interface", "--interface", "eth0",
@@ -229,6 +241,13 @@ class TestUpdateInterface(TestBrokerCommand):
         out = self.unimplementederrortest(command)
         self.matchoutput(out, "update_interface --chassis cannot use the "
                          "--autopg option.", command)
+
+    def test_200_rename_existing(self):
+        command = ["update", "interface", "--machine", "ut3c5n10",
+                   "--interface", "eth0", "--rename_to", "eth1"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Machine unittest02.one-nyp.ms.com already has "
+                         "an interface named eth1.", command)
 
     def test_300_verify_show_ut3c5n10_interfaces(self):
         command = "show host --hostname unittest02.one-nyp.ms.com"
@@ -336,6 +355,20 @@ class TestUpdateInterface(TestBrokerCommand):
         self.matchoutput(out, "Interface: oa %s" % new_mac, command)
         self.matchclean(out, old_mac, command)
         self.matchoutput(out, "Comments: Chassis interface comments", command)
+
+    def test_300_verify_rename(self):
+        command = ["show", "switch", "--switch", "ut3gd1r04"]
+        out = self.commandtest(command)
+        self.searchoutput(out,
+                          r"Interface: vlan220 \(no MAC addr\)$"
+                          r"\s+Type: oa$"
+                          r"\s+Network Environment: internal$"
+                          r"\s+Provides: ut3gd1r04-vlan220.aqd-unittest.ms.com \[%s\]$"
+                          r"\s+Provides: ut3gd1r04-vlan220-hsrp.aqd-unittest.ms.com \[%s\] \(label: hsrp\)$"
+                          % (self.net.tor_net[12].usable[1],
+                             self.net.tor_net[12].usable[2]),
+                          command)
+        self.matchclean(out, "vlan110", command)
 
 
 if __name__ == '__main__':

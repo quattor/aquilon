@@ -33,7 +33,8 @@ from aquilon.exceptions_ import ArgumentError, AquilonError
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.interface import (verify_port_group,
                                                  choose_port_group,
-                                                 assign_address)
+                                                 assign_address,
+                                                 rename_interface)
 from aquilon.worker.locks import lock_queue
 from aquilon.worker.templates.machine import PlenaryMachineInfo
 from aquilon.worker.processes import DSDBRunner
@@ -47,7 +48,7 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
 
     def render(self, session, logger, interface, machine, mac, model, vendor,
                boot, pg, autopg, comments, master, clear_master, default_route,
-               **arguments):
+               rename_to, **arguments):
         """This command expects to locate an interface based only on name
         and machine - all other fields, if specified, are meant as updates.
 
@@ -145,6 +146,8 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
             dbmodel = Model.get_unique(session, name=model, vendor=vendor,
                                        machine_type='nic', compel=True)
             dbinterface.model = dbmodel
+        if rename_to:
+            rename_interface(session, dbinterface, rename_to)
 
         session.flush()
         session.refresh(dbhw_ent)

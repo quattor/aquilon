@@ -40,10 +40,11 @@ from sqlalchemy.sql.expression import desc
 from sqlalchemy.orm import object_session
 
 from aquilon.exceptions_ import ArgumentError, InternalError, NotFoundException
-from aquilon.aqdb.model import (Interface, HardwareEntity, ObservedMac,
+from aquilon.aqdb.model import (Interface, HardwareEntity, ObservedMac, Fqdn,
                                 ARecord, VlanInfo, ObservedVlan, Network,
                                 AddressAssignment, Model)
 from aquilon.aqdb.model.network import get_net_id_from_ip
+from aquilon.utils import no_autoflush
 
 
 _vlan_re = re.compile(r'^(.*)\.(\d+)$')
@@ -505,3 +506,47 @@ def assign_address(dbinterface, ip, dbnetwork, label=None, resource=None):
                                                      label=label,
                                                      service_address=resource,
                                                      dns_environment=dns_environment))
+
+def rename_interface(session, dbinterface, rename_to):
+    rename_to = rename_to.strip().lower()
+
+    dbhw_ent = dbinterface.hardware_entity
+    for iface in dbhw_ent.interfaces:
+        if iface.name == rename_to:
+            raise ArgumentError("{0} already has an interface named {1}."
+                                .format(dbhw_ent, rename_to))
+
+    fqdn_changes = []
+
+    if dbhw_ent.primary_name:
+        primary_fqdn = dbhw_ent.primary_name.fqdn
+        short = primary_fqdn.name
+        dbdns_domain = primary_fqdn.dns_domain
+        dbdns_env = primary_fqdn.dns_environment
+
+        dbdns_domain.lock_row()
+
+        # Rename DNS entries that follow the standard naming convention, except
+        # the primary name. The primary name should not have an interface
+        # suffix, but who knows...
+        for addr in dbinterface.assignments:
+            if addr.label:
+                old_name = "%s-%s-%s" % (short, dbinterface.name, addr.label)
+                new_name = "%s-%s-%s" % (short, rename_to, addr.label)
+            else:
+                old_name = "%s-%s" % (short, dbinterface.name)
+                new_name = "%s-%s" % (short, rename_to)
+            fqdn_changes.extend([(dns_rec.fqdn, new_name) for dns_rec
+                                 in addr.dns_records
+                                 if dns_rec.fqdn.name == old_name and
+                                    dns_rec.fqdn.dns_domain == dbdns_domain and
+                                    dns_rec.fqdn != primary_fqdn])
+    else:
+        dbdns_domain = dbdns_env = None
+
+    with no_autoflush(session):
+        dbinterface.name = rename_to
+        for dbfqdn, new_name in fqdn_changes:
+            Fqdn.get_unique(session, name=new_name, dns_domain=dbdns_domain,
+                            dns_environment=dbdns_env, preclude=True)
+            dbfqdn.name = new_name
