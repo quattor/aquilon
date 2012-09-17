@@ -21,9 +21,10 @@ import sqlite3
 
 from aquilon.exceptions_ import PartialError, InternalError, AquilonError
 from aquilon.aqdb.model import (Host, Interface, Machine, Domain, Archetype,
-                                Personality, HostLifecycle, DnsRecord,
-                                OperatingSystem, ReservedName, Fqdn)
+                                Personality, DnsRecord, OperatingSystem,
+                                ReservedName, Fqdn)
 from aquilon.aqdb.model.dns_domain import parse_fqdn
+from aquilon.aqdb.model.hostlifecycle import Ready
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.dns import delete_dns_record
 from aquilon.worker.dbwrappers.host import get_host_dependencies
@@ -126,8 +127,7 @@ class CommandRefreshWindowsHosts(BrokerCommand):
         dbpersonality = Personality.get_unique(session, archetype=dbarchetype,
                                                name="generic",
                                                compel=InternalError)
-        dbstatus = HostLifecycle.get_unique(session, "ready",
-                                            compel=InternalError)
+        dbstatus = Ready.get_instance(session)
         dbos = OperatingSystem.get_unique(session, name="windows",
                                           version="generic",
                                           archetype=dbarchetype,

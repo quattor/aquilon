@@ -18,8 +18,9 @@
 
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import (Cluster, HostLifecycle, Personality,
-                                ServiceAddress)
+from aquilon.aqdb.model import Cluster, Personality, ServiceAddress
+from aquilon.aqdb.model.hostlifecycle import (Ready as HostReady,
+                                              Almostready as HostAlmostready)
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.commands.add_service_address import apply_service_address
 from aquilon.worker.commands.uncluster import remove_service_addresses
@@ -119,14 +120,12 @@ class CommandCluster(BrokerCommand):
         # promote a host when switching clusters
         if dbhost.status.name == 'ready':
             if dbcluster.status.name != 'ready':
-                dbalmost = HostLifecycle.get_unique(session, 'almostready',
-                                                    compel=True)
+                dbalmost = HostAlmostready.get_instance(session)
                 dbhost.status.transition(dbhost, dbalmost)
                 plenaries.append(Plenary.get_plenary(dbhost))
         elif dbhost.status.name == 'almostready':
             if dbcluster.status.name == 'ready':
-                dbready = HostLifecycle.get_unique(session, 'ready',
-                                                   compel=True)
+                dbready = HostReady.get_instance(session)
                 dbhost.status.transition(dbhost, dbready)
                 plenaries.append(Plenary.get_plenary(dbhost))
 

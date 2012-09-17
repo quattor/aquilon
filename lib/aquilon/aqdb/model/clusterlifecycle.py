@@ -26,6 +26,8 @@ from sqlalchemy.orm.session import object_session
 from aquilon.config import Config
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Base, StateEngine, HostLifecycle
+from aquilon.aqdb.model.hostlifecycle import (Ready as HostReady,
+                                              Almostready as HostAlmostready)
 from aquilon.aqdb.column_types import Enum
 
 _TN = 'clusterlifecycle'
@@ -123,15 +125,13 @@ class Ready(ClusterLifecycle):
     __mapper_args__ = {'polymorphic_identity': 'ready'}
 
     def onEnter(self, dbcluster):
-        dbready = HostLifecycle.get_unique(object_session(dbcluster),
-                                           "ready", compel=True)
+        dbready = HostReady.get_instance(object_session(dbcluster))
         for dbhost in dbcluster.hosts:
             if dbhost.status.name == 'almostready':
                 dbhost.status.transition(dbhost, dbready)
 
     def onLeave(self, dbcluster):
-        dbalmostready = HostLifecycle.get_unique(object_session(dbcluster),
-                                                 "almostready", compel=True)
+        dbalmostready = HostAlmostready.get_instance(object_session(dbcluster))
         for dbhost in dbcluster.hosts:
             if dbhost.status.name == 'ready':
                 dbhost.status.transition(dbhost, dbalmostready)

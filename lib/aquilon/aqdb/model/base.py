@@ -371,6 +371,17 @@ class Base(object):
 Base = declarative_base(cls=Base)
 
 
+class SingleInstanceMixin(object):
+    @classmethod
+    def get_instance(cls, session):
+        '''Return the one and only instance of the given class'''
+
+        if "polymorphic_identity" not in cls.__mapper_args__:
+            raise InternalError("get_instance() must be called on a "
+                                "child class.")
+        return session.query(cls).one()
+
+
 # WAY too much magic in AssociationProxy.  This bug and proposed patch is
 # listed in the second half of this message:
 # http://groups.google.com/group/sqlalchemy-devel/browse_thread/thread/973f4104007f6964/9a001201b3179c58

@@ -17,16 +17,16 @@
 """ Helper functions for managing parameters. """
 
 import re
+
+from sqlalchemy.sql import or_
+
 from aquilon.exceptions_ import NotFoundException, ArgumentError
 from aquilon.utils import (force_json_dict, force_int, force_float,
                            force_boolean)
-from sqlalchemy.sql import or_
-from aquilon.aqdb.model import (Personality, Parameter,
-                                Feature, FeatureLink, Host,
-                                HostLifecycle, Model,
-                                ParamDefinition,
-                                ArchetypeParamDef,
+from aquilon.aqdb.model import (Personality, Parameter, Feature, FeatureLink,
+                                Host, Model, ParamDefinition, ArchetypeParamDef,
                                 PersonalityParameter)
+from aquilon.aqdb.model.hostlifecycle import Ready, Almostready
 from aquilon.worker.formats.parameter_definition import ParamDefinitionFormatter
 
 
@@ -207,8 +207,8 @@ def validate_rebuild_required(session, path, param_holder):
     """ check if this parameter requires hosts to be in non-ready state
     """
     q = session.query(Host)
-    dbready = HostLifecycle.get_unique(session, "ready", compel=True)
-    dbalmostready = HostLifecycle.get_unique(session, "almostready", compel=True)
+    dbready = Ready.get_instance(session)
+    dbalmostready = Almostready.get_instance(session)
     q = q.filter(or_(Host.status == dbready, Host.status == dbalmostready))
     personality = param_holder.personality
     if isinstance(param_holder, PersonalityParameter):
