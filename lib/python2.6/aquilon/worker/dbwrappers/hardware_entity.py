@@ -78,6 +78,10 @@ def search_hardware_entity_query(session, hardware_type=HardwareEntity,
 
 
 def update_primary_ip(session, dbhw_ent, ip):
+    if not dbhw_ent.primary_name:
+        raise ArgumentError("{0} does not have a primary name."
+                            .format(dbhw_ent))
+
     dbnetwork = get_net_id_from_ip(session, ip)
     check_ip_restrictions(dbnetwork, ip)
 
