@@ -82,6 +82,10 @@ class TestAddArchetype(TestBrokerCommand):
         command = "add archetype --archetype utarchetype2"
         self.noouttest(command.split(" "))
 
+    def testaddutarchetype3(self):
+        command = "add archetype --archetype utarchetype3"
+        self.noouttest(command.split(" "))
+
     def testverifyutarchetype(self):
         command = "show archetype --archetype utarchetype1"
         out = self.commandtest(command.split(" "))

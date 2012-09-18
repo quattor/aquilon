@@ -41,10 +41,11 @@ class CommandDelArchetype(BrokerCommand):
         dbarch = Archetype.get_unique(session, archetype, compel=True)
 
         # Check dependencies
-        if session.query(Personality).filter_by(archetype=dbarch).first():
-            raise ArgumentError("Archetype %s is still in use and cannot be "
-                                "deleted." % archetype)
-
+        row = session.query(Personality).filter_by(archetype=dbarch).first()
+        # if personality exists, raise error
+        if row:
+            raise ArgumentError("{0} is still in use by {1} and cannot be "
+                                "deleted.".format (dbarch, row))
         # All clear
         session.delete(dbarch)
         return
