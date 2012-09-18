@@ -476,6 +476,8 @@ class TestAddPersonality(TestBrokerCommand):
                                personality, command)
         self.matchoutput(out, "template personality/%s/config;" % personality,
                          command)
+        self.matchoutput(out, '"/system/personality/name" = "%s";' % personality,
+                         command)
         if config_override:
             self.searchoutput(out, r'include { "features/personality/config_override/config" };\s*'
                                    r'include { if_exists\("personality/utpersonality/post_feature"\) };',
