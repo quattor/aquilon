@@ -3672,8 +3672,10 @@
       Add a new cluster.
       <optgroup name="add_cluster_req" mandatory="True" fields="all">
          <option name="cluster" type="string">Name of the new cluster</option>
+         <option name="archetype" type="string">Archetype name</option>
+         <option name="personality" type="string">Personality name</option>
          <option name="down_hosts_threshold" type="string">Number of hosts that can be down before monitoring alarms trigger</option>
-         <optgroup name="add_cluster_location_opts" fields="any">
+         <optgroup name="add_cluster_location_opts" mandatory="True" fields="any">
             <option name="organization" type="string">Organization</option>
             <option name="hub" type="string">Hub</option>
             <option name="continent" type="string">Continent</option>
@@ -3685,9 +3687,7 @@
             <option name="rack" type="string">Rack</option>
             <option name="desk" type="string">Desk</option>
          </optgroup>
-         <option name="archetype" type="string">Archetype name</option>
-         <option name="personality" type="string">Personality name</option>
-         <optgroup name="branch_opts" fields="any">
+         <optgroup name="branch_opts" mandatory="True" fields="any">
             <option name="domain" type="string" conflicts="sandbox">Name of template domain</option>
             <option name="sandbox" type="string" conflicts="domain">Name of the sandbox (given as 'author/branch')</option>
          </optgroup>
