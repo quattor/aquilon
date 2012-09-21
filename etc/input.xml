@@ -5038,6 +5038,7 @@
          <option name="required" type="flag">Is this parameter required for object compilation </option>
          <option name="default" type="string">Default value </option>
          <option name="description" type="string">Description</option>
+         <option name="rebuild_required" type="flag">Adding/Modifiying this parameter value requires rebuild of host </option>
       </optgroup>
       <transport method="put" trigger="archetype" path="archetype/%(archetype)s/parameter_definitions"/>
       <transport method="put" trigger="feature" path="feature/%(type)s/%(feature)s/parameter_definitions"/>

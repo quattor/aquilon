@@ -50,6 +50,7 @@ class ParamDefinitionFormatter(ObjectFormatter):
             details.append(indent + "  Default: %s" % paramdef.default)
         if paramdef.description:
             details.append(indent + "  Description: %s" % paramdef.description)
+        details.append(indent + "  Rebuild Required: %s" % paramdef.rebuild_required)
         return "\n".join(details)
 
     def csv_fields(self, paramdef):
@@ -59,6 +60,7 @@ class ParamDefinitionFormatter(ObjectFormatter):
                 paramdef.default,
                 paramdef.description,
                 paramdef.template,
-                paramdef.required]
+                paramdef.required,
+                paramdef.rebuild_required]
 
 ObjectFormatter.handlers[ParamDefinition] = ParamDefinitionFormatter()

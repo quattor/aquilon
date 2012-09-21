@@ -39,7 +39,7 @@ class CommandAddParameterDefintionArchetype(BrokerCommand):
     required_parameters = ["archetype", "template", "path", "value_type"]
 
     def render(self, session, archetype, template, path, value_type, required,
-               default, description, **kwargs):
+               rebuild_required, default, description, **kwargs):
         dbarchetype = Archetype.get_unique(session, archetype, compel=True)
         if not dbarchetype.is_compileable:
             raise ArgumentError("{0} is not compileable.".format(dbarchetype))
@@ -59,6 +59,7 @@ class CommandAddParameterDefintionArchetype(BrokerCommand):
                                       holder=dbarchetype.paramdef_holder,
                                       value_type=value_type, default=default,
                                       required=required, template=template,
+                                      rebuild_required=rebuild_required,
                                       description=description)
         session.add(db_paramdef)
 

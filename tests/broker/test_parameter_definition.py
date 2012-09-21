@@ -32,69 +32,12 @@
 import unittest
 
 if __name__ == "__main__":
-    import broker.utils
-    broker.utils.import_depends()
+    import utils
+    utils.import_depends()
 
 from broker.brokertest import TestBrokerCommand
 
 ARCHETYPE = 'aquilon'
-
-FEATURE = 'myfeature'
-
-PARAM_DEFS = [	{ "path": "netgroup",
-                  "value_type": "list",
-                  "description": "netgroups access",
-                  "template": "access"
-                },
-
-		{ "path": "users",
-                  "value_type": "list",
-                  "description": "users access",
-                  "template": "access",
-		},
-
-		{ "path": "lastacl",
-                  "value_type": "list",
-                  "description": "acl access",
-                  "template": "access",
-		},
-
-		{ "path": "action/\w+/user",
-                  "value_type": "string",
-                  "description": "action user",
-                  "template": "actions",
-                },
-
-		{ "path": "action/\w+/command",
-                  "value_type": "string",
-                  "description": "action command",
-                  "template": "actions",
-                },
-
-		{ "path": "function",
-                  "value_type": "string",
-                  "description": "espinfo function",
-                  "template": "espinfo",
-		  "required": True,
-		},
-
-		{ "path": "security_class",
-                  "value_type": "string",
-                  "description": "security class",
-                  "template": "security",
-		  "required": True,
-		  "default": "internal-isg-relaxed",
-		  "required": True,
-		},
-
-		{ "path": "filesystem_layout",
-                  "value_type": "string",
-                  "description": "filesystem layout",
-                  "template": "security",
-		  "required": True,
-		  "default": "afs",
-		}
-]
 
 class TestParameterDefinition(TestBrokerCommand):
 
@@ -121,14 +64,14 @@ class TestParameterDefinition(TestBrokerCommand):
                "--path=testdefault", "--description=blaah",
                "--template=foo" ]
 
-        err = self.noouttest(cmd)
+        self.noouttest(cmd)
 
     def test_130_add_int_value_type(self):
         cmd = ["add_parameter_definition", "--archetype", ARCHETYPE,
                "--path=testint", "--description=blaah",
                "--template=foo", "--value_type=int", "--default=60"]
 
-        err = self.noouttest(cmd)
+        self.noouttest(cmd)
 
     def test_130_add_invalid_int_value_type(self):
         cmd = ["add_parameter_definition", "--archetype", ARCHETYPE,
@@ -143,7 +86,7 @@ class TestParameterDefinition(TestBrokerCommand):
                "--path=testfloat", "--description=blaah",
                "--template=foo", "--value_type=float", "--default=100.100"]
 
-        err = self.noouttest(cmd)
+        self.noouttest(cmd)
 
     def test_130_add_invalid_float_value_type(self):
         cmd = ["add_parameter_definition", "--archetype", ARCHETYPE,
@@ -158,7 +101,7 @@ class TestParameterDefinition(TestBrokerCommand):
                "--path=testboolean", "--description=blaah",
                "--template=foo", "--value_type=boolean", "--default=yes"]
 
-        err = self.noouttest(cmd)
+        self.noouttest(cmd)
 
     def test_130_add_invalid_boolean_value_type(self):
         cmd = ["add_parameter_definition", "--archetype", ARCHETYPE,
@@ -173,14 +116,14 @@ class TestParameterDefinition(TestBrokerCommand):
                "--path=testlist", "--description=blaah",
                "--template=foo", "--value_type=list", "--default=val1,val2"]
 
-        err = self.noouttest(cmd)
+        self.noouttest(cmd)
 
     def test_130_add_json_value_type(self):
         cmd = ["add_parameter_definition", "--archetype", ARCHETYPE,
                "--path=testjson", "--description=blaah",
                "--template=foo", "--value_type=json","--default=\"{'val1':'val2'}\""]
 
-        err = self.noouttest(cmd)
+        self.noouttest(cmd)
 
     def test_130_add_invalid_json_value_type(self):
         cmd = ["add_parameter_definition", "--archetype", ARCHETYPE,
@@ -196,6 +139,13 @@ class TestParameterDefinition(TestBrokerCommand):
                "--template=foo", "--value_type=int", "--default=60"]
         out = self.badrequesttest(cmd)
         self.matchoutput(out, "Archetype windows is not compileable.", cmd)
+
+    def test_130_rebuild_required(self):
+        cmd = ["add_parameter_definition", "--archetype", ARCHETYPE,
+               "--path=test_rebuild_required", "--description=rebuild_required",
+               "--template=foo", "--value_type=string", "--rebuild_required"]
+
+        self.noouttest(cmd)
 
     def test_140_verify_add(self):
         cmd = ["show", "parameter_definition", "--archetype", ARCHETYPE ]
@@ -230,10 +180,24 @@ class TestParameterDefinition(TestBrokerCommand):
                           r'Template: foo\s*'
                           r'Default: val1,val2',
                           cmd)
+        self.searchoutput(out,
+                          r'Parameter Definition: testboolean\s*'
+                          r'Type: boolean\s*'
+                          r'Template: foo\s*'
+                          r'Default: yes',
+                          cmd)
+        self.searchoutput(out,
+                          r'Parameter Definition: test_rebuild_required\s*'
+                          r'Type: string\s*'
+                          r'Template: foo\s*'
+                          r'Description: rebuild_required\s*'
+                          r'Rebuild Required: True',
+                          cmd)
 
     def test_150_del(self):
 
-        for path in ['testpath','testdefault','testint', 'testlist', 'testjson', 'testboolean', 'testfloat']:
+        for path in ['testpath', 'testdefault', 'testint', 'testlist', 'testjson',
+                     'testboolean', 'testfloat', 'test_rebuild_required']:
             cmd = ["del_parameter_definition", "--archetype", ARCHETYPE,
                    "--path=%s" % path ]
             self.noouttest(cmd)
@@ -245,6 +209,6 @@ class TestParameterDefinition(TestBrokerCommand):
         self.matchoutput(err, "Not Found: No parameter definitions found for archetype aquilon", cmd)
 
 if __name__ == '__main__':
-    suite = unittest.TestLoader().loadTestsFromTestCase(TestParameterDefintion)
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestParameterDefinition)
     unittest.TextTestRunner(verbosity=2).run(suite)
 

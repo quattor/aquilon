@@ -196,6 +196,11 @@ class PlenaryPersonalityBase(Plenary):
         pan_include_if_exists(lines, "%s/pre_feature" % self.plenary_core)
         ## process parameter templates
         pan_include_if_exists(lines, "personality/config")
+        pan_assign(lines, "/system/personality/name", self.name)
+
+        ## TODO : This is just to satisfy quattor schema
+        ## needs to be removed as soon as the schema allows this
+        pan_assign(lines, "/system/personality/systemgrn", [])
 
         if self.dbobj.config_override:
             pan_include(lines, "features/personality/config_override/config")

@@ -32,8 +32,8 @@
 import unittest
 
 if __name__ == "__main__":
-    import broker.utils
-    broker.utils.import_depends()
+    import utils
+    utils.import_depends()
 
 from broker.brokertest import TestBrokerCommand
 
@@ -67,14 +67,14 @@ class TestParameterDefinitionFeature(TestBrokerCommand):
         cmd = ["add_parameter_definition", "--feature", FEATURE, "--type=host",
                "--path=testdefault", "--description=blaah" ]
 
-        err = self.noouttest(cmd)
+        self.noouttest(cmd)
 
     def test_130_add_int_value_type(self):
         cmd = ["add_parameter_definition", "--feature", FEATURE, "--type=host",
                "--path=testint", "--description=blaah",
                "--value_type=int", "--default=60"]
 
-        err = self.noouttest(cmd)
+        self.noouttest(cmd)
 
     def test_130_add_invalid_int_value_type(self):
         cmd = ["add_parameter_definition", "--feature", FEATURE, "--type=host",
@@ -89,7 +89,7 @@ class TestParameterDefinitionFeature(TestBrokerCommand):
                "--path=testfloat", "--description=blaah",
                "--value_type=float", "--default=100.100"]
 
-        err = self.noouttest(cmd)
+        self.noouttest(cmd)
 
     def test_130_add_invalid_float_value_type(self):
         cmd = ["add_parameter_definition", "--feature", FEATURE, "--type=host",
@@ -104,7 +104,7 @@ class TestParameterDefinitionFeature(TestBrokerCommand):
                "--path=testboolean", "--description=blaah",
                "--value_type=boolean", "--default=yes"]
 
-        err = self.noouttest(cmd)
+        self.noouttest(cmd)
 
     def test_130_add_invalid_boolean_value_type(self):
         cmd = ["add_parameter_definition", "--feature", FEATURE, "--type=host",
@@ -119,14 +119,14 @@ class TestParameterDefinitionFeature(TestBrokerCommand):
                "--path=testlist", "--description=blaah",
                "--value_type=list", "--default=val1,val2"]
 
-        err = self.noouttest(cmd)
+        self.noouttest(cmd)
 
     def test_130_add_json_value_type(self):
         cmd = ["add_parameter_definition", "--feature", FEATURE, "--type=host",
                "--path=testjson", "--description=blaah",
                "--value_type=json","--default=\"{'val1':'val2'}\""]
 
-        err = self.noouttest(cmd)
+        self.noouttest(cmd)
 
     def test_130_add_invalid_json_value_type(self):
         cmd = ["add_parameter_definition", "--feature", FEATURE, "--type=host",
@@ -135,6 +135,12 @@ class TestParameterDefinitionFeature(TestBrokerCommand):
 
         err = self.badrequesttest(cmd)
         self.matchoutput(err, "The json string specified for default for path=testbadjson is invalid", cmd)
+
+    def test_130_rebuild_required(self):
+        cmd = ["add_parameter_definition", "--feature", FEATURE, "--type=host",
+               "--path=test_rebuild_required", "--value_type=string", "--rebuild_required"]
+
+        self.noouttest(cmd)
 
     def test_140_verify_add(self):
         cmd = ["show", "parameter_definition", "--feature", FEATURE,
@@ -165,10 +171,15 @@ class TestParameterDefinitionFeature(TestBrokerCommand):
                           r'Type: list\s*'
                           r'Default: val1,val2',
                           cmd)
+        self.searchoutput(out,
+                          r'Parameter Definition: test_rebuild_required\s*'
+                          r'Type: string\s*'
+                          r'Rebuild Required: True',
+                          cmd)
 
     def test_150_del(self):
         for path in ['testpath', 'testdefault', 'testint', 'testlist',
-                     'testjson', 'testboolean', 'testfloat']:
+                     'testjson', 'testboolean', 'testfloat', 'test_rebuild_required']:
             cmd = ["del_parameter_definition", "--feature", FEATURE,
                    "--type=host", "--path=%s" % path ]
             self.noouttest(cmd)
@@ -186,6 +197,6 @@ class TestParameterDefinitionFeature(TestBrokerCommand):
         self.noouttest(cmd)
 
 if __name__ == '__main__':
-    suite = unittest.TestLoader().loadTestsFromTestCase(TestParameterDefintionFeature)
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestParameterDefinitionFeature)
     unittest.TextTestRunner(verbosity=2).run(suite)
 
