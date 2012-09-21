@@ -94,6 +94,9 @@ class ClusterFormatter(ObjectFormatter):
                     u.name = name
                     u.value = value
 
+        if cluster.max_hosts:
+            skeleton.max_members = cluster.max_hosts
+
         return container
 
 
