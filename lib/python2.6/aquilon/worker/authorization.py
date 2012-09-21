@@ -114,6 +114,19 @@ class AuthorizationBroker(object):
                               'add_host',
                               'change_status']:
                 self.raise_auth_error(principal, action, resource)
+        if dbuser.role.name == 'spot_server':
+            if action not in ['add_machine', 'del_machine',
+                              'add_interface_hostname',
+                              'add_interface_machine',
+                              'add_interface_address',
+                              'del_interface', 'del_interface_address',
+                              'add_address', 'del_address',
+                              'add_host', 'del_host',
+                              'add_alias', 'del_alias',
+                              'make', 'make_cluster',
+                              'pxeswitch',
+                              'add_disk', 'del_disk']:
+                self.raise_auth_error(principal, action, resource)
         if dbuser.role.name == 'resource_pool':
             if action not in ['add_address', 'del_address']:
                 self.raise_auth_error(principal, action, resource)
