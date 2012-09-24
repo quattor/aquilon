@@ -198,6 +198,16 @@ class TestUsecaseHACluster(TestBrokerCommand):
         self.matchoutput(out, "IP: %s" % ips[0], command)
         #self.matchoutput(out, "IP: %s" % ips[1], command)
 
+    def test_400_try_deco_hacl1(self):
+        command = ["change_status", "--cluster", "hacl1", "--buildstatus",
+                  "decommissioned"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "Cannot change state to decommissioned, as "
+                         "High Availability Cluster hacl1's archetype "
+                         "is hacluster.",
+                         command)
+
     def test_900_try_del_hacl1g1(self):
         command = ["del", "resourcegroup", "--cluster", "hacl1",
                    "--resourcegroup", "hacl1g1"]

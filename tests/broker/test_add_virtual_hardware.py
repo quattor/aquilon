@@ -466,7 +466,7 @@ class TestAddVirtualHardware(TestBrokerCommand):
                    "--machine=evm1", "--comments=Windows Virtual Desktop"]
         self.noouttest(command)
 
-    def test_605_verify_vm_status(self):
+    def test_705_verify_vm_status(self):
         command = ["cat", "--cluster", "utecl1", "--virtual_machine", "evm1"]
         out = self.commandtest(command)
         self.searchoutput(out, r'"build", "build",', command)
