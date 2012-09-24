@@ -150,6 +150,7 @@ class PlenaryResource(Plenary):
             system = {'archetype': {'name': arch.name,
                                     'os': os.name,
                                     'osversion': os.version},
+                      'build': machine.host.status.name,
                       'network': {'hostname': pn.name,
                                   'domainname': pn.dns_domain}}
             pan_assign(lines, "system", system)
