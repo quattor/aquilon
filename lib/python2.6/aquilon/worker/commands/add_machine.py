@@ -81,6 +81,10 @@ class CommandAddMachine(BrokerCommand):
             if dbcluster.personality.archetype.name != 'esx_cluster':
                 raise ArgumentError("Can only add virtual machines to "
                                     "clusters with archetype esx_cluster.")
+            # TODO implement the same to vmhosts.
+            if dbcluster.status.name == 'decommissioned':
+                raise ArgumentError("Cannot add virtual machines to "
+                                    "decommissioned clusters.")
             if dblocation and dbcluster.location_constraint != dblocation:
                 raise ArgumentError("Cannot override cluster location {0} "
                                     "with location {1}.".format(

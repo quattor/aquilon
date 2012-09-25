@@ -51,6 +51,9 @@ class CommandCluster(BrokerCommand):
         dbhost = hostname_to_host(session, hostname)
         dbcluster = Cluster.get_unique(session, cluster, compel=True)
 
+        if dbcluster.status.name == 'decommissioned':
+            raise ArgumentError("Cannot add hosts to decommissioned clusters.")
+
         # We only support changing personality within the same
         # archetype. The archetype decides things like which OS, how
         # it builds (dhcp, etc), whether it's compilable, and
