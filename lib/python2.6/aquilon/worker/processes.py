@@ -558,9 +558,9 @@ class DSDBRunner(object):
         if new_mac and new_mac != old_mac:
             command.extend(["-ethernet_address", new_mac])
             rollback.extend(["-ethernet_address", old_mac])
-        if new_comments and new_comments != old_comments:
-            command.extend(["-comments", new_comments])
-            rollback.extend(["-comments", old_comments])
+        if new_comments != old_comments:
+            command.extend(["-comments", new_comments or ""])
+            rollback.extend(["-comments", old_comments or ""])
 
         self.add_action(command, rollback)
 
@@ -880,30 +880,29 @@ class DSDBRunner(object):
         return fields
 
     def add_alias(self, alias, target, comments):
-        if not comments:
-            comments = ""
         command = ["add_host_alias", "-host_name", target,
-                   "-alias_name", alias, "-comments", comments]
+                   "-alias_name", alias]
+        if comments:
+            command.extend(["-comments", comments])
         rollback = ["delete_host_alias", "-alias_name", alias]
         self.add_action(command, rollback)
 
     def del_alias(self, alias, old_target, old_comments):
-        if not old_comments:
-            old_comments = ""
         command = ["delete_host_alias", "-alias_name", alias]
         rollback = ["add_host_alias", "-host_name", old_target,
-                    "-alias_name", alias, "-comments", old_comments]
+                    "-alias_name", alias]
+        if old_comments:
+            rollback.extend(["-comments", old_comments])
         self.add_action(command, rollback)
 
     def update_alias(self, alias, target, comments, old_target, old_comments):
-        if not comments:
-            comments = ""
-        if not old_comments:
-            old_comments = ""
         command = ["update_host_alias", "-alias", alias,
-                   "-new_host", target, "-new_comments", comments]
+                   "-new_host", target]
         rollback = ["update_host_alias", "-alias", alias,
-                    "-new_host", old_target, "-new_comments", old_comments]
+                    "-new_host", old_target]
+        if comments != old_comments:
+            command.extend(["-new_comments", comments or ""])
+            rollback.extend(["-new_comments", old_comments or ""])
         self.add_action(command, rollback)
 
 

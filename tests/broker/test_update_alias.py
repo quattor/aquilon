@@ -49,11 +49,12 @@ class TestUpdateAlias(TestBrokerCommand):
 
     def test_110_update_mscom(self):
         command = ["update", "alias", "--fqdn", "alias.ms.com",
-                   "--target", "arecord14.aqd-unittest.ms.com"]
+                   "--target", "arecord14.aqd-unittest.ms.com",
+                   "--comments", "Other alias comments"]
         self.dsdb_expect("update_host_alias "
                          "-alias alias.ms.com "
                          "-new_host arecord14.aqd-unittest.ms.com "
-                         "-new_comments ")
+                         "-new_comments Other alias comments")
         self.noouttest(command)
         self.dsdb_verify()
 
@@ -86,6 +87,7 @@ class TestUpdateAlias(TestBrokerCommand):
         command = ["search", "dns", "--fullinfo", "--fqdn", "alias.ms.com"]
         out = self.commandtest(command)
         self.matchoutput(out, "Target: arecord14.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "Comments: Other alias comments", command)
 
     def test_320_verify_oldtarget(self):
         command = ["search", "dns", "--fullinfo",
