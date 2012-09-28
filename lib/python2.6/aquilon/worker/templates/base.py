@@ -306,6 +306,7 @@ class Plenary(object):
                     os.removedirs(maindir)
                 except OSError:
                     pass
+                self.removed = True
             else:
                 # Non-object templates do not depend on the domain, so calling
                 # remove() is fine

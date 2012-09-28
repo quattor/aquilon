@@ -202,6 +202,9 @@ class TestCompile(TestBrokerCommand):
         command = ['manage', '--hostname=unittest02.one-nyp.ms.com',
                    '--domain=unittest', '--force']
         self.successtest(command)
+        command = ['manage', '--hostname=unittest02.one-nyp.ms.com',
+                   '--domain=unittest', '--force']
+        self.successtest(command)
         command = ['compile', '--hostname=unittest02.one-nyp.ms.com']
         self.successtest(command)
 
