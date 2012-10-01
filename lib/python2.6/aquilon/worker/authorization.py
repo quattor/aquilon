@@ -91,7 +91,7 @@ class AuthorizationBroker(object):
                     "Must have the aqd_admin role to %s." % action)
         if dbuser.role.name == 'winops':
             if action not in ['add_host', 'add_windows_host', 'make_cluster',
-                              'reconfigure']:
+                              'reconfigure', 'update_machine']:
                 self.raise_auth_error(principal, action, resource)
         if dbuser.role.name == 'winops_server':
             # Only need add/update_cluster for hacluster VCenters
@@ -102,7 +102,7 @@ class AuthorizationBroker(object):
                               'add_cluster', 'make_cluster', 'update_cluster',
                               'change_status', 'change_status_cluster',
                               'add_service_instance', 'map_service',
-                              'bind_server']:
+                              'bind_server', 'update_machine']:
                 self.raise_auth_error(principal, action, resource)
         if dbuser.role.name == 'mssb_unixops':
             if action not in ['add_machine',
