@@ -113,7 +113,11 @@ def del_parameter(session, path, param_holder):
     dbparameter = Parameter.get_unique(session, holder=param_holder,
                                        compel=True)
 
-    validate_rebuild_required(session, path, param_holder)
+    match = get_paramdef_for_parameter(path, param_holder)
+
+    if match and match.rebuild_required:
+        validate_rebuild_required(session, path, param_holder)
+
     dbparameter.del_path(path)
     return dbparameter
 
@@ -140,30 +144,7 @@ def validate_value(label, value_type, value):
 
 
 def validate_parameter(session, path, value, param_holder):
-    param_definitions = None
-    match = None
-    if isinstance(param_holder, PersonalityParameter):
-        paramdef_holder = param_holder.personality.archetype.paramdef_holder
-    else:
-        paramdef_holder = param_holder.featurelink.feature.paramdef_holder
-
-    if paramdef_holder:
-        param_definitions = paramdef_holder.param_definitions
-    else:
-        param_definitions = []
-
-    ## the specified path of the parameter should either be an actual match
-    ## or match input specified regexp.
-    ## The regexp is done only after all actual paths dont find a match
-    ## e.g action/\w+/user will never be an actual match
-    for paramdef in param_definitions:
-        if path == paramdef.path:
-            match = paramdef
-
-    if not match:
-        for paramdef in param_definitions:
-            if re.match(paramdef.path + '$', path):
-                match = paramdef
+    match = get_paramdef_for_parameter(path, param_holder)
     if not match:
         raise ArgumentError("Parameter %s does not match any parameter "
                             "definitions for the archetype." % path)
@@ -180,7 +161,8 @@ def validate_parameter(session, path, value, param_holder):
 
     retval = validate_value(path, match.value_type, value)
 
-    validate_rebuild_required(session, path, param_holder)
+    if match.rebuild_required:
+        validate_rebuild_required(session, path, param_holder)
 
     return retval, match
 
@@ -219,3 +201,32 @@ def get_parameters(session, archetype=None, personality=None, feature=None,
         return []
     q = session.query(Parameter).filter_by(holder=param_holder)
     return q.all()
+
+def get_paramdef_for_parameter(path, param_holder):
+    param_definitions = None
+    match = None
+
+    if isinstance(param_holder, PersonalityParameter):
+        paramdef_holder = param_holder.personality.archetype.paramdef_holder
+    else:
+        paramdef_holder = param_holder.featurelink.feature.paramdef_holder
+
+    if paramdef_holder:
+        param_definitions = paramdef_holder.param_definitions
+    else:
+        param_definitions = []
+
+    ## the specified path of the parameter should either be an actual match
+    ## or match input specified regexp.
+    ## The regexp is done only after all actual paths dont find a match
+    ## e.g action/\w+/user will never be an actual match
+    for paramdef in param_definitions:
+        if path == paramdef.path:
+            match = paramdef
+
+    if not match:
+        for paramdef in param_definitions:
+            if re.match(paramdef.path + '$', path):
+                match = paramdef
+
+    return match
