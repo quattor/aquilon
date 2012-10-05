@@ -2,3 +2,18 @@ Put schema migrations for whatever branch into this_branch.
 
 When we figure out what release it's going into, move it
 into there and leave it there.
+
+General rules for performing schema upgrades:
+
+- When upgrading from version A to version B, you must run all
+  the upgrade scripts for versions A + 1, A + 2, ..., B.
+
+- If there is a README file in the subdirecrory of a given version,
+  follow the procedures listed there.
+
+- If there are no version specific README, then you should execute all
+  the scripts that are relevant to your installation:
+
+  - .sql extension: for Oracle database, to be run using "sqlplus @<script>.sql"
+  - .psql extension: for PostgreSQL databasee to be run using "psql -f <script>.psql"
+  - .py extension: all databases, run it from the directory the script is in

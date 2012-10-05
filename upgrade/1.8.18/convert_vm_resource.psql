@@ -1,0 +1,60 @@
+CREATE TABLE virtual_machine (
+	resource_id INTEGER NOT NULL,
+	machine_id INTEGER NOT NULL,
+	CONSTRAINT virtual_machine_resource_fk FOREIGN KEY (resource_id) REFERENCES "resource" (id) ON DELETE CASCADE,
+	CONSTRAINT virtual_machine_machine_fk FOREIGN KEY (machine_id) REFERENCES machine (machine_id) ON DELETE CASCADE,
+	CONSTRAINT virtual_machine_pk PRIMARY KEY (resource_id)
+);
+
+CREATE OR REPLACE FUNCTION _convert_vm_resource() RETURNS VOID LANGUAGE plpgsql AS $$
+DECLARE
+	resid "resource".id%TYPE;
+	cnt INTEGER;
+
+	-- Get cluster IDs that do not have a resource holder but have a VM
+	missing_holder CURSOR IS
+		SELECT clstr.id FROM clstr
+			LEFT OUTER JOIN resholder ON resholder.cluster_id = clstr.id
+		WHERE resholder.id IS NULL AND EXISTS
+			(
+				SELECT 1 FROM machine_cluster_member
+				WHERE machine_cluster_member.cluster_id = clstr.id
+			);
+
+	vm_curs CURSOR IS
+		SELECT resholder.id AS holder_id,
+			machine_cluster_member.machine_id,
+			machine_cluster_member.creation_date,
+			hardware_entity.label
+		FROM machine_cluster_member JOIN machine ON machine.machine_id = machine_cluster_member.machine_id
+			JOIN hardware_entity ON hardware_entity.id = machine.machine_id
+			JOIN resholder ON resholder.cluster_id = machine_cluster_member.cluster_id;
+BEGIN
+	-- Ensure all clusters having VMs also have a resource holder object
+	cnt := 0;
+	FOR cluster_rec IN missing_holder LOOP
+		INSERT INTO resholder (id, holder_type, cluster_id) VALUES (nextval('resholder_seq'), 'cluster', cluster_rec.id);
+		cnt := cnt + 1;
+	END LOOP;
+	RAISE INFO 'Added % resource holders', cnt;
+
+	-- Convert the machine_cluster_member table to virtual_machine
+	cnt := 0;
+	FOR vm_rec IN vm_curs LOOP
+		INSERT INTO "resource" (id, resource_type, name, creation_date, holder_id)
+			VALUES (nextval('resource_seq'), 'virtual_machine', vm_rec.label, vm_rec.creation_date, vm_rec.holder_id)
+			RETURNING id INTO resid;
+		INSERT INTO virtual_machine (resource_id, machine_id)
+			VALUES (resid, vm_rec.machine_id);
+		cnt := cnt + 1;
+	END LOOP;
+	RAISE INFO 'Converted % virtual machines', cnt;
+END $$;
+
+BEGIN;
+SELECT _convert_vm_resource();
+COMMIT;
+
+DROP FUNCTION _convert_vm_resource();
+
+DROP TABLE machine_cluster_member;

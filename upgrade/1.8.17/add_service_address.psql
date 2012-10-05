@@ -1,0 +1,79 @@
+CREATE TABLE service_address (
+	resource_id INTEGER NOT NULL,
+	dns_record_id INTEGER NOT NULL,
+	CONSTRAINT srv_addr_resource_fk FOREIGN KEY (resource_id) REFERENCES "resource" (id),
+	CONSTRAINT srv_addr_arecord_fk FOREIGN KEY (dns_record_id) REFERENCES a_record (dns_record_id),
+	CONSTRAINT service_address_pk PRIMARY KEY (resource_id)
+);
+
+ALTER TABLE address_assignment ADD service_address_id INTEGER;
+ALTER TABLE address_assignment ADD CONSTRAINT addr_assign_srv_addr_id FOREIGN KEY (service_address_id) REFERENCES service_address (resource_id) ON DELETE CASCADE;
+
+CREATE OR REPLACE FUNCTION _convert_service_addresses() RETURNS VOID LANGUAGE plpgsql AS $$
+DECLARE
+	srv_addr_id service_address.resource_id%TYPE;
+	dns_rec_id a_record.dns_record_id%TYPE;
+	cnt INTEGER;
+
+	addr_curs CURSOR IS
+		SELECT address_assignment.*, resholder.id AS holder_id FROM address_assignment
+			JOIN interface ON interface.id = address_assignment.interface_id
+			JOIN hardware_entity ON hardware_entity.id = interface.hardware_entity_id
+			LEFT OUTER JOIN host ON host.machine_id = hardware_entity.id
+			LEFT OUTER JOIN resholder ON resholder.host_id = host.machine_id
+		WHERE address_assignment.usage = 'zebra'
+		FOR UPDATE OF address_assignment;
+
+	srv_curs CURSOR (dns_id service_address.dns_record_id%TYPE) IS
+		SELECT service_address.resource_id FROM service_address WHERE service_address.dns_record_id = dns_id;
+
+	-- Get host IDs that do not have a resource holder but have a zebra address
+	missing_holder CURSOR IS
+		SELECT DISTINCT host.machine_id FROM host
+			JOIN machine ON machine.machine_id = host.machine_id
+			JOIN interface ON interface.hardware_entity_id = machine.machine_id
+			JOIN address_assignment ON address_assignment.interface_id = interface.id
+			LEFT OUTER JOIN resholder ON resholder.host_id = host.machine_id
+		WHERE resholder.id IS NULL AND address_assignment.usage = 'zebra';
+BEGIN
+	-- Ensure all hosts having a Zebra address also has a resource holder object
+	cnt := 0;
+	FOR host_rec IN missing_holder LOOP
+		INSERT INTO resholder (id, holder_type, host_id) VALUES (nextval('resholder_seq'), 'host', host_rec.machine_id);
+		cnt := cnt + 1;
+	END LOOP;
+	RAISE INFO 'Added % resource holders', cnt;
+
+	cnt := 0;
+	FOR addr_rec IN addr_curs LOOP
+		-- This throws an exception either if there is no matching DNS record or if there are more than one
+		SELECT a_record.dns_record_id INTO dns_rec_id FROM a_record
+			WHERE a_record.ip = addr_rec.ip AND a_record.network_id = addr_rec.network_id;
+
+		-- Fetch the resource object or create it if needed
+		OPEN srv_curs(dns_rec_id);
+		FETCH srv_curs INTO srv_addr_id;
+		IF NOT FOUND THEN
+			INSERT INTO "resource" (id, resource_type, name, creation_date, holder_id)
+				VALUES (nextval('resource_seq'), 'service_address', addr_rec.label,
+					addr_rec.creation_date, addr_rec.holder_id)
+				RETURNING id INTO srv_addr_id;
+			INSERT INTO service_address (resource_id, dns_record_id)
+				VALUES (srv_addr_id, dns_rec_id);
+		END IF;
+		CLOSE srv_curs;
+
+		UPDATE address_assignment SET service_address_id = srv_addr_id WHERE CURRENT OF addr_curs;
+		cnt := cnt + 1;
+	END LOOP;
+	RAISE INFO 'Converted % address assignments', cnt;
+END
+$$;
+
+BEGIN;
+SELECT _convert_service_addresses();
+SELECT COUNT(*) AS "Conversion failed" FROM address_assignment WHERE usage = 'zebra' AND service_address_id IS NULL;
+COMMIT;
+DROP FUNCTION _convert_service_addresses();
+
+ALTER TABLE address_assignment DROP COLUMN usage;

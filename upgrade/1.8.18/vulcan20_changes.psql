@@ -1,0 +1,108 @@
+-- CLSTR
+
+ALTER TABLE clstr ALTER COLUMN down_hosts_threshold DROP NOT NULL;
+ALTER TABLE clstr ALTER COLUMN down_hosts_percent DROP NOT NULL;
+ALTER TABLE clstr ALTER COLUMN down_maint_percent DROP NOT NULL;
+
+
+-- RESOURCEGROUP
+
+ALTER TABLE RESOURCEGROUP ADD REQUIRED_TYPE CHARACTER VARYING (32);
+
+
+-- SHARE
+CREATE TABLE "share" (
+    id INTEGER NOT NULL,
+    latency INTEGER,
+    CONSTRAINT share_pk PRIMARY KEY (id),
+    CONSTRAINT share_resource_fk FOREIGN KEY (id) REFERENCES "resource" (id) ON DELETE CASCADE
+);
+
+
+-- DISK
+
+ALTER TABLE DISK ADD SHARE_ID INTEGER;
+ALTER TABLE DISK ADD CONSTRAINT DISK_SHARE_FK FOREIGN KEY (SHARE_ID) REFERENCES "share" (ID) ON DELETE CASCADE;
+
+
+-- METACLUSTER
+
+-- remove existing, unneeded constraints
+ALTER TABLE METACLUSTER DROP CONSTRAINT METACLUSTER_UK;
+DROP SEQUENCE METACLUSTER_SEQ;
+
+--    create a temporary CLUSTER_ID field in METACLUSTER
+ALTER TABLE METACLUSTER ADD CLUSTER_ID INTEGER;
+
+ALTER TABLE metacluster_member DROP CONSTRAINT metacluster_member_meta_fk;
+ALTER TABLE metacluster_member DROP CONSTRAINT metacluster_member_pk;
+
+CREATE OR REPLACE FUNCTION _convert_vulcan20() RETURNS VOID LANGUAGE plpgsql AS $$
+DECLARE
+    cl_id INTEGER;
+    loc_id INTEGER;
+    arch_id INTEGER;
+
+    pers_id INTEGER;
+    branch_ny_prod INTEGER;
+    status_ready INTEGER;
+    mc_rec RECORD;
+
+BEGIN
+    select id into loc_id from location where location_type = 'company' and name = 'ms';
+    select id into status_ready from clusterlifecycle where name = 'ready';
+    select id into branch_ny_prod from branch where branch_type = 'domain' and name = 'ny-prod';
+
+    -- metacluster archetype
+    arch_id := nextval('archetype_id_seq');
+
+    INSERT INTO ARCHETYPE(id, name, outputdesc, is_compileable, cluster_type, creation_date)
+        VALUES(arch_id, 'metacluster', 'Meta', 't', 'meta', NOW());
+
+    -- metacluster personality
+    pers_id := nextval('prsnlty_seq');
+
+    INSERT INTO PERSONALITY(id, name, archetype_id, cluster_required, creation_date)
+        VALUES(pers_id, 'metacluster', arch_id, 'f', NOW());
+
+    -- migrate data from metacluster to clstr
+    FOR mc_rec IN SELECT id, comments, creation_date, name FROM metacluster LOOP
+        cl_id := nextval('clstr_seq');
+
+        -- create new CLUSTER records for every METACLUSTER
+        INSERT INTO clstr(id, name, cluster_type, personality_id, branch_id, location_constraint_id, creation_date, status_id, comments)
+            VALUES(cl_id, mc_rec.name, 'meta', pers_id, branch_ny_prod, loc_id, mc_rec.creation_date, status_ready, mc_rec.comments);
+
+        -- add CLUSTER record ID to METACLUSTER
+        UPDATE metacluster SET cluster_id = cl_id
+            WHERE id = mc_rec.id;
+
+        -- update METACLUSTER_MEMBER reference based on CLUSTER_ID
+        UPDATE metacluster_member SET metacluster_id = cl_id
+            WHERE metacluster_id = mc_rec.id;
+    END LOOP;
+
+    -- update METACLUSTER ID based on CLUSTER_ID
+    FOR mc_rec IN SELECT id, cluster_id FROM metacluster LOOP
+        UPDATE metacluster SET id = mc_rec.cluster_id
+            WHERE id = mc_rec.id;
+    END LOOP;
+END $$;
+
+BEGIN;
+SELECT _convert_vulcan20();
+COMMIT;
+
+DROP FUNCTION _convert_vulcan20();
+
+ALTER TABLE metacluster_member ADD CONSTRAINT metacluster_member_meta_fk FOREIGN KEY (metacluster_id) REFERENCES metacluster(id) ON DELETE CASCADE;
+ALTER TABLE metacluster_member ADD CONSTRAINT metacluster_member_pk PRIMARY KEY (metacluster_id, cluster_id);
+
+--    drop temporary CLUSTER_ID field in METACLUSTER
+ALTER TABLE METACLUSTER DROP COLUMN CLUSTER_ID;
+
+ALTER TABLE METACLUSTER DROP COLUMN COMMENTS;
+ALTER TABLE METACLUSTER DROP COLUMN CREATION_DATE;
+ALTER TABLE METACLUSTER DROP COLUMN NAME;
+
+ALTER TABLE METACLUSTER ADD CONSTRAINT META_CLUSTER_FK FOREIGN KEY (ID) REFERENCES CLSTR (ID) ON DELETE CASCADE;

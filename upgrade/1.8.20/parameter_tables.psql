@@ -1,0 +1,55 @@
+/* create tables */
+CREATE TABLE param_def_holder (
+	id integer NOT NULL,
+	type VARCHAR(16) NOT NULL,
+	creation_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+	archetype_id INTEGER,
+	feature_id INTEGER,
+	CONSTRAINT param_def_holder_feature_uk UNIQUE (feature_id),
+	CONSTRAINT param_def_holder_archetype_uk UNIQUE (archetype_id),
+	CONSTRAINT param_def_holder_archetype_fk FOREIGN KEY (archetype_id) REFERENCES archetype (id) ON DELETE CASCADE,
+	CONSTRAINT param_def_holder_feature_fk FOREIGN KEY (feature_id) REFERENCES feature (id) ON DELETE CASCADE,
+	CONSTRAINT param_def_holder_pk PRIMARY KEY (id)
+);
+
+CREATE TABLE param_definition (
+	id integer NOT NULL,
+	path VARCHAR(255) NOT NULL,
+	template VARCHAR(32),
+	required BOOLEAN NOT NULL,
+	value_type VARCHAR(16) NOT NULL,
+	"default" TEXT,
+	description VARCHAR(255),
+	holder_id INTEGER,
+	creation_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+	CONSTRAINT param_definition_holder_fk FOREIGN KEY (holder_id) REFERENCES param_def_holder (id) ON DELETE CASCADE,
+	CONSTRAINT param_definition_pk PRIMARY KEY (id)
+);
+
+CREATE TABLE param_holder (
+	id integer NOT NULL,
+	creation_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+	holder_type VARCHAR(16) NOT NULL,
+	personality_id INTEGER,
+	featurelink_id INTEGER,
+	CONSTRAINT param_holder_flink_uk UNIQUE (featurelink_id),
+	CONSTRAINT param_holder_persona_uk UNIQUE (personality_id),
+	CONSTRAINT param_holder_featurelink_fk FOREIGN KEY (featurelink_id) REFERENCES feature_link (id) ON DELETE CASCADE,
+	CONSTRAINT param_holder_persona_fk FOREIGN KEY (personality_id) REFERENCES personality (id) ON DELETE CASCADE,
+	CONSTRAINT param_holder_pk PRIMARY KEY (id)
+);
+
+CREATE TABLE parameter (
+	id integer NOT NULL,
+	value TEXT,
+	creation_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+	comments VARCHAR(255),
+	holder_id INTEGER,
+	CONSTRAINT parameter_paramholder_fk FOREIGN KEY (holder_id) REFERENCES param_holder (id) ON DELETE CASCADE,
+	CONSTRAINT parameter_pk PRIMARY KEY (id)
+);
+
+CREATE SEQUENCE parameter_seq;
+CREATE SEQUENCE param_definition_seq;
+CREATE SEQUENCE param_def_holder_seq;
+CREATE SEQUENCE param_holder_seq;

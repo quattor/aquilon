@@ -99,6 +99,9 @@ def main():
                 base_commit = merge_base
                 min_ahead = ahead
 
+            if min_ahead == 0:
+                break
+
         print "{0: <40}: {1.name} (ahead {2})".format(sandbox, base_domain,
                                                       min_ahead)
 
@@ -107,11 +110,17 @@ def main():
     session.expunge_all()
 
     try:
-        query = text("""
-    ALTER TABLE sandbox ADD base_commit VARCHAR2(40 CHAR)
+        if session.bind.dialect.name == 'oracle':
+            query = text("""
+        ALTER TABLE sandbox ADD base_commit VARCHAR2(40 CHAR)
+""")
+        elif session.bind.dialect.name == 'postgresql':
+            query = text("""
+        ALTER TABLE sandbox ADD base_commit CHARACTER VARYING (40)
 """)
         print "\nExecuting: %s" % query
         session.execute(query)
+        session.commit()
     except DatabaseError:
         # Allow the script to be re-run by not failing if the column already
         # exists. If the column does not exist, then trying to update it will
@@ -121,24 +130,32 @@ WARNING: Adding the sandbox.base_commit column has failed. If you're running
 this script for the second time, then that's likely OK, otherwise you should
 verify and correct the schema manually.
 """
+        session.rollback()
 
     for sandbox in q:
         sandbox.base_commit = base_commits[sandbox.name]
     session.commit()
 
     try:
-        query = text("""
-    ALTER TABLE sandbox MODIFY (base_commit VARCHAR2(40 CHAR)
-        CONSTRAINT sandbox_base_commit_nn NOT NULL)
+        if session.bind.dialect.name == 'oracle':
+            query = text("""
+        ALTER TABLE sandbox MODIFY (base_commit VARCHAR2(40 CHAR)
+            CONSTRAINT sandbox_base_commit_nn NOT NULL)
+""")
+        elif session.bind.dialect.name == 'postgresql':
+            query = text("""
+        ALTER TABLE sandbox ALTER COLUMN base_commit SET NOT NULL
 """)
         print "\nExecuting: %s" % query
         session.execute(query)
+        session.commit()
     except DatabaseError:
         print """
 WARNING: Enabling the NOT NULL constraint for sandbox.base_commit column has
 failed. If you're running this script for the second time, then that's likely
 OK, otherwise you should verify and correct the schema manually.
 """
+        session.rollback()
 
 if __name__ == '__main__':
     main()

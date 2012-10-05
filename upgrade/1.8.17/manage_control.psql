@@ -1,0 +1,3 @@
+ALTER TABLE domain ADD allow_manage boolean;
+UPDATE domain SET allow_manage = 't';
+ALTER TABLE domain ALTER allow_manage SET NOT NULL;
