@@ -33,14 +33,20 @@ from sqlalchemy.orm import joinedload, subqueryload
 from aquilon.exceptions_ import NotFoundException
 from aquilon.aqdb.model import MetaCluster
 from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.formats.cluster import SimpleClusterList
 
 
 class CommandShowMetaClusterAll(BrokerCommand):
 
     def render(self, session, metacluster, **arguments):
+        #all
+        if not metacluster:
+            q = session.query(MetaCluster.name).order_by(MetaCluster.name)
+            return SimpleClusterList(q.all())
+
         q = session.query(MetaCluster)
-        if metacluster:
-            q = q.filter_by(name=metacluster)
+
+        q = q.filter_by(name=metacluster)
         q = q.options(subqueryload('_clusters'),
                       joinedload('_clusters.cluster'),
                       subqueryload('_clusters.cluster._hosts'),
