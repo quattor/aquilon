@@ -44,6 +44,7 @@ class CommandPxeswitch(BrokerCommand):
                    'localboot':'--boot', 'install':'--install',
                    'rescue':'--rescue',
                    'firmware':'--firmware', 'blindbuild':'--livecd'}
+    requires_readonly = True
 
     def render(self, session, logger, hostname, **arguments):
         # The default is now --configure, but that does not play nice with
