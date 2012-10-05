@@ -116,6 +116,7 @@ class AuthorizationBroker(object):
                 self.raise_auth_error(principal, action, resource)
         if dbuser.role.name == 'spot_server':
             if action not in ['add_machine', 'del_machine',
+                              'add_machine_prefix',
                               'add_interface_hostname',
                               'add_interface_machine',
                               'add_interface_address',
