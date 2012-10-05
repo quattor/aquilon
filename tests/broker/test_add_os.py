@@ -125,6 +125,16 @@ class TestAddOS(TestBrokerCommand):
         command = "show os --osname os-does-not-exist --osversion foobar --archetype aquilon"
         self.notfoundtest(command.split(" "))
 
+    def testupdateoscomments(self):
+        command = ["update_os", "--osname", "windows", "--osversion", "nt61e",
+                   "--archetype", "windows",
+                   "--comments", "Windows 7 Enterprise (x86)"]
+        self.noouttest(command)
+
+    def testverifyoscomments(self):
+        command = "show os --archetype windows --osname windows --osversion nt61e"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Comments: Windows 7 Enterprise (x86)", command)
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddOS)

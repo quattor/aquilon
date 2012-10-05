@@ -2893,6 +2893,17 @@
       <transport method="put" path="os/%(osname)s/%(osversion)s/%(archetype)s" />
   </command>
 
+  <command name="update_os">
+      Update an operating system comments.
+      <optgroup name="mandatory_options" mandatory="True" fields="all">
+         <option name="osname" type="string">The name of the operating system</option>
+         <option name="osversion" type="string">The version of the operating system</option>
+         <option name="archetype" type="string">The archetype of the operating system</option>
+         <option name="comments" type="string">Comments</option>
+      </optgroup>
+      <transport method="post" path="os/%(osname)s/%(osversion)s/%(archetype)s" />
+  </command>
+
   <command name="del_os">
       Delete an operating system definition.
       <optgroup name="mandatory_options" mandatory="True" fields="all">

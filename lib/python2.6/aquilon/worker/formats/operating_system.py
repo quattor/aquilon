@@ -44,6 +44,9 @@ class OSFormatter(ObjectFormatter):
         details.append(indent + "  Archetype: %s" % os.archetype)
         details.append(indent + "  Template: %s/os/%s/%s/config.tpl" %
                        (os.archetype.name, os.name, os.version))
+        if os.comments:
+            details.append(indent + "  Comments: %s" % os.comments)
+
         return "\n".join(details)
 
     def format_proto(self, os, skeleton=None):

@@ -71,7 +71,7 @@ class AuthorizationBroker(object):
         # Right now, anybody in a group can do anything they want, except...
         if action in ['add_archetype', 'update_archetype', 'del_archetype',
                       'add_vendor', 'del_vendor',
-                      'add_os', 'del_os',
+                      'add_os', 'update_os', 'del_os',
                       'add_model', 'update_model', 'del_model',
                       'add_organization', 'del_organization',
                       'add_grn', 'del_grn', 'update_grn',
