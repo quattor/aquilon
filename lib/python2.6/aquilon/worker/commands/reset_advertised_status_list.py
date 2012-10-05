@@ -113,7 +113,7 @@ class CommandResetAdvertisedStatusList(CommandResetAdvertisedStatus):
             plenaries.stash()
             plenaries.write(locked=True)
             td = TemplateDomain(dbbranch, dbauthor, logger=logger)
-            td.compile(session, only=" ".join(compileable), locked=True)
+            td.compile(session, only=compileable, locked=True)
         except:
             plenaries.restore_stash()
             raise

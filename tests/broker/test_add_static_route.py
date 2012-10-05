@@ -91,7 +91,7 @@ class TestAddStaticRoute(TestBrokerCommand):
     def test_210_make_unittest26(self):
         command = ["make", "--hostname", "unittest26.aqd-unittest.ms.com"]
         (out, err) = self.successtest(command)
-        self.matchoutput(err, "1/1 compiled", command)
+        self.matchoutput(err, "2/2 compiled", command)
 
     def test_220_verify_unittest26(self):
         eth0_net = self.net.unknown[0]

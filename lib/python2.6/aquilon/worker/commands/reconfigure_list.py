@@ -99,6 +99,11 @@ class CommandReconfigureList(BrokerCommand):
             dbstatus = HostLifecycle.get_unique(session, buildstatus,
                                                 compel=True)
 
+        # Take a shortcut if there's nothing to do, but only after all the other
+        # parameters have been checked
+        if not dbhosts:
+            return
+
         personalities = {}
         branches = {}
         authors = {}

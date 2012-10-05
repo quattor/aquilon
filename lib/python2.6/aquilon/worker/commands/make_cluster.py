@@ -62,10 +62,11 @@ class CommandMakeCluster(BrokerCommand):
             chooser.write_plenary_templates(locked=True)
 
             profile_list = add_cluster_data(dbcluster)
+            profile_list.extend(chooser.changed_server_fqdns())
 
             td = TemplateDomain(dbcluster.branch, dbcluster.sandbox_author,
                                 logger=logger)
-            td.compile(session, only=" ".join(profile_list), locked=True)
+            td.compile(session, only=profile_list, locked=True)
 
         except:
             chooser.restore_stash()

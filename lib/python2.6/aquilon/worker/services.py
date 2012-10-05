@@ -29,12 +29,17 @@
 """Provides various utilities around services."""
 
 
+from itertools import chain
 from random import choice
 
+from sqlalchemy.orm import undefer, subqueryload
+from sqlalchemy.orm.attributes import set_committed_value
 from sqlalchemy.orm.session import object_session
+from sqlalchemy.sql import or_
 
 from aquilon.exceptions_ import ArgumentError, InternalError
-from aquilon.aqdb.model import Host, Cluster, ServiceInstance, MetaCluster, EsxCluster
+from aquilon.aqdb.model import (Host, Cluster, Service, ServiceInstance,
+                                MetaCluster, EsxCluster)
 from aquilon.worker.templates import (Plenary, PlenaryCollection,
                                       PlenaryServiceInstanceServer)
 
@@ -439,6 +444,18 @@ class Chooser(object):
     def restore_stash(self):
         self.plenaries.restore_stash()
 
+    def changed_server_fqdns(self):
+        hosts = set()
+        for instance in chain(self.instances_bound, self.instances_unbound):
+            for srv in instance.servers:
+                # Skip servers that do not have a profile
+                if not srv.host.personality.archetype.is_compileable:
+                    continue
+                if (srv.host.branch == self.dbobj.branch and
+                    srv.host.sandbox_author_id == self.dbobj.sandbox_author_id):
+                    hosts.add(str(srv.host.fqdn))
+        return hosts
+
 
 class HostChooser(Chooser):
     """Choose services for a host."""
@@ -453,7 +470,6 @@ class HostChooser(Chooser):
         self.location = self.dbhost.machine.location
         self.archetype = self.dbhost.archetype
         self.personality = self.dbhost.personality
-        self.required_services = set()
 
         self.network = self.dbhost.machine.primary_name.network
 
@@ -461,14 +477,20 @@ class HostChooser(Chooser):
         # dbhost.machine.interfaces[x].assignments[y].network
 
         """Stores interim service instance lists."""
-        for service in self.archetype.services:
-            self.required_services.add(service)
-        for service in self.personality.services:
-            self.required_services.add(service)
+        q = self.session.query(Service)
+        q = q.filter(or_(Service.archetypes.contains(self.archetype),
+                         Service.personalities.contains(self.personality)))
+        q = q.options(subqueryload('_clusters'))
+        self.required_services = set(q.all())
+
         self.original_service_instances = {}
         """Cache of any already bound services (keys) and the instance
         that was bound (values).
         """
+        q = self.session.query(ServiceInstance)
+        q = q.options(undefer('_client_count'))
+        q = q.filter(ServiceInstance.clients.contains(self.dbhost))
+        set_committed_value(self.dbhost, 'services_used', q.all())
         for si in self.dbhost.services_used:
             self.original_service_instances[si.service] = si
             self.logger.debug("%s original binding: %s",

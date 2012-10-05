@@ -39,7 +39,8 @@ from aquilon.exceptions_ import ArgumentError, ProcessException, InternalError
 from aquilon.worker.processes import run_command, run_git
 from aquilon.worker.templates.index import build_index
 from aquilon.worker.locks import lock_queue, CompileKey
-from aquilon.aqdb.model import Host, Cluster
+from aquilon.aqdb.model import (Host, Cluster, Fqdn, DnsRecord, HardwareEntity,
+                                Machine)
 from aquilon.worker.logger import CLIENT_INFO
 
 LOGGER = logging.getLogger(__name__)
@@ -96,7 +97,7 @@ class TemplateDomain(object):
         of blocking on the compile lock.
 
         If the 'only' parameter is provided, then it should be a
-        single object and just that profile will be compiled.
+        list or set containing the profiles that need to be compiled.
 
         May raise ArgumentError exception, else returns the standard
         output (as a string) of the compile
@@ -133,27 +134,38 @@ class TemplateDomain(object):
                 except OSError, e:
                     raise ArgumentError("Failed to mkdir %s: %s" % (d, e))
 
+        nothing_to_do = True
         if only:
-            objectlist = only.split(' ')
+            nothing_to_do = False
         else:
-            q = session.query(Host)
-            q = q.filter_by(branch=self.domain, sandbox_author=self.author)
-            hosts = q.all()
-            q = session.query(Cluster)
-            q = q.filter_by(branch=self.domain, sandbox_author=self.author)
-            clusters = q.all()
-            objectlist = hosts + clusters
+            hostnames = session.query(Fqdn)
+            hostnames = hostnames.join(DnsRecord, HardwareEntity, Machine, Host)
+            hostnames = hostnames.filter_by(branch=self.domain,
+                                            sandbox_author=self.author)
+
+            clusternames = session.query(Cluster.name)
+            clusternames = clusternames.filter_by(branch=self.domain,
+                                                  sandbox_author=self.author)
             if self.author:
                 # Need to restrict to the subset of the sandbox managed
                 # by this author.
-                only = " ".join([h.fqdn for h in hosts] +
-                                ["cluster/%s" % c.name for c in clusters])
+                only = [str(fqdn) for fqdn in hostnames]
+                only.extend(["cluster/%s" % c.name for c in clusternames])
+                nothing_to_do = not bool(only)
+            else:
+                nothing_to_do = not hostnames.count() and not clusternames.count()
 
-        if (len(objectlist) == 0):
-            return 'no hosts: nothing to do'
+        if nothing_to_do:
+            return 'No hosts: nothing to do.'
 
-        panc_env = {"PATH": "%s:%s" % (config.get("broker", "javadir"),
-                                       os_environ.get("PATH", ""))}
+        # The ant wrapper is silly and it may pick up the wrong set of .jars if
+        # ANT_HOME is not set
+        panc_env = {"PATH": "%s/bin:%s" % (config.get("broker", "java_home"),
+                                           os_environ.get("PATH", "")),
+                    "ANT_HOME": config.get("broker", "ant_home"),
+                    "JAVA_HOME": config.get("broker", "java_home")}
+        if config.has_option("broker", "ant_options"):
+            panc_env["ANT_OPTS"] = config.get("broker", "ant_options")
 
         args = [config.get("broker", "ant")]
         args.append("--noconfig")
@@ -174,9 +186,10 @@ class TemplateDomain(object):
                     config.get("panc", "gzip_output"))
         if self.domain.branch_type == 'sandbox':
             args.append("-Ddomain.templates=%s" % sandboxdir)
-        if (only):
+        if only:
             # Use -Dforce.build=true?
-            args.append("-Dobject.profile=%s" % only)
+            # TODO: pass the list in a temp file
+            args.append("-Dobject.profile=%s" % " ".join(only))
             args.append("compile.object.profile")
         else:
             # Technically this is the default, but being explicit
@@ -194,8 +207,9 @@ class TemplateDomain(object):
         out = ''
         try:
             if not locked:
-                if only and len(objectlist) == 1:
-                    key = CompileKey(domain=self.domain.name, profile=only,
+                if only and len(only) == 1:
+                    key = CompileKey(domain=self.domain.name,
+                                     profile=list(only)[0],
                                      logger=self.logger)
                 else:
                     key = CompileKey(domain=self.domain.name,

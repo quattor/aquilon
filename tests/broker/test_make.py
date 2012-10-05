@@ -216,12 +216,12 @@ class TestMake(TestBrokerCommand):
     def testmakeccisshost(self):
         command = ["make", "--hostname=unittest18.aqd-unittest.ms.com"]
         (out, err) = self.successtest(command)
-        self.matchoutput(err, "1/1 compiled", command)
+        self.matchoutput(err, "2/2 compiled", command)
 
     def testmakezebra(self):
         command = ["make", "--hostname", "unittest20.aqd-unittest.ms.com"]
         (out, err) = self.successtest(command)
-        self.matchoutput(err, "1/1 compiled", command)
+        self.matchoutput(err, "2/2 compiled", command)
 
     def testverifyunittest20(self):
         eth0_ip = self.net.unknown[11].usable[0]
@@ -345,7 +345,7 @@ class TestMake(TestBrokerCommand):
     def testmakeunittest21(self):
         command = ["make", "--hostname", "unittest21.aqd-unittest.ms.com"]
         (out, err) = self.successtest(command)
-        self.matchoutput(err, "1/1 compiled", command)
+        self.matchoutput(err, "2/2 compiled", command)
 
     def testverifyunittest21(self):
         net = self.net.unknown[11]
@@ -363,7 +363,7 @@ class TestMake(TestBrokerCommand):
     def testmakeunittest23(self):
         command = ["make", "--hostname", "unittest23.aqd-unittest.ms.com"]
         (out, err) = self.successtest(command)
-        self.matchoutput(err, "1/1 compiled", command)
+        self.matchoutput(err, "2/2 compiled", command)
 
     def testverifyunittest23(self):
         # Verify that the host chooses the closest router
@@ -395,7 +395,7 @@ class TestMake(TestBrokerCommand):
     def testmakeunittest24(self):
         command = ["make", "--hostname", "unittest24.aqd-unittest.ms.com"]
         (out, err) = self.successtest(command)
-        self.matchoutput(err, "1/1 compiled", command)
+        self.matchoutput(err, "2/2 compiled", command)
 
     def testverifyunittest24(self):
         # Verify that the host chooses the closest router
@@ -427,7 +427,7 @@ class TestMake(TestBrokerCommand):
     def testmakeunittest25(self):
         command = ["make", "--hostname", "unittest25.aqd-unittest.ms.com"]
         (out, err) = self.successtest(command)
-        self.matchoutput(err, "1/1 compiled", command)
+        self.matchoutput(err, "2/2 compiled", command)
 
     def testverifyunittest25(self):
         # Verify that the host chooses the closest router
