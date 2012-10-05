@@ -70,6 +70,7 @@ PARAM_DEFS = {
     { "path": "esp/class",    "value_type": "string", "description": "espinfo class", "required": True },
     { "path": "esp/users",    "value_type": "list", "description": "espinfo users", "required": True },
     { "path": "esp/threshold", "value_type": "int", "description": "espinfo threshold", "required": True },
+    { "path": "esp/description", "value_type": "string", "description": "espinfo desc" },
 ],
 "windows": [
     { "path": "windows/windows", "value_type": "json" , "required": True, "default": '[{"duration": 8, "start": "08:00", "day": "Sun"}]' }
@@ -119,6 +120,8 @@ class TestParameter(TestBrokerCommand):
                        "--value_type", p["value_type"]]
                 if "required" in p:
                     cmd.append( "--required" )
+                if "rebuild_required" in p:
+                    cmd.append( "--rebuild_required" )
                 if "default" in p:
                     cmd.extend(["--default", p["default"]])
 
@@ -308,6 +311,20 @@ class TestParameter(TestBrokerCommand):
                           r'There are hosts associated to the personality in non-ready state. '
                           r'Please set these host to status of rebuild to continue.',
                           command)
+
+    def test_400_validate_modifying_other_params_works (self):
+        path = "esp/function"
+        value = "development"
+        command = UPD_CMD + ["--path", path, "--value", value]
+        self.noouttest(command)
+
+        path = "esp/description"
+        value = "add other params in host ready state"
+        command = ADD_CMD + ["--path", path, "--value", value]
+        self.noouttest(command)
+
+        command = DEL_CMD + ["--path", path]
+        self.noouttest(command)
 
     def test_405_add_rebuild_required_ready (self):
         command = ["change_status", "--hostname", "unittest17.aqd-unittest.ms.com",
