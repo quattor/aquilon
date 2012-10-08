@@ -63,14 +63,16 @@ if __name__ == '__main__':
     dest_engine = create_engine(opts.dsn, convert_unicode=True, echo=opts.verbose)
     dest_session = sessionmaker(bind=dest_engine)()
 
-    # The only operation on sequences that all DBs support is getting the next
-    # value. Unfortunately that means we have to alter the state of the source
-    # database here.
-    for seq in Base.metadata._sequences.values():
-        nextid = src_session.execute(seq)
-        # Make sure the sequence is re-created with the right start index
-        seq.drop(dest_engine, checkfirst=True)
-        seq.start = nextid
+    if db.engine.dialect.supports_sequences and \
+       dest_engine.dialect.supports_sequences:
+        # The only operation on sequences that all DBs support is getting the
+        # next value. Unfortunately that means we have to alter the state of the
+        # source database here.
+        for seq in Base.metadata._sequences.values():
+            nextid = src_session.execute(seq)
+            # Make sure the sequence is re-created with the right start index
+            seq.drop(dest_engine, checkfirst=True)
+            seq.start = nextid
 
     Base.metadata.create_all(dest_engine, checkfirst=True)
 
