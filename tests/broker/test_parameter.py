@@ -210,7 +210,7 @@ class TestParameter(TestBrokerCommand):
         self.noouttest(command)
 
         path = "esp/users"
-        value = "someusers"
+        value = "someusers, otherusers"
         command = ADD_CMD + ["--path", path, "--value", value]
         self.noouttest(command)
 
@@ -242,7 +242,10 @@ class TestParameter(TestBrokerCommand):
 
     def test_240_verify_path(self):
         out = self.commandtest(SHOW_CMD)
-        self.check_match(out, 'esp: { "function": "development", "users": "someusers", "class": "INFRASTRUCTURE" }', SHOW_CMD)
+        self.check_match(out,
+                         'esp: { "function": "development", '
+                         '"users": "someusers, otherusers", '
+                         '"class": "INFRASTRUCTURE" }', SHOW_CMD)
         self.check_match(out, '"testaction": { "command": "/bin/testaction", "user": "user2" }', SHOW_CMD)
         self.check_match(out, '"testaction2": { "command": "/bin/testaction2", "user": "user1", "timeout": 100 } }', SHOW_CMD)
 
@@ -253,7 +256,8 @@ class TestParameter(TestBrokerCommand):
                                r'"function" = "development";\s*'
                                r'"class" = "INFRASTRUCTURE";\s*'
                                r'"users" = list\(\s*'
-                               r'"someusers"\s*'
+                               r'"someusers",\s*'
+                               r'"otherusers"\s*'
                                r'\);',
                           ESP_CAT_CMD)
 
@@ -434,7 +438,7 @@ class TestParameter(TestBrokerCommand):
         self.searchoutput(out, r'"function" = "development";', ESP_CAT_CMD)
         self.searchoutput(out, r'"threshold" = 0;', ESP_CAT_CMD)
         self.searchoutput(out, r'"class" = "INFRASTRUCTURE";', ESP_CAT_CMD)
-        self.searchoutput(out, r'"users" = list\(\s*"someusers"\s*\);', ESP_CAT_CMD)
+        self.searchoutput(out, r'"users" = list\(\s*"someusers",\s*"otherusers"\s*\);', ESP_CAT_CMD)
 
     def test_560_verify_default(self):
         ##included by default

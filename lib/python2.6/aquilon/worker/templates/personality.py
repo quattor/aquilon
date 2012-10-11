@@ -45,12 +45,7 @@ LOGGER = logging.getLogger(__name__)
 
 
 def string_to_list(data):
-    ret = []
-    for val in data.split(','):
-        if isinstance(val, str):
-            val = val.strip()
-        ret.append(val)
-    return ret
+    return [item.strip() for item in data.split(',') if item]
 
 
 def get_parameters_by_feature(dbfeaturelink):
