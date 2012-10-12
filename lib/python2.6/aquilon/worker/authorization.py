@@ -126,6 +126,7 @@ class AuthorizationBroker(object):
                               'add_alias', 'del_alias',
                               'make', 'make_cluster',
                               'pxeswitch',
+                              'change_status',
                               'add_disk', 'del_disk']:
                 self.raise_auth_error(principal, action, resource)
         if dbuser.role.name == 'resource_pool':
