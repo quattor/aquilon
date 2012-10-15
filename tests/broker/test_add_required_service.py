@@ -195,13 +195,10 @@ class TestAddRequiredService(TestBrokerCommand):
                    "--archetype=vmhost", "--personality=vulcan-1g-desktop-prod"]
         self.noouttest(command)
         command = ["add_required_service", "--service=esx_management_server",
-                   "--archetype=esx_cluster", "--personality=vulcan-1g-desktop-prod"]
+                   "--archetype=esx_cluster", "--justification", "tcm=12345678"]
         self.noouttest(command)
         command = ["add_required_service", "--service=esx_management_server",
                    "--archetype=vmhost", "--personality=vulcan2-10g-test"]
-        self.noouttest(command)
-        command = ["add_required_service", "--service=esx_management_server",
-                   "--archetype=esx_cluster", "--personality=vulcan2-10g-test"]
         self.noouttest(command)
         command = ["add_required_service", "--service=vmseasoning",
                    "--archetype=vmhost", "--personality=vulcan-1g-desktop-prod"]
@@ -214,8 +211,8 @@ class TestAddRequiredService(TestBrokerCommand):
         self.matchoutput(out, "Service: esx_management_server", command)
         self.matchoutput(out, "Service: vmseasoning", command)
 
-        command = ["show_personality",
-                   "--archetype=esx_cluster", "--personality=vulcan-1g-desktop-prod"]
+        command = ["show_archetype",
+                   "--archetype=esx_cluster"]
         out = self.commandtest(command)
         self.matchoutput(out, "Service: esx_management_server", command)
 
