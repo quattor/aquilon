@@ -43,10 +43,6 @@ GRN = "grn:/ms/ei/aquilon/aqd"
 
 class TestAddPersonality(TestBrokerCommand):
 
-    def testaddaqdgrns(self):
-        command = ["add", "grn", "--grn", GRN, "--eon_id", 2]
-        self.noouttest(command)
-
     def testaddutpersonality(self):
         command = ["add_personality", "--personality=utpersonality/dev",
                    "--archetype=aquilon", "--grn=%s" % GRN, "--config_override",

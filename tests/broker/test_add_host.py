@@ -94,11 +94,6 @@ class TestAddHost(TestBrokerCommand):
                         "--personality", "eaitools"])
         self.dsdb_verify()
 
-    def testaddjackgrn(self):
-        command = ["add", "grn", "--grn", "grn:/example/cards",
-                   "--eon_id", "4"]
-        self.noouttest(command)
-
     def testaddjackhost(self):
         ip = self.net.unknown[0].usable[17]
         self.dsdb_expect_add("jack.cards.example.com", ip, "eth0", ip.mac,
