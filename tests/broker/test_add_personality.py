@@ -595,6 +595,37 @@ class TestAddPersonality(VerifyGrnsMixin, TestBrokerCommand):
                          "aquilon, please specify --host_environment.",
                          command)
 
+    def testaddgeneric(self):
+        for archetype in ["aquilon", "aurora", "f5", "filer", "vmhost", "windows"]:
+            self.noouttest(["add", "personality", "--personality", "generic",
+                            "--archetype", archetype,
+                            "--host_environment", "prod",
+                            "--grn", "grn:/ms/ei/aquilon/unittest"])
+
+    def testaddvulcandektop(self):
+        command = ["add", "personality",
+                   "--personality", "vulcan-10g-desktop-prod",
+                   "--archetype", "vmhost",
+                   "--host_environment=prod",
+                   "--grn", "grn:/ms/ei/aquilon/unittest"]
+        self.noouttest(command)
+
+    def testaddmetrocluster(self):
+        command = ["add", "personality",
+                   "--personality", "metrocluster",
+                   "--archetype", "storagecluster",
+                   "--host_environment=prod",
+                   "--grn", "grn:/ms/ei/aquilon/unittest"]
+        self.noouttest(command)
+
+    def testaddaquilonpersonalities(self):
+        for personality in ["compileserver", "inventory", "sybase-test",
+                            "lemon-collector-oracle", "unixeng-test"]:
+            self.noouttest(["add", "personality", "--personality", personality,
+                            "--archetype", "aquilon",
+                            "--host_environment=dev",
+                            "--grn", "grn:/ms/ei/aquilon/unittest"])
+
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddPersonality)
