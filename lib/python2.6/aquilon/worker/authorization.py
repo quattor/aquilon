@@ -97,7 +97,12 @@ class AuthorizationBroker(object):
             # Only need add/update_cluster for hacluster VCenters
             if action not in ['add_windows_host', 'del_windows_host',
                               'add_aurora_host',
-                              'add_alias', 'del_alias',
+                              'add_alias', 'update_alias', 'del_alias',
+                              'add_machine', 'add_host',
+                              'add_interface_hostname',
+                              'add_interface_machine',
+                              'add_interface_address',
+                              'add_address', 'del_address',
                               'reconfigure',
                               'add_cluster', 'make_cluster', 'update_cluster',
                               'change_status', 'change_status_cluster',
