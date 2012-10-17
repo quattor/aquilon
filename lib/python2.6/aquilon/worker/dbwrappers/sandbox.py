@@ -31,15 +31,19 @@
 
 from aquilon.aqdb.model import Sandbox
 from aquilon.worker.dbwrappers.user_principal import get_user_principal
+import os
 
 
 def get_sandbox(session, logger, sandbox):
     """Allow an optional author field."""
-    (first, slash, second) = sandbox.partition('/')
-    if not slash:
-        dbsandbox = Sandbox.get_unique(session, first, compel=True)
+    sbx_split = sandbox.split('/')
+    first , second = '', ''
+    if len(sbx_split) <= 1:
+        dbsandbox = Sandbox.get_unique(session, sandbox, compel=True)
         dbauthor = None
         return (dbsandbox, dbauthor)
+    first = '/'.join(sbx_split[:-1])
+    second = sbx_split[-1]
     dbsandbox = Sandbox.get_unique(session, second, compel=True)
     dbauthor = get_user_principal(session, first)
     return (dbsandbox, dbauthor)
