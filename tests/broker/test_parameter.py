@@ -159,10 +159,19 @@ class TestParameter(TestBrokerCommand):
         expected = 'action: { "%s": { "command": "/bin/%s", "user": "user1" } }' % (action, action)
         self.check_match(out, expected, SHOW_CMD)
 
+    def test_132_verify_proto(self):
+        cmd = SHOW_CMD + ["--format=proto"]
+        out = self.commandtest(cmd)
+        p = self.parse_parameters_msg(out, 1)
+        params = p.parameters
+
+        self.failUnlessEqual(params[0].path, 'action')
+        self.failUnlessEqual(params[0].value, '{"testaction": {"command": "/bin/testaction", "user": "user1"}}')
+
     def test_140_update_existing_re_path(self):
         action = "testaction"
         path = "action/%s/user" % action
-        command = UPD_CMD + [ "--path", path, "--value", "user2" ]
+        command = UPD_CMD + [ "--path", path, "--value", "user2"]
         self.noouttest(command)
 
         out = self.commandtest(SHOW_CMD)
@@ -190,7 +199,7 @@ class TestParameter(TestBrokerCommand):
     def test_170_upd_nonexisting_re_path(self):
         action = "testaction"
         path = "action/%s/badpath" % action
-        command = UPD_CMD + [ "--path", path, "--value", "badvalue" ]
+        command = UPD_CMD + [ "--path", path, "--value", "badvalue"]
         err = self.badrequesttest(command)
         self.matchoutput(err,
                          "Parameter %s does not match any parameter definitions" % path, command)
@@ -249,6 +258,36 @@ class TestParameter(TestBrokerCommand):
                          '"class": "INFRASTRUCTURE" }', SHOW_CMD)
         self.check_match(out, '"testaction": { "command": "/bin/testaction", "user": "user2" }', SHOW_CMD)
         self.check_match(out, '"testaction2": { "command": "/bin/testaction2", "user": "user1", "timeout": 100 } }', SHOW_CMD)
+
+    def test_245_verify_path_proto(self):
+        cmd = SHOW_CMD + ["--format=proto"]
+        out = self.commandtest(cmd)
+        p = self.parse_parameters_msg(out, 4)
+        params = p.parameters
+
+        self.failUnlessEqual(params[0].path, 'esp/function')
+        self.failUnlessEqual(params[0].value, 'development')
+
+        self.failUnlessEqual(params[1].path, 'esp/class')
+        self.failUnlessEqual(params[1].value, 'INFRASTRUCTURE')
+
+        self.failUnlessEqual(params[2].path, 'esp/users')
+        self.failUnlessEqual(params[2].value, 'someusers')
+
+        self.failUnlessEqual(params[3].path, 'action')
+        self.failUnlessEqual(params[3].value, u'{"testaction": {"command": "/bin/testaction", "user": "user2"}, "testaction2": {"command": "/bin/testaction2", "user": "user1", "timeout": 100}}')
+
+
+
+    def test_250_verify_actions(self):
+        ACT_CAT_CMD = CAT_CMD + ["--param_tmpl=actions"]
+        out = self.commandtest(ACT_CAT_CMD)
+
+        match_str1 = '"testaction" = nlist\(\s*"command", "/bin/testaction",\s*"user", "user2"\s*\)'
+        match_str2 = '"testaction2" = nlist\(\s*"command", "/bin/testaction2",\s*"timeout", 100,\s*"user", "user1"\s*\)\s*'
+
+        self.searchoutput(out, match_str1, ACT_CAT_CMD)
+        self.searchoutput(out, match_str2, ACT_CAT_CMD)
 
     def test_255_verify_espinfo(self):
         ESP_CAT_CMD = CAT_CMD + ["--param_tmpl=espinfo"]
@@ -482,20 +521,20 @@ class TestParameter(TestBrokerCommand):
 
     def test_640_verify_actions(self):
         ## cat commands
-        ACT_CAT_CMD =  CAT_CMD + [ "--param_tmpl=actions" ]
+        ACT_CAT_CMD =  CAT_CMD + [ "--param_tmpl=actions"]
         out = self.commandtest(ACT_CAT_CMD)
 
         self.searchclean(out, "testaction", ACT_CAT_CMD)
         self.searchclean(out, "testaction2", ACT_CAT_CMD)
 
     def test_650_verify_esp(self):
-        ESP_CAT_CMD =  CAT_CMD + [ "--param_tmpl=espinfo" ]
+        ESP_CAT_CMD =  CAT_CMD + [ "--param_tmpl=espinfo"]
         err = self.commandtest(ESP_CAT_CMD)
         self.searchclean(err, r'"function" = "development";', ESP_CAT_CMD)
 
     def test_660_verify_default(self):
         ##included by default
-        SEC_CAT_CMD =  CAT_CMD + [ "--param_tmpl=windows" ]
+        SEC_CAT_CMD =  CAT_CMD + [ "--param_tmpl=windows"]
         out = self.commandtest(SEC_CAT_CMD)
         self.searchoutput(out, r'structure template personality/testpersona/dev/windows;\s*'
                                r'"windows" = list\(\s*nlist\(\s*"day", "Sun",\s*"duration", 8,\s*"start", "08:00"\s*\)\s*\);',

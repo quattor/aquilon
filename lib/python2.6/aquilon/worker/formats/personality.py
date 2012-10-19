@@ -137,11 +137,32 @@ class PersonalityFormatter(ObjectFormatter):
         if hasattr(personality, "dbpersonality"):
             threshold = personality.threshold
             personality = personality.dbpersonality
-        skeleton.name = str(personality)
-        self.redirect_proto(personality.archetype, skeleton.archetype)
-        # FIXME: Implement required services
+
+        self.add_personality_data(skeleton, personality)
         if threshold is not None:
             skeleton.threshold = threshold
+
+        if personality.grns:
+            skeleton.owner_eonid = personality.grns[0].eon_id
+
+        features = personality.features[:]
+        features.sort(key=lambda x: (x.feature.feature_type,
+                                     x.feature.post_personality,
+                                     x.feature.name))
+
+        for link in features:
+            self.add_featurelink_msg(skeleton.features.add(), link)
+
+        for service in personality.services:
+            rsvc_msg = skeleton.required_services.add()
+            rsvc_msg.service = service.name
+
+        if personality.comments:
+            skeleton.comments =  personality.comments
+
+        skeleton.config_override = personality.config_override
+        skeleton.cluster_required = personality.cluster_required
+
         return container
 
 

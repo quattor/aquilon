@@ -5069,7 +5069,7 @@
       <transport method="delete" trigger="feature" path="feature/%(type)s/%(feature)s/parameter_definitions"/>
    </command>
 
-   <command name="show_parameter_definition">
+   <command name="search_parameter_definition">
       Display all parameter definition configured for a object
       <p/>
       Supported options for --format: raw, csv.

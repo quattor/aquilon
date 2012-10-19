@@ -65,7 +65,8 @@ class TestBrokerCommand(unittest.TestCase):
         if protodir not in sys.path:
             sys.path.append(protodir)
         for m in ['aqdsystems_pb2', 'aqdnetworks_pb2', 'aqdservices_pb2',
-                  'aqddnsdomains_pb2', 'aqdlocations_pb2', 'aqdaudit_pb2']:
+                  'aqddnsdomains_pb2', 'aqdlocations_pb2', 'aqdaudit_pb2',
+                  'aqdparamdefinitions_pb2', 'aqdparameters_pb2']:
             globals()[m] = __import__(m)
 
         self.user = self.config.get("broker", "user")
@@ -419,6 +420,13 @@ class TestBrokerCommand(unittest.TestCase):
                                     'resources',
                                     msg, expect)
 
+    def parse_paramdefinition_msg(self, msg, expect=None):
+        return self.parse_proto_msg(aqdparamdefinitions_pb2.ParamDefinitionList,
+                                    'param_definitions', msg, expect)
+
+    def parse_parameters_msg(self, msg, expect=None):
+        return self.parse_proto_msg(aqdparameters_pb2.ParameterList,
+                                    'parameters',  msg, expect)
     def gitenv(self, env=None):
         """Configure a known sanitised environment"""
         git_path = self.config.get("broker", "git_path")

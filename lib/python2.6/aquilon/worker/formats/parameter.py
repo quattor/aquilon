@@ -28,13 +28,15 @@
 # TERMS THAT MAY APPLY.
 """Parameter formatter."""
 
-import json
 
-from aquilon.aqdb.model import Parameter
+import json
 from aquilon.worker.formats.formatters import ObjectFormatter
+from aquilon.aqdb.model import Parameter, FeatureLinkParameter
 
 
 class ParameterFormatter(ObjectFormatter):
+
+    protocol = "aqdparameters_pb2"
 
     def format_raw(self, param, indent=""):
         details = []
@@ -43,9 +45,36 @@ class ParameterFormatter(ObjectFormatter):
             details.append(indent + "{0}: {1}".format(k, str_value))
         return "\n".join(details)
 
+    def format_proto(self, param, skeleton=None):
+        container = skeleton
+        if not container:
+            container = self.loaded_protocols[self.protocol].ParameterList()
+
+        param_definitions = None
+        paramdef_holder = None
+        if isinstance(param.holder, FeatureLinkParameter):
+            dbflink = param.holder.featurelink
+            paramdef_holder = dbflink.feature.paramdef_holder
+
+        else:
+            dbpersonality = param.holder.personality
+            paramdef_holder = dbpersonality.archetype.paramdef_holder
+
+        param_definitions = paramdef_holder.param_definitions
+        for param_def in param_definitions:
+            value = param.get_path(param_def.path, compel=False)
+            if value:
+                skeleton = container.parameters.add()
+                skeleton.path = str(param_def.path)
+                if param_def.value_type == 'json':
+                    skeleton.value = json.dumps(value)
+                else:
+                    skeleton.value = str(value)
+
+        return container
+
 
 ObjectFormatter.handlers[Parameter] = ParameterFormatter()
-
 
 class DiffData(dict):
     def __init__(self, myobj, other_obj, diff):
@@ -84,10 +113,9 @@ class DiffFormatter(ObjectFormatter):
 
             different_value = list()
             for pp in intersect:
-                if mydata[pp] != otherdata[pp]:
+                if mydata[pp] != otherdata[pp] :
                     different_value.append("{0} value={1}, othervalue={2}".
-                                           format(pp, mydata[pp],
-                                                  otherdata[pp]))
+                                           format(pp, mydata[pp], otherdata[pp]))
             if different_value:
                 details.append(indent + "  matching {0} with different values:"
                                .format(k))

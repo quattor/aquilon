@@ -179,6 +179,10 @@ class TestAddPersonality(TestBrokerCommand):
         self.failUnlessEqual(personality.archetype.name, "aquilon")
         self.failUnlessEqual(personality.name, "utpersonality/dev")
         self.failUnlessEqual(personality.threshold, -1)
+        self.failUnlessEqual(personality.config_override, True)
+        self.failUnlessEqual(personality.cluster_required, False)
+        self.failUnlessEqual(personality.comments, "Some personality comments")
+        self.failUnlessEqual(personality.owner_eonid, 2)
 
     def testverifyshowpersonalityallproto(self):
         command = "show_personality --all --format=proto"
@@ -220,6 +224,11 @@ class TestAddPersonality(TestBrokerCommand):
         self.failUnlessEqual(personality.archetype.name, "aquilon")
         self.failUnlessEqual(personality.name, "utpersonality/dev")
         self.failUnlessEqual(personality.threshold, -1)
+        self.failUnlessEqual(personality.config_override, True)
+        self.failUnlessEqual(personality.cluster_required, False)
+        self.failUnlessEqual(personality.comments, "Some personality comments")
+        self.failUnlessEqual(personality.owner_eonid, 2)
+
 
     def testverifyshowpersonalityallprotonothreshold(self):
         user = self.config.get("unittest", "user")
@@ -262,6 +271,11 @@ class TestAddPersonality(TestBrokerCommand):
         self.failUnlessEqual(personality.archetype.name, "aquilon")
         self.failUnlessEqual(personality.name, "utpersonality/dev")
         self.failUnlessEqual(personality.threshold, 50)
+        self.failUnlessEqual(personality.config_override, True)
+        self.failUnlessEqual(personality.cluster_required, False)
+        self.failUnlessEqual(personality.comments, "Some personality comments")
+        self.failUnlessEqual(personality.owner_eonid, 2)
+
 
     def testverifyshowpersonalityallprotothreshold(self):
         command = "show_personality --all --domain unittest --format=proto"

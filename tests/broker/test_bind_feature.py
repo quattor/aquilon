@@ -134,6 +134,19 @@ class TestBindFeature(TestBrokerCommand):
         self.matchoutput(out, "Host Feature: post_host [post_personality]",
                          command)
 
+    def test_111_verify_show_personality_proto(self):
+        command = ["show", "personality", "--personality", "inventory", "--format=proto"]
+        out = self.commandtest(command)
+        pl = self.parse_personality_msg(out, 1)
+        personality = pl.personalities[0]
+        feature = personality.features[0]
+        self.failUnlessEqual(feature.name, "post_host")
+        self.failUnlessEqual(feature.type, "host")
+        self.failUnlessEqual(feature.post_personality, True)
+        self.failUnlessEqual(feature.interface_name, "")
+        self.failUnlessEqual(feature.model.name, "")
+        self.failUnlessEqual(feature.model.vendor, "")
+
     def test_111_verify_show_feature(self):
         command = ["show", "feature", "--feature", "post_host", "--type", "host"]
         out = self.commandtest(command)
@@ -293,6 +306,19 @@ class TestBindFeature(TestBrokerCommand):
                           r'^    Interface: eth1$',
                           command)
 
+    def test_141_verify_show_personality_proto(self):
+        command = ["show", "personality", "--personality", "compileserver", "--format=proto"]
+        out = self.commandtest(command)
+        pl = self.parse_personality_msg(out, 1)
+        personality = pl.personalities[0]
+        feature = personality.features[0]
+        self.failUnlessEqual(feature.name, "src_route")
+        self.failUnlessEqual(feature.type, "interface")
+        self.failUnlessEqual(feature.post_personality, False)
+        self.failUnlessEqual(feature.interface_name, "eth1")
+        self.failUnlessEqual(feature.model.name, "e1000")
+        self.failUnlessEqual(feature.model.vendor, "intel")
+
     def test_141_verify_show_feature(self):
         command = ["show", "feature", "--feature", "src_route",
                    "--type", "interface"]
@@ -347,6 +373,26 @@ class TestBindFeature(TestBrokerCommand):
                           r'Interface Feature: src_route$\n'
                           r'^    Interface: bond0$',
                           command)
+
+    def test_161_verify_show_personality_proto(self):
+        command = ["show", "personality", "--personality", "compileserver", "--format=proto"]
+        out = self.commandtest(command)
+        pl = self.parse_personality_msg(out, 1)
+        personality = pl.personalities[0]
+        feature = personality.features[0]
+        self.failUnlessEqual(feature.name, "src_route")
+        self.failUnlessEqual(feature.type, "interface")
+        self.failUnlessEqual(feature.post_personality, False)
+        self.failUnlessEqual(feature.interface_name, "eth1")
+        self.failUnlessEqual(feature.model.name, "e1000")
+        self.failUnlessEqual(feature.model.vendor, "intel")
+        feature = personality.features[1]
+        self.failUnlessEqual(feature.name, "src_route")
+        self.failUnlessEqual(feature.type, "interface")
+        self.failUnlessEqual(feature.post_personality, False)
+        self.failUnlessEqual(feature.interface_name, "bond0")
+        self.failUnlessEqual(feature.model.name, "")
+        self.failUnlessEqual(feature.model.vendor, "")
 
     def test_161_verify_show_feature(self):
         command = ["show", "feature", "--feature", "src_route",

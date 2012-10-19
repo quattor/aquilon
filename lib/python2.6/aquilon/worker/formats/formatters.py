@@ -388,6 +388,21 @@ class ObjectFormatter(object):
         else:
             sm_msg.personality.archetype.name = 'aquilon'
 
+    def add_featurelink_msg(self, feat_msg, featlink):
+        feat_msg.name = str(featlink.feature.name)
+        feat_msg.type = str(featlink.feature.feature_type)
+        feat_msg.post_personality = featlink.feature.post_personality
+        if featlink.model:
+            feat_msg.model.name = str(featlink.model.name)
+            feat_msg.model.vendor = str(featlink.model.vendor)
+        if featlink.interface_name:
+            feat_msg.interface_name = str(featlink.interface_name)
+
+    def add_feature_msg(self, feat_msg, feature):
+        feat_msg.name = str(feature.name)
+        feat_msg.type = str(feature.feature_type)
+        feat_msg.post_personality = feature.post_personality
+
 ObjectFormatter.default_handler = ObjectFormatter()
 
 

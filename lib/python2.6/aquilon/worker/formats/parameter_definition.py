@@ -30,10 +30,13 @@
 
 
 from aquilon.worker.formats.formatters import ObjectFormatter
+from aquilon.worker.formats.list import ListFormatter
 from aquilon.aqdb.model import ParamDefinition
 
 
 class ParamDefinitionFormatter(ObjectFormatter):
+
+    protocol = "aqdparamdefinitions_pb2"
 
     def format_raw(self, paramdef, indent=""):
         details = []
@@ -53,6 +56,24 @@ class ParamDefinitionFormatter(ObjectFormatter):
         details.append(indent + "  Rebuild Required: %s" % paramdef.rebuild_required)
         return "\n".join(details)
 
+    def format_proto(self, paramdef, skeleton=None):
+        container = skeleton
+        if not container:
+            container = self.loaded_protocols[self.protocol].ParamDefinitionList()
+        skeleton = container.param_definitions.add()
+        skeleton.path = str(paramdef.path)
+        skeleton.value_type = str(paramdef.value_type)
+        skeleton.is_required = paramdef.required
+        skeleton.rebuild_required = paramdef.rebuild_required
+        if paramdef.template:
+            skeleton.template = str(paramdef.template)
+        if paramdef.default:
+            skeleton.default = str(paramdef.default)
+        if paramdef.description:
+            skeleton.description = str(paramdef.description)
+
+        return container
+
     def csv_fields(self, paramdef):
         return [paramdef.holder.holder_name,
                 paramdef.path,
@@ -62,5 +83,6 @@ class ParamDefinitionFormatter(ObjectFormatter):
                 paramdef.template,
                 paramdef.required,
                 paramdef.rebuild_required]
+
 
 ObjectFormatter.handlers[ParamDefinition] = ParamDefinitionFormatter()

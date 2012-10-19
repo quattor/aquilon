@@ -143,8 +143,7 @@ class TestParameterDefinitionFeature(TestBrokerCommand):
         self.noouttest(cmd)
 
     def test_140_verify_add(self):
-        cmd = ["show", "parameter_definition", "--feature", FEATURE,
-               "--type", "host"]
+        cmd = ["search_parameter_definition", "--feature", FEATURE, "--type=host"]
 
         out = self.commandtest(cmd)
         self.searchoutput(out,
@@ -177,6 +176,45 @@ class TestParameterDefinitionFeature(TestBrokerCommand):
                           r'Rebuild Required: True',
                           cmd)
 
+    def test_145_verify_add(self):
+        cmd = ["search_parameter_definition", "--feature", FEATURE, "--format=proto", "--type=host" ]
+        out = self.commandtest(cmd)
+        p = self.parse_paramdefinition_msg(out, 8)
+        param_defs = p.param_definitions
+
+        self.failUnlessEqual(param_defs[0].path, 'testpath')
+        self.failUnlessEqual(param_defs[0].value_type, 'string')
+        self.failUnlessEqual(param_defs[0].default, 'default')
+        self.failUnlessEqual(param_defs[0].is_required, True)
+
+        self.failUnlessEqual(param_defs[1].path, 'testboolean')
+        self.failUnlessEqual(param_defs[1].value_type, 'boolean')
+        self.failUnlessEqual(param_defs[1].default, 'yes')
+
+        self.failUnlessEqual(param_defs[2].path, 'testdefault')
+        self.failUnlessEqual(param_defs[2].value_type, 'string')
+        self.failUnlessEqual(param_defs[2].default, '')
+
+        self.failUnlessEqual(param_defs[3].path, 'testfloat')
+        self.failUnlessEqual(param_defs[3].value_type, 'float')
+        self.failUnlessEqual(param_defs[3].default, '100.100')
+
+        self.failUnlessEqual(param_defs[4].path, 'testint')
+        self.failUnlessEqual(param_defs[4].value_type, 'int')
+        self.failUnlessEqual(param_defs[4].default, '60')
+
+        self.failUnlessEqual(param_defs[5].path, 'testjson')
+        self.failUnlessEqual(param_defs[5].value_type, 'json')
+        self.failUnlessEqual(param_defs[5].default, u'"{\'val1\':\'val2\'}"')
+
+        self.failUnlessEqual(param_defs[6].path, 'testlist')
+        self.failUnlessEqual(param_defs[6].value_type, 'list')
+        self.failUnlessEqual(param_defs[6].default, "val1,val2")
+
+        self.failUnlessEqual(param_defs[7].path, 'test_rebuild_required')
+        self.failUnlessEqual(param_defs[7].value_type, 'string')
+        self.failUnlessEqual(param_defs[7].rebuild_required, True)
+
     def test_150_del(self):
         for path in ['testpath', 'testdefault', 'testint', 'testlist',
                      'testjson', 'testboolean', 'testfloat', 'test_rebuild_required']:
@@ -185,8 +223,7 @@ class TestParameterDefinitionFeature(TestBrokerCommand):
             self.noouttest(cmd)
 
     def test_150_verify_delete(self):
-        cmd = ["show", "parameter_definition", "--feature", FEATURE,
-               "--type", "host"]
+        cmd = ["search_parameter_definition", "--feature", FEATURE, "--type=host" ]
 
         err = self.notfoundtest(cmd)
         self.matchoutput(err, "No parameter definitions found for host "
