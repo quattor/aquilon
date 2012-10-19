@@ -144,6 +144,7 @@ class CommandManageHostname(BrokerCommand):
         # XXX: There's a directory per domain.  Do we need subdirectories
         # for different authors for a sandbox?
         key = CompileKey(logger=logger)
+
         try:
             lock_queue.acquire(key)
 

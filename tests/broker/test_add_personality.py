@@ -47,23 +47,25 @@ class TestAddPersonality(TestBrokerCommand):
         self.noouttest(command)
 
     def testaddutpersonality(self):
-        command = ["add_personality", "--personality=utpersonality",
+        command = ["add_personality", "--personality=utpersonality/dev",
                    "--archetype=aquilon", "--grn=%s" % GRN, "--config_override",
+                   "--host_environment=dev",
                    "--comments", "Some personality comments"]
         self.noouttest(command)
-        self.verifycatforpersonality("aquilon", "utpersonality", True)
+        self.verifycatforpersonality("aquilon", "utpersonality/dev", True)
 
     def testverifyaddutpersonality(self):
-        command = ["show_personality", "--personality=utpersonality",
+        command = ["show_personality", "--personality=utpersonality/dev",
                    "--archetype=aquilon"]
         out = self.commandtest(command)
-        self.matchoutput(out, "Personality: utpersonality Archetype: aquilon",
+        self.matchoutput(out, "Personality: utpersonality/dev Archetype: aquilon",
                          command)
         self.matchoutput(out,
                          "Template: "
-                         "aquilon/personality/utpersonality/config.tpl",
+                         "aquilon/personality/utpersonality/dev/config.tpl",
                          command)
-        self.matchoutput(out, "config override: enabled", command)
+        self.matchoutput(out, "Config override: enabled", command)
+        self.matchoutput(out, "Environment: dev", command)
         self.matchoutput(out, "Comments: Some personality comments", command)
         self.matchclean(out, "Threshold:", command)
         self.matchclean(out, "Personality: inventory Archetype: aquilon",
@@ -76,6 +78,7 @@ class TestAddPersonality(TestBrokerCommand):
     def testaddeaipersonality(self):
         command = ["add_personality", "--personality=eaitools",
                    "--archetype=aquilon", "--eon_id=2",
+                   "--host_environment=legacy",
                    "--comments", "Existing personality for netperssvcmap tests"]
         self.noouttest(command)
         self.verifycatforpersonality("aquilon", "eaitools")
@@ -83,13 +86,13 @@ class TestAddPersonality(TestBrokerCommand):
     def testverifyutpersonalitynothreshold(self):
         user = self.config.get("unittest", "user")
         command = ["show_personality", "--sandbox=%s/changetest1" % user,
-                   "--archetype=aquilon", "--personality=utpersonality"]
+                   "--archetype=aquilon", "--personality=utpersonality/dev"]
         out = self.commandtest(command)
-        self.matchoutput(out, "Personality: utpersonality Archetype: aquilon",
+        self.matchoutput(out, "Personality: utpersonality/dev Archetype: aquilon",
                          command)
         self.matchoutput(out,
                          "Template: "
-                         "aquilon/personality/utpersonality/config.tpl",
+                         "aquilon/personality/utpersonality/dev/config.tpl",
                          command)
         self.matchoutput(out, "Threshold: None", command)
         self.matchclean(out, "Personality: inventory Archetype: aquilon",
@@ -101,13 +104,13 @@ class TestAddPersonality(TestBrokerCommand):
 
     def testverifyshowpersonalityallnothreshold(self):
         user = self.config.get("unittest", "user")
-        command = "show personality --all --sandbox %s/changetest1" % user
+        command = "show_personality --all --sandbox %s/changetest1" % user
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Personality: utpersonality Archetype: aquilon",
+        self.matchoutput(out, "Personality: utpersonality/dev Archetype: aquilon",
                          command)
         self.matchoutput(out,
                          "Template: "
-                         "aquilon/personality/utpersonality/config.tpl",
+                         "aquilon/personality/utpersonality/dev/config.tpl",
                          command)
         self.matchoutput(out, "Threshold: None", command)
         self.matchoutput(out, "Personality: generic Archetype: aurora",
@@ -120,13 +123,13 @@ class TestAddPersonality(TestBrokerCommand):
 
     def testverifyutpersonalitythreshold(self):
         command = ["show_personality", "--domain=unittest",
-                   "--archetype=aquilon", "--personality=utpersonality"]
+                   "--archetype=aquilon", "--personality=utpersonality/dev"]
         out = self.commandtest(command)
-        self.matchoutput(out, "Personality: utpersonality Archetype: aquilon",
+        self.matchoutput(out, "Personality: utpersonality/dev Archetype: aquilon",
                          command)
         self.matchoutput(out,
                          "Template: "
-                         "aquilon/personality/utpersonality/config.tpl",
+                         "aquilon/personality/utpersonality/dev/config.tpl",
                          command)
         self.matchoutput(out, "Threshold: 50", command)
         self.matchclean(out, "Personality: inventory Archetype: aquilon",
@@ -136,13 +139,13 @@ class TestAddPersonality(TestBrokerCommand):
                         command)
 
     def testverifyshowpersonalityallthreshold(self):
-        command = "show personality --all --domain unittest"
+        command = "show_personality --all --domain unittest"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Personality: utpersonality Archetype: aquilon",
+        self.matchoutput(out, "Personality: utpersonality/dev Archetype: aquilon",
                          command)
         self.matchoutput(out,
                          "Template: "
-                         "aquilon/personality/utpersonality/config.tpl",
+                         "aquilon/personality/utpersonality/dev/config.tpl",
                          command)
         self.matchoutput(out, "Threshold: 50", command)
         self.matchoutput(out, "Personality: generic Archetype: aurora",
@@ -152,13 +155,13 @@ class TestAddPersonality(TestBrokerCommand):
                          command)
 
     def testverifyshowpersonalityall(self):
-        command = "show personality --all"
+        command = "show_personality --all"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Personality: utpersonality Archetype: aquilon",
+        self.matchoutput(out, "Personality: utpersonality/dev Archetype: aquilon",
                          command)
         self.matchoutput(out,
                          "Template: "
-                         "aquilon/personality/utpersonality/config.tpl",
+                         "aquilon/personality/utpersonality/dev/config.tpl",
                          command)
         self.matchoutput(out, "Personality: generic Archetype: aurora",
                          command)
@@ -169,16 +172,16 @@ class TestAddPersonality(TestBrokerCommand):
 
     def testverifyshowutpersonalityproto(self):
         command = ["show_personality", "--archetype=aquilon",
-                   "--personality=utpersonality", "--format=proto"]
+                   "--personality=utpersonality/dev", "--format=proto"]
         out = self.commandtest(command)
         pl = self.parse_personality_msg(out, 1)
         personality = pl.personalities[0]
         self.failUnlessEqual(personality.archetype.name, "aquilon")
-        self.failUnlessEqual(personality.name, "utpersonality")
+        self.failUnlessEqual(personality.name, "utpersonality/dev")
         self.failUnlessEqual(personality.threshold, -1)
 
     def testverifyshowpersonalityallproto(self):
-        command = "show personality --all --format=proto"
+        command = "show_personality --all --format=proto"
         out = self.commandtest(command.split(" "))
         pl = self.parse_personality_msg(out)
         archetypes = {}
@@ -193,29 +196,29 @@ class TestAddPersonality(TestBrokerCommand):
                 found_threshold = True
         self.failUnless("aquilon" in archetypes,
                         "No personality with archetype aquilon in list.")
-        self.failUnless("utpersonality" in archetypes["aquilon"],
-                        "No aquilon/utpersonality in personality list.")
+        self.failUnless("utpersonality/dev" in archetypes["aquilon"],
+                        "No aquilon/utpersonality/dev in personality list.")
         self.failUnless("aurora" in archetypes,
                         "No personality with archetype aurora")
         self.failUnless("generic" in archetypes["aurora"],
                         "No aquilon/generic in personality list.")
-        self.failUnlessEqual(archetypes["aquilon"]["utpersonality"].threshold,
+        self.failUnlessEqual(archetypes["aquilon"]["utpersonality/dev"].threshold,
                              -1,
-                             "Got threshold %s for aquilon/utpersonality" %
-                             archetypes["aquilon"]["utpersonality"].threshold)
+                             "Got threshold %s for aquilon/utpersonality/dev" %
+                             archetypes["aquilon"]["utpersonality/dev"].threshold)
         self.failIf(found_threshold,
                     "Found a threshold defined when none expected.")
 
     def testverifyshowutpersonalityprotonothreshold(self):
         user = self.config.get("unittest", "user")
         command = ["show_personality", "--sandbox=%s/changetest1" % user,
-                   "--archetype=aquilon", "--personality=utpersonality",
+                   "--archetype=aquilon", "--personality=utpersonality/dev",
                    "--format=proto"]
         out = self.commandtest(command)
         pl = self.parse_personality_msg(out, 1)
         personality = pl.personalities[0]
         self.failUnlessEqual(personality.archetype.name, "aquilon")
-        self.failUnlessEqual(personality.name, "utpersonality")
+        self.failUnlessEqual(personality.name, "utpersonality/dev")
         self.failUnlessEqual(personality.threshold, -1)
 
     def testverifyshowpersonalityallprotonothreshold(self):
@@ -236,32 +239,32 @@ class TestAddPersonality(TestBrokerCommand):
                 found_threshold = True
         self.failUnless("aquilon" in archetypes,
                         "No personality with archetype aquilon in list.")
-        self.failUnless("utpersonality" in archetypes["aquilon"],
-                        "No aquilon/utpersonality in personality list.")
+        self.failUnless("utpersonality/dev" in archetypes["aquilon"],
+                        "No aquilon/utpersonality/dev in personality list.")
         self.failUnless("aurora" in archetypes,
                         "No personality with archetype aurora")
         self.failUnless("generic" in archetypes["aurora"],
                         "No aquilon/generic in personality list.")
-        self.failUnlessEqual(archetypes["aquilon"]["utpersonality"].threshold,
+        self.failUnlessEqual(archetypes["aquilon"]["utpersonality/dev"].threshold,
                              -1,
-                             "Got threshold %s for aquilon/utpersonality" %
-                             archetypes["aquilon"]["utpersonality"].threshold)
+                             "Got threshold %s for aquilon/utpersonality/dev" %
+                             archetypes["aquilon"]["utpersonality/dev"].threshold)
         self.failUnless(found_threshold,
                         "No thresholds defined in sandbox changetest1.")
 
     def testverifyshowutpersonalityprotothreshold(self):
         command = ["show_personality", "--domain=unittest",
-                   "--archetype=aquilon", "--personality=utpersonality",
+                   "--archetype=aquilon", "--personality=utpersonality/dev",
                    "--format=proto"]
         out = self.commandtest(command)
         pl = self.parse_personality_msg(out, 1)
         personality = pl.personalities[0]
         self.failUnlessEqual(personality.archetype.name, "aquilon")
-        self.failUnlessEqual(personality.name, "utpersonality")
+        self.failUnlessEqual(personality.name, "utpersonality/dev")
         self.failUnlessEqual(personality.threshold, 50)
 
     def testverifyshowpersonalityallprotothreshold(self):
-        command = "show personality --all --domain unittest --format=proto"
+        command = "show_personality --all --domain unittest --format=proto"
         out = self.commandtest(command.split(" "))
         pl = self.parse_personality_msg(out)
         archetypes = {}
@@ -273,25 +276,25 @@ class TestAddPersonality(TestBrokerCommand):
                 archetypes[archetype] = {personality.name:personality}
         self.failUnless("aquilon" in archetypes,
                         "No personality with archetype aquilon in list.")
-        self.failUnless("utpersonality" in archetypes["aquilon"],
-                        "No aquilon/utpersonality in personality list.")
+        self.failUnless("utpersonality/dev" in archetypes["aquilon"],
+                        "No aquilon/utpersonality/dev in personality list.")
         self.failUnless("aurora" in archetypes,
                         "No personality with archetype aurora")
         self.failUnless("generic" in archetypes["aurora"],
                         "No aquilon/generic in personality list.")
-        self.failUnlessEqual(archetypes["aquilon"]["utpersonality"].threshold,
+        self.failUnlessEqual(archetypes["aquilon"]["utpersonality/dev"].threshold,
                              50,
-                             "Got threshold %s for aquilon/utpersonality" %
-                             archetypes["aquilon"]["utpersonality"].threshold)
+                             "Got threshold %s for aquilon/utpersonality/dev" %
+                             archetypes["aquilon"]["utpersonality/dev"].threshold)
 
     def testverifyshowpersonalityarchetype(self):
-        command = "show personality --archetype aquilon"
+        command = "show_personality --archetype aquilon"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Personality: utpersonality Archetype: aquilon",
+        self.matchoutput(out, "Personality: utpersonality/dev Archetype: aquilon",
                          command)
         self.matchoutput(out,
                          "Template: "
-                         "aquilon/personality/utpersonality/config.tpl",
+                         "aquilon/personality/utpersonality/dev/config.tpl",
                          command)
         self.matchoutput(out, "Personality: inventory Archetype: aquilon",
                          command)
@@ -304,31 +307,31 @@ class TestAddPersonality(TestBrokerCommand):
                         command)
 
     def testshowarchetypeunavailable(self):
-        command = "show personality --archetype archetype-does-not-exist"
+        command = "show_personality --archetype archetype-does-not-exist"
         out = self.notfoundtest(command.split(" "))
         self.matchoutput(out, "Archetype archetype-does-not-exist", command)
 
     def testshowarchetypeunavailable2(self):
-        command = ["show", "personality",
+        command = ["show_personality",
                    "--archetype", "archetype-does-not-exist",
                    "--personality", "personality-does-not-exist"]
         out = self.notfoundtest(command)
         self.matchoutput(out, "Archetype archetype-does-not-exist", command)
 
     def testshowpersonalityunavailable(self):
-        command = ["show", "personality", "--archetype", "aquilon",
+        command = ["show_personality", "--archetype", "aquilon",
                    "--personality", "personality-does-not-exist"]
         out = self.notfoundtest(command)
         self.matchoutput(out, "Personality personality-does-not-exist, "
                          "archetype aquilon not found.", command)
 
     def testshowpersonalityunavailable2(self):
-        command = ["show", "personality",
+        command = ["show_personality",
                    "--personality", "personality-does-not-exist"]
         self.noouttest(command)
 
     def testshowpersonalityname(self):
-        command = "show personality --personality generic"
+        command = "show_personality --personality generic"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Personality: generic Archetype: aurora",
                          command)
@@ -342,12 +345,12 @@ class TestAddPersonality(TestBrokerCommand):
                          command)
 
     def testaddwindowsdesktop(self):
-        command = "add personality --personality desktop --archetype windows --eon_id=2"
+        command = "add_personality --personality desktop --archetype windows --eon_id=2 --host_environment=legacy"
         self.noouttest(command.split(" "))
         self.verifycatforpersonality("windows", "desktop")
 
     def testverifyaddwindowsdesktop(self):
-        command = "show personality --personality desktop --archetype windows"
+        command = "show_personality --personality desktop --archetype windows"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Personality: desktop Archetype: windows",
                          command)
@@ -359,6 +362,7 @@ class TestAddPersonality(TestBrokerCommand):
         # This personality is 'bad' because there will not be a set of
         # templates defined for it in the repository.
         command = ["add_personality", "--personality=badpersonality",
+                   "--host_environment=legacy",
                    "--archetype=aquilon", "--eon_id=2" ]
         self.noouttest(command)
 
@@ -377,6 +381,7 @@ class TestAddPersonality(TestBrokerCommand):
         # This personality is double 'bad'... there will be a required
         # service for the personality that has no instances.
         command = ["add_personality", "--personality=badpersonality2",
+                   "--host_environment=legacy",
                    "--archetype=aquilon", "--eon_id=2"]
         self.noouttest(command)
 
@@ -394,13 +399,22 @@ class TestAddPersonality(TestBrokerCommand):
 
     def testaddinvalidpersonalityname(self):
         command = ["add_personality", "--personality", "this is a bad; name",
+                   "--host_environment=dev",
                    "--archetype", "aquilon", "--eon_id=2" ]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Personality name 'this is a bad; name' is "
                          "not valid", command)
 
+    def testaddinvalidenvironment(self):
+        command = ["add_personality", "--personality", "invalidenvironment",
+                   "--host_environment", "badenv",
+                   "--archetype", "aquilon", "--eon_id=2" ]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Unknown environment value 'badenv'.  The valid values are: dev, infra, legacy, prod, qa, uat", command)
+
     def testaddduplicate(self):
         command = ["add_personality", "--personality", "inventory",
+                   "--host_environment=legacy",
                    "--archetype", "aquilon", "--eon_id=2" ]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Personality inventory, archetype aquilon "
@@ -408,6 +422,7 @@ class TestAddPersonality(TestBrokerCommand):
 
     def testaddesxserver(self):
         command = ["add_personality", "--cluster_required", "--eon_id=2",
+                   "--host_environment=legacy",
                    "--personality=esx_server", "--archetype=vmhost"]
         self.noouttest(command)
         self.verifycatforpersonality("vmhost", "esx_server")
@@ -416,36 +431,37 @@ class TestAddPersonality(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out, "Requires clustered hosts", command)
 
-        command = ["add_personality", "--eon_id=2",
+        command = ["add_personality", "--eon_id=2", "--host_environment=legacy",
                    "--personality=esx_server", "--archetype=esx_cluster"]
         self.noouttest(command)
         self.verifycatforpersonality("esx_cluster", "esx_server")
 
     def testaddv1personalities(self):
-        command = ["add_personality", "--cluster_required",
+        command = ["add_personality", "--cluster_required", "--host_environment=legacy",
                    "--personality=vulcan-1g-desktop-prod", "--archetype=vmhost", "--eon_id=2"]
         self.noouttest(command)
-        command = ["add_personality",
+        command = ["add_personality", "--host_environment=legacy",
                    "--personality=vulcan-1g-desktop-prod", "--archetype=esx_cluster", "--eon_id=2"]
         self.noouttest(command)
-        command = ["add_personality",
+        command = ["add_personality", "--host_environment=legacy",
                    "--personality=metacluster", "--archetype=metacluster", "--eon_id=2"]
         self.noouttest(command)
 
     def testaddv2personalities(self):
-        command = ["add_personality", "--cluster_required",
+        command = ["add_personality", "--cluster_required", "--host_environment=legacy",
                    "--personality=vulcan2-10g-test", "--archetype=vmhost", "--eon_id=2"]
         self.noouttest(command)
-        command = ["add_personality",
+        command = ["add_personality", "--host_environment=legacy",
                    "--personality=vulcan2-10g-test", "--archetype=esx_cluster", "--eon_id=2"]
         self.noouttest(command)
-        command = ["add_personality",
+        command = ["add_personality", "--host_environment=legacy",
                    "--personality=vulcan2-test", "--archetype=metacluster", "--eon_id=2"]
         self.noouttest(command)
         self.verifycatforpersonality("esx_cluster", "vulcan2-10g-test")
 
     def testaddesxstandalone(self):
         command = ["add_personality", "--personality=esx_standalone",
+                   "--host_environment=legacy",
                    "--archetype=vmhost", "--eon_id=2"]
         self.noouttest(command)
         self.verifycatforpersonality("vmhost", "esx_standalone")
@@ -455,13 +471,13 @@ class TestAddPersonality(TestBrokerCommand):
         self.matchclean(out, "Requires clustered hosts", command)
 
     def testaddgridpersonality(self):
-        command = ["add_personality", "--eon_id=2",
+        command = ["add_personality", "--eon_id=2", "--host_environment=legacy",
                    "--personality=hadoop", "--archetype=gridcluster"]
         self.noouttest(command)
         self.verifycatforpersonality("gridcluster", "hadoop")
 
     def testaddhapersonality(self):
-        command = ["add_personality", "--eon_id=2",
+        command = ["add_personality", "--eon_id=2", "--host_environment=legacy",
                    "--personality=vcs-msvcs", "--archetype=hacluster"]
         self.noouttest(command)
         self.verifycatforpersonality("hacluster", "vcs-msvcs")
@@ -480,7 +496,7 @@ class TestAddPersonality(TestBrokerCommand):
                          command)
         if config_override:
             self.searchoutput(out, r'include { "features/personality/config_override/config" };\s*'
-                                   r'include { if_exists\("personality/utpersonality/post_feature"\) };',
+                                   r'include { if_exists\("personality/utpersonality/dev/post_feature"\) };',
                              command)
         else:
             self.matchoutput(out, 'include { if_exists("personality/%s/post_feature") };' %
@@ -488,25 +504,28 @@ class TestAddPersonality(TestBrokerCommand):
             self.matchclean(out, 'config_override', command);
 
     def testverifyshowdiff1(self):
-        command = ["show_diff", "--personality=utpersonality",
+        command = ["show_diff", "--personality=utpersonality/dev",
                    "--archetype=aquilon", "--other=generic"]
         out = self.commandtest(command)
         self.searchoutput (out,
-                         r'missing Options Enabled in Personality aquilon/generic:\s+ConfigOverride',
+                         r'missing Options in Personality aquilon/generic:\s+ConfigOverride',
                          command)
         self.searchoutput(out,
                          r'missing Grns in Personality aquilon/generic:\s+GRN grn:/ms/ei/aquilon/aqd',
                          command)
 
     def testverifyshowdiff2(self):
-        command = ["show_diff", "--personality=utpersonality",
+        command = ["show_diff", "--personality=utpersonality/dev",
                    "--archetype=aquilon", "--other=esx_server", "--other_archetype=vmhost"]
         out = self.commandtest(command)
         self.searchoutput (out,
-                         r'missing Options Enabled in Personality aquilon/utpersonality:\s+Cluster Required',
+                         r'missing Options in Personality aquilon/utpersonality/dev:\s+Cluster Required',
                          command)
         self.searchoutput (out,
-                         r'missing Options Enabled in Personality vmhost/esx_server:\s+ConfigOverride',
+                         r'matching Options with different values:\s+Environment value=dev, othervalue=legacy',
+                         command)
+        self.searchoutput (out,
+                         r'missing Options in Personality vmhost/esx_server:\s+ConfigOverride',
                          command)
 
 

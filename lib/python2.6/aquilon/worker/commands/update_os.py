@@ -1,6 +1,6 @@
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 #
-# Copyright (C) 2008,2009,2010,2011,2012  Contributor
+# Copyright (C) 2009,2010,2011  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -28,25 +28,22 @@
 # TERMS THAT MAY APPLY.
 
 
-from aquilon.exceptions_ import ArgumentError
+from aquilon.aqdb.model import OperatingSystem, Archetype
 from aquilon.worker.broker import BrokerCommand
-from aquilon.aqdb.model import Service, ClusterAlignedService
 
 
-class CommandAddClusterAlignedService(BrokerCommand):
+class CommandUpdateOS(BrokerCommand):
 
-    required_parameters = ["service"]
+    required_parameters = ["osname", "osversion", "archetype"]
 
-    def render(self, session, service, cluster_type, comments, **arguments):
-        dbservice = Service.get_unique(session, name=service, compel=True)
+    def render(self, session, osname, osversion, archetype, comments,
+               **arguments):
+        dbarchetype = Archetype.get_unique(session, archetype, compel=True)
+        dbos = OperatingSystem.get_unique(session, name=osname, version=osversion,
+                                   archetype=dbarchetype, compel=True)
 
-        if cluster_type in dbservice.aligned_cluster_types:
-            raise ArgumentError("{0} is already aligned to ESX {1}clusters."
-                .format(dbservice, 'meta' if cluster_type == 'meta' else ''))
+        dbos.comments=comments
 
-        dbcas = ClusterAlignedService(service=dbservice,
-                                      cluster_type=cluster_type,
-                                      comments=comments)
-        session.add(dbcas)
-        session.flush()
+        session.add(dbos)
+
         return

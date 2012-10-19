@@ -58,6 +58,20 @@ class TestManage(TestBrokerCommand):
         self.matchoutput(out, '"/metadata/template/branch/type" = "sandbox";', command)
         self.matchoutput(out, '"/metadata/template/branch/author" = "%s";' % user, command)
 
+    def testmanageunittest02B(self):
+        user = self.config.get("unittest", "user")
+        # we are using --force to bypass checks because the source domain unittest
+        # latest commit does not exist in template-king
+        self.noouttest(["manage", "--hostname", "unittest02.one-nyp.ms.com",
+                        "--sandbox", "%s/changetest1" % user, "--force"])
+        self.verify_buildfiles("unittest", "unittest02.one-nyp.ms.com",
+                               want_exist=False)
+        command = ["cat", "--hostname", "unittest02.one-nyp.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out, '"/metadata/template/branch/name" = "changetest1";', command)
+        self.matchoutput(out, '"/metadata/template/branch/type" = "sandbox";', command)
+        self.matchoutput(out, '"/metadata/template/branch/author" = "%s";' % user, command)
+
     def testfailmanageunittest02(self):
         command = ["manage", "--hostname", "unittest02.one-nyp.ms.com",
                    "--domain", "nomanage"]

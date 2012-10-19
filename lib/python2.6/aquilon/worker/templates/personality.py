@@ -45,12 +45,7 @@ LOGGER = logging.getLogger(__name__)
 
 
 def string_to_list(data):
-    ret = []
-    for val in data.split(','):
-        if isinstance(val, str):
-            val = val.strip()
-        ret.append(val)
-    return ret
+    return [item.strip() for item in data.split(',') if item]
 
 
 def get_parameters_by_feature(dbfeaturelink):
@@ -177,7 +172,7 @@ class PlenaryPersonalityBase(Plenary):
         super(PlenaryPersonalityBase, self).__init__(dbpersonality,
                                                      logger=logger)
 
-        self.name = dbpersonality.name
+        self.name = str(dbpersonality)
         self.loadpath = dbpersonality.archetype.name
 
         self.plenary_core = "personality/%s" % self.name
@@ -217,7 +212,7 @@ class PlenaryPersonalityPreFeature(Plenary):
         super(PlenaryPersonalityPreFeature, self).__init__(dbpersonality,
                                                            logger=logger)
         self.loadpath = dbpersonality.archetype.name
-        self.plenary_core = "personality/%s" % dbpersonality.name
+        self.plenary_core = "personality/%s" % dbpersonality
         self.plenary_template = "pre_feature"
 
     def body(self, lines):
@@ -248,7 +243,7 @@ class PlenaryPersonalityPostFeature(Plenary):
         super(PlenaryPersonalityPostFeature, self).__init__(dbpersonality,
                                                             logger=logger)
         self.loadpath = dbpersonality.archetype.name
-        self.plenary_core = "personality/%s" % dbpersonality.name
+        self.plenary_core = "personality/%s" % dbpersonality
         self.plenary_template = "post_feature"
 
     def body(self, lines):
@@ -266,7 +261,7 @@ class PlenaryPersonalityParameter(Plenary):
         super(PlenaryPersonalityParameter, self).__init__(dbpersonality,
                                                           logger=logger)
         self.loadpath = dbpersonality.archetype.name
-        self.plenary_core = "personality/%s" % dbpersonality.name
+        self.plenary_core = "personality/%s" % dbpersonality
         self.plenary_template = template
 
         self.parameters = parameters

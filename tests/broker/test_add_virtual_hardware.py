@@ -468,12 +468,20 @@ class TestAddVirtualHardware(TestBrokerCommand):
 
     def test_800_verify_windows(self):
         command = "show host --hostname aqddesk1.msad.ms.com"
+
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Primary Name: aqddesk1.msad.ms.com", command)
-        self.matchoutput(out, "Virtual_machine: evm1", command)
-        self.matchoutput(out, "Template: windows/os/windows/nt61e/config.tpl",
+
+        # core info
+        self.searchoutput(out, r"^Virtual_machine: evm1", command)
+        self.searchoutput(out, r"^  Primary Name: aqddesk1.msad.ms.com",
+                          command)
+        self.searchoutput(out, r"^  Comments: Windows Virtual Desktop", command)
+
+        # os
+        self.searchoutput(out, r"^    Template: windows/os/windows/nt61e/config.tpl",
                          command)
-        self.matchoutput(out, "Comments: Windows Virtual Desktop", command)
+        self.searchoutput(out, r"^    Comments: Windows 7 Enterprise \(x86\)",
+                          command)
 
     def test_810_verifycatcluster(self):
         command = "cat --cluster=utecl1 --virtual_machine evm1"

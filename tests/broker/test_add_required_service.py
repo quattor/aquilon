@@ -59,6 +59,15 @@ class TestAddRequiredService(TestBrokerCommand):
                          "requires --justification.",
                          command)
 
+    def testfailmissingservice(self):
+        command = ["add_required_service", "--service",
+                   "does-not-exist", "--archetype", "aquilon",
+                   "--justification", "tcm=12345678"]
+        out = self.notfoundtest(command)
+        self.matchoutput(out,
+                         "Service does-not-exist not found.",
+                         command)
+
     def testaddrequireddns(self):
         command = "add required service --service dns --archetype aquilon"
         command += " --justification tcm=12345678"
@@ -186,13 +195,10 @@ class TestAddRequiredService(TestBrokerCommand):
                    "--archetype=vmhost", "--personality=vulcan-1g-desktop-prod"]
         self.noouttest(command)
         command = ["add_required_service", "--service=esx_management_server",
-                   "--archetype=esx_cluster", "--personality=vulcan-1g-desktop-prod"]
+                   "--archetype=esx_cluster", "--justification", "tcm=12345678"]
         self.noouttest(command)
         command = ["add_required_service", "--service=esx_management_server",
                    "--archetype=vmhost", "--personality=vulcan2-10g-test"]
-        self.noouttest(command)
-        command = ["add_required_service", "--service=esx_management_server",
-                   "--archetype=esx_cluster", "--personality=vulcan2-10g-test"]
         self.noouttest(command)
         command = ["add_required_service", "--service=vmseasoning",
                    "--archetype=vmhost", "--personality=vulcan-1g-desktop-prod"]
@@ -205,8 +211,8 @@ class TestAddRequiredService(TestBrokerCommand):
         self.matchoutput(out, "Service: esx_management_server", command)
         self.matchoutput(out, "Service: vmseasoning", command)
 
-        command = ["show_personality",
-                   "--archetype=esx_cluster", "--personality=vulcan-1g-desktop-prod"]
+        command = ["show_archetype",
+                   "--archetype=esx_cluster"]
         out = self.commandtest(command)
         self.matchoutput(out, "Service: esx_management_server", command)
 

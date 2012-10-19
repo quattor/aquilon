@@ -33,7 +33,7 @@ import re
 
 from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import (Archetype, Personality,
-                                Parameter,
+                                Parameter, HostEnvironment,
                                 PersonalityParameter)
 from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.templates.personality import PlenaryPersonality
@@ -44,11 +44,12 @@ from aquilon.worker.dbwrappers.grn import lookup_grn
 
 class CommandAddPersonality(BrokerCommand):
 
-    required_parameters = ["personality", "archetype"]
+    required_parameters = ["personality", "archetype", "host_environment"]
 
-    def render(self, session, logger, personality, archetype, grn, eon_id,
+    def render(self, session, logger, personality, archetype, grn, eon_id, host_environment,
                comments, cluster_required, copy_from, config_override, **arguments):
-        valid = re.compile('^[a-zA-Z0-9_-]+$')
+
+        valid = re.compile('^[a-zA-Z0-9_-]+\/?[a-zA-Z0-9_-]+$')
         if not valid.match(personality):
             raise ArgumentError("Personality name '%s' is not valid." %
                                 personality)
@@ -56,17 +57,20 @@ class CommandAddPersonality(BrokerCommand):
             raise ArgumentError("GRN or EON ID is required for adding a "
                                 "personality.")
 
+        HostEnvironment.validate_name(host_environment)
         dbarchetype = Archetype.get_unique(session, archetype, compel=True)
         Personality.get_unique(session, archetype=dbarchetype,
                                name=personality,
                                preclude=True)
 
+        host_env = HostEnvironment.get_unique(session, host_environment, compel=True)
         dbpersona = Personality(name=personality, archetype=dbarchetype,
                                 cluster_required=bool(cluster_required),
+                                config_override=config_override,
+                                host_environment=host_env,
                                 comments=comments)
 
         ##configuration override
-        dbpersona.config_override = config_override
         session.add(dbpersona)
 
         ## add grn/eonid

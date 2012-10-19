@@ -45,8 +45,8 @@ class CommandDelRequiredServicePersonality(BrokerCommand):
         try:
             dbservice.personalities.remove(dbpersonality)
         except ValueError:
-            raise NotFoundException("Service %s required for personality "
-                                    "%s, archetype %s not found." %
+            raise NotFoundException("Service %s required for archetype "
+                                    "%s, personality %s not found." %
                                     (service, archetype, personality))
         session.flush()
         return

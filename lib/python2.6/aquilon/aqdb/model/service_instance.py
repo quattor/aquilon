@@ -33,13 +33,13 @@ import socket
 from sqlalchemy import (Column, Integer, Sequence, String, DateTime,
                         ForeignKey, UniqueConstraint)
 from sqlalchemy.orm import (relation, contains_eager, column_property, backref,
-                            deferred, undefer)
+                            deferred, undefer, aliased)
 from sqlalchemy.orm.session import object_session
 from sqlalchemy.sql.expression import or_
 from sqlalchemy.sql import select, func
 
 from aquilon.aqdb.model import (Base, Service, Host, DnsRecord, DnsDomain,
-                                Machine, Fqdn)
+                                Machine, Fqdn, Personality, Archetype)
 from aquilon.aqdb.column_types.aqstr import AqStr
 from aquilon.aqdb.column_types import Enum
 from collections import defaultdict
@@ -96,42 +96,48 @@ class ServiceInstance(Base):
         as though max_members are bound.  The tricky bit is de-duplication.
 
         """
-        from aquilon.aqdb.model import Cluster, MetaCluster
-        from aquilon.aqdb.model.cluster import ClusterServiceBinding
-        from aquilon.aqdb.model.metacluster import MetaClusterMember
-        from sqlalchemy.sql import and_
-        from sqlalchemy.orm import aliased
+        from aquilon.aqdb.model import Cluster, MetaCluster, MetaClusterMember
 
         session = object_session(self)
 
-        cluster_types = self.service.aligned_cluster_types
-        if not cluster_types:
+        # personalities by service
+        q = session.query(Personality.id)
+        q = q.join(Archetype).filter(Archetype.cluster_type != None)
+        q = q.filter(Personality.services.contains(self.service))
+        personality_ids = [p[0] for p in q]
+
+        # personalities by archetype service
+        q = session.query(Personality.id)
+        q = q.join(Archetype).filter(Archetype.cluster_type != None)
+        q = q.filter(Archetype.services.contains(self.service))
+        personality_ids.extend([p[0] for p in q])
+
+        if not personality_ids:
             # By far, the common case.
             return self._client_count
 
         clusters = {}
+
         # Meta
-        if 'meta' in cluster_types:
+        McAlias = aliased(MetaCluster)
+        q = session.query(Cluster.name, Cluster.max_hosts)
+        # Force orm to look for mc - service relation
+        q = q.join('_metacluster', (McAlias,
+                        MetaClusterMember.metacluster_id == McAlias.id))
+        q = q.filter(McAlias.service_bindings.contains(self))
+        q = q.filter(McAlias.personality_id.in_(personality_ids))
 
-            McAlias = aliased(MetaCluster)
-            q = session.query(Cluster.name, Cluster.max_hosts)
-
-            # Force orm to look for mc - service relation
-            q = q.join('_metacluster', (McAlias,
-                            MetaClusterMember.metacluster_id == McAlias.id))
-            q = q.filter(McAlias.service_bindings.contains(self))
-
-            for name, max_host in q.all():
-                clusters[name]=max_host
+        for name, max_host in q.all():
+            clusters[name] = max_host
 
         # Esx et al.
         q = session.query(Cluster.name, Cluster.max_hosts)
-        q = q.filter(Cluster.cluster_type.in_(cluster_types))
         q = q.filter(Cluster.cluster_type != 'meta')
         q = q.filter(Cluster.service_bindings.contains(self))
+        q = q.filter(Cluster.personality_id.in_(personality_ids))
 
         for name, max_host in q.all():
-            clusters[name]=max_host
+            clusters[name] = max_host
 
         adjusted_count = sum(clusters.itervalues())
 
@@ -139,7 +145,7 @@ class ServiceInstance(Base):
         q = q.filter(Host.services_used.contains(self))
         q = q.outerjoin('_cluster', 'cluster', from_joinpoint=True)
         q = q.filter(or_(Cluster.id == None,
-                         ~Cluster.cluster_type.in_(cluster_types)))
+                         ~Cluster.personality_id.in_(personality_ids)))
         adjusted_count += q.count()
         return adjusted_count
 

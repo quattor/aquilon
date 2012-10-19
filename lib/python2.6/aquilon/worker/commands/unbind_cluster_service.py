@@ -47,7 +47,7 @@ class CommandUnbindClusterService(BrokerCommand):
         if dbinstance not in dbcluster.service_bindings:
             raise NotFoundException("{0} is not bound to {1:l}."
                                     .format(dbinstance, dbcluster))
-        if dbservice in [cas.service for cas in dbcluster.required_services]:
+        if dbservice in dbcluster.required_services:
             raise ArgumentError("Cannot remove cluster service instance "
                                 "binding for %s cluster aligned service %s." %
                                 (dbcluster.cluster_type, dbservice.name))

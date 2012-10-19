@@ -58,7 +58,6 @@ _long_nms['PERSONALITY_SERVICE_MAP'] = 'PRSNLTY_SVC_MAP'
 _long_nms['CREATION_DATE'] = 'CR_DATE'
 _long_nms['USER_PRINCIPAL_ID'] = 'USR_PRNC_ID'
 _long_nms['CLUSTER_TYPE'] = 'CLSTR_TYP'
-_long_nms['CLUSTER_ALIGNED_SERVICE'] = 'CLSTR_ALND_SVC'
 _long_nms['CLUSTER_REQUIRED'] = 'CLSTR_REQ'
 _long_nms['METACLUSTER_ID'] = 'MTACLSTR_ID'
 _long_nms['METACLUSTER_MEMBER'] = 'MTACLSTR_MBR'
@@ -87,6 +86,7 @@ _long_nms['REQUIRES_CHANGE_MANAGER'] = 'REQ_CHG_MGR'
 _long_nms['PERSONALITY_GRN_MAP'] = 'PERS_GRN_MAP'
 _long_nms['SERVICE_ADDRESS'] = 'SRV_ADDR'
 _long_nms['REBUILD_REQUIRED'] = 'REBLD_REQ'
+_long_nms['HOST_ENVIRONMENT_ID'] = 'HOST_ENV_ID'
 
 
 def rename_sys_pks(db, debug=False):

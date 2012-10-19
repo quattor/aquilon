@@ -48,7 +48,7 @@ class TestUnbindFeature(TestBrokerCommand):
                    "--archetype", "aquilon",
                    "--justification", "tcm=12345678"]
         (out, err) = self.successtest(command)
-        self.matchoutput(err, "Flushed 31/31 templates.", command)
+        self.matchoutput(err, "Flushed 10/10 templates.", command)
 
     def test_101_verify_archetype(self):
         command = ["show", "archetype", "--archetype", "aquilon"]
@@ -84,7 +84,7 @@ class TestUnbindFeature(TestBrokerCommand):
                    "--archetype", "aquilon",
                    "--justification", "tcm=12345678"]
         (out, err) = self.successtest(command)
-        self.matchoutput(err, "Flushed 31/31 templates." , command)
+        self.matchoutput(err, "Flushed 10/10 templates." , command)
 
     def test_131_verify_show_model(self):
         command = ["show", "model", "--model", "hs21-8853l5u"]

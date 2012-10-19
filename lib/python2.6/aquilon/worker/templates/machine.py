@@ -59,7 +59,7 @@ class PlenaryMachineInfo(Plenary):
         else:
             self.rack = None
         if loc.room:
-            self.room = loc.room.fullname
+            self.room = loc.room.name
         else:
             self.room = None
 

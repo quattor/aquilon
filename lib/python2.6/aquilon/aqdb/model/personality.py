@@ -33,7 +33,7 @@ from sqlalchemy import (Column, Integer, Boolean, DateTime, Sequence, String,
                         ForeignKey, UniqueConstraint, Index)
 from sqlalchemy.orm import relation, deferred
 
-from aquilon.aqdb.model import Base, Archetype, Grn
+from aquilon.aqdb.model import Base, Archetype, Grn, HostEnvironment
 from aquilon.aqdb.column_types.aqstr import AqStr
 
 _ABV = 'prsnlty'
@@ -56,13 +56,19 @@ class Personality(Base):
                               default=False, nullable=False)
 
     config_override = Column(Boolean(name="persona_cfg_override_ck"),
-                          default=False, nullable=False)
+                             default=False, nullable=False)
 
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
     comments = Column(String(255), nullable=True)
 
     archetype = relation(Archetype)
+
+    host_environment_id = Column(Integer, ForeignKey('host_environment.id',
+                                                     name='host_environment_fk'),
+                                 nullable=False)
+
+    host_environment = relation(HostEnvironment, innerjoin=True)
 
     @property
     def is_cluster(self):
@@ -71,7 +77,6 @@ class Personality(Base):
     def __format__(self, format_spec):
         instance = "%s/%s" % (self.archetype.name, self.name)
         return self.format_helper(format_spec, instance)
-
 
 personality = Personality.__table__   # pylint: disable=C0103
 

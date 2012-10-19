@@ -73,6 +73,7 @@ from aquilon.aqdb.model.router_address import RouterAddress
 #CONFIG
 from aquilon.aqdb.model.grn import Grn
 from aquilon.aqdb.model.archetype import Archetype
+from aquilon.aqdb.model.host_environment import HostEnvironment
 from aquilon.aqdb.model.personality import Personality, PersonalityGrnMap
 from aquilon.aqdb.model.operating_system import OperatingSystem
 
@@ -132,8 +133,7 @@ with warnings.catch_warnings():
 
 
 from aquilon.aqdb.model.cluster import (Cluster, EsxCluster,
-                                        ComputeCluster, StorageCluster,
-                                        ClusterAlignedService)
+                                        ComputeCluster, StorageCluster)
 from aquilon.aqdb.model.personality_cluster_info import (PersonalityClusterInfo,
                                                          PersonalityESXClusterInfo)
 

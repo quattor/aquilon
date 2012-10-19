@@ -152,16 +152,16 @@ class TestPublishSandbox(TestBrokerCommand):
     def testaddutpersonality(self):
         sandboxdir = os.path.join(self.sandboxdir, "utsandbox")
         personalitydir = os.path.join(sandboxdir, "aquilon", "personality",
-                                      "utpersonality")
+                                      "utpersonality/dev")
         if not os.path.exists(personalitydir):
             os.makedirs(personalitydir)
         template = os.path.join(personalitydir, "espinfo.tpl")
         f = open(template, 'w')
         try:
             f.writelines(
-                """structure template personality/utpersonality/espinfo;
+                """structure template personality/utpersonality/dev/espinfo;
 
-"name" = "utpersonality";
+"name" = "utpersonality/dev";
 "description" = "regression test personality";
 "class" = "INFRASTRUCTURE";
 "infrafunction" = "Sapphire-INV";
@@ -173,7 +173,7 @@ class TestPublishSandbox(TestBrokerCommand):
             f.close()
         self.gitcommand(["add", "espinfo.tpl"], cwd=personalitydir)
         self.gitcommand(["commit", "-a", "-m",
-                         "added personality utpersonality"],
+                         "added personality utpersonality/dev"],
                         cwd=sandboxdir)
 
     def testaddesxserverpersonality(self):

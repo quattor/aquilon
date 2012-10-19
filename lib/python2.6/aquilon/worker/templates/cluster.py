@@ -104,6 +104,8 @@ class PlenaryClusterData(Plenary):
             pan_assign(lines, "/system/cluster/rack/column",
                        dbloc.rack.rack_column)
             pan_assign(lines, "/system/cluster/rack/name", dbloc.rack.name)
+        if dbloc.room:
+            pan_assign(lines, "/system/cluster/rack/room", dbloc.room)
 
         pan_assign(lines, "/system/cluster/down_hosts_threshold",
                    self.dbobj.dht_value)

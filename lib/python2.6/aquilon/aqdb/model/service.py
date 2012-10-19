@@ -70,8 +70,6 @@ class Service(Base):
                                     nullable=False))
     comments = Column(String(255), nullable=True)
 
-    aligned_cluster_types = association_proxy('_clusters', 'cluster_type')
-
     @property
     def cfg_path(self):
         return 'service/%s' % (self.name)

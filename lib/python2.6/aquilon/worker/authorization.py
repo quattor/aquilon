@@ -71,7 +71,7 @@ class AuthorizationBroker(object):
         # Right now, anybody in a group can do anything they want, except...
         if action in ['add_archetype', 'update_archetype', 'del_archetype',
                       'add_vendor', 'del_vendor',
-                      'add_os', 'del_os',
+                      'add_os', 'update_os', 'del_os',
                       'add_model', 'update_model', 'del_model',
                       'add_organization', 'del_organization',
                       'add_grn', 'del_grn', 'update_grn',
@@ -97,7 +97,12 @@ class AuthorizationBroker(object):
             # Only need add/update_cluster for hacluster VCenters
             if action not in ['add_windows_host', 'del_windows_host',
                               'add_aurora_host',
-                              'add_alias', 'del_alias',
+                              'add_alias', 'update_alias', 'del_alias',
+                              'add_machine', 'add_host',
+                              'add_interface_hostname',
+                              'add_interface_machine',
+                              'add_interface_address',
+                              'add_address', 'del_address',
                               'reconfigure',
                               'add_cluster', 'make_cluster', 'update_cluster',
                               'change_status', 'change_status_cluster',
@@ -126,6 +131,7 @@ class AuthorizationBroker(object):
                               'add_alias', 'del_alias',
                               'make', 'make_cluster',
                               'pxeswitch',
+                              'change_status',
                               'add_disk', 'del_disk']:
                 self.raise_auth_error(principal, action, resource)
         if dbuser.role.name == 'resource_pool':

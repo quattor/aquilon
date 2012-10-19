@@ -480,7 +480,6 @@ class HostChooser(Chooser):
         q = self.session.query(Service)
         q = q.filter(or_(Service.archetypes.contains(self.archetype),
                          Service.personalities.contains(self.personality)))
-        q = q.options(subqueryload('_clusters'))
         self.required_services = set(q.all())
 
         self.original_service_instances = {}
@@ -501,11 +500,11 @@ class HostChooser(Chooser):
             # they are otherwise required by the archetype/personality.
             for si in self.dbhost.cluster.service_bindings:
                 self.cluster_aligned_services[si.service] = si
-            for item in self.dbhost.cluster.required_services:
-                if item.service not in self.cluster_aligned_services:
+            for service in self.dbhost.cluster.required_services:
+                if service not in self.cluster_aligned_services:
                     # Don't just error here because the error() call
                     # has not yet been set up.  Will error out later.
-                    self.cluster_aligned_services[item.service] = None
+                    self.cluster_aligned_services[service] = None
                 # Went back and forth on this... deciding not to force
                 # an aligned service as required.  This should give
                 # flexibility for multiple services to be aligned for
@@ -523,11 +522,11 @@ class HostChooser(Chooser):
                                 self.cluster_aligned_services[si.service],
                                  si, mc, si.service))
                     self.cluster_aligned_services[si.service] = si
-                for item in mc.required_services:
-                    if item.service not in self.cluster_aligned_services:
+                for service in mc.required_services:
+                    if service not in self.cluster_aligned_services:
                         # Don't just error here because the error() call
                         # has not yet been set up.  Will error out later.
-                        self.cluster_aligned_services[item.service] = None
+                        self.cluster_aligned_services[service] = None
 
     def generate_description(self):
         return format(self.dbhost)
@@ -609,8 +608,11 @@ class ClusterChooser(Chooser):
         # TODO Should be calculated from member host's network membership.
         self.network = None
         """Stores interim service instance lists."""
-        for item in self.dbcluster.required_services:
-            self.required_services.add(item.service)
+        for service in self.archetype.services:
+            self.required_services.add(service)
+        for service in self.personality.services:
+            self.required_services.add(service)
+
         self.original_service_instances = {}
         """Cache of any already bound services (keys) and the instance
         that was bound (values).
@@ -625,8 +627,8 @@ class ClusterChooser(Chooser):
 
     def get_footprint(self, instance):
         """If this cluster is bound to a service, how many hosts bind?"""
-        cluster_types = instance.service.aligned_cluster_types
-        if self.dbcluster.cluster_type in cluster_types:
+        if self.dbcluster.personality in instance.service.personalities or \
+            self.dbcluster.personality.archetype in instance.service.archetypes:
             if self.dbcluster.cluster_type == 'meta':
                 return 0
             return self.dbcluster.max_hosts

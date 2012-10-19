@@ -304,7 +304,7 @@ class ObjectFormatter(object):
             si.service = service.name
 
     def add_personality_data(self, msg, personality):
-        msg.name = str(personality.name)
+        msg.name = str(personality)
         for service in personality.services:
             si = msg.required_services.add()
             si.service = service.name
@@ -382,7 +382,7 @@ class ObjectFormatter(object):
         self.add_service_msg(sm_msg.service,
                              service_map.service, service_map.service_instance)
         if hasattr(service_map, "personality"):
-            sm_msg.personality.name = str(service_map.personality.name)
+            sm_msg.personality.name = str(service_map.personality)
             sm_msg.personality.archetype.name = \
                     str(service_map.personality.archetype.name)
         else:

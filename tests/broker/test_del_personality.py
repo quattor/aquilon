@@ -42,7 +42,7 @@ from brokertest import TestBrokerCommand
 class TestDelPersonality(TestBrokerCommand):
 
     def testdelutpersonality(self):
-        command = ["del_personality", "--personality=utpersonality",
+        command = ["del_personality", "--personality=utpersonality/dev",
                    "--archetype=aquilon"]
         self.noouttest(command)
 

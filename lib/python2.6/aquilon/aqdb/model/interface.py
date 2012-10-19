@@ -103,9 +103,13 @@ class Interface(Base):
                                                     ondelete='CASCADE'),
                                 nullable=False)
 
+    # The FK is deferrable to make it easier to copy the DB between different
+    # backends. The broker itself does not make use of deferred constraints.
     master_id = Column(Integer, ForeignKey('interface.id',
                                            name='%s_master_fk' % _ABV,
-                                           ondelete='CASCADE'),
+                                           ondelete='CASCADE',
+                                           deferrable=True,
+                                           initially='IMMEDIATE'),
                        nullable=True)
 
     # FIXME: move to PublicInterface
@@ -252,9 +256,13 @@ class VlanInterface(Interface):
 
     name_check = re.compile(r"^[a-z]+\d*\.[1-9]\d*$")
 
+    # The FK is deferrable to make it easier to copy the DB between different
+    # backends. The broker itself does not make use of deferred constraints.
     parent_id = Column(Integer, ForeignKey(Interface.id,
                                            name='iface_vlan_parent_fk',
-                                           ondelete='CASCADE'))
+                                           ondelete='CASCADE',
+                                           deferrable=True,
+                                           initially='IMMEDIATE'))
 
     vlan_id = Column(Integer)
 

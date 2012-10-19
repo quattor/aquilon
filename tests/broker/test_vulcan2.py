@@ -53,7 +53,7 @@ class TestVulcan20(TestBrokerCommand):
 
     def add_utcluster(self, name, metacluster):
         command = ["add_esx_cluster", "--cluster=%s" % name,
-                   "--metacluster=%s" % metacluster, "--building=ut",
+                   "--metacluster=%s" % metacluster, "--room=utroom1",
                    "--buildstatus=build",
                    "--domain=unittest", "--down_hosts_threshold=0",
                    "--archetype=esx_cluster",
@@ -106,7 +106,7 @@ class TestVulcan20(TestBrokerCommand):
     def test_004_add10gigracks(self):
         for port in range(0, 2):
             self.noouttest(["add", "machine", "--machine", "utpgs01p%d" % port,
-                            "--rack", "ut11", "--model", "vb1205xm"])
+                            "--rack", "ut3", "--model", "vb1205xm"])
 
     def test_005_add10gigrackinterfaces(self):
         for i in range(0, 2):
@@ -173,6 +173,20 @@ class TestVulcan20(TestBrokerCommand):
             self.noouttest(command)
         self.dsdb_verify()
 
+    def test_011_catutpgcl0(self):
+        data_command = ["cat", "--cluster", "utpgcl0", "--data"]
+        data = self.commandtest(data_command)
+
+        self.matchoutput(data, '"/system/cluster/rack/room" = "utroom1";',
+                         data_command)
+
+        data_command = ["cat", "--machine", "utpgs01p0"]
+        data = self.commandtest(data_command)
+
+        self.matchoutput(data, '"rack/name" = "ut3";',
+                         data_command)
+        self.matchoutput(data, '"rack/room" = "utroom1";',
+                         data_command)
 
     # Autopg test
     def test_100_addinterfaces(self):
@@ -370,18 +384,9 @@ class TestVulcan20(TestBrokerCommand):
                    "--archetype", "vmhost", "--personality", "vulcan2-10g-test"]
         self.noouttest(command)
 
-        command = ["add_cluster_aligned_service", "--cluster_type", "meta",
-                   "--service", "vcenter"]
+        command = ["add_required_service", "--service", "vcenter",
+                   "--archetype", "metacluster", "--personality", "vulcan2-test"]
         self.noouttest(command)
-
-    def test_150_failaddvcenteragain(self):
-        command = ["add_cluster_aligned_service", "--cluster_type", "meta",
-                   "--service", "vcenter"]
-        out = self.badrequesttest(command)
-        self.matchoutput(out,
-                         "Service vcenter is already aligned to "
-                         "ESX metaclusters.", command)
-
 
     def test_151_mapvcenterservices(self):
         command = ["map", "service", "--service", "vcenter", "--instance", "ut",
@@ -441,8 +446,8 @@ class TestVulcan20(TestBrokerCommand):
         self.successtest(command)
 
     def test_153_unbindvcenterservices(self):
-        command = ["del_cluster_aligned_service", "--cluster_type", "meta",
-                   "--service", "vcenter"]
+        command = ["del_required_service", "--service", "vcenter",
+                   "--archetype", "metacluster", "--personality", "vulcan2-test"]
         self.noouttest(command)
 
         command = ["del_required_service", "--service", "vcenter",
@@ -487,8 +492,8 @@ class TestVulcan20(TestBrokerCommand):
         command = ["add", "service", "--service", "esx_management_server", "--instance", "ut.mc"]
         self.noouttest(command)
 
-        command = ["add_cluster_aligned_service", "--service", "esx_management_server",
-                   "--cluster_type", "meta"]
+        command = ["add_required_service", "--service", "esx_management_server",
+                   "--archetype", "metacluster", "--personality", "vulcan2-test"]
         self.noouttest(command)
 
         command = ["map", "service", "--service", "esx_management_server", "--instance", "ut.mc",
@@ -540,8 +545,8 @@ class TestVulcan20(TestBrokerCommand):
         self.successtest(command)
 
     def test_180_remove_mc_esx_service(self):
-        command = ["del_cluster_aligned_service", "--service", "esx_management_server",
-                   "--cluster_type", "meta"]
+        command = ["del_required_service", "--service", "esx_management_server",
+                   "--archetype", "metacluster", "--personality", "vulcan2-test"]
         self.noouttest(command)
 
         command = ["unbind_cluster", "--cluster", "utmc8", "--service", "esx_management_server",
