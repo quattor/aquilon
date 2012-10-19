@@ -272,7 +272,7 @@ class TestParameter(TestBrokerCommand):
         self.failUnlessEqual(params[1].value, 'INFRASTRUCTURE')
 
         self.failUnlessEqual(params[2].path, 'esp/users')
-        self.failUnlessEqual(params[2].value, 'someusers')
+        self.failUnlessEqual(params[2].value, 'someusers, otherusers')
 
         self.failUnlessEqual(params[3].path, 'action')
         self.failUnlessEqual(params[3].value, u'{"testaction": {"command": "/bin/testaction", "user": "user2"}, "testaction2": {"command": "/bin/testaction2", "user": "user1", "timeout": 100}}')
