@@ -825,10 +825,10 @@ class DSDBRunner(object):
 
         return fields
 
-    primary_re = re.compile(r'^Primary Name:\s*\b([-\w]+)\b$', re.M)
-    node_re = re.compile(r'^Node:\s*\b([-\w]+)\b$', re.M)
-    dns_re = re.compile(r'^DNS Domain:\s*\b([-\w\.]+)\b$', re.M)
-    state_re = re.compile(r'^State:\s*\b(\d+)\b$', re.M)
+    primary_re = re.compile(r'^\s*Primary Name:\s*\b([-\w]+)\b$', re.M)
+    node_re = re.compile(r'^\s*Node:\s*\b([-\w]+)\b$', re.M)
+    dns_re = re.compile(r'^\s*DNS Domain:\s*\b([-\w\.]+)\b$', re.M)
+    state_re = re.compile(r'^\s*State:\s*\b(\d+)\b$', re.M)
 
     def show_host(self, hostname):
         (short, dot, dns_domain) = hostname.partition(".")
