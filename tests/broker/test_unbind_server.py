@@ -123,6 +123,23 @@ class TestUnbindServer(TestBrokerCommand):
         self.matchclean(out, "Server: unittest02.one-nyp.ms.com", command)
         self.matchclean(out, "Server: unittest00.one-nyp.ms.com", command)
 
+    def testunbindntp(self):
+        command = ["unbind", "server",
+                   "--hostname", "nyaqd1.ms.com", "--service", "ntp", "--all"]
+
+        (out, err) = self.successtest(command)
+        self.assertEmptyOut(out, command)
+
+        self.matchoutput(err,
+                         SRV_MSG % ("nyaqd1.ms.com","ntp"),
+                         command)
+
+    def testverifyunbindntp(self):
+        command = "show service --service ntp"
+        out = self.commandtest(command.split(" "))
+        self.matchclean(out, "Server: nyaqd1.ms.com", command)
+
+
     def testunbindaqd(self):
         command = ["unbind", "server",
                    "--hostname", "nyaqd1.ms.com", "--service", "aqd", "--all"]
