@@ -192,6 +192,8 @@ class PlenaryPersonalityBase(Plenary):
         ## process parameter templates
         pan_include_if_exists(lines, "personality/config")
         pan_assign(lines, "/system/personality/name", self.name)
+        pan_assign(lines, "/system/personality/host_environment",
+                   self.dbobj.host_environment)
 
         ## TODO : This is just to satisfy quattor schema
         ## needs to be removed as soon as the schema allows this

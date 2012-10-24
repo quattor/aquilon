@@ -309,6 +309,7 @@ class ObjectFormatter(object):
             si = msg.required_services.add()
             si.service = service.name
         self.add_archetype_data(msg.archetype, personality.archetype)
+        msg.host_environment = str(personality.host_environment)
 
     def add_host_data(self, host_msg, host):
         # FIXME: Add branch type and sandbox author to protobufs.
