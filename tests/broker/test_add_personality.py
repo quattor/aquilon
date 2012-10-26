@@ -52,7 +52,7 @@ class TestAddPersonality(TestBrokerCommand):
                    "--host_environment=dev",
                    "--comments", "Some personality comments"]
         self.noouttest(command)
-        self.verifycatforpersonality("aquilon", "utpersonality/dev", True)
+        self.verifycatforpersonality("aquilon", "utpersonality/dev", True, "dev")
 
     def testverifyaddutpersonality(self):
         command = ["show_personality", "--personality=utpersonality/dev",
@@ -183,6 +183,7 @@ class TestAddPersonality(TestBrokerCommand):
         self.failUnlessEqual(personality.cluster_required, False)
         self.failUnlessEqual(personality.comments, "Some personality comments")
         self.failUnlessEqual(personality.owner_eonid, 2)
+        self.failUnlessEqual(personality.host_environment, "dev")
 
     def testverifyshowpersonalityallproto(self):
         command = "show_personality --all --format=proto"
@@ -496,7 +497,8 @@ class TestAddPersonality(TestBrokerCommand):
         self.noouttest(command)
         self.verifycatforpersonality("hacluster", "vcs-msvcs")
 
-    def verifycatforpersonality(self, archetype, personality, config_override=False):
+    def verifycatforpersonality(self, archetype, personality, config_override=False,
+                                host_env='legacy'):
         command = ["cat","--archetype", archetype,  "--personality", personality]
         out = self.commandtest(command)
         self.matchoutput(out, 'variable PERSONALITY = "%s"' % personality,
@@ -507,6 +509,8 @@ class TestAddPersonality(TestBrokerCommand):
         self.matchoutput(out, "template personality/%s/config;" % personality,
                          command)
         self.matchoutput(out, '"/system/personality/name" = "%s";' % personality,
+                         command)
+        self.matchoutput(out, '"/system/personality/host_environment" = "%s";' % host_env,
                          command)
         if config_override:
             self.searchoutput(out, r'include { "features/personality/config_override/config" };\s*'

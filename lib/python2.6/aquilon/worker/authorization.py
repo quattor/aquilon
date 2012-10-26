@@ -132,6 +132,7 @@ class AuthorizationBroker(object):
                               'make', 'make_cluster',
                               'pxeswitch',
                               'change_status',
+                              'add_room', 'add_rack', 'add_rack_room',
                               'add_disk', 'del_disk']:
                 self.raise_auth_error(principal, action, resource)
         if dbuser.role.name == 'resource_pool':
@@ -220,6 +221,7 @@ class AuthorizationBroker(object):
                               'poll_switch_switch', 'poll_tor_switch',
                               'add_rack', 'add_rack_room', 'add_chassis',
                               'del_rack', 'del_chassis',
+                              'add_address', 'del_address',
                               'make', 'make_cluster']:
                 self.raise_auth_error(principal, action, resource)
         if dbuser.role.name == 'alias_manager':

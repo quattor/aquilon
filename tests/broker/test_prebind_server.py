@@ -43,6 +43,16 @@ from brokertest import TestBrokerCommand
 
 class TestPrebindServer(TestBrokerCommand):
 
+    def testbindntpserver(self):
+        self.noouttest(["bind", "server",
+            "--hostname", "nyaqd1.ms.com",
+            "--service", "ntp", "--instance", "pa.ny.na"])
+
+    def testverifybindntp(self):
+        command = "show service --service ntp --instance pa.ny.na"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Server: nyaqd1.ms.com", command)
+
     def testbindaqdserver(self):
         self.noouttest(["bind", "server",
             "--hostname", "nyaqd1.ms.com",
