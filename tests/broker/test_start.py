@@ -94,13 +94,37 @@ class TestBrokerStart(unittest.TestCase):
 
     def testclonetemplateking(self):
         source = self.config.get("unittest", "template_base")
+        if not source:
+            source = os.path.join(self.config.get("broker", "srcdir"),
+                                  "tests/templates")
+
         dest = self.config.get("broker", "kingdir")
         rmtree(dest, ignore_errors=True)
+
         env = {}
         env["PATH"] = os.environ.get("PATH", "")
         git = self.config.lookup_tool("git")
 
-        self.run_command([git, "clone", "--bare", source, dest], env=env)
+        if source.startswith("git://"):
+            # Easy case - just clone the source repository
+            self.run_command([git, "clone", "--bare", source, dest], env=env)
+        else:
+            # The source is just a directory somewhere. Create a temporary git
+            # repository which we can then clone
+            tmpdir = mkdtemp()
+            self.run_command(["rsync", "-aH", source + "/", tmpdir + "/"],
+                             env=env)
+            self.run_command([git, "init"], cwd=tmpdir, env=env)
+            self.run_command([git, "add", "-A"], cwd=tmpdir, env=env)
+            self.run_command([git, "commit", "-m", "Initial commit"],
+                             cwd=tmpdir, env=env)
+
+            # Create the prod branch
+            self.run_command([git, "checkout", "-b", "prod"], cwd=tmpdir, env=env)
+
+            self.run_command([git, "clone", "--bare", tmpdir, dest], env=env)
+            rmtree(tmpdir, ignore_errors=True)
+
         # This value can be used to test against a different branch/commit
         # than the current 'prod'.
         new_prod = None

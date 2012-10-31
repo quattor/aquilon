@@ -40,6 +40,7 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
         self.noouttest(command)
         self.verifycatforpersonality("aquilon", "utpersonality/dev", True,
                                      "dev", grn=GRN)
+
     def testaddnetinfrapersonality(self):
         command = ["add_personality", "--personality=generic",
                    "--archetype=netinfra", "--eon_id=10",
