@@ -63,5 +63,6 @@ install: all install-man install-html
 # messages can be misleading sometimes...
 check: version.txt
 	$(XMLLINT) $(XMLLINT_PARAMS) $(ALL_SOURCES)
+	@./check_command_options.py
 
 .PHONY: all check clean install install-man install-html man html FORCE
