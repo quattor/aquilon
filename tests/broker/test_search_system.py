@@ -63,10 +63,6 @@ class TestSearchSystem(TestBrokerCommand):
     def testdnsdomainavailable(self):
         command = "search system --dns_domain aqd-unittest.ms.com"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "np997gd1r04.aqd-unittest.ms.com", command)
-        self.matchoutput(out, "np998gd1r01.aqd-unittest.ms.com", command)
-        self.matchoutput(out, "np998gd1r02.aqd-unittest.ms.com", command)
-        self.matchoutput(out, "np999gd1r01.aqd-unittest.ms.com", command)
         self.matchoutput(out, "ut3gd1r01.aqd-unittest.ms.com", command)
         self.matchoutput(out, "ut3c1.aqd-unittest.ms.com", command)
         self.matchoutput(out, "ut3c5.aqd-unittest.ms.com", command)

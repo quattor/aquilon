@@ -74,10 +74,6 @@ class TestSearchDns(TestBrokerCommand):
         self.matchoutput(out, "arecord13.aqd-unittest.ms.com", command)
         self.matchoutput(out, "alias2host.aqd-unittest.ms.com", command)
         self.matchoutput(out, "zebra2.aqd-unittest.ms.com", command)
-        self.matchoutput(out, "np997gd1r04.aqd-unittest.ms.com", command)
-        self.matchoutput(out, "np998gd1r01.aqd-unittest.ms.com", command)
-        self.matchoutput(out, "np998gd1r02.aqd-unittest.ms.com", command)
-        self.matchoutput(out, "np999gd1r01.aqd-unittest.ms.com", command)
         self.matchoutput(out, "ut3gd1r01.aqd-unittest.ms.com", command)
         self.matchoutput(out, "ut3c1.aqd-unittest.ms.com", command)
         self.matchoutput(out, "ut3c5.aqd-unittest.ms.com", command)
@@ -180,9 +176,7 @@ class TestSearchDns(TestBrokerCommand):
         self.matchoutput(out, "unittest20-e1.aqd-unittest.ms.com", command)
         self.matchoutput(out, "zebra2.aqd-unittest.ms.com", command)
         self.matchoutput(out, "zebra3.aqd-unittest.ms.com", command)
-        self.matchoutput(out, "np999gd1r01.aqd-unittest.ms.com", command)
         self.matchoutput(out, "ut9c1.aqd-unittest.ms.com", command)
-        self.matchclean(out, "np997gd1r04.aqd-unittest.ms.com", command)
         self.matchclean(out, "ut3c1.aqd-unittest.ms.com", command)
         self.matchclean(out, "arecord13.aqd-unittest.ms.com", command)
         self.matchclean(out, "alias2host.aqd-unittest.ms.com", command)
@@ -196,9 +190,7 @@ class TestSearchDns(TestBrokerCommand):
         self.matchclean(out, "unittest20-e1.aqd-unittest.ms.com", command)
         self.matchclean(out, "zebra2.aqd-unittest.ms.com", command)
         self.matchclean(out, "zebra3.aqd-unittest.ms.com", command)
-        self.matchclean(out, "np999gd1r01.aqd-unittest.ms.com", command)
         self.matchclean(out, "ut9c1.aqd-unittest.ms.com", command)
-        self.matchoutput(out, "np997gd1r04.aqd-unittest.ms.com", command)
         self.matchoutput(out, "ut3c1.aqd-unittest.ms.com", command)
         self.matchoutput(out, "arecord13.aqd-unittest.ms.com", command)
         self.matchoutput(out, "alias2host.aqd-unittest.ms.com", command)
@@ -207,8 +199,6 @@ class TestSearchDns(TestBrokerCommand):
     def testprimary(self):
         command = ["search", "dns", "--primary_name"]
         out = self.commandtest(command)
-        self.matchoutput(out, "np998gd1r01.aqd-unittest.ms.com", command)
-        self.matchoutput(out, "np997gd1r04.aqd-unittest.ms.com", command)
         self.matchoutput(out, "ut3c1.aqd-unittest.ms.com", command)
         self.matchoutput(out, "ut9c1.aqd-unittest.ms.com", command)
         self.matchoutput(out, "unittest00.one-nyp.ms.com", command)
@@ -222,8 +212,6 @@ class TestSearchDns(TestBrokerCommand):
     def testnoprimary(self):
         command = ["search", "dns", "--noprimary_name"]
         out = self.commandtest(command)
-        self.matchclean(out, "np998gd1r01.aqd-unittest.ms.com", command)
-        self.matchclean(out, "np997gd1r04.aqd-unittest.ms.com", command)
         self.matchclean(out, "ut3c1.aqd-unittest.ms.com", command)
         self.matchclean(out, "ut9c1.aqd-unittest.ms.com", command)
         self.matchclean(out, "unittest00.one-nyp.ms.com", command)

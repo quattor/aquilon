@@ -77,36 +77,6 @@ class TestDelSwitch(TestBrokerCommand):
         self.successtest(command.split(" "))
         self.dsdb_verify()
 
-    def testdelnp997gd1r04(self):
-        command = "del switch --switch np997gd1r04.aqd-unittest.ms.com"
-        self.noouttest(command.split(" "))
-
-    def testverifydelnp997gd1r04(self):
-        command = "show switch --switch np997gd1r04.aqd-unittest.ms.com"
-        self.notfoundtest(command.split(" "))
-
-    def testdelnp998gd1r01(self):
-        command = "del switch --switch np998gd1r01.aqd-unittest.ms.com"
-        self.noouttest(command.split(" "))
-
-    def testverifydelnp998gd1r01(self):
-        command = "show switch --switch np998gd1r01.aqd-unittest.ms.com"
-        self.notfoundtest(command.split(" "))
-
-    def testdelnp998gd1r02(self):
-        command = "del switch --switch np998gd1r02.aqd-unittest.ms.com"
-        self.noouttest(command.split(" "))
-
-    def testdelnp999gd1r01(self):
-        self.dsdb_expect_delete(self.net.tor_net[5].usable[0])
-        command = "del switch --switch np999gd1r01.aqd-unittest.ms.com"
-        self.noouttest(command.split(" "))
-        self.dsdb_verify()
-
-    def testverifydelnp999gd1r01(self):
-        command = "show switch --switch np999gd1r01.aqd-unittest.ms.com"
-        self.notfoundtest(command.split(" "))
-
     def testdelnp06bals03(self):
         self.dsdb_expect_delete("172.31.64.69")
         command = "del switch --switch np06bals03.ms.com"
