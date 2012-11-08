@@ -52,9 +52,9 @@ class TestUpdateBranch(TestBrokerCommand):
         command = "show domain --domain deployable"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Domain: deployable", command)
-        self.matchoutput(out,
-                         "Compiler: "
-                         "/ms/dist/elfms/PROJ/panc/8.2.7/lib/panc.jar",
+        compiler = self.config.get("panc", "pan_compiler", raw=True) % {
+            'version': '8.2.7'}
+        self.matchoutput(out, "Compiler: %s" % compiler,
                          command)
         self.matchoutput(out, "Comments: Updated Comments", command)
 
