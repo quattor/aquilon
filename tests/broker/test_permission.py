@@ -54,8 +54,8 @@ class TestPermission(TestBrokerCommand):
         klist = self.config.get('kerberos', 'klist')
         p = Popen([klist], stdout=PIPE, stderr=2)
         (out, err) = p.communicate()
-        m = re.search(r'^Default principal:\s+'
-                      r'(?P<principal>(?P<user>.*)@(?P<realm>.*?))$',
+        m = re.search(r'^\s*(?:Default p|P)rincipal:\s*'
+                      r'(?P<principal>(?P<user>\S.*)@(?P<realm>.*?))$',
                       out, re.M)
         self.assertTrue(m,
                         "Could not determine default principal from klist "
