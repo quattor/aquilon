@@ -40,7 +40,7 @@ from aquilon.worker.locks import CompileKey
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
 from aquilon.worker.templates.cluster import PlenaryClusterClient
 from aquilon.worker.templates.panutils import (StructureTemplate, pan_assign,
-                                               pan_push, pan_include)
+                                               pan_append, pan_include)
 
 LOGGER = logging.getLogger(__name__)
 
@@ -278,8 +278,9 @@ class PlenaryHostData(Plenary):
         if self.dbobj.resholder:
             lines.append("")
             for resource in sorted(self.dbobj.resholder.resources):
-                pan_push(lines, "/system/resources/%s" % resource.resource_type,
-                         StructureTemplate(resource.template_base + '/config'))
+                pan_append(lines, "/system/resources/" + resource.resource_type,
+                           StructureTemplate(resource.template_base +
+                                             '/config'))
 
 
 class PlenaryToplevelHost(Plenary):

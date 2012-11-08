@@ -231,7 +231,7 @@ class TestVulcan20(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out,
                          '"/system/resources/resourcegroup" = '
-                         'push(create("resource/cluster/utmc8/'
+                         'append(create("resource/cluster/utmc8/'
                          'resourcegroup/utmc8as1/config"));',
                          command)
 
@@ -276,7 +276,7 @@ class TestVulcan20(TestBrokerCommand):
         self.matchoutput(out, '"name" = "utmc8as1', command)
         self.matchoutput(out,
                          '"resources/share" = '
-                         'push(create("resource/cluster/utmc8/resourcegroup/'
+                         'append(create("resource/cluster/utmc8/resourcegroup/'
                          'utmc8as1/share/test_v2_share/config"));',
                          command)
 

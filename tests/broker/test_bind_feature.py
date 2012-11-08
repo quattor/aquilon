@@ -52,7 +52,7 @@ r'};'
 r'"/metadata/features"={\n'
 r'\s*if ((value("/hardware/manufacturer") == "ibm") &&\n'
 r'\s(value("/hardware/template_name") == "hs21-8853l5u")){\n'
-r'\spush("features/hardware/bios_setup");\n'
+r'\sappend("features/hardware/bios_setup");\n'
 r'\s} else { SELF; };\n'
 r'};'
 
@@ -121,7 +121,7 @@ class TestBindFeature(TestBrokerCommand):
                           r'include { "features/pre_host/config" };\s*',
                           command)
         self.searchoutput(out,
-                          r'"/metadata/features" = push\("features/pre_host/config"\);',
+                          r'"/metadata/features" = append\("features/pre_host/config"\);',
                           command)
 
     def test_110_bind_personality(self):
@@ -177,7 +177,7 @@ class TestBindFeature(TestBrokerCommand):
                           r'include { "features/post_host/config" };',
                           command)
         self.searchoutput(out,
-                          r'"/metadata/features" = push\("features/post_host/config"\);',
+                          r'"/metadata/features" = append\("features/post_host/config"\);',
                           command)
 
     def test_120_bind_personality_redundant(self):

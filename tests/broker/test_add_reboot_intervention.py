@@ -124,7 +124,7 @@ class TestAddRebootIntervention(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out,
                          '"/system/resources/reboot_iv" = '
-                         'push(create("resource/host/server1.aqd-unittest.ms.com/reboot_iv/reboot_intervention/config"))',
+                         'append(create("resource/host/server1.aqd-unittest.ms.com/reboot_iv/reboot_intervention/config"))',
                          command)
 
         command = ["show_host", "--hostname=server1.aqd-unittest.ms.com",

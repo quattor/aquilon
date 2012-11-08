@@ -102,7 +102,7 @@ class TestAddResourceGroup(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out,
                          '"/system/resources/resourcegroup" = '
-                         'push(create("resource/cluster/utvcs1/resourcegroup/utvcs1as1/config"));',
+                         'append(create("resource/cluster/utvcs1/resourcegroup/utvcs1as1/config"));',
                          command)
 
     def test_210_cat_rg(self):
@@ -110,7 +110,7 @@ class TestAddResourceGroup(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out,
                          '"resources/filesystem" = '
-                         'push(create("resource/cluster/utvcs1/resourcegroup/utvcs1as1/filesystem/fs1/config"));',
+                         'append(create("resource/cluster/utvcs1/resourcegroup/utvcs1as1/filesystem/fs1/config"));',
                          command)
 
     def test_210_cat_rg_generate(self):
@@ -119,7 +119,7 @@ class TestAddResourceGroup(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out,
                          '"resources/filesystem" = '
-                         'push(create("resource/cluster/utvcs1/resourcegroup/utvcs1as1/filesystem/fs1/config"));',
+                         'append(create("resource/cluster/utvcs1/resourcegroup/utvcs1as1/filesystem/fs1/config"));',
                          command)
 
     def test_210_cat_fs(self):

@@ -546,7 +546,7 @@ class TestAddPersonality(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out, 'variable PERSONALITY = "%s"' % personality,
                          command)
-        self.matchoutput(out, '"/system/eon_ids" = push(2);', command)
+        self.matchoutput(out, '"/system/eon_ids" = append(2);', command)
         self.matchoutput(out, 'include { if_exists("personality/%s/pre_feature") };' %
                          personality, command)
         self.matchoutput(out, "template personality/%s/config;" % personality,

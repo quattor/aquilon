@@ -115,7 +115,7 @@ class TestDelInterfaceAddress(TestBrokerCommand):
         out = self.commandtest(command)
         self.searchoutput(out,
                           r'"/system/resources/service_address" = '
-                          r'push\(create\("resource/host/unittest20.aqd-unittest.ms.com/service_address/hostname/config"\)\);',
+                          r'append\(create\("resource/host/unittest20.aqd-unittest.ms.com/service_address/hostname/config"\)\);',
                           command)
         self.matchclean(out, "aliases", command)
         self.matchclean(out, "zebra2", command)

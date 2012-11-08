@@ -248,15 +248,15 @@ class TestMake(TestBrokerCommand):
                          command)
         self.searchoutput(out,
                           r'"/system/resources/service_address" = '
-                          r'push\(create\("resource/host/unittest20.aqd-unittest.ms.com/service_address/hostname/config"\)\);',
+                          r'append\(create\("resource/host/unittest20.aqd-unittest.ms.com/service_address/hostname/config"\)\);',
                           command)
         self.searchoutput(out,
                           r'"/system/resources/service_address" = '
-                          r'push\(create\("resource/host/unittest20.aqd-unittest.ms.com/service_address/zebra2/config"\)\);',
+                          r'append\(create\("resource/host/unittest20.aqd-unittest.ms.com/service_address/zebra2/config"\)\);',
                           command)
         self.searchoutput(out,
                           r'"/system/resources/service_address" = '
-                          r'push\(create\("resource/host/unittest20.aqd-unittest.ms.com/service_address/zebra3/config"\)\);',
+                          r'append\(create\("resource/host/unittest20.aqd-unittest.ms.com/service_address/zebra3/config"\)\);',
                           command)
         self.searchoutput(out,
                           r'"/system/network/routers" = nlist\(\s*'

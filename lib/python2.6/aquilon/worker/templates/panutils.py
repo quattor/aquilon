@@ -131,8 +131,8 @@ def pan_assign(lines, path, value):
     lines.append('"%s" = %s;' % (path, pan(value)))
 
 
-def pan_push(lines, path, value):
-    lines.append('"%s" = push(%s);' % (path, pan(value)))
+def pan_append(lines, path, value):
+    lines.append('"%s" = append(%s);' % (path, pan(value)))
 
 
 def pan_include(lines, templates):

@@ -355,7 +355,7 @@ class TestAddVirtualHardware(TestBrokerCommand):
             machine = "evm%s" % i
             self.searchoutput(out,
                               r'"/system/resources/virtual_machine" = '
-                              r'push\(create\("resource/cluster/utecl1/virtual_machine/%s/config"\)\);'
+                              r'append\(create\("resource/cluster/utecl1/virtual_machine/%s/config"\)\);'
                               % machine,
                               command)
         self.matchclean(out, "evm9", command)

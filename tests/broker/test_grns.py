@@ -124,8 +124,8 @@ class TestGrns(TestBrokerCommand):
 
         command = ["cat", "--archetype=aquilon", "--personality=compileserver"]
         out = self.commandtest(command)
-        self.matchoutput(out, '"/system/eon_ids" = push(2);', command)
-        self.matchoutput(out, '"/system/eon_ids" = push(4);', command)
+        self.matchoutput(out, '"/system/eon_ids" = append(2);', command)
+        self.matchoutput(out, '"/system/eon_ids" = append(4);', command)
 
     def test_420_verify_host(self):
         command = ["show", "host", "--hostname", "unittest20.aqd-unittest.ms.com"]
@@ -262,8 +262,8 @@ class TestGrns(TestBrokerCommand):
         command = ["cat", "--archetype", "aquilon",
                    "--personality", "compileserver"]
         out = self.commandtest(command)
-        self.matchoutput(out, '"/system/eon_ids" = push(2);', command)
-        self.searchclean(out, '"/system/eon_ids" = push(4);', command)
+        self.matchoutput(out, '"/system/eon_ids" = append(2);', command)
+        self.searchclean(out, '"/system/eon_ids" = append(4);', command)
 
         command = ["unmap", "grn", "--grn", "grn:/ms/ei/aquilon/aqd",
                    "--personality", "compileserver"]

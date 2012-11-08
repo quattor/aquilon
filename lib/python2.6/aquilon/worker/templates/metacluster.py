@@ -34,7 +34,7 @@ import logging
 from aquilon.aqdb.model import MetaCluster
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
 from aquilon.worker.templates.panutils import (StructureTemplate, pan_assign,
-                                               pan_include, pan_push)
+                                               pan_include, pan_append)
 from aquilon.worker.locks import CompileKey
 
 
@@ -110,8 +110,9 @@ class PlenaryMetaClusterData(Plenary):
         lines.append("")
         if self.dbobj.resholder:
             for resource in sorted(self.dbobj.resholder.resources):
-                pan_push(lines, "/system/resources/%s" % resource.resource_type,
-                         StructureTemplate(resource.template_base + '/config'))
+                pan_append(lines, "/system/resources/" + resource.resource_type,
+                           StructureTemplate(resource.template_base +
+                                             '/config'))
 
 
 class PlenaryMetaClusterObject(Plenary):

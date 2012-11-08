@@ -35,7 +35,7 @@ from aquilon.aqdb.model import (Cluster, EsxCluster, ComputeCluster,
                                 StorageCluster)
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
 from aquilon.worker.templates.panutils import (StructureTemplate, pan_assign,
-                                               pan_include, pan_push)
+                                               pan_include, pan_append)
 from aquilon.worker.locks import CompileKey
 
 
@@ -135,8 +135,9 @@ class PlenaryClusterData(Plenary):
         lines.append("")
         if self.dbobj.resholder:
             for resource in sorted(self.dbobj.resholder.resources):
-                pan_push(lines, "/system/resources/%s" % resource.resource_type,
-                         StructureTemplate(resource.template_base + '/config'))
+                pan_append(lines, "/system/resources/" + resource.resource_type,
+                           StructureTemplate(resource.template_base +
+                                             '/config'))
         pan_assign(lines, "/system/build", self.dbobj.status.name)
         if self.dbobj.allowed_personalities:
             pan_assign(lines, "/system/cluster/allowed_personalities",
@@ -228,9 +229,9 @@ class PlenaryClusterClient(Plenary):
         # circular external references.
         if self.dbobj.resholder:
             for resource in sorted(self.dbobj.resholder.resources):
-                pan_push(lines, "/system/cluster/resources/%s" %
-                         resource.resource_type,
-                         StructureTemplate(resource.template_base + '/config'))
+                pan_append(lines, "/system/cluster/resources/" +
+                           resource.resource_type,
+                           StructureTemplate(resource.template_base + '/config'))
         lines.append("include { if_exists('features/' + value('/system/archetype/name') + '/%s/%s/config') };"
                      % (self.dbobj.personality.archetype.name,
                         self.dbobj.personality.name))
