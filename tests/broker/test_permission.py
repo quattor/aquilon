@@ -80,10 +80,11 @@ class TestPermission(TestBrokerCommand):
         self.matchoutput(out, "Comments: Some user comments", command)
 
     def testverifycsvnocomments(self):
-        command = ["show_principal", "--principal=testusernobody@is1.morgan",
+        realm = self.config.get('unittest', 'realm')
+        command = ["show_principal", "--principal=testusernobody@%s" % realm,
                    "--format=csv"]
         out = self.commandtest(command)
-        self.searchoutput(out, r"^testusernobody@is1.morgan,nobody$", command)
+        self.searchoutput(out, r"^testusernobody@%s,nobody$" % realm, command)
 
     def testverifynohostpart(self):
         command = ["permission", "--principal", "testusernobody",
@@ -109,11 +110,13 @@ class TestPermission(TestBrokerCommand):
                          command)
 
     def testverifycsv(self):
+        realm = self.config.get('unittest', 'realm')
         command = ["show_principal",
-                   "--principal=testuseroperations@is1.morgan", "--format=csv"]
+                   "--principal=testuseroperations@%s" % realm,
+                   "--format=csv"]
         out = self.commandtest(command)
-        self.searchoutput(out, r"^testuseroperations@is1.morgan,operations$",
-                          command)
+        self.searchoutput(out, r"^testuseroperations@%s,operations$" %
+                          realm, command)
 
     def testpermissionengineering(self):
         realm = self.config.get('unittest', 'realm')
