@@ -35,7 +35,6 @@ from sqlalchemy import (Column, Integer, String, DateTime, Sequence,
 from sqlalchemy.orm import deferred
 
 from aquilon.aqdb.model import Base
-from aquilon.aqdb.column_types.aqstr import AqStr
 
 #Upfront Design Decisions:
 #  -Needs it's own creation_date + comments columns. Audit log depends on
@@ -47,7 +46,7 @@ class Realm(Base):
     __tablename__ = 'realm'
 
     id = Column(Integer, Sequence('realm_id_seq'), primary_key=True)
-    name = Column(AqStr(32), nullable=False)
+    name = Column(String(32), nullable=False)
     creation_date = deferred(Column(DateTime, nullable=False,
                                     default=datetime.now))
     comments = Column('comments', String(255), nullable=True)
