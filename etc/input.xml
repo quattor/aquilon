@@ -87,14 +87,14 @@
       were selected. For example "flushed 10/10 templates" would indicate
       that 10 templates matched and they were all written out successfully.
       <optgroup name="sections" fields="any">
-         <option name="hosts" type="boolean">flush the host templates</option>
-         <option name="machines" type="boolean">flush the machine templates</option>
-         <option name="personalities" type="boolean">flush the personality templates</option>
-         <option name="clusters" type="boolean">flush the cluster templates</option>
-         <option name="services" type="boolean">flush the service templates</option>
-         <option name="resources" type="boolean">flush the resource templates</option>
-         <option name="locations" type="boolean">flush templates related to locations. This is only cities for now.</option>
-         <option name="switches" type="boolean">flush templates related to switches.</option>
+         <option name="hosts" type="flag">flush the host templates</option>
+         <option name="machines" type="flag">flush the machine templates</option>
+         <option name="personalities" type="flag">flush the personality templates</option>
+         <option name="clusters" type="flag">flush the cluster templates</option>
+         <option name="services" type="flag">flush the service templates</option>
+         <option name="resources" type="flag">flush the resource templates</option>
+         <option name="locations" type="flag">flush templates related to locations. This is only cities for now.</option>
+         <option name="switches" type="flag">flush templates related to switches.</option>
          <option name="all" type="flag">flush all templates</option>
       </optgroup>
       <transport method="post" path="flush" />
