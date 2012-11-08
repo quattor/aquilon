@@ -119,15 +119,10 @@ class TestPrebindServer(TestBrokerCommand):
                           r'"servers" = list\(\s*"nyaqd1.ms.com",\s*'
                           r'"unittest02.one-nyp.ms.com"\s*\);',
                           command)
-        # Relying on 'nyaqd1.ms.com' to be in DNS isn't going to work
-        # in other locations.  A better choice might be one of the
-        # root servers (a.root-servers.net) but there's no sane way
-        # to add that to the database right now.  Maybe post DNS
-        # revamp.
+        # The IP address comes from fakebin/dsdb.d, not from the real DNS.
         self.searchoutput(out,
-                          '"server_ips" = list\(\s*"%s",\s*"%s"\s*\);' %
-                          (socket.gethostbyname('nyaqd1.ms.com'),
-                           self.net.unknown[0].usable[0]),
+                          '"server_ips" = list\(\s*"10.184.155.249",\s*"%s"\s*\);' %
+                          self.net.unknown[0].usable[0],
                           command)
 
 
