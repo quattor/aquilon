@@ -75,7 +75,18 @@ class Base(object):
         for prop in mapper.iterate_properties:
             if not isinstance(prop, ColumnProperty):
                 continue
+
+            # Do not load deferred columns, they can't be that interesting
+            if prop.deferred:
+                continue
+
             field = prop.columns[0].name
+
+            # Skip the column holding the polymorphic identity, since the
+            # information is already present in the class name
+            if mapper.polymorphic_on is not None and \
+               mapper.polymorphic_on.name == field:
+                continue
 
             # These fields are not really interesting
             if field == 'id' or field == 'creation_date' or field == 'comments':
