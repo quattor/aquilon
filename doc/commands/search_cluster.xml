@@ -28,48 +28,52 @@
                 <synopfragmentref linkend="global-options">Global options</synopfragmentref>
             </group>
             <group choice="req">
-                 <arg choice="opt"><option>--archetype <replaceable>ARCHETYPE</replaceable></option></arg>
-                 <arg choice="opt"><option>--buildstatus <replaceable>BUILDSTATUS</replaceable></option></arg>
-                 <arg choice="opt"><option>--cluster_type <replaceable>CLUSTER_TYPE</replaceable></option></arg>
-                 <arg choice="opt"><option>--personality <replaceable>PERSONALITY</replaceable></option></arg>
-                 <arg choice="opt"><option>--allowed_archetype <replaceable>ALLOWED_ARCHETYPE</replaceable></option></arg>
-                 <arg choice="opt"><option>--allowed_personality <replaceable>ALLOWED_PERSONALITY</replaceable></option></arg>
-                 <arg choice="opt"><option>--down_hosts_threshold <replaceable>DOWN_HOSTS_THRESHOLD</replaceable></option></arg>
-                 <arg choice="opt"><option>--down_maint_threshold <replaceable>DOWN_MAINT_THRESHOLD</replaceable></option></arg>
-                 <arg choice="opt"><option>--max_members <replaceable>MAX_MEMBERS</replaceable></option></arg>
-                 <arg choice="opt"><option>--member_archetype <replaceable>MEMBER_ARCHETYPE</replaceable></option></arg>
-                 <arg choice="opt"><option>--member_hostname <replaceable>MEMBER_HOSTNAME</replaceable></option></arg>
-                 <arg choice="opt"><option>--member_personality <replaceable>MEMBER_PERSONALITY</replaceable></option></arg>
+                <arg choice="opt"><option>--archetype <replaceable>ARCHETYPE</replaceable></option></arg>
+                <arg choice="opt"><option>--buildstatus <replaceable>BUILDSTATUS</replaceable></option></arg>
+                <arg choice="opt"><option>--cluster_type <replaceable>CLUSTER_TYPE</replaceable></option></arg>
+                <arg choice="opt"><option>--personality <replaceable>PERSONALITY</replaceable></option></arg>
+                <arg choice="opt"><option>--allowed_archetype <replaceable>ALLOWED_ARCHETYPE</replaceable></option></arg>
+                <arg choice="opt"><option>--allowed_personality <replaceable>ALLOWED_PERSONALITY</replaceable></option></arg>
+                <arg choice="opt"><option>--down_hosts_threshold <replaceable>DOWN_HOSTS_THRESHOLD</replaceable></option></arg>
+                <arg choice="opt"><option>--down_maint_threshold <replaceable>DOWN_MAINT_THRESHOLD</replaceable></option></arg>
+                <arg choice="opt"><option>--max_members <replaceable>MAX_MEMBERS</replaceable></option></arg>
+                <arg choice="opt"><option>--member_archetype <replaceable>MEMBER_ARCHETYPE</replaceable></option></arg>
+                <arg choice="opt"><option>--member_hostname <replaceable>MEMBER_HOSTNAME</replaceable></option></arg>
+                <arg choice="opt"><option>--member_personality <replaceable>MEMBER_PERSONALITY</replaceable></option></arg>
             </group>
 
             <group choice="opt">
-                 <arg choice="opt"><option>--domain <replaceable>DOMAIN</replaceable></option></arg>
-                 <arg choice="opt"><option>--sandbox <replaceable>SANDBOX</replaceable></option></arg>
-                 <arg choice="opt"><option>--branch <replaceable>BRANCH</replaceable></option></arg>
+                <arg choice="opt"><option>--domain <replaceable>DOMAIN</replaceable></option></arg>
+                <arg choice="opt"><option>--sandbox <replaceable>SANDBOX</replaceable></option></arg>
+                <arg choice="opt"><option>--branch <replaceable>BRANCH</replaceable></option></arg>
             </group>
 
             <group choice="opt">
-                 <arg choice="opt"><option>--cluster <replaceable>CLUSTER</replaceable></option></arg>
-                 <arg choice="opt"><option>--esx_metacluster <replaceable>ESX_METACLUSTER</replaceable></option></arg>
-                 <arg choice="opt"><option>--esx_virtual_machine <replaceable>ESX_VIRTUAL_MACHINE</replaceable></option></arg>
-                 <arg choice="opt"><option>--esx_guest <replaceable>ESX_GUEST</replaceable></option></arg>
-                 <arg choice="opt"><option>--service <replaceable>SERVICE</replaceable></option></arg>
-                 <arg choice="opt"><option>--instance <replaceable>INSTANCE</replaceable></option></arg>
-                 <arg choice="opt"><option>--esx_share <replaceable>ESX_SHARE</replaceable></option></arg>
-                 <arg choice="opt"><option>--capacity_override <replaceable>CAPACITY</replaceable></option></arg>
-                 <arg choice="opt"><option>--esx_switch <replaceable>ESX_SWITCH</replaceable></option></arg>
+                <arg choice="opt"><option>--cluster <replaceable>CLUSTER</replaceable></option></arg>
+                <arg choice="opt"><option>--esx_metacluster <replaceable>ESX_METACLUSTER</replaceable></option></arg>
+                <arg choice="opt"><option>--esx_virtual_machine <replaceable>ESX_VIRTUAL_MACHINE</replaceable></option></arg>
+                <arg choice="opt"><option>--esx_guest <replaceable>ESX_GUEST</replaceable></option></arg>
+                <arg choice="opt"><option>--service <replaceable>SERVICE</replaceable></option></arg>
+                <arg choice="opt"><option>--instance <replaceable>INSTANCE</replaceable></option></arg>
+                <arg choice="opt"><option>--esx_share <replaceable>ESX_SHARE</replaceable></option></arg>
+                <arg choice="opt"><option>--capacity_override</option></arg>
+                <arg choice="opt"><option>--esx_switch <replaceable>ESX_SWITCH</replaceable></option></arg>
             </group>
             <group choice="opt">
-                <arg choice="opt"><option>--fullinfo <replaceable>FULLINFO</replaceable></option></arg>
+                <arg choice="opt"><option>--all</option></arg>
+                <arg choice="opt"><option>--fullinfo</option></arg>
             </group>
-        <group>
-        <synopfragmentref linkend="location-options">cluster location options (with cluster prefix before any of them)</synopfragmentref>
-        </group>
-        <group>
-        <synopfragmentref linkend="location-options">member location options (with member prefix before any of them)</synopfragmentref>
-        </group>
-        <xi:include href="../common/global_options.xml"/>
-        <xi:include href="../common/location_options.xml"/>
+            <group>
+                <synopfragmentref linkend="cluster-location-options">cluster location options</synopfragmentref>
+		<arg choice="opt"><option>--cluster_exact_location</option></arg>
+            </group>
+            <group>
+                <synopfragmentref linkend="member-location-options">member location options</synopfragmentref>
+		<arg choice="opt"><option>--member_exact_location</option></arg>
+            </group>
+            <xi:include href="../common/global_options.xml"/>
+            <xi:include href="../common/cluster_location_options.xml"/>
+            <xi:include href="../common/member_location_options.xml"/>
         </cmdsynopsis>
     </refsynopsisdiv>
 
@@ -170,6 +174,12 @@
             The maximum hosts that can be added to the cluster.
             </para></listitem>
         </varlistentry>
+        <varlistentry>
+	    <term><option>--buildstatus <replaceable>BUILDSTATUS</replaceable></option></term>
+            <listitem><para>
+                Matches clusters with the given build status.
+            </para></listitem>
+        </varlistentry>
         </variablelist>
 
         <variablelist>
@@ -226,7 +236,7 @@
         </varlistentry>
 
         <varlistentry>
-            <term><option>--capacity_override <replaceable>CAPACITY</replaceable></option></term>
+            <term><option>--capacity_override</option></term>
             <listitem><para>Select clusters with capacity overrides.</para></listitem>
         </varlistentry>
 
@@ -236,9 +246,59 @@
         </varlistentry>
 
         <varlistentry>
-            <term><option>--fullinfo <replaceable>FULLINFO</replaceable></option></term>
+            <term><option>--all</option></term>
+            <listitem><para>List all clusters.</para></listitem>
+        </varlistentry>
+
+        <varlistentry>
+            <term><option>--fullinfo</option></term>
             <listitem><para>Show full information of the matching clusters.</para></listitem>
         </varlistentry>
+
+        </variablelist>
+
+        <variablelist>
+            <title>Location-specific options</title>
+            <varlistentry>
+                <term>
+		    <option>--cluster_organization <replaceable>NAME</replaceable></option>,
+		    <option>--cluster_hub <replaceable>NAME</replaceable></option>,
+		    <option>--cluster_continent <replaceable>NAME</replaceable></option>,
+		    <option>--cluster_country <replaceable>NAME</replaceable></option>,
+		    <option>--cluster_campus <replaceable>NAME</replaceable></option>,
+		    <option>--cluster_city <replaceable>NAME</replaceable></option>,
+		    <option>--cluster_building <replaceable>NAME</replaceable></option>,
+		    <option>--cluster_room <replaceable>NAME</replaceable></option>,
+		    <option>--cluster_rack <replaceable>NAME</replaceable></option>,
+		    <option>--cluster_desk <replaceable>NAME</replaceable></option>,
+		    <option>--member_organization <replaceable>NAME</replaceable></option>,
+		    <option>--member_hub <replaceable>NAME</replaceable></option>,
+		    <option>--member_continent <replaceable>NAME</replaceable></option>,
+		    <option>--member_country <replaceable>NAME</replaceable></option>,
+		    <option>--member_campus <replaceable>NAME</replaceable></option>,
+		    <option>--member_city <replaceable>NAME</replaceable></option>,
+		    <option>--member_building <replaceable>NAME</replaceable></option>,
+		    <option>--member_room <replaceable>NAME</replaceable></option>,
+		    <option>--member_rack <replaceable>NAME</replaceable></option>,
+		    <option>--member_desk <replaceable>NAME</replaceable></option>
+	        </term>
+		<listitem>
+		    <para>
+			Search for clusters by location. The options prefixed by "cluster_" match on the cluster's
+			location constraint, while the options prefixed by "member_" match on the location of the
+			cluster members. The two may yield different results if e.g. the cluster spans multiple
+			racks.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+		<term><option>--cluster_exact_location</option>, <option>--member_exact_location</option></term>
+		<listitem>
+		    <para>
+			Require an exact match for the cluster/member location. Default is to match sub-locations as well.
+		    </para>
+		</listitem>
+	    </varlistentry>
         </variablelist>
 
         <xi:include href="../common/global_options_desc.xml"/>

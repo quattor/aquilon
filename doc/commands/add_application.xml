@@ -122,6 +122,16 @@ The EON reference ID of the application.
 		    </para>
 		</listitem>
 	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--comments <replaceable>COMMENTS</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Free-form comments for the application resource.
+		    </para>
+		</listitem>
+	    </varlistentry>
 	</variablelist>
 	<xi:include href="../common/global_options_desc.xml"/>
     </refsect1>

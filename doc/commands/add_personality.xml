@@ -29,6 +29,7 @@
 	    </group>
 	    <arg choice="plain"><option>--personality <replaceable>PERSONALITY</replaceable></option></arg>
 	    <arg choice="plain"><option>--archetype <replaceable>ARCHETYPE</replaceable></option></arg>
+	    <arg choice="plain"><option>--host_environment <replaceable>HOSTENV</replaceable></option></arg>
 	    <arg choice="opt"><option>--grn <replaceable>GRN</replaceable></option></arg>
 	    <arg choice="opt"><option>--eon_id <replaceable>EON_ID</replaceable></option></arg>
 	    <group choice="opt">
@@ -75,6 +76,17 @@
 		<listitem>
 		    <para>
                         The name of the archteype.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+                    <option>--host_environment <replaceable>HOSTENV</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			The name of the environment hosts belonging to this personality will live in. The valid
+			environments are: prod, uat, qa, dev, infra.
 		    </para>
 		</listitem>
 	    </varlistentry>

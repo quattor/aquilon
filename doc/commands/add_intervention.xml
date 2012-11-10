@@ -31,9 +31,10 @@
 	    <arg choice="req"><option>--intervention <replaceable>NAME</replaceable></option></arg>
 	    <arg choice="req"><option>--expiry <replaceable>WHEN</replaceable></option></arg>
 	    <arg choice="req"><option>--justification <replaceable>REASON</replaceable></option></arg>
-	    <arg choice="opt"><option>--users <replaceable>USERS</replaceable></option></arg>
-	    <arg choice="opt"><option>--groups <replaceable>GROUPS</replaceable></option></arg>
-	    <arg choice="opt"><option>--disable <replaceable>DISABLE</replaceable></option></arg>
+	    <arg choice="opt"><option>--allowusers <replaceable>USERS</replaceable></option></arg>
+	    <arg choice="opt"><option>--allowgroups <replaceable>GROUPS</replaceable></option></arg>
+	    <arg choice="opt"><option>--disabled_actions <replaceable>ACTIONS</replaceable></option></arg>
+	    <arg choice="opt"><option>--start_time <replaceable>WHEN</replaceable></option></arg>
 	    <arg choice="opt"><option>--comments <replaceable>COMMENTS</replaceable></option></arg>
 	    <group>
 		<synopfragmentref linkend="global-options">Global options</synopfragmentref>
@@ -138,6 +139,17 @@
 	    </varlistentry>
 	    <varlistentry>
 	        <term>
+		    <option>--start_time <replaceable>WHEN</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			When the intervention should start. The format is anything the python library
+			dateutil.parser can understand. The default value is the current time.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
 		    <option>--allowusers <replaceable>USERS</replaceable></option>
 		</term>
 		<listitem>
@@ -167,9 +179,19 @@
 	    A comma-separated list of action names that should be
 	    disabled. For example, if there is a named action called
 	    "start-my-app" that is configured to run at host startup,
-	    then using <option>--disable start-my-app</option> will
+	    then using "--disabled_actions start-my-app" will
 	    prevent that action from triggering when the host next
 	    reboots.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--comments <replaceable>COMMENTS</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Free-form comments for the intervention.
 		    </para>
 		</listitem>
 	    </varlistentry>

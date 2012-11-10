@@ -38,6 +38,9 @@
 	    <arg choice="opt"><option>--maint_threshold <replaceable>THRESHOLD</replaceable></option></arg>
 	    <arg choice="opt"><option>--max_members <replaceable>LIMIT</replaceable></option></arg>
 	    <arg choice="opt"><option>--buildstatus <replaceable>STATUS</replaceable></option></arg>
+	    <arg choice="opt"><option>--metacluster <replaceable>METACLUSTER</replaceable></option></arg>
+	    <arg choice="opt"><option>--vm_to_host_ratio <replaceable>VM_COUNT</replaceable>:<replaceable>HOST_COUNT</replaceable></option></arg>
+	    <arg choice="opt"><option>--switch <replaceable>SWITCH</replaceable></option></arg>
 	    <arg choice="opt"><option>--comments <replaceable>COMMENTS</replaceable></option></arg>
 	    <group>
 		<synopfragmentref linkend="global-options">Global options</synopfragmentref>
@@ -196,7 +199,51 @@
 		    </para>
 		</listitem>
 	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--metacluster <replaceable>METACLUSTER</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Name of the metacluster this cluster should belong to.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--vm_to_host_ratio <replaceable>VM_COUNT</replaceable>:<replaceable>HOST_COUNT</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Maximum allowed ratio of virtual machines to cluster members. This option can
+			only be specified for ESX clusters.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--switch <replaceable>SWITCH</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Name of the switch that acts as the router for this cluster. The networks defined on this
+			switch will be used for automatic IP address generation for virtual machines. This option
+			can only be specified for ESX clusters.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--comments <replaceable>COMMENTS</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Free-form comments associated with the cluster.
+		    </para>
+		</listitem>
+	    </varlistentry>
 	</variablelist>
+	<xi:include href="../common/location_options_desc.xml"/>
 	<xi:include href="../common/global_options_desc.xml"/>
     </refsect1>
 
