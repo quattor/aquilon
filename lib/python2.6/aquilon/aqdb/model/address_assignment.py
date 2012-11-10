@@ -154,7 +154,7 @@ class AddressAssignment(Base):
         # work with other databases.
         if not label:
             label = '-'
-        elif not self._label_check.match(label):
+        elif not self._label_check.match(label):  # pragma: no cover
             raise ValueError("Illegal address label '%s'." % label)
 
         # Right now network_id is nullable due to how refresh_network works, so

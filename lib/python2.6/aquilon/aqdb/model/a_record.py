@@ -62,19 +62,19 @@ class ARecord(DnsRecord):
         return "%s [%s]" % (self.fqdn, self.ip)
 
     def __init__(self, ip=None, network=None, fqdn=None, **kwargs):
-        if not network:
+        if not network:  # pragma: no cover
             raise ValueError("network argument is missing")
-        if ip not in network.network:
+        if ip not in network.network:  # pragma: no cover
             raise ValueError("IP not inside network")
 
-        if not fqdn:
+        if not fqdn:  # pragma: no cover
             raise ValueError("fqdn cannot be empty")
 
         # We can't share both the IP and the FQDN with an other A record. Only
         # do the query if the FQDN is already persistent
         if instance_state(fqdn).has_identity:
             session = object_session(fqdn)
-            if not session:
+            if not session:  # pragma: no cover
                 raise ValueError("fqdn must be already part of a session")
 
             # Disable autoflush temporarily
@@ -85,7 +85,7 @@ class ARecord(DnsRecord):
             q = q.filter_by(ip=ip)
             q = q.filter_by(network=network)
             q = q.filter_by(fqdn=fqdn)
-            if q.all():
+            if q.all():  # pragma: no cover
                 raise ArgumentError("%s, ip %s already exists." %
                                     (self._get_class_label(), ip))
             session.autoflush = flush_state

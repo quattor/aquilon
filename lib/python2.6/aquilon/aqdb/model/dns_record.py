@@ -95,7 +95,7 @@ class DnsRecord(Base):
                 dns_environment = DnsEnvironment.get_unique_or_default(session,
                                                                       dns_environment)
             if fqdn:
-                if name or dns_domain:
+                if name or dns_domain:  # pragma: no cover
                     raise TypeError("fqdn and name/dns_domain cannot be mixed")
                 (name, dns_domain) = parse_fqdn(session, fqdn)
             try:
@@ -156,10 +156,10 @@ class DnsRecord(Base):
         return aliases
 
     def __init__(self, fqdn=None, **kwargs):
-        if not fqdn:
+        if not fqdn:  # pragma: no cover
             raise ValueError("fqdn cannot be empty")
         session = object_session(fqdn)
-        if not session:
+        if not session:  # pragma: no cover
             raise ValueError("fqdn must be already part of a session")
 
         # Disable autoflush temporarily
