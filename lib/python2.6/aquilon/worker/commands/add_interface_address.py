@@ -153,6 +153,8 @@ class CommandAddInterfaceAddress(BrokerCommand):
                 lock_queue.release(key)
         else:
             dsdb_runner = DSDBRunner(logger=logger)
+            if delete_old_dsdb_entry:
+                dsdb_runner.delete_host_details(dbdns_rec.fqdn, ip)
             dsdb_runner.update_host(dbhw_ent, oldinfo)
             dsdb_runner.commit_or_rollback("Could not add host to DSDB")
 
