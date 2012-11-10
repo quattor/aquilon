@@ -37,7 +37,7 @@ from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.formats.list import StringAttributeList
 
 from sqlalchemy.orm import contains_eager, undefer, subqueryload, aliased
-from sqlalchemy.sql import or_
+from sqlalchemy.sql import or_, and_
 
 # Map standard DNS record types to our internal types
 DNS_RRTYPE_MAP = {'a': 'a_record',
@@ -123,12 +123,12 @@ class CommandSearchDns(BrokerCommand):
         if used is not None:
             if used:
                 q = q.join(AddressAssignment,
-                           ARecord.ip == AddressAssignment.ip and
-                           ARecord.network == AddressAssignment.network)
+                           and_(ARecord.ip == AddressAssignment.ip,
+                                ARecord.network_id == AddressAssignment.network_id))
             else:
                 q = q.outerjoin(AddressAssignment,
-                                ARecord.ip == AddressAssignment.ip and
-                                ARecord.network == AddressAssignment.network)
+                                and_(ARecord.ip == AddressAssignment.ip,
+                                     ARecord.network_id == AddressAssignment.network_id))
                 q = q.filter(AddressAssignment.id == None)
             q = q.reset_joinpoint()
 
