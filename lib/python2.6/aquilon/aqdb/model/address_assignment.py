@@ -84,6 +84,9 @@ class AddressAssignment(Base):
                                                     ondelete="CASCADE"),
                                 nullable=True)
 
+    # This should be the same as #
+    # network.network_environment.dns_environment_id, but using that would mean
+    # joining two extra tables in the dns_records relation
     dns_environment_id = Column(Integer, ForeignKey('dns_environment.id',
                                                     name='%s_dns_env_fk' %
                                                     _ABV),
@@ -183,7 +186,8 @@ Interface.addresses = association_proxy('assignments', 'ip')
 ARecord.assignments = relation(
     AddressAssignment,
     primaryjoin=and_(AddressAssignment.ip == ARecord.ip,
+                     AddressAssignment.network_id == ARecord.network_id,
                      ARecord.fqdn_id == Fqdn.id,
                      AddressAssignment.dns_environment_id == Fqdn.dns_environment_id),
-    foreign_keys=[AddressAssignment.ip, Fqdn.id],
+    foreign_keys=[AddressAssignment.ip, AddressAssignment.network_id, Fqdn.id],
     viewonly=True)
