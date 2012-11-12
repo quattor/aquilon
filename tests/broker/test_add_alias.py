@@ -138,6 +138,22 @@ class TestAddAlias(TestBrokerCommand):
                '--target', 'alias2host.aqd-unittest.ms.com']
         self.noouttest(cmd)
 
+    def test_510_add_alias3alias(self):
+        cmd = ['add', 'alias', '--fqdn', 'alias3alias.aqd-unittest.ms.com',
+               '--target', 'alias2alias.aqd-unittest.ms.com']
+        self.noouttest(cmd)
+
+    def test_520_add_alias4alias(self):
+        cmd = ['add', 'alias', '--fqdn', 'alias4alias.aqd-unittest.ms.com',
+               '--target', 'alias3alias.aqd-unittest.ms.com']
+        self.noouttest(cmd)
+
+    def test_530_add_alias5alias_fail(self):
+        cmd = ['add', 'alias', '--fqdn', 'alias5alias.aqd-unittest.ms.com',
+               '--target', 'alias4alias.aqd-unittest.ms.com']
+        out = self.badrequesttest(cmd)
+        self.matchoutput(out, "Maximum alias depth exceeded", cmd)
+
     def test_600_verify_alias2alias(self):
         cmd = 'show alias --fqdn alias2alias.aqd-unittest.ms.com'
         out = self.commandtest(cmd.split(" "))
@@ -154,7 +170,9 @@ class TestAddAlias(TestBrokerCommand):
         self.matchoutput(out,
                          "Aliases: alias.ms.com, "
                          "alias2alias.aqd-unittest.ms.com, "
-                         "alias2host.aqd-unittest.ms.com",
+                         "alias2host.aqd-unittest.ms.com, "
+                         "alias3alias.aqd-unittest.ms.com, "
+                         "alias4alias.aqd-unittest.ms.com",
                          cmd)
 
 

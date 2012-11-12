@@ -51,7 +51,15 @@ class TestDelAlias(TestBrokerCommand):
                          "environment internal not found.",
                          command)
 
-    def test_200_del_alias2alias(self):
+    def test_200_del_alias4alias(self):
+        command = ["del", "alias", "--fqdn", "alias4alias.aqd-unittest.ms.com"]
+        self.noouttest(command)
+
+    def test_201_del_alias3alias(self):
+        command = ["del", "alias", "--fqdn", "alias3alias.aqd-unittest.ms.com"]
+        self.noouttest(command)
+
+    def test_202_del_alias2alias(self):
         command = ["del", "alias", "--fqdn", "alias2alias.aqd-unittest.ms.com"]
         self.noouttest(command)
 
