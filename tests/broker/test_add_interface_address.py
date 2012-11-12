@@ -288,6 +288,19 @@ class TestAddInterfaceAddress(TestBrokerCommand):
         # External IP addresses should not be added to DSDB
         self.dsdb_verify(empty=True)
 
+    def testaddunittest25utcolo3(self):
+        net = self.net.unknown[1]
+        command = ["add", "interface", "address", "--machine", "ut3c5n7",
+                   "--interface", "eth2", "--ipfromip", net.ip,
+                   "--fqdn", "unittest25-e2-2.utcolo.aqd-unittest.ms.com",
+                   "--label", "e2", "--map_to_primary",
+                   "--network_environment", "utcolo"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "Machine unittest25.aqd-unittest.ms.com lives in DNS "
+                         "environment internal, not DNS environment ut-env.",
+                         command)
+
     def testaddunittest25excx(self):
         net_internal = self.net.unknown[0]
         net_excx = self.net.unknown[0].subnet()[0]

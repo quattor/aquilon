@@ -30,7 +30,7 @@
 
 from aquilon.worker.broker import BrokerCommand, validate_basic
 from aquilon.exceptions_ import ArgumentError, IncompleteError
-from aquilon.aqdb.model import HardwareEntity
+from aquilon.aqdb.model import HardwareEntity, NetworkEnvironment
 from aquilon.worker.dbwrappers.dns import grab_address
 from aquilon.worker.dbwrappers.interface import (get_interface,
                                                  generate_ip,
@@ -57,6 +57,9 @@ class CommandAddInterfaceAddress(BrokerCommand):
             hwtype = 'switch'
             hwname = switch
 
+        dbnet_env = NetworkEnvironment.get_unique_or_default(session,
+                                                             network_environment)
+
         dbhw_ent = HardwareEntity.get_unique(session, hwname,
                                              hardware_type=hwtype, compel=True)
 
@@ -64,7 +67,8 @@ class CommandAddInterfaceAddress(BrokerCommand):
 
         oldinfo = DSDBRunner.snapshot_hw(dbhw_ent)
 
-        ip = generate_ip(session, dbinterface, **kwargs)
+        ip = generate_ip(session, dbinterface, network_environment=dbnet_env,
+                         **kwargs)
 
         if dbinterface.interface_type == "loopback":
             # Switch loopback interfaces may use e.g. the network address as an
@@ -99,8 +103,7 @@ class CommandAddInterfaceAddress(BrokerCommand):
             validate_basic("label", label)
 
         # TODO: add allow_multi=True
-        dbdns_rec, newly_created = grab_address(session, fqdn, ip,
-                                                network_environment,
+        dbdns_rec, newly_created = grab_address(session, fqdn, ip, dbnet_env,
                                                 relaxed=relaxed)
         ip = dbdns_rec.ip
         dbnetwork = dbdns_rec.network
