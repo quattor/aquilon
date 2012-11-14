@@ -72,7 +72,7 @@ install: all install-man install-html
 
 # Use "make check" to validate the XML files. Unfortunately the error
 # messages can be misleading sometimes...
-check: version.txt
+check: version.txt $(GENERATED_XML)
 	$(XMLLINT) $(XMLLINT_PARAMS) $(ALL_SOURCES)
 	@./check_command_options.py
 
