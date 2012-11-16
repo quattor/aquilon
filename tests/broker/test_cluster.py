@@ -91,7 +91,7 @@ class TestCluster(TestBrokerCommand):
         for i in range(1, 5):
             host = "evh%s.aqd-unittest.ms.com" % i
             self.searchoutput(cat_cluster_out,
-                              '"/system/cluster/members" = list\([^\)]*'
+                              '"system/cluster/members" = list\([^\)]*'
                               '"%s"[^\)]*\);' % host,
                               cat_cluster_command)
 
@@ -111,7 +111,7 @@ class TestCluster(TestBrokerCommand):
             command = "cat --hostname evh%s.aqd-unittest.ms.com --data" % i
             out = self.commandtest(command.split())
             self.searchoutput(out,
-                              '"/system/cluster/name" = "utecl1";',
+                              '"system/cluster/name" = "utecl1";',
                               command)
 
     def testfailmissingcluster(self):
@@ -175,7 +175,7 @@ class TestCluster(TestBrokerCommand):
         command = ["cat", "--cluster", "utecl2", "--data"]
         out = self.commandtest(command)
         self.searchoutput(out,
-                          r'"/system/cluster/members" = list\('
+                          r'"system/cluster/members" = list\('
                           r'[^)]*"aquilon61.aqd-unittest.ms.com"[^)]*\);',
                           command)
 

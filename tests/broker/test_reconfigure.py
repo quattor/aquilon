@@ -81,10 +81,10 @@ class TestReconfigure(TestBrokerCommand):
         command = "cat --hostname unittest02.one-nyp.ms.com --data"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
-                         "template hostdata/unittest02.one-nyp.ms.com;",
+                         "structure template hostdata/unittest02.one-nyp.ms.com;",
                          command)
         self.matchoutput(out,
-                         '"/hardware" = create("machine/americas/ut/ut3/ut3c5n10");',
+                         '"hardware" = create("machine/americas/ut/ut3/ut3c5n10");',
                          command)
         self.searchoutput(out,
                           r'"eth0", nlist\(\s*'
@@ -108,7 +108,7 @@ class TestReconfigure(TestBrokerCommand):
                            self.net.unknown[0].netmask,
                            self.net.unknown[0].gateway),
                           command)
-        self.matchoutput(out, '"/system/advertise_status" = true;', command)
+        self.matchoutput(out, '"system/advertise_status" = true;', command)
 
         command = "cat --hostname unittest02.one-nyp.ms.com"
         out = self.commandtest(command.split(" "))
@@ -123,7 +123,7 @@ class TestReconfigure(TestBrokerCommand):
             """include { "archetype/base" };""",
             command)
         self.matchoutput(out,
-            """include { "hostdata/unittest02.one-nyp.ms.com" };""",
+            """\"/\" = create(\"hostdata/unittest02.one-nyp.ms.com\"""",
             command)
         self.matchoutput(out,
             """include { "os/linux/5.0.1-x86_64/config" };""",
@@ -160,10 +160,10 @@ class TestReconfigure(TestBrokerCommand):
         command = "cat --hostname unittest00.one-nyp.ms.com --data"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
-                         "template hostdata/unittest00.one-nyp.ms.com;",
+                         "structure template hostdata/unittest00.one-nyp.ms.com;",
                          command)
         self.matchoutput(out,
-                         '"/hardware" = create("machine/americas/ut/ut3/ut3c1n3");',
+                         '"hardware" = create("machine/americas/ut/ut3/ut3c1n3");',
                          command)
         self.searchoutput(out,
                           r'"eth0", nlist\(\s*'
@@ -209,7 +209,7 @@ class TestReconfigure(TestBrokerCommand):
                            self.net.unknown[0].netmask,
                            self.net.unknown[0].gateway),
                           command)
-        self.matchoutput(out, '"/system/advertise_status" = false;', command)
+        self.matchoutput(out, '"system/advertise_status" = false;', command)
 
         command = "cat --hostname unittest00.one-nyp.ms.com"
         out = self.commandtest(command.split(" "))
@@ -217,7 +217,7 @@ class TestReconfigure(TestBrokerCommand):
             """include { "archetype/base" };""",
             command)
         self.matchoutput(out,
-            """include { "hostdata/unittest00.one-nyp.ms.com" };""",
+            """\"/\" = create(\"hostdata/unittest00.one-nyp.ms.com\"""",
             command)
         self.matchoutput(out,
             """include { "os/linux/5.0.1-x86_64/config" };""",
@@ -406,10 +406,10 @@ class TestReconfigure(TestBrokerCommand):
         command = "cat --hostname aquilon87.aqd-unittest.ms.com --data"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
-                         "template hostdata/aquilon87.aqd-unittest.ms.com;",
+                         "structure template hostdata/aquilon87.aqd-unittest.ms.com;",
                          command)
         self.matchoutput(out,
-                         '"/hardware" = create("machine/americas/ut/ut9/ut9s03p37");',
+                         '"hardware" = create("machine/americas/ut/ut9/ut9s03p37");',
                          command)
 
         command = "cat --hostname aquilon87.aqd-unittest.ms.com"
@@ -421,7 +421,7 @@ class TestReconfigure(TestBrokerCommand):
             """include { "archetype/base" };""",
             command)
         self.matchoutput(out,
-            """include { "hostdata/aquilon87.aqd-unittest.ms.com" };""",
+            """\"/\" = create(\"hostdata/aquilon87.aqd-unittest.ms.com\"""",
             command)
         self.matchoutput(out,
             """include { "os/linux/5.0.1-x86_64/config" };""",

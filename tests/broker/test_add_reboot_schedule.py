@@ -113,7 +113,7 @@ class TestAddRebootSchedule(TestBrokerCommand):
                    "--hostname", "server1.aqd-unittest.ms.com", "--data"]
         out = self.commandtest(command)
         self.matchoutput(out,
-                         '"/system/resources/reboot_schedule" = '
+                         '"system/resources/reboot_schedule" = '
                          'append(create("resource/host/server1.aqd-unittest.ms.com/reboot_schedule/reboot_schedule/config"))',
                          command)
 

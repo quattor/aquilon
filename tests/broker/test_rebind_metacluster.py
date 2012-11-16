@@ -81,9 +81,9 @@ class TestRebindMetaCluster(TestBrokerCommand):
     def testverifyrebindutecl3(self):
         command = ["cat", "--cluster=utecl3", "--data"]
         out = self.commandtest(command)
-        self.matchoutput(out, "template clusterdata/utecl3;", command)
-        self.matchoutput(out, '"/system/cluster/name" = "utecl3";', command)
-        self.matchoutput(out, '"/system/metacluster/name" = "utmc1";', command)
+        self.matchoutput(out, "structure template clusterdata/utecl3;", command)
+        self.matchoutput(out, '"system/cluster/name" = "utecl3";', command)
+        self.matchoutput(out, '"system/metacluster/name" = "utmc1";', command)
         self.matchclean(out, "resources/virtual_machine", command)
 
 

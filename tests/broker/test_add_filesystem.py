@@ -136,8 +136,8 @@ class TestAddFilesystem(TestBrokerCommand):
         command = ["cat", "--generate",
                    "--hostname", "server1.aqd-unittest.ms.com", "--data"]
         out = self.commandtest(command)
-        self.matchoutput(out, '"/system/resources/filesystem" = append(create("resource/host/server1.aqd-unittest.ms.com/filesystem/fs1/config"))', command)
-        self.matchoutput(out, '"/system/resources/filesystem" = append(create("resource/host/server1.aqd-unittest.ms.com/filesystem/fs2/config"))', command)
+        self.matchoutput(out, '"system/resources/filesystem" = append(create("resource/host/server1.aqd-unittest.ms.com/filesystem/fs1/config"))', command)
+        self.matchoutput(out, '"system/resources/filesystem" = append(create("resource/host/server1.aqd-unittest.ms.com/filesystem/fs2/config"))', command)
 
         command = ["show_host", "--hostname=server1.aqd-unittest.ms.com",
                    "--format=proto"]

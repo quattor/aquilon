@@ -34,8 +34,9 @@ import logging
 from aquilon.aqdb.model import (Cluster, EsxCluster, ComputeCluster,
                                 StorageCluster)
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
-from aquilon.worker.templates.panutils import (StructureTemplate, pan_assign,
-                                               pan_include, pan_append)
+from aquilon.worker.templates.panutils import (StructureTemplate, PanValue,
+                                               pan_assign, pan_include,
+                                               pan_append)
 from aquilon.worker.locks import CompileKey
 
 
@@ -62,7 +63,7 @@ Plenary.handlers[StorageCluster] = PlenaryCluster
 
 class PlenaryClusterData(Plenary):
 
-    template_type = ""
+    template_type = "structure"
 
     def __init__(self, dbcluster, logger=LOGGER):
         Plenary.__init__(self, dbcluster, logger=logger)
@@ -79,68 +80,66 @@ class PlenaryClusterData(Plenary):
                           profile=self.plenary_template_name, logger=self.logger)
 
     def body(self, lines):
-        pan_include(lines, ["pan/units", "pan/functions"])
-        lines.append("")
-        pan_assign(lines, "/system/cluster/name", self.name)
-        pan_assign(lines, "/system/cluster/type", self.dbobj.cluster_type)
+        pan_assign(lines, "system/cluster/name", self.name)
+        pan_assign(lines, "system/cluster/type", self.dbobj.cluster_type)
 
         dbloc = self.dbobj.location_constraint
-        pan_assign(lines, "/system/cluster/sysloc/location", dbloc.sysloc())
+        pan_assign(lines, "system/cluster/sysloc/location", dbloc.sysloc())
         if dbloc.continent:
-            pan_assign(lines, "/system/cluster/sysloc/continent",
+            pan_assign(lines, "system/cluster/sysloc/continent",
                        dbloc.continent.name)
         if dbloc.city:
-            pan_assign(lines, "/system/cluster/sysloc/city", dbloc.city.name)
+            pan_assign(lines, "system/cluster/sysloc/city", dbloc.city.name)
         if dbloc.campus:
-            pan_assign(lines, "/system/cluster/sysloc/campus",
+            pan_assign(lines, "system/cluster/sysloc/campus",
                        dbloc.campus.name)
             ## maintaining this so templates dont break
             ## during transtion period.. should be DEPRECATED
-            pan_assign(lines, "/system/cluster/campus", dbloc.campus.name)
+            pan_assign(lines, "system/cluster/campus", dbloc.campus.name)
         if dbloc.building:
-            pan_assign(lines, "/system/cluster/sysloc/building",
+            pan_assign(lines, "system/cluster/sysloc/building",
                        dbloc.building.name)
         if dbloc.rack:
-            pan_assign(lines, "/system/cluster/rack/row", dbloc.rack.rack_row)
-            pan_assign(lines, "/system/cluster/rack/column",
+            pan_assign(lines, "system/cluster/rack/row", dbloc.rack.rack_row)
+            pan_assign(lines, "system/cluster/rack/column",
                        dbloc.rack.rack_column)
-            pan_assign(lines, "/system/cluster/rack/name", dbloc.rack.name)
+            pan_assign(lines, "system/cluster/rack/name", dbloc.rack.name)
         if dbloc.room:
-            pan_assign(lines, "/system/cluster/rack/room", dbloc.room)
+            pan_assign(lines, "system/cluster/rack/room", dbloc.room)
 
-        pan_assign(lines, "/system/cluster/down_hosts_threshold",
+        pan_assign(lines, "system/cluster/down_hosts_threshold",
                    self.dbobj.dht_value)
         if self.dbobj.dmt_value is not None:
-            pan_assign(lines, "/system/cluster/down_maint_threshold",
+            pan_assign(lines, "system/cluster/down_maint_threshold",
                        self.dbobj.dmt_value)
         if self.dbobj.down_hosts_percent:
-            pan_assign(lines, "/system/cluster/down_hosts_percent",
+            pan_assign(lines, "system/cluster/down_hosts_percent",
                          self.dbobj.down_hosts_threshold)
-            pan_assign(lines, "/system/cluster/down_hosts_as_percent",
+            pan_assign(lines, "system/cluster/down_hosts_as_percent",
                        self.dbobj.down_hosts_percent)
         if self.dbobj.down_maint_percent:
-            pan_assign(lines, "/system/cluster/down_maint_percent",
+            pan_assign(lines, "system/cluster/down_maint_percent",
                        self.dbobj.down_maint_threshold)
-            pan_assign(lines, "/system/cluster/down_maint_as_percent",
+            pan_assign(lines, "system/cluster/down_maint_as_percent",
                        self.dbobj.down_maint_percent)
         lines.append("")
         # Only use system names here to avoid circular dependencies.
         # Other templates that needs to look up the underlying values use:
-        # foreach(idx; host; value("/system/cluster/members")) {
-        #     v = value("//" + host + "/system/foo/bar/baz");
+        # foreach(idx; host; value("system/cluster/members")) {
+        #     v = value("/" + host + "/system/foo/bar/baz");
         # );
-        pan_assign(lines, "/system/cluster/members",
+        pan_assign(lines, "system/cluster/members",
                    sorted([member.fqdn for member in self.dbobj.hosts]))
 
         lines.append("")
         if self.dbobj.resholder:
             for resource in sorted(self.dbobj.resholder.resources):
-                pan_append(lines, "/system/resources/" + resource.resource_type,
+                pan_append(lines, "system/resources/" + resource.resource_type,
                            StructureTemplate(resource.template_base +
                                              '/config'))
-        pan_assign(lines, "/system/build", self.dbobj.status.name)
+        pan_assign(lines, "system/build", self.dbobj.status.name)
         if self.dbobj.allowed_personalities:
-            pan_assign(lines, "/system/cluster/allowed_personalities",
+            pan_assign(lines, "system/cluster/allowed_personalities",
                        sorted(["%s/%s" % (p.archetype.name, p.name)
                                for p in self.dbobj.allowed_personalities]))
 
@@ -150,16 +149,16 @@ class PlenaryClusterData(Plenary):
 
     def body_esx(self, lines):
         if self.metacluster:
-            pan_assign(lines, "/system/metacluster/name", self.metacluster)
-        pan_assign(lines, "/system/cluster/ratio", [self.dbobj.vm_count,
+            pan_assign(lines, "system/metacluster/name", self.metacluster)
+        pan_assign(lines, "system/cluster/ratio", [self.dbobj.vm_count,
                                                     self.dbobj.host_count])
-        pan_assign(lines, "/system/cluster/max_hosts",
+        pan_assign(lines, "system/cluster/max_hosts",
                    self.dbobj.max_hosts)
         lines.append("")
 
         lines.append("")
         if isinstance(self.dbobj, EsxCluster) and self.dbobj.switch:
-            pan_assign(lines, "/system/cluster/switch",
+            pan_assign(lines, "system/cluster/switch",
                        self.dbobj.switch.primary_name)
 
 
@@ -189,7 +188,9 @@ class PlenaryClusterObject(Plenary):
 
     def body(self, lines):
         pan_include(lines, ["pan/units", "pan/functions"])
-        pan_include(lines, "clusterdata/%s" % self.name)
+        pan_assign(lines, "/",
+                   StructureTemplate("clusterdata/%s" % self.name,
+                                     {"metadata": PanValue("/metadata")}))
         pan_include(lines, "archetype/base")
 
         for servinst in sorted(self.dbobj.service_bindings):
@@ -221,12 +222,10 @@ class PlenaryClusterClient(Plenary):
 
     def body(self, lines):
         pan_assign(lines, "/system/cluster/name", self.name)
-        # we could just use a PAN external reference to pull in this
-        # value from the cluster template, i.e. using
-        #  value('clusters/'+value('/system/cluster/name')+':/system/resources')
-        # but since we know that these templates are always in sync,
-        # we can duplicate the content here to avoid the possibility of
-        # circular external references.
+        # We could just use a PAN external reference to pull in this value from
+        # the cluster template, but since we know that these templates are
+        # always in sync, we can duplicate the content here to avoid the
+        # possibility of circular external references.
         if self.dbobj.resholder:
             for resource in sorted(self.dbobj.resholder.resources):
                 pan_append(lines, "/system/cluster/resources/" +

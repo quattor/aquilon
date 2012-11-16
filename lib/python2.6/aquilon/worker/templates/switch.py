@@ -41,7 +41,7 @@ LOGGER = logging.getLogger(__name__)
 
 class PlenarySwitch(Plenary):
 
-    template_type = ""
+    template_type = "structure"
 
     """
     A facade for the variety of PlenarySwitch subsidiary files
@@ -68,6 +68,6 @@ class PlenarySwitch(Plenary):
 
             vlans[ov.vlan.port_group] = vlan
 
-        lines.append('"/system/network/vlans" = %s;' % pan(vlans))
+        lines.append('"system/network/vlans" = %s;' % pan(vlans))
 
 Plenary.handlers[Switch] = PlenarySwitch

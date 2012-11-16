@@ -102,16 +102,16 @@ class TestAddESXCluster(TestBrokerCommand):
                                         "esx_cluster_vm_to_host_ratio")
         default_ratio = re.sub(r"(\d+):(\d+)", r"\1,\\s*\2", default_ratio)
 
-        self.searchoutput(data, r'"/system/cluster/ratio" = list\(\s*' +
+        self.searchoutput(data, r'"system/cluster/ratio" = list\(\s*' +
                           default_ratio + r'\s*\);', data_cmd)
-        self.matchoutput(data, '"/system/cluster/down_hosts_threshold" = 2;',
+        self.matchoutput(data, '"system/cluster/down_hosts_threshold" = 2;',
                          data_cmd)
-        self.matchoutput(data, '"/system/cluster/down_maint_threshold" = 2;',
+        self.matchoutput(data, '"system/cluster/down_maint_threshold" = 2;',
                          data_cmd)
-        self.matchclean(data, '"/system/cluster/down_hosts_as_percent"', data_cmd)
-        self.matchclean(data, '"/system/cluster/down_maint_as_percent"', data_cmd)
-        self.matchclean(data, '"/system/cluster/down_hosts_percent"', data_cmd)
-        self.matchclean(data, '"/system/cluster/down_maint_percent"', data_cmd)
+        self.matchclean(data, '"system/cluster/down_hosts_as_percent"', data_cmd)
+        self.matchclean(data, '"system/cluster/down_maint_as_percent"', data_cmd)
+        self.matchclean(data, '"system/cluster/down_hosts_percent"', data_cmd)
+        self.matchclean(data, '"system/cluster/down_maint_percent"', data_cmd)
 
     def testaddutecl2(self):
         command = ["add_esx_cluster", "--cluster=utecl2",
@@ -145,7 +145,7 @@ class TestAddESXCluster(TestBrokerCommand):
                                                                 "vulcan-1g-desktop-prod",
                                                                 "esx", "utmc1")
 
-        self.matchoutput(data, '"/system/cluster/down_hosts_threshold" = 1;',
+        self.matchoutput(data, '"system/cluster/down_hosts_threshold" = 1;',
                          data_cmd)
 
     def testfailaddexisting(self):
@@ -399,7 +399,7 @@ class TestAddESXCluster(TestBrokerCommand):
         self.searchoutput(object,
                           r'variable LOADPATH = list\(\s*"esx_cluster"\s*\);',
                           object_command)
-        self.matchoutput(object, 'include { "clusterdata/%s" };' % name,
+        self.matchoutput(object, '"/" = create("clusterdata/%s"' % name,
                          object_command)
         self.matchclean(object, 'include { "service', object_command)
         self.matchoutput(object, 'include { "personality/%s/config" };' % persona,
@@ -408,36 +408,36 @@ class TestAddESXCluster(TestBrokerCommand):
         data_command = ["cat", "--cluster", name, "--data"]
         data = self.commandtest(data_command)
 
-        self.matchoutput(data, "template clusterdata/%s;" % name, data_command)
-        self.matchoutput(data, '"/system/cluster/name" = "%s";' % name,
+        self.matchoutput(data, "structure template clusterdata/%s;" % name, data_command)
+        self.matchoutput(data, '"system/cluster/name" = "%s";' % name,
                          data_command)
-        self.matchoutput(data, '"/system/cluster/type" = "%s";' % ctype,
+        self.matchoutput(data, '"system/cluster/type" = "%s";' % ctype,
                          data_command)
-        self.matchoutput(data, '"/system/cluster/sysloc/continent" = "na";',
+        self.matchoutput(data, '"system/cluster/sysloc/continent" = "na";',
                          data_command)
-        self.matchoutput(data, '"/system/cluster/sysloc/city" = "ny";',
+        self.matchoutput(data, '"system/cluster/sysloc/city" = "ny";',
                          data_command)
-        self.matchoutput(data, '"/system/cluster/sysloc/campus" = "ny";',
+        self.matchoutput(data, '"system/cluster/sysloc/campus" = "ny";',
                          data_command)
-        self.matchoutput(data, '"/system/cluster/sysloc/building" = "ut";',
+        self.matchoutput(data, '"system/cluster/sysloc/building" = "ut";',
                          data_command)
-        self.matchoutput(data, '"/system/cluster/sysloc/location" = "ut.ny.na";',
+        self.matchoutput(data, '"system/cluster/sysloc/location" = "ut.ny.na";',
                          data_command)
-        self.matchoutput(data, '"/system/metacluster/name" = "%s";' %
+        self.matchoutput(data, '"system/metacluster/name" = "%s";' %
                          metacluster, data_command)
-        self.matchoutput(data, '"/system/build" = "build";', data_command)
+        self.matchoutput(data, '"system/build" = "build";', data_command)
         if on_rack:
-            self.matchoutput(data, '"/system/cluster/rack/name" = "ut13"',
+            self.matchoutput(data, '"system/cluster/rack/name" = "ut13"',
                              data_command)
-            self.matchoutput(data, '"/system/cluster/rack/row" = "k"',
+            self.matchoutput(data, '"system/cluster/rack/row" = "k"',
                              data_command)
-            self.matchoutput(data, '"/system/cluster/rack/column" = "3"',
+            self.matchoutput(data, '"system/cluster/rack/column" = "3"',
                              data_command)
         else:
-            self.matchclean(data, '"/system/cluster/rack/name"', data_command)
-            self.matchclean(data, '"/system/cluster/rack/row"', data_command)
-            self.matchclean(data, '"/system/cluster/rack/column"', data_command)
-        self.matchclean(data, '"/system/cluster/allowed_personalities"', data_command)
+            self.matchclean(data, '"system/cluster/rack/name"', data_command)
+            self.matchclean(data, '"system/cluster/rack/row"', data_command)
+            self.matchclean(data, '"system/cluster/rack/column"', data_command)
+        self.matchclean(data, '"system/cluster/allowed_personalities"', data_command)
         self.matchclean(data, "resources/virtual_machine", data_command)
 
         return object_command, object, data_command, data

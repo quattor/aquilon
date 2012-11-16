@@ -197,6 +197,14 @@ class PanMetric(PanObject):
         return "%d*%s" % (self.value, self.unit)
 
 
+class PanValue(PanObject):
+    def __init__(self, path):
+        self.path = path
+
+    def format(self, indent=0):
+        return 'value("%s")' % self.path;
+
+
 class PanEscape(PanObject):
     def __init__(self, value):
         if not isinstance(value, basestring):  # pragma: no cover

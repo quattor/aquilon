@@ -310,17 +310,17 @@ class TestUpdateESXCluster(TestBrokerCommand):
         ## verify cat
         command = "cat --cluster=%s --data" % cname
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, '"/system/cluster/down_hosts_threshold" = 0;',
+        self.matchoutput(out, '"system/cluster/down_hosts_threshold" = 0;',
                          command)
-        self.matchoutput(out, '"/system/cluster/down_maint_threshold" = 2;',
+        self.matchoutput(out, '"system/cluster/down_maint_threshold" = 2;',
                          command)
-        self.matchoutput(out, '"/system/cluster/down_hosts_as_percent" = true;',
+        self.matchoutput(out, '"system/cluster/down_hosts_as_percent" = true;',
                          command)
-        self.matchoutput(out, '"/system/cluster/down_maint_as_percent" = true;',
+        self.matchoutput(out, '"system/cluster/down_maint_as_percent" = true;',
                          command)
-        self.matchoutput(out, '"/system/cluster/down_hosts_percent" = 1;',
+        self.matchoutput(out, '"system/cluster/down_hosts_percent" = 1;',
                          command)
-        self.matchoutput(out, '"/system/cluster/down_maint_percent" = 50;',
+        self.matchoutput(out, '"system/cluster/down_maint_percent" = 50;',
                          command)
 
     def test_605_compileforthreshold(self):
