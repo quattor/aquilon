@@ -17,7 +17,7 @@
 """ Enumerates kerberos realms """
 from datetime import datetime
 
-from sqlalchemy import (Column, Integer, String, DateTime, Sequence,
+from sqlalchemy import (Column, Integer, String, DateTime, Sequence, Boolean,
                         UniqueConstraint)
 from sqlalchemy.orm import deferred
 
@@ -34,6 +34,7 @@ class Realm(Base):
 
     id = Column(Integer, Sequence('realm_id_seq'), primary_key=True)
     name = Column(String(32), nullable=False)
+    trusted = Column(Boolean('realm_trusted_ck'), nullable=False)
     creation_date = deferred(Column(DateTime, nullable=False,
                                     default=datetime.now))
     comments = deferred(Column(String(255), nullable=True))

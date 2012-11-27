@@ -24,6 +24,7 @@ from aquilon.exceptions_ import (ArgumentError, ProcessException,
 from aquilon.aqdb.model import Sandbox
 from aquilon.aqdb.column_types import AqStr
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.dbwrappers.user_principal import get_user_principal
 from aquilon.worker.processes import run_command
 from aquilon.worker.formats.branch import RemoteSandbox
 from aquilon.utils import remove_dir
@@ -76,16 +77,26 @@ class CommandGet(BrokerCommand):
                              dbsandbox.name, userdir)
 
     def force_my_sandbox(self, session, logger, dbuser, sandbox):
+        # The principal name may also contain '/'
         sbx_split = sandbox.split('/')
         sandbox = AqStr.normalize(sbx_split[-1])
         author = '/'.join(sbx_split[:-1])
-        if len(sbx_split) <= 1:
-            return sandbox
+
+        if not dbuser.realm.trusted:
+            raise AuthorizationException("{0} is not trusted to handle "
+                                         "sandboxes.".format(dbuser.realm))
+
         # User used the name/branch syntax - that's fine.  They can't
         # do anything on behalf of anyone else, though, so error if the
         # user given is anyone else.
-        if AqStr.normalize(author) != dbuser.name:
-            raise ArgumentError("User '%s' cannot add or get a sandbox on "
-                                "behalf of '%s'." %
-                                (dbuser.name, author))
+        if author:
+            dbauthor = get_user_principal(session, author)
+            # If two different domains are both trusted, then their principals
+            # map to the same local users, so for sandbox handling purposes they
+            # are the same
+            if not dbauthor.realm.trusted or dbauthor.name != dbuser.name:
+                raise ArgumentError("User '{0!s}' cannot add or get a sandbox "
+                                    "on behalf of '{1!s}'."
+                                    .format(dbuser, dbauthor))
+
         return sandbox

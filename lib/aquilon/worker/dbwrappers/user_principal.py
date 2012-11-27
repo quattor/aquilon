@@ -22,7 +22,8 @@ import logging
 
 from sqlalchemy.orm import contains_eager, joinedload
 
-from aquilon.exceptions_ import ArgumentError, InternalError, NotFoundException
+from aquilon.exceptions_ import (ArgumentError, AuthorizationException,
+                                 NotFoundException)
 from aquilon.aqdb.model import Role, Realm, UserPrincipal
 from aquilon.worker.dbwrappers.host import hostname_to_host
 
@@ -74,7 +75,7 @@ def get_or_create_user_principal(session, principal, createuser=True,
                                 "%s, use --createrealm to create a new record "
                                 "for the realm." % (realm, principal))
         LOGGER.info("Realm %s did not exist, creating..." % realm)
-        dbrealm = Realm(name=realm)
+        dbrealm = Realm(name=realm, trusted=False)
         session.add(dbrealm)
         LOGGER.info("Creating user %s@%s..." % (user, realm))
         dbuser = UserPrincipal(name=user, realm=dbrealm, role=dbnobody,
@@ -100,11 +101,24 @@ def get_or_create_user_principal(session, principal, createuser=True,
     return dbuser
 
 
-def get_user_principal(session, user):
-    """Ignore the realm.  This should probably be re-thought."""
-    dbusers = session.query(UserPrincipal).filter_by(name=user).all()
+def get_user_principal(session, principal):
+    if "@" in principal:
+        user, realm = principal.rsplit("@", 1)
+    else:
+        user = principal
+        realm = None
+
+    q = session.query(UserPrincipal)
+    q = q.filter_by(name=user)
+    q = q.join(Realm)
+    if realm:
+        q = q.filter_by(name=realm)
+    q = q.options(contains_eager(UserPrincipal.realm))
+
+    dbusers = q.all()
     if len(dbusers) > 1:
-        raise InternalError("More than one user found for name %s" % user)
+        raise AuthorizationException("More than one user found for name %s." %
+                                     principal)
     if len(dbusers) == 0:
-        raise NotFoundException("User '%s' not found." % user)
+        raise NotFoundException("User '%s' not found." % principal)
     return dbusers[0]

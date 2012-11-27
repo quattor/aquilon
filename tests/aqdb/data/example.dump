@@ -50,7 +50,7 @@ Role(name="telco_eng")
 Role(name="unixops_l2")
 Role(name="winops")
 
-Realm(name="example.realm")
+Realm(name="example.realm", trusted=True)
 UserPrincipal(name="njw", role=Role(name="aqd_admin"), realm=Realm(name="example.realm"))
 Domain(name="prod", owner=UserPrincipal(name="njw"),
        compiler="/qwg/templates/external/panc/lib/panc.jar",

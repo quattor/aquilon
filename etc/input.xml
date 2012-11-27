@@ -3421,6 +3421,28 @@
       <transport method="get" path="find/principal" />
    </command>
 
+   <command name="show_realm">
+      Show the existing authentication realms.
+      <optgroup name="show_realm_opts" mandatory="True" fields="any">
+         <option name="realm" type="string" conflicts="all">Realm name</option>
+         <option name="all" type="flag" conflicts="realm">Show all realms</option>
+      </optgroup>
+      <transport trigger="all" method="get" path="realm" />
+      <transport trigger="realm" method="get" path="realm/%(realm)s" />
+   </command>
+
+   <command name="update_realm">
+      Update the parameters of an authentication realm.
+      <optgroup name="update_realm_opts" mandatory="True" fields="any">
+         <option name="realm" type="string">Realm name</option>
+      </optgroup>
+      <optgroup name="update_realm_opions" mandatory="False">
+         <option name="trusted" type="boolean" reverse="untrusted">Control if the realm is trusted to manage sandboxes</option>
+	 <option name="comments" type="string">Comments for the realm</option>
+      </optgroup>
+      <transport method="post" path="realm/%(realm)s" />
+   </command>
+
    <command name="permission">
       Modify the entitlements for a user.
       <optgroup name="permission_opts" mandatory="True" fields="all">

@@ -90,10 +90,12 @@ def main(*args, **kw):
     session = db.Session()
 
     aqd_admin = Role.get_unique(session, "aqd_admin", compel=True)
+
     dbrealm = Realm.get_unique(session, realm)
     if not dbrealm:
-        dbrealm = Realm(name=realm)
+        dbrealm = Realm(name=realm, trusted=False)
         session.add(dbrealm)
+
     dbuser = UserPrincipal.get_unique(session, name=principal, realm=dbrealm)
     if dbuser:
         if dbuser.role == aqd_admin:

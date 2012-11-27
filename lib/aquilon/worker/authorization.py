@@ -59,6 +59,7 @@ class AuthorizationBroker(object):
             self.raise_auth_error(principal, action, resource)
         # Right now, anybody in a group can do anything they want, except...
         if action in ['add_archetype', 'update_archetype', 'del_archetype',
+                      'update_realm',
                       'add_vendor', 'del_vendor',
                       'add_os', 'update_os', 'del_os',
                       'add_model', 'update_model', 'del_model',

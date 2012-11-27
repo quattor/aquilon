@@ -1,0 +1,108 @@
+<?xml version="1.0"?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V5.0//EN"
+"http://docbook.org/xml/5.0/dtd/docbook.dtd" [
+<!ENTITY aqd_version SYSTEM "../version.txt">
+]>
+<refentry xml:id="update_realm"
+	  xmlns="http://docbook.org/ns/docbook"
+	  xmlns:xi="http://www.w3.org/2001/XInclude">
+    <refmeta>
+        <refentrytitle>update_realm</refentrytitle>
+        <manvolnum>1</manvolnum>
+        <refmiscinfo class="version">&aqd_version;</refmiscinfo>
+        <refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
+    </refmeta>
+
+    <refnamediv>
+        <refname>update realm</refname>
+        <refpurpose>
+	    Update Kerberos realm information
+        </refpurpose>
+	<refclass>Aquilon</refclass>
+    </refnamediv>
+
+    <refsynopsisdiv>
+	<cmdsynopsis>
+	    <command>aq update realm</command>
+	    <group>
+		<synopfragmentref linkend="global-options">Global options</synopfragmentref>
+	    </group>
+	    <arg choice="plain"><option>--realm <replaceable>REALM</replaceable></option></arg>
+	    <group choice="opt">
+		<arg choice="plain"><option>--trusted</option></arg>
+		<arg choice="plain"><option>--untrusted</option></arg>
+	    </group>
+	    <arg choice="opt"><option>--comments <replaceable>COMMENTS</replaceable></option></arg>
+	    <xi:include href="../common/global_options.xml"/>
+	</cmdsynopsis>
+    </refsynopsisdiv>
+
+    <refsect1>
+        <title>Description</title>
+	<para>
+	    The <command>aq update realm</command> command is used to manage
+	    the attributes of Kerberos realms known to the broker. Realms are
+	    created implicitly when a user in the given realm authenticates to
+	    the broker.
+	</para>
+    </refsect1>
+
+    <refsect1>
+        <title>Options</title>
+	<variablelist>
+	    <title>Command-specific options</title>
+	    <varlistentry>
+	        <term>
+		    <option>--realm <replaceable>REALM</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			The name of the realm to manage.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--trusted</option>, <option>--untrusted</option>
+		</term>
+		<listitem>
+		    <para>
+			Controls if the given Kerberos realm is trusted to manage sandboxes or not.
+			If a realm is trusted, then all principals of the given realm are assumed to
+			be equivalent of the local Unix account with the same name. Principals of
+			untrusted realms will not be able to create or to check out sandboxes.
+		    </para>
+		    <para>
+			Principals of different realms will still be treated as different users
+			for authorization purposes, and you have to assign roles to them separately
+			using the <command>aq permission</command> command.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--comments <replaceable>COMMENTS</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Comments for this realm.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	</variablelist>
+	<xi:include href="../common/global_options_desc.xml"/>
+    </refsect1>
+
+    <refsect1>
+	<title>See also</title>
+	<para>
+	    <citerefentry><refentrytitle>update_realm</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>show_principal</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>permission</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>add_sandbox</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>get</refentrytitle><manvolnum>1</manvolnum></citerefentry>
+	</para>
+    </refsect1>
+</refentry>
+
+<!-- vim: set ai sw=4: -->
