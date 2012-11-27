@@ -51,10 +51,11 @@ class TestAddWindowsHost(TestBrokerCommand):
         self.matchoutput(out, "Advertise Status: False", command)
         self.matchoutput(out, "Operating System: windows", command)
         self.matchoutput(out, "Version: generic", command)
-        self.matchoutput(out,
-                         "Template: windows/os/windows/generic/config" +
-                         self.template_extension,
-                         command)
+        self.searchoutput(out,
+                          r'Operating System: windows\s*'
+                          r'Version: generic\s*'
+                          r'Archetype: windows',
+                          command)
 
 
 if __name__ == '__main__':

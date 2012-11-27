@@ -385,7 +385,9 @@ class PlenaryToplevelHost(ObjectPlenary):
                    StructureTemplate(path,
                                      {"metadata": PanValue("/metadata")}))
         pan_include(lines, "archetype/base")
-        pan_include(lines, self.dbobj.operating_system.cfg_path + '/config')
+
+        opsys = self.dbobj.operating_system
+        pan_include(lines, "os/%s/%s/config" % (opsys.name, opsys.version))
 
         pan_include(lines, services)
         pan_include(lines, provides)

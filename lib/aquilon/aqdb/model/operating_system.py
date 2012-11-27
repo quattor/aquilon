@@ -54,9 +54,6 @@ class OperatingSystem(Base):
         instance = "%s/%s-%s" % (self.archetype.name, self.name, self.version)
         return self.format_helper(format_spec, instance)
 
-    @property
-    def cfg_path(self):
-        return 'os/%s/%s' % (self.name, self.version)
 
 operating_system = OperatingSystem.__table__  # pylint: disable=C0103
 operating_system.info['unique_fields'] = ['name', 'version', 'archetype']

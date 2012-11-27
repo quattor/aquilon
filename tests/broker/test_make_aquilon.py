@@ -390,10 +390,11 @@ class TestMakeAquilon(VerifyNotificationsMixin, TestBrokerCommand):
                          "Primary Name: unittest17.aqd-unittest.ms.com [%s]" %
                          self.net["tor_net_0"].usable[3],
                          command)
-        self.matchoutput(out,
-                         "Template: aquilon/os/linux/5.0.1-x86_64/config" +
-                         self.template_extension,
-                         command)
+        self.searchoutput(out,
+                          r'Operating System: linux\s*'
+                          r'Version: 5\.0\.1-x86_64\s*'
+                          r'Archetype: aquilon',
+                          command)
 
     def testverifyunittest17proto(self):
         command = ["show_host", "--format=proto",

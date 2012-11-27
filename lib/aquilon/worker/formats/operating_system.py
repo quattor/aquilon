@@ -20,7 +20,6 @@
 from aquilon.aqdb.model import OperatingSystem
 from aquilon.worker.formats.formatters import ObjectFormatter
 from aquilon.worker.formats.list import ListFormatter
-from aquilon.worker.templates.base import TEMPLATE_EXTENSION
 
 
 class OSFormatter(ObjectFormatter):
@@ -31,9 +30,6 @@ class OSFormatter(ObjectFormatter):
         details.append(indent + "{0:c}: {0.name}".format(os))
         details.append(indent + "  Version: %s" % os.version)
         details.append(indent + "  Archetype: %s" % os.archetype)
-        details.append(indent + "  Template: %s/os/%s/%s/config%s" %
-                       (os.archetype.name, os.name, os.version,
-                        TEMPLATE_EXTENSION))
         if os.comments:
             details.append(indent + "  Comments: %s" % os.comments)
 

@@ -287,10 +287,11 @@ class TestAddHost(TestBrokerCommand):
                          "Primary Name: unittest17.aqd-unittest.ms.com [%s]" %
                          self.net["tor_net_0"].usable[3],
                          command)
-        self.matchoutput(out,
-                         "Template: aquilon/os/linux/5.0.1-x86_64/config" +
-                         self.template_extension,
-                         command)
+        self.searchoutput(out,
+                          r'Operating System: linux\s*'
+                          r'Version: 5\.0\.1-x86_64\s*'
+                          r'Archetype: aquilon',
+                          command)
         self.matchoutput(out, "Personality: inventory", command)
 
     def testaddnointerface(self):
@@ -494,9 +495,11 @@ class TestAddHost(TestBrokerCommand):
         self.matchoutput(out, "Archetype: aurora", command)
         self.matchoutput(out, "Personality: generic", command)
         self.matchoutput(out, "Domain: ny-prod", command)
-        self.matchoutput(out, "Template: aurora/os/linux/generic/config" +
-                         self.template_extension,
-                         command)
+        self.searchoutput(out,
+                          r'Operating System: linux\s*'
+                          r'Version: generic\s*'
+                          r'Archetype: aurora',
+                          command)
 
     def testaddwindowsefaultos(self):
         ip = self.net["utpgsw0-v710"].usable[-2]
@@ -515,9 +518,11 @@ class TestAddHost(TestBrokerCommand):
         self.matchoutput(out, "Archetype: windows", command)
         self.matchoutput(out, "Personality: generic", command)
         self.matchoutput(out, "Domain: ny-prod", command)
-        self.matchoutput(out, "Template: windows/os/windows/generic/config" +
-                         self.template_extension,
-                         command)
+        self.searchoutput(out,
+                          r'Operating System: windows\s*'
+                          r'Version: generic\s*'
+                          r'Archetype: windows',
+                          command)
 
     def testaddf5(self):
         # The IP address is also a /32 network

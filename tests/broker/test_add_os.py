@@ -59,7 +59,6 @@ class TestAddOS(TestBrokerCommand):
         self.matchoutput(out, "Operating System: utos", command)
         self.matchoutput(out, "Version: 1.0", command)
         self.matchoutput(out, "Archetype: utarchetype1", command)
-        self.matchoutput(out, "Template: utarchetype1/os/utos/1.0", command)
         self.matchclean(out, "linux", command)
 
     def testverifyutosproto(self):
@@ -75,13 +74,13 @@ class TestAddOS(TestBrokerCommand):
     def testverifyosonly(self):
         command = "show os --osname utos --archetype utarchetype1"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Template: utarchetype1/os/utos/1.0", command)
+        self.matchoutput(out, "Operating System: utos", command)
         self.matchclean(out, "linux", command)
 
     def testverifyversonly(self):
         command = "show os --osversion 1.0 --archetype utarchetype1"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Template: utarchetype1/os/utos/1.0", command)
+        self.matchoutput(out, "Version: 1.0", command)
         self.matchclean(out, "linux", command)
 
     def testverifyall(self):
@@ -91,8 +90,6 @@ class TestAddOS(TestBrokerCommand):
         self.matchoutput(out, "Operating System: linux", command)
         self.matchoutput(out, "Archetype: utarchetype1", command)
         self.matchoutput(out, "Archetype: aquilon", command)
-        self.matchoutput(out, "Template: utarchetype1/os/utos/1.0", command)
-        self.matchoutput(out, "Template: aquilon/os/linux/5.0.1-x86_64", command)
 
     def testverifyallproto(self):
         command = "show os --all --format=proto"
