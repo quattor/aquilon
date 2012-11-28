@@ -86,6 +86,24 @@ def determine_helper_args(config):
 
 
 def discover_switch(session, logger, config, dbswitch, dryrun):
+    """
+    Perform switch discovery
+
+    This function can operate in two modes:
+
+    - If dryrun is False, it performs all the operations required to bring the
+      definition of the switch in AQDB in line with the discovered status in
+      one transaction.
+
+    - If dryrun is True, it returns the list of individual "aq" commands the
+      user should execute to get the switch into the desired state.
+
+    In order to make the core logic less complex, simple actions like
+    adding/deleting IP addresses and interfaces are implemented as helper
+    functions, and those helper functions hide the differences between the
+    normal and dryrun modes from the rest of the code.
+    """
+
     importer = config.get("broker", "switch_discover")
 
     results = []
@@ -93,11 +111,13 @@ def discover_switch(session, logger, config, dbswitch, dryrun):
     dbnet_env = NetworkEnvironment.get_unique_or_default(session)
 
     def aqcmd(cmd, *args):
+        """ Helper function to print an AQ command to be executed by the user """
         quoted_args = [quote(str(arg)) for arg in args]
         results.append("aq %s --switch %s %s" % (cmd, dbswitch.primary_name,
                                                  " ".join(quoted_args)))
 
     def update_switch(dbmodel, serial_no, comments):
+        """ Helper for updating core switch attributes, honouring dryrun """
         if dryrun:
             args = ["update_switch"]
             if dbmodel and dbmodel != dbswitch.model:
@@ -117,6 +137,7 @@ def discover_switch(session, logger, config, dbswitch, dryrun):
                 dbswitch.comments = comments
 
     def del_address(iface, addr):
+        """ Helper for deleting an IP address, honouring dryrun """
         if dryrun:
             aqcmd("del_interface_address", "--interface", iface.name,
                   "--ip", addr.ip)
@@ -131,12 +152,14 @@ def discover_switch(session, logger, config, dbswitch, dryrun):
                 map(delete_dns_record, q.all())
 
     def del_interface(iface):
+        """ Helper for deleting an interface, honouring dryrun """
         if dryrun:
             aqcmd("del_interface", "--interface", iface.name)
         else:
             dbswitch.interfaces.remove(iface)
 
     def do_rename_interface(iface, new_name):
+        """ Helper for renaming an interface, honouring dryrun """
         if dryrun:
             aqcmd("update_interface", "--interface", iface.name, "--rename_to",
                   new_name)
@@ -144,6 +167,7 @@ def discover_switch(session, logger, config, dbswitch, dryrun):
             rename_interface(session, iface, new_name)
 
     def add_interface(ifname, iftype):
+        """ Helper for adding a new interface, honouring dryrun """
         if dryrun:
             aqcmd("add_interface", "--interface", ifname, "--type", iftype)
             # There's no Interface instace we could return here, but fortunately
@@ -154,6 +178,7 @@ def discover_switch(session, logger, config, dbswitch, dryrun):
                                            interface_type=iftype)
 
     def add_address(iface, ifname, ip, label, relaxed):
+        """ Helper for adding an IP address, honouring dryrun """
         if label:
             name = "%s-%s-%s" % (dbswitch.primary_name.fqdn.name, ifname,
                                  label)
@@ -176,16 +201,25 @@ def discover_switch(session, logger, config, dbswitch, dryrun):
             assign_address(iface, ip, dbdns_rec.network, label=label)
 
     def add_router(ip):
+        """ Helper command for managing router IPs, honouring dryrun """
         # TODO: the command should be configurable
         cmd = "qip-set-router %s" % ip
         if dryrun:
             results.append(cmd)
         else:
-            # We're not the authoritative source, so we can't just create the
-            # RouterAddress directly
+            # If we're not the authoritative source, then we can't just create
+            # the RouterAddress directly. TODO: It should be configurable
+            # whether we're authoritative for network data
             logger.client_info("You should run '%s'." % cmd)
 
     def warning(msg):
+        """
+        Helper for sending warning messages to the client
+
+        We cannot use the side channel in dryrun mode, because the "aq
+        show_switch" command does not issue show_request. So we need to embed
+        the warnings in the output.
+        """
         if dryrun:
             results.append("# Warning: " + msg)
         else:
@@ -237,6 +271,7 @@ def discover_switch(session, logger, config, dbswitch, dryrun):
         comments = re.sub("\s+", " ", comments)
         comments = comments.strip()
 
+    # This is the easy part, so deal with it first
     update_switch(dbmodel, serial_no, comments)
 
     primary_ip = dbswitch.primary_name.ip
@@ -259,7 +294,8 @@ def discover_switch(session, logger, config, dbswitch, dryrun):
                 if not params["ip"]:
                     del data["interfaces"][ifname]
 
-    # Some switches do not report their management IP address
+    # Some switches do not report their management IP address. In theory the
+    # discovery script should fix that up, but better to be sure.
     if primary_ip not in ip_to_iface:
         for iface in dbswitch.interfaces:
             if primary_ip in iface.addresses:
@@ -276,8 +312,9 @@ def discover_switch(session, logger, config, dbswitch, dryrun):
         # Lock the DNS domain, because we may want to add new entries
         dbswitch.primary_name.fqdn.dns_domain.lock_row()
 
-    # Do a first pass over interfaces. The name_by_iface mapping is needed for
-    # the dryrun mode when we can't just update the name of the interface
+    # Do a first pass over interfaces. We'll fill in a bunch of lookup tables to
+    # help rename detection etc. later. The name_by_iface mapping is needed for
+    # dryrun mode when we can't just update the name of the interface
     iface_by_name = {}
     name_by_iface = {}
     addr_by_ip = {}
@@ -286,9 +323,12 @@ def discover_switch(session, logger, config, dbswitch, dryrun):
         delete_iface = False
 
         if iface in ifaces_to_delete:
+            # We may get here if we figured out that an interface we enumerated
+            # before should be renamed to the name of this interface
             continue
 
         if iface.name in data["interfaces"]:
+            # No change to the interface, just do some administration
             iface_by_name[iface.name] = iface
             name_by_iface[iface] = iface.name
         else:
@@ -317,7 +357,15 @@ def discover_switch(session, logger, config, dbswitch, dryrun):
                         name_by_iface[iface] = new_name
                         delete_iface = False
 
+        # Make a copy of iface.assignments, because we want to modify it inside
+        # the loop
         for addr in iface.assignments[:]:
+            # We need to delete addresses that are gone. However we also need to
+            # delete and re-add addresses if:
+            # - the interface itself has to be deleted
+            # - the interface is still there, but the IP address now belongs to
+            #   a different interface
+            # - the label have changed
             if delete_iface or addr.ip not in ip_to_iface or \
                ip_to_iface[addr.ip]["name"] != name_by_iface[iface] or \
                addr.label != ip_to_iface[addr.ip]["label"]:
@@ -333,8 +381,10 @@ def discover_switch(session, logger, config, dbswitch, dryrun):
     del ifaces_to_delete[:]
 
     # Rename interfaces
-    # TODO: cascaded renames (e1->e2, e2->e3) and loops (e1->e2, e2->e1) are not
-    # handled properly
+    # TODO: cascaded renames (e1->e2, e2->e3) and loops (e1->e2, e2->e1) may not
+    # be handled properly, and may need someone to break the cycles manually.
+    # However such cases should be rare in real life, so probably it's not worth
+    # spending too much effort dealing with them.
     for new_name, iface in iface_by_name.items():
         if iface.name == new_name:
             continue
