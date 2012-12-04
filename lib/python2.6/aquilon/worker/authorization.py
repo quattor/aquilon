@@ -227,6 +227,10 @@ class AuthorizationBroker(object):
         if dbuser.role.name == 'alias_manager':
             if action not in ['add_alias', 'del_alias', 'update_alias']:
                 self.raise_auth_error(principal, action, resource)
+        if dbuser.role.name == 'webops':
+            if action not in ['add_address', 'del_address',
+                              'add_alias', 'del_alias', 'update_alias']:
+                self.raise_auth_error(principal, action, resource)
         return True
 
     def _check_aquilonhost(self, principal, dbuser, action, resource):
