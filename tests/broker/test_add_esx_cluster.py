@@ -79,6 +79,19 @@ class TestAddESXCluster(TestBrokerCommand):
         self.matchoutput(out, "Domain: unittest", command)
         self.matchclean(out, "Comments", command)
 
+    def testverifyutecl1proto(self):
+        command = "show esx_cluster --cluster utecl1 --format proto"
+        out = self.commandtest(command.split(" "))
+        clusterlist = self.parse_clusters_msg(out, expect=1)
+        cluster = clusterlist.clusters[0]
+        self.failUnlessEqual(cluster.name, "utecl1")
+        self.failUnlessEqual(cluster.personality.archetype.name, "esx_cluster")
+        self.failUnlessEqual(cluster.threshold, 2)
+        self.failUnlessEqual(cluster.threshold_is_percent, False)
+        self.failUnlessEqual(cluster.max_members,
+                             self.config.getint("broker",
+                                                "esx_cluster_max_members_default"))
+
     def testverifycatutecl1(self):
         obj_cmd, obj, data_cmd, data = self.verify_cat_clusters("utecl1",
                                                                 "vulcan-1g-desktop-prod",
