@@ -1826,6 +1826,9 @@
          <option name="service" type="string">Service name</option>
          <option name="instance" type="string">Instance name</option>
       </optgroup>
+      <optgroup name="bind_server_options" mandatory="False">
+         <option name="position" type="int">Position in the list</option>
+      </optgroup>
       <transport method="post" path="host/%(hostname)s/server_of_service/%(service)s/bind" />
    </command>
 
