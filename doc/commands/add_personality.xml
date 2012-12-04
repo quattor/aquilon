@@ -30,11 +30,13 @@
 	    <arg choice="plain"><option>--personality <replaceable>PERSONALITY</replaceable></option></arg>
 	    <arg choice="plain"><option>--archetype <replaceable>ARCHETYPE</replaceable></option></arg>
 	    <arg choice="plain"><option>--host_environment <replaceable>HOSTENV</replaceable></option></arg>
-	    <arg choice="opt"><option>--grn <replaceable>GRN</replaceable></option></arg>
-	    <arg choice="opt"><option>--eon_id <replaceable>EON_ID</replaceable></option></arg>
+	    <group choice="req">
+		<arg choice="plain"><option>--grn <replaceable>GRN</replaceable></option></arg>
+		<arg choice="plain"><option>--eon_id <replaceable>EON_ID</replaceable></option></arg>
+	    </group>
 	    <group choice="opt">
-	          <arg choice="plain"><option>--cluster_required</option></arg>
-	          <arg choice="plain"><option>--nocluster_required</option></arg>
+	         <arg choice="plain"><option>--cluster_required</option></arg>
+	         <arg choice="plain"><option>--nocluster_required</option></arg>
 	    </group>
 	    <arg choice="opt"><option>--comments <replaceable>COMMENTS</replaceable></option></arg>
 	    <arg choice="opt"><option>--copy_from <replaceable>COPY_FROM</replaceable></option></arg>
@@ -92,16 +94,14 @@
 	    </varlistentry>
 	    <varlistentry>
 	        <term>
-		    <option>--grn <replaceable>GRN</replaceable></option>
+		    <option>--grn <replaceable>GRN</replaceable></option>,
 		    <option>--eon_id <replaceable>EON_ID</replaceable></option>
 		</term>
 		<listitem>
 		    <para>
-			The grn/eon_id of the personality to be created. Grn specification is required and
-			can be provided as grn or eon_id. The grn mapping to personality can be modified
-			using <command>aq map_grn</command> or <command>aq unmap_grn</command>. Multiple
-			grns can be mapped to the personality.  But unmapping of grn will require
-			atleast one grn mapping always to be present for a personality.
+			The owner GRN of the personality to be created. Scripts should use the
+			numeric <replaceable>EON_ID</replaceable>, the textual <replaceable>GRN</replaceable> is
+			more suitable for humans.
 		    </para>
 		</listitem>
 	    </varlistentry>

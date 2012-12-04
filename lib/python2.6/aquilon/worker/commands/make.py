@@ -34,6 +34,7 @@ from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import (Archetype, HostLifecycle,
                                 OperatingSystem, Personality)
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.dbwrappers.grn import lookup_grn
 from aquilon.worker.dbwrappers.host import hostname_to_host
 from aquilon.worker.templates.domain import TemplateDomain
 from aquilon.worker.locks import lock_queue, CompileKey
@@ -44,8 +45,8 @@ class CommandMake(BrokerCommand):
 
     required_parameters = ["hostname"]
 
-    def render(self, session, logger, hostname, osname, osversion,
-               archetype, personality, buildstatus, keepbindings,
+    def render(self, session, logger, hostname, osname, osversion, archetype,
+               personality, buildstatus, keepbindings, grn, eon_id,
                **arguments):
         dbhost = hostname_to_host(session, hostname)
 
@@ -106,6 +107,11 @@ class CommandMake(BrokerCommand):
             dbstatus = HostLifecycle.get_unique(session, buildstatus,
                                                 compel=True)
             dbhost.status.transition(dbhost, dbstatus)
+
+        if grn or eon_id:
+            dbgrn = lookup_grn(session, grn, eon_id, logger=logger,
+                               config=self.config)
+            dbhost.owner_grn = dbgrn
 
         session.flush()
 

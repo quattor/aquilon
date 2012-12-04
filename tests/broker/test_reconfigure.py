@@ -40,9 +40,10 @@ if __name__ == "__main__":
     utils.import_depends()
 
 from broker.brokertest import TestBrokerCommand
+from broker.grntest import VerifyGrnsMixin
 
 
-class TestReconfigure(TestBrokerCommand):
+class TestReconfigure(VerifyGrnsMixin, TestBrokerCommand):
     # Note that some tests for reconfigure --list appear in
     # test_make_aquilon.py.
 
@@ -54,7 +55,7 @@ class TestReconfigure(TestBrokerCommand):
     # this case q.ny.ms.com.
     def testreconfigureunittest02_1(self):
         command = ["reconfigure", "--hostname", "unittest02.one-nyp.ms.com",
-                   "--buildstatus", "ready"]
+                   "--buildstatus", "ready", "--grn", "grn:/ms/ei/aquilon/aqd"]
         (out, err) = self.successtest(command)
         self.matchoutput(err,
                          "unittest02.one-nyp.ms.com adding binding for "
@@ -68,14 +69,18 @@ class TestReconfigure(TestBrokerCommand):
 
     ## verify status before reconfigure
     def testreconfigureunittest02_0(self):
-        command = "cat --hostname unittest02.one-nyp.ms.com"
+        command = "cat --hostname unittest02.one-nyp.ms.com --data"
         out = self.commandtest(command.split(" "))
+        self.matchoutput(out, '"system/build" = "build";', command)
+        self.matchoutput(out, '"system/owner_eon_id" = %d;' %
+                         self.grns["grn:/ms/ei/aquilon/unittest"], command)
 
-    def testverifybuildstatus(self):
+    def testverifyshowunittest02(self):
         command = "show host --hostname unittest02.one-nyp.ms.com"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Build Status: ready", command)
         self.matchoutput(out, "Advertise Status: True", command)
+        self.matchoutput(out, "Owned by GRN: grn:/ms/ei/aquilon/aqd", command)
 
     def testverifycatunittest02(self):
         command = "cat --hostname unittest02.one-nyp.ms.com --data"
@@ -109,6 +114,8 @@ class TestReconfigure(TestBrokerCommand):
                            self.net.unknown[0].gateway),
                           command)
         self.matchoutput(out, '"system/advertise_status" = true;', command)
+        self.matchoutput(out, '"system/owner_eon_id" = %d;' %
+                         self.grns["grn:/ms/ei/aquilon/aqd"], command)
 
         command = "cat --hostname unittest02.one-nyp.ms.com"
         out = self.commandtest(command.split(" "))

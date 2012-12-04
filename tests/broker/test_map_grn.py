@@ -152,7 +152,7 @@ class TestMapGrn(VerifyGrnsMixin, TestBrokerCommand):
     def test_300_delete_used_byhost(self):
         command = ["del", "grn", "--grn", "grn:/ms/ei/aquilon/aqd"]
         out = self.badrequesttest(command)
-        self.matchoutput(out, "GRN grn:/ms/ei/aquilon/aqd is still mapped to "
+        self.matchoutput(out, "GRN grn:/ms/ei/aquilon/aqd is still used by "
                          "hosts, and cannot be deleted.", command)
 
     def test_310_delete_missing(self):
@@ -193,10 +193,10 @@ class TestMapGrn(VerifyGrnsMixin, TestBrokerCommand):
         self.noouttest(command)
 
     def test_330_delete_used_bypers(self):
-        command = ["del", "grn", "--grn", "grn:/ms/ei/aquilon/aqd"]
+        command = ["del", "grn", "--grn", "grn:/ms/windows/desktop"]
         out = self.badrequesttest(command)
-        self.matchoutput(out, "GRN grn:/ms/ei/aquilon/aqd is still mapped to "
-                         "personalities, and cannot be deleted.", command)
+        self.matchoutput(out, "GRN grn:/ms/windows/desktop is still used "
+                         "by personalities, and cannot be deleted.", command)
 
     def test_340_unmap_personality(self):
         command = ["unmap", "grn", "--grn", "grn:/example/cards",
@@ -212,19 +212,6 @@ class TestMapGrn(VerifyGrnsMixin, TestBrokerCommand):
 
         command = ["unmap", "grn", "--grn", "grn:/ms/ei/aquilon/aqd",
                    "--personality", "compileserver"]
-        self.noouttest(command)
-
-        command = ["unmap", "grn", "--grn", "grn:/ms/ei/aquilon/unittest",
-                   "--personality", "compileserver"]
-        out = self.badrequesttest(command)
-        self.matchoutput(out,
-                         "GRN grn:/ms/ei/aquilon/unittest is the last grn on "
-                         "Personality aquilon/compileserver and cannot be "
-                         "removed",
-                         command)
-
-    def test_350_delete(self):
-        command = ["del", "grn", "--grn", "grn:/example"]
         self.noouttest(command)
 
     def test_400_verify_unittest00(self):

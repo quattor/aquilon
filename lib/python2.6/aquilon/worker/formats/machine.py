@@ -150,8 +150,10 @@ class MachineFormatter(ObjectFormatter):
             details.append(indent +
                            "  Advertise Status: %s" % host.advertise_status)
 
+            details.append(indent + "  Owned by {0:c}: {0.grn}"
+                           .format(host.owner_grn))
             for grn in host.grns:
-                details.append(indent + "  {0:c}: {0.grn}".format(grn))
+                details.append(indent + "  Used by {0:c}: {0.grn}".format(grn))
 
             for feature in model_features(machine.model,
                                           host.personality.archetype,

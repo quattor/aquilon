@@ -122,15 +122,17 @@ class CommandAddHost(BrokerCommand):
             raise ArgumentError("{0:c} {0.label} is already allocated to "
                                 "{1:l}.".format(dbmachine, dbmachine.host))
 
-        dbhost = Host(machine=dbmachine, branch=dbbranch,
-                      sandbox_author=dbauthor, personality=dbpersonality,
-                      status=dbstatus, operating_system=dbos, comments=comments)
-        session.add(dbhost)
-
         if grn or eon_id:
             dbgrn = lookup_grn(session, grn, eon_id, logger=logger,
                                config=self.config)
-            dbhost.grns.append(dbgrn)
+        else:
+            dbgrn = dbpersonality.owner_grn
+
+        dbhost = Host(machine=dbmachine, branch=dbbranch, owner_grn=dbgrn,
+                      sandbox_author=dbauthor, personality=dbpersonality,
+                      status=dbstatus, operating_system=dbos, comments=comments)
+        session.add(dbhost)
+        dbhost.grns.append(dbgrn)
 
         if zebra_interfaces:
             # --autoip does not make sense for Zebra (at least not the way it's

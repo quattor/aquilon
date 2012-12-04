@@ -262,21 +262,14 @@ class CommandSearchHost(BrokerCommand):
         if grn or eon_id:
             dbgrn = lookup_grn(session, grn, eon_id, autoupdate=False)
 
-            # For some reason, this does not work:
-            # q = q.join(Personality).filter_by(or_(Personality.grns.contains(dbgrn),
-            #                                       Host.grns.contains(dbgrn)))
-            # The generated SQL query contains an implicit inner join instead of
-            # an outer join, so if either PersonalityGrnMap or HostGrnMap is
-            # empty, there will be no results
-
-            PersAlias = aliased(Personality)
-            q = q.join(PersAlias)
-            q = q.outerjoin(PersonalityGrnMap)
-            q = q.reset_joinpoint()
+            persq = session.query(Personality.id)
+            persq = persq.outerjoin(PersonalityGrnMap)
+            persq = persq.filter(or_(Personality.owner_eon_id == dbgrn.eon_id,
+                                     PersonalityGrnMap.eon_id == dbgrn.eon_id))
             q = q.outerjoin(HostGrnMap)
-            q = q.reset_joinpoint()
-            q = q.filter(or_(PersonalityGrnMap.eon_id == dbgrn.eon_id,
-                             HostGrnMap.eon_id == dbgrn.eon_id))
+            q = q.filter(or_(Host.owner_eon_id == dbgrn.eon_id,
+                             HostGrnMap.eon_id == dbgrn.eon_id,
+                             Host.personality_id.in_(persq.subquery())))
 
         if fullinfo:
             return q.all()

@@ -187,6 +187,9 @@ class PlenaryPersonalityBase(Plenary):
         for eon_id in eon_id_list:
             pan_append(lines, "/system/eon_ids", eon_id)
 
+        pan_assign(lines, "/system/personality/owner_eon_id",
+                   self.dbobj.owner_eon_id)
+
         ## include pre features
         pan_include_if_exists(lines, "%s/pre_feature" % self.plenary_core)
         ## process parameter templates

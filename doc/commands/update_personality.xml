@@ -29,6 +29,11 @@
 	    </group>
 	    <arg choice="plain"><option>--personality <replaceable>PERSONALITY</replaceable></option></arg>
 	    <arg choice="plain"><option>--archetype <replaceable>ARCHETYPE</replaceable></option></arg>
+	    <group choice="opt">
+		<arg choice="plain"><option>--grn <replaceable>GRN</replaceable></option></arg>
+		<arg choice="plain"><option>--eon_id <replaceable>EON_ID</replaceable></option></arg>
+	    </group>
+	    <arg choice="opt"><option>--leave_existing</option></arg>
             <group choice="opt">
 	    	<arg choice="plain"><option>--cluster_required</option></arg>
 		<arg choice="plain"><option>--nocluster_required</option></arg>
@@ -71,7 +76,31 @@
 		</term>
 		<listitem>
 		    <para>
-                        The name of the archteype.
+                        The name of the archteype, if the personality name is not unique.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+		<term>
+		    <option>--grn <replaceable>GRN</replaceable></option>
+		    <option>--eon_id <replaceable>EON_ID</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Change the owner GRN of the personality. If the <option>--leave_existing</option> option is not
+			specified, all hosts having the same owner GRN as the personality will be updated as well. Hosts
+			having an owner GRN different from the original owner of the personality will not be affected.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--leave_existing</option>
+		</term>
+		<listitem>
+		    <para>
+			Do not cascade updates to hosts belonging to the personality. Currently only updating the owner
+			GRN is cascaded to the member hosts.
 		    </para>
 		</listitem>
 	    </varlistentry>

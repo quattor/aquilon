@@ -110,7 +110,8 @@ class TestAddHost(TestBrokerCommand):
     def testverifyjackgrn(self):
         command = "show host --hostname jack.cards.example.com"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "GRN: grn:/example/cards", command)
+        self.matchoutput(out, "Owned by GRN: grn:/example/cards", command)
+        self.matchoutput(out, "Used by GRN: grn:/example/cards", command)
 
     def testmachinereuse(self):
         ip = self.net.unknown[0].usable[-1]

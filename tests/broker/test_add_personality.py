@@ -50,7 +50,8 @@ class TestAddPersonality(VerifyGrnsMixin, TestBrokerCommand):
                    "--host_environment=dev",
                    "--comments", "Some personality comments"]
         self.noouttest(command)
-        self.verifycatforpersonality("aquilon", "utpersonality/dev", True, "dev")
+        self.verifycatforpersonality("aquilon", "utpersonality/dev", True,
+                                     "dev", grn=GRN)
 
     def testverifyaddutpersonality(self):
         command = ["show_personality", "--personality=utpersonality/dev",
@@ -71,7 +72,8 @@ class TestAddPersonality(VerifyGrnsMixin, TestBrokerCommand):
         self.matchclean(out,
                         "Template: aquilon/personality/inventory/config.tpl",
                         command)
-        self.matchoutput(out, "GRN: %s" % GRN, command)
+        self.matchoutput(out, "Owned by GRN: %s" % GRN, command)
+        self.matchoutput(out, "Used by GRN: %s" % GRN, command)
 
     def testaddeaipersonality(self):
         command = ["add_personality", "--personality=eaitools",
@@ -98,7 +100,8 @@ class TestAddPersonality(VerifyGrnsMixin, TestBrokerCommand):
         self.matchclean(out,
                         "Template: aquilon/personality/inventory/config.tpl",
                         command)
-        self.matchoutput(out, "GRN: %s" % GRN, command)
+        self.matchoutput(out, "Owned by GRN: %s" % GRN, command)
+        self.matchoutput(out, "Used by GRN: %s" % GRN, command)
 
     def testverifyshowpersonalityallnothreshold(self):
         user = self.config.get("unittest", "user")
@@ -356,9 +359,12 @@ class TestAddPersonality(VerifyGrnsMixin, TestBrokerCommand):
                          command)
 
     def testaddwindowsdesktop(self):
-        command = "add_personality --personality desktop --archetype windows --eon_id=2 --host_environment=legacy"
-        self.noouttest(command.split(" "))
-        self.verifycatforpersonality("windows", "desktop")
+        command = ["add", "personality", "--personality", "desktop",
+                   "--archetype", "windows", "--grn", "grn:/ms/windows/desktop",
+                   "--host_environment", "legacy"]
+        self.noouttest(command)
+        self.verifycatforpersonality("windows", "desktop",
+                                     grn="grn:/ms/windows/desktop")
 
     def testverifyaddwindowsdesktop(self):
         command = "show_personality --personality desktop --archetype windows"
@@ -537,13 +543,14 @@ class TestAddPersonality(VerifyGrnsMixin, TestBrokerCommand):
         self.noouttest(command)
         self.verifycatforpersonality("hacluster", "vcs-msvcs")
 
-    def verifycatforpersonality(self, archetype, personality, config_override=False,
-                                host_env='legacy'):
+    def verifycatforpersonality(self, archetype, personality,
+                                config_override=False, host_env='legacy',
+                                grn="grn:/ms/ei/aquilon/aqd"):
         command = ["cat", "--archetype", archetype, "--personality", personality]
         out = self.commandtest(command)
         self.matchoutput(out, 'variable PERSONALITY = "%s"' % personality,
                          command)
-        self.check_personality_grns(out, ["grn:/ms/ei/aquilon/aqd"], command)
+        self.check_personality_grns(out, [grn], command)
         self.matchoutput(out, 'include { if_exists("personality/%s/pre_feature") };' %
                          personality, command)
         self.matchoutput(out, "template personality/%s/config;" % personality,
@@ -569,7 +576,7 @@ class TestAddPersonality(VerifyGrnsMixin, TestBrokerCommand):
                           r'missing Options in Personality aquilon/generic:\s+ConfigOverride',
                           command)
         self.searchoutput(out,
-                          r'missing Grns in Personality aquilon/generic:\s+GRN grn:/ms/ei/aquilon/aqd',
+                          r'missing Grns in Personality aquilon/generic:\s+GRN %s' % GRN,
                           command)
 
     def testverifyshowdiff2(self):

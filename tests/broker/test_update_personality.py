@@ -38,11 +38,12 @@ if __name__ == "__main__":
     utils.import_depends()
 
 from broker.brokertest import TestBrokerCommand
+from broker.grntest import VerifyGrnsMixin
 
 
-class TestUpdatePersonality(TestBrokerCommand):
+class TestUpdatePersonality(VerifyGrnsMixin, TestBrokerCommand):
 
-    def testinvalidfunction(self):
+    def test_200_invalid_function(self):
         """ Verify that the list of built-in functions is restricted """
         command = ["update_personality", "--personality", "vulcan-1g-desktop-prod",
                    "--archetype", "esx_cluster",
@@ -50,14 +51,14 @@ class TestUpdatePersonality(TestBrokerCommand):
         out = self.badrequesttest(command)
         self.matchoutput(out, "name 'locals' is not defined", command)
 
-    def testinvalidtype(self):
+    def test_200_invalid_type(self):
         command = ["update_personality", "--personality", "vulcan-1g-desktop-prod",
                    "--archetype", "esx_cluster",
                    "--vmhost_capacity_function", "memory - 100"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "The function should return a dictonary.", command)
 
-    def testinvaliddict(self):
+    def test_200_invalid_dict(self):
         command = ["update_personality", "--personality", "vulcan-1g-desktop-prod",
                    "--archetype", "esx_cluster",
                    "--vmhost_capacity_function", "{'memory': 'bar'}"]
@@ -67,7 +68,7 @@ class TestUpdatePersonality(TestBrokerCommand):
                          "keys being strings, and all values being numbers.",
                          command)
 
-    def testmissingmemory(self):
+    def test_200_missing_memory(self):
         command = ["update_personality", "--personality", "vulcan-1g-desktop-prod",
                    "--archetype", "esx_cluster",
                    "--vmhost_capacity_function", "{'foo': 5}"]
@@ -76,7 +77,7 @@ class TestUpdatePersonality(TestBrokerCommand):
                          "The memory constraint is missing from the returned "
                          "dictionary.", command)
 
-    def testnotenoughmemory(self):
+    def test_200_not_enough_memory(self):
         command = ["update_personality", "--personality", "vulcan-1g-desktop-prod",
                    "--archetype", "esx_cluster",
                    "--vmhost_capacity_function", "{'memory': memory / 4}"]
@@ -88,19 +89,19 @@ class TestUpdatePersonality(TestBrokerCommand):
                          "ESX Cluster utecl1 is over capacity regarding memory",
                          command)
 
-    def testupdatecapacity(self):
+    def test_100_update_capacity(self):
         command = ["update_personality", "--personality", "vulcan-1g-desktop-prod",
                    "--archetype", "esx_cluster",
                    "--vmhost_capacity_function", "{'memory': (memory - 1500) * 0.94}"]
         self.noouttest(command)
 
-    def testupdateovercommit(self):
+    def test_110_update_overcommit(self):
         command = ["update_personality", "--personality", "vulcan-1g-desktop-prod",
                    "--archetype", "esx_cluster",
                    "--vmhost_overcommit_memory", 1.04]
         self.noouttest(command)
 
-    def testverifyupdatecapacity(self):
+    def test_115_verify_update_capacity(self):
         command = ["show_personality", "--personality", "vulcan-1g-desktop-prod",
                    "--archetype", "esx_cluster"]
         out = self.commandtest(command)
@@ -109,13 +110,14 @@ class TestUpdatePersonality(TestBrokerCommand):
                          command)
         self.matchoutput(out, "VM host overcommit factor: 1.04", command)
 
-    def testupdateclusterrequirement(self):
+    def test_200_update_cluster_inuse(self):
         command = ["update_personality", "--personality=vulcan-1g-desktop-prod",
                    "--archetype=esx_cluster",
                    "--cluster"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "The personality vulcan-1g-desktop-prod is in use", command)
 
+    def test_120_update_cluster_requirement(self):
         command = ["add_personality", "--archetype=aquilon", "--grn=grn:/ms/ei/aquilon/aqd",
                    "--personality=unused", "--host_environment=infra"]
         self.successtest(command)
@@ -128,8 +130,7 @@ class TestUpdatePersonality(TestBrokerCommand):
                    "--archetype=aquilon"]
         out = self.successtest(command)
 
-    def testupdateconfigoverride01(self):
-
+    def test_130_add_testovrpersona_dev(self):
         command = ["add_personality", "--archetype=aquilon", "--grn=grn:/ms/ei/aquilon/aqd",
                    "--personality=testovrpersona/dev", "--host_environment=dev"]
         self.successtest(command)
@@ -143,7 +144,7 @@ class TestUpdatePersonality(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchclean(out, 'override', command)
 
-    def testupdateconfigoverride02(self):
+    def test_131_update_config_override(self):
         command = ["update_personality", "--personality=testovrpersona/dev",
                    "--archetype=aquilon", "--config_override"]
         self.successtest(command)
@@ -158,7 +159,7 @@ class TestUpdatePersonality(TestBrokerCommand):
         self.matchoutput(out, 'include { "features/personality/config_override/config" }',
                          command)
 
-    def testupdateconfigoverride03(self):
+    def test_132_remove_config_override(self):
         command = ["update_personality", "--personality=testovrpersona/dev",
                    "--archetype=aquilon", "--noconfig_override"]
         self.successtest(command)
@@ -171,14 +172,79 @@ class TestUpdatePersonality(TestBrokerCommand):
         command = ["cat", "--archetype=aquilon", "--personality=testovrpersona/dev"]
         self.matchclean(out, 'override', command)
 
-    def testupdatehostenv01(self):
+    def test_133_update_hostenv_testovrpersona(self):
         command = ["update_personality", "--personality=testovrpersona/dev",
                     "--archetype=aquilon", "--host_environment=dev"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "The personality 'testovrpersona/dev' already has env set to 'dev' and cannot be update",
                          command)
 
-    def testupdatehostenv03(self):
+    def test_139_delete_testovrpersona_dev(self):
+        command = ["del_personality", "--personality=testovrpersona/dev",
+                   "--archetype=aquilon"]
+        out = self.successtest(command)
+
+    def test_140_update_owner_grn(self):
+        command = ["update_personality", "--personality", "compileserver",
+                   "--archetype", "aquilon", "--grn", "grn:/ms/ei/aquilon/ut2"]
+        # Some hosts may emit warnings if 'aq make' was not run on them
+        self.successtest(command)
+
+    def test_141_verify_owner_grn(self):
+        command = ["show_personality", "--personality", "compileserver"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Owned by GRN: grn:/ms/ei/aquilon/ut2", command)
+
+        command = ["show_host", "--hostname", "unittest20.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Personality: compileserver", command)
+        self.matchoutput(out, "Owned by GRN: grn:/ms/ei/aquilon/ut2", command)
+
+        # unittest02 had a different GRN before, so it should not have been
+        # updated
+        command = ["show_host", "--hostname", "unittest02.one-nyp.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Personality: compileserver", command)
+        self.matchoutput(out, "Owned by GRN: grn:/ms/ei/aquilon/aqd", command)
+
+    def test_142_update_owner_grn_nohosts(self):
+        command = ["update_personality", "--personality", "compileserver",
+                   "--archetype", "aquilon", "--grn", "grn:/ms/ei/aquilon/unittest",
+                   "--leave_existing"]
+        self.noouttest(command)
+
+    def test_143_verify_update(self):
+        command = ["show_personality", "--personality", "compileserver"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Owned by GRN: grn:/ms/ei/aquilon/unittest", command)
+
+        command = ["show_host", "--hostname", "unittest20.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Personality: compileserver", command)
+        self.matchoutput(out, "Owned by GRN: grn:/ms/ei/aquilon/ut2", command)
+
+        command = ["show_host", "--hostname", "unittest02.one-nyp.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Personality: compileserver", command)
+        self.matchoutput(out, "Owned by GRN: grn:/ms/ei/aquilon/aqd", command)
+
+    def test_144_verify_cat(self):
+        command = ["cat", "--personality", "compileserver"]
+        out = self.commandtest(command)
+        self.searchoutput(out, r'"/system/personality/owner_eon_id" = %d;' %
+                          self.grns["grn:/ms/ei/aquilon/unittest"], command)
+
+        command = ["cat", "--hostname", "unittest02.one-nyp.ms.com", "--data"]
+        out = self.commandtest(command)
+        self.searchoutput(out, r'"system/owner_eon_id" = %d;' %
+                          self.grns["grn:/ms/ei/aquilon/aqd"], command)
+
+        command = ["cat", "--hostname", "unittest20.aqd-unittest.ms.com", "--data"]
+        out = self.commandtest(command)
+        self.searchoutput(out, r'"system/owner_eon_id" = %d;' %
+                          self.grns["grn:/ms/ei/aquilon/ut2"], command)
+
+    def test_150_update_hostenv_infra(self):
         command = ["add_personality", "--archetype=windows", "--grn=grn:/ms/ei/aquilon/aqd",
                    "--personality=prod-perim", "--host_environment=legacy"]
         self.successtest(command)
@@ -195,7 +261,7 @@ class TestUpdatePersonality(TestBrokerCommand):
         command = ["del_personality", "--archetype=windows", "--personality=prod-perim"]
         self.successtest(command)
 
-    def testupdatehostenv04(self):
+    def test_155_update_hostenv_prod(self):
         command = ["update_personality", "--personality=desktop",
                     "--archetype=windows", "--host_environment=prod"]
         out = self.successtest(command)
@@ -204,11 +270,6 @@ class TestUpdatePersonality(TestBrokerCommand):
                    "--archetype=windows"]
         out = self.commandtest(command)
         self.matchoutput(out, "Environment: prod", command)
-
-    def testupdatepersonalitycleanup(self):
-        command = ["del_personality", "--personality=testovrpersona/dev",
-                   "--archetype=aquilon"]
-        self.successtest(command)
 
 
 if __name__ == '__main__':

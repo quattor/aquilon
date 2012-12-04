@@ -33,15 +33,15 @@
 import sqlite3
 
 from aquilon.exceptions_ import PartialError, InternalError, AquilonError
+from aquilon.aqdb.model import (Host, Interface, Machine, Domain, Archetype,
+                                Personality, HostLifecycle, DnsRecord,
+                                OperatingSystem, ReservedName, Fqdn)
+from aquilon.aqdb.model.dns_domain import parse_fqdn
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.dns import delete_dns_record
 from aquilon.worker.dbwrappers.host import get_host_dependencies
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
 from aquilon.worker.locks import SyncKey
-from aquilon.aqdb.model import (Host, Interface, Machine, Domain, Archetype,
-                                Personality, HostLifecycle, DnsRecord,
-                                OperatingSystem, ReservedName, Fqdn)
-from aquilon.aqdb.model.dns_domain import parse_fqdn
 
 
 class CommandRefreshWindowsHosts(BrokerCommand):
@@ -208,10 +208,11 @@ class CommandRefreshWindowsHosts(BrokerCommand):
                 logger.info(msg)
                 continue
             dbhost = Host(machine=dbmachine, branch=dbdomain,
-                          status=dbstatus,
+                          status=dbstatus, owner_grn=dbpersonality.owner_grn,
                           personality=dbpersonality, operating_system=dbos,
                           comments="Created by refresh_windows_host")
             session.add(dbhost)
+            dbhost.grns.append(dbpersonality.owner_grn)
             dbfqdn = Fqdn.get_or_create(session, name=short,
                                         dns_domain=dbdns_domain, preclude=True)
             dbdns_rec = ReservedName(fqdn=dbfqdn)
