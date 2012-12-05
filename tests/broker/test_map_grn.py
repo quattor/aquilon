@@ -59,8 +59,9 @@ class TestMapGrn(VerifyGrnsMixin, TestBrokerCommand):
 
         command = ["cat", "--archetype=aquilon", "--personality=compileserver"]
         out = self.commandtest(command)
-        self.matchoutput(out, '"/system/eon_ids" = append(2);', command)
-        self.matchoutput(out, '"/system/eon_ids" = append(4);', command)
+        self.check_personality_grns(out, ["grn:/ms/ei/aquilon/aqd",
+                                          "grn:/example/cards"],
+                                    command)
 
     def test_120_verify_host(self):
         command = ["show_host", "--hostname", "unittest20.aqd-unittest.ms.com"]
@@ -200,8 +201,7 @@ class TestMapGrn(VerifyGrnsMixin, TestBrokerCommand):
         command = ["cat", "--archetype", "aquilon",
                    "--personality", "compileserver"]
         out = self.commandtest(command)
-        self.matchoutput(out, '"/system/eon_ids" = append(2);', command)
-        self.searchclean(out, '"/system/eon_ids" = append(4);', command)
+        self.check_personality_grns(out, ["grn:/ms/ei/aquilon/aqd"], command)
 
         command = ["unmap", "grn", "--grn", "grn:/ms/ei/aquilon/aqd",
                    "--personality", "compileserver"]

@@ -84,7 +84,7 @@ class TestGrns(VerifyGrnsMixin, TestBrokerCommand):
     def test_200_refresh(self):
         command = ["refresh", "grns"]
         (out, err) = self.successtest(command)
-        self.matchoutput(err, "Added 3, updated 1, deleted 1 GRNs.", command)
+        self.matchoutput(err, "Added 7, updated 1, deleted 1 GRNs.", command)
 
     def test_210_verify_test1_renamed(self):
         command = ["show", "grn", "--eon_id", "1"]

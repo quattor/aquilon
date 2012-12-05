@@ -58,3 +58,11 @@ class VerifyGrnsMixin(object):
                           r',\s*'.join([str(eon_id) for eon_id in eon_ids]) +
                           r'\s*\);',
                           command)
+
+    def check_personality_grns(self, out, grn_list, command):
+        eon_ids = [self.grns[grn] for grn in grn_list]
+        eon_ids.sort()
+        for eon_id in eon_ids:
+            self.searchoutput(out,
+                              r'"/system/eon_ids" = append\(%d\);' % eon_id,
+                              command)

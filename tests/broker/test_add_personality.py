@@ -37,11 +37,12 @@ if __name__ == "__main__":
     utils.import_depends()
 
 from broker.brokertest import TestBrokerCommand
+from broker.grntest import VerifyGrnsMixin
 
 GRN = "grn:/ms/ei/aquilon/aqd"
 
 
-class TestAddPersonality(TestBrokerCommand):
+class TestAddPersonality(VerifyGrnsMixin, TestBrokerCommand):
 
     def testaddutpersonality(self):
         command = ["add_personality", "--personality=utpersonality/dev",
@@ -179,7 +180,7 @@ class TestAddPersonality(TestBrokerCommand):
         self.failUnlessEqual(personality.config_override, True)
         self.failUnlessEqual(personality.cluster_required, False)
         self.failUnlessEqual(personality.comments, "Some personality comments")
-        self.failUnlessEqual(personality.owner_eonid, 2)
+        self.failUnlessEqual(personality.owner_eonid, self.grns[GRN])
         self.failUnlessEqual(personality.host_environment, "dev")
 
     def testverifyshowpersonalityallproto(self):
@@ -225,7 +226,7 @@ class TestAddPersonality(TestBrokerCommand):
         self.failUnlessEqual(personality.config_override, True)
         self.failUnlessEqual(personality.cluster_required, False)
         self.failUnlessEqual(personality.comments, "Some personality comments")
-        self.failUnlessEqual(personality.owner_eonid, 2)
+        self.failUnlessEqual(personality.owner_eonid, self.grns[GRN])
 
     def testverifyshowpersonalityallprotonothreshold(self):
         user = self.config.get("unittest", "user")
@@ -271,7 +272,7 @@ class TestAddPersonality(TestBrokerCommand):
         self.failUnlessEqual(personality.config_override, True)
         self.failUnlessEqual(personality.cluster_required, False)
         self.failUnlessEqual(personality.comments, "Some personality comments")
-        self.failUnlessEqual(personality.owner_eonid, 2)
+        self.failUnlessEqual(personality.owner_eonid, self.grns[GRN])
 
     def testverifyshowpersonalityallprotothreshold(self):
         command = "show_personality --all --domain unittest --format=proto"
@@ -542,7 +543,7 @@ class TestAddPersonality(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out, 'variable PERSONALITY = "%s"' % personality,
                          command)
-        self.matchoutput(out, '"/system/eon_ids" = append(2);', command)
+        self.check_personality_grns(out, ["grn:/ms/ei/aquilon/aqd"], command)
         self.matchoutput(out, 'include { if_exists("personality/%s/pre_feature") };' %
                          personality, command)
         self.matchoutput(out, "template personality/%s/config;" % personality,
