@@ -44,7 +44,6 @@ from aquilon.aqdb.model import (Interface, HardwareEntity, ObservedMac, Fqdn,
                                 ARecord, VlanInfo, ObservedVlan, Network,
                                 AddressAssignment, Model)
 from aquilon.aqdb.model.network import get_net_id_from_ip
-from aquilon.utils import no_autoflush
 
 
 _vlan_re = re.compile(r'^(.*)\.(\d+)$')
@@ -544,7 +543,7 @@ def rename_interface(session, dbinterface, rename_to):
     else:
         dbdns_domain = dbdns_env = None
 
-    with no_autoflush(session):
+    with session.no_autoflush:
         dbinterface.name = rename_to
         for dbfqdn, new_name in fqdn_changes:
             Fqdn.get_unique(session, name=new_name, dns_domain=dbdns_domain,

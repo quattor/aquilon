@@ -127,21 +127,17 @@ class SrvRecord(DnsRecord):
             raise ArgumentError("Unknown protocol %s." % protocol)
         name = "_%s._%s" % (service.strip().lower(), protocol.strip().lower())
 
-        # Disable autoflush temporarily
-        flush_state = session.autoflush
-        session.autoflush = False
+        # Disable autoflush because self is not ready to be pushed to the DB yet
+        with session.no_autoflush:
+            fqdn = Fqdn.get_or_create(session, name=name, dns_domain=dns_domain,
+                                      dns_environment=dns_environment,
+                                      ignore_name_check=True)
 
-        fqdn = Fqdn.get_or_create(session, name=name, dns_domain=dns_domain,
-                                  dns_environment=dns_environment,
-                                  ignore_name_check=True)
-
-        # Do not allow two SRV records pointing at the same target
-        for rr in fqdn.dns_records:
-            if isinstance(rr, SrvRecord) and rr.target == target and \
-               rr.protocol == protocol and rr.service == service:
-                raise ArgumentError("{0} already exists.".format(rr))
-
-        session.autoflush = flush_state
+            # Do not allow two SRV records pointing at the same target
+            for rr in fqdn.dns_records:
+                if isinstance(rr, SrvRecord) and rr.target == target and \
+                   rr.protocol == protocol and rr.service == service:
+                    raise ArgumentError("{0} already exists.".format(rr))
 
         super(SrvRecord, self).__init__(fqdn=fqdn, priority=priority, weight=weight,
                                         port=port, target=target, **kwargs)
