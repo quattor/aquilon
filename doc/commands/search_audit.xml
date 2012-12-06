@@ -4,6 +4,7 @@
 <!ENTITY aqd_version SYSTEM "../version.txt">
 ]>
 <refentry xml:id="search_audit"
+          xmlns="http://docbook.org/ns/docbook"
           xmlns:xi="http://www.w3.org/2001/XInclude">
     <refmeta>
         <refentrytitle>search_audit</refentrytitle>
@@ -26,14 +27,15 @@
             <group>
                 <synopfragmentref linkend="global-options">Global options</synopfragmentref>
             </group>
-            <arg choice="plain"><option>--keyword <replaceable>KEYWORD</replaceable></option></arg>
-            <arg choice="plain"><option>--username <replaceable>USERNAME</replaceable></option></arg>
-            <arg choice="plain"><option>--command <replaceable>COMMAND</replaceable></option></arg>
-            <arg choice="plain"><option>--return_code <replaceable>RETURN CODE</replaceable></option></arg>
-            <arg choice="plain"><option>--before <replaceable>DATE/TIME</replaceable></option></arg>
-            <arg choice="plain"><option>--after <replaceable>DATE/TIME</replaceable></option></arg>
-            <arg choice="plain"><option>--limit <replaceable>LIMIT</replaceable></option></arg>
-            <arg choice="plain"><option>--reverse_order</option></arg>
+            <arg choice="opt"><option>--keyword <replaceable>KEYWORD</replaceable></option></arg>
+            <arg choice="opt"><option>--argument <replaceable>ARG</replaceable></option></arg>
+            <arg choice="opt"><option>--username <replaceable>USERNAME</replaceable></option></arg>
+            <arg choice="opt"><option>--command <replaceable>COMMAND</replaceable></option></arg>
+            <arg choice="opt"><option>--return_code <replaceable>RETURN CODE</replaceable></option></arg>
+            <arg choice="opt"><option>--before <replaceable>DATE/TIME</replaceable></option></arg>
+            <arg choice="opt"><option>--after <replaceable>DATE/TIME</replaceable></option></arg>
+            <arg choice="opt"><option>--limit <replaceable>LIMIT</replaceable></option></arg>
+            <arg choice="opt"><option>--reverse_order</option></arg>
 	    <xi:include href="../common/global_options.xml"/>
         </cmdsynopsis>
     </refsynopsisdiv>
@@ -60,7 +62,23 @@
                 <listitem>
                     <para>
                         Search for commands which have been run with an argument
-                        whose value is the keyword supplied to the command.
+			whose value is the keyword supplied to the command. If the
+			<option>--argument</option> option is specified, only the argument named
+			<replaceable>ARG</replaceable> will be considered; otherwise, <replaceable>KEYWORD</replaceable>
+			may match the value of any arguments of the command.
+                    </para>
+                </listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term>
+                    <option>--argument
+                        <replaceable>ARG</replaceable>
+                    </option>
+                </term>
+                <listitem>
+                    <para>
+			Limit the keyword matching to the named argument only.
                     </para>
                 </listitem>
             </varlistentry>

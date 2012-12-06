@@ -4,6 +4,7 @@
 <!ENTITY aqd_version SYSTEM "../version.txt">
 ]>
 <refentry xml:id="bind_feature"
+          xmlns="http://docbook.org/ns/docbook"
 	  xmlns:xi="http://www.w3.org/2001/XInclude">
     <refmeta>
         <refentrytitle>bind_feature</refentrytitle>
@@ -33,10 +34,6 @@
 	    <arg choice="opt"><option>--archetype <replaceable>ARCH</replaceable></option></arg>
 	    <arg choice="opt"><option>--interface <replaceable>IFACE</replaceable></option></arg>
 	    <arg choice="opt"><option>--justification <replaceable>REASON</replaceable></option></arg>
-	    <group choice="opt">
-		<arg choice="plain"><option>--flush</option></arg>
-		<arg choice="plain"><option>--noflush</option></arg>
-	    </group>
 	    <xi:include href="../common/global_options.xml"/>
 	</cmdsynopsis>
     </refsynopsisdiv>
@@ -160,21 +157,6 @@
 			<replaceable>MANAGER</replaceable> is the change manager like <literal>tcm</literal>
 			for TCM2, and <replaceable>TICKET</replaceable> is the ticket number (the TCM number
 			when using TCM2).
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-	        <term>
-		    <option>--flush</option>, <option>--noflush</option>
-		</term>
-		<listitem>
-		    <para>
-			Specify if the plenary templates of affected hosts should be updated
-			(<option>--flush</option>), or not (<option>--noflush</option>). The default is to
-			flush host templates.
-		    </para>
-		    <para>
-			Note that updating the plenary templates for a whole archetype can take a long time.
 		    </para>
 		</listitem>
 	    </varlistentry>

@@ -1,6 +1,7 @@
+#!/usr/bin/env python2.6
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 #
-# Copyright (C) 2009,2010,2011  Contributor
+# Copyright (C) 2012  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -26,26 +27,31 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
+"""Module for testing errors in the documentation."""
+
+import os
+import unittest
+from subprocess import Popen, PIPE
+
+if __name__ == '__main__':
+    import utils
+    utils.import_depends()
+
+from brokertest import TestBrokerCommand
 
 
-from aquilon.worker.broker import BrokerCommand
-from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import Archetype, Personality
+class TestDocumentation(TestBrokerCommand):
+    def test_100_run_make_check(self):
+        srcdir = self.config.get("broker", "srcdir")
+        docdir = os.path.join(srcdir, "doc")
+        p = Popen(["make", "check"], stdout=PIPE, stderr=PIPE, cwd=docdir)
+        out, err = p.communicate()
+        self.assertEqual(p.returncode, 0,
+                         "Running 'make check' on the documentation failed: "
+                         "STDOUT:\n@@@\n'%s'\n@@@\nSTDERR:\n@@@\n'%s'\n@@@\n"
+                         % (out, err))
 
 
-class CommandDelArchetype(BrokerCommand):
-
-    required_parameters = ["archetype"]
-
-    def render(self, session, archetype, **kwargs):
-        dbarch = Archetype.get_unique(session, archetype, compel=True)
-
-        # Check dependencies
-        row = session.query(Personality).filter_by(archetype=dbarch).first()
-        # if personality exists, raise error
-        if row:
-            raise ArgumentError("{0} is still in use by {1} and cannot be "
-                                "deleted.".format (dbarch, row))
-        # All clear
-        session.delete(dbarch)
-        return
+if __name__ == '__main__':
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestDocumentation)
+    unittest.TextTestRunner(verbosity=2).run(suite)

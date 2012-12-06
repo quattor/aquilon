@@ -21,17 +21,29 @@ FORMATS = man html
 
 COMMAND_SOURCES = $(wildcard commands/*.xml)
 ALL_SOURCES = $(wildcard *.xml) $(COMMAND_SOURCES)
+GENERATED_XML = common/cluster_location_options.xml common/member_location_options.xml
+
+MAN_OUTPUT = $(addprefix man/man1/,$(notdir $(COMMAND_SOURCES:.xml=.1)))
+
+# Eventually we'll want to add other items to HTML_OUTPUT...
+HTML_OUTPUT = $(addprefix html/,$(notdir $(COMMAND_SOURCES:.xml=.html)))
 
 all: version.txt $(FORMATS)
 
-man: MAN.MANIFEST
+common/cluster_location_options.xml: generate_locations.xsl common/location_options.xml
+	$(XSLTPROC) --stringparam location_type cluster $^ > $@
 
-MAN.MANIFEST: $(COMMAND_SOURCES) version.txt
+common/member_location_options.xml: generate_locations.xsl common/location_options.xml
+	$(XSLTPROC) --stringparam location_type member $^ > $@
+
+man: $(MAN_OUTPUT)
+
+$(MAN_OUTPUT): $(COMMAND_SOURCES) $(GENERATED_XML) version.txt
 	$(XSLTPROC) $(XSLT_PARAMS) style-man.xsl $(COMMAND_SOURCES)
 
-html: HTML.MANIFEST
+html: $(HTML_OUTPUT)
 
-HTML.MANIFEST: $(ALL_SOURCES) version.txt
+$(HTML_OUTPUT): $(ALL_SOURCES) $(GENERATED_XML) version.txt
 	$(XSLTPROC) $(XSLT_PARAMS) style-html.xsl $(ALL_SOURCES)
 
 version.txt: FORCE
@@ -41,12 +53,11 @@ version.txt: FORCE
 	@cmp -s $@ $@.tmp; if [ $$? -gt 0 -a -s $@.tmp ]; then mv $@.tmp $@; else rm -f $@.tmp; fi
 
 clean:
-	-rm -f *.MANIFEST
 	-rm -rf html
 	-rm -rf man
 	-rm -f version.txt
+	-rm -f $(GENERATED_XML)
 
-# MANIFEST generation is broken, using find instead...
 install-man: man
 	for file in `find man -type f`; do \
 		install -m 644 -D "$$file" "$(DESTDIR)/$$file"; \
@@ -61,7 +72,8 @@ install: all install-man install-html
 
 # Use "make check" to validate the XML files. Unfortunately the error
 # messages can be misleading sometimes...
-check: version.txt
+check: version.txt $(GENERATED_XML)
 	$(XMLLINT) $(XMLLINT_PARAMS) $(ALL_SOURCES)
+	@./check_command_options.py
 
 .PHONY: all check clean install install-man install-html man html FORCE

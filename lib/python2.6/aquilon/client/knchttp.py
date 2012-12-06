@@ -82,10 +82,14 @@ class WrappedHTTPConnection(ChunkedHTTPConnection):
 
     def connect(self):
         try:
-            process = subprocess.Popen([self.executable, self.service + '@' + self.host, str(self.port)],
-                                       stdin = subprocess.PIPE,
-                                       stdout = subprocess.PIPE,
-                                       stderr = subprocess.PIPE)
+            # FIXME: The -o option requires knc >= 1.7.
+            process = subprocess.Popen([self.executable,
+                                        '-o', 'no-half-close',
+                                        self.service + '@' + self.host,
+                                        str(self.port)],
+                                       stdin=subprocess.PIPE,
+                                       stdout=subprocess.PIPE,
+                                       stderr=subprocess.PIPE)
         except OSError, e:
             raise httplib.NotConnected(e)
 

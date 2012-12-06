@@ -43,7 +43,9 @@ class TestArchetypeConstraints(TestBrokerCommand):
     def testdelarchetypewithpersonality(self):
         command = "del archetype --archetype aquilon"
         out = self.badrequesttest(command.split(" "))
-        self.matchoutput(out, "in use and cannot be deleted", command)
+        self.matchoutput(out, "Archetype aquilon is still in use by "
+                         "Personality aquilon/generic and cannot be deleted.",
+                         command)
 
     def testverifydelarchetypewithmodel(self):
         command = ["show_archetype", "--archetype=aquilon"]

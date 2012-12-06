@@ -31,9 +31,13 @@
 
 import os
 import socket
+import pwd
 from ConfigParser import SafeConfigParser
 
 from exceptions_ import AquilonError
+
+def get_username():
+    return pwd.getpwuid(os.getuid()).pw_name
 
 # All defaults should be in etc/aqd.conf.defaults.  This is only needed to
 # supply defaults that are determined by code at run time.
@@ -42,7 +46,7 @@ global_defaults = {
             # is not meant in any way, shape, or form to be used for security.
             # Having it be something that can be overridden by an env variable
             # is just an extra layer of convenience.
-            "user"     : os.environ.get("USER"),
+            "user"     : os.environ.get("USER") or get_username(),
             # Only used by unit tests at the moment, but maybe useful for
             # scripts that want to execute stand-alone.
             "srcdir"   : os.path.realpath(os.path.join(

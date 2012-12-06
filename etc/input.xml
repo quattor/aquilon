@@ -2305,7 +2305,7 @@
          <option name="server" type="flag" conflicts="hostname machine cluster nasinfo city switch">Show the server config for the service/instance</option>
          <option name="data" type="flag" conflicts="machine service nasinfo city switch">Show the data template for the host/cluster</option>
          <option name="instance" type="string" conflicts="hostname machine cluster nasinfo city switch">Name of the service instance</option>
-         <option name="generate" type="boolean">Show the plenary template as it would be generated</option>
+         <option name="generate" type="flag">Show the plenary template as it would be generated</option>
       </optgroup>
       <optgroup name="cat_resource_options" mandatory="False" fields="any">
          <option name="resourcegroup" type="string" conflicts="machine service instance default nasinfo data">Name of a resource group</option>
@@ -4331,7 +4331,7 @@
          <option name="after" type="string">Search for transactions started after a specific date/time</option>
          <option name="return_code" type="int">Search by an HTTP response code (200-505)</option>
          <option name="limit" type="int">Limit the number of rows returned. (Default 5000/Max 20000)</option>
-         <option name="reverse_order" type="boolean">Output records in
+         <option name="reverse_order" type="flag">Output records in
          reverse chronological order. Also causes the --limit
          parameter to find the oldest records and not the newest.
          </option>

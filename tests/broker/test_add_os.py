@@ -62,6 +62,10 @@ class TestAddOS(TestBrokerCommand):
         command = "add os --archetype utarchetype1 --osname utos --osversion 1.0"
         self.noouttest(command.split(" "))
 
+    def testaddutos2(self):
+        command = "add os --archetype utarchetype3 --osname utos2 --osversion 1.0"
+        self.noouttest(command.split(" "))
+
     def testverifyutos(self):
         command = "show os --archetype utarchetype1 --osname utos --osversion 1.0"
         out = self.commandtest(command.split(" "))

@@ -9,10 +9,9 @@
   <xsl:param name="admon.graphics.path">images/</xsl:param>
   <xsl:param name="admon.graphics.extension">.png</xsl:param>
   <xsl:param name="root.filename"></xsl:param>
-  <xsl:param name="generate.manifest">1</xsl:param>
+  <xsl:param name="generate.manifest">0</xsl:param>
   <xsl:param name="use.id.as.filename">1</xsl:param>
   <xsl:param name="chunker.output.indent">yes</xsl:param>
   <xsl:param name="index.on.type">1</xsl:param>
-  <xsl:param name="manifest">HTML.MANIFEST</xsl:param>
   <xsl:param name="base.dir">html/</xsl:param>
 </xsl:stylesheet>

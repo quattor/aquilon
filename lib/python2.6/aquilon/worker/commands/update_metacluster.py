@@ -94,7 +94,7 @@ class CommandUpdateMetaCluster(BrokerCommand):
         session.flush()
         dbmetacluster.validate()
 
-        plenary_info = Plenary.get_plenary(dbmetacluster)
+        plenary_info = Plenary.get_plenary(dbmetacluster, logger=logger)
         key = plenary_info.get_write_key()
 
         try:

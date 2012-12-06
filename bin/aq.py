@@ -301,7 +301,7 @@ class StatusThread(Thread):
         while res.fp:
             pageData = res.read_chunk()
             if pageData:
-                print >>self.outstream, pageData
+                self.outstream.write(pageData)
         sconn.close()
         return
 
@@ -512,10 +512,14 @@ if __name__ == "__main__":
             sys.exit(1)
         # KNC connections
         msg = conn.getError()
+        host_failed = "Failed to connect to %s" % host
+        port_failed = "%s port %s" % (host_failed, port)
         if msg.find('Connection refused') >= 0:
-            print >>sys.stderr, "Failed to connect to %(aqhost)s port %(aqport)s: Connection refused." % globalOptions
+            print >>sys.stderr, "%s: Connection refused." % port_failed
+        elif msg.find('Connection timed out') >= 0:
+            print >>sys.stderr, "%s: Connection timed out." % port_failed
         elif msg.find('Unknown host') >= 0:
-            print >>sys.stderr, "Failed to connect to %(aqhost)s: Unknown host." % globalOptions
+            print >>sys.stderr, "%s: Unknown host." % host_failed
         else:
             print >>sys.stderr, "Error: %s: %s" % (repr(e), msg)
         sys.exit(1)

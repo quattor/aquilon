@@ -87,9 +87,10 @@ class CommandGet(BrokerCommand):
                              dbsandbox.name, userdir)
 
     def force_my_sandbox(self, session, logger, dbuser, sandbox):
-        sandbox = AqStr.normalize(sandbox)
-        (author, slash, name) = sandbox.partition('/')
-        if not slash:
+        sbx_split = sandbox.split('/')
+        sandbox = AqStr.normalize(sbx_split[-1])
+        author = '/'.join(sbx_split[:-1])
+        if len(sbx_split) <= 1:
             return sandbox
         # User used the name/branch syntax - that's fine.  They can't
         # do anything on behalf of anyone else, though, so error if the
@@ -98,4 +99,4 @@ class CommandGet(BrokerCommand):
             raise ArgumentError("User '%s' cannot add or get a sandbox on "
                                 "behalf of '%s'." %
                                 (dbuser.name, author))
-        return name
+        return sandbox

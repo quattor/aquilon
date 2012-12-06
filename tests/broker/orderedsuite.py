@@ -267,6 +267,7 @@ from test_parameter import TestParameter
 from test_parameter_feature import TestParameterFeature
 from test_parameter_definition import TestParameterDefinition
 from test_parameter_definition_feature import TestParameterDefinitionFeature
+from test_documentation import TestDocumentation
 
 
 class BrokerTestSuite(unittest.TestSuite):
@@ -395,6 +396,7 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestDelDomain, TestDelSandbox,
                 TestDelDnsEnvironment, TestDelDnsDomain,
                 TestClientFailure, TestAudit, TestShowActiveCommands,
+                TestDocumentation,
                 TestBrokerStop]:
             self.addTest(unittest.TestLoader().loadTestsFromTestCase(test))
 

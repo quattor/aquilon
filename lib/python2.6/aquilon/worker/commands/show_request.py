@@ -53,7 +53,10 @@ class StatusWriter(StatusSubscriber):
         if self.request._disconnected:
             return
         if record.levelno >= self.loglevel:
-            self.request.write(str(record.getMessage()))
+            msg = record.getMessage() or ''
+            if msg:
+                msg = "%s\n" % msg
+            self.request.write(str(msg))
 
     def finish(self):
         if not self.deferred.called:

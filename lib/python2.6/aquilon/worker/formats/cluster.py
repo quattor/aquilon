@@ -41,7 +41,7 @@ class ClusterFormatter(ObjectFormatter):
         container = skeleton
         if not container:
             container = self.loaded_protocols[self.protocol].ClusterList()
-            skeleton = container.resources.add()
+            skeleton = container.clusters.add()
         skeleton.name = str(cluster.name)
         skeleton.status = str(cluster.status)
         self.add_personality_data(skeleton.personality, cluster.personality)

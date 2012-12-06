@@ -49,7 +49,8 @@ class OperatingSystem(Base):
     name = Column(AqStr(32), nullable=False)
     version = Column(AqStr(16), nullable=False)
     archetype_id = Column(Integer, ForeignKey('archetype.id',
-                                              name='%s_arch_fk' % _ABV),
+                                              name='%s_arch_fk' % _ABV,
+                                              ondelete="CASCADE"),
                           nullable=False)
     #vendor id?
     creation_date = deferred(Column(DateTime, default=datetime.now,

@@ -33,6 +33,7 @@ from sqlalchemy.orm import joinedload, subqueryload, lazyload
 from aquilon.exceptions_ import NotFoundException
 from aquilon.aqdb.model import EsxCluster, VirtualMachine, ClusterResource
 from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.formats.cluster import ClusterList
 
 
 class CommandShowESXClusterAll(BrokerCommand):
@@ -73,4 +74,4 @@ class CommandShowESXClusterAll(BrokerCommand):
         for vm in vm_q:
             machines[vm.machine.machine_id] = vm
 
-        return dbclusters
+        return ClusterList(dbclusters)

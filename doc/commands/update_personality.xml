@@ -4,6 +4,7 @@
 <!ENTITY aqd_version SYSTEM "../version.txt">
 ]>
 <refentry xml:id="update_personality"
+          xmlns="http://docbook.org/ns/docbook"
 	  xmlns:xi="http://www.w3.org/2001/XInclude">
     <refmeta>
         <refentrytitle>update_personality</refentrytitle>
@@ -28,7 +29,6 @@
 	    </group>
 	    <arg choice="plain"><option>--personality <replaceable>PERSONALITY</replaceable></option></arg>
 	    <arg choice="plain"><option>--archetype <replaceable>ARCHETYPE</replaceable></option></arg>
-	    <arg choice="opt"><option>--cluster_required <replaceable>CLUSTER_REQUIRED</replaceable></option></arg>
             <group choice="opt">
 	    	<arg choice="plain"><option>--cluster_required</option></arg>
 		<arg choice="plain"><option>--nocluster_required</option></arg>

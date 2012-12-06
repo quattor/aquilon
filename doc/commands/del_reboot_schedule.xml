@@ -4,6 +4,7 @@
 <!ENTITY aqd_version SYSTEM "../version.txt">
 ]>
 <refentry xml:id="del_reboot_schedule"
+          xmlns="http://docbook.org/ns/docbook"
 	  xmlns:xi="http://www.w3.org/2001/XInclude">
     <refmeta>
         <refentrytitle>del_reboot_schedule</refentrytitle>
