@@ -30,7 +30,7 @@
 
 from aquilon.worker.broker import BrokerCommand, validate_basic
 from aquilon.exceptions_ import ArgumentError, IncompleteError
-from aquilon.aqdb.model import HardwareEntity
+from aquilon.aqdb.model import HardwareEntity, NetworkEnvironment
 from aquilon.worker.dbwrappers.dns import grab_address
 from aquilon.worker.dbwrappers.interface import (get_interface,
                                                  generate_ip,
@@ -45,7 +45,7 @@ class CommandAddInterfaceAddress(BrokerCommand):
     required_parameters = ['interface']
 
     def render(self, session, logger, machine, chassis, switch, fqdn, interface,
-               label, network_environment, **kwargs):
+               label, network_environment, map_to_primary, **kwargs):
 
         if machine:
             hwtype = 'machine'
@@ -57,6 +57,9 @@ class CommandAddInterfaceAddress(BrokerCommand):
             hwtype = 'switch'
             hwname = switch
 
+        dbnet_env = NetworkEnvironment.get_unique_or_default(session,
+                                                             network_environment)
+
         dbhw_ent = HardwareEntity.get_unique(session, hwname,
                                              hardware_type=hwtype, compel=True)
 
@@ -64,7 +67,8 @@ class CommandAddInterfaceAddress(BrokerCommand):
 
         oldinfo = DSDBRunner.snapshot_hw(dbhw_ent)
 
-        ip = generate_ip(session, dbinterface, **kwargs)
+        ip = generate_ip(session, dbinterface, network_environment=dbnet_env,
+                         **kwargs)
 
         if dbinterface.interface_type == "loopback":
             # Switch loopback interfaces may use e.g. the network address as an
@@ -99,12 +103,34 @@ class CommandAddInterfaceAddress(BrokerCommand):
             validate_basic("label", label)
 
         # TODO: add allow_multi=True
-        dbdns_rec, newly_created = grab_address(session, fqdn, ip,
-                                                network_environment,
+        dbdns_rec, newly_created = grab_address(session, fqdn, ip, dbnet_env,
                                                 relaxed=relaxed)
         ip = dbdns_rec.ip
         dbnetwork = dbdns_rec.network
         delete_old_dsdb_entry = not newly_created and not dbdns_rec.assignments
+
+        # Reverse PTR control. Auxiliary addresses should point to the primary
+        # name by default, with some exceptions.
+        if (map_to_primary is None and dbhw_ent.primary_name and
+            dbinterface.interface_type != "management" and
+            dbdns_rec.fqdn.dns_environment == dbhw_ent.primary_name.fqdn.dns_environment):
+            map_to_primary = True
+
+        if map_to_primary:
+            if not dbhw_ent.primary_name:
+                raise ArgumentError("{0} does not have a primary name, cannot "
+                                    "set the reverse DNS mapping."
+                                    .format(dbhw_ent))
+            if (dbhw_ent.primary_name.fqdn.dns_environment !=
+                dbdns_rec.fqdn.dns_environment):
+                raise ArgumentError("{0} lives in {1:l}, not {2:l}."
+                                    .format(dbhw_ent,
+                                            dbhw_ent.primary_name.fqdn.dns_environment,
+                                            dbdns_rec.fqdn.dns_environment))
+            if dbinterface.interface_type == "management":
+                raise ArgumentError("The reverse PTR for management addresses "
+                                    "should not point to the primary name.")
+            dbdns_rec.reverse_ptr = dbhw_ent.primary_name.fqdn
 
         # Check that the network ranges assigned to different interfaces
         # do not overlap even if the network environments are different, because
@@ -153,6 +179,8 @@ class CommandAddInterfaceAddress(BrokerCommand):
                 lock_queue.release(key)
         else:
             dsdb_runner = DSDBRunner(logger=logger)
+            if delete_old_dsdb_entry:
+                dsdb_runner.delete_host_details(dbdns_rec.fqdn, ip)
             dsdb_runner.update_host(dbhw_ent, oldinfo)
             dsdb_runner.commit_or_rollback("Could not add host to DSDB")
 

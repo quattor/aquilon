@@ -154,6 +154,19 @@ class CommandAddHost(BrokerCommand):
                                                 preclude=True)
         dbmachine.primary_name = dbdns_rec
 
+        # Fix up auxiliary addresses to point to the primary name by default
+        if ip:
+            dns_env = dbdns_rec.fqdn.dns_environment
+
+            for addr in dbmachine.all_addresses():
+                if addr.interface.interface_type == "management":
+                    continue
+                if addr.service_address_id:  # pragma: no cover
+                    continue
+                for rec in addr.dns_records:
+                    if rec.fqdn.dns_environment == dns_env:
+                        rec.reverse_ptr = dbdns_rec.fqdn
+
         if zebra_interfaces:
             if not ip:
                 raise ArgumentError("Zebra configuration requires an IP address.")
@@ -234,6 +247,14 @@ class CommandAddHost(BrokerCommand):
             if not dbinterface:
                 raise ArgumentError("{0} does not have an interface named "
                                     "{1}.".format(dbmachine, name))
+
+            # Make sure the transit IPs resolve to the primary name
+            for addr in dbinterface.assignments:
+                if addr.label:
+                    continue
+                for dnr in addr.dns_records:
+                    dnr.reverse_ptr = dbdns_rec.fqdn
+
             assign_address(dbinterface, dbdns_rec.ip, dbdns_rec.network,
                            label="hostname", resource=dbsrv_addr)
 

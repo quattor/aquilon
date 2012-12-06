@@ -31,7 +31,7 @@
 from aquilon.worker.broker import BrokerCommand
 from aquilon.exceptions_ import ArgumentError, IncompleteError
 from aquilon.aqdb.model import (HardwareEntity, AddressAssignment, ARecord,
-                                Fqdn, NetworkEnvironment)
+                                NetworkEnvironment)
 from aquilon.worker.dbwrappers.dns import delete_dns_record
 from aquilon.worker.dbwrappers.interface import get_interface
 from aquilon.worker.templates.host import PlenaryHost
@@ -114,7 +114,7 @@ class CommandDelInterfaceAddress(BrokerCommand):
             q = session.query(ARecord)
             q = q.filter_by(network=dbnetwork)
             q = q.filter_by(ip=ip)
-            q = q.join(Fqdn)
+            q = q.join(ARecord.fqdn)
             q = q.filter_by(dns_environment=dbnet_env.dns_environment)
             map(delete_dns_record, q.all())
 

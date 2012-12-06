@@ -77,6 +77,12 @@ class TestAddServiceAddress(TestBrokerCommand):
                          command)
         self.matchoutput(out, "Interfaces: eth0, eth1", command)
 
+    def testverifyzebra2dns(self):
+        ip = self.net.unknown[13].usable[1]
+        command = ["show", "fqdn", "--fqdn", "zebra2.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchclean(out, "Reverse", command)
+
     def testaddzebra3(self):
         # Adding an even lower IP should cause zebra2 to be renumbered in DSDB
         zebra2_ip = self.net.unknown[13].usable[1]
@@ -88,7 +94,7 @@ class TestAddServiceAddress(TestBrokerCommand):
                    "--hostname", "unittest20.aqd-unittest.ms.com",
                    "--service_address", "zebra3.aqd-unittest.ms.com",
                    "--interfaces", "eth0,eth1", "--ip", zebra3_ip,
-                   "--name", "zebra3"]
+                   "--name", "zebra3", "--map_to_primary"]
         self.noouttest(command)
         self.dsdb_verify()
 

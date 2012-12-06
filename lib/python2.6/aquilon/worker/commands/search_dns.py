@@ -37,7 +37,7 @@ from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.formats.list import StringAttributeList
 
 from sqlalchemy.orm import contains_eager, undefer, subqueryload, aliased
-from sqlalchemy.sql import or_
+from sqlalchemy.sql import or_, and_
 
 # Map standard DNS record types to our internal types
 DNS_RRTYPE_MAP = {'a': 'a_record',
@@ -51,7 +51,8 @@ class CommandSearchDns(BrokerCommand):
 
     def render(self, session, fqdn, dns_environment, dns_domain, shortname,
                record_type, ip, network, network_environment, target,
-               target_domain, primary_name, used, fullinfo, style, **kwargs):
+               target_domain, primary_name, used, reverse_override, reverse_ptr,
+               fullinfo, style, **kwargs):
         q = session.query(DnsRecord)
         q = q.with_polymorphic('*')
         if record_type:
@@ -123,14 +124,23 @@ class CommandSearchDns(BrokerCommand):
         if used is not None:
             if used:
                 q = q.join(AddressAssignment,
-                           ARecord.ip == AddressAssignment.ip and
-                           ARecord.network == AddressAssignment.network)
+                           and_(ARecord.ip == AddressAssignment.ip,
+                                ARecord.network_id == AddressAssignment.network_id))
             else:
                 q = q.outerjoin(AddressAssignment,
-                                ARecord.ip == AddressAssignment.ip and
-                                ARecord.network == AddressAssignment.network)
+                                and_(ARecord.ip == AddressAssignment.ip,
+                                     ARecord.network_id == AddressAssignment.network_id))
                 q = q.filter(AddressAssignment.id == None)
             q = q.reset_joinpoint()
+        if reverse_override is not None:
+            if reverse_override:
+                q = q.filter(ARecord.reverse_ptr.has())
+            else:
+                q = q.filter(~ARecord.reverse_ptr.has())
+        if reverse_ptr:
+            dbtarget = Fqdn.get_unique(session, fqdn=reverse_ptr,
+                                       dns_environment=dbdns_env, compel=True)
+            q = q.filter(ARecord.reverse_ptr == dbtarget)
 
         if fullinfo:
             q = q.options(undefer('comments'))

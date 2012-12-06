@@ -78,6 +78,11 @@ class CommandAddAuxiliary(BrokerCommand):
                                                 comments=comments,
                                                 preclude=True)
 
+        if dbmachine.primary_name:
+            # This command cannot use a non-default DNS environment, so no extra
+            # checks are necessary
+            dbdns_rec.reverse_ptr = dbmachine.primary_name.fqdn
+
         assign_address(dbinterface, ip, dbdns_rec.network)
 
         session.flush()

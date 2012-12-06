@@ -27,6 +27,7 @@
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
 
+from aquilon.aqdb.model import ARecord
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.dns import grab_address
 from aquilon.worker.dbwrappers.interface import generate_ip
@@ -37,17 +38,27 @@ class CommandAddAddressDNSEnvironment(BrokerCommand):
 
     required_parameters = ["fqdn", "dns_environment"]
 
-    def render(self, session, logger, fqdn, dns_environment, network_environment, comments,
-               **arguments):
+    def render(self, session, logger, fqdn, dns_environment,
+               network_environment, reverse_ptr, comments, **arguments):
 
         ip = generate_ip(session, compel=True, dbinterface=None,
                          network_environment=network_environment, **arguments)
         # TODO: add allow_multi=True
         dbdns_rec, newly_created = grab_address(session, fqdn, ip,
-                                                network_environment, # network_environment,
+                                                network_environment,
                                                 dns_environment,
                                                 comments=comments,
                                                 preclude=True)
+
+        if reverse_ptr:
+            # Technically the reverse PTR could point to other types, not just
+            # ARecord, but there are no use cases for that, so better avoid
+            # confusion
+            dbreverse = ARecord.get_unique(session, fqdn=reverse_ptr,
+                                           dns_environment=dns_environment,
+                                           compel=True)
+            if dbreverse.fqdn != dbdns_rec.fqdn:
+                dbdns_rec.reverse_ptr = dbreverse.fqdn
 
         session.flush()
 

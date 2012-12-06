@@ -39,6 +39,10 @@
 	    <group>
 		<synopfragmentref linkend="ip-options">IP address options</synopfragmentref>
 	    </group>
+	    <group choice="opt">
+		<arg choice="plain"><option>--map_to_primary</option></arg>
+		<arg choice="plain"><option>--nomap_to_primary</option></arg>
+	    </group>
 	    <xi:include href="../common/global_options.xml"/>
 	    <xi:include href="../common/ip_options.xml"/>
 	</cmdsynopsis>
@@ -140,6 +144,18 @@
 		    <para>
 			Specifying <option>--network_environment</option> also sets the DNS
 			environment where <replaceable>FQDN</replaceable> is looked up or created.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--map_to_primary</option>, <option>--nomap_to_primary</option>
+		</term>
+		<listitem>
+		    <para>
+			Flag to control if the reverse PTR record of the address should point to the
+			primary name instead the name given in <replaceable>FQDN</replaceable>. Default
+			is to point to the primary name.
 		    </para>
 		</listitem>
 	    </varlistentry>

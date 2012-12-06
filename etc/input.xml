@@ -1595,7 +1595,8 @@
 	 <option name="fqdn" type="string">FQDN of the new address</option>
 	 <option name="network_environment" type="string">Network environment (default: internal)</option>
 	 <option name="label" type="string">Interface alias of the new address</option>
-         <option name="ipalgorithm" type="string">Algorithm for automatically choosing an IP.</option>
+	 <option name="ipalgorithm" type="string">Algorithm for automatically choosing an IP.</option>
+	 <option name="map_to_primary" type="boolean">Should the reverse PTR point to the primary name?</option>
       </optgroup>
       <optgroup name="add_interface_address_ip_opts" mandatory="False" fields="any">
          <option name="ip" type="ipv4" conflicts="ipfromip ipfromsystem autoip">IP address</option>
@@ -4003,6 +4004,7 @@
 	 <option name="network_environment" type="string">Name of the environment</option>
          <option name="ipalgorithm" type="string">Algorithm for automatically choosing an IP.</option>
          <option name="comments" type="string">Comments</option>
+         <option name="reverse_ptr" type="string">Where the reverse record should point to</option>
       </optgroup>
       <transport method="post" path="address_default/%(fqdn)s" />
       <transport method="post" trigger="dns_environment" path="address/%(dns_environment)s/%(fqdn)s" />
@@ -4033,6 +4035,21 @@
       </optgroup>
       <transport method="get" path="address_default/%(fqdn)s" />
       <transport method="get" trigger="dns_environment" path="address/%(dns_environment)s/%(fqdn)s" />
+   </command>
+
+   <command name="update_address">
+      Update an address in the DNS.
+      <optgroup name="update_address_opts" mandatory="True" fields="any">
+         <option name="fqdn" type="string">The fully qualified domain name</option>
+      </optgroup>
+      <optgroup name="update_address_optional" mandatory="False">
+         <option name="ip" type="ipv4">The new IP address</option>
+         <option name="comments" type="string">Comments</option>
+         <option name="reverse_ptr" type="string">Where the reverse record should point to</option>
+         <option name="dns_environment" type="string">The name of the environment the address is in (defaults to 'internal')</option>
+         <option name="network_environment" type="string">Network environment (default: internal)</option>
+      </optgroup>
+      <transport method="put" path="address" />
    </command>
 
    <command name="show_ns_record">
@@ -4202,6 +4219,8 @@
          <option name="dns_domain" type="string">Name of the DNS domain the record lives in</option>
          <option name="primary_name" type="boolean">The DNS record is used as a primary name</option>
          <option name="used" type="boolean" reverse="unused">The IP address is in use</option>
+         <option name="reverse_override" type="boolean">Is there an override for the reverse PTR record?</option>
+         <option name="reverse_ptr" type="string">The reverse PTR points to this FQDN</option>
       </optgroup>
       <optgroup name="search_dns_optional" mandatory="False" fields="any">
          <option name="dns_environment" type="string" conflicts="network_environment">The name of an environment the address is in (default: internal)</option>
@@ -4681,6 +4700,7 @@
          <option name="ip" type="ipv4">IP address</option>
          <option name="network_environment" type="string">Network environment (default: internal)</option>
          <option name="comments" type="string">Comments</option>
+         <option name="map_to_primary" type="boolean">Should the reverse PTR point to the primary name?</option>
       </optgroup>
       <transport method="put" path="resource/service_address/%(name)s" />
    </command>

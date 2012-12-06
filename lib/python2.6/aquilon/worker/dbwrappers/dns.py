@@ -193,7 +193,7 @@ def grab_address(session, fqdn, ip, network_environment=None,
         # CNAME when the dump_dns command is called.
         q = session.query(ARecord)
         q = q.filter_by(network=dbnetwork, ip=ip)
-        q = q.join(Fqdn)
+        q = q.join(ARecord.fqdn)
         q = q.filter_by(dns_environment=dns_environment)
         dbrecords = q.all()
         if dbrecords and len(dbrecords) > 1:  # pragma: no cover

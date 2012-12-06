@@ -44,8 +44,8 @@ class CommandShowManagerAll(BrokerCommand):
         q = q.join(Interface)
         q = q.filter_by(interface_type='management')
         q = q.reset_joinpoint()
-        q = q.join(Fqdn, DnsDomain)
-        q = q.options(contains_eager('fqdn'))
-        q = q.options(contains_eager('fqdn.dns_domain'))
+        q = q.join(ARecord.fqdn, DnsDomain)
+        q = q.options(contains_eager('fqdn'),
+                      contains_eager('fqdn.dns_domain'))
         q = q.order_by(Fqdn.name, DnsDomain.name)
         return [rec.fqdn for rec in q.all()]

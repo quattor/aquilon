@@ -92,9 +92,9 @@ class CommandShowHostIPList(BrokerCommand):
         # Append addresses that are not bound to interfaces
         if not archetype:
             q = session.query(ARecord)
-            q = q.join(Fqdn, DnsDomain)
-            q = q.options(contains_eager("fqdn"))
-            q = q.options(contains_eager("fqdn.dns_domain"))
+            q = q.join(ARecord.fqdn, DnsDomain)
+            q = q.options(contains_eager("fqdn"),
+                          contains_eager("fqdn.dns_domain"))
             q = q.reset_joinpoint()
 
             q = q.join(Network)

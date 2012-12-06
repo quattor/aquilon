@@ -1,0 +1,254 @@
+<?xml version="1.0"?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V5.0//EN"
+"http://docbook.org/xml/5.0/dtd/docbook.dtd" [
+<!ENTITY aqd_version SYSTEM "../version.txt">
+]>
+<refentry xml:id="search_dns"
+          xmlns="http://docbook.org/ns/docbook"
+	  xmlns:xi="http://www.w3.org/2001/XInclude">
+    <refmeta>
+        <refentrytitle>search_dns</refentrytitle>
+        <manvolnum>1</manvolnum>
+        <refmiscinfo class="version">&aqd_version;</refmiscinfo>
+        <refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
+    </refmeta>
+
+    <refnamediv>
+        <refname>search dns</refname>
+        <refpurpose>
+	    Look up DNS-related information
+        </refpurpose>
+	<refclass>Aquilon</refclass>
+    </refnamediv>
+
+    <refsynopsisdiv>
+	<cmdsynopsis>
+	    <command>aq search dns</command>
+	    <group>
+		<synopfragmentref linkend="global-options">Global options</synopfragmentref>
+	    </group>
+	    <arg choice="opt"><option>--fqdn <replaceable>FQDN</replaceable></option></arg>
+	    <arg choice="opt"><option>--shortname <replaceable>NAME</replaceable></option></arg>
+	    <arg choice="opt"><option>--dns_domain <replaceable>DOMAIN</replaceable></option></arg>
+	    <arg choice="opt"><option>--record_type <replaceable>RRTYPE</replaceable></option></arg>
+	    <arg choice="opt"><option>--ip <replaceable>IPADDR</replaceable></option></arg>
+	    <arg choice="opt"><option>--network <replaceable>NAME</replaceable></option></arg>
+	    <arg choice="opt"><option>--target <replaceable>FQDN</replaceable></option></arg>
+	    <arg choice="opt"><option>--target_domain <replaceable>DOMAIN</replaceable></option></arg>
+	    <arg choice="opt"><option>--reverse_ptr <replaceable>FQDN</replaceable></option></arg>
+	    <group choice="opt">
+		<arg choice="plain"><option>--primary_name</option></arg>
+		<arg choice="plain"><option>--noprimary_name</option></arg>
+	    </group>
+	    <group choice="opt">
+		<arg choice="plain"><option>--used</option></arg>
+		<arg choice="plain"><option>--unused</option></arg>
+	    </group>
+	    <group choice="opt">
+		<arg choice="plain"><option>--reverse_override</option></arg>
+		<arg choice="plain"><option>--noreverse_override</option></arg>
+	    </group>
+	    <arg choice="opt"><option>--dns_environment <replaceable>DNSENV</replaceable></option></arg>
+	    <arg choice="opt"><option>--network_environment <replaceable>NETENV</replaceable></option></arg>
+	    <arg choice="opt"><option>--fullinfo</option></arg>
+	    <xi:include href="../common/global_options.xml"/>
+	</cmdsynopsis>
+    </refsynopsisdiv>
+
+    <refsect1>
+        <title>Description</title>
+	<para>
+	    The <command>aq search dns</command> command allows looking up DNS records based on
+	    several criteria. By default, only the FQDNs of matching entries are returned. Specifying
+	    the <option>--fullinfo</option> option causes the complete record descriptions to be
+	    returned.
+	</para>
+    </refsect1>
+
+    <refsect1>
+        <title>Options</title>
+	<variablelist>
+	    <title>Command-specific options</title>
+	    <varlistentry>
+	        <term>
+		    <option>--fqdn <replaceable>FQDN</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Matches records with the given fully qualified domain name. The result may
+			contain multiple entries if there are more than one Resource Records associated with
+			the given FQDN.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--shortname <replaceable>NAME</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Matches records with the given short name <replaceable>NAME</replaceable>.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--dns_domain <replaceable>DOMAIN</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Matches records in the given DNS domain <replaceable>DOMAIN</replaceable>.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--record_type <replaceable>RRTYPE</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Matches the given record type. <replaceable>RRTYPE</replaceable> may be either a valid
+			DNS RR name, like A, CNAME, SRV, or they type used by the database, like a_record, alias,
+			srv_record, dynamic_stub.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--ip <replaceable>IPADDR</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Matches addresses with the given IP address.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--network <replaceable>NAME</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Matches networks with the given <replaceable>NAME</replaceable>.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--target <replaceable>FQDN</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Matches if the target of the alias or service record is the given <replaceable>FQDN</replaceable>.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--target_domain <replaceable>DOMAIN</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Matches aliases and service records pointing to the given DNS domain.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--reverse_ptr <replaceable>FQDN</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Matches addresses having their reverse PTR record overridden to point to <replaceable>FQDN</replaceable>.
+			Note that <replaceable>FQDN</replaceable> itself will not be among the results.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--primary_name</option>, <option>--noprimary_name</option>
+		</term>
+		<listitem>
+		    <para>
+			The option <option>--primary_name</option> matches DNS records that are primary names. The
+			option <option>--noprimary_name</option> matches DNS records that are not used as primary
+			names.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--used</option>, <option>--unused</option>
+		</term>
+		<listitem>
+		    <para>
+			The option <option>--used</option> matches DNS records that have their IP address assigned
+			to at least one network interface. The option <option>--noprimary_name</option> matches DNS
+			records that either do not contain an IP address, or if they do, that IP address is not
+			assigned to any network interfaces.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--reverse_override</option>, <option>--noreverse_override</option>
+		</term>
+		<listitem>
+		    <para>
+			The option <option>--reverse_override</option> matches DNS records where the reverse
+			PTR record points to a different FQDN. The option <option>--noreverse_override</option>
+			matches DNS records where the reverse PTR record is not overridden.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--network_environment <replaceable>NETENV</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Matches addresses in the given network environment. The default is
+			defined by the <literal>default_network_environment</literal> key in the
+			<literal>site</literal> section of the broker's configuration. The network
+			environment is used only if there are other search criteria based on
+			IP addresses.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--dns_environment <replaceable>DNSENV</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Defines the DNS environment where to search. The output of the
+			<command>search_dns</command> command will never contain entries from multiple
+			DNS environments. The default is the DNS environment associated with the
+			network environment <replaceable>NETENV</replaceable>.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--fullinfo</option>
+		</term>
+		<listitem>
+		    <para>
+			Print full record descriptions, not just the FQDN of matching entries.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	</variablelist>
+	<xi:include href="../common/global_options_desc.xml"/>
+    </refsect1>
+
+    <refsect1>
+	<title>See also</title>
+	<para>
+	    <citerefentry><refentrytitle>map_dns_domain</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>unmap_dns_domain</refentrytitle><manvolnum>1</manvolnum></citerefentry>
+	</para>
+    </refsect1>
+</refentry>
+
+<!-- vim: set ai sw=4: -->

@@ -31,8 +31,7 @@ from sqlalchemy.orm import contains_eager
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 
 from aquilon.worker.broker import BrokerCommand
-from aquilon.aqdb.model import (ARecord, Fqdn, DnsEnvironment,
-                                NetworkEnvironment)
+from aquilon.aqdb.model import ARecord, DnsEnvironment, NetworkEnvironment
 from aquilon.aqdb.model.dns_domain import parse_fqdn
 from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.worker.locks import DeleteKey
@@ -62,7 +61,7 @@ class CommandDelAddressDNSEnvironment(BrokerCommand):
             q = session.query(ARecord)
             if ip:
                 q = q.filter_by(ip=ip)
-            q = q.join(Fqdn)
+            q = q.join(ARecord.fqdn)
             q = q.options(contains_eager('fqdn'))
             q = q.filter_by(dns_environment=dbdns_env)
             if fqdn:

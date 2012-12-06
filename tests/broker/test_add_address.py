@@ -61,6 +61,7 @@ class TestAddAddress(TestBrokerCommand):
         self.matchoutput(out, "IP: %s" % net.usable[13], command)
         self.matchoutput(out, "Network: %s [%s]" % (net.ip, net), command)
         self.matchoutput(out, "Network Environment: internal", command)
+        self.matchclean(out, "Reverse", command)
 
     def test_200_add_defaultenv(self):
         self.dsdb_expect_add("arecord14.aqd-unittest.ms.com",
@@ -68,18 +69,29 @@ class TestAddAddress(TestBrokerCommand):
         default = self.config.get("site", "default_dns_environment")
         command = ["add_address", "--ip=%s" % self.net.unknown[0].usable[14],
                    "--fqdn=arecord14.aqd-unittest.ms.com",
+                   "--reverse_ptr=arecord13.aqd-unittest.ms.com",
                    "--dns_environment=%s" % default]
         self.noouttest(command)
         self.dsdb_verify()
 
-    def test_210_add_utenv(self):
+    def test_210_add_utenv_noreverse(self):
+        # The reverse does not exist in this environment
+        command = ["add_address", "--ip", self.net.unknown[1].usable[14],
+                   "--fqdn", "arecord14.aqd-unittest.ms.com",
+                   "--reverse_ptr", "arecord13.aqd-unittest.ms.com",
+                   "--dns_environment", "ut-env"]
+        out = self.notfoundtest(command)
+        self.matchoutput(out, "DNS Record arecord13.aqd-unittest.ms.com, "
+                         "DNS environment ut-env not found.", command)
+
+    def test_220_add_utenv(self):
         # Different IP in this environment
         command = ["add_address", "--ip", self.net.unknown[1].usable[14],
                    "--fqdn", "arecord14.aqd-unittest.ms.com",
                    "--dns_environment", "ut-env"]
         self.noouttest(command)
 
-    def test_220_verifydefaultenv(self):
+    def test_230_verifydefaultenv(self):
         default = self.config.get("site", "default_dns_environment")
         command = ["show_address", "--fqdn=arecord14.aqd-unittest.ms.com"]
         out = self.commandtest(command)
@@ -87,6 +99,8 @@ class TestAddAddress(TestBrokerCommand):
                          command)
         self.matchoutput(out, "DNS Environment: %s" % default, command)
         self.matchoutput(out, "IP: %s" % self.net.unknown[0].usable[14],
+                         command)
+        self.matchoutput(out, "Reverse PTR: arecord13.aqd-unittest.ms.com",
                          command)
 
     def test_230_verifyutenv(self):
@@ -98,6 +112,7 @@ class TestAddAddress(TestBrokerCommand):
         self.matchoutput(out, "DNS Environment: ut-env", command)
         self.matchoutput(out, "IP: %s" % self.net.unknown[1].usable[14],
                          command)
+        self.matchclean(out, "Reverse", command)
 
     def test_300_ipfromip(self):
         self.dsdb_expect_add("arecord15.aqd-unittest.ms.com",
@@ -115,6 +130,7 @@ class TestAddAddress(TestBrokerCommand):
                          command)
         self.matchoutput(out, "IP: %s" % self.net.unknown[0].usable[15],
                          command)
+        self.matchclean(out, "Reverse", command)
 
     def test_400_dsdbfailure(self):
         self.dsdb_expect_add("arecord16.aqd-unittest.ms.com",
