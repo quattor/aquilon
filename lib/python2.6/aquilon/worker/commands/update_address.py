@@ -109,9 +109,9 @@ class CommandUpdateAddress(BrokerCommand):
             #    XXX using None as the interface name does not work (yet)
             #    dsdb_runner.update_host_ip(fqdn, None, dbdns_rec.ip, old_ip)
             if old_comments != dbdns_rec.comments:
-                dsdb_runner.update_host_details(dbdns_rec.fqdn,
-                                                comments=dbdns_rec.comments,
-                                                old_comments=old_comments)
+                dsdb_runner.update_address_details(dbdns_rec.fqdn,
+                                                   new_comments=dbdns_rec.comments,
+                                                   old_comments=old_comments)
             dsdb_runner.commit_or_rollback()
 
         return

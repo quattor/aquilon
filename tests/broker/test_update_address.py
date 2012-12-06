@@ -42,8 +42,8 @@ from brokertest import TestBrokerCommand
 class TestUpdateAddress(TestBrokerCommand):
 
     def test_100_update_reverse(self):
-        self.dsdb_expect_update("arecord15.aqd-unittest.ms.com",
-                                comments="Test comment")
+        self.dsdb_expect_update_address("arecord15.aqd-unittest.ms.com",
+                                        comments="Test comment")
         command = ["update", "address",
                    "--fqdn", "arecord15.aqd-unittest.ms.com",
                    "--reverse_ptr", "arecord14.aqd-unittest.ms.com",

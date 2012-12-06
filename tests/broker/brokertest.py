@@ -588,6 +588,12 @@ class TestBrokerCommand(unittest.TestCase):
             command.extend(["-comments", comments])
         self.dsdb_expect(" ".join(command), fail=fail)
 
+    def dsdb_expect_update_address(self, fqdn, comments=None, fail=False):
+        command = ["update_host", "-host_name", fqdn, "-status", "aq"]
+        if comments:
+            command.extend(["-comments", comments])
+        self.dsdb_expect(" ".join(command), fail=fail)
+
     def dsdb_expect_rename(self, fqdn, new_fqdn=None, iface=None,
                            new_iface=None, fail=False):
         command = ["update_aqd_host", "-host_name", fqdn]

@@ -564,6 +564,17 @@ class DSDBRunner(object):
 
         self.add_action(command, rollback)
 
+    def update_address_details(self, fqdn, new_comments=None,
+                               old_comments=None):
+        command = ["update_host", "-host_name", fqdn, "-status", "aq"]
+        rollback = command[:]
+
+        if new_comments != old_comments:
+            command.extend(["-comments", new_comments or ""])
+            rollback.extend(["-comments", old_comments or ""])
+
+        self.add_action(command, rollback)
+
     def update_host_iface_name(self, old_fqdn, new_fqdn, old_iface, new_iface):
         old_iface = self.normalize_iface(old_iface)
         new_iface = self.normalize_iface(new_iface)
