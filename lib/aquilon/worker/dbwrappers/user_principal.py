@@ -21,9 +21,10 @@ import re
 import logging
 
 from sqlalchemy.orm import contains_eager, joinedload
+from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 
 from aquilon.exceptions_ import (ArgumentError, AuthorizationException,
-                                 NotFoundException)
+                                 NotFoundException, InternalError)
 from aquilon.aqdb.model import Role, Realm, UserPrincipal
 from aquilon.worker.dbwrappers.host import hostname_to_host
 
@@ -35,7 +36,8 @@ host_re = re.compile(r'^host/(.*)$')
 
 def get_or_create_user_principal(session, principal, createuser=True,
                                  createrealm=True, commitoncreate=False,
-                                 comments=None, query_options=None):
+                                 comments=None, query_options=None,
+                                 logger=LOGGER):
     if principal is None:
         return None
 
@@ -65,8 +67,15 @@ def get_or_create_user_principal(session, principal, createuser=True,
     dbuser = q.first()
     if dbuser:
         return dbuser
-    # If here, need more complicated behavior...
-    dbnobody = Role.get_unique(session, 'nobody', compel=True)
+
+    # If we're here, we need more complicated behavior...
+    if not createuser:
+        raise ArgumentError("Could not find principal %s to permission, "
+                            "use --createuser to create a new record for "
+                            "the principal." % principal)
+
+    dbnobody = Role.get_unique(session, 'nobody', compel=InternalError)
+
     try:
         dbrealm = Realm.get_unique(session, realm, compel=True)
     except NotFoundException:
@@ -74,30 +83,16 @@ def get_or_create_user_principal(session, principal, createuser=True,
             raise ArgumentError("Could not find realm %s to create principal "
                                 "%s, use --createrealm to create a new record "
                                 "for the realm." % (realm, principal))
-        LOGGER.info("Realm %s did not exist, creating..." % realm)
+        logger.client_info("Realm %s did not exist, creating." % realm)
         dbrealm = Realm(name=realm, trusted=False)
         session.add(dbrealm)
-        LOGGER.info("Creating user %s@%s..." % (user, realm))
-        dbuser = UserPrincipal(name=user, realm=dbrealm, role=dbnobody,
-                               comments=comments)
-        session.add(dbuser)
-        if commitoncreate:
-            session.commit()
-        return dbuser
-    q = session.query(UserPrincipal).filter_by(name=user, realm=dbrealm)
-    dbuser = q.first()
-    if not dbuser:
-        if not createuser:
-            raise ArgumentError("Could not find principal %s to permission, "
-                                "use --createuser to create a new record for "
-                                "the principal." % principal)
-        LOGGER.info("User %s did not exist in realm %s, creating..." %
-                    (user, realm))
-        dbuser = UserPrincipal(name=user, realm=dbrealm, role=dbnobody,
-                               comments=comments)
-        session.add(dbuser)
-        if commitoncreate:
-            session.commit()
+
+    logger.client_info("User %s@%s did not exist, creating." % (user, realm))
+    dbuser = UserPrincipal(name=user, realm=dbrealm, role=dbnobody,
+                           comments=comments)
+    session.add(dbuser)
+    if commitoncreate:
+        session.commit()
     return dbuser
 
 
@@ -115,10 +110,10 @@ def get_user_principal(session, principal):
         q = q.filter_by(name=realm)
     q = q.options(contains_eager(UserPrincipal.realm))
 
-    dbusers = q.all()
-    if len(dbusers) > 1:
+    try:
+        return q.one()
+    except NoResultFound:
+        raise NotFoundException("User '%s' not found." % principal)
+    except MultipleResultsFound:
         raise AuthorizationException("More than one user found for name %s." %
                                      principal)
-    if len(dbusers) == 0:
-        raise NotFoundException("User '%s' not found." % principal)
-    return dbusers[0]

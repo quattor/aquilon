@@ -39,7 +39,7 @@ class CommandGet(BrokerCommand):
 
     # If updating this argument list also update CommandAddSandbox.
     def render(self, session, logger, dbuser, sandbox, **arguments):
-        sandbox = self.force_my_sandbox(session, logger, dbuser, sandbox)
+        sandbox = self.force_my_sandbox(session, dbuser, sandbox)
         dbsandbox = Sandbox.get_unique(session, sandbox, compel=True)
 
         if not dbuser:
@@ -76,7 +76,7 @@ class CommandGet(BrokerCommand):
         return RemoteSandbox(self.config.get("broker", "git_templates_url"),
                              dbsandbox.name, userdir)
 
-    def force_my_sandbox(self, session, logger, dbuser, sandbox):
+    def force_my_sandbox(self, session, dbuser, sandbox):
         # The principal name may also contain '/'
         sbx_split = sandbox.split('/')
         sandbox = AqStr.normalize(sbx_split[-1])

@@ -28,6 +28,7 @@
 # TERMS THAT MAY APPLY.
 """Contains the logic for `aq show realm --realm`."""
 
+from sqlalchemy.orm import undefer
 
 from aquilon.aqdb.model import Realm
 from aquilon.worker.broker import BrokerCommand
@@ -38,4 +39,5 @@ class CommandShowRealmRealm(BrokerCommand):
     required_parameters = ["realm"]
 
     def render(self, session, realm, **arguments):
-        return Realm.get_unique(session, realm, compel=True)
+        return Realm.get_unique(session, realm, compel=True,
+                                query_options=[undefer(Realm.comments)])

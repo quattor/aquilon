@@ -40,7 +40,7 @@ class CommandAddSandbox(CommandGet):
             raise AuthorizationException("Cannot create a sandbox without an "
                                          "authenticated connection.")
 
-        sandbox = self.force_my_sandbox(session, logger, dbuser, sandbox)
+        sandbox = self.force_my_sandbox(session, dbuser, sandbox)
 
         # See `git check-ref-format --help` for naming restrictions.
         # We want to layer a few extra restrictions on top of that...

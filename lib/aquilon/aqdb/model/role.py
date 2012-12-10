@@ -24,15 +24,13 @@ from sqlalchemy.orm import deferred
 from aquilon.aqdb.model import Base
 from aquilon.aqdb.column_types.aqstr import AqStr
 
-#Upfront Design Decisions:
-#  -Needs it's own creation_date + comments columns. Audit log depends on
-#   this table for it's info, and would have a circular dependency
+_TN = 'role'
 
 
 class Role(Base):
-    __tablename__ = 'role'
+    __tablename__ = _TN
 
-    id = Column(Integer, Sequence('role_id_seq'), primary_key=True)
+    id = Column(Integer, Sequence('%s_id_seq' % _TN), primary_key=True)
 
     name = Column(AqStr(32), nullable=False)
 
@@ -44,4 +42,5 @@ class Role(Base):
     __table_args__ = (UniqueConstraint(name, name='role_uk'),)
 
 role = Role.__table__  # pylint: disable=C0103
+role.primary_key.name = '%s_pk' % _TN
 role.info['unique_fields'] = ['name']

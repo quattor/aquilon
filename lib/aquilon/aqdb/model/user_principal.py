@@ -24,19 +24,22 @@ from sqlalchemy.orm import relation, deferred
 
 from aquilon.aqdb.model import Base, Role, Realm
 
+_TN = 'user_principal'
+_ABV = 'usr_princ'
+
 
 class UserPrincipal(Base):
     """ Simple class for strings representing users kerberos credential """
-    __tablename__ = 'user_principal'
+    __tablename__ = _TN
 
-    id = Column(Integer, Sequence('user_principal_id_seq'), primary_key=True)
+    id = Column(Integer, Sequence('%s_id_seq' % _TN), primary_key=True)
 
     name = Column(String(32), nullable=False)
 
-    realm_id = Column(Integer, ForeignKey('realm.id', name='usr_princ_rlm_fk'),
+    realm_id = Column(Integer, ForeignKey('realm.id', name='%s_rlm_fk' % _ABV),
                       nullable=False)
 
-    role_id = Column(Integer, ForeignKey('role.id', name='usr_princ_role_fk',
+    role_id = Column(Integer, ForeignKey('role.id', name='%s_role_fk' % _ABV,
                                          ondelete='CASCADE'),
                      nullable=False)
 
@@ -55,4 +58,5 @@ class UserPrincipal(Base):
         return '@'.join([self.name, self.realm.name])
 
 user_principal = UserPrincipal.__table__  # pylint: disable=C0103
+user_principal.primary_key.name = '%s_pk' % _TN
 user_principal.info['unique_fields'] = ['name', 'realm']

@@ -217,12 +217,9 @@ class TestAddSandbox(TestBrokerCommand):
                          command)
 
     def test_200_slash_in_userid(self):
-        test_user = "user1" + '/' + "test"
-        command = "add sandbox --sandbox '%s/nevermade'" % test_user
-        err = self.unauthorizedtest(command.split(" "))
-        err = self.unauthorizedtest(command.split(" "))
-        self.matchoutput(err, "Unauthorized anonymous access attempt"
-                         " to add_sandbox on /sandbox/command/add", command)
+        command = "add sandbox --sandbox user1/test/nevermade"
+        err = self.notfoundtest(command.split(" "))
+        self.matchoutput(err, "User 'user1/test' not found.", command)
 
 
 if __name__ == '__main__':

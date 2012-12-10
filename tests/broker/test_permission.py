@@ -55,13 +55,15 @@ class TestPermission(TestBrokerCommand):
         command = ["permission", "--principal", principal,
                    "--role", "nobody", "--createuser",
                    "--comments", "Some user comments"]
-        self.noouttest(command)
+        err = self.statustest(command)
+        self.matchoutput(err, "User %s did not exist, creating." % principal,
+                         command)
 
     def testverifynobody(self):
         principal = 'testusernobody@' + self.config.get('unittest', 'realm')
         command = "show principal --principal " + principal
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "UserPrincipal: %s [role: nobody]" % principal,
+        self.matchoutput(out, "User Principal: %s [role: nobody]" % principal,
                          command)
         self.matchoutput(out, "Comments: Some user comments", command)
 
@@ -76,7 +78,7 @@ class TestPermission(TestBrokerCommand):
         principal = 'testusernobody@' + self.config.get('unittest', 'realm')
         command = ["search_principal", "--role", "nobody", "--fullinfo"]
         out = self.commandtest(command)
-        self.matchoutput(out, "UserPrincipal: %s [role: nobody]" % principal,
+        self.matchoutput(out, "User Principal: %s [role: nobody]" % principal,
                          command)
         self.matchoutput(out, "Comments: Some user comments", command)
         self.matchclean(out, "operations", command)
@@ -94,7 +96,9 @@ class TestPermission(TestBrokerCommand):
         principal = 'testuseroperations@' + realm
         command = ["permission", "--principal", principal, "--role=operations",
                    "--createuser"]
-        self.noouttest(command)
+        err = self.statustest(command)
+        self.matchoutput(err, "User %s did not exist, creating." % principal,
+                         command)
 
     def testverifyoperations(self):
         realm = self.config.get('unittest', 'realm')
@@ -102,7 +106,7 @@ class TestPermission(TestBrokerCommand):
         command = "show principal --principal " + principal
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
-                         "UserPrincipal: %s [role: operations]" % principal,
+                         "User Principal: %s [role: operations]" % principal,
                          command)
 
     def testverifycsv(self):
@@ -119,7 +123,9 @@ class TestPermission(TestBrokerCommand):
         principal = 'testuserengineering@' + realm
         command = ["permission", "--principal", principal,
                    "--role=engineering", "--createuser"]
-        self.noouttest(command)
+        err = self.statustest(command)
+        self.matchoutput(err, "User %s did not exist, creating." % principal,
+                         command)
 
     def testverifyengineering(self):
         realm = self.config.get('unittest', 'realm')
@@ -127,7 +133,7 @@ class TestPermission(TestBrokerCommand):
         command = "show principal --principal " + principal
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
-                         "UserPrincipal: %s [role: engineering]" % principal,
+                         "User Principal: %s [role: engineering]" % principal,
                          command)
 
     def testpermissionaqd_admin(self):
@@ -135,7 +141,9 @@ class TestPermission(TestBrokerCommand):
         principal = 'testuseraqd_admin@' + realm
         command = ["permission", "--principal", principal, "--role=aqd_admin",
                    "--createuser"]
-        self.noouttest(command)
+        err = self.statustest(command)
+        self.matchoutput(err, "User %s did not exist, creating." % principal,
+                         command)
 
     def testverifyaqd_admin(self):
         realm = self.config.get('unittest', 'realm')
@@ -143,13 +151,16 @@ class TestPermission(TestBrokerCommand):
         command = "show principal --principal " + principal
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
-                         "UserPrincipal: %s [role: aqd_admin]" % principal,
+                         "User Principal: %s [role: aqd_admin]" % principal,
                          command)
 
     def testpermissionforeignrealm(self):
-        self.noouttest(["permission", "--principal", "foreign@foreign",
-                        "--role", "operations", "--createuser",
-                        "--createrealm"])
+        command = ["permission", "--principal", "foreign@foreign",
+                   "--role", "operations", "--createuser", "--createrealm"]
+        err = self.statustest(command)
+        self.matchoutput(err, "User foreign@foreign did not exist, creating.",
+                         command)
+        self.matchoutput(err, "Realm foreign did not exist, creating.", command)
 
     def testverifysearchrealm(self):
         command = ["search_principal", "--realm", "foreign"]
@@ -167,7 +178,9 @@ class TestPermission(TestBrokerCommand):
         principal = 'testuserpromote@' + realm
         command = ["permission", "--principal", principal, "--role=nobody",
                    "--createuser"]
-        self.noouttest(command)
+        err = self.statustest(command)
+        self.matchoutput(err, "User %s did not exist, creating." % principal,
+                         command)
         command = ["permission", "--principal", principal,
                    "--role=engineering"]
         self.noouttest(command)
@@ -178,7 +191,7 @@ class TestPermission(TestBrokerCommand):
         command = "show principal --principal " + principal
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
-                         "UserPrincipal: %s [role: engineering]" % principal,
+                         "User Principal: %s [role: engineering]" % principal,
                          command)
 
     def testdemote(self):
@@ -186,7 +199,9 @@ class TestPermission(TestBrokerCommand):
         principal = 'testuserdemote@' + realm
         command = ["permission", "--principal", principal, "--role=operations",
                    "--createuser"]
-        self.noouttest(command)
+        err = self.statustest(command)
+        self.matchoutput(err, "User %s did not exist, creating." % principal,
+                         command)
         command = ["permission", "--principal", principal, "--role=nobody"]
         self.noouttest(command)
 
@@ -195,7 +210,7 @@ class TestPermission(TestBrokerCommand):
         principal = 'testuserdemote@' + realm
         command = "show principal --principal " + principal
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "UserPrincipal: %s [role: nobody]" % principal,
+        self.matchoutput(out, "User Principal: %s [role: nobody]" % principal,
                          command)
 
     def testmissinguser(self):
@@ -244,7 +259,7 @@ class TestPermission(TestBrokerCommand):
 
     def testcreaterealm(self):
         command = ["permission", "--principal", "somebody@realm-does-not-exist",
-                   "--role", "operations"]
+                   "--role", "operations", "--createuser"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "Could not find realm realm-does-not-exist to create "

@@ -268,7 +268,8 @@ class BrokerCommand(object):
                     self._record_xtn(session, logger.get_status())
 
                     dbuser = get_or_create_user_principal(session, principal,
-                                                          commitoncreate=True)
+                                                          commitoncreate=True,
+                                                          logger=logger)
                     kwargs["dbuser"] = dbuser
 
                     if self.requires_azcheck:

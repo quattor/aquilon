@@ -23,18 +23,16 @@ from sqlalchemy.orm import deferred
 
 from aquilon.aqdb.model import Base
 
-#Upfront Design Decisions:
-#  -Needs it's own creation_date + comments columns. Audit log depends on
-#   this table for it's info, and would have a circular dependency
+_TN = 'realm'
 
 
 class Realm(Base):
     """ Represent Kerberos Realms (simple names) """
-    __tablename__ = 'realm'
+    __tablename__ = _TN
 
-    id = Column(Integer, Sequence('realm_id_seq'), primary_key=True)
+    id = Column(Integer, Sequence('%s_id_seq' % _TN), primary_key=True)
     name = Column(String(32), nullable=False)
-    trusted = Column(Boolean('realm_trusted_ck'), nullable=False)
+    trusted = Column(Boolean('%s_trusted_ck' % _TN), nullable=False)
     creation_date = deferred(Column(DateTime, nullable=False,
                                     default=datetime.now))
     comments = deferred(Column(String(255), nullable=True))
