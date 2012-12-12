@@ -102,7 +102,7 @@ class Domain(Branch):
     requires_change_manager = Column(Boolean(name="%s_req_chg_mgr_ck" % _DMN),
                                      nullable=False, default=False)
 
-    allow_manage = Column(Boolean(name="%s_allow_manage" % _DMN),
+    allow_manage = Column(Boolean(name="%s_allow_manage_ck" % _DMN),
                           nullable=False, default=True)
 
     __mapper_args__ = {'polymorphic_identity': _DMN,
