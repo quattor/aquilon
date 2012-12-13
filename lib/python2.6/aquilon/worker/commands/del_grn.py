@@ -42,13 +42,13 @@ class CommandDelGrn(BrokerCommand):
                            config=self.config, usable_only=False)
 
         q = session.query(HostGrnMap)
-        q = q.filter_by(grn=dbgrn)
+        q = q.filter_by(eon_id=dbgrn.eon_id)
         if q.first():
             raise ArgumentError("GRN %s is still mapped to hosts, and "
                                 "cannot be deleted." % dbgrn.grn)
 
         q = session.query(PersonalityGrnMap)
-        q = q.filter_by(grn=dbgrn)
+        q = q.filter_by(eon_id=dbgrn.eon_id)
         if q.first():
             raise ArgumentError("GRN %s is still mapped to personalities, "
                                 "and cannot be deleted." % dbgrn.grn)

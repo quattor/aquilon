@@ -105,15 +105,13 @@ class PersonalityGrnMap(Base):
     __tablename__ = _PGN
 
     personality_id = Column(Integer, ForeignKey('%s.id' % _TN,
-                                                name='%s_personality_fk' % _PGNABV),
+                                                name='%s_personality_fk' % _PGNABV,
+                                                ondelete='CASCADE'),
                             primary_key=True)
 
     eon_id = Column(Integer, ForeignKey('grn.eon_id',
                                         name='%s_grn_fk' % _PGNABV),
                     primary_key=True)
-
-    personality = relation(Personality)
-    grn = relation(Grn)
 
 
 pgn = PersonalityGrnMap.__table__  # pylint: disable=C0103

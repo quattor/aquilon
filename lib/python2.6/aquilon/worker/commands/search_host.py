@@ -275,8 +275,8 @@ class CommandSearchHost(BrokerCommand):
             q = q.reset_joinpoint()
             q = q.outerjoin(HostGrnMap)
             q = q.reset_joinpoint()
-            q = q.filter(or_(PersonalityGrnMap.grn == dbgrn,
-                             HostGrnMap.grn == dbgrn))
+            q = q.filter(or_(PersonalityGrnMap.eon_id == dbgrn.eon_id,
+                             HostGrnMap.eon_id == dbgrn.eon_id))
 
         if fullinfo:
             return q.all()

@@ -140,15 +140,13 @@ class HostGrnMap(Base):
     __tablename__ = _HOSTGRN
 
     host_id = Column(Integer, ForeignKey("%s.machine_id" % _TN,
-                                         name="%s_host_fk" % _HOSTGRN),
+                                         name="%s_host_fk" % _HOSTGRN,
+                                         ondelete="CASCADE"),
                      primary_key=True)
 
     eon_id = Column(Integer, ForeignKey('grn.eon_id',
                                         name='%s_grn_fk' % _HOSTGRN),
                     primary_key=True)
-
-    host = relation(Host)
-    grn = relation(Grn)
 
 
 hostgrns = HostGrnMap.__table__  # pylint: disable=C0103
