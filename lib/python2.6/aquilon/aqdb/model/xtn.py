@@ -62,10 +62,7 @@ class Xtn(Base):
     start_time = Column(UTCDateTime(timezone=True),
                         default=utcnow, nullable=False)
 
-    args = relationship("XtnDetail", backref=backref("xtn"), lazy="joined")
-
-    end = relationship("XtnEnd", uselist=False, backref=backref("xtn_start"),
-                       lazy="joined")
+    end = relationship("XtnEnd", uselist=False, lazy="joined")
     # N.B. NO "cascade". Transaction logs are *never* deleted/changed
     # Given that, we don't really *need* the foreign key, but we'll keep it
     # unless it proves otherwise cumbersome for performance (mainly insert).
@@ -143,6 +140,9 @@ class XtnDetail(Base):
 
 xtn_detail = XtnDetail.__table__  # pylint: disable=C0103
 xtn_detail.primary_key.name = 'XTN_DTL_PK'
+
+Xtn.args = relationship(XtnDetail, lazy="joined", order_by=[XtnDetail.name])
+
 
 Index('xtn_dtl_name_idx', xtn_detail.c.name, oracle_compress=True)
 Index('xtn_dtl_value_idx', xtn_detail.c.value, oracle_compress=True)
