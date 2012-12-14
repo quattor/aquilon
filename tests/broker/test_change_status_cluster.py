@@ -107,6 +107,65 @@ class TestChangeClusterStatus(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Build Status: build", command)
 
+    def test_140_DecoClusterFail(self):
+        # add a vm to make change fail
+        self.noouttest(["add", "machine", "--machine", "evm1",
+                        "--cluster", "utecl1", "--model", "utmedium"])
+
+        command = ["change_status", "--cluster", "utecl1", "--buildstatus",
+                  "decommissioned"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "Cannot change state to decommissioned, as "
+                         "ESX Cluster utecl1 has 1 VM(s).",
+                         command)
+
+        command = ["change_status", "--hostname", "evh1.aqd-unittest.ms.com",
+                  "--buildstatus", "decommissioned"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "Cannot change state to decommissioned, as "
+                         "ESX Cluster utecl1's state is not decommissioned.",
+                         command)
+
+        # remove temp vm
+        self.noouttest(["del", "machine", "--machine", "evm1"])
+
+    def test_145_DecoCluster(self):
+        self.successtest(["change_status", "--cluster", "utecl1",
+                          "--buildstatus", "decommissioned"])
+
+        # all vmhosts must be decoed.
+        for i in range(1, 5):
+            command = "show host --hostname evh%d.aqd-unittest.ms.com" % i
+            out = self.commandtest(command.split(" "))
+            self.matchoutput(out, "Build Status: decommissioned", command)
+
+        # can't add vm
+        command = ["add", "machine", "--machine", "evm1",
+                        "--cluster", "utecl1", "--model", "utmedium"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "Cannot add virtual machines to decommissioned clusters.",
+                         command)
+
+        # can't add host.
+        command = ["cluster", "--hostname", "evh6.aqd-unittest.ms.com",
+                        "--cluster", "utecl1"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "Cannot add hosts to decommissioned clusters.",
+                         command)
+
+        #revert status changes
+        self.successtest(["change_status", "--cluster", "utecl1",
+                          "--buildstatus", "rebuild"])
+
+        for i in range(1, 5):
+            self.successtest(["change_status",
+                              "--hostname", "evh%d.aqd-unittest.ms.com" % i,
+                              "--buildstatus", "rebuild"])
+
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestChangeClusterStatus)

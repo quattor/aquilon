@@ -36,6 +36,7 @@ from sqlalchemy import (Column, Enum, Integer, DateTime, Sequence, String,
 from aquilon.aqdb.model import StateEngine, Base
 from aquilon.utils import monkeypatch
 from aquilon.aqdb.column_types import Enum
+from aquilon.exceptions_ import ArgumentError
 
 _TN = 'hostlifecycle'
 
@@ -57,7 +58,7 @@ class HostLifecycle(StateEngine, Base):
                'rebuild'      : ['almostready', 'ready', 'reinstall', 'failed',
                                  'decommissioned'],
                'failed'       : ['rebuild', 'reinstall', 'decommissioned'],
-               'decommissioned' : ['rebuild'],
+               'decommissioned' : ['rebuild', 'reinstall'],
                }
 
     __tablename__ = _TN
@@ -131,6 +132,13 @@ class Blind(HostLifecycle):
 
 class Decommissioned(HostLifecycle):
     __mapper_args__ = {'polymorphic_identity': 'decommissioned'}
+
+    def onEnter(self, obj):
+        # can't set the status to "decommissioned" if the cluster has VMs.
+        dbcluster = obj.cluster
+        if dbcluster and dbcluster.status.name != "decommissioned":
+            raise ArgumentError("Cannot change state to decommissioned, as "
+                                "{0}'s state is not decommissioned.".format(dbcluster))
 
 
 class Ready(HostLifecycle):
