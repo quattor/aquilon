@@ -51,11 +51,12 @@ class TestAddAlias(TestBrokerCommand):
 
     def test_110_mscom_alias(self):
         cmd = ['add', 'alias', '--fqdn', 'alias.ms.com',
-               '--target', 'arecord13.aqd-unittest.ms.com']
+               '--target', 'arecord13.aqd-unittest.ms.com',
+               '--comments', 'Some alias comments']
         self.dsdb_expect("add_host_alias "
                          "-host_name arecord13.aqd-unittest.ms.com "
                          "-alias_name alias.ms.com "
-                         "-comments ")
+                         "-comments Some alias comments")
         self.noouttest(cmd)
         self.dsdb_verify()
 
@@ -132,6 +133,15 @@ class TestAddAlias(TestBrokerCommand):
         out = self.commandtest(cmd.split(" "))
         self.matchoutput(out, "Aliases: alias.ms.com, "
                          "alias2host.aqd-unittest.ms.com", cmd)
+
+    def test_410_verify_mscom_alias(self):
+        cmd = "show alias --fqdn alias.ms.com"
+        out = self.commandtest(cmd.split(" "))
+
+        self.matchoutput(out, "Alias: alias.ms.com", cmd)
+        self.matchoutput(out, "Target: arecord13.aqd-unittest.ms.com", cmd)
+        self.matchoutput(out, "DNS Environment: internal", cmd)
+        self.matchoutput(out, "Comments: Some alias comments", cmd)
 
     def test_500_add_alias2alias(self):
         cmd = ['add', 'alias', '--fqdn', 'alias2alias.aqd-unittest.ms.com',

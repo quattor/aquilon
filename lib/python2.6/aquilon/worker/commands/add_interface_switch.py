@@ -49,7 +49,7 @@ class CommandAddInterfaceSwitch(BrokerCommand):
                                 "switches." % type)
 
         if not type:
-            if interface.lower().startswith("loop"):
+            if interface.lower().startswith("lo"):
                 type = "loopback"
             else:
                 type = "oa"

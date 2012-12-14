@@ -30,9 +30,9 @@
 
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import Chassis, Machine, Switch
+from aquilon.aqdb.model import Chassis, Machine, Switch, Interface
 from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.dbwrappers.interface import get_interface, assign_address
+from aquilon.worker.dbwrappers.interface import assign_address
 from aquilon.worker.templates.machine import PlenaryMachineInfo
 
 
@@ -60,7 +60,8 @@ class CommandDelInterface(BrokerCommand):
         else:
             dbhw_ent = None
 
-        dbinterface = get_interface(session, interface, dbhw_ent, mac)
+        dbinterface = Interface.get_unique(session, hardware_entity=dbhw_ent,
+                                           name=interface, mac=mac, compel=True)
         if not dbhw_ent:
             dbhw_ent = dbinterface.hardware_entity
 
@@ -119,7 +120,7 @@ class CommandDelInterface(BrokerCommand):
                                 "configured, delete them first: "
                                 "{1}.".format(dbinterface, addrs))
 
-        session.delete(dbinterface)
+        dbhw_ent.interfaces.remove(dbinterface)
         session.flush()
 
         if dbhw_ent.hardware_type == 'machine':

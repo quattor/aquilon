@@ -29,9 +29,10 @@
 """Contains the logic for `aq update interface --chassis`."""
 
 
-from aquilon.exceptions_ import UnimplementedError, NotFoundException
+from aquilon.exceptions_ import UnimplementedError
+from aquilon.aqdb.model import Chassis, Interface
 from aquilon.worker.broker import BrokerCommand
-from aquilon.aqdb.model import Interface, Chassis
+from aquilon.worker.dbwrappers.interface import rename_interface
 from aquilon.worker.processes import DSDBRunner
 
 
@@ -40,22 +41,16 @@ class CommandUpdateInterfaceChassis(BrokerCommand):
     required_parameters = ["interface", "chassis"]
     invalid_parameters = ['autopg', 'pg', 'boot', 'model', 'vendor']
 
-    def render(self, session, logger, interface, chassis, mac, comments, ip,
-               **arguments):
+    def render(self, session, logger, interface, chassis, mac, comments,
+               rename_to, **arguments):
         for arg in self.invalid_parameters:
             if arguments.get(arg) is not None:
                 raise UnimplementedError("update_interface --chassis cannot use "
                                          "the --%s option." % arg)
-        if ip:
-            raise UnimplementedError("use update_chassis to update the IP")
 
         dbchassis = Chassis.get_unique(session, chassis, compel=True)
-        q = session.query(Interface)
-        q = q.filter_by(name=interface, hardware_entity=dbchassis)
-        dbinterface = q.first()
-        if not dbinterface:
-            raise NotFoundException("Interface %s of %s not found." %
-                                    (interface, dbchassis.fqdn))
+        dbinterface = Interface.get_unique(session, hardware_entity=dbchassis,
+                                           name=interface, compel=True)
 
         oldinfo = DSDBRunner.snapshot_hw(dbchassis)
 
@@ -63,6 +58,8 @@ class CommandUpdateInterfaceChassis(BrokerCommand):
             dbinterface.comments = comments
         if mac:
             dbinterface.mac = mac
+        if rename_to:
+            rename_interface(session, dbinterface, rename_to)
 
         session.flush()
 

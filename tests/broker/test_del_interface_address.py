@@ -150,21 +150,21 @@ class TestDelInterfaceAddress(TestBrokerCommand):
         self.noouttest(command)
         self.dsdb_verify()
 
-    def testdelut3gd1r04vlan110(self):
+    def testdelut3gd1r04vlan220(self):
         ip = self.net.tor_net[12].usable[1]
         self.dsdb_expect_delete(ip)
         command = ["del", "interface", "address",
                    "--switch", "ut3gd1r04.aqd-unittest.ms.com",
-                   "--interface", "vlan110", "--ip", ip]
+                   "--interface", "vlan220", "--ip", ip]
         self.noouttest(command)
         self.dsdb_verify()
 
-    def testdelut3gd1r04vlan110hsrp(self):
+    def testdelut3gd1r04vlan220hsrp(self):
         ip = self.net.tor_net[12].usable[2]
         self.dsdb_expect_delete(ip)
         command = ["del", "interface", "address",
                    "--switch", "ut3gd1r04.aqd-unittest.ms.com",
-                   "--interface", "vlan110", "--label", "hsrp"]
+                   "--interface", "vlan220", "--label", "hsrp"]
         self.noouttest(command)
         self.dsdb_verify()
 

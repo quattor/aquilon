@@ -29,12 +29,12 @@
 """Contains the logic for `aq update interface --machine`."""
 
 
-from aquilon.exceptions_ import ArgumentError, AquilonError, UnimplementedError
+from aquilon.exceptions_ import ArgumentError, AquilonError
 from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.dbwrappers.interface import (get_interface,
-                                                 verify_port_group,
+from aquilon.worker.dbwrappers.interface import (verify_port_group,
                                                  choose_port_group,
-                                                 assign_address)
+                                                 assign_address,
+                                                 rename_interface)
 from aquilon.worker.locks import lock_queue
 from aquilon.worker.templates.machine import PlenaryMachineInfo
 from aquilon.worker.processes import DSDBRunner
@@ -47,8 +47,8 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
     required_parameters = ["interface", "machine"]
 
     def render(self, session, logger, interface, machine, mac, model, vendor,
-               ip, boot, pg, autopg, comments, master, clear_master,
-               default_route, **arguments):
+               boot, pg, autopg, comments, master, clear_master, default_route,
+               rename_to, **arguments):
         """This command expects to locate an interface based only on name
         and machine - all other fields, if specified, are meant as updates.
 
@@ -63,7 +63,8 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
         """
 
         dbhw_ent = Machine.get_unique(session, machine, compel=True)
-        dbinterface = get_interface(session, interface, dbhw_ent, None)
+        dbinterface = Interface.get_unique(session, hardware_entity=dbhw_ent,
+                                           name=interface, compel=True)
 
         oldinfo = DSDBRunner.snapshot_hw(dbhw_ent)
 
@@ -94,7 +95,8 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
                 # for now.
                 raise ArgumentError("Can not enslave {0:l} because it has "
                                     "addresses.".format(dbinterface))
-            dbmaster = get_interface(session, master, dbhw_ent, None)
+            dbmaster = Interface.get_unique(session, hardware_entity=dbhw_ent,
+                                            name=master, compel=True)
             if dbmaster in dbinterface.all_slaves():
                 raise ArgumentError("Enslaving {0:l} would create a circle, "
                                     "which is not allowed.".format(dbinterface))
@@ -104,12 +106,6 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
             if not dbinterface.master:
                 raise ArgumentError("{0} is not a slave.".format(dbinterface))
             dbinterface.master = None
-
-        if ip:
-            raise UnimplementedError("Please use update_machine to update the "
-                                     "primary IP, or add_interface_address to "
-                                     "add a new auxiliary address to the "
-                                     "interface.")
 
         if comments:
             dbinterface.comments = comments
@@ -150,6 +146,8 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
             dbmodel = Model.get_unique(session, name=model, vendor=vendor,
                                        machine_type='nic', compel=True)
             dbinterface.model = dbmodel
+        if rename_to:
+            rename_interface(session, dbinterface, rename_to)
 
         session.flush()
         session.refresh(dbhw_ent)

@@ -40,40 +40,15 @@ from sqlalchemy.sql.expression import desc
 from sqlalchemy.orm import object_session
 
 from aquilon.exceptions_ import ArgumentError, InternalError, NotFoundException
-from aquilon.aqdb.model import (Interface, HardwareEntity, ObservedMac,
+from aquilon.aqdb.model import (Interface, HardwareEntity, ObservedMac, Fqdn,
                                 ARecord, VlanInfo, ObservedVlan, Network,
                                 AddressAssignment, Model)
 from aquilon.aqdb.model.network import get_net_id_from_ip
+from aquilon.utils import no_autoflush
 
 
 _vlan_re = re.compile(r'^(.*)\.(\d+)$')
 
-
-# FIXME: interface type?
-# FIXME: replace me with a usable get_unique
-def get_interface(session, interface, dbhw_ent, mac):
-    q = session.query(Interface)
-    errmsg = []
-    if interface:
-        errmsg.append("named " + interface)
-        q = q.filter_by(name=interface)
-    if dbhw_ent:
-        errmsg.append("of {0:l} ".format(dbhw_ent))
-        q = q.join(HardwareEntity)
-        q = q.filter(HardwareEntity.id == dbhw_ent.id)
-        q = q.reset_joinpoint()
-    if mac:
-        errmsg.append("having MAC address " + mac)
-        q = q.filter_by(mac=mac)
-
-    try:
-        dbinterface = q.one()
-    except NoResultFound:
-        raise NotFoundException("Interface %s not found." % " ".join(errmsg))
-    except MultipleResultsFound:
-        raise ArgumentError("There are multiple interfaces %s." %
-                            " ".join(errmsg))
-    return dbinterface
 
 def check_ip_restrictions(dbnetwork, ip, relaxed=False):
     """ given a network and ip addr, raise an exception if the ip is reserved
@@ -531,3 +506,47 @@ def assign_address(dbinterface, ip, dbnetwork, label=None, resource=None):
                                                      label=label,
                                                      service_address=resource,
                                                      dns_environment=dns_environment))
+
+def rename_interface(session, dbinterface, rename_to):
+    rename_to = rename_to.strip().lower()
+
+    dbhw_ent = dbinterface.hardware_entity
+    for iface in dbhw_ent.interfaces:
+        if iface.name == rename_to:
+            raise ArgumentError("{0} already has an interface named {1}."
+                                .format(dbhw_ent, rename_to))
+
+    fqdn_changes = []
+
+    if dbhw_ent.primary_name:
+        primary_fqdn = dbhw_ent.primary_name.fqdn
+        short = primary_fqdn.name
+        dbdns_domain = primary_fqdn.dns_domain
+        dbdns_env = primary_fqdn.dns_environment
+
+        dbdns_domain.lock_row()
+
+        # Rename DNS entries that follow the standard naming convention, except
+        # the primary name. The primary name should not have an interface
+        # suffix, but who knows...
+        for addr in dbinterface.assignments:
+            if addr.label:
+                old_name = "%s-%s-%s" % (short, dbinterface.name, addr.label)
+                new_name = "%s-%s-%s" % (short, rename_to, addr.label)
+            else:
+                old_name = "%s-%s" % (short, dbinterface.name)
+                new_name = "%s-%s" % (short, rename_to)
+            fqdn_changes.extend([(dns_rec.fqdn, new_name) for dns_rec
+                                 in addr.dns_records
+                                 if dns_rec.fqdn.name == old_name and
+                                    dns_rec.fqdn.dns_domain == dbdns_domain and
+                                    dns_rec.fqdn != primary_fqdn])
+    else:
+        dbdns_domain = dbdns_env = None
+
+    with no_autoflush(session):
+        dbinterface.name = rename_to
+        for dbfqdn, new_name in fqdn_changes:
+            Fqdn.get_unique(session, name=new_name, dns_domain=dbdns_domain,
+                            dns_environment=dbdns_env, preclude=True)
+            dbfqdn.name = new_name

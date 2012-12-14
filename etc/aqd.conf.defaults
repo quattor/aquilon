@@ -190,6 +190,7 @@ poll_helper_service = poll_helper
 poll_ssh = /ms/dist/sec/PROJ/openssh/prod/bin/ssh
 poll_ssh_options = -o StrictHostKeyChecking=no -o BatchMode=yes
 grn_to_eonid_map_location = /ms/dist/appmw/PROJ/eon-data/prod/common
+switch_discover = /ms/dist/aquilon/PROJ/switch-discover/prod/bin/switch-discover
 
 hacluster_allow_cascaded_deco = False
 esx_cluster_allow_cascaded_deco = True

@@ -43,28 +43,14 @@ from switchtest import VerifySwitchMixin
 class TestRenameSwitch(TestBrokerCommand, VerifySwitchMixin):
 
     def test_100_rename_ut3gd1r04(self):
-        ips = [self.net.tor_net[6].usable[1],
-               self.net.tor_net[12].usable[1],
-               self.net.tor_net[12].usable[2],
-               self.net.unknown[17][0]]
-        mac = self.net.tor_net[6].usable[0].mac
-
-        for ip in ips:
-            self.dsdb_expect_delete(ip)
-
-        self.dsdb_expect_add("renametest.aqd-unittest.ms.com", ips[0], "xge49",
-                             mac, comments="Some new switch comments")
-        self.dsdb_expect_add("renametest-vlan110.aqd-unittest.ms.com",
-                             ips[1], "vlan110",
-                             primary="renametest.aqd-unittest.ms.com",
-                             comments="Some new switch comments")
-        self.dsdb_expect_add("renametest-vlan110-hsrp.aqd-unittest.ms.com",
-                             ips[2], "vlan110_hsrp",
-                             primary="renametest.aqd-unittest.ms.com",
-                             comments="Some new switch comments")
-        self.dsdb_expect_add("renametest-loop0.aqd-unittest.ms.com", ip,
-                             "loop0", primary="renametest.aqd-unittest.ms.com",
-                             comments="Some new switch comments")
+        self.dsdb_expect_rename("ut3gd1r04-vlan110-hsrp.aqd-unittest.ms.com",
+                                "renametest-vlan110-hsrp.aqd-unittest.ms.com")
+        self.dsdb_expect_rename("ut3gd1r04-vlan110.aqd-unittest.ms.com",
+                                "renametest-vlan110.aqd-unittest.ms.com")
+        self.dsdb_expect_rename("ut3gd1r04-loop0.aqd-unittest.ms.com",
+                                "renametest-loop0.aqd-unittest.ms.com")
+        self.dsdb_expect_rename("ut3gd1r04.aqd-unittest.ms.com",
+                                "renametest.aqd-unittest.ms.com")
 
         pdir = os.path.join(self.config.get("broker", "plenarydir"),
                             "switchdata")
@@ -95,28 +81,15 @@ class TestRenameSwitch(TestBrokerCommand, VerifySwitchMixin):
                           comments="Some new switch comments")
 
     def test_200_rename_ut3gd1r04_back(self):
-        ips = [self.net.tor_net[6].usable[1],
-               self.net.tor_net[12].usable[1],
-               self.net.tor_net[12].usable[2],
-               self.net.unknown[17][0]]
-        mac = self.net.tor_net[6].usable[0].mac
+        self.dsdb_expect_rename("renametest-vlan110-hsrp.aqd-unittest.ms.com",
+                                "ut3gd1r04-vlan110-hsrp.aqd-unittest.ms.com")
+        self.dsdb_expect_rename("renametest-vlan110.aqd-unittest.ms.com",
+                                "ut3gd1r04-vlan110.aqd-unittest.ms.com")
+        self.dsdb_expect_rename("renametest-loop0.aqd-unittest.ms.com",
+                                "ut3gd1r04-loop0.aqd-unittest.ms.com")
+        self.dsdb_expect_rename("renametest.aqd-unittest.ms.com",
+                                "ut3gd1r04.aqd-unittest.ms.com")
 
-        for ip in ips:
-            self.dsdb_expect_delete(ip)
-
-        self.dsdb_expect_add("ut3gd1r04.aqd-unittest.ms.com", ips[0], "xge49",
-                             mac, comments="Some new switch comments")
-        self.dsdb_expect_add("ut3gd1r04-vlan110.aqd-unittest.ms.com",
-                             ips[1], "vlan110",
-                             primary="ut3gd1r04.aqd-unittest.ms.com",
-                             comments="Some new switch comments")
-        self.dsdb_expect_add("ut3gd1r04-vlan110-hsrp.aqd-unittest.ms.com",
-                             ips[2], "vlan110_hsrp",
-                             primary="ut3gd1r04.aqd-unittest.ms.com",
-                             comments="Some new switch comments")
-        self.dsdb_expect_add("ut3gd1r04-loop0.aqd-unittest.ms.com", ip,
-                             "loop0", primary="ut3gd1r04.aqd-unittest.ms.com",
-                             comments="Some new switch comments")
         command = ["update", "switch",
                    "--switch", "renametest",
                    "--rename_to", "ut3gd1r04.aqd-unittest.ms.com"]

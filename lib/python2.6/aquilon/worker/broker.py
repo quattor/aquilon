@@ -251,6 +251,7 @@ class BrokerCommand(object):
             request = kwargs["request"]
             logger = kwargs["logger"]
             raising_exception = None
+            rollback_failed = False
             try:
                 if self.requires_transaction or self.requires_azcheck:
                     # Set up a session...
@@ -300,7 +301,11 @@ class BrokerCommand(object):
                 # Need to close after the rollback, or the next time session
                 # is accessed it tries to commit the transaction... (?)
                 if "session" in kwargs:
-                    session.rollback()
+                    try:
+                        session.rollback()
+                    except:  # pragma: no cover
+                        rollback_failed = True
+                        raise
                     session.close()
                 raise
             finally:
@@ -309,14 +314,21 @@ class BrokerCommand(object):
                 if "session" in kwargs:
                     # Complete the transaction
                     request = kwargs['request']
-                    end_xtn(session, kwargs['requestid'],
-                            get_code_for_error_class(
-                                raising_exception.__class__),
-                            getattr(request, '_audit_result', None))
-                    if self.is_lock_free:
-                        self.dbf.NLSession.remove()
-                    else:
-                        self.dbf.Session.remove()
+                    # We really want to get rid of the session, even if
+                    # end_xtn() fails
+                    try:
+                        if not rollback_failed:
+                            # If session.rollback() failed for whatever reason,
+                            # our best bet is to avoid touching the session
+                            end_xtn(session, kwargs['requestid'],
+                                    get_code_for_error_class(
+                                        raising_exception.__class__),
+                                    getattr(request, '_audit_result', None))
+                    finally:
+                        if self.is_lock_free:
+                            self.dbf.NLSession.remove()
+                        else:
+                            self.dbf.Session.remove()
                 self._cleanup_logger(kwargs)
         updated_render.__name__ = command.__name__
         updated_render.__dict__ = command.__dict__

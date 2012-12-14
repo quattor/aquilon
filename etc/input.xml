@@ -1539,7 +1539,6 @@
       </optgroup>
       <optgroup name="update_interface_optional" mandatory="False" fields="none">
          <option name="mac" type="mac">MAC address</option>
-         <option name="ip" type="ipv4" conflicts="master">IP address</option>
          <option name="boot" type="flag">Mark the interface as bootable</option>
          <option name="default_route" type="boolean">Mark that the interface provides the default route</option>
          <option name="pg" type="string" conflicts="autopg">portgroup, or an empty string to clear</option>
@@ -1549,6 +1548,7 @@
          <option name="clear_master" type="flag" conflicts="master">Clear the bonding</option>
          <option name="model" type="string">Interface model name</option>
          <option name="vendor" type="string">Interface vendor name</option>
+         <option name="rename_to" type="string">New name of the interface</option>
       </optgroup>
       <transport trigger="machine" method="post" path="machine/%(machine)s/interface/%(interface)s" />
       <transport trigger="hostname" method="post" path="host/%(hostname)s/interface/%(interface)s" />
@@ -3245,6 +3245,7 @@
 	 <option name="serial" type="string">Serial Number</option>
 	 <option name="comments" type="string">Comments</option>
 	 <option name="rename_to" type="string">New name of the switch</option>
+	 <option name="discover" type="flag">Do automatic discovery</option>
       </optgroup>
       <transport method="post" path="switch/%(switch)s" />
    </command>
@@ -3287,6 +3288,9 @@
       <optgroup name="show_switch_opts" mandatory="True" fields="any">
          <option name="switch" type="string">switch fully qualified name</option>
          <option name="all" type="flag">show all</option>
+      </optgroup>
+      <optgroup name="show_switch_optional" mandatory="False" fields="any">
+         <option name="discover" type="flag" conflicts="all">Show differences to discovery data</option>
       </optgroup>
       <transport trigger="switch" method="get" path="switch/%(switch)s" />
       <transport trigger="all" method="get" path="switch" />

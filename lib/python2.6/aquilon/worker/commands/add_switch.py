@@ -79,7 +79,7 @@ class CommandAddSwitch(BrokerCommand):
             ifcomments = "Created automatically by add_switch"
         else:
             ifcomments = None
-            if interface.lower().startswith("loop"):
+            if interface.lower().startswith("lo"):
                 iftype = "loopback"
 
         dbinterface = get_or_create_interface(session, dbswitch,

@@ -121,7 +121,8 @@ class Interface(Base):
     comments = Column('comments', String(255), nullable=True)
 
     hardware_entity = relation(HardwareEntity, lazy=False, innerjoin=True,
-                               backref=backref('interfaces', cascade='all'))
+                               backref=backref('interfaces',
+                                               cascade='all, delete-orphan'))
 
     model = relation(Model, innerjoin=True)
 
@@ -330,8 +331,6 @@ class LoopbackInterface(Interface):
 
     __mapper_args__ = {'polymorphic_identity': 'loopback'}
 
-    name_check = re.compile(r'^loop\d+$')
-
     def validate_mac(self, key, value):
         if value is not None:
             raise ValueError("Loopback interfaces cannot have a MAC address.")
@@ -341,6 +340,7 @@ class LoopbackInterface(Interface):
 interface = Interface.__table__  # pylint: disable=C0103
 interface.primary_key.name = '%s_pk' % _TN
 interface.info['unique_fields'] = ['name', 'hardware_entity']
+interface.info['extra_search_fields'] = ['mac']
 
 interface.append_constraint(UniqueConstraint('mac', name='%s_mac_addr_uk' % _ABV))
 

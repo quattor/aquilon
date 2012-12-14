@@ -423,7 +423,7 @@ class TestAddInterface(TestBrokerCommand):
 
     def testaddinterfaceut3c5(self):
         ip = self.net.unknown[0].usable[6]
-        self.dsdb_expect_update("ut3c5.aqd-unittest.ms.com", ip.mac)
+        self.dsdb_expect_update("ut3c5.aqd-unittest.ms.com", "oa", mac=ip.mac)
         command = ["add", "interface", "--interface", "oa", "--mac", ip.mac,
                    "--chassis", "ut3c5.aqd-unittest.ms.com"]
         self.noouttest(command)

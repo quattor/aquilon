@@ -80,15 +80,15 @@ class TestDelInterface(TestBrokerCommand):
         self.matchclean(out, "eth0", command)
         self.matchclean(out, "eth1", command)
 
-    def testdelut3gd1r04vlan110(self):
-        command = ["del", "interface", "--interface", "vlan110",
+    def testdelut3gd1r04vlan220(self):
+        command = ["del", "interface", "--interface", "vlan220",
                    "--switch", "ut3gd1r04.aqd-unittest.ms.com"]
         self.noouttest(command)
 
-    def testverifydelut3gd1r04vlan110(self):
+    def testverifydelut3gd1r04vlan220(self):
         command = ["show", "switch", "--switch", "ut3gd1r04.aqd-unittest.ms.com"]
         out = self.commandtest(command)
-        self.matchclean(out, "vlan110", command)
+        self.matchclean(out, "vlan220", command)
 
 
 if __name__ == '__main__':

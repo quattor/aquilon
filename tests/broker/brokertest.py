@@ -576,17 +576,28 @@ class TestBrokerCommand(unittest.TestCase):
     def dsdb_expect_delete(self, ip, fail=False):
         self.dsdb_expect("delete_host -ip_address %s" % ip, fail=fail)
 
-    def dsdb_expect_update(self, fqdn, mac=None, comments=None, fail=False):
-        command = ["update_host", "-host_name", fqdn, "-status", "aq"]
+    def dsdb_expect_update(self, fqdn, iface, ip=None, mac=None, comments=None,
+                           fail=False):
+        command = ["update_aqd_host", "-host_name", fqdn,
+                   "-interface_name", iface]
+        if ip:
+            command.extend(["-ip_address", str(ip)])
         if mac:
             command.extend(["-ethernet_address", str(mac)])
         if comments:
             command.extend(["-comments", comments])
         self.dsdb_expect(" ".join(command), fail=fail)
 
-    def dsdb_expect_update_ip(self, fqdn, iface, ip, fail=False):
-        self.dsdb_expect("update_aqd_host -host_name %s -interface_name %s "
-                         "-ip_address %s" % (fqdn, iface, ip), fail=fail)
+    def dsdb_expect_rename(self, fqdn, new_fqdn=None, iface=None,
+                           new_iface=None, fail=False):
+        command = ["update_aqd_host", "-host_name", fqdn]
+        if new_fqdn:
+            command.extend(["-primary_host_name", new_fqdn])
+        if iface:
+            command.extend(["-interface_name", iface])
+        if new_iface:
+            command.extend(["-new_interface_name", new_iface])
+        self.dsdb_expect(" ".join(command), fail=fail)
 
     def dsdb_verify(self, empty=False):
         dsdb_coverage_dir = os.path.join(self.config.get("unittest", "scratchdir"),
@@ -753,6 +764,9 @@ class DummyNetworks(object):
 
         # Switch loopback
         self.unknown.append(NetworkInfo("4.2.19.0/24", "unknown"))
+
+        # Switch sync testing
+        self.unknown.append(NetworkInfo("4.2.20.0/24", "unknown"))
 
         self.tor_net.append(NetworkInfo("4.2.1.128/26", "tor_net"))
         self.tor_net.append(NetworkInfo("4.2.1.192/26", "tor_net"))

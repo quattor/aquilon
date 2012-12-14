@@ -35,6 +35,7 @@ from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.location import get_location
 from aquilon.worker.dbwrappers.hardware_entity import (update_primary_ip,
                                                        rename_hardware)
+from aquilon.worker.dbwrappers.switch import discover_switch
 from aquilon.worker.locks import lock_queue, CompileKey
 from aquilon.worker.processes import DSDBRunner
 from aquilon.worker.templates.base import Plenary
@@ -44,11 +45,14 @@ class CommandUpdateSwitch(BrokerCommand):
 
     required_parameters = ["switch"]
 
-    def render(self, session, logger, switch, model, rack, type, ip,
-               vendor, serial, comments, rename_to, **arguments):
+    def render(self, session, logger, switch, model, rack, type, ip, vendor,
+               serial, rename_to, discover, comments, **arguments):
         dbswitch = Switch.get_unique(session, switch, compel=True)
 
         oldinfo = DSDBRunner.snapshot_hw(dbswitch)
+
+        if discover:
+            discover_switch(session, logger, self.config, dbswitch, False)
 
         if vendor and not model:
             model = dbswitch.model.name
