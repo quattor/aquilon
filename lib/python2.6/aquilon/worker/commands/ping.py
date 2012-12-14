@@ -35,6 +35,7 @@ from aquilon.worker.broker import BrokerCommand
 class CommandPing(BrokerCommand):
 
     requires_transaction = False
+    requires_readonly = True
     requires_azcheck = False
     requires_format = True
     defer_to_thread = False

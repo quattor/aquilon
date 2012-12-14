@@ -39,6 +39,7 @@ import json
 
 from ipaddr import IPv4Address, AddressValueError
 from aquilon.exceptions_ import ArgumentError
+from socket import gaierror, gethostbyname
 
 ratio_re = re.compile('^\s*(?P<left>\d+)\s*(?:[:/]\s*(?P<right>\d+))?\s*$')
 yes_re = re.compile("^(true|yes|y|1|on|enabled)$", re.I)
@@ -217,7 +218,6 @@ def first_of(iterable, function):
         if function(item):
             return item
     return None
-
 
 # SQLA 0.7.6 will have "with session.no_autoflush:"
 class no_autoflush(object):

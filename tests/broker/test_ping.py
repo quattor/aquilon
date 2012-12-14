@@ -45,6 +45,11 @@ class TestPing(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out, "pong", command)
 
+    def testpingnoauth(self):
+        command = "ping"
+        out = self.commandtest(command, auth=False)
+        self.matchoutput(out, "pong", command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestPing)

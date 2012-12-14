@@ -150,7 +150,6 @@ keytab = /var/spool/keytabs/%(service)s
 installfe = /ms/dist/elfms/PROJ/aii/prod/sbin/aii-installfe
 installfe_user = %(user)s
 installfe_sshdir = /ms/dist/sec/PROJ/openssh/prod/bin
-sys_loc = /ms/dist/aurora/bin/sys_loc
 server_notifications =
 client_notifications = yes
 CheckNet = /ms/dist/NetEng/bin/Cisco/CheckNet
