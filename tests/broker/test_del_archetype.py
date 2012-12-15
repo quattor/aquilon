@@ -71,20 +71,6 @@ class TestDelArchetype(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchclean(out, "Archetype: utarchetype", command)
 
-    def testdeletearchetypef5(self):
-        command = ["del_archetype", "--archetype=f5"]
-        errOut = self.badrequesttest(command)
-        self.matchoutput(errOut,
-                         "Archetype f5 is still in use by Personality"
-                         " f5/generic and cannot be deleted.", command)
-
-    def testdeletearchetypestorate(self):
-        command = ["del_archetype", "--archetype=storagecluster"]
-        errOut = self.badrequesttest(command)
-        self.matchoutput(errOut,
-                         "Archetype storagecluster is still in use by "
-                         "Personality storagecluster/metrocluster and cannot "
-                         "be deleted.", command)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelArchetype)
