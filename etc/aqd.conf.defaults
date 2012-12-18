@@ -194,6 +194,14 @@ switch_discover = /ms/dist/aquilon/PROJ/switch-discover/prod/bin/switch-discover
 
 hacluster_allow_cascaded_deco = False
 esx_cluster_allow_cascaded_deco = True
+# Limit of hostlists
+default_max_list_size = 1000
+reconfigure_max_list_size =
+pxeswitch_max_list_size =
+manage_max_list_size =
+reset_advertised_status_max_list_size =
+map_grn_max_list_size =
+unmap_grn_max_list_size =
 
 [panc]
 default_version = prod

@@ -31,7 +31,8 @@
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.dbwrappers.host import hostlist_to_hosts
+from aquilon.worker.dbwrappers.host import (hostlist_to_hosts,
+                                            check_hostlist_size)
 from aquilon.worker.commands.reset_advertised_status \
      import CommandResetAdvertisedStatus
 from aquilon.worker.templates.domain import TemplateDomain
@@ -46,6 +47,7 @@ class CommandResetAdvertisedStatusList(CommandResetAdvertisedStatus):
     required_parameters = ["list"]
 
     def render(self, session, logger, list, **arguments):
+        check_hostlist_size(self.command, self.config, list)
         dbhosts = hostlist_to_hosts(session, list)
 
         self.resetadvertisedstatus_list(session, logger, dbhosts)

@@ -591,6 +591,18 @@ class TestReconfigure(TestBrokerCommand):
         self.matchoutput(out, "host.domain-does-not-exist.ms.com:", command)
         self.matchclean(out, "aquilon91.aqd-unittest.ms.com:", command)
 
+    def testfailoverlistlimit(self):
+        user = self.config.get("unittest", "user")
+        hostlimit = self.config.getint("broker", "reconfigure_max_list_size")
+        hosts = []
+        for i in range(1,20):
+            hosts.append("thishostdoesnotexist%d.aqd-unittest.ms.com\n" %i)
+        scratchfile = self.writescratch("reconfigurelistlimit", "".join(hosts))
+        command = ["reconfigure", "--list", scratchfile, "--personality=generic"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,"The number of hosts in list {0:d} can not be more "
+                         "than {1:d}".format(len(hosts), hostlimit), command)
+
     # Need easy ordering for these, so using numbers...
     # If we end up fixing map dns domain, it may be harder to do this test.
     # Also, these tests would just "keep working", but they wouldn't

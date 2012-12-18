@@ -34,7 +34,8 @@ from tempfile import NamedTemporaryFile
 from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.host import (hostname_to_host,
-                                            get_host_bound_service)
+                                            get_host_bound_service,
+                                            check_hostlist_size)
 from aquilon.worker.processes import run_command
 from aquilon.worker.logger import CLIENT_INFO
 from aquilon.aqdb.model import Service
@@ -50,6 +51,7 @@ class CommandPxeswitchList(BrokerCommand):
     requires_readonly = True
 
     def render(self, session, logger, list, **arguments):
+        check_hostlist_size(self.command, self.config, list)
         # The default is now --configure, but that does not play nice with
         # --status. Turn --configure off if --status is present
         if arguments.get("status", False):
