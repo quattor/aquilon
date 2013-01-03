@@ -251,4 +251,5 @@ suite = unittest.TestSuite()
 # Relies on the oracle rebuild doing a nuke first.
 suite.addTest(DatabaseTestSuite())
 suite.addTest(BrokerTestSuite())
-VerboseTextTestRunner(verbosity=verbosity).run(suite)
+result = VerboseTextTestRunner(verbosity=verbosity).run(suite)
+sys.exit(not result.wasSuccessful())
