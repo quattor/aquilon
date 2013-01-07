@@ -81,8 +81,9 @@ class AQDMaker(object):
 
     def makeService(self, options):
         # Start up coverage ASAP.
-        if options["coveragedir"]:
-            os.makedirs(options["coveragedir"], 0755)
+        coverage_dir = options["coveragedir"]
+        if coverage_dir:
+            os.makedirs(coverage_dir, 0755)
             if options["coveragerc"]:
                 coveragerc = options["coveragerc"]
             else:
@@ -112,14 +113,16 @@ class AQDMaker(object):
                     if not filename.endswith('.py'):
                         continue
                     sourcefiles.append(os.path.join(dirpath, filename))
-            self.coverage.html_report(sourcefiles, directory=options["coveragedir"])
-            aggregate = os.path.join(options["coveragedir"], "aqd.coverage")
-            output = open(aggregate, 'w')
-            self.coverage.report(sourcefiles, file=output)
-            output.close()
+
+            self.coverage.html_report(sourcefiles, directory=coverage_dir)
+            self.coverage.xml_report(sourcefiles,
+                                     outfile=os.path.join(coverage_dir, "aqd.xml"))
+
+            with open(os.path.join(coverage_dir, "aqd.coverage"), "w") as outfile:
+                self.coverage.report(sourcefiles, file=outfile)
 
         # Make sure the coverage report gets generated.
-        if options["coveragedir"]:
+        if coverage_dir:
             reactor.addSystemEventTrigger('after', 'shutdown', stop_coverage)
 
         # Set up the environment...
