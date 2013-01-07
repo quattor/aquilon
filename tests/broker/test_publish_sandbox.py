@@ -48,15 +48,16 @@ class TestPublishSandbox(TestBrokerCommand):
 
         Replace with setupClass when we move to Py2.7
         """
-        p = Popen(('/usr/bin/make', 'clean'),
-                  cwd=os.path.join(self.sandboxdir, 'changetest1', 't'),
-                  env=self.gitenv(env={'PATH':'/bin:/usr/bin'}),
-                  stdout=PIPE, stderr=PIPE)
-        (out, err) = p.communicate()
-        self.assertEqual(p.returncode, 0,
-                         "Non-zero return code running make clean in sandbox,"+
-                         " STDOUT:\n@@@'%s'\n@@@\nSTDERR:\n@@@'%s'@@@\n"
-                         % (out, err))
+        testdir = os.path.join(self.sandboxdir, "changetest1", "t")
+        if os.path.exists(os.path.join(testdir, "Makefile")):
+            p = Popen(('/usr/bin/make', 'clean'),
+                      cwd=testdir, env=self.gitenv(env={'PATH':'/bin:/usr/bin'}),
+                      stdout=PIPE, stderr=PIPE)
+            (out, err) = p.communicate()
+            self.assertEqual(p.returncode, 0,
+                             "Non-zero return code running make clean in sandbox,"+
+                             " STDOUT:\n@@@'%s'\n@@@\nSTDERR:\n@@@'%s'@@@\n"
+                             % (out, err))
 
     def testmakechange(self):
         sandboxdir = os.path.join(self.sandboxdir, "changetest1")

@@ -32,6 +32,7 @@
 import os
 import sys
 import unittest
+from tempfile import mkdtemp
 from subprocess import Popen, PIPE
 
 if __name__ == "__main__":
@@ -168,7 +169,47 @@ class TestBrokerStart(unittest.TestCase):
                          % (out, err))
         return
 
+    def testdisabletemplatetests(self):
+        config = Config()
+        kingdir = config.get("broker", "kingdir")
+        rundir = config.get("broker", "rundir")
+        env = {}
+        env["PATH"] = "%s:%s" % (config.get("broker", "git_path"),
+                                 os.environ.get("PATH", ""))
 
-if __name__=='__main__':
+        tempdir = mkdtemp(prefix="fixup", dir=rundir)
+
+        p = Popen(("git", "clone", "--shared", kingdir, "template-king",
+                   "--branch", "prod"),
+                  cwd=tempdir, env=env, stdout=PIPE, stderr=PIPE)
+        out, err = p.communicate()
+        self.assertEqual(p.returncode, 0, "Failed to clone template-king")
+
+        repodir = os.path.join(tempdir, "template-king")
+        makefile = os.path.join(repodir, "Makefile")
+        if os.path.exists(os.path.join(repodir, "t", "Makefile")):
+            p = Popen(("git", "rm", "-f", os.path.join("t", "Makefile")),
+                      cwd=repodir, env=env, stdout=PIPE, stderr=PIPE)
+            out, err = p.communicate()
+            self.assertEqual(p.returncode, 0, "Failed to remove t/Makefile")
+
+            p = Popen(("git", "commit", "-m", "Removed t/Makefile"),
+                      cwd=repodir, env=env, stdout=PIPE, stderr=PIPE)
+            out, err = p.communicate()
+            self.assertEqual(p.returncode, 0, "Failed to commit removal of t/Makefile")
+
+            for branch in ['prod', 'ny-prod']:
+                p = Popen(("git", "push", "origin", "prod:%s" % branch),
+                          cwd=repodir, env=env, stdout=PIPE, stderr=PIPE)
+                out, err = p.communicate()
+                self.assertEqual(p.returncode, 0,
+                                 "Failed to push to %s, "
+                                 "STDOUT:\n@@@\n'%s'\n@@@\nSTDERR:\n@@@\n'%s'\n@@@\n"
+                                 % (branch, out, err))
+        p = Popen(("rm", "-rf", tempdir))
+        p.communicate()
+
+
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestBrokerStart)
     unittest.TextTestRunner(verbosity=2).run(suite)
