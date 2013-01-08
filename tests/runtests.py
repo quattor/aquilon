@@ -225,17 +225,19 @@ for label in ["templatesdir", "domainsdir", "rundir", "logdir", "profilesdir",
               "plenarydir", "builddir"]:
     dirs.append(config.get("broker", label))
 
-if configfile != default_configfile:
-    force_yes(
-        "About to remove any of the following directories that exist:\n%s\n"
-        % "\n".join(dirs))
+existing_dirs = [dir for dir in dirs if os.path.exists(dir)]
+
+if existing_dirs:
+    force_yes("About to remove the following directories:\n%s\n" %
+              "\n\t".join(existing_dirs))
+
+for dir in existing_dirs:
+    print "Removing %s" % dir
+    p = Popen(("/bin/rm", "-rf", dir), stdout=1, stderr=2)
+    rc = p.wait()
+    # FIXME: check rc
 
 for dir in dirs:
-    if os.path.exists(dir):
-        print "Removing %s" % dir
-        p = Popen(("/bin/rm", "-rf", dir), stdout=1, stderr=2)
-        rc = p.wait()
-        # FIXME: check rc
     try:
         os.makedirs(dir)
     except OSError, e:
