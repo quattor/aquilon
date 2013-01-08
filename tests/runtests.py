@@ -33,11 +33,12 @@
 import os
 import re
 import sys
-import getopt
 import unittest
 from subprocess import Popen
 
-import depends
+import depends  # pylint: disable=W0611
+
+import argparse
 
 BINDIR = os.path.dirname(os.path.realpath(__file__))
 SRCDIR = os.path.join(BINDIR, "..")
@@ -52,20 +53,7 @@ from aqdb.orderedsuite import DatabaseTestSuite
 
 default_configfile = os.path.join(BINDIR, "unittest.conf")
 
-def usage():
-    print >>sys.stderr, """
-    %s [--help] [--debug] [--config=configfile]
-
-    --help      returns this message
-    --debug     enable debug (not implemented)
-    --config    supply an alternate config file
-    --coverage  generate code coverage metrics for the broker
-                in logs/coverage.
-    --profile   generate profile information in logs/aqd.profile
-    --verbose   list each test name as it runs
-    --quiet     do not print module names during tests
-    --mirror    copy source into an alternate directory and re-exec
-
+epilog = """
     Note that:
     %s
     will be used by default, and setting the AQDCONF environment variable
@@ -75,86 +63,71 @@ def usage():
     without breaking the in-progress tests.  It copies all the source
     code into the directory given in the mirrordir option of the unittest
     section of the config and then re-launches the tests from there.
-    """ % (sys.argv[0], default_configfile)
+    """ % default_configfile
 
 def force_yes(msg):
-    print >>sys.stderr, msg
-    print >>sys.stderr, """
+    print >> sys.stderr, msg
+    print >> sys.stderr, """
         Please confirm by typing yes (three letters) and pressing enter.
         """
     answer = sys.stdin.readline()
     if not answer.startswith("yes"):
-        print >>sys.stderr, """Aborting."""
+        print >> sys.stderr, """Aborting."""
         sys.exit(1)
 
-try:
-    opts, args = getopt.getopt(sys.argv[1:], "hdc:vqm",
-                               ["help", "debug", "config=", "coverage",
-                                "profile", "verbose", "quiet", "mirror"])
-except getopt.GetoptError, e:
-    print >>sys.stderr, str(e)
-    usage()
-    sys.exit(2)
+parser = argparse.ArgumentParser(description="Run the broker test suite.",
+                                 epilog=epilog)
+parser.add_argument('-v', '--verbose', action='count', dest='verbose',
+                    default=1,
+                    help='list each test name as it runs')
+parser.add_argument('-q', '--quiet', dest='verbose', action='store_const',
+                    const=0,
+                    help='do not print the module names during tests')
+parser.add_argument('-c', '--config', dest='config', default=default_configfile,
+                    help='supply an alternate config file')
+parser.add_argument('--coverage', action='store_true',
+                    help='generate code coverage metrics for the broker in '
+                         'logs/coverage')
+parser.add_argument('--profile', action='store_true',
+                    help='generate profiling information for the broker in '
+                         'logs/aqd.profile (currently broken)')
+parser.add_argument('-m', '--mirror', action='store_true',
+                    help='copy source to an alternate location and re-exec')
 
-configfile = default_configfile
-coverage = False
-profile = False
-verbosity = 1
-mirror = False
-for o, a in opts:
-    if o in ("-h", "--help"):
-        usage()
-        sys.exit()
-    elif o in ("-d", "--debug"):
-        # ?
-        debug = True
-    elif o in ("-c", "--config"):
-        configfile = a
-    elif o in ("--coverage"):
-        coverage = True
-    elif o in ("--profile"):
-        profile = True
-    elif o in ("-v", "--verbose"):
-        verbosity += 1
-    elif o in ("-q", "--quiet"):
-        verbosity -= 1
-    elif o in ("-m", "--mirror"):
-        mirror = True
-    else:
-        assert False, "unhandled option '%s'" % o
+opts = parser.parse_args()
 
-if not os.path.exists(configfile):
-    print >>sys.stderr, "configfile %s does not exist" % configfile
+if not os.path.exists(opts.config):
+    print >> sys.stderr, "configfile %s does not exist" % opts.config
     sys.exit(1)
 
-if os.environ.get("AQDCONF") and (os.path.realpath(configfile)
+if os.environ.get("AQDCONF") and (os.path.realpath(opts.config)
         != os.path.realpath(os.environ["AQDCONF"])):
     force_yes("""Will ignore AQDCONF variable value:
 %s
 and use
 %s
-instead.""" % (os.environ["AQDCONF"], configfile))
+instead.""" % (os.environ["AQDCONF"], opts.config))
 
-config = Config(configfile=configfile)
+config = Config(configfile=opts.config)
 if not config.has_section("unittest"):
     config.add_section("unittest")
 if not config.has_option("unittest", "srcdir"):
     config.set("unittest", "srcdir", SRCDIR)
-if coverage:
+if opts.coverage:
     config.set("unittest", "coverage", "True")
-if profile:
+if opts.profile:
     config.set("unittest", "profile", "True")
 
 hostname = config.get("unittest", "hostname")
 if hostname.find(".") < 0:
-    print >>sys.stderr, """
+    print >> sys.stderr, """
 Some regression tests depend on the config value for hostname to be
 fully qualified.  Please set the config value manually since the default
 on this system (%s) is a short name.
 """ % hostname
     sys.exit(1)
 
-if mirror:
+if opts.mirror:
     # Copy the source directory and exec from it.
     env = os.environ.copy()
     if 'AQDCONF' in env:
@@ -169,7 +142,7 @@ if mirror:
               stdout=1, stderr=2)
     p.communicate()
     if p.returncode != 0:
-        print >>sys.stderr, "Rsync failed!"
+        print >> sys.stderr, "Rsync failed!"
         sys.exit(1)
     args = [sys.executable, os.path.join(mirrordir, 'tests', 'runtests.py')]
     for o, a in opts:
@@ -210,38 +183,30 @@ rc = p.wait()
 pid_file = os.path.join(config.get('broker', 'rundir') , 'aqd.pid')
 kill_from_pid_file(pid_file)
 
-for label in ["quattordir", "kingdir", "swrepdir", ]:
-    dir = config.get("broker", label)
-    if os.path.exists(dir):
-        continue
-    try:
-        os.makedirs(dir)
-    except OSError, e:
-        print >>sys.stderr, "Could not create %s: %s" % (dir, e)
-
 # FIXME: Need to be careful about attempting to nuke templatesdir...
 dirs = [config.get("database", "dbdir"), config.get("unittest", "scratchdir")]
-for label in ["templatesdir", "domainsdir", "rundir", "logdir", "profilesdir",
-              "plenarydir", "builddir"]:
+for label in ["quattordir", "templatesdir", "domainsdir", "rundir", "logdir",
+              "profilesdir", "plenarydir", "builddir", "kingdir", "swrepdir"]:
     dirs.append(config.get("broker", label))
 
-existing_dirs = [dir for dir in dirs if os.path.exists(dir)]
+existing_dirs = [d for d in dirs if os.path.exists(d)]
 
 if existing_dirs:
     force_yes("About to remove the following directories:\n%s\n" %
               "\n\t".join(existing_dirs))
 
-for dir in existing_dirs:
-    print "Removing %s" % dir
-    p = Popen(("/bin/rm", "-rf", dir), stdout=1, stderr=2)
+for dirname in existing_dirs:
+    print "Removing %s" % dirname
+    p = Popen(("/bin/rm", "-rf", dirname), stdout=1, stderr=2)
     rc = p.wait()
     # FIXME: check rc
 
-for dir in dirs:
+for dirname in dirs:
     try:
-        os.makedirs(dir)
+        if not os.path.exists(dirname):
+            os.makedirs(dirname)
     except OSError, e:
-        print >>sys.stderr, "Could not create %s: %s" % (dir, e)
+        print >> sys.stderr, "Could not create %s: %s" % (dirname, e)
 
 # Create DSDB coverage directory
 dsdb_coverage_dir = os.path.join(config.get("unittest", "scratchdir"),
@@ -253,5 +218,5 @@ suite = unittest.TestSuite()
 # Relies on the oracle rebuild doing a nuke first.
 suite.addTest(DatabaseTestSuite())
 suite.addTest(BrokerTestSuite())
-result = VerboseTextTestRunner(verbosity=verbosity).run(suite)
+result = VerboseTextTestRunner(verbosity=opts.verbose).run(suite)
 sys.exit(not result.wasSuccessful())
