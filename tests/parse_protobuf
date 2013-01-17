@@ -62,7 +62,7 @@ typemap = {
     "service": aqdservices_pb2.ServiceList(),
     "service_map": aqdservices_pb2.ServiceMapList(),
     "location": aqdlocations_pb2.LocationList(),
-    "transaction": aqdaudit_pb2.TransactionList()
+    "transaction": aqdaudit_pb2.TransactionList(),
     "parameter": aqdparameters_pb2.ParameterList(),
     "parameter_definition": aqdparamdefinitions_pb2.ParamDefinitionList()
 }
