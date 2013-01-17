@@ -89,18 +89,16 @@ class ARecord(DnsRecord):
             if not session:  # pragma: no cover
                 raise ValueError("fqdn must be already part of a session")
 
-            # Disable autoflush temporarily
-            flush_state = session.autoflush
-            session.autoflush = False
-
-            q = session.query(ARecord.id)
-            q = q.filter_by(ip=ip)
-            q = q.filter_by(network=network)
-            q = q.filter_by(fqdn=fqdn)
-            if q.all():  # pragma: no cover
-                raise ArgumentError("%s, ip %s already exists." %
-                                    (self._get_class_label(), ip))
-            session.autoflush = flush_state
+            # Disable autoflush because self is not ready to be pushed to the DB
+            # yet
+            with session.no_autoflush:
+                q = session.query(ARecord.id)
+                q = q.filter_by(ip=ip)
+                q = q.filter_by(network=network)
+                q = q.filter_by(fqdn=fqdn)
+                if q.all():  # pragma: no cover
+                    raise ArgumentError("%s, ip %s already exists." %
+                                        (self._get_class_label(), ip))
 
         super(ARecord, self).__init__(ip=ip, network=network, fqdn=fqdn,
                                       **kwargs)

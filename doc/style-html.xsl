@@ -1,6 +1,6 @@
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
   <!--- XXX Pass this from the command line -->
-  <xsl:import href="/ms/dist/fsf/PROJ/docbook-xsl-ns/1.75.1/common/xhtml/chunk.xsl"/>
+  <xsl:import href="/ms/dist/fsf/PROJ/docbook-xsl-ns/1.77.1/common/xhtml/chunk.xsl"/>
   <xsl:param name="refentry.generate.name">0</xsl:param>
   <xsl:param name="refentry.generate.title">1</xsl:param>
   <xsl:param name="variablelist.as.table">0</xsl:param>

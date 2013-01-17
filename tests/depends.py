@@ -35,9 +35,9 @@ ms.version.addpkg('coverage', '3.4')
 
 ms.version.addpkg('argparse', '1.1')
 
-ms.version.addpkg('nose', '1.0.0')
+ms.version.addpkg('nose', '1.1.2')
 
-ms.version.addpkg('lxml', '2.2.8')
+ms.version.addpkg('lxml', '2.3.2')
 
 ms.version.addpkg('ipaddr', '2.1.9')
 

@@ -33,4 +33,4 @@
 
 import ms.version
 
-ms.version.addpkg('lxml', '2.2.4')
+ms.version.addpkg('lxml', '2.3.2')

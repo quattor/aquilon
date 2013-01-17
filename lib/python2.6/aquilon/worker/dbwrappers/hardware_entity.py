@@ -39,7 +39,7 @@ from aquilon.worker.dbwrappers.dns import convert_reserved_to_arecord
 from aquilon.worker.dbwrappers.location import get_location
 from aquilon.worker.dbwrappers.interface import (check_ip_restrictions,
                                                  assign_address)
-from aquilon.utils import first_of, no_autoflush
+from aquilon.utils import first_of
 
 
 def search_hardware_entity_query(session, hardware_type=HardwareEntity,
@@ -176,8 +176,7 @@ def rename_hardware(session, dbhw_ent, rename_to):
              (fqdn.name == old_label or fqdn.name.startswith(old_label + "-"))]
 
     # Update all state in one go, so disable autoflush for now.
-    # TODO: change to "with session.no_autoflush" once upgrading to SQLA 0.7.6
-    with no_autoflush(session):
+    with session.no_autoflush:
         dbhw_ent.label = new_label
 
         for dbfqdn in fqdns:

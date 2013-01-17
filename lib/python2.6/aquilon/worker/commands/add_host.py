@@ -230,37 +230,31 @@ class CommandAddHost(BrokerCommand):
 
         # Disable autoflush, since the ServiceAddress object won't be complete
         # until add_resource() is called
-        # TODO: In SQLA 0.7.6, we'd be able to use "with session.no_autoflush:"
-        saved_autoflush = session.autoflush
-        session.autoflush = False
+        with session.no_autoflush:
+            resholder = HostResource(host=dbmachine.host)
+            session.add(resholder)
+            dbsrv_addr = ServiceAddress(name="hostname", dns_record=dbdns_rec)
+            resholder.resources.append(dbsrv_addr)
 
-        resholder = HostResource(host=dbmachine.host)
-        session.add(resholder)
-        dbsrv_addr = ServiceAddress(name="hostname", dns_record=dbdns_rec)
-        resholder.resources.append(dbsrv_addr)
+            for name in zebra_interfaces.split(","):
+                dbinterface = None
+                for iface in dbmachine.interfaces:
+                    if iface.name == name:
+                        dbinterface = iface
+                if not dbinterface:
+                    raise ArgumentError("{0} does not have an interface named "
+                                        "{1}.".format(dbmachine, name))
+                assign_address(dbinterface, dbdns_rec.ip, dbdns_rec.network,
+                               label="hostname", resource=dbsrv_addr)
 
-        for name in zebra_interfaces.split(","):
-            dbinterface = None
-            for iface in dbmachine.interfaces:
-                if iface.name == name:
-                    dbinterface = iface
-            if not dbinterface:
-                raise ArgumentError("{0} does not have an interface named "
-                                    "{1}.".format(dbmachine, name))
+                # Make sure the transit IPs resolve to the primary name
+                for addr in dbinterface.assignments:
+                    if addr.label:
+                        continue
+                    for dnr in addr.dns_records:
+                        dnr.reverse_ptr = dbdns_rec.fqdn
 
-            # Make sure the transit IPs resolve to the primary name
-            for addr in dbinterface.assignments:
-                if addr.label:
-                    continue
-                for dnr in addr.dns_records:
-                    dnr.reverse_ptr = dbdns_rec.fqdn
-
-            assign_address(dbinterface, dbdns_rec.ip, dbdns_rec.network,
-                           label="hostname", resource=dbsrv_addr)
-
-            # Transits should be providers of the default route
-            dbinterface.default_route = True
-
-        session.autoflush = saved_autoflush
+                # Transits should be providers of the default route
+                dbinterface.default_route = True
 
         return dbsrv_addr
