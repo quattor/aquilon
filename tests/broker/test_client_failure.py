@@ -30,6 +30,8 @@
 """Module for testing client error handling."""
 
 import unittest
+import socket
+import re
 
 if __name__ == "__main__":
     import utils
@@ -51,13 +53,22 @@ class TestClientFailure(TestBrokerCommand):
         self.assertEqual(p.returncode, 1)
 
     def testnotrunningaqhost(self):
-        command = "status --aqhost=%s" % self.host_not_running_aqd
-        (p, out, err) = self.runcommand(command.split(" "))
-        # This might be either 'Connection refused.' or 'Connection timed out.'
-        msg = "Failed to connect to %s port %s: " % (
-            self.host_not_running_aqd, self.config.get("broker", "kncport"))
-        self.assertTrue(err.startswith(msg),
-                        "Expected '%s' to start with '%s'" % (err, msg))
+        # Reserve a port, but do not listen on it
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.bind(("127.0.0.1", 0))
+        port = sock.getsockname()[1]
+
+        hostname = self.config.get("unittest", "hostname")
+        short, domain = hostname.split('.', 1)
+
+        command = ["status", "--aqport", port]
+        (p, out, err) = self.runcommand(command)
+        # This might be either 'Connection refused.' or 'Connection timed out.'.
+        # There may also be variations in the output, like using the short or
+        # full hostname.
+        pattern = "Failed to connect to %s(\.%s)? port %d: " % (short, domain, port)
+        self.assertTrue(re.match(pattern, err),
+                        "Expected '%s' to start with '%s'" % (err, pattern))
         self.assertEqual(out, "",
                 "STDOUT for %s was not empty:\n@@@\n'%s'\n@@@\n"
                 % (command, out))

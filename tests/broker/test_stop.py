@@ -32,6 +32,7 @@
 import os
 import signal
 import unittest
+from time import sleep
 
 if __name__ == "__main__":
     import utils
@@ -58,9 +59,22 @@ class TestBrokerStop(unittest.TestCase):
         f.close()
         pid = int(pid)
         os.kill(pid, signal.SIGTERM)
-        # FIXME verify...
+
+        # Wait for the broker to shut down. E.g. generating code coverage may
+        # take some time.
+        i = 0
+        while i < 180:
+            i += 1
+            try:
+                os.kill(pid, 0)
+            except OSError:
+                break
+            sleep(1)
+
+        # Verify that the broker is down
+        self.failUnlessRaises(OSError, os.kill, pid, 0)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestBrokerStop)
     unittest.TextTestRunner(verbosity=2).run(suite)
