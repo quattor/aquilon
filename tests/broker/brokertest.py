@@ -31,7 +31,6 @@
 
 import os
 import sys
-import time
 import unittest
 from subprocess import Popen, PIPE
 import re
@@ -573,20 +572,15 @@ class TestBrokerCommand(unittest.TestCase):
     def dsdb_expect_delete(self, ip, fail=False):
         self.dsdb_expect("delete_host -ip_address %s" % ip, fail=fail)
 
-    def dsdb_expect_update(self, fqdn, iface, ip=None, mac=None, comments=None,
-                           fail=False):
-        command = ["update_aqd_host", "-host_name", fqdn,
-                   "-interface_name", iface]
+    def dsdb_expect_update(self, fqdn, iface=None, ip=None, mac=None,
+                           comments=None, fail=False):
+        command = ["update_aqd_host", "-host_name", fqdn]
+        if iface:
+            command.extend(["-interface_name", iface])
         if ip:
             command.extend(["-ip_address", str(ip)])
         if mac:
             command.extend(["-ethernet_address", str(mac)])
-        if comments:
-            command.extend(["-comments", comments])
-        self.dsdb_expect(" ".join(command), fail=fail)
-
-    def dsdb_expect_update_address(self, fqdn, comments=None, fail=False):
-        command = ["update_host", "-host_name", fqdn, "-status", "aq"]
         if comments:
             command.extend(["-comments", comments])
         self.dsdb_expect(" ".join(command), fail=fail)
