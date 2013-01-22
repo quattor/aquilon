@@ -31,15 +31,12 @@
 """Module for testing the del address command."""
 
 
-import os
-import sys
 import unittest
 
 if __name__ == "__main__":
     import utils
     utils.import_depends()
 
-from ipaddr import IPv4Address
 from brokertest import TestBrokerCommand
 
 
@@ -152,6 +149,23 @@ class TestDelAddress(TestBrokerCommand):
         command = ["show_address", "--fqdn", fqdn,
                    "--network_environment", "cardenv"]
         out = self.notfoundtest(command)
+
+    def test_delreservedreverse(self):
+        self.dsdb_expect_delete(self.net.unknown[0].usable[32])
+        command = ["del", "address",
+                   "--fqdn", "arecord17.aqd-unittest.ms.com"]
+        self.noouttest(command)
+        self.dsdb_verify()
+
+    def test_verifydelreserve(self):
+        command = ["show", "address",
+                   "--fqdn", "arecord17.aqd-unittest.ms.com"]
+        self.notfoundtest(command)
+
+        command = ["search", "dns", "--record_type", "reserved_name"]
+        out = self.commandtest(command)
+        self.matchclean(out, "reverse.restrict.aqd-unittest.ms.com", command)
+        self.matchclean(out, "reverse2.restrict.aqd-unittest.ms.com", command)
 
     def test_610_addipfromip_with_network_env(self):
         fqdn = "cardenvtest610.aqd-unittest.ms.com"

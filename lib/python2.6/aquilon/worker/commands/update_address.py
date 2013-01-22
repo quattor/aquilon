@@ -33,6 +33,8 @@ from aquilon.aqdb.model import ARecord
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.aqdb.model.network_environment import get_net_dns_env
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.dbwrappers.dns import (set_reverse_ptr,
+                                           delete_target_if_needed)
 from aquilon.worker.processes import DSDBRunner
 
 
@@ -85,19 +87,10 @@ class CommandUpdateAddress(BrokerCommand):
             #dbdns_rec.ip = ip
 
         if reverse_ptr:
-            # Technically the reverse PTR could point to other types, not just
-            # ARecord, but there are no use cases for that, so better avoid
-            # confusion
-            dbreverse = ARecord.get_unique(session, fqdn=reverse_ptr,
-                                           dns_environment=dbdns_env,
-                                           compel=True)
-            if dbreverse.fqdn != dbdns_rec.fqdn:
-                try:
-                    dbdns_rec.reverse_ptr = dbreverse.fqdn
-                except ValueError, err:
-                    raise ArgumentError(err)
-            else:
-                dbdns_rec.reverse_ptr = None
+            old_reverse = dbdns_rec.reverse_ptr
+            set_reverse_ptr(session, logger, dbdns_rec, reverse_ptr)
+            if old_reverse and old_reverse != dbdns_rec.reverse_ptr:
+                delete_target_if_needed(session, old_reverse)
 
         if comments:
             dbdns_rec.comments = comments

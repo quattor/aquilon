@@ -309,25 +309,34 @@ def grab_address(session, fqdn, ip, network_environment=None,
 
 
 def create_target_if_needed(session, logger, target, dbdns_env):
-    (name, target_domain) = parse_fqdn(session, target)
+    """
+    Create FQDNs in restricted domains.
+
+    This is used to allow pointing CNAME and PTR records to DNS domains we
+    otherwise don't manage.
+    """
+    name, dbtarget_domain = parse_fqdn(session, target)
+
+    dbtarget_domain.lock_row()
+
     q = session.query(Fqdn)
     q = q.filter_by(dns_environment=dbdns_env)
-    q = q.filter_by(dns_domain=target_domain)
+    q = q.filter_by(dns_domain=dbtarget_domain)
     q = q.filter_by(name=name)
     try:
         dbtarget = q.one()
     except NoResultFound:
-        if not target_domain.restricted:
+        if not dbtarget_domain.restricted:
             raise NotFoundException("Target FQDN {0} does not exist in {1:l}."
                                     .format(target, dbdns_env))
 
-        dbtarget = Fqdn(name=name, dns_domain=target_domain,
+        dbtarget = Fqdn(name=name, dns_domain=dbtarget_domain,
                         dns_environment=dbdns_env)
 
         try:
             socket.gethostbyname(dbtarget.fqdn)
         except socket.gaierror, e:
-            logger.warning("WARNING: Will create alias for target {0.fqdn!s}, "
+            logger.warning("WARNING: Will create a reference to {0.fqdn!s}, "
                            "but trying to resolve it resulted in an error: "
                            "{1.strerror}.".format(dbtarget, e))
 
@@ -369,3 +378,26 @@ def delete_target_if_needed(session, dbtarget):
         session.delete(dbtarget)
     else:
         session.expire(dbtarget, ['dns_records'])
+
+
+def set_reverse_ptr(session, logger, dbdns_rec, reverse_ptr):
+    if isinstance(reverse_ptr, Fqdn):
+        dbreverse = reverse_ptr
+    else:
+        dbreverse = create_target_if_needed(session, logger, reverse_ptr,
+                                            dbdns_rec.fqdn.dns_environment)
+    # Technically the reverse PTR could point to other types, not just
+    # ARecord, but there are no use cases for that, so better avoid
+    # confusion
+    for rec in dbreverse.dns_records:
+        if not isinstance(rec, ARecord) and \
+           not isinstance(rec, ReservedName):
+            raise ArgumentError("The reverse PTR cannot point "
+                                "to {0:lc}.".format(rec))
+    if dbreverse != dbdns_rec.fqdn:
+        try:
+            dbdns_rec.reverse_ptr = dbreverse
+        except ValueError, err:
+            raise ArgumentError(err)
+    else:
+        dbdns_rec.reverse_ptr = None

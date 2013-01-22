@@ -31,16 +31,13 @@
 """Module for testing the add address command."""
 
 
-import os
-import sys
 import unittest
 
 if __name__ == "__main__":
-    import utils
+    from broker import utils
     utils.import_depends()
 
-from ipaddr import IPv4Address
-from brokertest import TestBrokerCommand
+from broker.brokertest import TestBrokerCommand
 
 
 class TestAddAddress(TestBrokerCommand):
@@ -82,8 +79,8 @@ class TestAddAddress(TestBrokerCommand):
                    "--reverse_ptr", "arecord13.aqd-unittest.ms.com",
                    "--dns_environment", "ut-env"]
         out = self.notfoundtest(command)
-        self.matchoutput(out, "DNS Record arecord13.aqd-unittest.ms.com, "
-                         "DNS environment ut-env not found.", command)
+        self.matchoutput(out, "Target FQDN arecord13.aqd-unittest.ms.com does "
+                         "not exist in DNS environment ut-env.", command)
 
     def test_220_add_utenv(self):
         # Different IP in this environment
@@ -195,6 +192,35 @@ class TestAddAddress(TestBrokerCommand):
         self.matchoutput(out,
                          "DNS Domain restrict.aqd-unittest.ms.com is "
                          "restricted, adding extra addresses is not allowed.",
+                         command)
+
+    def test_470_restricted_reverse(self):
+        ip = self.net.unknown[0].usable[32]
+        self.dsdb_expect_add("arecord17.aqd-unittest.ms.com", ip)
+        command = ["add", "address", "--fqdn", "arecord17.aqd-unittest.ms.com",
+                   "--reverse_ptr", "reverse.restrict.aqd-unittest.ms.com",
+                   "--ip", ip]
+        out, err = self.successtest(command)
+        self.assertEmptyOut(out, command)
+        self.matchoutput(err,
+                         "WARNING: Will create a reference to "
+                         "reverse.restrict.aqd-unittest.ms.com, but trying to "
+                         "resolve it resulted in an error: Name or service "
+                         "not known",
+                         command)
+        self.dsdb_verify()
+
+    def test_471_verify_reverse(self):
+        command = ["search", "dns", "--fullinfo",
+                   "--fqdn", "reverse.restrict.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out,
+                         "Reserved Name: reverse.restrict.aqd-unittest.ms.com",
+                         command)
+        command = ["show", "address", "--fqdn", "arecord17.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out,
+                         "Reverse PTR: reverse.restrict.aqd-unittest.ms.com",
                          command)
 
     def test_500_addunittest20eth1(self):

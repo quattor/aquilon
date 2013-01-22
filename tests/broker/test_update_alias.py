@@ -34,10 +34,10 @@
 import unittest
 
 if __name__ == "__main__":
-    import utils
+    from broker import utils
     utils.import_depends()
 
-from brokertest import TestBrokerCommand
+from broker.brokertest import TestBrokerCommand
 
 
 class TestUpdateAlias(TestBrokerCommand):
@@ -110,7 +110,7 @@ class TestUpdateAlias(TestBrokerCommand):
                    "--target", "target2.restrict.aqd-unittest.ms.com"]
         out = self.statustest(command)
         self.matchoutput(out,
-                         "WARNING: Will create alias for target "
+                         "WARNING: Will create a reference to "
                          "target2.restrict.aqd-unittest.ms.com, but ",
                          command)
 

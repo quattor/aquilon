@@ -36,10 +36,10 @@ import unittest
 from subprocess import Popen, PIPE
 
 if __name__ == "__main__":
-    import utils
+    from broker import utils
     utils.import_depends()
 
-from brokertest import TestBrokerCommand
+from broker.brokertest import TestBrokerCommand
 
 
 class TestRefreshWindowsHosts(TestBrokerCommand):
@@ -74,7 +74,7 @@ class TestRefreshWindowsHosts(TestBrokerCommand):
                    "--target=badhost6.msad.ms.com"]
         out, err = self.successtest(command)
         self.matchoutput(err,
-                         "WARNING: Will create alias for target "
+                         "WARNING: Will create a reference to "
                          "badhost6.msad.ms.com, but trying to resolve it "
                          "resulted in an error: ",
                          command)

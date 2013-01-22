@@ -129,6 +129,34 @@ class TestUpdateAddress(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchclean(out, "Reverse", command)
 
+    def test_140_restricted_reverse(self):
+        command = ["update", "address",
+                   "--fqdn", "arecord17.aqd-unittest.ms.com",
+                   "--reverse_ptr", "reverse2.restrict.aqd-unittest.ms.com"]
+        out, err = self.successtest(command)
+        self.assertEmptyOut(out, command)
+        self.matchoutput(err,
+                         "WARNING: Will create a reference to "
+                         "reverse2.restrict.aqd-unittest.ms.com, but trying to "
+                         "resolve it resulted in an error: Name or service "
+                         "not known",
+                         command)
+        self.dsdb_verify(empty=True)
+
+    def test_141_verify_reverse(self):
+        command = ["search", "dns", "--fullinfo",
+                   "--fqdn", "arecord17.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out,
+                         "Reverse PTR: reverse2.restrict.aqd-unittest.ms.com",
+                         command)
+        self.matchclean(out, "reverse.restrict.aqd-unittest.ms.com", command)
+
+        command = ["search", "dns", "--record_type", "reserved_name"]
+        out = self.commandtest(command)
+        self.matchclean(out, "reverse.restrict", command)
+        self.matchoutput(out, "reverse2.restrict.aqd-unittest.ms.com", command)
+
     def test_200_update_dyndhcp(self):
         command = ["update", "address",
                    "--fqdn", "dynamic-4-2-4-20.aqd-unittest.ms.com",
