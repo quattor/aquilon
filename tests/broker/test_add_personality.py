@@ -425,7 +425,51 @@ class TestAddPersonality(TestBrokerCommand):
                    "--host_environment", "badenv",
                    "--archetype", "aquilon", "--eon_id=2" ]
         out = self.badrequesttest(command)
-        self.matchoutput(out, "Unknown environment value 'badenv'.  The valid values are: dev, infra, legacy, prod, qa, uat", command)
+        self.matchoutput(out, "Unknown environment value 'badenv'. The valid"
+                              " values are: dev, infra, legacy, prod, qa, uat",
+                         command)
+
+    def testaddnotmatchingnameenv01(self):
+        command = ["add_personality", "--personality", "test/dev",
+                   "--host_environment", "qa",
+                   "--archetype", "aquilon", "--eon_id=2" ]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Environment value in personality name 'test/dev' "
+                              "does not match the host environment 'qa'",
+                         command)
+
+    def testaddnotmatchingnameenv02(self):
+        command = ["add_personality", "--personality", "test-dev",
+                   "--host_environment", "qa",
+                   "--archetype", "aquilon", "--eon_id=2" ]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Environment value in personality name 'test-dev' "
+                              "does not match the host environment 'qa'",
+                         command)
+
+    def testaddselectivenamematchenv03(self):
+        command = ["add_personality", "--personality", "ec-infra-auth",
+                   "--host_environment", "infra",
+                   "--archetype", "vmhost", "--eon_id=2" ]
+        out = self.successtest(command)
+
+    def testaddnotmatchingnameenv04(self):
+        command = ["add_personality", "--personality", "test-qa-dev",
+                   "--host_environment", "qa",
+                   "--archetype", "aquilon", "--eon_id=2" ]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Environment value in personality name 'test-qa-dev' "
+                              "does not match the host environment 'qa'",
+                         command)
+
+    def testaddnotmatchingnameenv05(self):
+        command = ["add_personality", "--personality", "test-qa-DEV",
+                   "--host_environment", "qa",
+                   "--archetype", "aquilon", "--eon_id=2" ]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Environment value in personality name 'test-qa-DEV' "
+                              "does not match the host environment 'qa'",
+                         command)
 
     def testaddduplicate(self):
         command = ["add_personality", "--personality", "inventory",
@@ -452,10 +496,10 @@ class TestAddPersonality(TestBrokerCommand):
         self.verifycatforpersonality("esx_cluster", "esx_server")
 
     def testaddv1personalities(self):
-        command = ["add_personality", "--cluster_required", "--host_environment=legacy",
+        command = ["add_personality", "--cluster_required", "--host_environment=prod",
                    "--personality=vulcan-1g-desktop-prod", "--archetype=vmhost", "--eon_id=2"]
         self.noouttest(command)
-        command = ["add_personality", "--host_environment=legacy",
+        command = ["add_personality", "--host_environment=prod",
                    "--personality=vulcan-1g-desktop-prod", "--archetype=esx_cluster", "--eon_id=2"]
         self.noouttest(command)
         command = ["add_personality", "--host_environment=legacy",

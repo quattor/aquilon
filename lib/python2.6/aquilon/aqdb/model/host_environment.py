@@ -58,7 +58,7 @@ class HostEnvironment(Base):
         if env in cls.__mapper__.polymorphic_map:
             return
         valid_name = ", ".join(sorted(cls.__mapper__.polymorphic_map.keys()))
-        raise ArgumentError("Unknown environment value '%s'.  The valid values are: "
+        raise ArgumentError("Unknown environment value '%s'. The valid values are: "
                             "%s." % (env, valid_name))
 
 host_env = HostEnvironment.__table__  # pylint: disable=C0103

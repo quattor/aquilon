@@ -28,6 +28,7 @@
 # TERMS THAT MAY APPLY.
 """ Personality as a high level cfg object """
 from datetime import datetime
+import re
 
 from sqlalchemy import (Column, Integer, Boolean, DateTime, Sequence, String,
                         ForeignKey, UniqueConstraint, Index)
@@ -35,6 +36,7 @@ from sqlalchemy.orm import relation, deferred
 
 from aquilon.aqdb.model import Base, Archetype, Grn, HostEnvironment
 from aquilon.aqdb.column_types.aqstr import AqStr
+from aquilon.exceptions_ import ArgumentError
 
 _ABV = 'prsnlty'
 _TN = 'personality'
@@ -77,6 +79,16 @@ class Personality(Base):
     def __format__(self, format_spec):
         instance = "%s/%s" % (self.archetype.name, self.name)
         return self.format_helper(format_spec, instance)
+
+    @classmethod
+    def validate_env_in_name (cls, name, host_environment):
+        persona_env = re.search("[-/](" +
+                                "|".join(HostEnvironment.__mapper__.polymorphic_map.keys()) +
+                                ")$", name, re.IGNORECASE)
+        if persona_env and (persona_env.group(1) != host_environment):
+            raise ArgumentError("Environment value in personality name '{0}' "
+                                "does not match the host environment '{1}'"
+                                .format(name, host_environment))
 
 personality = Personality.__table__   # pylint: disable=C0103
 

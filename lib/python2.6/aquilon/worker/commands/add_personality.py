@@ -58,12 +58,14 @@ class CommandAddPersonality(BrokerCommand):
                                 "personality.")
 
         HostEnvironment.validate_name(host_environment)
+        Personality.validate_env_in_name(personality, host_environment)
+        host_env = HostEnvironment.get_unique(session, host_environment, compel=True)
+
         dbarchetype = Archetype.get_unique(session, archetype, compel=True)
         Personality.get_unique(session, archetype=dbarchetype,
                                name=personality,
                                preclude=True)
 
-        host_env = HostEnvironment.get_unique(session, host_environment, compel=True)
         dbpersona = Personality(name=personality, archetype=dbarchetype,
                                 cluster_required=bool(cluster_required),
                                 config_override=config_override,
