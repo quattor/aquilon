@@ -61,7 +61,6 @@ class TestShowFqdn(TestBrokerCommand):
         self.matchoutput(out, "unittest01.one-nyp.ms.com", command)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestShowFqdn)
     unittest.TextTestRunner(verbosity=2).run(suite)
-

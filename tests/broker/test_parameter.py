@@ -46,43 +46,43 @@ OTHER_PERSONALITY = 'eaitools'
 ## validation parameters by templates
 PARAM_DEFS = {
 "access": [
-    { "path": "access/netgroup", "value_type": "list",  "description": "netgroups access" },
-    { "path": "access/users",    "value_type": "list",  "description": "users access"},
+    {"path": "access/netgroup", "value_type": "list", "description": "netgroups access"},
+    {"path": "access/users", "value_type": "list", "description": "users access"},
 ],
 "actions": [
-    { "path": "action/\w+/user", "value_type": "string", "description": "action user" },
-    { "path": "action/\w+/command", "value_type": "string", "description": "action command" },
-    { "path": "action/\w+",      "value_type": "json",   "description": "per action block" },
-    { "path": "action",          "value_type": "json",   "description": "per action block" },
+    {"path": "action/\w+/user", "value_type": "string", "description": "action user"},
+    {"path": "action/\w+/command", "value_type": "string", "description": "action command"},
+    {"path": "action/\w+", "value_type": "json", "description": "per action block"},
+    {"path": "action", "value_type": "json", "description": "per action block"},
 ],
 "startup": [
-    { "path": "startup/actions",  "value_type": "list", "description": "startup actions" },
+    {"path": "startup/actions", "value_type": "list", "description": "startup actions"},
 ],
 "shutdown": [
-    { "path": "shutdown/actions", "value_type": "list", "description": "shutdown actions" },
+    {"path": "shutdown/actions", "value_type": "list", "description": "shutdown actions"},
 ],
 "maintenance": [
-    { "path": "maintenance/actions", "value_type": "list", "description": "maintenance actions" },
+    {"path": "maintenance/actions", "value_type": "list", "description": "maintenance actions"},
 ],
 "monitoring": [
-    { "path": "monitoring/alert", "value_type": "json", "description": "monitoring " },
+    {"path": "monitoring/alert", "value_type": "json", "description": "monitoring "},
 ],
 "espinfo": [
-    { "path": "esp/function", "value_type": "string", "description": "espinfo function", "required": True },
-    { "path": "esp/class",    "value_type": "string", "description": "espinfo class", "required": True },
-    { "path": "esp/users",    "value_type": "list", "description": "espinfo users", "required": True },
-    { "path": "esp/threshold", "value_type": "int", "description": "espinfo threshold", "required": True },
-    { "path": "esp/description", "value_type": "string", "description": "espinfo desc" },
+    {"path": "esp/function", "value_type": "string", "description": "espinfo function", "required": True},
+    {"path": "esp/class", "value_type": "string", "description": "espinfo class", "required": True},
+    {"path": "esp/users", "value_type": "list", "description": "espinfo users", "required": True},
+    {"path": "esp/threshold", "value_type": "int", "description": "espinfo threshold", "required": True},
+    {"path": "esp/description", "value_type": "string", "description": "espinfo desc"},
 ],
 "windows": [
-    { "path": "windows/windows", "value_type": "json" , "required": True, "default": '[{"duration": 8, "start": "08:00", "day": "Sun"}]' }
+    {"path": "windows/windows", "value_type": "json", "required": True, "default": '[{"duration": 8, "start": "08:00", "day": "Sun"}]'}
 ],
 "testrebuild": [
-    { "path" : "test/rebuild_required", "value_type": "string", "rebuild_required": True }
+    {"path": "test/rebuild_required", "value_type": "string", "rebuild_required": True}
 ],
 }
 
-SHOW_CMD = ["show", "parameter", "--personality", PERSONALITY ]
+SHOW_CMD = ["show", "parameter", "--personality", PERSONALITY]
 
 ADD_CMD = ["add", "parameter", "--personality", PERSONALITY]
 
@@ -90,9 +90,10 @@ UPD_CMD = ["update", "parameter", "--personality", PERSONALITY]
 
 DEL_CMD = ["del", "parameter", "--personality", PERSONALITY]
 
-CAT_CMD = ["cat", "--personality", PERSONALITY ]
+CAT_CMD = ["cat", "--personality", PERSONALITY]
 
-VAL_CMD = ["validate_parameter", "--personality", PERSONALITY ]
+VAL_CMD = ["validate_parameter", "--personality", PERSONALITY]
+
 
 class TestParameter(TestBrokerCommand):
 
@@ -112,7 +113,7 @@ class TestParameter(TestBrokerCommand):
 
         err = self.notfoundtest(SHOW_CMD)
         self.matchoutput(err,
-                         "No parameters found for personality %s." % PERSONALITY,  SHOW_CMD)
+                         "No parameters found for personality %s." % PERSONALITY, SHOW_CMD)
 
         for template in PARAM_DEFS:
             paths = PARAM_DEFS[template]
@@ -121,14 +122,13 @@ class TestParameter(TestBrokerCommand):
                        "--path", p["path"], "--template", template,
                        "--value_type", p["value_type"]]
                 if "required" in p:
-                    cmd.append( "--required" )
+                    cmd.append("--required")
                 if "rebuild_required" in p:
-                    cmd.append( "--rebuild_required" )
+                    cmd.append("--rebuild_required")
                 if "default" in p:
                     cmd.extend(["--default", p["default"]])
 
                 self.noouttest(cmd)
-
 
     def test_100_add_re_path(self):
         action = "testaction"
@@ -152,7 +152,7 @@ class TestParameter(TestBrokerCommand):
         command = ADD_CMD + ["--path", path, "--value", "user1"]
         err = self.badrequesttest(command)
         self.matchoutput(err, "Parameter with path=%s already exists"
-                         %  path, command)
+                         % path, command)
 
     def test_130_verify_re(self):
         action = "testaction"
@@ -172,7 +172,7 @@ class TestParameter(TestBrokerCommand):
     def test_140_update_existing_re_path(self):
         action = "testaction"
         path = "action/%s/user" % action
-        command = UPD_CMD + [ "--path", path, "--value", "user2"]
+        command = UPD_CMD + ["--path", path, "--value", "user2"]
         self.noouttest(command)
 
         out = self.commandtest(SHOW_CMD)
@@ -182,8 +182,8 @@ class TestParameter(TestBrokerCommand):
     def test_150_add_re_json_path(self):
         action = "testaction2"
         path = "action/%s" % action
-        value  = '{ "command": "/bin/%s", "user": "user1", "timeout": 100 }' % action
-        command = ADD_CMD + ["--path", path, "--value", value ]
+        value = '{ "command": "/bin/%s", "user": "user1", "timeout": 100 }' % action
+        command = ADD_CMD + ["--path", path, "--value", value]
         self.noouttest(command)
 
         out = self.commandtest(SHOW_CMD)
@@ -192,15 +192,15 @@ class TestParameter(TestBrokerCommand):
     def test_160_add_existing_re_json_path(self):
         action = "testaction2"
         path = "action/%s" % action
-        value  = '{ "command": "/bin/%s", "user": "user1", "timeout": 100 }' % action
-        command = ADD_CMD + ["--path", path, "--value", value ]
+        value = '{ "command": "/bin/%s", "user": "user1", "timeout": 100 }' % action
+        command = ADD_CMD + ["--path", path, "--value", value]
         err = self.badrequesttest(command)
         self.matchoutput(err, "Parameter with path=action/testaction2 already exists", command)
 
     def test_170_upd_nonexisting_re_path(self):
         action = "testaction"
         path = "action/%s/badpath" % action
-        command = UPD_CMD + [ "--path", path, "--value", "badvalue"]
+        command = UPD_CMD + ["--path", path, "--value", "badvalue"]
         err = self.badrequesttest(command)
         self.matchoutput(err,
                          "Parameter %s does not match any parameter definitions" % path, command)
@@ -209,7 +209,7 @@ class TestParameter(TestBrokerCommand):
         action = "testaction"
         path = "actions/%s/badpath" % action
         value = 800
-        command = ADD_CMD + [ "--path", path, "--value", value ]
+        command = ADD_CMD + ["--path", path, "--value", value]
         err = self.badrequesttest(command)
         self.matchoutput(err,
                          "Parameter %s does not match any parameter definitions" % path, command)
@@ -278,8 +278,6 @@ class TestParameter(TestBrokerCommand):
         self.failUnlessEqual(params[3].path, 'action')
         self.failUnlessEqual(params[3].value, u'{"testaction": {"command": "/bin/testaction", "user": "user2"}, "testaction2": {"command": "/bin/testaction2", "user": "user1", "timeout": 100}}')
 
-
-
     def test_250_verify_actions(self):
         ACT_CAT_CMD = CAT_CMD + ["--param_tmpl=actions"]
         out = self.commandtest(ACT_CAT_CMD)
@@ -322,8 +320,8 @@ class TestParameter(TestBrokerCommand):
         command = ["reconfigure", "--hostname", "unittest17.aqd-unittest.ms.com",
                    "--personality", PERSONALITY]
         (out, err) = self.failuretest(command, 4)
-        self.matchoutput (err, "record is missing required field: threshold", command)
-        self.matchoutput (err, "BUILD FAILED", command)
+        self.matchoutput(err, "record is missing required field: threshold", command)
+        self.matchoutput(err, "BUILD FAILED", command)
 
     def test_320_add_all_required(self):
         path = "esp/threshold"
@@ -342,7 +340,7 @@ class TestParameter(TestBrokerCommand):
                    "--personality", PERSONALITY]
         self.successtest(command)
 
-    def test_400_add_rebuild_required_ready (self):
+    def test_400_add_rebuild_required_ready(self):
         command = ["change_status", "--hostname", "unittest17.aqd-unittest.ms.com",
                    "--buildstatus", "almostready"]
         self.successtest(command)
@@ -357,7 +355,7 @@ class TestParameter(TestBrokerCommand):
                           r'Please set these host to status of rebuild to continue.',
                           command)
 
-    def test_400_validate_modifying_other_params_works (self):
+    def test_400_validate_modifying_other_params_works(self):
         path = "esp/function"
         value = "development"
         command = UPD_CMD + ["--path", path, "--value", value]
@@ -371,7 +369,7 @@ class TestParameter(TestBrokerCommand):
         command = DEL_CMD + ["--path", path]
         self.noouttest(command)
 
-    def test_405_add_rebuild_required_ready (self):
+    def test_405_add_rebuild_required_ready(self):
         command = ["change_status", "--hostname", "unittest17.aqd-unittest.ms.com",
                    "--buildstatus", "ready"]
         self.successtest(command)
@@ -386,7 +384,7 @@ class TestParameter(TestBrokerCommand):
                           r'Please set these host to status of rebuild to continue.',
                           command)
 
-    def test_410_add_rebuild_required_non_ready (self):
+    def test_410_add_rebuild_required_non_ready(self):
         command = ["change_status", "--hostname", "unittest17.aqd-unittest.ms.com",
                    "--buildstatus", "rebuild"]
         self.successtest(command)
@@ -396,7 +394,7 @@ class TestParameter(TestBrokerCommand):
         command = ADD_CMD + ["--path", path, "--value", value]
         self.successtest(command)
 
-    def test_420_upd_rebuild_required_ready (self):
+    def test_420_upd_rebuild_required_ready(self):
         command = ["change_status", "--hostname", "unittest17.aqd-unittest.ms.com",
                    "--buildstatus", "ready"]
         self.successtest(command)
@@ -411,7 +409,7 @@ class TestParameter(TestBrokerCommand):
                           r'Please set these host to status of rebuild to continue.',
                           command)
 
-    def test_430_upd_rebuild_required_non_ready (self):
+    def test_430_upd_rebuild_required_non_ready(self):
         command = ["change_status", "--hostname", "unittest17.aqd-unittest.ms.com",
                    "--buildstatus", "rebuild"]
         self.successtest(command)
@@ -421,7 +419,7 @@ class TestParameter(TestBrokerCommand):
         command = UPD_CMD + ["--path", path, "--value", value]
         self.successtest(command)
 
-    def test_440_del_rebuild_required_ready (self):
+    def test_440_del_rebuild_required_ready(self):
         command = ["change_status", "--hostname", "unittest17.aqd-unittest.ms.com",
                    "--buildstatus", "ready"]
         self.successtest(command)
@@ -435,7 +433,7 @@ class TestParameter(TestBrokerCommand):
                           r'Please set these host to status of rebuild to continue.',
                           command)
 
-    def test_450_del_rebuild_required_non_ready (self):
+    def test_450_del_rebuild_required_non_ready(self):
         command = ["change_status", "--hostname", "unittest17.aqd-unittest.ms.com",
                    "--buildstatus", "rebuild"]
         self.successtest(command)
@@ -449,7 +447,7 @@ class TestParameter(TestBrokerCommand):
                "--other", OTHER_PERSONALITY]
 
         out = self.commandtest(cmd)
-        self.searchoutput (out, r'Differences for Parameters:\s*'
+        self.searchoutput(out, r'Differences for Parameters:\s*'
                                r'missing Parameters in Personality aquilon/eaitools:\s*'
                                r'//action/testaction/command\s*'
                                r'//action/testaction/user\s*'
@@ -496,23 +494,23 @@ class TestParameter(TestBrokerCommand):
         self.noouttest(command)
 
         path = "action/%s/command" % action
-        command = DEL_CMD + ["--path", path ]
+        command = DEL_CMD + ["--path", path]
         self.noouttest(command)
 
     def test_610_del_path_notfound(self):
         path = "boo"
-        command =  DEL_CMD + ["--path", path]
+        command = DEL_CMD + ["--path", path]
         err = self.notfoundtest(command)
         self.matchoutput(err, "No parameter of path=%s defined" % path, command)
 
     def test_620_del_path_json(self):
         action = "testaction2"
         path = "action/%s" % action
-        command =  DEL_CMD + ["--path", path]
+        command = DEL_CMD + ["--path", path]
         err = self.noouttest(command)
 
         path = "esp"
-        command =  DEL_CMD + ["--path", path]
+        command = DEL_CMD + ["--path", path]
         err = self.noouttest(command)
 
     def test_630_verify_show(self):
@@ -522,20 +520,20 @@ class TestParameter(TestBrokerCommand):
 
     def test_640_verify_actions(self):
         ## cat commands
-        ACT_CAT_CMD =  CAT_CMD + [ "--param_tmpl=actions"]
+        ACT_CAT_CMD = CAT_CMD + ["--param_tmpl=actions"]
         out = self.commandtest(ACT_CAT_CMD)
 
         self.searchclean(out, "testaction", ACT_CAT_CMD)
         self.searchclean(out, "testaction2", ACT_CAT_CMD)
 
     def test_650_verify_esp(self):
-        ESP_CAT_CMD =  CAT_CMD + [ "--param_tmpl=espinfo"]
+        ESP_CAT_CMD = CAT_CMD + ["--param_tmpl=espinfo"]
         err = self.commandtest(ESP_CAT_CMD)
         self.searchclean(err, r'"function" = "development";', ESP_CAT_CMD)
 
     def test_660_verify_default(self):
         ##included by default
-        SEC_CAT_CMD =  CAT_CMD + [ "--param_tmpl=windows"]
+        SEC_CAT_CMD = CAT_CMD + ["--param_tmpl=windows"]
         out = self.commandtest(SEC_CAT_CMD)
         self.searchoutput(out, r'structure template personality/testpersona/dev/windows;\s*'
                                r'"windows" = list\(\s*nlist\(\s*"day", "Sun",\s*"duration", 8,\s*"start", "08:00"\s*\)\s*\);',

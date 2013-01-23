@@ -36,6 +36,7 @@ from aquilon.worker.templates.base import Plenary, PlenaryCollection
 from aquilon.worker.locks import lock_queue, CompileKey
 from aquilon.aqdb.model import Cluster, ClusterLifecycle
 
+
 class CommandChangeClusterStatus(BrokerCommand):
 
     required_parameters = ["cluster"]

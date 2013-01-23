@@ -36,6 +36,7 @@ from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.parameter import get_parameters
 from collections import defaultdict
 
+
 class CommandShowDiff(BrokerCommand):
 
     required_parameters = ["archetype", "personality", "other"]
@@ -64,15 +65,15 @@ class CommandShowDiff(BrokerCommand):
         ## parameters
         params = {}
 
-        dbpersona_parameters = get_parameters (session, personality=dbpersona)
+        dbpersona_parameters = get_parameters(session, personality=dbpersona)
 
         for param in dbpersona_parameters:
             params.update(Parameter.flatten(param.value))
-        ret["Parameters"][dtype] =  params
+        ret["Parameters"][dtype] = params
 
         ## process features
         features = dict((fl.feature.name, True) for fl in dbpersona.features)
-        ret["Features"][dtype] =  features
+        ret["Features"][dtype] = features
 
         ## process required_services
         services = dict((srv.name, True) for srv in dbpersona.services)

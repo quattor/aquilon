@@ -133,6 +133,7 @@ class CommandAddServiceAddress(BrokerCommand):
 
         return
 
+
 def apply_service_address(dbhost, ifnames, srv_addr):
     for ifname in ifnames:
         dbinterface = None

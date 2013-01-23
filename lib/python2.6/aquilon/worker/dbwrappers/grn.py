@@ -45,11 +45,13 @@ def lookup_by_name(config, grn):
     cdb_file = cdb.init(name)
     return cdb_file.has_key(grn)
 
+
 def lookup_by_id(config, eon_id):
     name = os.path.join(config.get("broker", "grn_to_eonid_map_location"),
                         "eon_catalog_by_id.cdb")
     cdb_file = cdb.init(name)
     return cdb_file.has_key(str(eon_id))
+
 
 def lookup_autoupdate(config, session, logger, grn, eon_id):
     # Check the CDB file first, since that quickly tells us if the cache is
@@ -70,6 +72,7 @@ def lookup_autoupdate(config, session, logger, grn, eon_id):
         dbgrn = Grn.get_unique(session, grn=grn, eon_id=eon_id)
     return dbgrn
 
+
 def lookup_grn(session, grn=None, eon_id=None, usable_only=True, logger=None,
                config=None, autoupdate=True):
     dbgrn = Grn.get_unique(session, grn=grn, eon_id=eon_id)
@@ -88,6 +91,7 @@ def lookup_grn(session, grn=None, eon_id=None, usable_only=True, logger=None,
         raise ArgumentError("GRN %s is not usable for new systems." % dbgrn.grn)
 
     return dbgrn
+
 
 def update_grn_map(config, session, logger):
     if not config.get("broker", "grn_to_eonid_map_location"):  # pragma: no cover

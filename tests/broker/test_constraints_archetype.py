@@ -54,7 +54,7 @@ class TestArchetypeConstraints(TestBrokerCommand):
         self.matchoutput(out, "Archetype: aquilon", command)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(
         TestArchetypeConstraints)
     unittest.TextTestRunner(verbosity=2).run(suite)

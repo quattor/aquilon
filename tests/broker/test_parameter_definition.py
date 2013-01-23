@@ -40,6 +40,7 @@ from broker.brokertest import TestBrokerCommand
 
 ARCHETYPE = 'aquilon'
 
+
 class TestParameterDefinition(TestBrokerCommand):
 
     def test_100_add(self):
@@ -63,7 +64,7 @@ class TestParameterDefinition(TestBrokerCommand):
     def test_130_add_default_value_type(self):
         cmd = ["add_parameter_definition", "--archetype", ARCHETYPE,
                "--path=testdefault", "--description=blaah",
-               "--template=foo" ]
+               "--template=foo"]
 
         self.noouttest(cmd)
 
@@ -122,14 +123,14 @@ class TestParameterDefinition(TestBrokerCommand):
     def test_130_add_json_value_type(self):
         cmd = ["add_parameter_definition", "--archetype", ARCHETYPE,
                "--path=testjson", "--description=blaah",
-               "--template=foo", "--value_type=json","--default=\"{'val1':'val2'}\""]
+               "--template=foo", "--value_type=json", "--default=\"{'val1':'val2'}\""]
 
         self.noouttest(cmd)
 
     def test_130_add_invalid_json_value_type(self):
         cmd = ["add_parameter_definition", "--archetype", ARCHETYPE,
                "--path=testbadjson", "--description=blaah",
-               "--template=foo", "--value_type=json","--default=foo"]
+               "--template=foo", "--value_type=json", "--default=foo"]
 
         err = self.badrequesttest(cmd)
         self.matchoutput(err, "The json string specified for default for path=testbadjson is invalid", cmd)
@@ -149,7 +150,7 @@ class TestParameterDefinition(TestBrokerCommand):
         self.noouttest(cmd)
 
     def test_140_verify_add(self):
-        cmd = ["search_parameter_definition", "--archetype", ARCHETYPE ]
+        cmd = ["search_parameter_definition", "--archetype", ARCHETYPE]
 
         out = self.commandtest(cmd)
         self.searchoutput(out,
@@ -196,7 +197,7 @@ class TestParameterDefinition(TestBrokerCommand):
                           cmd)
 
     def test_145_verify_add(self):
-        cmd = ["search_parameter_definition", "--archetype", ARCHETYPE, "--format=proto" ]
+        cmd = ["search_parameter_definition", "--archetype", ARCHETYPE, "--format=proto"]
         out = self.commandtest(cmd)
         p = self.parse_paramdefinition_msg(out, 8)
         param_defs = p.param_definitions
@@ -241,16 +242,17 @@ class TestParameterDefinition(TestBrokerCommand):
         self.failUnlessEqual(param_defs[7].value_type, 'string')
         self.failUnlessEqual(param_defs[7].template, 'foo')
         self.failUnlessEqual(param_defs[7].rebuild_required, True)
+
     def test_150_del(self):
 
         for path in ['testpath', 'testdefault', 'testint', 'testlist', 'testjson',
                      'testboolean', 'testfloat', 'test_rebuild_required']:
             cmd = ["del_parameter_definition", "--archetype", ARCHETYPE,
-                   "--path=%s" % path ]
+                   "--path=%s" % path]
             self.noouttest(cmd)
 
     def test_150_verify_delete(self):
-        cmd = ["search_parameter_definition", "--archetype", ARCHETYPE ]
+        cmd = ["search_parameter_definition", "--archetype", ARCHETYPE]
 
         err = self.notfoundtest(cmd)
         self.matchoutput(err, "Not Found: No parameter definitions found for archetype aquilon", cmd)
@@ -258,4 +260,3 @@ class TestParameterDefinition(TestBrokerCommand):
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestParameterDefinition)
     unittest.TextTestRunner(verbosity=2).run(suite)
-

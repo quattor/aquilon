@@ -40,7 +40,7 @@ from brokertest import TestBrokerCommand
 
 
 class TestInterfaceConstraints(TestBrokerCommand):
-    
+
     def testdelinterfaceprimary(self):
         command = ["del", "interface", "--interface", "eth0",
                    "--machine", "ut3c1n3"]
@@ -62,6 +62,6 @@ class TestInterfaceConstraints(TestBrokerCommand):
                          command)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestInterfaceConstraints)
     unittest.TextTestRunner(verbosity=2).run(suite)

@@ -36,6 +36,7 @@ from aquilon.worker.dbwrappers.service_instance import get_service_instance
 from aquilon.worker.services import Chooser
 from aquilon.aqdb.model import Service
 
+
 class CommandBindClient(BrokerCommand):
 
     required_parameters = ["hostname", "service"]

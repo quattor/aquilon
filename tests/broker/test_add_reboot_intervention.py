@@ -40,9 +40,9 @@ from datetime import datetime, timedelta
 
 from brokertest import TestBrokerCommand
 
-
 EXPIRY = datetime.utcnow().replace(microsecond=0) + timedelta(days=1)
 EXPIRY = EXPIRY.isoformat().replace("T", " ")
+
 
 class TestAddRebootIntervention(TestBrokerCommand):
 
@@ -148,7 +148,7 @@ class TestAddRebootIntervention(TestBrokerCommand):
         self.successtest(command)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(
         TestAddRebootIntervention)
     unittest.TextTestRunner(verbosity=2).run(suite)

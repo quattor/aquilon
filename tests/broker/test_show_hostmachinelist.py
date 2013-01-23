@@ -54,7 +54,6 @@ class TestShowHostMachineList(TestBrokerCommand):
         self.matchoutput(out, "unittest02.one-nyp.ms.com,ut3c5n10", command)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestShowHostMachineList)
     unittest.TextTestRunner(verbosity=2).run(suite)
-

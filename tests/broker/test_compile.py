@@ -67,7 +67,7 @@ class TestCompile(TestBrokerCommand):
         tree = ET.parse(source)
         mtimes = dict()
         for profile in tree.getiterator('profile'):
-            if profile.text and profile.attrib.has_key('mtime'):
+            if profile.text and "mtime" in profile.attrib:
                 obj = profile.text.strip()
                 if obj and obj.endswith(profile_suffix):
                     mtimes[obj[:-len(profile_suffix)]] = \
@@ -279,6 +279,6 @@ class TestCompile(TestBrokerCommand):
         self.matchclean(err, "Assigning repositories to packages...", command)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestCompile)
     unittest.TextTestRunner(verbosity=2).run(suite)

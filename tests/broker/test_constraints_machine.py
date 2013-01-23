@@ -56,7 +56,6 @@ class TestMachineConstraints(TestBrokerCommand):
         self.badrequesttest(command.split(" "))
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestMachineConstraints)
     unittest.TextTestRunner(verbosity=2).run(suite)
-

@@ -124,7 +124,6 @@ class TestClientFailure(TestBrokerCommand):
         out = self.unauthorizedtest(command)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestClientFailure)
     unittest.TextTestRunner(verbosity=2).run(suite)
-

@@ -66,6 +66,6 @@ class TestDomainConstraints(TestBrokerCommand):
         self.matchoutput(out, "Domain: ny-prod", command)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDomainConstraints)
     unittest.TextTestRunner(verbosity=2).run(suite)

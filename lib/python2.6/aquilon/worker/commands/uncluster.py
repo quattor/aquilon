@@ -94,6 +94,7 @@ class CommandUncluster(BrokerCommand):
         finally:
             lock_queue.release(key)
 
+
 def remove_service_addresses(dbcluster, dbhost):
     for res in walk_resources(dbcluster):
         if not isinstance(res, ServiceAddress):

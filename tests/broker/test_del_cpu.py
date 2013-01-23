@@ -60,7 +60,6 @@ class TestDelCpu(TestBrokerCommand):
         self.matchclean(out, "Cpu: intel utcpu_1500 1500 MHz", command)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelCpu)
     unittest.TextTestRunner(verbosity=2).run(suite)
-

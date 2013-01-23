@@ -120,7 +120,7 @@ class TestUpdatePersonality(TestBrokerCommand):
         self.matchoutput(out, "The personality vulcan-1g-desktop-prod is in use", command)
 
         command = ["add_personality", "--archetype=aquilon", "--grn=grn:/ms/ei/aquilon/aqd",
-                   "--personality=unused" , "--host_environment=infra"]
+                   "--personality=unused", "--host_environment=infra"]
         self.successtest(command)
 
         command = ["update_personality", "--personality", "unused",
@@ -148,7 +148,7 @@ class TestUpdatePersonality(TestBrokerCommand):
 
     def testupdateconfigoverride02(self):
         command = ["update_personality", "--personality=testovrpersona/dev",
-                   "--archetype=aquilon", "--config_override",]
+                   "--archetype=aquilon", "--config_override"]
         self.successtest(command)
 
         command = ["show_personality", "--personality=testovrpersona/dev",
@@ -162,9 +162,8 @@ class TestUpdatePersonality(TestBrokerCommand):
                          command)
 
     def testupdateconfigoverride03(self):
-
         command = ["update_personality", "--personality=testovrpersona/dev",
-                   "--archetype=aquilon", "--noconfig_override",]
+                   "--archetype=aquilon", "--noconfig_override"]
         self.successtest(command)
 
         command = ["show_personality", "--personality=testovrpersona/dev",
@@ -181,6 +180,6 @@ class TestUpdatePersonality(TestBrokerCommand):
         out = self.successtest(command)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestUpdateArchetype)
     unittest.TextTestRunner(verbosity=2).run(suite)

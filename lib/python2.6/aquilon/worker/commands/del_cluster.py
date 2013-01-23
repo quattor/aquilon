@@ -39,6 +39,7 @@ from aquilon.worker.templates.base import Plenary, PlenaryCollection
 from aquilon.worker.processes import remove_file
 from aquilon.worker.locks import CompileKey
 
+
 def del_cluster(session, logger, dbcluster, config):
     cluster = str(dbcluster.name)
 
@@ -91,4 +92,3 @@ class CommandDelCluster(BrokerCommand):
     def render(self, session, logger, cluster, **arguments):
         dbcluster = Cluster.get_unique(session, cluster, compel=True)
         del_cluster(session, logger, dbcluster, self.config)
-

@@ -53,10 +53,10 @@ class ProcessWrapper(object):
         self._stdin = self.__class__._closedsocket()
         self._stdout = self.__class__._closedsocket()
 
-    def makefile(self, mode, bufsize = None):
+    def makefile(self, mode, bufsize=None):
         return os.fdopen(os.dup(self._stdout.fileno()), mode, bufsize)
 
-    def send(self, stuff, flags = 0):
+    def send(self, stuff, flags=0):
         if self.process.poll():
             raise httplib.NotConnected()
 
@@ -64,7 +64,7 @@ class ProcessWrapper(object):
 
     sendall = send
 
-    def recv(self, len = 1024, flags = 0):
+    def recv(self, len=1024, flags=0):
         if self.process.poll():
             raise httplib.NotConnected()
 
@@ -76,7 +76,7 @@ class ProcessWrapper(object):
 
 class WrappedHTTPConnection(ChunkedHTTPConnection):
 
-    def __init__(self, executable, host, port, service = None, strict = None):
+    def __init__(self, executable, host, port, service=None, strict=None):
         httplib.HTTPConnection.__init__(self, host, port, strict)
         self.executable = executable
         self.service = service
@@ -109,7 +109,7 @@ class KNCHTTPConnection(WrappedHTTPConnection):
     KNC_BIN = 'knc'
     KNC_PATH = '/ms/dist/kerberos/PROJ/knc/prod/bin'
 
-    def __init__(self, host, port, service, strict = None):
+    def __init__(self, host, port, service, strict=None):
         if os.path.exists(self.__class__.KNC_PATH):
             os.environ['PATH'] = "%s:%s" % (self.__class__.KNC_PATH,
                                             os.environ.get('PATH', ''))

@@ -181,4 +181,3 @@ class TestSplitMergeNetwork(TestBrokerCommand):
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestSplitMergeNetwork)
     unittest.TextTestRunner(verbosity=2).run(suite)
-

@@ -51,7 +51,6 @@ class TestDelCampus(TestBrokerCommand):
         command = "show campus --campus ta"
         self.notfoundtest(command.split(" "))
 
-
     def testdelbunotindsdb(self):
         ## add campus
 
@@ -60,7 +59,6 @@ class TestDelCampus(TestBrokerCommand):
         command = ["add", "campus", "--campus", test_campus, "--country", "us"]
         self.successtest(command)
         self.dsdb_verify()
-
 
         dsdb_command = "delete_campus_aq -campus %s" % test_campus
         errstr = "campus %s doesn't exist" % test_campus

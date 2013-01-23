@@ -34,6 +34,7 @@ from aquilon.worker.broker import BrokerCommand, validate_basic
 from aquilon.worker.dbwrappers.resources import (add_resource,
                                                  get_resource_holder)
 
+
 class CommandAddShare(BrokerCommand):
 
     required_parameters = ["share"]
@@ -51,5 +52,3 @@ class CommandAddShare(BrokerCommand):
 
         dbshare = Share(name=share, comments=comments, latency=latency)
         return add_resource(session, logger, holder, dbshare)
-
-

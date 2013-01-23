@@ -38,6 +38,7 @@ import Sybase
 
 from dispatch_table import dispatch_tbl as dt
 
+
 class DsdbConnection(object):
     """ Wraps connections to DSDB """
     def __init__(self, fake=False, *args, **kw):
@@ -83,7 +84,7 @@ class DsdbConnection(object):
             Returns:
                 Sybase cursor object """
         rs = self.syb.cursor()
-        try:              #not so sure we need all the fancyness
+        try:  # not so sure we need all the fancyness
             rs.callproc(proc, parameters)
             return rs
         except Sybase.DatabaseError, e:
@@ -96,10 +97,9 @@ class DsdbConnection(object):
             campus = kw.pop('campus')
             if not campus:
                 raise ValueError('buildings_by_campus requires campus kwarg')
-            sql += "'%s'"% (campus)
+            sql += "'%s'" % campus
 
         return self.run_query(sql, limit).fetchall()
-
 
     def get_network_by_sysloc(self, loc):
         """ append a sysloc to the base query, get networks """
@@ -110,7 +110,7 @@ class DsdbConnection(object):
         return data.fetchall() if data else None
 
     def get_host_pod(self, host):
-        sql    = """
+        sql = """
         SELECT boot_path FROM network_host A, bootparam B
         WHERE A.host_name   =  \'%s\'
           AND A.machine_id  =  B.machine_id
@@ -121,6 +121,7 @@ class DsdbConnection(object):
 
     def close(self):
         self.syb.close()
+
 
 def test():  # pragma: no cover
     db = DsdbConnection()
@@ -146,4 +147,4 @@ def test():  # pragma: no cover
     db.close()
 
 if __name__ == '__main__':
-    test() # for now
+    test()  # for now

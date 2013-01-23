@@ -112,6 +112,6 @@ class TestDelCluster(TestBrokerCommand):
         command = ["show_cluster", "--cluster=utstorages2"]
         self.notfoundtest(command)
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelCluster)
     unittest.TextTestRunner(verbosity=2).run(suite)

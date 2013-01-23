@@ -342,7 +342,6 @@ class TestMake(TestBrokerCommand):
         self.matchoutput(out, '"fqdn" = "zebra3.aqd-unittest.ms.com";',
                          command)
 
-
     def testmakeunittest21(self):
         command = ["make", "--hostname", "unittest21.aqd-unittest.ms.com"]
         (out, err) = self.successtest(command)

@@ -221,4 +221,3 @@ class TestAddRequiredService(TestBrokerCommand):
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddRequiredService)
     unittest.TextTestRunner(verbosity=2).run(suite)
-

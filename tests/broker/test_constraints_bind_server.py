@@ -109,4 +109,3 @@ class TestBindServerConstraints(TestBrokerCommand):
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestBindServer)
     unittest.TextTestRunner(verbosity=2).run(suite)
-

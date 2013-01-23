@@ -141,6 +141,6 @@ class TestAddOS(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Comments: Windows 7 Enterprise (x86)", command)
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddOS)
     unittest.TextTestRunner(verbosity=2).run(suite)

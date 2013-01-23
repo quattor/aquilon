@@ -36,10 +36,9 @@ from aquilon.worker.commands.del_cluster import del_cluster
 
 class CommandDelMetaCluster(BrokerCommand):
 
-    required_parameters = [ "metacluster" ]
+    required_parameters = ["metacluster"]
 
     def render(self, session, logger, metacluster, **arguments):
         dbmetacluster = MetaCluster.get_unique(session, metacluster,
                                                compel=True)
         del_cluster(session, logger, dbmetacluster, self.config)
-

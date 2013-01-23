@@ -152,6 +152,6 @@ class TestAddSwitch(TestBrokerCommand, VerifySwitchMixin):
                          command)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddSwitch)
     unittest.TextTestRunner(verbosity=2).run(suite)

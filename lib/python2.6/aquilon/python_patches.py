@@ -44,6 +44,7 @@ def load_uuid_quickly():
     thread-safe.
     """
     import ctypes.util
+
     def find_library(name):
         return 'lib' + name + '.so'
     old_find_library = ctypes.util.find_library

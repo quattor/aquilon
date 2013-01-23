@@ -77,6 +77,7 @@ class ParameterFormatter(ObjectFormatter):
 
 ObjectFormatter.handlers[Parameter] = ParameterFormatter()
 
+
 class DiffData(dict):
     def __init__(self, myobj, other_obj, diff):
         self.myobj = myobj
@@ -114,7 +115,7 @@ class DiffFormatter(ObjectFormatter):
 
             different_value = list()
             for pp in intersect:
-                if mydata[pp] != otherdata[pp] :
+                if mydata[pp] != otherdata[pp]:
                     different_value.append("{0} value={1}, othervalue={2}".
                                            format(pp, mydata[pp], otherdata[pp]))
             if different_value:

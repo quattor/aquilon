@@ -176,33 +176,33 @@ class TestSearchCluster(TestBrokerCommand):
         command = "search cluster --down_hosts_threshold 2"
         out = self.commandtest(command.split(" "))
 
-        self.matchoutput(out, "utecl1", command) # 2
-        self.matchoutput(out, "utecl3", command) # 2
-        self.matchclean(out, "utecl2", command) # 1
-        self.matchclean(out, "utgrid1", command) # 5%
+        self.matchoutput(out, "utecl1", command)  # 2
+        self.matchoutput(out, "utecl3", command)  # 2
+        self.matchclean(out, "utecl2", command)  # 1
+        self.matchclean(out, "utgrid1", command)  # 5%
 
     def testdownhoststhresholdpercent(self):
         command = "search cluster --down_hosts_threshold 5%"
         out = self.commandtest(command.split(" "))
 
-        self.matchoutput(out, "utgrid1", command) # 5%
-        self.matchclean(out, "utecl2", command) # 1
-        self.matchclean(out, "utecl3", command) #2
+        self.matchoutput(out, "utgrid1", command)  # 5%
+        self.matchclean(out, "utecl2", command)  # 1
+        self.matchclean(out, "utecl3", command)  # 2
 
     def testdownmaintthreshold(self):
         command = "search cluster --down_maint_threshold 1"
         out = self.commandtest(command.split(" "))
 
-        self.matchclean(out, "utgrid1", command) # 0
-        self.matchoutput(out, "utvcs1", command) # 1
-        self.matchclean(out, "utstorage1", command) # None
+        self.matchclean(out, "utgrid1", command)  # 0
+        self.matchoutput(out, "utvcs1", command)  # 1
+        self.matchclean(out, "utstorage1", command)  # None
 
     def testmaxmembers(self):
         command = "search cluster --max_members 2"
         out = self.commandtest(command.split(" "))
 
         self.matchoutput(out, "utvcs1", command)
-        self.matchclean(out, "utgrid1", command) # 2000
+        self.matchclean(out, "utgrid1", command)  # 2000
         self.matchoutput(out, "utstorage1", command)
 
     def testmemberarchetype(self):

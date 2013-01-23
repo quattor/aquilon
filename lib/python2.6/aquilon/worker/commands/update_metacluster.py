@@ -36,6 +36,7 @@ from aquilon.worker.commands.update_cluster import update_cluster_location
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
 from aquilon.worker.locks import lock_queue, CompileKey
 
+
 class CommandUpdateMetaCluster(BrokerCommand):
 
     required_parameters = ["metacluster"]

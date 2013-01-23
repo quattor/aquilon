@@ -83,6 +83,6 @@ class TestClusterConstraints(TestBrokerCommand):
     # for the cluster would be exceeded.
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestClusterConstraints)
     unittest.TextTestRunner(verbosity=2).run(suite)

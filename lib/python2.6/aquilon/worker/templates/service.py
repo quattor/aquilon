@@ -278,5 +278,3 @@ class PlenaryInstanceNasDiskShare(Plenary):
         pan_assign(lines, "sharename", self.name)
         pan_assign(lines, "server", self.server)
         pan_assign(lines, "mountpoint", self.mount)
-
-

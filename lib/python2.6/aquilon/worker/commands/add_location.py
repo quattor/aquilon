@@ -40,6 +40,7 @@ from aquilon.aqdb.model import Location
 location_types = ("company", "hub", "continent", "country", "campus",
                   "city", "building", "room", "rack", "desk")
 
+
 def add_location(session, name, fullname, type, parent_name, parent_type,
                  comments=None, address=None):
     """ Perform all the initialization and error checking to add a location
@@ -78,6 +79,7 @@ def add_location(session, name, fullname, type, parent_name, parent_type,
         kw['address'] = address
 
     return location_type(**kw)
+
 
 class CommandAddLocation(BrokerCommand):
 

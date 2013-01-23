@@ -27,9 +27,8 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-""" Suggested versions of external libraries, and the defaults for the 
+""" Suggested versions of external libraries, and the defaults for the
     binaries shipped.
-    
 """
 
 import ms.version

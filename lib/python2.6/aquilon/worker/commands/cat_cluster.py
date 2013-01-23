@@ -39,6 +39,7 @@ from aquilon.worker.templates.cluster import (PlenaryClusterObject,
 from aquilon.worker.templates.metacluster import (PlenaryMetaClusterObject,
                                               PlenaryMetaClusterData)
 
+
 class CommandCatCluster(BrokerCommand):
 
     required_parameters = ["cluster"]

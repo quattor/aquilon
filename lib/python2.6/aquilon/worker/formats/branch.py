@@ -67,6 +67,7 @@ class AuthoredSandbox(object):
         config = Config()
         templatesdir = config.get('broker', 'templatesdir')
         self.path = os.path.join(templatesdir, dbauthor.name, dbsandbox.name)
+
     def __getattr__(self, attr):
         return getattr(self.dbsandbox, attr)
 

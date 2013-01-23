@@ -39,6 +39,7 @@ from aquilon.exceptions_ import ArgumentError
 
 _TN = 'host_environment'
 
+
 class HostEnvironment(Base):
     """ Describes the state a host is within the provisioning lifecycle """
 
@@ -67,6 +68,7 @@ host_env.primary_key.name = '%s_pk' % _TN
 host_env.append_constraint(UniqueConstraint('name', name='%s_uk' % _TN))
 host_env.info['unique_fields'] = ['name']
 
+
 class Development(HostEnvironment):
     __mapper_args__ = {'polymorphic_identity': 'dev'}
 
@@ -89,4 +91,3 @@ class Production(HostEnvironment):
 
 class Infra(HostEnvironment):
     __mapper_args__ = {'polymorphic_identity': 'infra'}
-

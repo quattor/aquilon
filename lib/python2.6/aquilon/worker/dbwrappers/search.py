@@ -36,6 +36,7 @@ from aquilon.utils import force_int
 
 int_re = re.compile(r'^(\d+)')
 
+
 def search_next(session, cls, attr, value, start, pack, **filters):
     q = session.query(cls).filter(attr.startswith(value))
     if filters:

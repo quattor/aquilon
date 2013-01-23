@@ -63,7 +63,6 @@ class TestShowCampus(TestBrokerCommand):
         self.matchoutput(out, "Fullname: Virginia", command)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestShowCampus)
     unittest.TextTestRunner(verbosity=2).run(suite)
-

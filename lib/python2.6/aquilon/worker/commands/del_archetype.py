@@ -46,7 +46,7 @@ class CommandDelArchetype(BrokerCommand):
         # if personality exists, raise error
         if row:
             raise ArgumentError("{0} is still in use by {1} and cannot be "
-                                "deleted.".format (dbarch, row))
+                                "deleted.".format(dbarch, row))
         # All clear
         session.delete(dbarch)
         return

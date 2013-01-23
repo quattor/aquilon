@@ -69,7 +69,6 @@ class TestAddRoom(TestBrokerCommand):
         self.matchoutput(out, "room,utroom2,building,ut", command)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddRoom)
     unittest.TextTestRunner(verbosity=2).run(suite)
-

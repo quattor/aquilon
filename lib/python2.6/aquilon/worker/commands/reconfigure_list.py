@@ -51,7 +51,6 @@ class CommandReconfigureList(BrokerCommand):
         self.reconfigure_list(session, logger, dbhosts, archetype, personality,
                               buildstatus, osname, osversion, os, **arguments)
 
-
     def reconfigure_list(self, session, logger, dbhosts, archetype,
                          personality, buildstatus, osname, osversion, os,
                          **arguments):

@@ -39,6 +39,7 @@ if __name__ == "__main__":
 
 from brokertest import TestBrokerCommand
 
+
 class TestUnbindFeature(TestBrokerCommand):
 
     def setUp(self):
@@ -69,7 +70,7 @@ class TestUnbindFeature(TestBrokerCommand):
         self.searchclean(out, r'^  Host Feature: pre_host$', command)
 
     def test_101_verify_cat_personality(self):
-        command = ["cat", "--personality", "inventory", "--pre_feature" ]
+        command = ["cat", "--personality", "inventory", "--pre_feature"]
         out = self.commandtest(command)
         self.matchclean(out, "pre_host", command)
 
@@ -85,7 +86,7 @@ class TestUnbindFeature(TestBrokerCommand):
                    "--archetype", "aquilon",
                    "--justification", "tcm=12345678"]
         (out, err) = self.successtest(command)
-        self.matchoutput(err, "Flushed 10/10 templates." , command)
+        self.matchoutput(err, "Flushed 10/10 templates.", command)
 
     def test_131_verify_show_model(self):
         command = ["show", "model", "--model", "hs21-8853l5u"]

@@ -66,6 +66,7 @@ epilog = """
     section of the config and then re-launches the tests from there.
     """ % default_configfile
 
+
 def force_yes(msg):
     print >> sys.stderr, msg
     print >> sys.stderr, """
@@ -181,7 +182,7 @@ if (config.get("database", "dsn").startswith("oracle") and
 p = Popen(config.get("kerberos", "krb5_keytab"), stdout=1, stderr=2)
 rc = p.wait()
 
-pid_file = os.path.join(config.get('broker', 'rundir') , 'aqd.pid')
+pid_file = os.path.join(config.get('broker', 'rundir'), 'aqd.pid')
 kill_from_pid_file(pid_file)
 
 # FIXME: Need to be careful about attempting to nuke templatesdir...

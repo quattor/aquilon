@@ -111,7 +111,6 @@ class TestDelMetaCluster(TestBrokerCommand):
         self.notfoundtest(command)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelMetaCluster)
     unittest.TextTestRunner(verbosity=2).run(suite)
-

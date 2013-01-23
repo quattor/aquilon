@@ -214,7 +214,6 @@ class TestAddAddress(TestBrokerCommand):
         # External IP addresses should not be added to DSDB
         self.dsdb_verify(empty=True)
 
-
         command = ["show_address", "--fqdn=%s" % fqdn,
                    "--network_environment", "cardenv"]
         out = self.commandtest(command)
@@ -249,12 +248,11 @@ class TestAddAddress(TestBrokerCommand):
         default = self.config.get("site", "default_dns_environment")
         command = ["add", "address", "--ip", ip, "--fqdn", fqdn,
                    "--dns_environment", default,
-                   "--network_environment", "cardenv" ]
+                   "--network_environment", "cardenv"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Entering external IP addresses to the internal DNS environment is not allowed", command)
 
 
-
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddAddress)
     unittest.TextTestRunner(verbosity=2).run(suite)

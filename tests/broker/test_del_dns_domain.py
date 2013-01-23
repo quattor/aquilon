@@ -116,4 +116,3 @@ if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelDnsDomain)
     #unittest.TextTestRunner(verbosity=2).run(suite)
     nose.runmodule()
-

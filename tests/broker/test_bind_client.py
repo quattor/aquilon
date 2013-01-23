@@ -194,6 +194,6 @@ class TestBindClient(TestBrokerCommand):
         self.matchoutput(out, "Template: service/ntp/pa.ny.na", command)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestBindClient)
     unittest.TextTestRunner(verbosity=2).run(suite)

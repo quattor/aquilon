@@ -44,6 +44,7 @@ from aquilon.aqdb.model.network import get_net_id_from_ip
 from socket import gaierror, gethostbyname
 from ipaddr import IPv4Address
 
+
 class CommandAddAuroraHost(CommandAddHost):
 
     required_parameters = ["hostname"]

@@ -51,6 +51,7 @@ def hostname_to_host(session, hostname):
                                 "assigned.".format(dbmachine))
     return dbmachine.host
 
+
 def hostlist_to_hosts(session, hostlist):
     dbhosts = []
     failed = []
@@ -68,11 +69,13 @@ def hostlist_to_hosts(session, hostlist):
         raise ArgumentError("Empty list.")
     return dbhosts
 
+
 def get_host_bound_service(dbhost, dbservice):
     for si in dbhost.services_used:
         if si.service == dbservice:
             return si
     return None
+
 
 def get_host_dependencies(session, dbhost):
     """ returns a list of strings describing how a host is being used.

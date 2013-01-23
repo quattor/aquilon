@@ -43,6 +43,7 @@ if __name__ == "__main__":
 
 from brokertest import TestBrokerCommand
 
+
 class TestProfile(TestBrokerCommand):
 
     def load_profile(self, name):
@@ -119,6 +120,6 @@ class TestProfile(TestBrokerCommand):
                          "search list in resolver was %s instead of %s" %
                          (repr(searchlist), repr(expect)))
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestProfile)
     unittest.TextTestRunner(verbosity=2).run(suite)

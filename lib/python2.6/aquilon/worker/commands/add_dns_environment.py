@@ -32,6 +32,7 @@
 from aquilon.worker.broker import BrokerCommand, validate_basic
 from aquilon.aqdb.model import DnsEnvironment
 
+
 class CommandAddDnsEnvironment(BrokerCommand):
 
     required_parameters = ["dns_environment"]

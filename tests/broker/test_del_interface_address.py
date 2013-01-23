@@ -141,7 +141,6 @@ class TestDelInterfaceAddress(TestBrokerCommand):
         # External addresses should not affect DSDB
         self.dsdb_verify(empty=True)
 
-
     def testdelunittest26(self):
         ip = self.net.unknown[14].usable[0]
         self.dsdb_expect_delete(ip)

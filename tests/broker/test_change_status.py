@@ -86,7 +86,6 @@ class TestChangeStatus(TestBrokerCommand):
         self.badrequesttest(command)
 
 
-
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestChangeStatus)
     unittest.TextTestRunner(verbosity=2).run(suite)

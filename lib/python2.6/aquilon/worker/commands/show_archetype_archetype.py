@@ -32,6 +32,7 @@
 from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import Archetype
 
+
 class CommandShowArchetypeArchetype(BrokerCommand):
 
     required_parameters = ["archetype"]

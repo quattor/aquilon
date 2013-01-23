@@ -192,6 +192,6 @@ class TestUpdateRack(TestBrokerCommand):
         self.matchclean(out, "Default DNS", command)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestUpdateRack)
     unittest.TextTestRunner(verbosity=2).run(suite)

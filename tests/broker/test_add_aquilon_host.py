@@ -229,7 +229,7 @@ class TestAddAquilonHost(TestBrokerCommand):
         msg = self.parse_netlist_msg(out, expect=1)
         network = msg.networks[0]
         seen = False
-        macs = [ip.mac] #, self.net.unknown[12].usable[1].mac]
+        macs = [ip.mac]  # , self.net.unknown[12].usable[1].mac]
         for host in network.hosts:
             if host.ip != str(ip):
                 continue
@@ -266,7 +266,7 @@ class TestAddAquilonHost(TestBrokerCommand):
         msg = self.parse_netlist_msg(out, expect=1)
         network = msg.networks[0]
         seen = False
-        macs = [ip.mac] #, self.net.unknown[12].usable[2].mac]
+        macs = [ip.mac]  # , self.net.unknown[12].usable[2].mac]
         for host in network.hosts:
             if host.ip != str(ip):
                 continue
@@ -332,6 +332,6 @@ class TestAddAquilonHost(TestBrokerCommand):
         self.dsdb_verify()
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddAquilonHost)
     unittest.TextTestRunner(verbosity=2).run(suite)

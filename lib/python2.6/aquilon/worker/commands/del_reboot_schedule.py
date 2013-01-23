@@ -34,6 +34,7 @@ from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.resources import (del_resource,
                                                  get_resource_holder)
 
+
 class CommandDelRebootSchedule(BrokerCommand):
 
     def render(self, session, logger, hostname, cluster, **arguments):

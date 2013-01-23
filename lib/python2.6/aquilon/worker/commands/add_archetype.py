@@ -34,6 +34,7 @@ from aquilon.aqdb.model import Archetype
 from aquilon.exceptions_ import ArgumentError
 import re
 
+
 class CommandAddArchetype(BrokerCommand):
 
     required_parameters = ["archetype"]

@@ -37,6 +37,7 @@ from aquilon.config import Config
 
 host_re = re.compile(r'^host/(.+)@([^@]+)$')
 
+
 class AuthorizationBroker(object):
     """Handles any behind the scenes work in figuring out entitlements."""
 

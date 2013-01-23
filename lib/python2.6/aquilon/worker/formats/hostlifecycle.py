@@ -38,6 +38,7 @@ from aquilon.aqdb.model.hostlifecycle import (Ready, Almostready, Build,
                                               Failed,
                                               Blind, Install, Reinstall)
 
+
 class StatusFormatter(ObjectFormatter):
     template_raw = "status.mako"
 

@@ -40,6 +40,7 @@ from aquilon.worker.dbwrappers.resources import (add_resource,
 from aquilon.aqdb.model import RebootIntervention
 from aquilon.aqdb.model import RebootSchedule
 
+
 class CommandAddRebootIntervention(BrokerCommand):
 
     required_parameters = ["expiry", "justification"]

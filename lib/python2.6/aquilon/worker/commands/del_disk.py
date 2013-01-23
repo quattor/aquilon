@@ -43,7 +43,7 @@ class CommandDelDisk(BrokerCommand):
     required_parameters = ["machine"]
 
     def render(self, session, logger, machine, disk, controller, size, all,
-               dbuser,  **arguments):
+               dbuser, **arguments):
 
         # Handle deprecated arguments
         if arguments.get("type", None):

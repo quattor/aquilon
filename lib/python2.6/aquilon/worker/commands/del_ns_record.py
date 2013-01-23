@@ -42,7 +42,6 @@ class CommandDelNsRecord(BrokerCommand):
 
         dba_rec = ARecord.get_unique(session, fqdn=fqdn, compel=True)
 
-
         ns_record = NsRecord.get_unique(session, dns_domain=dbdns_domain,
                                         a_record=dba_rec, compel=True)
 

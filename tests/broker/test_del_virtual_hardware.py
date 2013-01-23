@@ -73,7 +73,7 @@ class TestDelVirtualHardware(TestBrokerCommand):
         for i in range(1, 10) + \
                  range(50, 63) + range(70, 83) + \
                  range(90, 103) + range(110, 123):
-            command = "show machine --machine evm%s" %i
+            command = "show machine --machine evm%s" % i
             self.notfoundtest(command.split(" "))
 
     # Hack... doing this test here for timing reasons...

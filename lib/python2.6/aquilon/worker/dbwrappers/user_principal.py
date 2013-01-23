@@ -44,6 +44,7 @@ LOGGER = logging.getLogger(__name__)
 principal_re = re.compile(r'^(.+)@([^@]+)$')
 host_re = re.compile(r'^host/(.*)$')
 
+
 def get_or_create_user_principal(session, principal, createuser=True,
                                  createrealm=True, commitoncreate=False,
                                  comments=None):
@@ -104,6 +105,7 @@ def get_or_create_user_principal(session, principal, createuser=True,
         if commitoncreate:
             session.commit()
     return dbuser
+
 
 def get_user_principal(session, user):
     """Ignore the realm.  This should probably be re-thought."""

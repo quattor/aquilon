@@ -33,6 +33,7 @@ Borrowed from http://www.sqlalchemy.org/trac/wiki/UsageRecipes/Enum """
 import sqlalchemy
 from aquilon.exceptions_ import ArgumentError
 
+
 class Enum(sqlalchemy.types.TypeDecorator):
     impl = sqlalchemy.types.String
 
@@ -75,6 +76,7 @@ class Enum(sqlalchemy.types.TypeDecorator):
             raise ArgumentError('"%s" not a valid value. Valid values are: %s'
                                 % (value, self.values))
         return value
+
 
 def test_enum():  # pragma: no cover
     from sqlalchemy import (MetaData, Table, Column, Integer, insert)

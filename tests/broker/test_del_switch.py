@@ -182,6 +182,6 @@ class TestDelSwitch(TestBrokerCommand):
         self.dsdb_verify()
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelSwitch)
     unittest.TextTestRunner(verbosity=2).run(suite)

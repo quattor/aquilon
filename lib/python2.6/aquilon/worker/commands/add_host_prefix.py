@@ -37,6 +37,7 @@ from aquilon.worker.dbwrappers.search import search_next
 from aquilon.aqdb.model import Machine, DnsDomain, Fqdn
 from aquilon.aqdb.column_types import AqStr
 
+
 class CommandAddHostPrefix(CommandAddHost):
 
     required_parameters = ["prefix", "machine", "archetype"]

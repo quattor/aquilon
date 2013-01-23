@@ -56,9 +56,9 @@ class CommandAddInterfaceMachine(BrokerCommand):
         dbmachine = Machine.get_unique(session, machine, compel=True)
         oldinfo = DSDBRunner.snapshot_hw(dbmachine)
 
-        prev = session.query(Interface).filter_by(
-                name=interface,hardware_entity=dbmachine).first()
-        if prev:
+        q = session.query(Interface)
+        q = q.filter_by(name=interface, hardware_entity=dbmachine)
+        if q.first():
             raise ArgumentError("Machine %s already has an interface named %s."
                     % (machine, interface))
 

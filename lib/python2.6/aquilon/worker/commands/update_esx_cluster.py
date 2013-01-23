@@ -36,4 +36,3 @@ from aquilon.worker.commands.update_cluster import CommandUpdateCluster
 class CommandUpdateESXCluster(CommandUpdateCluster):
 
     required_parameters = ["cluster"]
-

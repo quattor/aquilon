@@ -143,7 +143,6 @@ class TestSearchMachine(TestBrokerCommand):
         self.matchclean(out, "evm10", command)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestSearchMachine)
     unittest.TextTestRunner(verbosity=2).run(suite)
-

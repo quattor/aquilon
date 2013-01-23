@@ -148,7 +148,6 @@ class TestAddFilesystem(TestBrokerCommand):
             if resource.name == "fs1" and resource.type == "filesystem":
                 self.assertEqual(resource.fsdata.mountpoint, "/mnt")
 
-
     def test_50_add_to_cluster(self):
         command = ["show_filesystem", "--cluster=utvcs1"]
         out = self.notfoundtest(command)
@@ -199,4 +198,3 @@ class TestAddFilesystem(TestBrokerCommand):
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddFilesystem)
     unittest.TextTestRunner(verbosity=2).run(suite)
-

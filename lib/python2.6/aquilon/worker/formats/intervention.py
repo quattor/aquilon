@@ -70,4 +70,3 @@ class InterventionFormatter(ResourceFormatter):
 
 
 ObjectFormatter.handlers[Intervention] = InterventionFormatter()
-

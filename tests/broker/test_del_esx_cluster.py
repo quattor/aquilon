@@ -124,6 +124,6 @@ class TestDelESXCluster(TestBrokerCommand):
                         "Profile file '%s' still exists" % profile)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelESXCluster)
     unittest.TextTestRunner(verbosity=2).run(suite)

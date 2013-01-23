@@ -72,7 +72,7 @@ class TestDelChassis(TestBrokerCommand):
             self.notfoundtest(command.split(" "))
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     import aquilon.aqdb.depends
     import nose
 

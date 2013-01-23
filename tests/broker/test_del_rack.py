@@ -120,7 +120,6 @@ class TestDelRack(TestBrokerCommand):
                         "--type", "unknown",
                         "--comments", "Made-up network"])
 
-
         # try delete rack
         command = "del rack --rack %s" % test_rack
         err = self.badrequesttest(command.split(" "))
@@ -133,7 +132,6 @@ class TestDelRack(TestBrokerCommand):
         self.noouttest(["del_network", "--ip", "192.176.6.0"])
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelRack)
     unittest.TextTestRunner(verbosity=2).run(suite)
-

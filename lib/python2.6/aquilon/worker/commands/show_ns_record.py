@@ -33,16 +33,17 @@ from aquilon.aqdb.model import NsRecord, DnsDomain, ARecord
 from aquilon.worker.broker import BrokerCommand
 from aquilon.exceptions_ import NotFoundException
 
+
 class CommandShowNsRecord(BrokerCommand):
 
-    required_parameters = [ "dns_domain", "fqdn" ]
+    required_parameters = ["dns_domain", "fqdn"]
 
     def render(self, session, dns_domain, **kw):
         dbdns = DnsDomain.get_unique(session, dns_domain, compel=True)
         q = session.query(NsRecord).filter_by(dns_domain=dbdns)
 
         dba_record = ARecord.get_unique(session, fqdn=kw['fqdn'], compel=True)
-        q = q.filter_by(a_record = dba_record)
+        q = q.filter_by(a_record=dba_record)
         ns_rec = q.all()
 
         if not ns_rec:

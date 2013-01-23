@@ -57,6 +57,7 @@ class AliasFormatter(ObjectFormatter):
         return (dns_record.fqdn, dns_record.fqdn.dns_environment.name,
                 'CNAME', dns_record.target)
 
+
 class SrvRecordFormatter(ObjectFormatter):
     template_raw = "srv_record.mako"
 
@@ -82,11 +83,14 @@ def inaddr_ptr(ip):
     octets.reverse()
     return "%s.in-addr.arpa" % '.'.join(octets)
 
+
 def octal16(value):
     return "\\%03o\\%03o" % (value >> 8, value & 0xff)
 
+
 def str8(text):
     return "\\%03o" % len(text) + text.replace(':', '\\072')
+
 
 def nstr(text):
     return "".join(str8(p) for p in (text + ".").split('.'))

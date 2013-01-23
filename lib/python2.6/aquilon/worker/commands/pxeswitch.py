@@ -38,13 +38,17 @@ from aquilon.worker.processes import run_command
 from aquilon.worker.logger import CLIENT_INFO
 from aquilon.aqdb.model import Service
 
+
 class CommandPxeswitch(BrokerCommand):
 
     required_parameters = ["hostname"]
-    _option_map = {'status':'--status', 'configure':'--configure',
-                   'localboot':'--boot', 'install':'--install',
-                   'rescue':'--rescue',
-                   'firmware':'--firmware', 'blindbuild':'--livecd'}
+    _option_map = {'status': '--status',
+                   'configure': '--configure',
+                   'localboot': '--boot',
+                   'install': '--install',
+                   'rescue': '--rescue',
+                   'firmware': '--firmware',
+                   'blindbuild': '--livecd'}
     requires_readonly = True
 
     def render(self, session, logger, hostname, **arguments):
@@ -82,10 +86,10 @@ class CommandPxeswitch(BrokerCommand):
         args.append("/dev/null")
         args.append("--servers")
         user = self.config.get("broker", "installfe_user")
-        args.append(" ".join(["%s@%s"%(user, s) for s in servers]))
+        args.append(" ".join(["%s@%s" % (user, s) for s in servers]))
         args.append("--sshdir")
         args.append(self.config.get("broker", "installfe_sshdir"))
         args.append("--logfile")
         logdir = self.config.get("broker", "logdir")
-        args.append("%s/aii-installfe.log"%logdir)
+        args.append("%s/aii-installfe.log" % logdir)
         run_command(args, logger=logger, loglevel=CLIENT_INFO)

@@ -248,6 +248,6 @@ class TestPermission(TestBrokerCommand):
         self.promote_current_user()
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestPermission)
     unittest.TextTestRunner(verbosity=2).run(suite)

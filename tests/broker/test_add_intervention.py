@@ -40,10 +40,10 @@ from datetime import datetime, timedelta
 
 from brokertest import TestBrokerCommand
 
-
 when = datetime.utcnow().replace(microsecond=0) + timedelta(days=1)
 EXPIRY = when.isoformat()
 when = EXPIRY.replace("T", " ")
+
 
 class TestAddIntervention(TestBrokerCommand):
 
@@ -234,7 +234,6 @@ class TestAddIntervention(TestBrokerCommand):
         self.successtest(command)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddIntervention)
     unittest.TextTestRunner(verbosity=2).run(suite)
-

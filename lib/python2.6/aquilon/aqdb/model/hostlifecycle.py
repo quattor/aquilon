@@ -154,6 +154,7 @@ class Ready(HostLifecycle):
         else:
             obj.advertise_status = True
 
+
 class Almostready(HostLifecycle):
     __mapper_args__ = {'polymorphic_identity': 'almostready'}
 

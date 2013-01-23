@@ -58,6 +58,6 @@ class TestUmaskConstraints(TestBrokerCommand):
         self.assert_(dirstat.st_mode & stat.S_IROTH)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestUmaskConstraints)
     unittest.TextTestRunner(verbosity=2).run(suite)

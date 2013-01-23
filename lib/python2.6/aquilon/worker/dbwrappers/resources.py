@@ -182,6 +182,7 @@ def add_resource(session, logger, holder, dbresource, dsdb_callback=None,
 
     return
 
+
 def walk_resources(dbobj):
     """
     Walk all resources of a resource holder

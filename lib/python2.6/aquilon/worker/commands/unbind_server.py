@@ -36,6 +36,7 @@ from aquilon.worker.dbwrappers.host import hostname_to_host
 from aquilon.worker.dbwrappers.service_instance import get_service_instance
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
 
+
 class CommandUnbindServer(BrokerCommand):
 
     required_parameters = ["hostname", "service"]
@@ -58,7 +59,8 @@ class CommandUnbindServer(BrokerCommand):
                 if (dbinstance.client_count > 0 and
                     len(dbinstance.server_hosts) <= 1):
                     logger.warning("WARNING: Server %s, is the last server "
-                                   "bound to %s which still has clients" % (hostname, msg))
+                                   "bound to %s which still has clients" %
+                                   (hostname, msg))
 
                 dbinstance.server_hosts.remove(dbhost)
                 session.expire(dbhost, ['_services_provided'])

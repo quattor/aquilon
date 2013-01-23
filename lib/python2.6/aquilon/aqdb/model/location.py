@@ -40,6 +40,7 @@ from aquilon.aqdb.model import Base, DnsDomain
 from aquilon.aqdb.column_types import AqStr
 from aquilon.exceptions_ import AquilonError
 
+
 class Location(Base):
     """ How we represent location data in Aquilon """
     __tablename__ = 'location'
@@ -178,7 +179,7 @@ class Location(Base):
             for plink in self._parent_links:
                 q = session.query(LocationLink)
                 q = q.filter(and_(LocationLink.child_id.in_(self.offspring_ids()),
-                                  LocationLink.parent_id==plink.parent.id))
+                                  LocationLink.parent_id == plink.parent.id))
                 # See above: we depend on the caching ability of the session, so
                 # we can't use q.delete()
                 for clink in q.all():

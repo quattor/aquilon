@@ -38,6 +38,7 @@ from aquilon.worker.broker import BrokerCommand, validate_basic
 from aquilon.worker.dbwrappers.resources import (add_resource,
                                                  get_resource_holder)
 
+
 class CommandAddRebootSchedule(BrokerCommand):
 
     required_parameters = ["week", "day"]

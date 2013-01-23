@@ -66,7 +66,6 @@ class TestDelRoom(TestBrokerCommand):
                         "--type", "unknown",
                         "--comments", "Made-up network"])
 
-
         # try delete room
         command = "del room --room %s" % test_room
         err = self.badrequesttest(command.split(" "))
@@ -82,4 +81,3 @@ class TestDelRoom(TestBrokerCommand):
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelRoom)
     unittest.TextTestRunner(verbosity=2).run(suite)
-

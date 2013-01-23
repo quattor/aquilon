@@ -39,6 +39,7 @@ from aquilon.worker.dbwrappers.host import hostlist_to_hosts
 from aquilon.worker.locks import lock_queue, CompileKey
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
 
+
 class CommandManageList(BrokerCommand):
 
     required_parameters = ["list"]

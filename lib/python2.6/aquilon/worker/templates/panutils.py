@@ -134,11 +134,13 @@ def pan_assign(lines, path, value):
 def pan_push(lines, path, value):
     lines.append('"%s" = push(%s);' % (path, pan(value)))
 
+
 def pan_include(lines, templates):
     if not isinstance(templates, list):
         templates = [templates]
     for tpl in templates:
         lines.append('include { "%s" };' % tpl)
+
 
 def pan_include_if_exists(lines, templates):
     if not isinstance(templates, list):
@@ -153,6 +155,7 @@ def pan_variable(lines, variable, value, final=False):
     else:
         lines.append('variable %s = %s;' % (variable, pan(value)))
 
+
 def pan_comment(lines, comments):
     if not isinstance(comments, list):
         comments = [comments]
@@ -162,6 +165,7 @@ def pan_comment(lines, comments):
     for comment in comments:
         lines.append(comment)
     lines.append('}')
+
 
 class PanObject(object):
     def format(self, indent=0):

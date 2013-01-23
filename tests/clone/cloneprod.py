@@ -38,7 +38,6 @@ for a proid.
 
 """
 
-
 import os
 import sys
 from subprocess import Popen
@@ -75,6 +74,7 @@ def nuke_target(target_login, target_user):
         cursor.execute('DROP SEQUENCE "%s"."%s"' % (target_user, sequence))
     cursor.close()
     connection.close()
+
 
 class Cloner(object):
     @staticmethod

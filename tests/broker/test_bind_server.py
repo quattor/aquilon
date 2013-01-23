@@ -166,6 +166,6 @@ class TestBindServer(TestBrokerCommand):
         self.matchoutput(out, "Provides: service/utsvc/utsi2", command)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestBindServer)
     unittest.TextTestRunner(verbosity=2).run(suite)

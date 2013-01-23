@@ -177,7 +177,7 @@ def find_storage_data(dbshare):
     dbshare can be a Share or a ServiceInstance which is a nas_disk_share
     """
 
-    # TODO should check here 
+    # TODO should check here
     # isinstance(dbshare, PlenaryResource and dbshare.type == share)
     # or (isinstance(dbshare, PlenaryInstanceNasDiskShare)
 
@@ -219,4 +219,3 @@ def find_storage_data(dbshare):
                         break
 
         return share_info
-

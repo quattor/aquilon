@@ -38,6 +38,7 @@ from aquilon.worker.locks import lock_queue, CompileKey
 from aquilon.worker.processes import DSDBRunner
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
 
+
 class CommandDelSwitch(BrokerCommand):
 
     required_parameters = ["switch"]

@@ -75,7 +75,6 @@ class TestDelManager(TestBrokerCommand):
         self.notfoundtest(command.split(" "))
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelManager)
     unittest.TextTestRunner(verbosity=2).run(suite)
-

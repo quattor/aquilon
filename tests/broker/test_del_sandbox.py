@@ -119,6 +119,6 @@ class TestDelSandbox(TestBrokerCommand):
                          command)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelSandbox)
     unittest.TextTestRunner(verbosity=2).run(suite)

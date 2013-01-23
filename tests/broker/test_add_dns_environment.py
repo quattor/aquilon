@@ -78,6 +78,6 @@ class TestAddDnsEnvironment(TestBrokerCommand):
         self.matchoutput(out, "Comments: Unit test environment", command)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddDnsEnvironment)
     unittest.TextTestRunner(verbosity=2).run(suite)

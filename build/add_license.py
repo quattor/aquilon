@@ -88,6 +88,7 @@ contributor_copyright_re = re.compile(
 trailing_space_re = re.compile(r'\s+(?=\n)$')
 module_re = re.compile(r'^\s*#\s*This module is part of [Aa]quilon')
 
+
 def fix_file(filepath):
     with file(filepath) as f:
         contents = f.readlines()
@@ -162,6 +163,7 @@ def fix_file(filepath):
         with file(filepath, 'w') as f:
             f.writelines(new_contents)
 
+
 def fix_recursive(start_dir):
     print >>sys.stderr, "Processing %s" % start_dir
     for dirpath, dirnames, filenames in os.walk(start_dir):
@@ -171,6 +173,7 @@ def fix_recursive(start_dir):
             if not f.endswith('.py'):
                 continue
             fix_file(os.path.join(dirpath, f))
+
 
 def main(args):
     if len(args) > 2:

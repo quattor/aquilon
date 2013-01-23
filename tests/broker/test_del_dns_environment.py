@@ -65,6 +65,6 @@ class TestDelDnsEnvironment(TestBrokerCommand):
         self.matchoutput(out, "DNS Environment ut-env not found.", command)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelDnsEnvironment)
     unittest.TextTestRunner(verbosity=2).run(suite)

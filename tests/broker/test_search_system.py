@@ -60,7 +60,6 @@ class TestSearchSystem(TestBrokerCommand):
 #        self.matchoutput(out, "Primary Name: unittest00.one-nyp.ms.com", command)
 #        self.matchoutput(out, "Blade: ut3c1n3", command)
 
-
     def testdnsdomainavailable(self):
         command = "search system --dns_domain aqd-unittest.ms.com"
         out = self.commandtest(command.split(" "))
@@ -175,7 +174,6 @@ class TestSearchSystem(TestBrokerCommand):
 #        self.matchoutput(out, "Chassis: ut3c1", command)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestSearchSystem)
     unittest.TextTestRunner(verbosity=2).run(suite)
-

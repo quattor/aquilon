@@ -42,12 +42,10 @@ from brokertest import TestBrokerCommand
 class TestCountry(TestBrokerCommand):
 
     def testadd(self):
-
         command = ["add", "country", "--country", "ct", "--fullname",
                    "country example", "--continent", "na",
                    "--comments", "test country"]
         self.noouttest(command)
-
 
     def testaddshow(self):
         command = "show country --country ct"
@@ -73,7 +71,6 @@ class TestCountry(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchclean(out, "Country: ct", command)
 
-
     def testdel(self):
         test_country = "ct"
 
@@ -84,7 +81,6 @@ class TestCountry(TestBrokerCommand):
                         "--country", test_country,
                         "--type", "unknown",
                         "--comments", "Made-up network"])
-
 
         # try delete country
         command = "del country --country %s" % test_country
@@ -106,7 +102,7 @@ class TestCountry(TestBrokerCommand):
         out = self.notfoundtest(command.split(" "))
         self.matchoutput(out, "Country ct not found.", command)
 
+
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestCountry)
     unittest.TextTestRunner(verbosity=2).run(suite)
-

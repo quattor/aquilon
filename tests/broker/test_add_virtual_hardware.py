@@ -48,7 +48,7 @@ class TestAddVirtualHardware(TestBrokerCommand):
                             "--cluster", "utecl1", "--model", "utmedium"])
 
     def test_001_addnextmachine(self):
-        command = ["add", "machine", "--prefix", "evm" ,
+        command = ["add", "machine", "--prefix", "evm",
                    "--cluster", "utecl1", "--model", "utmedium"]
         out = self.commandtest(command)
         self.matchoutput(out, "evm9", command)

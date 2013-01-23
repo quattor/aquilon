@@ -102,4 +102,3 @@ class TestOrganization(TestBrokerCommand):
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestOrganization)
     unittest.TextTestRunner(verbosity=2).run(suite)
-

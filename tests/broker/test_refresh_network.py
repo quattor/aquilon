@@ -45,6 +45,7 @@ from ipaddr import IPv4Address, IPv4Network
 
 from brokertest import TestBrokerCommand
 
+
 def dynname(ip, domain="aqd-unittest.ms.com"):
     return "dynamic-%s.%s" % (str(ip).replace(".", "-"), domain)
 
@@ -332,6 +333,6 @@ class TestRefreshNetwork(TestBrokerCommand):
         self.noouttest(command)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestRefreshNetwork)
     unittest.TextTestRunner(verbosity=2).run(suite)

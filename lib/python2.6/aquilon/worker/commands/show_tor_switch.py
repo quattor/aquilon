@@ -58,7 +58,7 @@ class CommandShowTorSwitch(BrokerCommand):
         q = session.query(Switch)
         if rack:
             dblocation = get_location(session, rack=rack)
-            q = q.filter(Switch.location==dblocation)
+            q = q.filter_by(location=dblocation)
         if model or vendor:
             subq = Model.get_matching_query(session, name=model, vendor=vendor,
                                             machine_type='switch', compel=True)

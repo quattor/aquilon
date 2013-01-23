@@ -72,7 +72,7 @@ class TestManageList(TestBrokerCommand):
                  "aquilon66.aqd-unittest.ms.com\n"]
         scratchfile = self.writescratch("managelist", "".join(hosts))
         self.noouttest(["manage", "--list", scratchfile,
-                        "--sandbox", "%s/managetest2" % user ])
+                        "--sandbox", "%s/managetest2" % user])
 
     def test_103_verify_manage_list(self):
         user = self.config.get("unittest", "user")

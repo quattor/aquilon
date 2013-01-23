@@ -36,7 +36,7 @@ from aquilon.worker.broker import BrokerCommand
 
 class CommandDelVendor(BrokerCommand):
 
-    required_parameters = [ "vendor" ]
+    required_parameters = ["vendor"]
 
     def render(self, session, vendor, **arguments):
         dbvendor = Vendor.get_unique(session, vendor, compel=True)

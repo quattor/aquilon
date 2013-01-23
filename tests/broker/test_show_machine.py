@@ -60,6 +60,6 @@ class TestShowMachine(TestBrokerCommand):
         self.matchoutput(out, "Illegal hardware label", command)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestShowMachine)
     unittest.TextTestRunner(verbosity=2).run(suite)

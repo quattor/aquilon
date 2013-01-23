@@ -91,6 +91,7 @@ def visit_create_index(create, compiler, **kw):
 
     return text
 
+
 # Add support for table compression
 @monkeypatch(OracleDDLCompiler)
 def post_create_table(self, table):
@@ -98,8 +99,10 @@ def post_create_table(self, table):
         return " COMPRESS"
     return ""
 
+
 def sqlite_foreign_keys(dbapi_con, con_record):
     dbapi_con.execute('pragma foreign_keys=ON')
+
 
 def sqlite_no_fsync(dbapi_con, con_record):
     dbapi_con.execute('pragma synchronous=OFF')
@@ -107,7 +110,7 @@ def sqlite_no_fsync(dbapi_con, con_record):
 
 class DbFactory(object):
     __shared_state = {}
-    __started = False # at the class definition, that is
+    __started = False  # at the class definition, that is
 
     def __init__(self, *args, **kw):
         self.__dict__ = self.__shared_state
@@ -303,6 +306,7 @@ class DbFactory(object):
             raise ValueError('can not drop %s databases' %
                              self.engine.dialect.name)
 
+
 def is_prod_ora_instance(dsn):  # pragma: no cover
     prod_re = re.compile('@NYPO_AQUILON', re.IGNORECASE)
     if prod_re.search(dsn):
@@ -310,11 +314,13 @@ def is_prod_ora_instance(dsn):  # pragma: no cover
     else:
         return False
 
+
 def is_prod_user():  # pragma: no cover
     if os.environ['USER'] == 'cdb':
         return True
     else:
         return False
+
 
 def is_prod(dsn):  # pragma: no cover
     if is_prod_ora_instance(dsn) and is_prod_user():

@@ -191,7 +191,6 @@ class PlenaryClusterObject(Plenary):
         pan_include(lines, "clusterdata/%s" % self.name)
         pan_include(lines, "archetype/base")
 
-
         for servinst in sorted(self.dbobj.service_bindings):
             pan_include(lines, "service/%s/%s/client/config" %
                         (servinst.service.name, servinst.name))

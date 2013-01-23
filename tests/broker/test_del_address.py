@@ -149,14 +149,13 @@ class TestDelAddress(TestBrokerCommand):
         # External IP addresses should not be added to DSDB
         self.dsdb_verify(empty=True)
 
-
         command = ["show_address", "--fqdn", fqdn,
                    "--network_environment", "cardenv"]
         out = self.notfoundtest(command)
 
     def test_610_addipfromip_with_network_env(self):
         fqdn = "cardenvtest610.aqd-unittest.ms.com"
-        command = ["del", "address",  "--fqdn", fqdn,
+        command = ["del", "address", "--fqdn", fqdn,
                    "--network_environment", "cardenv"]
         self.noouttest(command)
         # External IP addresses should not be added to DSDB

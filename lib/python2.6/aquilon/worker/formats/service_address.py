@@ -56,4 +56,3 @@ class ServiceAddressFormatter(ResourceFormatter):
 
 
 ObjectFormatter.handlers[ServiceAddress] = ServiceAddressFormatter()
-

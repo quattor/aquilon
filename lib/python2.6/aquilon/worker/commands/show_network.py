@@ -58,7 +58,7 @@ class CommandShowNetwork(BrokerCommand):
             else:
                 return dbnetwork
         if type:
-            q = q.filter_by(network_type = type)
+            q = q.filter_by(network_type=type)
         dblocation = get_location(session, **arguments)
         if dblocation:
             childids = dblocation.offspring_ids()

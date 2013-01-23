@@ -168,6 +168,6 @@ class TestSearchSwitch(TestBrokerCommand):
                          command)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestSearchSwitch)
     unittest.TextTestRunner(verbosity=2).run(suite)

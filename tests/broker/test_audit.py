@@ -144,9 +144,9 @@ class TestAudit(TestBrokerCommand):
                 # This command!
                 self.assertTrue(tran_start_time >= my_start_time)
                 self.assertTrue(tran.end_time == 0)
-                expected = {command[1][2:]:command[2],
-                            command[3][2:]:command[4],
-                            command[5][2:]:command[6]}
+                expected = {command[1][2:]: command[2],
+                            command[3][2:]: command[4],
+                            command[5][2:]: command[6]}
                 for arg in tran.arguments:
                     self.assertTrue(arg.name in expected,
                                     "Unexpected arg %s='%s' in "

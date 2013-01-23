@@ -52,11 +52,11 @@ class TestPublishSandbox(TestBrokerCommand):
         testdir = os.path.join(self.sandboxdir, "changetest1", "t")
         if os.path.exists(os.path.join(testdir, "Makefile")):
             p = Popen(('/usr/bin/make', 'clean'),
-                      cwd=testdir, env=self.gitenv(env={'PATH':'/bin:/usr/bin'}),
+                      cwd=testdir, env=self.gitenv(env={'PATH': '/bin:/usr/bin'}),
                       stdout=PIPE, stderr=PIPE)
             (out, err) = p.communicate()
             self.assertEqual(p.returncode, 0,
-                             "Non-zero return code running make clean in sandbox,"+
+                             "Non-zero return code running make clean in sandbox,"
                              " STDOUT:\n@@@'%s'\n@@@\nSTDERR:\n@@@'%s'@@@\n"
                              % (out, err))
 

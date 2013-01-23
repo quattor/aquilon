@@ -178,6 +178,7 @@ class CommandUpdateCluster(BrokerCommand):
 
         return
 
+
 def update_cluster_location(session, logger, dbcluster,
                             fix_location, plenaries, remove_plenaries,
                             **arguments):

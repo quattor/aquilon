@@ -167,6 +167,6 @@ class TestAddRouter(TestBrokerCommand):
         self.matchclean(out, "ut3gd1r04", command)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddRouter)
     unittest.TextTestRunner(verbosity=2).run(suite)

@@ -44,10 +44,13 @@ from aquilon.aqdb.model import Service
 class CommandPxeswitchList(BrokerCommand):
 
     required_parameters = ["list"]
-    _option_map = {'status':'--statuslist', 'configure':'--configurelist',
-                   'localboot':'--bootlist', 'install':'--installlist',
-                   'rescue':'--rescuelist',
-                   'firmware':'--firmwarelist', 'blindbuild':'--livecdlist'}
+    _option_map = {'status': '--statuslist',
+                   'configure': '--configurelist',
+                   'localboot': '--bootlist',
+                   'install': '--installlist',
+                   'rescue': '--rescuelist',
+                   'firmware': '--firmwarelist',
+                   'blindbuild': '--livecdlist'}
     requires_readonly = True
 
     def render(self, session, logger, list, **arguments):

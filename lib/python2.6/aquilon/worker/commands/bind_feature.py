@@ -38,6 +38,7 @@ from aquilon.worker.templates.personality import PlenaryPersonality
 from aquilon.worker.commands.deploy import validate_justification
 from aquilon.worker.dbwrappers.feature import add_link
 
+
 class CommandBindFeature(BrokerCommand):
 
     required_parameters = ['feature']
@@ -50,7 +51,6 @@ class CommandBindFeature(BrokerCommand):
         if interface and not personality:
             raise ArgumentError("Binding to a named interface needs "
                                 "a personality.")
-
 
         q = session.query(Personality)
         dbarchetype = None
@@ -149,7 +149,6 @@ class CommandBindFeature(BrokerCommand):
                 for plenary in successful:
                     plenary.restore_stash()
                 raise PartialError([], failed)
-
 
         logger.client_info("Flushed %d/%d templates." %
                            (written, written + len(failed)))

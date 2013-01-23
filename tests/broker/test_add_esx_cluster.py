@@ -113,7 +113,6 @@ class TestAddESXCluster(TestBrokerCommand):
         self.matchclean(data, '"/system/cluster/down_hosts_percent"', data_cmd)
         self.matchclean(data, '"/system/cluster/down_maint_percent"', data_cmd)
 
-
     def testaddutecl2(self):
         command = ["add_esx_cluster", "--cluster=utecl2",
                    "--metacluster=utmc1", "--building=ut",

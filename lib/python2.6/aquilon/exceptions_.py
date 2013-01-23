@@ -30,6 +30,7 @@
 """Exceptions to be used by Aquilon"""
 """The base exception class is AquilonError."""
 
+
 def deprecated(message):
     import warnings
     warnings.warn(message, DeprecationWarning, stacklevel=2)
@@ -86,7 +87,7 @@ class RollbackException(AquilonError):
         self.jobid = jobid
         self.cause = cause
         if not args and cause:
-            args = [ str(cause) ]
+            args = [str(cause)]
         AquilonError.__init__(self, *args, **kwargs)
 
 

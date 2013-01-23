@@ -255,7 +255,7 @@ class ServiceInstance(Base):
                 q = q.reset_joinpoint()
                 q = q.outerjoin('network')
                 q = q.filter(or_(Location.id.in_(location_ids),
-                                 Network.id==dbnetwork.id))
+                                 Network.id == dbnetwork.id))
             else:
                 q = q.reset_joinpoint()
                 q = q.join('location')
@@ -298,13 +298,14 @@ service_instance.append_constraint(
 service_instance.info['abrev'] = _ABV
 service_instance.info['unique_fields'] = ['name', 'service']
 
+
 class BuildItem(Base):
     """ Identifies the service_instance bindings of a machine. """
     __tablename__ = 'build_item'
 
     host_id = Column('host_id', Integer, ForeignKey('host.machine_id',
-                                                     ondelete='CASCADE',
-                                                     name='build_item_host_fk'),
+                                                    ondelete='CASCADE',
+                                                    name='build_item_host_fk'),
                      primary_key=True)
 
     service_instance_id = Column(Integer,

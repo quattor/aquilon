@@ -45,7 +45,6 @@ class TestFlush(TestBrokerCommand):
         (out, err) = self.successtest(["flush", "--all"])
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestFlush)
     unittest.TextTestRunner(verbosity=2).run(suite)
-

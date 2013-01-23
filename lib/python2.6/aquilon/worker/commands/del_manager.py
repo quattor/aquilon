@@ -67,7 +67,7 @@ class CommandDelManager(BrokerCommand):
             dbinterface.assignments.remove(assignment)
             delete_dns_record(dbmanager)
             session.flush()
-    
+
             dsdb_runner = DSDBRunner(logger=logger)
             dsdb_runner.update_host(dbmachine, oldinfo)
             dsdb_runner.commit_or_rollback("Could not remove host %s from DSDB"

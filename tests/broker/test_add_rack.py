@@ -101,7 +101,6 @@ class TestAddRack(TestBrokerCommand):
         self.matchoutput(out, "Row: 99", command)
         self.matchoutput(out, "Column: zz", command)
 
-
     def testverifyshowallcsv(self):
         command = "show rack --all --format=csv"
         out = self.commandtest(command.split(" "))
@@ -110,6 +109,6 @@ class TestAddRack(TestBrokerCommand):
         self.matchoutput(out, "rack,np909,building,np,99,zz", command)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddRack)
     unittest.TextTestRunner(verbosity=2).run(suite)

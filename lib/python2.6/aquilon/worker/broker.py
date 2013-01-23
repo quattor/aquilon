@@ -67,11 +67,12 @@ audit_id = 0
    """
 
 # Mapping of command exceptions to client return code.
-ERROR_TO_CODE = {NotFoundException:http.NOT_FOUND,
-                 AuthorizationException:http.UNAUTHORIZED,
-                 ArgumentError:http.BAD_REQUEST,
-                 UnimplementedError:http.NOT_IMPLEMENTED,
-                 PartialError:http.MULTI_STATUS}
+ERROR_TO_CODE = {NotFoundException: http.NOT_FOUND,
+                 AuthorizationException: http.UNAUTHORIZED,
+                 ArgumentError: http.BAD_REQUEST,
+                 UnimplementedError: http.NOT_IMPLEMENTED,
+                 PartialError: http.MULTI_STATUS}
+
 
 def get_code_for_error_class(e):
     if e is None or e == None.__class__:
@@ -103,7 +104,6 @@ class BrokerCommand(object):
     If so, the required entry "wins".
 
     """
-
 
     requires_azcheck = True
     """ Opt out of authorization checks by setting this flag to False."""
@@ -281,7 +281,7 @@ class BrokerCommand(object):
                         self._set_readonly(session)
                     # begin() is only required if session transactional=False
                     #session.begin()
-                if self.badmode: # pragma: no cover
+                if self.badmode:  # pragma: no cover
                     raise UnimplementedError("Command %s not available on "
                                              "a %s broker." %
                                              (self.command, self.badmode))
@@ -511,6 +511,7 @@ class BrokerCommand(object):
 # What is considered valid here should also be a valid nlist key.
 basic_validation_re = re.compile('^[a-zA-Z_][a-zA-Z0-9_.-]*$')
 """Restriction for certain incoming labels beyond AqStr."""
+
 
 def validate_basic(label, value):
     if not basic_validation_re.match(value):

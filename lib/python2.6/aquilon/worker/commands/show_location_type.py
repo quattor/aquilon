@@ -38,6 +38,7 @@ from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import Location
 from aquilon.worker.formats.location import LocationList
 
+
 class CommandShowLocationType(BrokerCommand):
 
     required_parameters = ["type"]

@@ -51,8 +51,9 @@ def gather_deps(dir):
                         continue
                     if package in ['setuptools']:
                         continue
-		    dependencies[package] = version
+                    dependencies[package] = version
     return dependencies
+
 
 def bootstrap(dependencies, dir):
     extra = textwrap.dedent("""
@@ -77,6 +78,7 @@ def bootstrap(dependencies, dir):
     extra += "    subprocess.call([easy_install, '.'], cwd='%s')\n" % (
         os.path.join(dir, 'bootstrap_Sybase'))
     print virtualenv.create_bootstrap_script(extra)
+
 
 if __name__ == '__main__':
     dir = os.path.dirname(os.path.realpath(__file__))

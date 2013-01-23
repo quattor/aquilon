@@ -87,4 +87,3 @@ class ResourceListFormatter(ListFormatter):
 
 
 ObjectFormatter.handlers[ResourceList] = ResourceListFormatter()
-

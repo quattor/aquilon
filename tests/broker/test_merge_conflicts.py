@@ -381,6 +381,6 @@ class TestMergeConflicts(TestBrokerCommand):
         self.notfoundtest(command.split(" "))
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestMergeConflicts)
     unittest.TextTestRunner(verbosity=2).run(suite)

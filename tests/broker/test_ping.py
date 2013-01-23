@@ -52,7 +52,6 @@ class TestPing(TestBrokerCommand):
         self.matchoutput(out, "pong", command)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestPing)
     unittest.TextTestRunner(verbosity=2).run(suite)
-

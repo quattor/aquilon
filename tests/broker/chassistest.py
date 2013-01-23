@@ -82,4 +82,3 @@ class VerifyChassisMixin(object):
                               interface, command)
 
         return (out, command)
-

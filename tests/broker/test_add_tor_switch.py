@@ -120,7 +120,7 @@ class TestAddTorSwitch(TestBrokerCommand, VerifySwitchMixin):
     # Test adding a switch, creating a new rack, and adding an IP.
     def testaddnp999gd1r01(self):
         # Deprecated.
-        ip =  self.net.tor_net[5].usable[0]
+        ip = self.net.tor_net[5].usable[0]
         self.dsdb_expect_add("np999gd1r01.aqd-unittest.ms.com", ip, "xge49",
                              ip.mac)
         command = ["add", "tor_switch",
@@ -355,6 +355,6 @@ class TestAddTorSwitch(TestBrokerCommand, VerifySwitchMixin):
         (out, err) = self.successtest(command)
         self.dsdb_verify()
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddTorSwitch)
     unittest.TextTestRunner(verbosity=2).run(suite)

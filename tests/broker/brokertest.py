@@ -37,7 +37,7 @@ from subprocess import Popen, PIPE
 import re
 
 from aquilon.config import Config
-from aquilon.worker import depends # fetch protobuf, ipaddr dependency
+from aquilon.worker import depends  # fetch protobuf, ipaddr dependency
 
 from ipaddr import IPv4Network, IPv4Address
 
@@ -74,7 +74,6 @@ class TestBrokerCommand(unittest.TestCase):
         self.sandboxdir = os.path.join(self.config.get("broker",
                                                        "templatesdir"),
                                        self.user)
-
 
         # This method is cumbersome.  Should probably develop something
         # like unittest.conf.defaults.
@@ -130,7 +129,7 @@ class TestBrokerCommand(unittest.TestCase):
             args.append(self.config.get("broker", "service"))
         else:
             args.append("--noauth")
-        if kwargs.has_key("env"):
+        if "env" in kwargs:
             # Make sure that kerberos tickets are still present if the
             # environment is being overridden...
             env = {}
@@ -423,7 +422,8 @@ class TestBrokerCommand(unittest.TestCase):
 
     def parse_parameters_msg(self, msg, expect=None):
         return self.parse_proto_msg(aqdparameters_pb2.ParameterList,
-                                    'parameters',  msg, expect)
+                                    'parameters', msg, expect)
+
     def gitenv(self, env=None):
         """Configure a known sanitised environment"""
         git_path = self.config.get("broker", "git_path")
@@ -436,7 +436,7 @@ class TestBrokerCommand(unittest.TestCase):
         if env:
             for (key, value) in env.iteritems():
                 newenv[key] = value
-        if newenv.has_key("PATH"):
+        if "PATH" in newenv:
             newenv["PATH"] = "%s:%s:%s" % (git_path, python_path, newenv["PATH"])
         else:
             newenv["PATH"] = "%s:%s:%s" % (git_path, python_path, '/bin:/usr/bin')
@@ -450,7 +450,7 @@ class TestBrokerCommand(unittest.TestCase):
             args = [command]
         args.insert(0, git)
         env = {}
-        if kwargs.has_key("env"):
+        if "env" in kwargs:
             env = self.gitenv(kwargs.pop("env"))
         p = Popen(args, stdout=PIPE, stderr=PIPE, env=env, **kwargs)
         return p
@@ -547,7 +547,7 @@ class TestBrokerCommand(unittest.TestCase):
             else:
                 fp.write(str(command))
             fp.write("\n")
-        if fail and errstr :
+        if fail and errstr:
             errfile = DSDB_EXPECT_FAILURE_ERROR
             expected_name = os.path.join(dsdb_coverage_dir, errfile)
             with open(expected_name, "a") as fp:
@@ -677,12 +677,14 @@ class TestBrokerCommand(unittest.TestCase):
                          "Failed to restore admin privs '%s', '%s'." %
                          (out, err))
 
+
 class DummyIP(IPv4Address):
     def __init__(self, *args, **kwargs):
         super(DummyIP, self).__init__(*args, **kwargs)
 
         octets = [int(i) for i in str(self).split('.')]
         self.mac = "02:02:%02x:%02x:%02x:%02x" % tuple(octets)
+
 
 class NetworkInfo(IPv4Network):
     def __init__(self, cidr, nettype):
@@ -803,4 +805,3 @@ class DummyNetworks(object):
         # network base svc maps, deliberately not in self.all
         self.netsvcmap = NetworkInfo("4.2.16.0/26", "unknown")
         self.netperssvcmap = NetworkInfo("4.2.17.0/26", "unknown")
-

@@ -147,6 +147,7 @@ def set_log_file(logFile, setStdout=True, start=True):
         log.startLoggingWithObserver(observer, setStdout=setStdout)
     return observer
 
+
 def updated_application_run(self):
     """Patch for twisted.application.app.ApplicationRunner.run().
 
@@ -184,6 +185,7 @@ def updated_application_run(self):
     self.postApplication()
     self.logger.stop()
 
+
 def integrate_logging(config):
     """Use a BridgeLogHandler to tie python's logging to twisted.python.log."""
     rootlog = logging.getLogger()
@@ -195,7 +197,7 @@ def integrate_logging(config):
         if logvalue not in logging._levelNames:
             # ...but ignore it if it is a default (accidently
             # polluting the section).
-            if not config.defaults().has_key(logname):
+            if not logname in config.defaults():
                 log.msg("For config [logging]/%s, "
                         "%s not a valid log level." % (logname, logvalue))
             continue

@@ -51,6 +51,7 @@ def get_network_byname(session, netname, environment):
                             netname)
     return dbnetwork
 
+
 def get_network_byip(session, ipaddr, environment):
     try:
         q = session.query(Network)
@@ -60,6 +61,7 @@ def get_network_byip(session, ipaddr, environment):
     except NoResultFound:
         raise NotFoundException("Network with address %s not found." % ipaddr)
     return dbnetwork
+
 
 def fix_foreign_links(session, oldnet, newnet):
     """

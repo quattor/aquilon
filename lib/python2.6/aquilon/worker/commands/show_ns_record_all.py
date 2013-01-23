@@ -34,6 +34,7 @@ from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.commands.show_ns_record import CommandShowNsRecord
 from aquilon.worker.formats.ns_record import SimpleNSRecordList
 
+
 class CommandShowNsRecordAll(CommandShowNsRecord):
 
     required_parameters = []

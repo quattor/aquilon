@@ -151,4 +151,3 @@ class TestUpdateAlias(TestBrokerCommand):
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestUpdateAlias)
     unittest.TextTestRunner(verbosity=2).run(suite)
-

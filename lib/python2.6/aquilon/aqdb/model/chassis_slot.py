@@ -56,7 +56,7 @@ class ChassisSlot(Base):
                         nullable=True)
     # TODO: need a unique key against this, but what if it takes 2 slots?
     # TODO: remove delete-orphan?
-    chassis = relation(Chassis, 
+    chassis = relation(Chassis,
                        backref=backref('slots', cascade='delete, delete-orphan',
                                        order_by=[slot_number]))
 

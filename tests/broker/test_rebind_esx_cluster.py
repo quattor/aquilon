@@ -83,4 +83,3 @@ class TestRebindESXCluster(TestBrokerCommand):
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestRebindESXCluster)
     unittest.TextTestRunner(verbosity=2).run(suite)
-

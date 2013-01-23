@@ -48,8 +48,7 @@ class TestClusterEarlyConstraints(TestBrokerCommand):
         self.matchoutput(out, "cannot support VMs", command)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(
         TestClusterEarlyConstraints)
     unittest.TextTestRunner(verbosity=2).run(suite)
-

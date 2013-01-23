@@ -79,7 +79,7 @@ class CommandAddDisk(BrokerCommand):
         if dbshare.manager != 'aqd':
             raise ArgumentError("Disk '%s' is managed by %s and can only be "
                                 "assigned with the 'autoshare' option." %
-                                ( dbshare.name, dbshare.manager))
+                                (dbshare.name, dbshare.manager))
         if not CommandAddDisk.REGEX_CAPACITY.match(address):
             raise ArgumentError("Disk address '%s' is not valid, it must "
                                 "match \d+:\d+ (e.g. 0:0)." % address)

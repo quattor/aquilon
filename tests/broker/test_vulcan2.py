@@ -39,11 +39,9 @@ if __name__ == "__main__":
 
 from brokertest import TestBrokerCommand
 
+
 class TestVulcan20(TestBrokerCommand):
-
-
     # Metacluster / cluster / Switch tests
-
 
     def test_000_addutmc8(self):
         command = ["add_metacluster", "--metacluster=utmc8",
@@ -206,12 +204,7 @@ class TestVulcan20(TestBrokerCommand):
                          "utpgsw1.aqd-unittest.ms.com",
                          command)
 
-
-
-
 #    Storage group / resource tests
-
-
     def test_101_add_rg_to_cluster(self):
         command = ["add_resourcegroup", "--resourcegroup=utmc8as1",
                    "--cluster=utmc8", "--required_type=share"]
@@ -241,7 +234,6 @@ class TestVulcan20(TestBrokerCommand):
                          'push(create("resource/cluster/utmc8/'
                          'resourcegroup/utmc8as1/config"));',
                          command)
-
 
     def test_103_add_share_to_rg(self):
         command = ["add_share", "--resourcegroup=utmc8as1",
@@ -373,7 +365,6 @@ class TestVulcan20(TestBrokerCommand):
         self.matchclean(out, "utpgs01p0", command)
 
 #    metacluster aligned svc tests
-
     def test_150_addvcenterservices(self):
         command = ["add", "service", "--service", "vcenter", "--instance", "ut"]
         self.noouttest(command)
@@ -399,7 +390,6 @@ class TestVulcan20(TestBrokerCommand):
                    "--building", "np", "--personality", "vulcan2-10g-test",
                    "--archetype", "vmhost"]
         self.noouttest(command)
-
 
     def test_152_bindvcenterservices(self):
         command = ["bind_cluster", "--cluster", "utmc8", "--service", "vcenter",
@@ -562,10 +552,7 @@ class TestVulcan20(TestBrokerCommand):
         command = ["del", "service", "--service", "esx_management_server", "--instance", "ut.mc"]
         self.noouttest(command)
 
-
 #    Storage group related deletes
-
-
     def test_202_delutpgm0disk(self):
         self.noouttest(["del", "disk", "--machine", "utpgm0",
             "--controller", "scsi", "--disk", "sdb"])
@@ -587,10 +574,7 @@ class TestVulcan20(TestBrokerCommand):
                    "--cluster=utmc8"]
         self.successtest(command)
 
-
     # Metacluster / cluster / Switch deletes
-
-
     def test_305_delinterfaces(self):
         for i in range(0, 2):
             ip = self.net.vm_storage_net[0].usable[i + 26]

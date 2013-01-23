@@ -41,6 +41,7 @@ from brokertest import TestBrokerCommand
 SRV_MSG = "WARNING: Server %s, is the last server bound to Service %s which still has clients"
 SRVINST_MSG = "WARNING: Server %s, is the last server bound to Service %s, instance %s which still has clients"
 
+
 class TestUnbindServer(TestBrokerCommand):
 
     def testunbindutsi1unittest02(self):
@@ -52,7 +53,7 @@ class TestUnbindServer(TestBrokerCommand):
         self.assertEmptyOut(out, command)
 
         self.matchoutput(err,
-                         SRV_MSG % ("unittest02.one-nyp.ms.com","utsvc"),
+                         SRV_MSG % ("unittest02.one-nyp.ms.com", "utsvc"),
                          command)
 
     def testunbinddns(self):
@@ -67,7 +68,7 @@ class TestUnbindServer(TestBrokerCommand):
         self.assertEmptyOut(out, command)
 
         self.matchoutput(err,
-                         SRV_MSG % ("nyaqd1.ms.com","dns"),
+                         SRV_MSG % ("nyaqd1.ms.com", "dns"),
                          command)
 
     # Should have already been unbound...
@@ -104,7 +105,7 @@ class TestUnbindServer(TestBrokerCommand):
         self.assertEmptyOut(out, command)
 
         self.matchoutput(err,
-                         SRVINST_MSG % ("unittest00.one-nyp.ms.com","utsvc","utsi2"),
+                         SRVINST_MSG % ("unittest00.one-nyp.ms.com", "utsvc", "utsi2"),
                          command)
 
     def testverifycatutsi2(self):
@@ -132,14 +133,13 @@ class TestUnbindServer(TestBrokerCommand):
         self.assertEmptyOut(out, command)
 
         self.matchoutput(err,
-                         SRV_MSG % ("nyaqd1.ms.com","ntp"),
+                         SRV_MSG % ("nyaqd1.ms.com", "ntp"),
                          command)
 
     def testverifyunbindntp(self):
         command = "show service --service ntp"
         out = self.commandtest(command.split(" "))
         self.matchclean(out, "Server: nyaqd1.ms.com", command)
-
 
     def testunbindaqd(self):
         command = ["unbind", "server",
@@ -149,7 +149,7 @@ class TestUnbindServer(TestBrokerCommand):
         self.assertEmptyOut(out, command)
 
         self.matchoutput(err,
-                         SRV_MSG % ("nyaqd1.ms.com","aqd"),
+                         SRV_MSG % ("nyaqd1.ms.com", "aqd"),
                          command)
 
     def testverifyunbindaqd(self):
@@ -165,7 +165,7 @@ class TestUnbindServer(TestBrokerCommand):
         self.assertEmptyOut(out, command)
 
         self.matchoutput(err,
-                         SRV_MSG % ("nyaqd1.ms.com","lemon"),
+                         SRV_MSG % ("nyaqd1.ms.com", "lemon"),
                          command)
 
     def testverifyunbindlemon(self):
@@ -197,7 +197,7 @@ class TestUnbindServer(TestBrokerCommand):
         self.assertEmptyOut(out, command)
 
         self.matchoutput(err,
-                         SRV_MSG % ("server9.aqd-unittest.ms.com","bootserver"),
+                         SRV_MSG % ("server9.aqd-unittest.ms.com", "bootserver"),
                          command)
 
     def testverifyunbindbootserver(self):

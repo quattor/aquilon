@@ -372,7 +372,6 @@ class TestMakeAquilon(TestBrokerCommand):
                    "--hostname", "jack.cards.example.com"]
         (out, err) = self.successtest(command)
 
-
     def testmakewithos(self):
         command = ["make", "aquilon",
                    "--hostname", "unittest17.aqd-unittest.ms.com",

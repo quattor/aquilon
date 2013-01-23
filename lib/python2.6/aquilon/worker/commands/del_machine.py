@@ -36,6 +36,7 @@ from aquilon.worker.templates.base import Plenary, PlenaryCollection
 from aquilon.aqdb.model import Machine
 from aquilon.worker.processes import NASAssign
 
+
 class CommandDelMachine(BrokerCommand):
 
     required_parameters = ["machine"]
@@ -86,7 +87,6 @@ class CommandDelMachine(BrokerCommand):
         session.delete(dbmachine)
 
         session.flush()
-
 
         key = remove_plenaries.get_remove_key()
         if dbcontainer:

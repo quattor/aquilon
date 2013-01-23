@@ -58,6 +58,6 @@ class TestSyncDomain(TestBrokerCommand):
         self.matchoutput(out, "Justification: tcm=12345678", command)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestSyncDomain)
     unittest.TextTestRunner(verbosity=2).run(suite)

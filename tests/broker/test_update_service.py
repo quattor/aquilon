@@ -155,7 +155,6 @@ class TestUpdateService(TestBrokerCommand):
     # FIXME: Missing functionality and tests for plenaries.
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestUpdateService)
     unittest.TextTestRunner(verbosity=2).run(suite)
-

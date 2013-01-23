@@ -41,7 +41,6 @@ from brokertest import TestBrokerCommand
 
 class TestSearchRack(TestBrokerCommand):
 
-
     def test_100_byrowcolumn(self):
         command = ["search", "rack", "--row", "k", "--column", "3",
                    "--city", "ny", "--fullinfo"]
@@ -52,12 +51,12 @@ class TestSearchRack(TestBrokerCommand):
         self.matchclean(out, "City ln", command)
 
     def test_101_byrack(self):
-        command = ["search", "rack", "--rack", "np13" ]
+        command = ["search", "rack", "--rack", "np13"]
         out = self.commandtest(command)
         self.matchoutput(out, "np13", command)
 
     def test_102_empty_byrack(self):
-        command = ["search", "rack", "--rack", "npxx" ]
+        command = ["search", "rack", "--rack", "npxx"]
         out = self.noouttest(command)
 
     def test_103_bybuilding(self):
@@ -136,7 +135,6 @@ class TestSearchRack(TestBrokerCommand):
         command = ["search", "rack", "--all", "--format", "html"]
         out = self.commandtest(command)
         self.matchoutput(out, ">ut13<", command)
-
 
 
 if __name__ == '__main__':

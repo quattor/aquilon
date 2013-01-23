@@ -36,6 +36,7 @@ from aquilon.worker.dbwrappers.search import search_next
 from aquilon.aqdb.model import Machine
 from aquilon.aqdb.column_types import AqStr
 
+
 class CommandAddMachinePrefix(CommandAddMachine):
 
     required_parameters = ["prefix", "model"]

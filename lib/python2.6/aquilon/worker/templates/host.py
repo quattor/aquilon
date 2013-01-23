@@ -243,7 +243,6 @@ class PlenaryHostData(Plenary):
 
             interfaces[dbinterface.name] = ifdesc
 
-
         # Okay, here's the real content
         pan_include(lines, ["pan/units", "pan/functions"])
         lines.append("")

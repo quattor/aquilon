@@ -41,6 +41,7 @@ from aquilon.worker.dbwrappers.host import hostname_to_host
 from aquilon.worker.dbwrappers.branch import get_branch_and_author
 from aquilon.worker.dbwrappers.location import get_location
 
+
 class CommandSearchCluster(BrokerCommand):
 
     required_parameters = []
@@ -228,7 +229,7 @@ class CommandSearchCluster(BrokerCommand):
             # Added to the searches as appropriate below.
             dbma = Archetype.get_unique(session, member_archetype, compel=True)
         if member_personality and member_archetype:
-            q = q.join('_hosts','host')
+            q = q.join('_hosts', 'host')
             dbmp = Personality.get_unique(session, archetype=dbma,
                                           name=member_personality, compel=True)
             q = q.filter_by(personality=dbmp)

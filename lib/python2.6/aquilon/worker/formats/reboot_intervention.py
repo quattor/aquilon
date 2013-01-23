@@ -60,4 +60,3 @@ class RebootInterventionFormatter(ResourceFormatter):
 
 
 ObjectFormatter.handlers[RebootIntervention] = RebootInterventionFormatter()
-

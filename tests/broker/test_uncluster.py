@@ -74,7 +74,7 @@ class TestUncluster(TestBrokerCommand):
 
     def testunbindutecl1(self):
         for i in range(2, 5):
-            hostname = 'evh%s.aqd-unittest.ms.com' %i
+            hostname = 'evh%s.aqd-unittest.ms.com' % i
             self.verify_buildfiles('utsandbox', hostname, want_exist=True,
                                    command='uncluster')
             self.noouttest(['uncluster', '--personality', 'generic',
@@ -130,6 +130,6 @@ class TestUncluster(TestBrokerCommand):
         self.successtest(command)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestUncluster)
     unittest.TextTestRunner(verbosity=2).run(suite)

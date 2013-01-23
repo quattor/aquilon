@@ -77,6 +77,6 @@ class TestDelRouter(TestBrokerCommand):
         self.noouttest(command)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelRouter)
     unittest.TextTestRunner(verbosity=2).run(suite)

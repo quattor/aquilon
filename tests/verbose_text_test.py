@@ -31,6 +31,7 @@
 """ Used by the test runner to display what test is currently running """
 import unittest
 
+
 class VerboseTextTestResult(unittest._TextTestResult):
     lastmodule = ""
 

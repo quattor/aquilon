@@ -38,6 +38,7 @@ from aquilon.worker.dbwrappers.resources import (del_resource,
                                                  get_resource_holder)
 from aquilon.worker.processes import DSDBRunner
 
+
 def del_srv_dsdb_callback(session, logger, holder, dbsrv_addr, oldinfo,
                           keep_dns):
     real_holder = holder.holder_object

@@ -67,6 +67,6 @@ class TestAddCpu(TestBrokerCommand):
         self.matchoutput(out, "Cpu: intel utcpu_1500 1500 MHz", command)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddCpu)
     unittest.TextTestRunner(verbosity=2).run(suite)

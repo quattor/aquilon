@@ -33,9 +33,10 @@ from aquilon.aqdb.model import Vendor
 from aquilon.exceptions_ import ArgumentError
 import re
 
+
 class CommandAddVendor(BrokerCommand):
 
-    required_parameters = [ "vendor" ]
+    required_parameters = ["vendor"]
 
     def render(self, session, vendor, comments, **arguments):
         valid = re.compile('^[a-zA-Z0-9_.-]+$')

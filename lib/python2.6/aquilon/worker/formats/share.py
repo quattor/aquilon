@@ -54,4 +54,3 @@ class ShareFormatter(ResourceFormatter):
 
 
 ObjectFormatter.handlers[Share] = ShareFormatter()
-

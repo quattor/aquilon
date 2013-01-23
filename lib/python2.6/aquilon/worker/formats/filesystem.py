@@ -65,4 +65,3 @@ class FilesystemFormatter(ResourceFormatter):
 
 
 ObjectFormatter.handlers[Filesystem] = FilesystemFormatter()
-

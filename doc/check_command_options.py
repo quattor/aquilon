@@ -42,6 +42,7 @@ from collections import defaultdict
 
 was_error = False
 
+
 def error(message):
     global was_error
 

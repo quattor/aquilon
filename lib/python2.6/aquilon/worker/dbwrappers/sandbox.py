@@ -38,7 +38,7 @@ import os
 def get_sandbox(session, logger, sandbox):
     """Allow an optional author field."""
     sbx_split = sandbox.split('/')
-    first , second = '', ''
+    first, second = '', ''
     if len(sbx_split) <= 1:
         dbsandbox = Sandbox.get_unique(session, sandbox, compel=True)
         dbauthor = None

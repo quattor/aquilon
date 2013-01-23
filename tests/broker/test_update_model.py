@@ -271,6 +271,6 @@ class TestUpdateModel(TestBrokerCommand):
         self.matchoutput(out, "Disk: sda 30 GB scsi (local)", command)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestUpdateModel)
     unittest.TextTestRunner(verbosity=2).run(suite)

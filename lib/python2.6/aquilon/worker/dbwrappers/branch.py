@@ -64,6 +64,7 @@ def get_branch_and_author(session, logger,
         raise ArgumentError("Please specify either sandbox or domain.")
     return (dbbranch, dbauthor)
 
+
 def get_branch_dependencies(dbbranch):
     """Returns a list of strings describing how a branch is being used.
 
@@ -79,6 +80,7 @@ def get_branch_dependencies(dbbranch):
         ret.append("%s is tracked by %s." %
                    (format(dbbranch), [str(t.name) for t in dbbranch.trackers]))
     return ret
+
 
 def remove_branch(config, logger, dbbranch):
     session = object_session(dbbranch)
@@ -102,6 +104,7 @@ def remove_branch(config, logger, dbbranch):
         logger.warning("Error removing branch %s from template-king, "
                        "proceeding anyway: %s", dbbranch.name, e)
 
+
 def search_branch_query(config, session, cls, owner=None, compiler_version=None,
                         autosync=None, validated=None, **arguments):
     q = session.query(cls)
@@ -120,11 +123,12 @@ def search_branch_query(config, session, cls, owner=None, compiler_version=None,
         q = q.filter_by(is_sync_valid=validated)
     return q
 
+
 def expand_compiler(config, compiler_version):
     if not VERSION_RE.match(compiler_version):
         raise ArgumentError("Invalid characters in compiler version")
     compiler = config.get("panc", "pan_compiler", raw=True) % {
-        'version':compiler_version}
+        'version': compiler_version}
     if not os.path.exists(compiler):
         raise ArgumentError("Compiler not found at '%s'" % compiler)
     return compiler

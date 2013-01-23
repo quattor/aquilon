@@ -115,8 +115,6 @@ class TestDelPersonality(TestBrokerCommand):
         self.noouttest(command)
 
 
-
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelPersonality)
     unittest.TextTestRunner(verbosity=2).run(suite)
-

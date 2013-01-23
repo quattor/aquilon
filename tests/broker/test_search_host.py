@@ -389,7 +389,7 @@ class TestSearchHost(TestBrokerCommand):
             "--service", "foo", "--instance", "fooinst2"])
 
         self.noouttest(["search", "host",
-                        "--server_of_service",  "foo", "--server_of_instance", "fooinst2"])
+                        "--server_of_service", "foo", "--server_of_instance", "fooinst2"])
 
         self.noouttest(["search", "host", "--server_of_instance", "fooinst2"])
 

@@ -46,10 +46,7 @@ LOGGER = logging.getLogger(__name__)
 CCM_NOTIF = 1
 CDB_NOTIF = 2
 
-NOTIFICATION_TYPES = {
-        CCM_NOTIF : "ccm",
-        CDB_NOTIF : "cdb"
-}
+NOTIFICATION_TYPES = {CCM_NOTIF: "ccm", CDB_NOTIF: "cdb"}
 
 try:
     CDPPORT = socket.getservbyname("cdp")
@@ -202,6 +199,7 @@ def build_index(config, session, profilesdir, clientNotify=True,
         logger.log(CLIENT_INFO, "sent %d client notifications" % count)
 
     sock.close()
+
 
 def send_notification(ntype, modified, sock=None, logger=LOGGER):
     '''send CDP notification messages to a list of hosts.

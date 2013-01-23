@@ -49,7 +49,7 @@ class ChunkedHTTPResponse(httplib.HTTPResponse):
             line = self.fp.readline()
             i = line.find(';')
             if i >= 0:
-                line = line[:i] # strip chunk-extensions
+                line = line[:i]  # strip chunk-extensions
             chunk_left = int(line, 16)
             if chunk_left == 0:
                 # read and discard trailer up to the CRLF terminator

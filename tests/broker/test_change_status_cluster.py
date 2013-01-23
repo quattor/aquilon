@@ -71,7 +71,6 @@ class TestChangeClusterStatus(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Build Status: build", command)
 
-
     def test_120_BindDemotion(self):
         self.successtest(["cluster",
                           "--hostname", "evh1.aqd-unittest.ms.com",
@@ -171,4 +170,3 @@ class TestChangeClusterStatus(TestBrokerCommand):
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestChangeClusterStatus)
     unittest.TextTestRunner(verbosity=2).run(suite)
-

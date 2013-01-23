@@ -33,6 +33,7 @@ from aquilon.aqdb.model import RebootIntervention
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.commands.show_resource import show_resource
 
+
 class CommandShowRebootIntervention(BrokerCommand):
 
     required_parameters = []

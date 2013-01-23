@@ -170,4 +170,3 @@ class TestSearchHardware(TestBrokerCommand):
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestSearchHardware)
     unittest.TextTestRunner(verbosity=2).run(suite)
-

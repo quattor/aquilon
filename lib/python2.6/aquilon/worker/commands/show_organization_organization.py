@@ -33,6 +33,7 @@
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.commands.show_location_type import CommandShowLocationType
 
+
 class CommandShowOrganizationOrganization(CommandShowLocationType):
 
     required_parameters = ["organization"]

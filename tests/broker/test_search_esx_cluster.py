@@ -306,6 +306,6 @@ class TestSearchESXCluster(TestBrokerCommand):
         self.noouttest(command)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestSearchESXCluster)
     unittest.TextTestRunner(verbosity=2).run(suite)

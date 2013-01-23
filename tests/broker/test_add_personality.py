@@ -38,8 +38,8 @@ if __name__ == "__main__":
 
 from brokertest import TestBrokerCommand
 
-
 GRN = "grn:/ms/ei/aquilon/aqd"
+
 
 class TestAddPersonality(TestBrokerCommand):
 
@@ -197,7 +197,7 @@ class TestAddPersonality(TestBrokerCommand):
             if archetype in archetypes:
                 archetypes[archetype][personality.name] = personality
             else:
-                archetypes[archetype] = {personality.name:personality}
+                archetypes[archetype] = {personality.name: personality}
             if personality.threshold >= 0:
                 found_threshold = True
         self.failUnless("aquilon" in archetypes,
@@ -231,7 +231,6 @@ class TestAddPersonality(TestBrokerCommand):
         self.failUnlessEqual(personality.comments, "Some personality comments")
         self.failUnlessEqual(personality.owner_eonid, 2)
 
-
     def testverifyshowpersonalityallprotonothreshold(self):
         user = self.config.get("unittest", "user")
         command = ["show_personality", "--all",
@@ -245,7 +244,7 @@ class TestAddPersonality(TestBrokerCommand):
             if archetype in archetypes:
                 archetypes[archetype][personality.name] = personality
             else:
-                archetypes[archetype] = {personality.name:personality}
+                archetypes[archetype] = {personality.name: personality}
             if personality.threshold >= 0:
                 found_threshold = True
         self.failUnless("aquilon" in archetypes,
@@ -278,7 +277,6 @@ class TestAddPersonality(TestBrokerCommand):
         self.failUnlessEqual(personality.comments, "Some personality comments")
         self.failUnlessEqual(personality.owner_eonid, 2)
 
-
     def testverifyshowpersonalityallprotothreshold(self):
         command = "show_personality --all --domain unittest --format=proto"
         out = self.commandtest(command.split(" "))
@@ -289,7 +287,7 @@ class TestAddPersonality(TestBrokerCommand):
             if archetype in archetypes:
                 archetypes[archetype][personality.name] = personality
             else:
-                archetypes[archetype] = {personality.name:personality}
+                archetypes[archetype] = {personality.name: personality}
         self.failUnless("aquilon" in archetypes,
                         "No personality with archetype aquilon in list.")
         self.failUnless("utpersonality/dev" in archetypes["aquilon"],
@@ -379,7 +377,7 @@ class TestAddPersonality(TestBrokerCommand):
         # templates defined for it in the repository.
         command = ["add_personality", "--personality=badpersonality",
                    "--host_environment=legacy",
-                   "--archetype=aquilon", "--eon_id=2" ]
+                   "--archetype=aquilon", "--eon_id=2"]
         self.noouttest(command)
 
     def testverifybadaquilonpersonality(self):
@@ -416,7 +414,7 @@ class TestAddPersonality(TestBrokerCommand):
     def testaddinvalidpersonalityname(self):
         command = ["add_personality", "--personality", "this is a bad; name",
                    "--host_environment=dev",
-                   "--archetype", "aquilon", "--eon_id=2" ]
+                   "--archetype", "aquilon", "--eon_id=2"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Personality name 'this is a bad; name' is "
                          "not valid", command)
@@ -424,14 +422,14 @@ class TestAddPersonality(TestBrokerCommand):
     def testaddinvalidenvironment(self):
         command = ["add_personality", "--personality", "invalidenvironment",
                    "--host_environment", "badenv",
-                   "--archetype", "aquilon", "--eon_id=2" ]
+                   "--archetype", "aquilon", "--eon_id=2"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Unknown environment value 'badenv'.  The valid values are: dev, infra, legacy, prod, qa, uat", command)
 
     def testaddduplicate(self):
         command = ["add_personality", "--personality", "inventory",
                    "--host_environment=legacy",
-                   "--archetype", "aquilon", "--eon_id=2" ]
+                   "--archetype", "aquilon", "--eon_id=2"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Personality inventory, archetype aquilon "
                          "already exists.", command)
@@ -500,13 +498,13 @@ class TestAddPersonality(TestBrokerCommand):
 
     def verifycatforpersonality(self, archetype, personality, config_override=False,
                                 host_env='legacy'):
-        command = ["cat","--archetype", archetype,  "--personality", personality]
+        command = ["cat", "--archetype", archetype, "--personality", personality]
         out = self.commandtest(command)
         self.matchoutput(out, 'variable PERSONALITY = "%s"' % personality,
                          command)
         self.matchoutput(out, '"/system/eon_ids" = push(2);', command)
         self.matchoutput(out, 'include { if_exists("personality/%s/pre_feature") };' %
-                               personality, command)
+                         personality, command)
         self.matchoutput(out, "template personality/%s/config;" % personality,
                          command)
         self.matchoutput(out, '"/system/personality/name" = "%s";' % personality,
@@ -516,36 +514,36 @@ class TestAddPersonality(TestBrokerCommand):
         if config_override:
             self.searchoutput(out, r'include { "features/personality/config_override/config" };\s*'
                                    r'include { if_exists\("personality/utpersonality/dev/post_feature"\) };',
-                             command)
+                              command)
         else:
             self.matchoutput(out, 'include { if_exists("personality/%s/post_feature") };' %
-                               personality, command)
-            self.matchclean(out, 'config_override', command);
+                             personality, command)
+            self.matchclean(out, 'config_override', command)
 
     def testverifyshowdiff1(self):
         command = ["show_diff", "--personality=utpersonality/dev",
                    "--archetype=aquilon", "--other=generic"]
         out = self.commandtest(command)
-        self.searchoutput (out,
-                         r'missing Options in Personality aquilon/generic:\s+ConfigOverride',
-                         command)
         self.searchoutput(out,
-                         r'missing Grns in Personality aquilon/generic:\s+GRN grn:/ms/ei/aquilon/aqd',
-                         command)
+                          r'missing Options in Personality aquilon/generic:\s+ConfigOverride',
+                          command)
+        self.searchoutput(out,
+                          r'missing Grns in Personality aquilon/generic:\s+GRN grn:/ms/ei/aquilon/aqd',
+                          command)
 
     def testverifyshowdiff2(self):
         command = ["show_diff", "--personality=utpersonality/dev",
                    "--archetype=aquilon", "--other=esx_server", "--other_archetype=vmhost"]
         out = self.commandtest(command)
-        self.searchoutput (out,
-                         r'missing Options in Personality aquilon/utpersonality/dev:\s+Cluster Required',
-                         command)
-        self.searchoutput (out,
-                         r'matching Options with different values:\s+Environment value=dev, othervalue=legacy',
-                         command)
-        self.searchoutput (out,
-                         r'missing Options in Personality vmhost/esx_server:\s+ConfigOverride',
-                         command)
+        self.searchoutput(out,
+                          r'missing Options in Personality aquilon/utpersonality/dev:\s+Cluster Required',
+                          command)
+        self.searchoutput(out,
+                          r'matching Options with different values:\s+Environment value=dev, othervalue=legacy',
+                          command)
+        self.searchoutput(out,
+                          r'missing Options in Personality vmhost/esx_server:\s+ConfigOverride',
+                          command)
 
 
 if __name__ == '__main__':

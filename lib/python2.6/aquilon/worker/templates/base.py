@@ -534,6 +534,7 @@ class PlenaryCollection(object):
             plenary.set_logger(self.logger)
             self.plenaries.append(plenary)
 
+
 class TemplateFormatter(ObjectFormatter):
 
     def __init__(self):
@@ -546,4 +547,3 @@ class TemplateFormatter(ObjectFormatter):
                                          'aquilon.worker.formats.formatters '
                                          'import shift'],
                                 default_filters=['unicode', 'rstrip'])
-

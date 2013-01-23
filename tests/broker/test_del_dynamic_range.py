@@ -147,4 +147,3 @@ class TestDelDynamicRange(TestBrokerCommand):
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelDynamicRange)
     unittest.TextTestRunner(verbosity=2).run(suite)
-

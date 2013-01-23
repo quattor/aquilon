@@ -37,6 +37,7 @@ from aquilon.worker.templates.city import PlenaryCity
 from aquilon.worker.locks import lock_queue
 from aquilon.worker.commands.del_location import CommandDelLocation
 
+
 class CommandDelCity(CommandDelLocation):
 
     required_parameters = ["city"]
@@ -65,6 +66,5 @@ class CommandDelCity(CommandDelLocation):
             raise
         finally:
             lock_queue.release(key)
-
 
         return

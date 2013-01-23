@@ -105,7 +105,6 @@ class TestShowHostIPList(TestBrokerCommand):
         self.matchclean(out, "nyaqd1", command)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestShowHostIPList)
     unittest.TextTestRunner(verbosity=2).run(suite)
-

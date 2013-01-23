@@ -36,6 +36,7 @@ from sqlalchemy import types
 from dateutil.tz import tzutc
 from datetime import datetime
 
+
 class UTCDateTime(types.TypeDecorator):
     """A Type Decorator which forces datetime values to the UTC timezone """
 

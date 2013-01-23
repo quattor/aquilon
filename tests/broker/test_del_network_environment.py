@@ -78,6 +78,6 @@ class TestDelNetworkEnvironment(TestBrokerCommand):
         self.matchclean(out, "utcolo", command)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelNetworkEnvironment)
     unittest.TextTestRunner(verbosity=2).run(suite)

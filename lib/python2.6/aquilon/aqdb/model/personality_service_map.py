@@ -79,7 +79,6 @@ class PersonalityServiceMap(Base):
                                     nullable=False))
     comments = deferred(Column(String(255), nullable=True))
 
-
     location = relation(Location)
     service_instance = relation(ServiceInstance, innerjoin=True,
                                 backref=backref('personality_service_map',

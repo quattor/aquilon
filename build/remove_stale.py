@@ -33,9 +33,11 @@
 import os
 import sys
 
+
 def clean_old(installdir):
     if not os.path.isdir(installdir):
-        print >>sys.stderr, "Warning: '%s' is not a directory, not searching for and removing stale files." % installdir
+        print >>sys.stderr, "Warning: '%s' is not a directory, not searching " \
+                "for and removing stale files." % installdir
         return
     src = os.path.realpath(os.path.join(os.path.dirname(__file__), '..'))
     for (dirpath, dirnames, filenames) in os.walk(installdir):
@@ -60,6 +62,7 @@ def clean_old(installdir):
                         print "Removing %s" % old_pyc
                         os.remove(old_pyc)
 
+
 if __name__ == '__main__':
     if len(sys.argv) > 2:
         print >>sys.stderr, "Takes only one argument, the install directory to prune."
@@ -68,4 +71,3 @@ if __name__ == '__main__':
         print >>sys.stderr, "The install directory to prune is required."
         sys.exit(1)
     clean_old(sys.argv[1])
-

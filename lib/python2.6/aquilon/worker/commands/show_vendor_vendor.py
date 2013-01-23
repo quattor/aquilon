@@ -35,7 +35,7 @@ from aquilon.aqdb.model import Vendor
 
 class CommandShowVendorVendor(BrokerCommand):
 
-    required_parameters = [ "vendor" ]
+    required_parameters = ["vendor"]
 
     def render(self, session, vendor, **arguments):
         return Vendor.get_unique(session, vendor, compel=True)

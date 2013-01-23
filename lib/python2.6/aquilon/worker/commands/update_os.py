@@ -40,11 +40,12 @@ class CommandUpdateOS(BrokerCommand):
     def render(self, session, osname, osversion, archetype, comments,
                **arguments):
         dbarchetype = Archetype.get_unique(session, archetype, compel=True)
-        dbos = OperatingSystem.get_unique(session, name=osname, version=osversion,
-                                   archetype=dbarchetype, compel=True)
+        dbos = OperatingSystem.get_unique(session, name=osname,
+                                          version=osversion,
+                                          archetype=dbarchetype, compel=True)
 
-        dbos.comments=comments
+        dbos.comments = comments
 
-        session.add(dbos)
+        session.flush()
 
         return

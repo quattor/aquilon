@@ -75,7 +75,8 @@ class PersonalityFormatter(ObjectFormatter):
         details = [indent + "%s Personality: %s" % (description,
                                                     personality) +
                    " Archetype: %s" % personality.archetype]
-        details.append(indent + "  Environment: %s" %  personality.host_environment)
+        details.append(indent +
+                       "  Environment: %s" % personality.host_environment)
         for grn in personality.grns:
             details.append(indent + "  GRN: %s" % grn)
 
@@ -159,7 +160,7 @@ class PersonalityFormatter(ObjectFormatter):
             rsvc_msg.service = service.name
 
         if personality.comments:
-            skeleton.comments =  personality.comments
+            skeleton.comments = personality.comments
 
         skeleton.config_override = personality.config_override
         skeleton.cluster_required = personality.cluster_required

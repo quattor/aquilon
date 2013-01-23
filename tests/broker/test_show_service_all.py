@@ -55,7 +55,6 @@ class TestShowServiceAll(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.parse_service_msg(out)
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestShowServiceAll)
     unittest.TextTestRunner(verbosity=2).run(suite)
-

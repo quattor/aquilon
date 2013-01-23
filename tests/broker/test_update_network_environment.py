@@ -87,6 +87,6 @@ class TestUpdateNetworkEnvironment(TestBrokerCommand):
         self.matchclean(out, "internal", command)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(UpdateNetworkEnvironment)
     unittest.TextTestRunner(verbosity=2).run(suite)

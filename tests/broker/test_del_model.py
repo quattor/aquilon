@@ -78,7 +78,6 @@ class TestDelModel(TestBrokerCommand):
         self.noouttest(command)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelModel)
     unittest.TextTestRunner(verbosity=2).run(suite)
-

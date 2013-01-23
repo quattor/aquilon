@@ -41,6 +41,7 @@ DNS_RRTYPE_MAP = {'a': ARecord,
                   'cname': Alias,
                   'srv': SrvRecord}
 
+
 class CommandShowDnsRecord(BrokerCommand):
 
     required_parameters = ["fqdn"]

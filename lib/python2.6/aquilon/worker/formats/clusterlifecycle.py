@@ -36,6 +36,7 @@ from aquilon.aqdb.model import ClusterLifecycle
 from aquilon.aqdb.model.clusterlifecycle import (Ready, Build,
                                                  Rebuild, Decommissioned)
 
+
 class StatusFormatter(ObjectFormatter):
     template_raw = "status.mako"
 

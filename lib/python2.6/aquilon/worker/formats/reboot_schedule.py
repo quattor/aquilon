@@ -33,6 +33,7 @@ from aquilon.worker.formats.formatters import ObjectFormatter
 from aquilon.worker.formats.resource import ResourceFormatter
 from aquilon.aqdb.model import RebootSchedule
 
+
 class RebootScheduleFormatter(ResourceFormatter):
     protocol = "aqdsystems_pb2"
 
@@ -56,4 +57,3 @@ class RebootScheduleFormatter(ResourceFormatter):
 
 
 ObjectFormatter.handlers[RebootSchedule] = RebootScheduleFormatter()
-

@@ -30,6 +30,7 @@
 
 from sqlalchemy.ext.mutable import Mutable
 
+
 class MutationDict(Mutable, dict):
     """ This tracks mutation on dict table
         This currently only tracks a single level of mutation
@@ -38,7 +39,6 @@ class MutationDict(Mutable, dict):
     @classmethod
     def coerce(cls, key, value):
         "Convert plain dictionaries to MutationDict."
-
 
         if not isinstance(value, MutationDict):
             if isinstance(value, dict):
@@ -60,4 +60,3 @@ class MutationDict(Mutable, dict):
 
         dict.__delitem__(self, key)
         self.changed()
-

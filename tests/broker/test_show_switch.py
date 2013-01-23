@@ -81,6 +81,6 @@ class TestShowSwitch(TestBrokerCommand):
                    "--format=csv"]
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestShowSwitch)
     unittest.TextTestRunner(verbosity=2).run(suite)

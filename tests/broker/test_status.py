@@ -50,7 +50,6 @@ class TestStatus(TestBrokerCommand):
         self.matchoutput(out, "Aquilon Broker ", command)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestStatus)
     unittest.TextTestRunner(verbosity=2).run(suite)
-

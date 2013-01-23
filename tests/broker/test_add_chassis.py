@@ -67,7 +67,7 @@ class TestAddChassis(TestBrokerCommand, VerifyChassisMixin):
         self.matchoutput(out, "ut3c1.aqd-unittest.ms.com", command)
 
     def testaddut9chassis(self):
-        for i in range(1,6):
+        for i in range(1, 6):
             ip = self.net.unknown[10].usable[i]
             self.dsdb_expect_add("ut9c%d.aqd-unittest.ms.com" % i,
                                  ip, "oa", ip.mac)
@@ -79,7 +79,7 @@ class TestAddChassis(TestBrokerCommand, VerifyChassisMixin):
         self.dsdb_verify()
 
     def testverifyaddut9chassis(self):
-        for i in range(1,6):
+        for i in range(1, 6):
             self.verifychassis("ut9c%d.aqd-unittest.ms.com" % i,
                                "hp", "c-class", "ut9", "", "",
                                ip=str(self.net.unknown[10].usable[i]),
@@ -121,4 +121,3 @@ class TestAddChassis(TestBrokerCommand, VerifyChassisMixin):
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddChassis)
     unittest.TextTestRunner(verbosity=2).run(suite)
-

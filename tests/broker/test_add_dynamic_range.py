@@ -40,6 +40,7 @@ if __name__ == "__main__":
 from ipaddr import IPv4Address
 from brokertest import TestBrokerCommand
 
+
 def dynname(ip, domain="aqd-unittest.ms.com"):
     return "dynamic-%s.%s" % (str(ip).replace(".", "-"), domain)
 

@@ -51,7 +51,6 @@ class CommandResetAdvertisedStatusList(CommandResetAdvertisedStatus):
 
         self.resetadvertisedstatus_list(session, logger, dbhosts)
 
-
     def resetadvertisedstatus_list(self, session, logger, dbhosts):
         branches = {}
         authors = {}
@@ -72,11 +71,10 @@ class CommandResetAdvertisedStatusList(CommandResetAdvertisedStatus):
                 else:
                     authors[dbhost.sandbox_author] = [dbhost]
 
-
             if dbhost.status.name == 'ready':
-                failed.append ("{0:l} is in ready status, "
-                               "advertised status can be reset only "
-                               "when host is in non ready state".format(dbhost))
+                failed.append("{0:l} is in ready status, "
+                              "advertised status can be reset only "
+                              "when host is in non ready state".format(dbhost))
         if failed:
             raise ArgumentError("Cannot modify the following hosts:\n%s" %
                                 "\n".join(failed))

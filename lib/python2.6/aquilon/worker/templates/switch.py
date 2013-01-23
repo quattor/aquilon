@@ -71,4 +71,3 @@ class PlenarySwitch(Plenary):
         lines.append('"/system/network/vlans" = %s;' % pan(vlans))
 
 Plenary.handlers[Switch] = PlenarySwitch
-

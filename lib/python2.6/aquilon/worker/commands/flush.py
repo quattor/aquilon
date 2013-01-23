@@ -176,7 +176,6 @@ class CommandFlush(BrokerCommand):
                               subqueryload("parents"))
                 racks = q.all()
 
-
             if locations:
                 logger.client_info("Flushing locations.")
                 for dbloc in session.query(City).all():

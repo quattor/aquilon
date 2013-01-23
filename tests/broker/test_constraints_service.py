@@ -90,7 +90,6 @@ class TestServiceConstraints(TestBrokerCommand):
                          "clients and cannot be deleted", command)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestServiceConstraints)
     unittest.TextTestRunner(verbosity=2).run(suite)
-

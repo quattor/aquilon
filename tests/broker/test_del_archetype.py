@@ -86,7 +86,6 @@ class TestDelArchetype(TestBrokerCommand):
                          "Personality storagecluster/metrocluster and cannot "
                          "be deleted.", command)
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelArchetype)
     unittest.TextTestRunner(verbosity=2).run(suite)
-

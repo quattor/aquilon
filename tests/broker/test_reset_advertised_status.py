@@ -57,7 +57,7 @@ class TestResetAdvertisedStatus(TestBrokerCommand):
             (out, err) = self.successtest(command)
 
             ## reset advertised state to build
-            command = ["reset_advertised_status", "--hostname" , hostname]
+            command = ["reset_advertised_status", "--hostname", hostname]
 
             if (status == "ready"):
                 advertise_status = "True"
@@ -67,14 +67,13 @@ class TestResetAdvertisedStatus(TestBrokerCommand):
             else:
                 (out, err) = self.successtest(command)
 
-
             command = "show host --hostname %s" % hostname
             out = self.commandtest(command.split(" "))
             self.matchoutput(out, "Build Status: %s" % status, command)
             self.matchoutput(out, "Advertise Status: %s" % advertise_status,
                              command)
 
-            command = "cat --hostname %s --data"  % hostname
+            command = "cat --hostname %s --data" % hostname
             out = self.commandtest(command.split(" "))
             self.matchoutput(out, '"/system/build" = "%s";' % status,
                              command)
@@ -84,7 +83,7 @@ class TestResetAdvertisedStatus(TestBrokerCommand):
     def testunittest02(self):
         """ test reset advertised status on various build status """
 
-        hostname = "unittest02.one-nyp.ms.com";
+        hostname = "unittest02.one-nyp.ms.com"
         hosts = [hostname]
         scratchfile = self.writescratch("hostlist", "".join(hosts))
 
@@ -109,14 +108,13 @@ class TestResetAdvertisedStatus(TestBrokerCommand):
             else:
                 (out, err) = self.successtest(command)
 
-
-            command = "show host --hostname %s"  % hostname
+            command = "show host --hostname %s" % hostname
             out = self.commandtest(command.split(" "))
             self.matchoutput(out, "Build Status: %s" % status, command)
             self.matchoutput(out, "Advertise Status: %s" % advertise_status,
                              command)
 
-            command = "cat --hostname %s --data"  % hostname
+            command = "cat --hostname %s --data" % hostname
             out = self.commandtest(command.split(" "))
             self.matchoutput(out, '"/system/build" = "%s";' % status,
                              command)

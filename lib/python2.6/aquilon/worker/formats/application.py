@@ -55,4 +55,3 @@ class ApplicationFormatter(ResourceFormatter):
 
 
 ObjectFormatter.handlers[Application] = ApplicationFormatter()
-

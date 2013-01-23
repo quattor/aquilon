@@ -147,6 +147,6 @@ class TestAddAuroraHost(TestBrokerCommand):
         self.assertEqual(host.ip, "")
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddAuroraHost)
     unittest.TextTestRunner(verbosity=2).run(suite)

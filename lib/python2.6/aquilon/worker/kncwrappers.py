@@ -74,14 +74,14 @@ class KNCHTTPChannel(http.HTTPChannel):
 
     # FIXME: Generally, twisted methods would return an IPv4Address here.
     def getClientIP(self):
-        """The Request object would normally supply this method.  
+        """The Request object would normally supply this method.
         However, the client IP is being obtained via knc.  Ideally this
         subclass could just override the Request object creation and
         give it this info, but that does not seem to be straightforward.
 
         """
         return self.kncinfo.get("REMOTE_IP")
-            
+
 
 class KNCSite(server.Site):
     protocol = KNCHTTPChannel

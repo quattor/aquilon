@@ -101,6 +101,6 @@ class TestBindESXCluster(TestBrokerCommand):
                              "Not all cluster members (%s) are aligned (%s)." %
                              (members, aligned))
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestBindESXCluster)
     unittest.TextTestRunner(verbosity=2).run(suite)

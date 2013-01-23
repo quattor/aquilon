@@ -68,11 +68,11 @@ class CommandDelHost(BrokerCommand):
         with DeleteKey("system", logger=logger) as key:
             # Check dependencies, translate into user-friendly message
             dbhost = hostname_to_host(session, hostname)
-            host_plenary =  Plenary.get_plenary(dbhost, logger=logger)
+            host_plenary = Plenary.get_plenary(dbhost, logger=logger)
             domain = dbhost.branch.name
             deps = get_host_dependencies(session, dbhost)
             if (len(deps) != 0):
-                deptext = "\n".join(["  %s"%d for d in deps])
+                deptext = "\n".join(["  %s" % d for d in deps])
                 raise ArgumentError("Cannot delete host %s due to the "
                                     "following dependencies:\n%s." %
                                     (hostname, deptext))

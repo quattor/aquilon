@@ -33,6 +33,7 @@ from aquilon.aqdb.model import RebootSchedule
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.commands.show_resource import show_resource
 
+
 class CommandShowRebootSchedule(BrokerCommand):
 
     required_parameters = []

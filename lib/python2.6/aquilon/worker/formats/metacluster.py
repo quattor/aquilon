@@ -32,6 +32,7 @@
 from aquilon.worker.formats.formatters import ObjectFormatter
 from aquilon.aqdb.model import MetaCluster
 
+
 # TODO add extra data based on cluster.py(formats)
 class MetaClusterFormatter(ObjectFormatter):
     def format_raw(self, metacluster, indent=""):

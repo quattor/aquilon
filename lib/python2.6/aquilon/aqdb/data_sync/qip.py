@@ -472,4 +472,3 @@ class QIPRefresh(object):
             else:
                 msg = "No changes applied because of errors."
             raise PartialError(success=[], failed=self.errors, success_msg=msg)
-

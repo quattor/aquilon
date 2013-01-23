@@ -48,7 +48,6 @@ class TestShowMachineMacList(TestBrokerCommand):
                          ",ut3c1n3,unittest00.one-nyp.ms.com",
                          command)
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestShowMachineMacList)
     unittest.TextTestRunner(verbosity=2).run(suite)
-

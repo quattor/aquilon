@@ -39,4 +39,5 @@ class CommandUnbindESXClusterService(CommandUnbindClusterService):
 
     def render(self, session, **arguments):
         return CommandUnbindClusterService.render(self, session,
-                                            cluster_type = "esx", **arguments)
+                                                  cluster_type="esx",
+                                                  **arguments)

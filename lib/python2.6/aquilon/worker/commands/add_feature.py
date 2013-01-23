@@ -38,6 +38,7 @@ from aquilon.exceptions_ import ArgumentError, UnimplementedError
 # hidden directories like ".foo/bar"
 _name_re = re.compile(r'^\.|[/\\]\.')
 
+
 class CommandAddFeature(BrokerCommand):
 
     required_parameters = ['feature', 'type']

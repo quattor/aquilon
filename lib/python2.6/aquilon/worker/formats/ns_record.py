@@ -46,10 +46,12 @@ class NsRecordFormatter(ObjectFormatter):
 
 ObjectFormatter.handlers[NsRecord] = NsRecordFormatter()
 
+
 class SimpleNSRecordList(list):
     """By convention, holds a list of ns_records to be formatted in a simple
        (dns_domain: fqdn-only) manner."""
     pass
+
 
 class SimpleNSRecordListFormatter(ListFormatter):
     def format_raw(self, snsrlist, indent=""):

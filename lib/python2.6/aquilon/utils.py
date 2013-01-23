@@ -63,11 +63,13 @@ def kill_from_pid_file(pid_file):  # pragma: no cover
         except OSError, err:
             print 'Failed to kill %s: %s' % (pid, err.strerror)
 
+
 def monkeypatch(cls):
     def decorator(func):
         setattr(cls, func.__name__, func)
         return func
     return decorator
+
 
 def confirm(prompt=None, resp=False):  # pragma: no cover
     """prompts for yes or no response from the user. Returns True for yes and
@@ -108,6 +110,7 @@ def confirm(prompt=None, resp=False):  # pragma: no cover
         if ans == 'n' or ans == 'N' or ans == 'no':
             return False
 
+
 def force_ipv4(label, value):
     if value is None:
         return None
@@ -117,6 +120,7 @@ def force_ipv4(label, value):
         return IPv4Address(value)
     except AddressValueError, e:
         raise ArgumentError("Expected an IPv4 address for %s: %s" % (label, e))
+
 
 def force_int(label, value):
     """Utility method to force incoming values to int and wrap errors."""
@@ -128,6 +132,7 @@ def force_int(label, value):
         raise ArgumentError("Expected an integer for %s." % label)
     return result
 
+
 def force_float(label, value):
     """Utility method to force incoming values to float and wrap errors."""
     if value is None:
@@ -137,6 +142,7 @@ def force_float(label, value):
     except ValueError:
         raise ArgumentError("Expected an floating point number for %s." % label)
     return result
+
 
 def force_ratio(label, value):
     """Utility method to force incoming values to int ratio and wrap errors."""
@@ -151,6 +157,7 @@ def force_ratio(label, value):
         right = 1
     return (int(left), int(right))
 
+
 def force_boolean(label, value):
     """Utility method to force incoming values to boolean and wrap errors."""
     if value is None:
@@ -160,6 +167,7 @@ def force_boolean(label, value):
     if no_re.match(value):
         return False
     raise ArgumentError("Expected a boolean value for %s." % label)
+
 
 def force_mac(label, value):
     # Allow nullable Mac Addresses, consistent with behavior of IPV4
@@ -177,6 +185,7 @@ def force_mac(label, value):
     raise ArgumentError("Expected a MAC address like 00:1a:2b:3c:0d:55, "
                         "001a2b3c0d55 or 0:1a:2b:3c:d:55 for %s." % label)
 
+
 def force_ascii(label, value):
     if value is None:
         return None
@@ -185,6 +194,7 @@ def force_ascii(label, value):
     except UnicodeDecodeError:
         raise ArgumentError("Only ASCII characters are allowed for %s." % label)
     return value
+
 
 def force_list(label, value):
     """
@@ -196,6 +206,7 @@ def force_list(label, value):
         return None
     lines = map(lambda x: force_ascii('line', x.strip()), value.splitlines())
     return filter(lambda x: x and not x.startswith("#"), lines)
+
 
 def force_json_dict(label, value):
     if value is None:

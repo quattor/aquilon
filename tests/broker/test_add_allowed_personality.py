@@ -93,6 +93,7 @@ class TestAddAllowedPersonality(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out, "Allowed Personality: Personality metacluster/metacluster", command)
 
-if __name__=='__main__':
+
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddAllowedPersonality)
     unittest.TextTestRunner(verbosity=2).run(suite)

@@ -165,6 +165,6 @@ class TestSearchNext(TestBrokerCommand):
         self.matchoutput(out, "utmc9", command)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestSearchNext)
     unittest.TextTestRunner(verbosity=2).run(suite)

@@ -33,6 +33,7 @@ from aquilon.exceptions_ import NotFoundException
 from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import Archetype
 
+
 class CommandSearchParameterDefinitionArchetype(BrokerCommand):
 
     required_parameters = ["archetype"]

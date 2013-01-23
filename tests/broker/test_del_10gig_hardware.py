@@ -69,7 +69,7 @@ class TestDel10GigHardware(TestBrokerCommand):
         self.dsdb_verify()
 
     def test_600_delautoassignshares(self):
-        for i in range(10,18):
+        for i in range(10, 18):
             self.noouttest(["del", "disk", "--machine", "evm%d" % i,
                             "--disk", "sdc"])
 
@@ -84,6 +84,6 @@ class TestDel10GigHardware(TestBrokerCommand):
             command = "show machine --machine %s" % machine
             self.notfoundtest(command.split(" "))
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDel10GigHardware)
     unittest.TextTestRunner(verbosity=2).run(suite)

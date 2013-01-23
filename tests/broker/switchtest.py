@@ -85,4 +85,3 @@ class VerifySwitchMixin(object):
 #        for port in range(1,49):
 #            self.matchoutput(out, "Switch Port %d" % port, command)
         return (out, command)
-

@@ -161,7 +161,6 @@ class TestAddMetaCluster(TestBrokerCommand):
         self.matchoutput(out, "Country us is not within "
                          "a campus.", command)
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddMetaCluster)
     unittest.TextTestRunner(verbosity=2).run(suite)
-

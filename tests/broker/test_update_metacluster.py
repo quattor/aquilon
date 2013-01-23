@@ -164,7 +164,6 @@ class TestUpdateMetaCluster(TestBrokerCommand):
         self.matchoutput(out, "ESX Cluster utecl2 has location Building ut.",
                          command)
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestUpdateMetaCluster)
     unittest.TextTestRunner(verbosity=2).run(suite)
-

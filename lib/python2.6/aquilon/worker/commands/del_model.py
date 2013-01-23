@@ -45,7 +45,6 @@ class CommandDelModel(BrokerCommand):
         dbmodel = Model.get_unique(session, name=model, vendor=dbvendor,
                                    compel=True)
 
-
         if dbmodel.machine_type == 'nic':
             q = session.query(Interface)
             q = q.filter_by(model=dbmodel)

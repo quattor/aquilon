@@ -299,4 +299,3 @@ def get_net_id_from_ip(session, ip, network_environment=None):
         raise NotFoundException("Could not determine network containing IP "
                                 "address %s." % ip)
     return net
-
