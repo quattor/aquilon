@@ -1,7 +1,8 @@
 #!/usr/bin/env python2.6
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2009,2010  Contributor
+# Copyright (C) 2009,2010,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -40,8 +41,9 @@ from datetime import date
 shebang = "#!/usr/bin/env python2.6\n"
 
 ex_re = re.compile(r'^\s*#\s*ex:')
-ex_line = "# ex: set expandtab softtabstop=4 shiftwidth=4: " \
-          "-*- cpy-indent-level: 4; indent-tabs-mode: nil -*-\n"
+ex_line = "# ex: set expandtab softtabstop=4 shiftwidth=4: \n"
+emacs_re = re.compile(r'^\s+#\s+-\*- ')
+emacs_line = "# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-\n"
 
 comment_line = "#\n"
 comment_prefix = "# "
@@ -130,6 +132,7 @@ def fix_file(filepath):
     # If there's a shebang, standardize it
     if contents[0].startswith("#!"):
         new_contents.append(shebang)
+    new_contents.append(emacs_line)
     new_contents.append(ex_line)
     new_contents.append(comment_line)
     new_contents.append("%sCopyright (C) %s  Contributor\n" %
@@ -142,7 +145,7 @@ def fix_file(filepath):
     # Leave any other unwanted cruft out of the file (ex line)
     for i in range(last_leading_comment + 1, len(contents)):
         line = contents[i]
-        if ex_re.search(line):
+        if ex_re.search(line) or emacs_re.search(line):
             #print >>sys.stderr, "Skipping ex line"
             continue
         if copyright_re.search(line):
