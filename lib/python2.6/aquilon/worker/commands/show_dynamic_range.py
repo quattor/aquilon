@@ -34,7 +34,7 @@ from ipaddr import IPv4Address
 from aquilon.aqdb.model import DynamicStub, DnsEnvironment
 from aquilon.aqdb.model.network import get_net_id_from_ip
 
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.formats.dynamic_range import DynamicRange
 
 

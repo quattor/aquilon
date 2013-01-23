@@ -32,7 +32,7 @@
 from aquilon.worker.formats.parameter import DiffData
 from aquilon.aqdb.model import (Parameter, Personality,
                                 PersonalityServiceMap)
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.parameter import get_parameters
 from collections import defaultdict
 

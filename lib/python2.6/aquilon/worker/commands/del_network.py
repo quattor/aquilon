@@ -29,7 +29,7 @@
 # TERMS THAT MAY APPLY.
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.aqdb.model.network import Network, NetworkEnvironment
 from aquilon.worker.dbwrappers.dns import delete_dns_record
 

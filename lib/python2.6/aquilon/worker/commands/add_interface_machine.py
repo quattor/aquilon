@@ -35,7 +35,7 @@ from sqlalchemy.sql.expression import asc, desc
 from aquilon.exceptions_ import ArgumentError, UnimplementedError
 from aquilon.aqdb.model import Interface, Machine, ARecord, Fqdn
 from aquilon.aqdb.model.network import get_net_id_from_ip
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.dns import delete_dns_record
 from aquilon.worker.dbwrappers.interface import (get_or_create_interface,
                                                  describe_interface,

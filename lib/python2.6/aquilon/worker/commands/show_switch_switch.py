@@ -32,7 +32,7 @@
 from sqlalchemy.orm import joinedload, subqueryload, undefer
 
 from aquilon.aqdb.model import Switch
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.switch import discover_switch
 from aquilon.worker.formats.list import StringList
 

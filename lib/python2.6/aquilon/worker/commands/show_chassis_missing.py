@@ -31,7 +31,7 @@
 
 from sqlalchemy.sql import exists
 
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.formats.chassis import MissingChassisList
 from aquilon.aqdb.model import Machine, Model, ChassisSlot
 

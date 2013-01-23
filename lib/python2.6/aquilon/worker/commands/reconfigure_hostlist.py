@@ -31,7 +31,7 @@
 
 
 from aquilon.worker.commands.reconfigure_list import CommandReconfigureList
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 
 
 class CommandReconfigureHostlist(CommandReconfigureList):

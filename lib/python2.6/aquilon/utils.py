@@ -40,7 +40,6 @@ import json
 
 from ipaddr import IPv4Address, AddressValueError
 from aquilon.exceptions_ import ArgumentError
-from socket import gaierror, gethostbyname
 
 ratio_re = re.compile('^\s*(?P<left>\d+)\s*(?:[:/]\s*(?P<right>\d+))?\s*$')
 yes_re = re.compile("^(true|yes|y|1|on|enabled)$", re.I)

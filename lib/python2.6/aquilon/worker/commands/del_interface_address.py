@@ -29,10 +29,10 @@
 # TERMS THAT MAY APPLY.
 """Contains the logic for `aq del interface address`."""
 
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.exceptions_ import ArgumentError, IncompleteError
 from aquilon.aqdb.model import (HardwareEntity, Interface, AddressAssignment,
-                                ARecord, Fqdn, NetworkEnvironment)
+                                ARecord, NetworkEnvironment)
 from aquilon.worker.dbwrappers.dns import delete_dns_record
 from aquilon.worker.templates.host import PlenaryHost
 from aquilon.worker.locks import lock_queue

@@ -33,7 +33,7 @@
 from sqlalchemy.orm import contains_eager, joinedload
 from sqlalchemy.sql import and_
 
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.formats.host import HostIPList
 from aquilon.aqdb.model import (AddressAssignment, Interface, HardwareEntity,
                                 Personality, Machine, Host, Archetype, ARecord,

@@ -35,7 +35,7 @@ from logging import DEBUG
 from twisted.internet.defer import Deferred
 
 from aquilon.exceptions_ import NotFoundException
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.logger import CLIENT_INFO
 from aquilon.worker.messages import StatusSubscriber
 

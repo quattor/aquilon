@@ -30,7 +30,7 @@
 
 
 from aquilon.worker.formats.parameter_definition import ParamDefinitionFormatter
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.aqdb.model import FeatureLinkParameter, PersonalityParameter
 from aquilon.worker.dbwrappers.parameter import (get_parameter_holder,
                                                  get_parameters)

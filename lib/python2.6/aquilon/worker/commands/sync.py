@@ -30,7 +30,7 @@
 """Contains the logic for `aq sync`."""
 
 
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.exceptions_ import ProcessException, ArgumentError
 from aquilon.aqdb.model import Domain
 from aquilon.worker.processes import sync_domain

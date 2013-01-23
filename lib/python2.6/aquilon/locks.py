@@ -117,6 +117,7 @@ class LockKey(object):
         self.loglevel = loglevel
         self.blocker_count = None
         self.lock_queue = lock_queue
+        self.state = None
         self.transition("initialized", debug=True)
 
     def __str__(self):

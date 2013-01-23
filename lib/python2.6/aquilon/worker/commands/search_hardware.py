@@ -31,7 +31,7 @@
 
 from sqlalchemy.orm import subqueryload, joinedload
 
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.formats.hardware_entity import SimpleHardwareEntityList
 from aquilon.aqdb.model import HardwareEntity
 from aquilon.worker.dbwrappers.hardware_entity import (

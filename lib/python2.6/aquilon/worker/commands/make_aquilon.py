@@ -30,7 +30,7 @@
 """Contains the logic for `aq make aquilon`."""
 
 
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.commands.make import CommandMake
 
 

@@ -31,7 +31,7 @@
 
 
 from aquilon.worker.processes import DSDBRunner
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.commands.del_location import CommandDelLocation
 from aquilon.worker.dbwrappers.location import get_location
 

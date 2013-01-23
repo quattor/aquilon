@@ -33,7 +33,7 @@
 from sqlalchemy.orm import aliased, contains_eager
 from sqlalchemy.sql import or_
 
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.formats.host import SimpleHostList
 from aquilon.aqdb.model import (Host, Cluster, Archetype, Personality,
                                 PersonalityGrnMap, HostGrnMap, HostLifecycle,

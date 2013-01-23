@@ -35,7 +35,7 @@ import socket
 import pwd
 from ConfigParser import SafeConfigParser
 
-from exceptions_ import AquilonError
+from aquilon.exceptions_ import AquilonError
 
 
 def get_username():

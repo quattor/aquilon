@@ -30,7 +30,7 @@
 """Contains the logic for `aq show city`."""
 
 from aquilon.aqdb.model import NsRecord
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.commands.show_ns_record import CommandShowNsRecord
 from aquilon.worker.formats.ns_record import SimpleNSRecordList
 

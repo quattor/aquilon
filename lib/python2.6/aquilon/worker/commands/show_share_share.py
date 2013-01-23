@@ -28,7 +28,7 @@
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
 
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.commands.show_share import CommandShowShare
 
 

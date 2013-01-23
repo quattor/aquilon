@@ -30,7 +30,7 @@
 
 
 from aquilon.aqdb.model import Feature, FeatureParamDef, ParamDefinition
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.parameter import validate_value
 
 

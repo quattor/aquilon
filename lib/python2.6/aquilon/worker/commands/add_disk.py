@@ -32,7 +32,7 @@
 import re
 
 from aquilon.exceptions_ import ArgumentError, InternalError, NotFoundException
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.service_instance import get_service_instance
 from aquilon.aqdb.model import (LocalDisk, NasDisk, Service, Machine, Share,
                                 VirtualDisk, ResourceGroup)

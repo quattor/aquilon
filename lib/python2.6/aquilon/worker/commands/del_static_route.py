@@ -34,7 +34,7 @@ from ipaddr import IPv4Network
 from sqlalchemy.orm.exc import NoResultFound
 
 from aquilon.exceptions_ import NotFoundException
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.aqdb.model import NetworkEnvironment, StaticRoute
 from aquilon.aqdb.model.network import get_net_id_from_ip
 

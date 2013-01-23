@@ -32,7 +32,7 @@
 
 from sqlalchemy.orm import aliased, subqueryload, joinedload
 
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.formats.machine import SimpleMachineList
 from aquilon.aqdb.model import (Machine, Cpu, Cluster, Service, ServiceInstance,
                                 NasDisk, Disk, ClusterResource,

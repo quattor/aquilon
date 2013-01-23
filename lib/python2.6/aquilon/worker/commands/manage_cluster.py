@@ -31,7 +31,7 @@
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Cluster
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.commands.manage_hostname import validate_branch_commits
 from aquilon.worker.dbwrappers.branch import get_branch_and_author
 from aquilon.worker.templates.base import Plenary, PlenaryCollection

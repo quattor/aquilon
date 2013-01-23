@@ -40,10 +40,9 @@ from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 from sqlalchemy.sql.expression import desc
 from sqlalchemy.orm import object_session
 
-from aquilon.exceptions_ import ArgumentError, InternalError, NotFoundException
-from aquilon.aqdb.model import (Interface, HardwareEntity, ObservedMac, Fqdn,
-                                ARecord, VlanInfo, ObservedVlan, Network,
-                                AddressAssignment, Model)
+from aquilon.exceptions_ import ArgumentError, InternalError
+from aquilon.aqdb.model import (Interface, ObservedMac, Fqdn, ARecord, VlanInfo,
+                                ObservedVlan, Network, AddressAssignment, Model)
 from aquilon.aqdb.model.network import get_net_id_from_ip
 
 

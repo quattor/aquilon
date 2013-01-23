@@ -30,7 +30,7 @@
 """Contains the logic for `aq update grn`."""
 
 from aquilon.aqdb.model import Grn
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.grn import lookup_grn
 
 

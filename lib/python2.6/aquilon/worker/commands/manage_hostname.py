@@ -32,7 +32,7 @@
 import os
 
 from aquilon.exceptions_ import IncompleteError, ArgumentError
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.branch import get_branch_and_author
 from aquilon.worker.dbwrappers.host import hostname_to_host
 from aquilon.worker.templates.host import PlenaryHost

@@ -60,12 +60,10 @@ class Disk(Base):
     device_name = Column(AqStr(128), nullable=False, default='sda')
     controller_type = Column(Enum(64, controller_types), nullable=False)
 
-    """
-    We need to know the bus address of each disk.
-    This isn't really nullable, but single-table inheritance means
-    that the base class will end up with the column and the base class
-    wants it to be nullable. We enforce this via __init__ instead.
-    """
+    # We need to know the bus address of each disk.
+    # This isn't really nullable, but single-table inheritance means
+    # that the base class will end up with the column and the base class
+    # wants it to be nullable. We enforce this via __init__ instead.
     address = Column("address", AqStr(128), nullable=True)
 
     machine_id = Column(Integer, ForeignKey('machine.machine_id',
@@ -116,17 +114,15 @@ class NasDisk(Disk):
     """
     __mapper_args__ = {'polymorphic_identity': 'nas'}
 
-    """
-        No cascade delete here: we want to restrict any attempt to delete
-        any service instance that has client dependencies.
-    """
+    # No cascade delete here: we want to restrict any attempt to delete
+    # any service instance that has client dependencies.
     service_instance_id = Column(Integer, ForeignKey('service_instance.id',
                                                      name='%s_srv_inst_fk' % (
                                                         _NDTN)),
                                  nullable=True)
 
-#    TODO: double check property values on forward and backrefs before commit
-#        cascade ops too
+    # TODO: double check property values on forward and backrefs before commit
+    # cascade ops too
     service_instance = relation(ServiceInstance, backref='nas_disks')
 
     def __init__(self, **kw):

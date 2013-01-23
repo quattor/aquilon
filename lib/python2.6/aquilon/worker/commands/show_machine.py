@@ -30,7 +30,7 @@
 """Contains the logic for `aq show machine`."""
 
 
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.location import get_location
 from aquilon.aqdb.column_types import AqStr
 from aquilon.aqdb.model import Machine, Model, Chassis

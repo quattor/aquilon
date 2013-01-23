@@ -29,7 +29,7 @@
 # TERMS THAT MAY APPLY.
 
 from aquilon.aqdb.model import ARecord
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.dns import grab_address
 from aquilon.worker.dbwrappers.interface import generate_ip
 from aquilon.worker.processes import DSDBRunner

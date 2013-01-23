@@ -34,7 +34,7 @@ from datetime import datetime
 from aquilon.exceptions_ import ArgumentError
 from sqlalchemy.orm.exc import NoResultFound
 
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.resources import (add_resource,
                                                  get_resource_holder)
 from aquilon.aqdb.model import RebootIntervention

@@ -30,7 +30,7 @@
 """Contains the logic for `aq update srv record`."""
 
 from aquilon.aqdb.model import SrvRecord
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 
 
 class CommandUpdateSrvRecord(BrokerCommand):

@@ -30,7 +30,7 @@
 """Contains the logic for `aq search sandbox`."""
 
 from aquilon.aqdb.model import Sandbox
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.branch import search_branch_query
 from aquilon.worker.formats.list import StringList
 

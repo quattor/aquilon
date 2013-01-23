@@ -30,7 +30,7 @@
 """Contains the logic for `aq search domain`."""
 
 from aquilon.aqdb.model import Branch, Domain
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.branch import search_branch_query
 from aquilon.worker.formats.list import StringList
 

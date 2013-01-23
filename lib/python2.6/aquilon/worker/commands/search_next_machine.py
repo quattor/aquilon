@@ -30,7 +30,7 @@
 """Contains the logic for `aq search next --machine`."""
 
 
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.aqdb.model import Machine
 from aquilon.worker.dbwrappers.search import search_next
 

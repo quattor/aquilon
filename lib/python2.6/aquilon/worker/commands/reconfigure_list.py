@@ -31,7 +31,7 @@
 
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.host import hostlist_to_hosts
 from aquilon.aqdb.model import (Archetype, Personality,
                                 OperatingSystem, HostLifecycle)

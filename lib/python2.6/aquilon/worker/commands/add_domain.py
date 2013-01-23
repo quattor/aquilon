@@ -35,7 +35,7 @@ import re
 
 from aquilon.exceptions_ import (AuthorizationException, ArgumentError,
                                  InternalError, ProcessException)
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.aqdb.model import Domain, Branch
 from aquilon.worker.processes import run_git, remove_dir
 

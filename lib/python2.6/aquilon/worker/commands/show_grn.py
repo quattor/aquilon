@@ -31,7 +31,7 @@
 
 from aquilon.exceptions_ import NotFoundException
 from aquilon.aqdb.model import Grn
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 
 
 class CommandShowGrn(BrokerCommand):

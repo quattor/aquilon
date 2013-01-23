@@ -32,7 +32,7 @@
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Machine, DnsDomain
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.location import get_location
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
 

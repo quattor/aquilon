@@ -30,7 +30,7 @@
 """Contains the logic for `aq search system`."""
 
 
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.formats.list import StringAttributeList
 from aquilon.aqdb.model import DnsRecord
 from aquilon.worker.dbwrappers.system import search_system_query

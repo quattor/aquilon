@@ -37,7 +37,7 @@ if __name__ == '__main__':
     BINDIR = os.path.dirname(os.path.realpath(sys.argv[0]))
     sys.path.append(BINDIR)
 
-    import depends
+    import aquilon.client.depends
 
 
 from optparse import OptionParser, OptionValueError

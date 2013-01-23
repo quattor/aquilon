@@ -33,7 +33,7 @@ from datetime import datetime
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Intervention
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.resources import (add_resource,
                                                  get_resource_holder)
 

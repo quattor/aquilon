@@ -31,7 +31,7 @@
 
 
 from aquilon.aqdb.model import Cluster, MetaCluster
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.resources import get_resource
 from aquilon.worker.templates.base import Plenary
 from aquilon.worker.templates.cluster import (PlenaryClusterObject,

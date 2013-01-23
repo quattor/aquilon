@@ -34,7 +34,7 @@ from aquilon.exceptions_ import ArgumentError, ProcessException
 from aquilon.aqdb.model import (Host, OperatingSystem, Archetype,
                                 HostLifecycle, Machine, Personality,
                                 ServiceAddress, HostResource)
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.branch import get_branch_and_author
 from aquilon.worker.dbwrappers.dns import grab_address
 from aquilon.worker.dbwrappers.grn import lookup_grn

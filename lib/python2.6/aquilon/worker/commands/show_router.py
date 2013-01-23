@@ -34,7 +34,7 @@ from sqlalchemy.orm import (undefer, joinedload, subqueryload_all,
                             contains_eager)
 
 from aquilon.exceptions_ import ArgumentError, NotFoundException
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.aqdb.model import (RouterAddress, ARecord, Network,
                                 NetworkEnvironment)
 

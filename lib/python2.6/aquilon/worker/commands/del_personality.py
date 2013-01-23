@@ -29,7 +29,7 @@
 # TERMS THAT MAY APPLY.
 """Contains the logic for `aq del personality`."""
 
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Personality, Host
 from aquilon.worker.templates.personality import PlenaryPersonality

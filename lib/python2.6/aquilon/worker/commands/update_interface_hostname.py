@@ -30,7 +30,7 @@
 """Contains the logic for `aq update interface --hostname`."""
 
 
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.commands.update_interface_machine import (
         CommandUpdateInterfaceMachine)
 from aquilon.worker.dbwrappers.host import hostname_to_host

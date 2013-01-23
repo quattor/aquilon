@@ -33,7 +33,7 @@
 from itertools import chain
 from random import choice
 
-from sqlalchemy.orm import undefer, subqueryload
+from sqlalchemy.orm import undefer
 from sqlalchemy.orm.attributes import set_committed_value
 from sqlalchemy.orm.session import object_session
 from sqlalchemy.sql import or_
@@ -99,20 +99,27 @@ class Chooser(object):
         self.logger.debug("Creating service Chooser for %s", self.description)
         # Cache of the service maps
         self.mapped_services = {}
+
+        # Stores interim service instance lists
         self.staging_services = {}
-        """Stores interim service instance lists."""
+
+        # Report as many errors as possible in one shot
         self.errors = []
-        """Report as many errors as possible in one shot."""
+
+        # Cache the servers backing service instances
         self.servers = {}
-        """Cache the servers backing service instances."""
+
+        # Set of service instances with a new client
         self.instances_bound = set()
-        """Set of service instances with a new client."""
+
+        # Set of service instances losing a client
         self.instances_unbound = set()
-        """Set of service instances losing a client."""
+
+        # Track the chosen services
         self.chosen_services = {}
-        """Track the chosen services."""
+
+        # Keep stashed plenaries for rollback purposes
         self.plenaries = PlenaryCollection(logger=self.logger)
-        """Keep stashed plenaries for rollback purposes."""
 
     def generate_description(self):
         return str(self.dbobj)

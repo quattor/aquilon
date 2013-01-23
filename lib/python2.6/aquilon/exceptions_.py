@@ -76,7 +76,7 @@ class ProcessException(AquilonError):
         elif out and out.strip():
             filter_msg = "filtered " if filtered else ""
             msg = msg + " and %sstdout:\n%s" % (filter_msg, out)
-        StandardError.__init__(self, msg)
+        super(ProcessException, self).__init__(msg)
 
 
 class RollbackException(AquilonError):

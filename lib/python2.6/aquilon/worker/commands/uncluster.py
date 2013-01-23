@@ -31,7 +31,7 @@
 
 from aquilon.exceptions_ import ArgumentError, IncompleteError
 from aquilon.aqdb.model import Cluster, Personality, ServiceAddress
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.host import hostname_to_host
 from aquilon.worker.dbwrappers.resources import walk_resources
 from aquilon.worker.locks import lock_queue, CompileKey

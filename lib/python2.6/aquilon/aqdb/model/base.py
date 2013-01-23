@@ -258,7 +258,7 @@ class Base(object):
                 clslabel = mapper.polymorphic_map[value].class_._get_class_label()
             else:
                 if field == "name" or (hasattr(cls, "_instance_label") and
-                                       field == cls._instance_label):
+                                       field == cls._instance_label):  # pylint: disable=E1101
                     desc.insert(0, str(value))
                 elif isinstance(value, Base):
                     desc.append("{0:l}".format(value))

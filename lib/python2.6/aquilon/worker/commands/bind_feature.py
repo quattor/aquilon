@@ -32,7 +32,7 @@ from aquilon.exceptions_ import (ArgumentError, PartialError, IncompleteError,
                                  InternalError, AuthorizationException,
                                  UnimplementedError)
 from aquilon.aqdb.model import Feature, Archetype, Personality, Model
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.locks import CompileKey
 from aquilon.worker.templates.personality import PlenaryPersonality
 from aquilon.worker.commands.deploy import validate_justification

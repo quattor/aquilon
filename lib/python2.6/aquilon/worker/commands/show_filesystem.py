@@ -30,7 +30,7 @@
 
 
 from aquilon.aqdb.model import Filesystem
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.commands.show_resource import show_resource
 
 

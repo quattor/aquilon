@@ -31,7 +31,7 @@
 
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.host import (hostname_to_host,
                                             get_host_bound_service)
 from aquilon.worker.processes import run_command

@@ -30,7 +30,7 @@
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Personality, Archetype
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.parameter import (get_parameter_holder,
                                                  set_parameter)
 from aquilon.worker.templates import Plenary, PlenaryCollection

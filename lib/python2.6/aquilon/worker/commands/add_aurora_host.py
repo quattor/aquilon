@@ -33,7 +33,7 @@
 import re
 
 from aquilon.exceptions_ import ProcessException, ArgumentError
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.commands.add_host import CommandAddHost
 from aquilon.worker.processes import DSDBRunner
 from aquilon.worker.dbwrappers.machine import create_machine

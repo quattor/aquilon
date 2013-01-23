@@ -31,7 +31,7 @@
 
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.commands.add_host import CommandAddHost
 from aquilon.worker.dbwrappers.search import search_next
 from aquilon.aqdb.model import Machine, DnsDomain, Fqdn

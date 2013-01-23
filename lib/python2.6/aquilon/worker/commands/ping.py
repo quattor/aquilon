@@ -30,7 +30,7 @@
 """Contains the logic for `aq ping`."""
 
 
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 
 
 class CommandPing(BrokerCommand):

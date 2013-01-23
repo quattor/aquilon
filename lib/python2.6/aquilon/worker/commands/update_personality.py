@@ -31,7 +31,7 @@
 
 from sqlalchemy.orm import joinedload, subqueryload
 
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.aqdb.model import (Personality, PersonalityESXClusterInfo,
                                 Cluster, Host)
 from aquilon.aqdb.model.cluster import restricted_builtins

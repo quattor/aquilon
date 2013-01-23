@@ -30,7 +30,7 @@
 """Contains the logic for `aq cat --personality`."""
 
 
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.aqdb.model import Personality
 from aquilon.worker.templates.personality import (PlenaryPersonalityPreFeature,
                                                   PlenaryPersonalityPostFeature,

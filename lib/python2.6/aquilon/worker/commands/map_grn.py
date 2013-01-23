@@ -30,7 +30,7 @@
 """Contains the logic for `aq map grn`."""
 
 from aquilon.aqdb.model import Personality
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.grn import lookup_grn
 from aquilon.worker.dbwrappers.host import hostname_to_host, hostlist_to_hosts
 from aquilon.worker.templates.personality import PlenaryPersonality

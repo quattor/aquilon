@@ -32,7 +32,7 @@
 
 from sqlalchemy.orm import contains_eager
 
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.formats.host import SimpleHostList
 from aquilon.aqdb.model import Host, Machine, DnsRecord, DnsDomain, Fqdn
 

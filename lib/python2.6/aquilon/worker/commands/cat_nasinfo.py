@@ -30,7 +30,7 @@
 """Contains the logic for `aq cat --nasinfo`."""
 
 
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.aqdb.model import Service, ServiceInstance
 from aquilon.worker.templates.service import PlenaryInstanceNasDiskShare
 

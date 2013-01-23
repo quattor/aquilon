@@ -30,7 +30,7 @@
 """Contains the logic for `aq unmap grn`."""
 
 from aquilon.aqdb.model import Personality
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.commands.map_grn import CommandMapGrn
 from aquilon.exceptions_ import ArgumentError
 

@@ -33,7 +33,7 @@
 from sqlalchemy.orm import contains_eager
 
 from aquilon.exceptions_ import NotFoundException
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.aqdb.model import SrvRecord, DnsDomain, DnsEnvironment, Fqdn
 
 

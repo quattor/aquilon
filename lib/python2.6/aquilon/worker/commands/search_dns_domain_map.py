@@ -31,7 +31,7 @@
 
 
 from aquilon.aqdb.model import DnsDomain, DnsMap, Location
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.location import get_location
 
 from sqlalchemy.orm import contains_eager, undefer

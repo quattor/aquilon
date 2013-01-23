@@ -33,7 +33,7 @@ from sqlalchemy.orm import joinedload, subqueryload, lazyload
 
 from aquilon.exceptions_ import NotFoundException
 from aquilon.aqdb.model import EsxCluster, VirtualMachine, ClusterResource
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.formats.cluster import ClusterList
 
 

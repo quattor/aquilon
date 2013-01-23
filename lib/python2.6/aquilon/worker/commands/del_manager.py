@@ -32,7 +32,7 @@
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import ARecord
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.processes import DSDBRunner
 from aquilon.worker.locks import DeleteKey
 from aquilon.worker.dbwrappers.dns import delete_dns_record

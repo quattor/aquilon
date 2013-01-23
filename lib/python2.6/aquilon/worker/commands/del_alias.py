@@ -30,9 +30,8 @@
 """Contains the logic for `aq del alias`."""
 
 
-from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import DnsEnvironment, Alias, ReservedName
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.dns import delete_dns_record
 from aquilon.worker.processes import DSDBRunner
 

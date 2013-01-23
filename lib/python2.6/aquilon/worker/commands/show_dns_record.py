@@ -30,7 +30,7 @@
 """Contains the logic for `aq show dns record`."""
 
 
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.aqdb.model import (DnsRecord, ARecord, Alias, SrvRecord,
                                 DnsEnvironment, NetworkEnvironment,

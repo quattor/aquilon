@@ -30,7 +30,7 @@
 """Contains the logic for `aq update alias`."""
 
 from aquilon.aqdb.model import Alias, DnsEnvironment
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.processes import DSDBRunner
 from aquilon.worker.commands.add_alias import create_target_if_needed
 from aquilon.worker.commands.del_alias import delete_target_if_needed

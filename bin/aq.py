@@ -55,6 +55,7 @@ MANDIR = os.path.join(SRCDIR, "doc", "man")
 
 sys.path.append(LIBDIR)
 
+from aquilon.exceptions_ import AquilonError
 from aquilon.client import depends
 from aquilon.client.knchttp import KNCHTTPConnection
 from aquilon.client.chunked import ChunkedHTTPConnection
@@ -121,7 +122,6 @@ class CustomAction(object):
 
     def create_bundle(self, commandOptions):
         from subprocess import Popen, PIPE
-        from re import search
         from tempfile import mkstemp
         from base64 import b64encode
 

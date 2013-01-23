@@ -30,7 +30,7 @@
 """Contains the logic for `aq show sandbox --sandbox`."""
 
 
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.dbwrappers.sandbox import get_sandbox
 from aquilon.worker.formats.branch import AuthoredSandbox

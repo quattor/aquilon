@@ -30,7 +30,7 @@
 """Contains the logic for `aq status`."""
 
 
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 
 
 class CommandStatus(BrokerCommand):

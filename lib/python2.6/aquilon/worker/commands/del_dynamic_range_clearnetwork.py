@@ -31,7 +31,7 @@
 
 from sqlalchemy.sql.expression import asc
 
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.commands.del_dynamic_range import CommandDelDynamicRange
 from aquilon.aqdb.model import DynamicStub, Network, NetworkEnvironment
 from aquilon.exceptions_ import ArgumentError

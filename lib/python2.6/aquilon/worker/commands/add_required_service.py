@@ -32,7 +32,7 @@
 
 from aquilon.exceptions_ import ArgumentError, AuthorizationException
 from aquilon.aqdb.model import Archetype, Service
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.commands.deploy import validate_justification
 
 

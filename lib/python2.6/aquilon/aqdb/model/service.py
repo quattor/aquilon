@@ -46,7 +46,6 @@ from datetime import datetime
 from sqlalchemy import (Column, Integer, Sequence, String, DateTime, ForeignKey,
                         UniqueConstraint, Index)
 from sqlalchemy.orm import relation, backref, deferred
-from sqlalchemy.ext.associationproxy import association_proxy
 
 from aquilon.aqdb.model import Base, Archetype, Personality
 from aquilon.aqdb.column_types.aqstr import AqStr

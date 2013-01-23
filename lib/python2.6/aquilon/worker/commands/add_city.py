@@ -30,7 +30,7 @@
 """Contains the logic for `aq add city`."""
 
 
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.processes import DSDBRunner
 from aquilon.worker.locks import lock_queue
 from aquilon.worker.templates.city import PlenaryCity

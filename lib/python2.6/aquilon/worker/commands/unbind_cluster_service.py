@@ -30,7 +30,7 @@
 
 
 from aquilon.exceptions_ import ArgumentError, NotFoundException
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.aqdb.model import Cluster, Service
 from aquilon.worker.dbwrappers.service_instance import get_service_instance
 from aquilon.worker.templates.base import Plenary

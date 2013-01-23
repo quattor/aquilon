@@ -319,8 +319,6 @@ class PlenaryToplevelHost(Plenary):
                           logger=self.logger)
 
     def body(self, lines):
-        iface_features = {}
-
         pers = self.dbobj.personality
         arch = pers.archetype
 
@@ -329,8 +327,6 @@ class PlenaryToplevelHost(Plenary):
             # Management interfaces are not configured at the host level
             if dbinterface.interface_type == 'management':
                 continue
-
-        os_template = self.dbobj.operating_system.cfg_path + '/config'
 
         services = []
         required_services = set(arch.services + pers.services)

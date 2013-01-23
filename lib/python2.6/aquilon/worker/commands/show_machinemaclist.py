@@ -30,7 +30,7 @@
 """Contains the logic for `aq show hostiplist`."""
 
 
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.formats.machine import MachineMacList
 from aquilon.aqdb.model import HardwareEntity, Interface
 from sqlalchemy.orm import contains_eager

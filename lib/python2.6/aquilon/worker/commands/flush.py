@@ -36,7 +36,7 @@ from operator import attrgetter
 from sqlalchemy.orm import joinedload, subqueryload, lazyload, contains_eager
 from sqlalchemy.orm.attributes import set_committed_value
 
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.aqdb.model import (Service, Machine, Chassis, Host,
                                 Personality, Cluster, City, Rack, Resource,
                                 ResourceHolder, HostResource, ClusterResource,

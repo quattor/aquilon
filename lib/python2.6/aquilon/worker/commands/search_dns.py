@@ -34,7 +34,7 @@ from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import (DnsRecord, ARecord, Alias, SrvRecord, Fqdn,
                                 DnsDomain, DnsEnvironment, Network,
                                 NetworkEnvironment, AddressAssignment)
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.formats.list import StringAttributeList
 
 from sqlalchemy.orm import contains_eager, undefer, subqueryload, aliased

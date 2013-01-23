@@ -33,7 +33,7 @@
 from sqlalchemy.orm.session import object_session
 
 from aquilon.exceptions_ import ArgumentError, UnimplementedError
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.aqdb.model import (Vendor, Model, Cpu, MachineSpecs, Machine, Disk,
                                 HardwareEntity, Interface)
 from aquilon.worker.templates.base import PlenaryCollection

@@ -29,7 +29,7 @@
 # TERMS THAT MAY APPLY.
 """Contains the logic for `aq show hostmachinelist`."""
 
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.formats.host import HostMachineList
 from aquilon.aqdb.model import Host, Archetype
 

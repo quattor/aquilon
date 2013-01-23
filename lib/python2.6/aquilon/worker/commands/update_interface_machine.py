@@ -31,7 +31,7 @@
 
 
 from aquilon.exceptions_ import ArgumentError, AquilonError
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.interface import (verify_port_group,
                                                  choose_port_group,
                                                  assign_address,

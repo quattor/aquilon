@@ -32,7 +32,7 @@
 from sqlalchemy.orm import contains_eager
 
 from aquilon.aqdb.model import DnsRecord, Fqdn, DnsDomain, DnsEnvironment
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.formats.dns_record import DnsDump
 
 

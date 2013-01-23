@@ -36,7 +36,7 @@ import re
 from sqlalchemy.orm import joinedload, subqueryload, contains_eager
 
 from aquilon.aqdb.model import Archetype, Personality
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.formats.personality import (ThresholdedPersonality,
                                                 PersonalityList)
 from aquilon.worker.dbwrappers.branch import get_branch_and_author
