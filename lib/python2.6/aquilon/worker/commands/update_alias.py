@@ -54,7 +54,8 @@ class CommandUpdateAlias(BrokerCommand):
             old_target = dbalias.target
             dbalias.target = create_target_if_needed(session, logger,
                                                      target, dbdns_env)
-            delete_target_if_needed(session, old_target)
+            if dbalias.target != old_target:
+                delete_target_if_needed(session, old_target)
 
         if comments is not None:
             dbalias.comments = comments

@@ -31,12 +31,13 @@
 
 import socket
 
-from sqlalchemy.orm import object_session, joinedload
+from sqlalchemy.orm import object_session, joinedload, lazyload
 from sqlalchemy.orm.exc import NoResultFound
+from sqlalchemy.sql import or_
 
 from aquilon.exceptions_ import ArgumentError, AquilonError, NotFoundException
-from aquilon.aqdb.model import (Fqdn, DnsRecord, ARecord, DynamicStub,
-                                ReservedName, DnsEnvironment,
+from aquilon.aqdb.model import (Fqdn, DnsRecord, ARecord, DynamicStub, Alias,
+                                ReservedName, SrvRecord, DnsEnvironment,
                                 AddressAssignment, NetworkEnvironment)
 from aquilon.aqdb.model.dns_domain import parse_fqdn
 from aquilon.aqdb.model.network import get_net_id_from_ip
@@ -60,9 +61,22 @@ def delete_dns_record(dbdns_rec):
         raise ArgumentError("{0} is still in use by SRV records, delete them "
                             "first.".format(dbdns_rec))
 
-    # Lock the FQDN
     dbfqdn = dbdns_rec.fqdn
-    dbfqdn.lock_row()
+    targets = []
+    if getattr(dbdns_rec, 'reverse_ptr', None):
+        targets.append(dbdns_rec.reverse_ptr)
+    if getattr(dbdns_rec, 'target', None):
+        targets.append(dbdns_rec.target)
+
+    # Lock the affected DNS domains
+    dns_domains = [dbfqdn.dns_domain]
+    for tgt in targets:
+        if tgt.dns_domain in dns_domains:
+            continue
+        dns_domains.append(tgt.dns_domain)
+    dns_domains.sort()  # poor man's deadlock avoidance
+    for dbdns_domain in dns_domains:
+        dbdns_domain.lock_row()
 
     # Delete the DNS record
     session.delete(dbdns_rec)
@@ -70,11 +84,15 @@ def delete_dns_record(dbdns_rec):
 
     # Delete the FQDN if it is orphaned
     q = session.query(DnsRecord)
-    q = q.filter_by(fqdn_id=dbfqdn.id)
+    q = q.filter_by(fqdn=dbfqdn)
     if q.count() == 0:
         session.delete(dbfqdn)
     else:
         session.expire(dbfqdn, ['dns_records'])
+
+    # Delete the orphaned targets
+    for tgt in targets:
+        delete_target_if_needed(session, tgt)
 
 
 def convert_reserved_to_arecord(session, dbdns_rec, dbnetwork, ip):
@@ -109,8 +127,8 @@ def _check_netenv_compat(dbdns_rec, dbnet_env):
 def _forbid_dyndns(dbdns_rec):
     """ Raise an error if the address is reserved for dynamic DHCP """
     if isinstance(dbdns_rec, DynamicStub):
-            raise ArgumentError("Address {0:a} is reserved for dynamic "
-                            "DHCP.".format(dbdns_rec))
+        raise ArgumentError("Address {0:a} is reserved for dynamic "
+                        "DHCP.".format(dbdns_rec))
 
 
 # Locking rules:
@@ -321,18 +339,33 @@ def create_target_if_needed(session, logger, target, dbdns_env):
 
 
 def delete_target_if_needed(session, dbtarget):
-    if not dbtarget.dns_domain.restricted:
-        return
-
-    # Make sure the original alias is gone before we reference alias_cnt below
     session.flush()
 
-    delete_target_fqdn = True
-    for rec in dbtarget.dns_records:
-        if not isinstance(rec, ReservedName) or rec.alias_cnt > 0:
-            delete_target_fqdn = False
-        else:
-            session.delete(rec)
-    if delete_target_fqdn:
-        session.flush()
+    # If there's a ReservedName pointing to this FQDN and we're in a restricted
+    # domain, then auto-remove the ReservedName entry
+    if dbtarget.dns_records:
+        if not dbtarget.dns_domain.restricted:
+            return
+
+        for dbdns_rec in dbtarget.dns_records:
+            if not isinstance(dbdns_rec, ReservedName):
+                return
+            if dbdns_rec.hardware_entity:
+                return
+    else:
+        dbdns_rec = None
+
+    # Check if the FQDN is still the target of an existing alias, service record
+    # or reverse PTR record
+    q = session.query(DnsRecord)
+    q = q.with_polymorphic([ARecord, Alias, SrvRecord])
+    q = q.filter(or_(ARecord.reverse_ptr_id == dbtarget.id,
+                     Alias.target_id == dbtarget.id,
+                     SrvRecord.target_id == dbtarget.id))
+    q = q.options(lazyload('fqdn'))
+    if not q.count():
+        for dbdns_rec in dbtarget.dns_records:
+            session.delete(dbdns_rec)
         session.delete(dbtarget)
+    else:
+        session.expire(dbtarget, ['dns_records'])
