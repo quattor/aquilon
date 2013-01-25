@@ -66,7 +66,7 @@ class CommandChangeClusterStatus(BrokerCommand):
             plenaries.write(locked=True)
             td = TemplateDomain(dbcluster.branch, dbcluster.sandbox_author,
                                 logger=logger)
-            td.compile(session, " ".join(plenaries.object_templates), locked=True)
+            td.compile(session, plenaries.object_templates, locked=True)
         except:
             plenaries.restore_stash()
             raise
