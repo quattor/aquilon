@@ -29,9 +29,12 @@
 # TERMS THAT MAY APPLY.
 """ Helpers for managing DNS-related objects """
 
-from sqlalchemy.orm import object_session, joinedload
+import socket
 
-from aquilon.exceptions_ import ArgumentError, AquilonError
+from sqlalchemy.orm import object_session, joinedload
+from sqlalchemy.orm.exc import NoResultFound
+
+from aquilon.exceptions_ import ArgumentError, AquilonError, NotFoundException
 from aquilon.aqdb.model import (Fqdn, DnsRecord, ARecord, DynamicStub,
                                 ReservedName, DnsEnvironment,
                                 AddressAssignment, NetworkEnvironment)
@@ -285,3 +288,51 @@ def grab_address(session, fqdn, ip, network_environment=None,
                                 "{1:l}.".format(ip, addr.interface))
 
     return (existing_record, newly_created)
+
+
+def create_target_if_needed(session, logger, target, dbdns_env):
+    (name, target_domain) = parse_fqdn(session, target)
+    q = session.query(Fqdn)
+    q = q.filter_by(dns_environment=dbdns_env)
+    q = q.filter_by(dns_domain=target_domain)
+    q = q.filter_by(name=name)
+    try:
+        dbtarget = q.one()
+    except NoResultFound:
+        if not target_domain.restricted:
+            raise NotFoundException("Target FQDN {0} does not exist in {1:l}."
+                                    .format(target, dbdns_env))
+
+        dbtarget = Fqdn(name=name, dns_domain=target_domain,
+                        dns_environment=dbdns_env)
+
+        try:
+            socket.gethostbyname(dbtarget.fqdn)
+        except socket.gaierror, e:
+            logger.warning("WARNING: Will create alias for target {0.fqdn!s}, "
+                           "but trying to resolve it resulted in an error: "
+                           "{1.strerror}.".format(dbtarget, e))
+
+        session.add(dbtarget)
+        dbtarget_rec = ReservedName(fqdn=dbtarget)
+        session.add(dbtarget_rec)
+
+    return dbtarget
+
+
+def delete_target_if_needed(session, dbtarget):
+    if not dbtarget.dns_domain.restricted:
+        return
+
+    # Make sure the original alias is gone before we reference alias_cnt below
+    session.flush()
+
+    delete_target_fqdn = True
+    for rec in dbtarget.dns_records:
+        if not isinstance(rec, ReservedName) or rec.alias_cnt > 0:
+            delete_target_fqdn = False
+        else:
+            session.delete(rec)
+    if delete_target_fqdn:
+        session.flush()
+        session.delete(dbtarget)

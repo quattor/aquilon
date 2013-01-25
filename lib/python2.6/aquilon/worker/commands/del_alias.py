@@ -30,9 +30,10 @@
 """Contains the logic for `aq del alias`."""
 
 
-from aquilon.aqdb.model import DnsEnvironment, Alias, ReservedName
+from aquilon.aqdb.model import DnsEnvironment, Alias
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.dbwrappers.dns import delete_dns_record
+from aquilon.worker.dbwrappers.dns import (delete_dns_record,
+                                           delete_target_if_needed)
 from aquilon.worker.processes import DSDBRunner
 
 
@@ -61,21 +62,3 @@ class CommandDelAlias(BrokerCommand):
             dsdb_runner.commit_or_rollback("Could not delete alias from DSDB")
 
         return
-
-
-def delete_target_if_needed(session, dbtarget):
-    if not dbtarget.dns_domain.restricted:
-        return
-
-    # Make sure the original alias is gone before we reference alias_cnt below
-    session.flush()
-
-    delete_target_fqdn = True
-    for rec in dbtarget.dns_records:
-        if not isinstance(rec, ReservedName) or rec.alias_cnt > 0:
-            delete_target_fqdn = False
-        else:
-            session.delete(rec)
-    if delete_target_fqdn:
-        session.flush()
-        session.delete(dbtarget)
