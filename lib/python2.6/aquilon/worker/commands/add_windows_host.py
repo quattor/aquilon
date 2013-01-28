@@ -41,9 +41,7 @@ class CommandAddWindowsHost(CommandAddHost):
     def render(self, *args, **kwargs):
         kwargs['archetype'] = 'windows'
         kwargs['osname'] = 'windows'
-        if not kwargs['osversion']:
-            kwargs['osversion'] = 'generic'
-        kwargs['domain'] = self.config.get("broker", "windows_host_domain")
+        kwargs['domain'] = None
         kwargs['sandbox'] = None
         kwargs['zebra_interfaces'] = None
         # The superclass already contains the logic to handle this case.

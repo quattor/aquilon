@@ -49,8 +49,8 @@ class TestAddMetaCluster(TestBrokerCommand):
     def testverifyutmc1(self):
         command = "show metacluster --metacluster utmc1"
         out = self.commandtest(command.split(" "))
-        default_members = self.config.get("broker",
-                                          "metacluster_max_members_default")
+        default_members = self.config.get("archetype_metacluster",
+                                          "max_members_default")
         self.matchoutput(out, "MetaCluster: utmc1", command)
         self.matchoutput(out, "Max members: %s" % default_members, command)
         self.matchoutput(out, "Max shares: 8", command)
@@ -88,8 +88,8 @@ class TestAddMetaCluster(TestBrokerCommand):
         self.noouttest(command)
 
     def testverifyutmc3(self):
-        default_shares = self.config.get("broker",
-                                         "metacluster_max_shares_default")
+        default_shares = self.config.get("archetype_metacluster",
+                                         "max_shares_default")
         command = "show metacluster --metacluster utmc3"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "MetaCluster: utmc3", command)

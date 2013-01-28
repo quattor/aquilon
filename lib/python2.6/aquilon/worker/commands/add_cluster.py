@@ -57,6 +57,7 @@ class CommandAddCluster(BrokerCommand):
                                 personality)
 
         ctype = dbpersonality.archetype.cluster_type
+        section = "archetype_" + dbpersonality.archetype.name
 
         if not buildstatus:
             buildstatus = "build"
@@ -80,9 +81,8 @@ class CommandAddCluster(BrokerCommand):
             raise ArgumentError("{0} is not within a campus.".format(dbloc))
 
         if max_members is None:
-            opt = "%s_max_members_default" % dbpersonality.archetype.name
-            if self.config.has_option("broker", opt):
-                max_members = self.config.getint("broker", opt)
+            if self.config.has_option(section, "max_members_default"):
+                max_members = self.config.getint(section, "max_members_default")
 
         Cluster.get_unique(session, cluster, preclude=True)
         clus_type = Cluster.__mapper__.polymorphic_map[ctype].class_
@@ -102,10 +102,9 @@ class CommandAddCluster(BrokerCommand):
 
         if ctype == 'esx':
             if vm_to_host_ratio is None:
-                key = "{0}_vm_to_host_ratio".format(
-                    kw["personality"].archetype.name)
-                if self.config.has_option("broker", key):
-                    vm_to_host_ratio = self.config.get("broker", key)
+                if self.config.has_option(section, "vm_to_host_ratio"):
+                    vm_to_host_ratio = self.config.get(section,
+                                                       "vm_to_host_ratio")
                 else:
                     vm_to_host_ratio = "1:1"
             (vm_count, host_count) = force_ratio("vm_to_host_ratio",

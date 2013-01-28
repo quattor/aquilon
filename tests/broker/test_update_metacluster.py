@@ -43,16 +43,16 @@ from brokertest import TestBrokerCommand
 class TestUpdateMetaCluster(TestBrokerCommand):
 
     def testupdatenoop(self):
-        default_max = self.config.get("broker",
-                                      "metacluster_max_members_default")
+        default_max = self.config.get("archetype_metacluster",
+                                      "max_members_default")
         self.noouttest(["update_metacluster", "--metacluster=utmc1",
                         "--max_members=%s" % default_max])
 
     def testverifynoop(self):
         command = "show metacluster --metacluster utmc1"
         out = self.commandtest(command.split(" "))
-        default_max = self.config.get("broker",
-                                      "metacluster_max_members_default")
+        default_max = self.config.get("archetype_metacluster",
+                                      "max_members_default")
         self.matchoutput(out, "MetaCluster: utmc1", command)
         self.matchoutput(out, "Max members: %s" % default_max, command)
         self.matchclean(out, "Comments", command)

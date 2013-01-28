@@ -62,10 +62,10 @@ class TestAddESXCluster(TestBrokerCommand):
     def testverifyutecl1(self):
         command = "show esx_cluster --cluster utecl1"
         out = self.commandtest(command.split(" "))
-        default_max = self.config.get("broker",
-                                      "esx_cluster_max_members_default")
-        default_ratio = self.config.get("broker",
-                                        "esx_cluster_vm_to_host_ratio")
+        default_max = self.config.get("archetype_esx_cluster",
+                                      "max_members_default")
+        default_ratio = self.config.get("archetype_esx_cluster",
+                                        "vm_to_host_ratio")
         self.matchoutput(out, "ESX Cluster: utecl1", command)
         self.matchoutput(out, "Metacluster: utmc1", command)
         self.matchoutput(out, "Building: ut", command)
@@ -90,16 +90,16 @@ class TestAddESXCluster(TestBrokerCommand):
         self.failUnlessEqual(cluster.threshold, 2)
         self.failUnlessEqual(cluster.threshold_is_percent, False)
         self.failUnlessEqual(cluster.max_members,
-                             self.config.getint("broker",
-                                                "esx_cluster_max_members_default"))
+                             self.config.getint("archetype_esx_cluster",
+                                                "max_members_default"))
 
     def testverifycatutecl1(self):
         obj_cmd, obj, data_cmd, data = self.verify_cat_clusters("utecl1",
                                                                 "vulcan-1g-desktop-prod",
                                                                 "esx", "utmc1")
 
-        default_ratio = self.config.get("broker",
-                                        "esx_cluster_vm_to_host_ratio")
+        default_ratio = self.config.get("archetype_esx_cluster",
+                                        "vm_to_host_ratio")
         default_ratio = re.sub(r"(\d+):(\d+)", r"\1,\\s*\2", default_ratio)
 
         self.searchoutput(data, r'"/system/cluster/ratio" = list\(\s*' +
@@ -257,8 +257,8 @@ class TestAddESXCluster(TestBrokerCommand):
     def testverifyutecl3(self):
         command = "show esx_cluster --cluster utecl3"
         out = self.commandtest(command.split(" "))
-        default_ratio = self.config.get("broker",
-                                        "esx_cluster_vm_to_host_ratio")
+        default_ratio = self.config.get("archetype_esx_cluster",
+                                        "vm_to_host_ratio")
         self.matchoutput(out, "ESX Cluster: utecl3", command)
         self.matchoutput(out, "Metacluster: utmc2", command)
         self.matchoutput(out, "Building: ut", command)
@@ -286,10 +286,10 @@ class TestAddESXCluster(TestBrokerCommand):
     def testverifyutecl4(self):
         command = "show esx_cluster --cluster utecl4"
         out = self.commandtest(command.split(" "))
-        default_ratio = self.config.get("broker",
-                                        "esx_cluster_vm_to_host_ratio")
-        default_max = self.config.get("broker",
-                                      "esx_cluster_max_members_default")
+        default_ratio = self.config.get("archetype_esx_cluster",
+                                        "vm_to_host_ratio")
+        default_max = self.config.get("archetype_esx_cluster",
+                                      "max_members_default")
         self.matchoutput(out, "ESX Cluster: utecl4", command)
         self.matchoutput(out, "Metacluster: utmc2", command)
         self.matchoutput(out, "Building: ut", command)

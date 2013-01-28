@@ -155,20 +155,8 @@ client_notifications = yes
 CheckNet = /ms/dist/NetEng/bin/Cisco/CheckNet
 CheckNet_module = /ms/dist/NetEng/modules/prod
 sharedata = /ms/dist/storage/etc/nasobjects.map
-aurora_host_domain = ny-prod
-windows_host_domain = ny-prod
-metacluster_host_domain = ny-prod
-metacluster_location_type = company
-metacluster_location_name = ms
 default_domain_start = prod
 authorization_error = Please contact an administrator for access.
-esx_cluster_max_members_default = 8
-esx_cluster_vm_to_host_ratio = 16:1
-metacluster_max_members_default = 32
-metacluster_max_shares_default = 32
-hacluster_max_members_default = 2
-storagecluster_max_members_default = 2
-gridcluster_max_members_default = 2000
 namespaced_host_profiles = False
 flat_host_profiles = True
 windows_host_info = /ms/dist/aquilon/PROJ/datawarehouse/dumpv3/machines.db
@@ -192,8 +180,6 @@ poll_ssh_options = -o StrictHostKeyChecking=no -o BatchMode=yes
 grn_to_eonid_map_location = /ms/dist/appmw/PROJ/eon-data/prod/common
 switch_discover = /ms/dist/aquilon/PROJ/switch-discover/prod/bin/switch-discover
 
-hacluster_allow_cascaded_deco = False
-esx_cluster_allow_cascaded_deco = True
 # Limit of hostlists
 default_max_list_size = 1000
 reconfigure_max_list_size =
@@ -202,6 +188,43 @@ manage_max_list_size =
 reset_advertised_status_max_list_size =
 map_grn_max_list_size =
 unmap_grn_max_list_size =
+
+[archetype_aquilon]
+default_personality = inventory
+default_osname = linux
+default_osversion = 5.0.1-x86_64
+
+[archetype_aurora]
+host_domain = ny-prod
+default_osname = linux
+default_osversion = generic
+
+[archetype_esx_cluster]
+allow_cascaded_deco = True
+max_members_default = 8
+vm_to_host_ratio = 16:1
+
+[archetype_gridcluster]
+max_members_default = 2000
+
+[archetype_hacluster]
+allow_cascaded_deco = False
+max_members_default = 2
+
+[archetype_metacluster]
+host_domain = ny-prod
+location_type = company
+location_name = ms
+max_members_default = 32
+max_shares_default = 32
+
+[archetype_storagecluster]
+max_members_default = 2
+
+[archetype_windows]
+host_domain = ny-prod
+default_osname = windows
+default_osversion = generic
 
 [panc]
 default_version = prod

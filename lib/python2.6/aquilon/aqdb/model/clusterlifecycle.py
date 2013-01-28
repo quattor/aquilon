@@ -128,10 +128,11 @@ class Decommissioned(ClusterLifecycle):
 
         config = Config()
         archetype = dbcluster.personality.archetype
-        opt = "%s_allow_cascaded_deco" % archetype.name
+        section = "archetype_" + archetype.name
+        opt = "allow_cascaded_deco"
 
-        if dbcluster.hosts and (not config.has_option("broker", opt) or
-                                not config.getboolean("broker", opt)):
+        if dbcluster.hosts and (not config.has_option(section, opt) or
+                                not config.getboolean(section, opt)):
             raise ArgumentError("Cannot change state to {0}, as {1}'s "
                                 "archetype is {2}.".format(
                                                     dbdecommissioned.name,

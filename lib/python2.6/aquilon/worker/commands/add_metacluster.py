@@ -73,7 +73,7 @@ class CommandAddMetaCluster(BrokerCommand):
 
         # this should be reverted when virtbuild supports these options
         if not domain and not sandbox:
-            domain = self.config.get("broker", "metacluster_host_domain")
+            domain = self.config.get("archetype_metacluster", "host_domain")
 
         (dbbranch, dbauthor) = get_branch_and_author(session, logger,
                                                      domain=domain,
@@ -85,20 +85,20 @@ class CommandAddMetaCluster(BrokerCommand):
         # this should be reverted when virtbuild supports this option
         if not dbloc:
             dbloc = Location.get_unique(session,
-                                        name=self.config.get("broker",
-                                                 "metacluster_location_name"),
-                                        location_type=self.config.get("broker",
-                                                  "metacluster_location_type"))
+                                        name=self.config.get("archetype_metacluster",
+                                                             "location_name"),
+                                        location_type=self.config.get("archetype_metacluster",
+                                                                      "location_type"))
         elif not dbloc.campus:
             raise ArgumentError("{0} is not within a campus.".format(dbloc))
 
         if max_members is None:
-            max_members = self.config.getint("broker",
-                                             "metacluster_max_members_default")
+            max_members = self.config.getint("archetype_metacluster",
+                                             "max_members_default")
 
         if max_shares is None:
-            max_shares = self.config.getint("broker",
-                                            "metacluster_max_shares_default")
+            max_shares = self.config.getint("archetype_metacluster",
+                                            "max_shares_default")
 
         if metacluster.strip().lower() == 'global':
             raise ArgumentError("Metacluster name global is reserved.")
