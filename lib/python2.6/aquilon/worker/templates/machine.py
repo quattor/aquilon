@@ -90,10 +90,9 @@ class PlenaryMachineInfo(Plenary):
         host = self.dbobj.host
         container = self.dbobj.vm_container
         # Need a compile key if:
-        # - There is a non-aurora host attached.
+        # - There is a host attached.
         # - This is a virtual machine in a container.
-        if ((not host or self.dbobj.model.machine_type == 'aurora_node')
-                and (not container)):
+        if not host and not container:
             return None
         # We have at least host or container, maybe both...
         if host:
@@ -221,9 +220,6 @@ class PlenaryMachineInfo(Plenary):
             pan_assign(lines, "console/%s" % manager, managers[manager])
 
     def write(self, *args, **kwargs):
-        # Don't bother writing plenary files for dummy aurora hardware.
-        if self.dbobj.model.machine_type == 'aurora_node':
-            return 0
         return Plenary.write(self, *args, **kwargs)
 
 
