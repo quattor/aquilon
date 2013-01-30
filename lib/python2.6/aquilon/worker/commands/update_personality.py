@@ -32,7 +32,7 @@ from sqlalchemy.orm import joinedload, subqueryload
 
 from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import (Personality, PersonalityESXClusterInfo,
-                                Cluster, Host)
+                                Cluster, Host, HostEnvironment)
 from aquilon.aqdb.model.cluster import restricted_builtins
 from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.templates.personality import PlenaryPersonality
@@ -43,7 +43,8 @@ class CommandUpdatePersonality(BrokerCommand):
     required_parameters = ["personality", "archetype"]
 
     def render(self, session, logger, personality, archetype, vmhost_capacity_function,
-               vmhost_overcommit_memory, cluster_required, config_override, **arguments):
+               vmhost_overcommit_memory, cluster_required, config_override, host_environment,
+               **arguments):
         dbpersona = Personality.get_unique(session, name=personality,
                                            archetype=archetype, compel=True)
 
@@ -103,6 +104,17 @@ class CommandUpdatePersonality(BrokerCommand):
             dbpersona.config_override = config_override
             write_plenary = 1
 
+        if host_environment is not None:
+            legacy_env = HostEnvironment.get_unique(session, 'legacy', compel=True)
+            if dbpersona.host_environment == legacy_env:
+                HostEnvironment.validate_name(host_environment)
+                Personality.validate_env_in_name(personality, host_environment)
+                dbpersona.host_environment = HostEnvironment.get_unique(session,
+                                                                        host_environment,
+                                                                        compel=True)
+            else:
+                 raise ArgumentError("The personality '{0}' already has env set to '{1}'"
+                                     " and cannot be updated".format(str(dbpersona), host_environment))
         session.flush()
 
         q = session.query(Cluster)
