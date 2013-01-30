@@ -31,14 +31,13 @@
 
 import re
 
-from aquilon.exceptions_ import ArgumentError, InternalError, NotFoundException
+from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.service_instance import get_service_instance
 from aquilon.aqdb.model import (LocalDisk, NasDisk, Service, Machine, Share,
                                 VirtualDisk, ResourceGroup)
 from aquilon.aqdb.model.disk import controller_types
 from aquilon.worker.templates.machine import PlenaryMachineInfo
-from aquilon.worker.processes import NASAssign
 
 
 class CommandAddDisk(BrokerCommand):
@@ -47,48 +46,12 @@ class CommandAddDisk(BrokerCommand):
     # removed
     required_parameters = ["machine", "disk"]
 
-    REGEX_CAPACITY = re.compile("\d+:\d+$")
+    REGEX_ADDRESS = re.compile("\d+:\d+$")
 
-    def _get_nasassign_obj(self, dbmachine, disk, dbuser, size):
-        """request an auto share assignment from Resource Pool"""
-        if not dbmachine.location.rack:
-            raise ArgumentError("{0} is not associated with a rack."
-                                .format(dbmachine))
-        return NASAssign(machine=dbmachine.label, disk=disk, owner=dbuser.name,
-                         rack=dbmachine.location.rack.name, size=size)
-
-    def _verify_share(self, session, share, autoshare, address):
-        """get share (NAS) objects from aqdb"""
-        dbservice = Service.get_unique(session, "nas_disk_share",
-                                       compel=InternalError)
-        dbshare = get_service_instance(session, dbservice, share)
-        if autoshare:
-            if not dbshare.manager == 'resourcepool':
-                raise ArgumentError('Share "%s", which was assigned by '
-                                    'Resource Pool, is not correctly '
-                                    'configured as a Resource Pool '
-                                    'managed share in Aquilon. Please '
-                                    'correct Aquilon config of the share.'
-                                    % share)
-        else:
-            self._check_capacity(dbshare, address)
-        return dbshare
-
-    def _check_capacity(self, dbshare, address):
-        """capacity tracking for manually managed shares (not resource pool)"""
-        if dbshare.manager != 'aqd':
-            raise ArgumentError("Disk '%s' is managed by %s and can only be "
-                                "assigned with the 'autoshare' option." %
-                                (dbshare.name, dbshare.manager))
-        if not CommandAddDisk.REGEX_CAPACITY.match(address):
+    def _check_disk_address(self, address):
+        if not CommandAddDisk.REGEX_ADDRESS.match(address):
             raise ArgumentError("Disk address '%s' is not valid, it must "
                                 "match \d+:\d+ (e.g. 0:0)." % address)
-        max_clients = dbshare.enforced_max_clients
-        current_clients = len(dbshare.nas_disks)
-        if max_clients is not None and current_clients >= max_clients:
-            raise ArgumentError("NAS share %s is full (%s/%s)" %
-                                (dbshare.name, current_clients,
-                                 max_clients))
 
     def _write_plenary_info(self, dbmachine, logger):
         """write template files"""
@@ -96,7 +59,7 @@ class CommandAddDisk(BrokerCommand):
         plenary_info.write()
 
     def render(self, session, logger, machine, disk, controller,
-               share, autoshare, resourcegroup,
+               share, resourcegroup,
                address, comments, dbuser, size, boot, **kw):
 
         # Handle deprecated arguments
@@ -140,72 +103,63 @@ class CommandAddDisk(BrokerCommand):
         else:
             dbmetacluster = None
 
-        if autoshare:
-            nasassign_obj = self._get_nasassign_obj(dbmachine, disk, dbuser, size)
-            share = nasassign_obj.create()
+        if resourcegroup:
 
-        try:
-            if resourcegroup:
+            if not dbmachine.cluster or not dbmetacluster:
+                raise ArgumentError("Machine %s should be contained by a "
+                                    "cluster")
 
-                if not dbmachine.cluster or not dbmetacluster:
-                    raise ArgumentError("Machine %s should be contained by a "
-                                        "cluster")
+            dbrg = ResourceGroup.get_unique(session, name=resourcegroup,
+                                    holder=dbmachine.cluster.resholder,
+                                    compel=False)
 
-                dbrg = ResourceGroup.get_unique(session, name=resourcegroup,
-                                        holder=dbmachine.cluster.resholder,
-                                        compel=False)
-
-                if not dbrg:
-                    if dbmetacluster:
-                        dbrg = ResourceGroup.get_unique(session,
-                                        name=resourcegroup,
-                                        holder=dbmetacluster.resholder,
-                                        compel=True)
-                    else:
-                        raise NotFoundException("resourcegroup %s in %s "
-                                    "not found." %
-                                    (resourcegroup, dbmachine.cluster.name))
-
-                dbshare = Share.get_unique(session,
-                                           name=share,
-                                           holder=dbrg.resholder,
-                                           compel=True)
-
-                dbdisk = VirtualDisk(device_name=disk,
-                                     controller_type=controller,
-                                     bootable=boot,
-                                     capacity=size, address=address,
-                                     comments=comments)
-
-                dbmachine.disks.append(dbdisk)
-                dbshare.disks.append(dbdisk)
-
-            else:
-                if share:
-                    dbshare = self._verify_share(session, share, autoshare,
-                                                 address)
-                    dbdisk = NasDisk(device_name=disk,
-                                     controller_type=controller,
-                                     bootable=boot, service_instance=dbshare,
-                                     capacity=size, address=address,
-                                     comments=comments)
+            if not dbrg:
+                if dbmetacluster:
+                    dbrg = ResourceGroup.get_unique(session,
+                                    name=resourcegroup,
+                                    holder=dbmetacluster.resholder,
+                                    compel=True)
                 else:
-                    dbdisk = LocalDisk(device_name=disk,
-                                       controller_type=controller,
-                                       capacity=size, bootable=boot,
-                                       comments=comments)
-                dbmachine.disks.append(dbdisk)
+                    raise NotFoundException("resourcegroup %s in %s "
+                                "not found." %
+                                (resourcegroup, dbmachine.cluster.name))
 
-            if dbmetacluster:
-                dbmetacluster.validate()
+            dbshare = Share.get_unique(session,
+                                       name=share,
+                                       holder=dbrg.resholder,
+                                       compel=True)
 
-            self._write_plenary_info(dbmachine, logger)
-        except Exception, outer:
-            if autoshare:
-                try:
-                    nasassign_obj.delete()
-                except Exception, inner:
-                    logger.warn('Error undoing autoassign. '
-                                'Escalate to admin: %s' % inner)
-            raise outer
+            dbdisk = VirtualDisk(device_name=disk,
+                                 controller_type=controller,
+                                 bootable=boot,
+                                 capacity=size, address=address,
+                                 comments=comments)
+
+            dbmachine.disks.append(dbdisk)
+            dbshare.disks.append(dbdisk)
+
+        else:
+            if share:
+                dbservice = Service.get_unique(session, "nas_disk_share",
+                                               compel=True)
+                dbshare = get_service_instance(session, dbservice, share)
+
+                self._check_disk_address(address)
+
+                dbdisk = NasDisk(device_name=disk,
+                                 controller_type=controller,
+                                 bootable=boot, service_instance=dbshare,
+                                 capacity=size, address=address,
+                                 comments=comments)
+            else:
+                dbdisk = LocalDisk(device_name=disk,
+                                   controller_type=controller,
+                                   capacity=size, bootable=boot,
+                                   comments=comments)
+            dbmachine.disks.append(dbdisk)
+
+        if dbmetacluster:
+            dbmetacluster.validate()
+
+        self._write_plenary_info(dbmachine, logger)
         return

@@ -34,7 +34,6 @@ from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.locks import lock_queue, CompileKey
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
 from aquilon.aqdb.model import Machine
-from aquilon.worker.processes import NASAssign
 
 
 class CommandDelMachine(BrokerCommand):
@@ -63,29 +62,8 @@ class CommandDelMachine(BrokerCommand):
             raise ArgumentError("{0} still provides the following addresses, "
                                 "delete them first: {1}.".format(dbmachine,
                                                                  addrmsg))
-        uname = str(dbuser.name)
-        to_remove_from_rp = None
-        for dbdisk in dbmachine.disks:
-            if (hasattr(dbdisk, 'service_instance') and
-                dbdisk.service_instance.manager == 'resourcepool'):
-                if to_remove_from_rp:
-                    raise ArgumentError('Multiple managed shares must be '
-                                        'removed as seperate operations. '
-                                        'Please run "del_disk" individually for '
-                                        'the following shares: %s '
-                                        % (" ,".join(to_remove_from_rp)))
-                else:
-                    na_obj = NASAssign(machine=machine, disk=dbdisk.device_name,
-                                       owner=uname)
-                    to_remove_from_rp = na_obj
-            # Rely on cascade delete to remove the disks.  The Oracle driver
-            # can handle the additional/explicit delete request but the
-            # sqlite driver can't.
-            logger.info("While deleting machine '%s' will remove disk '%s'" %
-                        (dbmachine.label, dbdisk.device_name))
-            #session.delete(dbdisk)
-        session.delete(dbmachine)
 
+        session.delete(dbmachine)
         session.flush()
 
         key = remove_plenaries.get_remove_key()
@@ -98,8 +76,6 @@ class CommandDelMachine(BrokerCommand):
             if dbcontainer:
                 plenary_container.write(locked=True)
             remove_plenaries.remove(locked=True)
-            if to_remove_from_rp:
-                self._remove_from_rp(to_remove_from_rp)
         except:
             remove_plenaries.restore_stash()
             if dbcontainer:
