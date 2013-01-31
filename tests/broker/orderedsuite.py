@@ -90,8 +90,10 @@ from test_add_router import TestAddRouter
 from test_add_metacluster import TestAddMetaCluster
 from test_add_esx_cluster import TestAddESXCluster
 from test_add_cluster import TestAddCluster
+from test_add_share import TestAddShare
 from test_update_cluster import TestUpdateCluster
 from test_del_cluster import TestDelCluster
+from test_del_share import TestDelShare
 from test_early_constraints_cluster import TestClusterEarlyConstraints
 from test_add_tor_switch import TestAddTorSwitch
 from test_add_switch import TestAddSwitch
@@ -295,6 +297,7 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestMergeConflicts,
                 TestAddArchetype, TestAddOS, TestAddPersonality,
                 TestParameterDefinition,
+                TestAddShare,
                 TestAddService, TestUpdateService, TestAddRequiredService,
                 TestCountry, TestOrganization, TestHub,
                 TestAddCampus, TestAddCity,
@@ -394,6 +397,7 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestUnmapDnsDomain,
                 TestDelDesk, TestDelRack, TestDelRoom,
                 TestDelBuilding, TestDelRequiredService, TestDelService,
+                TestDelShare,
                 TestDelCity, TestDelCampus,
                 TestDelPersonality, TestDelOS, TestDelArchetype,
                 TestDelDomain, TestDelSandbox,
