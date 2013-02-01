@@ -39,6 +39,7 @@
 	    </group>
 	    <arg choice="opt"><option>--vmhost_capacity_function <replaceable>VMHOST_CAPACITY_FUNCTION</replaceable></option></arg>
 	    <arg choice="opt"><option>--vmhost_overcommit_memory <replaceable>VMHOST_iOVERCOMMIT_MEMORY</replaceable></option></arg>
+	    <arg choice="opt"><option>--host_environment <replaceable>HOST_ENVIRONMENT</replaceable></option></arg>
 	    <xi:include href="../common/global_options.xml"/>
 	</cmdsynopsis>
     </refsynopsisdiv>
@@ -114,6 +115,19 @@
 		<listitem>
 		    <para>
                         Memory overcommit factor for VM hosts.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+			<option>--host_environment <replaceable>HOST_ENVIRONMENT</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+                        Environment for hosts assigned to this personality.
+			Possible values:<literal>dev</literal>, <literal>qa</literal>, <literal>uat</literal>, <literal>prod</literal>, <literal>infra</literal>.
+			Once the environment has been set to anything other that <literal>legacy</literal>, it
+			cannot be updated.
 		    </para>
 		</listitem>
 	    </varlistentry>

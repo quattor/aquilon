@@ -174,12 +174,47 @@ class TestUpdatePersonality(TestBrokerCommand):
         command = ["cat", "--archetype=aquilon", "--personality=testovrpersona/dev"]
         self.matchclean(out, 'override', command)
 
-    def testupdateconfigoverride04(self):
+
+    def testupdatehostenv01(self):
+        command = ["update_personality", "--personality=testovrpersona/dev",
+                    "--archetype=aquilon", "--host_environment=dev"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "The personality 'testovrpersona/dev' already has env set to 'dev' and cannot be update",
+                         command)
+
+    def testupdatehostenv03(self):
+        command = ["add_personality", "--archetype=windows", "--grn=grn:/ms/ei/aquilon/aqd",
+                   "--personality=prod-perim" , "--host_environment=legacy"]
+        self.successtest(command)
+
+        command = ["update_personality", "--personality=prod-perim",
+                    "--archetype=windows", "--host_environment=infra"]
+        out = self.successtest(command)
+
+        command = ["show_personality", "--personality=prod-perim",
+                   "--archetype=windows"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Environment: infra", command)
+
+        command = ["del_personality", "--archetype=windows", "--personality=prod-perim"]
+        self.successtest(command)
+
+    def testupdatehostenv04(self):
+        command = ["update_personality", "--personality=desktop",
+                    "--archetype=windows", "--host_environment=prod"]
+        out = self.successtest(command)
+
+        command = ["show_personality", "--personality=desktop",
+                   "--archetype=windows"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Environment: prod", command)
+
+    def testupdatepersonalitycleanup(self):
         command = ["del_personality", "--personality=testovrpersona/dev",
                    "--archetype=aquilon"]
         out = self.successtest(command)
 
 
-if __name__=='__main__':
-    suite = unittest.TestLoader().loadTestsFromTestCase(TestUpdateArchetype)
+if __name__ == '__main__':
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestUpdatePersonality)
     unittest.TextTestRunner(verbosity=2).run(suite)
