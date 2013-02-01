@@ -166,6 +166,21 @@ class TestManageList(TestBrokerCommand):
                          command)
         self.matchoutput(out, "Sandbox: %s/managetest1" % user, command)
 
+    def test_120_fail_overlimit_manage_list(self):
+        user = self.config.get("unittest", "user")
+        hostlimit = self.config.getint("broker", "manage_max_list_size")
+        hosts = []
+        for i in range(1,20):
+            hosts.append("thishostdoesnotexist%d.aqd-unittest.ms.com\n" %i)
+        scratchfile = self.writescratch("managelistlimit", "".join(hosts))
+        command = ["manage", "--list", scratchfile, "--sandbox",
+                   "%s/changetest1" % user, "--force"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,"The number of hosts in list {0:d} can not be more "
+                         "than {1:d}".format(len(hosts), hostlimit), command)
+
+
+
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestManageList)
     unittest.TextTestRunner(verbosity=2).run(suite)

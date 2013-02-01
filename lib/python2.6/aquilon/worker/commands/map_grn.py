@@ -31,7 +31,8 @@
 from aquilon.aqdb.model import Personality
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.grn import lookup_grn
-from aquilon.worker.dbwrappers.host import hostname_to_host, hostlist_to_hosts
+from aquilon.worker.dbwrappers.host import (hostname_to_host, hostlist_to_hosts,
+                                            check_hostlist_size)
 from aquilon.worker.templates.personality import PlenaryPersonality
 
 
@@ -51,6 +52,7 @@ class CommandMapGrn(BrokerCommand):
         if hostname:
             objs = [hostname_to_host(session, hostname)]
         elif list:
+            check_hostlist_size(self.command, self.config, list)
             objs = hostlist_to_hosts(session, list)
         elif personality:
             objs = [Personality.get_unique(session, name=personality,

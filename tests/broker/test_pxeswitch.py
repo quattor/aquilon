@@ -246,6 +246,19 @@ class TestPxeswitch(TestBrokerCommand):
             self.matchoutput(err, "--livecdlist", command)
             self.matchclean(err, "--firmware", command)
 
+    def testfailoverpxeswitchlimitlist(self):
+        user = self.config.get("unittest", "user")
+        hostlimit = self.config.getint("broker", "pxeswitch_max_list_size")
+        hosts = []
+        for i in range(1,20):
+            hosts.append("thishostdoesnotexist%d.aqd-unittest.ms.com\n" %i)
+        scratchfile = self.writescratch("pxeswitchlistlimit", "".join(hosts))
+        command = ["pxeswitch", "--list", scratchfile,
+                   "--configure", "--blindbuild"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,"The number of hosts in list {0:d} can not be more "
+                         "than {1:d}".format(len(hosts), hostlimit), command)
+
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestPxeswitch)

@@ -34,7 +34,7 @@ from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.commands.manage_hostname import validate_branch_commits
 from aquilon.worker.dbwrappers.branch import get_branch_and_author
-from aquilon.worker.dbwrappers.host import hostlist_to_hosts
+from aquilon.worker.dbwrappers.host import hostlist_to_hosts, check_hostlist_size
 from aquilon.worker.locks import lock_queue, CompileKey
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
 
@@ -52,6 +52,7 @@ class CommandManageList(BrokerCommand):
         if hasattr(dbbranch, "allow_manage") and not dbbranch.allow_manage:
             raise ArgumentError("Managing hosts to {0:l} is not allowed."
                                 .format(dbbranch))
+        check_hostlist_size(self.command, self.config, list)
         dbhosts = hostlist_to_hosts(session, list)
 
         failed = []

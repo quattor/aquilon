@@ -295,6 +295,31 @@ class TestGrns(TestBrokerCommand):
         # The GRN was mapped to the host only
         self.searchclean(out, r'"/system/eon_ids"', command)
 
+    def test_730_fail_map_overlimitlist(self):
+        user = self.config.get("unittest", "user")
+        hostlimit = self.config.getint("broker", "map_grn_max_list_size")
+        hosts = []
+        for i in range(1,20):
+            hosts.append("thishostdoesnotexist%d.aqd-unittest.ms.com\n" %i)
+        scratchfile = self.writescratch("mapgrnlistlimit", "".join(hosts))
+        command = ["map", "grn", "--grn", "grn:/ms/ei/aquilon/aqd",
+                   "--list", scratchfile]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,"The number of hosts in list {0:d} can not be more "
+                         "than {1:d}".format(len(hosts), hostlimit), command)
+
+    def test_740_fail_unmap_overlimitlist(self):
+        user = self.config.get("unittest", "user")
+        hostlimit = self.config.getint("broker", "unmap_grn_max_list_size")
+        hosts = []
+        for i in range(1,20):
+            hosts.append("thishostdoesnotexist%d.aqd-unittest.ms.com\n" %i)
+        scratchfile = self.writescratch("mapgrnlistlimit", "".join(hosts))
+        command = ["unmap", "grn", "--grn", "grn:/ms/ei/aquilon/aqd",
+                   "--list", scratchfile]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,"The number of hosts in list {0:d} can not be more "
+                         "than {1:d}".format(len(hosts), hostlimit), command)
 
 
 if __name__ == '__main__':

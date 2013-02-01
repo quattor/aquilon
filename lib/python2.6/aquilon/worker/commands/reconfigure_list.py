@@ -31,7 +31,8 @@
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.dbwrappers.host import hostlist_to_hosts
+from aquilon.worker.dbwrappers.host import (hostlist_to_hosts,
+                                            check_hostlist_size)
 from aquilon.aqdb.model import (Archetype, Personality,
                                 OperatingSystem, HostLifecycle)
 from aquilon.worker.templates.domain import TemplateDomain
@@ -45,6 +46,7 @@ class CommandReconfigureList(BrokerCommand):
 
     def render(self, session, logger, list, archetype, personality,
                buildstatus, osname, osversion, os, **arguments):
+        check_hostlist_size(self.command, self.config, list)
         dbhosts = hostlist_to_hosts(session, list)
 
         self.reconfigure_list(session, logger, dbhosts, archetype, personality,

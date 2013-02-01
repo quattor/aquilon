@@ -82,3 +82,27 @@ def get_host_dependencies(session, dbhost):
         ret.append("%s is bound as a server for service %s instance %s" %
                    (dbhost.fqdn, si.service.name, si.name))
     return ret
+
+
+def check_hostlist_size(command, config, hostlist):
+
+    if not hostlist:
+        return
+
+    default_max_size = config.getint("broker", "default_max_list_size")
+    max_size_opt = "%s_max_list_size" % command
+    if config.has_option("broker", max_size_opt):
+        if config.get("broker", max_size_opt) != '':
+            hostlist_max_size = config.getint("broker", max_size_opt)
+        else:
+            hostlist_max_size = 0
+    else:
+        hostlist_max_size = default_max_size
+
+    if not hostlist_max_size:
+        return
+
+    if len(hostlist) > hostlist_max_size:
+        raise ArgumentError("The number of hosts in list {0:d} can not be "
+                            "more than {1:d}".format(len(hostlist), hostlist_max_size))
+    return
