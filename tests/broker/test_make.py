@@ -452,6 +452,10 @@ class TestMake(TestBrokerCommand):
         self.matchoutput(out, '"/system/network/default_gateway" = "%s";' %
                          self.net.unknown[0].gateway, command)
 
+    def testmakeaurora(self):
+        command = ["make", "--hostname", self.aurora_with_node + ".ms.com"]
+        self.successtest(command)
+
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestMake)
