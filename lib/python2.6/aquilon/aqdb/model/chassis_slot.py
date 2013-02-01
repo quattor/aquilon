@@ -1,4 +1,5 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
 # Copyright (C) 2008,2009,2010,2011,2012  Contributor
 #
@@ -55,7 +56,7 @@ class ChassisSlot(Base):
                         nullable=True)
     # TODO: need a unique key against this, but what if it takes 2 slots?
     # TODO: remove delete-orphan?
-    chassis = relation(Chassis, 
+    chassis = relation(Chassis,
                        backref=backref('slots', cascade='delete, delete-orphan',
                                        order_by=[slot_number]))
 

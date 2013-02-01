@@ -1,4 +1,5 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
 # Copyright (C) 2008,2009,2010,2011,2012  Contributor
 #
@@ -33,6 +34,7 @@ from aquilon.aqdb.model import (Resource, Intervention)
 
 _TN_RES = 'reboot_schedule'
 
+
 class RebootSchedule(Resource):
     """ RebootSchedule resources """
     __tablename__ = _TN_RES
@@ -57,6 +59,7 @@ reboot_schedule.info['unique_fields'] = ['name', 'holder']
 
 _TN_IV = 'reboot_intervention'
 
+
 class RebootIntervention(Intervention):
     """ RebootIntervention resources """
     __tablename__ = _TN_IV
@@ -72,4 +75,3 @@ class RebootIntervention(Intervention):
 reboot_intervention = RebootIntervention.__table__
 reboot_intervention.primary_key.name = '%s_pk' % (_TN_IV)
 reboot_intervention.info['unique_fields'] = ['name', 'holder']
-

@@ -1,5 +1,6 @@
 #!/usr/bin/env python2.6
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
 # Copyright (C) 2008,2009,2010,2011,2012  Contributor
 #
@@ -53,7 +54,6 @@ class TestDelCity(TestBrokerCommand):
         self.failIf(os.path.exists(dir),
                     "Plenary directory '%s' still exists" % dir)
 
-
     def test_delex_01(self):
         test_city = "ex"
 
@@ -64,7 +64,6 @@ class TestDelCity(TestBrokerCommand):
                         "--city", test_city,
                         "--type", "unknown",
                         "--comments", "Made-up network"])
-
 
         # try delete city
         command = "del_city --city %s" % test_city

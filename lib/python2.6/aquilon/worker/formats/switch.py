@@ -1,4 +1,5 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
 # Copyright (C) 2010,2011,2012  Contributor
 #
@@ -135,8 +136,10 @@ class TorSwitch(object):
     """Wrapper to mark switch objects that need to have the old CSV output."""
     def __init__(self, dbtor_switch):
         self.dbtor_switch = dbtor_switch
+
     def __getattr__(self, attr):
         return getattr(self.dbtor_switch, attr)
+
 
 class TorSwitchFormatter(SwitchFormatter):
     """Wrapper to use the old CSV output."""
@@ -151,8 +154,10 @@ class TorSwitchFormatter(SwitchFormatter):
 
 ObjectFormatter.handlers[TorSwitch] = TorSwitchFormatter()
 
+
 class SimpleSwitchList(list):
     pass
+
 
 class SimpleSwitchListFormatter(ListFormatter):
     def format_raw(self, objects, indent=""):

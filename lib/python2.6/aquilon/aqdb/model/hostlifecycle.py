@@ -1,4 +1,5 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
 # Copyright (C) 2008,2009,2010,2011,2012  Contributor
 #
@@ -152,6 +153,7 @@ class Ready(HostLifecycle):
             obj.status.transition(obj, dbstate)
         else:
             obj.advertise_status = True
+
 
 class Almostready(HostLifecycle):
     __mapper_args__ = {'polymorphic_identity': 'almostready'}

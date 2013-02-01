@@ -1,5 +1,6 @@
 #!/usr/bin/env python2.6
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
 # Copyright (C) 2008,2009,2010,2011,2012  Contributor
 #
@@ -85,7 +86,6 @@ class TestChangeStatus(TestBrokerCommand):
         self.badrequesttest(command)
 
 
-
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestChangeStatus)
     unittest.TextTestRunner(verbosity=2).run(suite)

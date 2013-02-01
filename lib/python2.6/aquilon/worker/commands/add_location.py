@@ -1,4 +1,5 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
 # Copyright (C) 2008,2009,2010,2011,2012  Contributor
 #
@@ -30,7 +31,7 @@
 
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.aqdb.model import Location
 
 # FIXME: This probably belongs in location.py
@@ -38,6 +39,7 @@ from aquilon.aqdb.model import Location
 # The list of imports above needs to include all of these entries.
 location_types = ("company", "hub", "continent", "country", "campus",
                   "city", "building", "room", "rack", "desk")
+
 
 def add_location(session, name, fullname, type, parent_name, parent_type,
                  comments=None, address=None):
@@ -77,6 +79,7 @@ def add_location(session, name, fullname, type, parent_name, parent_type,
         kw['address'] = address
 
     return location_type(**kw)
+
 
 class CommandAddLocation(BrokerCommand):
 

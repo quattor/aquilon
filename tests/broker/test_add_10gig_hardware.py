@@ -1,5 +1,6 @@
 #!/usr/bin/env python2.6
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
 # Copyright (C) 2010,2011,2012  Contributor
 #
@@ -171,7 +172,7 @@ class TestAdd10GigHardware(TestBrokerCommand):
                    "--disk", "sdf", "--controller", "sata",
                    "--size", "15", "--share", "utecl13_share",
                    "--address", "0:0"]
-        out,err = self.failuretest(command, 4)
+        out, err = self.failuretest(command, 4)
         self.matchoutput(err, "Bad Request: Disk 'utecl13_share' is managed by "
                          "resourcepool and can only be assigned with the "
                          "'autoshare' option.", command)
@@ -182,7 +183,7 @@ class TestAdd10GigHardware(TestBrokerCommand):
                    "--disk", "sdd", "--controller", "sata",
                    "--size", "15", "--autoshare",
                    "--address", "0:0"]
-        out,err = self.failuretest(command, 4)
+        out, err = self.failuretest(command, 4)
         self.matchoutput(err,
                          "Bad Request: Invalid size for autoshare disk. "
                          "Supported sizes are: ['30, 40, 50']",
@@ -194,7 +195,7 @@ class TestAdd10GigHardware(TestBrokerCommand):
                    "--disk", "sde", "--controller", "sata",
                    "--size", "30", "--autoshare",
                    "--address", "0:0"]
-        out,err = self.failuretest(command, 4)
+        out, err = self.failuretest(command, 4)
         self.matchoutput(err,
                          "Bad Request: No available NAS capacity in "
                          "Resource Pool for rack ut11. Please notify an "
@@ -395,7 +396,7 @@ class TestAdd10GigHardware(TestBrokerCommand):
                 usable_index = i / 4
             else:
                 net_index = ((i - 9) % 4) + 6
-                usable_index = (i - 9)  / 4
+                usable_index = (i - 9) / 4
             hostname = "ivirt%d.aqd-unittest.ms.com" % (i + 1)
             ip = self.net.unknown[net_index].usable[usable_index]
             command = "search host --hostname %s --ip %s" % (hostname, ip)
@@ -415,6 +416,6 @@ class TestAdd10GigHardware(TestBrokerCommand):
             (out, err) = self.successtest(command)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAdd10GigHardware)
     unittest.TextTestRunner(verbosity=2).run(suite)

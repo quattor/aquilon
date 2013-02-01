@@ -1,5 +1,6 @@
 #!/usr/bin/env python2.6
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
 # Copyright (C) 2011  Contributor
 #
@@ -50,7 +51,7 @@ class TestHub(TestBrokerCommand):
         self.noouttest(command)
 
         command = ["add", "hub", "--hub", "hub2", "--fullname", "hub2 example",
-                   "--organization", "example", "--comments", "test hub2"];
+                   "--organization", "example", "--comments", "test hub2"]
         self.noouttest(command)
 
     def testaddhubshow(self):
@@ -88,7 +89,6 @@ class TestHub(TestBrokerCommand):
         self.matchclean(out, "Hub: hub1", command)
         self.matchclean(out, "Hub: hub2", command)
 
-
     def testdelhub(self):
         test_hub = "hub1"
 
@@ -99,7 +99,6 @@ class TestHub(TestBrokerCommand):
                         "--hub", test_hub,
                         "--type", "unknown",
                         "--comments", "Made-up network"])
-
 
         # try delete hub
         command = "del hub --hub %s" % test_hub
@@ -133,7 +132,7 @@ class TestHub(TestBrokerCommand):
         command = "del organization --organization example"
         self.noouttest(command.split(" "))
 
+
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestHub)
     unittest.TextTestRunner(verbosity=2).run(suite)
-

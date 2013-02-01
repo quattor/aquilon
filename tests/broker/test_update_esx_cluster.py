@@ -1,5 +1,6 @@
 #!/usr/bin/env python2.6
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
 # Copyright (C) 2009,2010,2011,2012  Contributor
 #
@@ -79,7 +80,7 @@ class TestUpdateESXCluster(TestBrokerCommand):
         self.matchoutput(out, "Building: ut", command)
         self.matchoutput(out, "Max members: 97", command)
         self.matchoutput(out, "vm_to_host_ratio: 5:1", command)
-        self.matchoutput(out, "Down Hosts Threshold: 0",command)
+        self.matchoutput(out, "Down Hosts Threshold: 0", command)
         self.matchoutput(out, "Capacity limits: memory: 16384 [override]",
                          command)
         self.matchoutput(out, "Personality: vulcan-1g-desktop-prod Archetype: esx_cluster",
@@ -331,6 +332,6 @@ class TestUpdateESXCluster(TestBrokerCommand):
     # FIXME: Include test that machine plenary moved correctly
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestUpdateESXCluster)
     unittest.TextTestRunner(verbosity=2).run(suite)

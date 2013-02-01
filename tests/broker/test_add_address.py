@@ -1,5 +1,6 @@
 #!/usr/bin/env python2.6
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
 # Copyright (C) 2008,2009,2010,2011,2012  Contributor
 #
@@ -213,7 +214,6 @@ class TestAddAddress(TestBrokerCommand):
         # External IP addresses should not be added to DSDB
         self.dsdb_verify(empty=True)
 
-
         command = ["show_address", "--fqdn=%s" % fqdn,
                    "--network_environment", "cardenv"]
         out = self.commandtest(command)
@@ -248,12 +248,11 @@ class TestAddAddress(TestBrokerCommand):
         default = self.config.get("site", "default_dns_environment")
         command = ["add", "address", "--ip", ip, "--fqdn", fqdn,
                    "--dns_environment", default,
-                   "--network_environment", "cardenv" ]
+                   "--network_environment", "cardenv"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Entering external IP addresses to the internal DNS environment is not allowed", command)
 
 
-
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddAddress)
     unittest.TextTestRunner(verbosity=2).run(suite)

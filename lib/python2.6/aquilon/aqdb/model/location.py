@@ -1,4 +1,5 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
 # Copyright (C) 2008,2009,2010,2011,2012  Contributor
 #
@@ -38,6 +39,7 @@ from sqlalchemy.sql import and_, or_, desc
 from aquilon.aqdb.model import Base, DnsDomain
 from aquilon.aqdb.column_types import AqStr
 from aquilon.exceptions_ import AquilonError
+
 
 class Location(Base):
     """ How we represent location data in Aquilon """
@@ -177,7 +179,7 @@ class Location(Base):
             for plink in self._parent_links:
                 q = session.query(LocationLink)
                 q = q.filter(and_(LocationLink.child_id.in_(self.offspring_ids()),
-                                  LocationLink.parent_id==plink.parent.id))
+                                  LocationLink.parent_id == plink.parent.id))
                 # See above: we depend on the caching ability of the session, so
                 # we can't use q.delete()
                 for clink in q.all():

@@ -1,4 +1,5 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
 # Copyright (C) 2008,2009,2010,2011,2012  Contributor
 #
@@ -39,10 +40,9 @@ from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 from sqlalchemy.sql.expression import desc
 from sqlalchemy.orm import object_session
 
-from aquilon.exceptions_ import ArgumentError, InternalError, NotFoundException
-from aquilon.aqdb.model import (Interface, HardwareEntity, ObservedMac, Fqdn,
-                                ARecord, VlanInfo, ObservedVlan, Network,
-                                AddressAssignment, Model)
+from aquilon.exceptions_ import ArgumentError, InternalError
+from aquilon.aqdb.model import (Interface, ObservedMac, Fqdn, ARecord, VlanInfo,
+                                ObservedVlan, Network, AddressAssignment, Model)
 from aquilon.aqdb.model.network import get_net_id_from_ip
 
 
@@ -85,6 +85,7 @@ def check_ip_restrictions(dbnetwork, ip, relaxed=False):
                                 "DHCP for a switch on subnet %s." %
                                 (ip, dbnetwork.ip))
     return
+
 
 def generate_ip(session, dbinterface, ip=None, ipfromip=None,
                 ipfromsystem=None, autoip=None, ipalgorithm=None,
@@ -208,6 +209,7 @@ def generate_ip(session, dbinterface, ip=None, ipfromip=None,
         return ip
     raise ArgumentError("Unknown algorithm %s." % ipalgorithm)
 
+
 def describe_interface(session, interface):
     description = ["%s interface %s has MAC address %s and boot=%s" %
                    (interface.interface_type, interface.name, interface.mac,
@@ -226,6 +228,7 @@ def describe_interface(session, interface):
         description.append("but MAC address %s is in use by %s" %
                            (interface.mac, format(ifaces[0].hardware_entity)))
     return ", ".join(description)
+
 
 def verify_port_group(dbmachine, port_group):
     """Validate that the port_group can be used on an interface.
@@ -277,6 +280,7 @@ def verify_port_group(dbmachine, port_group):
                                 "{1:l}.".format(dbvi.vlan_id, dbswitch))
     return dbvi.port_group
 
+
 def choose_port_group(session, dbmachine):
     if dbmachine.model.machine_type != "virtual_machine":
         raise ArgumentError("Can only automatically generate "
@@ -310,12 +314,14 @@ def choose_port_group(session, dbmachine):
     raise ArgumentError("No available user port groups on "
                         "{0:l}.".format(dbmachine.cluster.switch))
 
+
 def _type_msg(interface_type, bootable):
     if bootable is not None:
         return "%s, %s" % ("bootable" if bootable else "non-bootable",
                            interface_type)
     else:
         return interface_type
+
 
 def get_or_create_interface(session, dbhw_ent, name=None, mac=None,
                             model=None, vendor=None,
@@ -477,6 +483,7 @@ def get_or_create_interface(session, dbhw_ent, name=None, mac=None,
     session.flush()
     return dbinterface
 
+
 def assign_address(dbinterface, ip, dbnetwork, label=None, resource=None):
     assert isinstance(dbinterface, Interface)
 
@@ -505,6 +512,7 @@ def assign_address(dbinterface, ip, dbnetwork, label=None, resource=None):
                                                      label=label,
                                                      service_address=resource,
                                                      dns_environment=dns_environment))
+
 
 def rename_interface(session, dbinterface, rename_to):
     rename_to = rename_to.strip().lower()

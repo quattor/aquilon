@@ -1,4 +1,5 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
 # Copyright (C) 2009,2010,2011,2012  Contributor
 #
@@ -31,7 +32,7 @@
 
 from sqlalchemy.orm import aliased, subqueryload, joinedload
 
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.formats.machine import SimpleMachineList
 from aquilon.aqdb.model import (Machine, Cpu, Cluster, Service, ServiceInstance,
                                 NasDisk, Disk, ClusterResource,
@@ -75,7 +76,7 @@ class CommandSearchMachine(BrokerCommand):
             v2shares = session.query(Share.id).filter_by(name=share).all()
             if v2shares:
                 NasAlias = aliased(VirtualDisk)
-                q = q.join('disks', (NasAlias, NasAlias.id==Disk.id))
+                q = q.join('disks', (NasAlias, NasAlias.id == Disk.id))
                 q = q.filter(
                     NasAlias.share_id.in_(map(lambda s: s[0], v2shares)))
                 q = q.reset_joinpoint()
@@ -88,7 +89,7 @@ class CommandSearchMachine(BrokerCommand):
                                                      service=nas_disk_share,
                                                      compel=True)
                 NasAlias = aliased(NasDisk)
-                q = q.join('disks', (NasAlias, NasAlias.id==Disk.id))
+                q = q.join('disks', (NasAlias, NasAlias.id == Disk.id))
                 q = q.filter_by(service_instance=dbshare)
                 q = q.reset_joinpoint()
         if fullinfo:

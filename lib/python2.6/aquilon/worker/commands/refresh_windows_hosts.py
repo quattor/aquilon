@@ -1,4 +1,5 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
 # Copyright (C) 2009,2010,2011,2012  Contributor
 #
@@ -32,7 +33,7 @@
 import sqlite3
 
 from aquilon.exceptions_ import PartialError, InternalError, AquilonError
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.dns import delete_dns_record
 from aquilon.worker.dbwrappers.host import get_host_dependencies
 from aquilon.worker.templates.base import Plenary, PlenaryCollection

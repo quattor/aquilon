@@ -1,5 +1,6 @@
 #!/usr/bin/env python2.6
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
 # Copyright (C) 2010,2011,2012  Contributor
 #
@@ -158,7 +159,7 @@ class TestAddCity(TestBrokerCommand):
         self.dsdb_expect("add_city_aq -city_symbol e5 " +
                          "-country_symbol us -city_name Examplefive")
         command = ["add", "city", "--city", "e5", "--campus", "ta",
-                   "--fullname", "Examplefive", "--timezone",   "US/Eastern"]
+                   "--fullname", "Examplefive", "--timezone", "US/Eastern"]
         self.noouttest(command)
         self.dsdb_verify()
 
@@ -192,7 +193,7 @@ class TestAddCity(TestBrokerCommand):
                          "-country_symbol gb -city_name ExampleSix")
 
         command = ["add", "city", "--city", "e6", "--country", "gb",
-                   "--fullname", "ExampleSix", "--timezone",   "Europe/London"]
+                   "--fullname", "ExampleSix", "--timezone", "Europe/London"]
         self.noouttest(command)
 
         ## update city bad campus

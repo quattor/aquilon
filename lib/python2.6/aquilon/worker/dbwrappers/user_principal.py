@@ -1,4 +1,5 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
 # Copyright (C) 2008,2009,2010,2011  Contributor
 #
@@ -42,6 +43,7 @@ from aquilon.worker.dbwrappers.host import hostname_to_host
 LOGGER = logging.getLogger(__name__)
 principal_re = re.compile(r'^(.+)@([^@]+)$')
 host_re = re.compile(r'^host/(.*)$')
+
 
 def get_or_create_user_principal(session, principal, createuser=True,
                                  createrealm=True, commitoncreate=False,
@@ -103,6 +105,7 @@ def get_or_create_user_principal(session, principal, createuser=True,
         if commitoncreate:
             session.commit()
     return dbuser
+
 
 def get_user_principal(session, user):
     """Ignore the realm.  This should probably be re-thought."""

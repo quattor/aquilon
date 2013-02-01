@@ -1,4 +1,5 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
 # Copyright (C) 2008,2009,2010,2011,2012  Contributor
 #
@@ -32,7 +33,7 @@
 from sqlalchemy.orm import aliased, contains_eager
 from sqlalchemy.sql import or_
 
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.formats.host import SimpleHostList
 from aquilon.aqdb.model import (Host, Cluster, Archetype, Personality,
                                 PersonalityGrnMap, HostGrnMap, HostLifecycle,
@@ -202,8 +203,8 @@ class CommandSearchHost(BrokerCommand):
             if server_of_instance:
                 dbssi = get_service_instance(session, dbserver_service,
                                              server_of_instance)
-                q = q.join ('_services_provided')
-                q = q.filter_by (service_instance=dbssi)
+                q = q.join('_services_provided')
+                q = q.filter_by(service_instance=dbssi)
                 q = q.reset_joinpoint()
             else:
                 q = q.join('_services_provided', 'service_instance')
@@ -236,7 +237,7 @@ class CommandSearchHost(BrokerCommand):
                                                  service=nas_disk_share,
                                                  compel=True)
             NasAlias = aliased(NasDisk)
-            q = q.join('machine', 'disks', (NasAlias, NasAlias.id==Disk.id))
+            q = q.join('machine', 'disks', (NasAlias, NasAlias.id == Disk.id))
             q = q.filter_by(service_instance=dbshare)
             q = q.reset_joinpoint()
         if member_cluster_share:
@@ -248,7 +249,7 @@ class CommandSearchHost(BrokerCommand):
                                                  compel=True)
             NasAlias = aliased(NasDisk)
             q = q.join('_cluster', 'cluster', 'resholder', VirtualMachine,
-                       'machine', 'disks', (NasAlias, NasAlias.id==Disk.id))
+                       'machine', 'disks', (NasAlias, NasAlias.id == Disk.id))
             q = q.filter_by(service_instance=dbshare)
             q = q.reset_joinpoint()
 

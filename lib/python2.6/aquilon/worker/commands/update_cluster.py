@@ -1,4 +1,5 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
 # Copyright (C) 2009,2010,2011,2012  Contributor
 #
@@ -30,7 +31,7 @@
 
 from aquilon.aqdb.model import Cluster, Personality, Switch
 from aquilon.exceptions_ import ArgumentError
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.location import get_location
 from aquilon.worker.templates.machine import machine_plenary_will_move
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
@@ -176,6 +177,7 @@ class CommandUpdateCluster(BrokerCommand):
             lock_queue.release(key)
 
         return
+
 
 def update_cluster_location(session, logger, dbcluster,
                             fix_location, plenaries, remove_plenaries,

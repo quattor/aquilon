@@ -1,4 +1,5 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
 # Copyright (C) 2008,2009,2010,2011,2012  Contributor
 #
@@ -31,13 +32,12 @@
 
 from aquilon.aqdb.model import Sandbox
 from aquilon.worker.dbwrappers.user_principal import get_user_principal
-import os
 
 
 def get_sandbox(session, logger, sandbox):
     """Allow an optional author field."""
     sbx_split = sandbox.split('/')
-    first , second = '', ''
+    first, second = '', ''
     if len(sbx_split) <= 1:
         dbsandbox = Sandbox.get_unique(session, sandbox, compel=True)
         dbauthor = None

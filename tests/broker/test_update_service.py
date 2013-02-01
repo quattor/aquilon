@@ -1,5 +1,6 @@
 #!/usr/bin/env python2.6
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
 # Copyright (C) 2009,2010,2012  Contributor
 #
@@ -154,7 +155,6 @@ class TestUpdateService(TestBrokerCommand):
     # FIXME: Missing functionality and tests for plenaries.
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestUpdateService)
     unittest.TextTestRunner(verbosity=2).run(suite)
-

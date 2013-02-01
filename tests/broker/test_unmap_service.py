@@ -1,5 +1,6 @@
 #!/usr/bin/env python2.6
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
 # Copyright (C) 2008,2009,2010,2011,2012  Contributor
 #
@@ -164,18 +165,18 @@ class TestUnmapService(TestBrokerCommand):
                         "--service", "ntp", "--instance", "pa.ny.na"])
 
     def testverifyunmapntp(self):
-       command = ["show_map", "--archetype=aquilon",
-                  "--service=ntp", "--instance=pa.ny.na", "--city=ex"]
-       self.notfoundtest(command)
+        command = ["show_map", "--archetype=aquilon",
+                   "--service=ntp", "--instance=pa.ny.na", "--city=ex"]
+        self.notfoundtest(command)
 
     def testunmapsyslogng(self):
         self.noouttest(["unmap", "service", "--campus", "ny",
                         "--service", "syslogng", "--instance", "ny-prod"])
 
     def testverifyunmapsyslogng(self):
-       command = ["show_map", "--archetype=aquilon",
-                  "--service=syslogng", "--instance=ny-prod", "--campus=ny"]
-       self.notfoundtest(command)
+        command = ["show_map", "--archetype=aquilon",
+                   "--service=syslogng", "--instance=ny-prod", "--campus=ny"]
+        self.notfoundtest(command)
 
     def testunmaputsi1(self):
         self.noouttest(["unmap", "service", "--building", "ut",

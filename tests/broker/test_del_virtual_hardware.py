@@ -1,5 +1,6 @@
 #!/usr/bin/env python2.6
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
 # Copyright (C) 2008,2009,2010,2011,2012  Contributor
 #
@@ -72,7 +73,7 @@ class TestDelVirtualHardware(TestBrokerCommand):
         for i in range(1, 10) + \
                  range(50, 63) + range(70, 83) + \
                  range(90, 103) + range(110, 123):
-            command = "show machine --machine evm%s" %i
+            command = "show machine --machine evm%s" % i
             self.notfoundtest(command.split(" "))
 
     # Hack... doing this test here for timing reasons...

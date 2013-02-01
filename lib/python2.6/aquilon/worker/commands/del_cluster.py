@@ -1,4 +1,5 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
 # Copyright (C) 2009,2010,2011,2012  Contributor
 #
@@ -32,11 +33,12 @@ import os
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Cluster
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.templates.index import build_index
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
 from aquilon.worker.processes import remove_file
 from aquilon.worker.locks import CompileKey
+
 
 def del_cluster(session, logger, dbcluster, config):
     cluster = str(dbcluster.name)
@@ -90,4 +92,3 @@ class CommandDelCluster(BrokerCommand):
     def render(self, session, logger, cluster, **arguments):
         dbcluster = Cluster.get_unique(session, cluster, compel=True)
         del_cluster(session, logger, dbcluster, self.config)
-

@@ -1,4 +1,5 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
 # Copyright (C) 2008,2009,2010,2011,2012  Contributor
 #
@@ -242,7 +243,6 @@ class PlenaryHostData(Plenary):
 
             interfaces[dbinterface.name] = ifdesc
 
-
         # Okay, here's the real content
         pan_include(lines, ["pan/units", "pan/functions"])
         lines.append("")
@@ -319,8 +319,6 @@ class PlenaryToplevelHost(Plenary):
                           logger=self.logger)
 
     def body(self, lines):
-        iface_features = {}
-
         pers = self.dbobj.personality
         arch = pers.archetype
 
@@ -329,8 +327,6 @@ class PlenaryToplevelHost(Plenary):
             # Management interfaces are not configured at the host level
             if dbinterface.interface_type == 'management':
                 continue
-
-        os_template = self.dbobj.operating_system.cfg_path + '/config'
 
         services = []
         required_services = set(arch.services + pers.services)

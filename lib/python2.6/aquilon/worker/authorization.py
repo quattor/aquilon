@@ -1,4 +1,5 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
 # Copyright (C) 2008,2009,2010,2011,2012  Contributor
 #
@@ -35,6 +36,7 @@ from aquilon.exceptions_ import AuthorizationException
 from aquilon.config import Config
 
 host_re = re.compile(r'^host/(.+)@([^@]+)$')
+
 
 class AuthorizationBroker(object):
     """Handles any behind the scenes work in figuring out entitlements."""

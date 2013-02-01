@@ -1,4 +1,5 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
 # Copyright (C) 2008,2009,2010,2011,2012  Contributor
 #
@@ -29,11 +30,12 @@
 """Contains the logic for `aq del machine`."""
 
 from aquilon.exceptions_ import ArgumentError, AquilonError
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.locks import lock_queue, CompileKey
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
 from aquilon.aqdb.model import Machine
 from aquilon.worker.processes import NASAssign
+
 
 class CommandDelMachine(BrokerCommand):
 
@@ -85,7 +87,6 @@ class CommandDelMachine(BrokerCommand):
         session.delete(dbmachine)
 
         session.flush()
-
 
         key = remove_plenaries.get_remove_key()
         if dbcontainer:

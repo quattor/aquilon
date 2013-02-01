@@ -1,4 +1,5 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
 # Copyright (C) 2012  Contributor
 #
@@ -146,6 +147,7 @@ def set_log_file(logFile, setStdout=True, start=True):
         log.startLoggingWithObserver(observer, setStdout=setStdout)
     return observer
 
+
 def updated_application_run(self):
     """Patch for twisted.application.app.ApplicationRunner.run().
 
@@ -183,6 +185,7 @@ def updated_application_run(self):
     self.postApplication()
     self.logger.stop()
 
+
 def integrate_logging(config):
     """Use a BridgeLogHandler to tie python's logging to twisted.python.log."""
     rootlog = logging.getLogger()
@@ -194,7 +197,7 @@ def integrate_logging(config):
         if logvalue not in logging._levelNames:
             # ...but ignore it if it is a default (accidently
             # polluting the section).
-            if not config.defaults().has_key(logname):
+            if not logname in config.defaults():
                 log.msg("For config [logging]/%s, "
                         "%s not a valid log level." % (logname, logvalue))
             continue

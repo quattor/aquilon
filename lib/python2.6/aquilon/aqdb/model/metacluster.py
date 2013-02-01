@@ -1,4 +1,5 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
 # Copyright (C) 2009,2010,2011,2012  Contributor
 #
@@ -235,8 +236,7 @@ class MetaClusterMember(Base):
     metacluster = relation(MetaCluster, lazy='subquery', innerjoin=True,
                            backref=backref('_clusters',
                                            cascade='all, delete-orphan'),
-                           primaryjoin=(metacluster_id==MetaCluster.id)
-                           )
+                           primaryjoin=(metacluster_id == MetaCluster.id))
 
     # This is a one-to-one relation, so we need uselist=False on the backref
     cluster = relation(Cluster, lazy='subquery', innerjoin=True,

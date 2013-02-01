@@ -1,4 +1,5 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
 # Copyright (C) 2008,2009,2010,2011,2012  Contributor
 #
@@ -72,6 +73,7 @@ def delete_dns_record(dbdns_rec):
     else:
         session.expire(dbfqdn, ['dns_records'])
 
+
 def convert_reserved_to_arecord(session, dbdns_rec, dbnetwork, ip):
     comments = dbdns_rec.comments
     dbhw_ent = dbdns_rec.hardware_entity
@@ -89,6 +91,7 @@ def convert_reserved_to_arecord(session, dbdns_rec, dbnetwork, ip):
 
     return dbdns_rec
 
+
 def _check_netenv_compat(dbdns_rec, dbnet_env):
     """ Verify that a DNS record is consistent with a network environment """
     dbnetwork = dbdns_rec.network
@@ -99,13 +102,14 @@ def _check_netenv_compat(dbdns_rec, dbnet_env):
                             .format(dbdns_rec, dbnetwork.network_environment,
                                     dbnet_env))
 
+
 def _forbid_dyndns(dbdns_rec):
     """ Raise an error if the address is reserved for dynamic DHCP """
     if isinstance(dbdns_rec, DynamicStub):
             raise ArgumentError("Address {0:a} is reserved for dynamic "
                             "DHCP.".format(dbdns_rec))
 
-#
+
 # Locking rules:
 # - Locking the DNS domain ensures exclusive access to the name
 # - Locking the network ensures exclusive access to the IP address allocation

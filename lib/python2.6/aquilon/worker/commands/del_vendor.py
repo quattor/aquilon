@@ -1,4 +1,5 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
 # Copyright (C) 2009,2010,2011  Contributor
 #
@@ -30,12 +31,12 @@
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Vendor, Cpu, Model
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 
 
 class CommandDelVendor(BrokerCommand):
 
-    required_parameters = [ "vendor" ]
+    required_parameters = ["vendor"]
 
     def render(self, session, vendor, **arguments):
         dbvendor = Vendor.get_unique(session, vendor, compel=True)

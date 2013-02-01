@@ -1,4 +1,5 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
 # Copyright (C) 2012  Contributor
 #
@@ -50,10 +51,8 @@ class PlenaryMetaCluster(PlenaryCollection):
         self.plenaries.append(PlenaryMetaClusterObject(dbcluster, logger=logger))
         self.plenaries.append(PlenaryMetaClusterData(dbcluster, logger=logger))
 
+
 class PlenaryMetaClusterData(Plenary):
-    """
-    TODO
-    """
 
     template_type = ""
 
@@ -114,10 +113,8 @@ class PlenaryMetaClusterData(Plenary):
                 pan_push(lines, "/system/resources/%s" % resource.resource_type,
                          StructureTemplate(resource.template_base + '/config'))
 
+
 class PlenaryMetaClusterObject(Plenary):
-    """
-    TODO
-    """
 
     template_type = "object"
 
@@ -149,4 +146,3 @@ class PlenaryMetaClusterObject(Plenary):
 
 
 Plenary.handlers[MetaCluster] = PlenaryMetaCluster
-

@@ -1,5 +1,6 @@
 #!/usr/bin/env python2.6
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
 # Copyright (C) 2008,2009,2010,2011  Contributor
 #
@@ -119,7 +120,6 @@ class TestDelRack(TestBrokerCommand):
                         "--type", "unknown",
                         "--comments", "Made-up network"])
 
-
         # try delete rack
         command = "del rack --rack %s" % test_rack
         err = self.badrequesttest(command.split(" "))
@@ -132,7 +132,6 @@ class TestDelRack(TestBrokerCommand):
         self.noouttest(["del_network", "--ip", "192.176.6.0"])
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelRack)
     unittest.TextTestRunner(verbosity=2).run(suite)
-

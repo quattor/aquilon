@@ -1,5 +1,6 @@
 #!/usr/bin/env python2.6
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
 # Copyright (C) 2009,2010,2011,2012  Contributor
 #
@@ -270,7 +271,7 @@ class TestRefreshWindowsHosts(TestBrokerCommand):
 
         self.matchoutput(err, "WARNING: Server %s, is the last server bound to " \
                          "Service %s, instance %s which still has clients"
-                         % ("desktop3.msad.ms.com","utsvc","utsi1"),
+                         % ("desktop3.msad.ms.com", "utsvc", "utsi1"),
                          command)
 
     def test_410_cleanrun(self):

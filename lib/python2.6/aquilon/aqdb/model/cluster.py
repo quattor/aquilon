@@ -1,4 +1,5 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
 # Copyright (C) 2009,2010,2011,2012  Contributor
 #
@@ -38,7 +39,7 @@ from sqlalchemy.ext.associationproxy import association_proxy
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.column_types import AqStr
-from aquilon.aqdb.model import (Base, Host, Service, Location, Personality,
+from aquilon.aqdb.model import (Base, Host, Location, Personality,
                                 ClusterLifecycle, ServiceInstance, Branch,
                                 Switch, UserPrincipal)
 
@@ -564,14 +565,12 @@ class HostClusterMember(Base):
 
     node_index = Column(Integer, nullable=False)
 
-    """
-        Association Proxy and relation cascading: We need cascade=all
-        on backrefs so that deletion propagates to avoid AssertionError:
-        Dependency rule tried to blank-out primary key column on deletion
-        of the Cluster and it's links. On the contrary do not have
-        cascade='all' on the forward mapper here, else deletion of
-        clusters and their links also causes deleteion of hosts (BAD)
-    """
+    # Association Proxy and relation cascading: We need cascade=all
+    # on backrefs so that deletion propagates to avoid AssertionError:
+    # Dependency rule tried to blank-out primary key column on deletion
+    # of the Cluster and it's links. On the contrary do not have
+    # cascade='all' on the forward mapper here, else deletion of
+    # clusters and their links also causes deleteion of hosts (BAD)
     cluster = relation(Cluster, lazy=False, innerjoin=True,
                        backref=backref('_hosts', cascade='all, delete-orphan'))
 

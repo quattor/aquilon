@@ -1,4 +1,5 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
 # Copyright (C) 2008,2009,2010,2011,2012  Contributor
 #
@@ -27,10 +28,11 @@
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
 
-from sqlalchemy import (Integer, Column, ForeignKey)
+from sqlalchemy import Integer, Column, ForeignKey
 from aquilon.aqdb.model import Resource
 
 _TN = 'share'
+
 
 class Share(Resource):
     """ Share resources """

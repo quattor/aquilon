@@ -1,4 +1,5 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
 # Copyright (C) 2012  Contributor
 #
@@ -29,7 +30,7 @@
 
 
 from aquilon.worker.formats.parameter_definition import ParamDefinitionFormatter
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.aqdb.model import FeatureLinkParameter, PersonalityParameter
 from aquilon.worker.dbwrappers.parameter import (get_parameter_holder,
                                                  get_parameters)

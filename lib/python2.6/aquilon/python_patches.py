@@ -1,4 +1,5 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
 # Copyright (C) 2008,2009,2010,2011,2012  Contributor
 #
@@ -43,6 +44,7 @@ def load_uuid_quickly():
     thread-safe.
     """
     import ctypes.util
+
     def find_library(name):
         return 'lib' + name + '.so'
     old_find_library = ctypes.util.find_library

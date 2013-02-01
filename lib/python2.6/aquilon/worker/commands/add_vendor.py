@@ -1,4 +1,5 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
 # Copyright (C) 2009,2010,2011  Contributor
 #
@@ -27,14 +28,15 @@
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
 
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.aqdb.model import Vendor
 from aquilon.exceptions_ import ArgumentError
 import re
 
+
 class CommandAddVendor(BrokerCommand):
 
-    required_parameters = [ "vendor" ]
+    required_parameters = ["vendor"]
 
     def render(self, session, vendor, comments, **arguments):
         valid = re.compile('^[a-zA-Z0-9_.-]+$')

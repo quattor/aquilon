@@ -1,4 +1,5 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
 # Copyright (C) 2008,2009,2010,2011,2012  Contributor
 #
@@ -31,7 +32,7 @@
 import re
 
 from aquilon.exceptions_ import ArgumentError, InternalError, NotFoundException
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.service_instance import get_service_instance
 from aquilon.aqdb.model import (LocalDisk, NasDisk, Service, Machine, Share,
                                 VirtualDisk, ResourceGroup)
@@ -78,7 +79,7 @@ class CommandAddDisk(BrokerCommand):
         if dbshare.manager != 'aqd':
             raise ArgumentError("Disk '%s' is managed by %s and can only be "
                                 "assigned with the 'autoshare' option." %
-                                ( dbshare.name, dbshare.manager))
+                                (dbshare.name, dbshare.manager))
         if not CommandAddDisk.REGEX_CAPACITY.match(address):
             raise ArgumentError("Disk address '%s' is not valid, it must "
                                 "match \d+:\d+ (e.g. 0:0)." % address)

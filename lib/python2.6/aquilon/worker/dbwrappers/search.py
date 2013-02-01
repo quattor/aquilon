@@ -1,4 +1,5 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
 # Copyright (C) 2008,2009,2010,2011,2012  Contributor
 #
@@ -34,6 +35,7 @@ import re
 from aquilon.utils import force_int
 
 int_re = re.compile(r'^(\d+)')
+
 
 def search_next(session, cls, attr, value, start, pack, **filters):
     q = session.query(cls).filter(attr.startswith(value))

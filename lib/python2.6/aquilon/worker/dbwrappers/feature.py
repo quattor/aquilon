@@ -1,4 +1,5 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
 # Copyright (C) 2011,2012  Contributor
 #
@@ -41,6 +42,7 @@ def model_features(dbmodel, dbarch, dbpers, interface_name=None):
 
     return features
 
+
 def personality_features(dbpersonality):
     pre = []
     post = []
@@ -66,6 +68,7 @@ def personality_features(dbpersonality):
 
     return (pre, post)
 
+
 def interface_features(dbinterface, dbarch, dbpers):
     features = []
 
@@ -88,6 +91,7 @@ def interface_features(dbinterface, dbarch, dbpers):
                 features.append(link.feature)
 
     return features
+
 
 def add_link(session, logger, dbfeature, params):
     FeatureLink.get_unique(session, feature=dbfeature, preclude=True,
@@ -118,4 +122,3 @@ def add_link(session, logger, dbfeature, params):
                                .format(dbfeature, link.personality))
 
     dbfeature.links.append(FeatureLink(**params))
-

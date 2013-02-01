@@ -1,4 +1,5 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
 # Copyright (C) 2009,2010,2011,2012  Contributor
 #
@@ -63,7 +64,7 @@ class CommandAddMetaCluster(BrokerCommand):
             raise ArgumentError("%s is not a cluster personality." %
                                 personality)
 
-        ctype = "meta" # dbpersonality.archetype.cluster_type
+        ctype = "meta"  # dbpersonality.archetype.cluster_type
 
         if not buildstatus:
             buildstatus = "build"
@@ -103,7 +104,7 @@ class CommandAddMetaCluster(BrokerCommand):
             raise ArgumentError("Metacluster name global is reserved.")
 
         MetaCluster.get_unique(session, metacluster, preclude=True)
-        clus_type = MetaCluster #Cluster.__mapper__.polymorphic_map[ctype].class_
+        clus_type = MetaCluster  # Cluster.__mapper__.polymorphic_map[ctype].class_
 
         kw = {}
 

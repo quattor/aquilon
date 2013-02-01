@@ -1,4 +1,5 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
 # Copyright (C) 2009,2010,2011,2012  Contributor
 #
@@ -74,7 +75,8 @@ class PersonalityFormatter(ObjectFormatter):
         details = [indent + "%s Personality: %s" % (description,
                                                     personality) +
                    " Archetype: %s" % personality.archetype]
-        details.append(indent + "  Environment: %s" %  personality.host_environment)
+        details.append(indent +
+                       "  Environment: %s" % personality.host_environment)
         for grn in personality.grns:
             details.append(indent + "  GRN: %s" % grn)
 
@@ -158,7 +160,7 @@ class PersonalityFormatter(ObjectFormatter):
             rsvc_msg.service = service.name
 
         if personality.comments:
-            skeleton.comments =  personality.comments
+            skeleton.comments = personality.comments
 
         skeleton.config_override = personality.config_override
         skeleton.cluster_required = personality.cluster_required

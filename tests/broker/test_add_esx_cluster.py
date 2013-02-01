@@ -1,5 +1,6 @@
 #!/usr/bin/env python2.6
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
 # Copyright (C) 2009,2010,2011,2012  Contributor
 #
@@ -111,7 +112,6 @@ class TestAddESXCluster(TestBrokerCommand):
         self.matchclean(data, '"/system/cluster/down_maint_as_percent"', data_cmd)
         self.matchclean(data, '"/system/cluster/down_hosts_percent"', data_cmd)
         self.matchclean(data, '"/system/cluster/down_maint_percent"', data_cmd)
-
 
     def testaddutecl2(self):
         command = ["add_esx_cluster", "--cluster=utecl2",

@@ -1,5 +1,6 @@
 #!/usr/bin/env python2.6
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
 # Copyright (C) 2012  Contributor
 #
@@ -71,7 +72,7 @@ class TestManageList(TestBrokerCommand):
                  "aquilon66.aqd-unittest.ms.com\n"]
         scratchfile = self.writescratch("managelist", "".join(hosts))
         self.noouttest(["manage", "--list", scratchfile,
-                        "--sandbox", "%s/managetest2" % user ])
+                        "--sandbox", "%s/managetest2" % user])
 
     def test_103_verify_manage_list(self):
         user = self.config.get("unittest", "user")

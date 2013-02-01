@@ -1,5 +1,6 @@
 #!/usr/bin/env python2.6
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
 # Copyright (C) 2008,2009,2010,2011,2012  Contributor
 #
@@ -34,7 +35,8 @@ import socket
 import pwd
 from ConfigParser import SafeConfigParser
 
-from exceptions_ import AquilonError
+from aquilon.exceptions_ import AquilonError
+
 
 def get_username():
     return pwd.getpwuid(os.getuid()).pw_name
@@ -46,12 +48,12 @@ global_defaults = {
             # is not meant in any way, shape, or form to be used for security.
             # Having it be something that can be overridden by an env variable
             # is just an extra layer of convenience.
-            "user"     : os.environ.get("USER") or get_username(),
+            "user": os.environ.get("USER") or get_username(),
             # Only used by unit tests at the moment, but maybe useful for
             # scripts that want to execute stand-alone.
-            "srcdir"   : os.path.realpath(os.path.join(
+            "srcdir": os.path.realpath(os.path.join(
                             os.path.dirname(__file__), "..", "..", "..")),
-            "hostname" : socket.getfqdn(),
+            "hostname": socket.getfqdn(),
         }
 
 
@@ -60,6 +62,7 @@ class Config(SafeConfigParser):
         Set up as a borg/singleton class (can only be instanced once) """
 
     __shared_state = {}
+
     def __init__(self, defaults=global_defaults, configfile=None):
         self.__dict__ = self.__shared_state
         if getattr(self, "baseconfig", None):

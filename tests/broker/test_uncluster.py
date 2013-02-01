@@ -1,5 +1,6 @@
 #!/usr/bin/env python2.6
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
 # Copyright (C) 2009,2010,2011,2012  Contributor
 #
@@ -73,7 +74,7 @@ class TestUncluster(TestBrokerCommand):
 
     def testunbindutecl1(self):
         for i in range(2, 5):
-            hostname = 'evh%s.aqd-unittest.ms.com' %i
+            hostname = 'evh%s.aqd-unittest.ms.com' % i
             self.verify_buildfiles('utsandbox', hostname, want_exist=True,
                                    command='uncluster')
             self.noouttest(['uncluster', '--personality', 'generic',
@@ -129,6 +130,6 @@ class TestUncluster(TestBrokerCommand):
         self.successtest(command)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestUncluster)
     unittest.TextTestRunner(verbosity=2).run(suite)

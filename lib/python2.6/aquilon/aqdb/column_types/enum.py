@@ -1,4 +1,5 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
 # Copyright (C) 2008,2009,2010,2011  Contributor
 #
@@ -31,6 +32,7 @@ dynamically pull all possible values at run-time with some clever caching.
 Borrowed from http://www.sqlalchemy.org/trac/wiki/UsageRecipes/Enum """
 import sqlalchemy
 from aquilon.exceptions_ import ArgumentError
+
 
 class Enum(sqlalchemy.types.TypeDecorator):
     impl = sqlalchemy.types.String
@@ -74,6 +76,7 @@ class Enum(sqlalchemy.types.TypeDecorator):
             raise ArgumentError('"%s" not a valid value. Valid values are: %s'
                                 % (value, self.values))
         return value
+
 
 def test_enum():  # pragma: no cover
     from sqlalchemy import (MetaData, Table, Column, Integer, insert)

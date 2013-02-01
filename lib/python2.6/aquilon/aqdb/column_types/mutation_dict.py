@@ -1,4 +1,5 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
 # Copyright (C) 2011,2012  Contributor
 #
@@ -29,6 +30,7 @@
 
 from sqlalchemy.ext.mutable import Mutable
 
+
 class MutationDict(Mutable, dict):
     """ This tracks mutation on dict table
         This currently only tracks a single level of mutation
@@ -37,7 +39,6 @@ class MutationDict(Mutable, dict):
     @classmethod
     def coerce(cls, key, value):
         "Convert plain dictionaries to MutationDict."
-
 
         if not isinstance(value, MutationDict):
             if isinstance(value, dict):
@@ -59,4 +60,3 @@ class MutationDict(Mutable, dict):
 
         dict.__delitem__(self, key)
         self.changed()
-

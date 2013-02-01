@@ -1,5 +1,6 @@
 #!/usr/bin/env python2.6
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
 # Copyright (C) 2008,2009,2010,2011,2012  Contributor
 #
@@ -72,7 +73,6 @@ class TestChangeClusterStatus(TestBrokerCommand):
         command = "show host --hostname evh2.aqd-unittest.ms.com"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Build Status: build", command)
-
 
     def test_120_BindDemotion(self):
         self.successtest(["cluster",
@@ -176,4 +176,3 @@ class TestChangeClusterStatus(TestBrokerCommand):
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestChangeClusterStatus)
     unittest.TextTestRunner(verbosity=2).run(suite)
-

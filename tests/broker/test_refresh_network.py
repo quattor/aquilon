@@ -1,5 +1,6 @@
 #!/usr/bin/env python2.6
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
 # Copyright (C) 2008,2009,2010,2011,2012  Contributor
 #
@@ -43,6 +44,7 @@ if __name__ == "__main__":
 from ipaddr import IPv4Address, IPv4Network
 
 from brokertest import TestBrokerCommand
+
 
 def dynname(ip, domain="aqd-unittest.ms.com"):
     return "dynamic-%s.%s" % (str(ip).replace(".", "-"), domain)
@@ -331,6 +333,6 @@ class TestRefreshNetwork(TestBrokerCommand):
         self.noouttest(command)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestRefreshNetwork)
     unittest.TextTestRunner(verbosity=2).run(suite)

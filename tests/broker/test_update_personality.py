@@ -1,5 +1,6 @@
 #!/usr/bin/env python2.6
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
 # Copyright (C) 2009,2010,2011,2012  Contributor
 #
@@ -119,7 +120,7 @@ class TestUpdatePersonality(TestBrokerCommand):
         self.matchoutput(out, "The personality vulcan-1g-desktop-prod is in use", command)
 
         command = ["add_personality", "--archetype=aquilon", "--grn=grn:/ms/ei/aquilon/aqd",
-                   "--personality=unused" , "--host_environment=infra"]
+                   "--personality=unused", "--host_environment=infra"]
         self.successtest(command)
 
         command = ["update_personality", "--personality", "unused",
@@ -147,7 +148,7 @@ class TestUpdatePersonality(TestBrokerCommand):
 
     def testupdateconfigoverride02(self):
         command = ["update_personality", "--personality=testovrpersona/dev",
-                   "--archetype=aquilon", "--config_override",]
+                   "--archetype=aquilon", "--config_override"]
         self.successtest(command)
 
         command = ["show_personality", "--personality=testovrpersona/dev",
@@ -161,9 +162,8 @@ class TestUpdatePersonality(TestBrokerCommand):
                          command)
 
     def testupdateconfigoverride03(self):
-
         command = ["update_personality", "--personality=testovrpersona/dev",
-                   "--archetype=aquilon", "--noconfig_override",]
+                   "--archetype=aquilon", "--noconfig_override"]
         self.successtest(command)
 
         command = ["show_personality", "--personality=testovrpersona/dev",

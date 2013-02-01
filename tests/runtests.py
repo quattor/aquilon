@@ -1,5 +1,6 @@
 #!/usr/bin/env python2.6
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
 # Copyright (C) 2008,2009,2010,2011,2012,2013  Contributor
 #
@@ -64,6 +65,7 @@ epilog = """
     code into the directory given in the mirrordir option of the unittest
     section of the config and then re-launches the tests from there.
     """ % default_configfile
+
 
 def force_yes(msg):
     print >> sys.stderr, msg
@@ -180,7 +182,7 @@ if (config.get("database", "dsn").startswith("oracle") and
 p = Popen(config.get("kerberos", "krb5_keytab"), stdout=1, stderr=2)
 rc = p.wait()
 
-pid_file = os.path.join(config.get('broker', 'rundir') , 'aqd.pid')
+pid_file = os.path.join(config.get('broker', 'rundir'), 'aqd.pid')
 kill_from_pid_file(pid_file)
 
 # FIXME: Need to be careful about attempting to nuke templatesdir...

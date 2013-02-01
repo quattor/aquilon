@@ -1,4 +1,5 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
 # Copyright (C) 2008,2009,2010,2011,2012  Contributor
 #
@@ -34,6 +35,7 @@
 from sqlalchemy import types
 from dateutil.tz import tzutc
 from datetime import datetime
+
 
 class UTCDateTime(types.TypeDecorator):
     """A Type Decorator which forces datetime values to the UTC timezone """

@@ -1,4 +1,5 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
 # Copyright (C) 2008,2009,2010,2011,2012  Contributor
 #
@@ -146,7 +147,7 @@ class ResponsePage(resource.Resource):
             # Since these are both lists, there is a theoretical case where
             # one might want to merge the lists, instead of overwriting with
             # the new.  Not sure if that matters right now.
-            request.args.update( http.parse_qs(request.content.read()) )
+            request.args.update(http.parse_qs(request.content.read()))
         # FIXME: This breaks HEAD and OPTIONS handling...
         handler = self.handlers.get(request.method, None)
         if not handler:
@@ -154,7 +155,7 @@ class ResponsePage(resource.Resource):
             # message based on available render_ methods.
             raise server.UnsupportedMethod(getattr(self, 'allowedMethods', ()))
         # Default render would just call the method here.
-        # This is expanded to do argument checking, finish the request, 
+        # This is expanded to do argument checking, finish the request,
         # and do some error handling.
         d = self.check_arguments(request,
                 handler.required_parameters, handler.optional_parameters)
@@ -181,14 +182,14 @@ class ResponsePage(resource.Resource):
         d = d.addErrback(self.wrapError, request)
         return server.NOT_DONE_YET
 
-    def check_arguments(self, request, required = [], optional = []):
+    def check_arguments(self, request, required=[], optional=[]):
         """Check for the required and optional arguments.
 
         Returns a Deferred that will have a dictionary of the arguments
-        found.  Any unsupplied optional arguments will have a value of 
+        found.  Any unsupplied optional arguments will have a value of
         None.  If there are any problems, the Deferred will errback with
         a failure.
-        
+
         As a hack, debug is always allowed as an argument.  Should
         maybe have a flag on global options in input.xml for this.
 
@@ -207,7 +208,7 @@ class ResponsePage(resource.Resource):
         arguments = {}
         for (arg, req) in required_map.items():
             #log.msg("Checking for arg %s with required=%s" % (arg, req))
-            if not request.args.has_key(arg):
+            if arg not in request.args:
                 if req:
                     return defer.fail(ArgumentError(
                         "Missing mandatory argument %s" % arg))
@@ -280,14 +281,14 @@ class RestServer(ResponsePage):
         # component.
         varmatch = re.compile(r'^%\((.*)\)s$')
 
-        BINDIR = os.path.dirname( os.path.realpath(sys.argv[0]) )
-        tree = ET.parse( os.path.join( BINDIR, '..', 'etc', 'input.xml' ) )
+        BINDIR = os.path.dirname(os.path.realpath(sys.argv[0]))
+        tree = ET.parse(os.path.join(BINDIR, '..', 'etc', 'input.xml'))
 
         for command in tree.getiterator("command"):
             for transport in command.getiterator("transport"):
-                if not command.attrib.has_key("name") \
-                        or not transport.attrib.has_key("method") \
-                        or not transport.attrib.has_key("path"):
+                if "name" not in command.attrib \
+                        or "method" not in transport.attrib \
+                        or "path" not in transport.attrib:
                     continue
                 name = command.attrib["name"]
                 method = transport.attrib["method"]
@@ -360,12 +361,12 @@ class RestServer(ResponsePage):
                 # Since we are parsing input.xml anyway, record the possible
                 # parameters...
                 for option in command.getiterator("option"):
-                    if not option.attrib.has_key("name"):
+                    if "name" not in option.attrib:
                         continue
                     option_name = option.attrib["name"]
                     if option_name not in myinstance.optional_parameters:
                         myinstance.optional_parameters.append(option_name)
-                    if option.attrib.has_key("type"):
+                    if "type" in option.attrib:
                         paramtype = option.attrib["type"]
                         myinstance.parameter_types[option_name] = paramtype
                         if paramtype == "int":
@@ -405,11 +406,11 @@ class RestServer(ResponsePage):
             for (key, child) in container.listStaticEntities():
                 log.msg("Resource at level %d for %s [key:%s]"
                         % (level, child.path, key))
-                _logChildren(level+1, child)
+                _logChildren(level + 1, child)
             if getattr(container, "dynamic_child", None):
                 log.msg("Resource at level %d for %s [dynamic]"
                         % (level, container.dynamic_child.path))
-                _logChildren(level+1, container.dynamic_child)
+                _logChildren(level + 1, container.dynamic_child)
 
         #_logChildren(0, self)
 

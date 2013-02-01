@@ -1,5 +1,6 @@
 #!/usr/bin/env python2.6
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
 # Copyright (C) 2008,2009,2010,2011,2012  Contributor
 #
@@ -47,7 +48,7 @@ class TestAddVirtualHardware(TestBrokerCommand):
                             "--cluster", "utecl1", "--model", "utmedium"])
 
     def test_001_addnextmachine(self):
-        command = ["add", "machine", "--prefix", "evm" ,
+        command = ["add", "machine", "--prefix", "evm",
                    "--cluster", "utecl1", "--model", "utmedium"]
         out = self.commandtest(command)
         self.matchoutput(out, "evm9", command)

@@ -1,4 +1,5 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
 # Copyright (C) 2009,2010,2011,2012  Contributor
 #
@@ -30,7 +31,7 @@
 
 from aquilon.exceptions_ import ArgumentError, IncompleteError
 from aquilon.aqdb.model import Cluster, Personality, ServiceAddress
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.host import hostname_to_host
 from aquilon.worker.dbwrappers.resources import walk_resources
 from aquilon.worker.locks import lock_queue, CompileKey
@@ -92,6 +93,7 @@ class CommandUncluster(BrokerCommand):
             raise
         finally:
             lock_queue.release(key)
+
 
 def remove_service_addresses(dbcluster, dbhost):
     for res in walk_resources(dbcluster):

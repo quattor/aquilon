@@ -1,4 +1,5 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
 # Copyright (C) 2009,2010,2011,2012  Contributor
 #
@@ -28,7 +29,7 @@
 # TERMS THAT MAY APPLY.
 
 
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Archetype, Personality
 
@@ -45,7 +46,7 @@ class CommandDelArchetype(BrokerCommand):
         # if personality exists, raise error
         if row:
             raise ArgumentError("{0} is still in use by {1} and cannot be "
-                                "deleted.".format (dbarch, row))
+                                "deleted.".format(dbarch, row))
         # All clear
         session.delete(dbarch)
         return

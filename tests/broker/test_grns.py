@@ -1,5 +1,6 @@
 #!/usr/bin/env python2.6
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
 # Copyright (C) 2011,2012  Contributor
 #
@@ -42,7 +43,7 @@ from brokertest import TestBrokerCommand
 
 
 class TestGrns(TestBrokerCommand):
-    
+
     def test_100_add_test1(self):
         command = ["add", "grn", "--grn", "grn:/ms/test1", "--eon_id", "1",
                    "--disabled"]
@@ -121,7 +122,7 @@ class TestGrns(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out, "GRN: grn:/ms/ei/aquilon/aqd", command)
 
-        command =["cat", "--archetype=aquilon", "--personality=compileserver"]
+        command = ["cat", "--archetype=aquilon", "--personality=compileserver"]
         out = self.commandtest(command)
         self.matchoutput(out, '"/system/eon_ids" = push(2);', command)
         self.matchoutput(out, '"/system/eon_ids" = push(4);', command)
@@ -258,8 +259,8 @@ class TestGrns(TestBrokerCommand):
                    "--personality", "compileserver"]
         self.noouttest(command)
 
-        command =["cat", "--archetype", "aquilon",
-                  "--personality", "compileserver"]
+        command = ["cat", "--archetype", "aquilon",
+                   "--personality", "compileserver"]
         out = self.commandtest(command)
         self.matchoutput(out, '"/system/eon_ids" = push(2);', command)
         self.searchclean(out, '"/system/eon_ids" = push(4);', command)
@@ -320,7 +321,6 @@ class TestGrns(TestBrokerCommand):
         out = self.badrequesttest(command)
         self.matchoutput(out,"The number of hosts in list {0:d} can not be more "
                          "than {1:d}".format(len(hosts), hostlimit), command)
-
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestGrns)

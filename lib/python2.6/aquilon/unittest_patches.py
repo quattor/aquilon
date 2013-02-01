@@ -1,5 +1,6 @@
 #!/usr/bin/env python2.6
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
 # Copyright (C) 2012  Contributor
 #
@@ -28,7 +29,8 @@
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
 
-import sys, os
+import sys
+import os
 # bin/twistd.py, we'll start it after the patch is done
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)),
                              "..", "..", "..", "bin"))
@@ -42,7 +44,7 @@ import socket
 import re
 
 # dwim options parser
-for i in range(0,len(sys.argv)):
+for i in range(0, len(sys.argv)):
     if sys.argv[i] == "--config":
         configpath = sys.argv[i + 1]
         break

@@ -1,4 +1,5 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
 # Copyright (C) 2008,2009,2010,2011,2012  Contributor
 #
@@ -31,7 +32,7 @@
 from aquilon.exceptions_ import ArgumentError, NotFoundException, AquilonError
 from aquilon.aqdb.model import Disk, Machine
 from aquilon.aqdb.model.disk import controller_types
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.templates.base import Plenary
 from aquilon.worker.processes import NASAssign
 from aquilon.worker.locks import lock_queue, CompileKey
@@ -42,7 +43,7 @@ class CommandDelDisk(BrokerCommand):
     required_parameters = ["machine"]
 
     def render(self, session, logger, machine, disk, controller, size, all,
-               dbuser,  **arguments):
+               dbuser, **arguments):
 
         # Handle deprecated arguments
         if arguments.get("type", None):

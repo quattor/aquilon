@@ -1,4 +1,5 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
 # Copyright (C) 2009,2010,2011,2012  Contributor
 #
@@ -30,6 +31,7 @@
 
 from aquilon.worker.formats.formatters import ObjectFormatter
 from aquilon.aqdb.model import MetaCluster
+
 
 # TODO add extra data based on cluster.py(formats)
 class MetaClusterFormatter(ObjectFormatter):

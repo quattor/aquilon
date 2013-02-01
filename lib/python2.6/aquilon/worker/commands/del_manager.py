@@ -1,4 +1,5 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
 # Copyright (C) 2008,2009,2010,2011,2012  Contributor
 #
@@ -31,7 +32,7 @@
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import ARecord
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.processes import DSDBRunner
 from aquilon.worker.locks import DeleteKey
 from aquilon.worker.dbwrappers.dns import delete_dns_record
@@ -66,7 +67,7 @@ class CommandDelManager(BrokerCommand):
             dbinterface.assignments.remove(assignment)
             delete_dns_record(dbmanager)
             session.flush()
-    
+
             dsdb_runner = DSDBRunner(logger=logger)
             dsdb_runner.update_host(dbmachine, oldinfo)
             dsdb_runner.commit_or_rollback("Could not remove host %s from DSDB"

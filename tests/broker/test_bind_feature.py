@@ -1,5 +1,6 @@
 #!/usr/bin/env python2.6
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
 # Copyright (C) 2011,2012  Contributor
 #
@@ -55,6 +56,7 @@ r'\spush("features/hardware/bios_setup");\n'
 r'\s} else { SELF; };\n'
 r'};'
 
+
 class TestBindFeature(TestBrokerCommand):
 
     def setUp(self):
@@ -89,7 +91,7 @@ class TestBindFeature(TestBrokerCommand):
                    "--archetype", "aquilon",
                    "--justification", "tcm=12345678"]
         (out, err) = self.successtest(command)
-        self.matchoutput(err, "Flushed 10/10 templates" , command)
+        self.matchoutput(err, "Flushed 10/10 templates", command)
         # We can't easily check the number of templates that got refreshed since
         # there's no easy way to query if "make" was run for a host or not
 
@@ -113,7 +115,7 @@ class TestBindFeature(TestBrokerCommand):
                           command)
 
     def test_101_verify_cat_personality(self):
-        command = ["cat", "--personality", "inventory", "--pre_feature" ]
+        command = ["cat", "--personality", "inventory", "--pre_feature"]
         out = self.commandtest(command)
         self.searchoutput(out,
                           r'include { "features/pre_host/config" };\s*',
@@ -124,7 +126,7 @@ class TestBindFeature(TestBrokerCommand):
 
     def test_110_bind_personality(self):
         command = ["bind", "feature", "--feature", "post_host",
-                   "--personality", "inventory" ]
+                   "--personality", "inventory"]
         (out, err) = self.successtest(command)
         self.matchclean(err, "Flushed 31/31", command)
 

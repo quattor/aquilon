@@ -1,4 +1,5 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
 # Copyright (C) 2012  Contributor
 #
@@ -131,6 +132,7 @@ class CommandAddServiceAddress(BrokerCommand):
                      newly_created=newly_created, comments=comments)
 
         return
+
 
 def apply_service_address(dbhost, ifnames, srv_addr):
     for ifname in ifnames:

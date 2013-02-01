@@ -1,4 +1,5 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
 # Copyright (C) 2011,2012  Contributor
 #
@@ -30,7 +31,7 @@
 from ipaddr import IPv4Network
 
 from aquilon.exceptions_ import ArgumentError, AquilonError
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.aqdb.model import (Network, NetworkEnvironment, AddressAssignment,
                                 ARecord)
 from aquilon.aqdb.model.network import get_net_id_from_ip

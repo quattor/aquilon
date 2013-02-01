@@ -1,4 +1,5 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
 # Copyright (C) 2008,2009,2010,2011,2012  Contributor
 #
@@ -277,5 +278,3 @@ class PlenaryInstanceNasDiskShare(Plenary):
         pan_assign(lines, "sharename", self.name)
         pan_assign(lines, "server", self.server)
         pan_assign(lines, "mountpoint", self.mount)
-
-

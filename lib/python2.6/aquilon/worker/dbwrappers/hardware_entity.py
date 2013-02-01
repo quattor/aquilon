@@ -1,4 +1,5 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
 # Copyright (C) 2008,2009,2010,2011,2012  Contributor
 #
@@ -88,6 +89,7 @@ def search_hardware_entity_query(session, hardware_type=HardwareEntity,
         q = q.order_by(HardwareEntity.label)
     return q
 
+
 def update_primary_ip(session, dbhw_ent, ip):
     dbnetwork = get_net_id_from_ip(session, ip)
     check_ip_restrictions(dbnetwork, ip)
@@ -136,6 +138,7 @@ def update_primary_ip(session, dbhw_ent, ip):
         for addr in addrs:
             addr.ip = ip
             addr.network = dbnetwork
+
 
 def rename_hardware(session, dbhw_ent, rename_to):
     if "." in rename_to:

@@ -1,4 +1,5 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
 # Copyright (C) 2008,2009,2010,2011,2012  Contributor
 #
@@ -38,6 +39,7 @@ from aquilon.exceptions_ import ArgumentError
 
 _TN = 'host_environment'
 
+
 class HostEnvironment(Base):
     """ Describes the state a host is within the provisioning lifecycle """
 
@@ -66,6 +68,7 @@ host_env.primary_key.name = '%s_pk' % _TN
 host_env.append_constraint(UniqueConstraint('name', name='%s_uk' % _TN))
 host_env.info['unique_fields'] = ['name']
 
+
 class Development(HostEnvironment):
     __mapper_args__ = {'polymorphic_identity': 'dev'}
 
@@ -88,4 +91,3 @@ class Production(HostEnvironment):
 
 class Infra(HostEnvironment):
     __mapper_args__ = {'polymorphic_identity': 'infra'}
-

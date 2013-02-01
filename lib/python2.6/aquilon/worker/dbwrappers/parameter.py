@@ -1,4 +1,5 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
 # Copyright (C) 2012  Contributor
 #
@@ -166,7 +167,8 @@ def validate_parameter(session, path, value, param_holder):
 
     return retval, match
 
-def validate_rebuild_required (session, path, param_holder):
+
+def validate_rebuild_required(session, path, param_holder):
     """ check if this parameter requires hosts to be in non-ready state
     """
     q = session.query(Host)
@@ -187,7 +189,8 @@ def validate_rebuild_required (session, path, param_holder):
                             "Run 'aq search host --personality %s --buildstatus ready' "
                             "and 'aq search host --personality %s --buildstatus almostready' to "
                             "get the list of the affected hosts." %
-                            (path, personality, personality)  )
+                            (path, personality, personality))
+
 
 def get_parameters(session, archetype=None, personality=None, feature=None,
                    featurelink=None):
@@ -201,6 +204,7 @@ def get_parameters(session, archetype=None, personality=None, feature=None,
         return []
     q = session.query(Parameter).filter_by(holder=param_holder)
     return q.all()
+
 
 def get_paramdef_for_parameter(path, param_holder):
     param_definitions = None

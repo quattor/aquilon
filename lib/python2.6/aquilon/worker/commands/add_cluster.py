@@ -1,4 +1,5 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
 # Copyright (C) 2011,2012  Contributor
 #
@@ -38,18 +39,14 @@ from aquilon.aqdb.model import (Personality, ClusterLifecycle, MetaCluster,
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
 from aquilon.worker.locks import lock_queue
 
+
 class CommandAddCluster(BrokerCommand):
 
     required_parameters = ["cluster", "down_hosts_threshold"]
 
-    def render(self, session, logger,
-               # Generic arguments
-               cluster, archetype, personality, domain, sandbox,
-               max_members, down_hosts_threshold, maint_threshold,
-               buildstatus, comments,
-               # ESX Specific options
-               vm_to_host_ratio, switch, metacluster,
-               # Finally, anything else
+    def render(self, session, logger, cluster, archetype, personality, domain,
+               sandbox, max_members, down_hosts_threshold, maint_threshold,
+               buildstatus, comments, vm_to_host_ratio, switch, metacluster,
                **arguments):
 
         validate_basic("cluster", cluster)
@@ -92,18 +89,16 @@ class CommandAddCluster(BrokerCommand):
 
         (down_hosts_pct, dht) = Cluster.parse_threshold(down_hosts_threshold)
 
-        kw = {
-               'name' : cluster,
-               'location_constraint' : dbloc,
-               'personality' : dbpersonality,
-               'max_hosts' : max_members,
-               'branch' : dbbranch,
-               'sandbox_author' : dbauthor,
-               'down_hosts_threshold' : dht,
-               'down_hosts_percent' : down_hosts_pct,
-               'status' : dbstatus,
-               'comments' : comments
-             }
+        kw = {'name': cluster,
+              'location_constraint': dbloc,
+              'personality': dbpersonality,
+              'max_hosts': max_members,
+              'branch': dbbranch,
+              'sandbox_author': dbauthor,
+              'down_hosts_threshold': dht,
+              'down_hosts_percent': down_hosts_pct,
+              'status': dbstatus,
+              'comments': comments}
 
         if ctype == 'esx':
             if vm_to_host_ratio is None:

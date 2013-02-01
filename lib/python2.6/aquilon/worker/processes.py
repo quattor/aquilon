@@ -1,4 +1,5 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
 # Copyright (C) 2008,2009,2010,2011,2012  Contributor
 #
@@ -158,6 +159,7 @@ def run_command(args, env=None, path=".", logger=LOGGER, loglevel=logging.INFO,
                                code=p.returncode, filtered=bool(filterre))
     return out
 
+
 def run_git(args, env=None, path=".",
             logger=LOGGER, loglevel=logging.INFO, filterre=None):
     config = Config()
@@ -176,6 +178,7 @@ def run_git(args, env=None, path=".",
 
     return run_command(git_args, env=git_env, path=path,
                        logger=logger, loglevel=loglevel, filterre=filterre)
+
 
 def remove_dir(dir, logger=LOGGER):
     """Remove a directory.  Could have been implemented as a call to rm -rf."""
@@ -203,6 +206,7 @@ def remove_dir(dir, logger=LOGGER):
     except OSError, e:
         logger.info("Failed to remove '%s': %s" % (dir, e))
     return
+
 
 def write_file(filename, content, mode=None, logger=LOGGER, compress=None):
     """Atomically write content into the specified filename.
@@ -256,6 +260,7 @@ def write_file(filename, content, mode=None, logger=LOGGER, compress=None):
         if os.path.exists(fpath):
             os.remove(fpath)
 
+
 def read_file(path, filename, logger=LOGGER):
     fullfile = os.path.join(path, filename)
     try:
@@ -264,12 +269,14 @@ def read_file(path, filename, logger=LOGGER):
         raise AquilonError("Could not read contents of %s: %s"
                 % (fullfile, e))
 
+
 def remove_file(filename, logger=LOGGER):
     try:
         os.remove(filename)
     except OSError, e:
         if e.errno != errno.ENOENT:
             logger.info("Could not remove file '%s': %s" % (filename, e))
+
 
 def cache_version(config, logger=LOGGER):
     """Try to determine the broker version by examining the path
@@ -298,6 +305,7 @@ def cache_version(config, logger=LOGGER):
         logger.info("Could not run git describe to get version: %s" % e)
         config.set("broker", "version", "Unknown")
 
+
 def sync_domain(dbdomain, logger=LOGGER, locked=False):
     """Update templates on disk to match contents of branch in template-king.
 
@@ -310,8 +318,8 @@ def sync_domain(dbdomain, logger=LOGGER, locked=False):
     session = object_session(dbdomain)
     kingdir = config.get("broker", "kingdir")
     domaindir = os.path.join(config.get("broker", "domainsdir"), dbdomain.name)
-    git_env = {"PATH":"%s:%s" % (config.get("broker", "git_path"),
-                                 os.environ.get("PATH", ""))}
+    git_env = {"PATH": "%s:%s" % (config.get("broker", "git_path"),
+                                  os.environ.get("PATH", ""))}
     if dbdomain.tracked_branch:
         # Might need to revisit if using this helper from rollback...
         run_command(["git", "push", ".",
@@ -344,7 +352,7 @@ BUILDING_NOT_FOUND = re.compile(r"bldg [a-zA-Z0-9]{2} doesn't exists")
 
 CAMPUS_NOT_FOUND = re.compile(r"campus [a-zA-Z0-9]{2} doesn't exist")
 
-DNS_DOMAIN_NOT_FOUND = re.compile (r"DNS domain ([-\w\.\d]+) doesn't exists")
+DNS_DOMAIN_NOT_FOUND = re.compile(r"DNS domain ([-\w\.\d]+) doesn't exists")
 
 DNS_DOMAIN_EXISTS = re.compile(r"DNS domain [-\w\.\d]+ already defined")
 
@@ -424,7 +432,8 @@ class DSDBRunner(object):
 
         command_args: the DSDB command to execute
         rollback_args: the DSDB command to execute on rollback
-        error_filter: regexp of error messages in the output of dsdb that should be ignored
+        error_filter: regexp of error messages in the output of dsdb that
+                      should be ignored
         ignore_msg: message to log if the error_filter matched
         """
         if error_filter and not ignore_msg:
@@ -514,7 +523,7 @@ class DSDBRunner(object):
             return
         command = ["delete_building_aq", "-building", building]
         rollback = ["add_building_aq", "-building_name", building,
-                    "-city", old_city,"-building_addr", old_addr]
+                    "-city", old_city, "-building_addr", old_addr]
         self.add_action(command, rollback, BUILDING_NOT_FOUND,
                         "DSDB does not have building %s defined, "
                         "proceeding." % building)
@@ -792,7 +801,8 @@ class DSDBRunner(object):
         # is identified by having an empty ['primary'] key (this is true for the
         # management address as well, but that does not matter).
         adds.sort(lambda x, y: cmp(x['primary'] or "", y['primary'] or ""))
-        deletes.sort(lambda x, y: cmp(x['primary'] or "", y['primary'] or ""), reverse=True)
+        deletes.sort(lambda x, y: cmp(x['primary'] or "", y['primary'] or ""),
+                     reverse=True)
 
         for attrs in deletes:
             self.delete_host_details(attrs['fqdn'], attrs['ip'],
@@ -928,12 +938,12 @@ class NASAssign(object):
         self.config = Config()
         if self.config.getboolean('nasassign', 'use_dev_db'):
             self.devdb = 1
-        self.laf_dict = {'_id':'%s_%s' % (self.disk, self.machine),
-                         'owner':self.owner, 'rack':self.rack, 'size':self.size,
-                         'devdb':self.devdb}
+        self.laf_dict = {'_id': '%s_%s' % (self.disk, self.machine),
+                         'owner': self.owner, 'rack': self.rack, 'size': self.size,
+                         'devdb': self.devdb}
         self.bin = self.config.get('nasassign', 'bin')
         self.cmdline_args = self.config.get('nasassign', 'cmdline_args')
-        self.args = [ self.bin ]
+        self.args = [self.bin]
         if self.cmdline_args:
             self.args.extend(self.cmdline_args.split())
 
@@ -969,7 +979,7 @@ class NASAssign(object):
                 if dherr.startswith("data@size"):
                     sizes = re.findall("\[([\d+, ]+)\]", dherr)
                     raise ArgumentError("Invalid size for autoshare disk. "
-                                        "Supported sizes are: %s" % sizes )
+                                        "Supported sizes are: %s" % sizes)
             raise AquilonError("Received unexpected output from nasassign "
                                "/ resource pool: %s" % error)
 

@@ -1,5 +1,6 @@
 #!/usr/bin/env python2.6
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
 # Copyright (C) 2010,2011,2012  Contributor
 #
@@ -168,7 +169,7 @@ class TestAddSandbox(TestBrokerCommand):
                          command)
 
     def testslashinuserid(self):
-        test_user = "user1"+'/'+"test"
+        test_user = "user1" + '/' + "test"
         command = "add sandbox --sandbox '%s/nevermade'" % test_user
         err = self.unauthorizedtest(command.split(" "))
         err = self.unauthorizedtest(command.split(" "))

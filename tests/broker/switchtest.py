@@ -1,4 +1,5 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
 # Copyright (C) 2008,2009,2010,2011,2012  Contributor
 #
@@ -84,4 +85,3 @@ class VerifySwitchMixin(object):
 #        for port in range(1,49):
 #            self.matchoutput(out, "Switch Port %d" % port, command)
         return (out, command)
-

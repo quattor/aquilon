@@ -1,5 +1,6 @@
 #!/usr/bin/env python2.6
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
 # Copyright (C) 2008,2009,2010,2011,2012  Contributor
 #
@@ -54,6 +55,7 @@ MANDIR = os.path.join(SRCDIR, "doc", "man")
 
 sys.path.append(LIBDIR)
 
+from aquilon.exceptions_ import AquilonError
 from aquilon.client import depends
 from aquilon.client.knchttp import KNCHTTPConnection
 from aquilon.client.chunked import ChunkedHTTPConnection
@@ -120,7 +122,6 @@ class CustomAction(object):
 
     def create_bundle(self, commandOptions):
         from subprocess import Popen, PIPE
-        from re import search
         from tempfile import mkstemp
         from base64 import b64encode
 

@@ -1,5 +1,6 @@
 #!/usr/bin/env python2.6
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
 # Copyright (C) 2008,2009,2010,2011,2012  Contributor
 #
@@ -29,6 +30,7 @@
 # TERMS THAT MAY APPLY.
 """ Used by the test runner to display what test is currently running """
 import unittest
+
 
 class VerboseTextTestResult(unittest._TextTestResult):
     lastmodule = ""

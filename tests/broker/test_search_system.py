@@ -1,5 +1,6 @@
 #!/usr/bin/env python2.6
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
 # Copyright (C) 2008,2009,2010,2011  Contributor
 #
@@ -58,7 +59,6 @@ class TestSearchSystem(TestBrokerCommand):
 #        out = self.commandtest(command.split(" "))
 #        self.matchoutput(out, "Primary Name: unittest00.one-nyp.ms.com", command)
 #        self.matchoutput(out, "Blade: ut3c1n3", command)
-
 
     def testdnsdomainavailable(self):
         command = "search system --dns_domain aqd-unittest.ms.com"
@@ -174,7 +174,6 @@ class TestSearchSystem(TestBrokerCommand):
 #        self.matchoutput(out, "Chassis: ut3c1", command)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestSearchSystem)
     unittest.TextTestRunner(verbosity=2).run(suite)
-

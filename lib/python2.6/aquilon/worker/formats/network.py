@@ -1,4 +1,5 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
 # Copyright (C) 2008,2009,2010,2011,2012  Contributor
 #
@@ -37,6 +38,7 @@ from aquilon.aqdb.model import Network, HardwareEntity, Host
 from aquilon.worker.formats.formatters import ObjectFormatter
 from aquilon.worker.formats.list import ListFormatter
 
+
 def summarize_ranges(addrlist):
     """ Convert a list like [1,2,3,5] to ["1-3", "5"], but with IP addresses """
     ranges = []
@@ -61,6 +63,7 @@ def summarize_ranges(addrlist):
             ranges.append("%s-%s" % (start, end))
 
     return ranges
+
 
 def possible_mac_addresses(interface):
     """ Return the list of MAC addresses the DHCP server should accept.

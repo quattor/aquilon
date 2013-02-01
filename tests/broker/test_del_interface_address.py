@@ -1,5 +1,6 @@
 #!/usr/bin/env python2.6
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
 # Copyright (C) 2010,2011,2012  Contributor
 #
@@ -139,7 +140,6 @@ class TestDelInterfaceAddress(TestBrokerCommand):
         self.noouttest(command)
         # External addresses should not affect DSDB
         self.dsdb_verify(empty=True)
-
 
     def testdelunittest26(self):
         ip = self.net.unknown[14].usable[0]

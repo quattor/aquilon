@@ -1,4 +1,5 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
 # Copyright (C) 2009,2010,2011,2012  Contributor
 #
@@ -29,13 +30,14 @@
 
 import re
 
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.aqdb.model import Feature
 from aquilon.exceptions_ import ArgumentError, UnimplementedError
 
 # Do not allow path components to start with '.' to avoid games like "../foo" or
 # hidden directories like ".foo/bar"
 _name_re = re.compile(r'^\.|[/\\]\.')
+
 
 class CommandAddFeature(BrokerCommand):
 

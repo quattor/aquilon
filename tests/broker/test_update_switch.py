@@ -1,5 +1,6 @@
 #!/usr/bin/env python2.6
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
 # Copyright (C) 2010,2011,2012  Contributor
 #
@@ -66,11 +67,11 @@ class TestUpdateSwitch(TestBrokerCommand, VerifySwitchMixin):
         command = ["update", "switch", "--ip", ip,
                    "--switch", "ut3gd1r04.aqd-unittest.ms.com"]
         out = self.badrequesttest(command)
-        self.matchoutput (out,
-                          "IP address %s is already in use by on-board admin "
-                          "interface xge of switch "
-                          "ut3gd1r01.aqd-unittest.ms.com." % ip,
-                          command)
+        self.matchoutput(out,
+                         "IP address %s is already in use by on-board admin "
+                         "interface xge of switch "
+                         "ut3gd1r01.aqd-unittest.ms.com." % ip,
+                         command)
 
     def testupdatemisc(self):
         command = ["update", "switch",
