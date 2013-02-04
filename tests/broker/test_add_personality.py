@@ -33,10 +33,10 @@
 import unittest
 
 if __name__ == "__main__":
-    import utils
+    from broker import utils
     utils.import_depends()
 
-from brokertest import TestBrokerCommand
+from broker.brokertest import TestBrokerCommand
 
 GRN = "grn:/ms/ei/aquilon/aqd"
 
@@ -588,6 +588,15 @@ class TestAddPersonality(TestBrokerCommand):
         self.searchoutput(out,
                           r'missing Options in Personality vmhost/esx_server:\s+ConfigOverride',
                           command)
+
+    def testfailnoenvironment(self):
+        command = ["add_personality", "--eon_id=2", "--archetype=aquilon",
+                   "--personality=no-environment"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "Default environment is not configured for archetype "
+                         "aquilon, please specify --host_environment.",
+                         command)
 
 
 if __name__ == '__main__':

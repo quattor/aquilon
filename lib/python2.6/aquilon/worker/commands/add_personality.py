@@ -31,40 +31,50 @@
 
 
 import re
+from ConfigParser import NoSectionError, NoOptionError
 
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import (Archetype, Personality,
                                 Parameter, HostEnvironment,
                                 PersonalityParameter)
-from aquilon.exceptions_ import ArgumentError
-from aquilon.worker.templates.personality import PlenaryPersonality
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.parameter import get_parameters
 from aquilon.worker.dbwrappers.feature import add_link
 from aquilon.worker.dbwrappers.grn import lookup_grn
+from aquilon.worker.templates.personality import PlenaryPersonality
+
+VALID_PERSONALITY_RE = re.compile('^[a-zA-Z0-9_-]+\/?[a-zA-Z0-9_-]+$')
 
 
 class CommandAddPersonality(BrokerCommand):
 
-    required_parameters = ["personality", "archetype", "host_environment"]
+    required_parameters = ["personality", "archetype"]
 
     def render(self, session, logger, personality, archetype, grn, eon_id, host_environment,
                comments, cluster_required, copy_from, config_override, **arguments):
-
-        valid = re.compile('^[a-zA-Z0-9_-]+\/?[a-zA-Z0-9_-]+$')
-        if not valid.match(personality):
+        if not VALID_PERSONALITY_RE.match(personality):
             raise ArgumentError("Personality name '%s' is not valid." %
                                 personality)
         if not (grn or eon_id):
             raise ArgumentError("GRN or EON ID is required for adding a "
                                 "personality.")
 
+        dbarchetype = Archetype.get_unique(session, archetype, compel=True)
+
+        if not host_environment:
+            try:
+                host_environment = self.config.get("archetype_" + archetype,
+                                                   "default_environment")
+            except (NoSectionError, NoOptionError):
+                raise ArgumentError("Default environment is not configured "
+                                    "for {0:l}, please specify "
+                                    "--host_environment.".format(dbarchetype))
+
         HostEnvironment.validate_name(host_environment)
         Personality.validate_env_in_name(personality, host_environment)
         host_env = HostEnvironment.get_unique(session, host_environment, compel=True)
 
-        dbarchetype = Archetype.get_unique(session, archetype, compel=True)
-        Personality.get_unique(session, archetype=dbarchetype,
-                               name=personality,
+        Personality.get_unique(session, archetype=dbarchetype, name=personality,
                                preclude=True)
 
         dbpersona = Personality(name=personality, archetype=dbarchetype,
