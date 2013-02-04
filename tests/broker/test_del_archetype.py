@@ -34,10 +34,10 @@
 import unittest
 
 if __name__ == "__main__":
-    import utils
+    from broker import utils
     utils.import_depends()
 
-from brokertest import TestBrokerCommand
+from broker.brokertest import TestBrokerCommand
 
 
 class TestDelArchetype(TestBrokerCommand):

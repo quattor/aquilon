@@ -31,16 +31,13 @@
 """Module for testing the update personality command."""
 
 
-import os
-import sys
 import unittest
 
 if __name__ == "__main__":
-    BINDIR = os.path.dirname(os.path.realpath(sys.argv[0]))
-    SRCDIR = os.path.join(BINDIR, "..", "..")
-    sys.path.append(os.path.join(SRCDIR, "lib", "python2.6"))
+    from broker import utils
+    utils.import_depends()
 
-from brokertest import TestBrokerCommand
+from broker.brokertest import TestBrokerCommand
 
 
 class TestUpdatePersonality(TestBrokerCommand):
@@ -174,7 +171,6 @@ class TestUpdatePersonality(TestBrokerCommand):
         command = ["cat", "--archetype=aquilon", "--personality=testovrpersona/dev"]
         self.matchclean(out, 'override', command)
 
-
     def testupdatehostenv01(self):
         command = ["update_personality", "--personality=testovrpersona/dev",
                     "--archetype=aquilon", "--host_environment=dev"]
@@ -184,7 +180,7 @@ class TestUpdatePersonality(TestBrokerCommand):
 
     def testupdatehostenv03(self):
         command = ["add_personality", "--archetype=windows", "--grn=grn:/ms/ei/aquilon/aqd",
-                   "--personality=prod-perim" , "--host_environment=legacy"]
+                   "--personality=prod-perim", "--host_environment=legacy"]
         self.successtest(command)
 
         command = ["update_personality", "--personality=prod-perim",
@@ -212,7 +208,7 @@ class TestUpdatePersonality(TestBrokerCommand):
     def testupdatepersonalitycleanup(self):
         command = ["del_personality", "--personality=testovrpersona/dev",
                    "--archetype=aquilon"]
-        out = self.successtest(command)
+        self.successtest(command)
 
 
 if __name__ == '__main__':

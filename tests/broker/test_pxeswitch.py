@@ -251,8 +251,8 @@ class TestPxeswitch(TestBrokerCommand):
         user = self.config.get("unittest", "user")
         hostlimit = self.config.getint("broker", "pxeswitch_max_list_size")
         hosts = []
-        for i in range(1,20):
-            hosts.append("thishostdoesnotexist%d.aqd-unittest.ms.com\n" %i)
+        for i in range(1, 20):
+            hosts.append("thishostdoesnotexist%d.aqd-unittest.ms.com\n" % i)
         scratchfile = self.writescratch("pxeswitchlistlimit", "".join(hosts))
         command = ["pxeswitch", "--list", scratchfile,
                    "--configure", "--blindbuild"]

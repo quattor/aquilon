@@ -30,16 +30,13 @@
 # TERMS THAT MAY APPLY.
 """Module for testing GRN support."""
 
-import os
-import sys
 import unittest
-from subprocess import Popen, PIPE
 
 if __name__ == "__main__":
-    import utils
+    from broker import utils
     utils.import_depends()
 
-from brokertest import TestBrokerCommand
+from broker.brokertest import TestBrokerCommand
 
 
 class TestGrns(TestBrokerCommand):
@@ -57,7 +54,8 @@ class TestGrns(TestBrokerCommand):
         self.matchoutput(out, "Disabled: True", command)
 
     def test_110_add_test2(self):
-        command = ["add", "grn", "--grn", "grn:/ms/test2", "--eon_id", "123456789"]
+        command = ["add", "grn", "--grn", "grn:/ms/test2",
+                   "--eon_id", "123456789"]
         self.noouttest(command)
 
     def test_111_verify_test2(self):
@@ -110,12 +108,12 @@ class TestGrns(TestBrokerCommand):
     def test_400_map_personality(self):
         command = ["map", "grn", "--grn", "grn:/ms/ei/aquilon/aqd",
                    "--personality", "compileserver"]
-        (out, err) = self.successtest(command)
+        self.successtest(command)
 
     def test_405_map_personality(self):
         command = ["map", "grn", "--grn", "grn:/example/cards",
                    "--personality", "compileserver"]
-        out = self.successtest(command)
+        self.successtest(command)
 
     def test_410_verify_personality(self):
         command = ["show", "personality", "--personality", "compileserver"]
@@ -128,7 +126,7 @@ class TestGrns(TestBrokerCommand):
         self.matchoutput(out, '"/system/eon_ids" = append(4);', command)
 
     def test_420_verify_host(self):
-        command = ["show", "host", "--hostname", "unittest20.aqd-unittest.ms.com"]
+        command = ["show_host", "--hostname", "unittest20.aqd-unittest.ms.com"]
         out = self.commandtest(command)
         self.matchoutput(out, "GRN: grn:/ms/ei/aquilon/aqd", command)
 
@@ -190,18 +188,20 @@ class TestGrns(TestBrokerCommand):
         # The GRN is mapped to both the host and the personality; verify it is
         # not duplicated. Should print out both the host mapped
         # personality mapped grns
-        self.searchoutput(out, r'"system/eon_ids" = list\(\s+2,\s+4\s+\);', command)
+        self.searchoutput(out, r'"system/eon_ids" = list\(\s+2,\s+4\s+\);',
+                          command)
 
     def test_510_verify_unittest20(self):
-        command = ["cat", "--hostname", "unittest20.aqd-unittest.ms.com", "--data",
-                   "--generate"]
+        command = ["cat", "--hostname", "unittest20.aqd-unittest.ms.com",
+                   "--data", "--generate"]
         out = self.commandtest(command)
         # The GRN is mapped to the personality only
-        self.searchoutput(out, r'"system/eon_ids" = list\(\s+2,\s+4\s+\);', command)
+        self.searchoutput(out, r'"system/eon_ids" = list\(\s+2,\s+4\s+\);',
+                          command)
 
     def test_520_verify_unittest12(self):
-        command = ["cat", "--hostname", "unittest12.aqd-unittest.ms.com", "--data",
-                   "--generate"]
+        command = ["cat", "--hostname", "unittest12.aqd-unittest.ms.com",
+                   "--data", "--generate"]
         out = self.commandtest(command)
         # The GRN is mapped to the host only
         self.searchoutput(out, r'"system/eon_ids" = list\(\s+2\s+\);', command)
@@ -228,7 +228,7 @@ class TestGrns(TestBrokerCommand):
         self.noouttest(command)
 
     def test_621_verify_unittest12(self):
-        command = ["show", "host", "--hostname", "unittest12.aqd-unittest.ms.com"]
+        command = ["show_host", "--hostname", "unittest12.aqd-unittest.ms.com"]
         out = self.commandtest(command)
         self.matchclean(out, "GRN", command)
 
@@ -268,8 +268,11 @@ class TestGrns(TestBrokerCommand):
         command = ["unmap", "grn", "--grn", "grn:/ms/ei/aquilon/aqd",
                    "--personality", "compileserver"]
         out = self.badrequesttest(command)
-        self.matchoutput(out, "GRN grn:/ms/ei/aquilon/aqd is the last grn on "
-                         "Personality aquilon/compileserver and cannot be removed", command)
+        self.matchoutput(out,
+                         "GRN grn:/ms/ei/aquilon/aqd is the last grn on "
+                         "Personality aquilon/compileserver and cannot be "
+                         "removed",
+                         command)
 
     def test_650_delete(self):
         command = ["del", "grn", "--grn", "grn:/example"]
@@ -283,44 +286,46 @@ class TestGrns(TestBrokerCommand):
         self.searchoutput(out, r'"system/eon_ids" = list\(\s+2\s+\);', command)
 
     def test_710_verify_unittest20(self):
-        command = ["cat", "--hostname", "unittest20.aqd-unittest.ms.com", "--data",
-                   "--generate"]
+        command = ["cat", "--hostname", "unittest20.aqd-unittest.ms.com",
+                   "--data", "--generate"]
         out = self.commandtest(command)
         # The GRN was mapped to the personality only
         self.searchoutput(out, r'"system/eon_ids" = list\(\s+2\s+\);', command)
 
     def test_720_verify_unittest12(self):
-        command = ["cat", "--hostname", "unittest12.aqd-unittest.ms.com", "--data",
-                   "--generate"]
+        command = ["cat", "--hostname", "unittest12.aqd-unittest.ms.com",
+                   "--data", "--generate"]
         out = self.commandtest(command)
         # The GRN was mapped to the host only
         self.searchclean(out, r'"system/eon_ids"', command)
 
     def test_730_fail_map_overlimitlist(self):
-        user = self.config.get("unittest", "user")
         hostlimit = self.config.getint("broker", "map_grn_max_list_size")
         hosts = []
-        for i in range(1,20):
-            hosts.append("thishostdoesnotexist%d.aqd-unittest.ms.com\n" %i)
+        for i in range(1, 20):
+            hosts.append("thishostdoesnotexist%d.aqd-unittest.ms.com\n" % i)
         scratchfile = self.writescratch("mapgrnlistlimit", "".join(hosts))
         command = ["map", "grn", "--grn", "grn:/ms/ei/aquilon/aqd",
                    "--list", scratchfile]
         out = self.badrequesttest(command)
-        self.matchoutput(out,"The number of hosts in list {0:d} can not be more "
-                         "than {1:d}".format(len(hosts), hostlimit), command)
+        self.matchoutput(out,
+                         "The number of hosts in list {0:d} can not be more "
+                         "than {1:d}".format(len(hosts), hostlimit),
+                         command)
 
     def test_740_fail_unmap_overlimitlist(self):
-        user = self.config.get("unittest", "user")
         hostlimit = self.config.getint("broker", "unmap_grn_max_list_size")
         hosts = []
-        for i in range(1,20):
-            hosts.append("thishostdoesnotexist%d.aqd-unittest.ms.com\n" %i)
+        for i in range(1, 20):
+            hosts.append("thishostdoesnotexist%d.aqd-unittest.ms.com\n" % i)
         scratchfile = self.writescratch("mapgrnlistlimit", "".join(hosts))
         command = ["unmap", "grn", "--grn", "grn:/ms/ei/aquilon/aqd",
                    "--list", scratchfile]
         out = self.badrequesttest(command)
-        self.matchoutput(out,"The number of hosts in list {0:d} can not be more "
-                         "than {1:d}".format(len(hosts), hostlimit), command)
+        self.matchoutput(out,
+                         "The number of hosts in list {0:d} can not be more "
+                         "than {1:d}".format(len(hosts), hostlimit),
+                         command)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestGrns)

@@ -31,13 +31,12 @@
 """Module for testing the add host command."""
 
 import unittest
-import socket
 
 if __name__ == "__main__":
-    import utils
+    from broker import utils
     utils.import_depends()
 
-from brokertest import TestBrokerCommand, DummyIP
+from broker.brokertest import TestBrokerCommand, DummyIP
 
 
 class TestAddHost(TestBrokerCommand):

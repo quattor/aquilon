@@ -431,7 +431,7 @@ class TestAddPersonality(TestBrokerCommand):
     def testaddnotmatchingnameenv01(self):
         command = ["add_personality", "--personality", "test/dev",
                    "--host_environment", "qa",
-                   "--archetype", "aquilon", "--eon_id=2" ]
+                   "--archetype", "aquilon", "--eon_id=2"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Environment value in personality name 'test/dev' "
                               "does not match the host environment 'qa'",
@@ -440,7 +440,7 @@ class TestAddPersonality(TestBrokerCommand):
     def testaddnotmatchingnameenv02(self):
         command = ["add_personality", "--personality", "test-dev",
                    "--host_environment", "qa",
-                   "--archetype", "aquilon", "--eon_id=2" ]
+                   "--archetype", "aquilon", "--eon_id=2"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Environment value in personality name 'test-dev' "
                               "does not match the host environment 'qa'",
@@ -449,13 +449,13 @@ class TestAddPersonality(TestBrokerCommand):
     def testaddselectivenamematchenv03(self):
         command = ["add_personality", "--personality", "ec-infra-auth",
                    "--host_environment", "infra",
-                   "--archetype", "vmhost", "--eon_id=2" ]
-        out = self.successtest(command)
+                   "--archetype", "vmhost", "--eon_id=2"]
+        self.successtest(command)
 
     def testaddnotmatchingnameenv04(self):
         command = ["add_personality", "--personality", "test-qa-dev",
                    "--host_environment", "qa",
-                   "--archetype", "aquilon", "--eon_id=2" ]
+                   "--archetype", "aquilon", "--eon_id=2"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Environment value in personality name 'test-qa-dev' "
                               "does not match the host environment 'qa'",
@@ -464,7 +464,7 @@ class TestAddPersonality(TestBrokerCommand):
     def testaddnotmatchingnameenv05(self):
         command = ["add_personality", "--personality", "test-qa-DEV",
                    "--host_environment", "qa",
-                   "--archetype", "aquilon", "--eon_id=2" ]
+                   "--archetype", "aquilon", "--eon_id=2"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Environment value in personality name 'test-qa-DEV' "
                               "does not match the host environment 'qa'",

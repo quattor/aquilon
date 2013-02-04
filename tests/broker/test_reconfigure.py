@@ -36,10 +36,10 @@ import re
 import unittest
 
 if __name__ == "__main__":
-    import utils
+    from broker import utils
     utils.import_depends()
 
-from brokertest import TestBrokerCommand
+from broker.brokertest import TestBrokerCommand
 
 
 class TestReconfigure(TestBrokerCommand):
@@ -585,8 +585,8 @@ class TestReconfigure(TestBrokerCommand):
         user = self.config.get("unittest", "user")
         hostlimit = self.config.getint("broker", "reconfigure_max_list_size")
         hosts = []
-        for i in range(1,20):
-            hosts.append("thishostdoesnotexist%d.aqd-unittest.ms.com\n" %i)
+        for i in range(1, 20):
+            hosts.append("thishostdoesnotexist%d.aqd-unittest.ms.com\n" % i)
         scratchfile = self.writescratch("reconfigurelistlimit", "".join(hosts))
         command = ["reconfigure", "--list", scratchfile, "--personality=generic"]
         out = self.badrequesttest(command)
