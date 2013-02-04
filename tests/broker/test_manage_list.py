@@ -30,8 +30,6 @@
 # TERMS THAT MAY APPLY.
 """Module for testing the manage --list command."""
 
-
-import os
 import unittest
 
 if __name__ == "__main__":

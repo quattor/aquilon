@@ -46,7 +46,7 @@ if __name__ == "__main__":
     SRCDIR = os.path.join(BINDIR, "..", "..")
     sys.path.append(os.path.join(SRCDIR, "lib", "python2.6"))
     sys.path.append(os.path.join(SRCDIR, "tests"))
-    import depends
+    import depends  # pylint: disable=W0611
 
 from test_start import TestBrokerStart
 from test_ping import TestPing

@@ -32,7 +32,6 @@
 
 
 import os
-import re
 import unittest
 from lxml import etree
 import gzip

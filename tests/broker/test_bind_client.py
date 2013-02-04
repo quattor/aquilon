@@ -30,8 +30,6 @@
 # TERMS THAT MAY APPLY.
 """Module for testing the bind client command."""
 
-
-import re
 import unittest
 
 if __name__ == "__main__":

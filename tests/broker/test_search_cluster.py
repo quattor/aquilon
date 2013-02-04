@@ -31,7 +31,6 @@
 """Module for testing the search cluster command."""
 
 import unittest
-import sys
 
 if __name__ == "__main__":
     import utils

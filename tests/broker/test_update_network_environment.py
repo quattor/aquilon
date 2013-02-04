@@ -88,5 +88,5 @@ class TestUpdateNetworkEnvironment(TestBrokerCommand):
 
 
 if __name__ == '__main__':
-    suite = unittest.TestLoader().loadTestsFromTestCase(UpdateNetworkEnvironment)
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestUpdateNetworkEnvironment)
     unittest.TextTestRunner(verbosity=2).run(suite)

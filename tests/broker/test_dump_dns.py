@@ -30,6 +30,8 @@
 # TERMS THAT MAY APPLY.
 """Module for testing the dump_dns command."""
 
+import unittest
+
 if __name__ == '__main__':
     import utils
     utils.import_depends()

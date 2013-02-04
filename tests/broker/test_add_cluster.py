@@ -31,7 +31,6 @@
 """Module for testing the add cluster command."""
 
 import os
-import re
 import unittest
 
 if __name__ == "__main__":

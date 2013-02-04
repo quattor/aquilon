@@ -30,7 +30,6 @@
 # TERMS THAT MAY APPLY.
 """Module for testing the add dns environment command."""
 
-import os
 import unittest
 
 if __name__ == "__main__":
