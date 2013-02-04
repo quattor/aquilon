@@ -168,7 +168,7 @@ class TestAddHost(TestBrokerCommand):
                          self.net.unknown[0].usable[0],
                          command)
 
-    def testverifyaddafsbynetmachine(self):
+    def testverifyaddafsbynetut3c5n11(self):
         command = "show machine --machine ut3c5n11"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
@@ -176,7 +176,7 @@ class TestAddHost(TestBrokerCommand):
                          self.net.netsvcmap.usable[0],
                          command)
 
-    def testverifyaddafsbynetmachine(self):
+    def testverifyaddafsbynetut3c5n12(self):
         command = "show machine --machine ut3c5n12"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,

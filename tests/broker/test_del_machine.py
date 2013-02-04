@@ -195,9 +195,6 @@ class TestDelMachine(TestBrokerCommand):
     def testdelnp3c5n5(self):
         self.noouttest(["del", "machine", "--machine", "np3c5n5"])
 
-    def testdelut3c5n6(self):
-        self.noouttest(["del", "machine", "--machine", "ut3c5n6"])
-
     def testdeljack(self):
         self.noouttest(["del", "machine", "--machine", "jack"])
 

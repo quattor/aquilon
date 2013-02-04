@@ -561,9 +561,9 @@ class TestReconfigure(TestBrokerCommand):
         scratchfile = self.writescratch("empty", "".join(hosts))
         command = ["reconfigure", "--list", scratchfile]
         out = self.badrequesttest(command)
-        self.matchoutput(out, "Empty hostlist.", command)
+        self.matchoutput(out, "Empty list.", command)
 
-    def testemptyhostlist(self):
+    def testbadhostsinlist(self):
         hosts = ["host-does-not-exist.aqd-unittest.ms.com\n",
                  "another-host-does-not-exist.aqd-unittest.ms.com\n",
                  "aquilon91.aqd-unittest.ms.com\n",

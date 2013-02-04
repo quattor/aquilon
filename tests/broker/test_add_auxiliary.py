@@ -150,7 +150,7 @@ class TestAddAuxiliary(TestBrokerCommand):
                          self.net.tor_net[0].usable[0].mac,
                          command)
 
-    def testverifyrejectseventhip(self):
+    def testverifyrejectmacinuse(self):
         command = "show machine --machine ut3c1n4"
         out = self.commandtest(command.split(" "))
         self.matchclean(out, "Interface: eth4", command)

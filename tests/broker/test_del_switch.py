@@ -93,7 +93,7 @@ class TestDelSwitch(TestBrokerCommand):
         self.noouttest(command.split(" "))
         self.dsdb_verify()
 
-    def testverifydelnp06bals03(self):
+    def testverifydelnp06fals01(self):
         command = "show switch --switch np06fals01.ms.com"
         self.notfoundtest(command.split(" "))
 
