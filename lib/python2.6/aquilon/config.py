@@ -96,14 +96,3 @@ class Config(SafeConfigParser):
                 if self.has_section(alternate_section):
                     for (name, value) in self.items(alternate_section):
                         self.set(section, name, value)
-
-
-if __name__ == '__main__':
-    config = Config()
-    print "[DEFAULT]"
-    for (name, value) in config.defaults().items():
-        print "%s=%s" % (name, value)
-    for section in config.sections():
-        print "[%s]" % section
-        for (name, value) in config.items(section):
-            print "%s=%s" % (name, value)

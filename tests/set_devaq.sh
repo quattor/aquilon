@@ -20,9 +20,9 @@ else
 	AQDCONF=$(python2.6 -c 'import os, sys; print os.path.realpath(sys.argv[1])' "$AQDCONF")
 fi
 
-AQUSER=$("$SRCDIR/lib/python2.6/aquilon/config.py" | grep -A 1000 "\[broker\]" | grep "user=" | head -1 | cut -d= -f2)
-AQHOST=$("$SRCDIR/lib/python2.6/aquilon/config.py" | grep -A 1000 "\[broker\]" | grep "hostname=" | head -1 | cut -d= -f2)
-AQPORT=$("$SRCDIR/lib/python2.6/aquilon/config.py" | grep -A 1000 "\[broker\]" | grep "kncport=" | head -1 | cut -d= -f2)
+AQUSER=$($SRCDIR/bin/aqd_config.py --get broker.user)
+AQHOST=$($SRCDIR/bin/aqd_config.py --get broker.hostname)
+AQPORT=$($SRCDIR/bin/aqd_config.py --get broker.kncport)
 
 echo
 echo "Using srcdir  = $SRCDIR"
