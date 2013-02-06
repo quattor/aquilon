@@ -7,15 +7,15 @@ if [ -z "$AQDCONF" ] ; then
 	export AQDCONF
 fi
 
-BASEDIR=`$STARTDIR/../lib/python2.6/aquilon/config.py | grep -A 1000 "\[broker\]" | grep "basedir=" | head -1 | cut -c9-`
+BASEDIR=`$STARTDIR/../bin/aqd_config.py --get broker.basedir`
 
 if [ -z "$BASEDIR" ]; then
 	echo "Failed to determine the base directory" >&2
 	exit 1
 fi
 
-RUNDIR=`$STARTDIR/../lib/python2.6/aquilon/config.py | grep -A 1000 "\[broker\]" | grep "rundir=" | head -1 | cut -c8-`
-DSN=`$STARTDIR/../lib/python2.6/aquilon/config.py | grep -A 1000 "\[database\]" | grep "dsn=" | head -1 | cut -c5-`
+RUNDIR=`$STARTDIR/../bin/aqd_config.py --get broker.rundir`
+DSN=`$STARTDIR/../bin/aqd_config.py --get database.dsn`
 
 echo
 echo "Using AQDCONF = $AQDCONF"
