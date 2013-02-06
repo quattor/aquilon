@@ -72,5 +72,5 @@ class CommandAddHostPrefix(CommandAddHost):
         CommandAddHost.render(self, session, hostname=hostname, machine=machine,
                               **args)
 
-        self.audit_result(session, hostname, **args)
+        self.audit_result(session, 'hostname', hostname, **args)
         return hostname

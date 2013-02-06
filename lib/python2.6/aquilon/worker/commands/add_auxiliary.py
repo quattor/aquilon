@@ -73,7 +73,9 @@ class CommandAddAuxiliary(BrokerCommand):
             raise ArgumentError("{0} already has the following addresses: "
                                 "{1}.".format(dbinterface, addrs))
 
-        ip = generate_ip(session, dbinterface, compel=True, **arguments)
+        audit_results = []
+        ip = generate_ip(session, dbinterface, compel=True,
+                         audit_results=audit_results, **arguments)
 
         dbdns_rec, newly_created = grab_address(session, auxiliary, ip,
                                                 comments=comments,
@@ -107,4 +109,6 @@ class CommandAddAuxiliary(BrokerCommand):
             # XXX: Host needs to be reconfigured.
             pass
 
+        for name, value in audit_results:
+            self.audit_result(session, name, value, **arguments)
         return

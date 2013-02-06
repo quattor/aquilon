@@ -147,7 +147,9 @@ class CommandAddHost(BrokerCommand):
         # This method is allowed to return None. This can only happen
         # (currently) using add_aurora_host, add_windows_host, or possibly by
         # bypassing the aq client and posting a request directly.
-        ip = generate_ip(session, dbinterface, **arguments)
+        audit_results = []
+        ip = generate_ip(session, dbinterface, audit_results=audit_results,
+                         **arguments)
 
         dbdns_rec, newly_created = grab_address(session, hostname, ip,
                                                 allow_restricted_domain=True,
@@ -218,6 +220,8 @@ class CommandAddHost(BrokerCommand):
         finally:
             lock_queue.release(key)
 
+        for name, value in audit_results:
+            self.audit_result(session, name, value, **arguments)
         return
 
     def assign_zebra_address(self, session, dbmachine, dbdns_rec,

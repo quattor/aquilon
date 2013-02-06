@@ -121,7 +121,7 @@ class TestAddAddress(TestBrokerCommand):
         self.noouttest(command)
         self.dsdb_verify()
 
-    def test_350_verifyipfromip(self):
+    def test_310_verifyipfromip(self):
         command = ["show_address", "--fqdn=arecord15.aqd-unittest.ms.com"]
         out = self.commandtest(command)
         self.matchoutput(out, "DNS Record: arecord15.aqd-unittest.ms.com",
@@ -129,6 +129,14 @@ class TestAddAddress(TestBrokerCommand):
         self.matchoutput(out, "IP: %s" % self.net.unknown[0].usable[15],
                          command)
         self.matchclean(out, "Reverse", command)
+
+    def test_320_verifyaudit(self):
+        command = ["search_audit", "--command", "add_address",
+                   "--keyword", "arecord15.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out,
+                         "[Result: ip=%s]" % self.net.unknown[0].usable[15],
+                         command)
 
     def test_400_dsdbfailure(self):
         self.dsdb_expect_add("arecord16.aqd-unittest.ms.com",

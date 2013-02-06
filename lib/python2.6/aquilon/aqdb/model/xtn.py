@@ -88,6 +88,9 @@ class Xtn(Base):
             if arg.name == "__RESULT__":
                 results.append(arg.value)
                 continue
+            elif arg.name.startswith("__RESULT__:"):
+                results.append("%s=%s" % (arg.name[11:], arg.value))
+                continue
 
             # TODO: remove the str() once we can handle Unicode
             try:
@@ -204,9 +207,9 @@ def end_xtn(session, xtn_id, return_code, results=None):
 
     session.add(XtnEnd(xtn_id=xtn_id, return_code=return_code))
     if results:
-        for result in results:
-            session.add(XtnDetail(xtn_id=xtn_id, name='__RESULT__',
-                                  value=result))
+        for name, value in results:
+            session.add(XtnDetail(xtn_id=xtn_id, name='__RESULT__:' + str(name),
+                                  value=str(value)))
 
     try:
         session.commit()

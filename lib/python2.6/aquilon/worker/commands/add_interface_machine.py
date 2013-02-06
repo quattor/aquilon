@@ -55,6 +55,7 @@ class CommandAddInterfaceMachine(BrokerCommand):
                model, vendor, pg, autopg, type, comments, **arguments):
         dbmachine = Machine.get_unique(session, machine, compel=True)
         oldinfo = DSDBRunner.snapshot_hw(dbmachine)
+        audit_results = []
 
         q = session.query(Interface)
         q = q.filter_by(name=interface, hardware_entity=dbmachine)
@@ -133,6 +134,7 @@ class CommandAddInterfaceMachine(BrokerCommand):
                                     (mac, msg))
         elif automac:
             mac = self.generate_mac(session, dbmachine)
+            audit_results.append(('mac', mac))
         else:
             #Ignore now that Mac Address can be null
             pass
@@ -141,6 +143,7 @@ class CommandAddInterfaceMachine(BrokerCommand):
             port_group = verify_port_group(dbmachine, pg)
         elif autopg:
             port_group = choose_port_group(session, dbmachine)
+            audit_results.append(('pg', port_group))
         else:
             port_group = None
 
@@ -189,6 +192,8 @@ class CommandAddInterfaceMachine(BrokerCommand):
             # FIXME: reconfigure host
             pass
 
+        for name, value in audit_results:
+            self.audit_result(session, name, value, **arguments)
         return
 
     def remove_prev(self, session, logger, prev, pending_removals):

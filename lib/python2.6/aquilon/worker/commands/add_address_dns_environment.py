@@ -44,8 +44,10 @@ class CommandAddAddressDNSEnvironment(BrokerCommand):
                network_environment, reverse_ptr, comments, **arguments):
         dbnet_env, dbdns_env = get_net_dns_env(session, network_environment,
                                                dns_environment)
+        audit_results = []
         ip = generate_ip(session, compel=True, dbinterface=None,
-                         network_environment=dbnet_env, **arguments)
+                         network_environment=dbnet_env,
+                         audit_results=audit_results, **arguments)
         # TODO: add allow_multi=True
         dbdns_rec, newly_created = grab_address(session, fqdn, ip, dbnet_env,
                                                 dbdns_env, comments=comments,
@@ -61,4 +63,6 @@ class CommandAddAddressDNSEnvironment(BrokerCommand):
             dsdb_runner.add_host_details(dbdns_rec.fqdn, ip, comments=comments)
             dsdb_runner.commit_or_rollback("Could not add address to DSDB")
 
+        for name, value in audit_results:
+            self.audit_result(session, name, value, **arguments)
         return

@@ -216,14 +216,14 @@ class BrokerCommand(object):
         #free = "True " if self.is_lock_free else "False"
         #log.msg("is_lock_free = %s [%s]" % (free, self.command))
 
-    def audit_result(self, session, result, **arguments):
+    def audit_result(self, session, key, value, **arguments):
         # We need a place to store the result somewhere until we can finish the
         # audit record. Use the request object for now.
         request = arguments["request"]
         if not hasattr(request, "_audit_result"):
             request._audit_result = []
 
-        request._audit_result.append(result)
+        request._audit_result.append((key, value))
 
     def render(self, **arguments):  # pragma: no cover
         """ Implement this method to create a functional broker command.
