@@ -73,7 +73,7 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
                 dbinterface.hardware_entity, pg)
         elif autopg:
             dbinterface.port_group = choose_port_group(
-                session, logger, dbinterface.hardware_entity)
+                logger, dbinterface.hardware_entity)
             audit_results.append(('pg', dbinterface.port_group))
 
         if master:

@@ -154,13 +154,25 @@ class TestDelNetworkDevice(TestBrokerCommand):
         self.check_plenary_nonexistant('network_device', 'americas', 'ut', 'ut01ga2s01')
         self.check_plenary_nonexistant('hostdata', 'ut01ga2s01.aqd-unittest.ms.com')
 
-    def test_165_del_ut01ga2s02(self):
+    def test_161_del_ut01ga2s02(self):
         self.dsdb_expect_delete(self.net["vmotion_net"].usable[1])
         command = "del network_device --network_device ut01ga2s02.aqd-unittest.ms.com"
         self.noouttest(command.split(" "))
         self.dsdb_verify()
         self.check_plenary_nonexistant('network_device', 'americas', 'ut', 'ut01ga2s02')
         self.check_plenary_nonexistant('hostdata', 'ut01ga2s02.aqd-unittest.ms.com')
+
+    def test_162_del_ut01ga2s03(self):
+        self.dsdb_expect_delete(self.net["ut_net_mgmt"].usable[5])
+        command = "del network_device --network_device ut01ga2s03.aqd-unittest.ms.com"
+        self.noouttest(command.split(" "))
+        self.dsdb_verify()
+
+    def test_163_del_ut01ga2s04(self):
+        self.dsdb_expect_delete(self.net["ut_net_mgmt"].usable[6])
+        command = "del network_device --network_device ut01ga2s04.aqd-unittest.ms.com"
+        self.noouttest(command.split(" "))
+        self.dsdb_verify()
 
     def test_170_del_ut01ga2s05(self):
         self.dsdb_expect_delete(self.net["esx_bcp_ut"].usable[0])
