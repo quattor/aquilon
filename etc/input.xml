@@ -3314,6 +3314,7 @@
       separate line for each.
       <optgroup name="search_switch_opts" mandatory="True" fields="any">
          <option name="switch" type="string">switch fully qualified name</option>
+         <option name="vlan" type="int">Vlan ID</option>
          <option name="type" type="string">Type (tor, bor, agg)</option>
          <option name="model" type="string">switch model</option>
          <option name="vendor" type="string">switch vendor </option>
@@ -5110,6 +5111,34 @@
       </optgroup>
       <transport method="get" trigger="archetype" path="archetype/%(archetype)s/parameter_definitions"/>
       <transport method="get" trigger="feature" path="feature/%(type)s/%(feature)s/parameter_definitions"/>
+   </command>
+
+   <command name="add_vlan">
+      Add a new user vlan.
+      <optgroup name="add_vlan_opts" mandatory="True" fields="all">
+         <option name="vlan" type="int">VLAN</option>
+         <option name="name" type="string">VLAN name</option>
+         <option name="vlan_type" type="string">VLAN type</option>
+      </optgroup>
+      <transport method="put" path="vlan/%(vlan)s/%(name)s" />
+   </command>
+
+   <command name="del_vlan">
+      Delete an vlan resource.
+      <optgroup name="del_vlan_opts" mandatory="True" fields="all">
+         <option name="vlan" type="int">VLAN</option>
+      </optgroup>
+      <transport method="delete" path="vlan/%(vlan)s" />
+   </command>
+
+   <command name="show_vlan">
+      Show a specified vlan or all vlans
+      <optgroup name="show_vlan_opts" mandatory="True" fields="any">
+         <option name="vlan" type="int">VLAN</option>
+         <option name="all" type="flag">list all hardware</option>
+      </optgroup>
+      <transport trigger="all" method="get" path="vlan" />
+      <transport trigger="vlan" method="get" path="vlan/%(vlan)s" />
    </command>
 
 </commandline>

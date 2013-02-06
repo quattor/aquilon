@@ -41,7 +41,7 @@ class CommandSearchSwitch(BrokerCommand):
 
     required_parameters = []
 
-    def render(self, session, switch, type, fullinfo, **arguments):
+    def render(self, session, switch, type, vlan, fullinfo, **arguments):
         q = search_hardware_entity_query(session, hardware_type=Switch,
                                          **arguments)
         if type:
@@ -49,6 +49,10 @@ class CommandSearchSwitch(BrokerCommand):
         if switch:
             dbswitch = Switch.get_unique(session, switch, compel=True)
             q = q.filter_by(id=dbswitch.id)
+
+        if vlan:
+            q = q.join("observed_vlans", "vlan").filter_by(vlan_id=vlan)
+            q = q.reset_joinpoint()
 
         # Prefer the primary name for ordering
         q = q.outerjoin(DnsRecord, (Fqdn, DnsRecord.fqdn_id == Fqdn.id),

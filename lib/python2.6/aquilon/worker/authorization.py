@@ -77,6 +77,7 @@ class AuthorizationBroker(object):
                       'add_model', 'update_model', 'del_model',
                       'add_organization', 'del_organization',
                       'add_grn', 'del_grn', 'update_grn',
+                      'add_vlan', 'del_vlan',
                       'rollback', 'update_city']:
             if dbuser.role.name not in ['engineering', 'aqd_admin']:
                 raise AuthorizationException(
