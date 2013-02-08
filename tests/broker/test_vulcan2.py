@@ -302,23 +302,26 @@ class TestVulcan20(TestBrokerCommand):
             out = self.commandtest(command)
             self.matchoutput(out, '"user-v710", nlist(', command)
 
-    def test_108_addutpgm0disk(self):
-        self.noouttest(["add", "disk", "--machine", "utpgm0",
-            "--disk", "sdb", "--controller", "scsi", "--share", "test_v2_share",
-            "--size", "34", "--resourcegroup", "utmc8as1", "--address", "0:0"])
+    def test_108_addutpgmdisk(self):
+        for i in range(0, 3):
+            self.noouttest(["add", "disk", "--machine", "utpgm%d" %i,
+                "--disk", "sda", "--controller", "scsi", "--share", "test_v2_share",
+                "--size", "34", "--resourcegroup", "utmc8as1", "--address", "0:0"])
 
     def test_109_verifyaddutpgm0disk(self):
         command = "show machine --machine utpgm0"
         out = self.commandtest(command.split(" "))
-        self.searchoutput(out, r"Disk: sdb 34 GB scsi "
-                          "\(virtual_disk from test_v2_share\)$", command)
+        self.searchoutput(out, r"Disk: sda 34 GB scsi "
+                          "\(virtual_disk from test_v2_share\) \[boot\]$", command)
 
         command = ["show_share", "--resourcegroup=utmc8as1",
                    "--cluster=utmc8", "--share=test_v2_share"]
         out = self.commandtest(command)
         self.matchoutput(out, "Share: test_v2_share", command)
         self.matchoutput(out, "Bound to: Resource Group utmc8as1", command)
-        self.searchoutput(out, r"Disk: sdb 34 GB \(Machine: utpgm0\)$", command)
+        self.searchoutput(out, r"Disk: sda 34 GB \(Machine: utpgm0\)$", command)
+        self.searchoutput(out, r"Disk: sda 34 GB \(Machine: utpgm1\)$", command)
+        self.searchoutput(out, r"Disk: sda 34 GB \(Machine: utpgm2\)$", command)
 
     def test_111_addfilesystemfail(self):
         command = ["add_filesystem", "--filesystem=fs1", "--type=ext3",
@@ -553,9 +556,12 @@ class TestVulcan20(TestBrokerCommand):
         self.noouttest(command)
 
 #    Storage group related deletes
-    def test_202_delutpgm0disk(self):
-        self.noouttest(["del", "disk", "--machine", "utpgm0",
-            "--controller", "scsi", "--disk", "sdb"])
+
+
+    def test_202_delutpgmdisk(self):
+        for i in range(0, 2):
+            self.noouttest(["del", "disk", "--machine", "utpgm%d" %i,
+                "--controller", "scsi", "--disk", "sda"])
 
     def test_204_delresourcegroup(self):
         command = ["del_share", "--resourcegroup=utmc8as1",
