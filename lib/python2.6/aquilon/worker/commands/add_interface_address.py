@@ -68,7 +68,8 @@ class CommandAddInterfaceAddress(BrokerCommand):
         oldinfo = DSDBRunner.snapshot_hw(dbhw_ent)
 
         audit_results = []
-        ip = generate_ip(session, dbinterface, network_environment=dbnet_env,
+        ip = generate_ip(session, logger, dbinterface,
+                         network_environment=dbnet_env,
                          audit_results=audit_results, **kwargs)
 
         if dbinterface.interface_type == "loopback":

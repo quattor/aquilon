@@ -74,7 +74,7 @@ class CommandAddAuxiliary(BrokerCommand):
                                 "{1}.".format(dbinterface, addrs))
 
         audit_results = []
-        ip = generate_ip(session, dbinterface, compel=True,
+        ip = generate_ip(session, logger, dbinterface, compel=True,
                          audit_results=audit_results, **arguments)
 
         dbdns_rec, newly_created = grab_address(session, auxiliary, ip,

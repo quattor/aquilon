@@ -41,13 +41,14 @@ class CommandAddMachinePrefix(CommandAddMachine):
 
     required_parameters = ["prefix", "model"]
 
-    def render(self, session, prefix, **args):
+    def render(self, session, logger, prefix, **args):
         prefix = AqStr.normalize(prefix)
         result = search_next(session=session, cls=Machine, attr=Machine.label,
                              value=prefix, start=None, pack=None)
         machine = '%s%d' % (prefix, result)
         args['machine'] = machine
-        CommandAddMachine.render(self, session, **args)
+        CommandAddMachine.render(self, session, logger, **args)
 
+        logger.info("Selected hardware label %s" % machine)
         self.audit_result(session, 'machine', machine, **args)
         return machine

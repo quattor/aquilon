@@ -87,8 +87,8 @@ def check_ip_restrictions(dbnetwork, ip, relaxed=False):
     return
 
 
-def generate_ip(session, dbinterface, ip=None, ipfromip=None, ipfromsystem=None,
-                autoip=None, ipalgorithm=None, compel=False,
+def generate_ip(session, logger, dbinterface, ip=None, ipfromip=None,
+                ipfromsystem=None, autoip=None, ipalgorithm=None, compel=False,
                 network_environment=None, audit_results=None, **kwargs):
     ip_options = [ip, ipfromip, ipfromsystem, autoip]
     numopts = sum([1 if opt else 0 for opt in ip_options])
@@ -209,6 +209,11 @@ def generate_ip(session, dbinterface, ip=None, ipfromip=None, ipfromsystem=None,
         raise ArgumentError("Unknown algorithm %s." % ipalgorithm)
 
     if audit_results is not None:
+        if dbinterface:
+            logger.info("Selected IP address {0!s} for {1:l}"
+                        .format(ip, dbinterface))
+        else:
+            logger.info("Selected IP address %s" % ip)
         audit_results.append(('ip', ip))
 
     return ip
@@ -285,7 +290,7 @@ def verify_port_group(dbmachine, port_group):
     return dbvi.port_group
 
 
-def choose_port_group(session, dbmachine):
+def choose_port_group(session, logger, dbmachine):
     if dbmachine.model.machine_type != "virtual_machine":
         raise ArgumentError("Can only automatically generate "
                             "portgroup entry for virtual hardware.")
@@ -314,6 +319,8 @@ def choose_port_group(session, dbmachine):
             selected_vlan = dbobserved_vlan
 
     if selected_vlan:
+        logger.info("Selected port group {0} for {1:l} (based on {2:l})"
+                    .format(selected_vlan.port_group, dbmachine, sw))
         return selected_vlan.port_group
     raise ArgumentError("No available user port groups on "
                         "{0:l}.".format(dbmachine.cluster.switch))

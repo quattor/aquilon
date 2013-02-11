@@ -148,8 +148,8 @@ class CommandAddHost(BrokerCommand):
         # (currently) using add_aurora_host, add_windows_host, or possibly by
         # bypassing the aq client and posting a request directly.
         audit_results = []
-        ip = generate_ip(session, dbinterface, audit_results=audit_results,
-                         **arguments)
+        ip = generate_ip(session, logger, dbinterface,
+                         audit_results=audit_results, **arguments)
 
         dbdns_rec, newly_created = grab_address(session, hostname, ip,
                                                 allow_restricted_domain=True,

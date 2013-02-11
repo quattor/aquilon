@@ -45,7 +45,7 @@ class CommandAddAddressDNSEnvironment(BrokerCommand):
         dbnet_env, dbdns_env = get_net_dns_env(session, network_environment,
                                                dns_environment)
         audit_results = []
-        ip = generate_ip(session, compel=True, dbinterface=None,
+        ip = generate_ip(session, logger, compel=True, dbinterface=None,
                          network_environment=dbnet_env,
                          audit_results=audit_results, **arguments)
         # TODO: add allow_multi=True

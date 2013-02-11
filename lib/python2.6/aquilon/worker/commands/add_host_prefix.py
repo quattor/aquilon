@@ -42,7 +42,8 @@ class CommandAddHostPrefix(CommandAddHost):
 
     required_parameters = ["prefix", "machine", "archetype"]
 
-    def render(self, session, prefix, dns_domain, hostname, machine, **args):
+    def render(self, session, logger, prefix, dns_domain, hostname, machine,
+               **args):
         if dns_domain:
             dbdns_domain = DnsDomain.get_unique(session, dns_domain,
                                                 compel=True)
@@ -69,8 +70,9 @@ class CommandAddHostPrefix(CommandAddHost):
                              start=None, pack=None)
         hostname = "%s%d.%s" % (prefix, result, dbdns_domain)
 
-        CommandAddHost.render(self, session, hostname=hostname, machine=machine,
-                              **args)
+        CommandAddHost.render(self, session, logger, hostname=hostname,
+                              machine=machine, **args)
 
+        logger.info("Selected host name %s" % hostname)
         self.audit_result(session, 'hostname', hostname, **args)
         return hostname
