@@ -104,6 +104,30 @@ class TestAudit(TestBrokerCommand):
             m = self.searchoutput(line, AUDIT_RAW_RE, command)
             self.searchoutput(m.group('args'), "--[a-z]+='ut'", line)
 
+    def test_200_argument(self):
+        command = ["search_audit", "--argument", "member_personality",
+                   "--command", "all"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "aq search_cluster", command)
+        self.matchoutput(out, "personality-does-not-exist", command)
+        # No other commands should show up in the result
+        self.matchclean(out, "show", command)
+        self.matchclean(out, "add", command)
+        self.matchclean(out, "del", command)
+        self.matchclean(out, "update", command)
+
+    def test_200_argument_keyword(self):
+        command = ["search_audit", "--argument", "member_personality",
+                   "--keyword", "vulcan-1g-desktop-prod", "--command", "all"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "aq search_cluster", command)
+        # No other commands should show up in the result
+        self.matchclean(out, "personality-does-not-exist", command)
+        self.matchclean(out, "show", command)
+        self.matchclean(out, "add", command)
+        self.matchclean(out, "del", command)
+        self.matchclean(out, "update", command)
+
     def test_210_user(self):
         """ test search audit by user name """
         command = ["search_audit", "--username", self.user]

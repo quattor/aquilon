@@ -98,10 +98,11 @@ class CommandSearchAudit(BrokerCommand):
                 q = q.filter(XtnEnd.return_code == return_code)
                 q = q.reset_joinpoint()
 
-        if keyword is not None:
+        if keyword is not None or argument is not None:
             q = q.join(XtnDetail)
-            q = q.filter_by(value=keyword)
-            if argument:
+            if keyword is not None:
+                q = q.filter_by(value=keyword)
+            if argument is not None:
                 q = q.filter_by(name=argument)
             q = q.reset_joinpoint()
 
