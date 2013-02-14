@@ -211,10 +211,10 @@ class AQDMaker(object):
                 # will fork and exec git-daemon, resulting in a new pid that
                 # the process monitor won't know about!
                 gitpath = config.get("broker", "git_path")
+                gitdaemon = config.get("broker", "git_daemon")
                 ospath = os.environ.get("PATH", "")
                 args = ["/usr/bin/env", "PATH=%s:%s" % (gitpath, ospath),
-                        os.path.join(gitpath, "git-daemon"), "--export-all",
-                        "--base-path=%s" %
+                        gitdaemon, "--export-all", "--base-path=%s" %
                         config.get("broker", "git_daemon_basedir")]
                 if config.has_option("broker", "git_port"):
                     args.append("--port=%s" % config.get("broker", "git_port"))

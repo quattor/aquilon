@@ -443,15 +443,12 @@ class TestBrokerCommand(unittest.TestCase):
         return newenv
 
     def gitcommand_raw(self, command, **kwargs):
-        git = self.config.get("broker", "git")
         if isinstance(command, list):
             args = command[:]
         else:
             args = [command]
-        args.insert(0, git)
-        env = {}
-        if "env" in kwargs:
-            env = self.gitenv(kwargs.pop("env"))
+        args.insert(0, "git")
+        env = self.gitenv(kwargs.pop("env", None))
         p = Popen(args, stdout=PIPE, stderr=PIPE, env=env, **kwargs)
         return p
 
