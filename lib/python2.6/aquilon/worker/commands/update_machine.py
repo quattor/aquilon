@@ -183,7 +183,6 @@ class CommandUpdateMachine(BrokerCommand):
         if dbmachine.vm_container:
             plenaries.append(Plenary.get_plenary(dbmachine.vm_container))
 
-        session.add(dbmachine)
         session.flush()
 
         # Check if the changed parameters still meet cluster capacity
