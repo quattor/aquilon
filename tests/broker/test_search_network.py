@@ -141,6 +141,14 @@ class TestSearchNetwork(TestBrokerCommand):
             else:
                 self.matchclean(out, str(net), command)
 
+    def testside(self):
+        command = ["search", "network", "--side", "b"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "172.31.64.64/26", command)
+        self.matchoutput(out, "172.31.88.0/26", command)
+        self.matchclean(out, str(self.net.tor_net2[0].ip), command)
+        self.matchclean(out, str(self.net.unknown[0].ip), command)
+
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestSearchNetwork)
