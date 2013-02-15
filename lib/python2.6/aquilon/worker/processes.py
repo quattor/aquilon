@@ -553,12 +553,14 @@ class DSDBRunner(object):
         rollback = ["delete_host", "-ip_address", ip]
         self.add_action(command, rollback)
 
-    def update_host_details(self, fqdn, iface, new_ip=None, new_mac=None,
+    def update_host_details(self, fqdn, iface=None, new_ip=None, new_mac=None,
                             new_comments=None, old_ip=None, old_mac=None,
                             old_comments=None):
-        iface = self.normalize_iface(iface)
-        command = ["update_aqd_host", "-host_name", fqdn,
-                   "-interface_name", iface]
+        command = ["update_aqd_host", "-host_name", fqdn]
+        if iface:
+            iface = self.normalize_iface(iface)
+            command.extend(["-interface_name", iface])
+
         rollback = command[:]
 
         if new_ip and new_ip != old_ip:
@@ -567,17 +569,6 @@ class DSDBRunner(object):
         if new_mac and new_mac != old_mac:
             command.extend(["-ethernet_address", new_mac])
             rollback.extend(["-ethernet_address", old_mac])
-        if new_comments != old_comments:
-            command.extend(["-comments", new_comments or ""])
-            rollback.extend(["-comments", old_comments or ""])
-
-        self.add_action(command, rollback)
-
-    def update_address_details(self, fqdn, new_comments=None,
-                               old_comments=None):
-        command = ["update_host", "-host_name", fqdn, "-status", "aq"]
-        rollback = command[:]
-
         if new_comments != old_comments:
             command.extend(["-comments", new_comments or ""])
             rollback.extend(["-comments", old_comments or ""])

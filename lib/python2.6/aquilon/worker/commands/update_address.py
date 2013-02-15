@@ -28,11 +28,13 @@
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
 
-from aquilon.exceptions_ import ArgumentError, UnimplementedError
+from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import ARecord
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.aqdb.model.network_environment import get_net_dns_env
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.dbwrappers.dns import (set_reverse_ptr,
+                                           delete_target_if_needed)
 from aquilon.worker.processes import DSDBRunner
 
 
@@ -49,70 +51,52 @@ class CommandUpdateAddress(BrokerCommand):
         old_comments = dbdns_rec.comments
 
         if ip:
-            # Deleting/re-adding the record automatically is not safe, because
-            # dependencies in DSDB may be lost. Disable this functionality until
-            # the matching functionality in DSDB is implemented.
-            raise UnimplementedError("Updating the IP address of an existing "
-                                     "address is not implemented yet. You "
-                                     "have to delete and re-add it.")
+            if dbdns_rec.hardware_entity:
+                raise ArgumentError("{0} is a primary name, and its IP address "
+                                    "cannot be changed.".format(dbdns_rec))
 
-            #if dbdns_rec.hardware_entity:
-            #    raise ArgumentError("{0} is a primary name, and its IP address "
-            #                        "cannot be changed.".format(dbdns_rec))
+            if dbdns_rec.assignments:
+                ifaces = ", ".join(["%s/%s" % (addr.interface.hardware_entity,
+                                               addr.interface)
+                                    for addr in dbdns_rec.assignments])
+                raise ArgumentError("{0} is already used by the following "
+                                    "interfaces, and its IP address cannot be "
+                                    "changed: {1!s}."
+                                    .format(dbdns_rec, ifaces))
 
-            #if dbdns_rec.assignments:
-            #    ifaces = ", ".join(["%s/%s" % (addr.interface.hardware_entity,
-            #                                   addr.interface)
-            #                        for addr in dbdns_rec.assignments])
-            #    raise ArgumentError("{0} is already used by the following "
-            #                        "interfaces, and its IP address cannot be "
-            #                        "changed: {1!s}."
-            #                        .format(dbdns_rec, ifaces))
+            dbnetwork = get_net_id_from_ip(session, ip, dbnet_env)
 
-            #dbnetwork = get_net_id_from_ip(session, ip, dbnet_env)
+            q = session.query(ARecord)
+            q = q.filter_by(network=dbnetwork, ip=ip)
+            q = q.join(ARecord.fqdn)
+            q = q.filter_by(dns_environment=dbdns_env)
+            existing = q.first()
+            if existing:
+                raise ArgumentError("IP address {0!s} is already used by "
+                                    "{1:l}." .format(ip, existing))
 
-            #q = session.query(ARecord)
-            #q = q.filter_by(network=dbnetwork, ip=ip)
-            #q = q.join(ARecord.fqdn)
-            #q = q.filter_by(dns_environment=dbdns_env)
-            #existing = q.first()
-            #if existing:
-            #    raise ArgumentError("IP address {0!s} is already used by "
-            #                        "{1:l}." .format(ip, existing))
-
-            #dbdns_rec.network = dbnetwork
-            #old_ip = dbdns_rec.ip
-            #dbdns_rec.ip = ip
+            dbdns_rec.network = dbnetwork
+            old_ip = dbdns_rec.ip
+            dbdns_rec.ip = ip
 
         if reverse_ptr:
-            # Technically the reverse PTR could point to other types, not just
-            # ARecord, but there are no use cases for that, so better avoid
-            # confusion
-            dbreverse = ARecord.get_unique(session, fqdn=reverse_ptr,
-                                           dns_environment=dbdns_env,
-                                           compel=True)
-            if dbreverse.fqdn != dbdns_rec.fqdn:
-                try:
-                    dbdns_rec.reverse_ptr = dbreverse.fqdn
-                except ValueError, err:
-                    raise ArgumentError(err)
-            else:
-                dbdns_rec.reverse_ptr = None
+            old_reverse = dbdns_rec.reverse_ptr
+            set_reverse_ptr(session, logger, dbdns_rec, reverse_ptr)
+            if old_reverse and old_reverse != dbdns_rec.reverse_ptr:
+                delete_target_if_needed(session, old_reverse)
 
         if comments:
             dbdns_rec.comments = comments
 
         session.flush()
 
-        if dbdns_env.is_default:
+        if dbdns_env.is_default and (dbdns_rec.ip != old_ip or
+                                     dbdns_rec.comments != old_comments):
             dsdb_runner = DSDBRunner(logger=logger)
-            #if old_ip != dbdns_rec.ip:
-            #    XXX using None as the interface name does not work (yet)
-            #    dsdb_runner.update_host_ip(fqdn, None, dbdns_rec.ip, old_ip)
-            if old_comments != dbdns_rec.comments:
-                dsdb_runner.update_address_details(dbdns_rec.fqdn,
-                                                   new_comments=dbdns_rec.comments,
-                                                   old_comments=old_comments)
+            dsdb_runner.update_host_details(dbdns_rec.fqdn, new_ip=dbdns_rec.ip,
+                                            old_ip=old_ip,
+                                            new_comments=dbdns_rec.comments,
+                                            old_comments=old_comments)
             dsdb_runner.commit_or_rollback()
 
         return

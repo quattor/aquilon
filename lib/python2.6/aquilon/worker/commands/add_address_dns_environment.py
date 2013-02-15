@@ -28,9 +28,10 @@
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
 
-from aquilon.aqdb.model import ARecord
+from aquilon.aqdb.model.network_environment import get_net_dns_env
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.dbwrappers.dns import grab_address
+from aquilon.worker.dbwrappers.dns import (grab_address,
+                                           set_reverse_ptr)
 from aquilon.worker.dbwrappers.interface import generate_ip
 from aquilon.worker.processes import DSDBRunner
 
@@ -41,25 +42,17 @@ class CommandAddAddressDNSEnvironment(BrokerCommand):
 
     def render(self, session, logger, fqdn, dns_environment,
                network_environment, reverse_ptr, comments, **arguments):
-
+        dbnet_env, dbdns_env = get_net_dns_env(session, network_environment,
+                                               dns_environment)
         ip = generate_ip(session, compel=True, dbinterface=None,
-                         network_environment=network_environment, **arguments)
+                         network_environment=dbnet_env, **arguments)
         # TODO: add allow_multi=True
-        dbdns_rec, newly_created = grab_address(session, fqdn, ip,
-                                                network_environment,
-                                                dns_environment,
-                                                comments=comments,
+        dbdns_rec, newly_created = grab_address(session, fqdn, ip, dbnet_env,
+                                                dbdns_env, comments=comments,
                                                 preclude=True)
 
         if reverse_ptr:
-            # Technically the reverse PTR could point to other types, not just
-            # ARecord, but there are no use cases for that, so better avoid
-            # confusion
-            dbreverse = ARecord.get_unique(session, fqdn=reverse_ptr,
-                                           dns_environment=dns_environment,
-                                           compel=True)
-            if dbreverse.fqdn != dbdns_rec.fqdn:
-                dbdns_rec.reverse_ptr = dbreverse.fqdn
+            set_reverse_ptr(session, logger, dbdns_rec, reverse_ptr)
 
         session.flush()
 

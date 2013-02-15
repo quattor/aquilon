@@ -30,11 +30,13 @@
 # TERMS THAT MAY APPLY.
 """Module for testing the add/show alias command."""
 
+import unittest
+
 if __name__ == '__main__':
-    import utils
+    from broker import utils
     utils.import_depends()
 
-from brokertest import TestBrokerCommand
+from broker.brokertest import TestBrokerCommand
 
 
 class TestAddAlias(TestBrokerCommand):
@@ -88,7 +90,7 @@ class TestAddAlias(TestBrokerCommand):
                "--target", "target.restrict.aqd-unittest.ms.com"]
         out = self.statustest(cmd)
         self.matchoutput(out,
-                         "WARNING: Will create alias for target "
+                         "WARNING: Will create a reference to "
                          "target.restrict.aqd-unittest.ms.com, but ",
                          cmd)
 
@@ -116,7 +118,7 @@ class TestAddAlias(TestBrokerCommand):
                "--target", "no-dsdb.restrict.aqd-unittest.ms.com"]
         out = self.statustest(cmd)
         self.matchoutput(out,
-                         "WARNING: Will create alias for target "
+                         "WARNING: Will create a reference to "
                          "no-dsdb.restrict.aqd-unittest.ms.com, but ",
                          cmd)
         self.dsdb_verify(empty=True)
