@@ -41,9 +41,6 @@ class ShareFormatter(ResourceFormatter):
     def extra_details(self, share, indent=""):
         details = []
 
-        if share.latency:
-            details.append(indent + "  Latency: %s" % share.latency)
-
         share_info = find_storage_data(share)
         details.append(indent + "  Server: %s" % share_info["server"])
         details.append(indent + "  Mountpoint: %s" % share_info["mount"])

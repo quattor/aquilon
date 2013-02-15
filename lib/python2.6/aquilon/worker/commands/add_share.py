@@ -40,8 +40,7 @@ class CommandAddShare(BrokerCommand):
     required_parameters = ["share"]
 
     def render(self, session, logger, share,
-               comments, latency,
-               hostname, resourcegroup, cluster, **arguments):
+               comments, hostname, resourcegroup, cluster, **arguments):
 
         validate_basic("share", share)
         holder = get_resource_holder(session,
@@ -50,7 +49,7 @@ class CommandAddShare(BrokerCommand):
 
         Share.get_unique(session, name=share, holder=holder, preclude=True)
 
-        dbshare = Share(name=share, comments=comments, latency=latency)
+        dbshare = Share(name=share, comments=comments)
         add_resource(session, logger, holder, dbshare)
 
         # metacluster.validate for max_shares

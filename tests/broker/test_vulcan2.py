@@ -237,8 +237,7 @@ class TestVulcan20(TestBrokerCommand):
 
     def test_103_add_share_to_rg(self):
         command = ["add_share", "--resourcegroup=utmc8as1",
-                   "--cluster=utmc8", "--share=test_v2_share",
-                   "--latency=5"]
+                   "--cluster=utmc8", "--share=test_v2_share"]
         self.successtest(command)
 
         command = ["show_share", "--resourcegroup=utmc8as1",
@@ -246,11 +245,9 @@ class TestVulcan20(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out, "Share: test_v2_share", command)
         self.matchoutput(out, "Bound to: Resource Group utmc8as1", command)
-        self.matchoutput(out, "Latency: 5", command)
 
         command = ["add_share", "--resourcegroup=utmc8as2",
-                   "--cluster=utmc8", "--share=test_v2_share",
-                   "--latency=5"]
+                   "--cluster=utmc8", "--share=test_v2_share"]
         self.successtest(command)
 
         command = ["show_share", "--all"]
@@ -261,7 +258,7 @@ class TestVulcan20(TestBrokerCommand):
 
     def test_104_add_same_share_name_fail(self):
         command = ["add_share", "--resourcegroup=utmc8as2",
-                   "--share=test_v2_share", "--latency=5"]
+                   "--share=test_v2_share"]
         err = self.badrequesttest(command)
         self.matchoutput(err, "Bad Request: Share test_v2_share, "
                          "bundleresource instance already exists.", command)
@@ -293,7 +290,6 @@ class TestVulcan20(TestBrokerCommand):
         self.matchoutput(out, '"server" = "lnn30f1";', command)
         self.matchoutput(out, '"mountpoint" = "/vol/lnn30f1v1/test_v2_share";',
                          command)
-        self.matchoutput(out, '"latency" = 5;', command)
 
     def test_107_cat_switch(self):
         for i in range(0, 2):
