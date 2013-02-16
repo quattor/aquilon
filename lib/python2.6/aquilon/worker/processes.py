@@ -169,6 +169,14 @@ def run_git(args, env=None, path=".",
         git_env = {}
     env_path = git_env.get("PATH", os.environ.get("PATH", ""))
     git_env["PATH"] = "%s:%s" % (config.get("broker", "git_path"), env_path)
+
+    for name in ["git_author_name", "git_author_email",
+                 "git_committer_name", "git_committer_email"]:
+        if not config.has_option("broker", name):
+            continue
+        value = config.get("broker", name);
+        git_env[name.upper()] = value
+
     if isinstance(args, list):
         git_args = args[:]
         if git_args[0] != "git":
