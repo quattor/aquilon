@@ -31,7 +31,6 @@
 """Module for testing the add host command."""
 
 import unittest
-import socket
 
 if __name__ == "__main__":
     import utils
@@ -306,7 +305,8 @@ class TestAddHost(TestBrokerCommand):
                          self.net.tor_net[0].usable[3],
                          command)
         self.matchoutput(out,
-                         "Template: aquilon/os/linux/5.0.1-x86_64/config.tpl",
+                         "Template: aquilon/os/linux/5.0.1-x86_64/config" +
+                         self.template_extension,
                          command)
         self.matchoutput(out, "Personality: inventory", command)
 
@@ -507,7 +507,8 @@ class TestAddHost(TestBrokerCommand):
         self.matchoutput(out, "Archetype: aurora", command)
         self.matchoutput(out, "Personality: generic", command)
         self.matchoutput(out, "Domain: ny-prod", command)
-        self.matchoutput(out, "Template: aurora/os/linux/generic/config.tpl",
+        self.matchoutput(out, "Template: aurora/os/linux/generic/config" +
+                         self.template_extension,
                          command)
 
     def testaddwindowsefaultos(self):
@@ -527,7 +528,8 @@ class TestAddHost(TestBrokerCommand):
         self.matchoutput(out, "Archetype: windows", command)
         self.matchoutput(out, "Personality: generic", command)
         self.matchoutput(out, "Domain: ny-prod", command)
-        self.matchoutput(out, "Template: windows/os/windows/generic/config.tpl",
+        self.matchoutput(out, "Template: windows/os/windows/generic/config" +
+                         self.template_extension,
                          command)
 
     def testaddf5(self):

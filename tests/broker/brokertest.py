@@ -73,6 +73,7 @@ class TestBrokerCommand(unittest.TestCase):
         self.sandboxdir = os.path.join(self.config.get("broker",
                                                        "templatesdir"),
                                        self.user)
+        self.template_extension = self.config.get("panc", "template_extension")
 
         # This method is cumbersome.  Should probably develop something
         # like unittest.conf.defaults.
@@ -114,11 +115,11 @@ class TestBrokerCommand(unittest.TestCase):
                                args.get("domain"))
         else:
             self.assert_(0, "template_name() called without domain or sandbox")
-        return os.path.join(dir, *template) + ".tpl"
+        return os.path.join(dir, *template) + self.template_extension
 
     def plenary_name(self, *template):
         dir = self.config.get("broker", "plenarydir")
-        return os.path.join(dir, *template) + ".tpl"
+        return os.path.join(dir, *template) + self.template_extension
 
     def find_template(self, *template, **args):
         """ Figure out the extension of an existing template """
@@ -141,7 +142,7 @@ class TestBrokerCommand(unittest.TestCase):
         base = os.path.join(self.config.get("broker", "builddir"),
                             "domains", args.get("domain"),
                             "profiles", *template)
-        return base + ".tpl"
+        return base + self.template_extension
 
     msversion_dev_re = re.compile('WARNING:msversion:Loading \S* from dev\n')
 
@@ -678,7 +679,7 @@ class TestBrokerCommand(unittest.TestCase):
         depfile = os.path.join(domaindir, object + '.xml.dep')
         builddir = self.config.get('broker', 'builddir')
         profile = os.path.join(builddir, 'domains', domain, 'profiles',
-                               object + '.tpl')
+                               object + self.template_extension)
         for f in [xmlfile, depfile, profile]:
             if want_exist:
                 self.failUnless(os.path.exists(f),

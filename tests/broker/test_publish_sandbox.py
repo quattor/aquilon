@@ -107,13 +107,13 @@ class TestPublishSandbox(TestBrokerCommand):
         utdir = os.path.join(sitedir, "americas", "ny", "ut")
         if not os.path.exists(utdir):
             os.makedirs(utdir)
-        template = os.path.join(utdir, "config.tpl")
+        template = os.path.join(utdir, "config" + self.template_extension)
         f = open(template, 'w')
         try:
             f.writelines("template site/americas/ny/ut/config;\n\n")
         finally:
             f.close()
-        self.gitcommand(["add", "config.tpl"], cwd=utdir)
+        self.gitcommand(["add", "config" + self.template_extension], cwd=utdir)
         self.gitcommand(["commit", "-a", "-m", "added building ut"],
                         cwd=sandboxdir)
 
@@ -130,7 +130,7 @@ class TestPublishSandbox(TestBrokerCommand):
             f.writelines("template service/utsvc/utsi1/client/config;\n\n")
         finally:
             f.close()
-        self.gitcommand(["add", "config.tpl"], cwd=svcdir)
+        self.gitcommand(["add", "config" + self.template_extension], cwd=svcdir)
         self.gitcommand(["commit", "-a", "-m",
                          "added unit test service instance 1"],
                         cwd=sandboxdir)
@@ -148,7 +148,7 @@ class TestPublishSandbox(TestBrokerCommand):
             f.writelines("template service/utsvc/utsi2/client/config;\n\n")
         finally:
             f.close()
-        self.gitcommand(["add", "config.tpl"], cwd=svcdir)
+        self.gitcommand(["add", "config" + self.template_extension], cwd=svcdir)
         self.gitcommand(["commit", "-a", "-m",
                          "added unit test service instance 2"],
                         cwd=sandboxdir)
@@ -176,7 +176,8 @@ class TestPublishSandbox(TestBrokerCommand):
                 """)
         finally:
             f.close()
-        self.gitcommand(["add", "espinfo.tpl"], cwd=personalitydir)
+        self.gitcommand(["add", "espinfo" + self.template_extension],
+                        cwd=personalitydir)
         self.gitcommand(["commit", "-a", "-m",
                          "added personality utpersonality/dev"],
                         cwd=sandboxdir)
@@ -200,7 +201,8 @@ class TestPublishSandbox(TestBrokerCommand):
 "function" = "production";
 "users" = list("IT / TECHNOLOGY");
                 """)
-        self.gitcommand(["add", "espinfo.tpl"], cwd=personalitydir)
+        self.gitcommand(["add", "espinfo" + self.template_extension],
+                        cwd=personalitydir)
         template = self.template_name("vmhost", "personality",
                                       "vulcan-1g-desktop-prod", "windows",
                                       sandbox="utsandbox")
@@ -212,7 +214,8 @@ class TestPublishSandbox(TestBrokerCommand):
                 nlist("day", "Fri", "start", "23:00", "duration", 48),
 );
                 """)
-        self.gitcommand(["add", "windows.tpl"], cwd=personalitydir)
+        self.gitcommand(["add", "windows" + self.template_extension],
+                        cwd=personalitydir)
         self.gitcommand(["commit", "-a", "-m",
                          "added personality vulcan-1g-desktop-prod"],
                          cwd=sandboxdir)
@@ -235,7 +238,8 @@ class TestPublishSandbox(TestBrokerCommand):
                 """)
         finally:
             f.close()
-        self.gitcommand(["add", "utmedium.tpl"], cwd=modeldir)
+        self.gitcommand(["add", "utmedium" + self.template_extension],
+                        cwd=modeldir)
         self.gitcommand(["commit", "-a", "-m", "added model utmedium"],
                         cwd=sandboxdir)
 
@@ -257,7 +261,8 @@ class TestPublishSandbox(TestBrokerCommand):
                 """)
         finally:
             f.close()
-        self.gitcommand(["add", "utccissmodel.tpl"], cwd=modeldir)
+        self.gitcommand(["add", "utccissmodel" + self.template_extension],
+                        cwd=modeldir)
         self.gitcommand(["commit", "-a", "-m", "added model utccissmodel"],
                         cwd=sandboxdir)
 
@@ -282,7 +287,7 @@ class TestPublishSandbox(TestBrokerCommand):
                 """)
         finally:
             f.close()
-        self.gitcommand(["add", "utcpu.tpl"], cwd=cpudir)
+        self.gitcommand(["add", "utcpu" + self.template_extension], cwd=cpudir)
         self.gitcommand(["commit", "-a", "-m", "added cpu utcpu"],
                         cwd=sandboxdir)
 
@@ -304,7 +309,8 @@ class TestPublishSandbox(TestBrokerCommand):
                 """)
         finally:
             f.close()
-        self.gitcommand(["add", "default.tpl"], cwd=modeldir)
+        self.gitcommand(["add", "default" + self.template_extension],
+                        cwd=modeldir)
         self.gitcommand(["commit", "-a", "-m", "added model utvirt/default"],
                         cwd=sandboxdir)
 

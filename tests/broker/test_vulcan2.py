@@ -617,13 +617,15 @@ class TestVulcan20(TestBrokerCommand):
     def test_308_delutpgsw(self):
         for i in range(0, 2):
             ip = self.net.unknown[17].usable[i]
+            swname = "utpgsw%d.aqd-unittest.ms.com" % i
+            plenary = self.plenary_name("switchdata", swname)
+            self.failUnless(os.path.exists(plenary),
+                        "Plenary file '%s' does not exist" % plenary)
 
             self.dsdb_expect_delete(ip)
-            swname = "utpgsw%d.aqd-unittest.ms.com" % i
             command = "del switch --switch %s" % swname
             self.noouttest(command.split(" "))
 
-            plenary = self.plenary_name("switchdata", swname)
             self.failIf(os.path.exists(plenary),
                         "Plenary file '%s' still exists" % plenary)
 

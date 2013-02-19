@@ -177,6 +177,8 @@ class TemplateDomain(object):
         args.append("-Dpanc.jar=%s" % self.domain.compiler)
         args.append("-Dpanc.formatter=%s" %
                     config.get("panc", "formatter"))
+        args.append("-Dpanc.template_extension=%s" %
+                    config.get("panc", "template_extension"))
         args.append("-Ddomain=%s" % self.domain.name)
         args.append("-Ddistributed.profiles=%s" % outputdir)
         args.append("-Dpanc.batch.size=%s" %

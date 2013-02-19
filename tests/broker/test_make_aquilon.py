@@ -384,7 +384,8 @@ class TestMakeAquilon(TestBrokerCommand):
                          self.net.tor_net[0].usable[3],
                          command)
         self.matchoutput(out,
-                         "Template: aquilon/os/linux/5.0.1-x86_64/config.tpl",
+                         "Template: aquilon/os/linux/5.0.1-x86_64/config" +
+                         self.template_extension,
                          command)
 
     def testverifyunittest17proto(self):

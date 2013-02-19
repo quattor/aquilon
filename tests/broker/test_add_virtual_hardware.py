@@ -462,7 +462,8 @@ class TestAddVirtualHardware(TestBrokerCommand):
         self.searchoutput(out, r"^  Comments: Windows Virtual Desktop", command)
 
         # os
-        self.searchoutput(out, r"^    Template: windows/os/windows/nt61e/config.tpl",
+        self.searchoutput(out, r"^    Template: windows/os/windows/nt61e/config"
+                          + self.template_extension,
                          command)
         self.searchoutput(out, r"^    Comments: Windows 7 Enterprise \(x86\)",
                           command)

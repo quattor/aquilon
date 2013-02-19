@@ -16,6 +16,7 @@
 	<property name="panc.jar" location="/ms/dist/elfms/PROJ/panc/${panc.version}/lib/panc.jar" />
 	<property name="panc.debug.include" value="" />
 	<property name="panc.debug.exclude" value="" />
+	<property name="panc.template_extension" value=".tpl" />
 	<property name="ant-contrib.version" value="1.0b2" />
 	<property name="ant-contrib.jar" location="/ms/dist/msjava/PROJ/ant-contrib/${ant-contrib.version}/common/lib/ant-contrib.jar" />
 	<property name="force.build" value="false" />
@@ -104,9 +105,9 @@
 	<target name="-verify.object.profile">
 		<fail message="No object defined via the object.profile property"
 			unless="object.profile" />
-		<fail message="object.profile should be a name, not .tpl">
+		<fail message="object.profile should be a name without extension">
 			<condition>
-				<matches pattern=".tpl$$" string="${object.profile}" />
+				<matches pattern="\.(tpl|pan)$$" string="${object.profile}" />
 			</condition>
 		</fail>
 	</target>
@@ -116,7 +117,7 @@
 		<var name="compiled.includes" value="" />
 		<for list="${object.profile}" delimiter=" " param="profile">
 			<sequential>
-				<var name="source.includes" value="${source.includes} @{profile}.tpl" />
+				<var name="source.includes" value="${source.includes} @{profile}${panc.template_extension}" />
 				<var name="compiled.includes" value="${compiled.includes} @{profile}${profile.suffix}" />
 			</sequential>
 		</for>
@@ -136,7 +137,7 @@
 	</target>
 
 	<target name="compile.domain.profiles" description="compile all objects managed by a domain" depends="delete.domain.deps">
-		<fileset id="source.fileset" dir="${source.profiles}" includes="**/*.tpl" />
+		<fileset id="source.fileset" dir="${source.profiles}" includes="**/*${panc.template_extension}" />
 		<panc nthread="0" depWriteEnabled="true" outputDirectory="${compiled.profiles}" verbose="true" batchSize="${panc.batch.size}" forceBuild="${force.build}" formatter="${panc.formatter}" gzipOutput="${gzip.output}">
 			<path refid="pan.objectloadpath" />
 			<fileset refid="source.fileset" />
@@ -166,7 +167,7 @@
 					var base = thisfile.substring(prefix.length());
 					var source = self.getProject().getProperty("source.profiles");
 					var suffix = self.getProject().getProperty("profile.suffix").toString();
-					var counterpart = new File(source, base.replaceAll(suffix + "$", ".tpl"));
+					var counterpart = new File(source, base.replaceAll(suffix + "$", self.getProject().getProperty("panc.template_extension").toString()));
 					// System.out.println("Comparing '" + thisfile + "' with source '" + counterpart + "' and exists=" + counterpart.exists());
 					self.setSelected(counterpart.exists());
 				]]></scriptselector>
