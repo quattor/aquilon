@@ -60,8 +60,8 @@ class TestManageValidateBranch(TestBrokerCommand):
 
     def test_101_make_uncommitted_change(self):
         sandboxdir = os.path.join(self.sandboxdir, "managetest1")
-        base = os.path.join("aquilon", "archetype", "base.tpl")
-        template = os.path.join(sandboxdir, base)
+        template = self.find_template("aquilon", "archetype", "base",
+                                      sandbox="managetest1")
         f = open(template)
         try:
             contents = f.readlines()
@@ -73,7 +73,7 @@ class TestManageValidateBranch(TestBrokerCommand):
             f.writelines(contents)
         finally:
             f.close()
-        self.gitcommand(["add", base], cwd=sandboxdir)
+        self.gitcommand(["add", template], cwd=sandboxdir)
 
     def test_102_fail_uncommitted_change(self):
         user = self.config.get("unittest", "user")
@@ -87,7 +87,6 @@ class TestManageValidateBranch(TestBrokerCommand):
 
     def test_110_commit_uncommitted_change(self):
         sandboxdir = os.path.join(self.sandboxdir, "managetest1")
-        template = os.path.join(sandboxdir, "aquilon", "archetype", "base.tpl")
         self.gitcommand(["commit", "-a", "-m",
                          "added test_manage unittest comment"], cwd=sandboxdir)
 

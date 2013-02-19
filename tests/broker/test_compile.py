@@ -99,10 +99,8 @@ class TestCompile(TestBrokerCommand):
 
     def test_100_addchange(self):
         # Touch the template used by utsi1 clients to trigger a recompile.
-        domaindir = os.path.join(self.config.get("broker", "domainsdir"),
-                                 "unittest")
-        template = os.path.join(domaindir, "service", "utsvc", "utsi1",
-                                "client", "config.tpl")
+        template = self.template_name("service", "utsvc", "utsi1", "client",
+                                      "config", domain="unittest")
         f = open(template)
         try:
             contents = f.readlines()
@@ -211,7 +209,8 @@ class TestCompile(TestBrokerCommand):
 
     def test_500_adddebug(self):
         sandboxdir = os.path.join(self.sandboxdir, "utsandbox")
-        template = os.path.join(sandboxdir, "aquilon", "archetype", "base.tpl")
+        template = self.find_template("aquilon", "archetype", "base",
+                                      sandbox="utsandbox")
         with open(template) as f:
             contents = f.readlines()
         # These templates can't just have random debug statements...
@@ -220,7 +219,8 @@ class TestCompile(TestBrokerCommand):
                         "debug('aqd unittest debug for aquilon base');\n")
         with open(template, 'w') as f:
             f.writelines(contents)
-        template = os.path.join(sandboxdir, "aquilon", "archetype", "final.tpl")
+        template = self.find_template("aquilon", "archetype", "final",
+                                      sandbox="utsandbox")
         with open(template) as f:
             contents = f.readlines()
         contents.append("variable AQDDEBUGFINAL = "

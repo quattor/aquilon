@@ -30,9 +30,7 @@
 # TERMS THAT MAY APPLY.
 """Module for testing the make cluster command."""
 
-
 import os
-import re
 import unittest
 
 if __name__ == "__main__":
@@ -59,10 +57,8 @@ class TestMakeCluster(TestBrokerCommand):
             self.config.get("broker", "profilesdir"), "clusters",
             "utecl1%s" % self.profile_suffix)))
 
-        self.failUnless(os.path.exists(os.path.join(
-            self.config.get("broker", "builddir"),
-            "domains", "unittest", "profiles", "clusters",
-            "utecl1.tpl")))
+        self.failUnless(os.path.exists(
+            self.build_profile_name("clusters", "utecl1", domain="unittest")))
 
     def testverifycatutecl1(self):
         command = "cat --cluster=utecl1"
@@ -151,10 +147,8 @@ class TestMakeCluster(TestBrokerCommand):
             self.config.get("broker", "profilesdir"), "clusters",
             "utecl2%s" % self.profile_suffix)))
 
-        self.failUnless(os.path.exists(os.path.join(
-            self.config.get("broker", "builddir"),
-            "domains", "unittest", "profiles", "clusters",
-            "utecl2.tpl")))
+        self.failUnless(os.path.exists(
+            self.build_profile_name("clusters", "utecl2", domain="unittest")))
 
     def testverifycatutecl2(self):
         command = "cat --cluster=utecl2"

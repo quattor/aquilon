@@ -322,9 +322,8 @@ class TestReconfigure(TestBrokerCommand):
                    "--personality", "badpersonality"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "cannot locate template", command)
-        buildfile = os.path.join(self.config.get("broker", "builddir"),
-                                 "domains", "utsandbox", "profiles",
-                                 "aquilon62.aqd-unittest.ms.com.tpl")
+        buildfile = self.build_profile_name("aquilon62.aqd-unittest.ms.com",
+                                            domain="utsandbox")
         results = self.grepcommand(["-l", "badpersonality", buildfile])
         self.failIf(results, "Found bad personality data in plenary "
                              "template for aquilon62.aqd-unittest.ms.com")
@@ -336,10 +335,9 @@ class TestReconfigure(TestBrokerCommand):
                    "--archetype", "aquilon", "--personality", "badpersonality"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "cannot locate template", command)
-        self.failIf(os.path.exists(os.path.join(
-            self.config.get("broker", "builddir"),
-            "domains", "utsandbox", "profiles",
-            "aquilon93.aqd-unittest.ms.com.tpl")))
+        self.failIf(os.path.exists(
+            self.build_profile_name("aquilon93.aqd-unittest.ms.com",
+                                    domain="utsandbox")))
         servicedir = os.path.join(self.config.get("broker", "plenarydir"),
                                   "servicedata")
         results = self.grepcommand(["-rl", "aquilon93.aqd-unittest.ms.com",

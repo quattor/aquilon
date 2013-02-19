@@ -53,10 +53,10 @@ class TestRenameSwitch(TestBrokerCommand, VerifySwitchMixin):
         self.dsdb_expect_rename("ut3gd1r04.aqd-unittest.ms.com",
                                 "renametest.aqd-unittest.ms.com")
 
-        pdir = os.path.join(self.config.get("broker", "plenarydir"),
-                            "switchdata")
-        old_plenary = os.path.join(pdir, "ut3gd1r04.aqd-unittest.ms.com.tpl")
-        new_plenary = os.path.join(pdir, "renametest.aqd-unittest.ms.com.tpl")
+        old_plenary = self.plenary_name("switchdata",
+                                        "ut3gd1r04.aqd-unittest.ms.com")
+        new_plenary = self.plenary_name("switchdata",
+                                        "renametest.aqd-unittest.ms.com")
 
         self.failUnless(os.path.exists(old_plenary),
                         "Plenary file '%s' does not exist" % old_plenary)

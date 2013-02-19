@@ -245,10 +245,8 @@ class TestAddVirtualHardware(TestBrokerCommand):
     def test_200_updatemachine(self):
         self.noouttest(["update_machine", "--machine", "evm9",
                         "--cluster", "utecl2"])
-        oldpath = os.path.join(self.config.get("broker", "plenarydir"),
-                               "machine", "americas", "ut", "ut10", "evm9.tpl")
-        newpath = os.path.join(self.config.get("broker", "plenarydir"),
-                               "machine", "americas", "ut", "None", "evm9.tpl")
+        oldpath = self.plenary_name("machine", "americas", "ut", "ut10", "evm9")
+        newpath = self.plenary_name("machine", "americas", "ut", "None", "evm9")
         self.failIf(os.path.exists(oldpath),
                     "Plenary file '%s' not removed." % oldpath)
         self.failUnless(os.path.exists(newpath),

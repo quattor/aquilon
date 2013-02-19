@@ -60,13 +60,12 @@ class TestDelCluster(TestBrokerCommand):
         self.notfoundtest(command)
 
     def test_100_verifyplenaryclusterclient(self):
-        plenary = os.path.join(self.config.get("broker", "plenarydir"),
-                               "cluster", "utgrid1")
-        self.failIf(os.path.exists(plenary),
-                    "Plenary directory '%s' still exists" % plenary)
-        plenary = os.path.join(self.config.get("broker", "builddir"),
-                               "domains", "unittest", "profiles",
-                               "clusters", "utgrid1.tpl")
+        dir = os.path.join(self.config.get("broker", "plenarydir"),
+                           "cluster", "utgrid1")
+        self.failIf(os.path.exists(dir),
+                    "Plenary directory '%s' still exists" % dir)
+        plenary = self.build_profile_name("clusters", "utgrid1",
+                                          domain="unittest")
         self.failIf(os.path.exists(plenary),
                     "Plenary file '%s' still exists" % plenary)
 

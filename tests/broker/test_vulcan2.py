@@ -623,8 +623,7 @@ class TestVulcan20(TestBrokerCommand):
             command = "del switch --switch %s" % swname
             self.noouttest(command.split(" "))
 
-            plenary = os.path.join(self.config.get("broker", "plenarydir"),
-                       "switchdata", "%s.tpl" % swname)
+            plenary = self.plenary_name("switchdata", swname)
             self.failIf(os.path.exists(plenary),
                         "Plenary file '%s' still exists" % plenary)
 

@@ -471,9 +471,8 @@ class TestUpdateMachine(TestBrokerCommand):
     # on the files since we're still the owner.  Which is good, but means
     # the recovery routines can't be easily tested.
 #   def testfailbrokenplenary(self):
-#       template = os.path.join(self.config.get("broker", "plenarydir"),
-#                               "machine", "americas", "ut", "ut9",
-#                               "ut9s03p20.tpl")
+#       template = self.plenary_name("machine", "americas", "ut", "ut9",
+#                                    "ut9s03p20")
 #       os.chmod(template, 0000)
 #       command = ["update_machine", "--machine=ut9s03p20", "--serial=20"]
 #       out = self.badrequesttest(command)
@@ -481,9 +480,8 @@ class TestUpdateMachine(TestBrokerCommand):
 
 #   def testverifyfailbrokenplenary(self):
 #       # Fixing the previous breakage... not actually necessary for this test.
-#       template = os.path.join(self.config.get("broker", "plenarydir"),
-#                               "machine", "americas", "ut", "ut9",
-#                               "ut9s03p20.tpl")
+#       template = self.plenary_name("machine", "americas", "ut", "ut9",
+#                                    "ut9s03p20")
 #       os.chmod(template, 0644)
 #       command = ["show_machine", "--machine=ut9s03p20"]
 #       out = self.commandtest(command)

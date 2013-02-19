@@ -109,7 +109,8 @@ class TestMergeConflicts(TestBrokerCommand):
 
     def test_002_makeconflictingchange(self):
         sandboxdir = os.path.join(self.sandboxdir, "changetest3")
-        template = os.path.join(sandboxdir, "aquilon", "archetype", "base.tpl")
+        template = self.find_template("aquilon", "archetype", "base",
+                                      sandbox="changetest3")
         f = open(template)
         try:
             contents = f.readlines()
@@ -125,7 +126,8 @@ class TestMergeConflicts(TestBrokerCommand):
                         cwd=sandboxdir)
 
         sandboxdir = os.path.join(self.sandboxdir, "changetest4")
-        template = os.path.join(sandboxdir, "aquilon", "archetype", "base.tpl")
+        template = self.find_template("aquilon", "archetype", "base",
+                                      sandbox="changetest4")
         f = open(template)
         try:
             contents = f.readlines()
@@ -153,9 +155,8 @@ class TestMergeConflicts(TestBrokerCommand):
     def test_004_deploychangetest3sandbox(self):
         self.successtest(["deploy", "--source", "changetest3",
                           "--target", "changetarget"])
-        template = os.path.join(self.config.get("broker", "domainsdir"),
-                                "changetarget",
-                                "aquilon", "archetype", "base.tpl")
+        template = self.find_template("aquilon", "archetype", "base",
+                                      domain="changetarget")
         f = open(template)
         try:
             contents = f.readlines()
@@ -198,7 +199,10 @@ class TestMergeConflicts(TestBrokerCommand):
 
         # The file will now have merge conflicts.  Cheat by grabbing
         # the copy from changetest3.
-        base = os.path.join("aquilon", "archetype", "base.tpl")
+        for ext in [".tpl", ".pan"]:
+            base = os.path.join("aquilon", "archetype", "base" + ext)
+            if os.path.exists(os.path.join(sandboxdir, base)):
+                break
         self.gitcommand(["checkout", "origin/changetest3", base],
                         cwd=sandboxdir)
 
@@ -220,7 +224,8 @@ class TestMergeConflicts(TestBrokerCommand):
         # previous commit!
         sandboxdir = os.path.join(self.sandboxdir, "changetest3")
         self.gitcommand(["reset", "--hard", "HEAD^1"], cwd=sandboxdir)
-        template = os.path.join(sandboxdir, "aquilon", "archetype", "base.tpl")
+        template = self.find_template("aquilon", "archetype", "base",
+                                      sandbox="changetest3")
         with open(template) as f:
             contents = f.readlines()
         contents.append("#Added by prepchangetest3conflict\n")
@@ -256,9 +261,8 @@ class TestMergeConflicts(TestBrokerCommand):
                             "changetarget")
         self.check_git_merge_health(repo)
 
-        domaindir = os.path.join(self.config.get("broker", "domainsdir"),
-                                 "changetarget-tracker")
-        template = os.path.join(domaindir, "aquilon", "archetype", "base.tpl")
+        template = self.find_template("aquilon", "archetype", "base",
+                                      domain="changetarget-tracker")
         with open(template) as f:
             contents = f.readlines()
         self.failUnlessEqual(contents[-1], "#Added by changetest4\n")
@@ -266,9 +270,8 @@ class TestMergeConflicts(TestBrokerCommand):
     def test_012_rollback(self):
         command = "rollback --domain changetarget-tracker --lastsync"
         self.successtest(command.split(" "))
-        domaindir = os.path.join(self.config.get("broker", "domainsdir"),
-                                 "changetarget-tracker")
-        template = os.path.join(domaindir, "aquilon", "archetype", "base.tpl")
+        template = self.find_template("aquilon", "archetype", "base",
+                                      domain="changetarget-tracker")
         with open(template) as f:
             contents = f.readlines()
         self.failIfEqual(contents[-1], "#Added by changetest4\n")
@@ -280,9 +283,8 @@ class TestMergeConflicts(TestBrokerCommand):
                          "Tracked branch changetarget is set to not "
                          "allow sync.  Run aq validate",
                          command)
-        domaindir = os.path.join(self.config.get("broker", "domainsdir"),
-                                 "changetarget-tracker")
-        template = os.path.join(domaindir, "aquilon", "archetype", "base.tpl")
+        template = self.find_template("aquilon", "archetype", "base",
+                                      domain="changetarget-tracker")
         with open(template) as f:
             contents = f.readlines()
         self.failIfEqual(contents[-1], "#Added by changetest4\n")
@@ -294,9 +296,8 @@ class TestMergeConflicts(TestBrokerCommand):
     def test_015_reverserollback(self):
         command = "sync --domain changetarget-tracker"
         out = self.commandtest(command.split(" "))
-        domaindir = os.path.join(self.config.get("broker", "domainsdir"),
-                                 "changetarget-tracker")
-        template = os.path.join(domaindir, "aquilon", "archetype", "base.tpl")
+        template = self.find_template("aquilon", "archetype", "base",
+                                      domain="changetarget-tracker")
         with open(template) as f:
             contents = f.readlines()
         self.failUnlessEqual(contents[-1], "#Added by changetest4\n")
@@ -305,9 +306,8 @@ class TestMergeConflicts(TestBrokerCommand):
 #   def test_012_mergechangetest3(self):
 #       command = ["merge", "--sandbox=changetest3", "--domain=ut-qa"]
 #       self.successtest(command)
-
-#       qadir = os.path.join(self.config.get("broker", "domainsdir"), "ut-qa")
-#       template = os.path.join(qadir, "aquilon", "archetype", "base.tpl")
+#       template = self.find_template("aquilon", "archetype", "base",
+#                                     domain="ut-qa")
 #       with open(template) as f:
 #           contents = f.readlines()
 #       self.failUnlessEqual(contents[-1], "#Added by changetest3\n")
@@ -315,9 +315,8 @@ class TestMergeConflicts(TestBrokerCommand):
 #   def test_013_mergechangetest4(self):
 #       command = ["merge", "--sandbox=changetest4", "--domain=ut-qa"]
 #       self.successtest(command)
-
-#       qadir = os.path.join(self.config.get("broker", "domainsdir"), "ut-qa")
-#       template = os.path.join(qadir, "aquilon", "archetype", "base.tpl")
+#       template = self.find_template("aquilon", "archetype", "base",
+#                                     domain="ut-qa")
 #       with open(template) as f:
 #           contents = f.readlines()
 #       self.failUnlessEqual(contents[-2], "#Added by changetest3\n")

@@ -133,13 +133,16 @@ class TestAddResourceGroup(TestBrokerCommand):
 
     def test_300_del_resourcegroup(self):
         # Check that the plenaries of contained resources get cleaned up
-        plenarydir = self.config.get("broker", "plenarydir")
-        fs_plenary = os.path.join(plenarydir, "resource", "cluster", "utvcs1",
-                                  "resourcegroup", "utvcs1as1",
-                                  "filesystem", "fs1", "config.tpl")
-        rg_dir = os.path.join(plenarydir, "resource", "cluster", "utvcs1",
-                              "resourcegroup", "utvcs1as1")
-        rg_plenary = os.path.join(rg_dir, "config.tpl")
+        rg_base = ["resource", "cluster", "utvcs1", "resourcegroup",
+                   "utvcs1as1"]
+
+        rg_path = rg_base[:]
+        rg_path.append("config")
+        rg_plenary = self.plenary_name(*rg_path)
+
+        fs_path = rg_base[:]
+        fs_path.extend(["filesystem", "fs1", "config"])
+        fs_plenary = self.plenary_name(*fs_path)
 
         # Verify that we got the paths right
         self.failUnless(os.path.exists(fs_plenary),
@@ -158,6 +161,7 @@ class TestAddResourceGroup(TestBrokerCommand):
                     "Plenary '%s' still exists" % rg_plenary)
 
         # The directory should be gone
+        rg_dir = os.path.dirname(rg_plenary)
         self.failIf(os.path.exists(rg_dir),
                     "Plenary directory '%s' still exists" % rg_dir)
 

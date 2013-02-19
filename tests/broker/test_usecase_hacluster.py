@@ -82,14 +82,13 @@ class TestUsecaseHACluster(TestBrokerCommand):
         self.dsdb_verify()
 
     def test_120_add_resourcegroups(self):
-        plenarydir = self.config.get("broker", "plenarydir")
         for cl in range(1, 3):
-            cluster_res_dir = os.path.join(plenarydir, "resource", "cluster",
-                                           "hacl%d" % cl)
             for rg in range(1, 3):
-                rg_dir = os.path.join(cluster_res_dir, "resourcegroup",
-                                      "hacl%dg%d" % (cl, rg))
-                plenary = os.path.join(rg_dir, "config.tpl")
+                plenary = self.plenary_name("resource",
+                                            "cluster", "hacl%d" % cl,
+                                            "resourcegroup",
+                                            "hacl%dg%d" % (cl, rg),
+                                            "config")
 
                 self.successtest(["add", "resourcegroup",
                                   "--cluster", "hacl%d" % cl,
@@ -98,15 +97,15 @@ class TestUsecaseHACluster(TestBrokerCommand):
                                 "Plenary '%s' does not exist" % plenary)
 
     def test_125_add_apps(self):
-        plenarydir = self.config.get("broker", "plenarydir")
         for cl in range(1, 3):
-            cluster_res_dir = os.path.join(plenarydir, "resource", "cluster",
-                                           "hacl%d" % cl)
             for rg in range(1, 3):
-                rg_dir = os.path.join(cluster_res_dir, "resourcegroup",
-                                      "hacl%dg%d" % (cl, rg))
-                plenary = os.path.join(rg_dir, "application",
-                                       "hacl%dg%dapp" % (cl, rg), "config.tpl")
+                plenary = self.plenary_name("resource",
+                                            "cluster", "hacl%d" % cl,
+                                            "resourcegroup",
+                                            "hacl%dg%d" % (cl, rg),
+                                            "application",
+                                            "hacl%dg%dapp" % (cl, rg),
+                                            "config")
 
                 self.successtest(["add", "application",
                                   "--cluster", "hacl%d" % cl,
@@ -117,15 +116,16 @@ class TestUsecaseHACluster(TestBrokerCommand):
                                 "Plenary '%s' does not exist" % plenary)
 
     def test_125_add_fs(self):
-        plenarydir = self.config.get("broker", "plenarydir")
         for cl in range(1, 3):
-            cluster_res_dir = os.path.join(plenarydir, "resource", "cluster",
-                                           "hacl%d" % cl)
             for rg in range(1, 3):
-                rg_dir = os.path.join(cluster_res_dir, "resourcegroup",
-                                      "hacl%dg%d" % (cl, rg))
-                plenary = os.path.join(rg_dir, "filesystem",
-                                       "hacl%dg%dfs" % (cl, rg), "config.tpl")
+                plenary = self.plenary_name("resource",
+                                            "cluster", "hacl%d" % cl,
+                                            "resourcegroup",
+                                            "hacl%dg%d" % (cl, rg),
+                                            "filesystem",
+                                            "hacl%dg%dfs" % (cl, rg),
+                                            "config")
+
                 self.successtest(["add", "filesystem", "--type", "ext3",
                                   "--cluster", "hacl%d" % cl,
                                   "--resourcegroup", "hacl%dg%d" % (cl, rg),
@@ -141,14 +141,14 @@ class TestUsecaseHACluster(TestBrokerCommand):
         # grep-friendly syntax
         ips = [self.net.unknown[0].usable[28],
                self.net.unknown[0].usable[29]]
-        plenarydir = self.config.get("broker", "plenarydir")
         for cl in range(1, 3):
-            cluster_res_dir = os.path.join(plenarydir, "resource", "cluster",
-                                           "hacl%d" % cl)
-            rg_dir = os.path.join(cluster_res_dir, "resourcegroup",
-                                  "hacl%dg1" % cl)
-            plenary = os.path.join(rg_dir, "service_address",
-                                   "hacl%dg1addr" % cl, "config.tpl")
+            plenary = self.plenary_name("resource",
+                                        "cluster", "hacl%d" % cl,
+                                        "resourcegroup",
+                                        "hacl%dg1" % cl,
+                                        "service_address",
+                                        "hacl%dg1addr" % cl,
+                                        "config")
 
             self.dsdb_expect_add("hacl%dg1.aqd-unittest.ms.com" % cl,
                                  ips[cl - 1])
@@ -166,15 +166,15 @@ class TestUsecaseHACluster(TestBrokerCommand):
         # Multi-A record pointing to two different service IPs
         ips = [self.net.unknown[0].usable[30],
                self.net.unknown[0].usable[31]]
-        plenarydir = self.config.get("broker", "plenarydir")
         # TODO: range(1, 3) once multi-A records are sorted out
         for cl in range(1, 2):
-            cluster_res_dir = os.path.join(plenarydir, "resource", "cluster",
-                                           "hacl%d" % cl)
-            rg_dir = os.path.join(cluster_res_dir, "resourcegroup",
-                                  "hacl%dg2" % cl)
-            plenary = os.path.join(rg_dir, "service_address",
-                                   "hacl%dg2addr" % cl, "config.tpl")
+            plenary = self.plenary_name("resource",
+                                        "cluster", "hacl%d" % cl,
+                                        "resourcegroup",
+                                        "hacl%dg2" % cl,
+                                        "service_address",
+                                        "hacl%dg2addr" % cl,
+                                        "config")
 
             self.dsdb_expect_add("hashared.aqd-unittest.ms.com", ips[cl - 1])
             self.successtest(["add", "service", "address",
@@ -219,16 +219,16 @@ class TestUsecaseHACluster(TestBrokerCommand):
                          command)
 
     def test_910_del_appsrv(self):
-        plenarydir = self.config.get("broker", "plenarydir")
         ips = [self.net.unknown[0].usable[28],
                self.net.unknown[0].usable[29]]
         for cl in range(1, 3):
-            cluster_res_dir = os.path.join(plenarydir, "resource", "cluster",
-                                           "hacl%d" % cl)
-            rg_dir = os.path.join(cluster_res_dir, "resourcegroup",
-                                  "hacl%dg1" % cl)
-            plenary = os.path.join(rg_dir, "service_address",
-                                   "hacl%dg1addr" % cl, "config.tpl")
+            plenary = self.plenary_name("resource",
+                                        "cluster", "hacl%d" % cl,
+                                        "resourcegroup",
+                                        "hacl%dg1" % cl,
+                                        "service_address",
+                                        "hacl%dg1daddr" % cl,
+                                        "config")
             self.dsdb_expect_delete(ips[cl - 1])
             self.successtest(["del", "service", "address",
                               "--cluster", "hacl%d" % cl,
@@ -242,11 +242,17 @@ class TestUsecaseHACluster(TestBrokerCommand):
         plenarydir = self.config.get("broker", "plenarydir")
         cluster_res_dir = os.path.join(plenarydir, "resource", "cluster", "hacl1")
         rg_dir = os.path.join(cluster_res_dir, "resourcegroup", "hacl1g1")
-        res_plenaries = [os.path.join(rg_dir, "config.tpl"),
-                         os.path.join(rg_dir, "application", "hacl1g1app",
-                                      "config.tpl"),
-                         os.path.join(rg_dir, "filesystem", "hacl1g1fs",
-                                      "config.tpl")]
+        res_plenaries = [self.plenary_name("resource", "cluster", "hacl1",
+                                           "resourcegroup", "hacl1g1",
+                                           "config"),
+                         self.plenary_name("resource", "cluster", "hacl1",
+                                           "resourcegroup", "hacl1g1",
+                                           "application", "hacl1g1app",
+                                           "config"),
+                         self.plenary_name("resource", "cluster", "hacl1",
+                                           "resourcegroup", "hacl1g1",
+                                           "filesystem", "hacl1g1fs",
+                                           "config")]
 
         # Verify that we got the paths right
         for plenary in res_plenaries:

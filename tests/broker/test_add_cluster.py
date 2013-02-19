@@ -30,8 +30,6 @@
 # TERMS THAT MAY APPLY.
 """Module for testing the add cluster command."""
 
-import os
-import re
 import unittest
 
 if __name__ == "__main__":
@@ -114,8 +112,7 @@ class TestAddCluster(TestBrokerCommand):
 
     def test_30_verify_plenary_ha_clusterclient(self):
         cluster = "utvcs1"
-        plenary = os.path.join(self.config.get("broker", "plenarydir"),
-                               "cluster", cluster, "client.tpl")
+        plenary = self.plenary_name("cluster", cluster, "client")
         with open(plenary) as f:
             contents = f.read()
         self.matchoutput(contents,
@@ -184,8 +181,7 @@ class TestAddCluster(TestBrokerCommand):
         self.matchoutput(out, "High Availability Cluster: utvcs1", command)
 
     def test_45_verifyplenary_grid_clusterclient(self):
-        plenary = os.path.join(self.config.get("broker", "plenarydir"),
-                               "cluster", "utgrid1", "client.tpl")
+        plenary = self.plenary_name("cluster", "utgrid1", "client")
         with open(plenary) as f:
             contents = f.read()
         self.matchoutput(contents,

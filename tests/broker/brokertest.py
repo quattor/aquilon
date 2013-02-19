@@ -106,6 +106,43 @@ class TestBrokerCommand(unittest.TestCase):
     def tearDown(self):
         pass
 
+    def template_name(self, *template, **args):
+        if args.get("sandbox", None):
+            dir = os.path.join(self.sandboxdir, args.get("sandbox"))
+        elif args.get("domain", None):
+            dir = os.path.join(self.config.get("broker", "domainsdir"),
+                               args.get("domain"))
+        else:
+            self.assert_(0, "template_name() called without domain or sandbox")
+        return os.path.join(dir, *template) + ".tpl"
+
+    def plenary_name(self, *template):
+        dir = self.config.get("broker", "plenarydir")
+        return os.path.join(dir, *template) + ".tpl"
+
+    def find_template(self, *template, **args):
+        """ Figure out the extension of an existing template """
+        if args.get("sandbox", None):
+            dir = os.path.join(self.sandboxdir, args.get("sandbox"))
+        elif args.get("domain", None):
+            dir = os.path.join(self.config.get("broker", "domainsdir"),
+                               args.get("domain"))
+        else:
+            self.assert_(0, "find_template() called without domain or sandbox")
+
+        base = os.path.join(dir, *template)
+
+        for extension in [".tpl", ".pan"]:
+            if os.path.exists(base + extension):
+                return base + extension
+        self.assert_(0, "template %s does not exist with any extension" % base)
+
+    def build_profile_name(self, *template, **args):
+        base = os.path.join(self.config.get("broker", "builddir"),
+                            "domains", args.get("domain"),
+                            "profiles", *template)
+        return base + ".tpl"
+
     msversion_dev_re = re.compile('WARNING:msversion:Loading \S* from dev\n')
 
     def runcommand(self, command, auth=True, **kwargs):

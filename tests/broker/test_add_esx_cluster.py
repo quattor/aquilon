@@ -30,7 +30,6 @@
 # TERMS THAT MAY APPLY.
 """Module for testing the add esx_cluster command."""
 
-import os
 import re
 import unittest
 
@@ -307,8 +306,7 @@ class TestAddESXCluster(TestBrokerCommand):
     def testverifyplenaryclusterclient(self):
         for i in range(1, 5):
             cluster = "utecl%s" % i
-            plenary = os.path.join(self.config.get("broker", "plenarydir"),
-                                   "cluster", cluster, "client.tpl")
+            plenary = self.plenary_name("cluster", cluster, "client")
             with open(plenary) as f:
                 contents = f.read()
             self.matchoutput(contents,
