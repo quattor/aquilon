@@ -79,6 +79,32 @@ class TestVlan(TestBrokerCommand):
                          "instance poll_helper/unittest to run CheckNet for "
                          "switch utpgsw0.aqd-unittest.ms.com.", command)
 
+        self.matchoutput(err, "vlan 5 is not defined in AQ. Please use "
+                "add_vlan to add it.", command)
+
+    # Adding vlan 5 as unknown will suppress poll_switch vlan warning.
+    def test_012_addvlan5(self):
+        command = ["add_vlan", "--vlan=5", "--name=user_5",
+                   "--vlan_type=unknown"]
+        self.noouttest(command)
+
+        command = "show vlan --vlan 5"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Vlan: 5", command)
+        self.matchoutput(out, "Name: user_5", command)
+
+    def test_012_pollutpgsw(self):
+        command = ["poll", "switch", "--vlan", "--switch",
+                   SW_HOSTNAME]
+        err = self.statustest(command)
+
+        self.matchoutput(err, "Using jump host nyaqd1.ms.com from service "
+                         "instance poll_helper/unittest to run CheckNet for "
+                         "switch utpgsw0.aqd-unittest.ms.com.", command)
+
+        self.matchclean(err, "vlan 5 is not defined in AQ. Please use "
+                "add_vlan to add it.", command)
+
     def test_015_searchswbyvlan(self):
         command = ["search_switch", "--vlan=714",
                    "--format=csv"]
@@ -97,6 +123,14 @@ class TestVlan(TestBrokerCommand):
         self.matchoutput(errOut,
                          "VlanInfo 714 is still in use and cannot be "
                          "deleted.", command)
+
+    # Unknown vlans have no dependencies, can be deleted.
+    def test_025_delvlan(self):
+        command = ["del_vlan", "--vlan=5"]
+        self.noouttest(command)
+
+        command = ["show_vlan", "--vlan=5"]
+        self.notfoundtest(command)
 
     def test_030_delutpgsw(self):
         self.dsdb_expect_delete(self.getswip())
