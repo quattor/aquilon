@@ -44,7 +44,7 @@ from aquilon.worker.dbwrappers.switch import (determine_helper_hostname,
                                               determine_helper_args)
 from aquilon.worker.processes import run_command
 from aquilon.aqdb.model import (Switch, ObservedMac, ObservedVlan, Network,
-                                NetworkEnvironment)
+                                NetworkEnvironment, VlanInfo)
 from aquilon.utils import force_ipv4
 
 
@@ -247,6 +247,17 @@ class CommandPollSwitch(BrokerCommand):
                                                                    bitmask,
                                                                    dbnetwork))
                     continue
+
+                vlan_info = VlanInfo.get_unique(session, vlan_id=vlan_int,
+                                                compel=False)
+                if not vlan_info:
+                    logger.client_info("vlan {0} is not defined in AQ. Please "
+                            "use add_vlan to add it.".format(vlan_int))
+                    continue
+
+                if vlan_info.vlan_type == "unknown":
+                    continue
+
                 dbvlan = ObservedVlan(vlan_id=vlan_int, switch=switch,
                                       network=dbnetwork, creation_date=now)
                 session.add(dbvlan)

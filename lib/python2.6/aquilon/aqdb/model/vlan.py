@@ -42,12 +42,7 @@ from aquilon.aqdb.model import Base, Network, Switch
 
 MAX_VLANS = 4096  # IEEE 802.1Q standard
 
-VLAN_TYPES = ('storage', 'vmotion', 'user')
-
-VLAN_INFO = [(701, 'storage-v701', 'storage'),
-             (702, 'vmotion-v702', 'vmotion'),
-             (710, 'user-v710', 'user'), (711, 'user-v711', 'user'),
-             (712, 'user-v712', 'user'), (713, 'user-v713', 'user')]
+VLAN_TYPES = ('storage', 'vmotion', 'user', 'unknown')
 
 _VTN = 'vlan_info'
 
@@ -85,6 +80,7 @@ vlaninfo.primary_key.name = '%s_pk' % _VTN
 vlaninfo.append_constraint(
     UniqueConstraint('port_group', name='%s_port_group_uk' % _VTN))
 vlaninfo.info['unique_fields'] = ['port_group']
+vlaninfo.info['extra_search_fields'] = ['vlan_id']
 
 vlaninfo.append_constraint(
     CheckConstraint('vlan_id < %d' % MAX_VLANS,
@@ -111,7 +107,9 @@ class ObservedVlan(Base):
                                             name='%s_net_fk' % _ABV),
                         primary_key=True)
 
-    vlan_id = Column(Integer, primary_key=True)
+    vlan_id = Column(Integer, ForeignKey('vlan_info.vlan_id',
+                                           name='%s_vlan_fk' % _ABV),
+                     primary_key=True)
 
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
