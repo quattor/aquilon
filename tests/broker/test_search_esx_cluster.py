@@ -254,9 +254,7 @@ class TestSearchESXCluster(TestBrokerCommand):
         command = "search esx cluster --share share-does-not-exist"
         out = self.notfoundtest(command.split(" "))
         self.matchoutput(out,
-                         "Service Instance share-does-not-exist, service "
-                         "nas_disk_share not found.",
-                         command)
+                         "Share share-does-not-exist not found.", command)
 
     def testclusterlocationavailable(self):
         command = "search esx cluster --cluster_building ut"

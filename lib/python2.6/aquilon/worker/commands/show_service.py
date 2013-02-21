@@ -69,7 +69,6 @@ class CommandShowService(BrokerCommand):
             q = q.options(subqueryload('archetypes'))
             q = q.options(subqueryload('personalities'))
             q = q.options(undefer('instances._client_count'))
-            q = q.options(undefer('instances.nas_disk_count'))
             q = q.options(subqueryload('instances.personality_service_map'))
             q = q.options(subqueryload('instances.servers'))
             q = q.options(joinedload('instances.servers.host'))

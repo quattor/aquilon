@@ -1,7 +1,7 @@
-# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-# ex: set expandtab softtabstop=4 shiftwidth=4:
+#!/usr/bin/env python2.6
+# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 #
-# Copyright (C) 2008,2009,2010,2011,2012,2013  Contributor
+# Copyright (C) 2008,2009,2010,2011,2012  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -27,31 +27,36 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-"""Contains the logic for `aq add service`."""
+"""Module for testing the add service command."""
 
-from aquilon.exceptions_ import InternalError
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.aqdb.model import Service, ServiceInstance
-from aquilon.worker.templates.base import Plenary, PlenaryCollection
+import unittest
 
+if __name__ == "__main__":
+    import utils
+    utils.import_depends()
 
-class CommandAddNASDiskShare(BrokerCommand):
+from brokertest import TestBrokerCommand
 
-    required_parameters = ["share"]
+# taken from test_add_service.py
+class TestDelShare(TestBrokerCommand):
 
-    def render(self, session, logger, share, comments, manager,
-               **arguments):
-        dbservice = Service.get_unique(session, name='nas_disk_share',
-                                       compel=InternalError)
-        plenaries = PlenaryCollection(logger=logger)
-        plenaries.append(Plenary.get_plenary(dbservice))
+    def testdel10gigshares(self):
+        for i in range(5, 11):
+            self.noouttest(["del_share", "--cluster=utecl%d" % i,
+                            "--share=utecl%d_share" % i])
 
-        ServiceInstance.get_unique(session, service=dbservice,
-                                   name=share, preclude=True)
-        dbsi = ServiceInstance(service=dbservice, name=share,
-                               comments=comments, manager=manager)
-        session.add(dbsi)
-        plenaries.append(Plenary.get_plenary(dbsi))
-        session.flush()
-        plenaries.write()
-        return
+    def testdelhashares(self):
+        for i in range(11, 13):
+            self.noouttest(["del_share", "--cluster=utecl%d" % i,
+                            "--share=utecl%d_share" % i])
+            self.noouttest(["del_share", "--cluster=npecl%d" % i,
+                            "--share=npecl%d_share" % i])
+
+    def testdelnasshares(self):
+        for i in range(1, 9):
+            self.noouttest(["del_share", "--cluster=utecl1",
+                            "--share=test_share_%s" % i])
+
+if __name__ == '__main__':
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestDelShare)
+    unittest.TextTestRunner(verbosity=2).run(suite)

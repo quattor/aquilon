@@ -363,7 +363,7 @@
          <option name="serial" type="string">machine serial number</option>
          <option name="cluster" type="string">cluster or metacluster name</option>
          <option name="guest_on_cluster" type="string">host is a virtual machine guest on this cluster</option>
-         <option name="guest_on_share" type="string">host is a virtual machine using this nas_disk_share</option>
+         <option name="guest_on_share" type="string">host is a virtual machine using this share</option>
          <option name="member_cluster_share" type="string">host is a member of a cluster with machines using this nas_disk_share</option>
          <optgroup name="search_host_branch" fields="any">
             <option name="domain" type="string" conflicts="sandbox branch">template domain</option>
@@ -790,8 +790,7 @@
       <optgroup name="nas_opts" fields="all">
          <optgroup name="share_opts" fields="any">
             <!-- TODO find out conflicts we might have -->
-            <option name="share" type="string" conflicts="autoshare">Share name (an instance of nas_disk_share service)</option>
-            <option name="autoshare" type="flag" conflicts="share">Resource pool will pick an appropriate share</option>
+            <option name="share" type="string">Share name (an instance of nas_disk_share service)</option>
             <option name="resourcegroup" type="string">Resourcegroup to add share</option>
          </optgroup>
          <option name="address" type="string">Bus address (e.g. 0:0)</option>
@@ -1643,20 +1642,6 @@
       <transport trigger="instance" method="put" path="service/%(service)s/instance/%(instance)s" />
    </command>
 
-   <command name="add_nas_disk_share">
-     Add a new NAS share service instance. If the --manager property is set, membership and capacity
-     management is deferred to an external manager such as  Resource Pool. Default templates
-      describing the service will be created so that shares can be immediately used (bound and configured) by clients.
-      <optgroup name="add_nas_disk_share_opts" mandatory="True" fields="all">
-         <option name="share" type="string" mandatory="True">share name</option>
-      </optgroup>
-      <optgroup name="optional_opts">
-         <option name="comments" type="string">Comments</option>
-         <option name="manager" type="string">External Manager (resourcepool, ...)</option>
-      </optgroup>
-      <transport method="put" path="/nas_disk_share/instance/%(share)s" />
-   </command>
-
    <command name="show_service">
       Show the configuration of a service. All instances of the service will
       be listed, the number of clients bound to that service and any service mappings.
@@ -2281,46 +2266,44 @@
       that template generated on-demand in this way will be incomplete
       (especially if it cannot be compiled) and is purely provided for debugging.
       <optgroup name="cat_selector" mandatory="True" fields="any">
-         <option name="machine" type="string" conflicts="hostname cluster service instance default nasinfo city switch personality">Name of the machine</option>
-         <option name="hostname" type="string" conflicts="machine cluster service instance default nasinfo city switch personality">Name of the host</option>
-         <option name="cluster" type="string" conflicts="hostname machine service instance default nasinfo city switch personality">Name of the cluster</option>
-         <option name="service" type="string" conflicts="hostname machine cluster nasinfo city switch personality">Name of the service</option>
-         <option name="nasinfo" type="string" conflicts="hostname machine cluster service instance default city switch personality">Show the default client config for the service/instance</option>
-         <option name="city" type="string" conflicts="hostname machine cluster service instance default nasinfo switch personality">Name of the city</option>
-         <option name="switch" type="string" conflicts="hostname machine cluster service instance default nasinfo personality">Name of the switch</option>
-	 <option name="personality" conflicts="hostname cluster service instance default nasinfo city switch machine" type="string">Name of personality</option>
+         <option name="machine" type="string" conflicts="hostname cluster service instance default city switch personality">Name of the machine</option>
+         <option name="hostname" type="string" conflicts="machine cluster service instance default city switch personality">Name of the host</option>
+         <option name="cluster" type="string" conflicts="hostname machine service instance default city switch personality">Name of the cluster</option>
+         <option name="service" type="string" conflicts="hostname machine cluster city switch personality">Name of the service</option>
+         <option name="city" type="string" conflicts="hostname machine cluster service instance default switch personality">Name of the city</option>
+         <option name="switch" type="string" conflicts="hostname machine cluster service instance default personality">Name of the switch</option>
+	 <option name="personality" conflicts="hostname cluster service instance default city switch machine" type="string">Name of personality</option>
 	 <optgroup name="persopts" fields="any">
-		<option name="archetype" conflicts="hostname cluster service instance default nasinfo city switch machine" type="string">Archetype</option>
-		<option name="pre_feature" conflicts="hostname cluster service instance default nasinfo city switch machine post_feature param_tmpl" type="flag">Pre feature template</option>
-		<option name="post_feature" conflicts="hostname cluster service instance default nasinfo city switch machine pre_feature param_tmpl" type="flag">Post feature template</option>
-		<option name="param_tmpl" conflicts="hostname cluster service instance default nasinfo city switch machine post_feature pre_feature" type="string">param templates</option>
+		<option name="archetype" conflicts="hostname cluster service instance default city switch machine" type="string">Archetype</option>
+		<option name="pre_feature" conflicts="hostname cluster service instance default city switch machine post_feature param_tmpl" type="flag">Pre feature template</option>
+		<option name="post_feature" conflicts="hostname cluster service instance default city switch machine pre_feature param_tmpl" type="flag">Post feature template</option>
+		<option name="param_tmpl" conflicts="hostname cluster service instance default city switch machine post_feature pre_feature" type="string">param templates</option>
          </optgroup>
       </optgroup>
       <optgroup name="cat_options" mandatory="False" fields="any">
-         <option name="default" type="flag" conflicts="hostname machine cluster nasinfo city switch">Show the default client config for the service/instance</option>
-         <option name="server" type="flag" conflicts="hostname machine cluster nasinfo city switch">Show the server config for the service/instance</option>
-         <option name="data" type="flag" conflicts="machine service nasinfo city switch">Show the data template for the host/cluster</option>
-         <option name="instance" type="string" conflicts="hostname machine cluster nasinfo city switch">Name of the service instance</option>
+         <option name="default" type="flag" conflicts="hostname machine cluster city switch">Show the default client config for the service/instance</option>
+         <option name="server" type="flag" conflicts="hostname machine cluster city switch">Show the server config for the service/instance</option>
+         <option name="data" type="flag" conflicts="machine service city switch">Show the data template for the host/cluster</option>
+         <option name="instance" type="string" conflicts="hostname machine cluster city switch">Name of the service instance</option>
          <option name="generate" type="flag">Show the plenary template as it would be generated</option>
       </optgroup>
       <optgroup name="cat_resource_options" mandatory="False" fields="any">
-         <option name="resourcegroup" type="string" conflicts="machine service instance default nasinfo data">Name of a resource group</option>
-         <option name="application" type="string" conflicts="machine service instance default nasinfo data">Name of an application</option>
-         <option name="filesystem" type="string" conflicts="machine service instance default nasinfo data">Name of a file system</option>
-         <option name="hostlink" type="string" conflicts="machine service instance default nasinfo data">Name of a hostlink</option>
-         <option name="intervention" type="string" conflicts="machine service instance default nasinfo data">Name of an intervention</option>
-         <option name="reboot_intervention" type="string" conflicts="machine service instance default nasinfo data">Name of a reboot intervention</option>
-         <option name="reboot_schedule" type="string" conflicts="machine service instance default nasinfo data">Name of a reboot schedule</option>
-         <option name="virtual_machine" type="string" conflicts="machine service instance default nasinfo data">Name of a virtual machine</option>
-         <option name="service_address" type="string" conflicts="machine service instance default nasinfo data">Name of a service address</option>
-         <option name="share" type="string" conflicts="machine service instance default nasinfo data">Name of a resource group</option>
+         <option name="resourcegroup" type="string" conflicts="machine service instance default data">Name of a resource group</option>
+         <option name="application" type="string" conflicts="machine service instance default data">Name of an application</option>
+         <option name="filesystem" type="string" conflicts="machine service instance default data">Name of a file system</option>
+         <option name="hostlink" type="string" conflicts="machine service instance default data">Name of a hostlink</option>
+         <option name="intervention" type="string" conflicts="machine service instance default data">Name of an intervention</option>
+         <option name="reboot_intervention" type="string" conflicts="machine service instance default data">Name of a reboot intervention</option>
+         <option name="reboot_schedule" type="string" conflicts="machine service instance default data">Name of a reboot schedule</option>
+         <option name="virtual_machine" type="string" conflicts="machine service instance default data">Name of a virtual machine</option>
+         <option name="service_address" type="string" conflicts="machine service instance default data">Name of a service address</option>
+         <option name="share" type="string" conflicts="machine service instance default data">Name of a resource group</option>
       </optgroup>
       <transport trigger="machine" method="get" path="machine/%(machine)s/plenary" />
       <transport trigger="hostname" method="get" path="host/%(hostname)s/plenary" />
       <transport trigger="cluster" method="get" path="cluster/any/%(cluster)s/plenary" />
       <transport trigger="service" method="get" path="service/%(service)s/plenary" />
       <transport trigger="instance" method="get" path="service/%(service)s/instance/%(instance)s/plenary" />
-      <transport trigger="nasinfo" method="get" path="nasinfo/%(nasinfo)s/plenary" />
       <transport trigger="city" method="get" path="city/%(city)s/plenary" />
       <transport trigger="switch" method="get" path="switch/%(switch)s/plenary" />
       <transport trigger="personality" method="get"  path="personality/personality/%(personality)s/plenary" />

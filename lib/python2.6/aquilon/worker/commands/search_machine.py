@@ -34,8 +34,7 @@ from sqlalchemy.orm import aliased, subqueryload, joinedload
 
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.formats.machine import SimpleMachineList
-from aquilon.aqdb.model import (Machine, Cpu, Cluster, Service, ServiceInstance,
-                                NasDisk, Disk, ClusterResource,
+from aquilon.aqdb.model import (Machine, Cpu, Cluster, ClusterResource,
                                 Share, VirtualDisk, Disk, MetaCluster)
 from aquilon.worker.dbwrappers.hardware_entity import (
     search_hardware_entity_query)
@@ -81,17 +80,6 @@ class CommandSearchMachine(BrokerCommand):
                     NasAlias.share_id.in_(map(lambda s: s[0], v2shares)))
                 q = q.reset_joinpoint()
 
-            #v1
-            else:
-                nas_disk_share = Service.get_unique(session, name='nas_disk_share',
-                                                    compel=True)
-                dbshare = ServiceInstance.get_unique(session, name=share,
-                                                     service=nas_disk_share,
-                                                     compel=True)
-                NasAlias = aliased(NasDisk)
-                q = q.join('disks', (NasAlias, NasAlias.id == Disk.id))
-                q = q.filter_by(service_instance=dbshare)
-                q = q.reset_joinpoint()
         if fullinfo:
             q = q.options(joinedload('location'),
                           subqueryload('interfaces'),

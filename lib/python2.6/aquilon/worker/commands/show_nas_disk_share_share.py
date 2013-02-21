@@ -32,18 +32,29 @@
 
 from aquilon.exceptions_ import InternalError
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.aqdb.model import Service, ServiceInstance
-from aquilon.worker.formats.service_instance import Share
+from aquilon.aqdb.model import Share, ClusterResource, EsxCluster
+from aquilon.worker.formats.service_instance import ServiceShare
 
 
 class CommandShowNASDiskShareShare(BrokerCommand):
 
     required_parameters = ["share"]
 
-    def render(self, session, share, **arguments):
-        nas_disk_share = Service.get_unique(session, name='nas_disk_share',
-                                            compel=InternalError)
-        dbshare = ServiceInstance.get_unique(session, name=share,
-                                             service=nas_disk_share,
-                                             compel=True)
-        return Share(dbshare)
+    def render(self, session, logger, share, **arguments):
+        q = session.query(Share).filter_by(name = share)
+        self.deprecated_command("show_nas_disk_share is deprecated, please use "
+                                "show_share instead.", logger=logger,
+                                **arguments)
+        q = q.join(ClusterResource, EsxCluster)
+        try:
+            dbshare = q.one()
+            return ServiceShare(dbshare)
+        except NoResultFound:
+            raise InternalError("Share %s not found." % Share.name)
+        except MultipleResultsFound:
+            raise InternalError("Share %s not unique." % Share.name)
+        # nas_disk_share = Service.get_unique(session, name='nas_disk_share',
+        #                                     compel=InternalError)
+        # dbshare = ServiceInstance.get_unique(session, name=share,
+        #                                      service=nas_disk_share,
+        #                                      compel=True)

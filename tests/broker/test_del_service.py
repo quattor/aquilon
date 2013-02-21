@@ -198,29 +198,6 @@ class TestDelService(TestBrokerCommand):
         command = "show service --service vmseasoning"
         self.notfoundtest(command.split(" "))
 
-    def testdel10gigshares(self):
-        for i in range(5, 11):
-            self.noouttest(["del_service", "--service=nas_disk_share",
-                            "--instance=utecl%d_share" % i])
-
-    def testdelhashares(self):
-        for i in range(11, 13):
-            self.noouttest(["del_service", "--service=nas_disk_share",
-                            "--instance=utecl%d_share" % i])
-            self.noouttest(["del_service", "--service=nas_disk_share",
-                            "--instance=npecl%d_share" % i])
-
-    def testdelmgdshares(self):
-        for i in range(13, 15):
-            self.noouttest(["del_service", "--service=nas_disk_share",
-                            "--instance=utecl%d_share" % i])
-
-    def testdelnasshares(self):
-        for i in range(1, 10):
-            self.noouttest(["del_service", "--service=nas_disk_share",
-                            "--instance=test_share_%s" % i])
-        self.noouttest(["del_service", "--service=nas_disk_share"])
-
     def testdelpollhelper(self):
         service = self.config.get("broker", "poll_helper_service")
         self.noouttest(["del", "service", "--service", service,

@@ -52,7 +52,6 @@ from aquilon.worker.templates.service import (PlenaryService,
                                               PlenaryServiceInstanceToplevel,
                                               PlenaryServiceInstanceClientDefault,
                                               PlenaryServiceInstanceServer,
-                                              PlenaryServiceInstanceServerDefault,
-                                              PlenaryInstanceNasDiskShare)
+                                              PlenaryServiceInstanceServerDefault)
 
 from aquilon.worker.templates.domain import TemplateDomain

@@ -68,11 +68,6 @@ class TestDel10GigHardware(TestBrokerCommand):
             self.assertEmptyOut(out, command)
         self.dsdb_verify()
 
-    def test_600_delautoassignshares(self):
-        for i in range(10, 18):
-            self.noouttest(["del", "disk", "--machine", "evm%d" % i,
-                            "--disk", "sdc"])
-
     def test_700_delmachines(self):
         for i in range(0, 8) + range(9, 17):
             machine = "evm%d" % (10 + i)

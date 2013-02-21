@@ -59,11 +59,6 @@
 	</cmdsynopsis>
 	<cmdsynopsis>
 	    <command>aq cat</command>
-	    <arg choice="plain"><option>--nasinfo <replaceable>SHARE</replaceable></option></arg>
-	    <arg choice="opt"><option>--generate</option></arg>
-	</cmdsynopsis>
-	<cmdsynopsis>
-	    <command>aq cat</command>
 	    <arg choice="plain"><option>--service <replaceable>SERVICE</replaceable></option></arg>
 	    <arg choice="opt"><option>--instance <replaceable>INSTANCE</replaceable></option></arg>
 	    <arg choice="opt"><option>--server</option></arg>
@@ -274,17 +269,6 @@
 			Display default plenaries which may be overridden by the real templates. See the
 			description of the <option>--service</option> and <option>--instance</option>
 			options for details.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-	        <term>
-		    <option>--nasinfo <replaceable>SHARE</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			Display the plenary of the given share. Shares are instances of the nas_disk_share instance
-			but contain extra data in the plenaries.
 		    </para>
 		</listitem>
 	    </varlistentry>

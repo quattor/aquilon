@@ -33,12 +33,13 @@
 from sqlalchemy.orm import aliased, contains_eager
 from sqlalchemy.sql import or_
 
+from aquilon.exceptions_ import NotFoundException
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.formats.host import SimpleHostList
 from aquilon.aqdb.model import (Host, Cluster, Archetype, Personality,
                                 PersonalityGrnMap, HostGrnMap, HostLifecycle,
-                                OperatingSystem, Service, ServiceInstance,
-                                NasDisk, Disk, Machine, Model, ARecord,
+                                OperatingSystem, Service, Share,
+                                VirtualDisk, Disk, Machine, Model, ARecord,
                                 DnsDomain, Interface, AddressAssignment,
                                 NetworkEnvironment, Network, MetaCluster,
                                 VirtualMachine, ClusterResource)
@@ -231,26 +232,31 @@ class CommandSearchHost(BrokerCommand):
             q = q.filter_by(cluster=dbcluster)
             q = q.reset_joinpoint()
         if guest_on_share:
-            nas_disk_share = Service.get_unique(session, name='nas_disk_share',
-                                                compel=True)
-            dbshare = ServiceInstance.get_unique(session, name=guest_on_share,
-                                                 service=nas_disk_share,
-                                                 compel=True)
-            NasAlias = aliased(NasDisk)
+            #v2
+            v2shares = session.query(Share.id).filter_by(name=guest_on_share).all()
+            if not v2shares:
+                raise NotFoundException("No shares found with name {0}."
+                                        .format(guest_on_share))
+
+            NasAlias = aliased(VirtualDisk)
             q = q.join('machine', 'disks', (NasAlias, NasAlias.id == Disk.id))
-            q = q.filter_by(service_instance=dbshare)
+            q = q.filter(
+                NasAlias.share_id.in_(map(lambda s: s[0], v2shares)))
             q = q.reset_joinpoint()
+
         if member_cluster_share:
-            nas_disk_share = Service.get_unique(session, name='nas_disk_share',
-                                                compel=True)
-            dbshare = ServiceInstance.get_unique(session,
-                                                 name=member_cluster_share,
-                                                 service=nas_disk_share,
-                                                 compel=True)
-            NasAlias = aliased(NasDisk)
+            #v2
+            v2shares = session.query(Share.id).filter_by(name=member_cluster_share).all()
+            if not v2shares:
+                raise NotFoundException("No shares found with name {0}."
+                                        .format(guest_on_share))
+
+            NasAlias = aliased(VirtualDisk)
+
             q = q.join('_cluster', 'cluster', 'resholder', VirtualMachine,
                        'machine', 'disks', (NasAlias, NasAlias.id == Disk.id))
-            q = q.filter_by(service_instance=dbshare)
+            q = q.filter(
+                NasAlias.share_id.in_(map(lambda s: s[0], v2shares)))
             q = q.reset_joinpoint()
 
         if grn or eon_id:

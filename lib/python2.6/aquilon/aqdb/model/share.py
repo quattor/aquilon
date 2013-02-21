@@ -44,9 +44,6 @@ class Share(Resource):
                                     ondelete='CASCADE'),
                                     primary_key=True)
 
-    # TODO what is latency? What's its unit? millisec?
-    latency = Column(Integer)
-
 
 share = Share.__table__
 share.primary_key.name = '%s_pk' % (_TN)

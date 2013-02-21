@@ -117,8 +117,7 @@ from aquilon.aqdb.model.service_instance_server import ServiceInstanceServer
 from aquilon.aqdb.model.service_map import ServiceMap
 from aquilon.aqdb.model.personality_service_map import PersonalityServiceMap
 
-#NasDisk depends on ServiceInstance
-from aquilon.aqdb.model.disk import Disk, LocalDisk, NasDisk
+from aquilon.aqdb.model.disk import Disk, LocalDisk
 
 #CLUSTER
 #FIXME: this is a measure to dodge a warning raised by conflicting class names

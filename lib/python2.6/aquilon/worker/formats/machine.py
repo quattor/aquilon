@@ -116,9 +116,7 @@ class MachineFormatter(ObjectFormatter):
             details.append(indent + "  Serial: %s" % machine.serial_no)
         for d in machine.disks:
             extra = d.disk_type
-            if d.disk_type == "nas" and d.service_instance:
-                extra = extra + " from " + d.service_instance.name
-            elif d.disk_type == "virtual_disk" and d.share:
+            if hasattr(d, "share") and d.share:
                 extra = extra + " from " + d.share.name
             if d.bootable:
                 flags = " [boot]"

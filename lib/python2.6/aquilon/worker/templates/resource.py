@@ -66,7 +66,6 @@ class PlenaryResource(Plenary):
         pan_assign(lines, "name", self.name)
         pan_assign(lines, "server", share_info["server"])
         pan_assign(lines, "mountpoint", share_info["mount"])
-        pan_assign(lines, "latency", self.dbobj.latency)
 
     def body_filesystem(self, lines):
         pan_assign(lines, "type", self.dbobj.fstype)

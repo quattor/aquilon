@@ -57,8 +57,6 @@ class ServiceInstanceFormatter(ObjectFormatter):
         details.append(indent + "  Maximum Client Count: %s" %
                        ServiceInstanceFormatter.get_max_client_count(si))
         details.append(indent + "  Client Count: %d" % si.client_count)
-        if si.service.name == 'nas_disk_share':
-            details.append(indent + "  Disk Count: %d" % si.nas_disk_count)
         if si.comments:
             details.append(indent + "  Comments: %s" % si.comments)
         return "\n".join(details)
@@ -98,13 +96,12 @@ class ServiceInstanceListFormatter(ListFormatter):
 
 ObjectFormatter.handlers[ServiceInstanceList] = ServiceInstanceListFormatter()
 
-
-class Share(object):
+class ServiceShare(object):
     def __init__(self, dbshare):
         self.dbshare = dbshare
 
 
-class ShareFormatter(ObjectFormatter):
+class ServiceShareFormatter(ObjectFormatter):
     def format_raw(self, share, indent=""):
         dbshare = share.dbshare
         details = [indent + "NAS Disk Share: %s" % dbshare.name]
@@ -113,13 +110,13 @@ class ShareFormatter(ObjectFormatter):
 
         details.append(indent + "  Server: %s" % share_info["server"])
         details.append(indent + "  Mountpoint: %s" % share_info["mount"])
-        details.append(indent + "  Disk Count: %d" % dbshare.nas_disk_count)
-        details.append(indent + "  Maximum Disk Count: %s" %
-                       ServiceInstanceFormatter.get_max_client_count(dbshare))
+        details.append(indent + "  Disk Count: %d" % dbshare.disk_count)
+        # details.append(indent + "  Maximum Disk Count: %s" %
+        #                ServiceInstanceFormatter.get_max_client_count(dbshare))
         details.append(indent + "  Machine Count: %d" %
-                       dbshare.nas_machine_count)
-        if dbshare.comments:
-            details.append(indent + "  Comments: %s" % dbshare.comments)
+                       dbshare.machine_count)
+        # if dbshare.comments:
+        #     details.append(indent + "  Comments: %s" % dbshare.comments)
         return "\n".join(details)
 
-ObjectFormatter.handlers[Share] = ShareFormatter()
+ObjectFormatter.handlers[ServiceShare] = ServiceShareFormatter()
