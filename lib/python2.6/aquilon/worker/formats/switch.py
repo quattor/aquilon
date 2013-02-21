@@ -61,31 +61,6 @@ class SwitchInterfaceTupleFormatter(ObjectFormatter):
 ObjectFormatter.handlers[SwitchInterfaceTuple] = SwitchInterfaceTupleFormatter()
 
 
-class TorSwitchInterfaceTuple(tuple):
-    """Compatibility Layer for deprecated commands."""
-
-
-class TorSwitchInterfaceTupleFormatter(ObjectFormatter):
-    def csv_fields(self, item):
-        switch = item[0]
-        interface = item[1]
-        addr = item[2]
-
-        details = [switch.fqdn,
-                   switch.location.rack.name,
-                   switch.location.building.name,
-                   switch.model.vendor.name,
-                   switch.model.name,
-                   switch.serial_no]
-        if interface:
-            details.extend([addr.logical_name, interface.mac, addr.ip])
-        else:
-            details.extend([None, None, None])
-        return details
-
-ObjectFormatter.handlers[TorSwitchInterfaceTuple] = TorSwitchInterfaceTupleFormatter()
-
-
 class SwitchFormatter(ObjectFormatter):
     def format_raw(self, switch, indent=""):
         details = [indent + "%s: %s" % (switch.model.machine_type.capitalize(),
@@ -130,29 +105,6 @@ class SwitchFormatter(ObjectFormatter):
         return f.csv_fields(item)
 
 ObjectFormatter.handlers[Switch] = SwitchFormatter()
-
-
-class TorSwitch(object):
-    """Wrapper to mark switch objects that need to have the old CSV output."""
-    def __init__(self, dbtor_switch):
-        self.dbtor_switch = dbtor_switch
-
-    def __getattr__(self, attr):
-        return getattr(self.dbtor_switch, attr)
-
-
-class TorSwitchFormatter(SwitchFormatter):
-    """Wrapper to use the old CSV output."""
-    def csv_tolist(self, switch):
-        tuples = []
-        for addr in switch.all_addresses():
-            tuples.append(TorSwitchInterfaceTuple((switch, addr.interface, addr)))
-        if len(tuples):
-            return tuples
-        else:
-            return [TorSwitchInterfaceTuple((switch, None, None))]
-
-ObjectFormatter.handlers[TorSwitch] = TorSwitchFormatter()
 
 
 class SimpleSwitchList(list):

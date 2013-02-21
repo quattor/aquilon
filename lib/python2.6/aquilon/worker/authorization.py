@@ -150,9 +150,9 @@ class AuthorizationBroker(object):
                               'add_city', 'del_city']:
                 self.raise_auth_error(principal, action, resource)
         if dbuser.role.name == 'telco_operations':
-            if action not in ['add_rack', 'add_switch', 'add_tor_switch',
+            if action not in ['add_rack', 'add_switch',
                               'update_rack', 'update_switch',
-                              'del_rack', 'del_switch', 'del_tor_switch',
+                              'del_rack', 'del_switch',
                               'add_interface_switch', 'del_interface_switch',
                               'update_interface_switch',
                               'add_interface_address_switch',
@@ -219,8 +219,7 @@ class AuthorizationBroker(object):
                               'del_alias',
                               'add_filesystem',
                               'del_filesystem',
-                              'poll_switch', 'poll_tor_switch_tor_switch',
-                              'poll_switch_switch', 'poll_tor_switch',
+                              'poll_switch', 'poll_switch_switch',
                               'add_rack', 'add_rack_room', 'add_chassis',
                               'del_rack', 'del_chassis',
                               'add_address', 'del_address',

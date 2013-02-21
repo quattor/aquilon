@@ -133,7 +133,8 @@ class TestCluster(TestBrokerCommand):
         # So, make it a compatible archetype and try again
         command = ["reconfigure", "--hostname=aquilon61.aqd-unittest.ms.com",
                    "--personality=esx_server", "--archetype=vmhost",
-                   "--os=esxi/4.0.0", "--buildstatus=rebuild"]
+                   "--osname", "esxi", "--osversion", "4.0.0",
+                   "--buildstatus=rebuild"]
         (out, err) = self.successtest(command)
         self.matchoutput(err,
                          "Warning: Host aquilon61.aqd-unittest.ms.com "
@@ -203,7 +204,8 @@ class TestCluster(TestBrokerCommand):
 
         command = ["reconfigure", "--hostname=aquilon61.aqd-unittest.ms.com",
                    "--personality=inventory", "--archetype=aquilon",
-                   "--os=linux/5.0.1-x86_64", "--buildstatus=rebuild"]
+                   "--osname=linux", "--osversion=5.0.1-x86_64",
+                   "--buildstatus=rebuild"]
         self.successtest(command)
 
     def testfailbadlocation(self):

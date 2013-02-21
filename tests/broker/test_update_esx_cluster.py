@@ -149,13 +149,13 @@ class TestUpdateESXCluster(TestBrokerCommand):
     def test_330_updateutecl1switch(self):
         # Deprecated.
         command = ["update_esx_cluster", "--cluster=utecl1",
-                   "--tor_switch=ut01ga1s04.aqd-unittest.ms.com"]
+                   "--switch=ut01ga1s04.aqd-unittest.ms.com"]
         self.successtest(command)
 
     def test_340_updateutecl1switchfail(self):
         # Try something that is not a tor_switch
         command = ["update_esx_cluster", "--cluster=utecl1",
-                   "--tor_switch=unittest02.one-nyp.ms.com"]
+                   "--switch=unittest02.one-nyp.ms.com"]
         self.badrequesttest(command)
 
     def test_350_failupdatelocation(self):

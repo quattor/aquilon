@@ -65,7 +65,6 @@ class TestDelRack(TestBrokerCommand):
         command = "show rack --rack np997"
         self.notfoundtest(command.split(" "))
 
-    # Created by test_add_tor_switch
     def testdelnp998(self):
         command = "del rack --rack np998"
         self.noouttest(command.split(" "))
@@ -74,7 +73,6 @@ class TestDelRack(TestBrokerCommand):
         command = "show rack --rack np998"
         self.notfoundtest(command.split(" "))
 
-    # Created by test_add_tor_switch
     def testdelnp999(self):
         command = "del rack --rack np999"
         self.noouttest(command.split(" "))
@@ -83,7 +81,7 @@ class TestDelRack(TestBrokerCommand):
         command = "show rack --rack np999"
         self.notfoundtest(command.split(" "))
 
-    # FIXME: Maybe del_tor_switch should remove the rack if it is
+    # FIXME: Maybe del_switch should remove the rack if it is
     # otherwise empty.
     def testdelut8(self):
         command = "del rack --rack ut8"

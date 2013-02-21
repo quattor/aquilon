@@ -47,8 +47,7 @@ class CommandUpdateCluster(BrokerCommand):
                max_members, fix_location, down_hosts_threshold,
                maint_threshold, comments,
                # ESX specific options
-               switch, tor_switch, memory_capacity, clear_overrides,
-               vm_to_host_ratio,
+               switch, memory_capacity, clear_overrides, vm_to_host_ratio,
                **arguments):
 
         dbcluster = Cluster.get_unique(session, cluster, compel=True)
@@ -86,10 +85,6 @@ class CommandUpdateCluster(BrokerCommand):
                 dbcluster.host_count = host_count
                 cluster_updated = True
 
-        if tor_switch is not None:
-            logger.client_info("option tor_switch is deprecated. "
-                               "Please use --switch instead.")
-            switch = tor_switch
         if switch is not None:
             if switch:
                 # FIXME: Verify that any hosts are on the same network

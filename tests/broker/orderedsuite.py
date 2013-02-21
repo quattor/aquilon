@@ -93,7 +93,6 @@ from test_add_cluster import TestAddCluster
 from test_update_cluster import TestUpdateCluster
 from test_del_cluster import TestDelCluster
 from test_early_constraints_cluster import TestClusterEarlyConstraints
-from test_add_tor_switch import TestAddTorSwitch
 from test_add_switch import TestAddSwitch
 from test_update_switch import TestUpdateSwitch
 from test_rename_switch import TestRenameSwitch
@@ -307,7 +306,7 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestAddMetaCluster, TestAddESXCluster,
                 TestAddCluster,
                 TestClusterEarlyConstraints,
-                TestAddTorSwitch, TestAddSwitch, TestUpdateSwitch,
+                TestAddSwitch, TestUpdateSwitch,
                 TestAddChassis, TestUpdateChassis,
                 TestAddMachine, TestAddDisk, TestAddInterface,
                 TestAddAddress,

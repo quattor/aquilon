@@ -44,13 +44,13 @@ class TestDelSwitch(TestBrokerCommand):
     def testdelut3gd1r01(self):
         # Deprecated usage.
         self.dsdb_expect_delete(self.net.tor_net[12].usable[0])
-        command = "del tor_switch --tor_switch ut3gd1r01.aqd-unittest.ms.com"
+        command = "del switch --switch ut3gd1r01.aqd-unittest.ms.com"
         self.successtest(command.split(" "))
         self.dsdb_verify()
 
     def testverifydelut3gd1r01(self):
         # Deprecated usage.
-        command = "show tor_switch --tor_switch ut3gd1r01.aqd-unittest.ms.com"
+        command = "show switch --switch ut3gd1r01.aqd-unittest.ms.com"
         self.notfoundtest(command.split(" "))
 
     def testdelut3gd1r04(self):
@@ -76,36 +76,6 @@ class TestDelSwitch(TestBrokerCommand):
         command = "del switch --switch ut3gd1r07.aqd-unittest.ms.com"
         self.successtest(command.split(" "))
         self.dsdb_verify()
-
-    def testdelnp997gd1r04(self):
-        command = "del switch --switch np997gd1r04.aqd-unittest.ms.com"
-        self.noouttest(command.split(" "))
-
-    def testverifydelnp997gd1r04(self):
-        command = "show switch --switch np997gd1r04.aqd-unittest.ms.com"
-        self.notfoundtest(command.split(" "))
-
-    def testdelnp998gd1r01(self):
-        command = "del switch --switch np998gd1r01.aqd-unittest.ms.com"
-        self.noouttest(command.split(" "))
-
-    def testverifydelnp998gd1r01(self):
-        command = "show switch --switch np998gd1r01.aqd-unittest.ms.com"
-        self.notfoundtest(command.split(" "))
-
-    def testdelnp998gd1r02(self):
-        command = "del switch --switch np998gd1r02.aqd-unittest.ms.com"
-        self.noouttest(command.split(" "))
-
-    def testdelnp999gd1r01(self):
-        self.dsdb_expect_delete(self.net.tor_net[5].usable[0])
-        command = "del switch --switch np999gd1r01.aqd-unittest.ms.com"
-        self.noouttest(command.split(" "))
-        self.dsdb_verify()
-
-    def testverifydelnp999gd1r01(self):
-        command = "show switch --switch np999gd1r01.aqd-unittest.ms.com"
-        self.notfoundtest(command.split(" "))
 
     def testdelnp06bals03(self):
         self.dsdb_expect_delete("172.31.64.69")
