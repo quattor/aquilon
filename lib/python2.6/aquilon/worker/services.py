@@ -479,7 +479,12 @@ class HostChooser(Chooser):
         self.archetype = self.dbhost.archetype
         self.personality = self.dbhost.personality
 
-        self.network = self.dbhost.machine.primary_name.network
+        # If the primary name is a ReservedName, then it does not have a network
+        # attribute
+        if hasattr(self.dbhost.machine.primary_name, 'network'):
+            self.network = self.dbhost.machine.primary_name.network
+        else:
+            self.network = None
 
         # all of them would be self. but that should be optimized
         # dbhost.machine.interfaces[x].assignments[y].network

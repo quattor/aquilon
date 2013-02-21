@@ -110,10 +110,8 @@ class PlenaryHost(PlenaryCollection):
         self.plenaries.append(PlenaryHostData(dbhost))
 
     def write(self, locked=False, content=None):
-        # Don't bother writing plenary files for dummy aurora hardware or for
-        # non-compilable archetypes.
-        if self.dbobj.machine.model.machine_type == 'aurora_node' or \
-           not self.dbobj.archetype.is_compileable:
+        # Don't bother writing plenary files non-compilable archetypes.
+        if not self.dbobj.archetype.is_compileable:
             return 0
 
         # Standard PlenaryCollection swallows IncompleteError.  If/when

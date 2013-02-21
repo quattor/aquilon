@@ -54,8 +54,8 @@ class TestAddCluster(TestBrokerCommand):
     def test_10_verify_utvcs1(self):
         command = "show cluster --cluster utvcs1"
         out = self.commandtest(command.split(" "))
-        default_max = self.config.get("broker",
-                                      "hacluster_max_members_default")
+        default_max = self.config.get("archetype_hacluster",
+                                      "max_members_default")
         self.matchoutput(out, "High Availability Cluster: utvcs1", command)
         self.matchoutput(out, "Building: ut", command)
         self.matchoutput(out, "Max members: %s" % default_max, command)
@@ -131,7 +131,7 @@ class TestAddCluster(TestBrokerCommand):
         self.noouttest(command)
 
     def get_grid_max(self):
-        return self.config.getint("broker", "gridcluster_max_members_default")
+        return self.config.getint("archetype_gridcluster", "max_members_default")
 
     def test_41_verify_utgrid1(self):
         command = "show cluster --cluster utgrid1"

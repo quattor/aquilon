@@ -145,11 +145,6 @@ class CommandAddAuroraHost(CommandAddHost):
         # FIXME: Pull this from somewhere.
         buildstatus = 'ready'
 
-        if osname is None:
-            osname = 'linux'
-        if osversion is None:
-            osversion = 'generic'
-
         kwargs['skip_dsdb_check'] = True
         kwargs['session'] = session
         kwargs['logger'] = logger
@@ -157,8 +152,8 @@ class CommandAddAuroraHost(CommandAddHost):
         kwargs['archetype'] = 'aurora'
         kwargs['osname'] = osname
         kwargs['osversion'] = osversion
-        kwargs['personality'] = 'generic'
-        kwargs['domain'] = self.config.get("broker", "aurora_host_domain")
+        kwargs['personality'] = None
+        kwargs['domain'] = None
         kwargs['sandbox'] = None
         kwargs['machine'] = dbmachine.label
         kwargs['buildstatus'] = buildstatus

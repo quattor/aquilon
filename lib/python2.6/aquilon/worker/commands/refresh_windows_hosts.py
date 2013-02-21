@@ -130,8 +130,8 @@ class CommandRefreshWindowsHosts(BrokerCommand):
         session.autoflush = False
 
         dbdomain = Domain.get_unique(session,
-                                     self.config.get("broker",
-                                                     "windows_host_domain"),
+                                     self.config.get("archetype_windows",
+                                                     "host_domain"),
                                      compel=InternalError)
         dbarchetype = Archetype.get_unique(session, "windows",
                                            compel=InternalError)

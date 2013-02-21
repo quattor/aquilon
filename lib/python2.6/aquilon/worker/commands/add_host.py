@@ -66,6 +66,13 @@ class CommandAddHost(BrokerCommand):
                sandbox, osname, osversion, buildstatus, personality, comments,
                zebra_interfaces, grn, eon_id, skip_dsdb_check=False,
                **arguments):
+        dbarchetype = Archetype.get_unique(session, archetype, compel=True)
+        section = "archetype_" + dbarchetype.name
+
+        # This is for the various add_*_host commands
+        if not domain and not sandbox:
+            domain = self.config.get(section, "host_domain")
+
         (dbbranch, dbauthor) = get_branch_and_author(session, logger,
                                                      domain=domain,
                                                      sandbox=sandbox,
@@ -81,38 +88,26 @@ class CommandAddHost(BrokerCommand):
         dbmachine = Machine.get_unique(session, machine, compel=True)
         oldinfo = DSDBRunner.snapshot_hw(dbmachine)
 
-        dbarchetype = Archetype.get_unique(session, archetype, compel=True)
         if not personality:
-            if dbarchetype.name == 'aquilon':
-                personality = 'inventory'
+            if self.config.has_option(section, "default_personality"):
+                personality = self.config.get(section, "default_personality")
             else:
                 personality = 'generic'
         dbpersonality = Personality.get_unique(session, name=personality,
-                                               archetype=archetype, compel=True)
+                                               archetype=dbarchetype, compel=True)
 
-        if dbarchetype.name == 'aquilon':
-            # default to os linux/5.0.1-x86_64 for aquilon
-            if not osname:
-                osname = 'linux'
-            if not osversion:
-                osversion = '5.0.1-x86_64'
-        elif dbarchetype.name == 'aurora':
-            if not osname:
-                #no solaris yet
-                osname = 'linux'
-            if not osversion:
-                osversion = 'generic'
-        elif dbarchetype.name == 'windows':
-            if not osname:
-                osname = 'windows'
-            if not osversion:
-                osversion = 'generic'
-        else:
-            if not osname or not osversion:
-                raise ArgumentError("Can not determine a sensible default OS "
-                                    "for archetype %s. Please use the "
-                                    "--osname and --osversion parameters." %
-                                    (dbarchetype.name))
+        if not osname:
+            if self.config.has_option(section, "default_osname"):
+                osname = self.config.get(section, "default_osname")
+        if not osversion:
+            if self.config.has_option(section, "default_osversion"):
+                osversion = self.config.get(section, "default_osversion")
+
+        if not osname or not osversion:
+            raise ArgumentError("Can not determine a sensible default OS "
+                                "for archetype %s. Please use the "
+                                "--osname and --osversion parameters." %
+                                (dbarchetype.name))
 
         dbos = OperatingSystem.get_unique(session, name=osname,
                                           version=osversion,

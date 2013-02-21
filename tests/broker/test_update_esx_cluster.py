@@ -43,18 +43,18 @@ from brokertest import TestBrokerCommand
 class TestUpdateESXCluster(TestBrokerCommand):
 
     def test_100_updatenoop(self):
-        default_max = self.config.get("broker",
-                                      "esx_cluster_max_members_default")
+        default_max = self.config.get("archetype_esx_cluster",
+                                      "max_members_default")
         self.noouttest(["update_esx_cluster", "--cluster=utecl4",
                         "--building=ut"])
 
     def test_110_verifynoop(self):
         command = "show esx_cluster --cluster utecl4"
         out = self.commandtest(command.split(" "))
-        default_ratio = self.config.get("broker",
-                                        "esx_cluster_vm_to_host_ratio")
-        default_max = self.config.get("broker",
-                                      "esx_cluster_max_members_default")
+        default_ratio = self.config.get("archetype_esx_cluster",
+                                        "vm_to_host_ratio")
+        default_max = self.config.get("archetype_esx_cluster",
+                                      "max_members_default")
         self.matchoutput(out, "ESX Cluster: utecl4", command)
         self.matchoutput(out, "Metacluster: utmc2", command)
         self.matchoutput(out, "Building: ut", command)
@@ -262,10 +262,10 @@ class TestUpdateESXCluster(TestBrokerCommand):
         self.matchoutput(out, "cannot support VMs", command)
 
     def test_450_verifyutecl1(self):
-        default_max = self.config.get("broker",
-                                      "esx_cluster_max_members_default")
-        default_ratio = self.config.get("broker",
-                                        "esx_cluster_vm_to_host_ratio")
+        default_max = self.config.get("archetype_esx_cluster",
+                                      "max_members_default")
+        default_ratio = self.config.get("archetype_esx_cluster",
+                                        "vm_to_host_ratio")
         command = "show esx_cluster --cluster utecl1"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "ESX Cluster: utecl1", command)
