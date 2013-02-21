@@ -71,7 +71,7 @@ class PlenaryClusterData(Plenary):
         if dbcluster.metacluster:
             self.metacluster = dbcluster.metacluster.name
         else:
-            self.metacluster = "global"
+            self.metacluster = None
         self.plenary_core = "clusterdata"
         self.plenary_template = dbcluster.name
 
@@ -174,10 +174,6 @@ class PlenaryClusterObject(Plenary):
     def __init__(self, dbcluster, logger=LOGGER):
         Plenary.__init__(self, dbcluster, logger=logger)
         self.name = dbcluster.name
-        if dbcluster.metacluster:
-            self.metacluster = dbcluster.metacluster.name
-        else:
-            self.metacluster = "global"
         self.loadpath = dbcluster.personality.archetype.name
         self.plenary_core = "clusters"
         self.plenary_template = dbcluster.name
