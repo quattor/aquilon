@@ -57,13 +57,13 @@ class TestAddVirtualHardware(TestBrokerCommand):
         command = ["search_audit", "--command", "add_machine", "--limit", 1,
                    "--keyword", "evm", "--argument", "prefix"]
         out = self.commandtest(command)
-        self.matchoutput(out, "[Result: evm9]", command)
+        self.matchoutput(out, "[Result: machine=evm9]", command)
 
     def test_002_verify_audit_argument(self):
         command = ["search_audit", "--command", "add_machine",
-                   "--keyword", "evm9", "--argument", "__RESULT__"]
+                   "--keyword", "evm9", "--argument", "__RESULT__:machine"]
         out = self.commandtest(command)
-        self.matchoutput(out, "[Result: evm9]", command)
+        self.matchoutput(out, "[Result: machine=evm9]", command)
         command = ["search_audit", "--keyword", "evm9", "--argument", "machine"]
         self.noouttest(command)
 
@@ -309,6 +309,15 @@ class TestAddVirtualHardware(TestBrokerCommand):
                               r'"hwaddr", "00:50:56:01:20:%02x"\s*\)\s*\);'
                               % (i - 1),
                               command)
+
+    def test_500_verifyaudit(self):
+        for i in range(1, 9):
+            command = ["search", "audit", "--command", "add_interface",
+                       "--keyword", "evm%d" % i]
+            out = self.commandtest(command)
+            self.matchoutput(out,
+                             "[Result: mac=00:50:56:01:20:%02x]" % (i - 1),
+                             command)
 
     def test_500_verifycatcluster(self):
         command = "cat --cluster=utecl1 --data"

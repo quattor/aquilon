@@ -67,8 +67,10 @@ class CommandAddInterfaceAddress(BrokerCommand):
 
         oldinfo = DSDBRunner.snapshot_hw(dbhw_ent)
 
-        ip = generate_ip(session, dbinterface, network_environment=dbnet_env,
-                         **kwargs)
+        audit_results = []
+        ip = generate_ip(session, logger, dbinterface,
+                         network_environment=dbnet_env,
+                         audit_results=audit_results, **kwargs)
 
         if dbinterface.interface_type == "loopback":
             # Switch loopback interfaces may use e.g. the network address as an
@@ -184,4 +186,6 @@ class CommandAddInterfaceAddress(BrokerCommand):
             dsdb_runner.update_host(dbhw_ent, oldinfo)
             dsdb_runner.commit_or_rollback("Could not add host to DSDB")
 
+        for name, value in audit_results:
+            self.audit_result(session, name, value, **kwargs)
         return

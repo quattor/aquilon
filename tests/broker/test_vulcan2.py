@@ -201,6 +201,12 @@ class TestVulcan20(TestBrokerCommand):
                          "utpgsw1.aqd-unittest.ms.com",
                          command)
 
+    def test_101_verify_audit(self):
+        command = ["search_audit", "--command", "add_interface",
+                   "--keyword", "utpgm0"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "pg=user-v710", command)
+
 #    Storage group / resource tests
     def test_101_add_rg_to_cluster(self):
         command = ["add_resourcegroup", "--resourcegroup=utmc8as1",

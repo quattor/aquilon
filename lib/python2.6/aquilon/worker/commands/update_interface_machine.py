@@ -63,6 +63,8 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
 
         """
 
+        audit_results = []
+
         dbhw_ent = Machine.get_unique(session, machine, compel=True)
         dbinterface = Interface.get_unique(session, hardware_entity=dbhw_ent,
                                            name=interface, compel=True)
@@ -85,7 +87,8 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
                 dbinterface.hardware_entity, pg)
         elif autopg:
             dbinterface.port_group = choose_port_group(
-                session, dbinterface.hardware_entity)
+                session, logger, dbinterface.hardware_entity)
+            audit_results.append(('pg', dbinterface.port_group))
 
         if master:
             if dbinterface.addresses:
@@ -171,4 +174,7 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
             raise
         finally:
             lock_queue.release(key)
+
+        for name, value in audit_results:
+            self.audit_result(session, name, value, **arguments)
         return

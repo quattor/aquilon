@@ -87,9 +87,9 @@ def check_ip_restrictions(dbnetwork, ip, relaxed=False):
     return
 
 
-def generate_ip(session, dbinterface, ip=None, ipfromip=None,
-                ipfromsystem=None, autoip=None, ipalgorithm=None,
-                compel=False, network_environment=None, **kwargs):
+def generate_ip(session, logger, dbinterface, ip=None, ipfromip=None,
+                ipfromsystem=None, autoip=None, ipalgorithm=None, compel=False,
+                network_environment=None, audit_results=None, **kwargs):
     ip_options = [ip, ipfromip, ipfromsystem, autoip]
     numopts = sum([1 if opt else 0 for opt in ip_options])
     if numopts > 1:
@@ -189,25 +189,34 @@ def generate_ip(session, dbinterface, ip=None, ipfromip=None,
     if ipalgorithm is None or ipalgorithm == 'lowest':
         # Select the lowest available address
         ip = IPv4Address(min(free_set))
-        return ip
     elif ipalgorithm == 'highest':
         # Select the highest available address
         ip = IPv4Address(max(free_set))
-        return ip
     elif ipalgorithm == 'max':
         # Return the max. used address + 1
         if not used_set:
-            #Avoids ValueError being thrown when used_set is empty
-            return IPv4Address(min(free_set))
-        ip = None
-        next = max(used_set)
-        if not next + 1 in free_set:
-            raise ArgumentError("Failed to find an IP that is suitable for " \
-                                "--ipalgorithm=max.  Try an other algorithm "
-                                "as there are still some free addresses.")
-        ip = IPv4Address(next + 1)
-        return ip
-    raise ArgumentError("Unknown algorithm %s." % ipalgorithm)
+            # Avoids ValueError being thrown when used_set is empty
+            ip = IPv4Address(min(free_set))
+        else:
+            next = max(used_set)
+            if not next + 1 in free_set:
+                raise ArgumentError("Failed to find an IP that is suitable "
+                                    "for --ipalgorithm=max.  Try an other "
+                                    "algorithm as there are still some free "
+                                    "addresses.")
+            ip = IPv4Address(next + 1)
+    else:
+        raise ArgumentError("Unknown algorithm %s." % ipalgorithm)
+
+    if audit_results is not None:
+        if dbinterface:
+            logger.info("Selected IP address {0!s} for {1:l}"
+                        .format(ip, dbinterface))
+        else:
+            logger.info("Selected IP address %s" % ip)
+        audit_results.append(('ip', ip))
+
+    return ip
 
 
 def describe_interface(session, interface):
@@ -281,7 +290,7 @@ def verify_port_group(dbmachine, port_group):
     return dbvi.port_group
 
 
-def choose_port_group(session, dbmachine):
+def choose_port_group(session, logger, dbmachine):
     if dbmachine.model.machine_type != "virtual_machine":
         raise ArgumentError("Can only automatically generate "
                             "portgroup entry for virtual hardware.")
@@ -310,6 +319,8 @@ def choose_port_group(session, dbmachine):
             selected_vlan = dbobserved_vlan
 
     if selected_vlan:
+        logger.info("Selected port group {0} for {1:l} (based on {2:l})"
+                    .format(selected_vlan.port_group, dbmachine, sw))
         return selected_vlan.port_group
     raise ArgumentError("No available user port groups on "
                         "{0:l}.".format(dbmachine.cluster.switch))
