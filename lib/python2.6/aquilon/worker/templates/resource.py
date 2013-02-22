@@ -38,7 +38,7 @@ from aquilon.aqdb.model import (Application, Filesystem, Intervention,
 from aquilon.aqdb.model.disk import find_storage_data
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
 from aquilon.worker.templates.panutils import (StructureTemplate, pan_assign,
-                                               pan_push)
+                                               pan_append)
 
 LOGGER = logging.getLogger('aquilon.server.templates.resource')
 
@@ -115,8 +115,9 @@ class PlenaryResource(Plenary):
         pan_assign(lines, "name", self.dbobj.name)
         if self.dbobj.resholder:
             for resource in self.dbobj.resholder.resources:
-                pan_push(lines, "resources/%s" % resource.resource_type,
-                         StructureTemplate(resource.template_base + "/config"))
+                pan_append(lines, "resources/" + resource.resource_type,
+                           StructureTemplate(resource.template_base +
+                                             "/config"))
 
     def body_reboot_iv(self, lines):
         pan_assign(lines, "name", self.dbobj.name)

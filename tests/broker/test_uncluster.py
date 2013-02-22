@@ -87,7 +87,7 @@ class TestUncluster(TestBrokerCommand):
     def testverifycat(self):
         command = "cat --cluster utecl1 --data"
         out = self.commandtest(command.split())
-        self.searchoutput(out, r'"/system/cluster/members" = list\(\s*\);', command)
+        self.searchoutput(out, r'"system/cluster/members" = list\(\s*\);', command)
 
     def testunbindutecl2(self):
         self.noouttest(["uncluster", "--hostname", "evh5.aqd-unittest.ms.com",

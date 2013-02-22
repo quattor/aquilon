@@ -39,8 +39,9 @@ from aquilon.aqdb.model import (Host, VlanInterface, BondingInterface,
 from aquilon.worker.locks import CompileKey
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
 from aquilon.worker.templates.cluster import PlenaryClusterClient
-from aquilon.worker.templates.panutils import (StructureTemplate, pan_assign,
-                                               pan_push, pan_include)
+from aquilon.worker.templates.panutils import (StructureTemplate, PanValue,
+                                               pan_assign, pan_append,
+                                               pan_include)
 
 LOGGER = logging.getLogger(__name__)
 
@@ -128,7 +129,7 @@ Plenary.handlers[Host] = PlenaryHost
 
 class PlenaryHostData(Plenary):
 
-    template_type = ""
+    template_type = "structure"
 
     def __init__(self, dbhost, logger=LOGGER):
         Plenary.__init__(self, dbhost, logger=logger)
@@ -242,42 +243,41 @@ class PlenaryHostData(Plenary):
             interfaces[dbinterface.name] = ifdesc
 
         # Okay, here's the real content
-        pan_include(lines, ["pan/units", "pan/functions"])
-        lines.append("")
         pmachine = Plenary.get_plenary(self.dbobj.machine, logger=self.logger)
-        pan_assign(lines, "/hardware",
+        pan_assign(lines, "hardware",
                    StructureTemplate(pmachine.plenary_template_name))
 
         lines.append("")
-        pan_assign(lines, "/system/network/interfaces", interfaces)
-        pan_assign(lines, "/system/network/primary_ip",
+        pan_assign(lines, "system/network/interfaces", interfaces)
+        pan_assign(lines, "system/network/primary_ip",
                    self.dbobj.machine.primary_ip)
         if default_gateway:
-            pan_assign(lines, "/system/network/default_gateway",
+            pan_assign(lines, "system/network/default_gateway",
                        default_gateway)
         if routers:
-            pan_assign(lines, "/system/network/routers", routers)
+            pan_assign(lines, "system/network/routers", routers)
         lines.append("")
 
-        pan_assign(lines, "/system/build", self.dbobj.status.name)
-        pan_assign(lines, "/system/advertise_status", self.dbobj.advertise_status)
+        pan_assign(lines, "system/build", self.dbobj.status.name)
+        pan_assign(lines, "system/advertise_status", self.dbobj.advertise_status)
 
         eon_id_set = set([grn.eon_id for grn in self.dbobj.grns])
         eon_id_set |= set([grn.eon_id for grn in pers.grns])
         eon_id_list = list(eon_id_set)
         eon_id_list.sort()
         if eon_id_list:
-            pan_assign(lines, "/system/eon_ids", eon_id_list)
+            pan_assign(lines, "system/eon_ids", eon_id_list)
 
         if self.dbobj.cluster:
-            pan_assign(lines, "/system/cluster/name", self.dbobj.cluster.name)
-            pan_assign(lines, "/system/cluster/node_index",
+            pan_assign(lines, "system/cluster/name", self.dbobj.cluster.name)
+            pan_assign(lines, "system/cluster/node_index",
                        self.dbobj._cluster.node_index)
         if self.dbobj.resholder:
             lines.append("")
             for resource in sorted(self.dbobj.resholder.resources):
-                pan_push(lines, "/system/resources/%s" % resource.resource_type,
-                         StructureTemplate(resource.template_base + '/config'))
+                pan_append(lines, "system/resources/" + resource.resource_type,
+                           StructureTemplate(resource.template_base +
+                                             '/config'))
 
 
 class PlenaryToplevelHost(Plenary):
@@ -350,7 +350,9 @@ class PlenaryToplevelHost(Plenary):
         pan_include(lines, ["pan/units", "pan/functions"])
         lines.append("")
 
-        pan_include(lines, "hostdata/%s" % self.name)
+        pan_assign(lines, "/",
+                   StructureTemplate("hostdata/%s" % self.name,
+                                     {"metadata": PanValue("/metadata")}))
         pan_include(lines, "archetype/base")
         pan_include(lines, self.dbobj.operating_system.cfg_path + '/config')
 

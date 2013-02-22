@@ -78,8 +78,8 @@ class TestMakeCluster(TestBrokerCommand):
 
         command = "cat --cluster=utecl1 --data"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, '"/system/cluster/name" = "utecl1";', command)
-        self.matchoutput(out, '"/system/metacluster/name" = "utmc1";', command)
+        self.matchoutput(out, '"system/cluster/name" = "utecl1";', command)
+        self.matchoutput(out, '"system/metacluster/name" = "utmc1";', command)
         self.matchclean(out, "resources/virtual_machine", command)
 
     def testverifycatutecl1_2(self):
@@ -100,7 +100,7 @@ class TestMakeCluster(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
 
         self.searchoutput(out,
-                          r'"/system/cluster/allowed_personalities" = list\(\s*' +
+                          r'"system/cluster/allowed_personalities" = list\(\s*' +
                           '"vmhost/generic",' + r'\s*' +
                           '"vmhost/vulcan-1g-desktop-prod"' + r'\s*\);',
                           command)
@@ -170,8 +170,8 @@ class TestMakeCluster(TestBrokerCommand):
 
         command = "cat --cluster=utecl2 --data"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, '"/system/cluster/name" = "utecl2";', command)
-        self.matchoutput(out, '"/system/metacluster/name" = "utmc1";', command)
+        self.matchoutput(out, '"system/cluster/name" = "utecl2";', command)
+        self.matchoutput(out, '"system/metacluster/name" = "utmc1";', command)
         self.matchclean(out, "resources/virtual_machine", command)
 
     def testfailmissingcluster(self):

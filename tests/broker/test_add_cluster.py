@@ -73,16 +73,16 @@ class TestAddCluster(TestBrokerCommand):
                                                                 "vcs-msvcs",
                                                                 "compute")
 
-        self.matchoutput(data, '"/system/cluster/down_hosts_threshold" = 0;',
+        self.matchoutput(data, '"system/cluster/down_hosts_threshold" = 0;',
                          data_cmd)
-        self.matchoutput(data, '"/system/cluster/down_maint_threshold" = 1;',
+        self.matchoutput(data, '"system/cluster/down_maint_threshold" = 1;',
                          data_cmd)
-        self.matchclean(data, '"/system/cluster/down_hosts_as_percent"',
+        self.matchclean(data, '"system/cluster/down_hosts_as_percent"',
                         data_cmd)
-        self.matchclean(data, '"/system/cluster/down_maint_as_percent"',
+        self.matchclean(data, '"system/cluster/down_maint_as_percent"',
                         data_cmd)
-        self.matchclean(data, '"/system/cluster/down_hosts_percent"', data_cmd)
-        self.matchclean(data, '"/system/cluster/down_maint_percent"', data_cmd)
+        self.matchclean(data, '"system/cluster/down_hosts_percent"', data_cmd)
+        self.matchclean(data, '"system/cluster/down_maint_percent"', data_cmd)
 
     def test_20_fail_add_existing(self):
         command = ["add_cluster", "--cluster=utvcs1",
@@ -153,17 +153,17 @@ class TestAddCluster(TestBrokerCommand):
                                                                 "hadoop",
                                                                 "compute")
 
-        self.matchoutput(data, '"/system/cluster/down_hosts_threshold" = 0;',
+        self.matchoutput(data, '"system/cluster/down_hosts_threshold" = 0;',
                          data_cmd)
-        self.matchoutput(data, '"/system/cluster/down_maint_threshold" = 0;',
+        self.matchoutput(data, '"system/cluster/down_maint_threshold" = 0;',
                          data_cmd)
-        self.matchoutput(data, '"/system/cluster/down_hosts_as_percent" = true;',
+        self.matchoutput(data, '"system/cluster/down_hosts_as_percent" = true;',
                          data_cmd)
-        self.matchoutput(data, '"/system/cluster/down_maint_as_percent" = true;',
+        self.matchoutput(data, '"system/cluster/down_maint_as_percent" = true;',
                          data_cmd)
-        self.matchoutput(data, '"/system/cluster/down_hosts_percent" = 5;',
+        self.matchoutput(data, '"system/cluster/down_hosts_percent" = 5;',
                          data_cmd)
-        self.matchoutput(data, '"/system/cluster/down_maint_percent" = 6;',
+        self.matchoutput(data, '"system/cluster/down_maint_percent" = 6;',
                          data_cmd)
 
     def test_43_verifyshowutgrid1proto(self):
@@ -273,7 +273,7 @@ class TestAddCluster(TestBrokerCommand):
         self.searchoutput(object,
                           r'variable LOADPATH = list\(\s*"%s"\s*\);' % archetype,
                           object_command)
-        self.matchoutput(object, 'include { "clusterdata/%s" };' % name,
+        self.matchoutput(object, '"/" = create("clusterdata/%s"' % name,
                          object_command)
         self.matchclean(object, 'include { "service', object_command)
         self.matchoutput(object, 'include { "personality/%s/config" };' % persona,
@@ -292,27 +292,27 @@ class TestAddCluster(TestBrokerCommand):
         data_command = ["cat", "--cluster", name, "--data"]
         data = self.commandtest(data_command)
 
-        self.matchoutput(data, "template clusterdata/%s" % name,
+        self.matchoutput(data, "structure template clusterdata/%s" % name,
                          data_command)
-        self.matchoutput(data, '"/system/cluster/name" = "%s";' % name,
+        self.matchoutput(data, '"system/cluster/name" = "%s";' % name,
                          data_command)
-        self.matchoutput(data, '"/system/cluster/type" = "%s";' % ctype,
+        self.matchoutput(data, '"system/cluster/type" = "%s";' % ctype,
                          data_command)
-        self.matchoutput(data, '"/system/cluster/sysloc/continent" = "na";',
+        self.matchoutput(data, '"system/cluster/sysloc/continent" = "na";',
                          data_command)
-        self.matchoutput(data, '"/system/cluster/sysloc/city" = "ny";',
+        self.matchoutput(data, '"system/cluster/sysloc/city" = "ny";',
                          data_command)
-        self.matchoutput(data, '"/system/cluster/sysloc/campus" = "ny";',
+        self.matchoutput(data, '"system/cluster/sysloc/campus" = "ny";',
                          data_command)
-        self.matchoutput(data, '"/system/cluster/sysloc/building" = "ut";',
+        self.matchoutput(data, '"system/cluster/sysloc/building" = "ut";',
                          data_command)
-        self.matchoutput(data, '"/system/cluster/sysloc/location" = "ut.ny.na";',
+        self.matchoutput(data, '"system/cluster/sysloc/location" = "ut.ny.na";',
                          data_command)
-        self.matchoutput(data, '"/system/build" = "build";', data_command)
-        self.matchclean(data, '"/system/cluster/rack/row"', data_command)
-        self.matchclean(data, '"/system/cluster/rack/column"', data_command)
-        self.matchclean(data, '"/system/cluster/rack/name"', data_command)
-        self.matchclean(data, '"/system/cluster/allowed_personalities"', data_command)
+        self.matchoutput(data, '"system/build" = "build";', data_command)
+        self.matchclean(data, '"system/cluster/rack/row"', data_command)
+        self.matchclean(data, '"system/cluster/rack/column"', data_command)
+        self.matchclean(data, '"system/cluster/rack/name"', data_command)
+        self.matchclean(data, '"system/cluster/allowed_personalities"', data_command)
 
         return object_command, object, data_command, data
 

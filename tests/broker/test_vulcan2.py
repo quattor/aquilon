@@ -173,7 +173,7 @@ class TestVulcan20(TestBrokerCommand):
         data_command = ["cat", "--cluster", "utpgcl0", "--data"]
         data = self.commandtest(data_command)
 
-        self.matchoutput(data, '"/system/cluster/rack/room" = "utroom1";',
+        self.matchoutput(data, '"system/cluster/rack/room" = "utroom1";',
                          data_command)
 
         data_command = ["cat", "--machine", "utpgs01p0"]
@@ -233,8 +233,8 @@ class TestVulcan20(TestBrokerCommand):
         command = ["cat", "--cluster", "utmc8", "--data"]
         out = self.commandtest(command)
         self.matchoutput(out,
-                         '"/system/resources/resourcegroup" = '
-                         'push(create("resource/cluster/utmc8/'
+                         '"system/resources/resourcegroup" = '
+                         'append(create("resource/cluster/utmc8/'
                          'resourcegroup/utmc8as1/config"));',
                          command)
 
@@ -276,7 +276,7 @@ class TestVulcan20(TestBrokerCommand):
         self.matchoutput(out, '"name" = "utmc8as1', command)
         self.matchoutput(out,
                          '"resources/share" = '
-                         'push(create("resource/cluster/utmc8/resourcegroup/'
+                         'append(create("resource/cluster/utmc8/resourcegroup/'
                          'utmc8as1/share/test_v2_share/config"));',
                          command)
 

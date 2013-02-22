@@ -33,9 +33,8 @@ import logging
 from aquilon.aqdb.model import Personality, Parameter
 from aquilon.worker.templates.base import (Plenary, TemplateFormatter,
                                            PlenaryCollection)
-from aquilon.worker.templates.panutils import (pan_include,
-                                               pan_variable,
-                                               pan_assign, pan_push,
+from aquilon.worker.templates.panutils import (pan_include, pan_variable,
+                                               pan_assign, pan_append,
                                                pan_include_if_exists)
 from aquilon.worker.dbwrappers.parameter import (validate_value,
                                                  get_parameters)
@@ -186,7 +185,7 @@ class PlenaryPersonalityBase(Plenary):
         eon_id_list = [grn.eon_id for grn in self.dbobj.grns]
         eon_id_list.sort()
         for eon_id in eon_id_list:
-            pan_push(lines, "/system/eon_ids", eon_id)
+            pan_append(lines, "/system/eon_ids", eon_id)
 
         ## include pre features
         pan_include_if_exists(lines, "%s/pre_feature" % self.plenary_core)

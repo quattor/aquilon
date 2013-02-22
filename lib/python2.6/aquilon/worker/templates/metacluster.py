@@ -33,8 +33,9 @@ import logging
 
 from aquilon.aqdb.model import MetaCluster
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
-from aquilon.worker.templates.panutils import (StructureTemplate, pan_assign,
-                                               pan_include, pan_push)
+from aquilon.worker.templates.panutils import (StructureTemplate, PanValue,
+                                               pan_assign, pan_include,
+                                               pan_append)
 from aquilon.worker.locks import CompileKey
 
 
@@ -54,7 +55,7 @@ class PlenaryMetaCluster(PlenaryCollection):
 
 class PlenaryMetaClusterData(Plenary):
 
-    template_type = ""
+    template_type = "structure"
 
     def __init__(self, dbmetacluster, logger=LOGGER):
         Plenary.__init__(self, dbmetacluster, logger=logger)
@@ -69,49 +70,48 @@ class PlenaryMetaClusterData(Plenary):
                           profile=self.plenary_template, logger=self.logger)
 
     def body(self, lines):
-        pan_include(lines, ["pan/units", "pan/functions"])
-        lines.append("")
-        pan_assign(lines, "/system/metacluster/name", self.name)
-        pan_assign(lines, "/system/metacluster/type", self.dbobj.cluster_type)
+        pan_assign(lines, "system/metacluster/name", self.name)
+        pan_assign(lines, "system/metacluster/type", self.dbobj.cluster_type)
 
         dbloc = self.dbobj.location_constraint
-        pan_assign(lines, "/system/metacluster/sysloc/location", dbloc.sysloc())
+        pan_assign(lines, "system/metacluster/sysloc/location", dbloc.sysloc())
         if dbloc.continent:
-            pan_assign(lines, "/system/metacluster/sysloc/continent",
+            pan_assign(lines, "system/metacluster/sysloc/continent",
                        dbloc.continent.name)
         if dbloc.city:
-            pan_assign(lines, "/system/metacluster/sysloc/city", dbloc.city.name)
+            pan_assign(lines, "system/metacluster/sysloc/city", dbloc.city.name)
         if dbloc.campus:
-            pan_assign(lines, "/system/metacluster/sysloc/campus",
+            pan_assign(lines, "system/metacluster/sysloc/campus",
                        dbloc.campus.name)
             ## maintaining this so templates dont break
             ## during transtion period.. should be DEPRECATED
-            pan_assign(lines, "/system/metacluster/campus", dbloc.campus.name)
+            pan_assign(lines, "system/metacluster/campus", dbloc.campus.name)
         if dbloc.building:
-            pan_assign(lines, "/system/metacluster/sysloc/building",
+            pan_assign(lines, "system/metacluster/sysloc/building",
                        dbloc.building.name)
         if dbloc.rack:
-            pan_assign(lines, "/system/metacluster/rack/row",
+            pan_assign(lines, "system/metacluster/rack/row",
                        dbloc.rack.rack_row)
-            pan_assign(lines, "/system/metacluster/rack/column",
+            pan_assign(lines, "system/metacluster/rack/column",
                        dbloc.rack.rack_column)
-            pan_assign(lines, "/system/metacluster/rack/name",
+            pan_assign(lines, "system/metacluster/rack/name",
                        dbloc.rack.name)
 
         lines.append("")
 
-        pan_assign(lines, "/system/metacluster/members",
+        pan_assign(lines, "system/metacluster/members",
                    [member.name for member in self.dbobj.members])
 
         lines.append("")
 
-        pan_assign(lines, "/system/build", self.dbobj.status.name)
+        pan_assign(lines, "system/build", self.dbobj.status.name)
 
         lines.append("")
         if self.dbobj.resholder:
             for resource in sorted(self.dbobj.resholder.resources):
-                pan_push(lines, "/system/resources/%s" % resource.resource_type,
-                         StructureTemplate(resource.template_base + '/config'))
+                pan_append(lines, "system/resources/" + resource.resource_type,
+                           StructureTemplate(resource.template_base +
+                                             '/config'))
 
 
 class PlenaryMetaClusterObject(Plenary):
@@ -132,7 +132,9 @@ class PlenaryMetaClusterObject(Plenary):
 
     def body(self, lines):
         pan_include(lines, ["pan/units", "pan/functions"])
-        pan_include(lines, "clusterdata/%s" % self.name)
+        pan_assign(lines, "/",
+                   StructureTemplate("clusterdata/%s" % self.name,
+                                     {"metadata": PanValue("/metadata")}))
         pan_include(lines, "archetype/base")
 
         #for esx_management_server
