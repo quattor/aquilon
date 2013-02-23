@@ -36,6 +36,7 @@ from ConfigParser import NoSectionError, NoOptionError
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import (Archetype, Personality,
                                 Parameter, HostEnvironment,
+                                PersonalityServiceMap,
                                 PersonalityParameter)
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.parameter import get_parameters
@@ -117,6 +118,19 @@ class CommandAddPersonality(BrokerCommand):
                     params["interface_name"] = link.interface_name
 
                 add_link(session, logger, link.feature, params)
+
+            ## service maps
+            q = session.query(PersonalityServiceMap).filter_by(personality=dbfrom_persona)
+
+            for sm in q.all() :
+                dbmap = PersonalityServiceMap(service_instance=sm.service_instance,
+                                              location=sm.location,
+                                              network=sm.network,
+                                              personality=dbpersona)
+                session.add(dbmap)
+
+            ## required services
+            dbpersona.services.extend(dbfrom_persona.services)
 
         session.flush()
 

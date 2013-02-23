@@ -234,6 +234,20 @@ class TestMapService(TestBrokerCommand):
                          "Service: utsvc Instance: utsi2 Map: Organization ms",
                          command)
 
+    def testmaputsilpersona2(self):
+        self.noouttest(["add_personality", "--personality", "testme",
+                          "--eon_id", "2", "--archetype", "aquilon",
+                          "--copy_from", "lemon-collector-oracle",
+                          "--host_environment", "dev"])
+
+        command = ["show_map", "--archetype=aquilon",
+                   "--service=utsvc"]
+        out = self.commandtest(command)
+        self.matchoutput(out,
+                         "Archetype: aquilon Personality: testme "
+                         "Service: utsvc Instance: utsi2 Map: Organization ms",
+                         command)
+
     def testverifymapwihtoutarchetype(self):
         command = ["show_map",
                    "--personality=lemon-collector-oracle", "--service=utsvc"]
@@ -248,6 +262,10 @@ class TestMapService(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out,
                          "Archetype: aquilon Personality: lemon-collector-oracle "
+                         "Service: utsvc Instance: utsi2 Map: Organization ms",
+                         command)
+        self.matchoutput(out,
+                         "Archetype: aquilon Personality: testme "
                          "Service: utsvc Instance: utsi2 Map: Organization ms",
                          command)
 
@@ -350,6 +368,10 @@ class TestMapService(TestBrokerCommand):
                          "Service: vmseasoning Instance: pepper "
                          "Map: Building ut",
                          command)
+
+    def testzcleanup(self):
+        self.successtest(["del_personality", "--personality", "testme",
+                          "--archetype", "aquilon"])
 
 
 if __name__ == '__main__':
