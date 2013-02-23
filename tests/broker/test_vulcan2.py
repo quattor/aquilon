@@ -84,7 +84,7 @@ class TestVulcan20(TestBrokerCommand):
     # see     def testverifypollut01ga2s01(self):
     # see fakevlan2net
     def test_003_pollutpgsw(self):
-        # Issues deprecated warning.
+        macs = ["02:02:04:02:12:05", "02:02:04:02:12:06"]
         for i in range(0, 2):
             command = ["poll", "switch", "--vlan", "--switch",
                        "utpgsw%d.aqd-unittest.ms.com" % i]
@@ -97,6 +97,11 @@ class TestVulcan20(TestBrokerCommand):
                              "for switch utpgsw%d.aqd-unittest.ms.com" %
                              (service, i),
                              command)
+
+            # For Nexus switches we have if names, not snmp ids.
+            command = "show switch --switch utpgsw%d.aqd-unittest.ms.com" % i
+            out = self.commandtest(command.split(" "))
+            self.matchoutput(out, "Port et1-1: %s" % macs[i], command)
 
     # for each cluster's hosts
     def test_004_add10gigracks(self):
