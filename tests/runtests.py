@@ -85,7 +85,8 @@ parser.add_argument('-v', '--verbose', action='count', dest='verbose',
 parser.add_argument('-q', '--quiet', dest='verbose', action='store_const',
                     const=0,
                     help='do not print the module names during tests')
-parser.add_argument('-c', '--config', dest='config', default=default_configfile,
+parser.add_argument('-c', '--config', dest='config',
+                    default=default_configfile,
                     help='supply an alternate config file')
 parser.add_argument('--coverage', action='store_true',
                     help='generate code coverage metrics for the broker in '
@@ -147,12 +148,11 @@ if opts.mirror:
         print >> sys.stderr, "Rsync failed!"
         sys.exit(1)
     args = [sys.executable, os.path.join(mirrordir, 'tests', 'runtests.py')]
-    for o, a in opts:
-        if o in ('-m', '--mirror'):
-            continue
-        args.append(o)
-        if a is not None:
-            args.append(a)
+    args.extend(sys.argv[1:])
+    if '--mirror' in args:
+        args.remove('--mirror')
+    if '-m' in args:
+        args.remove('-m')
     os.execve(sys.executable, args, env)
 
 makefile = os.path.join(SRCDIR, "Makefile")
