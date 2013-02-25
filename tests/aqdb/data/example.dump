@@ -77,8 +77,6 @@ Archetype(name="qwg", is_compileable=True)
 
 OperatingSystem(archetype=Archetype(name="qwg"), name="linux", version="5.0-x86_64")
 
-Personality(archetype=Archetype(name="qwg"), name="generic")
-
 Vendor(name="amd")
 Vendor(name="intel")
 Vendor(name="generic")

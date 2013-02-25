@@ -36,7 +36,7 @@ from aquilon.exceptions_ import (AuthorizationException, ArgumentError,
                                  InternalError, ProcessException)
 from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import Domain, Branch
-from aquilon.worker.processes import run_git, remove_dir
+from aquilon.worker.processes import run_git, remove_dir, write_file
 
 
 class CommandAddDomain(BrokerCommand):
@@ -104,6 +104,8 @@ class CommandAddDomain(BrokerCommand):
             run_git(["clone", "--branch", dbdomain.name,
                      kingdir, dbdomain.name],
                     path=domainsdir, logger=logger)
+            # Set description in git repo
+            write_file("%s/%s/.git/description" % (domainsdir, dbdomain.name), "Domain %s" % (dbdomain.name))
         except ProcessException, e:
             try:
                 remove_dir(clonedir, logger=logger)

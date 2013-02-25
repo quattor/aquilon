@@ -229,6 +229,10 @@ def create_sandbox(pageData, noexec=False):
     exit_status = p.wait()
     if exit_status == 0:
         print "Created sandbox: %s" % sandbox_dir
+        # Set description in git repo
+        f = open("%s/.git/description" % sandbox_dir, "w")
+        f.write("Sandbox %s/%s" % (os.path.basename(user_base), sandbox_name))
+        f.close()
     return exit_status
 
 
