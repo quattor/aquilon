@@ -84,7 +84,7 @@ class TestUnbindClient(TestBrokerCommand):
                          "Warning: Host aquilon94.aqd-unittest.ms.com is "
                          "missing the following required services, please run "
                          "'aq reconfigure': afs, aqd, bootserver, dns, lemon, "
-                         "ntp.",
+                         "ntp, support-group.",
                          command)
 
     def test_400_verify_unbind_search(self):

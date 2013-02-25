@@ -373,6 +373,10 @@ class TestMapService(TestBrokerCommand):
         self.successtest(["del_personality", "--personality", "testme",
                           "--archetype", "aquilon"])
 
+    def testmapsupportgroup(self):
+        self.noouttest(["map_service", "--service", "support-group",
+                        "--instance", "ec-service", "--organization", "ms"])
+
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestMapService)
