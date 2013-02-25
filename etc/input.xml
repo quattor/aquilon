@@ -471,7 +471,8 @@
       Switch FQDN, port, MAC address, Last Observation Date
       <optgroup name="search_observed_mac_opts" mandatory="True" fields="any">
          <option name="switch" type="string">FQDN of the switch</option>
-         <option name="port_number" type="int">Port number on the switch</option>
+         <option name="port_number" type="int">[Deprecated] Port number on the switch</option>
+         <option name="port" type="string">Port name on the switch</option>
          <option name="mac" type="mac">MAC address to search for</option>
       </optgroup>
       <transport method="get" path="find/observed_mac" />

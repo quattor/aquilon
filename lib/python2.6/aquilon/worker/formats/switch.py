@@ -74,8 +74,8 @@ class SwitchFormatter(ObjectFormatter):
         if switch.serial_no:
             details.append(indent + "  Serial: %s" % switch.serial_no)
         for om in switch.observed_macs:
-            details.append(indent + "  Port %d: %s" %
-                           (om.port_number, om.mac_address))
+            details.append(indent + "  Port %s: %s" %
+                           (om.port, om.mac_address))
             details.append(indent + "    Created: %s Last Seen: %s" %
                            (om.creation_date, om.last_seen))
         for ov in switch.observed_vlans:
