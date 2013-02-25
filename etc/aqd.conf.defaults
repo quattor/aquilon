@@ -106,7 +106,8 @@ pool_timeout =
 
 
 [broker]
-default_organization = ms
+#default_organization = ms
+default_organization = example
 servername = %(hostname)s
 # Set mode to readonly for a read-only broker.  Anything else is ignored.
 mode = readwrite
@@ -135,33 +136,43 @@ http_access_log = %(logdir)s/aqd_access.log
 profilesdir = %(quattordir)s/web/htdocs/profiles
 plenarydir = %(quattordir)s/plenary
 swrepdir = %(quattordir)s/swrep
-git_base_dir = /ms/dist/fsf/PROJ/git/1.8.1
-git_path = %(git_base_dir)s/bin
-git_daemon = %(git_base_dir)s/libexec/git-core/git-daemon
-#git_author_name =
-#git_author_email =
-#git_committer_name =
-#git_committer_email =
-dsdb = /ms/dist/aurora/PROJ/dsdb/5.0prod/bin/dsdb
+#git_path = /ms/dist/fsf/PROJ/git/1.7.1/bin
+git_path =/usr/libexec/git-core/
+git = /usr/bin/git
+#dsdb = /ms/dist/aurora/PROJ/dsdb/5.0prod/bin/dsdb
+dsdb = /bin/echo
 dsdb_location_sync = True
-dsdb_use_testdb = False
-java_home = /ms/dist/msjava/PROJ/sunjdk/1.6.0_31
-ant_home = /ms/dist/ossjava/PROJ/ant/1.8.3
-ant = %(ant_home)s/bin/ant
-#ant_options = -Xmx2560m -server
-ant_contrib_jar = /ms/dist/msjava/PROJ/ant-contrib/1.0b2/common/lib/ant-contrib.jar
-service = %(user)s
-keytab = /var/spool/keytabs/%(service)s
+dsdb_use_testdb = True
+#dsdb_use_testdb = False
+#ant_contrib_jar = /ms/dist/msjava/PROJ/ant-contrib/1.0b2/common/lib/ant-contrib.jar
+ant_contrib_jar = /usr/share/java/ant/ant-contrib.jar
+#javadir = /ms/dist/msjava/PROJ/sunjdk/1.6.0_29/bin
+javadir = /usr/share/java/
+#service = %(user)s
+service = aqd
+#keytab = /var/spool/keytabs/%(service)s
+keytab = /etc/krb5.keytab
 installfe = /ms/dist/elfms/PROJ/aii/prod/sbin/aii-installfe
 installfe_user = %(user)s
 installfe_sshdir = /ms/dist/sec/PROJ/openssh/prod/bin
+sys_loc = /ms/dist/aurora/bin/sys_loc
 server_notifications =
 client_notifications = yes
 CheckNet = /ms/dist/NetEng/bin/Cisco/CheckNet
 CheckNet_module = /ms/dist/NetEng/modules/prod
 sharedata = /ms/dist/storage/etc/nasobjects.map
+aurora_host_domain = ny-prod
+windows_host_domain = ny-prod
 default_domain_start = prod
 authorization_error = Please contact an administrator for access.
+esx_cluster_max_members_default = 8
+esx_cluster_vm_to_host_ratio = 16:1
+metacluster_max_members_default = 32
+metacluster_max_shares_default = 32
+hacluster_max_members_default = 2
+gridcluster_max_members_default = 2000
+#ant = /ms/dist/ossjava/PROJ/ant/1.8.2/bin/ant
+ant = /usr/bin/ant
 namespaced_host_profiles = False
 flat_host_profiles = True
 windows_host_info = /ms/dist/aquilon/PROJ/datawarehouse/dumpv3/machines.db
@@ -171,7 +182,8 @@ vlan2net = /ms/dist/aquilon/PROJ/vlan2net/prod/bin/vlan2net
 # The knc daemon can be run by the broker for development purposes.
 # Will default to True until we migrate to a new configuration in prod.
 run_knc = True
-mean = /ms/dist/storage/PROJ/infra/prod/bin/mean
+#mean = /ms/dist/storage/PROJ/infra/prod/bin/mean
+mean = /usr/local/bin/mean
 qip_dump_subnetdata = /ms/dist/3rd/qip/usr/sbin/qip-dump-subnetdata
 # Default and maximum numbers of audit (xtn table) rows returned by search audit
 default_audit_rows = 5000
@@ -237,20 +249,25 @@ default_version = prod
 version = %(default_version)s
 # The update_domain command expects to be able to read this value
 # in raw mode and set the version variable itself.
-pan_compiler = /ms/dist/elfms/PROJ/panc/%(version)s/lib/panc.jar
+#pan_compiler = /ms/dist/elfms/PROJ/panc/%(version)s/lib/panc.jar
+pan_compiler = /var/quattor/panc/panc-9.2-jar-with-dependencies.jar
 # Number of templates to cache in memory during compiles
 batch_size = 1000
 # Option passed to panc the output format that it uses
-formatter = pan
+formatter = pan 
 gzip_output = false
 # Assume the webserver will decompress transparently as needed.
 # only used if gzip_output = true
 advertise_gzip_as_xml = true
 
 [kerberos]
-knc = /ms/dist/kerberos/PROJ/knc/prod/bin/knc
-krb5_keytab = /ms/dist/kerberos/PROJ/krb5_keytab/prod/sbin/krb5_keytab
-klist = /ms/dist/aurora/bin/klist
+#knc = /ms/dist/kerberos/PROJ/knc/prod/bin/knc
+knc = /usr/local/bin/knc
+#krb5_keytab = /ms/dist/kerberos/PROJ/krb5_keytab/prod/sbin/krb5_keytab
+#krb5_keytab = /etc/krb5.keytab
+#klist = /ms/dist/aurora/bin/klist
+klist = /usr/bin/klist
+service = aqd
 
 [site]
 # Site specific settings
@@ -269,4 +286,19 @@ sqlalchemy.orm    = WARNING
 aquilon = INFO
 
 [protocols]
-directory = /ms/dist/aquilon/PROJ/protocols/1.12/common/lib/python
+#directory = /ms/dist/aquilon/PROJ/protocols/1.9/common/lib/python
+directory =  /usr/local/lib/aquilon/protocols/lib/python/
+
+[nasassign]
+#PROD
+bin = /ms/dist/virtual/PROJ/resourcepool-laf/prod/bin/nasassign
+cmdline_args =
+use_dev_db = False
+#QA
+#bin = /ms/dist/virtual/PROJ/resourcepool-laf/qa/bin/nasassign
+#cmdline_args =
+#use_dev_db = True
+#DEV
+#bin = /ms/dist/virtual/PROJ/resourcepool-laf/0.2/bin/nasassign
+#cmdline_args = --mode lone
+#use_dev_db = True
