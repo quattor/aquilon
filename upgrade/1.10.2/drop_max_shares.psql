@@ -1,0 +1,1 @@
+ALTER TABLE metacluster DROP COLUMN max_shares;

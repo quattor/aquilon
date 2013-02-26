@@ -1,0 +1,21 @@
+CREATE TABLE host_environment (
+	id INTEGER NOT NULL,
+	name VARCHAR(16) NOT NULL,
+	creation_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+	CONSTRAINT host_environment_pk PRIMARY KEY (id),
+	CONSTRAINT host_environment_uk UNIQUE (name)
+);
+
+CREATE SEQUENCE host_environment_id_seq;
+
+INSERT INTO host_environment(id, name, creation_date) values(nextval('host_environment_id_seq'), 'legacy', current_timestamp);
+INSERT INTO host_environment(id, name, creation_date) values(nextval('host_environment_id_seq'), 'dev', current_timestamp);
+INSERT INTO host_environment(id, name, creation_date) values(nextval('host_environment_id_seq'), 'qa', current_timestamp);
+INSERT INTO host_environment(id, name, creation_date) values(nextval('host_environment_id_seq'), 'uat', current_timestamp);
+INSERT INTO host_environment(id, name, creation_date) values(nextval('host_environment_id_seq'), 'prod', current_timestamp);
+INSERT INTO host_environment(id, name, creation_date) values(nextval('host_environment_id_seq'), 'infra', current_timestamp);
+
+ALTER TABLE personality ADD host_environment_id INTEGER;
+UPDATE personality SET host_environment_id = (select id from host_environment where name='legacy');
+ALTER TABLE personality ALTER host_environment_id SET NOT NULL;
+ALTER TABLE personality ADD CONSTRAINT host_environment_fk FOREIGN KEY (host_environment_id) REFERENCES host_environment(id);
