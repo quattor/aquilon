@@ -82,11 +82,14 @@ class BundleResource(ResourceHolder):
     # identities should at least be the same.
     __mapper_args__ = {'polymorphic_identity': 'resourcegroup'}
 
-    resourcegroup_id = Column(Integer, ForeignKey('resourcegroup.id',
-                                           name='%s_bundle_fk' % _RESHOLDER,
-                                           ondelete='CASCADE',
-                                           use_alter=True),
-                        nullable=True)
+    resourcegroup_id = Column(Integer,
+                              ForeignKey('resourcegroup.id',
+                                         name='%s_bundle_fk' % _RESHOLDER,
+                                         ondelete='CASCADE',
+                                         deferrable=True,
+                                         initially='IMMEDIATE',
+                                         use_alter=True),
+                              nullable=True)
 
     # This is a one-to-one relation, so we need uselist=False on the backref
     resourcegroup = relation(ResourceGroup, lazy='subquery',

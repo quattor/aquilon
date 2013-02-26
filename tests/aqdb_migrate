@@ -76,20 +76,20 @@ if __name__ == '__main__':
 
     Base.metadata.create_all(dest_engine, checkfirst=True)
 
+    if dest_engine.dialect.name == 'postgresql':
+        dest_session.execute(text('SET CONSTRAINTS ALL DEFERRED'))
+    elif dest_engine.dialect.name == 'oracle':
+        dest_session.execute(text('ALTER SESSION SET CONSTRAINTS = DEFERRED'))
+    elif dest_engine.dialect.name == 'sqlite':
+        # SQLite does not allow changing the deferred state at run-time, but
+        # it does allow disabling foreign keys entirely
+        dest_session.execute(text('PRAGMA foreign_keys = 0;'))
+
     for table in Base.metadata.sorted_tables:
         total = db.engine.execute(table.count()).scalar()
         print 'Processing %s (%d rows)' % (table, total),
         sys.stdout.flush()
         cnt = 0
-
-        if dest_engine.dialect.name == 'postgresql':
-            dest_session.execute(text('SET CONSTRAINTS ALL DEFERRED'))
-        elif dest_engine.dialect.name == 'oracle':
-            dest_session.execute(text('ALTER SESSION SET CONSTRAINTS = DEFERRED'))
-        elif dest_engine.dialect.name == 'sqlite':
-            # SQLite does not allow changing the deferred state at run-time, but
-            # it does allow disabling foreign keys entirely
-            dest_session.execute(text('PRAGMA foreign_keys = 0;'))
 
         columns = table.columns.keys()
 
@@ -108,5 +108,7 @@ if __name__ == '__main__':
             #dest_session.merge(NewRecord(**data))
             dest_session.execute(table.insert().values(**data))
 
-        dest_session.commit()
+        dest_session.flush()
         print
+
+    dest_session.commit()
