@@ -23,6 +23,7 @@ Under Scientific Linux 6, install the following RPMs:
 *   git-daemon-1.7.1
 *   ant-contrib-1.0
 *   make
+*   python-virtualenv
 
 * real version of java (not GCJ!); openjdk?, oracle?
 
@@ -39,19 +40,10 @@ installation](http://tldp.org/HOWTO/Kerberos-Infrastructure-HOWTO/install.html).
 If using a different distribution, you will need python 2.6.x and git
 1.7.x.
 
-protobuf
-protobuf-devel
-protobuf-compiler
-protobuf-python
 
-Install the knc package from the Quattor repository, or build your own
-from sources at http://oskt.secure-endpoints.com/knc.html
-
-Use the python setuptools installed earlier to run (as root):
-
-    easy_install virtualenv
-
-(also rpm available in EPEL; test if it works?)
+Install the knc package from the
+[Quattor repository](http://yum.quattor.org/external), or build your own from
+sources at http://oskt.secure-endpoints.com/knc.html
 
 
 Cloning the git repositories
