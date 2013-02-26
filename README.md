@@ -14,19 +14,23 @@ Under Scientific Linux 6, install the following RPMs:
 *   python-dateutil
 *   python-cdb
 *   python-lxml
+*   python-virtualenv
 *   PyYAML
+*   protobuf-compiler (to build the protocol buffers)
+*   protobuf-python
 *   gcc-4.4.4
 *   git-1.7.1
 *   git-daemon-1.7.1
 *   ant-contrib-1.0
 *   make
+*   python-virtualenv
 
 * real version of java (not GCJ!); openjdk?, oracle?
 
 Kerberos
 
-* krb5-server 
-* krb5-workstation 
+* krb5-server
+* krb5-workstation
 
 See instructions for [krb5
 installation](http://tldp.org/HOWTO/Kerberos-Infrastructure-HOWTO/install.html). In
@@ -36,19 +40,10 @@ installation](http://tldp.org/HOWTO/Kerberos-Infrastructure-HOWTO/install.html).
 If using a different distribution, you will need python 2.6.x and git
 1.7.x.
 
-protobuf
-protobuf-devel
-protobuf-compiler 
-protobuf-python 
 
-Install the knc package from the Quattor repository, or build your own
-from sources at http://oskt.secure-endpoints.com/knc.html
-
-Use the python setuptools installed earlier to run (as root):
-
-    easy_install virtualenv
-
-(also rpm available in EPEL; test if it works?)
+Install the knc package from the
+[Quattor repository](http://yum.quattor.org/external), or build your own from
+sources at http://oskt.secure-endpoints.com/knc.html
 
 
 Cloning the git repositories
@@ -85,10 +80,10 @@ The cx_Oracle install will fail if there is no local Oracle client
 installed - that's fine.  Some versions may fail to install, and the
 current stable version will be installed instead.
 
-    python2.6 aq_env.py --python=python2.6 --prompt="(aquilon) " /usr/local/aquilon/pythonenv --system-site-packages 
+    python2.6 aq_env.py --python=python2.6 --prompt="(aquilon) " /usr/local/aquilon/pythonenv --system-site-packages
 
 (look in following for installed files
- /usr/local/aquilon/pythonenv 
+ /usr/local/aquilon/pythonenv
  /opt/aquilon
  /usr/local/bin/aquilon)
 
@@ -123,7 +118,7 @@ Set up AQDCONF (or have an /etc/aqd.conf) as described above first.
 Create the database directory if using sqlite and it does not exist.
 
     cd ../tests/aqdb
-    ./build_db.py -D 
+    ./build_db.py -D
 
 (ignore warning on administration not setup)
 
@@ -155,7 +150,7 @@ To test without kerberos:
 Misc. Bits
 ----------
 
-chmod a+x     /usr/local/aquilon/pythonenv/bin/activate 
+chmod a+x     /usr/local/aquilon/pythonenv/bin/activate
 source this instead...
 
 Need to create a kerberos keytab...
@@ -166,7 +161,7 @@ export AQSERVICE=aqd
 
 export AQDCONF=/etc/aqd.conf
 
-Setup bare git repository in /var/quattor/template-king.  
+Setup bare git repository in /var/quattor/template-king.
 
 in aqd.conf.defaults, change:
 
@@ -179,4 +174,4 @@ git daemon --export-all --base-path=/var /var/quattor/template-king/ &
 
 
 # production service...
-python2.6 /opt/aquilon/bin/twistd.py --logfile=/var/log/aqd.log aqd 
+python2.6 /opt/aquilon/bin/twistd.py --logfile=/var/log/aqd.log aqd
