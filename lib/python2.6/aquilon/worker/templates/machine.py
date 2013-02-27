@@ -34,6 +34,7 @@ import logging
 
 from aquilon.aqdb.model import Machine
 from aquilon.worker.locks import CompileKey
+from aquilon.aqdb.model.disk import find_storage_data
 from aquilon.worker.templates.base import Plenary
 from aquilon.worker.templates.panutils import (StructureTemplate, pan_assign,
                                                pan_include, PanMetric,
@@ -128,20 +129,26 @@ class PlenaryMachineInfo(Plenary):
                 params["boot"] = True
 
             if disk.disk_type == 'local':
-                relpath = "hardware/harddisk/generic/%s" % disk.controller_type
+                tpl = StructureTemplate(
+                                        ("hardware/harddisk/generic/%s" %
+                                        disk.controller_type),
+                                        params)
+
                 if disk.controller_type == 'cciss':
                     devname = "cciss/" + devname
-            # TODO: this is for backward compatibility
-            # at plenary level the vm - disk connection would be lost
             elif disk.disk_type == 'virtual_disk':
-                relpath = Plenary.get_plenary(disk.share).plenary_template_name
+                share = disk.share
+                share_info = find_storage_data(share)
+
                 params["path"] = "%s/%s.vmdk" % (self.machine, disk.device_name)
                 params["address"] = disk.address
-            else:  # pragma: no cover
-                relpath = None
+                params["sharename"] = share.name
+                params["server"] = share_info["server"]
+                params["mountpoint"] = share_info["mount"]
 
-            if relpath:
-                disks[PanEscape(devname)] = StructureTemplate(relpath, params)
+                tpl = params
+
+            disks[PanEscape(devname)] = tpl
 
         managers = {}
         interfaces = {}

@@ -320,6 +320,16 @@ class TestVulcan20(TestBrokerCommand):
         self.matchoutput(out, "Bound to: Resource Group utmc8as1", command)
         self.matchoutput(out, "Disk Count: 3", command)
 
+        command = ["cat", "--machine", "utpgm0", "--generate"]
+
+        out = self.commandtest(command)
+        self.matchoutput(out, '"sda", nlist(', command)
+        self.searchoutput(out,
+                r'"mountpoint", "/vol/lnn30f1v1/test_v2_share",\s*'
+                r'"path", "utpgm0/sda.vmdk",\s*'
+                r'"server", "lnn30f1",\s*'
+                r'"sharename", "test_v2_share"', command)
+
     def test_111_addfilesystemfail(self):
         command = ["add_filesystem", "--filesystem=fs1", "--type=ext3",
                    "--mountpoint=/mnt", "--blockdevice=/dev/foo/bar",
