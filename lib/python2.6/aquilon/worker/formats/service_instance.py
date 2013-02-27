@@ -96,27 +96,35 @@ class ServiceInstanceListFormatter(ListFormatter):
 
 ObjectFormatter.handlers[ServiceInstanceList] = ServiceInstanceListFormatter()
 
-class ServiceShare(object):
-    def __init__(self, dbshare):
-        self.dbshare = dbshare
+class ServiceShareList(list):
+    pass
 
 
-class ServiceShareFormatter(ObjectFormatter):
-    def format_raw(self, share, indent=""):
-        dbshare = share.dbshare
-        details = [indent + "NAS Disk Share: %s" % dbshare.name]
+class ServiceShareListFormatter(ObjectFormatter):
+    def format_raw(self, shares, indent=""):
+        sharedata = {}
 
-        share_info = find_storage_data(dbshare)
+        for dbshare in shares:
+            if dbshare.name not in sharedata:
+                share_info = find_storage_data(dbshare)
 
-        details.append(indent + "  Server: %s" % share_info["server"])
-        details.append(indent + "  Mountpoint: %s" % share_info["mount"])
-        details.append(indent + "  Disk Count: %d" % dbshare.disk_count)
-        # details.append(indent + "  Maximum Disk Count: %s" %
-        #                ServiceInstanceFormatter.get_max_client_count(dbshare))
-        details.append(indent + "  Machine Count: %d" %
-                       dbshare.machine_count)
-        # if dbshare.comments:
-        #     details.append(indent + "  Comments: %s" % dbshare.comments)
+                sharedata[dbshare.name] = {"disks": 0,
+                                           "machines": 0,
+                                           "server": share_info["server"],
+                                           "mount": share_info["mount"]}
+            sharedata[dbshare.name]["disks"] += dbshare.disk_count
+            sharedata[dbshare.name]["machines"] += dbshare.machine_count
+
+        details = []
+
+        for name in sorted(sharedata.keys()):
+            rec = sharedata[name]
+
+            details.append(indent + "NAS Disk Share: %s" % name)
+            details.append(indent + "  Server: %s" % rec["server"])
+            details.append(indent + "  Mountpoint: %s" % rec["mount"])
+            details.append(indent + "  Disk Count: %d" % rec["disks"])
+            details.append(indent + "  Machine Count: %d" % rec["machines"])
         return "\n".join(details)
 
-ObjectFormatter.handlers[ServiceShare] = ServiceShareFormatter()
+ObjectFormatter.handlers[ServiceShareList] = ServiceShareListFormatter()

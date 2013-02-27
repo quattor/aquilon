@@ -32,22 +32,27 @@
 
 from sqlalchemy.orm import undefer
 
-from aquilon.exceptions_ import InternalError
+from aquilon.exceptions_ import NotFoundException
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.aqdb.model import Share, ClusterResource, EsxCluster
-from aquilon.worker.formats.service_instance import ServiceShare
+from aquilon.worker.formats.service_instance import ServiceShareList
 
 
 class CommandShowNASDiskShareAll(BrokerCommand):
 
     required_parameters = []
 
-    def render(self, session, logger, **arguments):
+    def render(self, session, logger, share, **arguments):
         self.deprecated_command("show_nas_disk_share is deprecated, please use "
                                 "show_share instead.", logger=logger,
                                 **arguments)
-        q = session.query(Share).join(ClusterResource, EsxCluster)
+        q = session.query(Share)
+        if share:
+            q = q.filter_by(name=share)
+        q = q.join(ClusterResource, EsxCluster)
         q = q.options(undefer(Share.disk_count))
         q = q.options(undefer(Share.machine_count))
-        q = q.order_by(Share.name)
-        return [ServiceShare(dbshare) for dbshare in q.all()]
+        result = q.all()
+        if share and not result:
+            raise NotFoundException("Share %s does not exist." % share)
+        return ServiceShareList(result)
