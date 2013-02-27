@@ -33,7 +33,7 @@ from aquilon.config import Config
 
 # Utility functions for service / resource based disk mounts
 # This should come from some external API...?
-def find_storage_data(dbshare):
+def cache_storage_data():
     """
     Scan a storeng-style data file, checking each line as we go
 
@@ -49,25 +49,21 @@ def find_storage_data(dbshare):
     """
 
     config = Config()
+    sharedata = {}
     with open(config.get("broker", "sharedata")) as datafile:
-        share_info = {"server": None, "mount": None}
-
-        def check_nas_line(info):
-            """
-            Search for the pshare info that refers to this plenary
-            """
+        def process_nas_line(info):
             # silently discard lines that don't have all of our reqd info.
             for k in ["objtype", "pshare", "server", "dg"]:
                 if k not in info:
-                    return False
+                    return
 
-            if info["objtype"] == "pshare" and info["pshare"] == dbshare.name:
-                share_info["server"] = info["server"]
-                share_info["mount"] = "/vol/%(dg)s/%(pshare)s" % (info)
+            if info["objtype"] != "pshare":
+                return
 
-                return True
-            else:
-                return False
+            sharedata[info["pshare"]] = {
+                "server": info["server"],
+                "mount": "/vol/%s/%s" % (info["dg"], info["pshare"]),
+            }
 
         for line in datafile:
             line = line.rstrip()
@@ -77,12 +73,22 @@ def find_storage_data(dbshare):
                 hdr = line[1:].split('|')
             else:
                 fields = line.split('|')
-                if len(fields) == len(hdr):  # silently ignore invalid lines
-                    info = dict()
-                    for i in range(0, len(hdr)):
-                        info[hdr[i]] = fields[i]
+                if len(fields) != len(hdr):  # silently ignore invalid lines
+                    continue
 
-                    if check_nas_line(info):
-                        break
+                info = dict()
+                for i in range(0, len(hdr)):
+                    info[hdr[i]] = fields[i]
 
-        return share_info
+                process_nas_line(info)
+
+        return sharedata
+
+
+def find_storage_data(dbshare, cache=None):
+    if not cache:
+        cache = cache_storage_data()
+    if dbshare.name in cache:
+        return cache[dbshare.name]
+    else:
+        return {"server": None, "mount": None}

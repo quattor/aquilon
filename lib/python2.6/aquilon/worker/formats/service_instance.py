@@ -33,7 +33,8 @@
 from aquilon.worker.formats.formatters import ObjectFormatter
 from aquilon.worker.formats.list import ListFormatter
 from aquilon.aqdb.model import ServiceInstance
-from aquilon.aqdb.data_sync.storage import find_storage_data
+from aquilon.aqdb.data_sync.storage import (find_storage_data,
+                                            cache_storage_data)
 
 
 class ServiceInstanceFormatter(ObjectFormatter):
@@ -103,10 +104,11 @@ class ServiceShareList(list):
 class ServiceShareListFormatter(ObjectFormatter):
     def format_raw(self, shares, indent=""):
         sharedata = {}
+        storage_cache = cache_storage_data()
 
         for dbshare in shares:
             if dbshare.name not in sharedata:
-                share_info = find_storage_data(dbshare)
+                share_info = find_storage_data(dbshare, storage_cache)
 
                 sharedata[dbshare.name] = {"disks": 0,
                                            "machines": 0,
