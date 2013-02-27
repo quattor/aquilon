@@ -33,7 +33,7 @@
 from aquilon.worker.formats.formatters import ObjectFormatter
 from aquilon.worker.formats.list import ListFormatter
 from aquilon.aqdb.model import ServiceInstance
-from aquilon.aqdb.model.disk import find_storage_data
+from aquilon.aqdb.data_sync.storage import find_storage_data
 
 
 class ServiceInstanceFormatter(ObjectFormatter):
