@@ -4865,15 +4865,10 @@
       Display all parameters configured on a personality
       <optgroup name="show_parameter_options" mandatory="True" fields="any">
          <option name="personality" type="string">Name of  personality</option>
-         <optgroup name="show_parameter_feature_options" mandatory="False" fields="all">
-            <option name="feature" type="string">Feature</option>
-            <option name="type" type="string">Type of the feature: host, hardware or interface</option>
-         </optgroup>
       </optgroup>
       <optgroup name="by_other_opts" mandatory="False" fields="any">
          <option name="archetype" type="string">Archetype</option>
       </optgroup>
-      <transport method="get" trigger="feature" path="feature/%(type)s/%(feature)s/parameters"/>
       <transport method="get" path="personality/personality/%(personality)s/parameters"/>
    </command>
 
@@ -4882,9 +4877,10 @@
       <p/>
       <optgroup name="validate_parameter_options" mandatory="True" fields="any">
          <optgroup name="target" mandatory="True" fields="any">
-            <option name="archetype" type="string">Archetype</option>
             <option name="personality" type="string">Name of personality</option>
-	    <option name="feature" type="string">Feature</option>
+         </optgroup>
+         <optgroup name="optional_opts" mandatory="False" fields="any">
+            <option name="archetype" type="string">Archetype</option>
          </optgroup>
       </optgroup>
       <transport method="put" path="validate/parameter/"/>
@@ -4894,14 +4890,16 @@
    <command name="add_parameter">
       add a parameter to a given object.
       <optgroup name="add_parameter_opts" mandatory="True" fields="all">
-         <optgroup name="target" mandatory="True" fields="any">
-            <option name="archetype" type="string">Archetype</option>
-            <option name="personality" type="string">Name of personality</option>
-	    <option name="feature" type="string">Feature</option>
-         </optgroup>
+         <option name="personality" type="string">Name of personality</option>
          <option name="path" type="string">Path of the parameter</option>
       </optgroup>
+      <optgroup name="parameter_feature_opts" mandatory="False" fields="all">
+         <option name="feature" type="string">Feature</option>
+       </optgroup>
       <optgroup name="add_parameter_optional" mandatory="False" fields="any">
+         <option name="archetype" type="string">Archetype</option>
+         <option name="interface" type="string">Interface of a machine</option>
+         <option name="model" type="string">Name of a hardware model</option>
          <option name="value" type="string">Value for the parameter, type depending on the parameter definition</option>
          <option name="comments" type="string">Comments</option>
       </optgroup>
@@ -4911,15 +4909,17 @@
    <command name="update_parameter">
       update config parameter to a given object.
       <optgroup name="upd_parameter_opts" mandatory="True" fields="all">
-         <optgroup name="target" mandatory="True" fields="any">
-            <option name="archetype" type="string">Archetype</option>
-            <option name="personality" type="string">Name of personality</option>
-	    <option name="feature" type="string">Feature</option>
-         </optgroup>
+         <option name="personality" type="string">Name of personality</option>
          <option name="path" type="string">Path of the parameter</option>
          <option name="value" type="string">Value for the parameter, type depending on the parameter definition</option>
       </optgroup>
+      <optgroup name="parameter_feature_opts" mandatory="False" fields="all">
+         <option name="feature" type="string">Feature</option>
+      </optgroup>
       <optgroup name="upd_parameter_optional" mandatory="False" fields="any">
+         <option name="archetype" type="string">Archetype</option>
+         <option name="interface" type="string">Interface of a machine</option>
+         <option name="model" type="string">Name of a hardware model</option>
          <option name="comments" type="string">Comments</option>
       </optgroup>
       <transport method="put" path="commands/upd_parameter"/>
@@ -4928,12 +4928,16 @@
    <command name="del_parameter">
       Delete config parameter of a given object.
       <optgroup name="del_parameter_opts" mandatory="True" fields="all">
-         <optgroup name="target" mandatory="True" fields="any">
-            <option name="archetype" type="string">Archetype</option>
-            <option name="personality" type="string">Name of personality</option>
-	    <option name="feature" type="string">Feature</option>
-         </optgroup>
+         <option name="personality" type="string">Name of personality</option>
          <option name="path" type="string">Path of the parameter</option>
+      </optgroup>
+      <optgroup name="parameter_feature_opts" mandatory="False" fields="all">
+         <option name="feature" type="string">Feature</option>
+      </optgroup>
+      <optgroup name="del_parameter_optional" mandatory="False" fields="any">
+         <option name="archetype" type="string">Archetype</option>
+         <option name="interface" type="string">Interface of a machine</option>
+         <option name="model" type="string">Name of a hardware model</option>
       </optgroup>
       <transport method="put" path="commands/del_parameter"/>
    </command>

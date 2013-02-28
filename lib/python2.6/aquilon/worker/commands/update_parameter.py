@@ -35,11 +35,13 @@ from aquilon.worker.dbwrappers.parameter import set_parameter
 
 class CommandUpdateParameter(CommandAddParameter):
 
-    required_parameters = ['path']
+    required_parameters = ['personality', 'path']
 
-    def process_parameter(self, session, param_holder, path, value, comments):
+    def process_parameter(self, session, param_holder, feature, model, interface,
+                          path, value, comments):
 
-        dbparameter = set_parameter(session, param_holder, path, value, compel=True)
+        dbparameter = set_parameter(session, param_holder, feature, model, interface,
+                                    path, value, compel=True)
         if comments:
             dbparameter.comments = comments
 

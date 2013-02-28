@@ -300,13 +300,6 @@ class TestParameter(TestBrokerCommand):
                                r'\);',
                           ESP_CAT_CMD)
 
-    def test_300_validate_noparams(self):
-        # Validate a personality that has no parameters defined
-        command = ["validate", "parameter", "--personality", "utpersonality/dev"]
-        out, err = self.successtest(command)
-        self.assertEmptyOut(out, command)
-        self.matchoutput(err, "All required parameters specified.", command)
-
     def test_300_validate(self):
         out = self.badrequesttest(VAL_CMD)
         self.searchoutput(out,
@@ -346,8 +339,7 @@ class TestParameter(TestBrokerCommand):
         self.successtest(command)
 
         path = "test/rebuild_required"
-        value = "test"
-        command = ADD_CMD + ["--path", path, "--value", value]
+        command = ADD_CMD + ["--path", path, "--value=test", ]
         err = self.badrequesttest(command)
         self.searchoutput(err,
                           r'Modifying parameter test/rebuild_required value needs a host rebuild. '
@@ -375,8 +367,7 @@ class TestParameter(TestBrokerCommand):
         self.successtest(command)
 
         path = "test/rebuild_required"
-        value = "test"
-        command = ADD_CMD + ["--path", path, "--value", value]
+        command = ADD_CMD + ["--path", path, "--value=test"]
         err = self.badrequesttest(command)
         self.searchoutput(err,
                           r'Modifying parameter test/rebuild_required value needs a host rebuild. '
@@ -390,8 +381,7 @@ class TestParameter(TestBrokerCommand):
         self.successtest(command)
 
         path = "test/rebuild_required"
-        value = "test"
-        command = ADD_CMD + ["--path", path, "--value", value]
+        command = ADD_CMD + ["--path", path, "--value=test"]
         self.successtest(command)
 
     def test_420_upd_rebuild_required_ready(self):
@@ -400,8 +390,7 @@ class TestParameter(TestBrokerCommand):
         self.successtest(command)
 
         path = "test/rebuild_required"
-        value = "test"
-        command = UPD_CMD + ["--path", path, "--value", value]
+        command = UPD_CMD + ["--path", path, "--value=test"]
         err = self.badrequesttest(command)
         self.searchoutput(err,
                           r'Modifying parameter test/rebuild_required value needs a host rebuild. '
@@ -415,8 +404,7 @@ class TestParameter(TestBrokerCommand):
         self.successtest(command)
 
         path = "test/rebuild_required"
-        value = "test"
-        command = UPD_CMD + ["--path", path, "--value", value]
+        command = UPD_CMD + ["--path", path, "--value=test"]
         self.successtest(command)
 
     def test_440_del_rebuild_required_ready(self):

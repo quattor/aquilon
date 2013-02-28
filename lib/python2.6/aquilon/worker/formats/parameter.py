@@ -32,7 +32,7 @@
 
 import json
 from aquilon.worker.formats.formatters import ObjectFormatter
-from aquilon.aqdb.model import Parameter, FeatureLinkParameter
+from aquilon.aqdb.model import Parameter
 
 
 class ParameterFormatter(ObjectFormatter):
@@ -53,24 +53,33 @@ class ParameterFormatter(ObjectFormatter):
 
         param_definitions = None
         paramdef_holder = None
-        if isinstance(param.holder, FeatureLinkParameter):
-            dbflink = param.holder.featurelink
-            paramdef_holder = dbflink.feature.paramdef_holder
+        dbpersonality = param.holder.personality
+        paramdef_holder = dbpersonality.archetype.paramdef_holder
 
-        else:
-            dbpersonality = param.holder.personality
-            paramdef_holder = dbpersonality.archetype.paramdef_holder
+        if paramdef_holder:
+            param_definitions = paramdef_holder.param_definitions
+            for param_def in param_definitions:
+                value = param.get_path(param_def.path, compel=False)
+                if value:
+                    skeleton = container.parameters.add()
+                    skeleton.path = str(param_def.path)
+                    if param_def.value_type == 'json':
+                        skeleton.value = json.dumps(value)
+                    else:
+                        skeleton.value = str(value)
+        for link in dbpersonality.features:
+            param_definitions = link.feature.paramdef_holder.param_definitions
+            for param_def in param_definitions:
+                value = param.get_feature_path(link, param_def.path,
+                                               compel=False)
+                if value:
+                    skeleton = container.parameters.add()
+                    skeleton.path = str(Parameter.feature_path(link, param_def.path))
+                    if param_def.value_type == 'json':
+                        skeleton.value = json.dumps(value)
+                    else:
+                        skeleton.value = str(value)
 
-        param_definitions = paramdef_holder.param_definitions
-        for param_def in param_definitions:
-            value = param.get_path(param_def.path, compel=False)
-            if value:
-                skeleton = container.parameters.add()
-                skeleton.path = str(param_def.path)
-                if param_def.value_type == 'json':
-                    skeleton.value = json.dumps(value)
-                else:
-                    skeleton.value = str(value)
 
         return container
 

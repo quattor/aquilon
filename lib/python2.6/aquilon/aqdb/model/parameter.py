@@ -31,12 +31,11 @@
 
 from datetime import datetime
 
-from sqlalchemy import (Column, Integer, DateTime, Sequence, String, ForeignKey,
-                        UniqueConstraint)
+from sqlalchemy import Column, Integer, DateTime, Sequence, String, ForeignKey
 from sqlalchemy.orm import relation, backref, deferred
 
 from aquilon.aqdb.column_types import JSONEncodedDict, MutationDict
-from aquilon.aqdb.model import Base, Personality, FeatureLink
+from aquilon.aqdb.model import Base, Personality
 from aquilon.exceptions_ import NotFoundException, ArgumentError, InternalError
 from aquilon.aqdb.column_types import AqStr
 
@@ -100,44 +99,6 @@ class PersonalityParameter(ParameterHolder):
         return self.personality
 
 
-class FeatureLinkParameter(ParameterHolder):
-    """ Parameters associated with features """
-
-    __mapper_args__ = {'polymorphic_identity': 'featurelink'}
-
-    featurelink_id = Column(Integer,
-                            ForeignKey('feature_link.id',
-                                       name='%s_featurelink_fk' % _PARAM_HOLDER,
-                                       ondelete='CASCADE'),
-                            nullable=True)
-
-    featurelink = relation(FeatureLink, uselist=False,
-                           backref=backref('paramholder', uselist=False,
-                                           cascade='all, delete-orphan'))
-
-    @property
-    def holder_name(self):
-        ret = []
-        if self.featurelink.personality:
-            ret.extend([self.featurelink.personality.archetype.name,
-                       self.featurelink.personality.name])
-        elif self.featurelink.archetype:
-            ret.append(self.featurelink.archetype.name)
-
-        ret.append(self.featurelink.feature.name)
-
-        return "/".join(ret)
-
-    @property
-    def holder_object(self):
-        return self.featurelink
-
-paramholder.append_constraint(UniqueConstraint('personality_id',
-                                               name='param_holder_persona_uk'))
-paramholder.append_constraint(UniqueConstraint('featurelink_id',
-                                               name='param_holder_flink_uk'))
-
-
 class Parameter(Base):
     """
         Paramter data storing individual key value pairs
@@ -189,6 +150,13 @@ class Parameter(Base):
         """
         return PATH_SEP.join(pparts)
 
+    @staticmethod
+    def feature_path(featurelink, path):
+        """
+        constructs the parameter path for feature namespace
+        """
+        return PATH_SEP.join([featurelink.cfg_path, path])
+
     def get_path(self, path, compel=True, preclude=False):
         """ get value of paramter specified by path made of dict keys """
 
@@ -210,7 +178,11 @@ class Parameter(Base):
                 pass
         return None
 
-    def set_path(self,  path, value, compel=False, preclude=False):
+    def get_feature_path(self, dbfeaturelink, path, compel=True, preclude=False):
+        return self.get_path(Parameter.feature_path(dbfeaturelink, path),
+                             compel, preclude)
+
+    def set_path(self, path, value, compel=False, preclude=False):
         """
         add/or update a new parameter key
 

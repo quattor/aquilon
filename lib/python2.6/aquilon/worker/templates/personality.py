@@ -56,12 +56,13 @@ def get_parameters_by_feature(dbfeaturelink):
 
     param_definitions = paramdef_holder.param_definitions
     parameters = get_parameters(object_session(dbfeaturelink),
-                                featurelink=dbfeaturelink)
+                                personality=dbfeaturelink.personality)
 
     for param_def in param_definitions:
         value = None
         for param in parameters:
-            value = param.get_path(param_def.path, compel=False)
+            value = param.get_feature_path(dbfeaturelink,
+                                           param_def.path, compel=False)
             if not value and param_def.default:
                 value = validate_value("default for path=%s" % param_def.path,
                                        param_def.value_type, param_def.default)
@@ -76,7 +77,7 @@ def helper_feature_template(featuretemplate, dbfeaturelink, lines):
 
     params = get_parameters_by_feature(dbfeaturelink)
     for path in params:
-        pan_variable(lines, path, params[path])
+        pan_assign(lines, "/system/%s/%s" % (dbfeaturelink.cfg_path_escaped, path), params[path])
     lines.append(featuretemplate.format_raw(dbfeaturelink))
 
 

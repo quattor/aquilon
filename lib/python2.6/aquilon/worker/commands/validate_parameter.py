@@ -29,65 +29,17 @@
 # TERMS THAT MAY APPLY.
 
 
-from aquilon.worker.formats.parameter_definition import ParamDefinitionFormatter
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.aqdb.model import FeatureLinkParameter, PersonalityParameter
-from aquilon.worker.dbwrappers.parameter import (get_parameter_holder,
-                                                 get_parameters)
+from aquilon.worker.dbwrappers.parameter import validate_personality_config
 from aquilon.exceptions_ import ArgumentError
 
 
 class CommandValidateParameter(BrokerCommand):
 
-    def render(self, session, logger, personality, archetype, feature,
-               **arguments):
+    required_parameters = ["personality"]
+    def render(self, session, logger, personality, archetype, **arguments):
 
-        if not personality:
-            if not feature:
-                raise ArgumentError("Parameters can be validated for "
-                                    "personality or feature.")
-            if not archetype:
-                raise ArgumentError("Validating parameter on feature binding "
-                                    "needs personality or archetype.")
-
-        param_holder = get_parameter_holder(session, archetype, personality,
-                                            feature)
-
-        if isinstance(param_holder, FeatureLinkParameter):
-            paramdef_holder = param_holder.featurelink.feature.paramdef_holder
-            parameters = get_parameters(session,
-                                        featurelink=param_holder.featurelink)
-        elif isinstance(param_holder, PersonalityParameter):
-            paramdef_holder = param_holder.personality.archetype.paramdef_holder
-            parameters = get_parameters(session,
-                                        personality=param_holder.personality)
-        else:
-            paramdef_holder = None
-            parameters = []
-
-        if paramdef_holder:
-            param_definitions = paramdef_holder.param_definitions
-        else:
-            param_definitions = []
-
-        errors = []
-        formatter = ParamDefinitionFormatter()
-
-        for param_def in param_definitions:
-            ## ignore not required fields or fields
-            ## which have defaults specified
-            if (not param_def.required) or param_def.default:
-                continue
-
-            value = None
-            for param in parameters:
-                value = param.get_path(param_def.path, compel=False)
-                if value:
-                    break
-
-            ## ignore if value is specified
-            if value is None:
-                errors.append(formatter.format_raw(param_def))
+        errors = validate_personality_config(session, archetype, personality)
 
         if errors:
             raise ArgumentError("Following required parameters have not been "
@@ -96,3 +48,4 @@ class CommandValidateParameter(BrokerCommand):
 
         logger.client_info("All required parameters specified.")
         return
+
