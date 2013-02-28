@@ -243,16 +243,34 @@ class TestParameterDefinition(TestBrokerCommand):
         self.failUnlessEqual(param_defs[7].template, 'foo')
         self.failUnlessEqual(param_defs[7].rebuild_required, True)
 
-    def test_150_del(self):
+    def test_150_del_validation(self):
+        cmd = ["add_personality", "--archetype", ARCHETYPE,
+               "--personality=paramtest", "--eon_id=2", "--host_environment=legacy"]
+        self.noouttest(cmd)
 
+        cmd = ["add_parameter", "--personality=paramtest", "--path=testpath",
+               "--value=test"]
+        self.noouttest(cmd)
+
+        cmd = ["del_parameter_definition", "--archetype", ARCHETYPE, "--path=testpath" ]
+        out = self.badrequesttest(cmd)
+        self.matchoutput(out, "Parameter with path testpath used by following and cannot be deleted", cmd)
+
+        cmd = ["del_parameter", "--personality=paramtest", "--path=testpath"]
+        self.noouttest(cmd)
+
+        cmd = ["del_personality", "--archetype", ARCHETYPE, "--personality=paramtest"]
+        self.noouttest(cmd)
+
+    def test_200_del(self):
         for path in ['testpath', 'testdefault', 'testint', 'testlist', 'testjson',
                      'testboolean', 'testfloat', 'test_rebuild_required']:
             cmd = ["del_parameter_definition", "--archetype", ARCHETYPE,
                    "--path=%s" % path]
             self.noouttest(cmd)
 
-    def test_150_verify_delete(self):
-        cmd = ["search_parameter_definition", "--archetype", ARCHETYPE]
+    def test_200_verify_delete(self):
+        cmd = ["search_parameter_definition", "--archetype", ARCHETYPE ]
 
         err = self.notfoundtest(cmd)
         self.matchoutput(err, "Not Found: No parameter definitions found for archetype aquilon", cmd)

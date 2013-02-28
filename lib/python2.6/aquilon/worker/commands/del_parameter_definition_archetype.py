@@ -32,6 +32,7 @@
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import ParamDefinition, Archetype
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.dbwrappers.parameter import search_path_in_personas
 
 
 class CommandDelParameterDefintionArchetype(BrokerCommand):
@@ -47,9 +48,13 @@ class CommandDelParameterDefintionArchetype(BrokerCommand):
         db_paramdef = ParamDefinition.get_unique(session, path=path,
                                                  holder=dbarchetype.paramdef_holder,
                                                  compel=True)
+        ## validate if this path is being used
+        holder = search_path_in_personas(session, path, dbarchetype.paramdef_holder)
+        if holder:
+            raise ArgumentError ("Parameter with path {0} used by following and cannot be deleted : ".format(path) +
+                                 ", ".join(["{0.holder_object:l}".format(h) for h in holder]))
+
         session.delete(db_paramdef)
         session.flush()
-
-        # FIXME: update personality templates
 
         return

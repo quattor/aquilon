@@ -217,22 +217,47 @@ class TestParameterDefinitionFeature(TestBrokerCommand):
         self.failUnlessEqual(param_defs[7].value_type, 'string')
         self.failUnlessEqual(param_defs[7].rebuild_required, True)
 
-    def test_150_del(self):
+    def test_150_del_validation(self):
+        cmd = ["add_personality", "--archetype=aquilon", "--personality=paramtest", "--eon_id=2", "--host_environment=legacy"]
+        self.noouttest(cmd)
+
+        cmd = ["bind_feature", "--personality=paramtest", "--feature", FEATURE]
+        self.successtest(cmd)
+
+        cmd = ["add_parameter", "--personality=paramtest", "--feature", FEATURE,
+               "--path=testpath", "--value=hello"]
+        self.noouttest(cmd)
+
+        cmd = ["del_parameter_definition", "--feature", FEATURE, "--type=host",
+               "--path=testpath"]
+        out = self.badrequesttest(cmd)
+        self.matchoutput(out, "Parameter with path testpath used by following and cannot be deleted", cmd)
+
+        cmd = ["del_parameter", "--personality=paramtest", "--feature", FEATURE, "--path=testpath"]
+        self.noouttest(cmd)
+
+        cmd = ["unbind_feature", "--personality=paramtest", "--feature", FEATURE]
+        self.successtest(cmd)
+
+        cmd = ["del_personality", "--archetype=aquilon", "--personality=paramtest"]
+        self.noouttest(cmd)
+
+    def test_200_del(self):
         for path in ['testpath', 'testdefault', 'testint', 'testlist',
                      'testjson', 'testboolean', 'testfloat', 'test_rebuild_required']:
             cmd = ["del_parameter_definition", "--feature", FEATURE,
                    "--type=host", "--path=%s" % path]
             self.noouttest(cmd)
 
-    def test_150_verify_delete(self):
-        cmd = ["search_parameter_definition", "--feature", FEATURE, "--type=host"]
+    def test_200_verify_delete(self):
+        cmd = ["search_parameter_definition", "--feature", FEATURE, "--type=host" ]
 
         err = self.notfoundtest(cmd)
         self.matchoutput(err, "No parameter definitions found for host "
                          "feature myfeature", cmd)
 
-    def test_999_del(self):
-        cmd = ["del_feature", "--feature", FEATURE, "--type=host"]
+    def test_300_del(self):
+        cmd = ["del_feature", "--feature", FEATURE, "--type=host" ]
         self.noouttest(cmd)
 
 if __name__ == '__main__':
