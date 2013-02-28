@@ -269,17 +269,3 @@ aquilon = INFO
 
 [protocols]
 directory = /ms/dist/aquilon/PROJ/protocols/1.11/common/lib/python
-
-[nasassign]
-#PROD
-bin = /ms/dist/virtual/PROJ/resourcepool-laf/prod/bin/nasassign
-cmdline_args =
-use_dev_db = False
-#QA
-#bin = /ms/dist/virtual/PROJ/resourcepool-laf/qa/bin/nasassign
-#cmdline_args =
-#use_dev_db = True
-#DEV
-#bin = /ms/dist/virtual/PROJ/resourcepool-laf/0.2/bin/nasassign
-#cmdline_args = --mode lone
-#use_dev_db = True
