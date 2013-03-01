@@ -35,7 +35,7 @@ from aquilon.aqdb.model import (Application, Filesystem, Intervention,
                                 ResourceGroup, Hostlink, RebootSchedule,
                                 RebootIntervention, ServiceAddress,
                                 VirtualMachine, Share)
-from aquilon.aqdb.model.disk import find_storage_data
+from aquilon.aqdb.data_sync.storage import find_storage_data
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
 from aquilon.worker.templates.panutils import (StructureTemplate, pan_assign,
                                                pan_append)
