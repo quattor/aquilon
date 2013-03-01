@@ -1969,6 +1969,8 @@
          <option name="personality" type="string">Personality of the host</option>
          <option name="buildstatus" type="string">Update host buildstatus to 'build' or 'ready'</option>
          <option name="keepbindings" type="boolean">Preserve service bindings that are not required</option>
+         <option name="grn" type="string" conflicts="eon_id">GRN as string</option>
+         <option name="eon_id" type="int" conflicts="grn">Numeric EON ID</option>
       </optgroup>
       <transport method="post" path="host/%(hostname)s/command/reconfigure" />
       <transport trigger="list" method="post" path="command/reconfigure/list" />
@@ -2934,9 +2936,12 @@
       <optgroup name="update_personality_opt" mandatory="False">
 	 <option name="vmhost_capacity_function" type="string">Function for calculating VM host capacity units</option>
 	 <option name="vmhost_overcommit_memory" type="float">Memory overcommit factor for VM hosts</option>
-         <option name="cluster_required" type="boolean" default='False'>Does this personality require hosts to be clustered?</option>
+	 <option name="cluster_required" type="boolean" default='False'>Does this personality require hosts to be clustered?</option>
 	 <option name="config_override" type="boolean">Include external personality config override template</option>
 	 <option name="host_environment" type="string">Environment for Hosts assigned to this personality [dev|qa|uat|prod|infra]</option>
+	 <option name="grn" type="string" conflicts="eon_id">GRN as string</option>
+	 <option name="eon_id" type="int" conflicts="grn">Numeric EON ID</option>
+	 <option name="leave_existing" type="flag">Do not propagate GRN changes to hosts in the personality</option>
       </optgroup>
       <transport method="post" path="personality/archetype/%(archetype)s/personality/%(personality)s" />
   </command>
@@ -2982,6 +2987,8 @@
          <option name="personality" type="string">Personality of the host</option>
          <option name="buildstatus" type="string">Build Status can be updated to 'build' or 'ready'.</option>
          <option name="keepbindings" type="boolean">Preserve service bindings that are not required</option>
+         <option name="grn" type="string" conflicts="eon_id">GRN as string</option>
+         <option name="eon_id" type="int" conflicts="grn">Numeric EON ID</option>
       </optgroup>
       <transport method="post" path="host/%(hostname)s/command/make" />
    </command>
@@ -3007,6 +3014,8 @@
          <option name="personality" type="string">Personality of the host</option>
          <option name="buildstatus" type="string">Build Status can be updated to 'build' or 'ready'.</option>
          <option name="keepbindings" type="boolean">Preserve service bindings that are not required</option>
+         <option name="grn" type="string" conflicts="eon_id">GRN as string</option>
+         <option name="eon_id" type="int" conflicts="grn">Numeric EON ID</option>
       </optgroup>
       <transport method="post" path="host/%(hostname)s/command/make_aquilon" />
    </command>

@@ -34,10 +34,10 @@
 import unittest
 
 if __name__ == "__main__":
-    import utils
+    from broker import utils
     utils.import_depends()
 
-from brokertest import TestBrokerCommand
+from broker.brokertest import TestBrokerCommand
 
 aquilon_hosts = None
 inventory_hosts = None
@@ -128,7 +128,7 @@ class TestBindFeature(TestBrokerCommand):
         command = ["bind", "feature", "--feature", "post_host",
                    "--personality", "inventory"]
         (out, err) = self.successtest(command)
-        self.matchclean(err, "Flushed 31/31", command)
+        self.matchclean(err, "Flushed 10/10", command)
 
     def test_111_verify_show_personality(self):
         command = ["show", "personality", "--personality", "inventory"]

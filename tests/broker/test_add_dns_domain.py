@@ -30,9 +30,7 @@
 # TERMS THAT MAY APPLY.
 """Module for testing the add dns domain command."""
 
-import os
 import unittest
-import socket
 
 if __name__ == "__main__":
     import utils

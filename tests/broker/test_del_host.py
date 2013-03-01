@@ -31,7 +31,6 @@
 """Module for testing the del host command."""
 
 import unittest
-import socket
 
 if __name__ == "__main__":
     import utils

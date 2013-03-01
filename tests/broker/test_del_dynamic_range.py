@@ -40,7 +40,6 @@ if __name__ == "__main__":
 from ipaddr import IPv4Address
 
 from brokertest import TestBrokerCommand
-from test_add_dynamic_range import dynname
 
 
 class TestDelDynamicRange(TestBrokerCommand):

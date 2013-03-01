@@ -78,18 +78,16 @@ class CommandAddPersonality(BrokerCommand):
         Personality.get_unique(session, archetype=dbarchetype, name=personality,
                                preclude=True)
 
-        dbpersona = Personality(name=personality, archetype=dbarchetype,
-                                cluster_required=bool(cluster_required),
-                                config_override=config_override,
-                                host_environment=host_env,
-                                comments=comments)
-
-        ##configuration override
-        session.add(dbpersona)
-
-        ## add grn/eonid
         dbgrn = lookup_grn(session, grn, eon_id, logger=logger,
                            config=self.config)
+        host_env = HostEnvironment.get_unique(session, host_environment, compel=True)
+
+        dbpersona = Personality(name=personality, archetype=dbarchetype,
+                                cluster_required=bool(cluster_required),
+                                host_environment=host_env, owner_grn=dbgrn,
+                                comments=comments,
+                                config_override=config_override)
+        session.add(dbpersona)
         dbpersona.grns.append(dbgrn)
 
         if copy_from:

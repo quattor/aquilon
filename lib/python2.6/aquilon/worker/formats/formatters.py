@@ -311,12 +311,14 @@ class ObjectFormatter(object):
             si.service = service.name
         self.add_archetype_data(msg.archetype, personality.archetype)
         msg.host_environment = str(personality.host_environment)
+        msg.owner_eonid = personality.owner_eon_id
 
     def add_host_data(self, host_msg, host):
         # FIXME: Add branch type and sandbox author to protobufs.
         host_msg.domain.name = str(host.branch.name)
         host_msg.domain.owner = str(host.branch.owner.name)
         host_msg.status = str(host.status.name)
+        host_msg.owner_eonid = host.owner_eon_id
         self.add_personality_data(host_msg.personality, host.personality)
         self.add_archetype_data(host_msg.archetype, host.archetype)
         self.redirect_proto(host.operating_system, host_msg.operating_system)

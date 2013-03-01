@@ -35,9 +35,9 @@ from sqlalchemy import (Column, Integer, Boolean, DateTime, Sequence, String,
                         ForeignKey, UniqueConstraint, Index)
 from sqlalchemy.orm import relation, deferred
 
-from aquilon.aqdb.model import Base, Archetype, Grn, HostEnvironment
-from aquilon.aqdb.column_types.aqstr import AqStr
 from aquilon.exceptions_ import ArgumentError
+from aquilon.aqdb.column_types.aqstr import AqStr
+from aquilon.aqdb.model import Base, Archetype, Grn, HostEnvironment
 
 _ABV = 'prsnlty'
 _TN = 'personality'
@@ -61,15 +61,20 @@ class Personality(Base):
     config_override = Column(Boolean(name="persona_cfg_override_ck"),
                              default=False, nullable=False)
 
+    owner_eon_id = Column(Integer, ForeignKey('grn.eon_id',
+                                              name='%s_owner_grn_fk' % _TN),
+                          nullable=False)
+
+    host_environment_id = Column(Integer, ForeignKey('host_environment.id',
+                                                     name='host_environment_fk'),
+                                 nullable=False)
+
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
     comments = Column(String(255), nullable=True)
 
     archetype = relation(Archetype)
-
-    host_environment_id = Column(Integer, ForeignKey('host_environment.id',
-                                                     name='host_environment_fk'),
-                                 nullable=False)
+    owner_grn = relation(Grn, innerjoin=True)
 
     host_environment = relation(HostEnvironment, innerjoin=True)
 
@@ -105,15 +110,13 @@ class PersonalityGrnMap(Base):
     __tablename__ = _PGN
 
     personality_id = Column(Integer, ForeignKey('%s.id' % _TN,
-                                                name='%s_personality_fk' % _PGNABV),
+                                                name='%s_personality_fk' % _PGNABV,
+                                                ondelete='CASCADE'),
                             primary_key=True)
 
     eon_id = Column(Integer, ForeignKey('grn.eon_id',
                                         name='%s_grn_fk' % _PGNABV),
                     primary_key=True)
-
-    personality = relation(Personality)
-    grn = relation(Grn)
 
 
 pgn = PersonalityGrnMap.__table__  # pylint: disable=C0103

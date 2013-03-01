@@ -36,6 +36,10 @@
       <arg choice="opt"><option>--personality <replaceable>PERSONALITY</replaceable></option></arg>
       <arg choice="opt"><option>--buildstatus <replaceable>BUILDSTATUS</replaceable></option></arg>
       <group choice="opt">
+	<arg choice="plain"><option>--grn <replaceable>GRN</replaceable></option></arg>
+	<arg choice="plain"><option>--eon_id <replaceable>EON_ID</replaceable></option></arg>
+      </group>
+      <group choice="opt">
 	<arg choice="plain"><option>--keepbindings</option></arg>
 	<arg choice="plain"><option>--nokeepbindings</option></arg>
       </group>
@@ -196,6 +200,17 @@
           <para>
             A host lifecycle tends to go from build to ready to decommissioned.
             After ready, the host might also transition to rebuild.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <option>--grn <replaceable>GRN</replaceable></option>
+          <option>--eon_id <replaceable>EON_ID</replaceable></option>
+        </term>
+        <listitem>
+          <para>
+	    Change the owner GRN of the host.
           </para>
         </listitem>
       </varlistentry>

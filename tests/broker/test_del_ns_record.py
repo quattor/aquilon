@@ -30,6 +30,8 @@
 # TERMS THAT MAY APPLY.
 """Module for testing the del chassis command."""
 
+import unittest
+
 if __name__ == '__main__':
     import utils
     utils.import_depends()
@@ -62,5 +64,5 @@ class TestDelNSRecord(TestBrokerCommand):
 
 
 if __name__ == '__main__':
-    import nose
-    nose.runmodule()
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestDelNSRecord)
+    unittest.TextTestRunner(verbosity=2).run(suite)

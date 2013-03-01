@@ -30,7 +30,6 @@
 # TERMS THAT MAY APPLY.
 """Module for testing the reconfigure command."""
 
-import re
 import unittest
 
 if __name__ == "__main__":

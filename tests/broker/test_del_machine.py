@@ -195,9 +195,6 @@ class TestDelMachine(TestBrokerCommand):
     def testdelnp3c5n5(self):
         self.noouttest(["del", "machine", "--machine", "np3c5n5"])
 
-    def testdelut3c5n6(self):
-        self.noouttest(["del", "machine", "--machine", "ut3c5n6"])
-
     def testdeljack(self):
         self.noouttest(["del", "machine", "--machine", "jack"])
 
@@ -229,9 +226,5 @@ class TestDelMachine(TestBrokerCommand):
 
 
 if __name__ == '__main__':
-    import aquilon.aqdb.depends
-    import nose
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelMachine)
-
-    #unittest.TextTestRunner(verbosity=2).run(suite)
-    nose.runmodule()
+    unittest.TextTestRunner(verbosity=2).run(suite)

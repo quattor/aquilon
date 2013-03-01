@@ -30,8 +30,6 @@
 # TERMS THAT MAY APPLY.
 """Module for testing the manage --list command."""
 
-
-import os
 import unittest
 
 if __name__ == "__main__":
@@ -171,8 +169,8 @@ class TestManageList(TestBrokerCommand):
         user = self.config.get("unittest", "user")
         hostlimit = self.config.getint("broker", "manage_max_list_size")
         hosts = []
-        for i in range(1,20):
-            hosts.append("thishostdoesnotexist%d.aqd-unittest.ms.com\n" %i)
+        for i in range(1, 20):
+            hosts.append("thishostdoesnotexist%d.aqd-unittest.ms.com\n" % i)
         scratchfile = self.writescratch("managelistlimit", "".join(hosts))
         command = ["manage", "--list", scratchfile, "--sandbox",
                    "%s/changetest1" % user, "--force"]

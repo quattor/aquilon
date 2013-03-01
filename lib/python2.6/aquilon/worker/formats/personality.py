@@ -77,8 +77,10 @@ class PersonalityFormatter(ObjectFormatter):
                    " Archetype: %s" % personality.archetype]
         details.append(indent +
                        "  Environment: %s" % personality.host_environment)
+        details.append(indent + "  Owned by {0:c}: {0.grn}"
+                       .format(personality.owner_grn))
         for grn in personality.grns:
-            details.append(indent + "  GRN: %s" % grn)
+            details.append(indent + "  Used by {0:c}: {0.grn}".format(grn))
 
         if personality.config_override:
             details.append(indent + "  Config override: enabled")

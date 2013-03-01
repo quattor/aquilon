@@ -343,7 +343,7 @@ class TestUpdateMachine(TestBrokerCommand):
         self.matchoutput(out, "Chassis ut9c1.aqd-unittest.ms.com slot 11 "
                               "already has machine ut9s03p11", command)
 
-    def testverifyreuseslot(self):
+    def testverifytakenslot(self):
         command = ["show", "machine", "--machine", "ut9s03p11"]
         out = self.commandtest(command)
         self.matchoutput(out, "Blade: ut9s03p11", command)
@@ -388,7 +388,7 @@ class TestUpdateMachine(TestBrokerCommand):
                    "--chassis", "ut9c2.aqd-unittest.ms.com", "--slot", "3"]
         self.noouttest(command)
 
-    def testverifymultislotclear(self):
+    def testverifymultislotadd(self):
         command = ["show", "machine", "--machine", "ut9s03p15"]
         out = self.commandtest(command)
         self.matchoutput(out, "Blade: ut9s03p15", command)
@@ -411,7 +411,7 @@ class TestUpdateMachine(TestBrokerCommand):
         self.matchoutput(out, "Use --multislot to support a machine in more "
                               "than one slot", command)
 
-    def testverifymultislotclear(self):
+    def testverifymultislotupdatefail(self):
         command = ["show", "machine", "--machine", "ut9s03p19"]
         out = self.commandtest(command)
         self.matchoutput(out, "Blade: ut9s03p19", command)

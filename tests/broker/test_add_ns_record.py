@@ -30,6 +30,8 @@
 # TERMS THAT MAY APPLY.
 """Module for testing the add/show dns_record command(s)."""
 
+import unittest
+
 if __name__ == '__main__':
     import utils
     utils.import_depends()
@@ -95,5 +97,5 @@ class TestAddNSRecord(TestBrokerCommand):
 
 
 if __name__ == '__main__':
-    import nose
-    nose.runmodule()
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestAddNSRecord)
+    unittest.TextTestRunner(verbosity=2).run(suite)

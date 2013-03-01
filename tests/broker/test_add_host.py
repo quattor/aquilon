@@ -31,13 +31,12 @@
 """Module for testing the add host command."""
 
 import unittest
-import socket
 
 if __name__ == "__main__":
-    import utils
+    from broker import utils
     utils.import_depends()
 
-from brokertest import TestBrokerCommand, DummyIP
+from broker.brokertest import TestBrokerCommand, DummyIP
 
 
 class TestAddHost(TestBrokerCommand):
@@ -95,11 +94,6 @@ class TestAddHost(TestBrokerCommand):
                         "--personality", "eaitools"])
         self.dsdb_verify()
 
-    def testaddjackgrn(self):
-        command = ["add", "grn", "--grn", "grn:/example/cards",
-                   "--eon_id", "4"]
-        self.noouttest(command)
-
     def testaddjackhost(self):
         ip = self.net.unknown[0].usable[17]
         self.dsdb_expect_add("jack.cards.example.com", ip, "eth0", ip.mac,
@@ -116,7 +110,8 @@ class TestAddHost(TestBrokerCommand):
     def testverifyjackgrn(self):
         command = "show host --hostname jack.cards.example.com"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "GRN: grn:/example/cards", command)
+        self.matchoutput(out, "Owned by GRN: grn:/example/cards", command)
+        self.matchoutput(out, "Used by GRN: grn:/example/cards", command)
 
     def testmachinereuse(self):
         ip = self.net.unknown[0].usable[-1]
@@ -169,7 +164,7 @@ class TestAddHost(TestBrokerCommand):
                          self.net.unknown[0].usable[0],
                          command)
 
-    def testverifyaddafsbynetmachine(self):
+    def testverifyaddafsbynetut3c5n11(self):
         command = "show machine --machine ut3c5n11"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
@@ -177,7 +172,7 @@ class TestAddHost(TestBrokerCommand):
                          self.net.netsvcmap.usable[0],
                          command)
 
-    def testverifyaddafsbynetmachine(self):
+    def testverifyaddafsbynetut3c5n12(self):
         command = "show machine --machine ut3c5n12"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,

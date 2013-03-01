@@ -30,6 +30,8 @@
 # TERMS THAT MAY APPLY.
 """ Used by the test runner to display what test is currently running """
 import unittest
+from aquilon.config import Config
+from subprocess import call
 
 
 class VerboseTextTestResult(unittest._TextTestResult):
@@ -54,17 +56,31 @@ class VerboseTextTestResult(unittest._TextTestResult):
         self.stream.writeln(self.separator2)
         self.stream.writeln("%s" % err)
 
+    def _snapshot_db(self, test):
+        # If there was an error, and we're using SQLite, create a snapshot
+        # TODO: create a git-managed snapshot of the plenaries/profiles as well
+        config = Config()
+        dsn = config.get("database", "dsn")
+        if dsn.startswith("sqlite:///"):
+
+            dbfile = dsn[10:]
+            target = dbfile + ".%s:%s" % (test.__class__.__name__,
+                                          test._testMethodName)
+            call(["/bin/cp", "-a", dbfile, target])
+
     def addError(self, test, err):
         self.printModule(test)
         # Specifically skip over base class's implementation.
         unittest.TestResult.addError(self, test, err)
         self.printResult("ERROR", self.errors[-1])
+        self._snapshot_db(test)
 
     def addFailure(self, test, err):
         self.printModule(test)
         # Specifically skip over base class's implementation.
         unittest.TestResult.addFailure(self, test, err)
         self.printResult("FAIL", self.failures[-1])
+        self._snapshot_db(test)
 
 
 class VerboseTextTestRunner(unittest.TextTestRunner):

@@ -37,7 +37,6 @@ that the 'permission' and 'show principal' commands work as expected.
 
 import unittest
 import re
-import os
 from subprocess import Popen, PIPE
 
 if __name__ == "__main__":

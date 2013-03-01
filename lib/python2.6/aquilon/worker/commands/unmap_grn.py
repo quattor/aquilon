@@ -29,10 +29,8 @@
 # TERMS THAT MAY APPLY.
 """Contains the logic for `aq unmap grn`."""
 
-from aquilon.aqdb.model import Personality
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.commands.map_grn import CommandMapGrn
-from aquilon.exceptions_ import ArgumentError
 
 
 class CommandUnMapGrn(CommandMapGrn):
@@ -42,7 +40,3 @@ class CommandUnMapGrn(CommandMapGrn):
             # TODO: should we throw an error here?
             return
         obj.grns.remove(grn)
-        if isinstance(obj, Personality):
-            if not obj.grns:
-                raise ArgumentError("{0} is the last grn on "
-                                    "{1} and cannot be removed".format(grn, obj))

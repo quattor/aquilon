@@ -268,6 +268,8 @@ class PlenaryHostData(Plenary):
         if eon_id_list:
             pan_assign(lines, "system/eon_ids", eon_id_list)
 
+        pan_assign(lines, "system/owner_eon_id", self.dbobj.owner_eon_id)
+
         if self.dbobj.cluster:
             pan_assign(lines, "system/cluster/name", self.dbobj.cluster.name)
             pan_assign(lines, "system/cluster/node_index",

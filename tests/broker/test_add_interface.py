@@ -387,7 +387,7 @@ class TestAddInterface(TestBrokerCommand):
                          self.net.unknown[0].usable[0].mac,
                          command)
 
-    def testfailaddut3c1n4eth1(self):
+    def testfailaddut3c1n4eth1badmac(self):
         command = ["add", "interface", "--interface", "eth1",
                    "--machine", "ut3c1n4", "--mac", "not-a-mac"]
         out = self.badrequesttest(command)

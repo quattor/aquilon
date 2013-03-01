@@ -46,7 +46,7 @@ if __name__ == "__main__":
     SRCDIR = os.path.join(BINDIR, "..", "..")
     sys.path.append(os.path.join(SRCDIR, "lib", "python2.6"))
     sys.path.append(os.path.join(SRCDIR, "tests"))
-    import depends
+    import depends  # pylint: disable=W0611
 
 from test_start import TestBrokerStart
 from test_ping import TestPing
@@ -266,6 +266,7 @@ from test_audit import TestAudit
 from test_usecase_database import TestUsecaseDatabase
 from test_usecase_hacluster import TestUsecaseHACluster
 from test_grns import TestGrns
+from test_map_grn import TestMapGrn
 from test_stop import TestBrokerStop
 from test_reset_advertised_status import TestResetAdvertisedStatus
 from test_parameter import TestParameter
@@ -295,6 +296,7 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestGet, TestPublishSandbox, TestDeployDomain,
                 TestSyncDomain,
                 TestMergeConflicts,
+                TestGrns,
                 TestAddArchetype, TestAddOS, TestAddPersonality,
                 TestParameterDefinition,
                 TestAddService, TestUpdateService, TestAddRequiredService,
@@ -333,7 +335,7 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestBindESXCluster, TestChangeClusterStatus, TestRebindESXCluster,
                 TestMake,
                 TestAddStaticRoute,
-                TestGrns,
+                TestMapGrn,
                 TestRebindMetaCluster,
                 TestUpdateBuilding,
                 TestAddVirtualHardware, TestAdd10GigHardware,

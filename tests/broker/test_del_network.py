@@ -149,5 +149,5 @@ class TestDelNetwork(TestBrokerCommand):
 
 
 if __name__ == '__main__':
-    suite = unittest.TestLoader().loadTestsFromTestCase(TestAddNetwork)
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestDelNetwork)
     unittest.TextTestRunner(verbosity=2).run(suite)

@@ -33,10 +33,10 @@
 import unittest
 
 if __name__ == "__main__":
-    import utils
+    from broker import utils
     utils.import_depends()
 
-from brokertest import TestBrokerCommand
+from broker.brokertest import TestBrokerCommand
 
 
 class TestArchetypeConstraints(TestBrokerCommand):
@@ -45,7 +45,8 @@ class TestArchetypeConstraints(TestBrokerCommand):
         command = "del archetype --archetype aquilon"
         out = self.badrequesttest(command.split(" "))
         self.matchoutput(out, "Archetype aquilon is still in use by "
-                         "Personality aquilon/generic and cannot be deleted.",
+                         "personality aquilon/badpersonality and "
+                         "cannot be deleted.",
                          command)
 
     def testverifydelarchetypewithmodel(self):
