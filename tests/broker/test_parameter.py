@@ -460,6 +460,18 @@ class TestParameter(TestBrokerCommand):
                                r'//esp/users',
                          cmd)
 
+    def test_520_copy_from(self):
+        cmd = ["add_personality", "--archetype", ARCHETYPE, "--personality", "myshinynew",
+                "--eon_id=2", "--copy_from", PERSONALITY, "--host_environment", "dev"]
+        self.successtest(cmd)
+
+        cmd = ["show_diff", "--archetype", ARCHETYPE, "--personality", PERSONALITY,
+               "--other", "myshinynew"]
+        out = self.noouttest(cmd)
+
+        cmd = ["del_personality", "--archetype", ARCHETYPE, "--personality", "myshinynew"]
+        self.successtest(cmd)
+
     def test_550_verify_actions(self):
         ACT_CAT_CMD = CAT_CMD + ["--param_tmpl=actions"]
         out = self.commandtest(ACT_CAT_CMD)

@@ -161,6 +161,20 @@ class TestAddRequiredService(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out, "Service: netmap", command)
 
+    def testaddrequirednetmapcopy(self):
+        self.noouttest(["add_personality", "--personality", "testme",
+                          "--eon_id", "2", "--archetype", "aquilon",
+                          "--copy_from", "eaitools",
+                          "--host_environment", "dev"])
+
+        command = ["show_personality", "--archetype=aquilon",
+                   "--personality=testme"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Service: netmap", command)
+
+        self.successtest(["del_personality", "--personality", "testme",
+                          "--archetype", "aquilon"])
+
     def testaddrequiredbadservice(self):
         command = ["add_required_service", "--service=badservice",
                    "--personality=badpersonality2", "--archetype=aquilon"]
