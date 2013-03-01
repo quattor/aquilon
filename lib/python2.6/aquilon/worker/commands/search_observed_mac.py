@@ -39,13 +39,19 @@ class CommandSearchObservedMac(BrokerCommand):
     required_parameters = []
     default_style = "csv"
 
-    def render(self, session, switch, port_number, mac, **arguments):
+    def render(self, session, logger, switch, port, mac,
+               **arguments):
         q = session.query(ObservedMac)
         if switch:
             dbswitch = Switch.get_unique(session, switch, compel=True)
             q = q.filter_by(switch=dbswitch)
-        if port_number is not None:
-            q = q.filter_by(port_number=port_number)
+        if arguments.get("port_number", None):
+            self.deprecated_option("port_number", "Please use --port instead.",
+                                   logger=logger, **arguments)
+            port = str(arguments["port_number"])
+
+        if port is not None:
+            q = q.filter_by(port=port)
         if mac:
             q = q.filter_by(mac_address=mac)
         return q.order_by(ObservedMac.mac_address).all()

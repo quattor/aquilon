@@ -31,6 +31,7 @@
 
 
 from csv import DictReader, Error as CSVError
+from json import JSONDecoder
 from StringIO import StringIO
 from datetime import datetime
 
@@ -86,7 +87,7 @@ class CommandPollSwitch(BrokerCommand):
         default_ssh_args = determine_helper_args(self.config)
         for switch in switches:
             if clear:
-                self.clear(session, logger, switch)
+                self.clear(session, switch)
 
             hostname = determine_helper_hostname(session, logger, self.config,
                                                  switch)
@@ -96,7 +97,7 @@ class CommandPollSwitch(BrokerCommand):
             else:
                 ssh_args = []
 
-            self.poll_mac(session, logger, switch, now, ssh_args)
+            self.poll_mac(session, switch, now, ssh_args)
             if vlan:
                 if switch.switch_type != "tor":
                     logger.client_info("Skipping VLAN probing on {0:l}, it's "
@@ -113,17 +114,10 @@ class CommandPollSwitch(BrokerCommand):
             raise ArgumentError("Failed getting VLAN info.")
         return
 
-    def poll_mac(self, session, logger, switch, now, ssh_args):
-        out = self.run_checknet(logger, switch, ssh_args)
-        macports = self.parse_ports(logger, out)
-        for (mac, port) in macports:
-            update_or_create_observed_mac(session, switch, port, mac, now)
+    def poll_mac(self, session, switch, now, ssh_args):
+        importer = self.config.get("broker", "get_camtable")
 
-    def clear(self, session, logger, switch):
-        session.query(ObservedMac).filter_by(switch=switch).delete()
-        session.flush()
-
-    def run_checknet(self, logger, switch, ssh_args):
+        # run_checknet factored in
         if not switch.primary_name:
             hostname = switch.label
         elif switch.primary_name.fqdn.dns_domain.name == 'ms.com':
@@ -131,11 +125,23 @@ class CommandPollSwitch(BrokerCommand):
         else:
             hostname = switch.fqdn
         args = []
+
         if ssh_args:
             args.extend(ssh_args)
-        args.extend([self.config.get("broker", "CheckNet"), "-ho", hostname,
-                     "camtable", "-nobanner", "-table", "1", "-noprompt"])
-        return run_command(args, logger=logger)
+        args.extend([importer, hostname])
+
+        try:
+            out = run_command(args)
+        except ProcessException, err:
+            raise ArgumentError("Failed to run switch discovery: %s" % err)
+
+        macports = JSONDecoder().decode(out)
+        for (mac, port) in macports:
+            update_or_create_observed_mac(session, switch, port, mac, now)
+
+    def clear(self, session, switch):
+        session.query(ObservedMac).filter_by(switch=switch).delete()
+        session.flush()
 
     def parse_ports(self, logger, results):
         """ This method could require switch and have hard-coded field

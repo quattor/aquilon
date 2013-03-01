@@ -179,8 +179,9 @@ class Interface(Base):
         q = q.filter_by(mac_address=self.mac)
         # Group the results into 'any port number but zero' and 'port 0'.
         # This prioritizes any port over the uplink port.
-        # Saying that port 0 is an uplink port isn't very elegant...
-        q = q.order_by(desc(case([(ObservedMac.port_number == 0, 0)], else_=1)))
+        # Saying that port 0 is an uplink port isn't very elegant, also
+        # with real port names it's not even true.
+        q = q.order_by(desc(case([(ObservedMac.port == "0", 0)], else_=1)))
         q = q.order_by(desc(ObservedMac.last_seen))
         return q.first()
 
