@@ -34,7 +34,7 @@ import logging
 
 from aquilon.aqdb.model import Machine
 from aquilon.worker.locks import CompileKey
-from aquilon.aqdb.model.disk import find_storage_data
+from aquilon.aqdb.data_sync.storage import find_storage_data
 from aquilon.worker.templates.base import Plenary
 from aquilon.worker.templates.panutils import (StructureTemplate, pan_assign,
                                                pan_include, PanMetric,
