@@ -85,7 +85,7 @@ class MetaCluster(Cluster):
     @property
     def shares(self):
         from aquilon.aqdb.model import ClusterResource, Share
-        q = object_session(self).query(Share)
+        q = object_session(self).query(Share.name).distinct()
         q = q.join(ClusterResource, Cluster, '_metacluster').filter_by(metacluster=self)
         return q.all()
 
