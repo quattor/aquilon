@@ -71,8 +71,6 @@ class MetaCluster(Cluster):
 
     max_clusters = Column(Integer, nullable=False)
 
-    max_shares = Column(Integer, nullable=False)
-
     high_availability = Column(Boolean(name="%s_ha_ck" % _MCT), default=False,
                                nullable=False)
 
@@ -144,9 +142,6 @@ class MetaCluster(Cluster):
         if len(self.members) > self.max_clusters:
             raise error("{0} already has the maximum number of clusters "
                         "({1}).".format(self, self.max_clusters))
-        if len(self.shares) > self.max_shares:
-            raise error("{0} already has the maximum number of shares "
-                        "({1}).".format(self, self.max_shares))
 
         # Small optimization: avoid enumerating all the clusters/VMs if high
         # availability is not enabled

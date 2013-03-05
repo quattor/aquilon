@@ -42,7 +42,7 @@ from brokertest import TestBrokerCommand
 class TestAddMetaCluster(TestBrokerCommand):
 
     def testaddutmc1(self):
-        command = ["add_metacluster", "--metacluster=utmc1", "--max_shares=8",
+        command = ["add_metacluster", "--metacluster=utmc1",
                    "--domain=unittest", "--building=ut"]
         self.noouttest(command)
 
@@ -53,7 +53,6 @@ class TestAddMetaCluster(TestBrokerCommand):
                                           "max_members_default")
         self.matchoutput(out, "MetaCluster: utmc1", command)
         self.matchoutput(out, "Max members: %s" % default_members, command)
-        self.matchoutput(out, "Max shares: 8", command)
         self.matchclean(out, "Comments", command)
         self.matchclean(out, "Member:", command)
         self.matchclean(out, "Share:", command)
@@ -68,7 +67,7 @@ class TestAddMetaCluster(TestBrokerCommand):
 
     def testaddutmc2(self):
         command = ["add_metacluster", "--metacluster=utmc2",
-                   "--max_members=99", "--max_shares=89", "--building=ut",
+                   "--max_members=99", "--building=ut",
                    "--domain=unittest",
                    "--comments", "MetaCluster with a comment"]
         self.noouttest(command)
@@ -78,7 +77,6 @@ class TestAddMetaCluster(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "MetaCluster: utmc2", command)
         self.matchoutput(out, "Max members: 99", command)
-        self.matchoutput(out, "Max shares: 89", command)
         self.matchoutput(out, "Comments: MetaCluster with a comment", command)
 
     def testaddutmc3(self):
@@ -88,34 +86,31 @@ class TestAddMetaCluster(TestBrokerCommand):
         self.noouttest(command)
 
     def testverifyutmc3(self):
-        default_shares = self.config.get("archetype_metacluster",
-                                         "max_shares_default")
         command = "show metacluster --metacluster utmc3"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "MetaCluster: utmc3", command)
         self.matchoutput(out, "Max members: 0", command)
-        self.matchoutput(out, "Max shares: %s" % default_shares, command)
         self.matchoutput(out, "Comments: MetaCluster with no members allowed",
                          command)
 
     def testaddutmc4(self):
         # Sort of a mini-10 Gig design for port group testing...
         command = ["add_metacluster", "--metacluster=utmc4",
-                   "--max_members=6", "--max_shares=7", "--building=ut",
+                   "--max_members=6", "--building=ut",
                    "--domain=unittest"]
         self.noouttest(command)
 
     def testaddutmc5(self):
         # High availability testing
         command = ["add_metacluster", "--metacluster=utmc5",
-                   "--max_members=6", "--max_shares=6", "--building=ut",
+                   "--max_members=6", "--building=ut",
                    "--domain=unittest"]
         self.noouttest(command)
 
     def testaddutmc6(self):
         # High availability testing
         command = ["add_metacluster", "--metacluster=utmc6",
-                   "--max_members=6", "--max_shares=6", "--building=ut",
+                   "--max_members=6", "--building=ut",
                    "--domain=unittest"]
         self.noouttest(command)
 

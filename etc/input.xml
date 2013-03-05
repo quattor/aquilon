@@ -3426,7 +3426,6 @@
         </optgroup>
       <optgroup name="add_metacluster_options" mandatory="False">
          <option name="max_members" type="int">Comments</option>
-         <option name="max_shares" type="int">Comments</option>
          <option name="buildstatus" type="string">Build status of the metacluster (defaults to 'build')</option>
          <option name="comments" type="string">Comments</option>
       </optgroup>
@@ -3450,7 +3449,6 @@
       </optgroup>
       <optgroup name="update_metacluster_options" mandatory="False">
          <option name="max_members" type="int">Maximum number of clusters that can be members of this metacluster</option>
-         <option name="max_shares" type="int">Maximum number of shares that virtual machines may use</option>
          <option name="comments" type="string">Comments</option>
          <option name="high_availability" type="boolean">Turn on high availaibility mode</option>
          <option name="fix_location" type="flag">Sets the location of the metacluster based on the location of its member clusters.</option>

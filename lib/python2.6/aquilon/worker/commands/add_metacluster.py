@@ -45,7 +45,7 @@ class CommandAddMetaCluster(BrokerCommand):
     def render(self, session, logger,
                metacluster, archetype, personality,
                domain, sandbox,
-               max_members, max_shares,
+               max_members,
                buildstatus, comments,
                **arguments):
 
@@ -96,10 +96,6 @@ class CommandAddMetaCluster(BrokerCommand):
             max_members = self.config.getint("archetype_metacluster",
                                              "max_members_default")
 
-        if max_shares is None:
-            max_shares = self.config.getint("archetype_metacluster",
-                                            "max_shares_default")
-
         if metacluster.strip().lower() == 'global':
             raise ArgumentError("Metacluster name global is reserved.")
 
@@ -110,7 +106,7 @@ class CommandAddMetaCluster(BrokerCommand):
 
         dbcluster = MetaCluster(name=metacluster, location_constraint=dbloc,
                                 personality=dbpersonality,
-                                max_clusters=max_members, max_shares=max_shares,
+                                max_clusters=max_members,
                                 branch=dbbranch, sandbox_author=dbauthor,
                                 status=dbstatus, comments=comments)
 
