@@ -31,11 +31,11 @@
 
 import re
 
-from aquilon.exceptions_ import ArgumentError, NotFoundException
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.aqdb.model import (LocalDisk, Machine, Share,
-                                VirtualDisk, ResourceGroup)
+from aquilon.exceptions_ import ArgumentError
+from aquilon.aqdb.model import Machine, LocalDisk, VirtualDisk
 from aquilon.aqdb.model.disk import controller_types
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.dbwrappers.resources import find_share
 from aquilon.worker.templates.machine import PlenaryMachineInfo
 
 
@@ -47,19 +47,13 @@ class CommandAddDisk(BrokerCommand):
 
     REGEX_ADDRESS = re.compile("\d+:\d+$")
 
-    def _check_disk_address(self, address):
-        if not CommandAddDisk.REGEX_ADDRESS.match(address):
-            raise ArgumentError("Disk address '%s' is not valid, it must "
-                                "match \d+:\d+ (e.g. 0:0)." % address)
-
     def _write_plenary_info(self, dbmachine, logger):
         """write template files"""
         plenary_info = PlenaryMachineInfo(dbmachine, logger=logger)
         plenary_info.write()
 
-    def render(self, session, logger, machine, disk, controller,
-               share, resourcegroup,
-               address, comments, dbuser, size, boot, **kw):
+    def render(self, session, logger, machine, disk, controller, share,
+               resourcegroup, address, comments, size, boot, **kw):
 
         # Handle deprecated arguments
         if kw.get("type"):
@@ -96,77 +90,27 @@ class CommandAddDisk(BrokerCommand):
             # is already a boot disk
             boot = (disk == "sda" or disk == "c0d0")
 
-        if dbmachine.vm_container and \
-           hasattr(dbmachine.vm_container.holder.holder_object, 'metacluster'):
-            dbmetacluster = dbmachine.vm_container.holder.holder_object.metacluster
-        else:
-            dbmetacluster = None
+        if share:
+            if not CommandAddDisk.REGEX_ADDRESS.match(address):
+                raise ArgumentError("Disk address '%s' is not valid, it must "
+                                    "match \d+:\d+ (e.g. 0:0)." % address)
+            if not dbmachine.vm_container:
+                raise ArgumentError("{0} is not a virtual machine, it is not "
+                                    "possible to define a virtual disk."
+                                    .format(dbmachine))
 
-        # TODD This logic should be much cleaner when merged with
-        # vm_host(localdisk) branch
-        # v2 share
-        if resourcegroup:
-
-            if not dbmachine.cluster or not dbmetacluster:
-                raise ArgumentError("Machine %s should be contained by a "
-                                    "cluster")
-
-            dbrg = ResourceGroup.get_unique(session, name=resourcegroup,
-                                    holder=dbmachine.cluster.resholder,
-                                    compel=False)
-
-            if not dbrg:
-                if dbmetacluster:
-                    dbrg = ResourceGroup.get_unique(session,
-                                    name=resourcegroup,
-                                    holder=dbmetacluster.resholder,
-                                    compel=True)
-                else:
-                    raise NotFoundException("resourcegroup %s in %s "
-                                "not found." %
-                                (resourcegroup, dbmachine.cluster.name))
-
-            dbshare = Share.get_unique(session,
-                                       name=share,
-                                       holder=dbrg.resholder,
-                                       compel=True)
-
-            self._check_disk_address(address)
-            dbdisk = VirtualDisk(device_name=disk,
-                                 controller_type=controller,
-                                 bootable=boot,
-                                 capacity=size, address=address,
+            dbshare = find_share(dbmachine.vm_container.holder.holder_object,
+                                 resourcegroup, share)
+            dbdisk = VirtualDisk(device_name=disk, controller_type=controller,
+                                 bootable=boot, capacity=size, address=address,
                                  comments=comments)
 
-            dbmachine.disks.append(dbdisk)
             dbshare.disks.append(dbdisk)
-
         else:
-            # v1 share - modded copy of v2 share logic.
-            if share:
-                if not dbmachine.cluster:
-                    raise ArgumentError("Machine %s should be contained by a "
-                                        "cluster")
-                dbshare = Share.get_unique(session,
-                                           name=share,
-                                           holder=dbmachine.cluster.resholder,
-                                           compel=True)
+            dbdisk = LocalDisk(device_name=disk, controller_type=controller,
+                               capacity=size, bootable=boot, comments=comments)
 
-                self._check_disk_address(address)
-
-                dbdisk = VirtualDisk(device_name=disk,
-                                     controller_type=controller,
-                                     bootable=boot,
-                                     capacity=size, address=address,
-                                     comments=comments)
-
-                dbshare.disks.append(dbdisk)
-            else:
-                dbdisk = LocalDisk(device_name=disk,
-                                   controller_type=controller,
-                                   capacity=size, bootable=boot,
-                                   comments=comments)
-            dbmachine.disks.append(dbdisk)
+        dbmachine.disks.append(dbdisk)
 
         self._write_plenary_info(dbmachine, logger)
         return

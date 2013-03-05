@@ -46,8 +46,11 @@ class TestAddShare(TestBrokerCommand):
             self.noouttest(["add_share", "--cluster=utecl1",
                             "--share=test_share_%s" % i])
 
-        # This isn't counted as a separate share
         self.noouttest(["add_share", "--cluster=utecl2",
+                        "--share=test_share_1"])
+        self.noouttest(["add_share", "--cluster=utecl3",
+                        "--share=test_share_1"])
+        self.noouttest(["add_share", "--cluster=utecl13",
                         "--share=test_share_1"])
 
     # test_share_1 must appear once.

@@ -31,15 +31,18 @@
 
 
 from aquilon.exceptions_ import ArgumentError
+from aquilon.aqdb.model import (Cpu, Chassis, ChassisSlot, Model, Cluster,
+                                Machine, ClusterResource, BundleResource,
+                                VirtualDisk)
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.hardware_entity import update_primary_ip
 from aquilon.worker.dbwrappers.location import get_location
+from aquilon.worker.dbwrappers.resources import (find_share,
+                                                 get_resource_holder)
 from aquilon.worker.templates.machine import machine_plenary_will_move
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
 from aquilon.worker.locks import lock_queue, CompileKey
 from aquilon.worker.processes import DSDBRunner
-from aquilon.aqdb.model import (Cpu, Chassis, ChassisSlot, Model, Cluster,
-                                Machine, ClusterResource)
 
 
 class CommandUpdateMachine(BrokerCommand):
@@ -174,6 +177,25 @@ class CommandUpdateMachine(BrokerCommand):
                 session.flush()
             remove_plenaries.append(Plenary.get_plenary(dbmachine.vm_container))
             dbmachine.vm_container.holder_id = dbcluster.resholder.id
+
+            for dbdisk in dbmachine.disks:
+                if not isinstance(dbdisk, VirtualDisk):
+                    continue
+                old_share = dbdisk.share
+                if isinstance(old_share.holder, BundleResource):
+                    resourcegroup = old_share.holder.name
+                else:
+                    resourcegroup = None
+                new_share = find_share(dbcluster, resourcegroup, old_share.name,
+                                       error=ArgumentError)
+
+                # If the shares are registered at the metacluster level and both
+                # clusters are in the same metacluster, then there will be no
+                # real change here
+                if new_share != old_share:
+                    old_share.disks.remove(dbdisk)
+                    new_share.disks.append(dbdisk)
+
             session.expire(dbmachine.vm_container, ["holder"])
             dbmachine.location = dbcluster.location_constraint
             session.flush()

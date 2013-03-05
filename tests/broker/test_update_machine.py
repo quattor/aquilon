@@ -437,10 +437,54 @@ class TestUpdateMachine(TestBrokerCommand):
                          "new ESX metacluster utmc7.",
                          command)
 
+    def testallowchangemetacluster_05(self):
+        command = ["show_share", "--all"]
+        out = self.commandtest(command)
+        # Initially the VM is on utecl1, test_share_1 is not used on utecl2
+        self.searchoutput(out,
+                          r'Share: test_share_1\s*'
+                          r'Bound to: ESX Cluster utecl1\s*'
+                          r'Server: lnn30f1\s*'
+                          r'Mountpoint: /vol/lnn30f1v1/test_share_1\s*'
+                          r'Disk Count: 1\s*'
+                          r'Machine Count: 1\s*',
+                          command)
+        self.searchoutput(out,
+                          r'Share: test_share_1\s*'
+                          r'Bound to: ESX Cluster utecl2\s*'
+                          r'Server: lnn30f1\s*'
+                          r'Mountpoint: /vol/lnn30f1v1/test_share_1\s*'
+                          r'Disk Count: 0\s*'
+                          r'Machine Count: 0\s*',
+                          command)
+
     def testallowchangemetacluster_10(self):
         command = ["update_machine", "--machine=evm1", "--cluster=utecl13",
                    "--allow_metacluster_change"]
         out = self.commandtest(command)
+
+    def testallowchangemetacluster_15(self):
+        command = ["show_share", "--all"]
+        out = self.commandtest(command)
+
+        # The disk should have moved to utecl13, test_share_1 should be unused on
+        # utecl1
+        self.searchoutput(out,
+                          r'Share: test_share_1\s*'
+                          r'Bound to: ESX Cluster utecl1\s*'
+                          r'Server: lnn30f1\s*'
+                          r'Mountpoint: /vol/lnn30f1v1/test_share_1\s*'
+                          r'Disk Count: 0\s*'
+                          r'Machine Count: 0\s*',
+                          command)
+        self.searchoutput(out,
+                          r'Share: test_share_1\s*'
+                          r'Bound to: ESX Cluster utecl13\s*'
+                          r'Server: lnn30f1\s*'
+                          r'Mountpoint: /vol/lnn30f1v1/test_share_1\s*'
+                          r'Disk Count: 1\s*'
+                          r'Machine Count: 1\s*',
+                          command)
 
     def testallowchangemetacluster_20(self):
         command = ["search_machine", "--machine=evm1", "--cluster=utecl13"]
