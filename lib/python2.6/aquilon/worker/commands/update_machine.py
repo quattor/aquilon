@@ -32,8 +32,7 @@
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import (Cpu, Chassis, ChassisSlot, Model, Cluster,
-                                Machine, ClusterResource, BundleResource,
-                                VirtualDisk)
+                                Machine, BundleResource, VirtualDisk)
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.hardware_entity import update_primary_ip
 from aquilon.worker.dbwrappers.location import get_location
@@ -51,7 +50,7 @@ class CommandUpdateMachine(BrokerCommand):
 
     def render(self, session, logger, machine, model, vendor, serial,
                chassis, slot, clearchassis, multislot,
-               cluster, allow_metacluster_change,
+               vmhost, cluster, allow_metacluster_change,
                cpuname, cpuvendor, cpuspeed, cpucount, memory, ip,
                **arguments):
         dbmachine = Machine.get_unique(session, machine, compel=True)
@@ -159,24 +158,32 @@ class CommandUpdateMachine(BrokerCommand):
         # re-evaluate the portgroup for overflow.
         # It would be better to have --pg and --autopg options to let it
         # happen at this point.
-        if cluster:
-            if not dbmachine.cluster:
-                raise ArgumentError("Cannot add an existing machine to "
-                                    "a cluster.")
-            dbcluster = Cluster.get_unique(session, name=cluster, compel=True)
-            if dbcluster.metacluster != dbmachine.cluster.metacluster \
-               and not allow_metacluster_change:
-                raise ArgumentError("Cannot move machine to a new "
-                                    "metacluster: Current {0:l} does not match "
-                                    "new {1:l}.".format(dbmachine.cluster.metacluster,
-                                                        dbcluster.metacluster))
-            old_cluster = dbmachine.cluster
-            if not dbcluster.resholder:
-                dbcluster.resholder = ClusterResource(cluster=dbcluster)
-                # We need the ID of the resholder object...
-                session.flush()
+        if cluster or vmhost:
+            if not dbmachine.vm_container:
+                raise ArgumentError("Cannot convert a physical machine to "
+                                    "virtual.")
+
+            old_holder = dbmachine.vm_container.holder.holder_object
+            resholder = get_resource_holder(session, hostname=vmhost,
+                                            cluster=cluster, compel=False)
+            new_holder = resholder.holder_object
+
+            # TODO: do we want to allow moving machines between the cluster and
+            # metacluster level?
+            if new_holder.__class__ != old_holder.__class__:
+                raise ArgumentError("Cannot move a VM between a cluster and a "
+                                    "stand-alone host.")
+
+            if cluster:
+                if new_holder.metacluster != old_holder.metacluster \
+                   and not allow_metacluster_change:
+                    raise ArgumentError("Current {0:l} does not match "
+                                        "new {1:l}."
+                                        .format(old_holder.metacluster,
+                                                new_holder.metacluster))
+
             remove_plenaries.append(Plenary.get_plenary(dbmachine.vm_container))
-            dbmachine.vm_container.holder_id = dbcluster.resholder.id
+            dbmachine.vm_container.holder = resholder
 
             for dbdisk in dbmachine.disks:
                 if not isinstance(dbdisk, VirtualDisk):
@@ -186,7 +193,7 @@ class CommandUpdateMachine(BrokerCommand):
                     resourcegroup = old_share.holder.name
                 else:
                     resourcegroup = None
-                new_share = find_share(dbcluster, resourcegroup, old_share.name,
+                new_share = find_share(new_holder, resourcegroup, old_share.name,
                                        error=ArgumentError)
 
                 # If the shares are registered at the metacluster level and both
@@ -196,11 +203,14 @@ class CommandUpdateMachine(BrokerCommand):
                     old_share.disks.remove(dbdisk)
                     new_share.disks.append(dbdisk)
 
-            session.expire(dbmachine.vm_container, ["holder"])
-            dbmachine.location = dbcluster.location_constraint
+            if isinstance(new_holder, Cluster):
+                dbmachine.location = new_holder.location_constraint
+            else:
+                dbmachine.location = new_holder.location
+
             session.flush()
-            plenaries.append(Plenary.get_plenary(old_cluster))
-            plenaries.append(Plenary.get_plenary(dbcluster))
+            plenaries.append(Plenary.get_plenary(old_holder))
+            plenaries.append(Plenary.get_plenary(new_holder))
 
         if dbmachine.vm_container:
             plenaries.append(Plenary.get_plenary(dbmachine.vm_container))

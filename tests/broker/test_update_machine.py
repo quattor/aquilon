@@ -432,7 +432,6 @@ class TestUpdateMachine(TestBrokerCommand):
         command = ["update_machine", "--machine=evm1", "--cluster=utecl13"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
-                         "Cannot move machine to a new metacluster: "
                          "Current ESX metacluster utmc1 does not match "
                          "new ESX metacluster utmc7.",
                          command)
@@ -508,7 +507,7 @@ class TestUpdateMachine(TestBrokerCommand):
     def testfailaddreadmachinetocluster(self):
         command = ["update_machine", "--machine=ut9s03p19", "--cluster=utecl1"]
         out = self.badrequesttest(command)
-        self.matchoutput(out, "Cannot add an existing machine to a cluster.",
+        self.matchoutput(out, "Cannot convert a physical machine to virtual.",
                          command)
 
     # These tests would be nice, but twisted just ignores the permission

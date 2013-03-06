@@ -3117,8 +3117,9 @@
          <option name="rack" type="string">rack name</option>
          <option name="desk" type="string">desk name</option>
          <option name="serial" type="string">serial number</option>
-         <option name="cluster" type="string">Cluster name</option>
+         <option name="cluster" type="string">Cluster name hosting the VM</option>
          <option name="allow_metacluster_change" type="boolean">when changing clusters, allow the cluster to be in a different metacluster</option>
+         <option name="vmhost" type="string">Host name hosting the VM</option>
          <option name="ip" type="ipv4">New primary IP address</option>
       </optgroup>
       <transport method="post" trigger="hostname" path="host/%(hostname)s/command/update_hardware" />
