@@ -132,9 +132,9 @@
 		<listitem>
 		    <para>
                         This option takes a name of another personality within the archetype.
-			All parameters and feature bindings will be copied over from the
-			copy_from personality to the new personality being created. Other mappings
-			such as required services, service mappings etc are not copied.
+			All parameters, feature bindings, required services and service mappings
+			will be copied over from the copy_from personality to the new personality
+			being created. Other mappings
 		    </para>
 		</listitem>
 	    </varlistentry>
