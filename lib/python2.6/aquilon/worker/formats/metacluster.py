@@ -29,11 +29,12 @@
 # TERMS THAT MAY APPLY.
 
 
+from sqlalchemy.orm.session import object_session
+
+from aquilon.aqdb.model import Cluster, ClusterResource, MetaCluster, Share
 from aquilon.worker.formats.formatters import ObjectFormatter
-from aquilon.aqdb.model import MetaCluster
 
 
-# TODO add extra data based on cluster.py(formats)
 class MetaClusterFormatter(ObjectFormatter):
     def format_raw(self, metacluster, indent=""):
         details = [indent + "MetaCluster: %s" % metacluster.name]
@@ -78,7 +79,12 @@ class MetaClusterFormatter(ObjectFormatter):
                 details.append(self.redirect_raw(resource, indent + "    "))
 
         # for v1 shares
-        for share_name in metacluster.shares:
+        q = object_session(metacluster).query(Share.name).distinct()
+        q = q.join(ClusterResource, Cluster, '_metacluster')
+        q = q.filter_by(metacluster=metacluster)
+        shares = q.all()
+
+        for share_name in shares:
             details.append(indent + "  Share: %s" % share_name)
 
         if metacluster.comments:
