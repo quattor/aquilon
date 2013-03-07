@@ -271,6 +271,11 @@ class TestVulcan20(TestBrokerCommand):
         self.matchoutput(err, "Bad Request: Share test_v2_share, "
                          "bundleresource instance already exists.", command)
 
+    def test_105_search_share(self):
+        command = ["search_cluster", "--share", "test_v2_share"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "utmc8", command)
+
     def test_105_cat_rg(self):
         command = ["cat", "--resourcegroup=utmc8as1", "--cluster=utmc8",
                    "--generate"]

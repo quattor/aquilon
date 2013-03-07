@@ -30,13 +30,16 @@
 """Contains the logic for `aq search cluster`."""
 
 from sqlalchemy.orm import aliased
+from sqlalchemy.sql import or_
 
+from aquilon.exceptions_ import NotFoundException
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.formats.cluster import SimpleClusterList
 from aquilon.aqdb.model import (Cluster, EsxCluster, MetaCluster, Archetype,
                                 Personality, Machine, Switch, ClusterLifecycle,
                                 Service, ServiceInstance, Share,
-                                ClusterResource, VirtualMachine)
+                                ClusterResource, VirtualMachine, BundleResource,
+                                ResourceGroup)
 from aquilon.worker.dbwrappers.host import hostname_to_host
 from aquilon.worker.dbwrappers.branch import get_branch_and_author
 from aquilon.worker.dbwrappers.location import get_location
@@ -55,9 +58,14 @@ class CommandSearchCluster(BrokerCommand):
                down_hosts_threshold, down_maint_threshold, max_members,
                member_archetype, member_hostname, member_personality,
                capacity_override, cluster, esx_guest, instance,
-               esx_metacluster, service, esx_share,
+               esx_metacluster, service, share, esx_share,
                esx_switch, esx_virtual_machine,
                fullinfo, style, **arguments):
+
+        if esx_share:
+            self.deprecated_option("esx_share", "Please use --share instead.",
+                                   logger=logger, **arguments)
+            share = esx_share
 
         if cluster_type == 'esx':
             cls = EsxCluster
@@ -69,6 +77,10 @@ class CommandSearchCluster(BrokerCommand):
             q = session.query(cls)
         else:
             q = session.query(cls.name)
+
+        # The ORM automatically de-duplicates the result if we query full
+        # objects, but not when we query just the names. Tell the DB to do so.
+        q = q.distinct()
 
         (dbbranch, dbauthor) = get_branch_and_author(session, logger,
                                                      domain=domain,
@@ -177,16 +189,24 @@ class CommandSearchCluster(BrokerCommand):
             q = q.filter_by(name=instance)
             q = q.reset_joinpoint()
 
-        if esx_share:
-            holder = get_resource_holder(session,
-                                         None, cluster, None,
-                                         compel=False)
+        if share:
+            # Perform sanity check on the share name
+            q2 = session.query(Share)
+            q2 = q2.filter_by(name=share)
+            if not q2.first():
+                raise NotFoundException("Share %s not found." % share)
 
-            dbshare = Share.get_unique(session, name=esx_share, holder=holder,
-                             compel=True)
-
-            q = q.join(ClusterResource)
-            q = q.filter(ClusterResource.resources.contains(dbshare))
+            CR = aliased(ClusterResource)
+            S1 = aliased(Share)
+            S2 = aliased(Share)
+            RG = aliased(ResourceGroup)
+            BR = aliased(BundleResource)
+            q = q.join(CR)
+            q = q.outerjoin((S1, S1.holder_id == CR.id))
+            q = q.outerjoin((RG, RG.holder_id == CR.id),
+                            (BR, BR.resourcegroup_id == RG.id),
+                            (S2, S2.holder_id == BR.id))
+            q = q.filter(or_(S1.name == share, S2.name == share))
             q = q.reset_joinpoint()
 
         if max_members:
