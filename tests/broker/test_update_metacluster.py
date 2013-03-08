@@ -59,7 +59,7 @@ class TestUpdateMetaCluster(TestBrokerCommand):
 
     def testupdateutmc2(self):
         command = ["update_metacluster", "--metacluster=utmc2",
-                   "--max_members=98", "--max_shares=88",
+                   "--max_members=98",
                    "--comments", "MetaCluster with a new comment"]
         self.noouttest(command)
 
@@ -68,7 +68,6 @@ class TestUpdateMetaCluster(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "MetaCluster: utmc2", command)
         self.matchoutput(out, "Max members: 98", command)
-        self.matchoutput(out, "Max shares: 88", command)
         self.matchoutput(out, "Comments: MetaCluster with a new comment",
                          command)
 
@@ -86,15 +85,6 @@ class TestUpdateMetaCluster(TestBrokerCommand):
         self.matchoutput(out,
                          "Metacluster utmc3 has 0 clusters bound, "
                          "which exceeds the requested limit -1.",
-                         command)
-
-    def testfailreducemaxshares(self):
-        command = ["update_metacluster", "--metacluster=utmc1",
-                   "--max_shares=6"]
-        out = self.badrequesttest(command)
-        self.matchoutput(out,
-                         "Metacluster utmc1 has 8 shares attached, "
-                         "which exceeds the requested limit 6.",
                          command)
 
     def testfailhabuilding(self):

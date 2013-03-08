@@ -122,7 +122,7 @@ cl_factory = cluster_factory()
 
 
 def test_create_metacluster():
-    mc = MetaCluster(name=META_NAME, max_shares=8)
+    mc = MetaCluster(name=META_NAME)
     create(sess, mc)
 
     assert mc
@@ -165,8 +165,8 @@ def test_add_too_many_metacluster_members():
 @raises(IntegrityError, AssertionError)
 def test_two_metaclusters():
     """ Test unique constraint against cluster """
-    m2 = MetaCluster(name=M2, max_shares=8)
-    m3 = MetaCluster(name=M3, max_shares=8)
+    m2 = MetaCluster(name=M2)
+    m3 = MetaCluster(name=M3)
     sess.add_all([m2, m3])
     commit(sess)
     assert m2, 'metacluster %s not created ' % m2

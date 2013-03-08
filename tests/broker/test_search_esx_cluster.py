@@ -243,7 +243,7 @@ class TestSearchESXCluster(TestBrokerCommand):
         self.noouttest(command)
 
     def testshareavailable(self):
-        command = "search esx cluster --share test_share_1"
+        command = "search esx cluster --share test_share_2"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "utecl1", command)
         self.matchclean(out, "utecl2", command)

@@ -52,13 +52,6 @@ class CommandAddShare(BrokerCommand):
         dbshare = Share(name=share, comments=comments)
         add_resource(session, logger, holder, dbshare)
 
-        # metacluster.validate for max_shares
-        if isinstance(holder, ClusterResource):
-            if holder.cluster.cluster_type == 'meta':
-                holder.cluster.validate()
-            elif holder.cluster.metacluster:
-                holder.cluster.metacluster.validate()
-
         return
 
 

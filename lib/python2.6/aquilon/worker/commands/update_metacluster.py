@@ -41,7 +41,7 @@ class CommandUpdateMetaCluster(BrokerCommand):
 
     required_parameters = ["metacluster"]
 
-    def render(self, session, logger, metacluster, max_members, max_shares,
+    def render(self, session, logger, metacluster, max_members,
                fix_location, high_availability, comments, **arguments):
         dbmetacluster = MetaCluster.get_unique(session, metacluster,
                                                compel=True)
@@ -55,16 +55,6 @@ class CommandUpdateMetaCluster(BrokerCommand):
                                     (format(dbmetacluster), current_members,
                                      max_members))
             dbmetacluster.max_clusters = max_members
-            cluster_updated = True
-
-        if max_shares is not None:
-            current_shares = len(dbmetacluster.shares)
-            if max_shares < current_shares:
-                raise ArgumentError("%s has %d shares attached, which exceeds "
-                                    "the requested limit %d." %
-                                    (format(dbmetacluster), current_shares,
-                                     max_shares))
-            dbmetacluster.max_shares = max_shares
             cluster_updated = True
 
         if comments is not None:

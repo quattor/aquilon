@@ -40,7 +40,6 @@ from sqlalchemy import (Column, Integer, DateTime, Boolean, ForeignKey,
 from sqlalchemy.orm import relation, backref, deferred
 from sqlalchemy.orm.attributes import instance_state
 from sqlalchemy.orm.interfaces import MapperExtension
-from sqlalchemy.orm.session import object_session
 from sqlalchemy.ext.associationproxy import association_proxy
 
 from aquilon.exceptions_ import ArgumentError
@@ -71,23 +70,12 @@ class MetaCluster(Cluster):
 
     max_clusters = Column(Integer, nullable=False)
 
-    max_shares = Column(Integer, nullable=False)
-
     high_availability = Column(Boolean(name="%s_ha_ck" % _MCT), default=False,
                                nullable=False)
 
     members = association_proxy('_clusters', 'cluster',
                                 creator=lambda x: MetaClusterMember(cluster=x))
 
-
-    # backward compat only: show metacluster shows cluster bound shares, also
-    # enforces an upper limit on them.
-    @property
-    def shares(self):
-        from aquilon.aqdb.model import ClusterResource, Share
-        q = object_session(self).query(Share)
-        q = q.join(ClusterResource, Cluster, '_metacluster').filter_by(metacluster=self)
-        return q.all()
 
     # see cluster.minimum_location
     @property
@@ -144,9 +132,6 @@ class MetaCluster(Cluster):
         if len(self.members) > self.max_clusters:
             raise error("{0} already has the maximum number of clusters "
                         "({1}).".format(self, self.max_clusters))
-        if len(self.shares) > self.max_shares:
-            raise error("{0} already has the maximum number of shares "
-                        "({1}).".format(self, self.max_shares))
 
         # Small optimization: avoid enumerating all the clusters/VMs if high
         # availability is not enabled

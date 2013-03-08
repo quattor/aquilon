@@ -46,12 +46,23 @@ class TestAddShare(TestBrokerCommand):
             self.noouttest(["add_share", "--cluster=utecl1",
                             "--share=test_share_%s" % i])
 
-    def testfailaddmaxshares(self):
-        # Number 9 should trip the limit.
-        command = ["add_share", "--cluster=utecl1", "--share=test_share_9"]
-        out = self.badrequesttest(command)
-        self.matchoutput(out, "Metacluster utmc1 already has the maximum "
-                         "number of shares (8).", command)
+        # This isn't counted as a separate share
+        self.noouttest(["add_share", "--cluster=utecl2",
+                        "--share=test_share_1"])
+
+    # test_share_1 must appear once.
+    def testverifyshowutmc1(self):
+        command = ["show_metacluster", "--metacluster=utmc1"]
+        out = self.commandtest(command)
+        self.searchoutput(out,
+                          r"\s*Share: test_share_1\s*"
+                          r"Share: test_share_2\s*"
+                          r"Share: test_share_3\s*"
+                          r"Share: test_share_4\s*"
+                          r"Share: test_share_5\s*"
+                          r"Share: test_share_6\s*"
+                          r"Share: test_share_7\s*"
+                          r"Share: test_share_8", command)
 
     def testadd10gigshares(self):
         for i in range(5, 11):

@@ -222,7 +222,6 @@ host_domain = ny-prod
 location_type = company
 location_name = ms
 max_members_default = 32
-max_shares_default = 32
 
 [archetype_storagecluster]
 max_members_default = 2
