@@ -1,0 +1,374 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<book version="5.0" xmlns="http://docbook.org/ns/docbook"
+      xmlns:xlink="http://www.w3.org/1999/xlink"
+      xmlns:xi="http://www.w3.org/2001/XInclude"
+      xmlns:svg="http://www.w3.org/2000/svg"
+      xmlns:m="http://www.w3.org/1998/Math/MathML"
+      xmlns:html="http://www.w3.org/1999/xhtml"
+      xmlns:db="http://docbook.org/ns/docbook">
+  <info>
+    <title>Aquilon</title>
+
+    <subtitle><?eval ${project.version}?></subtitle>
+
+    <author>
+      <personname><surname>Jane Quattor</surname></personname>
+
+      <email>docs@quattor.org</email>
+
+      <affiliation>
+        <orgname>Quattor Collaboration</orgname>
+      </affiliation>
+    </author>
+
+    <pubdate><?eval ${buildTimestamp}?></pubdate>
+
+    <productnumber><?eval ${project.version}?></productnumber>
+
+    <date><?eval ${buildTimestamp}?></date>
+
+    <copyright>
+      <year>2013</year>
+
+      <holder>Quattor Collaboration</holder>
+    </copyright>
+
+    <legalnotice>
+      <para>This work is licensed under the Apache 2.0 License. To view a copy
+      of this license, visit <uri
+      xlink:href="http://creativecommons.org/licenses/by/3.0/">http://www.apache.org/licenses/LICENSE-2.0.html</uri>.</para>
+    </legalnotice>
+
+    <mediaobject>
+      <imageobject>
+        <imagedata align="center" contentwidth="10cm"
+                   fileref="images/quattor_logo.png" format="PNG"></imagedata>
+      </imageobject>
+
+      <imageobject>
+        <imagedata align="center" contentwidth="10cm" depth=""
+                   fileref="images/quattor_logo.svg" format="SVG"></imagedata>
+      </imageobject>
+
+      <imageobject>
+        <imagedata align="center" contentwidth="10cm"
+                   fileref="images/quattor_logo.pdf" format="PDF"></imagedata>
+      </imageobject>
+    </mediaobject>
+  </info>
+
+  <preface>
+    <title>Preface</title>
+
+    <section>
+      <title>Organization</title>
+
+      <para>This book is intended to act as both a reference guide for
+      Aquilon.</para>
+    </section>
+
+    <section>
+      <title>Typographic Conventions</title>
+
+      <table>
+        <title>Typographic Conventions</title>
+
+        <tgroup cols="2">
+          <colspec align="left" colnum="1" colwidth="1*" />
+
+          <colspec align="left" colnum="2" colwidth="4*" />
+
+          <tbody>
+            <row>
+              <entry><filename>filename</filename></entry>
+
+              <entry>References to files are typeset in this style. In this
+              book, these are usually references to configuration
+              templates.</entry>
+            </row>
+
+            <row>
+              <entry>command</entry>
+
+              <entry>Commands to be executed from the command line are typeset
+              in this style. This is usually a direct or indirect invocation
+              of Aquilon command line.</entry>
+            </row>
+
+            <row>
+              <entry><literal>keyword</literal></entry>
+
+              <entry>Aquilon configuration language keywords are typeset in
+              this style. They represent the language's reserved words and
+              should appear in configuration files exactly as written.</entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </table>
+    </section>
+  </preface>
+
+  <chapter>
+    <title>Getting Started</title>
+
+    <para>Aquilon is the third generation configuration datastore for Quattor
+    (The 1st generation being CDB and the 2nd being SCDB).</para>
+
+    <para>The biggest single change is the introduction of a broker daemon
+    which has overall ownership of the system including template compilation.
+    The broker stores specifc configuration in a relational database,
+    generating object templates on-the-fly at compile time.</para>
+
+    <para>All user interaction takes place over a kerberos secured connection
+    to the broker, which delegates sandboxes (taking the form of git
+    repositories) when changes to pan templates are needed.</para>
+
+    <para>Most operations do not require editing of templates and can be
+    performed in almost real-time with a single command, this opens the
+    possibility for event driven configuration changes and self modification
+    by configured systems. </para>
+
+    <section>
+      <title>Core Concepts</title>
+
+      <para>Basic terminology:</para>
+
+      <variablelist>
+        <varlistentry>
+          <term>broker (aqd)</term>
+
+          <listitem>
+            <para>The backend which the aq client communicates with and the
+            owner of all object and production templates. </para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>sandbox</term>
+
+          <listitem>
+            <para>A working area owned by a specific user and associated with
+            a group of systems. </para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>archetype</term>
+
+          <listitem>
+            <para>The highest possible grouping of hosts into distinctly
+            seperate types, analogous to a QWG site. Archetypes are a bundle
+            that expresses how to build something. It defines what set of
+            templates to use (for example, what operating systems are
+            available, etc). Hosts therefore require an archetype to define
+            how they are compiled. </para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>domain</term>
+
+          <listitem>
+            <para>A high level grouping of hosts eg. prod </para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>personality</term>
+
+          <listitem>
+            <para>Analogous to QWG machine types, describes the services
+            required but not the instance (selected using plenary template
+            information). </para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>service</term>
+
+          <listitem>
+            <para>... </para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>feature</term>
+
+          <listitem>
+            <para>A chunk of code for configuring a specific thing, similar to
+            Puppet recipes. </para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>cluster</term>
+
+          <listitem>
+            <para>A group of hosts related in some way, different to an
+            archetype in that hosts may or may not be in a cluster. When
+            grouping hosts into a cluster, an object profile is also built for
+            the cluster, as well as the hosts. Clusters go through a
+            completely different schema and build process to how hosts are
+            built and therefore have a different archetypes. </para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>plenary</term>
+
+          <listitem>
+            <para>Equivalent of SCDB hardware/machine + the
+            service/personality. Typically generated on the fly from an
+            external source. </para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+    </section>
+
+    <section>
+      <title>Installation</title>
+
+      <para>There is an early version of a virtual appliance for trying out
+      Aquilon, available at
+      http://sourceforge.net/projects/quattor/files/appliances/. This version
+      of the appliance is for testing only. Although it can produce profiles,
+      it is not yet integrated with QWG templates and there is a large amount
+      of work remaining to productionize the appliance.</para>
+
+      <para>This appliance provides: A complete quattor server distribution,
+      managed by Aquilon. This includes the 8.4 version of the PAN
+      compiler.</para>
+
+      <itemizedlist>
+        <listitem>
+          <para>A couchdb datawarehouse to describe all the profiles produced
+          by the appliance.</para>
+        </listitem>
+      </itemizedlist>
+
+      <itemizedlist>
+        <listitem>
+          <para>A webserver providing access to the generated profiles and
+          providing an interface to manage the appliance.</para>
+        </listitem>
+
+        <listitem>
+          <para>A couchdb datawarehouse to describe all the profiles produced
+          by the appliance.</para>
+        </listitem>
+      </itemizedlist>
+
+      <para>This virtual appliance is available in ISO format, tested with:
+      VMware Fusion on a Mac; and qemu/kvm under Fedora 15.</para>
+
+      <para>To install the appliance, create a Linux Ubuntu 64-bit VM (no
+      special requirements - I've typically used 5GB disk, 1GB memory, 1
+      processor) with your favourite virtualization software. Add the ISO to
+      the CD for the virtual machine and boot the machine. On boot this will
+      display a Turnkey appliance logo and ask you to install the software on
+      the virtual machine. Please see the detailed appliance walkthrough if
+      you need more information.</para>
+
+      <para>Once the appliance has started up normally the console will show
+      an Aquilon URL that you can use from a web browser to activate the
+      appliance. You should see a web page similar to the screenshot
+      below.</para>
+
+      <para>There is an intent to automate much of the activation but that
+      work is incomplete. Therefore the only option is to use ManualActivation
+      manual activation guide. This means you should fill in the organisation
+      code (the distinguished name in LDAP terms) and a text representation of
+      the organisation, but leave the Quattor URL empty. Submit that form to
+      activate your appliance. At this point your appliance will be ready for
+      use. You should be able to look at the appliance status, browse logs,
+      etc. Without any hosts defined within Aquilon, the datawarehouse will
+      not yet be of any use.</para>
+
+      <para>See the ManualActivation manual activation guide to continue
+      setting up your Aquilon appliance.</para>
+    </section>
+
+    <section>
+      <title>Appliance Walkthrough</title>
+
+      <para>Creating an Aquilon appliance from the ISO should take only a
+      couple of minutes. Follow the steps below:</para>
+
+      <orderedlist>
+        <listitem>
+          <para>At first you will see a Turnkey installation page offering to
+          install to disk or run from the CD. Select "Install to disk" (the
+          default) and press return.</para>
+        </listitem>
+
+        <listitem>
+          <para>The next step will be to carve up the virtual disk into a
+          useful form for the appliance. The easiest thing to do here is just
+          to make the entire disk into a single logical partition and to
+          install grub on that partition</para>
+        </listitem>
+
+        <listitem>
+          <para>At this point the appliance will be installed and should be
+          rebooted </para>
+        </listitem>
+
+        <listitem>
+          <para>After the appliance boots it will ask for some passwords to be
+          set. Please give some reasonable passwords for these accounts! These
+          passwords are: root cdb (the identity under which all of the aquilon
+          tools will run)</para>
+        </listitem>
+
+        <listitem>
+          <para>TurnKey Linux provides "Hub services" which allows for a
+          number of services related to the management of your appliance. If
+          you have an API key for these services, you can enable them here. If
+          you do not have an API key or you do not want to enable the service,
+          then select Skip.</para>
+        </listitem>
+
+        <listitem>
+          <para>You will be offered the chance to install security updates.
+          You should select "Install".</para>
+        </listitem>
+
+        <listitem>
+          <para>After the security updates have been applied (and it's
+          possible that the machine may reboot here, but not always), the
+          machine will present an information menu on the console which looks
+          something like the below screenshot (your network addresses will
+          probably be different to these!)</para>
+        </listitem>
+      </orderedlist>
+
+      <para>At this point your appliance is ready for use and you can follow
+      the regular Aquilon installation guide.</para>
+    </section>
+  </chapter>
+
+  <chapter>
+    <title>Troubleshooting</title>
+
+    <para>If you see a line like the following:</para>
+
+    <screen>Error: BadStatusLine('',): knc[13217]: gstd_error: gss_init_sec_context: Server not found in Kerberos database</screen>
+
+    <para>Set AQSERVICE to match the service name in the keytab that aqd is
+    running with, eg: </para>
+
+    <screen>export AQSERVICE=http</screen>
+
+    <section>
+      <title>Bug Reporting</title>
+
+      <para>Aquilon, like all software, contains bugs. If the problem your
+      experiencing looks to be misbehavior by the compiler, please report the
+      problem. Bug reports can be filed in the in the issues area of
+      GitHub.</para>
+
+      <screen>https://github.com/quattor/aquilon/issues</screen>
+    </section>
+  </chapter>
+
+</book>
