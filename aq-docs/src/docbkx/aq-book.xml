@@ -109,6 +109,715 @@
   </preface>
 
   <chapter>
+    <title>Aquilon Primer</title>
+
+    <para>Aquilon<footnote>
+        <para>Aquilon is based on the Roman name for the god of the North
+        Wind. In mythology, Aquilon was the son of Aurora.</para>
+      </footnote> is a configuration system that manages operating system
+    level configuration and installation of hosts. The hosts managed by
+    Aquilon can be Linux hosts, CISCO switches, NetApp filers or almost
+    anything else. As of September 2009, Linux and VMware builds are
+    supported; NetApp filers are under development.</para>
+
+    <para>For the host being managed by Aquilon, there is an operating
+    environment that takes advantage of the Aquilon configuration system and
+    presents features to the client application. For example, we provide a
+    Linux build based on Red Hat’s enterprise distribution. This Linux
+    environment presents features such as Lemon monitoring and AFS application
+    distribution. This Linux build is also named Aquilon. Other managed hosts
+    may have alternately named builds.</para>
+
+    <para>Aquilon is a management layer that sits above Quattor<footnote>
+        <para>Quattor is an open-source product originally developed at CERN
+        and now maintained by a consortium of users known as the Quattor
+        Working Group (QWG).</para>
+      </footnote>; all the standard Quattor toolset is used within
+    Aquilon.</para>
+
+    <section>
+      <title>Features</title>
+
+      <itemizedlist>
+        <listitem>
+          <para>Simple configuration changes are immediately ap- plied. For a
+          grid of 15,000 machines “immediate” means within approximately 20
+          minutes.</para>
+        </listitem>
+
+        <listitem>
+          <para>You can customize any part of the system from the personality.
+          This means that applications can dictate RPMs to install, turn off
+          swap devices, etc. Integrated configuration allows such changes to
+          be correctly reflected in monitoring configuration. For example, we
+          don’t setup monitoring of swap if the host does not have any
+          swap.</para>
+        </listitem>
+
+        <listitem>
+          <para>Configuration is consistently applied across the plant. If DNS
+          servers change, subscribers automatically update their configuration
+          “instantly”. Reconfiguration in such cases is also directed: only
+          the managed hosts that were using that service would be updated.
+          Such configuration is managed directly by commands from the Aquilon
+          broker.</para>
+        </listitem>
+
+        <listitem>
+          <para>The modeling of distributed services provides rudimentary
+          capacity planning of the infrastructure across the plant and
+          explicit descriptions of how services are deployed. For example, we
+          know how many clients have been configured to use any specific AFS
+          cell and the system will evenly spread the clients between all the
+          relevant servers.</para>
+        </listitem>
+
+        <listitem>
+          <para>Configuration is prescribed by the application. For example,
+          login access to hosts is dictated by who needs access to meet the
+          objectives of the application, and is not a simple generalization
+          across the entire global plant.</para>
+        </listitem>
+
+        <listitem>
+          <para>Configuration is entirely known and modeled before being
+          applied to a host. This means that configuration can be validated
+          for consistency at the plant level rather than calculated at runtime
+          on the host under management. This means that the CMDB contains
+          information known to be correct instead of inferring CMDB
+          information by later analysis.</para>
+        </listitem>
+
+        <listitem>
+          <para>A hierarchical location model allowing location-specific
+          attributes (use a New York AFS server if the client is in New York)
+          to be easily specified.</para>
+        </listitem>
+      </itemizedlist>
+    </section>
+
+    <section>
+      <title>Quattor</title>
+
+      <para>Aquilon is based on Quattor. So, what features and limitations
+      does that present?</para>
+
+      <section>
+        <title>What Quattor Provides Out-of-the-Box</title>
+
+        <para>Quattor provides two core systems: the template system and the
+        build infrastructure. Any kernel parameters (i.e. sysctl settings).
+        This includes such things as shared and virtual memory configuration,
+        and TCP-IP tunables.</para>
+
+        <itemizedlist>
+          <listitem>
+            <para>The template system provides: a rich template language
+            (known as Pan) that includes configuration validation; a large
+            template library describing grid configuration; a model to
+            describe a machine configuration.</para>
+          </listitem>
+
+          <listitem>
+            <para>The compile and build and application infrastructure
+            provides: DHCP configuration allowing machines to be automatically
+            installed; datawarehouse facilities to present expected host
+            configuration; component code that can control most of the
+            configurable aspects of Linux and can affect changes almost
+            instantly.</para>
+          </listitem>
+        </itemizedlist>
+
+        <para>These two systems are loosely coupled. The template compiler can
+        be used to generate XML profiles independently of any other Quattor
+        system.</para>
+
+        <para>The list of elements of configuration that can be controlled by
+        Quattor is almost unlimited. Out-of-the-box, Quattor has specific
+        support for:</para>
+
+        <itemizedlist>
+          <listitem>
+            <para>What RPM packages should be installed on a host, including
+            support for vendor-supplied operating system errata.</para>
+          </listitem>
+
+          <listitem>
+            <para>Directory layouts, files and symbolic links that should
+            exist on the host.</para>
+          </listitem>
+
+          <listitem>
+            <para>Any kernel parameters (i.e. sysctl settings). This includes
+            such things as shared and virtual memory configuration, and TCP-IP
+            tunables.</para>
+          </listitem>
+
+          <listitem>
+            <para>Configuration of any system service: how to start system
+            daemons, what configuration they should use.</para>
+          </listitem>
+
+          <listitem>
+            <para>Monitoring: what agents to install on the host, how and what
+            they should be monitoring.</para>
+          </listitem>
+
+          <listitem>
+            <para>User access to the machine: who has login privileges (by way
+            of PAM configuration).</para>
+          </listitem>
+
+          <listitem>
+            <para>Password control such as root password distribution.</para>
+          </listitem>
+
+          <listitem>
+            <para>Much more including specialized configuration for AFS,
+            iptables, networking, http servers, NFS services, etc.</para>
+          </listitem>
+        </itemizedlist>
+      </section>
+
+      <section>
+        <title>What Quattor Does Not Provide</title>
+
+        <itemizedlist>
+          <listitem>
+            <para>No data model except that provided within the templates
+            language itself and except by the validation supplied by the user.
+            This means that relationships between hosts are awkward to
+            describe and prone to error.</para>
+          </listitem>
+
+          <listitem>
+            <para>No entitlements or delegation model are provided by Quattor.
+            The Quattor community recognize this as a problem, although not
+            with a high priority.</para>
+          </listitem>
+
+          <listitem>
+            <para>No feedback mechanism for validating the real application of
+            a configuration compared to the expected configuration. This is
+            not considered to be a problem by the Quattor community;
+            configuration is either completely correct (an overall failure can
+            be moni- tored), or is reapplied. Partial configuration is not
+            allowed or catered for.</para>
+          </listitem>
+        </itemizedlist>
+      </section>
+    </section>
+
+    <section>
+      <title>Aquilon</title>
+
+      <section>
+        <title>What Aquilon Provides</title>
+
+        <para>The layer of management provided by Aquilon includes:</para>
+
+        <itemizedlist>
+          <listitem>
+            <para>A relational data model (AQDB) that describes the overall
+            plant.</para>
+          </listitem>
+
+          <listitem>
+            <para>An entitlement model that restricts access to functionality.
+            This is a simplistic role-based modeling in the early releases,
+            but future releases will provide more complex entitlement rules by
+            using Opal.</para>
+          </listitem>
+
+          <listitem>
+            <para>A broker model that packages common template tasks into
+            commands that can be delegated to users who have no knowledge of
+            the Pan language.</para>
+          </listitem>
+
+          <listitem>
+            <para>Broker tasks that scan for new hardware and provides
+            automation of host installation.</para>
+          </listitem>
+
+          <listitem>
+            <para>A modified template library that includes the standard QWG
+            functionality and adds functionality tailored to Morgan Stanley
+            use-cases.</para>
+          </listitem>
+        </itemizedlist>
+      </section>
+
+      <section>
+        <title>Naming</title>
+
+        <para>Topics often asked about are the new DNS model; the issues
+        arising from decommissioning NIS; and the impact of dropping support
+        for NFS pathnames via /u. All of these changes have a common driver:
+        the decision to move away from localized namespaces towards global
+        namespaces. Any time that a namespace has to be localized, it
+        typically involves extra maintenance:</para>
+
+        <itemizedlist>
+          <listitem>
+            <para>transformation jobs that must run in every locale. DNS, NIS
+            and NFS namespace “dumps” are processed on around 150 servers
+            globally.</para>
+          </listitem>
+
+          <listitem>
+            <para>users are increasingly deploying global applications and the
+            burden of understanding the names is pushed to the application
+            configuration that must explicitly cope with localization
+            differences</para>
+          </listitem>
+        </itemizedlist>
+
+        <section>
+          <title>DNS</title>
+
+          <para>A hierarchical DNS namespace has been created for Aquilon
+          clients. The new DNS namespaces is primarily used for physical
+          machine hostnames, which applications should not reference in their
+          configurations (applications should register against
+          “serviceaddresses” which are localized by way of logical domain
+          names). If an application is aware of physical machine hostnames,
+          then an issue that requires care is that these hostnames are not
+          unique in DNS unless a fully qualified domain name is used. For
+          example, there is “igrid1.devin1.ms.com” and “igrid1.devin2.ms.com”.
+          Systems that reference hostnames may need to be modified to avoid
+          errors with these names<footnote>
+              <para>RFC3696 describes the valid hostnames and how applications
+              should be coded to handle hostnames.</para>
+            </footnote>. Short DNS names (e.g. “mstoday”) are still supported
+          by use of search lists in the DNS resolver.</para>
+        </section>
+
+        <section>
+          <title>NFS</title>
+
+          <para>Only the /v namespace is presented on Aquilon/Linux machines.
+          Names under /u are localized based on Aurora “pods” which is a
+          concept not present in Aquilon. Applications that are currently
+          using /u pathnames must be modified to use the /v equivalent name.
+          Equivalent names can be made within /v if the target share is hosted
+          by a NetApp filer. If the target share is on a Solaris fileserver,
+          then the only workaround is to migrate the share onto a
+          NetApp.</para>
+        </section>
+
+        <section>
+          <title>NIS</title>
+
+          <para>On Aurora, NIS (which is localized to buildings) is the
+          primary access method for looking up names such as hosts, users,
+          etc. With Aquilon/Linux NIS has been decommissioned and therefore
+          DNS and local DB files are the method by which names are looked up.
+          Applications should be using getent routines (e.g. gethostbyname,
+          getpwbyuid, etc) which will transparently connect to the appropriate
+          source and therefore require no modification. Applications that use
+          NIS directly, for example scripts that use ypmatch(1), must be
+          remediated to use getent(1).</para>
+        </section>
+      </section>
+
+      <section>
+        <title>Monitoring</title>
+
+        <para>The Linux build of Aquilon provides monitoring by way of the
+        Lemon system. Lemon configuration is fully integrated with Quattor
+        which means that the specific pieces to monitor are defined by
+        template and personality. Lemon’s advantage over perfdata is the
+        facility for aggregation of metrics to present a view of utilization
+        over an entire grid. Lemon does not provide as much detailed
+        information (at the host level) as PerfData. The Lemon agents that run
+        on the managed host are installed with RPMs and are not pulled from
+        AFS. Lemon provides metrics, sensors, exceptions and actuators.</para>
+
+        <itemizedlist>
+          <listitem>
+            <para>Metrics are the data being measured. Defining new metrics
+            requires modifying the Lemon database schema.</para>
+          </listitem>
+
+          <listitem>
+            <para>Sensors are code that retrieves metrics to provide to the
+            Lemon agent. Sensors are written in either perl or C. There are
+            generic sensors supplied with the product that allow measuring of
+            a wide range of metrics including tracking messages in logfiles,
+            watching processes, etc.</para>
+          </listitem>
+
+          <listitem>
+            <para>Exceptions are conditions that are tested on the local host.
+            The conditions can be arbitrarily complex and encompass any
+            metric. If an exception is triggered, it appears as a special
+            metric within Lemon (i.e. available for reporting).</para>
+          </listitem>
+
+          <listitem>
+            <para>Actuators are agents that run on a local host when an
+            exception has been detected. Actuators are arbitrary command lines
+            and are intended to be commands that try to fix the problem. If
+            the actuator can fix the problem, then the exception is not
+            reported to Lemon. The configuration says how many times an
+            actuator should be attempted before deciding that the exception is
+            worth reporting to the Lemon server.</para>
+          </listitem>
+        </itemizedlist>
+      </section>
+
+      <section>
+        <title>Hidden Features</title>
+
+        <para>Quattor and Aquilon provide a large amount of functionality, not
+        all of which is currently presented within our interfaces. This list
+        describes features that are possible with the current implementation,
+        but may not be exposed in day-to-day usage:</para>
+
+        <orderedlist>
+          <listitem>
+            <para>The system is designed to manage the underlying host
+            operating system. Although the configuration of the host is
+            prescribed by the application, the system is not designed to
+            configure the applications themselves. That said, there’s nothing
+            in the system preventing such usage and there are benefits to
+            doing so (the same benefits that drove the usage of Quattor for
+            infrastructure). No effort has been made to develop this
+            possibility, since the runtime con- figuration is typically
+            already managed by more domain-specific tooling.</para>
+          </listitem>
+
+          <listitem>
+            <para>The Aquilon/Linux build installs the operating system
+            locally, however applications (including some infrastructure
+            services)are still expected to be distributed and run from AFS
+            (i.e. /ms/dist). If an application wants to run their application
+            from the local disk, they can provide a RPM and this will work as
+            expected. No dependency management or tooling is provided to
+            assist in such a configuration and there are some unresolved
+            issues around tracking software in use and dependency conflicts.
+            Extreme differences in configuration will cause an impact on the
+            supportability of Aquilon managed hosts. If a host has different
+            RPM installations to “the norm”, then system administrators lose
+            many of the advantages arising from homogenous environments: every
+            outage investigation must begin with discovering the configuration
+            of the host. This problem increases with the number of variations
+            in host profiles: every new personality adds to the support
+            burden.</para>
+          </listitem>
+
+          <listitem>
+            <para>Quattor understands having two profiles available on a host:
+            a profile and a “context”. The context is an additional XML
+            document that can be downloaded from a completely different from
+            where the profile was sourced. The context and the profile are
+            merged to provide a final profile for the host. This has two
+            possible applications:</para>
+
+            <orderedlist>
+              <listitem>
+                <para>Making the system more efficient. There is typically
+                200KB of data in the profile that is standard between all
+                other hosts in the profile. That common data could be factored
+                into a common context and shared between all hosts with the
+                same hardware, usage and personality. Such a factorization
+                could produce dramatically faster compilation, validation and
+                distribution of profiles.</para>
+              </listitem>
+
+              <listitem>
+                <para>Allowing “devolved” administration. The profile could be
+                managed by a central asset database, while more local
+                administration retain complete control of passwords,
+                access-control and the like by storing such information in the
+                host context and providing a merge function that prioritizes
+                the local context over the host’s centrally generated profile.
+                The devolved management model is currently used by a number of
+                organizations using Quattor and is described in the 2008 LISA
+                paper.</para>
+
+                <para>The downside to this system is that the validation of
+                the host profile has less meaning: validation should instead
+                be applied to the context and profile merge, however this is
+                not possible.</para>
+              </listitem>
+            </orderedlist>
+          </listitem>
+
+          <listitem>
+            <para>Aquilon provides a mechanism, called “tellme”, for
+            distribution of secrets7. This is typically used for distributing
+            a common root password crypt to a group of hosts, however this
+            allows arbitrary secrets to be distributed and could be used by
+            other infrastructure applications.</para>
+          </listitem>
+
+          <listitem>
+            <para>Lemon exceptions and actuators are very extensible and allow
+            for automating many common fixes. Possibilities include deleting
+            old files, restarting processes, rebooting or even reinstalling
+            hosts. Lemon could replace sysedge, kiwa, checkout and
+            harvester.</para>
+          </listitem>
+
+          <listitem>
+            <para>The Aquilon system allows arbitrary hosts to be managed.
+            Configuration profiles can be generated for any type of host,
+            including Windows hosts, network switches and NetApp filers. We
+            can provide a compiled, validated profile for almost any
+            device.</para>
+          </listitem>
+        </orderedlist>
+      </section>
+
+      <section>
+        <title>Deployment Requirements</title>
+
+        <para>To deploy a single Aquilon managed host the following pieces of
+        infrastructure are necessary:</para>
+
+        <orderedlist>
+          <listitem>
+            <para>A database providing the Aquilon data model. This is
+            currently an Oracle database, but we expect to be able to move to
+            other databases easily.</para>
+          </listitem>
+
+          <listitem>
+            <para>A broker that takes user requests and combines database
+            information with configuration policy to produce host
+            profiles.</para>
+          </listitem>
+
+          <listitem>
+            <para>A datawarehouse process. This typically runs on the Aquilon
+            host. The job of the datawarehouse process is to export realized
+            views of the Aquilon data model into a form that can be consumed
+            easily, at scale, and under BCP conditions.</para>
+          </listitem>
+
+          <listitem>
+            <para>A bootserver that transforms host profiles into
+            configuration that allows network installation. A bootserver is
+            required to reinstall a host and typically would be configured in
+            pairs to provide a small measure of fault tolerance.</para>
+          </listitem>
+
+          <listitem>
+            <para>Networking configuration will need to be modified to point
+            iphelpers at the Aquilon bootservers in addition to the standard
+            Aurora bootserver.</para>
+          </listitem>
+
+          <listitem>
+            <para>A DNS server providing the new Aquilon-ready view of the DNS
+            namespace.</para>
+          </listitem>
+        </orderedlist>
+
+        <para>The database, broker and datawarehouse process can all be
+        located centrally and used by clients in any location. The core
+        systems are required to affect any changes but are not involved in the
+        runtime booting of hosts. The bootserver must be available through a
+        network local to the managed host. Typical installations will have
+        numerous boot servers located in every data center, with a single
+        centralized database and broker.</para>
+
+        <para>If configuration is being managed by Quattor that does not
+        require a bootserver (for example, providing profiles for NetApp
+        filers), then the bootserver deployment is unnecessary: compiled
+        profiles can be retrieved directly from the broker and the
+        datawarehouse.</para>
+      </section>
+
+      <section>
+        <title>Modifying Aquilon</title>
+
+        <section>
+          <title>Summary</title>
+
+          <para>The system directly supports creating new operating system
+          builds, or new styles of host. Such changes can be done using normal
+          broker commands and by writing and submitting new templates into the
+          library. Such tasks are typically measured in days or weeks.</para>
+
+          <para>Changing the data model requires a schema and a broker
+          upgrade. Such tasks are typically measured in many weeks.</para>
+
+          <para>A breakdown of some typical activities are shown, giving an
+          idea of how much effort is required to create new
+          functionality.</para>
+        </section>
+
+        <section>
+          <title>New Configuration Components</title>
+
+          <para>To be able to change some part of a host’s configuration not
+          currently implemented by Aquilon, but on a host which is managed by
+          Aquilon, a new component must be created. Components are dynamically
+          loaded and require no upgrade to broker or data model. The following
+          tasks are required:</para>
+
+          <orderedlist>
+            <listitem>
+              <para>Write the new component to affect the configuration. This
+              requires perl skill and a small amount of Pan knowledge. This
+              typically takes about a week. If the necessary host change is
+              simple and supported by the existing template library, then this
+              step can be skipped.</para>
+            </listitem>
+
+            <listitem>
+              <para>Modify the archetype within the provided template
+              libraries to describe when it is applicable to invoke the new
+              configuration component. This can be implemented within a day by
+              someone with knowledge of Pan and the template library.
+              Low-level changes to the library would still require full
+              testing procedures that typically require a week.</para>
+            </listitem>
+          </orderedlist>
+        </section>
+
+        <section>
+          <title>Adding a New Style of Managed Host</title>
+
+          <para>To add a new managed type into Aquilon (for example, a NetApp
+          filer), the following pieces of work may be required:</para>
+
+          <orderedlist>
+            <listitem>
+              <para>(Optional) Describe the hardware layout in the database.
+              For typical compute based hardware, this simply requires someone
+              with engineering privileges that can run the relevant few
+              commands. If the hardware needs to be modeled differently, then
+              schema may need to be modified within the database. Such schema
+              modifications are usually simple subclassing and therefore
+              require minimal time to complete, but require Data modeling
+              experience; python and SQLAlchemy experience.</para>
+            </listitem>
+
+            <listitem>
+              <para>Describe an "archetype" to Aquilon. The archetype
+              describes the build and management process of the managed host,
+              and is described within templates. Writing (or copying) skeleton
+              templates takes little time, and requires facility with the PAN
+              template language. The archetype includes operating system
+              templates which may be copied from other archetypes that share
+              similar operating systems. The broker provides commands to
+              facilitate the creation of new archetypes.</para>
+            </listitem>
+
+            <listitem>
+              <para>Implement configuration components that take compiled
+              profiles and applies the configuration to the managed host.
+              There are two frameworks to ease this: the original Quattor
+              "Node Configuration Dispatcher" which runs on the managed host
+              itself and would require porting to any new operating system; or
+              the quattor-remote-configure facility provided by Aquilon which
+              requires a connector API to cause configuration changes to
+              happen remotely. Both systems provide a framework for deciding
+              what component configuration to run. The code of the individual
+              configuration components must be written by the an integrator
+              and is probably the most intensive part of the work. This
+              requires knowledge of how the components are executed and Perl
+              skills. Several weeks should be set aside for this task.</para>
+            </listitem>
+
+            <listitem>
+              <para>Developing and fleshing out the templates that describe
+              host configuration policy. This requires PAN language skills.
+              This step is the “interesting” part and can take many weeks,
+              typically in parallel with step 3.</para>
+            </listitem>
+          </orderedlist>
+        </section>
+
+        <section>
+          <title>Adding New Management Paradigms</title>
+
+          <para>To add a new management paradigm into Aquilon (for example, a
+          new way of clustering hosts together), the following tasks may be
+          required:</para>
+
+          <orderedlist>
+            <listitem>
+              <para>New commands must be implemented that cause the desired
+              effects. New broker commands are typically fairly quick to
+              implement. This requires python programming and knowledge of the
+              AQD broker and schema. Expect a couple of weeks for this
+              task.</para>
+            </listitem>
+
+            <listitem>
+              <para>New schema within the data model that expresses the
+              desired configuration. If the schema change is a simple
+              extension of the existing model, then it will be simple and
+              quick to implement. However, when creating brand new schema,
+              this task is the most intensive and can require a number of
+              iterations to ensure a correct interaction with existing schema.
+              Each iteration needs to be worked in conjunction with the
+              implementation of the new commands. This requires facility with
+              database modeling; knowledge of the AQD schema; python and
+              SQLAlchemy skills. Expect many weeks for this task.</para>
+            </listitem>
+
+            <listitem>
+              <para>It might be necessary to expose the new configuration by
+              way of datawarehouse methods. This typically takes a couple of
+              weeks and requires knowledge of the access methods for the
+              existing datawarehouse; Perl skills.</para>
+            </listitem>
+
+            <listitem>
+              <para>It may be necessary to implement new configuration
+              components as part of the task. This is described
+              previously.</para>
+            </listitem>
+          </orderedlist>
+        </section>
+
+        <section>
+          <title>Extending the Data Model</title>
+
+          <para>Sometimes adding new functionality in the configuration of a
+          managed host will best be implemented by accessing data from AQDB
+          but with data which is not currently stored in the data model. This
+          route (as opposed to putting data into templates) should be followed
+          when the data requires relational integrity.</para>
+
+          <orderedlist>
+            <listitem>
+              <para>Decide if the data should be canonically homed within
+              AQDB, or is better managed externally. If the data will be
+              external, then import methods must be created within the broker.
+              If the data will be homed in AQDB, then methods to bootstrap the
+              population of the data must be designed.</para>
+            </listitem>
+
+            <listitem>
+              <para>Design the new schema additions including the typical
+              queries for accessing the data. This requires data modeling
+              experience, knowledge of python and SQLAlchemy. This can take a
+              few weeks.</para>
+            </listitem>
+
+            <listitem>
+              <para>Implement either the import command or new commands for
+              managing the data canonically via the broker. This will
+              typically be a quick process once the schema has been completed.
+              If the data is to be managed by import, then Autosys should be
+              used to trigger the import on an appropriate schedule. This task
+              requires python knowledge and typically takes a week or
+              two.</para>
+            </listitem>
+          </orderedlist>
+        </section>
+      </section>
+    </section>
+  </chapter>
+
+  <chapter>
     <title>Getting Started</title>
 
     <para>Aquilon is the third generation configuration datastore for Quattor
@@ -126,7 +835,7 @@
     <para>Most operations do not require editing of templates and can be
     performed in almost real-time with a single command, this opens the
     possibility for event driven configuration changes and self modification
-    by configured systems. </para>
+    by configured systems.</para>
 
     <section>
       <title>Core Concepts</title>
@@ -139,7 +848,7 @@
 
           <listitem>
             <para>The backend which the aq client communicates with and the
-            owner of all object and production templates. </para>
+            owner of all object and production templates.</para>
           </listitem>
         </varlistentry>
 
@@ -148,7 +857,7 @@
 
           <listitem>
             <para>A working area owned by a specific user and associated with
-            a group of systems. </para>
+            a group of systems.</para>
           </listitem>
         </varlistentry>
 
@@ -161,7 +870,7 @@
             that expresses how to build something. It defines what set of
             templates to use (for example, what operating systems are
             available, etc). Hosts therefore require an archetype to define
-            how they are compiled. </para>
+            how they are compiled.</para>
           </listitem>
         </varlistentry>
 
@@ -169,7 +878,7 @@
           <term>domain</term>
 
           <listitem>
-            <para>A high level grouping of hosts eg. prod </para>
+            <para>A high level grouping of hosts eg. prod</para>
           </listitem>
         </varlistentry>
 
@@ -179,7 +888,7 @@
           <listitem>
             <para>Analogous to QWG machine types, describes the services
             required but not the instance (selected using plenary template
-            information). </para>
+            information).</para>
           </listitem>
         </varlistentry>
 
@@ -187,7 +896,7 @@
           <term>service</term>
 
           <listitem>
-            <para>... </para>
+            <para>...</para>
           </listitem>
         </varlistentry>
 
@@ -196,7 +905,7 @@
 
           <listitem>
             <para>A chunk of code for configuring a specific thing, similar to
-            Puppet recipes. </para>
+            Puppet recipes.</para>
           </listitem>
         </varlistentry>
 
@@ -209,7 +918,7 @@
             grouping hosts into a cluster, an object profile is also built for
             the cluster, as well as the hosts. Clusters go through a
             completely different schema and build process to how hosts are
-            built and therefore have a different archetypes. </para>
+            built and therefore have a different archetypes.</para>
           </listitem>
         </varlistentry>
 
@@ -219,7 +928,7 @@
           <listitem>
             <para>Equivalent of SCDB hardware/machine + the
             service/personality. Typically generated on the fly from an
-            external source. </para>
+            external source.</para>
           </listitem>
         </varlistentry>
       </variablelist>
@@ -310,7 +1019,7 @@
 
         <listitem>
           <para>At this point the appliance will be installed and should be
-          rebooted </para>
+          rebooted</para>
         </listitem>
 
         <listitem>
@@ -355,7 +1064,7 @@
     <screen>Error: BadStatusLine('',): knc[13217]: gstd_error: gss_init_sec_context: Server not found in Kerberos database</screen>
 
     <para>Set AQSERVICE to match the service name in the keytab that aqd is
-    running with, eg: </para>
+    running with, eg:</para>
 
     <screen>export AQSERVICE=http</screen>
 
@@ -370,5 +1079,7 @@
       <screen>https://github.com/quattor/aquilon/issues</screen>
     </section>
   </chapter>
+
+  <xi:include href="appendix/appendix-commands.xml" xpointer="element(/1)" />
 
 </book>
