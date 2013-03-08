@@ -1,0 +1,364 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>org.quattor.aquilon</groupId>
+  <artifactId>aquilon</artifactId>
+  <version>0.1-SNAPSHOT</version>
+  <packaging>pom</packaging>
+
+  <name>pan</name>
+  <description>Aquilon</description>
+  <url>http://quattor.org/</url>
+
+  <prerequisites>
+    <maven>2.2.1</maven>
+  </prerequisites>
+
+  <licenses>
+    <license>
+      <name>The Apache Software License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+
+  <parent>
+    <groupId>org.sonatype.oss</groupId>
+    <artifactId>oss-parent</artifactId>
+    <version>7</version>
+  </parent>
+
+  <modules>
+    <module>aq-docs</module>
+  </modules>
+
+  <organization>
+    <name>Quattor</name>
+    <url>http://quattor.org/</url>
+  </organization>
+
+  <scm>
+    <connection>scm:git:ssh://git@github.com/quattor/pan.git</connection>
+    <developerConnection>scm:git:ssh://git@github.com/quattor/pan.git</developerConnection>
+    <url>https://github.com/quattor/aquilon</url>
+    <tag>HEAD</tag>
+  </scm>
+
+  <issueManagement>
+    <system>GitHub Issues</system>
+    <url>https://github.com/quattor/aquilon/issues</url>
+  </issueManagement>
+
+  <mailingLists>
+    <mailingList>
+      <name>Quattor Discuss</name>
+      <subscribe>https://lists.sourceforge.net/lists/listinfo/quattor-discuss</subscribe>
+      <unsubscribe>https://lists.sourceforge.net/lists/listinfo/quattor-discuss</unsubscribe>
+      <archive>https://sourceforge.net/mailarchive/forum.php?forum_name=quattor-discuss</archive>
+    </mailingList>
+  </mailingLists>
+
+  <developers>
+    <developer>
+      <id>loomisc</id>
+      <name>Charles LOOMIS</name>
+      <email>loomis@lal.in2p3.fr</email>
+    </developer>
+  </developers>
+
+  <profiles>
+    <profile>
+
+      <activation>
+	<file>
+	  <exists>/bin/rpm</exists>
+	</file>
+      </activation>
+
+      <modules>
+	<module>panc-rpm</module>
+      </modules>
+
+    </profile>
+
+    <profile>
+      <id>release-signed-artifacts</id>
+      <activation>
+
+	<!--
+        <file>
+          <exists>/tmp</exists>
+        </file>
+	-->
+
+	<property>
+	  <name>performRelease</name>
+	  <value>true</value>
+	</property>
+
+      </activation>
+
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-gpg-plugin</artifactId>
+            <version>1.4</version>
+            <executions>
+              <execution>
+                <id>sign-artifacts</id>
+                <phase>verify</phase>
+                <goals>
+                  <goal>sign</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
+  </profiles>
+
+  <dependencyManagement>
+    <dependencies>
+      
+      <dependency>
+        <groupId>net.jcip</groupId>
+        <artifactId>jcip-annotations</artifactId>
+        <version>1.0</version>
+      </dependency>
+      
+      <dependency>
+        <groupId>org.apache.ant</groupId>
+        <artifactId>ant</artifactId>
+        <version>1.8.4</version>
+      </dependency>
+      
+      <dependency>
+        <groupId>reply</groupId>
+        <artifactId>reply</artifactId>
+        <version>0.1.2</version>
+      </dependency>
+      
+      <dependency>
+        <groupId>jline</groupId>
+        <artifactId>jline</artifactId>
+        <version>2.9</version>
+      </dependency>
+
+      <dependency>
+        <groupId>junit</groupId>
+        <artifactId>junit</artifactId>
+        <version>4.10</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.maven</groupId>
+        <artifactId>maven-plugin-api</artifactId>
+        <version>2.0</version>
+      </dependency>
+      
+      <dependency>
+        <groupId>com.google.code.gson</groupId>
+        <artifactId>gson</artifactId>
+        <version>2.2.2</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.quattor.pan</groupId>
+        <artifactId>panc-docs</artifactId>
+        <version>10.1-SNAPSHOT</version>
+      </dependency>
+      
+      <dependency>
+        <groupId>org.quattor.pan</groupId>
+        <artifactId>panc</artifactId>
+        <version>10.1-SNAPSHOT</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.clojure</groupId>
+        <artifactId>clojure</artifactId>
+        <version>1.4.0</version>
+      </dependency>
+      
+      <dependency>
+        <groupId>org.clojure</groupId>
+        <artifactId>tools.cli</artifactId>
+        <version>0.2.2</version>
+      </dependency>
+
+      <dependency>
+        <groupId>autodoc</groupId>
+        <artifactId>autodoc</artifactId>
+        <version>0.9.0</version>
+        <scope>test</scope>
+      </dependency>
+
+    </dependencies>
+  </dependencyManagement>
+
+  <repositories>
+    <repository>
+      <id>clojars.org</id>
+      <url>http://clojars.org/repo</url>
+    </repository>
+  </repositories>
+
+  <build>
+    <pluginManagement>
+      <plugins>
+	<plugin>
+	  <groupId>org.apache.maven.plugins</groupId>
+	  <artifactId>maven-release-plugin</artifactId>
+	  <version>2.3.2</version>
+	  <configuration>
+	    <preparationGoals>clean install</preparationGoals>
+	    <autoVersionSubmodules>true</autoVersionSubmodules>
+	    <goals>deploy</goals>
+            <mavenExecutorId>forked-path</mavenExecutorId>
+	  </configuration>
+	</plugin>
+	<plugin>
+	  <groupId>org.apache.maven.plugins</groupId>
+	  <artifactId>maven-assembly-plugin</artifactId>
+	  <version>2.3</version>
+	</plugin>
+	<plugin>
+	  <groupId>org.apache.maven.plugins</groupId>
+	  <artifactId>maven-plugin-plugin</artifactId>
+	  <version>3.1</version>
+	</plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-javadoc-plugin</artifactId>
+          <version>2.9</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-source-plugin</artifactId>
+          <version>2.2.1</version>
+        </plugin>
+	<plugin>
+	  <groupId>org.apache.maven.plugins</groupId>
+	  <artifactId>maven-compiler-plugin</artifactId>
+	  <version>2.5.1</version>
+	  <configuration>
+	    <target>1.5</target>
+	    <source>1.5</source>
+	  </configuration>
+	</plugin>
+	<plugin>
+	  <groupId>org.apache.maven.plugins</groupId>
+	  <artifactId>maven-clean-plugin</artifactId>
+	  <version>2.5</version>
+	</plugin>
+	<plugin>
+	  <groupId>org.apache.maven.plugins</groupId>
+	  <artifactId>maven-dependency-plugin</artifactId>
+	  <version>2.5.1</version>
+	</plugin>
+	<plugin>
+	  <groupId>org.apache.maven.plugins</groupId>
+	  <artifactId>maven-deploy-plugin</artifactId>
+	  <version>2.7</version>
+	</plugin>
+	<plugin>
+	  <groupId>org.apache.maven.plugins</groupId>
+	  <artifactId>maven-install-plugin</artifactId>
+	  <version>2.4</version>
+	</plugin>
+	<plugin>
+	  <groupId>org.apache.maven.plugins</groupId>
+	  <artifactId>maven-resources-plugin</artifactId>
+	  <version>2.6</version>
+	</plugin>
+	<plugin>
+	  <groupId>org.apache.maven.plugins</groupId>
+	  <artifactId>maven-site-plugin</artifactId>
+	  <version>3.2</version>
+	</plugin>
+	<plugin>
+	  <groupId>org.apache.maven.plugins</groupId>
+	  <artifactId>maven-surefire-plugin</artifactId>
+	  <version>2.12.4</version>
+	</plugin>
+	<plugin>
+	  <groupId>org.apache.maven.plugins</groupId>
+	  <artifactId>maven-jar-plugin</artifactId>
+	  <version>2.4</version>
+	</plugin>
+
+	<plugin>
+	  <groupId>org.codehaus.mojo</groupId>
+	  <artifactId>build-helper-maven-plugin</artifactId>
+	  <version>1.7</version>
+	</plugin>
+	<plugin>
+	  <groupId>org.codehaus.mojo</groupId>
+	  <artifactId>findbugs-maven-plugin</artifactId>
+	  <version>2.5.2</version>
+	</plugin>
+	<plugin>
+	  <groupId>org.codehaus.mojo</groupId>
+	  <artifactId>javacc-maven-plugin</artifactId>
+	  <version>2.6</version>
+	</plugin>
+	<plugin>
+	  <groupId>org.codehaus.mojo</groupId>
+	  <artifactId>rpm-maven-plugin</artifactId>
+	  <version>2.0.1</version>
+	</plugin>
+	<plugin>
+	  <groupId>com.agilejava.docbkx</groupId>
+	  <artifactId>docbkx-maven-plugin</artifactId>
+	  <version>2.0.14</version>
+	</plugin>
+
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>exec-maven-plugin</artifactId>
+          <version>1.2.1</version>
+        </plugin>
+
+        <plugin>
+          <groupId>com.theoryinpractise</groupId>
+          <artifactId>clojure-maven-plugin</artifactId>
+          <version>1.3.13</version>
+        </plugin>
+
+      </plugins>
+
+    </pluginManagement>
+
+  </build>
+
+  <reporting>
+    <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>findbugs-maven-plugin</artifactId>
+        <version>2.3.2</version>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>2.9</version>
+      </plugin>
+    </plugins>
+  </reporting>
+
+  <dependencies>
+  </dependencies>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <!-- <maven.build.timestamp.format>dd-MMM-yyyy (HH:mm)</maven.build.timestamp.format> -->
+    <maven.build.timestamp.format>yyyy-MM-dd</maven.build.timestamp.format>
+    <buildTimestamp>${maven.build.timestamp}</buildTimestamp>
+  </properties>
+
+</project>
