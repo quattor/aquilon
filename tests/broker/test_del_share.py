@@ -61,6 +61,7 @@ class TestDelShare(TestBrokerCommand):
         self.noouttest(["del_share", "--cluster=utecl2",
                         "--share=test_share_1"])
 
+
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelShare)
     unittest.TextTestRunner(verbosity=2).run(suite)

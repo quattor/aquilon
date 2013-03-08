@@ -55,7 +55,8 @@
                 <arg choice="opt"><option>--esx_guest <replaceable>ESX_GUEST</replaceable></option></arg>
                 <arg choice="opt"><option>--service <replaceable>SERVICE</replaceable></option></arg>
                 <arg choice="opt"><option>--instance <replaceable>INSTANCE</replaceable></option></arg>
-                <arg choice="opt"><option>--esx_share <replaceable>ESX_SHARE</replaceable></option></arg>
+                <arg choice="opt"><option>--share <replaceable>SHARE</replaceable></option></arg>
+                <arg choice="opt"><option>--esx_share <replaceable>SHARE</replaceable></option></arg>
                 <arg choice="opt"><option>--capacity_override</option></arg>
                 <arg choice="opt"><option>--esx_switch <replaceable>ESX_SWITCH</replaceable></option></arg>
             </group>
@@ -231,8 +232,16 @@
         </varlistentry>
 
         <varlistentry>
-            <term><option>--esx_share <replaceable>ESX_SHARE</replaceable></option></term>
-            <listitem><para>The name of a network share linked to the cluster.</para></listitem>
+	    <term>
+		<option>--share <replaceable>SHARE</replaceable></option>,
+		<option>--esx_share <replaceable>SHARE</replaceable></option>
+	    </term>
+	    <listitem>
+		<para>
+		    The name of a network share linked to the cluster. The <option>--esx_share</option> variant
+		    is deprecated.
+		</para>
+	    </listitem>
         </varlistentry>
 
         <varlistentry>

@@ -29,11 +29,13 @@
 # TERMS THAT MAY APPLY.
 """Wrappers to make getting and using systems simpler."""
 
+from sqlalchemy.orm.exc import NoResultFound
+from sqlalchemy.orm import object_session
 
 from aquilon.exceptions_ import (IncompleteError, NotFoundException,
                                  ArgumentError)
 from aquilon.aqdb.model import (Cluster, ClusterResource, HostResource,
-                                Resource, ResourceGroup, BundleResource)
+                                Resource, ResourceGroup, BundleResource, Share)
 from aquilon.worker.templates import Plenary
 from aquilon.worker.dbwrappers.host import hostname_to_host
 from aquilon.worker.locks import lock_queue, CompileKey
@@ -197,3 +199,61 @@ def walk_resources(dbobj):
             walk_resources(res)
         else:
             yield res
+
+
+def find_share(dbobj, resourcegroup, share, ignore=None,
+               error=NotFoundException):
+    """
+    Find a suitable share resource.
+
+    dbobj is either a host, cluster, or metacluster. If dbobj is a cluster
+    that is part of a metacluster, and the share is not defined at the cluster
+    level, then it is also searched for at the metacluster level. If
+    resourcegroup is not None, the share must be part of the named
+    resourcegroup; otherwise, it must not be inside a resourcegroup.
+
+    If the value of ignore is an existing Share instance, then that instance
+    will be ignored by find_share.
+    """
+
+    session = object_session(dbobj)
+
+    if resourcegroup:
+        dbrg = ResourceGroup.get_unique(session, name=resourcegroup,
+                                        holder=dbobj.resholder)
+        if dbrg:
+            holder = dbrg.resholder
+        else:
+            holder = None
+    else:
+        holder = dbobj.resholder
+
+    if holder:
+        q = session.query(Share)
+        q = q.filter_by(name=share, holder=holder)
+        if ignore:
+            q = q.filter_by(id != ignore.id)
+
+        # The (name, holder) pair is unique, so we cannot get multiple results
+        # here
+        try:
+            return q.one()
+        except NoResultFound:
+            pass
+
+    # No luck. If this was a cluster, try to find the share at the metacluster
+    # level, but if even that fails, report the problem for the cluster.
+    if hasattr(dbobj, 'metacluster') and dbobj.metacluster:
+        try:
+            return find_share(dbobj.metacluster, resourcegroup, share,
+                              ignore=ignore, error=error)
+        except error:
+            pass
+
+    if resourcegroup:
+        msg = "{0} does not have share {1!s} assigned to it in " + \
+                "resourcegroup {2}.".format(dbobj, share, resourcegroup)
+    else:
+        msg = "{0} does not have share {1!s} assigned to it.".format(dbobj,
+                                                                     share)
+    raise error(msg)

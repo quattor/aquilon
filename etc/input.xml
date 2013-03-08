@@ -297,7 +297,8 @@
            <option name="esx_guest" type="string">fully qualified host name of a virtual machine</option>
            <option name="service" type="string">client of service (single service only)</option>
            <option name="instance" type="string">client of service instance (single instance only)</option>
-           <option name="esx_share" type="string">nas_disk_share in use by an virtual machine on the cluster</option>
+           <option name="esx_share" type="string">[Deprecated] Share used by the cluster</option>
+           <option name="share" type="string">Share used by the cluster</option>
            <option name="capacity_override" type="flag">Select clusters with capacity overrides</option>
            <option name="esx_switch" type="string">Select clusters bound to the given switch</option>
          </optgroup>
@@ -3117,8 +3118,9 @@
          <option name="rack" type="string">rack name</option>
          <option name="desk" type="string">desk name</option>
          <option name="serial" type="string">serial number</option>
-         <option name="cluster" type="string">Cluster name</option>
+         <option name="cluster" type="string">Cluster name hosting the VM</option>
          <option name="allow_metacluster_change" type="boolean">when changing clusters, allow the cluster to be in a different metacluster</option>
+         <option name="vmhost" type="string">Host name hosting the VM</option>
          <option name="ip" type="ipv4">New primary IP address</option>
       </optgroup>
       <transport method="post" trigger="hostname" path="host/%(hostname)s/command/update_hardware" />

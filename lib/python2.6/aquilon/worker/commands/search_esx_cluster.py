@@ -53,11 +53,13 @@ class CommandSearchESXCluster(CommandSearchCluster):
             elif key == 'esx_hostname':
                 esx_hostname = arguments[key]
             # 'esx_' prefix to these options.
-            elif key in [
-                'metacluster', 'guest', 'share', 'switch', 'virtual_machine']:
+            elif key in ['metacluster', 'guest', 'switch', 'virtual_machine']:
                 gen_arguments["esx_%s" % key] = arguments[key]
             else:
                 gen_arguments[key] = arguments[key]
+
+            # Backwards compat
+            gen_arguments['esx_share'] = None
 
         return CommandSearchCluster.render(self, cluster_type='esx',
             allowed_archetype=None, allowed_personality=None,

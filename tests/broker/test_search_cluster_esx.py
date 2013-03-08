@@ -259,21 +259,6 @@ class TestSearchClusterESX(TestBrokerCommand):
                    "--instance=service-instance-does-not-exist"]
         self.noouttest(command)
 
-    def testshareavailable(self):
-        command = "search cluster --cluster_type esx --esx_share test_share_2"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "utecl1", command)
-        self.matchclean(out, "utecl2", command)
-        self.matchclean(out, "utecl3", command)
-        self.matchclean(out, "utecl4", command)
-
-    def testshareunavailable(self):
-        command = ['search', 'cluster', '--cluster_type', 'esx',
-                   '--esx_share', 'share-does-not-exist']
-        out = self.notfoundtest(command)
-        self.matchoutput(out,
-                         "Share share-does-not-exist not found.", command)
-
     # Kept it since the output is different from testclusterlocationavailable
     def testesxclusterlocationavailable(self):
         command = "search cluster --cluster_type esx --cluster_building ut"

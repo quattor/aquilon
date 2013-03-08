@@ -250,6 +250,21 @@ class TestSearchCluster(TestBrokerCommand):
         self.matchclean(out, "utecl3", command)
         self.matchclean(out, "utecl4", command)
 
+    def testshareavailable(self):
+        command = "search cluster --share test_share_2"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "utecl1", command)
+        self.matchclean(out, "utecl2", command)
+        self.matchclean(out, "utecl3", command)
+        self.matchclean(out, "utecl4", command)
+
+    def testshareunavailable(self):
+        command = ['search', 'cluster', '--share', 'share-does-not-exist']
+        out = self.notfoundtest(command)
+        self.matchoutput(out,
+                         "Share share-does-not-exist not found.", command)
+
+
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestSearchCluster)
     unittest.TextTestRunner(verbosity=5).run(suite)
