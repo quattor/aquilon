@@ -1,0 +1,49 @@
+<?xml version="1.0"?>
+<synopfragment xml:id="global-options"
+               version="5.0" xmlns="http://docbook.org/ns/docbook"
+               xmlns:xlink="http://www.w3.org/1999/xlink"
+               xmlns:xi="http://www.w3.org/2001/XInclude"
+               xmlns:svg="http://www.w3.org/2000/svg"
+               xmlns:m="http://www.w3.org/1998/Math/MathML"
+               xmlns:html="http://www.w3.org/1999/xhtml"
+               xmlns:db="http://docbook.org/ns/docbook">
+    <group choice="opt">
+	<arg choice="plain"><option>-v</option></arg>
+	<arg choice="plain"><option>--verbose</option></arg>
+    </group>
+    <group choice="opt">
+	<arg choice="plain"><option>-q</option></arg>
+	<arg choice="plain"><option>--quiet</option></arg>
+    </group>
+    <group choice="opt">
+	<arg choice="plain"><option>--partialok</option></arg>
+	<arg choice="plain"><option>--nopartialok</option></arg>
+    </group>
+    <group choice="opt">
+	<arg choice="plain"><option>-d</option></arg>
+	<arg choice="plain"><option>--debug</option></arg>
+    </group>
+    <group choice="opt">
+	<arg choice="plain"><option>-u</option></arg>
+	<arg choice="plain"><option>--httpinfo</option></arg>
+    </group>
+    <group choice="opt">
+	<arg choice="plain"><option>-f <replaceable>FORMAT</replaceable></option></arg>
+	<arg choice="plain"><option>--format <replaceable>FORMAT</replaceable></option></arg>
+    </group>
+    <group choice="opt">
+	<arg choice="plain"><option>--auth</option></arg>
+	<arg choice="plain"><option>--noauth</option></arg>
+    </group>
+    <group choice="opt">
+	<arg choice="plain"><option>--exec</option></arg>
+	<arg choice="plain"><option>--noexec</option></arg>
+    </group>
+    <!-- FIXME: - -usesock does not seem to exist on the client side -->
+    <!-- FIXME: - -slowstatus: do we need it documented? -->
+    <arg choice="opt"><option>--aqport <replaceable>PORT</replaceable></option></arg>
+    <arg choice="opt"><option>--aqhost <replaceable>FQDN</replaceable></option></arg>
+    <arg choice="opt"><option>--aqservice <replaceable>SERVICE</replaceable></option></arg>
+</synopfragment>
+
+<!-- vim: set ai sw=4: -->
