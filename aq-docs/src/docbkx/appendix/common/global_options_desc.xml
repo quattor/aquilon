@@ -1,0 +1,153 @@
+<?xml version="1.0"?>
+<variablelist xml:id="global-options-desc"
+              version="5.0" xmlns="http://docbook.org/ns/docbook"
+              xmlns:xlink="http://www.w3.org/1999/xlink"
+              xmlns:xi="http://www.w3.org/2001/XInclude"
+              xmlns:svg="http://www.w3.org/2000/svg"
+              xmlns:m="http://www.w3.org/1998/Math/MathML"
+              xmlns:html="http://www.w3.org/1999/xhtml"
+              xmlns:db="http://docbook.org/ns/docbook">
+    <title>Global options</title>
+    <varlistentry>
+	<term>
+	    <option>-v</option>,
+	    <option>--verbose</option>
+	</term>
+	<listitem>
+	    <para>
+		Verbose mode. Contact the broker for out of band status messages
+		about the request while it is being processed. These messages are
+		printed on stderr. This is the default for commands that are not
+		read-only.
+	    </para>
+	</listitem>
+    </varlistentry>
+    <varlistentry>
+	<term>
+	    <option>-q</option>,
+	    <option>--quiet</option>
+	</term>
+	<listitem>
+	    <para>
+		Turn off verbose mode. Do not make a secondary request to the
+		broker for out of band status messages. This is the default for
+		read-only commands.
+	    </para>
+	</listitem>
+    </varlistentry>
+    <varlistentry>
+	<term>
+	    <option>--partialok</option>,
+	    <option>--nopartialok</option>
+	</term>
+	<listitem>
+	    <para>
+		For any command that returns status 207 (MULTI_STATUS)
+		indicating some success and some failure,
+		<option>--partialok</option> causes the client to exit with
+		status code 0 instead of exit code 2. Warning messages will
+		still go to stderr. <option>--nopartialok</option> is the default.
+	    </para>
+	</listitem>
+    </varlistentry>
+    <varlistentry>
+	<term>
+	    <option>-d</option>,
+	    <option>--debug</option>
+	</term>
+	<listitem>
+	    <para>
+		Generate debug statements sent to stderr. Some commands may
+		also increase output from the server on stdout.
+	    </para>
+	</listitem>
+    </varlistentry>
+    <varlistentry>
+	<term>
+	    <option>-u</option>,
+	    <option>--httpinfo</option>
+	</term>
+	<listitem>
+	    <para>
+		Show the URL being accessed and the response code. Implied by
+		<option>--debug</option>.
+	    </para>
+	</listitem>
+    </varlistentry>
+    <varlistentry>
+	<term>
+	    <option>-f <replaceable>FORMAT</replaceable></option>,
+	    <option>--format <replaceable>FORMAT</replaceable></option>
+	</term>
+	<listitem>
+	    <para>
+		Specify the output format. The default is <literal>raw</literal>. Other common
+		formats are <literal>proto</literal> for Google protobuf format, <literal>html</literal>,
+		and <literal>csv</literal>. Check the documentation of the individual commands to see
+		what formats they support.
+	    </para>
+	</listitem>
+    </varlistentry>
+    <varlistentry>
+	<term>
+	    <option>--auth</option>,
+	    <option>--noauth</option>
+	</term>
+	<listitem>
+	    <para>
+		Controls the authentication mechanism. <option>--auth</option> uses KNC for
+		authentication and encryption. This is the default. <option>--noauth</option>
+		disables both authentication and encryption.
+	    </para>
+	</listitem>
+    </varlistentry>
+    <varlistentry>
+	<term>
+	    <option>--exec</option>,
+	    <option>--noexec</option>
+	</term>
+	<listitem>
+	    <para>
+		<option>--exec</option> enables the client to execute commands sent back by
+		the server, and it is the default. <option>--noexec</option> disables executing
+		any commands.
+	    </para>
+	</listitem>
+    </varlistentry>
+    <varlistentry>
+	<term>
+	    <option>--aqport <replaceable>PORT</replaceable></option>
+	</term>
+	<listitem>
+	    <para>
+		Connect to the port number <replaceable>PORT</replaceable>
+		instead of the default. The default port is 6900 for
+		authenticated, and 6901 for non-authenticated connections.
+	    </para>
+	</listitem>
+    </varlistentry>
+    <varlistentry>
+	<term>
+	    <option>--aqhost <replaceable>FQDN</replaceable></option>
+	</term>
+	<listitem>
+	    <para>
+		Name of the server to connect to.
+	    </para>
+	</listitem>
+    </varlistentry>
+    <varlistentry>
+	<term>
+	    <option>--aqservice <replaceable>SERVICE</replaceable></option>
+	</term>
+	<listitem>
+	    <para>
+		Name of the Kerberos service principal used to authenticate to
+		the server. Should default correctly, only useful for
+		development.
+	    </para>
+	</listitem>
+    </varlistentry>
+</variablelist>
+
+<!-- vim: set ai sw=4: -->
