@@ -42,8 +42,8 @@ class ShareFormatter(ResourceFormatter):
         details = []
 
         share_info = find_storage_data(share)
-        details.append(indent + "  Server: %s" % share_info["server"])
-        details.append(indent + "  Mountpoint: %s" % share_info["mount"])
+        details.append(indent + "  Server: %s" % share_info.server)
+        details.append(indent + "  Mountpoint: %s" % share_info.mount)
         details.append(indent + "  Disk Count: %d" % share.disk_count)
         details.append(indent + "  Machine Count: %d" % share.machine_count)
 

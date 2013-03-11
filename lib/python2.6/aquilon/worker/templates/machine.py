@@ -143,8 +143,8 @@ class PlenaryMachineInfo(Plenary):
                 params["path"] = "%s/%s.vmdk" % (self.machine, disk.device_name)
                 params["address"] = disk.address
                 params["sharename"] = share.name
-                params["server"] = share_info["server"]
-                params["mountpoint"] = share_info["mount"]
+                params["server"] = share_info.server
+                params["mountpoint"] = share_info.mount
 
                 tpl = params
 
