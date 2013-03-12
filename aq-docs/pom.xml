@@ -164,10 +164,9 @@
 
   <licenses>
     <license>
-      <name>Creative Commons Attribution 3.0 Unported</name>
-      <url>http://creativecommons.org/licenses/by/3.0/legalcode</url>
+      <name>The Apache Software License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
       <distribution>repo</distribution>
-      <comments>Copyright (c) 2013, Morgan Stanley</comments>
     </license>
   </licenses>
 
