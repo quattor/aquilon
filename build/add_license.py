@@ -74,8 +74,6 @@ def fix_file(filepath):
         if comment_re.search(contents[i]):
             last_leading_comment = i
             continue
-        if whitespace_re.search(contents[i]):
-            continue
         break
     #print >>sys.stderr, "Using %d as last leading comment line." % last_leading_comment
 
@@ -103,12 +101,22 @@ def fix_file(filepath):
     p4 = Popen(["uniq"], stdin=p3.stdout, stdout=PIPE, stderr=2)
     copyright_years = p4.communicate()[0].splitlines() or [year]
 
+    is_python = filepath.endswith(".py")
+
     new_contents = []
     # If there's a shebang, standardize it
     if contents[0].startswith("#!"):
-        new_contents.append(shebang)
-    new_contents.append(emacs_line)
-    new_contents.append(ex_line)
+        if "python" in contents[0]:
+            new_contents.append(shebang)
+            is_python = True
+        else:
+            new_contents.append(contents[0])
+
+    # The editor settings apply to Python code only
+    if is_python:
+        new_contents.append(emacs_line)
+        new_contents.append(ex_line)
+
     new_contents.append(comment_line)
     new_contents.append("%sCopyright (C) %s  Contributor\n" %
                         (comment_prefix, ",".join(copyright_years)))
@@ -144,9 +152,10 @@ def fix_recursive(start_dir):
         if '.git' in dirnames:
             dirnames.remove('.git')
         for f in filenames:
-            if not f.endswith('.py'):
+            full_path = os.path.join(dirpath, f)
+            if not f.endswith('.py') and not os.access(full_path, os.X_OK):
                 continue
-            fix_file(os.path.join(dirpath, f))
+            fix_file(full_path)
 
 
 def main(args):
