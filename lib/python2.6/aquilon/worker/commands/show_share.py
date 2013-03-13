@@ -28,10 +28,13 @@
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
 
+from sqlalchemy.orm import undefer
 
 from aquilon.aqdb.model import Share
+from aquilon.aqdb.data_sync.storage import cache_storage_data
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.commands.show_resource import show_resource
+from aquilon.worker.dbwrappers.resources import get_resource_holder
+from aquilon.worker.formats.resource import ResourceList
 
 
 class CommandShowShare(BrokerCommand):
@@ -40,6 +43,21 @@ class CommandShowShare(BrokerCommand):
 
     def render(self, session, share, hostname, resourcegroup, cluster, all,
                **arguments):
+        q = session.query(Share)
+        if share:
+            q = q.filter_by(name=share)
 
-        return show_resource(session, hostname, cluster, resourcegroup, all,
-                             share, Share)
+        q = q.options(undefer(Share.disk_count),
+                      undefer(Share.machine_count))
+
+        if hostname or cluster or resourcegroup:
+            who = get_resource_holder(session, hostname, cluster, resourcegroup)
+            q = q.filter_by(holder=who)
+
+        shares = q.all()
+
+        share_info = cache_storage_data()
+        for dbshare in shares:
+            dbshare.populate_share_info(share_info)
+
+        return ResourceList(shares)

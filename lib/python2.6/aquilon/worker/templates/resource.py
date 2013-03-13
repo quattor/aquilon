@@ -35,7 +35,6 @@ from aquilon.aqdb.model import (Application, Filesystem, Intervention,
                                 ResourceGroup, Hostlink, RebootSchedule,
                                 RebootIntervention, ServiceAddress,
                                 VirtualMachine, Share)
-from aquilon.aqdb.data_sync.storage import find_storage_data
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
 from aquilon.worker.templates.panutils import (StructureTemplate, pan_assign,
                                                pan_append)
@@ -60,12 +59,9 @@ class PlenaryResource(Plenary):
             getattr(self, fname)(lines)
 
     def body_share(self, lines):
-
-        share_info = find_storage_data(self)
-
         pan_assign(lines, "name", self.name)
-        pan_assign(lines, "server", share_info.server)
-        pan_assign(lines, "mountpoint", share_info.mount)
+        pan_assign(lines, "server", self.dbobj.server)
+        pan_assign(lines, "mountpoint", self.dbobj.mount)
 
     def body_filesystem(self, lines):
         pan_assign(lines, "type", self.dbobj.fstype)
