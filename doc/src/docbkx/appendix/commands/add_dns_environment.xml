@@ -1,0 +1,89 @@
+<?xml version="1.0"?>
+<refentry version="5.0" xmlns="http://docbook.org/ns/docbook"
+          xml:id="add_dns_environment"
+	  xmlns:xi="http://www.w3.org/2001/XInclude">
+    <refmeta>
+        <refentrytitle>add_dns_environment</refentrytitle>
+        <manvolnum>1</manvolnum>
+        <refmiscinfo class="version"><?eval ${project.version}?></refmiscinfo>
+        <refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
+    </refmeta>
+
+    <refnamediv>
+        <refname>add dns environment</refname>
+        <refpurpose>
+	    Create a new DNS environment
+        </refpurpose>
+	<refclass>Aquilon</refclass>
+    </refnamediv>
+
+    <refsynopsisdiv>
+	<cmdsynopsis>
+	    <command>aq add dns environment</command>
+	    <group>
+		<synopfragmentref linkend="go-aq-add-dns-env">Global options</synopfragmentref>
+	    </group>
+	    <arg choice="plain"><option>--dns_environment <replaceable>ENV</replaceable></option></arg>
+	    <arg choice="opt"><option>--comments <replaceable>COMMENTS</replaceable></option></arg>
+            <synopfragment xml:id="go-aq-add-dns-env">
+              <xi:include href="../common/global_options.xml"/>
+            </synopfragment>
+	</cmdsynopsis>
+    </refsynopsisdiv>
+
+    <refsection>
+        <title>Description</title>
+	<para>
+	    The <command>aq add dns environment</command> command creates a new DNS environment.
+	</para>
+	<para>
+	    DNS environments are independent views of DNS information. The same FQDN may exist in
+	    one environment and not in another; or if it exists in both, it may resolve to a
+	    different resource record.
+	</para>
+	<para>
+	    The default DNS environment is defined by the <literal>default_dns_environment</literal>
+	    key in the <literal>site</literal> section of the broker's configuration. All commands
+	    will operate inside this environment unless explicitly directed otherwise.
+	</para>
+
+    </refsection>
+
+    <refsection>
+        <title>Options</title>
+	<variablelist>
+	    <title>Command-specific options</title>
+	    <varlistentry>
+	        <term>
+		    <option>--dns_environment <replaceable>ENV</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			The name of the DNS environment. The name must contain only alphanumeric characters, '_', '.' and '-'.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--comments <replaceable>COMMENTS</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Short description of the purpose of the DNS environment.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	</variablelist>
+	<xi:include href="../common/global_options_desc.xml"/>
+    </refsection>
+
+    <refsection>
+	<title>See also</title>
+	<para>
+	    <citerefentry><refentrytitle>del_dns_environment</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>show_dns_environment</refentrytitle><manvolnum>1</manvolnum></citerefentry>
+	</para>
+    </refsection>
+</refentry>
+
+<!-- vim: set ai sw=4: -->

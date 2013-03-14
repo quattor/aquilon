@@ -8,7 +8,7 @@
   <version>0.1-SNAPSHOT</version>
   <packaging>pom</packaging>
 
-  <name>pan</name>
+  <name>Aquilon</name>
   <description>Aquilon</description>
   <url>http://quattor.org/</url>
 
@@ -31,7 +31,7 @@
   </parent>
 
   <modules>
-    <module>aq-docs</module>
+    <module>doc</module>
   </modules>
 
   <organization>
@@ -40,8 +40,8 @@
   </organization>
 
   <scm>
-    <connection>scm:git:ssh://git@github.com/quattor/pan.git</connection>
-    <developerConnection>scm:git:ssh://git@github.com/quattor/pan.git</developerConnection>
+    <connection>scm:git:ssh://git@github.com/quattor/aquilon.git</connection>
+    <developerConnection>scm:git:ssh://git@github.com/quattor/aquilon.git</developerConnection>
     <url>https://github.com/quattor/aquilon</url>
     <tag>HEAD</tag>
   </scm>
@@ -69,20 +69,6 @@
   </developers>
 
   <profiles>
-    <profile>
-
-      <activation>
-	<file>
-	  <exists>/bin/rpm</exists>
-	</file>
-      </activation>
-
-      <modules>
-	<module>panc-rpm</module>
-      </modules>
-
-    </profile>
-
     <profile>
       <id>release-signed-artifacts</id>
       <activation>

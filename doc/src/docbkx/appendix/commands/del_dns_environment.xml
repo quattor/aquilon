@@ -1,0 +1,70 @@
+<?xml version="1.0"?>
+<refentry version="5.0" xmlns="http://docbook.org/ns/docbook"
+          xml:id="del_dns_environment"
+	  xmlns:xi="http://www.w3.org/2001/XInclude">
+    <refmeta>
+        <refentrytitle>del_dns_environment</refentrytitle>
+        <manvolnum>1</manvolnum>
+        <refmiscinfo class="version"><?eval ${project.version}?></refmiscinfo>
+        <refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
+    </refmeta>
+
+    <refnamediv>
+        <refname>del dns environment</refname>
+        <refpurpose>
+	    Delete a DNS environment
+        </refpurpose>
+	<refclass>Aquilon</refclass>
+    </refnamediv>
+
+    <refsynopsisdiv>
+	<cmdsynopsis>
+	    <command>aq del dns environment</command>
+	    <group>
+		<synopfragmentref linkend="go-aq-del-dns-env">Global options</synopfragmentref>
+	    </group>
+	    <arg choice="plain"><option>--dns_environment <replaceable>ENV</replaceable></option></arg>
+            <synopfragment xml:id="go-aq-del-dns-env">
+              <xi:include href="../common/global_options.xml"/>
+            </synopfragment>
+	</cmdsynopsis>
+    </refsynopsisdiv>
+
+    <refsection>
+        <title>Description</title>
+	<para>
+	    The <command>aq del dns environment</command> removes a DNS environment. The DNS environment
+	    must be empty. The default environment (defined by the <literal>default_dns_environment</literal>
+	    key in the <literal>site</literal> section of the broker's configuration) cannot be deleted.
+	</para>
+
+    </refsection>
+
+    <refsection>
+        <title>Options</title>
+	<variablelist>
+	    <title>Command-specific options</title>
+	    <varlistentry>
+	        <term>
+		    <option>--dns_environment <replaceable>ENV</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			The name of the DNS environment to be deleted.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	</variablelist>
+	<xi:include href="../common/global_options_desc.xml"/>
+    </refsection>
+
+    <refsection>
+	<title>See also</title>
+	<para>
+	    <citerefentry><refentrytitle>add_dns_environment</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>show_dns_environment</refentrytitle><manvolnum>1</manvolnum></citerefentry>
+	</para>
+    </refsection>
+</refentry>
+
+<!-- vim: set ai sw=4: -->

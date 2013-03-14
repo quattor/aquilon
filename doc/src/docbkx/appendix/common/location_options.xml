@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<synopfragment version="5.0" xmlns="http://docbook.org/ns/docbook">
+    <group choice="opt">
+    <arg choice="plain"><option>--organization <replaceable>ORGANIZATION</replaceable></option></arg>
+    <arg choice="plain"><option>--hub <replaceable>HUB</replaceable></option></arg>
+    <arg choice="plain"><option>--continent <replaceable>CONTINENT</replaceable></option></arg>
+    <arg choice="plain"><option>--country <replaceable>COUNTRY</replaceable></option></arg>
+    <arg choice="plain"><option>--campus <replaceable>CAMPUS</replaceable></option></arg>
+    <arg choice="plain"><option>--city <replaceable>CITY</replaceable></option></arg>
+    <arg choice="plain"><option>--building <replaceable>BUILDING</replaceable></option></arg>
+    <arg choice="plain"><option>--room <replaceable>ROOM</replaceable></option></arg>
+    <arg choice="plain"><option>--rack <replaceable>RACK</replaceable></option></arg>
+    <arg choice="plain"><option>--desk <replaceable>DESK</replaceable></option></arg>
+    </group>
+</synopfragment>
+
+<!-- vim: set ai sw=4: -->

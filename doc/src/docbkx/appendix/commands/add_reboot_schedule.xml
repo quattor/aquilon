@@ -1,0 +1,166 @@
+<?xml version="1.0"?>
+<refentry version="5.0" xmlns="http://docbook.org/ns/docbook"
+          xml:id="add_reboot_schedule"
+	  xmlns:xi="http://www.w3.org/2001/XInclude">
+    <refmeta>
+        <refentrytitle>add_reboot_schedule</refentrytitle>
+        <manvolnum>1</manvolnum>
+        <refmiscinfo class="version"><?eval ${project.version}?></refmiscinfo>
+        <refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
+    </refmeta>
+
+    <refnamediv>
+        <refname>add reboot schedule</refname>
+        <refpurpose>
+	    Add a reboot schedule resource onto a host or cluster.
+        </refpurpose>
+	<refclass>Aquilon</refclass>
+    </refnamediv>
+
+    <refsynopsisdiv>
+	<cmdsynopsis>
+	    <command>aq add reboot schedule</command>
+	    <group>
+	      <arg choice="req"><option>--hostname <replaceable>HOSTNAME</replaceable></option></arg>
+	      <arg choice="req"><option>--cluster <replaceable>CLUSTER</replaceable></option></arg>
+            </group>
+	    <arg choice="req"><option>--week <replaceable>WHEN</replaceable></option></arg>
+	    <arg choice="req"><option>--day <replaceable>WHEN</replaceable></option></arg>
+	    <arg choice="opt"><option>--time <replaceable>WHEN</replaceable></option></arg>
+	    <arg choice="opt"><option>--comments <replaceable>COMMENTS</replaceable></option></arg>
+	    <group>
+		<synopfragmentref linkend="go-aq-add-reboot-schedule">Global options</synopfragmentref>
+	    </group>
+            <synopfragment xml:id="go-aq-add-reboot-schedule">
+              <xi:include href="../common/global_options.xml"/>
+            </synopfragment>
+	</cmdsynopsis>
+    </refsynopsisdiv>
+
+    <refsection>
+        <title>Description</title>
+	<para>
+	    The <command>aq add_reboot_schedule</command> command adds a
+	    reboot schedule onto a host or a cluster.
+	</para>
+	<para>
+	    The work window must match the maintenance window defined
+	    for the personality.
+	</para>
+	<para>
+	    For the schedule to take affect the server must be bound
+	    to reboot service instance 'scheduled'.
+	</para>
+    </refsection>
+
+    <refsection>
+        <title>Entitlements</title>
+        <para>Requires "operations" or "unixops_l2" role</para>
+    </refsection>
+
+    <refsection>
+        <title>Templates</title>
+        <para>
+      This command will modify the templates for the host or
+      cluster (depending on which option was given) and the resource
+      template for the reboot schedule itself.
+	</para>
+    </refsection>
+
+    <refsection>
+        <title>Options</title>
+	<variablelist>
+	    <title>Command-specific options</title>
+	    <varlistentry>
+	        <term>
+		    <option>--hostname <replaceable>HOSTNAME</replaceable></option>,
+		</term>
+		<listitem>
+		    <para>
+		        Specify the target host for the reboot schedule.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--cluster <replaceable>CLUSTER</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			The name of the target cluster for the reboot schedule.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--week <replaceable>WHEN</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			A comma separated list of weeks where valid values
+			are the numbers 1 through 5 and the string "all".
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--day <replaceable>WHEN</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Day of the week as a three letter character code
+			(Sun, Mon, Tue, Wed, Thu, Fri, Sat) matching the
+			maintenance work window.  This defaults to Sunday
+			if not given.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--time <replaceable>WHEN</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Preferred time local to the host.  Omit this for
+			any time within the work window.  If given, the
+			time must still be in the maintenance window.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--comments <replaceable>WHY</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Any additional notes for the reboot schedule.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	</variablelist>
+	<xi:include href="../common/global_options_desc.xml"/>
+    </refsection>
+
+    <refsection>
+	<title>Examples</title>
+	<example>
+	    <title>Adding a reboot schedule</title>
+	    <programlisting>
+aq add reboot schedule --hostname foo.example.com --week 1 day Sun
+	    </programlisting>
+	    <para>
+		Add a reboot schedule for foo.example.com for the first
+		Sunday of the month.
+	    </para>
+	</example>
+    </refsection>
+
+    <refsection>
+	<title>See also</title>
+	<para>
+	    <citerefentry><refentrytitle>del_reboot_schedule</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	</para>
+    </refsection>
+</refentry>
+
+<!-- vim: set ai sw=4: -->

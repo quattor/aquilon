@@ -1,0 +1,188 @@
+<?xml version="1.0"?>
+<refentry version="5.0" xmlns="http://docbook.org/ns/docbook"
+          xml:id="add_hostlink"
+	  xmlns:xi="http://www.w3.org/2001/XInclude">
+    <refmeta>
+        <refentrytitle>add_hostlink</refentrytitle>
+        <manvolnum>1</manvolnum>
+        <refmiscinfo class="version"><?eval ${project.version}?></refmiscinfo>
+        <refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
+    </refmeta>
+    <!--Tried to use this fix the warnings, but it just created another set!
+    <info>
+      <author>
+        <personname><firstname>Nathan</firstname>
+        <surname>Dimmock</surname></personname>
+      </author>
+      <author><orgname>Morgan Stanley</orgname></author>
+    </info>-->
+    <refnamediv>
+        <refname>add hostlink</refname>
+        <refpurpose>
+          Add a hostlink resource onto a host or cluster
+        </refpurpose>
+	<refclass>Aquilon</refclass>
+    </refnamediv>
+
+    <refsynopsisdiv>
+	<cmdsynopsis>
+	    <command>aq add hostlink </command>
+	    <group>
+	      <arg choice="req"><option>--hostname <replaceable>HOSTNAME</replaceable></option></arg>
+	      <arg choice="req"><option>--cluster <replaceable>CLUSTER</replaceable></option></arg>
+	      <arg choice="req"><option>--resourcegroup <replaceable>RESOURCEGROUP</replaceable></option></arg>
+        </group>
+	    <arg choice="req"><option>--hostlink <replaceable>NAME</replaceable></option></arg>
+	    <arg choice="req"><option>--target <replaceable>PATH</replaceable></option></arg>
+	    <arg choice="req"><option>--owner <replaceable>USER</replaceable></option></arg>
+	    <arg choice="opt"><option>--group <replaceable>GROUP</replaceable></option></arg>
+	    <arg choice="opt"><option>--comments <replaceable>COMMENTS</replaceable></option></arg>
+	    <group>
+		<synopfragmentref linkend="go-aq-add-hostlink">Global options</synopfragmentref>
+	    </group>
+            <synopfragment xml:id="go-aq-add-hostlink">
+              <xi:include href="../common/global_options.xml"/>
+            </synopfragment>
+	</cmdsynopsis>
+    </refsynopsisdiv>
+
+    <refsection>
+        <title>Description</title>
+	<para>
+	    The <command>aq add_hostlink</command> command adds a hostlink
+	    resource onto a host or a cluster. A hostlink allows the
+	    creation of host or cluster specific symlinks under
+	    /var/hostlinks which may point to arbitrary locations. If the
+	    location does not exist then it will be created and given the
+	    specified user (and optionally group) owner.
+	</para>
+    </refsection>
+
+    <refsection>
+        <title>Entitlements</title>
+        <para>Requires "operations" role</para>
+    </refsection>
+
+    <refsection>
+        <title>Templates</title>
+        <para>
+      This command will modify the templates for the host or
+      cluster (depending on which option was given) and the resource
+      template for the hostlink itself.
+	</para>
+    </refsection>
+
+    <refsection>
+        <title>Options</title>
+	<variablelist>
+	    <title>Command-specific options</title>
+	    <varlistentry>
+	        <term>
+		    <option>--hostname <replaceable>HOSTNAME</replaceable></option>,
+		</term>
+		<listitem>
+		    <para>
+		        Specify the target host for the hostlink.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--cluster <replaceable>CLUSTER</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			The name of the target cluster for the hostlink.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--resourcegroup
+		    <replaceable>RESOURCEGROUP</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			The name of the target resourcegroup for the hostlink.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--group <replaceable>GROUP</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+              The group owner of the target directory. If not
+              specified then the owner user's default group will be
+              used.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--hostlink <replaceable>NAME</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			A name for the hostlink. This is the name that appears in
+			/var/hostlinks. It must be unique to the cluster, host or
+			resourcegroup to which this resource is assigned.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--owner <replaceable>USER</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+              The username of the owner of the target directory.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--target <replaceable>PATH</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+              The target path for the symlink.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	</variablelist>
+	<xi:include href="../common/global_options_desc.xml"/>
+    </refsection>
+
+    <refsection>
+	<title>Examples</title>
+	<example>
+	    <title>Adding a hostlink to a host</title>
+	    <programlisting>
+aq add hostlink --hostname foo.example.com \
+	--hostlink ftp \
+	--target /d/d1/esliprod \
+    --owner esliprod
+	    </programlisting>
+    </example>
+    <example>
+	    <title>Specifying the group owner</title>
+	    <programlisting>
+aq add hostlink --cluster ny01vv \
+	--hostlink nyqsanless1  \
+	--target /var/spool/hostlinks/nyqsanless1 \
+    --owner zeti --group fwpbatch
+	    </programlisting>
+	</example>
+    </refsection>
+
+    <refsection>
+	<title>See also</title>
+	<para>
+	    <citerefentry><refentrytitle>del_hostlink</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	</para>
+    </refsection>
+</refentry>
+
+<!-- vim: set ai sw=4: -->

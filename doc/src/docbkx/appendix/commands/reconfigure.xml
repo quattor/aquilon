@@ -1,0 +1,263 @@
+<?xml version="1.0"?>
+<refentry version="5.0" xmlns="http://docbook.org/ns/docbook"
+          xml:id="reconfigure"
+  xmlns:xi="http://www.w3.org/2001/XInclude">
+  <refmeta>
+    <refentrytitle>reconfigure</refentrytitle>
+    <manvolnum>1</manvolnum>
+    <refmiscinfo class="version"><?eval ${project.version}?></refmiscinfo>
+    <refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
+  </refmeta>
+
+  <refnamediv>
+    <refname>reconfigure</refname>
+    <refpurpose>
+      Rebuild configuration
+    </refpurpose>
+    <refclass>Aquilon</refclass>
+  </refnamediv>
+
+  <refsynopsisdiv>
+    <cmdsynopsis>
+      <command>aq reconfigure </command>
+      <group choice="req">
+	<arg choice="plain"><option>--hostname <replaceable>HOSTNAME</replaceable></option></arg>
+	<arg choice="plain"><option>--list <replaceable>FILENAME</replaceable></option></arg>
+	<arg choice="plain"><option>--membersof <replaceable>CLUSTER</replaceable></option></arg>
+      </group>
+      <arg choice="opt"><option>--osname <replaceable>OSNAME</replaceable></option></arg>
+      <arg choice="opt"><option>--osversion <replaceable>OSVERSION</replaceable></option></arg>
+      <arg choice="opt"><option>--archetype <replaceable>ARCHETYPE</replaceable></option></arg>
+      <arg choice="opt"><option>--personality <replaceable>PERSONALITY</replaceable></option></arg>
+      <arg choice="opt"><option>--buildstatus <replaceable>BUILDSTATUS</replaceable></option></arg>
+      <group choice="opt">
+	<arg choice="plain"><option>--keepbindings</option></arg>
+	<arg choice="plain"><option>--nokeepbindings</option></arg>
+      </group>
+      <group>
+	<synopfragmentref linkend="go-reconfigure">Global options</synopfragmentref>
+      </group>
+      <synopfragment xml:id="go-reconfigure">
+        <xi:include href="../common/global_options.xml"/>
+      </synopfragment>
+    </cmdsynopsis>
+  </refsynopsisdiv>
+
+  <refsection>
+    <title>Description</title>
+    <para>
+      The <command>aq reconfigure</command> command forces a complete
+      rebuild of the configuration of the specified hosts. This
+      includes the tasks of:
+    </para>
+        <itemizedlist>
+	    <listitem>
+	        <para>
+		    re-evaluating all the service bindings
+		</para>
+		<para>
+		    All service bindings will be re-evaluated and possibly
+		    changed to new defaults.  Also, any
+		    services that are not listed as required will be dropped
+		    unless the <option>--keepbindings</option> flag is used.
+		</para>
+	    </listitem>
+	    <listitem>
+		<para>
+		    re-writing the plenary template files for the hosts
+		</para>
+	    </listitem>
+	    <listitem>
+		<para>
+		    rebuilding the configuration files on AII bootservers
+		</para>
+	    </listitem>
+	    <listitem>
+		<para>
+		    updating downstream datawarehouses
+		</para>
+	    </listitem>
+      </itemizedlist>
+  </refsection>
+
+  <refsection>
+    <title>Entitlements</title>
+    <para>
+      Requires one of the following roles: operations, engineering, winops,
+      winops_server, unixops_l2.
+    </para>
+  </refsection>
+
+  <refsection>
+    <title>Templates</title>
+    <para>This command may modify: host templates and service templates (if any service bindings are changed).
+    </para>
+  </refsection>
+
+  <refsection>
+    <title>Options</title>
+    <variablelist>
+      <title>Command-specific options</title>
+      <varlistentry>
+	<term>
+	  <option>--hostname <replaceable>HOSTNAME</replaceable></option>,
+	</term>
+	<listitem>
+	  <para>
+	    Only the named <replaceable>HOSTNAME</replaceable> will be reconfigured.
+	  </para>
+	</listitem>
+      </varlistentry>
+      <varlistentry>
+	<term>
+	  <option>--list <replaceable>FILENAME</replaceable></option>
+	</term>
+	<listitem>
+	  <para>
+            A list of hosts will be read from
+            <replaceable>FILENAME</replaceable> and the given reconfiguration
+            options will be applied equally to all hosts. The format of the
+            file is one hostname per line. Lines that are blank or begin with
+            "#" will be skipped.  All hosts must be in the same domain, and
+            after applying all changes the full domain will be compiled.
+	  </para>
+	</listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <option>--membersof <replaceable>CLUSTER</replaceable></option>
+        </term>
+        <listitem>
+          <para>
+            Behaves like --list, except the hosts to be reconfigured are
+            the members of <replaceable>CLUSTER</replaceable>.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <option>--osname <replaceable>OSNAME</replaceable></option>
+        </term>
+        <listitem>
+          <para>
+            Name of the OS family to assign to the host (linux, windows,
+            esx, etc.).  Generally the osversion will need to be specified
+            as well.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <option>--osversion <replaceable>OSVERSION</replaceable></option>
+        </term>
+        <listitem>
+          <para>
+            Version of the operating system to run.  May require use of the
+            osname parameter if there is ambiguity.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <option>--archetype <replaceable>ARCHETYPE</replaceable></option>
+        </term>
+        <listitem>
+          <para>
+            To change the archetype of a host, a new OS and personality
+            will need to be given.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <option>--personality <replaceable>PERSONALITY</replaceable></option>
+        </term>
+        <listitem>
+          <para>
+            The name of the personality that should be given to the host.
+            If the operation fails, then the previous personality will remain
+            on the host.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <option>--buildstatus <replaceable>BUILDSTATUS</replaceable></option>
+        </term>
+        <listitem>
+          <para>
+            A host lifecycle tends to go from build to ready to decommissioned.
+            After ready, the host might also transition to rebuild.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <option>--keepbindings</option>, <option>--nokeepbindings</option>
+        </term>
+        <listitem>
+          <para>
+            When <option>--keepbindings</option> is passed, any bindings
+            which have been added manually with bind_client and are not
+            listed as required for the archetype or personality of the host
+            will be kept.  The default behavior is
+            <option>--nokeepbindings</option>, which removes any services
+            that are not required.
+          </para>
+          <para>
+            This option will not change the behavior of enforcing the
+            service maps for required services.
+          </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+    <xi:include href="../common/global_options_desc.xml"/>
+  </refsection>
+
+  <refsection>
+    <title>EXIT STATUS</title>
+    <variablelist>
+      <varlistentry>
+	<term>0</term>
+	<listitem>
+	  <para>
+	    all hosts were successfully reconfigured.
+	  </para>
+	</listitem>
+      </varlistentry>
+      <varlistentry>
+	<term>2</term>
+	<listitem>
+	    <para>
+	      partial success. When specifying a number of hosts (either using the <option>--list</option> or the <option>--membersof</option> options) some of the hosts were successful and some failed.</para>
+	</listitem>
+      </varlistentry>
+      <varlistentry>
+	<term>4</term>
+	<listitem><para>
+	    no hosts were reconfigured.</para>
+	</listitem>
+      </varlistentry>
+    </variablelist>
+  </refsection>
+
+  <refsection>
+    <title>Examples</title>
+    <example>
+      <title>Change the operating system of a host</title>
+      <programlisting>
+aq reconfigure --hostname foo.example.com --osver 5.0.1-x86_64 \
+               --buildstatus rebuild
+      </programlisting>
+    </example>
+  </refsection>
+
+  <refsection>
+    <title>See also</title>
+    <para>
+      <citerefentry><refentrytitle>compile</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+    </para>
+  </refsection>
+</refentry>
+
+<!-- vim: set ai sw=4: -->

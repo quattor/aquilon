@@ -1,0 +1,107 @@
+<?xml version="1.0"?>
+<refentry version="5.0" xmlns="http://docbook.org/ns/docbook"
+          xml:id="add_resourcegroup"
+	  xmlns:xi="http://www.w3.org/2001/XInclude">
+    <refmeta>
+        <refentrytitle>add_resourcegroup</refentrytitle>
+        <manvolnum>1</manvolnum>
+        <refmiscinfo class="version"><?eval ${project.version}?></refmiscinfo>
+        <refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
+    </refmeta>
+
+    <refnamediv>
+        <refname>add resourcegroup</refname>
+        <refpurpose>
+	    Add a resourcegroup onto a host or cluster
+        </refpurpose>
+	<refclass>Aquilon</refclass>
+    </refnamediv>
+
+    <refsynopsisdiv>
+	<cmdsynopsis>
+	    <command>aq add resourcegroup</command>
+	    <group>
+	      <arg choice="req"><option>--hostname <replaceable>HOSTNAME</replaceable></option></arg>
+	      <arg choice="req"><option>--cluster <replaceable>CLUSTER</replaceable></option></arg>
+        </group>
+	    <arg choice="req"><option>--resourcegroup <replaceable>NAME</replaceable></option></arg>
+	    <group>
+		<synopfragmentref linkend="go-aq-add-resourcegroup">Global options</synopfragmentref>
+	    </group>
+            <synopfragment xml:id="go-aq-add-resourcegroup">
+              <xi:include href="../common/global_options.xml"/>
+            </synopfragment>
+	</cmdsynopsis>
+    </refsynopsisdiv>
+
+    <refsection>
+        <title>Description</title>
+	<para>
+	    The <command>aq add_resourcegroup</command> command adds a
+	    resourcegroup onto a host or a cluster. A resourcegroup is
+        a collection or bundle of resources which work together. 
+	</para>
+    </refsection>
+
+    <refsection>
+        <title>Entitlements</title>
+        <para>Requires "operations" role</para>
+    </refsection>
+
+    <refsection>
+        <title>Templates</title>
+        <para>
+      This command will modify the templates for the host or
+      cluster (depending on which option was given).
+	</para>
+    </refsection>
+
+    <refsection>
+        <title>Options</title>
+	<variablelist>
+	    <title>Command-specific options</title>
+	    <varlistentry>
+	        <term>
+		    <option>--hostname <replaceable>HOSTNAME</replaceable></option>,
+		</term>
+		<listitem>
+		    <para>
+		        Specify the host which holds this resourcegroup.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--cluster <replaceable>CLUSTER</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			The name of the cluster which holds this resourcegroup.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--resourcegroup <replaceable>NAME</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			The name for the resourcegroup. This is a globally unique
+			name. The name must consist of only alphanumeric
+			characters.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	</variablelist>
+	<xi:include href="../common/global_options_desc.xml"/>
+    </refsection>
+
+    <refsection>
+	<title>See also</title>
+	<para>
+	    <citerefentry><refentrytitle>del_resourcegroup</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	</para>
+    </refsection>
+</refentry>
+
+<!-- vim: set ai sw=4: -->
