@@ -1,0 +1,144 @@
+<?xml version="1.0"?>
+<refentry version="5.0" xmlns="http://docbook.org/ns/docbook"
+          xml:id="map_dns_domain"
+	  xmlns:xi="http://www.w3.org/2001/XInclude">
+    <refmeta>
+        <refentrytitle>map_dns_domain</refentrytitle>
+        <manvolnum>1</manvolnum>
+        <refmiscinfo class="version"><?eval ${project.version}?></refmiscinfo>
+        <refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
+    </refmeta>
+
+    <refnamediv>
+        <refname>map dns domain</refname>
+        <refpurpose>
+	    Map a DNS domain to a location
+        </refpurpose>
+	<refclass>Aquilon</refclass>
+    </refnamediv>
+
+    <refsynopsisdiv>
+	<cmdsynopsis>
+	    <command>aq map dns domain</command>
+	    <group>
+		<synopfragmentref linkend="go-aq-map-dns-domain">Global options</synopfragmentref>
+	    </group>
+	    <arg choice="plain"><option>--dns_domain <replaceable>DOMAIN</replaceable></option></arg>
+	    <arg choice="opt"><option>--position <replaceable>POSITION</replaceable></option></arg>
+	    <arg choice="opt"><option>--comments <replaceable>COMMENTS</replaceable></option></arg>
+	    <group>
+		<synopfragmentref linkend="lo-aq-map-dns-domain">Location options</synopfragmentref>
+	    </group>
+            <synopfragment xml:id="lo-aq-map-dns-domain">
+              <xi:include href="../common/location_options.xml"/>
+            </synopfragment>
+            <synopfragment xml:id="go-aq-map-dns-domain">
+              <xi:include href="../common/global_options.xml"/>
+            </synopfragment>
+	</cmdsynopsis>
+    </refsynopsisdiv>
+
+    <refsection>
+        <title>Description</title>
+	<para>
+	    The <command>aq map dns domain</command> command maps a DNS domain to a location. This
+	    mapping is used to construct the default DNS search path.
+	</para>
+	<para>
+	    The DNS search path for a given machine is constructed by walking the location tree,
+	    starting from the machine's physical location and moving from each node to its parent.
+	    At every step, the DNS domains mapped to the given location are appended to the list. If
+	    a DNS domain appears multiple times in the list, only the first occurrence is retained,
+	    any further occurrences are removed.
+	</para>
+	<para>
+	    The 
+	    <citerefentry><refentrytitle>show_dns_domain</refentrytitle><manvolnum>1</manvolnum></citerefentry>
+	    command will show the locations a particular DNS domain is mapped to.
+	</para>
+	<para>
+	    Changes in the DNS search path due to changes in the domain mapping take effect only
+	    when the machine's plenary template is updated. Use the
+	    <citerefentry><refentrytitle>flush</refentrytitle><manvolnum>1</manvolnum></citerefentry>
+	    command to force an update of the machine templates.
+	</para>
+	<para>
+	    Note that the Quattor templates may also alter the DNS search path; such changes are not
+	    known to the broker.
+	</para>
+    </refsection>
+
+    <refsection>
+        <title>Options</title>
+	<variablelist>
+	    <title>Command-specific options</title>
+	    <varlistentry>
+	        <term>
+		    <option>--dns_domain <replaceable>DOMAIN</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			The DNS domain to map to the specified location.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--position <replaceable>POSITION</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			The position of <replaceable>DOMAIN</replaceable> in the list of domains
+			mapped to the same location, if there are more than one such domains. The
+			numbering starts from zero.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--comments <replaceable>COMMENTS</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Short description of this mapping.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	</variablelist>
+	<xi:include href="../common/location_options_desc.xml"/>
+	<xi:include href="../common/global_options_desc.xml"/>
+    </refsection>
+
+    <refsection>
+	<title>Examples</title>
+
+	<example>
+	    <title>Set the DNS search path</title>
+	    <programlisting>
+aq map dns domain --dns_domain other.ms.com --building np
+aq map dns domain --dns_domain one-nyp.ms.com --building np --position 0
+aq map dns domain --dns_domain new-york.ms.com --city ny
+	    </programlisting>
+	    <para>
+		The above commands will cause any hosts in the <literal>np</literal> building to
+		look up unqualified names first in the <literal>one-nyp.ms.com</literal>, then in
+		the <literal>other.ms.com</literal> domain, and finally in the
+		<literal>new-york.ms.com</literal> domain. Other hosts in New York outside the
+		<literal>np</literal> building will search the <literal>new-york.ms.com</literal>
+		domain only.
+	    </para>
+	</example>
+    </refsection>
+
+    <refsection>
+	<title>See also</title>
+	<para>
+	    <citerefentry><refentrytitle>unmap_dns_domain</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>search_dns_domain_map</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>show_dns_domain</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>flush</refentrytitle><manvolnum>1</manvolnum></citerefentry>
+	</para>
+    </refsection>
+</refentry>
+
+<!-- vim: set ai sw=4: -->

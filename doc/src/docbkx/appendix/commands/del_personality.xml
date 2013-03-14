@@ -1,0 +1,80 @@
+<?xml version="1.0"?>
+<refentry version="5.0" xmlns="http://docbook.org/ns/docbook"
+          xml:id="del_personality"
+	  xmlns:xi="http://www.w3.org/2001/XInclude">
+    <refmeta>
+        <refentrytitle>del_personality</refentrytitle>
+        <manvolnum>1</manvolnum>
+        <refmiscinfo class="version"><?eval ${project.version}?></refmiscinfo>
+        <refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
+    </refmeta>
+
+    <refnamediv>
+        <refname>del personality</refname>
+        <refpurpose>
+	    Delete a personality. This command will fail if any hosts are currently using the personality.
+        </refpurpose>
+	<refclass>Aquilon</refclass>
+    </refnamediv>
+
+    <refsynopsisdiv>
+	<cmdsynopsis>
+	    <command>aq del personality</command>
+	    <group>
+		<synopfragmentref linkend="go-aq-del-personality">Global options</synopfragmentref>
+	    </group>
+	    <arg choice="plain"><option>--personality <replaceable>PERSONALITY</replaceable></option></arg>
+	    <arg choice="plain"><option>--archetype <replaceable>ARCHETYPE</replaceable></option></arg>
+            <synopfragment xml:id="go-aq-del-personality">
+              <xi:include href="../common/global_options.xml"/>
+            </synopfragment>
+	</cmdsynopsis>
+    </refsynopsisdiv>
+
+    <refsection>
+        <title>Description</title>
+	<para>
+	    The <command>aq del personality</command> deletes existing personality. This command
+	    will fail if any hosts are currently using the personality.
+	</para>
+    </refsection>
+
+    <refsection>
+        <title>Options</title>
+	<variablelist>
+	    <title>Command-specific options</title>
+	    <varlistentry>
+	        <term>
+		    <option>--personality <replaceable>PERSONALITY</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			The name of the personality to delete.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+                    <option>--archetype <replaceable>ARCHETYPE</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+                        The name of the archteype.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	</variablelist>
+	<xi:include href="../common/global_options_desc.xml"/>
+    </refsection>
+
+    <refsection>
+	<title>See also</title>
+	<para>
+	    <citerefentry><refentrytitle>del_personality</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>add_personality</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>update_personality</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	</para>
+    </refsection>
+</refentry>
+
+<!-- vim: set ai sw=4: -->

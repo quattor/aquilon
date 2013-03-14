@@ -1,0 +1,81 @@
+<?xml version="1.0"?>
+<refentry version="5.0" xmlns="http://docbook.org/ns/docbook"
+          xml:id="del_alias"
+	  xmlns:xi="http://www.w3.org/2001/XInclude">
+    <refmeta>
+        <refentrytitle>del_alias</refentrytitle>
+        <manvolnum>1</manvolnum>
+        <refmiscinfo class="version"><?eval ${project.version}?></refmiscinfo>
+        <refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
+    </refmeta>
+
+    <refnamediv>
+        <refname>del alias</refname>
+        <refpurpose>
+	    Delete a DNS alias
+        </refpurpose>
+	<refclass>Aquilon</refclass>
+    </refnamediv>
+
+    <refsynopsisdiv>
+	<cmdsynopsis>
+	    <command>aq del alias</command>
+	    <group>
+		<synopfragmentref linkend="go-aq-del-alias">Global options</synopfragmentref>
+	    </group>
+	    <arg choice="plain"><option>--fqdn <replaceable>ALIAS</replaceable></option></arg>
+	    <arg choice="opt"><option>--dns_environment <replaceable>ENV</replaceable></option></arg>
+            <synopfragment xml:id="go-aq-del-alias">
+              <xi:include href="../common/global_options.xml"/>
+            </synopfragment>
+	</cmdsynopsis>
+    </refsynopsisdiv>
+
+    <refsection>
+        <title>Description</title>
+	<para>
+	    The <command>aq del alias</command> command deletes a DNS alias (CNAME record).
+	</para>
+    </refsection>
+
+    <refsection>
+        <title>Options</title>
+	<variablelist>
+	    <title>Command-specific options</title>
+	    <varlistentry>
+	        <term>
+		    <option>--fqdn <replaceable>ALIAS</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			The name of the alias to delete.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--dns_environment <replaceable>ENV</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			The name of the DNS environment where the alias lives.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	</variablelist>
+	<xi:include href="../common/global_options_desc.xml"/>
+    </refsection>
+
+    <refsection>
+	<title>See also</title>
+	<para>
+	    <citerefentry><refentrytitle>add_alias</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>update_alias</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>show_alias</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>add_dns_environment</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>search_dns</refentrytitle><manvolnum>1</manvolnum></citerefentry>
+	</para>
+    </refsection>
+</refentry>
+
+<!-- vim: set ai sw=4: -->

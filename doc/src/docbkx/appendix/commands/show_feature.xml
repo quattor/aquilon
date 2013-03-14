@@ -1,0 +1,99 @@
+<?xml version="1.0"?>
+<refentry version="5.0" xmlns="http://docbook.org/ns/docbook"
+          xml:id="show_feature"
+	  xmlns:xi="http://www.w3.org/2001/XInclude">
+    <refmeta>
+        <refentrytitle>show_feature</refentrytitle>
+        <manvolnum>1</manvolnum>
+        <refmiscinfo class="version"><?eval ${project.version}?></refmiscinfo>
+        <refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
+    </refmeta>
+
+    <refnamediv>
+        <refname>show feature</refname>
+        <refpurpose>
+	    Display a feature or all features
+        </refpurpose>
+	<refclass>Aquilon</refclass>
+    </refnamediv>
+
+    <refsynopsisdiv>
+	<cmdsynopsis>
+	    <command>aq show feature</command>
+	    <group>
+		<synopfragmentref linkend="go-aq-show-feature">Global options</synopfragmentref>
+	    </group>
+	    <arg choice="plain"><option>--feature <replaceable>NAME</replaceable></option></arg>
+	    <arg choice="plain"><option>--type <replaceable>TYPE</replaceable></option></arg>
+            <synopfragment xml:id="go-aq-show-feature">
+              <xi:include href="../common/global_options.xml"/>
+            </synopfragment>
+	</cmdsynopsis>
+	<!-- This fails validation, although the documentation of refsynopsisdiv allows
+	     multiple cmdsynopsis sections... The manpage conversion at least works as intended. -->
+	<cmdsynopsis>
+	    <command>aq show feature</command>
+	    <arg choice="plain"><option>--all</option></arg>
+	</cmdsynopsis>
+    </refsynopsisdiv>
+
+    <refsection>
+        <title>Description</title>
+	<para>
+	    The <command>aq show feature</command> command displays a single feature or all features.
+	    The output contains the name and type of the feature, and any objects it is bound to.
+	</para>
+    </refsection>
+
+    <refsection>
+        <title>Options</title>
+	<variablelist>
+	    <title>Command-specific options</title>
+	    <varlistentry>
+	        <term>
+		    <option>--feature <replaceable>NAME</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			The name of the feature to display.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--type <replaceable>TYPE</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			The type of the feature.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--all</option>
+		</term>
+		<listitem>
+		    <para>
+			Display all features.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	</variablelist>
+        <synopfragment xml:id="qo-aq-show-feature">
+          <xi:include href="../common/global_options_desc.xml"/>
+        </synopfragment>
+    </refsection>
+
+    <refsection>
+	<title>See also</title>
+	<para>
+	    <citerefentry><refentrytitle>bind_feature</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>unbind_feature</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>add_feature</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>del_feature</refentrytitle><manvolnum>1</manvolnum></citerefentry>
+	</para>
+    </refsection>
+</refentry>
+
+<!-- vim: set ai sw=4: -->

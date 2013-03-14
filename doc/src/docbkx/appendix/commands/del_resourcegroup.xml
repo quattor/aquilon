@@ -1,0 +1,90 @@
+<?xml version="1.0"?>
+<refentry version="5.0" xmlns="http://docbook.org/ns/docbook"
+          xml:id="del_resourcegroup"
+	  xmlns:xi="http://www.w3.org/2001/XInclude">
+    <refmeta>
+        <refentrytitle>del_resourcegroup</refentrytitle>
+        <manvolnum>1</manvolnum>
+        <refmiscinfo class="version"><?eval ${project.version}?></refmiscinfo>
+        <refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
+    </refmeta>
+
+    <refnamediv>
+        <refname>del resourcegroup</refname>
+        <refpurpose>
+	    Removes a resourcegroup and all the resources its holds.
+        </refpurpose>
+	<refclass>Aquilon</refclass>
+    </refnamediv>
+
+    <refsynopsisdiv>
+	<cmdsynopsis>
+	    <command>aq del resourcegroup </command>
+	    <arg choice="req"><option>--resourcegroup <replaceable>NAME</replaceable></option></arg>
+	    <group>
+          <synopfragmentref linkend="go-aq-del-resourcegroup">Global options</synopfragmentref>
+	    </group>
+            <synopfragment xml:id="go-aq-del-resourcegroup">
+              <xi:include href="../common/global_options.xml"/>
+            </synopfragment>
+	</cmdsynopsis>
+    </refsynopsisdiv>
+
+    <refsection>
+        <title>Description</title>
+	<para>
+	    The <command>aq del_resourcegroup</command> command deletes
+        a resourcegroup and all the resources it holds.
+	</para>
+    </refsection>
+
+    <refsection>
+        <title>Entitlements</title>
+        <para>Requires "operations" role</para>
+    </refsection>
+
+    <refsection>
+        <title>Templates</title>
+        <para>This command will modify the templates for the host or
+	cluster that held this resourcegroup.
+	</para>
+    </refsection>
+
+    <refsection>
+        <title>Options</title>
+	<variablelist>
+	    <title>Command-specific options</title>
+	    <varlistentry>
+	        <term>
+		    <option>--resourcegroup <replaceable>NAME</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			The name of the resourcegroup. This is globally unique so
+			no further qualifer is required.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	</variablelist>
+	<xi:include href="../common/global_options_desc.xml"/>
+    </refsection>
+
+    <refsection>
+	<title>Examples</title>
+	<example>
+	    <title>Delete a resourcegroup and all the resources it holds</title>
+	    <programlisting>
+          aq del_resourcegroup --resourcegroup ny01vvas01
+	    </programlisting>
+	</example>
+    </refsection>
+
+    <refsection>
+	<title>See also</title>
+	<para>
+	    <citerefentry><refentrytitle>del_application</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	</para>
+    </refsection>
+</refentry>
+
+<!-- vim: set ai sw=4: -->

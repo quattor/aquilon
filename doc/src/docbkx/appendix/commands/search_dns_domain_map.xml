@@ -1,0 +1,77 @@
+<?xml version="1.0"?>
+<refentry version="5.0" xmlns="http://docbook.org/ns/docbook"
+          xml:id="search_dns_domain_map"
+	  xmlns:xi="http://www.w3.org/2001/XInclude">
+    <refmeta>
+        <refentrytitle>search_dns_domain_map</refentrytitle>
+        <manvolnum>1</manvolnum>
+        <refmiscinfo class="version"><?eval ${project.version}?></refmiscinfo>
+        <refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
+    </refmeta>
+
+    <refnamediv>
+        <refname>search dns domain map</refname>
+        <refpurpose>
+	    Look up DNS domain mappings based on location
+        </refpurpose>
+	<refclass>Aquilon</refclass>
+    </refnamediv>
+
+    <refsynopsisdiv>
+	<cmdsynopsis>
+	    <command>aq search dns domain map</command>
+	    <group>
+		<synopfragmentref linkend="go-aq-search-dns-domain-map">Global options</synopfragmentref>
+	    </group>
+	    <arg choice="opt"><option>--include_parents</option></arg>
+	    <group>
+		<synopfragmentref linkend="lo-aq-search-dns-domain-map">Location options</synopfragmentref>
+	    </group>
+            <synopfragment xml:id="lo-aq-search-dns-domain-map">
+              <xi:include href="../common/location_options.xml"/>
+            </synopfragment>
+            <synopfragment xml:id="go-aq-search-dns-domain-map">
+              <xi:include href="../common/global_options.xml"/>
+            </synopfragment>
+	</cmdsynopsis>
+    </refsynopsisdiv>
+
+    <refsection>
+        <title>Description</title>
+	<para>
+	    The <command>aq search dns domain map</command> command looks up DNS domains mapped to a
+	    given location.
+	</para>
+    </refsection>
+
+    <refsection>
+        <title>Options</title>
+	<variablelist>
+	    <title>Command-specific options</title>
+	    <varlistentry>
+	        <term>
+		    <option>--include_parents</option>
+		</term>
+		<listitem>
+		    <para>
+			Include all parents of the specified location in the search. If this option
+			is not specified, only DNS domain mapped directly to the given location are
+			included.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	</variablelist>
+	<xi:include href="../common/location_options_desc.xml"/>
+	<xi:include href="../common/global_options_desc.xml"/>
+    </refsection>
+
+    <refsection>
+	<title>See also</title>
+	<para>
+	    <citerefentry><refentrytitle>map_dns_domain</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>unmap_dns_domain</refentrytitle><manvolnum>1</manvolnum></citerefentry>
+	</para>
+    </refsection>
+</refentry>
+
+<!-- vim: set ai sw=4: -->

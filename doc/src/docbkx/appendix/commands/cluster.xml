@@ -1,0 +1,148 @@
+<?xml version="1.0"?>
+<refentry version="5.0" xmlns="http://docbook.org/ns/docbook"
+          xml:id="cluster"
+	  xmlns:xi="http://www.w3.org/2001/XInclude">
+    <refmeta>
+        <refentrytitle>cluster</refentrytitle>
+        <manvolnum>1</manvolnum>
+        <refmiscinfo class="version"><?eval ${project.version}?></refmiscinfo>
+        <refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
+    </refmeta>
+
+    <refnamediv>
+        <refname>cluster</refname>
+        <refpurpose>
+	    Add hosts to a cluster
+        </refpurpose>
+	<refclass>Aquilon</refclass>
+    </refnamediv>
+
+    <refsynopsisdiv>
+	<cmdsynopsis>
+	    <command>aq cluster </command>
+	    <arg choice="req"><option>--hostname <replaceable>HOSTNAME</replaceable></option></arg>
+	    <arg choice="req"><option>--cluster <replaceable>CLUSTER</replaceable></option></arg>
+	    <arg choice="opt"><option>--personality <replaceable>PERSONALITY</replaceable></option></arg>
+	    <group>
+		<synopfragmentref linkend="go-aq-cluster">Global options</synopfragmentref>
+	    </group>
+            <synopfragment xml:id="go-aq-cluster">
+              <xi:include href="../common/global_options.xml"/>
+            </synopfragment>
+	</cmdsynopsis>
+    </refsynopsisdiv>
+
+    <refsection>
+        <title>Description</title>
+	<para>
+	    The <command>aq cluster</command> command adds a host to a cluster.
+	    The host will be removed from any current clusters it is currently
+	    a member.  The cluster may impose restrictions on membership.
+	    Any restrictions will
+	    be displayed via the <command>aq show cluster</command> command.
+	    One restriction is the allowed
+	    personalities that are permitted within a cluster,
+	    however the personality may not make any sense outside
+	    of a cluster context.
+	    Therefore you can specify
+	    a new personality for the host on entry into the cluster,
+	    and also when leaving the cluster via the
+	    <command>aq uncluster</command> command.
+	</para>
+	<para>
+	    Another restriction that can be imposed on hosts is to enforce
+	    common service bindings across all member hosts. Such services
+	    are shown as "cluster aligned services" in the output of
+	    <command>show cluster</command>. By adding a host into a cluster,
+	    this may cause existing service bindings of the host to be
+	    modified to match cluster aligned services.
+	</para>
+	<para>
+	    In the same way as a host has a buildstatus reflecting its
+	    lifecycle status, a cluster also has a buildstatus.
+	    Adding a host into a cluster may change the
+	    buildstatus of the host to match the cluster.
+	    If the cluster is "ready" and the host is "almostready"
+	    then the host will be immediately promoted to "ready".
+	    If the cluster is not "ready" but the host is,
+	    then the host will be immediately demoted to "almostready".
+	    This has the effect of making the cluster buildstatus
+	    as a barrier for promoting hosts -
+	    hosts will only be promoted when the cluster
+	    as a whole is marked "ready".
+        </para>
+    </refsection>
+
+    <refsection>
+        <title>Entitlements</title>
+        <para>Requires "operations" role</para>
+    </refsection>
+
+    <refsection>
+        <title>Templates</title>
+        <para>This command will modify the templates for both the cluster
+	itself and for the new host(s). Also, if any service bindings
+	are changed then the service templates will be
+	modified.</para>
+    </refsection>
+
+    <refsection>
+        <title>Options</title>
+	<variablelist>
+	    <title>Command-specific options</title>
+	    <varlistentry>
+	        <term>
+		    <option>--hostname <replaceable>HOSTNAME</replaceable></option>,
+		</term>
+		<listitem>
+		    <para>
+		        Specify the host which you wish to add to the cluster.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--cluster <replaceable>CLUSTER</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			The name of the cluster to which the host should be added.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--personality <replaceable>PERSONALITY</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			The name of the personality that should be given to
+			the host.
+			If the operation fails,
+			then the previous personality will remain on the host.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	</variablelist>
+	<xi:include href="../common/global_options_desc.xml"/>
+    </refsection>
+
+    <refsection>
+	<title>Examples</title>
+	<example>
+	    <title>Cluster a host</title>
+	    <programlisting>
+aq cluster --hostname foo.example.com --cluster grid1
+	    </programlisting>
+	</example>
+    </refsection>
+
+    <refsection>
+	<title>See also</title>
+	<para>
+	    <citerefentry><refentrytitle>uncluster</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	</para>
+    </refsection>
+</refentry>
+
+<!-- vim: set ai sw=4: -->

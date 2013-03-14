@@ -1,0 +1,92 @@
+<?xml version="1.0"?>
+<variablelist version="5.0" xmlns="http://docbook.org/ns/docbook">
+    <title>IP address options</title>
+    <varlistentry>
+    <term>
+	<option>--ip <replaceable>IPADDR</replaceable></option>
+    </term>
+    <listitem>
+	<para>
+	    Always use the specified IP address <replaceable>IPADDR</replaceable>.
+	</para>
+    </listitem>
+    </varlistentry>
+    <varlistentry>
+    <term>
+	<option>--ipalgorithm <replaceable>ALGO</replaceable></option>
+    </term>
+    <listitem>
+	<para>
+	    Algorithm to use when generating an IP address. The following algorithms are available:
+	</para>
+	<variablelist>
+	    <varlistentry>
+		<term>lowest</term>
+		<listitem><para>
+		    Use the lowest available IP in the subnet. If there is
+		    a hole in the range of IP addresses in use, this
+		    algorithm will fill the hole.
+		</para></listitem>
+	    </varlistentry>
+	    <varlistentry>
+		<term>highest</term>
+		<listitem><para>
+		    Use the highest available IP in the subnet. Repeated
+		    use means allocating the IP addresses backwards.
+		</para></listitem>
+	    </varlistentry>
+	    <varlistentry>
+		<term>max</term>
+		<listitem><para>
+		    Use the highest IP address in use and add one. Using it
+		    repeatedly means allocating IP addresses in numerical
+		    order, but not filling any holes.
+		</para></listitem>
+	    </varlistentry>
+	</variablelist>
+	<para>
+	    The default value for <replaceable>ALGO</replaceable> is <literal>lowest</literal>.
+	</para>
+    </listitem>
+    </varlistentry>
+    <varlistentry>
+    <term>
+	<option>--ipfromip <replaceable>IPADDR</replaceable></option>
+    </term>
+    <listitem>
+	<para>
+	    Choose a free IP address from the network containing <replaceable>IPADDR</replaceable>.
+	    Use the <option>--ipalgorithm</option> option to tell how the address should
+	    be selected from the addresses available in the network.
+	</para>
+    </listitem>
+    </varlistentry>
+    <varlistentry>
+    <term>
+	<option>--ipfromsystem <replaceable>FQDN</replaceable></option>
+    </term>
+    <listitem>
+	<para>
+	    Choose a free IP address from the network containing <replaceable>FQDN</replaceable>.
+	    Use the <option>--ipalgorithm</option> option to tell how the address should
+	    be selected from the addresses available in the network.
+	</para>
+    </listitem>
+    </varlistentry>
+    <varlistentry>
+    <term>
+	<option>--autoip</option>
+    </term>
+    <listitem>
+	<para>
+	    Check the switch discovery tables and determine the network to use based on
+	    which switch port saw the MAC address of the interface. The discovery tables
+	    can be updated using the <command>poll switch</command> command.
+	    Use the <option>--ipalgorithm</option> option to tell how the address should
+	    be selected from the addresses available in the network.
+	</para>
+    </listitem>
+    </varlistentry>
+</variablelist>
+
+<!-- vim: set ai sw=4: -->

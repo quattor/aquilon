@@ -1,0 +1,125 @@
+<?xml version="1.0"?>
+<refentry version="5.0" xmlns="http://docbook.org/ns/docbook"
+          xml:id="del_static_route"
+	  xmlns:xi="http://www.w3.org/2001/XInclude">
+    <refmeta>
+        <refentrytitle>del_static_route</refentrytitle>
+        <manvolnum>1</manvolnum>
+        <refmiscinfo class="version"><?eval ${project.version}?></refmiscinfo>
+        <refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
+    </refmeta>
+
+    <refnamediv>
+        <refname>del static route</refname>
+        <refpurpose>
+	    Deletes a static route
+        </refpurpose>
+	<refclass>Aquilon</refclass>
+    </refnamediv>
+
+    <refsynopsisdiv>
+	<cmdsynopsis>
+	    <command>aq del static route</command>
+	    <group>
+		<synopfragmentref linkend="go-aq-del-static-route">Global options</synopfragmentref>
+	    </group>
+	    <arg choice="plain"><option>--gateway <replaceable>GW</replaceable></option></arg>
+	    <arg choice="plain"><option>--ip <replaceable>IP</replaceable></option></arg>
+	    <group choice="req">
+	        <arg choice="plain"><option>--netmask <replaceable>MASK</replaceable></option></arg>
+	        <arg choice="plain"><option>--prefixlen <replaceable>PREFIX</replaceable></option></arg>
+	    </group>
+	    <arg choice="opt"><option>--network_environment <replaceable>NETENV</replaceable></option></arg>
+            <synopfragment xml:id="go-aq-del-static-route">
+              <xi:include href="../common/global_options.xml"/>
+            </synopfragment>
+	</cmdsynopsis>
+    </refsynopsisdiv>
+
+    <refsection>
+        <title>Description</title>
+	<para>
+	    The <command>aq del static route</command> command deletes a static route.
+	</para>
+	<para>
+	    Note that this command does not update the profiles of affected hosts. You have
+	    to run the <command>aq make</command> for all affected hosts.
+	</para>
+    </refsection>
+
+    <refsection>
+        <title>Options</title>
+	<variablelist>
+	    <title>Command-specific options</title>
+	    <varlistentry>
+	        <term>
+		    <option>--gateway <replaceable>GW</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			IP address of the gateway that routes the traffic to the destination.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--ip <replaceable>IP</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Address of the destination range. Together with <option>--netmask</option>
+			or <option>--prefixlen</option>, it defines the destination IP address range
+			which should be routed through <replaceable>GW</replaceable>.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--netmask <replaceable>MASK</replaceable></option>,
+		    <option>--prefixlen <replaceable>PREFIX</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Define the netmask of the destination either as a dotted quad using
+			<option>--netmask</option>, or as a prefix length using
+			<option>--prefixlen</option>.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--network_environment <replaceable>NETENV</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Defines the network environment where this route is valid. The default is
+			defined by the <literal>default_network_environment</literal> key in the
+			<literal>site</literal> section of the broker's configuration.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	</variablelist>
+	<xi:include href="../common/global_options_desc.xml"/>
+    </refsection>
+
+    <refsection>
+	<title>Examples</title>
+	<example>
+	    <title>Delete a static route</title>
+	    <programlisting>
+aq del static route --gateway 192.168.0.1 --ip 192.168.1.0 --prefixlen 24
+	    </programlisting>
+	</example>
+    </refsection>
+
+    <refsection>
+	<title>See also</title>
+	<para>
+	    <citerefentry><refentrytitle>add_static_route</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>show_network</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>show_host</refentrytitle><manvolnum>1</manvolnum></citerefentry>
+	</para>
+    </refsection>
+</refentry>
+
+<!-- vim: set ai sw=4: -->

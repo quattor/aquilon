@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<appendix version="5.0" xml:id="appendix-commands"
+          xmlns="http://docbook.org/ns/docbook"
+          xmlns:xlink="http://www.w3.org/1999/xlink"
+          xmlns:xi="http://www.w3.org/2001/XInclude"
+          xmlns:svg="http://www.w3.org/2000/svg"
+          xmlns:mml="http://www.w3.org/1998/Math/MathML"
+          xmlns:html="http://www.w3.org/1999/xhtml"
+          xmlns:db="http://docbook.org/ns/docbook">
+  <title>Command Reference</title>
+
+  <para>Aquilon command reference.</para>
+
+  <xi:include href="commands/add_alias.xml" xpointer="element(/1)" />
+  <xi:include href="commands/add_application.xml" xpointer="element(/1)" />
+  <xi:include href="commands/add_cluster.xml" xpointer="element(/1)" />
+  <xi:include href="commands/add_dns_environment.xml" xpointer="element(/1)" />
+  <xi:include href="commands/add_feature.xml" xpointer="element(/1)" />
+  <xi:include href="commands/add_filesystem.xml" xpointer="element(/1)" />
+  <xi:include href="commands/add_hostlink.xml" xpointer="element(/1)" />
+
+  <xi:include href="commands/add_interface_address.xml" xpointer="element(/1)" />
+
+  <xi:include href="commands/add_intervention.xml" xpointer="element(/1)" />
+  <xi:include href="commands/add_network_environment.xml" xpointer="element(/1)" />
+  <xi:include href="commands/add_personality.xml" xpointer="element(/1)" />
+  <xi:include href="commands/add_reboot_intervention.xml" xpointer="element(/1)" />
+  <xi:include href="commands/add_reboot_schedule.xml" xpointer="element(/1)" />
+  <xi:include href="commands/add_resourcegroup.xml" xpointer="element(/1)" />
+  <xi:include href="commands/add_static_route.xml" xpointer="element(/1)" />
+  <xi:include href="commands/bind_feature.xml" xpointer="element(/1)" />
+  <xi:include href="commands/cat.xml" xpointer="element(/1)" />
+  <xi:include href="commands/cluster.xml" xpointer="element(/1)" />
+  <xi:include href="commands/del_alias.xml" xpointer="element(/1)" />
+  <xi:include href="commands/del_application.xml" xpointer="element(/1)" />
+  <xi:include href="commands/del_dns_environment.xml" xpointer="element(/1)" />
+  <xi:include href="commands/del_feature.xml" xpointer="element(/1)" />
+  <xi:include href="commands/del_filesystem.xml" xpointer="element(/1)" />
+  <xi:include href="commands/del_hostlink.xml" xpointer="element(/1)" />
+  <xi:include href="commands/del_intervention.xml" xpointer="element(/1)" />
+  <xi:include href="commands/del_network_environment.xml" xpointer="element(/1)" />
+  <xi:include href="commands/del_personality.xml" xpointer="element(/1)" />
+  <xi:include href="commands/del_reboot_intervention.xml" xpointer="element(/1)" />
+  <xi:include href="commands/del_reboot_schedule.xml" xpointer="element(/1)" />
+  <xi:include href="commands/del_resourcegroup.xml" xpointer="element(/1)" />
+  <xi:include href="commands/del_static_route.xml" xpointer="element(/1)" />
+  <xi:include href="commands/manage.xml" xpointer="element(/1)" />
+  <xi:include href="commands/map_dns_domain.xml" xpointer="element(/1)" />
+  <xi:include href="commands/merge_network.xml" xpointer="element(/1)" />
+  <xi:include href="commands/reconfigure.xml" xpointer="element(/1)" />
+
+  <xi:include href="commands/search_audit.xml" xpointer="element(/1)" />
+
+  <xi:include href="commands/search_cluster.xml" xpointer="element(/1)" />
+  <xi:include href="commands/search_dns_domain_map.xml" xpointer="element(/1)" />
+  <xi:include href="commands/search_network_environment.xml" xpointer="element(/1)" />
+  <xi:include href="commands/show_alias.xml" xpointer="element(/1)" />
+  <xi:include href="commands/show_dns_environment.xml" xpointer="element(/1)" />
+  <xi:include href="commands/show_feature.xml" xpointer="element(/1)" />
+  <xi:include href="commands/show_network_environment.xml" xpointer="element(/1)" />
+  <xi:include href="commands/split_network.xml" xpointer="element(/1)" />
+  <xi:include href="commands/unbind_feature.xml" xpointer="element(/1)" />
+  <xi:include href="commands/uncluster.xml" xpointer="element(/1)" />
+  <xi:include href="commands/unmap_dns_domain.xml" xpointer="element(/1)" />
+  <xi:include href="commands/update_alias.xml" xpointer="element(/1)" />
+  <xi:include href="commands/update_network_environment.xml" xpointer="element(/1)" />
+  <xi:include href="commands/update_personality.xml" xpointer="element(/1)" />
+
+
+  <!-- vim: set ai sw=4: -->
+</appendix>

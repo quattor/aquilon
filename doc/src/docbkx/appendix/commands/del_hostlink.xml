@@ -1,0 +1,125 @@
+<?xml version="1.0"?>
+<refentry version="5.0" xmlns="http://docbook.org/ns/docbook"
+          xml:id="del_hostlink"
+	  xmlns:xi="http://www.w3.org/2001/XInclude">
+    <refmeta>
+        <refentrytitle>del_hostlink</refentrytitle>
+        <manvolnum>1</manvolnum>
+        <refmiscinfo class="version"><?eval ${project.version}?></refmiscinfo>
+        <refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
+    </refmeta>
+
+    <refnamediv>
+        <refname>del hostlink</refname>
+        <refpurpose>
+	    Removes a hostlink resource from a host or cluster
+        </refpurpose>
+	<refclass>Aquilon</refclass>
+    </refnamediv>
+
+    <refsynopsisdiv>
+	<cmdsynopsis>
+	    <command>aq del hostlink </command>
+	    <group>
+	      <arg choice="req"><option>--hostname <replaceable>HOSTNAME</replaceable></option></arg>
+	      <arg choice="req"><option>--cluster <replaceable>CLUSTER</replaceable></option></arg>
+	      <arg choice="req"><option>--resourcegroup <replaceable>RESOURCEGROUP</replaceable></option></arg>
+        </group>
+	    <arg choice="req"><option>--hostlink <replaceable>NAME</replaceable></option></arg>
+	    <group>
+		<synopfragmentref linkend="go-aq-del-hostlink">Global options</synopfragmentref>
+	    </group>
+            <synopfragment xml:id="go-aq-del-hostlink">
+              <xi:include href="../common/global_options.xml"/>
+            </synopfragment>
+	</cmdsynopsis>
+    </refsynopsisdiv>
+
+    <refsection>
+        <title>Description</title>
+	<para>
+	    The <command>aq del_hostlink</command> command removes a
+	    hostlink resource from a host or a cluster.
+	</para>
+    </refsection>
+
+    <refsection>
+        <title>Entitlements</title>
+        <para>Requires "operations" role</para>
+    </refsection>
+
+    <refsection>
+        <title>Templates</title>
+        <para>This command will modify the templates for the host or
+	cluster (depending on which option was given) and remove the resource
+	template for the hostlink itself.
+	</para>
+    </refsection>
+
+    <refsection>
+        <title>Options</title>
+	<variablelist>
+	    <title>Command-specific options</title>
+	    <varlistentry>
+	        <term>
+		    <option>--hostname <replaceable>HOSTNAME</replaceable></option>,
+		</term>
+		<listitem>
+		    <para>
+		        Specify the target host of the hostlink.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--cluster <replaceable>CLUSTER</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			The name of the target cluster of the hostlink.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--resourcegroup <replaceable>RESOURCEGROUP</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			The name of the target resourcegroup of the hostlink.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--hostlink <replaceable>NAME</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			The name of the hostlink.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	</variablelist>
+	<xi:include href="../common/global_options_desc.xml"/>
+    </refsection>
+
+    <refsection>
+	<title>Examples</title>
+	<example>
+	    <title>Removing an hostlink from a host</title>
+	    <programlisting>
+aq del_hostlink --hostname foo.example.com --hostlink ftp
+	    </programlisting>
+	</example>
+    </refsection>
+
+    <refsection>
+	<title>See also</title>
+	<para>
+	    <citerefentry><refentrytitle>add_hostlink</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	</para>
+    </refsection>
+</refentry>
+
+<!-- vim: set ai sw=4: -->
