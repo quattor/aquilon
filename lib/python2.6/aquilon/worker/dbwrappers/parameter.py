@@ -60,11 +60,11 @@ def get_parameter_holder(session, archetype=None, personality=None,
 
     return db_param_holder
 
-def get_feature_link (session, feature, model, interface, personality):
+def get_feature_link (session, feature, model, interface_name, personality):
     dblink = None
     dbmodel = None
     feature_type = 'host'
-    if interface:
+    if interface_name:
        feature_type = 'interface'
     if model:
        feature_type = 'hardware'
@@ -74,13 +74,13 @@ def get_feature_link (session, feature, model, interface, personality):
     dbfeature = Feature.get_unique(session, name=feature,
                                    feature_type=feature_type, compel=True)
     dblink = FeatureLink.get_unique(session, feature=dbfeature,
-                                    interface_name=interface,
+                                    interface_name=interface_name,
                                     model=dbmodel, personality=personality,
                                     compel=True)
     return dblink
 
 
-def set_parameter(session, param_holder, feature, model, interface,
+def set_parameter(session, param_holder, feature, model, interface_name,
                   path, value, compel=False, preclude=False):
     """
         Handles add parameter as well as update parameter. Parmeters for features
@@ -98,7 +98,7 @@ def set_parameter(session, param_holder, feature, model, interface,
 
     dblink = None
     if feature:
-        dblink = get_feature_link(session, feature, model, interface,
+        dblink = get_feature_link(session, feature, model, interface_name,
                                   param_holder.personality)
 
     retval, param_def = validate_parameter(session, path, value, param_holder, dblink)
@@ -110,13 +110,13 @@ def set_parameter(session, param_holder, feature, model, interface,
     return dbparameter
 
 
-def del_parameter(session, path, param_holder, feature=None, model=None, interface=None):
+def del_parameter(session, path, param_holder, feature=None, model=None, interface_name=None):
     dbparameter = Parameter.get_unique(session, holder=param_holder,
                                        compel=True)
 
     dblink = None
     if feature:
-        dblink = get_feature_link(session, feature, model, interface,
+        dblink = get_feature_link(session, feature, model, interface_name,
                                   param_holder.personality)
 
     match = get_paramdef_for_parameter(session, path, param_holder, dblink)
@@ -128,6 +128,37 @@ def del_parameter(session, path, param_holder, feature=None, model=None, interfa
         path = Parameter.feature_path(dblink, path)
     dbparameter.del_path(path)
     return dbparameter
+
+def del_all_feature_parameter(session, dblink):
+
+    if not dblink:
+        return
+
+    paramdef_holder = None
+    param_definitions = None
+    if dblink:
+        paramdef_holder = dblink.feature.paramdef_holder
+        if paramdef_holder:
+            param_definitions = paramdef_holder.param_definitions
+
+    if not param_definitions:
+        return
+
+    dbparams = get_parameters(session, archetype=None,
+                              personality=dblink.personality)
+
+    if not dbparams:
+        return
+
+    for paramdef in param_definitions:
+        for dbparam in dbparams:
+            if paramdef.rebuild_required:
+                validate_rebuild_required(session, paramdef.path, dbparam.holder)
+
+            dbparam.del_path(Parameter.feature_path(dblink, paramdef.path),
+                             compel=False)
+
+    return
 
 
 def validate_value(label, value_type, value):

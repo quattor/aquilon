@@ -403,14 +403,11 @@ class TestParameterFeature(TestBrokerCommand):
         self.searchoutput(out, r'"shinynew": {\s*'
                                r'"car": "audihost"', cmd)
 
-    def test_910_del_host_featue_params(self):
+    def test_910_del_host_featue_param(self):
         cmd = DEL_CMD + ["--path=teststring", "--feature", HOSTFEATURE]
         self.noouttest(cmd)
 
-        cmd = DEL_CMD + ["--path=testlist", "--feature", HOSTFEATURE]
-        self.noouttest(cmd)
-
-    def test_915_del_host_featue(self):
+    def test_915_unbind_host_featue(self):
         cmd = ["unbind_feature", "--feature", HOSTFEATURE, "--personality", PERSONALITY]
         self.ignoreoutputtest(cmd)
 
@@ -421,10 +418,7 @@ class TestParameterFeature(TestBrokerCommand):
         cmd = DEL_CMD + ["--path=teststring", "--feature", HARDWAREFEATURE, "--model", "hs21-8853l5u"]
         self.noouttest(cmd)
 
-        cmd = DEL_CMD + ["--path=testlist", "--feature", HARDWAREFEATURE, "--model", "hs21-8853l5u"]
-        self.noouttest(cmd)
-
-    def test_925_del_hardware_feature(self):
+    def test_925_unbind_hardware_feature(self):
         cmd = ["unbind_feature", "--feature", HARDWAREFEATURE, "--personality", PERSONALITY,
                "--archetype", ARCHETYPE, "--justification=tcm=12345678", "--model", "hs21-8853l5u"]
         self.ignoreoutputtest(cmd)
@@ -436,13 +430,7 @@ class TestParameterFeature(TestBrokerCommand):
         cmd = DEL_CMD + ["--path=teststring", "--feature", INTERFACEFEATURE, "--interface=eth0"]
         self.noouttest(cmd)
 
-        cmd = DEL_CMD + ["--path=testlist", "--feature", INTERFACEFEATURE, "--interface=eth0"]
-        self.noouttest(cmd)
-
-        cmd = DEL_CMD + ["--path=teststring", "--feature", INTERFACEFEATURE, "--interface=eth1"]
-        self.noouttest(cmd)
-
-    def test_940_del_interface_feature(self):
+    def test_935_del_interface_feature(self):
         cmd = ["unbind_feature", "--feature", INTERFACEFEATURE,"--interface", "eth0",
                "--personality", PERSONALITY]
         self.ignoreoutputtest(cmd)

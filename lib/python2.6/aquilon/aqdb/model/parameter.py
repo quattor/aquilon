@@ -225,11 +225,14 @@ class Parameter(Base):
         except KeyError:
             raise NotFoundException("No parameter of path=%s defined." % path)
 
-    def del_path(self, path):
+    def del_path(self, path, compel=True):
         """ delete parameter specified at a path """
 
         if not self.value:
-            raise NotFoundException("No parameter of path=%s defined." % path)
+            if compel:
+                raise NotFoundException("No parameter of path=%s defined." % path)
+            return
+
         pparts = Parameter.path_parts(path)
         try:
             ## delete the specified path
@@ -248,8 +251,9 @@ class Parameter(Base):
             ## coerce mutation of parameter since sqlalchemy
             ## cannot recognize parameter change
             self.value.changed()  # pylint: disable=E1101
-        except KeyError:
-            raise NotFoundException("No parameter of path=%s defined." % path)
+        except:
+            if compel:
+                raise NotFoundException("No parameter of path=%s defined." % path)
 
     @staticmethod
     def flatten(data, key="", path="", flattened=None):
