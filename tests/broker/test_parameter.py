@@ -509,7 +509,7 @@ class TestParameter(TestBrokerCommand):
         command = DEL_CMD + ["--path", path]
         err = self.noouttest(command)
 
-        path = "esp"
+        path = "esp/"
         command = DEL_CMD + ["--path", path]
         err = self.noouttest(command)
 

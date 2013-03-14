@@ -136,9 +136,11 @@ class Parameter(Base):
         """
         pparts = path.split(PATH_SEP)
 
-        # ignore the leading slash
+        # ignore the leading and trailing slash
         if pparts[0] == "":
             pparts = pparts[1:]
+        if pparts[-1] == "":
+            pparts = pparts[:-1]
         return pparts
 
     @staticmethod
