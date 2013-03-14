@@ -207,3 +207,18 @@ git daemon --export-all --base-path=/var /var/quattor/template-king/ &
 ```bash
 python2.6 /opt/aquilon/bin/twistd.py --logfile=/var/log/aqd.log aqd
 ```
+
+Building and Packaging
+----------------------
+
+To build and package the software and documentation, use the following
+command:
+
+```bash
+mvn clean install
+```
+
+This will remove the results of any previous build, rebuild
+everything, and package the results.
+
+Note that only part of the build has been automated with maven.

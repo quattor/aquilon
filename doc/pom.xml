@@ -72,24 +72,13 @@
               <epubNcxDepth>2</epubNcxDepth>
               <htmlStylesheet>pan.css</htmlStylesheet>
               <preProcess>
-                <copy todir="${project.build.directory}/docbkx/epub/pan-book/images">
+                <copy todir="${project.build.directory}/docbkx/epub/aq-book/images">
                   <fileset dir="src/docbkx/images">
                     <include name="**/*.png" />
                   </fileset>
-                 </copy>
-		 <!--
-                <copy todir="${project.build.directory}/docbkx/epub/pan-tutorial/images">
-                  <fileset dir="src/docbkx/images">
-                    <include name="**/hello.png" />
-                  </fileset>
-                 </copy>
-		 -->
-                 <copy todir="${project.build.directory}/docbkx/epub/pan-book/" file="src/docbkx/pan.css">
-                 </copy>
-		 <!--
-                 <copy todir="${project.build.directory}/docbkx/epub/pan-tutorial/" file="src/docbkx/pan.css">
-                 </copy>
-		 -->
+                </copy>
+                <copy todir="${project.build.directory}/docbkx/epub/aq-book/" file="src/docbkx/pan.css"/>
+                <copy todir="${project.build.directory}/docbkx/html/" file="src/docbkx/pan.css" />
               </preProcess>
             </configuration>
             <phase>prepare-package</phase>
