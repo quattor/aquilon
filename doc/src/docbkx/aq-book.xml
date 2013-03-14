@@ -121,12 +121,12 @@
     supported; NetApp filers are under development.</para>
 
     <para>For the host being managed by Aquilon, there is an operating
-    environment that takes advantage of the Aquilon configuration system and
-    presents features to the client application. For example, we provide a
-    Linux build based on Red Hat’s enterprise distribution. This Linux
-    environment presents features such as Lemon monitoring and AFS application
-    distribution. This Linux build is also named Aquilon. Other managed hosts
-    may have alternately named builds.</para>
+    environment that takes advantage of the Aquilon configuration
+    system and presents features to the client application. For
+    example, we provide a Linux build based on Red Hat’s enterprise
+    distribution. This Linux environment presents features such as
+    Lemon monitoring. This Linux build is also named Aquilon. Other
+    managed hosts may have alternately named builds.</para>
 
     <para>Aquilon is a management layer that sits above Quattor<footnote>
         <para>Quattor is an open-source product originally developed at CERN
@@ -166,10 +166,7 @@
         <listitem>
           <para>The modeling of distributed services provides rudimentary
           capacity planning of the infrastructure across the plant and
-          explicit descriptions of how services are deployed. For example, we
-          know how many clients have been configured to use any specific AFS
-          cell and the system will evenly spread the clients between all the
-          relevant servers.</para>
+          explicit descriptions of how services are deployed.</para>
         </listitem>
 
         <listitem>
@@ -190,8 +187,7 @@
 
         <listitem>
           <para>A hierarchical location model allowing location-specific
-          attributes (use a New York AFS server if the client is in New York)
-          to be easily specified.</para>
+          attributes to be easily specified.</para>
         </listitem>
       </itemizedlist>
     </section>
@@ -273,8 +269,9 @@
           </listitem>
 
           <listitem>
-            <para>Much more including specialized configuration for AFS,
-            iptables, networking, http servers, NFS services, etc.</para>
+            <para>Much more including specialized configuration for
+            iptables, networking, http servers, NFS services,
+            etc.</para>
           </listitem>
         </itemizedlist>
       </section>
@@ -323,10 +320,10 @@
           </listitem>
 
           <listitem>
-            <para>An entitlement model that restricts access to functionality.
-            This is a simplistic role-based modeling in the early releases,
-            but future releases will provide more complex entitlement rules by
-            using Opal.</para>
+            <para>An entitlement model that restricts access to
+            functionality.  This is a simplistic role-based modeling
+            in the early releases, but future releases may provide
+            more complex entitlement rules.</para>
           </listitem>
 
           <listitem>
@@ -340,11 +337,6 @@
             automation of host installation.</para>
           </listitem>
 
-          <listitem>
-            <para>A modified template library that includes the standard QWG
-            functionality and adds functionality tailored to Morgan Stanley
-            use-cases.</para>
-          </listitem>
         </itemizedlist>
       </section>
 
@@ -424,15 +416,12 @@
       <section>
         <title>Monitoring</title>
 
-        <para>The Linux build of Aquilon provides monitoring by way of the
-        Lemon system. Lemon configuration is fully integrated with Quattor
-        which means that the specific pieces to monitor are defined by
-        template and personality. Lemon’s advantage over perfdata is the
-        facility for aggregation of metrics to present a view of utilization
-        over an entire grid. Lemon does not provide as much detailed
-        information (at the host level) as PerfData. The Lemon agents that run
-        on the managed host are installed with RPMs and are not pulled from
-        AFS. Lemon provides metrics, sensors, exceptions and actuators.</para>
+        <para>The Linux build of Aquilon provides monitoring by way of
+        the Lemon system. Lemon configuration is fully integrated with
+        Quattor which means that the specific pieces to monitor are
+        defined by template and personality.  The Lemon agents that
+        run on the managed host are installed with RPMs. Lemon
+        provides metrics, sensors, exceptions and actuators.</para>
 
         <itemizedlist>
           <listitem>
@@ -484,26 +473,26 @@
             in the system preventing such usage and there are benefits to
             doing so (the same benefits that drove the usage of Quattor for
             infrastructure). No effort has been made to develop this
-            possibility, since the runtime con- figuration is typically
+            possibility, since the runtime configuration is typically
             already managed by more domain-specific tooling.</para>
           </listitem>
 
           <listitem>
-            <para>The Aquilon/Linux build installs the operating system
-            locally, however applications (including some infrastructure
-            services)are still expected to be distributed and run from AFS
-            (i.e. /ms/dist). If an application wants to run their application
-            from the local disk, they can provide a RPM and this will work as
-            expected. No dependency management or tooling is provided to
-            assist in such a configuration and there are some unresolved
-            issues around tracking software in use and dependency conflicts.
-            Extreme differences in configuration will cause an impact on the
-            supportability of Aquilon managed hosts. If a host has different
-            RPM installations to “the norm”, then system administrators lose
-            many of the advantages arising from homogenous environments: every
-            outage investigation must begin with discovering the configuration
-            of the host. This problem increases with the number of variations
-            in host profiles: every new personality adds to the support
+            <para>The Aquilon/Linux build installs the operating
+            system locally.  If an application wants to run their
+            application from the local disk, they can provide a RPM
+            and this will work as expected. No dependency management
+            or tooling is provided to assist in such a configuration
+            and there are some unresolved issues around tracking
+            software in use and dependency conflicts.  Extreme
+            differences in configuration will cause an impact on the
+            supportability of Aquilon managed hosts. If a host has
+            different RPM installations to “the norm”, then system
+            administrators lose many of the advantages arising from
+            homogenous environments: every outage investigation must
+            begin with discovering the configuration of the host. This
+            problem increases with the number of variations in host
+            profiles: every new personality adds to the support
             burden.</para>
           </listitem>
 
