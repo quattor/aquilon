@@ -16,6 +16,7 @@
 # limitations under the License.
 """ResourceGroup Resource formatter."""
 
+from operator import attrgetter
 
 from aquilon.worker.formats.formatters import ObjectFormatter
 from aquilon.worker.formats.resource import ResourceFormatter
@@ -31,7 +32,8 @@ class ResourceGroupFormatter(ResourceFormatter):
             details.append(indent + "  Type: %s" % rg.required_type)
 
         if rg.resholder:
-            for resource in rg.resholder.resources:
+            for resource in sorted(rg.resholder.resources,
+                                   key=attrgetter('resource_type', 'name')):
                 details.append(self.redirect_raw(resource, indent + "  "))
 
         return details

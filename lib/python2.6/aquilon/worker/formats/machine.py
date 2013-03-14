@@ -16,6 +16,8 @@
 # limitations under the License.
 """Machine formatter."""
 
+from operator import attrgetter
+
 from aquilon.aqdb.model import Machine, Location
 from aquilon.worker.formats.formatters import ObjectFormatter
 from aquilon.worker.formats.list import ListFormatter
@@ -123,7 +125,8 @@ class MachineFormatter(ObjectFormatter):
                                .format(host.cluster))
             if host.resholder and host.resholder.resources:
                 details.append(indent + "  Resources:")
-                for resource in host.resholder.resources:
+                for resource in sorted(host.resholder.resources,
+                                       key=attrgetter('resource_type', 'name')):
                     details.append(self.redirect_raw(resource, indent + "    "))
 
             # TODO: supress features when redirecting personality/archetype
