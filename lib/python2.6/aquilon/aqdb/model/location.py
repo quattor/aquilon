@@ -20,7 +20,8 @@ from datetime import datetime
 from sqlalchemy import (Integer, DateTime, Sequence, String, Column,
                         ForeignKey, UniqueConstraint)
 
-from sqlalchemy.orm import relation, backref, object_session, deferred
+from sqlalchemy.orm import (relation, backref, object_session, deferred,
+                            reconstructor)
 from sqlalchemy.sql import and_, or_, desc
 
 from aquilon.aqdb.model import Base, DnsDomain
@@ -54,55 +55,52 @@ class Location(Base):
 
     default_dns_domain = relation(DnsDomain)
 
-    def get_p_dict(self):
-        d = {str(self.location_type): self}
-        for p_node in self.parents:
-            d[str(p_node.location_type)] = p_node
-        return d
-
-    @property
-    def p_dict(self):
-        return self.get_p_dict()
+    def get_p_dict(self, loc_type):
+        if self._parent_dict is None:
+            self._parent_dict = {str(self.location_type): self}
+            for node in self.parents:
+                self._parent_dict[str(node.location_type)] = node
+        return self._parent_dict.get(loc_type, None)
 
     @property
     def hub(self):
-        return self.p_dict.get('hub', None)
+        return self.get_p_dict('hub')
 
     @property
     def continent(self):
-        return self.p_dict.get('continent', None)
+        return self.get_p_dict('continent')
 
     @property
     def country(self):
-        return self.p_dict.get('country', None)
+        return self.get_p_dict('country')
 
     @property
     def campus(self):
-        return self.p_dict.get('campus', None)
+        return self.get_p_dict('campus')
 
     @property
     def city(self):
-        return self.p_dict.get('city', None)
+        return self.get_p_dict('city')
 
     @property
     def building(self):
-        return self.p_dict.get('building', None)
+        return self.get_p_dict('building')
 
     @property
     def bunker(self):
-        return self.p_dict.get('bunker', None)
+        return self.get_p_dict('bunker')
 
     @property
     def room(self):
-        return self.p_dict.get('room', None)
+        return self.get_p_dict('room')
 
     @property
     def rack(self):
-        return self.p_dict.get('rack', None)
+        return self.get_p_dict('rack')
 
     @property
     def chassis(self):
-        return self.p_dict.get('chassis', None)
+        return self.get_p_dict('chassis')
 
     def offspring_ids(self):
         session = object_session(self)
@@ -114,11 +112,14 @@ class Location(Base):
         return q.subquery()
 
     def sysloc(self):
-        components = ['building', 'city', 'continent']
+        components = ('building', 'city', 'continent')
+        names = []
         for component in components:
-            if component not in self.p_dict:
+            value = self.get_p_dict(component)
+            if not value:
                 return None
-        return str('.'.join([self.p_dict[item].name for item in components]))
+            names.append(value.name)
+        return str('.'.join(names))
 
     def get_parts(self):
         parts = list(self.parents)
@@ -156,6 +157,11 @@ class Location(Base):
             session.expire(parent, ["_child_links", "children"])
 
         super(Location, self).__init__(**kwargs)
+        self._parent_dict = None
+
+    @reconstructor
+    def setup(self):
+        self._parent_dict = None
 
     def update_parent(self, parent=None):
         session = object_session(self)
@@ -196,6 +202,7 @@ class Location(Base):
         session.flush()
         session.expire(parent, ["_child_links", "children"])
         session.expire(self, ["_parent_links", "parent", "parents"])
+        self._parent_dict = None
 
 
 location = Location.__table__  # pylint: disable=C0103
