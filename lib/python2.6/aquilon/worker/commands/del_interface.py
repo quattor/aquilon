@@ -1,6 +1,7 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011  Contributor
+# Copyright (C) 2008,2009,2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -30,9 +31,9 @@
 
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import Chassis, Machine, Switch
-from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.dbwrappers.interface import get_interface, assign_address
+from aquilon.aqdb.model import Chassis, Machine, Switch, Interface
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.dbwrappers.interface import assign_address
 from aquilon.worker.templates.machine import PlenaryMachineInfo
 
 
@@ -60,7 +61,8 @@ class CommandDelInterface(BrokerCommand):
         else:
             dbhw_ent = None
 
-        dbinterface = get_interface(session, interface, dbhw_ent, mac)
+        dbinterface = Interface.get_unique(session, hardware_entity=dbhw_ent,
+                                           name=interface, mac=mac, compel=True)
         if not dbhw_ent:
             dbhw_ent = dbinterface.hardware_entity
 
@@ -119,7 +121,7 @@ class CommandDelInterface(BrokerCommand):
                                 "configured, delete them first: "
                                 "{1}.".format(dbinterface, addrs))
 
-        session.delete(dbinterface)
+        dbhw_ent.interfaces.remove(dbinterface)
         session.flush()
 
         if dbhw_ent.hardware_type == 'machine':

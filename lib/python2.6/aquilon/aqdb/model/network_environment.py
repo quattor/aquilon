@@ -1,6 +1,7 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012  Contributor
+# Copyright (C) 2008,2009,2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -98,3 +99,16 @@ netenv.primary_key.name = '%s_pk' % _TN
 
 netenv.append_constraint(UniqueConstraint('name', name='%s_name_uk' % _ABV))
 netenv.info['unique_fields'] = ['name']
+
+
+def get_net_dns_env(session, network_environment=None,
+                    dns_environment=None):
+    dbnet_env = NetworkEnvironment.get_unique_or_default(session,
+                                                         network_environment)
+    if dns_environment:
+        dbdns_env = DnsEnvironment.get_unique(session, dns_environment,
+                                              compel=True)
+    else:
+        dbdns_env = dbnet_env.dns_environment
+
+    return (dbnet_env, dbdns_env)

@@ -1,6 +1,7 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012  Contributor
+# Copyright (C) 2008,2009,2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -30,13 +31,12 @@
 
 import os
 import sys
-import time
 import unittest
 from subprocess import Popen, PIPE
 import re
 
 from aquilon.config import Config
-from aquilon.worker import depends # fetch protobuf, ipaddr dependency
+from aquilon.worker import depends  # pylint: disable=W0611
 
 from ipaddr import IPv4Network, IPv4Address
 
@@ -74,18 +74,12 @@ class TestBrokerCommand(unittest.TestCase):
                                                        "templatesdir"),
                                        self.user)
 
-
         # This method is cumbersome.  Should probably develop something
         # like unittest.conf.defaults.
         if self.config.has_option("unittest", "scratchdir"):
             self.scratchdir = self.config.get("unittest", "scratchdir")
             if not os.path.exists(self.scratchdir):
                 os.makedirs(self.scratchdir)
-        if self.config.has_option("unittest", "host_not_running_aqd"):
-            self.host_not_running_aqd = self.config.get("unittest",
-                    "host_not_running_aqd")
-        else:
-            self.host_not_running_aqd = "nyinfra0"
         if self.config.has_option("unittest", "aurora_with_node"):
             self.aurora_with_node = self.config.get("unittest",
                     "aurora_with_node")
@@ -126,14 +120,15 @@ class TestBrokerCommand(unittest.TestCase):
             args = [command]
         args.insert(0, sys.executable)
         args.insert(1, aq)
-        args.append("--aqport")
-        args.append(port)
+        if "--aqport" not in args:
+            args.append("--aqport")
+            args.append(port)
         if auth:
             args.append("--aqservice")
             args.append(self.config.get("broker", "service"))
         else:
             args.append("--noauth")
-        if kwargs.has_key("env"):
+        if "env" in kwargs:
             # Make sure that kerberos tickets are still present if the
             # environment is being overridden...
             env = {}
@@ -426,7 +421,8 @@ class TestBrokerCommand(unittest.TestCase):
 
     def parse_parameters_msg(self, msg, expect=None):
         return self.parse_proto_msg(aqdparameters_pb2.ParameterList,
-                                    'parameters',  msg, expect)
+                                    'parameters', msg, expect)
+
     def gitenv(self, env=None):
         """Configure a known sanitised environment"""
         git_path = self.config.get("broker", "git_path")
@@ -439,22 +435,19 @@ class TestBrokerCommand(unittest.TestCase):
         if env:
             for (key, value) in env.iteritems():
                 newenv[key] = value
-        if newenv.has_key("PATH"):
+        if "PATH" in newenv:
             newenv["PATH"] = "%s:%s:%s" % (git_path, python_path, newenv["PATH"])
         else:
             newenv["PATH"] = "%s:%s:%s" % (git_path, python_path, '/bin:/usr/bin')
         return newenv
 
     def gitcommand_raw(self, command, **kwargs):
-        git = self.config.get("broker", "git")
         if isinstance(command, list):
             args = command[:]
         else:
             args = [command]
-        args.insert(0, git)
-        env = {}
-        if kwargs.has_key("env"):
-            env = self.gitenv(kwargs.pop("env"))
+        args.insert(0, "git")
+        env = self.gitenv(kwargs.pop("env", None))
         p = Popen(args, stdout=PIPE, stderr=PIPE, env=env, **kwargs)
         return p
 
@@ -550,7 +543,7 @@ class TestBrokerCommand(unittest.TestCase):
             else:
                 fp.write(str(command))
             fp.write("\n")
-        if fail and errstr :
+        if fail and errstr:
             errfile = DSDB_EXPECT_FAILURE_ERROR
             expected_name = os.path.join(dsdb_coverage_dir, errfile)
             with open(expected_name, "a") as fp:
@@ -576,17 +569,29 @@ class TestBrokerCommand(unittest.TestCase):
     def dsdb_expect_delete(self, ip, fail=False):
         self.dsdb_expect("delete_host -ip_address %s" % ip, fail=fail)
 
-    def dsdb_expect_update(self, fqdn, mac=None, comments=None, fail=False):
-        command = ["update_host", "-host_name", fqdn, "-status", "aq"]
+    def dsdb_expect_update(self, fqdn, iface=None, ip=None, mac=None,
+                           comments=None, fail=False):
+        command = ["update_aqd_host", "-host_name", fqdn]
+        if iface:
+            command.extend(["-interface_name", iface])
+        if ip:
+            command.extend(["-ip_address", str(ip)])
         if mac:
             command.extend(["-ethernet_address", str(mac)])
         if comments:
             command.extend(["-comments", comments])
         self.dsdb_expect(" ".join(command), fail=fail)
 
-    def dsdb_expect_update_ip(self, fqdn, iface, ip, fail=False):
-        self.dsdb_expect("update_aqd_host -host_name %s -interface_name %s "
-                         "-ip_address %s" % (fqdn, iface, ip), fail=fail)
+    def dsdb_expect_rename(self, fqdn, new_fqdn=None, iface=None,
+                           new_iface=None, fail=False):
+        command = ["update_aqd_host", "-host_name", fqdn]
+        if new_fqdn:
+            command.extend(["-primary_host_name", new_fqdn])
+        if iface:
+            command.extend(["-interface_name", iface])
+        if new_iface:
+            command.extend(["-new_interface_name", new_iface])
+        self.dsdb_expect(" ".join(command), fail=fail)
 
     def dsdb_verify(self, empty=False):
         dsdb_coverage_dir = os.path.join(self.config.get("unittest", "scratchdir"),
@@ -663,12 +668,14 @@ class TestBrokerCommand(unittest.TestCase):
                          "Failed to restore admin privs '%s', '%s'." %
                          (out, err))
 
+
 class DummyIP(IPv4Address):
     def __init__(self, *args, **kwargs):
         super(DummyIP, self).__init__(*args, **kwargs)
 
         octets = [int(i) for i in str(self).split('.')]
         self.mac = "02:02:%02x:%02x:%02x:%02x" % tuple(octets)
+
 
 class NetworkInfo(IPv4Network):
     def __init__(self, cidr, nettype):
@@ -754,6 +761,9 @@ class DummyNetworks(object):
         # Switch loopback
         self.unknown.append(NetworkInfo("4.2.19.0/24", "unknown"))
 
+        # Switch sync testing
+        self.unknown.append(NetworkInfo("4.2.20.0/24", "unknown"))
+
         self.tor_net.append(NetworkInfo("4.2.1.128/26", "tor_net"))
         self.tor_net.append(NetworkInfo("4.2.1.192/26", "tor_net"))
         self.tor_net.append(NetworkInfo("4.2.2.0/26", "tor_net"))
@@ -786,4 +796,3 @@ class DummyNetworks(object):
         # network base svc maps, deliberately not in self.all
         self.netsvcmap = NetworkInfo("4.2.16.0/26", "unknown")
         self.netperssvcmap = NetworkInfo("4.2.17.0/26", "unknown")
-

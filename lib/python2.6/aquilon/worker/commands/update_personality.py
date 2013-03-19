@@ -1,6 +1,7 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2010,2011,2012  Contributor
+# Copyright (C) 2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -30,12 +31,13 @@
 
 from sqlalchemy.orm import joinedload, subqueryload
 
-from aquilon.worker.broker import BrokerCommand
-from aquilon.aqdb.model import (Personality, PersonalityESXClusterInfo,
-                                Cluster, Host)
-from aquilon.aqdb.model.cluster import restricted_builtins
 from aquilon.exceptions_ import ArgumentError
-from aquilon.worker.templates.personality import PlenaryPersonality
+from aquilon.aqdb.model import (Personality, PersonalityESXClusterInfo,
+                                Cluster, Host, HostEnvironment)
+from aquilon.aqdb.model.cluster import restricted_builtins
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.dbwrappers.grn import lookup_grn
+from aquilon.worker.templates import Plenary, PlenaryCollection
 
 
 class CommandUpdatePersonality(BrokerCommand):
@@ -43,7 +45,8 @@ class CommandUpdatePersonality(BrokerCommand):
     required_parameters = ["personality", "archetype"]
 
     def render(self, session, logger, personality, archetype, vmhost_capacity_function,
-               vmhost_overcommit_memory, cluster_required, config_override, **arguments):
+               vmhost_overcommit_memory, cluster_required, config_override,
+               host_environment, grn, eon_id, leave_existing, **arguments):
         dbpersona = Personality.get_unique(session, name=personality,
                                            archetype=archetype, compel=True)
 
@@ -97,12 +100,40 @@ class CommandUpdatePersonality(BrokerCommand):
                                     "be modified".format(str(dbpersona)))
             dbpersona.cluster_required = cluster_required
 
-        write_plenary = None
+        plenaries = PlenaryCollection(logger=logger)
+
+        if grn or eon_id:
+            dbgrn = lookup_grn(session, grn, eon_id, logger=logger,
+                               config=self.config)
+            old_grn = dbpersona.owner_grn
+            dbpersona.owner_grn = dbgrn
+
+            if not leave_existing:
+                # If this is a public personality, then there may be hosts with
+                # various GRNs inside the personality, so make sure we preserve
+                # those GRNs by filtering on the original GRN of the personality
+                q = session.query(Host)
+                q = q.filter_by(personality=dbpersona, owner_grn=old_grn)
+                for dbhost in q.all():
+                    dbhost.owner_grn = dbgrn
+                    plenaries.append(Plenary.get_plenary(dbhost))
+
         if config_override is not None and \
            dbpersona.config_override != config_override:
             dbpersona.config_override = config_override
-            write_plenary = 1
+            plenaries.append(Plenary.get_plenary(dbpersona))
 
+        if host_environment is not None:
+            legacy_env = HostEnvironment.get_unique(session, 'legacy', compel=True)
+            if dbpersona.host_environment == legacy_env:
+                HostEnvironment.validate_name(host_environment)
+                Personality.validate_env_in_name(personality, host_environment)
+                dbpersona.host_environment = HostEnvironment.get_unique(session,
+                                                                        host_environment,
+                                                                        compel=True)
+            else:
+                raise ArgumentError("The personality '{0}' already has env set to '{1}'"
+                                    " and cannot be updated".format(str(dbpersona), host_environment))
         session.flush()
 
         q = session.query(Cluster)
@@ -127,8 +158,6 @@ class CommandUpdatePersonality(BrokerCommand):
             raise ArgumentError("Validation failed for the following "
                                 "clusters:\n%s" % "\n".join(failures))
 
-        if write_plenary:
-            plenary = PlenaryPersonality(dbpersona, logger=logger)
-            plenary.write()
+        plenaries.write()
 
         return

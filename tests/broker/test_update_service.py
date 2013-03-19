@@ -1,7 +1,8 @@
 #!/usr/bin/env python2.6
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2009,2010,2012  Contributor
+# Copyright (C) 2009,2010,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -137,24 +138,9 @@ class TestUpdateService(TestBrokerCommand):
         self.matchoutput(out, "Service: utsvc Instance: utsi2", command)
         self.matchoutput(out, "Maximum Client Count: Default (1100)", command)
 
-    def test_910_updatetestshare1(self):
-        command = ["update_service", "--service=nas_disk_share",
-        "--instance=test_share_1", "--max_clients=100"]
-        self.noouttest(command)
-
-    def test_910_verifypdatetestshare1(self):
-        command = ["show_service", "--service=nas_disk_share",
-                   "--instance=test_share_1"]
-        out = self.commandtest(command)
-        self.matchoutput(out, "Maximum Client Count: 100", command)
-
-        command = ["show_nas_disk_share", "--share=test_share_1"]
-        out = self.commandtest(command)
-        self.matchoutput(out, "Maximum Disk Count: 100", command)
     # FIXME: Missing functionality and tests for plenaries.
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestUpdateService)
     unittest.TextTestRunner(verbosity=2).run(suite)
-

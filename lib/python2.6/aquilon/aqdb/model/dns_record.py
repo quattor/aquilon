@@ -1,6 +1,7 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2011,2012  Contributor
+# Copyright (C) 2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -95,7 +96,7 @@ class DnsRecord(Base):
                 dns_environment = DnsEnvironment.get_unique_or_default(session,
                                                                       dns_environment)
             if fqdn:
-                if name or dns_domain:
+                if name or dns_domain:  # pragma: no cover
                     raise TypeError("fqdn and name/dns_domain cannot be mixed")
                 (name, dns_domain) = parse_fqdn(session, fqdn)
             try:
@@ -156,29 +157,26 @@ class DnsRecord(Base):
         return aliases
 
     def __init__(self, fqdn=None, **kwargs):
-        if not fqdn:
+        if not fqdn:  # pragma: no cover
             raise ValueError("fqdn cannot be empty")
         session = object_session(fqdn)
-        if not session:
+        if not session:  # pragma: no cover
             raise ValueError("fqdn must be already part of a session")
 
-        # Disable autoflush temporarily
-        flush_state = session.autoflush
-        session.autoflush = False
+        # Disable autoflush because self is not ready to be pushed to the DB yet
+        with session.no_autoflush:
+            # self.dns_record_type is not populated by the ORM yet, so query our
+            # class
+            own_type = self.__class__.__mapper_args__['polymorphic_identity']
 
-        # self.dns_record_type is not populated by the ORM yet, so query our
-        # class
-        own_type = self.__class__.__mapper_args__['polymorphic_identity']
+            # Asking for just one column makes both the query and the ORM faster
+            q = session.query(DnsRecord.dns_record_type).filter_by(fqdn=fqdn)
+            for existing in q.all():
+                if existing.dns_record_type in _rr_conflict_map[own_type]:
+                    cls = DnsRecord.__mapper__.polymorphic_map[existing.dns_record_type].class_
+                    raise ArgumentError("%s %s already exist." %
+                                        (cls._get_class_label(), fqdn))
 
-        # Asking for just one column makes both the query and the ORM faster
-        q = session.query(DnsRecord.dns_record_type).filter_by(fqdn=fqdn)
-        for existing in q.all():
-            if existing.dns_record_type in _rr_conflict_map[own_type]:
-                cls = DnsRecord.__mapper__.polymorphic_map[existing.dns_record_type].class_
-                raise ArgumentError("%s %s already exist." %
-                                    (cls._get_class_label(), fqdn))
-
-        session.autoflush = flush_state
         super(DnsRecord, self).__init__(fqdn=fqdn, **kwargs)
 
 
@@ -186,3 +184,4 @@ dns_record = DnsRecord.__table__  # pylint: disable=C0103
 dns_record.primary_key.name = '%s_pk' % _TN
 
 dns_record.info['unique_fields'] = ['fqdn']
+dns_record.info['extra_search_fields'] = ['dns_environment']

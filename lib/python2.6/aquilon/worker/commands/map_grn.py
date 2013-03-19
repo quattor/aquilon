@@ -1,6 +1,7 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012  Contributor
+# Copyright (C) 2008,2009,2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -29,9 +30,10 @@
 """Contains the logic for `aq map grn`."""
 
 from aquilon.aqdb.model import Personality
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.grn import lookup_grn
-from aquilon.worker.dbwrappers.host import hostname_to_host, hostlist_to_hosts
+from aquilon.worker.dbwrappers.host import (hostname_to_host, hostlist_to_hosts,
+                                            check_hostlist_size)
 from aquilon.worker.templates.personality import PlenaryPersonality
 
 
@@ -51,6 +53,7 @@ class CommandMapGrn(BrokerCommand):
         if hostname:
             objs = [hostname_to_host(session, hostname)]
         elif list:
+            check_hostlist_size(self.command, self.config, list)
             objs = hostlist_to_hosts(session, list)
         elif personality:
             objs = [Personality.get_unique(session, name=personality,

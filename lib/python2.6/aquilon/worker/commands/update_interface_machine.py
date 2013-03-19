@@ -1,6 +1,7 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012  Contributor
+# Copyright (C) 2008,2009,2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -29,12 +30,12 @@
 """Contains the logic for `aq update interface --machine`."""
 
 
-from aquilon.exceptions_ import ArgumentError, AquilonError, UnimplementedError
-from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.dbwrappers.interface import (get_interface,
-                                                 verify_port_group,
+from aquilon.exceptions_ import ArgumentError, AquilonError
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.dbwrappers.interface import (verify_port_group,
                                                  choose_port_group,
-                                                 assign_address)
+                                                 assign_address,
+                                                 rename_interface)
 from aquilon.worker.locks import lock_queue
 from aquilon.worker.templates.machine import PlenaryMachineInfo
 from aquilon.worker.processes import DSDBRunner
@@ -47,8 +48,8 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
     required_parameters = ["interface", "machine"]
 
     def render(self, session, logger, interface, machine, mac, model, vendor,
-               ip, boot, pg, autopg, comments, master, clear_master,
-               default_route, **arguments):
+               boot, pg, autopg, comments, master, clear_master, default_route,
+               rename_to, **arguments):
         """This command expects to locate an interface based only on name
         and machine - all other fields, if specified, are meant as updates.
 
@@ -62,8 +63,11 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
 
         """
 
+        audit_results = []
+
         dbhw_ent = Machine.get_unique(session, machine, compel=True)
-        dbinterface = get_interface(session, interface, dbhw_ent, None)
+        dbinterface = Interface.get_unique(session, hardware_entity=dbhw_ent,
+                                           name=interface, compel=True)
 
         oldinfo = DSDBRunner.snapshot_hw(dbhw_ent)
 
@@ -83,7 +87,8 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
                 dbinterface.hardware_entity, pg)
         elif autopg:
             dbinterface.port_group = choose_port_group(
-                session, dbinterface.hardware_entity)
+                session, logger, dbinterface.hardware_entity)
+            audit_results.append(('pg', dbinterface.port_group))
 
         if master:
             if dbinterface.addresses:
@@ -94,7 +99,8 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
                 # for now.
                 raise ArgumentError("Can not enslave {0:l} because it has "
                                     "addresses.".format(dbinterface))
-            dbmaster = get_interface(session, master, dbhw_ent, None)
+            dbmaster = Interface.get_unique(session, hardware_entity=dbhw_ent,
+                                            name=master, compel=True)
             if dbmaster in dbinterface.all_slaves():
                 raise ArgumentError("Enslaving {0:l} would create a circle, "
                                     "which is not allowed.".format(dbinterface))
@@ -104,12 +110,6 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
             if not dbinterface.master:
                 raise ArgumentError("{0} is not a slave.".format(dbinterface))
             dbinterface.master = None
-
-        if ip:
-            raise UnimplementedError("Please use update_machine to update the "
-                                     "primary IP, or add_interface_address to "
-                                     "add a new auxiliary address to the "
-                                     "interface.")
 
         if comments:
             dbinterface.comments = comments
@@ -150,6 +150,8 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
             dbmodel = Model.get_unique(session, name=model, vendor=vendor,
                                        machine_type='nic', compel=True)
             dbinterface.model = dbmodel
+        if rename_to:
+            rename_interface(session, dbinterface, rename_to)
 
         session.flush()
         session.refresh(dbhw_ent)
@@ -172,4 +174,7 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
             raise
         finally:
             lock_queue.release(key)
+
+        for name, value in audit_results:
+            self.audit_result(session, name, value, **arguments)
         return

@@ -1,6 +1,7 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012  Contributor
+# Copyright (C) 2008,2009,2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -35,7 +36,7 @@ from aquilon.aqdb.model import ObservedMac
 
 class ObservedMacFormatter(ObjectFormatter):
     def csv_fields(self, item):
-        return [item.switch.fqdn, item.port_number, item.mac_address,
+        return [item.switch.fqdn, item.port, item.mac_address,
                 item.last_seen]
 
 ObjectFormatter.handlers[ObservedMac] = ObservedMacFormatter()

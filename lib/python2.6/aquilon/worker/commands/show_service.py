@@ -1,6 +1,7 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012  Contributor
+# Copyright (C) 2008,2009,2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -31,7 +32,7 @@
 
 from sqlalchemy.orm import joinedload, subqueryload, undefer, contains_eager
 
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.aqdb.model import Service, ServiceInstance
 from aquilon.worker.dbwrappers.host import hostname_to_host
 from aquilon.worker.formats.service_instance import ServiceInstanceList
@@ -68,7 +69,6 @@ class CommandShowService(BrokerCommand):
             q = q.options(subqueryload('archetypes'))
             q = q.options(subqueryload('personalities'))
             q = q.options(undefer('instances._client_count'))
-            q = q.options(undefer('instances.nas_disk_count'))
             q = q.options(subqueryload('instances.personality_service_map'))
             q = q.options(subqueryload('instances.servers'))
             q = q.options(joinedload('instances.servers.host'))

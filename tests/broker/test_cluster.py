@@ -1,7 +1,8 @@
 #!/usr/bin/env python2.6
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2009,2010,2011,2012  Contributor
+# Copyright (C) 2009,2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -90,7 +91,7 @@ class TestCluster(TestBrokerCommand):
         for i in range(1, 5):
             host = "evh%s.aqd-unittest.ms.com" % i
             self.searchoutput(cat_cluster_out,
-                              '"/system/cluster/members" = list\([^\)]*'
+                              '"system/cluster/members" = list\([^\)]*'
                               '"%s"[^\)]*\);' % host,
                               cat_cluster_command)
 
@@ -110,7 +111,7 @@ class TestCluster(TestBrokerCommand):
             command = "cat --hostname evh%s.aqd-unittest.ms.com --data" % i
             out = self.commandtest(command.split())
             self.searchoutput(out,
-                              '"/system/cluster/name" = "utecl1";',
+                              '"system/cluster/name" = "utecl1";',
                               command)
 
     def testfailmissingcluster(self):
@@ -132,7 +133,8 @@ class TestCluster(TestBrokerCommand):
         # So, make it a compatible archetype and try again
         command = ["reconfigure", "--hostname=aquilon61.aqd-unittest.ms.com",
                    "--personality=esx_server", "--archetype=vmhost",
-                   "--os=esxi/4.0.0", "--buildstatus=rebuild"]
+                   "--osname", "esxi", "--osversion", "4.0.0",
+                   "--buildstatus=rebuild"]
         (out, err) = self.successtest(command)
         self.matchoutput(err,
                          "Warning: Host aquilon61.aqd-unittest.ms.com "
@@ -174,7 +176,7 @@ class TestCluster(TestBrokerCommand):
         command = ["cat", "--cluster", "utecl2", "--data"]
         out = self.commandtest(command)
         self.searchoutput(out,
-                          r'"/system/cluster/members" = list\('
+                          r'"system/cluster/members" = list\('
                           r'[^)]*"aquilon61.aqd-unittest.ms.com"[^)]*\);',
                           command)
 
@@ -202,7 +204,8 @@ class TestCluster(TestBrokerCommand):
 
         command = ["reconfigure", "--hostname=aquilon61.aqd-unittest.ms.com",
                    "--personality=inventory", "--archetype=aquilon",
-                   "--os=linux/5.0.1-x86_64", "--buildstatus=rebuild"]
+                   "--osname=linux", "--osversion=5.0.1-x86_64",
+                   "--buildstatus=rebuild"]
         self.successtest(command)
 
     def testfailbadlocation(self):

@@ -1,6 +1,7 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2009,2010,2011,2012  Contributor
+# Copyright (C) 2009,2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -28,12 +29,13 @@
 # TERMS THAT MAY APPLY.
 
 
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.aqdb.model import MetaCluster
 from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.commands.update_cluster import update_cluster_location
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
 from aquilon.worker.locks import lock_queue, CompileKey
+
 
 class CommandUpdateMetaCluster(BrokerCommand):
 
@@ -94,7 +96,7 @@ class CommandUpdateMetaCluster(BrokerCommand):
         session.flush()
         dbmetacluster.validate()
 
-        plenary_info = Plenary.get_plenary(dbmetacluster)
+        plenary_info = Plenary.get_plenary(dbmetacluster, logger=logger)
         key = plenary_info.get_write_key()
 
         try:

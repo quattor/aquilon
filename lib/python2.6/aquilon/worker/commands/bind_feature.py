@@ -1,6 +1,7 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2011,2012  Contributor
+# Copyright (C) 2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -31,11 +32,12 @@ from aquilon.exceptions_ import (ArgumentError, PartialError, IncompleteError,
                                  InternalError, AuthorizationException,
                                  UnimplementedError)
 from aquilon.aqdb.model import Feature, Archetype, Personality, Model
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.locks import CompileKey
 from aquilon.worker.templates.personality import PlenaryPersonality
 from aquilon.worker.commands.deploy import validate_justification
 from aquilon.worker.dbwrappers.feature import add_link
+
 
 class CommandBindFeature(BrokerCommand):
 
@@ -49,7 +51,6 @@ class CommandBindFeature(BrokerCommand):
         if interface and not personality:
             raise ArgumentError("Binding to a named interface needs "
                                 "a personality.")
-
 
         q = session.query(Personality)
         dbarchetype = None
@@ -148,7 +149,6 @@ class CommandBindFeature(BrokerCommand):
                 for plenary in successful:
                     plenary.restore_stash()
                 raise PartialError([], failed)
-
 
         logger.client_info("Flushed %d/%d templates." %
                            (written, written + len(failed)))

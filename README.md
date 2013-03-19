@@ -14,7 +14,6 @@ Under Scientific Linux 6, install the following RPMs:
 *   python-dateutil
 *   python-cdb
 *   python-lxml
-*   python-virtualenv
 *   PyYAML
 *   protobuf-compiler (to build the protocol buffers)
 *   protobuf-python

@@ -1,6 +1,7 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2009,2010,2011,2012  Contributor
+# Copyright (C) 2009,2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -29,7 +30,7 @@
 
 
 from aquilon.aqdb.model import OperatingSystem, Archetype
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 
 
 class CommandUpdateOS(BrokerCommand):
@@ -39,11 +40,12 @@ class CommandUpdateOS(BrokerCommand):
     def render(self, session, osname, osversion, archetype, comments,
                **arguments):
         dbarchetype = Archetype.get_unique(session, archetype, compel=True)
-        dbos = OperatingSystem.get_unique(session, name=osname, version=osversion,
-                                   archetype=dbarchetype, compel=True)
+        dbos = OperatingSystem.get_unique(session, name=osname,
+                                          version=osversion,
+                                          archetype=dbarchetype, compel=True)
 
-        dbos.comments=comments
+        dbos.comments = comments
 
-        session.add(dbos)
+        session.flush()
 
         return

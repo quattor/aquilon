@@ -1,6 +1,7 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012  Contributor
+# Copyright (C) 2008,2009,2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -29,10 +30,10 @@
 """Contains the logic for `aq update alias`."""
 
 from aquilon.aqdb.model import Alias, DnsEnvironment
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.dbwrappers.dns import (create_target_if_needed,
+                                           delete_target_if_needed)
 from aquilon.worker.processes import DSDBRunner
-from aquilon.worker.commands.add_alias import create_target_if_needed
-from aquilon.worker.commands.del_alias import delete_target_if_needed
 
 
 class CommandUpdateAlias(BrokerCommand):
@@ -53,7 +54,8 @@ class CommandUpdateAlias(BrokerCommand):
             old_target = dbalias.target
             dbalias.target = create_target_if_needed(session, logger,
                                                      target, dbdns_env)
-            delete_target_if_needed(session, old_target)
+            if dbalias.target != old_target:
+                delete_target_if_needed(session, old_target)
 
         if comments is not None:
             dbalias.comments = comments

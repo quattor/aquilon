@@ -1,7 +1,8 @@
 #!/usr/bin/env python2.6
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2011,2012  Contributor
+# Copyright (C) 2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -92,7 +93,7 @@ class TestAddHostlink(TestBrokerCommand):
         command = ["cat", "--generate",
                    "--hostname", "server1.aqd-unittest.ms.com", "--data"]
         out = self.commandtest(command)
-        self.matchoutput(out, '"/system/resources/hostlink" = push(create("resource/host/server1.aqd-unittest.ms.com/hostlink/app1/config"))', command)
+        self.matchoutput(out, '"system/resources/hostlink" = append(create("resource/host/server1.aqd-unittest.ms.com/hostlink/app1/config"))', command)
 
         command = ["del_hostlink", "--hostlink=app1",
                    "--hostname=server1.aqd-unittest.ms.com"]

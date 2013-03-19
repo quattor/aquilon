@@ -1,6 +1,7 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012  Contributor
+# Copyright (C) 2008,2009,2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -40,7 +41,7 @@ LOGGER = logging.getLogger(__name__)
 
 class PlenarySwitch(Plenary):
 
-    template_type = ""
+    template_type = "structure"
 
     """
     A facade for the variety of PlenarySwitch subsidiary files
@@ -67,7 +68,6 @@ class PlenarySwitch(Plenary):
 
             vlans[ov.vlan.port_group] = vlan
 
-        lines.append('"/system/network/vlans" = %s;' % pan(vlans))
+        lines.append('"system/network/vlans" = %s;' % pan(vlans))
 
 Plenary.handlers[Switch] = PlenarySwitch
-

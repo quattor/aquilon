@@ -1,7 +1,8 @@
 #!/usr/bin/env python2.6
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2009,2010  Contributor
+# Copyright (C) 2009,2010,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -32,10 +33,10 @@
 import unittest
 
 if __name__ == "__main__":
-    import utils
+    from broker import utils
     utils.import_depends()
 
-from brokertest import TestBrokerCommand
+from broker.brokertest import TestBrokerCommand
 
 
 class TestArchetypeConstraints(TestBrokerCommand):
@@ -43,7 +44,10 @@ class TestArchetypeConstraints(TestBrokerCommand):
     def testdelarchetypewithpersonality(self):
         command = "del archetype --archetype aquilon"
         out = self.badrequesttest(command.split(" "))
-        self.matchoutput(out, "in use and cannot be deleted", command)
+        self.matchoutput(out, "Archetype aquilon is still in use by "
+                         "personality aquilon/badpersonality and "
+                         "cannot be deleted.",
+                         command)
 
     def testverifydelarchetypewithmodel(self):
         command = ["show_archetype", "--archetype=aquilon"]
@@ -51,7 +55,7 @@ class TestArchetypeConstraints(TestBrokerCommand):
         self.matchoutput(out, "Archetype: aquilon", command)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(
         TestArchetypeConstraints)
     unittest.TextTestRunner(verbosity=2).run(suite)

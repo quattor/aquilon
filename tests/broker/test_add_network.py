@@ -1,7 +1,8 @@
 #!/usr/bin/env python2.6
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012  Contributor
+# Copyright (C) 2008,2009,2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -47,6 +48,18 @@ class TestAddNetwork(TestBrokerCommand):
                        "--netmask=%s" % network.netmask,
                        "--building=ut", "--type=%s" % network.nettype]
             self.noouttest(command)
+
+    def testaddauroranetwork(self):
+        self.noouttest(["add_network", "--ip", "144.14.174.0",
+                        "--network", "pissp1_aur",
+                        "--netmask", "255.255.255.0",
+                        "--building", "ut", "--side", "a", "--type", "unknown",
+                        "--comments", "Test aurora net"])
+        self.noouttest(["add_network", "--ip", "10.184.155.0",
+                        "--network", "ny00l4as01_aur",
+                        "--netmask", "255.255.255.0",
+                        "--building", "np", "--side", "a", "--type", "unknown",
+                        "--comments", "Test aurora net"])
 
     def testaddextranetwork(self):
         # These were previously pulled from DSDB
@@ -254,4 +267,3 @@ class TestAddNetwork(TestBrokerCommand):
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddNetwork)
     unittest.TextTestRunner(verbosity=2).run(suite)
-

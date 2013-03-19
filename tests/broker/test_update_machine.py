@@ -1,7 +1,8 @@
 #!/usr/bin/env python2.6
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012  Contributor
+# Copyright (C) 2008,2009,2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -342,7 +343,7 @@ class TestUpdateMachine(TestBrokerCommand):
         self.matchoutput(out, "Chassis ut9c1.aqd-unittest.ms.com slot 11 "
                               "already has machine ut9s03p11", command)
 
-    def testverifyreuseslot(self):
+    def testverifytakenslot(self):
         command = ["show", "machine", "--machine", "ut9s03p11"]
         out = self.commandtest(command)
         self.matchoutput(out, "Blade: ut9s03p11", command)
@@ -387,7 +388,7 @@ class TestUpdateMachine(TestBrokerCommand):
                    "--chassis", "ut9c2.aqd-unittest.ms.com", "--slot", "3"]
         self.noouttest(command)
 
-    def testverifymultislotclear(self):
+    def testverifymultislotadd(self):
         command = ["show", "machine", "--machine", "ut9s03p15"]
         out = self.commandtest(command)
         self.matchoutput(out, "Blade: ut9s03p15", command)
@@ -410,7 +411,7 @@ class TestUpdateMachine(TestBrokerCommand):
         self.matchoutput(out, "Use --multislot to support a machine in more "
                               "than one slot", command)
 
-    def testverifymultislotclear(self):
+    def testverifymultislotupdatefail(self):
         command = ["show", "machine", "--machine", "ut9s03p19"]
         out = self.commandtest(command)
         self.matchoutput(out, "Blade: ut9s03p19", command)
@@ -489,7 +490,6 @@ class TestUpdateMachine(TestBrokerCommand):
 #       self.matchclean(out, "Serial", command)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestUpdateMachine)
     unittest.TextTestRunner(verbosity=2).run(suite)
-

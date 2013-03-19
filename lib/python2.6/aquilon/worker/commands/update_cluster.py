@@ -1,6 +1,7 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2009,2010,2011,2012  Contributor
+# Copyright (C) 2009,2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -30,7 +31,7 @@
 
 from aquilon.aqdb.model import Cluster, Personality, Switch
 from aquilon.exceptions_ import ArgumentError
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.location import get_location
 from aquilon.worker.templates.machine import machine_plenary_will_move
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
@@ -46,8 +47,7 @@ class CommandUpdateCluster(BrokerCommand):
                max_members, fix_location, down_hosts_threshold,
                maint_threshold, comments,
                # ESX specific options
-               switch, tor_switch, memory_capacity, clear_overrides,
-               vm_to_host_ratio,
+               switch, memory_capacity, clear_overrides, vm_to_host_ratio,
                **arguments):
 
         dbcluster = Cluster.get_unique(session, cluster, compel=True)
@@ -85,10 +85,6 @@ class CommandUpdateCluster(BrokerCommand):
                 dbcluster.host_count = host_count
                 cluster_updated = True
 
-        if tor_switch is not None:
-            logger.client_info("option tor_switch is deprecated. "
-                               "Please use --switch instead.")
-            switch = tor_switch
         if switch is not None:
             if switch:
                 # FIXME: Verify that any hosts are on the same network
@@ -176,6 +172,7 @@ class CommandUpdateCluster(BrokerCommand):
             lock_queue.release(key)
 
         return
+
 
 def update_cluster_location(session, logger, dbcluster,
                             fix_location, plenaries, remove_plenaries,

@@ -1,7 +1,8 @@
 #!/usr/bin/env python2.6
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2012  Contributor
+# Copyright (C) 2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -39,10 +40,11 @@ from broker.brokertest import TestBrokerCommand
 
 FEATURE = 'myfeature'
 
+
 class TestParameterDefinitionFeature(TestBrokerCommand):
 
     def test_00_add_feature(self):
-        cmd = ["add_feature", "--feature", FEATURE, "--type=host" ]
+        cmd = ["add_feature", "--feature", FEATURE, "--type=host"]
         self.noouttest(cmd)
 
     def test_100_add(self):
@@ -65,7 +67,7 @@ class TestParameterDefinitionFeature(TestBrokerCommand):
 
     def test_130_add_default_value_type(self):
         cmd = ["add_parameter_definition", "--feature", FEATURE, "--type=host",
-               "--path=testdefault", "--description=blaah" ]
+               "--path=testdefault", "--description=blaah"]
 
         self.noouttest(cmd)
 
@@ -124,14 +126,14 @@ class TestParameterDefinitionFeature(TestBrokerCommand):
     def test_130_add_json_value_type(self):
         cmd = ["add_parameter_definition", "--feature", FEATURE, "--type=host",
                "--path=testjson", "--description=blaah",
-               "--value_type=json","--default=\"{'val1':'val2'}\""]
+               "--value_type=json", "--default=\"{'val1':'val2'}\""]
 
         self.noouttest(cmd)
 
     def test_130_add_invalid_json_value_type(self):
         cmd = ["add_parameter_definition", "--feature", FEATURE, "--type=host",
                "--path=testbadjson", "--description=blaah",
-               "--value_type=json","--default=foo"]
+               "--value_type=json", "--default=foo"]
 
         err = self.badrequesttest(cmd)
         self.matchoutput(err, "The json string specified for default for path=testbadjson is invalid", cmd)
@@ -177,7 +179,7 @@ class TestParameterDefinitionFeature(TestBrokerCommand):
                           cmd)
 
     def test_145_verify_add(self):
-        cmd = ["search_parameter_definition", "--feature", FEATURE, "--format=proto", "--type=host" ]
+        cmd = ["search_parameter_definition", "--feature", FEATURE, "--format=proto", "--type=host"]
         out = self.commandtest(cmd)
         p = self.parse_paramdefinition_msg(out, 8)
         param_defs = p.param_definitions
@@ -219,21 +221,20 @@ class TestParameterDefinitionFeature(TestBrokerCommand):
         for path in ['testpath', 'testdefault', 'testint', 'testlist',
                      'testjson', 'testboolean', 'testfloat', 'test_rebuild_required']:
             cmd = ["del_parameter_definition", "--feature", FEATURE,
-                   "--type=host", "--path=%s" % path ]
+                   "--type=host", "--path=%s" % path]
             self.noouttest(cmd)
 
     def test_150_verify_delete(self):
-        cmd = ["search_parameter_definition", "--feature", FEATURE, "--type=host" ]
+        cmd = ["search_parameter_definition", "--feature", FEATURE, "--type=host"]
 
         err = self.notfoundtest(cmd)
         self.matchoutput(err, "No parameter definitions found for host "
                          "feature myfeature", cmd)
 
     def test_999_del(self):
-        cmd = ["del_feature", "--feature", FEATURE, "--type=host" ]
+        cmd = ["del_feature", "--feature", FEATURE, "--type=host"]
         self.noouttest(cmd)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestParameterDefinitionFeature)
     unittest.TextTestRunner(verbosity=2).run(suite)
-

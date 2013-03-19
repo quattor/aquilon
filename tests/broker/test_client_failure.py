@@ -1,7 +1,8 @@
 #!/usr/bin/env python2.6
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2012  Contributor
+# Copyright (C) 2008,2009,2010,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -30,6 +31,8 @@
 """Module for testing client error handling."""
 
 import unittest
+import socket
+import re
 
 if __name__ == "__main__":
     import utils
@@ -51,12 +54,22 @@ class TestClientFailure(TestBrokerCommand):
         self.assertEqual(p.returncode, 1)
 
     def testnotrunningaqhost(self):
-        command = "status --aqhost=%s" % self.host_not_running_aqd
-        (p, out, err) = self.runcommand(command.split(" "))
-        self.assertEqual(err,
-                "Failed to connect to %s port %s: Connection refused.\n"
-                % (self.host_not_running_aqd, 
-                    self.config.get("broker", "kncport")))
+        # Reserve a port, but do not listen on it
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.bind(("127.0.0.1", 0))
+        port = sock.getsockname()[1]
+
+        hostname = self.config.get("unittest", "hostname")
+        short, domain = hostname.split('.', 1)
+
+        command = ["status", "--aqport", port]
+        (p, out, err) = self.runcommand(command)
+        # This might be either 'Connection refused.' or 'Connection timed out.'.
+        # There may also be variations in the output, like using the short or
+        # full hostname.
+        pattern = "Failed to connect to %s(\.%s)? port %d: " % (short, domain, port)
+        self.assertTrue(re.match(pattern, err),
+                        "Expected '%s' to start with '%s'" % (err, pattern))
         self.assertEqual(out, "",
                 "STDOUT for %s was not empty:\n@@@\n'%s'\n@@@\n"
                 % (command, out))
@@ -111,7 +124,6 @@ class TestClientFailure(TestBrokerCommand):
         out = self.unauthorizedtest(command)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestClientFailure)
     unittest.TextTestRunner(verbosity=2).run(suite)
-

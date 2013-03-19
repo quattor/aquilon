@@ -1,7 +1,8 @@
 #!/usr/bin/env python2.6
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012  Contributor
+# Copyright (C) 2008,2009,2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -194,9 +195,6 @@ class TestDelMachine(TestBrokerCommand):
     def testdelnp3c5n5(self):
         self.noouttest(["del", "machine", "--machine", "np3c5n5"])
 
-    def testdelut3c5n6(self):
-        self.noouttest(["del", "machine", "--machine", "ut3c5n6"])
-
     def testdeljack(self):
         self.noouttest(["del", "machine", "--machine", "jack"])
 
@@ -228,9 +226,5 @@ class TestDelMachine(TestBrokerCommand):
 
 
 if __name__ == '__main__':
-    import aquilon.aqdb.depends
-    import nose
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelMachine)
-
-    #unittest.TextTestRunner(verbosity=2).run(suite)
-    nose.runmodule()
+    unittest.TextTestRunner(verbosity=2).run(suite)

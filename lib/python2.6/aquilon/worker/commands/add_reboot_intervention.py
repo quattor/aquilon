@@ -1,6 +1,7 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2011,2012  Contributor
+# Copyright (C) 2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -33,11 +34,12 @@ from datetime import datetime
 from aquilon.exceptions_ import ArgumentError
 from sqlalchemy.orm.exc import NoResultFound
 
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.resources import (add_resource,
                                                  get_resource_holder)
 from aquilon.aqdb.model import RebootIntervention
 from aquilon.aqdb.model import RebootSchedule
+
 
 class CommandAddRebootIntervention(BrokerCommand):
 

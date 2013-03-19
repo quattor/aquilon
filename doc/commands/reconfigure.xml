@@ -4,7 +4,8 @@
 <!ENTITY aqd_version SYSTEM "../version.txt">
 ]>
 <refentry xml:id="reconfigure"
-  xmlns:xi="http://www.w3.org/2001/XInclude">
+          xmlns="http://docbook.org/ns/docbook"
+          xmlns:xi="http://www.w3.org/2001/XInclude">
   <refmeta>
     <refentrytitle>reconfigure</refentrytitle>
     <manvolnum>1</manvolnum>
@@ -26,6 +27,7 @@
       <group choice="req">
 	<arg choice="plain"><option>--hostname <replaceable>HOSTNAME</replaceable></option></arg>
 	<arg choice="plain"><option>--list <replaceable>FILENAME</replaceable></option></arg>
+	<arg choice="plain"><option>--hostlist <replaceable>FILENAME</replaceable></option></arg>
 	<arg choice="plain"><option>--membersof <replaceable>CLUSTER</replaceable></option></arg>
       </group>
       <arg choice="opt"><option>--osname <replaceable>OSNAME</replaceable></option></arg>
@@ -33,6 +35,10 @@
       <arg choice="opt"><option>--archetype <replaceable>ARCHETYPE</replaceable></option></arg>
       <arg choice="opt"><option>--personality <replaceable>PERSONALITY</replaceable></option></arg>
       <arg choice="opt"><option>--buildstatus <replaceable>BUILDSTATUS</replaceable></option></arg>
+      <group choice="opt">
+	<arg choice="plain"><option>--grn <replaceable>GRN</replaceable></option></arg>
+	<arg choice="plain"><option>--eon_id <replaceable>EON_ID</replaceable></option></arg>
+      </group>
       <group choice="opt">
 	<arg choice="plain"><option>--keepbindings</option></arg>
 	<arg choice="plain"><option>--nokeepbindings</option></arg>
@@ -111,7 +117,8 @@
       </varlistentry>
       <varlistentry>
 	<term>
-	  <option>--list <replaceable>FILENAME</replaceable></option>
+	  <option>--list <replaceable>FILENAME</replaceable></option>,
+	  <option>--hostlist <replaceable>FILENAME</replaceable></option>
 	</term>
 	<listitem>
 	  <para>
@@ -121,6 +128,10 @@
             file is one hostname per line. Lines that are blank or begin with
             "#" will be skipped.  All hosts must be in the same domain, and
             after applying all changes the full domain will be compiled.
+	  </para>
+	  <para>
+	    The <option>--list</option> and <option>--hostlist</option> forms are equivalent,
+	    but <option>--hostlist</option> is considered deprecated and should not be used.
 	  </para>
 	</listitem>
       </varlistentry>
@@ -189,6 +200,17 @@
           <para>
             A host lifecycle tends to go from build to ready to decommissioned.
             After ready, the host might also transition to rebuild.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <option>--grn <replaceable>GRN</replaceable></option>
+          <option>--eon_id <replaceable>EON_ID</replaceable></option>
+        </term>
+        <listitem>
+          <para>
+	    Change the owner GRN of the host.
           </para>
         </listitem>
       </varlistentry>

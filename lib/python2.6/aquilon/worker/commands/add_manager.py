@@ -1,6 +1,7 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012  Contributor
+# Copyright (C) 2008,2009,2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -30,7 +31,7 @@
 
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.host import hostname_to_host
 from aquilon.worker.dbwrappers.dns import grab_address
 from aquilon.worker.dbwrappers.interface import (generate_ip,
@@ -65,7 +66,9 @@ class CommandAddManager(BrokerCommand):
             raise ArgumentError("{0} already has the following addresses: "
                                 "{1}.".format(dbinterface, addrs))
 
-        ip = generate_ip(session, dbinterface, compel=True, **arguments)
+        audit_results = []
+        ip = generate_ip(session, logger, dbinterface, compel=True,
+                         audit_results=audit_results, **arguments)
 
         dbdns_rec, newly_created = grab_address(session, manager, ip,
                                                 comments=comments,
@@ -94,4 +97,6 @@ class CommandAddManager(BrokerCommand):
             # XXX: Host needs to be reconfigured.
             pass
 
+        for name, value in audit_results:
+            self.audit_result(session, name, value, **arguments)
         return

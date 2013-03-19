@@ -1,7 +1,8 @@
 #!/usr/bin/env python2.6
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2011,2012  Contributor
+# Copyright (C) 2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -39,9 +40,9 @@ from datetime import datetime, timedelta
 
 from brokertest import TestBrokerCommand
 
-
 EXPIRY = datetime.utcnow().replace(microsecond=0) + timedelta(days=1)
 EXPIRY = EXPIRY.isoformat().replace("T", " ")
+
 
 class TestAddRebootIntervention(TestBrokerCommand):
 
@@ -122,8 +123,8 @@ class TestAddRebootIntervention(TestBrokerCommand):
                    "--hostname", "server1.aqd-unittest.ms.com", "--data"]
         out = self.commandtest(command)
         self.matchoutput(out,
-                         '"/system/resources/reboot_iv" = '
-                         'push(create("resource/host/server1.aqd-unittest.ms.com/reboot_iv/reboot_intervention/config"))',
+                         '"system/resources/reboot_iv" = '
+                         'append(create("resource/host/server1.aqd-unittest.ms.com/reboot_iv/reboot_intervention/config"))',
                          command)
 
         command = ["show_host", "--hostname=server1.aqd-unittest.ms.com",
@@ -147,7 +148,7 @@ class TestAddRebootIntervention(TestBrokerCommand):
         self.successtest(command)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(
         TestAddRebootIntervention)
     unittest.TextTestRunner(verbosity=2).run(suite)

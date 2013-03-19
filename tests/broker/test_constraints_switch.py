@@ -1,7 +1,8 @@
 #!/usr/bin/env python2.6
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2012  Contributor
+# Copyright (C) 2008,2009,2010,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -27,7 +28,7 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-"""Module for testing constraints in commands involving tor_switch."""
+"""Module for testing constraints in commands involving switches."""
 
 import unittest
 
@@ -42,7 +43,7 @@ class TestSwitchConstraints(TestBrokerCommand):
 
     def testdelmachineastor_switch(self):
         # Deprecated usage.
-        command = "del tor_switch --tor_switch ut3c5n10"
+        command = "del switch --switch ut3c5n10"
         self.badrequesttest(command.split(" "))
 
     def testverifydelmachineastor_switchfailed(self):
@@ -57,14 +58,14 @@ class TestSwitchConstraints(TestBrokerCommand):
 
     def testverifydeltor_switchasmachinefailed(self):
         # Deprecated usage.
-        command = "show tor_switch --tor_switch ut3gd1r01.aqd-unittest.ms.com"
+        command = "show switch --switch ut3gd1r01.aqd-unittest.ms.com"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Switch: ut3gd1r01", command)
 
-    # Testing that del tor_switch does not delete a blade....
+    # Testing that del switch does not delete a blade....
     def testrejectut3c1n3(self):
         # Deprecated usage.
-        self.badrequesttest(["del", "tor_switch", "--tor_switch", "ut3c1n3"])
+        self.badrequesttest(["del", "switch", "--switch", "ut3c1n3"])
 
     def testverifyrejectut3c1n3(self):
         command = "show machine --machine ut3c1n3"
@@ -101,4 +102,3 @@ class TestSwitchConstraints(TestBrokerCommand):
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestSwitchConstraints)
     unittest.TextTestRunner(verbosity=2).run(suite)
-

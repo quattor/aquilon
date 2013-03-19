@@ -1,6 +1,7 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012  Contributor
+# Copyright (C) 2008,2009,2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -26,11 +27,17 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-"""Host formatter."""
+"""Network formatter."""
 
+from collections import defaultdict
+
+from sqlalchemy.orm.attributes import set_committed_value
+from sqlalchemy.orm import object_session, subqueryload, lazyload
+
+from aquilon.aqdb.model import Network, HardwareEntity, Host
 from aquilon.worker.formats.formatters import ObjectFormatter
 from aquilon.worker.formats.list import ListFormatter
-from aquilon.aqdb.model import Network
+
 
 def summarize_ranges(addrlist):
     """ Convert a list like [1,2,3,5] to ["1-3", "5"], but with IP addresses """
@@ -56,6 +63,7 @@ def summarize_ranges(addrlist):
             ranges.append("%s-%s" % (start, end))
 
     return ranges
+
 
 def possible_mac_addresses(interface):
     """ Return the list of MAC addresses the DHCP server should accept.
@@ -217,13 +225,51 @@ class SimpleNetworkListFormatter(ListFormatter):
         net_msg.location.location_type = str(net.location.location_type)
         net_msg.type = str(net.network_type)
 
+        # Bulk load information about anything having a network address on this
+        # network
+        hw_ids = set([addr.interface.hardware_entity_id for addr in
+                      net.assignments])
+        if hw_ids:
+            session = object_session(net)
+            q = session.query(HardwareEntity)
+            q = q.filter(HardwareEntity.id.in_(hw_ids))
+            q = q.options(subqueryload('interfaces'))
+            hwent_by_id = {}
+            for dbhwent in q.all():
+                hwent_by_id[dbhwent.id] = dbhwent
+
+                iface_by_id = {}
+                slaves_by_id = defaultdict(list)
+
+                # We have all the interfaces loaded already, so compute the
+                # master/slave relationships to avoid having to touch the
+                # database again
+                for iface in dbhwent.interfaces:
+                    iface_by_id[iface.id] = iface
+                    if iface.master_id:
+                        slaves_by_id[iface.master_id].append(iface)
+
+                for iface in dbhwent.interfaces:
+                    set_committed_value(iface, "master",
+                                        iface_by_id.get(iface.master_id, None))
+                    set_committed_value(iface, "slaves", slaves_by_id[iface.id])
+
+            # TODO: once we refactor Host to be an FK to HardwareEntity instead
+            # of Machine, this could be converted to a single joinedload('host')
+            q = session.query(Host)
+            q = q.options(lazyload('machine'))
+            q = q.filter(Host.machine_id.in_(hw_ids))
+            for host in q.all():
+                set_committed_value(hwent_by_id[host.machine_id], "host", host)
+                set_committed_value(host, "machine", hwent_by_id[host.machine_id])
+
         # Add interfaces that have addresses in this network
         for addr in net.assignments:
-            hwent = addr.interface.hardware_entity
-
             if not addr.dns_records:
                 # hostname is a required field in the protobuf description
                 continue
+
+            hwent = addr.interface.hardware_entity
 
             # DHCP: we do not care about secondary IP addresses, but in some
             # cases the same IP address may show up with different MACs

@@ -1,6 +1,7 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012  Contributor
+# Copyright (C) 2008,2009,2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -28,11 +29,15 @@
 # TERMS THAT MAY APPLY.
 """ Helpers for managing DNS-related objects """
 
-from sqlalchemy.orm import object_session, joinedload
+import socket
 
-from aquilon.exceptions_ import ArgumentError, AquilonError
-from aquilon.aqdb.model import (Fqdn, DnsRecord, ARecord, DynamicStub,
-                                ReservedName, DnsEnvironment,
+from sqlalchemy.orm import object_session, joinedload, lazyload
+from sqlalchemy.orm.exc import NoResultFound
+from sqlalchemy.sql import or_
+
+from aquilon.exceptions_ import ArgumentError, AquilonError, NotFoundException
+from aquilon.aqdb.model import (Fqdn, DnsRecord, ARecord, DynamicStub, Alias,
+                                ReservedName, SrvRecord, DnsEnvironment,
                                 AddressAssignment, NetworkEnvironment)
 from aquilon.aqdb.model.dns_domain import parse_fqdn
 from aquilon.aqdb.model.network import get_net_id_from_ip
@@ -56,9 +61,22 @@ def delete_dns_record(dbdns_rec):
         raise ArgumentError("{0} is still in use by SRV records, delete them "
                             "first.".format(dbdns_rec))
 
-    # Lock the FQDN
     dbfqdn = dbdns_rec.fqdn
-    dbfqdn.lock_row()
+    targets = []
+    if getattr(dbdns_rec, 'reverse_ptr', None):
+        targets.append(dbdns_rec.reverse_ptr)
+    if getattr(dbdns_rec, 'target', None):
+        targets.append(dbdns_rec.target)
+
+    # Lock the affected DNS domains
+    dns_domains = [dbfqdn.dns_domain]
+    for tgt in targets:
+        if tgt.dns_domain in dns_domains:
+            continue
+        dns_domains.append(tgt.dns_domain)
+    dns_domains.sort()  # poor man's deadlock avoidance
+    for dbdns_domain in dns_domains:
+        dbdns_domain.lock_row()
 
     # Delete the DNS record
     session.delete(dbdns_rec)
@@ -66,11 +84,16 @@ def delete_dns_record(dbdns_rec):
 
     # Delete the FQDN if it is orphaned
     q = session.query(DnsRecord)
-    q = q.filter_by(fqdn_id=dbfqdn.id)
+    q = q.filter_by(fqdn=dbfqdn)
     if q.count() == 0:
         session.delete(dbfqdn)
     else:
         session.expire(dbfqdn, ['dns_records'])
+
+    # Delete the orphaned targets
+    for tgt in targets:
+        delete_target_if_needed(session, tgt)
+
 
 def convert_reserved_to_arecord(session, dbdns_rec, dbnetwork, ip):
     comments = dbdns_rec.comments
@@ -89,6 +112,7 @@ def convert_reserved_to_arecord(session, dbdns_rec, dbnetwork, ip):
 
     return dbdns_rec
 
+
 def _check_netenv_compat(dbdns_rec, dbnet_env):
     """ Verify that a DNS record is consistent with a network environment """
     dbnetwork = dbdns_rec.network
@@ -99,13 +123,14 @@ def _check_netenv_compat(dbdns_rec, dbnet_env):
                             .format(dbdns_rec, dbnetwork.network_environment,
                                     dbnet_env))
 
+
 def _forbid_dyndns(dbdns_rec):
     """ Raise an error if the address is reserved for dynamic DHCP """
     if isinstance(dbdns_rec, DynamicStub):
-            raise ArgumentError("Address {0:a} is reserved for dynamic "
-                            "DHCP.".format(dbdns_rec))
+        raise ArgumentError("Address {0:a} is reserved for dynamic "
+                        "DHCP.".format(dbdns_rec))
 
-#
+
 # Locking rules:
 # - Locking the DNS domain ensures exclusive access to the name
 # - Locking the network ensures exclusive access to the IP address allocation
@@ -193,7 +218,7 @@ def grab_address(session, fqdn, ip, network_environment=None,
         # CNAME when the dump_dns command is called.
         q = session.query(ARecord)
         q = q.filter_by(network=dbnetwork, ip=ip)
-        q = q.join(Fqdn)
+        q = q.join(ARecord.fqdn)
         q = q.filter_by(dns_environment=dns_environment)
         dbrecords = q.all()
         if dbrecords and len(dbrecords) > 1:  # pragma: no cover
@@ -281,3 +306,98 @@ def grab_address(session, fqdn, ip, network_environment=None,
                                 "{1:l}.".format(ip, addr.interface))
 
     return (existing_record, newly_created)
+
+
+def create_target_if_needed(session, logger, target, dbdns_env):
+    """
+    Create FQDNs in restricted domains.
+
+    This is used to allow pointing CNAME and PTR records to DNS domains we
+    otherwise don't manage.
+    """
+    name, dbtarget_domain = parse_fqdn(session, target)
+
+    dbtarget_domain.lock_row()
+
+    q = session.query(Fqdn)
+    q = q.filter_by(dns_environment=dbdns_env)
+    q = q.filter_by(dns_domain=dbtarget_domain)
+    q = q.filter_by(name=name)
+    try:
+        dbtarget = q.one()
+    except NoResultFound:
+        if not dbtarget_domain.restricted:
+            raise NotFoundException("Target FQDN {0} does not exist in {1:l}."
+                                    .format(target, dbdns_env))
+
+        dbtarget = Fqdn(name=name, dns_domain=dbtarget_domain,
+                        dns_environment=dbdns_env)
+
+        try:
+            socket.gethostbyname(dbtarget.fqdn)
+        except socket.gaierror, e:
+            logger.warning("WARNING: Will create a reference to {0.fqdn!s}, "
+                           "but trying to resolve it resulted in an error: "
+                           "{1.strerror}.".format(dbtarget, e))
+
+        session.add(dbtarget)
+        dbtarget_rec = ReservedName(fqdn=dbtarget)
+        session.add(dbtarget_rec)
+
+    return dbtarget
+
+
+def delete_target_if_needed(session, dbtarget):
+    session.flush()
+
+    # If there's a ReservedName pointing to this FQDN and we're in a restricted
+    # domain, then auto-remove the ReservedName entry
+    if dbtarget.dns_records:
+        if not dbtarget.dns_domain.restricted:
+            return
+
+        for dbdns_rec in dbtarget.dns_records:
+            if not isinstance(dbdns_rec, ReservedName):
+                return
+            if dbdns_rec.hardware_entity:
+                return
+    else:
+        dbdns_rec = None
+
+    # Check if the FQDN is still the target of an existing alias, service record
+    # or reverse PTR record
+    q = session.query(DnsRecord)
+    q = q.with_polymorphic([ARecord, Alias, SrvRecord])
+    q = q.filter(or_(ARecord.reverse_ptr_id == dbtarget.id,
+                     Alias.target_id == dbtarget.id,
+                     SrvRecord.target_id == dbtarget.id))
+    q = q.options(lazyload('fqdn'))
+    if not q.count():
+        for dbdns_rec in dbtarget.dns_records:
+            session.delete(dbdns_rec)
+        session.delete(dbtarget)
+    else:
+        session.expire(dbtarget, ['dns_records'])
+
+
+def set_reverse_ptr(session, logger, dbdns_rec, reverse_ptr):
+    if isinstance(reverse_ptr, Fqdn):
+        dbreverse = reverse_ptr
+    else:
+        dbreverse = create_target_if_needed(session, logger, reverse_ptr,
+                                            dbdns_rec.fqdn.dns_environment)
+    # Technically the reverse PTR could point to other types, not just
+    # ARecord, but there are no use cases for that, so better avoid
+    # confusion
+    for rec in dbreverse.dns_records:
+        if not isinstance(rec, ARecord) and \
+           not isinstance(rec, ReservedName):
+            raise ArgumentError("The reverse PTR cannot point "
+                                "to {0:lc}.".format(rec))
+    if dbreverse != dbdns_rec.fqdn:
+        try:
+            dbdns_rec.reverse_ptr = dbreverse
+        except ValueError, err:
+            raise ArgumentError(err)
+    else:
+        dbdns_rec.reverse_ptr = None

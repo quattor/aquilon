@@ -1,7 +1,8 @@
 #!/usr/bin/env python2.6
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012  Contributor
+# Copyright (C) 2008,2009,2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -29,7 +30,6 @@
 # TERMS THAT MAY APPLY.
 """Module for testing the reconfigure command."""
 
-import re
 import unittest
 
 if __name__ == "__main__":
@@ -55,7 +55,7 @@ class TestChangeStatus(TestBrokerCommand):
 
             command = "cat --hostname unittest02.one-nyp.ms.com --data"
             out = self.commandtest(command.split(" "))
-            self.matchoutput(out, '"/system/build" = "%s";' % status, command)
+            self.matchoutput(out, '"system/build" = "%s";' % status, command)
 
         # And a transition that should be illegal from the final state above (ready)
         command = ["change_status", "--hostname=unittest02.one-nyp.ms.com",
@@ -77,7 +77,7 @@ class TestChangeStatus(TestBrokerCommand):
 
             command = "cat --hostname unittest02.one-nyp.ms.com --data"
             out = self.commandtest(command.split(" "))
-            self.matchoutput(out, '"/system/build" = "%s";' % status, command)
+            self.matchoutput(out, '"system/build" = "%s";' % status, command)
 
         # And a transition that should be illegal from the final state above (ready)
         command = ["change_status", "--hostname=unittest02.one-nyp.ms.com",
@@ -85,7 +85,6 @@ class TestChangeStatus(TestBrokerCommand):
         self.badrequesttest(command)
 
 
-
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestChangeStatus)
     unittest.TextTestRunner(verbosity=2).run(suite)

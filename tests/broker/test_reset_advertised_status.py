@@ -1,7 +1,8 @@
 #!/usr/bin/env python2.6
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012  Contributor
+# Copyright (C) 2008,2009,2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -56,7 +57,7 @@ class TestResetAdvertisedStatus(TestBrokerCommand):
             (out, err) = self.successtest(command)
 
             ## reset advertised state to build
-            command = ["reset_advertised_status", "--hostname" , hostname]
+            command = ["reset_advertised_status", "--hostname", hostname]
 
             if (status == "ready"):
                 advertise_status = "True"
@@ -66,24 +67,23 @@ class TestResetAdvertisedStatus(TestBrokerCommand):
             else:
                 (out, err) = self.successtest(command)
 
-
             command = "show host --hostname %s" % hostname
             out = self.commandtest(command.split(" "))
             self.matchoutput(out, "Build Status: %s" % status, command)
             self.matchoutput(out, "Advertise Status: %s" % advertise_status,
                              command)
 
-            command = "cat --hostname %s --data"  % hostname
+            command = "cat --hostname %s --data" % hostname
             out = self.commandtest(command.split(" "))
-            self.matchoutput(out, '"/system/build" = "%s";' % status,
+            self.matchoutput(out, '"system/build" = "%s";' % status,
                              command)
-            self.matchoutput(out, '"/system/advertise_status" = %s' %
+            self.matchoutput(out, '"system/advertise_status" = %s' %
                              advertise_status.lower(), command)
 
     def testunittest02(self):
         """ test reset advertised status on various build status """
 
-        hostname = "unittest02.one-nyp.ms.com";
+        hostname = "unittest02.one-nyp.ms.com"
         hosts = [hostname]
         scratchfile = self.writescratch("hostlist", "".join(hosts))
 
@@ -108,18 +108,17 @@ class TestResetAdvertisedStatus(TestBrokerCommand):
             else:
                 (out, err) = self.successtest(command)
 
-
-            command = "show host --hostname %s"  % hostname
+            command = "show host --hostname %s" % hostname
             out = self.commandtest(command.split(" "))
             self.matchoutput(out, "Build Status: %s" % status, command)
             self.matchoutput(out, "Advertise Status: %s" % advertise_status,
                              command)
 
-            command = "cat --hostname %s --data"  % hostname
+            command = "cat --hostname %s --data" % hostname
             out = self.commandtest(command.split(" "))
-            self.matchoutput(out, '"/system/build" = "%s";' % status,
+            self.matchoutput(out, '"system/build" = "%s";' % status,
                              command)
-            self.matchoutput(out, '"/system/advertise_status" = %s' %
+            self.matchoutput(out, '"system/advertise_status" = %s' %
                              advertise_status.lower(), command)
 
     def testunittest03(self):
@@ -145,6 +144,20 @@ class TestResetAdvertisedStatus(TestBrokerCommand):
             command = ["change_status", "--hostname", host,
                        "--buildstatus", "ready"]
             (out, err) = self.successtest(command)
+
+    def testfailoverlimitlist(self):
+        user = self.config.get("unittest", "user")
+        hostlimit = self.config.getint("broker", "reset_advertised_status_max_list_size")
+        hosts = []
+        for i in range(1,20):
+            hosts.append("thishostdoesnotexist%d.aqd-unittest.ms.com\n" %i)
+        scratchfile = self.writescratch("mapgrnlistlimit", "".join(hosts))
+        command = ["unmap", "grn", "--grn", "grn:/ms/ei/aquilon/aqd",
+                   "--list", scratchfile]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,"The number of hosts in list {0:d} can not be more "
+                         "than {1:d}".format(len(hosts), hostlimit), command)
+
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestResetAdvertisedStatus)

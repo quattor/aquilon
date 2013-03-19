@@ -4,6 +4,7 @@
 <!ENTITY aqd_version SYSTEM "../version.txt">
 ]>
 <refentry xml:id="update_personality"
+          xmlns="http://docbook.org/ns/docbook"
 	  xmlns:xi="http://www.w3.org/2001/XInclude">
     <refmeta>
         <refentrytitle>update_personality</refentrytitle>
@@ -28,7 +29,11 @@
 	    </group>
 	    <arg choice="plain"><option>--personality <replaceable>PERSONALITY</replaceable></option></arg>
 	    <arg choice="plain"><option>--archetype <replaceable>ARCHETYPE</replaceable></option></arg>
-	    <arg choice="opt"><option>--cluster_required <replaceable>CLUSTER_REQUIRED</replaceable></option></arg>
+	    <group choice="opt">
+		<arg choice="plain"><option>--grn <replaceable>GRN</replaceable></option></arg>
+		<arg choice="plain"><option>--eon_id <replaceable>EON_ID</replaceable></option></arg>
+	    </group>
+	    <arg choice="opt"><option>--leave_existing</option></arg>
             <group choice="opt">
 	    	<arg choice="plain"><option>--cluster_required</option></arg>
 		<arg choice="plain"><option>--nocluster_required</option></arg>
@@ -39,6 +44,7 @@
 	    </group>
 	    <arg choice="opt"><option>--vmhost_capacity_function <replaceable>VMHOST_CAPACITY_FUNCTION</replaceable></option></arg>
 	    <arg choice="opt"><option>--vmhost_overcommit_memory <replaceable>VMHOST_iOVERCOMMIT_MEMORY</replaceable></option></arg>
+	    <arg choice="opt"><option>--host_environment <replaceable>HOST_ENVIRONMENT</replaceable></option></arg>
 	    <xi:include href="../common/global_options.xml"/>
 	</cmdsynopsis>
     </refsynopsisdiv>
@@ -70,7 +76,31 @@
 		</term>
 		<listitem>
 		    <para>
-                        The name of the archteype.
+                        The name of the archteype, if the personality name is not unique.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+		<term>
+		    <option>--grn <replaceable>GRN</replaceable></option>
+		    <option>--eon_id <replaceable>EON_ID</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Change the owner GRN of the personality. If the <option>--leave_existing</option> option is not
+			specified, all hosts having the same owner GRN as the personality will be updated as well. Hosts
+			having an owner GRN different from the original owner of the personality will not be affected.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--leave_existing</option>
+		</term>
+		<listitem>
+		    <para>
+			Do not cascade updates to hosts belonging to the personality. Currently only updating the owner
+			GRN is cascaded to the member hosts.
 		    </para>
 		</listitem>
 	    </varlistentry>
@@ -114,6 +144,19 @@
 		<listitem>
 		    <para>
                         Memory overcommit factor for VM hosts.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+			<option>--host_environment <replaceable>HOST_ENVIRONMENT</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+                        Environment for hosts assigned to this personality.
+			Possible values:<literal>dev</literal>, <literal>qa</literal>, <literal>uat</literal>, <literal>prod</literal>, <literal>infra</literal>.
+			Once the environment has been set to anything other that <literal>legacy</literal>, it
+			cannot be updated.
 		    </para>
 		</listitem>
 	    </varlistentry>

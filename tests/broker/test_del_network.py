@@ -1,7 +1,8 @@
 #!/usr/bin/env python2.6
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012  Contributor
+# Copyright (C) 2008,2009,2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -43,6 +44,11 @@ class TestDelNetwork(TestBrokerCommand):
     def testdelnetwork(self):
         for network in self.net.all:
             command = ["del_network", "--ip=%s" % network.ip]
+            self.noouttest(command)
+
+    def testdelauroranetwork(self):
+        for ip in ["144.14.174.0", "10.184.155.0"]:
+            command = ["del_network", "--ip=%s" % ip]
             self.noouttest(command)
 
     def testdelnetworkdup(self):
@@ -143,6 +149,5 @@ class TestDelNetwork(TestBrokerCommand):
 
 
 if __name__ == '__main__':
-    suite = unittest.TestLoader().loadTestsFromTestCase(TestAddNetwork)
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestDelNetwork)
     unittest.TextTestRunner(verbosity=2).run(suite)
-

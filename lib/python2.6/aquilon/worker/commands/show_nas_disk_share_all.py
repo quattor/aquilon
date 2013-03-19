@@ -1,6 +1,7 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012  Contributor
+# Copyright (C) 2008,2009,2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -31,22 +32,27 @@
 
 from sqlalchemy.orm import undefer
 
-from aquilon.exceptions_ import InternalError
-from aquilon.worker.broker import BrokerCommand
-from aquilon.aqdb.model import Service, ServiceInstance
-from aquilon.worker.formats.service_instance import Share
+from aquilon.exceptions_ import NotFoundException
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.aqdb.model import Share, ClusterResource, EsxCluster
+from aquilon.worker.formats.service_instance import ServiceShareList
 
 
 class CommandShowNASDiskShareAll(BrokerCommand):
 
     required_parameters = []
 
-    def render(self, session, **arguments):
-        nas_disk_share = Service.get_unique(session, name='nas_disk_share',
-                                            compel=InternalError)
-        q = session.query(ServiceInstance)
-        q = q.filter_by(service=nas_disk_share)
-        q = q.options(undefer(ServiceInstance.nas_disk_count))
-        q = q.options(undefer(ServiceInstance.nas_machine_count))
-        q = q.order_by(ServiceInstance.name)
-        return [Share(dbshare) for dbshare in q.all()]
+    def render(self, session, logger, share, **arguments):
+        self.deprecated_command("show_nas_disk_share is deprecated, please use "
+                                "show_share instead.", logger=logger,
+                                **arguments)
+        q = session.query(Share)
+        if share:
+            q = q.filter_by(name=share)
+        q = q.join(ClusterResource, EsxCluster)
+        q = q.options(undefer(Share.disk_count))
+        q = q.options(undefer(Share.machine_count))
+        result = q.all()
+        if share and not result:
+            raise NotFoundException("Share %s does not exist." % share)
+        return ServiceShareList(result)

@@ -1,7 +1,8 @@
 #!/usr/bin/env python2.6
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2010,2011,2012  Contributor
+# Copyright (C) 2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -52,8 +53,7 @@ class TestUpdateSwitch(TestBrokerCommand, VerifySwitchMixin):
 
     def testupdateut3gd1r04(self):
         newip = self.net.tor_net[6].usable[1]
-        self.dsdb_expect_update_ip("ut3gd1r04.aqd-unittest.ms.com", "xge49", newip)
-        self.dsdb_expect_update("ut3gd1r04.aqd-unittest.ms.com",
+        self.dsdb_expect_update("ut3gd1r04.aqd-unittest.ms.com", "xge49", newip,
                                 comments="Some new switch comments")
         command = ["update", "switch", "--type", "bor",
                    "--switch", "ut3gd1r04.aqd-unittest.ms.com",
@@ -67,11 +67,11 @@ class TestUpdateSwitch(TestBrokerCommand, VerifySwitchMixin):
         command = ["update", "switch", "--ip", ip,
                    "--switch", "ut3gd1r04.aqd-unittest.ms.com"]
         out = self.badrequesttest(command)
-        self.matchoutput (out,
-                          "IP address %s is already in use by on-board admin "
-                          "interface xge of switch "
-                          "ut3gd1r01.aqd-unittest.ms.com." % ip,
-                          command)
+        self.matchoutput(out,
+                         "IP address %s is already in use by on-board admin "
+                         "interface xge of switch "
+                         "ut3gd1r01.aqd-unittest.ms.com." % ip,
+                         command)
 
     def testupdatemisc(self):
         command = ["update", "switch",
@@ -83,8 +83,9 @@ class TestUpdateSwitch(TestBrokerCommand, VerifySwitchMixin):
     def testaddinterface(self):
         ip = self.net.tor_net[8].usable[0]
         mac = self.net.tor_net[8].usable[1].mac
-        self.dsdb_expect_delete(ip)
-        self.dsdb_expect_add("ut3gd1r06.aqd-unittest.ms.com", ip, "xge49", mac)
+        self.dsdb_expect_update("ut3gd1r06.aqd-unittest.ms.com", "xge", mac=mac)
+        self.dsdb_expect_rename("ut3gd1r06.aqd-unittest.ms.com", iface="xge",
+                                new_iface="xge49")
         command = ["add_interface", "--switch=ut3gd1r06.aqd-unittest.ms.com",
                    "--interface=xge49", "--mac", mac]
         self.noouttest(command)
@@ -98,13 +99,12 @@ class TestUpdateSwitch(TestBrokerCommand, VerifySwitchMixin):
 
     def testupdatewithinterface(self):
         newip = self.net.tor_net[8].usable[1]
-        self.dsdb_expect_update_ip("ut3gd1r06.aqd-unittest.ms.com", "xge49", newip)
+        self.dsdb_expect_update("ut3gd1r06.aqd-unittest.ms.com", "xge49", newip)
         command = ["update", "switch",
                    "--switch", "ut3gd1r06.aqd-unittest.ms.com",
                    "--ip", newip]
         self.noouttest(command)
         self.dsdb_verify()
-
 
     def testverifyupdatewithoutinterface(self):
         self.verifyswitch("ut3gd1r04.aqd-unittest.ms.com", "hp", "uttorswitch",

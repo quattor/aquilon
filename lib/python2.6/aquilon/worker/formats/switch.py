@@ -1,6 +1,7 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2010,2011,2012  Contributor
+# Copyright (C) 2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -60,31 +61,6 @@ class SwitchInterfaceTupleFormatter(ObjectFormatter):
 ObjectFormatter.handlers[SwitchInterfaceTuple] = SwitchInterfaceTupleFormatter()
 
 
-class TorSwitchInterfaceTuple(tuple):
-    """Compatibility Layer for deprecated commands."""
-
-
-class TorSwitchInterfaceTupleFormatter(ObjectFormatter):
-    def csv_fields(self, item):
-        switch = item[0]
-        interface = item[1]
-        addr = item[2]
-
-        details = [switch.fqdn,
-                   switch.location.rack.name,
-                   switch.location.building.name,
-                   switch.model.vendor.name,
-                   switch.model.name,
-                   switch.serial_no]
-        if interface:
-            details.extend([addr.logical_name, interface.mac, addr.ip])
-        else:
-            details.extend([None, None, None])
-        return details
-
-ObjectFormatter.handlers[TorSwitchInterfaceTuple] = TorSwitchInterfaceTupleFormatter()
-
-
 class SwitchFormatter(ObjectFormatter):
     def format_raw(self, switch, indent=""):
         details = [indent + "%s: %s" % (switch.model.machine_type.capitalize(),
@@ -98,8 +74,8 @@ class SwitchFormatter(ObjectFormatter):
         if switch.serial_no:
             details.append(indent + "  Serial: %s" % switch.serial_no)
         for om in switch.observed_macs:
-            details.append(indent + "  Port %d: %s" %
-                           (om.port_number, om.mac_address))
+            details.append(indent + "  Port %s: %s" %
+                           (om.port, om.mac_address))
             details.append(indent + "    Created: %s Last Seen: %s" %
                            (om.creation_date, om.last_seen))
         for ov in switch.observed_vlans:
@@ -131,28 +107,9 @@ class SwitchFormatter(ObjectFormatter):
 ObjectFormatter.handlers[Switch] = SwitchFormatter()
 
 
-class TorSwitch(object):
-    """Wrapper to mark switch objects that need to have the old CSV output."""
-    def __init__(self, dbtor_switch):
-        self.dbtor_switch = dbtor_switch
-    def __getattr__(self, attr):
-        return getattr(self.dbtor_switch, attr)
-
-class TorSwitchFormatter(SwitchFormatter):
-    """Wrapper to use the old CSV output."""
-    def csv_tolist(self, switch):
-        tuples = []
-        for addr in switch.all_addresses():
-            tuples.append(TorSwitchInterfaceTuple((switch, addr.interface, addr)))
-        if len(tuples):
-            return tuples
-        else:
-            return [TorSwitchInterfaceTuple((switch, None, None))]
-
-ObjectFormatter.handlers[TorSwitch] = TorSwitchFormatter()
-
 class SimpleSwitchList(list):
     pass
+
 
 class SimpleSwitchListFormatter(ListFormatter):
     def format_raw(self, objects, indent=""):

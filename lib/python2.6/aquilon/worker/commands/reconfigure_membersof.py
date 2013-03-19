@@ -1,6 +1,7 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2009,2010,2011,2012  Contributor
+# Copyright (C) 2009,2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -30,7 +31,7 @@
 
 
 from aquilon.aqdb.model import Cluster
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.commands.reconfigure_list import CommandReconfigureList
 
 
@@ -39,8 +40,8 @@ class CommandReconfigureMembersof(CommandReconfigureList):
     required_parameters = ["membersof"]
 
     def render(self, session, logger, membersof, archetype, personality,
-               buildstatus, osname, osversion, os, **arguments):
+               buildstatus, osname, osversion, **arguments):
         dbcluster = Cluster.get_unique(session, membersof, compel=True)
         self.reconfigure_list(session, logger, dbcluster.hosts,
                               archetype, personality,
-                              buildstatus, osname, osversion, os, **arguments)
+                              buildstatus, osname, osversion, **arguments)

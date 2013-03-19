@@ -1,7 +1,8 @@
 #!/usr/bin/env python2.6
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012  Contributor
+# Copyright (C) 2008,2009,2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -53,19 +54,20 @@ from test_map_dns_domain import TestMapDnsDomain
 from test_unmap_dns_domain import TestUnmapDnsDomain
 
 #TODO: have TestBrokerStart/Stop as fixtures, not tests
-dns = [ TestBrokerStart,
-        ### ADDS ###
-        TestPing, TestAddDnsDomain, TestAddBuilding, TestMapDnsDomain,
-        TestAddNetwork, TestAddDnsRecords,
-        ### DELETES ###
-        TestDelDnsRecords, TestUnmapDnsDomain, TestDelNetwork,
-        TestDelDnsDomain, TestDelBuilding,
-        ### TEAR DOWN ###
-        TestBrokerStop]
+dns = [TestBrokerStart,
+       ### ADDS ###
+       TestPing, TestAddDnsDomain, TestAddBuilding, TestMapDnsDomain,
+       TestAddNetwork, TestAddDnsRecords,
+       ### DELETES ###
+       TestDelDnsRecords, TestUnmapDnsDomain, TestDelNetwork,
+       TestDelDnsDomain, TestDelBuilding,
+       ### TEAR DOWN ###
+       TestBrokerStop]
 
 tiny = [TestBrokerStart, TestPing, TestBrokerStop]
 
 suites = {'tiny': tiny, 'dns': dns}
+
 
 class MySuite(nose.suite.ContextSuite):
     def __init__(self, tests='tiny', *args, **kwargs):
@@ -76,7 +78,7 @@ class MySuite(nose.suite.ContextSuite):
             self.addTest(loader.loadTestsFromTestCase(t))
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     import sys
     import orderedsuite
 
@@ -87,7 +89,7 @@ if __name__=='__main__':
     else:
         for k in suites.keys():
             if k in sys.argv:
-               suite = MySuite(tests=k)
+                suite = MySuite(tests=k)
 
     if not suite:
         suite = MySuite()

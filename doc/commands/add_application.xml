@@ -4,6 +4,7 @@
 <!ENTITY aqd_version SYSTEM "../version.txt">
 ]>
 <refentry xml:id="add_application"
+          xmlns="http://docbook.org/ns/docbook"
 	  xmlns:xi="http://www.w3.org/2001/XInclude">
     <refmeta>
         <refentrytitle>add_application</refentrytitle>
@@ -118,6 +119,16 @@ The EON reference ID of the application.
 			A name for the application. This is the internal name
 			which must be unique for the specific host. The name
 			must consist of only alphanumeric characters.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--comments <replaceable>COMMENTS</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Free-form comments for the application resource.
 		    </para>
 		</listitem>
 	    </varlistentry>

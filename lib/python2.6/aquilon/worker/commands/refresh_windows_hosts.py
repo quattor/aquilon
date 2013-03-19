@@ -1,6 +1,7 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2009,2010,2011,2012  Contributor
+# Copyright (C) 2009,2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -32,15 +33,15 @@
 import sqlite3
 
 from aquilon.exceptions_ import PartialError, InternalError, AquilonError
-from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.dbwrappers.dns import delete_dns_record
-from aquilon.worker.dbwrappers.host import get_host_dependencies
-from aquilon.worker.templates.base import Plenary, PlenaryCollection
-from aquilon.worker.locks import SyncKey
 from aquilon.aqdb.model import (Host, Interface, Machine, Domain, Archetype,
                                 Personality, HostLifecycle, DnsRecord,
                                 OperatingSystem, ReservedName, Fqdn)
 from aquilon.aqdb.model.dns_domain import parse_fqdn
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.dbwrappers.dns import delete_dns_record
+from aquilon.worker.dbwrappers.host import get_host_dependencies
+from aquilon.worker.templates.base import Plenary, PlenaryCollection
+from aquilon.worker.locks import SyncKey
 
 
 class CommandRefreshWindowsHosts(BrokerCommand):
@@ -129,8 +130,8 @@ class CommandRefreshWindowsHosts(BrokerCommand):
         session.autoflush = False
 
         dbdomain = Domain.get_unique(session,
-                                     self.config.get("broker",
-                                                     "windows_host_domain"),
+                                     self.config.get("archetype_windows",
+                                                     "host_domain"),
                                      compel=InternalError)
         dbarchetype = Archetype.get_unique(session, "windows",
                                            compel=InternalError)
@@ -207,10 +208,11 @@ class CommandRefreshWindowsHosts(BrokerCommand):
                 logger.info(msg)
                 continue
             dbhost = Host(machine=dbmachine, branch=dbdomain,
-                          status=dbstatus,
+                          status=dbstatus, owner_grn=dbpersonality.owner_grn,
                           personality=dbpersonality, operating_system=dbos,
                           comments="Created by refresh_windows_host")
             session.add(dbhost)
+            dbhost.grns.append(dbpersonality.owner_grn)
             dbfqdn = Fqdn.get_or_create(session, name=short,
                                         dns_domain=dbdns_domain, preclude=True)
             dbdns_rec = ReservedName(fqdn=dbfqdn)

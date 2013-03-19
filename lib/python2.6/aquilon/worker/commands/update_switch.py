@@ -1,6 +1,7 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2010,2011,2012  Contributor
+# Copyright (C) 2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -31,10 +32,11 @@
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Model, Switch
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.location import get_location
 from aquilon.worker.dbwrappers.hardware_entity import (update_primary_ip,
                                                        rename_hardware)
+from aquilon.worker.dbwrappers.switch import discover_switch
 from aquilon.worker.locks import lock_queue, CompileKey
 from aquilon.worker.processes import DSDBRunner
 from aquilon.worker.templates.base import Plenary
@@ -44,11 +46,14 @@ class CommandUpdateSwitch(BrokerCommand):
 
     required_parameters = ["switch"]
 
-    def render(self, session, logger, switch, model, rack, type, ip,
-               vendor, serial, comments, rename_to, **arguments):
+    def render(self, session, logger, switch, model, rack, type, ip, vendor,
+               serial, rename_to, discover, comments, **arguments):
         dbswitch = Switch.get_unique(session, switch, compel=True)
 
         oldinfo = DSDBRunner.snapshot_hw(dbswitch)
+
+        if discover:
+            discover_switch(session, logger, self.config, dbswitch, False)
 
         if vendor and not model:
             model = dbswitch.model.name

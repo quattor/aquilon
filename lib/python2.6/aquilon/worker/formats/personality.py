@@ -1,6 +1,7 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2009,2010,2011,2012  Contributor
+# Copyright (C) 2009,2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -74,9 +75,12 @@ class PersonalityFormatter(ObjectFormatter):
         details = [indent + "%s Personality: %s" % (description,
                                                     personality) +
                    " Archetype: %s" % personality.archetype]
-        details.append(indent + "  Environment: %s" %  personality.host_environment)
+        details.append(indent +
+                       "  Environment: %s" % personality.host_environment)
+        details.append(indent + "  Owned by {0:c}: {0.grn}"
+                       .format(personality.owner_grn))
         for grn in personality.grns:
-            details.append(indent + "  GRN: %s" % grn)
+            details.append(indent + "  Used by {0:c}: {0.grn}".format(grn))
 
         if personality.config_override:
             details.append(indent + "  Config override: enabled")
@@ -158,7 +162,7 @@ class PersonalityFormatter(ObjectFormatter):
             rsvc_msg.service = service.name
 
         if personality.comments:
-            skeleton.comments =  personality.comments
+            skeleton.comments = personality.comments
 
         skeleton.config_override = personality.config_override
         skeleton.cluster_required = personality.cluster_required

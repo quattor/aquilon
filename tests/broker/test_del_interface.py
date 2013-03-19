@@ -1,7 +1,8 @@
 #!/usr/bin/env python2.6
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2012  Contributor
+# Copyright (C) 2008,2009,2010,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -80,18 +81,17 @@ class TestDelInterface(TestBrokerCommand):
         self.matchclean(out, "eth0", command)
         self.matchclean(out, "eth1", command)
 
-    def testdelut3gd1r04vlan110(self):
-        command = ["del", "interface", "--interface", "vlan110",
+    def testdelut3gd1r04vlan220(self):
+        command = ["del", "interface", "--interface", "vlan220",
                    "--switch", "ut3gd1r04.aqd-unittest.ms.com"]
         self.noouttest(command)
 
-    def testverifydelut3gd1r04vlan110(self):
+    def testverifydelut3gd1r04vlan220(self):
         command = ["show", "switch", "--switch", "ut3gd1r04.aqd-unittest.ms.com"]
         out = self.commandtest(command)
-        self.matchclean(out, "vlan110", command)
+        self.matchclean(out, "vlan220", command)
 
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelInterface)
     unittest.TextTestRunner(verbosity=2).run(suite)
-

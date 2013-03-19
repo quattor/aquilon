@@ -1,6 +1,7 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012  Contributor
+# Copyright (C) 2008,2009,2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -32,15 +33,16 @@
 from sqlalchemy.orm import aliased, contains_eager
 from sqlalchemy.sql import or_
 
-from aquilon.worker.broker import BrokerCommand
+from aquilon.exceptions_ import NotFoundException
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.formats.host import SimpleHostList
 from aquilon.aqdb.model import (Host, Cluster, Archetype, Personality,
-                                PersonalityGrnMap, HostGrnMap,
-                                HostLifecycle, OperatingSystem, Service,
-                                ServiceInstance, NasDisk, Disk, Machine, Model,
-                                ARecord, Fqdn, DnsDomain, Interface,
-                                AddressAssignment, NetworkEnvironment, Network,
-                                MetaCluster, VirtualMachine, ClusterResource)
+                                PersonalityGrnMap, HostGrnMap, HostLifecycle,
+                                OperatingSystem, Service, Share,
+                                VirtualDisk, Disk, Machine, Model, ARecord,
+                                DnsDomain, Interface, AddressAssignment,
+                                NetworkEnvironment, Network, MetaCluster,
+                                VirtualMachine, ClusterResource)
 from aquilon.aqdb.model.dns_domain import parse_fqdn
 from aquilon.worker.dbwrappers.service_instance import get_service_instance
 from aquilon.worker.dbwrappers.branch import get_branch_and_author
@@ -64,7 +66,7 @@ class CommandSearchHost(BrokerCommand):
         dbnet_env = NetworkEnvironment.get_unique_or_default(session,
                                                              network_environment)
         dnsq = session.query(ARecord.ip)
-        dnsq = dnsq.join(Fqdn)
+        dnsq = dnsq.join(ARecord.fqdn)
         use_dnsq = False
         if hostname:
             (short, dbdns_domain) = parse_fqdn(session, hostname)
@@ -202,8 +204,8 @@ class CommandSearchHost(BrokerCommand):
             if server_of_instance:
                 dbssi = get_service_instance(session, dbserver_service,
                                              server_of_instance)
-                q = q.join ('_services_provided')
-                q = q.filter_by (service_instance=dbssi)
+                q = q.join('_services_provided')
+                q = q.filter_by(service_instance=dbssi)
                 q = q.reset_joinpoint()
             else:
                 q = q.join('_services_provided', 'service_instance')
@@ -230,46 +232,44 @@ class CommandSearchHost(BrokerCommand):
             q = q.filter_by(cluster=dbcluster)
             q = q.reset_joinpoint()
         if guest_on_share:
-            nas_disk_share = Service.get_unique(session, name='nas_disk_share',
-                                                compel=True)
-            dbshare = ServiceInstance.get_unique(session, name=guest_on_share,
-                                                 service=nas_disk_share,
-                                                 compel=True)
-            NasAlias = aliased(NasDisk)
-            q = q.join('machine', 'disks', (NasAlias, NasAlias.id==Disk.id))
-            q = q.filter_by(service_instance=dbshare)
+            #v2
+            v2shares = session.query(Share.id).filter_by(name=guest_on_share).all()
+            if not v2shares:
+                raise NotFoundException("No shares found with name {0}."
+                                        .format(guest_on_share))
+
+            NasAlias = aliased(VirtualDisk)
+            q = q.join('machine', 'disks', (NasAlias, NasAlias.id == Disk.id))
+            q = q.filter(
+                NasAlias.share_id.in_(map(lambda s: s[0], v2shares)))
             q = q.reset_joinpoint()
+
         if member_cluster_share:
-            nas_disk_share = Service.get_unique(session, name='nas_disk_share',
-                                                compel=True)
-            dbshare = ServiceInstance.get_unique(session,
-                                                 name=member_cluster_share,
-                                                 service=nas_disk_share,
-                                                 compel=True)
-            NasAlias = aliased(NasDisk)
+            #v2
+            v2shares = session.query(Share.id).filter_by(name=member_cluster_share).all()
+            if not v2shares:
+                raise NotFoundException("No shares found with name {0}."
+                                        .format(guest_on_share))
+
+            NasAlias = aliased(VirtualDisk)
+
             q = q.join('_cluster', 'cluster', 'resholder', VirtualMachine,
-                       'machine', 'disks', (NasAlias, NasAlias.id==Disk.id))
-            q = q.filter_by(service_instance=dbshare)
+                       'machine', 'disks', (NasAlias, NasAlias.id == Disk.id))
+            q = q.filter(
+                NasAlias.share_id.in_(map(lambda s: s[0], v2shares)))
             q = q.reset_joinpoint()
 
         if grn or eon_id:
             dbgrn = lookup_grn(session, grn, eon_id, autoupdate=False)
 
-            # For some reason, this does not work:
-            # q = q.join(Personality).filter_by(or_(Personality.grns.contains(dbgrn),
-            #                                       Host.grns.contains(dbgrn)))
-            # The generated SQL query contains an implicit inner join instead of
-            # an outer join, so if either PersonalityGrnMap or HostGrnMap is
-            # empty, there will be no results
-
-            PersAlias = aliased(Personality)
-            q = q.join(PersAlias)
-            q = q.outerjoin(PersonalityGrnMap)
-            q = q.reset_joinpoint()
+            persq = session.query(Personality.id)
+            persq = persq.outerjoin(PersonalityGrnMap)
+            persq = persq.filter(or_(Personality.owner_eon_id == dbgrn.eon_id,
+                                     PersonalityGrnMap.eon_id == dbgrn.eon_id))
             q = q.outerjoin(HostGrnMap)
-            q = q.reset_joinpoint()
-            q = q.filter(or_(PersonalityGrnMap.grn == dbgrn,
-                             HostGrnMap.grn == dbgrn))
+            q = q.filter(or_(Host.owner_eon_id == dbgrn.eon_id,
+                             HostGrnMap.eon_id == dbgrn.eon_id,
+                             Host.personality_id.in_(persq.subquery())))
 
         if fullinfo:
             return q.all()

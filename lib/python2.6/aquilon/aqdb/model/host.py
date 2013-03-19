@@ -1,6 +1,7 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012  Contributor
+# Copyright (C) 2008,2009,2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -87,14 +88,18 @@ class Host(Base):
                                                      name='host_os_fk'),
                                  nullable=False)
 
-    creation_date = deferred(Column(DateTime, default=datetime.now,
-                                    nullable=False))
-
-    comments = Column(String(255), nullable=True)
+    owner_eon_id = Column(Integer, ForeignKey('grn.eon_id',
+                                              name='%s_owner_grn_fk' % _TN),
+                          nullable=False)
 
     # something to retain the advertised status of the host
     advertise_status = Column(Boolean(name="%s_advertise_status_valid_ck" % _TN),
                                       nullable=False, default=False)
+
+    creation_date = deferred(Column(DateTime, default=datetime.now,
+                                    nullable=False))
+
+    comments = Column(String(255), nullable=True)
 
     # Deletion of a machine deletes the host. When this is 'machine profile'
     # this should no longer be the case as it will be many to one as opposed to
@@ -109,6 +114,7 @@ class Host(Base):
     personality = relation(Personality, innerjoin=True)
     status = relation(HostLifecycle, innerjoin=True)
     operating_system = relation(OperatingSystem, innerjoin=True)
+    owner_grn = relation(Grn, innerjoin=True)
 
     @property
     def fqdn(self):
@@ -139,15 +145,13 @@ class HostGrnMap(Base):
     __tablename__ = _HOSTGRN
 
     host_id = Column(Integer, ForeignKey("%s.machine_id" % _TN,
-                                         name="%s_host_fk" % _HOSTGRN),
+                                         name="%s_host_fk" % _HOSTGRN,
+                                         ondelete="CASCADE"),
                      primary_key=True)
 
     eon_id = Column(Integer, ForeignKey('grn.eon_id',
                                         name='%s_grn_fk' % _HOSTGRN),
                     primary_key=True)
-
-    host = relation(Host)
-    grn = relation(Grn)
 
 
 hostgrns = HostGrnMap.__table__  # pylint: disable=C0103

@@ -1,6 +1,7 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012  Contributor
+# Copyright (C) 2008,2009,2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -115,9 +116,7 @@ class MachineFormatter(ObjectFormatter):
             details.append(indent + "  Serial: %s" % machine.serial_no)
         for d in machine.disks:
             extra = d.disk_type
-            if d.disk_type == "nas" and d.service_instance:
-                extra = extra + " from " + d.service_instance.name
-            elif d.disk_type == "virtual_disk" and d.share:
+            if hasattr(d, "share") and d.share:
                 extra = extra + " from " + d.share.name
             if d.bootable:
                 flags = " [boot]"
@@ -151,8 +150,10 @@ class MachineFormatter(ObjectFormatter):
             details.append(indent +
                            "  Advertise Status: %s" % host.advertise_status)
 
+            details.append(indent + "  Owned by {0:c}: {0.grn}"
+                           .format(host.owner_grn))
             for grn in host.grns:
-                details.append(indent + "  {0:c}: {0.grn}".format(grn))
+                details.append(indent + "  Used by {0:c}: {0.grn}".format(grn))
 
             for feature in model_features(machine.model,
                                           host.personality.archetype,

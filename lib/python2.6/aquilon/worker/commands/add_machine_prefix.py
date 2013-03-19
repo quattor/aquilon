@@ -1,6 +1,7 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2009,2010,2011,2012  Contributor
+# Copyright (C) 2009,2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -29,23 +30,25 @@
 """Contains a wrapper for `aq add machine --prefix`."""
 
 
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.commands.add_machine import CommandAddMachine
 from aquilon.worker.dbwrappers.search import search_next
 from aquilon.aqdb.model import Machine
 from aquilon.aqdb.column_types import AqStr
 
+
 class CommandAddMachinePrefix(CommandAddMachine):
 
     required_parameters = ["prefix", "model"]
 
-    def render(self, session, prefix, **args):
+    def render(self, session, logger, prefix, **args):
         prefix = AqStr.normalize(prefix)
         result = search_next(session=session, cls=Machine, attr=Machine.label,
                              value=prefix, start=None, pack=None)
         machine = '%s%d' % (prefix, result)
         args['machine'] = machine
-        CommandAddMachine.render(self, session, **args)
+        CommandAddMachine.render(self, session, logger, **args)
 
-        self.audit_result(session, machine, **args)
+        logger.info("Selected hardware label %s" % machine)
+        self.audit_result(session, 'machine', machine, **args)
         return machine

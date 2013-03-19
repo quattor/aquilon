@@ -1,6 +1,7 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2012  Contributor
+# Copyright (C) 2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -36,6 +37,7 @@ from aquilon.worker.dbwrappers.dns import delete_dns_record
 from aquilon.worker.dbwrappers.resources import (del_resource,
                                                  get_resource_holder)
 from aquilon.worker.processes import DSDBRunner
+
 
 def del_srv_dsdb_callback(session, logger, holder, dbsrv_addr, oldinfo,
                           keep_dns):

@@ -1,6 +1,7 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012  Contributor
+# Copyright (C) 2008,2009,2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -30,19 +31,21 @@
 
 
 from csv import DictReader, Error as CSVError
+from json import JSONDecoder
 from StringIO import StringIO
 from datetime import datetime
-from random import choice
 
 from aquilon.exceptions_ import (AquilonError, ArgumentError, InternalError,
                                  NotFoundException, ProcessException)
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.location import get_location
 from aquilon.worker.dbwrappers.observed_mac import (
     update_or_create_observed_mac)
+from aquilon.worker.dbwrappers.switch import (determine_helper_hostname,
+                                              determine_helper_args)
 from aquilon.worker.processes import run_command
 from aquilon.aqdb.model import (Switch, ObservedMac, ObservedVlan, Network,
-                                NetworkEnvironment, Service, ServiceInstance)
+                                NetworkEnvironment, VlanInfo)
 from aquilon.utils import force_ipv4
 
 
@@ -81,19 +84,20 @@ class CommandPollSwitch(BrokerCommand):
     def poll(self, session, logger, switches, clear, vlan):
         now = datetime.now()
         failed_vlan = 0
-        default_ssh_args = self.determine_helper_args()
+        default_ssh_args = determine_helper_args(self.config)
         for switch in switches:
             if clear:
-                self.clear(session, logger, switch)
+                self.clear(session, switch)
 
-            hostname = self.determine_helper_hostname(session, logger, switch)
+            hostname = determine_helper_hostname(session, logger, self.config,
+                                                 switch)
             if hostname:
                 ssh_args = default_ssh_args[:]
                 ssh_args.append(hostname)
             else:
                 ssh_args = []
 
-            self.poll_mac(session, logger, switch, now, ssh_args)
+            self.poll_mac(session, switch, now, ssh_args)
             if vlan:
                 if switch.switch_type != "tor":
                     logger.client_info("Skipping VLAN probing on {0:l}, it's "
@@ -110,50 +114,10 @@ class CommandPollSwitch(BrokerCommand):
             raise ArgumentError("Failed getting VLAN info.")
         return
 
-    def determine_helper_args(self):
-        ssh_command = self.config.get("broker", "poll_ssh").strip()
-        if not ssh_command:  # pragma: no cover
-            return []
-        ssh_args = [ssh_command]
-        ssh_options = self.config.get("broker", "poll_ssh_options")
-        ssh_args.extend(ssh_options.strip().split())
-        return ssh_args
+    def poll_mac(self, session, switch, now, ssh_args):
+        importer = self.config.get("broker", "get_camtable")
 
-    def determine_helper_hostname(self, session, logger, switch):
-        """Try to figure out a useful helper from the mappings.
-        """
-        helper_name = self.config.get("broker", "poll_helper_service")
-        if not helper_name:  # pragma: no cover
-            return
-        helper_service = Service.get_unique(session, helper_name,
-                                            compel=InternalError)
-        mapped_instances = ServiceInstance.get_mapped_instance_cache(
-            dbpersonality=None, dblocation=switch.location,
-            dbservices=[helper_service])
-        for dbsi in mapped_instances.get(helper_service, []):
-            if dbsi.server_hosts:
-                # Poor man's load balancing...
-                jump = choice(dbsi.server_hosts).fqdn
-                logger.client_info("Using jump host {0} from {1:l} "
-                                   "to run CheckNet for {2:l}.".format(
-                                       jump, dbsi, switch))
-                return jump
-
-        logger.client_info("No jump host for %s, calling CheckNet from %s." %
-                           (switch, self.config.get("broker", "hostname")))
-        return None
-
-    def poll_mac(self, session, logger, switch, now, ssh_args):
-        out = self.run_checknet(logger, switch, ssh_args)
-        macports = self.parse_ports(logger, out)
-        for (mac, port) in macports:
-            update_or_create_observed_mac(session, switch, port, mac, now)
-
-    def clear(self, session, logger, switch):
-        session.query(ObservedMac).filter_by(switch=switch).delete()
-        session.flush()
-
-    def run_checknet(self, logger, switch, ssh_args):
+        # run_checknet factored in
         if not switch.primary_name:
             hostname = switch.label
         elif switch.primary_name.fqdn.dns_domain.name == 'ms.com':
@@ -161,11 +125,23 @@ class CommandPollSwitch(BrokerCommand):
         else:
             hostname = switch.fqdn
         args = []
+
         if ssh_args:
             args.extend(ssh_args)
-        args.extend([self.config.get("broker", "CheckNet"), "-ho", hostname,
-                     "camtable", "-nobanner", "-table", "1", "-noprompt"])
-        return run_command(args, logger=logger)
+        args.extend([importer, hostname])
+
+        try:
+            out = run_command(args)
+        except ProcessException, err:
+            raise ArgumentError("Failed to run switch discovery: %s" % err)
+
+        macports = JSONDecoder().decode(out)
+        for (mac, port) in macports:
+            update_or_create_observed_mac(session, switch, port, mac, now)
+
+    def clear(self, session, switch):
+        session.query(ObservedMac).filter_by(switch=switch).delete()
+        session.flush()
 
     def parse_ports(self, logger, results):
         """ This method could require switch and have hard-coded field
@@ -277,6 +253,17 @@ class CommandPollSwitch(BrokerCommand):
                                                                    bitmask,
                                                                    dbnetwork))
                     continue
+
+                vlan_info = VlanInfo.get_unique(session, vlan_id=vlan_int,
+                                                compel=False)
+                if not vlan_info:
+                    logger.client_info("vlan {0} is not defined in AQ. Please "
+                            "use add_vlan to add it.".format(vlan_int))
+                    continue
+
+                if vlan_info.vlan_type == "unknown":
+                    continue
+
                 dbvlan = ObservedVlan(vlan_id=vlan_int, switch=switch,
                                       network=dbnetwork, creation_date=now)
                 session.add(dbvlan)

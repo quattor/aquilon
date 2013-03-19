@@ -1,7 +1,8 @@
 #!/usr/bin/env python2.6
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012  Contributor
+# Copyright (C) 2008,2009,2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -138,9 +139,25 @@ class TestAddAquilonHost(TestBrokerCommand):
         self.matchoutput(out, "Machine unittest20.aqd-unittest.ms.com does not "
                          "have an interface named eth2.", command)
 
+    def testaddunittest20e1(self):
+        # Add the transit before the host to verify that the reverse DNS entry
+        # will get fixed up
+        ip = self.net.unknown[12].usable[0]
+        fqdn = "unittest20-e1.aqd-unittest.ms.com"
+        self.dsdb_expect_delete(ip)
+        self.dsdb_expect_add(fqdn, ip, "eth1", ip.mac)
+        command = ["add", "interface", "address", "--machine", "ut3c5n2",
+                   "--interface", "eth1", "--fqdn", fqdn]
+        self.noouttest(command)
+        self.dsdb_verify()
+
     def testaddunittest20good(self):
         ip = self.net.unknown[13].usable[2]
+        eth1_ip = self.net.unknown[12].usable[0]
         self.dsdb_expect_add("unittest20.aqd-unittest.ms.com", ip, "le0")
+        self.dsdb_expect_delete(eth1_ip)
+        self.dsdb_expect_add("unittest20-e1.aqd-unittest.ms.com", eth1_ip, "eth1",
+                             eth1_ip.mac, primary="unittest20.aqd-unittest.ms.com")
         self.noouttest(["add", "aquilon", "host",
                         "--hostname", "unittest20.aqd-unittest.ms.com",
                         "--ip", ip, "--buildstatus", "build",
@@ -165,6 +182,9 @@ class TestAddAquilonHost(TestBrokerCommand):
                          "Provides: unittest20.aqd-unittest.ms.com [%s] "
                          "(label: hostname, service_holder: host)" % ip,
                          command)
+        self.matchoutput(out,
+                         "Provides: unittest20-e1.aqd-unittest.ms.com [%s]" % eth1_ip,
+                         command)
 
     def testverifyunittest20hostname(self):
         ip = self.net.unknown[13].usable[2]
@@ -177,6 +197,17 @@ class TestAddAquilonHost(TestBrokerCommand):
         self.matchoutput(out, "Address: unittest20.aqd-unittest.ms.com [%s]" % ip,
                          command)
         self.matchoutput(out, "Interfaces: eth0, eth1", command)
+
+    def testverifyunittest20e1(self):
+        command = ["show", "address",
+                   "--fqdn", "unittest20-e1.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "DNS Record: unittest20-e1.aqd-unittest.ms.com",
+                         command)
+        self.matchoutput(out, "IP: %s" % self.net.unknown[12].usable[0],
+                         command)
+        self.matchoutput(out, "Reverse PTR: unittest20.aqd-unittest.ms.com",
+                         command)
 
     def testaddunittest21(self):
         ip = self.net.unknown[11].usable[1]
@@ -198,7 +229,7 @@ class TestAddAquilonHost(TestBrokerCommand):
         msg = self.parse_netlist_msg(out, expect=1)
         network = msg.networks[0]
         seen = False
-        macs = [ip.mac] #, self.net.unknown[12].usable[1].mac]
+        macs = [ip.mac]  # , self.net.unknown[12].usable[1].mac]
         for host in network.hosts:
             if host.ip != str(ip):
                 continue
@@ -235,7 +266,7 @@ class TestAddAquilonHost(TestBrokerCommand):
         msg = self.parse_netlist_msg(out, expect=1)
         network = msg.networks[0]
         seen = False
-        macs = [ip.mac] #, self.net.unknown[12].usable[2].mac]
+        macs = [ip.mac]  # , self.net.unknown[12].usable[2].mac]
         for host in network.hosts:
             if host.ip != str(ip):
                 continue
@@ -301,6 +332,6 @@ class TestAddAquilonHost(TestBrokerCommand):
         self.dsdb_verify()
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddAquilonHost)
     unittest.TextTestRunner(verbosity=2).run(suite)

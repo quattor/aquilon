@@ -1,7 +1,8 @@
 #!/usr/bin/env python2.6
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2012  Contributor
+# Copyright (C) 2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -40,7 +41,6 @@ from brokertest import TestBrokerCommand
 
 class TestSearchRack(TestBrokerCommand):
 
-
     def test_100_byrowcolumn(self):
         command = ["search", "rack", "--row", "k", "--column", "3",
                    "--city", "ny", "--fullinfo"]
@@ -51,12 +51,12 @@ class TestSearchRack(TestBrokerCommand):
         self.matchclean(out, "City ln", command)
 
     def test_101_byrack(self):
-        command = ["search", "rack", "--rack", "np13" ]
+        command = ["search", "rack", "--rack", "np13"]
         out = self.commandtest(command)
         self.matchoutput(out, "np13", command)
 
     def test_102_empty_byrack(self):
-        command = ["search", "rack", "--rack", "npxx" ]
+        command = ["search", "rack", "--rack", "npxx"]
         out = self.noouttest(command)
 
     def test_103_bybuilding(self):
@@ -135,7 +135,6 @@ class TestSearchRack(TestBrokerCommand):
         command = ["search", "rack", "--all", "--format", "html"]
         out = self.commandtest(command)
         self.matchoutput(out, ">ut13<", command)
-
 
 
 if __name__ == '__main__':

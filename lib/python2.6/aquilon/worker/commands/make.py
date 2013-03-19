@@ -1,6 +1,7 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012  Contributor
+# Copyright (C) 2008,2009,2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -32,7 +33,8 @@ from aquilon.exceptions_ import ArgumentError
 
 from aquilon.aqdb.model import (Archetype, HostLifecycle,
                                 OperatingSystem, Personality)
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.dbwrappers.grn import lookup_grn
 from aquilon.worker.dbwrappers.host import hostname_to_host
 from aquilon.worker.templates.domain import TemplateDomain
 from aquilon.worker.locks import lock_queue, CompileKey
@@ -43,8 +45,8 @@ class CommandMake(BrokerCommand):
 
     required_parameters = ["hostname"]
 
-    def render(self, session, logger, hostname, osname, osversion,
-               archetype, personality, buildstatus, keepbindings, os,
+    def render(self, session, logger, hostname, osname, osversion, archetype,
+               personality, buildstatus, keepbindings, grn, eon_id,
                **arguments):
         dbhost = hostname_to_host(session, hostname)
 
@@ -66,7 +68,7 @@ class CommandMake(BrokerCommand):
             else:
                 dbarchetype = dbhost.archetype
 
-            if not os and not osname and not osversion and \
+            if not osname and not osversion and \
                dbhost.operating_system.archetype != dbarchetype:
                 raise ArgumentError("{0} belongs to {1:l}, not {2:l}.  Please "
                                     "specify --osname/--osversion."
@@ -88,18 +90,28 @@ class CommandMake(BrokerCommand):
 
             dbhost.personality = dbpersonality
 
-        if os:
-            self.deprecated_option("os", "Please use --osname/--osversion "
-                                   "instead.", logger=logger, **arguments)
-        dbos = self.get_os(session, dbhost, osname, osversion, os)
-        if dbos:
+        if not osname:
+            osname = dbhost.operating_system.name
+        if osname and osversion:
+            dbos = OperatingSystem.get_unique(session, name=osname,
+                                              version=osversion,
+                                              archetype=dbhost.archetype,
+                                              compel=True)
             # Hmm... no cluster constraint here...
             dbhost.operating_system = dbos
+        elif osname != dbhost.operating_system.name:
+            raise ArgumentError("Please specify a version to use for OS %s." %
+                                osname)
 
         if buildstatus:
             dbstatus = HostLifecycle.get_unique(session, buildstatus,
                                                 compel=True)
             dbhost.status.transition(dbhost, dbstatus)
+
+        if grn or eon_id:
+            dbgrn = lookup_grn(session, grn, eon_id, logger=logger,
+                               config=self.config)
+            dbhost.owner_grn = dbgrn
 
         session.flush()
 
@@ -143,27 +155,3 @@ class CommandMake(BrokerCommand):
             lock_queue.release(key)
 
         return
-
-    def get_os(self, session, dbhost, osname, osversion, os):
-        """Wrapper for handling deprecated os argument."""
-        if os:
-            try:
-                (splitname, splitversion) = os.split('/')
-            except ValueError:
-                raise ArgumentError("Incorrect value for --os.  Please use "
-                                    "--osname/--osversion instead.")
-            if not osname:
-                osname = splitname
-            if not osversion:
-                osversion = splitversion
-        if not osname:
-            osname = dbhost.operating_system.name
-        if osname and osversion:
-            return OperatingSystem.get_unique(session, name=osname,
-                                              version=osversion,
-                                              archetype=dbhost.archetype,
-                                              compel=True)
-        elif osname != dbhost.operating_system.name:
-            raise ArgumentError("Please specify a version to use for OS %s." %
-                                osname)
-        return None

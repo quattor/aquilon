@@ -1,7 +1,8 @@
 #!/usr/bin/env python2.6
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012  Contributor
+# Copyright (C) 2008,2009,2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -45,10 +46,10 @@ class TestAddManager(TestBrokerCommand):
         command = ["add", "manager", "--ip", ip,
                    "--hostname", "unittest00.one-nyp.ms.com"]
         out = self.badrequesttest(command)
-        self.matchoutput (out,
-                          "IP address %s is already in use by DNS record "
-                          "unittest00.one-nyp.ms.com." % ip,
-                          command)
+        self.matchoutput(out,
+                         "IP address %s is already in use by DNS record "
+                         "unittest00.one-nyp.ms.com." % ip,
+                         command)
 
     def testaddaddrmismatch(self):
         ip = self.net.unknown[0].usable[-1]
@@ -56,10 +57,10 @@ class TestAddManager(TestBrokerCommand):
                    "--manager", "unittest02.one-nyp.ms.com",
                    "--hostname", "unittest00.one-nyp.ms.com"]
         out = self.badrequesttest(command)
-        self.matchoutput (out,
-                          "DNS Record unittest02.one-nyp.ms.com points to a "
-                          "different IP address.",
-                          command)
+        self.matchoutput(out,
+                         "DNS Record unittest02.one-nyp.ms.com points to a "
+                         "different IP address.",
+                         command)
 
     # Note: If changing this, also change testverifyshowmissingmanager
     # in test_add_aquilon_host.py.
@@ -227,7 +228,6 @@ class TestAddManager(TestBrokerCommand):
         self.matchoutput(out, "unittest12r.aqd-unittest.ms.com", command)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddManager)
     unittest.TextTestRunner(verbosity=2).run(suite)
-

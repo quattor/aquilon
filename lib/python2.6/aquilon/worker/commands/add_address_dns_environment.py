@@ -1,6 +1,7 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012  Contributor
+# Copyright (C) 2008,2009,2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -27,8 +28,10 @@
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
 
-from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.dbwrappers.dns import grab_address
+from aquilon.aqdb.model.network_environment import get_net_dns_env
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.dbwrappers.dns import (grab_address,
+                                           set_reverse_ptr)
 from aquilon.worker.dbwrappers.interface import generate_ip
 from aquilon.worker.processes import DSDBRunner
 
@@ -37,17 +40,21 @@ class CommandAddAddressDNSEnvironment(BrokerCommand):
 
     required_parameters = ["fqdn", "dns_environment"]
 
-    def render(self, session, logger, fqdn, dns_environment, network_environment, comments,
-               **arguments):
-
-        ip = generate_ip(session, compel=True, dbinterface=None,
-                         network_environment=network_environment, **arguments)
+    def render(self, session, logger, fqdn, dns_environment,
+               network_environment, reverse_ptr, comments, **arguments):
+        dbnet_env, dbdns_env = get_net_dns_env(session, network_environment,
+                                               dns_environment)
+        audit_results = []
+        ip = generate_ip(session, logger, compel=True, dbinterface=None,
+                         network_environment=dbnet_env,
+                         audit_results=audit_results, **arguments)
         # TODO: add allow_multi=True
-        dbdns_rec, newly_created = grab_address(session, fqdn, ip,
-                                                network_environment, # network_environment,
-                                                dns_environment,
-                                                comments=comments,
+        dbdns_rec, newly_created = grab_address(session, fqdn, ip, dbnet_env,
+                                                dbdns_env, comments=comments,
                                                 preclude=True)
+
+        if reverse_ptr:
+            set_reverse_ptr(session, logger, dbdns_rec, reverse_ptr)
 
         session.flush()
 
@@ -56,4 +63,6 @@ class CommandAddAddressDNSEnvironment(BrokerCommand):
             dsdb_runner.add_host_details(dbdns_rec.fqdn, ip, comments=comments)
             dsdb_runner.commit_or_rollback("Could not add address to DSDB")
 
+        for name, value in audit_results:
+            self.audit_result(session, name, value, **arguments)
         return

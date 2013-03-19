@@ -1,7 +1,8 @@
 #!/usr/bin/env python2.6
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012  Contributor
+# Copyright (C) 2008,2009,2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -51,9 +52,9 @@ class TestUpdateBranch(TestBrokerCommand):
         command = "show domain --domain deployable"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Domain: deployable", command)
-        self.matchoutput(out,
-                         "Compiler: "
-                         "/ms/dist/elfms/PROJ/panc/8.2.7/lib/panc.jar",
+        compiler = self.config.get("panc", "pan_compiler", raw=True) % {
+            'version': '8.2.7'}
+        self.matchoutput(out, "Compiler: %s" % compiler,
                          command)
         self.matchoutput(out, "Comments: Updated Comments", command)
 

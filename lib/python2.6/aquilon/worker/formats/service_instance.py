@@ -1,6 +1,7 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012  Contributor
+# Copyright (C) 2008,2009,2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -32,7 +33,8 @@
 from aquilon.worker.formats.formatters import ObjectFormatter
 from aquilon.worker.formats.list import ListFormatter
 from aquilon.aqdb.model import ServiceInstance
-from aquilon.aqdb.model.disk import find_storage_data
+from aquilon.aqdb.data_sync.storage import (find_storage_data,
+                                            cache_storage_data)
 
 
 class ServiceInstanceFormatter(ObjectFormatter):
@@ -56,8 +58,6 @@ class ServiceInstanceFormatter(ObjectFormatter):
         details.append(indent + "  Maximum Client Count: %s" %
                        ServiceInstanceFormatter.get_max_client_count(si))
         details.append(indent + "  Client Count: %d" % si.client_count)
-        if si.service.name == 'nas_disk_share':
-            details.append(indent + "  Disk Count: %d" % si.nas_disk_count)
         if si.comments:
             details.append(indent + "  Comments: %s" % si.comments)
         return "\n".join(details)
@@ -97,28 +97,36 @@ class ServiceInstanceListFormatter(ListFormatter):
 
 ObjectFormatter.handlers[ServiceInstanceList] = ServiceInstanceListFormatter()
 
-
-class Share(object):
-    def __init__(self, dbshare):
-        self.dbshare = dbshare
+class ServiceShareList(list):
+    pass
 
 
-class ShareFormatter(ObjectFormatter):
-    def format_raw(self, share, indent=""):
-        dbshare = share.dbshare
-        details = [indent + "NAS Disk Share: %s" % dbshare.name]
+class ServiceShareListFormatter(ObjectFormatter):
+    def format_raw(self, shares, indent=""):
+        sharedata = {}
+        storage_cache = cache_storage_data()
 
-        share_info = find_storage_data(dbshare)
+        for dbshare in shares:
+            if dbshare.name not in sharedata:
+                share_info = find_storage_data(dbshare, storage_cache)
 
-        details.append(indent + "  Server: %s" % share_info["server"])
-        details.append(indent + "  Mountpoint: %s" % share_info["mount"])
-        details.append(indent + "  Disk Count: %d" % dbshare.nas_disk_count)
-        details.append(indent + "  Maximum Disk Count: %s" %
-                       ServiceInstanceFormatter.get_max_client_count(dbshare))
-        details.append(indent + "  Machine Count: %d" %
-                       dbshare.nas_machine_count)
-        if dbshare.comments:
-            details.append(indent + "  Comments: %s" % dbshare.comments)
+                sharedata[dbshare.name] = {"disks": 0,
+                                           "machines": 0,
+                                           "server": share_info["server"],
+                                           "mount": share_info["mount"]}
+            sharedata[dbshare.name]["disks"] += dbshare.disk_count
+            sharedata[dbshare.name]["machines"] += dbshare.machine_count
+
+        details = []
+
+        for name in sorted(sharedata.keys()):
+            rec = sharedata[name]
+
+            details.append(indent + "NAS Disk Share: %s" % name)
+            details.append(indent + "  Server: %s" % rec["server"])
+            details.append(indent + "  Mountpoint: %s" % rec["mount"])
+            details.append(indent + "  Disk Count: %d" % rec["disks"])
+            details.append(indent + "  Machine Count: %d" % rec["machines"])
         return "\n".join(details)
 
-ObjectFormatter.handlers[Share] = ShareFormatter()
+ObjectFormatter.handlers[ServiceShareList] = ServiceShareListFormatter()

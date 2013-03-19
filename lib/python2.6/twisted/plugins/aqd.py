@@ -1,6 +1,7 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012  Contributor
+# Copyright (C) 2008,2009,2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -81,8 +82,9 @@ class AQDMaker(object):
 
     def makeService(self, options):
         # Start up coverage ASAP.
-        if options["coveragedir"]:
-            os.makedirs(options["coveragedir"], 0755)
+        coverage_dir = options["coveragedir"]
+        if coverage_dir:
+            os.makedirs(coverage_dir, 0755)
             if options["coveragerc"]:
                 coveragerc = options["coveragerc"]
             else:
@@ -112,14 +114,16 @@ class AQDMaker(object):
                     if not filename.endswith('.py'):
                         continue
                     sourcefiles.append(os.path.join(dirpath, filename))
-            self.coverage.html_report(sourcefiles, directory=options["coveragedir"])
-            aggregate = os.path.join(options["coveragedir"], "aqd.coverage")
-            output = open(aggregate, 'w')
-            self.coverage.report(sourcefiles, file=output)
-            output.close()
+
+            self.coverage.html_report(sourcefiles, directory=coverage_dir)
+            self.coverage.xml_report(sourcefiles,
+                                     outfile=os.path.join(coverage_dir, "aqd.xml"))
+
+            with open(os.path.join(coverage_dir, "aqd.coverage"), "w") as outfile:
+                self.coverage.report(sourcefiles, file=outfile)
 
         # Make sure the coverage report gets generated.
-        if options["coveragedir"]:
+        if coverage_dir:
             reactor.addSystemEventTrigger('after', 'shutdown', stop_coverage)
 
         # Set up the environment...
@@ -207,10 +211,10 @@ class AQDMaker(object):
                 # will fork and exec git-daemon, resulting in a new pid that
                 # the process monitor won't know about!
                 gitpath = config.get("broker", "git_path")
+                gitdaemon = config.get("broker", "git_daemon")
                 ospath = os.environ.get("PATH", "")
                 args = ["/usr/bin/env", "PATH=%s:%s" % (gitpath, ospath),
-                        os.path.join(gitpath, "git-daemon"), "--export-all",
-                        "--base-path=%s" %
+                        gitdaemon, "--export-all", "--base-path=%s" %
                         config.get("broker", "git_daemon_basedir")]
                 if config.has_option("broker", "git_port"):
                     args.append("--port=%s" % config.get("broker", "git_port"))

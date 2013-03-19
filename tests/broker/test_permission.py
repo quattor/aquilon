@@ -1,7 +1,8 @@
 #!/usr/bin/env python2.6
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011  Contributor
+# Copyright (C) 2008,2009,2010,2011,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -36,7 +37,6 @@ that the 'permission' and 'show principal' commands work as expected.
 
 import unittest
 import re
-import os
 from subprocess import Popen, PIPE
 
 if __name__ == "__main__":
@@ -247,6 +247,6 @@ class TestPermission(TestBrokerCommand):
         self.promote_current_user()
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestPermission)
     unittest.TextTestRunner(verbosity=2).run(suite)

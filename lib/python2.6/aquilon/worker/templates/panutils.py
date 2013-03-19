@@ -1,6 +1,7 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2010,2011,2012  Contributor
+# Copyright (C) 2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -130,14 +131,16 @@ def pan_assign(lines, path, value):
     lines.append('"%s" = %s;' % (path, pan(value)))
 
 
-def pan_push(lines, path, value):
-    lines.append('"%s" = push(%s);' % (path, pan(value)))
+def pan_append(lines, path, value):
+    lines.append('"%s" = append(%s);' % (path, pan(value)))
+
 
 def pan_include(lines, templates):
     if not isinstance(templates, list):
         templates = [templates]
     for tpl in templates:
         lines.append('include { "%s" };' % tpl)
+
 
 def pan_include_if_exists(lines, templates):
     if not isinstance(templates, list):
@@ -152,6 +155,7 @@ def pan_variable(lines, variable, value, final=False):
     else:
         lines.append('variable %s = %s;' % (variable, pan(value)))
 
+
 def pan_comment(lines, comments):
     if not isinstance(comments, list):
         comments = [comments]
@@ -161,6 +165,7 @@ def pan_comment(lines, comments):
     for comment in comments:
         lines.append(comment)
     lines.append('}')
+
 
 class PanObject(object):
     def format(self, indent=0):
@@ -190,6 +195,14 @@ class PanMetric(PanObject):
 
     def format(self, indent=0):
         return "%d*%s" % (self.value, self.unit)
+
+
+class PanValue(PanObject):
+    def __init__(self, path):
+        self.path = path
+
+    def format(self, indent=0):
+        return 'value("%s")' % self.path;
 
 
 class PanEscape(PanObject):

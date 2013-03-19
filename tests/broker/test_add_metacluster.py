@@ -1,7 +1,8 @@
 #!/usr/bin/env python2.6
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2009,2010,2011,2012  Contributor
+# Copyright (C) 2009,2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -48,8 +49,8 @@ class TestAddMetaCluster(TestBrokerCommand):
     def testverifyutmc1(self):
         command = "show metacluster --metacluster utmc1"
         out = self.commandtest(command.split(" "))
-        default_members = self.config.get("broker",
-                                          "metacluster_max_members_default")
+        default_members = self.config.get("archetype_metacluster",
+                                          "max_members_default")
         self.matchoutput(out, "MetaCluster: utmc1", command)
         self.matchoutput(out, "Max members: %s" % default_members, command)
         self.matchoutput(out, "Max shares: 8", command)
@@ -87,8 +88,8 @@ class TestAddMetaCluster(TestBrokerCommand):
         self.noouttest(command)
 
     def testverifyutmc3(self):
-        default_shares = self.config.get("broker",
-                                         "metacluster_max_shares_default")
+        default_shares = self.config.get("archetype_metacluster",
+                                         "max_shares_default")
         command = "show metacluster --metacluster utmc3"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "MetaCluster: utmc3", command)
@@ -160,7 +161,6 @@ class TestAddMetaCluster(TestBrokerCommand):
         self.matchoutput(out, "Country us is not within "
                          "a campus.", command)
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddMetaCluster)
     unittest.TextTestRunner(verbosity=2).run(suite)
-

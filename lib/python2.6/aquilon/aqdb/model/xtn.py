@@ -1,6 +1,7 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2011,2012  Contributor
+# Copyright (C) 2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -61,10 +62,7 @@ class Xtn(Base):
     start_time = Column(UTCDateTime(timezone=True),
                         default=utcnow, nullable=False)
 
-    args = relationship("XtnDetail", backref=backref("xtn"), lazy="joined")
-
-    end = relationship("XtnEnd", uselist=False, backref=backref("xtn_start"),
-                       lazy="joined")
+    end = relationship("XtnEnd", uselist=False, lazy="joined")
     # N.B. NO "cascade". Transaction logs are *never* deleted/changed
     # Given that, we don't really *need* the foreign key, but we'll keep it
     # unless it proves otherwise cumbersome for performance (mainly insert).
@@ -89,6 +87,9 @@ class Xtn(Base):
         for arg in self.args:
             if arg.name == "__RESULT__":
                 results.append(arg.value)
+                continue
+            elif arg.name.startswith("__RESULT__:"):
+                results.append("%s=%s" % (arg.name[11:], arg.value))
                 continue
 
             # TODO: remove the str() once we can handle Unicode
@@ -142,6 +143,9 @@ class XtnDetail(Base):
 
 xtn_detail = XtnDetail.__table__  # pylint: disable=C0103
 xtn_detail.primary_key.name = 'XTN_DTL_PK'
+
+Xtn.args = relationship(XtnDetail, lazy="joined", order_by=[XtnDetail.name])
+
 
 Index('xtn_dtl_name_idx', xtn_detail.c.name, oracle_compress=True)
 Index('xtn_dtl_value_idx', xtn_detail.c.value, oracle_compress=True)
@@ -203,9 +207,9 @@ def end_xtn(session, xtn_id, return_code, results=None):
 
     session.add(XtnEnd(xtn_id=xtn_id, return_code=return_code))
     if results:
-        for result in results:
-            session.add(XtnDetail(xtn_id=xtn_id, name='__RESULT__',
-                                  value=result))
+        for name, value in results:
+            session.add(XtnDetail(xtn_id=xtn_id, name='__RESULT__:' + str(name),
+                                  value=str(value)))
 
     try:
         session.commit()

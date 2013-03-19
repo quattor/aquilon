@@ -1,7 +1,8 @@
 #!/usr/bin/env python2.6
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2009,2010,2011,2012  Contributor
+# Copyright (C) 2009,2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -42,18 +43,18 @@ from brokertest import TestBrokerCommand
 class TestUpdateESXCluster(TestBrokerCommand):
 
     def test_100_updatenoop(self):
-        default_max = self.config.get("broker",
-                                      "esx_cluster_max_members_default")
+        default_max = self.config.get("archetype_esx_cluster",
+                                      "max_members_default")
         self.noouttest(["update_esx_cluster", "--cluster=utecl4",
                         "--building=ut"])
 
     def test_110_verifynoop(self):
         command = "show esx_cluster --cluster utecl4"
         out = self.commandtest(command.split(" "))
-        default_ratio = self.config.get("broker",
-                                        "esx_cluster_vm_to_host_ratio")
-        default_max = self.config.get("broker",
-                                      "esx_cluster_max_members_default")
+        default_ratio = self.config.get("archetype_esx_cluster",
+                                        "vm_to_host_ratio")
+        default_max = self.config.get("archetype_esx_cluster",
+                                      "max_members_default")
         self.matchoutput(out, "ESX Cluster: utecl4", command)
         self.matchoutput(out, "Metacluster: utmc2", command)
         self.matchoutput(out, "Building: ut", command)
@@ -79,7 +80,7 @@ class TestUpdateESXCluster(TestBrokerCommand):
         self.matchoutput(out, "Building: ut", command)
         self.matchoutput(out, "Max members: 97", command)
         self.matchoutput(out, "vm_to_host_ratio: 5:1", command)
-        self.matchoutput(out, "Down Hosts Threshold: 0",command)
+        self.matchoutput(out, "Down Hosts Threshold: 0", command)
         self.matchoutput(out, "Capacity limits: memory: 16384 [override]",
                          command)
         self.matchoutput(out, "Personality: vulcan-1g-desktop-prod Archetype: esx_cluster",
@@ -148,13 +149,13 @@ class TestUpdateESXCluster(TestBrokerCommand):
     def test_330_updateutecl1switch(self):
         # Deprecated.
         command = ["update_esx_cluster", "--cluster=utecl1",
-                   "--tor_switch=ut01ga1s04.aqd-unittest.ms.com"]
+                   "--switch=ut01ga1s04.aqd-unittest.ms.com"]
         self.successtest(command)
 
     def test_340_updateutecl1switchfail(self):
         # Try something that is not a tor_switch
         command = ["update_esx_cluster", "--cluster=utecl1",
-                   "--tor_switch=unittest02.one-nyp.ms.com"]
+                   "--switch=unittest02.one-nyp.ms.com"]
         self.badrequesttest(command)
 
     def test_350_failupdatelocation(self):
@@ -261,10 +262,10 @@ class TestUpdateESXCluster(TestBrokerCommand):
         self.matchoutput(out, "cannot support VMs", command)
 
     def test_450_verifyutecl1(self):
-        default_max = self.config.get("broker",
-                                      "esx_cluster_max_members_default")
-        default_ratio = self.config.get("broker",
-                                        "esx_cluster_vm_to_host_ratio")
+        default_max = self.config.get("archetype_esx_cluster",
+                                      "max_members_default")
+        default_ratio = self.config.get("archetype_esx_cluster",
+                                        "vm_to_host_ratio")
         command = "show esx_cluster --cluster utecl1"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "ESX Cluster: utecl1", command)
@@ -309,17 +310,17 @@ class TestUpdateESXCluster(TestBrokerCommand):
         ## verify cat
         command = "cat --cluster=%s --data" % cname
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, '"/system/cluster/down_hosts_threshold" = 0;',
+        self.matchoutput(out, '"system/cluster/down_hosts_threshold" = 0;',
                          command)
-        self.matchoutput(out, '"/system/cluster/down_maint_threshold" = 2;',
+        self.matchoutput(out, '"system/cluster/down_maint_threshold" = 2;',
                          command)
-        self.matchoutput(out, '"/system/cluster/down_hosts_as_percent" = true;',
+        self.matchoutput(out, '"system/cluster/down_hosts_as_percent" = true;',
                          command)
-        self.matchoutput(out, '"/system/cluster/down_maint_as_percent" = true;',
+        self.matchoutput(out, '"system/cluster/down_maint_as_percent" = true;',
                          command)
-        self.matchoutput(out, '"/system/cluster/down_hosts_percent" = 1;',
+        self.matchoutput(out, '"system/cluster/down_hosts_percent" = 1;',
                          command)
-        self.matchoutput(out, '"/system/cluster/down_maint_percent" = 50;',
+        self.matchoutput(out, '"system/cluster/down_maint_percent" = 50;',
                          command)
 
     def test_605_compileforthreshold(self):
@@ -331,6 +332,6 @@ class TestUpdateESXCluster(TestBrokerCommand):
     # FIXME: Include test that machine plenary moved correctly
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestUpdateESXCluster)
     unittest.TextTestRunner(verbosity=2).run(suite)

@@ -1,7 +1,8 @@
 #!/usr/bin/env python2.6
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2009,2010,2011  Contributor
+# Copyright (C) 2009,2010,2011,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -40,12 +41,17 @@ import optparse
 import xml.etree.ElementTree as ET
 from Cheetah.Template import Template
 
+usage = """%prog [options] template1 [template2 ...]
+   or: %prog [options] --all"""
+
 if __name__ == "__main__":
-    parser = optparse.OptionParser(usage="usage: %prog [options] template1 [template2 ...]\n   or: %prog [options] --all")
+    parser = optparse.OptionParser(usage=usage)
     parser.add_option("-o", "--outputdir", type="string", dest="output_dir",
-                      help="the directory to put generated files in", metavar="DIRECTORY")
+                      help="the directory to put generated files in",
+                      metavar="DIRECTORY")
     parser.add_option("-t", "--templatedir", type="string", dest="template_dir",
-                      help="the directory to search for templates", metavar="DIRECTORY")
+                      help="the directory to search for templates",
+                      metavar="DIRECTORY")
     parser.add_option("-i", "--input", type="string", dest="input_filename",
                       help="name of the input XML file", metavar="FILE")
     parser.set_defaults(generate_all=False)
@@ -53,9 +59,9 @@ if __name__ == "__main__":
                       help="generate output for all available templates")
 
     bindir = os.path.join(os.path.dirname(os.path.realpath(sys.argv[0])), "..")
-    parser.set_defaults(output_dir = ".",
-                        template_dir = os.path.join(bindir, "etc", "templates"),
-                        input_filename = os.path.join(bindir, "etc", "input.xml"))
+    parser.set_defaults(output_dir=".",
+                        template_dir=os.path.join(bindir, "etc", "templates"),
+                        input_filename=os.path.join(bindir, "etc", "input.xml"))
 
     (options, args) = parser.parse_args()
 
@@ -71,13 +77,15 @@ if __name__ == "__main__":
         parser.print_help()
         sys.exit(os.EX_USAGE)
 
-    tree = ET.parse( options.input_filename )
+    tree = ET.parse(options.input_filename)
 
     for template_name in args:
-        template = Template( file = os.path.join(options.template_dir, template_name + ".tmpl") )
+        template = Template(file=os.path.join(options.template_dir,
+                                              template_name + ".tmpl"))
         template.tree = tree
 
-        output_filename = os.path.join(options.output_dir, "aq_" + template_name + "_completion.sh")
+        output_filename = os.path.join(options.output_dir,
+                                       "aq_" + template_name + "_completion.sh")
         output_file = open(output_filename, "w")
         output_file.write(str(template))
         output_file.close()

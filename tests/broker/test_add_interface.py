@@ -1,7 +1,8 @@
 #!/usr/bin/env python2.6
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012  Contributor
+# Copyright (C) 2008,2009,2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -386,7 +387,7 @@ class TestAddInterface(TestBrokerCommand):
                          self.net.unknown[0].usable[0].mac,
                          command)
 
-    def testfailaddut3c1n4eth1(self):
+    def testfailaddut3c1n4eth1badmac(self):
         command = ["add", "interface", "--interface", "eth1",
                    "--machine", "ut3c1n4", "--mac", "not-a-mac"]
         out = self.badrequesttest(command)
@@ -423,7 +424,7 @@ class TestAddInterface(TestBrokerCommand):
 
     def testaddinterfaceut3c5(self):
         ip = self.net.unknown[0].usable[6]
-        self.dsdb_expect_update("ut3c5.aqd-unittest.ms.com", ip.mac)
+        self.dsdb_expect_update("ut3c5.aqd-unittest.ms.com", "oa", mac=ip.mac)
         command = ["add", "interface", "--interface", "oa", "--mac", ip.mac,
                    "--chassis", "ut3c5.aqd-unittest.ms.com"]
         self.noouttest(command)
@@ -489,24 +490,6 @@ class TestAddInterface(TestBrokerCommand):
         self.matchoutput(out, "Only 'oa' is allowed as the interface type "
                          "for chassis.", command)
 
-    def testaddinterfacenp997gd1r04(self):
-        command = ["add", "interface", "--interface", "xge49",
-                   "--mac", self.net.tor_net[3].usable[0].mac,
-                   "--switch", "np997gd1r04.aqd-unittest.ms.com"]
-        self.noouttest(command)
-
-    def testverifyaddinterfacenp997gd1r04(self):
-        command = "show tor_switch --tor_switch np997gd1r04.aqd-unittest.ms.com"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Switch: np997gd1r04", command)
-        self.matchoutput(out, "Primary Name: np997gd1r04.aqd-unittest.ms.com",
-                         command)
-        self.searchoutput(out,
-                          r"Interface: xge49 %s$" %
-                          self.net.tor_net[3].usable[0].mac,
-                          command)
-        self.matchclean(out, "Interface: xge50", command)
-
     def testfailaddinterfaceut3dg1r01(self):
         command = ["add", "interface", "--interface", "xge49",
                    "--mac", self.net.tor_net[0].usable[0].mac,
@@ -534,7 +517,7 @@ class TestAddInterface(TestBrokerCommand):
                          "switches.", command)
 
     def testverifyfailaddinterfaceut3dg1r01(self):
-        command = "show tor_switch --tor_switch ut3gd1r01.aqd-unittest.ms.com"
+        command = "show switch --switch ut3gd1r01.aqd-unittest.ms.com"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Switch: ut3gd1r01", command)
         self.matchoutput(out, "Primary Name: ut3gd1r01.aqd-unittest.ms.com",
@@ -699,7 +682,7 @@ class TestAddInterface(TestBrokerCommand):
             self.noouttest(["add", "interface", "--interface", "eth0",
                             "--machine", machine,
                             "--mac", self.net.tor_net[2].usable[port].mac])
-            # Didn't bother putting a tor_switch on this network, although
+            # Didn't bother putting a switch on this network, although
             # it wouldn't hurt.  At least the first ten (ESX servers) are
             # meant to be left dangling with no IP assigned to test some
             # edge cases.
@@ -712,7 +695,7 @@ class TestAddInterface(TestBrokerCommand):
             for (template, offset) in [('ut11s01p%d', 0), ('ut12s02p%d', 12)]:
                 machine = template % port
                 # Both counts would start at 0 except the tor_net has two
-                # tor_switches taking IPs.
+                # switches taking IPs.
                 i = port + 1 + offset
                 j = port - 1 + offset
                 self.noouttest(["add", "interface", "--interface", "eth0",

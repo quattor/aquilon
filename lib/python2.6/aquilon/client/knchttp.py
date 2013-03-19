@@ -1,6 +1,7 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011  Contributor
+# Copyright (C) 2008,2009,2010,2011,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -52,10 +53,10 @@ class ProcessWrapper(object):
         self._stdin = self.__class__._closedsocket()
         self._stdout = self.__class__._closedsocket()
 
-    def makefile(self, mode, bufsize = None):
+    def makefile(self, mode, bufsize=None):
         return os.fdopen(os.dup(self._stdout.fileno()), mode, bufsize)
 
-    def send(self, stuff, flags = 0):
+    def send(self, stuff, flags=0):
         if self.process.poll():
             raise httplib.NotConnected()
 
@@ -63,7 +64,7 @@ class ProcessWrapper(object):
 
     sendall = send
 
-    def recv(self, len = 1024, flags = 0):
+    def recv(self, len=1024, flags=0):
         if self.process.poll():
             raise httplib.NotConnected()
 
@@ -75,17 +76,21 @@ class ProcessWrapper(object):
 
 class WrappedHTTPConnection(ChunkedHTTPConnection):
 
-    def __init__(self, executable, host, port, service = None, strict = None):
+    def __init__(self, executable, host, port, service=None, strict=None):
         httplib.HTTPConnection.__init__(self, host, port, strict)
         self.executable = executable
         self.service = service
 
     def connect(self):
         try:
-            process = subprocess.Popen([self.executable, self.service + '@' + self.host, str(self.port)],
-                                       stdin = subprocess.PIPE,
-                                       stdout = subprocess.PIPE,
-                                       stderr = subprocess.PIPE)
+            # FIXME: The -o option requires knc >= 1.7.
+            process = subprocess.Popen([self.executable,
+                                        '-o', 'no-half-close',
+                                        self.service + '@' + self.host,
+                                        str(self.port)],
+                                       stdin=subprocess.PIPE,
+                                       stdout=subprocess.PIPE,
+                                       stderr=subprocess.PIPE)
         except OSError, e:
             raise httplib.NotConnected(e)
 
@@ -104,7 +109,7 @@ class KNCHTTPConnection(WrappedHTTPConnection):
     KNC_BIN = 'knc'
     KNC_PATH = '/ms/dist/kerberos/PROJ/knc/prod/bin'
 
-    def __init__(self, host, port, service, strict = None):
+    def __init__(self, host, port, service, strict=None):
         if os.path.exists(self.__class__.KNC_PATH):
             os.environ['PATH'] = "%s:%s" % (self.__class__.KNC_PATH,
                                             os.environ.get('PATH', ''))

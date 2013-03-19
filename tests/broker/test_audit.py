@@ -1,7 +1,8 @@
 #!/usr/bin/env python2.6
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2011,2012  Contributor
+# Copyright (C) 2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -103,6 +104,30 @@ class TestAudit(TestBrokerCommand):
             m = self.searchoutput(line, AUDIT_RAW_RE, command)
             self.searchoutput(m.group('args'), "--[a-z]+='ut'", line)
 
+    def test_200_argument(self):
+        command = ["search_audit", "--argument", "member_personality",
+                   "--command", "all"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "aq search_cluster", command)
+        self.matchoutput(out, "personality-does-not-exist", command)
+        # No other commands should show up in the result
+        self.matchclean(out, "show", command)
+        self.matchclean(out, "add", command)
+        self.matchclean(out, "del", command)
+        self.matchclean(out, "update", command)
+
+    def test_200_argument_keyword(self):
+        command = ["search_audit", "--argument", "member_personality",
+                   "--keyword", "vulcan-1g-desktop-prod", "--command", "all"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "aq search_cluster", command)
+        # No other commands should show up in the result
+        self.matchclean(out, "personality-does-not-exist", command)
+        self.matchclean(out, "show", command)
+        self.matchclean(out, "add", command)
+        self.matchclean(out, "del", command)
+        self.matchclean(out, "update", command)
+
     def test_210_user(self):
         """ test search audit by user name """
         command = ["search_audit", "--username", self.user]
@@ -143,9 +168,9 @@ class TestAudit(TestBrokerCommand):
                 # This command!
                 self.assertTrue(tran_start_time >= my_start_time)
                 self.assertTrue(tran.end_time == 0)
-                expected = {command[1][2:]:command[2],
-                            command[3][2:]:command[4],
-                            command[5][2:]:command[6]}
+                expected = {command[1][2:]: command[2],
+                            command[3][2:]: command[4],
+                            command[5][2:]: command[6]}
                 for arg in tran.arguments:
                     self.assertTrue(arg.name in expected,
                                     "Unexpected arg %s='%s' in "

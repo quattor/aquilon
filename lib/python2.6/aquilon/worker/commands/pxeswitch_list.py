@@ -1,6 +1,7 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2010,2011,2012  Contributor
+# Copyright (C) 2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -32,9 +33,10 @@ from __future__ import with_statement
 from tempfile import NamedTemporaryFile
 
 from aquilon.exceptions_ import ArgumentError, NotFoundException
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.host import (hostname_to_host,
-                                            get_host_bound_service)
+                                            get_host_bound_service,
+                                            check_hostlist_size)
 from aquilon.worker.processes import run_command
 from aquilon.worker.logger import CLIENT_INFO
 from aquilon.aqdb.model import Service
@@ -43,13 +45,17 @@ from aquilon.aqdb.model import Service
 class CommandPxeswitchList(BrokerCommand):
 
     required_parameters = ["list"]
-    _option_map = {'status':'--statuslist', 'configure':'--configurelist',
-                   'localboot':'--bootlist', 'install':'--installlist',
-                   'rescue':'--rescuelist',
-                   'firmware':'--firmwarelist', 'blindbuild':'--livecdlist'}
+    _option_map = {'status': '--statuslist',
+                   'configure': '--configurelist',
+                   'localboot': '--bootlist',
+                   'install': '--installlist',
+                   'rescue': '--rescuelist',
+                   'firmware': '--firmwarelist',
+                   'blindbuild': '--livecdlist'}
     requires_readonly = True
 
     def render(self, session, logger, list, **arguments):
+        check_hostlist_size(self.command, self.config, list)
         # The default is now --configure, but that does not play nice with
         # --status. Turn --configure off if --status is present
         if arguments.get("status", False):
@@ -72,6 +78,13 @@ class CommandPxeswitchList(BrokerCommand):
         for host in list:
             try:
                 dbhost = hostname_to_host(session, host)
+
+                if arguments.get("install", None) and (dbhost.status.name == "ready" or
+                                                       dbhost.status.name == "almostready"):
+                    failed.append("%s: You should change the build status "
+                                  "before switching the PXE link to install." %
+                                  host)
+
                 # Find what "bootserver" instance we're bound to
                 dbservice = Service.get_unique(session, "bootserver",
                                                compel=True)

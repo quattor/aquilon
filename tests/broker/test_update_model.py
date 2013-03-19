@@ -1,7 +1,8 @@
 #!/usr/bin/env python2.6
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2010,2011,2012  Contributor
+# Copyright (C) 2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -71,7 +72,7 @@ class TestUpdateModel(TestBrokerCommand):
         self.matchoutput(out, "Cpu: utcpu x 1", command)
         self.matchoutput(out, "Memory: 4096 MB", command)
         self.matchoutput(out, "NIC count: 1", command)
-        self.matchoutput(out, "Disk: sda 45 GB scsi (nas)", command)
+        self.matchoutput(out, "Disk: sda 45 GB scsi (virtual_disk)", command)
         self.matchoutput(out, "Comments: New model comments", command)
 
     def test_120_verifymachine(self):
@@ -270,6 +271,6 @@ class TestUpdateModel(TestBrokerCommand):
         self.matchoutput(out, "Disk: sda 30 GB scsi (local)", command)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestUpdateModel)
     unittest.TextTestRunner(verbosity=2).run(suite)

@@ -1,6 +1,7 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2009,2010,2011,2012  Contributor
+# Copyright (C) 2009,2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -33,12 +34,14 @@ from datetime import datetime
 from sqlalchemy import (Column, Integer, Boolean, String, DateTime, Sequence,
                         ForeignKey, UniqueConstraint)
 
-from sqlalchemy.orm import relation, backref, deferred
+from sqlalchemy.orm import (object_session, relation, backref, deferred,
+                            joinedload)
+from sqlalchemy.orm.attributes import set_committed_value
 from sqlalchemy.ext.associationproxy import association_proxy
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.column_types import AqStr
-from aquilon.aqdb.model import (Base, Host, Service, Location, Personality,
+from aquilon.aqdb.model import (Base, Host, Location, Personality,
                                 ClusterLifecycle, ServiceInstance, Branch,
                                 Switch, UserPrincipal)
 
@@ -221,6 +224,14 @@ class Cluster(Base):
                                               self.authored_branch))
 
     def validate(self, max_hosts=None, error=ArgumentError, **kwargs):
+        session = object_session(self)
+        q = session.query(HostClusterMember)
+        q = q.filter_by(cluster=self)
+        q = q.options(joinedload('host'),
+                      joinedload('host.machine'))
+        members = q.all()
+        set_committed_value(self, '_hosts', members)
+
         if self.cluster_type != 'meta':
             for i in [
                     "down_hosts_threshold",
@@ -230,12 +241,11 @@ class Cluster(Base):
                     #"branch_id"
                 ]:
                 if getattr(self, i, None) is None:
-                    raise ValueError(
-                        "%s attribute must be set for a %s cluster" % (
-                            i, self.cluster_type))
+                    raise error("Attribute %s must be set for a %s cluster." %
+                                (i, self.cluster_type))
         else:
             if self.metacluster:
-                raise ValueError("Metaclusters can't contain metaclusters")
+                raise error("Metaclusters can't contain other metaclusters.")
 
         if max_hosts is None:
             max_hosts = self.max_hosts
@@ -477,6 +487,21 @@ class EsxCluster(Cluster):
                  error=ArgumentError, **kwargs):
         super(EsxCluster, self).validate(error=error, **kwargs)
 
+        # Preload resources
+        resource_by_id = {}
+        if self.resholder:
+            from aquilon.aqdb.model import VirtualMachine, ClusterResource
+            session = object_session(self)
+            q = session.query(VirtualMachine)
+            q = q.join(ClusterResource)
+            q = q.filter_by(cluster=self)
+            q = q.options([joinedload('machine'),
+                           joinedload('machine.primary_name'),
+                           joinedload('machine.primary_name.fqdn')])
+            for res in q:
+                resource_by_id[res.id] = res
+
+
         if vm_part is None:
             vm_part = self.vm_count
         if host_part is None:
@@ -564,14 +589,12 @@ class HostClusterMember(Base):
 
     node_index = Column(Integer, nullable=False)
 
-    """
-        Association Proxy and relation cascading: We need cascade=all
-        on backrefs so that deletion propagates to avoid AssertionError:
-        Dependency rule tried to blank-out primary key column on deletion
-        of the Cluster and it's links. On the contrary do not have
-        cascade='all' on the forward mapper here, else deletion of
-        clusters and their links also causes deleteion of hosts (BAD)
-    """
+    # Association Proxy and relation cascading: We need cascade=all
+    # on backrefs so that deletion propagates to avoid AssertionError:
+    # Dependency rule tried to blank-out primary key column on deletion
+    # of the Cluster and it's links. On the contrary do not have
+    # cascade='all' on the forward mapper here, else deletion of
+    # clusters and their links also causes deleteion of hosts (BAD)
     cluster = relation(Cluster, lazy=False, innerjoin=True,
                        backref=backref('_hosts', cascade='all, delete-orphan'))
 

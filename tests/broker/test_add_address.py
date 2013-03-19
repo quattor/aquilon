@@ -1,7 +1,8 @@
 #!/usr/bin/env python2.6
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012  Contributor
+# Copyright (C) 2008,2009,2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -29,17 +30,13 @@
 # TERMS THAT MAY APPLY.
 """Module for testing the add address command."""
 
-
-import os
-import sys
 import unittest
 
 if __name__ == "__main__":
-    import utils
+    from broker import utils
     utils.import_depends()
 
-from ipaddr import IPv4Address
-from brokertest import TestBrokerCommand
+from broker.brokertest import TestBrokerCommand
 
 
 class TestAddAddress(TestBrokerCommand):
@@ -61,6 +58,7 @@ class TestAddAddress(TestBrokerCommand):
         self.matchoutput(out, "IP: %s" % net.usable[13], command)
         self.matchoutput(out, "Network: %s [%s]" % (net.ip, net), command)
         self.matchoutput(out, "Network Environment: internal", command)
+        self.matchclean(out, "Reverse", command)
 
     def test_200_add_defaultenv(self):
         self.dsdb_expect_add("arecord14.aqd-unittest.ms.com",
@@ -68,18 +66,29 @@ class TestAddAddress(TestBrokerCommand):
         default = self.config.get("site", "default_dns_environment")
         command = ["add_address", "--ip=%s" % self.net.unknown[0].usable[14],
                    "--fqdn=arecord14.aqd-unittest.ms.com",
+                   "--reverse_ptr=arecord13.aqd-unittest.ms.com",
                    "--dns_environment=%s" % default]
         self.noouttest(command)
         self.dsdb_verify()
 
-    def test_210_add_utenv(self):
+    def test_210_add_utenv_noreverse(self):
+        # The reverse does not exist in this environment
+        command = ["add_address", "--ip", self.net.unknown[1].usable[14],
+                   "--fqdn", "arecord14.aqd-unittest.ms.com",
+                   "--reverse_ptr", "arecord13.aqd-unittest.ms.com",
+                   "--dns_environment", "ut-env"]
+        out = self.notfoundtest(command)
+        self.matchoutput(out, "Target FQDN arecord13.aqd-unittest.ms.com does "
+                         "not exist in DNS environment ut-env.", command)
+
+    def test_220_add_utenv(self):
         # Different IP in this environment
         command = ["add_address", "--ip", self.net.unknown[1].usable[14],
                    "--fqdn", "arecord14.aqd-unittest.ms.com",
                    "--dns_environment", "ut-env"]
         self.noouttest(command)
 
-    def test_220_verifydefaultenv(self):
+    def test_230_verifydefaultenv(self):
         default = self.config.get("site", "default_dns_environment")
         command = ["show_address", "--fqdn=arecord14.aqd-unittest.ms.com"]
         out = self.commandtest(command)
@@ -87,6 +96,8 @@ class TestAddAddress(TestBrokerCommand):
                          command)
         self.matchoutput(out, "DNS Environment: %s" % default, command)
         self.matchoutput(out, "IP: %s" % self.net.unknown[0].usable[14],
+                         command)
+        self.matchoutput(out, "Reverse PTR: arecord13.aqd-unittest.ms.com",
                          command)
 
     def test_230_verifyutenv(self):
@@ -98,6 +109,7 @@ class TestAddAddress(TestBrokerCommand):
         self.matchoutput(out, "DNS Environment: ut-env", command)
         self.matchoutput(out, "IP: %s" % self.net.unknown[1].usable[14],
                          command)
+        self.matchclean(out, "Reverse", command)
 
     def test_300_ipfromip(self):
         self.dsdb_expect_add("arecord15.aqd-unittest.ms.com",
@@ -108,12 +120,21 @@ class TestAddAddress(TestBrokerCommand):
         self.noouttest(command)
         self.dsdb_verify()
 
-    def test_350_verifyipfromip(self):
+    def test_310_verifyipfromip(self):
         command = ["show_address", "--fqdn=arecord15.aqd-unittest.ms.com"]
         out = self.commandtest(command)
         self.matchoutput(out, "DNS Record: arecord15.aqd-unittest.ms.com",
                          command)
         self.matchoutput(out, "IP: %s" % self.net.unknown[0].usable[15],
+                         command)
+        self.matchclean(out, "Reverse", command)
+
+    def test_320_verifyaudit(self):
+        command = ["search_audit", "--command", "add_address",
+                   "--keyword", "arecord15.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out,
+                         "[Result: ip=%s]" % self.net.unknown[0].usable[15],
                          command)
 
     def test_400_dsdbfailure(self):
@@ -180,6 +201,35 @@ class TestAddAddress(TestBrokerCommand):
                          "restricted, adding extra addresses is not allowed.",
                          command)
 
+    def test_470_restricted_reverse(self):
+        ip = self.net.unknown[0].usable[32]
+        self.dsdb_expect_add("arecord17.aqd-unittest.ms.com", ip)
+        command = ["add", "address", "--fqdn", "arecord17.aqd-unittest.ms.com",
+                   "--reverse_ptr", "reverse.restrict.aqd-unittest.ms.com",
+                   "--ip", ip]
+        out, err = self.successtest(command)
+        self.assertEmptyOut(out, command)
+        self.matchoutput(err,
+                         "WARNING: Will create a reference to "
+                         "reverse.restrict.aqd-unittest.ms.com, but trying to "
+                         "resolve it resulted in an error: Name or service "
+                         "not known",
+                         command)
+        self.dsdb_verify()
+
+    def test_471_verify_reverse(self):
+        command = ["search", "dns", "--fullinfo",
+                   "--fqdn", "reverse.restrict.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out,
+                         "Reserved Name: reverse.restrict.aqd-unittest.ms.com",
+                         command)
+        command = ["show", "address", "--fqdn", "arecord17.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out,
+                         "Reverse PTR: reverse.restrict.aqd-unittest.ms.com",
+                         command)
+
     def test_500_addunittest20eth1(self):
         ip = self.net.unknown[12].usable[0]
         fqdn = "unittest20-e1.aqd-unittest.ms.com"
@@ -196,7 +246,6 @@ class TestAddAddress(TestBrokerCommand):
         self.noouttest(command)
         # External IP addresses should not be added to DSDB
         self.dsdb_verify(empty=True)
-
 
         command = ["show_address", "--fqdn=%s" % fqdn,
                    "--network_environment", "cardenv"]
@@ -232,12 +281,11 @@ class TestAddAddress(TestBrokerCommand):
         default = self.config.get("site", "default_dns_environment")
         command = ["add", "address", "--ip", ip, "--fqdn", fqdn,
                    "--dns_environment", default,
-                   "--network_environment", "cardenv" ]
+                   "--network_environment", "cardenv"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Entering external IP addresses to the internal DNS environment is not allowed", command)
 
 
-
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddAddress)
     unittest.TextTestRunner(verbosity=2).run(suite)

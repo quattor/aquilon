@@ -1,7 +1,8 @@
 #!/usr/bin/env python2.6
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2009,2010,2011,2012  Contributor
+# Copyright (C) 2009,2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -42,7 +43,7 @@ class TestSearchObservedMac(TestBrokerCommand):
 
     def testswitch(self):
         command = ["search_observed_mac",
-                   "--tor_switch=ut01ga2s01.aqd-unittest.ms.com"]
+                   "--switch=ut01ga2s01.aqd-unittest.ms.com"]
         out = self.commandtest(command)
         self.matchoutput(out, "ut01ga2s01.aqd-unittest.ms.com,1,02:02:04:02:06:cb,", command)
         self.matchoutput(out, "ut01ga2s01.aqd-unittest.ms.com,2,02:02:04:02:06:cc,", command)
@@ -57,7 +58,7 @@ class TestSearchObservedMac(TestBrokerCommand):
 
     def testall(self):
         command = ["search_observed_mac", "--mac=02:02:04:02:06:cb",
-                   "--port=1", "--tor_switch=ut01ga2s01.aqd-unittest.ms.com"]
+                   "--port=1", "--switch=ut01ga2s01.aqd-unittest.ms.com"]
         out = self.commandtest(command)
         self.matchoutput(out, "ut01ga2s01.aqd-unittest.ms.com,1,02:02:04:02:06:cb,", command)
         self.matchclean(out, "02:02:04:02:06:cc", command)
@@ -65,10 +66,10 @@ class TestSearchObservedMac(TestBrokerCommand):
 
     def testallnegative(self):
         command = ["search_observed_mac", "--mac=02:02:04:02:06:cb",
-                   "--port=2", "--tor_switch=ut01ga2s01.aqd-unittest.ms.com"]
+                   "--port=2", "--switch=ut01ga2s01.aqd-unittest.ms.com"]
         self.noouttest(command)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestSearchObservedMac)
     unittest.TextTestRunner(verbosity=2).run(suite)

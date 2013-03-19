@@ -1,6 +1,7 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2009,2011,2012  Contributor
+# Copyright (C) 2009,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -78,7 +79,7 @@ class Alias(DnsRecord):
 alias = Alias.__table__  # pylint: disable=C0103
 alias.primary_key.name = '%s_pk' % _TN
 alias.info['unique_fields'] = ['fqdn']
-alias.info['extra_search_fields'] = ['target']
+alias.info['extra_search_fields'] = ['target', 'dns_environment']
 
 # Most addresses will not have aliases. This bulk loadable property allows the
 # formatter to avoid querying the alias table for every displayed DNS record

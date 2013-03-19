@@ -4,6 +4,7 @@
 <!ENTITY aqd_version SYSTEM "../version.txt">
 ]>
 <refentry xml:id="cat"
+          xmlns="http://docbook.org/ns/docbook"
 	  xmlns:xi="http://www.w3.org/2001/XInclude">
     <refmeta>
         <refentrytitle>cat</refentrytitle>
@@ -43,8 +44,11 @@
 		<arg choice="plain"><option>--filesystem <replaceable>NAME</replaceable></option></arg>
 		<arg choice="plain"><option>--hostlink <replaceable>NAME</replaceable></option></arg>
 		<arg choice="plain"><option>--intervention <replaceable>NAME</replaceable></option></arg>
+		<arg choice="plain"><option>--service_address <replaceable>NAME</replaceable></option></arg>
+		<arg choice="plain"><option>--share <replaceable>NAME</replaceable></option></arg>
 		<arg choice="plain"><option>--reboot_intervention <replaceable>NAME</replaceable></option></arg>
 		<arg choice="plain"><option>--reboot_schedule <replaceable>NAME</replaceable></option></arg>
+		<arg choice="plain"><option>--virtual_machine <replaceable>NAME</replaceable></option></arg>
 	    </group>
 	    <arg choice="opt"><option>--generate</option></arg>
 	</cmdsynopsis>
@@ -55,15 +59,24 @@
 	</cmdsynopsis>
 	<cmdsynopsis>
 	    <command>aq cat</command>
-	    <arg choice="plain"><option>--nasinfo <replaceable>SHARE</replaceable></option></arg>
-	    <arg choice="opt"><option>--generate</option></arg>
-	</cmdsynopsis>
-	<cmdsynopsis>
-	    <command>aq cat</command>
 	    <arg choice="plain"><option>--service <replaceable>SERVICE</replaceable></option></arg>
 	    <arg choice="opt"><option>--instance <replaceable>INSTANCE</replaceable></option></arg>
 	    <arg choice="opt"><option>--server</option></arg>
 	    <arg choice="opt"><option>--default</option></arg>
+	    <arg choice="opt"><option>--generate</option></arg>
+	</cmdsynopsis>
+	<cmdsynopsis>
+	    <command>aq cat</command>
+	    <arg choice="plain"><option>--switch <replaceable>SWITCH</replaceable></option></arg>
+	    <arg choice="opt"><option>--generate</option></arg>
+	</cmdsynopsis>
+	<cmdsynopsis>
+	    <command>aq cat</command>
+	    <arg choice="plain"><option>--personality <replaceable>PERSONALITY</replaceable></option></arg>
+	    <arg choice="opt"><option>--archetype <replaceable>ARCHETYPE</replaceable></option></arg>
+	    <arg choice="opt"><option>--pre_feature</option></arg>
+	    <arg choice="opt"><option>--post_feature</option></arg>
+	    <arg choice="opt"><option>--param_tmpl <replaceable>NAME</replaceable></option></arg>
 	    <arg choice="opt"><option>--generate</option></arg>
 	</cmdsynopsis>
     </refsynopsisdiv>
@@ -78,7 +91,7 @@
     <refsect1>
         <title>Options</title>
 	<variablelist>
-	    <title>Command-specific options</title>
+	    <title>Generic command-specific options</title>
 	    <varlistentry>
 	        <term>
 		    <option>--generate</option>
@@ -89,6 +102,9 @@
 		    </para>
 		</listitem>
 	    </varlistentry>
+	</variablelist>
+	<variablelist>
+	    <title>Looking at the host/machine plenaries</title>
 	    <varlistentry>
 	        <term>
 		    <option>--machine <replaceable>MACHINE</replaceable></option>
@@ -97,16 +113,6 @@
 		    <para>
 			Display the machine plenary. <replaceable>MACHINE</replaceable> may be either the
 			hardware label or the primary host name.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-	        <term>
-		    <option>--city <replaceable>CITY</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			Display the plenary of the named city.
 		    </para>
 		</listitem>
 	    </varlistentry>
@@ -171,8 +177,11 @@
 		    <option>--filesystem <replaceable>NAME</replaceable></option>,
 		    <option>--hostlink <replaceable>NAME</replaceable></option>,
 		    <option>--intervention <replaceable>NAME</replaceable></option>,
+		    <option>--service_address <replaceable>NAME</replaceable></option>,
+		    <option>--share <replaceable>NAME</replaceable></option>,
 		    <option>--reboot_intervention <replaceable>NAME</replaceable></option>,
-		    <option>--reboot_schedule <replaceable>NAME</replaceable></option>
+		    <option>--reboot_schedule <replaceable>NAME</replaceable></option>,
+		    <option>--virtual_machine <replaceable>NAME</replaceable></option>
 		</term>
 		<listitem>
 		    <para>
@@ -181,6 +190,35 @@
 		    </para>
 		</listitem>
 	    </varlistentry>
+	</variablelist>
+	<variablelist>
+	    <title>Looking at switch plenaries</title>
+	    <varlistentry>
+	        <term>
+		    <option>--switch <replaceable>SWITCH</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Display the plenary of the named switch.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	</variablelist>
+	<variablelist>
+	    <title>Looking at location plenaries</title>
+	    <varlistentry>
+	        <term>
+		    <option>--city <replaceable>CITY</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Display the plenary of the named city.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	</variablelist>
+	<variablelist>
+	    <title>Looking at service plenaries</title>
 	    <varlistentry>
 	        <term>
 		    <option>--service <replaceable>SERVICE</replaceable></option>
@@ -234,14 +272,59 @@
 		    </para>
 		</listitem>
 	    </varlistentry>
+	</variablelist>
+	<variablelist>
+	    <title>Looking at personality plenaries</title>
 	    <varlistentry>
 	        <term>
-		    <option>--nasinfo <replaceable>SHARE</replaceable></option>
+		    <option>--personality <replaceable>PERSONALITY</replaceable></option>
 		</term>
 		<listitem>
 		    <para>
-			Display the plenary of the given share. Shares are instances of the nas_disk_share instance
-			but contain extra data in the plenaries.
+			Display the plenary of the given personality. If no other options are specified, the default
+			top-level plenary is displayed. Use options <option>--pre_feature</option>,
+			<option>--post_feature</option>, and <option>--param_tmpl</option> to select other related
+			templates.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--archetype <replaceable>ARCHETYPE</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Specify the archetype of the personality, if the name of the personality is not unique.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--param_tmpl <replaceable>NAME</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Display the named parameter template.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--pre_feature</option>
+		</term>
+		<listitem>
+		    <para>
+			Display the template including features before the personality body.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--post_feature</option>
+		</term>
+		<listitem>
+		    <para>
+			Display the template including features after the personality body.
 		    </para>
 		</listitem>
 	    </varlistentry>

@@ -1,6 +1,7 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2009,2010,2011,2012  Contributor
+# Copyright (C) 2009,2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -43,7 +44,7 @@ from sqlalchemy.orm.session import object_session
 from sqlalchemy.ext.associationproxy import association_proxy
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import Base, Cluster, ServiceInstance
+from aquilon.aqdb.model import Base, Cluster
 from aquilon.aqdb.model.cluster import convert_resources
 
 _TN = 'clstr'
@@ -78,18 +79,14 @@ class MetaCluster(Cluster):
     members = association_proxy('_clusters', 'cluster',
                                 creator=lambda x: MetaClusterMember(cluster=x))
 
-    # resourcegroup, see resources relatio.
 
-    # Works for both Vulcan 1 and Vulcan 2.
-    # Abusing the fact that only length and retval[x].name is used of shares
-    # return value
+    # backward compat only: show metacluster shows cluster bound shares, also
+    # enforces an upper limit on them.
     @property
     def shares(self):
-        from aquilon.aqdb.model import VirtualMachine, ClusterResource
-        q = object_session(self).query(ServiceInstance)
-        q = q.join('nas_disks', 'machine', VirtualMachine, ClusterResource, 'cluster',
-                   '_metacluster')
-        q = q.filter_by(metacluster=self)
+        from aquilon.aqdb.model import ClusterResource, Share
+        q = object_session(self).query(Share)
+        q = q.join(ClusterResource, Cluster, '_metacluster').filter_by(metacluster=self)
         return q.all()
 
     # see cluster.minimum_location
@@ -235,8 +232,7 @@ class MetaClusterMember(Base):
     metacluster = relation(MetaCluster, lazy='subquery', innerjoin=True,
                            backref=backref('_clusters',
                                            cascade='all, delete-orphan'),
-                           primaryjoin=(metacluster_id==MetaCluster.id)
-                           )
+                           primaryjoin=(metacluster_id == MetaCluster.id))
 
     # This is a one-to-one relation, so we need uselist=False on the backref
     cluster = relation(Cluster, lazy='subquery', innerjoin=True,

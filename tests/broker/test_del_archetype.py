@@ -1,7 +1,8 @@
 #!/usr/bin/env python2.6
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2009,2010  Contributor
+# Copyright (C) 2009,2010,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -33,10 +34,10 @@
 import unittest
 
 if __name__ == "__main__":
-    import utils
+    from broker import utils
     utils.import_depends()
 
-from brokertest import TestBrokerCommand
+from broker.brokertest import TestBrokerCommand
 
 
 class TestDelArchetype(TestBrokerCommand):
@@ -49,6 +50,10 @@ class TestDelArchetype(TestBrokerCommand):
         command = ["del_archetype", "--archetype=utarchetype2"]
         self.noouttest(command)
 
+    def testdelutarchetype3(self):
+        command = ["del_archetype", "--archetype=utarchetype3"]
+        self.noouttest(command)
+
     def testverifydelutarchetype1(self):
         command = ["show_archetype", "--archetype=utarchetype1"]
         self.notfoundtest(command)
@@ -57,13 +62,16 @@ class TestDelArchetype(TestBrokerCommand):
         command = ["show_archetype", "--archetype=utarchetype2"]
         self.notfoundtest(command)
 
+    def testverifydelutarchetype3(self):
+        command = ["show_archetype", "--archetype=utarchetype3"]
+        self.notfoundtest(command)
+
     def testverifyall(self):
         command = ["show_archetype", "--all"]
         out = self.commandtest(command)
         self.matchclean(out, "Archetype: utarchetype", command)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelArchetype)
     unittest.TextTestRunner(verbosity=2).run(suite)
-

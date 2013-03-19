@@ -1,6 +1,7 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012  Contributor
+# Copyright (C) 2008,2009,2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -29,7 +30,7 @@
 
 
 from aquilon.aqdb.model import DnsDomain, NsRecord, ARecord
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 
 
 class CommandDelNsRecord(BrokerCommand):
@@ -40,7 +41,6 @@ class CommandDelNsRecord(BrokerCommand):
         dbdns_domain = DnsDomain.get_unique(session, dns_domain, compel=True)
 
         dba_rec = ARecord.get_unique(session, fqdn=fqdn, compel=True)
-
 
         ns_record = NsRecord.get_unique(session, dns_domain=dbdns_domain,
                                         a_record=dba_rec, compel=True)

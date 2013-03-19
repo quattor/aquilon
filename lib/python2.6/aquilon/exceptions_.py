@@ -1,6 +1,7 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011  Contributor
+# Copyright (C) 2008,2009,2010,2011,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -28,6 +29,7 @@
 # TERMS THAT MAY APPLY.
 """Exceptions to be used by Aquilon"""
 """The base exception class is AquilonError."""
+
 
 def deprecated(message):
     import warnings
@@ -74,7 +76,7 @@ class ProcessException(AquilonError):
         elif out and out.strip():
             filter_msg = "filtered " if filtered else ""
             msg = msg + " and %sstdout:\n%s" % (filter_msg, out)
-        StandardError.__init__(self, msg)
+        super(ProcessException, self).__init__(msg)
 
 
 class RollbackException(AquilonError):
@@ -85,7 +87,7 @@ class RollbackException(AquilonError):
         self.jobid = jobid
         self.cause = cause
         if not args and cause:
-            args = [ str(cause) ]
+            args = [str(cause)]
         AquilonError.__init__(self, *args, **kwargs)
 
 

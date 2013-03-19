@@ -1,7 +1,8 @@
 #!/usr/bin/env python2.6
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012  Contributor
+# Copyright (C) 2008,2009,2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -50,7 +51,6 @@ class TestDelCampus(TestBrokerCommand):
         command = "show campus --campus ta"
         self.notfoundtest(command.split(" "))
 
-
     def testdelbunotindsdb(self):
         ## add campus
 
@@ -59,7 +59,6 @@ class TestDelCampus(TestBrokerCommand):
         command = ["add", "campus", "--campus", test_campus, "--country", "us"]
         self.successtest(command)
         self.dsdb_verify()
-
 
         dsdb_command = "delete_campus_aq -campus %s" % test_campus
         errstr = "campus %s doesn't exist" % test_campus

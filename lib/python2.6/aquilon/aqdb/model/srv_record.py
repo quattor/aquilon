@@ -1,6 +1,7 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2011,2012  Contributor
+# Copyright (C) 2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -127,21 +128,17 @@ class SrvRecord(DnsRecord):
             raise ArgumentError("Unknown protocol %s." % protocol)
         name = "_%s._%s" % (service.strip().lower(), protocol.strip().lower())
 
-        # Disable autoflush temporarily
-        flush_state = session.autoflush
-        session.autoflush = False
+        # Disable autoflush because self is not ready to be pushed to the DB yet
+        with session.no_autoflush:
+            fqdn = Fqdn.get_or_create(session, name=name, dns_domain=dns_domain,
+                                      dns_environment=dns_environment,
+                                      ignore_name_check=True)
 
-        fqdn = Fqdn.get_or_create(session, name=name, dns_domain=dns_domain,
-                                  dns_environment=dns_environment,
-                                  ignore_name_check=True)
-
-        # Do not allow two SRV records pointing at the same target
-        for rr in fqdn.dns_records:
-            if isinstance(rr, SrvRecord) and rr.target == target and \
-               rr.protocol == protocol and rr.service == service:
-                raise ArgumentError("{0} already exists.".format(rr))
-
-        session.autoflush = flush_state
+            # Do not allow two SRV records pointing at the same target
+            for rr in fqdn.dns_records:
+                if isinstance(rr, SrvRecord) and rr.target == target and \
+                   rr.protocol == protocol and rr.service == service:
+                    raise ArgumentError("{0} already exists.".format(rr))
 
         super(SrvRecord, self).__init__(fqdn=fqdn, priority=priority, weight=weight,
                                         port=port, target=target, **kwargs)
@@ -150,4 +147,4 @@ class SrvRecord(DnsRecord):
 srv_record = SrvRecord.__table__  # pylint: disable=C0103
 srv_record.primary_key.name = '%s_pk' % _TN
 srv_record.info["unique_fields"] = ["fqdn"]
-srv_record.info["extra_search_fields"] = ['target']
+srv_record.info["extra_search_fields"] = ['target', 'dns_environment']

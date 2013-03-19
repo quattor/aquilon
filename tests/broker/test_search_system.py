@@ -1,7 +1,8 @@
 #!/usr/bin/env python2.6
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011  Contributor
+# Copyright (C) 2008,2009,2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -59,14 +60,9 @@ class TestSearchSystem(TestBrokerCommand):
 #        self.matchoutput(out, "Primary Name: unittest00.one-nyp.ms.com", command)
 #        self.matchoutput(out, "Blade: ut3c1n3", command)
 
-
     def testdnsdomainavailable(self):
         command = "search system --dns_domain aqd-unittest.ms.com"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "np997gd1r04.aqd-unittest.ms.com", command)
-        self.matchoutput(out, "np998gd1r01.aqd-unittest.ms.com", command)
-        self.matchoutput(out, "np998gd1r02.aqd-unittest.ms.com", command)
-        self.matchoutput(out, "np999gd1r01.aqd-unittest.ms.com", command)
         self.matchoutput(out, "ut3gd1r01.aqd-unittest.ms.com", command)
         self.matchoutput(out, "ut3c1.aqd-unittest.ms.com", command)
         self.matchoutput(out, "ut3c5.aqd-unittest.ms.com", command)
@@ -174,7 +170,6 @@ class TestSearchSystem(TestBrokerCommand):
 #        self.matchoutput(out, "Chassis: ut3c1", command)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestSearchSystem)
     unittest.TextTestRunner(verbosity=2).run(suite)
-

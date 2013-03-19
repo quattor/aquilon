@@ -1,7 +1,8 @@
 #!/usr/bin/env python2.6
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2011,2012  Contributor
+# Copyright (C) 2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -73,10 +74,6 @@ class TestSearchDns(TestBrokerCommand):
         self.matchoutput(out, "arecord13.aqd-unittest.ms.com", command)
         self.matchoutput(out, "alias2host.aqd-unittest.ms.com", command)
         self.matchoutput(out, "zebra2.aqd-unittest.ms.com", command)
-        self.matchoutput(out, "np997gd1r04.aqd-unittest.ms.com", command)
-        self.matchoutput(out, "np998gd1r01.aqd-unittest.ms.com", command)
-        self.matchoutput(out, "np998gd1r02.aqd-unittest.ms.com", command)
-        self.matchoutput(out, "np999gd1r01.aqd-unittest.ms.com", command)
         self.matchoutput(out, "ut3gd1r01.aqd-unittest.ms.com", command)
         self.matchoutput(out, "ut3c1.aqd-unittest.ms.com", command)
         self.matchoutput(out, "ut3c5.aqd-unittest.ms.com", command)
@@ -179,9 +176,7 @@ class TestSearchDns(TestBrokerCommand):
         self.matchoutput(out, "unittest20-e1.aqd-unittest.ms.com", command)
         self.matchoutput(out, "zebra2.aqd-unittest.ms.com", command)
         self.matchoutput(out, "zebra3.aqd-unittest.ms.com", command)
-        self.matchoutput(out, "np999gd1r01.aqd-unittest.ms.com", command)
         self.matchoutput(out, "ut9c1.aqd-unittest.ms.com", command)
-        self.matchclean(out, "np997gd1r04.aqd-unittest.ms.com", command)
         self.matchclean(out, "ut3c1.aqd-unittest.ms.com", command)
         self.matchclean(out, "arecord13.aqd-unittest.ms.com", command)
         self.matchclean(out, "alias2host.aqd-unittest.ms.com", command)
@@ -195,9 +190,7 @@ class TestSearchDns(TestBrokerCommand):
         self.matchclean(out, "unittest20-e1.aqd-unittest.ms.com", command)
         self.matchclean(out, "zebra2.aqd-unittest.ms.com", command)
         self.matchclean(out, "zebra3.aqd-unittest.ms.com", command)
-        self.matchclean(out, "np999gd1r01.aqd-unittest.ms.com", command)
         self.matchclean(out, "ut9c1.aqd-unittest.ms.com", command)
-        self.matchoutput(out, "np997gd1r04.aqd-unittest.ms.com", command)
         self.matchoutput(out, "ut3c1.aqd-unittest.ms.com", command)
         self.matchoutput(out, "arecord13.aqd-unittest.ms.com", command)
         self.matchoutput(out, "alias2host.aqd-unittest.ms.com", command)
@@ -206,8 +199,6 @@ class TestSearchDns(TestBrokerCommand):
     def testprimary(self):
         command = ["search", "dns", "--primary_name"]
         out = self.commandtest(command)
-        self.matchoutput(out, "np998gd1r01.aqd-unittest.ms.com", command)
-        self.matchoutput(out, "np997gd1r04.aqd-unittest.ms.com", command)
         self.matchoutput(out, "ut3c1.aqd-unittest.ms.com", command)
         self.matchoutput(out, "ut9c1.aqd-unittest.ms.com", command)
         self.matchoutput(out, "unittest00.one-nyp.ms.com", command)
@@ -221,8 +212,6 @@ class TestSearchDns(TestBrokerCommand):
     def testnoprimary(self):
         command = ["search", "dns", "--noprimary_name"]
         out = self.commandtest(command)
-        self.matchclean(out, "np998gd1r01.aqd-unittest.ms.com", command)
-        self.matchclean(out, "np997gd1r04.aqd-unittest.ms.com", command)
         self.matchclean(out, "ut3c1.aqd-unittest.ms.com", command)
         self.matchclean(out, "ut9c1.aqd-unittest.ms.com", command)
         self.matchclean(out, "unittest00.one-nyp.ms.com", command)
@@ -237,6 +226,49 @@ class TestSearchDns(TestBrokerCommand):
         command = ["search", "dns", "--record_type", "no-such-rr"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Unknown DNS record type 'no-such-rr'.", command)
+
+    def testunittest20(self):
+        command = ["search", "dns", "--reverse_ptr",
+                   "unittest20.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "unittest20-e0.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "unittest20-e1.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "zebra3.aqd-unittest.ms.com", command)
+        self.matchclean(out, "unittest20.aqd-unittest.ms.com", command)
+        self.matchclean(out, "unittest20-e1-1.aqd-unittest.ms.com", command)
+        self.matchclean(out, "zebra2.aqd-unittest.ms.com", command)
+
+    def testptroverride(self):
+        command = ["search", "dns", "--reverse_override"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "unittest20-e0.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "unittest20-e1.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "zebra3.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "unittest26-e1.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "ut3gd1r04-vlan110-hsrp.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "evh51-e1.aqd-unittest.ms.com", command)
+        self.matchclean(out, "unittest20.aqd-unittest.ms.com", command)
+        self.matchclean(out, "unittest20-e1-1.aqd-unittest.ms.com", command)
+        self.matchclean(out, "zebra2.aqd-unittest.ms.com", command)
+        self.matchclean(out, "dynamic-", command)
+        self.matchclean(out, "alias", command)
+        self.matchclean(out, "_tcp.aqd-unittest.ms.com", command)
+
+    def testptrnooverride(self):
+        command = ["search", "dns", "--noreverse_override"]
+        out = self.commandtest(command)
+        self.matchclean(out, "unittest20-e0.aqd-unittest.ms.com", command)
+        self.matchclean(out, "unittest20-e1.aqd-unittest.ms.com", command)
+        self.matchclean(out, "zebra3.aqd-unittest.ms.com", command)
+        self.matchclean(out, "unittest26-e1.aqd-unittest.ms.com", command)
+        self.matchclean(out, "ut3gd1r04-vlan110-hsrp.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "unittest20.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "unittest20-e1-1.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "zebra2.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "ut3gd1r01.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "ut3c1.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "alias2host.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "_kerberos._tcp.aqd-unittest.ms.com", command)
 
 
 if __name__ == '__main__':

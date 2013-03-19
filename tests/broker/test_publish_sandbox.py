@@ -1,7 +1,8 @@
 #!/usr/bin/env python2.6
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012  Contributor
+# Copyright (C) 2008,2009,2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -48,15 +49,16 @@ class TestPublishSandbox(TestBrokerCommand):
 
         Replace with setupClass when we move to Py2.7
         """
-        p = Popen(('/usr/bin/make', 'clean'),
-                  cwd=os.path.join(self.sandboxdir, 'changetest1', 't'),
-                  env=self.gitenv(env={'PATH':'/bin:/usr/bin'}),
-                  stdout=PIPE, stderr=PIPE)
-        (out, err) = p.communicate()
-        self.assertEqual(p.returncode, 0,
-                         "Non-zero return code running make clean in sandbox,"+
-                         " STDOUT:\n@@@'%s'\n@@@\nSTDERR:\n@@@'%s'@@@\n"
-                         % (out, err))
+        testdir = os.path.join(self.sandboxdir, "changetest1", "t")
+        if os.path.exists(os.path.join(testdir, "Makefile")):
+            p = Popen(('/usr/bin/make', 'clean'),
+                      cwd=testdir, env=self.gitenv(env={'PATH': '/bin:/usr/bin'}),
+                      stdout=PIPE, stderr=PIPE)
+            (out, err) = p.communicate()
+            self.assertEqual(p.returncode, 0,
+                             "Non-zero return code running make clean in sandbox,"
+                             " STDOUT:\n@@@'%s'\n@@@\nSTDERR:\n@@@'%s'@@@\n"
+                             % (out, err))
 
     def testmakechange(self):
         sandboxdir = os.path.join(self.sandboxdir, "changetest1")

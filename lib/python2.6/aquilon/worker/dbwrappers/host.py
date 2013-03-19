@@ -1,6 +1,7 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012  Contributor
+# Copyright (C) 2008,2009,2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -50,6 +51,7 @@ def hostname_to_host(session, hostname):
                                 "assigned.".format(dbmachine))
     return dbmachine.host
 
+
 def hostlist_to_hosts(session, hostlist):
     dbhosts = []
     failed = []
@@ -67,11 +69,13 @@ def hostlist_to_hosts(session, hostlist):
         raise ArgumentError("Empty list.")
     return dbhosts
 
+
 def get_host_bound_service(dbhost, dbservice):
     for si in dbhost.services_used:
         if si.service == dbservice:
             return si
     return None
+
 
 def get_host_dependencies(session, dbhost):
     """ returns a list of strings describing how a host is being used.
@@ -82,3 +86,27 @@ def get_host_dependencies(session, dbhost):
         ret.append("%s is bound as a server for service %s instance %s" %
                    (dbhost.fqdn, si.service.name, si.name))
     return ret
+
+
+def check_hostlist_size(command, config, hostlist):
+
+    if not hostlist:
+        return
+
+    default_max_size = config.getint("broker", "default_max_list_size")
+    max_size_opt = "%s_max_list_size" % command
+    if config.has_option("broker", max_size_opt):
+        if config.get("broker", max_size_opt) != '':
+            hostlist_max_size = config.getint("broker", max_size_opt)
+        else:
+            hostlist_max_size = 0
+    else:
+        hostlist_max_size = default_max_size
+
+    if not hostlist_max_size:
+        return
+
+    if len(hostlist) > hostlist_max_size:
+        raise ArgumentError("The number of hosts in list {0:d} can not be "
+                            "more than {1:d}".format(len(hostlist), hostlist_max_size))
+    return

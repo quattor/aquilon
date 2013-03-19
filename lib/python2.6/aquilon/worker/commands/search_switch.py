@@ -1,6 +1,7 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012  Contributor
+# Copyright (C) 2008,2009,2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -30,7 +31,7 @@
 
 from sqlalchemy.orm import subqueryload, joinedload, contains_eager, undefer
 
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.formats.switch import SimpleSwitchList
 from aquilon.aqdb.model import Switch, DnsRecord, Fqdn, DnsDomain
 from aquilon.worker.dbwrappers.hardware_entity import search_hardware_entity_query
@@ -40,7 +41,7 @@ class CommandSearchSwitch(BrokerCommand):
 
     required_parameters = []
 
-    def render(self, session, switch, type, fullinfo, **arguments):
+    def render(self, session, switch, type, vlan, fullinfo, **arguments):
         q = search_hardware_entity_query(session, hardware_type=Switch,
                                          **arguments)
         if type:
@@ -48,6 +49,10 @@ class CommandSearchSwitch(BrokerCommand):
         if switch:
             dbswitch = Switch.get_unique(session, switch, compel=True)
             q = q.filter_by(id=dbswitch.id)
+
+        if vlan:
+            q = q.join("observed_vlans", "vlan").filter_by(vlan_id=vlan)
+            q = q.reset_joinpoint()
 
         # Prefer the primary name for ordering
         q = q.outerjoin(DnsRecord, (Fqdn, DnsRecord.fqdn_id == Fqdn.id),

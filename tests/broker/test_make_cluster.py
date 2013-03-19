@@ -1,7 +1,8 @@
 #!/usr/bin/env python2.6
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012  Contributor
+# Copyright (C) 2008,2009,2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -31,7 +32,6 @@
 
 
 import os
-import re
 import unittest
 
 if __name__ == "__main__":
@@ -77,8 +77,8 @@ class TestMakeCluster(TestBrokerCommand):
 
         command = "cat --cluster=utecl1 --data"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, '"/system/cluster/name" = "utecl1";', command)
-        self.matchoutput(out, '"/system/metacluster/name" = "utmc1";', command)
+        self.matchoutput(out, '"system/cluster/name" = "utecl1";', command)
+        self.matchoutput(out, '"system/metacluster/name" = "utmc1";', command)
         self.matchclean(out, "resources/virtual_machine", command)
 
     def testverifycatutecl1_2(self):
@@ -99,7 +99,7 @@ class TestMakeCluster(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
 
         self.searchoutput(out,
-                          r'"/system/cluster/allowed_personalities" = list\(\s*' +
+                          r'"system/cluster/allowed_personalities" = list\(\s*' +
                           '"vmhost/generic",' + r'\s*' +
                           '"vmhost/vulcan-1g-desktop-prod"' + r'\s*\);',
                           command)
@@ -169,8 +169,8 @@ class TestMakeCluster(TestBrokerCommand):
 
         command = "cat --cluster=utecl2 --data"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, '"/system/cluster/name" = "utecl2";', command)
-        self.matchoutput(out, '"/system/metacluster/name" = "utmc1";', command)
+        self.matchoutput(out, '"system/cluster/name" = "utecl2";', command)
+        self.matchoutput(out, '"system/metacluster/name" = "utmc1";', command)
         self.matchclean(out, "resources/virtual_machine", command)
 
     def testfailmissingcluster(self):

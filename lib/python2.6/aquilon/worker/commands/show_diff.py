@@ -1,6 +1,7 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2012  Contributor
+# Copyright (C) 2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -31,9 +32,10 @@
 from aquilon.worker.formats.parameter import DiffData
 from aquilon.aqdb.model import (Parameter, Personality,
                                 PersonalityServiceMap)
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.parameter import get_parameters
 from collections import defaultdict
+
 
 class CommandShowDiff(BrokerCommand):
 
@@ -63,15 +65,15 @@ class CommandShowDiff(BrokerCommand):
         ## parameters
         params = {}
 
-        dbpersona_parameters = get_parameters (session, personality=dbpersona)
+        dbpersona_parameters = get_parameters(session, personality=dbpersona)
 
         for param in dbpersona_parameters:
             params.update(Parameter.flatten(param.value))
-        ret["Parameters"][dtype] =  params
+        ret["Parameters"][dtype] = params
 
         ## process features
         features = dict((fl.feature.name, True) for fl in dbpersona.features)
-        ret["Features"][dtype] =  features
+        ret["Features"][dtype] = features
 
         ## process required_services
         services = dict((srv.name, True) for srv in dbpersona.services)

@@ -1,6 +1,7 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012  Contributor
+# Copyright (C) 2008,2009,2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -47,9 +48,6 @@ from collections import defaultdict
 _TN = 'service_instance'
 _ABV = 'svc_inst'
 
-# list of possible external service managers to enable federated control to
-MANAGERS = ['aqd', 'resourcepool']
-
 
 class ServiceInstance(Base):
     """ Service instance captures the data around assignment of a host for a
@@ -67,13 +65,9 @@ class ServiceInstance(Base):
     max_clients = Column(Integer, nullable=True)  # null means 'no limit'
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
-    manager = Column(Enum(32, MANAGERS), default='aqd', nullable=False)
     comments = Column(String(255), nullable=True)
 
     service = relation(Service, lazy=False, innerjoin=True, backref='instances')
-
-    # _client_count is defined later in this file
-    # nas_disk_count and nas_machine_count are defined in disk.py
 
     def __format__(self, format_spec):
         instance = "%s/%s" % (self.service.name, self.name)
@@ -254,7 +248,7 @@ class ServiceInstance(Base):
                 q = q.reset_joinpoint()
                 q = q.outerjoin('network')
                 q = q.filter(or_(Location.id.in_(location_ids),
-                                 Network.id==dbnetwork.id))
+                                 Network.id == dbnetwork.id))
             else:
                 q = q.reset_joinpoint()
                 q = q.join('location')
@@ -297,13 +291,14 @@ service_instance.append_constraint(
 service_instance.info['abrev'] = _ABV
 service_instance.info['unique_fields'] = ['name', 'service']
 
+
 class BuildItem(Base):
     """ Identifies the service_instance bindings of a machine. """
     __tablename__ = 'build_item'
 
     host_id = Column('host_id', Integer, ForeignKey('host.machine_id',
-                                                     ondelete='CASCADE',
-                                                     name='build_item_host_fk'),
+                                                    ondelete='CASCADE',
+                                                    name='build_item_host_fk'),
                      primary_key=True)
 
     service_instance_id = Column(Integer,

@@ -1,7 +1,8 @@
 #!/usr/bin/env python2.6
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010  Contributor
+# Copyright (C) 2008,2009,2010,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -43,13 +44,13 @@ class TestDelSwitch(TestBrokerCommand):
     def testdelut3gd1r01(self):
         # Deprecated usage.
         self.dsdb_expect_delete(self.net.tor_net[12].usable[0])
-        command = "del tor_switch --tor_switch ut3gd1r01.aqd-unittest.ms.com"
+        command = "del switch --switch ut3gd1r01.aqd-unittest.ms.com"
         self.successtest(command.split(" "))
         self.dsdb_verify()
 
     def testverifydelut3gd1r01(self):
         # Deprecated usage.
-        command = "show tor_switch --tor_switch ut3gd1r01.aqd-unittest.ms.com"
+        command = "show switch --switch ut3gd1r01.aqd-unittest.ms.com"
         self.notfoundtest(command.split(" "))
 
     def testdelut3gd1r04(self):
@@ -76,36 +77,6 @@ class TestDelSwitch(TestBrokerCommand):
         self.successtest(command.split(" "))
         self.dsdb_verify()
 
-    def testdelnp997gd1r04(self):
-        command = "del switch --switch np997gd1r04.aqd-unittest.ms.com"
-        self.noouttest(command.split(" "))
-
-    def testverifydelnp997gd1r04(self):
-        command = "show switch --switch np997gd1r04.aqd-unittest.ms.com"
-        self.notfoundtest(command.split(" "))
-
-    def testdelnp998gd1r01(self):
-        command = "del switch --switch np998gd1r01.aqd-unittest.ms.com"
-        self.noouttest(command.split(" "))
-
-    def testverifydelnp998gd1r01(self):
-        command = "show switch --switch np998gd1r01.aqd-unittest.ms.com"
-        self.notfoundtest(command.split(" "))
-
-    def testdelnp998gd1r02(self):
-        command = "del switch --switch np998gd1r02.aqd-unittest.ms.com"
-        self.noouttest(command.split(" "))
-
-    def testdelnp999gd1r01(self):
-        self.dsdb_expect_delete(self.net.tor_net[5].usable[0])
-        command = "del switch --switch np999gd1r01.aqd-unittest.ms.com"
-        self.noouttest(command.split(" "))
-        self.dsdb_verify()
-
-    def testverifydelnp999gd1r01(self):
-        command = "show switch --switch np999gd1r01.aqd-unittest.ms.com"
-        self.notfoundtest(command.split(" "))
-
     def testdelnp06bals03(self):
         self.dsdb_expect_delete("172.31.64.69")
         command = "del switch --switch np06bals03.ms.com"
@@ -122,7 +93,7 @@ class TestDelSwitch(TestBrokerCommand):
         self.noouttest(command.split(" "))
         self.dsdb_verify()
 
-    def testverifydelnp06bals03(self):
+    def testverifydelnp06fals01(self):
         command = "show switch --switch np06fals01.ms.com"
         self.notfoundtest(command.split(" "))
 
@@ -181,6 +152,6 @@ class TestDelSwitch(TestBrokerCommand):
         self.dsdb_verify()
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelSwitch)
     unittest.TextTestRunner(verbosity=2).run(suite)

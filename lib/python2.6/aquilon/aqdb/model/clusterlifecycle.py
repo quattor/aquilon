@@ -1,6 +1,7 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2010,2011,2012  Contributor
+# Copyright (C) 2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -34,9 +35,11 @@ from sqlalchemy import (Column, Enum, Integer, DateTime, Sequence,
 from sqlalchemy.orm import deferred
 from sqlalchemy.orm.session import object_session
 
+from aquilon.config import Config
 from aquilon.aqdb.model import Base, StateEngine, HostLifecycle
 from aquilon.utils import monkeypatch
 from aquilon.aqdb.column_types import Enum
+from aquilon.exceptions_ import ArgumentError
 
 _TN = 'clusterlifecycle'
 
@@ -48,7 +51,7 @@ class ClusterLifecycle(StateEngine, Base):
                'build'        : ['ready', 'decommissioned'],
                'ready'        : ['rebuild', 'decommissioned'],
                'rebuild'      : ['ready', 'decommissioned'],
-               'decommissioned' : [],
+               'decommissioned' : ['rebuild'],
                }
 
     __tablename__ = _TN
@@ -116,6 +119,35 @@ type(r)
 
 class Decommissioned(ClusterLifecycle):
     __mapper_args__ = {'polymorphic_identity': 'decommissioned'}
+
+    # can't set the status to "decommissioned" if the cluster has VMs.
+    def onEnter(self, dbcluster):
+        dbdecommissioned = HostLifecycle.get_unique(object_session(dbcluster),
+                                                    "decommissioned",
+                                                    compel=True)
+
+        config = Config()
+        archetype = dbcluster.personality.archetype
+        section = "archetype_" + archetype.name
+        opt = "allow_cascaded_deco"
+
+        if dbcluster.hosts and (not config.has_option(section, opt) or
+                                not config.getboolean(section, opt)):
+            raise ArgumentError("Cannot change state to {0}, as {1}'s "
+                                "archetype is {2}.".format(
+                                                    dbdecommissioned.name,
+                                                    dbcluster,
+                                                    archetype.name))
+
+        if dbcluster.machines:
+            raise ArgumentError("Cannot change state to {0}, as {1} has "
+                                "{2} VM(s).".format(
+                                                    dbdecommissioned.name,
+                                                    dbcluster,
+                                                    len(dbcluster.machines)))
+
+        for dbhost in dbcluster.hosts:
+            dbhost.status.transition(dbhost, dbdecommissioned)
 
 
 class Ready(ClusterLifecycle):

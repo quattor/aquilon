@@ -1,6 +1,7 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012  Contributor
+# Copyright (C) 2008,2009,2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -35,6 +36,7 @@ from aquilon.exceptions_ import AuthorizationException
 from aquilon.config import Config
 
 host_re = re.compile(r'^host/(.+)@([^@]+)$')
+
 
 class AuthorizationBroker(object):
     """Handles any behind the scenes work in figuring out entitlements."""
@@ -75,6 +77,7 @@ class AuthorizationBroker(object):
                       'add_model', 'update_model', 'del_model',
                       'add_organization', 'del_organization',
                       'add_grn', 'del_grn', 'update_grn',
+                      'add_vlan', 'del_vlan',
                       'rollback', 'update_city']:
             if dbuser.role.name not in ['engineering', 'aqd_admin']:
                 raise AuthorizationException(
@@ -132,6 +135,7 @@ class AuthorizationBroker(object):
                               'make', 'make_cluster',
                               'pxeswitch',
                               'change_status',
+                              'add_room', 'add_rack', 'add_rack_room',
                               'add_disk', 'del_disk']:
                 self.raise_auth_error(principal, action, resource)
         if dbuser.role.name == 'resource_pool':
@@ -147,9 +151,9 @@ class AuthorizationBroker(object):
                               'add_city', 'del_city']:
                 self.raise_auth_error(principal, action, resource)
         if dbuser.role.name == 'telco_operations':
-            if action not in ['add_rack', 'add_switch', 'add_tor_switch',
+            if action not in ['add_rack', 'add_switch',
                               'update_rack', 'update_switch',
-                              'del_rack', 'del_switch', 'del_tor_switch',
+                              'del_rack', 'del_switch',
                               'add_interface_switch', 'del_interface_switch',
                               'update_interface_switch',
                               'add_interface_address_switch',
@@ -211,19 +215,22 @@ class AuthorizationBroker(object):
                               'add_service_instance',
                               'update_service_instance',
                               'del_service_instance',
-                              'add_nas_disk_share',
                               'add_alias',
                               'del_alias',
                               'add_filesystem',
                               'del_filesystem',
-                              'poll_switch', 'poll_tor_switch_tor_switch',
-                              'poll_switch_switch', 'poll_tor_switch',
+                              'poll_switch', 'poll_switch_switch',
                               'add_rack', 'add_rack_room', 'add_chassis',
                               'del_rack', 'del_chassis',
+                              'add_address', 'del_address',
                               'make', 'make_cluster']:
                 self.raise_auth_error(principal, action, resource)
         if dbuser.role.name == 'alias_manager':
             if action not in ['add_alias', 'del_alias', 'update_alias']:
+                self.raise_auth_error(principal, action, resource)
+        if dbuser.role.name == 'webops':
+            if action not in ['add_address', 'del_address',
+                              'add_alias', 'del_alias', 'update_alias']:
                 self.raise_auth_error(principal, action, resource)
         return True
 

@@ -1,6 +1,7 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2009,2010,2011  Contributor
+# Copyright (C) 2009,2010,2011,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -45,10 +46,7 @@ LOGGER = logging.getLogger(__name__)
 CCM_NOTIF = 1
 CDB_NOTIF = 2
 
-NOTIFICATION_TYPES = {
-        CCM_NOTIF : "ccm",
-        CDB_NOTIF : "cdb"
-}
+NOTIFICATION_TYPES = {CCM_NOTIF: "ccm", CDB_NOTIF: "cdb"}
 
 try:
     CDPPORT = socket.getservbyname("cdp")
@@ -201,6 +199,7 @@ def build_index(config, session, profilesdir, clientNotify=True,
         logger.log(CLIENT_INFO, "sent %d client notifications" % count)
 
     sock.close()
+
 
 def send_notification(ntype, modified, sock=None, logger=LOGGER):
     '''send CDP notification messages to a list of hosts.

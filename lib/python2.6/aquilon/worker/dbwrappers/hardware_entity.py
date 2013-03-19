@@ -1,6 +1,7 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012  Contributor
+# Copyright (C) 2008,2009,2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -39,7 +40,7 @@ from aquilon.worker.dbwrappers.dns import convert_reserved_to_arecord
 from aquilon.worker.dbwrappers.location import get_location
 from aquilon.worker.dbwrappers.interface import (check_ip_restrictions,
                                                  assign_address)
-from aquilon.utils import first_of, no_autoflush
+from aquilon.utils import first_of
 
 
 def search_hardware_entity_query(session, hardware_type=HardwareEntity,
@@ -87,6 +88,7 @@ def search_hardware_entity_query(session, hardware_type=HardwareEntity,
         # suppress it if we want to use this query as a subquery
         q = q.order_by(HardwareEntity.label)
     return q
+
 
 def update_primary_ip(session, dbhw_ent, ip):
     dbnetwork = get_net_id_from_ip(session, ip)
@@ -137,6 +139,7 @@ def update_primary_ip(session, dbhw_ent, ip):
             addr.ip = ip
             addr.network = dbnetwork
 
+
 def rename_hardware(session, dbhw_ent, rename_to):
     if "." in rename_to:
         if not dbhw_ent.primary_name:
@@ -155,6 +158,10 @@ def rename_hardware(session, dbhw_ent, rename_to):
             new_domain = None
             dns_env = None
 
+    old_domain.lock_row()
+    if new_domain != old_domain:
+        new_domain.lock_row()
+
     dbhw_ent.check_label(new_label)
     HardwareEntity.get_unique(session, new_label, preclude=True)
 
@@ -168,12 +175,11 @@ def rename_hardware(session, dbhw_ent, rename_to):
         fqdns.append(dbhw_ent.primary_name.fqdn)
 
     # Filter out unrelated FQDNs
-    fqdns = [fqdn for fqdn in fqdns if fqdn.name.startswith(old_label) and
-             fqdn.dns_domain == old_domain]
+    fqdns = [fqdn for fqdn in fqdns if fqdn.dns_domain == old_domain and
+             (fqdn.name == old_label or fqdn.name.startswith(old_label + "-"))]
 
     # Update all state in one go, so disable autoflush for now.
-    # TODO: change to "with session.no_autoflush" once upgrading to SQLA 0.7.6
-    with no_autoflush(session):
+    with session.no_autoflush:
         dbhw_ent.label = new_label
 
         for dbfqdn in fqdns:

@@ -34,7 +34,6 @@ installfe = /bin/echo
 #sharedata = %(srcdir)s/tests/testnasobjects.map
 #windows_host_info = %(dbdir)s/machines.db
 #vlan2net = %(srcdir)s/tests/fakebin/fake_vlan2net
-sys_loc = %(srcdir)s/tests/fakebin/fake_sys_loc
 mean = %(srcdir)s/tests/fakebin/fake_mean
 
 [unittest]

@@ -1,7 +1,8 @@
 #!/usr/bin/env python2.6
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012  Contributor
+# Copyright (C) 2008,2009,2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -42,6 +43,16 @@ from brokertest import TestBrokerCommand
 
 
 class TestPrebindServer(TestBrokerCommand):
+
+    def testbindntpserver(self):
+        self.noouttest(["bind", "server",
+            "--hostname", "nyaqd1.ms.com",
+            "--service", "ntp", "--instance", "pa.ny.na"])
+
+    def testverifybindntp(self):
+        command = "show service --service ntp --instance pa.ny.na"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Server: nyaqd1.ms.com", command)
 
     def testbindaqdserver(self):
         self.noouttest(["bind", "server",
@@ -108,15 +119,10 @@ class TestPrebindServer(TestBrokerCommand):
                           r'"servers" = list\(\s*"nyaqd1.ms.com",\s*'
                           r'"unittest02.one-nyp.ms.com"\s*\);',
                           command)
-        # Relying on 'nyaqd1.ms.com' to be in DNS isn't going to work
-        # in other locations.  A better choice might be one of the
-        # root servers (a.root-servers.net) but there's no sane way
-        # to add that to the database right now.  Maybe post DNS
-        # revamp.
+        # The IP address comes from fakebin/dsdb.d, not from the real DNS.
         self.searchoutput(out,
-                          '"server_ips" = list\(\s*"%s",\s*"%s"\s*\);' %
-                          (socket.gethostbyname('nyaqd1.ms.com'),
-                           self.net.unknown[0].usable[0]),
+                          '"server_ips" = list\(\s*"10.184.155.249",\s*"%s"\s*\);' %
+                          self.net.unknown[0].usable[0],
                           command)
 
 

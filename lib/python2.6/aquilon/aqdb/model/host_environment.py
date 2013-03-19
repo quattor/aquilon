@@ -1,6 +1,7 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012  Contributor
+# Copyright (C) 2008,2009,2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -38,6 +39,7 @@ from aquilon.exceptions_ import ArgumentError
 
 _TN = 'host_environment'
 
+
 class HostEnvironment(Base):
     """ Describes the state a host is within the provisioning lifecycle """
 
@@ -58,13 +60,14 @@ class HostEnvironment(Base):
         if env in cls.__mapper__.polymorphic_map:
             return
         valid_name = ", ".join(sorted(cls.__mapper__.polymorphic_map.keys()))
-        raise ArgumentError("Unknown environment value '%s'.  The valid values are: "
+        raise ArgumentError("Unknown environment value '%s'. The valid values are: "
                             "%s." % (env, valid_name))
 
 host_env = HostEnvironment.__table__  # pylint: disable=C0103
 host_env.primary_key.name = '%s_pk' % _TN
 host_env.append_constraint(UniqueConstraint('name', name='%s_uk' % _TN))
 host_env.info['unique_fields'] = ['name']
+
 
 class Development(HostEnvironment):
     __mapper_args__ = {'polymorphic_identity': 'dev'}
@@ -88,4 +91,3 @@ class Production(HostEnvironment):
 
 class Infra(HostEnvironment):
     __mapper_args__ = {'polymorphic_identity': 'infra'}
-

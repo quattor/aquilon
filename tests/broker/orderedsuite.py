@@ -1,7 +1,8 @@
 #!/usr/bin/env python2.6
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012  Contributor
+# Copyright (C) 2008,2009,2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -45,7 +46,7 @@ if __name__ == "__main__":
     SRCDIR = os.path.join(BINDIR, "..", "..")
     sys.path.append(os.path.join(SRCDIR, "lib", "python2.6"))
     sys.path.append(os.path.join(SRCDIR, "tests"))
-    import depends
+    import depends  # pylint: disable=W0611
 
 from test_start import TestBrokerStart
 from test_ping import TestPing
@@ -89,13 +90,16 @@ from test_add_router import TestAddRouter
 from test_add_metacluster import TestAddMetaCluster
 from test_add_esx_cluster import TestAddESXCluster
 from test_add_cluster import TestAddCluster
+from test_add_share import TestAddShare
 from test_update_cluster import TestUpdateCluster
 from test_del_cluster import TestDelCluster
+from test_del_share import TestDelShare
 from test_early_constraints_cluster import TestClusterEarlyConstraints
-from test_add_tor_switch import TestAddTorSwitch
 from test_add_switch import TestAddSwitch
 from test_update_switch import TestUpdateSwitch
 from test_rename_switch import TestRenameSwitch
+from test_discover_switch import TestDiscoverSwitch
+from test_vlan import TestVlan
 from test_poll_switch import TestPollSwitch
 from test_add_chassis import TestAddChassis
 from test_update_chassis import TestUpdateChassis
@@ -189,6 +193,7 @@ from test_search_network import TestSearchNetwork
 from test_refresh_network import TestRefreshNetwork
 from test_split_merge_network import TestSplitMergeNetwork
 from test_update_alias import TestUpdateAlias
+from test_update_address import TestUpdateAddress
 from test_update_srv_record import TestUpdateSrvRecord
 from test_update_interface import TestUpdateInterface
 from test_update_machine import TestUpdateMachine
@@ -261,12 +266,14 @@ from test_audit import TestAudit
 from test_usecase_database import TestUsecaseDatabase
 from test_usecase_hacluster import TestUsecaseHACluster
 from test_grns import TestGrns
+from test_map_grn import TestMapGrn
 from test_stop import TestBrokerStop
 from test_reset_advertised_status import TestResetAdvertisedStatus
 from test_parameter import TestParameter
 from test_parameter_feature import TestParameterFeature
 from test_parameter_definition import TestParameterDefinition
 from test_parameter_definition_feature import TestParameterDefinitionFeature
+from test_documentation import TestDocumentation
 
 
 class BrokerTestSuite(unittest.TestSuite):
@@ -289,6 +296,7 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestGet, TestPublishSandbox, TestDeployDomain,
                 TestSyncDomain,
                 TestMergeConflicts,
+                TestGrns,
                 TestAddArchetype, TestAddOS, TestAddPersonality,
                 TestParameterDefinition,
                 TestAddService, TestUpdateService, TestAddRequiredService,
@@ -302,18 +310,20 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestAddNSRecord, TestMapDnsDomain,
                 TestAddMetaCluster, TestAddESXCluster,
                 TestAddCluster,
+                TestAddShare,
                 TestClusterEarlyConstraints,
-                TestAddTorSwitch, TestAddSwitch, TestUpdateSwitch,
+                TestAddSwitch, TestUpdateSwitch,
                 TestAddChassis, TestUpdateChassis,
                 TestAddMachine, TestAddDisk, TestAddInterface,
                 TestAddAddress,
                 TestAddRouter, TestAddDynamicRange,
                 TestAddAquilonHost, TestAddWindowsHost, TestAddAuroraHost,
                 TestPollSwitch,
+                TestVlan,
                 TestAddHost,
                 TestAddAuxiliary, TestAddManager, TestAddInterfaceAddress,
                 TestAddServiceAddress,
-                TestRenameSwitch,
+                TestRenameSwitch, TestDiscoverSwitch,
                 TestAddAlias, TestAddSrvRecord,
                 TestMapService, TestBindClient, TestPrebindServer,
                 TestServiceConstraints,
@@ -325,7 +335,7 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestBindESXCluster, TestChangeClusterStatus, TestRebindESXCluster,
                 TestMake,
                 TestAddStaticRoute,
-                TestGrns,
+                TestMapGrn,
                 TestRebindMetaCluster,
                 TestUpdateBuilding,
                 TestAddVirtualHardware, TestAdd10GigHardware,
@@ -360,7 +370,7 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestSearchObservedMac, TestSearchNext, TestSearchNetwork,
                 TestUpdateInterface, TestUpdateMachine, TestUpdateModel,
                 TestUpdateRack,
-                TestUpdateAlias, TestUpdateSrvRecord,
+                TestUpdateAlias, TestUpdateSrvRecord, TestUpdateAddress,
                 TestBindFeature, TestUnbindFeature,
                 TestRefreshNetwork, TestUpdateNetwork, TestSplitMergeNetwork,
                 TestUpdateNetworkEnvironment,
@@ -382,6 +392,7 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestDelManager, TestDelAuxiliary, TestDelWindowsHost, TestDelHost,
                 TestDelInterface, TestDelDisk, TestDelMachine, TestDelChassis,
                 TestDelSwitch,
+                TestDelShare,
                 TestDelCluster,
                 TestDelESXCluster, TestDelMetaCluster,
                 TestDelRouter, TestDelNetwork, TestDelNetworkEnvironment,
@@ -395,6 +406,7 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestDelDomain, TestDelSandbox,
                 TestDelDnsEnvironment, TestDelDnsDomain,
                 TestClientFailure, TestAudit, TestShowActiveCommands,
+                TestDocumentation,
                 TestBrokerStop]:
             self.addTest(unittest.TestLoader().loadTestsFromTestCase(test))
 

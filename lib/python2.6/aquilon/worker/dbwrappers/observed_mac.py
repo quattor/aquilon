@@ -1,6 +1,7 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011  Contributor
+# Copyright (C) 2008,2009,2010,2011,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -34,15 +35,14 @@ from aquilon.aqdb.model import ObservedMac
 
 def update_or_create_observed_mac(session, dbswitch, port, mac, now):
     dbobserved_mac = session.query(ObservedMac).filter_by(
-            switch=dbswitch, port_number=port, mac_address=mac).first()
+            switch=dbswitch, port=port, mac_address=mac).first()
     if dbobserved_mac:
         dbobserved_mac.last_seen = now
         session.add(dbobserved_mac)
         return dbobserved_mac
     # Set creation_date explicitely instead of relying on the default to ensure
     # creation_date == last_seen
-    dbobserved_mac = ObservedMac(switch=dbswitch, port_number=port,
-                                 mac_address=mac, creation_date=now,
-                                 last_seen=now)
+    dbobserved_mac = ObservedMac(switch=dbswitch, port=port, mac_address=mac,
+                                 creation_date=now, last_seen=now)
     session.add(dbobserved_mac)
     return dbobserved_mac

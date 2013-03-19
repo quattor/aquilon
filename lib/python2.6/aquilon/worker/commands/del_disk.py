@@ -1,6 +1,7 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012  Contributor
+# Copyright (C) 2008,2009,2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -31,9 +32,8 @@
 from aquilon.exceptions_ import ArgumentError, NotFoundException, AquilonError
 from aquilon.aqdb.model import Disk, Machine
 from aquilon.aqdb.model.disk import controller_types
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.templates.base import Plenary
-from aquilon.worker.processes import NASAssign
 from aquilon.worker.locks import lock_queue, CompileKey
 
 
@@ -42,7 +42,7 @@ class CommandDelDisk(BrokerCommand):
     required_parameters = ["machine"]
 
     def render(self, session, logger, machine, disk, controller, size, all,
-               dbuser,  **arguments):
+               dbuser, **arguments):
 
         # Handle deprecated arguments
         if arguments.get("type", None):
@@ -68,21 +68,6 @@ class CommandDelDisk(BrokerCommand):
         if size is not None:
             q = q.filter_by(capacity=size)
         results = q.all()
-        to_remove_from_rp = None
-        uname = str(dbuser.name)
-        for dbdisk in results:
-            if hasattr(dbdisk, 'service_instance') and (
-                dbdisk.service_instance.manager == 'resourcepool'):
-                na_obj = NASAssign(machine=machine, disk=dbdisk.device_name,
-                                   owner=uname)
-                if to_remove_from_rp:
-                    raise ArgumentError('Multiple managed shares must be '
-                                        'removed as seperate operations. '
-                                        'Please run "del_disk" individually for '
-                                        'the following shares: %s '
-                                        % " ,".join(to_remove_from_rp))
-                else:
-                    to_remove_from_rp = na_obj
 
         if len(results) == 0:
             raise NotFoundException("No disks found.")
@@ -106,8 +91,6 @@ class CommandDelDisk(BrokerCommand):
             if dbcontainer:
                 plenary_container.write(locked=True)
             plenary_machine.write(locked=True)
-            if to_remove_from_rp:
-                self._remove_from_rp(to_remove_from_rp)
         except:
             plenary_machine.restore_stash()
             if dbcontainer:
@@ -115,11 +98,3 @@ class CommandDelDisk(BrokerCommand):
             raise
         finally:
             lock_queue.release(key)
-
-    def _remove_from_rp(self, na_obj):
-        try:
-            na_obj.delete()
-        except Exception, e:
-            raise AquilonError('Failed while removing nas assignment in '
-                               'resource pool: %s' % e)
-        return

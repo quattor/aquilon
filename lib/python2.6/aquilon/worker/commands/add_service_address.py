@@ -1,6 +1,7 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2012  Contributor
+# Copyright (C) 2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -59,7 +60,7 @@ class CommandAddServiceAddress(BrokerCommand):
 
     def render(self, session, logger, service_address, ip, name, interfaces,
                hostname, cluster, resourcegroup,
-               network_environment, comments, **arguments):
+               network_environment, map_to_primary, comments, **arguments):
 
         validate_basic("name", name)
 
@@ -95,34 +96,35 @@ class CommandAddServiceAddress(BrokerCommand):
         ip = dbdns_rec.ip
         dbnetwork = dbdns_rec.network
 
+        if map_to_primary:
+            if not isinstance(real_holder, Host):
+                raise ArgumentError("The --map_to_primary option works only "
+                                    "for host-based service addresses.")
+            dbdns_rec.reverse_ptr = real_holder.machine.primary_name.fqdn
+
         # Disable autoflush, since the ServiceAddress object won't be complete
         # until add_resource() is called
-        # TODO: In SQLA 0.7.6, we'd be able to use "with session.no_autoflush:"
-        saved_autoflush = session.autoflush
-        session.autoflush = False
+        with session.no_autoflush:
+            dbsrv = ServiceAddress(name=name, dns_record=dbdns_rec,
+                                   comments=comments)
+            holder.resources.append(dbsrv)
 
-        dbsrv = ServiceAddress(name=name, dns_record=dbdns_rec,
-                               comments=comments)
-        holder.resources.append(dbsrv)
-
-        oldinfo = None
-        if isinstance(real_holder, Cluster):
-            if not real_holder.hosts:
-                # The interface names are only stored in the AddressAssignment
-                # objects, so we can't handle a cluster with no hosts and thus
-                # no interfaces
-                raise ArgumentError("Cannot assign a service address to a "
-                                    "cluster that has no members.")
-            for host in real_holder.hosts:
-                apply_service_address(host, ifnames, dbsrv)
-        elif isinstance(real_holder, Host):
-            oldinfo = DSDBRunner.snapshot_hw(real_holder.machine)
-            apply_service_address(real_holder, ifnames, dbsrv)
-        else:  # pragma: no cover
-            raise UnimplementedError("{0} as a resource holder is not "
-                                     "implemented.".format(real_holder))
-
-        session.autoflush = saved_autoflush
+            oldinfo = None
+            if isinstance(real_holder, Cluster):
+                if not real_holder.hosts:
+                    # The interface names are only stored in the
+                    # AddressAssignment objects, so we can't handle a cluster
+                    # with no hosts and thus no interfaces
+                    raise ArgumentError("Cannot assign a service address to a "
+                                        "cluster that has no members.")
+                for host in real_holder.hosts:
+                    apply_service_address(host, ifnames, dbsrv)
+            elif isinstance(real_holder, Host):
+                oldinfo = DSDBRunner.snapshot_hw(real_holder.machine)
+                apply_service_address(real_holder, ifnames, dbsrv)
+            else:  # pragma: no cover
+                raise UnimplementedError("{0} as a resource holder is not "
+                                         "implemented.".format(real_holder))
 
         add_resource(session, logger, holder, dbsrv,
                      dsdb_callback=add_srv_dsdb_callback,
@@ -130,6 +132,7 @@ class CommandAddServiceAddress(BrokerCommand):
                      newly_created=newly_created, comments=comments)
 
         return
+
 
 def apply_service_address(dbhost, ifnames, srv_addr):
     for ifname in ifnames:

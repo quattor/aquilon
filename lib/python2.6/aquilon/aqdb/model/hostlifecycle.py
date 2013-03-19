@@ -1,6 +1,7 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012  Contributor
+# Copyright (C) 2008,2009,2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -36,6 +37,7 @@ from sqlalchemy import (Column, Enum, Integer, DateTime, Sequence, String,
 from aquilon.aqdb.model import StateEngine, Base
 from aquilon.utils import monkeypatch
 from aquilon.aqdb.column_types import Enum
+from aquilon.exceptions_ import ArgumentError
 
 _TN = 'hostlifecycle'
 
@@ -57,7 +59,7 @@ class HostLifecycle(StateEngine, Base):
                'rebuild'      : ['almostready', 'ready', 'reinstall', 'failed',
                                  'decommissioned'],
                'failed'       : ['rebuild', 'reinstall', 'decommissioned'],
-               'decommissioned' : ['rebuild'],
+               'decommissioned' : ['rebuild', 'reinstall'],
                }
 
     __tablename__ = _TN
@@ -132,6 +134,13 @@ class Blind(HostLifecycle):
 class Decommissioned(HostLifecycle):
     __mapper_args__ = {'polymorphic_identity': 'decommissioned'}
 
+    def onEnter(self, obj):
+        # can't set the status to "decommissioned" if the cluster has VMs.
+        dbcluster = obj.cluster
+        if dbcluster and dbcluster.status.name != "decommissioned":
+            raise ArgumentError("Cannot change state to decommissioned, as "
+                                "{0}'s state is not decommissioned.".format(dbcluster))
+
 
 class Ready(HostLifecycle):
     __mapper_args__ = {'polymorphic_identity': 'ready'}
@@ -144,6 +153,7 @@ class Ready(HostLifecycle):
             obj.status.transition(obj, dbstate)
         else:
             obj.advertise_status = True
+
 
 class Almostready(HostLifecycle):
     __mapper_args__ = {'polymorphic_identity': 'almostready'}

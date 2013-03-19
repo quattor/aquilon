@@ -1,7 +1,8 @@
 #!/usr/bin/env python2.6
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2010,2011,2012  Contributor
+# Copyright (C) 2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -147,9 +148,9 @@ class TestAddSandbox(TestBrokerCommand):
     def testaddbaduser(self):
         command = ["add", "sandbox",
                    "--sandbox", "user-does-not-exist/badbranch"]
-        out = self.badrequesttest(command)
+        err = self.badrequesttest(command)
         user = self.config.get("unittest", "user")
-        self.matchoutput(out,
+        self.matchoutput(err,
                          "User '%s' cannot add or get a sandbox on "
                          "behalf of 'user-does-not-exist'." % user,
                          command)
@@ -166,6 +167,14 @@ class TestAddSandbox(TestBrokerCommand):
         out = self.badrequesttest(command.split(" "))
         self.matchoutput(out, "sandbox name 'bad:characters!' is not valid",
                          command)
+
+    def testslashinuserid(self):
+        test_user = "user1" + '/' + "test"
+        command = "add sandbox --sandbox '%s/nevermade'" % test_user
+        err = self.unauthorizedtest(command.split(" "))
+        err = self.unauthorizedtest(command.split(" "))
+        self.matchoutput(err, "Unauthorized anonymous access attempt"
+                         " to add_sandbox on /sandbox/command/add", command)
 
     def testverifysearch(self):
         user = self.config.get("unittest", "user")

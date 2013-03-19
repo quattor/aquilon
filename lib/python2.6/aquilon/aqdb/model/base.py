@@ -1,6 +1,7 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2009,2010,2011,2012  Contributor
+# Copyright (C) 2009,2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -75,7 +76,18 @@ class Base(object):
         for prop in mapper.iterate_properties:
             if not isinstance(prop, ColumnProperty):
                 continue
+
+            # Do not load deferred columns, they can't be that interesting
+            if prop.deferred:
+                continue
+
             field = prop.columns[0].name
+
+            # Skip the column holding the polymorphic identity, since the
+            # information is already present in the class name
+            if mapper.polymorphic_on is not None and \
+               mapper.polymorphic_on.name == field:
+                continue
 
             # These fields are not really interesting
             if field == 'id' or field == 'creation_date' or field == 'comments':
@@ -246,7 +258,7 @@ class Base(object):
                 clslabel = mapper.polymorphic_map[value].class_._get_class_label()
             else:
                 if field == "name" or (hasattr(cls, "_instance_label") and
-                                       field == cls._instance_label):
+                                       field == cls._instance_label):  # pylint: disable=E1101
                     desc.insert(0, str(value))
                 elif isinstance(value, Base):
                     desc.append("{0:l}".format(value))

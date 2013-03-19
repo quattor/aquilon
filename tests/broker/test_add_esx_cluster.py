@@ -1,7 +1,8 @@
 #!/usr/bin/env python2.6
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2009,2010,2011,2012  Contributor
+# Copyright (C) 2009,2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -61,10 +62,10 @@ class TestAddESXCluster(TestBrokerCommand):
     def testverifyutecl1(self):
         command = "show esx_cluster --cluster utecl1"
         out = self.commandtest(command.split(" "))
-        default_max = self.config.get("broker",
-                                      "esx_cluster_max_members_default")
-        default_ratio = self.config.get("broker",
-                                        "esx_cluster_vm_to_host_ratio")
+        default_max = self.config.get("archetype_esx_cluster",
+                                      "max_members_default")
+        default_ratio = self.config.get("archetype_esx_cluster",
+                                        "vm_to_host_ratio")
         self.matchoutput(out, "ESX Cluster: utecl1", command)
         self.matchoutput(out, "Metacluster: utmc1", command)
         self.matchoutput(out, "Building: ut", command)
@@ -79,26 +80,38 @@ class TestAddESXCluster(TestBrokerCommand):
         self.matchoutput(out, "Domain: unittest", command)
         self.matchclean(out, "Comments", command)
 
+    def testverifyutecl1proto(self):
+        command = "show esx_cluster --cluster utecl1 --format proto"
+        out = self.commandtest(command.split(" "))
+        clusterlist = self.parse_clusters_msg(out, expect=1)
+        cluster = clusterlist.clusters[0]
+        self.failUnlessEqual(cluster.name, "utecl1")
+        self.failUnlessEqual(cluster.personality.archetype.name, "esx_cluster")
+        self.failUnlessEqual(cluster.threshold, 2)
+        self.failUnlessEqual(cluster.threshold_is_percent, False)
+        self.failUnlessEqual(cluster.max_members,
+                             self.config.getint("archetype_esx_cluster",
+                                                "max_members_default"))
+
     def testverifycatutecl1(self):
         obj_cmd, obj, data_cmd, data = self.verify_cat_clusters("utecl1",
                                                                 "vulcan-1g-desktop-prod",
                                                                 "esx", "utmc1")
 
-        default_ratio = self.config.get("broker",
-                                        "esx_cluster_vm_to_host_ratio")
+        default_ratio = self.config.get("archetype_esx_cluster",
+                                        "vm_to_host_ratio")
         default_ratio = re.sub(r"(\d+):(\d+)", r"\1,\\s*\2", default_ratio)
 
-        self.searchoutput(data, r'"/system/cluster/ratio" = list\(\s*' +
+        self.searchoutput(data, r'"system/cluster/ratio" = list\(\s*' +
                           default_ratio + r'\s*\);', data_cmd)
-        self.matchoutput(data, '"/system/cluster/down_hosts_threshold" = 2;',
+        self.matchoutput(data, '"system/cluster/down_hosts_threshold" = 2;',
                          data_cmd)
-        self.matchoutput(data, '"/system/cluster/down_maint_threshold" = 2;',
+        self.matchoutput(data, '"system/cluster/down_maint_threshold" = 2;',
                          data_cmd)
-        self.matchclean(data, '"/system/cluster/down_hosts_as_percent"', data_cmd)
-        self.matchclean(data, '"/system/cluster/down_maint_as_percent"', data_cmd)
-        self.matchclean(data, '"/system/cluster/down_hosts_percent"', data_cmd)
-        self.matchclean(data, '"/system/cluster/down_maint_percent"', data_cmd)
-
+        self.matchclean(data, '"system/cluster/down_hosts_as_percent"', data_cmd)
+        self.matchclean(data, '"system/cluster/down_maint_as_percent"', data_cmd)
+        self.matchclean(data, '"system/cluster/down_hosts_percent"', data_cmd)
+        self.matchclean(data, '"system/cluster/down_maint_percent"', data_cmd)
 
     def testaddutecl2(self):
         command = ["add_esx_cluster", "--cluster=utecl2",
@@ -132,7 +145,7 @@ class TestAddESXCluster(TestBrokerCommand):
                                                                 "vulcan-1g-desktop-prod",
                                                                 "esx", "utmc1")
 
-        self.matchoutput(data, '"/system/cluster/down_hosts_threshold" = 1;',
+        self.matchoutput(data, '"system/cluster/down_hosts_threshold" = 1;',
                          data_cmd)
 
     def testfailaddexisting(self):
@@ -244,8 +257,8 @@ class TestAddESXCluster(TestBrokerCommand):
     def testverifyutecl3(self):
         command = "show esx_cluster --cluster utecl3"
         out = self.commandtest(command.split(" "))
-        default_ratio = self.config.get("broker",
-                                        "esx_cluster_vm_to_host_ratio")
+        default_ratio = self.config.get("archetype_esx_cluster",
+                                        "vm_to_host_ratio")
         self.matchoutput(out, "ESX Cluster: utecl3", command)
         self.matchoutput(out, "Metacluster: utmc2", command)
         self.matchoutput(out, "Building: ut", command)
@@ -273,10 +286,10 @@ class TestAddESXCluster(TestBrokerCommand):
     def testverifyutecl4(self):
         command = "show esx_cluster --cluster utecl4"
         out = self.commandtest(command.split(" "))
-        default_ratio = self.config.get("broker",
-                                        "esx_cluster_vm_to_host_ratio")
-        default_max = self.config.get("broker",
-                                      "esx_cluster_max_members_default")
+        default_ratio = self.config.get("archetype_esx_cluster",
+                                        "vm_to_host_ratio")
+        default_max = self.config.get("archetype_esx_cluster",
+                                      "max_members_default")
         self.matchoutput(out, "ESX Cluster: utecl4", command)
         self.matchoutput(out, "Metacluster: utmc2", command)
         self.matchoutput(out, "Building: ut", command)
@@ -386,7 +399,7 @@ class TestAddESXCluster(TestBrokerCommand):
         self.searchoutput(object,
                           r'variable LOADPATH = list\(\s*"esx_cluster"\s*\);',
                           object_command)
-        self.matchoutput(object, 'include { "clusterdata/%s" };' % name,
+        self.matchoutput(object, '"/" = create("clusterdata/%s"' % name,
                          object_command)
         self.matchclean(object, 'include { "service', object_command)
         self.matchoutput(object, 'include { "personality/%s/config" };' % persona,
@@ -395,36 +408,36 @@ class TestAddESXCluster(TestBrokerCommand):
         data_command = ["cat", "--cluster", name, "--data"]
         data = self.commandtest(data_command)
 
-        self.matchoutput(data, "template clusterdata/%s;" % name, data_command)
-        self.matchoutput(data, '"/system/cluster/name" = "%s";' % name,
+        self.matchoutput(data, "structure template clusterdata/%s;" % name, data_command)
+        self.matchoutput(data, '"system/cluster/name" = "%s";' % name,
                          data_command)
-        self.matchoutput(data, '"/system/cluster/type" = "%s";' % ctype,
+        self.matchoutput(data, '"system/cluster/type" = "%s";' % ctype,
                          data_command)
-        self.matchoutput(data, '"/system/cluster/sysloc/continent" = "na";',
+        self.matchoutput(data, '"system/cluster/sysloc/continent" = "na";',
                          data_command)
-        self.matchoutput(data, '"/system/cluster/sysloc/city" = "ny";',
+        self.matchoutput(data, '"system/cluster/sysloc/city" = "ny";',
                          data_command)
-        self.matchoutput(data, '"/system/cluster/sysloc/campus" = "ny";',
+        self.matchoutput(data, '"system/cluster/sysloc/campus" = "ny";',
                          data_command)
-        self.matchoutput(data, '"/system/cluster/sysloc/building" = "ut";',
+        self.matchoutput(data, '"system/cluster/sysloc/building" = "ut";',
                          data_command)
-        self.matchoutput(data, '"/system/cluster/sysloc/location" = "ut.ny.na";',
+        self.matchoutput(data, '"system/cluster/sysloc/location" = "ut.ny.na";',
                          data_command)
-        self.matchoutput(data, '"/system/metacluster/name" = "%s";' %
+        self.matchoutput(data, '"system/metacluster/name" = "%s";' %
                          metacluster, data_command)
-        self.matchoutput(data, '"/system/build" = "build";', data_command)
+        self.matchoutput(data, '"system/build" = "build";', data_command)
         if on_rack:
-            self.matchoutput(data, '"/system/cluster/rack/name" = "ut13"',
+            self.matchoutput(data, '"system/cluster/rack/name" = "ut13"',
                              data_command)
-            self.matchoutput(data, '"/system/cluster/rack/row" = "k"',
+            self.matchoutput(data, '"system/cluster/rack/row" = "k"',
                              data_command)
-            self.matchoutput(data, '"/system/cluster/rack/column" = "3"',
+            self.matchoutput(data, '"system/cluster/rack/column" = "3"',
                              data_command)
         else:
-            self.matchclean(data, '"/system/cluster/rack/name"', data_command)
-            self.matchclean(data, '"/system/cluster/rack/row"', data_command)
-            self.matchclean(data, '"/system/cluster/rack/column"', data_command)
-        self.matchclean(data, '"/system/cluster/allowed_personalities"', data_command)
+            self.matchclean(data, '"system/cluster/rack/name"', data_command)
+            self.matchclean(data, '"system/cluster/rack/row"', data_command)
+            self.matchclean(data, '"system/cluster/rack/column"', data_command)
+        self.matchclean(data, '"system/cluster/allowed_personalities"', data_command)
         self.matchclean(data, "resources/virtual_machine", data_command)
 
         return object_command, object, data_command, data

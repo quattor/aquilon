@@ -1,7 +1,8 @@
 #!/usr/bin/env python2.6
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012  Contributor
+# Copyright (C) 2008,2009,2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -119,21 +120,17 @@ class TestAddModel(TestBrokerCommand):
         # Use the old --mem name here
         command = ["add_model", "--model=utmedium", "--vendor=utvendor",
                    "--type=virtual_machine", "--cpuname=xeon_5150",
-                   "--cpunum=1", "--mem=8192", "--disktype=nas",
+                   "--cpunum=1", "--mem=8192", "--disktype=virtual_disk",
                    "--diskcontroller=sata", "--disksize=15", "--nics=1",
                    "--nicmodel", "default", "--nicvendor", "utvirt"]
         self.noouttest(command)
 
     def test_100_addutlarge(self):
-        # This test still use --cputype to test backwards compatibility
         command = ["add_model", "--model=utlarge", "--vendor=utvendor",
-                   "--type=virtual_machine", "--cputype=xeon_5150",
-                   "--cpunum=4", "--memory=16384", "--disktype=nas",
+                   "--type=virtual_machine", "--cpuname=xeon_5150",
+                   "--cpunum=4", "--memory=16384", "--disktype=virtual_disk",
                    "--diskcontroller=sata", "--disksize=45", "--nics=1"]
-        (out, err) = self.successtest(command)
-        self.assertEmptyOut(out, command)
-        self.matchoutput(err, "The --cputype option is deprecated.  "
-                         "Please use --cpuname instead.", command)
+        self.noouttest(command)
 
     def test_200_verifyaddutmedium(self):
         command = "show model --model utmedium"

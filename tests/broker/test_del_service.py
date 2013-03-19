@@ -1,7 +1,8 @@
 #!/usr/bin/env python2.6
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012  Contributor
+# Copyright (C) 2008,2009,2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -197,29 +198,6 @@ class TestDelService(TestBrokerCommand):
         command = "show service --service vmseasoning"
         self.notfoundtest(command.split(" "))
 
-    def testdel10gigshares(self):
-        for i in range(5, 11):
-            self.noouttest(["del_service", "--service=nas_disk_share",
-                            "--instance=utecl%d_share" % i])
-
-    def testdelhashares(self):
-        for i in range(11, 13):
-            self.noouttest(["del_service", "--service=nas_disk_share",
-                            "--instance=utecl%d_share" % i])
-            self.noouttest(["del_service", "--service=nas_disk_share",
-                            "--instance=npecl%d_share" % i])
-
-    def testdelmgdshares(self):
-        for i in range(13, 15):
-            self.noouttest(["del_service", "--service=nas_disk_share",
-                            "--instance=utecl%d_share" % i])
-
-    def testdelnasshares(self):
-        for i in range(1, 10):
-            self.noouttest(["del_service", "--service=nas_disk_share",
-                            "--instance=test_share_%s" % i])
-        self.noouttest(["del_service", "--service=nas_disk_share"])
-
     def testdelpollhelper(self):
         service = self.config.get("broker", "poll_helper_service")
         self.noouttest(["del", "service", "--service", service,
@@ -230,4 +208,3 @@ class TestDelService(TestBrokerCommand):
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelService)
     unittest.TextTestRunner(verbosity=2).run(suite)
-

@@ -1,6 +1,7 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2010,2011  Contributor
+# Copyright (C) 2010,2011,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -29,8 +30,9 @@
 """Contains the logic for `aq search esx cluster`."""
 
 
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.commands.search_cluster import CommandSearchCluster
+
 
 class CommandSearchESXCluster(CommandSearchCluster):
 
@@ -60,8 +62,7 @@ class CommandSearchESXCluster(CommandSearchCluster):
         return CommandSearchCluster.render(self, cluster_type='esx',
             allowed_archetype=None, allowed_personality=None,
             down_hosts_threshold=None,
-            down_maint_threshold=None, #fullinfo=None,
+            down_maint_threshold=None,  # fullinfo=None,
             location=None, max_members=None, member_archetype=None,
             member_hostname=esx_hostname, member_personality=None,
             **gen_arguments)
-

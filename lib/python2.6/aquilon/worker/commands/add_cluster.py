@@ -1,6 +1,7 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2011,2012  Contributor
+# Copyright (C) 2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -38,18 +39,14 @@ from aquilon.aqdb.model import (Personality, ClusterLifecycle, MetaCluster,
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
 from aquilon.worker.locks import lock_queue
 
+
 class CommandAddCluster(BrokerCommand):
 
     required_parameters = ["cluster", "down_hosts_threshold"]
 
-    def render(self, session, logger,
-               # Generic arguments
-               cluster, archetype, personality, domain, sandbox,
-               max_members, down_hosts_threshold, maint_threshold,
-               buildstatus, comments,
-               # ESX Specific options
-               vm_to_host_ratio, switch, metacluster,
-               # Finally, anything else
+    def render(self, session, logger, cluster, archetype, personality, domain,
+               sandbox, max_members, down_hosts_threshold, maint_threshold,
+               buildstatus, comments, vm_to_host_ratio, switch, metacluster,
                **arguments):
 
         validate_basic("cluster", cluster)
@@ -60,6 +57,7 @@ class CommandAddCluster(BrokerCommand):
                                 personality)
 
         ctype = dbpersonality.archetype.cluster_type
+        section = "archetype_" + dbpersonality.archetype.name
 
         if not buildstatus:
             buildstatus = "build"
@@ -83,34 +81,30 @@ class CommandAddCluster(BrokerCommand):
             raise ArgumentError("{0} is not within a campus.".format(dbloc))
 
         if max_members is None:
-            opt = "%s_max_members_default" % dbpersonality.archetype.name
-            if self.config.has_option("broker", opt):
-                max_members = self.config.getint("broker", opt)
+            if self.config.has_option(section, "max_members_default"):
+                max_members = self.config.getint(section, "max_members_default")
 
         Cluster.get_unique(session, cluster, preclude=True)
         clus_type = Cluster.__mapper__.polymorphic_map[ctype].class_
 
         (down_hosts_pct, dht) = Cluster.parse_threshold(down_hosts_threshold)
 
-        kw = {
-               'name' : cluster,
-               'location_constraint' : dbloc,
-               'personality' : dbpersonality,
-               'max_hosts' : max_members,
-               'branch' : dbbranch,
-               'sandbox_author' : dbauthor,
-               'down_hosts_threshold' : dht,
-               'down_hosts_percent' : down_hosts_pct,
-               'status' : dbstatus,
-               'comments' : comments
-             }
+        kw = {'name': cluster,
+              'location_constraint': dbloc,
+              'personality': dbpersonality,
+              'max_hosts': max_members,
+              'branch': dbbranch,
+              'sandbox_author': dbauthor,
+              'down_hosts_threshold': dht,
+              'down_hosts_percent': down_hosts_pct,
+              'status': dbstatus,
+              'comments': comments}
 
         if ctype == 'esx':
             if vm_to_host_ratio is None:
-                key = "{0}_vm_to_host_ratio".format(
-                    kw["personality"].archetype.name)
-                if self.config.has_option("broker", key):
-                    vm_to_host_ratio = self.config.get("broker", key)
+                if self.config.has_option(section, "vm_to_host_ratio"):
+                    vm_to_host_ratio = self.config.get(section,
+                                                       "vm_to_host_ratio")
                 else:
                     vm_to_host_ratio = "1:1"
             (vm_count, host_count) = force_ratio("vm_to_host_ratio",

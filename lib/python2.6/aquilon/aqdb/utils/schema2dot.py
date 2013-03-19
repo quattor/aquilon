@@ -1,6 +1,7 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011  Contributor
+# Copyright (C) 2008,2009,2010,2011,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -33,7 +34,7 @@ import ms.modulecmd
 ms.modulecmd.load('fsf/libtool/1.5.18')
 ms.modulecmd.load('fsf/graphviz/2.24.0')
 
-ms.version.addpkg('pyparsing', '1.5.5') #pydot relies on pyparsing
+ms.version.addpkg('pyparsing', '1.5.5')  # pydot relies on pyparsing
 ms.version.addpkg('pydot', '1.0.2')
 import pydot
 
@@ -41,6 +42,7 @@ from sqlalchemy.orm import class_mapper
 from sqlalchemy.orm.properties import PropertyLoader
 
 from aquilon.aqdb.model import Base
+
 
 def create_uml_graph(mappers,
                      show_attributes=True,
@@ -50,7 +52,7 @@ def create_uml_graph(mappers,
                      font="Sans-Serif"):
 
     graph = pydot.Dot(prog='neato', mode="major", overlap="0", sep="0.01",
-                      pack="True",dim="3", concentrate="True", rankdir="TB")
+                      pack="True", dim="3", concentrate="True", rankdir="TB")
     relations = set()
 
     for mapper in mappers:
@@ -80,6 +82,7 @@ def create_uml_graph(mappers,
 
     for relation in relations:
         args = {}
+
         def multiplicity_indicator(prop):
             if prop.uselist:
                 return ' *'
@@ -111,23 +114,18 @@ def create_uml_graph(mappers,
             args['arrowhead'] = 'vee'
 
         graph.add_edge(
-            pydot.Edge(from_name,to_name,
-                       fontname=font,
-                       fontsize="7.0",
+            pydot.Edge(from_name, to_name, fontname=font, fontsize="7.0",
                        style="setlinewidth(%s)" % linewidth,
                        arrowsize=linewidth, **args))
 
     return graph
 
-def create_schema_graph(tables=None,
-                        metadata=None,
-                        show_datatypes=False,
-                        font="Sans-Serif",
-                        concentrate="True",
-                        relation_options=None,
-                        rankdir='TB'):
+
+def create_schema_graph(tables=None, metadata=None, show_datatypes=False,
+                        font="Sans-Serif", concentrate="True",
+                        relation_options=None, rankdir='TB'):
     relation_options = {}
-    relation_kwargs = {'fontsize':"7.0"}
+    relation_kwargs = {'fontsize': "7.0"}
     relation_kwargs.update(relation_options)
 
     if not metadata and len(tables):
@@ -145,9 +143,8 @@ def create_schema_graph(tables=None,
 
     #Grossly inefficient. We can do this once for the whole graph
     for table in tables:
-        graph.add_node(pydot.Node(str(table.name),
-            shape = "record",
-            label = _render_table_record(table, show_datatypes)))
+        graph.add_node(pydot.Node(str(table.name), shape="record",
+            label=_render_table_record(table, show_datatypes)))
 
     for table in tables:
         for fk in table.foreign_keys:
@@ -156,27 +153,31 @@ def create_schema_graph(tables=None,
             if is_inheritance:
                 edge = edge[::-1]
             graph_edge = pydot.Edge(
-                headlabel = " %s" % fk.column.name,
-                taillabel = " %s" % fk.parent.name,
-                arrowhead = is_inheritance and 'inv' or 'normal' ,
-                arrowtail = (fk.parent.primary_key or
-                           fk.parent.unique) and 'empty' or 'crow' ,
+                headlabel=" %s" % fk.column.name,
+                taillabel=" %s" % fk.parent.name,
+                arrowhead=is_inheritance and 'inv' or 'normal',
+                arrowtail=(fk.parent.primary_key or
+                           fk.parent.unique) and 'empty' or 'crow',
                 *edge, **relation_kwargs)
 
             graph_edge.set_parent_graph(graph.get_parent_graph)
             graph.add_edge(graph_edge)
     return graph
 
+
 def write_schema_dot(meta, file_name='/tmp/aqdb_schema.dot'):
     create_schema_graph(metadata=meta).write(file_name)
+
 
 def write_uml_png(file_name='/tmp/aqdb_uml.png'):
     r = Base._decl_class_registry
     g = create_uml_graph([class_mapper(c) for c in r.itervalues()])
     g.write_png(file_name)
 
-def write_schema_png(meta, file_name = "/tmp/aqdb_schema.png"):
+
+def write_schema_png(meta, file_name="/tmp/aqdb_schema.png"):
     create_schema_graph(metadata=meta).write_png(file_name)
+
 
 def _render_table_record(table, show_datatypes=False):
     def format_col_type(col):
@@ -187,11 +188,11 @@ def _render_table_record(table, show_datatypes=False):
 
     cols = list()
     for col in table.columns:
-        if col.name in ['id', 'creation_date', 'comments']:  #skip these columns
+        if col.name in ['id', 'creation_date', 'comments']:  # skip these columns
             continue
         desc = "%s" % (col.name)
         if show_datatypes:
-            label = "%s : %s"% (desc, format_col_type(col))
+            label = "%s : %s" % (desc, format_col_type(col))
             cols.append(label)
         else:
             cols.append(desc)
@@ -199,6 +200,7 @@ def _render_table_record(table, show_datatypes=False):
         return "\"{%s}\"" % table.name.title()
     else:
         return "\"{%s|%s\l}\"" % (table.name.title(), "\\l".join(cols))
+
 
 def _mk_label(mapper, show_attributes=True, show_datatypes=True):
 
@@ -208,11 +210,11 @@ def _mk_label(mapper, show_attributes=True, show_datatypes=True):
             ''.join([colstr, " : %s" % (col.type.__class__.__name__)])
         return colstr
 
-
     attrs = list()
     if show_attributes:
-        desc = '\\l'.join(format_col(col) for col in sorted(
-                        mapper.columns, key=lambda col:not col.primary_key))
+        desc = '\\l'.join(format_col(col) for col in
+                          sorted(mapper.columns,
+                                 key=lambda col: not col.primary_key))
         attrs.append(desc)
 
     else:

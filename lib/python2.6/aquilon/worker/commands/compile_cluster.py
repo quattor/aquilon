@@ -1,6 +1,7 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012  Contributor
+# Copyright (C) 2008,2009,2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -29,29 +30,24 @@
 """Contains the logic for `aq compile`."""
 
 
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.templates.domain import TemplateDomain
-from aquilon.aqdb.model import Cluster, MetaCluster, EsxCluster
+from aquilon.aqdb.model import Cluster, MetaCluster
 
 
 def add_cluster_data(dbclus):
-    def add_esx_cluster_data(c, profile_list):
+    def add_member_hosts(c, profile_list):
         for h in c.hosts:
             profile_list.append(h.fqdn)
 
-        if isinstance(c, EsxCluster) and c.switch:
-            profile_list.append("switchdata/%s" % c.switch.primary_name)
+    profile_list = ["clusters/%s" % dbclus.name]
 
     if isinstance(dbclus, MetaCluster):
-        profile_list = ["clusters/%s" % dbclus.name]
         for c in dbclus.members:
             profile_list.append("clusters/%s" % c.name)
-            add_esx_cluster_data(c, profile_list)
-
-    # esx
+            add_member_hosts(c, profile_list)
     else:
-        profile_list = ["clusters/%s" % dbclus.name]
-        add_esx_cluster_data(dbclus, profile_list)
+        add_member_hosts(dbclus, profile_list)
 
     return profile_list
 
@@ -70,7 +66,6 @@ class CommandCompileCluster(BrokerCommand):
             pancexclude = r'components/spma/functions'
         dom = TemplateDomain(dbclus.branch, dbclus.sandbox_author,
                              logger=logger)
-
         profile_list = add_cluster_data(dbclus)
 
         dom.compile(session, only=profile_list,

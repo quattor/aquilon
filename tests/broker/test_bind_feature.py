@@ -1,7 +1,8 @@
 #!/usr/bin/env python2.6
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2011,2012  Contributor
+# Copyright (C) 2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -33,10 +34,10 @@
 import unittest
 
 if __name__ == "__main__":
-    import utils
+    from broker import utils
     utils.import_depends()
 
-from brokertest import TestBrokerCommand
+from broker.brokertest import TestBrokerCommand
 
 aquilon_hosts = None
 inventory_hosts = None
@@ -51,9 +52,10 @@ r'};'
 r'"/metadata/features"={\n'
 r'\s*if ((value("/hardware/manufacturer") == "ibm") &&\n'
 r'\s(value("/hardware/template_name") == "hs21-8853l5u")){\n'
-r'\spush("features/hardware/bios_setup");\n'
+r'\sappend("features/hardware/bios_setup");\n'
 r'\s} else { SELF; };\n'
 r'};'
+
 
 class TestBindFeature(TestBrokerCommand):
 
@@ -89,7 +91,7 @@ class TestBindFeature(TestBrokerCommand):
                    "--archetype", "aquilon",
                    "--justification", "tcm=12345678"]
         (out, err) = self.successtest(command)
-        self.matchoutput(err, "Flushed 10/10 templates" , command)
+        self.matchoutput(err, "Flushed 10/10 templates", command)
         # We can't easily check the number of templates that got refreshed since
         # there's no easy way to query if "make" was run for a host or not
 
@@ -113,20 +115,20 @@ class TestBindFeature(TestBrokerCommand):
                           command)
 
     def test_101_verify_cat_personality(self):
-        command = ["cat", "--personality", "inventory", "--pre_feature" ]
+        command = ["cat", "--personality", "inventory", "--pre_feature"]
         out = self.commandtest(command)
         self.searchoutput(out,
                           r'include { "features/pre_host/config" };\s*',
                           command)
         self.searchoutput(out,
-                          r'"/metadata/features" = push\("features/pre_host/config"\);',
+                          r'"/metadata/features" = append\("features/pre_host/config"\);',
                           command)
 
     def test_110_bind_personality(self):
         command = ["bind", "feature", "--feature", "post_host",
-                   "--personality", "inventory" ]
+                   "--personality", "inventory"]
         (out, err) = self.successtest(command)
-        self.matchclean(err, "Flushed 31/31", command)
+        self.matchclean(err, "Flushed 10/10", command)
 
     def test_111_verify_show_personality(self):
         command = ["show", "personality", "--personality", "inventory"]
@@ -175,7 +177,7 @@ class TestBindFeature(TestBrokerCommand):
                           r'include { "features/post_host/config" };',
                           command)
         self.searchoutput(out,
-                          r'"/metadata/features" = push\("features/post_host/config"\);',
+                          r'"/metadata/features" = append\("features/post_host/config"\);',
                           command)
 
     def test_120_bind_personality_redundant(self):

@@ -1,7 +1,8 @@
 #!/usr/bin/env python2.6
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012  Contributor
+# Copyright (C) 2008,2009,2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -80,13 +81,12 @@ class TestRebindMetaCluster(TestBrokerCommand):
     def testverifyrebindutecl3(self):
         command = ["cat", "--cluster=utecl3", "--data"]
         out = self.commandtest(command)
-        self.matchoutput(out, "template clusterdata/utecl3;", command)
-        self.matchoutput(out, '"/system/cluster/name" = "utecl3";', command)
-        self.matchoutput(out, '"/system/metacluster/name" = "utmc1";', command)
+        self.matchoutput(out, "structure template clusterdata/utecl3;", command)
+        self.matchoutput(out, '"system/cluster/name" = "utecl3";', command)
+        self.matchoutput(out, '"system/metacluster/name" = "utmc1";', command)
         self.matchclean(out, "resources/virtual_machine", command)
 
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestRebindMetaCluster)
     unittest.TextTestRunner(verbosity=2).run(suite)
-

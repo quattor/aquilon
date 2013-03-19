@@ -1,6 +1,7 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2011,2012  Contributor
+# Copyright (C) 2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -33,7 +34,7 @@ from dateutil.tz import tzutc
 from sqlalchemy.sql.expression import asc, desc, or_, exists
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.formats.transaction_info import TransactionList
 from aquilon.aqdb.model import Xtn, XtnDetail, XtnEnd
 
@@ -97,10 +98,11 @@ class CommandSearchAudit(BrokerCommand):
                 q = q.filter(XtnEnd.return_code == return_code)
                 q = q.reset_joinpoint()
 
-        if keyword is not None:
+        if keyword is not None or argument is not None:
             q = q.join(XtnDetail)
-            q = q.filter_by(value=keyword)
-            if argument:
+            if keyword is not None:
+                q = q.filter_by(value=keyword)
+            if argument is not None:
                 q = q.filter_by(name=argument)
             q = q.reset_joinpoint()
 

@@ -4,6 +4,7 @@
 <!ENTITY aqd_version SYSTEM "../version.txt">
 ]>
 <refentry xml:id="add_interface_address"
+          xmlns="http://docbook.org/ns/docbook"
 	  xmlns:xi="http://www.w3.org/2001/XInclude">
     <refmeta>
         <refentrytitle>add_interface_address</refentrytitle>
@@ -34,10 +35,13 @@
 	    <arg choice="plain"><option>--interface <replaceable>IFACE</replaceable></option></arg>
 	    <arg choice="opt"><option>--fqdn <replaceable>FQDN</replaceable></option></arg>
 	    <arg choice="opt"><option>--label <replaceable>LABEL</replaceable></option></arg>
-	    <arg choice="opt"><option>--usage <replaceable>USAGE</replaceable></option></arg>
 	    <arg choice="opt"><option>--network_environment <replaceable>NETENV</replaceable></option></arg>
 	    <group>
 		<synopfragmentref linkend="ip-options">IP address options</synopfragmentref>
+	    </group>
+	    <group choice="opt">
+		<arg choice="plain"><option>--map_to_primary</option></arg>
+		<arg choice="plain"><option>--nomap_to_primary</option></arg>
 	    </group>
 	    <xi:include href="../common/global_options.xml"/>
 	    <xi:include href="../common/ip_options.xml"/>
@@ -129,25 +133,6 @@
 	    </varlistentry>
 	    <varlistentry>
 	        <term>
-		    <option>--usage <replaceable>USAGE</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			Valid values for <replaceable>USAGE</replaceable> are
-			<literal>system</literal> and <literal>zebra</literal>.
-			<literal>system</literal> means that the address will be configured by the
-			operating system. <literal>zebra</literal> means that the address will be
-			managed by Zebra.
-		    </para>
-		    <para>
-			To enable IP failover support using Zebra, the same IP address must be
-			assigned to multiple interfaces with the same
-			<replaceable>LABEL</replaceable>.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-	        <term>
 		    <option>--network_environment <replaceable>NETENV</replaceable></option>
 		</term>
 		<listitem>
@@ -159,6 +144,18 @@
 		    <para>
 			Specifying <option>--network_environment</option> also sets the DNS
 			environment where <replaceable>FQDN</replaceable> is looked up or created.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--map_to_primary</option>, <option>--nomap_to_primary</option>
+		</term>
+		<listitem>
+		    <para>
+			Flag to control if the reverse PTR record of the address should point to the
+			primary name instead the name given in <replaceable>FQDN</replaceable>. Default
+			is to point to the primary name.
 		    </para>
 		</listitem>
 	    </varlistentry>
@@ -209,24 +206,6 @@ aq add interface address --machine foo.one-nyp.ms.com \
 	    </programlisting>
 	</example>
 
-	<example>
-	    <title>Add a Zebra-managed address, which is not the primary IP</title>
-	    <programlisting>
-aq add interface address --machine foo.one-nyp.ms.com \
-                         --interface eth0 \
-			 --label bar \
-			 --usage zebra \
-			 --fqdn foo-bar.one-nyp.ms.com \
-			 --ip 10.10.1.12
-
-aq add interface address --machine foo.one-nyp.ms.com \
-                         --interface eth1 \
-			 --label bar \
-			 --usage zebra \
-			 --fqdn foo-bar.one-nyp.ms.com \
-			 --ip 10.10.1.12
-	    </programlisting>
-	</example>
 	<example>
 	    <title>Let the broker auto-generate the DNS entry</title>
 	    <programlisting>

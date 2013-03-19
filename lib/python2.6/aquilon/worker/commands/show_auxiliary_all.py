@@ -1,6 +1,7 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012  Contributor
+# Copyright (C) 2008,2009,2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -30,7 +31,7 @@
 
 from sqlalchemy.orm import contains_eager, aliased
 
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.aqdb.model import (Interface, AddressAssignment, HardwareEntity,
                                 ARecord, DnsDomain, Fqdn)
 
@@ -52,9 +53,8 @@ class CommandShowAuxiliaryAll(BrokerCommand):
         q = q.join(aliased(HardwareEntity))
         q = q.filter_by(hardware_type='machine')
         q = q.reset_joinpoint()
-        q = q.join(Fqdn, DnsDomain)
-        q = q.options(contains_eager('fqdn'))
-        q = q.options(contains_eager('fqdn.dns_domain'))
+        q = q.join(ARecord.fqdn, DnsDomain)
+        q = q.options(contains_eager('fqdn'), contains_eager('fqdn.dns_domain'))
         q = q.order_by(Fqdn.name, DnsDomain.name)
         fqdns = [rec.fqdn for rec in q.all()]
         return fqdns

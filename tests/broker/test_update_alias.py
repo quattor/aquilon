@@ -1,7 +1,8 @@
 #!/usr/bin/env python2.6
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2011,2012  Contributor
+# Copyright (C) 2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -33,10 +34,10 @@
 import unittest
 
 if __name__ == "__main__":
-    import utils
+    from broker import utils
     utils.import_depends()
 
-from brokertest import TestBrokerCommand
+from broker.brokertest import TestBrokerCommand
 
 
 class TestUpdateAlias(TestBrokerCommand):
@@ -49,11 +50,12 @@ class TestUpdateAlias(TestBrokerCommand):
 
     def test_110_update_mscom(self):
         command = ["update", "alias", "--fqdn", "alias.ms.com",
-                   "--target", "arecord14.aqd-unittest.ms.com"]
+                   "--target", "arecord14.aqd-unittest.ms.com",
+                   "--comments", "Other alias comments"]
         self.dsdb_expect("update_host_alias "
                          "-alias alias.ms.com "
                          "-new_host arecord14.aqd-unittest.ms.com "
-                         "-new_comments ")
+                         "-new_comments Other alias comments")
         self.noouttest(command)
         self.dsdb_verify()
 
@@ -86,6 +88,7 @@ class TestUpdateAlias(TestBrokerCommand):
         command = ["search", "dns", "--fullinfo", "--fqdn", "alias.ms.com"]
         out = self.commandtest(command)
         self.matchoutput(out, "Target: arecord14.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "Comments: Other alias comments", command)
 
     def test_320_verify_oldtarget(self):
         command = ["search", "dns", "--fullinfo",
@@ -107,7 +110,7 @@ class TestUpdateAlias(TestBrokerCommand):
                    "--target", "target2.restrict.aqd-unittest.ms.com"]
         out = self.statustest(command)
         self.matchoutput(out,
-                         "WARNING: Will create alias for target "
+                         "WARNING: Will create a reference to "
                          "target2.restrict.aqd-unittest.ms.com, but ",
                          command)
 
@@ -148,4 +151,3 @@ class TestUpdateAlias(TestBrokerCommand):
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestUpdateAlias)
     unittest.TextTestRunner(verbosity=2).run(suite)
-

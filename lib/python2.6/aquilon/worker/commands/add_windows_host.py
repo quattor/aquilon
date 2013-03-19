@@ -1,6 +1,7 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011  Contributor
+# Copyright (C) 2008,2009,2010,2011,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -29,7 +30,7 @@
 """Contains a wrapper for `aq add windows host`."""
 
 
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.commands.add_host import CommandAddHost
 
 
@@ -40,9 +41,7 @@ class CommandAddWindowsHost(CommandAddHost):
     def render(self, *args, **kwargs):
         kwargs['archetype'] = 'windows'
         kwargs['osname'] = 'windows'
-        if not kwargs['osversion']:
-            kwargs['osversion'] = 'generic'
-        kwargs['domain'] = self.config.get("broker", "windows_host_domain")
+        kwargs['domain'] = None
         kwargs['sandbox'] = None
         kwargs['zebra_interfaces'] = None
         # The superclass already contains the logic to handle this case.

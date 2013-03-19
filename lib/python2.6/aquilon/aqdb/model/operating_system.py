@@ -1,6 +1,7 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2009,2010,2011,2012  Contributor
+# Copyright (C) 2009,2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -49,7 +50,8 @@ class OperatingSystem(Base):
     name = Column(AqStr(32), nullable=False)
     version = Column(AqStr(16), nullable=False)
     archetype_id = Column(Integer, ForeignKey('archetype.id',
-                                              name='%s_arch_fk' % _ABV),
+                                              name='%s_arch_fk' % _ABV,
+                                              ondelete="CASCADE"),
                           nullable=False)
     #vendor id?
     creation_date = deferred(Column(DateTime, default=datetime.now,

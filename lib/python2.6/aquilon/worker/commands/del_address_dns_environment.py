@@ -1,6 +1,7 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012  Contributor
+# Copyright (C) 2008,2009,2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -30,9 +31,8 @@
 from sqlalchemy.orm import contains_eager
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 
-from aquilon.worker.broker import BrokerCommand
-from aquilon.aqdb.model import (ARecord, Fqdn, DnsEnvironment,
-                                NetworkEnvironment)
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.aqdb.model import ARecord, DnsEnvironment, NetworkEnvironment
 from aquilon.aqdb.model.dns_domain import parse_fqdn
 from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.worker.locks import DeleteKey
@@ -62,7 +62,7 @@ class CommandDelAddressDNSEnvironment(BrokerCommand):
             q = session.query(ARecord)
             if ip:
                 q = q.filter_by(ip=ip)
-            q = q.join(Fqdn)
+            q = q.join(ARecord.fqdn)
             q = q.options(contains_eager('fqdn'))
             q = q.filter_by(dns_environment=dbdns_env)
             if fqdn:

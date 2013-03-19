@@ -1,6 +1,7 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012  Contributor
+# Copyright (C) 2008,2009,2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -32,7 +33,7 @@
 from sqlalchemy.orm import contains_eager, joinedload
 from sqlalchemy.sql import and_
 
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.formats.host import HostIPList
 from aquilon.aqdb.model import (AddressAssignment, Interface, HardwareEntity,
                                 Personality, Machine, Host, Archetype, ARecord,
@@ -92,9 +93,9 @@ class CommandShowHostIPList(BrokerCommand):
         # Append addresses that are not bound to interfaces
         if not archetype:
             q = session.query(ARecord)
-            q = q.join(Fqdn, DnsDomain)
-            q = q.options(contains_eager("fqdn"))
-            q = q.options(contains_eager("fqdn.dns_domain"))
+            q = q.join(ARecord.fqdn, DnsDomain)
+            q = q.options(contains_eager("fqdn"),
+                          contains_eager("fqdn.dns_domain"))
             q = q.reset_joinpoint()
 
             q = q.join(Network)

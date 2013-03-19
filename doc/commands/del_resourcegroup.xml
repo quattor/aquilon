@@ -4,6 +4,7 @@
 <!ENTITY aqd_version SYSTEM "../version.txt">
 ]>
 <refentry xml:id="del_resourcegroup"
+          xmlns="http://docbook.org/ns/docbook"
 	  xmlns:xi="http://www.w3.org/2001/XInclude">
     <refmeta>
         <refentrytitle>del_resourcegroup</refentrytitle>
@@ -15,7 +16,7 @@
     <refnamediv>
         <refname>del resourcegroup</refname>
         <refpurpose>
-	    Removes a resourcegroup and all the resources its holds.
+	    Removes a resourcegroup.
         </refpurpose>
 	<refclass>Aquilon</refclass>
     </refnamediv>
@@ -23,9 +24,13 @@
     <refsynopsisdiv>
 	<cmdsynopsis>
 	    <command>aq del resourcegroup </command>
+	    <group choice="req">
+		<arg choice="plain"><option>--cluster <replaceable>CLUSTER</replaceable></option></arg>
+		<arg choice="plain"><option>--hostname <replaceable>HOST</replaceable></option></arg>
+	    </group>
 	    <arg choice="req"><option>--resourcegroup <replaceable>NAME</replaceable></option></arg>
 	    <group>
-          <synopfragmentref linkend="global-options">Global options</synopfragmentref>
+                <synopfragmentref linkend="global-options">Global options</synopfragmentref>
 	    </group>
 	    <xi:include href="../common/global_options.xml"/>
 	</cmdsynopsis>
@@ -34,8 +39,9 @@
     <refsect1>
         <title>Description</title>
 	<para>
-	    The <command>aq del_resourcegroup</command> command deletes
-        a resourcegroup and all the resources it holds.
+	    The <command>aq del_resourcegroup</command> command deletes a
+	    resourcegroup. The resourcegroup should be empty, otherwise the
+	    command will return with an error.
 	</para>
     </refsect1>
 
@@ -46,8 +52,9 @@
 
     <refsect1>
         <title>Templates</title>
-        <para>This command will modify the templates for the host or
-	cluster that held this resourcegroup.
+	<para>
+	    This command will modify the templates for the host or cluster that
+	    held this resourcegroup.
 	</para>
     </refsect1>
 
@@ -57,12 +64,31 @@
 	    <title>Command-specific options</title>
 	    <varlistentry>
 	        <term>
+		    <option>--hostname <replaceable>HOST</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Name of the host holding the resourcegroup.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--cluster <replaceable>CLUSTER</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Name of the cluster holding the resourcegroup.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
 		    <option>--resourcegroup <replaceable>NAME</replaceable></option>
 		</term>
 		<listitem>
 		    <para>
-			The name of the resourcegroup. This is globally unique so
-			no further qualifer is required.
+			The name of the resourcegroup.
 		    </para>
 		</listitem>
 	    </varlistentry>
@@ -75,7 +101,7 @@
 	<example>
 	    <title>Delete a resourcegroup and all the resources it holds</title>
 	    <programlisting>
-          aq del_resourcegroup --resourcegroup ny01vvas01
+aq del_resourcegroup --cluster ny01vv --resourcegroup ny01vvas01
 	    </programlisting>
 	</example>
     </refsect1>
@@ -83,7 +109,7 @@
     <refsect1>
 	<title>See also</title>
 	<para>
-	    <citerefentry><refentrytitle>del_application</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>del_application</refentrytitle><manvolnum>1</manvolnum></citerefentry>
 	</para>
     </refsect1>
 </refentry>

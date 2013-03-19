@@ -1,7 +1,8 @@
 #!/usr/bin/env python2.6
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2010,2011,2012  Contributor
+# Copyright (C) 2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -113,8 +114,8 @@ class TestDelInterfaceAddress(TestBrokerCommand):
                    "--data"]
         out = self.commandtest(command)
         self.searchoutput(out,
-                          r'"/system/resources/service_address" = '
-                          r'push\(create\("resource/host/unittest20.aqd-unittest.ms.com/service_address/hostname/config"\)\);',
+                          r'"system/resources/service_address" = '
+                          r'append\(create\("resource/host/unittest20.aqd-unittest.ms.com/service_address/hostname/config"\)\);',
                           command)
         self.matchclean(out, "aliases", command)
         self.matchclean(out, "zebra2", command)
@@ -140,7 +141,6 @@ class TestDelInterfaceAddress(TestBrokerCommand):
         # External addresses should not affect DSDB
         self.dsdb_verify(empty=True)
 
-
     def testdelunittest26(self):
         ip = self.net.unknown[14].usable[0]
         self.dsdb_expect_delete(ip)
@@ -150,21 +150,21 @@ class TestDelInterfaceAddress(TestBrokerCommand):
         self.noouttest(command)
         self.dsdb_verify()
 
-    def testdelut3gd1r04vlan110(self):
+    def testdelut3gd1r04vlan220(self):
         ip = self.net.tor_net[12].usable[1]
         self.dsdb_expect_delete(ip)
         command = ["del", "interface", "address",
                    "--switch", "ut3gd1r04.aqd-unittest.ms.com",
-                   "--interface", "vlan110", "--ip", ip]
+                   "--interface", "vlan220", "--ip", ip]
         self.noouttest(command)
         self.dsdb_verify()
 
-    def testdelut3gd1r04vlan110hsrp(self):
+    def testdelut3gd1r04vlan220hsrp(self):
         ip = self.net.tor_net[12].usable[2]
         self.dsdb_expect_delete(ip)
         command = ["del", "interface", "address",
                    "--switch", "ut3gd1r04.aqd-unittest.ms.com",
-                   "--interface", "vlan110", "--label", "hsrp"]
+                   "--interface", "vlan220", "--label", "hsrp"]
         self.noouttest(command)
         self.dsdb_verify()
 

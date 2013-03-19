@@ -1,7 +1,8 @@
 #!/usr/bin/env python2.6
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2009,2010,2011,2012  Contributor
+# Copyright (C) 2009,2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -30,7 +31,6 @@
 """Module for testing the make command."""
 
 import os
-import re
 import unittest
 
 if __name__ == "__main__":
@@ -181,7 +181,8 @@ class TestMake(TestBrokerCommand):
     def testmakevmhosts(self):
         for i in range(1, 6):
             command = ["make", "--hostname", "evh%s.aqd-unittest.ms.com" % i,
-                       "--os", "esxi/4.0.0", "--buildstatus", "rebuild"]
+                       "--osname", "esxi", "--osversion", "4.0.0",
+                       "--buildstatus", "rebuild"]
             (out, err) = self.successtest(command)
             self.matchclean(err, "removing binding", command)
 
@@ -200,13 +201,6 @@ class TestMake(TestBrokerCommand):
                                         servicedir])
             self.failUnless(results, "No service plenary data that includes"
                                      "evh%s.aqd-unittest.ms.com" % i)
-
-    def testbados(self):
-        command = ["make", "--hostname", "evh1.aqd-unittest.ms.com",
-                   "--os", "bad-os-value"]
-        out = self.badrequesttest(command)
-        self.matchoutput(out, "Incorrect value for --os.  Please use "
-                         "--osname/--osversion instead.", command)
 
     def testmake10gighosts(self):
         for i in range(51, 75):
@@ -243,22 +237,22 @@ class TestMake(TestBrokerCommand):
                    "--data"]
         out = self.commandtest(command)
         self.matchoutput(out,
-                         "template hostdata/unittest20.aqd-unittest.ms.com;",
+                         "structure template hostdata/unittest20.aqd-unittest.ms.com;",
                          command)
         self.searchoutput(out,
-                          r'"/system/resources/service_address" = '
-                          r'push\(create\("resource/host/unittest20.aqd-unittest.ms.com/service_address/hostname/config"\)\);',
+                          r'"system/resources/service_address" = '
+                          r'append\(create\("resource/host/unittest20.aqd-unittest.ms.com/service_address/hostname/config"\)\);',
                           command)
         self.searchoutput(out,
-                          r'"/system/resources/service_address" = '
-                          r'push\(create\("resource/host/unittest20.aqd-unittest.ms.com/service_address/zebra2/config"\)\);',
+                          r'"system/resources/service_address" = '
+                          r'append\(create\("resource/host/unittest20.aqd-unittest.ms.com/service_address/zebra2/config"\)\);',
                           command)
         self.searchoutput(out,
-                          r'"/system/resources/service_address" = '
-                          r'push\(create\("resource/host/unittest20.aqd-unittest.ms.com/service_address/zebra3/config"\)\);',
+                          r'"system/resources/service_address" = '
+                          r'append\(create\("resource/host/unittest20.aqd-unittest.ms.com/service_address/zebra3/config"\)\);',
                           command)
         self.searchoutput(out,
-                          r'"/system/network/routers" = nlist\(\s*'
+                          r'"system/network/routers" = nlist\(\s*'
                           r'"eth0", list\(\s*"%s",\s*"%s"\s*\),\s*'
                           r'"eth1", list\(\s*"%s",\s*"%s"\s*\)\s*'
                           r'\);' % (self.net.unknown[11][1],
@@ -297,7 +291,7 @@ class TestMake(TestBrokerCommand):
                           (eth1_broadcast, eth1_1_ip, eth1_netmask,
                            eth1_broadcast, eth1_gateway, eth1_ip, eth1_netmask),
                           command)
-        self.matchoutput(out, '"/system/network/default_gateway" = \"%s\";' %
+        self.matchoutput(out, '"system/network/default_gateway" = \"%s\";' %
                          eth0_gateway, command)
 
         command = ["cat", "--hostname", "unittest20.aqd-unittest.ms.com"]
@@ -341,7 +335,6 @@ class TestMake(TestBrokerCommand):
         self.matchoutput(out, '"fqdn" = "zebra3.aqd-unittest.ms.com";',
                          command)
 
-
     def testmakeunittest21(self):
         command = ["make", "--hostname", "unittest21.aqd-unittest.ms.com"]
         (out, err) = self.successtest(command)
@@ -352,10 +345,10 @@ class TestMake(TestBrokerCommand):
         command = ["cat", "--hostname", "unittest21.aqd-unittest.ms.com",
                    "--data"]
         out = self.commandtest(command)
-        self.matchoutput(out, '"/system/network/default_gateway" = \"%s\";' %
+        self.matchoutput(out, '"system/network/default_gateway" = \"%s\";' %
                          net.gateway, command)
         self.searchoutput(out,
-                          r'"/system/network/routers" = nlist\(\s*'
+                          r'"system/network/routers" = nlist\(\s*'
                           r'"bond0", list\(\s*'
                           r'"%s",\s*"%s"\s*\)\s*\);' % (net[1], net[2]),
                           command)
@@ -385,10 +378,10 @@ class TestMake(TestBrokerCommand):
                           r'"network_type", "vpls"\s*\)\s*' %
                           (net.broadcast, router, ip, net.netmask),
                           command)
-        self.matchoutput(out, '"/system/network/default_gateway" = \"%s\";' %
+        self.matchoutput(out, '"system/network/default_gateway" = \"%s\";' %
                          router, command)
         self.searchoutput(out,
-                          r'"/system/network/routers" = nlist\(\s*'
+                          r'"system/network/routers" = nlist\(\s*'
                           r'"eth0", list\(\s*"%s"\s*\)\s*\);' % router,
                           command)
 
@@ -417,10 +410,10 @@ class TestMake(TestBrokerCommand):
                           r'"network_type", "vpls"\s*\)\s*' %
                           (net.broadcast, router, ip, net.netmask),
                           command)
-        self.matchoutput(out, '"/system/network/default_gateway" = \"%s\";' %
+        self.matchoutput(out, '"system/network/default_gateway" = \"%s\";' %
                          router, command)
         self.searchoutput(out,
-                          r'"/system/network/routers" = nlist\(\s*'
+                          r'"system/network/routers" = nlist\(\s*'
                           r'"eth0", list\(\s*"%s"\s*\)\s*\);' % router,
                           command)
 
@@ -449,8 +442,12 @@ class TestMake(TestBrokerCommand):
                           r'"network_type", "unknown"\s*\)\s*' %
                           (net.broadcast, router, ip, net.netmask),
                           command)
-        self.matchoutput(out, '"/system/network/default_gateway" = "%s";' %
+        self.matchoutput(out, '"system/network/default_gateway" = "%s";' %
                          self.net.unknown[0].gateway, command)
+
+    def testmakeaurora(self):
+        command = ["make", "--hostname", self.aurora_with_node + ".ms.com"]
+        self.successtest(command)
 
 
 if __name__ == '__main__':

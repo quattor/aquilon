@@ -1,7 +1,8 @@
 #!/usr/bin/env python2.6
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2009,2010,2011,2012  Contributor
+# Copyright (C) 2009,2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -29,16 +30,12 @@
 # TERMS THAT MAY APPLY.
 """Module for testing the del address command."""
 
-
-import os
-import sys
 import unittest
 
 if __name__ == "__main__":
     import utils
     utils.import_depends()
 
-from ipaddr import IPv4Address
 from brokertest import TestBrokerCommand
 
 
@@ -148,14 +145,30 @@ class TestDelAddress(TestBrokerCommand):
         # External IP addresses should not be added to DSDB
         self.dsdb_verify(empty=True)
 
-
         command = ["show_address", "--fqdn", fqdn,
                    "--network_environment", "cardenv"]
         out = self.notfoundtest(command)
 
+    def test_delreservedreverse(self):
+        self.dsdb_expect_delete(self.net.unknown[0].usable[32])
+        command = ["del", "address",
+                   "--fqdn", "arecord17.aqd-unittest.ms.com"]
+        self.noouttest(command)
+        self.dsdb_verify()
+
+    def test_verifydelreserve(self):
+        command = ["show", "address",
+                   "--fqdn", "arecord17.aqd-unittest.ms.com"]
+        self.notfoundtest(command)
+
+        command = ["search", "dns", "--record_type", "reserved_name"]
+        out = self.commandtest(command)
+        self.matchclean(out, "reverse.restrict.aqd-unittest.ms.com", command)
+        self.matchclean(out, "reverse2.restrict.aqd-unittest.ms.com", command)
+
     def test_610_addipfromip_with_network_env(self):
         fqdn = "cardenvtest610.aqd-unittest.ms.com"
-        command = ["del", "address",  "--fqdn", fqdn,
+        command = ["del", "address", "--fqdn", fqdn,
                    "--network_environment", "cardenv"]
         self.noouttest(command)
         # External IP addresses should not be added to DSDB

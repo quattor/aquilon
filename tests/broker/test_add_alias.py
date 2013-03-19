@@ -1,7 +1,8 @@
 #!/usr/bin/env python2.6
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2011,2012  Contributor
+# Copyright (C) 2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -29,11 +30,13 @@
 # TERMS THAT MAY APPLY.
 """Module for testing the add/show alias command."""
 
+import unittest
+
 if __name__ == '__main__':
-    import utils
+    from broker import utils
     utils.import_depends()
 
-from brokertest import TestBrokerCommand
+from broker.brokertest import TestBrokerCommand
 
 
 class TestAddAlias(TestBrokerCommand):
@@ -51,11 +54,12 @@ class TestAddAlias(TestBrokerCommand):
 
     def test_110_mscom_alias(self):
         cmd = ['add', 'alias', '--fqdn', 'alias.ms.com',
-               '--target', 'arecord13.aqd-unittest.ms.com']
+               '--target', 'arecord13.aqd-unittest.ms.com',
+               '--comments', 'Some alias comments']
         self.dsdb_expect("add_host_alias "
                          "-host_name arecord13.aqd-unittest.ms.com "
                          "-alias_name alias.ms.com "
-                         "-comments ")
+                         "-comments Some alias comments")
         self.noouttest(cmd)
         self.dsdb_verify()
 
@@ -86,7 +90,7 @@ class TestAddAlias(TestBrokerCommand):
                "--target", "target.restrict.aqd-unittest.ms.com"]
         out = self.statustest(cmd)
         self.matchoutput(out,
-                         "WARNING: Will create alias for target "
+                         "WARNING: Will create a reference to "
                          "target.restrict.aqd-unittest.ms.com, but ",
                          cmd)
 
@@ -114,7 +118,7 @@ class TestAddAlias(TestBrokerCommand):
                "--target", "no-dsdb.restrict.aqd-unittest.ms.com"]
         out = self.statustest(cmd)
         self.matchoutput(out,
-                         "WARNING: Will create alias for target "
+                         "WARNING: Will create a reference to "
                          "no-dsdb.restrict.aqd-unittest.ms.com, but ",
                          cmd)
         self.dsdb_verify(empty=True)
@@ -133,10 +137,35 @@ class TestAddAlias(TestBrokerCommand):
         self.matchoutput(out, "Aliases: alias.ms.com, "
                          "alias2host.aqd-unittest.ms.com", cmd)
 
+    def test_410_verify_mscom_alias(self):
+        cmd = "show alias --fqdn alias.ms.com"
+        out = self.commandtest(cmd.split(" "))
+
+        self.matchoutput(out, "Alias: alias.ms.com", cmd)
+        self.matchoutput(out, "Target: arecord13.aqd-unittest.ms.com", cmd)
+        self.matchoutput(out, "DNS Environment: internal", cmd)
+        self.matchoutput(out, "Comments: Some alias comments", cmd)
+
     def test_500_add_alias2alias(self):
         cmd = ['add', 'alias', '--fqdn', 'alias2alias.aqd-unittest.ms.com',
                '--target', 'alias2host.aqd-unittest.ms.com']
         self.noouttest(cmd)
+
+    def test_510_add_alias3alias(self):
+        cmd = ['add', 'alias', '--fqdn', 'alias3alias.aqd-unittest.ms.com',
+               '--target', 'alias2alias.aqd-unittest.ms.com']
+        self.noouttest(cmd)
+
+    def test_520_add_alias4alias(self):
+        cmd = ['add', 'alias', '--fqdn', 'alias4alias.aqd-unittest.ms.com',
+               '--target', 'alias3alias.aqd-unittest.ms.com']
+        self.noouttest(cmd)
+
+    def test_530_add_alias5alias_fail(self):
+        cmd = ['add', 'alias', '--fqdn', 'alias5alias.aqd-unittest.ms.com',
+               '--target', 'alias4alias.aqd-unittest.ms.com']
+        out = self.badrequesttest(cmd)
+        self.matchoutput(out, "Maximum alias depth exceeded", cmd)
 
     def test_600_verify_alias2alias(self):
         cmd = 'show alias --fqdn alias2alias.aqd-unittest.ms.com'
@@ -154,7 +183,9 @@ class TestAddAlias(TestBrokerCommand):
         self.matchoutput(out,
                          "Aliases: alias.ms.com, "
                          "alias2alias.aqd-unittest.ms.com, "
-                         "alias2host.aqd-unittest.ms.com",
+                         "alias2host.aqd-unittest.ms.com, "
+                         "alias3alias.aqd-unittest.ms.com, "
+                         "alias4alias.aqd-unittest.ms.com",
                          cmd)
 
 

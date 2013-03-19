@@ -1,6 +1,7 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012  Contributor
+# Copyright (C) 2008,2009,2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -121,7 +122,8 @@ class Interface(Base):
     comments = Column('comments', String(255), nullable=True)
 
     hardware_entity = relation(HardwareEntity, lazy=False, innerjoin=True,
-                               backref=backref('interfaces', cascade='all'))
+                               backref=backref('interfaces',
+                                               cascade='all, delete-orphan'))
 
     model = relation(Model, innerjoin=True)
 
@@ -177,8 +179,9 @@ class Interface(Base):
         q = q.filter_by(mac_address=self.mac)
         # Group the results into 'any port number but zero' and 'port 0'.
         # This prioritizes any port over the uplink port.
-        # Saying that port 0 is an uplink port isn't very elegant...
-        q = q.order_by(desc(case([(ObservedMac.port_number == 0, 0)], else_=1)))
+        # Saying that port 0 is an uplink port isn't very elegant, also
+        # with real port names it's not even true.
+        q = q.order_by(desc(case([(ObservedMac.port == "0", 0)], else_=1)))
         q = q.order_by(desc(ObservedMac.last_seen))
         return q.first()
 
@@ -330,8 +333,6 @@ class LoopbackInterface(Interface):
 
     __mapper_args__ = {'polymorphic_identity': 'loopback'}
 
-    name_check = re.compile(r'^loop\d+$')
-
     def validate_mac(self, key, value):
         if value is not None:
             raise ValueError("Loopback interfaces cannot have a MAC address.")
@@ -341,6 +342,7 @@ class LoopbackInterface(Interface):
 interface = Interface.__table__  # pylint: disable=C0103
 interface.primary_key.name = '%s_pk' % _TN
 interface.info['unique_fields'] = ['name', 'hardware_entity']
+interface.info['extra_search_fields'] = ['mac']
 
 interface.append_constraint(UniqueConstraint('mac', name='%s_mac_addr_uk' % _ABV))
 

@@ -1,6 +1,7 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012  Contributor
+# Copyright (C) 2008,2009,2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -37,6 +38,7 @@ from sqlalchemy.orm import relation, backref, deferred
 
 from aquilon.aqdb.model import Base, Switch
 from aquilon.aqdb.column_types.aqmac import AqMac
+from aquilon.aqdb.column_types import AqStr
 
 _TN = 'observed_mac'
 
@@ -50,11 +52,10 @@ class ObservedMac(Base):
                                            name='obs_mac_hw_fk'),
                        primary_key=True)
 
-    port_number = Column(Integer, primary_key=True)
+    port = Column(AqStr(32), primary_key=True)
 
     mac_address = Column(AqMac(17), nullable=False, primary_key=True)
 
-    slot = Column(Integer, nullable=True, default=1, primary_key=True)
 
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
@@ -64,7 +65,7 @@ class ObservedMac(Base):
 
     switch = relation(Switch, backref=backref('observed_macs',
                                               cascade='delete',
-                                              order_by=[slot, port_number]))
+                                              order_by=[port]))
 
 
 observedmac = ObservedMac.__table__  # pylint: disable=C0103

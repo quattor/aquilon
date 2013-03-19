@@ -1,6 +1,7 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2010,2011,2012  Contributor
+# Copyright (C) 2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -28,12 +29,11 @@
 # TERMS THAT MAY APPLY.
 """Contains the logic for `aq del interface address`."""
 
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.exceptions_ import ArgumentError, IncompleteError
-from aquilon.aqdb.model import (HardwareEntity, AddressAssignment, ARecord,
-                                Fqdn, NetworkEnvironment)
+from aquilon.aqdb.model import (HardwareEntity, Interface, AddressAssignment,
+                                ARecord, NetworkEnvironment)
 from aquilon.worker.dbwrappers.dns import delete_dns_record
-from aquilon.worker.dbwrappers.interface import get_interface
 from aquilon.worker.templates.host import PlenaryHost
 from aquilon.worker.locks import lock_queue
 from aquilon.worker.processes import DSDBRunner
@@ -60,7 +60,8 @@ class CommandDelInterfaceAddress(BrokerCommand):
 
         dbhw_ent = HardwareEntity.get_unique(session, hwname,
                                              hardware_type=hwtype, compel=True)
-        dbinterface = get_interface(session, interface, dbhw_ent, None)
+        dbinterface = Interface.get_unique(session, hardware_entity=dbhw_ent,
+                                           name=interface, compel=True)
         dbnet_env = NetworkEnvironment.get_unique_or_default(session,
                                                              network_environment)
 
@@ -114,7 +115,7 @@ class CommandDelInterfaceAddress(BrokerCommand):
             q = session.query(ARecord)
             q = q.filter_by(network=dbnetwork)
             q = q.filter_by(ip=ip)
-            q = q.join(Fqdn)
+            q = q.join(ARecord.fqdn)
             q = q.filter_by(dns_environment=dbnet_env.dns_environment)
             map(delete_dns_record, q.all())
 

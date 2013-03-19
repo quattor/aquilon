@@ -1,7 +1,8 @@
 #!/usr/bin/env python2.6
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012  Contributor
+# Copyright (C) 2008,2009,2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -382,81 +383,6 @@ class TestAddService(TestBrokerCommand):
         self.matchoutput(out, "Service: vmseasoning Instance: pepper", command)
         self.matchclean(out, "Disk Count", command)
 
-    def testaddnasshares(self):
-        # Creates shares test_share_1 through test_share_9
-        for i in range(1, 10):
-            self.noouttest(["add_service", "--service=nas_disk_share",
-                            "--instance=test_share_%s" % i])
-
-    def testadd10gigshares(self):
-        for i in range(5, 11):
-            self.noouttest(["add_service", "--service=nas_disk_share",
-                            "--instance=utecl%d_share" % i])
-
-    def testaddhashares(self):
-        for i in range(11, 13):
-            self.noouttest(["add_service", "--service=nas_disk_share",
-                            "--instance=utecl%d_share" % i])
-            self.noouttest(["add_service", "--service=nas_disk_share",
-                            "--instance=npecl%d_share" % i])
-
-    def testaddmgdshares(self):
-        for i in range(13, 15):
-            self.noouttest(["add_nas_disk_share", "--share=utecl%d_share" % i,
-                            "--manager", "resourcepool"])
-
-    def testverifydiskcount(self):
-        command = ["show_service", "--service=nas_disk_share",
-                   "--instance=test_share_1"]
-        out = self.commandtest(command)
-        self.matchoutput(out, "Disk Count: 0", command)
-
-    def testverifyshowshare(self):
-        command = ["show_nas_disk_share", "--share=test_share_1"]
-        out = self.commandtest(command)
-        self.matchoutput(out, "NAS Disk Share: test_share_1", command)
-        self.matchoutput(out, "Server: lnn30f1", command)
-        self.matchoutput(out, "Mountpoint: /vol/lnn30f1v1/test_share_1",
-                         command)
-        self.matchoutput(out, "Disk Count: 0", command)
-        self.matchoutput(out, "Maximum Disk Count: Default (Unlimited)",
-                         command)
-        self.matchoutput(out, "Machine Count: 0", command)
-        self.matchclean(out, "Comments", command)
-        self.matchclean(out, "NAS Disk Share: test_share_2", command)
-
-    def testverifyshowshareall(self):
-        command = ["show_nas_disk_share", "--all"]
-        out = self.commandtest(command)
-        self.matchoutput(out, "NAS Disk Share: test_share_1", command)
-        self.matchoutput(out, "NAS Disk Share: test_share_2", command)
-        self.matchoutput(out, "Server: lnn30f1", command)
-        self.matchoutput(out, "Mountpoint: /vol/lnn30f1v1/test_share_1",
-                         command)
-        self.matchoutput(out, "Disk Count: 0", command)
-        self.matchoutput(out, "Machine Count: 0", command)
-
-    def testcatnasinfo(self):
-        command = ["cat", "--nasinfo=test_share_1"]
-        out = self.commandtest(command)
-        self.matchoutput(out,
-                         "structure template service/nas_disk_share/"
-                         "test_share_1/client/nasinfo",
-                         command)
-        self.matchoutput(out, '"sharename" = "test_share_1";', command)
-        self.matchoutput(out, '"server" = "lnn30f1";', command)
-        self.matchoutput(out, '"mountpoint" = "/vol/lnn30f1v1/test_share_1";',
-                         command)
-
-    def testfailaddnasshare(self):
-        command = ["add_service", "--service=nas_disk_share",
-                   "--instance=share-does-not-exist"]
-        out = self.notfoundtest(command)
-        self.matchoutput(out,
-                         "Share share-does-not-exist cannot be found "
-                         "in NAS maps.",
-                         command)
-
     def testaddnotify(self):
         self.noouttest(["add", "service", "--service", "utnotify"])
         self.noouttest(["add", "service", "--service", "utnotify",
@@ -472,4 +398,3 @@ class TestAddService(TestBrokerCommand):
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddService)
     unittest.TextTestRunner(verbosity=2).run(suite)
-

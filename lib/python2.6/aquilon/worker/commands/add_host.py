@@ -1,6 +1,7 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012  Contributor
+# Copyright (C) 2008,2009,2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -33,7 +34,7 @@ from aquilon.exceptions_ import ArgumentError, ProcessException
 from aquilon.aqdb.model import (Host, OperatingSystem, Archetype,
                                 HostLifecycle, Machine, Personality,
                                 ServiceAddress, HostResource)
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.branch import get_branch_and_author
 from aquilon.worker.dbwrappers.dns import grab_address
 from aquilon.worker.dbwrappers.grn import lookup_grn
@@ -65,6 +66,13 @@ class CommandAddHost(BrokerCommand):
                sandbox, osname, osversion, buildstatus, personality, comments,
                zebra_interfaces, grn, eon_id, skip_dsdb_check=False,
                **arguments):
+        dbarchetype = Archetype.get_unique(session, archetype, compel=True)
+        section = "archetype_" + dbarchetype.name
+
+        # This is for the various add_*_host commands
+        if not domain and not sandbox:
+            domain = self.config.get(section, "host_domain")
+
         (dbbranch, dbauthor) = get_branch_and_author(session, logger,
                                                      domain=domain,
                                                      sandbox=sandbox,
@@ -80,38 +88,26 @@ class CommandAddHost(BrokerCommand):
         dbmachine = Machine.get_unique(session, machine, compel=True)
         oldinfo = DSDBRunner.snapshot_hw(dbmachine)
 
-        dbarchetype = Archetype.get_unique(session, archetype, compel=True)
         if not personality:
-            if dbarchetype.name == 'aquilon':
-                personality = 'inventory'
+            if self.config.has_option(section, "default_personality"):
+                personality = self.config.get(section, "default_personality")
             else:
                 personality = 'generic'
         dbpersonality = Personality.get_unique(session, name=personality,
-                                               archetype=archetype, compel=True)
+                                               archetype=dbarchetype, compel=True)
 
-        if dbarchetype.name == 'aquilon':
-            # default to os linux/5.0.1-x86_64 for aquilon
-            if not osname:
-                osname = 'linux'
-            if not osversion:
-                osversion = '5.0.1-x86_64'
-        elif dbarchetype.name == 'aurora':
-            if not osname:
-                #no solaris yet
-                osname = 'linux'
-            if not osversion:
-                osversion = 'generic'
-        elif dbarchetype.name == 'windows':
-            if not osname:
-                osname = 'windows'
-            if not osversion:
-                osversion = 'generic'
-        else:
-            if not osname or not osversion:
-                raise ArgumentError("Can not determine a sensible default OS "
-                                    "for archetype %s. Please use the "
-                                    "--osname and --osversion parameters." %
-                                    (dbarchetype.name))
+        if not osname:
+            if self.config.has_option(section, "default_osname"):
+                osname = self.config.get(section, "default_osname")
+        if not osversion:
+            if self.config.has_option(section, "default_osversion"):
+                osversion = self.config.get(section, "default_osversion")
+
+        if not osname or not osversion:
+            raise ArgumentError("Can not determine a sensible default OS "
+                                "for archetype %s. Please use the "
+                                "--osname and --osversion parameters." %
+                                (dbarchetype.name))
 
         dbos = OperatingSystem.get_unique(session, name=osname,
                                           version=osversion,
@@ -126,15 +122,17 @@ class CommandAddHost(BrokerCommand):
             raise ArgumentError("{0:c} {0.label} is already allocated to "
                                 "{1:l}.".format(dbmachine, dbmachine.host))
 
-        dbhost = Host(machine=dbmachine, branch=dbbranch,
-                      sandbox_author=dbauthor, personality=dbpersonality,
-                      status=dbstatus, operating_system=dbos, comments=comments)
-        session.add(dbhost)
-
         if grn or eon_id:
             dbgrn = lookup_grn(session, grn, eon_id, logger=logger,
                                config=self.config)
-            dbhost.grns.append(dbgrn)
+        else:
+            dbgrn = dbpersonality.owner_grn
+
+        dbhost = Host(machine=dbmachine, branch=dbbranch, owner_grn=dbgrn,
+                      sandbox_author=dbauthor, personality=dbpersonality,
+                      status=dbstatus, operating_system=dbos, comments=comments)
+        session.add(dbhost)
+        dbhost.grns.append(dbgrn)
 
         if zebra_interfaces:
             # --autoip does not make sense for Zebra (at least not the way it's
@@ -146,13 +144,28 @@ class CommandAddHost(BrokerCommand):
         # This method is allowed to return None. This can only happen
         # (currently) using add_aurora_host, add_windows_host, or possibly by
         # bypassing the aq client and posting a request directly.
-        ip = generate_ip(session, dbinterface, **arguments)
+        audit_results = []
+        ip = generate_ip(session, logger, dbinterface,
+                         audit_results=audit_results, **arguments)
 
         dbdns_rec, newly_created = grab_address(session, hostname, ip,
                                                 allow_restricted_domain=True,
                                                 allow_reserved=True,
                                                 preclude=True)
         dbmachine.primary_name = dbdns_rec
+
+        # Fix up auxiliary addresses to point to the primary name by default
+        if ip:
+            dns_env = dbdns_rec.fqdn.dns_environment
+
+            for addr in dbmachine.all_addresses():
+                if addr.interface.interface_type == "management":
+                    continue
+                if addr.service_address_id:  # pragma: no cover
+                    continue
+                for rec in addr.dns_records:
+                    if rec.fqdn.dns_environment == dns_env:
+                        rec.reverse_ptr = dbdns_rec.fqdn
 
         if zebra_interfaces:
             if not ip:
@@ -204,6 +217,8 @@ class CommandAddHost(BrokerCommand):
         finally:
             lock_queue.release(key)
 
+        for name, value in audit_results:
+            self.audit_result(session, name, value, **arguments)
         return
 
     def assign_zebra_address(self, session, dbmachine, dbdns_rec,
@@ -217,29 +232,31 @@ class CommandAddHost(BrokerCommand):
 
         # Disable autoflush, since the ServiceAddress object won't be complete
         # until add_resource() is called
-        # TODO: In SQLA 0.7.6, we'd be able to use "with session.no_autoflush:"
-        saved_autoflush = session.autoflush
-        session.autoflush = False
+        with session.no_autoflush:
+            resholder = HostResource(host=dbmachine.host)
+            session.add(resholder)
+            dbsrv_addr = ServiceAddress(name="hostname", dns_record=dbdns_rec)
+            resholder.resources.append(dbsrv_addr)
 
-        resholder = HostResource(host=dbmachine.host)
-        session.add(resholder)
-        dbsrv_addr = ServiceAddress(name="hostname", dns_record=dbdns_rec)
-        resholder.resources.append(dbsrv_addr)
+            for name in zebra_interfaces.split(","):
+                dbinterface = None
+                for iface in dbmachine.interfaces:
+                    if iface.name == name:
+                        dbinterface = iface
+                if not dbinterface:
+                    raise ArgumentError("{0} does not have an interface named "
+                                        "{1}.".format(dbmachine, name))
+                assign_address(dbinterface, dbdns_rec.ip, dbdns_rec.network,
+                               label="hostname", resource=dbsrv_addr)
 
-        for name in zebra_interfaces.split(","):
-            dbinterface = None
-            for iface in dbmachine.interfaces:
-                if iface.name == name:
-                    dbinterface = iface
-            if not dbinterface:
-                raise ArgumentError("{0} does not have an interface named "
-                                    "{1}.".format(dbmachine, name))
-            assign_address(dbinterface, dbdns_rec.ip, dbdns_rec.network,
-                           label="hostname", resource=dbsrv_addr)
+                # Make sure the transit IPs resolve to the primary name
+                for addr in dbinterface.assignments:
+                    if addr.label:
+                        continue
+                    for dnr in addr.dns_records:
+                        dnr.reverse_ptr = dbdns_rec.fqdn
 
-            # Transits should be providers of the default route
-            dbinterface.default_route = True
-
-        session.autoflush = saved_autoflush
+                # Transits should be providers of the default route
+                dbinterface.default_route = True
 
         return dbsrv_addr

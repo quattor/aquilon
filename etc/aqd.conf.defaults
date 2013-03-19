@@ -195,6 +195,54 @@ poll_helper_service = poll_helper
 poll_ssh = /ms/dist/sec/PROJ/openssh/prod/bin/ssh
 poll_ssh_options = -o StrictHostKeyChecking=no -o BatchMode=yes
 grn_to_eonid_map_location = /ms/dist/appmw/PROJ/eon-data/prod/common
+switch_discover = /ms/dist/aquilon/PROJ/switch-discover/prod/bin/switch-discover
+get_camtable = /ms/dist/aquilon/PROJ/switch-discover/prod/bin/get-camtable
+
+# Limit of hostlists
+default_max_list_size = 1000
+reconfigure_max_list_size =
+pxeswitch_max_list_size =
+manage_max_list_size =
+reset_advertised_status_max_list_size =
+map_grn_max_list_size =
+unmap_grn_max_list_size =
+
+[archetype_aquilon]
+default_personality = inventory
+default_osname = linux
+default_osversion = 5.0.1-x86_64
+
+[archetype_aurora]
+host_domain = ny-prod
+default_osname = linux
+default_osversion = generic
+
+[archetype_esx_cluster]
+allow_cascaded_deco = True
+max_members_default = 8
+vm_to_host_ratio = 16:1
+
+[archetype_gridcluster]
+max_members_default = 2000
+
+[archetype_hacluster]
+allow_cascaded_deco = False
+max_members_default = 2
+
+[archetype_metacluster]
+host_domain = ny-prod
+location_type = company
+location_name = ms
+max_members_default = 32
+max_shares_default = 32
+
+[archetype_storagecluster]
+max_members_default = 2
+
+[archetype_windows]
+host_domain = ny-prod
+default_osname = windows
+default_osversion = generic
 
 [panc]
 default_version = prod

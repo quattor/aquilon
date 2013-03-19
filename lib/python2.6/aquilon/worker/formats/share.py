@@ -1,6 +1,7 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012  Contributor
+# Copyright (C) 2008,2009,2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -32,6 +33,7 @@
 from aquilon.worker.formats.formatters import ObjectFormatter
 from aquilon.worker.formats.resource import ResourceFormatter
 from aquilon.aqdb.model import Share
+from aquilon.aqdb.data_sync.storage import find_storage_data
 
 
 class ShareFormatter(ResourceFormatter):
@@ -39,18 +41,13 @@ class ShareFormatter(ResourceFormatter):
     def extra_details(self, share, indent=""):
         details = []
 
-        # TODO some other data from svcinstance?
-        if share.latency:
-            details.append(indent + "  Latency: %s" % share.latency)
+        share_info = find_storage_data(share)
+        details.append(indent + "  Server: %s" % share_info["server"])
+        details.append(indent + "  Mountpoint: %s" % share_info["mount"])
+        details.append(indent + "  Disk Count: %d" % share.disk_count)
+        details.append(indent + "  Machine Count: %d" % share.machine_count)
 
-        for disk in share.disks:
-            # see MachineSpecsFormatter
-            details.append(indent + "  Disk: %s %d GB (Machine: %s)" %
-                           (disk.device_name,
-                            disk.capacity,
-                            disk.machine.label))
         return details
 
 
 ObjectFormatter.handlers[Share] = ShareFormatter()
-

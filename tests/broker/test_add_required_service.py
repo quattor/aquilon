@@ -1,7 +1,8 @@
 #!/usr/bin/env python2.6
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012  Contributor
+# Copyright (C) 2008,2009,2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -160,6 +161,20 @@ class TestAddRequiredService(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out, "Service: netmap", command)
 
+    def testaddrequirednetmapcopy(self):
+        self.noouttest(["add_personality", "--personality", "testme",
+                          "--eon_id", "2", "--archetype", "aquilon",
+                          "--copy_from", "eaitools",
+                          "--host_environment", "dev"])
+
+        command = ["show_personality", "--archetype=aquilon",
+                   "--personality=testme"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Service: netmap", command)
+
+        self.successtest(["del_personality", "--personality", "testme",
+                          "--archetype", "aquilon"])
+
     def testaddrequiredbadservice(self):
         command = ["add_required_service", "--service=badservice",
                    "--personality=badpersonality2", "--archetype=aquilon"]
@@ -220,4 +235,3 @@ class TestAddRequiredService(TestBrokerCommand):
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddRequiredService)
     unittest.TextTestRunner(verbosity=2).run(suite)
-

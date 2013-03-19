@@ -1,7 +1,8 @@
 #!/usr/bin/env python2.6
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2012  Contributor
+# Copyright (C) 2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -197,6 +198,16 @@ class TestUsecaseHACluster(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out, "IP: %s" % ips[0], command)
         #self.matchoutput(out, "IP: %s" % ips[1], command)
+
+    def test_400_try_deco_hacl1(self):
+        command = ["change_status", "--cluster", "hacl1", "--buildstatus",
+                  "decommissioned"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "Cannot change state to decommissioned, as "
+                         "High Availability Cluster hacl1's archetype "
+                         "is hacluster.",
+                         command)
 
     def test_900_try_del_hacl1g1(self):
         command = ["del", "resourcegroup", "--cluster", "hacl1",

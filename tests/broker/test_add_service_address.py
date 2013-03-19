@@ -1,7 +1,8 @@
 #!/usr/bin/env python2.6
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2012  Contributor
+# Copyright (C) 2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -77,18 +78,24 @@ class TestAddServiceAddress(TestBrokerCommand):
                          command)
         self.matchoutput(out, "Interfaces: eth0, eth1", command)
 
+    def testverifyzebra2dns(self):
+        ip = self.net.unknown[13].usable[1]
+        command = ["show", "fqdn", "--fqdn", "zebra2.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchclean(out, "Reverse", command)
+
     def testaddzebra3(self):
         # Adding an even lower IP should cause zebra2 to be renumbered in DSDB
         zebra2_ip = self.net.unknown[13].usable[1]
         zebra3_ip = self.net.unknown[13].usable[0]
-        self.dsdb_expect_delete(zebra2_ip)
+        self.dsdb_expect_rename("zebra2.aqd-unittest.ms.com", iface="le1",
+                                new_iface="le2")
         self.dsdb_expect_add("zebra3.aqd-unittest.ms.com", zebra3_ip, "le1")
-        self.dsdb_expect_add("zebra2.aqd-unittest.ms.com", zebra2_ip, "le2")
         command = ["add", "service", "address",
                    "--hostname", "unittest20.aqd-unittest.ms.com",
                    "--service_address", "zebra3.aqd-unittest.ms.com",
                    "--interfaces", "eth0,eth1", "--ip", zebra3_ip,
-                   "--name", "zebra3"]
+                   "--name", "zebra3", "--map_to_primary"]
         self.noouttest(command)
         self.dsdb_verify()
 

@@ -1,6 +1,7 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2009,2010,2011,2012  Contributor
+# Copyright (C) 2009,2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -28,18 +29,18 @@
 # TERMS THAT MAY APPLY.
 
 
-from aquilon.aqdb.model import Share
+from aquilon.aqdb.model import Share, ClusterResource
 from aquilon.worker.broker import BrokerCommand, validate_basic
 from aquilon.worker.dbwrappers.resources import (add_resource,
                                                  get_resource_holder)
+
 
 class CommandAddShare(BrokerCommand):
 
     required_parameters = ["share"]
 
     def render(self, session, logger, share,
-               comments, latency,
-               hostname, resourcegroup, cluster, **arguments):
+               comments, hostname, resourcegroup, cluster, **arguments):
 
         validate_basic("share", share)
         holder = get_resource_holder(session,
@@ -48,7 +49,16 @@ class CommandAddShare(BrokerCommand):
 
         Share.get_unique(session, name=share, holder=holder, preclude=True)
 
-        dbshare = Share(name=share, comments=comments, latency=latency)
-        return add_resource(session, logger, holder, dbshare)
+        dbshare = Share(name=share, comments=comments)
+        add_resource(session, logger, holder, dbshare)
+
+        # metacluster.validate for max_shares
+        if isinstance(holder, ClusterResource):
+            if holder.cluster.cluster_type == 'meta':
+                holder.cluster.validate()
+            elif holder.cluster.metacluster:
+                holder.cluster.metacluster.validate()
+
+        return
 
 

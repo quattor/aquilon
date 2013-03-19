@@ -1,6 +1,7 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2009,2010,2011,2012  Contributor
+# Copyright (C) 2009,2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -28,13 +29,15 @@
 # TERMS THAT MAY APPLY.
 """ Personality as a high level cfg object """
 from datetime import datetime
+import re
 
 from sqlalchemy import (Column, Integer, Boolean, DateTime, Sequence, String,
                         ForeignKey, UniqueConstraint, Index)
 from sqlalchemy.orm import relation, deferred
 
-from aquilon.aqdb.model import Base, Archetype, Grn, HostEnvironment
+from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.column_types.aqstr import AqStr
+from aquilon.aqdb.model import Base, Archetype, Grn, HostEnvironment
 
 _ABV = 'prsnlty'
 _TN = 'personality'
@@ -58,15 +61,20 @@ class Personality(Base):
     config_override = Column(Boolean(name="persona_cfg_override_ck"),
                              default=False, nullable=False)
 
+    owner_eon_id = Column(Integer, ForeignKey('grn.eon_id',
+                                              name='%s_owner_grn_fk' % _TN),
+                          nullable=False)
+
+    host_environment_id = Column(Integer, ForeignKey('host_environment.id',
+                                                     name='host_environment_fk'),
+                                 nullable=False)
+
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
     comments = Column(String(255), nullable=True)
 
     archetype = relation(Archetype)
-
-    host_environment_id = Column(Integer, ForeignKey('host_environment.id',
-                                                     name='host_environment_fk'),
-                                 nullable=False)
+    owner_grn = relation(Grn, innerjoin=True)
 
     host_environment = relation(HostEnvironment, innerjoin=True)
 
@@ -77,6 +85,16 @@ class Personality(Base):
     def __format__(self, format_spec):
         instance = "%s/%s" % (self.archetype.name, self.name)
         return self.format_helper(format_spec, instance)
+
+    @classmethod
+    def validate_env_in_name (cls, name, host_environment):
+        persona_env = re.search("[-/](" +
+                                "|".join(HostEnvironment.__mapper__.polymorphic_map.keys()) +
+                                ")$", name, re.IGNORECASE)
+        if persona_env and (persona_env.group(1) != host_environment):
+            raise ArgumentError("Environment value in personality name '{0}' "
+                                "does not match the host environment '{1}'"
+                                .format(name, host_environment))
 
 personality = Personality.__table__   # pylint: disable=C0103
 
@@ -92,15 +110,13 @@ class PersonalityGrnMap(Base):
     __tablename__ = _PGN
 
     personality_id = Column(Integer, ForeignKey('%s.id' % _TN,
-                                                name='%s_personality_fk' % _PGNABV),
+                                                name='%s_personality_fk' % _PGNABV,
+                                                ondelete='CASCADE'),
                             primary_key=True)
 
     eon_id = Column(Integer, ForeignKey('grn.eon_id',
                                         name='%s_grn_fk' % _PGNABV),
                     primary_key=True)
-
-    personality = relation(Personality)
-    grn = relation(Grn)
 
 
 pgn = PersonalityGrnMap.__table__  # pylint: disable=C0103

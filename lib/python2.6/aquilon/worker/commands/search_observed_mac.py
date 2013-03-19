@@ -1,6 +1,7 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012  Contributor
+# Copyright (C) 2008,2009,2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -29,7 +30,7 @@
 """Contains the logic for `aq search observed mac`."""
 
 
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.aqdb.model import ObservedMac, Switch
 
 
@@ -38,18 +39,19 @@ class CommandSearchObservedMac(BrokerCommand):
     required_parameters = []
     default_style = "csv"
 
-    def render(self, session, tor_switch, switch, port_number, mac,
+    def render(self, session, logger, switch, port, mac,
                **arguments):
         q = session.query(ObservedMac)
-        if tor_switch:
-            self.deprecated_option("tor_switch", "Please use --switch instead.",
-                                   **arguments)
-            switch = tor_switch
         if switch:
             dbswitch = Switch.get_unique(session, switch, compel=True)
             q = q.filter_by(switch=dbswitch)
-        if port_number is not None:
-            q = q.filter_by(port_number=port_number)
+        if arguments.get("port_number", None):
+            self.deprecated_option("port_number", "Please use --port instead.",
+                                   logger=logger, **arguments)
+            port = str(arguments["port_number"])
+
+        if port is not None:
+            q = q.filter_by(port=port)
         if mac:
             q = q.filter_by(mac_address=mac)
         return q.order_by(ObservedMac.mac_address).all()

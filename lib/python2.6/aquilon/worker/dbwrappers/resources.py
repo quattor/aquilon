@@ -1,6 +1,7 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2011,2012  Contributor
+# Copyright (C) 2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -116,7 +117,7 @@ def get_resource(session, holder, **arguments_in):
 def del_resource(session, logger, dbresource, dsdb_callback=None, **arguments):
     holder = dbresource.holder
     holder_plenary = Plenary.get_plenary(holder.holder_object, logger=logger)
-    remove_plenary = Plenary.get_plenary(dbresource)
+    remove_plenary = Plenary.get_plenary(dbresource, logger=logger)
 
     domain = holder.holder_object.branch.name
 
@@ -180,6 +181,7 @@ def add_resource(session, logger, holder, dbresource, dsdb_callback=None,
         lock_queue.release(key)
 
     return
+
 
 def walk_resources(dbobj):
     """

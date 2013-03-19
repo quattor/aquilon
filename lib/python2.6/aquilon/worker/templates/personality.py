@@ -1,6 +1,7 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012  Contributor
+# Copyright (C) 2008,2009,2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -32,9 +33,8 @@ import logging
 from aquilon.aqdb.model import Personality, Parameter
 from aquilon.worker.templates.base import (Plenary, TemplateFormatter,
                                            PlenaryCollection)
-from aquilon.worker.templates.panutils import (pan_include,
-                                               pan_variable,
-                                               pan_assign, pan_push,
+from aquilon.worker.templates.panutils import (pan_include, pan_variable,
+                                               pan_assign, pan_append,
                                                pan_include_if_exists)
 from aquilon.worker.dbwrappers.parameter import (validate_value,
                                                  get_parameters)
@@ -185,13 +185,18 @@ class PlenaryPersonalityBase(Plenary):
         eon_id_list = [grn.eon_id for grn in self.dbobj.grns]
         eon_id_list.sort()
         for eon_id in eon_id_list:
-            pan_push(lines, "/system/eon_ids", eon_id)
+            pan_append(lines, "/system/eon_ids", eon_id)
+
+        pan_assign(lines, "/system/personality/owner_eon_id",
+                   self.dbobj.owner_eon_id)
 
         ## include pre features
         pan_include_if_exists(lines, "%s/pre_feature" % self.plenary_core)
         ## process parameter templates
         pan_include_if_exists(lines, "personality/config")
         pan_assign(lines, "/system/personality/name", self.name)
+        pan_assign(lines, "/system/personality/host_environment",
+                   self.dbobj.host_environment)
 
         ## TODO : This is just to satisfy quattor schema
         ## needs to be removed as soon as the schema allows this

@@ -1,7 +1,8 @@
 #!/usr/bin/env python2.6
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2009,2010,2011,2012  Contributor
+# Copyright (C) 2009,2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -60,6 +61,10 @@ class TestAddOS(TestBrokerCommand):
 
     def testaddutos(self):
         command = "add os --archetype utarchetype1 --osname utos --osversion 1.0"
+        self.noouttest(command.split(" "))
+
+    def testaddutos2(self):
+        command = "add os --archetype utarchetype3 --osname utos2 --osversion 1.0"
         self.noouttest(command.split(" "))
 
     def testverifyutos(self):
@@ -136,6 +141,6 @@ class TestAddOS(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Comments: Windows 7 Enterprise (x86)", command)
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddOS)
     unittest.TextTestRunner(verbosity=2).run(suite)

@@ -1,6 +1,7 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2009,2010,2011,2012  Contributor
+# Copyright (C) 2009,2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -41,7 +42,7 @@ class ClusterFormatter(ObjectFormatter):
         container = skeleton
         if not container:
             container = self.loaded_protocols[self.protocol].ClusterList()
-            skeleton = container.resources.add()
+            skeleton = container.clusters.add()
         skeleton.name = str(cluster.name)
         skeleton.status = str(cluster.status)
         self.add_personality_data(skeleton.personality, cluster.personality)
@@ -55,7 +56,7 @@ class ClusterFormatter(ObjectFormatter):
             skeleton.maint_threshold_is_percent = \
                                            cluster.down_maint_percent
 
-        for host in sorted(cluster.hosts, key=lambda x : x.fqdn):
+        for host in sorted(cluster.hosts, key=lambda x: x.fqdn):
             self.add_host_msg(skeleton.hosts.add(), host)
 
         if cluster.resholder and len(cluster.resholder.resources) > 0:
@@ -100,7 +101,6 @@ class ClusterFormatter(ObjectFormatter):
 
         return container
 
-
     def format_raw(self, cluster, indent=""):
         details = [indent + "{0:c}: {0.name}".format(cluster)]
         if cluster.metacluster:
@@ -110,7 +110,7 @@ class ClusterFormatter(ObjectFormatter):
                                          indent + "  "))
         details.append(indent + "  Max members: %s" % cluster.max_hosts)
         if cluster.down_hosts_percent:
-            dht = int((cluster.down_hosts_threshold * len(cluster.hosts))/100)
+            dht = int((cluster.down_hosts_threshold * len(cluster.hosts)) / 100)
             details.append(indent + "  Down Hosts Threshold: %s (%s%%)" %
                            (dht, cluster.down_hosts_threshold))
         else:
@@ -120,7 +120,7 @@ class ClusterFormatter(ObjectFormatter):
         if cluster.down_maint_threshold is not None:
             if cluster.down_maint_percent:
                 dht = int((cluster.down_maint_threshold *
-                           len(cluster.hosts))/100)
+                           len(cluster.hosts)) / 100)
                 details.append(indent + "  Maintenance Threshold: %s (%s%%)" %
                            (dht, cluster.down_maint_threshold))
             else:
@@ -178,7 +178,7 @@ class ClusterFormatter(ObjectFormatter):
                            (dbsi.service.name, dbsi.name))
         for personality in cluster.allowed_personalities:
             details.append(indent + "  Allowed Personality: {0}".format(personality))
-        for member in sorted(cluster._hosts, key=lambda x : x.host.fqdn):
+        for member in sorted(cluster._hosts, key=lambda x: x.host.fqdn):
             details.append(indent + "  Member: %s [node_index: %d]" %
                            (member.host.fqdn, member.node_index))
         if cluster.comments:

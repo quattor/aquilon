@@ -1,6 +1,7 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2011,2012  Contributor
+# Copyright (C) 2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -89,7 +90,7 @@ class BundleResource(ResourceHolder):
 
     # This is a one-to-one relation, so we need uselist=False on the backref
     resourcegroup = relation(ResourceGroup, lazy='subquery',
-                             primaryjoin=resourcegroup_id==ResourceGroup.id,
+                             primaryjoin=resourcegroup_id == ResourceGroup.id,
                              backref=backref('resholder',
                                              cascade='all, delete-orphan',
                                              uselist=False))

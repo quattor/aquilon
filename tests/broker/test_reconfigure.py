@@ -1,7 +1,8 @@
 #!/usr/bin/env python2.6
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012  Contributor
+# Copyright (C) 2008,2009,2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -35,13 +36,14 @@ import re
 import unittest
 
 if __name__ == "__main__":
-    import utils
+    from broker import utils
     utils.import_depends()
 
-from brokertest import TestBrokerCommand
+from broker.brokertest import TestBrokerCommand
+from broker.grntest import VerifyGrnsMixin
 
 
-class TestReconfigure(TestBrokerCommand):
+class TestReconfigure(VerifyGrnsMixin, TestBrokerCommand):
     # Note that some tests for reconfigure --list appear in
     # test_make_aquilon.py.
 
@@ -53,7 +55,7 @@ class TestReconfigure(TestBrokerCommand):
     # this case q.ny.ms.com.
     def testreconfigureunittest02_1(self):
         command = ["reconfigure", "--hostname", "unittest02.one-nyp.ms.com",
-                   "--buildstatus", "ready"]
+                   "--buildstatus", "ready", "--grn", "grn:/ms/ei/aquilon/aqd"]
         (out, err) = self.successtest(command)
         self.matchoutput(err,
                          "unittest02.one-nyp.ms.com adding binding for "
@@ -67,23 +69,27 @@ class TestReconfigure(TestBrokerCommand):
 
     ## verify status before reconfigure
     def testreconfigureunittest02_0(self):
-        command = "cat --hostname unittest02.one-nyp.ms.com"
+        command = "cat --hostname unittest02.one-nyp.ms.com --data"
         out = self.commandtest(command.split(" "))
+        self.matchoutput(out, '"system/build" = "build";', command)
+        self.matchoutput(out, '"system/owner_eon_id" = %d;' %
+                         self.grns["grn:/ms/ei/aquilon/unittest"], command)
 
-    def testverifybuildstatus(self):
+    def testverifyshowunittest02(self):
         command = "show host --hostname unittest02.one-nyp.ms.com"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Build Status: ready", command)
         self.matchoutput(out, "Advertise Status: True", command)
+        self.matchoutput(out, "Owned by GRN: grn:/ms/ei/aquilon/aqd", command)
 
     def testverifycatunittest02(self):
         command = "cat --hostname unittest02.one-nyp.ms.com --data"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
-                         "template hostdata/unittest02.one-nyp.ms.com;",
+                         "structure template hostdata/unittest02.one-nyp.ms.com;",
                          command)
         self.matchoutput(out,
-                         '"/hardware" = create("machine/americas/ut/ut3/ut3c5n10");',
+                         '"hardware" = create("machine/americas/ut/ut3/ut3c5n10");',
                          command)
         self.searchoutput(out,
                           r'"eth0", nlist\(\s*'
@@ -107,7 +113,9 @@ class TestReconfigure(TestBrokerCommand):
                            self.net.unknown[0].netmask,
                            self.net.unknown[0].gateway),
                           command)
-        self.matchoutput(out, '"/system/advertise_status" = true;', command)
+        self.matchoutput(out, '"system/advertise_status" = true;', command)
+        self.matchoutput(out, '"system/owner_eon_id" = %d;' %
+                         self.grns["grn:/ms/ei/aquilon/aqd"], command)
 
         command = "cat --hostname unittest02.one-nyp.ms.com"
         out = self.commandtest(command.split(" "))
@@ -122,7 +130,7 @@ class TestReconfigure(TestBrokerCommand):
             """include { "archetype/base" };""",
             command)
         self.matchoutput(out,
-            """include { "hostdata/unittest02.one-nyp.ms.com" };""",
+            """\"/\" = create(\"hostdata/unittest02.one-nyp.ms.com\"""",
             command)
         self.matchoutput(out,
             """include { "os/linux/5.0.1-x86_64/config" };""",
@@ -159,10 +167,10 @@ class TestReconfigure(TestBrokerCommand):
         command = "cat --hostname unittest00.one-nyp.ms.com --data"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
-                         "template hostdata/unittest00.one-nyp.ms.com;",
+                         "structure template hostdata/unittest00.one-nyp.ms.com;",
                          command)
         self.matchoutput(out,
-                         '"/hardware" = create("machine/americas/ut/ut3/ut3c1n3");',
+                         '"hardware" = create("machine/americas/ut/ut3/ut3c1n3");',
                          command)
         self.searchoutput(out,
                           r'"eth0", nlist\(\s*'
@@ -208,7 +216,7 @@ class TestReconfigure(TestBrokerCommand):
                            self.net.unknown[0].netmask,
                            self.net.unknown[0].gateway),
                           command)
-        self.matchoutput(out, '"/system/advertise_status" = false;', command)
+        self.matchoutput(out, '"system/advertise_status" = false;', command)
 
         command = "cat --hostname unittest00.one-nyp.ms.com"
         out = self.commandtest(command.split(" "))
@@ -216,7 +224,7 @@ class TestReconfigure(TestBrokerCommand):
             """include { "archetype/base" };""",
             command)
         self.matchoutput(out,
-            """include { "hostdata/unittest00.one-nyp.ms.com" };""",
+            """\"/\" = create(\"hostdata/unittest00.one-nyp.ms.com\"""",
             command)
         self.matchoutput(out,
             """include { "os/linux/5.0.1-x86_64/config" };""",
@@ -257,7 +265,7 @@ class TestReconfigure(TestBrokerCommand):
 
     def testreconfigurewindowswrongos(self):
         command = ["reconfigure", "--hostname", "unittest01.one-nyp.ms.com",
-                   "--os", "linux/5.0.1-x86_64"]
+                   "--osname", "linux", "--osversion", "5.0.1-x86_64"]
         err = self.notfoundtest(command)
         self.matchoutput(err,
                          "Operating System linux, version 5.0.1-x86_64, "
@@ -300,7 +308,7 @@ class TestReconfigure(TestBrokerCommand):
     def testreconfigureos(self):
         command = ["reconfigure",
                    "--hostname", "aquilon61.aqd-unittest.ms.com",
-                   "--os", "linux/5.0-x86_64"]
+                   "--osname", "linux", "--osversion", "5.0-x86_64"]
         (out, err) = self.successtest(command)
         self.matchoutput(err, "1/1 object template", command)
         self.matchclean(err, "removing binding", command)
@@ -405,10 +413,10 @@ class TestReconfigure(TestBrokerCommand):
         command = "cat --hostname aquilon87.aqd-unittest.ms.com --data"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
-                         "template hostdata/aquilon87.aqd-unittest.ms.com;",
+                         "structure template hostdata/aquilon87.aqd-unittest.ms.com;",
                          command)
         self.matchoutput(out,
-                         '"/hardware" = create("machine/americas/ut/ut9/ut9s03p37");',
+                         '"hardware" = create("machine/americas/ut/ut9/ut9s03p37");',
                          command)
 
         command = "cat --hostname aquilon87.aqd-unittest.ms.com"
@@ -420,7 +428,7 @@ class TestReconfigure(TestBrokerCommand):
             """include { "archetype/base" };""",
             command)
         self.matchoutput(out,
-            """include { "hostdata/aquilon87.aqd-unittest.ms.com" };""",
+            """\"/\" = create(\"hostdata/aquilon87.aqd-unittest.ms.com\"""",
             command)
         self.matchoutput(out,
             """include { "os/linux/5.0.1-x86_64/config" };""",
@@ -517,17 +525,6 @@ class TestReconfigure(TestBrokerCommand):
 #       self.matchoutput(out, "1 hosts in domain changetest1", command)
 #       self.matchoutput(out, "1 hosts in domain unittest", command)
 
-    def testhostlistos(self):
-        hosts = ["aquilon91.aqd-unittest.ms.com"]
-        scratchfile = self.writescratch("bados", "".join(hosts))
-        command = ["reconfigure", "--list", scratchfile,
-                   "--os=os-does-not-exist"]
-        out = self.badrequesttest(command)
-        self.matchoutput(out,
-                         "Please use --osname and --osversion to "
-                         "specify a new OS.",
-                         command)
-
     def testhostlistnoosversion(self):
         hosts = ["aquilon91.aqd-unittest.ms.com"]
         scratchfile = self.writescratch("missingosversion", "".join(hosts))
@@ -571,9 +568,9 @@ class TestReconfigure(TestBrokerCommand):
         scratchfile = self.writescratch("empty", "".join(hosts))
         command = ["reconfigure", "--list", scratchfile]
         out = self.badrequesttest(command)
-        self.matchoutput(out, "Empty hostlist.", command)
+        self.matchoutput(out, "Empty list.", command)
 
-    def testemptyhostlist(self):
+    def testbadhostsinlist(self):
         hosts = ["host-does-not-exist.aqd-unittest.ms.com\n",
                  "another-host-does-not-exist.aqd-unittest.ms.com\n",
                  "aquilon91.aqd-unittest.ms.com\n",
@@ -590,6 +587,18 @@ class TestReconfigure(TestBrokerCommand):
                          command)
         self.matchoutput(out, "host.domain-does-not-exist.ms.com:", command)
         self.matchclean(out, "aquilon91.aqd-unittest.ms.com:", command)
+
+    def testfailoverlistlimit(self):
+        user = self.config.get("unittest", "user")
+        hostlimit = self.config.getint("broker", "reconfigure_max_list_size")
+        hosts = []
+        for i in range(1, 20):
+            hosts.append("thishostdoesnotexist%d.aqd-unittest.ms.com\n" % i)
+        scratchfile = self.writescratch("reconfigurelistlimit", "".join(hosts))
+        command = ["reconfigure", "--list", scratchfile, "--personality=generic"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,"The number of hosts in list {0:d} can not be more "
+                         "than {1:d}".format(len(hosts), hostlimit), command)
 
     # Need easy ordering for these, so using numbers...
     # If we end up fixing map dns domain, it may be harder to do this test.

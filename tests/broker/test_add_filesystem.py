@@ -1,7 +1,8 @@
 #!/usr/bin/env python2.6
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2011,2012  Contributor
+# Copyright (C) 2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -135,8 +136,8 @@ class TestAddFilesystem(TestBrokerCommand):
         command = ["cat", "--generate",
                    "--hostname", "server1.aqd-unittest.ms.com", "--data"]
         out = self.commandtest(command)
-        self.matchoutput(out, '"/system/resources/filesystem" = push(create("resource/host/server1.aqd-unittest.ms.com/filesystem/fs1/config"))', command)
-        self.matchoutput(out, '"/system/resources/filesystem" = push(create("resource/host/server1.aqd-unittest.ms.com/filesystem/fs2/config"))', command)
+        self.matchoutput(out, '"system/resources/filesystem" = append(create("resource/host/server1.aqd-unittest.ms.com/filesystem/fs1/config"))', command)
+        self.matchoutput(out, '"system/resources/filesystem" = append(create("resource/host/server1.aqd-unittest.ms.com/filesystem/fs2/config"))', command)
 
         command = ["show_host", "--hostname=server1.aqd-unittest.ms.com",
                    "--format=proto"]
@@ -146,7 +147,6 @@ class TestAddFilesystem(TestBrokerCommand):
         for resource in host.resources:
             if resource.name == "fs1" and resource.type == "filesystem":
                 self.assertEqual(resource.fsdata.mountpoint, "/mnt")
-
 
     def test_50_add_to_cluster(self):
         command = ["show_filesystem", "--cluster=utvcs1"]
@@ -198,4 +198,3 @@ class TestAddFilesystem(TestBrokerCommand):
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddFilesystem)
     unittest.TextTestRunner(verbosity=2).run(suite)
-

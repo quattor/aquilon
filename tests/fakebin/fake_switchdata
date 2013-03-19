@@ -1,0 +1,12 @@
+#! /bin/sh
+
+DATADIR=$(dirname "$0")/switchdata.d
+ARGSTR=`echo $* | sed -e 's![ /]!_!g'`
+
+if [ -e "${DATADIR}/${ARGSTR}" ]; then
+	cat "${DATADIR}/${ARGSTR}"
+	exit 0
+else
+	exit 1
+fi
+

@@ -4,6 +4,7 @@
 <!ENTITY aqd_version SYSTEM "../version.txt">
 ]>
 <refentry xml:id="search_dns_domain_map"
+          xmlns="http://docbook.org/ns/docbook"
 	  xmlns:xi="http://www.w3.org/2001/XInclude">
     <refmeta>
         <refentrytitle>search_dns_domain_map</refentrytitle>
@@ -26,6 +27,7 @@
 	    <group>
 		<synopfragmentref linkend="global-options">Global options</synopfragmentref>
 	    </group>
+	    <arg choice="opt"><option>--dns_domain <replaceable>DOMAIN</replaceable></option></arg>
 	    <arg choice="opt"><option>--include_parents</option></arg>
 	    <group>
 		<synopfragmentref linkend="location-options">Location options</synopfragmentref>
@@ -47,6 +49,16 @@
         <title>Options</title>
 	<variablelist>
 	    <title>Command-specific options</title>
+	    <varlistentry>
+	        <term>
+		    <option>--dns_domain <replaceable>DOMAIN</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			The name of the DNS domain to search for.
+		    </para>
+		</listitem>
+	    </varlistentry>
 	    <varlistentry>
 	        <term>
 		    <option>--include_parents</option>

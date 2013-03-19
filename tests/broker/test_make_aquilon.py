@@ -1,7 +1,8 @@
 #!/usr/bin/env python2.6
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012  Contributor
+# Copyright (C) 2008,2009,2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -49,7 +50,7 @@ class TestMakeAquilon(TestBrokerCommand):
     def testmakeunittest02(self):
         command = ["make", "aquilon",
                    "--hostname", "unittest02.one-nyp.ms.com",
-                   "--os", "linux/5.0.1-x86_64"]
+                   "--osname", "linux", "--osversion", "5.0.1-x86_64"]
         (out, err) = self.successtest(command)
         self.matchoutput(err,
                          "unittest02.one-nyp.ms.com adding binding for "
@@ -78,7 +79,7 @@ class TestMakeAquilon(TestBrokerCommand):
         command = "cat --hostname unittest02.one-nyp.ms.com --data"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
-                         '"/hardware" = create("machine/americas/ut/ut3/ut3c5n10");',
+                         '"hardware" = create("machine/americas/ut/ut3/ut3c5n10");',
                          command)
         self.searchoutput(out,
                           r'"eth0", nlist\(\s*'
@@ -105,9 +106,9 @@ class TestMakeAquilon(TestBrokerCommand):
                           r'"physdev", "eth1",\s*'
                           r'"vlan", true\s*\)',
                           command)
-        self.matchoutput(out, '"/system/network/default_gateway" = "%s";' %
+        self.matchoutput(out, '"system/network/default_gateway" = "%s";' %
                          self.net.unknown[0].gateway, command)
-        self.matchoutput(out, '"/system/advertise_status" = false', command)
+        self.matchoutput(out, '"system/advertise_status" = false', command)
 
         command = "cat --hostname unittest02.one-nyp.ms.com"
         out = self.commandtest(command.split(" "))
@@ -147,7 +148,7 @@ class TestMakeAquilon(TestBrokerCommand):
         command = ["make", "aquilon",
                    "--hostname", "unittest00.one-nyp.ms.com",
                    "--buildstatus", "blind", "--personality", "compileserver",
-                   "--os", "linux/5.0.1-x86_64"]
+                   "--osname", "linux", "--osversion", "5.0.1-x86_64"]
         (out, err) = self.successtest(command)
         self.matchoutput(err,
                          "unittest00.one-nyp.ms.com adding binding for "
@@ -208,7 +209,7 @@ class TestMakeAquilon(TestBrokerCommand):
         command = "cat --hostname unittest00.one-nyp.ms.com --data"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
-                         '"/hardware" = create("machine/americas/ut/ut3/ut3c1n3");',
+                         '"hardware" = create("machine/americas/ut/ut3/ut3c1n3");',
                          command)
         self.searchoutput(out,
                           r'"eth0", nlist\(\s*'
@@ -240,7 +241,7 @@ class TestMakeAquilon(TestBrokerCommand):
                            self.net.unknown[0].usable[3],
                            self.net.unknown[0].netmask),
                           command)
-        self.matchoutput(out, '"/system/advertise_status" = false', command)
+        self.matchoutput(out, '"system/advertise_status" = false', command)
 
         command = "cat --hostname unittest00.one-nyp.ms.com"
         out = self.commandtest(command.split(" "))
@@ -335,7 +336,7 @@ class TestMakeAquilon(TestBrokerCommand):
         command = ["make", "aquilon",
                    "--hostname", "aquilon91.aqd-unittest.ms.com",
                    "--personality", "badpersonality2",
-                   "--os", "linux/5.0.1-x86_64"]
+                   "--osname", "linux", "--osversion", "5.0.1-x86_64"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Could not find a relevant service map", command)
 
@@ -343,7 +344,7 @@ class TestMakeAquilon(TestBrokerCommand):
         command = ["make", "aquilon", "--debug",
                    "--hostname", "aquilon92.aqd-unittest.ms.com",
                    "--personality", "badpersonality2",
-                   "--os", "linux/5.0.1-x86_64"]
+                   "--osname", "linux", "--osversion", "5.0.1-x86_64"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Creating service Chooser", command)
         self.matchoutput(out, "Could not find a relevant service map", command)
@@ -352,7 +353,7 @@ class TestMakeAquilon(TestBrokerCommand):
         command = ["make", "aquilon",
                    "--hostname", "aquilon93.aqd-unittest.ms.com",
                    "--personality", "badpersonality",
-                   "--os", "linux/5.0.1-x86_64"]
+                   "--osname", "linux", "--osversion", "5.0.1-x86_64"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "cannot locate template", command)
         self.failIf(os.path.exists(os.path.join(
@@ -371,11 +372,10 @@ class TestMakeAquilon(TestBrokerCommand):
                    "--hostname", "jack.cards.example.com"]
         (out, err) = self.successtest(command)
 
-
     def testmakewithos(self):
         command = ["make", "aquilon",
                    "--hostname", "unittest17.aqd-unittest.ms.com",
-                   "--os", "linux/5.0.1-x86_64"]
+                   "--osname", "linux", "--osversion", "5.0.1-x86_64"]
         (out, err) = self.successtest(command)
 
     def testverifyunittest17(self):

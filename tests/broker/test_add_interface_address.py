@@ -1,7 +1,8 @@
 #!/usr/bin/env python2.6
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2010,2011,2012  Contributor
+# Copyright (C) 2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -36,6 +37,7 @@ if __name__ == "__main__":
     utils.import_depends()
 
 from brokertest import TestBrokerCommand
+
 
 def dynname(ip, domain="aqd-unittest.ms.com"):
     return "dynamic-%s.%s" % (str(ip).replace(".", "-"), domain)
@@ -85,16 +87,16 @@ class TestAddInterfaceAddress(TestBrokerCommand):
         self.matchoutput(out, "DNS Record unittest20-e0.aqd-unittest.ms.com "
                          "points to a different IP address.", command)
 
-    def testaddunittest20e1(self):
-        ip = self.net.unknown[12].usable[0]
-        fqdn = "unittest20-e1.aqd-unittest.ms.com"
-        self.dsdb_expect_delete(ip)
-        self.dsdb_expect_add(fqdn, ip, "eth1", ip.mac,
-                             primary="unittest20.aqd-unittest.ms.com")
-        command = ["add", "interface", "address", "--machine", "ut3c5n2",
-                   "--interface", "eth1", "--fqdn", fqdn]
-        self.noouttest(command)
-        self.dsdb_verify()
+    def testverifyunittest20e0(self):
+        command = ["show", "address",
+                   "--fqdn", "unittest20-e0.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "DNS Record: unittest20-e0.aqd-unittest.ms.com",
+                         command)
+        self.matchoutput(out, "IP: %s" % self.net.unknown[11].usable[0],
+                         command)
+        self.matchoutput(out, "Reverse PTR: unittest20.aqd-unittest.ms.com",
+                         command)
 
     def testverifyunittest20network(self):
         # test_add_aquilon_host would be a better place for this test, but that
@@ -129,7 +131,7 @@ class TestAddInterfaceAddress(TestBrokerCommand):
                              primary="unittest20.aqd-unittest.ms.com")
         command = ["add", "interface", "address", "--machine", "ut3c5n2",
                    "--interface", "eth1", "--label", "e1",
-                   "--fqdn", fqdn, "--ip", ip]
+                   "--fqdn", fqdn, "--ip", ip, "--nomap_to_primary"]
         self.noouttest(command)
         self.dsdb_verify()
 
@@ -270,6 +272,14 @@ class TestAddInterfaceAddress(TestBrokerCommand):
         # External IP addresses should not be added to DSDB
         self.dsdb_verify(empty=True)
 
+    def testverifyunittest25utcolo(self):
+        command = ["show", "address", "--dns_environment", "ut-env",
+                   "--fqdn", "unittest25-e1.utcolo.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "DNS Environment: ut-env", command)
+        self.matchoutput(out, "Network Environment: utcolo", command)
+        self.matchclean(out, "Reverse", command)
+
     def testaddunittest25utcolo2(self):
         net = self.net.unknown[1]
         command = ["add", "interface", "address", "--machine", "ut3c5n7",
@@ -280,6 +290,18 @@ class TestAddInterfaceAddress(TestBrokerCommand):
         # External IP addresses should not be added to DSDB
         self.dsdb_verify(empty=True)
 
+    def testaddunittest25utcolo3(self):
+        net = self.net.unknown[1]
+        command = ["add", "interface", "address", "--machine", "ut3c5n7",
+                   "--interface", "eth2", "--ipfromip", net.ip,
+                   "--fqdn", "unittest25-e2-2.utcolo.aqd-unittest.ms.com",
+                   "--label", "e2", "--map_to_primary",
+                   "--network_environment", "utcolo"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "Machine unittest25.aqd-unittest.ms.com lives in DNS "
+                         "environment internal, not DNS environment ut-env.",
+                         command)
 
     def testaddunittest25excx(self):
         net_internal = self.net.unknown[0]

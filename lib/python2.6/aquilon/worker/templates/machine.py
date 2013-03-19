@@ -1,6 +1,7 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012  Contributor
+# Copyright (C) 2008,2009,2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -33,6 +34,7 @@ import logging
 
 from aquilon.aqdb.model import Machine
 from aquilon.worker.locks import CompileKey
+from aquilon.aqdb.data_sync.storage import find_storage_data
 from aquilon.worker.templates.base import Plenary
 from aquilon.worker.templates.panutils import (StructureTemplate, pan_assign,
                                                pan_include, PanMetric,
@@ -89,10 +91,9 @@ class PlenaryMachineInfo(Plenary):
         host = self.dbobj.host
         container = self.dbobj.vm_container
         # Need a compile key if:
-        # - There is a non-aurora host attached.
+        # - There is a host attached.
         # - This is a virtual machine in a container.
-        if ((not host or self.dbobj.model.machine_type == 'aurora_node')
-                and (not container)):
+        if not host and not container:
             return None
         # We have at least host or container, maybe both...
         if host:
@@ -128,19 +129,26 @@ class PlenaryMachineInfo(Plenary):
                 params["boot"] = True
 
             if disk.disk_type == 'local':
-                relpath = "hardware/harddisk/generic/%s" % disk.controller_type
+                tpl = StructureTemplate(
+                                        ("hardware/harddisk/generic/%s" %
+                                        disk.controller_type),
+                                        params)
+
                 if disk.controller_type == 'cciss':
                     devname = "cciss/" + devname
-            elif disk.disk_type == 'nas' and disk.service_instance:
-                relpath = "service/nas_disk_share/%s/client/nasinfo" % \
-                    disk.service_instance.name
+            elif disk.disk_type == 'virtual_disk':
+                share = disk.share
+                share_info = find_storage_data(share)
+
                 params["path"] = "%s/%s.vmdk" % (self.machine, disk.device_name)
                 params["address"] = disk.address
-            else:  # pragma: no cover
-                relpath = None
+                params["sharename"] = share.name
+                params["server"] = share_info["server"]
+                params["mountpoint"] = share_info["mount"]
 
-            if relpath:
-                disks[PanEscape(devname)] = StructureTemplate(relpath, params)
+                tpl = params
+
+            disks[PanEscape(devname)] = tpl
 
         managers = {}
         interfaces = {}
@@ -220,9 +228,6 @@ class PlenaryMachineInfo(Plenary):
             pan_assign(lines, "console/%s" % manager, managers[manager])
 
     def write(self, *args, **kwargs):
-        # Don't bother writing plenary files for dummy aurora hardware.
-        if self.dbobj.model.machine_type == 'aurora_node':
-            return 0
         return Plenary.write(self, *args, **kwargs)
 
 

@@ -1,7 +1,8 @@
 #!/usr/bin/env python2.6
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012  Contributor
+# Copyright (C) 2008,2009,2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -32,19 +33,16 @@
 import unittest
 
 if __name__ == "__main__":
-    import utils
+    from broker import utils
     utils.import_depends()
 
-from brokertest import TestBrokerCommand
-
+from broker.brokertest import TestBrokerCommand
+from broker.grntest import VerifyGrnsMixin
 
 GRN = "grn:/ms/ei/aquilon/aqd"
 
-class TestAddPersonality(TestBrokerCommand):
 
-    def testaddaqdgrns(self):
-        command = ["add", "grn", "--grn", GRN, "--eon_id", 2]
-        self.noouttest(command)
+class TestAddPersonality(VerifyGrnsMixin, TestBrokerCommand):
 
     def testaddutpersonality(self):
         command = ["add_personality", "--personality=utpersonality/dev",
@@ -52,7 +50,8 @@ class TestAddPersonality(TestBrokerCommand):
                    "--host_environment=dev",
                    "--comments", "Some personality comments"]
         self.noouttest(command)
-        self.verifycatforpersonality("aquilon", "utpersonality/dev", True)
+        self.verifycatforpersonality("aquilon", "utpersonality/dev", True,
+                                     "dev", grn=GRN)
 
     def testverifyaddutpersonality(self):
         command = ["show_personality", "--personality=utpersonality/dev",
@@ -73,7 +72,8 @@ class TestAddPersonality(TestBrokerCommand):
         self.matchclean(out,
                         "Template: aquilon/personality/inventory/config.tpl",
                         command)
-        self.matchoutput(out, "GRN: %s" % GRN, command)
+        self.matchoutput(out, "Owned by GRN: %s" % GRN, command)
+        self.matchoutput(out, "Used by GRN: %s" % GRN, command)
 
     def testaddeaipersonality(self):
         command = ["add_personality", "--personality=eaitools",
@@ -100,7 +100,8 @@ class TestAddPersonality(TestBrokerCommand):
         self.matchclean(out,
                         "Template: aquilon/personality/inventory/config.tpl",
                         command)
-        self.matchoutput(out, "GRN: %s" % GRN, command)
+        self.matchoutput(out, "Owned by GRN: %s" % GRN, command)
+        self.matchoutput(out, "Used by GRN: %s" % GRN, command)
 
     def testverifyshowpersonalityallnothreshold(self):
         user = self.config.get("unittest", "user")
@@ -182,7 +183,8 @@ class TestAddPersonality(TestBrokerCommand):
         self.failUnlessEqual(personality.config_override, True)
         self.failUnlessEqual(personality.cluster_required, False)
         self.failUnlessEqual(personality.comments, "Some personality comments")
-        self.failUnlessEqual(personality.owner_eonid, 2)
+        self.failUnlessEqual(personality.owner_eonid, self.grns[GRN])
+        self.failUnlessEqual(personality.host_environment, "dev")
 
     def testverifyshowpersonalityallproto(self):
         command = "show_personality --all --format=proto"
@@ -195,7 +197,7 @@ class TestAddPersonality(TestBrokerCommand):
             if archetype in archetypes:
                 archetypes[archetype][personality.name] = personality
             else:
-                archetypes[archetype] = {personality.name:personality}
+                archetypes[archetype] = {personality.name: personality}
             if personality.threshold >= 0:
                 found_threshold = True
         self.failUnless("aquilon" in archetypes,
@@ -227,8 +229,7 @@ class TestAddPersonality(TestBrokerCommand):
         self.failUnlessEqual(personality.config_override, True)
         self.failUnlessEqual(personality.cluster_required, False)
         self.failUnlessEqual(personality.comments, "Some personality comments")
-        self.failUnlessEqual(personality.owner_eonid, 2)
-
+        self.failUnlessEqual(personality.owner_eonid, self.grns[GRN])
 
     def testverifyshowpersonalityallprotonothreshold(self):
         user = self.config.get("unittest", "user")
@@ -243,7 +244,7 @@ class TestAddPersonality(TestBrokerCommand):
             if archetype in archetypes:
                 archetypes[archetype][personality.name] = personality
             else:
-                archetypes[archetype] = {personality.name:personality}
+                archetypes[archetype] = {personality.name: personality}
             if personality.threshold >= 0:
                 found_threshold = True
         self.failUnless("aquilon" in archetypes,
@@ -274,8 +275,7 @@ class TestAddPersonality(TestBrokerCommand):
         self.failUnlessEqual(personality.config_override, True)
         self.failUnlessEqual(personality.cluster_required, False)
         self.failUnlessEqual(personality.comments, "Some personality comments")
-        self.failUnlessEqual(personality.owner_eonid, 2)
-
+        self.failUnlessEqual(personality.owner_eonid, self.grns[GRN])
 
     def testverifyshowpersonalityallprotothreshold(self):
         command = "show_personality --all --domain unittest --format=proto"
@@ -287,7 +287,7 @@ class TestAddPersonality(TestBrokerCommand):
             if archetype in archetypes:
                 archetypes[archetype][personality.name] = personality
             else:
-                archetypes[archetype] = {personality.name:personality}
+                archetypes[archetype] = {personality.name: personality}
         self.failUnless("aquilon" in archetypes,
                         "No personality with archetype aquilon in list.")
         self.failUnless("utpersonality/dev" in archetypes["aquilon"],
@@ -359,9 +359,12 @@ class TestAddPersonality(TestBrokerCommand):
                          command)
 
     def testaddwindowsdesktop(self):
-        command = "add_personality --personality desktop --archetype windows --eon_id=2 --host_environment=legacy"
-        self.noouttest(command.split(" "))
-        self.verifycatforpersonality("windows", "desktop")
+        command = ["add", "personality", "--personality", "desktop",
+                   "--archetype", "windows", "--grn", "grn:/ms/windows/desktop",
+                   "--host_environment", "legacy"]
+        self.noouttest(command)
+        self.verifycatforpersonality("windows", "desktop",
+                                     grn="grn:/ms/windows/desktop")
 
     def testverifyaddwindowsdesktop(self):
         command = "show_personality --personality desktop --archetype windows"
@@ -377,7 +380,7 @@ class TestAddPersonality(TestBrokerCommand):
         # templates defined for it in the repository.
         command = ["add_personality", "--personality=badpersonality",
                    "--host_environment=legacy",
-                   "--archetype=aquilon", "--eon_id=2" ]
+                   "--archetype=aquilon", "--eon_id=2"]
         self.noouttest(command)
 
     def testverifybadaquilonpersonality(self):
@@ -414,7 +417,7 @@ class TestAddPersonality(TestBrokerCommand):
     def testaddinvalidpersonalityname(self):
         command = ["add_personality", "--personality", "this is a bad; name",
                    "--host_environment=dev",
-                   "--archetype", "aquilon", "--eon_id=2" ]
+                   "--archetype", "aquilon", "--eon_id=2"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Personality name 'this is a bad; name' is "
                          "not valid", command)
@@ -422,14 +425,58 @@ class TestAddPersonality(TestBrokerCommand):
     def testaddinvalidenvironment(self):
         command = ["add_personality", "--personality", "invalidenvironment",
                    "--host_environment", "badenv",
-                   "--archetype", "aquilon", "--eon_id=2" ]
+                   "--archetype", "aquilon", "--eon_id=2"]
         out = self.badrequesttest(command)
-        self.matchoutput(out, "Unknown environment value 'badenv'.  The valid values are: dev, infra, legacy, prod, qa, uat", command)
+        self.matchoutput(out, "Unknown environment value 'badenv'. The valid"
+                              " values are: dev, infra, legacy, prod, qa, uat",
+                         command)
+
+    def testaddnotmatchingnameenv01(self):
+        command = ["add_personality", "--personality", "test/dev",
+                   "--host_environment", "qa",
+                   "--archetype", "aquilon", "--eon_id=2"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Environment value in personality name 'test/dev' "
+                              "does not match the host environment 'qa'",
+                         command)
+
+    def testaddnotmatchingnameenv02(self):
+        command = ["add_personality", "--personality", "test-dev",
+                   "--host_environment", "qa",
+                   "--archetype", "aquilon", "--eon_id=2"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Environment value in personality name 'test-dev' "
+                              "does not match the host environment 'qa'",
+                         command)
+
+    def testaddselectivenamematchenv03(self):
+        command = ["add_personality", "--personality", "ec-infra-auth",
+                   "--host_environment", "infra",
+                   "--archetype", "vmhost", "--eon_id=2"]
+        self.successtest(command)
+
+    def testaddnotmatchingnameenv04(self):
+        command = ["add_personality", "--personality", "test-qa-dev",
+                   "--host_environment", "qa",
+                   "--archetype", "aquilon", "--eon_id=2"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Environment value in personality name 'test-qa-dev' "
+                              "does not match the host environment 'qa'",
+                         command)
+
+    def testaddnotmatchingnameenv05(self):
+        command = ["add_personality", "--personality", "test-qa-DEV",
+                   "--host_environment", "qa",
+                   "--archetype", "aquilon", "--eon_id=2"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Environment value in personality name 'test-qa-DEV' "
+                              "does not match the host environment 'qa'",
+                         command)
 
     def testaddduplicate(self):
         command = ["add_personality", "--personality", "inventory",
                    "--host_environment=legacy",
-                   "--archetype", "aquilon", "--eon_id=2" ]
+                   "--archetype", "aquilon", "--eon_id=2"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Personality inventory, archetype aquilon "
                          "already exists.", command)
@@ -451,10 +498,10 @@ class TestAddPersonality(TestBrokerCommand):
         self.verifycatforpersonality("esx_cluster", "esx_server")
 
     def testaddv1personalities(self):
-        command = ["add_personality", "--cluster_required", "--host_environment=legacy",
+        command = ["add_personality", "--cluster_required", "--host_environment=prod",
                    "--personality=vulcan-1g-desktop-prod", "--archetype=vmhost", "--eon_id=2"]
         self.noouttest(command)
-        command = ["add_personality", "--host_environment=legacy",
+        command = ["add_personality", "--host_environment=prod",
                    "--personality=vulcan-1g-desktop-prod", "--archetype=esx_cluster", "--eon_id=2"]
         self.noouttest(command)
         command = ["add_personality", "--host_environment=legacy",
@@ -496,51 +543,95 @@ class TestAddPersonality(TestBrokerCommand):
         self.noouttest(command)
         self.verifycatforpersonality("hacluster", "vcs-msvcs")
 
-    def verifycatforpersonality(self, archetype, personality, config_override=False):
-        command = ["cat","--archetype", archetype,  "--personality", personality]
+    def verifycatforpersonality(self, archetype, personality,
+                                config_override=False, host_env='legacy',
+                                grn="grn:/ms/ei/aquilon/aqd"):
+        command = ["cat", "--archetype", archetype, "--personality", personality]
         out = self.commandtest(command)
         self.matchoutput(out, 'variable PERSONALITY = "%s"' % personality,
                          command)
-        self.matchoutput(out, '"/system/eon_ids" = push(2);', command)
+        self.check_personality_grns(out, [grn], command)
         self.matchoutput(out, 'include { if_exists("personality/%s/pre_feature") };' %
-                               personality, command)
+                         personality, command)
         self.matchoutput(out, "template personality/%s/config;" % personality,
                          command)
         self.matchoutput(out, '"/system/personality/name" = "%s";' % personality,
                          command)
+        self.matchoutput(out, '"/system/personality/host_environment" = "%s";' % host_env,
+                         command)
         if config_override:
             self.searchoutput(out, r'include { "features/personality/config_override/config" };\s*'
                                    r'include { if_exists\("personality/utpersonality/dev/post_feature"\) };',
-                             command)
+                              command)
         else:
             self.matchoutput(out, 'include { if_exists("personality/%s/post_feature") };' %
-                               personality, command)
-            self.matchclean(out, 'config_override', command);
+                             personality, command)
+            self.matchclean(out, 'config_override', command)
 
     def testverifyshowdiff1(self):
         command = ["show_diff", "--personality=utpersonality/dev",
                    "--archetype=aquilon", "--other=generic"]
         out = self.commandtest(command)
-        self.searchoutput (out,
-                         r'missing Options in Personality aquilon/generic:\s+ConfigOverride',
-                         command)
         self.searchoutput(out,
-                         r'missing Grns in Personality aquilon/generic:\s+GRN grn:/ms/ei/aquilon/aqd',
-                         command)
+                          r'missing Options in Personality aquilon/generic:\s+ConfigOverride',
+                          command)
+        self.searchoutput(out,
+                          r'missing Grns in Personality aquilon/generic:\s+GRN %s' % GRN,
+                          command)
 
     def testverifyshowdiff2(self):
         command = ["show_diff", "--personality=utpersonality/dev",
                    "--archetype=aquilon", "--other=esx_server", "--other_archetype=vmhost"]
         out = self.commandtest(command)
-        self.searchoutput (out,
-                         r'missing Options in Personality aquilon/utpersonality/dev:\s+Cluster Required',
+        self.searchoutput(out,
+                          r'missing Options in Personality aquilon/utpersonality/dev:\s+Cluster Required',
+                          command)
+        self.searchoutput(out,
+                          r'matching Options with different values:\s+Environment value=dev, othervalue=legacy',
+                          command)
+        self.searchoutput(out,
+                          r'missing Options in Personality vmhost/esx_server:\s+ConfigOverride',
+                          command)
+
+    def testfailnoenvironment(self):
+        command = ["add_personality", "--eon_id=2", "--archetype=aquilon",
+                   "--personality=no-environment"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "Default environment is not configured for archetype "
+                         "aquilon, please specify --host_environment.",
                          command)
-        self.searchoutput (out,
-                         r'matching Options with different values:\s+Environment value=dev, othervalue=legacy',
-                         command)
-        self.searchoutput (out,
-                         r'missing Options in Personality vmhost/esx_server:\s+ConfigOverride',
-                         command)
+
+    def testaddgeneric(self):
+        for archetype in ["aquilon", "aurora", "f5", "filer", "vmhost", "windows"]:
+            self.noouttest(["add", "personality", "--personality", "generic",
+                            "--archetype", archetype,
+                            "--host_environment", "prod",
+                            "--grn", "grn:/ms/ei/aquilon/unittest"])
+
+    def testaddvulcandektop(self):
+        command = ["add", "personality",
+                   "--personality", "vulcan-10g-desktop-prod",
+                   "--archetype", "vmhost",
+                   "--host_environment=prod",
+                   "--grn", "grn:/ms/ei/aquilon/unittest"]
+        self.noouttest(command)
+
+    def testaddmetrocluster(self):
+        command = ["add", "personality",
+                   "--personality", "metrocluster",
+                   "--archetype", "storagecluster",
+                   "--host_environment=prod",
+                   "--grn", "grn:/ms/ei/aquilon/unittest"]
+        self.noouttest(command)
+
+    def testaddaquilonpersonalities(self):
+        for personality in ["compileserver", "inventory", "sybase-test",
+                            "lemon-collector-oracle", "unixeng-test"]:
+            self.noouttest(["add", "personality", "--personality", personality,
+                            "--archetype", "aquilon",
+                            "--host_environment=dev",
+                            "--grn", "grn:/ms/ei/aquilon/unittest"])
 
 
 if __name__ == '__main__':

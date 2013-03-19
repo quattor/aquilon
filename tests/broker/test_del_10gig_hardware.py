@@ -1,7 +1,8 @@
 #!/usr/bin/env python2.6
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2009,2010,2011,2012  Contributor
+# Copyright (C) 2009,2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -67,11 +68,6 @@ class TestDel10GigHardware(TestBrokerCommand):
             self.assertEmptyOut(out, command)
         self.dsdb_verify()
 
-    def test_600_delautoassignshares(self):
-        for i in range(10,18):
-            self.noouttest(["del", "disk", "--machine", "evm%d" % i,
-                            "--disk", "sdc"])
-
     def test_700_delmachines(self):
         for i in range(0, 8) + range(9, 17):
             machine = "evm%d" % (10 + i)
@@ -83,6 +79,6 @@ class TestDel10GigHardware(TestBrokerCommand):
             command = "show machine --machine %s" % machine
             self.notfoundtest(command.split(" "))
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDel10GigHardware)
     unittest.TextTestRunner(verbosity=2).run(suite)

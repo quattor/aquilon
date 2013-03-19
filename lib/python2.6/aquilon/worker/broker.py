@@ -1,6 +1,7 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012  Contributor
+# Copyright (C) 2008,2009,2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -66,11 +67,12 @@ audit_id = 0
    """
 
 # Mapping of command exceptions to client return code.
-ERROR_TO_CODE = {NotFoundException:http.NOT_FOUND,
-                 AuthorizationException:http.UNAUTHORIZED,
-                 ArgumentError:http.BAD_REQUEST,
-                 UnimplementedError:http.NOT_IMPLEMENTED,
-                 PartialError:http.MULTI_STATUS}
+ERROR_TO_CODE = {NotFoundException: http.NOT_FOUND,
+                 AuthorizationException: http.UNAUTHORIZED,
+                 ArgumentError: http.BAD_REQUEST,
+                 UnimplementedError: http.NOT_IMPLEMENTED,
+                 PartialError: http.MULTI_STATUS}
+
 
 def get_code_for_error_class(e):
     if e is None or e == None.__class__:
@@ -102,7 +104,6 @@ class BrokerCommand(object):
     If so, the required entry "wins".
 
     """
-
 
     requires_azcheck = True
     """ Opt out of authorization checks by setting this flag to False."""
@@ -215,14 +216,14 @@ class BrokerCommand(object):
         #free = "True " if self.is_lock_free else "False"
         #log.msg("is_lock_free = %s [%s]" % (free, self.command))
 
-    def audit_result(self, session, result, **arguments):
+    def audit_result(self, session, key, value, **arguments):
         # We need a place to store the result somewhere until we can finish the
         # audit record. Use the request object for now.
         request = arguments["request"]
         if not hasattr(request, "_audit_result"):
             request._audit_result = []
 
-        request._audit_result.append(result)
+        request._audit_result.append((key, value))
 
     def render(self, **arguments):  # pragma: no cover
         """ Implement this method to create a functional broker command.
@@ -251,6 +252,7 @@ class BrokerCommand(object):
             request = kwargs["request"]
             logger = kwargs["logger"]
             raising_exception = None
+            rollback_failed = False
             try:
                 if self.requires_transaction or self.requires_azcheck:
                     # Set up a session...
@@ -279,7 +281,7 @@ class BrokerCommand(object):
                         self._set_readonly(session)
                     # begin() is only required if session transactional=False
                     #session.begin()
-                if self.badmode: # pragma: no cover
+                if self.badmode:  # pragma: no cover
                     raise UnimplementedError("Command %s not available on "
                                              "a %s broker." %
                                              (self.command, self.badmode))
@@ -300,7 +302,11 @@ class BrokerCommand(object):
                 # Need to close after the rollback, or the next time session
                 # is accessed it tries to commit the transaction... (?)
                 if "session" in kwargs:
-                    session.rollback()
+                    try:
+                        session.rollback()
+                    except:  # pragma: no cover
+                        rollback_failed = True
+                        raise
                     session.close()
                 raise
             finally:
@@ -309,14 +315,21 @@ class BrokerCommand(object):
                 if "session" in kwargs:
                     # Complete the transaction
                     request = kwargs['request']
-                    end_xtn(session, kwargs['requestid'],
-                            get_code_for_error_class(
-                                raising_exception.__class__),
-                            getattr(request, '_audit_result', None))
-                    if self.is_lock_free:
-                        self.dbf.NLSession.remove()
-                    else:
-                        self.dbf.Session.remove()
+                    # We really want to get rid of the session, even if
+                    # end_xtn() fails
+                    try:
+                        if not rollback_failed:
+                            # If session.rollback() failed for whatever reason,
+                            # our best bet is to avoid touching the session
+                            end_xtn(session, kwargs['requestid'],
+                                    get_code_for_error_class(
+                                        raising_exception.__class__),
+                                    getattr(request, '_audit_result', None))
+                    finally:
+                        if self.is_lock_free:
+                            self.dbf.NLSession.remove()
+                        else:
+                            self.dbf.Session.remove()
                 self._cleanup_logger(kwargs)
         updated_render.__name__ = command.__name__
         updated_render.__dict__ = command.__dict__
@@ -498,6 +511,7 @@ class BrokerCommand(object):
 # What is considered valid here should also be a valid nlist key.
 basic_validation_re = re.compile('^[a-zA-Z_][a-zA-Z0-9_.-]*$')
 """Restriction for certain incoming labels beyond AqStr."""
+
 
 def validate_basic(label, value):
     if not basic_validation_re.match(value):

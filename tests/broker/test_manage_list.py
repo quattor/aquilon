@@ -1,7 +1,8 @@
 #!/usr/bin/env python2.6
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2012  Contributor
+# Copyright (C) 2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -29,8 +30,6 @@
 # TERMS THAT MAY APPLY.
 """Module for testing the manage --list command."""
 
-
-import os
 import unittest
 
 if __name__ == "__main__":
@@ -71,7 +70,7 @@ class TestManageList(TestBrokerCommand):
                  "aquilon66.aqd-unittest.ms.com\n"]
         scratchfile = self.writescratch("managelist", "".join(hosts))
         self.noouttest(["manage", "--list", scratchfile,
-                        "--sandbox", "%s/managetest2" % user ])
+                        "--sandbox", "%s/managetest2" % user])
 
     def test_103_verify_manage_list(self):
         user = self.config.get("unittest", "user")
@@ -165,6 +164,21 @@ class TestManageList(TestBrokerCommand):
                          "Primary Name: unittest17.aqd-unittest.ms.com",
                          command)
         self.matchoutput(out, "Sandbox: %s/managetest1" % user, command)
+
+    def test_120_fail_overlimit_manage_list(self):
+        user = self.config.get("unittest", "user")
+        hostlimit = self.config.getint("broker", "manage_max_list_size")
+        hosts = []
+        for i in range(1, 20):
+            hosts.append("thishostdoesnotexist%d.aqd-unittest.ms.com\n" % i)
+        scratchfile = self.writescratch("managelistlimit", "".join(hosts))
+        command = ["manage", "--list", scratchfile, "--sandbox",
+                   "%s/changetest1" % user, "--force"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,"The number of hosts in list {0:d} can not be more "
+                         "than {1:d}".format(len(hosts), hostlimit), command)
+
+
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestManageList)

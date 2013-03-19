@@ -1,6 +1,7 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2011,2012  Contributor
+# Copyright (C) 2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -30,8 +31,9 @@
 
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.dbwrappers.host import hostlist_to_hosts
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.dbwrappers.host import (hostlist_to_hosts,
+                                            check_hostlist_size)
 from aquilon.worker.commands.reset_advertised_status \
      import CommandResetAdvertisedStatus
 from aquilon.worker.templates.domain import TemplateDomain
@@ -46,10 +48,10 @@ class CommandResetAdvertisedStatusList(CommandResetAdvertisedStatus):
     required_parameters = ["list"]
 
     def render(self, session, logger, list, **arguments):
+        check_hostlist_size(self.command, self.config, list)
         dbhosts = hostlist_to_hosts(session, list)
 
         self.resetadvertisedstatus_list(session, logger, dbhosts)
-
 
     def resetadvertisedstatus_list(self, session, logger, dbhosts):
         branches = {}
@@ -71,11 +73,10 @@ class CommandResetAdvertisedStatusList(CommandResetAdvertisedStatus):
                 else:
                     authors[dbhost.sandbox_author] = [dbhost]
 
-
             if dbhost.status.name == 'ready':
-                failed.append ("{0:l} is in ready status, "
-                               "advertised status can be reset only "
-                               "when host is in non ready state".format(dbhost))
+                failed.append("{0:l} is in ready status, "
+                              "advertised status can be reset only "
+                              "when host is in non ready state".format(dbhost))
         if failed:
             raise ArgumentError("Cannot modify the following hosts:\n%s" %
                                 "\n".join(failed))

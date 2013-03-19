@@ -1,7 +1,8 @@
 #!/usr/bin/env python2.6
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2011,2012  Contributor
+# Copyright (C) 2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -100,8 +101,8 @@ class TestAddResourceGroup(TestBrokerCommand):
         command = ["cat", "--cluster", "utvcs1", "--data"]
         out = self.commandtest(command)
         self.matchoutput(out,
-                         '"/system/resources/resourcegroup" = '
-                         'push(create("resource/cluster/utvcs1/resourcegroup/utvcs1as1/config"));',
+                         '"system/resources/resourcegroup" = '
+                         'append(create("resource/cluster/utvcs1/resourcegroup/utvcs1as1/config"));',
                          command)
 
     def test_210_cat_rg(self):
@@ -109,7 +110,7 @@ class TestAddResourceGroup(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out,
                          '"resources/filesystem" = '
-                         'push(create("resource/cluster/utvcs1/resourcegroup/utvcs1as1/filesystem/fs1/config"));',
+                         'append(create("resource/cluster/utvcs1/resourcegroup/utvcs1as1/filesystem/fs1/config"));',
                          command)
 
     def test_210_cat_rg_generate(self):
@@ -118,7 +119,7 @@ class TestAddResourceGroup(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out,
                          '"resources/filesystem" = '
-                         'push(create("resource/cluster/utvcs1/resourcegroup/utvcs1as1/filesystem/fs1/config"));',
+                         'append(create("resource/cluster/utvcs1/resourcegroup/utvcs1as1/filesystem/fs1/config"));',
                          command)
 
     def test_210_cat_fs(self):

@@ -1,6 +1,7 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012  Contributor
+# Copyright (C) 2008,2009,2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -29,8 +30,8 @@
 """Contains the logic for `aq del grn`."""
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import HostGrnMap, PersonalityGrnMap
-from aquilon.worker.broker import BrokerCommand
+from aquilon.aqdb.model import Host, Personality, HostGrnMap, PersonalityGrnMap
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.grn import lookup_grn
 
 
@@ -40,16 +41,20 @@ class CommandDelGrn(BrokerCommand):
         dbgrn = lookup_grn(session, grn, eon_id, logger=logger,
                            config=self.config, usable_only=False)
 
-        q = session.query(HostGrnMap)
-        q = q.filter_by(grn=dbgrn)
-        if q.first():
-            raise ArgumentError("GRN %s is still mapped to hosts, and "
+        q1 = session.query(Host)
+        q1 = q1.filter_by(owner_eon_id=dbgrn.eon_id)
+        q2 = session.query(HostGrnMap)
+        q2 = q2.filter_by(eon_id=dbgrn.eon_id)
+        if q1.first() or q2.first():
+            raise ArgumentError("GRN %s is still used by hosts, and "
                                 "cannot be deleted." % dbgrn.grn)
 
-        q = session.query(PersonalityGrnMap)
-        q = q.filter_by(grn=dbgrn)
-        if q.first():
-            raise ArgumentError("GRN %s is still mapped to personalities, "
+        q1 = session.query(Personality)
+        q1 = q1.filter_by(owner_eon_id=dbgrn.eon_id)
+        q2 = session.query(PersonalityGrnMap)
+        q2 = q2.filter_by(eon_id=dbgrn.eon_id)
+        if q1.first() or q2.first():
+            raise ArgumentError("GRN %s is still used by personalities, "
                                 "and cannot be deleted." % dbgrn.grn)
 
         session.delete(dbgrn)

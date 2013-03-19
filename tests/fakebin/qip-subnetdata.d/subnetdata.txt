@@ -11,3 +11,4 @@ SubnetAddress 0.1.4.0	SubnetMask 255.255.255.128	SubnetId 1	SubnetName split_1	D
 SubnetAddress 0.1.4.192	SubnetMask 255.255.255.192	SubnetId 1	SubnetName split_2	DefaultRouters 0.1.4.193	UDF LOCATION=nettest.ny.na
 SubnetAddress 0.1.5.128	SubnetMask 255.255.255.192	SubnetId 1	SubnetName split_3	DefaultRouters 0.1.5.129	UDF LOCATION=nettest.ny.na
 SubnetAddress 0.1.5.192	SubnetMask 255.255.255.192	SubnetId 1	SubnetName split_4	DefaultRouters 0.1.5.193	UDF LOCATION=nettest.ny.na
+SubnetAddress 10.184.155.0	SubnetMask 255.255.255.0	SubnetId 61771	SubnetName ny00l4as01_aur	DHCPServer pispm2.ms.com	DefaultRouters 10.184.155.1,10.184.155.2	DHCPOptionTemplate np.nt.m	UDF BUCKET=NYB10;LOCATION=np.ny.na;SIDE=b;TYPE=transit

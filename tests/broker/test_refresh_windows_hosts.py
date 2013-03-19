@@ -1,7 +1,8 @@
 #!/usr/bin/env python2.6
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2009,2010,2011,2012  Contributor
+# Copyright (C) 2009,2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -35,10 +36,10 @@ import unittest
 from subprocess import Popen, PIPE
 
 if __name__ == "__main__":
-    import utils
+    from broker import utils
     utils.import_depends()
 
-from brokertest import TestBrokerCommand
+from broker.brokertest import TestBrokerCommand
 
 
 class TestRefreshWindowsHosts(TestBrokerCommand):
@@ -73,7 +74,7 @@ class TestRefreshWindowsHosts(TestBrokerCommand):
                    "--target=badhost6.msad.ms.com"]
         out, err = self.successtest(command)
         self.matchoutput(err,
-                         "WARNING: Will create alias for target "
+                         "WARNING: Will create a reference to "
                          "badhost6.msad.ms.com, but trying to resolve it "
                          "resulted in an error: ",
                          command)
@@ -197,6 +198,10 @@ class TestRefreshWindowsHosts(TestBrokerCommand):
             command = ["show_host", "--hostname", host]
             out = self.commandtest(command)
             self.matchoutput(out, host, command)
+            self.matchoutput(out, "Owned by GRN: grn:/ms/ei/aquilon/unittest",
+                             command)
+            self.matchoutput(out, "Used by GRN: grn:/ms/ei/aquilon/unittest",
+                             command)
 
     def test_295_removebadalias(self):
         command = ["del_alias", "--fqdn=badhost6.ms.com"]
@@ -270,7 +275,7 @@ class TestRefreshWindowsHosts(TestBrokerCommand):
 
         self.matchoutput(err, "WARNING: Server %s, is the last server bound to " \
                          "Service %s, instance %s which still has clients"
-                         % ("desktop3.msad.ms.com","utsvc","utsi1"),
+                         % ("desktop3.msad.ms.com", "utsvc", "utsi1"),
                          command)
 
     def test_410_cleanrun(self):

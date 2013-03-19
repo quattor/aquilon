@@ -1,6 +1,7 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2009,2010  Contributor
+# Copyright (C) 2009,2010,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -48,7 +49,7 @@ class ChunkedHTTPResponse(httplib.HTTPResponse):
             line = self.fp.readline()
             i = line.find(';')
             if i >= 0:
-                line = line[:i] # strip chunk-extensions
+                line = line[:i]  # strip chunk-extensions
             chunk_left = int(line, 16)
             if chunk_left == 0:
                 # read and discard trailer up to the CRLF terminator

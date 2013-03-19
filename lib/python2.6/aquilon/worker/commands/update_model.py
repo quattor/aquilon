@@ -1,6 +1,7 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2010,2011  Contributor
+# Copyright (C) 2010,2011,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -32,7 +33,7 @@
 from sqlalchemy.orm.session import object_session
 
 from aquilon.exceptions_ import ArgumentError, UnimplementedError
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.aqdb.model import (Vendor, Model, Cpu, MachineSpecs, Machine, Disk,
                                 HardwareEntity, Interface)
 from aquilon.worker.templates.base import PlenaryCollection
@@ -49,7 +50,7 @@ class CommandUpdateModel(BrokerCommand):
                        'cpuspeed': 'speed', 'cpunum': 'cpu_quantity',
                        'memory': 'memory', 'disktype': 'disk_type',
                        'diskcontroller': 'controller_type',
-                       'disksize': 'disk_capacity', 'nics':'nic_count',
+                       'disksize': 'disk_capacity', 'nics': 'nic_count',
                        'nicmodel': 'name', 'nicvendor': 'vendor'}
 
     def render(self, session, logger, model, vendor, newmodel, newvendor,
@@ -94,7 +95,7 @@ class CommandUpdateModel(BrokerCommand):
         if newvendor or newmodel:
             q = session.query(Machine).filter_by(model=dbmodel)
             dbmachines.update(q.all())
-                
+
         # For now, can't update machine_type.  There are too many spots
         # that special case things like aurora_node or virtual_machine to
         # know that the transistion is safe.  If there is enough need we
@@ -189,7 +190,7 @@ class CommandUpdateModel(BrokerCommand):
         session = object_session(model)
         if fix_existing:
             oldattr = getattr(model.machine_specs, attr)
-            filters = {'model':model, attr:oldattr}
+            filters = {'model': model, attr: oldattr}
             q = session.query(Machine).filter_by(**filters)
             for dbmachine in q.all():
                 setattr(dbmachine, attr, value)
@@ -204,7 +205,7 @@ class CommandUpdateModel(BrokerCommand):
             oldattr = getattr(model.machine_specs, attr)
             # disk_capacity => capacity
             disk_attr = attr.replace('disk_', '')
-            filters = {disk_attr:oldattr}
+            filters = {disk_attr: oldattr}
             q = session.query(Disk)
             q = q.filter_by(**filters)
             q = q.join('machine')

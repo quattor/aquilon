@@ -1,6 +1,7 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012  Contributor
+# Copyright (C) 2008,2009,2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -44,11 +45,12 @@ from subprocess import Popen, PIPE
 from tempfile import mkstemp
 from threading import Thread
 from cStringIO import StringIO
-
-from sqlalchemy.orm.session import object_session
 import yaml
 
-from aquilon.exceptions_ import ProcessException, AquilonError, ArgumentError
+from sqlalchemy.orm.session import object_session
+
+from aquilon.exceptions_ import (ProcessException, AquilonError, ArgumentError,
+                                 InternalError)
 from aquilon.config import Config
 from aquilon.worker.locks import lock_queue, CompileKey
 
@@ -157,6 +159,7 @@ def run_command(args, env=None, path=".", logger=LOGGER, loglevel=logging.INFO,
                                code=p.returncode, filtered=bool(filterre))
     return out
 
+
 def run_git(args, env=None, path=".",
             logger=LOGGER, loglevel=logging.INFO, filterre=None):
     config = Config()
@@ -166,6 +169,14 @@ def run_git(args, env=None, path=".",
         git_env = {}
     env_path = git_env.get("PATH", os.environ.get("PATH", ""))
     git_env["PATH"] = "%s:%s" % (config.get("broker", "git_path"), env_path)
+
+    for name in ["git_author_name", "git_author_email",
+                 "git_committer_name", "git_committer_email"]:
+        if not config.has_option("broker", name):
+            continue
+        value = config.get("broker", name);
+        git_env[name.upper()] = value
+
     if isinstance(args, list):
         git_args = args[:]
         if git_args[0] != "git":
@@ -175,6 +186,7 @@ def run_git(args, env=None, path=".",
 
     return run_command(git_args, env=git_env, path=path,
                        logger=logger, loglevel=loglevel, filterre=filterre)
+
 
 def remove_dir(dir, logger=LOGGER):
     """Remove a directory.  Could have been implemented as a call to rm -rf."""
@@ -202,6 +214,7 @@ def remove_dir(dir, logger=LOGGER):
     except OSError, e:
         logger.info("Failed to remove '%s': %s" % (dir, e))
     return
+
 
 def write_file(filename, content, mode=None, logger=LOGGER, compress=None):
     """Atomically write content into the specified filename.
@@ -255,6 +268,7 @@ def write_file(filename, content, mode=None, logger=LOGGER, compress=None):
         if os.path.exists(fpath):
             os.remove(fpath)
 
+
 def read_file(path, filename, logger=LOGGER):
     fullfile = os.path.join(path, filename)
     try:
@@ -263,12 +277,14 @@ def read_file(path, filename, logger=LOGGER):
         raise AquilonError("Could not read contents of %s: %s"
                 % (fullfile, e))
 
+
 def remove_file(filename, logger=LOGGER):
     try:
         os.remove(filename)
     except OSError, e:
         if e.errno != errno.ENOENT:
             logger.info("Could not remove file '%s': %s" % (filename, e))
+
 
 def cache_version(config, logger=LOGGER):
     """Try to determine the broker version by examining the path
@@ -297,6 +313,7 @@ def cache_version(config, logger=LOGGER):
         logger.info("Could not run git describe to get version: %s" % e)
         config.set("broker", "version", "Unknown")
 
+
 def sync_domain(dbdomain, logger=LOGGER, locked=False):
     """Update templates on disk to match contents of branch in template-king.
 
@@ -309,8 +326,8 @@ def sync_domain(dbdomain, logger=LOGGER, locked=False):
     session = object_session(dbdomain)
     kingdir = config.get("broker", "kingdir")
     domaindir = os.path.join(config.get("broker", "domainsdir"), dbdomain.name)
-    git_env = {"PATH":"%s:%s" % (config.get("broker", "git_path"),
-                                 os.environ.get("PATH", ""))}
+    git_env = {"PATH": "%s:%s" % (config.get("broker", "git_path"),
+                                  os.environ.get("PATH", ""))}
     if dbdomain.tracked_branch:
         # Might need to revisit if using this helper from rollback...
         run_command(["git", "push", ".",
@@ -343,9 +360,12 @@ BUILDING_NOT_FOUND = re.compile(r"bldg [a-zA-Z0-9]{2} doesn't exists")
 
 CAMPUS_NOT_FOUND = re.compile(r"campus [a-zA-Z0-9]{2} doesn't exist")
 
-DNS_DOMAIN_NOT_FOUND = re.compile (r"DNS domain ([-\w\.\d]+) doesn't exists")
+DNS_DOMAIN_NOT_FOUND = re.compile(r"DNS domain ([-\w\.\d]+) doesn't exists")
 
 DNS_DOMAIN_EXISTS = re.compile(r"DNS domain [-\w\.\d]+ already defined")
+
+# The regexp is taken from DSDB
+INVALID_NAME_RE = re.compile(r"[^A-Za-z0-9_.-]")
 
 
 class DSDBRunner(object):
@@ -358,6 +378,9 @@ class DSDBRunner(object):
         self.location_sync = config.getboolean("broker", "dsdb_location_sync")
         self.actions = []
         self.rollback_list = []
+
+    def normalize_iface(self, iface):
+        return INVALID_NAME_RE.sub("_", iface)
 
     def commit(self, verbose=False):
         for args, rollback, error_filter, ignore_msg in self.actions:
@@ -417,7 +440,8 @@ class DSDBRunner(object):
 
         command_args: the DSDB command to execute
         rollback_args: the DSDB command to execute on rollback
-        error_filter: regexp of error messages in the output of dsdb that should be ignored
+        error_filter: regexp of error messages in the output of dsdb that
+                      should be ignored
         ignore_msg: message to log if the error_filter matched
         """
         if error_filter and not ignore_msg:
@@ -507,7 +531,7 @@ class DSDBRunner(object):
             return
         command = ["delete_building_aq", "-building", building]
         rollback = ["add_building_aq", "-building_name", building,
-                    "-city", old_city,"-building_addr", old_addr]
+                    "-city", old_city, "-building_addr", old_addr]
         self.add_action(command, rollback, BUILDING_NOT_FOUND,
                         "DSDB does not have building %s defined, "
                         "proceeding." % building)
@@ -526,9 +550,7 @@ class DSDBRunner(object):
         command = ["add_host", "-host_name", fqdn,
                     "-ip_address", ip, "-status", "aq"]
         if interface:
-            # DSDB does not accept '/' as valid in an interface name.
-            interface = str(interface).replace('/', '_').replace(':', '_')
-            command.extend(["-interface_name", interface])
+            command.extend(["-interface_name", self.normalize_iface(interface)])
         if mac:
             command.extend(["-ethernet_address", mac])
         if primary and str(primary) != str(fqdn):
@@ -539,33 +561,44 @@ class DSDBRunner(object):
         rollback = ["delete_host", "-ip_address", ip]
         self.add_action(command, rollback)
 
-    def update_host_details(self, fqdn, mac=None, comments=None, old_mac=None,
+    def update_host_details(self, fqdn, iface=None, new_ip=None, new_mac=None,
+                            new_comments=None, old_ip=None, old_mac=None,
                             old_comments=None):
-        command = ["update_host", "-host_name", fqdn, "-status", "aq"]
-        if mac:
-            command.extend(["-ethernet_address", mac])
-        if comments:
-            command.extend(["-comments", comments])
+        command = ["update_aqd_host", "-host_name", fqdn]
+        if iface:
+            iface = self.normalize_iface(iface)
+            command.extend(["-interface_name", iface])
 
-        rollback = ["update_host", "-host_name", fqdn, "-status", "aq"]
-        if old_mac:
+        rollback = command[:]
+
+        if new_ip and new_ip != old_ip:
+            command.extend(["-ip_address", new_ip])
+            rollback.extend(["-ip_address", old_ip])
+        if new_mac and new_mac != old_mac:
+            command.extend(["-ethernet_address", new_mac])
             rollback.extend(["-ethernet_address", old_mac])
-        if old_comments:
-            rollback.extend(["-comments", old_comments])
+        if new_comments != old_comments:
+            command.extend(["-comments", new_comments or ""])
+            rollback.extend(["-comments", old_comments or ""])
+
         self.add_action(command, rollback)
 
-    def update_host_ip(self, fqdn, iface, ip, old_ip):
-        command = ["update_aqd_host", "-host_name", fqdn,
-                   "-interface_name", iface, "-ip_address", ip]
-        rollback = ["update_aqd_host", "-host_name", fqdn,
-                    "-interface_name", iface, "-ip_address", old_ip]
-        self.add_action(command, rollback)
+    def update_host_iface_name(self, old_fqdn, new_fqdn, old_iface, new_iface):
+        old_iface = self.normalize_iface(old_iface)
+        new_iface = self.normalize_iface(new_iface)
+        command = ["update_aqd_host", "-host_name", old_fqdn]
+        rollback = ["update_aqd_host", "-host_name", new_fqdn]
 
-    def update_host_name(self, fqdn, fqdn_new, iface):
-        command = ["update_aqd_host", "-host_name", fqdn, "-interface_name", iface,
-                   "-primary_host_name", fqdn_new]
-        rollback = ["update_aqd_host", "-host_name", fqdn_new,
-                    "-interface_name", iface, "-primary_host_name", fqdn]
+        if old_fqdn != new_fqdn:
+            # Yes, -primary_host_name sets the new host name...
+            command.extend(["-primary_host_name", new_fqdn])
+            rollback.extend(["-primary_host_name", old_fqdn])
+        if old_iface and old_iface != new_iface:
+            command.extend(["-interface_name", old_iface,
+                            "-new_interface_name", new_iface])
+            rollback.extend(["-interface_name", new_iface,
+                             "-new_interface_name", old_iface])
+
         self.add_action(command, rollback)
 
     def delete_host_details(self, fqdn, ip, iface=None, mac=None, primary=None,
@@ -574,8 +607,7 @@ class DSDBRunner(object):
         rollback = ["add_host", "-host_name", fqdn,
                     "-ip_address", ip, "-status", "aq"]
         if iface:
-            interface = str(iface).replace('/', '_').replace(':', '_')
-            rollback.extend(["-interface_name", interface])
+            rollback.extend(["-interface_name", self.normalize_iface(iface)])
         if mac:
             rollback.extend(["-ethernet_address", mac])
         if primary and str(primary) != str(fqdn):
@@ -608,10 +640,8 @@ class DSDBRunner(object):
           Exception: management interfaces
         """
 
-        status = {}
-
-
         real_primary = dbhw_ent.fqdn
+        status = {"by-ip": {}, "by-fqdn": {}, "primary": real_primary}
 
         # We need a stable index for generating virtual interface names for
         # DSDB. Sort the Zebra IPs and use the list index for this purpose.
@@ -666,37 +696,36 @@ class DSDBRunner(object):
                    addr.interface.comments.startswith("Created automatically"):
                     comments = addr.interface.comments
 
-            # The blind build magic in "add_interface --machine" renames the
-            # machine, so we can't use dbhw_ent.label in the key. Renaming e.g.
-            # switches also depend on using a key that does not include the
-            # label.
-            key = '%s:%s' % (dbhw_ent.id, ifname)
-
-            if key in status:
-                continue
-
-            # Do not use -primary_host_name:
-            # - for the management address
-            # - for the real primary name, because update_host() uses this hint
-            #   for issuing the operations in the correct order
-            # - for service addresses, because srvloc breaks otherwise
-            if addr.interface.interface_type == "management" or \
-               addr.service_address or fqdn == real_primary:
+            if addr.interface.interface_type == "management":
+                # Do not use -primary_host_name for the management address
+                primary = None
+            elif addr.service_address:
+                # Do not use -primary_host_name for service addresses, because
+                # srvloc does not like that
+                primary = None
+            elif fqdn == real_primary:
+                # Do not set the 'primary' key for the real primary name.
+                # update_host() uses this hint for issuing the operations in the
+                # correct order
                 primary = None
             else:
                 primary = real_primary
 
-            status[key] = {'name': ifname,
-                           'ip': addr.ip,
-                           'fqdn': fqdn,
-                           'primary': primary,
-                           'comments': comments}
+            statrec = {'name': ifname,
+                       'ip': addr.ip,
+                       'fqdn': fqdn,
+                       'primary': primary,
+                       'comments': comments}
 
             # Exclude the MAC address for aliases
             if addr.label:
-                status[key]["mac"] = None
+                statrec["mac"] = None
             else:
-                status[key]["mac"] = addr.interface.mac
+                statrec["mac"] = addr.interface.mac
+
+            status["by-ip"][statrec["ip"]] = statrec
+            status["by-fqdn"][statrec["fqdn"]] = statrec
+
         return status
 
     def update_host(self, dbhw_ent, oldinfo):
@@ -716,51 +745,63 @@ class DSDBRunner(object):
         newinfo = self.snapshot_hw(dbhw_ent)
 
         if not oldinfo:
-            oldinfo = {}
+            oldinfo = {"by-ip": {}, "by-fqdn": {}, "primary": None}
 
         deletes = []
         adds = []
+        # Host/interface names cannot be updated simultaneously with IP/MAC
+        # addresses or comments
         updates = []
-        ip_updates = []
-        hostname_update = None
+        name_updates = []
 
         # Construct the list of operations
-        for key, attrs in oldinfo.items():
-            if key not in newinfo:
-                deletes.append(attrs)
-            elif attrs['primary'] != newinfo[key]['primary'] or attrs['fqdn'] != newinfo[key]['fqdn']:
-                deletes.append(attrs)
-                adds.append(newinfo[key])
+        for key, attrs in oldinfo["by-fqdn"].items():
+            if key in newinfo["by-fqdn"]:
+                newattrs = newinfo["by-fqdn"][key]
+            elif attrs["ip"] in newinfo["by-ip"]:
+                newattrs = newinfo["by-ip"][attrs["ip"]]
             else:
-                if attrs['ip'] != newinfo[key]['ip']:
-                    ip_updates.append({"fqdn": attrs['fqdn'],
-                                       "name": attrs['name'],
-                                       "oldip": attrs['ip'],
-                                       "newip": newinfo[key]['ip']})
-                if attrs['mac'] != newinfo[key]['mac'] or \
-                        attrs['comments'] != newinfo[key]['comments']:
-                    update = {'fqdn': attrs['fqdn']}
-                    if attrs['mac'] != newinfo[key]['mac']:
-                        update['oldmac'] = attrs['mac']
-                        update['newmac'] = newinfo[key]['mac']
-                    if attrs['comments'] != newinfo[key]['comments']:
-                        update['oldcomments'] = attrs['comments']
-                        update['newcomments'] = newinfo[key]['comments']
-                    updates.append(update)
-                if attrs['fqdn'] != newinfo[key]['fqdn']:
-                    hostname_update = {"ifname": attrs['name'],
-                                       "oldfqdn": attrs['fqdn'],
-                                       "newfqdn": newinfo[key]['fqdn']}
+                newattrs = None
 
-        for key, attrs in newinfo.items():
-            if key not in oldinfo:
-                adds.append(attrs)
+            # If either the old or the new entry is bound to a primary name but
+            # the other is not, then we have to delete & re-add it.
+            if newattrs and bool(attrs["primary"]) != bool(newattrs["primary"]):
+                newattrs = None
+
+            if not newattrs:
+                deletes.append(attrs)
+            else:
+                if attrs['ip'] != newattrs['ip'] or \
+                   attrs['mac'] != newattrs['mac'] or \
+                   attrs['comments'] != newattrs['comments']:
+                    updates.append({'fqdn': attrs['fqdn'],
+                                    'iface': attrs['name'],
+                                    'oldip': attrs['ip'],
+                                    'newip': newattrs['ip'],
+                                    'oldmac': attrs['mac'],
+                                    'newmac': newattrs['mac'],
+                                    'oldcomments': attrs['comments'],
+                                    'newcomments': newattrs['comments']})
+
+                if attrs['fqdn'] != newattrs['fqdn'] or \
+                   attrs['name'] != newattrs['name']:
+                    name_updates.append({"oldfqdn": attrs['fqdn'],
+                                         "newfqdn": newattrs['fqdn'],
+                                         "oldiface": attrs['name'],
+                                         "newiface": newattrs['name']})
+
+                del newinfo["by-fqdn"][newattrs["fqdn"]]
+                del newinfo["by-ip"][newattrs["ip"]]
+
+        for key, attrs in newinfo["by-fqdn"].items():
+            adds.append(attrs)
 
         # Add the primary address first, and delete it last. The primary address
         # is identified by having an empty ['primary'] key (this is true for the
-        # management address as well, but it does not matter).
+        # management address as well, but that does not matter).
         adds.sort(lambda x, y: cmp(x['primary'] or "", y['primary'] or ""))
-        deletes.sort(lambda x, y: cmp(x['primary'] or "", y['primary'] or ""), reverse=True)
+        deletes.sort(lambda x, y: cmp(x['primary'] or "", y['primary'] or ""),
+                     reverse=True)
 
         for attrs in deletes:
             self.delete_host_details(attrs['fqdn'], attrs['ip'],
@@ -768,20 +809,15 @@ class DSDBRunner(object):
                                      attrs['primary'], attrs['comments'])
 
         for attrs in updates:
-            self.update_host_details(attrs['fqdn'],
-                                     mac=attrs.get('newmac', None),
-                                     comments=attrs.get('newcomments',
-                                                        None),
-                                     old_mac=attrs.get('oldmac', None),
-                                     old_comments=attrs.get('oldcomments',
-                                                            None))
-        for attrs in ip_updates:
-            self.update_host_ip(attrs['fqdn'], attrs['name'],
-                                attrs['newip'], attrs['oldip'])
-        if hostname_update:
-            self.update_host_name(hostname_update['ifname'],
-                                  hostname_update['oldfqdn'],
-                                  hostname_update['newfqdn'])
+            self.update_host_details(attrs['fqdn'], attrs['iface'],
+                                     attrs['newip'], attrs['newmac'],
+                                     attrs['newcomments'],
+                                     attrs['oldip'], attrs['oldmac'],
+                                     attrs['oldcomments'])
+
+        for attrs in name_updates:
+            self.update_host_iface_name(attrs['oldfqdn'], attrs['newfqdn'],
+                                        attrs['oldiface'], attrs['newiface'])
 
         for attrs in adds:
             self.add_host_details(attrs['fqdn'], attrs['ip'],
@@ -864,98 +900,28 @@ class DSDBRunner(object):
         return fields
 
     def add_alias(self, alias, target, comments):
-        if not comments:
-            comments = ""
         command = ["add_host_alias", "-host_name", target,
-                   "-alias_name", alias, "-comments", comments]
+                   "-alias_name", alias]
+        if comments:
+            command.extend(["-comments", comments])
         rollback = ["delete_host_alias", "-alias_name", alias]
         self.add_action(command, rollback)
 
     def del_alias(self, alias, old_target, old_comments):
-        if not old_comments:
-            old_comments = ""
         command = ["delete_host_alias", "-alias_name", alias]
         rollback = ["add_host_alias", "-host_name", old_target,
-                    "-alias_name", alias, "-comments", old_comments]
+                    "-alias_name", alias]
+        if old_comments:
+            rollback.extend(["-comments", old_comments])
         self.add_action(command, rollback)
 
     def update_alias(self, alias, target, comments, old_target, old_comments):
-        if not comments:
-            comments = ""
-        if not old_comments:
-            old_comments = ""
         command = ["update_host_alias", "-alias", alias,
-                   "-new_host", target, "-new_comments", comments]
+                   "-new_host", target]
         rollback = ["update_host_alias", "-alias", alias,
-                    "-new_host", old_target, "-new_comments", old_comments]
+                    "-new_host", old_target]
+        if comments != old_comments:
+            command.extend(["-new_comments", comments or ""])
+            rollback.extend(["-new_comments", old_comments or ""])
         self.add_action(command, rollback)
 
-
-class NASAssign(object):
-
-    def __init__(self, machine, disk, owner, rack=None, size=None):
-        self.machine = str(machine)
-        self.disk = str(disk)
-        self.owner = str(owner)
-        self.rack = str(rack)
-        self.size = size
-        self.config = Config()
-        if self.config.getboolean('nasassign', 'use_dev_db'):
-            self.devdb = 1
-        self.laf_dict = {'_id':'%s_%s' % (self.disk, self.machine),
-                         'owner':self.owner, 'rack':self.rack, 'size':self.size,
-                         'devdb':self.devdb}
-        self.bin = self.config.get('nasassign', 'bin')
-        self.cmdline_args = self.config.get('nasassign', 'cmdline_args')
-        self.args = [ self.bin ]
-        if self.cmdline_args:
-            self.args.extend(self.cmdline_args.split())
-
-    def yaml(self):
-        return yaml.dump(self.laf_dict, explicit_start=True,
-                         default_flow_style=True, indent=2, tags=False)
-
-    def create(self):
-        if not self.rack or not self.size:
-            raise ArgumentError("Must set rack and size attributes to "
-                                "create nas assignments.")
-        args = self.args[:]
-        args.extend(['create', '-'])
-        output = run_command(args, input=self.yaml())
-        response_obj = yaml.load(output)
-        if response_obj.get('sharename'):
-            self.sharename = response_obj['sharename']
-            return response_obj['sharename']
-        else:
-            #parse error output if possible, else just stringify it.
-            error = str(response_obj.get('_error', {}).get('why', output))
-            #check for parsable 'default handler' error from LAF
-            try:
-                default_handler_errors = response_obj['_error']['why']['default']
-            except:
-                default_handler_errors = []
-            if error.startswith("Requested number of nas slots "
-                                "are not available"):
-                raise ArgumentError("No available NAS capacity in Resource Pool "
-                                    "for rack %s. Please notify an "
-                                    "administrator or add capacity." % self.rack)
-            for dherr in default_handler_errors:
-                if dherr.startswith("data@size"):
-                    sizes = re.findall("\[([\d+, ]+)\]", dherr)
-                    raise ArgumentError("Invalid size for autoshare disk. "
-                                        "Supported sizes are: %s" % sizes )
-            raise AquilonError("Received unexpected output from nasassign "
-                               "/ resource pool: %s" % error)
-
-    def delete(self):
-        args = self.args[:]
-        args.extend(['delete', '-'])
-        output = run_command(args, input=self.yaml())
-        response_obj = yaml.load(output)
-        if response_obj:
-            error = str(response_obj.get('_error', {}).get('why', output))
-            raise AquilonError("Received unexpected output from nasassign "
-                               "/ resource pool: %s" % error)
-        else:
-            self.sharename = None
-            return True

@@ -87,14 +87,14 @@
       were selected. For example "flushed 10/10 templates" would indicate
       that 10 templates matched and they were all written out successfully.
       <optgroup name="sections" fields="any">
-         <option name="hosts" type="boolean">flush the host templates</option>
-         <option name="machines" type="boolean">flush the machine templates</option>
-         <option name="personalities" type="boolean">flush the personality templates</option>
-         <option name="clusters" type="boolean">flush the cluster templates</option>
-         <option name="services" type="boolean">flush the service templates</option>
-         <option name="resources" type="boolean">flush the resource templates</option>
-         <option name="locations" type="boolean">flush templates related to locations. This is only cities for now.</option>
-         <option name="switches" type="boolean">flush templates related to switches.</option>
+         <option name="hosts" type="flag">flush the host templates</option>
+         <option name="machines" type="flag">flush the machine templates</option>
+         <option name="personalities" type="flag">flush the personality templates</option>
+         <option name="clusters" type="flag">flush the cluster templates</option>
+         <option name="services" type="flag">flush the service templates</option>
+         <option name="resources" type="flag">flush the resource templates</option>
+         <option name="locations" type="flag">flush templates related to locations. This is only cities for now.</option>
+         <option name="switches" type="flag">flush templates related to switches.</option>
          <option name="all" type="flag">flush all templates</option>
       </optgroup>
       <transport method="post" path="flush" />
@@ -363,7 +363,7 @@
          <option name="serial" type="string">machine serial number</option>
          <option name="cluster" type="string">cluster or metacluster name</option>
          <option name="guest_on_cluster" type="string">host is a virtual machine guest on this cluster</option>
-         <option name="guest_on_share" type="string">host is a virtual machine using this nas_disk_share</option>
+         <option name="guest_on_share" type="string">host is a virtual machine using this share</option>
          <option name="member_cluster_share" type="string">host is a member of a cluster with machines using this nas_disk_share</option>
          <optgroup name="search_host_branch" fields="any">
             <option name="domain" type="string" conflicts="sandbox branch">template domain</option>
@@ -470,9 +470,9 @@
       The 'csv' format contains the following fields, in this order:
       Switch FQDN, port, MAC address, Last Observation Date
       <optgroup name="search_observed_mac_opts" mandatory="True" fields="any">
-         <option name="tor_switch" type="string" conflicts="switch">(Deprecated.) FQDN of the switch</option>
-         <option name="switch" type="string" conflicts="tor_switch">FQDN of the switch</option>
-         <option name="port_number" type="int">Port number on the switch</option>
+         <option name="switch" type="string">FQDN of the switch</option>
+         <option name="port_number" type="int">[Deprecated] Port number on the switch</option>
+         <option name="port" type="string">Port name on the switch</option>
          <option name="mac" type="mac">MAC address to search for</option>
       </optgroup>
       <transport method="get" path="find/observed_mac" />
@@ -791,8 +791,7 @@
       <optgroup name="nas_opts" fields="all">
          <optgroup name="share_opts" fields="any">
             <!-- TODO find out conflicts we might have -->
-            <option name="share" type="string" conflicts="autoshare">Share name (an instance of nas_disk_share service)</option>
-            <option name="autoshare" type="flag" conflicts="share">Resource pool will pick an appropriate share</option>
+            <option name="share" type="string">Share name (an instance of nas_disk_share service)</option>
             <option name="resourcegroup" type="string">Resourcegroup to add share</option>
          </optgroup>
          <option name="address" type="string">Bus address (e.g. 0:0)</option>
@@ -1134,10 +1133,7 @@
          <option name="type" type="string">Machine type name</option>
       </optgroup>
       <optgroup name="default_config_opts" mandatory="False" fields="all">
-         <optgroup name="cpu_spec" mandatory="False" fields="any">
-            <option name="cputype" type="string" conflicts="cpuname">[Deprecated] CPU type</option>
-            <option name="cpuname" type="string" conflicts="cputype">CPU type</option>
-         </optgroup>
+         <option name="cpuname" type="string">CPU model name</option>
          <option name="cpunum" type="int">CPU count</option>
          <option name="memory" type="int">amount of installed memory (MB)</option>
          <option name="disktype" type="string">installed disk type (generally 'local', use 'nas' for virtual disks on NAS)</option>
@@ -1539,7 +1535,6 @@
       </optgroup>
       <optgroup name="update_interface_optional" mandatory="False" fields="none">
          <option name="mac" type="mac">MAC address</option>
-         <option name="ip" type="ipv4" conflicts="master">IP address</option>
          <option name="boot" type="flag">Mark the interface as bootable</option>
          <option name="default_route" type="boolean">Mark that the interface provides the default route</option>
          <option name="pg" type="string" conflicts="autopg">portgroup, or an empty string to clear</option>
@@ -1549,6 +1544,7 @@
          <option name="clear_master" type="flag" conflicts="master">Clear the bonding</option>
          <option name="model" type="string">Interface model name</option>
          <option name="vendor" type="string">Interface vendor name</option>
+         <option name="rename_to" type="string">New name of the interface</option>
       </optgroup>
       <transport trigger="machine" method="post" path="machine/%(machine)s/interface/%(interface)s" />
       <transport trigger="hostname" method="post" path="host/%(hostname)s/interface/%(interface)s" />
@@ -1595,7 +1591,8 @@
 	 <option name="fqdn" type="string">FQDN of the new address</option>
 	 <option name="network_environment" type="string">Network environment (default: internal)</option>
 	 <option name="label" type="string">Interface alias of the new address</option>
-         <option name="ipalgorithm" type="string">Algorithm for automatically choosing an IP.</option>
+	 <option name="ipalgorithm" type="string">Algorithm for automatically choosing an IP.</option>
+	 <option name="map_to_primary" type="boolean">Should the reverse PTR point to the primary name?</option>
       </optgroup>
       <optgroup name="add_interface_address_ip_opts" mandatory="False" fields="any">
          <option name="ip" type="ipv4" conflicts="ipfromip ipfromsystem autoip">IP address</option>
@@ -1644,20 +1641,6 @@
       </optgroup>
       <transport method="put" path="service/%(service)s" />
       <transport trigger="instance" method="put" path="service/%(service)s/instance/%(instance)s" />
-   </command>
-
-   <command name="add_nas_disk_share">
-     Add a new NAS share service instance. If the --manager property is set, membership and capacity
-     management is deferred to an external manager such as  Resource Pool. Default templates
-      describing the service will be created so that shares can be immediately used (bound and configured) by clients.
-      <optgroup name="add_nas_disk_share_opts" mandatory="True" fields="all">
-         <option name="share" type="string" mandatory="True">share name</option>
-      </optgroup>
-      <optgroup name="optional_opts">
-         <option name="comments" type="string">Comments</option>
-         <option name="manager" type="string">External Manager (resourcepool, ...)</option>
-      </optgroup>
-      <transport method="put" path="/nas_disk_share/instance/%(share)s" />
    </command>
 
    <command name="show_service">
@@ -1987,7 +1970,8 @@
          <option name="personality" type="string">Personality of the host</option>
          <option name="buildstatus" type="string">Update host buildstatus to 'build' or 'ready'</option>
          <option name="keepbindings" type="boolean">Preserve service bindings that are not required</option>
-         <option name="os" type="string">[Deprecated] OS to assign to host</option>
+         <option name="grn" type="string" conflicts="eon_id">GRN as string</option>
+         <option name="eon_id" type="int" conflicts="grn">Numeric EON ID</option>
       </optgroup>
       <transport method="post" path="host/%(hostname)s/command/reconfigure" />
       <transport trigger="list" method="post" path="command/reconfigure/list" />
@@ -2285,46 +2269,44 @@
       that template generated on-demand in this way will be incomplete
       (especially if it cannot be compiled) and is purely provided for debugging.
       <optgroup name="cat_selector" mandatory="True" fields="any">
-         <option name="machine" type="string" conflicts="hostname cluster service instance default nasinfo city switch personality">Name of the machine</option>
-         <option name="hostname" type="string" conflicts="machine cluster service instance default nasinfo city switch personality">Name of the host</option>
-         <option name="cluster" type="string" conflicts="hostname machine service instance default nasinfo city switch personality">Name of the cluster</option>
-         <option name="service" type="string" conflicts="hostname machine cluster nasinfo city switch personality">Name of the service</option>
-         <option name="nasinfo" type="string" conflicts="hostname machine cluster service instance default city switch personality">Show the default client config for the service/instance</option>
-         <option name="city" type="string" conflicts="hostname machine cluster service instance default nasinfo switch personality">Name of the city</option>
-         <option name="switch" type="string" conflicts="hostname machine cluster service instance default nasinfo personality">Name of the switch</option>
-	 <option name="personality" conflicts="hostname cluster service instance default nasinfo city switch machine" type="string">Name of personality</option>
+         <option name="machine" type="string" conflicts="hostname cluster service instance default city switch personality">Name of the machine</option>
+         <option name="hostname" type="string" conflicts="machine cluster service instance default city switch personality">Name of the host</option>
+         <option name="cluster" type="string" conflicts="hostname machine service instance default city switch personality">Name of the cluster</option>
+         <option name="service" type="string" conflicts="hostname machine cluster city switch personality">Name of the service</option>
+         <option name="city" type="string" conflicts="hostname machine cluster service instance default switch personality">Name of the city</option>
+         <option name="switch" type="string" conflicts="hostname machine cluster service instance default personality">Name of the switch</option>
+	 <option name="personality" conflicts="hostname cluster service instance default city switch machine" type="string">Name of personality</option>
 	 <optgroup name="persopts" fields="any">
-		<option name="archetype" conflicts="hostname cluster service instance default nasinfo city switch machine" type="string">Archetype</option>
-		<option name="pre_feature" conflicts="hostname cluster service instance default nasinfo city switch machine post_feature param_tmpl" type="flag">Pre feature template</option>
-		<option name="post_feature" conflicts="hostname cluster service instance default nasinfo city switch machine pre_feature param_tmpl" type="flag">Post feature template</option>
-		<option name="param_tmpl" conflicts="hostname cluster service instance default nasinfo city switch machine post_feature pre_feature" type="string">param templates</option>
+		<option name="archetype" conflicts="hostname cluster service instance default city switch machine" type="string">Archetype</option>
+		<option name="pre_feature" conflicts="hostname cluster service instance default city switch machine post_feature param_tmpl" type="flag">Pre feature template</option>
+		<option name="post_feature" conflicts="hostname cluster service instance default city switch machine pre_feature param_tmpl" type="flag">Post feature template</option>
+		<option name="param_tmpl" conflicts="hostname cluster service instance default city switch machine post_feature pre_feature" type="string">param templates</option>
          </optgroup>
       </optgroup>
       <optgroup name="cat_options" mandatory="False" fields="any">
-         <option name="default" type="flag" conflicts="hostname machine cluster nasinfo city switch">Show the default client config for the service/instance</option>
-         <option name="server" type="flag" conflicts="hostname machine cluster nasinfo city switch">Show the server config for the service/instance</option>
-         <option name="data" type="flag" conflicts="machine service nasinfo city switch">Show the data template for the host/cluster</option>
-         <option name="instance" type="string" conflicts="hostname machine cluster nasinfo city switch">Name of the service instance</option>
-         <option name="generate" type="boolean">Show the plenary template as it would be generated</option>
+         <option name="default" type="flag" conflicts="hostname machine cluster city switch">Show the default client config for the service/instance</option>
+         <option name="server" type="flag" conflicts="hostname machine cluster city switch">Show the server config for the service/instance</option>
+         <option name="data" type="flag" conflicts="machine service city switch">Show the data template for the host/cluster</option>
+         <option name="instance" type="string" conflicts="hostname machine cluster city switch">Name of the service instance</option>
+         <option name="generate" type="flag">Show the plenary template as it would be generated</option>
       </optgroup>
       <optgroup name="cat_resource_options" mandatory="False" fields="any">
-         <option name="resourcegroup" type="string" conflicts="machine service instance default nasinfo data">Name of a resource group</option>
-         <option name="application" type="string" conflicts="machine service instance default nasinfo data">Name of an application</option>
-         <option name="filesystem" type="string" conflicts="machine service instance default nasinfo data">Name of a file system</option>
-         <option name="hostlink" type="string" conflicts="machine service instance default nasinfo data">Name of a hostlink</option>
-         <option name="intervention" type="string" conflicts="machine service instance default nasinfo data">Name of an intervention</option>
-         <option name="reboot_intervention" type="string" conflicts="machine service instance default nasinfo data">Name of a reboot intervention</option>
-         <option name="reboot_schedule" type="string" conflicts="machine service instance default nasinfo data">Name of a reboot schedule</option>
-         <option name="virtual_machine" type="string" conflicts="machine service instance default nasinfo data">Name of a virtual machine</option>
-         <option name="service_address" type="string" conflicts="machine service instance default nasinfo data">Name of a service address</option>
-         <option name="share" type="string" conflicts="machine service instance default nasinfo data">Name of a resource group</option>
+         <option name="resourcegroup" type="string" conflicts="machine service instance default data">Name of a resource group</option>
+         <option name="application" type="string" conflicts="machine service instance default data">Name of an application</option>
+         <option name="filesystem" type="string" conflicts="machine service instance default data">Name of a file system</option>
+         <option name="hostlink" type="string" conflicts="machine service instance default data">Name of a hostlink</option>
+         <option name="intervention" type="string" conflicts="machine service instance default data">Name of an intervention</option>
+         <option name="reboot_intervention" type="string" conflicts="machine service instance default data">Name of a reboot intervention</option>
+         <option name="reboot_schedule" type="string" conflicts="machine service instance default data">Name of a reboot schedule</option>
+         <option name="virtual_machine" type="string" conflicts="machine service instance default data">Name of a virtual machine</option>
+         <option name="service_address" type="string" conflicts="machine service instance default data">Name of a service address</option>
+         <option name="share" type="string" conflicts="machine service instance default data">Name of a resource group</option>
       </optgroup>
       <transport trigger="machine" method="get" path="machine/%(machine)s/plenary" />
       <transport trigger="hostname" method="get" path="host/%(hostname)s/plenary" />
       <transport trigger="cluster" method="get" path="cluster/any/%(cluster)s/plenary" />
       <transport trigger="service" method="get" path="service/%(service)s/plenary" />
       <transport trigger="instance" method="get" path="service/%(service)s/instance/%(instance)s/plenary" />
-      <transport trigger="nasinfo" method="get" path="nasinfo/%(nasinfo)s/plenary" />
       <transport trigger="city" method="get" path="city/%(city)s/plenary" />
       <transport trigger="switch" method="get" path="switch/%(switch)s/plenary" />
       <transport trigger="personality" method="get"  path="personality/personality/%(personality)s/plenary" />
@@ -2851,9 +2833,9 @@
             <option name="grn" type="string" conflicts="eon_id">GRN as string</option>
             <option name="eon_id" type="int" conflicts="grn">Numeric EON ID</option>
 	 </optgroup>
-	<option name="host_environment" type="string">Environment for Hosts assigned to this personality [dev|qa|uat|prod|infra]</option>
       </optgroup>
       <optgroup name="add_personality_optional" mandatory="False">
+         <option name="host_environment" type="string">Environment for Hosts assigned to this personality [dev|qa|uat|prod|infra]</option>
          <option name="cluster_required" type="boolean" default='False'>Does this personality require hosts to be clustered?</option>
          <option name="comments" type="string">Comments</option>
 	 <option name="copy_from" type="string">Personality to copy parameters and features from</option>
@@ -2955,8 +2937,12 @@
       <optgroup name="update_personality_opt" mandatory="False">
 	 <option name="vmhost_capacity_function" type="string">Function for calculating VM host capacity units</option>
 	 <option name="vmhost_overcommit_memory" type="float">Memory overcommit factor for VM hosts</option>
-         <option name="cluster_required" type="boolean" default='False'>Does this personality require hosts to be clustered?</option>
+	 <option name="cluster_required" type="boolean" default='False'>Does this personality require hosts to be clustered?</option>
 	 <option name="config_override" type="boolean">Include external personality config override template</option>
+	 <option name="host_environment" type="string">Environment for Hosts assigned to this personality [dev|qa|uat|prod|infra]</option>
+	 <option name="grn" type="string" conflicts="eon_id">GRN as string</option>
+	 <option name="eon_id" type="int" conflicts="grn">Numeric EON ID</option>
+	 <option name="leave_existing" type="flag">Do not propagate GRN changes to hosts in the personality</option>
       </optgroup>
       <transport method="post" path="personality/archetype/%(archetype)s/personality/%(personality)s" />
   </command>
@@ -3002,7 +2988,8 @@
          <option name="personality" type="string">Personality of the host</option>
          <option name="buildstatus" type="string">Build Status can be updated to 'build' or 'ready'.</option>
          <option name="keepbindings" type="boolean">Preserve service bindings that are not required</option>
-         <option name="os" type="string">[Deprecated] OS to assign to host</option>
+         <option name="grn" type="string" conflicts="eon_id">GRN as string</option>
+         <option name="eon_id" type="int" conflicts="grn">Numeric EON ID</option>
       </optgroup>
       <transport method="post" path="host/%(hostname)s/command/make" />
    </command>
@@ -3028,7 +3015,8 @@
          <option name="personality" type="string">Personality of the host</option>
          <option name="buildstatus" type="string">Build Status can be updated to 'build' or 'ready'.</option>
          <option name="keepbindings" type="boolean">Preserve service bindings that are not required</option>
-         <option name="os" type="string">[Deprecated] OS to assign to host</option>
+         <option name="grn" type="string" conflicts="eon_id">GRN as string</option>
+         <option name="eon_id" type="int" conflicts="grn">Numeric EON ID</option>
       </optgroup>
       <transport method="post" path="host/%(hostname)s/command/make_aquilon" />
    </command>
@@ -3175,40 +3163,6 @@
       <transport method="delete" path="machine/%(machine)s" />
    </command>
 
-   <command name="add_tor_switch">
-      Create a new Top-Of-Rack (TOR) network switch.
-      <p/>
-      This command is deprecated.  Please use the new add_switch.
-      <optgroup name="add_tor_switch_opts" mandatory="True" fields="all">
-         <option name="tor_switch" type="string">Switch name</option>
-         <option name="model" type="string">Switch model</option>
-      </optgroup>
-      <optgroup name="add_tor_switch_location" mandatory="True" fields="any">
-         <option name="rack" type="string" conflicts="building">Rack name</option>
-         <optgroup name="add_tor_switch_new_rack" fields="all">
-            <option name="rackid" type="string" conflicts="rack">Rack id/number</option>
-            <option name="rackrow" type="string" conflicts="rack">Rack Row (letters only)</option>
-            <option name="rackcolumn" type="string" conflicts="rack">Rack Column (numbers only)</option>
-            <optgroup name="add_tor_switch_rack_parent" fields="any">
-               <option name="building" type="string" conflicts="rack room">Building</option>
-               <option name="room" type="string" conflicts="rack building">Room</option>
-            </optgroup>
-         </optgroup>
-      </optgroup>
-      <optgroup name="add_tor_switch_primary" mandatory="False" fields="all">
-         <option name="interface" type="string">Interface name (like xge49)</option>
-         <option name="mac" type="mac">MAC address of the interface</option>
-         <option name="ip" type="ipv4">IP address of the interface</option>
-      </optgroup>
-      <optgroup name="add_tor_switch_optional">
-	 <option name="label" type="string">Hardware label. If not specified, chassis name minus the DNS domain is used.</option>
-	 <option name="vendor" type="string">Switch vendor. Needed if the model name is not unique</option>
-	 <option name="serial" type="string">Serial number</option>
-	 <option name="comments" type="string">Comments</option>
-      </optgroup>
-      <transport method="put" path="tor_switch/%(tor_switch)s" />
-   </command>
-
    <command name="add_switch">
       Create a new network switch.
       <optgroup name="add_switch_mandatory" mandatory="True" fields="all">
@@ -3244,32 +3198,9 @@
 	 <option name="serial" type="string">Serial Number</option>
 	 <option name="comments" type="string">Comments</option>
 	 <option name="rename_to" type="string">New name of the switch</option>
+	 <option name="discover" type="flag">Do automatic discovery</option>
       </optgroup>
       <transport method="post" path="switch/%(switch)s" />
-   </command>
-
-   <command name="show_tor_switch">
-      Show the configuration information for the specified switch.
-      <p/>
-      This is deprecated.  Please use either show_switch or search_switch.
-      <p/>
-      Supported options for --format: raw, csv.
-      <p/>
-      The 'csv' format contains the following fields, in this order:
-      FQDN, Rack, Building, Vendor name, Model name, Serial number,
-      Interface name, Interface MAC address, Interface IP address.
-      <p/>
-      If the switch has multiple interfaces assigned, then there will be a
-      separate line for each.
-      <optgroup name="show_tor_switch_opts" mandatory="True" fields="any">
-         <option name="tor_switch" type="string">ToR switch name</option>
-         <option name="rack" type="string">Rack name</option>
-         <option name="model" type="string">ToR switch model</option>
-         <option name="vendor" type="string">ToR switch vendor </option>
-         <option name="all" type="flag">show all</option>
-      </optgroup>
-      <transport trigger="tor_switch" method="get" path="tor_switch/%(tor_switch)s" />
-      <transport method="get" path="find/tor_switch" />
    </command>
 
    <command name="show_switch">
@@ -3286,6 +3217,9 @@
       <optgroup name="show_switch_opts" mandatory="True" fields="any">
          <option name="switch" type="string">switch fully qualified name</option>
          <option name="all" type="flag">show all</option>
+      </optgroup>
+      <optgroup name="show_switch_optional" mandatory="False" fields="any">
+         <option name="discover" type="flag" conflicts="all">Show differences to discovery data</option>
       </optgroup>
       <transport trigger="switch" method="get" path="switch/%(switch)s" />
       <transport trigger="all" method="get" path="switch" />
@@ -3308,6 +3242,7 @@
       separate line for each.
       <optgroup name="search_switch_opts" mandatory="True" fields="any">
          <option name="switch" type="string">switch fully qualified name</option>
+         <option name="vlan" type="int">Vlan ID</option>
          <option name="type" type="string">Type (tor, bor, agg)</option>
          <option name="model" type="string">switch model</option>
          <option name="vendor" type="string">switch vendor </option>
@@ -3330,16 +3265,6 @@
       <transport method="get" path="find/switch" />
    </command>
 
-   <command name="del_tor_switch">
-      Delete the specified TOR switch.
-      <p/>
-      This is deprecated.  Please use del_switch.
-      <optgroup name="del_tor_switch_opts" mandatory="True" fields="all">
-         <option name="tor_switch" type="string">tor_switch name</option>
-      </optgroup>
-      <transport method="delete" path="tor_switch/%(tor_switch)s" />
-   </command>
-
    <command name="del_switch">
       Delete the specified switch.
       <optgroup name="del_switch_opts" mandatory="True" fields="all">
@@ -3348,29 +3273,13 @@
       <transport method="delete" path="switch/%(switch)s" />
    </command>
 
-   <command name="poll_tor_switch">
-      Poll ToR switch for MAC information.
-      <p/>
-      This is deprecated.  Please use poll_switch.
-      <optgroup name="poll_tor_switch_opts" mandatory="True" fields="any">
-         <option name="tor_switch" type="string" conflicts="rack">tor_switch name</option>
-         <option name="rack" type="string" conflicts="tor_switch">Rack name</option>
-      </optgroup>
-      <optgroup name="poll_tor_switch optional" mandatory="False" fields="any">
-         <option name="clear" type="boolean">Clear any previously observed MACs before polling</option>
-         <option name="vlan" type="boolean">Additionally poll for vlan/subnet mappings</option>
-      </optgroup>
-      <transport trigger="tor_switch" method="post" path="tor_switch/%(tor_switch)s/command/poll" />
-      <transport method="post" path="old_poll/rack/%(rack)s" />
-   </command>
-
    <command name="poll_switch">
       Poll switch for MAC information.
       <optgroup name="poll_switch_opts" mandatory="True" fields="any">
          <option name="switch" type="string" conflicts="rack">switch name</option>
          <option name="rack" type="string" conflicts="switch">Rack name</option>
       </optgroup>
-      <optgroup name="poll_tor_switch optional" mandatory="False" fields="any">
+      <optgroup name="poll_switch optional" mandatory="False" fields="any">
          <option name="type" type="string">If polling a rack, poll only this type of switch</option>
          <option name="clear" type="boolean">Clear any previously observed MACs before polling</option>
          <option name="vlan" type="boolean">Additionally poll for vlan/subnet mappings</option>
@@ -3660,8 +3569,7 @@
          <option name="maint_threshold" type="string">Down hosts threshold for maintenance windows</option>
          <option name="max_members" type="int">Max allowed vmhost members</option>
          <option name="vm_to_host_ratio" type="string">Ratio of virtual machines to ESX servers</option>
-         <option name="switch" type="string" conflicts="tor_switch">Set the switch in use by the cluster.  An empty string removes the setting.</option>
-         <option name="tor_switch" type="string" conflicts="switch">[DEPRECATED] Set the switch in use by the cluster.  An empty string removes the setting.</option>
+         <option name="switch" type="string">Set the switch in use by the cluster.  An empty string removes the setting.</option>
          <option name="fix_location" type="flag">Set the location based on cluster membership.</option>
          <option name="comments" type="string">Comments</option>
          <option name="memory_capacity" type="int" conflicts="clear_overrides">Override the computed memory capacity</option>
@@ -3737,8 +3645,7 @@
          <option name="maint_threshold" type="string">Down hosts threshold for maintenance windows</option>
          <option name="max_members" type="int">Max allowed host members</option>
          <option name="vm_to_host_ratio" type="string">Ratio of virtual machines to ESX servers</option>
-         <option name="tor_switch" type="string" conflicts="switch">DEPRECATED Set the switch in use by the cluster.  An empty string removes the setting.</option>
-         <option name="switch" type="string" conflicts="tor_switch">Set the switch in use by the cluster.  An empty string removes the setting.</option>
+         <option name="switch" type="string">Set the switch in use by the cluster.  An empty string removes the setting.</option>
          <option name="fix_location" type="flag">Set the location based on cluster membership.</option>
          <option name="comments" type="string">Comments</option>
          <option name="memory_capacity" type="int" conflicts="clear_overrides">Override the computed memory capacity</option>
@@ -4003,6 +3910,7 @@
 	 <option name="network_environment" type="string">Name of the environment</option>
          <option name="ipalgorithm" type="string">Algorithm for automatically choosing an IP.</option>
          <option name="comments" type="string">Comments</option>
+         <option name="reverse_ptr" type="string">Where the reverse record should point to</option>
       </optgroup>
       <transport method="post" path="address_default/%(fqdn)s" />
       <transport method="post" trigger="dns_environment" path="address/%(dns_environment)s/%(fqdn)s" />
@@ -4033,6 +3941,21 @@
       </optgroup>
       <transport method="get" path="address_default/%(fqdn)s" />
       <transport method="get" trigger="dns_environment" path="address/%(dns_environment)s/%(fqdn)s" />
+   </command>
+
+   <command name="update_address">
+      Update an address in the DNS.
+      <optgroup name="update_address_opts" mandatory="True" fields="any">
+         <option name="fqdn" type="string">The fully qualified domain name</option>
+      </optgroup>
+      <optgroup name="update_address_optional" mandatory="False">
+         <option name="ip" type="ipv4">The new IP address</option>
+         <option name="comments" type="string">Comments</option>
+         <option name="reverse_ptr" type="string">Where the reverse record should point to</option>
+         <option name="dns_environment" type="string">The name of the environment the address is in (defaults to 'internal')</option>
+         <option name="network_environment" type="string">Network environment (default: internal)</option>
+      </optgroup>
+      <transport method="put" path="address" />
    </command>
 
    <command name="show_ns_record">
@@ -4202,6 +4125,8 @@
          <option name="dns_domain" type="string">Name of the DNS domain the record lives in</option>
          <option name="primary_name" type="boolean">The DNS record is used as a primary name</option>
          <option name="used" type="boolean" reverse="unused">The IP address is in use</option>
+         <option name="reverse_override" type="boolean">Is there an override for the reverse PTR record?</option>
+         <option name="reverse_ptr" type="string">The reverse PTR points to this FQDN</option>
       </optgroup>
       <optgroup name="search_dns_optional" mandatory="False" fields="any">
          <option name="dns_environment" type="string" conflicts="network_environment">The name of an environment the address is in (default: internal)</option>
@@ -4331,7 +4256,7 @@
          <option name="after" type="string">Search for transactions started after a specific date/time</option>
          <option name="return_code" type="int">Search by an HTTP response code (200-505)</option>
          <option name="limit" type="int">Limit the number of rows returned. (Default 5000/Max 20000)</option>
-         <option name="reverse_order" type="boolean">Output records in
+         <option name="reverse_order" type="flag">Output records in
          reverse chronological order. Also causes the --limit
          parameter to find the oldest records and not the newest.
          </option>
@@ -4681,6 +4606,7 @@
          <option name="ip" type="ipv4">IP address</option>
          <option name="network_environment" type="string">Network environment (default: internal)</option>
          <option name="comments" type="string">Comments</option>
+         <option name="map_to_primary" type="boolean">Should the reverse PTR point to the primary name?</option>
       </optgroup>
       <transport method="put" path="resource/service_address/%(name)s" />
    </command>
@@ -5085,6 +5011,34 @@
       </optgroup>
       <transport method="get" trigger="archetype" path="archetype/%(archetype)s/parameter_definitions"/>
       <transport method="get" trigger="feature" path="feature/%(type)s/%(feature)s/parameter_definitions"/>
+   </command>
+
+   <command name="add_vlan">
+      Add a new user vlan.
+      <optgroup name="add_vlan_opts" mandatory="True" fields="all">
+         <option name="vlan" type="int">VLAN</option>
+         <option name="name" type="string">VLAN name</option>
+         <option name="vlan_type" type="string">VLAN type</option>
+      </optgroup>
+      <transport method="put" path="vlan/%(vlan)s/%(name)s" />
+   </command>
+
+   <command name="del_vlan">
+      Delete an vlan resource.
+      <optgroup name="del_vlan_opts" mandatory="True" fields="all">
+         <option name="vlan" type="int">VLAN</option>
+      </optgroup>
+      <transport method="delete" path="vlan/%(vlan)s" />
+   </command>
+
+   <command name="show_vlan">
+      Show a specified vlan or all vlans
+      <optgroup name="show_vlan_opts" mandatory="True" fields="any">
+         <option name="vlan" type="int">VLAN</option>
+         <option name="all" type="flag">list all hardware</option>
+      </optgroup>
+      <transport trigger="all" method="get" path="vlan" />
+      <transport trigger="vlan" method="get" path="vlan/%(vlan)s" />
    </command>
 
 </commandline>

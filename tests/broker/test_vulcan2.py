@@ -1,7 +1,8 @@
 #!/usr/bin/env python2.6
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2012  Contributor
+# Copyright (C) 2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -38,11 +39,9 @@ if __name__ == "__main__":
 
 from brokertest import TestBrokerCommand
 
+
 class TestVulcan20(TestBrokerCommand):
-
-
     # Metacluster / cluster / Switch tests
-
 
     def test_000_addutmc8(self):
         command = ["add_metacluster", "--metacluster=utmc8",
@@ -76,19 +75,16 @@ class TestVulcan20(TestBrokerCommand):
 
             self.dsdb_expect_add(hostname, ip, "xge49",
                                  ip.mac)
-            command = ["add", "tor_switch",
-                       "--tor_switch", hostname,
-                       "--building", "ut", "--rackid", "12",
-                       "--rackrow", "k", "--rackcol", "2",
+            command = ["add", "switch", "--switch", hostname, "--rack", "ut12",
                        "--model", "rs g8000", "--interface", "xge49",
-                       "--mac", ip.mac, "--ip", ip]
+                       "--type", "tor", "--mac", ip.mac, "--ip", ip]
             (out, err) = self.successtest(command)
         self.dsdb_verify()
 
     # see     def testverifypollut01ga2s01(self):
     # see fakevlan2net
     def test_003_pollutpgsw(self):
-        # Issues deprecated warning.
+        macs = ["02:02:04:02:12:05", "02:02:04:02:12:06"]
         for i in range(0, 2):
             command = ["poll", "switch", "--vlan", "--switch",
                        "utpgsw%d.aqd-unittest.ms.com" % i]
@@ -101,6 +97,11 @@ class TestVulcan20(TestBrokerCommand):
                              "for switch utpgsw%d.aqd-unittest.ms.com" %
                              (service, i),
                              command)
+
+            # For Nexus switches we have if names, not snmp ids.
+            command = "show switch --switch utpgsw%d.aqd-unittest.ms.com" % i
+            out = self.commandtest(command.split(" "))
+            self.matchoutput(out, "Port et1-1: %s" % macs[i], command)
 
     # for each cluster's hosts
     def test_004_add10gigracks(self):
@@ -177,7 +178,7 @@ class TestVulcan20(TestBrokerCommand):
         data_command = ["cat", "--cluster", "utpgcl0", "--data"]
         data = self.commandtest(data_command)
 
-        self.matchoutput(data, '"/system/cluster/rack/room" = "utroom1";',
+        self.matchoutput(data, '"system/cluster/rack/room" = "utroom1";',
                          data_command)
 
         data_command = ["cat", "--machine", "utpgs01p0"]
@@ -205,12 +206,13 @@ class TestVulcan20(TestBrokerCommand):
                          "utpgsw1.aqd-unittest.ms.com",
                          command)
 
-
-
+    def test_101_verify_audit(self):
+        command = ["search_audit", "--command", "add_interface",
+                   "--keyword", "utpgm0"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "pg=user-v710", command)
 
 #    Storage group / resource tests
-
-
     def test_101_add_rg_to_cluster(self):
         command = ["add_resourcegroup", "--resourcegroup=utmc8as1",
                    "--cluster=utmc8", "--required_type=share"]
@@ -236,16 +238,14 @@ class TestVulcan20(TestBrokerCommand):
         command = ["cat", "--cluster", "utmc8", "--data"]
         out = self.commandtest(command)
         self.matchoutput(out,
-                         '"/system/resources/resourcegroup" = '
-                         'push(create("resource/cluster/utmc8/'
+                         '"system/resources/resourcegroup" = '
+                         'append(create("resource/cluster/utmc8/'
                          'resourcegroup/utmc8as1/config"));',
                          command)
 
-
     def test_103_add_share_to_rg(self):
         command = ["add_share", "--resourcegroup=utmc8as1",
-                   "--cluster=utmc8", "--share=test_v2_share",
-                   "--latency=5"]
+                   "--cluster=utmc8", "--share=test_v2_share"]
         self.successtest(command)
 
         command = ["show_share", "--resourcegroup=utmc8as1",
@@ -253,11 +253,9 @@ class TestVulcan20(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out, "Share: test_v2_share", command)
         self.matchoutput(out, "Bound to: Resource Group utmc8as1", command)
-        self.matchoutput(out, "Latency: 5", command)
 
         command = ["add_share", "--resourcegroup=utmc8as2",
-                   "--cluster=utmc8", "--share=test_v2_share",
-                   "--latency=5"]
+                   "--cluster=utmc8", "--share=test_v2_share"]
         self.successtest(command)
 
         command = ["show_share", "--all"]
@@ -268,7 +266,7 @@ class TestVulcan20(TestBrokerCommand):
 
     def test_104_add_same_share_name_fail(self):
         command = ["add_share", "--resourcegroup=utmc8as2",
-                   "--share=test_v2_share", "--latency=5"]
+                   "--share=test_v2_share"]
         err = self.badrequesttest(command)
         self.matchoutput(err, "Bad Request: Share test_v2_share, "
                          "bundleresource instance already exists.", command)
@@ -283,7 +281,7 @@ class TestVulcan20(TestBrokerCommand):
         self.matchoutput(out, '"name" = "utmc8as1', command)
         self.matchoutput(out,
                          '"resources/share" = '
-                         'push(create("resource/cluster/utmc8/resourcegroup/'
+                         'append(create("resource/cluster/utmc8/resourcegroup/'
                          'utmc8as1/share/test_v2_share/config"));',
                          command)
 
@@ -300,7 +298,6 @@ class TestVulcan20(TestBrokerCommand):
         self.matchoutput(out, '"server" = "lnn30f1";', command)
         self.matchoutput(out, '"mountpoint" = "/vol/lnn30f1v1/test_v2_share";',
                          command)
-        self.matchoutput(out, '"latency" = 5;', command)
 
     def test_107_cat_switch(self):
         for i in range(0, 2):
@@ -309,23 +306,34 @@ class TestVulcan20(TestBrokerCommand):
             out = self.commandtest(command)
             self.matchoutput(out, '"user-v710", nlist(', command)
 
-    def test_108_addutpgm0disk(self):
-        self.noouttest(["add", "disk", "--machine", "utpgm0",
-            "--disk", "sdb", "--controller", "scsi", "--share", "test_v2_share",
-            "--size", "34", "--resourcegroup", "utmc8as1", "--address", "0:0"])
+    def test_108_addutpgmdisk(self):
+        for i in range(0, 3):
+            self.noouttest(["add", "disk", "--machine", "utpgm%d" %i,
+                "--disk", "sda", "--controller", "scsi", "--share", "test_v2_share",
+                "--size", "34", "--resourcegroup", "utmc8as1", "--address", "0:0"])
 
     def test_109_verifyaddutpgm0disk(self):
         command = "show machine --machine utpgm0"
         out = self.commandtest(command.split(" "))
-        self.searchoutput(out, r"Disk: sdb 34 GB scsi "
-                          "\(virtual_disk from test_v2_share\)$", command)
+        self.searchoutput(out, r"Disk: sda 34 GB scsi "
+                          "\(virtual_disk from test_v2_share\) \[boot\]$", command)
 
         command = ["show_share", "--resourcegroup=utmc8as1",
                    "--cluster=utmc8", "--share=test_v2_share"]
         out = self.commandtest(command)
         self.matchoutput(out, "Share: test_v2_share", command)
         self.matchoutput(out, "Bound to: Resource Group utmc8as1", command)
-        self.searchoutput(out, r"Disk: sdb 34 GB \(Machine: utpgm0\)$", command)
+        self.matchoutput(out, "Disk Count: 3", command)
+
+        command = ["cat", "--machine", "utpgm0", "--generate"]
+
+        out = self.commandtest(command)
+        self.matchoutput(out, '"sda", nlist(', command)
+        self.searchoutput(out,
+                r'"mountpoint", "/vol/lnn30f1v1/test_v2_share",\s*'
+                r'"path", "utpgm0/sda.vmdk",\s*'
+                r'"server", "lnn30f1",\s*'
+                r'"sharename", "test_v2_share"', command)
 
     def test_111_addfilesystemfail(self):
         command = ["add_filesystem", "--filesystem=fs1", "--type=ext3",
@@ -372,7 +380,6 @@ class TestVulcan20(TestBrokerCommand):
         self.matchclean(out, "utpgs01p0", command)
 
 #    metacluster aligned svc tests
-
     def test_150_addvcenterservices(self):
         command = ["add", "service", "--service", "vcenter", "--instance", "ut"]
         self.noouttest(command)
@@ -398,7 +405,6 @@ class TestVulcan20(TestBrokerCommand):
                    "--building", "np", "--personality", "vulcan2-10g-test",
                    "--archetype", "vmhost"]
         self.noouttest(command)
-
 
     def test_152_bindvcenterservices(self):
         command = ["bind_cluster", "--cluster", "utmc8", "--service", "vcenter",
@@ -561,13 +567,13 @@ class TestVulcan20(TestBrokerCommand):
         command = ["del", "service", "--service", "esx_management_server", "--instance", "ut.mc"]
         self.noouttest(command)
 
-
 #    Storage group related deletes
 
 
-    def test_202_delutpgm0disk(self):
-        self.noouttest(["del", "disk", "--machine", "utpgm0",
-            "--controller", "scsi", "--disk", "sdb"])
+    def test_202_delutpgmdisk(self):
+        for i in range(0, 2):
+            self.noouttest(["del", "disk", "--machine", "utpgm%d" %i,
+                "--controller", "scsi", "--disk", "sda"])
 
     def test_204_delresourcegroup(self):
         command = ["del_share", "--resourcegroup=utmc8as1",
@@ -586,10 +592,7 @@ class TestVulcan20(TestBrokerCommand):
                    "--cluster=utmc8"]
         self.successtest(command)
 
-
     # Metacluster / cluster / Switch deletes
-
-
     def test_305_delinterfaces(self):
         for i in range(0, 2):
             ip = self.net.vm_storage_net[0].usable[i + 26]

@@ -1,6 +1,7 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2009,2010,2011,2012  Contributor
+# Copyright (C) 2009,2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -29,11 +30,12 @@
 """Contains the logic for `aq change status`."""
 
 
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.templates.domain import TemplateDomain
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
 from aquilon.worker.locks import lock_queue, CompileKey
 from aquilon.aqdb.model import Cluster, ClusterLifecycle
+
 
 class CommandChangeClusterStatus(BrokerCommand):
 
@@ -66,7 +68,7 @@ class CommandChangeClusterStatus(BrokerCommand):
             plenaries.write(locked=True)
             td = TemplateDomain(dbcluster.branch, dbcluster.sandbox_author,
                                 logger=logger)
-            td.compile(session, " ".join(plenaries.object_templates), locked=True)
+            td.compile(session, plenaries.object_templates, locked=True)
         except:
             plenaries.restore_stash()
             raise

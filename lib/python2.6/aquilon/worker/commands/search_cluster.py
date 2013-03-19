@@ -1,6 +1,7 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2010,2011,2012  Contributor
+# Copyright (C) 2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -30,15 +31,17 @@
 
 from sqlalchemy.orm import aliased
 
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.formats.cluster import SimpleClusterList
 from aquilon.aqdb.model import (Cluster, EsxCluster, MetaCluster, Archetype,
                                 Personality, Machine, Switch, ClusterLifecycle,
-                                Service, ServiceInstance, NasDisk, Disk,
+                                Service, ServiceInstance, Share,
                                 ClusterResource, VirtualMachine)
 from aquilon.worker.dbwrappers.host import hostname_to_host
 from aquilon.worker.dbwrappers.branch import get_branch_and_author
 from aquilon.worker.dbwrappers.location import get_location
+from aquilon.worker.dbwrappers.resources import get_resource_holder
+
 
 class CommandSearchCluster(BrokerCommand):
 
@@ -175,15 +178,15 @@ class CommandSearchCluster(BrokerCommand):
             q = q.reset_joinpoint()
 
         if esx_share:
-            nas_disk_share = Service.get_unique(session, name='nas_disk_share',
-                                                compel=True)
-            dbshare = ServiceInstance.get_unique(session, name=esx_share,
-                                                 service=nas_disk_share,
-                                                 compel=True)
-            NasAlias = aliased(NasDisk)
-            q = q.join(ClusterResource, VirtualMachine, Machine, 'disks',
-                       (NasAlias, NasAlias.id == Disk.id))
-            q = q.filter_by(service_instance=dbshare)
+            holder = get_resource_holder(session,
+                                         None, cluster, None,
+                                         compel=False)
+
+            dbshare = Share.get_unique(session, name=esx_share, holder=holder,
+                             compel=True)
+
+            q = q.join(ClusterResource)
+            q = q.filter(ClusterResource.resources.contains(dbshare))
             q = q.reset_joinpoint()
 
         if max_members:
@@ -227,7 +230,7 @@ class CommandSearchCluster(BrokerCommand):
             # Added to the searches as appropriate below.
             dbma = Archetype.get_unique(session, member_archetype, compel=True)
         if member_personality and member_archetype:
-            q = q.join('_hosts','host')
+            q = q.join('_hosts', 'host')
             dbmp = Personality.get_unique(session, archetype=dbma,
                                           name=member_personality, compel=True)
             q = q.filter_by(personality=dbmp)

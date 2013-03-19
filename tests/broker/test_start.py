@@ -1,7 +1,8 @@
 #!/usr/bin/env python2.6
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012  Contributor
+# Copyright (C) 2008,2009,2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -32,6 +33,7 @@
 import os
 import sys
 import unittest
+from tempfile import mkdtemp
 from subprocess import Popen, PIPE
 
 if __name__ == "__main__":
@@ -57,7 +59,7 @@ class TestBrokerStart(unittest.TestCase):
 
         config = Config()
         twistd = os.path.join(config.get("broker", "srcdir"),
-                              "bin", "twistd.py")
+                              "lib", "python2.6", "aquilon", "unittest_patches.py")
         pidfile = os.path.join(config.get("broker", "rundir"), "aqd.pid")
         logfile = config.get("broker", "logfile")
 
@@ -168,7 +170,47 @@ class TestBrokerStart(unittest.TestCase):
                          % (out, err))
         return
 
+    def testdisabletemplatetests(self):
+        config = Config()
+        kingdir = config.get("broker", "kingdir")
+        rundir = config.get("broker", "rundir")
+        env = {}
+        env["PATH"] = "%s:%s" % (config.get("broker", "git_path"),
+                                 os.environ.get("PATH", ""))
 
-if __name__=='__main__':
+        tempdir = mkdtemp(prefix="fixup", dir=rundir)
+
+        p = Popen(("git", "clone", "--shared", kingdir, "template-king",
+                   "--branch", "prod"),
+                  cwd=tempdir, env=env, stdout=PIPE, stderr=PIPE)
+        out, err = p.communicate()
+        self.assertEqual(p.returncode, 0, "Failed to clone template-king")
+
+        repodir = os.path.join(tempdir, "template-king")
+        makefile = os.path.join(repodir, "Makefile")
+        if os.path.exists(os.path.join(repodir, "t", "Makefile")):
+            p = Popen(("git", "rm", "-f", os.path.join("t", "Makefile")),
+                      cwd=repodir, env=env, stdout=PIPE, stderr=PIPE)
+            out, err = p.communicate()
+            self.assertEqual(p.returncode, 0, "Failed to remove t/Makefile")
+
+            p = Popen(("git", "commit", "-m", "Removed t/Makefile"),
+                      cwd=repodir, env=env, stdout=PIPE, stderr=PIPE)
+            out, err = p.communicate()
+            self.assertEqual(p.returncode, 0, "Failed to commit removal of t/Makefile")
+
+            for branch in ['prod', 'ny-prod']:
+                p = Popen(("git", "push", "origin", "prod:%s" % branch),
+                          cwd=repodir, env=env, stdout=PIPE, stderr=PIPE)
+                out, err = p.communicate()
+                self.assertEqual(p.returncode, 0,
+                                 "Failed to push to %s, "
+                                 "STDOUT:\n@@@\n'%s'\n@@@\nSTDERR:\n@@@\n'%s'\n@@@\n"
+                                 % (branch, out, err))
+        p = Popen(("rm", "-rf", tempdir))
+        p.communicate()
+
+
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestBrokerStart)
     unittest.TextTestRunner(verbosity=2).run(suite)

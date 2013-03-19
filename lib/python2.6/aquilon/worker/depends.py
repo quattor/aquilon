@@ -1,6 +1,7 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012  Contributor
+# Copyright (C) 2008,2009,2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -43,6 +44,6 @@ ms.version.addpkg('zope.interface', '3.6.1')
 ms.version.addpkg('twisted', '12.0.0')
 ms.version.addpkg('coverage', '3.4')
 ms.version.addpkg('ipaddr', '2.1.9')
-ms.version.addpkg('mako', '0.4.0')
+ms.version.addpkg('mako', '0.7.2')
 ms.version.addpkg('yaml', '3.09')
 ms.version.addpkg('cdb', '0.34')

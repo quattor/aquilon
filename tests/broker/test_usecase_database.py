@@ -1,7 +1,8 @@
 #!/usr/bin/env python2.6
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2011,2012  Contributor
+# Copyright (C) 2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -70,8 +71,8 @@ class TestUsecaseDatabase(TestBrokerCommand):
     def test_110_verify_cat(self):
         command = ["cat", "--hostname=server1.aqd-unittest.ms.com", "--data"]
         out = self.commandtest(command)
-        self.matchoutput(out, '"/system/resources/filesystem" = push(create("resource/host/server1.aqd-unittest.ms.com/filesystem/gnr.0/config"))', command)
-        self.matchoutput(out, '"/system/resources/application" = push(create("resource/host/server1.aqd-unittest.ms.com/application/nydb1/config"))', command)
+        self.matchoutput(out, '"system/resources/filesystem" = append(create("resource/host/server1.aqd-unittest.ms.com/filesystem/gnr.0/config"))', command)
+        self.matchoutput(out, '"system/resources/application" = append(create("resource/host/server1.aqd-unittest.ms.com/application/nydb1/config"))', command)
 
     def test_120_standalone_two_dbserver(self):
         command = ["add_filesystem", "--filesystem=gnr.1", "--type=ext3",
@@ -102,10 +103,10 @@ class TestUsecaseDatabase(TestBrokerCommand):
     def test_130_verify_cat(self):
         command = ["cat", "--hostname=server1.aqd-unittest.ms.com", "--data"]
         out = self.commandtest(command)
-        self.matchoutput(out, '"/system/resources/filesystem" = push(create("resource/host/server1.aqd-unittest.ms.com/filesystem/gnr.0/config"))', command)
-        self.matchoutput(out, '"/system/resources/application" = push(create("resource/host/server1.aqd-unittest.ms.com/application/nydb1/config"))', command)
-        self.matchoutput(out, '"/system/resources/filesystem" = push(create("resource/host/server1.aqd-unittest.ms.com/filesystem/gnr.1/config"))', command)
-        self.matchoutput(out, '"/system/resources/application" = push(create("resource/host/server1.aqd-unittest.ms.com/application/utdb2/config"))', command)
+        self.matchoutput(out, '"system/resources/filesystem" = append(create("resource/host/server1.aqd-unittest.ms.com/filesystem/gnr.0/config"))', command)
+        self.matchoutput(out, '"system/resources/application" = append(create("resource/host/server1.aqd-unittest.ms.com/application/nydb1/config"))', command)
+        self.matchoutput(out, '"system/resources/filesystem" = append(create("resource/host/server1.aqd-unittest.ms.com/filesystem/gnr.1/config"))', command)
+        self.matchoutput(out, '"system/resources/application" = append(create("resource/host/server1.aqd-unittest.ms.com/application/utdb2/config"))', command)
 
     def test_190_del_fs1(self):
         command = ["del_filesystem", "--filesystem=gnr.0",
@@ -182,11 +183,11 @@ class TestUsecaseDatabase(TestBrokerCommand):
     def test_220_verify_cat(self):
         command = ["cat", "--cluster=nydb1", "--data"]
         out = self.commandtest(command)
-        self.matchoutput(out, '"/system/resources/filesystem" = push(create("resource/cluster/nydb1/filesystem/gnr.0/config"))', command)
-        self.matchoutput(out, '"/system/resources/application" = push(create("resource/cluster/nydb1/application/nydb1/config"))', command)
+        self.matchoutput(out, '"system/resources/filesystem" = append(create("resource/cluster/nydb1/filesystem/gnr.0/config"))', command)
+        self.matchoutput(out, '"system/resources/application" = append(create("resource/cluster/nydb1/application/nydb1/config"))', command)
         self.matchoutput(out,
-                         '"/system/resources/service_address" = '
-                         'push(create("resource/cluster/nydb1/service_address/nydb1nydb1/config"))',
+                         '"system/resources/service_address" = '
+                         'append(create("resource/cluster/nydb1/service_address/nydb1nydb1/config"))',
                          command)
 
     def test_290_cleanup_cluster(self):

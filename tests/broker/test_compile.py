@@ -1,7 +1,8 @@
 #!/usr/bin/env python2.6
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012  Contributor
+# Copyright (C) 2008,2009,2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -66,7 +67,7 @@ class TestCompile(TestBrokerCommand):
         tree = ET.parse(source)
         mtimes = dict()
         for profile in tree.getiterator('profile'):
-            if profile.text and profile.attrib.has_key('mtime'):
+            if profile.text and "mtime" in profile.attrib:
                 obj = profile.text.strip()
                 if obj and obj.endswith(profile_suffix):
                     mtimes[obj[:-len(profile_suffix)]] = \
@@ -278,6 +279,6 @@ class TestCompile(TestBrokerCommand):
         self.matchclean(err, "Assigning repositories to packages...", command)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestCompile)
     unittest.TextTestRunner(verbosity=2).run(suite)

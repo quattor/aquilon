@@ -1,7 +1,8 @@
 #!/usr/bin/env python2.6
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012  Contributor
+# Copyright (C) 2008,2009,2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -47,7 +48,7 @@ class TestAddVirtualHardware(TestBrokerCommand):
                             "--cluster", "utecl1", "--model", "utmedium"])
 
     def test_001_addnextmachine(self):
-        command = ["add", "machine", "--prefix", "evm" ,
+        command = ["add", "machine", "--prefix", "evm",
                    "--cluster", "utecl1", "--model", "utmedium"]
         out = self.commandtest(command)
         self.matchoutput(out, "evm9", command)
@@ -56,13 +57,13 @@ class TestAddVirtualHardware(TestBrokerCommand):
         command = ["search_audit", "--command", "add_machine", "--limit", 1,
                    "--keyword", "evm", "--argument", "prefix"]
         out = self.commandtest(command)
-        self.matchoutput(out, "[Result: evm9]", command)
+        self.matchoutput(out, "[Result: machine=evm9]", command)
 
     def test_002_verify_audit_argument(self):
         command = ["search_audit", "--command", "add_machine",
-                   "--keyword", "evm9", "--argument", "__RESULT__"]
+                   "--keyword", "evm9", "--argument", "__RESULT__:machine"]
         out = self.commandtest(command)
-        self.matchoutput(out, "[Result: evm9]", command)
+        self.matchoutput(out, "[Result: machine=evm9]", command)
         command = ["search_audit", "--keyword", "evm9", "--argument", "machine"]
         self.noouttest(command)
 
@@ -218,44 +219,15 @@ class TestAddVirtualHardware(TestBrokerCommand):
     def test_150_failaddillegaldisk(self):
         command = ["add", "disk", "--machine", "evm9", "--disk", "sda",
                    "--controller", "sata", "--size", "15",
-                   "--share", "test_share_9", "--address", "badaddress"]
+                   "--share", "test_share_8", "--address", "badaddress"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Disk address 'badaddress' is not valid", command)
 
-    def test_160_failaddmaxshares(self):
-        # Number 9 should trip the limit.
-        command = ["add", "disk", "--machine", "evm9", "--disk", "sda",
-                   "--controller", "sata", "--size", "15",
-                   "--share", "test_share_9", "--address", "0:0"]
-        out = self.badrequesttest(command)
-        self.matchoutput(out, "Metacluster utmc1 already has the maximum "
-                         "number of shares (8).", command)
-
-    def test_170_failmaxclients(self):
-        command = ["update_service", "--service=nas_disk_share",
-                   "--instance=test_share_8", "--max_clients=1"]
-        self.noouttest(command)
-
-        command = ["add", "disk", "--machine", "evm9", "--disk", "sda",
-                   "--controller", "sata", "--size", "15",
-                   "--share", "test_share_8", "--address", "0:0"]
-        out = self.badrequesttest(command)
-        self.matchoutput(out, "NAS share test_share_8 is full (1/1)", command)
-
-        command = ["update_service", "--service=nas_disk_share",
-                   "--instance=test_share_8", "--default"]
-        self.noouttest(command)
-
     def test_180_verifydiskcount(self):
-        command = ["show_service", "--service=nas_disk_share",
-                   "--instance=test_share_1"]
+        command = ["show_share", "--cluster=utecl1", "--share=test_share_1"]
         out = self.commandtest(command)
-        self.matchoutput(out, "Disk Count: 1", command)
 
-    def test_180_verifyshowshare(self):
-        command = ["show_nas_disk_share", "--share=test_share_1"]
-        out = self.commandtest(command)
-        self.matchoutput(out, "NAS Disk Share: test_share_1", command)
+        self.matchoutput(out, "Share: test_share_1", command)
         self.matchoutput(out, "Server: lnn30f1", command)
         self.matchoutput(out, "Mountpoint: /vol/lnn30f1v1/test_share_1",
                          command)
@@ -338,23 +310,32 @@ class TestAddVirtualHardware(TestBrokerCommand):
                               % (i - 1),
                               command)
 
+    def test_500_verifyaudit(self):
+        for i in range(1, 9):
+            command = ["search", "audit", "--command", "add_interface",
+                       "--keyword", "evm%d" % i]
+            out = self.commandtest(command)
+            self.matchoutput(out,
+                             "[Result: mac=00:50:56:01:20:%02x]" % (i - 1),
+                             command)
+
     def test_500_verifycatcluster(self):
         command = "cat --cluster=utecl1 --data"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "template clusterdata/utecl1;", command)
-        self.matchoutput(out, '"/system/cluster/name" = "utecl1";', command)
-        self.matchoutput(out, '"/system/metacluster/name" = "utmc1";', command)
-        self.searchoutput(out, '"/system/cluster/ratio" = list\(\s*16,\s*1\s*\);',
+        self.matchoutput(out, "structure template clusterdata/utecl1;", command)
+        self.matchoutput(out, '"system/cluster/name" = "utecl1";', command)
+        self.matchoutput(out, '"system/metacluster/name" = "utmc1";', command)
+        self.searchoutput(out, '"system/cluster/ratio" = list\(\s*16,\s*1\s*\);',
                           command)
-        self.matchoutput(out, '"/system/cluster/max_hosts" = 8;', command)
-        self.matchoutput(out, '"/system/cluster/down_hosts_threshold" = 2;',
+        self.matchoutput(out, '"system/cluster/max_hosts" = 8;', command)
+        self.matchoutput(out, '"system/cluster/down_hosts_threshold" = 2;',
                          command)
         self.matchclean(out, "hostname", command)
         for i in range(1, 9):
             machine = "evm%s" % i
             self.searchoutput(out,
-                              r'"/system/resources/virtual_machine" = '
-                              r'push\(create\("resource/cluster/utecl1/virtual_machine/%s/config"\)\);'
+                              r'"system/resources/virtual_machine" = '
+                              r'append\(create\("resource/cluster/utecl1/virtual_machine/%s/config"\)\);'
                               % machine,
                               command)
         self.matchclean(out, "evm9", command)
@@ -465,6 +446,11 @@ class TestAddVirtualHardware(TestBrokerCommand):
                    "--osversion=nt61e",
                    "--machine=evm1", "--comments=Windows Virtual Desktop"]
         self.noouttest(command)
+
+    def test_705_verify_vm_status(self):
+        command = ["cat", "--cluster", "utecl1", "--virtual_machine", "evm1"]
+        out = self.commandtest(command)
+        self.searchoutput(out, r'"build", "build",', command)
 
     def test_800_verify_windows(self):
         command = "show host --hostname aqddesk1.msad.ms.com"

@@ -1,6 +1,7 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012  Contributor
+# Copyright (C) 2008,2009,2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -28,21 +29,10 @@
 # TERMS THAT MAY APPLY.
 """Contains the logic for `aq show nas disk share --share`."""
 
-
-from aquilon.exceptions_ import InternalError
-from aquilon.worker.broker import BrokerCommand
-from aquilon.aqdb.model import Service, ServiceInstance
-from aquilon.worker.formats.service_instance import Share
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.commands.show_nas_disk_share_all import CommandShowNASDiskShareAll
 
 
-class CommandShowNASDiskShareShare(BrokerCommand):
+class CommandShowNASDiskShareShare(CommandShowNASDiskShareAll):
 
     required_parameters = ["share"]
-
-    def render(self, session, share, **arguments):
-        nas_disk_share = Service.get_unique(session, name='nas_disk_share',
-                                            compel=InternalError)
-        dbshare = ServiceInstance.get_unique(session, name=share,
-                                             service=nas_disk_share,
-                                             compel=True)
-        return Share(dbshare)

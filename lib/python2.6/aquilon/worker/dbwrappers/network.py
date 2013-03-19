@@ -1,6 +1,7 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012  Contributor
+# Copyright (C) 2008,2009,2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -50,6 +51,7 @@ def get_network_byname(session, netname, environment):
                             netname)
     return dbnetwork
 
+
 def get_network_byip(session, ipaddr, environment):
     try:
         q = session.query(Network)
@@ -59,6 +61,7 @@ def get_network_byip(session, ipaddr, environment):
     except NoResultFound:
         raise NotFoundException("Network with address %s not found." % ipaddr)
     return dbnetwork
+
 
 def fix_foreign_links(session, oldnet, newnet):
     """

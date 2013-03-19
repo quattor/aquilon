@@ -1,6 +1,7 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2010,2011,2012  Contributor
+# Copyright (C) 2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -102,7 +103,7 @@ class Domain(Branch):
     requires_change_manager = Column(Boolean(name="%s_req_chg_mgr_ck" % _DMN),
                                      nullable=False, default=False)
 
-    allow_manage = Column(Boolean(name="%s_allow_manage" % _DMN),
+    allow_manage = Column(Boolean(name="%s_allow_manage_ck" % _DMN),
                           nullable=False, default=True)
 
     __mapper_args__ = {'polymorphic_identity': _DMN,

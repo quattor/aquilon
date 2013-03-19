@@ -1,6 +1,7 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012  Contributor
+# Copyright (C) 2008,2009,2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -30,52 +31,63 @@
 
 
 import re
+from ConfigParser import NoSectionError, NoOptionError
 
-from aquilon.worker.broker import BrokerCommand
+from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import (Archetype, Personality,
                                 Parameter, HostEnvironment,
+                                PersonalityServiceMap,
                                 PersonalityParameter)
-from aquilon.exceptions_ import ArgumentError
-from aquilon.worker.templates.personality import PlenaryPersonality
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.parameter import get_parameters
 from aquilon.worker.dbwrappers.feature import add_link
 from aquilon.worker.dbwrappers.grn import lookup_grn
+from aquilon.worker.templates.personality import PlenaryPersonality
+
+VALID_PERSONALITY_RE = re.compile('^[a-zA-Z0-9_-]+\/?[a-zA-Z0-9_-]+$')
 
 
 class CommandAddPersonality(BrokerCommand):
 
-    required_parameters = ["personality", "archetype", "host_environment"]
+    required_parameters = ["personality", "archetype"]
 
     def render(self, session, logger, personality, archetype, grn, eon_id, host_environment,
                comments, cluster_required, copy_from, config_override, **arguments):
-
-        valid = re.compile('^[a-zA-Z0-9_-]+\/?[a-zA-Z0-9_-]+$')
-        if not valid.match(personality):
+        if not VALID_PERSONALITY_RE.match(personality):
             raise ArgumentError("Personality name '%s' is not valid." %
                                 personality)
         if not (grn or eon_id):
             raise ArgumentError("GRN or EON ID is required for adding a "
                                 "personality.")
 
-        HostEnvironment.validate_name(host_environment)
         dbarchetype = Archetype.get_unique(session, archetype, compel=True)
-        Personality.get_unique(session, archetype=dbarchetype,
-                               name=personality,
+
+        if not host_environment:
+            try:
+                host_environment = self.config.get("archetype_" + archetype,
+                                                   "default_environment")
+            except (NoSectionError, NoOptionError):
+                raise ArgumentError("Default environment is not configured "
+                                    "for {0:l}, please specify "
+                                    "--host_environment.".format(dbarchetype))
+
+        HostEnvironment.validate_name(host_environment)
+        Personality.validate_env_in_name(personality, host_environment)
+        host_env = HostEnvironment.get_unique(session, host_environment, compel=True)
+
+        Personality.get_unique(session, archetype=dbarchetype, name=personality,
                                preclude=True)
 
-        host_env = HostEnvironment.get_unique(session, host_environment, compel=True)
-        dbpersona = Personality(name=personality, archetype=dbarchetype,
-                                cluster_required=bool(cluster_required),
-                                config_override=config_override,
-                                host_environment=host_env,
-                                comments=comments)
-
-        ##configuration override
-        session.add(dbpersona)
-
-        ## add grn/eonid
         dbgrn = lookup_grn(session, grn, eon_id, logger=logger,
                            config=self.config)
+        host_env = HostEnvironment.get_unique(session, host_environment, compel=True)
+
+        dbpersona = Personality(name=personality, archetype=dbarchetype,
+                                cluster_required=bool(cluster_required),
+                                host_environment=host_env, owner_grn=dbgrn,
+                                comments=comments,
+                                config_override=config_override)
+        session.add(dbpersona)
         dbpersona.grns.append(dbgrn)
 
         if copy_from:
@@ -104,6 +116,19 @@ class CommandAddPersonality(BrokerCommand):
                     params["interface_name"] = link.interface_name
 
                 add_link(session, logger, link.feature, params)
+
+            ## service maps
+            q = session.query(PersonalityServiceMap).filter_by(personality=dbfrom_persona)
+
+            for sm in q.all() :
+                dbmap = PersonalityServiceMap(service_instance=sm.service_instance,
+                                              location=sm.location,
+                                              network=sm.network,
+                                              personality=dbpersona)
+                session.add(dbmap)
+
+            ## required services
+            dbpersona.services.extend(dbfrom_persona.services)
 
         session.flush()
 

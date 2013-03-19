@@ -1,7 +1,8 @@
 #!/usr/bin/env python2.6
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011  Contributor
+# Copyright (C) 2008,2009,2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -64,7 +65,6 @@ class TestDelRack(TestBrokerCommand):
         command = "show rack --rack np997"
         self.notfoundtest(command.split(" "))
 
-    # Created by test_add_tor_switch
     def testdelnp998(self):
         command = "del rack --rack np998"
         self.noouttest(command.split(" "))
@@ -73,7 +73,6 @@ class TestDelRack(TestBrokerCommand):
         command = "show rack --rack np998"
         self.notfoundtest(command.split(" "))
 
-    # Created by test_add_tor_switch
     def testdelnp999(self):
         command = "del rack --rack np999"
         self.noouttest(command.split(" "))
@@ -82,7 +81,7 @@ class TestDelRack(TestBrokerCommand):
         command = "show rack --rack np999"
         self.notfoundtest(command.split(" "))
 
-    # FIXME: Maybe del_tor_switch should remove the rack if it is
+    # FIXME: Maybe del_switch should remove the rack if it is
     # otherwise empty.
     def testdelut8(self):
         command = "del rack --rack ut8"
@@ -119,7 +118,6 @@ class TestDelRack(TestBrokerCommand):
                         "--type", "unknown",
                         "--comments", "Made-up network"])
 
-
         # try delete rack
         command = "del rack --rack %s" % test_rack
         err = self.badrequesttest(command.split(" "))
@@ -132,7 +130,6 @@ class TestDelRack(TestBrokerCommand):
         self.noouttest(["del_network", "--ip", "192.176.6.0"])
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelRack)
     unittest.TextTestRunner(verbosity=2).run(suite)
-

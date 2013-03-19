@@ -1,6 +1,7 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012  Contributor
+# Copyright (C) 2008,2009,2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -39,41 +40,14 @@ from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 from sqlalchemy.sql.expression import desc
 from sqlalchemy.orm import object_session
 
-from aquilon.exceptions_ import ArgumentError, InternalError, NotFoundException
-from aquilon.aqdb.model import (Interface, HardwareEntity, ObservedMac,
-                                ARecord, VlanInfo, ObservedVlan, Network,
-                                AddressAssignment, Model)
+from aquilon.exceptions_ import ArgumentError, InternalError
+from aquilon.aqdb.model import (Interface, ObservedMac, Fqdn, ARecord, VlanInfo,
+                                ObservedVlan, Network, AddressAssignment, Model)
 from aquilon.aqdb.model.network import get_net_id_from_ip
 
 
 _vlan_re = re.compile(r'^(.*)\.(\d+)$')
 
-
-# FIXME: interface type?
-# FIXME: replace me with a usable get_unique
-def get_interface(session, interface, dbhw_ent, mac):
-    q = session.query(Interface)
-    errmsg = []
-    if interface:
-        errmsg.append("named " + interface)
-        q = q.filter_by(name=interface)
-    if dbhw_ent:
-        errmsg.append("of {0:l} ".format(dbhw_ent))
-        q = q.join(HardwareEntity)
-        q = q.filter(HardwareEntity.id == dbhw_ent.id)
-        q = q.reset_joinpoint()
-    if mac:
-        errmsg.append("having MAC address " + mac)
-        q = q.filter_by(mac=mac)
-
-    try:
-        dbinterface = q.one()
-    except NoResultFound:
-        raise NotFoundException("Interface %s not found." % " ".join(errmsg))
-    except MultipleResultsFound:
-        raise ArgumentError("There are multiple interfaces %s." %
-                            " ".join(errmsg))
-    return dbinterface
 
 def check_ip_restrictions(dbnetwork, ip, relaxed=False):
     """ given a network and ip addr, raise an exception if the ip is reserved
@@ -112,9 +86,10 @@ def check_ip_restrictions(dbnetwork, ip, relaxed=False):
                                 (ip, dbnetwork.ip))
     return
 
-def generate_ip(session, dbinterface, ip=None, ipfromip=None,
-                ipfromsystem=None, autoip=None, ipalgorithm=None,
-                compel=False, network_environment=None, **kwargs):
+
+def generate_ip(session, logger, dbinterface, ip=None, ipfromip=None,
+                ipfromsystem=None, autoip=None, ipalgorithm=None, compel=False,
+                network_environment=None, audit_results=None, **kwargs):
     ip_options = [ip, ipfromip, ipfromsystem, autoip]
     numopts = sum([1 if opt else 0 for opt in ip_options])
     if numopts > 1:
@@ -214,25 +189,35 @@ def generate_ip(session, dbinterface, ip=None, ipfromip=None,
     if ipalgorithm is None or ipalgorithm == 'lowest':
         # Select the lowest available address
         ip = IPv4Address(min(free_set))
-        return ip
     elif ipalgorithm == 'highest':
         # Select the highest available address
         ip = IPv4Address(max(free_set))
-        return ip
     elif ipalgorithm == 'max':
         # Return the max. used address + 1
         if not used_set:
-            #Avoids ValueError being thrown when used_set is empty
-            return IPv4Address(min(free_set))
-        ip = None
-        next = max(used_set)
-        if not next + 1 in free_set:
-            raise ArgumentError("Failed to find an IP that is suitable for " \
-                                "--ipalgorithm=max.  Try an other algorithm "
-                                "as there are still some free addresses.")
-        ip = IPv4Address(next + 1)
-        return ip
-    raise ArgumentError("Unknown algorithm %s." % ipalgorithm)
+            # Avoids ValueError being thrown when used_set is empty
+            ip = IPv4Address(min(free_set))
+        else:
+            next = max(used_set)
+            if not next + 1 in free_set:
+                raise ArgumentError("Failed to find an IP that is suitable "
+                                    "for --ipalgorithm=max.  Try an other "
+                                    "algorithm as there are still some free "
+                                    "addresses.")
+            ip = IPv4Address(next + 1)
+    else:
+        raise ArgumentError("Unknown algorithm %s." % ipalgorithm)
+
+    if audit_results is not None:
+        if dbinterface:
+            logger.info("Selected IP address {0!s} for {1:l}"
+                        .format(ip, dbinterface))
+        else:
+            logger.info("Selected IP address %s" % ip)
+        audit_results.append(('ip', ip))
+
+    return ip
+
 
 def describe_interface(session, interface):
     description = ["%s interface %s has MAC address %s and boot=%s" %
@@ -252,6 +237,7 @@ def describe_interface(session, interface):
         description.append("but MAC address %s is in use by %s" %
                            (interface.mac, format(ifaces[0].hardware_entity)))
     return ", ".join(description)
+
 
 def verify_port_group(dbmachine, port_group):
     """Validate that the port_group can be used on an interface.
@@ -303,7 +289,8 @@ def verify_port_group(dbmachine, port_group):
                                 "{1:l}.".format(dbvi.vlan_id, dbswitch))
     return dbvi.port_group
 
-def choose_port_group(session, dbmachine):
+
+def choose_port_group(session, logger, dbmachine):
     if dbmachine.model.machine_type != "virtual_machine":
         raise ArgumentError("Can only automatically generate "
                             "portgroup entry for virtual hardware.")
@@ -332,9 +319,12 @@ def choose_port_group(session, dbmachine):
             selected_vlan = dbobserved_vlan
 
     if selected_vlan:
+        logger.info("Selected port group {0} for {1:l} (based on {2:l})"
+                    .format(selected_vlan.port_group, dbmachine, sw))
         return selected_vlan.port_group
     raise ArgumentError("No available user port groups on "
                         "{0:l}.".format(dbmachine.cluster.switch))
+
 
 def _type_msg(interface_type, bootable):
     if bootable is not None:
@@ -342,6 +332,7 @@ def _type_msg(interface_type, bootable):
                            interface_type)
     else:
         return interface_type
+
 
 def get_or_create_interface(session, dbhw_ent, name=None, mac=None,
                             model=None, vendor=None,
@@ -503,6 +494,7 @@ def get_or_create_interface(session, dbhw_ent, name=None, mac=None,
     session.flush()
     return dbinterface
 
+
 def assign_address(dbinterface, ip, dbnetwork, label=None, resource=None):
     assert isinstance(dbinterface, Interface)
 
@@ -531,3 +523,48 @@ def assign_address(dbinterface, ip, dbnetwork, label=None, resource=None):
                                                      label=label,
                                                      service_address=resource,
                                                      dns_environment=dns_environment))
+
+
+def rename_interface(session, dbinterface, rename_to):
+    rename_to = rename_to.strip().lower()
+
+    dbhw_ent = dbinterface.hardware_entity
+    for iface in dbhw_ent.interfaces:
+        if iface.name == rename_to:
+            raise ArgumentError("{0} already has an interface named {1}."
+                                .format(dbhw_ent, rename_to))
+
+    fqdn_changes = []
+
+    if dbhw_ent.primary_name:
+        primary_fqdn = dbhw_ent.primary_name.fqdn
+        short = primary_fqdn.name
+        dbdns_domain = primary_fqdn.dns_domain
+        dbdns_env = primary_fqdn.dns_environment
+
+        dbdns_domain.lock_row()
+
+        # Rename DNS entries that follow the standard naming convention, except
+        # the primary name. The primary name should not have an interface
+        # suffix, but who knows...
+        for addr in dbinterface.assignments:
+            if addr.label:
+                old_name = "%s-%s-%s" % (short, dbinterface.name, addr.label)
+                new_name = "%s-%s-%s" % (short, rename_to, addr.label)
+            else:
+                old_name = "%s-%s" % (short, dbinterface.name)
+                new_name = "%s-%s" % (short, rename_to)
+            fqdn_changes.extend([(dns_rec.fqdn, new_name) for dns_rec
+                                 in addr.dns_records
+                                 if dns_rec.fqdn.name == old_name and
+                                    dns_rec.fqdn.dns_domain == dbdns_domain and
+                                    dns_rec.fqdn != primary_fqdn])
+    else:
+        dbdns_domain = dbdns_env = None
+
+    with session.no_autoflush:
+        dbinterface.name = rename_to
+        for dbfqdn, new_name in fqdn_changes:
+            Fqdn.get_unique(session, name=new_name, dns_domain=dbdns_domain,
+                            dns_environment=dbdns_env, preclude=True)
+            dbfqdn.name = new_name

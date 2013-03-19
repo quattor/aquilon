@@ -1,7 +1,8 @@
 #!/usr/bin/env python2.6
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2011  Contributor
+# Copyright (C) 2011,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -50,8 +51,9 @@ def gather_deps(dir):
                         continue
                     if package in ['setuptools']:
                         continue
-		    dependencies[package] = version
+                    dependencies[package] = version
     return dependencies
+
 
 def bootstrap(dependencies, dir):
     extra = textwrap.dedent("""
@@ -76,6 +78,7 @@ def bootstrap(dependencies, dir):
     extra += "    subprocess.call([easy_install, '.'], cwd='%s')\n" % (
         os.path.join(dir, 'bootstrap_Sybase'))
     print virtualenv.create_bootstrap_script(extra)
+
 
 if __name__ == '__main__':
     dir = os.path.dirname(os.path.realpath(__file__))

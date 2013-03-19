@@ -1,6 +1,7 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2011,2012  Contributor
+# Copyright (C) 2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -34,10 +35,10 @@ from aquilon.aqdb.model import (Application, Filesystem, Intervention,
                                 ResourceGroup, Hostlink, RebootSchedule,
                                 RebootIntervention, ServiceAddress,
                                 VirtualMachine, Share)
-from aquilon.aqdb.model.disk import find_storage_data
+from aquilon.aqdb.data_sync.storage import find_storage_data
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
 from aquilon.worker.templates.panutils import (StructureTemplate, pan_assign,
-                                               pan_push)
+                                               pan_append)
 
 LOGGER = logging.getLogger('aquilon.server.templates.resource')
 
@@ -65,7 +66,6 @@ class PlenaryResource(Plenary):
         pan_assign(lines, "name", self.name)
         pan_assign(lines, "server", share_info["server"])
         pan_assign(lines, "mountpoint", share_info["mount"])
-        pan_assign(lines, "latency", self.dbobj.latency)
 
     def body_filesystem(self, lines):
         pan_assign(lines, "type", self.dbobj.fstype)
@@ -115,8 +115,9 @@ class PlenaryResource(Plenary):
         pan_assign(lines, "name", self.dbobj.name)
         if self.dbobj.resholder:
             for resource in self.dbobj.resholder.resources:
-                pan_push(lines, "resources/%s" % resource.resource_type,
-                         StructureTemplate(resource.template_base + "/config"))
+                pan_append(lines, "resources/" + resource.resource_type,
+                           StructureTemplate(resource.template_base +
+                                             "/config"))
 
     def body_reboot_iv(self, lines):
         pan_assign(lines, "name", self.dbobj.name)
@@ -150,6 +151,7 @@ class PlenaryResource(Plenary):
             system = {'archetype': {'name': arch.name,
                                     'os': os.name,
                                     'osversion': os.version},
+                      'build': machine.host.status.name,
                       'network': {'hostname': pn.name,
                                   'domainname': pn.dns_domain}}
             pan_assign(lines, "system", system)

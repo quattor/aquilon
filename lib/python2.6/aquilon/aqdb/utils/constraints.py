@@ -1,6 +1,7 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012  Contributor
+# Copyright (C) 2008,2009,2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -68,8 +69,8 @@ _long_nms['CLUSTER_SERVICE_BINDING'] = 'CLSTR_SVC_BNDG'
 _long_nms['HOST_CLUSTER_MEMBER'] = 'HOST_CLSTR_MMBR'
 _long_nms['MACHINE_SPECS'] = 'MCHN_SPECS'
 _long_nms['CONTROLLER_TYPE'] = 'CNTRLR_TYPE'
-_long_nms['CREATION_DATE']           = 'CR_DATE'
-_long_nms['USER_PRINCIPAL_ID']       = 'USR_PRNC_ID'
+_long_nms['CREATION_DATE'] = 'CR_DATE'
+_long_nms['USER_PRINCIPAL_ID'] = 'USR_PRNC_ID'
 _long_nms['OPERATING_SYSTEM'] = 'OS'
 _long_nms['DOWN_HOSTS_THRESHOLD'] = 'DOWN_HOSTS_THR'
 _long_nms['PERSONALITY_CLUSTER_INFO'] = 'PERS_CLSTR'
@@ -116,6 +117,7 @@ def rename_sys_pks(db, debug=False):
     else:
         print 'PKs are all properly named'
 
+
 def rename_non_null_check_constraints(db, debug=False, *args, **kw):
     stmt = """
     SELECT C.constraint_name  con,
@@ -127,7 +129,7 @@ def rename_non_null_check_constraints(db, debug=False, *args, **kw):
 
     cons = db.safe_execute(stmt)
 
-    rename =[]
+    rename = []
     pat = re.compile('\"(.*)\"')
 
     for i in cons:
@@ -138,15 +140,15 @@ def rename_non_null_check_constraints(db, debug=False, *args, **kw):
                 col = _long_nms[col]
             #replace table name if its long
             if i[1] in _long_nms.keys():
-                nm = '%s_%s_NN'%(_long_nms[i[1]], col)
+                nm = '%s_%s_NN' % (_long_nms[i[1]], col)
             else:
-                nm = '%s_%s_NN'%(i[1], col)
+                nm = '%s_%s_NN' % (i[1], col)
 
             rename = 'ALTER TABLE "%s" RENAME CONSTRAINT "%s" TO "%s"' % (
                 i[1], i[0], nm)
 
             if len(nm) > 30:
-                print '%s\n would fail, new name longer than 32 characters'%(
+                print '%s\n would fail, new name longer than 32 characters' % (
                     rename)
                 continue
             else:

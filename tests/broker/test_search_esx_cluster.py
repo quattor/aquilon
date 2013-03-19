@@ -1,7 +1,8 @@
 #!/usr/bin/env python2.6
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2010,2011,2012  Contributor
+# Copyright (C) 2010,2011,2012,2013  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -253,9 +254,7 @@ class TestSearchESXCluster(TestBrokerCommand):
         command = "search esx cluster --share share-does-not-exist"
         out = self.notfoundtest(command.split(" "))
         self.matchoutput(out,
-                         "Service Instance share-does-not-exist, service "
-                         "nas_disk_share not found.",
-                         command)
+                         "Share share-does-not-exist not found.", command)
 
     def testclusterlocationavailable(self):
         command = "search esx cluster --cluster_building ut"
@@ -305,6 +304,6 @@ class TestSearchESXCluster(TestBrokerCommand):
         self.noouttest(command)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestSearchESXCluster)
     unittest.TextTestRunner(verbosity=2).run(suite)
