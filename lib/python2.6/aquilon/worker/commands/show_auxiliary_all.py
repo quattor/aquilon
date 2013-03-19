@@ -30,6 +30,7 @@
 """Contains the logic for `aq show auxiliary --all`."""
 
 from sqlalchemy.orm import contains_eager, aliased
+from sqlalchemy.sql import and_
 
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.aqdb.model import (Interface, AddressAssignment, HardwareEntity,
@@ -46,7 +47,9 @@ class CommandShowAuxiliaryAll(BrokerCommand):
         q = q.filter(HardwareEntity.id == None)
         q = q.reset_joinpoint()
         # ... and is assigned to a public interface...
-        q = q.join((AddressAssignment, ARecord.ip == AddressAssignment.ip))
+        q = q.join((AddressAssignment,
+                    and_(ARecord.ip == AddressAssignment.ip,
+                         ARecord.network_id == AddressAssignment.network_id)))
         q = q.join(Interface)
         q = q.filter_by(interface_type='public')
         # ... of a machine.

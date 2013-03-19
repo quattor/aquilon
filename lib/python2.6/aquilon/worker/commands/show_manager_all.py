@@ -30,6 +30,7 @@
 """Contains the logic for `aq show manager --all`."""
 
 from sqlalchemy.orm import contains_eager
+from sqlalchemy.sql import and_
 
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.aqdb.model import (AddressAssignment, Interface, ARecord,
@@ -40,8 +41,9 @@ class CommandShowManagerAll(BrokerCommand):
 
     def render(self, session, **arguments):
         q = session.query(ARecord)
-        q = q.join((AddressAssignment, ARecord.ip ==
-                    AddressAssignment.ip))
+        q = q.join((AddressAssignment,
+                    and_(ARecord.ip == AddressAssignment.ip,
+                         ARecord.network_id == AddressAssignment.network_id)))
         q = q.join(Interface)
         q = q.filter_by(interface_type='management')
         q = q.reset_joinpoint()

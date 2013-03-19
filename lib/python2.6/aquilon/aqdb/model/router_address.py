@@ -83,6 +83,7 @@ class RouterAddress(Base):
 
     dns_records = relation(dns_fqdn_mapper, uselist=True,
                            primaryjoin=and_(ip == ARecord.ip,
+                                            network_id == ARecord.network_id,
                                             dns_environment_id == Fqdn.dns_environment_id),
                            foreign_keys=[ARecord.ip, Fqdn.dns_environment_id],
                            viewonly=True)
