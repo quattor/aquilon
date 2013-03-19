@@ -181,6 +181,23 @@ class AuthorizationBroker(object):
                               'update_interface_hostname',
                               'update_interface_machine']:
                 self.raise_auth_error(principal, action, resource)
+        if dbuser.role.name == 'itsec':
+            if action not in ['pxeswitch', 'pxeswitch_list',
+                              'compile', 'compile_hostname', 'change_status',
+                              'add_interface_machine',
+                              'add_interface_hostname',
+                              'add_interface_address',
+                              'update_interface_hostname',
+                              'update_interface_machine',
+                              'del_interface', 'del_interface_address',
+                              'add_disk', 'del_disk',
+                              'add_machine', 'del_machine',
+                              'update_machine', 'update_machine_hostname',
+                              'add_host', 'del_host',
+                              'add_alias', 'add_manager',
+                              'del_alias', 'del_manager']:
+                self.raise_auth_error(principal, action, resource)
+
         if dbuser.role.name == 'unixops_l2':
             if action not in ['add_host', 'add_windows_host',
                               'del_host', 'del_windows_host',
