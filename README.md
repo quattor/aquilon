@@ -24,36 +24,22 @@ Under Scientific Linux 6, install the following RPMs:
 *   make
 *   python-virtualenv
 
-* real version of java (not GCJ!); openjdk?, oracle?
+*   real version of java (not GCJ!); openjdk?, oracle?
 
 Kerberos
 
-* krb5-server
-* krb5-workstation
+*   krb5-server
+*   krb5-workstation
 
-See instructions for [krb5
-installation](http://tldp.org/HOWTO/Kerberos-Infrastructure-HOWTO/install.html). In
-/etc/krb5.conf, change server to servername in [realms] section.
+See instructions for [krb5 installation](http://tldp.org/HOWTO/Kerberos-Infrastructure-HOWTO/install.html).
+In /etc/krb5.conf, change server to servername in [realms] section.
 
 
 If using a different distribution, you will need python 2.6.x and git
 1.7.x.
 
-* protobuf
-* protobuf-devel
-* protobuf-compiler
-* protobuf-python
-
-Install the knc package from the Quattor repository, or build your own
-from sources at http://oskt.secure-endpoints.com/knc.html
-
-Use the python setuptools installed earlier to run (as root):
-
-```bash
-easy_install virtualenv
-```
-
-(also rpm available in EPEL; test if it works?)
+Install the knc package from the [Quattor repository](http://yum.quattor.org/external),
+or build your own from sources at http://oskt.secure-endpoints.com/knc.html
 
 
 Cloning the git repositories
@@ -196,7 +182,6 @@ change service `AQSERVICE`:
 
 ```bash
 export AQSERVICE=aqd
-
 export AQDCONF=/etc/aqd.conf
 ```
 
@@ -206,7 +191,6 @@ in aqd.conf.defaults, change:
 
 ```ini
 dsdb = /bin/echo
-
 dsdb_use_testdb = True
 ```
 
