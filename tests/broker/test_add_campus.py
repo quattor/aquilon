@@ -29,7 +29,7 @@ from brokertest import TestBrokerCommand
 class TestAddCampus(TestBrokerCommand):
 
     def testaddte(self):
-        self.dsdb_expect("add_campus_aq -campus_name ta -comments Test Comment")
+        self.dsdb_expect_add_campus("ta", "Test Comment")
         command = ["add", "campus", "--campus", "ta", "--country", "us",
                    "--comments", "Test Comment", "--fullname", "Test Campus"]
         self.noouttest(command)

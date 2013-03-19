@@ -618,6 +618,29 @@ class TestBrokerCommand(unittest.TestCase):
             command.extend(["-new_interface_name", new_iface])
         self.dsdb_expect(" ".join(command), fail=fail)
 
+    def dsdb_expect_add_campus(self, campus, comments=None, fail=False,
+                               errstr=""):
+        command = ["add_campus_aq", "-campus_name", campus]
+        if comments:
+            command.extend(["-comments", comments])
+        self.dsdb_expect(" ".join(command), fail=fail, errstr=errstr)
+
+    def dsdb_expect_del_campus(self, campus, fail=False, errstr=""):
+        command = ["delete_campus_aq", "-campus", campus]
+        self.dsdb_expect(" ".join(command), fail=fail, errstr=errstr)
+
+    def dsdb_expect_add_campus_building(self, campus, building, fail=False,
+                                        errstr=""):
+        command = ["add_campus_building_aq", "-campus_name", campus,
+                   "-building_name", building]
+        self.dsdb_expect(" ".join(command), fail=fail, errstr=errstr)
+
+    def dsdb_expect_del_campus_building(self, campus, building, fail=False,
+                                        errstr=""):
+        command = ["delete_campus_building_aq", "-campus_name", campus,
+                   "-building_name", building]
+        self.dsdb_expect(" ".join(command), fail=fail, errstr=errstr)
+
     def dsdb_verify(self, empty=False):
         dsdb_coverage_dir = os.path.join(self.config.get("unittest", "scratchdir"),
                                          "dsdb_coverage")

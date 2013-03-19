@@ -31,8 +31,7 @@ class TestAddBuilding(TestBrokerCommand):
     def testaddbu(self):
         self.dsdb_expect("add_building_aq -building_name bu -city ny "
                          "-building_addr 12 Cherry Lane")
-        self.dsdb_expect("add_campus_building_aq -campus_name ny "
-                         "-building_name bu")
+        self.dsdb_expect_add_campus_building("ny", "bu")
         command = ["add", "building", "--building", "bu", "--city", "ny",
                    "--address", "12 Cherry Lane"]
         self.noouttest(command)
@@ -48,8 +47,7 @@ class TestAddBuilding(TestBrokerCommand):
         self.dsdb_expect("add_building_aq -building_name cards -city ex "
                          "-building_addr Nowhere")
         # No campus for city ex
-#        self.dsdb_expect("add_campus_building_aq -campus_name ny "
-#                         "-building_name bu")
+#        self.dsdb_expect_add_campus_building("ny", "bu")
         command = ["add", "building", "--building", "cards", "--city", "ex",
                    "--address", "Nowhere"]
         self.noouttest(command)
@@ -81,8 +79,7 @@ class TestAddBuilding(TestBrokerCommand):
     def testaddnettest(self):
         self.dsdb_expect("add_building_aq -building_name nettest -city ny "
                          "-building_addr Nowhere")
-        self.dsdb_expect("add_campus_building_aq -campus_name ny "
-                         "-building_name nettest")
+        self.dsdb_expect_add_campus_building("ny", "nettest")
         command = ["add", "building", "--building", "nettest", "--city", "ny",
                    "--address", "Nowhere"]
         self.noouttest(command)
@@ -91,8 +88,6 @@ class TestAddBuilding(TestBrokerCommand):
     def testnonascii(self):
         command = ["add", "building", "--building", "nonascii", "--city", "ny",
                    "--address", "\xe1\xe9\xed\xf3\xfa"]
-        self.dsdb_expect("add_campus_building_aq -campus_name ny "
-                         "-building_name nonascii")
         out = self.badrequesttest(command)
         self.matchoutput(out, "Only ASCII characters are allowed for --address.",
                          command)
@@ -110,8 +105,7 @@ class TestAddBuilding(TestBrokerCommand):
     def test_addtu(self):
         self.dsdb_expect("add_building_aq -building_name tu -city ny "
                          "-building_addr 14 Test Lane")
-        self.dsdb_expect("add_campus_building_aq -campus_name ny "
-                         "-building_name tu")
+        self.dsdb_expect_add_campus_building("ny", "tu")
         command = ["add", "building", "--building", "tu", "--city", "ny",
                    "--address", "14 Test Lane"]
         self.noouttest(command)

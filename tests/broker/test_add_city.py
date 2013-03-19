@@ -119,6 +119,7 @@ class TestAddCity(TestBrokerCommand):
         self.dsdb_verify()
 
         ## add campus
+        # FIXME: this does not propagate the campus to DSDB
         command = ["add", "location", "--type", "campus", "--name", "na",
                    "--parenttype", "country", "--parentname", "us",
                    "--fullname", "test campus"]
