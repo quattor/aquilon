@@ -34,6 +34,7 @@ class TestAddResourceGroup(TestBrokerCommand):
                    "--cluster=utvcs1"]
         self.successtest(command)
 
+    def test_110_show_resourcegroup(self):
         command = ["show_resourcegroup", "--cluster=utvcs1"]
         out = self.commandtest(command)
         self.matchoutput(out, "Resource Group: utvcs1as1", command)
@@ -41,24 +42,12 @@ class TestAddResourceGroup(TestBrokerCommand):
                          "Bound to: High Availability Cluster utvcs1",
                          command)
 
+    def test_110_show_all(self):
         command = ["show_resourcegroup", "--all"]
         out = self.commandtest(command)
         self.matchoutput(out, "Resource Group: utvcs1as1", command)
 
-    def test_101_add_rg_to_cluster_fail(self):
-        command = ["add_resourcegroup", "--resourcegroup=utvcs1as1",
-                   "--cluster=utvcs1", "--required_type=non-existent-type"]
-        err = self.badrequesttest(command)
-        self.matchoutput(err, "Bad Request: non-existent-type is not a valid "
-                         "resource type", command)
-
-        command = ["add_resourcegroup", "--resourcegroup=utvcs1as1",
-                   "--cluster=utvcs1", "--required_type=resourcegroup"]
-        err = self.badrequesttest(command)
-        self.matchoutput(err, "Bad Request: A resourcegroup can't hold other "
-                         "resourcegroups.", command)
-
-    def test_110_add_fs_to_rg(self):
+    def test_120_add_fs_to_rg(self):
         command = ["add_filesystem", "--filesystem=fs1", "--type=ext3",
                    "--mountpoint=/mnt", "--blockdevice=/dev/foo/bar",
                    "--bootmount",
@@ -67,6 +56,7 @@ class TestAddResourceGroup(TestBrokerCommand):
                    "--resourcegroup=utvcs1as1", "--cluster=utvcs1"]
         self.successtest(command)
 
+    def test_130_show_filesystem(self):
         command = ["show_filesystem", "--filesystem=fs1"]
         out = self.commandtest(command)
         self.matchoutput(out, "Filesystem: fs1", command)
@@ -79,12 +69,12 @@ class TestAddResourceGroup(TestBrokerCommand):
         self.matchoutput(out, "Fsck Pass: 3", command)
         self.matchoutput(out, "Comments: testing", command)
 
-    def test_200_show_rg(self):
+    def test_130_show_resourcegroup(self):
         command = ["show", "resourcegroup", "--resourcegroup", "utvcs1as1"]
         out = self.commandtest(command)
         self.matchoutput(out, "Filesystem: fs1", command)
 
-    def test_210_cat_cluster(self):
+    def test_130_cat_cluster(self):
         command = ["cat", "--cluster", "utvcs1", "--data"]
         out = self.commandtest(command)
         self.matchoutput(out,
@@ -92,7 +82,7 @@ class TestAddResourceGroup(TestBrokerCommand):
                          'append(create("resource/cluster/utvcs1/resourcegroup/utvcs1as1/config"));',
                          command)
 
-    def test_210_cat_rg(self):
+    def test_130_cat_resourcegroup(self):
         command = ["cat", "--resourcegroup", "utvcs1as1", "--cluster", "utvcs1"]
         out = self.commandtest(command)
         self.matchoutput(out,
@@ -100,7 +90,7 @@ class TestAddResourceGroup(TestBrokerCommand):
                          'append(create("resource/cluster/utvcs1/resourcegroup/utvcs1as1/filesystem/fs1/config"));',
                          command)
 
-    def test_210_cat_rg_generate(self):
+    def test_130_cat_resourcegroup_generate(self):
         command = ["cat", "--resourcegroup", "utvcs1as1", "--cluster", "utvcs1",
                    "--generate"]
         out = self.commandtest(command)
@@ -109,7 +99,7 @@ class TestAddResourceGroup(TestBrokerCommand):
                          'append(create("resource/cluster/utvcs1/resourcegroup/utvcs1as1/filesystem/fs1/config"));',
                          command)
 
-    def test_210_cat_fs(self):
+    def test_130_cat_filesystem(self):
         command = ["cat", "--cluster", "utvcs1", "--resourcegroup", "utvcs1as1",
                    "--filesystem", "fs1"]
         out = self.commandtest(command)
@@ -117,6 +107,58 @@ class TestAddResourceGroup(TestBrokerCommand):
                          "structure template resource/cluster/utvcs1/resourcegroup/utvcs1as1/filesystem/fs1/config;",
                          command)
         self.matchoutput(out, '"block_device_path" = "/dev/foo/bar";', command)
+
+    def test_130_show_cluster(self):
+        command = ["show", "cluster", "--cluster", "utvcs1"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "    Resource Group: utvcs1", command)
+        self.matchoutput(out, "      Filesystem: fs1", command)
+
+    def test_130_show_cluster_proto(self):
+        command = ["show", "cluster", "--cluster", "utvcs1", "--format", "proto"]
+        out = self.commandtest(command)
+        clusterlist = self.parse_clusters_msg(out, expect=1)
+        cluster = clusterlist.clusters[0]
+        rg_msg = None
+        for resource in cluster.resources:
+            if resource.name == "utvcs1as1" and \
+               resource.type == "resourcegroup":
+                rg_msg = resource
+        self.assertTrue(rg_msg,
+                        "Resourcegroup utvcs1as1 not found in the resources. "
+                        "Existing resources: %s" %
+                        ", ".join(["%s %s" % (res.type, res.name) for res in
+                                              cluster.resources]))
+        fs_found = False
+        for resource in rg_msg.resourcegroup.resources:
+            if resource.name == "fs1" and resource.type == "filesystem":
+                fs_found = True
+                self.failUnlessEqual(resource.fsdata.fstype, "ext3")
+                self.failUnlessEqual(resource.fsdata.mountpoint, "/mnt")
+                self.failUnlessEqual(resource.fsdata.mount, True)
+                self.failUnlessEqual(resource.fsdata.blockdevice, "/dev/foo/bar")
+                self.failUnlessEqual(resource.fsdata.opts, "ro")
+                self.failUnlessEqual(resource.fsdata.freq, 1)
+                self.failUnlessEqual(resource.fsdata.passno, 3)
+        self.assertTrue(fs_found,
+                        "Filesystem fs1 not found in the resourcegroup. "
+                        "Existing resources: %s" %
+                        ", ".join(["%s %s" % (res.type, res.name) for res in
+                                              rg_msg.resourcegroup.resources]))
+
+    def test_200_add_bad_type(self):
+        command = ["add_resourcegroup", "--resourcegroup=utvcs1as1",
+                   "--cluster=utvcs1", "--required_type=non-existent-type"]
+        err = self.badrequesttest(command)
+        self.matchoutput(err, "Bad Request: non-existent-type is not a valid "
+                         "resource type", command)
+
+    def test_200_stacked_resourcegroup(self):
+        command = ["add_resourcegroup", "--resourcegroup=utvcs1as1",
+                   "--cluster=utvcs1", "--required_type=resourcegroup"]
+        err = self.badrequesttest(command)
+        self.matchoutput(err, "Bad Request: A resourcegroup can't hold other "
+                         "resourcegroups.", command)
 
     def test_300_del_resourcegroup(self):
         # Check that the plenaries of contained resources get cleaned up

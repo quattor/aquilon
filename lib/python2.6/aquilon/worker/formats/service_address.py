@@ -36,9 +36,9 @@ class ServiceAddressFormatter(ResourceFormatter):
         if not container:
             container = self.loaded_protocols[self.protocol].ResourceList()
             skeleton = container.resources.add()
-        # FIXME
-        #skeleton.service_address.ip = srv.ip
-        #skeleton.service_address.interfaces = srv.interfaces
+        skeleton.service_address.ip = str(srv.dns_record.ip)
+        skeleton.service_address.fqdn = str(srv.dns_record.fqdn)
+        skeleton.service_address.interfaces.extend(srv.interfaces)
         return super(ServiceAddressFormatter, self).format_proto(srv, skeleton)
 
 

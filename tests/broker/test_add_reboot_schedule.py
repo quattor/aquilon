@@ -29,11 +29,12 @@ from brokertest import TestBrokerCommand
 
 class TestAddRebootSchedule(TestBrokerCommand):
 
-    def test_00_basic_reboot_schedule(self):
+    def test_100_nonexistent(self):
         command = ["show_reboot_schedule",
                    "--hostname=server1.aqd-unittest.ms.com"]
         out = self.notfoundtest(command)
 
+    def test_110_add_schedule(self):
         # devaq add_reboot_schedule --hostname aquilon07.one-nyp.ms.com
         # --week 1,2,3,4,5 --day Sun --time 06:00
         command = ["add_reboot_schedule",
@@ -41,6 +42,11 @@ class TestAddRebootSchedule(TestBrokerCommand):
                    "--hostname=server1.aqd-unittest.ms.com"]
         self.successtest(command)
 
+    def test_115_make(self):
+        command = ["make", "--hostname=server1.aqd-unittest.ms.com"]
+        self.successtest(command)
+
+    def test_120_show_reboot_schedule(self):
         command = ["show_reboot_schedule",
                    "--hostname=server1.aqd-unittest.ms.com"]
         out = self.commandtest(command)
@@ -52,6 +58,7 @@ class TestAddRebootSchedule(TestBrokerCommand):
         self.matchoutput(out, "Day: Sun", command)
         self.matchoutput(out, "Time: 08:00", command)
 
+    def test_120_cat_resource(self):
         command = ["cat", "--reboot_schedule=reboot_schedule",
                    "--hostname=server1.aqd-unittest.ms.com"]
         out = self.commandtest(command)
@@ -71,39 +78,26 @@ class TestAddRebootSchedule(TestBrokerCommand):
         newout = self.commandtest(command)
         self.assertEqual(out, newout)
 
-        command = ["show_reboot_schedule", "--all"]
-        out = self.commandtest(command)
-        self.matchoutput(out, "RebootSchedule: reboot_schedule", command)
-
-    def test_11_addexisting(self):
-        command = ["add_reboot_schedule",
-                   "--week=all", "--day=Sun", "--time=08:00",
-                   "--hostname=server1.aqd-unittest.ms.com"]
-        out = self.badrequesttest(command)
-        self.matchoutput(out, "already exists", command)
-
-    def test_15_notfoundresource(self):
-        command = ["cat", "--reboot_schedule=schedule-does-not-exist",
-                   "--hostname=server1.aqd-unittest.ms.com"]
-        self.notfoundtest(command)
-
-    def test_30_checkthehost(self):
-        command = ["show_host", "--host=server1.aqd-unittest.ms.com"]
-        out = self.commandtest(command)
-        self.matchoutput(out,
-                         "RebootSchedule: reboot_schedule", command)
-
-        command = ["make", "--hostname=server1.aqd-unittest.ms.com"]
-        out = self.successtest(command)
-
-        command = ["cat", "--generate",
-                   "--hostname", "server1.aqd-unittest.ms.com", "--data"]
+    def test_120_cat_host(self):
+        command = ["cat", "--hostname", "server1.aqd-unittest.ms.com", "--data"]
         out = self.commandtest(command)
         self.matchoutput(out,
                          '"system/resources/reboot_schedule" = '
                          'append(create("resource/host/server1.aqd-unittest.ms.com/reboot_schedule/reboot_schedule/config"))',
                          command)
 
+    def test_120_show_all(self):
+        command = ["show_reboot_schedule", "--all"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "RebootSchedule: reboot_schedule", command)
+
+    def test_120_show_host(self):
+        command = ["show_host", "--host=server1.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out,
+                         "RebootSchedule: reboot_schedule", command)
+
+    def test_120_show_host_proto(self):
         command = ["show_host", "--hostname=server1.aqd-unittest.ms.com",
                    "--format=proto"]
         out = self.commandtest(command)
@@ -114,19 +108,47 @@ class TestAddRebootSchedule(TestBrokerCommand):
             if resource.name == "reboot_schedule" and \
                resource.type == "reboot_schedule":
                 found = True
-        self.assertTrue(found, "No reboot_schedule found in host protobuf.")
+                self.failUnlessEqual(resource.reboot_schedule.week, "All")
+                self.failUnlessEqual(resource.reboot_schedule.day, "Sun")
+                self.failUnlessEqual(resource.reboot_schedule.time, "08:00")
+        self.assertTrue(found,
+                        "Reboot schedule not found in the resources. "
+                        "Existing resources: %s" %
+                        ", ".join(["%s %s" % (res.type, res.name) for res in
+                                              host.resources]))
 
-    def test_del_reboot_schedule(self):
+    def test_200_add_existing(self):
+        command = ["add_reboot_schedule",
+                   "--week=all", "--day=Sun", "--time=08:00",
+                   "--hostname=server1.aqd-unittest.ms.com"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "already exists", command)
+
+    def test_200_cat_notfound(self):
+        command = ["cat", "--reboot_schedule=schedule-does-not-exist",
+                   "--hostname=server1.aqd-unittest.ms.com"]
+        self.notfoundtest(command)
+
+    def test_300_del_reboot_schedule(self):
+        plenary = self.plenary_name("resource", "host",
+                                    "server1.aqd-unittest.ms.com",
+                                    "reboot_schedule", "reboot_schedule",
+                                    "config")
+        self.failUnless(os.path.exists(plenary),
+                        "Pleanry '%s' does not exist" % plenary)
+
         command = ["del_reboot_schedule",
                    "--hostname=server1.aqd-unittest.ms.com"]
         self.successtest(command)
 
-    def test_verify_reboot_schedule_plenary(self):
-        dir = os.path.join(self.config.get("broker", "plenarydir"),
-                           "resource", "host", "server1.aqd-unittest.ms.com",
-                           "reboot_schedule")
+        dir = os.path.dirname(plenary)
         self.failIf(os.path.exists(dir),
                     "Plenary directory '%s' still exists" % dir)
+
+    def test_310_verify_del(self):
+        command = ["show_host", "--hostname", "server1.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchclean(out, "reboot_schedule", command)
 
 
 if __name__ == '__main__':
