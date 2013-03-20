@@ -41,7 +41,7 @@ class CommandUpdateRack(BrokerCommand):
 
     required_parameters = ["rack"]
 
-    def render(self, session, logger, rack, row, column, room, clearroom,
+    def render(self, session, logger, rack, row, column, room, building, bunker,
                fullname, default_dns_domain, comments, **arguments):
         dbrack = get_location(session, rack=rack)
         if row is not None:
@@ -59,22 +59,18 @@ class CommandUpdateRack(BrokerCommand):
                 dbrack.default_dns_domain = dbdns_domain
             else:
                 dbrack.default_dns_domain = None
-        if room:
-            dbroom = get_location(session, room=room)
+        if bunker or room or building:
+            dbparent = get_location(session, bunker=bunker, room=room,
+                                  building=building)
             # This one would change the template's locations hence forbidden
-            if dbroom.building != dbrack.building:
+            if dbparent.building != dbrack.building:
                 # Doing this both to reduce user error and to limit
                 # testing required.
                 raise ArgumentError("Cannot change buildings.  {0} is in {1} "
                                     "while {2} is in {3}.".format(
-                                        dbroom, dbroom.building,
+                                        dbparent, dbparent.building,
                                         dbrack, dbrack.building))
-            dbrack.update_parent(parent=dbroom)
-        if clearroom:
-            if not dbrack.room:
-                raise ArgumentError("{0} does not have room information "
-                                    "to clear.".format(dbrack))
-            dbrack.update_parent(parent=dbrack.room.parent)
+            dbrack.update_parent(parent=dbparent)
 
         session.flush()
 

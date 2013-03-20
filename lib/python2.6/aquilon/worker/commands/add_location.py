@@ -38,7 +38,7 @@ from aquilon.aqdb.model import Location
 # It's also broken, as campus is not strictly between country and city.
 # The list of imports above needs to include all of these entries.
 location_types = ("company", "hub", "continent", "country", "campus",
-                  "city", "building", "room", "rack", "desk")
+                  "city", "building", "room", "bunker", "rack", "desk")
 
 
 def add_location(session, name, fullname, type, parent_name, parent_type,

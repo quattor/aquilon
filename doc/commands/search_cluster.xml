@@ -278,6 +278,7 @@
 		    <option>--cluster_city <replaceable>NAME</replaceable></option>,
 		    <option>--cluster_building <replaceable>NAME</replaceable></option>,
 		    <option>--cluster_room <replaceable>NAME</replaceable></option>,
+		    <option>--cluster_bunker <replaceable>NAME</replaceable></option>,
 		    <option>--cluster_rack <replaceable>NAME</replaceable></option>,
 		    <option>--cluster_desk <replaceable>NAME</replaceable></option>,
 		    <option>--member_organization <replaceable>NAME</replaceable></option>,
@@ -288,6 +289,7 @@
 		    <option>--member_city <replaceable>NAME</replaceable></option>,
 		    <option>--member_building <replaceable>NAME</replaceable></option>,
 		    <option>--member_room <replaceable>NAME</replaceable></option>,
+		    <option>--member_bunker <replaceable>NAME</replaceable></option>,
 		    <option>--member_rack <replaceable>NAME</replaceable></option>,
 		    <option>--member_desk <replaceable>NAME</replaceable></option>
 	        </term>

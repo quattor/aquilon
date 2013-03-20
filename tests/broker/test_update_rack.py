@@ -146,21 +146,27 @@ class TestUpdateRack(TestBrokerCommand):
                           r'Location Parents: \[.*Building ut, Room utroom2\]',
                           command)
 
-    def test_140_clearroom(self):
-        command = ['update_rack', '--rack=ut8', '--clearroom']
+    def test_140_updatebunker(self):
+        command = ['update_rack', '--rack=ut8', '--bunker=utbunker2']
         self.noouttest(command)
 
-    def test_150_verifyclear(self):
+    def test_145_verifybunker(self):
+        command = ['show_rack', '--rack=ut8']
+        out = self.commandtest(command)
+        self.searchoutput(out,
+                          r'Location Parents: \[.*Building ut, '
+                          r'Room utroom2, Bunker utbunker2\]',
+                          command)
+
+    def test_150_clearroom(self):
+        command = ['update_rack', '--rack=ut8', '--building', 'ut']
+        self.noouttest(command)
+
+    def test_160_verifyclear(self):
         command = ['show_rack', '--rack=ut8']
         out = self.commandtest(command)
         self.searchclean(out, r'Location Parents: \[.* Room .*\]', command)
-
-    def test_160_failcleartwice(self):
-        command = ['update_rack', '--rack=ut8', '--clearroom']
-        out = self.badrequesttest(command)
-        self.matchoutput(out,
-                         'Rack ut8 does not have room information to clear.',
-                         command)
+        self.searchclean(out, r'Location Parents: \[.* Bunker .*\]', command)
 
     def test_170_failchangebuilding(self):
         command = ['update_rack', '--rack=ut8', '--room=np-lab1']

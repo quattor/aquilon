@@ -191,6 +191,7 @@
 	    <option name="city" type="string">City</option>
 	    <option name="building" type="string">Building</option>
 	    <option name="room" type="string">Room</option>
+	    <option name="bunker" type="string">Bunker</option>
 	    <option name="rack" type="string">Rack</option>
 	    <option name="desk" type="string">Desk</option>
          </optgroup>
@@ -237,6 +238,7 @@
 	    <option name="city" type="string">City</option>
 	    <option name="building" type="string">Building</option>
 	    <option name="room" type="string">Room</option>
+	    <option name="bunker" type="string">Bunker</option>
 	    <option name="rack" type="string">Rack</option>
 	    <option name="desk" type="string">Desk</option>
          </optgroup>
@@ -311,6 +313,7 @@
             <option name="cluster_city" type="string">Cluster City</option>
             <option name="cluster_building" type="string">Cluster Building</option>
             <option name="cluster_room" type="string">Cluster Room</option>
+            <option name="cluster_bunker" type="string">Bunker</option>
             <option name="cluster_rack" type="string">Cluster Rack</option>
             <option name="cluster_desk" type="string">Cluster Desk</option>
          </optgroup>
@@ -324,6 +327,7 @@
             <option name="member_city" type="string">member City</option>
             <option name="member_building" type="string">member Building</option>
             <option name="member_room" type="string">member Room</option>
+            <option name="member_bunker" type="string">Bunker</option>
             <option name="member_rack" type="string">member Rack</option>
             <option name="member_desk" type="string">member Desk</option>
          </optgroup>
@@ -380,6 +384,7 @@
 	    <option name="city" type="string">City</option>
 	    <option name="building" type="string">Building</option>
 	    <option name="room" type="string">Room</option>
+	    <option name="bunker" type="string">Bunker</option>
 	    <option name="rack" type="string">Rack</option>
 	    <option name="desk" type="string">Desk</option>
          </optgroup>
@@ -438,6 +443,7 @@
 	    <option name="cluster_city" type="string">Cluster City</option>
 	    <option name="cluster_building" type="string">Cluster Building</option>
 	    <option name="cluster_room" type="string">Cluster Room</option>
+	    <option name="cluster_bunker" type="string">Cluster Bunker</option>
 	    <option name="cluster_rack" type="string">Cluster Rack</option>
 	    <option name="cluster_desk" type="string">Cluster Desk</option>
          </optgroup>
@@ -451,6 +457,7 @@
 	    <option name="vmhost_city" type="string">vmhost City</option>
 	    <option name="vmhost_building" type="string">vmhost Building</option>
 	    <option name="vmhost_room" type="string">vmhost Room</option>
+	    <option name="vmhost_bunker" type="string">vmhost Bunker</option>
 	    <option name="vmhost_rack" type="string">vmhost Rack</option>
 	    <option name="vmhost_desk" type="string">vmhost Desk</option>
          </optgroup>
@@ -624,6 +631,7 @@
 	    <option name="city" type="string">City</option>
 	    <option name="building" type="string">Building</option>
 	    <option name="room" type="string">Room</option>
+	    <option name="bunker" type="string">Bunker</option>
 	    <option name="rack" type="string">Rack</option>
 	    <option name="desk" type="string">Desk</option>
          </optgroup>
@@ -666,6 +674,7 @@
             <option name="city" type="string">City</option>
             <option name="building" type="string">Building</option>
             <option name="room" type="string">Room</option>
+            <option name="bunker" type="string">Bunker</option>
             <option name="rack" type="string">Rack</option>
             <option name="desk" type="string">Desk</option>
          </optgroup>
@@ -1330,6 +1339,7 @@
             <option name="city" type="string">City</option>
             <option name="building" type="string">Building</option>
             <option name="room" type="string">Room</option>
+            <option name="bunker" type="string">Bunker</option>
             <option name="rack" type="string">Rack</option>
             <option name="desk" type="string">Desk</option>
          </optgroup>
@@ -1378,6 +1388,7 @@
 	    <option name="city" type="string">City</option>
 	    <option name="building" type="string">Building</option>
 	    <option name="room" type="string">Room</option>
+	    <option name="bunker" type="string">Bunker</option>
 	    <option name="rack" type="string">Rack</option>
 	    <option name="desk" type="string">Desk</option>
 	</optgroup>
@@ -1838,6 +1849,7 @@
         <option name="city" type="string">City</option>
         <option name="building" type="string">Building</option>
         <option name="room" type="string">Room</option>
+        <option name="bunker" type="string">Bunker</option>
         <option name="rack" type="string">Rack</option>
         <option name="desk" type="string">Desk</option>
         <option name="networkip" type="ipv4" conflicts="organization hub continent country campus city building room rack desk">Network IP address</option>
@@ -1861,6 +1873,7 @@
             <option name="city" type="string">City</option>
             <option name="building" type="string">Building</option>
             <option name="room" type="string">Room</option>
+            <option name="bunker" type="string">Bunker</option>
             <option name="rack" type="string">Rack</option>
             <option name="desk" type="string">Desk</option>
          </optgroup>
@@ -1890,9 +1903,10 @@
          <option name="city" type="string">City</option>
          <option name="building" type="string">Building</option>
          <option name="room" type="string">Room</option>
+         <option name="bunker" type="string">Bunker</option>
          <option name="rack" type="string">Rack</option>
          <option name="desk" type="string">Desk</option>
-         <option name="networkip" type="ipv4" conflicts="organization hub continent country campus city building room rack desk">Network IP address</option>
+         <option name="networkip" type="ipv4" conflicts="organization hub continent country campus city building bunker room rack desk">Network IP address</option>
       </optgroup>
       <transport method="post" path="service/%(service)s/instance/%(instance)s/command/unmap" />
    </command>
@@ -2442,8 +2456,9 @@
          <option name="row" type="string">Row of the tile location</option>
          <option name="column" type="string">Column of the tile location</option>
          <optgroup name="add_rack_parent" mandatory="True" fields="any">
-            <option name="building" type="string" conflicts="room">Name of the building that houses the rack</option>
-            <option name="room" type="string" conflicts="building">Name of the room that houses the rack</option>
+            <option name="building" type="string" conflicts="room bunker">Name of the building that houses the rack</option>
+            <option name="room" type="string" conflicts="building bunker">Name of the room that houses the rack</option>
+            <option name="bunker" type="string" conflicts="building room">Bunker</option>
          </optgroup>
       </optgroup>
       <optgroup name="optional_opts">
@@ -2462,8 +2477,9 @@
       <optgroup name="optional_opts">
          <option name="row" type="string">Row of the tile location</option>
          <option name="column" type="string">Column of the tile location</option>
-         <option name="room" type="string" conflicts="clearroom">Name of the room that houses the rack</option>
-         <option name="clearroom" type="boolean" conflicts="room">Clear room information for the rack</option>
+         <option name="building" type="string" conflicts="room bunker">Name of the building that houses the rack</option>
+         <option name="room" type="string" conflicts="bunker building">Name of the room that houses the rack</option>
+         <option name="bunker" type="string" conflicts="room building">Name of the bunker that houses the rack</option>
          <option name="fullname" type="string">Full, descriptive name</option>
          <option name="comments" type="string">Comments</option>
          <option name="default_dns_domain" type="string">Default DNS domain for new machines</option>
@@ -2595,6 +2611,43 @@
          <option name="room" type="string">room name</option>
       </optgroup>
       <transport method="delete" path="location/room/%(room)s" />
+   </command>
+
+   <command name="add_bunker">
+      Add a new bunker to the database. See also add_location.
+      <optgroup name="add_bunker_input" mandatory="True" fields="all">
+         <option name="bunker" type="string">Name of the new bunker</option>
+	 <optgroup name="add_bunker_parent" mandatory="True" fields="any">
+            <option name="room" type="string" conflicts="building">Name of the room that contains the bunker</option>
+            <option name="building" type="string" conflicts="room">Name of the building that contains the bunker</option>
+         </optgroup>
+      </optgroup>
+      <optgroup name="optional_opts">
+         <option name="fullname" type="string">Full, descriptive name</option>
+         <option name="comments" type="string">Comments</option>
+      </optgroup>
+      <transport method="put" path="location/bunker/%(bunker)s" />
+   </command>
+
+   <command name="show_bunker">
+      Show the bunker list, or details about a particular bunker.
+      <p/>
+      Supported options for --format: raw, csv, proto.
+      <p/>
+      <optgroup name="show_bunker_opts" mandatory="True" fields="any">
+         <option name="bunker" type="string">bunker name</option>
+         <option name="all" type="flag">show all</option>
+      </optgroup>
+      <transport trigger="all" method="get" path="location/bunker" />
+      <transport trigger="bunker" method="get" path="location/bunker/%(bunker)s" />
+   </command>
+
+   <command name="del_bunker">
+      Delete a bunker. See also del_location.
+      <optgroup name="del_bunker_opts" mandatory="True" fields="all">
+         <option name="bunker" type="string">bunker name</option>
+      </optgroup>
+      <transport method="delete" path="location/bunker/%(bunker)s" />
    </command>
 
    <command name="show_campus">
@@ -3256,6 +3309,7 @@
             <option name="city" type="string">City</option>
             <option name="building" type="string">Building</option>
             <option name="room" type="string">Room</option>
+            <option name="bunker" type="string">Bunker</option>
             <option name="rack" type="string">Rack</option>
             <option name="desk" type="string">Desk</option>
          </optgroup>
@@ -3415,6 +3469,7 @@
            <option name="city" type="string">City</option>
            <option name="building" type="string">Building</option>
            <option name="room" type="string">Room</option>
+           <option name="bunker" type="string">Bunker</option>
            <option name="rack" type="string">Rack</option>
            <option name="desk" type="string">Desk</option>
         </optgroup>
@@ -3463,6 +3518,7 @@
             <option name="city" type="string">City</option>
             <option name="building" type="string">Building</option>
             <option name="room" type="string">Room</option>
+            <option name="bunker" type="string">Bunker</option>
             <option name="rack" type="string">Rack</option>
             <option name="desk" type="string">Desk</option>
          </optgroup>
@@ -3523,6 +3579,7 @@
             <option name="city" type="string">City</option>
             <option name="building" type="string">Building</option>
             <option name="room" type="string">Room</option>
+            <option name="bunker" type="string">Bunker</option>
             <option name="rack" type="string">Rack</option>
             <option name="desk" type="string">Desk</option>
          </optgroup>
@@ -3583,6 +3640,7 @@
 	    <option name="city" type="string">City</option>
 	    <option name="building" type="string">Building</option>
 	    <option name="room" type="string">Room</option>
+	    <option name="bunker" type="string">Bunker</option>
 	    <option name="rack" type="string">Rack</option>
 	    <option name="desk" type="string">Desk</option>
          </optgroup>
@@ -3614,6 +3672,7 @@
             <option name="city" type="string">City</option>
             <option name="building" type="string">Building</option>
             <option name="room" type="string">Room</option>
+            <option name="bunker" type="string">Bunker</option>
             <option name="rack" type="string">Rack</option>
             <option name="desk" type="string">Desk</option>
          </optgroup>
@@ -3659,6 +3718,7 @@
 	    <option name="city" type="string">City</option>
 	    <option name="building" type="string">Building</option>
 	    <option name="room" type="string">Room</option>
+	    <option name="bunker" type="string">Bunker</option>
 	    <option name="rack" type="string">Rack</option>
 	    <option name="desk" type="string">Desk</option>
          </optgroup>
@@ -4148,6 +4208,7 @@
             <option name="city" type="string">City</option>
             <option name="building" type="string">Building</option>
             <option name="room" type="string">Room</option>
+            <option name="bunker" type="string">Bunker</option>
             <option name="rack" type="string">Rack</option>
             <option name="desk" type="string">Desk</option>
          </optgroup>
@@ -4174,6 +4235,7 @@
             <option name="city" type="string">City</option>
             <option name="building" type="string">Building</option>
             <option name="room" type="string">Room</option>
+            <option name="bunker" type="string">Bunker</option>
             <option name="rack" type="string">Rack</option>
             <option name="desk" type="string">Desk</option>
          </optgroup>
@@ -4198,6 +4260,7 @@
             <option name="city" type="string">City</option>
             <option name="building" type="string">Building</option>
             <option name="room" type="string">Room</option>
+            <option name="bunker" type="string">Bunker</option>
             <option name="rack" type="string">Rack</option>
             <option name="desk" type="string">Desk</option>
          </optgroup>
@@ -4221,6 +4284,7 @@
          <option name="city" type="string">City</option>
          <option name="building" type="string">Building</option>
          <option name="room" type="string">Room</option>
+         <option name="bunker" type="string">Bunker</option>
          <option name="rack" type="string">Rack</option>
          <option name="desk" type="string">Desk</option>
       </optgroup>

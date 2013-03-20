@@ -222,6 +222,7 @@ class AuthorizationBroker(object):
                               'poll_switch', 'poll_switch_switch',
                               'add_rack', 'add_rack_room', 'add_chassis',
                               'del_rack', 'del_chassis',
+                              'add_bunker', 'del_bunker',
                               'add_address', 'del_address',
                               'make', 'make_cluster']:
                 self.raise_auth_error(principal, action, resource)
