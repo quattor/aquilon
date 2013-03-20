@@ -18,6 +18,7 @@
 
 
 import logging
+from operator import attrgetter
 
 from aquilon.config import Config
 from aquilon.exceptions_ import IncompleteError, InternalError
@@ -220,7 +221,10 @@ class PlenaryHostData(Plenary):
             if static_routes:
                 if "route" not in ifdesc:
                     ifdesc["route"] = []
-                for route in static_routes:
+                # Enforce a stable order to make it easier to verify changes in
+                # the plenaries
+                for route in sorted(list(static_routes),
+                                    key=attrgetter('destination', 'gateway_ip')):
                     ifdesc["route"].append({"address": route.destination.ip,
                                             "netmask": route.destination.netmask,
                                             "gateway": route.gateway_ip})
