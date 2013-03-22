@@ -119,7 +119,11 @@ class CommandAddHost(BrokerCommand):
                       sandbox_author=dbauthor, personality=dbpersonality,
                       status=dbstatus, operating_system=dbos, comments=comments)
         session.add(dbhost)
-        dbhost.grns.append(dbgrn)
+
+        if self.config.has_option("archetype_" + archetype, "default_grn_target"):
+            dbhost.grns.append((dbhost, dbgrn,
+                                self.config.get("archetype_" + archetype,
+                                                "default_grn_target")))
 
         if zebra_interfaces:
             # --autoip does not make sense for Zebra (at least not the way it's

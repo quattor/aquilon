@@ -304,7 +304,7 @@ class CommandFlush(BrokerCommand):
                 q = q.options(joinedload("machine"),
                               joinedload("machine.primary_name"),
                               joinedload("machine.primary_name.fqdn"),
-                              subqueryload("grns"),
+                              subqueryload("_grns"),
                               subqueryload("resholder"),
                               subqueryload("services_used"),
                               subqueryload("_services_provided"),

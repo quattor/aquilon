@@ -26,13 +26,20 @@ from aquilon.worker.templates.personality import PlenaryPersonality
 
 class CommandMapGrn(BrokerCommand):
 
-    def _update_dbobj(self, obj, grn):
-        if grn in obj.grns:
-            # TODO: should we throw an error here?
-            return
-        obj.grns.append(grn)
+    required_parameters = ["target"]
 
-    def render(self, session, logger, grn, eon_id, hostname, list, personality,
+    def _update_dbobj(self, obj, target, grn):
+
+        # Don't add twice the same tuple
+        for grn_rec in obj._grns:
+            if (obj == grn_rec.mapped_object and
+                grn == grn_rec.grn and
+                target == grn_rec.target):
+                return
+
+        obj.grns.append((obj,grn,target))
+
+    def render(self, session, logger, target, grn, eon_id, hostname, list, personality,
                archetype, **arguments):
         dbgrn = lookup_grn(session, grn, eon_id, logger=logger,
                            config=self.config)
@@ -47,7 +54,7 @@ class CommandMapGrn(BrokerCommand):
                                            archetype=archetype, compel=True)]
 
         for obj in objs:
-            self._update_dbobj(obj, dbgrn)
+            self._update_dbobj(obj, target, dbgrn)
 
         session.flush()
 

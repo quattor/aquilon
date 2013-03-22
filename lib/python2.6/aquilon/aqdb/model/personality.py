@@ -20,8 +20,9 @@ import re
 
 from sqlalchemy import (Column, Integer, Boolean, DateTime, Sequence, String,
                         ForeignKey, UniqueConstraint, PrimaryKeyConstraint)
-from sqlalchemy.orm import relation, deferred
+from sqlalchemy.orm import relation, backref, deferred
 from sqlalchemy.inspection import inspect
+from sqlalchemy.ext.associationproxy import association_proxy
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.column_types.aqstr import AqStr
@@ -32,6 +33,9 @@ _TN = 'personality'
 
 _PGN = 'personality_grn_map'
 _PGNABV = 'pers_grn_map'
+
+def _pgm_creator(tuple):
+    return PersonalityGrnMap(personality=tuple[0], grn=tuple[1], target=tuple[2])
 
 
 class Personality(Base):
@@ -64,6 +68,7 @@ class Personality(Base):
 
     archetype = relation(Archetype)
     owner_grn = relation(Grn, innerjoin=True)
+    grns = association_proxy('_grns', 'grn', creator=_pgm_creator)
 
     host_environment = relation(HostEnvironment, innerjoin=True)
 
@@ -105,6 +110,19 @@ class PersonalityGrnMap(Base):
                                         name='%s_grn_fk' % _PGNABV),
                     nullable=False)
 
+    personality = relation(Personality, innerjoin=True,
+                     backref=backref('_grns', cascade='all, delete-orphan',
+                                     passive_deletes=True))
+
+    grn = relation(Grn, lazy=False, innerjoin=True,
+                   backref=backref('_personalities', passive_deletes=True))
+
+    target = Column(AqStr(32), nullable=False, primary_key=True)
+
+    # used by unmap
+    @property
+    def mapped_object(self):
+        return self.personality
+
     __table_args__ = (PrimaryKeyConstraint(personality_id, eon_id),)
 
-Personality.grns = relation(Grn, secondary=PersonalityGrnMap.__table__)

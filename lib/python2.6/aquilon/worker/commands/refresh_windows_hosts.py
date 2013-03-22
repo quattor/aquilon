@@ -200,7 +200,12 @@ class CommandRefreshWindowsHosts(BrokerCommand):
                           personality=dbpersonality, operating_system=dbos,
                           comments="Created by refresh_windows_host")
             session.add(dbhost)
-            dbhost.grns.append(dbpersonality.owner_grn)
+
+            if self.config.has_option("archetype_windows", "default_grn_target"):
+                dbhost.grns.append((dbhost, dbgrn,
+                                    self.config.get("archetype_",
+                                                    "default_grn_target")))
+
             dbfqdn = Fqdn.get_or_create(session, name=short,
                                         dns_domain=dbdns_domain, preclude=True)
             dbdns_rec = ReservedName(fqdn=dbfqdn)

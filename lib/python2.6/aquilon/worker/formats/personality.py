@@ -66,8 +66,9 @@ class PersonalityFormatter(ObjectFormatter):
                        .format(personality.host_environment))
         details.append(indent + "  Owned by {0:c}: {0.grn}"
                        .format(personality.owner_grn))
-        for grn in personality.grns:
-            details.append(indent + "  Used by {0:c}: {0.grn}".format(grn))
+        for grn_rec in sorted(personality._grns, key=lambda x: x.target):
+            details.append(indent + "  Used by {0.grn:c}: {0.grn.grn} "
+                           "[{0.target}]".format(grn_rec))
 
         if personality.config_override:
             details.append(indent + "  Config override: enabled")

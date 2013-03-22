@@ -61,7 +61,7 @@ class CommandSearchPersonality(BrokerCommand):
 
         if fullinfo:
             q = q.options(subqueryload('services'),
-                          subqueryload('grns'),
+                          subqueryload('_grns'),
                           subqueryload('features'),
                           joinedload('features.feature'),
                           joinedload('cluster_infos'))
