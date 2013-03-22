@@ -155,6 +155,22 @@ class TemplateDomain(object):
         if config.has_option("broker", "ant_options"):
             panc_env["ANT_OPTS"] = config.get("broker", "ant_options")
 
+        if config.getboolean('panc', 'gzip_output'):
+            compress_suffix = ".gz"
+        else:
+            compress_suffix = ""
+
+        formats = []
+        suffixes = []
+        if config.getboolean('panc', 'xml_profiles'):
+            formats.append("pan" + compress_suffix)
+            suffixes.append(".xml" + compress_suffix)
+        if config.getboolean('panc', 'json_profiles'):
+            formats.append("json" + compress_suffix)
+            suffixes.append(".json" + compress_suffix)
+
+        formats.append("dep")
+
         args = [config.get("broker", "ant")]
         args.append("--noconfig")
         args.append("-f")
@@ -162,8 +178,8 @@ class TemplateDomain(object):
                     config.get("broker", "compiletooldir"))
         args.append("-Dbasedir=%s" % config.get("broker", "quattordir"))
         args.append("-Dpanc.jar=%s" % self.domain.compiler)
-        args.append("-Dpanc.formatter=%s" %
-                    config.get("panc", "formatter"))
+        args.append("-Dpanc.formats=%s" % ",".join(formats))
+        args.append("-Dprofile.suffixes=%s" % ",".join(suffixes))
         args.append("-Dpanc.template_extension=%s" %
                     config.get("panc", "template_extension"))
         args.append("-Ddomain=%s" % self.domain.name)
@@ -172,8 +188,6 @@ class TemplateDomain(object):
                     config.get("panc", "batch_size"))
         args.append("-Dant-contrib.jar=%s" %
                     config.get("broker", "ant_contrib_jar"))
-        args.append("-Dgzip.output=%s" %
-                    config.get("panc", "gzip_output"))
         if self.domain.branch_type == 'sandbox':
             args.append("-Ddomain.templates=%s" % sandboxdir)
         if only:

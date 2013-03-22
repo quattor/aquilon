@@ -267,7 +267,8 @@ pan_compiler = /ms/dist/elfms/PROJ/panc/%(version)s/lib/panc.jar
 # Number of templates to cache in memory during compiles
 batch_size = 1000
 # Option passed to panc the output format that it uses
-formatter = pan
+xml_profiles = true
+json_profiles = false
 gzip_output = false
 # Assume the webserver will decompress transparently as needed.
 # only used if gzip_output = true

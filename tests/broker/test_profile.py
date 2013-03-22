@@ -34,7 +34,7 @@ class TestProfile(TestBrokerCommand):
 
     def load_profile(self, name):
         path = os.path.join(self.config.get("broker", "profilesdir"),
-                            name + self.profile_suffix)
+                            name + self.xml_suffix)
         self.failUnless(os.path.exists(path))
         if self.gzip_profiles:
             path = gzip.open(path)

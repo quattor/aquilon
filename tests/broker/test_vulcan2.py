@@ -685,7 +685,7 @@ class TestVulcan20(TestBrokerCommand):
 
         self.assertFalse(os.path.exists(os.path.join(
             self.config.get("broker", "profilesdir"), "clusters",
-            "utmc8%s" % self.profile_suffix)))
+            "utmc8%s" % self.xml_suffix)))
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestVulcan20)

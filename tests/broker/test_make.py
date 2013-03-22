@@ -175,7 +175,7 @@ class TestMake(TestBrokerCommand):
 
             self.assert_(os.path.exists(os.path.join(
                 self.config.get("broker", "profilesdir"),
-                "evh1.aqd-unittest.ms.com%s" % self.profile_suffix)))
+                "evh1.aqd-unittest.ms.com%s" % self.xml_suffix)))
 
             self.failUnless(os.path.exists(
                 self.build_profile_name("evh1.aqd-unittest.ms.com",

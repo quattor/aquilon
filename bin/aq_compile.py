@@ -71,13 +71,27 @@ def run_domain_compile(options, config):
         panc = config.get("panc", "pan_compiler")
     args.append("-Dpanc.jar=%s" % panc)
 
-    args.append("-Dpanc.formatter=%s" % config.get("panc", "formatter"))
+    if options.compress_output:
+        compress_suffix = ".gz"
+    else:
+        compress_suffix = ""
+
+    formats = []
+    suffixes = []
+    if config.getboolean("panc", "xml_profiles"):
+        formats.append("pan" + compress_suffix)
+        suffixes.append(".xml" + compress_suffix)
+    if config.getboolean("panc", "json_profiles"):
+        formats.append("json" + compress_suffix)
+        suffixes.append(".json" + compress_suffix)
+
+    args.append("-Dpanc.formats=%s" % ",".join(formats))
+    args.append("-Dprofile.suffixes=%s" % ",".join(suffixes))
     args.append("-Dpanc.template_extension=%s" %
                 config.get("panc", "template_extension"))
     args.append("-Ddomain.templates=%s" % options.templates)
     args.append("-Ddomain=%s" % options.domain)
     args.append("-Dpanc.batch.size=%s" % config.get("panc", "batch_size"))
-    args.append("-Dgzip.output=%s" % options.compress_output)
 
     if options.batch_size:
         args.append("-Dpanc.batch.size=%d" % options.batch_size)

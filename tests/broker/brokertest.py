@@ -79,7 +79,18 @@ class TestBrokerCommand(unittest.TestCase):
         else:
             self.aurora_without_node = "pissp1"
         self.gzip_profiles = self.config.getboolean("panc", "gzip_output")
-        self.profile_suffix = ".xml.gz" if self.gzip_profiles else ".xml"
+        if self.gzip_profiles:
+            compress_suffix = ".gz"
+        else:
+            compress_suffix = ""
+        if self.config.getboolean("panc", "xml_profiles"):
+            self.xml_suffix = ".xml" + compress_suffix
+        else:
+            self.xml_suffix = None
+        if self.config.getboolean("panc", "json_profiles"):
+            self.json_suffix = ".json" + compress_suffix
+        else:
+            self.json_suffix = None
 
         dsdb_coverage_dir = os.path.join(self.config.get("unittest", "scratchdir"),
                                          "dsdb_coverage")
@@ -683,14 +694,21 @@ class TestBrokerCommand(unittest.TestCase):
 
     def verify_buildfiles(self, domain, object,
                           want_exist=True, command='manage'):
+        buildfiles = []
+
         qdir = self.config.get('broker', 'quattordir')
         domaindir = os.path.join(qdir, 'build', 'xml', domain)
-        xmlfile = os.path.join(domaindir, object + self.profile_suffix)
-        depfile = os.path.join(domaindir, object + '.dep')
         builddir = self.config.get('broker', 'builddir')
-        profile = os.path.join(builddir, 'domains', domain, 'profiles',
-                               object + self.template_extension)
-        for f in [xmlfile, depfile, profile]:
+
+        buildfiles.append(os.path.join(domaindir, object + '.dep'))
+        buildfiles.append(os.path.join(builddir, 'domains', domain, 'profiles',
+                                       object + self.template_extension))
+        if self.xml_suffix:
+            buildfiles.append(os.path.join(domaindir, object + self.xml_suffix))
+        if self.json_suffix:
+            buildfiles.append(os.path.join(domaindir, object + self.json_suffix))
+
+        for f in buildfiles:
             if want_exist:
                 self.failUnless(os.path.exists(f),
                                 "Expecting %s to exist before running %s." %

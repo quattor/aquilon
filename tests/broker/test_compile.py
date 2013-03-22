@@ -48,10 +48,10 @@ class TestCompile(TestBrokerCommand):
         index = os.path.join(profilesdir, 'profiles-info.xml')
         if self.gzip_profiles and transparent_gzip:
             source = gzip.open(index + '.gz')
-            profile_suffix = '.xml'
         else:
             source = open(index)
-            profile_suffix = self.profile_suffix
+        # TODO: hardcode XML profiles for now
+        profile_suffix = self.xml_suffix
         tree = ET.parse(source)
         mtimes = dict()
         for profile in tree.getiterator('profile'):
