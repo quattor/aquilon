@@ -85,6 +85,18 @@
     </varlistentry>
     <varlistentry>
     <term>
+	<option>--bunker <replaceable>BUNKER</replaceable></option>
+    </term>
+    <listitem>
+	<para>
+	    The named bunker. A bunker is a collection of racks sharing some
+	    critical resource (common power input, common cooling, common
+	    network uplink etc.).
+	</para>
+    </listitem>
+    </varlistentry>
+    <varlistentry>
+    <term>
 	<option>--rack <replaceable>RACK</replaceable></option>
     </term>
     <listitem>

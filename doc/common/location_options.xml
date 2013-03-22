@@ -9,6 +9,7 @@
     <arg choice="plain"><option>--city <replaceable>CITY</replaceable></option></arg>
     <arg choice="plain"><option>--building <replaceable>BUILDING</replaceable></option></arg>
     <arg choice="plain"><option>--room <replaceable>ROOM</replaceable></option></arg>
+    <arg choice="plain"><option>--bunker <replaceable>BUNKER</replaceable></option></arg>
     <arg choice="plain"><option>--rack <replaceable>RACK</replaceable></option></arg>
     <arg choice="plain"><option>--desk <replaceable>DESK</replaceable></option></arg>
     </group>

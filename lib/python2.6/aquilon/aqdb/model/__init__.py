@@ -38,6 +38,7 @@ from aquilon.aqdb.model.continent import Continent
 from aquilon.aqdb.model.country import Country
 from aquilon.aqdb.model.city import City
 from aquilon.aqdb.model.building import Building
+from aquilon.aqdb.model.bunker import Bunker
 from aquilon.aqdb.model.room import Room
 from aquilon.aqdb.model.campus import Campus
 from aquilon.aqdb.model.rack import Rack

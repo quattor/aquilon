@@ -89,6 +89,10 @@ class Location(Base):
         return self.p_dict.get('building', None)
 
     @property
+    def bunker(self):
+        return self.p_dict.get('bunker', None)
+
+    @property
     def room(self):
         return self.p_dict.get('room', None)
 

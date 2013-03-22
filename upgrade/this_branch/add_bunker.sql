@@ -1,0 +1,7 @@
+CREATE TABLE bunker (
+	id INTEGER CONSTRAINT bunker_id_nn NOT NULL,
+	CONSTRAINT bunker_loc_fk FOREIGN KEY (id) REFERENCES location (id) ON DELETE CASCADE,
+	CONSTRAINT bunker_pk PRIMARY KEY (id)
+);
+
+QUIT;
