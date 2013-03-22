@@ -18,7 +18,8 @@
 
 from datetime import datetime
 
-from sqlalchemy import Column, Integer, DateTime, Sequence, String, ForeignKey
+from sqlalchemy import (Column, Integer, DateTime, Sequence, String, ForeignKey,
+                        UniqueConstraint)
 from sqlalchemy.orm import relation, backref, deferred
 
 from aquilon.aqdb.column_types import JSONEncodedDict, MutationDict
@@ -84,6 +85,9 @@ class PersonalityParameter(ParameterHolder):
     @property
     def holder_object(self):
         return self.personality
+
+paramholder.append_constraint(UniqueConstraint('personality_id',
+                                               name='param_holder_persona_uk'))
 
 
 class Parameter(Base):
