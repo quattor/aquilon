@@ -43,6 +43,9 @@ from aquilon.worker.formats.formatters import ObjectFormatter
 
 LOGGER = logging.getLogger(__name__)
 
+_config = Config()
+TEMPLATE_EXTENSION = _config.get("panc", "template_extension")
+
 
 class Plenary(object):
 
@@ -118,7 +121,8 @@ class Plenary(object):
     @property
     def plenary_file(self):
         """ Full absolute path name of the plenary template """
-        return "%s/%s.tpl" % (self.plenary_directory, self.plenary_template)
+        return "%s/%s%s" % (self.plenary_directory, self.plenary_template,
+                            TEMPLATE_EXTENSION)
 
     @property
     def plenary_template_name(self):
@@ -301,7 +305,8 @@ class Plenary(object):
                 builddir = self.config.get("broker", "builddir")
                 maindir = os.path.join(builddir, "domains", domain,
                                        "profiles", self.plenary_core)
-                mainfile = os.path.join(maindir, self.plenary_template + ".tpl")
+                mainfile = os.path.join(maindir, self.plenary_template +
+                                        TEMPLATE_EXTENSION)
                 remove_file(mainfile, logger=self.logger)
                 try:
                     os.removedirs(maindir)

@@ -30,8 +30,6 @@
 # TERMS THAT MAY APPLY.
 """Module for testing the sync domain command."""
 
-
-import os
 import unittest
 
 if __name__ == "__main__":
@@ -45,8 +43,8 @@ class TestSyncDomain(TestBrokerCommand):
 
     def testsyncdomain(self):
         self.successtest(["sync", "--domain", "ut-prod"])
-        template = os.path.join(self.config.get("broker", "domainsdir"),
-                                "ut-prod", "aquilon", "archetype", "base.tpl")
+        template = self.find_template("aquilon", "archetype", "base",
+                                      domain="ut-prod")
         with open(template) as f:
             contents = f.readlines()
         self.failUnlessEqual(contents[-1], "#Added by unittest\n")

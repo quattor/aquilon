@@ -29,9 +29,10 @@
 # TERMS THAT MAY APPLY.
 """ Personality formatter """
 
+from aquilon.aqdb.model import Personality
 from aquilon.worker.formats.formatters import ObjectFormatter
 from aquilon.worker.formats.list import ListFormatter
-from aquilon.aqdb.model import Personality
+from aquilon.worker.templates.base import TEMPLATE_EXTENSION
 
 
 class ThresholdedPersonality(object):
@@ -85,8 +86,8 @@ class PersonalityFormatter(ObjectFormatter):
         if personality.config_override:
             details.append(indent + "  Config override: enabled")
 
-        details.append(indent + "  Template: %s/personality/%s/config.tpl" %
-                       (personality.archetype, personality))
+        details.append(indent + "  Template: %s/personality/%s/config%s" %
+                       (personality.archetype, personality, TEMPLATE_EXTENSION))
 
         if has_threshold:
             details.append(indent + "  Threshold: %s" % threshold)

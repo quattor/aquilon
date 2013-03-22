@@ -66,7 +66,8 @@ class TestAddWindowsHost(TestBrokerCommand):
         self.matchoutput(out, "Operating System: windows", command)
         self.matchoutput(out, "Version: generic", command)
         self.matchoutput(out,
-                         "Template: windows/os/windows/generic/config.tpl",
+                         "Template: windows/os/windows/generic/config" +
+                         self.template_extension,
                          command)
 
 

@@ -63,10 +63,9 @@ class TestMakeAquilon(TestBrokerCommand):
             self.config.get("broker", "profilesdir"),
             "unittest02.one-nyp.ms.com%s" % self.profile_suffix)))
 
-        self.failUnless(os.path.exists(os.path.join(
-            self.config.get("broker", "builddir"),
-            "domains", "unittest", "profiles",
-            "unittest02.one-nyp.ms.com.tpl")))
+        self.failUnless(os.path.exists(
+            self.build_profile_name("unittest02.one-nyp.ms.com",
+                                    domain="unittest")))
 
         servicedir = os.path.join(self.config.get("broker", "plenarydir"),
                                   "servicedata")
@@ -356,10 +355,9 @@ class TestMakeAquilon(TestBrokerCommand):
                    "--osname", "linux", "--osversion", "5.0.1-x86_64"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "cannot locate template", command)
-        self.failIf(os.path.exists(os.path.join(
-            self.config.get("broker", "builddir"),
-            "domains", "unittest", "profiles",
-            "aquilon93.aqd-unittest.ms.com.tpl")))
+        self.failIf(os.path.exists(
+            self.build_profile_name("aquilon93.aqd-unittest.ms.com",
+                                    domain="unittest")))
         servicedir = os.path.join(self.config.get("broker", "plenarydir"),
                                   "servicedata")
         results = self.grepcommand(["-rl", "aquilon93.aqd-unittest.ms.com",
@@ -386,7 +384,8 @@ class TestMakeAquilon(TestBrokerCommand):
                          self.net.tor_net[0].usable[3],
                          command)
         self.matchoutput(out,
-                         "Template: aquilon/os/linux/5.0.1-x86_64/config.tpl",
+                         "Template: aquilon/os/linux/5.0.1-x86_64/config" +
+                         self.template_extension,
                          command)
 
     def testverifyunittest17proto(self):

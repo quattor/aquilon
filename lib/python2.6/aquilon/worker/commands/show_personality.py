@@ -95,14 +95,16 @@ class CommandShowPersonality(BrokerCommand):
         else:
             domaindir = os.path.join(self.config.get("broker", "domainsdir"),
                                      dbbranch.name)
-        template = os.path.join(domaindir, dbpersonality.archetype.name,
-                                "personality", dbpersonality.name,
-                                "espinfo.tpl")
-        try:
-            contents = open(template).read()
-        except IOError:
-            return None
-        values = dict(threshold=None, maintenance_threshold=None)
-        for m in self.threshold_re.finditer(contents):
-            values[m.group(1)] = int(m.group(2))
-        return values
+        for ext in [".tpl", ".pan"]:
+            template = os.path.join(domaindir, dbpersonality.archetype.name,
+                                    "personality", dbpersonality.name,
+                                    "espinfo" + ext)
+            try:
+                contents = open(template).read()
+            except IOError:
+                continue
+            values = dict(threshold=None, maintenance_threshold=None)
+            for m in self.threshold_re.finditer(contents):
+                values[m.group(1)] = int(m.group(2))
+            return values
+        return None

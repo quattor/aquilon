@@ -40,7 +40,8 @@ from aquilon.worker.dbwrappers.host import (hostname_to_host,
                                             get_host_dependencies)
 from aquilon.worker.dbwrappers.dns import delete_dns_record
 from aquilon.worker.processes import (DSDBRunner, remove_file)
-from aquilon.worker.templates.base import Plenary, PlenaryCollection
+from aquilon.worker.templates.base import (Plenary, PlenaryCollection,
+                                           TEMPLATE_EXTENSION)
 from aquilon.worker.templates.index import build_index
 from aquilon.worker.templates.service import PlenaryServiceInstanceServer
 from aquilon.worker.locks import DeleteKey, CompileKey
@@ -148,7 +149,7 @@ class CommandDelHost(BrokerCommand):
                 # And the cached template created by ant
                 remove_file(os.path.join(self.config.get("broker",
                                                          "quattordir"),
-                                         "objects", fqdn + ".tpl"),
+                                         "objects", fqdn + TEMPLATE_EXTENSION),
                             logger=logger)
                 bindings.write(locked=True)
                 resources.remove(locked=True)

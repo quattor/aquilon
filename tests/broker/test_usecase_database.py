@@ -195,12 +195,13 @@ class TestUsecaseDatabase(TestBrokerCommand):
         plenarydir = self.config.get("broker", "plenarydir")
         cluster_dir = os.path.join(plenarydir, "cluster", "nydb1")
         cluster_res_dir = os.path.join(plenarydir, "resource", "cluster", "nydb1")
-        res_plenaries = [os.path.join(cluster_res_dir, "filesystem", "gnr.0",
-                                      "config.tpl"),
-                         os.path.join(cluster_res_dir, "application", "nydb1",
-                                      "config.tpl"),
-                         os.path.join(cluster_res_dir, "service_address",
-                                      "nydb1nydb1", "config.tpl")]
+        res_plenaries = [self.plenary_name("resource", "cluster", "nydb1",
+                                           "filesystem", "gnr.0", "config"),
+                         self.plenary_name("resource", "cluster", "nydb1",
+                                           "application", "nydb1", "config"),
+                         self.plenary_name("resource", "cluster", "nydb1",
+                                           "service_address",  "nydb1nydb1",
+                                           "config")]
 
         # Verify that we got the paths right
         for plenary in res_plenaries:

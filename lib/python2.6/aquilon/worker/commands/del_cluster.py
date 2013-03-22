@@ -35,7 +35,8 @@ from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Cluster
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.templates.index import build_index
-from aquilon.worker.templates.base import Plenary, PlenaryCollection
+from aquilon.worker.templates.base import (Plenary, PlenaryCollection,
+                                           TEMPLATE_EXTENSION)
 from aquilon.worker.processes import remove_file
 from aquilon.worker.locks import CompileKey
 
@@ -76,7 +77,7 @@ def del_cluster(session, logger, dbcluster, config):
         remove_file(os.path.join(config.get("broker",
                                                  "quattordir"),
                                  "objects", "clusters",
-                                 cluster + ".tpl"),
+                                 cluster + TEMPLATE_EXTENSION),
                     logger=logger)
         resources.remove(locked=True)
 

@@ -62,7 +62,8 @@ class TestPublishSandbox(TestBrokerCommand):
 
     def testmakechange(self):
         sandboxdir = os.path.join(self.sandboxdir, "changetest1")
-        template = os.path.join(sandboxdir, "aquilon", "archetype", "base.tpl")
+        template = self.find_template("aquilon", "archetype", "base",
+                                      sandbox="changetest1")
         f = open(template)
         try:
             contents = f.readlines()
@@ -88,8 +89,9 @@ class TestPublishSandbox(TestBrokerCommand):
         p = Popen(["/bin/rm", "-rf", sandboxdir], stdout=1, stderr=2)
         rc = p.wait()
         self.successtest(["get", "--sandbox", "changetest1"])
-        self.failUnless(sandboxdir)
-        template = os.path.join(sandboxdir, "aquilon", "archetype", "base.tpl")
+        self.failUnless(os.path.exists(sandboxdir))
+        template = self.find_template("aquilon", "archetype", "base",
+                                      sandbox="changetest1")
         self.failUnless(os.path.exists(template),
                         "aq get did not retrive '%s'" % template)
         with open(template) as f:
@@ -105,30 +107,30 @@ class TestPublishSandbox(TestBrokerCommand):
         utdir = os.path.join(sitedir, "americas", "ny", "ut")
         if not os.path.exists(utdir):
             os.makedirs(utdir)
-        template = os.path.join(utdir, "config.tpl")
+        template = os.path.join(utdir, "config" + self.template_extension)
         f = open(template, 'w')
         try:
             f.writelines("template site/americas/ny/ut/config;\n\n")
         finally:
             f.close()
-        self.gitcommand(["add", "config.tpl"], cwd=utdir)
+        self.gitcommand(["add", "config" + self.template_extension], cwd=utdir)
         self.gitcommand(["commit", "-a", "-m", "added building ut"],
                         cwd=sandboxdir)
 
     def testaddutsi1(self):
         """utsi1 = unit test service instance 1"""
         sandboxdir = os.path.join(self.sandboxdir, "utsandbox")
-        svcdir = os.path.join(sandboxdir, "service", "utsvc", "utsi1",
-                              "client")
+        template = self.template_name("service", "utsvc", "utsi1", "client",
+                                      "config", sandbox="utsandbox")
+        svcdir = os.path.dirname(template)
         if not os.path.exists(svcdir):
             os.makedirs(svcdir)
-        template = os.path.join(svcdir, "config.tpl")
         f = open(template, 'w')
         try:
             f.writelines("template service/utsvc/utsi1/client/config;\n\n")
         finally:
             f.close()
-        self.gitcommand(["add", "config.tpl"], cwd=svcdir)
+        self.gitcommand(["add", "config" + self.template_extension], cwd=svcdir)
         self.gitcommand(["commit", "-a", "-m",
                          "added unit test service instance 1"],
                         cwd=sandboxdir)
@@ -136,28 +138,29 @@ class TestPublishSandbox(TestBrokerCommand):
     def testaddutsi2(self):
         """utsi1 = unit test service instance 2"""
         sandboxdir = os.path.join(self.sandboxdir, "utsandbox")
-        svcdir = os.path.join(sandboxdir, "service", "utsvc", "utsi2",
-                              "client")
+        template = self.template_name("service", "utsvc", "utsi2", "client",
+                                      "config", sandbox="utsandbox")
+        svcdir = os.path.dirname(template)
         if not os.path.exists(svcdir):
             os.makedirs(svcdir)
-        template = os.path.join(svcdir, "config.tpl")
         f = open(template, 'w')
         try:
             f.writelines("template service/utsvc/utsi2/client/config;\n\n")
         finally:
             f.close()
-        self.gitcommand(["add", "config.tpl"], cwd=svcdir)
+        self.gitcommand(["add", "config" + self.template_extension], cwd=svcdir)
         self.gitcommand(["commit", "-a", "-m",
                          "added unit test service instance 2"],
                         cwd=sandboxdir)
 
     def testaddutpersonality(self):
         sandboxdir = os.path.join(self.sandboxdir, "utsandbox")
-        personalitydir = os.path.join(sandboxdir, "aquilon", "personality",
-                                      "utpersonality/dev")
+        template = self.template_name("aquilon", "personality",
+                                      "utpersonality/dev", "espinfo",
+                                      sandbox="utsandbox")
+        personalitydir = os.path.dirname(template)
         if not os.path.exists(personalitydir):
             os.makedirs(personalitydir)
-        template = os.path.join(personalitydir, "espinfo.tpl")
         f = open(template, 'w')
         try:
             f.writelines(
@@ -173,18 +176,20 @@ class TestPublishSandbox(TestBrokerCommand):
                 """)
         finally:
             f.close()
-        self.gitcommand(["add", "espinfo.tpl"], cwd=personalitydir)
+        self.gitcommand(["add", "espinfo" + self.template_extension],
+                        cwd=personalitydir)
         self.gitcommand(["commit", "-a", "-m",
                          "added personality utpersonality/dev"],
                         cwd=sandboxdir)
 
     def testaddesxserverpersonality(self):
         sandboxdir = os.path.join(self.sandboxdir, "utsandbox")
-        personalitydir = os.path.join(sandboxdir, "vmhost",
-                                      "personality", "vulcan-1g-desktop-prod")
+        template = self.template_name("vmhost", "personality",
+                                      "vulcan-1g-desktop-prod", "espinfo",
+                                      sandbox="utsandbox")
+        personalitydir = os.path.dirname(template)
         if not os.path.exists(personalitydir):
             os.makedirs(personalitydir)
-        template = os.path.join(personalitydir, "espinfo.tpl")
         with open(template, 'w') as f:
             f.writelines(
                 """structure template personality/vulcan-1g-desktop-prod/espinfo;
@@ -196,8 +201,11 @@ class TestPublishSandbox(TestBrokerCommand):
 "function" = "production";
 "users" = list("IT / TECHNOLOGY");
                 """)
-        self.gitcommand(["add", "espinfo.tpl"], cwd=personalitydir)
-        template = os.path.join(personalitydir, "windows.tpl")
+        self.gitcommand(["add", "espinfo" + self.template_extension],
+                        cwd=personalitydir)
+        template = self.template_name("vmhost", "personality",
+                                      "vulcan-1g-desktop-prod", "windows",
+                                      sandbox="utsandbox")
         with open(template, 'w') as f:
             f.writelines(
                 """structure template personality/vulcan-1g-desktop-prod/windows;
@@ -206,17 +214,19 @@ class TestPublishSandbox(TestBrokerCommand):
                 nlist("day", "Fri", "start", "23:00", "duration", 48),
 );
                 """)
-        self.gitcommand(["add", "windows.tpl"], cwd=personalitydir)
+        self.gitcommand(["add", "windows" + self.template_extension],
+                        cwd=personalitydir)
         self.gitcommand(["commit", "-a", "-m",
                          "added personality vulcan-1g-desktop-prod"],
                          cwd=sandboxdir)
 
     def testaddutmedium(self):
         sandboxdir = os.path.join(self.sandboxdir, "utsandbox")
-        modeldir = os.path.join(sandboxdir, "hardware", "machine", "utvendor")
+        template = self.template_name("hardware", "machine", "utvendor",
+                                      "utmedium", sandbox="utsandbox")
+        modeldir = os.path.dirname(template)
         if not os.path.exists(modeldir):
             os.makedirs(modeldir)
-        template = os.path.join(modeldir, "utmedium.tpl")
         f = open(template, 'w')
         try:
             f.writelines(
@@ -228,16 +238,18 @@ class TestPublishSandbox(TestBrokerCommand):
                 """)
         finally:
             f.close()
-        self.gitcommand(["add", "utmedium.tpl"], cwd=modeldir)
+        self.gitcommand(["add", "utmedium" + self.template_extension],
+                        cwd=modeldir)
         self.gitcommand(["commit", "-a", "-m", "added model utmedium"],
                         cwd=sandboxdir)
 
     def testaddutccissmodel(self):
         sandboxdir = os.path.join(self.sandboxdir, "utsandbox")
-        modeldir = os.path.join(sandboxdir, "hardware", "machine", "hp")
+        template = self.template_name("hardware", "machine", "hp",
+                                      "utccissmodel", sandbox="utsandbox")
+        modeldir = os.path.dirname(template)
         if not os.path.exists(modeldir):
             os.makedirs(modeldir)
-        template = os.path.join(modeldir, "utccissmodel.tpl")
         f = open(template, 'w')
         try:
             f.writelines(
@@ -249,16 +261,18 @@ class TestPublishSandbox(TestBrokerCommand):
                 """)
         finally:
             f.close()
-        self.gitcommand(["add", "utccissmodel.tpl"], cwd=modeldir)
+        self.gitcommand(["add", "utccissmodel" + self.template_extension],
+                        cwd=modeldir)
         self.gitcommand(["commit", "-a", "-m", "added model utccissmodel"],
                         cwd=sandboxdir)
 
     def testaddutcpu(self):
         sandboxdir = os.path.join(self.sandboxdir, "utsandbox")
-        cpudir = os.path.join(sandboxdir, "hardware", "cpu", "intel")
+        template = self.template_name("hardware", "cpu", "intel",
+                                      "utcpu", sandbox="utsandbox")
+        cpudir = os.path.dirname(template)
         if not os.path.exists(cpudir):
             os.makedirs(cpudir)
-        template = os.path.join(cpudir, "utcpu.tpl")
         f = open(template, 'w')
         try:
             f.writelines(
@@ -273,16 +287,17 @@ class TestPublishSandbox(TestBrokerCommand):
                 """)
         finally:
             f.close()
-        self.gitcommand(["add", "utcpu.tpl"], cwd=cpudir)
+        self.gitcommand(["add", "utcpu" + self.template_extension], cwd=cpudir)
         self.gitcommand(["commit", "-a", "-m", "added cpu utcpu"],
                         cwd=sandboxdir)
 
     def testaddutvirt(self):
         sandboxdir = os.path.join(self.sandboxdir, "utsandbox")
-        modeldir = os.path.join(sandboxdir, "hardware", "nic", "utvirt")
+        template = self.template_name("hardware", "nic", "utvirt",
+                                      "default", sandbox="utsandbox")
+        modeldir = os.path.dirname(template)
         if not os.path.exists(modeldir):
             os.makedirs(modeldir)
-        template = os.path.join(modeldir, "default.tpl")
         f = open(template, 'w')
         try:
             f.writelines(
@@ -294,73 +309,73 @@ class TestPublishSandbox(TestBrokerCommand):
                 """)
         finally:
             f.close()
-        self.gitcommand(["add", "default.tpl"], cwd=modeldir)
+        self.gitcommand(["add", "default" + self.template_extension],
+                        cwd=modeldir)
         self.gitcommand(["commit", "-a", "-m", "added model utvirt/default"],
                         cwd=sandboxdir)
 
     def testaddesxcluster(self):
         templates = {}
-        templates['config.tpl'] = """
+        templates['config'] = """
 template personality/generic/config;
 
 variable PERSONALITY = "generic";
 include { "personality/config" };
 """
-        templates['espinfo.tpl'] = """
+        templates['espinfo'] = """
 structure template personality/generic/espinfo;
 
 "description" = "Generic ESX Cluster";
 "class" = "INFRASTRUCTURE";
 "function" = "production";
 """
-        templates['windows.tpl'] = """
+        templates['windows'] = """
 structure template personality/generic/windows;
 
 "windows" = list( nlist("day", "Fri", "start", "23:00", "duration", 48), );
 """
         sandboxdir = os.path.join(self.sandboxdir, 'utsandbox')
-        pdir = os.path.join(sandboxdir,
-                            'esx_cluster', 'personality', 'generic')
-        if not os.path.exists(pdir):
-            os.makedirs(pdir)
         for (name, contents) in templates.items():
-            template = os.path.join(pdir, name)
+            template = self.template_name("esx_cluster", "personality",
+                                          "generic", name, sandbox="utsandbox")
+            if not os.path.exists(os.path.dirname(template)):
+                os.makedirs(os.path.dirname(template))
             with open(template, 'w') as f:
                 f.writelines(contents)
-            self.gitcommand(["add", name], cwd=pdir)
+            self.gitcommand(["add", template], cwd=sandboxdir)
         self.gitcommand(["commit", "-a", "-m", "added generic esx_cluster"],
                         cwd=sandboxdir)
 
     def testaddesxdesktop(self):
         templates = {}
-        templates['config.tpl'] = """
+        templates['config'] = """
 template personality/vulcan-1g-desktop-prod/config;
 
 variable PERSONALITY = "vulcan-1g-desktop-prod";
 include { "personality/config" };
 """
-        templates['espinfo.tpl'] = """
+        templates['espinfo'] = """
 structure template personality/vulcan-1g-desktop-prod/espinfo;
 
 "description" = "ESX Cluster for virtual desktops";
 "class" = "INFRASTRUCTURE";
 "function" = "production";
 """
-        templates['windows.tpl'] = """
+        templates['windows'] = """
 structure template personality/vulcan-1g-desktop-prod/windows;
 
 "windows" = list( nlist("day", "Fri", "start", "23:00", "duration", 48), );
 """
         sandboxdir = os.path.join(self.sandboxdir, 'utsandbox')
-        pdir = os.path.join(sandboxdir,
-                            'esx_cluster', 'personality', 'vulcan-1g-desktop-prod')
-        if not os.path.exists(pdir):
-            os.makedirs(pdir)
         for (name, contents) in templates.items():
-            template = os.path.join(pdir, name)
+            template = self.template_name('esx_cluster', 'personality',
+                                          'vulcan-1g-desktop-prod', name,
+                                          sandbox="utsandbox")
+            if not os.path.exists(os.path.dirname(template)):
+                os.makedirs(os.path.dirname(template))
             with open(template, 'w') as f:
                 f.writelines(contents)
-            self.gitcommand(["add", name], cwd=pdir)
+            self.gitcommand(["add", template], cwd=sandboxdir)
         self.gitcommand(["commit", "-a", "-m", "added vulcan-1g-desktop-prod files"],
                         cwd=sandboxdir)
 

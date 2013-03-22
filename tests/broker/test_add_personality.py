@@ -60,8 +60,8 @@ class TestAddPersonality(VerifyGrnsMixin, TestBrokerCommand):
         self.matchoutput(out, "Personality: utpersonality/dev Archetype: aquilon",
                          command)
         self.matchoutput(out,
-                         "Template: "
-                         "aquilon/personality/utpersonality/dev/config.tpl",
+                         "Template: aquilon/personality/utpersonality/dev/config" +
+                         self.template_extension,
                          command)
         self.matchoutput(out, "Config override: enabled", command)
         self.matchoutput(out, "Environment: dev", command)
@@ -70,7 +70,8 @@ class TestAddPersonality(VerifyGrnsMixin, TestBrokerCommand):
         self.matchclean(out, "Personality: inventory Archetype: aquilon",
                         command)
         self.matchclean(out,
-                        "Template: aquilon/personality/inventory/config.tpl",
+                        "Template: aquilon/personality/inventory/config" +
+                        self.template_extension,
                         command)
         self.matchoutput(out, "Owned by GRN: %s" % GRN, command)
         self.matchoutput(out, "Used by GRN: %s" % GRN, command)
@@ -91,14 +92,15 @@ class TestAddPersonality(VerifyGrnsMixin, TestBrokerCommand):
         self.matchoutput(out, "Personality: utpersonality/dev Archetype: aquilon",
                          command)
         self.matchoutput(out,
-                         "Template: "
-                         "aquilon/personality/utpersonality/dev/config.tpl",
+                         "Template: aquilon/personality/utpersonality/dev/config" +
+                         self.template_extension,
                          command)
         self.matchoutput(out, "Threshold: None", command)
         self.matchclean(out, "Personality: inventory Archetype: aquilon",
                         command)
         self.matchclean(out,
-                        "Template: aquilon/personality/inventory/config.tpl",
+                        "Template: aquilon/personality/inventory/config" +
+                        self.template_extension,
                         command)
         self.matchoutput(out, "Owned by GRN: %s" % GRN, command)
         self.matchoutput(out, "Used by GRN: %s" % GRN, command)
@@ -110,14 +112,15 @@ class TestAddPersonality(VerifyGrnsMixin, TestBrokerCommand):
         self.matchoutput(out, "Personality: utpersonality/dev Archetype: aquilon",
                          command)
         self.matchoutput(out,
-                         "Template: "
-                         "aquilon/personality/utpersonality/dev/config.tpl",
+                         "Template: aquilon/personality/utpersonality/dev/config" +
+                         self.template_extension,
                          command)
         self.matchoutput(out, "Threshold: None", command)
         self.matchoutput(out, "Personality: generic Archetype: aurora",
                          command)
         self.matchoutput(out,
-                         "Template: aurora/personality/generic/config.tpl",
+                         "Template: aurora/personality/generic/config" +
+                         self.template_extension,
                          command)
         # Also expecting one of the personalities to have a non-zero threshold.
         self.searchoutput(out, r'Threshold: \d+', command)
@@ -130,13 +133,15 @@ class TestAddPersonality(VerifyGrnsMixin, TestBrokerCommand):
                          command)
         self.matchoutput(out,
                          "Template: "
-                         "aquilon/personality/utpersonality/dev/config.tpl",
+                         "aquilon/personality/utpersonality/dev/config" +
+                         self.template_extension,
                          command)
         self.matchoutput(out, "Threshold: 50", command)
         self.matchclean(out, "Personality: inventory Archetype: aquilon",
                         command)
         self.matchclean(out,
-                        "Template: aquilon/personality/inventory/config.tpl",
+                        "Template: aquilon/personality/inventory/config" +
+                        self.template_extension,
                         command)
 
     def testverifyshowpersonalityallthreshold(self):
@@ -145,14 +150,15 @@ class TestAddPersonality(VerifyGrnsMixin, TestBrokerCommand):
         self.matchoutput(out, "Personality: utpersonality/dev Archetype: aquilon",
                          command)
         self.matchoutput(out,
-                         "Template: "
-                         "aquilon/personality/utpersonality/dev/config.tpl",
+                         "Template: aquilon/personality/utpersonality/dev/config" +
+                         self.template_extension,
                          command)
         self.matchoutput(out, "Threshold: 50", command)
         self.matchoutput(out, "Personality: generic Archetype: aurora",
                          command)
         self.matchoutput(out,
-                         "Template: aurora/personality/generic/config.tpl",
+                         "Template: aurora/personality/generic/config" +
+                         self.template_extension,
                          command)
 
     def testverifyshowpersonalityall(self):
@@ -162,12 +168,14 @@ class TestAddPersonality(VerifyGrnsMixin, TestBrokerCommand):
                          command)
         self.matchoutput(out,
                          "Template: "
-                         "aquilon/personality/utpersonality/dev/config.tpl",
+                         "aquilon/personality/utpersonality/dev/config" +
+                         self.template_extension,
                          command)
         self.matchoutput(out, "Personality: generic Archetype: aurora",
                          command)
         self.matchoutput(out,
-                         "Template: aurora/personality/generic/config.tpl",
+                         "Template: aurora/personality/generic/config" +
+                         self.template_extension,
                          command)
         self.matchclean(out, "Threshold:", command)
 
@@ -307,17 +315,19 @@ class TestAddPersonality(VerifyGrnsMixin, TestBrokerCommand):
         self.matchoutput(out, "Personality: utpersonality/dev Archetype: aquilon",
                          command)
         self.matchoutput(out,
-                         "Template: "
-                         "aquilon/personality/utpersonality/dev/config.tpl",
+                         "Template: aquilon/personality/utpersonality/dev/config" +
+                         self.template_extension,
                          command)
         self.matchoutput(out, "Personality: inventory Archetype: aquilon",
                          command)
         self.matchoutput(out,
-                         "Template: aquilon/personality/inventory/config.tpl",
+                         "Template: aquilon/personality/inventory/config" +
+                         self.template_extension,
                          command)
         self.matchclean(out, "Personality: generic Archetype: aurora",
                         command)
-        self.matchclean(out, "Template: aurora/personality/generic/config.tpl",
+        self.matchclean(out, "Template: aurora/personality/generic/config" +
+                        self.template_extension,
                         command)
 
     def testshowarchetypeunavailable(self):
@@ -350,12 +360,14 @@ class TestAddPersonality(VerifyGrnsMixin, TestBrokerCommand):
         self.matchoutput(out, "Personality: generic Archetype: aurora",
                          command)
         self.matchoutput(out,
-                         "Template: aurora/personality/generic/config.tpl",
+                         "Template: aurora/personality/generic/config" +
+                         self.template_extension,
                          command)
         self.matchoutput(out, "Personality: generic Archetype: windows",
                          command)
         self.matchoutput(out,
-                         "Template: windows/personality/generic/config.tpl",
+                         "Template: windows/personality/generic/config" +
+                         self.template_extension,
                          command)
 
     def testaddwindowsdesktop(self):
@@ -372,7 +384,8 @@ class TestAddPersonality(VerifyGrnsMixin, TestBrokerCommand):
         self.matchoutput(out, "Personality: desktop Archetype: windows",
                          command)
         self.matchoutput(out,
-                         "Template: windows/personality/desktop/config.tpl",
+                         "Template: windows/personality/desktop/config" +
+                         self.template_extension,
                          command)
 
     def testaddbadaquilonpersonality(self):
@@ -391,7 +404,8 @@ class TestAddPersonality(VerifyGrnsMixin, TestBrokerCommand):
                          command)
         self.matchoutput(out,
                          "Template: "
-                         "aquilon/personality/badpersonality/config.tpl",
+                         "aquilon/personality/badpersonality/config" +
+                         self.template_extension,
                          command)
 
     def testaddbadaquilonpersonality2(self):
@@ -411,7 +425,8 @@ class TestAddPersonality(VerifyGrnsMixin, TestBrokerCommand):
                          command)
         self.matchoutput(out,
                          "Template: "
-                         "aquilon/personality/badpersonality2/config.tpl",
+                         "aquilon/personality/badpersonality2/config" +
+                         self.template_extension,
                          command)
 
     def testaddinvalidpersonalityname(self):

@@ -30,8 +30,6 @@
 # TERMS THAT MAY APPLY.
 """Module for testing the deploy domain command."""
 
-
-import os
 import unittest
 
 if __name__ == "__main__":
@@ -49,9 +47,8 @@ class TestDeployDomain(TestBrokerCommand):
                           "--comments", "Test comment"])
 
     def test_110_verifydeploy(self):
-        domainsdir = self.config.get("broker", "domainsdir")
-        ddir = os.path.join(domainsdir, "deployable")
-        template = os.path.join(ddir, "aquilon", "archetype", "base.tpl")
+        template = self.find_template("aquilon", "archetype", "base",
+                                      domain="deployable")
         with open(template) as f:
             contents = f.readlines()
         self.failUnlessEqual(contents[-1], "#Added by unittest\n")
@@ -91,16 +88,15 @@ class TestDeployDomain(TestBrokerCommand):
                           "--comments", "Test comment 2"])
 
     def test_200_verifynosync(self):
-        domainsdir = self.config.get("broker", "domainsdir")
         # The change should be in prod...
-        ddir = os.path.join(domainsdir, "prod")
-        template = os.path.join(ddir, "aquilon", "archetype", "base.tpl")
+        template = self.find_template("aquilon", "archetype", "base",
+                                      domain="prod")
         with open(template) as f:
             contents = f.readlines()
         self.failUnlessEqual(contents[-1], "#Added by unittest\n")
         # ...but not in the ut-prod tracking domain.
-        ddir = os.path.join(domainsdir, "ut-prod")
-        template = os.path.join(ddir, "aquilon", "archetype", "base.tpl")
+        template = self.find_template("aquilon", "archetype", "base",
+                                      domain="ut-prod")
         with open(template) as f:
             contents = f.readlines()
         self.failIfEqual(contents[-1], "#Added by unittest\n")

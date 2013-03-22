@@ -190,10 +190,9 @@ class TestMake(TestBrokerCommand):
                 self.config.get("broker", "profilesdir"),
                 "evh1.aqd-unittest.ms.com%s" % self.profile_suffix)))
 
-            self.failUnless(os.path.exists(os.path.join(
-                self.config.get("broker", "builddir"),
-                "domains", "unittest", "profiles",
-                "evh1.aqd-unittest.ms.com.tpl")))
+            self.failUnless(os.path.exists(
+                self.build_profile_name("evh1.aqd-unittest.ms.com",
+                                        domain="unittest")))
 
             servicedir = os.path.join(self.config.get("broker", "plenarydir"),
                                       "servicedata")

@@ -105,13 +105,12 @@ class TestDelESXCluster(TestBrokerCommand):
     def verifyplenaryclusterclient(self):
         for i in range(1, 5):
             cluster = "utecl%s" % i
-            plenary = os.path.join(self.config.get("broker", "plenarydir"),
-                                   "cluster", cluster)
-            self.failIf(os.path.exists(plenary),
-                        "Plenary directory '%s' still exists" % plenary)
-            plenary = os.path.join(self.config.get("broker", "builddir"),
-                                   "domains", "unittest", "profiles",
-                                   "clusters", "%s.tpl" % cluster)
+            dir = os.path.join(self.config.get("broker", "plenarydir"),
+                               "cluster", cluster)
+            self.failIf(os.path.exists(dir),
+                        "Plenary directory '%s' still exists" % dir)
+            plenary = self.build_profile_name("clusters", cluster,
+                                              domain="unittest")
             self.failIf(os.path.exists(plenary),
                         "Plenary file '%s' still exists" % plenary)
 
