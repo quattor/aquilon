@@ -4,30 +4,17 @@
 #
 # Copyright (C) 2009,2010,2013  Contributor
 #
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the EU DataGrid Software License.  You should
-# have received a copy of the license with this program, and the
-# license is published at
-# http://eu-datagrid.web.cern.ch/eu-datagrid/license.html.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
 #
-# THE FOLLOWING DISCLAIMER APPLIES TO ALL SOFTWARE CODE AND OTHER
-# MATERIALS CONTRIBUTED IN CONNECTION WITH THIS PROGRAM.
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
-# THIS SOFTWARE IS LICENSED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-# FOR A PARTICULAR PURPOSE AND ANY WARRANTY OF NON-INFRINGEMENT, ARE
-# DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS
-# BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY,
-# OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT
-# OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
-# BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
-# LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
-# NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-# SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. THIS
-# SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
-# THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
-# TERMS THAT MAY APPLY.
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 import re
 import sys
@@ -51,30 +38,17 @@ comment_re = re.compile(r'^\s*#')
 whitespace_re = re.compile(r'^\s*$')
 
 license = """
-This program is free software; you can redistribute it and/or modify
-it under the terms of the EU DataGrid Software License.  You should
-have received a copy of the license with this program, and the
-license is published at
-http://eu-datagrid.web.cern.ch/eu-datagrid/license.html.
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
 
-THE FOLLOWING DISCLAIMER APPLIES TO ALL SOFTWARE CODE AND OTHER
-MATERIALS CONTRIBUTED IN CONNECTION WITH THIS PROGRAM.
+    http://www.apache.org/licenses/LICENSE-2.0
 
-THIS SOFTWARE IS LICENSED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-FOR A PARTICULAR PURPOSE AND ANY WARRANTY OF NON-INFRINGEMENT, ARE
-DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS
-BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY,
-OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT
-OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
-BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
-LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
-NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. THIS
-SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
-THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
-TERMS THAT MAY APPLY.
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
 """
 license_re = re.compile(r'^#\s*' + license.splitlines()[1])
 license = [comment_prefix + line + '\n' for line in license.splitlines()]
@@ -99,8 +73,6 @@ def fix_file(filepath):
     for i in range(len(contents)):
         if comment_re.search(contents[i]):
             last_leading_comment = i
-            continue
-        if whitespace_re.search(contents[i]):
             continue
         break
     #print >>sys.stderr, "Using %d as last leading comment line." % last_leading_comment
@@ -129,12 +101,22 @@ def fix_file(filepath):
     p4 = Popen(["uniq"], stdin=p3.stdout, stdout=PIPE, stderr=2)
     copyright_years = p4.communicate()[0].splitlines() or [year]
 
+    is_python = filepath.endswith(".py")
+
     new_contents = []
     # If there's a shebang, standardize it
     if contents[0].startswith("#!"):
-        new_contents.append(shebang)
-    new_contents.append(emacs_line)
-    new_contents.append(ex_line)
+        if "python" in contents[0]:
+            new_contents.append(shebang)
+            is_python = True
+        else:
+            new_contents.append(contents[0])
+
+    # The editor settings apply to Python code only
+    if is_python:
+        new_contents.append(emacs_line)
+        new_contents.append(ex_line)
+
     new_contents.append(comment_line)
     new_contents.append("%sCopyright (C) %s  Contributor\n" %
                         (comment_prefix, ",".join(copyright_years)))
@@ -170,9 +152,10 @@ def fix_recursive(start_dir):
         if '.git' in dirnames:
             dirnames.remove('.git')
         for f in filenames:
-            if not f.endswith('.py'):
+            full_path = os.path.join(dirpath, f)
+            if not f.endswith('.py') and not os.access(full_path, os.X_OK):
                 continue
-            fix_file(os.path.join(dirpath, f))
+            fix_file(full_path)
 
 
 def main(args):
