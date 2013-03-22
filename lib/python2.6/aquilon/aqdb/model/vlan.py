@@ -29,7 +29,7 @@ from aquilon.aqdb.model import Base, Network, Switch
 
 MAX_VLANS = 4096  # IEEE 802.1Q standard
 
-VLAN_TYPES = ('storage', 'vmotion', 'user', 'unknown')
+VLAN_TYPES = ('storage', 'vmotion', 'user', 'unknown', 'vulcan-mgmt')
 
 _VTN = 'vlan_info'
 
