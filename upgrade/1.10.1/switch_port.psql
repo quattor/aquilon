@@ -1,0 +1,10 @@
+ALTER TABLE observed_mac ADD port VARCHAR(32);
+
+UPDATE observed_mac SET port = CAST(port_number AS TEXT);
+
+ALTER TABLE observed_mac DROP CONSTRAINT observed_mac_pk;
+ALTER TABLE observed_mac DROP COLUMN port_number;
+ALTER TABLE observed_mac DROP COLUMN slot;
+
+ALTER TABLE observed_mac ADD CONSTRAINT observed_mac_pk PRIMARY KEY (switch_id, port, mac_address);
+ALTER TABLE observed_mac ALTER port SET NOT NULL;

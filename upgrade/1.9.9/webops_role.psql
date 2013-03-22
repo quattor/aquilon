@@ -1,0 +1,3 @@
+INSERT INTO role (id, name, creation_date, comments)
+	VALUES (nextval('role_id_seq'), 'webops', current_timestamp,
+		'used by Webops');

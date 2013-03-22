@@ -1,0 +1,65 @@
+
+-- lookup all clusters the have vm's with nas disks
+-- NOT: they're already there for the VMs. Create resholder record for these clusters if needed.
+
+CREATE OR REPLACE FUNCTION _upgrade_shares() RETURNS VOID LANGUAGE plpgsql AS $$
+DECLARE
+	SH_ID INTEGER;
+	CURRENT_SH_NAME VARCHAR(64);
+	-- end-to-end select from service instance to vm holder.
+	svc_fetcher CURSOR IS
+		SELECT DISTINCT
+			SI.ID as share_id, SI.NAME as SHARE_NAME,
+			SI.COMMENTS AS SHARE_COMMENTS, SI.CREATION_DATE AS SH_DATE,
+			D.ID AS DISK_ID, D.DEVICE_NAME AS DISK_NAME,
+			RES.HOLDER_ID AS HOLDER_ID,
+			CLSTR.NAME AS CLUSTER_NAME
+		FROM
+			SERVICE SVC, SERVICE_INSTANCE SI, DISK D,
+			VIRTUAL_MACHINE, "resource" RES, RESHOLDER, CLSTR
+		WHERE
+			SVC.NAME = 'nas_disk_share' AND
+			SI.SERVICE_ID = SVC.ID AND
+			D.SERVICE_INSTANCE_ID = SI.ID AND
+			D.MACHINE_ID = VIRTUAL_MACHINE.MACHINE_ID AND
+			VIRTUAL_MACHINE.RESOURCE_ID = RES.ID AND
+			RES.HOLDER_ID = RESHOLDER.ID AND
+			RESHOLDER.CLUSTER_ID = CLSTR.ID
+			order by share_id, DISK_ID;
+BEGIN
+	CURRENT_SH_NAME := 'doesnt-exist'; -- emtpy string is NULL, the <> would result in NULL
+
+	-- create shares for each nas service instance
+	FOR svc_rec IN svc_fetcher LOOP
+		IF CURRENT_SH_NAME <> svc_rec.SHARE_NAME THEN
+			SH_ID := nextval('resource_seq');
+
+			INSERT INTO "resource" (id, resource_type, name, creation_date, comments, holder_id)
+				VALUES (SH_ID, 'share', svc_rec.SHARE_NAME, svc_rec.SH_DATE, svc_rec.SHARE_COMMENTS, svc_rec.HOLDER_ID);
+			INSERT INTO "share" (id, latency) VALUES (SH_ID, NULL);
+
+			CURRENT_SH_NAME := svc_rec.SHARE_NAME;
+			RAISE INFO 'Create share % for cluster %', svc_rec.SHARE_NAME, svc_rec.CLUSTER_NAME;
+		END IF;
+
+		UPDATE DISK set share_id = SH_ID, DISK_TYPE = 'virtual_disk'
+			WHERE DISK.ID = svc_rec.DISK_ID;
+	END LOOP;
+END
+$$;
+
+BEGIN;
+SELECT _upgrade_shares();
+COMMIT;
+DROP FUNCTION _upgrade_shares();
+
+---- post update schema changes
+UPDATE machine_specs SET disk_type = 'virtual_disk' WHERE disk_type = 'nas';
+
+ALTER TABLE disk DROP CONSTRAINT nas_disk_srv_inst_fk;
+ALTER TABLE disk DROP COLUMN service_instance_id;
+
+DELETE FROM service_instance WHERE service_id IN (SELECT id FROM service WHERE name = 'nas_disk_share');
+ALTER TABLE service_instance DROP COLUMN manager;
+
+ALTER TABLE "share" DROP COLUMN latency;

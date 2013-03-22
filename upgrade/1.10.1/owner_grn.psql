@@ -1,0 +1,97 @@
+ALTER TABLE personality ADD owner_eon_id INTEGER;
+ALTER TABLE personality ADD CONSTRAINT personality_owner_grn_fk FOREIGN KEY (owner_eon_id) REFERENCES grn (eon_id);
+
+-- XXX Personalities with multiple GRNs will have to be fixed up later
+CREATE OR REPLACE FUNCTION _populate_pers_owner_eon_id() RETURNS VOID LANGUAGE plpgsql AS $$
+DECLARE
+	eonid grn.eon_id%TYPE;
+
+	pers_curs CURSOR IS
+		SELECT * FROM personality
+		FOR UPDATE OF personality;
+	grn_curs CURSOR (pers_id personality_grn_map.personality_id%TYPE) IS
+		SELECT eon_id FROM personality_grn_map WHERE personality_id = pers_id;
+BEGIN
+	FOR pers_rec IN pers_curs LOOP
+		OPEN grn_curs(pers_rec.id);
+		FETCH grn_curs INTO eonid;
+
+		IF NOT FOUND THEN
+			RAISE INFO 'Missing GRN for personality %', pers_rec.name;
+			-- XXX Figure out a proper default GRN
+			UPDATE personality SET owner_eon_id = 6980 WHERE CURRENT OF pers_curs;
+		ELSE
+			UPDATE personality SET owner_eon_id = eonid WHERE CURRENT OF pers_curs;
+			FETCH grn_curs INTO eonid;
+			IF FOUND THEN
+				RAISE INFO 'Multiple GRNs for personality %', pers_rec.name;
+			END IF;
+		END IF;
+		CLOSE grn_curs;
+	END LOOP;
+END;
+$$;
+
+BEGIN;
+SELECT _populate_pers_owner_eon_id();
+COMMIT;
+DROP FUNCTION _populate_pers_owner_eon_id();
+
+ALTER TABLE personality ALTER owner_eon_id SET NOT NULL;
+
+ALTER TABLE host ADD owner_eon_id INTEGER;
+ALTER TABLE host ADD CONSTRAINT host_owner_grn_fk FOREIGN KEY (owner_eon_id) REFERENCES grn (eon_id);
+
+CREATE OR REPLACE FUNCTION _populate_host_owner_eon_id() RETURNS VOID LANGUAGE plpgsql AS $$
+DECLARE
+	eonid grn.eon_id%TYPE;
+
+	host_curs CURSOR IS
+		SELECT * FROM host
+		FOR UPDATE OF host;
+	primary_name CURSOR (host_id host.machine_id%TYPE) IS
+		SELECT fqdn.name AS short, dns_domain.name AS domain
+		FROM fqdn, dns_domain, dns_record, machine, hardware_entity
+		WHERE machine.machine_id = host_id AND
+			hardware_entity.id = machine.machine_id AND
+			hardware_entity.primary_name_id = dns_record.id AND
+			dns_record.fqdn_id = fqdn.id AND
+			fqdn.dns_domain_id = dns_domain.id;
+	grn_curs CURSOR (hostid host.machine_id%TYPE) IS
+		SELECT eon_id FROM host_grn_map WHERE host_grn_map.host_id = hostid;
+	pers_curs CURSOR (pers_id host.machine_id%TYPE) IS
+		SELECT personality.owner_eon_id FROM personality
+		WHERE personality.id = pers_id;
+
+	short_name fqdn.name%TYPE;
+	dns_domain dns_domain.name%TYPE;
+BEGIN
+	FOR host_rec IN host_curs LOOP
+		OPEN grn_curs(host_rec.machine_id);
+		FETCH grn_curs INTO eonid;
+		IF NOT FOUND THEN
+			OPEN pers_curs(host_rec.personality_id);
+			FETCH pers_curs INTO eonid;
+			CLOSE pers_curs;
+			UPDATE host SET owner_eon_id = eonid WHERE CURRENT OF host_curs;
+		ELSE
+			UPDATE host SET owner_eon_id = eonid WHERE CURRENT OF host_curs;
+			FETCH grn_curs INTO eonid;
+			IF FOUND THEN
+				OPEN primary_name(host_rec.machine_id);
+				FETCH primary_name INTO short_name, dns_domain;
+				RAISE INFO 'Multiple GRNs for host %.%', short_name, dns_domain;
+				CLOSE primary_name;
+			END IF;
+		END IF;
+		CLOSE grn_curs;
+	END LOOP;
+END;
+$$;
+
+BEGIN;
+SELECT _populate_host_owner_eon_id();
+COMMIT;
+DROP FUNCTION _populate_host_owner_eon_id();
+
+ALTER TABLE host ALTER owner_eon_id SET NOT NULL;
