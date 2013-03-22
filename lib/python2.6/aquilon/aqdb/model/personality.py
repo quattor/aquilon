@@ -87,7 +87,7 @@ class Personality(Base):
         return self.format_helper(format_spec, instance)
 
     @classmethod
-    def validate_env_in_name (cls, name, host_environment):
+    def validate_env_in_name(cls, name, host_environment):
         persona_env = re.search("[-/](" +
                                 "|".join(HostEnvironment.__mapper__.polymorphic_map.keys()) +
                                 ")$", name, re.IGNORECASE)

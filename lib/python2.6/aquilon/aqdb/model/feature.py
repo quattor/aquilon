@@ -248,6 +248,30 @@ class FeatureLink(Base):
 
         return result
 
+    @property
+    def cfg_path(self):
+
+        format_str="%s/%s"
+        if self.model:
+            return format_str % (self.feature.cfg_path, self.model)
+
+        if self.interface_name:
+            return format_str % (self.feature.cfg_path, self.interface_name)
+
+        return self.feature.cfg_path
+
+    @property
+    def cfg_path_escaped(self):
+
+        format_str="%s/{%s}";
+        if self.model:
+            return format_str % (self.feature.cfg_path, self.model)
+
+        if self.interface_name:
+            return format_str % (self.feature.cfg_path, self.interface_name)
+
+        return self.feature.cfg_path
+
 
 _lnk = FeatureLink.__table__  # pylint: disable=C0103
 _lnk.primary_key.name = '%s_pk' % _LINK

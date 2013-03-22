@@ -29,63 +29,41 @@
 # TERMS THAT MAY APPLY.
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import Personality, Archetype
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.aqdb.model import Personality
 from aquilon.worker.dbwrappers.parameter import (get_parameter_holder,
                                                  set_parameter)
-from aquilon.worker.templates import Plenary, PlenaryCollection
+from aquilon.worker.templates import Plenary
 
 
 class CommandAddParameter(BrokerCommand):
 
-    required_parameters = ['path']
+    required_parameters = ['personality', 'path']
 
-    def process_parameter(self, session, param_holder, path, value, comments):
+    def process_parameter(self, session, param_holder, feature, model, interface, path, value, comments):
 
-        dbparameter = set_parameter(session, param_holder, path, value,
+        dbparameter = set_parameter(session, param_holder, feature, model, interface, path, value,
                                     compel=False, preclude=True)
         if comments:
             dbparameter.comments = comments
 
         return dbparameter
 
-    def render(self, session, logger, archetype, personality, feature,
-               path, value=None, comments=None, **arguments):
-
-        if not personality:
-            if not feature:
-                raise ArgumentError("Parameters can be added for personality "
-                                    "or feature.")
-            if not archetype:
-                raise ArgumentError("Adding parameter on feature binding "
-                                    "needs personality or archetype")
+    def render(self, session, logger, archetype, personality, feature, model,
+               interface, path, value=None, comments=None, **arguments):
 
         param_holder = get_parameter_holder(session, archetype, personality,
-                                            feature, auto_include=True)
+                                            auto_include=True)
 
         if isinstance(param_holder.holder_object, Personality) and \
            not param_holder.holder_object.archetype.is_compileable:
             raise ArgumentError("{0} is not compileable."
                                 .format(param_holder.holder_object.archetype))
 
-        dbparameter = self.process_parameter(session, param_holder, path, value,
-                                             comments)
+        dbparameter = self.process_parameter(session, param_holder, feature, model, interface,
+                                             path, value, comments)
         session.add(dbparameter)
         session.flush()
 
-        plenaries = PlenaryCollection(logger=logger)
-
-        if feature:
-            q = session.query(Personality)
-            if personality:
-                q = q.filter_by(name=personality)
-            elif archetype:
-                dbarchetype = Archetype.get_unique(session, archetype,
-                                                   compel=True)
-                q = q.filter_by(archetype=dbarchetype)
-            for dbpers in q:
-                plenaries.append(Plenary.get_plenary(dbpers))
-        else:
-            plenaries.append(Plenary.get_plenary(param_holder.holder_object))
-
-        plenaries.write()
+        plenary = Plenary.get_plenary(param_holder.personality)
+        plenary.write()

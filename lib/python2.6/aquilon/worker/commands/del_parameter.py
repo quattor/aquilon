@@ -35,8 +35,8 @@ from aquilon.worker.commands.add_parameter import CommandAddParameter
 
 class CommandDelParameter(CommandAddParameter):
 
-    required_parameters = ['path']
+    required_parameters = ['personality', 'path']
 
-    def process_parameter(self, session, param_holder, path, value=None,
-                          comments=None):
-        return del_parameter(session, path, param_holder)
+    def process_parameter(self, session, param_holder, feature, model, interface,
+                          path, value=None, comments=None):
+        return del_parameter(session, path, param_holder, feature, model, interface)
