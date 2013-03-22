@@ -90,6 +90,11 @@ class TestAddRequiredService(TestBrokerCommand):
                    "--justification", "tcm=12345678"]
         self.noouttest(command)
 
+    def testaddrequiredsupportgroup(self):
+        self.noouttest(["add_required_service", "--service", "support-group",
+                        "--archetype", "aquilon",
+                        "--justification", "tcm=12345678"])
+
     def testaddrequiredlemon(self):
         command = "add required service --service lemon --archetype aquilon"
         command += " --justification tcm=12345678"

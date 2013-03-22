@@ -91,6 +91,12 @@ class TestDelRequiredService(TestBrokerCommand):
                    "--justification", "tcm=12345678"]
         self.noouttest(command)
 
+    def testdelrequiredsupportgroup(self):
+        command = ["del_required_service",
+                   "--service=support-group", "--archetype=aquilon",
+                   "--justification", "tcm=12345678"]
+        self.noouttest(command)
+
     def testverifydelrequiredservices(self):
         command = "show archetype --archetype aquilon"
         out = self.commandtest(command.split(" "))

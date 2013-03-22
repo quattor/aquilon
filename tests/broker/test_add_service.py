@@ -394,6 +394,10 @@ class TestAddService(TestBrokerCommand):
         self.noouttest(["add", "service", "--service", service,
                         "--instance", "unittest"])
 
+    def testaddsupportgroup(self):
+        self.noouttest(["add_service", "--service", "support-group",
+                        "--instance", "ec-service"])
+
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddService)
