@@ -152,6 +152,21 @@ class TestBindServer(TestBrokerCommand):
         self.matchoutput(out, "Provides: service/utsvc/utsi1", command)
         self.matchoutput(out, "Provides: service/utsvc/utsi2", command)
 
+    def testverifyshowunittest00proto(self):
+        command = "show host --hostname unittest00.one-nyp.ms.com --format proto"
+        out = self.commandtest(command.split(" "))
+        hostlist = self.parse_hostlist_msg(out, expect=1)
+        host = hostlist.hosts[0]
+        self.failUnlessEqual(len(host.services_provided), 2)
+        services = set()
+        for svc_msg in host.services_provided:
+            services.add("%s/%s" % (svc_msg.service, svc_msg.instance))
+        for binding in ("utsvc/utsi1", "utsvc/utsi2"):
+            self.failUnless(binding in services,
+                            "Service binding %s is missing from protobuf "
+                            "message. All bindings: %s" %
+                            (binding, ",".join(list(services))))
+
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestBindServer)

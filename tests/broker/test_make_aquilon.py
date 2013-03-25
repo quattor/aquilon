@@ -190,6 +190,14 @@ class TestMakeAquilon(TestBrokerCommand):
         self.failUnlessEqual(host.type, 'host')
         self.failUnlessEqual(host.personality.name, 'compileserver')
         self.failUnlessEqual(host.personality.archetype.name, 'aquilon')
+        services = set()
+        for svc_msg in host.services_used:
+            services.add("%s/%s" % (svc_msg.service, svc_msg.instance))
+        for binding in ("dns/utdnsinstance", "afs/q.ny.ms.com", "aqd/ny-prod"):
+            self.failUnless(binding in services,
+                            "Service binding %s is missing from protobuf "
+                            "message. All bindings: %s" %
+                            (binding, ",".join(list(services))))
 
     def testverifycatunittest00(self):
         command = "cat --hostname unittest00.one-nyp.ms.com --data"
