@@ -564,6 +564,7 @@ class TestReconfigure(VerifyGrnsMixin, TestBrokerCommand):
         # Use the deprecated option name here
         command = ["reconfigure", "--hostlist", scratchfile]
         out = self.badrequesttest(command)
+        self.matchoutput(out, "The --hostlist option is deprecated.", command)
         self.matchoutput(out, "Invalid hosts in list:", command)
         self.matchoutput(out, "host-does-not-exist.aqd-unittest.ms.com:",
                          command)
