@@ -39,7 +39,7 @@ class VlanInfo(Base):
     __tablename__ = _VTN
     _instance_label = 'vlan_id'
 
-    vlan_id = Column(Integer, primary_key=True)
+    vlan_id = Column(Integer, primary_key=True, autoincrement=False)
     port_group = Column(AqStr(32), nullable=False)
     vlan_type = Column(Enum(32, VLAN_TYPES), nullable=False)
 

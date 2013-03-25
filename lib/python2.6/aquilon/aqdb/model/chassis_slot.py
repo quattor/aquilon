@@ -35,7 +35,7 @@ class ChassisSlot(Base):
                                             ondelete='CASCADE'),
                         primary_key=True)
 
-    slot_number = Column(Integer, primary_key=True)
+    slot_number = Column(Integer, primary_key=True, autoincrement=False)
 
     # TODO: Code constraint that these are Blades...
     machine_id = Column(Integer, ForeignKey('machine.machine_id',
