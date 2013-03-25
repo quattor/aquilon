@@ -375,6 +375,7 @@
             <option name="sandbox" type="string" conflicts="domain branch">Name of the sandbox (given as 'author/branch')</option>
             <option name="branch" type="string" conflicts="domain sandbox">template branch (either a domain or a sandbox)</option>
          </optgroup>
+         <option name="sandbox_owner" type="string" conflicts="domain sandbox branch">Owner of the sandbox the host is in</option>
          <optgroup name="search_host_location_opts" fields="any">
 	    <option name="organization" type="string">Organization</option>
 	    <option name="hub" type="string">Hub</option>

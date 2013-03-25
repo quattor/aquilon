@@ -99,6 +99,13 @@ class TestSearchHost(TestBrokerCommand):
         self.matchoutput(out, "server1.aqd-unittest.ms.com", command)
         self.matchclean(out, "unittest00.one-nyp.ms.com", command)
 
+    def testsandboxowner(self):
+        user = self.config.get("unittest", "user")
+        command = ["search_host", "--sandbox_owner=%s" % user]
+        out = self.commandtest(command)
+        self.matchoutput(out, "server1.aqd-unittest.ms.com", command)
+        self.matchclean(out, "unittest00.one-nyp.ms.com", command)
+
     def testbranchavailable(self):
         command = ["search_host", "--branch=utsandbox"]
         out = self.commandtest(command)
