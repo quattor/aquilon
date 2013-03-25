@@ -31,6 +31,15 @@ SRVINST_MSG = "WARNING: Server %s, is the last server bound to Service %s, insta
 
 class TestUnbindServer(TestBrokerCommand):
 
+    def testcheckinitialplenary(self):
+        # This test must use the same regular expressions as
+        # testverifycatunittest02() does, to verify that the success of
+        # searchclean() is not due to errors in the expressions
+        command = ["cat", "--hostname", "unittest02.one-nyp.ms.com"]
+        out = self.commandtest(command)
+        self.searchoutput(out, r'/utsvc/[^/]+/server', command)
+        self.searchoutput(out, r'/dns/[^/]+/server', command)
+
     def testunbindutsi1unittest02(self):
         command = ["unbind", "server",
                    "--hostname", "unittest02.one-nyp.ms.com",
@@ -76,6 +85,12 @@ class TestUnbindServer(TestBrokerCommand):
                          command)
         self.matchoutput(out, '"instance" = "utsi1";', command)
         self.searchoutput(out, r'"servers" = list\(\s*\);', command)
+
+    def testverifycatunittest02(self):
+        command = ["cat", "--hostname", "unittest02.one-nyp.ms.com"]
+        out = self.commandtest(command)
+        self.searchclean(out, r'/utsvc/[^/]+/server', command)
+        self.searchclean(out, r'/dns/[^/]+/server', command)
 
     def testverifybindutsi1(self):
         command = "show service --service utsvc --instance utsi1"

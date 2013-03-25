@@ -54,9 +54,9 @@ class CommandUnbindServer(BrokerCommand):
         session.flush()
 
         plenaries = PlenaryCollection(logger=logger)
+        plenaries.append(Plenary.get_plenary(dbhost))
         for dbinstance in dbinstances:
             plenaries.append(Plenary.get_plenary(dbinstance))
         plenaries.write()
 
-        # XXX: Need to recompile...
         return
