@@ -40,6 +40,11 @@ def search_hardware_entity_query(session, hardware_type=HardwareEntity,
     q = session.query(hardware_type)
     if hardware_type is HardwareEntity:
         q = q.with_polymorphic('*')
+
+    # The ORM deduplicates the result if we query full objects, but not if we
+    # query just the label
+    q = q.distinct()
+
     dblocation = get_location(session, **kwargs)
     if dblocation:
         if exact_location:
