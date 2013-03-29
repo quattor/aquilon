@@ -244,14 +244,17 @@ class LocationLink(Base):
 llink = LocationLink.__table__  # pylint: disable=C0103
 llink.primary_key.name = 'location_link_pk'
 
-# Make these relations view-only, to make sure
-# the distance is managed explicitely
+# Make these relations view-only, to make sure the distance is managed
+# explicitely
 Location.parents = relation(Location,
                             secondary=LocationLink.__table__,
                             primaryjoin=Location.id == LocationLink.child_id,
                             secondaryjoin=Location.id == LocationLink.parent_id,
                             order_by=[desc(LocationLink.distance)],
-                            viewonly=True)
+                            viewonly=True,
+                            backref=backref('children',
+                                            order_by=[LocationLink.distance],
+                                            viewonly=True))
 
 # FIXME: this should be dropped when multiple parents are allowed
 Location.parent = relation(Location, uselist=False,
@@ -260,10 +263,3 @@ Location.parent = relation(Location, uselist=False,
                                             LocationLink.distance == 1),
                            secondaryjoin=Location.id == LocationLink.parent_id,
                            viewonly=True)
-
-Location.children = relation(Location,
-                             secondary=LocationLink.__table__,
-                             primaryjoin=Location.id == LocationLink.parent_id,
-                             secondaryjoin=Location.id == LocationLink.child_id,
-                             order_by=[LocationLink.distance],
-                             viewonly=True)
