@@ -59,6 +59,24 @@ class TestAddCampus(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "campus,ta,country,us", command)
 
+    def testaddln(self):
+        self.dsdb_expect_add_campus("ln")
+        self.noouttest(["add_campus", "--campus", "ln", "--country", "gb",
+                        "--fullname", "London"])
+        self.dsdb_verify()
+
+    def testaddny(self):
+        self.dsdb_expect_add_campus("ny")
+        self.noouttest(["add_campus", "--campus", "ny", "--country", "us",
+                        "--fullname", "New York"])
+        self.dsdb_verify()
+
+    def testaddvi(self):
+        self.dsdb_expect_add_campus("vi")
+        self.noouttest(["add_campus", "--campus", "vi", "--country", "us",
+                        "--fullname", "Virginia"])
+        self.dsdb_verify()
+
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddCampus)

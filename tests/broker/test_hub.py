@@ -119,6 +119,18 @@ class TestHub(TestBrokerCommand):
         command = "del organization --organization example"
         self.noouttest(command.split(" "))
 
+    def testaddhk(self):
+        self.noouttest(["add_hub", "--hub", "hk", "--organization", "ms",
+                        "--fullname", "Non-Japan-Asia"])
+
+    def testaddln(self):
+        self.noouttest(["add_hub", "--hub", "ln", "--organization", "ms",
+                        "--fullname", "Europa"])
+
+    def testaddny(self):
+        self.noouttest(["add_hub", "--hub", "ny", "--organization", "ms",
+                        "--fullname", "Americas"])
+
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestHub)

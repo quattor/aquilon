@@ -117,6 +117,54 @@ class TestAddBuilding(TestBrokerCommand):
         self.matchoutput(out, "Building: tu", command)
         self.matchoutput(out, "Address: 14 Test Lane", command)
 
+    def test_addhq(self):
+        self.dsdb_expect("add_building_aq -building_name hq -city ny "
+                         "-building_addr 1585 Broadway, NY, NY 10036")
+        self.dsdb_expect_add_campus_building("ny", "hq")
+        command = ["add_building", "--building", "hq", "--city", "ny",
+                   "--fullname", "seven-fifty",
+                   "--address", "1585 Broadway, NY, NY 10036"]
+        self.noouttest(command)
+        self.dsdb_verify()
+
+    def test_addnp(self):
+        self.dsdb_expect("add_building_aq -building_name np -city ny "
+                         "-building_addr 1 NY Plaza")
+        self.dsdb_expect_add_campus_building("ny", "np")
+        command = ["add_building", "--building", "np", "--city", "ny",
+                   "--fullname", "one-nyp", "--address", "1 NY Plaza"]
+        self.noouttest(command)
+        self.dsdb_verify()
+
+    def test_addoy(self):
+        self.dsdb_expect("add_building_aq -building_name oy -city ln "
+                         "-building_addr Hounslow, Middlesex")
+        self.dsdb_expect_add_campus_building("ln", "oy")
+        command = ["add_building", "--building", "oy", "--city", "ln",
+                   "--fullname", "heathrow", "--address", "Hounslow, Middlesex"]
+        self.noouttest(command)
+        self.dsdb_verify()
+
+    def test_addpi(self):
+        self.dsdb_expect("add_building_aq -building_name pi -city ny "
+                         "-building_addr 1 Pierrepont Plaza")
+        self.dsdb_expect_add_campus_building("ny", "pi")
+        command = ["add_building", "--building", "pi", "--city", "ny",
+                   "--fullname", "pierrepont",
+                   "--address", "1 Pierrepont Plaza"]
+        self.noouttest(command)
+        self.dsdb_verify()
+
+    def test_addut(self):
+        self.dsdb_expect("add_building_aq -building_name ut -city ny "
+                         "-building_addr unittest address")
+        self.dsdb_expect_add_campus_building("ny", "ut")
+        command = ["add_building", "--building", "ut", "--city", "ny",
+                   "--fullname", "Unittest-building",
+                   "--address", "unittest address"]
+        self.noouttest(command)
+        self.dsdb_verify()
+
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddBuilding)
