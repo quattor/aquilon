@@ -16,16 +16,13 @@
 # limitations under the License.
 """Contains the logic for `aq show room --room`."""
 
-
+from aquilon.aqdb.model import Room
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.commands.show_location_type import CommandShowLocationType
 
 
-class CommandShowRoomRoom(CommandShowLocationType):
+class CommandShowRoomRoom(BrokerCommand):
 
     required_parameters = ["room"]
 
     def render(self, session, room, **arguments):
-        return CommandShowLocationType.render(self, session=session,
-                                              type='room', name=room,
-                                              **arguments)
+        return Room.get_unique(session, room, compel=True)

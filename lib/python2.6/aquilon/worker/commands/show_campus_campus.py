@@ -16,16 +16,13 @@
 # limitations under the License.
 """Contains the logic for `aq show campus --campus`."""
 
-
+from aquilon.aqdb.model import Campus
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.commands.show_location_type import CommandShowLocationType
 
 
-class CommandShowCampusCampus(CommandShowLocationType):
+class CommandShowCampusCampus(BrokerCommand):
 
     required_parameters = ["campus"]
 
     def render(self, session, campus, **arguments):
-        return CommandShowLocationType.render(self, session=session,
-                                              type='campus', name=campus,
-                                              **arguments)
+        return Campus.get_unique(session, campus, compel=True)

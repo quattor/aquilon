@@ -2366,31 +2366,6 @@
       <transport method="post" path="domain/%(domain)s/command/sync" />
    </command>
 
-   <command name="show_location">
-      Shows all locations of a given type
-      or information about a specific location type and name.
-      <p/>
-      Supported options for --format: raw, csv, proto.
-      <optgroup name="show_location_opts" mandatory="True" fields="all">
-         <option name="type" type="string">Location type</option>
-      </optgroup>
-      <optgroup name="show_location_optional" mandatory="False" fields="all">
-         <option name="name" type="string">Location name</option>
-      </optgroup>
-      <transport trigger="type" method="get" path="location/%(type)s" />
-      <transport trigger="name" method="get" path="location/%(type)s/%(name)s" />
-   </command>
-
-   <command name="del_location">
-      Remove a location from the database. The command will fail if there
-      are any hosts at that location, or if the location is used within any service maps.
-      <optgroup name="del_location_opts" mandatory="True" fields="all">
-         <option name="name" type="string">Short name of new location</option>
-         <option name="type" type="string">Location type</option>
-      </optgroup>
-      <transport method="delete" path="location/generic/%(type)s/%(name)s" />
-   </command>
-
    <command name="add_chassis">
       Add a new chassis to the database.  A chassis can contain multiple blades. Management tasks for the blades are typically performed by connecting to the chassis itself, and so the chassis name must exist within DNS.
       <optgroup name="add_chassis_input" mandatory="True" fields="all">
@@ -2512,7 +2487,7 @@
    </command>
 
    <command name="del_rack">
-      Delete a rack. See also del_location.
+      Delete a rack.
       <optgroup name="del_rack_opts" mandatory="True" fields="all">
          <option name="rack" type="string">rack name</option>
       </optgroup>
@@ -2597,7 +2572,7 @@
    </command>
 
    <command name="del_building">
-      Delete a building. See also del_location.
+      Delete a building.
       <optgroup name="del_building_opts" mandatory="True" fields="all">
          <option name="building" type="string">building name</option>
       </optgroup>
@@ -2618,7 +2593,7 @@
    </command>
 
    <command name="del_campus">
-      Delete a campus. See also del_location.
+      Delete a campus.
       <optgroup name="del_campus_opts" mandatory="True" fields="all">
          <option name="campus" type="string">campus name</option>
       </optgroup>
@@ -2652,7 +2627,7 @@
    </command>
 
    <command name="del_room">
-      Delete a room. See also del_location.
+      Delete a room.
       <optgroup name="del_room_opts" mandatory="True" fields="all">
          <option name="room" type="string">room name</option>
       </optgroup>
@@ -2689,7 +2664,7 @@
    </command>
 
    <command name="del_bunker">
-      Delete a bunker. See also del_location.
+      Delete a bunker.
       <optgroup name="del_bunker_opts" mandatory="True" fields="all">
          <option name="bunker" type="string">bunker name</option>
       </optgroup>
@@ -2756,7 +2731,7 @@
    </command>
 
    <command name="del_city">
-      Delete a city. See also del_location.
+      Delete a city.
       <optgroup name="del_city_opts" mandatory="True" fields="all">
          <option name="city" type="string">city name</option>
       </optgroup>
@@ -2790,7 +2765,7 @@
    </command>
 
    <command name="del_country">
-      Delete a country. See also del_location.
+      Delete a country.
       <optgroup name="del_country_opts" mandatory="True" fields="all">
          <option name="country" type="string">country name</option>
       </optgroup>
@@ -2824,7 +2799,7 @@
    </command>
 
    <command name="del_continent">
-      Delete a continent. See also del_location.
+      Delete a continent.
       <optgroup name="del_continent_opts" mandatory="True" fields="all">
          <option name="continent" type="string">continent name</option>
       </optgroup>
@@ -2892,7 +2867,7 @@
    </command>
 
    <command name="del_hub">
-      Delete a hub. See also del_location.
+      Delete a hub.
       <optgroup name="del_hub_opts" mandatory="True" fields="all">
          <option name="hub" type="string">hub name</option>
       </optgroup>

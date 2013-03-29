@@ -34,12 +34,6 @@ class TestLocationConstraints(TestBrokerCommand):
         self.matchoutput(out, "Could not delete rack ut3, hardware objects "
                          "were found using this location.", command)
 
-    def testbadtype(self):
-        command = ["show", "location", "--type", "bad-type",
-                   "--name", "no-such-location"]
-        out = self.badrequesttest(command)
-        self.matchoutput(out, "Unknown location type 'bad-type'.", command)
-
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(

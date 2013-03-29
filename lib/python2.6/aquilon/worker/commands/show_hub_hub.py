@@ -16,15 +16,13 @@
 # limitations under the License.
 """Contains the logic for `aq show hub --hub`."""
 
-
+from aquilon.aqdb.model import Hub
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.commands.show_location_type import CommandShowLocationType
 
 
-class CommandShowHubHub(CommandShowLocationType):
+class CommandShowHubHub(BrokerCommand):
 
     required_parameters = ["hub"]
 
     def render(self, session, hub, **arguments):
-        return CommandShowLocationType.render(self, session=session, type='hub',
-                                              name=hub, **arguments)
+        return Hub.get_unique(session, hub, compel=True)

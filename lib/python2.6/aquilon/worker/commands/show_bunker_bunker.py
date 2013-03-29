@@ -16,16 +16,13 @@
 # limitations under the License.
 """Contains the logic for `aq show bunker --bunker`."""
 
-
+from aquilon.aqdb.model import Bunker
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.commands.show_location_type import CommandShowLocationType
 
 
-class CommandShowBunkerBunker(CommandShowLocationType):
+class CommandShowBunkerBunker(BrokerCommand):
 
     required_parameters = ["bunker"]
 
     def render(self, session, bunker, **arguments):
-        return CommandShowLocationType.render(self, session=session,
-                                              type='bunker', name=bunker,
-                                              **arguments)
+        return Bunker.get_unique(session, bunker, compel=True)

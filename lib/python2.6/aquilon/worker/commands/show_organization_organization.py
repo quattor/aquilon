@@ -16,16 +16,13 @@
 # limitations under the License.
 """Contains the logic for `aq show organization --organization`."""
 
-
+from aquilon.aqdb.model import Company
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.commands.show_location_type import CommandShowLocationType
 
 
-class CommandShowOrganizationOrganization(CommandShowLocationType):
+class CommandShowOrganizationOrganization(BrokerCommand):
 
     required_parameters = ["organization"]
 
     def render(self, session, organization, **arguments):
-        return CommandShowLocationType.render(self, session=session,
-                                              type='company', name=organization,
-                                              **arguments)
+        return Company.get_unique(session, organization, compel=True)
