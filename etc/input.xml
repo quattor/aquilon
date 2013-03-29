@@ -564,7 +564,8 @@
    <command name="search_domain">
       Search domains.
       <optgroup name="search_domain_input" mandatory="True" fields="any">
-         <option name="track" type="string" conflicts="start">Name of tracked branch</option>
+         <option name="track" type="string" conflicts="no_tracking">Name of tracked branch</option>
+         <option name="not_tracking" type="flag" conflicts="track">Do not include tracking domains</option>
          <option name="change_manager" type="boolean">Change manager required</option>
          <option name="owner" type="string">Show only domains of a given user</option>
          <option name="compiler_version" type="string">Version of panc to use</option>
