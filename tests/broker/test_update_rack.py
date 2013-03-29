@@ -110,6 +110,8 @@ class TestUpdateRack(TestBrokerCommand):
         self.matchoutput(out, '"rack/name" = "ut9";', command)
         self.matchoutput(out, '"rack/row" = "h";', command)
         self.matchoutput(out, '"rack/column" = "9";', command)
+        self.matchoutput(out, '"rack/room" = "utroom2";', command)
+        self.matchoutput(out, '"sysloc/bunker" = "utbunker2";', command)
 
     def test_100_updateroom(self):
         command = ['update_rack', '--rack=ut8', '--room=utroom1']

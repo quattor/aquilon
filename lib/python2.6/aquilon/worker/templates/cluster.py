@@ -86,6 +86,8 @@ class PlenaryClusterData(Plenary):
         if dbloc.building:
             pan_assign(lines, "system/cluster/sysloc/building",
                        dbloc.building.name)
+        if dbloc.bunker:
+            pan_assign(lines, "system/cluster/sysloc/bunker", dbloc.bunker.name)
         if dbloc.rack:
             pan_assign(lines, "system/cluster/rack/row", dbloc.rack.rack_row)
             pan_assign(lines, "system/cluster/rack/column",

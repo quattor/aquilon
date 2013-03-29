@@ -244,6 +244,9 @@ class TestAddMachine(TestBrokerCommand):
         self.matchoutput(out, '"rack/row" = "a";', command)
         self.matchoutput(out, '"rack/column" = "3";', command)
         self.matchoutput(out, '"rack/room" = "utroom1";', command)
+        self.matchoutput(out, '"sysloc/building" = "ut";', command)
+        self.matchoutput(out, '"sysloc/city" = "ny";', command)
+        self.matchoutput(out, '"sysloc/continent" = "na";', command)
         self.matchoutput(out, '"serialnumber" = "KPDZ406";', command)
         self.matchoutput(out,
                          'include { "hardware/machine/ibm/hs21-8853l5u" };',

@@ -596,6 +596,11 @@ class TestReconfigure(VerifyGrnsMixin, TestBrokerCommand):
     def test_105_verify_machine_plenary(self):
         command = ["cat", "--machine=ut9s03p45"]
         out = self.commandtest(command)
+        self.matchoutput(out, '"rack/room" = "utroom2";', command)
+        self.matchoutput(out, '"sysloc/bunker" = "utbunker2";', command)
+        self.matchoutput(out, '"sysloc/building" = "ut";', command)
+        self.matchoutput(out, '"sysloc/city" = "ny";', command)
+        self.matchoutput(out, '"sysloc/continent" = "na";', command)
         self.searchoutput(out,
                           r'"sysloc/dns_search_domains" = '
                           r'list\(\s*"new-york.ms.com"\s*\);',
