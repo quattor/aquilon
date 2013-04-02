@@ -282,7 +282,11 @@ class Plenary(object):
                 remove_file(xmlfile, logger=self.logger)
                 xmlgzfile = xmlfile + ".gz"
                 remove_file(xmlgzfile, logger=self.logger)
+                # Name used up to and including panc 9.2
                 depfile = xmlfile + ".dep"
+                remove_file(depfile, logger=self.logger)
+                # Name used by panc 9.4 and higher
+                depfile = os.path.join(xmldir, self.plenary_template + ".dep")
                 remove_file(depfile, logger=self.logger)
                 try:
                     os.removedirs(xmldir)
