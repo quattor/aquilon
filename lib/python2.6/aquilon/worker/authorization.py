@@ -123,7 +123,7 @@ class AuthorizationBroker(object):
                               'pxeswitch',
                               'change_status',
                               'add_room', 'add_rack', 'add_rack_room',
-                              'add_disk', 'del_disk']:
+                              'add_disk', 'del_disk', 'del_disk_disk']:
                 self.raise_auth_error(principal, action, resource)
         if dbuser.role.name == 'resource_pool':
             if action not in ['add_address', 'del_address']:
@@ -177,7 +177,7 @@ class AuthorizationBroker(object):
                               'update_interface_hostname',
                               'update_interface_machine',
                               'del_interface', 'del_interface_address',
-                              'add_disk', 'del_disk',
+                              'add_disk', 'del_disk', 'del_disk_disk',
                               'add_machine', 'del_machine',
                               'update_machine', 'update_machine_hostname',
                               'add_host', 'del_host',
