@@ -60,11 +60,10 @@ class PersonalityFormatter(ObjectFormatter):
         description = "Host"
         if personality.is_cluster:
             description = "Cluster"
-        details = [indent + "%s Personality: %s" % (description,
-                                                    personality) +
-                   " Archetype: %s" % personality.archetype]
-        details.append(indent +
-                       "  Environment: %s" % personality.host_environment)
+        details = [indent + "{0} Personality: {1.name} Archetype: {1.archetype.name}"
+                   .format(description, personality)]
+        details.append(indent + "  Environment: {0.name}"
+                       .format(personality.host_environment))
         details.append(indent + "  Owned by {0:c}: {0.grn}"
                        .format(personality.owner_grn))
         for grn in personality.grns:
@@ -73,17 +72,18 @@ class PersonalityFormatter(ObjectFormatter):
         if personality.config_override:
             details.append(indent + "  Config override: enabled")
 
-        details.append(indent + "  Template: %s/personality/%s/config%s" %
-                       (personality.archetype, personality, TEMPLATE_EXTENSION))
+        details.append(indent + "  Template: {0.archetype.name}/personality/{0.name}/config{1}"
+                       .format(personality, TEMPLATE_EXTENSION))
 
         if has_threshold:
-            details.append(indent + "  Threshold: %s" % threshold)
-            details.append(indent + "  Maintenance Threshold: %s" %
-                           maintenance_threshold)
+            details.append(indent + "  Threshold: {0}".format(threshold))
+            details.append(indent + "  Maintenance Threshold: {0}"
+                           .format(maintenance_threshold))
         if personality.cluster_required:
             details.append(indent + "  Requires clustered hosts")
         for service in personality.services:
-            details.append(indent + "  Required Service: %s" % service.name)
+            details.append(indent + "  Required Service: {0.name}"
+                           .format(service))
 
         features = personality.features[:]
         features.sort(key=lambda x: (x.feature.feature_type,
@@ -104,11 +104,12 @@ class PersonalityFormatter(ObjectFormatter):
                 details.append(indent + "    {0:c}: {0.name} {1:c}: {1.name}"
                                .format(link.model.vendor, link.model))
             if link.interface_name:
-                details.append(indent + "    Interface: %s" %
-                               link.interface_name)
+                details.append(indent + "    Interface: {0.interface_name}"
+                               .format(link))
 
         if personality.comments:
-            details.append(indent + "  Comments: %s" % personality.comments)
+            details.append(indent + "  Comments: {0.comments}"
+                           .format(personality))
 
         for cltype, info in personality.cluster_infos.items():
             details.append(indent + "  Extra settings for %s clusters:" % cltype)
@@ -134,9 +135,6 @@ class PersonalityFormatter(ObjectFormatter):
         if threshold is not None:
             skeleton.threshold = threshold
 
-        if personality.grns:
-            skeleton.owner_eonid = personality.grns[0].eon_id
-
         features = personality.features[:]
         features.sort(key=lambda x: (x.feature.feature_type,
                                      x.feature.post_personality,
@@ -161,3 +159,31 @@ class PersonalityFormatter(ObjectFormatter):
 ObjectFormatter.handlers[Personality] = PersonalityFormatter()
 ObjectFormatter.handlers[ThresholdedPersonality] = PersonalityFormatter()
 ObjectFormatter.handlers[PersonalityList] = PersonalityListFormatter()
+
+class SimplePersonalityList(list):
+    """Holds a list of personalities for which a list will be formatted
+       in a simple (name-only) manner."""
+
+
+class SimplePersonalityListFormatter(PersonalityListFormatter):
+    protocol = "aqdsystems_pb2"
+
+    def format_raw(self, result, indent=""):
+        return str("\n".join([indent + "{0.archetype.name}/{0.name}".format(obj) for obj in result]))
+
+    def csv_fields(self, obj):
+        return (obj.archetype.name, obj.name,)
+
+    def format_proto(self, tpl, skeleton=None):
+        if not skeleton:
+            skeleton = self.loaded_protocols[self.protocol].PersonalityList()
+        for personality in tpl:
+            container = skeleton.personalities.add()
+            container.name = str(personality)
+            container.archetype.name = str(personality.archetype.name)
+            container.host_environment = str(personality.host_environment)
+            container.owner_eonid = personality.owner_eon_id
+
+        return skeleton
+
+ObjectFormatter.handlers[SimplePersonalityList] = SimplePersonalityListFormatter()

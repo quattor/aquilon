@@ -3019,6 +3019,22 @@
       <transport method="get" path="personality" />
   </command>
 
+  <command name="search_personality">
+      Search personality based on given options. Full details of the personality can
+      be shown using the --fullinfo option
+      <p/>
+         <optgroup name="search_personality_opts" mandatory="True" fields="any">
+            <option name="personality" type="string" conflicts="all">personality name (same name may be in multiple archetypes)</option>
+            <option name="archetype" type="string" conflicts="all">which archetype to use</option>
+            <option name="grn" type="string" conflicts="all">match by GRN</option>
+            <option name="eon_id" type="int" conflicts="all">match by EON ID</option>
+            <option name="config_override" type="boolean" conflicts="all">Include external personality config override template</option>
+            <option name="host_environment" type="string" conflicts="all">Environment for Hosts assigned to this personality [dev|qa|uat|prod|infra]</option>
+            <option name="fullinfo" type="flag">show full information for the matching personalities</option>
+      </optgroup>
+      <transport method="get" path="find/personality" />
+  </command>
+
    <command name="make">
       Build a host configuration.  Any required services which are not bound
       will cause an implicit bind_client to occur.  Any services that
