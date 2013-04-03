@@ -327,8 +327,14 @@ class TestDelHost(TestBrokerCommand):
 
     def testdelnotify(self):
         hostname = self.config.get("unittest", "hostname")
-        self.noouttest(["unbind", "server", "--service", "utnotify",
-                        "--instance", "localhost", "--hostname", hostname])
+        command = ["unbind", "server", "--service", "utnotify",
+                   "--instance", "localhost", "--hostname", hostname]
+        out, err = self.successtest(command)
+        self.assertEmptyOut(out, command)
+        self.matchoutput(err,
+                         "Warning: Host %s is missing the following required "
+                         "services" % hostname,
+                         command)
 
         self.dsdb_expect_delete("127.0.0.1")
         command = ["del", "host", "--hostname", hostname]
