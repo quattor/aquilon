@@ -2537,6 +2537,41 @@
       <transport method="delete" path="location/rack/%(rack)s" />
    </command>
 
+   <command name="add_desk">
+      Add a new desk to the database.
+      <optgroup name="add_desk_input" mandatory="True" fields="all">
+         <option name="desk" type="string">Name of the new desk</option>
+	 <optgroup name="add_desk_parent" mandatory="True" fields="any">
+             <option name="building" type="string">Building where the desk is</option>
+             <option name="room" type="string">Room where the desk is</option>
+	 </optgroup>
+      </optgroup>
+      <optgroup name="optional_opts">
+         <option name="fullname" type="string">Full, descriptive name</option>
+         <option name="comments" type="string">Comments</option>
+      </optgroup>
+      <transport method="put" path="location/desk/%(desk)s" />
+   </command>
+
+   <command name="show_desk">
+      Show the desk list, or details about a particular desk.
+      <p/>
+      <optgroup name="show_desk_opts" mandatory="True" fields="any">
+         <option name="desk" type="string" conflicts="all">Desk name</option>
+         <option name="all" type="flag" conflicts="desk">Select all</option>
+      </optgroup>
+      <transport trigger="all" method="get" path="location/desk" />
+      <transport trigger="desk" method="get" path="location/desk/%(desk)s" />
+   </command>
+
+   <command name="del_desk">
+      Delete a desk. See also del_location.
+      <optgroup name="del_desk_opts" mandatory="True" fields="all">
+         <option name="desk" type="string">Desk name</option>
+      </optgroup>
+      <transport method="delete" path="location/desk/%(desk)s" />
+   </command>
+
    <command name="add_building">
       Add a new building to the database. See also add_location.
       <optgroup name="add_building_input" mandatory="True" fields="all">

@@ -29,13 +29,12 @@ from brokertest import TestBrokerCommand
 class TestAddDesk(TestBrokerCommand):
 
     def testaddutdesk1(self):
-        command = ["add", "location", "--name", "utdesk1", "--type", "desk",
-                   "--parentname", "utroom1", "--parenttype", "room",
+        command = ["add", "desk", "--desk", "utdesk1", "--room", "utroom1",
                    "--fullname", "Desk utroom1/1"]
         self.noouttest(command)
 
     def testverifyaddutdesk1(self):
-        command = "show location --type desk --name utdesk1"
+        command = "show desk --desk utdesk1"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Desk: utdesk1", command)
 
