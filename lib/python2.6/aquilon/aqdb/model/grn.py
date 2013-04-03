@@ -33,7 +33,7 @@ class Grn(Base):
     _instance_label = 'grn'
     _class_label = 'GRN'
 
-    eon_id = Column(Integer, primary_key=True)
+    eon_id = Column(Integer, primary_key=True, autoincrement=False)
 
     # GRNs are case sensitive, so no AqStr here
     # TODO: is there a limit on the length of GRNs? 132 is the longest currently

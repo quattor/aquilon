@@ -77,6 +77,10 @@ if __name__ == '__main__':
         db.engine.echo = True
     src_session = sessionmaker(bind=db.engine)()
 
+    if db.engine.dialect.name == 'oracle' or \
+       db.engine.dialect.name == 'postgresql':
+        src_session.execute(text('SET TRANSACTION ISOLATION LEVEL SERIALIZABLE'))
+
     dest_engine = create_engine(opts.dsn, convert_unicode=True, echo=opts.verbose)
     dest_session = sessionmaker(bind=dest_engine)()
 
@@ -103,7 +107,7 @@ if __name__ == '__main__':
         dest_session.execute(text('PRAGMA foreign_keys = 0;'))
 
     for table in Base.metadata.sorted_tables:
-        total = db.engine.execute(table.count()).scalar()
+        total = src_session.execute(table.count()).scalar()
         print 'Processing %s (%d rows)' % (table, total),
         sys.stdout.flush()
         cnt = 0
@@ -111,7 +115,7 @@ if __name__ == '__main__':
         columns = table.columns.keys()
 
         NewRecord = dummy_mapper(table)
-        for record in db.engine.execute(table.select()):
+        for record in src_session.execute(table.select()):
             cnt = cnt + 1
             if not cnt % 15000:
                 print "... %d" % cnt,

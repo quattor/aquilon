@@ -1,0 +1,3 @@
+DROP SEQUENCE grn_eon_id_seq CASCADE;
+DROP SEQUENCE vlan_info_vlan_id_seq CASCADE;
+DROP SEQUENCE chassis_slot_slot_number_seq CASCADE;
