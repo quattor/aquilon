@@ -33,6 +33,8 @@ class Location(Base):
     """ How we represent location data in Aquilon """
     __tablename__ = 'location'
 
+    valid_parents = []
+
     id = Column(Integer, Sequence('location_id_seq'), primary_key=True)
 
     name = Column(AqStr(16), nullable=False)
@@ -138,11 +140,14 @@ class Location(Base):
             merged = self_part
         return merged
 
-    def __init__(self, parent=None, **kwargs):
+    def __init__(self, parent=None, name=None, fullname=None, **kwargs):
         # Keep compatibility with the old behavior of the "parent" attribute
         # when creating new objects. Note that both the location manipulation
         # commands and the data loader in the unittest suite depends on this.
         if parent is not None:
+            if parent.__class__ not in self.valid_parents:
+                raise AquilonError("{0} cannot be a parent of {1:lc} {2}."
+                                   .format(parent, self, name))
             session = object_session(parent)
             if not session:
                 raise AquilonError("The parent must be persistent")
@@ -156,7 +161,10 @@ class Location(Base):
                 session.add(LocationLink(child=self, parent=parent, distance=1))
             session.expire(parent, ["_child_links", "children"])
 
-        super(Location, self).__init__(**kwargs)
+        if not fullname:
+            fullname = name
+
+        super(Location, self).__init__(name=name, fullname=fullname, **kwargs)
         self._parent_dict = None
 
     @reconstructor
@@ -167,6 +175,9 @@ class Location(Base):
         session = object_session(self)
         if parent is None:  # pragma: no cover
             raise AquilonError("Parent location can be updated but not removed")
+        if parent.__class__ not in self.valid_parents:
+            raise AquilonError("{0} cannot be a parent of {1:l}."
+                               .format(parent, self))
 
         # Disable autoflush. We'll make use of SQLA's ability to replace
         # DELETE + INSERT for the same LocationLink with an UPDATE of the

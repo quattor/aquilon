@@ -59,3 +59,10 @@ def get_location(session, query_options=None, **kwargs):
         raise ArgumentError("There are multiple matches for %s %s." %
                             (cls._get_class_label(), name))
     return dblocation
+
+
+def add_location(session, cls, name, parent, **kwargs):
+    cls.get_unique(session, name, preclude=True)
+    dbloc = cls(name=name, parent=parent, **kwargs)
+    session.add(dbloc)
+    return dbloc

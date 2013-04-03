@@ -2366,23 +2366,6 @@
       <transport method="post" path="domain/%(domain)s/command/sync" />
    </command>
 
-   <command name="add_location">
-      Create a new location within the database, which can then be used to place
-      hosts and within service maps. Names of all locations are globally unique.
-      For example, you can only have one city 'ln' anywhere, and only one chassis called "np3c5".
-      <optgroup name="add_location_opts" mandatory="True" fields="all">
-         <option name="name" type="string">Short name of new location</option>
-         <option name="fullname" type="string">Full/descriptive name of new location</option>
-         <option name="type" type="string">Location type</option>
-         <option name="parentname" type="string">Short name of parent</option>
-         <option name="parenttype" type="string">Location type of parent</option>
-      </optgroup>
-      <optgroup name="add_location_optional" mandatory="False">
-         <option name="comments" type="string">Comments about the location</option>
-      </optgroup>
-      <transport method="put" path="location/generic/%(type)s/%(name)s" />
-   </command>
-
    <command name="show_location">
       Shows all locations of a given type
       or information about a specific location type and name.
@@ -2478,7 +2461,6 @@
       use --building=dd --rackid=120 --row=H --column=13.  The rackid
       option can also be prefixed by building name, so using
       --building=dd --rackid=dd120 --row=H --column=13 would also work.
-      See also add_location.
       <optgroup name="add_rack_input" mandatory="True" fields="all">
          <option name="rackid" type="string">Name of the new rack, or just the id number</option>
          <option name="row" type="string">Row of the tile location</option>
@@ -2573,7 +2555,7 @@
    </command>
 
    <command name="add_building">
-      Add a new building to the database. See also add_location.
+      Add a new building to the database.
       <optgroup name="add_building_input" mandatory="True" fields="all">
          <option name="building" type="string">Name of the new building</option>
          <option name="address" type="string">The building's address</option>
@@ -2623,7 +2605,7 @@
    </command>
 
    <command name="add_campus">
-      Add a new campus to the database. See also add_location.
+      Add a new campus to the database.
       <optgroup name="add_campus_input" mandatory="True" fields="all">
          <option name="campus" type="string">Name of the new campus</option>
          <option name="country" type="string">Name of the country that contains the campus</option>
@@ -2644,7 +2626,7 @@
    </command>
 
    <command name="add_room">
-      Add a new room to the database. See also add_location.
+      Add a new room to the database.
       <optgroup name="add_room_input" mandatory="True" fields="all">
          <option name="room" type="string">Name of the new room</option>
          <option name="building" type="string">Name of the building that contains the room</option>
@@ -2678,7 +2660,7 @@
    </command>
 
    <command name="add_bunker">
-      Add a new bunker to the database. See also add_location.
+      Add a new bunker to the database.
       <optgroup name="add_bunker_input" mandatory="True" fields="all">
          <option name="bunker" type="string">Name of the new bunker</option>
 	 <optgroup name="add_bunker_parent" mandatory="True" fields="any">
@@ -2728,7 +2710,7 @@
    </command>
 
    <command name="add_city">
-      Add a new city to the database. See also add_location.
+      Add a new city to the database.
       <p/>
       Cities have a plenary template named site/$region/$city/config. The timezone of the city will be available in this template as the global variable TIMEZONE.
       <optgroup name="add_city_options" mandatory="True" fields="all">
@@ -2782,7 +2764,7 @@
    </command>
 
    <command name="add_country">
-      Add a new country to the database. See also add_location.
+      Add a new country to the database.
       <optgroup name="add_country_options" mandatory="True" fields="all">
          <option name="country" type="string">Name of the new country</option>
          <option name="continent" type="string">Name of the continent that contains the country</option>
@@ -2816,7 +2798,7 @@
    </command>
 
    <command name="add_continent">
-      Add a new continent to the database. See also add_location.
+      Add a new continent to the database.
       <optgroup name="add_continent_options" mandatory="True" fields="all">
          <option name="continent" type="string">Name of the new continent</option>
          <option name="hub" type="string">Name of the hub, which the continent belongs to</option>
@@ -2884,7 +2866,7 @@
    </command>
 
    <command name="add_hub">
-      Add a new hub to the database. See also add_location.
+      Add a new hub to the database.
       <optgroup name="add_hub_options" mandatory="True" fields="all">
          <option name="hub" type="string">Name of the new hub</option>
       </optgroup>

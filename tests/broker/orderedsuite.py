@@ -65,7 +65,6 @@ from test_add_campus import TestAddCampus
 from test_add_city import TestAddCity
 from test_add_room import TestAddRoom
 from test_add_bunker import TestAddBunker
-from test_add_location import TestAddLocation
 from test_add_rack import TestAddRack
 from test_add_desk import TestAddDesk
 from test_add_vendor import TestAddVendor
@@ -294,7 +293,7 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestCountry, TestOrganization, TestHub,
                 TestAddCampus, TestAddCity,
                 TestAddBuilding, TestAddRoom, TestAddBunker,
-                TestAddLocation, TestAddRack, TestAddDesk,
+                TestAddRack, TestAddDesk,
                 TestAddVendor, TestAddCpu, TestAddModel,
                 TestAddFeature, TestParameterDefinitionFeature,
                 TestAddNetworkEnvironment, TestAddNetwork,

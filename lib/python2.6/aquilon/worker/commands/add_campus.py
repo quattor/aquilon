@@ -16,26 +16,26 @@
 # limitations under the License.
 """Contains the logic for `aq add campus`."""
 
-
-from aquilon.worker.processes import DSDBRunner
+from aquilon.aqdb.model import Country, Campus
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.commands.add_location import CommandAddLocation
+from aquilon.worker.dbwrappers.location import add_location
+from aquilon.worker.processes import DSDBRunner
 
 
-class CommandAddCampus(CommandAddLocation):
+class CommandAddCampus(BrokerCommand):
 
     required_parameters = ["country", "campus"]
 
     def render(self, session, logger, campus, country, fullname, comments,
                **arguments):
+        dbcountry = Country.get_unique(session, country, compel=True)
+        add_location(session, Campus, campus, dbcountry, fullname=fullname,
+                     comments=comments)
 
-        return CommandAddLocation.render(self, session, campus,
-                                         fullname, 'campus', country, 'country',
-                                         comments, logger=logger, **arguments)
-
-    def after_flush(self, session, new_loc, **arguments):
-        logger = arguments["logger"]
+        session.flush()
 
         dsdb_runner = DSDBRunner(logger=logger)
-        dsdb_runner.add_campus(new_loc.name, new_loc.comments)
+        dsdb_runner.add_campus(campus, comments)
         dsdb_runner.commit_or_rollback()
+
+        return

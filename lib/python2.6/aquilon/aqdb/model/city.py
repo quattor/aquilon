@@ -17,13 +17,15 @@
 """ City is a subclass of Location """
 from sqlalchemy import Column, Integer, String, ForeignKey
 
-from aquilon.aqdb.model import Location
+from aquilon.aqdb.model import Location, Campus, Country
 
 
 class City(Location):
     """ City is a subtype of location """
     __tablename__ = 'city'
     __mapper_args__ = {'polymorphic_identity': 'city'}
+
+    valid_parents = [Campus, Country]
 
     id = Column(Integer, ForeignKey('location.id',
                                     name='city_loc_fk',

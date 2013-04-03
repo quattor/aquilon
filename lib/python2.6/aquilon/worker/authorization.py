@@ -133,8 +133,7 @@ class AuthorizationBroker(object):
                               'add_disk', 'del_disk', 'del_disk_disk']:
                 self.raise_auth_error(principal, action, resource)
         if dbuser.role.name == 'location_admin':
-            if action not in ['add_location', 'del_location',
-                              'add_building', 'del_building',
+            if action not in ['add_building', 'del_building',
                               'add_city', 'del_city']:
                 self.raise_auth_error(principal, action, resource)
         if dbuser.role.name == 'telco_operations':

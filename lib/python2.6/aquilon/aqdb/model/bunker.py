@@ -17,7 +17,7 @@
 """ Bunker is a subclass of Location """
 from sqlalchemy import Column, Integer, ForeignKey
 
-from aquilon.aqdb.model import Location
+from aquilon.aqdb.model import Location, Building, Room
 
 _TN = 'bunker'
 
@@ -26,6 +26,8 @@ class Bunker(Location):
     """ Bunker is a subtype of location """
     __tablename__ = _TN
     __mapper_args__ = {'polymorphic_identity': _TN}
+
+    valid_parents = [Building, Room]
 
     id = Column(Integer, ForeignKey('location.id',
                                     name='%s_loc_fk' % _TN,
