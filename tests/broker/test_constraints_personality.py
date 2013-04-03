@@ -33,6 +33,12 @@ class TestPersonalityConstraints(TestBrokerCommand):
         out = self.badrequesttest(command.split(" "))
         self.matchoutput(out, "is still in use and cannot be deleted", command)
 
+    def testdelpersonalitywithcluster(self):
+        command = ["del_personality", "--personality", "vulcan-1g-desktop-prod",
+                   "--archetype", "esx_cluster"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "is still in use and cannot be deleted", command)
+
     def testverifydelpersonalitywithhostfailed(self):
         command = ["show_personality", "--personality=inventory",
                    "--archetype=aquilon"]

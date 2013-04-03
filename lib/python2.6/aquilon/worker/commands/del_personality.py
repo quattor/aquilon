@@ -16,9 +16,9 @@
 # limitations under the License.
 """Contains the logic for `aq del personality`."""
 
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import Personality, Host
+from aquilon.aqdb.model import Personality, Host, Cluster
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.templates.personality import PlenaryPersonality
 
 
@@ -30,13 +30,12 @@ class CommandDelPersonality(BrokerCommand):
         dbpersona = Personality.get_unique(session, name=personality,
                                            archetype=archetype, compel=True)
 
-        # Check dependencies
-        dbhosts = session.query(Host).filter_by(personality=dbpersona).first()
-        if dbhosts:
-            raise ArgumentError("Personality %s is still in use and cannot be "
-                                "deleted." % personality)
+        dbhost = session.query(Host).filter_by(personality=dbpersona).first()
+        dbcls = session.query(Cluster).filter_by(personality=dbpersona).first()
+        if dbhost or dbcls:
+            raise ArgumentError("{0} is still in use and cannot be deleted."
+                                .format(dbpersona))
 
-        # All clear
         plenary = PlenaryPersonality(dbpersona, logger=logger)
         session.delete(dbpersona)
         session.flush()
