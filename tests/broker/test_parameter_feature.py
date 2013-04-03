@@ -91,6 +91,11 @@ class TestParameterFeature(TestBrokerCommand):
 
         self.load_paramdefs(INTERFACEFEATURE, 'interface')
 
+    def test_090_verify_feature_proto_noerr(self):
+        cmd = SHOW_CMD + ["--format=proto"]
+        out = self.notfoundtest(cmd)
+        self.matchoutput(out, "No parameters found for personality unixeng-test", cmd)
+
     def load_paramdefs(self, feature, feature_type):
         for p in PARAM_DEFS:
             cmd = ["add_parameter_definition", "--feature", feature,

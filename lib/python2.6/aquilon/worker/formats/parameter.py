@@ -55,6 +55,8 @@ class ParameterFormatter(ObjectFormatter):
                     else:
                         skeleton.value = str(value)
         for link in dbpersonality.features:
+            if not link.feature.paramdef_holder:
+               continue
             param_definitions = link.feature.paramdef_holder.param_definitions
             for param_def in param_definitions:
                 value = param.get_feature_path(link, param_def.path,
