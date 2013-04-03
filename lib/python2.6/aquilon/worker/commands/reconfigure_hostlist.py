@@ -27,4 +27,6 @@ class CommandReconfigureHostlist(CommandReconfigureList):
 
     def render(self, hostlist, **kwargs):
         kwargs.pop("list", None)
+        self.deprecated_option("hostlist", "Please use --list instead.",
+                               **kwargs)
         CommandReconfigureList.render(self, list=hostlist, **kwargs)
