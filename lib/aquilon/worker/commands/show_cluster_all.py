@@ -23,6 +23,8 @@ from aquilon.worker.formats.cluster import SimpleClusterList
 
 class CommandShowClusterAll(BrokerCommand):
 
+    query_class = Cluster
+
     def render(self, session, **arguments):
-        q = session.query(Cluster.name).order_by(Cluster.name)
+        q = session.query(self.query_class.name).order_by(self.query_class.name)
         return SimpleClusterList(q.all())

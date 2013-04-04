@@ -21,15 +21,16 @@ from sqlalchemy.orm import joinedload, subqueryload, lazyload
 from aquilon.exceptions_ import NotFoundException
 from aquilon.aqdb.model import Cluster, VirtualMachine, ClusterResource
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.formats.cluster import ClusterList, SimpleClusterList
+from aquilon.worker.formats.cluster import ClusterList
 
 
 class CommandShowClusterCluster(BrokerCommand):
 
     required_parameters = ['cluster']
+    query_class = Cluster
 
     def render(self, session, cluster, **arguments):
-        q = session.query(Cluster)
+        q = session.query(self.query_class)
         vm_q = session.query(VirtualMachine)
         vm_q = vm_q.join(ClusterResource, Cluster)
 
@@ -50,7 +51,7 @@ class CommandShowClusterCluster(BrokerCommand):
                       subqueryload('resholder.resources'),
                       subqueryload('service_bindings'),
                       subqueryload('allowed_personalities'))
-        q = q.order_by(Cluster.name)
+        q = q.order_by(self.query_class.name)
         dbclusters = q.all()
         if cluster and not dbclusters:
             raise NotFoundException("Cluster %s not found." % cluster)

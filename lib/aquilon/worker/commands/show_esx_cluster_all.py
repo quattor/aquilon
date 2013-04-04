@@ -15,14 +15,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 from aquilon.aqdb.model import EsxCluster
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.formats.cluster import SimpleClusterList
+from aquilon.worker.commands.show_cluster_all import CommandShowClusterAll
 
 
-class CommandShowESXClusterAll(BrokerCommand):
+class CommandShowESXClusterAll(CommandShowClusterAll):
 
-    def render(self, session, **arguments):
-        q = session.query(EsxCluster.name).order_by(EsxCluster.name)
-        return SimpleClusterList(q.all())
+    query_class = EsxCluster
