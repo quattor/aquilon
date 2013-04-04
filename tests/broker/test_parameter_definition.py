@@ -262,6 +262,37 @@ class TestParameterDefinition(TestBrokerCommand):
         err = self.notfoundtest(cmd)
         self.matchoutput(err, "Not Found: No parameter definitions found for archetype aquilon", cmd)
 
+    def test_210_invalid_path_cleaned(self):
+        for path in ["/startslash", "endslash/"] :
+            cmd = ["add_parameter_definition", "--archetype", ARCHETYPE,
+                   "--path=%s" % path, "--template=foo", "--value_type=string"]
+            self.noouttest(cmd)
+        cmd = ["search_parameter_definition", "--archetype", ARCHETYPE]
+        out = self.commandtest(cmd)
+        self.searchoutput(out, r'Parameter Definition: startslash\s*', cmd)
+        self.searchoutput(out, r'Parameter Definition: endslash\s*', cmd)
+
+    def test_215_invalid_path1(self):
+        for path in ["!badchar", "@badchar", "#badchar", "$badchar", "%badchar", "^badchar",
+                     "&badchar", "*badchar" ":badchar", ";badcharjk", "+badchar"] :
+            cmd = ["add_parameter_definition", "--archetype", ARCHETYPE,
+                   "--path=%s" % path, "--template=foo", "--value_type=string"]
+            err = self.badrequesttest(cmd)
+            self.matchoutput(err, "Invalid path %s specified, path cannot start with special characters" % path,
+                             cmd)
+
+    def test_220_valid_path(self):
+        for path in ["multi/part1/part2", "noslash", "valid/with_under", "valid/with.dot",
+                     "valid/with-dash", "with_under", "with.dot", "with-dash"] :
+
+            cmd = ["add_parameter_definition", "--archetype", ARCHETYPE,
+                   "--path=%s" % path, "--template=foo", "--value_type=string"]
+            self.noouttest(cmd)
+
+            cmd = ["del_parameter_definition", "--archetype", ARCHETYPE,
+                   "--path=%s" % path]
+            self.noouttest(cmd)
+
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestParameterDefinition)
     unittest.TextTestRunner(verbosity=2).run(suite)

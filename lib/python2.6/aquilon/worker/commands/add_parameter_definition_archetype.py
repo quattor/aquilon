@@ -19,7 +19,7 @@
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Archetype, ArchetypeParamDef, ParamDefinition
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.dbwrappers.parameter import validate_value
+from aquilon.worker.dbwrappers.parameter import validate_param_definition
 
 
 class CommandAddParameterDefintionArchetype(BrokerCommand):
@@ -35,10 +35,14 @@ class CommandAddParameterDefintionArchetype(BrokerCommand):
         if not dbarchetype.paramdef_holder:
             dbarchetype.paramdef_holder = ArchetypeParamDef()
 
-        ParamDefinition.validate_type(value_type)
 
-        if default:
-            validate_value("default for path=%s" % path, value_type, default)
+        ## strip slash from path start and end
+        if path.startswith("/"):
+            path = path[1:]
+        if path.endswith("/"):
+            path = path[:-1]
+
+        validate_param_definition(path, value_type, default)
 
         ParamDefinition.get_unique(session, path=path,
                                    holder=dbarchetype.paramdef_holder, preclude=True)

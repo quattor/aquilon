@@ -18,7 +18,7 @@
 
 from aquilon.aqdb.model import Feature, FeatureParamDef, ParamDefinition
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.dbwrappers.parameter import validate_value
+from aquilon.worker.dbwrappers.parameter import validate_param_definition
 
 
 class CommandAddParameterDefintionFeature(BrokerCommand):
@@ -33,10 +33,13 @@ class CommandAddParameterDefintionFeature(BrokerCommand):
         if not dbfeature.paramdef_holder:
             dbfeature.paramdef_holder = FeatureParamDef()
 
-        ParamDefinition.validate_type(value_type)
+        ## strip slash from path start and end
+        if path.startswith("/"):
+            path = path[1:]
+        if path.endswith("/"):
+            path = path[:-1]
 
-        if default:
-            validate_value("default for path=%s" % path, value_type, default)
+        validate_param_definition(path, value_type, default)
 
         ParamDefinition.get_unique(session, path=path,
                                    holder=dbfeature.paramdef_holder, preclude=True)
