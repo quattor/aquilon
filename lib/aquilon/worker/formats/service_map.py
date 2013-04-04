@@ -59,7 +59,7 @@ class ServiceMapListFormatter(ListFormatter):
     def format_proto(self, sml, skeleton=None):
         servicemap_list_msg = self.loaded_protocols[self.protocol].ServiceMapList()
         for sm in sml:
-            self.add_service_map_msg(servicemap_list_msg.servicemaps.add(), sm)
+            self.add_service_map_data(servicemap_list_msg.servicemaps.add(), sm)
         return servicemap_list_msg.SerializeToString()
 
 ObjectFormatter.handlers[ServiceMapList] = ServiceMapListFormatter()

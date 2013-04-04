@@ -141,7 +141,7 @@ class PersonalityFormatter(ObjectFormatter):
                                      x.feature.name))
 
         for link in features:
-            self.add_featurelink_msg(skeleton.features.add(), link)
+            self.add_featurelink_data(skeleton.features.add(), link)
 
         for service in personality.services:
             rsvc_msg = skeleton.required_services.add()

@@ -305,7 +305,7 @@ class ObjectFormatter(object):
 
             Hosts used to be systems, which makes this method name a bit odd
         """
-        if not isinstance(host, Host):
+        if not isinstance(host, Host):  # pragma: no cover
             raise InternalError("add_host_data was called with {0} instead of "
                                 "a Host.".format(host))
         host_msg.type = "host"  # FIXME: is hardcoding this ok?
@@ -334,20 +334,22 @@ class ObjectFormatter(object):
         self.redirect_proto(host.operating_system, host_msg.operating_system)
         self.add_hardware_data(host_msg, host.machine)
 
-    def add_dns_domain_msg(self, dns_domain_msg, dns_domain):
+    def add_dns_domain_data(self, dns_domain_msg, dns_domain):
         dns_domain_msg.name = str(dns_domain.name)
 
-    def add_service_msg(self, service_msg, service, service_instance=False):
+    def add_service_data(self, service_msg, service, service_instance=None):
         """Adds a service message, will either nest the given service_instance in the message,
         or will add all the service instances which are available as a backref from a service object"""
         service_msg.name = str(service.name)
         if service_instance:
-            self.add_service_instance_msg(service_msg.serviceinstances.add(), service_instance)
+            msg = service_msg.serviceinstances.add()
+            self.add_service_instance_data(msg, service_instance)
         else:
             for si in service.instances:
-                self.add_service_instance_msg(service_msg.serviceinstances.add(), si)
+                msg = service_msg.serviceinstances.add()
+                self.add_service_instance_data(msg, si)
 
-    def add_service_instance_msg(self, si_msg, service_instance):
+    def add_service_instance_data(self, si_msg, service_instance):
         si_msg.name = str(service_instance.name)
         for host in service_instance.server_hosts:
             self.add_host_data(si_msg.servers.add(), host)
@@ -355,7 +357,7 @@ class ObjectFormatter(object):
         #for client in service_instance.clients:
         #    self.add_host_data(si_msg.clients.add(), client.host)
 
-    def add_service_map_msg(self, sm_msg, service_map):
+    def add_service_map_data(self, sm_msg, service_map):
         if service_map.location:
             sm_msg.location.name = str(service_map.location.name)
             sm_msg.location.location_type = \
@@ -365,8 +367,8 @@ class ObjectFormatter(object):
             sm_msg.network.env_name = \
                 service_map.network.network_environment.name
 
-        self.add_service_msg(sm_msg.service,
-                             service_map.service, service_map.service_instance)
+        self.add_service_data(sm_msg.service, service_map.service,
+                              service_map.service_instance)
         if hasattr(service_map, "personality"):
             sm_msg.personality.name = str(service_map.personality)
             sm_msg.personality.archetype.name = \
@@ -374,7 +376,7 @@ class ObjectFormatter(object):
         else:
             sm_msg.personality.archetype.name = 'aquilon'
 
-    def add_featurelink_msg(self, feat_msg, featlink):
+    def add_featurelink_data(self, feat_msg, featlink):
         feat_msg.name = str(featlink.feature.name)
         feat_msg.type = str(featlink.feature.feature_type)
         feat_msg.post_personality = featlink.feature.post_personality
@@ -384,7 +386,7 @@ class ObjectFormatter(object):
         if featlink.interface_name:
             feat_msg.interface_name = str(featlink.interface_name)
 
-    def add_feature_msg(self, feat_msg, feature):
+    def add_feature_data(self, feat_msg, feature):
         feat_msg.name = str(feature.name)
         feat_msg.type = str(feature.feature_type)
         feat_msg.post_personality = feature.post_personality

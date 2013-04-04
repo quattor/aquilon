@@ -61,7 +61,7 @@ class ServiceListFormatter(ListFormatter):
     def format_proto(self, sl, skeleton=None):
         servicelist_msg = self.loaded_protocols[self.protocol].ServiceList()
         for service in sl:
-            self.add_service_msg(servicelist_msg.services.add(), service)
+            self.add_service_data(servicelist_msg.services.add(), service)
         return servicelist_msg.SerializeToString()
 
 ObjectFormatter.handlers[ServiceList] = ServiceListFormatter()

@@ -198,10 +198,10 @@ class SimpleNetworkListFormatter(ListFormatter):
     def format_proto(self, nlist, skeleton=None):
         netlist_msg = self.loaded_protocols[self.protocol].NetworkList()
         for n in nlist:
-            self.add_net_msg(netlist_msg.networks.add(), n)
+            self.add_net_data(netlist_msg.networks.add(), n)
         return netlist_msg.SerializeToString()
 
-    def add_net_msg(self, net_msg, net):
+    def add_net_data(self, net_msg, net):
         net_msg.name = str(net.name)
         net_msg.id = net.id
         net_msg.ip = str(net.ip)

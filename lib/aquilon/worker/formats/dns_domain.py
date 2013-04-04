@@ -73,8 +73,8 @@ class DNSDomainListFormatter(ListFormatter):
         dns_domain_list_msg = \
                 self.loaded_protocols[self.protocol].DNSDomainList()
         for dns_domain in dns_domain_list:
-            self.add_dns_domain_msg(dns_domain_list_msg.dns_domains.add(),
-                                    dns_domain)
+            msg = dns_domain_list_msg.dns_domains.add()
+            self.add_dns_domain_data(msg, dns_domain)
         return dns_domain_list_msg.SerializeToString()
 
     def csv_fields(self, dns_domain):
