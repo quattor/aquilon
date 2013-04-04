@@ -213,10 +213,12 @@ class ResponsePage(resource.Resource):
         return defer.succeed(arguments)
 
     def format(self, result, request):
-        style = getattr(self, "output_format", None)
-        if style is None:
-            style = getattr(request, "output_format", "raw")
-        return self.formatter.format(style, result, request)
+        # This method is called to format error messages, and the only format
+        # we currently support for those is "raw"
+        #style = getattr(self, "output_format", None)
+        #if style is None:
+        #    style = getattr(request, "output_format", "raw")
+        return self.formatter.format("raw", result, request)
 
     def finishRender(self, result, request):
         if result:
