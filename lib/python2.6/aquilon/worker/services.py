@@ -27,7 +27,7 @@ from sqlalchemy.sql import or_
 
 from aquilon.exceptions_ import ArgumentError, InternalError
 from aquilon.aqdb.model import (Host, Cluster, Service, ServiceInstance,
-                                MetaCluster, EsxCluster)
+                                MetaCluster, EsxCluster, Archetype, Personality)
 from aquilon.worker.templates import (Plenary, PlenaryCollection,
                                       PlenaryServiceInstanceServer)
 
@@ -478,8 +478,11 @@ class HostChooser(Chooser):
 
         """Stores interim service instance lists."""
         q = self.session.query(Service)
-        q = q.filter(or_(Service.archetypes.contains(self.archetype),
-                         Service.personalities.contains(self.personality)))
+        q = q.outerjoin(Service.archetypes)
+        q = q.reset_joinpoint()
+        q = q.outerjoin(Service.personalities)
+        q = q.filter(or_(Archetype.id == self.archetype.id,
+                         Personality.id == self.personality.id))
         self.required_services = set(q.all())
 
         self.original_service_instances = {}
