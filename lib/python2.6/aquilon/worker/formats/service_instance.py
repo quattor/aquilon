@@ -99,8 +99,8 @@ class ServiceShareListFormatter(ObjectFormatter):
 
                 sharedata[dbshare.name] = {"disks": 0,
                                            "machines": 0,
-                                           "server": share_info["server"],
-                                           "mount": share_info["mount"]}
+                                           "server": share_info.server,
+                                           "mount": share_info.mount}
             sharedata[dbshare.name]["disks"] += dbshare.disk_count
             sharedata[dbshare.name]["machines"] += dbshare.machine_count
 

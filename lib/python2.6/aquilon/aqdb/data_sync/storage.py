@@ -16,11 +16,17 @@
 # limitations under the License.
 """ Routines to query information about NAS shares """
 
+from collections import namedtuple
+
 from aquilon.config import Config
+
+
+ShareInfo = namedtuple('ShareInfo', ['server', 'mount'])
+
 
 # Utility functions for service / resource based disk mounts
 # This should come from some external API...?
-def cache_storage_data():
+def cache_storage_data(only=None):
     """
     Scan a storeng-style data file, checking each line as we go
 
@@ -37,45 +43,50 @@ def cache_storage_data():
 
     config = Config()
     sharedata = {}
+    found_header = False
+    header_idx = {}
     with open(config.get("broker", "sharedata")) as datafile:
-        def process_nas_line(info):
-            # silently discard lines that don't have all of our reqd info.
-            for k in ["objtype", "pshare", "server", "dg"]:
-                if k not in info:
-                    return
-
-            if info["objtype"] != "pshare":
-                return
-
-            sharedata[info["pshare"]] = {
-                "server": info["server"],
-                "mount": "/vol/%s/%s" % (info["dg"], info["pshare"]),
-            }
-
         for line in datafile:
-            line = line.rstrip()
-
             if line[0] == '#':
                 # A header line
-                hdr = line[1:].split('|')
+                found_header = True
+                hdr = line[1:].rstrip().split('|')
+
+                header_idx = {}
+                for idx, name in enumerate(hdr):
+                    header_idx[name] = idx
+
+                # Silently discard lines that don't have all the required info
+                for k in ["objtype", "pshare", "server", "dg"]:
+                    if k not in header_idx:
+                        found_header = False
+            elif not found_header:
+                # We haven't found the right header line
+                continue
             else:
-                fields = line.split('|')
-                if len(fields) != len(hdr):  # silently ignore invalid lines
+                fields = line.rstrip().split('|')
+                if len(fields) != len(header_idx):  # Silently ignore invalid lines
+                    continue
+                if fields[header_idx["objtype"]] != "pshare":
                     continue
 
-                info = dict()
-                for i in range(0, len(hdr)):
-                    info[hdr[i]] = fields[i]
+                sharedata[fields[header_idx["pshare"]]] = ShareInfo(
+                    server=fields[header_idx["server"]],
+                    mount="/vol/%s/%s" % (fields[header_idx["dg"]],
+                                          fields[header_idx["pshare"]])
+                )
 
-                process_nas_line(info)
+                # Take a shortcut if we need just a single entry
+                if only and only == fields[header_idx["pshare"]]:
+                    break
 
         return sharedata
 
 
 def find_storage_data(dbshare, cache=None):
     if not cache:
-        cache = cache_storage_data()
+        cache = cache_storage_data(only=dbshare.name)
     if dbshare.name in cache:
         return cache[dbshare.name]
     else:
-        return {"server": None, "mount": None}
+        return ShareInfo(server=None, mount=None)

@@ -23,16 +23,17 @@ from operator import attrgetter
 from sqlalchemy.orm import joinedload, subqueryload, lazyload, contains_eager
 from sqlalchemy.orm.attributes import set_committed_value
 
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.exceptions_ import PartialError, IncompleteError
 from aquilon.aqdb.model import (Service, Machine, Chassis, Host,
                                 Personality, Cluster, City, Rack, Resource,
                                 ResourceHolder, HostResource, ClusterResource,
                                 VirtualMachine, Filesystem, RebootSchedule,
-                                Disk, Interface, AddressAssignment,
+                                Share, Disk, Interface, AddressAssignment,
                                 ServiceInstance, Switch)
+from aquilon.aqdb.data_sync.storage import cache_storage_data
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.templates.base import Plenary
 from aquilon.worker.locks import CompileKey
-from aquilon.exceptions_ import PartialError, IncompleteError
 
 
 class CommandFlush(BrokerCommand):
@@ -98,7 +99,10 @@ class CommandFlush(BrokerCommand):
                     VirtualMachine: [joinedload('machine'),
                                      joinedload('machine.primary_name'),
                                      joinedload('machine.primary_name.fqdn')],
+                    Share: [],
                 }
+
+                share_info = cache_storage_data()
 
                 for cls, options in  preload_classes.items():
                     q = session.query(cls)
@@ -119,6 +123,10 @@ class CommandFlush(BrokerCommand):
 
                     for res in q:
                         resource_by_id[res.id] = res
+                        try:
+                            res.populate_share_info(share_info)
+                        except AttributeError:
+                            pass
 
             if hosts or machines:
                 # Polymorphic loading cannot be applied to eager-loaded

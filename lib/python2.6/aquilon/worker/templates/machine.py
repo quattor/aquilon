@@ -21,7 +21,6 @@ import logging
 
 from aquilon.aqdb.model import Machine
 from aquilon.worker.locks import CompileKey
-from aquilon.aqdb.data_sync.storage import find_storage_data
 from aquilon.worker.templates.base import Plenary
 from aquilon.worker.templates.panutils import (StructureTemplate, pan_assign,
                                                pan_include, PanMetric,
@@ -125,13 +124,12 @@ class PlenaryMachineInfo(Plenary):
                     devname = "cciss/" + devname
             elif disk.disk_type == 'virtual_disk':
                 share = disk.share
-                share_info = find_storage_data(share)
 
                 params["path"] = "%s/%s.vmdk" % (self.machine, disk.device_name)
                 params["address"] = disk.address
                 params["sharename"] = share.name
-                params["server"] = share_info["server"]
-                params["mountpoint"] = share_info["mount"]
+                params["server"] = share.server
+                params["mountpoint"] = share.mount
 
                 tpl = params
 

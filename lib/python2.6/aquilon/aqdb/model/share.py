@@ -16,7 +16,10 @@
 # limitations under the License.
 
 from sqlalchemy import Integer, Column, ForeignKey
+from sqlalchemy.orm import reconstructor
+
 from aquilon.aqdb.model import Resource
+from aquilon.aqdb.data_sync.storage import find_storage_data
 
 _TN = 'share'
 
@@ -30,6 +33,29 @@ class Share(Resource):
                                     name='%s_resource_fk' % (_TN),
                                     ondelete='CASCADE'),
                                     primary_key=True)
+
+    def __init__(self, *args, **kwargs):
+        super(Share, self).__init__(*args, **kwargs)
+        self._init_cache()
+
+    @reconstructor
+    def _init_cache(self):
+        self._share_info = None
+
+    @property
+    def mount(self):
+        if not self._share_info:
+            self._share_info = find_storage_data(self)
+        return self._share_info.mount
+
+    @property
+    def server(self):
+        if not self._share_info:
+            self._share_info = find_storage_data(self)
+        return self._share_info.server
+
+    def populate_share_info(self, cache):
+        self._share_info = find_storage_data(self, cache)
 
 
 share = Share.__table__
