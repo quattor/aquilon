@@ -258,6 +258,9 @@ class TestUpdatePersonality(VerifyGrnsMixin, TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out, "Environment: prod", command)
 
+        command = ["cat", "--personality=desktop"]
+        out = self.commandtest(command)
+        self.searchoutput(out, r'"/system/personality/host_environment" = "prod";', command)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestUpdatePersonality)

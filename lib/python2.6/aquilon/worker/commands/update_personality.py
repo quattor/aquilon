@@ -87,6 +87,18 @@ class CommandUpdatePersonality(BrokerCommand):
                                     "be modified".format(str(dbpersona)))
             dbpersona.cluster_required = cluster_required
 
+        if host_environment is not None:
+            legacy_env = HostEnvironment.get_unique(session, 'legacy', compel=True)
+            if dbpersona.host_environment == legacy_env:
+                HostEnvironment.validate_name(host_environment)
+                Personality.validate_env_in_name(personality, host_environment)
+                dbpersona.host_environment = HostEnvironment.get_unique(session,
+                                                                        host_environment,
+                                                                        compel=True)
+            else:
+                raise ArgumentError("The personality '{0}' already has env set to '{1}'"
+                                    " and cannot be updated".format(str(dbpersona), host_environment))
+
         plenaries = PlenaryCollection(logger=logger)
 
         if grn or eon_id:
@@ -108,19 +120,8 @@ class CommandUpdatePersonality(BrokerCommand):
         if config_override is not None and \
            dbpersona.config_override != config_override:
             dbpersona.config_override = config_override
-            plenaries.append(Plenary.get_plenary(dbpersona))
 
-        if host_environment is not None:
-            legacy_env = HostEnvironment.get_unique(session, 'legacy', compel=True)
-            if dbpersona.host_environment == legacy_env:
-                HostEnvironment.validate_name(host_environment)
-                Personality.validate_env_in_name(personality, host_environment)
-                dbpersona.host_environment = HostEnvironment.get_unique(session,
-                                                                        host_environment,
-                                                                        compel=True)
-            else:
-                raise ArgumentError("The personality '{0}' already has env set to '{1}'"
-                                    " and cannot be updated".format(str(dbpersona), host_environment))
+        plenaries.append(Plenary.get_plenary(dbpersona))
         session.flush()
 
         q = session.query(Cluster)
