@@ -47,6 +47,8 @@ class Feature(Base):
                                     nullable=False))
     comments = deferred(Column(String(255), nullable=True))
 
+    __table_args__ = (UniqueConstraint(name, feature_type,
+                                       name='%s_name_type_uk' % _TN),)
     __mapper_args__ = {'polymorphic_on': feature_type}
 
     @validates('links')
@@ -60,8 +62,6 @@ class Feature(Base):
 
 feature = Feature.__table__  # pylint: disable=C0103
 feature.primary_key.name = '%s_pk' % _TN
-feature.append_constraint(UniqueConstraint('name', 'feature_type',
-                          name='%s_name_type_uk' % _TN))
 feature.info['unique_fields'] = ['name', 'feature_type']
 
 
@@ -183,6 +183,14 @@ class FeatureLink(Base):
                            backref=backref('features',
                                            cascade='all, delete-orphan'))
 
+    # The behavior of UNIQUE constraints in the presence of NULL columns is not
+    # universal. We need the Oracle compatible behavior, meaning:
+    # - Trying to add a row like ('a', NULL) two times should fail
+    # - Trying to add ('b', NULL) after ('a', NULL) should succeed
+    __table_args__ = (UniqueConstraint(feature_id, model_id, archetype_id,
+                                       personality_id, interface_name,
+                                       name='%s_uk' % _LINK),)
+
     def __init__(self, feature=None, archetype=None, personality=None,
                  model=None, interface_name=None):
         # Archetype and personality are mutually exclusive. This makes
@@ -249,13 +257,5 @@ class FeatureLink(Base):
 
         return self.feature.cfg_path
 
-
 _lnk = FeatureLink.__table__  # pylint: disable=C0103
 _lnk.primary_key.name = '%s_pk' % _LINK
-# The behavior of UNIQUE constraints in the presence of NULL columns is not
-# universal. We need the Oracle compatible behavior, meaning:
-# - Trying to add a row like ('a', NULL) two times should fail
-# - Trying to add ('b', NULL) after ('a', NULL) should succeed
-_lnk.append_constraint(UniqueConstraint('feature_id', 'model_id', 'archetype_id',
-                                        'personality_id', 'interface_name',
-                                        name='%s_uk' % _LINK))

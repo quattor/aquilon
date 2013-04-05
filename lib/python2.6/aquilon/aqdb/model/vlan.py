@@ -31,6 +31,8 @@ MAX_VLANS = 4096  # IEEE 802.1Q standard
 
 VLAN_TYPES = ('storage', 'vmotion', 'user', 'unknown', 'vulcan-mgmt')
 
+_TN = 'observed_vlan'
+_ABV = 'obs_vlan'
 _VTN = 'vlan_info'
 
 
@@ -42,6 +44,13 @@ class VlanInfo(Base):
     vlan_id = Column(Integer, primary_key=True, autoincrement=False)
     port_group = Column(AqStr(32), nullable=False)
     vlan_type = Column(Enum(32, VLAN_TYPES), nullable=False)
+
+    __table_args__ = (UniqueConstraint(port_group,
+                                       name='%s_port_group_uk' % _VTN),
+                      CheckConstraint('vlan_id < %d' % MAX_VLANS,
+                                      name='%s_max_vlan_id_ck' % _VTN),
+                      CheckConstraint('vlan_id >= 0',
+                                      name='%s_min_vlan_id_ck' % _VTN))
 
     @classmethod
     def get_vlan_id(cls, session, port_group, compel=InternalError):
@@ -64,25 +73,17 @@ class VlanInfo(Base):
 
 vlaninfo = VlanInfo.__table__  # pylint: disable=C0103
 vlaninfo.primary_key.name = '%s_pk' % _VTN
-vlaninfo.append_constraint(
-    UniqueConstraint('port_group', name='%s_port_group_uk' % _VTN))
 vlaninfo.info['unique_fields'] = ['port_group']
 vlaninfo.info['extra_search_fields'] = ['vlan_id']
-
-vlaninfo.append_constraint(
-    CheckConstraint('vlan_id < %d' % MAX_VLANS,
-                    name='%s_max_vlan_id_ck' % _VTN))
-vlaninfo.append_constraint(
-    CheckConstraint('vlan_id >= 0',
-                    name='%s_min_vlan_id_ck' % _VTN))
-
-_TN = 'observed_vlan'
-_ABV = 'obs_vlan'
 
 
 class ObservedVlan(Base):
     """ reports the observance of a vlan/network on a switch """
     __tablename__ = 'observed_vlan'
+    __table_args__ = (CheckConstraint('vlan_id < %d' % MAX_VLANS,
+                                      name='%s_max_vlan_id_ck' % _TN),
+                      CheckConstraint('vlan_id >= 0',
+                                      name='%s_min_vlan_id_ck' % _TN))
 
     switch_id = Column(Integer, ForeignKey('switch.hardware_entity_id',
                                            ondelete='CASCADE',
@@ -159,13 +160,5 @@ class ObservedVlan(Base):
                                 "and VLAN %s" % (switch.fqdn, vlan_id))
         return nets[0].network
 
-
 obsvlan = ObservedVlan.__table__  # pylint: disable=C0103
 obsvlan.primary_key.name = '%s_pk' % _TN
-
-obsvlan.append_constraint(
-    CheckConstraint('vlan_id < %d' % MAX_VLANS,
-                    name='%s_max_vlan_id_ck' % _TN))
-obsvlan.append_constraint(
-    CheckConstraint('vlan_id >= 0',
-                    name='%s_min_vlan_id_ck' % _TN))

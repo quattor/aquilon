@@ -121,7 +121,12 @@ class Interface(Base):
                       primaryjoin=master_id == id,
                       backref=backref('slaves'))
 
+    # Order matters here, utils/constraints.py checks for endswith("NOT NULL")
+    __table_args__ = (UniqueConstraint(mac, name='%s_mac_addr_uk' % _ABV),
+                      UniqueConstraint(hardware_entity_id, name,
+                                       name='%s_hw_name_uk' % _ABV))
     __mapper_args__ = {'polymorphic_on': interface_type}
+
     # Interfaces also have the property 'assignments' which is defined in
     # address_assignment.py
 
@@ -242,8 +247,6 @@ class VlanInterface(Interface):
 
     _class_label = "VLAN Interface"
 
-    __mapper_args__ = {'polymorphic_identity': 'vlan'}
-
     extra_fields = ['vlan_id', 'parent']
 
     name_check = re.compile(r"^[a-z]+\d*\.[1-9]\d*$")
@@ -263,6 +266,14 @@ class VlanInterface(Interface):
                       primaryjoin=parent_id == Interface.id,
                       backref=backref('vlans',
                                       collection_class=attribute_mapped_collection('vlan_id')))
+
+    __mapper_args__ = {'polymorphic_identity': 'vlan'}
+    # Order matters here, utils/constraints.py checks for endswith("NOT NULL")
+    __extra_table_args__ = (
+        CheckConstraint("(parent_id IS NOT NULL AND vlan_id > 0 AND vlan_id < %s) "
+                        "OR interface_type <> 'vlan'" % MAX_VLANS,
+                        name="%s_vlan_ck" % _ABV),
+        UniqueConstraint(parent_id, vlan_id, name="%s_parent_vlan_uk" % _ABV))
 
     @validates('vlan_id')
     def validate_vlan_id(self, key, value):
@@ -332,16 +343,3 @@ interface = Interface.__table__  # pylint: disable=C0103
 interface.primary_key.name = '%s_pk' % _TN
 interface.info['unique_fields'] = ['name', 'hardware_entity']
 interface.info['extra_search_fields'] = ['mac']
-
-interface.append_constraint(UniqueConstraint('mac', name='%s_mac_addr_uk' % _ABV))
-
-interface.append_constraint(
-    UniqueConstraint('hardware_entity_id', 'name', name='%s_hw_name_uk' % _ABV))
-
-# Order matters here, utils/constraints.py checks for endswith("NOT NULL")
-interface.append_constraint(
-    CheckConstraint("(parent_id IS NOT NULL AND vlan_id > 0 AND vlan_id < %s) "
-                    "OR interface_type <> 'vlan'" % MAX_VLANS,
-                    name="%s_vlan_ck" % _ABV))
-interface.append_constraint(
-    UniqueConstraint('parent_id', 'vlan_id', name="%s_parent_vlan_uk" % _ABV))

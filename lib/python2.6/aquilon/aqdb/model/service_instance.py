@@ -56,6 +56,8 @@ class ServiceInstance(Base):
 
     service = relation(Service, lazy=False, innerjoin=True, backref='instances')
 
+    __table_args__ = (UniqueConstraint(service_id, name, name='svc_inst_uk'),)
+
     def __format__(self, format_spec):
         instance = "%s/%s" % (self.service.name, self.name)
         return self.format_helper(format_spec, instance)
@@ -269,12 +271,8 @@ class ServiceInstance(Base):
 
         return cache
 
-
 service_instance = ServiceInstance.__table__  # pylint: disable=C0103
-
 service_instance.primary_key.name = 'svc_inst_pk'
-service_instance.append_constraint(
-    UniqueConstraint('service_id', 'name', name='svc_inst_uk'))
 service_instance.info['abrev'] = _ABV
 service_instance.info['unique_fields'] = ['name', 'service']
 
@@ -292,7 +290,6 @@ class BuildItem(Base):
                                  ForeignKey('service_instance.id',
                                             name='build_item_svc_inst_fk'),
                                  primary_key=True)
-
 
 build_item = BuildItem.__table__  # pylint: disable=C0103
 build_item.primary_key.name = 'build_item_pk'

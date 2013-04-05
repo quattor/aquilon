@@ -46,9 +46,9 @@ class Archetype(Base):
 
     comments = deferred(Column(String(255), nullable=True))
 
+    __table_args__ = (UniqueConstraint(name, name='%s_uk' % _TN),)
+
 
 archetype = Archetype.__table__  # pylint: disable=C0103
-archetype.info['unique_fields'] = ['name']
-
 archetype.primary_key.name = '%s_pk' % _TN
-archetype.append_constraint(UniqueConstraint('name', name='%s_uk' % _TN))
+archetype.info['unique_fields'] = ['name']

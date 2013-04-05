@@ -87,6 +87,12 @@ class Network(Base):
     # The routers relation is defined in router_address.py
     router_ips = association_proxy("routers", "ip")
 
+    __table_args__ = (UniqueConstraint(network_environment_id, ip,
+                                       name='%s_net_env_ip_uk' % _TN),
+                      CheckConstraint("cidr >= 1 AND cidr <= 32",
+                                      name="%s_cidr_ck" % _TN),
+                      Index('%s_loc_id_idx' % _TN, location_id))
+
     def __init__(self, **kw):
         args = kw.copy()
         if "network" not in kw:
@@ -248,16 +254,8 @@ class Network(Base):
 
 network = Network.__table__  # pylint: disable=C0103
 network.primary_key.name = '%s_pk' % _TN
-
-network.append_constraint(UniqueConstraint('network_environment_id', 'ip',
-                                           name='%s_net_env_ip_uk' % _TN))
-network.append_constraint(CheckConstraint("cidr >= 1 AND cidr <= 32",
-                                          name="%s_cidr_ck" % _TN))
-
 network.info['unique_fields'] = ['network_environment', 'ip']
 network.info['extra_search_fields'] = ['name', 'cidr']
-
-Index('%s_loc_id_idx' % _TN, network.c.location_id)
 
 
 def get_net_id_from_ip(session, ip, network_environment=None):

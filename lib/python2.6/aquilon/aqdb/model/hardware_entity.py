@@ -74,6 +74,8 @@ class HardwareEntity(Base):
                             backref=backref('hardware_entity', uselist=False,
                                             passive_deletes=True))
 
+    __table_args__ = (UniqueConstraint(label, name='%s_label_uk' % _TN),
+                      Index('hw_ent_loc_idx', location_id))
     __mapper_args__ = {'polymorphic_on': hardware_type}
 
     _label_check = re.compile("^[a-z][a-z0-9]{,62}$")
@@ -202,6 +204,4 @@ class HardwareEntity(Base):
 
 hardware_entity = HardwareEntity.__table__  # pylint: disable=C0103
 hardware_entity.primary_key.name = '%s_pk' % _TN
-hardware_entity.append_constraint(UniqueConstraint('label', name='%s_label_uk' % _TN))
 hardware_entity.info['unique_fields'] = ['label']
-Index('hw_ent_loc_idx', hardware_entity.c.location_id)

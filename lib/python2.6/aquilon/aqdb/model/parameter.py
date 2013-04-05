@@ -64,8 +64,6 @@ paramholder.primary_key.name = '%s_pk' % _PARAM_HOLDER
 class PersonalityParameter(ParameterHolder):
     """ Association of parameters with Personality """
 
-    __mapper_args__ = {'polymorphic_identity': 'personality'}
-
     personality_id = Column(Integer,
                             ForeignKey('personality.id',
                                        name='%s_persona_fk' % _PARAM_HOLDER,
@@ -77,6 +75,10 @@ class PersonalityParameter(ParameterHolder):
                                     cascade='all, delete-orphan',
                                     uselist=False))
 
+    __extra_table_args__ = (UniqueConstraint(personality_id,
+                                             name='param_holder_persona_uk'),)
+    __mapper_args__ = {'polymorphic_identity': 'personality'}
+
     @property
     def holder_name(self):
         return "%s/%s" % (self.personality.archetype.name,  # pylint: disable=C0103
@@ -86,9 +88,6 @@ class PersonalityParameter(ParameterHolder):
     def holder_object(self):
         return self.personality
 
-paramholder.append_constraint(UniqueConstraint('personality_id',
-                                               name='param_holder_persona_uk'))
-
 
 class Parameter(Base):
     """
@@ -96,7 +95,6 @@ class Parameter(Base):
     """
 
     __tablename__ = _TN
-    __table_args__ = {'oracle_compress': True}
 
     id = Column(Integer, Sequence('%s_seq' % _TN), primary_key=True)
     value = Column(MutationDict.as_mutable(JSONEncodedDict))
@@ -111,6 +109,8 @@ class Parameter(Base):
     holder = relation(ParameterHolder, innerjoin=True,
                       backref=backref('parameters',
                                       cascade='all, delete-orphan'))
+
+    __table_args__ = {'oracle_compress': True}
 
     @staticmethod
     def tokey(path):

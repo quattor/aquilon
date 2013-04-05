@@ -107,6 +107,11 @@ class AddressAssignment(Base):
                                                 passive_deletes=True,
                                                 order_by=[ip]))
 
+    __table_args__ = (UniqueConstraint(interface_id, ip,
+                                       name="%s_iface_ip_uk" % _ABV),
+                      UniqueConstraint(interface_id, _label,
+                                       name="%s_iface_label_uk" % _ABV))
+
     @property
     def logical_name(self):
         """
@@ -162,10 +167,6 @@ class AddressAssignment(Base):
 
 address = AddressAssignment.__table__  # pylint: disable=C0103
 address.primary_key.name = '%s_pk' % _TN
-address.append_constraint(
-    UniqueConstraint("interface_id", "ip", name="%s_iface_ip_uk" % _ABV))
-address.append_constraint(
-    UniqueConstraint("interface_id", "label", name="%s_iface_label_uk" % _ABV))
 
 # Assigned to external classes here to avoid circular dependencies.
 Interface.addresses = association_proxy('assignments', 'ip')

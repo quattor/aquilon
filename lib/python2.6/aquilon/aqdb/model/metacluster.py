@@ -212,10 +212,9 @@ class MetaClusterMember(Base):
                        backref=backref('_metacluster', uselist=False,
                                        cascade='all, delete-orphan'))
 
+    __table_args__ = (UniqueConstraint(cluster_id, name='%s_uk' % _MCM),)
     __mapper_args__ = {'extension': ValidateMetaCluster()}
 
 metamember = MetaClusterMember.__table__  # pylint: disable=C0103
 metamember.primary_key.name = '%s_pk' % _MCM
-metamember.append_constraint(
-    UniqueConstraint('cluster_id', name='%s_uk' % _MCM))
 metamember.info['unique_fields'] = ['metacluster', 'cluster']

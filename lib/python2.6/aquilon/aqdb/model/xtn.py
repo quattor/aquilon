@@ -38,7 +38,6 @@ def utcnow(context, tz=tzutc()):
 class Xtn(Base):
     """ auditing information from command invocations """
     __tablename__ = 'xtn'
-    __table_args__ = {'oracle_compress': True}
 
     xtn_id = Column(GUID(), primary_key=True)
     username = Column(String(65), nullable=False, default='nobody')
@@ -54,6 +53,14 @@ class Xtn(Base):
     # N.B. NO "cascade". Transaction logs are *never* deleted/changed
     # Given that, we don't really *need* the foreign key, but we'll keep it
     # unless it proves otherwise cumbersome for performance (mainly insert).
+
+    __table_args__ = (Index('XTN_USERNAME_IDX', username,
+                            oracle_compress=True),
+                      Index('XTN_COMMAND_IDX', command, oracle_compress=True),
+                      Index('XTN_ISREADONLY_IDX', is_readonly,
+                            oracle_bitmap=True),
+                      Index('XTN_START_TIME_IDX', desc(start_time)),
+                      {'oracle_compress': True})
 
     @property
     def return_code(self):
@@ -89,54 +96,47 @@ class Xtn(Base):
             msg.append("[Result: " + " ".join(results) + "]")
         return " ".join(msg)
 
-
 xtn = Xtn.__table__  # pylint: disable=C0103
 xtn.primary_key.name = 'XTN_PK'  # pylint: disable=C0103
-
-Index('XTN_USERNAME_IDX', xtn.c.username, oracle_compress=True)
-Index('XTN_COMMAND_IDX', xtn.c.command, oracle_compress=True)
-Index('XTN_ISREADONLY_IDX', xtn.c.is_readonly, oracle_bitmap=True)
-Index('XTN_START_TIME_IDX', desc(xtn.c.start_time))
 
 
 class XtnEnd(Base):
     """ A record of a completed command/transaction """
     __tablename__ = 'xtn_end'
-    __table_args__ = {'oracle_compress': True}
-
-    xtn_id = Column(GUID(),
-                    ForeignKey(Xtn.xtn_id, name='XTN_END_XTN_FK'),
+    xtn_id = Column(GUID(), ForeignKey(Xtn.xtn_id, name='xtn_end_xtn_fk'),
                     primary_key=True)
     return_code = Column(Integer, nullable=False)
     end_time = Column(UTCDateTime(timezone=True),
                       default=utcnow, nullable=False)
 
-xtn_end = XtnEnd.__table__
+    __table_args__ = (Index('XTN_END_RETURN_CODE_IDX', return_code,
+                            oracle_compress=True),
+                      {'oracle_compress': True})
+
+xtn_end = XtnEnd.__table__  # pylint: disable=C0103
 xtn_end.primary_key.name = 'XTN_END_PK'
-Index('XTN_END_RETURN_CODE_IDX', xtn_end.c.return_code, oracle_compress=True)
 
 
 class XtnDetail(Base):
     """ Key/Value argument pairs for executed commands """
     __tablename__ = 'xtn_detail'
-    __table_args__ = {'oracle_compress': True}
 
-    xtn_id = Column(GUID(),
-                    ForeignKey(Xtn.xtn_id, name='XTN_DTL_XTN_FK'),
+    xtn_id = Column(GUID(), ForeignKey(Xtn.xtn_id, name='xtn_dtl_xtn_fk'),
                     primary_key=True)
 
     name = Column(String(255), primary_key=True)
     value = Column(String(255), default='True', primary_key=True)
 
+    __table_args__ = (Index('XTN_DTL_NAME_IDX', name,
+                            oracle_compress=True),
+                      Index('XTN_DTL_VALUE_IDX', value, oracle_compress=True),
+                      {'oracle_compress': True})
 
 xtn_detail = XtnDetail.__table__  # pylint: disable=C0103
 xtn_detail.primary_key.name = 'XTN_DTL_PK'
 
 Xtn.args = relationship(XtnDetail, lazy="joined", order_by=[XtnDetail.name])
 
-
-Index('xtn_dtl_name_idx', xtn_detail.c.name, oracle_compress=True)
-Index('xtn_dtl_value_idx', xtn_detail.c.value, oracle_compress=True)
 
 if config.has_option('database', 'audit_schema'):  # pragma: no cover
     schema = config.get('database', 'audit_schema')

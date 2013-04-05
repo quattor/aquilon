@@ -136,6 +136,7 @@ class Cluster(Base):
 
     metacluster = association_proxy('_metacluster', 'metacluster')
 
+    __table_args__ = (UniqueConstraint(name, name='cluster_uk'),)
     __mapper_args__ = {'polymorphic_on': cluster_type}
 
     @property
@@ -271,7 +272,6 @@ class Cluster(Base):
 
 cluster = Cluster.__table__  # pylint: disable=C0103
 cluster.primary_key.name = 'cluster_pk'
-cluster.append_constraint(UniqueConstraint('name', name='cluster_uk'))
 cluster.info['unique_fields'] = ['name']
 
 
@@ -590,13 +590,13 @@ class HostClusterMember(Base):
                     backref=backref('_cluster', uselist=False,
                                     cascade='all, delete-orphan'))
 
+    __table_args__ = (UniqueConstraint(host_id,
+                                       name='host_cluster_member_host_uk'),
+                      UniqueConstraint(cluster_id, node_index,
+                                       name='host_cluster_member_node_uk'))
 
 hcm = HostClusterMember.__table__  # pylint: disable=C0103
 hcm.primary_key.name = '%s_pk' % _HCM
-hcm.append_constraint(
-    UniqueConstraint('host_id', name='host_cluster_member_host_uk'))
-hcm.append_constraint(UniqueConstraint('cluster_id', 'node_index',
-                                       name='host_cluster_member_node_uk'))
 hcm.info['unique_fields'] = ['cluster', 'host']
 
 Host.cluster = association_proxy('_cluster', 'cluster')

@@ -73,6 +73,11 @@ class PersonalityServiceMap(Base):
     personality = relation(Personality, innerjoin=True)
     network = relation(Network)
 
+    #TODO: reconsider the surrogate primary key?
+    __table_args__ = (UniqueConstraint(personality_id, service_instance_id,
+                                       location_id, network_id,
+                                       name='%s_loc_net_ins_uk' % _ABV),)
+
     #Archetype probably shouldn't be exposed at this table/object: This isn't
     #intended for use with Archetype, but I'm not 100% sure yet
     #def _archetype(self):
@@ -105,8 +110,3 @@ class PersonalityServiceMap(Base):
 
 psm = PersonalityServiceMap.__table__  # pylint: disable=C0103
 psm.primary_key.name = 'prsnlty_svc_map_pk'
-
-#TODO: reconsider the surrogate primary key?
-psm.append_constraint(
-    UniqueConstraint('personality_id', 'service_instance_id', 'location_id',
-                     'network_id', name='%s_loc_net_ins_uk' % _ABV))

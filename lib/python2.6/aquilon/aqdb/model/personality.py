@@ -66,6 +66,10 @@ class Personality(Base):
 
     host_environment = relation(HostEnvironment, innerjoin=True)
 
+    __table_args__ = (UniqueConstraint(name, archetype_id,
+                                       name='%s_uk' % _TN),
+                      Index('%s_arch_idx' % _ABV, archetype_id))
+
     @property
     def is_cluster(self):
         return self.archetype.cluster_type is not None
@@ -86,13 +90,8 @@ class Personality(Base):
                                 .format(name, host_environment))
 
 personality = Personality.__table__   # pylint: disable=C0103
-
 personality.primary_key.name = '%s_pk' % _ABV
-personality.append_constraint(UniqueConstraint('name', 'archetype_id',
-                                               name='%s_uk' % _TN))
 personality.info['unique_fields'] = ['name', 'archetype']
-
-Index('%s_arch_idx' % _ABV, personality.c.archetype_id)
 
 
 class PersonalityGrnMap(Base):

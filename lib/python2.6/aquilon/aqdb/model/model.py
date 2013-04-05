@@ -32,6 +32,7 @@ class Model(Base):
     """ Vendor and Model are representations of the various manufacturers and
     the asset inventory of the kinds of machines we use in the plant """
     __tablename__ = 'model'
+
     id = Column(Integer, Sequence('model_id_seq'), primary_key=True)
     name = Column(AqStr(64), nullable=False)
 
@@ -45,6 +46,9 @@ class Model(Base):
     comments = Column(String(255))
 
     vendor = relation(Vendor)
+
+    __table_args__ = (UniqueConstraint(name, vendor_id,
+                                       name='model_name_vendor_uk'),)
 
     def __format__(self, format_spec):
         instance = "%s/%s" % (self.vendor.name, self.name)
@@ -64,12 +68,7 @@ class Model(Base):
         session = object_session(self)
         return self.default_nic_model(session)
 
-
 model = Model.__table__  # pylint: disable=C0103
 model.primary_key.name = 'model_pk'
-
-model.append_constraint(UniqueConstraint('name', 'vendor_id',
-                                         name='model_name_vendor_uk'))
-
 model.info['unique_fields'] = ['name', 'vendor']
 model.info['extra_search_fields'] = ['machine_type']

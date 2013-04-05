@@ -39,6 +39,7 @@ class MachineSpecs(Base):
     _def_memory = {'workstation': 2048, 'blade': 8192, 'rackmount': 16384}
 
     __tablename__ = 'machine_specs'
+
     id = Column(Integer, Sequence('mach_specs_id_seq'), primary_key=True)
 
     model_id = Column(Integer, ForeignKey('model.id',
@@ -72,16 +73,14 @@ class MachineSpecs(Base):
     cpu = relation(Cpu, innerjoin=True)
     nic_model = relation(Model, foreign_keys=nic_model_id)
 
+    __table_args__ = (UniqueConstraint(model_id,
+                                       name='machine_specs_model_uk'),)
+
     @property
     def disk_name(self):
         if self.controller_type == 'cciss':
             return 'c0d0'
         return 'sda'
 
-
 machine_specs = MachineSpecs.__table__  # pylint: disable=C0103
 machine_specs.primary_key.name = 'machine_specs_pk'
-
-#for now, need a UK on model_id. WILL be a name AND a model_id as UK.
-machine_specs.append_constraint(
-    UniqueConstraint('model_id', name='machine_specs_model_uk'))

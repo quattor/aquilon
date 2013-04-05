@@ -50,9 +50,11 @@ class Location(Base):
 
     comments = Column(String(255), nullable=True)
 
-    __mapper_args__ = {'polymorphic_on': location_type}
-
     default_dns_domain = relation(DnsDomain)
+
+    __table_args__ = (UniqueConstraint(name, location_type,
+                                       name='loc_name_type_uk'),)
+    __mapper_args__ = {'polymorphic_on': location_type}
 
     def get_p_dict(self):
         d = {str(self.location_type): self}
@@ -206,14 +208,9 @@ class Location(Base):
         session.expire(parent, ["_child_links", "children"])
         session.expire(self, ["_parent_links", "parent", "parents"])
 
-
 location = Location.__table__  # pylint: disable=C0103
-
 location.primary_key.name = 'location_pk'
 location.info['unique_fields'] = ['name', 'location_type']
-
-location.append_constraint(
-    UniqueConstraint('name', 'location_type', name='loc_name_type_uk'))
 
 
 class LocationLink(Base):

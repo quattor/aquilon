@@ -67,6 +67,8 @@ class NetworkEnvironment(Base):
 
     dns_environment = relation(DnsEnvironment)
 
+    __table_args__ = (UniqueConstraint(name, name='%s_name_uk' % _ABV),)
+
     @property
     def is_default(self):
         return self.name == _config.get("site", "default_network_environment")
@@ -80,11 +82,8 @@ class NetworkEnvironment(Base):
                                                        "default_network_environment"),
                                   compel=InternalError)
 
-
 netenv = NetworkEnvironment.__table__  # pylint: disable=C0103
 netenv.primary_key.name = '%s_pk' % _TN
-
-netenv.append_constraint(UniqueConstraint('name', name='%s_name_uk' % _ABV))
 netenv.info['unique_fields'] = ['name']
 
 

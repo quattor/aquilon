@@ -63,6 +63,10 @@ class ServiceMap(Base):
                                                 cascade="all, delete-orphan"))
     network = relation(Network)
 
+    __table_args__ = (UniqueConstraint(service_instance_id, location_id,
+                                       network_id,
+                                       name='%s_loc_net_inst_uk' % _ABV),)
+
     @property
     def service(self):
         return self.service_instance.service
@@ -89,7 +93,3 @@ class ServiceMap(Base):
 
 service_map = ServiceMap.__table__  # pylint: disable=C0103
 service_map.primary_key.name = 'service_map_pk'
-
-service_map.append_constraint(
-    UniqueConstraint('service_instance_id', 'location_id', 'network_id',
-                     name='%s_loc_net_inst_uk' % _ABV))

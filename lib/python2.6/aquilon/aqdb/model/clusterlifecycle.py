@@ -42,11 +42,13 @@ class ClusterLifecycle(StateEngine, Base):
                }
 
     __tablename__ = _TN
+
     id = Column(Integer, Sequence('%s_id_seq' % _TN), primary_key=True)
     name = Column(Enum(32, transitions.keys()), nullable=False)
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
 
+    __table_args__ = (UniqueConstraint(name, name='%s_uk' % _TN),)
     __mapper_args__ = {'polymorphic_on': name}
 
     def __repr__(self):
@@ -55,7 +57,6 @@ class ClusterLifecycle(StateEngine, Base):
 
 clusterlifecycle = ClusterLifecycle.__table__  # pylint: disable=C0103
 clusterlifecycle.primary_key.name = '%s_pk' % _TN
-clusterlifecycle.append_constraint(UniqueConstraint('name', name='%s_uk' % _TN))
 clusterlifecycle.info['unique_fields'] = ['name']
 
 event.listen(clusterlifecycle, "after_create",

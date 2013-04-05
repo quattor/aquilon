@@ -103,6 +103,10 @@ class Host(Base):
     operating_system = relation(OperatingSystem, innerjoin=True)
     owner_grn = relation(Grn, innerjoin=True)
 
+    __table_args__ = (UniqueConstraint(machine_id, branch_id,
+                                       name='host_machine_branch_uk'),
+                      Index('host_prsnlty_idx', personality_id))
+
     @property
     def fqdn(self):
         return self.machine.fqdn
@@ -122,10 +126,6 @@ class Host(Base):
 
 host = Host.__table__  # pylint: disable=C0103
 host.primary_key.name = 'host_pk'
-host.append_constraint(
-    UniqueConstraint('machine_id', 'branch_id', name='host_machine_branch_uk'))
-
-Index('host_prsnlty_idx', host.c.personality_id)
 
 
 class HostGrnMap(Base):

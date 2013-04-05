@@ -71,6 +71,8 @@ class Disk(Base):
     machine = relation(Machine, backref=backref('disks', cascade='all',
                                                 order_by=[device_name]))
 
+    __table_args__ = (UniqueConstraint(machine_id, device_name,
+                                       name='disk_mach_dev_name_uk'),)
     __mapper_args__ = {'polymorphic_on': disk_type,
                        'with_polymorphic': '*'}
 
@@ -83,8 +85,6 @@ class Disk(Base):
 
 disk = Disk.__table__  # pylint: disable=C0103
 disk.primary_key.name = '%s_pk' % _TN
-disk.append_constraint(UniqueConstraint('machine_id', 'device_name',
-                                        name='disk_mach_dev_name_uk'))
 disk.info['unique_fields'] = ['machine', 'device_name']
 
 

@@ -39,8 +39,8 @@ class Realm(Base):
                                     default=datetime.now))
     comments = deferred(Column(String(255), nullable=True))
 
-realm = Realm.__table__  # pylint: disable=C0103
+    __table_args__ = (UniqueConstraint(name, name='realm_uk'),)
 
+realm = Realm.__table__  # pylint: disable=C0103
 realm.primary_key.name = 'realm_pk'
-realm.append_constraint(UniqueConstraint('name', name='realm_uk'))
 realm.info['unique_fields'] = ['name']

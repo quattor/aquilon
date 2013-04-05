@@ -38,10 +38,8 @@ class Vendor(Base):
                                     nullable=False))
     comments = Column(String(255), nullable=True)
 
+    __table_args__ = (UniqueConstraint(name, name='%s_uk' % _TN),)
 
 vendor = Vendor.__table__  # pylint: disable=C0103
-
 vendor.primary_key.name = '%s_pk' % _TN
-vendor.append_constraint(
-    UniqueConstraint('name', name='%s_uk' % _TN))
 vendor.info['unique_fields'] = ['name']

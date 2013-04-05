@@ -64,10 +64,10 @@ class Branch(Base):
     owner = relation(UserPrincipal, innerjoin=True)
 
     __mapper_args__ = {'polymorphic_on': branch_type}
+    __table_args__ = (UniqueConstraint(name, name='%s_uk' % _TN),)
 
 branch = Branch.__table__  # pylint: disable=C0103
 branch.primary_key.name = '%s_pk' % _TN
-branch.append_constraint(UniqueConstraint('name', name='%s_uk' % _TN))
 branch.info['unique_fields'] = ['name']
 
 
@@ -93,12 +93,11 @@ class Domain(Branch):
     allow_manage = Column(Boolean(name="%s_allow_manage_ck" % _DMN),
                           nullable=False, default=True)
 
-    __mapper_args__ = {'polymorphic_identity': _DMN,
-                       'inherit_condition': domain_id == Branch.id}
-
     tracked_branch = relation(Branch, foreign_keys=tracked_branch_id,
                               backref=backref('trackers'))
 
+    __mapper_args__ = {'polymorphic_identity': _DMN,
+                       'inherit_condition': domain_id == Branch.id}
 
 domain = Domain.__table__  # pylint: disable=C0103
 domain.primary_key.name = '%s_pk' % _DMN
@@ -111,7 +110,6 @@ class Sandbox(Branch):
         by a user.  Multiple users can have a sandbox checked out.
     """
     __tablename__ = _SBX
-    __mapper_args__ = {'polymorphic_identity': _SBX}
 
     sandbox_id = Column(Integer, ForeignKey('branch.id', name='%s_fk' % _SBX,
                                             ondelete='CASCADE'),
@@ -119,6 +117,7 @@ class Sandbox(Branch):
 
     base_commit = Column(AqStr(40), nullable=False)
 
+    __mapper_args__ = {'polymorphic_identity': _SBX}
 
 sandbox = Sandbox.__table__  # pylint: disable=C0103
 sandbox.primary_key.name = '%s_pk' % _SBX

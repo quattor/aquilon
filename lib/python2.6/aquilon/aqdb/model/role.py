@@ -41,9 +41,8 @@ class Role(Base):
 
     comments = deferred(Column(String(255), nullable=True))
 
+    __table_args__ = (UniqueConstraint(name, name='role_uk'),)
 
 role = Role.__table__  # pylint: disable=C0103
-
 role.primary_key.name = 'role_pk'
-role.append_constraint(UniqueConstraint('name', name='role_uk'))
 role.info['unique_fields'] = ['name']

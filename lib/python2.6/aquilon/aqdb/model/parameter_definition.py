@@ -78,6 +78,9 @@ class ArchetypeParamDef(ParamDefHolder):
                          backref=backref('paramdef_holder', uselist=False,
                                     cascade='all, delete-orphan'))
 
+    __extra_table_args__ = (UniqueConstraint(archetype_id,
+                                             name='param_def_holder_archetype_uk'),)
+
     @property
     def holder_name(self):
         return "%s" % self.archetype.name  # pylint: disable=C0103
@@ -90,8 +93,6 @@ class ArchetypeParamDef(ParamDefHolder):
 class FeatureParamDef(ParamDefHolder):
     """ valid parameter paths which can be associated with this feature """
 
-    __mapper_args__ = {'polymorphic_identity': 'feature'}
-
     feature_id = Column(Integer,
                         ForeignKey('feature.id',
                                    name='%s_feature_fk' % _PARAM_DEF_HOLDER,
@@ -102,6 +103,10 @@ class FeatureParamDef(ParamDefHolder):
                        backref=backref('paramdef_holder', uselist=False,
                                     cascade='all, delete-orphan'))
 
+    __extra_table_args__ = (UniqueConstraint(feature_id,
+                                             name='param_def_holder_feature_uk'),)
+    __mapper_args__ = {'polymorphic_identity': 'feature'}
+
     @property
     def holder_name(self):
         return "%s" % self.feature.name  # pylint: disable=C0103
@@ -110,11 +115,6 @@ class FeatureParamDef(ParamDefHolder):
     def holder_object(self):
         return self.feature
 
-param_definition_holder.append_constraint(
-    UniqueConstraint('feature_id', name='param_def_holder_feature_uk'))
-param_definition_holder.append_constraint(
-    UniqueConstraint('archetype_id', name='param_def_holder_archetype_uk'))
-
 
 class ParamDefinition(Base):
     """
@@ -122,7 +122,6 @@ class ParamDefinition(Base):
     """
 
     __tablename__ = _TN
-    __table_args__ = {'oracle_compress': True}
     _class_label = 'Parameter Definition'
     _instance_label = 'path'
 
@@ -145,6 +144,8 @@ class ParamDefinition(Base):
     holder = relation(ParamDefHolder, innerjoin=True,
                       backref=backref('param_definitions',
                                       cascade='all, delete-orphan'))
+
+    __table_args__ = {'oracle_compress': True}
 
     @property
     def template_base(self, base_object):

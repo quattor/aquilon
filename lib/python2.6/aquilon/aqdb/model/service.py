@@ -57,14 +57,14 @@ class Service(Base):
                                     nullable=False))
     comments = Column(String(255), nullable=True)
 
+    __table_args__ = (UniqueConstraint(name, name='svc_name_uk'),)
+
     @property
     def cfg_path(self):
         return 'service/%s' % (self.name)
 
 service = Service.__table__  # pylint: disable=C0103
-
 service.primary_key.name = 'service_pk'
-service.append_constraint(UniqueConstraint('name', name='svc_name_uk'))
 service.info['unique_fields'] = ['name']
 
 
@@ -87,11 +87,10 @@ class ServiceListItem(Base):
                                               ondelete='CASCADE'),
                           primary_key=True)
 
+    __table_args__ = (Index('srvlst_archtyp_idx', archetype_id),)
 
 sli = ServiceListItem.__table__  # pylint: disable=C0103
 sli.primary_key.name = '%s_pk' % _SLI
-
-Index('srvlst_archtyp_idx', sli.c.archetype_id)
 
 Service.archetypes = relation(Archetype, secondary=sli,
                               backref=backref("services"))
@@ -115,10 +114,10 @@ class PersonalityServiceListItem(Base):
                                                  ondelete='CASCADE'),
                              primary_key=True)
 
+    __table_args__ = (Index('%s_prsnlty_idx' % _ABV, personality_id),)
+
 psli = PersonalityServiceListItem.__table__  # pylint: disable=C0103
 psli.primary_key.name = '%s_pk' % _ABV
-
-Index('%s_prsnlty_idx' % _ABV, psli.c.personality_id)
 
 Service.personalities = relation(Personality, secondary=psli,
                                  backref=backref("services"))
