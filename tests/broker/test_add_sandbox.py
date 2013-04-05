@@ -87,7 +87,8 @@ class TestAddSandbox(TestBrokerCommand):
 
     def testaddchangetest2sandbox(self):
         command = ["add", "sandbox", "--sandbox", "changetest2"]
-        out = self.commandtest(command)
+        # Progress report may be displayed on stderr, ignore it
+        out, err = self.successtest(command)
         sandboxdir = os.path.join(self.sandboxdir, "changetest2")
         self.matchoutput(out, "Created sandbox: %s" % sandboxdir, command)
         self.failUnless(os.path.exists(sandboxdir),
@@ -101,7 +102,8 @@ class TestAddSandbox(TestBrokerCommand):
     def testuppercase1(self):
         # For testing mixed-case add.
         command = ["add", "sandbox", "--sandbox", "CamelCaseTest1"]
-        out = self.commandtest(command)
+        # Progress report may be displayed on stderr, ignore it
+        out, err = self.successtest(command)
         sandboxdir = os.path.join(self.sandboxdir, "camelcasetest1")
         self.matchoutput(out, "Created sandbox: %s" % sandboxdir, command)
         self.failUnless(os.path.exists(sandboxdir),
@@ -110,7 +112,8 @@ class TestAddSandbox(TestBrokerCommand):
     def testuppercase2(self):
         # For testing deletion of a sandbox added with mixed case.
         command = ["add", "sandbox", "--sandbox", "CamelCaseTest2"]
-        out = self.commandtest(command)
+        # Progress report may be displayed on stderr, ignore it
+        out, err = self.successtest(command)
         sandboxdir = os.path.join(self.sandboxdir, "camelcasetest2")
         self.matchoutput(out, "Created sandbox: %s" % sandboxdir, command)
         self.failUnless(os.path.exists(sandboxdir),
