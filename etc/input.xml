@@ -2465,8 +2465,9 @@
          <option name="fullname" type="string">Full, descriptive name</option>
          <option name="comments" type="string">Comments</option>
       </optgroup>
-      <transport method="put" path="location/add_rack_to_building/%(building)s/%(rackid)s" />
-      <transport method="put" trigger="room" path="location/add_rack_to_room/%(room)s/%(rackid)s" />
+      <transport method="put" path="location/rack/building/%(building)s/%(rackid)s" />
+      <transport method="put" trigger="room" path="location/rack/room/%(room)s/%(rackid)s" />
+      <transport method="put" trigger="bunker" path="location/rack/bunker/%(bunker)s/%(rackid)s" />
    </command>
 
    <command name="update_rack">

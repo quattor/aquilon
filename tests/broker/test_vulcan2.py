@@ -224,10 +224,40 @@ class TestVulcan20(TestBrokerCommand):
 
         command = ["cat", "--cluster", "utmc8", "--data"]
         out = self.commandtest(command)
+        self.matchoutput(out, "structure template clusterdata/utmc8;", command)
+        self.matchoutput(out, '"system/metacluster/name" = "utmc8";', command)
+        self.matchoutput(out, '"system/metacluster/type" = "meta";', command)
+        self.searchoutput(out,
+                          r'"system/metacluster/members" = list\(\s*'
+                          r'"utpgcl0",\s*'
+                          r'"utpgcl1"\s*'
+                          r'\);',
+                          command)
+        self.matchoutput(out, '"system/build" = "build";', command)
+        self.matchoutput(out,
+                         '"system/metacluster/sysloc/location" = "ut.ny.na";',
+                         command)
+        self.matchoutput(out,
+                         '"system/metacluster/sysloc/continent" = "na";',
+                         command)
+        self.matchoutput(out,
+                         '"system/metacluster/sysloc/city" = "ny";',
+                         command)
+        self.matchoutput(out,
+                         '"system/metacluster/sysloc/campus" = "ny";',
+                         command)
+        self.matchoutput(out,
+                         '"system/metacluster/sysloc/building" = "ut";',
+                         command)
         self.matchoutput(out,
                          '"system/resources/resourcegroup" = '
                          'append(create("resource/cluster/utmc8/'
                          'resourcegroup/utmc8as1/config"));',
+                         command)
+        self.matchoutput(out,
+                         '"system/resources/resourcegroup" = '
+                         'append(create("resource/cluster/utmc8/'
+                         'resourcegroup/utmc8as2/config"));',
                          command)
 
     def test_103_add_share_to_rg(self):

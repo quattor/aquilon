@@ -40,16 +40,30 @@ class PlenaryMachineInfo(Plenary):
         loc = dbmachine.location
         self.hub = loc.hub.fullname.lower()
         self.building = loc.building.name
+        self.city = loc.city.name
+        self.continent = loc.continent.name
+
         if loc.rack:
             self.rack = loc.rack.name
             self.rackrow = loc.rack.rack_row
             self.rackcol = loc.rack.rack_column
         else:
             self.rack = None
+
         if loc.room:
             self.room = loc.room.name
         else:
             self.room = None
+
+        if loc.bunker:
+            self.bunker = loc.bunker.name
+        else:
+            self.bunker = None
+
+        if loc.campus:
+            self.campus = loc.campus.name
+        else:
+            self.campus = None
 
         self.dns_search_domains = []
         parents = loc.parents[:]
@@ -61,11 +75,6 @@ class PlenaryMachineInfo(Plenary):
                              for map in parent.dns_maps
                              if map.dns_domain.name not in self.dns_search_domains]
             self.dns_search_domains.extend(extra_domains)
-
-        if loc.campus:
-            self.campus = loc.campus.name
-        else:
-            self.campus = None
 
         self.sysloc = loc.sysloc()
 
@@ -168,6 +177,9 @@ class PlenaryMachineInfo(Plenary):
 
         # Firstly, location
         pan_assign(lines, "location", self.sysloc)
+        pan_assign(lines, "sysloc/building", self.building)
+        pan_assign(lines, "sysloc/city", self.city)
+        pan_assign(lines, "sysloc/continent", self.continent)
         if self.rack:
             pan_assign(lines, "rack/name", self.rack)
             if self.rackrow:
@@ -187,6 +199,8 @@ class PlenaryMachineInfo(Plenary):
         #    pan_assign(lines, "sysloc/hub", self.hub)
         if self.campus:
             pan_assign(lines, "sysloc/campus", self.campus)
+        if self.bunker:
+            pan_assign(lines, "sysloc/bunker", self.bunker)
         if self.dns_search_domains:
             pan_assign(lines, "sysloc/dns_search_domains",
                        self.dns_search_domains)

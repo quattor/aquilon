@@ -76,6 +76,10 @@ class PlenaryMetaClusterData(Plenary):
         if dbloc.building:
             pan_assign(lines, "system/metacluster/sysloc/building",
                        dbloc.building.name)
+        if dbloc.room:
+            pan_assign(lines, "system/cluster/rack/room", dbloc.room)
+        if dbloc.bunker:
+            pan_assign(lines, "system/cluster/sysloc/bunker", dbloc.bunker.name)
         if dbloc.rack:
             pan_assign(lines, "system/metacluster/rack/row",
                        dbloc.rack.rack_row)

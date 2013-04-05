@@ -85,7 +85,7 @@ class TestUpdateRack(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "rack,ut3,room,utroom1,b,3", command)
         self.matchoutput(out, "rack,ut8,building,ut,g,8", command)
-        self.matchoutput(out, "rack,ut9,room,utroom2,h,9", command)
+        self.matchoutput(out, "rack,ut9,bunker,utbunker2,h,9", command)
         self.matchoutput(out, "rack,np997,building,np,xx,77", command)
         self.matchoutput(out, "rack,np998,building,np,vv,66", command)
         self.matchoutput(out, "rack,np999,building,np,zz,a", command)
@@ -110,6 +110,8 @@ class TestUpdateRack(TestBrokerCommand):
         self.matchoutput(out, '"rack/name" = "ut9";', command)
         self.matchoutput(out, '"rack/row" = "h";', command)
         self.matchoutput(out, '"rack/column" = "9";', command)
+        self.matchoutput(out, '"rack/room" = "utroom2";', command)
+        self.matchoutput(out, '"sysloc/bunker" = "utbunker2";', command)
 
     def test_100_updateroom(self):
         command = ['update_rack', '--rack=ut8', '--room=utroom1']

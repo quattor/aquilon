@@ -24,12 +24,13 @@ from aquilon.aqdb.model import Rack
 from aquilon.worker.dbwrappers.location import get_location
 
 
-def get_or_create_rack(session, rackid, rackrow, rackcolumn,
-                       building=None, room=None, fullname=None, comments=None):
-    dblocation = get_location(session, building=building, room=room)
-    if not dblocation or not dblocation.building:
-        raise ArgumentError("No parent (building or room) given for the rack.")
+def get_or_create_rack(session, rackid, rackrow, rackcolumn, building=None,
+                       room=None, bunker=None, fullname=None, comments=None):
+    dblocation = get_location(session, building=building, room=room,
+                              bunker=bunker)
     dbbuilding = dblocation.building
+    if not dbbuilding:  # pragma: no cover
+        raise ArgumentError("The rack must be inside a building.")
 
     # The database contains normalized values so we have to normalize the input
     # before doing any comparisons.
