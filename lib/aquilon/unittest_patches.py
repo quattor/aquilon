@@ -20,10 +20,10 @@ import sys
 import os
 # sbin/aqd.py, we'll start it after the patch is done
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                             "..", "..", "..", "sbin"))
-# lib/python2.6/config.py
+                             "..", "..", "sbin"))
+# lib/aquilon/config.py
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                             "..", "..", "..", "lib", "python2.6"))
+                             "..", "..", "lib"))
 
 from aquilon.config import Config
 from socket import gaierror
@@ -81,7 +81,7 @@ socket.gethostbyname = fake_gethostbyname
 
 # worker/resources.py depends on it.
 sys.argv[0] = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                             "..", "..", "..", "sbin", "aqd.py")
+                           "..", "..", "sbin", "twistd.py")
 
 # start the broker
 import aqd

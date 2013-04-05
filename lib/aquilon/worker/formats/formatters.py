@@ -122,7 +122,7 @@ class ObjectFormatter(object):
 
     """
 
-    mako_dir = os.path.join(config.get("broker", "srcdir"), "lib", "python2.6",
+    mako_dir = os.path.join(config.get("broker", "srcdir"), "lib",
                             "aquilon", "worker", "formats", "mako")
     # Be careful about using the module_directory and cache!
     # Not using module_directory so that we don't have to worry about stale

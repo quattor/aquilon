@@ -20,7 +20,7 @@ import sys
 import os
 
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                             "..", "lib", "python2.6"))
+                             "..", "lib"))
 
 import aquilon.worker.depends
 import aquilon.aqdb.depends

@@ -88,7 +88,7 @@ class AQDMaker(object):
             log.msg("Finishing coverage")
             self.coverage.stop()
             aquilon_srcdir = os.path.join(config.get("broker", "srcdir"),
-                                          "lib", "python2.6", "aquilon")
+                                          "lib", "aquilon")
             sourcefiles = []
             for dirpath, dirnames, filenames in os.walk(aquilon_srcdir):
                 # FIXME: try to do this from the coverage config file

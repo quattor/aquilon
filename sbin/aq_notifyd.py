@@ -25,8 +25,7 @@ from threading import Thread, Condition
 import signal
 import errno
 
-sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                             "..", "lib", "python2.6"))
+sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "lib"))
 
 import aquilon.aqdb.depends
 

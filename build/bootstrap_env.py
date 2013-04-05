@@ -69,6 +69,6 @@ def bootstrap(dependencies, dir):
 
 if __name__ == '__main__':
     dir = os.path.dirname(os.path.realpath(__file__))
-    libdir = os.path.join(dir, '..', 'lib', 'python2.6')
+    libdir = os.path.join(dir, '..', 'lib')
     dependencies = gather_deps(libdir)
     print bootstrap(dependencies, dir)

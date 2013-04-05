@@ -46,8 +46,7 @@ class TestBrokerStart(unittest.TestCase):
 
         config = Config()
         aqd = os.path.join(config.get("broker", "srcdir"),
-                           "lib", "python2.6", "aquilon",
-                           "unittest_patches.py")
+                           "lib", "aquilon", "unittest_patches.py")
         pidfile = os.path.join(config.get("broker", "rundir"), "aqd.pid")
         logfile = config.get("broker", "logfile")
 

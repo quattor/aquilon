@@ -21,7 +21,7 @@ import os
 import sys
 
 _DIR = os.path.dirname(os.path.realpath(__file__))
-_LIBDIR = os.path.join(_DIR, '..', 'lib', 'python2.6')
+_LIBDIR = os.path.join(_DIR, '..', 'lib')
 _ETCDIR = os.path.join(_DIR, '..', 'etc')
 sys.path.insert(0, _LIBDIR)
 

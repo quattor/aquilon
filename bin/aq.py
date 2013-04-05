@@ -37,7 +37,7 @@ from threading import Thread
 
 BINDIR = os.path.dirname(os.path.realpath(sys.argv[0]))
 SRCDIR = os.path.join(BINDIR, "..")
-LIBDIR = os.path.join(SRCDIR, "lib", "python2.6")
+LIBDIR = os.path.join(SRCDIR, "lib")
 MANDIR = os.path.join(SRCDIR, "doc", "man")
 
 sys.path.append(LIBDIR)

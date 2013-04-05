@@ -40,7 +40,7 @@ import cx_Oracle
 
 BINDIR = os.path.dirname(os.path.realpath(__file__))
 SRCDIR = os.path.join(BINDIR, '..', '..')
-sys.path.append(os.path.join(SRCDIR, 'lib', 'python2.6'))
+sys.path.append(os.path.join(SRCDIR, 'lib'))
 
 from aquilon.config import Config
 

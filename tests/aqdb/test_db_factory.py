@@ -22,7 +22,7 @@ import sys
 
 
 _DIR = os.path.dirname(os.path.realpath(__file__))
-_LIBDIR = os.path.join(_DIR, "..", "..", "lib", "python2.6")
+_LIBDIR = os.path.join(_DIR, "..", "..", "lib")
 sys.path.insert(0, _LIBDIR)
 
 from aquilon.aqdb.db_factory import DbFactory

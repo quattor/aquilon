@@ -17,15 +17,12 @@
 # limitations under the License.
 """Module for tests that bypass the aq client."""
 
-import os
-import sys
 import unittest
 import urllib
 
 if __name__ == "__main__":
-    BINDIR = os.path.dirname(os.path.realpath(sys.argv[0]))
-    SRCDIR = os.path.join(BINDIR, "..", "..")
-    sys.path.append(os.path.join(SRCDIR, "lib", "python2.6"))
+    from broker import utils
+    utils.import_depends()
 
 from brokertest import TestBrokerCommand
 

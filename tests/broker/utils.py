@@ -24,7 +24,7 @@ def import_depends():
     import sys
 
     _DIR = os.path.dirname(os.path.realpath(__file__))
-    _LIBDIR = os.path.join(_DIR, "..", "..", "lib", "python2.6")
+    _LIBDIR = os.path.join(_DIR, "..", "..", "lib")
     _TESTDIR = os.path.join(_DIR, "..")
 
     if _LIBDIR not in sys.path:
