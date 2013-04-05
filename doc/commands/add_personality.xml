@@ -29,7 +29,6 @@
 	    </group>
 	    <arg choice="plain"><option>--personality <replaceable>PERSONALITY</replaceable></option></arg>
 	    <arg choice="plain"><option>--archetype <replaceable>ARCHETYPE</replaceable></option></arg>
-	    <arg choice="plain"><option>--host_environment <replaceable>HOSTENV</replaceable></option></arg>
 	    <group choice="req">
 		<arg choice="plain"><option>--grn <replaceable>GRN</replaceable></option></arg>
 		<arg choice="plain"><option>--eon_id <replaceable>EON_ID</replaceable></option></arg>
@@ -40,6 +39,7 @@
 	    </group>
 	    <arg choice="opt"><option>--comments <replaceable>COMMENTS</replaceable></option></arg>
 	    <arg choice="opt"><option>--copy_from <replaceable>COPY_FROM</replaceable></option></arg>
+	    <arg choice="opt"><option>--host_environment <replaceable>HOSTENV</replaceable></option></arg>
 	    <group choice="opt">
 	          <arg choice="plain"><option>--config_override</option></arg>
 	          <arg choice="plain"><option>--noconfig_override</option></arg>
@@ -87,8 +87,11 @@
 		</term>
 		<listitem>
 		    <para>
-			The name of the environment hosts belonging to this personality will live in. The valid
-			environments are: prod, uat, qa, dev, infra.
+			The name of the environment hosts for belonging to this personality. The valid
+			environments are: prod, uat, qa, dev, infra. For all purposes it is a required
+			field but archetypes can have a default env set which will be used during creating
+			personality. This can be set as default_environment key in the
+			<literal>archetype_&lt;archetype name&gt;</literal> section of the broker configuration.
 		    </para>
 		</listitem>
 	    </varlistentry>

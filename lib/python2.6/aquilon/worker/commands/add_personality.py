@@ -67,7 +67,6 @@ class CommandAddPersonality(BrokerCommand):
 
         dbgrn = lookup_grn(session, grn, eon_id, logger=logger,
                            config=self.config)
-        host_env = HostEnvironment.get_unique(session, host_environment, compel=True)
 
         dbpersona = Personality(name=personality, archetype=dbarchetype,
                                 cluster_required=bool(cluster_required),
