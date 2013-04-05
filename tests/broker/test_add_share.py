@@ -80,6 +80,20 @@ class TestAddShare(TestBrokerCommand):
         self.matchclean(out, "Comments", command)
         self.matchclean(out, "Share: test_share_2", command)
 
+    def testverifyshowshareproto(self):
+        command = ["show_share", "--cluster=utecl1", "--share=test_share_1",
+                   "--format", "proto"]
+        out = self.commandtest(command)
+        reslist = self.parse_resourcelist_msg(out, expect=1)
+        resource = reslist.resources[0]
+        self.failUnlessEqual(resource.name, "test_share_1")
+        self.failUnlessEqual(resource.type, "share")
+        self.failUnlessEqual(resource.share.server, "lnn30f1")
+        self.failUnlessEqual(resource.share.mount,
+                             "/vol/lnn30f1v1/test_share_1")
+        self.failUnlessEqual(resource.share.disk_count, 0)
+        self.failUnlessEqual(resource.share.machine_count, 0)
+
     def testverifyshowshareall(self):
         command = ["show_share", "--all"]
         out = self.commandtest(command)

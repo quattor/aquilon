@@ -38,7 +38,10 @@ class HostlinkFormatter(ResourceFormatter):
         if not container:
             container = self.loaded_protocols[self.protocol].ResourceList()
             skeleton = container.resources.add()
-        # TODO: add hostlinks to protobuf definition
+        skeleton.hostlink.target = hostlink.target
+        skeleton.hostlink.owner_user = hostlink.owner_user
+        if hostlink.owner_group:
+            skeleton.hostlink.owner_group = hostlink.owner_group
         return super(HostlinkFormatter, self).format_proto(hostlink,
                                                            skeleton)
 

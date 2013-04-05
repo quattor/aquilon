@@ -173,6 +173,30 @@ class TestAddAquilonHost(TestBrokerCommand):
                          "Provides: unittest20-e1.aqd-unittest.ms.com [%s]" % eth1_ip,
                          command)
 
+    def testverifyunittest20proto(self):
+        ip = self.net.unknown[13].usable[2]
+        eth0_ip = self.net.unknown[11].usable[0]
+        eth1_ip = self.net.unknown[12].usable[0]
+        command = ["show", "host", "--hostname",
+                   "unittest20.aqd-unittest.ms.com", "--format", "proto"]
+        out = self.commandtest(command)
+        hostlist = self.parse_hostlist_msg(out, expect=1)
+        host = hostlist.hosts[0]
+        found = False
+        for resource in host.resources:
+            if resource.name == "hostname" and resource.type == "service_address":
+                found = True
+                self.failUnlessEqual(resource.service_address.ip, str(ip))
+                self.failUnlessEqual(resource.service_address.fqdn,
+                                     "unittest20.aqd-unittest.ms.com")
+                ifaces = ",".join(sorted(resource.service_address.interfaces))
+                self.failUnlessEqual(ifaces, "eth0,eth1")
+        self.assertTrue(found,
+                        "Service address hostname not found in the resources. "
+                        "Existing resources: %s" %
+                        ", ".join(["%s %s" % (res.type, res.name) for res in
+                                              host.resources]))
+
     def testverifyunittest20hostname(self):
         ip = self.net.unknown[13].usable[2]
         command = ["show", "service", "address", "--name", "hostname",

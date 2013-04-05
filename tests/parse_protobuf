@@ -80,7 +80,8 @@ typemap = {
     "location": aqdlocations_pb2.LocationList(),
     "transaction": aqdaudit_pb2.TransactionList(),
     "parameter": aqdparameters_pb2.ParameterList(),
-    "parameter_definition": aqdparamdefinitions_pb2.ParamDefinitionList()
+    "parameter_definition": aqdparamdefinitions_pb2.ParamDefinitionList(),
+    "resource": aqdsystems_pb2.ResourceList(),
 }
 
 input = sys.stdin

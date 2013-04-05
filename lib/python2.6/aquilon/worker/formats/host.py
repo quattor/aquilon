@@ -55,10 +55,20 @@ class SimpleHostListFormatter(ListFormatter):
     def csv_fields(self, host):
         return (host.fqdn,)
 
-    def format_proto(self, shlist, skeleton=None):
+    def format_proto(self, hostlist, skeleton=None):
         hostlist_msg = self.loaded_protocols[self.protocol].HostList()
-        for h in shlist:
-            self.add_host_msg(hostlist_msg.hosts.add(), h)
+        for host in hostlist:
+            msg = hostlist_msg.hosts.add()
+            self.add_host_msg(msg, host)
+            for si in host.services_used:
+                srv_msg = msg.services_used.add()
+                srv_msg.service = si.service.name
+                srv_msg.instance = si.name
+            for si in host.services_provided:
+                srv_msg = msg.services_provided.add()
+                srv_msg.service = si.service.name
+                srv_msg.instance = si.name
+
         return hostlist_msg.SerializeToString()
 
 ObjectFormatter.handlers[SimpleHostList] = SimpleHostListFormatter()

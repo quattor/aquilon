@@ -17,6 +17,7 @@
 # limitations under the License.
 """Module for testing the add hostlink command."""
 
+import os
 import unittest
 
 if __name__ == "__main__":
@@ -28,7 +29,7 @@ from brokertest import TestBrokerCommand
 
 class TestAddHostlink(TestBrokerCommand):
 
-    def test_00_basic_hostlink(self):
+    def test_100_add_hostlink(self):
         command = ["add_hostlink", "--hostlink=app1",
                    "--target=/var/spool/hostlinks/app1",
                    "--hostname=server1.aqd-unittest.ms.com",
@@ -36,6 +37,11 @@ class TestAddHostlink(TestBrokerCommand):
                    "--comments=testing"]
         self.successtest(command)
 
+    def test_105_make(self):
+        command = ["make", "--hostname=server1.aqd-unittest.ms.com"]
+        self.successtest(command)
+
+    def test_110_show_hostlink(self):
         command = ["show_hostlink", "--hostlink=app1",
                    "--hostname=server1.aqd-unittest.ms.com"]
         out = self.commandtest(command)
@@ -46,23 +52,12 @@ class TestAddHostlink(TestBrokerCommand):
         self.matchoutput(out, "Target Path: /var/spool/hostlinks/app1", command)
         self.matchoutput(out, "Owner: user1", command)
 
-    def test_10_addexisting(self):
-        command = ["add_hostlink", "--hostlink=app1",
-                   "--target=/var/spool/hostlinks/app1",
-                   "--hostname=server1.aqd-unittest.ms.com",
-                   "--owner=user2"]
-        out = self.badrequesttest(command)
-        self.matchoutput(out, "already exists", command)
-
-    def test_15_notfound(self):
-        command = "show hostlink --hostlink app-does-not-exist"
-        self.notfoundtest(command.split(" "))
-
-    def test_30_checkhost(self):
+    def test_110_show_host(self):
         command = ["show_host", "--hostname=server1.aqd-unittest.ms.com"]
         out = self.commandtest(command)
         self.matchoutput(out, "Hostlink: app1", command)
 
+    def test_110_show_host_proto(self):
         command = ["show_host", "--hostname=server1.aqd-unittest.ms.com",
                    "--format=proto"]
         out = self.commandtest(command)
@@ -71,20 +66,53 @@ class TestAddHostlink(TestBrokerCommand):
         hostlinkfound = False
         for resource in host.resources:
             if resource.name == "app1" and resource.type == "hostlink":
-                # there is not yet a hostlink protobuf definition so just
-                # check that it is found
+                self.failUnlessEqual(resource.hostlink.target,
+                                     "/var/spool/hostlinks/app1")
+                self.failUnlessEqual(resource.hostlink.owner_user, "user1")
+                self.failUnlessEqual(resource.hostlink.owner_group, "")
                 hostlinkfound = True
         self.assertTrue(hostlinkfound,
-                        "Hostlink resource not found in protocol output")
+                        "Hostlink app1 not found in the resources. "
+                        "Existing resources: %s" %
+                        ", ".join(["%s %s" % (res.type, res.name) for res in
+                                              host.resources]))
 
-        command = ["cat", "--generate",
-                   "--hostname", "server1.aqd-unittest.ms.com", "--data"]
+    def test_110_cat_host(self):
+        command = ["cat", "--hostname", "server1.aqd-unittest.ms.com", "--data"]
         out = self.commandtest(command)
         self.matchoutput(out, '"system/resources/hostlink" = append(create("resource/host/server1.aqd-unittest.ms.com/hostlink/app1/config"))', command)
+
+    def test_200_add_existing(self):
+        command = ["add_hostlink", "--hostlink=app1",
+                   "--target=/var/spool/hostlinks/app1",
+                   "--hostname=server1.aqd-unittest.ms.com",
+                   "--owner=user2"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "already exists", command)
+
+    def test_200_notfound(self):
+        command = "show hostlink --hostlink app-does-not-exist"
+        self.notfoundtest(command.split(" "))
+
+    def test_300_del_hostlink(self):
+        plenary = self.plenary_name("resource", "host",
+                                    "server1.aqd-unittest.ms.com",
+                                    "hostlink", "app1", "config")
+        self.failUnless(os.path.exists(plenary),
+                        "Pleanry '%s' does not exist" % plenary)
 
         command = ["del_hostlink", "--hostlink=app1",
                    "--hostname=server1.aqd-unittest.ms.com"]
         self.successtest(command)
+
+        dir = os.path.dirname(plenary)
+        self.failIf(os.path.exists(dir),
+                    "Plenary directory '%s' still exists" % dir)
+
+    def test_310_verify_del(self):
+        command = ["show_host", "--hostname", "server1.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchclean(out, "Hostlink", command)
 
 
 if __name__ == '__main__':

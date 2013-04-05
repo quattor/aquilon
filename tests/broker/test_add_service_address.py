@@ -65,6 +65,29 @@ class TestAddServiceAddress(TestBrokerCommand):
                          command)
         self.matchoutput(out, "Interfaces: eth0, eth1", command)
 
+    def testverifyzebra2proto(self):
+        ip = self.net.unknown[13].usable[1]
+        command = ["show", "host",
+                   "--hostname", "unittest20.aqd-unittest.ms.com",
+                   "--format", "proto"]
+        out = self.commandtest(command)
+        hostlist = self.parse_hostlist_msg(out, expect=1)
+        host = hostlist.hosts[0]
+        found = False
+        for resource in host.resources:
+            if resource.name == "zebra2" and resource.type == "service_address":
+                found = True
+                self.failUnlessEqual(resource.service_address.ip, str(ip))
+                self.failUnlessEqual(resource.service_address.fqdn,
+                                     "zebra2.aqd-unittest.ms.com")
+                ifaces = ",".join(sorted(resource.service_address.interfaces))
+                self.failUnlessEqual(ifaces, "eth0,eth1")
+        self.assertTrue(found,
+                        "Service address zebra2 not found in the resources. "
+                        "Existing resources: %s" %
+                        ", ".join(["%s %s" % (res.type, res.name) for res in
+                                              host.resources]))
+
     def testverifyzebra2dns(self):
         ip = self.net.unknown[13].usable[1]
         command = ["show", "fqdn", "--fqdn", "zebra2.aqd-unittest.ms.com"]
