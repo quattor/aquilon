@@ -19,7 +19,7 @@
 from datetime import datetime
 
 from sqlalchemy import (Column, Integer, DateTime, Sequence, String, ForeignKey,
-                        UniqueConstraint)
+                        UniqueConstraint, Index)
 from sqlalchemy.orm import relation, backref, deferred
 
 from aquilon.aqdb.column_types import JSONEncodedDict, MutationDict
@@ -109,7 +109,8 @@ class Parameter(Base):
                       backref=backref('parameters',
                                       cascade='all, delete-orphan'))
 
-    __table_args__ = {'oracle_compress': True}
+    __table_args__ = (Index('%s_holder_idx' % _TN, holder_id),
+                      {'oracle_compress': True})
 
     @staticmethod
     def tokey(path):

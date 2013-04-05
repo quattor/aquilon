@@ -19,7 +19,7 @@
 from datetime import datetime
 
 from sqlalchemy import (Column, Integer, DateTime, Sequence, String,
-                        Boolean, Text, ForeignKey, UniqueConstraint)
+                        Boolean, Text, ForeignKey, UniqueConstraint, Index)
 from sqlalchemy.orm import (relation, backref, deferred)
 
 from aquilon.aqdb.model import Base, Archetype, Feature
@@ -144,7 +144,8 @@ class ParamDefinition(Base):
                       backref=backref('param_definitions',
                                       cascade='all, delete-orphan'))
 
-    __table_args__ = {'oracle_compress': True}
+    __table_args__ = (Index('%s_holder_idx' % _TN, holder_id),
+                      {'oracle_compress': True})
 
     @property
     def template_base(self, base_object):

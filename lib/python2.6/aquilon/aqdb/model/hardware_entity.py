@@ -78,7 +78,8 @@ class HardwareEntity(Base):
     __table_args__ = (UniqueConstraint(label, name='%s_label_uk' % _TN),
                       UniqueConstraint('primary_name_id',
                                        name='%s_pri_name_uk' % _ABV),
-                      Index('%s_location_idx' % _ABV, location_id))
+                      Index('%s_location_idx' % _ABV, location_id),
+                      Index('%s_model_idx' % _ABV, model_id))
     __mapper_args__ = {'polymorphic_on': hardware_type}
 
     _label_check = re.compile("^[a-z][a-z0-9]{,62}$")

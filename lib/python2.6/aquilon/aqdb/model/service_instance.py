@@ -19,7 +19,8 @@ from datetime import datetime
 import socket
 
 from sqlalchemy import (Column, Integer, Sequence, String, DateTime,
-                        ForeignKey, UniqueConstraint, PrimaryKeyConstraint)
+                        ForeignKey, UniqueConstraint, PrimaryKeyConstraint,
+                        Index)
 from sqlalchemy.orm import (relation, contains_eager, column_property, backref,
                             deferred, undefer, aliased)
 from sqlalchemy.orm.session import object_session
@@ -290,7 +291,8 @@ class BuildItem(Base):
                                             name='build_item_svc_inst_fk'),
                                  nullable=False)
 
-    __table_args__ = (PrimaryKeyConstraint(host_id, service_instance_id),)
+    __table_args__ = (PrimaryKeyConstraint(host_id, service_instance_id),
+                      Index('build_item_si_idx', service_instance_id))
 
 ServiceInstance.clients = relation(Host, secondary=BuildItem.__table__,
                                    backref=backref("services_used",

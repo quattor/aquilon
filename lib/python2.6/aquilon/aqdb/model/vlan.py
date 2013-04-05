@@ -19,7 +19,7 @@
 from datetime import datetime
 
 from sqlalchemy import (Column, Integer, DateTime, ForeignKey, CheckConstraint,
-                        UniqueConstraint, PrimaryKeyConstraint)
+                        UniqueConstraint, PrimaryKeyConstraint, Index)
 from sqlalchemy.orm import relation, backref, deferred, object_session
 from sqlalchemy.sql import func, and_
 
@@ -112,7 +112,10 @@ class ObservedVlan(Base):
                                            name="%s_pk" % _TN),
                       CheckConstraint(and_(vlan_id >= 0,
                                            vlan_id < MAX_VLANS),
-                                      name='%s_vlan_id_ck' % _TN))
+                                      name='%s_vlan_id_ck' % _TN),
+                      Index('%s_network_idx' % _TN, 'network_id'),
+                      Index('%s_vlan_idx' % _TN, 'vlan_id'))
+
     @property
     def port_group(self):
         if self.vlan:

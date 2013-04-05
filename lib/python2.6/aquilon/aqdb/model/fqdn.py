@@ -19,7 +19,7 @@
 from datetime import datetime
 
 from sqlalchemy import (Integer, DateTime, Sequence, Column, ForeignKey,
-                        UniqueConstraint)
+                        UniqueConstraint, Index)
 from sqlalchemy.orm import relation, deferred
 from sqlalchemy.orm.session import Session
 
@@ -56,7 +56,8 @@ class Fqdn(Base):
     dns_environment = relation(DnsEnvironment, innerjoin=True)
 
     __table_args__ = (UniqueConstraint(dns_domain_id, name, dns_environment_id,
-                                       name='%s_domain_name_env_uk' % _TN),)
+                                       name='%s_domain_name_env_uk' % _TN),
+                      Index('%s_dns_env_idx' % _TN, dns_environment_id))
 
     @property
     def fqdn(self):

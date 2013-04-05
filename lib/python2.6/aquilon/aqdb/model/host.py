@@ -105,7 +105,8 @@ class Host(Base):
 
     __table_args__ = (UniqueConstraint(machine_id, branch_id,
                                        name='host_machine_branch_uk'),
-                      Index('host_prsnlty_idx', personality_id))
+                      Index('host_prsnlty_idx', personality_id),
+                      Index('%s_branch_idx' % _TN, branch_id))
 
     @property
     def fqdn(self):

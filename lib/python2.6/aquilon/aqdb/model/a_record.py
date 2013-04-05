@@ -16,7 +16,7 @@
 # limitations under the License.
 """ Representation of DNS A records """
 
-from sqlalchemy import Integer, Column, ForeignKey
+from sqlalchemy import Integer, Column, ForeignKey, Index
 from sqlalchemy.orm import (relation, backref, mapper, deferred, object_session,
                             validates)
 from sqlalchemy.orm.attributes import instance_state
@@ -31,7 +31,6 @@ _DTN = 'dynamic_stub'
 
 class ARecord(DnsRecord):
     __tablename__ = _TN
-    __mapper_args__ = {'polymorphic_identity': _TN}
     _class_label = 'DNS Record'
 
     dns_record_id = Column(Integer, ForeignKey('dns_record.id',
@@ -56,6 +55,10 @@ class ARecord(DnsRecord):
     reverse_ptr = relation(Fqdn, foreign_keys=reverse_ptr_id,
                            backref=backref('reverse_entries',
                                            passive_deletes=True))
+
+    __table_args__ = (Index("%s_reverse_ptr_idx" % _TN, reverse_ptr_id),
+                      Index("%s_network_ip_idx" % _TN, network_id, ip))
+    __mapper_args__ = {'polymorphic_identity': _TN}
 
     def __format__(self, format_spec):
         if format_spec != "a":
@@ -102,10 +105,7 @@ class ARecord(DnsRecord):
                              (self.fqdn.dns_environment, value.dns_environment))
         return value
 
-
 arecord = ARecord.__table__  # pylint: disable=C0103
-# TODO: index on ip?
-
 arecord.info['unique_fields'] = ['fqdn']
 arecord.info['extra_search_fields'] = ['ip', 'network', 'dns_environment']
 

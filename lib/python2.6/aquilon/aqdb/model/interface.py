@@ -24,7 +24,7 @@ from collections import deque
 import re
 
 from sqlalchemy import (Column, Integer, DateTime, Sequence, String, Boolean,
-                        ForeignKey, UniqueConstraint, CheckConstraint)
+                        ForeignKey, UniqueConstraint, CheckConstraint, Index)
 from sqlalchemy.orm import (relation, backref, validates, object_session,
                             deferred)
 from sqlalchemy.orm.collections import attribute_mapped_collection
@@ -124,7 +124,9 @@ class Interface(Base):
     # Order matters here, utils/constraints.py checks for endswith("NOT NULL")
     __table_args__ = (UniqueConstraint(mac, name='%s_mac_addr_uk' % _ABV),
                       UniqueConstraint(hardware_entity_id, name,
-                                       name='%s_hw_name_uk' % _ABV))
+                                       name='%s_hw_name_uk' % _ABV),
+                      Index('%s_model_idx' % _ABV, model_id),
+                      Index('%s_master_idx' % _ABV, master_id))
     __mapper_args__ = {'polymorphic_on': interface_type}
 
     # Interfaces also have the property 'assignments' which is defined in

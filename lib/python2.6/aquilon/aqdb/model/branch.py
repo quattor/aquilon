@@ -19,7 +19,7 @@
 from datetime import datetime
 
 from sqlalchemy import (Integer, Boolean, DateTime, Sequence, String,
-                        Column, ForeignKey, UniqueConstraint)
+                        Column, ForeignKey, UniqueConstraint, Index)
 from sqlalchemy.orm import relation, deferred, backref
 
 from aquilon.aqdb.model import Base, UserPrincipal
@@ -95,6 +95,8 @@ class Domain(Branch):
     tracked_branch = relation(Branch, foreign_keys=tracked_branch_id,
                               backref=backref('trackers'))
 
+    __table_args__ = (Index("%s_tracked_branch_idx" % _DMN,
+                            tracked_branch_id),)
     __mapper_args__ = {'polymorphic_identity': _DMN,
                        'inherit_condition': domain_id == Branch.id}
 

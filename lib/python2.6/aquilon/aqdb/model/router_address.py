@@ -18,7 +18,7 @@
 from datetime import datetime
 
 from sqlalchemy import (Column, Integer, String, DateTime, ForeignKey,
-                        PrimaryKeyConstraint)
+                        PrimaryKeyConstraint, Index)
 from sqlalchemy.orm import relation, deferred, backref
 from sqlalchemy.sql import and_
 
@@ -76,7 +76,9 @@ class RouterAddress(Base):
                            foreign_keys=[ARecord.ip, Fqdn.dns_environment_id],
                            viewonly=True)
 
-    __table_args__ = (PrimaryKeyConstraint(network_id, ip),)
+    __table_args__ = (PrimaryKeyConstraint(network_id, ip),
+                      Index("%s_dns_env_idx" % _TN, dns_environment_id),
+                      Index("%s_location_idx" % _TN, location_id))
 
 rtaddr = RouterAddress.__table__  # pylint: disable=C0103
 rtaddr.info['unique_fields'] = ['ip', 'network']

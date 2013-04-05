@@ -18,7 +18,8 @@
 from datetime import datetime
 from ipaddr import IPv4Network
 
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Sequence
+from sqlalchemy import (Column, Integer, String, DateTime, ForeignKey, Sequence,
+                        Index)
 from sqlalchemy.orm import relation, deferred, backref
 
 from aquilon.aqdb.model import Base, Network
@@ -56,6 +57,9 @@ class StaticRoute(Base):
     network = relation(Network, innerjoin=True,
                        backref=backref("static_routes",
                                        cascade="all, delete-orphan"))
+
+    __table_args__ = (Index("%s_gw_network_ip_idx" % _TN, network_id,
+                            gateway_ip),)
 
     @property
     def destination(self):

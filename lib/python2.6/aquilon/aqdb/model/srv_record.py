@@ -18,7 +18,7 @@
 
 import re
 
-from sqlalchemy import Column, Integer, ForeignKey
+from sqlalchemy import Column, Integer, ForeignKey, Index
 from sqlalchemy.orm import relation, backref, object_session, validates
 from sqlalchemy.ext.associationproxy import association_proxy
 
@@ -53,6 +53,7 @@ class SrvRecord(DnsRecord):
 
     target_rrs = association_proxy('target', 'dns_records')
 
+    __table_args__ = (Index("%s_target_idx" % _TN, target_id),)
     __mapper_args__ = {'polymorphic_identity': _TN}
 
     @validates('priority', 'weight', 'port')

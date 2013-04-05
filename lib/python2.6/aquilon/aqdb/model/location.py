@@ -18,7 +18,8 @@
 
 from datetime import datetime
 from sqlalchemy import (Integer, DateTime, Sequence, String, Column,
-                        ForeignKey, UniqueConstraint, PrimaryKeyConstraint)
+                        ForeignKey, UniqueConstraint, PrimaryKeyConstraint,
+                        Index)
 
 from sqlalchemy.orm import relation, backref, object_session, deferred
 from sqlalchemy.sql import and_, or_, desc
@@ -238,7 +239,8 @@ class LocationLink(Base):
                                       cascade="all, delete-orphan",
                                       passive_deletes=True))
 
-    __table_args__ = (PrimaryKeyConstraint(child_id, parent_id),)
+    __table_args__ = (PrimaryKeyConstraint(child_id, parent_id),
+                      Index("location_link_parent_idx", parent_id))
 
 # Make these relations view-only, to make sure
 # the distance is managed explicitely

@@ -19,7 +19,7 @@
 from datetime import datetime
 
 from sqlalchemy import (Column, Integer, String, DateTime, ForeignKey,
-                        PrimaryKeyConstraint)
+                        PrimaryKeyConstraint, Index)
 from sqlalchemy.orm import relation, deferred, backref
 from sqlalchemy.ext.orderinglist import ordering_list
 from sqlalchemy.ext.associationproxy import association_proxy
@@ -61,7 +61,8 @@ class ServiceInstanceServer(Base):
                                     cascade="all, delete-orphan"))
 
     __table_args__ = (PrimaryKeyConstraint(service_instance_id, host_id,
-                                           name="%s_pk" % _TN),)
+                                           name="%s_pk" % _TN),
+                      Index("sis_host_idx", host_id))
 
 def _sis_host_creator(host):
     return ServiceInstanceServer(host=host)

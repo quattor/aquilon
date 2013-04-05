@@ -20,7 +20,7 @@ from datetime import datetime
 import re
 
 from sqlalchemy import (Column, Integer, String, DateTime, ForeignKey, Sequence,
-                        UniqueConstraint)
+                        UniqueConstraint, Index)
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import relation, backref, deferred
 from sqlalchemy.sql import and_
@@ -110,7 +110,10 @@ class AddressAssignment(Base):
     __table_args__ = (UniqueConstraint(interface_id, ip,
                                        name="%s_iface_ip_uk" % _ABV),
                       UniqueConstraint(interface_id, _label,
-                                       name="%s_iface_label_uk" % _ABV))
+                                       name="%s_iface_label_uk" % _ABV),
+                      Index("%s_service_addr_idx" % _ABV, service_address_id),
+                      Index("%s_network_ip_idx" % _ABV, network_id, ip),
+                      Index("%s_dns_env_idx" % _ABV, dns_environment_id))
 
     @property
     def logical_name(self):

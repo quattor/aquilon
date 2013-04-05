@@ -19,7 +19,8 @@ import re
 from datetime import datetime
 
 from sqlalchemy import (Column, Integer, Boolean, String, DateTime, Sequence,
-                        ForeignKey, UniqueConstraint, PrimaryKeyConstraint)
+                        ForeignKey, UniqueConstraint, PrimaryKeyConstraint,
+                        Index)
 
 from sqlalchemy.orm import (object_session, relation, backref, deferred,
                             joinedload)
@@ -137,7 +138,10 @@ class Cluster(Base):
 
     metacluster = association_proxy('_metacluster', 'metacluster')
 
-    __table_args__ = (UniqueConstraint(name, name='cluster_uk'),)
+    __table_args__ = (UniqueConstraint(name, name='cluster_uk'),
+                      Index("cluster_branch_idx", branch_id),
+                      Index("cluster_prsnlty_idx", personality_id),
+                      Index("cluster_location_idx", location_constraint_id))
     __mapper_args__ = {'polymorphic_on': cluster_type}
 
     @property
@@ -325,7 +329,6 @@ class EsxCluster(Cluster):
         Specifically for our VMware esx based clusters.
     """
     __tablename__ = _ETN
-    __mapper_args__ = {'polymorphic_identity': 'esx'}
     _class_label = 'ESX Cluster'
 
     esx_cluster_id = Column(Integer, ForeignKey('%s.id' % _TN,
@@ -347,6 +350,9 @@ class EsxCluster(Cluster):
 
     switch = relation(Switch, lazy=False,
                       backref=backref('esx_clusters'))
+
+    __table_args__ = (Index("%s_switch_idx" % _ETN, switch_id),)
+    __mapper_args__ = {'polymorphic_identity': 'esx'}
 
     @property
     def vm_to_host_ratio(self):
@@ -602,6 +608,7 @@ Host.cluster = association_proxy('_cluster', 'cluster')
 
 class ClusterAllowedPersonality(Base):
     __tablename__ = _CAP
+
     cluster_id = Column(Integer, ForeignKey('%s.id' % _TN,
                                             name='clstr_allowed_pers_c_fk',
                                             ondelete='CASCADE'),
@@ -612,7 +619,8 @@ class ClusterAllowedPersonality(Base):
                                                 ondelete='CASCADE'),
                             nullable=False)
 
-    __table_args__ = (PrimaryKeyConstraint(cluster_id, personality_id),)
+    __table_args__ = (PrimaryKeyConstraint(cluster_id, personality_id),
+                      Index('%s_prsnlty_idx' % _CAP, personality_id))
 
 Cluster.allowed_personalities = relation(Personality,
                                          secondary=ClusterAllowedPersonality.__table__)
@@ -635,7 +643,8 @@ class ClusterServiceBinding(Base):
                                             name='%s_srv_inst_fk' % _CSBABV),
                                  nullable=False)
 
-    __table_args__ = (PrimaryKeyConstraint(cluster_id, service_instance_id),)
+    __table_args__ = (PrimaryKeyConstraint(cluster_id, service_instance_id),
+                      Index('%s_si_idx' % _CSBABV, service_instance_id))
 
 Cluster.service_bindings = relation(ServiceInstance,
                                     secondary=ClusterServiceBinding.__table__)
