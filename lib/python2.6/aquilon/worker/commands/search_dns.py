@@ -113,12 +113,12 @@ class CommandSearchDns(BrokerCommand):
         if used is not None:
             if used:
                 q = q.join(AddressAssignment,
-                           and_(ARecord.ip == AddressAssignment.ip,
-                                ARecord.network_id == AddressAssignment.network_id))
+                           and_(ARecord.network_id == AddressAssignment.network_id,
+                                ARecord.ip == AddressAssignment.ip))
             else:
                 q = q.outerjoin(AddressAssignment,
-                                and_(ARecord.ip == AddressAssignment.ip,
-                                     ARecord.network_id == AddressAssignment.network_id))
+                                and_(ARecord.network_id == AddressAssignment.network_id,
+                                     ARecord.ip == AddressAssignment.ip))
                 q = q.filter(AddressAssignment.id == None)
             q = q.reset_joinpoint()
         if reverse_override is not None:

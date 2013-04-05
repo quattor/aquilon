@@ -95,8 +95,8 @@ class AddressAssignment(Base):
     # an AddressAssignment record to change the linked DNS record(s)
     # Can't use backref or back_populates due to the different mappers
     dns_records = relation(dns_fqdn_mapper, uselist=True,
-                           primaryjoin=and_(ip == ARecord.ip,
-                                            network_id == ARecord.network_id,
+                           primaryjoin=and_(network_id == ARecord.network_id,
+                                            ip == ARecord.ip,
                                             dns_environment_id == Fqdn.dns_environment_id),
                            foreign_keys=[ARecord.ip, Fqdn.dns_environment_id],
                            viewonly=True)
@@ -176,7 +176,7 @@ Interface.addresses = association_proxy('assignments', 'ip')
 # not depend on its visibility in DNS
 ARecord.assignments = relation(
     AddressAssignment,
-    primaryjoin=and_(AddressAssignment.ip == ARecord.ip,
-                     AddressAssignment.network_id == ARecord.network_id),
+    primaryjoin=and_(AddressAssignment.network_id == ARecord.network_id,
+                     AddressAssignment.ip == ARecord.ip),
     foreign_keys=[AddressAssignment.ip, AddressAssignment.network_id],
     viewonly=True)

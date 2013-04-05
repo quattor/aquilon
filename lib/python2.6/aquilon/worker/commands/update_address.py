@@ -54,7 +54,8 @@ class CommandUpdateAddress(BrokerCommand):
             dbnetwork = get_net_id_from_ip(session, ip, dbnet_env)
 
             q = session.query(ARecord)
-            q = q.filter_by(network=dbnetwork, ip=ip)
+            q = q.filter_by(network=dbnetwork)
+            q = q.filter_by(ip=ip)
             q = q.join(ARecord.fqdn)
             q = q.filter_by(dns_environment=dbdns_env)
             existing = q.first()

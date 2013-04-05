@@ -190,7 +190,8 @@ def grab_address(session, fqdn, ip, network_environment=None,
         # environment, it should not be considered static in a different
         # environment.
         q = session.query(DynamicStub)
-        q = q.filter_by(network=dbnetwork, ip=ip)
+        q = q.filter_by(network=dbnetwork)
+        q = q.filter_by(ip=ip)
         dbdns_rec = q.first()
         _forbid_dyndns(dbdns_rec)
 
@@ -203,7 +204,8 @@ def grab_address(session, fqdn, ip, network_environment=None,
         # subclass Alias and let that subclass emit an A record instead of a
         # CNAME when the dump_dns command is called.
         q = session.query(ARecord)
-        q = q.filter_by(network=dbnetwork, ip=ip)
+        q = q.filter_by(network=dbnetwork)
+        q = q.filter_by(ip=ip)
         q = q.join(ARecord.fqdn)
         q = q.filter_by(dns_environment=dns_environment)
         dbrecords = q.all()
@@ -285,7 +287,8 @@ def grab_address(session, fqdn, ip, network_environment=None,
 
     if ip:
         q = session.query(AddressAssignment)
-        q = q.filter_by(ip=ip, network=dbnetwork)
+        q = q.filter_by(network=dbnetwork)
+        q = q.filter_by(ip=ip)
         addr = q.first()
         if addr:
             raise ArgumentError("IP address {0} is already in use by "

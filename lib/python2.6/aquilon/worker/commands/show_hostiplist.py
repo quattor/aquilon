@@ -91,8 +91,8 @@ class CommandShowHostIPList(BrokerCommand):
             q = q.reset_joinpoint()
 
             q = q.outerjoin((AddressAssignment,
-                             and_(AddressAssignment.ip == ARecord.ip,
-                                  AddressAssignment.network_id == ARecord.network_id,
+                             and_(AddressAssignment.network_id == ARecord.network_id,
+                                  AddressAssignment.ip == ARecord.ip,
                                   AddressAssignment.dns_environment_id ==
                                   Fqdn.dns_environment_id)))
             q = q.filter(AddressAssignment.id == None)

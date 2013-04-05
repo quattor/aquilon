@@ -85,8 +85,8 @@ class ARecord(DnsRecord):
             # yet
             with session.no_autoflush:
                 q = session.query(ARecord.id)
-                q = q.filter_by(ip=ip)
                 q = q.filter_by(network=network)
+                q = q.filter_by(ip=ip)
                 q = q.filter_by(fqdn=fqdn)
                 if q.all():  # pragma: no cover
                     raise ArgumentError("%s, ip %s already exists." %

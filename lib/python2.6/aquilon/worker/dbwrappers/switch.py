@@ -133,10 +133,12 @@ def discover_switch(session, logger, config, dbswitch, dryrun):
             iface.assignments.remove(addr)
             session.flush()
             q = session.query(AddressAssignment.id)
-            q = q.filter_by(network=addr.network, ip=addr.ip)
+            q = q.filter_by(network=addr.network)
+            q = q.filter_by(ip=addr.ip)
             if not q.first():
                 q = session.query(ARecord)
-                q = q.filter_by(network=addr.network, ip=addr.ip)
+                q = q.filter_by(network=addr.network)
+                q = q.filter_by(ip=addr.ip)
                 map(delete_dns_record, q.all())
 
     def del_interface(iface):
