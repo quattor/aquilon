@@ -34,7 +34,7 @@ ms.version.addpkg('ms.modulecmd', '1.0.4')
 import ms.modulecmd
 ms.modulecmd.load('orcl/client/11.2.0.1.0')
 ms.version.addpkg('cx_Oracle', '5.1-11.2.0.1.0')
-ms.version.addpkg('argparse', '1.1')
+ms.version.addpkg('argparse', '1.2.1')
 import argparse
 import cx_Oracle
 

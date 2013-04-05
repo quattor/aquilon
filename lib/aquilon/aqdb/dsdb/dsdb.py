@@ -20,7 +20,7 @@
 import os
 import ms.version
 
-ms.version.addpkg('sybase', '0.39-15.0.0.17')
+ms.version.addpkg('sybase', '0.39-ms1-15.0.0.17')
 import Sybase
 
 from dispatch_table import dispatch_tbl as dt

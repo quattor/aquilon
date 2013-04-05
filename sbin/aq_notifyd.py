@@ -30,7 +30,7 @@ sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", 
 import aquilon.aqdb.depends
 
 import ms.version
-ms.version.addpkg('argparse', '1.1')
+ms.version.addpkg('argparse', '1.2.1')
 
 import argparse
 

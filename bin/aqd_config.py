@@ -24,7 +24,7 @@ import os
 from ConfigParser import NoSectionError, NoOptionError
 
 import ms.version
-ms.version.addpkg('argparse', '1.1')
+ms.version.addpkg('argparse', '1.2.1')
 
 import argparse
 
