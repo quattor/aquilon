@@ -103,9 +103,7 @@ class Host(Base):
     operating_system = relation(OperatingSystem, innerjoin=True)
     owner_grn = relation(Grn, innerjoin=True)
 
-    __table_args__ = (UniqueConstraint(machine_id, branch_id,
-                                       name='host_machine_branch_uk'),
-                      Index('host_prsnlty_idx', personality_id),
+    __table_args__ = (Index('host_prsnlty_idx', personality_id),
                       Index('%s_branch_idx' % _TN, branch_id))
 
     @property

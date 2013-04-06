@@ -6,6 +6,7 @@ ALTER TABLE fqdn ADD CONSTRAINT fqdn_domain_name_env_uk UNIQUE (dns_domain_id, n
 ALTER TABLE hardware_entity ADD CONSTRAINT hw_ent_pri_name_uk UNIQUE (primary_name_id);
 ALTER INDEX hw_ent_loc_idx RENAME TO hw_ent_location_idx;
 ALTER TABLE hardware_entity RENAME CONSTRAINT hw_ent_loc_fk TO hw_ent_location_fk;
+ALTER TABLE host DROP CONSTRAINT host_machine_branch_uk DROP INDEX;
 ALTER TABLE interface DROP CONSTRAINT iface_vlan_ck;
 ALTER TABLE interface ADD CONSTRAINT iface_vlan_ck CHECK (parent_id IS NOT NULL AND vlan_id > 0 AND vlan_id < 4096 OR interface_type != 'vlan');
 ALTER TABLE machine_specs RENAME CONSTRAINT machine_specs_cr_date_nn TO mchn_specs_cr_date_nn;
