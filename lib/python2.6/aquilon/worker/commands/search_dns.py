@@ -28,9 +28,9 @@ from sqlalchemy.orm import contains_eager, undefer, subqueryload, aliased
 from sqlalchemy.sql import or_, and_
 
 # Map standard DNS record types to our internal types
-DNS_RRTYPE_MAP = {'a': 'a_record',
-                  'cname': 'alias',
-                  'srv': 'srv_record'}
+DNS_RRTYPE_MAP = {'a': ARecord,
+                  'cname': Alias,
+                  'srv': SrvRecord}
 
 
 class CommandSearchDns(BrokerCommand):
@@ -41,16 +41,17 @@ class CommandSearchDns(BrokerCommand):
                record_type, ip, network, network_environment, target,
                target_domain, primary_name, used, reverse_override, reverse_ptr,
                fullinfo, style, **kwargs):
-        q = session.query(DnsRecord)
-        q = q.with_polymorphic('*')
         if record_type:
             record_type = record_type.strip().lower()
             if record_type in DNS_RRTYPE_MAP:
-                record_type = DNS_RRTYPE_MAP[record_type]
-            if record_type not in DnsRecord.__mapper__.polymorphic_map:
-                raise ArgumentError("Unknown DNS record type '%s'." %
-                                    record_type)
-            q = q.filter_by(dns_record_type=record_type)
+                cls = DNS_RRTYPE_MAP[record_type]
+            else:
+                cls = DnsRecord.polymorphic_subclass(record_type,
+                                                     "Unknown DNS record type")
+            q = session.query(cls)
+        else:
+            q = session.query(DnsRecord)
+            q = q.with_polymorphic('*')
 
         dbnet_env = NetworkEnvironment.get_unique_or_default(session,
                                                              network_environment)

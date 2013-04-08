@@ -93,8 +93,8 @@ class TestDelFeature(TestBrokerCommand):
         command = ["del", "feature", "--feature", "bad-type",
                    "--type", "no-such-type"]
         out = self.badrequesttest(command)
-        self.matchoutput(out, "Unknown feature type 'no-such-type'.  The "
-                         "valid types are: hardware, host, interface.",
+        self.matchoutput(out, "Unknown feature type 'no-such-type'. The "
+                         "valid values are: hardware, host, interface.",
                          command)
 
 

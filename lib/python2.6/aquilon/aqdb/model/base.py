@@ -317,6 +317,16 @@ class Base(object):
         return q.one()
 
     @classmethod
+    def polymorphic_subclass(cls, value, msg, error=ArgumentError):
+        value = value.strip().lower()
+        mapper = inspect(cls)
+        if value not in mapper.polymorphic_map.keys():
+            valid_values = ", ".join(sorted(mapper.polymorphic_map.keys()))
+            raise error("%s '%s'. The valid values are: %s." %
+                        (msg, value, valid_values))
+        return mapper.polymorphic_map[value].class_
+
+    @classmethod
     def ddl(self):  # pragma: no cover
         """ Returns the DDL SqlAlchemy will use to generate the table.
 

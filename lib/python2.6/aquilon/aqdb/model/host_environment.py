@@ -41,15 +41,6 @@ class HostEnvironment(Base):
     def __repr__(self):
         return str(self.name)
 
-    @classmethod
-    def validate_name(cls, env):
-        """ Utility function for command parameter parsing """
-        if env in cls.__mapper__.polymorphic_map:
-            return
-        valid_name = ", ".join(sorted(cls.__mapper__.polymorphic_map.keys()))
-        raise ArgumentError("Unknown environment value '%s'. The valid values are: "
-                            "%s." % (env, valid_name))
-
 host_env = HostEnvironment.__table__  # pylint: disable=C0103
 host_env.primary_key.name = '%s_pk' % _TN
 host_env.append_constraint(UniqueConstraint('name', name='%s_uk' % _TN))

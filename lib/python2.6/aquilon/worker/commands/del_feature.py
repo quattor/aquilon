@@ -25,10 +25,8 @@ class CommandDelFeature(BrokerCommand):
     required_parameters = ['feature', 'type']
 
     def render(self, session, feature, type, **arguments):
-        Feature.validate_type(type)
-
-        dbfeature = Feature.get_unique(session, name=feature, feature_type=type,
-                                       compel=True)
+        cls = Feature.polymorphic_subclass(type, "Unknown feature type")
+        dbfeature = cls.get_unique(session, name=feature, compel=True)
 
         if dbfeature.links:
             raise ArgumentError("{0} is still in use and cannot be deleted."

@@ -16,7 +16,7 @@
 # limitations under the License.
 
 
-from aquilon.exceptions_ import ArgumentError
+from aquilon.exceptions_ import ArgumentError, AquilonError
 from aquilon.worker.broker import BrokerCommand, validate_basic
 from aquilon.worker.dbwrappers.branch import get_branch_and_author
 from aquilon.worker.dbwrappers.location import get_location
@@ -72,7 +72,10 @@ class CommandAddCluster(BrokerCommand):
                 max_members = self.config.getint(section, "max_members_default")
 
         Cluster.get_unique(session, cluster, preclude=True)
-        clus_type = Cluster.__mapper__.polymorphic_map[ctype].class_
+        # Not finding the cluster type is an internal consistency issue, so make
+        # that show up in the logs by using AquilonError
+        clus_type = Cluster.polymorphic_subclass(ctype, "Unknown cluster type",
+                                                 error=AquilonError)
 
         (down_hosts_pct, dht) = Cluster.parse_threshold(down_hosts_threshold)
 

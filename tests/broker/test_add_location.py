@@ -47,7 +47,7 @@ class TestAddLocation(TestBrokerCommand):
                    "--parenttype", "city", "--parentname", "ny",
                    "--fullname", "bt"]
         out = self.badrequesttest(command)
-        self.matchoutput(out, "Bad-type is not a known location type.", command)
+        self.matchoutput(out, "Unknown location type 'bad-type'.", command)
 
     def testaddillegalparent(self):
         command = ["add", "location", "--type", "country", "--name", "bt",

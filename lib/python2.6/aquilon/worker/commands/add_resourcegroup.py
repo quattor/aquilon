@@ -33,10 +33,9 @@ class CommandAddResourceGroup(BrokerCommand):
         validate_basic("resourcegroup", resourcegroup)
 
         if required_type is not None:
-            if required_type not in Resource.__mapper__.polymorphic_map:
-                raise ArgumentError("{0} is not a valid resource type".
-                                    format(required_type))
-            elif required_type == "resourcegroup":
+            Resource.polymorphic_subclass(required_type,
+                                          "Unknown resource type")
+            if required_type == "resourcegroup":
                 raise ArgumentError("A resourcegroup can't hold other "
                                     "resourcegroups.")
 
