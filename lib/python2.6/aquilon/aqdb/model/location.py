@@ -223,14 +223,12 @@ class LocationLink(Base):
     # Distance from the given parent. 1 means direct child.
     distance = Column(Integer, nullable=False)
 
-    child = relation(Location, innerjoin=True,
-                     primaryjoin=child_id == Location.id,
+    child = relation(Location, innerjoin=True, foreign_keys=child_id,
                      backref=backref("_parent_links",
                                      cascade="all, delete-orphan",
                                      passive_deletes=True))
 
-    parent = relation(Location, innerjoin=True,
-                      primaryjoin=parent_id == Location.id,
+    parent = relation(Location, innerjoin=True, foreign_keys=parent_id,
                       backref=backref("_child_links",
                                       cascade="all, delete-orphan",
                                       passive_deletes=True))

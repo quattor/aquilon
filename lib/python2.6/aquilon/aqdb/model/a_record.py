@@ -52,7 +52,7 @@ class ARecord(DnsRecord):
     network = relation(Network, backref=backref('dns_records',
                                                 passive_deletes=True))
 
-    reverse_ptr = relation(Fqdn, primaryjoin=reverse_ptr_id == Fqdn.id,
+    reverse_ptr = relation(Fqdn, foreign_keys=reverse_ptr_id,
                            backref=backref('reverse_entries',
                                            passive_deletes=True))
 

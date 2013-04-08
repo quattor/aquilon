@@ -48,7 +48,7 @@ class SrvRecord(DnsRecord):
                                            name='%s_target_fk' % _TN),
                        nullable=False)
 
-    target = relation(Fqdn, primaryjoin=target_id == Fqdn.id,
+    target = relation(Fqdn, foreign_keys=target_id,
                       backref=backref('srv_records'))
 
     target_rrs = association_proxy('target', 'dns_records')
