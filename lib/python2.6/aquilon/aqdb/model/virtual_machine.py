@@ -43,10 +43,8 @@ class VirtualMachine(Resource):
                        backref=backref('vm_container', uselist=False,
                                        cascade='all'))
 
-    # A machine can be assigned to one holder only.
-    UniqueConstraint('machine_id', name='%s_machine_uk' % _TN)
-
-
 vm = VirtualMachine.__table__
 vm.primary_key.name = '%s_pk' % _TN
 vm.info['unique_fields'] = ['name', 'holder']
+# A machine can be assigned to one holder only.
+vm.append_constraint(UniqueConstraint('machine_id', name='%s_machine_uk' % _TN))

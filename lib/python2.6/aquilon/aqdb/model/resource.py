@@ -149,11 +149,6 @@ class Resource(Base):
                       backref=backref('resources',
                                       cascade='all, delete-orphan'))
 
-    # Uniqueness over just the resource name and holder_id - you can't
-    # have filesystem 'foo' and intervention 'foo' attached to the same
-    # host.  Done for sanity.
-    UniqueConstraint('name', 'holder_id', name='%s_uk' % _TN)
-
     __mapper_args__ = {'polymorphic_on': resource_type}
 
     @property
@@ -185,4 +180,6 @@ class Resource(Base):
 
 resource = Resource.__table__  # pylint: disable=C0103
 resource.primary_key.name = '%s_pk' % _TN
-resource.info['unique_fields'] = ['name', 'holder']
+resource.info['unique_fields'] = ['name', 'resource_type', 'holder']
+resource.append_constraint(UniqueConstraint('holder_id', 'name', 'resource_type',
+                                            name='%s_holder_name_type_uk' % _TN))
