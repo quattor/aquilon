@@ -26,8 +26,6 @@ from aquilon.aqdb.column_types import AqStr, Enum
 
 _TN = 'archetype'
 
-CLUSTER_TYPES = ('esx', 'storage', 'compute', 'meta')
-
 
 class Archetype(Base):
     """ Archetype names """
@@ -41,7 +39,7 @@ class Archetype(Base):
     is_compileable = Column(Boolean(name="%s_is_compileable_ck" % _TN),
                             default=False, nullable=False)
 
-    cluster_type = Column(Enum(32, CLUSTER_TYPES), nullable=True)
+    cluster_type = Column(AqStr(32), nullable=True)
 
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
