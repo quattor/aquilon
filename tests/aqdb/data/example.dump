@@ -56,14 +56,6 @@ Domain(name="prod", owner=UserPrincipal(name="njw"),
        compiler="/qwg/templates/external/panc/lib/panc.jar",
        comments="Production templates")
 
-
-# FIXME: Status objects cannot be instantiated
-#Status(name="blind")
-#Status(name="build")
-#Status(name="ready")
-#Status(name="failed")
-#Status(name="install")
-
 DnsDomain(name="example.com")
 
 Company(name="example", fullname="An Example Organization")

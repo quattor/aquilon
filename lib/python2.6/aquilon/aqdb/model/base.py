@@ -327,6 +327,17 @@ class Base(object):
         return mapper.polymorphic_map[value].class_
 
     @classmethod
+    def populate_const_table(cls, table, connection, **kwargs):  # pragma: no cover
+        names = inspect(cls).polymorphic_map.keys()
+        names.sort()  # beautification only
+        stmt = table.insert()
+        for name in names:
+            try:
+                connection.execute(stmt.values(name=name))
+            except IntegrityError:
+                pass
+
+    @classmethod
     def ddl(self):  # pragma: no cover
         """ Returns the DDL SqlAlchemy will use to generate the table.
 

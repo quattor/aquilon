@@ -19,7 +19,7 @@ from datetime import datetime
 
 from sqlalchemy.orm import deferred
 from sqlalchemy import (Column, Integer, DateTime, Sequence, String,
-                        UniqueConstraint)
+                        UniqueConstraint, event)
 
 from aquilon.aqdb.model import Base
 from aquilon.exceptions_ import ArgumentError
@@ -45,6 +45,8 @@ host_env = HostEnvironment.__table__  # pylint: disable=C0103
 host_env.primary_key.name = '%s_pk' % _TN
 host_env.append_constraint(UniqueConstraint('name', name='%s_uk' % _TN))
 host_env.info['unique_fields'] = ['name']
+
+event.listen(host_env, "after_create", HostEnvironment.populate_const_table)
 
 
 class Development(HostEnvironment):

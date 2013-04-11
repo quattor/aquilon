@@ -54,22 +54,8 @@ Role(name="winops")
 
 UserPrincipal(name="cdb", role=Role(name="aqd_admin"), realm=Realm(name="is1.morgan"))
 
-# FIXME: Status objects cannot be instantiated
-#Status(name="blind")
-#Status(name="build")
-#Status(name="ready")
-#Status(name="failed")
-#Status(name="install")
-
 DnsEnvironment(name="internal")
 DnsEnvironment(name="external")
-
-HostEnvironment(name="dev")
-HostEnvironment(name="qa")
-HostEnvironment(name="uat")
-HostEnvironment(name="prod")
-HostEnvironment(name="infra")
-HostEnvironment(name="legacy")
 
 NetworkEnvironment(name="internal", dns_environment=DnsEnvironment(name="internal"))
 
