@@ -295,7 +295,7 @@ class TestReconfigure(VerifyGrnsMixin, TestBrokerCommand):
     def testreconfigureos(self):
         command = ["reconfigure",
                    "--hostname", "aquilon61.aqd-unittest.ms.com",
-                   "--osname", "linux", "--osversion", "5.0-x86_64"]
+                   "--osname", "linux", "--osversion", "5.0.2-x86_64"]
         (out, err) = self.successtest(command)
         self.matchoutput(err, "1/1 object template", command)
         self.matchclean(err, "removing binding", command)
@@ -304,7 +304,7 @@ class TestReconfigure(VerifyGrnsMixin, TestBrokerCommand):
     def testreconfigureossplitargs(self):
         command = ["reconfigure",
                    "--hostname", "unittest17.aqd-unittest.ms.com",
-                   "--osname", "linux", "--osversion", "5.0-x86_64"]
+                   "--osname", "linux", "--osversion", "5.0.2-x86_64"]
         (out, err) = self.successtest(command)
         self.matchoutput(err, "1/1 object template", command)
         self.matchclean(err, "removing binding", command)
