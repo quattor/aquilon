@@ -115,7 +115,9 @@ class CommandPollSwitch(BrokerCommand):
 
         if ssh_args:
             args.extend(ssh_args)
-        args.extend([importer, hostname])
+        # TODO debug options shows CheckNet fails to return data and not
+        # get-camtable
+        args.extend([importer, "--debug", hostname])
 
         try:
             out = run_command(args)
