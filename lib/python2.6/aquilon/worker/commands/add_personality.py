@@ -58,7 +58,8 @@ class CommandAddPersonality(BrokerCommand):
                                     "for {0:l}, please specify "
                                     "--host_environment.".format(dbarchetype))
 
-        HostEnvironment.validate_name(host_environment)
+        HostEnvironment.polymorphic_subclass(host_environment,
+                                             "Unknown environment name")
         Personality.validate_env_in_name(personality, host_environment)
         host_env = HostEnvironment.get_unique(session, host_environment, compel=True)
 

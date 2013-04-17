@@ -37,15 +37,12 @@ def add_location(session, name, fullname, type, parent_name, parent_type,
         the transactions
     """
 
-    for value in [type, parent_type]:
-        if value not in Location.__mapper__.polymorphic_map:
-            raise ArgumentError("%s is not a known location type." %
-                                value.capitalize())
+    loc_cls = Location.polymorphic_subclass(type, "Unknown location type")
+    parent_cls = Location.polymorphic_subclass(parent_type,
+                                               "Unknown location type")
 
-    Location.get_unique(session, name=name, location_type=type, preclude=True)
-
-    parent = Location.get_unique(session, name=parent_name,
-                                 location_type=parent_type, compel=True)
+    loc_cls.get_unique(session, name=name, preclude=True)
+    parent = parent_cls.get_unique(session, name=parent_name, compel=True)
 
     type_weight = location_types.index(type)
     parent_weight = location_types.index(parent_type)
@@ -53,8 +50,6 @@ def add_location(session, name, fullname, type, parent_name, parent_type,
     if type_weight <= parent_weight:
         raise ArgumentError("Type %s cannot be a parent of %s." %
                     (parent_type.capitalize(), type.capitalize()))
-
-    location_type = Location.__mapper__.polymorphic_map[type].class_
 
     if not fullname:
         fullname = name
@@ -65,7 +60,7 @@ def add_location(session, name, fullname, type, parent_name, parent_type,
     if type == 'building':
         kw['address'] = address
 
-    return location_type(**kw)
+    return loc_cls(**kw)
 
 
 class CommandAddLocation(BrokerCommand):

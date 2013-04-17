@@ -17,7 +17,7 @@
 
 
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.aqdb.model import Archetype
+from aquilon.aqdb.model import Archetype, Cluster
 from aquilon.exceptions_ import ArgumentError
 import re
 
@@ -39,6 +39,8 @@ class CommandAddArchetype(BrokerCommand):
 
         if description is None:
             description = archetype
+        if cluster_type:
+            Cluster.polymorphic_subclass(cluster_type, "Unknown cluster type")
         dbarch = Archetype(name=archetype,
                            cluster_type=cluster_type,
                            outputdesc=description,

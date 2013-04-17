@@ -118,14 +118,6 @@ def main(*args, **kw):
         if rc != 0:
             log.warn("Failed to add current user as administrator.")
 
-    # New loop: over sorted tables in Base.metadata.
-    for tbl in Base.metadata.sorted_tables:
-        #this might be a place to set schema if needed (for DB2)
-
-        if hasattr(tbl, 'populate') and opts.populate:
-            #log.debug('populating %s' % tbl.name)
-            tbl.populate(s)
-
     # CONSTRAINTS
     if db.engine.dialect.name == 'oracle':
         #TODO: rename should be able to dump DDL to a file

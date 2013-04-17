@@ -58,16 +58,6 @@ class Feature(Base):
     def validate_link(self, key, link):  # pragma: no cover
         return link
 
-    @classmethod
-    def validate_type(cls, feature_type):
-        """ Utility function for command parameter parsing """
-        if feature_type in cls.__mapper__.polymorphic_map:
-            return
-        valid_types = ", ".join(sorted(cls.__mapper__.polymorphic_map.keys()))
-        raise ArgumentError("Unknown feature type '%s'.  The valid types are: "
-                            "%s." % (feature_type, valid_types))
-
-
 feature = Feature.__table__  # pylint: disable=C0103
 feature.primary_key.name = '%s_pk' % _TN
 feature.append_constraint(UniqueConstraint('name', 'feature_type',

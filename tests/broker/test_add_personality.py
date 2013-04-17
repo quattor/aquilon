@@ -429,7 +429,7 @@ class TestAddPersonality(VerifyGrnsMixin, TestBrokerCommand):
                    "--host_environment", "badenv",
                    "--archetype", "aquilon", "--eon_id=2"]
         out = self.badrequesttest(command)
-        self.matchoutput(out, "Unknown environment value 'badenv'. The valid"
+        self.matchoutput(out, "Unknown environment name 'badenv'. The valid"
                               " values are: dev, infra, legacy, prod, qa, uat",
                          command)
 

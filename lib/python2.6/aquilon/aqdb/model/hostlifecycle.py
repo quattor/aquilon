@@ -17,14 +17,14 @@
 
 from datetime import datetime
 
-from sqlalchemy.orm import object_session, deferred
 from sqlalchemy import (Column, Enum, Integer, DateTime, Sequence, String,
-                        UniqueConstraint)
+                        UniqueConstraint, event)
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import object_session, deferred
 
-from aquilon.aqdb.model import StateEngine, Base
-from aquilon.utils import monkeypatch
-from aquilon.aqdb.column_types import Enum
 from aquilon.exceptions_ import ArgumentError
+from aquilon.aqdb.model import StateEngine, Base
+from aquilon.aqdb.column_types import Enum
 
 _TN = 'hostlifecycle'
 
@@ -68,21 +68,7 @@ hostlifecycle.primary_key.name = '%s_pk' % _TN
 hostlifecycle.append_constraint(UniqueConstraint('name', name='%s_uk' % _TN))
 hostlifecycle.info['unique_fields'] = ['name']
 
-
-@monkeypatch(hostlifecycle)
-def populate(sess, *args, **kw):  # pragma: no cover
-    from sqlalchemy.exc import IntegrityError
-
-    statuslist = HostLifecycle.transitions.keys()
-
-    i = hostlifecycle.insert()
-    for name in statuslist:
-        try:
-            i.execute(name=name)
-        except IntegrityError:
-            pass
-
-    assert len(sess.query(HostLifecycle).all()) == len(statuslist)
+event.listen(hostlifecycle, "after_create", HostLifecycle.populate_const_table)
 
 
 """

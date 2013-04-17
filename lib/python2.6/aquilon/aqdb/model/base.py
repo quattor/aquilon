@@ -19,12 +19,12 @@ import sys
 from inspect import isclass
 
 from sqlalchemy.schema import CreateTable
-from sqlalchemy.orm import object_mapper
 from sqlalchemy.orm.session import Session, object_session
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 from sqlalchemy.orm.properties import RelationProperty, ColumnProperty
 from sqlalchemy.ext.associationproxy import AssociationProxy, _lazy_collection
+from sqlalchemy.inspection import inspect
 
 from aquilon.utils import monkeypatch
 from aquilon.exceptions_ import InternalError, NotFoundException, ArgumentError
@@ -59,16 +59,11 @@ class Base(object):
         """
         label = self.__class__.__name__
         attrs = []
-        mapper = self.__class__.__mapper__
-        for prop in mapper.iterate_properties:
-            if not isinstance(prop, ColumnProperty):
-                continue
-
+        mapper = inspect(self)
+        for field, prop in mapper.column_attrs.iteritems():
             # Do not load deferred columns, they can't be that interesting
             if prop.deferred:
                 continue
-
-            field = prop.columns[0].name
 
             # Skip the column holding the polymorphic identity, since the
             # information is already present in the class name
@@ -81,9 +76,7 @@ class Base(object):
                 continue
 
             # Convert foreign IDs to names
-            if field.endswith("_id") and mapper.has_property(field[:-3]) and \
-                    isinstance(mapper.get_property(field[:-3]),
-                               RelationProperty):
+            if field.endswith("_id") and field[:-3] in mapper.relationships:
                 field = field[:-3]
             value = getattr(self, field, None)
 
@@ -188,7 +181,7 @@ class Base(object):
 
         compel = kwargs.pop('compel', False)
         table = cls.__table__
-        mapper = cls.__mapper__
+        mapper = inspect(cls)
         caller = sys._getframe(1).f_code.co_name
         clslabel = cls._get_class_label()
 
@@ -226,10 +219,9 @@ class Base(object):
 
             # Do a lookup if the field refers to a relation but the argument
             # given is not a DB object
-            if mapper.has_property(field):
-                rel = mapper.get_property(field)
-                if isinstance(rel, RelationProperty) and \
-                        not isinstance(value, rel.argument):
+            if field in mapper.relationships:
+                rel = mapper.relationships[field]
+                if not isinstance(value, rel.argument):
                     value = rel.argument.get_unique(session, value,
                                                     compel=compel)
 
@@ -238,7 +230,7 @@ class Base(object):
             query = query.filter(getattr(cls, field) == value)
 
             # Now some beautification...
-            poly_column = getattr(mapper, "polymorphic_on", None)
+            poly_column = mapper.polymorphic_on
             if poly_column is not None and poly_column.name == field:
                 # Return "Building foo" instead of "Location foo, location_type
                 # building"
@@ -316,13 +308,34 @@ class Base(object):
             raise InternalError("lock_row() called on a detached object %r" %
                                 self)
 
-        pk = object_mapper(self).primary_key
+        pk = inspect(self).mapper.primary_key
         q = session.query(*pk)
         for col in pk:
             q = q.filter(col == getattr(self, col.key))
 
         q = q.with_lockmode("update")
         return q.one()
+
+    @classmethod
+    def polymorphic_subclass(cls, value, msg, error=ArgumentError):
+        value = value.strip().lower()
+        mapper = inspect(cls)
+        if value not in mapper.polymorphic_map.keys():
+            valid_values = ", ".join(sorted(mapper.polymorphic_map.keys()))
+            raise error("%s '%s'. The valid values are: %s." %
+                        (msg, value, valid_values))
+        return mapper.polymorphic_map[value].class_
+
+    @classmethod
+    def populate_const_table(cls, table, connection, **kwargs):  # pragma: no cover
+        names = inspect(cls).polymorphic_map.keys()
+        names.sort()  # beautification only
+        stmt = table.insert()
+        for name in names:
+            try:
+                connection.execute(stmt.values(name=name))
+            except IntegrityError:
+                pass
 
     @classmethod
     def ddl(self):  # pragma: no cover

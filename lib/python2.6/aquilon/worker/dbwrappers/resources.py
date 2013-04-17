@@ -18,11 +18,13 @@
 
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.orm import object_session
+from sqlalchemy.inspection import inspect
 
 from aquilon.exceptions_ import (IncompleteError, NotFoundException,
                                  ArgumentError)
 from aquilon.aqdb.model import (Cluster, ClusterResource, HostResource,
-                                Resource, ResourceGroup, BundleResource, Share)
+                                Resource, ResourceGroup, BundleResource, Share,
+                                RebootIntervention)
 from aquilon.worker.templates import Plenary
 from aquilon.worker.dbwrappers.host import hostname_to_host
 from aquilon.worker.locks import lock_queue, CompileKey
@@ -71,18 +73,19 @@ def get_resource_holder(session, hostname=None, cluster=None, resgroup=None,
 def get_resource(session, holder, **arguments_in):
     # Filter out arguments that are not resources
     arguments = dict()
+    mapper = inspect(Resource)
     for key, value in arguments_in.items():
-        if key in Resource.__mapper__.polymorphic_map and value is not None:
-            arguments[key] = value
+        if key in mapper.polymorphic_map and value is not None:
+            arguments[mapper.polymorphic_map[key].class_] = value
         elif key == "reboot_intervention" and value is not None:
             # Sigh... Abbreviations are bad.
-            arguments["reboot_iv"] = value
+            arguments[RebootIntervention] = value
 
     # Resource groups are act both as resource and as holder. If there's another
     # resource type specified, then use it as a holder; if it is specified
     # alone, then use it as a resource.
-    if "resourcegroup" in arguments and len(arguments) > 1:
-        rg_name = arguments.pop("resourcegroup")
+    if ResourceGroup in arguments and len(arguments) > 1:
+        rg_name = arguments.pop(ResourceGroup)
         if not holder.resholder:
             raise NotFoundException("{0} has no resources.".format(holder))
         dbrg = ResourceGroup.get_unique(session, name=rg_name,
@@ -96,9 +99,8 @@ def get_resource(session, holder, **arguments_in):
         if not holder.resholder:
             raise NotFoundException("{0} has no resources.".format(holder))
 
-        res_type, res_name = arguments.popitem()
-        cls = Resource.__mapper__.polymorphic_map[res_type].class_
-        return cls.get_unique(session, name=res_name, holder=holder.resholder,
+        cls, name = arguments.popitem()
+        return cls.get_unique(session, name=name, holder=holder.resholder,
                               compel=True)
     return None
 

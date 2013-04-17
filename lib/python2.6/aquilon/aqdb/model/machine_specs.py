@@ -67,12 +67,10 @@ class MachineSpecs(Base):
     comments = Column('comments', String(255), nullable=True)
 
     # This is a one-to-one relation, so we need uselist=False on the backref
-    model = relation(Model, innerjoin=True,
-                     primaryjoin=model_id == Model.id,
+    model = relation(Model, innerjoin=True, foreign_keys=model_id,
                      backref=backref('machine_specs', uselist=False))
     cpu = relation(Cpu, innerjoin=True)
-    nic_model = relation(Model,
-                         primaryjoin=nic_model_id == Model.id)
+    nic_model = relation(Model, foreign_keys=nic_model_id)
 
     @property
     def disk_name(self):

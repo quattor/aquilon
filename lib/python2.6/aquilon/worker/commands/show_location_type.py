@@ -31,10 +31,7 @@ class CommandShowLocationType(BrokerCommand):
     required_parameters = ["type"]
 
     def render(self, session, type, name, **arguments):
-        if type not in Location.__mapper__.polymorphic_map:
-            raise ArgumentError("Unknown location type '%s'." % type)
-
-        cls = Location.__mapper__.polymorphic_map[type].class_
+        cls = Location.polymorphic_subclass(type, "Unknown location type")
         query = session.query(cls)
         query = query.options(subqueryload('parents'),
                               subqueryload('default_dns_domain'))

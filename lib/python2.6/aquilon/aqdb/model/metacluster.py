@@ -202,12 +202,13 @@ class MetaClusterMember(Base):
     """
 
     metacluster = relation(MetaCluster, lazy='subquery', innerjoin=True,
+                           foreign_keys=metacluster_id,
                            backref=backref('_clusters',
-                                           cascade='all, delete-orphan'),
-                           primaryjoin=(metacluster_id == MetaCluster.id))
+                                           cascade='all, delete-orphan'))
 
     # This is a one-to-one relation, so we need uselist=False on the backref
     cluster = relation(Cluster, lazy='subquery', innerjoin=True,
+                       foreign_keys=cluster_id,
                        backref=backref('_metacluster', uselist=False,
                                        cascade='all, delete-orphan'))
 

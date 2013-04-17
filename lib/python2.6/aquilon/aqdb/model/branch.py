@@ -20,7 +20,7 @@ from datetime import datetime
 
 from sqlalchemy import (Integer, Boolean, DateTime, Sequence, String,
                         Column, ForeignKey, UniqueConstraint)
-from sqlalchemy.orm import relation, deferred
+from sqlalchemy.orm import relation, deferred, backref
 
 from aquilon.aqdb.model import Base, UserPrincipal
 from aquilon.aqdb.column_types.aqstr import AqStr
@@ -96,12 +96,13 @@ class Domain(Branch):
     __mapper_args__ = {'polymorphic_identity': _DMN,
                        'inherit_condition': domain_id == Branch.id}
 
+    tracked_branch = relation(Branch, foreign_keys=tracked_branch_id,
+                              backref=backref('trackers'))
+
 
 domain = Domain.__table__  # pylint: disable=C0103
 domain.primary_key.name = '%s_pk' % _DMN
 domain.info['unique_fields'] = ['name']
-Domain.tracked_branch = relation(Branch, backref='trackers',
-        primaryjoin=Domain.tracked_branch_id == Branch.id)
 
 
 class Sandbox(Branch):

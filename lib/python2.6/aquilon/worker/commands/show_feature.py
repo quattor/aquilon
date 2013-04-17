@@ -24,6 +24,5 @@ class CommandShowFeature(BrokerCommand):
     required_parameters = ['feature', 'type']
 
     def render(self, session, feature, type, **arguments):
-        Feature.validate_type(type)
-        cls = Feature.__mapper__.polymorphic_map[type].class_
+        cls = Feature.polymorphic_subclass(type, "Unknown feature type")
         return cls.get_unique(session, name=feature, compel=True)

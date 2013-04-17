@@ -90,7 +90,8 @@ class CommandUpdatePersonality(BrokerCommand):
         if host_environment is not None:
             legacy_env = HostEnvironment.get_unique(session, 'legacy', compel=True)
             if dbpersona.host_environment == legacy_env:
-                HostEnvironment.validate_name(host_environment)
+                HostEnvironment.polymorphic_subclass(host_environment,
+                                                     "Unknown environment name")
                 Personality.validate_env_in_name(personality, host_environment)
                 dbpersona.host_environment = HostEnvironment.get_unique(session,
                                                                         host_environment,

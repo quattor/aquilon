@@ -18,15 +18,15 @@
 from datetime import datetime
 
 from sqlalchemy import (Column, Enum, Integer, DateTime, Sequence,
-                        String, UniqueConstraint)
+                        String, UniqueConstraint, event)
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import deferred
 from sqlalchemy.orm.session import object_session
 
 from aquilon.config import Config
-from aquilon.aqdb.model import Base, StateEngine, HostLifecycle
-from aquilon.utils import monkeypatch
-from aquilon.aqdb.column_types import Enum
 from aquilon.exceptions_ import ArgumentError
+from aquilon.aqdb.model import Base, StateEngine, HostLifecycle
+from aquilon.aqdb.column_types import Enum
 
 _TN = 'clusterlifecycle'
 
@@ -58,21 +58,8 @@ clusterlifecycle.primary_key.name = '%s_pk' % _TN
 clusterlifecycle.append_constraint(UniqueConstraint('name', name='%s_uk' % _TN))
 clusterlifecycle.info['unique_fields'] = ['name']
 
-
-@monkeypatch(clusterlifecycle)
-def populate(sess, *args, **kw):  # pragma: no cover
-    from sqlalchemy.exc import IntegrityError
-
-    statuslist = ClusterLifecycle.transitions.keys()
-
-    i = clusterlifecycle.insert()
-    for name in statuslist:
-        try:
-            i.execute(name=name)
-        except IntegrityError:
-            pass
-
-    assert len(sess.query(ClusterLifecycle).all()) == len(statuslist)
+event.listen(clusterlifecycle, "after_create",
+             ClusterLifecycle.populate_const_table)
 
 
 """

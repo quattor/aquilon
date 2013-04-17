@@ -422,12 +422,8 @@ def get_or_create_interface(session, dbhw_ent, name=None, mac=None,
         raise ArgumentError("{0} has no {1} interfaces.".format(dbhw_ent,
                                                                 type_msg))
 
-    cls = None
-    try:
-        cls = Interface.__mapper__.polymorphic_map[interface_type].class_
-    except KeyError:
-        raise ArgumentError("Invalid interface type '%s'." % interface_type)
-
+    cls = Interface.polymorphic_subclass(interface_type,
+                                         "Invalid interface type")
     extra_args = {}
     default_route = False
     if bootable is not None:

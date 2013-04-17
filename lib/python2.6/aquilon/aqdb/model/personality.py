@@ -21,6 +21,7 @@ import re
 from sqlalchemy import (Column, Integer, Boolean, DateTime, Sequence, String,
                         ForeignKey, UniqueConstraint, Index)
 from sqlalchemy.orm import relation, deferred
+from sqlalchemy.inspection import inspect
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.column_types.aqstr import AqStr
@@ -75,8 +76,9 @@ class Personality(Base):
 
     @classmethod
     def validate_env_in_name(cls, name, host_environment):
+        env_mapper = inspect(HostEnvironment)
         persona_env = re.search("[-/](" +
-                                "|".join(HostEnvironment.__mapper__.polymorphic_map.keys()) +
+                                "|".join(env_mapper.polymorphic_map.keys()) +
                                 ")$", name, re.IGNORECASE)
         if persona_env and (persona_env.group(1) != host_environment):
             raise ArgumentError("Environment value in personality name '{0}' "

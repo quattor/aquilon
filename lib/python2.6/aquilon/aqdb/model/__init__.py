@@ -14,10 +14,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import warnings
 
 import aquilon.aqdb.depends
-from sqlalchemy.exc import SAWarning
 
 from aquilon.aqdb.model.base import Base
 from aquilon.aqdb.model.stateengine import StateEngine
@@ -108,18 +106,7 @@ from aquilon.aqdb.model.personality_service_map import PersonalityServiceMap
 from aquilon.aqdb.model.disk import Disk, LocalDisk
 
 #CLUSTER
-#FIXME: this is a measure to dodge a warning raised by conflicting class names
-#in this and hostlifecycle. It's only used for one of the two classes using a
-#'with' clause to ensure as few warnings as possible are masked.
-#TODO: overhaul this using importlib. Before loading conflicting classes check
-# if they already exist in the current 'locals().keys()' and raise some kind of
-# error or warning.
-#(daqscott 29/10/10)
-with warnings.catch_warnings():
-    warnings.simplefilter("ignore", SAWarning)
-    from aquilon.aqdb.model.clusterlifecycle import ClusterLifecycle
-
-
+from aquilon.aqdb.model.clusterlifecycle import ClusterLifecycle
 from aquilon.aqdb.model.cluster import (Cluster, EsxCluster,
                                         ComputeCluster, StorageCluster)
 from aquilon.aqdb.model.personality_cluster_info import (PersonalityClusterInfo,

@@ -32,13 +32,11 @@ class CommandAddFeature(BrokerCommand):
 
     def render(self, session, feature, type, post_personality, comments,
                **arguments):
-        Feature.validate_type(type)
+        cls = Feature.polymorphic_subclass(type, "Unknown feature type")
 
         if _name_re.search(feature):
             raise ArgumentError("Path components in the feature name must not "
                                 "start with a dot.")
-
-        cls = Feature.__mapper__.polymorphic_map[type].class_
 
         if post_personality and not cls.post_personality_allowed:
             raise UnimplementedError("The post_personality attribute is "

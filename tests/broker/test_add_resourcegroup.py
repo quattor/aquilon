@@ -150,8 +150,8 @@ class TestAddResourceGroup(TestBrokerCommand):
         command = ["add_resourcegroup", "--resourcegroup=utvcs1as1",
                    "--cluster=utvcs1", "--required_type=non-existent-type"]
         err = self.badrequesttest(command)
-        self.matchoutput(err, "Bad Request: non-existent-type is not a valid "
-                         "resource type", command)
+        self.matchoutput(err, "Unknown resource type 'non-existent-type'.",
+                         command)
 
     def test_200_stacked_resourcegroup(self):
         command = ["add_resourcegroup", "--resourcegroup=utvcs1as1",

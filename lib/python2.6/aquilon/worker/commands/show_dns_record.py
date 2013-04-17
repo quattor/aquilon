@@ -50,15 +50,14 @@ class CommandShowDnsRecord(BrokerCommand):
         dbfqdn = Fqdn.get_unique(session, fqdn=fqdn,
                                  dns_environment=dbdns_env)
 
-        cls = DnsRecord
         if record_type:
             if record_type in DNS_RRTYPE_MAP:
                 cls = DNS_RRTYPE_MAP[record_type]
-            elif record_type not in DnsRecord.__mapper__.polymorphic_map:
-                raise ArgumentError("Unknown DNS record type '%s'." %
-                                    record_type)
             else:
-                cls = DnsRecord.__mapper__.polymorphic_map[record_type].class_
+                cls = DnsRecord.polymorphic_subclass(record_type,
+                                                     "Unknown DNS record type")
+        else:
+            cls = DnsRecord
 
         # We want to query(ARecord) instead of
         # query(DnsRecord).filter_by(record_type='a_record'), because the former

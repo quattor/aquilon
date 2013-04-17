@@ -43,6 +43,15 @@ class TestAddArchetype(TestBrokerCommand):
         out = self.badrequesttest(command.split(" "))
         self.matchoutput(out, "Archetype name 'oops@!' is not valid", command)
 
+    def testaddbadcluster(self):
+        command = ["add_archetype", "--archetype", "bad-cluster",
+                   "--cluster_type", "bad-cluster-type"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "Unknown cluster type 'bad-cluster-type'. The valid "
+                         "values are: compute, esx, meta, storage.",
+                         command)
+
     def testaddgridarchetype(self):
         command = ["add_archetype", "--archetype=gridcluster", "--cluster=compute",
                    "--compilable", "--description=Grid"]
