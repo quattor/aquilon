@@ -1,12 +1,12 @@
 SHELL  = /bin/ksh
-COMMON = ../install/common/
+COMMON = ../install/common
 QACOMMENT = -comment cmrs=qa
 QCELLS = q.ny,q.ln,q.hk,q.tk
 TCM_COMMENT = "-comment tcm FILL IT IN NOW"
 PYTHON_DEFAULT = /usr/bin/env python2.6
 #PYTHON = /ms/dist/python/PROJ/core/2.6.4/bin/python
-PYTHON_CLIENT_PROD = /ms/dist/python/PROJ/core/2.6.4/bin/python
-PYTHON_SERVER_PROD = /ms/dist/python/PROJ/core/2.6.4-64/bin/python
+PYTHON_CLIENT_PROD = /ms/dist/python/PROJ/core/2.6.4/bin/python -E
+PYTHON_SERVER_PROD = /ms/dist/python/PROJ/core/2.6.4-64/bin/python -E
 
 MPR    := $(shell echo $(PWD) | awk -F/ '{print $$(NF-3), $$(NF-2), $$(NF-1)}')
 META   = $(word 1,$(MPR))
@@ -26,7 +26,7 @@ LIB_PERMS = 644
 
 IN_AFS = $(findstring /ms/dev/aquilon/aqd, $(PWD))
 ifneq (,$(IN_AFS))
-        COMMON = /ms/dev/aquilon/aqd/$(REL)/install/common/
+        COMMON = /ms/dev/aquilon/aqd/$(REL)/install/common
         PERMS = 555
         LIB_PERMS = 444
 endif
@@ -46,42 +46,42 @@ ETC_FILES := $(shell find etc -type f | grep -v templates)
 PYC_FILES := $(shell find lib -name '*.py' | sed -e 's,\.py,\.pyc,')
 
 FILES = $(BIN_FILES) $(LIB_FILES) $(MAN_FILES) $(ETC_FILES) $(PYC_FILES)
-INSTALLFILES = $(addprefix $(COMMON),$(FILES))
+INSTALLFILES = $(addprefix $(COMMON)/,$(FILES))
 
-#$(COMMON)bin/%: bin/%.py
+#$(COMMON)/bin/%: bin/%.py
 #	@mkdir -p `dirname $@`
 #	sed -e '1s,^#!$(PYTHON_DEFAULT)\(.*\),#!$(PYTHON)\1,' <$< >$@
 #	chmod $(PERMS) $@
 
-$(COMMON)bin/aq: bin/aq.py
+$(COMMON)/bin/aq: bin/aq.py
 	@mkdir -p `dirname $@`
 	sed -e '1s,^#!$(PYTHON_DEFAULT)\(.*\),#!$(PYTHON_CLIENT_PROD)\1,' <$< >$@
 	chmod $(PERMS) $@
 
-$(COMMON)bin/aqd_config: bin/aqd_config.py
+$(COMMON)/bin/aqd_config: bin/aqd_config.py
 	@mkdir -p `dirname $@`
 	sed -e '1s,^#!$(PYTHON_DEFAULT)\(.*\),#!$(PYTHON_CLIENT_PROD)\1,' <$< >$@
 	chmod $(PERMS) $@
 
-$(COMMON)bin/twistd: bin/twistd.py
+$(COMMON)/bin/twistd: bin/twistd.py
 	@mkdir -p `dirname $@`
 	sed -e '1s,^#!$(PYTHON_DEFAULT)\(.*\),#!$(PYTHON_SERVER_PROD)\1,' <$< >$@
 	chmod $(PERMS) $@
 
-$(COMMON)%.pyc: $(COMMON)%.py
+$(COMMON)/%.pyc: $(COMMON)/%.py
 	@echo "compiling $@"
 	@rm -f $@
 	./build/compile_for_dist.py $<
 
-$(COMMON)lib/%: lib/%
+$(COMMON)/lib/%: lib/%
 	@mkdir -p `dirname $@`
 	install -m $(LIB_PERMS) $< $@
 
-$(COMMON)etc/%: etc/%
+$(COMMON)/etc/%: etc/%
 	@mkdir -p `dirname $@`
 	install -m $(LIB_PERMS) $< $@
 
-$(COMMON)etc/rc.d/init.d/aqd: etc/rc.d/init.d/aqd
+$(COMMON)/etc/rc.d/init.d/aqd: etc/rc.d/init.d/aqd
 	@mkdir -p `dirname $@`
 	install -m 0555 $< $@
 
@@ -96,15 +96,15 @@ $(COMMON)etc/rc.d/init.d/aqd: etc/rc.d/init.d/aqd
 # remove the generated files anyway.
 .PHONY: install
 install: remove_stale $(INSTALLFILES) install-doc
-	ln -sf twistd "$(COMMON)bin/aqd"
-	ln -sf twistd "$(COMMON)bin/aqd_readonly"
-	$(COMMON)bin/twistd --help >/dev/null
-	./build/gen_completion.py --outputdir="$(COMMON)etc" --templatedir="./etc/templates" --all
-	./build/graph_schema.py --outputdir="$(COMMON)doc"
+	ln -sf twistd "$(COMMON)/bin/aqd"
+	ln -sf twistd "$(COMMON)/bin/aqd_readonly"
+	$(COMMON)/bin/twistd --help >/dev/null
+	./build/gen_completion.py --outputdir="$(COMMON)/etc" --templatedir="./etc/templates" --all
+	./build/graph_schema.py --outputdir="$(COMMON)/doc"
 
 .PHONY: install-doc
 install-doc:
-	$(MAKE) -C doc install DESTDIR="$(abspath $(COMMON)doc)"
+	$(MAKE) -C doc install DESTDIR="$(abspath $(COMMON)/doc)"
 
 .PHONY: remove_stale
 remove_stale:
