@@ -59,8 +59,8 @@ class Base(object):
         """
         label = self.__class__.__name__
         attrs = []
-        mapper = inspect(self)
-        for field, prop in mapper.column_attrs.iteritems():
+        mapper = inspect(self.__class__)
+        for field, prop in mapper.column_attrs.items():
             # Do not load deferred columns, they can't be that interesting
             if prop.deferred:
                 continue
