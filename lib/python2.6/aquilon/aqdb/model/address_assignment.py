@@ -172,11 +172,11 @@ Interface.addresses = association_proxy('assignments', 'ip')
 
 # Can't use backref or back_populates due to the different mappers
 # This relation gives us the two other sides of the triangle mentioned above
+# Do NOT consider the DNS environment here - whether the IP is used or not does
+# not depend on its visibility in DNS
 ARecord.assignments = relation(
     AddressAssignment,
     primaryjoin=and_(AddressAssignment.ip == ARecord.ip,
-                     AddressAssignment.network_id == ARecord.network_id,
-                     ARecord.fqdn_id == Fqdn.id,
-                     AddressAssignment.dns_environment_id == Fqdn.dns_environment_id),
-    foreign_keys=[AddressAssignment.ip, AddressAssignment.network_id, Fqdn.id],
+                     AddressAssignment.network_id == ARecord.network_id),
+    foreign_keys=[AddressAssignment.ip, AddressAssignment.network_id],
     viewonly=True)
