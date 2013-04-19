@@ -24,11 +24,13 @@ from aquilon.worker.formats.list import StringList
 
 class CommandSearchDomain(BrokerCommand):
 
-    def render(self, session, track, change_manager, fullinfo, **arguments):
+    def render(self, session, track, not_tracking, change_manager, fullinfo, **arguments):
         q = search_branch_query(self.config, session, Domain, **arguments)
         if track:
             dbtracked = Branch.get_unique(session, track, compel=True)
             q = q.filter_by(tracked_branch=dbtracked)
+        if not_tracking:
+            q = q.filter_by(tracked_branch=None)
         if change_manager is not None:
             q = q.filter_by(requires_change_manager=change_manager)
 

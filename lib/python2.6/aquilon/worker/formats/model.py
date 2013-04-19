@@ -18,6 +18,7 @@
 
 
 from aquilon.worker.formats.formatters import ObjectFormatter
+from aquilon.worker.formats.list import ListFormatter
 from aquilon.aqdb.model import Model
 
 
@@ -45,3 +46,15 @@ class ModelFormatter(ObjectFormatter):
         return "\n".join(details)
 
 ObjectFormatter.handlers[Model] = ModelFormatter()
+
+
+class SimpleModelList(list):
+    pass
+
+
+class SimpleModelListFormatter(ListFormatter):
+    def format_raw(self, models, indent=""):
+        return "\n".join([indent + "%s/%s" % (model.vendor.name, model.name)
+                          for model in models])
+
+ObjectFormatter.handlers[SimpleModelList] = SimpleModelListFormatter()

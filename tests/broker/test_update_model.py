@@ -62,6 +62,13 @@ class TestUpdateModel(TestBrokerCommand):
         self.matchoutput(out, "Disk: sda 45 GB scsi (virtual_disk)", command)
         self.matchoutput(out, "Comments: New model comments", command)
 
+    def test_110_verify_search(self):
+        command = ["search", "model", "--cpuname", "utcpu"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "utvendor/utmedium", command)
+        self.matchclean(out, "utlarge", command)
+        self.matchclean(out, "ibm", command)
+
     def test_120_verifymachine(self):
         command = ["cat", "--machine=evm1"]
         out = self.commandtest(command)

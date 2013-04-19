@@ -33,8 +33,9 @@ class CommandSearchNetwork(BrokerCommand):
 
     required_parameters = []
 
-    def render(self, session, network, network_environment, ip, type, machine,
-               fqdn, cluster, pg, has_dynamic_ranges, fullinfo, **arguments):
+    def render(self, session, network, network_environment, ip, type, side,
+               machine, fqdn, cluster, pg, has_dynamic_ranges, fullinfo,
+               **arguments):
         """Return a network matching the parameters.
 
         Some of the search terms can only return a unique network.  For
@@ -55,6 +56,8 @@ class CommandSearchNetwork(BrokerCommand):
             q = q.filter_by(id=dbnetwork.id)
         if type:
             q = q.filter_by(network_type=type)
+        if side:
+            q = q.filter_by(side=side)
         if machine:
             dbmachine = Machine.get_unique(session, machine, compel=True)
             vlans = []

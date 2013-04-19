@@ -21,8 +21,6 @@ from sqlalchemy.orm import aliased, contains_eager
 from sqlalchemy.sql import and_, or_
 
 from aquilon.exceptions_ import NotFoundException
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.formats.host import SimpleHostList
 from aquilon.aqdb.model import (Host, Cluster, Archetype, Personality,
                                 PersonalityGrnMap, HostGrnMap, HostLifecycle,
                                 OperatingSystem, Service, Share, VirtualDisk,
@@ -31,11 +29,14 @@ from aquilon.aqdb.model import (Host, Cluster, Archetype, Personality,
                                 NetworkEnvironment, Network, MetaCluster,
                                 VirtualMachine, ClusterResource)
 from aquilon.aqdb.model.dns_domain import parse_fqdn
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.formats.host import SimpleHostList
 from aquilon.worker.dbwrappers.service_instance import get_service_instance
 from aquilon.worker.dbwrappers.branch import get_branch_and_author
 from aquilon.worker.dbwrappers.grn import lookup_grn
 from aquilon.worker.dbwrappers.location import get_location
 from aquilon.worker.dbwrappers.network import get_network_byip
+from aquilon.worker.dbwrappers.user_principal import get_user_principal
 
 
 class CommandSearchHost(BrokerCommand):
@@ -46,7 +47,7 @@ class CommandSearchHost(BrokerCommand):
                buildstatus, personality, osname, osversion, service, instance,
                model, machine_type, vendor, serial, cluster,
                guest_on_cluster, guest_on_share, member_cluster_share,
-               domain, sandbox, branch,
+               domain, sandbox, branch, sandbox_owner,
                dns_domain, shortname, mac, ip, networkip, network_environment,
                exact_location, server_of_service, server_of_instance, grn,
                eon_id, fullinfo, **arguments):
@@ -147,6 +148,9 @@ class CommandSearchHost(BrokerCommand):
                                                      domain=domain,
                                                      sandbox=sandbox,
                                                      branch=branch)
+        if sandbox_owner:
+            dbauthor = get_user_principal(session, sandbox_owner)
+
         if dbbranch:
             q = q.filter_by(branch=dbbranch)
         if dbauthor:

@@ -115,6 +115,16 @@ class TestAddDomain(TestBrokerCommand):
         self.matchoutput(out, "unittest", command)
         self.matchclean(out, "ut-prod", command)
 
+    def test_210_verifysearchnot_tracking(self):
+        command = ["search", "domain", "--not_tracking"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "deployable", command)
+        self.matchoutput(out, "leftbehind", command)
+        self.matchoutput(out, "nomanage", command)
+        self.searchoutput(out, r"^prod$", command)
+        self.matchclean(out, "unittest", command)
+        self.matchclean(out, "ut-prod", command)
+
     def test_210_verifysearchchm(self):
         command = ["search", "domain", "--change_manager"]
         self.noouttest(command)
