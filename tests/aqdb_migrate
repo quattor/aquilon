@@ -39,7 +39,7 @@ if _LIBDIR not in sys.path:
 from aquilon.aqdb import depends
 
 import ms.version
-ms.version.addpkg('psycopg2', '2.4.2-9.0.1', 'dev')
+ms.version.addpkg('psycopg2', '2.5-9.2.4')
 
 import argparse
 
