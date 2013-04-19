@@ -18,15 +18,15 @@
 
 
 from sqlalchemy.orm import aliased, contains_eager
-from sqlalchemy.sql import or_
+from sqlalchemy.sql import and_, or_
 
 from aquilon.exceptions_ import NotFoundException
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.formats.host import SimpleHostList
 from aquilon.aqdb.model import (Host, Cluster, Archetype, Personality,
                                 PersonalityGrnMap, HostGrnMap, HostLifecycle,
-                                OperatingSystem, Service, Share,
-                                VirtualDisk, Disk, Machine, Model, ARecord,
+                                OperatingSystem, Service, Share, VirtualDisk,
+                                Disk, Machine, Model, DnsRecord, ARecord, Fqdn,
                                 DnsDomain, Interface, AddressAssignment,
                                 NetworkEnvironment, Network, MetaCluster,
                                 VirtualMachine, ClusterResource)
@@ -52,41 +52,6 @@ class CommandSearchHost(BrokerCommand):
                eon_id, fullinfo, **arguments):
         dbnet_env = NetworkEnvironment.get_unique_or_default(session,
                                                              network_environment)
-        dnsq = session.query(ARecord.ip)
-        dnsq = dnsq.join(ARecord.fqdn)
-        use_dnsq = False
-        if hostname:
-            (short, dbdns_domain) = parse_fqdn(session, hostname)
-            dnsq = dnsq.filter_by(name=short)
-            dnsq = dnsq.filter_by(dns_domain=dbdns_domain)
-            use_dnsq = True
-        if dns_domain:
-            dbdns_domain = DnsDomain.get_unique(session, dns_domain, compel=True)
-            dnsq = dnsq.filter_by(dns_domain=dbdns_domain)
-            use_dnsq = True
-        if shortname:
-            dnsq = dnsq.filter_by(name=shortname)
-            use_dnsq = True
-
-        use_addrq = False
-        addrq = session.query(Interface.id)
-        if mac:
-            self.deprecated_option("mac", "Please use search machine --mac instead.",
-                logger=logger, **arguments)
-            addrq = addrq.filter(Interface.mac == mac)
-            use_addrq = True
-        addrq = addrq.join(AddressAssignment, Network)
-        addrq = addrq.filter_by(network_environment=dbnet_env)
-        if ip:
-            addrq = addrq.filter(AddressAssignment.ip == ip)
-            use_addrq = True
-        if networkip:
-            dbnetwork = get_network_byip(session, networkip, dbnet_env)
-            addrq = addrq.filter(AddressAssignment.network == dbnetwork)
-            use_addrq = True
-        if use_dnsq:
-            addrq = addrq.filter(AddressAssignment.ip.in_(dnsq.subquery()))
-            use_addrq = True
 
         q = session.query(Host)
 
@@ -94,14 +59,28 @@ class CommandSearchHost(BrokerCommand):
             dbmachine = Machine.get_unique(session, machine, compel=True)
             q = q.filter_by(machine=dbmachine)
 
-        # Hardware-specific filters
-        q = q.join(Machine)
-        q = q.options(contains_eager('machine'))
+        # Add the machine definition and the primary name. Use aliases to make
+        # sure the end result will be ordered by primary name.
+        PriDns = aliased(DnsRecord)
+        PriFqdn = aliased(Fqdn)
+        PriDomain = aliased(DnsDomain)
+        q = q.join(Machine,
+                   (PriDns, PriDns.id == Machine.primary_name_id),
+                   (PriFqdn, PriDns.fqdn_id == PriFqdn.id),
+                   (PriDomain, PriFqdn.dns_domain_id == PriDomain.id))
+        q = q.order_by(PriFqdn.name, PriDomain.name)
+        q = q.options(contains_eager('machine'),
+                      contains_eager('machine.primary_name', alias=PriDns),
+                      contains_eager('machine.primary_name.fqdn', alias=PriFqdn),
+                      contains_eager('machine.primary_name.fqdn.dns_domain',
+                                     alias=PriDomain))
+        q = q.reset_joinpoint()
 
+        # Hardware-specific filters
         dblocation = get_location(session, **arguments)
         if dblocation:
             if exact_location:
-                q = q.filter_by(location=dblocation)
+                q = q.filter(Machine.location == dblocation)
             else:
                 childids = dblocation.offspring_ids()
                 q = q.filter(Machine.location_id.in_(childids))
@@ -115,14 +94,54 @@ class CommandSearchHost(BrokerCommand):
         if serial:
             self.deprecated_option("serial", "Please use search machine --serial instead.",
                 logger=logger, **arguments)
-            q = q.filter_by(serial_no=serial)
+            q = q.filter(Machine.serial_no == serial)
 
-        if use_addrq:
-            q = q.join(Interface)
-            q = q.filter(Interface.id.in_(addrq.subquery()))
+        # DNS IP address related filters
+        if mac or ip or networkip or hostname or dns_domain or shortname:
+            # Inner joins are cheaper than outer joins, so make some effort to
+            # use inner joins when possible
+            if mac or ip or networkip:
+                q = q.join(Interface)
+            else:
+                q = q.outerjoin(Interface)
+            if ip or networkip:
+                q = q.join(AddressAssignment, Network, from_joinpoint=True)
+            else:
+                q = q.outerjoin(AddressAssignment, Network, from_joinpoint=True)
 
-        # End of hardware-specific filters
-        q = q.reset_joinpoint()
+            if mac:
+                self.deprecated_option("mac", "Please use search machine "
+                                       "--mac instead.", logger=logger,
+                                       **arguments)
+                q = q.filter(Interface.mac == mac)
+            if ip:
+                q = q.filter(AddressAssignment.ip == ip)
+                q = q.filter(Network.network_environment == dbnet_env)
+            if networkip:
+                dbnetwork = get_network_byip(session, networkip, dbnet_env)
+                q = q.filter(AddressAssignment.network == dbnetwork)
+
+            dbdns_domain = None
+            if hostname:
+                (shortname, dbdns_domain) = parse_fqdn(session, hostname)
+            if dns_domain:
+                dbdns_domain = DnsDomain.get_unique(session, dns_domain, compel=True)
+
+            if shortname or dbdns_domain:
+                ARecAlias = aliased(ARecord)
+                ARecFqdn = aliased(Fqdn)
+
+                q = q.outerjoin((ARecAlias,
+                                 and_(ARecAlias.ip == AddressAssignment.ip,
+                                      ARecAlias.network_id == AddressAssignment.network_id)),
+                                (ARecFqdn, ARecAlias.fqdn_id == ARecFqdn.id))
+                if shortname:
+                    q = q.filter(or_(ARecFqdn.name == shortname,
+                                     PriFqdn.name == shortname))
+                if dbdns_domain:
+                    q = q.filter(or_(ARecFqdn.dns_domain == dbdns_domain,
+                                     PriFqdn.dns_domain == dbdns_domain))
+            q = q.reset_joinpoint()
 
         (dbbranch, dbauthor) = get_branch_and_author(session, logger,
                                                      domain=domain,
@@ -257,6 +276,7 @@ class CommandSearchHost(BrokerCommand):
             q = q.filter(or_(Host.owner_eon_id == dbgrn.eon_id,
                              HostGrnMap.eon_id == dbgrn.eon_id,
                              Host.personality_id.in_(persq.subquery())))
+            q = q.reset_joinpoint()
 
         if fullinfo:
             return q.all()

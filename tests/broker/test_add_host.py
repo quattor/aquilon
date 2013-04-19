@@ -433,7 +433,11 @@ class TestAddHost(TestBrokerCommand):
         self.assertEqual(host.machine.name, "ut10s04p1")
         self.assertEqual(len(host.machine.interfaces), 2)
         self.assertEqual(host.machine.location.name, 'ut10')
-        self.assertEqual(len(host.machine.location.parents), 7)
+        self.assertEqual(' '.join(['%s:%s' % (str(loc.location_type),
+                                              str(loc.name))
+                                   for loc in host.machine.location.parents]),
+                         "company:ms hub:ny continent:na country:us "
+                         "campus:ny city:ny building:ut")
         for i in host.machine.interfaces:
             if i.device == 'eth0':
                 self.assertEqual(i.ip, str(self.net.tor_net[2].usable[1]))

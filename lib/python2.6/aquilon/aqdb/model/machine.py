@@ -34,15 +34,15 @@ class Machine(HardwareEntity):
                                            ondelete='CASCADE'),
                                            primary_key=True)
 
-    cpu_id = Column(Integer, ForeignKey(
-        'cpu.id', name='machine_cpu_fk'), nullable=False)
+    cpu_id = Column(Integer, ForeignKey('cpu.id', name='machine_cpu_fk'),
+                    nullable=False)
 
     #TODO: constrain/smallint
     cpu_quantity = Column(Integer, nullable=False, default=2)
 
     memory = Column(Integer, nullable=False, default=512)
 
-    cpu = relation(Cpu)
+    cpu = relation(Cpu, innerjoin=True)
 
     @property
     def cluster(self):

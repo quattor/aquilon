@@ -48,6 +48,16 @@ class TestVendorConstraints(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out, "Vendor: intel", command)
 
+    # TODO: better place for this test
+    def testdelxeon2500(self):
+        command = "del cpu --cpu xeon_2500 --vendor intel --speed 2500"
+        out = self.badrequesttest(command.split(" "))
+        self.matchoutput(out,
+                         "Cpu xeon_2500 is still used by the following "
+                         "models, and cannot be deleted: hp/bl260c, "
+                         "hp/utccissmodel, hp/uttorswitch, verari/vb1205xm",
+                          command)
+
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(

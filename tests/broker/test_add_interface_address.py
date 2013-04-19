@@ -24,10 +24,7 @@ if __name__ == "__main__":
     utils.import_depends()
 
 from brokertest import TestBrokerCommand
-
-
-def dynname(ip, domain="aqd-unittest.ms.com"):
-    return "dynamic-%s.%s" % (str(ip).replace(".", "-"), domain)
+from test_add_dynamic_range import dynname
 
 
 class TestAddInterfaceAddress(TestBrokerCommand):
@@ -170,16 +167,24 @@ class TestAddInterfaceAddress(TestBrokerCommand):
                          command)
 
     def testrejectdyndns(self):
-        # Dynamic DHCP address, set up using add_dynamic_range
+        # The FQDN does not exist yet, but the IP is used for dynamic DHCP
         ip = self.net.tor_net2[0].usable[2]
         command = ["add", "interface", "address", "--machine", "ut3c5n2",
                    "--interface", "eth1", "--label", "e3",
                    "--fqdn", "dyndhcp.aqd-unittest.ms.com", "--ip", ip]
         out = self.badrequesttest(command)
-        self.matchoutput(out,
-                         "Address %s [%s] is reserved for dynamic DHCP." %
-                         (dynname(ip), ip),
-                         command)
+        self.matchoutput(out, "Address %s [%s] is reserved for dynamic DHCP." %
+                         (dynname(ip), ip), command)
+
+    def testrejectdyndnsfqdn(self):
+        # The FQDN exists and is used for dynamic DHCP
+        ip = self.net.tor_net2[0].usable[2]
+        command = ["add", "interface", "address", "--machine", "ut3c5n2",
+                   "--interface", "eth1", "--label", "e3",
+                   "--fqdn", dynname(ip)]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Address %s [%s] is reserved for dynamic DHCP." %
+                         (dynname(ip), ip), command)
 
     def testrejectreserved(self):
         # Address in the reserved range

@@ -26,7 +26,7 @@
 import ms.version
 
 ms.version.addpkg('setuptools', '0.6c11')
-ms.version.addpkg('protobuf', '2.3.0')
+ms.version.addpkg('protobuf', '2.4.1')
 ms.version.addpkg('zope.interface', '3.6.1')
 ms.version.addpkg('twisted', '12.0.0')
 ms.version.addpkg('coverage', '3.4')

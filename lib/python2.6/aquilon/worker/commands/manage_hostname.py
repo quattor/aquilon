@@ -15,8 +15,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 import os
+import re
 
 from aquilon.exceptions_ import IncompleteError, ArgumentError
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
@@ -55,8 +55,7 @@ def validate_branch_commits(dbsource, dbsource_author,
 
     # get latest source commit bit
     dbsource_commit = run_git(['rev-list', '--max-count=1', 'HEAD'],
-                              path=source_path,
-                              logger=logger)
+                              path=source_path, logger=logger)
     dbsource_commit = dbsource_commit.rstrip()
     if not dbsource_commit:  # pragma: no cover
         raise ArgumentError("Unable to retrieve the git commit history from "
@@ -67,20 +66,22 @@ def validate_branch_commits(dbsource, dbsource_author,
     # any results returned will mean that all commits has been published
     kingdir = config.get("broker", "kingdir")
     try:
-        found = run_git(['show', dbsource_commit, '--oneline'],
+        found = run_git(['cat-file', '-t', dbsource_commit],
                         path=kingdir, logger=logger)
+        found = found.strip()
     except ProcessException as pe:
         if pe.code != 128:
             raise
         else:
             found = None
-    if not found:
+    if found != 'commit':
         raise ArgumentError("The source {0:l} latest commit has not been "
                             "published to template-king yet.".format(dbsource))
 
     # check if target branch has the latest source commit
     try:
-        found = run_git(['show', dbsource_commit, '--oneline'],
+        filterre = re.compile('^' + dbsource_commit + '$')
+        found = run_git(['rev-list', 'HEAD'], filterre=filterre,
                         path=target_path, logger=logger)
     except ProcessException as pe:
         if pe.code != 128:

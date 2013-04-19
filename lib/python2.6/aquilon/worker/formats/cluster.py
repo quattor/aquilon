@@ -15,6 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from operator import attrgetter
 
 from aquilon.worker.formats.formatters import ObjectFormatter
 from aquilon.worker.formats.list import ListFormatter
@@ -116,7 +117,8 @@ class ClusterFormatter(ObjectFormatter):
 
         if cluster.resholder and cluster.resholder.resources:
             details.append(indent + "  Resources:")
-            for resource in cluster.resholder.resources:
+            for resource in sorted(cluster.resholder.resources,
+                                   key=attrgetter('resource_type', 'name')):
                 details.append(self.redirect_raw(resource, indent + "    "))
 
         if cluster.cluster_type == 'esx':

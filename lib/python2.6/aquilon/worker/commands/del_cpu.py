@@ -17,11 +17,9 @@
 """Contains the logic for `aq del cpu`."""
 
 
-from sqlalchemy.exc import InvalidRequestError
-
 from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.aqdb.model import Cpu
+from aquilon.aqdb.model import Cpu, Machine, MachineSpecs, Model, Vendor
 
 
 class CommandDelCpu(BrokerCommand):
@@ -31,8 +29,19 @@ class CommandDelCpu(BrokerCommand):
     def render(self, session, cpu, vendor, speed, **arguments):
         dbcpu = Cpu.get_unique(session, name=cpu, vendor=vendor, speed=speed,
                                compel=True)
-        try:
-            session.delete(dbcpu)
-        except InvalidRequestError, e:
-            raise ArgumentError("Could not delete CPU: %s" % e)
+
+        q = session.query(MachineSpecs)
+        q = q.filter_by(cpu=dbcpu)
+        q = q.join((Model, MachineSpecs.model_id == Model.id), Vendor)
+        q = q.order_by(Vendor.name, Model.name)
+        if q.count():
+            models = ", ".join(["%s/%s" % (spec.model.vendor.name,
+                                           spec.model.name) for spec in q])
+            raise ArgumentError("{0} is still used by the following models, "
+                                "and cannot be deleted: {1!s}"
+                                .format(dbcpu, models))
+
+        session.delete(dbcpu)
+        session.flush()
+
         return
