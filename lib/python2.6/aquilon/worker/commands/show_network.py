@@ -32,10 +32,18 @@ class CommandShowNetwork(BrokerCommand):
 
     def render(self, session, network, ip, network_environment, all, style,
                type=False, hosts=False, **arguments):
+        options = []
+        if hosts or style == "proto":
+            options.extend([subqueryload("assignments"),
+                            joinedload("assignments.interface"),
+                            joinedload("assignments.dns_records"),
+                            subqueryload("dynamic_stubs")])
         dbnet_env = NetworkEnvironment.get_unique_or_default(session,
                                                              network_environment)
-        dbnetwork = network and get_network_byname(session, network, dbnet_env) or None
-        dbnetwork = ip and get_network_byip(session, ip, dbnet_env) or dbnetwork
+        dbnetwork = network and get_network_byname(session, network, dbnet_env,
+                                                   query_options=options) or None
+        dbnetwork = ip and get_network_byip(session, ip, dbnet_env,
+                                            query_options=options) or dbnetwork
         q = session.query(Network)
         q = q.filter_by(network_environment=dbnet_env)
         q = q.options(joinedload('location'))
@@ -51,10 +59,7 @@ class CommandShowNetwork(BrokerCommand):
             childids = dblocation.offspring_ids()
             q = q.filter(Network.location_id.in_(childids))
         q = q.order_by(Network.ip)
-        if hosts or style == "proto":
-            q = q.options(subqueryload("assignments"))
-            q = q.options(joinedload("assignments.dns_records"))
-            q = q.options(subqueryload("dynamic_stubs"))
+        q = q.options(*options)
         if hosts:
             return NetworkHostList(q.all())
         else:
