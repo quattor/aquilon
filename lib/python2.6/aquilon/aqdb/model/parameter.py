@@ -100,7 +100,8 @@ class Parameter(Base):
 
     id = Column(Integer, Sequence('%s_seq' % _TN), primary_key=True)
     value = Column(MutationDict.as_mutable(JSONEncodedDict))
-    creation_date = Column(DateTime, default=datetime.now, nullable=False)
+    creation_date = deferred(Column(DateTime, default=datetime.now,
+                                    nullable=False))
     comments = deferred(Column(String(255), nullable=True))
     holder_id = Column(Integer, ForeignKey('%s.id' % _PARAM_HOLDER,
                                            name='%s_paramholder_fk' % _TN,
