@@ -22,6 +22,7 @@ import unittest
 import gzip
 from cStringIO import StringIO
 from cPickle import Pickler, Unpickler
+from subprocess import Popen, PIPE
 
 import xml.etree.ElementTree as ET
 
@@ -264,6 +265,26 @@ class TestCompile(TestBrokerCommand):
         self.matchoutput(err, "aqd unittest debug for aquilon base", command)
         self.matchclean(err, "aqd unittest debug for aquilon final", command)
         self.matchclean(err, "Assigning repositories to packages...", command)
+
+    def test_600_aqcompile(self):
+        aqcompile = os.path.join(self.config.get("broker", "srcdir"),
+                                 "bin", "aq_compile.py")
+        basedir = self.config.get("broker", "quattordir")
+        templates = os.path.join(self.sandboxdir, "utsandbox")
+        swrep = self.config.get("broker", "swrepdir")
+        args = [aqcompile, "--basedir", basedir, "--domain", "utsandbox",
+                "--templates", templates, "--swrep", swrep,
+                "--batch_size", "10"]
+        if self.config.getboolean('panc', 'gzip_output'):
+            args.append("--compress_output")
+        p = Popen(args, stdout=PIPE, stderr=PIPE)
+        out, err = p.communicate()
+        self.assertEqual(p.returncode, 0,
+                         "Non-0 return code %s for %s, "
+                         "STDOUT:\n@@@\n'%s'\n@@@\n"
+                         "STDERR:\n@@@\n'%s'\n@@@\n"
+                         % (p.returncode, args, out, err))
+        self.matchoutput(out, "BUILD SUCCESSFUL", args)
 
 
 if __name__ == '__main__':

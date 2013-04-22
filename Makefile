@@ -58,6 +58,11 @@ $(COMMON)/bin/aq: bin/aq.py
 	sed -e '1s,^#!$(PYTHON_DEFAULT)\(.*\),#!$(PYTHON_CLIENT_PROD)\1,' <$< >$@
 	chmod $(PERMS) $@
 
+$(COMMON)/bin/aq_compile: bin/aq_compile.py
+	@mkdir -p `dirname $@`
+	sed -e '1s,^#!$(PYTHON_DEFAULT)\(.*\),#!$(PYTHON_CLIENT_PROD)\1,' <$< >$@
+	chmod $(PERMS) $@
+
 $(COMMON)/bin/aqd_config: bin/aqd_config.py
 	@mkdir -p `dirname $@`
 	sed -e '1s,^#!$(PYTHON_DEFAULT)\(.*\),#!$(PYTHON_CLIENT_PROD)\1,' <$< >$@
