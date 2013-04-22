@@ -55,7 +55,6 @@ class HostLifecycle(StateEngine, Base):
     name = Column(Enum(32, transitions.keys()), nullable=False)
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
-    comments = Column(String(255), nullable=True)
 
     __mapper_args__ = {'polymorphic_on': name}
 
