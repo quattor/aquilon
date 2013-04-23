@@ -19,7 +19,8 @@ from ipaddr import IPv4Address
 
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.aqdb.model import (DynamicStub, ARecord, DnsDomain, Fqdn,
-                                AddressAssignment, NetworkEnvironment)
+                                AddressAssignment, NetworkEnvironment,
+                                DnsEnvironment)
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.dbwrappers.interface import check_ip_restrictions
@@ -35,6 +36,7 @@ class CommandAddDynamicRange(BrokerCommand):
         if not prefix:
             prefix = 'dynamic'
         dbnet_env = NetworkEnvironment.get_unique_or_default(session)
+        dbdns_env = DnsEnvironment.get_unique_or_default(session)
         startnet = get_net_id_from_ip(session, startip, dbnet_env)
         endnet = get_net_id_from_ip(session, endip, dbnet_env)
         if startnet != endnet:
@@ -72,15 +74,18 @@ class CommandAddDynamicRange(BrokerCommand):
                                 "\n".join([format(c, "a") for c in conflicts]))
 
         dsdb_runner = DSDBRunner(logger=logger)
-        for ipint in range(int(startip), int(endip) + 1):
-            ip = IPv4Address(ipint)
-            check_ip_restrictions(startnet, ip)
-            name = "%s-%s" % (prefix, str(ip).replace('.', '-'))
-            dbfqdn = Fqdn.get_or_create(session, name=name,
-                                        dns_domain=dbdns_domain, preclude=True)
-            dbdynamic_stub = DynamicStub(fqdn=dbfqdn, ip=ip, network=startnet)
-            session.add(dbdynamic_stub)
-            dsdb_runner.add_host_details(dbfqdn, ip)
+        with session.no_autoflush:
+            for ipint in range(int(startip), int(endip) + 1):
+                ip = IPv4Address(ipint)
+                check_ip_restrictions(startnet, ip)
+                name = "%s-%s" % (prefix, str(ip).replace('.', '-'))
+                dbfqdn = Fqdn.get_or_create(session, name=name,
+                                            dns_domain=dbdns_domain,
+                                            dns_environment=dbdns_env,
+                                            preclude=True)
+                dbdynamic_stub = DynamicStub(fqdn=dbfqdn, ip=ip, network=startnet)
+                session.add(dbdynamic_stub)
+                dsdb_runner.add_host_details(dbfqdn, ip)
 
         session.flush()
         # This may take some time if the range is big, so be verbose
