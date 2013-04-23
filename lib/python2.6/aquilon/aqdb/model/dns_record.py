@@ -167,12 +167,9 @@ class DnsRecord(Base):
             own_type = self.__class__.__mapper_args__['polymorphic_identity']
 
             # Asking for just one column makes both the query and the ORM faster
-            q = session.query(DnsRecord.dns_record_type).filter_by(fqdn=fqdn)
-            for existing in q.all():
+            for existing in fqdn.dns_records:
                 if existing.dns_record_type in _rr_conflict_map[own_type]:
-                    cls = DnsRecord.__mapper__.polymorphic_map[existing.dns_record_type].class_
-                    raise ArgumentError("%s %s already exist." %
-                                        (cls._get_class_label(), fqdn))
+                    raise ArgumentError("{0} already exist.".format(existing))
 
         super(DnsRecord, self).__init__(fqdn=fqdn, **kwargs)
 

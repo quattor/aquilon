@@ -95,10 +95,12 @@ class CommandDelHost(BrokerCommand):
                 set_committed_value(dbhost, '_cluster', None)
                 dbcluster.validate()
 
+            dbdns_rec = dbmachine.primary_name
+            dbmachine.primary_name = None
+            dbmachine.host = None
             session.delete(dbhost)
-            delete_dns_record(dbmachine.primary_name)
+            delete_dns_record(dbdns_rec)
             session.flush()
-            session.expire(dbmachine, ['host', 'primary_name'])
             delplenary = True
 
             if dbmachine.vm_container:

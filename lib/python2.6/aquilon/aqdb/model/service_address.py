@@ -45,7 +45,8 @@ class ServiceAddress(Resource):
                            backref=backref('service_address'))
 
     dns_record = relation(ARecord, innerjoin=True,
-                          backref=backref('service_address', uselist=False))
+                          backref=backref('service_address', uselist=False,
+                                          passive_deletes=True))
 
     @property
     def interfaces(self):

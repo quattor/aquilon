@@ -44,7 +44,8 @@ class NsRecord(Base):
     comments = deferred(Column(String(255), nullable=True))
 
     a_record = relation(ARecord, lazy=False, innerjoin=True,
-                        backref=backref('_ns_records', cascade='all'))
+                        backref=backref('_ns_records', cascade='all',
+                                        passive_deletes=True))
 
     dns_domain = relation(DnsDomain, lazy=False, innerjoin=True,
                           backref=backref('_ns_records', cascade='all'))

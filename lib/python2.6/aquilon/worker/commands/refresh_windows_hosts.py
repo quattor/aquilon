@@ -110,8 +110,9 @@ class CommandRefreshWindowsHosts(BrokerCommand):
             if dbmachine.vm_container:
                 containers.add(dbmachine.vm_container)
             session.delete(dbhost)
-            delete_dns_record(dbmachine.primary_name)
-            session.expire(dbmachine, ['primary_name'])
+            dbdns_rec = dbmachine.primary_name
+            dbmachine.primary_name = None
+            delete_dns_record(dbdns_rec)
         session.flush()
         # The Host() creations below fail when autoflush is enabled.
         session.autoflush = False

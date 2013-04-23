@@ -71,7 +71,8 @@ class HardwareEntity(Base):
     # eagerly
     # This is a one-to-one relation, so we need uselist=False on the backref
     primary_name = relation(DnsRecord, lazy=False,
-                            backref=backref('hardware_entity', uselist=False))
+                            backref=backref('hardware_entity', uselist=False,
+                                            passive_deletes=True))
 
     __mapper_args__ = {'polymorphic_on': hardware_type}
 
