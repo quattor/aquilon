@@ -31,4 +31,4 @@ if sys.platform == "sunos5":
     ms.version.addpkg("ctypes", "1.0.2")
 
     # required to move the ctypes path  before the core paths
-    sys.path[0] = sys.path.pop()
+    sys.path.insert(0, sys.path.pop())
