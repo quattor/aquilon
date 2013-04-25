@@ -21,16 +21,18 @@ from aquilon.aqdb.model import Sandbox
 from aquilon.worker.dbwrappers.user_principal import get_user_principal
 
 
-def get_sandbox(session, logger, sandbox):
+def get_sandbox(session, logger, sandbox, query_options=None):
     """Allow an optional author field."""
     sbx_split = sandbox.split('/')
     first, second = '', ''
     if len(sbx_split) <= 1:
-        dbsandbox = Sandbox.get_unique(session, sandbox, compel=True)
+        dbsandbox = Sandbox.get_unique(session, sandbox, compel=True,
+                                       query_options=query_options)
         dbauthor = None
         return (dbsandbox, dbauthor)
     first = '/'.join(sbx_split[:-1])
     second = sbx_split[-1]
-    dbsandbox = Sandbox.get_unique(session, second, compel=True)
+    dbsandbox = Sandbox.get_unique(session, second, compel=True,
+                                   query_options=query_options)
     dbauthor = get_user_principal(session, first)
     return (dbsandbox, dbauthor)

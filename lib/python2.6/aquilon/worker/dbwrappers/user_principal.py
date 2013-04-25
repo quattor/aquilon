@@ -34,7 +34,7 @@ host_re = re.compile(r'^host/(.*)$')
 
 def get_or_create_user_principal(session, principal, createuser=True,
                                  createrealm=True, commitoncreate=False,
-                                 comments=None):
+                                 comments=None, query_options=None):
     if principal is None:
         return None
 
@@ -59,6 +59,8 @@ def get_or_create_user_principal(session, principal, createuser=True,
     q = q.reset_joinpoint()
     q = q.options(contains_eager('realm'),
                   joinedload('role'))
+    if query_options:
+        q = q.options(*query_options)
     dbuser = q.first()
     if dbuser:
         return dbuser
