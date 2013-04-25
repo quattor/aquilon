@@ -21,6 +21,7 @@ from dateutil.tz import tzutc
 
 from sqlalchemy import Column, String, Integer, ForeignKey, Index, Boolean
 from sqlalchemy.orm import relationship, backref
+from sqlalchemy.sql import desc
 
 from aquilon.config import Config
 from aquilon.aqdb.model.base import Base
@@ -95,7 +96,7 @@ xtn.primary_key.name = 'XTN_PK'  # pylint: disable=C0103
 Index('XTN_USERNAME_IDX', xtn.c.username, oracle_compress=True)
 Index('XTN_COMMAND_IDX', xtn.c.command, oracle_compress=True)
 Index('XTN_ISREADONLY_IDX', xtn.c.is_readonly, oracle_bitmap=True)
-Index('XTN_START_TIME_IDX', xtn.c.start_time, oracle_desc=True)
+Index('XTN_START_TIME_IDX', desc(xtn.c.start_time))
 
 
 class XtnEnd(Base):

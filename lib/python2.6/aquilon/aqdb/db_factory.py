@@ -51,6 +51,7 @@ if config.has_option("database", "module"):
 @compiles(CreateIndex, 'oracle')
 def visit_create_index(create, compiler, **kw):
     index = create.element
+    compiler._verify_index_table(index)
     preparer = compiler.preparer
 
     text = "CREATE "
@@ -59,19 +60,11 @@ def visit_create_index(create, compiler, **kw):
     if index.kwargs.get("oracle_bitmap", False):
         text += "BITMAP "
 
-    # FIXME: this is really a per-column property, but Index.__init__ does not
-    # accept column expressions like "sqlalchemy.sql.desc(some_table.c.col)"
-    if index.kwargs.get("oracle_desc", False):
-        dirtxt = " DESC"
-    else:
-        dirtxt = ""
-
     text += "INDEX %s ON %s (%s)" \
-            % (preparer.quote(compiler._index_identifier(index.name),
-                              index.quote),
-               preparer.format_table(index.table),
-               ', '.join(preparer.quote(c.name, c.quote) + dirtxt
-                         for c in index.columns))
+        % (compiler._prepared_index_name(index, include_schema=True),
+           preparer.format_table(index.table, use_schema=True),
+           ', '.join(compiler.sql_compiler.process(expr, include_table=False)
+                     for expr in index.expressions))
 
     if index.kwargs.get("oracle_compress", False):
         text += " COMPRESS"
