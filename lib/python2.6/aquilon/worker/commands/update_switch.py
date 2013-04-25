@@ -17,12 +17,16 @@
 """Contains the logic for `aq update switch`."""
 
 
+from datetime import datetime
+
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import Model, Switch
+from aquilon.aqdb.model import Model, Switch, ObservedMac
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.location import get_location
 from aquilon.worker.dbwrappers.hardware_entity import (update_primary_ip,
                                                        rename_hardware)
+from aquilon.worker.dbwrappers.observed_mac import (
+    update_or_create_observed_mac)
 from aquilon.worker.dbwrappers.switch import discover_switch
 from aquilon.worker.locks import lock_queue, CompileKey
 from aquilon.worker.processes import DSDBRunner
@@ -34,7 +38,7 @@ class CommandUpdateSwitch(BrokerCommand):
     required_parameters = ["switch"]
 
     def render(self, session, logger, switch, model, rack, type, ip, vendor,
-               serial, rename_to, discover, comments, **arguments):
+               serial, rename_to, discovered_macs, clear, discover, comments, **arguments):
         dbswitch = Switch.get_unique(session, switch, compel=True)
 
         oldinfo = DSDBRunner.snapshot_hw(dbswitch)
@@ -59,6 +63,7 @@ class CommandUpdateSwitch(BrokerCommand):
         # FIXME: What do the error messages for an invalid enum (switch_type)
         # look like?
         if type:
+            Switch.check_type(type)
             dbswitch.switch_type = type
 
         if ip:
@@ -78,6 +83,14 @@ class CommandUpdateSwitch(BrokerCommand):
                                     "renamed. Please remove all aliases first.")
             remove_plenary = Plenary.get_plenary(dbswitch, logger=logger)
             rename_hardware(session, dbswitch, rename_to)
+
+        if clear:
+            session.query(ObservedMac).filter_by(switch=dbswitch).delete()
+
+        if discovered_macs:
+            now = datetime.now()
+            for (macaddr, port) in discovered_macs:
+                update_or_create_observed_mac(session, dbswitch, port, macaddr, now)
 
         session.flush()
 

@@ -3297,7 +3297,10 @@
 	 <option name="vendor" type="string">Switch vendor. Needed if the model name is not unique</option>
 	 <option name="serial" type="string">Serial Number</option>
 	 <option name="comments" type="string">Comments</option>
-	 <option name="rename_to" type="string">New name of the switch</option>
+     <option name="rename_to" type="string">New name of the switch</option>
+     <!-- TODO should be some json type with schema + validation -->
+     <option name="discovered_macs" type="json">mac/port mapping</option>
+     <option name="clear" type="flag">clear current mac/port mapping</option>
 	 <option name="discover" type="flag">Do automatic discovery</option>
       </optgroup>
       <transport method="post" path="switch/%(switch)s" />
