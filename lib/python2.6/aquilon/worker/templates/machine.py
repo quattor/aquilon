@@ -23,8 +23,7 @@ from aquilon.aqdb.model import Machine
 from aquilon.worker.locks import CompileKey
 from aquilon.worker.templates.base import Plenary
 from aquilon.worker.templates.panutils import (StructureTemplate, pan_assign,
-                                               pan_include, PanMetric,
-                                               PanEscape)
+                                               pan_include, PanMetric)
 
 LOGGER = logging.getLogger(__name__)
 
@@ -152,7 +151,7 @@ class PlenaryMachineInfo(Plenary):
 
                 tpl = params
 
-            disks[PanEscape(devname)] = tpl
+            disks[devname] = tpl
 
         managers = {}
         interfaces = {}
@@ -226,8 +225,8 @@ class PlenaryMachineInfo(Plenary):
         lines.append("")
         pan_assign(lines, "ram", ram)
         pan_assign(lines, "cpu", cpus)
-        if disks:
-            pan_assign(lines, "harddisks", disks)
+        for name in sorted(disks.keys()):
+            pan_assign(lines, "harddisks/{%s}" % name, disks[name])
         if interfaces:
             pan_assign(lines, "cards/nic", interfaces)
 

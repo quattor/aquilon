@@ -324,7 +324,7 @@ class TestAddMachine(TestBrokerCommand):
                          'include { "hardware/machine/hp/utccissmodel" };',
                          command)
         self.matchoutput(out,
-                         'escape("cciss/c0d0"), '
+                         '"harddisks/{cciss/c0d0}" = '
                          'create("hardware/harddisk/generic/cciss",',
                          command)
         self.matchoutput(out,

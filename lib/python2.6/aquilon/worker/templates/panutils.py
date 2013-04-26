@@ -51,9 +51,7 @@ def pan(obj, indent=0):
         # ordering. This also helps with the testsuite.
         for key in sorted(obj.keys()):
             val = pan(obj[key], indent + 1)
-            if isinstance(key, PanEscape):
-                pass
-            elif isinstance(key, basestring):
+            if isinstance(key, basestring):
                 if not _valid_id.match(str(key)):  # pragma: no cover
                     raise ValueError("Invalid nlist key '%s'." % key)
             else:  # pragma: no cover
@@ -94,9 +92,7 @@ def pan_create(path, params=None, indent=0):
     if params:
         for key in sorted(params.keys()):
             val = pan(params[key], indent + 2)
-            if isinstance(key, PanEscape):
-                pass
-            elif isinstance(key, basestring):
+            if isinstance(key, basestring):
                 if not _valid_id.match(str(key)):  # pragma: no cover
                     raise ValueError("Invalid nlist key '%s'." % key)
             else:  # pragma: no cover
@@ -190,29 +186,3 @@ class PanValue(PanObject):
 
     def format(self, indent=0):
         return 'value("%s")' % self.path;
-
-
-class PanEscape(PanObject):
-    def __init__(self, value):
-        if not isinstance(value, basestring):  # pragma: no cover
-            raise TypeError("The escaped value must be a string "
-                            "(it was %r)." % value)
-
-        self.value = value
-
-    def __lt__(self, other):
-        if isinstance(other, PanEscape):
-            return self.value.__lt__(other.value)
-        elif isinstance(other, basestring):
-            return self.value.__lt__(other)
-        else:  # pragma: no cover
-            raise TypeError("PanEscape cannot be compared with %r." % other)
-
-    def format(self, indent=0):
-        # For better readability, omit the "escape()" if the value is already a
-        # valid nlist key, and calling "unescape()" on it would not change it
-        # either
-        if _valid_id.match(self.value) and "_" not in self.value:
-            return pan(self.value)
-        else:
-            return "escape(%s)" % pan(self.value)
