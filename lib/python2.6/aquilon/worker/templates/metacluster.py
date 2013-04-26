@@ -15,7 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
+from operator import attrgetter
 import logging
 
 from aquilon.aqdb.model import MetaCluster
@@ -99,7 +99,8 @@ class PlenaryMetaClusterData(Plenary):
 
         lines.append("")
         if self.dbobj.resholder:
-            for resource in sorted(self.dbobj.resholder.resources):
+            for resource in sorted(self.dbobj.resholder.resources,
+                                   key=attrgetter('resource_type', 'name')):
                 pan_append(lines, "system/resources/" + resource.resource_type,
                            StructureTemplate(resource.template_base +
                                              '/config'))

@@ -102,9 +102,6 @@ class HardwareEntity(Base):
             raise ArgumentError("HardwareEntity needs a label.")
         super(HardwareEntity, self).__init__(label=label, **kwargs)
 
-    def __lt__(self, other):
-        return self.label < other.label
-
     @property
     def fqdn(self):
         """ Returns the FQDN, if there is a primary name """

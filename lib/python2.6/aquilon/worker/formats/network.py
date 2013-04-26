@@ -17,6 +17,7 @@
 """Network formatter."""
 
 from collections import defaultdict
+from operator import attrgetter
 
 from sqlalchemy.orm.attributes import set_committed_value
 from sqlalchemy.orm import object_session, subqueryload, lazyload
@@ -116,7 +117,8 @@ class NetworkFormatter(ObjectFormatter):
         if ranges:
             details.append(indent + "  Dynamic Ranges: %s" % ", ".join(ranges))
 
-        for route in sorted(network.static_routes):
+        for route in sorted(network.static_routes,
+                            key=attrgetter('destination','gateway_ip')):
             details.append(indent + "  Static Route: %s gateway %s" %
                            (route.destination, route.gateway_ip))
             if route.comments:

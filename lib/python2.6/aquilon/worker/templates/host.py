@@ -293,7 +293,8 @@ class PlenaryHostData(Plenary):
                        self.dbobj._cluster.node_index)
         if self.dbobj.resholder:
             lines.append("")
-            for resource in sorted(self.dbobj.resholder.resources):
+            for resource in sorted(self.dbobj.resholder.resources,
+                                   key=attrgetter('resource_type', 'name')):
                 pan_append(lines, "system/resources/" + resource.resource_type,
                            StructureTemplate(resource.template_base +
                                              '/config'))

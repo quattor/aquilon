@@ -74,7 +74,3 @@ class StaticRoute(Base):
                              (gateway_ip, network))
         super(StaticRoute, self).__init__(network=network,
                                           gateway_ip=gateway_ip, **kwargs)
-
-    def __lt__(self, other):
-        """ Sort static routes based on the destination range """
-        return self.destination.__lt__(other.destination)

@@ -231,22 +231,22 @@ class Network(Base):
     def __le__(self, other):
         if self.network_environment_id != other.network_environment_id:
             return NotImplemented
-        return self.ip.__le__(other.ip)
+        return self.ip <= other.ip
 
     def __lt__(self, other):
         if self.network_environment_id != other.network_environment_id:
             return NotImplemented
-        return self.ip.__lt__(other.ip)
+        return self.ip < other.ip
 
     def __ge__(self, other):
         if self.network_environment_id != other.network_environment_id:
             return NotImplemented
-        return self.ip.__ge__(other.ip)
+        return self.ip >= other.ip
 
     def __gt__(self, other):
         if self.network_environment_id != other.network_environment_id:
             return NotImplemented
-        return self.ip.__gt__(other.ip)
+        return self.ip > other.ip
 
     @classmethod
     def get_unique(cls, session, *args, **kwargs):

@@ -16,6 +16,7 @@
 # limitations under the License.
 """Interface formatter."""
 
+from operator import attrgetter
 
 from aquilon.aqdb.model import (Interface, PublicInterface, ManagementInterface,
                                 OnboardInterface, VlanInterface,
@@ -91,7 +92,8 @@ class InterfaceFormatter(ObjectFormatter):
                            (names, addr.ip, tagstr))
             static_routes |= set(addr.network.static_routes)
 
-        for route in sorted(static_routes):
+        for route in sorted(static_routes, key=attrgetter('destination',
+                                                          'gateway_ip')):
             details.append(indent + "  Static Route: {0} gateway {1}"
                            .format(route.destination, route.gateway_ip))
             if route.comments:

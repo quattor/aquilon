@@ -160,16 +160,6 @@ class Resource(Base):
     def validate_holder(self, key, value):
         return value
 
-    def __lt__(self, other):
-        # Quick optimizations to not have to evaluate the name.
-        if self.holder != other.holder:
-            if self.holder.holder_type != other.holder.holder_type:
-                return self.holder.holder_type < other.holder.holder_type
-            return self.holder.holder_name < other.holder.holder_name
-        if self.resource_type != other.resource_type:
-            return self.resource_type < other.resource_type
-        return self.name < other.name
-
     def __repr__(self):
         return "<{0:c} Resource {0.name} of {1}>".format(self, self.holder)
 

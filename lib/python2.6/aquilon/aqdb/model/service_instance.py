@@ -63,10 +63,6 @@ class ServiceInstance(Base):
         instance = "%s/%s" % (self.service.name, self.name)
         return self.format_helper(format_spec, instance)
 
-    def __lt__(self, other):
-        return tuple([self.service.name,
-                      self.name]) < tuple([other.service.name, other.name])
-
     @property
     def cfg_path(self):
         return 'service/%s/%s' % (self.service.name, self.name)

@@ -15,8 +15,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 import logging
+from operator import attrgetter
 
 from aquilon.aqdb.model import (Cluster, EsxCluster, ComputeCluster,
                                 StorageCluster)
@@ -122,7 +122,8 @@ class PlenaryClusterData(Plenary):
 
         lines.append("")
         if self.dbobj.resholder:
-            for resource in sorted(self.dbobj.resholder.resources):
+            for resource in sorted(self.dbobj.resholder.resources,
+                                   key=attrgetter('resource_type', 'name')):
                 pan_append(lines, "system/resources/" + resource.resource_type,
                            StructureTemplate(resource.template_base +
                                              '/config'))
@@ -212,7 +213,8 @@ class PlenaryClusterClient(Plenary):
         # always in sync, we can duplicate the content here to avoid the
         # possibility of circular external references.
         if self.dbobj.resholder:
-            for resource in sorted(self.dbobj.resholder.resources):
+            for resource in sorted(self.dbobj.resholder.resources,
+                                   key=attrgetter('resource_type', 'name')):
                 pan_append(lines, "/system/cluster/resources/" +
                            resource.resource_type,
                            StructureTemplate(resource.template_base + '/config'))
