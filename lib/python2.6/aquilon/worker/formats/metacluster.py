@@ -15,6 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from operator import attrgetter
 
 from sqlalchemy.orm.session import object_session
 
@@ -62,13 +63,15 @@ class MetaClusterFormatter(ObjectFormatter):
 
         if metacluster.resholder and metacluster.resholder.resources:
             details.append(indent + "  Resources:")
-            for resource in metacluster.resholder.resources:
+            for resource in sorted(metacluster.resholder.resources,
+                                   key=attrgetter('resource_type', 'name')):
                 details.append(self.redirect_raw(resource, indent + "    "))
 
         # for v1 shares
         q = object_session(metacluster).query(Share.name).distinct()
         q = q.join(ClusterResource, Cluster, '_metacluster')
         q = q.filter_by(metacluster=metacluster)
+        q = q.order_by(Share.name)
         shares = q.all()
 
         for share_name in shares:
