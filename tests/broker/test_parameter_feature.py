@@ -141,15 +141,21 @@ class TestParameterFeature(TestBrokerCommand):
         out = self.badrequesttest(cmd)
 
         self.searchoutput(out,
-                          r'Following required parameters have not been specified:\s*'
+                          r'Following required parameters have not been specified:\s*',
+                          cmd)
+        self.searchoutput(out,
                           r'Feature Binding : hostfeature\s*'
                           r'Parameter Definition: testrequired \[required\]\s*'
                           r'Type: string\s*'
-                          r'Rebuild Required: False\s*'
+                          r'Rebuild Required: False\s*',
+                          cmd)
+        self.searchoutput(out,
                           r'Feature Binding : hardwarefeature\s*'
                           r'Parameter Definition: testrequired \[required\]\s*'
                           r'Type: string\s*'
-                          r'Rebuild Required: False\s*'
+                          r'Rebuild Required: False\s*',
+                          cmd)
+        self.searchoutput(out,
                           r'Feature Binding : interfacefeature\s*'
                           r'Parameter Definition: testrequired \[required\]\s*'
                           r'Type: string\s*'
@@ -241,18 +247,32 @@ class TestParameterFeature(TestBrokerCommand):
         p = self.parse_parameters_msg(out, 7)
         params = p.parameters
 
-        self.failUnlessEqual(params[0].path, 'features/hostfeature/teststring')
-        self.failUnlessEqual(params[0].value, 'host_feature')
-        self.failUnlessEqual(params[1].path, 'features/hostfeature/testlist')
-        self.failUnlessEqual(params[1].value, 'host1,host2')
-        self.failUnlessEqual(params[2].path, 'features/hardware/hardwarefeature/hs21-8853l5u/teststring')
-        self.failUnlessEqual(params[2].value, 'hardware_feature')
-        self.failUnlessEqual(params[3].path, 'features/hardware/hardwarefeature/hs21-8853l5u/testlist')
-        self.failUnlessEqual(params[3].value, 'hardware1,hardware2')
-        self.failUnlessEqual(params[4].path, 'features/interface/interfacefeature/eth0/teststring')
-        self.failUnlessEqual(params[4].value, 'interface_feature')
-        self.failUnlessEqual(params[5].path, 'features/interface/interfacefeature/eth0/testlist')
-        self.failUnlessEqual(params[5].value, 'intf1,intf2')
+        param_values = {}
+        for param in params:
+            param_values[param.path] = param.value
+
+        self.failUnless('features/hostfeature/teststring' in param_values)
+        self.failUnlessEqual(param_values['features/hostfeature/teststring'],
+                             'host_feature')
+        self.failUnless('features/hostfeature/testlist' in param_values)
+        self.failUnlessEqual(param_values['features/hostfeature/testlist'],
+                             'host1,host2')
+        self.failUnless('features/hardware/hardwarefeature/hs21-8853l5u/teststring'
+                       in param_values)
+        self.failUnlessEqual(param_values['features/hardware/hardwarefeature/hs21-8853l5u/teststring'],
+                             'hardware_feature')
+        self.failUnless('features/hardware/hardwarefeature/hs21-8853l5u/testlist'
+                       in param_values)
+        self.failUnlessEqual(param_values['features/hardware/hardwarefeature/hs21-8853l5u/testlist'],
+                             'hardware1,hardware2')
+        self.failUnless('features/interface/interfacefeature/eth0/teststring'
+                        in param_values)
+        self.failUnlessEqual(param_values['features/interface/interfacefeature/eth0/teststring'],
+                             'interface_feature')
+        self.failUnless('features/interface/interfacefeature/eth0/testlist' in
+                        param_values)
+        self.failUnlessEqual(param_values['features/interface/interfacefeature/eth0/testlist'],
+                             'intf1,intf2')
 
     def test_320_verify_cat_hardware_feature(self):
         cmd = CAT_CMD + ["--pre_feature"]
