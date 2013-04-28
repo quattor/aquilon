@@ -88,6 +88,25 @@ def sqlite_no_fsync(dbapi_con, con_record):
     dbapi_con.execute('pragma synchronous=OFF')
 
 
+def oracle_set_module(dbapi_con, con_record):
+    # Store the program's name in v$session. Trying to set a value longer than
+    # the allowed length will generate ORA-24960, so do an explicit truncation.
+    prog = os.path.basename(sys.argv[0])
+    dbapi_con.module = prog[:48]
+
+
+def oracle_reset_action(dbapi_con, con_record):
+    # Reset action and clientinfo in v$session. The DB connection may be closed
+    # when this function is called, so be careful.
+    if dbapi_con is None:
+        return
+    try:
+        dbapi_con.action = ""
+        dbapi_con.clientinfo = ""
+    except:
+        pass
+
+
 class DbFactory(object):
     __shared_state = {}
     __started = False  # at the class definition, that is
@@ -175,6 +194,16 @@ class DbFactory(object):
             self.dsn = re.sub(pswd_re, p, dsn_copy)
             self.engine = create_engine(self.dsn, **self.pool_options)
             self.no_lock_engine = create_engine(self.dsn, **self.pool_options)
+
+            # Events should be registered before we try to open a real
+            # connection below, because the underlying DBAPI connection will not
+            # be closed
+            if self.engine.dialect.name == "oracle":
+                event.listen(self.engine, "connect", oracle_set_module)
+                event.listen(self.no_lock_engine, "connect", oracle_set_module)
+                event.listen(self.engine, "checkin", oracle_reset_action)
+                event.listen(self.no_lock_engine, "checkin",
+                             oracle_reset_action)
 
             try:
                 connection = self.engine.connect()
