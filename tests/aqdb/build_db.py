@@ -31,6 +31,8 @@ utils.load_classpath()
 
 import argparse
 
+from sqlalchemy.orm import configure_mappers
+
 from aquilon.config import Config
 config = Config()
 
@@ -104,6 +106,9 @@ def main(*args, **kw):
     if opts.populate:
         s = db.Session()
         assert s, "No Session in build_db.py populate"
+
+    # Need to call this explicitely to make the __extra_table_args__ hack work
+    configure_mappers()
 
     # Create all tables upfront
     Base.metadata.create_all(checkfirst=True)

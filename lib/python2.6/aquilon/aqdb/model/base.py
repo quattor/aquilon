@@ -349,6 +349,17 @@ class Base(object):
 
         return str(CreateTable(self.__table__))
 
+    @classmethod
+    def __declare_last__(cls):
+        """
+        Support __table_args__ with single-table inheritance
+
+        See: http://www.sqlalchemy.org/trac/ticket/2700
+        """
+        if '__extra_table_args__' in cls.__dict__:
+            cls.__table__._init_items(*cls.__extra_table_args__)
+            del cls.__extra_table_args__
+
 #Base = declarative_base(metaclass=VersionedMeta, cls=Base)
 Base = declarative_base(cls=Base)
 
