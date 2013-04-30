@@ -349,7 +349,7 @@ class TestMakeAquilon(TestBrokerCommand):
                    "--personality", "badpersonality",
                    "--osname", "linux", "--osversion", "5.0.1-x86_64"]
         out = self.badrequesttest(command)
-        self.matchoutput(out, "cannot locate template", command)
+        self.matchoutput(out, "'/system/personality/function' does not have an associated value", command)
         self.failIf(os.path.exists(
             self.build_profile_name("aquilon93.aqd-unittest.ms.com",
                                     domain="unittest")))

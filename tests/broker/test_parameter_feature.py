@@ -92,9 +92,10 @@ class TestParameterFeature(TestBrokerCommand):
         self.load_paramdefs(INTERFACEFEATURE, 'interface')
 
     def test_090_verify_feature_proto_noerr(self):
-        cmd = SHOW_CMD + ["--format=proto"]
+        cmd = ["show", "parameter", "--personality", "utpersonality/dev", "--format=proto"]
         out = self.notfoundtest(cmd)
-        self.matchoutput(out, "No parameters found for personality unixeng-test", cmd)
+        self.matchoutput(out, "Not Found: No parameters found for personality utpersonality/dev",
+                         cmd)
 
     def load_paramdefs(self, feature, feature_type):
         for p in PARAM_DEFS:
@@ -244,7 +245,7 @@ class TestParameterFeature(TestBrokerCommand):
     def test_310_verify_feature_proto(self):
         cmd = SHOW_CMD + ["--format=proto"]
         out = self.commandtest(cmd)
-        p = self.parse_parameters_msg(out, 7)
+        p = self.parse_parameters_msg(out, 10)
         params = p.parameters
 
         param_values = {}
@@ -326,10 +327,10 @@ class TestParameterFeature(TestBrokerCommand):
 
         out = self.commandtest(cmd)
         self.searchoutput(out, r'Differences for Required Services:\s*'
-                               r'missing Required Services in Personality aquilon/unixeng-test:\s*'
+                               r'missing Required Services in Personality aquilon/%s:\s*'
                                r'netmap\s*'
                                r'missing Required Services in Personality aquilon/eaitools:\s*'
-                               r'chooser1\s*chooser2\s*chooser3',
+                               r'chooser1\s*chooser2\s*chooser3' % PERSONALITY,
                            cmd)
         self.searchoutput (out, r'Differences for Features:\s*'
                                r'missing Features in Personality aquilon/eaitools:\s*'
@@ -467,7 +468,9 @@ class TestParameterFeature(TestBrokerCommand):
 
     def test_960_verify_same_name_feature_parameter(self):
         cmd = SHOW_CMD
-        self.noouttest(cmd)
+        out = self.commandtest(cmd)
+        self.searchclean(out, "shinynew", cmd)
+        self.searchclean(out, "car", cmd)
 
     def test_970_unbind_same_name_feature(self):
         feature = "shinynew"
