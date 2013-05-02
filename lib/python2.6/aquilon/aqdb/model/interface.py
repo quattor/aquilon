@@ -28,7 +28,7 @@ from sqlalchemy import (Column, Integer, DateTime, Sequence, String, Boolean,
 from sqlalchemy.orm import (relation, backref, validates, object_session,
                             deferred)
 from sqlalchemy.orm.collections import attribute_mapped_collection
-from sqlalchemy.sql.expression import desc, case
+from sqlalchemy.sql import desc, case, and_, or_
 
 from aquilon.exceptions_ import InternalError
 from aquilon.aqdb.column_types import AqMac, AqStr
@@ -269,11 +269,13 @@ class VlanInterface(Interface):
 
     __mapper_args__ = {'polymorphic_identity': 'vlan'}
     # Order matters here, utils/constraints.py checks for endswith("NOT NULL")
-    __extra_table_args__ = (
-        CheckConstraint("(parent_id IS NOT NULL AND vlan_id > 0 AND vlan_id < %s) "
-                        "OR interface_type <> 'vlan'" % MAX_VLANS,
-                        name="%s_vlan_ck" % _ABV),
-        UniqueConstraint(parent_id, vlan_id, name="%s_parent_vlan_uk" % _ABV))
+    __extra_table_args__ = (CheckConstraint(or_(and_(parent_id != None,
+                                                     vlan_id > 0,
+                                                     vlan_id < MAX_VLANS),
+                                                Interface.interface_type != "vlan"),
+                                            name="%s_vlan_ck" % _ABV),
+                            UniqueConstraint(parent_id, vlan_id,
+                                             name="%s_parent_vlan_uk" % _ABV))
 
     @validates('vlan_id')
     def validate_vlan_id(self, key, value):

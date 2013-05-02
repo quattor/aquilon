@@ -47,10 +47,9 @@ class VlanInfo(Base):
 
     __table_args__ = (UniqueConstraint(port_group,
                                        name='%s_port_group_uk' % _VTN),
-                      CheckConstraint('vlan_id < %d' % MAX_VLANS,
-                                      name='%s_max_vlan_id_ck' % _VTN),
-                      CheckConstraint('vlan_id >= 0',
-                                      name='%s_min_vlan_id_ck' % _VTN))
+                      CheckConstraint(and_(vlan_id >= 0,
+                                           vlan_id < MAX_VLANS),
+                                      name='%s_vlan_id_ck' % _VTN))
 
     @classmethod
     def get_vlan_id(cls, session, port_group, compel=InternalError):
@@ -80,10 +79,6 @@ vlaninfo.info['extra_search_fields'] = ['vlan_id']
 class ObservedVlan(Base):
     """ reports the observance of a vlan/network on a switch """
     __tablename__ = 'observed_vlan'
-    __table_args__ = (CheckConstraint('vlan_id < %d' % MAX_VLANS,
-                                      name='%s_max_vlan_id_ck' % _TN),
-                      CheckConstraint('vlan_id >= 0',
-                                      name='%s_min_vlan_id_ck' % _TN))
 
     switch_id = Column(Integer, ForeignKey('switch.hardware_entity_id',
                                            ondelete='CASCADE',
@@ -114,6 +109,9 @@ class ObservedVlan(Base):
                     foreign_keys=[VlanInfo.vlan_id],
                     viewonly=True)
 
+    __table_args__ = (CheckConstraint(and_(vlan_id >= 0,
+                                           vlan_id < MAX_VLANS),
+                                      name='%s_vlan_id_ck' % _TN),)
     @property
     def port_group(self):
         if self.vlan:

@@ -23,6 +23,7 @@ from sqlalchemy import (Column, Integer, Sequence, String, DateTime, ForeignKey,
                         UniqueConstraint, CheckConstraint, Index, desc)
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import relation, deferred
+from sqlalchemy.sql import and_
 
 from aquilon.exceptions_ import NotFoundException, InternalError
 from aquilon.aqdb.model import Base, Location, NetworkEnvironment
@@ -89,7 +90,7 @@ class Network(Base):
 
     __table_args__ = (UniqueConstraint(network_environment_id, ip,
                                        name='%s_net_env_ip_uk' % _TN),
-                      CheckConstraint("cidr >= 1 AND cidr <= 32",
+                      CheckConstraint(and_(cidr >= 1, cidr <= 32),
                                       name="%s_cidr_ck" % _TN),
                       Index('%s_loc_id_idx' % _TN, location_id))
 
