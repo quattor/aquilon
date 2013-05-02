@@ -170,7 +170,11 @@ class AuthorizationBroker(object):
                 self.raise_auth_error(principal, action, resource)
         if dbuser.role.name == 'itsec':
             if action not in ['pxeswitch', 'pxeswitch_list',
-                              'compile', 'compile_hostname', 'change_status',
+                              'compile', 'compile_hostname',
+                              'change_status', 'make',
+                              'reconfigure',
+                              'reconfigure_list',
+                              'reconfigure_hostlist',
                               'add_interface_machine',
                               'add_interface_hostname',
                               'add_interface_address',
