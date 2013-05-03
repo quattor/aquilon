@@ -54,12 +54,12 @@ class Xtn(Base):
     # Given that, we don't really *need* the foreign key, but we'll keep it
     # unless it proves otherwise cumbersome for performance (mainly insert).
 
-    __table_args__ = (Index('XTN_USERNAME_IDX', username,
+    __table_args__ = (Index('xtn_username_idx', username,
                             oracle_compress=True),
-                      Index('XTN_COMMAND_IDX', command, oracle_compress=True),
-                      Index('XTN_ISREADONLY_IDX', is_readonly,
+                      Index('xtn_command_idx', command, oracle_compress=True),
+                      Index('xtn_isreadonly_idx', is_readonly,
                             oracle_bitmap=True),
-                      Index('XTN_START_TIME_IDX', desc(start_time)),
+                      Index('xtn_start_time_idx', desc(start_time)),
                       {'oracle_compress': True})
 
     @property
@@ -97,7 +97,7 @@ class Xtn(Base):
         return " ".join(msg)
 
 xtn = Xtn.__table__  # pylint: disable=C0103
-xtn.primary_key.name = 'XTN_PK'  # pylint: disable=C0103
+xtn.primary_key.name = 'xtn_pk'  # pylint: disable=C0103
 
 
 class XtnEnd(Base):
@@ -109,12 +109,12 @@ class XtnEnd(Base):
     end_time = Column(UTCDateTime(timezone=True),
                       default=utcnow, nullable=False)
 
-    __table_args__ = (Index('XTN_END_RETURN_CODE_IDX', return_code,
+    __table_args__ = (Index('xtn_end_return_code_idx', return_code,
                             oracle_compress=True),
                       {'oracle_compress': True})
 
 xtn_end = XtnEnd.__table__  # pylint: disable=C0103
-xtn_end.primary_key.name = 'XTN_END_PK'
+xtn_end.primary_key.name = 'xtn_end_pk'
 
 
 class XtnDetail(Base):
@@ -127,13 +127,13 @@ class XtnDetail(Base):
     name = Column(String(255), primary_key=True)
     value = Column(String(255), default='True', primary_key=True)
 
-    __table_args__ = (Index('XTN_DTL_NAME_IDX', name,
+    __table_args__ = (Index('xtn_dtl_name_idx', name,
                             oracle_compress=True),
-                      Index('XTN_DTL_VALUE_IDX', value, oracle_compress=True),
+                      Index('xtn_dtl_value_idx', value, oracle_compress=True),
                       {'oracle_compress': True})
 
 xtn_detail = XtnDetail.__table__  # pylint: disable=C0103
-xtn_detail.primary_key.name = 'XTN_DTL_PK'
+xtn_detail.primary_key.name = 'xtn_dtl_pk'
 
 Xtn.args = relationship(XtnDetail, lazy="joined", order_by=[XtnDetail.name])
 
