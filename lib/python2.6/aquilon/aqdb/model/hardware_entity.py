@@ -45,7 +45,7 @@ class HardwareEntity(Base):
     hardware_type = Column(AqStr(64), nullable=False)
 
     location_id = Column(Integer, ForeignKey('location.id',
-                                             name='%s_loc_fk' % _ABV),
+                                             name='%s_location_fk' % _ABV),
                          nullable=False)
 
     model_id = Column(Integer, ForeignKey('model.id',
@@ -78,7 +78,7 @@ class HardwareEntity(Base):
     __table_args__ = (UniqueConstraint(label, name='%s_label_uk' % _TN),
                       UniqueConstraint('primary_name_id',
                                        name='%s_pri_name_uk' % _ABV),
-                      Index('%s_loc_idx' % _ABV, location_id))
+                      Index('%s_location_idx' % _ABV, location_id))
     __mapper_args__ = {'polymorphic_on': hardware_type}
 
     _label_check = re.compile("^[a-z][a-z0-9]{,62}$")

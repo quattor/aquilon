@@ -1,11 +1,17 @@
 ALTER INDEX cluster_pk RENAME TO clstr_pk;
+ALTER TABLE esx_cluster DROP CONSTRAINT esx_cluster_fk;
+ALTER TABLE esx_cluster ADD CONSTRAINT esx_cluster_cluster_fk FOREIGN KEY (esx_cluster_id) REFERENCES clstr (id) ON DELETE CASCADE;
 ALTER TABLE fqdn DROP CONSTRAINT fqdn_name_domain_env_uk;
 ALTER TABLE fqdn ADD CONSTRAINT fqdn_domain_name_env_uk UNIQUE (dns_domain_id, name, dns_environment_id);
 ALTER TABLE hardware_entity ADD CONSTRAINT hw_ent_pri_name_uk UNIQUE (primary_name_id);
+ALTER TABLE hardware_entity DROP CONSTRAINT hw_ent_loc_fk;
+ALTER TABLE hardware_entity ADD CONSTRAINT hw_ent_location_fk FOREIGN KEY (location_id) REFERENCES location (id);
+ALTER INDEX hw_ent_loc_idx RENAME TO hw_ent_location_idx;
 ALTER TABLE interface DROP CONSTRAINT iface_vlan_ck;
 ALTER TABLE interface ADD CONSTRAINT iface_vlan_ck CHECK (parent_id IS NOT NULL AND vlan_id > 0 AND vlan_id < 4096 OR interface_type != 'vlan');
 ALTER TABLE model DROP CONSTRAINT model_name_vendor_uk;
 ALTER TABLE model ADD CONSTRAINT model_vendor_name_uk UNIQUE (vendor_id, name);
+ALTER INDEX network_loc_id_idx RENAME TO network_location_idx;
 ALTER TABLE observed_vlan DROP CONSTRAINT observed_vlan_max_vlan_id_ck;
 ALTER TABLE observed_vlan DROP CONSTRAINT observed_vlan_min_vlan_id_ck;
 ALTER TABLE observed_vlan ADD CONSTRAINT observed_vlan_vlan_id_ck CHECK (vlan_id >= 0 AND vlan_id < 4096);

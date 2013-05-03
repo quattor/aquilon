@@ -26,6 +26,7 @@ from aquilon.aqdb.model import Network, DnsRecord, Fqdn
 from aquilon.aqdb.column_types import IPV4
 
 _TN = 'a_record'
+_DTN = 'dynamic_stub'
 
 
 class ARecord(DnsRecord):
@@ -145,12 +146,12 @@ class DynamicStub(ARecord):
         records for virtual machines using names similar to
         'dynamic-1-2-3-4.subdomain.ms.com'
     """
-    __tablename__ = 'dynamic_stub'
-    __mapper_args__ = {'polymorphic_identity': 'dynamic_stub'}
+    __tablename__ = _DTN
+    __mapper_args__ = {'polymorphic_identity': _DTN}
     _class_label = 'Dynamic Stub'
 
     dns_record_id = Column(Integer, ForeignKey('%s.dns_record_id' % _TN,
-                                               name='dynamic_stub_arecord_fk',
+                                               name='%s_arecord_fk' % _DTN,
                                                ondelete='CASCADE'),
                            primary_key=True)
 
@@ -160,7 +161,6 @@ class DynamicStub(ARecord):
             raise ValueError("The reverse PTR record cannot be set for "
                              "DNS records used for dynamic DHCP.")
         return value
-
 
 dynstub = DynamicStub.__table__  # pylint: disable=C0103
 dynstub.info['unique_fields'] = ['fqdn']

@@ -92,7 +92,7 @@ class Network(Base):
                                        name='%s_net_env_ip_uk' % _TN),
                       CheckConstraint(and_(cidr >= 1, cidr <= 32),
                                       name="%s_cidr_ck" % _TN),
-                      Index('%s_loc_id_idx' % _TN, location_id))
+                      Index('%s_location_idx' % _TN, location_id))
 
     def __init__(self, **kw):
         args = kw.copy()

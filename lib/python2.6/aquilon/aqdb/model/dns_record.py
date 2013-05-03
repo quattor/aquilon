@@ -73,7 +73,7 @@ class DnsRecord(Base):
     srv_records = association_proxy('fqdn', 'srv_records')
 
     __mapper_args__ = {'polymorphic_on': dns_record_type,
-                       'polymorphic_identity': 'dns_record'}
+                       'polymorphic_identity': _TN}
 
     @classmethod
     def get_unique(cls, session, fqdn=None, name=None, dns_domain=None,

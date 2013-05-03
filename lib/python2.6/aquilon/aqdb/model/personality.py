@@ -38,10 +38,11 @@ class Personality(Base):
     """ Personality names """
     __tablename__ = _TN
 
-    id = Column(Integer, Sequence('%s_seq' % (_ABV)), primary_key=True)
+    id = Column(Integer, Sequence('%s_seq' % _ABV), primary_key=True)
     name = Column(AqStr(32), nullable=False)
-    archetype_id = Column(Integer, ForeignKey(
-        'archetype.id', name='%s_arch_fk' % (_ABV)), nullable=False)
+    archetype_id = Column(Integer, ForeignKey('archetype.id',
+                                              name='%s_arch_fk' % _ABV),
+                          nullable=False)
 
     cluster_required = Column(Boolean(name="%s_clstr_req_ck" % _TN),
                               default=False, nullable=False)

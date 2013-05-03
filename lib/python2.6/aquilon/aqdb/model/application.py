@@ -25,7 +25,7 @@ _TN = 'application'
 class Application(Resource):
     """ Application resources """
     __tablename__ = _TN
-    __mapper_args__ = {'polymorphic_identity': 'application'}
+    __mapper_args__ = {'polymorphic_identity': _TN}
 
     id = Column(Integer, ForeignKey('resource.id',
                                     name='app_resource_fk',

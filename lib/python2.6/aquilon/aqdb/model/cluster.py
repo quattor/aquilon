@@ -63,6 +63,7 @@ def convert_resources(resources):
 
 # Cluster is a reserved word in Oracle
 _TN = 'clstr'
+_ETN = 'esx_cluster'
 _HCM = 'host_cluster_member'
 _CSB = 'cluster_service_binding'
 _CSBABV = 'clstr_svc_bndg'
@@ -323,12 +324,12 @@ class EsxCluster(Cluster):
     """
         Specifically for our VMware esx based clusters.
     """
-    __tablename__ = 'esx_cluster'
+    __tablename__ = _ETN
     __mapper_args__ = {'polymorphic_identity': 'esx'}
     _class_label = 'ESX Cluster'
 
     esx_cluster_id = Column(Integer, ForeignKey('%s.id' % _TN,
-                                            name='esx_cluster_fk',
+                                            name='%s_cluster_fk' % _ETN,
                                             ondelete='CASCADE'),
                             #if the cluster record is deleted so is esx_cluster
                             primary_key=True)
@@ -341,7 +342,7 @@ class EsxCluster(Cluster):
 
     switch_id = Column(Integer,
                        ForeignKey('switch.hardware_entity_id',
-                                  name='esx_cluster_switch_fk'),
+                                  name='%s_switch_fk' % _ETN),
                        nullable=True)
 
     switch = relation(Switch, lazy=False,
