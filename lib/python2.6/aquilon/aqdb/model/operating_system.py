@@ -47,8 +47,8 @@ class OperatingSystem(Base):
 
     archetype = relation(Archetype, lazy=False, innerjoin=True)
 
-    __table_args__ = (UniqueConstraint(name, version, archetype_id,
-                                       name='%s_uk' % _TN),)
+    __table_args__ = (UniqueConstraint(archetype_id, name, version,
+                                       name='%s_arch_name_version_uk' % _ABV),)
 
     def __format__(self, format_spec):
         instance = "%s/%s-%s" % (self.archetype.name, self.name, self.version)

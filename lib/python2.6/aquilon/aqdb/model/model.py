@@ -47,8 +47,8 @@ class Model(Base):
 
     vendor = relation(Vendor)
 
-    __table_args__ = (UniqueConstraint(name, vendor_id,
-                                       name='model_name_vendor_uk'),)
+    __table_args__ = (UniqueConstraint(vendor_id, name,
+                                       name='model_vendor_name_uk'),)
 
     def __format__(self, format_spec):
         instance = "%s/%s" % (self.vendor.name, self.name)

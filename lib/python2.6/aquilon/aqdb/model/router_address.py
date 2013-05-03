@@ -61,9 +61,9 @@ class RouterAddress(Base):
 
     comments = deferred(Column(String(255), nullable=True))
 
-    network = relation(Network, backref=backref('routers',
-                                                cascade="all, delete-orphan",
-                                                order_by=[ip]))
+    network = relation(Network, innerjoin=True,
+                       backref=backref('routers', cascade="all, delete-orphan",
+                                       order_by=[ip]))
 
     dns_environment = relation(DnsEnvironment)
 
@@ -76,7 +76,7 @@ class RouterAddress(Base):
                            foreign_keys=[ARecord.ip, Fqdn.dns_environment_id],
                            viewonly=True)
 
-    __table_args__ = (PrimaryKeyConstraint(ip, network_id),)
+    __table_args__ = (PrimaryKeyConstraint(network_id, ip),)
 
 rtaddr = RouterAddress.__table__  # pylint: disable=C0103
 rtaddr.info['unique_fields'] = ['ip', 'network']

@@ -19,8 +19,7 @@ from datetime import datetime
 import re
 
 from sqlalchemy import (Column, Integer, Boolean, DateTime, Sequence, String,
-                        ForeignKey, UniqueConstraint, PrimaryKeyConstraint,
-                        Index)
+                        ForeignKey, UniqueConstraint, PrimaryKeyConstraint)
 from sqlalchemy.orm import relation, deferred
 from sqlalchemy.inspection import inspect
 
@@ -67,9 +66,8 @@ class Personality(Base):
 
     host_environment = relation(HostEnvironment, innerjoin=True)
 
-    __table_args__ = (UniqueConstraint(name, archetype_id,
-                                       name='%s_uk' % _TN),
-                      Index('%s_arch_idx' % _ABV, archetype_id))
+    __table_args__ = (UniqueConstraint(archetype_id, name,
+                                       name='%s_arch_name_uk' % _TN),)
 
     @property
     def is_cluster(self):

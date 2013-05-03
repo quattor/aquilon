@@ -55,8 +55,8 @@ class Fqdn(Base):
 
     dns_environment = relation(DnsEnvironment, innerjoin=True)
 
-    __table_args__ = (UniqueConstraint(name, dns_domain_id, dns_environment_id,
-                                       name='%s_name_domain_env_uk' % _TN),)
+    __table_args__ = (UniqueConstraint(dns_domain_id, name, dns_environment_id,
+                                       name='%s_domain_name_env_uk' % _TN),)
 
     @property
     def fqdn(self):
