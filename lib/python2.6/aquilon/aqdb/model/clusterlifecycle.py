@@ -54,9 +54,7 @@ class ClusterLifecycle(StateEngine, Base):
     def __repr__(self):
         return str(self.name)
 
-
 clusterlifecycle = ClusterLifecycle.__table__  # pylint: disable=C0103
-clusterlifecycle.primary_key.name = '%s_pk' % _TN
 clusterlifecycle.info['unique_fields'] = ['name']
 
 event.listen(clusterlifecycle, "after_create",

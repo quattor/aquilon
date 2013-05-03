@@ -48,7 +48,5 @@ class Intervention(Resource):
     disabled = Column(String(255), nullable=True)
     enabled = Column(String(255), nullable=True)
 
-
 intervention = Intervention.__table__
-intervention.primary_key.name = '%s_pk' % (_TN)
 intervention.info['unique_fields'] = ['name', 'holder']

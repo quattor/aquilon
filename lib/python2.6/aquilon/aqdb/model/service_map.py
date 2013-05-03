@@ -90,6 +90,3 @@ class ServiceMap(Base):
         if network is None and location is None:  # pragma: no cover
             raise ValueError("A service should by mapped to a Network or a "
                              "Location")
-
-service_map = ServiceMap.__table__  # pylint: disable=C0103
-service_map.primary_key.name = 'service_map_pk'

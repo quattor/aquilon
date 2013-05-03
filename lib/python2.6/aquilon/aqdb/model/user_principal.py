@@ -55,5 +55,4 @@ class UserPrincipal(Base):
         return '@'.join([self.name, self.realm.name])
 
 user_principal = UserPrincipal.__table__  # pylint: disable=C0103
-user_principal.primary_key.name = 'user_principal_pk'
 user_principal.info['unique_fields'] = ['name', 'realm']

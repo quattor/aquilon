@@ -84,5 +84,4 @@ class DnsMap(Base):
         super(DnsMap, self).__init__(**kwargs)
 
 dnsmap = DnsMap.__table__  # pylint: disable=C0103
-dnsmap.primary_key.name = '%s_pk' % _TN
 dnsmap.info['unique_fields'] = ['location', 'dns_domain']

@@ -108,8 +108,5 @@ class DnsDomain(Base):
 
         super(DnsDomain, self).__init__(*args, **kwargs)
 
-
 dnsdomain = DnsDomain.__table__  # pylint: disable=C0103
-
-dnsdomain.primary_key.name = '%s_pk' % (_TN)
 dnsdomain.info['unique_fields'] = ['name']

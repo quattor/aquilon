@@ -254,7 +254,6 @@ class Network(Base):
         return self.vlans_guest_count >= self.available_ip_count
 
 network = Network.__table__  # pylint: disable=C0103
-network.primary_key.name = '%s_pk' % _TN
 network.info['unique_fields'] = ['network_environment', 'ip']
 network.info['extra_search_fields'] = ['name', 'cidr']
 

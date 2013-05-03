@@ -43,7 +43,5 @@ class Hostlink(Resource):
             raise ValueError("%s cannot contain the ':' character" % key)
         return value
 
-
 hostlink = Hostlink.__table__
-hostlink.primary_key.name = '%s_pk' % (_TN)
 hostlink.info['unique_fields'] = ['name', 'holder']

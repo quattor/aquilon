@@ -271,7 +271,6 @@ class Cluster(Base):
         return val.__format__(passthrough)
 
 cluster = Cluster.__table__  # pylint: disable=C0103
-cluster.primary_key.name = 'cluster_pk'
 cluster.info['unique_fields'] = ['name']
 
 
@@ -289,7 +288,6 @@ class ComputeCluster(Cluster):
                                     primary_key=True)
 
 compute_cluster = ComputeCluster.__table__  # pylint: disable=C0103
-compute_cluster.primary_key.name = 'compute_cluster_pk'
 compute_cluster.info['unique_fields'] = ['name']
 
 
@@ -315,7 +313,6 @@ class StorageCluster(Cluster):
                         % (host.fqdn, host.archetype))
 
 storage_cluster = StorageCluster.__table__  # pylint: disable=C0103
-storage_cluster.primary_key.name = 'storage_cluster_pk'
 storage_cluster.info['unique_fields'] = ['name']
 
 
@@ -554,7 +551,6 @@ class EsxCluster(Cluster):
         super(EsxCluster, self).__init__(**kw)
 
 esx_cluster = EsxCluster.__table__  # pylint: disable=C0103
-esx_cluster.primary_key.name = 'esx_cluster_pk'
 esx_cluster.info['unique_fields'] = ['name']
 
 
@@ -596,7 +592,6 @@ class HostClusterMember(Base):
                                        name='host_cluster_member_node_uk'))
 
 hcm = HostClusterMember.__table__  # pylint: disable=C0103
-hcm.primary_key.name = '%s_pk' % _HCM
 hcm.info['unique_fields'] = ['cluster', 'host']
 
 Host.cluster = association_proxy('_cluster', 'cluster')
@@ -614,11 +609,8 @@ class ClusterAllowedPersonality(Base):
                                                 ondelete='CASCADE'),
                             primary_key=True)
 
-
-cap = ClusterAllowedPersonality.__table__  # pylint: disable=C0103
-cap.primary_key.name = '%s_pk' % _CAP
-
-Cluster.allowed_personalities = relation(Personality, secondary=cap)
+Cluster.allowed_personalities = relation(Personality,
+                                         secondary=ClusterAllowedPersonality.__table__)
 
 
 class ClusterServiceBinding(Base):
@@ -638,8 +630,5 @@ class ClusterServiceBinding(Base):
                                             name='%s_srv_inst_fk' % _CSBABV),
                                  primary_key=True)
 
-
-csb = ClusterServiceBinding.__table__  # pylint: disable=C0103
-csb.primary_key.name = '%s_pk' % _CSB
-
-Cluster.service_bindings = relation(ServiceInstance, secondary=csb)
+Cluster.service_bindings = relation(ServiceInstance,
+                                    secondary=ClusterServiceBinding.__table__)

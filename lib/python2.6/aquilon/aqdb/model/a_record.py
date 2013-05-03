@@ -103,7 +103,6 @@ class ARecord(DnsRecord):
 
 
 arecord = ARecord.__table__  # pylint: disable=C0103
-arecord.primary_key.name = '%s_pk' % _TN
 # TODO: index on ip?
 
 arecord.info['unique_fields'] = ['fqdn']
@@ -164,7 +163,6 @@ class DynamicStub(ARecord):
 
 
 dynstub = DynamicStub.__table__  # pylint: disable=C0103
-dynstub.primary_key.name = 'dynamic_stub_pk'
 dynstub.info['unique_fields'] = ['fqdn']
 dynstub.info['extra_search_fields'] = ['ip', 'network', 'dns_environment']
 

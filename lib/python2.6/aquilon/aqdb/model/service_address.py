@@ -58,7 +58,5 @@ class ServiceAddress(Resource):
         ifaces.sort()
         return ifaces
 
-
 srvaddr = ServiceAddress.__table__
-srvaddr.primary_key.name = '%s_pk' % (_TN)
 srvaddr.info['unique_fields'] = ['name', 'holder']

@@ -51,7 +51,3 @@ class ChassisSlot(Base):
     # machine is removed
     machine = relation(Machine,
                        backref=backref('chassis_slot', cascade='all'))
-
-
-chassis_slot = ChassisSlot.__table__  # pylint: disable=C0103
-chassis_slot.primary_key.name = '%s_pk' % _TN

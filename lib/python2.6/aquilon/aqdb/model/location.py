@@ -209,7 +209,6 @@ class Location(Base):
         session.expire(self, ["_parent_links", "parent", "parents"])
 
 location = Location.__table__  # pylint: disable=C0103
-location.primary_key.name = 'location_pk'
 location.info['unique_fields'] = ['name', 'location_type']
 
 
@@ -238,10 +237,6 @@ class LocationLink(Base):
                       backref=backref("_child_links",
                                       cascade="all, delete-orphan",
                                       passive_deletes=True))
-
-
-llink = LocationLink.__table__  # pylint: disable=C0103
-llink.primary_key.name = 'location_link_pk'
 
 # Make these relations view-only, to make sure
 # the distance is managed explicitely

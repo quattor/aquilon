@@ -75,8 +75,6 @@ class RouterAddress(Base):
                            foreign_keys=[ARecord.ip, Fqdn.dns_environment_id],
                            viewonly=True)
 
-
 rtaddr = RouterAddress.__table__  # pylint: disable=C0103
-rtaddr.primary_key.name = '%s_pk' % _TN
 rtaddr.info['unique_fields'] = ['ip', 'network']
 rtaddr.info['extra_search_fields'] = ['dns_environment']

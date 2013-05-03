@@ -107,6 +107,3 @@ class PersonalityServiceMap(Base):
         if network is None and location is None:  # pragma: no cover
             raise ValueError("A service should by mapped to a Network or a "
                              "Location")
-
-psm = PersonalityServiceMap.__table__  # pylint: disable=C0103
-psm.primary_key.name = 'prsnlty_svc_map_pk'

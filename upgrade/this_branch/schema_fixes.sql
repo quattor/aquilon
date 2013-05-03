@@ -1,14 +1,26 @@
+ALTER TABLE clstr RENAME CONSTRAINT cluster_pk TO clstr_pk;
+ALTER INDEX cluster_pk RENAME TO clstr_pk;
 ALTER TABLE interface DROP CONSTRAINT iface_vlan_ck;
 ALTER TABLE interface ADD CONSTRAINT iface_vlan_ck CHECK (parent_id IS NOT NULL AND vlan_id > 0 AND vlan_id < 4096 OR interface_type != 'vlan');
 ALTER TABLE observed_vlan DROP CONSTRAINT observed_vlan_max_vlan_id_ck;
 ALTER TABLE observed_vlan DROP CONSTRAINT observed_vlan_min_vlan_id_ck;
 ALTER TABLE observed_vlan ADD CONSTRAINT observed_vlan_vlan_id_ck CHECK (vlan_id >= 0 AND vlan_id < 4096);
+ALTER TABLE operating_system RENAME CONSTRAINT os_pk TO operating_system_pk;
+ALTER INDEX os_pk RENAME TO operating_system_pk;
+ALTER TABLE personality RENAME CONSTRAINT prsnlty_pk TO personality_pk;
+ALTER INDEX prsnlty_pk RENAME TO personality_pk;
+ALTER TABLE personality_service_map RENAME CONSTRAINT prsnlty_svc_map_pk TO personality_service_map_pk;
+ALTER INDEX prsnlty_svc_map_pk RENAME TO personality_service_map_pk;
 ALTER TABLE "resource" RENAME CONSTRAINT resource_holder_id_nn TO "resource_HOLDER_ID_NN";
+ALTER TABLE service_instance RENAME CONSTRAINT svc_inst_pk TO service_instance_pk;
+ALTER INDEX svc_inst_pk RENAME TO service_instance_pk;
 ALTER TABLE "share" RENAME CONSTRAINT "share_PK" TO share_pk;
 ALTER TABLE "share" RENAME CONSTRAINT "share_RESOURCE_FK" TO share_resource_fk;
 ALTER INDEX "share_PK" RENAME TO share_pk;
 ALTER TABLE vlan_info DROP CONSTRAINT vlan_info_max_vlan_id_ck;
 ALTER TABLE vlan_info DROP CONSTRAINT vlan_info_min_vlan_id_ck;
 ALTER TABLE vlan_info ADD CONSTRAINT vlan_info_vlan_id_ck CHECK (vlan_id >= 0 AND vlan_id < 4096);
+ALTER TABLE xtn_detail RENAME CONSTRAINT xtn_dtl_pk TO xtn_detail_pk;
+ALTER INDEX xtn_dtl_pk RENAME TO xtn_detail_pk;
 
 QUIT;

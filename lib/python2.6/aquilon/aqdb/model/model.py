@@ -69,6 +69,5 @@ class Model(Base):
         return self.default_nic_model(session)
 
 model = Model.__table__  # pylint: disable=C0103
-model.primary_key.name = 'model_pk'
 model.info['unique_fields'] = ['name', 'vendor']
 model.info['extra_search_fields'] = ['machine_type']

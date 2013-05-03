@@ -149,7 +149,6 @@ class MetaCluster(Cluster):
                                               self.authored_branch))
 
 metacluster = MetaCluster.__table__  # pylint: disable=C0103
-metacluster.primary_key.name = '%s_pk' % _MCT
 metacluster.info['unique_fields'] = ['name']
 
 
@@ -216,5 +215,4 @@ class MetaClusterMember(Base):
     __mapper_args__ = {'extension': ValidateMetaCluster()}
 
 metamember = MetaClusterMember.__table__  # pylint: disable=C0103
-metamember.primary_key.name = '%s_pk' % _MCM
 metamember.info['unique_fields'] = ['metacluster', 'cluster']

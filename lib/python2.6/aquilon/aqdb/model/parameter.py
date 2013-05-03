@@ -58,7 +58,6 @@ class ParameterHolder(Base):
         raise InternalError("Abstract base method called")
 
 paramholder = ParameterHolder.__table__  # pylint: disable=C0103
-paramholder.primary_key.name = '%s_pk' % _PARAM_HOLDER
 
 
 class PersonalityParameter(ParameterHolder):
@@ -264,5 +263,4 @@ class Parameter(Base):
         return flattened
 
 parameter = Parameter.__table__  # pylint: disable=C0103
-parameter.primary_key.name = '%s_pk' % _TN
 parameter.info['unique_fields'] = ['holder']

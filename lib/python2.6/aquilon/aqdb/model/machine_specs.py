@@ -81,6 +81,3 @@ class MachineSpecs(Base):
         if self.controller_type == 'cciss':
             return 'c0d0'
         return 'sda'
-
-machine_specs = MachineSpecs.__table__  # pylint: disable=C0103
-machine_specs.primary_key.name = 'machine_specs_pk'

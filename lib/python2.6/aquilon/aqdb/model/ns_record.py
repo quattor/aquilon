@@ -68,7 +68,6 @@ class NsRecord(Base):
 
 nsrecord = NsRecord.__table__  # pylint: disable=C0103
 nsrecord.info['unique_fields'] = ['a_record', 'dns_domain']
-nsrecord.primary_key.name = '%s_pk' % _TN
 
 # Association proxies from/to NSRecord:
 # DnsDomain.servers = association_proxy('_name_servers', 'a_record')

@@ -45,7 +45,3 @@ class Switch(HardwareEntity):
     def check_type(cls, type):
         if type is not None and type not in SWITCH_TYPES:
             raise ArgumentError("Unknown switch type '%s'." % type)
-
-
-switch = Switch.__table__  # pylint: disable=C0103
-switch.primary_key.name = 'switch_pk'

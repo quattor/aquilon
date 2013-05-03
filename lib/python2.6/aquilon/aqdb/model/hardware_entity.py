@@ -201,7 +201,5 @@ class HardwareEntity(Base):
             for addr in iface.assignments:
                 yield addr
 
-
 hardware_entity = HardwareEntity.__table__  # pylint: disable=C0103
-hardware_entity.primary_key.name = '%s_pk' % _TN
 hardware_entity.info['unique_fields'] = ['label']

@@ -41,5 +41,4 @@ class Vendor(Base):
     __table_args__ = (UniqueConstraint(name, name='%s_uk' % _TN),)
 
 vendor = Vendor.__table__  # pylint: disable=C0103
-vendor.primary_key.name = '%s_pk' % _TN
 vendor.info['unique_fields'] = ['name']

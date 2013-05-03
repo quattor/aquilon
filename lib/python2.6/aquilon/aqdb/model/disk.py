@@ -82,9 +82,7 @@ class Disk(Base):
             (self._get_class_label(), self.device_name, self.controller_type,
              self.machine.label, self.capacity)
 
-
 disk = Disk.__table__  # pylint: disable=C0103
-disk.primary_key.name = '%s_pk' % _TN
 disk.info['unique_fields'] = ['machine', 'device_name']
 
 

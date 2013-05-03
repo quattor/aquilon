@@ -71,7 +71,6 @@ class VlanInfo(Base):
             self.vlan_type)
 
 vlaninfo = VlanInfo.__table__  # pylint: disable=C0103
-vlaninfo.primary_key.name = '%s_pk' % _VTN
 vlaninfo.info['unique_fields'] = ['port_group']
 vlaninfo.info['extra_search_fields'] = ['vlan_id']
 
@@ -157,6 +156,3 @@ class ObservedVlan(Base):
             raise InternalError("More than one network found for switch %s "
                                 "and VLAN %s" % (switch.fqdn, vlan_id))
         return nets[0].network
-
-obsvlan = ObservedVlan.__table__  # pylint: disable=C0103
-obsvlan.primary_key.name = '%s_pk' % _TN

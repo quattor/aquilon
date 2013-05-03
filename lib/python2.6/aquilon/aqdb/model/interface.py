@@ -340,8 +340,6 @@ class LoopbackInterface(Interface):
             raise ValueError("Loopback interfaces cannot have a MAC address.")
         return value
 
-
 interface = Interface.__table__  # pylint: disable=C0103
-interface.primary_key.name = '%s_pk' % _TN
 interface.info['unique_fields'] = ['name', 'hardware_entity']
 interface.info['extra_search_fields'] = ['mac']

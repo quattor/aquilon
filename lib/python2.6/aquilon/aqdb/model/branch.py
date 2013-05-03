@@ -67,7 +67,6 @@ class Branch(Base):
     __table_args__ = (UniqueConstraint(name, name='%s_uk' % _TN),)
 
 branch = Branch.__table__  # pylint: disable=C0103
-branch.primary_key.name = '%s_pk' % _TN
 branch.info['unique_fields'] = ['name']
 
 
@@ -100,7 +99,6 @@ class Domain(Branch):
                        'inherit_condition': domain_id == Branch.id}
 
 domain = Domain.__table__  # pylint: disable=C0103
-domain.primary_key.name = '%s_pk' % _DMN
 domain.info['unique_fields'] = ['name']
 
 
@@ -120,5 +118,4 @@ class Sandbox(Branch):
     __mapper_args__ = {'polymorphic_identity': _SBX}
 
 sandbox = Sandbox.__table__  # pylint: disable=C0103
-sandbox.primary_key.name = '%s_pk' % _SBX
 sandbox.info['unique_fields'] = ['name']

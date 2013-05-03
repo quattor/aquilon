@@ -173,9 +173,6 @@ class DnsRecord(Base):
 
         super(DnsRecord, self).__init__(fqdn=fqdn, **kwargs)
 
-
 dns_record = DnsRecord.__table__  # pylint: disable=C0103
-dns_record.primary_key.name = '%s_pk' % _TN
-
 dns_record.info['unique_fields'] = ['fqdn']
 dns_record.info['extra_search_fields'] = ['dns_environment']

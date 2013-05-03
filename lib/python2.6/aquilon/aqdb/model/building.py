@@ -34,5 +34,4 @@ class Building(Location):
     address = Column(String(255), nullable=False)
 
 building = Building.__table__  # pylint: disable=C0103
-building.primary_key.name = 'building_pk'
 building.info['unique_fields'] = ['name']

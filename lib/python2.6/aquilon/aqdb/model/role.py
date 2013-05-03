@@ -44,5 +44,4 @@ class Role(Base):
     __table_args__ = (UniqueConstraint(name, name='role_uk'),)
 
 role = Role.__table__  # pylint: disable=C0103
-role.primary_key.name = 'role_pk'
 role.info['unique_fields'] = ['name']

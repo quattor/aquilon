@@ -140,5 +140,4 @@ class Fqdn(Base):
                                    dns_environment=dns_environment, **kwargs)
 
 fqdn = Fqdn.__table__  # pylint: disable=C0103
-fqdn.primary_key.name = '%s_pk' % _TN
 fqdn.info['unique_fields'] = ['dns_environment', 'dns_domain', 'name']

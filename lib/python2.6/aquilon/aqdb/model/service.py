@@ -64,7 +64,6 @@ class Service(Base):
         return 'service/%s' % (self.name)
 
 service = Service.__table__  # pylint: disable=C0103
-service.primary_key.name = 'service_pk'
 service.info['unique_fields'] = ['name']
 
 
@@ -89,10 +88,7 @@ class ServiceListItem(Base):
 
     __table_args__ = (Index('srvlst_archtyp_idx', archetype_id),)
 
-sli = ServiceListItem.__table__  # pylint: disable=C0103
-sli.primary_key.name = '%s_pk' % _SLI
-
-Service.archetypes = relation(Archetype, secondary=sli,
+Service.archetypes = relation(Archetype, secondary=ServiceListItem.__table__,
                               backref=backref("services"))
 
 
@@ -119,5 +115,6 @@ class PersonalityServiceListItem(Base):
 psli = PersonalityServiceListItem.__table__  # pylint: disable=C0103
 psli.primary_key.name = '%s_pk' % _ABV
 
-Service.personalities = relation(Personality, secondary=psli,
+Service.personalities = relation(Personality,
+                                 secondary=PersonalityServiceListItem.__table__,
                                  backref=backref("services"))

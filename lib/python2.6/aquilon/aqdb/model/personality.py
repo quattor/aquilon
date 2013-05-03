@@ -90,7 +90,6 @@ class Personality(Base):
                                 .format(name, host_environment))
 
 personality = Personality.__table__   # pylint: disable=C0103
-personality.primary_key.name = '%s_pk' % _ABV
 personality.info['unique_fields'] = ['name', 'archetype']
 
 
@@ -105,9 +104,5 @@ class PersonalityGrnMap(Base):
     eon_id = Column(Integer, ForeignKey('grn.eon_id',
                                         name='%s_grn_fk' % _PGNABV),
                     primary_key=True)
-
-
-pgn = PersonalityGrnMap.__table__  # pylint: disable=C0103
-pgn.primary_key.name = '%s_pk' % _PGN
 
 Personality.grns = relation(Grn, secondary=PersonalityGrnMap.__table__)

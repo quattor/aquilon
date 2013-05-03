@@ -61,7 +61,6 @@ class Feature(Base):
         return link
 
 feature = Feature.__table__  # pylint: disable=C0103
-feature.primary_key.name = '%s_pk' % _TN
 feature.info['unique_fields'] = ['name', 'feature_type']
 
 
@@ -256,6 +255,3 @@ class FeatureLink(Base):
             return format_str % (self.feature.cfg_path, self.interface_name)
 
         return self.feature.cfg_path
-
-_lnk = FeatureLink.__table__  # pylint: disable=C0103
-_lnk.primary_key.name = '%s_pk' % _LINK

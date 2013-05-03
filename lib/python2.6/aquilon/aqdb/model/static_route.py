@@ -74,7 +74,3 @@ class StaticRoute(Base):
     def __lt__(self, other):
         """ Sort static routes based on the destination range """
         return self.destination.__lt__(other.destination)
-
-
-str = StaticRoute.__table__  # pylint: disable=C0103
-str.primary_key.name = '%s_pk' % _TN

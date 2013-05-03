@@ -59,7 +59,6 @@ class ParamDefHolder(Base):
 
 
 param_definition_holder = ParamDefHolder.__table__  # pylint: disable=C0103
-param_definition_holder.primary_key.name = '%s_pk' % _PARAM_DEF_HOLDER
 param_definition_holder.info['unique_fields'] = ['id']
 
 
@@ -161,5 +160,4 @@ class ParamDefinition(Base):
                             "%s." % (value_type, valid_types))
 
 param_definition = ParamDefinition.__table__  # pylint: disable=C0103
-param_definition.primary_key.name = '%s_pk' % _TN
 param_definition.info['unique_fields'] = ['path', 'holder']

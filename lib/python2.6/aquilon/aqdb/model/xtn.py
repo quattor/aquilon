@@ -96,9 +96,6 @@ class Xtn(Base):
             msg.append("[Result: " + " ".join(results) + "]")
         return " ".join(msg)
 
-xtn = Xtn.__table__  # pylint: disable=C0103
-xtn.primary_key.name = 'xtn_pk'  # pylint: disable=C0103
-
 
 class XtnEnd(Base):
     """ A record of a completed command/transaction """
@@ -112,9 +109,6 @@ class XtnEnd(Base):
     __table_args__ = (Index('xtn_end_return_code_idx', return_code,
                             oracle_compress=True),
                       {'oracle_compress': True})
-
-xtn_end = XtnEnd.__table__  # pylint: disable=C0103
-xtn_end.primary_key.name = 'xtn_end_pk'
 
 
 class XtnDetail(Base):
@@ -131,9 +125,6 @@ class XtnDetail(Base):
                             oracle_compress=True),
                       Index('xtn_dtl_value_idx', value, oracle_compress=True),
                       {'oracle_compress': True})
-
-xtn_detail = XtnDetail.__table__  # pylint: disable=C0103
-xtn_detail.primary_key.name = 'xtn_dtl_pk'
 
 Xtn.args = relationship(XtnDetail, lazy="joined", order_by=[XtnDetail.name])
 

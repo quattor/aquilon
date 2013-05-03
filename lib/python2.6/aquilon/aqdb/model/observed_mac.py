@@ -53,7 +53,3 @@ class ObservedMac(Base):
     switch = relation(Switch, backref=backref('observed_macs',
                                               cascade='delete',
                                               order_by=[port]))
-
-
-observedmac = ObservedMac.__table__  # pylint: disable=C0103
-observedmac.primary_key.name = '%s_pk' % _TN

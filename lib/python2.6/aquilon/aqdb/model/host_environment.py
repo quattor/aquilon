@@ -43,7 +43,6 @@ class HostEnvironment(Base):
         return str(self.name)
 
 host_env = HostEnvironment.__table__  # pylint: disable=C0103
-host_env.primary_key.name = '%s_pk' % _TN
 host_env.info['unique_fields'] = ['name']
 
 event.listen(host_env, "after_create", HostEnvironment.populate_const_table)

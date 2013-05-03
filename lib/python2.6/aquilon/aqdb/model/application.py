@@ -34,7 +34,5 @@ class Application(Resource):
 
     eonid = Column(Integer, nullable=False)
 
-
 application = Application.__table__
-application.primary_key.name = '%s_pk' % (_TN)
 application.info['unique_fields'] = ['name', 'holder']

@@ -124,10 +124,6 @@ class Host(Base):
         return str(self.branch.name)
 
 
-host = Host.__table__  # pylint: disable=C0103
-host.primary_key.name = 'host_pk'
-
-
 class HostGrnMap(Base):
     __tablename__ = _HOSTGRN
 
@@ -139,9 +135,5 @@ class HostGrnMap(Base):
     eon_id = Column(Integer, ForeignKey('grn.eon_id',
                                         name='%s_grn_fk' % _HOSTGRN),
                     primary_key=True)
-
-
-hostgrns = HostGrnMap.__table__  # pylint: disable=C0103
-hostgrns.primary_key.name = "%s_pk" % _HOSTGRN
 
 Host.grns = relation(Grn, secondary=HostGrnMap.__table__)

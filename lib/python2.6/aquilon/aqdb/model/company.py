@@ -32,5 +32,4 @@ class Company(Location):
                 primary_key=True)
 
 company = Company.__table__  # pylint: disable=C0103
-company.primary_key.name = 'company_pk'
 company.info['unique_fields'] = ['name']

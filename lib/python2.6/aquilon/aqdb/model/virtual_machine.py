@@ -48,5 +48,4 @@ class VirtualMachine(Resource):
     __mapper_args__ = {'polymorphic_identity': 'virtual_machine'}
 
 vm = VirtualMachine.__table__
-vm.primary_key.name = '%s_pk' % _TN
 vm.info['unique_fields'] = ['name', 'holder']

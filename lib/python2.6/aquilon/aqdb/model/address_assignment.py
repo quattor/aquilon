@@ -164,10 +164,6 @@ class AddressAssignment(Base):
                                           self.interface.hardware_entity.label,
                                           self.logical_name)
 
-
-address = AddressAssignment.__table__  # pylint: disable=C0103
-address.primary_key.name = '%s_pk' % _TN
-
 # Assigned to external classes here to avoid circular dependencies.
 Interface.addresses = association_proxy('assignments', 'ip')
 

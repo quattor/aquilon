@@ -67,5 +67,4 @@ class DnsEnvironment(Base):
                                   compel=InternalError)
 
 dnsenv = DnsEnvironment.__table__  # pylint: disable=C0103
-dnsenv.primary_key.name = '%s_pk' % _TN
 dnsenv.info['unique_fields'] = ['name']

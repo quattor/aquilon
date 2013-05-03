@@ -49,6 +49,5 @@ class Grn(Base):
     __table_args__ = (UniqueConstraint(grn, name='%s_grn_uk' % _TN),)
 
 grn = Grn.__table__  # pylint: disable=C0103
-grn.primary_key.name = '%s_pk' % _TN
 grn.info['unique_fields'] = ['grn']
 grn.info['extra_search_fields'] = ['eon_id']

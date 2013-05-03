@@ -41,7 +41,5 @@ class Filesystem(Resource):
     dumpfreq = Column(Integer)
     passno = Column(Integer)
 
-
 filesystem = Filesystem.__table__
-filesystem.primary_key.name = '%s_pk' % (_TN)
 filesystem.info['unique_fields'] = ['name', 'holder']

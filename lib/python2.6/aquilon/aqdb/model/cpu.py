@@ -49,5 +49,4 @@ class Cpu(Base):
                                        name='%s_nm_speed_uk' % _TN),)
 
 cpu = Cpu.__table__   # pylint: disable=C0103
-cpu.primary_key.name = '%s_pk' % _TN
 cpu.info['unique_fields'] = ['name', 'vendor', 'speed']
