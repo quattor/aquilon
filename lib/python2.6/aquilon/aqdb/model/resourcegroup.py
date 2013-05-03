@@ -15,7 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from sqlalchemy import Integer, Column, ForeignKey
+from sqlalchemy import Integer, Column, ForeignKey, UniqueConstraint
 
 from aquilon.aqdb.model import Resource, ResourceHolder
 from aquilon.aqdb.column_types.aqstr import AqStr
@@ -31,7 +31,6 @@ class ResourceGroup(Resource):
     """ A collection of resources which operate together
         (e.g. a VCS Service Group)."""
     __tablename__ = _TN
-    __mapper_args__ = {'polymorphic_identity': 'resourcegroup'}
     _class_label = 'Resource Group'
 
     id = Column(Integer, ForeignKey('resource.id',
@@ -43,6 +42,8 @@ class ResourceGroup(Resource):
 
     # This is to enforce the same type of resources in the group
     required_type = Column(AqStr(32), nullable=True)
+
+    __mapper_args__ = {'polymorphic_identity': _TN}
 
     def validate_holder(self, key, value):
         if isinstance(value, BundleResource):
@@ -60,12 +61,6 @@ resourcegroup.info['unique_fields'] = ['holder', 'name']
 
 class BundleResource(ResourceHolder):
     '''Allow ResourceGroups to hold other types of resource. '''
-    # Note: the polymorphic identity of ResourceGroup and BundleResource should
-    # be the same, because plenary paths sometimes use one or the other,
-    # depending on the context. These two classes should really be one if there
-    # was a sane way to support multiple inheritance in the DB, so their
-    # identities should at least be the same.
-    __mapper_args__ = {'polymorphic_identity': 'resourcegroup'}
 
     resourcegroup_id = Column(Integer,
                               ForeignKey('resourcegroup.id',
@@ -82,6 +77,16 @@ class BundleResource(ResourceHolder):
                              backref=backref('resholder',
                                              cascade='all, delete-orphan',
                                              uselist=False))
+
+    __extra_table_args__ = (UniqueConstraint(resourcegroup_id,
+                                             name="resholder_rg_uk"),)
+
+    # Note: the polymorphic identity of ResourceGroup and BundleResource should
+    # be the same, because plenary paths sometimes use one or the other,
+    # depending on the context. These two classes should really be one if there
+    # was a sane way to support multiple inheritance in the DB, so their
+    # identities should at least be the same.
+    __mapper_args__ = {'polymorphic_identity': _TN}
 
     def validate_resources(self, key, value):
         rg = self.resourcegroup

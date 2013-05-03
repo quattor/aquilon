@@ -24,6 +24,7 @@ ALTER INDEX prsnlty_svc_map_pk RENAME TO personality_service_map_pk;
 ALTER TABLE personality DROP CONSTRAINT personality_uk;
 ALTER TABLE personality ADD CONSTRAINT personality_arch_name_uk UNIQUE (archetype_id, name);
 DROP INDEX prsnlty_arch_idx;
+ALTER TABLE resholder ADD CONSTRAINT resholder_rg_uk UNIQUE (resourcegroup_id);
 ALTER TABLE router_address DROP CONSTRAINT router_address_pk;
 ALTER TABLE router_address ADD CONSTRAINT router_address_pk PRIMARY KEY (network_id, ip);
 ALTER INDEX svc_inst_pk RENAME TO service_instance_pk;

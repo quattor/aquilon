@@ -31,6 +31,7 @@ ALTER TABLE "resource" RENAME CONSTRAINT resource_holder_id_nn TO "resource_HOLD
 ALTER TABLE service_instance RENAME CONSTRAINT svc_inst_pk TO service_instance_pk;
 ALTER INDEX svc_inst_pk RENAME TO service_instance_pk;
 ALTER TABLE "resource" RENAME CONSTRAINT resource_holder_id_nn TO "resource_HOLDER_ID_NN";
+ALTER TABLE resholder ADD CONSTRAINT resholder_rg_uk UNIQUE (resourcegroup_id);
 ALTER TABLE router_address DROP PRIMARY KEY DROP INDEX;
 ALTER TABLE router_address ADD CONSTRAINT router_address_pk PRIMARY KEY (network_id, ip);
 ALTER TABLE "share" RENAME CONSTRAINT "share_PK" TO share_pk;
