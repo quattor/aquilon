@@ -19,7 +19,7 @@ import re
 from datetime import datetime
 
 from sqlalchemy import (Column, Integer, Boolean, String, DateTime, Sequence,
-                        ForeignKey, UniqueConstraint)
+                        ForeignKey, UniqueConstraint, PrimaryKeyConstraint)
 
 from sqlalchemy.orm import (object_session, relation, backref, deferred,
                             joinedload)
@@ -562,13 +562,13 @@ class HostClusterMember(Base):
                                                 name='hst_clstr_mmbr_clstr_fk',
                                                 ondelete='CASCADE'),
                         #if the cluster is deleted, so is membership
-                        primary_key=True)
+                        nullable=False)
 
     host_id = Column(Integer, ForeignKey('host.machine_id',
                                          name='hst_clstr_mmbr_hst_fk',
                                          ondelete='CASCADE'),
                         #if the host is deleted, so is the membership
-                        primary_key=True)
+                        nullable=False)
 
     node_index = Column(Integer, nullable=False)
 
@@ -586,7 +586,9 @@ class HostClusterMember(Base):
                     backref=backref('_cluster', uselist=False,
                                     cascade='all, delete-orphan'))
 
-    __table_args__ = (UniqueConstraint(host_id,
+    __table_args__ = (PrimaryKeyConstraint(cluster_id, host_id,
+                                           name="%s_pk" % _HCM),
+                      UniqueConstraint(host_id,
                                        name='host_cluster_member_host_uk'),
                       UniqueConstraint(cluster_id, node_index,
                                        name='host_cluster_member_node_uk'))
@@ -602,12 +604,14 @@ class ClusterAllowedPersonality(Base):
     cluster_id = Column(Integer, ForeignKey('%s.id' % _TN,
                                             name='clstr_allowed_pers_c_fk',
                                             ondelete='CASCADE'),
-                        primary_key=True)
+                        nullable=False)
 
     personality_id = Column(Integer, ForeignKey('personality.id',
                                                 name='clstr_allowed_pers_p_fk',
                                                 ondelete='CASCADE'),
-                            primary_key=True)
+                            nullable=False)
+
+    __table_args__ = (PrimaryKeyConstraint(cluster_id, personality_id),)
 
 Cluster.allowed_personalities = relation(Personality,
                                          secondary=ClusterAllowedPersonality.__table__)
@@ -623,12 +627,14 @@ class ClusterServiceBinding(Base):
     cluster_id = Column(Integer, ForeignKey('%s.id' % _TN,
                                             name='%s_cluster_fk' % _CSBABV,
                                             ondelete='CASCADE'),
-                        primary_key=True)
+                        nullable=False)
 
     service_instance_id = Column(Integer,
                                  ForeignKey('service_instance.id',
                                             name='%s_srv_inst_fk' % _CSBABV),
-                                 primary_key=True)
+                                 nullable=False)
+
+    __table_args__ = (PrimaryKeyConstraint(cluster_id, service_instance_id),)
 
 Cluster.service_bindings = relation(ServiceInstance,
                                     secondary=ClusterServiceBinding.__table__)

@@ -20,7 +20,8 @@
 
 from datetime import datetime
 
-from sqlalchemy import Column, Integer, DateTime, ForeignKey
+from sqlalchemy import (Column, Integer, DateTime, ForeignKey,
+                        PrimaryKeyConstraint)
 from sqlalchemy.orm import relation, backref, deferred
 
 from aquilon.aqdb.model import Base, Switch
@@ -37,12 +38,11 @@ class ObservedMac(Base):
     switch_id = Column(Integer, ForeignKey('switch.hardware_entity_id',
                                            ondelete='CASCADE',
                                            name='obs_mac_hw_fk'),
-                       primary_key=True)
+                       nullable=False)
 
-    port = Column(AqStr(32), primary_key=True)
+    port = Column(AqStr(32), nullable=False)
 
-    mac_address = Column(AqMac(17), nullable=False, primary_key=True)
-
+    mac_address = Column(AqMac(17), nullable=False)
 
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
@@ -53,3 +53,5 @@ class ObservedMac(Base):
     switch = relation(Switch, backref=backref('observed_macs',
                                               cascade='delete',
                                               order_by=[port]))
+
+    __table_args__ = (PrimaryKeyConstraint(switch_id, port, mac_address),)

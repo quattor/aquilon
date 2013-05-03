@@ -19,7 +19,7 @@ from datetime import datetime
 import socket
 
 from sqlalchemy import (Column, Integer, Sequence, String, DateTime,
-                        ForeignKey, UniqueConstraint)
+                        ForeignKey, UniqueConstraint, PrimaryKeyConstraint)
 from sqlalchemy.orm import (relation, contains_eager, column_property, backref,
                             deferred, undefer, aliased)
 from sqlalchemy.orm.session import object_session
@@ -283,12 +283,14 @@ class BuildItem(Base):
     host_id = Column('host_id', Integer, ForeignKey('host.machine_id',
                                                     ondelete='CASCADE',
                                                     name='build_item_host_fk'),
-                     primary_key=True)
+                     nullable=False)
 
     service_instance_id = Column(Integer,
                                  ForeignKey('service_instance.id',
                                             name='build_item_svc_inst_fk'),
-                                 primary_key=True)
+                                 nullable=False)
+
+    __table_args__ = (PrimaryKeyConstraint(host_id, service_instance_id),)
 
 ServiceInstance.clients = relation(Host, secondary=BuildItem.__table__,
                                    backref=backref("services_used",

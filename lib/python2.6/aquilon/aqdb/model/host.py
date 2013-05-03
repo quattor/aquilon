@@ -19,7 +19,7 @@
 from datetime import datetime
 
 from sqlalchemy import (Integer, Boolean, DateTime, String, Column, ForeignKey,
-                        UniqueConstraint, Index)
+                        UniqueConstraint, PrimaryKeyConstraint, Index)
 from sqlalchemy.orm import relation, backref, deferred
 
 from aquilon.aqdb.model import (Base, Branch, Machine, HostLifecycle, Grn,
@@ -130,10 +130,12 @@ class HostGrnMap(Base):
     host_id = Column(Integer, ForeignKey("%s.machine_id" % _TN,
                                          name="%s_host_fk" % _HOSTGRN,
                                          ondelete="CASCADE"),
-                     primary_key=True)
+                     nullable=False)
 
     eon_id = Column(Integer, ForeignKey('grn.eon_id',
                                         name='%s_grn_fk' % _HOSTGRN),
-                    primary_key=True)
+                    nullable=False)
+
+    __table_args__ = (PrimaryKeyConstraint(host_id, eon_id),)
 
 Host.grns = relation(Grn, secondary=HostGrnMap.__table__)

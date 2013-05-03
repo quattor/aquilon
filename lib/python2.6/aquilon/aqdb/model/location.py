@@ -18,7 +18,7 @@
 
 from datetime import datetime
 from sqlalchemy import (Integer, DateTime, Sequence, String, Column,
-                        ForeignKey, UniqueConstraint)
+                        ForeignKey, UniqueConstraint, PrimaryKeyConstraint)
 
 from sqlalchemy.orm import relation, backref, object_session, deferred
 from sqlalchemy.sql import and_, or_, desc
@@ -218,12 +218,12 @@ class LocationLink(Base):
     child_id = Column(Integer, ForeignKey('location.id',
                                           name='location_link_child_fk',
                                           ondelete='CASCADE'),
-                      primary_key=True)
+                      nullable=False)
 
     parent_id = Column(Integer, ForeignKey('location.id',
                                            name='location_link_parent_fk',
                                            ondelete='CASCADE'),
-                       primary_key=True)
+                       nullable=False)
 
     # Distance from the given parent. 1 means direct child.
     distance = Column(Integer, nullable=False)
@@ -237,6 +237,8 @@ class LocationLink(Base):
                       backref=backref("_child_links",
                                       cascade="all, delete-orphan",
                                       passive_deletes=True))
+
+    __table_args__ = (PrimaryKeyConstraint(child_id, parent_id),)
 
 # Make these relations view-only, to make sure
 # the distance is managed explicitely

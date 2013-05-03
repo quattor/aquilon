@@ -19,7 +19,8 @@ import logging
 from datetime import datetime
 from dateutil.tz import tzutc
 
-from sqlalchemy import Column, String, Integer, ForeignKey, Index, Boolean
+from sqlalchemy import (Column, String, Integer, Boolean, ForeignKey,
+                        PrimaryKeyConstraint, Index)
 from sqlalchemy.orm import relationship, backref
 from sqlalchemy.sql import desc
 
@@ -116,12 +117,13 @@ class XtnDetail(Base):
     __tablename__ = 'xtn_detail'
 
     xtn_id = Column(GUID(), ForeignKey(Xtn.xtn_id, name='xtn_dtl_xtn_fk'),
-                    primary_key=True)
+                    nullable=False)
+    name = Column(String(255), nullable=False)
+    value = Column(String(255), default='True', nullable=False)
 
-    name = Column(String(255), primary_key=True)
-    value = Column(String(255), default='True', primary_key=True)
-
-    __table_args__ = (Index('xtn_dtl_name_idx', name,
+    __table_args__ = (PrimaryKeyConstraint(xtn_id, name, value,
+                                           name="xtn_dtl_pk"),
+                      Index('xtn_dtl_name_idx', name,
                             oracle_compress=True),
                       Index('xtn_dtl_value_idx', value, oracle_compress=True),
                       {'oracle_compress': True})

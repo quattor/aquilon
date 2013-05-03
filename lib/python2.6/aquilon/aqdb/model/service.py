@@ -31,7 +31,7 @@
 from datetime import datetime
 
 from sqlalchemy import (Column, Integer, Sequence, String, DateTime, ForeignKey,
-                        UniqueConstraint, Index)
+                        UniqueConstraint, PrimaryKeyConstraint, Index)
 from sqlalchemy.orm import relation, backref, deferred
 
 from aquilon.aqdb.model import Base, Archetype, Personality
@@ -79,14 +79,16 @@ class ServiceListItem(Base):
     service_id = Column(Integer, ForeignKey('%s.id' % (_TN),
                                             name='sli_svc_fk',
                                             ondelete='CASCADE'),
-                        primary_key=True)
+                        nullable=False)
 
     archetype_id = Column(Integer, ForeignKey('archetype.id',
                                               name='sli_arctype_fk',
                                               ondelete='CASCADE'),
-                          primary_key=True)
+                          nullable=False)
 
-    __table_args__ = (Index('srvlst_archtyp_idx', archetype_id),)
+    __table_args__ = (PrimaryKeyConstraint(service_id, archetype_id,
+                                           name="%s_pk" % _SLI),
+                      Index('srvlst_archtyp_idx', archetype_id))
 
 Service.archetypes = relation(Archetype, secondary=ServiceListItem.__table__,
                               backref=backref("services"))
@@ -103,17 +105,16 @@ class PersonalityServiceListItem(Base):
     service_id = Column(Integer, ForeignKey('%s.id' % (_TN),
                                                name='%s_svc_fk' % (_ABV),
                                                ondelete='CASCADE'),
-                           primary_key=True)
+                           nullable=False)
 
     personality_id = Column(Integer, ForeignKey('personality.id',
                                                  name='sli_prsnlty_fk',
                                                  ondelete='CASCADE'),
-                             primary_key=True)
+                             nullable=False)
 
-    __table_args__ = (Index('%s_prsnlty_idx' % _ABV, personality_id),)
-
-psli = PersonalityServiceListItem.__table__  # pylint: disable=C0103
-psli.primary_key.name = '%s_pk' % _ABV
+    __table_args__ = (PrimaryKeyConstraint(service_id, personality_id,
+                                           name="%s_pk" % _ABV),
+                      Index('%s_prsnlty_idx' % _ABV, personality_id))
 
 Service.personalities = relation(Personality,
                                  secondary=PersonalityServiceListItem.__table__,

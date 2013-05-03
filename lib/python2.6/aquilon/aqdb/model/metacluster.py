@@ -22,7 +22,7 @@
 from datetime import datetime
 
 from sqlalchemy import (Column, Integer, DateTime, Boolean, ForeignKey,
-                        UniqueConstraint)
+                        UniqueConstraint, PrimaryKeyConstraint)
 
 from sqlalchemy.orm import relation, backref, deferred
 from sqlalchemy.orm.attributes import instance_state
@@ -180,13 +180,13 @@ class MetaClusterMember(Base):
                                                 name='%s_meta_fk' % _MCM,
                                                 ondelete='CASCADE'),
                             #if a metacluser is delete so is the association
-                            primary_key=True)
+                            nullable=False)
 
     cluster_id = Column(Integer, ForeignKey('clstr.id',
                                             name='%s_clstr_fk' % _MCM,
                                             ondelete='CASCADE'),
                         #if a cluster is deleted, so is the association
-                        primary_key=True)
+                        nullable=False)
 
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
@@ -211,7 +211,9 @@ class MetaClusterMember(Base):
                        backref=backref('_metacluster', uselist=False,
                                        cascade='all, delete-orphan'))
 
-    __table_args__ = (UniqueConstraint(cluster_id, name='%s_uk' % _MCM),)
+    __table_args__ = (PrimaryKeyConstraint(metacluster_id, cluster_id,
+                                           name="%s_pk" % _MCM),
+                      UniqueConstraint(cluster_id, name='%s_uk' % _MCM))
     __mapper_args__ = {'extension': ValidateMetaCluster()}
 
 metamember = MetaClusterMember.__table__  # pylint: disable=C0103

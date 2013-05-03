@@ -17,7 +17,8 @@
 
 from datetime import datetime
 
-from sqlalchemy import (Column, Integer, String, DateTime, ForeignKey)
+from sqlalchemy import (Column, Integer, String, DateTime, ForeignKey,
+                        PrimaryKeyConstraint)
 from sqlalchemy.orm import relation, deferred, backref
 from sqlalchemy.sql import and_
 
@@ -36,13 +37,13 @@ class RouterAddress(Base):
     _class_label = 'Router Address'
     _instance_label = 'ip'
 
-    ip = Column(IPV4, primary_key=True)
+    ip = Column(IPV4, nullable=False)
 
     # With the introduction of network environments, the IP alone is not enough
     # to uniquely identify the router
     network_id = Column(Integer, ForeignKey('network.id',
                                             name='%s_network_fk' % _TN),
-                        primary_key=True)
+                        nullable=False)
 
     dns_environment_id = Column(Integer, ForeignKey('dns_environment.id',
                                                     name='%s_dns_env_fk' % _TN),
@@ -74,6 +75,8 @@ class RouterAddress(Base):
                                             dns_environment_id == Fqdn.dns_environment_id),
                            foreign_keys=[ARecord.ip, Fqdn.dns_environment_id],
                            viewonly=True)
+
+    __table_args__ = (PrimaryKeyConstraint(ip, network_id),)
 
 rtaddr = RouterAddress.__table__  # pylint: disable=C0103
 rtaddr.info['unique_fields'] = ['ip', 'network']

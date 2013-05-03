@@ -19,7 +19,7 @@
 from datetime import datetime
 
 from sqlalchemy import (Column, Integer, DateTime, ForeignKey, CheckConstraint,
-                        UniqueConstraint)
+                        UniqueConstraint, PrimaryKeyConstraint)
 from sqlalchemy.orm import relation, backref, deferred, object_session
 from sqlalchemy.sql import func, and_
 
@@ -82,16 +82,16 @@ class ObservedVlan(Base):
     switch_id = Column(Integer, ForeignKey('switch.hardware_entity_id',
                                            ondelete='CASCADE',
                                            name='%s_hw_fk' % _ABV),
-                       primary_key=True)
+                       nullable=False)
 
     network_id = Column(Integer, ForeignKey('network.id',
                                             ondelete='CASCADE',
                                             name='%s_net_fk' % _ABV),
-                        primary_key=True)
+                        nullable=False)
 
     vlan_id = Column(Integer, ForeignKey('vlan_info.vlan_id',
                                            name='%s_vlan_fk' % _ABV),
-                     primary_key=True)
+                     nullable=False)
 
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
@@ -108,9 +108,11 @@ class ObservedVlan(Base):
                     foreign_keys=[VlanInfo.vlan_id],
                     viewonly=True)
 
-    __table_args__ = (CheckConstraint(and_(vlan_id >= 0,
+    __table_args__ = (PrimaryKeyConstraint(switch_id, network_id, vlan_id,
+                                           name="%s_pk" % _TN),
+                      CheckConstraint(and_(vlan_id >= 0,
                                            vlan_id < MAX_VLANS),
-                                      name='%s_vlan_id_ck' % _TN),)
+                                      name='%s_vlan_id_ck' % _TN))
     @property
     def port_group(self):
         if self.vlan:

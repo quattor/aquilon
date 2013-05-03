@@ -19,7 +19,8 @@ from datetime import datetime
 import re
 
 from sqlalchemy import (Column, Integer, Boolean, DateTime, Sequence, String,
-                        ForeignKey, UniqueConstraint, Index)
+                        ForeignKey, UniqueConstraint, PrimaryKeyConstraint,
+                        Index)
 from sqlalchemy.orm import relation, deferred
 from sqlalchemy.inspection import inspect
 
@@ -99,10 +100,12 @@ class PersonalityGrnMap(Base):
     personality_id = Column(Integer, ForeignKey('%s.id' % _TN,
                                                 name='%s_personality_fk' % _PGNABV,
                                                 ondelete='CASCADE'),
-                            primary_key=True)
+                            nullable=False)
 
     eon_id = Column(Integer, ForeignKey('grn.eon_id',
                                         name='%s_grn_fk' % _PGNABV),
-                    primary_key=True)
+                    nullable=False)
+
+    __table_args__ = (PrimaryKeyConstraint(personality_id, eon_id),)
 
 Personality.grns = relation(Grn, secondary=PersonalityGrnMap.__table__)
