@@ -31,6 +31,7 @@ from aquilon.aqdb.model import Base, Location, Model, DnsRecord
 from aquilon.aqdb.column_types import AqStr
 
 _TN = "hardware_entity"
+_ABV = "hw_ent"
 
 
 class HardwareEntity(Base):
@@ -44,17 +45,17 @@ class HardwareEntity(Base):
     hardware_type = Column(AqStr(64), nullable=False)
 
     location_id = Column(Integer, ForeignKey('location.id',
-                                            name='hw_ent_loc_fk'),
+                                             name='%s_loc_fk' % _ABV),
                          nullable=False)
 
     model_id = Column(Integer, ForeignKey('model.id',
-                                          name='hw_ent_model_fk'),
+                                          name='%s_model_fk' % _ABV),
                       nullable=False)
 
     serial_no = Column(String(64), nullable=True)
 
     primary_name_id = Column(Integer, ForeignKey('dns_record.id',
-                                                 name='hw_ent_pri_name_fk'),
+                                                 name='%s_pri_name_fk' % _ABV),
                              nullable=True)
 
     creation_date = deferred(Column(DateTime, default=datetime.now,
@@ -75,7 +76,9 @@ class HardwareEntity(Base):
                                             passive_deletes=True))
 
     __table_args__ = (UniqueConstraint(label, name='%s_label_uk' % _TN),
-                      Index('hw_ent_loc_idx', location_id))
+                      UniqueConstraint('primary_name_id',
+                                       name='%s_pri_name_uk' % _ABV),
+                      Index('%s_loc_idx' % _ABV, location_id))
     __mapper_args__ = {'polymorphic_on': hardware_type}
 
     _label_check = re.compile("^[a-z][a-z0-9]{,62}$")

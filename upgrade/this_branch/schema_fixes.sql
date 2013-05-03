@@ -2,6 +2,7 @@ ALTER TABLE clstr RENAME CONSTRAINT cluster_pk TO clstr_pk;
 ALTER INDEX cluster_pk RENAME TO clstr_pk;
 ALTER TABLE fqdn DROP CONSTRAINT fqdn_name_domain_env_uk DROP INDEX;
 ALTER TABLE fqdn ADD CONSTRAINT fqdn_domain_name_env_uk UNIQUE (dns_domain_id, name, dns_environment_id);
+ALTER TABLE hardware_entity ADD CONSTRAINT hw_ent_pri_name_uk UNIQUE (primary_name_id);
 ALTER TABLE interface DROP CONSTRAINT iface_vlan_ck;
 ALTER TABLE interface ADD CONSTRAINT iface_vlan_ck CHECK (parent_id IS NOT NULL AND vlan_id > 0 AND vlan_id < 4096 OR interface_type != 'vlan');
 ALTER TABLE model DROP CONSTRAINT model_name_vendor_uk DROP INDEX;
