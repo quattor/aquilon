@@ -30,44 +30,6 @@ PERSONALITY = 'testpersona/dev'
 ARCHETYPE = 'aquilon'
 OTHER_PERSONALITY = 'eaitools'
 
-## validation parameters by templates
-PARAM_DEFS = {
-"access": [
-    {"path": "access/netgroup", "value_type": "list", "description": "netgroups access"},
-    {"path": "access/users", "value_type": "list", "description": "users access"},
-],
-"actions": [
-    {"path": "action/\w+/user", "value_type": "string", "description": "action user"},
-    {"path": "action/\w+/command", "value_type": "string", "description": "action command"},
-    {"path": "action/\w+", "value_type": "json", "description": "per action block"},
-    {"path": "action", "value_type": "json", "description": "per action block"},
-],
-"startup": [
-    {"path": "startup/actions", "value_type": "list", "description": "startup actions"},
-],
-"shutdown": [
-    {"path": "shutdown/actions", "value_type": "list", "description": "shutdown actions"},
-],
-"maintenance": [
-    {"path": "maintenance/actions", "value_type": "list", "description": "maintenance actions"},
-],
-"monitoring": [
-    {"path": "monitoring/alert", "value_type": "json", "description": "monitoring "},
-],
-"espinfo": [
-    {"path": "esp/function", "value_type": "string", "description": "espinfo function", "required": True},
-    {"path": "esp/class", "value_type": "string", "description": "espinfo class", "required": True},
-    {"path": "esp/users", "value_type": "list", "description": "espinfo users", "required": True},
-    {"path": "esp/threshold", "value_type": "int", "description": "espinfo threshold", "required": True},
-    {"path": "esp/description", "value_type": "string", "description": "espinfo desc"},
-],
-"windows": [
-    {"path": "windows/windows", "value_type": "json", "required": True, "default": '[{"duration": 8, "start": "08:00", "day": "Sun"}]'}
-],
-"testrebuild": [
-    {"path": "test/rebuild_required", "value_type": "string", "rebuild_required": True}
-],
-}
 
 SHOW_CMD = ["show", "parameter", "--personality", PERSONALITY]
 
@@ -101,21 +63,6 @@ class TestParameter(TestBrokerCommand):
         err = self.notfoundtest(SHOW_CMD)
         self.matchoutput(err,
                          "No parameters found for personality %s." % PERSONALITY, SHOW_CMD)
-
-        for template in PARAM_DEFS:
-            paths = PARAM_DEFS[template]
-            for p in paths:
-                cmd = ["add_parameter_definition", "--archetype=aquilon",
-                       "--path", p["path"], "--template", template,
-                       "--value_type", p["value_type"]]
-                if "required" in p:
-                    cmd.append("--required")
-                if "rebuild_required" in p:
-                    cmd.append("--rebuild_required")
-                if "default" in p:
-                    cmd.extend(["--default", p["default"]])
-
-                self.noouttest(cmd)
 
     def test_100_add_re_path(self):
         action = "testaction"
@@ -202,36 +149,36 @@ class TestParameter(TestBrokerCommand):
                          "Parameter %s does not match any parameter definitions" % path, command)
 
     def test_200_add_path(self):
-        path = "esp/function"
+        path = "espinfo/function"
         value = "crash"
         command = ADD_CMD + ["--path", path, "--value", value]
         self.noouttest(command)
 
-        path = "esp/users"
+        path = "espinfo/users"
         value = "someusers, otherusers"
         command = ADD_CMD + ["--path", path, "--value", value]
         self.noouttest(command)
 
-        path = "esp/class"
+        path = "espinfo/class"
         value = "INFRASTRUCTURE"
         command = ADD_CMD + ["--path", path, "--value", value]
         self.successtest(command)
 
     def test_210_add_existing_path(self):
-        path = "esp/function"
+        path = "espinfo/function"
         value = "crash"
         command = ADD_CMD + ["--path", path, "--value", value]
         err = self.badrequesttest(command)
         self.matchoutput(err, "Parameter with path=%s already exists" % path, command)
 
     def test_220_upd_existing_path(self):
-        path = "esp/function"
-        value = "development"
+        path = "espinfo/function"
+        value = "production"
         command = UPD_CMD + ["--path", path, "--value", value]
         self.noouttest(command)
 
     def test_230_upd_nonexisting_path(self):
-        path = "esp/badpath"
+        path = "espinfo/badpath"
         value = "somevalue"
         command = UPD_CMD + ["--path", path, "--value", value]
         err = self.badrequesttest(command)
@@ -241,7 +188,7 @@ class TestParameter(TestBrokerCommand):
     def test_240_verify_path(self):
         out = self.commandtest(SHOW_CMD)
         self.check_match(out,
-                         'esp: { "function": "development", '
+                         'espinfo: { "function": "production", '
                          '"users": "someusers, otherusers", '
                          '"class": "INFRASTRUCTURE" }', SHOW_CMD)
         self.check_match(out, '"testaction": { "command": "/bin/testaction", "user": "user2" }', SHOW_CMD)
@@ -253,13 +200,13 @@ class TestParameter(TestBrokerCommand):
         p = self.parse_parameters_msg(out, 4)
         params = p.parameters
 
-        self.failUnlessEqual(params[0].path, 'esp/function')
-        self.failUnlessEqual(params[0].value, 'development')
+        self.failUnlessEqual(params[0].path, 'espinfo/function')
+        self.failUnlessEqual(params[0].value, 'production')
 
-        self.failUnlessEqual(params[1].path, 'esp/class')
+        self.failUnlessEqual(params[1].path, 'espinfo/class')
         self.failUnlessEqual(params[1].value, 'INFRASTRUCTURE')
 
-        self.failUnlessEqual(params[2].path, 'esp/users')
+        self.failUnlessEqual(params[2].path, 'espinfo/users')
         self.failUnlessEqual(params[2].value, 'someusers, otherusers')
 
         self.failUnlessEqual(params[3].path, 'action')
@@ -279,7 +226,7 @@ class TestParameter(TestBrokerCommand):
         ESP_CAT_CMD = CAT_CMD + ["--param_tmpl=espinfo"]
         out = self.commandtest(ESP_CAT_CMD)
         self.searchoutput(out, r'structure template personality/testpersona/dev/espinfo;\s*'
-                               r'"function" = "development";\s*'
+                               r'"function" = "production";\s*'
                                r'"class" = "INFRASTRUCTURE";\s*'
                                r'"users" = list\(\s*'
                                r'"someusers",\s*'
@@ -291,21 +238,31 @@ class TestParameter(TestBrokerCommand):
         out = self.badrequesttest(VAL_CMD)
         self.searchoutput(out,
                           r'Following required parameters have not been specified:\s*'
-                          r'Parameter Definition: esp/threshold \[required\]\s*'
+                          r'Parameter Definition: espinfo/threshold \[required\]\s*'
                           r'Type: int\s*'
                           r'Template: espinfo',
                           VAL_CMD)
 
     def test_310_reconfigurehost(self):
+        path = "espinfo/function"
+        command = DEL_CMD + ["--path", path]
+        self.noouttest(command)
+
         command = ["reconfigure", "--hostname", "unittest17.aqd-unittest.ms.com",
                    "--personality", PERSONALITY]
         (out, err) = self.failuretest(command, 4)
-        self.matchoutput(err, "record is missing required field: threshold", command)
+        self.matchoutput(err, "'/system/personality/function' does not have an associated value", command)
         self.matchoutput(err, "BUILD FAILED", command)
 
+
     def test_320_add_all_required(self):
-        path = "esp/threshold"
+        path = "espinfo/threshold"
         value = 0
+        command = ADD_CMD + ["--path", path, "--value", value]
+        self.noouttest(command)
+
+        path = "espinfo/function"
+        value = "crash"
         command = ADD_CMD + ["--path", path, "--value", value]
         self.noouttest(command)
 
@@ -335,12 +292,12 @@ class TestParameter(TestBrokerCommand):
                           command)
 
     def test_400_validate_modifying_other_params_works(self):
-        path = "esp/function"
-        value = "development"
+        path = "espinfo/function"
+        value = "production"
         command = UPD_CMD + ["--path", path, "--value", value]
         self.noouttest(command)
 
-        path = "esp/description"
+        path = "espinfo/description"
         value = "add other params in host ready state"
         command = ADD_CMD + ["--path", path, "--value", value]
         self.noouttest(command)
@@ -429,10 +386,9 @@ class TestParameter(TestBrokerCommand):
                                r'//action/testaction2/command\s*'
                                r'//action/testaction2/timeout\s*'
                                r'//action/testaction2/user\s*'
-                               r'//esp/class\s*'
-                               r'//esp/function\s*'
-                               r'//esp/threshold\s*'
-                               r'//esp/users',
+                               r'matching Parameters with different values:\s*'
+                               r'//espinfo/function value=production, othervalue=development\s*'
+                               r'//espinfo/users value=someusers, otherusers, othervalue=IT / TECHNOLOGY',
                          cmd)
 
     def test_520_copy_from(self):
@@ -461,7 +417,7 @@ class TestParameter(TestBrokerCommand):
         ESP_CAT_CMD = CAT_CMD + ["--param_tmpl=espinfo"]
         out = self.commandtest(ESP_CAT_CMD)
         self.searchoutput(out, r'structure template personality/testpersona/dev/espinfo;\s*', ESP_CAT_CMD)
-        self.searchoutput(out, r'"function" = "development";', ESP_CAT_CMD)
+        self.searchoutput(out, r'"function" = "production";', ESP_CAT_CMD)
         self.searchoutput(out, r'"threshold" = 0;', ESP_CAT_CMD)
         self.searchoutput(out, r'"class" = "INFRASTRUCTURE";', ESP_CAT_CMD)
         self.searchoutput(out, r'"users" = list\(\s*"someusers",\s*"otherusers"\s*\);', ESP_CAT_CMD)
@@ -496,7 +452,7 @@ class TestParameter(TestBrokerCommand):
         command = DEL_CMD + ["--path", path]
         err = self.noouttest(command)
 
-        path = "esp/"
+        path = "espinfo/"
         command = DEL_CMD + ["--path", path]
         err = self.noouttest(command)
 
@@ -516,7 +472,7 @@ class TestParameter(TestBrokerCommand):
     def test_650_verify_esp(self):
         ESP_CAT_CMD = CAT_CMD + ["--param_tmpl=espinfo"]
         err = self.commandtest(ESP_CAT_CMD)
-        self.searchclean(err, r'"function" = "development";', ESP_CAT_CMD)
+        self.searchclean(err, r'"function" = "production";', ESP_CAT_CMD)
 
     def test_660_verify_default(self):
         ##included by default
@@ -535,12 +491,6 @@ class TestParameter(TestBrokerCommand):
 
         cmd = ["del_personality", "--archetype", ARCHETYPE, "--personality", PERSONALITY]
         self.noouttest(cmd)
-
-        for template in PARAM_DEFS:
-            paths = PARAM_DEFS[template]
-            for p in paths:
-                cmd = ["del_parameter_definition", "--archetype=aquilon", "--path", p["path"]]
-                self.noouttest(cmd)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestParameter)
