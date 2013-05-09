@@ -60,8 +60,8 @@ def build_index(config, session, profilesdir, clientNotify=True,
 
     '''
     gzip_output = config.getboolean('panc', 'gzip_output')
-    gzip_as_xml = config.getboolean('panc', 'advertise_gzip_as_xml')
-    gzip_index = gzip_output and gzip_as_xml
+    transparent_gzip = config.getboolean('panc', 'transparent_gzip')
+    gzip_index = gzip_output and transparent_gzip
 
     # Profiles are xml files, and can be configured to (additionally) be gzip'd
     profile_suffix = '.xml'
@@ -73,7 +73,7 @@ def build_index(config, session, profilesdir, clientNotify=True,
     # when just the .xml is requested.  In this case, the index should just
     # list (advertise) the profile as a .xml file.
     advertise_suffix = profile_suffix
-    if gzip_as_xml:
+    if transparent_gzip:
         advertise_suffix = '.xml'
 
     # The profile should be .xml, unless webserver trickery is going to
