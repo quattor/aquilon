@@ -229,6 +229,12 @@ class AuthorizationBroker(object):
                               'del_rack', 'del_chassis',
                               'add_bunker', 'del_bunker',
                               'add_address', 'del_address',
+                              'add_personality', 'update_personality',
+                              'del_personality',
+                              'add_parameter', 'update_parameter',
+                              'del_parameter', 'add_required_service',
+                              'bind_feature', 'unbind_feature',
+                              'validate_parameter',
                               'make', 'make_cluster']:
                 self.raise_auth_error(principal, action, resource)
         if dbuser.role.name == 'alias_manager':
