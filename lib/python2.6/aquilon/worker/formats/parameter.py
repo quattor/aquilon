@@ -19,6 +19,7 @@
 
 import json
 from aquilon.worker.formats.formatters import ObjectFormatter
+from aquilon.worker.formats.list import ListFormatter
 from aquilon.aqdb.model import Parameter
 
 
@@ -130,3 +131,25 @@ class DiffFormatter(ObjectFormatter):
 
 
 ObjectFormatter.handlers[DiffData] = DiffFormatter()
+
+class SimpleParameterList(list):
+    """By convention, holds a list of holders and parameter, value to be formatted in a simple
+       (fqdn-only) manner."""
+    pass
+
+
+class SimpleParameterListFormatter(ListFormatter):
+    protocol = "aqdsystems_pb2"
+
+    def format_raw(self, hlist, indent=""):
+        ret = []
+        for k, v in hlist:
+            ret.append(indent + "{0.holder_object}:".format(k))
+            for ikey in v.iterkeys():
+                ret.append(indent + "  {0}: {1}".format(ikey, json.dumps(v[ikey])))
+        return "\n".join(ret)
+
+    def format_proto(self, hostlist, skeleton=None):
+        pass
+
+ObjectFormatter.handlers[SimpleParameterList] = SimpleParameterListFormatter()

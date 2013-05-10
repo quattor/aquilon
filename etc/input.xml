@@ -5126,6 +5126,19 @@
       <transport method="get" trigger="feature" path="feature/%(type)s/%(feature)s/parameter_definitions"/>
    </command>
 
+   <command name="search_parameter">
+      search a given path in personality or feature parameter
+      <p/>
+      Supported options for --format: raw.
+      <optgroup name="search_parameter_options" mandatory="True" fields="any">
+         <option name="archetype" type="string" conflicts="feature type">Archetype</option>
+      </optgroup>
+      <optgroup name="target_required_opts" mandatory="True" fields="any">
+         <option name="path" type="string">Path of the parameter</option>
+      </optgroup>
+      <transport method="get" path="find/parameter"/>
+   </command>
+
    <command name="add_vlan">
       Add a new user vlan.
       <optgroup name="add_vlan_opts" mandatory="True" fields="all">

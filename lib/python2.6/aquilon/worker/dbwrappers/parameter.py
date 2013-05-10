@@ -293,7 +293,7 @@ def search_path_in_personas(session, path, paramdef_holder):
         q = q.join(FeatureLink)
         q = q.filter_by(feature=paramdef_holder.feature)
 
-    holder = []
+    holder = {}
     trypath = []
     if isinstance(paramdef_holder, ArchetypeParamDef):
         trypath.append(path)
@@ -310,11 +310,13 @@ def search_path_in_personas(session, path, paramdef_holder):
 
             for tpath in trypath:
                 for param in param_holder.parameters:
-                    if param.get_path(tpath):
-                        holder.append(param_holder)
+                    value = param.get_path(tpath)
+                    if value:
+                        holder[param_holder] = {path: value}
         except NotFoundException:
             pass
     return holder
+
 
 def validate_personality_config(session, archetype, personality):
     """
