@@ -170,10 +170,34 @@ class PlenaryPersonalityBase(Plenary):
         pan_variable(lines, "PERSONALITY", self.name)
 
         ## process grns
-        eon_id_list = [grn.eon_id for grn in self.dbobj.grns]
-        eon_id_list.sort()
-        for eon_id in eon_id_list:
-            pan_append(lines, "/system/eon_ids", eon_id)
+        eon_id_map = {}
+
+        # own == pers level
+        for grn_rec in self.dbobj._grns:
+            if grn_rec.target not in eon_id_map:
+                eon_id_map[grn_rec.target] = set()
+
+            eon_id_map[grn_rec.target].add(grn_rec.grn.eon_id)
+
+        for (target, eon_id_set) in eon_id_map.iteritems():
+            eon_id_list = list(eon_id_set)
+            eon_id_list.sort()
+            for eon_id in eon_id_list:
+                pan_append(lines, "/system/eon_id_maps/%s" % target, eon_id)
+
+        archetype = self.dbobj.archetype.name
+        # backward compat for esp reporting
+        if self.config.has_option("archetype_" + archetype,
+                                  "default_grn_target"):
+            default_grn_target = self.config.get("archetype_" + archetype,
+                            "default_grn_target")
+
+            eon_id_set = eon_id_map[default_grn_target]
+
+            eon_id_list = list(eon_id_set)
+            eon_id_list.sort()
+            for eon_id in eon_id_list:
+                pan_append(lines, "/system/eon_ids", eon_id)
 
         pan_assign(lines, "/system/personality/owner_eon_id",
                    self.dbobj.owner_eon_id)

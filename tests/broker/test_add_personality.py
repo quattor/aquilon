@@ -546,7 +546,7 @@ class TestAddPersonality(VerifyGrnsMixin, TestBrokerCommand):
         self.matchoutput(out, 'variable PERSONALITY = "%s"' % personality,
                          command)
         if grn:
-            self.check_personality_grns(out, [grn], command)
+            self.check_personality_grns(out, [grn], {"esp": [grn]}, command)
         self.matchoutput(out, 'include { if_exists("personality/%s/pre_feature") };' %
                          personality, command)
         self.matchoutput(out, "template personality/%s/config;" % personality,

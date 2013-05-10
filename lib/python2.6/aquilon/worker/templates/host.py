@@ -252,12 +252,43 @@ class PlenaryHostData(Plenary):
         pan_assign(lines, "system/build", self.dbobj.status.name)
         pan_assign(lines, "system/advertise_status", self.dbobj.advertise_status)
 
-        eon_id_set = set([grn.eon_id for grn in self.dbobj.grns])
-        eon_id_set |= set([grn.eon_id for grn in pers.grns])
-        eon_id_list = list(eon_id_set)
-        eon_id_list.sort()
-        if eon_id_list:
-            pan_assign(lines, "system/eon_ids", eon_id_list)
+
+        ## process grns
+        eon_id_map = {}
+
+        # own
+        for grn_rec in self.dbobj._grns:
+            if grn_rec.target not in eon_id_map:
+                eon_id_map[grn_rec.target] = set()
+
+            eon_id_map[grn_rec.target].add(grn_rec.grn.eon_id)
+
+        # pers level
+        for grn_rec in pers._grns:
+            if grn_rec.target not in eon_id_map:
+                eon_id_map[grn_rec.target] = set()
+
+            eon_id_map[grn_rec.target].add(grn_rec.grn.eon_id)
+
+        for (target, eon_id_set) in eon_id_map.iteritems():
+            eon_id_list = list(eon_id_set)
+            eon_id_list.sort()
+            pan_assign(lines, "system/eon_id_maps/%s" % target, eon_id_list)
+
+        # backward compat for esp reporting
+        archetype = self.dbobj.archetype.name
+        if self.config.has_option("archetype_" + archetype,
+                                  "default_grn_target"):
+            default_grn_target = self.config.get("archetype_" + archetype,
+                            "default_grn_target")
+
+            eon_id_set = eon_id_map[default_grn_target]
+
+            eon_id_list = list(eon_id_set)
+            eon_id_list.sort()
+            if eon_id_list:
+                pan_assign(lines, "system/eon_ids", eon_id_list)
+
 
         pan_assign(lines, "system/owner_eon_id", self.dbobj.owner_eon_id)
 

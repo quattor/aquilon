@@ -31,6 +31,9 @@ GRN = "grn:/ms/ei/aquilon/unittest"
 
 class TestMapGrn(VerifyGrnsMixin, TestBrokerCommand):
 
+    grn_list = [ "grn:/ms/ei/aquilon/aqd", "grn:/ms/ei/aquilon/unittest"]
+    grn_maps = { "esp": grn_list, "atarget": [ "grn:/example/cards"] }
+
     def test_100_add_personality(self):
         command = ["add_personality", "--personality=utesppers/dev",
                    "--archetype=aquilon", "--grn=%s" % GRN,
@@ -72,9 +75,7 @@ class TestMapGrn(VerifyGrnsMixin, TestBrokerCommand):
 
         command = ["cat", "--archetype=aquilon", "--personality=compileserver"]
         out = self.commandtest(command)
-        self.check_personality_grns(out, ["grn:/ms/ei/aquilon/aqd",
-                                          "grn:/ms/ei/aquilon/unittest",
-                                          "grn:/example/cards"],
+        self.check_personality_grns(out, self.grn_maps["esp"], self.grn_maps,
                                     command)
 
     def test_120_verify_host(self):
@@ -100,6 +101,10 @@ class TestMapGrn(VerifyGrnsMixin, TestBrokerCommand):
         # The personality already includes the GRN
         command = ["map", "grn", "--grn", "grn:/ms/ei/aquilon/aqd",
                    "--hostname", "unittest00.one-nyp.ms.com", "--target", "esp"]
+        self.noouttest(command)
+
+        command = ["map", "grn", "--grn", "grn:/example/cards",
+                   "--hostname", "unittest00.one-nyp.ms.com", "--target", "atarget"]
         self.noouttest(command)
 
     def test_140_search(self):
@@ -143,27 +148,21 @@ class TestMapGrn(VerifyGrnsMixin, TestBrokerCommand):
         # The GRN is mapped to both the host and the personality; verify it is
         # not duplicated. Should print out both the host mapped
         # personality mapped grns
-        self.check_grns(out, ["grn:/ms/ei/aquilon/aqd", "grn:/example/cards",
-                              "grn:/ms/ei/aquilon/unittest"],
-                        command)
+        self.check_grns(out, self.grn_maps["esp"], self.grn_maps, command)
 
     def test_210_verify_unittest20(self):
         command = ["cat", "--hostname", "unittest20.aqd-unittest.ms.com",
                    "--data", "--generate"]
         out = self.commandtest(command)
         # The GRN is mapped to the personality only
-        self.check_grns(out, ["grn:/ms/ei/aquilon/aqd", "grn:/example/cards",
-                              "grn:/ms/ei/aquilon/unittest"],
-                        command)
+        self.check_grns(out, self.grn_list, {"esp": self.grn_list}, command)
 
     def test_220_verify_unittest12(self):
         command = ["cat", "--hostname", "unittest12.aqd-unittest.ms.com",
                    "--data", "--generate"]
         out = self.commandtest(command)
         # The GRN is mapped to the host only
-        self.check_grns(out, ["grn:/ms/ei/aquilon/aqd",
-                              "grn:/ms/ei/aquilon/unittest"],
-                        command)
+        self.check_grns(out, self.grn_list, {"esp": self.grn_list}, command)
 
     def test_300_delete_used_byhost(self):
         command = ["del", "grn", "--grn", "grn:/ms/ei/aquilon/aqd"]
@@ -223,9 +222,9 @@ class TestMapGrn(VerifyGrnsMixin, TestBrokerCommand):
         command = ["cat", "--archetype", "aquilon",
                    "--personality", "compileserver"]
         out = self.commandtest(command)
-        self.check_personality_grns(out, ["grn:/ms/ei/aquilon/aqd",
-                                          "grn:/ms/ei/aquilon/unittest"],
-                                    command)
+
+        grn_list = [ "grn:/ms/ei/aquilon/aqd", "grn:/ms/ei/aquilon/unittest"]
+        self.check_personality_grns(out, grn_list, {"esp": grn_list}, command)
 
         command = ["unmap", "grn", "--grn", "grn:/ms/ei/aquilon/aqd",
                    "--personality", "compileserver", "--target", "esp"]
@@ -237,6 +236,7 @@ class TestMapGrn(VerifyGrnsMixin, TestBrokerCommand):
         out = self.commandtest(command)
         # The GRN was mapped to both the host and the personality;
         self.check_grns(out, ["grn:/ms/ei/aquilon/unittest"],
+                        {"esp": ["grn:/ms/ei/aquilon/unittest"]},
                         command)
 
     def test_410_verify_unittest20(self):
@@ -245,6 +245,7 @@ class TestMapGrn(VerifyGrnsMixin, TestBrokerCommand):
         out = self.commandtest(command)
         # The GRN was mapped to the personality only
         self.check_grns(out, ["grn:/ms/ei/aquilon/unittest"],
+                        {"esp": ["grn:/ms/ei/aquilon/unittest"]},
                         command)
 
     def test_420_verify_unittest12(self):
@@ -252,7 +253,9 @@ class TestMapGrn(VerifyGrnsMixin, TestBrokerCommand):
                    "--data", "--generate"]
         out = self.commandtest(command)
         # The GRN was mapped to the host only
-        self.check_grns(out, ["grn:/ms/ei/aquilon/unittest"], command)
+        self.check_grns(out, ["grn:/ms/ei/aquilon/unittest"],
+                        {"esp": ["grn:/ms/ei/aquilon/unittest"]},
+                        command)
 
     def test_500_fail_map_overlimitlist(self):
         user = self.config.get("unittest", "user")
