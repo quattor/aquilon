@@ -16,6 +16,7 @@
 # limitations under the License.
 """Contains the logic for `aq map grn`."""
 
+from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Personality
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.grn import lookup_grn
@@ -44,6 +45,8 @@ class CommandMapGrn(BrokerCommand):
         dbgrn = lookup_grn(session, grn, eon_id, logger=logger,
                            config=self.config)
 
+        target_type = "personality" if personality else "host"
+
         if hostname:
             objs = [hostname_to_host(session, hostname)]
         elif list:
@@ -54,6 +57,16 @@ class CommandMapGrn(BrokerCommand):
                                            archetype=archetype, compel=True)]
 
         for obj in objs:
+            # INFO: Fails for archetypes other than 'aquilon', 'vmhost'
+            valid_targets = self.config.get("archetype_" + obj.archetype.name,
+                                            target_type + "_grn_targets")
+
+            if target not in map(lambda s: s.strip(), valid_targets.split(",")):
+                raise ArgumentError("Invalid %s target %s for archetype %s, please "
+                                    "choose from %s" % (target_type, target,
+                                                        obj.archetype.name,
+                                                        valid_targets))
+
             self._update_dbobj(obj, target, dbgrn)
 
         session.flush()

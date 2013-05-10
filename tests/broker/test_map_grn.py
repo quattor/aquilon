@@ -48,12 +48,19 @@ class TestMapGrn(VerifyGrnsMixin, TestBrokerCommand):
                    "--archetype=aquilon"]
         self.noouttest(command)
 
-    def test_100_map_personality(self):
+    def test_100_map_bad_personality(self):
+        command = ["map", "grn", "--grn", "grn:/ms/ei/aquilon/aqd",
+                   "--personality", "compileserver", "--target", "badtarget"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Invalid personality target badtarget for "
+                              "archetype aquilon, please choose from "
+                              "esp,hlmplus", command)
+
+    def test_105_map_personality(self):
         command = ["map", "grn", "--grn", "grn:/ms/ei/aquilon/aqd",
                    "--personality", "compileserver", "--target", "esp"]
         self.successtest(command)
 
-    def test_105_map_personality(self):
         command = ["map", "grn", "--grn", "grn:/example/cards",
                    "--personality", "compileserver", "--target", "atarget"]
         self.successtest(command)
