@@ -137,7 +137,7 @@
                         This option takes a name of another personality within the archetype.
 			All parameters, feature bindings, required services and service mappings
 			will be copied over from the copy_from personality to the new personality
-			being created. Other mappings
+			being created.
 		    </para>
 		</listitem>
 	    </varlistentry>
