@@ -57,7 +57,7 @@ class ParameterFormatter(ObjectFormatter):
                         skeleton.value = str(value)
         for link in dbpersonality.features:
             if not link.feature.paramdef_holder:
-               continue
+                continue
             param_definitions = link.feature.paramdef_holder.param_definitions
             for param_def in param_definitions:
                 value = param.get_feature_path(link, param_def.path,
@@ -69,7 +69,6 @@ class ParameterFormatter(ObjectFormatter):
                         skeleton.value = json.dumps(value)
                     else:
                         skeleton.value = str(value)
-
 
         return container
 
@@ -131,6 +130,7 @@ class DiffFormatter(ObjectFormatter):
 
 
 ObjectFormatter.handlers[DiffData] = DiffFormatter()
+
 
 class SimpleParameterList(list):
     """By convention, holds a list of holders and parameter, value to be formatted in a simple

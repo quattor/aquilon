@@ -47,16 +47,17 @@ def get_parameter_holder(session, archetype=None, personality=None,
 
     return db_param_holder
 
-def get_feature_link (session, feature, model, interface_name, personality):
+
+def get_feature_link(session, feature, model, interface_name, personality):
     dblink = None
     dbmodel = None
     feature_type = 'host'
     if interface_name:
-       feature_type = 'interface'
+        feature_type = 'interface'
     if model:
-       feature_type = 'hardware'
-       dbmodel = Model.get_unique(session, name=model,
-                                  compel=True)
+        feature_type = 'hardware'
+        dbmodel = Model.get_unique(session, name=model,
+                                   compel=True)
 
     dbfeature = Feature.get_unique(session, name=feature,
                                    feature_type=feature_type, compel=True)
@@ -115,6 +116,7 @@ def del_parameter(session, path, param_holder, feature=None, model=None, interfa
         path = Parameter.feature_path(dblink, path)
     dbparameter.del_path(path)
     return dbparameter
+
 
 def del_all_feature_parameter(session, dblink):
 
@@ -231,6 +233,7 @@ def get_parameters(session, archetype=None, personality=None):
     q = session.query(Parameter).filter_by(holder=param_holder)
     return q.all()
 
+
 def get_paramdef_for_parameter(session, path, param_holder, dbfeaturelink=None):
     param_definitions = None
     match = None
@@ -260,6 +263,7 @@ def get_paramdef_for_parameter(session, path, param_holder, dbfeaturelink=None):
 
     return match
 
+
 def validate_required_parameter(param_definitions, parameters, dbfeaturelink=None):
     errors = []
     formatter = ParamDefinitionFormatter()
@@ -282,6 +286,7 @@ def validate_required_parameter(param_definitions, parameters, dbfeaturelink=Non
             errors.append(formatter.format_raw(param_def))
 
     return errors
+
 
 def search_path_in_personas(session, path, paramdef_holder):
 
