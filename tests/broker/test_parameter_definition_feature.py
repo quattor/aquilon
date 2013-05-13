@@ -204,6 +204,25 @@ class TestParameterDefinitionFeature(TestBrokerCommand):
         self.failUnlessEqual(param_defs[7].value_type, 'string')
         self.failUnlessEqual(param_defs[7].rebuild_required, True)
 
+
+    def test_146_update(self):
+        cmd = ["update_parameter_definition", "--feature", FEATURE, "--type=host",
+              "--path=testint", "--description=testint",
+              "--default=100", "--required",
+              "--rebuild_required"]
+        self.noouttest(cmd)
+
+    def test_147_verify_add(self):
+        cmd = ["search_parameter_definition", "--feature", FEATURE, "--type=host"]
+        out = self.commandtest(cmd)
+        self.searchoutput(out,
+                          r'Parameter Definition: testint \[required\]\s*'
+                          r'Type: int\s*'
+                          r'Default: 100\s*'
+                          r'Description: testint\s*'
+                          r'Rebuild Required: True',
+                          cmd)
+
     def test_150_del_validation(self):
         cmd = ["add_personality", "--archetype=aquilon", "--personality=paramtest", "--eon_id=2", "--host_environment=legacy"]
         self.noouttest(cmd)

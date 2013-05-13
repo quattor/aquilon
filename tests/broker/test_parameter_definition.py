@@ -230,6 +230,25 @@ class TestParameterDefinition(TestBrokerCommand):
         self.failUnlessEqual(param_defs[7].template, 'foo')
         self.failUnlessEqual(param_defs[7].rebuild_required, True)
 
+    def test_146_update(self):
+        cmd = ["update_parameter_definition", "--archetype", ARCHETYPE,
+              "--path=testint", "--description=testint",
+              "--default=100", "--required",
+              "--rebuild_required"]
+        self.noouttest(cmd)
+
+    def test_147_verify_add(self):
+        cmd = ["search_parameter_definition", "--archetype", ARCHETYPE]
+        out = self.commandtest(cmd)
+        self.searchoutput(out,
+                          r'Parameter Definition: testint \[required\]\s*'
+                          r'Type: int\s*'
+                          r'Template: foo\s*'
+                          r'Default: 100\s*'
+                          r'Description: testint\s*'
+                          r'Rebuild Required: True',
+                          cmd)
+
     def test_150_del_validation(self):
         cmd = ["add_personality", "--archetype", ARCHETYPE,
                "--personality=paramtest", "--eon_id=2", "--host_environment=legacy"]

@@ -5102,7 +5102,7 @@
       Delete parameter definition for a given object.
       <optgroup name="target" mandatory="True" fields="any">
          <option name="archetype" type="string" conflicts="feature type">Archetype</option>
-         <optgroup name="add_parameter_definition_feature_opts" mandatory="False" fields="all">
+         <optgroup name="parameter_definition_feature_opts" mandatory="False" fields="all">
             <option name="feature" type="string" conflicts="archetype template">Feature</option>
             <option name="type" type="string" conflicts="archetype">Type of the feature: host, hardware or interface</option>
          </optgroup>
@@ -5112,6 +5112,28 @@
       </optgroup>
       <transport method="delete" trigger="archetype" path="archetype/%(archetype)s/parameter_definitions"/>
       <transport method="delete" trigger="feature" path="feature/%(type)s/%(feature)s/parameter_definitions"/>
+   </command>
+
+   <command name="update_parameter_definition">
+      Update parameter definition for a given object.
+      <optgroup name="target" mandatory="True" fields="any">
+         <option name="archetype" type="string" conflicts="feature type">Archetype</option>
+         <optgroup name="add_parameter_definition_feature_opts" mandatory="False" fields="all">
+            <option name="feature" type="string" conflicts="archetype template">Feature</option>
+            <option name="type" type="string" conflicts="archetype">Type of the feature: host, hardware or interface</option>
+         </optgroup>
+         <optgroup name="parameter_validator_optional" mandatory="True" fields="any">
+            <option name="required" type="flag">Is this parameter required for object compilation </option>
+            <option name="default" type="string">Default value </option>
+            <option name="description" type="string">Description</option>
+            <option name="rebuild_required" type="flag">Adding/Modifiying this parameter value requires rebuild of host </option>
+         </optgroup>
+      </optgroup>
+      <optgroup name="target_required_opts" mandatory="True" fields="any">
+         <option name="path" type="string">Path of the parameter</option>
+      </optgroup>
+      <transport method="post" trigger="archetype" path="archetype/%(archetype)s/parameter_definitions"/>
+      <transport method="post" trigger="feature" path="feature/%(type)s/%(feature)s/parameter_definitions"/>
    </command>
 
    <command name="search_parameter_definition">
