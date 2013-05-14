@@ -18,19 +18,60 @@
     Aquilon. """
 from datetime import datetime
 from ipaddr import IPv4Address, IPv4Network
+import logging
 
 from sqlalchemy import (Column, Integer, Sequence, String, DateTime, ForeignKey,
-                        UniqueConstraint, CheckConstraint, Index, desc)
+                        UniqueConstraint, CheckConstraint, Index, desc, event)
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import relation, deferred, reconstructor, validates
+from sqlalchemy.pool import Pool
 
 from aquilon.exceptions_ import NotFoundException, InternalError
 from aquilon.aqdb.model import Base, Location, NetworkEnvironment
 from aquilon.aqdb.column_types import AqStr, IPV4
+from aquilon.config import Config
 
-
-#TODO: enum type for network_type
+LOGGER = logging.getLogger(__name__)
 _TN = "network"
+
+
+class NetworkProperties(object):
+    """ Container class for attributes derived from the network's type """
+
+    @staticmethod
+    def get_str(config, network_type, option, default=None):
+        section = "network_" + network_type
+        if config.has_option(section, option):
+            return config.get(section, option)
+        else:
+            default_section = "network_" + config.get("broker",
+                                                      "default_network_type")
+            if config.has_option(default_section, option):
+                return config.get(default_section, option)
+            else:
+                return default
+
+    @staticmethod
+    def get_int(config, network_type, option, default=None):
+        section = "network_" + network_type
+        if config.has_option(section, option):
+            return config.getint(section, option)
+        else:
+            default_section = "network_" + config.get("broker",
+                                                      "default_network_type")
+            if config.has_option(default_section, option):
+                return config.getint(default_section, option)
+            else:
+                return default
+
+    def __init__(self, config, network_type):
+        self.default_gateway_offset = self.get_int(config, network_type,
+                                                   "default_gateway_offset", 1)
+        self.first_usable_offset = self.get_int(config, network_type,
+                                                "first_usable_offset", 2)
+        reserved_str = self.get_str(config, network_type, "reserved_offsets")
+        self.reserved_offsets = [int(idx.strip()) for idx in
+                                 reserved_str.split(",")]
 
 
 class Network(Base):
@@ -58,6 +99,12 @@ class Network(Base):
 
     __tablename__ = _TN
 
+    # Class-level cache of properties bound to the network type
+    network_type_map = {}
+
+    # Default network properties
+    default_network_props = None
+
     id = Column(Integer, Sequence('%s_id_seq' % _TN), primary_key=True)
 
     network_environment_id = Column(Integer,
@@ -69,9 +116,9 @@ class Network(Base):
                          ForeignKey('location.id', name='%s_loc_fk' % _TN),
                          nullable=False)
 
-    network_type = Column(AqStr(32), nullable=False, default='unknown')
+    network_type = Column(AqStr(32), nullable=False)
     cidr = Column(Integer, nullable=False)
-    name = Column(AqStr(255), nullable=False)  # TODO: default to ip
+    name = Column(AqStr(255), nullable=False)
     ip = Column(IPV4, nullable=False)
     side = Column(AqStr(4), nullable=True, default='a')
 
@@ -87,36 +134,37 @@ class Network(Base):
     # The routers relation is defined in router_address.py
     router_ips = association_proxy("routers", "ip")
 
-    def __init__(self, network=None, **kw):  # pylint: disable=W0621
+    def __init__(self, network=None, network_type=None, **kw):
+        # pylint: disable=W0621
         if not isinstance(network, IPv4Network):
             raise InternalError("Expected an IPv4Network, got: %s" %
                                 type(network))
+
+        if not network_type:
+            config = Config()
+            network_type = config.get("broker", "default_network_type")
+
         self._network = network
+        self._props = self.network_type_map.get(self.network_type,
+                                                self.default_network_props)
+
         super(Network, self).__init__(ip=network.network,
-                                      cidr=network.prefixlen, **kw)
+                                      cidr=network.prefixlen,
+                                      network_type=network_type, **kw)
 
     @reconstructor
     def _init_db(self):
         # This function gets called instead of __init__ when an object is loaded
         # from the database
         self._network = None
+        self._props = self.network_type_map.get(self.network_type,
+                                                self.default_network_props)
 
     @property
     def first_usable_host(self):
-        """ return the offset from the base address to the first usable ip """
-        #TODO: rename to first_usable_ip?
-        if self.network_type == 'tor_net':
-            start = 8
-        elif self.network_type == 'tor_net2':
-            start = 9
-        elif self.network_type == 'tor_net4':
-            start = 16
-        elif self.network_type == 'vm_storage_net':
-            start = 40
-        else:
-            start = 5
+        start = self._props.first_usable_offset
 
-        # TODO: Not sure what to do about networks like /32 and /31...
+        # TODO: do we need this fallback for /31 and /32 networks?
         if self.network.numhosts < start:
             start = 0
 
@@ -124,19 +172,11 @@ class Network(Base):
 
     @property
     def reserved_offsets(self):
-        """returns address offsets from the base which are the reserved range"""
+        return self._props.reserved_offsets
 
-        # Always reserve the network and the broadcast address
-        reserved = [0, self.network.numhosts - 1]
-
-        if self.network_type == 'tor_net':
-            reserved.extend([6, 7])
-        elif self.network_type == 'tor_net2':
-            reserved.extend([7, 8])
-        #TODO: this will be uncommented in a future release (daqscott 7/24/10)
-        #elif self.network_type == 'zebra':
-        #    reserved.extend([1, 2])
-        return reserved
+    @property
+    def default_gateway_offset(self):
+        return self._props.default_gateway_offset
 
     @property
     def network(self):
@@ -303,3 +343,37 @@ def get_net_id_from_ip(session, ip, network_environment=None):
         raise NotFoundException("Could not determine network containing IP "
                                 "address %s." % ip)
     return net
+
+
+# This is a hack. We have to call discover_network_types() after the
+# configuration has been parsed, and that surely happens before the first DB
+# connection
+@event.listens_for(Pool, 'first_connect')
+def discover_network_types(dbapi_con, connection_record):  # pylint: disable=W0613
+    config = Config()
+    if not config.has_option("broker", "default_network_type"):  # pragma: no cover
+        raise InternalError("The default_network_type option is missing from "
+                            "the [broker] section in the configuration.")
+
+    default_type = config.get("broker", "default_network_type")
+    default_section = "network_" + default_type
+    if not config.has_section(default_section):  # pragma: no cover
+        raise InternalError("The default network type is %s, but there's no "
+                            "section named [%s] in the configuration." %
+                            (default_type, default_section))
+
+    nettypes = {}
+
+    # This function should be called only once, but you never know...
+    if Network.network_type_map:
+        return
+
+    for section in config.sections():
+        if not section.startswith("network_"):
+            continue
+        name = section[8:]
+        nettypes[name] = NetworkProperties(config, name)
+        LOGGER.info("Configured network type %s" % name)
+
+    Network.network_type_map = nettypes
+    Network.default_network_props = nettypes[default_type]

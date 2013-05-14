@@ -189,8 +189,8 @@ class PlenaryHostData(Plenary):
                         if is_default_route(dbinterface):
                             routers[dbinterface.name] = local_rtrs
                     else:
-                        # Fudge the gateway as the first available ip
-                        gateway = net.network[1]
+                        # No routers defided, fall back to the default
+                        gateway = net.network[net.default_gateway_offset]
 
                     # TODO: generate appropriate routing policy if there are
                     # multiple interfaces marked as default_route

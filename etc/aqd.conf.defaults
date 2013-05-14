@@ -182,6 +182,8 @@ reset_advertised_status_max_list_size =
 map_grn_max_list_size =
 unmap_grn_max_list_size =
 
+default_network_type = unknown
+
 [archetype_aquilon]
 default_personality = inventory
 default_osname = linux
@@ -217,6 +219,36 @@ max_members_default = 2
 host_domain = ny-prod
 default_osname = windows
 default_osversion = generic
+
+[network_unknown]
+# Default offset of the gateway's IP address, if there are no explicit router
+# addresses registered in the database. Usual values are 1 for the first IP
+# address of the network, or -2 for the last IP address (-1 would be the
+# broadcast address)
+default_gateway_offset = 1
+
+# Index of the first usable IP address available for auto allocation. IPs
+# before this index can still be assigned manually. This value will be ignored
+# if the network is smaller than the index here (e.g. /31 or /32 networks)
+first_usable_offset = 5
+
+# Comma-separated list of indexes of IP addresses which should never be
+# allocated. Negative indexes count from the end of the network
+reserved_offsets = 0,-1
+
+[network_tor_net]
+first_usable_offset = 8
+reserved_offsets = 0,6,7,-1
+
+[network_tor_net2]
+first_usable_offset = 9
+reserved_offsets = 0,7,8,-1
+
+[network_tor_net4]
+first_usable_offset = 16
+
+[network_vm_storage_net]
+first_usable_offset = 40
 
 [panc]
 default_version = prod
