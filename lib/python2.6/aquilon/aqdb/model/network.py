@@ -22,7 +22,7 @@ from ipaddr import IPv4Address, IPv4Network
 from sqlalchemy import (Column, Integer, Sequence, String, DateTime, ForeignKey,
                         UniqueConstraint, CheckConstraint, Index, desc)
 from sqlalchemy.ext.associationproxy import association_proxy
-from sqlalchemy.orm import relation, deferred
+from sqlalchemy.orm import relation, deferred, reconstructor, validates
 
 from aquilon.exceptions_ import NotFoundException, InternalError
 from aquilon.aqdb.model import Base, Location, NetworkEnvironment
@@ -87,16 +87,19 @@ class Network(Base):
     # The routers relation is defined in router_address.py
     router_ips = association_proxy("routers", "ip")
 
-    def __init__(self, **kw):
-        args = kw.copy()
-        if "network" not in kw:
-            raise InternalError("No network in kwargs.")
-        net = args.pop("network")
-        if not isinstance(net, IPv4Network):
-            raise TypeError("Invalid type for network: %s" % repr(net))
-        args["ip"] = net.network
-        args["cidr"] = net.prefixlen
-        super(Network, self).__init__(**args)
+    def __init__(self, network=None, **kw):  # pylint: disable=W0621
+        if not isinstance(network, IPv4Network):
+            raise InternalError("Expected an IPv4Network, got: %s" %
+                                type(network))
+        self._network = network
+        super(Network, self).__init__(ip=network.network,
+                                      cidr=network.prefixlen, **kw)
+
+    @reconstructor
+    def _init_db(self):
+        # This function gets called instead of __init__ when an object is loaded
+        # from the database
+        self._network = None
 
     @property
     def first_usable_host(self):
@@ -137,15 +140,29 @@ class Network(Base):
 
     @property
     def network(self):
-        # TODO: cache the IPv4Network object
-        return IPv4Network("%s/%s" % (self.ip, self.cidr))
+        if not self._network:
+            # TODO: more efficient initialization? Using
+            # IPv4Network(int(self.ip)).supernet(new_prefix=self.cidr) looks
+            # promising at first, but unfortunately it uses the same string
+            # conversion internally...
+            self._network = IPv4Network("%s/%s" % (self.ip, self.cidr))
+        return self._network
 
     @network.setter
     def network(self, value):
         if not isinstance(value, IPv4Network):
-            raise TypeError("An IPv4Network object is required")
+            raise InternalError("Expected an IPv4Network, got: %s" %
+                                type(network))
+        self._network = value
         self.ip = value.network
         self.cidr = value.prefixlen
+
+    @validates('ip', 'cidr')
+    def _reset_network(self, attr, value):  # pylint: disable=W0613
+        # Make sure the network object will get re-computed if the parameters
+        # change
+        self._network = None
+        return value
 
     @property
     def netmask(self):
