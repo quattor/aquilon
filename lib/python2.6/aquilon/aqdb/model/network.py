@@ -17,7 +17,8 @@
 """ The module governing tables and objects that represent IP networks in
     Aquilon. """
 from datetime import datetime
-from ipaddr import IPv4Address, IPv4Network
+from ipaddr import (IPv4Address, IPv4Network, AddressValueError,
+                    NetmaskValueError)
 import logging
 
 from sqlalchemy import (Column, Integer, Sequence, String, DateTime, ForeignKey,
@@ -257,23 +258,35 @@ class Network(Base):
         # Just a single positional argumentum - do magic
         # The order matters here, we don't want to parse '1.2.3.4' as
         # IPv4Network('1.2.3.4/32')
-        try:
-            ip = IPv4Address(args[0])
+        ip = None
+        if isinstance(args[0], IPv4Address):
+            ip = args[0]
+        else:
+            try:
+                ip = IPv4Address(args[0])
+            except AddressValueError:
+                pass
+
+        if ip:
             return super(Network, cls).get_unique(session, ip=ip,
                                                   network_environment=netenv,
                                                   query_options=options,
                                                   compel=compel)
-        except:
-            pass
-        try:
-            net = IPv4Network(args[0])
+        net = None
+        if isinstance(args[0], IPv4Network):
+            net = args[0]
+        else:
+            try:
+                net = IPv4Network(args[0])
+            except (AddressValueError, NetmaskValueError):
+                pass
+        if net:
             return super(Network, cls).get_unique(session, ip=net.network,
                                                   cidr=net.prefixlen,
                                                   network_environment=netenv,
                                                   query_options=options,
                                                   compel=compel)
-        except:
-            pass
+
         return super(Network, cls).get_unique(session, name=args[0],
                                               network_environment=netenv,
                                               query_options=options,
