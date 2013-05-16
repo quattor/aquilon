@@ -239,6 +239,9 @@ first_usable_offset = 5
 # allocated. Negative indexes count from the end of the network
 reserved_offsets = 0,-1
 
+# True if the network may span multiple buildings
+may_span_buildings = False
+
 [network_tor_net]
 first_usable_offset = 8
 reserved_offsets = 0,6,7,-1
@@ -252,6 +255,9 @@ first_usable_offset = 16
 
 [network_vm_storage_net]
 first_usable_offset = 40
+
+[network_vip]
+may_span_buildings = True
 
 [archetype_vmhost]
 default_grn_target = esp

@@ -90,7 +90,7 @@ class CommandCluster(BrokerCommand):
         for res in walk_resources(dbcluster):
             if not isinstance(res, ServiceAddress):
                 continue
-            apply_service_address(dbhost, res.interfaces, res)
+            apply_service_address(dbhost, res.interfaces, res, logger)
 
         if dbhost.cluster:
             if personality_change:

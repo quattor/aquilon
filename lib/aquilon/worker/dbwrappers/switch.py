@@ -188,7 +188,8 @@ def discover_switch(session, logger, config, dbswitch, dryrun):
                                                     dbnet_env,
                                                     relaxed=relaxed,
                                                     preclude=True)
-            assign_address(iface, ip, dbdns_rec.network, label=label)
+            assign_address(iface, ip, dbdns_rec.network, label=label,
+                           logger=logger)
 
     def add_router(ip):
         """ Helper command for managing router IPs, honouring dryrun """

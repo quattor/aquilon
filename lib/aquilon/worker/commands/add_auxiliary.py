@@ -73,7 +73,7 @@ class CommandAddAuxiliary(BrokerCommand):
             # checks are necessary
             dbdns_rec.reverse_ptr = dbmachine.primary_name.fqdn
 
-        assign_address(dbinterface, ip, dbdns_rec.network)
+        assign_address(dbinterface, ip, dbdns_rec.network, logger=logger)
 
         session.flush()
 

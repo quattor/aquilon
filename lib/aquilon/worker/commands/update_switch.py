@@ -67,7 +67,7 @@ class CommandUpdateSwitch(BrokerCommand):
             dbswitch.switch_type = type
 
         if ip:
-            update_primary_ip(session, dbswitch, ip)
+            update_primary_ip(session, logger, dbswitch, ip)
 
         if comments is not None:
             dbswitch.comments = comments

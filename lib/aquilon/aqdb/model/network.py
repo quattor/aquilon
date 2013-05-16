@@ -68,6 +68,9 @@ class NetworkProperties(object):
         reserved_str = self.getopt(config, network_type, "reserved_offsets")
         self.reserved_offsets = [int(idx.strip()) for idx in
                                  reserved_str.split(",")]
+        self.may_span_buildings = self.getopt(config, network_type,
+                                              "may_span_buildings",
+                                              config.getboolean)
 
 
 class Network(Base):
@@ -179,6 +182,10 @@ class Network(Base):
     @property
     def default_gateway_offset(self):
         return self._props.default_gateway_offset
+
+    @property
+    def may_span_buildings(self):
+        return self._props.may_span_buildings
 
     @property
     def network(self):

@@ -25,10 +25,6 @@ from brokertest import TestBrokerCommand
 
 
 class TestNetworkConstraints(TestBrokerCommand):
-    def test_000_setup(self):
-        # This will be done by auto-discovery later
-        self.noouttest(["update_rack", "--rack", "np7", "--bunker", "nyb10.np"])
-
     def test_100_add_testnet(self):
         self.net.allocate_network(self, "bunker_mismatch1", 24, "unknown",
                                   "building", "ut")
@@ -47,6 +43,11 @@ class TestNetworkConstraints(TestBrokerCommand):
                    "--interface", "eth0", "--label", "bunkertest",
                    "--ip", ip, "--fqdn", "mismatch1.aqd-unittest.ms.com"]
         err = self.statustest(command)
+        self.matchoutput(err,
+                         "Bunker violation: rack ut9 is inside bunker "
+                         "bucket2.ut, but network bunker_mismatch1 is not "
+                         "bunkerized.",
+                         command)
         self.dsdb_verify()
 
     def test_120_mismatch_2(self):
@@ -61,6 +62,11 @@ class TestNetworkConstraints(TestBrokerCommand):
                    "--interface", "eth0", "--label", "bunkertest",
                    "--ip", ip, "--fqdn", "mismatch2.aqd-unittest.ms.com"]
         err = self.statustest(command)
+        self.matchoutput(err,
+                         "Bunker violation: rack ut9 is inside bunker "
+                         "bucket2.ut, but network bunker_mismatch2 is inside "
+                         "bunker bucket1.ut.",
+                         command)
         self.dsdb_verify()
 
     def test_130_mismatch_3(self):
@@ -76,6 +82,11 @@ class TestNetworkConstraints(TestBrokerCommand):
                    "--ip", net.usable[1],
                    "--fqdn", "mismatch3.aqd-unittest.ms.com"]
         err = self.statustest(command)
+        self.matchoutput(err,
+                         "Bunker violation: network bunker_mismatch2 is "
+                         "inside bunker bucket1.ut, but rack ut8 is not inside "
+                         "a bunker.",
+                         command)
         self.dsdb_verify()
 
     def test_200_show_bunker_violations(self):

@@ -105,10 +105,10 @@ class CommandAddServiceAddress(BrokerCommand):
                     raise ArgumentError("Cannot assign a service address to a "
                                         "cluster that has no members.")
                 for host in real_holder.hosts:
-                    apply_service_address(host, ifnames, dbsrv)
+                    apply_service_address(host, ifnames, dbsrv, logger)
             elif isinstance(real_holder, Host):
                 oldinfo = DSDBRunner.snapshot_hw(real_holder.machine)
-                apply_service_address(real_holder, ifnames, dbsrv)
+                apply_service_address(real_holder, ifnames, dbsrv, logger)
             else:  # pragma: no cover
                 raise UnimplementedError("{0} as a resource holder is not "
                                          "implemented.".format(real_holder))
@@ -121,7 +121,7 @@ class CommandAddServiceAddress(BrokerCommand):
         return
 
 
-def apply_service_address(dbhost, ifnames, srv_addr):
+def apply_service_address(dbhost, ifnames, srv_addr, logger):
     for ifname in ifnames:
         dbinterface = None
         for iface in dbhost.machine.interfaces:
@@ -134,4 +134,4 @@ def apply_service_address(dbhost, ifnames, srv_addr):
 
         assign_address(dbinterface, srv_addr.dns_record.ip,
                        srv_addr.dns_record.network, label=srv_addr.name,
-                       resource=srv_addr)
+                       resource=srv_addr, logger=logger)

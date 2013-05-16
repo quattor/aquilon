@@ -146,7 +146,7 @@ class CommandUpdateMachine(BrokerCommand):
             dbmachine.serial_no = serial
 
         if ip:
-            update_primary_ip(session, dbmachine, ip)
+            update_primary_ip(session, logger, dbmachine, ip)
 
         # FIXME: For now, if a machine has its interface(s) in a portgroup
         # this command will need to be followed by an update_interface to

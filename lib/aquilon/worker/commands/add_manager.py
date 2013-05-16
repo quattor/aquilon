@@ -61,7 +61,7 @@ class CommandAddManager(BrokerCommand):
                                                 comments=comments,
                                                 preclude=True)
 
-        assign_address(dbinterface, ip, dbdns_rec.network)
+        assign_address(dbinterface, ip, dbdns_rec.network, logger=logger)
 
         session.flush()
 

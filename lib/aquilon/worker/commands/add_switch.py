@@ -76,7 +76,7 @@ class CommandAddSwitch(BrokerCommand):
                                               comments=ifcomments)
         dbnetwork = get_net_id_from_ip(session, ip)
         # TODO: should we call check_ip_restrictions() here?
-        assign_address(dbinterface, ip, dbnetwork)
+        assign_address(dbinterface, ip, dbnetwork, logger=logger)
 
         session.flush()
 

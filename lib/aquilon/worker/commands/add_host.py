@@ -162,14 +162,14 @@ class CommandAddHost(BrokerCommand):
             if not ip:
                 raise ArgumentError("Zebra configuration requires an IP address.")
             dbsrv_addr = self.assign_zebra_address(session, dbmachine, dbdns_rec,
-                                                   zebra_interfaces)
+                                                   zebra_interfaces, logger)
         else:
             if ip:
                 if not dbinterface:
                     raise ArgumentError("You have specified an IP address for the "
                                         "host, but {0:l} does not have a bootable "
                                         "interface.".format(dbmachine))
-                assign_address(dbinterface, ip, dbdns_rec.network)
+                assign_address(dbinterface, ip, dbdns_rec.network, logger=logger)
             dbsrv_addr = None
 
         session.flush()
@@ -213,7 +213,7 @@ class CommandAddHost(BrokerCommand):
         return
 
     def assign_zebra_address(self, session, dbmachine, dbdns_rec,
-                             zebra_interfaces):
+                             zebra_interfaces, logger):
         """ Assign a Zebra-managed address to multiple interfaces """
 
         # Reset the routing configuration
@@ -238,7 +238,8 @@ class CommandAddHost(BrokerCommand):
                     raise ArgumentError("{0} does not have an interface named "
                                         "{1}.".format(dbmachine, name))
                 assign_address(dbinterface, dbdns_rec.ip, dbdns_rec.network,
-                               label="hostname", resource=dbsrv_addr)
+                               label="hostname", resource=dbsrv_addr,
+                               logger=logger)
 
                 # Make sure the transit IPs resolve to the primary name
                 for addr in dbinterface.assignments:
