@@ -236,6 +236,7 @@ class AuthorizationBroker(object):
                               'del_parameter', 'add_required_service',
                               'bind_feature', 'unbind_feature',
                               'validate_parameter',
+                              'map_grn', 'unmap_grn',
                               'make', 'make_cluster']:
                 self.raise_auth_error(principal, action, resource)
         if dbuser.role.name == 'alias_manager':
