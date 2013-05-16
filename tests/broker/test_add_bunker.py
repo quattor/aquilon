@@ -43,6 +43,10 @@ class TestAddBunker(TestBrokerCommand):
         command = ['add_bunker', '--bunker=utbunker2', '--room=utroom2']
         self.noouttest(command)
 
+    def testaddnyb10(self):
+        self.noouttest(["add_bunker", "--bunker", "nyb10.np",
+                        "--building", "np"])
+
     def testverifyutbunker2(self):
         command = "show bunker --bunker utbunker2"
         out = self.commandtest(command.split(" "))

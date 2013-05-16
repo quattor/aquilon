@@ -319,6 +319,22 @@ class TestRefreshNetwork(TestBrokerCommand):
         command = ["search", "system", "--fqdn", "dummydyn.aqd-unittest.ms.com"]
         self.noouttest(command)
 
+    def test_800_bunker_added(self):
+        command = ["show", "network", "--ip", "10.184.155.0"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Network: ny00l4as01_aur", command)
+        self.matchoutput(out, "IP: 10.184.155.0", command)
+        self.matchoutput(out, "Network Type: transit", command)
+        self.matchoutput(out, "Comments: Test aurora net", command)
+        self.matchoutput(out, "Bunker: nyb10.np", command)
+
+    def test_800_bunker_cleared(self):
+        command = ["show", "network", "--ip", "172.31.64.64"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Network: np06bals03_v103", command)
+        self.matchoutput(out, "IP: 172.31.64.64", command)
+        self.matchoutput(out, "Building: np", command)
+
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestRefreshNetwork)

@@ -44,12 +44,6 @@ class TestUpdateNetwork(TestBrokerCommand):
         self.matchoutput(out, "Network Type: dmz-net", command)
         self.matchoutput(out, "Side: b", command)
 
-    def test_200_update_wrong_env(self):
-        command = ["update", "network", "--network", "excx-net",
-                   "--comments", "Test comments"]
-        out = self.notfoundtest(command)
-        self.matchoutput(out, "No matching network was found.", command)
-
     # There should be a test_constraint_network.py one day...
     def test_900_delinuse(self):
         net = self.net.unknown[0]
