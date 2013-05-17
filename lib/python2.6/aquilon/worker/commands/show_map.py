@@ -32,7 +32,7 @@ class CommandShowMap(BrokerCommand):
     required_parameters = []
 
     def render(self, session, service, instance, archetype, personality,
-               networkip, **arguments):
+               networkip, include_parents, **arguments):
         dbservice = service and Service.get_unique(session, service,
                                                    compel=True) or None
         dblocation = get_location(session, **arguments)
@@ -74,7 +74,12 @@ class CommandShowMap(BrokerCommand):
         # Nothing fancy for now - just show any relevant explicit bindings.
         if dblocation:
             for i in range(len(queries)):
-                queries[i] = queries[i].filter_by(location=dblocation)
+                if include_parents:
+                    base_cls = queries[i].column_descriptions[0]["expr"]
+                    col = base_cls.location_id
+                    queries[i] = queries[i].filter(col.in_(dblocation.parent_ids()))
+                else:
+                    queries[i] = queries[i].filter_by(location=dblocation)
 
         if networkip:
             dbnet_env = NetworkEnvironment.get_unique_or_default(session)

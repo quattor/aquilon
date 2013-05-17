@@ -364,6 +364,36 @@ class TestMapService(TestBrokerCommand):
         self.noouttest(["map_service", "--service", "support-group",
                         "--instance", "ec-service", "--organization", "ms"])
 
+    def testverifyparents(self):
+        command = ["show_map", "--rack", "ut3", "--include_parents"]
+        out = self.commandtest(command)
+        self.matchoutput(out,
+                         "Archetype: aquilon Service: afs "
+                         "Instance: q.ny.ms.com Map: Building ut",
+                         command)
+        self.matchoutput(out,
+                         "Archetype: aquilon Service: bootserver "
+                         "Instance: np.test Map: Building ut",
+                         command)
+        self.matchoutput(out,
+                         "Archetype: aquilon Service: ntp "
+                         "Instance: pa.ny.na Map: City ny",
+                         command)
+        self.matchoutput(out,
+                         "Archetype: aquilon Service: aqd "
+                         "Instance: ny-prod Map: Campus ny",
+                         command)
+        self.matchoutput(out,
+                         "Archetype: aquilon Service: dns "
+                         "Instance: utdnsinstance Map: Hub ny",
+                         command)
+        self.matchoutput(out,
+                         "Archetype: aquilon Personality: lemon-collector-oracle "
+                         "Service: utsvc Instance: utsi2 Map: Organization ms",
+                         command)
+        self.matchclean(out, "Building np", command)
+        self.matchclean(out, "Building cards", command)
+
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestMapService)

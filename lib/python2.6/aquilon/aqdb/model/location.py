@@ -113,6 +113,15 @@ class Location(Base):
                          LocationLink.parent_id == self.id))
         return q.subquery()
 
+    def parent_ids(self):
+        session = object_session(self)
+        q = session.query(Location.id)
+        q = q.join((LocationLink, Location.id == LocationLink.parent_id))
+        # Include self as well
+        q = q.filter(or_(Location.id == self.id,
+                         LocationLink.child_id == self.id))
+        return q.subquery()
+
     def sysloc(self):
         components = ['building', 'city', 'continent']
         for component in components:

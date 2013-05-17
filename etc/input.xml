@@ -1908,6 +1908,9 @@
          <option name="networkip" type="ipv4">Network IP address</option>
          <option name="all" type="flag">show all maps</option>
       </optgroup>
+      <optgroup name="show_map_optional" mandatory="False">
+         <option name="include_parents" type="flag">Include mappings of parent locations</option>
+      </optgroup>
       <transport method="get" path="show/map" />
    </command>
 
