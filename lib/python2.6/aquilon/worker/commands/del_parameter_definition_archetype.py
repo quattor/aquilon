@@ -39,7 +39,7 @@ class CommandDelParameterDefintionArchetype(BrokerCommand):
         holder = search_path_in_personas(session, path, dbarchetype.paramdef_holder)
         if holder:
             raise ArgumentError ("Parameter with path {0} used by following and cannot be deleted : ".format(path) +
-                                 ", ".join(["{0.holder_object:l}".format(h) for h in holder]))
+                                 ", ".join(["{0.holder_object:l}".format(h) for h in holder.iterkeys()]))
 
         session.delete(db_paramdef)
         session.flush()
