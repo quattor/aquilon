@@ -193,6 +193,7 @@ class AuthorizationBroker(object):
             if action not in ['add_host', 'add_windows_host',
                               'del_host', 'del_windows_host',
                               'compile', 'compile_hostname',
+                              'compile_cluster',
                               'reconfigure', 'change_status',
                               'reconfigure_list', 'reconfigure_hostlist',
                               'pxeswitch', 'pxeswitch_list',
@@ -233,6 +234,13 @@ class AuthorizationBroker(object):
                               'del_rack', 'del_chassis',
                               'add_bunker', 'del_bunker',
                               'add_address', 'del_address',
+                              'add_personality', 'update_personality',
+                              'del_personality',
+                              'add_parameter', 'update_parameter',
+                              'del_parameter', 'add_required_service',
+                              'bind_feature', 'unbind_feature',
+                              'validate_parameter',
+                              'map_grn', 'unmap_grn',
                               'make', 'make_cluster']:
                 self.raise_auth_error(principal, action, resource)
         if dbuser.role.name == 'alias_manager':
