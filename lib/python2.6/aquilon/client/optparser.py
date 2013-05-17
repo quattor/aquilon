@@ -426,7 +426,7 @@ class Option(Element):
         elif self.type == "flag":
             parser.add_option(*names, dest=self.name, action="store_true",
                               **extra_args)
-        elif self.type in ['string', 'ipv4', 'mac']:
+        elif self.type in ['string', 'ipv4', 'mac', 'json']:
             parser.add_option(*names, dest=self.name, action="store",
                               **extra_args)
         elif self.type == 'int':

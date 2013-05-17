@@ -132,56 +132,6 @@ class CommandPollSwitch(BrokerCommand):
         session.query(ObservedMac).filter_by(switch=switch).delete()
         session.flush()
 
-    def parse_ports(self, logger, results):
-        """ This method could require switch and have hard-coded field
-            names based on the switch model, but for now just loosely
-            searches for any known fields."""
-        macports = []
-        try:
-            reader = DictReader(StringIO(results))
-            mac_label = None
-            port_label = None
-            for row in reader:
-                if not mac_label:
-                    if 'fdbMacAddr' in reader.fieldnames:
-                        # BNT
-                        mac_label = 'fdbMacAddr'
-                    elif 'Mac' in reader.fieldnames:
-                        # Cisco
-                        mac_label = 'Mac'
-                    else:
-                        raise AquilonError("Invalid CheckNet header, no field "
-                                           "for MAC address.")
-                if not port_label:
-                    if 'fdbSrcPort' in reader.fieldnames:
-                        # BNT
-                        port_label = 'fdbSrcPort'
-                    elif 'dot1dTpFdbPort' in reader.fieldnames:
-                        # Cisco
-                        port_label = 'dot1dTpFdbPort'
-                    else:
-                        raise AquilonError("Invalid CheckNet header, no field "
-                                           "for source port.")
-                mac = row.get(mac_label, None)
-                port = row.get(port_label, None)
-                if mac is None or port is None or \
-                   len(mac) == 0 or len(port) == 0:
-                    logger.info("Missing value for mac or port in CheckNet "
-                                "output line #%d: %s" % (reader.line_num, row))
-                    continue
-                try:
-                    port_int = int(port)
-                except ValueError, e:
-                    logger.info("Error parsing port number in CheckNet output "
-                                "line #%d: %s error: %s" %
-                                (reader.line_num, row, e))
-                    continue
-                macports.append([mac, port_int])
-
-        except CSVError, e:
-            raise AquilonError("Error parsing CheckNet results: %s" % e)
-        return macports
-
     def poll_vlan(self, session, logger, switch, now, ssh_args):
         if not switch.primary_ip:
             raise ArgumentError("Cannot poll VLAN info for {0:l} without "
