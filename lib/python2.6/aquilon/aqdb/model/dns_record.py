@@ -21,7 +21,8 @@ from collections import deque
 
 from sqlalchemy import Integer, DateTime, Sequence, String, Column, ForeignKey
 
-from sqlalchemy.orm import relation, deferred, backref, object_session
+from sqlalchemy.orm import relation, deferred, backref, object_session, lazyload
+from sqlalchemy.orm.attributes import set_committed_value
 from sqlalchemy.ext.associationproxy import association_proxy
 
 from aquilon.exceptions_ import NotFoundException, ArgumentError
@@ -63,7 +64,7 @@ class DnsRecord(Base):
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
 
-    comments = deferred(Column('comments', String(255), nullable=True))
+    comments = deferred(Column(String(255), nullable=True))
 
     fqdn = relation(Fqdn, lazy=False, innerjoin=True,
                     backref=backref('dns_records'))
@@ -102,9 +103,18 @@ class DnsRecord(Base):
             if not fqdn:
                 return None
 
-        return super(DnsRecord, cls).get_unique(session, fqdn=fqdn,
-                                                compel=compel,
-                                                preclude=preclude, **kwargs)
+        # We already have the FQDN, no need to load it again
+        if "query_options" not in kwargs:
+            kwargs["query_options"] = [lazyload("fqdn")]
+
+        result = super(DnsRecord, cls).get_unique(session, fqdn=fqdn,
+                                                  compel=compel,
+                                                  preclude=preclude, **kwargs)
+        if result:
+            # Make sure not to load the relation again if we already know its
+            # value
+            set_committed_value(result, 'fqdn', fqdn)
+        return result
 
     @classmethod
     def get_or_create(cls, session, **kwargs):
@@ -157,12 +167,9 @@ class DnsRecord(Base):
             own_type = self.__class__.__mapper_args__['polymorphic_identity']
 
             # Asking for just one column makes both the query and the ORM faster
-            q = session.query(DnsRecord.dns_record_type).filter_by(fqdn=fqdn)
-            for existing in q.all():
+            for existing in fqdn.dns_records:
                 if existing.dns_record_type in _rr_conflict_map[own_type]:
-                    cls = DnsRecord.__mapper__.polymorphic_map[existing.dns_record_type].class_
-                    raise ArgumentError("%s %s already exist." %
-                                        (cls._get_class_label(), fqdn))
+                    raise ArgumentError("{0} already exist.".format(existing))
 
         super(DnsRecord, self).__init__(fqdn=fqdn, **kwargs)
 

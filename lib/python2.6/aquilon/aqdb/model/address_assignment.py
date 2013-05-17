@@ -85,7 +85,7 @@ class AddressAssignment(Base):
 
     comments = deferred(Column(String(255), nullable=True))
 
-    interface = relation(Interface, lazy=False, innerjoin=True,
+    interface = relation(Interface, innerjoin=True,
                          backref=backref('assignments', order_by=[_label],
                                          cascade='all, delete-orphan'))
 

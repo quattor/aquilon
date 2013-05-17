@@ -250,6 +250,18 @@ class BrokerCommand(object):
                             kwargs["session"] = self.dbf.Session()
                     session = kwargs["session"]
 
+                    if session.bind.dialect.name == "oracle":
+                        # Make the name of the command and the request ID
+                        # available in v$session. Trying to set a value longer
+                        # than the allowed length will generate ORA-24960, so
+                        # do an explicit truncation.
+                        conn = session.connection()
+                        dbapi_con = conn.connection.connection
+                        dbapi_con.action = str(self.action)[:32]
+                        # TODO: we should include the command number as well,
+                        # since that is easier to find in the logs
+                        dbapi_con.clientinfo = str(kwargs["requestid"])[:64]
+
                     # This does a COMMIT, which in turn invalidates the session.
                     # We should therefore avoid looking up anything in the DB
                     # before this point which might be used later.

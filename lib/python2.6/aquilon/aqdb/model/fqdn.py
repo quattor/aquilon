@@ -94,7 +94,6 @@ class Fqdn(Base):
         fqdn = cls(session=session, dns_environment=dns_environment,
                    ignore_name_check=ignore_name_check, **kwargs)
         session.add(fqdn)
-        session.flush()
         return fqdn
 
     @classmethod

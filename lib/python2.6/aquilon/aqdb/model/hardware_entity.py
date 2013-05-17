@@ -59,6 +59,9 @@ class HardwareEntity(Base):
 
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
+
+    # Most of the update_* commands need to load the comments due to
+    # snapshot_hw(), so it is not worth deferring it
     comments = Column(String(255), nullable=True)
 
     location = relation(Location)
@@ -68,7 +71,8 @@ class HardwareEntity(Base):
     # eagerly
     # This is a one-to-one relation, so we need uselist=False on the backref
     primary_name = relation(DnsRecord, lazy=False,
-                            backref=backref('hardware_entity', uselist=False))
+                            backref=backref('hardware_entity', uselist=False,
+                                            passive_deletes=True))
 
     __mapper_args__ = {'polymorphic_on': hardware_type}
 

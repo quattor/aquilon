@@ -16,6 +16,7 @@
 # limitations under the License.
 """Contains the logic for `aq show principal --principal`."""
 
+from sqlalchemy.orm import undefer
 
 from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
@@ -29,7 +30,8 @@ class CommandShowPrincipalPrincipal(BrokerCommand):
 
     def render(self, session, principal, **arguments):
         try:
-            return get_or_create_user_principal(
-                    session, principal, False, False)
+            options = [undefer("comments")]
+            return get_or_create_user_principal(session, principal, False,
+                                                False, options)
         except ArgumentError:
             raise NotFoundException("User principal %s not found." % principal)

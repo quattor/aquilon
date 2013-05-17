@@ -16,7 +16,7 @@
 # limitations under the License.
 """Contains the logic for `aq show network_environment`."""
 
-from sqlalchemy.orm import undefer
+from sqlalchemy.orm import undefer, joinedload
 
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.aqdb.model import NetworkEnvironment
@@ -28,6 +28,9 @@ class CommandShowNetworkEnvironmentAll(BrokerCommand):
 
     def render(self, session, **arguments):
         q = session.query(NetworkEnvironment)
-        q = q.options(undefer('comments'))
-        q = q.order_by('name')
+        q = q.options(undefer('comments'),
+                      joinedload('dns_environment'),
+                      undefer('dns_environment.comments'),
+                      joinedload('location'))
+        q = q.order_by(NetworkEnvironment.name)
         return q.all()

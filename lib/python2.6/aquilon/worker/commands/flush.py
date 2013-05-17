@@ -142,8 +142,7 @@ class CommandFlush(BrokerCommand):
                     # subqueryload() and with_polymorphic() do not play nice
                     # together, so do it by hand
                     q = session.query(AddressAssignment)
-                    q = q.options(lazyload("interface"),
-                                  joinedload("network"),
+                    q = q.options(joinedload("network"),
                                   joinedload("dns_records"))
                     q = q.order_by(AddressAssignment._label)
                     addrs_by_iface = defaultdict(list)

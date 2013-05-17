@@ -43,7 +43,7 @@ class UserPrincipal(Base):
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
 
-    comments = Column('comments', String(255), nullable=True)
+    comments = deferred(Column(String(255), nullable=True))
 
     role = relation(Role, innerjoin=True)
     realm = relation(Realm, innerjoin=True)

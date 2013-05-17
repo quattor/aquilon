@@ -15,6 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from sqlalchemy.orm import undefer
 
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.aqdb.model import Archetype
@@ -25,4 +26,5 @@ class CommandShowArchetypeArchetype(BrokerCommand):
     required_parameters = ["archetype"]
 
     def render(self, session, archetype, **arguments):
-        return Archetype.get_unique(session, archetype, compel=True)
+        return Archetype.get_unique(session, archetype, compel=True,
+                                    query_options=[undefer('comments')])

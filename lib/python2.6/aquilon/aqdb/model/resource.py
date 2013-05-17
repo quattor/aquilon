@@ -19,7 +19,7 @@ from datetime import datetime
 
 from sqlalchemy import (Column, Integer, String, DateTime, ForeignKey,
                         Sequence, UniqueConstraint)
-from sqlalchemy.orm import relation, backref, validates
+from sqlalchemy.orm import relation, backref, validates, deferred
 
 from aquilon.exceptions_ import InternalError
 from aquilon.aqdb.column_types import AqStr
@@ -137,7 +137,8 @@ class Resource(Base):
     id = Column(Integer, Sequence('%s_seq' % _TN), primary_key=True)
     resource_type = Column(AqStr(16), nullable=False)
     name = Column(AqStr(64), nullable=False)
-    creation_date = Column(DateTime, default=datetime.now, nullable=False)
+    creation_date = deferred(Column(DateTime, default=datetime.now,
+                                    nullable=False))
     comments = Column(String(255), nullable=True)
     holder_id = Column(Integer, ForeignKey('%s.id' % _RESHOLDER,
                                            name='%s_resholder_fk' % _TN,

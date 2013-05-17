@@ -15,6 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from sqlalchemy.orm import joinedload
 
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.aqdb.model import ARecord, NetworkEnvironment
@@ -48,6 +49,10 @@ class CommandDelDynamicRange(BrokerCommand):
         q = q.filter(ARecord.ip >= startip)
         q = q.filter(ARecord.ip <= endip)
         q = q.order_by(ARecord.ip)
+        q = q.options(joinedload('fqdn'),
+                      joinedload('fqdn.aliases'),
+                      joinedload('fqdn.srv_records'),
+                      joinedload('reverse_ptr'))
         existing = q.all()
         if not existing:
             raise ArgumentError("Nothing found in range.")

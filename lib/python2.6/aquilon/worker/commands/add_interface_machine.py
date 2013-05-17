@@ -202,8 +202,9 @@ class CommandAddInterfaceMachine(BrokerCommand):
         pending_removals.append(machine_plenary_info)
         # This will cascade to prev & the host
         if dbmachine.primary_name:
-            delete_dns_record(dbmachine.primary_name)
-            session.expire(dbmachine, ["primary_name"])
+            dbdns_rec = dbmachine.primary_name
+            dbmachine.primary_name = None
+            delete_dns_record(dbdns_rec)
         session.delete(dbmachine)
         session.flush()
 

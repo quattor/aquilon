@@ -17,8 +17,7 @@
 """Contains the logic for `aq show router`."""
 
 from sqlalchemy.orm.exc import NoResultFound
-from sqlalchemy.orm import (undefer, joinedload, subqueryload_all,
-                            contains_eager)
+from sqlalchemy.orm import undefer, joinedload, contains_eager
 
 from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
@@ -44,7 +43,6 @@ class CommandShowRouter(BrokerCommand):
         q = q.options(undefer(RouterAddress.comments))
         q = q.options(joinedload('location'))
         q = q.options(joinedload('dns_records'))
-        q = q.options(subqueryload_all('network'))
 
         if all:
             return q.all()

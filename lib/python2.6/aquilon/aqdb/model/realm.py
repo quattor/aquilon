@@ -37,7 +37,7 @@ class Realm(Base):
     name = Column(AqStr(32), nullable=False)
     creation_date = deferred(Column(DateTime, nullable=False,
                                     default=datetime.now))
-    comments = Column('comments', String(255), nullable=True)
+    comments = deferred(Column(String(255), nullable=True))
 
 realm = Realm.__table__  # pylint: disable=C0103
 

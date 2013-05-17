@@ -16,6 +16,7 @@
 # limitations under the License.
 """Contains the logic for `aq show cpu`."""
 
+from sqlalchemy.orm import contains_eager, undefer
 
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.aqdb.model import Cpu, Vendor
@@ -33,5 +34,7 @@ class CommandShowCpu(BrokerCommand):
         if speed is not None:
             q = q.filter_by(speed=speed)
         q = q.join(Vendor)
+        q = q.options(undefer('comments'),
+                      contains_eager('vendor'))
         q = q.order_by(Vendor.name, Cpu.name)
         return q.all()
