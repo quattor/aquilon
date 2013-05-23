@@ -3394,12 +3394,24 @@
 
    <command name="show_principal">
       Show the entitlements for a given username.
-      <optgroup name="show_role_opts" mandatory="True" fields="any">
+      <optgroup name="show_principal_opts" mandatory="True" fields="any">
          <option name="principal" type="string" conflicts="all">User Principal to check</option>
          <option name="all" type="flag" conflicts="principal">Show all principals</option>
       </optgroup>
       <transport trigger="all" method="get" path="principal" />
       <transport trigger="principal" method="get" path="principal/%(principal)s" />
+   </command>
+
+   <command name="search_principal">
+      Search between known principals.
+      <optgroup name="search_principal_opts" mandatory="True" fields="any">
+         <option name="role" type="string">Role the principal has</option>
+         <option name="realm" type="string">Realm of the principal</option>
+      </optgroup>
+      <optgroup name="search_principal_optional" mandatory="False">
+         <option name="fullinfo" type="flag">Show full information for the matching records</option>
+      </optgroup>
+      <transport method="get" path="find/principal" />
    </command>
 
    <command name="permission">

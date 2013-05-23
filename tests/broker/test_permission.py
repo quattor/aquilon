@@ -72,6 +72,16 @@ class TestPermission(TestBrokerCommand):
         out = self.commandtest(command)
         self.searchoutput(out, r"^testusernobody@%s,nobody$" % realm, command)
 
+    def testverifysearchnobody(self):
+        principal = 'testusernobody@' + self.config.get('unittest', 'realm')
+        command = ["search_principal", "--role", "nobody", "--fullinfo"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "UserPrincipal: %s [role: nobody]" % principal,
+                         command)
+        self.matchoutput(out, "Comments: Some user comments", command)
+        self.matchclean(out, "operations", command)
+        self.matchclean(out, "engineering", command)
+
     def testverifynohostpart(self):
         command = ["permission", "--principal", "testusernobody",
                    "--role", "nobody", "--createuser"]
@@ -135,6 +145,22 @@ class TestPermission(TestBrokerCommand):
         self.matchoutput(out,
                          "UserPrincipal: %s [role: aqd_admin]" % principal,
                          command)
+
+    def testpermissionforeignrealm(self):
+        self.noouttest(["permission", "--principal", "foreign@foreign",
+                        "--role", "operations", "--createuser",
+                        "--createrealm"])
+
+    def testverifysearchrealm(self):
+        command = ["search_principal", "--realm", "foreign"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "foreign@foreign", command)
+        self.matchclean(out, "testengineering", command)
+        self.matchclean(out, "testoperations", command)
+        self.matchclean(out, "testnobody", command)
+        self.matchclean(out, "testtestuseraqd_admin", command)
+        self.matchclean(out, '@' + self.config.get('unittest', 'realm'),
+                        command)
 
     def testpromote(self):
         realm = self.config.get('unittest', 'realm')
@@ -214,6 +240,16 @@ class TestPermission(TestBrokerCommand):
         # aren't set up yet.
         self.matchoutput(out,
                          "DNS Domain aqd-unittest.ms.com not found.",
+                         command)
+
+    def testcreaterealm(self):
+        command = ["permission", "--principal", "somebody@realm-does-not-exist",
+                   "--role", "operations"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "Could not find realm realm-does-not-exist to create "
+                         "principal somebody@realm-does-not-exist, use "
+                         "--createrealm to create a new record for the realm.",
                          command)
 
     def test_autherror_100(self):
