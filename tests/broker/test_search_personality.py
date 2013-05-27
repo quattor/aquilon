@@ -120,6 +120,12 @@ class TestSearchPersonality(VerifyGrnsMixin, TestBrokerCommand):
         self.matchoutput(out, "vmhost/vulcan-1g-desktop-prod", command)
         self.matchclean(out, "esx_cluster/vulcan-1g-desktop-prod", command)
 
+    def test_100_by_required_service(self):
+        command = ["search_personality", "--required_service", "chooser2"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "aquilon/unixeng-test", command)
+        self.matchclean(out, "compileserver", command)
+
     def test_110_show_diff_1(self):
         command = ["show_diff", "--personality=utpersonality/dev",
                    "--archetype=aquilon", "--other=generic"]

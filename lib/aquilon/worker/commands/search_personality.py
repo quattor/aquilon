@@ -20,7 +20,7 @@ from sqlalchemy.orm import joinedload, subqueryload, contains_eager
 from sqlalchemy.sql import or_
 
 from aquilon.aqdb.model import (Archetype, Personality, HostEnvironment,
-                                PersonalityGrnMap)
+                                PersonalityGrnMap, Service)
 from aquilon.worker.dbwrappers.grn import lookup_grn
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.formats.personality import SimplePersonalityList
@@ -31,7 +31,8 @@ class CommandSearchPersonality(BrokerCommand):
     required_parameters = []
 
     def render(self, session, personality, archetype, grn, eon_id,
-               host_environment, config_override, fullinfo, **arguments):
+               host_environment, config_override, required_service, fullinfo,
+               **arguments):
         q = session.query(Personality)
         if archetype:
             dbarchetype = Archetype.get_unique(session, archetype, compel=True)
@@ -52,6 +53,11 @@ class CommandSearchPersonality(BrokerCommand):
             q = q.outerjoin(PersonalityGrnMap)
             q = q.filter(or_(Personality.owner_eon_id == dbgrn.eon_id,
                              PersonalityGrnMap.eon_id == dbgrn.eon_id))
+            q = q.reset_joinpoint()
+
+        if required_service:
+            dbsrv = Service.get_unique(session, required_service, compel=True)
+            q = q.filter(Personality.services.contains(dbsrv))
 
         q = q.join(Archetype)
         q = q.order_by(Archetype.name, Personality.name)
