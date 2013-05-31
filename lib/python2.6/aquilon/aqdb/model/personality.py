@@ -19,7 +19,7 @@ from datetime import datetime
 import re
 
 from sqlalchemy import (Column, Integer, Boolean, DateTime, Sequence, String,
-                        ForeignKey, UniqueConstraint, Index)
+                        ForeignKey, UniqueConstraint, PrimaryKeyConstraint)
 from sqlalchemy.orm import relation, deferred
 from sqlalchemy.inspection import inspect
 
@@ -38,10 +38,11 @@ class Personality(Base):
     """ Personality names """
     __tablename__ = _TN
 
-    id = Column(Integer, Sequence('%s_seq' % (_ABV)), primary_key=True)
+    id = Column(Integer, Sequence('%s_seq' % _ABV), primary_key=True)
     name = Column(AqStr(32), nullable=False)
-    archetype_id = Column(Integer, ForeignKey(
-        'archetype.id', name='%s_arch_fk' % (_ABV)), nullable=False)
+    archetype_id = Column(Integer, ForeignKey('archetype.id',
+                                              name='%s_arch_fk' % _ABV),
+                          nullable=False)
 
     cluster_required = Column(Boolean(name="%s_clstr_req_ck" % _TN),
                               default=False, nullable=False)
@@ -66,6 +67,9 @@ class Personality(Base):
 
     host_environment = relation(HostEnvironment, innerjoin=True)
 
+    __table_args__ = (UniqueConstraint(archetype_id, name,
+                                       name='%s_arch_name_uk' % _TN),)
+
     @property
     def is_cluster(self):
         return self.archetype.cluster_type is not None
@@ -86,13 +90,7 @@ class Personality(Base):
                                 .format(name, host_environment))
 
 personality = Personality.__table__   # pylint: disable=C0103
-
-personality.primary_key.name = '%s_pk' % _ABV
-personality.append_constraint(UniqueConstraint('name', 'archetype_id',
-                                               name='%s_uk' % _TN))
 personality.info['unique_fields'] = ['name', 'archetype']
-
-Index('%s_arch_idx' % _ABV, personality.c.archetype_id)
 
 
 class PersonalityGrnMap(Base):
@@ -101,14 +99,12 @@ class PersonalityGrnMap(Base):
     personality_id = Column(Integer, ForeignKey('%s.id' % _TN,
                                                 name='%s_personality_fk' % _PGNABV,
                                                 ondelete='CASCADE'),
-                            primary_key=True)
+                            nullable=False)
 
     eon_id = Column(Integer, ForeignKey('grn.eon_id',
                                         name='%s_grn_fk' % _PGNABV),
-                    primary_key=True)
+                    nullable=False)
 
-
-pgn = PersonalityGrnMap.__table__  # pylint: disable=C0103
-pgn.primary_key.name = '%s_pk' % _PGN
+    __table_args__ = (PrimaryKeyConstraint(personality_id, eon_id),)
 
 Personality.grns = relation(Grn, secondary=PersonalityGrnMap.__table__)

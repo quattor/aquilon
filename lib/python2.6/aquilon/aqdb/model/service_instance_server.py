@@ -18,28 +18,31 @@
 
 from datetime import datetime
 
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
+from sqlalchemy import (Column, Integer, String, DateTime, ForeignKey,
+                        PrimaryKeyConstraint, Index)
 from sqlalchemy.orm import relation, deferred, backref
 from sqlalchemy.ext.orderinglist import ordering_list
 from sqlalchemy.ext.associationproxy import association_proxy
 
 from aquilon.aqdb.model import Base, Host, ServiceInstance
 
+_TN = 'service_instance_server'
+
 
 class ServiceInstanceServer(Base):
     """ Store the list of servers that backs a service instance."""
 
-    __tablename__ = 'service_instance_server'
+    __tablename__ = _TN
 
     service_instance_id = Column(Integer, ForeignKey('service_instance.id',
                                                      name='sis_si_fk',
                                                      ondelete='CASCADE'),
-                                 primary_key=True)
+                                 nullable=False)
 
     host_id = Column(Integer, ForeignKey('host.machine_id',
                                          name='sis_host_fk',
                                          ondelete='CASCADE'),
-                     primary_key=True)
+                     nullable=False)
 
     position = Column(Integer, nullable=False)
 
@@ -57,6 +60,9 @@ class ServiceInstanceServer(Base):
                     backref=backref('_services_provided',
                                     cascade="all, delete-orphan"))
 
+    __table_args__ = (PrimaryKeyConstraint(service_instance_id, host_id,
+                                           name="%s_pk" % _TN),
+                      Index("sis_host_idx", host_id))
 
 def _sis_host_creator(host):
     return ServiceInstanceServer(host=host)
@@ -71,6 +77,3 @@ ServiceInstance.server_hosts = association_proxy('servers', 'host',
 Host.services_provided = association_proxy('_services_provided',
                                            'service_instance',
                                            creator=_sis_si_creator)
-
-sis = ServiceInstanceServer.__table__  # pylint: disable=C0103
-sis.primary_key.name = 'service_instance_server_pk'

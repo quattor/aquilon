@@ -48,12 +48,11 @@ class UserPrincipal(Base):
     role = relation(Role, innerjoin=True)
     realm = relation(Realm, innerjoin=True)
 
+    __table_args__ = (UniqueConstraint(name, realm_id,
+                                       name='user_principal_realm_uk'),)
+
     def __str__(self):
         return '@'.join([self.name, self.realm.name])
 
-
 user_principal = UserPrincipal.__table__  # pylint: disable=C0103
-user_principal.primary_key.name = 'user_principal_pk'
-user_principal.append_constraint(
-    UniqueConstraint('name', 'realm_id', name='user_principal_realm_uk'))
 user_principal.info['unique_fields'] = ['name', 'realm']

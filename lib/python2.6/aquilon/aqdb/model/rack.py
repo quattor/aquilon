@@ -47,6 +47,4 @@ class Rack(Location):
             return value
 
 rack = Rack.__table__  # pylint: disable=C0103
-
-rack.primary_key.name = 'rack_pk'
 rack.info['unique_fields'] = ['name']

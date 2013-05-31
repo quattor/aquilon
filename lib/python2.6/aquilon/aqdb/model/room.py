@@ -30,7 +30,5 @@ class Room(Location):
                                     ondelete='CASCADE'),
                 primary_key=True)
 
-
 room = Room.__table__  # pylint: disable=C0103
-room.primary_key.name = 'room_pk'
 room.info['unique_fields'] = ['name']

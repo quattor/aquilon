@@ -19,7 +19,7 @@
 from datetime import datetime
 
 from sqlalchemy import (Column, Integer, DateTime, Sequence, String, ForeignKey,
-                        UniqueConstraint)
+                        UniqueConstraint, Index)
 from sqlalchemy.orm import relation, backref, deferred
 
 from aquilon.aqdb.column_types import JSONEncodedDict, MutationDict
@@ -58,13 +58,10 @@ class ParameterHolder(Base):
         raise InternalError("Abstract base method called")
 
 paramholder = ParameterHolder.__table__  # pylint: disable=C0103
-paramholder.primary_key.name = '%s_pk' % _PARAM_HOLDER
 
 
 class PersonalityParameter(ParameterHolder):
     """ Association of parameters with Personality """
-
-    __mapper_args__ = {'polymorphic_identity': 'personality'}
 
     personality_id = Column(Integer,
                             ForeignKey('personality.id',
@@ -77,6 +74,10 @@ class PersonalityParameter(ParameterHolder):
                                     cascade='all, delete-orphan',
                                     uselist=False))
 
+    __extra_table_args__ = (UniqueConstraint(personality_id,
+                                             name='param_holder_persona_uk'),)
+    __mapper_args__ = {'polymorphic_identity': 'personality'}
+
     @property
     def holder_name(self):
         return "%s/%s" % (self.personality.archetype.name,  # pylint: disable=C0103
@@ -86,9 +87,6 @@ class PersonalityParameter(ParameterHolder):
     def holder_object(self):
         return self.personality
 
-paramholder.append_constraint(UniqueConstraint('personality_id',
-                                               name='param_holder_persona_uk'))
-
 
 class Parameter(Base):
     """
@@ -96,7 +94,6 @@ class Parameter(Base):
     """
 
     __tablename__ = _TN
-    __table_args__ = {'oracle_compress': True}
 
     id = Column(Integer, Sequence('%s_seq' % _TN), primary_key=True)
     value = Column(MutationDict.as_mutable(JSONEncodedDict))
@@ -111,6 +108,9 @@ class Parameter(Base):
     holder = relation(ParameterHolder, innerjoin=True,
                       backref=backref('parameters',
                                       cascade='all, delete-orphan'))
+
+    __table_args__ = (Index('%s_holder_idx' % _TN, holder_id),
+                      {'oracle_compress': True})
 
     @staticmethod
     def tokey(path):
@@ -264,5 +264,4 @@ class Parameter(Base):
         return flattened
 
 parameter = Parameter.__table__  # pylint: disable=C0103
-parameter.primary_key.name = '%s_pk' % _TN
 parameter.info['unique_fields'] = ['holder']

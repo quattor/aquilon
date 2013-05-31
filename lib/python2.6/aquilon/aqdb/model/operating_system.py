@@ -47,6 +47,9 @@ class OperatingSystem(Base):
 
     archetype = relation(Archetype, lazy=False, innerjoin=True)
 
+    __table_args__ = (UniqueConstraint(archetype_id, name, version,
+                                       name='%s_arch_name_version_uk' % _ABV),)
+
     def __format__(self, format_spec):
         instance = "%s/%s-%s" % (self.archetype.name, self.name, self.version)
         return self.format_helper(format_spec, instance)
@@ -55,10 +58,5 @@ class OperatingSystem(Base):
     def cfg_path(self):
         return 'os/%s/%s' % (self.name, self.version)
 
-
 operating_system = OperatingSystem.__table__  # pylint: disable=C0103
-
-operating_system.primary_key.name = '%s_pk' % _ABV
-operating_system.append_constraint(
-    UniqueConstraint('name', 'version', 'archetype_id', name='%s_uk' % _TN))
 operating_system.info['unique_fields'] = ['name', 'version', 'archetype']

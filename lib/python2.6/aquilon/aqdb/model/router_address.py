@@ -17,7 +17,8 @@
 
 from datetime import datetime
 
-from sqlalchemy import (Column, Integer, String, DateTime, ForeignKey)
+from sqlalchemy import (Column, Integer, String, DateTime, ForeignKey,
+                        PrimaryKeyConstraint, Index)
 from sqlalchemy.orm import relation, deferred, backref
 from sqlalchemy.sql import and_
 
@@ -36,13 +37,13 @@ class RouterAddress(Base):
     _class_label = 'Router Address'
     _instance_label = 'ip'
 
-    ip = Column(IPV4, primary_key=True)
+    ip = Column(IPV4, nullable=False)
 
     # With the introduction of network environments, the IP alone is not enough
     # to uniquely identify the router
     network_id = Column(Integer, ForeignKey('network.id',
                                             name='%s_network_fk' % _TN),
-                        primary_key=True)
+                        nullable=False)
 
     dns_environment_id = Column(Integer, ForeignKey('dns_environment.id',
                                                     name='%s_dns_env_fk' % _TN),
@@ -60,23 +61,25 @@ class RouterAddress(Base):
 
     comments = deferred(Column(String(255), nullable=True))
 
-    network = relation(Network, backref=backref('routers',
-                                                cascade="all, delete-orphan",
-                                                order_by=[ip]))
+    network = relation(Network, innerjoin=True,
+                       backref=backref('routers', cascade="all, delete-orphan",
+                                       order_by=[ip]))
 
     dns_environment = relation(DnsEnvironment)
 
     location = relation(Location)
 
     dns_records = relation(dns_fqdn_mapper, uselist=True,
-                           primaryjoin=and_(ip == ARecord.ip,
-                                            network_id == ARecord.network_id,
+                           primaryjoin=and_(network_id == ARecord.network_id,
+                                            ip == ARecord.ip,
                                             dns_environment_id == Fqdn.dns_environment_id),
                            foreign_keys=[ARecord.ip, Fqdn.dns_environment_id],
                            viewonly=True)
 
+    __table_args__ = (PrimaryKeyConstraint(network_id, ip),
+                      Index("%s_dns_env_idx" % _TN, dns_environment_id),
+                      Index("%s_location_idx" % _TN, location_id))
 
 rtaddr = RouterAddress.__table__  # pylint: disable=C0103
-rtaddr.primary_key.name = '%s_pk' % _TN
 rtaddr.info['unique_fields'] = ['ip', 'network']
 rtaddr.info['extra_search_fields'] = ['dns_environment']

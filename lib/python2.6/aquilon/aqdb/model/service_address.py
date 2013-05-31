@@ -15,7 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from sqlalchemy import Integer, Column, ForeignKey
+from sqlalchemy import Integer, Column, ForeignKey, Index
 from sqlalchemy.orm import relation, backref
 
 from aquilon.aqdb.model import Resource, AddressAssignment, ARecord
@@ -27,7 +27,6 @@ _ABV = 'srv_addr'
 class ServiceAddress(Resource):
     """ Service address resources """
     __tablename__ = _TN
-    __mapper_args__ = {'polymorphic_identity': _TN}
     _class_label = 'Service Address'
 
     resource_id = Column(Integer, ForeignKey('resource.id',
@@ -48,6 +47,9 @@ class ServiceAddress(Resource):
                           backref=backref('service_address', uselist=False,
                                           passive_deletes=True))
 
+    __table_args__ = (Index("%s_dns_record_idx" % _ABV, dns_record_id),)
+    __mapper_args__ = {'polymorphic_identity': _TN}
+
     @property
     def interfaces(self):
         ifaces = []
@@ -58,7 +60,5 @@ class ServiceAddress(Resource):
         ifaces.sort()
         return ifaces
 
-
 srvaddr = ServiceAddress.__table__
-srvaddr.primary_key.name = '%s_pk' % (_TN)
 srvaddr.info['unique_fields'] = ['name', 'holder']

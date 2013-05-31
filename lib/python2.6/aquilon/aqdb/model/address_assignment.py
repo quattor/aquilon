@@ -20,7 +20,7 @@ from datetime import datetime
 import re
 
 from sqlalchemy import (Column, Integer, String, DateTime, ForeignKey, Sequence,
-                        UniqueConstraint)
+                        UniqueConstraint, Index)
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import relation, backref, deferred
 from sqlalchemy.sql import and_
@@ -95,8 +95,8 @@ class AddressAssignment(Base):
     # an AddressAssignment record to change the linked DNS record(s)
     # Can't use backref or back_populates due to the different mappers
     dns_records = relation(dns_fqdn_mapper, uselist=True,
-                           primaryjoin=and_(ip == ARecord.ip,
-                                            network_id == ARecord.network_id,
+                           primaryjoin=and_(network_id == ARecord.network_id,
+                                            ip == ARecord.ip,
                                             dns_environment_id == Fqdn.dns_environment_id),
                            foreign_keys=[ARecord.ip, Fqdn.dns_environment_id],
                            viewonly=True)
@@ -106,6 +106,14 @@ class AddressAssignment(Base):
     network = relation(Network, backref=backref('assignments',
                                                 passive_deletes=True,
                                                 order_by=[ip]))
+
+    __table_args__ = (UniqueConstraint(interface_id, ip,
+                                       name="%s_iface_ip_uk" % _ABV),
+                      UniqueConstraint(interface_id, _label,
+                                       name="%s_iface_label_uk" % _ABV),
+                      Index("%s_service_addr_idx" % _ABV, service_address_id),
+                      Index("%s_network_ip_idx" % _ABV, network_id, ip),
+                      Index("%s_dns_env_idx" % _ABV, dns_environment_id))
 
     @property
     def logical_name(self):
@@ -159,14 +167,6 @@ class AddressAssignment(Base):
                                           self.interface.hardware_entity.label,
                                           self.logical_name)
 
-
-address = AddressAssignment.__table__  # pylint: disable=C0103
-address.primary_key.name = '%s_pk' % _TN
-address.append_constraint(
-    UniqueConstraint("interface_id", "ip", name="%s_iface_ip_uk" % _ABV))
-address.append_constraint(
-    UniqueConstraint("interface_id", "label", name="%s_iface_label_uk" % _ABV))
-
 # Assigned to external classes here to avoid circular dependencies.
 Interface.addresses = association_proxy('assignments', 'ip')
 
@@ -176,7 +176,7 @@ Interface.addresses = association_proxy('assignments', 'ip')
 # not depend on its visibility in DNS
 ARecord.assignments = relation(
     AddressAssignment,
-    primaryjoin=and_(AddressAssignment.ip == ARecord.ip,
-                     AddressAssignment.network_id == ARecord.network_id),
+    primaryjoin=and_(AddressAssignment.network_id == ARecord.network_id,
+                     AddressAssignment.ip == ARecord.ip),
     foreign_keys=[AddressAssignment.ip, AddressAssignment.network_id],
     viewonly=True)

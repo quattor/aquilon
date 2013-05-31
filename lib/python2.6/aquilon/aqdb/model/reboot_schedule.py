@@ -41,7 +41,6 @@ class RebootSchedule(Resource):
     day = Column(String(32), nullable=False)
 
 reboot_schedule = RebootSchedule.__table__
-reboot_schedule.primary_key.name = '%s_pk' % (_TN_RES)
 reboot_schedule.info['unique_fields'] = ['name', 'holder']
 
 _TN_IV = 'reboot_intervention'
@@ -60,5 +59,4 @@ class RebootIntervention(Intervention):
                 primary_key=True)
 
 reboot_intervention = RebootIntervention.__table__
-reboot_intervention.primary_key.name = '%s_pk' % (_TN_IV)
 reboot_intervention.info['unique_fields'] = ['name', 'holder']

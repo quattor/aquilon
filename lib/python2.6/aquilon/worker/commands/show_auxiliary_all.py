@@ -35,8 +35,8 @@ class CommandShowAuxiliaryAll(BrokerCommand):
         q = q.reset_joinpoint()
         # ... and is assigned to a public interface...
         q = q.join((AddressAssignment,
-                    and_(ARecord.ip == AddressAssignment.ip,
-                         ARecord.network_id == AddressAssignment.network_id)))
+                    and_(ARecord.network_id == AddressAssignment.network_id,
+                         ARecord.ip == AddressAssignment.ip)))
         q = q.join(Interface)
         q = q.filter_by(interface_type='public')
         # ... of a machine.

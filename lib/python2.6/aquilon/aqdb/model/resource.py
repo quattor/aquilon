@@ -18,7 +18,7 @@
 from datetime import datetime
 
 from sqlalchemy import (Column, Integer, String, DateTime, ForeignKey,
-                        Sequence, UniqueConstraint)
+                        Sequence, UniqueConstraint, Index)
 from sqlalchemy.orm import relation, backref, validates, deferred
 
 from aquilon.exceptions_ import InternalError
@@ -66,13 +66,8 @@ class ResourceHolder(Base):
     def holder_path(self):
         return "%s/%s" % (self.holder_type, self.holder_name)
 
-resholder = ResourceHolder.__table__  # pylint: disable=C0103
-resholder.primary_key.name = '%s_pk' % _RESHOLDER
-
 
 class HostResource(ResourceHolder):
-    __mapper_args__ = {'polymorphic_identity': 'host'}
-
     host_id = Column(Integer, ForeignKey('host.machine_id',
                                          name='%s_host_fk' % _RESHOLDER,
                                          ondelete='CASCADE'),
@@ -83,6 +78,10 @@ class HostResource(ResourceHolder):
                     backref=backref('resholder', uselist=False,
                                     cascade='all, delete-orphan'))
 
+    __extra_table_args__ = (UniqueConstraint(host_id,
+                                             name='%s_host_uk' % _RESHOLDER),)
+    __mapper_args__ = {'polymorphic_identity': 'host'}
+
     @property
     def holder_name(self):
         return self.host.fqdn
@@ -92,13 +91,7 @@ class HostResource(ResourceHolder):
         return self.host
 
 
-resholder.append_constraint(UniqueConstraint('host_id',
-                                             name='%s_host_uk' % _RESHOLDER))
-
-
 class ClusterResource(ResourceHolder):
-    __mapper_args__ = {'polymorphic_identity': 'cluster'}
-
     cluster_id = Column(Integer, ForeignKey('clstr.id',
                                             name='%s_clstr_fk' % _RESHOLDER,
                                             ondelete='CASCADE'),
@@ -109,6 +102,10 @@ class ClusterResource(ResourceHolder):
                        backref=backref('resholder', uselist=False,
                                        cascade='all, delete-orphan'))
 
+    __extra_table_args__ = (UniqueConstraint(cluster_id,
+                                             name='%s_cluster_uk' % _RESHOLDER),)
+    __mapper_args__ = {'polymorphic_identity': 'cluster'}
+
     @property
     def holder_name(self):
         return self.cluster.name
@@ -116,10 +113,6 @@ class ClusterResource(ResourceHolder):
     @property
     def holder_object(self):
         return self.cluster
-
-
-resholder.append_constraint(UniqueConstraint('cluster_id',
-                                             name='%s_cluster_uk' % _RESHOLDER))
 
 
 class Resource(Base):
@@ -149,11 +142,9 @@ class Resource(Base):
                       backref=backref('resources',
                                       cascade='all, delete-orphan'))
 
-    # Uniqueness over just the resource name and holder_id - you can't
-    # have filesystem 'foo' and intervention 'foo' attached to the same
-    # host.  Done for sanity.
-    UniqueConstraint('name', 'holder_id', name='%s_uk' % _TN)
-
+    __table_args__ = (UniqueConstraint(holder_id, name, resource_type,
+                                       name='%s_holder_name_type_uk' % _TN),
+                      Index('%s_holder_idx' %_TN, holder_id))
     __mapper_args__ = {'polymorphic_on': resource_type}
 
     @property
@@ -182,7 +173,5 @@ class Resource(Base):
     def __repr__(self):
         return "<{0:c} Resource {0.name} of {1}>".format(self, self.holder)
 
-
 resource = Resource.__table__  # pylint: disable=C0103
-resource.primary_key.name = '%s_pk' % _TN
-resource.info['unique_fields'] = ['name', 'holder']
+resource.info['unique_fields'] = ['name', 'resource_type', 'holder']

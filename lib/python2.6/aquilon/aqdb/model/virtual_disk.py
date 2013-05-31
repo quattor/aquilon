@@ -16,21 +16,17 @@
 # limitations under the License.
 """ Disk for share """
 
-from sqlalchemy import Column, Integer, ForeignKey
+from sqlalchemy import Column, Integer, ForeignKey, Index
 from sqlalchemy.orm import relation, backref, column_property, deferred
 from sqlalchemy.sql import select, func
 
 from aquilon.aqdb.model import Disk, Share
-
 
 _TN = 'disk'
 
 
 # Disk subclass for Share class
 class VirtualDisk(Disk):
-    """To be done"""
-    __mapper_args__ = {'polymorphic_identity': 'virtual_disk'}
-
     share_id = Column(Integer, ForeignKey('share.id',
                                                     name='%s_share_fk' % _TN,
                                                     ondelete='CASCADE'),
@@ -38,6 +34,9 @@ class VirtualDisk(Disk):
 
     share = relation(Share, innerjoin=True,
                      backref=backref('disks', cascade='all'))
+
+    __extra_table_args__ = (Index('%s_share_idx' % _TN, share_id),)
+    __mapper_args__ = {'polymorphic_identity': 'virtual_disk'}
 
     def __init__(self, **kw):
         if 'address' not in kw or kw['address'] is None:

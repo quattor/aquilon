@@ -16,7 +16,7 @@
 # limitations under the License.
 """ DNS CNAME records """
 
-from sqlalchemy import Column, Integer, ForeignKey
+from sqlalchemy import Column, Integer, ForeignKey, Index
 from sqlalchemy.orm import relation, backref, column_property
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.sql import select, func
@@ -45,6 +45,7 @@ class Alias(DnsRecord):
     # The same name may resolve to multiple RRs
     target_rrs = association_proxy('target', 'dns_records')
 
+    __table_args__ = (Index('%s_target_idx' % _TN, target_id),)
     __mapper_args__ = {'polymorphic_identity': _TN}
 
     @property
@@ -61,9 +62,7 @@ class Alias(DnsRecord):
         if self.alias_depth > MAX_ALIAS_DEPTH:
             raise ValueError("Maximum alias depth exceeded")
 
-
 alias = Alias.__table__  # pylint: disable=C0103
-alias.primary_key.name = '%s_pk' % _TN
 alias.info['unique_fields'] = ['fqdn']
 alias.info['extra_search_fields'] = ['target', 'dns_environment']
 

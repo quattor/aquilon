@@ -30,7 +30,5 @@ class Desk(Location):
                                     ondelete='CASCADE'),
                 primary_key=True)
 
-
 desk = Desk.__table__  # pylint: disable=C0103
-desk.primary_key.name = 'desk_pk'
 desk.info['unique_fields'] = ['name']

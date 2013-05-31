@@ -19,7 +19,7 @@
 from datetime import datetime
 
 from sqlalchemy import (Integer, Boolean, DateTime, String, Column, ForeignKey,
-                        UniqueConstraint, Index)
+                        UniqueConstraint, PrimaryKeyConstraint, Index)
 from sqlalchemy.orm import relation, backref, deferred
 
 from aquilon.aqdb.model import (Base, Branch, Machine, HostLifecycle, Grn,
@@ -103,6 +103,9 @@ class Host(Base):
     operating_system = relation(OperatingSystem, innerjoin=True)
     owner_grn = relation(Grn, innerjoin=True)
 
+    __table_args__ = (Index('host_prsnlty_idx', personality_id),
+                      Index('%s_branch_idx' % _TN, branch_id))
+
     @property
     def fqdn(self):
         return self.machine.fqdn
@@ -120,28 +123,18 @@ class Host(Base):
         return str(self.branch.name)
 
 
-host = Host.__table__  # pylint: disable=C0103
-host.primary_key.name = 'host_pk'
-host.append_constraint(
-    UniqueConstraint('machine_id', 'branch_id', name='host_machine_branch_uk'))
-
-Index('host_prsnlty_idx', host.c.personality_id)
-
-
 class HostGrnMap(Base):
     __tablename__ = _HOSTGRN
 
     host_id = Column(Integer, ForeignKey("%s.machine_id" % _TN,
                                          name="%s_host_fk" % _HOSTGRN,
                                          ondelete="CASCADE"),
-                     primary_key=True)
+                     nullable=False)
 
     eon_id = Column(Integer, ForeignKey('grn.eon_id',
                                         name='%s_grn_fk' % _HOSTGRN),
-                    primary_key=True)
+                    nullable=False)
 
-
-hostgrns = HostGrnMap.__table__  # pylint: disable=C0103
-hostgrns.primary_key.name = "%s_pk" % _HOSTGRN
+    __table_args__ = (PrimaryKeyConstraint(host_id, eon_id),)
 
 Host.grns = relation(Grn, secondary=HostGrnMap.__table__)

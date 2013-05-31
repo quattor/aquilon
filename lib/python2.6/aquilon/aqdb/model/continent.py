@@ -31,5 +31,4 @@ class Continent(Location):
                 primary_key=True)
 
 continent = Continent.__table__  # pylint: disable=C0103
-continent.primary_key.name = 'continent_pk'
 continent.info['unique_fields'] = ['name']

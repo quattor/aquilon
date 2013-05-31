@@ -19,7 +19,8 @@ import re
 from datetime import datetime
 
 from sqlalchemy import (Column, Integer, Boolean, String, DateTime, Sequence,
-                        ForeignKey, UniqueConstraint)
+                        ForeignKey, UniqueConstraint, PrimaryKeyConstraint,
+                        Index)
 
 from sqlalchemy.orm import (object_session, relation, backref, deferred,
                             joinedload)
@@ -63,6 +64,7 @@ def convert_resources(resources):
 
 # Cluster is a reserved word in Oracle
 _TN = 'clstr'
+_ETN = 'esx_cluster'
 _HCM = 'host_cluster_member'
 _CSB = 'cluster_service_binding'
 _CSBABV = 'clstr_svc_bndg'
@@ -136,6 +138,10 @@ class Cluster(Base):
 
     metacluster = association_proxy('_metacluster', 'metacluster')
 
+    __table_args__ = (UniqueConstraint(name, name='cluster_uk'),
+                      Index("cluster_branch_idx", branch_id),
+                      Index("cluster_prsnlty_idx", personality_id),
+                      Index("cluster_location_idx", location_constraint_id))
     __mapper_args__ = {'polymorphic_on': cluster_type}
 
     @property
@@ -270,8 +276,6 @@ class Cluster(Base):
         return val.__format__(passthrough)
 
 cluster = Cluster.__table__  # pylint: disable=C0103
-cluster.primary_key.name = 'cluster_pk'
-cluster.append_constraint(UniqueConstraint('name', name='cluster_uk'))
 cluster.info['unique_fields'] = ['name']
 
 
@@ -289,7 +293,6 @@ class ComputeCluster(Cluster):
                                     primary_key=True)
 
 compute_cluster = ComputeCluster.__table__  # pylint: disable=C0103
-compute_cluster.primary_key.name = 'compute_cluster_pk'
 compute_cluster.info['unique_fields'] = ['name']
 
 
@@ -315,7 +318,6 @@ class StorageCluster(Cluster):
                         % (host.fqdn, host.archetype))
 
 storage_cluster = StorageCluster.__table__  # pylint: disable=C0103
-storage_cluster.primary_key.name = 'storage_cluster_pk'
 storage_cluster.info['unique_fields'] = ['name']
 
 
@@ -326,12 +328,11 @@ class EsxCluster(Cluster):
     """
         Specifically for our VMware esx based clusters.
     """
-    __tablename__ = 'esx_cluster'
-    __mapper_args__ = {'polymorphic_identity': 'esx'}
+    __tablename__ = _ETN
     _class_label = 'ESX Cluster'
 
     esx_cluster_id = Column(Integer, ForeignKey('%s.id' % _TN,
-                                            name='esx_cluster_fk',
+                                            name='%s_cluster_fk' % _ETN,
                                             ondelete='CASCADE'),
                             #if the cluster record is deleted so is esx_cluster
                             primary_key=True)
@@ -344,11 +345,14 @@ class EsxCluster(Cluster):
 
     switch_id = Column(Integer,
                        ForeignKey('switch.hardware_entity_id',
-                                  name='esx_cluster_switch_fk'),
+                                  name='%s_switch_fk' % _ETN),
                        nullable=True)
 
     switch = relation(Switch, lazy=False,
                       backref=backref('esx_clusters'))
+
+    __table_args__ = (Index("%s_switch_idx" % _ETN, switch_id),)
+    __mapper_args__ = {'polymorphic_identity': 'esx'}
 
     @property
     def vm_to_host_ratio(self):
@@ -554,7 +558,6 @@ class EsxCluster(Cluster):
         super(EsxCluster, self).__init__(**kw)
 
 esx_cluster = EsxCluster.__table__  # pylint: disable=C0103
-esx_cluster.primary_key.name = 'esx_cluster_pk'
 esx_cluster.info['unique_fields'] = ['name']
 
 
@@ -566,13 +569,13 @@ class HostClusterMember(Base):
                                                 name='hst_clstr_mmbr_clstr_fk',
                                                 ondelete='CASCADE'),
                         #if the cluster is deleted, so is membership
-                        primary_key=True)
+                        nullable=False)
 
     host_id = Column(Integer, ForeignKey('host.machine_id',
                                          name='hst_clstr_mmbr_hst_fk',
                                          ondelete='CASCADE'),
                         #if the host is deleted, so is the membership
-                        primary_key=True)
+                        nullable=False)
 
     node_index = Column(Integer, nullable=False)
 
@@ -590,13 +593,14 @@ class HostClusterMember(Base):
                     backref=backref('_cluster', uselist=False,
                                     cascade='all, delete-orphan'))
 
+    __table_args__ = (PrimaryKeyConstraint(cluster_id, host_id,
+                                           name="%s_pk" % _HCM),
+                      UniqueConstraint(host_id,
+                                       name='host_cluster_member_host_uk'),
+                      UniqueConstraint(cluster_id, node_index,
+                                       name='host_cluster_member_node_uk'))
 
 hcm = HostClusterMember.__table__  # pylint: disable=C0103
-hcm.primary_key.name = '%s_pk' % _HCM
-hcm.append_constraint(
-    UniqueConstraint('host_id', name='host_cluster_member_host_uk'))
-hcm.append_constraint(UniqueConstraint('cluster_id', 'node_index',
-                                       name='host_cluster_member_node_uk'))
 hcm.info['unique_fields'] = ['cluster', 'host']
 
 Host.cluster = association_proxy('_cluster', 'cluster')
@@ -604,21 +608,22 @@ Host.cluster = association_proxy('_cluster', 'cluster')
 
 class ClusterAllowedPersonality(Base):
     __tablename__ = _CAP
+
     cluster_id = Column(Integer, ForeignKey('%s.id' % _TN,
                                             name='clstr_allowed_pers_c_fk',
                                             ondelete='CASCADE'),
-                        primary_key=True)
+                        nullable=False)
 
     personality_id = Column(Integer, ForeignKey('personality.id',
                                                 name='clstr_allowed_pers_p_fk',
                                                 ondelete='CASCADE'),
-                            primary_key=True)
+                            nullable=False)
 
+    __table_args__ = (PrimaryKeyConstraint(cluster_id, personality_id),
+                      Index('%s_prsnlty_idx' % _CAP, personality_id))
 
-cap = ClusterAllowedPersonality.__table__  # pylint: disable=C0103
-cap.primary_key.name = '%s_pk' % _CAP
-
-Cluster.allowed_personalities = relation(Personality, secondary=cap)
+Cluster.allowed_personalities = relation(Personality,
+                                         secondary=ClusterAllowedPersonality.__table__)
 
 
 class ClusterServiceBinding(Base):
@@ -631,15 +636,15 @@ class ClusterServiceBinding(Base):
     cluster_id = Column(Integer, ForeignKey('%s.id' % _TN,
                                             name='%s_cluster_fk' % _CSBABV,
                                             ondelete='CASCADE'),
-                        primary_key=True)
+                        nullable=False)
 
     service_instance_id = Column(Integer,
                                  ForeignKey('service_instance.id',
                                             name='%s_srv_inst_fk' % _CSBABV),
-                                 primary_key=True)
+                                 nullable=False)
 
+    __table_args__ = (PrimaryKeyConstraint(cluster_id, service_instance_id),
+                      Index('%s_si_idx' % _CSBABV, service_instance_id))
 
-csb = ClusterServiceBinding.__table__  # pylint: disable=C0103
-csb.primary_key.name = '%s_pk' % _CSB
-
-Cluster.service_bindings = relation(ServiceInstance, secondary=csb)
+Cluster.service_bindings = relation(ServiceInstance,
+                                    secondary=ClusterServiceBinding.__table__)

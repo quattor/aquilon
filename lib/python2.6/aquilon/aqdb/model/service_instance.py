@@ -19,7 +19,8 @@ from datetime import datetime
 import socket
 
 from sqlalchemy import (Column, Integer, Sequence, String, DateTime,
-                        ForeignKey, UniqueConstraint)
+                        ForeignKey, UniqueConstraint, PrimaryKeyConstraint,
+                        Index)
 from sqlalchemy.orm import (relation, contains_eager, column_property, backref,
                             deferred, undefer, aliased)
 from sqlalchemy.orm.session import object_session
@@ -55,6 +56,8 @@ class ServiceInstance(Base):
     comments = Column(String(255), nullable=True)
 
     service = relation(Service, lazy=False, innerjoin=True, backref='instances')
+
+    __table_args__ = (UniqueConstraint(service_id, name, name='svc_inst_uk'),)
 
     def __format__(self, format_spec):
         instance = "%s/%s" % (self.service.name, self.name)
@@ -269,12 +272,7 @@ class ServiceInstance(Base):
 
         return cache
 
-
 service_instance = ServiceInstance.__table__  # pylint: disable=C0103
-
-service_instance.primary_key.name = 'svc_inst_pk'
-service_instance.append_constraint(
-    UniqueConstraint('service_id', 'name', name='svc_inst_uk'))
 service_instance.info['abrev'] = _ABV
 service_instance.info['unique_fields'] = ['name', 'service']
 
@@ -286,18 +284,17 @@ class BuildItem(Base):
     host_id = Column('host_id', Integer, ForeignKey('host.machine_id',
                                                     ondelete='CASCADE',
                                                     name='build_item_host_fk'),
-                     primary_key=True)
+                     nullable=False)
 
     service_instance_id = Column(Integer,
                                  ForeignKey('service_instance.id',
                                             name='build_item_svc_inst_fk'),
-                                 primary_key=True)
+                                 nullable=False)
 
+    __table_args__ = (PrimaryKeyConstraint(host_id, service_instance_id),
+                      Index('build_item_si_idx', service_instance_id))
 
-build_item = BuildItem.__table__  # pylint: disable=C0103
-build_item.primary_key.name = 'build_item_pk'
-
-ServiceInstance.clients = relation(Host, secondary=build_item,
+ServiceInstance.clients = relation(Host, secondary=BuildItem.__table__,
                                    backref=backref("services_used",
                                                    cascade="all"))
 

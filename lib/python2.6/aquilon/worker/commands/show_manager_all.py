@@ -29,8 +29,8 @@ class CommandShowManagerAll(BrokerCommand):
     def render(self, session, **arguments):
         q = session.query(ARecord)
         q = q.join((AddressAssignment,
-                    and_(ARecord.ip == AddressAssignment.ip,
-                         ARecord.network_id == AddressAssignment.network_id)))
+                    and_(ARecord.network_id == AddressAssignment.network_id,
+                         ARecord.ip == AddressAssignment.ip)))
         q = q.join(Interface)
         q = q.filter_by(interface_type='management')
         q = q.reset_joinpoint()

@@ -34,5 +34,4 @@ class Bunker(Location):
 
 
 bunker = Bunker.__table__  # pylint: disable=C0103
-bunker.primary_key.name = '%s_pk' % _TN
 bunker.info['unique_fields'] = ['name']

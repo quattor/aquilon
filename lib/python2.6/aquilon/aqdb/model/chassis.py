@@ -37,7 +37,3 @@ class Chassis(HardwareEntity):
                                            name='%s_hw_ent_fk' % _TN,
                                            ondelete='CASCADE'),
                                 primary_key=True)
-
-
-chassis = Chassis.__table__  # pylint: disable=C0103
-chassis.primary_key.name = '%s_pk' % _TN

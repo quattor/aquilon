@@ -57,7 +57,5 @@ class Share(Resource):
     def populate_share_info(self, cache):
         self._share_info = find_storage_data(self, cache)
 
-
 share = Share.__table__
-share.primary_key.name = '%s_pk' % (_TN)
 share.info['unique_fields'] = ['name', 'holder']

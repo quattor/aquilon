@@ -32,9 +32,7 @@ class Campus(Location):
                                     ondelete='CASCADE'),
                 primary_key=True)
 
-
 campus = Campus.__table__  # pylint: disable=C0103
-campus.primary_key.name = 'campus_pk'
 campus.info['unique_fields'] = ['name']
 
 

@@ -51,6 +51,8 @@ class DnsEnvironment(Base):
 
     comments = deferred(Column(String(255), nullable=True))
 
+    __table_args__ = (UniqueConstraint(name, name='%s_name_uk' % _TN),)
+
     @property
     def is_default(self):
         return self.name == _config.get("site", "default_dns_environment")
@@ -64,9 +66,5 @@ class DnsEnvironment(Base):
                                                        "default_dns_environment"),
                                   compel=InternalError)
 
-
 dnsenv = DnsEnvironment.__table__  # pylint: disable=C0103
-
-dnsenv.primary_key.name = '%s_pk' % _TN
-dnsenv.append_constraint(UniqueConstraint('name', name='%s_name_uk' % _TN))
 dnsenv.info['unique_fields'] = ['name']

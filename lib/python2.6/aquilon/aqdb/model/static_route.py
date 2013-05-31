@@ -18,7 +18,8 @@
 from datetime import datetime
 from ipaddr import IPv4Network
 
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Sequence
+from sqlalchemy import (Column, Integer, String, DateTime, ForeignKey, Sequence,
+                        Index)
 from sqlalchemy.orm import relation, deferred, backref
 
 from aquilon.aqdb.model import Base, Network
@@ -57,6 +58,9 @@ class StaticRoute(Base):
                        backref=backref("static_routes",
                                        cascade="all, delete-orphan"))
 
+    __table_args__ = (Index("%s_gw_network_ip_idx" % _TN, network_id,
+                            gateway_ip),)
+
     @property
     def destination(self):
         # TODO: cache the IPv4Network object
@@ -74,7 +78,3 @@ class StaticRoute(Base):
     def __lt__(self, other):
         """ Sort static routes based on the destination range """
         return self.destination.__lt__(other.destination)
-
-
-str = StaticRoute.__table__  # pylint: disable=C0103
-str.primary_key.name = '%s_pk' % _TN

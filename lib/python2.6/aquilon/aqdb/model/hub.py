@@ -46,5 +46,4 @@ class Hub(Location):
                 primary_key=True)
 
 hub = Hub.__table__  # pylint: disable=C0103
-hub.primary_key.name = 'hub_pk'
 hub.info['unique_fields'] = ['name']

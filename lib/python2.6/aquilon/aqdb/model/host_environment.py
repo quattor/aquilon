@@ -29,21 +29,20 @@ _TN = 'host_environment'
 
 class HostEnvironment(Base):
     """ Describes the state a host is within the provisioning lifecycle """
-
     __tablename__ = _TN
 
     id = Column(Integer, Sequence('%s_id_seq' % _TN), primary_key=True)
     name = Column(String(16), nullable=False)
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
+
+    __table_args__ = (UniqueConstraint(name, name='%s_uk' % _TN),)
     __mapper_args__ = {'polymorphic_on': name}
 
     def __repr__(self):
         return str(self.name)
 
 host_env = HostEnvironment.__table__  # pylint: disable=C0103
-host_env.primary_key.name = '%s_pk' % _TN
-host_env.append_constraint(UniqueConstraint('name', name='%s_uk' % _TN))
 host_env.info['unique_fields'] = ['name']
 
 event.listen(host_env, "after_create", HostEnvironment.populate_const_table)

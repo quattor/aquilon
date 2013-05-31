@@ -17,7 +17,8 @@
 """ NS Records tell us what name servers to use for a given Dns Domain """
 from datetime import datetime
 
-from sqlalchemy import Column, Integer, DateTime, String, ForeignKey
+from sqlalchemy import (Column, Integer, DateTime, String, ForeignKey,
+                        PrimaryKeyConstraint)
 from sqlalchemy.orm import relation, backref, deferred
 
 from aquilon.aqdb.model import Base, DnsDomain, ARecord
@@ -32,11 +33,11 @@ class NsRecord(Base):
 
     a_record_id = Column(Integer, ForeignKey(ARecord.dns_record_id,
                                              name='%s_a_record_fk' % (_TN)),
-                         primary_key=True)
+                         nullable=False)
 
     dns_domain_id = Column(Integer, ForeignKey('dns_domain.id',
                                                name='%s_domain_fk' % (_TN)),
-                           primary_key=True)
+                           nullable=False)
 
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
@@ -49,6 +50,9 @@ class NsRecord(Base):
 
     dns_domain = relation(DnsDomain, lazy=False, innerjoin=True,
                           backref=backref('_ns_records', cascade='all'))
+
+    __table_args__ = (PrimaryKeyConstraint(a_record_id, dns_domain_id,
+                                           name="%s_pk" % _TN),)
 
     def __format__(self, format_spec):
         instance = "%s [%s] of DNS Domain %s" % (self.a_record.fqdn,
@@ -65,10 +69,8 @@ class NsRecord(Base):
     def _get_instance_label(self):
         return "{0:a} of {1:l}".format(self.a_record, self.dns_domain)
 
-
 nsrecord = NsRecord.__table__  # pylint: disable=C0103
 nsrecord.info['unique_fields'] = ['a_record', 'dns_domain']
-nsrecord.primary_key.name = '%s_pk' % _TN
 
 # Association proxies from/to NSRecord:
 # DnsDomain.servers = association_proxy('_name_servers', 'a_record')

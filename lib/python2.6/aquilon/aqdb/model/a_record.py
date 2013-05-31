@@ -16,7 +16,7 @@
 # limitations under the License.
 """ Representation of DNS A records """
 
-from sqlalchemy import Integer, Column, ForeignKey
+from sqlalchemy import Integer, Column, ForeignKey, Index
 from sqlalchemy.orm import (relation, backref, mapper, deferred, object_session,
                             validates)
 from sqlalchemy.orm.attributes import instance_state
@@ -26,11 +26,11 @@ from aquilon.aqdb.model import Network, DnsRecord, Fqdn
 from aquilon.aqdb.column_types import IPV4
 
 _TN = 'a_record'
+_DTN = 'dynamic_stub'
 
 
 class ARecord(DnsRecord):
     __tablename__ = _TN
-    __mapper_args__ = {'polymorphic_identity': _TN}
     _class_label = 'DNS Record'
 
     dns_record_id = Column(Integer, ForeignKey('dns_record.id',
@@ -55,6 +55,10 @@ class ARecord(DnsRecord):
     reverse_ptr = relation(Fqdn, foreign_keys=reverse_ptr_id,
                            backref=backref('reverse_entries',
                                            passive_deletes=True))
+
+    __table_args__ = (Index("%s_reverse_ptr_idx" % _TN, reverse_ptr_id),
+                      Index("%s_network_ip_idx" % _TN, network_id, ip))
+    __mapper_args__ = {'polymorphic_identity': _TN}
 
     def __format__(self, format_spec):
         if format_spec != "a":
@@ -81,8 +85,8 @@ class ARecord(DnsRecord):
             # yet
             with session.no_autoflush:
                 q = session.query(ARecord.id)
-                q = q.filter_by(ip=ip)
                 q = q.filter_by(network=network)
+                q = q.filter_by(ip=ip)
                 q = q.filter_by(fqdn=fqdn)
                 if q.all():  # pragma: no cover
                     raise ArgumentError("%s, ip %s already exists." %
@@ -101,11 +105,7 @@ class ARecord(DnsRecord):
                              (self.fqdn.dns_environment, value.dns_environment))
         return value
 
-
 arecord = ARecord.__table__  # pylint: disable=C0103
-arecord.primary_key.name = '%s_pk' % _TN
-# TODO: index on ip?
-
 arecord.info['unique_fields'] = ['fqdn']
 arecord.info['extra_search_fields'] = ['ip', 'network', 'dns_environment']
 
@@ -146,12 +146,12 @@ class DynamicStub(ARecord):
         records for virtual machines using names similar to
         'dynamic-1-2-3-4.subdomain.ms.com'
     """
-    __tablename__ = 'dynamic_stub'
-    __mapper_args__ = {'polymorphic_identity': 'dynamic_stub'}
+    __tablename__ = _DTN
+    __mapper_args__ = {'polymorphic_identity': _DTN}
     _class_label = 'Dynamic Stub'
 
     dns_record_id = Column(Integer, ForeignKey('%s.dns_record_id' % _TN,
-                                               name='dynamic_stub_arecord_fk',
+                                               name='%s_arecord_fk' % _DTN,
                                                ondelete='CASCADE'),
                            primary_key=True)
 
@@ -162,9 +162,7 @@ class DynamicStub(ARecord):
                              "DNS records used for dynamic DHCP.")
         return value
 
-
 dynstub = DynamicStub.__table__  # pylint: disable=C0103
-dynstub.primary_key.name = 'dynamic_stub_pk'
 dynstub.info['unique_fields'] = ['fqdn']
 dynstub.info['extra_search_fields'] = ['ip', 'network', 'dns_environment']
 

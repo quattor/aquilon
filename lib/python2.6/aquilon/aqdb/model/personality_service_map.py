@@ -19,7 +19,7 @@
 from datetime import datetime
 
 from sqlalchemy import (Column, Integer, Sequence, String, DateTime, ForeignKey,
-                        UniqueConstraint)
+                        UniqueConstraint, Index)
 from sqlalchemy.orm import relation, deferred, backref
 
 from aquilon.aqdb.model import (Base, Location, Personality, ServiceInstance,
@@ -46,16 +46,13 @@ class PersonalityServiceMap(Base):
                                             ondelete='CASCADE'),
                                  nullable=False)
 
-    location_id = Column(Integer,
-                         ForeignKey('location.id',
-                                    ondelete='CASCADE',
-                                    name='%s_loc_fk' % _ABV),
+    location_id = Column(Integer, ForeignKey('location.id', ondelete='CASCADE',
+                                             name='%s_loc_fk' % _ABV),
                          nullable=True)
 
-    personality_id = Column(Integer,
-                            ForeignKey('personality.id',
-                                       name='personality',
-                                       ondelete='CASCADE'),
+    personality_id = Column(Integer, ForeignKey('personality.id',
+                                                name='personality',
+                                                ondelete='CASCADE'),
                             nullable=False)
 
     network_id = Column(Integer, ForeignKey('network.id', ondelete='CASCADE',
@@ -72,6 +69,14 @@ class PersonalityServiceMap(Base):
                                                 cascade="all, delete-orphan"))
     personality = relation(Personality, innerjoin=True)
     network = relation(Network)
+
+    #TODO: reconsider the surrogate primary key?
+    __table_args__ = (UniqueConstraint(personality_id, service_instance_id,
+                                       location_id, network_id,
+                                       name='%s_loc_net_ins_uk' % _ABV),
+                      Index("%s_location_idx" % _ABV, location_id),
+                      Index("%s_si_idx" % _ABV, service_instance_id),
+                      Index("%s_network_idx" % _ABV, network_id))
 
     #Archetype probably shouldn't be exposed at this table/object: This isn't
     #intended for use with Archetype, but I'm not 100% sure yet
@@ -102,11 +107,3 @@ class PersonalityServiceMap(Base):
         if network is None and location is None:  # pragma: no cover
             raise ValueError("A service should by mapped to a Network or a "
                              "Location")
-
-psm = PersonalityServiceMap.__table__  # pylint: disable=C0103
-psm.primary_key.name = 'prsnlty_svc_map_pk'
-
-#TODO: reconsider the surrogate primary key?
-psm.append_constraint(
-    UniqueConstraint('personality_id', 'service_instance_id', 'location_id',
-                     'network_id', name='%s_loc_net_ins_uk' % _ABV))

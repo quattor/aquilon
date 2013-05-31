@@ -20,11 +20,13 @@ from sqlalchemy import Column, Integer, ForeignKey, String
 
 from aquilon.aqdb.model import Location
 
+_TN = 'building'
+
 
 class Building(Location):
     """ Building is a subtype of location """
-    __tablename__ = 'building'
-    __mapper_args__ = {'polymorphic_identity': 'building'}
+    __tablename__ = _TN
+    __mapper_args__ = {'polymorphic_identity': _TN}
 
     id = Column(Integer, ForeignKey('location.id',
                                     name='building_loc_fk',
@@ -34,5 +36,4 @@ class Building(Location):
     address = Column(String(255), nullable=False)
 
 building = Building.__table__  # pylint: disable=C0103
-building.primary_key.name = 'building_pk'
 building.info['unique_fields'] = ['name']

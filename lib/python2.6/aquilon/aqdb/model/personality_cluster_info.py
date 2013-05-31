@@ -36,6 +36,7 @@ class PersonalityClusterInfo(Base):
     """ Extra personality data specific to clusters """
 
     __tablename__ = _PCI
+
     id = Column(Integer, Sequence("%s_seq" % _PCIABV), primary_key=True)
 
     personality_id = Column(Integer, ForeignKey("personality.id",
@@ -53,12 +54,12 @@ class PersonalityClusterInfo(Base):
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
 
+    __table_args__ = (UniqueConstraint(personality_id, cluster_type,
+                                       name="%s_pc_uk" % _PCIABV),)
     __mapper_args__ = {'polymorphic_on': cluster_type}
 
 pci = PersonalityClusterInfo.__table__  # pylint: disable=C0103
 pci.primary_key.name = "%s_pk" % _PCIABV
-pci.append_constraint(UniqueConstraint("personality_id", "cluster_type",
-                                       name="%s_pc_uk" % _PCIABV))
 
 
 class PersonalityESXClusterInfo(PersonalityClusterInfo):
@@ -108,7 +109,6 @@ class PersonalityESXClusterInfo(PersonalityClusterInfo):
     def __init__(self, **kwargs):
         super(PersonalityESXClusterInfo, self).__init__(**kwargs)
         self._compiled_vmhost = None
-
 
 pcei = PersonalityESXClusterInfo.__table__  # pylint: disable=C0103
 pcei.primary_key.name = "%s_pk" % _PECIABV

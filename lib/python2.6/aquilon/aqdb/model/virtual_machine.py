@@ -26,7 +26,6 @@ _TN = 'virtual_machine'
 class VirtualMachine(Resource):
     """ Virtual machine resources """
     __tablename__ = _TN
-    __mapper_args__ = {'polymorphic_identity': 'virtual_machine'}
     _class_label = 'Virtual Machine'
 
     resource_id = Column(Integer, ForeignKey('resource.id',
@@ -44,9 +43,9 @@ class VirtualMachine(Resource):
                                        cascade='all'))
 
     # A machine can be assigned to one holder only.
-    UniqueConstraint('machine_id', name='%s_machine_uk' % _TN)
-
+    __table_args__ = (UniqueConstraint(machine_id,
+                                       name='%s_machine_uk' % _TN),)
+    __mapper_args__ = {'polymorphic_identity': 'virtual_machine'}
 
 vm = VirtualMachine.__table__
-vm.primary_key.name = '%s_pk' % _TN
 vm.info['unique_fields'] = ['name', 'holder']

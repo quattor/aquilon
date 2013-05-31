@@ -56,15 +56,13 @@ class HostLifecycle(StateEngine, Base):
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
 
+    __table_args__ = (UniqueConstraint(name, name='%s_uk' % _TN),)
     __mapper_args__ = {'polymorphic_on': name}
 
     def __repr__(self):
         return str(self.name)
 
-
 hostlifecycle = HostLifecycle.__table__  # pylint: disable=C0103
-hostlifecycle.primary_key.name = '%s_pk' % _TN
-hostlifecycle.append_constraint(UniqueConstraint('name', name='%s_uk' % _TN))
 hostlifecycle.info['unique_fields'] = ['name']
 
 event.listen(hostlifecycle, "after_create", HostLifecycle.populate_const_table)

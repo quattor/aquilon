@@ -19,7 +19,7 @@
 from datetime import datetime
 
 from sqlalchemy import (Column, Integer, DateTime, ForeignKey, CheckConstraint,
-                        UniqueConstraint)
+                        UniqueConstraint, PrimaryKeyConstraint, Index)
 from sqlalchemy.orm import relation, backref, deferred, object_session
 from sqlalchemy.sql import func, and_
 
@@ -31,6 +31,8 @@ MAX_VLANS = 4096  # IEEE 802.1Q standard
 
 VLAN_TYPES = ('storage', 'vmotion', 'user', 'unknown', 'vulcan-mgmt')
 
+_TN = 'observed_vlan'
+_ABV = 'obs_vlan'
 _VTN = 'vlan_info'
 
 
@@ -42,6 +44,12 @@ class VlanInfo(Base):
     vlan_id = Column(Integer, primary_key=True, autoincrement=False)
     port_group = Column(AqStr(32), nullable=False)
     vlan_type = Column(Enum(32, VLAN_TYPES), nullable=False)
+
+    __table_args__ = (UniqueConstraint(port_group,
+                                       name='%s_port_group_uk' % _VTN),
+                      CheckConstraint(and_(vlan_id >= 0,
+                                           vlan_id < MAX_VLANS),
+                                      name='%s_vlan_id_ck' % _VTN))
 
     @classmethod
     def get_vlan_id(cls, session, port_group, compel=InternalError):
@@ -63,21 +71,8 @@ class VlanInfo(Base):
             self.vlan_type)
 
 vlaninfo = VlanInfo.__table__  # pylint: disable=C0103
-vlaninfo.primary_key.name = '%s_pk' % _VTN
-vlaninfo.append_constraint(
-    UniqueConstraint('port_group', name='%s_port_group_uk' % _VTN))
 vlaninfo.info['unique_fields'] = ['port_group']
 vlaninfo.info['extra_search_fields'] = ['vlan_id']
-
-vlaninfo.append_constraint(
-    CheckConstraint('vlan_id < %d' % MAX_VLANS,
-                    name='%s_max_vlan_id_ck' % _VTN))
-vlaninfo.append_constraint(
-    CheckConstraint('vlan_id >= 0',
-                    name='%s_min_vlan_id_ck' % _VTN))
-
-_TN = 'observed_vlan'
-_ABV = 'obs_vlan'
 
 
 class ObservedVlan(Base):
@@ -87,16 +82,16 @@ class ObservedVlan(Base):
     switch_id = Column(Integer, ForeignKey('switch.hardware_entity_id',
                                            ondelete='CASCADE',
                                            name='%s_hw_fk' % _ABV),
-                       primary_key=True)
+                       nullable=False)
 
     network_id = Column(Integer, ForeignKey('network.id',
                                             ondelete='CASCADE',
                                             name='%s_net_fk' % _ABV),
-                        primary_key=True)
+                        nullable=False)
 
     vlan_id = Column(Integer, ForeignKey('vlan_info.vlan_id',
                                            name='%s_vlan_fk' % _ABV),
-                     primary_key=True)
+                     nullable=False)
 
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
@@ -112,6 +107,14 @@ class ObservedVlan(Base):
                     primaryjoin=vlan_id == VlanInfo.vlan_id,
                     foreign_keys=[VlanInfo.vlan_id],
                     viewonly=True)
+
+    __table_args__ = (PrimaryKeyConstraint(switch_id, network_id, vlan_id,
+                                           name="%s_pk" % _TN),
+                      CheckConstraint(and_(vlan_id >= 0,
+                                           vlan_id < MAX_VLANS),
+                                      name='%s_vlan_id_ck' % _TN),
+                      Index('%s_network_idx' % _TN, 'network_id'),
+                      Index('%s_vlan_idx' % _TN, 'vlan_id'))
 
     @property
     def port_group(self):
@@ -158,14 +161,3 @@ class ObservedVlan(Base):
             raise InternalError("More than one network found for switch %s "
                                 "and VLAN %s" % (switch.fqdn, vlan_id))
         return nets[0].network
-
-
-obsvlan = ObservedVlan.__table__  # pylint: disable=C0103
-obsvlan.primary_key.name = '%s_pk' % _TN
-
-obsvlan.append_constraint(
-    CheckConstraint('vlan_id < %d' % MAX_VLANS,
-                    name='%s_max_vlan_id_ck' % _TN))
-obsvlan.append_constraint(
-    CheckConstraint('vlan_id >= 0',
-                    name='%s_min_vlan_id_ck' % _TN))

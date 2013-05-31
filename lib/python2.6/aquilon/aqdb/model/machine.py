@@ -51,11 +51,6 @@ class Machine(HardwareEntity):
         else:
             return None
 
-
-machine = Machine.__table__  # pylint: disable=C0103
-machine.primary_key.name = 'machine_pk'
-
-
 #TODO: an __init__ (or other method) that could use DSDB to create itself?
 #   check if it exists in dbdb minfo, and get from there if it does
 #    and/or -dsdb option, and, make machine --like [other machine] + overrides

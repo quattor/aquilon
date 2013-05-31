@@ -16,7 +16,7 @@
 # limitations under the License.
 """ ChassisSlot sets up a structure for tracking position within a chassis. """
 
-from sqlalchemy import Column, Integer, ForeignKey
+from sqlalchemy import Column, Integer, ForeignKey, PrimaryKeyConstraint
 from sqlalchemy.orm import relation, backref
 
 from aquilon.aqdb.model import Base, Machine, Chassis
@@ -33,9 +33,9 @@ class ChassisSlot(Base):
     chassis_id = Column(Integer, ForeignKey('chassis.hardware_entity_id',
                                             name='%s_chassis_fk' % _TN,
                                             ondelete='CASCADE'),
-                        primary_key=True)
+                        nullable=False)
 
-    slot_number = Column(Integer, primary_key=True, autoincrement=False)
+    slot_number = Column(Integer, nullable=False, autoincrement=False)
 
     # TODO: Code constraint that these are Blades...
     machine_id = Column(Integer, ForeignKey('machine.machine_id',
@@ -43,7 +43,7 @@ class ChassisSlot(Base):
                         nullable=True)
     # TODO: need a unique key against this, but what if it takes 2 slots?
     # TODO: remove delete-orphan?
-    chassis = relation(Chassis,
+    chassis = relation(Chassis, innerjoin=True,
                        backref=backref('slots', cascade='delete, delete-orphan',
                                        order_by=[slot_number]))
 
@@ -52,6 +52,4 @@ class ChassisSlot(Base):
     machine = relation(Machine,
                        backref=backref('chassis_slot', cascade='all'))
 
-
-chassis_slot = ChassisSlot.__table__  # pylint: disable=C0103
-chassis_slot.primary_key.name = '%s_pk' % _TN
+    __table_args__ = (PrimaryKeyConstraint(chassis_id, slot_number),)

@@ -19,7 +19,7 @@
 from datetime import datetime
 
 from sqlalchemy import (Integer, DateTime, Sequence, Column, ForeignKey,
-                        UniqueConstraint)
+                        UniqueConstraint, Index)
 from sqlalchemy.orm import relation, deferred
 from sqlalchemy.orm.session import Session
 
@@ -28,7 +28,6 @@ from aquilon.aqdb.model import Base, DnsDomain, DnsEnvironment
 from aquilon.aqdb.model.base import _raise_custom
 from aquilon.aqdb.model.dns_domain import parse_fqdn
 from aquilon.aqdb.column_types import AqStr
-
 
 _TN = "fqdn"
 
@@ -55,6 +54,10 @@ class Fqdn(Base):
     dns_domain = relation(DnsDomain, innerjoin=True)
 
     dns_environment = relation(DnsEnvironment, innerjoin=True)
+
+    __table_args__ = (UniqueConstraint(dns_domain_id, name, dns_environment_id,
+                                       name='%s_domain_name_env_uk' % _TN),
+                      Index('%s_dns_env_idx' % _TN, dns_environment_id))
 
     @property
     def fqdn(self):
@@ -137,11 +140,5 @@ class Fqdn(Base):
         super(Fqdn, self).__init__(name=name, dns_domain=dns_domain,
                                    dns_environment=dns_environment, **kwargs)
 
-
 fqdn = Fqdn.__table__  # pylint: disable=C0103
-fqdn.primary_key.name = '%s_pk' % _TN
-fqdn.append_constraint(UniqueConstraint('name', 'dns_domain_id',
-                                        'dns_environment_id',
-                                        name='%s_name_domain_env_uk' % _TN))
-
 fqdn.info['unique_fields'] = ['dns_environment', 'dns_domain', 'name']
