@@ -21,24 +21,29 @@ from sqlalchemy.orm import aliased, subqueryload, joinedload
 
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.formats.machine import SimpleMachineList
-from aquilon.aqdb.model import (Machine, Cpu, Cluster, ClusterResource,
-                                Share, VirtualDisk, Disk, MetaCluster)
+from aquilon.aqdb.model import (Machine, Cpu, Cluster, ClusterResource, Share,
+                                VirtualDisk, Disk, MetaCluster, DnsRecord, 
+                                HardwareEntity)
 from aquilon.worker.dbwrappers.hardware_entity import (
     search_hardware_entity_query)
+from aquilon.worker.dbwrappers.host import (hostname_to_host)
 
 
 class CommandSearchMachine(BrokerCommand):
 
     required_parameters = []
 
-    def render(self, session, machine, cpuname, cpuvendor, cpuspeed, cpucount,
-               memory, cluster, share, fullinfo, style, **arguments):
+    def render(self, session, hostname, machine, cpuname, cpuvendor, cpuspeed, 
+               cpucount, memory, cluster, share, fullinfo, style, **arguments):
         if fullinfo or style != 'raw':
             q = search_hardware_entity_query(session, Machine, **arguments)
         else:
             q = search_hardware_entity_query(session, Machine.label, **arguments)
         if machine:
             q = q.filter_by(label=machine)
+        if hostname:
+            dns_rec = DnsRecord.get_unique(session, fqdn=hostname, compel=True)
+            q = q.filter(Machine.primary_name_id==dns_rec.id)
         if cpuname or cpuvendor or cpuspeed is not None:
             subq = Cpu.get_matching_query(session, name=cpuname,
                                           vendor=cpuvendor, speed=cpuspeed,

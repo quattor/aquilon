@@ -63,6 +63,26 @@ class TestSearchMachine(TestBrokerCommand):
             self.matchoutput(out, "evm%s" % i, command)
         self.matchclean(out, "ut", command)
 
+    def testhost(self):
+        hostname = self.config.get("unittest", "hostname")
+        command = "search machine --hostname ut3c5n10.aqd-unittest.ms.com"
+        out = self.notfoundtest(command.split(" "))
+        self.matchoutput(out, "DnsRecord ut3c5n10.aqd-unittest.ms.com, "
+                              "DNS environment internal not found.", command)
+
+        command = "search machine --hostname server1.aqd-unittest.ms.com"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "ut9s03p1", command)
+        self.matchclean(out, "ut3c5n10", command)
+        self.matchclean(out, "ut3c5n6", command)
+
+    def testhost_not_found(self):
+        hostname = 'not_there.msad.ms.com'
+        command = "search machine --hostname %s" % hostname
+        out = self.notfoundtest(command.split(" "))
+        command = "search machine --hostname %s --fullinfo" % hostname
+        out = self.notfoundtest(command.split(" "))
+
     def testmemory(self):
         command = "search machine --memory 8192"
         out = self.commandtest(command.split(" "))
