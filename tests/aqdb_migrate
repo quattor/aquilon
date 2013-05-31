@@ -95,6 +95,9 @@ if __name__ == '__main__':
             seq.drop(dest_engine, checkfirst=True)
             seq.start = nextid
 
+    # Avoid auto-populating tables as that would interfere with the copying
+    Base.populate_table_on_create = False
+
     Base.metadata.create_all(dest_engine, checkfirst=True)
 
     if dest_engine.dialect.name == 'postgresql':

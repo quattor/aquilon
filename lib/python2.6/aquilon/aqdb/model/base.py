@@ -40,6 +40,9 @@ def _raise_custom(cls, defcls, msg):
 class Base(object):
     """ The abstract base class for all aqdb objects """
 
+    # Populate const tables when created
+    populate_table_on_create = True
+
     def __init__(self, **kw):
         for k in kw:
             if not hasattr(type(self), k):  # pragma: no cover
@@ -328,6 +331,9 @@ class Base(object):
 
     @classmethod
     def populate_const_table(cls, table, connection, **kwargs):  # pragma: no cover
+        if not cls.populate_table_on_create:
+            return
+
         names = inspect(cls).polymorphic_map.keys()
         names.sort()  # beautification only
         stmt = table.insert()
