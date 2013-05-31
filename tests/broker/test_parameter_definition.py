@@ -187,13 +187,13 @@ class TestParameterDefinition(TestBrokerCommand):
         cmd = ["search_parameter_definition", "--archetype", ARCHETYPE, "--format=proto"]
         out = self.commandtest(cmd)
         p = self.parse_paramdefinition_msg(out, 8)
-        param_defs = p.param_definitions
+        param_defs = p.param_definitions[:]
+        param_defs.sort(key=lambda x: x.path)
 
-        self.failUnlessEqual(param_defs[0].path, 'testpath')
+        self.failUnlessEqual(param_defs[0].path, 'test_rebuild_required')
         self.failUnlessEqual(param_defs[0].value_type, 'string')
         self.failUnlessEqual(param_defs[0].template, 'foo')
-        self.failUnlessEqual(param_defs[0].default, 'default')
-        self.failUnlessEqual(param_defs[0].is_required, True)
+        self.failUnlessEqual(param_defs[0].rebuild_required, True)
 
         self.failUnlessEqual(param_defs[1].path, 'testboolean')
         self.failUnlessEqual(param_defs[1].value_type, 'boolean')
@@ -225,10 +225,11 @@ class TestParameterDefinition(TestBrokerCommand):
         self.failUnlessEqual(param_defs[6].template, 'foo')
         self.failUnlessEqual(param_defs[6].default, "val1,val2")
 
-        self.failUnlessEqual(param_defs[7].path, 'test_rebuild_required')
+        self.failUnlessEqual(param_defs[7].path, 'testpath')
         self.failUnlessEqual(param_defs[7].value_type, 'string')
         self.failUnlessEqual(param_defs[7].template, 'foo')
-        self.failUnlessEqual(param_defs[7].rebuild_required, True)
+        self.failUnlessEqual(param_defs[7].default, 'default')
+        self.failUnlessEqual(param_defs[7].is_required, True)
 
     def test_146_update(self):
         cmd = ["update_parameter_definition", "--archetype", ARCHETYPE,
