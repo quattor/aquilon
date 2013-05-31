@@ -23,7 +23,7 @@ import heapq
 from aquilon.exceptions_ import PartialError
 from aquilon.aqdb.model import (NetworkEnvironment, Network, RouterAddress,
                                 ARecord, DnsEnvironment, AddressAssignment,
-                                Building)
+                                Building, Bunker)
 from aquilon.worker.dbwrappers.dns import delete_dns_record
 from aquilon.worker.dbwrappers.network import fix_foreign_links
 
@@ -41,6 +41,9 @@ def heap_pop(heap):
 
 
 class QIPInfo(object):
+    __slots__ = ("name", "address", "location", "network_type", "side",
+                 "routers")
+
     def __init__(self, name, address, location, network_type, side, routers):
         self.name = name
         self.address = address
@@ -70,12 +73,14 @@ class QIPRefresh(object):
 
         self.dns_env = DnsEnvironment.get_unique_or_default(session)
 
-        # Cache building information. Load all buildings even if we're
-        # interested in only one, so we can verify subnetdata.txt
+        # Cache building and bunker information. Load all buildings even if
+        # we're interested in only one, so we can verify subnetdata.txt
         self.buildings = {}
-        q = session.query(Building)
-        for item in q:
+        for item in session.query(Building):
             self.buildings[item.name] = item
+        self.bunkers = {}
+        for item in session.query(Bunker):
+            self.bunkers[item.name] = item
 
         # Used to limit the number of warnings
         self.unknown_syslocs = set()
@@ -194,6 +199,12 @@ class QIPRefresh(object):
                         return None
                 else:
                     raise ValueError("Failed to parse LOCATION")
+
+            if "BUCKET" in qipinfo["UDF"] and location:
+                bucket = qipinfo["UDF"]["BUCKET"].strip().lower()
+                bunker = bucket + "." + location.name
+                if bunker in self.bunkers:
+                    location = self.bunkers[bunker]
 
             if "TYPE" in qipinfo["UDF"]:
                 network_type = qipinfo["UDF"]["TYPE"].strip().lower()
@@ -327,7 +338,7 @@ class QIPRefresh(object):
                 qipinfo = self.parse_line(line)
                 if not qipinfo:
                     continue
-                if self.building and qipinfo.location != self.building:
+                if self.building and qipinfo.location.building != self.building:
                     continue
                 qipnetworks[qipinfo.address.ip] = qipinfo
             except ValueError, err:
@@ -340,7 +351,7 @@ class QIPRefresh(object):
             if ip not in qipnetworks:
                 # "Forget" networks not inside the requested building to prevent
                 # them being deleted
-                if self.building and self.aqnetworks[ip].location != self.building:
+                if self.building and self.aqnetworks[ip].location.building != self.building:
                     del self.aqnetworks[ip]
                 continue
             if self.update_network(self.aqnetworks[ip], qipnetworks[ip]):

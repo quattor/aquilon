@@ -1372,7 +1372,6 @@
             <option name="desk" type="string">Desk</option>
          </optgroup>
       </optgroup>
-
       <optgroup name="add_network_modifiers" mandatory="False" fields="any">
          <option name="network_environment" type="string">Network environment (default: internal)</option>
          <option name="type" type="string">Network type, defaults to 'unknown'</option>
