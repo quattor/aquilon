@@ -18,8 +18,9 @@
 
 import ms.version
 
-ms.version.addpkg('sqlalchemy', '0.8.0')
+ms.version.addpkg('sqlalchemy', '0.8.1')
 ms.version.addpkg('cx_Oracle', '5.1-11.2.0.1.0')
+ms.version.addpkg('psycopg2', '2.5-9.2.4')
 ms.version.addpkg('ipython', '0.12.1')
 ms.version.addpkg('argparse', '1.1')
 ms.version.addpkg('ms.modulecmd', '1.0.4')
