@@ -21,7 +21,7 @@ from dateutil.tz import tzutc
 
 from sqlalchemy import (Column, String, Integer, Boolean, ForeignKey,
                         PrimaryKeyConstraint, Index)
-from sqlalchemy.orm import relationship, backref
+from sqlalchemy.orm import relationship
 from sqlalchemy.sql import desc
 
 from aquilon.config import Config
@@ -133,9 +133,9 @@ Xtn.args = relationship(XtnDetail, lazy="joined", order_by=[XtnDetail.name])
 
 if config.has_option('database', 'audit_schema'):  # pragma: no cover
     schema = config.get('database', 'audit_schema')
-    xtn.schema = schema
-    xtn_end.schema = schema
-    xtn_detail.schema = schema
+    Xtn.__table__.schema = schema
+    XtnEnd.__table__.schema = schema
+    XtnDetail.__table__.schema = schema
 
 
 def start_xtn(session, xtn_id, username, command, is_readonly, details,
