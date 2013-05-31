@@ -21,11 +21,11 @@ from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.parameter import validate_param_definition
 
 
-class CommandAddParameterDefintionFeature(BrokerCommand):
+class CommandUpdParameterDefintionFeature(BrokerCommand):
 
-    required_parameters = ["feature", "type", "path", "value_type"]
+    required_parameters = ["feature", "type", "path"]
 
-    def render(self, session, feature, type, path, value_type, required,
+    def render(self, session, feature, type, path, required,
                rebuild_required, default, description, **kwargs):
         dbfeature = Feature.get_unique(session, name=feature, feature_type=type,
                                        compel=True)
@@ -33,24 +33,23 @@ class CommandAddParameterDefintionFeature(BrokerCommand):
         if not dbfeature.paramdef_holder:
             dbfeature.paramdef_holder = FeatureParamDef()
 
-        ## strip slash from path start and end
-        if path.startswith("/"):
-            path = path[1:]
-        if path.endswith("/"):
-            path = path[:-1]
 
-        validate_param_definition(path, value_type, default)
+        db_paramdef = ParamDefinition.get_unique(session, path=path,
+                                                 holder=dbfeature.paramdef_holder,
+                                                 compel=True)
 
-        ParamDefinition.get_unique(session, path=path,
-                                   holder=dbfeature.paramdef_holder, preclude=True)
+        if default:
+            validate_param_definition(db_paramdef.path,
+                                  db_paramdef.value_type,
+                                  default)
+            db_paramdef.default = default
 
-        db_paramdef = ParamDefinition(path=path,
-                                      holder=dbfeature.paramdef_holder,
-                                      value_type=value_type, default=default,
-                                      required=required,
-                                      rebuild_required=rebuild_required,
-                                      description=description)
-        session.add(db_paramdef)
+        if required is not None:
+            db_paramdef.required = required
+        if rebuild_required is not None:
+            db_paramdef.rebuild_required = rebuild_required
+        if description:
+            db_paramdef.description = description
 
         session.flush()
 
