@@ -21,10 +21,14 @@ import os
 import sys
 import logging
 
-# -- begin path_setup --
-import ms.version
-ms.version.addpkg('ipython', '3.1.0')
+try:
+    import ms.version
+except ImportError:
+    pass
+else:
+    ms.version.addpkg('ipython', '3.1.0')
 
+# -- begin path_setup --
 BINDIR = os.path.dirname(os.path.realpath(sys.argv[0]))
 LIBDIR = os.path.join(BINDIR, "..", "lib")
 

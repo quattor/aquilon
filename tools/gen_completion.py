@@ -19,13 +19,18 @@
 '''Script generating bash completion code from input.xml.
 '''
 
-import ms.version
-ms.version.addpkg('Cheetah', '2.4.4')
-
 import os
 import sys
 import optparse
 import xml.etree.ElementTree as ET
+
+try:
+    import ms.version
+except ImportError:
+    pass
+else:
+    ms.version.addpkg('Cheetah', '2.4.4')
+
 from Cheetah.Template import Template
 
 usage = """%prog [options] template1 [template2 ...]

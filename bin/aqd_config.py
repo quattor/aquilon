@@ -25,10 +25,14 @@ import argparse
 import sys
 import os
 
-# -- begin path_setup --
-import ms.version
-ms.version.addpkg('six', '1.7.3')
+try:
+    import ms.version
+except ImportError:
+    pass
+else:
+    ms.version.addpkg('six', '1.7.3')
 
+# -- begin path_setup --
 BINDIR = os.path.dirname(os.path.realpath(sys.argv[0]))
 LIBDIR = os.path.join(BINDIR, "..", "lib")
 

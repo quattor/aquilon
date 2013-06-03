@@ -18,19 +18,25 @@
 
 import sys
 import os
-import ms.version
 import getopt
 
-ms.version.addpkg('setuptools', '0.6c11')
-ms.version.addpkg('protobuf', '2.5.0')
+try:
+    import ms.version
+except ImportError:
+    pass
+else:
+    ms.version.addpkg('setuptools', '0.6c11')
+    ms.version.addpkg('protobuf', '2.5.0')
 
-from google.protobuf.text_format import PrintMessage
-
+# -- begin path_setup --
 BINDIR = os.path.dirname(os.path.realpath(__file__))
 LIBDIR = os.path.join(BINDIR, "..", "lib")
 
 if LIBDIR not in sys.path:
     sys.path.append(LIBDIR)
+# -- end path_setup --
+
+from google.protobuf.text_format import PrintMessage
 
 from aquilon.worker import depends  # pylint: disable=W0611
 from aquilon.config import Config, lookup_file_path

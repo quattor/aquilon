@@ -21,19 +21,25 @@ import os
 import logging
 import argparse
 
-import ms.version
-ms.version.addpkg('twisted', '12.0.0')
-ms.version.addpkg('zope.interface', '3.6.1')
-ms.version.addpkg('setuptools', '0.6c11')
-ms.version.addpkg('protobuf', '3.0.0b2')
-ms.version.addpkg('six', '1.7.3')
-ms.version.addpkg('python-daemon', '2.0.5')
-ms.version.addpkg('lockfile', '0.9.1')
+try:
+    import ms.version
+except ImportError:
+    pass
+else:
+    ms.version.addpkg('twisted', '12.0.0')
+    ms.version.addpkg('zope.interface', '3.6.1')
+    ms.version.addpkg('setuptools', '0.6c11')
+    ms.version.addpkg('protobuf', '3.0.0b2')
+    ms.version.addpkg('six', '1.7.3')
+    ms.version.addpkg('python-daemon', '2.0.5')
+    ms.version.addpkg('lockfile', '0.9.1')
 
 from twisted.internet.protocol import Factory
 from twisted.protocols.basic import Int32StringReceiver
 from twisted.internet import reactor
 from google.protobuf.json_format import MessageToJson
+from daemon import DaemonContext
+from daemon.pidfile import TimeoutPIDLockFile
 
 # -- begin path_setup --
 BINDIR = os.path.dirname(os.path.realpath(sys.argv[0]))
@@ -44,8 +50,7 @@ if LIBDIR not in sys.path:
 # -- end path_setup --
 
 from aquilon.config import Config
-from daemon import DaemonContext
-from daemon.pidfile import TimeoutPIDLockFile
+
 
 class EventProtocol(Int32StringReceiver):
     def __init__(self, storedir):
