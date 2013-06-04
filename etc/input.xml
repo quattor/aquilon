@@ -810,7 +810,8 @@
       <optgroup name="nas_opts" fields="all">
          <optgroup name="share_opts" fields="any">
             <!-- TODO find out conflicts we might have -->
-            <option name="share" type="string">Share name (an instance of nas_disk_share service)</option>
+            <option name="share" type="string">Share name</option>
+            <option name="filesystem" type="string">Filesystem name</option>
             <option name="resourcegroup" type="string">Resourcegroup to add share</option>
          </optgroup>
          <option name="address" type="string">Bus address (e.g. 0:0)</option>

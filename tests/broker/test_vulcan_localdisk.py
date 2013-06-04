@@ -88,7 +88,7 @@ class TestVulcanLocalDisk(TestBrokerCommand):
         command = ["add_metacluster", "--metacluster=%s" % self.metacluster,
                    "--personality=vulcan2-test", "--archetype=metacluster",
                    "--domain=unittest", "--building=ut", "--domain=unittest",
-                   "--comments=autopg_v2_tests"]
+                   "--comments=vulcan_localdisk_test"]
         self.noouttest(command)
 
     # INFO: this piece of code is needed to make autopg logic work for vulcan
@@ -164,11 +164,33 @@ class TestVulcanLocalDisk(TestBrokerCommand):
                          command)
 
 
+    def test_122_addvmfswohost(self):
+        # Try to bind to fs1 of another host.
+        command = ["add", "disk", "--machine", "utpgm0",
+            "--disk", "sda", "--controller", "scsi",
+            "--filesystem", "utfs1n", "--address", "0:0",
+            "--size", "34"]
+
+        out = self.notfoundtest(command)
+        self.matchoutput(out,
+                         "Not Found: Filesystem utfs1n, hostresource instance not found.",
+                         command)
+
+    def test_125_addvmfs(self):
+        command = ["add_filesystem", "--filesystem=utfs1", "--type=ext3",
+                   "--mountpoint=/mnt", "--blockdevice=/dev/foo/bar",
+                   "--bootmount",
+                   "--dumpfreq=1", "--fsckpass=3", "--options=ro",
+                   "--comments=testing",
+                   "--hostname=%s" % self.vmhost]
+        self.successtest(command)
+
     def test_130_addutpgm0disk(self):
         for i in range(0, 3):
             machine = "utpgm%d" % i
             self.noouttest(["add", "disk", "--machine", machine,
                 "--disk", "sda", "--controller", "scsi",
+                "--filesystem", "utfs1", "--address", "0:0",
                 "--size", "34"])
 
     def test_140_verifyaddutpgm0disk(self):
@@ -178,7 +200,7 @@ class TestVulcanLocalDisk(TestBrokerCommand):
             command = ["show", "machine", "--machine", machine]
             out = self.commandtest(command)
 
-            self.searchoutput(out, r"Disk: sda 34 GB scsi \(local\) \[boot\]$",
+            self.searchoutput(out, r"Disk: sda 34 GB scsi \(virtual_localdisk from utfs1\) \[boot\]$",
                               command)
 
     def test_160_addinterfaces(self):
@@ -189,6 +211,12 @@ class TestVulcanLocalDisk(TestBrokerCommand):
             self.noouttest(["add", "interface", "--machine", machine,
                             "--interface", "eth0", "--mac",
                             "00:50:56:01:20:0%d" %i ])
+    def test_150_verifyutfs1(self):
+        command = ["show_filesystem", "--filesystem=utfs1"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Filesystem: utfs1", command)
+        self.matchoutput(out, "Bound to: Host %s" % self.vmhost, command)
+        self.matchoutput(out, "Disk Count: 3", command)
 
     def test_200_make_host(self):
         command = ["make", "--hostname", "utpgh0.aqd-unittest.ms.com"]
@@ -232,10 +260,16 @@ class TestVulcanLocalDisk(TestBrokerCommand):
     # deletes
 
 
-    def test_300_delutpgm0disk(self):
+    def test_290_delutpgm0disk(self):
         for i in range(0, 3):
             self.noouttest(["del", "disk", "--machine", "utpgm%d" % i,
                 "--controller", "scsi", "--disk", "sda"])
+
+    # deleting fs before depending disk would drop them as well
+    def test_295_delvmfs(self):
+        command = ["del_filesystem", "--filesystem=utfs1",
+                   "--hostname=%s" % self.vmhost]
+        self.successtest(command)
 
     def test_310_del_vms(self):
         for i in range(0, 3):

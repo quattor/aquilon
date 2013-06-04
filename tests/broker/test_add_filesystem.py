@@ -181,6 +181,7 @@ class TestAddFilesystem(TestBrokerCommand):
                    "--cluster=utvcs1"]
         self.successtest(command)
 
+        # fs1 is not deleted here, it will be removed when the host is deleted.
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddFilesystem)

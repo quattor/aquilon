@@ -19,7 +19,7 @@
 from datetime import datetime
 
 from sqlalchemy import (Integer, Boolean, DateTime, String, Column, ForeignKey,
-                        UniqueConstraint, PrimaryKeyConstraint, Index)
+                        PrimaryKeyConstraint, Index)
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import relation, backref, deferred
 
@@ -101,7 +101,7 @@ class Host(Base):
     # This is a one-to-one relation, so we need uselist=False on the backref
     machine = relation(Machine, lazy=False, innerjoin=True,
                        backref=backref('host', uselist=False, lazy=False,
-                                       cascade='all'))
+                                       cascade='all, delete-orphan'))
 
     branch = relation(Branch, innerjoin=True, backref='hosts')
     sandbox_author = relation(UserPrincipal)

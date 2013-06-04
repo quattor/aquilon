@@ -19,7 +19,8 @@
 import re
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import Machine, LocalDisk, VirtualDisk
+from aquilon.aqdb.model import (Machine, LocalDisk, VirtualDisk,
+                                VirtualLocalDisk, Filesystem)
 from aquilon.aqdb.model.disk import controller_types
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.resources import find_share
@@ -40,7 +41,7 @@ class CommandAddDisk(BrokerCommand):
         plenary_info.write()
 
     def render(self, session, logger, machine, disk, controller, share,
-               resourcegroup, address, comments, size, boot, **kw):
+               filesystem, resourcegroup, address, comments, size, boot, **kw):
 
         # Handle deprecated arguments
         if kw.get("type"):
@@ -93,6 +94,20 @@ class CommandAddDisk(BrokerCommand):
                                  comments=comments)
 
             dbshare.disks.append(dbdisk)
+        elif filesystem:
+            if not dbmachine.vm_container:
+                raise ArgumentError("{0} is not a virtual machine, it is not "
+                                    "possible to define a virtual disk."
+                                    .format(dbmachine))
+
+            dbfs = Filesystem.get_unique(session, name=filesystem,
+                    holder=dbmachine.vm_container.holder, compel=True)
+
+            dbdisk = VirtualLocalDisk(device_name=disk, controller_type=controller,
+                                 bootable=boot, capacity=size, address=address,
+                                 comments=comments)
+            dbfs.disks.append(dbdisk)
+
         else:
             dbdisk = LocalDisk(device_name=disk, controller_type=controller,
                                capacity=size, bootable=boot, comments=comments)

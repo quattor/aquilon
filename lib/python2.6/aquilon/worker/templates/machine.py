@@ -142,6 +142,16 @@ class PlenaryMachineInfo(Plenary):
 
                 tpl = params
 
+            elif disk.disk_type == 'virtual_localdisk':
+                filesystem = disk.filesystem
+
+                params["path"] = "%s/%s.vmdk" % (self.machine, disk.device_name)
+                params["address"] = disk.address
+                params["filesystemname"] = filesystem.name
+                params["mountpoint"] = filesystem.mount
+
+                tpl = params
+
             disks[PanEscape(devname)] = tpl
 
         managers = {}
