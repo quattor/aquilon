@@ -109,8 +109,6 @@ class TestAddPersonality(VerifyGrnsMixin, TestBrokerCommand):
                          "Template: aurora/personality/generic/config" +
                          self.template_extension,
                          command)
-        # Also expecting one of the personalities to have a non-zero threshold.
-        self.searchoutput(out, r'Threshold: \d+', command)
 
     def testverifyutpersonalitythreshold(self):
         command = ["show_personality", "--domain=unittest",
@@ -250,12 +248,6 @@ class TestAddPersonality(VerifyGrnsMixin, TestBrokerCommand):
                         "No personality with archetype aurora")
         self.failUnless("generic" in archetypes["aurora"],
                         "No aquilon/generic in personality list.")
-        self.failUnlessEqual(archetypes["aquilon"]["utpersonality/dev"].threshold,
-                             -1,
-                             "Got threshold %s for aquilon/utpersonality/dev" %
-                             archetypes["aquilon"]["utpersonality/dev"].threshold)
-        self.failUnless(found_threshold,
-                        "No thresholds defined in sandbox changetest1.")
 
     def testverifyshowutpersonalityprotothreshold(self):
         command = ["show_personality", "--domain=unittest",
