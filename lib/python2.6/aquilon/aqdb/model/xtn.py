@@ -61,7 +61,7 @@ class Xtn(Base):
                       Index('xtn_isreadonly_idx', is_readonly,
                             oracle_bitmap=True),
                       Index('xtn_start_time_idx', desc(start_time)),
-                      {'oracle_compress': True})
+                      {'oracle_compress': 'OLTP'})
 
     @property
     def return_code(self):
@@ -109,7 +109,7 @@ class XtnEnd(Base):
 
     __table_args__ = (Index('xtn_end_return_code_idx', return_code,
                             oracle_compress=True),
-                      {'oracle_compress': True})
+                      {'oracle_compress': 'OLTP'})
 
 
 class XtnDetail(Base):
@@ -126,7 +126,7 @@ class XtnDetail(Base):
                       Index('xtn_dtl_name_idx', name,
                             oracle_compress=True),
                       Index('xtn_dtl_value_idx', value, oracle_compress=True),
-                      {'oracle_compress': True})
+                      {'oracle_compress': 'OLTP'})
 
 Xtn.args = relationship(XtnDetail, lazy="joined", order_by=[XtnDetail.name])
 
