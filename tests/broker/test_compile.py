@@ -43,10 +43,10 @@ class TestCompile(TestBrokerCommand):
         expected suffix are included.
 
         """
-        advertise_xml = self.config.getboolean('panc', 'advertise_gzip_as_xml')
+        transparent_gzip = self.config.getboolean('panc', 'transparent_gzip')
         profilesdir = self.config.get('broker', 'profilesdir')
         index = os.path.join(profilesdir, 'profiles-info.xml')
-        if self.gzip_profiles and advertise_xml:
+        if self.gzip_profiles and transparent_gzip:
             source = gzip.open(index + '.gz')
             profile_suffix = '.xml'
         else:

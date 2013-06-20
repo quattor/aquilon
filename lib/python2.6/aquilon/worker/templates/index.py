@@ -60,8 +60,8 @@ def build_index(config, session, profilesdir, clientNotify=True,
 
     '''
     gzip_output = config.getboolean('panc', 'gzip_output')
-    gzip_as_xml = config.getboolean('panc', 'advertise_gzip_as_xml')
-    gzip_index = gzip_output and gzip_as_xml
+    transparent_gzip = config.getboolean('panc', 'transparent_gzip')
+    gzip_index = gzip_output and transparent_gzip
 
     # Profiles are xml files, and can be configured to (additionally) be gzip'd
     profile_suffix = '.xml'
@@ -73,7 +73,7 @@ def build_index(config, session, profilesdir, clientNotify=True,
     # when just the .xml is requested.  In this case, the index should just
     # list (advertise) the profile as a .xml file.
     advertise_suffix = profile_suffix
-    if gzip_as_xml:
+    if transparent_gzip:
         advertise_suffix = '.xml'
 
     # The profile should be .xml, unless webserver trickery is going to
@@ -93,14 +93,20 @@ def build_index(config, session, profilesdir, clientNotify=True,
                 source = open(index_path)
             tree = ET.parse(source)
             for profile in tree.getiterator("profile"):
-                if (profile.text and "mtime" in profile.attrib):
-                    obj = profile.text.strip()
-                    if obj:
-                        if obj.endswith(".xml"):
-                            obj = obj[:-4]
-                        elif obj.endswith(".xml.gz"):
-                            obj = obj[:-7]
-                        old_object_index[obj] = int(profile.attrib["mtime"])
+                if not profile.text or "mtime" not in profile.attrib:
+                    continue
+                mtime = int(profile.attrib["mtime"])
+
+                obj = profile.text.strip()
+                if not obj:
+                    continue
+
+                for ext in [".xml", ".xml.gz"]:
+                    if obj.endswith(ext):
+                        obj = obj[:-len(ext)]
+                        break
+
+                old_object_index[obj] = mtime
         except Exception, e:  # pragma: no cover
             logger.info("Error processing %s, continuing: %s" %
                         (index_path, e))
@@ -108,11 +114,13 @@ def build_index(config, session, profilesdir, clientNotify=True,
             if source:
                 source.close()
 
-    # object_index ties namespaced files to mtime
-    object_index = {}
     # modified_index stores the subset of namespaced names that
     # have changed since the last index. The values are unused.
     modified_index = {}
+
+    content = []
+    content.append("<?xml version='1.0' encoding='utf-8'?>")
+    content.append("<profiles>")
 
     for root, _dirs, files in os.walk(profilesdir):
         for profile in files:
@@ -129,27 +137,21 @@ def build_index(config, session, profilesdir, clientNotify=True,
             # that the file has been removed since calling os.walk().
             # If that's the case, no need to add it to the modified_index.
             try:
-                object_index[obj] = os.path.getmtime(os.path.join(root,
-                                                                  profile))
+                mtime = os.path.getmtime(os.path.join(root, profile))
             except OSError, e:
                 continue
-            if (obj in old_object_index and
-                object_index[obj] > old_object_index[obj]):
-                modified_index[obj] = object_index[obj]
+            if obj in old_object_index and mtime > old_object_index[obj]:
+                modified_index[obj] = mtime
 
-    content = []
-    content.append("<?xml version='1.0' encoding='utf-8'?>")
-    content.append("<profiles>")
-    for obj, mtime in object_index.items():
-        content.append("<profile mtime='%d'>%s%s</profile>" %
-                       (mtime, obj, advertise_suffix))
+            content.append("<profile mtime='%d'>%s%s</profile>" %
+                           (mtime, obj, advertise_suffix))
+
     content.append("</profiles>")
 
     compress = None
     if gzip_index:
         compress = 'gzip'
-    write_file(index_path, "\n".join(content), logger=logger,
-               compress=compress)
+    write_file(index_path, "\n".join(content), logger=logger, compress=compress)
 
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 

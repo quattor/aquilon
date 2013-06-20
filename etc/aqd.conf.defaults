@@ -271,7 +271,7 @@ formatter = pan
 gzip_output = false
 # Assume the webserver will decompress transparently as needed.
 # only used if gzip_output = true
-advertise_gzip_as_xml = true
+transparent_gzip = true
 template_extension = .tpl
 
 [kerberos]
