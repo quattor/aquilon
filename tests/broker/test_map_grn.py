@@ -20,59 +20,91 @@
 import unittest
 
 if __name__ == "__main__":
-    from broker import utils
+    import utils
     utils.import_depends()
 
 from broker.brokertest import TestBrokerCommand
 from broker.grntest import VerifyGrnsMixin
 
+GRN = "grn:/ms/ei/aquilon/unittest"
+
 
 class TestMapGrn(VerifyGrnsMixin, TestBrokerCommand):
 
-    def test_100_map_personality(self):
+    grn_list = [ "grn:/ms/ei/aquilon/aqd", "grn:/ms/ei/aquilon/unittest"]
+    grn_maps = { "esp": grn_list, "atarget": [ "grn:/example/cards"] }
+
+    def test_100_add_personality(self):
+        command = ["add_personality", "--personality=utesppers/dev",
+                   "--archetype=aquilon", "--grn=%s" % GRN,
+                   "--host_environment=dev",
+                   "--comments", "Personality target test"]
+        self.noouttest(command)
+
+        command = ["show_personality", "--personality=utesppers/dev",
+                   "--archetype=aquilon"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Used by GRN: grn:/ms/ei/aquilon/unittest [esp]",
+                         command)
+
+        command = ["del_personality", "--personality=utesppers/dev",
+                   "--archetype=aquilon"]
+        self.noouttest(command)
+
+    def test_100_map_bad_personality(self):
         command = ["map", "grn", "--grn", "grn:/ms/ei/aquilon/aqd",
-                   "--personality", "compileserver"]
-        self.successtest(command)
+                   "--personality", "compileserver", "--target", "badtarget"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Invalid personality target badtarget for "
+                              "archetype aquilon, please choose from "
+                              "esp,hlmplus", command)
 
     def test_105_map_personality(self):
+        command = ["map", "grn", "--grn", "grn:/ms/ei/aquilon/aqd",
+                   "--personality", "compileserver", "--target", "esp"]
+        self.successtest(command)
+
         command = ["map", "grn", "--grn", "grn:/example/cards",
-                   "--personality", "compileserver"]
+                   "--personality", "compileserver", "--target", "atarget"]
         self.successtest(command)
 
     def test_110_verify_personality(self):
         command = ["show", "personality", "--personality", "compileserver"]
         out = self.commandtest(command)
-        self.matchoutput(out, "GRN: grn:/ms/ei/aquilon/aqd", command)
+        self.matchoutput(out, "GRN: grn:/ms/ei/aquilon/aqd [esp]", command)
 
         command = ["cat", "--archetype=aquilon", "--personality=compileserver"]
         out = self.commandtest(command)
-        self.check_personality_grns(out, ["grn:/ms/ei/aquilon/aqd",
-                                          "grn:/ms/ei/aquilon/unittest",
-                                          "grn:/example/cards"],
+        self.check_personality_grns(out, self.grn_maps["esp"], self.grn_maps,
                                     command)
 
     def test_120_verify_host(self):
         command = ["show_host", "--hostname", "unittest20.aqd-unittest.ms.com"]
         out = self.commandtest(command)
-        self.matchoutput(out, "GRN: grn:/ms/ei/aquilon/aqd", command)
+        self.matchoutput(out, "GRN: grn:/ms/ei/aquilon/aqd [esp]", command)
 
     def test_130_map_host(self):
         command = ["map", "grn", "--grn", "grn:/ms/ei/aquilon/aqd",
-                   "--hostname", "unittest12.aqd-unittest.ms.com"]
+                   "--hostname", "unittest12.aqd-unittest.ms.com",
+                   "--target", "esp"]
         self.noouttest(command)
 
     def test_131_map_host_again(self):
         scratchfile = self.writescratch("hostlist",
                                         "unittest12.aqd-unittest.ms.com")
         command = ["map", "grn", "--grn", "grn:/ms/ei/aquilon/aqd",
-                   "--list", scratchfile]
+                   "--list", scratchfile, "--target", "esp"]
         # TODO: should this throw an error?
         self.noouttest(command)
 
     def test_132_map_host_plus_pers(self):
         # The personality already includes the GRN
         command = ["map", "grn", "--grn", "grn:/ms/ei/aquilon/aqd",
-                   "--hostname", "unittest00.one-nyp.ms.com"]
+                   "--hostname", "unittest00.one-nyp.ms.com", "--target", "esp"]
+        self.noouttest(command)
+
+        command = ["map", "grn", "--grn", "grn:/example/cards",
+                   "--hostname", "unittest00.one-nyp.ms.com", "--target", "atarget"]
         self.noouttest(command)
 
     def test_140_search(self):
@@ -84,13 +116,14 @@ class TestMapGrn(VerifyGrnsMixin, TestBrokerCommand):
 
     def test_150_map_disabled(self):
         command = ["map", "grn", "--grn", "grn:/ms/ei/aquilon",
-                   "--hostname", "unittest20.aqd-unittest.ms.com"]
+                   "--hostname", "unittest20.aqd-unittest.ms.com",
+                   "--target", "esp"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "GRN grn:/ms/ei/aquilon is not usable for new "
                          "systems.", command)
 
     def test_160_map_missing_eonid(self):
-        command = ["map", "grn", "--eon_id", "987654321",
+        command = ["map", "grn", "--eon_id", "987654321", "--target", "esp",
                    "--hostname", "unittest20.aqd-unittest.ms.com"]
         out = self.notfoundtest(command)
         self.matchoutput(out, "EON ID 987654321 not found.", command)
@@ -100,7 +133,8 @@ class TestMapGrn(VerifyGrnsMixin, TestBrokerCommand):
 
     def test_160_map_missing_grn(self):
         command = ["map", "grn", "--grn", "grn:/ms/no-such-grn",
-                   "--hostname", "unittest20.aqd-unittest.ms.com"]
+                   "--hostname", "unittest20.aqd-unittest.ms.com",
+                   "--target", "esp"]
         out = self.notfoundtest(command)
         self.matchoutput(out, "GRN grn:/ms/no-such-grn not found.", command)
         # The GRN is not in the CDB file, so the CSV file should not be
@@ -114,27 +148,21 @@ class TestMapGrn(VerifyGrnsMixin, TestBrokerCommand):
         # The GRN is mapped to both the host and the personality; verify it is
         # not duplicated. Should print out both the host mapped
         # personality mapped grns
-        self.check_grns(out, ["grn:/ms/ei/aquilon/aqd", "grn:/example/cards",
-                              "grn:/ms/ei/aquilon/unittest"],
-                        command)
+        self.check_grns(out, self.grn_maps["esp"], self.grn_maps, command)
 
     def test_210_verify_unittest20(self):
         command = ["cat", "--hostname", "unittest20.aqd-unittest.ms.com",
                    "--data", "--generate"]
         out = self.commandtest(command)
         # The GRN is mapped to the personality only
-        self.check_grns(out, ["grn:/ms/ei/aquilon/aqd", "grn:/example/cards",
-                              "grn:/ms/ei/aquilon/unittest"],
-                        command)
+        self.check_grns(out, self.grn_list, {"esp": self.grn_list}, command)
 
     def test_220_verify_unittest12(self):
         command = ["cat", "--hostname", "unittest12.aqd-unittest.ms.com",
                    "--data", "--generate"]
         out = self.commandtest(command)
         # The GRN is mapped to the host only
-        self.check_grns(out, ["grn:/ms/ei/aquilon/aqd",
-                              "grn:/ms/ei/aquilon/unittest"],
-                        command)
+        self.check_grns(out, self.grn_list, {"esp": self.grn_list}, command)
 
     def test_300_delete_used_byhost(self):
         command = ["del", "grn", "--grn", "grn:/ms/ei/aquilon/aqd"]
@@ -149,12 +177,13 @@ class TestMapGrn(VerifyGrnsMixin, TestBrokerCommand):
 
     def test_320_unmap_unittest12(self):
         command = ["unmap", "grn", "--grn", "grn:/ms/ei/aquilon/aqd",
-                   "--hostname", "unittest12.aqd-unittest.ms.com"]
+                   "--hostname", "unittest12.aqd-unittest.ms.com",
+                   "--target", "esp"]
         self.noouttest(command)
 
     def test_320_unmap_unittest00(self):
         command = ["unmap", "grn", "--grn", "grn:/ms/ei/aquilon/aqd",
-                   "--hostname", "unittest00.one-nyp.ms.com"]
+                   "--hostname", "unittest00.one-nyp.ms.com", "--target", "esp"]
         self.noouttest(command)
 
     def test_321_verify_unittest12(self):
@@ -175,7 +204,7 @@ class TestMapGrn(VerifyGrnsMixin, TestBrokerCommand):
         scratchfile = self.writescratch("hostlist",
                                         "unittest12.aqd-unittest.ms.com")
         command = ["unmap", "grn", "--grn", "grn:/ms/ei/aquilon/aqd",
-                   "--list", scratchfile]
+                   "--list", scratchfile, "--target", "esp"]
         # TODO: should this throw an error?
         self.noouttest(command)
 
@@ -187,18 +216,18 @@ class TestMapGrn(VerifyGrnsMixin, TestBrokerCommand):
 
     def test_340_unmap_personality(self):
         command = ["unmap", "grn", "--grn", "grn:/example/cards",
-                   "--personality", "compileserver"]
+                   "--personality", "compileserver", "--target", "atarget"]
         self.noouttest(command)
 
         command = ["cat", "--archetype", "aquilon",
                    "--personality", "compileserver"]
         out = self.commandtest(command)
-        self.check_personality_grns(out, ["grn:/ms/ei/aquilon/aqd",
-                                          "grn:/ms/ei/aquilon/unittest"],
-                                    command)
+
+        grn_list = [ "grn:/ms/ei/aquilon/aqd", "grn:/ms/ei/aquilon/unittest"]
+        self.check_personality_grns(out, grn_list, {"esp": grn_list}, command)
 
         command = ["unmap", "grn", "--grn", "grn:/ms/ei/aquilon/aqd",
-                   "--personality", "compileserver"]
+                   "--personality", "compileserver", "--target", "esp"]
         self.noouttest(command)
 
     def test_400_verify_unittest00(self):
@@ -207,6 +236,7 @@ class TestMapGrn(VerifyGrnsMixin, TestBrokerCommand):
         out = self.commandtest(command)
         # The GRN was mapped to both the host and the personality;
         self.check_grns(out, ["grn:/ms/ei/aquilon/unittest"],
+                        {"esp": ["grn:/ms/ei/aquilon/unittest"]},
                         command)
 
     def test_410_verify_unittest20(self):
@@ -215,6 +245,7 @@ class TestMapGrn(VerifyGrnsMixin, TestBrokerCommand):
         out = self.commandtest(command)
         # The GRN was mapped to the personality only
         self.check_grns(out, ["grn:/ms/ei/aquilon/unittest"],
+                        {"esp": ["grn:/ms/ei/aquilon/unittest"]},
                         command)
 
     def test_420_verify_unittest12(self):
@@ -222,7 +253,9 @@ class TestMapGrn(VerifyGrnsMixin, TestBrokerCommand):
                    "--data", "--generate"]
         out = self.commandtest(command)
         # The GRN was mapped to the host only
-        self.check_grns(out, ["grn:/ms/ei/aquilon/unittest"], command)
+        self.check_grns(out, ["grn:/ms/ei/aquilon/unittest"],
+                        {"esp": ["grn:/ms/ei/aquilon/unittest"]},
+                        command)
 
     def test_500_fail_map_overlimitlist(self):
         user = self.config.get("unittest", "user")
@@ -232,7 +265,7 @@ class TestMapGrn(VerifyGrnsMixin, TestBrokerCommand):
             hosts.append("thishostdoesnotexist%d.aqd-unittest.ms.com\n" % i)
         scratchfile = self.writescratch("mapgrnlistlimit", "".join(hosts))
         command = ["map", "grn", "--grn", "grn:/ms/ei/aquilon/aqd",
-                   "--list", scratchfile]
+                   "--list", scratchfile, "--target", "esp"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "The number of hosts in list {0:d} can not be more "
@@ -247,7 +280,7 @@ class TestMapGrn(VerifyGrnsMixin, TestBrokerCommand):
             hosts.append("thishostdoesnotexist%d.aqd-unittest.ms.com\n" % i)
         scratchfile = self.writescratch("mapgrnlistlimit", "".join(hosts))
         command = ["unmap", "grn", "--grn", "grn:/ms/ei/aquilon/aqd",
-                   "--list", scratchfile]
+                   "--list", scratchfile, "--target", "esp"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "The number of hosts in list {0:d} can not be more "

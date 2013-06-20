@@ -38,8 +38,9 @@ class CommandAddPersonality(BrokerCommand):
 
     required_parameters = ["personality", "archetype"]
 
-    def render(self, session, logger, personality, archetype, grn, eon_id, host_environment,
-               comments, cluster_required, copy_from, config_override, **arguments):
+    def render(self, session, logger, personality, archetype,
+               grn, eon_id, host_environment, comments,
+               cluster_required, copy_from, config_override, **arguments):
         if not VALID_PERSONALITY_RE.match(personality):
             raise ArgumentError("Personality name '%s' is not valid." %
                                 personality)
@@ -75,7 +76,11 @@ class CommandAddPersonality(BrokerCommand):
                                 comments=comments,
                                 config_override=config_override)
         session.add(dbpersona)
-        dbpersona.grns.append(dbgrn)
+
+        if self.config.has_option("archetype_" + archetype, "default_grn_target"):
+            dbpersona.grns.append((dbpersona, dbgrn,
+                                   self.config.get("archetype_" + archetype,
+                                                   "default_grn_target")))
 
         if copy_from:
             ## copy config data

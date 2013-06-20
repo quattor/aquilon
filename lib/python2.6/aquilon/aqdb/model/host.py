@@ -20,13 +20,20 @@ from datetime import datetime
 
 from sqlalchemy import (Integer, Boolean, DateTime, String, Column, ForeignKey,
                         UniqueConstraint, PrimaryKeyConstraint, Index)
+from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import relation, backref, deferred
 
 from aquilon.aqdb.model import (Base, Branch, Machine, HostLifecycle, Grn,
                                 Personality, OperatingSystem, UserPrincipal)
 
+from aquilon.aqdb.column_types import AqStr
+
+
 _TN = 'host'
 _HOSTGRN = 'host_grn_map'
+
+def _hgm_creator(tuple):
+    return HostGrnMap(host=tuple[0], grn=tuple[1], target=tuple[2])
 
 
 class Host(Base):
@@ -102,6 +109,7 @@ class Host(Base):
     status = relation(HostLifecycle, innerjoin=True)
     operating_system = relation(OperatingSystem, innerjoin=True)
     owner_grn = relation(Grn, innerjoin=True)
+    grns = association_proxy('_grns', 'grn', creator=_hgm_creator)
 
     __table_args__ = (Index('host_prsnlty_idx', personality_id),
                       Index('%s_branch_idx' % _TN, branch_id))
@@ -135,6 +143,19 @@ class HostGrnMap(Base):
                                         name='%s_grn_fk' % _HOSTGRN),
                     nullable=False)
 
+    host = relation(Host, innerjoin=True,
+                     backref=backref('_grns', cascade='all, delete-orphan',
+                                     passive_deletes=True))
+
+    grn = relation(Grn, lazy=False, innerjoin=True,
+                   backref=backref('_hosts', passive_deletes=True))
+
+    target = Column(AqStr(32), nullable=False, primary_key=True)
+
+    # used by unmap
+    @property
+    def mapped_object(self):
+        return self.host
+
     __table_args__ = (PrimaryKeyConstraint(host_id, eon_id),)
 
-Host.grns = relation(Grn, secondary=HostGrnMap.__table__)

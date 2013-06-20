@@ -187,8 +187,6 @@ class TestRefreshWindowsHosts(TestBrokerCommand):
             self.matchoutput(out, host, command)
             self.matchoutput(out, "Owned by GRN: grn:/ms/ei/aquilon/unittest",
                              command)
-            self.matchoutput(out, "Used by GRN: grn:/ms/ei/aquilon/unittest",
-                             command)
 
     def test_295_removebadalias(self):
         command = ["del_alias", "--fqdn=badhost6.ms.com"]

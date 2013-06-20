@@ -175,6 +175,7 @@ class TestSetupParams(TestBrokerCommand):
         self.add_parameter("aquilon", "inventory", data)
         self.add_parameter("aquilon", "eaitools", data)
         self.add_parameter("aquilon", "unixeng-test", data)
+        self.add_parameter("aquilon", "sybase-test", data)
 
 
 if __name__ == '__main__':

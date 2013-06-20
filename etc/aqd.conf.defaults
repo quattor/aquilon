@@ -188,6 +188,9 @@ default_network_type = unknown
 default_personality = inventory
 default_osname = linux
 default_osversion = 5.0.1-x86_64
+default_grn_target = esp
+host_grn_targets = esp,hlmplus
+personality_grn_targets = esp,hlmplus
 
 [archetype_aurora]
 host_domain = ny-prod
@@ -249,6 +252,11 @@ first_usable_offset = 16
 
 [network_vm_storage_net]
 first_usable_offset = 40
+
+[archetype_vmhost]
+default_grn_target = esp
+host_grn_targets = esp
+personality_grn_targets = esp
 
 [panc]
 default_version = prod

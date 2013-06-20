@@ -38,19 +38,29 @@ class VerifyGrnsMixin(object):
                 self.grns[row["name"]] = int(row["id"])
                 self.eon_ids[int(row["id"])] = row["name"]
 
-    def check_grns(self, out, grn_list, command):
-        eon_ids = [self.grns[grn] for grn in grn_list]
-        eon_ids.sort()
-        self.searchoutput(out,
-                          r'"system/eon_ids" = list\(\s*' +
-                          r',\s*'.join([str(eon_id) for eon_id in eon_ids]) +
-                          r'\s*\);',
-                          command)
-
-    def check_personality_grns(self, out, grn_list, command):
-        eon_ids = [self.grns[grn] for grn in grn_list]
-        eon_ids.sort()
-        for eon_id in eon_ids:
+    def check_grns(self, out, grn_list, grn_maps, command):
+        def check_grn_for_key(grn_list, key):
+            eon_ids = [self.grns[grn] for grn in grn_list]
+            eon_ids.sort()
             self.searchoutput(out,
-                              r'"/system/eon_ids" = append\(%d\);' % eon_id,
+                              r'"%s" = list\(\s*' % key +
+                              r',\s*'.join([str(eon_id) for eon_id in eon_ids]) +
+                              r'\s*\);',
                               command)
+
+        check_grn_for_key(grn_list, "system/eon_ids")
+        for (target, target_list) in grn_maps.iteritems():
+            check_grn_for_key(target_list, "system/eon_id_maps/%s" % target)
+
+    def check_personality_grns(self, out, grn_list, grn_maps, command):
+        def check_grn_for_key(grn_list, key):
+            eon_ids = [self.grns[grn] for grn in grn_list]
+            eon_ids.sort()
+            for eon_id in eon_ids:
+                self.searchoutput(out,
+                                  r'"%s" = append\(%d\);' % (key, eon_id),
+                                  command)
+
+        check_grn_for_key(grn_list, "/system/eon_ids")
+        for (target, target_list) in grn_maps.iteritems():
+            check_grn_for_key(target_list, "/system/eon_id_maps/%s" % target)

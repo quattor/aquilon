@@ -16,6 +16,7 @@
 # limitations under the License.
 """Contains the logic for `aq map grn`."""
 
+from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Personality
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.grn import lookup_grn
@@ -26,16 +27,25 @@ from aquilon.worker.templates.personality import PlenaryPersonality
 
 class CommandMapGrn(BrokerCommand):
 
-    def _update_dbobj(self, obj, grn):
-        if grn in obj.grns:
-            # TODO: should we throw an error here?
-            return
-        obj.grns.append(grn)
+    required_parameters = ["target"]
 
-    def render(self, session, logger, grn, eon_id, hostname, list, personality,
+    def _update_dbobj(self, obj, target, grn):
+
+        # Don't add twice the same tuple
+        for grn_rec in obj._grns:
+            if (obj == grn_rec.mapped_object and
+                grn == grn_rec.grn and
+                target == grn_rec.target):
+                return
+
+        obj.grns.append((obj,grn,target))
+
+    def render(self, session, logger, target, grn, eon_id, hostname, list, personality,
                archetype, **arguments):
         dbgrn = lookup_grn(session, grn, eon_id, logger=logger,
                            config=self.config)
+
+        target_type = "personality" if personality else "host"
 
         if hostname:
             objs = [hostname_to_host(session, hostname)]
@@ -47,7 +57,17 @@ class CommandMapGrn(BrokerCommand):
                                            archetype=archetype, compel=True)]
 
         for obj in objs:
-            self._update_dbobj(obj, dbgrn)
+            # INFO: Fails for archetypes other than 'aquilon', 'vmhost'
+            valid_targets = self.config.get("archetype_" + obj.archetype.name,
+                                            target_type + "_grn_targets")
+
+            if target not in map(lambda s: s.strip(), valid_targets.split(",")):
+                raise ArgumentError("Invalid %s target %s for archetype %s, please "
+                                    "choose from %s" % (target_type, target,
+                                                        obj.archetype.name,
+                                                        valid_targets))
+
+            self._update_dbobj(obj, target, dbgrn)
 
         session.flush()
 

@@ -4812,9 +4812,12 @@
    <command name="map_grn">
       Map a given GRN to a host or a personality. The affected host(s) must be
       recompiled for the changes to take effect.
-      <optgroup name="map_grn_grn" mandatory="true" fields="any">
-         <option name="grn" type="string" conflicts="eon_id">GRN as string</option>
-         <option name="eon_id" type="int" conflicts="grn">Numeric EON ID</option>
+      <optgroup name="map_grn_grn" mandatory="true" fields="all">
+         <option name="target" type="string">peer system using the GRN</option>
+         <optgroup name="map_grn_grn_type" mandatory="true" fields="any">
+            <option name="grn" type="string" conflicts="eon_id">GRN as string</option>
+            <option name="eon_id" type="int" conflicts="grn">Numeric EON ID</option>
+         </optgroup>
       </optgroup>
       <optgroup name="map_grn_target" mandatory="true" fields="any">
          <option name="hostname" type="string" conflicts="list personality">Host</option>
@@ -4831,9 +4834,12 @@
    <command name="unmap_grn">
       Unmap a given GRN from a host or a personality. The affected host(s) must be
       recompiled for the changes to take effect.
-      <optgroup name="unmap_grn_grn" mandatory="true" fields="any">
-         <option name="grn" type="string" conflicts="eon_id">GRN as string</option>
-         <option name="eon_id" type="int" conflicts="grn">Numeric EON ID</option>
+      <optgroup name="unmap_grn_grn" mandatory="true" fields="all">
+         <option name="target" type="string">peer system using the GRN</option>
+         <optgroup name="unmap_grn_grn_type" mandatory="true" fields="any">
+            <option name="grn" type="string" conflicts="eon_id">GRN as string</option>
+            <option name="eon_id" type="int" conflicts="grn">Numeric EON ID</option>
+         </optgroup>
       </optgroup>
       <optgroup name="unmap_grn_target" mandatory="true" fields="any">
          <option name="hostname" type="string" conflicts="list personality">Host</option>

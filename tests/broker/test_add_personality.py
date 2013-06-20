@@ -109,8 +109,6 @@ class TestAddPersonality(VerifyGrnsMixin, TestBrokerCommand):
                          "Template: aurora/personality/generic/config" +
                          self.template_extension,
                          command)
-        # Also expecting one of the personalities to have a non-zero threshold.
-        self.searchoutput(out, r'Threshold: \d+', command)
 
     def testverifyutpersonalitythreshold(self):
         command = ["show_personality", "--domain=unittest",
@@ -250,12 +248,6 @@ class TestAddPersonality(VerifyGrnsMixin, TestBrokerCommand):
                         "No personality with archetype aurora")
         self.failUnless("generic" in archetypes["aurora"],
                         "No aquilon/generic in personality list.")
-        self.failUnlessEqual(archetypes["aquilon"]["utpersonality/dev"].threshold,
-                             -1,
-                             "Got threshold %s for aquilon/utpersonality/dev" %
-                             archetypes["aquilon"]["utpersonality/dev"].threshold)
-        self.failUnless(found_threshold,
-                        "No thresholds defined in sandbox changetest1.")
 
     def testverifyshowutpersonalityprotothreshold(self):
         command = ["show_personality", "--domain=unittest",
@@ -362,8 +354,7 @@ class TestAddPersonality(VerifyGrnsMixin, TestBrokerCommand):
                    "--archetype", "windows", "--grn", "grn:/ms/windows/desktop",
                    "--host_environment", "legacy"]
         self.noouttest(command)
-        self.verifycatforpersonality("windows", "desktop",
-                                     grn="grn:/ms/windows/desktop")
+        self.verifycatforpersonality("windows", "desktop")
 
     def testverifyaddwindowsdesktop(self):
         command = "show_personality --personality desktop --archetype windows"
@@ -488,7 +479,8 @@ class TestAddPersonality(VerifyGrnsMixin, TestBrokerCommand):
                    "--host_environment=legacy",
                    "--personality=esx_server", "--archetype=vmhost"]
         self.noouttest(command)
-        self.verifycatforpersonality("vmhost", "esx_server")
+        self.verifycatforpersonality("vmhost", "esx_server",
+                                     grn="grn:/ms/ei/aquilon/aqd")
         command = ["show_personality", "--personality=esx_server",
                    "--archetype=vmhost"]
         out = self.commandtest(command)
@@ -527,7 +519,8 @@ class TestAddPersonality(VerifyGrnsMixin, TestBrokerCommand):
                    "--host_environment=legacy",
                    "--archetype=vmhost", "--eon_id=2"]
         self.noouttest(command)
-        self.verifycatforpersonality("vmhost", "esx_standalone")
+        self.verifycatforpersonality("vmhost", "esx_standalone",
+                                     grn="grn:/ms/ei/aquilon/aqd")
         command = ["show_personality", "--personality=esx_standalone",
                    "--archetype=vmhost"]
         out = self.commandtest(command)
@@ -547,12 +540,13 @@ class TestAddPersonality(VerifyGrnsMixin, TestBrokerCommand):
 
     def verifycatforpersonality(self, archetype, personality,
                                 config_override=False, host_env='legacy',
-                                grn="grn:/ms/ei/aquilon/aqd"):
+                                grn=None):
         command = ["cat", "--archetype", archetype, "--personality", personality]
         out = self.commandtest(command)
         self.matchoutput(out, 'variable PERSONALITY = "%s"' % personality,
                          command)
-        self.check_personality_grns(out, [grn], command)
+        if grn:
+            self.check_personality_grns(out, [grn], {"esp": [grn]}, command)
         self.matchoutput(out, 'include { if_exists("personality/%s/pre_feature") };' %
                          personality, command)
         self.matchoutput(out, "template personality/%s/config;" % personality,
