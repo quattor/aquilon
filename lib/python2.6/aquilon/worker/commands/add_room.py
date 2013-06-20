@@ -16,18 +16,20 @@
 # limitations under the License.
 """Contains the logic for `aq add room`."""
 
-
+from aquilon.aqdb.model import Building, Room
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.commands.add_location import CommandAddLocation
+from aquilon.worker.dbwrappers.location import add_location
 
 
-class CommandAddRoom(CommandAddLocation):
+class CommandAddRoom(BrokerCommand):
 
     required_parameters = ["room", "building"]
 
     def render(self, session, room, building, fullname, comments, **arguments):
-        return CommandAddLocation.render(self, session=session, name=room,
-                                         type='room', fullname=fullname,
-                                         parentname=building,
-                                         parenttype='building',
-                                         comments=comments, **arguments)
+        dbbuilding = Building.get_unique(session, building, compel=True)
+        add_location(session, Room, room, dbbuilding, fullname=fullname,
+                     comments=comments)
+
+        session.flush()
+
+        return

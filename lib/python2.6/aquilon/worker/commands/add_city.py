@@ -16,53 +16,39 @@
 # limitations under the License.
 """Contains the logic for `aq add city`."""
 
-
+from aquilon.aqdb.model import City, Country, Campus
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.dbwrappers.location import add_location
 from aquilon.worker.processes import DSDBRunner
 from aquilon.worker.locks import lock_queue
 from aquilon.worker.templates.city import PlenaryCity
-from aquilon.worker.commands.add_location import CommandAddLocation
 
 
-class CommandAddCity(CommandAddLocation):
+class CommandAddCity(BrokerCommand):
 
     required_parameters = ["city", "timezone"]
 
     def render(self, session, logger, city, country, fullname, comments,
                timezone, campus,
                **arguments):
-
         if country:
-            parentname = country
-            parenttype = 'country'
+            dbparent = Country.get_unique(session, country, compel=True)
         else:
-            parentname = campus
-            parenttype = 'campus'
+            dbparent = Campus.get_unique(session, campus, compel=True)
 
-        return CommandAddLocation.render(self, session, city, fullname, 'city',
-                                         parentname, parenttype, comments,
-                                         logger=logger, timezone=timezone,
-                                         campus=campus, **arguments)
+        dbcity = add_location(session, City, city, dbparent, fullname=fullname,
+                              comments=comments, timezone=timezone)
 
-    def before_flush(self, session, new_loc, **arguments):
+        session.flush()
 
-        if "timezone" in arguments:
-            new_loc.timezone = arguments["timezone"]
-
-    def after_flush(self, session, new_loc, **arguments):
-        logger = arguments["logger"]
-
-        city, country, fullname = (new_loc.name, new_loc.country.name,
-                                   new_loc.fullname)
-
-        plenary = PlenaryCity(new_loc, logger=logger)
+        plenary = PlenaryCity(dbcity, logger=logger)
         key = plenary.get_write_key()
         try:
             lock_queue.acquire(key)
             plenary.write(locked=True)
 
             dsdb_runner = DSDBRunner(logger=logger)
-            dsdb_runner.add_city(city, country, fullname)
+            dsdb_runner.add_city(city, dbcity.country.name, fullname)
             dsdb_runner.commit_or_rollback()
 
         except:

@@ -17,13 +17,15 @@
 """ Desk is a subclass of Location """
 from sqlalchemy import Column, Integer, ForeignKey
 
-from aquilon.aqdb.model import Location
+from aquilon.aqdb.model import Location, Building, Room
 
 
 class Desk(Location):
     """ Desk is a subtype of location """
     __tablename__ = 'desk'
     __mapper_args__ = {'polymorphic_identity': 'desk'}
+
+    valid_parents = [Building, Room]
 
     id = Column(Integer, ForeignKey('location.id',
                                     name='desk_loc_fk',

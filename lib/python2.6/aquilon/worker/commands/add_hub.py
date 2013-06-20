@@ -16,14 +16,13 @@
 # limitations under the License.
 """Contains the logic for `aq add hub`."""
 
-
 from aquilon.exceptions_ import ArgumentError
-from aquilon.worker.commands.add_location import CommandAddLocation
-from aquilon.worker.commands import BrokerCommand
-from aquilon.aqdb.model import Company
+from aquilon.aqdb.model import Company, Hub
+from aquilon.worker.commands import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.dbwrappers.location import add_location
 
 
-class CommandAddHub(CommandAddLocation):
+class CommandAddHub(BrokerCommand):
 
     required_parameters = ["hub"]
 
@@ -34,11 +33,10 @@ class CommandAddHub(CommandAddLocation):
             raise ArgumentError("Please specify --organization, since no "
                                 "default is available.")
 
-        # This is not strictly neccessary, but gives a nicer error message
-        Company.get_unique(session, organization, compel=True)
+        dborg = Company.get_unique(session, organization, compel=True)
+        add_location(session, Hub, hub, dborg, fullname=fullname,
+                     comments=comments)
 
-        return CommandAddLocation.render(self, session=session, name=hub,
-                                         type='hub', fullname=fullname,
-                                         parentname=organization,
-                                         parenttype='company',
-                                         comments=comments, **arguments)
+        session.flush()
+
+        return

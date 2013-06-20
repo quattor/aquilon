@@ -85,6 +85,11 @@ class TestOrganization(TestBrokerCommand):
         command = "del organization --organization example"
         self.noouttest(command.split(" "))
 
+    def test_160_add_ms(self):
+        command = ["add_organization", "--organization", "ms",
+                   "--fullname", "Morgan Stanley"]
+        self.noouttest(command)
+
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestOrganization)

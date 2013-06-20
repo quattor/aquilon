@@ -16,16 +16,13 @@
 # limitations under the License.
 """Contains the logic for `aq show building --building`."""
 
-
+from aquilon.aqdb.model import Building
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.commands.show_location_type import CommandShowLocationType
 
 
-class CommandShowBuildingBuilding(CommandShowLocationType):
+class CommandShowBuildingBuilding(BrokerCommand):
 
     required_parameters = ["building"]
 
     def render(self, session, building, **arguments):
-        return CommandShowLocationType.render(self, session=session,
-                                              type='building', name=building,
-                                              **arguments)
+        return Building.get_unique(session, building, compel=True)

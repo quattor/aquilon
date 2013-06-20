@@ -26,6 +26,8 @@ class Company(Location):
     _class_label = 'Organization'
     __mapper_args__ = {'polymorphic_identity': 'company'}
 
+    valid_parents = []
+
     id = Column(Integer, ForeignKey('location.id',
                                     name='company_loc_fk',
                                     ondelete='CASCADE'),

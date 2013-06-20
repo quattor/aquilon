@@ -16,16 +16,13 @@
 # limitations under the License.
 """Contains the logic for `aq show country --country`."""
 
-
+from aquilon.aqdb.model import Country
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.commands.show_location_type import CommandShowLocationType
 
 
-class CommandShowCountryCountry(CommandShowLocationType):
+class CommandShowCountryCountry(BrokerCommand):
 
     required_parameters = ["country"]
 
     def render(self, session, country, **arguments):
-        return CommandShowLocationType.render(self, session=session,
-                                              type='country', name=country,
-                                              **arguments)
+        return Country.get_unique(session, country, compel=True)

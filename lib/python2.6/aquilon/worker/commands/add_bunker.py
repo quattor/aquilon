@@ -16,26 +16,28 @@
 # limitations under the License.
 """Contains the logic for `aq add bunker`."""
 
-
+from aquilon.exceptions_ import ArgumentError
+from aquilon.aqdb.model import Building, Bunker, Room
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.commands.add_location import CommandAddLocation
+from aquilon.worker.dbwrappers.location import add_location
 
 
-class CommandAddBunker(CommandAddLocation):
+class CommandAddBunker(BrokerCommand):
 
     required_parameters = ["bunker"]
 
     def render(self, session, bunker, room, building, fullname, comments,
                **arguments):
         if room:
-            parentname = room
-            parenttype = 'room'
-        else:
-            parentname = building
-            parenttype = 'building'
+            dbparent = Room.get_unique(session, room, compel=True)
+        elif building:
+            dbparent = Building.get_unique(session, building, compel=True)
+        else:  # pragma: no cover
+            raise ArgumentError("Please specify either --room or --building.")
 
-        return CommandAddLocation.render(self, session=session, name=bunker,
-                                         type='bunker', fullname=fullname,
-                                         parentname=parentname,
-                                         parenttype=parenttype,
-                                         comments=comments, **arguments)
+        add_location(session, Bunker, bunker, dbparent, fullname=fullname,
+                     comments=comments)
+
+        session.flush()
+
+        return

@@ -2,7 +2,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012,2013  Contributor
+# Copyright (C) 2013  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Module for testing the add desk command."""
+"""Module for testing the add/del/show continent command."""
 
 import unittest
 
@@ -25,20 +25,21 @@ if __name__ == "__main__":
 
 from brokertest import TestBrokerCommand
 
+continents = {'af': ('Africa', 'ln'),
+              'as': ('Asia', 'hk'),
+              'au': ('Australia', 'hk'),
+              'eu': ('Europe', 'ln'),
+              'na': ('North America', 'ny'),
+              'sa': ('South America', 'ny')}
 
-class TestAddDesk(TestBrokerCommand):
 
-    def testaddutdesk1(self):
-        command = ["add", "desk", "--desk", "utdesk1", "--room", "utroom1",
-                   "--fullname", "Desk utroom1/1"]
-        self.noouttest(command)
-
-    def testverifyaddutdesk1(self):
-        command = "show desk --desk utdesk1"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Desk: utdesk1", command)
+class TestContinent(TestBrokerCommand):
+    def test_add_continents(self):
+        for continent, params in continents.items():
+            self.noouttest(["add_continent", "--continent", continent,
+                            "--fullname", params[0], "--hub", params[1]])
 
 
 if __name__ == '__main__':
-    suite = unittest.TestLoader().loadTestsFromTestCase(TestAddDesk)
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestContinent)
     unittest.TextTestRunner(verbosity=2).run(suite)

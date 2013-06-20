@@ -29,11 +29,11 @@ from brokertest import TestBrokerCommand
 class TestDelDesk(TestBrokerCommand):
 
     def testdelutdesk1(self):
-        command = "del location --type desk --name utdesk1"
+        command = "del desk --desk utdesk1"
         self.noouttest(command.split(" "))
 
     def testverifydelutdesk1(self):
-        command = "show location --type desk --name utdesk1"
+        command = "show desk --desk utdesk1"
         self.notfoundtest(command.split(" "))
 
 

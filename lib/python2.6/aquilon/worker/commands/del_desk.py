@@ -14,14 +14,17 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Contains the logic for `aq show location --type --name`."""
+"""Contains the logic for `aq del desk`."""
 
 
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.commands.show_location_type import CommandShowLocationType
+from aquilon.worker.commands.del_location import CommandDelLocation
 
 
-class CommandShowLocationName(CommandShowLocationType):
-    """The superclass can already handle this case."""
+class CommandDelDesk(CommandDelLocation):
 
-    required_parameters = ["type", "name"]
+    required_parameters = ["desk"]
+
+    def render(self, session, desk, **arguments):
+        return CommandDelLocation.render(self, session=session, name=desk,
+                                         type='desk', **arguments)

@@ -11,6 +11,6 @@ Permissions are significant to nose's automated test collections. By default,
 nose will *NOT* run any module that is executable. 
 
 The things that are executable in this directory, especially build_db, 
-runnose, test_campus_populate, orderedsuite and test_utils are executable so
+runnose, orderedsuite and test_utils are executable so
 that they won't run as a part of the fully automated noserun system.
 

@@ -89,6 +89,14 @@ class TestCountry(TestBrokerCommand):
         out = self.notfoundtest(command.split(" "))
         self.matchoutput(out, "Country ct not found.", command)
 
+    def testaddgb(self):
+        self.noouttest(["add_country", "--country", "gb", "--continent", "eu",
+                        "--fullname", "Great Britain"])
+
+    def testaddus(self):
+        self.noouttest(["add_country", "--country", "us", "--continent", "na",
+                        "--fullname", "USA"])
+
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestCountry)

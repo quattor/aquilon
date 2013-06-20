@@ -29,7 +29,7 @@ from brokertest import TestBrokerCommand
 class TestDelCampus(TestBrokerCommand):
 
     def testdelte(self):
-        self.dsdb_expect("delete_campus_aq -campus ta")
+        self.dsdb_expect_del_campus("ta")
         command = "del campus --campus ta"
         self.noouttest(command.split(" "))
         self.dsdb_verify()
@@ -42,14 +42,13 @@ class TestDelCampus(TestBrokerCommand):
         ## add campus
 
         test_campus = "bz"
-        self.dsdb_expect("add_campus_aq -campus_name bz")
+        self.dsdb_expect_add_campus(test_campus)
         command = ["add", "campus", "--campus", test_campus, "--country", "us"]
         self.successtest(command)
         self.dsdb_verify()
 
-        dsdb_command = "delete_campus_aq -campus %s" % test_campus
         errstr = "campus %s doesn't exist" % test_campus
-        self.dsdb_expect(dsdb_command, True, errstr)
+        self.dsdb_expect_del_campus(test_campus, fail=True, errstr=errstr)
         command = "del campus --campus %s" % test_campus
         (out, err) = self.successtest(command.split(" "))
         self.assertEmptyOut(out, command)

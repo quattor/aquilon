@@ -18,7 +18,7 @@
 
 from sqlalchemy import Column, Integer, ForeignKey, String
 
-from aquilon.aqdb.model import Location
+from aquilon.aqdb.model import Location, City, Campus
 
 _TN = 'building'
 
@@ -27,6 +27,8 @@ class Building(Location):
     """ Building is a subtype of location """
     __tablename__ = _TN
     __mapper_args__ = {'polymorphic_identity': _TN}
+
+    valid_parents = [City, Campus]
 
     id = Column(Integer, ForeignKey('location.id',
                                     name='building_loc_fk',

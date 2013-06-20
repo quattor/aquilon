@@ -55,10 +55,8 @@ class TestUpdateBuilding(TestBrokerCommand):
     def test_106_updatecity(self):
         self.dsdb_expect("update_building_aq -building_name tu "
                          "-building_addr 20 Penny Lane")
-        self.dsdb_expect("delete_campus_building_aq -campus_name ny "
-                         "-building_name tu")
-        self.dsdb_expect("add_campus_building_aq -campus_name ta "
-                         "-building_name tu")
+        self.dsdb_expect_del_campus_building("ny", "tu")
+        self.dsdb_expect_add_campus_building("ta", "tu")
 
         command = ["update", "building", "--building", "tu",
                    "--address", "20 Penny Lane", "--city", "e5"]

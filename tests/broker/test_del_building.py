@@ -29,8 +29,7 @@ from brokertest import TestBrokerCommand
 class TestDelBuilding(TestBrokerCommand):
 
     def testdelbu(self):
-        self.dsdb_expect("delete_campus_building_aq -campus_name ny "
-                         "-building_name bu")
+        self.dsdb_expect_del_campus_building("ny", "bu")
         self.dsdb_expect("delete_building_aq -building bu")
         command = "del building --building bu"
         self.noouttest(command.split(" "))
@@ -68,8 +67,7 @@ class TestDelBuilding(TestBrokerCommand):
         self.dsdb_verify()
 
     def testdelnettest02(self):
-        self.dsdb_expect("delete_campus_building_aq -campus_name ny "
-                         "-building_name nettest")
+        self.dsdb_expect_del_campus_building("ny", "nettest")
         self.dsdb_expect("delete_building_aq -building nettest")
         command = "del building --building nettest"
         self.noouttest(command.split(" "))
@@ -99,8 +97,7 @@ class TestDelBuilding(TestBrokerCommand):
         self.noouttest(["del_network", "--ip", "192.176.6.0"])
 
     def test_deletetu(self):
-        self.dsdb_expect("delete_campus_building_aq -campus_name ta "
-                         "-building_name tu")
+        self.dsdb_expect_del_campus_building("ta", "tu")
         self.dsdb_expect("delete_building_aq -building tu")
         command = "del building --building tu"
         self.noouttest(command.split(" "))

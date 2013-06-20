@@ -21,7 +21,8 @@ from sqlalchemy import (Integer, DateTime, Sequence, String, Column,
                         ForeignKey, UniqueConstraint, PrimaryKeyConstraint,
                         Index)
 
-from sqlalchemy.orm import relation, backref, object_session, deferred
+from sqlalchemy.orm import (relation, backref, object_session, deferred,
+                            reconstructor)
 from sqlalchemy.sql import and_, or_, desc
 
 from aquilon.aqdb.model import Base, DnsDomain
@@ -32,6 +33,8 @@ from aquilon.exceptions_ import AquilonError
 class Location(Base):
     """ How we represent location data in Aquilon """
     __tablename__ = 'location'
+
+    valid_parents = []
 
     id = Column(Integer, Sequence('location_id_seq'), primary_key=True)
 
@@ -57,55 +60,52 @@ class Location(Base):
                                        name='loc_name_type_uk'),)
     __mapper_args__ = {'polymorphic_on': location_type}
 
-    def get_p_dict(self):
-        d = {str(self.location_type): self}
-        for p_node in self.parents:
-            d[str(p_node.location_type)] = p_node
-        return d
-
-    @property
-    def p_dict(self):
-        return self.get_p_dict()
+    def get_p_dict(self, loc_type):
+        if self._parent_dict is None:
+            self._parent_dict = {str(self.location_type): self}
+            for node in self.parents:
+                self._parent_dict[str(node.location_type)] = node
+        return self._parent_dict.get(loc_type, None)
 
     @property
     def hub(self):
-        return self.p_dict.get('hub', None)
+        return self.get_p_dict('hub')
 
     @property
     def continent(self):
-        return self.p_dict.get('continent', None)
+        return self.get_p_dict('continent')
 
     @property
     def country(self):
-        return self.p_dict.get('country', None)
+        return self.get_p_dict('country')
 
     @property
     def campus(self):
-        return self.p_dict.get('campus', None)
+        return self.get_p_dict('campus')
 
     @property
     def city(self):
-        return self.p_dict.get('city', None)
+        return self.get_p_dict('city')
 
     @property
     def building(self):
-        return self.p_dict.get('building', None)
+        return self.get_p_dict('building')
 
     @property
     def bunker(self):
-        return self.p_dict.get('bunker', None)
+        return self.get_p_dict('bunker')
 
     @property
     def room(self):
-        return self.p_dict.get('room', None)
+        return self.get_p_dict('room')
 
     @property
     def rack(self):
-        return self.p_dict.get('rack', None)
+        return self.get_p_dict('rack')
 
     @property
     def chassis(self):
-        return self.p_dict.get('chassis', None)
+        return self.get_p_dict('chassis')
 
     def offspring_ids(self):
         session = object_session(self)
@@ -126,11 +126,14 @@ class Location(Base):
         return q.subquery()
 
     def sysloc(self):
-        components = ['building', 'city', 'continent']
+        components = ('building', 'city', 'continent')
+        names = []
         for component in components:
-            if component not in self.p_dict:
+            value = self.get_p_dict(component)
+            if not value:
                 return None
-        return str('.'.join([self.p_dict[item].name for item in components]))
+            names.append(value.name)
+        return str('.'.join(names))
 
     def get_parts(self):
         parts = list(self.parents)
@@ -149,11 +152,14 @@ class Location(Base):
             merged = self_part
         return merged
 
-    def __init__(self, parent=None, **kwargs):
+    def __init__(self, parent=None, name=None, fullname=None, **kwargs):
         # Keep compatibility with the old behavior of the "parent" attribute
         # when creating new objects. Note that both the location manipulation
         # commands and the data loader in the unittest suite depends on this.
         if parent is not None:
+            if parent.__class__ not in self.valid_parents:
+                raise AquilonError("{0} cannot be a parent of {1:lc} {2}."
+                                   .format(parent, self, name))
             session = object_session(parent)
             if not session:
                 raise AquilonError("The parent must be persistent")
@@ -167,12 +173,23 @@ class Location(Base):
                 session.add(LocationLink(child=self, parent=parent, distance=1))
             session.expire(parent, ["_child_links", "children"])
 
-        super(Location, self).__init__(**kwargs)
+        if not fullname:
+            fullname = name
+
+        super(Location, self).__init__(name=name, fullname=fullname, **kwargs)
+        self._parent_dict = None
+
+    @reconstructor
+    def setup(self):
+        self._parent_dict = None
 
     def update_parent(self, parent=None):
         session = object_session(self)
         if parent is None:  # pragma: no cover
             raise AquilonError("Parent location can be updated but not removed")
+        if parent.__class__ not in self.valid_parents:
+            raise AquilonError("{0} cannot be a parent of {1:l}."
+                               .format(parent, self))
 
         # Disable autoflush. We'll make use of SQLA's ability to replace
         # DELETE + INSERT for the same LocationLink with an UPDATE of the
@@ -208,6 +225,7 @@ class Location(Base):
         session.flush()
         session.expire(parent, ["_child_links", "children"])
         session.expire(self, ["_parent_links", "parent", "parents"])
+        self._parent_dict = None
 
 location = Location.__table__  # pylint: disable=C0103
 location.info['unique_fields'] = ['name', 'location_type']
@@ -242,14 +260,17 @@ class LocationLink(Base):
     __table_args__ = (PrimaryKeyConstraint(child_id, parent_id),
                       Index("location_link_parent_idx", parent_id))
 
-# Make these relations view-only, to make sure
-# the distance is managed explicitely
+# Make these relations view-only, to make sure the distance is managed
+# explicitely
 Location.parents = relation(Location,
                             secondary=LocationLink.__table__,
                             primaryjoin=Location.id == LocationLink.child_id,
                             secondaryjoin=Location.id == LocationLink.parent_id,
                             order_by=[desc(LocationLink.distance)],
-                            viewonly=True)
+                            viewonly=True,
+                            backref=backref('children',
+                                            order_by=[LocationLink.distance],
+                                            viewonly=True))
 
 # FIXME: this should be dropped when multiple parents are allowed
 Location.parent = relation(Location, uselist=False,
@@ -258,10 +279,3 @@ Location.parent = relation(Location, uselist=False,
                                             LocationLink.distance == 1),
                            secondaryjoin=Location.id == LocationLink.parent_id,
                            viewonly=True)
-
-Location.children = relation(Location,
-                             secondary=LocationLink.__table__,
-                             primaryjoin=Location.id == LocationLink.parent_id,
-                             secondaryjoin=Location.id == LocationLink.child_id,
-                             order_by=[LocationLink.distance],
-                             viewonly=True)

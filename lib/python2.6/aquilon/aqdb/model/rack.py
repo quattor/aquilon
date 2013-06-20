@@ -21,13 +21,15 @@ from sqlalchemy.orm import validates
 
 from aquilon.aqdb.column_types import AqStr
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import Location
+from aquilon.aqdb.model import Location, Building, Room, Bunker
 
 
 class Rack(Location):
     """ Rack is a subtype of location """
     __tablename__ = 'rack'
     __mapper_args__ = {'polymorphic_identity': 'rack'}
+
+    valid_parents = [Building, Room, Bunker]
 
     id = Column(Integer, ForeignKey('location.id', name='rack_loc_fk',
                                     ondelete='CASCADE'), primary_key=True)

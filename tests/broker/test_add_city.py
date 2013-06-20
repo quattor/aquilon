@@ -119,10 +119,11 @@ class TestAddCity(TestBrokerCommand):
         self.dsdb_verify()
 
         ## add campus
-        command = ["add", "location", "--type", "campus", "--name", "na",
-                   "--parenttype", "country", "--parentname", "us",
+        self.dsdb_expect_add_campus("na")
+        command = ["add", "campus", "--campus", "na", "--country", "us",
                    "--fullname", "test campus"]
         self.noouttest(command)
+        self.dsdb_verify()
 
         # update city
         self.dsdb_expect("update_city_aq -city e4 -campus na")
@@ -181,6 +182,7 @@ class TestAddCity(TestBrokerCommand):
         command = ["add", "city", "--city", "e6", "--country", "gb",
                    "--fullname", "ExampleSix", "--timezone", "Europe/London"]
         self.noouttest(command)
+        self.dsdb_verify()
 
         ## update city bad campus
         command = ["update", "city", "--city", "e6", "--campus", "na"]
@@ -196,6 +198,20 @@ class TestAddCity(TestBrokerCommand):
         command = ["show", "city", "--city", "ny"]
         out = self.commandtest(command)
         self.matchoutput(out, "Default DNS Domain: one-nyp.ms.com", command)
+
+    def testaddln(self):
+        self.dsdb_expect("add_city_aq -city_symbol ln " +
+                         "-country_symbol gb -city_name London")
+        self.noouttest(["add_city", "--city", "ln", "--campus", "ln",
+                        "--fullname", "London", "--timezone", "Europe/London"])
+        self.dsdb_verify()
+
+    def testaddny(self):
+        self.dsdb_expect("add_city_aq -city_symbol ny " +
+                         "-country_symbol us -city_name New York")
+        self.noouttest(["add_city", "--city", "ny", "--campus", "ny",
+                        "--fullname", "New York", "--timezone", "US/Eastern"])
+        self.dsdb_verify()
 
 
 if __name__ == '__main__':

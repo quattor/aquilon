@@ -55,6 +55,10 @@ class TestAddRoom(TestBrokerCommand):
         self.matchoutput(out, "room,utroom1,building,ut", command)
         self.matchoutput(out, "room,utroom2,building,ut", command)
 
+    def testaddnplab1(self):
+        self.noouttest(["add_room", "--room", "np-lab1", "--building", "np",
+                        "--fullname", "NP lab1"])
+
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddRoom)

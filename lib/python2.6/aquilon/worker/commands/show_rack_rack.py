@@ -16,16 +16,13 @@
 # limitations under the License.
 """Contains the logic for `aq show rack --rack`."""
 
-
+from aquilon.aqdb.model import Rack
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.commands.show_location_type import CommandShowLocationType
 
 
-class CommandShowRackRack(CommandShowLocationType):
+class CommandShowRackRack(BrokerCommand):
 
     required_parameters = ["rack"]
 
     def render(self, session, rack, **arguments):
-        return CommandShowLocationType.render(self, session=session,
-                                              type='rack', name=rack,
-                                              **arguments)
+        return Rack.get_unique(session, rack, compel=True)

@@ -32,13 +32,15 @@
 
 from sqlalchemy import Column, Integer, ForeignKey
 
-from aquilon.aqdb.model import Location
+from aquilon.aqdb.model import Location, Company
 
 
 class Hub(Location):
     """ Hub is a subtype of location """
     __tablename__ = 'hub'
     __mapper_args__ = {'polymorphic_identity': 'hub'}
+
+    valid_parents = [Company]
 
     id = Column(Integer, ForeignKey('location.id',
                                     name='hub_loc_fk',

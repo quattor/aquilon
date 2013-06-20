@@ -17,13 +17,15 @@
 """ Country is a subclass of Location """
 from sqlalchemy import Column, Integer, ForeignKey
 
-from aquilon.aqdb.model import Location
+from aquilon.aqdb.model import Location, Continent
 
 
 class Country(Location):
     """ Country is a subtype of location """
     __tablename__ = 'country'
     __mapper_args__ = {'polymorphic_identity': 'country'}
+
+    valid_parents = [Continent]
 
     id = Column(Integer, ForeignKey('location.id',
                                     name='country_loc_fk',

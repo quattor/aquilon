@@ -58,13 +58,6 @@ Domain(name="prod", owner=UserPrincipal(name="njw"),
 
 DnsDomain(name="example.com")
 
-Company(name="example", fullname="An Example Organization")
-Hub(name="ln", fullname="Europe", parent=Company(name="example"))
-Continent(name="eu", fullname="Europe", parent=Hub(name="ln"))
-Country(name="gb", fullname="Great Britain", parent=Continent(name="eu"))
-Campus(name="ln", fullname="London", parent=Country(name="gb"))
-City(name="ln", fullname="London", parent=Campus(name="ln"))
-
 Archetype(name="qwg", is_compileable=True)
 
 OperatingSystem(archetype=Archetype(name="qwg"), name="linux", version="5.0-x86_64")

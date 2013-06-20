@@ -17,34 +17,28 @@
 """Contains the logic for `aq add building`."""
 
 
-from aquilon.worker.processes import DSDBRunner
+from aquilon.aqdb.model import Building, City
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.commands.add_location import CommandAddLocation
+from aquilon.worker.dbwrappers.location import add_location
+from aquilon.worker.processes import DSDBRunner
 
 
-class CommandAddBuilding(CommandAddLocation):
+class CommandAddBuilding(BrokerCommand):
 
     required_parameters = ["building", "city", "address"]
 
     def render(self, session, logger, building, city, fullname, comments,
                address, **arguments):
+        dbcity = City.get_unique(session, city, compel=True)
+        add_location(session, Building, building, dbcity, fullname=fullname,
+                     address=address, comments=comments)
 
-        return CommandAddLocation.render(self, session, building,
-                                         fullname, 'building', city, 'city',
-                                         comments, address, logger=logger,
-                                         **arguments)
-
-    def after_flush(self, session, new_loc, **arguments):
-        logger = arguments["logger"]
-
-        building, city, address = (new_loc.name,
-                                   new_loc.city.name, new_loc.address)
-        newcity = new_loc.city
+        session.flush()
 
         dsdb_runner = DSDBRunner(logger=logger)
         dsdb_runner.add_building(building, city, address)
-        if newcity.campus:
-            dsdb_runner.add_campus_building(newcity.campus, building)
+        if dbcity.campus:
+            dsdb_runner.add_campus_building(dbcity.campus, building)
         dsdb_runner.commit_or_rollback()
 
         return

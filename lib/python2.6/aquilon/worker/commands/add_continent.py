@@ -16,17 +16,20 @@
 # limitations under the License.
 """Contains the logic for `aq add continent`."""
 
-
+from aquilon.aqdb.model import Hub, Continent
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.commands.add_location import CommandAddLocation
+from aquilon.worker.dbwrappers.location import add_location
 
 
-class CommandAddContinent(CommandAddLocation):
+class CommandAddContinent(BrokerCommand):
 
     required_parameters = ["continent", "hub"]
 
     def render(self, session, continent, hub, fullname, comments, **arguments):
-        return CommandAddLocation.render(self, session=session, name=continent,
-                                         type='continent', fullname=fullname,
-                                         parentname=hub, parenttype='hub',
-                                         comments=comments, **arguments)
+        dbhub = Hub.get_unique(session, hub, compel=True)
+        add_location(session, Continent, continent, dbhub, fullname=fullname,
+                     comments=comments)
+
+        session.flush()
+
+        return
