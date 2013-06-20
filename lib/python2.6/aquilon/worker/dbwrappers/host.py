@@ -20,6 +20,8 @@
 from aquilon.exceptions_ import NotFoundException, ArgumentError
 from aquilon.aqdb.model import Machine
 from aquilon.aqdb.model.dns_domain import parse_fqdn
+from collections import defaultdict
+from types import ListType
 
 
 def hostname_to_host(session, hostname):
@@ -97,3 +99,27 @@ def check_hostlist_size(command, config, hostlist):
         raise ArgumentError("The number of hosts in list {0:d} can not be "
                             "more than {1:d}".format(len(hostlist), hostlist_max_size))
     return
+
+def validate_branch_author(dbhosts):
+    branches = defaultdict(ListType)
+    authors = defaultdict(ListType)    
+    for dbhost in dbhosts:
+        branches[dbhost.branch].append(dbhost)      
+        authors[dbhost.sandbox_author].append(dbhost)
+
+    if len(branches) > 1:
+       keys = branches.keys()
+       branch_sort = lambda x, y: cmp(len(branches[x]), len(branches[y]))
+       keys.sort(cmp=branch_sort)
+       stats = ["{0:d} hosts in {1:l}".format(len(branches[branch]), branch)
+                     for branch in keys]
+       raise ArgumentError("All hosts must be in the same domain or "
+                           "sandbox:\n%s" % "\n".join(stats))
+    if len(authors) > 1:
+       keys = authors.keys()
+       author_sort = lambda x, y: cmp(len(authors[x]), len(authors[y]))
+       keys.sort(cmp=author_sort)
+       stats = ["%s hosts with sandbox author %s" %
+                (len(authors[author]), author.name) for author in keys]
+       raise ArgumentError("All hosts must be managed by the same "
+                           "sandbox author:\n%s" % "\n".join(stats))

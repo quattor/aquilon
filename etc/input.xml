@@ -539,6 +539,10 @@
          <option name="sandbox" type="string" conflicts="domain hostname cluster">Name of the sandbox (given as 'author/branch')</option>
          <option name="hostname" type="string" conflicts="domain sandbox cluster">FQDN</option>
          <option name="cluster" type="string" conflicts="domain sandbox hostname">Name of cluster</option>
+         <optgroup name="personality_opts" fields="all">
+            <option name="personality" type="string" conflicts="hostname cluster">personality name</option>
+            <option name="archetype" type="string" conflicts="hostname cluster">archetype name</option>
+         </optgroup>
       </optgroup>
       <optgroup name="compile_optional" mandatory="False" fields="any">
          <option name="pancinclude" type="string" conflicts="pancdebug">Regex for templates to include in debug output (None included by default)</option>
@@ -549,6 +553,7 @@
       <transport method="post" path="compile"/>
       <transport trigger="hostname" method="post" path="host/%(hostname)s/command/compile" />
       <transport trigger="cluster" method="post" path="cluster/%(cluster)s/command/compile" />
+      <transport trigger="personality" method="post" path="archetype/%(archetype)s/personality/%(personality)s/command/compile" />
    </command>
 
    <command name="show_domain">

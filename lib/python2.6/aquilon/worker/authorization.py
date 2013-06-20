@@ -192,7 +192,7 @@ class AuthorizationBroker(object):
             if action not in ['add_host', 'add_windows_host',
                               'del_host', 'del_windows_host',
                               'compile', 'compile_hostname',
-                              'compile_cluster',
+                              'compile_cluster', 'compile_personality',
                               'reconfigure', 'change_status',
                               'reconfigure_list', 'reconfigure_hostlist',
                               'pxeswitch', 'pxeswitch_list',

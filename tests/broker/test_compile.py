@@ -189,9 +189,6 @@ class TestCompile(TestBrokerCommand):
         command = ['manage', '--hostname=unittest02.one-nyp.ms.com',
                    '--domain=unittest', '--force']
         self.successtest(command)
-        command = ['manage', '--hostname=unittest02.one-nyp.ms.com',
-                   '--domain=unittest', '--force']
-        self.successtest(command)
         command = ['compile', '--hostname=unittest02.one-nyp.ms.com']
         self.successtest(command)
 
@@ -265,6 +262,34 @@ class TestCompile(TestBrokerCommand):
         self.matchoutput(err, "aqd unittest debug for aquilon base", command)
         self.matchclean(err, "aqd unittest debug for aquilon final", command)
         self.matchclean(err, "Assigning repositories to packages...", command)
+
+    def test_550_compilepersonality(self):
+        command = "compile --personality compileserver --archetype aquilon"
+        (out, err) = self.successtest(command.split(" "))
+        self.matchoutput(err, "0/10 object template(s) being processed",
+                         command)
+
+    def test_560_compilepersonality(self):
+        command = ['manage', '--hostname=unittest02.one-nyp.ms.com',
+                   '--domain=ut-prod', '--force']
+        self.successtest(command)
+        command = ['compile', '--personality=compileserver', '--archetype=aquilon']
+        err = self.badrequesttest(command)
+        self.matchoutput(err, 'Bad Request: All hosts must be in the same domain or sandbox:',
+                         command)
+        self.matchoutput(err, '1 hosts in domain ut-prod', command)
+
+    def test_570_compilepersonalityidomain(self):
+        command = ['compile', '--personality=compileserver', '--archetype=aquilon',
+                   '--domain=ut-prod']
+        (out, err) = self.successtest(command)
+        self.matchoutput(err, "1/1 object template(s) being processed",
+                         command)
+
+    def test_580_reset_data(self):
+        command = ['manage', '--hostname=unittest02.one-nyp.ms.com',
+                   '--domain=unittest', '--force']
+        self.successtest(command)
 
     def test_600_aqcompile(self):
         aqcompile = os.path.join(self.config.get("broker", "srcdir"),
