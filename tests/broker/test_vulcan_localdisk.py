@@ -185,6 +185,12 @@ class TestVulcanLocalDisk(TestBrokerCommand):
                    "--hostname=%s" % self.vmhost]
         self.successtest(command)
 
+        # Quick test
+        command = ["cat", "--filesystem=utfs1",
+                   "--hostname=%s" % self.vmhost]
+        out = self.commandtest(command)
+        self.matchoutput(out, '"name" = "utfs1";', command)
+
     def test_130_addutpgm0disk(self):
         for i in range(0, 3):
             machine = "utpgm%d" % i
