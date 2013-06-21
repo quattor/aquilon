@@ -19,6 +19,7 @@
 
 import logging
 from operator import attrgetter
+from collections import defaultdict
 
 from aquilon.config import Config
 from aquilon.exceptions_ import IncompleteError, InternalError
@@ -254,20 +255,14 @@ class PlenaryHostData(Plenary):
 
 
         ## process grns
-        eon_id_map = {}
+        eon_id_map = defaultdict(set)
 
         # own
         for grn_rec in self.dbobj._grns:
-            if grn_rec.target not in eon_id_map:
-                eon_id_map[grn_rec.target] = set()
-
             eon_id_map[grn_rec.target].add(grn_rec.grn.eon_id)
 
         # pers level
         for grn_rec in pers._grns:
-            if grn_rec.target not in eon_id_map:
-                eon_id_map[grn_rec.target] = set()
-
             eon_id_map[grn_rec.target].add(grn_rec.grn.eon_id)
 
         for (target, eon_id_set) in eon_id_map.iteritems():

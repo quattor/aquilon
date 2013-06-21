@@ -16,6 +16,7 @@
 # limitations under the License.
 
 import logging
+from collections import defaultdict
 
 from aquilon.aqdb.model import Personality, Parameter
 from aquilon.worker.templates.base import (Plenary, TemplateFormatter,
@@ -170,13 +171,10 @@ class PlenaryPersonalityBase(Plenary):
         pan_variable(lines, "PERSONALITY", self.name)
 
         ## process grns
-        eon_id_map = {}
+        eon_id_map = defaultdict(set)
 
         # own == pers level
         for grn_rec in self.dbobj._grns:
-            if grn_rec.target not in eon_id_map:
-                eon_id_map[grn_rec.target] = set()
-
             eon_id_map[grn_rec.target].add(grn_rec.grn.eon_id)
 
         for (target, eon_id_set) in eon_id_map.iteritems():
@@ -190,7 +188,7 @@ class PlenaryPersonalityBase(Plenary):
         if self.config.has_option("archetype_" + archetype,
                                   "default_grn_target"):
             default_grn_target = self.config.get("archetype_" + archetype,
-                            "default_grn_target")
+                                                 "default_grn_target")
 
             eon_id_set = eon_id_map[default_grn_target]
 
