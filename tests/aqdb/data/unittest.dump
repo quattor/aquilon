@@ -41,7 +41,7 @@
 # character. The rest of the name should be a valid Python identifier, although
 # this is not enforced yet.
 
-Realm(name="is1.morgan")
+Realm(name="example.realm")
 
 Role(name="nobody")
 Role(name="operations")
@@ -52,7 +52,7 @@ Role(name="maintech")
 Role(name="unixops_l2")
 Role(name="winops")
 
-UserPrincipal(name="cdb", role=Role(name="aqd_admin"), realm=Realm(name="is1.morgan"))
+UserPrincipal(name="cdb", role=Role(name="aqd_admin"), realm=Realm(name="example.realm"))
 
 DnsEnvironment(name="internal")
 DnsEnvironment(name="external")
