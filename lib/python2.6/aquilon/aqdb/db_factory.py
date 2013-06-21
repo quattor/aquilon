@@ -20,6 +20,7 @@ import re
 import os
 import sys
 import logging
+from numbers import Number
 
 from aquilon.aqdb import depends
 from aquilon.config import Config
@@ -66,8 +67,12 @@ def visit_create_index(create, compiler, **kw):
            ', '.join(compiler.sql_compiler.process(expr, include_table=False)
                      for expr in index.expressions))
 
-    if index.kwargs.get("oracle_compress", False):
-        text += " COMPRESS"
+    compress = index.kwargs.get("oracle_compress", False)
+    if compress:
+        if isinstance(compress, Number):
+            text += " COMPRESS %d" % compress
+        else:
+            text += " COMPRESS"
 
     return text
 
@@ -75,9 +80,15 @@ def visit_create_index(create, compiler, **kw):
 # Add support for table compression
 @monkeypatch(OracleDDLCompiler)
 def post_create_table(self, table):
-    if table.kwargs.get("oracle_compress", False):
-        return " COMPRESS"
-    return ""
+    text = ""
+    compress = table.kwargs.get("oracle_compress", False)
+    if compress:
+        if isinstance(compress, basestring):
+            text += " COMPRESS FOR " + compress.upper()
+        else:
+            text += " COMPRESS"
+
+    return text
 
 
 def sqlite_foreign_keys(dbapi_con, con_record):
