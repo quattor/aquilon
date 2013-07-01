@@ -16,13 +16,13 @@
 # limitations under the License.
 """Contains the logic for `aq manage --list`."""
 
-from types import ListType
-from collections import defaultdict
 from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.commands.manage_hostname import validate_branch_commits
 from aquilon.worker.dbwrappers.branch import get_branch_and_author
-from aquilon.worker.dbwrappers.host import hostlist_to_hosts, check_hostlist_size
+from aquilon.worker.dbwrappers.host import (hostlist_to_hosts,
+                                            check_hostlist_size,
+                                            validate_branch_author)
 from aquilon.worker.locks import lock_queue, CompileKey
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
 
@@ -45,12 +45,9 @@ class CommandManageList(BrokerCommand):
         dbhosts = hostlist_to_hosts(session, list)
 
         failed = []
-        branches = defaultdict(ListType)
-        authors = defaultdict(ListType)
-        for dbhost in dbhosts:
-            branches[dbhost.branch].append(dbhost)
-            authors[dbhost.sandbox_author].append(dbhost)
 
+        validate_branch_author(dbhosts)
+        for dbhost in dbhosts:
             # check if any host in the list is a cluster node
             if dbhost.cluster:
                 failed.append("Cluster nodes must be managed at the "
@@ -61,26 +58,6 @@ class CommandManageList(BrokerCommand):
             raise ArgumentError("Cannot modify the following hosts:\n%s" %
                                 "\n".join(failed))
 
-        if len(branches) > 1:
-            keys = branches.keys()
-            branch_sort = lambda x, y: cmp(len(branches[x]), len(branches[y]))
-            keys.sort(cmp=branch_sort)
-            stats = ["{0:d} hosts in {1:l}".format(len(branches[branch]), branch)
-                     for branch in keys]
-            raise ArgumentError("All hosts must be in the same domain or "
-                                "sandbox:\n%s" % "\n".join(stats))
-
-        # check if all hosts are from the same sandbox author
-        if len(authors) > 1:
-            keys = authors.keys()
-            author_sort = lambda x, y: cmp(len(authors[x]), len(authors[y]))
-            keys.sort(cmp=author_sort)
-            stats = ["{0:d} hosts with sandbox author {1:l}"
-                     .format(len(authors[author]), author.name)
-                     for author in keys]
-            raise ArgumentError("All hosts must be managed by the same "
-                                "sandbox author:\n%s" % "\n".join(stats))
-
         # since we have already checked if all hosts in list are within the
         # same branch, we only need one dbsource to validate the branch
         dbhost = dbhosts[0]
@@ -90,7 +67,7 @@ class CommandManageList(BrokerCommand):
             validate_branch_commits(dbsource, dbsource_author,
                                     dbbranch, dbauthor, logger, self.config)
 
-        old_branch = branches.keys()[0].name
+        old_branch = dbhost.branch.name
 
         plenaries = PlenaryCollection(logger=logger)
         for dbhost in dbhosts:
