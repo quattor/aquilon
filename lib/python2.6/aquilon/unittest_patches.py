@@ -18,9 +18,9 @@
 
 import sys
 import os
-# bin/twistd.py, we'll start it after the patch is done
+# sbin/aqd.py, we'll start it after the patch is done
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                             "..", "..", "..", "bin"))
+                             "..", "..", "..", "sbin"))
 # lib/python2.6/config.py
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)),
                              "..", "..", "..", "lib", "python2.6"))
@@ -81,7 +81,7 @@ socket.gethostbyname = fake_gethostbyname
 
 # worker/resources.py depends on it.
 sys.argv[0] = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                             "..", "..", "..", "bin", "twistd.py")
+                             "..", "..", "..", "sbin", "aqd.py")
 
 # start the broker
-import twistd
+import aqd

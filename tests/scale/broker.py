@@ -34,14 +34,14 @@ from aquilon.exceptions_ import ProcessException
 
 class AQBroker(object):
     default_dir = os.path.dirname(__file__)
-    default_twistd = os.path.realpath(os.path.join(default_dir,
+    default_aqd = os.path.realpath(os.path.join(default_dir,
                                                    '..', '..',
-                                                   'bin', 'twistd.py'))
+                                                   'sbin', 'aqd.py'))
     default_configfile = os.path.realpath(os.path.join(default_dir,
                                                        'aqd.conf.scale'))
 
-    def __init__(self, twistd=None, configfile=None):
-        self.twistd = twistd or self.default_twistd
+    def __init__(self, aqd=None, configfile=None):
+        self.aqd = aqd or self.default_aqd
         self.configfile = configfile or self.default_configfile
         self.config = Config(configfile=self.configfile)
         self.pidfile = os.path.join(self.config.get("broker", "rundir"),
@@ -53,7 +53,7 @@ class AQBroker(object):
     def start(self, **kwargs):
         """Start a broker with the given config."""
         # FIXME: Make coverage configurable.
-        args = [self.twistd, "--pidfile", self.pidfile,
+        args = [self.aqd, "--pidfile", self.pidfile,
                 "--logfile", self.logfile,
                 "aqd",
                 # "--coverage", self.coverage,
