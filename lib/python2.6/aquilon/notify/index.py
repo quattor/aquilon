@@ -41,27 +41,20 @@ except:  # pragma: no cover
     CDPPORT = 7777
 
 
-def build_index(config, session, profilesdir, clientNotify=True,
-                logger=LOGGER):
+def build_index(config, session, logger=LOGGER):
     '''
     Create an index of what profiles are available
 
     Compare the mtimes of everything in profiledir against
     an index file (profiles-info.xml). Produce a new index
     and send out notifications to "server modules" (as defined
-    within the broker configuration). If clientNotify
-    is True, then individual notifications are also sent
-    to each host. If clientNotify is False, then the server modules
-    will still be notified, but there is no processing of the
-    individual hosts. Note that the broker has a config option
-    send_notifications, which if false will turn off notifications
-    unconditionally. Only if the broker config allows will the
-    clientNotify be checked.
-
+    within the broker configuration).
     '''
     gzip_output = config.getboolean('panc', 'gzip_output')
     transparent_gzip = config.getboolean('panc', 'transparent_gzip')
     gzip_index = gzip_output and transparent_gzip
+
+    profilesdir = config.get("broker", "profilesdir")
 
     # Profiles are xml files, and can be configured to (additionally) be gzip'd
     profile_suffix = '.xml'
@@ -181,8 +174,7 @@ def build_index(config, session, profilesdir, clientNotify=True,
         logger.log(CLIENT_INFO, "sent %d server notifications" % count)
 
     if (config.has_option("broker", "client_notifications")
-        and config.getboolean("broker", "client_notifications")
-        and clientNotify):  # pragma: no cover
+        and config.getboolean("broker", "client_notifications")):  # pragma: no cover
         count = send_notification(CCM_NOTIF, modified_index.keys(), sock=sock,
                                   logger=logger)
         logger.log(CLIENT_INFO, "sent %d client notifications" % count)

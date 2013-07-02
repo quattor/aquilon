@@ -144,6 +144,6 @@ class CommandDelHost(BrokerCommand):
                 bindings.write(locked=True)
                 resources.remove(locked=True)
 
-            build_index(self.config, session, profiles, logger=logger)
+            build_index(self.config, session, logger)
 
         return

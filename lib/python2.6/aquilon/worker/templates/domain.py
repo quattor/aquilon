@@ -218,7 +218,7 @@ class TemplateDomain(object):
 
         # No need for a lock here - there is only a single file written
         # and it is swapped into place atomically.
-        build_index(config, session, outputdir, logger=self.logger)
+        build_index(config, session, self.logger)
         return out
 
     def sandbox_has_latest(self, config, sandboxdir):

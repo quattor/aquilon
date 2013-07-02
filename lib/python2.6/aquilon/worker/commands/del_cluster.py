@@ -68,7 +68,7 @@ def del_cluster(session, logger, dbcluster, config):
                     logger=logger)
         resources.remove(locked=True)
 
-    build_index(config, session, profiles, logger=logger)
+    build_index(config, session, logger)
 
     return
 
