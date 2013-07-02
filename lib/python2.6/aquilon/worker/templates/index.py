@@ -24,9 +24,9 @@ import gzip
 
 import xml.etree.ElementTree as ET
 
-from aquilon.worker.processes import write_file
-from aquilon.worker.logger import CLIENT_INFO
 from aquilon.aqdb.model import Service
+from aquilon.utils import write_file
+from aquilon.worker.logger import CLIENT_INFO
 
 LOGGER = logging.getLogger(__name__)
 

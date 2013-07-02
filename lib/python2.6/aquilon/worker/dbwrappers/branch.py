@@ -24,9 +24,10 @@ from sqlalchemy.orm.session import object_session
 from aquilon.exceptions_ import ArgumentError, ProcessException
 from aquilon.aqdb.model import Domain, Sandbox, Branch
 from aquilon.worker.dbwrappers.user_principal import get_user_principal
-from aquilon.worker.processes import remove_dir, run_git
+from aquilon.worker.processes import run_git
 from aquilon.worker.locks import CompileKey
 from aquilon.worker.templates.domain import TemplateDomain
+from aquilon.utils import remove_dir
 
 VERSION_RE = re.compile(r'^[-_.a-zA-Z0-9]*$')
 

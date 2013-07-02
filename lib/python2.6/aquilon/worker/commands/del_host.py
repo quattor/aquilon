@@ -26,12 +26,13 @@ from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.host import (hostname_to_host,
                                             get_host_dependencies)
 from aquilon.worker.dbwrappers.dns import delete_dns_record
-from aquilon.worker.processes import (DSDBRunner, remove_file)
+from aquilon.worker.processes import DSDBRunner
 from aquilon.worker.templates.base import (Plenary, PlenaryCollection,
                                            TEMPLATE_EXTENSION)
 from aquilon.worker.templates.index import build_index
 from aquilon.worker.templates.service import PlenaryServiceInstanceServer
 from aquilon.worker.locks import DeleteKey, CompileKey
+from aquilon.utils import remove_file
 
 
 class CommandDelHost(BrokerCommand):

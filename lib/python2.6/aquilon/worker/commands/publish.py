@@ -24,9 +24,9 @@ from base64 import b64decode
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.exceptions_ import ProcessException, ArgumentError
 from aquilon.aqdb.model import Sandbox
-from aquilon.worker.processes import (write_file, remove_file, remove_dir,
-                                      run_git, sync_domain)
+from aquilon.worker.processes import run_git, sync_domain
 from aquilon.worker.logger import CLIENT_INFO
+from aquilon.utils import write_file, remove_file, remove_dir
 
 
 class CommandPublish(BrokerCommand):

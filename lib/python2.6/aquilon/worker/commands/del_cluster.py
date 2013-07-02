@@ -24,8 +24,8 @@ from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.templates.index import build_index
 from aquilon.worker.templates.base import (Plenary, PlenaryCollection,
                                            TEMPLATE_EXTENSION)
-from aquilon.worker.processes import remove_file
 from aquilon.worker.locks import CompileKey
+from aquilon.utils import remove_file
 
 
 def del_cluster(session, logger, dbcluster, config):

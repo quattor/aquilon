@@ -25,8 +25,9 @@ from aquilon.exceptions_ import (ProcessException, ArgumentError,
                                  AuthorizationException)
 from aquilon.aqdb.model import Domain, Branch, Sandbox
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.processes import run_git, remove_dir, sync_domain
+from aquilon.worker.processes import run_git, sync_domain
 from aquilon.worker.logger import CLIENT_INFO
+from aquilon.utils import remove_dir
 
 TCM_RE = re.compile(r"^tcm=([0-9]+)$", re.IGNORECASE)
 SN_RE = re.compile(r"^sn=([a-z]+[0-9]+)$", re.IGNORECASE)
