@@ -123,8 +123,8 @@ class Cluster(Base):
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
     status_id = Column(Integer, ForeignKey('clusterlifecycle.id',
-                                              name='cluster_status_fk'),
-                          nullable=False)
+                                           name='cluster_status_fk'),
+                       nullable=False)
     comments = Column(String(255))
 
     status = relation(ClusterLifecycle, innerjoin=True)

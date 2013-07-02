@@ -67,8 +67,9 @@ class Disk(Base):
     # disks in the same order.  Technically order is irrelevant in the
     # template since the disks are stored in a hash but this helps with
     # the tests and with preventing spurious re-writes.
-    machine = relation(Machine, backref=backref('disks', cascade='all',
-                                                order_by=[device_name]))
+    machine = relation(Machine, innerjoin=True,
+                       backref=backref('disks', cascade='all',
+                                       order_by=[device_name]))
 
     __table_args__ = (UniqueConstraint(machine_id, device_name,
                                        name='disk_mach_dev_name_uk'),)

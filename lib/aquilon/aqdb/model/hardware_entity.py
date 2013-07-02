@@ -65,8 +65,8 @@ class HardwareEntity(Base):
     # snapshot_hw(), so it is not worth deferring it
     comments = Column(String(255), nullable=True)
 
-    location = relation(Location)
-    model = relation(Model)
+    location = relation(Location, innerjoin=True)
+    model = relation(Model, innerjoin=True)
 
     # When working with machines the primary name always crops up, so load it
     # eagerly

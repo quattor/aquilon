@@ -50,8 +50,8 @@ class ObservedMac(Base):
     last_seen = Column('last_seen', DateTime,
                        default=datetime.now, nullable=False)
 
-    switch = relation(Switch, backref=backref('observed_macs',
-                                              cascade='delete',
-                                              order_by=[port]))
+    switch = relation(Switch, innerjoin=True,
+                      backref=backref('observed_macs', cascade='delete',
+                                      order_by=[port]))
 
     __table_args__ = (PrimaryKeyConstraint(switch_id, port, mac_address),)

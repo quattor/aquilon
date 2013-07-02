@@ -65,7 +65,7 @@ class NetworkEnvironment(Base):
 
     location = relation(Location)
 
-    dns_environment = relation(DnsEnvironment)
+    dns_environment = relation(DnsEnvironment, innerjoin=True)
 
     __table_args__ = (UniqueConstraint(name, name='%s_name_uk' % _ABV),)
 

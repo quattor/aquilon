@@ -45,7 +45,7 @@ class Model(Base):
                                     nullable=False))
     comments = Column(String(255))
 
-    vendor = relation(Vendor)
+    vendor = relation(Vendor, innerjoin=True)
 
     __table_args__ = (UniqueConstraint(vendor_id, name,
                                        name='model_vendor_name_uk'),)
