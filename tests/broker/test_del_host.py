@@ -18,15 +18,17 @@
 """Module for testing the del host command."""
 
 import unittest
+from datetime import datetime
 
 if __name__ == "__main__":
     import utils
     utils.import_depends()
 
 from brokertest import TestBrokerCommand
+from notificationtest import VerifyNotificationsMixin
 
 
-class TestDelHost(TestBrokerCommand):
+class TestDelHost(VerifyNotificationsMixin, TestBrokerCommand):
 
     def testdelunittest02(self):
         self.dsdb_expect_delete(self.net.unknown[0].usable[11])
@@ -337,9 +339,10 @@ class TestDelHost(TestBrokerCommand):
                          command)
 
         self.dsdb_expect_delete("127.0.0.1")
+        basetime = datetime.now()
         command = ["del", "host", "--hostname", hostname]
-        (out, err) = self.successtest(command)
-        self.matchoutput(err, "sent 0 server notifications", command)
+        self.successtest(command)
+        self.wait_notification(basetime, 0)
         self.dsdb_verify()
 
     def testdelf5test(self):

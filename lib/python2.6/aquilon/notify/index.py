@@ -26,7 +26,6 @@ import xml.etree.ElementTree as ET
 
 from aquilon.aqdb.model import Service
 from aquilon.utils import write_file
-from aquilon.worker.logger import CLIENT_INFO
 
 LOGGER = logging.getLogger(__name__)
 
@@ -146,6 +145,9 @@ def build_index(config, session, logger=LOGGER):
         compress = 'gzip'
     write_file(index_path, "\n".join(content), logger=logger, compress=compress)
 
+    logger.debug("Updated %s, %d objects modified" % (index_path,
+                                                      len(modified_index)))
+
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
     if config.has_option("broker", "bind_address"):
@@ -171,13 +173,13 @@ def build_index(config, session, logger=LOGGER):
                                 (service, e))
         count = send_notification(CDB_NOTIF, service_modules.keys(), sock=sock,
                                   logger=logger)
-        logger.log(CLIENT_INFO, "sent %d server notifications" % count)
+        logger.info("sent %d server notifications" % count)
 
     if (config.has_option("broker", "client_notifications")
         and config.getboolean("broker", "client_notifications")):  # pragma: no cover
         count = send_notification(CCM_NOTIF, modified_index.keys(), sock=sock,
                                   logger=logger)
-        logger.log(CLIENT_INFO, "sent %d client notifications" % count)
+        logger.info("sent %d client notifications" % count)
 
     sock.close()
 
@@ -220,3 +222,22 @@ def send_notification(ntype, modified, sock=None, logger=LOGGER):
             logger.info("Error notifying %s: %s" % (host, e))
 
     return success
+
+
+def trigger_notifications(config, logger=LOGGER, loglevel=logging.INFO):
+    sockname = os.path.join(config.get("broker", "sockdir"), "notifysock")
+    sd = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+    try:
+        sd.connect(sockname)
+    except OSError, err:
+        logger.error("Failed to connect to notification socket: %s" % err)
+
+    try:
+        sd.send("update")
+    except OSError, err:
+        logger.error("Failed to send to notification socket: %s" % err)
+
+    sd.close()
+
+    logger.log(loglevel, "Index rebuild and notifications will happen in "
+               "the background.")

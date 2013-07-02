@@ -209,6 +209,13 @@ class AQDMaker(object):
                     args.append("--listen=%s" % bind_address)
                 args.append(config.get("broker", "kingdir"))
                 mon.addProcess("git-daemon", args)
+            if config.getboolean("broker", "run_aqnotifyd"):
+                notifyd = os.path.join(config.get("broker", "srcdir"),
+                                       "sbin", "aq_notifyd")
+                if not os.path.exists(notifyd):
+                    notifyd = notifyd + ".py"
+                args = [notifyd, "--config", config.baseconfig]
+                mon.addProcess("notifyd", args, env=os.environ)
             mon.startService()
             reactor.addSystemEventTrigger('before', 'shutdown', mon.stopService)
 

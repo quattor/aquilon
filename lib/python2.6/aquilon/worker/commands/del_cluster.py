@@ -20,7 +20,8 @@ import os
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Cluster
-from aquilon.notify.index import build_index
+from aquilon.worker.logger import CLIENT_INFO
+from aquilon.notify.index import trigger_notifications
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.templates.base import (Plenary, PlenaryCollection,
                                            TEMPLATE_EXTENSION)
@@ -68,7 +69,7 @@ def del_cluster(session, logger, dbcluster, config):
                     logger=logger)
         resources.remove(locked=True)
 
-    build_index(config, session, logger)
+    trigger_notifications(config, logger, CLIENT_INFO)
 
     return
 

@@ -73,6 +73,11 @@ $(COMMON)/sbin/aqd: sbin/aqd.py
 	sed -e '1s,^#!$(PYTHON_DEFAULT)\(.*\),#!$(PYTHON_SERVER_PROD)\1,' <$< >$@
 	chmod $(PERMS) $@
 
+$(COMMON)/sbin/aq_notifyd: sbin/aq_notifyd.py
+	@mkdir -p `dirname $@`
+	sed -e '1s,^#!$(PYTHON_DEFAULT)\(.*\),#!$(PYTHON_SERVER_PROD)\1,' <$< >$@
+	chmod $(PERMS) $@
+
 $(COMMON)/%.pyc: $(COMMON)/%.py
 	@echo "compiling $@"
 	@rm -f $@

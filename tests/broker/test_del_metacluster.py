@@ -19,73 +19,84 @@
 
 
 import unittest
+from datetime import datetime
 
 if __name__ == "__main__":
     import utils
     utils.import_depends()
 
 from brokertest import TestBrokerCommand
+from notificationtest import VerifyNotificationsMixin
 
 
-class TestDelMetaCluster(TestBrokerCommand):
+class TestDelMetaCluster(VerifyNotificationsMixin, TestBrokerCommand):
 
     def testdelutmc1(self):
+        basetime = datetime.now()
         command = ["del_metacluster", "--metacluster=utmc1"]
-        err = self.statustest(command)
-        self.matchoutput(err, "sent 0 server notifications", command)
+        self.statustest(command)
+        self.wait_notification(basetime, 0)
 
     def testverifydelutmc1(self):
         command = ["show_metacluster", "--metacluster=utmc1"]
         self.notfoundtest(command)
 
     def testdelutmc2(self):
+        basetime = datetime.now()
         command = ["del_metacluster", "--metacluster=utmc2"]
-        err = self.statustest(command)
-        self.matchoutput(err, "sent 0 server notifications", command)
+        self.statustest(command)
+        self.wait_notification(basetime, 0)
 
     def testverifydelutmc2(self):
         command = ["show_metacluster", "--metacluster=utmc2"]
         self.notfoundtest(command)
 
     def testdelutmc3(self):
+        basetime = datetime.now()
         command = ["del_metacluster", "--metacluster=utmc3"]
-        err = self.statustest(command)
-        self.matchoutput(err, "sent 0 server notifications", command)
+        self.statustest(command)
+        self.wait_notification(basetime, 0)
 
     def testverifydelutmc3(self):
         command = ["show_metacluster", "--metacluster=utmc3"]
         self.notfoundtest(command)
 
     def testdelutmc4(self):
+        basetime = datetime.now()
         command = ["del_metacluster", "--metacluster=utmc4"]
-        err = self.statustest(command)
-        self.matchoutput(err, "sent 0 server notifications", command)
+        self.statustest(command)
+        self.wait_notification(basetime, 0)
 
     def testdelutmc5(self):
+        basetime = datetime.now()
         command = ["del_metacluster", "--metacluster=utmc5"]
-        err = self.statustest(command)
-        self.matchoutput(err, "sent 0 server notifications", command)
+        self.statustest(command)
+        self.wait_notification(basetime, 0)
 
     def testdelutmc6(self):
+        basetime = datetime.now()
         command = ["del_metacluster", "--metacluster=utmc6"]
-        err = self.statustest(command)
-        self.matchoutput(err, "sent 0 server notifications", command)
+        self.statustest(command)
+        self.wait_notification(basetime, 0)
 
     def testdelutmc7(self):
+        basetime = datetime.now()
         command = ["del_metacluster", "--metacluster=utmc7"]
-        err = self.statustest(command)
-        self.matchoutput(err, "sent 0 server notifications", command)
+        self.statustest(command)
+        self.wait_notification(basetime, 0)
 
     def testdelutsandbox(self):
         # Test moving machines between metaclusters
+        basetime = datetime.now()
         command = ["del_metacluster", "--metacluster=sandboxmc"]
-        err = self.statustest(command)
-        self.matchoutput(err, "sent 0 server notifications", command)
+        self.statustest(command)
+        self.wait_notification(basetime, 0)
 
     def testdelvulcan1(self):
+        basetime = datetime.now()
         command = ["del_metacluster", "--metacluster=vulcan1"]
-        err = self.statustest(command)
-        self.matchoutput(err, "sent 0 server notifications", command)
+        self.statustest(command)
+        self.wait_notification(basetime, 0)
 
     def testverifyall(self):
         command = ["show_metacluster", "--all"]

@@ -24,12 +24,12 @@ import re
 
 from aquilon.config import Config
 from aquilon.exceptions_ import ArgumentError, ProcessException, InternalError
-from aquilon.notify.index import build_index
-from aquilon.worker.processes import run_command, run_git
-from aquilon.worker.locks import lock_queue, CompileKey
 from aquilon.aqdb.model import (Host, Cluster, Fqdn, DnsRecord, HardwareEntity,
                                 Machine)
 from aquilon.worker.logger import CLIENT_INFO
+from aquilon.notify.index import trigger_notifications
+from aquilon.worker.processes import run_command, run_git
+from aquilon.worker.locks import lock_queue, CompileKey
 
 LOGGER = logging.getLogger(__name__)
 
@@ -216,9 +216,7 @@ class TemplateDomain(object):
             if not locked:
                 lock_queue.release(key)
 
-        # No need for a lock here - there is only a single file written
-        # and it is swapped into place atomically.
-        build_index(config, session, self.logger)
+        trigger_notifications(config, self.logger, CLIENT_INFO)
         return out
 
     def sandbox_has_latest(self, config, sandboxdir):

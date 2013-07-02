@@ -22,7 +22,8 @@ import os
 from sqlalchemy.orm.attributes import set_committed_value
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.notify.index import build_index
+from aquilon.worker.logger import CLIENT_INFO
+from aquilon.notify.index import trigger_notifications
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.host import (hostname_to_host,
                                             get_host_dependencies)
@@ -144,6 +145,6 @@ class CommandDelHost(BrokerCommand):
                 bindings.write(locked=True)
                 resources.remove(locked=True)
 
-            build_index(self.config, session, logger)
+            trigger_notifications(self.config, logger, CLIENT_INFO)
 
         return

@@ -23,6 +23,8 @@ import gzip
 from cStringIO import StringIO
 from cPickle import Pickler, Unpickler
 from subprocess import Popen, PIPE
+from datetime import datetime
+import time
 
 import xml.etree.ElementTree as ET
 
@@ -31,9 +33,10 @@ if __name__ == "__main__":
     utils.import_depends()
 
 from brokertest import TestBrokerCommand
+from notificationtest import VerifyNotificationsMixin
 
 
-class TestCompile(TestBrokerCommand):
+class TestCompile(VerifyNotificationsMixin, TestBrokerCommand):
 
     def get_profile_mtimes(self):
         """Returns a dictionary of objects to profile-info (indexed) mtimes.
@@ -85,6 +88,11 @@ class TestCompile(TestBrokerCommand):
             self.assertTrue(host in stashed_mtimes,
                             "host %s missing from profiles-info" % host)
 
+        # Make sure some time is spent before we check if the mtime was updated
+        last_update = max(stashed_mtimes.itervalues())
+        if time.time() < last_update + 1:
+            time.sleep(1)
+
     def test_100_addchange(self):
         # Touch the template used by utsi1 clients to trigger a recompile.
         template = self.template_name("service", "utsvc", "utsi1", "client",
@@ -106,9 +114,12 @@ class TestCompile(TestBrokerCommand):
                                   "--service=utsvc", "--instance=utsi1"]
                                 ).splitlines()
         total = len(hosts)
+        basetime = datetime.now()
         command = "compile --domain unittest"
         (out, err) = self.successtest(command.split(" "))
         self.matchoutput(err, "%s/%s compiled" % (total, total), command)
+        # Index building is now asynchronous, so we have to wait for it
+        self.wait_notification(basetime, 1)
 
     def test_210_index(self):
         new_mtimes = self.get_profile_mtimes()
