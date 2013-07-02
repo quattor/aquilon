@@ -24,8 +24,8 @@ import re
 
 from aquilon.config import Config
 from aquilon.exceptions_ import ArgumentError, ProcessException, InternalError
+from aquilon.notify.index import build_index
 from aquilon.worker.processes import run_command, run_git
-from aquilon.worker.templates.index import build_index
 from aquilon.worker.locks import lock_queue, CompileKey
 from aquilon.aqdb.model import (Host, Cluster, Fqdn, DnsRecord, HardwareEntity,
                                 Machine)

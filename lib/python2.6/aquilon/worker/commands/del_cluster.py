@@ -20,8 +20,8 @@ import os
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Cluster
+from aquilon.notify.index import build_index
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.templates.index import build_index
 from aquilon.worker.templates.base import (Plenary, PlenaryCollection,
                                            TEMPLATE_EXTENSION)
 from aquilon.worker.locks import CompileKey
