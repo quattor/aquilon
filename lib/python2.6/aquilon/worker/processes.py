@@ -28,7 +28,6 @@ import re
 import logging
 from subprocess import Popen, PIPE
 from threading import Thread
-import yaml
 
 from sqlalchemy.orm.session import object_session
 
