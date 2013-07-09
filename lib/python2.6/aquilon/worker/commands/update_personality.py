@@ -97,8 +97,10 @@ class CommandUpdatePersonality(BrokerCommand):
                                                                         host_environment,
                                                                         compel=True)
             else:
-                raise ArgumentError("The personality '{0}' already has env set to '{1}'"
-                                    " and cannot be updated".format(str(dbpersona), host_environment))
+                raise ArgumentError("The personality '{0!s}' already has env set to '{1!s}'"
+                                    " and cannot be updated"
+                                    .format(dbpersona, dbpersona.host_environment))
+
 
         plenaries = PlenaryCollection(logger=logger)
 

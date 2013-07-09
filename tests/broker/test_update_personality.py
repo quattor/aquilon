@@ -161,9 +161,9 @@ class TestUpdatePersonality(VerifyGrnsMixin, TestBrokerCommand):
 
     def test_133_update_hostenv_testovrpersona(self):
         command = ["update_personality", "--personality=testovrpersona/dev",
-                    "--archetype=aquilon", "--host_environment=dev"]
+                    "--archetype=aquilon", "--host_environment=infra"]
         out = self.badrequesttest(command)
-        self.matchoutput(out, "The personality 'testovrpersona/dev' already has env set to 'dev' and cannot be update",
+        self.matchoutput(out, "The personality 'testovrpersona/dev' already has env set to 'dev' and cannot be updated",
                          command)
 
     def test_139_delete_testovrpersona_dev(self):
