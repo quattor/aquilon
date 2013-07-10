@@ -541,7 +541,7 @@ class TestAddInterface(TestBrokerCommand):
         self.matchclean(out, "loop1", command)
 
     # These two will eventually be created when testing the addition
-    # of a whole rack of machines based on a CheckNet sweep.
+    # of a whole rack of machines based on switch discovery.
     def testaddut3s01p1aeth0(self):
         self.noouttest(["add", "interface", "--interface", "eth0",
                         "--machine", "ut3s01p1a",

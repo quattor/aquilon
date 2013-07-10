@@ -47,8 +47,8 @@ class TestPollSwitch(TestBrokerCommand):
     def testpollnp06bals03(self):
         command = ["poll", "switch", "--switch", "np06bals03.ms.com"]
         (out, err) = self.successtest(command)
-        self.matchoutput(err, "No jump host for np06bals03.ms.com, calling "
-                         "CheckNet from %s." % socket.gethostname(), command)
+        self.matchoutput(err, "No jump host for np06bals03.ms.com, running "
+                         "discovery from %s." % socket.gethostname(), command)
 
     # Tests re-polling np06bals03 and polls np06fals01
     def testpollnp7(self):
@@ -143,7 +143,7 @@ class TestPollSwitch(TestBrokerCommand):
         service = self.config.get("broker", "poll_helper_service")
         self.matchoutput(err,
                          "Using jump host nyaqd1.ms.com from service instance "
-                         "%s/unittest to run CheckNet "
+                         "%s/unittest to run discovery "
                          "for switch ut01ga2s01.aqd-unittest.ms.com." %
                          (service),
                          command)

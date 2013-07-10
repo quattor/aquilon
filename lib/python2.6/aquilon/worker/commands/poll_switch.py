@@ -36,23 +36,7 @@ from aquilon.aqdb.model import (Switch, ObservedMac, ObservedVlan, Network,
 from aquilon.utils import force_ipv4
 
 
-# This runs...
-# CheckNet -ho np06bals03 camtable -nobanner -table 1 -noprompt
-# ...which yields...
-# Device_Name,fdbMacAddr,fdbVlan,fdbVlanId,fdbSrcPort,fdbSrcTrunk,fdbState,fdbRefSps,fdbLearnedPort,fbStatus
-#np06bals03,003048663a62,103,103,17,0,forward,,0,notpermanent
-#np06bals03,001f29c439ba,103,103,2,0,forward,,0,notpermanent
-#np06bals03,0030486638e6,103,103,22,0,forward,,0,notpermanent
-#np06bals03,001f29c429ca,103,103,4,0,forward,,0,notpermanent
-# ...and the mac/port combos are added to the switch info.
-
 class CommandPollSwitch(BrokerCommand):
-    """ The CheckNet command seems to run fine without a module load.
-        Leaving it like that for now.  In the future, we may need a
-
-        module load /ms/dist/NetEng/modules/prod
-
-    """
 
     required_parameters = ["rack"]
 
@@ -104,7 +88,6 @@ class CommandPollSwitch(BrokerCommand):
     def poll_mac(self, session, switch, now, ssh_args):
         importer = self.config.get("broker", "get_camtable")
 
-        # run_checknet factored in
         if not switch.primary_name:
             hostname = switch.label
         elif switch.primary_name.fqdn.dns_domain.name == 'ms.com':

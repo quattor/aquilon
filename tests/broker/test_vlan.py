@@ -63,7 +63,7 @@ class TestVlan(TestBrokerCommand):
         err = self.statustest(command)
 
         self.matchoutput(err, "Using jump host nyaqd1.ms.com from service "
-                         "instance poll_helper/unittest to run CheckNet for "
+                         "instance poll_helper/unittest to run discovery for "
                          "switch utpgsw0.aqd-unittest.ms.com.", command)
 
         self.matchoutput(err, "vlan 5 is not defined in AQ. Please use "
@@ -86,7 +86,7 @@ class TestVlan(TestBrokerCommand):
         err = self.statustest(command)
 
         self.matchoutput(err, "Using jump host nyaqd1.ms.com from service "
-                         "instance poll_helper/unittest to run CheckNet for "
+                         "instance poll_helper/unittest to run discovery for "
                          "switch utpgsw0.aqd-unittest.ms.com.", command)
 
         self.matchclean(err, "vlan 5 is not defined in AQ. Please use "

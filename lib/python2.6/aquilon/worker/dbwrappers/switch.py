@@ -54,11 +54,11 @@ def determine_helper_hostname(session, logger, config, dbswitch):
         if dbsi.server_hosts:
             # Poor man's load balancing...
             jump = choice(dbsi.server_hosts).fqdn
-            logger.client_info("Using jump host {0} from {1:l} to run CheckNet "
+            logger.client_info("Using jump host {0} from {1:l} to run discovery "
                                "for {2:l}.".format(jump, dbsi, dbswitch))
             return jump
 
-    logger.client_info("No jump host for %s, calling CheckNet from %s." %
+    logger.client_info("No jump host for %s, running discovery from %s." %
                        (dbswitch, config.get("broker", "hostname")))
     return None
 

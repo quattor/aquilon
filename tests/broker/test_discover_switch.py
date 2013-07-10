@@ -139,7 +139,7 @@ class TestDiscoverSwitch(TestBrokerCommand, VerifySwitchMixin):
         out, err = self.successtest(command)
         self.matchoutput(err,
                          "Using jump host nyaqd1.ms.com from service instance "
-                         "poll_helper/unittest to run CheckNet for switch "
+                         "poll_helper/unittest to run discovery for switch "
                          "swsync.aqd-unittest.ms.com.",
                          command)
         self.matchoutput(err, "You should run 'qip-set-router %s'." % ip1,
