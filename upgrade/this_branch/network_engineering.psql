@@ -1,0 +1,2 @@
+INSERT INTO role (id, name, creation_date, comments)
+	VALUES (nextval('role_id_seq'), 'network_engineering', current_timestamp);
