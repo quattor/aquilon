@@ -224,8 +224,8 @@ class AuthorizationBroker(object):
                               'add_service_instance',
                               'update_service_instance',
                               'del_service_instance',
-                              'add_alias',
-                              'del_alias',
+                              'add_alias', 'del_alias',
+                              'update_alias',
                               'add_filesystem',
                               'del_filesystem',
                               'poll_switch', 'poll_switch_switch',
@@ -239,6 +239,11 @@ class AuthorizationBroker(object):
                               'del_parameter', 'add_required_service',
                               'bind_feature', 'unbind_feature',
                               'validate_parameter',
+                              'add_hostlink', 'del_hostlink',
+                              'add_static_route',
+                              'del_static_route',
+                              'manage_hostname', 'manage_list',
+                              'manage_cluster',
                               'map_grn', 'unmap_grn',
                               'make', 'make_cluster']:
                 self.raise_auth_error(principal, action, resource)
