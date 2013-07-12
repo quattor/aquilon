@@ -43,7 +43,7 @@ class TestVulcanLocalDisk(TestBrokerCommand):
 
     metacluster = "utmc9"
     cluster = "utlccl1"
-    switch = "utpgsw0.aqd-unittest.ms.com"
+    switch = "utpgsw1.aqd-unittest.ms.com"
     vmhost = "utpgh0.aqd-unittest.ms.com"
     machine = "utpgs01p0"
 
@@ -115,6 +115,28 @@ class TestVulcanLocalDisk(TestBrokerCommand):
                    "--type", "tor", "--mac", ip.mac, "--ip", ip]
         (out, err) = self.successtest(command)
         self.dsdb_verify()
+
+    # see fakevlan2net
+    def test_025_pollutpgsw(self):
+
+        command = ["poll", "switch", "--vlan", "--switch",
+                   self.switch]
+        (out, err) = self.successtest(command)
+
+        service = self.config.get("broker", "poll_helper_service")
+        self.matchoutput(err,
+                         "Using jump host nyaqd1.ms.com from service "
+                         "instance %s/unittest to run CheckNet "
+                         "for switch %s" % (service, self.switch),
+                         command)
+
+        # For Nexus switches we have if names, not snmp ids.
+        command = "show switch --switch %s" % self.switch
+        out = self.commandtest(command.split(" "))
+
+        macs = ["02:02:04:02:12:06", "02:02:04:02:12:07"]
+        for i in range(0,2):
+            self.matchoutput(out, "Port et1-%d: %s" % (i + 1, macs[i]), command)
 
     def test_030_addswitch(self):
         self.successtest(["update_esx_cluster", "--cluster=%s" % self.cluster,
@@ -212,11 +234,12 @@ class TestVulcanLocalDisk(TestBrokerCommand):
     def test_160_addinterfaces(self):
         # TODO: fixed mac addresses grabbed from test_vulcan2 until automac\pg
         # for localdisk is implemented.
+
+        # Pick first one with automac(fakebind data should be fixed)
         for i in range(0, 2):
-            machine = "utpgm%d" % i
-            self.noouttest(["add", "interface", "--machine", machine,
-                            "--interface", "eth0", "--mac",
-                            "00:50:56:01:20:0%d" %i ])
+            self.noouttest(["add", "interface", "--machine", "utpgm%d" % i,
+                            "--interface", "eth0", "--automac", "--autopg"])
+
     def test_150_verifyutfs1(self):
         command = ["show_filesystem", "--filesystem=utfs1"]
         out = self.commandtest(command)
