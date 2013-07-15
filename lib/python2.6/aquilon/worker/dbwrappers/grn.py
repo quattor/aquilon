@@ -101,7 +101,12 @@ def update_grn_map(config, session, logger):
             eon_id = int(row["id"])
             disabled = int(row["can_map_resources"]) == 0 or \
                     int(row["deleted"]) != 0
+
             if eon_id not in grns:
+                if not row["name"]:
+                    logger.info("EON ID %d has no name, ignoring" % eon_id)
+                    continue
+
                 dbgrn = Grn(eon_id=eon_id, grn=row["name"], disabled=disabled)
                 session.add(dbgrn)
                 added += 1
