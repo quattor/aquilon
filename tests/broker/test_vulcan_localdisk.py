@@ -245,7 +245,7 @@ class TestVulcanLocalDisk(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out, "Filesystem: utfs1", command)
         self.matchoutput(out, "Bound to: Host %s" % self.vmhost, command)
-        self.matchoutput(out, "Disk Count: 3", command)
+        self.matchoutput(out, "Virtual Disk Count: 3", command)
 
     def test_200_make_host(self):
         command = ["make", "--hostname", "utpgh0.aqd-unittest.ms.com"]

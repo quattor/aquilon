@@ -83,7 +83,7 @@ class VirtualLocalDisk(Disk):
                  self.controller_type, self.machine.label, self.capacity,
                  (self.filesystem.name if self.filesystem else "no_filesystem"))
 
-Filesystem.disk_count = column_property(
+Filesystem.virtual_disk_count = column_property(
     select([func.count()],
            VirtualLocalDisk.filesystem_id == Filesystem.id)
-    .label("disk_count"), deferred=True)
+    .label("virtual_disk_count"), deferred=True)
