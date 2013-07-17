@@ -161,12 +161,11 @@ class HostGrnMap(Base):
     grn = relation(Grn, lazy=False, innerjoin=True,
                    backref=backref('_hosts', passive_deletes=True))
 
-    target = Column(AqStr(32), nullable=False, primary_key=True)
+    target = Column(AqStr(32), nullable=False)
+
+    __table_args__ = (PrimaryKeyConstraint(host_id, eon_id, target),)
 
     # used by unmap
     @property
     def mapped_object(self):
         return self.host
-
-    __table_args__ = (PrimaryKeyConstraint(host_id, eon_id),)
-
