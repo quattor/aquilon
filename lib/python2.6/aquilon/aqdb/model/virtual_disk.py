@@ -17,7 +17,7 @@
 """ Disk for share """
 
 from sqlalchemy import Column, Integer, ForeignKey, Index
-from sqlalchemy.orm import relation, backref, column_property, deferred # pylint: disable=W0611
+from sqlalchemy.orm import relation, backref, column_property
 from sqlalchemy.sql import select, func
 
 from aquilon.aqdb.model import Disk, Share, Filesystem
