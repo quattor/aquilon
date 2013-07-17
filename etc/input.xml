@@ -810,7 +810,8 @@
       <optgroup name="nas_opts" fields="all">
          <optgroup name="share_opts" fields="any">
             <!-- TODO find out conflicts we might have -->
-            <option name="share" type="string">Share name (an instance of nas_disk_share service)</option>
+            <option name="share" type="string">Share name</option>
+            <option name="filesystem" type="string">Filesystem name</option>
             <option name="resourcegroup" type="string">Resourcegroup to add share</option>
          </optgroup>
          <option name="address" type="string">Bus address (e.g. 0:0)</option>
@@ -3179,9 +3180,8 @@
          </optgroup>
          <option name="rack" type="string">Rack name</option>
          <option name="desk" type="string">Desk name</option>
-         <optgroup name="add_machine_cluster_opts" fields="all">
-            <option name="cluster" type="string" conflicts="chassis rack desk">Cluster name</option>
-         </optgroup>
+         <option name="cluster" type="string" conflicts="chassis rack desk vmhost">Cluster name</option>
+         <option name="vmhost" type="string" conflicts="chassis rack desk cluster">Host where the VM lives</option>
       </optgroup>
       <optgroup name="add_machine_optional">
 	 <option name="serial" type="string">Serial number</option>

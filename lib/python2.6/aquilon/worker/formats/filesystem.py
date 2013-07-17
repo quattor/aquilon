@@ -34,6 +34,7 @@ class FilesystemFormatter(ResourceFormatter):
         details.append(indent + "  Mountpoint: %s" % fs.mountpoint)
         details.append(indent + "  Dump Freq: %d" % fs.dumpfreq)
         details.append(indent + "  Fsck Pass: %d" % fs.passno)
+        details.append(indent + "  Disk Count: %d" % fs.disk_count)
         return details
 
     def format_proto(self, fs, skeleton=None):

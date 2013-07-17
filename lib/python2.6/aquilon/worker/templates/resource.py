@@ -41,12 +41,13 @@ class PlenaryResource(Plenary):
         self.plenary_template = "config"
 
     def body(self, lines):
+        pan_assign(lines, "name", self.name)
+
         fname = "body_%s" % self.type
         if hasattr(self, fname):
             getattr(self, fname)(lines)
 
     def body_share(self, lines):
-        pan_assign(lines, "name", self.name)
         pan_assign(lines, "server", self.dbobj.server)
         pan_assign(lines, "mountpoint", self.dbobj.mount)
 
@@ -63,11 +64,9 @@ class PlenaryResource(Plenary):
         pan_assign(lines, "pass", self.dbobj.passno)
 
     def body_application(self, lines):
-        pan_assign(lines, "name", self.dbobj.name)
         pan_assign(lines, "eonid", self.dbobj.eonid)
 
     def body_hostlink(self, lines):
-        pan_assign(lines, "name", self.dbobj.name)
         pan_assign(lines, "target", self.dbobj.target)
         if self.dbobj.owner_group:
             owner_string = self.dbobj.owner_user + ':' + self.dbobj.owner_group
@@ -76,7 +75,6 @@ class PlenaryResource(Plenary):
         pan_assign(lines, "owner", owner_string)
 
     def body_intervention(self, lines):
-        pan_assign(lines, "name", self.dbobj.name)
         pan_assign(lines, "start", self.dbobj.start_date.isoformat())
         pan_assign(lines, "expiry", self.dbobj.expiry_date.isoformat())
 
@@ -89,13 +87,11 @@ class PlenaryResource(Plenary):
             pan_assign(lines, "disabled", self.dbobj.disabled.split(","))
 
     def body_reboot_schedule(self, lines):
-        pan_assign(lines, "name", self.dbobj.name)
         pan_assign(lines, "time", self.dbobj.time)
         pan_assign(lines, "week", self.dbobj.week)
         pan_assign(lines, "day", self.dbobj.day)
 
     def body_resourcegroup(self, lines):
-        pan_assign(lines, "name", self.dbobj.name)
         if self.dbobj.resholder:
             for resource in self.dbobj.resholder.resources:
                 pan_append(lines, "resources/" + resource.resource_type,
@@ -103,18 +99,15 @@ class PlenaryResource(Plenary):
                                              "/config"))
 
     def body_reboot_iv(self, lines):
-        pan_assign(lines, "name", self.dbobj.name)
         pan_assign(lines, "justification", self.dbobj.justification)
         self.body_intervention(lines)
 
     def body_service_address(self, lines):
-        pan_assign(lines, "name", self.dbobj.name)
         pan_assign(lines, "ip", str(self.dbobj.dns_record.ip))
         pan_assign(lines, "fqdn", str(self.dbobj.dns_record.fqdn))
         pan_assign(lines, "interfaces", self.dbobj.interfaces)
 
     def body_virtual_machine(self, lines):
-        pan_assign(lines, "name", self.dbobj.name)
 
         machine = self.dbobj.machine
         pmac = Plenary.get_plenary(machine)

@@ -107,6 +107,9 @@ class MachineFormatter(ObjectFormatter):
             extra = d.disk_type
             if hasattr(d, "share") and d.share:
                 extra = extra + " from " + d.share.name
+            elif hasattr(d, "filesystem") and d.filesystem:
+                extra = extra + " from " + d.filesystem.name
+
             if d.bootable:
                 flags = " [boot]"
             else:

@@ -72,7 +72,8 @@ class TestAddVirtualHardware(TestBrokerCommand):
                    "--model=utmedium"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
-                         "Virtual machines must be assigned to a cluster.",
+                         "Virtual machines must be assigned to a cluster "
+                         "or a host.",
                          command)
 
     # The current client does not allow this test.
@@ -471,19 +472,21 @@ class TestAddVirtualHardware(TestBrokerCommand):
     # FIXME: Missing a test for add_interface non-esx automac.  (Might not
     # be possible to test with the current command set.)
 
-    def testfailaddnonvirtualcluster(self):
-        command = ["add", "machine", "--machine", "ut9s03p51",
-                   "--cluster", "utgrid1", "--model", "utmedium"]
-        out = self.badrequesttest(command)
-        self.matchoutput(out,
-                         "Can only add virtual machines to "
-                         "clusters with archetype esx_cluster.",
-                         command)
+    # FIXME: we need a more generic test to check if a host/cluster may contain
+    # VMs. Perhaps an attribute of Archetype or Personality?
+    #def testfailaddnonvirtualcluster(self):
+    #    command = ["add", "machine", "--machine", "ut9s03p51",
+    #               "--cluster", "utgrid1", "--model", "utmedium"]
+    #    out = self.badrequesttest(command)
+    #    self.matchoutput(out,
+    #                     "Can only add virtual machines to "
+    #                     "clusters with archetype esx_cluster.",
+    #                     command)
 
     def testfailaddmissingcluster(self):
         command = ["add_machine", "--machine=ut9s03p51",
                    "--cluster=cluster-does-not-exist", "--model=utmedium"]
-        out = self.badrequesttest(command)
+        out = self.notfoundtest(command)
         self.matchoutput(out, "Cluster cluster-does-not-exist not found",
                          command)
 
@@ -492,7 +495,8 @@ class TestAddVirtualHardware(TestBrokerCommand):
                    "--chassis=ut3c1.aqd-unittest.ms.com", "--slot=1"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
-                         "Virtual machines must be assigned to a cluster.",
+                         "Virtual machines must be assigned to a cluster "
+                         "or a host.",
                          command)
 
     def testfailaddnoncluster(self):
@@ -500,7 +504,7 @@ class TestAddVirtualHardware(TestBrokerCommand):
                    "--model=hs21-8853l5u"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
-                         "Only virtual machines can have a cluster attribute.",
+                         "Model ibm/hs21-8853l5u is not a virtual machine.",
                          command)
 
     def testpgnoswitch(self):

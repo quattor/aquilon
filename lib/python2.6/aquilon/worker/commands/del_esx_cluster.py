@@ -29,8 +29,8 @@ class CommandDelESXCluster(CommandDelCluster):
     def render(self, session, logger, cluster, **arguments):
         dbcluster = EsxCluster.get_unique(session, cluster, compel=True)
         cluster = str(dbcluster.name)
-        if dbcluster.machines:
-            machines = ", ".join([m.label for m in dbcluster.machines])
+        if dbcluster.virtual_machines:
+            machines = ", ".join([m.label for m in dbcluster.virtual_machines])
             raise ArgumentError("%s is still in use by virtual machines: %s." %
                                 (format(dbcluster), machines))
 

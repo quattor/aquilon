@@ -17,10 +17,10 @@
 """ Disk for share """
 
 from sqlalchemy import Column, Integer, ForeignKey, Index
-from sqlalchemy.orm import relation, backref, column_property, deferred
+from sqlalchemy.orm import relation, backref, column_property, deferred # pylint: disable=W0611
 from sqlalchemy.sql import select, func
 
-from aquilon.aqdb.model import Disk, Share
+from aquilon.aqdb.model import Disk, Share, Filesystem
 
 _TN = 'disk'
 
@@ -60,3 +60,31 @@ Share.machine_count = column_property(
     select([func.count(func.distinct(VirtualDisk.machine_id))],
            VirtualDisk.share_id == Share.id)
     .label("machine_count"), deferred=True)
+
+class VirtualLocalDisk(Disk):
+    filesystem_id = Column(Integer, ForeignKey('filesystem.id',
+                                                    name='%s_filesystem_fk' % _TN,
+                                                    ondelete='CASCADE'),
+                                nullable=True)
+
+    filesystem = relation(Filesystem, innerjoin=True,
+                     backref=backref('disks', cascade='all'))
+
+    __extra_table_args__ = (Index('%s_filesystem_idx' % _TN, filesystem_id),)
+    __mapper_args__ = {'polymorphic_identity': 'virtual_localdisk'}
+
+    def __init__(self, **kw):
+        if 'address' not in kw or kw['address'] is None:
+            raise ValueError("address is mandatory for filesystem disks")
+        super(VirtualLocalDisk, self).__init__(**kw)
+
+    def __repr__(self):
+        return "<%s %s (%s) of machine %s, %d GB, provided by %s>" % \
+                (self._get_class_label(), self.device_name,
+                 self.controller_type, self.machine.label, self.capacity,
+                 (self.filesystem.name if self.filesystem else "no_filesystem"))
+
+Filesystem.disk_count = column_property(
+    select([func.count()],
+           VirtualLocalDisk.filesystem_id == Filesystem.id)
+    .label("disk_count"), deferred=True)

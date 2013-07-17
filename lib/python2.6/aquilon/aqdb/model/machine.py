@@ -46,8 +46,12 @@ class Machine(HardwareEntity):
 
     @property
     def cluster(self):
+        # Bound to a cluster
         if self.vm_container and hasattr(self.vm_container.holder, 'cluster'):
             return self.vm_container.holder.holder_object
+        # Vulcan local disk with esx cluster
+        if self.vm_container and hasattr(self.vm_container.holder, 'host') and hasattr(self.vm_container.holder.host, 'cluster'):
+            return self.vm_container.holder.host.cluster
         else:
             return None
 

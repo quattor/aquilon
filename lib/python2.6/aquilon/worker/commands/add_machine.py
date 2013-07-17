@@ -20,11 +20,13 @@ from sqlalchemy.orm import joinedload, subqueryload
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.dbwrappers.host import hostname_to_host
 from aquilon.worker.dbwrappers.location import get_location
 from aquilon.worker.dbwrappers.machine import create_machine
+from aquilon.worker.dbwrappers.resources import get_resource_holder
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
-from aquilon.aqdb.model import (Chassis, ChassisSlot, Cluster, Model, Machine,
-                                ClusterResource, VirtualMachine)
+from aquilon.aqdb.model import (Chassis, ChassisSlot, Model, Machine,
+                                VirtualMachine)
 
 
 class CommandAddMachine(BrokerCommand):
@@ -34,7 +36,7 @@ class CommandAddMachine(BrokerCommand):
     # arguments will contain one of --chassis --rack or --desk
     def render(self, session, logger, machine, model, vendor, serial, chassis,
                slot, cpuname, cpuvendor, cpuspeed, cpucount, memory, cluster,
-               comments, **arguments):
+               vmhost, comments, **arguments):
         dblocation = get_location(session,
                                   query_options=[subqueryload('parents'),
                                                  joinedload('parents.dns_maps')],
@@ -59,29 +61,37 @@ class CommandAddMachine(BrokerCommand):
                                 "of type %(type)s.  Try 'add %(type)s'." %
                     {"type": dbmodel.machine_type})
 
-        if cluster:
+        vmholder = None
+        if cluster or vmhost:
+            if cluster and vmhost:
+                raise ArgumentError("Cluster and vmhost cannot be specified "
+                                    "together.")
             if dbmodel.machine_type != 'virtual_machine':
-                raise ArgumentError("Only virtual machines can have a cluster "
-                                    "attribute.")
-            dbcluster = Cluster.get_unique(session, cluster,
-                                           compel=ArgumentError)
-            # This test could be either archetype or cluster_type
-            if dbcluster.personality.archetype.name != 'esx_cluster':
-                raise ArgumentError("Can only add virtual machines to "
-                                    "clusters with archetype esx_cluster.")
-            # TODO implement the same to vmhosts.
-            if dbcluster.status.name == 'decommissioned':
+                raise ArgumentError("{0} is not a virtual machine."
+                                    .format(dbmodel))
+
+            # TODO: do we need VMs inside resource groups?
+            vmholder = get_resource_holder(session, hostname=vmhost,
+                                              cluster=cluster, resgroup=None,
+                                              compel=False)
+
+            if vmholder.holder_object.status.name == 'decommissioned':
                 raise ArgumentError("Cannot add virtual machines to "
                                     "decommissioned clusters.")
-            if dblocation and dbcluster.location_constraint != dblocation:
-                raise ArgumentError("Cannot override cluster location {0} "
-                                    "with location {1}.".format(
-                                        dbcluster.location_constraint,
-                                        dblocation))
-            dblocation = dbcluster.location_constraint
+
+            if cluster:
+                container_loc = vmholder.holder_object.location_constraint
+            else:
+                container_loc = vmholder.holder_object.machine.location
+
+            if dblocation and dblocation != container_loc:
+                raise ArgumentError("Cannot override container location {0} "
+                                    "with location {1}.".format(container_loc,
+                                                                dblocation))
+            dblocation = container_loc
         elif dbmodel.machine_type == 'virtual_machine':
             raise ArgumentError("Virtual machines must be assigned to a "
-                                "cluster.")
+                                "cluster or a host.")
 
         Machine.get_unique(session, machine, preclude=True)
         dbmachine = create_machine(session, machine, dblocation, dbmodel,
@@ -97,19 +107,19 @@ class CommandAddMachine(BrokerCommand):
             dbslot.machine = dbmachine
             session.add(dbslot)
 
-        if cluster:
-            if not dbcluster.resholder:
-                dbcluster.resholder = ClusterResource(cluster=dbcluster)
+        if vmholder:
             dbvm = VirtualMachine(machine=dbmachine, name=dbmachine.label,
-                                  holder=dbcluster.resholder)
-            dbcluster.validate()
+                                  holder=vmholder)
+            if hasattr(vmholder.holder_object, "validate") and \
+               callable(vmholder.holder_object.validate):
+                vmholder.holder_object.validate()
 
         session.flush()
 
         plenaries = PlenaryCollection(logger=logger)
         plenaries.append(Plenary.get_plenary(dbmachine))
-        if cluster:
-            plenaries.append(Plenary.get_plenary(dbcluster))
+        if vmholder:
+            plenaries.append(Plenary.get_plenary(vmholder.holder_object))
             plenaries.append(Plenary.get_plenary(dbvm))
 
         # The check to make sure a plenary file is not written out for

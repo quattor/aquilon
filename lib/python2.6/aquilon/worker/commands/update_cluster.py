@@ -197,7 +197,7 @@ def update_cluster_location(session, logger, dbcluster,
         if dbcluster.location_constraint != dblocation:
             if machine_plenary_will_move(old=dbcluster.location_constraint,
                                          new=dblocation):
-                for dbmachine in dbcluster.machines:
+                for dbmachine in dbcluster.virtual_machines:
                     # This plenary will have a path to the old location.
                     plenary = Plenary.get_plenary(dbmachine, logger=logger)
                     remove_plenaries.append(plenary)

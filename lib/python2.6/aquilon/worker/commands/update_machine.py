@@ -91,6 +91,14 @@ class CommandUpdateMachine(BrokerCommand):
                 remove_plenaries.append(Plenary.get_plenary(dbmachine))
             dbmachine.location = dblocation
 
+            if dbmachine.host:
+                for vm in dbmachine.host.virtual_machines:
+                    if machine_plenary_will_move(old=vm.location,
+                                                 new=dbmachine.location):
+                        remove_plenaries.append(Plenary.get_plenary(vm))
+                    vm.location = dblocation
+                    plenaries.append(Plenary.get_plenary(vm))
+
         if model or vendor:
             # If overriding model, should probably overwrite default
             # machine specs as well.

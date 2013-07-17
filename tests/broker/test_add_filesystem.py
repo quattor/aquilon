@@ -60,6 +60,7 @@ class TestAddFilesystem(TestBrokerCommand):
                    "--hostname=server1.aqd-unittest.ms.com"]
         out = self.commandtest(command)
         self.matchoutput(out, "structure template resource/host/server1.aqd-unittest.ms.com/filesystem/fs1/config;", command)
+        self.matchoutput(out, '"name" = "fs1";', command)
         self.matchoutput(out, '"type" = "ext3";', command)
         self.matchoutput(out, '"mountpoint" = "/mnt";', command)
         self.matchoutput(out, '"mount" = true;', command)
@@ -181,6 +182,7 @@ class TestAddFilesystem(TestBrokerCommand):
                    "--cluster=utvcs1"]
         self.successtest(command)
 
+        # fs1 is not deleted here, it will be removed when the host is deleted.
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddFilesystem)

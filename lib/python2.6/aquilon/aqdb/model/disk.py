@@ -24,9 +24,8 @@ from sqlalchemy.orm import relation, backref, deferred
 
 from aquilon.aqdb.model import Base, Machine, ServiceInstance
 from aquilon.aqdb.column_types import AqStr, Enum
-from aquilon.config import Config
 
-disk_types = ['local', 'san', 'virtual_disk']
+disk_types = ['local', 'san', 'virtual_disk', 'virtual_localdisk']
 controller_types = ['cciss', 'ide', 'sas', 'sata', 'scsi', 'flash',
                     'fibrechannel']
 

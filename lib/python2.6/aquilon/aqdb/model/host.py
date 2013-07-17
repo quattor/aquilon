@@ -19,7 +19,7 @@
 from datetime import datetime
 
 from sqlalchemy import (Integer, Boolean, DateTime, String, Column, ForeignKey,
-                        UniqueConstraint, PrimaryKeyConstraint, Index)
+                        PrimaryKeyConstraint, Index)
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import relation, backref, deferred
 
@@ -101,7 +101,7 @@ class Host(Base):
     # This is a one-to-one relation, so we need uselist=False on the backref
     machine = relation(Machine, lazy=False, innerjoin=True,
                        backref=backref('host', uselist=False, lazy=False,
-                                       cascade='all'))
+                                       cascade='all, delete-orphan'))
 
     branch = relation(Branch, innerjoin=True, backref='hosts')
     sandbox_author = relation(UserPrincipal)
@@ -129,6 +129,17 @@ class Host(Base):
         if self.sandbox_author:
             return "%s/%s" % (self.sandbox_author.name, self.branch.name)
         return str(self.branch.name)
+
+    # see cluster.py
+    @property
+    def virtual_machines(self):
+        mach = []
+        if self.resholder:
+            for res in self.resholder.resources:
+                # TODO: support virtual machines inside resource groups?
+                if res.resource_type == "virtual_machine":
+                    mach.append(res.machine)
+        return mach
 
 
 class HostGrnMap(Base):

@@ -189,7 +189,7 @@ class Cluster(Base):
         return self.personality.services + self.personality.archetype.services
 
     @property
-    def machines(self):
+    def virtual_machines(self):
         mach = []
         if self.resholder:
             for res in self.resholder.resources:
@@ -457,7 +457,7 @@ class EsxCluster(Cluster):
         global_vars = {'__builtins__': restricted_builtins}
 
         resmap = {}
-        for machine in self.machines:
+        for machine in self.virtual_machines:
             # This is the list of variables we want to pass to the capacity
             # function
             local_vars = {'memory': machine.memory}
@@ -498,7 +498,9 @@ class EsxCluster(Cluster):
         if host_part is None:
             host_part = self.host_count
         if current_vm_count is None:
-            current_vm_count = len(self.machines)
+            current_vm_count = len(self.virtual_machines)
+
+
         if current_host_count is None:
             current_host_count = len(self.hosts)
         if down_hosts_threshold is None:

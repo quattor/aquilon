@@ -131,4 +131,4 @@ from aquilon.aqdb.model.reboot_schedule import (RebootSchedule,
 from aquilon.aqdb.model.virtual_machine import VirtualMachine
 from aquilon.aqdb.model.service_address import ServiceAddress
 from aquilon.aqdb.model.share import Share
-from aquilon.aqdb.model.virtual_disk import VirtualDisk
+from aquilon.aqdb.model.virtual_disk import VirtualDisk, VirtualLocalDisk
