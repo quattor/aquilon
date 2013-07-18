@@ -1,0 +1,15 @@
+ALTER TABLE host_grn_map ADD target VARCHAR(32);
+
+UPDATE host_grn_map SET target = 'esp';
+ALTER TABLE host_grn_map ALTER target SET NOT NULL;
+
+ALTER TABLE host_grn_map DROP CONSTRAINT host_grn_map_pk;
+ALTER TABLE host_grn_map ADD CONSTRAINT host_grn_map_pk PRIMARY KEY (host_id, eon_id, target);
+
+ALTER TABLE personality_grn_map ADD target VARCHAR(32);
+
+UPDATE personality_grn_map SET target = 'esp';
+ALTER TABLE personality_grn_map ALTER target SET NOT NULL;
+
+ALTER TABLE personality_grn_map DROP CONSTRAINT personality_grn_map_pk;
+ALTER TABLE personality_grn_map ADD CONSTRAINT personality_grn_map_pk PRIMARY KEY (personality_id, eon_id, target);

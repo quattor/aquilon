@@ -52,5 +52,5 @@ class CommandAddParameter(BrokerCommand):
         session.add(dbparameter)
         session.flush()
 
-        plenary = Plenary.get_plenary(param_holder.personality)
+        plenary = Plenary.get_plenary(param_holder.personality, logger=logger)
         plenary.write()

@@ -122,7 +122,7 @@ class XtnDetail(Base):
     value = Column(String(255), default='True', nullable=False)
 
     __table_args__ = (PrimaryKeyConstraint(xtn_id, name, value,
-                                           name="xtn_dtl_pk"),
+                                           name="xtn_detail_pk"),
                       Index('xtn_dtl_name_idx', name,
                             oracle_compress=True),
                       Index('xtn_dtl_value_idx', value, oracle_compress=True),

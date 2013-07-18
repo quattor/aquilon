@@ -30,7 +30,6 @@ server_notifications =
 client_notifications = no
 dsdb = %(srcdir)s/tests/scale/fake_dsdb.sh
 installfe = /bin/echo
-#CheckNet = %(srcdir)s/tests/fakebin/fake_CheckNet
 #sharedata = %(srcdir)s/tests/testnasobjects.map
 #windows_host_info = %(dbdir)s/machines.db
 #vlan2net = %(srcdir)s/tests/fakebin/fake_vlan2net

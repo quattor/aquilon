@@ -128,7 +128,7 @@ class TestVulcanLocalDisk(VerifyNotificationsMixin, TestBrokerCommand):
         service = self.config.get("broker", "poll_helper_service")
         self.matchoutput(err,
                          "Using jump host nyaqd1.ms.com from service "
-                         "instance %s/unittest to run CheckNet "
+                         "instance %s/unittest to run discovery "
                          "for switch %s" % (service, self.switch),
                          command)
 
