@@ -17,7 +17,7 @@
 """ Disk for share """
 
 from sqlalchemy import Column, Integer, ForeignKey, Index
-from sqlalchemy.orm import relation, backref, column_property, deferred # pylint: disable=W0611
+from sqlalchemy.orm import relation, backref, column_property
 from sqlalchemy.sql import select, func
 
 from aquilon.aqdb.model import Disk, Share, Filesystem
@@ -27,10 +27,9 @@ _TN = 'disk'
 
 # Disk subclass for Share class
 class VirtualDisk(Disk):
-    share_id = Column(Integer, ForeignKey('share.id',
-                                                    name='%s_share_fk' % _TN,
-                                                    ondelete='CASCADE'),
-                                nullable=True)
+    share_id = Column(Integer, ForeignKey('share.id', name='%s_share_fk' % _TN,
+                                          ondelete='CASCADE'),
+                      nullable=True)
 
     share = relation(Share, innerjoin=True,
                      backref=backref('disks', cascade='all'))
@@ -63,12 +62,12 @@ Share.machine_count = column_property(
 
 class VirtualLocalDisk(Disk):
     filesystem_id = Column(Integer, ForeignKey('filesystem.id',
-                                                    name='%s_filesystem_fk' % _TN,
-                                                    ondelete='CASCADE'),
-                                nullable=True)
+                                               name='%s_filesystem_fk' % _TN,
+                                               ondelete='CASCADE'),
+                           nullable=True)
 
     filesystem = relation(Filesystem, innerjoin=True,
-                     backref=backref('disks', cascade='all'))
+                          backref=backref('disks', cascade='all'))
 
     __extra_table_args__ = (Index('%s_filesystem_idx' % _TN, filesystem_id),)
     __mapper_args__ = {'polymorphic_identity': 'virtual_localdisk'}
@@ -84,7 +83,7 @@ class VirtualLocalDisk(Disk):
                  self.controller_type, self.machine.label, self.capacity,
                  (self.filesystem.name if self.filesystem else "no_filesystem"))
 
-Filesystem.disk_count = column_property(
+Filesystem.virtual_disk_count = column_property(
     select([func.count()],
            VirtualLocalDisk.filesystem_id == Filesystem.id)
-    .label("disk_count"), deferred=True)
+    .label("virtual_disk_count"), deferred=True)

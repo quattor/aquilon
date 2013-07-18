@@ -103,9 +103,10 @@ class CommandAddDisk(BrokerCommand):
             dbfs = Filesystem.get_unique(session, name=filesystem,
                     holder=dbmachine.vm_container.holder, compel=True)
 
-            dbdisk = VirtualLocalDisk(device_name=disk, controller_type=controller,
-                                 bootable=boot, capacity=size, address=address,
-                                 comments=comments)
+            dbdisk = VirtualLocalDisk(device_name=disk,
+                                      controller_type=controller, bootable=boot,
+                                      capacity=size, address=address,
+                                      comments=comments)
             dbfs.disks.append(dbdisk)
 
         else:
