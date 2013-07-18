@@ -31,15 +31,17 @@
 
 import os
 import unittest
+from datetime import datetime
 
 if __name__ == "__main__":
     import utils
     utils.import_depends()
 
 from brokertest import TestBrokerCommand
+from notificationtest import VerifyNotificationsMixin
 
 # see test_vulcan2.py
-class TestVulcanLocalDisk(TestBrokerCommand):
+class TestVulcanLocalDisk(VerifyNotificationsMixin, TestBrokerCommand):
 
     metacluster = "utmc9"
     cluster = "utlccl1"
@@ -248,9 +250,10 @@ class TestVulcanLocalDisk(TestBrokerCommand):
         self.matchoutput(out, "Virtual Disk Count: 3", command)
 
     def test_200_make_host(self):
+        basetime = datetime.now()
         command = ["make", "--hostname", "utpgh0.aqd-unittest.ms.com"]
-        (out, err) = self.successtest(command)
-        self.matchoutput(err, "sent 1 server notifications", command)
+        self.successtest(command)
+        self.wait_notification(basetime, 1)
 
         command = ["show", "host", "--hostname", "utpgh0.aqd-unittest.ms.com"]
         out = self.commandtest(command)
@@ -307,11 +310,11 @@ class TestVulcanLocalDisk(TestBrokerCommand):
             self.noouttest(["del", "machine", "--machine", machine])
 
     def test_320_del_vmhost(self):
-
+        basetime = datetime.now()
         self.dsdb_expect_delete(self.getip())
         command = ["del", "host", "--hostname", self.vmhost]
-        err = self.statustest(command)
-        self.matchoutput(err, "sent 1 server notifications", command)
+        self.statustest(command)
+        self.wait_notification(basetime, 1)
         self.dsdb_verify()
 
         self.noouttest(["del", "machine", "--machine", self.machine])
@@ -336,9 +339,10 @@ class TestVulcanLocalDisk(TestBrokerCommand):
         self.successtest(command)
 
     def test_340_delutmc9(self):
+        basetime = datetime.now()
         command = ["del_metacluster", "--metacluster=%s" % self.metacluster]
-        err = self.statustest(command)
-        self.matchoutput(err, "sent 1 server notifications", command)
+        self.statustest(command)
+        self.wait_notification(basetime, 1)
 
         self.assertFalse(os.path.exists(os.path.join(
             self.config.get("broker", "profilesdir"), "clusters",
