@@ -22,16 +22,18 @@ import os
 from sqlalchemy.orm.attributes import set_committed_value
 
 from aquilon.exceptions_ import ArgumentError
+from aquilon.worker.logger import CLIENT_INFO
+from aquilon.notify.index import trigger_notifications
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.host import (hostname_to_host,
                                             get_host_dependencies)
 from aquilon.worker.dbwrappers.dns import delete_dns_record
-from aquilon.worker.processes import (DSDBRunner, remove_file)
+from aquilon.worker.processes import DSDBRunner
 from aquilon.worker.templates.base import (Plenary, PlenaryCollection,
                                            TEMPLATE_EXTENSION)
-from aquilon.worker.templates.index import build_index
 from aquilon.worker.templates.service import PlenaryServiceInstanceServer
 from aquilon.worker.locks import DeleteKey, CompileKey
+from aquilon.utils import remove_file
 
 
 class CommandDelHost(BrokerCommand):
@@ -143,6 +145,6 @@ class CommandDelHost(BrokerCommand):
                 bindings.write(locked=True)
                 resources.remove(locked=True)
 
-            build_index(self.config, session, profiles, logger=logger)
+            trigger_notifications(self.config, logger, CLIENT_INFO)
 
         return

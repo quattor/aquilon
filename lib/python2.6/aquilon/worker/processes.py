@@ -25,14 +25,9 @@ the chain.
 
 import os
 import re
-import errno
 import logging
-import gzip
 from subprocess import Popen, PIPE
-from tempfile import mkstemp
 from threading import Thread
-from cStringIO import StringIO
-import yaml
 
 from sqlalchemy.orm.session import object_session
 
@@ -173,104 +168,6 @@ def run_git(args, env=None, path=".",
 
     return run_command(git_args, env=git_env, path=path,
                        logger=logger, loglevel=loglevel, filterre=filterre)
-
-
-def remove_dir(dir, logger=LOGGER):
-    """Remove a directory.  Could have been implemented as a call to rm -rf."""
-    for root, dirs, files in os.walk(dir, topdown=False):
-        for name in files:
-            try:
-                thisfile = os.path.join(root, name)
-                os.remove(thisfile)
-            except OSError, e:
-                logger.info("Failed to remove '%s': %s" % (thisfile, e))
-        for name in dirs:
-            try:
-                thisdir = os.path.join(root, name)
-                os.rmdir(thisdir)
-            except OSError, e:
-                # If this 'directory' is a symlink, the rmdir command
-                # will fail.  Try to remove it as a file.  If this
-                # fails, report the original error.
-                try:
-                    os.remove(thisdir)
-                except OSError, e1:
-                    logger.info("Failed to remove '%s': %s" % (thisdir, e))
-    try:
-        os.rmdir(dir)
-    except OSError, e:
-        logger.info("Failed to remove '%s': %s" % (dir, e))
-    return
-
-
-def write_file(filename, content, mode=None, logger=LOGGER, compress=None):
-    """Atomically write content into the specified filename.
-
-    The content is written into a temp file in the same directory as
-    filename, and then swapped into place with rename.  This assumes
-    that both the file and the directory can be written to by the
-    broker.  The same directory was used instead of a temporary
-    directory because atomic swaps are generally only available when
-    the source and the target are on the same filesystem.
-
-    If mode is set, change permissions on the file (newly created or
-    pre-existing) to the new mode.  If unset and the file exists, the
-    current permissions will be kept.  If unset and the file is new,
-    the default is 0644.
-
-    This method may raise OSError if any of the OS-related methods
-    (creating the temp file, writing to it, correcting permissions,
-    swapping into place) fail.  The method will attempt to remove
-    the temp file if it had been created.
-
-    If the compress keyword is passed, the content is compressed in
-    memory before writing.  The only compression currently supported
-    is gzip.
-
-    """
-    if compress == 'gzip':
-        config = Config()
-        buffer = StringIO()
-        compress = config.getint('broker', 'gzip_level')
-        zipper = gzip.GzipFile(filename, 'wb', compress, buffer)
-        zipper.write(content)
-        zipper.close()
-        content = buffer.getvalue()
-    if mode is None:
-        try:
-            old_mode = os.stat(filename).st_mode
-        except OSError, e:
-            old_mode = 0644
-    (dirname, basename) = os.path.split(filename)
-    (fd, fpath) = mkstemp(prefix=basename, dir=dirname)
-    try:
-        with os.fdopen(fd, 'w') as f:
-            f.write(content)
-        if mode is None:
-            os.chmod(fpath, old_mode)
-        else:
-            os.chmod(fpath, mode)
-        os.rename(fpath, filename)
-    finally:
-        if os.path.exists(fpath):
-            os.remove(fpath)
-
-
-def read_file(path, filename, logger=LOGGER):
-    fullfile = os.path.join(path, filename)
-    try:
-        return open(fullfile).read()
-    except OSError, e:
-        raise AquilonError("Could not read contents of %s: %s"
-                % (fullfile, e))
-
-
-def remove_file(filename, logger=LOGGER):
-    try:
-        os.remove(filename)
-    except OSError, e:
-        if e.errno != errno.ENOENT:
-            logger.info("Could not remove file '%s': %s" % (filename, e))
 
 
 def cache_version(config, logger=LOGGER):

@@ -20,21 +20,24 @@
 import os
 import re
 import unittest
+from datetime import datetime
 
 if __name__ == "__main__":
     import utils
     utils.import_depends()
 
 from brokertest import TestBrokerCommand
+from notificationtest import VerifyNotificationsMixin
 
 
-class TestMakeAquilon(TestBrokerCommand):
+class TestMakeAquilon(VerifyNotificationsMixin, TestBrokerCommand):
     """ This tests the "make aquilon" command
 
         which has the specific feature of auto-binding required services
     """
 
     def testmakeunittest02(self):
+        basetime = datetime.now()
         command = ["make", "aquilon",
                    "--hostname", "unittest02.one-nyp.ms.com",
                    "--osname", "linux", "--osversion", "5.0.1-x86_64"]
@@ -44,7 +47,9 @@ class TestMakeAquilon(TestBrokerCommand):
                          "service aqd instance ny-prod",
                          command)
         self.matchclean(err, "removing binding", command)
-        self.matchoutput(err, "sent 1 server notifications", command)
+        self.matchoutput(err, "Index rebuild and notifications will happen in "
+                         "the background.", command)
+        self.wait_notification(basetime, 1)
 
         self.assert_(os.path.exists(os.path.join(
             self.config.get("broker", "profilesdir"),
@@ -131,6 +136,7 @@ class TestMakeAquilon(TestBrokerCommand):
         self.matchclean(out, '"/metadata/template/branch/author"', command)
 
     def testmakeunittest00(self):
+        basetime = datetime.now()
         command = ["make", "aquilon",
                    "--hostname", "unittest00.one-nyp.ms.com",
                    "--buildstatus", "blind", "--personality", "compileserver",
@@ -149,7 +155,9 @@ class TestMakeAquilon(TestBrokerCommand):
                          "service afs instance q.ny.ms.com",
                          command)
         self.matchclean(err, "removing binding", command)
-        self.matchoutput(err, "sent 1 server notifications", command)
+        self.matchoutput(err, "Index rebuild and notifications will happen in "
+                         "the background.", command)
+        self.wait_notification(basetime, 1)
         self.assert_(os.path.exists(os.path.join(
             self.config.get("broker", "profilesdir"),
             "unittest00.one-nyp.ms.com%s" % self.profile_suffix)))

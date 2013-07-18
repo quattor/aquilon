@@ -22,9 +22,10 @@ from tempfile import mkdtemp
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.data_sync.qip import QIPRefresh
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.processes import run_command, remove_dir
+from aquilon.worker.processes import run_command
 from aquilon.worker.dbwrappers.location import get_location
 from aquilon.worker.locks import lock_queue, SyncKey
+from aquilon.utils import remove_dir
 
 
 class CommandRefreshNetwork(BrokerCommand):

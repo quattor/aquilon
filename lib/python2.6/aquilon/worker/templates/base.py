@@ -20,13 +20,14 @@
 import os
 import logging
 
+from mako.lookup import TemplateLookup
+
 from aquilon.exceptions_ import InternalError, IncompleteError
 from aquilon.config import Config
 from aquilon.worker.locks import lock_queue, CompileKey
-from aquilon.worker.processes import write_file, read_file, remove_file
 from aquilon.worker.templates.panutils import pan_assign, pan_variable
-from mako.lookup import TemplateLookup
 from aquilon.worker.formats.formatters import ObjectFormatter
+from aquilon.utils import write_file, read_file, remove_file
 
 LOGGER = logging.getLogger(__name__)
 

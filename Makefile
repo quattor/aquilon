@@ -40,7 +40,7 @@ print-%: ; @$(error $* is $($*) ($(value $*)))
 # The goal is to be readable by someone who doesn't know make very well,
 # to make it maintainable, not to impress you with how well I know the tool
 
-BIN_FILES := $(shell find bin -type f | sed -e 's/.py$$//')
+BIN_FILES := $(shell find bin sbin -type f | sed -e 's/.py$$//')
 LIB_FILES := $(shell find lib -type f)
 ETC_FILES := $(shell find etc -type f | grep -v templates)
 PYC_FILES := $(shell find lib -name '*.py' | sed -e 's,\.py,\.pyc,')
@@ -68,7 +68,12 @@ $(COMMON)/bin/aqd_config: bin/aqd_config.py
 	sed -e '1s,^#!$(PYTHON_DEFAULT)\(.*\),#!$(PYTHON_CLIENT_PROD)\1,' <$< >$@
 	chmod $(PERMS) $@
 
-$(COMMON)/bin/twistd: bin/twistd.py
+$(COMMON)/sbin/aqd: sbin/aqd.py
+	@mkdir -p `dirname $@`
+	sed -e '1s,^#!$(PYTHON_DEFAULT)\(.*\),#!$(PYTHON_SERVER_PROD)\1,' <$< >$@
+	chmod $(PERMS) $@
+
+$(COMMON)/sbin/aq_notifyd: sbin/aq_notifyd.py
 	@mkdir -p `dirname $@`
 	sed -e '1s,^#!$(PYTHON_DEFAULT)\(.*\),#!$(PYTHON_SERVER_PROD)\1,' <$< >$@
 	chmod $(PERMS) $@
@@ -90,7 +95,7 @@ $(COMMON)/etc/rc.d/init.d/aqd: etc/rc.d/init.d/aqd
 	@mkdir -p `dirname $@`
 	install -m 0555 $< $@
 
-# Running twistd after all the files have been installed generates a
+# Running aqd after all the files have been installed generates a
 # dropin.cache file that would otherwise be missing (and that missing
 # file causes the server to complain loudly on startup).
 # The file will only be generated as needed.  The remove_stale script
@@ -101,9 +106,8 @@ $(COMMON)/etc/rc.d/init.d/aqd: etc/rc.d/init.d/aqd
 # remove the generated files anyway.
 .PHONY: install
 install: remove_stale $(INSTALLFILES) install-doc
-	ln -sf twistd "$(COMMON)/bin/aqd"
-	ln -sf twistd "$(COMMON)/bin/aqd_readonly"
-	$(COMMON)/bin/twistd --help >/dev/null
+	ln -sf aqd "$(COMMON)/sbin/aqd_readonly"
+	$(COMMON)/sbin/aqd --help >/dev/null
 	./build/gen_completion.py --outputdir="$(COMMON)/etc" --templatedir="./etc/templates" --all
 	./build/graph_schema.py --outputdir="$(COMMON)/doc"
 

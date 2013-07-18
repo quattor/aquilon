@@ -19,15 +19,17 @@
 
 import os
 import unittest
+from datetime import datetime
 
 if __name__ == "__main__":
     import utils
     utils.import_depends()
 
 from brokertest import TestBrokerCommand
+from notificationtest import VerifyNotificationsMixin
 
 
-class TestVulcan20(TestBrokerCommand):
+class TestVulcan20(VerifyNotificationsMixin, TestBrokerCommand):
     # Metacluster / cluster / Switch tests
 
     def test_000_addutmc8(self):
@@ -637,13 +639,14 @@ class TestVulcan20(TestBrokerCommand):
 
     def test_307_del10gigrackhosts(self):
         for i in range(0, 2):
+            basetime = datetime.now()
             ip = self.net.unknown[18].usable[i]
             hostname = "utpgh%d.aqd-unittest.ms.com" % i
 
             self.dsdb_expect_delete(ip)
             command = ["del", "host", "--hostname", hostname]
-            (out, err) = self.successtest(command)
-            self.matchoutput(err, "sent 1 server notifications", command)
+            self.successtest(command)
+            self.wait_notification(basetime, 1)
         self.dsdb_verify()
 
     def test_307_del10gigracks(self):
@@ -679,13 +682,15 @@ class TestVulcan20(TestBrokerCommand):
             self.successtest(command)
 
     def test_310_delutmc8(self):
+        basetime = datetime.now()
         command = ["del_metacluster", "--metacluster=utmc8"]
         err = self.statustest(command)
-        self.matchoutput(err, "sent 1 server notifications", command)
+        self.wait_notification(basetime, 1)
 
         self.assertFalse(os.path.exists(os.path.join(
             self.config.get("broker", "profilesdir"), "clusters",
             "utmc8%s" % self.profile_suffix)))
+
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestVulcan20)

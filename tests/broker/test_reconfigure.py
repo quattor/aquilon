@@ -21,6 +21,7 @@
 import os
 import re
 import unittest
+from datetime import datetime
 
 if __name__ == "__main__":
     from broker import utils
@@ -28,9 +29,11 @@ if __name__ == "__main__":
 
 from broker.brokertest import TestBrokerCommand
 from broker.grntest import VerifyGrnsMixin
+from broker.notificationtest import VerifyNotificationsMixin
 
 
-class TestReconfigure(VerifyGrnsMixin, TestBrokerCommand):
+class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
+                      TestBrokerCommand):
     # Note that some tests for reconfigure --list appear in
     # test_make_aquilon.py.
 
@@ -41,6 +44,7 @@ class TestReconfigure(VerifyGrnsMixin, TestBrokerCommand):
     # force it *back* to using a correct service map entry, in
     # this case q.ny.ms.com.
     def testreconfigureunittest02_1(self):
+        basetime = datetime.now()
         command = ["reconfigure", "--hostname", "unittest02.one-nyp.ms.com",
                    "--buildstatus", "ready", "--grn", "grn:/ms/ei/aquilon/aqd"]
         (out, err) = self.successtest(command)
@@ -52,7 +56,9 @@ class TestReconfigure(VerifyGrnsMixin, TestBrokerCommand):
                          "unittest02.one-nyp.ms.com removing binding for "
                          "service afs instance q.ln.ms.com",
                          command)
-        self.matchoutput(err, "sent 1 server notifications", command)
+        self.matchoutput(err, "Index rebuild and notifications will happen in "
+                         "the background.", command)
+        self.wait_notification(basetime, 1)
 
     ## verify status before reconfigure
     def testreconfigureunittest02_0(self):
@@ -143,12 +149,15 @@ class TestReconfigure(VerifyGrnsMixin, TestBrokerCommand):
 
     # These settings have not changed - the command should still succeed.
     def testreconfigureunittest00(self):
+        basetime = datetime.now()
         command = ["reconfigure", "--hostname", "unittest00.one-nyp.ms.com"]
         (out, err) = self.successtest(command)
         self.matchoutput(err, "1/1 object template", command)
         self.matchclean(err, "removing binding", command)
         self.matchclean(err, "adding binding", command)
-        self.matchoutput(err, "sent 1 server notifications", command)
+        self.matchoutput(err, "Index rebuild and notifications will happen in "
+                         "the background.", command)
+        self.wait_notification(basetime, 1)
 
     def testverifycatunittest00(self):
         command = "cat --hostname unittest00.one-nyp.ms.com --data"

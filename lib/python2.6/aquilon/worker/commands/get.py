@@ -21,11 +21,12 @@ import os
 
 from aquilon.exceptions_ import (ArgumentError, ProcessException,
                                  AuthorizationException)
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.aqdb.model import Sandbox
 from aquilon.aqdb.column_types import AqStr
-from aquilon.worker.processes import run_command, remove_dir
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.processes import run_command
 from aquilon.worker.formats.branch import RemoteSandbox
+from aquilon.utils import remove_dir
 
 
 class CommandGet(BrokerCommand):

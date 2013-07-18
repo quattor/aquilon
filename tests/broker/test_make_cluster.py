@@ -19,6 +19,7 @@
 
 import os
 import unittest
+from datetime import datetime
 
 if __name__ == "__main__":
     import utils
@@ -26,11 +27,13 @@ if __name__ == "__main__":
 
 
 from brokertest import TestBrokerCommand
+from notificationtest import VerifyNotificationsMixin
 
 
-class TestMakeCluster(TestBrokerCommand):
+class TestMakeCluster(VerifyNotificationsMixin, TestBrokerCommand):
 
     def testmakeutecl1(self):
+        basetime = datetime.now()
         command = ["make_cluster", "--cluster", "utecl1"]
         (out, err) = self.successtest(command)
         self.matchoutput(err,
@@ -38,7 +41,9 @@ class TestMakeCluster(TestBrokerCommand):
                          "service esx_management_server",
                          command)
         self.matchclean(err, "removing binding", command)
-        self.matchoutput(err, "sent 1 server notifications", command)
+        self.matchoutput(err, "Index rebuild and notifications will happen in "
+                         "the background.", command)
+        self.wait_notification(basetime, 1)
 
         self.assert_(os.path.exists(os.path.join(
             self.config.get("broker", "profilesdir"), "clusters",
@@ -121,6 +126,7 @@ class TestMakeCluster(TestBrokerCommand):
                          command)
 
     def testmakeutecl2(self):
+        basetime = datetime.now()
         command = ["make_cluster", "--cluster", "utecl2"]
         (out, err) = self.successtest(command)
         self.matchoutput(err,
@@ -128,7 +134,9 @@ class TestMakeCluster(TestBrokerCommand):
                          "service esx_management_server",
                          command)
         self.matchclean(err, "removing binding", command)
-        self.matchoutput(err, "sent 1 server notifications", command)
+        self.matchoutput(err, "Index rebuild and notifications will happen in "
+                         "the background.", command)
+        self.wait_notification(basetime, 1)
 
         self.assert_(os.path.exists(os.path.join(
             self.config.get("broker", "profilesdir"), "clusters",

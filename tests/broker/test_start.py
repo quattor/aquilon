@@ -45,13 +45,14 @@ class TestBrokerStart(unittest.TestCase):
         # warning message it tickles you)
 
         config = Config()
-        twistd = os.path.join(config.get("broker", "srcdir"),
-                              "lib", "python2.6", "aquilon", "unittest_patches.py")
+        aqd = os.path.join(config.get("broker", "srcdir"),
+                           "lib", "python2.6", "aquilon",
+                           "unittest_patches.py")
         pidfile = os.path.join(config.get("broker", "rundir"), "aqd.pid")
         logfile = config.get("broker", "logfile")
 
-        # Specify twistd and options...
-        args = [sys.executable, twistd,
+        # Specify aqd and options...
+        args = [sys.executable, aqd,
                 "--pidfile", pidfile, "--logfile", logfile]
 
         if config.has_option("unittest", "profile"):
@@ -82,7 +83,7 @@ class TestBrokerStart(unittest.TestCase):
         # FIXME: Check that it is listening on the correct port(s)...
 
         # FIXME: If it fails, either cat the log file, or tell the user to try
-        # running '%s -bn aqd --config %s'%(twistd, config.baseconfig)
+        # running '%s -bn aqd --config %s'%(aqd, config.baseconfig)
 
     def testclonetemplateking(self):
         config = Config()
