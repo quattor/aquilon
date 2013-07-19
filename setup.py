@@ -29,7 +29,6 @@ def get_version():
             else:
                 raise
 
-
 setup(name="aquilon",
       version=get_version(),
       description="Aquilon",
@@ -39,5 +38,9 @@ setup(name="aquilon",
       author_email="quattor-aquilon@lists.sourceforge.net",
       package_dir={'' : 'lib/python2.6'},
       packages=["aquilon"],
+      data_files=[("/usr/share/aquilon/config", glob.glob("etc/*.conf*")),
+                  ("/usr/share/aquilon", glob.glob("etc/*.xml")),
+                  ("/etc/init.d", glob.glob("etc/rc.d/init.d/*"))],
+
       scripts=glob.glob(os.path.join("bin", "a*")),
       url="http://quattor.org")
