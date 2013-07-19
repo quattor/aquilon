@@ -21,6 +21,7 @@ import sys
 import unittest
 from subprocess import Popen, PIPE
 import re
+from csv import DictReader
 
 from aquilon.config import Config
 from aquilon.worker import depends  # pylint: disable=W0611
@@ -40,7 +41,7 @@ class TestBrokerCommand(unittest.TestCase):
 
     def setUp(self):
         self.config = Config()
-        self.net = DummyNetworks()
+        self.net = DummyNetworks(self.config)
 
         # Need to import protocol buffers after we have the config
         # object all squared away and we can set the sys.path
@@ -726,12 +727,19 @@ class DummyIP(IPv4Address):
 
 
 class NetworkInfo(IPv4Network):
-    def __init__(self, cidr, nettype):
+    def __init__(self, cidr, nettype, autocreate):
         super(NetworkInfo, self).__init__(cidr)
 
         self.nettype = nettype
         self.usable = list()
         self.reserved = list()
+
+        if autocreate == "True":
+            self.autocreate = True
+        elif autocreate == "False":
+            self.autocreate = False
+        else:
+            raise ValueError("Invalid value for autocreate: %s" % autocreate)
 
         if nettype == 'tor_net':
             offsets = [6, 7]
@@ -762,82 +770,50 @@ class DummyNetworks(object):
     # Borg
     __shared_state = {}
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, config, *args, **kwargs):
         self.__dict__ = self.__shared_state
         if getattr(self, "unknown", None):
             return
         object.__init__(self, *args, **kwargs)
+
         self.unknown = list()
         self.tor_net = list()
         self.tor_net2 = list()
         self.vm_storage_net = list()
         self.vpls = list()
         self.all = list()
-        self.unknown.append(NetworkInfo("4.2.1.0/26", "unknown"))
-        self.unknown.append(NetworkInfo("4.2.1.64/26", "unknown"))
-        self.unknown.append(NetworkInfo("4.2.6.128/29", "unknown"))
-        self.unknown.append(NetworkInfo("4.2.6.136/29", "unknown"))
-        self.unknown.append(NetworkInfo("4.2.6.144/29", "unknown"))
-        self.unknown.append(NetworkInfo("4.2.6.152/29", "unknown"))
-        self.unknown.append(NetworkInfo("4.2.6.160/29", "unknown"))
-        self.unknown.append(NetworkInfo("4.2.6.168/29", "unknown"))
-        self.unknown.append(NetworkInfo("4.2.6.176/29", "unknown"))
-        self.unknown.append(NetworkInfo("4.2.6.184/29", "unknown"))
-        self.unknown.append(NetworkInfo("4.2.10.0/24", "unknown"))
 
-        # Zebra/bonding/bridge: eth0 address/mac
-        self.unknown.append(NetworkInfo("4.2.12.0/26", "unknown"))
+        self.networks = {}
 
-        # Zebra/bonding/bridge: eth1 address/mac
-        self.unknown.append(NetworkInfo("4.2.12.64/26", "unknown"))
+        typemap = {"unknown": self.unknown,
+                   "tor_net": self.tor_net,
+                   "tor_net2": self.tor_net2,
+                   "vm_storage_net": self.vm_storage_net,
+                   "vpls": self.vpls}
 
-        # Zebra/bonding/bridge: virtual interface addresses
-        self.unknown.append(NetworkInfo("4.2.12.128/26", "unknown"))
+        dir = config.get("unittest", "datadir")
+        filename = os.path.join(dir, "networks.csv")
+        with open(filename, "r") as datafile:
+            # Filter out comments
+            lines = [line for line in datafile if not line.startswith('#')]
+            reader = DictReader(lines)
+            for row in reader:
+                n = NetworkInfo(row["cidr"], row["type"], row["autocreate"])
+                if row["type"] in typemap:
+                    typemap[row["type"]].append(n)
+                if row["autocreate"] == "True":
+                    self.all.append(n)
 
-        # Static routing tests
-        self.unknown.append(NetworkInfo("4.2.14.0/25", "unknown"))
-        self.unknown.append(NetworkInfo("4.2.14.128/25", "unknown"))
+                # Sanity checks
+                if row["name"] in self.networks:
+                    raise KeyError("Duplicate name '%s' in %s" % (row["name"],
+                                                                  filename))
+                for existing in self.networks.itervalues():
+                    if n in existing or existing in n:
+                        raise ValueError("Overlapping networks %s and %s in %s"
+                                         % (existing, n, filename))
 
-        # Small networks
-        self.unknown.append(NetworkInfo("4.2.15.0/32", "unknown"))
+                self.networks[row["name"]] = n
 
-        # autopg v2
-        self.unknown.append(NetworkInfo("4.2.18.0/29", "unknown"))
-        self.unknown.append(NetworkInfo("4.2.18.16/29", "unknown"))
-
-        # Switch loopback
-        self.unknown.append(NetworkInfo("4.2.19.0/24", "unknown"))
-
-        # Switch sync testing
-        self.unknown.append(NetworkInfo("4.2.20.0/24", "unknown"))
-
-        self.tor_net.append(NetworkInfo("4.2.1.128/26", "tor_net"))
-        self.tor_net.append(NetworkInfo("4.2.1.192/26", "tor_net"))
-        self.tor_net.append(NetworkInfo("4.2.2.0/26", "tor_net"))
-        self.tor_net.append(NetworkInfo("4.2.2.64/26", "tor_net"))
-        self.tor_net.append(NetworkInfo("4.2.2.128/26", "tor_net"))
-        self.tor_net.append(NetworkInfo("4.2.2.192/26", "tor_net"))
-        self.tor_net.append(NetworkInfo("4.2.9.0/26", "tor_net"))
-        self.tor_net.append(NetworkInfo("4.2.9.64/26", "tor_net"))
-        self.tor_net.append(NetworkInfo("4.2.9.128/26", "tor_net"))
-        self.tor_net.append(NetworkInfo("4.2.9.192/26", "tor_net"))
-        self.tor_net.append(NetworkInfo("4.2.3.0/25", "tor_net"))
-        self.tor_net.append(NetworkInfo("4.2.3.128/25", "tor_net"))
-        self.tor_net.append(NetworkInfo("4.2.5.0/25", "tor_net"))
-        self.tor_net2.append(NetworkInfo("4.2.4.0/25", "tor_net2"))
-        self.tor_net2.append(NetworkInfo("4.2.4.128/25", "tor_net2"))
-        self.tor_net2.append(NetworkInfo("4.2.6.192/26", "tor_net2"))
-        self.tor_net2.append(NetworkInfo("4.2.7.0/25", "tor_net2"))
-        self.tor_net2.append(NetworkInfo("4.2.7.128/25", "tor_net2"))
-        self.tor_net2.append(NetworkInfo("4.2.11.0/28", "tor_net2"))
-        self.vm_storage_net.append(NetworkInfo("4.2.6.0/25", "vm_storage_net"))
-        self.vpls.append(NetworkInfo("4.2.13.0/24", "vpls"))
-        self.all.extend(self.unknown)
-        self.all.extend(self.tor_net)
-        self.all.extend(self.tor_net2)
-        self.all.extend(self.vm_storage_net)
-        self.all.extend(self.vpls)
-
-        # network base svc maps, deliberately not in self.all
-        self.netsvcmap = NetworkInfo("4.2.16.0/26", "unknown")
-        self.netperssvcmap = NetworkInfo("4.2.17.0/26", "unknown")
+            self.netsvcmap = self.networks["netsvcmap"]
+            self.netperssvcmap = self.networks["netperssvcmap"]
