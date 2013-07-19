@@ -57,7 +57,7 @@ class TestAddHost(TestBrokerCommand):
         self.dsdb_verify()
 
     def testaddafsbynet(self):
-        ip = self.net.netsvcmap.usable[0]
+        ip = self.net["netsvcmap"].usable[0]
         self.dsdb_expect_add("afs-by-net.aqd-unittest.ms.com", ip, "eth0", ip.mac,
                              comments="For network based service mappings")
         self.noouttest(["add", "host",
@@ -70,7 +70,7 @@ class TestAddHost(TestBrokerCommand):
         self.dsdb_verify()
 
     def testaddnetmappers(self):
-        ip = self.net.netperssvcmap.usable[0]
+        ip = self.net["netperssvcmap"].usable[0]
         self.dsdb_expect_add("netmap-pers.aqd-unittest.ms.com", ip, "eth0", ip.mac,
                              comments="For net/pers based service mappings")
         self.noouttest(["add", "host",
@@ -133,7 +133,7 @@ class TestAddHost(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
                          "Primary Name: afs-by-net.aqd-unittest.ms.com [%s]" %
-                         self.net.netsvcmap.usable[0],
+                         self.net["netsvcmap"].usable[0],
                          command)
         self.matchoutput(out, "Blade: ut3c5n11", command)
         self.matchoutput(out, "Archetype: aquilon", command)
@@ -157,7 +157,7 @@ class TestAddHost(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
                          "Primary Name: afs-by-net.aqd-unittest.ms.com [%s]" %
-                         self.net.netsvcmap.usable[0],
+                         self.net["netsvcmap"].usable[0],
                          command)
 
     def testverifyaddafsbynetut3c5n12(self):
@@ -165,7 +165,7 @@ class TestAddHost(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
                          "Primary Name: netmap-pers.aqd-unittest.ms.com [%s]" %
-                         self.net.netperssvcmap.usable[0],
+                         self.net["netperssvcmap"].usable[0],
                          command)
 
     def testverifyhostdns(self):

@@ -98,12 +98,12 @@ class TestDelNetwork(TestBrokerCommand):
         self.noouttest(command)
 
     def testdelnetsvcmap(self):
-        net = self.net.netsvcmap
+        net = self.net["netsvcmap"]
         command = ["del", "network", "--ip", net.ip]
         self.noouttest(command)
 
     def testdelnetperssvcmap(self):
-        net = self.net.netperssvcmap
+        net = self.net["netperssvcmap"]
         command = ["del", "network", "--ip", net.ip]
         self.noouttest(command)
 
@@ -121,7 +121,7 @@ class TestDelNetwork(TestBrokerCommand):
         self.matchclean(out, str(net.ip), command)
 
     def testverifynetsvcmap(self):
-        net = self.net.netsvcmap
+        net = self.net["netsvcmap"]
         command = ["search", "network", "--all"]
         out = self.commandtest(command)
         self.matchclean(out, "netsvcmap", command)

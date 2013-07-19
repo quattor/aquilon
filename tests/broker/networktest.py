@@ -119,9 +119,6 @@ class DummyNetworks(object):
 
                 self.networks[row["name"]] = n
 
-            self.netsvcmap = self.networks["netsvcmap"]
-            self.netperssvcmap = self.networks["netperssvcmap"]
-
     def __getitem__(self, name):
         return self.networks[name]
 

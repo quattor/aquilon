@@ -45,12 +45,12 @@ class TestUnmapService(TestBrokerCommand):
         self.noouttest(command)
 
     def testunmapafsbynet(self):
-        ip = self.net.netsvcmap.subnet()[0].ip
+        ip = self.net["netsvcmap"].subnet()[0].ip
         self.noouttest(["unmap", "service", "--networkip", ip,
                         "--service", "afs", "--instance", "afs-by-net"])
 
     def testverifyunmapafsbynet(self):
-        ip = self.net.netsvcmap.subnet()[0].ip
+        ip = self.net["netsvcmap"].subnet()[0].ip
         command = ["show_map",
                    "--service=afs", "--instance=afs-by-net",
                    "--networkip=%s" % ip]
@@ -60,7 +60,7 @@ class TestUnmapService(TestBrokerCommand):
         self.noouttest(command)
 
     def testunmapafsbynetpers(self):
-        ip = self.net.netperssvcmap.subnet()[0].ip
+        ip = self.net["netperssvcmap"].subnet()[0].ip
         self.noouttest(["unmap", "service", "--networkip", ip,
                         "--service", "netmap", "--instance", "netmap-pers",
                         "--personality", "eaitools",
@@ -75,7 +75,7 @@ class TestUnmapService(TestBrokerCommand):
                         "--service", "netmap", "--instance", "q.ny.ms.com"])
 
     def testverifyunmapafsbynetpers(self):
-        ip = self.net.netperssvcmap.subnet()[0].ip
+        ip = self.net["netperssvcmap"].subnet()[0].ip
         command = ["show_map",
                    "--service=netmap", "--instance=netmap-pers",
                    "--networkip=%s" % ip, "--personality", "compileserver",

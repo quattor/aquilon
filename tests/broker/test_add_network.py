@@ -147,7 +147,7 @@ class TestAddNetwork(TestBrokerCommand):
         self.noouttest(command)
 
     def testaddnetsvcmap(self):
-        net = self.net.netsvcmap
+        net = self.net["netsvcmap"]
         subnet = net.subnet()[0]
         command = ["add", "network", "--network", "netsvcmap",
                    "--ip", subnet.ip, "--netmask", subnet.netmask,
@@ -155,7 +155,7 @@ class TestAddNetwork(TestBrokerCommand):
         self.noouttest(command)
 
     def testaddnetperssvcmap(self):
-        net = self.net.netperssvcmap
+        net = self.net["netperssvcmap"]
         subnet = net.subnet()[0]
         command = ["add", "network", "--network", "netperssvcmap",
                    "--ip", subnet.ip, "--netmask", subnet.netmask,

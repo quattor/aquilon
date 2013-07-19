@@ -40,7 +40,7 @@ class TestMake(TestBrokerCommand):
         self.matchoutput(out, "Template: service/afs/q.ny.ms.com", command)
 
     def testmakeafsbynet_2_mapservice(self):
-        ip = self.net.netsvcmap.subnet()[0].ip
+        ip = self.net["netsvcmap"].subnet()[0].ip
 
         self.noouttest(["map", "service", "--networkip", ip,
                         "--service", "afs", "--instance", "afs-by-net"])
@@ -48,7 +48,7 @@ class TestMake(TestBrokerCommand):
                         "--service", "afs", "--instance", "afs-by-net2"])
 
     def testmakeafsbynet_3_verifymapservice(self):
-        ip = self.net.netsvcmap.subnet()[0].ip
+        ip = self.net["netsvcmap"].subnet()[0].ip
 
         command = ["show_map", "--service=afs", "--instance=afs-by-net",
                    "--networkip=%s" % ip]
@@ -59,7 +59,7 @@ class TestMake(TestBrokerCommand):
                          command)
 
     def testmakeafsbynet_3_verifymapservice_proto(self):
-        ip = self.net.netsvcmap.subnet()[0].ip
+        ip = self.net["netsvcmap"].subnet()[0].ip
 
         command = ["show_map", "--service=afs", "--instance=afs-by-net",
                    "--networkip=%s" % ip, "--format=proto"]
@@ -81,7 +81,7 @@ class TestMake(TestBrokerCommand):
         self.matchoutput(out, "Template: service/afs/afs-by-net", command)
 
     def testmakeafsbynet_5_mapconflicts(self):
-        ip = self.net.netsvcmap.subnet()[0].ip
+        ip = self.net["netsvcmap"].subnet()[0].ip
 
         command = ["map", "service", "--networkip", ip,
                         "--service", "afs", "--instance", "afs-by-net",
@@ -120,7 +120,7 @@ class TestMake(TestBrokerCommand):
         self.matchoutput(out, "Template: service/netmap/p-q.ny.ms.com", command)
 
     def testmakenetmappers_3_mapservice(self):
-        ip = self.net.netperssvcmap.subnet()[0].ip
+        ip = self.net["netperssvcmap"].subnet()[0].ip
 
         self.noouttest(["map", "service", "--networkip", ip,
                         "--service", "netmap", "--instance", "netmap-pers",
@@ -128,7 +128,7 @@ class TestMake(TestBrokerCommand):
                         "--archetype", "aquilon"])
 
     def testmakenetmappers_4_verifymapservice(self):
-        ip = self.net.netperssvcmap.subnet()[0].ip
+        ip = self.net["netperssvcmap"].subnet()[0].ip
 
         command = ["show_map", "--service=netmap", "--instance=netmap-pers",
                    "--networkip=%s" % ip, "--personality", "eaitools",
@@ -141,7 +141,7 @@ class TestMake(TestBrokerCommand):
                          command)
 
     def testmakenetmappers_5_verifymapservice_proto(self):
-        ip = self.net.netperssvcmap.subnet()[0].ip
+        ip = self.net["netperssvcmap"].subnet()[0].ip
 
         command = ["show_map", "--service=netmap", "--instance=netmap-pers",
                    "--networkip=%s" % ip, "--personality", "eaitools",

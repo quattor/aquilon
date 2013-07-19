@@ -42,7 +42,7 @@ class TestDelHost(VerifyNotificationsMixin, TestBrokerCommand):
         self.notfoundtest(command.split(" "))
 
     def testdelafsbynet(self):
-        self.dsdb_expect_delete(self.net.netsvcmap.usable[0])
+        self.dsdb_expect_delete(self.net["netsvcmap"].usable[0])
         command = "del host --hostname afs-by-net.aqd-unittest.ms.com"
         (out, err) = self.successtest(command.split(" "))
         self.assertEmptyOut(out, command)
@@ -53,7 +53,7 @@ class TestDelHost(VerifyNotificationsMixin, TestBrokerCommand):
         self.notfoundtest(command.split(" "))
 
     def testdelnetmappers(self):
-        self.dsdb_expect_delete(self.net.netperssvcmap.usable[0])
+        self.dsdb_expect_delete(self.net["netperssvcmap"].usable[0])
         command = "del host --hostname netmap-pers.aqd-unittest.ms.com"
         (out, err) = self.successtest(command.split(" "))
         self.assertEmptyOut(out, command)
