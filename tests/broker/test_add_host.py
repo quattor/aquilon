@@ -23,7 +23,8 @@ if __name__ == "__main__":
     from broker import utils
     utils.import_depends()
 
-from broker.brokertest import TestBrokerCommand, DummyIP
+from broker.brokertest import TestBrokerCommand
+from networktest import DummyIP
 
 
 class TestAddHost(TestBrokerCommand):

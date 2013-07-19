@@ -23,7 +23,8 @@ if __name__ == "__main__":
     import utils
     utils.import_depends()
 
-from brokertest import TestBrokerCommand, DummyIP
+from brokertest import TestBrokerCommand
+from networktest import DummyIP
 
 
 class TestAddInterface(TestBrokerCommand):
