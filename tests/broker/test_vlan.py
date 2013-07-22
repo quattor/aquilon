@@ -33,7 +33,7 @@ SW_HOSTNAME = "utpgsw0.aqd-unittest.ms.com"
 class TestVlan(TestBrokerCommand):
 
     def getswip(self):
-        return self.net["tor_net_10"].usable[0]
+        return self.net["utpgsw0-v710"].usable[0]
 
     def test_001_addvlan714(self):
         command = ["add_vlan", "--vlan=714", "--name=user_714",

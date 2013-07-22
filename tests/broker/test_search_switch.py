@@ -123,7 +123,7 @@ class TestSearchSwitch(TestBrokerCommand):
         self.matchoutput(out, "Switch: ut3gd1r04", command)
         self.matchoutput(out,
                          "Primary Name: ut3gd1r04.aqd-unittest.ms.com [%s]" %
-                         self.net["tor_net_6"].usable[1],
+                         self.net["verari_eth1"].usable[1],
                          command)
         self.matchoutput(out, "Switch Type: tor", command)
 
@@ -134,7 +134,7 @@ class TestSearchSwitch(TestBrokerCommand):
         self.matchoutput(out, "Switch: ut3gd1r04", command)
         self.matchoutput(out,
                          "Primary Name: ut3gd1r04.aqd-unittest.ms.com [%s]" %
-                         self.net["tor_net_6"].usable[1],
+                         self.net["verari_eth1"].usable[1],
                          command)
         self.matchoutput(out, "Switch Type: bor", command)
         self.matchoutput(out, "Rack: ut3", command)

@@ -33,37 +33,37 @@ class TestDelDynamicRange(TestBrokerCommand):
 
     def testdeldifferentnetworks(self):
         command = ["del_dynamic_range",
-                   "--startip", self.net["tor_net2_0"].usable[2],
-                   "--endip", self.net["tor_net2_1"].usable[2]]
+                   "--startip", self.net["dyndhcp0"].usable[2],
+                   "--endip", self.net["dyndhcp1"].usable[2]]
         out = self.badrequesttest(command)
         self.matchoutput(out, "must be on the same subnet", command)
 
     # These rely on the ip never having been used...
     def testdelnothingfound(self):
         command = ["del_dynamic_range",
-                   "--startip", self.net["tor_net2_0"].usable[-2],
-                   "--endip", self.net["tor_net2_0"].usable[-1]]
+                   "--startip", self.net["dyndhcp0"].usable[-2],
+                   "--endip", self.net["dyndhcp0"].usable[-1]]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Nothing found in range", command)
 
     def testdelnostart(self):
         command = ["del_dynamic_range",
-                   "--startip", self.net["tor_net2_0"].usable[1],
-                   "--endip", self.net["tor_net2_0"].usable[-3]]
+                   "--startip", self.net["dyndhcp0"].usable[1],
+                   "--endip", self.net["dyndhcp0"].usable[-3]]
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "No system found with IP address %s" %
-                         self.net["tor_net2_0"].usable[1],
+                         self.net["dyndhcp0"].usable[1],
                          command)
 
     def testdelnoend(self):
         command = ["del_dynamic_range",
-                   "--startip", self.net["tor_net2_0"].usable[2],
-                   "--endip", self.net["tor_net2_0"].usable[-2]]
+                   "--startip", self.net["dyndhcp0"].usable[2],
+                   "--endip", self.net["dyndhcp0"].usable[-2]]
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "No system found with IP address %s" %
-                         self.net["tor_net2_0"].usable[-2],
+                         self.net["dyndhcp0"].usable[-2],
                          command)
 
     def testdelnotdynamic(self):
@@ -84,14 +84,14 @@ class TestDelDynamicRange(TestBrokerCommand):
 
     def testdelrange(self):
         messages = []
-        for ip in range(int(self.net["tor_net2_0"].usable[2]),
-                        int(self.net["tor_net2_0"].usable[-3]) + 1):
+        for ip in range(int(self.net["dyndhcp0"].usable[2]),
+                        int(self.net["dyndhcp0"].usable[-3]) + 1):
             address = IPv4Address(ip)
             self.dsdb_expect_delete(address)
             messages.append("DSDB: delete_host -ip_address %s" % address)
         command = ["del_dynamic_range",
-                   "--startip", self.net["tor_net2_0"].usable[2],
-                   "--endip", self.net["tor_net2_0"].usable[-3]]
+                   "--startip", self.net["dyndhcp0"].usable[2],
+                   "--endip", self.net["dyndhcp0"].usable[-3]]
         err = self.statustest(command)
         for message in messages:
             self.matchoutput(err, message, command)
@@ -102,7 +102,7 @@ class TestDelDynamicRange(TestBrokerCommand):
         self.noouttest(command.split(" "))
 
     def testdelendingrange(self):
-        ip = self.net["tor_net2_1"].usable[-1]
+        ip = self.net["dyndhcp1"].usable[-1]
         self.dsdb_expect_delete(ip)
         command = ["del_dynamic_range", "--startip", ip, "--endip", ip]
         err = self.statustest(command)
@@ -111,13 +111,13 @@ class TestDelDynamicRange(TestBrokerCommand):
 
     def testclearnetwork(self):
         messages = []
-        for ip in range(int(self.net["tor_net2_5"].usable[0]),
-                        int(self.net["tor_net2_5"].usable[-1]) + 1):
+        for ip in range(int(self.net["dyndhcp3"].usable[0]),
+                        int(self.net["dyndhcp3"].usable[-1]) + 1):
             address = IPv4Address(ip)
             self.dsdb_expect_delete(address)
             messages.append("DSDB: delete_host -ip_address %s" % address)
         command = ["del_dynamic_range",
-                   "--clearnetwork", self.net["tor_net2_5"].ip]
+                   "--clearnetwork", self.net["dyndhcp3"].ip]
         err = self.statustest(command)
         for message in messages:
             self.matchoutput(err, message, command)
@@ -125,7 +125,7 @@ class TestDelDynamicRange(TestBrokerCommand):
 
     def testclearnetworkagain(self):
         command = ["del_dynamic_range",
-                   "--clearnetwork", self.net["tor_net2_5"].ip]
+                   "--clearnetwork", self.net["dyndhcp3"].ip]
         out = self.badrequesttest(command)
         self.matchoutput(out, "No dynamic stubs found on network.", command)
 

@@ -29,7 +29,7 @@ from brokertest import TestBrokerCommand
 class TestDelInterfaceAddress(TestBrokerCommand):
 
     def testdelkeepdns(self):
-        ip = self.net["unknown12"].usable[0]
+        ip = self.net["zebra_eth1"].usable[0]
         self.dsdb_expect_delete(ip)
         self.dsdb_expect_add("unittest20-e1.aqd-unittest.ms.com", ip)
         command = ["del", "interface", "address", "--machine", "ut3c5n2",
@@ -70,7 +70,7 @@ class TestDelInterfaceAddress(TestBrokerCommand):
         self.matchoutput(out, "unittest20-e1.aqd-unittest.ms.com", command)
 
     def testdelbylabel(self):
-        ip = self.net["unknown12"].usable[3]
+        ip = self.net["zebra_eth1"].usable[3]
         self.dsdb_expect_delete(ip)
         command = ["del", "interface", "address", "--machine", "ut3c5n2",
                    "--interface", "eth1", "--label", "e1"]
@@ -78,7 +78,7 @@ class TestDelInterfaceAddress(TestBrokerCommand):
         self.dsdb_verify()
 
     def testdelbylabelagain(self):
-        ip = self.net["unknown12"].usable[3]
+        ip = self.net["zebra_eth1"].usable[3]
         command = ["del", "interface", "address", "--machine", "ut3c5n2",
                    "--interface", "eth1", "--label", "e1"]
         out = self.badrequesttest(command)
@@ -88,7 +88,7 @@ class TestDelInterfaceAddress(TestBrokerCommand):
                          command)
 
     def testdelunittest20e0(self):
-        ip = self.net["unknown11"].usable[0]
+        ip = self.net["zebra_eth0"].usable[0]
         self.dsdb_expect_delete(ip)
         command = ["del", "interface", "address", "--machine", "ut3c5n2",
                    "--interface", "eth0", "--ip", ip]
@@ -96,7 +96,7 @@ class TestDelInterfaceAddress(TestBrokerCommand):
         self.dsdb_verify()
 
     def testverifyunittest20(self):
-        ip = self.net["unknown13"].usable[2]
+        ip = self.net["zebra_vip"].usable[2]
         command = ["cat", "--hostname", "unittest20.aqd-unittest.ms.com",
                    "--data"]
         out = self.commandtest(command)
@@ -129,7 +129,7 @@ class TestDelInterfaceAddress(TestBrokerCommand):
         self.dsdb_verify(empty=True)
 
     def testdelunittest26(self):
-        ip = self.net["unknown14"].usable[0]
+        ip = self.net["routing1"].usable[0]
         self.dsdb_expect_delete(ip)
         command = ["del", "interface", "address",
                    "--machine", "unittest26.aqd-unittest.ms.com",
@@ -156,7 +156,7 @@ class TestDelInterfaceAddress(TestBrokerCommand):
         self.dsdb_verify()
 
     def testdelut3gd1r04loop0(self):
-        ip = self.net["unknown17"][0]
+        ip = self.net["autopg1"][0]
         self.dsdb_expect_delete(ip)
         command = ["del", "interface", "address",
                    "--switch", "ut3gd1r04.aqd-unittest.ms.com",

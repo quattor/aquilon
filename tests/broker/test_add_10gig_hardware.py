@@ -159,7 +159,7 @@ class TestAdd10GigHardware(TestBrokerCommand):
     def test_155_verifysearch(self):
         command = ["search_network", "--machine=evm10"]
         out = self.commandtest(command)
-        self.matchoutput(out, str(self.net["unknown2"]), command)
+        self.matchoutput(out, str(self.net["ut01ga2s01_v710"]), command)
 
     def test_160_updatenoop(self):
         command = ["update_interface", "--machine=evm10", "--interface=eth0",
@@ -191,7 +191,7 @@ class TestAdd10GigHardware(TestBrokerCommand):
         self.verifypg()
 
     def test_200_addaux(self):
-        net = self.net["vm_storage_net0"]
+        net = self.net["vm_storage_net"]
         for i in range(1, 25):
             hostname = "evh%d-e1.aqd-unittest.ms.com" % (i + 50)
             if i < 13:
@@ -210,7 +210,7 @@ class TestAdd10GigHardware(TestBrokerCommand):
 
     def test_210_verifyaux(self):
         command = ["show", "network", "--hosts",
-                   "--ip", self.net["vm_storage_net0"].ip]
+                   "--ip", self.net["vm_storage_net"].ip]
         out = self.commandtest(command)
         for i in range(1, 25):
             hostname = "evh%d-e1.aqd-unittest.ms.com" % (i + 50)
@@ -255,23 +255,23 @@ class TestAdd10GigHardware(TestBrokerCommand):
 
     # Because the machines are allocated across portgroups, the IP addresses
     # allocated by autoip also differ
-    # evm10 -> self.net["unknown2"].usable[0]
-    # evm11 -> self.net["unknown3"].usable[0]
-    # evm12 -> self.net["unknown4"].usable[0]
-    # evm13 -> self.net["unknown5"].usable[0]
-    # evm14 -> self.net["unknown2"].usable[1]
+    # evm10 -> self.net["ut01ga2s01_v710"].usable[0]
+    # evm11 -> self.net["ut01ga2s01_v711"].usable[0]
+    # evm12 -> self.net["ut01ga2s01_v712"].usable[0]
+    # evm13 -> self.net["ut01ga2s01_v713"].usable[0]
+    # evm14 -> self.net["ut01ga2s01_v710"].usable[1]
     # As each subnet only has two usable IPs, when we get to evm19 it becomes
-    # evm19 -> self.net["unknown6"].usable[0]
+    # evm19 -> self.net["ut01ga2s02_v710"].usable[0]
     # and the above pattern repeats
     def test_700_add_hosts(self):
         # Skip index 8 and 17 - these don't have interfaces. Index 16 will be
         # used for --prefix testing.
         mac_prefix = "00:50:56:01:20"
         mac_idx = 60
-        nets = (self.net["unknown2"], self.net["unknown3"],
-                self.net["unknown4"], self.net["unknown5"],
-                self.net["unknown6"], self.net["unknown7"],
-                self.net["unknown8"], self.net["unknown9"])
+        nets = (self.net["ut01ga2s01_v710"], self.net["ut01ga2s01_v711"],
+                self.net["ut01ga2s01_v712"], self.net["ut01ga2s01_v713"],
+                self.net["ut01ga2s02_v710"], self.net["ut01ga2s02_v711"],
+                self.net["ut01ga2s02_v712"], self.net["ut01ga2s02_v713"])
         for i in range(0, 8) + range(9, 16):
             machine = "evm%d" % (10 + i)
             hostname = "ivirt%d.aqd-unittest.ms.com" % (1 + i)
@@ -297,7 +297,7 @@ class TestAdd10GigHardware(TestBrokerCommand):
         self.dsdb_verify()
 
     def test_705_add_nexthost(self):
-        ip = self.net["unknown9"].usable[1]
+        ip = self.net["ut01ga2s02_v713"].usable[1]
         mac = "00:50:56:01:20:4b"
         self.dsdb_expect_add("ivirt17.aqd-unittest.ms.com", ip, "eth0", mac)
         command = ["add", "host", "--prefix", "ivirt", "--machine", "evm26",
@@ -322,10 +322,10 @@ class TestAdd10GigHardware(TestBrokerCommand):
     # This is verifying test_700, so logic applies for determing
     # the IP addresses autoIP will give out
     def test_800_verify_add_host(self):
-        nets = (self.net["unknown2"], self.net["unknown3"],
-                self.net["unknown4"], self.net["unknown5"],
-                self.net["unknown6"], self.net["unknown7"],
-                self.net["unknown8"], self.net["unknown9"])
+        nets = (self.net["ut01ga2s01_v710"], self.net["ut01ga2s01_v711"],
+                self.net["ut01ga2s01_v712"], self.net["ut01ga2s01_v713"],
+                self.net["ut01ga2s02_v710"], self.net["ut01ga2s02_v711"],
+                self.net["ut01ga2s02_v712"], self.net["ut01ga2s02_v713"])
         for i in range(0, 8) + range(9, 17):
             if i < 9:
                 net_index = (i % 4)
@@ -340,10 +340,10 @@ class TestAdd10GigHardware(TestBrokerCommand):
             self.matchoutput(out, hostname, command)
 
     def test_810_verify_audit(self):
-        nets = (self.net["unknown2"], self.net["unknown3"],
-                self.net["unknown4"], self.net["unknown5"],
-                self.net["unknown6"], self.net["unknown7"],
-                self.net["unknown8"], self.net["unknown9"])
+        nets = (self.net["ut01ga2s01_v710"], self.net["ut01ga2s01_v711"],
+                self.net["ut01ga2s01_v712"], self.net["ut01ga2s01_v713"],
+                self.net["ut01ga2s02_v710"], self.net["ut01ga2s02_v711"],
+                self.net["ut01ga2s02_v712"], self.net["ut01ga2s02_v713"])
         i = 16
         net_index = ((i - 9) % 4) + 4
         usable_index = (i - 9) / 4

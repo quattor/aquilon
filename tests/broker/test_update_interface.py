@@ -145,7 +145,7 @@ class TestUpdateInterface(TestBrokerCommand):
         self.dsdb_verify()
 
     def test_200_update_bad_mac(self):
-        mac = self.net["tor_net_6"].usable[0].mac
+        mac = self.net["verari_eth1"].usable[0].mac
         command = ["update", "interface", "--interface", "eth0",
                    "--machine", "ut3c5n10", "--mac", mac]
         out = self.badrequesttest(command)

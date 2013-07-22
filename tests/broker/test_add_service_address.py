@@ -43,7 +43,7 @@ class TestAddServiceAddress(TestBrokerCommand):
     def testaddzebra2(self):
         # Use an address that is smaller than the primary IP to verify that the
         # primary IP is not removed
-        ip = self.net["unknown13"].usable[1]
+        ip = self.net["zebra_vip"].usable[1]
         self.dsdb_expect_add("zebra2.aqd-unittest.ms.com", ip, "le1")
         command = ["add", "service", "address",
                    "--hostname", "unittest20.aqd-unittest.ms.com",
@@ -54,7 +54,7 @@ class TestAddServiceAddress(TestBrokerCommand):
         self.dsdb_verify()
 
     def testverifyzebra2(self):
-        ip = self.net["unknown13"].usable[1]
+        ip = self.net["zebra_vip"].usable[1]
         command = ["show", "service", "address", "--name", "zebra2",
                    "--hostname", "unittest20.aqd-unittest.ms.com"]
         out = self.commandtest(command)
@@ -66,7 +66,7 @@ class TestAddServiceAddress(TestBrokerCommand):
         self.matchoutput(out, "Interfaces: eth0, eth1", command)
 
     def testverifyzebra2proto(self):
-        ip = self.net["unknown13"].usable[1]
+        ip = self.net["zebra_vip"].usable[1]
         command = ["show", "host",
                    "--hostname", "unittest20.aqd-unittest.ms.com",
                    "--format", "proto"]
@@ -89,15 +89,15 @@ class TestAddServiceAddress(TestBrokerCommand):
                                               host.resources]))
 
     def testverifyzebra2dns(self):
-        ip = self.net["unknown13"].usable[1]
+        ip = self.net["zebra_vip"].usable[1]
         command = ["show", "fqdn", "--fqdn", "zebra2.aqd-unittest.ms.com"]
         out = self.commandtest(command)
         self.matchclean(out, "Reverse", command)
 
     def testaddzebra3(self):
         # Adding an even lower IP should cause zebra2 to be renumbered in DSDB
-        zebra2_ip = self.net["unknown13"].usable[1]
-        zebra3_ip = self.net["unknown13"].usable[0]
+        zebra2_ip = self.net["zebra_vip"].usable[1]
+        zebra3_ip = self.net["zebra_vip"].usable[0]
         self.dsdb_expect_rename("zebra2.aqd-unittest.ms.com", iface="le1",
                                 new_iface="le2")
         self.dsdb_expect_add("zebra3.aqd-unittest.ms.com", zebra3_ip, "le1")
@@ -110,9 +110,9 @@ class TestAddServiceAddress(TestBrokerCommand):
         self.dsdb_verify()
 
     def testverifyunittest20(self):
-        ip = self.net["unknown13"].usable[2]
-        zebra2_ip = self.net["unknown13"].usable[1]
-        zebra3_ip = self.net["unknown13"].usable[0]
+        ip = self.net["zebra_vip"].usable[2]
+        zebra2_ip = self.net["zebra_vip"].usable[1]
+        zebra3_ip = self.net["zebra_vip"].usable[0]
         command = ["show", "host", "--hostname",
                    "unittest20.aqd-unittest.ms.com"]
         out = self.commandtest(command)

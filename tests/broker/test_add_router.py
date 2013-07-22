@@ -29,14 +29,14 @@ from brokertest import TestBrokerCommand
 class TestAddRouter(TestBrokerCommand):
 
     def testaddrouter(self):
-        net = self.net["tor_net_6"]
+        net = self.net["verari_eth1"]
         command = ["add", "router", "--ip", net.gateway,
                    "--fqdn", "ut3gd1r04-v109-hsrp.aqd-unittest.ms.com",
                    "--building", "ut", "--comments", "Test router"]
         self.noouttest(command)
 
     def testaddrouteragain(self):
-        net = self.net["tor_net_6"]
+        net = self.net["verari_eth1"]
         command = ["add", "router", "--ip", net.gateway,
                    "--fqdn", "ut3gd1r04-v110-hsrp.aqd-unittest.ms.com",
                    "--building", "ut"]
@@ -45,7 +45,7 @@ class TestAddRouter(TestBrokerCommand):
                          "for network %s." % (net.gateway, net.ip), command)
 
     def testaddnormalhostasrouter(self):
-        net = self.net["unknown2"]
+        net = self.net["ut01ga2s01_v710"]
         ip = net.usable[0]
         command = ["add", "router", "--ip", ip,
                    "--fqdn", "not-a-router.aqd-unittest.ms.com",
@@ -69,8 +69,8 @@ class TestAddRouter(TestBrokerCommand):
                          command)
 
     def testaddzebrarouters(self):
-        for net_idx, net in enumerate((self.net["unknown11"],
-                                       self.net["unknown12"])):
+        for net_idx, net in enumerate((self.net["zebra_eth0"],
+                                       self.net["zebra_eth1"])):
             for rtr_idx in range(0, 2):
                 rtr = "ut3gd1r0%d-v%d-hsrp.aqd-unittest.ms.com" % (net_idx + 1,
                                                                    rtr_idx + 109)
@@ -79,14 +79,14 @@ class TestAddRouter(TestBrokerCommand):
                 self.noouttest(command)
 
     def testaddvplsrouters(self):
-        net = self.net["vpls0"]
+        net = self.net["vpls"]
         self.noouttest(["add", "router", "--ip", net[1], "--building", "ut",
                         "--fqdn", "utvplsgw.aqd-unittest.ms.com"])
         self.noouttest(["add", "router", "--ip", net[2], "--building", "np",
                         "--fqdn", "npvplsgw.aqd-unittest.ms.com"])
 
     def testshowrouter(self):
-        net = self.net["tor_net_6"]
+        net = self.net["verari_eth1"]
         command = ["show", "router", "--ip", net.gateway]
         out = self.commandtest(command)
         self.matchoutput(out,
@@ -98,7 +98,7 @@ class TestAddRouter(TestBrokerCommand):
         self.matchoutput(out, "Comments: Test router", command)
 
     def testshownetwork(self):
-        net = self.net["tor_net_6"]
+        net = self.net["verari_eth1"]
         command = ["show", "network", "--ip", net.ip]
         out = self.commandtest(command)
         self.matchoutput(out, "Routers: %s (Building ut)" % net.gateway, command)

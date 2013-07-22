@@ -76,12 +76,12 @@ class TestSearchNetwork(TestBrokerCommand):
     def testclusterpg(self):
         command = ["search_network", "--cluster=utecl5", "--pg=user-v710"]
         out = self.commandtest(command)
-        self.matchoutput(out, str(self.net["unknown2"]), command)
+        self.matchoutput(out, str(self.net["ut01ga2s01_v710"]), command)
 
     def testcluster(self):
         command = ["search_network", "--cluster=utecl1"]
         out = self.commandtest(command)
-        self.matchoutput(out, str(self.net["tor_net_2"]), command)
+        self.matchoutput(out, str(self.net["verari_eth0"]), command)
 
     def testfqdn(self):
         command = ["search_network", "--fqdn=unittest15.aqd-unittest.ms.com"]
@@ -131,8 +131,8 @@ class TestSearchNetwork(TestBrokerCommand):
     def testdynrange(self):
         command = ["search", "network", "--has_dynamic_ranges"]
         out = self.commandtest(command)
-        expect = [self.net["tor_net2_0"], self.net["tor_net2_1"],
-                  self.net["tor_net2_5"]]
+        expect = [self.net["dyndhcp0"], self.net["dyndhcp1"],
+                  self.net["dyndhcp3"]]
         for net in self.net.all:
             if net in expect:
                 self.matchoutput(out, str(net), command)
@@ -144,7 +144,7 @@ class TestSearchNetwork(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out, "172.31.64.64/26", command)
         self.matchoutput(out, "172.31.88.0/26", command)
-        self.matchclean(out, str(self.net["tor_net2_0"].ip), command)
+        self.matchclean(out, str(self.net["dyndhcp0"].ip), command)
         self.matchclean(out, str(self.net["unknown0"].ip), command)
 
 

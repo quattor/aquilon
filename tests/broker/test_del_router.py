@@ -29,7 +29,7 @@ from brokertest import TestBrokerCommand
 class TestDelRouter(TestBrokerCommand):
 
     def testdelrouterbyip(self):
-        net = self.net["tor_net_6"]
+        net = self.net["verari_eth1"]
         command = ["del", "router", "--ip", net.gateway]
         self.noouttest(command)
 
@@ -49,7 +49,7 @@ class TestDelRouter(TestBrokerCommand):
         command = ["show", "router", "--all"]
         out = self.commandtest(command)
         self.matchclean(out, str(self.net["tor_net_12"].gateway), command)
-        self.matchclean(out, str(self.net["tor_net_6"].gateway), command)
+        self.matchclean(out, str(self.net["verari_eth1"].gateway), command)
 
     def testdelexcx(self):
         net = self.net["unknown0"].subnet()[0]

@@ -36,8 +36,8 @@ class TestAddNSRecord(TestBrokerCommand):
 
     def setUp(self, *args, **kwargs):
         super(TestAddNSRecord, self).setUp(*args, **kwargs)
-        self.NETWORK = self.net["unknown10"]
-        self.IP = str(self.net["unknown10"].usable[0])
+        self.NETWORK = self.net["ut9_chassis"]
+        self.IP = str(self.net["ut9_chassis"].usable[0])
 
     def test_100_add_a_record(self):
         self.dsdb_expect_add(NAME, self.IP)

@@ -54,7 +54,7 @@ class TestAddSwitch(TestBrokerCommand, VerifySwitchMixin):
         self.dsdb_verify()
 
     def testaddut3gd1r04(self):
-        ip = self.net["tor_net_6"].usable[0]
+        ip = self.net["verari_eth1"].usable[0]
         self.dsdb_expect_add("ut3gd1r04.aqd-unittest.ms.com", ip, "xge49",
                              ip.mac, comments="Some switch comments")
         self.successtest(["add", "switch", "--type", "tor",
@@ -125,7 +125,7 @@ class TestAddSwitch(TestBrokerCommand, VerifySwitchMixin):
         self.dsdb_verify()
 
     def testaddut01ga1s03(self):
-        ip = self.net["tor_net_1"].usable[0]
+        ip = self.net["hp_eth0"].usable[0]
         self.dsdb_expect_add("ut01ga1s03.aqd-unittest.ms.com", ip, "xge49",
                              ip.mac)
         command = ["add", "switch", "--type", "tor",
@@ -136,7 +136,7 @@ class TestAddSwitch(TestBrokerCommand, VerifySwitchMixin):
         self.dsdb_verify()
 
     def testaddut01ga1s04(self):
-        ip = self.net["tor_net_2"].usable[0]
+        ip = self.net["verari_eth0"].usable[0]
         self.dsdb_expect_add("ut01ga1s04.aqd-unittest.ms.com", ip, "xge49",
                              ip.mac)
         command = ["add", "switch", "--type", "tor",
@@ -147,7 +147,7 @@ class TestAddSwitch(TestBrokerCommand, VerifySwitchMixin):
         self.dsdb_verify()
 
     def testaddut01ga2s01(self):
-        ip = self.net["tor_net2_2"].usable[0]
+        ip = self.net["vmotion_net"].usable[0]
         self.dsdb_expect_add("ut01ga2s01.aqd-unittest.ms.com", ip, "xge49",
                              ip.mac)
         command = ["add", "switch", "--type", "tor",
@@ -158,7 +158,7 @@ class TestAddSwitch(TestBrokerCommand, VerifySwitchMixin):
         self.dsdb_verify()
 
     def testaddut01ga2s02(self):
-        ip = self.net["tor_net2_2"].usable[1]
+        ip = self.net["vmotion_net"].usable[1]
         self.dsdb_expect_add("ut01ga2s02.aqd-unittest.ms.com", ip, "xge49",
                              ip.mac)
         command = ["add", "switch", "--type", "tor",
@@ -169,7 +169,7 @@ class TestAddSwitch(TestBrokerCommand, VerifySwitchMixin):
         self.dsdb_verify()
 
     def testaddut01ga2s03(self):
-        ip = self.net["tor_net2_3"].usable[0]
+        ip = self.net["esx_bcp_ut"].usable[0]
         self.dsdb_expect_add("ut01ga2s03.aqd-unittest.ms.com", ip, "xge49",
                              ip.mac)
         command = ["add", "switch", "--type", "tor",
@@ -181,7 +181,7 @@ class TestAddSwitch(TestBrokerCommand, VerifySwitchMixin):
         self.dsdb_verify()
 
     def testaddnp01ga2s03(self):
-        ip = self.net["tor_net2_4"].usable[0]
+        ip = self.net["esx_bcp_np"].usable[0]
         self.dsdb_expect_add("np01ga2s03.one-nyp.ms.com", ip, "xge49", ip.mac)
         command = ["add", "switch", "--type", "tor",
                    "--switch", "np01ga2s03.one-nyp.ms.com",
@@ -215,8 +215,8 @@ class TestAddSwitch(TestBrokerCommand, VerifySwitchMixin):
     def testverifyaddut3gd1r04(self):
         self.verifyswitch("ut3gd1r04.aqd-unittest.ms.com", "generic",
                           "temp_switch", "ut3", "a", "3", switch_type='tor',
-                          ip=self.net["tor_net_6"].usable[0],
-                          mac=self.net["tor_net_6"].usable[0].mac,
+                          ip=self.net["verari_eth1"].usable[0],
+                          mac=self.net["verari_eth1"].usable[0].mac,
                           interface="xge49",
                           comments="Some switch comments")
 
@@ -258,15 +258,15 @@ class TestAddSwitch(TestBrokerCommand, VerifySwitchMixin):
     def testverifyut01ga1s03(self):
         self.verifyswitch("ut01ga1s03.aqd-unittest.ms.com",
                           "bnt", "rs g8000", "ut9", "g", "3",
-                          ip=str(self.net["tor_net_1"].usable[0]),
-                          mac=self.net["tor_net_1"].usable[0].mac,
+                          ip=str(self.net["hp_eth0"].usable[0]),
+                          mac=self.net["hp_eth0"].usable[0].mac,
                           interface="xge49")
 
     def testverifyut01ga1s04(self):
         self.verifyswitch("ut01ga1s04.aqd-unittest.ms.com",
                           "bnt", "rs g8000", "ut10", "g", "4",
-                          ip=str(self.net["tor_net_2"].usable[0]),
-                          mac=self.net["tor_net_2"].usable[0].mac,
+                          ip=str(self.net["verari_eth0"].usable[0]),
+                          mac=self.net["verari_eth0"].usable[0].mac,
                           interface="xge49")
 
     def testrejectbadlabelimplicit(self):

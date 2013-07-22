@@ -29,13 +29,13 @@ from brokertest import TestBrokerCommand
 class TestDelStaticRoute(TestBrokerCommand):
 
     def testdelroute1(self):
-        gw = self.net["unknown14"].usable[-1]
+        gw = self.net["routing1"].usable[-1]
         command = ["del", "static", "route", "--gateway", gw,
                    "--ip", "192.168.250.0", "--prefixlen", "23"]
         self.noouttest(command)
 
     def testdelroute1again(self):
-        gw = self.net["unknown14"].usable[-1]
+        gw = self.net["routing1"].usable[-1]
         command = ["del", "static", "route", "--gateway", gw,
                    "--ip", "192.168.250.0", "--prefixlen", "23"]
         out = self.notfoundtest(command)
@@ -45,7 +45,7 @@ class TestDelStaticRoute(TestBrokerCommand):
                          command)
 
     def testdelroute2(self):
-        gw = self.net["unknown15"].usable[-1]
+        gw = self.net["routing2"].usable[-1]
         command = ["del", "static", "route", "--gateway", gw,
                    "--ip", "192.168.252.0", "--prefixlen", "23"]
         self.noouttest(command)
@@ -57,7 +57,7 @@ class TestDelStaticRoute(TestBrokerCommand):
         self.noouttest(command)
 
     def testverifynetwork(self):
-        command = ["show", "network", "--ip", self.net["unknown14"].ip]
+        command = ["show", "network", "--ip", self.net["routing1"].ip]
         out = self.commandtest(command)
         self.matchclean(out, "Static Route", command)
 
@@ -67,7 +67,7 @@ class TestDelStaticRoute(TestBrokerCommand):
         self.matchclean(out, "Static Route", command)
 
     def testverifyunittest26(self):
-        net = self.net["unknown14"]
+        net = self.net["routing1"]
         ip = net.usable[0]
         command = ["cat", "--hostname", "unittest26.aqd-unittest.ms.com",
                    "--data", "--generate"]

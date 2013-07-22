@@ -63,8 +63,8 @@ class TestRenameSwitch(TestBrokerCommand, VerifySwitchMixin):
     def test_110_verify(self):
         self.verifyswitch("renametest.aqd-unittest.ms.com", "hp", "uttorswitch",
                           "ut3", "a", "3", switch_type='bor',
-                          ip=self.net["tor_net_6"].usable[1],
-                          mac=self.net["tor_net_6"].usable[0].mac,
+                          ip=self.net["verari_eth1"].usable[1],
+                          mac=self.net["verari_eth1"].usable[0].mac,
                           interface="xge49",
                           comments="Some new switch comments")
 
@@ -87,8 +87,8 @@ class TestRenameSwitch(TestBrokerCommand, VerifySwitchMixin):
     def test_210_verify(self):
         self.verifyswitch("ut3gd1r04.aqd-unittest.ms.com", "hp", "uttorswitch",
                           "ut3", "a", "3", switch_type='bor',
-                          ip=self.net["tor_net_6"].usable[1],
-                          mac=self.net["tor_net_6"].usable[0].mac,
+                          ip=self.net["verari_eth1"].usable[1],
+                          mac=self.net["verari_eth1"].usable[0].mac,
                           interface="xge49",
                           comments="Some new switch comments")
 

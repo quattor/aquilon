@@ -31,7 +31,7 @@ class TestShowHostIPList(TestBrokerCommand):
     def testshowhostiplist(self):
         command = "show hostiplist"
         out = self.commandtest(command.split(" "))
-        dynip = self.net["tor_net2_0"].usable[2]
+        dynip = self.net["dyndhcp0"].usable[2]
         self.matchoutput(out,
                          "unittest02.one-nyp.ms.com,%s,\n" %
                          self.net["unknown0"].usable[0],

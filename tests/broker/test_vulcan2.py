@@ -59,7 +59,7 @@ class TestVulcan20(VerifyNotificationsMixin, TestBrokerCommand):
         # Deprecated.
 
         for i in range(0, 2):
-            ip = self.net["unknown17"].usable[i]
+            ip = self.net["autopg1"].usable[i]
             hostname = "utpgsw%d.aqd-unittest.ms.com" % i
 
             self.dsdb_expect_add(hostname, ip, "xge49",
@@ -100,7 +100,7 @@ class TestVulcan20(VerifyNotificationsMixin, TestBrokerCommand):
 
     def test_005_add10gigrackinterfaces(self):
         for i in range(0, 2):
-            ip = self.net["unknown18"].usable[i]
+            ip = self.net["autopg2"].usable[i]
             machine = "utpgs01p%d" % i
 
             self.noouttest(["add", "interface", "--interface", "eth0",
@@ -109,7 +109,7 @@ class TestVulcan20(VerifyNotificationsMixin, TestBrokerCommand):
 
     def test_006_populate10gigrackhosts(self):
         for i in range(0, 2):
-            ip = self.net["unknown18"].usable[i]
+            ip = self.net["autopg2"].usable[i]
             hostname = "utpgh%d.aqd-unittest.ms.com" % i
             machine = "utpgs01p%d" % i
 
@@ -148,7 +148,7 @@ class TestVulcan20(VerifyNotificationsMixin, TestBrokerCommand):
     def test_010_addstorageips(self):
         # storage IPs
         for i in range(0, 2):
-            ip = self.net["vm_storage_net0"].usable[i + 26]
+            ip = self.net["vm_storage_net"].usable[i + 26]
             machine = "utpgs01p%d" % i
 
             self.noouttest(["add", "interface", "--interface", "eth1",
@@ -619,7 +619,7 @@ class TestVulcan20(VerifyNotificationsMixin, TestBrokerCommand):
     # Metacluster / cluster / Switch deletes
     def test_305_delinterfaces(self):
         for i in range(0, 2):
-            ip = self.net["vm_storage_net0"].usable[i + 26]
+            ip = self.net["vm_storage_net"].usable[i + 26]
             machine = "utpgs01p%d" % i
 
             self.dsdb_expect_delete(ip)
@@ -640,7 +640,7 @@ class TestVulcan20(VerifyNotificationsMixin, TestBrokerCommand):
     def test_307_del10gigrackhosts(self):
         for i in range(0, 2):
             basetime = datetime.now()
-            ip = self.net["unknown18"].usable[i]
+            ip = self.net["autopg2"].usable[i]
             hostname = "utpgh%d.aqd-unittest.ms.com" % i
 
             self.dsdb_expect_delete(ip)
@@ -656,7 +656,7 @@ class TestVulcan20(VerifyNotificationsMixin, TestBrokerCommand):
 
     def test_308_delutpgsw(self):
         for i in range(0, 2):
-            ip = self.net["unknown17"].usable[i]
+            ip = self.net["autopg1"].usable[i]
             swname = "utpgsw%d.aqd-unittest.ms.com" % i
             plenary = self.plenary_name("switchdata", swname)
             self.failUnless(os.path.exists(plenary),

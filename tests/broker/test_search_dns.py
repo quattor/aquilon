@@ -50,7 +50,7 @@ class TestSearchDns(TestBrokerCommand):
         command = ["search", "dns", "--fqdn",
                    "unittest20-e1.aqd-unittest.ms.com", "--fullinfo"]
         out = self.commandtest(command)
-        self.matchoutput(out, "IP: %s" % self.net["unknown12"].usable[0],
+        self.matchoutput(out, "IP: %s" % self.net["zebra_eth1"].usable[0],
                          command)
         self.matchoutput(out, "Assigned To: ut3c5n2/eth1", command)
         self.matchclean(out, "Primary Name", command)

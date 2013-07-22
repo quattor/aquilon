@@ -40,16 +40,16 @@ class TestDumpDns(TestBrokerCommand):
         # Primary name
         self.matchoutput(out,
                          "=unittest20.aqd-unittest.ms.com:%s" %
-                         self.net["unknown13"].usable[2],
+                         self.net["zebra_vip"].usable[2],
                          command)
         # Auxiliary address
         self.matchoutput(out,
                          "+unittest20-e0.aqd-unittest.ms.com:%s" %
-                         self.net["unknown11"].usable[0],
+                         self.net["zebra_eth0"].usable[0],
                          command)
         self.matchoutput(out,
                          "^%s:unittest20.aqd-unittest.ms.com" %
-                         inaddr_ptr(self.net["unknown11"].usable[0]),
+                         inaddr_ptr(self.net["zebra_eth0"].usable[0]),
                          command)
         # CNAME
         self.matchoutput(out,
@@ -88,20 +88,20 @@ class TestDumpDns(TestBrokerCommand):
         # Primary name
         self.matchoutput(out,
                          "unittest20.aqd-unittest.ms.com.\tIN\tA\t%s" %
-                         self.net["unknown13"].usable[2],
+                         self.net["zebra_vip"].usable[2],
                          command)
         self.matchoutput(out,
                          "%s.\tIN\tPTR\tunittest20.aqd-unittest.ms.com." %
-                         inaddr_ptr(self.net["unknown13"].usable[2]),
+                         inaddr_ptr(self.net["zebra_vip"].usable[2]),
                          command)
         # Auxiliary address
         self.matchoutput(out,
                          "unittest20-e0.aqd-unittest.ms.com.\tIN\tA\t%s" %
-                         self.net["unknown11"].usable[0],
+                         self.net["zebra_eth0"].usable[0],
                          command)
         self.matchoutput(out,
                          "%s.\tIN\tPTR\tunittest20.aqd-unittest.ms.com." %
-                         inaddr_ptr(self.net["unknown11"].usable[0]),
+                         inaddr_ptr(self.net["zebra_eth0"].usable[0]),
                          command)
         # CNAME
         self.matchoutput(out,

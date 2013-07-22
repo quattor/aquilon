@@ -218,7 +218,7 @@ class TestAddAddress(TestBrokerCommand):
                          command)
 
     def test_500_addunittest20eth1(self):
-        ip = self.net["unknown12"].usable[0]
+        ip = self.net["zebra_eth1"].usable[0]
         fqdn = "unittest20-e1.aqd-unittest.ms.com"
         self.dsdb_expect_add(fqdn, ip)
         command = ["add", "address", "--ip", ip, "--fqdn", fqdn]

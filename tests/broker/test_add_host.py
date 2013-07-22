@@ -208,7 +208,7 @@ class TestAddHost(TestBrokerCommand):
     def testaddunittest16bad(self):
         command = ["add", "host",
                    "--hostname", "unittest16.aqd-unittest.ms.com",
-                   "--ipfromip", self.net["tor_net2_1"].usable[-1],
+                   "--ipfromip", self.net["dyndhcp1"].usable[-1],
                    "--ipalgorithm", "max",
                    "--machine", "ut8s02p2", "--domain", "unittest",
                    "--buildstatus", "build", "--archetype", "aquilon",
@@ -317,7 +317,7 @@ class TestAddHost(TestBrokerCommand):
         # reserved for manage tests.
         servers = 0
         user = self.config.get("unittest", "user")
-        net = self.net["tor_net_1"]
+        net = self.net["hp_eth0"]
         for i in range(51, 100):
             if servers < 10:
                 servers += 1
@@ -351,7 +351,7 @@ class TestAddHost(TestBrokerCommand):
         # This is used for utmc7 and update_machine testing:
         # evh10.aqd-unittest.ms.com
         # The other hosts are left for future use.
-        net = self.net["tor_net_2"]
+        net = self.net["verari_eth0"]
         for i in range(101, 111):
             port = i - 100
             hostname = "evh%d.aqd-unittest.ms.com" % port
@@ -368,7 +368,7 @@ class TestAddHost(TestBrokerCommand):
 
     def testpopulate10gigrackhosts(self):
         # Assuming evh11 - evh50 will eventually be claimed above.
-        net = self.net["tor_net2_2"]
+        net = self.net["vmotion_net"]
         for i in range(1, 25):
             hostname = "evh%d.aqd-unittest.ms.com" % (i + 50)
             if i < 13:
@@ -388,8 +388,8 @@ class TestAddHost(TestBrokerCommand):
         self.dsdb_verify()
 
     def testpopulate_esx_bcp_clusterhosts(self):
-        utnet = self.net["tor_net2_3"]
-        npnet = self.net["tor_net2_4"]
+        utnet = self.net["esx_bcp_ut"]
+        npnet = self.net["esx_bcp_np"]
         for i in range(25, 49):
             port = i - 24
 
@@ -430,7 +430,7 @@ class TestAddHost(TestBrokerCommand):
         self.assertEqual(host.operating_system.archetype.name, "vmhost")
         self.assertEqual(host.operating_system.name, "esxi")
         self.assertEqual(host.operating_system.version, "4.0.0")
-        self.assertEqual(host.ip, str(self.net["tor_net_2"].usable[1]))
+        self.assertEqual(host.ip, str(self.net["verari_eth0"].usable[1]))
         self.assertEqual(host.machine.name, "ut10s04p1")
         self.assertEqual(len(host.machine.interfaces), 2)
         self.assertEqual(host.machine.location.name, 'ut10')
@@ -441,7 +441,7 @@ class TestAddHost(TestBrokerCommand):
                          "campus:ny city:ny building:ut")
         for i in host.machine.interfaces:
             if i.device == 'eth0':
-                self.assertEqual(i.ip, str(self.net["tor_net_2"].usable[1]))
+                self.assertEqual(i.ip, str(self.net["verari_eth0"].usable[1]))
                 # We're not using this field anymore...
                 self.assertEqual(i.network_id, 0)
             elif i.device == 'eth1':
@@ -469,7 +469,7 @@ class TestAddHost(TestBrokerCommand):
         self.dsdb_verify()
 
     def testaddfiler(self):
-        ip = self.net["vm_storage_net0"].usable[25]
+        ip = self.net["vm_storage_net"].usable[25]
         self.dsdb_expect_add("filer1.ms.com", ip, "v0")
         command = ["add", "host", "--archetype", "filer",
                    "--hostname", "filer1.ms.com", "--ip", ip,
@@ -480,7 +480,7 @@ class TestAddHost(TestBrokerCommand):
 
     #test aurora and windows defaults now
     def testaddauroradefaultos(self):
-        ip = self.net["tor_net_10"].usable[-1]
+        ip = self.net["utpgsw0-v710"].usable[-1]
         self.dsdb_expect("show_host -host_name test-aurora-default-os")
         self.noouttest(["add", "host", "--archetype", "aurora",
                         "--hostname", "test-aurora-default-os.ms.com",
@@ -500,7 +500,7 @@ class TestAddHost(TestBrokerCommand):
                          command)
 
     def testaddwindowsefaultos(self):
-        ip = self.net["tor_net_10"].usable[-2]
+        ip = self.net["utpgsw0-v710"].usable[-2]
         self.dsdb_expect_add("test-windows-default-os.msad.ms.com", ip,
                              "eth0", self.net["tor_net_0"].usable[5].mac)
         self.noouttest(["add", "host", "--archetype", "windows",
@@ -522,7 +522,7 @@ class TestAddHost(TestBrokerCommand):
 
     def testaddf5(self):
         # The IP address is also a /32 network
-        ip = self.net["unknown16"].ip
+        ip = self.net["f5test"].ip
         self.dsdb_expect_add("f5test.aqd-unittest.ms.com", ip, "eth0",
                              DummyIP(ip).mac)
         command = ["add", "host", "--hostname", "f5test.aqd-unittest.ms.com",

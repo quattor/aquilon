@@ -29,10 +29,10 @@ from brokertest import TestBrokerCommand
 class TestDel10GigHardware(TestBrokerCommand):
 
     def test_200_del_hosts(self):
-        nets = (self.net["unknown2"], self.net["unknown3"],
-                self.net["unknown4"], self.net["unknown5"],
-                self.net["unknown6"], self.net["unknown7"],
-                self.net["unknown8"], self.net["unknown9"])
+        nets = (self.net["ut01ga2s01_v710"], self.net["ut01ga2s01_v711"],
+                self.net["ut01ga2s01_v712"], self.net["ut01ga2s01_v713"],
+                self.net["ut01ga2s02_v710"], self.net["ut01ga2s02_v711"],
+                self.net["ut01ga2s02_v712"], self.net["ut01ga2s02_v713"])
         for i in range(0, 8) + range(9, 17):
             hostname = "ivirt%d.aqd-unittest.ms.com" % (1 + i)
             command = "del_host --hostname %s" % hostname
@@ -53,7 +53,7 @@ class TestDel10GigHardware(TestBrokerCommand):
     def test_300_delaux(self):
         for i in range(1, 25):
             hostname = "evh%d-e1.aqd-unittest.ms.com" % (i + 50)
-            self.dsdb_expect_delete(self.net["vm_storage_net0"].usable[i - 1])
+            self.dsdb_expect_delete(self.net["vm_storage_net"].usable[i - 1])
             command = ["del", "auxiliary", "--auxiliary", hostname]
             (out, err) = self.successtest(command)
             self.assertEmptyOut(out, command)

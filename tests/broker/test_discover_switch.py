@@ -30,7 +30,7 @@ from switchtest import VerifySwitchMixin
 class TestDiscoverSwitch(TestBrokerCommand, VerifySwitchMixin):
 
     def test_100_add_swsync(self):
-        ip = self.net["unknown20"].usable[0]
+        ip = self.net["switch_sync"].usable[0]
         self.dsdb_expect_add("swsync.aqd-unittest.ms.com", ip, "mgmt0")
         self.noouttest(["add", "switch", "--type", "misc",
                         "--switch", "swsync.aqd-unittest.ms.com",
@@ -49,9 +49,9 @@ class TestDiscoverSwitch(TestBrokerCommand, VerifySwitchMixin):
                         "--interface", "vlan400"])
 
     def test_120_add_swsync_addrs(self):
-        ip1 = self.net["unknown20"].usable[1]
-        ip2 = self.net["unknown20"].usable[2]
-        ip3 = self.net["unknown20"].usable[3]
+        ip1 = self.net["switch_sync"].usable[1]
+        ip2 = self.net["switch_sync"].usable[2]
+        ip3 = self.net["switch_sync"].usable[3]
         self.dsdb_expect_add("swsync-vlan100.aqd-unittest.ms.com",
                              ip1, "vlan100",
                              primary="swsync.aqd-unittest.ms.com")
@@ -73,11 +73,11 @@ class TestDiscoverSwitch(TestBrokerCommand, VerifySwitchMixin):
         self.dsdb_verify()
 
     def test_200_show(self):
-        ip1 = self.net["unknown20"].usable[1]
-        ip2 = self.net["unknown20"].usable[2]
-        ip3 = self.net["unknown20"].usable[3]
-        ip4 = self.net["unknown20"].usable[4]
-        ip5 = self.net["unknown20"].usable[5]
+        ip1 = self.net["switch_sync"].usable[1]
+        ip2 = self.net["switch_sync"].usable[2]
+        ip3 = self.net["switch_sync"].usable[3]
+        ip4 = self.net["switch_sync"].usable[4]
+        ip5 = self.net["switch_sync"].usable[5]
         command = ["show", "switch", "--switch", "swsync", "--discover"]
         out = self.commandtest(command)
         self.matchoutput(out,
@@ -113,9 +113,9 @@ class TestDiscoverSwitch(TestBrokerCommand, VerifySwitchMixin):
         self.matchoutput(out, "qip-set-router %s" % ip1, command)
 
     def test_210_update(self):
-        ip1 = self.net["unknown20"].usable[1]
-        ip4 = self.net["unknown20"].usable[4]
-        ip5 = self.net["unknown20"].usable[5]
+        ip1 = self.net["switch_sync"].usable[1]
+        ip4 = self.net["switch_sync"].usable[4]
+        ip5 = self.net["switch_sync"].usable[5]
         self.dsdb_expect_update("swsync.aqd-unittest.ms.com",
                                 "mgmt0", comments="T1 T2")
         self.dsdb_expect_update("swsync-vlan100.aqd-unittest.ms.com",
@@ -147,16 +147,16 @@ class TestDiscoverSwitch(TestBrokerCommand, VerifySwitchMixin):
         self.dsdb_verify()
 
     def test_300_verify(self):
-        ip = self.net["unknown20"].usable[0]
-        ip1 = self.net["unknown20"].usable[1]
-        ip2 = self.net["unknown20"].usable[2]
-        ip3 = self.net["unknown20"].usable[3]
-        ip4 = self.net["unknown20"].usable[4]
-        ip5 = self.net["unknown20"].usable[5]
+        ip = self.net["switch_sync"].usable[0]
+        ip1 = self.net["switch_sync"].usable[1]
+        ip2 = self.net["switch_sync"].usable[2]
+        ip3 = self.net["switch_sync"].usable[3]
+        ip4 = self.net["switch_sync"].usable[4]
+        ip5 = self.net["switch_sync"].usable[5]
         out, command = self.verifyswitch("swsync.aqd-unittest.ms.com",
                                          "cisco", "ws-c2960-48tt-l", "ut3", "a",
                                          "3", switch_type="misc",
-                                         ip=self.net["unknown20"].usable[0],
+                                         ip=self.net["switch_sync"].usable[0],
                                          interface="mgmt0",
                                          comments="T1 T2")
         # TODO: the interface type is not updated, it's not clear if it should
@@ -193,11 +193,11 @@ class TestDiscoverSwitch(TestBrokerCommand, VerifySwitchMixin):
                           % ip5, command)
 
     def test_400_del_swsync_addrs(self):
-        ip1 = self.net["unknown20"].usable[1]
-        ip2 = self.net["unknown20"].usable[2]
-        ip3 = self.net["unknown20"].usable[3]
-        ip4 = self.net["unknown20"].usable[4]
-        ip5 = self.net["unknown20"].usable[5]
+        ip1 = self.net["switch_sync"].usable[1]
+        ip2 = self.net["switch_sync"].usable[2]
+        ip3 = self.net["switch_sync"].usable[3]
+        ip4 = self.net["switch_sync"].usable[4]
+        ip5 = self.net["switch_sync"].usable[5]
         self.dsdb_expect_delete(ip1)
         self.dsdb_expect_delete(ip2)
         self.dsdb_expect_delete(ip3)
@@ -216,7 +216,7 @@ class TestDiscoverSwitch(TestBrokerCommand, VerifySwitchMixin):
         self.dsdb_verify()
 
     def test_410_del_swsync(self):
-        self.dsdb_expect_delete(self.net["unknown20"].usable[0])
+        self.dsdb_expect_delete(self.net["switch_sync"].usable[0])
         self.noouttest(["del", "switch", "--switch", "swsync"])
         self.dsdb_verify()
 
