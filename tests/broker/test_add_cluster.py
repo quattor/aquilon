@@ -81,7 +81,7 @@ class TestAddCluster(TestBrokerCommand):
     def test_20_verify_showall(self):
         command = "show cluster --all"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "High Availability Cluster: utvcs1", command)
+        self.matchoutput(out, "utvcs1", command)
 
     def test_20_notfound_cluster(self):
         command = "show cluster --cluster cluster-does-not-exist"
@@ -164,8 +164,8 @@ class TestAddCluster(TestBrokerCommand):
     def test_44_verifyshowall(self):
         command = "show cluster --all"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Grid Cluster: utgrid1", command)
-        self.matchoutput(out, "High Availability Cluster: utvcs1", command)
+        self.matchoutput(out, "utgrid1", command)
+        self.matchoutput(out, "utvcs1", command)
 
     def test_45_verifyplenary_grid_clusterclient(self):
         plenary = self.plenary_name("cluster", "utgrid1", "client")

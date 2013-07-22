@@ -40,7 +40,7 @@ class TestDelCluster(TestBrokerCommand):
     def test_100_verifyall(self):
         command = ["show_cluster", "--all"]
         out = self.commandtest(command)
-        self.matchclean(out, "Grid Cluster: utgrid", command)
+        self.matchclean(out, "utgrid", command)
 
     def test_100_delnotfound(self):
         command = ["del_cluster", "--cluster=grid_cluster-does-not-exist"]
@@ -72,7 +72,7 @@ class TestDelCluster(TestBrokerCommand):
     def test_200_verifyall(self):
         command = ["show_cluster", "--all"]
         out = self.commandtest(command)
-        self.matchclean(out, "HA Cluster: utvcs", command)
+        self.matchclean(out, "utvcs", command)
 
     def test_300_delutstorage1(self):
         command = ["del_cluster", "--cluster=utstorage1"]
