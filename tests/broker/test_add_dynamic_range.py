@@ -94,7 +94,7 @@ class TestAddDynamicRange(TestBrokerCommand):
         command = "show dynamic range --ip %s" % IPv4Address(int(start) + 1)
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Dynamic Range: %s - %s" % (start, end), command)
-        self.matchoutput(out, "Network: %s [%s]" % (net.ip, net),
+        self.matchoutput(out, "Network: %s [%s]" % (net.name, net),
                          command)
 
     def testshowfqdn(self):
@@ -104,7 +104,7 @@ class TestAddDynamicRange(TestBrokerCommand):
         command = ["show", "dynamic", "range", "--fqdn", dynname(end)]
         out = self.commandtest(command)
         self.matchoutput(out, "Dynamic Range: %s - %s" % (start, end), command)
-        self.matchoutput(out, "Network: %s [%s]" % (net.ip, net),
+        self.matchoutput(out, "Network: %s [%s]" % (net.name, net),
                          command)
 
     def testverifynetwork(self):

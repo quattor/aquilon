@@ -35,7 +35,7 @@ class TestSearchDns(TestBrokerCommand):
         self.matchoutput(out, "DNS Record: unittest00.one-nyp.ms.com", command)
         self.matchoutput(out, "DNS Environment: internal", command)
         self.matchoutput(out, "IP: %s" % ip, command)
-        self.matchoutput(out, "Network: %s [%s]" % (net.ip, net), command)
+        self.matchoutput(out, "Network: %s [%s]" % (net.name, net), command)
         self.matchoutput(out, "Primary Name Of: Machine ut3c1n3", command)
         self.matchoutput(out, "Assigned To: ut3c1n3/eth0", command)
 

@@ -49,7 +49,7 @@ class TestUpdateNetwork(TestBrokerCommand):
         net = self.net["unknown0"]
         command = ["del", "network", "--ip", net.ip]
         out = self.badrequesttest(command)
-        self.matchoutput(out, "Network %s is still in use" % net.ip, command)
+        self.matchoutput(out, "Network %s is still in use" % net.name, command)
 
 
 if __name__ == '__main__':

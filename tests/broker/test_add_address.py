@@ -43,7 +43,7 @@ class TestAddAddress(TestBrokerCommand):
         self.matchoutput(out, "DNS Record: arecord13.aqd-unittest.ms.com",
                          command)
         self.matchoutput(out, "IP: %s" % net.usable[13], command)
-        self.matchoutput(out, "Network: %s [%s]" % (net.ip, net), command)
+        self.matchoutput(out, "Network: %s [%s]" % (net.name, net), command)
         self.matchoutput(out, "Network Environment: internal", command)
         self.matchclean(out, "Reverse", command)
 

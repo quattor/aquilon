@@ -308,7 +308,8 @@ class TestAddInterfaceAddress(TestBrokerCommand):
                          "Network %s in network environment internal used on "
                          "public interface eth0 of machine "
                          "unittest25.aqd-unittest.ms.com overlaps requested "
-                         "network excx-net in network environment excx." % net_internal.ip,
+                         "network excx-net in network environment excx." %
+                         net_internal.name,
                          command)
 
     def testverifyunittest23(self):

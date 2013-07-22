@@ -33,10 +33,11 @@ class TestAddNetwork(TestBrokerCommand):
             if not network.autocreate:
                 continue
 
-            command = ["add_network", "--network=%s" % network.ip,
+            command = ["add_network", "--network=%s" % network.name,
                        "--ip=%s" % network.ip,
                        "--netmask=%s" % network.netmask,
-                       "--building=ut", "--type=%s" % network.nettype]
+                       "--" + network.loc_type, network.loc_name,
+                       "--type=%s" % network.nettype]
             self.noouttest(command)
 
     def testaddauroranetwork(self):
@@ -82,12 +83,12 @@ class TestAddNetwork(TestBrokerCommand):
     def testaddnetworkdup(self):
         # Old name, new address
         net = self.net["unknown0"]
-        command = ["add", "network", "--network", net.ip,
+        command = ["add", "network", "--network", net.name,
                    "--ip", "192.168.10.0", "--netmask", "255.255.255.0",
                    "--building", "ut", "--type", net.nettype]
         (out, err) = self.successtest(command)
         self.matchoutput(err, "WARNING: Network name %s is already used for "
-                         "address %s." % (str(net.ip), str(net)), command)
+                         "address %s." % (net.name, str(net)), command)
 
     def testaddsubnet(self):
         # Add a subnet of an existing network
@@ -99,7 +100,7 @@ class TestAddNetwork(TestBrokerCommand):
         out = self.badrequesttest(command)
         self.matchoutput(out, "IP address %s is part of existing network "
                          "named %s with address %s." %
-                         (str(subnet.ip), str(net.ip), str(net)), command)
+                         (str(subnet.ip), net.name, str(net)), command)
 
     def testaddnetworkofcards(self):
         # An entirely fictitious network
@@ -188,17 +189,15 @@ class TestAddNetwork(TestBrokerCommand):
 
             command = "show network --ip %s" % network.ip
             out = self.commandtest(command.split(" "))
-            self.matchoutput(out, "Network: %s" % network.ip, command)
+            self.matchoutput(out, "Network: %s" % network.name, command)
             self.matchoutput(out, "Network Environment: internal", command)
             self.matchoutput(out, "IP: %s" % network.ip, command)
             self.matchoutput(out, "Netmask: %s" % network.netmask, command)
-            self.matchoutput(out, "Sysloc: ut.ny.na", command)
-            self.matchoutput(out, "Building: ut", command)
             self.matchoutput(out,
-                             "Location Parents: [Organization ms, Hub ny, "
-                             "Continent na, Country us, Campus ny, City ny]",
+                             "%s: %s" % (network.loc_type.title(),
+                                         network.loc_name),
                              command)
-            self.matchoutput(out, "Side: a", command)
+            self.matchoutput(out, "Side: %s" % network.side, command)
             self.matchoutput(out, "Network Type: %s" % network.nettype,
                              command)
 
@@ -222,7 +221,7 @@ class TestAddNetwork(TestBrokerCommand):
             if not network.autocreate:
                 continue
             self.matchoutput(out, "%s,%s,%s,ut.ny.na,us,a,%s,\n" % (
-                network.ip, network.ip, network.netmask, network.nettype),
+                network.name, network.ip, network.netmask, network.nettype),
                 command)
 
     def testshownetworkproto(self):

@@ -31,19 +31,26 @@ class DummyIP(IPv4Address):
 
 
 class NetworkInfo(IPv4Network):
-    def __init__(self, cidr, nettype, autocreate):
+    def __init__(self, name, cidr, nettype, loc_type, loc_name, side="a",
+                 autocreate=False):
         super(NetworkInfo, self).__init__(cidr)
 
+        self.name = name
         self.nettype = nettype
         self.usable = list()
         self.reserved = list()
+        self.loc_type = loc_type
+        self.loc_name = loc_name
+        self.side = side
 
-        if autocreate == "True":
+        if isinstance(autocreate, bool):
+            self.autocreate = autocreate
+        elif autocreate == "True":
             self.autocreate = True
         elif autocreate == "False":
             self.autocreate = False
         else:
-            raise ValueError("Invalid value for autocreate: %s" % autocreate)
+            raise ValueError("Invalid value for autocreate: %r" % autocreate)
 
         if nettype == 'tor_net':
             offsets = [6, 7]
@@ -89,7 +96,9 @@ class DummyNetworks(object):
             lines = [line for line in datafile if not line.startswith('#')]
             reader = DictReader(lines)
             for row in reader:
-                n = NetworkInfo(row["cidr"], row["type"], row["autocreate"])
+                n = NetworkInfo(row["name"], row["cidr"], row["type"],
+                                row["loc_type"], row["loc_name"],
+                                side=row["side"], autocreate=row["autocreate"])
 
                 # Sanity checks
                 if row["name"] in self.networks:

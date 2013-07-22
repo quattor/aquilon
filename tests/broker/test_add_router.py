@@ -42,7 +42,7 @@ class TestAddRouter(TestBrokerCommand):
                    "--building", "ut"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "IP address %s is already present as a router "
-                         "for network %s." % (net.gateway, net.ip), command)
+                         "for network %s." % (net.gateway, net.name), command)
 
     def testaddnormalhostasrouter(self):
         net = self.net["ut01ga2s01_v710"]
@@ -53,7 +53,7 @@ class TestAddRouter(TestBrokerCommand):
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "IP address %s is not a valid router address on "
-                         "network %s." % (ip, net.ip),
+                         "network %s." % (ip, net.name),
                          command)
 
     def testaddreserved(self):
@@ -65,7 +65,7 @@ class TestAddRouter(TestBrokerCommand):
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "IP address %s is not a valid router address on "
-                         "network %s." % (ip, net.ip),
+                         "network %s." % (ip, net.name),
                          command)
 
     def testaddzebrarouters(self):
@@ -93,7 +93,7 @@ class TestAddRouter(TestBrokerCommand):
                          "Router: ut3gd1r04-v109-hsrp.aqd-unittest.ms.com [%s]"
                          % net.gateway,
                          command)
-        self.matchoutput(out, "Network: %s [%s]" % (net.ip, net), command)
+        self.matchoutput(out, "Network: %s [%s]" % (net.name, net), command)
         self.matchoutput(out, "Network Environment: internal", command)
         self.matchoutput(out, "Comments: Test router", command)
 

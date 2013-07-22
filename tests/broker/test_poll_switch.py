@@ -135,10 +135,11 @@ class TestPollSwitch(TestBrokerCommand):
         command = ["poll", "switch", "--vlan", "--switch",
                    "ut01ga2s01.aqd-unittest.ms.com"]
         (out, err) = self.successtest(command)
+        net = self.net["vmotion_net"]
         self.matchoutput(err,
                          "Switch ut01ga2s01.aqd-unittest.ms.com: skipping VLAN "
                          "714, because network bitmask value 24 differs from "
-                         "prefixlen 26 of network 4.2.6.192.",
+                         "prefixlen 26 of network %s." % net.name,
                          command)
         service = self.config.get("broker", "poll_helper_service")
         self.matchoutput(err,

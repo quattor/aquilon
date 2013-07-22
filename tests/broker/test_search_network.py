@@ -29,7 +29,7 @@ from brokertest import TestBrokerCommand
 class TestSearchNetwork(TestBrokerCommand):
 
     def testname(self):
-        command = ["search_network", "--network=%s" % self.net["tor_net_0"].ip]
+        command = ["search_network", "--network=%s" % self.net["tor_net_0"].name]
         out = self.commandtest(command)
         self.matchoutput(out, str(self.net["tor_net_0"]), command)
 
@@ -100,7 +100,7 @@ class TestSearchNetwork(TestBrokerCommand):
         net = self.net["tor_net_0"]
         command = ["search_network", "--ip=%s" % net.ip, "--fullinfo"]
         out = self.commandtest(command)
-        self.matchoutput(out, "Network: %s" % net.ip, command)
+        self.matchoutput(out, "Network: %s" % net.name, command)
         self.matchoutput(out, "IP: %s" % net.ip, command)
 
     def testnoenv(self):
@@ -108,7 +108,7 @@ class TestSearchNetwork(TestBrokerCommand):
         net = self.net["unknown0"]
         command = ["search", "network", "--ip", net.ip, "--fullinfo"]
         out = self.commandtest(command)
-        self.matchoutput(out, "Network: %s" % net.ip, command)
+        self.matchoutput(out, "Network: %s" % net.name, command)
         self.matchoutput(out, "Network Environment: internal", command)
         self.matchclean(out, "Network Environment: excx", command)
         self.matchclean(out, "Network Environment: utcolo", command)
@@ -122,8 +122,8 @@ class TestSearchNetwork(TestBrokerCommand):
         command = ["search", "network", "--ip", net.ip,
                    "--network_environment", "excx", "--fullinfo"]
         out = self.commandtest(command)
-        self.matchoutput(out, "Network: excx-net" % net.ip, command)
-        self.matchclean(out, "Network: %s" % net.ip, command)
+        self.matchoutput(out, "Network: excx-net", command)
+        self.matchclean(out, "Network: %s" % net.name, command)
         self.matchoutput(out, "Network Environment: excx", command)
         self.matchclean(out, "Network Environment: internal", command)
         self.matchclean(out, "Network Environment: utcolo", command)
