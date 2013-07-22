@@ -159,6 +159,7 @@ from test_constraints_cluster import TestClusterConstraints
 from test_constraints_metacluster import TestMetaClusterConstraints
 from test_constraints_location import TestLocationConstraints
 from test_constraints_dns import TestDnsConstraints
+from test_constraints_network import TestNetworkConstraints
 from test_show_hostiplist import TestShowHostIPList
 from test_show_hostmachinelist import TestShowHostMachineList
 from test_show_machinemaclist import TestShowMachineMacList
@@ -370,6 +371,7 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestUpdateAlias, TestUpdateSrvRecord, TestUpdateAddress,
                 TestBindFeature, TestUnbindFeature,
                 TestRefreshNetwork, TestUpdateNetwork, TestSplitMergeNetwork,
+                TestNetworkConstraints,
                 TestUpdateNetworkEnvironment,
                 TestUpdateArchetype,
                 TestUpdateMetaCluster, TestUpdateESXCluster,
