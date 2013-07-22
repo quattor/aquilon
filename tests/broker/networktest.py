@@ -80,20 +80,7 @@ class DummyNetworks(object):
             return
         object.__init__(self, *args, **kwargs)
 
-        self.unknown = list()
-        self.tor_net = list()
-        self.tor_net2 = list()
-        self.vm_storage_net = list()
-        self.vpls = list()
-        self.all = list()
-
         self.networks = {}
-
-        typemap = {"unknown": self.unknown,
-                   "tor_net": self.tor_net,
-                   "tor_net2": self.tor_net2,
-                   "vm_storage_net": self.vm_storage_net,
-                   "vpls": self.vpls}
 
         dir = config.get("unittest", "datadir")
         filename = os.path.join(dir, "networks.csv")
@@ -103,10 +90,6 @@ class DummyNetworks(object):
             reader = DictReader(lines)
             for row in reader:
                 n = NetworkInfo(row["cidr"], row["type"], row["autocreate"])
-                if row["type"] in typemap:
-                    typemap[row["type"]].append(n)
-                if row["autocreate"] == "True":
-                    self.all.append(n)
 
                 # Sanity checks
                 if row["name"] in self.networks:
