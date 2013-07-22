@@ -211,17 +211,29 @@ class TestAddNetwork(TestBrokerCommand):
         for network in self.net:
             if not network.autocreate:
                 continue
-            self.matchoutput(out, str(network.ip), command)
+
+            if ((network.loc_type == "building" and
+                 network.loc_name == "ut") or
+                (network.loc_type == "bunker" and
+                 network.loc_name == "utbunker2")):
+                self.matchoutput(out, str(network.ip), command)
+            else:
+                self.matchclean(out, str(network.ip), command)
 
     def testshownetworkcsv(self):
-        command = "show_network --building ut --format csv"
+        # Use --exact_location here, so we don't have to worry about networks
+        # mapped to child locations
+        command = "show_network --building ut --exact_location --format csv"
         out = self.commandtest(command.split(" "))
         for network in self.net:
             if not network.autocreate:
                 continue
-            self.matchoutput(out, "%s,%s,%s,ut.ny.na,us,a,%s,\n" % (
-                network.name, network.ip, network.netmask, network.nettype),
-                command)
+            if network.loc_type == "building" and network.loc_name == "ut":
+                self.matchoutput(out, "%s,%s,%s,ut.ny.na,us,a,%s,\n" % (
+                    network.name, network.ip, network.netmask, network.nettype),
+                    command)
+            else:
+                self.matchclean(out, str(network.ip), command)
 
     def testshownetworkproto(self):
         command = "show network --building ut --format proto"

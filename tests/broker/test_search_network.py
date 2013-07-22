@@ -93,7 +93,24 @@ class TestSearchNetwork(TestBrokerCommand):
         for net in self.net:
             if not net.autocreate:
                 continue
-            self.matchoutput(out, str(net), command)
+            if ((net.loc_type == "building" and
+                 net.loc_name == "ut") or
+                (net.loc_type == "bunker" and
+                 net.loc_name == "utbunker2")):
+                self.matchoutput(out, str(net), command)
+            else:
+                self.matchclean(out, str(net.ip), command)
+
+    def testexactlocation(self):
+        command = ["search_network", "--building=ut", "--exact_location"]
+        out = self.commandtest(command)
+        for net in self.net:
+            if not net.autocreate:
+                continue
+            if net.loc_type == "building" and net.loc_name == "ut":
+                self.matchoutput(out, str(net), command)
+            else:
+                self.matchclean(out, str(net.ip), command)
 
     def testfullinfo(self):
         net = self.net["tor_net_0"]
