@@ -78,13 +78,9 @@ class TestHub(TestBrokerCommand):
     def testdelhub(self):
         test_hub = "hub1"
 
-        # add network to hub
-        self.noouttest(["add_network", "--ip", "192.176.6.0",
-                        "--network", "test_warn_network",
-                        "--netmask", "255.255.255.0",
-                        "--hub", test_hub,
-                        "--type", "unknown",
-                        "--comments", "Made-up network"])
+        self.net.allocate_network(self, "hub1_net", 24, "unknown",
+                                  "hub", test_hub,
+                                  comments="Made-up network")
 
         # try delete hub
         command = "del hub --hub %s" % test_hub
@@ -94,8 +90,7 @@ class TestHub(TestBrokerCommand):
                          "were found using this location." % test_hub,
                          command)
 
-        # delete network
-        self.noouttest(["del_network", "--ip", "192.176.6.0"])
+        self.net.dispose_network(self, "hub1_net")
 
     def testdelhub01(self):
         command = "del hub --hub hub1"

@@ -44,13 +44,9 @@ class TestDelBunker(TestBrokerCommand):
     def testdelbunkernetwork(self):
         test_bunker = "utbunker1"
 
-        # add network to bunker
-        self.noouttest(["add_network", "--ip", "192.176.6.0",
-                        "--network", "test_warn_network",
-                        "--netmask", "255.255.255.0",
-                        "--bunker", test_bunker,
-                        "--type", "unknown",
-                        "--comments", "Made-up network"])
+        self.net.allocate_network(self, "utbunker1_net", 24, "unknown",
+                                  "bunker", test_bunker,
+                                  comments="Made-up network")
 
         # try delete bunker
         command = "del bunker --bunker %s" % test_bunker
@@ -60,8 +56,7 @@ class TestDelBunker(TestBrokerCommand):
                          "were found using this location." % test_bunker,
                          command)
 
-        # delete network
-        self.noouttest(["del_network", "--ip", "192.176.6.0"])
+        self.net.dispose_network(self, "utbunker1_net")
 
 
 if __name__ == '__main__':

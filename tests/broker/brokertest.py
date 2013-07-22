@@ -47,6 +47,8 @@ class TestBrokerCommand(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.config = Config()
+        cls.net = DummyNetworks(cls.config)
+
         cls.scratchdir = cls.config.get("unittest", "scratchdir")
         cls.dsdb_coverage_dir = os.path.join(cls.scratchdir, "dsdb_coverage")
 
@@ -74,8 +76,6 @@ class TestBrokerCommand(unittest.TestCase):
             globals()[m] = __import__(m)
 
     def setUp(self):
-        self.net = DummyNetworks(self.config)
-
         self.template_extension = self.config.get("panc", "template_extension")
 
         if self.config.has_option("unittest", "aurora_with_node"):

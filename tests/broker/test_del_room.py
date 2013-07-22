@@ -44,13 +44,9 @@ class TestDelRoom(TestBrokerCommand):
     def testdelroomnetwork(self):
         test_room = "utroom1"
 
-        # add network to room
-        self.noouttest(["add_network", "--ip", "192.176.6.0",
-                        "--network", "test_warn_network",
-                        "--netmask", "255.255.255.0",
-                        "--room", test_room,
-                        "--type", "unknown",
-                        "--comments", "Made-up network"])
+        self.net.allocate_network(self, "utroom1_net", 24, "unknown",
+                                  "room", test_room,
+                                  comments="Made-up network")
 
         # try delete room
         command = "del room --room %s" % test_room
@@ -60,8 +56,7 @@ class TestDelRoom(TestBrokerCommand):
                          "were found using this location." % test_room,
                          command)
 
-        # delete network
-        self.noouttest(["del_network", "--ip", "192.176.6.0"])
+        self.net.dispose_network(self, "utroom1_net")
 
 
 if __name__ == '__main__':

@@ -61,13 +61,9 @@ class TestOrganization(TestBrokerCommand):
     def test_140_delexorginuse(self):
         test_org = "example"
 
-        # add network to org
-        self.noouttest(["add_network", "--ip", "192.176.6.0",
-                        "--network", "test_warn_network",
-                        "--netmask", "255.255.255.0",
-                        "--organization", test_org,
-                        "--type", "unknown",
-                        "--comments", "Made-up network"])
+        self.net.allocate_network(self, "example_org_net", 24, "unknown",
+                                  "organization", test_org,
+                                  comments="Made-up network")
 
         # try delete org
         command = "del organization --organization %s" % test_org
@@ -77,8 +73,7 @@ class TestOrganization(TestBrokerCommand):
                          "networks were found using this location." % test_org,
                          command)
 
-        # delete network
-        self.noouttest(["del_network", "--ip", "192.176.6.0"])
+        self.net.dispose_network(self, "example_org_net")
 
     def test_150_delexorg1(self):
         command = "del organization --organization example"

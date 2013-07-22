@@ -75,13 +75,9 @@ class TestDelBuilding(TestBrokerCommand):
     def testdelnettest01(self):
         test_bu = "nettest"
 
-        # add network to building
-        self.noouttest(["add_network", "--ip", "192.176.6.0",
-                        "--network", "test_warn_network",
-                        "--netmask", "255.255.255.0",
-                        "--building", test_bu,
-                        "--type", "unknown",
-                        "--comments", "Made-up network"])
+        self.net.allocate_network(self, "nettest_net", 24, "unknown",
+                                  "building", test_bu,
+                                  comments="Made-up network")
 
         # try delete building
         command = "del building --building %s" % test_bu
@@ -92,8 +88,7 @@ class TestDelBuilding(TestBrokerCommand):
                          command)
         self.dsdb_verify(empty=True)
 
-        # delete network
-        self.noouttest(["del_network", "--ip", "192.176.6.0"])
+        self.net.dispose_network(self, "nettest_net")
 
     def test_deletetu(self):
         self.dsdb_expect_del_campus_building("ta", "tu")

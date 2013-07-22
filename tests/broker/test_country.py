@@ -60,13 +60,9 @@ class TestCountry(TestBrokerCommand):
     def testdel(self):
         test_country = "ct"
 
-        # add network to hub
-        self.noouttest(["add_network", "--ip", "192.176.6.0",
-                        "--network", "test_warn_network",
-                        "--netmask", "255.255.255.0",
-                        "--country", test_country,
-                        "--type", "unknown",
-                        "--comments", "Made-up network"])
+        self.net.allocate_network(self, "ct_net", 24, "unknown",
+                                  "country", test_country,
+                                  comments="Made-up network")
 
         # try delete country
         command = "del country --country %s" % test_country
@@ -76,8 +72,7 @@ class TestCountry(TestBrokerCommand):
                          "were found using this location." % test_country,
                          command)
 
-        # delete network
-        self.noouttest(["del_network", "--ip", "192.176.6.0"])
+        self.net.dispose_network(self, "ct_net")
 
     def testdel01(self):
         command = "del country --country ct"

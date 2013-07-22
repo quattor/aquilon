@@ -96,13 +96,9 @@ class TestDelRack(TestBrokerCommand):
     def testdelracknetwork(self):
         test_rack = "ut9"
 
-        # add network to rack
-        self.noouttest(["add_network", "--ip", "192.176.6.0",
-                        "--network", "test_warn_network",
-                        "--netmask", "255.255.255.0",
-                        "--rack", test_rack,
-                        "--type", "unknown",
-                        "--comments", "Made-up network"])
+        self.net.allocate_network(self, "ut9_net", 24, "unknown",
+                                  "rack", test_rack,
+                                  comments="Made-up network")
 
         # try delete rack
         command = "del rack --rack %s" % test_rack
@@ -112,8 +108,7 @@ class TestDelRack(TestBrokerCommand):
                          "were found using this location." % test_rack,
                          command)
 
-        # delete network
-        self.noouttest(["del_network", "--ip", "192.176.6.0"])
+        self.net.dispose_network(self, "ut9_net")
 
 
 if __name__ == '__main__':
