@@ -39,7 +39,7 @@ class TestUpdateSwitch(TestBrokerCommand, VerifySwitchMixin):
                          command)
 
     def testupdateut3gd1r04(self):
-        newip = self.net.tor_net[6].usable[1]
+        newip = self.net["tor_net_6"].usable[1]
         self.dsdb_expect_update("ut3gd1r04.aqd-unittest.ms.com", "xge49", newip,
                                 comments="Some new switch comments")
         command = ["update", "switch", "--type", "bor",
@@ -50,7 +50,7 @@ class TestUpdateSwitch(TestBrokerCommand, VerifySwitchMixin):
         self.dsdb_verify()
 
     def testupdatebadip(self):
-        ip = self.net.tor_net[12].usable[0]
+        ip = self.net["tor_net_12"].usable[0]
         command = ["update", "switch", "--ip", ip,
                    "--switch", "ut3gd1r04.aqd-unittest.ms.com"]
         out = self.badrequesttest(command)
@@ -68,8 +68,8 @@ class TestUpdateSwitch(TestBrokerCommand, VerifySwitchMixin):
         self.noouttest(command)
 
     def testaddinterface(self):
-        ip = self.net.tor_net[8].usable[0]
-        mac = self.net.tor_net[8].usable[1].mac
+        ip = self.net["tor_net_8"].usable[0]
+        mac = self.net["tor_net_8"].usable[1].mac
         self.dsdb_expect_update("ut3gd1r06.aqd-unittest.ms.com", "xge", mac=mac)
         self.dsdb_expect_rename("ut3gd1r06.aqd-unittest.ms.com", iface="xge",
                                 new_iface="xge49")
@@ -85,7 +85,7 @@ class TestUpdateSwitch(TestBrokerCommand, VerifySwitchMixin):
         self.dsdb_verify()
 
     def testupdatewithinterface(self):
-        newip = self.net.tor_net[8].usable[1]
+        newip = self.net["tor_net_8"].usable[1]
         self.dsdb_expect_update("ut3gd1r06.aqd-unittest.ms.com", "xge49", newip)
         command = ["update", "switch",
                    "--switch", "ut3gd1r06.aqd-unittest.ms.com",
@@ -96,27 +96,27 @@ class TestUpdateSwitch(TestBrokerCommand, VerifySwitchMixin):
     def testverifyupdatewithoutinterface(self):
         self.verifyswitch("ut3gd1r04.aqd-unittest.ms.com", "hp", "uttorswitch",
                           "ut3", "a", "3", switch_type='bor',
-                          ip=self.net.tor_net[6].usable[1],
-                          mac=self.net.tor_net[6].usable[0].mac,
+                          ip=self.net["tor_net_6"].usable[1],
+                          mac=self.net["tor_net_6"].usable[0].mac,
                           interface="xge49",
                           comments="Some new switch comments")
 
     def testverifyupdatemisc(self):
         self.verifyswitch("ut3gd1r05.aqd-unittest.ms.com", "hp", "uttorswitch",
                           "ut4", "a", "4", "SNgd1r05_new", switch_type='tor',
-                          ip=self.net.tor_net[7].usable[0], interface="xge49")
+                          ip=self.net["tor_net_7"].usable[0], interface="xge49")
 
     def testverifyupdatewithinterface(self):
         self.verifyswitch("ut3gd1r06.aqd-unittest.ms.com", "generic",
                           "temp_switch", "ut3", "a", "3", switch_type='tor',
-                          ip=self.net.tor_net[8].usable[1],
-                          mac=self.net.tor_net[8].usable[1].mac,
+                          ip=self.net["tor_net_8"].usable[1],
+                          mac=self.net["tor_net_8"].usable[1].mac,
                           interface="xge49")
 
     def testverifydsdbrollback(self):
         self.verifyswitch("ut3gd1r07.aqd-unittest.ms.com", "generic",
                           "temp_switch", "ut3", "a", "3", switch_type='bor',
-                          ip=self.net.tor_net[9].usable[0])
+                          ip=self.net["tor_net_9"].usable[0])
 
 
 if __name__ == '__main__':

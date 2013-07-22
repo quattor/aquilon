@@ -82,10 +82,10 @@ class TestMakeAquilon(VerifyNotificationsMixin, TestBrokerCommand):
                           r'"netmask", "%s",\s*'
                           r'"network_environment", "internal",\s*'
                           r'"network_type", "unknown"\s*\)\s*' %
-                          (self.net.unknown[0].broadcast,
-                           self.net.unknown[0].gateway,
-                           self.net.unknown[0].usable[0],
-                           self.net.unknown[0].netmask),
+                          (self.net["unknown0"].broadcast,
+                           self.net["unknown0"].gateway,
+                           self.net["unknown0"].usable[0],
+                           self.net["unknown0"].netmask),
                           command)
         self.searchoutput(out,
                           r'"eth1", nlist\(\s*'
@@ -98,7 +98,7 @@ class TestMakeAquilon(VerifyNotificationsMixin, TestBrokerCommand):
                           r'"vlan", true\s*\)',
                           command)
         self.matchoutput(out, '"system/network/default_gateway" = "%s";' %
-                         self.net.unknown[0].gateway, command)
+                         self.net["unknown0"].gateway, command)
         self.matchoutput(out, '"system/advertise_status" = false', command)
 
         command = "cat --hostname unittest02.one-nyp.ms.com"
@@ -187,8 +187,8 @@ class TestMakeAquilon(VerifyNotificationsMixin, TestBrokerCommand):
         self.failUnlessEqual(host.hostname, 'unittest00')
         self.failUnlessEqual(host.personality.name, 'compileserver')
         self.failUnlessEqual(host.fqdn, 'unittest00.one-nyp.ms.com')
-        self.failUnlessEqual(host.mac, self.net.unknown[0].usable[2].mac)
-        self.failUnlessEqual(host.ip, str(self.net.unknown[0].usable[2]))
+        self.failUnlessEqual(host.mac, self.net["unknown0"].usable[2].mac)
+        self.failUnlessEqual(host.ip, str(self.net["unknown0"].usable[2]))
         self.failUnlessEqual(host.archetype.name, 'aquilon')
         self.failUnlessEqual(host.dns_domain, 'one-nyp.ms.com')
         self.failUnlessEqual(host.domain.name, 'unittest')
@@ -223,10 +223,10 @@ class TestMakeAquilon(VerifyNotificationsMixin, TestBrokerCommand):
                           r'"netmask", "%s",\s*'
                           r'"network_environment", "internal",\s*'
                           r'"network_type", "unknown"\s*\),\s*' %
-                          (self.net.unknown[0].broadcast,
-                           self.net.unknown[0].gateway,
-                           self.net.unknown[0].usable[2],
-                           self.net.unknown[0].netmask),
+                          (self.net["unknown0"].broadcast,
+                           self.net["unknown0"].gateway,
+                           self.net["unknown0"].usable[2],
+                           self.net["unknown0"].netmask),
                           command)
         self.searchoutput(out,
                           r'"eth1", nlist\(\s*'
@@ -238,10 +238,10 @@ class TestMakeAquilon(VerifyNotificationsMixin, TestBrokerCommand):
                           r'"netmask", "%s",\s*'
                           r'"network_environment", "internal",\s*'
                           r'"network_type", "unknown"\s*\)' %
-                          (self.net.unknown[0].broadcast,
-                           self.net.unknown[0].gateway,
-                           self.net.unknown[0].usable[3],
-                           self.net.unknown[0].netmask),
+                          (self.net["unknown0"].broadcast,
+                           self.net["unknown0"].gateway,
+                           self.net["unknown0"].usable[3],
+                           self.net["unknown0"].netmask),
                           command)
         self.matchoutput(out, '"system/advertise_status" = false', command)
 
@@ -384,7 +384,7 @@ class TestMakeAquilon(VerifyNotificationsMixin, TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
                          "Primary Name: unittest17.aqd-unittest.ms.com [%s]" %
-                         self.net.tor_net[0].usable[3],
+                         self.net["tor_net_0"].usable[3],
                          command)
         self.matchoutput(out,
                          "Template: aquilon/os/linux/5.0.1-x86_64/config" +
@@ -400,14 +400,14 @@ class TestMakeAquilon(VerifyNotificationsMixin, TestBrokerCommand):
         host = hostlist.hosts[0]
         self.assertEqual(host.fqdn, "unittest17.aqd-unittest.ms.com")
         #still fails, but it's checked below in the for loop
-        self.assertEqual(host.ip, str(self.net.tor_net[0].usable[3]))
-        self.assertEqual(host.mac, self.net.tor_net[0].usable[3].mac)
+        self.assertEqual(host.ip, str(self.net["tor_net_0"].usable[3]))
+        self.assertEqual(host.mac, self.net["tor_net_0"].usable[3].mac)
         self.assertEqual(host.machine.name, "ut8s02p3")
         self.assertEqual(len(host.machine.interfaces), 2)
         for i in host.machine.interfaces:
             if i.device == 'eth0':
-                self.assertEqual(i.ip, str(self.net.tor_net[0].usable[3]))
-                self.assertEqual(i.mac, self.net.tor_net[0].usable[3].mac)
+                self.assertEqual(i.ip, str(self.net["tor_net_0"].usable[3]))
+                self.assertEqual(i.mac, self.net["tor_net_0"].usable[3].mac)
             elif i.device == 'eth1':
                 # Skipping IP test to avoid merge conflict
                 self.assertEqual(i.mac, "")

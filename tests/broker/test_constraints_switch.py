@@ -68,14 +68,14 @@ class TestSwitchConstraints(TestBrokerCommand):
     def testprimaryalias(self):
         command = ["add", "switch", "--switch", "alias2host.aqd-unittest.ms.com",
                    "--type", "misc", "--rack", "ut3", "--model", "uttorswitch",
-                   "--ip", self.net.unknown[0].usable[-1]]
+                   "--ip", self.net["unknown0"].usable[-1]]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Alias alias2host.aqd-unittest.ms.com cannot be "
                          "used for address assignment.", command)
 
     def testprimarybadip(self):
-        good_ip = self.net.unknown[0].usable[13]
-        bad_ip = self.net.unknown[0].usable[14]
+        good_ip = self.net["unknown0"].usable[13]
+        bad_ip = self.net["unknown0"].usable[14]
         command = ["add", "switch", "--switch", "arecord13.aqd-unittest.ms.com",
                    "--type", "misc", "--rack", "ut3", "--model", "uttorswitch",
                    "--ip", bad_ip]

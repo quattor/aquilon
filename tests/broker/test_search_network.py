@@ -29,19 +29,19 @@ from brokertest import TestBrokerCommand
 class TestSearchNetwork(TestBrokerCommand):
 
     def testname(self):
-        command = ["search_network", "--network=%s" % self.net.tor_net[0].ip]
+        command = ["search_network", "--network=%s" % self.net["tor_net_0"].ip]
         out = self.commandtest(command)
-        self.matchoutput(out, str(self.net.tor_net[0]), command)
+        self.matchoutput(out, str(self.net["tor_net_0"]), command)
 
     def testip0(self):
-        command = ["search_network", "--ip=%s" % self.net.tor_net[0].ip]
+        command = ["search_network", "--ip=%s" % self.net["tor_net_0"].ip]
         out = self.commandtest(command)
-        self.matchoutput(out, str(self.net.tor_net[0]), command)
+        self.matchoutput(out, str(self.net["tor_net_0"]), command)
 
     def testipcontains(self):
-        command = ["search_network", "--ip=%s" % self.net.tor_net[0].usable[0]]
+        command = ["search_network", "--ip=%s" % self.net["tor_net_0"].usable[0]]
         out = self.commandtest(command)
-        self.matchoutput(out, str(self.net.tor_net[0]), command)
+        self.matchoutput(out, str(self.net["tor_net_0"]), command)
 
     def testtype(self):
         command = ["search_network", "--type=tor_net"]
@@ -56,7 +56,7 @@ class TestSearchNetwork(TestBrokerCommand):
         # unittest15.aqd-unittest.ms.com
         command = ["search_network", "--machine=ut8s02p1"]
         out = self.commandtest(command)
-        self.matchoutput(out, str(self.net.tor_net[0]), command)
+        self.matchoutput(out, str(self.net["tor_net_0"]), command)
 
     # The test for virtual machines (with port groups) lives in
     # test_add_10gig_hardware.
@@ -76,17 +76,17 @@ class TestSearchNetwork(TestBrokerCommand):
     def testclusterpg(self):
         command = ["search_network", "--cluster=utecl5", "--pg=user-v710"]
         out = self.commandtest(command)
-        self.matchoutput(out, str(self.net.unknown[2]), command)
+        self.matchoutput(out, str(self.net["unknown2"]), command)
 
     def testcluster(self):
         command = ["search_network", "--cluster=utecl1"]
         out = self.commandtest(command)
-        self.matchoutput(out, str(self.net.tor_net[2]), command)
+        self.matchoutput(out, str(self.net["tor_net_2"]), command)
 
     def testfqdn(self):
         command = ["search_network", "--fqdn=unittest15.aqd-unittest.ms.com"]
         out = self.commandtest(command)
-        self.matchoutput(out, str(self.net.tor_net[0]), command)
+        self.matchoutput(out, str(self.net["tor_net_0"]), command)
 
     def testlocation(self):
         command = ["search_network", "--building=ut"]
@@ -95,7 +95,7 @@ class TestSearchNetwork(TestBrokerCommand):
             self.matchoutput(out, str(net), command)
 
     def testfullinfo(self):
-        net = self.net.tor_net[0]
+        net = self.net["tor_net_0"]
         command = ["search_network", "--ip=%s" % net.ip, "--fullinfo"]
         out = self.commandtest(command)
         self.matchoutput(out, "Network: %s" % net.ip, command)
@@ -103,7 +103,7 @@ class TestSearchNetwork(TestBrokerCommand):
 
     def testnoenv(self):
         # Same IP defined differently in different environments
-        net = self.net.unknown[0]
+        net = self.net["unknown0"]
         command = ["search", "network", "--ip", net.ip, "--fullinfo"]
         out = self.commandtest(command)
         self.matchoutput(out, "Network: %s" % net.ip, command)
@@ -115,7 +115,7 @@ class TestSearchNetwork(TestBrokerCommand):
 
     def testwithenv(self):
         # Same IP defined differently in different environments
-        net = self.net.unknown[0]
+        net = self.net["unknown0"]
         subnet = net.subnet()[0]
         command = ["search", "network", "--ip", net.ip,
                    "--network_environment", "excx", "--fullinfo"]
@@ -131,8 +131,8 @@ class TestSearchNetwork(TestBrokerCommand):
     def testdynrange(self):
         command = ["search", "network", "--has_dynamic_ranges"]
         out = self.commandtest(command)
-        expect = [self.net.tor_net2[0], self.net.tor_net2[1],
-                  self.net.tor_net2[5]]
+        expect = [self.net["tor_net2_0"], self.net["tor_net2_1"],
+                  self.net["tor_net2_5"]]
         for net in self.net.all:
             if net in expect:
                 self.matchoutput(out, str(net), command)
@@ -144,8 +144,8 @@ class TestSearchNetwork(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out, "172.31.64.64/26", command)
         self.matchoutput(out, "172.31.88.0/26", command)
-        self.matchclean(out, str(self.net.tor_net2[0].ip), command)
-        self.matchclean(out, str(self.net.unknown[0].ip), command)
+        self.matchclean(out, str(self.net["tor_net2_0"].ip), command)
+        self.matchclean(out, str(self.net["unknown0"].ip), command)
 
 
 if __name__ == '__main__':

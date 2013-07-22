@@ -93,7 +93,7 @@ class TestSearchHardware(TestBrokerCommand):
         self.noouttest(command.split(" "))
 
     def testmacavailable(self):
-        command = "search hardware --mac " + self.net.unknown[0].usable[2].mac
+        command = "search hardware --mac " + self.net["unknown0"].usable[2].mac
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "ut3c1n3", command)
 

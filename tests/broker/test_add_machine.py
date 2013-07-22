@@ -38,7 +38,7 @@ class TestAddMachine(TestBrokerCommand):
 
     def testupdateut3c5n10(self):
         command = ["update", "machine", "--machine", "ut3c5n10",
-                   "--ip", self.net.unknown[0].usable[0]]
+                   "--ip", self.net["unknown0"].usable[0]]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Machine ut3c5n10 does not have a primary name.",
                          command)

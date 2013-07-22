@@ -31,7 +31,7 @@ from notificationtest import VerifyNotificationsMixin
 class TestDelHost(VerifyNotificationsMixin, TestBrokerCommand):
 
     def testdelunittest02(self):
-        self.dsdb_expect_delete(self.net.unknown[0].usable[11])
+        self.dsdb_expect_delete(self.net["unknown0"].usable[11])
         command = "del host --hostname unittest02.one-nyp.ms.com"
         (out, err) = self.successtest(command.split(" "))
         self.assertEmptyOut(out, command)
@@ -64,7 +64,7 @@ class TestDelHost(VerifyNotificationsMixin, TestBrokerCommand):
         self.notfoundtest(command.split(" "))
 
     def testdelunittest00(self):
-        self.dsdb_expect_delete(self.net.unknown[0].usable[2])
+        self.dsdb_expect_delete(self.net["unknown0"].usable[2])
         command = "del host --hostname unittest00.one-nyp.ms.com"
         (out, err) = self.successtest(command.split(" "))
         self.assertEmptyOut(out, command)
@@ -87,12 +87,12 @@ class TestDelHost(VerifyNotificationsMixin, TestBrokerCommand):
         # No interface should have the IP address
         self.matchclean(out, "Auxiliary:", command)
         self.matchclean(out, "Provides:", command)
-        self.matchclean(out, str(self.net.unknown[0].usable[2]), command)
+        self.matchclean(out, str(self.net["unknown0"].usable[2]), command)
 
     # unittest01.one-nyp.ms.com gets deleted in test_del_windows_host.
 
     def testdelunittest12(self):
-        self.dsdb_expect_delete(self.net.unknown[0].usable[7])
+        self.dsdb_expect_delete(self.net["unknown0"].usable[7])
         command = "del host --hostname unittest12.aqd-unittest.ms.com"
         (out, err) = self.successtest(command.split(" "))
         self.assertEmptyOut(out, command)
@@ -103,49 +103,49 @@ class TestDelHost(VerifyNotificationsMixin, TestBrokerCommand):
         self.notfoundtest(command.split(" "))
 
     def testdelunittest20(self):
-        self.dsdb_expect_delete(self.net.unknown[13].usable[2])
+        self.dsdb_expect_delete(self.net["unknown13"].usable[2])
         command = "del host --hostname unittest20.aqd-unittest.ms.com"
         (out, err) = self.successtest(command.split(" "))
         self.assertEmptyOut(out, command)
         self.dsdb_verify()
 
     def testdelunittest21(self):
-        self.dsdb_expect_delete(self.net.unknown[11].usable[1])
+        self.dsdb_expect_delete(self.net["unknown11"].usable[1])
         command = "del host --hostname unittest21.aqd-unittest.ms.com"
         (out, err) = self.successtest(command.split(" "))
         self.assertEmptyOut(out, command)
         self.dsdb_verify()
 
     def testdelunittest22(self):
-        self.dsdb_expect_delete(self.net.unknown[11].usable[2])
+        self.dsdb_expect_delete(self.net["unknown11"].usable[2])
         command = "del host --hostname unittest22.aqd-unittest.ms.com"
         (out, err) = self.successtest(command.split(" "))
         self.assertEmptyOut(out, command)
         self.dsdb_verify()
 
     def testdelunittest23(self):
-        self.dsdb_expect_delete(self.net.vpls[0].usable[1])
+        self.dsdb_expect_delete(self.net["vpls0"].usable[1])
         command = "del host --hostname unittest23.aqd-unittest.ms.com"
         (out, err) = self.successtest(command.split(" "))
         self.assertEmptyOut(out, command)
         self.dsdb_verify()
 
     def testdelunittest24(self):
-        self.dsdb_expect_delete(self.net.vpls[0].usable[2])
+        self.dsdb_expect_delete(self.net["vpls0"].usable[2])
         command = "del host --hostname unittest24.aqd-unittest.ms.com"
         (out, err) = self.successtest(command.split(" "))
         self.assertEmptyOut(out, command)
         self.dsdb_verify()
 
     def testdelunittest25(self):
-        self.dsdb_expect_delete(self.net.unknown[0].usable[20])
+        self.dsdb_expect_delete(self.net["unknown0"].usable[20])
         command = "del host --hostname unittest25.aqd-unittest.ms.com"
         (out, err) = self.successtest(command.split(" "))
         self.assertEmptyOut(out, command)
         self.dsdb_verify()
 
     def testdelunittest26(self):
-        self.dsdb_expect_delete(self.net.unknown[0].usable[23])
+        self.dsdb_expect_delete(self.net["unknown0"].usable[23])
         command = "del host --hostname unittest26.aqd-unittest.ms.com"
         (out, err) = self.successtest(command.split(" "))
         self.assertEmptyOut(out, command)
@@ -202,7 +202,7 @@ class TestDelHost(VerifyNotificationsMixin, TestBrokerCommand):
         self.notfoundtest(command.split(" "))
 
     def testdelunittest15(self):
-        self.dsdb_expect_delete(self.net.tor_net[0].usable[1])
+        self.dsdb_expect_delete(self.net["tor_net_0"].usable[1])
         command = "del host --hostname unittest15.aqd-unittest.ms.com"
         (out, err) = self.successtest(command.split(" "))
         self.assertEmptyOut(out, command)
@@ -213,7 +213,7 @@ class TestDelHost(VerifyNotificationsMixin, TestBrokerCommand):
         self.notfoundtest(command.split(" "))
 
     def testdelunittest16(self):
-        self.dsdb_expect_delete(self.net.tor_net[0].usable[2])
+        self.dsdb_expect_delete(self.net["tor_net_0"].usable[2])
         command = "del host --hostname unittest16.aqd-unittest.ms.com"
         (out, err) = self.successtest(command.split(" "))
         self.assertEmptyOut(out, command)
@@ -224,7 +224,7 @@ class TestDelHost(VerifyNotificationsMixin, TestBrokerCommand):
         self.notfoundtest(command.split(" "))
 
     def testdelunittest17(self):
-        self.dsdb_expect_delete(self.net.tor_net[0].usable[3])
+        self.dsdb_expect_delete(self.net["tor_net_0"].usable[3])
         command = "del host --hostname unittest17.aqd-unittest.ms.com"
         (out, err) = self.successtest(command.split(" "))
         self.assertEmptyOut(out, command)
@@ -235,7 +235,7 @@ class TestDelHost(VerifyNotificationsMixin, TestBrokerCommand):
         self.notfoundtest(command.split(" "))
 
     def testdelunittest18(self):
-        self.dsdb_expect_delete(self.net.unknown[0].usable[18])
+        self.dsdb_expect_delete(self.net["unknown0"].usable[18])
         command = "del host --hostname unittest18.aqd-unittest.ms.com"
         (out, err) = self.successtest(command.split(" "))
         self.assertEmptyOut(out, command)
@@ -250,7 +250,7 @@ class TestDelHost(VerifyNotificationsMixin, TestBrokerCommand):
         self.notfoundtest(command.split(" "))
 
     def testdeltest_windows_default_os(self):
-        ip = self.net.tor_net[10].usable[-2]
+        ip = self.net["tor_net_10"].usable[-2]
         self.dsdb_expect_delete(ip)
         command = "del host --hostname test-windows-default-os.msad.ms.com --quiet"
         self.noouttest(command.split(" "))
@@ -263,7 +263,7 @@ class TestDelHost(VerifyNotificationsMixin, TestBrokerCommand):
     def testdelhprackhosts(self):
         servers = 0
         for i in range(51, 100):
-            self.dsdb_expect_delete(self.net.tor_net[1].usable[i - 50])
+            self.dsdb_expect_delete(self.net["tor_net_1"].usable[i - 50])
             if servers < 10:
                 servers += 1
                 hostname = "server%d.aqd-unittest.ms.com" % servers
@@ -277,7 +277,7 @@ class TestDelHost(VerifyNotificationsMixin, TestBrokerCommand):
     def testdelverarirackhosts(self):
         servers = 0
         for i in range(101, 111):
-            self.dsdb_expect_delete(self.net.tor_net[2].usable[i - 100])
+            self.dsdb_expect_delete(self.net["tor_net_2"].usable[i - 100])
             hostname = "evh%d.aqd-unittest.ms.com" % (i - 100)
             command = ["del", "host", "--hostname", hostname]
             (out, err) = self.successtest(command)
@@ -286,7 +286,7 @@ class TestDelHost(VerifyNotificationsMixin, TestBrokerCommand):
 
     def testdel10gigrackhosts(self):
         for i in range(1, 25):
-            self.dsdb_expect_delete(self.net.tor_net2[2].usable[i + 1])
+            self.dsdb_expect_delete(self.net["tor_net2_2"].usable[i + 1])
             hostname = "evh%d.aqd-unittest.ms.com" % (i + 50)
             command = ["del", "host", "--hostname", hostname]
             (out, err) = self.successtest(command)
@@ -296,13 +296,13 @@ class TestDelHost(VerifyNotificationsMixin, TestBrokerCommand):
     def testdel_esx_bcp_clusterhosts(self):
         for i in range(25, 49):
             port = i - 24
-            self.dsdb_expect_delete(self.net.tor_net2[3].usable[port])
+            self.dsdb_expect_delete(self.net["tor_net2_3"].usable[port])
             hostname = "evh%d.aqd-unittest.ms.com" % (i + 50)
             command = ["del", "host", "--hostname", hostname]
             (out, err) = self.successtest(command)
             self.assertEmptyOut(out, command)
 
-            self.dsdb_expect_delete(self.net.tor_net2[4].usable[port])
+            self.dsdb_expect_delete(self.net["tor_net2_4"].usable[port])
             hostname = "evh%d.one-nyp.ms.com" % (i + 50)
             command = ["del", "host", "--hostname", hostname]
             (out, err) = self.successtest(command)
@@ -310,7 +310,7 @@ class TestDelHost(VerifyNotificationsMixin, TestBrokerCommand):
         self.dsdb_verify()
 
     def testdeljack(self):
-        self.dsdb_expect_delete(self.net.unknown[0].usable[17])
+        self.dsdb_expect_delete(self.net["unknown0"].usable[17])
         command = "del host --hostname jack.cards.example.com"
         (out, err) = self.successtest(command.split(" "))
         self.assertEmptyOut(out, command)
@@ -319,7 +319,7 @@ class TestDelHost(VerifyNotificationsMixin, TestBrokerCommand):
         self.notfoundtest(command.split(" "))
 
     def testdelfiler(self):
-        self.dsdb_expect_delete(self.net.vm_storage_net[0].usable[25])
+        self.dsdb_expect_delete(self.net["vm_storage_net0"].usable[25])
         command = "del host --hostname filer1.ms.com"
         (out, err) = self.successtest(command.split(" "))
         self.assertEmptyOut(out, command)
@@ -346,7 +346,7 @@ class TestDelHost(VerifyNotificationsMixin, TestBrokerCommand):
         self.dsdb_verify()
 
     def testdelf5test(self):
-        self.dsdb_expect_delete(self.net.unknown[16].ip)
+        self.dsdb_expect_delete(self.net["unknown16"].ip)
         command = ["del", "host", "--hostname", "f5test.aqd-unittest.ms.com"]
         (out, err) = self.successtest(command)
         self.assertEmptyOut(out, command)

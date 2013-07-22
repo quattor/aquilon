@@ -37,7 +37,7 @@ class TestDelInterface(TestBrokerCommand):
 
     def testdelut3c1n3eth1(self):
         self.noouttest(["del", "interface",
-                        "--mac", self.net.unknown[0].usable[3].mac.upper()])
+                        "--mac", self.net["unknown0"].usable[3].mac.upper()])
 
     def testnotamachine(self):
         command = ["del", "interface", "--interface", "xge49",

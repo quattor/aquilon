@@ -29,7 +29,7 @@ from brokertest import TestBrokerCommand
 class TestDelRouter(TestBrokerCommand):
 
     def testdelrouterbyip(self):
-        net = self.net.tor_net[6]
+        net = self.net["tor_net_6"]
         command = ["del", "router", "--ip", net.gateway]
         self.noouttest(command)
 
@@ -39,7 +39,7 @@ class TestDelRouter(TestBrokerCommand):
         self.noouttest(command)
 
     def testdelmissingrouter(self):
-        net = self.net.unknown[0]
+        net = self.net["unknown0"]
         command = ["del", "router", "--ip", net.gateway]
         out = self.notfoundtest(command)
         self.matchoutput(out, "IP address %s is not a router on network %s." %
@@ -48,17 +48,17 @@ class TestDelRouter(TestBrokerCommand):
     def testverifyrouter(self):
         command = ["show", "router", "--all"]
         out = self.commandtest(command)
-        self.matchclean(out, str(self.net.tor_net[12].gateway), command)
-        self.matchclean(out, str(self.net.tor_net[6].gateway), command)
+        self.matchclean(out, str(self.net["tor_net_12"].gateway), command)
+        self.matchclean(out, str(self.net["tor_net_6"].gateway), command)
 
     def testdelexcx(self):
-        net = self.net.unknown[0].subnet()[0]
+        net = self.net["unknown0"].subnet()[0]
         command = ["del", "router", "--ip", net[-2],
                    "--network_environment", "excx"]
         self.noouttest(command)
 
     def testdelutcolo(self):
-        net = self.net.unknown[1]
+        net = self.net["unknown1"]
         command = ["del", "router", "--ip", net[2],
                    "--network_environment", "utcolo"]
         self.noouttest(command)

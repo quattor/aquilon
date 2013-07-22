@@ -29,7 +29,7 @@ from brokertest import TestBrokerCommand
 class TestDelChassis(TestBrokerCommand):
 
     def testdelut3c5(self):
-        self.dsdb_expect_delete(self.net.unknown[0].usable[6])
+        self.dsdb_expect_delete(self.net["unknown0"].usable[6])
         command = "del chassis --chassis ut3c5.aqd-unittest.ms.com"
         self.noouttest(command.split(" "))
         self.dsdb_verify()
@@ -48,7 +48,7 @@ class TestDelChassis(TestBrokerCommand):
 
     def testdelut9chassis(self):
         for i in range(1, 6):
-            self.dsdb_expect_delete(self.net.unknown[10].usable[i])
+            self.dsdb_expect_delete(self.net["unknown10"].usable[i])
             command = "del chassis --chassis ut9c%d.aqd-unittest.ms.com" % i
             self.noouttest(command.split(" "))
         self.dsdb_verify()

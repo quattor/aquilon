@@ -138,7 +138,7 @@ class TestSearchHost(TestBrokerCommand):
                          command)
 
     def testipavailable(self):
-        command = "search host --ip %s" % self.net.unknown[0].usable[2]
+        command = "search host --ip %s" % self.net["unknown0"].usable[2]
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "unittest00.one-nyp.ms.com", command)
 
@@ -155,7 +155,7 @@ class TestSearchHost(TestBrokerCommand):
                          command)
 
     def testnetworkipavailable(self):
-        command = "search host --networkip %s" % self.net.unknown[0].ip
+        command = "search host --networkip %s" % self.net["unknown0"].ip
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "unittest00.one-nyp.ms.com", command)
         self.matchclean(out, "unittest00-e1.one-nyp.ms.com", command)
@@ -187,7 +187,7 @@ class TestSearchHost(TestBrokerCommand):
 
     def testmacavailable(self):
         def testfunc():
-            command = "search host --mac %s" % self.net.unknown[0].usable[2].mac
+            command = "search host --mac %s" % self.net["unknown0"].usable[2].mac
             out = self.commandtest(command.split(" "))
             self.matchoutput(out, "unittest00.one-nyp.ms.com", command)
 

@@ -31,7 +31,7 @@ class TestShowMachineMacList(TestBrokerCommand):
         command = "show machinemaclist"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
-                         self.net.unknown[0].usable[2].mac.lower() +
+                         self.net["unknown0"].usable[2].mac.lower() +
                          ",ut3c1n3,unittest00.one-nyp.ms.com",
                          command)
 

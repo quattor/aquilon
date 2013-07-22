@@ -28,7 +28,7 @@ from brokertest import TestBrokerCommand
 
 class TestSearchDns(TestBrokerCommand):
     def testbyip(self):
-        net = self.net.unknown[0]
+        net = self.net["unknown0"]
         ip = net.usable[2]
         command = ["search", "dns", "--ip", ip, "--fullinfo"]
         out = self.commandtest(command)
@@ -50,7 +50,7 @@ class TestSearchDns(TestBrokerCommand):
         command = ["search", "dns", "--fqdn",
                    "unittest20-e1.aqd-unittest.ms.com", "--fullinfo"]
         out = self.commandtest(command)
-        self.matchoutput(out, "IP: %s" % self.net.unknown[12].usable[0],
+        self.matchoutput(out, "IP: %s" % self.net["unknown12"].usable[0],
                          command)
         self.matchoutput(out, "Assigned To: ut3c5n2/eth1", command)
         self.matchclean(out, "Primary Name", command)
@@ -104,7 +104,7 @@ class TestSearchDns(TestBrokerCommand):
                          command)
 
     def testbynetwork(self):
-        command = ["search", "dns", "--network", self.net.unknown[0].ip]
+        command = ["search", "dns", "--network", self.net["unknown0"].ip]
         out = self.commandtest(command)
         self.matchoutput(out, "arecord13.aqd-unittest.ms.com", command)
         self.matchoutput(out, "ut3c5.aqd-unittest.ms.com", command)
@@ -119,7 +119,7 @@ class TestSearchDns(TestBrokerCommand):
         self.matchclean(out, "utcolo", command)
 
     def testbynetenv(self):
-        command = ["search", "dns", "--network", self.net.unknown[1].ip,
+        command = ["search", "dns", "--network", self.net["unknown1"].ip,
                    "--network_environment", "utcolo"]
         out = self.commandtest(command)
         self.matchoutput(out, "gw1.utcolo.aqd-unittest.ms.com", command)
@@ -148,7 +148,7 @@ class TestSearchDns(TestBrokerCommand):
                    "--format", "csv"]
         out = self.commandtest(command)
         self.matchoutput(out, "arecord13.aqd-unittest.ms.com,internal,A,%s" %
-                         self.net.unknown[0].usable[13], command)
+                         self.net["unknown0"].usable[13], command)
         self.matchoutput(out,
                          "alias2host.aqd-unittest.ms.com,internal,CNAME,"
                          "arecord13.aqd-unittest.ms.com",

@@ -32,7 +32,7 @@ class TestAddInterface(TestBrokerCommand):
     def testaddut3c5n10eth0_good_mac(self):
         self.noouttest(["add", "interface", "--interface", "eth0",
                         "--machine", "ut3c5n10",
-                        "--mac", self.net.unknown[0].usable[0].mac.upper()])
+                        "--mac", self.net["unknown0"].usable[0].mac.upper()])
 
     def testaddut3c5n11eth0_mac(self):
         self.noouttest(["add", "interface", "--interface", "eth0",
@@ -47,7 +47,7 @@ class TestAddInterface(TestBrokerCommand):
     def testaddut3c5n10eth1(self):
         self.noouttest(["add", "interface", "--interface", "eth1",
                         "--machine", "ut3c5n10",
-                        "--mac", self.net.unknown[0].usable[1].mac.lower()])
+                        "--mac", self.net["unknown0"].usable[1].mac.lower()])
 
     def testaddut3c5n10eth1_2(self):
         self.noouttest(["add", "interface", "--interface", "eth1.2",
@@ -61,7 +61,7 @@ class TestAddInterface(TestBrokerCommand):
                          command)
 
     def testfailvlanmac(self):
-        mac = self.net.unknown[0].usable[-1].mac
+        mac = self.net["unknown0"].usable[-1].mac
         command = ["add", "interface", "--interface", "eth1.3",
                    "--machine", "ut3c5n10", "--mac", mac]
         out = self.badrequesttest(command)
@@ -86,7 +86,7 @@ class TestAddInterface(TestBrokerCommand):
                          command)
 
     def testfailvlanmodel(self):
-        mac = self.net.unknown[0].usable[-1].mac
+        mac = self.net["unknown0"].usable[-1].mac
         command = ["add", "interface", "--interface", "eth1.3",
                    "--machine", "ut3c5n10", "--model", "e1000"]
         out = self.badrequesttest(command)
@@ -97,7 +97,7 @@ class TestAddInterface(TestBrokerCommand):
     def testaddut3c5n10eth1again(self):
         command = ["add", "interface", "--interface", "eth1",
                    "--machine", "ut3c5n10",
-                   "--mac", self.net.unknown[0].usable[-1].mac]
+                   "--mac", self.net["unknown0"].usable[-1].mac]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Machine ut3c5n10 already has an interface named "
                          "eth1.", command)
@@ -105,10 +105,10 @@ class TestAddInterface(TestBrokerCommand):
     def testaddut3c5n10eth2badmac(self):
         command = ["add", "interface", "--interface", "eth2",
                    "--machine", "ut3c5n10",
-                   "--mac", self.net.tor_net[6].usable[0].mac]
+                   "--mac", self.net["tor_net_6"].usable[0].mac]
         out = self.badrequesttest(command)
         self.matchoutput(out, "MAC address %s is already in use" %
-                         self.net.tor_net[6].usable[0].mac, command)
+                         self.net["tor_net_6"].usable[0].mac, command)
 
     def testaddut3c5n10eth2_2(self):
         command = ["add", "interface", "--interface", "eth2.2",
@@ -131,13 +131,13 @@ class TestAddInterface(TestBrokerCommand):
                           r"Interface: eth0 %s \[boot, default_route\]"
                           r"\s+Type: public"
                           r"\s+Vendor: generic Model: generic_nic" %
-                          self.net.unknown[0].usable[0].mac.lower(),
+                          self.net["unknown0"].usable[0].mac.lower(),
                           command)
         self.searchoutput(out,
                           r"Interface: eth1 %s$"
                           r"\s+Type: public"
                           r"\s+Vendor: generic Model: generic_nic" %
-                          self.net.unknown[0].usable[1].mac.lower(),
+                          self.net["unknown0"].usable[1].mac.lower(),
                           command)
         self.searchoutput(out,
                           r"Interface: eth1\.2 \(no MAC addr\)$"
@@ -154,22 +154,22 @@ class TestAddInterface(TestBrokerCommand):
                           r'"eth0", create\("hardware/nic/generic/generic_nic",\s*'
                           r'"boot", true,\s*'
                           r'"hwaddr", "%s"\s*\),'
-                          % self.net.unknown[0].usable[0].mac,
+                          % self.net["unknown0"].usable[0].mac,
                           command)
         self.searchoutput(out,
                           r'"eth1", create\("hardware/nic/generic/generic_nic",\s*'
                           r'"hwaddr", "%s"\s*\)\s*\);'
-                          % self.net.unknown[0].usable[1].mac,
+                          % self.net["unknown0"].usable[1].mac,
                           command)
 
     def testaddut3c5n2(self):
         self.noouttest(["add", "interface", "--interface", "eth0",
                         "--machine", "ut3c5n2",
-                        "--mac", self.net.unknown[11].usable[0].mac,
+                        "--mac", self.net["unknown11"].usable[0].mac,
                         "--vendor", "intel", "--model", "e1000"])
         self.noouttest(["add", "interface", "--interface", "eth1",
                         "--machine", "ut3c5n2",
-                        "--mac", self.net.unknown[12].usable[0].mac,
+                        "--mac", self.net["unknown12"].usable[0].mac,
                         "--model", "e1000"])
 
     def testshowut3c5n2(self):
@@ -179,13 +179,13 @@ class TestAddInterface(TestBrokerCommand):
                           r"Interface: eth0 %s \[boot, default_route\]"
                           r"\s+Type: public"
                           r"\s+Vendor: intel Model: e1000" %
-                          self.net.unknown[11].usable[0].mac.lower(),
+                          self.net["unknown11"].usable[0].mac.lower(),
                           command)
         self.searchoutput(out,
                           r"Interface: eth1 %s$"
                           r"\s+Type: public"
                           r"\s+Vendor: intel Model: e1000" %
-                          self.net.unknown[12].usable[0].mac.lower(),
+                          self.net["unknown12"].usable[0].mac.lower(),
                           command)
         self.matchclean(out, "Port Group", command)
 
@@ -199,17 +199,17 @@ class TestAddInterface(TestBrokerCommand):
                           r'"hwaddr", "%s"\s*\),\s*'
                           r'"eth1", create\("hardware/nic/intel/e1000",\s*'
                           r'"hwaddr", "%s"\s*\)\s*\);'
-                          % (self.net.unknown[11].usable[0].mac,
-                             self.net.unknown[12].usable[0].mac),
+                          % (self.net["unknown11"].usable[0].mac,
+                             self.net["unknown12"].usable[0].mac),
                           command)
 
     def testaddut3c5n3(self):
         self.noouttest(["add", "interface", "--interface", "eth0",
                         "--machine", "ut3c5n3",
-                        "--mac", self.net.unknown[11].usable[1].mac])
+                        "--mac", self.net["unknown11"].usable[1].mac])
         self.noouttest(["add", "interface", "--interface", "eth1",
                         "--machine", "ut3c5n3",
-                        "--mac", self.net.unknown[12].usable[1].mac])
+                        "--mac", self.net["unknown12"].usable[1].mac])
 
     def testaddut3c5n3bond0(self):
         # Let the broker guess the type
@@ -243,17 +243,17 @@ class TestAddInterface(TestBrokerCommand):
                           r'"hwaddr", "%s"\s*\),\s*'
                           r'"eth1", create\("hardware/nic/generic/generic_nic",\s*'
                           r'"hwaddr", "%s"\s*\)\s*\);'
-                          % (self.net.unknown[11].usable[1].mac,
-                             self.net.unknown[12].usable[1].mac),
+                          % (self.net["unknown11"].usable[1].mac,
+                             self.net["unknown12"].usable[1].mac),
                           command)
 
     def testaddut3c5n4(self):
         self.noouttest(["add", "interface", "--interface", "eth0",
                         "--machine", "ut3c5n4",
-                        "--mac", self.net.unknown[11].usable[2].mac])
+                        "--mac", self.net["unknown11"].usable[2].mac])
         self.noouttest(["add", "interface", "--interface", "eth1",
                         "--machine", "ut3c5n4",
-                        "--mac", self.net.unknown[12].usable[2].mac])
+                        "--mac", self.net["unknown12"].usable[2].mac])
 
     def testaddut3c5n4br0(self):
         # Specify the interface type explicitely this time
@@ -269,7 +269,7 @@ class TestAddInterface(TestBrokerCommand):
                         "--interface", "eth1", "--master", "br0"])
 
     def testfailbridgemac(self):
-        mac = self.net.unknown[0].usable[-1].mac
+        mac = self.net["unknown0"].usable[-1].mac
         command = ["add", "interface", "--interface", "br1",
                    "--machine", "ut3c5n4", "--mac", mac]
         out = self.badrequesttest(command)
@@ -287,18 +287,18 @@ class TestAddInterface(TestBrokerCommand):
                           r'"hwaddr", "%s"\s*\),\s*'
                           r'"eth1", create\("hardware/nic/generic/generic_nic",\s*'
                           r'"hwaddr", "%s"\s*\)\s*\);'
-                          % (self.net.unknown[11].usable[2].mac,
-                             self.net.unknown[12].usable[2].mac),
+                          % (self.net["unknown11"].usable[2].mac,
+                             self.net["unknown12"].usable[2].mac),
                           command)
 
     def testaddut3c1n3eth0(self):
         self.noouttest(["add", "interface", "--interface", "eth0",
                         "--machine", "ut3c1n3",
-                        "--mac", self.net.unknown[0].usable[2].mac.upper()])
+                        "--mac", self.net["unknown0"].usable[2].mac.upper()])
 
     def testaddut3c1n3eth1(self):
         testmac = []
-        for i in self.net.unknown[0].usable[3].mac.split(":"):
+        for i in self.net["unknown0"].usable[3].mac.split(":"):
             if i.startswith("0"):
                 testmac.append(i[1])
             else:
@@ -309,28 +309,28 @@ class TestAddInterface(TestBrokerCommand):
     def testaddut3c1n3bmc(self):
         self.noouttest(["add", "interface", "--interface", "bmc",
                         "--machine", "ut3c1n3",
-                        "--mac", self.net.unknown[0].usable[4].mac.lower()])
+                        "--mac", self.net["unknown0"].usable[4].mac.lower()])
 
     def testverifyaddut3c1n3interfaces(self):
         command = "show machine --machine ut3c1n3"
         out = self.commandtest(command.split(" "))
         self.searchoutput(out,
                           r"Interface: eth0 %s \[boot, default_route\]" %
-                          self.net.unknown[0].usable[2].mac.lower(),
+                          self.net["unknown0"].usable[2].mac.lower(),
                           command)
         self.searchoutput(out,
                           r"Interface: eth1 %s$" %
-                          self.net.unknown[0].usable[3].mac.lower(),
+                          self.net["unknown0"].usable[3].mac.lower(),
                           command)
         self.searchoutput(out,
                           r"Interface: bmc %s$" %
-                          self.net.unknown[0].usable[4].mac.lower(),
+                          self.net["unknown0"].usable[4].mac.lower(),
                           command)
 
     def testaddut3c1n8eth0(self):
         self.noouttest(["add", "interface", "--interface", "eth0",
                         "--machine", "ut3c1n8",
-                        "--mac", self.net.unknown[0].usable[18].mac])
+                        "--mac", self.net["unknown0"].usable[18].mac])
 
     def testverifyshowmanagermissing(self):
         command = "show manager --missing"
@@ -347,32 +347,32 @@ class TestAddInterface(TestBrokerCommand):
                           r'"eth0", create\("hardware/nic/generic/generic_nic",\s*'
                           r'"boot", true,\s*'
                           r'"hwaddr", "%s"\s*\),'
-                          % self.net.unknown[0].usable[2].mac,
+                          % self.net["unknown0"].usable[2].mac,
                           command)
         self.searchoutput(out,
                           r'"eth1", create\("hardware/nic/generic/generic_nic",\s*'
                           r'"hwaddr", "%s"\s*\)\s*\);'
-                          % self.net.unknown[0].usable[3].mac,
+                          % self.net["unknown0"].usable[3].mac,
                           command)
         self.searchoutput(out,
                           r'"console/bmc" = nlist\(\s*'
                           r'"hwaddr", "%s"\s*\);'
-                          % (self.net.unknown[0].usable[4].mac.lower()),
+                          % (self.net["unknown0"].usable[4].mac.lower()),
                           command)
 
     def testaddut3c1n4eth0(self):
-        testmac = "".join(self.net.unknown[0].usable[5].mac.split(":"))
+        testmac = "".join(self.net["unknown0"].usable[5].mac.split(":"))
         self.noouttest(["add", "interface", "--interface", "eth0",
                         "--machine", "ut3c1n4", "--mac", testmac])
 
     def testfailaddut3c1n4eth1(self):
         command = ["add", "interface", "--interface", "eth1",
                    "--machine", "ut3c1n4",
-                   "--mac", self.net.unknown[0].usable[0].mac]
+                   "--mac", self.net["unknown0"].usable[0].mac]
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "MAC address %s is already in use: " %
-                         self.net.unknown[0].usable[0].mac,
+                         self.net["unknown0"].usable[0].mac,
                          command)
 
     def testfailaddut3c1n4eth1badmac(self):
@@ -395,7 +395,7 @@ class TestAddInterface(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.searchoutput(out,
                           r"Interface: eth0 %s \[boot, default_route\]" %
-                          self.net.unknown[0].usable[5].mac.lower(),
+                          self.net["unknown0"].usable[5].mac.lower(),
                           command)
         self.matchclean(out, "Interface: eth1", command)
 
@@ -407,11 +407,11 @@ class TestAddInterface(TestBrokerCommand):
                           r'"eth0", create\("hardware/nic/generic/generic_nic",\s*'
                           r'"boot", true,\s*'
                           r'"hwaddr", "%s"\s*\)\s*\);'
-                          % self.net.unknown[0].usable[5].mac,
+                          % self.net["unknown0"].usable[5].mac,
                           command)
 
     def testaddinterfaceut3c5(self):
-        ip = self.net.unknown[0].usable[6]
+        ip = self.net["unknown0"].usable[6]
         self.dsdb_expect_update("ut3c5.aqd-unittest.ms.com", "oa", mac=ip.mac)
         command = ["add", "interface", "--interface", "oa", "--mac", ip.mac,
                    "--chassis", "ut3c5.aqd-unittest.ms.com"]
@@ -419,7 +419,7 @@ class TestAddInterface(TestBrokerCommand):
         self.dsdb_verify()
 
     def testaddinterfaceut3c5again(self):
-        ip = self.net.unknown[0].usable[-1]
+        ip = self.net["unknown0"].usable[-1]
         command = ["add", "interface", "--interface", "oa", "--mac", ip.mac,
                    "--chassis", "ut3c5.aqd-unittest.ms.com"]
         out = self.badrequesttest(command)
@@ -432,22 +432,22 @@ class TestAddInterface(TestBrokerCommand):
         self.matchoutput(out, "Chassis: ut3c5", command)
         self.matchoutput(out,
                          "Primary Name: ut3c5.aqd-unittest.ms.com [%s]" %
-                         self.net.unknown[0].usable[6],
+                         self.net["unknown0"].usable[6],
                          command)
         self.searchoutput(out,
                           r"Interface: oa %s$" %
-                          self.net.unknown[0].usable[6].mac,
+                          self.net["unknown0"].usable[6].mac,
                           command)
         self.matchclean(out, "Interface: oa2", command)
 
     def testfailaddinterfaceut3c1(self):
         command = ["add", "interface", "--interface", "oa2",
-                   "--mac", self.net.unknown[0].usable[6].mac,
+                   "--mac", self.net["unknown0"].usable[6].mac,
                    "--chassis", "ut3c1.aqd-unittest.ms.com"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "MAC address %s is already in use: " %
-                         self.net.unknown[0].usable[6].mac,
+                         self.net["unknown0"].usable[6].mac,
                          command)
 
     def testverifyfailaddinterfaceut3c1(self):
@@ -460,7 +460,7 @@ class TestAddInterface(TestBrokerCommand):
 
     def testfailaddinterfaceut3c1model(self):
         command = ["add", "interface", "--interface", "oa2",
-                   "--mac", self.net.unknown[0].usable[-1].mac,
+                   "--mac", self.net["unknown0"].usable[-1].mac,
                    "--model", "e1000",
                    "--chassis", "ut3c1.aqd-unittest.ms.com"]
         out = self.badrequesttest(command)
@@ -471,7 +471,7 @@ class TestAddInterface(TestBrokerCommand):
 
     def testfailaddinterfaceut3c1type(self):
         command = ["add", "interface", "--interface", "oa2",
-                   "--mac", self.net.unknown[0].usable[-1].mac,
+                   "--mac", self.net["unknown0"].usable[-1].mac,
                    "--type", "vlan",
                    "--chassis", "ut3c1.aqd-unittest.ms.com"]
         out = self.badrequesttest(command)
@@ -480,12 +480,12 @@ class TestAddInterface(TestBrokerCommand):
 
     def testfailaddinterfaceut3dg1r01(self):
         command = ["add", "interface", "--interface", "xge49",
-                   "--mac", self.net.tor_net[0].usable[0].mac,
+                   "--mac", self.net["tor_net_0"].usable[0].mac,
                    "--switch", "ut3gd1r01.aqd-unittest.ms.com"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "MAC address %s is already in use: " %
-                         self.net.tor_net[0].usable[0].mac,
+                         self.net["tor_net_0"].usable[0].mac,
                          command)
 
     def testfailaddinterfaceud3dg1r01model(self):
@@ -525,7 +525,7 @@ class TestAddInterface(TestBrokerCommand):
     def testfailloopbackmac(self):
         command = ["add", "interface", "--interface", "loop1",
                    "--switch", "ut3gd1r04.aqd-unittest.ms.com",
-                   "--mac", self.net.unknown[17][0].mac]
+                   "--mac", self.net["unknown17"][0].mac]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Loopback interfaces cannot have a MAC address.",
                          command)
@@ -535,7 +535,7 @@ class TestAddInterface(TestBrokerCommand):
                    "ut3gd1r04.aqd-unittest.ms.com"]
         out = self.commandtest(command)
         self.matchoutput(out,
-                         "Interface: xge49 %s" % self.net.tor_net[6].usable[0].mac,
+                         "Interface: xge49 %s" % self.net["tor_net_6"].usable[0].mac,
                          command)
         self.matchoutput(out, "Interface: vlan110 (no MAC addr)", command)
         self.matchoutput(out, "Interface: loop0 (no MAC addr)", command)
@@ -546,92 +546,92 @@ class TestAddInterface(TestBrokerCommand):
     def testaddut3s01p1aeth0(self):
         self.noouttest(["add", "interface", "--interface", "eth0",
                         "--machine", "ut3s01p1a",
-                        "--mac", self.net.unknown[0].usable[7].mac])
+                        "--mac", self.net["unknown0"].usable[7].mac])
 
     def testverifyaddut3s01p1aeth0(self):
         command = "show machine --machine ut3s01p1a"
         out = self.commandtest(command.split(" "))
         self.searchoutput(out,
                           r"Interface: eth0 %s \[boot, default_route\]" %
-                          self.net.unknown[0].usable[7].mac.lower(),
+                          self.net["unknown0"].usable[7].mac.lower(),
                           command)
 
     def testaddut3s01p1beth0(self):
         self.noouttest(["add", "interface", "--interface", "eth0",
                         "--machine", "ut3s01p1b",
-                        "--mac", self.net.unknown[0].usable[8].mac])
+                        "--mac", self.net["unknown0"].usable[8].mac])
 
     def testverifyaddut3s01p1beth0(self):
         command = "show machine --machine ut3s01p1b"
         out = self.commandtest(command.split(" "))
         self.searchoutput(out,
                           r"Interface: eth0 %s \[boot, default_route\]" %
-                          self.net.unknown[0].usable[8].mac.lower(),
+                          self.net["unknown0"].usable[8].mac.lower(),
                           command)
 
     def testaddut8s02p1eth0(self):
         self.noouttest(["add", "interface", "--interface", "eth0",
                         "--machine", "ut8s02p1",
-                        "--mac", self.net.tor_net[0].usable[1].mac])
+                        "--mac", self.net["tor_net_0"].usable[1].mac])
 
     def testverifyaddut8s02p1eth0(self):
         command = "show machine --machine ut8s02p1"
         out = self.commandtest(command.split(" "))
         self.searchoutput(out,
                           r"Interface: eth0 %s \[boot, default_route\]" %
-                          self.net.tor_net[0].usable[1].mac.lower(),
+                          self.net["tor_net_0"].usable[1].mac.lower(),
                           command)
 
     def testaddut8s02p2eth0(self):
         self.noouttest(["add", "interface", "--interface", "eth0",
                         "--machine", "ut8s02p2",
-                        "--mac", self.net.tor_net[0].usable[2].mac])
+                        "--mac", self.net["tor_net_0"].usable[2].mac])
 
     def testverifyaddut8s02p2eth0(self):
         command = "show machine --machine ut8s02p2"
         out = self.commandtest(command.split(" "))
         self.searchoutput(out,
                           r"Interface: eth0 %s \[boot, default_route\]" %
-                          self.net.tor_net[0].usable[2].mac.lower(),
+                          self.net["tor_net_0"].usable[2].mac.lower(),
                           command)
 
     def testaddut8s02p3eth0(self):
         self.noouttest(["add", "interface", "--interface", "eth0",
                         "--machine", "ut8s02p3",
-                        "--mac", self.net.tor_net[0].usable[3].mac])
+                        "--mac", self.net["tor_net_0"].usable[3].mac])
 
     def testverifyaddut8s02p3eth0(self):
         command = "show machine --machine ut8s02p3"
         out = self.commandtest(command.split(" "))
         self.searchoutput(out,
                           r"Interface: eth0 %s \[boot, default_route\]" %
-                          self.net.tor_net[0].usable[3].mac.lower(),
+                          self.net["tor_net_0"].usable[3].mac.lower(),
                           command)
 
     def testaddut8s02p4eth0(self):
         self.noouttest(["add", "interface", "--interface", "eth0",
                         "--machine", "ut8s02p4",
-                        "--mac", self.net.tor_net[0].usable[4].mac])
+                        "--mac", self.net["tor_net_0"].usable[4].mac])
 
     def testverifyaddut8s04p3eth0(self):
         command = "show machine --machine ut8s02p4"
         out = self.commandtest(command.split(" "))
         self.searchoutput(out,
                           r"Interface: eth0 %s \[boot, default_route\]" %
-                         self.net.tor_net[0].usable[4].mac.lower(),
+                         self.net["tor_net_0"].usable[4].mac.lower(),
                          command)
 
     def testaddut8s02p5eth0(self):
         self.noouttest(["add", "interface", "--interface", "eth0",
                         "--machine", "ut8s02p5",
-                        "--mac", self.net.tor_net[0].usable[5].mac])
+                        "--mac", self.net["tor_net_0"].usable[5].mac])
 
     def testverifyaddut8s05p3eth0(self):
         command = "show machine --machine ut8s02p5"
         out = self.commandtest(command.split(" "))
         self.searchoutput(out,
                           r"Interface: eth0 %s \[boot, default_route\]" %
-                          self.net.tor_net[0].usable[5].mac.lower(),
+                          self.net["tor_net_0"].usable[5].mac.lower(),
                           command)
 
     def testadd_bootable_no_mac(self):
@@ -661,7 +661,7 @@ class TestAddInterface(TestBrokerCommand):
             machine = "ut9s03p%d" % port
             self.noouttest(["add", "interface", "--interface", "eth0",
                             "--machine", machine,
-                            "--mac", self.net.tor_net[1].usable[port].mac])
+                            "--mac", self.net["tor_net_1"].usable[port].mac])
 
     def testaddverarirackinterfaces(self):
         for i in range(101, 150):
@@ -669,14 +669,14 @@ class TestAddInterface(TestBrokerCommand):
             machine = "ut10s04p%d" % port
             self.noouttest(["add", "interface", "--interface", "eth0",
                             "--machine", machine,
-                            "--mac", self.net.tor_net[2].usable[port].mac])
+                            "--mac", self.net["tor_net_2"].usable[port].mac])
             # Didn't bother putting a switch on this network, although
             # it wouldn't hurt.  At least the first ten (ESX servers) are
             # meant to be left dangling with no IP assigned to test some
             # edge cases.
             self.noouttest(["add", "interface", "--interface", "eth1",
                             "--machine", machine,
-                            "--mac", self.net.tor_net[6].usable[port].mac])
+                            "--mac", self.net["tor_net_6"].usable[port].mac])
 
     def testadd10gigrackinterfaces(self):
         for port in range(1, 13):
@@ -688,11 +688,11 @@ class TestAddInterface(TestBrokerCommand):
                 j = port - 1 + offset
                 self.noouttest(["add", "interface", "--interface", "eth0",
                                 "--machine", machine,
-                                "--mac", self.net.tor_net2[2].usable[i].mac])
+                                "--mac", self.net["tor_net2_2"].usable[i].mac])
                 self.noouttest(["add", "interface", "--interface", "eth1",
                                 "--pg=storage-v701",
                                 "--machine", machine, "--mac",
-                                self.net.vm_storage_net[0].usable[j].mac])
+                                self.net["vm_storage_net0"].usable[j].mac])
 
     def testverifypg(self):
         command = "show machine --machine ut11s01p1"
@@ -707,13 +707,13 @@ class TestAddInterface(TestBrokerCommand):
                           r'"eth0", create\("hardware/nic/generic/generic_nic",\s*'
                           r'"boot", true,\s*'
                           r'"hwaddr", "%s"\s*\),'
-                          % self.net.tor_net2[2].usable[2].mac,
+                          % self.net["tor_net2_2"].usable[2].mac,
                           command)
         self.searchoutput(out,
                           r'"eth1", create\("hardware/nic/generic/generic_nic",\s*'
                           r'"hwaddr", "%s",\s*'
                           r'"port_group", "storage-v701"\s*\)\s*\);'
-                          % self.net.vm_storage_net[0].usable[0].mac,
+                          % self.net["vm_storage_net0"].usable[0].mac,
                           command)
 
     def testaddharackinterfaces(self):
@@ -728,36 +728,36 @@ class TestAddInterface(TestBrokerCommand):
     def testaddut3c5n5(self):
         self.noouttest(["add", "interface", "--interface", "eth0",
                         "--machine", "ut3c5n5",
-                        "--mac", self.net.vpls[0].usable[1].mac])
+                        "--mac", self.net["vpls0"].usable[1].mac])
 
     def testaddnp3c5n5(self):
         self.noouttest(["add", "interface", "--interface", "eth0",
                         "--machine", "np3c5n5",
-                        "--mac", self.net.vpls[0].usable[2].mac])
+                        "--mac", self.net["vpls0"].usable[2].mac])
 
     def testaddut3c5n6(self):
         self.noouttest(["add", "interface", "--interface", "eth0",
                         "--machine", "ut3c5n6",
-                        "--mac", self.net.unknown[0].usable[19].mac])
+                        "--mac", self.net["unknown0"].usable[19].mac])
 
     def testaddut3c5n7(self):
         self.noouttest(["add", "interface", "--interface", "eth0",
                         "--machine", "ut3c5n7",
-                        "--mac", self.net.unknown[0].usable[20].mac])
+                        "--mac", self.net["unknown0"].usable[20].mac])
         self.noouttest(["add", "interface", "--interface", "eth1",
                         "--machine", "ut3c5n7",
-                        "--mac", self.net.unknown[0].usable[21].mac])
+                        "--mac", self.net["unknown0"].usable[21].mac])
         self.noouttest(["add", "interface", "--interface", "eth2",
                         "--machine", "ut3c5n7",
-                        "--mac", self.net.unknown[0].usable[22].mac])
+                        "--mac", self.net["unknown0"].usable[22].mac])
 
     def testaddut3c5n8(self):
         self.noouttest(["add", "interface", "--interface", "eth0",
                         "--machine", "ut3c5n8",
-                        "--mac", self.net.unknown[0].usable[23].mac])
+                        "--mac", self.net["unknown0"].usable[23].mac])
         self.noouttest(["add", "interface", "--interface", "eth1",
                         "--machine", "ut3c5n8",
-                        "--mac", self.net.unknown[14].usable[0].mac])
+                        "--mac", self.net["unknown14"].usable[0].mac])
 
     # FIXME: Missing a test for a failed DSDB add_host.
     # FIXME: Missing tests around Dell rename hack.
@@ -769,14 +769,14 @@ class TestAddInterface(TestBrokerCommand):
         self.noouttest(["add", "interface", "--interface", "eth0",
                         "--machine", "jack",
                         "--comments", "interface for jack",
-                        "--mac", self.net.unknown[0].usable[17].mac.upper()])
+                        "--mac", self.net["unknown0"].usable[17].mac.upper()])
 
     def testverifyjackmac(self):
         command = "show machine --machine jack"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
                          "Interface: eth0 %s" %
-                         self.net.unknown[0].usable[17].mac.lower(),
+                         self.net["unknown0"].usable[17].mac.lower(),
                          command)
         self.searchoutput(out, r"\s+Comments: interface for jack",
                           command)
@@ -809,7 +809,7 @@ class TestAddInterface(TestBrokerCommand):
                          command)
 
     def testaddf5iface(self):
-        ip = DummyIP(self.net.unknown[16].ip)
+        ip = DummyIP(self.net["unknown16"].ip)
         command = ["add", "interface", "--machine", "f5test",
                    "--interface", "eth0", "--mac", ip.mac]
         self.noouttest(command)

@@ -143,7 +143,7 @@ class TestUsecaseDatabase(TestBrokerCommand):
         self.successtest(command)
 
     def test_205_add_srv(self):
-        ip = self.net.unknown[0].usable[25]
+        ip = self.net["unknown0"].usable[25]
         self.dsdb_expect_add('nydb1nydb1.aqd-unittest.ms.com', ip)
         command = ["add_service_address", "--ip", ip, "--name", "nydb1nydb1",
                    "--service_address", "nydb1nydb1.aqd-unittest.ms.com",
@@ -156,7 +156,7 @@ class TestUsecaseDatabase(TestBrokerCommand):
         self.successtest(command)
 
     def test_220_verify_show(self):
-        srv_ip = self.net.unknown[0].usable[25]
+        srv_ip = self.net["unknown0"].usable[25]
         command = ["show_cluster", "--cluster=nydb1"]
         out = self.commandtest(command)
         self.matchoutput(out, "Application: nydb1", command)
@@ -195,7 +195,7 @@ class TestUsecaseDatabase(TestBrokerCommand):
             self.failUnless(os.path.exists(plenary),
                             "Plenary '%s' does not exist" % plenary)
 
-        self.dsdb_expect_delete(self.net.unknown[0].usable[25])
+        self.dsdb_expect_delete(self.net["unknown0"].usable[25])
         command = ["del_service_address", "--cluster=nydb1",
                    "--name", "nydb1nydb1"]
         self.successtest(command)

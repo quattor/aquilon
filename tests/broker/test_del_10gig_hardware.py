@@ -53,7 +53,7 @@ class TestDel10GigHardware(TestBrokerCommand):
     def test_300_delaux(self):
         for i in range(1, 25):
             hostname = "evh%d-e1.aqd-unittest.ms.com" % (i + 50)
-            self.dsdb_expect_delete(self.net.vm_storage_net[0].usable[i - 1])
+            self.dsdb_expect_delete(self.net["vm_storage_net0"].usable[i - 1])
             command = ["del", "auxiliary", "--auxiliary", hostname]
             (out, err) = self.successtest(command)
             self.assertEmptyOut(out, command)

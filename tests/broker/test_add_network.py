@@ -138,7 +138,7 @@ class TestAddNetwork(TestBrokerCommand):
         self.promote_current_user()
 
     def testaddexcx(self):
-        net = self.net.unknown[0]
+        net = self.net["unknown0"]
         subnet = net.subnet()[0]
         command = ["add", "network", "--network", "excx-net",
                    "--ip", subnet.ip, "--netmask", subnet.netmask,
@@ -163,7 +163,7 @@ class TestAddNetwork(TestBrokerCommand):
         self.noouttest(command)
 
     def testaddutcolo(self):
-        net = self.net.unknown[1]
+        net = self.net["unknown1"]
         command = ["add", "network", "--network", "utcolo-net",
                    "--ip", net.ip, "--netmask", net.netmask,
                    "--building", "ut", "--type", net.nettype,
@@ -248,7 +248,7 @@ class TestAddNetwork(TestBrokerCommand):
         self.matchoutput(out, "Network excx-net not found.", command)
 
     def testshowexcxwithenv(self):
-        net = self.net.unknown[0]
+        net = self.net["unknown0"]
         subnet = net.subnet()[0]
         command = "show network --network excx-net --network_environment excx"
         out = self.commandtest(command.split(" "))
@@ -258,7 +258,7 @@ class TestAddNetwork(TestBrokerCommand):
         self.matchoutput(out, "Netmask: %s" % subnet.netmask, command)
 
     def testshowutcolowithenv(self):
-        net = self.net.unknown[1]
+        net = self.net["unknown1"]
         command = "show network --network utcolo-net --network_environment utcolo"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Network: utcolo-net", command)

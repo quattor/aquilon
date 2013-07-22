@@ -29,8 +29,8 @@ from brokertest import TestBrokerCommand
 class TestAddWindowsHost(TestBrokerCommand):
 
     def testaddunittest01(self):
-        ip = self.net.unknown[0].usable[10]
-        mac = self.net.unknown[0].usable[5].mac
+        ip = self.net["unknown0"].usable[10]
+        mac = self.net["unknown0"].usable[5].mac
         self.dsdb_expect_add("unittest01.one-nyp.ms.com", ip, "eth0", mac)
         self.noouttest(["add", "windows", "host",
                         "--hostname", "unittest01.one-nyp.ms.com",
@@ -42,7 +42,7 @@ class TestAddWindowsHost(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
                          "Primary Name: unittest01.one-nyp.ms.com [%s]" %
-                         self.net.unknown[0].usable[10],
+                         self.net["unknown0"].usable[10],
                          command)
         self.matchoutput(out, "Blade: ut3c1n4", command)
         self.matchoutput(out, "Archetype: windows", command)

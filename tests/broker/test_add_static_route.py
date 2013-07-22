@@ -29,20 +29,20 @@ from brokertest import TestBrokerCommand
 class TestAddStaticRoute(TestBrokerCommand):
 
     def test_100_add_route1(self):
-        gw = self.net.unknown[14].usable[-1]
+        gw = self.net["unknown14"].usable[-1]
         command = ["add", "static", "route", "--gateway", gw,
                    "--ip", "192.168.250.0", "--prefixlen", "23",
                    "--comments", "Route comments"]
         self.noouttest(command)
 
     def test_100_add_route2(self):
-        gw = self.net.unknown[15].usable[-1]
+        gw = self.net["unknown15"].usable[-1]
         command = ["add", "static", "route", "--gateway", gw,
                    "--ip", "192.168.252.0", "--prefixlen", "23"]
         self.noouttest(command)
 
     def test_110_add_overlap(self):
-        net = self.net.unknown[15]
+        net = self.net["unknown15"]
         gw = net.usable[-1]
         command = ["add", "static", "route", "--gateway", gw,
                    "--ip", "192.168.252.128", "--prefixlen", "25"]
@@ -53,13 +53,13 @@ class TestAddStaticRoute(TestBrokerCommand):
                          command)
 
     def test_120_add_default(self):
-        gw = self.net.unknown[0].gateway
+        gw = self.net["unknown0"].gateway
         command = ["add", "static", "route", "--gateway", gw,
                    "--ip", "250.250.0.0", "--prefixlen", "16"]
         self.noouttest(command)
 
     def test_200_show_host(self):
-        gw = self.net.unknown[14].usable[-1]
+        gw = self.net["unknown14"].usable[-1]
         command = ["show", "host", "--hostname", "unittest26.aqd-unittest.ms.com"]
         out = self.commandtest(command)
         self.matchoutput(out, "Static Route: 192.168.250.0/23 gateway %s" % gw,
@@ -68,8 +68,8 @@ class TestAddStaticRoute(TestBrokerCommand):
         self.matchclean(out, "192.168.252.0", command)
 
     def test_200_show_network(self):
-        gw = self.net.unknown[14].usable[-1]
-        command = ["show", "network", "--ip", self.net.unknown[14].ip]
+        gw = self.net["unknown14"].usable[-1]
+        command = ["show", "network", "--ip", self.net["unknown14"].ip]
         out = self.commandtest(command)
         self.matchoutput(out, "Static Route: 192.168.250.0/23 gateway %s" % gw,
                          command)
@@ -82,9 +82,9 @@ class TestAddStaticRoute(TestBrokerCommand):
         self.matchoutput(err, "2/2 compiled", command)
 
     def test_220_verify_unittest26(self):
-        eth0_net = self.net.unknown[0]
+        eth0_net = self.net["unknown0"]
         eth0_ip = eth0_net.usable[23]
-        eth1_net = self.net.unknown[14]
+        eth1_net = self.net["unknown14"]
         eth1_ip = eth1_net.usable[0]
         eth1_gw = eth1_net.usable[-1]
         command = ["cat", "--hostname", "unittest26.aqd-unittest.ms.com",
@@ -133,10 +133,10 @@ class TestAddStaticRoute(TestBrokerCommand):
         command = ["show", "host", "--hostname", "unittest02.one-nyp.ms.com"]
         out = self.commandtest(command)
         self.matchoutput(out, "Static Route: 250.250.0.0/16 gateway %s" %
-                         self.net.unknown[0].gateway, command)
+                         self.net["unknown0"].gateway, command)
 
     def test_240_verify_cat_unittest02(self):
-        net = self.net.unknown[0]
+        net = self.net["unknown0"]
         eth0_ip = net.usable[0]
         command = ["cat", "--hostname", "unittest02.one-nyp.ms.com", "--data",
                    "--generate"]

@@ -29,14 +29,14 @@ from brokertest import TestBrokerCommand
 class TestAddRouter(TestBrokerCommand):
 
     def testaddrouter(self):
-        net = self.net.tor_net[6]
+        net = self.net["tor_net_6"]
         command = ["add", "router", "--ip", net.gateway,
                    "--fqdn", "ut3gd1r04-v109-hsrp.aqd-unittest.ms.com",
                    "--building", "ut", "--comments", "Test router"]
         self.noouttest(command)
 
     def testaddrouteragain(self):
-        net = self.net.tor_net[6]
+        net = self.net["tor_net_6"]
         command = ["add", "router", "--ip", net.gateway,
                    "--fqdn", "ut3gd1r04-v110-hsrp.aqd-unittest.ms.com",
                    "--building", "ut"]
@@ -45,7 +45,7 @@ class TestAddRouter(TestBrokerCommand):
                          "for network %s." % (net.gateway, net.ip), command)
 
     def testaddnormalhostasrouter(self):
-        net = self.net.unknown[2]
+        net = self.net["unknown2"]
         ip = net.usable[0]
         command = ["add", "router", "--ip", ip,
                    "--fqdn", "not-a-router.aqd-unittest.ms.com",
@@ -57,7 +57,7 @@ class TestAddRouter(TestBrokerCommand):
                          command)
 
     def testaddreserved(self):
-        net = self.net.tor_net[0]
+        net = self.net["tor_net_0"]
         ip = net.reserved[0]
         command = ["add", "router", "--ip", ip,
                    "--fqdn", "reserved-address.aqd-unittest.ms.com",
@@ -79,14 +79,14 @@ class TestAddRouter(TestBrokerCommand):
                 self.noouttest(command)
 
     def testaddvplsrouters(self):
-        net = self.net.vpls[0]
+        net = self.net["vpls0"]
         self.noouttest(["add", "router", "--ip", net[1], "--building", "ut",
                         "--fqdn", "utvplsgw.aqd-unittest.ms.com"])
         self.noouttest(["add", "router", "--ip", net[2], "--building", "np",
                         "--fqdn", "npvplsgw.aqd-unittest.ms.com"])
 
     def testshowrouter(self):
-        net = self.net.tor_net[6]
+        net = self.net["tor_net_6"]
         command = ["show", "router", "--ip", net.gateway]
         out = self.commandtest(command)
         self.matchoutput(out,
@@ -98,13 +98,13 @@ class TestAddRouter(TestBrokerCommand):
         self.matchoutput(out, "Comments: Test router", command)
 
     def testshownetwork(self):
-        net = self.net.tor_net[6]
+        net = self.net["tor_net_6"]
         command = ["show", "network", "--ip", net.ip]
         out = self.commandtest(command)
         self.matchoutput(out, "Routers: %s (Building ut)" % net.gateway, command)
 
     def testshowbadip(self):
-        ip = self.net.tor_net[0].gateway
+        ip = self.net["tor_net_0"].gateway
         command = ["show", "router", "--ip", ip]
         out = self.notfoundtest(command)
         self.matchoutput(out, "Router with IP address %s not found." % ip,
@@ -130,7 +130,7 @@ class TestAddRouter(TestBrokerCommand):
         self.matchclean(out, "utcolo", command)
 
     def testaddexcx(self):
-        net = self.net.unknown[0].subnet()[0]
+        net = self.net["unknown0"].subnet()[0]
         # Test a different address assignment convention: router addresses are
         # at the end, not at the beginning
         command = ["add", "router", "--ip", net[-2],
@@ -139,7 +139,7 @@ class TestAddRouter(TestBrokerCommand):
         self.noouttest(command)
 
     def testaddutcolo(self):
-        net = self.net.unknown[1]
+        net = self.net["unknown1"]
         command = ["add", "router", "--ip", net[2],
                    "--fqdn", "gw1.utcolo.aqd-unittest.ms.com",
                    "--network_environment", "utcolo"]

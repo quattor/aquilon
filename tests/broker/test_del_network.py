@@ -92,7 +92,7 @@ class TestDelNetwork(TestBrokerCommand):
         self.noouttest(["del", "network", "--ip", "127.0.0.0"])
 
     def testdelexcx(self):
-        net = self.net.unknown[0].subnet()[0]
+        net = self.net["unknown0"].subnet()[0]
         command = ["del", "network", "--ip", net.ip,
                    "--network_environment", "excx"]
         self.noouttest(command)
@@ -108,13 +108,13 @@ class TestDelNetwork(TestBrokerCommand):
         self.noouttest(command)
 
     def testdelutcolo(self):
-        net = self.net.unknown[1]
+        net = self.net["unknown1"]
         command = ["del", "network", "--ip", net.ip,
                    "--network_environment", "utcolo"]
         self.noouttest(command)
 
     def testverifyexcx(self):
-        net = self.net.unknown[0].subnet()[0]
+        net = self.net["unknown0"].subnet()[0]
         command = ["search", "network", "--all", "--network_environment", "excx"]
         out = self.commandtest(command)
         self.matchclean(out, "excx-net", command)
@@ -128,7 +128,7 @@ class TestDelNetwork(TestBrokerCommand):
         self.matchclean(out, str(net.ip), command)
 
     def testverifyutcolo(self):
-        net = self.net.unknown[1]
+        net = self.net["unknown1"]
         command = ["search", "network", "--all", "--network_environment", "utcolo"]
         out = self.commandtest(command)
         self.matchclean(out, "utcolo-net", command)

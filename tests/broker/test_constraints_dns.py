@@ -67,7 +67,7 @@ class TestDnsConstraints(TestBrokerCommand):
                          command)
 
     def testdelserviceaddress(self):
-        ip = self.net.unknown[13].usable[1]
+        ip = self.net["unknown13"].usable[1]
         command = ["del", "address", "--fqdn", "zebra2.aqd-unittest.ms.com"]
         out = self.badrequesttest(command)
         self.matchoutput(out,

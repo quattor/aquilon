@@ -46,7 +46,7 @@ class TestUpdateNetwork(TestBrokerCommand):
 
     # There should be a test_constraint_network.py one day...
     def test_900_delinuse(self):
-        net = self.net.unknown[0]
+        net = self.net["unknown0"]
         command = ["del", "network", "--ip", net.ip]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Network %s is still in use" % net.ip, command)

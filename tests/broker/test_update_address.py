@@ -75,8 +75,8 @@ class TestUpdateAddress(TestBrokerCommand):
         self.matchclean(out, "arecord15.aqd-unittest.ms.com", command)
 
     def test_120_update_ip(self):
-        old_ip = self.net.unknown[0].usable[15]
-        ip = self.net.unknown[0].usable[-1]
+        old_ip = self.net["unknown0"].usable[15]
+        ip = self.net["unknown0"].usable[-1]
         self.dsdb_expect_update("arecord15.aqd-unittest.ms.com", ip=ip)
         command = ["update", "address",
                    "--fqdn", "arecord15.aqd-unittest.ms.com", "--ip", ip]
@@ -84,15 +84,15 @@ class TestUpdateAddress(TestBrokerCommand):
         self.dsdb_verify()
 
     def test_125_verify_arecord15(self):
-        ip = self.net.unknown[0].usable[-1]
+        ip = self.net["unknown0"].usable[-1]
         command = ["show", "fqdn", "--fqdn", "arecord15.aqd-unittest.ms.com"]
         out = self.commandtest(command)
         self.matchoutput(out, "IP: %s" % ip, command)
 
     def test_129_fix_ip(self):
         # Change the IP address back not to confuse other parts of the testsuite
-        old_ip = self.net.unknown[0].usable[-1]
-        ip = self.net.unknown[0].usable[15]
+        old_ip = self.net["unknown0"].usable[-1]
+        ip = self.net["unknown0"].usable[15]
         self.dsdb_expect_update("arecord15.aqd-unittest.ms.com", ip=ip)
         command = ["update", "address",
                    "--fqdn", "arecord15.aqd-unittest.ms.com", "--ip", ip]
@@ -149,7 +149,7 @@ class TestUpdateAddress(TestBrokerCommand):
                          "records used for dynamic DHCP.", command)
 
     def test_200_ip_conflict(self):
-        ip = self.net.unknown[0].usable[14]
+        ip = self.net["unknown0"].usable[14]
         command = ["update", "address",
                    "--fqdn", "arecord15.aqd-unittest.ms.com", "--ip", ip]
         out = self.badrequesttest(command)
@@ -159,7 +159,7 @@ class TestUpdateAddress(TestBrokerCommand):
     def test_200_update_primary(self):
         command = ["update", "address",
                    "--fqdn", "unittest20.aqd-unittest.ms.com",
-                   "--ip", self.net.unknown[0].usable[-1]]
+                   "--ip", self.net["unknown0"].usable[-1]]
         out = self.badrequesttest(command)
         self.matchoutput(out, "DNS Record unittest20.aqd-unittest.ms.com is "
                          "a primary name, and its IP address cannot be "
@@ -168,7 +168,7 @@ class TestUpdateAddress(TestBrokerCommand):
     def test_200_update_used(self):
         command = ["update", "address",
                    "--fqdn", "unittest20-e1.aqd-unittest.ms.com",
-                   "--ip", self.net.unknown[0].usable[-1]]
+                   "--ip", self.net["unknown0"].usable[-1]]
         out = self.badrequesttest(command)
         self.matchoutput(out, "DNS Record unittest20-e1.aqd-unittest.ms.com is "
                          "already used by the following interfaces, and its "

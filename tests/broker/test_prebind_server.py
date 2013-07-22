@@ -109,7 +109,7 @@ class TestPrebindServer(TestBrokerCommand):
         # The IP address comes from fakebin/dsdb.d, not from the real DNS.
         self.searchoutput(out,
                           '"server_ips" = list\(\s*"10.184.155.249",\s*"%s"\s*\);' %
-                          self.net.unknown[0].usable[0],
+                          self.net["unknown0"].usable[0],
                           command)
 
 

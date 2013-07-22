@@ -32,8 +32,8 @@ class TestUpdateInterface(TestBrokerCommand):
 
     def test_100_update_ut3c5n10_eth0_mac_bad(self):
         # see testaddunittest02
-        oldmac = self.net.unknown[0].usable[0].mac
-        mac = self.net.unknown[0].usable[11].mac
+        oldmac = self.net["unknown0"].usable[0].mac
+        mac = self.net["unknown0"].usable[11].mac
         self.dsdb_expect_update(self.badhost, "eth0", mac=mac, fail=True,
                                 comments="Updated interface comments")
         command = ["update", "interface", "--interface", "eth0",
@@ -47,7 +47,7 @@ class TestUpdateInterface(TestBrokerCommand):
         self.matchoutput(out, "Interface: eth0 %s" % oldmac, command)
 
     def test_105_update_ut3c5n10_eth0_mac_good(self):
-        mac = self.net.unknown[0].usable[11].mac
+        mac = self.net["unknown0"].usable[11].mac
         self.dsdb_expect_update("unittest02.one-nyp.ms.com", "eth0", mac=mac,
                                 comments="Updated interface comments")
         self.noouttest(["update", "interface", "--interface", "eth0",
@@ -56,8 +56,8 @@ class TestUpdateInterface(TestBrokerCommand):
         self.dsdb_verify()
 
     def test_110_update_ut3c5n10_eth0_ip_bad(self):
-        oldip = self.net.unknown[0].usable[0]
-        newip = self.net.unknown[0].usable[11]
+        oldip = self.net["unknown0"].usable[0]
+        newip = self.net["unknown0"].usable[11]
         self.dsdb_expect_update(self.badhost, "eth0", newip, fail=True)
         command = ["update", "machine", "--machine", "ut3c5n10", "--ip", newip]
 
@@ -69,8 +69,8 @@ class TestUpdateInterface(TestBrokerCommand):
         self.matchoutput(out, "Primary Name: %s [%s]" % (self.badhost, oldip), command)
 
     def test_115_update_ut3c5n10_eth0_ip_good(self):
-        oldip = self.net.unknown[0].usable[0]
-        newip = self.net.unknown[0].usable[11]
+        oldip = self.net["unknown0"].usable[0]
+        newip = self.net["unknown0"].usable[11]
         self.dsdb_expect_update(self.badhost, "eth0", newip)
 
         self.noouttest(["update", "machine", "--machine", "ut3c5n10",
@@ -80,7 +80,7 @@ class TestUpdateInterface(TestBrokerCommand):
     def test_120_update_ut3c5n10_eth1(self):
         self.noouttest(["update", "interface", "--interface", "eth1",
                         "--hostname", "unittest02.one-nyp.ms.com",
-                        "--mac", self.net.unknown[0].usable[12].mac,
+                        "--mac", self.net["unknown0"].usable[12].mac,
                         "--boot", "--model", "e1000"])
 
     def test_120_update_ut3c5n10_eth2(self):
@@ -88,7 +88,7 @@ class TestUpdateInterface(TestBrokerCommand):
             "--machine", "ut3c5n10", "--boot"])
 
     def test_130_update_switch(self):
-        mac = self.net.tor_net[8].usable[0].mac
+        mac = self.net["tor_net_8"].usable[0].mac
         self.dsdb_expect_update("ut3gd1r06.aqd-unittest.ms.com", "xge49",
                                 mac=mac, comments="Some interface comments")
         command = ["update_interface", "--interface=xge49",
@@ -98,7 +98,7 @@ class TestUpdateInterface(TestBrokerCommand):
         self.dsdb_verify()
 
     def test_130_update_chassis(self):
-        mac = self.net.unknown[0].usable[24].mac
+        mac = self.net["unknown0"].usable[24].mac
         self.dsdb_expect_update("ut3c5.aqd-unittest.ms.com", "oa", mac=mac,
                                 comments="Chassis interface comments")
         command = ["update", "interface", "--chassis", "ut3c5",
@@ -145,7 +145,7 @@ class TestUpdateInterface(TestBrokerCommand):
         self.dsdb_verify()
 
     def test_200_update_bad_mac(self):
-        mac = self.net.tor_net[6].usable[0].mac
+        mac = self.net["tor_net_6"].usable[0].mac
         command = ["update", "interface", "--interface", "eth0",
                    "--machine", "ut3c5n10", "--mac", mac]
         out = self.badrequesttest(command)
@@ -243,15 +243,15 @@ class TestUpdateInterface(TestBrokerCommand):
         self.matchoutput(out, "Blade: ut3c5n10", command)
         self.matchoutput(out, "Comments: Updated interface comments", command)
         self.searchoutput(out, r"Interface: eth0 %s$" %
-                          self.net.unknown[0].usable[11].mac.lower(), command)
+                          self.net["unknown0"].usable[11].mac.lower(), command)
         self.matchoutput(out, "Provides: unittest02.one-nyp.ms.com [%s]" %
-                         self.net.unknown[0].usable[11], command)
+                         self.net["unknown0"].usable[11], command)
         self.searchoutput(out, r"Interface: eth1 %s \[boot, default_route\]" %
-                          self.net.unknown[0].usable[12].mac.lower(), command)
+                          self.net["unknown0"].usable[12].mac.lower(), command)
         # Verify that the primary name got updated
         self.matchoutput(out, "Primary Name: unittest02.one-nyp.ms.com [%s]" %
-                         self.net.unknown[0].usable[11], command)
-        self.matchclean(out, str(self.net.unknown[0].usable[0]), command)
+                         self.net["unknown0"].usable[11], command)
+        self.matchclean(out, str(self.net["unknown0"].usable[0]), command)
 
     def test_300_verify_cat_ut3c5n10_interfaces(self):
         #FIX ME: this doesn't really test anything at the moment: needs to be
@@ -262,17 +262,17 @@ class TestUpdateInterface(TestBrokerCommand):
                           r'"cards/nic" = nlist\(\s*'
                           r'"eth0", create\("hardware/nic/generic/generic_nic",\s*'
                           r'"hwaddr", "%s"\s*\),'
-                          % self.net.unknown[0].usable[11].mac,
+                          % self.net["unknown0"].usable[11].mac,
                           command)
         self.searchoutput(out,
                           r'"eth1", create\("hardware/nic/intel/e1000",\s*'
                           r'"boot", true,\s*'
                           r'"hwaddr", "%s"\s*\)\s*\);'
-                          % self.net.unknown[0].usable[12].mac,
+                          % self.net["unknown0"].usable[12].mac,
                           command)
 
     def test_300_verify_cat_unittest02_interfaces(self):
-        net = self.net.unknown[0]
+        net = self.net["unknown0"]
         eth0ip = net.usable[11]
         eth1ip = net.usable[12]
         # Use --generate as update_interface does not update the on-disk
@@ -316,7 +316,7 @@ class TestUpdateInterface(TestBrokerCommand):
         self.matchoutput(out, "Switch: ut3gd1r06", command)
         self.matchoutput(out,
                          "Interface: xge49 %s" %
-                         self.net.tor_net[8].usable[0].mac,
+                         self.net["tor_net_8"].usable[0].mac,
                          command)
         self.matchoutput(out, "Comments: Some interface comments", command)
 
@@ -325,19 +325,19 @@ class TestUpdateInterface(TestBrokerCommand):
                    "--data", "--generate"]
         out = self.commandtest(command)
         self.matchoutput(out, '"system/network/default_gateway" = "%s";' %
-                         self.net.unknown[1][2], command)
+                         self.net["unknown1"][2], command)
 
     def test_300_verify_show_fliproute(self):
         command = ["show", "host", "--hostname", "unittest25.aqd-unittest.ms.com"]
         out = self.commandtest(command)
         self.matchoutput(out, "Interface: eth0 %s [boot]" %
-                         self.net.unknown[0].usable[20].mac, command)
+                         self.net["unknown0"].usable[20].mac, command)
         self.matchoutput(out, "Interface: eth1 %s [default_route]" %
-                         self.net.unknown[0].usable[21].mac, command)
+                         self.net["unknown0"].usable[21].mac, command)
 
     def test_300_verify_chassis(self):
-        old_mac = self.net.unknown[0].usable[6].mac
-        new_mac = self.net.unknown[0].usable[24].mac
+        old_mac = self.net["unknown0"].usable[6].mac
+        new_mac = self.net["unknown0"].usable[24].mac
         command = ["show", "chassis", "--chassis", "ut3c5"]
         out = self.commandtest(command)
         self.matchoutput(out, "Interface: oa %s" % new_mac, command)
@@ -353,8 +353,8 @@ class TestUpdateInterface(TestBrokerCommand):
                           r"\s+Network Environment: internal$"
                           r"\s+Provides: ut3gd1r04-vlan220.aqd-unittest.ms.com \[%s\]$"
                           r"\s+Provides: ut3gd1r04-vlan220-hsrp.aqd-unittest.ms.com \[%s\] \(label: hsrp\)$"
-                          % (self.net.tor_net[12].usable[1],
-                             self.net.tor_net[12].usable[2]),
+                          % (self.net["tor_net_12"].usable[1],
+                             self.net["tor_net_12"].usable[2]),
                           command)
         self.matchclean(out, "vlan110", command)
 

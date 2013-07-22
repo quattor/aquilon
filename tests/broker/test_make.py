@@ -204,20 +204,20 @@ class TestMake(TestBrokerCommand):
         self.matchoutput(err, "2/2 compiled", command)
 
     def testverifyunittest20(self):
-        eth0_ip = self.net.unknown[11].usable[0]
-        eth0_broadcast = self.net.unknown[11].broadcast
-        eth0_netmask = self.net.unknown[11].netmask
-        eth0_gateway = self.net.unknown[11].gateway
+        eth0_ip = self.net["unknown11"].usable[0]
+        eth0_broadcast = self.net["unknown11"].broadcast
+        eth0_netmask = self.net["unknown11"].netmask
+        eth0_gateway = self.net["unknown11"].gateway
 
-        eth1_ip = self.net.unknown[12].usable[0]
-        eth1_broadcast = self.net.unknown[12].broadcast
-        eth1_netmask = self.net.unknown[12].netmask
-        eth1_gateway = self.net.unknown[12].gateway
-        eth1_1_ip = self.net.unknown[12].usable[3]
+        eth1_ip = self.net["unknown12"].usable[0]
+        eth1_broadcast = self.net["unknown12"].broadcast
+        eth1_netmask = self.net["unknown12"].netmask
+        eth1_gateway = self.net["unknown12"].gateway
+        eth1_1_ip = self.net["unknown12"].usable[3]
 
-        hostname_ip = self.net.unknown[13].usable[2]
-        zebra2_ip = self.net.unknown[13].usable[1]
-        zebra3_ip = self.net.unknown[13].usable[0]
+        hostname_ip = self.net["unknown13"].usable[2]
+        zebra2_ip = self.net["unknown13"].usable[1]
+        zebra3_ip = self.net["unknown13"].usable[0]
 
         command = ["cat", "--hostname", "unittest20.aqd-unittest.ms.com",
                    "--data"]
@@ -241,10 +241,10 @@ class TestMake(TestBrokerCommand):
                           r'"system/network/routers" = nlist\(\s*'
                           r'"eth0", list\(\s*"%s",\s*"%s"\s*\),\s*'
                           r'"eth1", list\(\s*"%s",\s*"%s"\s*\)\s*'
-                          r'\);' % (self.net.unknown[11][1],
-                                    self.net.unknown[11][2],
-                                    self.net.unknown[12][1],
-                                    self.net.unknown[12][2]),
+                          r'\);' % (self.net["unknown11"][1],
+                                    self.net["unknown11"][2],
+                                    self.net["unknown12"][1],
+                                    self.net["unknown12"][2]),
                           command)
         self.searchoutput(out,
                           r'"eth0", nlist\(\s*'
@@ -327,7 +327,7 @@ class TestMake(TestBrokerCommand):
         self.matchoutput(err, "2/2 compiled", command)
 
     def testverifyunittest21(self):
-        net = self.net.unknown[11]
+        net = self.net["unknown11"]
         command = ["cat", "--hostname", "unittest21.aqd-unittest.ms.com",
                    "--data"]
         out = self.commandtest(command)
@@ -349,7 +349,7 @@ class TestMake(TestBrokerCommand):
         command = ["cat", "--hostname", "unittest23.aqd-unittest.ms.com",
                    "--data"]
         out = self.commandtest(command)
-        net = self.net.vpls[0]
+        net = self.net["vpls0"]
         ip = net.usable[1]
         router = net[1]
         self.searchoutput(out,
@@ -381,7 +381,7 @@ class TestMake(TestBrokerCommand):
         command = ["cat", "--hostname", "unittest24.aqd-unittest.ms.com",
                    "--data"]
         out = self.commandtest(command)
-        net = self.net.vpls[0]
+        net = self.net["vpls0"]
         ip = net.usable[2]
         router = net[2]
         self.searchoutput(out,
@@ -413,7 +413,7 @@ class TestMake(TestBrokerCommand):
         command = ["cat", "--hostname", "unittest25.aqd-unittest.ms.com",
                    "--data"]
         out = self.commandtest(command)
-        net = self.net.unknown[1]
+        net = self.net["unknown1"]
         ip = net[4]
         router = net[2]
         self.searchoutput(out,
@@ -429,7 +429,7 @@ class TestMake(TestBrokerCommand):
                           (net.broadcast, router, ip, net.netmask),
                           command)
         self.matchoutput(out, '"system/network/default_gateway" = "%s";' %
-                         self.net.unknown[0].gateway, command)
+                         self.net["unknown0"].gateway, command)
 
     def testmakeaurora(self):
         command = ["make", "--hostname", self.aurora_with_node + ".ms.com"]
