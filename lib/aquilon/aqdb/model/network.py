@@ -41,37 +41,31 @@ class NetworkProperties(object):
     """ Container class for attributes derived from the network's type """
 
     @staticmethod
-    def get_str(config, network_type, option, default=None):
-        section = "network_" + network_type
-        if config.has_option(section, option):
-            return config.get(section, option)
-        else:
-            default_section = "network_" + config.get("broker",
-                                                      "default_network_type")
-            if config.has_option(default_section, option):
-                return config.get(default_section, option)
-            else:
-                return default
+    def getopt(config, network_type, option, default=None, method=None):
+        # Helper function to look up a network property with automatic fallback
+        # to the default network type or a hardcoded value
+        if not method:
+            method = config.get
 
-    @staticmethod
-    def get_int(config, network_type, option, default=None):
         section = "network_" + network_type
         if config.has_option(section, option):
-            return config.getint(section, option)
+            return method(section, option)
         else:
             default_section = "network_" + config.get("broker",
                                                       "default_network_type")
             if config.has_option(default_section, option):
-                return config.getint(default_section, option)
+                return method(default_section, option)
             else:
                 return default
 
     def __init__(self, config, network_type):
-        self.default_gateway_offset = self.get_int(config, network_type,
-                                                   "default_gateway_offset", 1)
-        self.first_usable_offset = self.get_int(config, network_type,
-                                                "first_usable_offset", 2)
-        reserved_str = self.get_str(config, network_type, "reserved_offsets")
+        self.default_gateway_offset = self.getopt(config, network_type,
+                                                  "default_gateway_offset", 1,
+                                                  config.getint)
+        self.first_usable_offset = self.getopt(config, network_type,
+                                               "first_usable_offset", 2,
+                                               config.getint)
+        reserved_str = self.getopt(config, network_type, "reserved_offsets")
         self.reserved_offsets = [int(idx.strip()) for idx in
                                  reserved_str.split(",")]
 
