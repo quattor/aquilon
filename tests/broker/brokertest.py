@@ -38,9 +38,26 @@ DSDB_ISSUED_CMDS_FILE = "issued_dsdb_cmds"
 
 class TestBrokerCommand(unittest.TestCase):
 
-    def setUp(self):
-        self.config = Config()
-        self.net = DummyNetworks(self.config)
+    config = None
+    scratchdir = None
+    dsdb_coverage_dir = None
+    sandboxdir = None
+    user = None
+
+    @classmethod
+    def setUpClass(cls):
+        cls.config = Config()
+        cls.scratchdir = cls.config.get("unittest", "scratchdir")
+        cls.dsdb_coverage_dir = os.path.join(cls.scratchdir, "dsdb_coverage")
+
+        dirs = [cls.scratchdir, cls.dsdb_coverage_dir]
+        for dir in dirs:
+            if not os.path.exists(dir):
+                os.makedirs(dir)
+
+        cls.user = cls.config.get("broker", "user")
+        cls.sandboxdir = os.path.join(cls.config.get("broker", "templatesdir"),
+                                      cls.user)
 
         # Need to import protocol buffers after we have the config
         # object all squared away and we can set the sys.path
@@ -48,7 +65,7 @@ class TestBrokerCommand(unittest.TestCase):
         # It would be simpler just to change sys.path in runtests.py,
         # but this allows for each test to be run individually (without
         # the runtests.py wrapper).
-        protodir = self.config.get("protocols", "directory")
+        protodir = cls.config.get("protocols", "directory")
         if protodir not in sys.path:
             sys.path.append(protodir)
         for m in ['aqdsystems_pb2', 'aqdnetworks_pb2', 'aqdservices_pb2',
@@ -56,18 +73,11 @@ class TestBrokerCommand(unittest.TestCase):
                   'aqdparamdefinitions_pb2', 'aqdparameters_pb2']:
             globals()[m] = __import__(m)
 
-        self.user = self.config.get("broker", "user")
-        self.sandboxdir = os.path.join(self.config.get("broker",
-                                                       "templatesdir"),
-                                       self.user)
+    def setUp(self):
+        self.net = DummyNetworks(self.config)
+
         self.template_extension = self.config.get("panc", "template_extension")
 
-        # This method is cumbersome.  Should probably develop something
-        # like unittest.conf.defaults.
-        if self.config.has_option("unittest", "scratchdir"):
-            self.scratchdir = self.config.get("unittest", "scratchdir")
-            if not os.path.exists(self.scratchdir):
-                os.makedirs(self.scratchdir)
         if self.config.has_option("unittest", "aurora_with_node"):
             self.aurora_with_node = self.config.get("unittest",
                     "aurora_with_node")
@@ -81,11 +91,9 @@ class TestBrokerCommand(unittest.TestCase):
         self.gzip_profiles = self.config.getboolean("panc", "gzip_output")
         self.profile_suffix = ".xml.gz" if self.gzip_profiles else ".xml"
 
-        dsdb_coverage_dir = os.path.join(self.config.get("unittest", "scratchdir"),
-                                         "dsdb_coverage")
         for name in [DSDB_EXPECT_SUCCESS_FILE, DSDB_EXPECT_FAILURE_FILE,
                      DSDB_ISSUED_CMDS_FILE, DSDB_EXPECT_FAILURE_ERROR]:
-            path = os.path.join(dsdb_coverage_dir, name)
+            path = os.path.join(self.dsdb_coverage_dir, name)
             try:
                 os.remove(path)
             except OSError:
@@ -448,9 +456,10 @@ class TestBrokerCommand(unittest.TestCase):
         return self.parse_proto_msg(aqdparameters_pb2.ParameterList,
                                     'parameters', msg, expect)
 
-    def gitenv(self, env=None):
+    @classmethod
+    def gitenv(cls, env=None):
         """Configure a known sanitised environment"""
-        git_path = self.config.get("broker", "git_path")
+        git_path = cls.config.get("broker", "git_path")
         # The "publish" test abuses gitenv(), and it needs the Python interpreter
         # in the path, because it runs the template unit tests which in turn
         # call the aq command
@@ -554,14 +563,12 @@ class TestBrokerCommand(unittest.TestCase):
         return contents
 
     def dsdb_expect(self, command, fail=False, errstr=""):
-        dsdb_coverage_dir = os.path.join(self.config.get("unittest", "scratchdir"),
-                                         "dsdb_coverage")
         if fail:
             filename = DSDB_EXPECT_FAILURE_FILE
         else:
             filename = DSDB_EXPECT_SUCCESS_FILE
 
-        expected_name = os.path.join(dsdb_coverage_dir, filename)
+        expected_name = os.path.join(self.dsdb_coverage_dir, filename)
         with open(expected_name, "a") as fp:
             if isinstance(command, list):
                 fp.write(" ".join([str(cmd) for cmd in command]))
@@ -570,7 +577,7 @@ class TestBrokerCommand(unittest.TestCase):
             fp.write("\n")
         if fail and errstr:
             errfile = DSDB_EXPECT_FAILURE_ERROR
-            expected_name = os.path.join(dsdb_coverage_dir, errfile)
+            expected_name = os.path.join(self.dsdb_coverage_dir, errfile)
             with open(expected_name, "a") as fp:
                 fp.write(errstr)
                 fp.write("\n")
@@ -642,15 +649,13 @@ class TestBrokerCommand(unittest.TestCase):
         self.dsdb_expect(" ".join(command), fail=fail, errstr=errstr)
 
     def dsdb_verify(self, empty=False):
-        dsdb_coverage_dir = os.path.join(self.config.get("unittest", "scratchdir"),
-                                         "dsdb_coverage")
-        fail_expected_name = os.path.join(dsdb_coverage_dir,
+        fail_expected_name = os.path.join(self.dsdb_coverage_dir,
                                           DSDB_EXPECT_FAILURE_FILE)
-        issued_name = os.path.join(dsdb_coverage_dir, DSDB_ISSUED_CMDS_FILE)
+        issued_name = os.path.join(self.dsdb_coverage_dir, DSDB_ISSUED_CMDS_FILE)
 
         expected = {}
         for filename in [DSDB_EXPECT_SUCCESS_FILE, DSDB_EXPECT_FAILURE_FILE]:
-            expected_name = os.path.join(dsdb_coverage_dir, filename)
+            expected_name = os.path.join(self.dsdb_coverage_dir, filename)
             try:
                 with open(expected_name, "r") as fp:
                     for line in fp:

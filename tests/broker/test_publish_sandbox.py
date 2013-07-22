@@ -30,15 +30,15 @@ from brokertest import TestBrokerCommand
 
 class TestPublishSandbox(TestBrokerCommand):
 
-    def test_001(self):
-        """Run "make clean" on templates before anything else.
+    @classmethod
+    def setUpClass(cls):
+        super(TestPublishSandbox, cls).setUpClass()
 
-        Replace with setupClass when we move to Py2.7
-        """
-        testdir = os.path.join(self.sandboxdir, "changetest1", "t")
+        # Run "make clean" on templates before anything else.
+        testdir = os.path.join(cls.sandboxdir, "changetest1", "t")
         if os.path.exists(os.path.join(testdir, "Makefile")):
             p = Popen(('/usr/bin/make', 'clean'),
-                      cwd=testdir, env=self.gitenv(env={'PATH': '/bin:/usr/bin'}),
+                      cwd=testdir, env=cls.gitenv(env={'PATH': '/bin:/usr/bin'}),
                       stdout=PIPE, stderr=PIPE)
             (out, err) = p.communicate()
             self.assertEqual(p.returncode, 0,
