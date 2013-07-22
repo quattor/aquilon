@@ -91,7 +91,9 @@ class TestSearchNetwork(TestBrokerCommand):
     def testlocation(self):
         command = ["search_network", "--building=ut"]
         out = self.commandtest(command)
-        for net in self.net.all:
+        for net in self.net:
+            if not net.autocreate:
+                continue
             self.matchoutput(out, str(net), command)
 
     def testfullinfo(self):
@@ -133,7 +135,9 @@ class TestSearchNetwork(TestBrokerCommand):
         out = self.commandtest(command)
         expect = [self.net["dyndhcp0"], self.net["dyndhcp1"],
                   self.net["dyndhcp3"]]
-        for net in self.net.all:
+        for net in self.net:
+            if not net.autocreate:
+                continue
             if net in expect:
                 self.matchoutput(out, str(net), command)
             else:

@@ -29,7 +29,9 @@ from brokertest import TestBrokerCommand
 class TestDelNetwork(TestBrokerCommand):
 
     def testdelnetwork(self):
-        for network in self.net.all:
+        for network in self.net:
+            if not network.autocreate:
+                continue
             command = ["del_network", "--ip=%s" % network.ip]
             self.noouttest(command)
 
@@ -43,7 +45,9 @@ class TestDelNetwork(TestBrokerCommand):
         self.noouttest(["del", "network", "--ip", ip])
 
     def testshownetworkall(self):
-        for network in self.net.all:
+        for network in self.net:
+            if not network.autocreate:
+                continue
             command = "show network --ip %s --hosts" % network.ip
             out = self.notfoundtest(command.split(" "))
 

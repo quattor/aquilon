@@ -29,7 +29,10 @@ from brokertest import TestBrokerCommand
 class TestAddNetwork(TestBrokerCommand):
 
     def testaddnetwork(self):
-        for network in self.net.all:
+        for network in self.net:
+            if not network.autocreate:
+                continue
+
             command = ["add_network", "--network=%s" % network.ip,
                        "--ip=%s" % network.ip,
                        "--netmask=%s" % network.netmask,
@@ -179,7 +182,10 @@ class TestAddNetwork(TestBrokerCommand):
                          "Maybe you meant 10.0.0.0?", command)
 
     def testshownetwork(self):
-        for network in self.net.all:
+        for network in self.net:
+            if not network.autocreate:
+                continue
+
             command = "show network --ip %s" % network.ip
             out = self.commandtest(command.split(" "))
             self.matchoutput(out, "Network: %s" % network.ip, command)
@@ -204,13 +210,17 @@ class TestAddNetwork(TestBrokerCommand):
     def testshownetworkbuilding(self):
         command = "show_network --building ut"
         out = self.commandtest(command.split(" "))
-        for network in self.net.all:
+        for network in self.net:
+            if not network.autocreate:
+                continue
             self.matchoutput(out, str(network.ip), command)
 
     def testshownetworkcsv(self):
         command = "show_network --building ut --format csv"
         out = self.commandtest(command.split(" "))
-        for network in self.net.all:
+        for network in self.net:
+            if not network.autocreate:
+                continue
             self.matchoutput(out, "%s,%s,%s,ut.ny.na,us,a,%s,\n" % (
                 network.ip, network.ip, network.netmask, network.nettype),
                 command)
