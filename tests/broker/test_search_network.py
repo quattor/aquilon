@@ -46,10 +46,11 @@ class TestSearchNetwork(TestBrokerCommand):
     def testtype(self):
         command = ["search_network", "--type=tor_net"]
         out = self.commandtest(command)
-        for tor_net in self.net.tor_net:
-            self.matchoutput(out, str(tor_net), command)
-        for tor_net2 in self.net.tor_net2:
-            self.matchclean(out, str(tor_net2), command)
+        for net in self.net:
+            if net.nettype == "tor_net":
+                self.matchoutput(out, str(net), command)
+            else:
+                self.matchclean(out, str(net), command)
 
     def testphysicalmachine(self):
         # unittest15.aqd-unittest.ms.com
@@ -94,11 +95,11 @@ class TestSearchNetwork(TestBrokerCommand):
             self.matchoutput(out, str(net), command)
 
     def testfullinfo(self):
-        command = ["search_network", "--ip=%s" % self.net.tor_net[0].ip,
-                   "--fullinfo"]
+        net = self.net.tor_net[0]
+        command = ["search_network", "--ip=%s" % net.ip, "--fullinfo"]
         out = self.commandtest(command)
-        self.matchoutput(out, "Network: %s" % self.net.tor_net[0].ip, command)
-        self.matchoutput(out, "IP: %s" % self.net.tor_net[0].ip, command)
+        self.matchoutput(out, "Network: %s" % net.ip, command)
+        self.matchoutput(out, "IP: %s" % net.ip, command)
 
     def testnoenv(self):
         # Same IP defined differently in different environments

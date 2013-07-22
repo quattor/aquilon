@@ -24,15 +24,15 @@ if __name__ == '__main__':
     utils.import_depends()
 
 from brokertest import TestBrokerCommand
-from test_add_ns_record import NAME, DOMAIN, NET_OFFSET
+from test_add_ns_record import NAME, DOMAIN
 
 
 class TestDelNSRecord(TestBrokerCommand):
 
     def setUp(self, *args, **kwargs):
         super(TestDelNSRecord, self).setUp(*args, **kwargs)
-        self.NETWORK = self.net.unknown[NET_OFFSET]
-        self.IP = str(self.net.unknown[NET_OFFSET].usable[0])
+        self.NETWORK = self.net["unknown10"]
+        self.IP = str(self.net["unknown10"].usable[0])
 
     def test_100_delete_ns_record(self):
         cmd = "del ns_record --fqdn %s --dns_domain %s" % (NAME, DOMAIN)

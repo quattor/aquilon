@@ -268,17 +268,21 @@ class TestAdd10GigHardware(TestBrokerCommand):
         # used for --prefix testing.
         mac_prefix = "00:50:56:01:20"
         mac_idx = 60
+        nets = (self.net["unknown2"], self.net["unknown3"],
+                self.net["unknown4"], self.net["unknown5"],
+                self.net["unknown6"], self.net["unknown7"],
+                self.net["unknown8"], self.net["unknown9"])
         for i in range(0, 8) + range(9, 16):
             machine = "evm%d" % (10 + i)
             hostname = "ivirt%d.aqd-unittest.ms.com" % (1 + i)
 
             if i < 9:
-                net_index = (i % 4) + 2
+                net_index = (i % 4)
                 usable_index = i / 4
             else:
-                net_index = ((i - 9) % 4) + 6
+                net_index = ((i - 9) % 4) + 4
                 usable_index = (i - 9) / 4
-            ip = self.net.unknown[net_index].usable[usable_index]
+            ip = nets[net_index].usable[usable_index]
 
             # FIXME: the MAC check is fragile...
             self.dsdb_expect_add(hostname, ip, "eth0",
@@ -318,24 +322,32 @@ class TestAdd10GigHardware(TestBrokerCommand):
     # This is verifying test_700, so logic applies for determing
     # the IP addresses autoIP will give out
     def test_800_verify_add_host(self):
+        nets = (self.net["unknown2"], self.net["unknown3"],
+                self.net["unknown4"], self.net["unknown5"],
+                self.net["unknown6"], self.net["unknown7"],
+                self.net["unknown8"], self.net["unknown9"])
         for i in range(0, 8) + range(9, 17):
             if i < 9:
-                net_index = (i % 4) + 2
+                net_index = (i % 4)
                 usable_index = i / 4
             else:
-                net_index = ((i - 9) % 4) + 6
+                net_index = ((i - 9) % 4) + 4
                 usable_index = (i - 9) / 4
             hostname = "ivirt%d.aqd-unittest.ms.com" % (i + 1)
-            ip = self.net.unknown[net_index].usable[usable_index]
+            ip = nets[net_index].usable[usable_index]
             command = "search host --hostname %s --ip %s" % (hostname, ip)
             out = self.commandtest(command.split(" "))
             self.matchoutput(out, hostname, command)
 
     def test_810_verify_audit(self):
+        nets = (self.net["unknown2"], self.net["unknown3"],
+                self.net["unknown4"], self.net["unknown5"],
+                self.net["unknown6"], self.net["unknown7"],
+                self.net["unknown8"], self.net["unknown9"])
         i = 16
-        net_index = ((i - 9) % 4) + 6
+        net_index = ((i - 9) % 4) + 4
         usable_index = (i - 9) / 4
-        ip = self.net.unknown[net_index].usable[usable_index]
+        ip = nets[net_index].usable[usable_index]
         command = ["search", "audit", "--keyword",
                    "ivirt%d.aqd-unittest.ms.com" % (i + 1)]
         out = self.commandtest(command)

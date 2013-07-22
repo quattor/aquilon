@@ -69,8 +69,8 @@ class TestAddRouter(TestBrokerCommand):
                          command)
 
     def testaddzebrarouters(self):
-        for net_idx in range(0, 2):
-            net = self.net.unknown[11 + net_idx]
+        for net_idx, net in enumerate((self.net["unknown11"],
+                                       self.net["unknown12"])):
             for rtr_idx in range(0, 2):
                 rtr = "ut3gd1r0%d-v%d-hsrp.aqd-unittest.ms.com" % (net_idx + 1,
                                                                    rtr_idx + 109)

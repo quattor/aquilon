@@ -718,11 +718,12 @@ class TestAddInterface(TestBrokerCommand):
 
     def testaddharackinterfaces(self):
         for port in range(1, 25):
-            for (template, netoff) in [('ut13s03p%d', 3), ('np13s03p%d', 4)]:
+            for (template, net) in [('ut13s03p%d', self.net["tor_net2_3"]),
+                                    ('np13s03p%d', self.net["tor_net2_4"])]:
                 machine = template % port
                 self.noouttest(["add", "interface", "--interface", "eth0",
                                 "--machine", machine,
-                                "--mac", self.net.tor_net2[netoff].usable[port].mac])
+                                "--mac", net.usable[port].mac])
 
     def testaddut3c5n5(self):
         self.noouttest(["add", "interface", "--interface", "eth0",

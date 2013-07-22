@@ -78,7 +78,7 @@ class TestAddNetwork(TestBrokerCommand):
 
     def testaddnetworkdup(self):
         # Old name, new address
-        net = self.net.all[0]
+        net = self.net["unknown0"]
         command = ["add", "network", "--network", net.ip,
                    "--ip", "192.168.10.0", "--netmask", "255.255.255.0",
                    "--building", "ut", "--type", net.nettype]
@@ -88,7 +88,7 @@ class TestAddNetwork(TestBrokerCommand):
 
     def testaddsubnet(self):
         # Add a subnet of an existing network
-        net = self.net.all[0]
+        net = self.net["unknown0"]
         subnet = net.subnet()[1]
         command = ["add", "network", "--network", "subnet-test",
                    "--ip", subnet.ip, "--netmask", subnet.netmask,
