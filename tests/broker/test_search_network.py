@@ -96,7 +96,7 @@ class TestSearchNetwork(TestBrokerCommand):
             if ((net.loc_type == "building" and
                  net.loc_name == "ut") or
                 (net.loc_type == "bunker" and
-                 net.loc_name == "utbunker2")):
+                 net.loc_name == "bucket2.ut")):
                 self.matchoutput(out, str(net), command)
             else:
                 self.matchclean(out, str(net.ip), command)

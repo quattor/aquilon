@@ -215,7 +215,7 @@ class TestAddNetwork(TestBrokerCommand):
             if ((network.loc_type == "building" and
                  network.loc_name == "ut") or
                 (network.loc_type == "bunker" and
-                 network.loc_name == "utbunker2")):
+                 network.loc_name == "bucket2.ut")):
                 self.matchoutput(out, str(network.ip), command)
             else:
                 self.matchclean(out, str(network.ip), command)

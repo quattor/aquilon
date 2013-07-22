@@ -62,7 +62,7 @@ class TestAddRack(TestBrokerCommand):
         self.noouttest(command.split(" "))
 
     def testaddut9(self):
-        command = "add rack --rackid 9 --bunker utbunker2 --row g --column 3"
+        command = "add rack --rackid 9 --bunker bucket2.ut --row g --column 3"
         self.noouttest(command.split(" "))
 
     def testverifyut9(self):
@@ -71,7 +71,7 @@ class TestAddRack(TestBrokerCommand):
         self.matchoutput(out,
                          "Location Parents: [Organization ms, Hub ny, "
                          "Continent na, Country us, Campus ny, City ny, "
-                         "Building ut, Room utroom2, Bunker utbunker2]",
+                         "Building ut, Room utroom2, Bunker bucket2.ut]",
                          command)
 
     def testaddut10(self):

@@ -84,7 +84,7 @@ class TestUpdateRack(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "rack,ut3,room,utroom1,b,3", command)
         self.matchoutput(out, "rack,ut8,building,ut,g,8", command)
-        self.matchoutput(out, "rack,ut9,bunker,utbunker2,h,9", command)
+        self.matchoutput(out, "rack,ut9,bunker,bucket2.ut,h,9", command)
         self.matchoutput(out, "rack,np997,building,np,xx,77", command)
         self.matchoutput(out, "rack,np998,building,np,vv,66", command)
         self.matchoutput(out, "rack,np999,building,np,zz,a", command)
@@ -110,7 +110,7 @@ class TestUpdateRack(TestBrokerCommand):
         self.matchoutput(out, '"rack/row" = "h";', command)
         self.matchoutput(out, '"rack/column" = "9";', command)
         self.matchoutput(out, '"rack/room" = "utroom2";', command)
-        self.matchoutput(out, '"sysloc/bunker" = "utbunker2";', command)
+        self.matchoutput(out, '"sysloc/bunker" = "bucket2.ut";', command)
 
     def test_100_updateroom(self):
         command = ['update_rack', '--rack=ut8', '--room=utroom1']
@@ -135,7 +135,7 @@ class TestUpdateRack(TestBrokerCommand):
                           command)
 
     def test_140_updatebunker(self):
-        command = ['update_rack', '--rack=ut8', '--bunker=utbunker2']
+        command = ['update_rack', '--rack=ut8', '--bunker=bucket2.ut']
         self.noouttest(command)
 
     def test_145_verifybunker(self):
@@ -143,7 +143,7 @@ class TestUpdateRack(TestBrokerCommand):
         out = self.commandtest(command)
         self.searchoutput(out,
                           r'Location Parents: \[.*Building ut, '
-                          r'Room utroom2, Bunker utbunker2\]',
+                          r'Room utroom2, Bunker bucket2.ut\]',
                           command)
 
     def test_150_clearroom(self):
