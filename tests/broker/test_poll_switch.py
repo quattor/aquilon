@@ -18,7 +18,6 @@
 """Module for testing the poll switch command."""
 
 import re
-import unittest
 from time import sleep
 import socket
 
@@ -26,6 +25,7 @@ if __name__ == "__main__":
     import utils
     utils.import_depends()
 
+import unittest2 as unittest
 from brokertest import TestBrokerCommand
 
 

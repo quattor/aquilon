@@ -17,14 +17,13 @@
 # limitations under the License.
 """Module for testing the add intervention command."""
 
-import unittest
+from datetime import datetime, timedelta
 
 if __name__ == "__main__":
     import utils
     utils.import_depends()
 
-from datetime import datetime, timedelta
-
+import unittest2 as unittest
 from brokertest import TestBrokerCommand
 
 when = datetime.utcnow().replace(microsecond=0) + timedelta(days=1)

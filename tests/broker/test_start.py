@@ -19,7 +19,6 @@
 
 import os
 import sys
-import unittest
 from tempfile import mkdtemp
 from subprocess import Popen, PIPE
 
@@ -27,6 +26,7 @@ if __name__ == "__main__":
     import utils
     utils.import_depends()
 
+import unittest2 as unittest
 from aquilon.config import Config
 
 

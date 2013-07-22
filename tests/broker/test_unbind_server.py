@@ -17,12 +17,11 @@
 # limitations under the License.
 """Module for testing the unbind server command."""
 
-import unittest
-
 if __name__ == "__main__":
     import utils
     utils.import_depends()
 
+import unittest2 as unittest
 from brokertest import TestBrokerCommand
 
 SRV_MSG = "WARNING: Server %s, is the last server bound to Service %s which still has clients"

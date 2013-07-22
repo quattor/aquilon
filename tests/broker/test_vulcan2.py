@@ -18,13 +18,13 @@
 """Module for testing the vulcan2 related commands."""
 
 import os
-import unittest
 from datetime import datetime
 
 if __name__ == "__main__":
     import utils
     utils.import_depends()
 
+import unittest2 as unittest
 from brokertest import TestBrokerCommand
 from notificationtest import VerifyNotificationsMixin
 

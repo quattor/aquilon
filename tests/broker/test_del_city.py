@@ -17,14 +17,13 @@
 # limitations under the License.
 """Module for testing the del city command."""
 
-
 import os
-import unittest
 
 if __name__ == "__main__":
     import utils
     utils.import_depends()
 
+import unittest2 as unittest
 from brokertest import TestBrokerCommand
 
 

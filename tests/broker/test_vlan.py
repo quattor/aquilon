@@ -17,7 +17,6 @@
 # limitations under the License.
 """Module for testing the add switch command."""
 
-import unittest
 import os
 import socket
 
@@ -25,6 +24,7 @@ if __name__ == "__main__":
     import utils
     utils.import_depends()
 
+import unittest2 as unittest
 from brokertest import TestBrokerCommand
 
 SW_HOSTNAME = "utpgsw0.aqd-unittest.ms.com"

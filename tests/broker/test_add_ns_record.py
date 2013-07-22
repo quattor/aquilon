@@ -17,12 +17,11 @@
 # limitations under the License.
 """Module for testing the add/show dns_record command(s)."""
 
-import unittest
-
 if __name__ == '__main__':
     import utils
     utils.import_depends()
 
+import unittest2 as unittest
 from brokertest import TestBrokerCommand
 
 DOMAIN = 'aqd-unittest.ms.com'

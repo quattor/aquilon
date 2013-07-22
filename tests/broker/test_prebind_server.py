@@ -18,14 +18,13 @@
 """ This is needed to make sure that a server is bound to the aqd service
     before make aquilon runs."""
 
-
 import socket
-import unittest
 
 if __name__ == "__main__":
     import utils
     utils.import_depends()
 
+import unittest2 as unittest
 from brokertest import TestBrokerCommand
 
 

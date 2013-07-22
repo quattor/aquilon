@@ -18,13 +18,13 @@
 """Module for testing the get domain command."""
 
 import os
-import unittest
 from subprocess import Popen
 
 if __name__ == "__main__":
     import utils
     utils.import_depends()
 
+import unittest2 as unittest
 from brokertest import TestBrokerCommand
 
 

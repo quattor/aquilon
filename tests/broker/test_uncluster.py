@@ -17,12 +17,11 @@
 # limitations under the License.
 """Module for testing the uncluster command."""
 
-import unittest
-
 if __name__ == "__main__":
-    from broker import utils
+    import utils
     utils.import_depends()
 
+import unittest2 as unittest
 from brokertest import TestBrokerCommand
 
 

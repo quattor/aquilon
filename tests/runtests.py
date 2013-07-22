@@ -21,10 +21,10 @@
 import os
 import re
 import sys
-import unittest
 from subprocess import Popen
 
 import depends  # pylint: disable=W0611
+import unittest2 as unittest
 
 import argparse
 

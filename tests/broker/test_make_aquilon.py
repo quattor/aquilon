@@ -19,13 +19,13 @@
 
 import os
 import re
-import unittest
 from datetime import datetime
 
 if __name__ == "__main__":
     import utils
     utils.import_depends()
 
+import unittest2 as unittest
 from brokertest import TestBrokerCommand
 from notificationtest import VerifyNotificationsMixin
 
