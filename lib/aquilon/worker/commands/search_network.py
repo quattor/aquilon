@@ -36,7 +36,7 @@ class CommandSearchNetwork(BrokerCommand):
 
     def render(self, session, network, network_environment, ip, type, side,
                machine, fqdn, cluster, pg, has_dynamic_ranges, fullinfo,
-               **arguments):
+               exact_location, **arguments):
         """Return a network matching the parameters.
 
         Some of the search terms can only return a unique network.  For
@@ -110,7 +110,7 @@ class CommandSearchNetwork(BrokerCommand):
             q = q.reset_joinpoint()
         dblocation = get_location(session, **arguments)
         if dblocation:
-            if arguments.get('exact_location'):
+            if exact_location:
                 q = q.filter_by(location=dblocation)
             else:
                 childids = dblocation.offspring_ids()
