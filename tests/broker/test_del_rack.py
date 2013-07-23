@@ -27,88 +27,90 @@ from brokertest import TestBrokerCommand
 
 class TestDelRack(TestBrokerCommand):
 
-    def testdelut3(self):
+    def test_100_del_ut3(self):
         command = "del rack --rack ut3"
         self.noouttest(command.split(" "))
 
-    def testverifydelut3(self):
-        command = "show rack --rack ut3"
-        self.notfoundtest(command.split(" "))
-
-    def testdelnp3(self):
+    def test_100_del_np3(self):
         command = "del rack --rack np3"
         self.noouttest(command.split(" "))
 
-    def testdelut4(self):
+    def test_100_del_ut4(self):
         command = "del rack --rack ut4"
         self.noouttest(command.split(" "))
 
-    def testdelnp997(self):
+    def test_100_del_np997(self):
         command = "del rack --rack np997"
         self.noouttest(command.split(" "))
 
-    def testverifydelnp997(self):
-        command = "show rack --rack np997"
-        self.notfoundtest(command.split(" "))
-
-    def testdelnp998(self):
+    def test_100_del_np998(self):
         command = "del rack --rack np998"
         self.noouttest(command.split(" "))
 
-    def testverifydelnp998(self):
-        command = "show rack --rack np998"
-        self.notfoundtest(command.split(" "))
-
-    def testdelnp999(self):
+    def test_100_del_np999(self):
         command = "del rack --rack np999"
         self.noouttest(command.split(" "))
 
-    def testverifydelnp999(self):
-        command = "show rack --rack np999"
-        self.notfoundtest(command.split(" "))
-
-    # FIXME: Maybe del_switch should remove the rack if it is
-    # otherwise empty.
-    def testdelut8(self):
+    def test_100_del_ut8(self):
         command = "del rack --rack ut8"
         self.noouttest(command.split(" "))
 
-    def testverifydelut8(self):
-        command = "show rack --rack ut8"
-        self.notfoundtest(command.split(" "))
-
-    def testdelut9(self):
-        command = "del rack --rack ut9"
-        self.noouttest(command.split(" "))
-
-    def testverifydelut9(self):
-        command = "show rack --rack ut9"
-        self.notfoundtest(command.split(" "))
-
-    def testdelcards(self):
+    def test_100_del_cards(self):
         command = "del rack --rack cards1"
         self.noouttest(command.split(" "))
 
-    def testverifyvards(self):
+    def test_110_add_ut9_net(self):
+        self.net.allocate_network(self, "ut9_net", 24, "unknown", "rack", "ut9",
+                                  comments="Made-up network")
+
+    def test_111_del_ut9_fail(self):
+        command = "del rack --rack ut9"
+        err = self.badrequesttest(command.split(" "))
+        self.matchoutput(err,
+                         "Bad Request: Could not delete rack ut9, networks "
+                         "were found using this location.",
+                         command)
+
+    def test_112_cleanup_ut9_net(self):
+        self.net.dispose_network(self, "ut9_net")
+
+    def test_120_del_ut9(self):
+        command = "del rack --rack ut9"
+        self.noouttest(command.split(" "))
+
+    def test_200_del_ut9_again(self):
+        command = ["del_rack", "--rack", "ut9"]
+        self.notfoundtest(command)
+
+    def test_200_del_notexist(self):
+        command = ["del_rack", "--rack", "rack-does-not-exist"]
+        out = self.notfoundtest(command)
+        self.matchoutput(out, "Rack rack-does-not-exist not found.", command)
+
+    def test_300_verify_ut3(self):
+        command = "show rack --rack ut3"
+        self.notfoundtest(command.split(" "))
+
+    def test_300_verify_ut9(self):
+        command = "show rack --rack ut9"
+        self.notfoundtest(command.split(" "))
+
+    def test_300_verify_cards(self):
         command = "show rack --rack cards1"
         self.notfoundtest(command.split(" "))
 
-    def testdelracknetwork(self):
-        test_rack = "ut9"
-
-        self.net.allocate_network(self, "ut9_net", 24, "unknown",
-                                  "rack", test_rack,
-                                  comments="Made-up network")
-
-        # try delete rack
-        command = "del rack --rack %s" % test_rack
-        err = self.badrequesttest(command.split(" "))
-        self.matchoutput(err,
-                         "Bad Request: Could not delete rack %s, networks "
-                         "were found using this location." % test_rack,
-                         command)
-
-        self.net.dispose_network(self, "ut9_net")
+    def test_300_show_all(self):
+        command = ["show_rack", "--all"]
+        out = self.commandtest(command)
+        self.matchclean(out, "ut3", command)
+        self.matchclean(out, "ut4", command)
+        self.matchclean(out, "ut8", command)
+        self.matchclean(out, "ut9", command)
+        self.matchclean(out, "np3", command)
+        self.matchclean(out, "np997", command)
+        self.matchclean(out, "np998", command)
+        self.matchclean(out, "np999", command)
+        self.matchclean(out, "cards1", command)
 
 
 if __name__ == '__main__':

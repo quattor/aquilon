@@ -30,7 +30,23 @@ from brokertest import TestBrokerCommand
 class TestDelCity(TestBrokerCommand):
     """ test delete city functionality """
 
-    def test_delex_02(self):
+    def test_100_add_ex_net(self):
+        self.net.allocate_network(self, "ex_net", 24, "unknown",
+                                  "city", "ex",
+                                  comments="Made-up network")
+
+    def test_101_del_ex_fail(self):
+        command = "del_city --city ex"
+        err = self.badrequesttest(command.split(" "))
+        self.matchoutput(err,
+                         "Bad Request: Could not delete city ex, networks "
+                         "were found using this location.",
+                         command)
+
+    def test_102_cleanup_ex_net(self):
+        self.net.dispose_network(self, "ex_net")
+
+    def test_110_del_ex(self):
         command = ["del_city", "--city=ex"]
         self.dsdb_expect("delete_city_aq -city ex")
         self.successtest(command)
@@ -40,22 +56,19 @@ class TestDelCity(TestBrokerCommand):
         self.failIf(os.path.exists(dir),
                     "Plenary directory '%s' still exists" % dir)
 
-    def test_delex_01(self):
-        test_city = "ex"
+    def test_200_del_notexist(self):
+        command = ["del_city", "--city", "city-does-not-exist"]
+        out = self.notfoundtest(command)
+        self.matchoutput(out, "City city-does-not-exist not found.", command)
 
-        self.net.allocate_network(self, "ex_net", 24, "unknown",
-                                  "city", test_city,
-                                  comments="Made-up network")
+    def test_300_verify_ex(self):
+        command = ["show_city", "--city", "ex"]
+        self.notfoundtest(command)
 
-        # try delete city
-        command = "del_city --city %s" % test_city
-        err = self.badrequesttest(command.split(" "))
-        self.matchoutput(err,
-                         "Bad Request: Could not delete city %s, networks "
-                         "were found using this location." % test_city,
-                         command)
-
-        self.net.dispose_network(self, "ex_net")
+    def test_300_verify_all(self):
+        command = ["show_city", "--all"]
+        out = self.commandtest(command)
+        self.matchclean(out, "ex", command)
 
 
 if __name__ == '__main__':

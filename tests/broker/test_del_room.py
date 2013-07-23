@@ -27,36 +27,44 @@ from brokertest import TestBrokerCommand
 
 class TestDelRoom(TestBrokerCommand):
 
-    def testdelutroom1(self):
+    def test_100_add_utroom1_net(self):
+        self.net.allocate_network(self, "utroom1_net", 24, "unknown",
+                                  "room", "utroom1",
+                                  comments="Made-up network")
+
+    def test_101_del_utroom1_fail(self):
+        command = "del room --room utroom1"
+        err = self.badrequesttest(command.split(" "))
+        self.matchoutput(err,
+                         "Bad Request: Could not delete room utroom1, networks "
+                         "were found using this location.",
+                         command)
+
+    def test_102_cleanup_utroom1_net(self):
+        self.net.dispose_network(self, "utroom1_net")
+
+    def test_110_del_utroom1(self):
         command = "del room --room utroom1"
         self.noouttest(command.split(" "))
 
-    def testverifydelutroom1(self):
-        command = "show room --room utroom1"
-        out = self.notfoundtest(command.split(" "))
-        self.matchoutput(out, "Room utroom1 not found.", command)
+    def test_200_del_utroom1_again(self):
+        command = "del room --room utroom1"
+        self.notfoundtest(command.split(" "))
 
-    def testdelroomnotexist(self):
+    def test_200_del_notexist(self):
         command = "del room --room room-does-not-exist"
         out = self.notfoundtest(command.split(" "))
         self.matchoutput(out, "Room room-does-not-exist not found.", command)
 
-    def testdelroomnetwork(self):
-        test_room = "utroom1"
+    def test_300_verify_utroom1(self):
+        command = "show room --room utroom1"
+        out = self.notfoundtest(command.split(" "))
+        self.matchoutput(out, "Room utroom1 not found.", command)
 
-        self.net.allocate_network(self, "utroom1_net", 24, "unknown",
-                                  "room", test_room,
-                                  comments="Made-up network")
-
-        # try delete room
-        command = "del room --room %s" % test_room
-        err = self.badrequesttest(command.split(" "))
-        self.matchoutput(err,
-                         "Bad Request: Could not delete room %s, networks "
-                         "were found using this location." % test_room,
-                         command)
-
-        self.net.dispose_network(self, "utroom1_net")
+    def test_300_show_all(self):
+        command = ["show_room", "--all"]
+        out = self.commandtest(command)
+        self.matchclean(out, "utroom1", command)
 
 
 if __name__ == '__main__':
