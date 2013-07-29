@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.6
+#!/usr/bin/env python
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
@@ -65,14 +65,17 @@ class TestAddDisk(TestBrokerCommand):
         command = "cat --machine ut3c5n10"
         out = self.commandtest(command.split(" "))
         self.searchoutput(out,
-                          r'"harddisks" = nlist\(\s*"sda", '
+                          r'"harddisks/{sda}" = '
                           r'create\("hardware/harddisk/generic/scsi",\s*'
                           r'"boot", true,\s*'
                           r'"capacity", 68\*GB,\s*'
-                          r'"interface", "scsi"\s*\),\s*'
-                          r'"sdb", create\("hardware/harddisk/generic/scsi",\s*'
+                          r'"interface", "scsi"\s*\);',
+                          command)
+        self.searchoutput(out,
+                          r'"harddisks/{sdb}" = '
+                          r'create\("hardware/harddisk/generic/scsi",\s*'
                           r'"capacity", 34\*GB,\s*'
-                          r'"interface", "scsi"\s*\)\s*\);',
+                          r'"interface", "scsi"\s*\);',
                           command)
 
     def testaddut3c1n3disk(self):
@@ -94,14 +97,17 @@ class TestAddDisk(TestBrokerCommand):
         command = "cat --machine ut3c1n3"
         out = self.commandtest(command.split(" "))
         self.searchoutput(out,
-                          r'"harddisks" = nlist\(\s*escape\("cciss/c0d0"\), '
+                          r'"harddisks/{cciss/c0d0}" = '
                           r'create\("hardware/harddisk/generic/cciss",\s*'
                           r'"capacity", 34\*GB,\s*'
-                          r'"interface", "cciss"\s*\),\s*'
-                          r'"sda", create\("hardware/harddisk/generic/scsi",\s*'
+                          r'"interface", "cciss"\s*\);',
+                          command)
+        self.searchoutput(out,
+                          r'"harddisks/{sda}" = '
+                          r'create\("hardware/harddisk/generic/scsi",\s*'
                           r'"boot", true,\s*'
                           r'"capacity", 68\*GB,\s*'
-                          r'"interface", "scsi"\s*\)\s*\);',
+                          r'"interface", "scsi"\s*\);',
                           command)
 
 

@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.6
+#!/usr/bin/env python
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
@@ -352,7 +352,7 @@ class TestVulcan20(VerifyNotificationsMixin, TestBrokerCommand):
         command = ["cat", "--machine", "utpgm0", "--generate"]
 
         out = self.commandtest(command)
-        self.matchoutput(out, '"sda", nlist(', command)
+        self.matchoutput(out, '"harddisks/{sda}" = nlist(', command)
         self.searchoutput(out,
                 r'"mountpoint", "/vol/lnn30f1v1/test_v2_share",\s*'
                 r'"path", "utpgm0/sda.vmdk",\s*'

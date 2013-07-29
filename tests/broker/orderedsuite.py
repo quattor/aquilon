@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.6
+#!/usr/bin/env python
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
@@ -31,7 +31,7 @@ import unittest
 if __name__ == "__main__":
     BINDIR = os.path.dirname(os.path.realpath(__file__))
     SRCDIR = os.path.join(BINDIR, "..", "..")
-    sys.path.append(os.path.join(SRCDIR, "lib", "python2.6"))
+    sys.path.append(os.path.join(SRCDIR, "lib"))
     sys.path.append(os.path.join(SRCDIR, "tests"))
     import depends  # pylint: disable=W0611
 

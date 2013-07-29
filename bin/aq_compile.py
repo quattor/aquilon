@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.6
+#!/usr/bin/env python
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
@@ -27,13 +27,13 @@ import os
 from subprocess import call
 
 import ms.version
-ms.version.addpkg('argparse', '1.1')
+ms.version.addpkg('argparse', '1.2.1')
 
 import argparse
 
 BINDIR = os.path.dirname(os.path.realpath(sys.argv[0]))
 SRCDIR = os.path.join(BINDIR, "..")
-LIBDIR = os.path.join(SRCDIR, "lib", "python2.6")
+LIBDIR = os.path.join(SRCDIR, "lib")
 
 sys.path.append(LIBDIR)
 

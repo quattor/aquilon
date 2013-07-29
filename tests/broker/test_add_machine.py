@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.6
+#!/usr/bin/env python
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
@@ -324,7 +324,7 @@ class TestAddMachine(TestBrokerCommand):
                          'include { "hardware/machine/hp/utccissmodel" };',
                          command)
         self.matchoutput(out,
-                         'escape("cciss/c0d0"), '
+                         '"harddisks/{cciss/c0d0}" = '
                          'create("hardware/harddisk/generic/cciss",',
                          command)
         self.matchoutput(out,

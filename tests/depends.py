@@ -18,15 +18,9 @@
 import ms.version
 
 ms.version.addpkg('setuptools', '0.6c11')
-
-ms.version.addpkg('coverage', '3.4')
-
-ms.version.addpkg('argparse', '1.1')
-
+ms.version.addpkg('coverage', '3.6')
+ms.version.addpkg('argparse', '1.2.1')
 ms.version.addpkg('nose', '1.1.2')
-
 ms.version.addpkg('lxml', '2.3.2')
-
 ms.version.addpkg('ipaddr', '2.1.9')
-
 ms.version.addpkg('dateutil', '1.5')

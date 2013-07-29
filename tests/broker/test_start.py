@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.6
+#!/usr/bin/env python
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
@@ -46,8 +46,7 @@ class TestBrokerStart(unittest.TestCase):
 
         config = Config()
         aqd = os.path.join(config.get("broker", "srcdir"),
-                           "lib", "python2.6", "aquilon",
-                           "unittest_patches.py")
+                           "lib", "aquilon", "unittest_patches.py")
         pidfile = os.path.join(config.get("broker", "rundir"), "aqd.pid")
         logfile = config.get("broker", "logfile")
 

@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.6
+#!/usr/bin/env python
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
@@ -25,13 +25,12 @@ from threading import Thread, Condition
 import signal
 import errno
 
-sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                             "..", "lib", "python2.6"))
+sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "lib"))
 
 import aquilon.aqdb.depends
 
 import ms.version
-ms.version.addpkg('argparse', '1.1')
+ms.version.addpkg('argparse', '1.2.1')
 
 import argparse
 

@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.6
+#!/usr/bin/env python
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
@@ -30,7 +30,7 @@ import argparse
 
 BINDIR = os.path.dirname(os.path.realpath(__file__))
 SRCDIR = os.path.join(BINDIR, "..")
-sys.path.append(os.path.join(SRCDIR, "lib", "python2.6"))
+sys.path.append(os.path.join(SRCDIR, "lib"))
 
 from aquilon.config import Config
 from aquilon.utils  import kill_from_pid_file

@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.6
+#!/usr/bin/env python
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
@@ -25,8 +25,7 @@ from subprocess import Popen
 
 if __name__=='__main__':
     DIR = os.path.dirname(os.path.realpath(__file__))
-    sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..',
-                                                     "lib", "python2.6")))
+    sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..', "lib")))
 
 from aquilon.config import Config
 from aquilon.exceptions_ import ProcessException

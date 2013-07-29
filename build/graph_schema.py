@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.6
+#!/usr/bin/env python
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
@@ -21,7 +21,7 @@ import os
 import sys
 
 _DIR = os.path.dirname(os.path.realpath(__file__))
-_LIBDIR = os.path.join(_DIR, '..', 'lib', 'python2.6')
+_LIBDIR = os.path.join(_DIR, '..', 'lib')
 _ETCDIR = os.path.join(_DIR, '..', 'etc')
 sys.path.insert(0, _LIBDIR)
 

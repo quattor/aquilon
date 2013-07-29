@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.6
+#!/usr/bin/env python
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
@@ -18,8 +18,8 @@
 
 import ms.version
 
-ms.version.addpkg('lxml', '2.2.8')
-ms.version.addpkg('argparse', '1.1')
+ms.version.addpkg('lxml', '2.3.2')
+ms.version.addpkg('argparse', '1.2.1')
 
 import os
 import sys

@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.6
+#!/usr/bin/env python
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
@@ -28,7 +28,7 @@ from google.protobuf.text_format import PrintMessage
 
 BINDIR = os.path.dirname(os.path.realpath(__file__))
 SRCDIR = os.path.join(BINDIR, "..")
-sys.path.append(os.path.join(SRCDIR, "lib", "python2.6"))
+sys.path.append(os.path.join(SRCDIR, "lib"))
 
 if not os.environ.get("AQDCONF"):
     os.environ["AQDCONF"] = os.path.join(SRCDIR, "etc", "aqd.conf.defaults")

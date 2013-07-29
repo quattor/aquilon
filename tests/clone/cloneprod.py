@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.6
+#!/usr/bin/env python
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
@@ -34,13 +34,13 @@ ms.version.addpkg('ms.modulecmd', '1.0.4')
 import ms.modulecmd
 ms.modulecmd.load('orcl/client/11.2.0.1.0')
 ms.version.addpkg('cx_Oracle', '5.1-11.2.0.1.0')
-ms.version.addpkg('argparse', '1.1')
+ms.version.addpkg('argparse', '1.2.1')
 import argparse
 import cx_Oracle
 
 BINDIR = os.path.dirname(os.path.realpath(__file__))
 SRCDIR = os.path.join(BINDIR, '..', '..')
-sys.path.append(os.path.join(SRCDIR, 'lib', 'python2.6'))
+sys.path.append(os.path.join(SRCDIR, 'lib'))
 
 from aquilon.config import Config
 
