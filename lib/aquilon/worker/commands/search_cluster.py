@@ -98,7 +98,7 @@ class CommandSearchCluster(BrokerCommand):
 
         if buildstatus:
             dbbuildstatus = ClusterLifecycle.get_unique(session, buildstatus,
-                                                     compel=True)
+                                                        compel=True)
             q = q.filter_by(status=dbbuildstatus)
 
         if cluster_type:

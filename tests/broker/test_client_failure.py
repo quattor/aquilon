@@ -34,10 +34,10 @@ class TestClientFailure(TestBrokerCommand):
         command = "status --aqhost=invalidhost"
         (p, out, err) = self.runcommand(command.split(" "))
         self.assertEqual(err,
-                "Failed to connect to invalidhost: Unknown host.\n")
+                         "Failed to connect to invalidhost: Unknown host.\n")
         self.assertEqual(out, "",
-                "STDOUT for %s was not empty:\n@@@\n'%s'\n@@@\n"
-                % (command, out))
+                         "STDOUT for %s was not empty:\n@@@\n'%s'\n@@@\n"
+                         % (command, out))
         self.assertEqual(p.returncode, 1)
 
     def testnotrunningaqhost(self):
@@ -58,8 +58,8 @@ class TestClientFailure(TestBrokerCommand):
         self.assertTrue(re.match(pattern, err),
                         "Expected '%s' to start with '%s'" % (err, pattern))
         self.assertEqual(out, "",
-                "STDOUT for %s was not empty:\n@@@\n'%s'\n@@@\n"
-                % (command, out))
+                         "STDOUT for %s was not empty:\n@@@\n'%s'\n@@@\n"
+                         % (command, out))
         self.assertEqual(p.returncode, 1)
 
     def testconflictingoptions(self):
@@ -68,11 +68,11 @@ class TestClientFailure(TestBrokerCommand):
         (p, out, err) = self.runcommand(command.split(" "))
         s = "error: Option or option group switch conflicts with machine"
         self.assert_(err.find(s) >= 0,
-                "STDERR for %s did not include '%s':\n@@@\n'%s'\n@@@\n"
-                % (command, s, err))
+                     "STDERR for %s did not include '%s':\n@@@\n'%s'\n@@@\n"
+                     % (command, s, err))
         self.assertEqual(out, "",
-                "STDOUT for %s was not empty:\n@@@\n'%s'\n@@@\n"
-                % (command, out))
+                         "STDOUT for %s was not empty:\n@@@\n'%s'\n@@@\n"
+                         % (command, out))
         self.assertEqual(p.returncode, 2)
 
     def testextraargs(self):
@@ -80,16 +80,16 @@ class TestClientFailure(TestBrokerCommand):
         (p, out, err) = self.runcommand(command.split(" "))
         s = "Extra arguments on the command line"
         self.assert_(err.find(s) >= 0,
-                "STDERR for %s did not include '%s':\n@@@\n'%s'\n@@@\n"
-                % (command, s, err))
+                     "STDERR for %s did not include '%s':\n@@@\n'%s'\n@@@\n"
+                     % (command, s, err))
 
     def testinvalidinteger(self):
         command = "show cpu --speed foo"
         (p, out, err) = self.runcommand(command.split(" "))
         s = "option --speed: invalid integer value: 'foo'"
         self.assert_(err.find(s) >= 0,
-                "STDERR for %s did not include '%s':\n@@@\n'%s'\n@@@\n"
-                % (command, s, err))
+                     "STDERR for %s did not include '%s':\n@@@\n'%s'\n@@@\n"
+                     % (command, s, err))
 
     def testhelp(self):
         command = "help"
@@ -103,8 +103,9 @@ class TestClientFailure(TestBrokerCommand):
         self.matchoutput(err, "Command command-does-not-exist is not known!",
                          command)
         self.assertEqual(p.returncode, 2,
-                "Return code for %s was %d instead of %d, STDOUT:\n@@@\n'%s'\n"
-                % (command, p.returncode, 2, out))
+                         "Return code for %s was %d instead of %d, "
+                         "STDOUT:\n@@@\n'%s'\n"
+                         % (command, p.returncode, 2, out))
 
     def testunauthorized(self):
         command = "flush"

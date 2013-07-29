@@ -35,7 +35,7 @@ class CommandAddHostlink(BrokerCommand):
                                      resourcegroup, compel=False)
 
         Hostlink.get_unique(session, name=hostlink, holder=holder,
-                               preclude=True)
+                            preclude=True)
 
         dbhl = Hostlink(name=hostlink, comments=comments, target=target,
                         owner_user=owner, owner_group=group)

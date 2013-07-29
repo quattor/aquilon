@@ -61,27 +61,20 @@ def importName(modulename, name):
 
 def parse_cli(*args, **kw):
     parser = argparse.ArgumentParser(
-        description = 'rebuilds the aquilon data store (aqdb) from scratch')
+        description='rebuilds the aquilon data store (aqdb) from scratch')
 
-    parser.add_argument('-v', '--verbose',
-                      action  = 'store_true',
-                      dest    = 'verbose',
-                      help    = 'makes metadata bind.echo = True')
+    parser.add_argument('-v', '--verbose', action='store_true',
+                        help='makes metadata bind.echo = True')
 
-    parser.add_argument('-D', '--delete',
-                      action  = 'store_true',
-                      dest    = 'delete_db',
-                      help    = 'delete database without confirmation')
+    parser.add_argument('-D', '--delete', action='store_true', dest='delete_db',
+                        help='delete database without confirmation')
 
-    parser.add_argument('-d', '--debug',
-                      action  = 'store_true',
-                      dest    = 'debug',
-                      help    = 'write debug info on stdout')
+    parser.add_argument('-d', '--debug', action='store_true',
+                        help='write debug info on stdout')
 
     parser.add_argument('-p', '--populate',
-                      dest    = 'populate',
-                      help    = 'run functions to prepopulate data from the named file',
-                      default = os.path.join(BINDIR, "data", "unittest.dump"))
+                        help='run functions to prepopulate data from the named file',
+                        default=os.path.join(BINDIR, "data", "unittest.dump"))
 
     return parser.parse_args()
 
@@ -129,9 +122,7 @@ def main(*args, **kw):
         log.debug('renaming constraints...')
         cnst.rename_non_null_check_constraints(db)
 
-
     log.info('database built and populated')
-
 
 if __name__ == '__main__':
     main(sys.argv)

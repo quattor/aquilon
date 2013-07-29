@@ -70,9 +70,8 @@ class PersonalityParameter(ParameterHolder):
                             nullable=True)
 
     personality = relation(Personality, uselist=False,
-                    backref=backref('paramholder',
-                                    cascade='all, delete-orphan',
-                                    uselist=False))
+                           backref=backref('paramholder', uselist=False,
+                                           cascade='all, delete-orphan'))
 
     __extra_table_args__ = (UniqueConstraint(personality_id,
                                              name='param_holder_persona_uk'),)
@@ -166,8 +165,8 @@ class Parameter(Base):
                 return ref
         except KeyError:
             if compel:
-                raise NotFoundException(
-                      "No parameter of path=%s defined." % path)
+                raise NotFoundException("No parameter of path=%s defined." %
+                                        path)
             else:
                 pass
         return None

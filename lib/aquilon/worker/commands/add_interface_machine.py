@@ -48,7 +48,7 @@ class CommandAddInterfaceMachine(BrokerCommand):
         q = q.filter_by(name=interface, hardware_entity=dbmachine)
         if q.first():
             raise ArgumentError("Machine %s already has an interface named %s."
-                    % (machine, interface))
+                                % (machine, interface))
 
         if not type:
             type = 'public'

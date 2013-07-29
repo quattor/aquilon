@@ -127,8 +127,8 @@ class TestAddRequiredService(TestBrokerCommand):
         command = "show service --service chooser1"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
-            "Required for Personality: unixeng-test Archetype: aquilon",
-            command)
+                         "Required for Personality: unixeng-test Archetype: aquilon",
+                         command)
 
     def testaddrequiredutsvc(self):
         command = ["add_required_service", "--personality=compileserver",
@@ -154,9 +154,9 @@ class TestAddRequiredService(TestBrokerCommand):
 
     def testaddrequirednetmapcopy(self):
         self.noouttest(["add_personality", "--personality", "testme",
-                          "--eon_id", "2", "--archetype", "aquilon",
-                          "--copy_from", "eaitools",
-                          "--host_environment", "dev"])
+                        "--eon_id", "2", "--archetype", "aquilon",
+                        "--copy_from", "eaitools",
+                        "--host_environment", "dev"])
 
         command = ["show_personality", "--archetype=aquilon",
                    "--personality=testme"]

@@ -66,8 +66,9 @@ class CommandAddAuroraHost(CommandAddHost):
             m = self.nodename_re.search(machine)
             if m:
                 (building, rid, cid, nodenum) = m.groups()
-                dbbuilding = session.query(Building).filter_by(
-                        name=building).first()
+                q = session.query(Building)
+                q = q.filter_by(name=building)
+                dbbuilding = q.first()
                 if not dbbuilding:
                     raise ArgumentError("Failed to find building %s for "
                                         "node %s, please add an Aurora "
@@ -88,7 +89,7 @@ class CommandAddAuroraHost(CommandAddHost):
                 dblocation = dbrack or dbbuilding
                 chassis = rack + "c" + cid
                 dbdns_domain = session.query(DnsDomain).filter_by(
-                        name="ms.com").first()
+                    name="ms.com").first()
                 dbchassis = Chassis.get_unique(session, chassis)
                 if not dbchassis:
                     dbchassis_model = Model.get_unique(session,
@@ -105,7 +106,7 @@ class CommandAddAuroraHost(CommandAddHost):
                     session.add(dbdns_rec)
                     dbchassis.primary_name = dbdns_rec
                 dbslot = session.query(ChassisSlot).filter_by(
-                        chassis=dbchassis, slot_number=nodenum).first()
+                    chassis=dbchassis, slot_number=nodenum).first()
                 # Note: Could be even more persnickity here and check that
                 # the slot is currently empty.  Seems like overkill.
                 if not dbslot:

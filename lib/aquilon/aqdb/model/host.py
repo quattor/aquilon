@@ -28,9 +28,9 @@ from aquilon.aqdb.model import (Base, Branch, Machine, HostLifecycle, Grn,
 
 from aquilon.aqdb.column_types import AqStr
 
-
 _TN = 'host'
 _HOSTGRN = 'host_grn_map'
+
 
 def _hgm_creator(tuple):
     return HostGrnMap(host=tuple[0], grn=tuple[1], target=tuple[2])
@@ -88,7 +88,7 @@ class Host(Base):
 
     # something to retain the advertised status of the host
     advertise_status = Column(Boolean(name="%s_advertise_status_valid_ck" % _TN),
-                                      nullable=False, default=False)
+                              nullable=False, default=False)
 
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
@@ -155,8 +155,8 @@ class HostGrnMap(Base):
                     nullable=False)
 
     host = relation(Host, innerjoin=True,
-                     backref=backref('_grns', cascade='all, delete-orphan',
-                                     passive_deletes=True))
+                    backref=backref('_grns', cascade='all, delete-orphan',
+                                    passive_deletes=True))
 
     grn = relation(Grn, lazy=False, innerjoin=True,
                    backref=backref('_hosts', passive_deletes=True))

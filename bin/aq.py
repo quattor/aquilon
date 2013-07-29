@@ -98,7 +98,7 @@ class CustomAction(object):
         m = getattr(self, action, None)
         if not m:
             raise AquilonError("Internal Error: Unknown action '%s' attempted"
-                    % action)
+                               % action)
         self.run = m
 
         # Propagate some options to subprocesses
@@ -139,8 +139,8 @@ class CustomAction(object):
             p = Popen(['/usr/bin/make', '-C', testdir, 'test',
                        'AQCMD=%s' % os.path.realpath(sys.argv[0]),
                        'AQBUILDXML=%s' % os.path.join(SRCDIR, "etc",
-                                                      "build.xml")
-                      ], cwd=testdir, env=self.env)
+                                                      "build.xml")],
+                      cwd=testdir, env=self.env)
             p.wait()
             if p.returncode != 0:
                 print >>sys.stderr, "\nUnit tests failed, publish prohibited.",
@@ -169,10 +169,10 @@ class CustomAction(object):
         (handle, filename) = mkstemp()
         try:
             rc = Popen(("git", "bundle", "create", filename, revlist),
-                        stdout=1, stderr=2).wait()
+                       stdout=1, stderr=2).wait()
             if rc:
                 print >>sys.stderr, \
-                        "Error running git bundle create, returncode %d" % rc
+                    "Error running git bundle create, returncode %d" % rc
                 sys.exit(1)
 
             commandOptions["bundle"] = b64encode(file(filename).read())
@@ -192,14 +192,14 @@ def create_sandbox(pageData, noexec=False):
         break
     if not os.path.exists(user_base):
         print >>sys.stderr, "Cannot access user directory '%s'.  " \
-                "Is the share mounted and visible?" % user_base
+            "Is the share mounted and visible?" % user_base
         return 1
     sandbox_dir = os.path.join(user_base, sandbox_name)
     if os.path.exists(sandbox_dir):
         # This check is done broker-side as well.  This code should be
         # exercised rarely (and probably never).
         print >>sys.stderr, "Sandbox directory '%s' already exists.  " \
-                "Use `git fetch` to update it or remove the directory " \
+            "Use `git fetch` to update it or remove the directory " \
                 "and run `aq get`." % sandbox_dir
         return 1
     cmd = ("git", "clone", "--branch", sandbox_name,
@@ -282,7 +282,7 @@ class StatusThread(Thread):
                                                 res.read())
             if self.retry <= 0:
                 print >>sys.stderr, \
-                        "Client status messages disabled, retries exceeded."
+                    "Client status messages disabled, retries exceeded."
             sconn.close()
             return
 
@@ -307,7 +307,7 @@ if __name__ == "__main__":
     parser = OptParser(os.path.join(BINDIR, '..', 'etc', 'input.xml'))
     try:
         (command, transport, commandOptions, globalOptions) = \
-                parser.parse(sys.argv[1:])
+            parser.parse(sys.argv[1:])
     except ParsingError, e:
         print >>sys.stderr, '%s: %s' % (sys.argv[0], e.error)
         print >>sys.stderr, '%s: Try --help for usage details.' % (sys.argv[0])
@@ -333,9 +333,9 @@ if __name__ == "__main__":
         default_aqport = 6900
 
     host = globalOptions.get('aqhost') or os.environ.get('AQHOST', None) or \
-            default_aqhost
+        default_aqhost
     port = globalOptions.get('aqport') or os.environ.get('AQPORT', None) or \
-            default_aqport
+        default_aqport
     if globalOptions.get('aqservice'):
         aqservice = globalOptions.get('aqservice')
     elif os.environ.get('AQSERVICE', None):
@@ -427,7 +427,7 @@ if __name__ == "__main__":
     # Kick off a thread to (potentially) get status...
     # Spare a second connection to the server for read-only commands that use
     # the "GET" method
-    if command == "show_request" or (transport.method != "get" and \
+    if command == "show_request" or (transport.method != "get" and
                                      globalOptions.get("verbose")):
         status_thread = StatusThread(host, port, authuser, **commandOptions)
 

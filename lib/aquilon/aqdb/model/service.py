@@ -103,14 +103,14 @@ class PersonalityServiceListItem(Base):
     __tablename__ = _PSLI
 
     service_id = Column(Integer, ForeignKey('%s.id' % (_TN),
-                                               name='%s_svc_fk' % (_ABV),
-                                               ondelete='CASCADE'),
-                           nullable=False)
+                                            name='%s_svc_fk' % (_ABV),
+                                            ondelete='CASCADE'),
+                        nullable=False)
 
     personality_id = Column(Integer, ForeignKey('personality.id',
-                                                 name='sli_prsnlty_fk',
-                                                 ondelete='CASCADE'),
-                             nullable=False)
+                                                name='sli_prsnlty_fk',
+                                                ondelete='CASCADE'),
+                            nullable=False)
 
     __table_args__ = (PrimaryKeyConstraint(service_id, personality_id,
                                            name="%s_pk" % _ABV),

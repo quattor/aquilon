@@ -18,7 +18,7 @@
 
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.commands.del_address_dns_environment \
-        import CommandDelAddressDNSEnvironment
+    import CommandDelAddressDNSEnvironment
 
 
 class CommandDelAddress(CommandDelAddressDNSEnvironment):

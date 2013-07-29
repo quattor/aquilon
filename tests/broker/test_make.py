@@ -84,8 +84,8 @@ class TestMake(TestBrokerCommand):
         ip = self.net["netsvcmap"].subnet()[0].ip
 
         command = ["map", "service", "--networkip", ip,
-                        "--service", "afs", "--instance", "afs-by-net",
-                        "--building", "whatever"]
+                   "--service", "afs", "--instance", "afs-by-net",
+                   "--building", "whatever"]
         out = self.badoptiontest(command)
 
         self.matchoutput(out, "networkip conflicts with building", command)

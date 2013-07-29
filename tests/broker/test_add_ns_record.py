@@ -69,14 +69,14 @@ class TestAddNSRecord(TestBrokerCommand):
         self.matchoutput(out, NAME, cmd)
 
     def test_402_verify_ns_record_djb(self):
-        cmd = "show ns record --dns_domain %s --fqdn %s %s" % (
-             DOMAIN, NAME, DJB)
+        cmd = "show ns record --dns_domain %s --fqdn %s %s" % (DOMAIN, NAME,
+                                                               DJB)
         out = self.commandtest(cmd.split(" "))
         self.matchoutput(out, '.%s::%s' % (DOMAIN, NAME), cmd)
 
     def test_410_verify_ns_record_csv(self):
-        cmd = "show ns record --dns_domain %s --fqdn %s %s" % (
-             DOMAIN, NAME, CSV)
+        cmd = "show ns record --dns_domain %s --fqdn %s %s" % (DOMAIN, NAME,
+                                                               CSV)
         out = self.commandtest(cmd.split(" "))
         self.matchoutput(out, '%s,%s' % (DOMAIN, NAME), cmd)
 

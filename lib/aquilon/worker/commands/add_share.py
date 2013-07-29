@@ -40,5 +40,3 @@ class CommandAddShare(BrokerCommand):
         add_resource(session, logger, holder, dbshare)
 
         return
-
-

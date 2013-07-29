@@ -24,7 +24,7 @@ import sys
 def clean_old(installdir):
     if not os.path.isdir(installdir):
         print >>sys.stderr, "Warning: '%s' is not a directory, not searching " \
-                "for and removing stale files." % installdir
+            "for and removing stale files." % installdir
         return
     src = os.path.realpath(os.path.join(os.path.dirname(__file__), '..'))
     for (dirpath, dirnames, filenames) in os.walk(installdir):

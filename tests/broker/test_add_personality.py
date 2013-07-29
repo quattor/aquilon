@@ -668,7 +668,7 @@ class TestAddPersonality(VerifyGrnsMixin, TestBrokerCommand):
         self.matchoutput(out, "esx_cluster/esx_server", command)
         self.matchoutput(out, "esx_cluster/vulcan-1g-desktop-prod", command)
         self.matchoutput(out, "gridcluster/hadoop", command)
-        self.matchclean (out, "storagecluster/metrocluster", command)
+        self.matchclean(out, "storagecluster/metrocluster", command)
 
     def testsearchpersonality05(self):
         command = ["search", "personality", "--host_environment", "dev", "--eon_id", 2]

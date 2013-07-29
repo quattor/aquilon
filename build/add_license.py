@@ -161,7 +161,7 @@ def fix_recursive(start_dir):
 def main(args):
     if len(args) > 2:
         print >>sys.stderr, \
-                "Takes only one argument, the root directory to process."
+            "Takes only one argument, the root directory to process."
         sys.exit(1)
     if len(args) < 2:
         start_dir = os.path.join(os.path.dirname(os.path.realpath(args[0])),

@@ -30,9 +30,8 @@ class CommandDelShare(BrokerCommand):
                hostname, resourcegroup, cluster, **arguments):
 
         validate_basic("share", share)
-        holder = get_resource_holder(session, hostname, cluster,
-               resourcegroup)
+        holder = get_resource_holder(session, hostname, cluster, resourcegroup)
         dbshare = Share.get_unique(session, name=share, holder=holder,
-                                     compel=True)
+                                   compel=True)
         del_resource(session, logger, dbshare)
         return

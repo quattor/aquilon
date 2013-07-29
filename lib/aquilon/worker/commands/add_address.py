@@ -17,7 +17,7 @@
 
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.commands.add_address_dns_environment \
-        import CommandAddAddressDNSEnvironment
+    import CommandAddAddressDNSEnvironment
 
 
 class CommandAddAddress(CommandAddAddressDNSEnvironment):

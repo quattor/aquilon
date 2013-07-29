@@ -46,8 +46,8 @@ class TestBindServerConstraints(TestBrokerCommand):
     # Test that unittest00 comes out of utsi1 but stays in utsi2
     def testunbindutsi1unittest00(self):
         self.noouttest(["unbind", "server",
-            "--hostname", "unittest00.one-nyp.ms.com",
-            "--service", "utsvc", "--instance", "utsi1"])
+                        "--hostname", "unittest00.one-nyp.ms.com",
+                        "--service", "utsvc", "--instance", "utsi1"])
 
     def testverifycatutsi1(self):
         command = "cat --service utsvc --instance utsi1"

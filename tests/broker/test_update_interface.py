@@ -36,8 +36,8 @@ class TestUpdateInterface(TestBrokerCommand):
         self.dsdb_expect_update(self.badhost, "eth0", mac=mac, fail=True,
                                 comments="Updated interface comments")
         command = ["update", "interface", "--interface", "eth0",
-                        "--machine", "ut3c5n10", "--mac", mac,
-                        "--comments", "Updated interface comments"]
+                   "--machine", "ut3c5n10", "--mac", mac,
+                   "--comments", "Updated interface comments"]
         out = self.badrequesttest(command)
         self.dsdb_verify()
         self.matchoutput(out, "DSDB update failed", command)
@@ -84,7 +84,7 @@ class TestUpdateInterface(TestBrokerCommand):
 
     def test_120_update_ut3c5n10_eth2(self):
         self.notfoundtest(["update", "interface", "--interface", "eth2",
-            "--machine", "ut3c5n10", "--boot"])
+                           "--machine", "ut3c5n10", "--boot"])
 
     def test_130_update_switch(self):
         mac = self.net["tor_net_8"].usable[0].mac

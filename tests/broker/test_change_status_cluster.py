@@ -110,7 +110,7 @@ class TestChangeClusterStatus(TestBrokerCommand):
                         "--cluster", "utecl1", "--model", "utmedium"])
 
         command = ["change_status", "--cluster", "utecl1", "--buildstatus",
-                  "decommissioned"]
+                   "decommissioned"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "Cannot change state to decommissioned, as "
@@ -118,7 +118,7 @@ class TestChangeClusterStatus(TestBrokerCommand):
                          command)
 
         command = ["change_status", "--hostname", "evh1.aqd-unittest.ms.com",
-                  "--buildstatus", "decommissioned"]
+                   "--buildstatus", "decommissioned"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "Cannot change state to decommissioned, as "
@@ -140,7 +140,7 @@ class TestChangeClusterStatus(TestBrokerCommand):
 
         # can't add vm
         command = ["add", "machine", "--machine", "evm1",
-                        "--cluster", "utecl1", "--model", "utmedium"]
+                   "--cluster", "utecl1", "--model", "utmedium"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "Cannot add virtual machines to decommissioned clusters.",
@@ -148,7 +148,7 @@ class TestChangeClusterStatus(TestBrokerCommand):
 
         # can't add host.
         command = ["cluster", "--hostname", "evh6.aqd-unittest.ms.com",
-                        "--cluster", "utecl1"]
+                   "--cluster", "utecl1"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "Cannot add hosts to decommissioned clusters.",

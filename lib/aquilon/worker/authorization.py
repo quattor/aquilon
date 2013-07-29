@@ -49,7 +49,7 @@ class AuthorizationBroker(object):
             return True
         if dbuser is None:
             raise AuthorizationException(
-                    "Unauthorized anonymous access attempt to %s on %s" %
+                "Unauthorized anonymous access attempt to %s on %s" %
                     (action, resource))
         # Special-casing the aquilon hosts... this is a special user
         # that provides a bucket for all host-generated activity.
@@ -100,7 +100,7 @@ class AuthorizationBroker(object):
                               'bind_server', 'update_machine']:
                 self.raise_auth_error(principal, action, resource)
         if dbuser.role.name == 'mssb_unixops':
-            if action not in ['add_machine','del_machine',
+            if action not in ['add_machine', 'del_machine',
                               'update_machine', 'update_machine_hostname',
                               'add_interface_hostname',
                               'add_interface_machine',
@@ -109,7 +109,7 @@ class AuthorizationBroker(object):
                               'del_interface', 'del_interface_address',
                               'add_alias', 'update_alias', 'del_alias',
                               'add_address', 'del_address',
-                              'add_host','del_host',
+                              'add_host', 'del_host',
                               'add_windows_host', 'del_windows_host',
                               'add_manager', 'add_dynamic_range', 'add_disk',
                               'add_auxiliary',

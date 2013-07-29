@@ -32,7 +32,7 @@ class Intervention(Resource):
     id = Column(Integer, ForeignKey('resource.id',
                                     name='iv_resource_fk',
                                     ondelete='CASCADE'),
-                                    primary_key=True)
+                primary_key=True)
 
     start_date = Column(DateTime, default=datetime.now, nullable=False)
     expiry_date = Column(DateTime, default=datetime.now, nullable=False)

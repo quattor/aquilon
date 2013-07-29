@@ -36,7 +36,7 @@ class CommandDelArchetype(BrokerCommand):
         row = q.first()
         if row:
             raise ArgumentError("{0} is still in use by {1:l} and cannot be "
-                                "deleted.".format (dbarch, row))
+                                "deleted.".format(dbarch, row))
         session.delete(dbarch)
         session.flush()
         return

@@ -84,8 +84,8 @@ class TestAddServiceAddress(TestBrokerCommand):
         self.assertTrue(found,
                         "Service address zebra2 not found in the resources. "
                         "Existing resources: %s" %
-                        ", ".join(["%s %s" % (res.type, res.name) for res in
-                                              host.resources]))
+                        ", ".join(["%s %s" % (res.type, res.name)
+                                   for res in host.resources]))
 
     def testverifyzebra2dns(self):
         ip = self.net["zebra_vip"].usable[1]

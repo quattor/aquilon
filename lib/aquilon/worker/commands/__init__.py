@@ -65,6 +65,6 @@ for f in os.listdir(_thisdir):
             if issubclass(item, BrokerCommand):
                 mymodule.broker_command = item()
                 mymodule.broker_command.module_logger = \
-                        logging.getLogger(modulename)
+                    logging.getLogger(modulename)
                 __all__.append(moduleshort)
                 break

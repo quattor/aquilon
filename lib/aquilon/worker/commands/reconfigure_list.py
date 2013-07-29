@@ -128,7 +128,7 @@ class CommandReconfigureList(BrokerCommand):
                 personalities[dbhost.fqdn] = dbpersonality
             elif archetype:
                 personalities[dbhost.fqdn] = Personality.get_unique(session,
-                        name=dbhost.personality.name, archetype=dbarchetype)
+                    name=dbhost.personality.name, archetype=dbarchetype)
                 if not personalities[dbhost.fqdn]:
                     failed.append("%s: No personality %s found for archetype "
                                   "%s." %

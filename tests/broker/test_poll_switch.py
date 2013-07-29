@@ -156,7 +156,7 @@ class TestPollSwitch(TestBrokerCommand):
             self.matchoutput(out,
                              "Port %d: %s" %
                              (i, self.net["vmotion_net"].usable[i + 1].mac),
-                         command)
+                             command)
         self.matchoutput(out, "VLAN 701: %s" % self.net["vm_storage_net"].ip,
                          command)
         # I was lazy... really this should be some separate non-routeable

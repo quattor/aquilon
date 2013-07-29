@@ -36,7 +36,7 @@ class ResourceGroup(Resource):
     id = Column(Integer, ForeignKey('resource.id',
                                     name='rg_resource_fk',
                                     ondelete='CASCADE'),
-                                    primary_key=True)
+                primary_key=True)
 
     # declare any per-group attributes here (none for now)
 

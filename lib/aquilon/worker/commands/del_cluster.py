@@ -37,7 +37,7 @@ def del_cluster(session, logger, dbcluster, config):
                             (format(dbcluster),
                              ", ".join([c.name for c in dbcluster.members])))
     elif dbcluster.hosts:
-        hosts = ", ".join([h.fqdn for h in  dbcluster.hosts])
+        hosts = ", ".join([h.fqdn for h in dbcluster.hosts])
         raise ArgumentError("%s is still in use by hosts: %s." %
                             (format(dbcluster), hosts))
     cluster_plenary = Plenary.get_plenary(dbcluster, logger=logger)
@@ -62,8 +62,7 @@ def del_cluster(session, logger, dbcluster, config):
         xmlgzfile = xmlfile + ".gz"
         remove_file(xmlgzfile, logger=logger)
         # And the cached template created by ant
-        remove_file(os.path.join(config.get("broker",
-                                                 "quattordir"),
+        remove_file(os.path.join(config.get("broker", "quattordir"),
                                  "objects", "clusters",
                                  cluster + TEMPLATE_EXTENSION),
                     logger=logger)

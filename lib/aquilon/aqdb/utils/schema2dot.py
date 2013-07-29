@@ -131,7 +131,8 @@ def create_schema_graph(tables=None, metadata=None, show_datatypes=False,
     #Grossly inefficient. We can do this once for the whole graph
     for table in tables:
         graph.add_node(pydot.Node(str(table.name), shape="record",
-            label=_render_table_record(table, show_datatypes)))
+                                  label=_render_table_record(table,
+                                                             show_datatypes)))
 
     for table in tables:
         for fk in table.foreign_keys:

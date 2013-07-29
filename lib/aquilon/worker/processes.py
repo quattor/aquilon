@@ -156,7 +156,7 @@ def run_git(args, env=None, path=".",
                  "git_committer_name", "git_committer_email"]:
         if not config.has_option("broker", name):
             continue
-        value = config.get("broker", name);
+        value = config.get("broker", name)
         git_env[name.upper()] = value
 
     if isinstance(args, list):
@@ -368,7 +368,7 @@ class DSDBRunner(object):
     def update_city(self, city, campus, prev_campus):
         if not self.location_sync:
             return
-        command = ["update_city_aq", "-city", city,  "-campus", campus]
+        command = ["update_city_aq", "-city", city, "-campus", campus]
         # We can't revert to an empty campus
         if prev_campus:
             rollback = ["update_city_aq", "-city", city, "-campus", prev_campus]
@@ -389,7 +389,7 @@ class DSDBRunner(object):
             return
         command = ["add_campus_building_aq", "-campus_name", campus,
                    "-building_name", building]
-        rollback = ["delete_campus_building_aq",  "-campus_name", campus,
+        rollback = ["delete_campus_building_aq", "-campus_name", campus,
                     "-building_name", building]
         self.add_action(command, rollback)
 
@@ -424,7 +424,7 @@ class DSDBRunner(object):
         if not self.location_sync:
             return
         command = ["update_building_aq", "-building_name", building,
-                    "-building_addr", address]
+                   "-building_addr", address]
         rollback = ["update_building_aq", "-building_name", building,
                     "-building_addr", old_addr]
         self.add_action(command, rollback)
@@ -432,7 +432,7 @@ class DSDBRunner(object):
     def add_host_details(self, fqdn, ip, interface=None, mac=None, primary=None,
                          comments=None):
         command = ["add_host", "-host_name", fqdn,
-                    "-ip_address", ip, "-status", "aq"]
+                   "-ip_address", ip, "-status", "aq"]
         if interface:
             command.extend(["-interface_name", self.normalize_iface(interface)])
         if mac:
@@ -808,4 +808,3 @@ class DSDBRunner(object):
             command.extend(["-new_comments", comments or ""])
             rollback.extend(["-new_comments", old_comments or ""])
         self.add_action(command, rollback)
-

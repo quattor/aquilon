@@ -204,7 +204,7 @@ class TestPublishSandbox(TestBrokerCommand):
                         cwd=personalitydir)
         self.gitcommand(["commit", "-a", "-m",
                          "added personality vulcan-1g-desktop-prod"],
-                         cwd=sandboxdir)
+                        cwd=sandboxdir)
 
     def testaddutmedium(self):
         sandboxdir = os.path.join(self.sandboxdir, "utsandbox")

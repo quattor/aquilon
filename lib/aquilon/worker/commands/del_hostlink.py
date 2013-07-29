@@ -32,6 +32,6 @@ class CommandDelHostlink(BrokerCommand):
         validate_basic("hostlink", hostlink)
         holder = get_resource_holder(session, hostname, cluster)
         dbhl = Hostlink.get_unique(session, name=hostlink, holder=holder,
-                                       compel=True)
+                                   compel=True)
         del_resource(session, logger, dbhl)
         return

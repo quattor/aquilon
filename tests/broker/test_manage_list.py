@@ -161,10 +161,10 @@ class TestManageList(TestBrokerCommand):
         command = ["manage", "--list", scratchfile, "--sandbox",
                    "%s/changetest1" % user, "--force"]
         out = self.badrequesttest(command)
-        self.matchoutput(out,"The number of hosts in list {0:d} can not be more "
-                         "than {1:d}".format(len(hosts), hostlimit), command)
-
-
+        self.matchoutput(out,
+                         "The number of hosts in list {0:d} can not be more "
+                         "than {1:d}".format(len(hosts), hostlimit),
+                         command)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestManageList)

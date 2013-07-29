@@ -93,8 +93,9 @@ class CommandSearchHost(BrokerCommand):
             q = q.filter(Machine.model_id.in_(subq))
 
         if serial:
-            self.deprecated_option("serial", "Please use search machine --serial instead.",
-                logger=logger, **arguments)
+            self.deprecated_option("serial",
+                                   "Please use search machine --serial instead.",
+                                   logger=logger, **arguments)
             q = q.filter(Machine.serial_no == serial)
 
         # DNS IP address related filters

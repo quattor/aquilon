@@ -64,6 +64,7 @@ class ServiceInstanceServer(Base):
                                            name="%s_pk" % _TN),
                       Index("sis_host_idx", host_id))
 
+
 def _sis_host_creator(host):
     return ServiceInstanceServer(host=host)
 

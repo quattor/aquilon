@@ -105,29 +105,29 @@ class TestMakeAquilon(VerifyNotificationsMixin, TestBrokerCommand):
         out = self.commandtest(command.split(" "))
 
         self.matchoutput(out,
-            """include { "archetype/base" };""",
-            command)
+                         """include { "archetype/base" };""",
+                         command)
         self.matchoutput(out,
-            """include { "os/linux/5.0.1-x86_64/config" };""",
-            command)
+                         """include { "os/linux/5.0.1-x86_64/config" };""",
+                         command)
         self.matchoutput(out,
-            """include { "service/afs/q.ny.ms.com/client/config" };""",
-            command)
+                         """include { "service/afs/q.ny.ms.com/client/config" };""",
+                         command)
         self.matchoutput(out,
-            """include { "service/bootserver/np.test/client/config" };""",
-            command)
+                         """include { "service/bootserver/np.test/client/config" };""",
+                         command)
         self.matchoutput(out,
-            """include { "service/dns/utdnsinstance/client/config" };""",
-            command)
+                         """include { "service/dns/utdnsinstance/client/config" };""",
+                         command)
         self.matchoutput(out,
-            """include { "service/ntp/pa.ny.na/client/config" };""",
-            command)
+                         """include { "service/ntp/pa.ny.na/client/config" };""",
+                         command)
         self.matchoutput(out,
-            """include { "personality/compileserver/config" };""",
-            command)
+                         """include { "personality/compileserver/config" };""",
+                         command)
         self.matchoutput(out,
-            """include { "archetype/final" };""",
-            command)
+                         """include { "archetype/final" };""",
+                         command)
 
         self.matchoutput(out, '"/metadata/template/branch/name" = "unittest";',
                          command)
@@ -248,29 +248,29 @@ class TestMakeAquilon(VerifyNotificationsMixin, TestBrokerCommand):
         command = "cat --hostname unittest00.one-nyp.ms.com"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
-            """include { "archetype/base" };""",
-            command)
+                         """include { "archetype/base" };""",
+                         command)
         self.matchoutput(out,
-            """include { "os/linux/5.0.1-x86_64/config" };""",
-            command)
+                         """include { "os/linux/5.0.1-x86_64/config" };""",
+                         command)
         self.matchoutput(out,
-            """include { "service/afs/q.ny.ms.com/client/config" };""",
-            command)
+                         """include { "service/afs/q.ny.ms.com/client/config" };""",
+                         command)
         self.matchoutput(out,
-            """include { "service/bootserver/np.test/client/config" };""",
-            command)
+                         """include { "service/bootserver/np.test/client/config" };""",
+                         command)
         self.matchoutput(out,
-            """include { "service/dns/utdnsinstance/client/config" };""",
-            command)
+                         """include { "service/dns/utdnsinstance/client/config" };""",
+                         command)
         self.matchoutput(out,
-            """include { "service/ntp/pa.ny.na/client/config" };""",
-            command)
+                         """include { "service/ntp/pa.ny.na/client/config" };""",
+                         command)
         self.matchoutput(out,
-            """include { "personality/compileserver/config" };""",
-            command)
+                         """include { "personality/compileserver/config" };""",
+                         command)
         self.matchoutput(out,
-            """include { "archetype/final" };""",
-            command)
+                         """include { "archetype/final" };""",
+                         command)
         self.matchoutput(out, '"/metadata/template/branch/name" = "unittest";',
                          command)
         self.matchoutput(out, '"/metadata/template/branch/type" = "domain";',

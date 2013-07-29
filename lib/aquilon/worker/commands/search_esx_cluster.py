@@ -49,9 +49,12 @@ class CommandSearchESXCluster(CommandSearchCluster):
             gen_arguments['esx_share'] = None
 
         return CommandSearchCluster.render(self, cluster_type='esx',
-            allowed_archetype=None, allowed_personality=None,
-            down_hosts_threshold=None,
-            down_maint_threshold=None,  # fullinfo=None,
-            location=None, max_members=None, member_archetype=None,
-            member_hostname=esx_hostname, member_personality=None,
-            **gen_arguments)
+                                           allowed_archetype=None,
+                                           allowed_personality=None,
+                                           down_hosts_threshold=None,
+                                           down_maint_threshold=None,
+                                           location=None, max_members=None,
+                                           member_archetype=None,
+                                           member_hostname=esx_hostname,
+                                           member_personality=None,
+                                           **gen_arguments)

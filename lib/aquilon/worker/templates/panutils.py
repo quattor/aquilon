@@ -185,4 +185,4 @@ class PanValue(PanObject):
         self.path = path
 
     def format(self, indent=0):
-        return 'value("%s")' % self.path;
+        return 'value("%s")' % self.path

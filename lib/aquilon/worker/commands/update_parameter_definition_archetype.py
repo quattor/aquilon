@@ -24,7 +24,7 @@ from aquilon.worker.dbwrappers.parameter import validate_param_definition
 
 class CommandUpdParameterDefintionArchetype(BrokerCommand):
 
-    required_parameters = ["archetype", "path" ]
+    required_parameters = ["archetype", "path"]
 
     def render(self, session, archetype, path, required,
                rebuild_required, default, description, **kwargs):
@@ -34,7 +34,6 @@ class CommandUpdParameterDefintionArchetype(BrokerCommand):
 
         if not dbarchetype.paramdef_holder:
             dbarchetype.paramdef_holder = ArchetypeParamDef()
-
 
         db_paramdef = ParamDefinition.get_unique(session, path=path,
                                                  holder=dbarchetype.paramdef_holder,

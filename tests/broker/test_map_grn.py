@@ -30,8 +30,8 @@ GRN = "grn:/ms/ei/aquilon/unittest"
 
 class TestMapGrn(VerifyGrnsMixin, TestBrokerCommand):
 
-    grn_list = [ "grn:/ms/ei/aquilon/aqd", "grn:/ms/ei/aquilon/unittest"]
-    grn_maps = { "esp": grn_list, "atarget": [ "grn:/example/cards"] }
+    grn_list = ["grn:/ms/ei/aquilon/aqd", "grn:/ms/ei/aquilon/unittest"]
+    grn_maps = {"esp": grn_list, "atarget": ["grn:/example/cards"]}
 
     def test_100_add_personality(self):
         command = ["add_personality", "--personality=utesppers/dev",
@@ -222,7 +222,7 @@ class TestMapGrn(VerifyGrnsMixin, TestBrokerCommand):
                    "--personality", "compileserver"]
         out = self.commandtest(command)
 
-        grn_list = [ "grn:/ms/ei/aquilon/aqd", "grn:/ms/ei/aquilon/unittest"]
+        grn_list = ["grn:/ms/ei/aquilon/aqd", "grn:/ms/ei/aquilon/unittest"]
         self.check_personality_grns(out, grn_list, {"esp": grn_list}, command)
 
         command = ["unmap", "grn", "--grn", "grn:/ms/ei/aquilon/aqd",

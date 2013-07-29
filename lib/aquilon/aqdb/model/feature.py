@@ -237,8 +237,7 @@ class FeatureLink(Base):
 
     @property
     def cfg_path(self):
-
-        format_str="%s/%s"
+        format_str = "%s/%s"
         if self.model:
             return format_str % (self.feature.cfg_path, self.model)
 
@@ -249,8 +248,7 @@ class FeatureLink(Base):
 
     @property
     def cfg_path_escaped(self):
-
-        format_str="%s/{%s}";
+        format_str = "%s/{%s}"
         if self.model:
             return format_str % (self.feature.cfg_path, self.model)
 

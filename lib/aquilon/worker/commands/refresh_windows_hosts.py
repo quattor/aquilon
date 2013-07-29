@@ -100,7 +100,7 @@ class CommandRefreshWindowsHosts(BrokerCommand):
             deps = get_host_dependencies(session, dbhost)
             if deps:
                 msg = "Skipping removal of host %s with dependencies: %s" % \
-                        (dbhost.fqdn, ", ".join(deps))
+                    (dbhost.fqdn, ", ".join(deps))
                 failed.append(msg)
                 logger.info(msg)
                 continue
@@ -152,21 +152,20 @@ class CommandRefreshWindowsHosts(BrokerCommand):
                 # attempt above.
                 if not existing.hardware_entity.interfaces:
                     msg = "Skipping host %s: Host already exists but has " \
-                            "no interface attached." % host
+                        "no interface attached." % host
                     failed.append(msg)
                     logger.info(msg)
                 elif existing.hardware_entity.interfaces[0].mac != mac:
                     msg = "Skipping host %s: Host already exists but with " \
-                            "MAC address %s and not %s." % \
-                            (host, existing.hardware_entity.interfaces[0].mac,
-                             mac)
+                        "MAC address %s and not %s." % \
+                        (host, existing.hardware_entity.interfaces[0].mac, mac)
                     failed.append(msg)
                     logger.info(msg)
                 continue
             dbinterface = session.query(Interface).filter_by(mac=mac).first()
             if not dbinterface:
                 msg = "Skipping host %s: MAC address %s is not present in " \
-                        "AQDB." % (host, mac)
+                    "AQDB." % (host, mac)
                 failed.append(msg)
                 logger.info(msg)
                 continue
@@ -175,23 +174,21 @@ class CommandRefreshWindowsHosts(BrokerCommand):
             dbmachine = q.first()
             if not dbmachine:
                 msg = "Skipping host %s: The AQDB interface with MAC address " \
-                        "%s is tied to hardware %s instead of a virtual " \
-                        "machine." % \
-                        (host, mac, dbinterface.hardware_entity.label)
+                    "%s is tied to hardware %s instead of a virtual " \
+                    "machine." % (host, mac, dbinterface.hardware_entity.label)
                 failed.append(msg)
                 logger.info(msg)
                 continue
             if dbinterface.assignments:
                 msg = "Skipping host %s: The AQDB interface with MAC address " \
-                        "%s is already tied to %s." % \
-                        (host, mac, dbinterface.assignments[0].fqdns[0])
+                    "%s is already tied to %s." % \
+                    (host, mac, dbinterface.assignments[0].fqdns[0])
                 failed.append(msg)
                 logger.info(msg)
                 continue
             if dbmachine.host:
                 msg = "Skipping host %s: The AQDB interface with MAC address " \
-                        "%s is already tied to %s." % \
-                        (host, mac, dbmachine.fqdn)
+                    "%s is already tied to %s." % (host, mac, dbmachine.fqdn)
                 failed.append(msg)
                 logger.info(msg)
                 continue

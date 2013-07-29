@@ -50,10 +50,10 @@ class TestUpdateChassis(TestBrokerCommand, VerifyChassisMixin):
                    "--chassis", "ut3c1.aqd-unittest.ms.com"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
-                          "IP address %s is already in use by on-board admin "
-                          "interface oa of chassis "
-                          "ut3c5.aqd-unittest.ms.com." % ip,
-                          command)
+                         "IP address %s is already in use by on-board admin "
+                         "interface oa of chassis "
+                         "ut3c5.aqd-unittest.ms.com." % ip,
+                         command)
 
     def test_200_update_bad_model(self):
         command = ["update", "chassis", "--model", "uttorswitch",

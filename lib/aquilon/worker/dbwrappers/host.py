@@ -100,26 +100,27 @@ def check_hostlist_size(command, config, hostlist):
                             "more than {1:d}".format(len(hostlist), hostlist_max_size))
     return
 
+
 def validate_branch_author(dbhosts):
     branches = defaultdict(ListType)
-    authors = defaultdict(ListType)    
+    authors = defaultdict(ListType)
     for dbhost in dbhosts:
-        branches[dbhost.branch].append(dbhost)      
+        branches[dbhost.branch].append(dbhost)
         authors[dbhost.sandbox_author].append(dbhost)
 
     if len(branches) > 1:
-       keys = branches.keys()
-       branch_sort = lambda x, y: cmp(len(branches[x]), len(branches[y]))
-       keys.sort(cmp=branch_sort)
-       stats = ["{0:d} hosts in {1:l}".format(len(branches[branch]), branch)
-                     for branch in keys]
-       raise ArgumentError("All hosts must be in the same domain or "
-                           "sandbox:\n%s" % "\n".join(stats))
+        keys = branches.keys()
+        branch_sort = lambda x, y: cmp(len(branches[x]), len(branches[y]))
+        keys.sort(cmp=branch_sort)
+        stats = ["{0:d} hosts in {1:l}".format(len(branches[branch]), branch)
+                 for branch in keys]
+        raise ArgumentError("All hosts must be in the same domain or "
+                            "sandbox:\n%s" % "\n".join(stats))
     if len(authors) > 1:
-       keys = authors.keys()
-       author_sort = lambda x, y: cmp(len(authors[x]), len(authors[y]))
-       keys.sort(cmp=author_sort)
-       stats = ["%s hosts with sandbox author %s" %
-                (len(authors[author]), author.name) for author in keys]
-       raise ArgumentError("All hosts must be managed by the same "
-                           "sandbox author:\n%s" % "\n".join(stats))
+        keys = authors.keys()
+        author_sort = lambda x, y: cmp(len(authors[x]), len(authors[y]))
+        keys.sort(cmp=author_sort)
+        stats = ["%s hosts with sandbox author %s" %
+                 (len(authors[author]), author.name) for author in keys]
+        raise ArgumentError("All hosts must be managed by the same "
+                            "sandbox author:\n%s" % "\n".join(stats))

@@ -61,7 +61,7 @@ class TestCompile(VerifyNotificationsMixin, TestBrokerCommand):
                 obj = profile.text.strip()
                 if obj and obj.endswith(profile_suffix):
                     mtimes[obj[:-len(profile_suffix)]] = \
-                            int(profile.attrib['mtime'])
+                        int(profile.attrib['mtime'])
         return mtimes
 
     def test_000_precompile(self):
@@ -189,9 +189,9 @@ class TestCompile(VerifyNotificationsMixin, TestBrokerCommand):
         command = ['compile', '--sandbox=%s/out_of_date' % self.user]
         (out, err) = self.successtest(command)
         self.matchclean(err,
-                         "Sandbox %s/out_of_date does not contain the "
-                         "latest changes from the prod domain." % self.user,
-                         command)
+                        "Sandbox %s/out_of_date does not contain the "
+                        "latest changes from the prod domain." % self.user,
+                        command)
 
     def test_430_cleanup(self):
         # using --force to bypass normal checks due to git status

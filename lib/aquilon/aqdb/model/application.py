@@ -30,7 +30,7 @@ class Application(Resource):
     id = Column(Integer, ForeignKey('resource.id',
                                     name='app_resource_fk',
                                     ondelete='CASCADE'),
-                                    primary_key=True)
+                primary_key=True)
 
     eonid = Column(Integer, nullable=False)
 

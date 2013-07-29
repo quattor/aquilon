@@ -21,6 +21,8 @@ from sqlalchemy import Integer, Column, ForeignKey
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import DnsRecord
 
+_TN = "reserved_name"
+
 
 class ReservedName(DnsRecord):
     """
@@ -28,14 +30,14 @@ class ReservedName(DnsRecord):
         address.
     """
 
-    __tablename__ = 'reserved_name'
-    __mapper_args__ = {'polymorphic_identity': 'reserved_name'}
+    __tablename__ = _TN
+    __mapper_args__ = {'polymorphic_identity': _TN}
     _class_label = 'Reserved Name'
 
     dns_record_id = Column(Integer, ForeignKey('dns_record.id',
-                                           name='reserved_name_dns_record_fk',
-                                           ondelete='CASCADE'),
-                       primary_key=True)
+                                               name='%s_dns_record_fk' % _TN,
+                                               ondelete='CASCADE'),
+                           primary_key=True)
 
     def __init__(self, **kwargs):
         if "ip" in kwargs and kwargs["ip"]:  # pragma: no cover

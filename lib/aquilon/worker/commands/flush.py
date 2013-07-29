@@ -104,7 +104,7 @@ class CommandFlush(BrokerCommand):
 
                 share_info = cache_storage_data()
 
-                for cls, options in  preload_classes.items():
+                for cls, options in preload_classes.items():
                     q = session.query(cls)
 
                     # If only hosts or only clusters are needed, don't load

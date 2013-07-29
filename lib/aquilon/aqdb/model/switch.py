@@ -35,7 +35,7 @@ class Switch(HardwareEntity):
                                 ForeignKey('hardware_entity.id',
                                            name='%s_hw_ent_fk' % _TN,
                                            ondelete='CASCADE'),
-                                           primary_key=True)
+                                primary_key=True)
 
     switch_type = Column(Enum(16, SWITCH_TYPES), nullable=False)
 

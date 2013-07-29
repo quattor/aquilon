@@ -46,9 +46,10 @@ class StateEngine:
 
         targets = self.__class__.transitions[self.name]
         if target_state.name not in targets:
-            raise ArgumentError(("cannot change state to %s from %s. " +
-                   "Legal states are: %s") % (target_state.name, self.name,
-                   ", ".join(targets)))
+            raise ArgumentError("cannot change state to %s from %s. "
+                                "Legal states are: %s" %
+                                (target_state.name, self.name,
+                                 ", ".join(targets)))
 
         if hasattr(self, 'onLeave'):
             self.onLeave(obj)

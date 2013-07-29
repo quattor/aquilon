@@ -48,7 +48,7 @@ class CommandUpdatePersonality(BrokerCommand):
                 global_vars = {'__builtins__': restricted_builtins}
                 local_vars = {'memory': 10}
                 capacity = eval(vmhost_capacity_function, global_vars,
-                              local_vars)
+                                local_vars)
             except Exception, err:
                 raise ArgumentError("Failed to evaluate the function: %s" % err)
             if not isinstance(capacity, dict):
@@ -74,8 +74,8 @@ class CommandUpdatePersonality(BrokerCommand):
                 raise ArgumentError("The memory overcommit factor must be >= 1.")
             dbpersona.cluster_infos["esx"].vmhost_overcommit_memory = vmhost_overcommit_memory
 
-        if cluster_required is not None and \
-               dbpersona.cluster_required != cluster_required:
+        if (cluster_required is not None and
+            dbpersona.cluster_required != cluster_required):
             if dbpersona.is_cluster:
                 q = session.query(Cluster)
             else:
@@ -100,7 +100,6 @@ class CommandUpdatePersonality(BrokerCommand):
                 raise ArgumentError("The personality '{0!s}' already has env set to '{1!s}'"
                                     " and cannot be updated"
                                     .format(dbpersona, dbpersona.host_environment))
-
 
         plenaries = PlenaryCollection(logger=logger)
 

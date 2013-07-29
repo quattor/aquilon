@@ -83,7 +83,7 @@ class DnsRecord(Base):
         if not fqdn or not isinstance(fqdn, Fqdn):
             if not isinstance(dns_environment, DnsEnvironment):
                 dns_environment = DnsEnvironment.get_unique_or_default(session,
-                                                                      dns_environment)
+                                                                       dns_environment)
             if fqdn:
                 if name or dns_domain:  # pragma: no cover
                     raise TypeError("fqdn and name/dns_domain cannot be mixed")

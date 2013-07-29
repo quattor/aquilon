@@ -112,7 +112,7 @@ class CommandAddPersonality(BrokerCommand):
             ## service maps
             q = session.query(PersonalityServiceMap).filter_by(personality=dbfrom_persona)
 
-            for sm in q.all() :
+            for sm in q.all():
                 dbmap = PersonalityServiceMap(service_instance=sm.service_instance,
                                               location=sm.location,
                                               network=sm.network,

@@ -21,7 +21,7 @@ from sqlalchemy.orm import undefer
 from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.user_principal import (
-        get_or_create_user_principal)
+    get_or_create_user_principal)
 
 
 class CommandShowPrincipalPrincipal(BrokerCommand):

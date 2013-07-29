@@ -243,7 +243,7 @@ class TestPxeswitch(TestBrokerCommand):
         command = ["pxeswitch", "--list", scratchfile,
                    "--configure", "--blindbuild"]
         out = self.badrequesttest(command)
-        self.matchoutput(out,"The number of hosts in list {0:d} can not be more "
+        self.matchoutput(out, "The number of hosts in list {0:d} can not be more "
                          "than {1:d}".format(len(hosts), hostlimit), command)
 
 

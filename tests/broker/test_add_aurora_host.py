@@ -62,7 +62,7 @@ class TestAddAuroraHost(TestBrokerCommand):
         command = "show host --hostname %s.ms.com" % self.aurora_without_node
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Primary Name: %s" % self.aurora_without_node,
-                command)
+                         command)
         self.matchoutput(out, "Aurora_node: ", command)
         self.matchoutput(out, "Building: ", command)
         self.matchoutput(out, "Archetype: aurora", command)

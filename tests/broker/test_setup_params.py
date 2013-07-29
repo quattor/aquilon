@@ -137,6 +137,7 @@ PARAM_DEFS = {
 
 }
 
+
 class TestSetupParams(TestBrokerCommand):
 
     def test_000_add_parameter_definitions(self):
@@ -165,10 +166,10 @@ class TestSetupParams(TestBrokerCommand):
             self.successtest(cmd)
 
     def test_010_setup_personality(self):
-        data = {"espinfo/function" : "development",
-                "espinfo/class" : "INFRASTRUCTURE",
-                "espinfo/users" : "IT / TECHNOLOGY",
-                "espinfo/threshold" : 0 }
+        data = {"espinfo/function": "development",
+                "espinfo/class": "INFRASTRUCTURE",
+                "espinfo/users": "IT / TECHNOLOGY",
+                "espinfo/threshold": 0}
 
         self.add_parameter("aquilon", "compileserver", data)
         self.add_parameter("aquilon", "inventory", data)

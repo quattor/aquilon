@@ -50,8 +50,8 @@ class ServiceMap(Base):
                          nullable=True)
 
     network_id = Column(Integer, ForeignKey('network.id', ondelete='CASCADE',
-                                             name='%s_net_fk' % _ABV),
-                         nullable=True)
+                                            name='%s_net_fk' % _ABV),
+                        nullable=True)
 
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))

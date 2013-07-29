@@ -206,9 +206,9 @@ class TestParameterDefinitionFeature(TestBrokerCommand):
 
     def test_146_update(self):
         cmd = ["update_parameter_definition", "--feature", FEATURE, "--type=host",
-              "--path=testint", "--description=testint",
-              "--default=100", "--required",
-              "--rebuild_required"]
+               "--path=testint", "--description=testint",
+               "--default=100", "--required",
+               "--rebuild_required"]
         self.noouttest(cmd)
 
     def test_147_verify_add(self):
@@ -255,16 +255,16 @@ class TestParameterDefinitionFeature(TestBrokerCommand):
             self.noouttest(cmd)
 
     def test_200_verify_delete(self):
-        cmd = ["search_parameter_definition", "--feature", FEATURE, "--type=host" ]
+        cmd = ["search_parameter_definition", "--feature", FEATURE, "--type=host"]
 
         err = self.notfoundtest(cmd)
         self.matchoutput(err, "No parameter definitions found for host "
                          "feature myfeature", cmd)
 
     def test_210_invalid_path_cleaned(self):
-        for path in ["/startslash", "endslash/"] :
+        for path in ["/startslash", "endslash/"]:
             cmd = ["add_parameter_definition", "--feature", FEATURE, "--type=host",
-                   "--path=%s" % path,  "--value_type=string"]
+                   "--path=%s" % path, "--value_type=string"]
             self.noouttest(cmd)
         cmd = ["search_parameter_definition", "--feature", FEATURE, "--type=host"]
         out = self.commandtest(cmd)
@@ -273,7 +273,7 @@ class TestParameterDefinitionFeature(TestBrokerCommand):
 
     def test_215_invalid_path1(self):
         for path in ["!badchar", "@badchar", "#badchar", "$badchar", "%badchar", "^badchar",
-                     "&badchar", "*badchar" ":badchar", ";badcharjk", "+badchar"] :
+                     "&badchar", "*badchar", ":badchar", ";badcharjk", "+badchar"]:
             cmd = ["add_parameter_definition", "--feature", FEATURE, "--type=host",
                    "--path=%s" % path, "--value_type=string"]
             err = self.badrequesttest(cmd)
@@ -282,7 +282,7 @@ class TestParameterDefinitionFeature(TestBrokerCommand):
 
     def test_220_valid_path(self):
         for path in ["multi/part1/part2", "noslash", "valid/with_under", "valid/with.dot",
-                     "valid/with-dash", "with_under", "with.dot", "with-dash"] :
+                     "valid/with-dash", "with_under", "with.dot", "with-dash"]:
 
             cmd = ["add_parameter_definition", "--path=%s" % path,
                    "--feature", FEATURE, "--type=host", "--value_type=string"]
@@ -293,7 +293,7 @@ class TestParameterDefinitionFeature(TestBrokerCommand):
             self.noouttest(cmd)
 
     def test_300_del(self):
-        cmd = ["del_feature", "--feature", FEATURE, "--type=host" ]
+        cmd = ["del_feature", "--feature", FEATURE, "--type=host"]
         self.noouttest(cmd)
 
 if __name__ == '__main__':

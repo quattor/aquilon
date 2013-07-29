@@ -35,14 +35,14 @@ class TestBindServer(TestBrokerCommand):
 
     def testbindutsi1unittest02(self):
         self.noouttest(["bind", "server",
-            "--hostname", "unittest02.one-nyp.ms.com",
-            "--service", "utsvc", "--instance", "utsi1"])
+                        "--hostname", "unittest02.one-nyp.ms.com",
+                        "--service", "utsvc", "--instance", "utsi1"])
 
     # Test binding multiple servers to a single instance
     def testbindutsi1unittest00(self):
         self.noouttest(["bind", "server",
-            "--hostname", "unittest00.one-nyp.ms.com",
-            "--service", "utsvc", "--instance", "utsi1"])
+                        "--hostname", "unittest00.one-nyp.ms.com",
+                        "--service", "utsvc", "--instance", "utsi1"])
 
     def testcatutsi1(self):
         command = "cat --service utsvc --instance utsi1"
@@ -90,8 +90,8 @@ class TestBindServer(TestBrokerCommand):
     # Test binding a server to multiple instances
     def testbindutsi2unittest00(self):
         self.noouttest(["bind", "server",
-            "--hostname", "unittest00.one-nyp.ms.com",
-            "--service", "utsvc", "--instance", "utsi2"])
+                        "--hostname", "unittest00.one-nyp.ms.com",
+                        "--service", "utsvc", "--instance", "utsi2"])
 
     def testcatutsi2(self):
         command = "cat --service utsvc --instance utsi2"

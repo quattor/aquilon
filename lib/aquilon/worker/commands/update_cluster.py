@@ -92,10 +92,10 @@ class CommandUpdateCluster(BrokerCommand):
             dbcluster.validate()
             cluster_updated = True
 
-        location_updated = update_cluster_location(session, logger,
-                                          dbcluster, fix_location,
-                                          plenaries, remove_plenaries,
-                                          **arguments)
+        location_updated = update_cluster_location(session, logger, dbcluster,
+                                                   fix_location, plenaries,
+                                                   remove_plenaries,
+                                                   **arguments)
 
         if location_updated:
             cluster_updated = True
@@ -180,14 +180,14 @@ def update_cluster_location(session, logger, dbcluster,
             for host in dbcluster.hosts:
                 if host.machine.location != dblocation and \
                    dblocation not in host.machine.location.parents:
-                    errors.append("{0} has location {1}.".format(host,
-                                                     host.machine.location))
+                    errors.append("{0} has location {1}."
+                                  .format(host, host.machine.location))
         else:
             for cluster in dbcluster.members:
                 if cluster.location_constraint != dblocation and \
                    dblocation not in cluster.location_constraint.parents:
-                    errors.append("{0} has location {1}.".format(cluster,
-                                                 cluster.location_constraint))
+                    errors.append("{0} has location {1}."
+                                  .format(cluster, cluster.location_constraint))
 
         if errors:
             raise ArgumentError("Cannot set {0} location constraint to "

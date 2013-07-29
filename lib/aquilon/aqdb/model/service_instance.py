@@ -102,8 +102,8 @@ class ServiceInstance(Base):
         McAlias = aliased(MetaCluster)
         q = session.query(Cluster.name, Cluster.max_hosts)
         # Force orm to look for mc - service relation
-        q = q.join('_metacluster', (McAlias,
-                        MetaClusterMember.metacluster_id == McAlias.id))
+        q = q.join('_metacluster',
+                   (McAlias, MetaClusterMember.metacluster_id == McAlias.id))
         q = q.filter(McAlias.service_bindings.contains(self))
         q = q.filter(McAlias.personality_id.in_(personality_ids))
 

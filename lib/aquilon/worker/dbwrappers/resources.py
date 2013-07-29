@@ -241,7 +241,7 @@ def find_share(dbobj, resourcegroup, share, ignore=None,
 
     if resourcegroup:
         msg = "{0} does not have share {1!s} assigned to it in " + \
-                "resourcegroup {2}.".format(dbobj, share, resourcegroup)
+            "resourcegroup {2}.".format(dbobj, share, resourcegroup)
     else:
         msg = "{0} does not have share {1!s} assigned to it.".format(dbobj,
                                                                      share)

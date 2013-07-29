@@ -34,8 +34,8 @@ class TestUmaskConstraints(TestBrokerCommand):
     # by all.
     def testgitfilepermission(self):
         self.assert_(os.stat(os.path.join(self.config.get("broker", "kingdir"),
-                                          "refs", "heads", "utsandbox")
-                            ).st_mode & stat.S_IROTH)
+                                          "refs", "heads", "utsandbox"))
+                     .st_mode & stat.S_IROTH)
 
     # Check that directory created by the broker has the proper
     # permissions.  This gets created as part of test_make_aquilon.

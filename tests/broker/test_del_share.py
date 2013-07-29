@@ -24,7 +24,7 @@ if __name__ == "__main__":
 import unittest2 as unittest
 from brokertest import TestBrokerCommand
 
-# taken from test_add_service.py
+
 class TestDelShare(TestBrokerCommand):
 
     def testdel10gigshares(self):

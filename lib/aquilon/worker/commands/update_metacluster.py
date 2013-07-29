@@ -58,10 +58,9 @@ class CommandUpdateMetaCluster(BrokerCommand):
         remove_plenaries = PlenaryCollection(logger=logger)
 
         location_updated = update_cluster_location(session, logger,
-                                          dbmetacluster,
-                                          fix_location,
-                                          plenaries, remove_plenaries,
-                                          **arguments)
+                                                   dbmetacluster, fix_location,
+                                                   plenaries, remove_plenaries,
+                                                   **arguments)
 
         if location_updated:
             cluster_updated = True

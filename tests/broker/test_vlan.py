@@ -67,7 +67,7 @@ class TestVlan(TestBrokerCommand):
                          "switch utpgsw0.aqd-unittest.ms.com.", command)
 
         self.matchoutput(err, "vlan 5 is not defined in AQ. Please use "
-                "add_vlan to add it.", command)
+                         "add_vlan to add it.", command)
 
     # Adding vlan 5 as unknown will suppress poll_switch vlan warning.
     def test_012_addvlan5(self):
@@ -90,19 +90,18 @@ class TestVlan(TestBrokerCommand):
                          "switch utpgsw0.aqd-unittest.ms.com.", command)
 
         self.matchclean(err, "vlan 5 is not defined in AQ. Please use "
-                "add_vlan to add it.", command)
+                        "add_vlan to add it.", command)
 
     def test_015_searchswbyvlan(self):
-        command = ["search_switch", "--vlan=714",
-                   "--format=csv"]
+        command = ["search_switch", "--vlan=714", "--format=csv"]
         out = self.commandtest(command)
         ip = self.getswip()
         self.matchoutput(out,
                          "utpgsw0.aqd-unittest.ms.com,%s,tor,ut3,ut,bnt,"
                          "rs g8000,,xge49,%s" % (ip, ip.mac), command)
         self.matchclean(out,
-                         "ut3gd1r01.aqd-unittest.ms.com,4.2.5.8,bor,ut3,ut,hp,"
-                         "uttorswitch,SNgd1r01,,", command)
+                        "ut3gd1r01.aqd-unittest.ms.com,4.2.5.8,bor,ut3,ut,hp,"
+                        "uttorswitch,SNgd1r01,,", command)
 
     def test_020_faildelvlan(self):
         command = ["del_vlan", "--vlan=714"]
@@ -126,7 +125,7 @@ class TestVlan(TestBrokerCommand):
         self.noouttest(command.split(" "))
 
         plenary = os.path.join(self.config.get("broker", "plenarydir"),
-                   "switchdata", "%s.tpl" % SW_HOSTNAME)
+                               "switchdata", "%s.tpl" % SW_HOSTNAME)
         self.failIf(os.path.exists(plenary),
                     "Plenary file '%s' still exists" % plenary)
 

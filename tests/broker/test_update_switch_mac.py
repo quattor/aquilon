@@ -29,6 +29,7 @@ if __name__ == "__main__":
 import unittest2 as unittest
 from brokertest import TestBrokerCommand
 
+
 # This suite replicates parts of test_poll_switch testing update_switch --discovered_macs.
 # when aq_poll_switch is removed, the remaining test methods should be moved
 # here.
@@ -44,8 +45,8 @@ class TestUpdateSwitchMac(TestBrokerCommand):
 
     def getmacdata(self, switchfile):
         dir = os.path.dirname(os.path.realpath(__file__))
-        out = open(os.path.join(dir, "..", "fakebin", "macdata.d",
-                               switchfile), 'r').read()
+        out = open(os.path.join(dir, "..", "fakebin", "macdata.d", switchfile),
+                   'r').read()
         return re.sub("\s+", " ", "".join(out))
 
     def testpollnp06bals03(self):
@@ -164,7 +165,7 @@ class TestUpdateSwitchMac(TestBrokerCommand):
 
     def testbadtype(self):
         command = ["update", "switch", "--switch",
-                   "ut3gd1r01.aqd-unittest.ms.com", 
+                   "ut3gd1r01.aqd-unittest.ms.com",
                    "--discovered_macs", self.getmacdata("ut3gd1r01.aqd-unittest.ms.com"),
                    "--type", "no-such-type"]
         out = self.badrequesttest(command)

@@ -17,7 +17,7 @@
 """The tables/objects/mappings related to hardware in Aquilon. """
 
 from sqlalchemy import Column, Integer, ForeignKey
-from sqlalchemy.orm  import relation
+from sqlalchemy.orm import relation
 
 from aquilon.aqdb.model import Cpu, HardwareEntity
 
@@ -30,9 +30,9 @@ class Machine(HardwareEntity):
 
     #TODO: should this be named hardware_entity_id?
     machine_id = Column(Integer, ForeignKey('hardware_entity.id',
-                                           name='machine_hw_ent_fk',
-                                           ondelete='CASCADE'),
-                                           primary_key=True)
+                                            name='machine_hw_ent_fk',
+                                            ondelete='CASCADE'),
+                        primary_key=True)
 
     cpu_id = Column(Integer, ForeignKey('cpu.id', name='machine_cpu_fk'),
                     nullable=False)

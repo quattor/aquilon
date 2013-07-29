@@ -168,8 +168,8 @@ class TestUpdateESXCluster(TestBrokerCommand):
         command = ["cat", "--hostname", original_hosts[0]]
         out = self.commandtest(command)
         self.matchoutput(out,
-            """include { "personality/vulcan-1g-desktop-prod/config" };""",
-            command)
+                         """include { "personality/vulcan-1g-desktop-prod/config" };""",
+                         command)
 
         command = ["reconfigure", "--membersof=utecl1",
                    "--archetype=vmhost",
@@ -190,8 +190,8 @@ class TestUpdateESXCluster(TestBrokerCommand):
         command = ["cat", "--hostname", updated_hosts[0]]
         out = self.commandtest(command)
         self.matchoutput(out,
-            """include { "os/esxi/4.1.0-u1/config" };""",
-            command)
+                         """include { "os/esxi/4.1.0-u1/config" };""",
+                         command)
 
         command = ["reconfigure", "--membersof=utecl1",
                    "--archetype=vmhost", "--osname=esxi",

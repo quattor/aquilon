@@ -59,7 +59,7 @@ class CommandAddMachine(BrokerCommand):
                                         'aurora_node', 'virtual_machine']:
             raise ArgumentError("The add_machine command cannot add machines "
                                 "of type %(type)s.  Try 'add %(type)s'." %
-                    {"type": dbmodel.machine_type})
+                                {"type": dbmodel.machine_type})
 
         vmholder = None
         if cluster or vmhost:
@@ -72,8 +72,8 @@ class CommandAddMachine(BrokerCommand):
 
             # TODO: do we need VMs inside resource groups?
             vmholder = get_resource_holder(session, hostname=vmhost,
-                                              cluster=cluster, resgroup=None,
-                                              compel=False)
+                                           cluster=cluster, resgroup=None,
+                                           compel=False)
 
             if vmholder.holder_object.status.name == 'decommissioned':
                 raise ArgumentError("Cannot add virtual machines to "
@@ -101,7 +101,7 @@ class CommandAddMachine(BrokerCommand):
         if chassis:
             # FIXME: Are virtual machines allowed to be in a chassis?
             dbslot = session.query(ChassisSlot).filter_by(chassis=dbchassis,
-                    slot_number=slot).first()
+                                                          slot_number=slot).first()
             if not dbslot:
                 dbslot = ChassisSlot(chassis=dbchassis, slot_number=slot)
             dbslot.machine = dbmachine

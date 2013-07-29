@@ -144,8 +144,8 @@ class ResponsePage(resource.Resource):
         # Default render would just call the method here.
         # This is expanded to do argument checking, finish the request,
         # and do some error handling.
-        d = self.check_arguments(request,
-                handler.required_parameters, handler.optional_parameters)
+        d = self.check_arguments(request, handler.required_parameters,
+                                 handler.optional_parameters)
         style = getattr(self, "output_format", None)
         if style is None:
             style = getattr(request, "output_format", None)
@@ -297,8 +297,7 @@ class RestServer(ResponsePage):
                         child = container.getStaticEntity(component)
                         if child is None:
                             #log.msg("Creating new static component '" + component + "'.")
-                            child = ResponsePage(relative,
-                                    formatter)
+                            child = ResponsePage(relative, formatter)
                             container.putChild(component, child)
                         container = child
                     else:
@@ -320,8 +319,8 @@ class RestServer(ResponsePage):
                                 container = container.dynamic_child
                         else:
                             #log.msg("Creating new dynamic component '" + component + "'.")
-                            child = ResponsePage(relative,
-                                    formatter, path_variable=path_variable)
+                            child = ResponsePage(relative, formatter,
+                                                 path_variable=path_variable)
                             container.dynamic_child = child
                             container = child
 

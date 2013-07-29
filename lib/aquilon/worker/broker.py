@@ -35,7 +35,7 @@ from aquilon.aqdb.db_factory import DbFactory
 from aquilon.aqdb.model.xtn import start_xtn, end_xtn
 from aquilon.worker.formats.formatters import ResponseFormatter
 from aquilon.worker.dbwrappers.user_principal import (
-        get_or_create_user_principal)
+    get_or_create_user_principal)
 from aquilon.worker.dbwrappers.resources import add_resource, del_resource
 from aquilon.locks import LockKey
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
@@ -223,7 +223,7 @@ class BrokerCommand(object):
             # Default class... no useful command info to repeat back...
             raise UnimplementedError("Command has not been implemented.")
         raise UnimplementedError("%s has not been implemented" %
-                self.__class__.__module__)
+                                 self.__class__.__module__)
 
     def _update_render(self, command):
         """ Wrap the render method using the requires_* attributes.
@@ -490,7 +490,7 @@ class BrokerCommand(object):
         # cls.__name__ is good enough to mine the logs which deprecated commands
         # are still in use.
         logger.info("User %s invoked deprecated command %s" % (user,
-                                                                cls.__name__))
+                                                               cls.__name__))
         logger.client_info(msg)
 
     @classmethod

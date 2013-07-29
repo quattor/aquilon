@@ -34,6 +34,7 @@ _TN = 'personality'
 _PGN = 'personality_grn_map'
 _PGNABV = 'pers_grn_map'
 
+
 def _pgm_creator(tuple):
     return PersonalityGrnMap(personality=tuple[0], grn=tuple[1], target=tuple[2])
 
@@ -111,8 +112,9 @@ class PersonalityGrnMap(Base):
                     nullable=False)
 
     personality = relation(Personality, innerjoin=True,
-                     backref=backref('_grns', cascade='all, delete-orphan',
-                                     passive_deletes=True))
+                           backref=backref('_grns',
+                                           cascade='all, delete-orphan',
+                                           passive_deletes=True))
 
     grn = relation(Grn, lazy=False, innerjoin=True,
                    backref=backref('_personalities', passive_deletes=True))

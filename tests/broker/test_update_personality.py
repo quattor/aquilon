@@ -159,7 +159,7 @@ class TestUpdatePersonality(VerifyGrnsMixin, TestBrokerCommand):
 
     def test_133_update_hostenv_testovrpersona(self):
         command = ["update_personality", "--personality=testovrpersona/dev",
-                    "--archetype=aquilon", "--host_environment=infra"]
+                   "--archetype=aquilon", "--host_environment=infra"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "The personality 'testovrpersona/dev' already has env set to 'dev' and cannot be updated",
                          command)
@@ -235,7 +235,7 @@ class TestUpdatePersonality(VerifyGrnsMixin, TestBrokerCommand):
         self.successtest(command)
 
         command = ["update_personality", "--personality=prod-perim",
-                    "--archetype=windows", "--host_environment=infra"]
+                   "--archetype=windows", "--host_environment=infra"]
         out = self.successtest(command)
 
         command = ["show_personality", "--personality=prod-perim",
@@ -248,7 +248,7 @@ class TestUpdatePersonality(VerifyGrnsMixin, TestBrokerCommand):
 
     def test_155_update_hostenv_prod(self):
         command = ["update_personality", "--personality=desktop",
-                    "--archetype=windows", "--host_environment=prod"]
+                   "--archetype=windows", "--host_environment=prod"]
         out = self.successtest(command)
 
         command = ["show_personality", "--personality=desktop",

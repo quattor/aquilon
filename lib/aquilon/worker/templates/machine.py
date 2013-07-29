@@ -123,10 +123,8 @@ class PlenaryMachineInfo(Plenary):
                 params["boot"] = True
 
             if disk.disk_type == 'local':
-                tpl = StructureTemplate(
-                                        ("hardware/harddisk/generic/%s" %
-                                        disk.controller_type),
-                                        params)
+                tpl = StructureTemplate("hardware/harddisk/generic/%s" %
+                                        disk.controller_type, params)
 
                 if disk.controller_type == 'cciss':
                     devname = "cciss/" + devname
@@ -157,7 +155,7 @@ class PlenaryMachineInfo(Plenary):
         interfaces = {}
         for interface in self.dbobj.interfaces:
             path = "hardware/nic/%s/%s" % (interface.model.vendor,
-                                            interface.model)
+                                           interface.model)
             if interface.interface_type == 'public':
                 ifinfo = {}
                 if interface.mac:

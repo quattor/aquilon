@@ -38,8 +38,8 @@ global_defaults = {
             "user": os.environ.get("USER") or get_username(),
             # Only used by unit tests at the moment, but maybe useful for
             # scripts that want to execute stand-alone.
-            "srcdir": os.path.realpath(os.path.join(
-                            os.path.dirname(__file__), "..", "..")),
+            "srcdir": os.path.realpath(os.path.join(os.path.dirname(__file__),
+                                                    "..", "..")),
             "hostname": socket.getfqdn(),
         }
 
@@ -56,7 +56,7 @@ class Config(SafeConfigParser):
             if not configfile or self.baseconfig == os.path.realpath(configfile):
                 return
             raise AquilonError("Could not configure with %s, already configured with %s" %
-                    (configfile, self.baseconfig))
+                (configfile, self.baseconfig))
         # This is a small race condition here... baseconfig could be
         # checked here, pre-empted, checked again elsewhere, and also
         # get here.  If that ever happens, it is only a problem if one
@@ -64,11 +64,11 @@ class Config(SafeConfigParser):
         if configfile:
             self.baseconfig = os.path.realpath(configfile)
         else:
-            self.baseconfig = os.path.realpath(
-                    os.environ.get("AQDCONF", "/etc/aqd.conf"))
+            self.baseconfig = os.path.realpath(os.environ.get("AQDCONF",
+                                                              "/etc/aqd.conf"))
         SafeConfigParser.__init__(self, defaults)
-        src_defaults = os.path.join(defaults["srcdir"],
-                "etc", "aqd.conf.defaults")
+        src_defaults = os.path.join(defaults["srcdir"], "etc",
+                                    "aqd.conf.defaults")
         read_files = self.read([src_defaults, self.baseconfig])
         for file in [src_defaults, self.baseconfig]:
             if file not in read_files:

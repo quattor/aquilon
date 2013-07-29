@@ -120,32 +120,32 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
                           command)
 
         self.matchoutput(out,
-            """include { "archetype/base" };""",
-            command)
+                         """include { "archetype/base" };""",
+                         command)
         self.matchoutput(out,
-            """\"/\" = create(\"hostdata/unittest02.one-nyp.ms.com\"""",
-            command)
+                         """\"/\" = create(\"hostdata/unittest02.one-nyp.ms.com\"""",
+                         command)
         self.matchoutput(out,
-            """include { "os/linux/5.0.1-x86_64/config" };""",
-            command)
+                         """include { "os/linux/5.0.1-x86_64/config" };""",
+                         command)
         self.matchoutput(out,
-            """include { "service/afs/q.ny.ms.com/client/config" };""",
-            command)
+                         """include { "service/afs/q.ny.ms.com/client/config" };""",
+                         command)
         self.matchoutput(out,
-            """include { "service/bootserver/np.test/client/config" };""",
-            command)
+                         """include { "service/bootserver/np.test/client/config" };""",
+                         command)
         self.matchoutput(out,
-            """include { "service/dns/utdnsinstance/client/config" };""",
-            command)
+                         """include { "service/dns/utdnsinstance/client/config" };""",
+                         command)
         self.matchoutput(out,
-            """include { "service/ntp/pa.ny.na/client/config" };""",
-            command)
+                         """include { "service/ntp/pa.ny.na/client/config" };""",
+                         command)
         self.matchoutput(out,
-            """include { "personality/compileserver/config" };""",
-            command)
+                         """include { "personality/compileserver/config" };""",
+                         command)
         self.matchoutput(out,
-            """include { "archetype/final" };""",
-            command)
+                         """include { "archetype/final" };""",
+                         command)
 
     # These settings have not changed - the command should still succeed.
     def testreconfigureunittest00(self):
@@ -217,32 +217,32 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
         command = "cat --hostname unittest00.one-nyp.ms.com"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
-            """include { "archetype/base" };""",
-            command)
+                         """include { "archetype/base" };""",
+                         command)
         self.matchoutput(out,
-            """\"/\" = create(\"hostdata/unittest00.one-nyp.ms.com\"""",
-            command)
+                         """\"/\" = create(\"hostdata/unittest00.one-nyp.ms.com\"""",
+                         command)
         self.matchoutput(out,
-            """include { "os/linux/5.0.1-x86_64/config" };""",
-            command)
+                         """include { "os/linux/5.0.1-x86_64/config" };""",
+                         command)
         self.matchoutput(out,
-            """include { "service/afs/q.ny.ms.com/client/config" };""",
-            command)
+                         """include { "service/afs/q.ny.ms.com/client/config" };""",
+                         command)
         self.matchoutput(out,
-            """include { "service/bootserver/np.test/client/config" };""",
-            command)
+                         """include { "service/bootserver/np.test/client/config" };""",
+                         command)
         self.matchoutput(out,
-            """include { "service/dns/utdnsinstance/client/config" };""",
-            command)
+                         """include { "service/dns/utdnsinstance/client/config" };""",
+                         command)
         self.matchoutput(out,
-            """include { "service/ntp/pa.ny.na/client/config" };""",
-            command)
+                         """include { "service/ntp/pa.ny.na/client/config" };""",
+                         command)
         self.matchoutput(out,
-            """include { "personality/compileserver/config" };""",
-            command)
+                         """include { "personality/compileserver/config" };""",
+                         command)
         self.matchoutput(out,
-            """include { "archetype/final" };""",
-            command)
+                         """include { "archetype/final" };""",
+                         command)
 
     def testreconfigurewindowsstatus(self):
         self.noouttest(["reconfigure",
@@ -419,35 +419,35 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
         self.matchclean(out, "chooser2", command)
         self.matchclean(out, "chooser3", command)
         self.matchoutput(out,
-            """include { "archetype/base" };""",
-            command)
+                         """include { "archetype/base" };""",
+                         command)
         self.matchoutput(out,
-            """\"/\" = create(\"hostdata/aquilon87.aqd-unittest.ms.com\"""",
-            command)
+                         """\"/\" = create(\"hostdata/aquilon87.aqd-unittest.ms.com\"""",
+                         command)
         self.matchoutput(out,
-            """include { "os/linux/5.0.1-x86_64/config" };""",
-            command)
+                         """include { "os/linux/5.0.1-x86_64/config" };""",
+                         command)
         self.matchoutput(out,
-            """include { "service/aqd/ny-prod/client/config" };""",
-            command)
+                         """include { "service/aqd/ny-prod/client/config" };""",
+                         command)
         self.matchoutput(out,
-            """include { "service/ntp/pa.ny.na/client/config" };""",
-            command)
+                         """include { "service/ntp/pa.ny.na/client/config" };""",
+                         command)
         self.matchoutput(out,
-            """include { "service/bootserver/np.test/client/config" };""",
-            command)
+                         """include { "service/bootserver/np.test/client/config" };""",
+                         command)
         self.matchoutput(out,
-            """include { "service/afs/q.ny.ms.com/client/config" };""",
-            command)
+                         """include { "service/afs/q.ny.ms.com/client/config" };""",
+                         command)
         self.matchoutput(out,
-            """include { "service/dns/utdnsinstance/client/config" };""",
-            command)
+                         """include { "service/dns/utdnsinstance/client/config" };""",
+                         command)
         self.matchoutput(out,
-            """include { "personality/inventory/config" };""",
-            command)
+                         """include { "personality/inventory/config" };""",
+                         command)
         self.matchoutput(out,
-            """include { "archetype/final" };""",
-            command)
+                         """include { "archetype/final" };""",
+                         command)
 
     def testreconfiguredebug(self):
         command = ["reconfigure", "--debug",
@@ -494,7 +494,7 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
         command = "show esx cluster --cluster utecl1"
         out = self.commandtest(command.split(" "))
         m = re.search(r'Member Alignment: Service esx_management_server '
-                       'Instance (\S+)', out)
+                      r'Instance (\S+)', out)
         self.failUnless(m, "Aligned instance not found in output:\n%s" % out)
         instance = m.group(1)
         # A better test might be to search for all hosts in the cluster
@@ -592,7 +592,7 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
         scratchfile = self.writescratch("reconfigurelistlimit", "".join(hosts))
         command = ["reconfigure", "--list", scratchfile, "--personality=generic"]
         out = self.badrequesttest(command)
-        self.matchoutput(out,"The number of hosts in list {0:d} can not be more "
+        self.matchoutput(out, "The number of hosts in list {0:d} can not be more "
                          "than {1:d}".format(len(hosts), hostlimit), command)
 
     # Need easy ordering for these, so using numbers...

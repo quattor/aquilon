@@ -34,8 +34,9 @@ class CommandResetAdvertisedStatus(BrokerCommand):
         dbhost = hostname_to_host(session, hostname)
         if dbhost.status.name == 'ready':
             raise ArgumentError("{0:l} is in ready status, "
-                               "advertised status can be reset only "
-                               "when host is in non ready state".format(dbhost))
+                                "advertised status can be reset only "
+                                "when host is in non ready state"
+                                .format(dbhost))
 
         dbhost.advertise_status = False
 

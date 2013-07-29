@@ -62,7 +62,7 @@ class VerifySwitchMixin(object):
             # FIXME: eventually this should be part of the model
             interface = "xge"
             self.searchoutput(out, "^    Comments: Created automatically "
-                             "by add_(tor_)?switch", command)
+                              "by add_(tor_)?switch", command)
         if mac:
             self.searchoutput(out, r"Interface: %s %s$" % (interface, mac),
                               command)

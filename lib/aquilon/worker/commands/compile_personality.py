@@ -42,7 +42,7 @@ class CommandCompilePersonality(BrokerCommand):
                                                          compel=True)
 
         dbpersonality = Personality.get_unique(session, name=personality,
-                                           archetype=archetype, compel=True)
+                                               archetype=archetype, compel=True)
         if pancdebug:
             pancinclude = r'.*'
             pancexclude = r'components/spma/functions'
