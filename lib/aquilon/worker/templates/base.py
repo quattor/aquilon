@@ -22,8 +22,11 @@ import logging
 
 from mako.lookup import TemplateLookup
 
+from sqlalchemy.inspection import inspect
+
 from aquilon.exceptions_ import InternalError, IncompleteError
 from aquilon.config import Config
+from aquilon.aqdb.model import Base
 from aquilon.worker.locks import lock_queue, CompileKey
 from aquilon.worker.templates.panutils import pan_assign, pan_variable
 from aquilon.worker.formats.formatters import ObjectFormatter
@@ -130,6 +133,15 @@ class Plenary(object):
         return self.old_content != self.new_content
 
     def get_write_key(self):
+        # This is a hack to handle the case when the DB object has been deleted,
+        # but a plenary instance still references it (probably buried inside a
+        # PlenaryCollection). Calling self.will_change() on such a plenary would
+        # fail, because the primary key is None, which is otherwise impossible.
+        if isinstance(self.dbobj, Base):
+            state = inspect(self.dbobj)
+            if state.deleted:
+                return None
+
         if self.will_change():
             return self.get_key()
         return None
@@ -178,6 +190,15 @@ class Plenary(object):
            self.dbobj.personality and \
            not self.dbobj.personality.archetype.is_compileable:
             return 0
+
+        # This is a hack to handle the case when the DB object has been deleted,
+        # but a plenary instance still references it (probably buried inside a
+        # PlenaryCollection). Calling self.will_change() on such a plenary would
+        # fail, because the primary key is None, which is otherwise impossible.
+        if isinstance(self.dbobj, Base):
+            state = inspect(self.dbobj)
+            if state.deleted:
+                return 0
 
         if content is None:
             if not self.new_content:
