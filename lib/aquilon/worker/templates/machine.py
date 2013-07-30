@@ -33,7 +33,8 @@ class PlenaryMachineInfo(Plenary):
     template_type = "structure"
 
     def __init__(self, dbmachine, logger=LOGGER):
-        Plenary.__init__(self, dbmachine, logger=logger)
+        super(PlenaryMachineInfo, self).__init__(dbmachine, logger=logger)
+
         self.machine = dbmachine.label
 
         loc = dbmachine.location

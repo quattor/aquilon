@@ -32,7 +32,8 @@ class PlenaryService(PlenaryCollection):
     A facade for the variety of PlenaryService subsidiary files
     """
     def __init__(self, dbservice, logger=LOGGER):
-        PlenaryCollection.__init__(self, logger=logger)
+        super(PlenaryService, self).__init__(logger=logger)
+
         self.dbobj = dbservice
         self.plenaries.append(PlenaryServiceToplevel(dbservice, logger=logger))
         self.plenaries.append(PlenaryServiceClientDefault(dbservice,
@@ -58,7 +59,8 @@ class PlenaryServiceToplevel(Plenary):
     template_type = "structure"
 
     def __init__(self, dbservice, logger=LOGGER):
-        Plenary.__init__(self, dbservice, logger=logger)
+        super(PlenaryServiceToplevel, self).__init__(dbservice, logger=logger)
+
         self.plenary_core = "servicedata/%s" % dbservice.name
         self.plenary_template = "config"
 
@@ -76,7 +78,9 @@ class PlenaryServiceClientDefault(Plenary):
     template_type = ""
 
     def __init__(self, dbservice, logger=LOGGER):
-        Plenary.__init__(self, dbservice, logger=logger)
+        super(PlenaryServiceClientDefault, self).__init__(dbservice,
+                                                          logger=logger)
+
         self.plenary_core = "service/%s/client" % dbservice.name
         self.plenary_template = "config"
 
@@ -94,7 +98,9 @@ class PlenaryServiceServerDefault(Plenary):
     template_type = ""
 
     def __init__(self, dbservice, logger=LOGGER):
-        Plenary.__init__(self, dbservice, logger=logger)
+        super(PlenaryServiceServerDefault, self).__init__(dbservice,
+                                                          logger=logger)
+
         self.plenary_core = "service/%s/server" % dbservice.name
         self.plenary_template = "config"
 
@@ -104,7 +110,8 @@ class PlenaryServiceInstance(PlenaryCollection):
     A facade for the variety of PlenaryServiceInstance subsidiary files
     """
     def __init__(self, dbinstance, logger=LOGGER):
-        PlenaryCollection.__init__(self, logger=logger)
+        super(PlenaryServiceInstance, self).__init__(logger=logger)
+
         self.plenaries.append(PlenaryServiceInstanceToplevel(dbinstance,
                                                              logger=logger))
         self.plenaries.append(PlenaryServiceInstanceClientDefault(dbinstance,
@@ -131,7 +138,9 @@ class PlenaryServiceInstanceToplevel(Plenary):
     template_type = "structure"
 
     def __init__(self, dbinstance, logger=LOGGER):
-        Plenary.__init__(self, dbinstance, logger=logger)
+        super(PlenaryServiceInstanceToplevel, self).__init__(dbinstance,
+                                                             logger=logger)
+
         self.service = dbinstance.service.name
         self.name = dbinstance.name
         self.plenary_core = "servicedata/%(service)s/%(name)s" % self.__dict__
@@ -159,7 +168,9 @@ class PlenaryServiceInstanceServer(Plenary):
     template_type = "structure"
 
     def __init__(self, dbinstance, logger=LOGGER):
-        Plenary.__init__(self, dbinstance, logger=logger)
+        super(PlenaryServiceInstanceServer, self).__init__(dbinstance,
+                                                           logger=logger)
+
         self.service = dbinstance.service.name
         self.name = dbinstance.name
         self.plenary_core = "servicedata/%(service)s/%(name)s" % self.__dict__
@@ -184,7 +195,9 @@ class PlenaryServiceInstanceClientDefault(Plenary):
     template_type = ""
 
     def __init__(self, dbinstance, logger=LOGGER):
-        Plenary.__init__(self, dbinstance, logger=logger)
+        super(PlenaryServiceInstanceClientDefault, self).__init__(dbinstance,
+                                                                  logger=logger)
+
         self.service = dbinstance.service.name
         self.name = dbinstance.name
         self.plenary_core = "service/%(service)s/%(name)s/client" % self.__dict__
@@ -210,7 +223,9 @@ class PlenaryServiceInstanceServerDefault(Plenary):
     template_type = ""
 
     def __init__(self, dbinstance, logger=LOGGER):
-        Plenary.__init__(self, dbinstance, logger=logger)
+        super(PlenaryServiceInstanceServerDefault, self).__init__(dbinstance,
+                                                                  logger=logger)
+
         self.service = dbinstance.service.name
         self.name = dbinstance.name
         self.plenary_core = "service/%(service)s/%(name)s/server" % self.__dict__

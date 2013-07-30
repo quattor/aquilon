@@ -34,7 +34,8 @@ class PlenaryResource(Plenary):
     template_type = "structure"
 
     def __init__(self, dbresource, logger=LOGGER):
-        Plenary.__init__(self, dbresource, logger=logger)
+        super(PlenaryResource, self).__init__(dbresource, logger=logger)
+
         self.type = dbresource.resource_type
         self.name = dbresource.name
         self.plenary_core = dbresource.template_base
@@ -146,7 +147,8 @@ Plenary.handlers[VirtualMachine] = PlenaryResource
 
 class PlenaryResourceGroup(PlenaryCollection):
     def __init__(self, dbresource, logger=LOGGER):
-        PlenaryCollection.__init__(self, logger=logger)
+        super(PlenaryResourceGroup, self).__init__(logger=logger)
+
         self.dbobj = dbresource
         self.real_plenary = PlenaryResource(dbresource)
 

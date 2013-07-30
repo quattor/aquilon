@@ -30,7 +30,8 @@ class PlenaryCity(Plenary):
     template_type = ""
 
     def __init__(self, dbcity, logger=LOGGER):
-        Plenary.__init__(self, dbcity, logger=logger)
+        super(PlenaryCity, self).__init__(dbcity, logger=logger)
+
         self.plenary_core = "site/%s/%s" % (
             dbcity.hub.fullname.lower(), dbcity.name)
         self.plenary_template = "config"

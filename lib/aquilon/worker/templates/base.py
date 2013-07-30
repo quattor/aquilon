@@ -47,6 +47,8 @@ class Plenary(object):
 
     """
     def __init__(self, dbobj=None, logger=LOGGER):
+        super(Plenary, self).__init__()
+
         self.config = Config()
         self.dbobj = dbobj
         self.logger = logger
@@ -383,6 +385,8 @@ class PlenaryCollection(object):
 
     """
     def __init__(self, logger=LOGGER):
+        super(PlenaryCollection, self).__init__()
+
         self.plenaries = []
         self.logger = logger
 

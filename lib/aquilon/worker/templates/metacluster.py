@@ -34,7 +34,8 @@ class PlenaryMetaCluster(PlenaryCollection):
     A facade for the variety of PlenaryMetaCluster subsidiary files
     """
     def __init__(self, dbcluster, logger=LOGGER):
-        PlenaryCollection.__init__(self, logger=logger)
+        super(PlenaryMetaCluster, self).__init__(logger=logger)
+
         self.dbobj = dbcluster
         self.plenaries.append(PlenaryMetaClusterObject(dbcluster, logger=logger))
         self.plenaries.append(PlenaryMetaClusterData(dbcluster, logger=logger))
@@ -45,7 +46,9 @@ class PlenaryMetaClusterData(Plenary):
     template_type = "structure"
 
     def __init__(self, dbmetacluster, logger=LOGGER):
-        Plenary.__init__(self, dbmetacluster, logger=logger)
+        super(PlenaryMetaClusterData, self).__init__(dbmetacluster,
+                                                     logger=logger)
+
         self.name = dbmetacluster.name
 
         # TODO maybe metaclusterdata
@@ -111,7 +114,9 @@ class PlenaryMetaClusterObject(Plenary):
     template_type = "object"
 
     def __init__(self, dbmetacluster, logger=LOGGER):
-        Plenary.__init__(self, dbmetacluster, logger=logger)
+        super(PlenaryMetaClusterObject, self).__init__(dbmetacluster,
+                                                       logger=logger)
+
         self.name = dbmetacluster.name
 
         self.loadpath = self.dbobj.personality.archetype.name

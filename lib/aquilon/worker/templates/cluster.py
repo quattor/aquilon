@@ -35,7 +35,8 @@ class PlenaryCluster(PlenaryCollection):
     A facade for the variety of PlenaryCluster subsidiary files
     """
     def __init__(self, dbcluster, logger=LOGGER):
-        PlenaryCollection.__init__(self, logger=logger)
+        super(PlenaryCluster, self).__init__(logger=logger)
+
         self.dbobj = dbcluster
         self.plenaries.append(PlenaryClusterObject(dbcluster, logger=logger))
         self.plenaries.append(PlenaryClusterData(dbcluster, logger=logger))
@@ -53,7 +54,8 @@ class PlenaryClusterData(Plenary):
     template_type = "structure"
 
     def __init__(self, dbcluster, logger=LOGGER):
-        Plenary.__init__(self, dbcluster, logger=logger)
+        super(PlenaryClusterData, self).__init__(dbcluster, logger=logger)
+
         self.name = dbcluster.name
         if dbcluster.metacluster:
             self.metacluster = dbcluster.metacluster.name
@@ -162,7 +164,8 @@ class PlenaryClusterObject(Plenary):
     template_type = "object"
 
     def __init__(self, dbcluster, logger=LOGGER):
-        Plenary.__init__(self, dbcluster, logger=logger)
+        super(PlenaryClusterObject, self).__init__(dbcluster, logger=logger)
+
         self.name = dbcluster.name
         self.loadpath = dbcluster.personality.archetype.name
         self.plenary_core = "clusters"
@@ -197,7 +200,8 @@ class PlenaryClusterClient(Plenary):
     template_type = ""
 
     def __init__(self, dbcluster, logger=LOGGER):
-        Plenary.__init__(self, dbcluster, logger=logger)
+        super(PlenaryClusterClient, self).__init__(dbcluster, logger=logger)
+
         self.name = dbcluster.name
         self.plenary_core = "cluster/%s" % self.name
         self.plenary_template = "client"

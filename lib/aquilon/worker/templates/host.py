@@ -87,10 +87,11 @@ class PlenaryHost(PlenaryCollection):
       if host profiles should be put into a "flat" toplevel (non-namespaced)
     """
     def __init__(self, dbhost, logger=LOGGER):
+        super(PlenaryHost, self).__init__(logger=logger)
+
         if not isinstance(dbhost, Host):
             raise InternalError("PlenaryHost called with %s instead of Host" %
                                 dbhost.__class__.name)
-        PlenaryCollection.__init__(self, logger=logger)
         self.dbobj = dbhost
         self.config = Config()
         if self.config.getboolean("broker", "namespaced_host_profiles"):
@@ -121,7 +122,8 @@ class PlenaryHostData(Plenary):
     template_type = "structure"
 
     def __init__(self, dbhost, logger=LOGGER):
-        Plenary.__init__(self, dbhost, logger=logger)
+        super(PlenaryHostData, self).__init__(dbhost, logger=logger)
+
         # Store the branch separately so get_key() works even after the dbhost
         # object has been deleted
         self.branch = dbhost.branch
@@ -308,7 +310,8 @@ class PlenaryToplevelHost(Plenary):
     template_type = "object"
 
     def __init__(self, dbhost, logger=LOGGER):
-        Plenary.__init__(self, dbhost, logger=logger)
+        super(PlenaryToplevelHost, self).__init__(dbhost, logger=logger)
+
         # Store the branch separately so get_key() works even after the dbhost
         # object has been deleted
         self.branch = dbhost.branch
@@ -399,5 +402,6 @@ class PlenaryNamespacedHost(PlenaryToplevelHost):
     A plenary template describing a host, namespaced by DNS domain
     """
     def __init__(self, dbhost, logger=LOGGER):
-        PlenaryToplevelHost.__init__(self, dbhost, logger=logger)
+        super(PlenaryNamespacedHost, self).__init__(dbhost, logger=logger)
+
         self.plenary_core = dbhost.fqdn.dns_domain.name
