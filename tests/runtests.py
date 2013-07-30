@@ -21,10 +21,10 @@
 import os
 import re
 import sys
-import unittest
 from subprocess import Popen
 
 import depends  # pylint: disable=W0611
+import unittest2 as unittest
 
 import argparse
 
@@ -197,10 +197,9 @@ for dirname in dirs:
     except OSError, e:
         print >> sys.stderr, "Could not create %s: %s" % (dirname, e)
 
-# Create DSDB coverage directory
+# Set up DSDB coverage directory
 dsdb_coverage_dir = os.path.join(config.get("unittest", "scratchdir"),
                                  "dsdb_coverage")
-os.makedirs(dsdb_coverage_dir)
 os.environ["AQTEST_DSDB_COVERAGE_DIR"] = dsdb_coverage_dir
 
 suite = unittest.TestSuite()

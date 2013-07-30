@@ -17,12 +17,11 @@
 # limitations under the License.
 """Module for testing the add chassis command."""
 
-import unittest
-
 if __name__ == "__main__":
     import utils
     utils.import_depends()
 
+import unittest2 as unittest
 from brokertest import TestBrokerCommand
 from chassistest import VerifyChassisMixin
 
@@ -55,7 +54,7 @@ class TestAddChassis(TestBrokerCommand, VerifyChassisMixin):
 
     def testaddut9chassis(self):
         for i in range(1, 6):
-            ip = self.net.unknown[10].usable[i]
+            ip = self.net["ut9_chassis"].usable[i]
             self.dsdb_expect_add("ut9c%d.aqd-unittest.ms.com" % i,
                                  ip, "oa", ip.mac)
             command = ["add", "chassis",
@@ -69,8 +68,8 @@ class TestAddChassis(TestBrokerCommand, VerifyChassisMixin):
         for i in range(1, 6):
             self.verifychassis("ut9c%d.aqd-unittest.ms.com" % i,
                                "hp", "c-class", "ut9", "", "",
-                               ip=str(self.net.unknown[10].usable[i]),
-                               mac=self.net.unknown[10].usable[i].mac,
+                               ip=str(self.net["ut9_chassis"].usable[i]),
+                               mac=self.net["ut9_chassis"].usable[i].mac,
                                interface="oa")
 
     def testverifychassisall(self):

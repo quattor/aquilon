@@ -26,7 +26,6 @@ and 'unbind', 'map' and 'unmap', etc.
 
 import os
 import sys
-import unittest
 
 if __name__ == "__main__":
     BINDIR = os.path.dirname(os.path.realpath(__file__))
@@ -34,6 +33,8 @@ if __name__ == "__main__":
     sys.path.append(os.path.join(SRCDIR, "lib"))
     sys.path.append(os.path.join(SRCDIR, "tests"))
     import depends  # pylint: disable=W0611
+
+import unittest2 as unittest
 
 from test_start import TestBrokerStart
 from test_ping import TestPing

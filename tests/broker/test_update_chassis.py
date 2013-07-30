@@ -17,12 +17,11 @@
 # limitations under the License.
 """Module for testing the update chassis command."""
 
-import unittest
-
 if __name__ == "__main__":
     import utils
     utils.import_depends()
 
+import unittest2 as unittest
 from brokertest import TestBrokerCommand
 from chassistest import VerifyChassisMixin
 
@@ -30,7 +29,7 @@ from chassistest import VerifyChassisMixin
 class TestUpdateChassis(TestBrokerCommand, VerifyChassisMixin):
 
     def test_100_update_ut3c5(self):
-        ip = self.net.unknown[0].usable[6]
+        ip = self.net["unknown0"].usable[6]
         self.dsdb_expect_add("ut3c5.aqd-unittest.ms.com", ip, "oa",
                              comments="Some new chassis comments")
         command = ["update", "chassis", "--chassis", "ut3c5.aqd-unittest.ms.com",
@@ -43,10 +42,10 @@ class TestUpdateChassis(TestBrokerCommand, VerifyChassisMixin):
         self.verifychassis("ut3c5.aqd-unittest.ms.com", "hp", "c-class",
                            "ut3", "a", "3", "ABC5678",
                            comments="Some new chassis comments",
-                           ip=self.net.unknown[0].usable[6])
+                           ip=self.net["unknown0"].usable[6])
 
     def test_200_update_bad_ip(self):
-        ip = self.net.unknown[0].usable[6]
+        ip = self.net["unknown0"].usable[6]
         command = ["update", "chassis", "--ip", ip,
                    "--chassis", "ut3c1.aqd-unittest.ms.com"]
         out = self.badrequesttest(command)

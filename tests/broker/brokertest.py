@@ -18,14 +18,14 @@
 
 import os
 import sys
-import unittest
+import unittest2 as unittest
 from subprocess import Popen, PIPE
 import re
 
 from aquilon.config import Config
 from aquilon.worker import depends  # pylint: disable=W0611
 
-from ipaddr import IPv4Network, IPv4Address
+from networktest import DummyNetworks
 
 LOCK_RE = re.compile(r'^(acquired|releasing) '
                      r'((compile|delete|sync) )?lock[^\n]*\n', re.M)
@@ -38,9 +38,28 @@ DSDB_ISSUED_CMDS_FILE = "issued_dsdb_cmds"
 
 class TestBrokerCommand(unittest.TestCase):
 
-    def setUp(self):
-        self.config = Config()
-        self.net = DummyNetworks()
+    config = None
+    scratchdir = None
+    dsdb_coverage_dir = None
+    sandboxdir = None
+    user = None
+
+    @classmethod
+    def setUpClass(cls):
+        cls.config = Config()
+        cls.net = DummyNetworks(cls.config)
+
+        cls.scratchdir = cls.config.get("unittest", "scratchdir")
+        cls.dsdb_coverage_dir = os.path.join(cls.scratchdir, "dsdb_coverage")
+
+        dirs = [cls.scratchdir, cls.dsdb_coverage_dir]
+        for dir in dirs:
+            if not os.path.exists(dir):
+                os.makedirs(dir)
+
+        cls.user = cls.config.get("broker", "user")
+        cls.sandboxdir = os.path.join(cls.config.get("broker", "templatesdir"),
+                                      cls.user)
 
         # Need to import protocol buffers after we have the config
         # object all squared away and we can set the sys.path
@@ -48,7 +67,7 @@ class TestBrokerCommand(unittest.TestCase):
         # It would be simpler just to change sys.path in runtests.py,
         # but this allows for each test to be run individually (without
         # the runtests.py wrapper).
-        protodir = self.config.get("protocols", "directory")
+        protodir = cls.config.get("protocols", "directory")
         if protodir not in sys.path:
             sys.path.append(protodir)
         for m in ['aqdsystems_pb2', 'aqdnetworks_pb2', 'aqdservices_pb2',
@@ -56,18 +75,9 @@ class TestBrokerCommand(unittest.TestCase):
                   'aqdparamdefinitions_pb2', 'aqdparameters_pb2']:
             globals()[m] = __import__(m)
 
-        self.user = self.config.get("broker", "user")
-        self.sandboxdir = os.path.join(self.config.get("broker",
-                                                       "templatesdir"),
-                                       self.user)
+    def setUp(self):
         self.template_extension = self.config.get("panc", "template_extension")
 
-        # This method is cumbersome.  Should probably develop something
-        # like unittest.conf.defaults.
-        if self.config.has_option("unittest", "scratchdir"):
-            self.scratchdir = self.config.get("unittest", "scratchdir")
-            if not os.path.exists(self.scratchdir):
-                os.makedirs(self.scratchdir)
         if self.config.has_option("unittest", "aurora_with_node"):
             self.aurora_with_node = self.config.get("unittest",
                     "aurora_with_node")
@@ -81,11 +91,9 @@ class TestBrokerCommand(unittest.TestCase):
         self.gzip_profiles = self.config.getboolean("panc", "gzip_output")
         self.profile_suffix = ".xml.gz" if self.gzip_profiles else ".xml"
 
-        dsdb_coverage_dir = os.path.join(self.config.get("unittest", "scratchdir"),
-                                         "dsdb_coverage")
         for name in [DSDB_EXPECT_SUCCESS_FILE, DSDB_EXPECT_FAILURE_FILE,
                      DSDB_ISSUED_CMDS_FILE, DSDB_EXPECT_FAILURE_ERROR]:
-            path = os.path.join(dsdb_coverage_dir, name)
+            path = os.path.join(self.dsdb_coverage_dir, name)
             try:
                 os.remove(path)
             except OSError:
@@ -448,9 +456,10 @@ class TestBrokerCommand(unittest.TestCase):
         return self.parse_proto_msg(aqdparameters_pb2.ParameterList,
                                     'parameters', msg, expect)
 
-    def gitenv(self, env=None):
+    @classmethod
+    def gitenv(cls, env=None):
         """Configure a known sanitised environment"""
-        git_path = self.config.get("broker", "git_path")
+        git_path = cls.config.get("broker", "git_path")
         # The "publish" test abuses gitenv(), and it needs the Python interpreter
         # in the path, because it runs the template unit tests which in turn
         # call the aq command
@@ -554,14 +563,12 @@ class TestBrokerCommand(unittest.TestCase):
         return contents
 
     def dsdb_expect(self, command, fail=False, errstr=""):
-        dsdb_coverage_dir = os.path.join(self.config.get("unittest", "scratchdir"),
-                                         "dsdb_coverage")
         if fail:
             filename = DSDB_EXPECT_FAILURE_FILE
         else:
             filename = DSDB_EXPECT_SUCCESS_FILE
 
-        expected_name = os.path.join(dsdb_coverage_dir, filename)
+        expected_name = os.path.join(self.dsdb_coverage_dir, filename)
         with open(expected_name, "a") as fp:
             if isinstance(command, list):
                 fp.write(" ".join([str(cmd) for cmd in command]))
@@ -570,7 +577,7 @@ class TestBrokerCommand(unittest.TestCase):
             fp.write("\n")
         if fail and errstr:
             errfile = DSDB_EXPECT_FAILURE_ERROR
-            expected_name = os.path.join(dsdb_coverage_dir, errfile)
+            expected_name = os.path.join(self.dsdb_coverage_dir, errfile)
             with open(expected_name, "a") as fp:
                 fp.write(errstr)
                 fp.write("\n")
@@ -642,15 +649,13 @@ class TestBrokerCommand(unittest.TestCase):
         self.dsdb_expect(" ".join(command), fail=fail, errstr=errstr)
 
     def dsdb_verify(self, empty=False):
-        dsdb_coverage_dir = os.path.join(self.config.get("unittest", "scratchdir"),
-                                         "dsdb_coverage")
-        fail_expected_name = os.path.join(dsdb_coverage_dir,
+        fail_expected_name = os.path.join(self.dsdb_coverage_dir,
                                           DSDB_EXPECT_FAILURE_FILE)
-        issued_name = os.path.join(dsdb_coverage_dir, DSDB_ISSUED_CMDS_FILE)
+        issued_name = os.path.join(self.dsdb_coverage_dir, DSDB_ISSUED_CMDS_FILE)
 
         expected = {}
         for filename in [DSDB_EXPECT_SUCCESS_FILE, DSDB_EXPECT_FAILURE_FILE]:
-            expected_name = os.path.join(dsdb_coverage_dir, filename)
+            expected_name = os.path.join(self.dsdb_coverage_dir, filename)
             try:
                 with open(expected_name, "r") as fp:
                     for line in fp:
@@ -715,132 +720,3 @@ class TestBrokerCommand(unittest.TestCase):
         self.assertEqual(p.returncode, 0,
                          "Failed to restore admin privs '%s', '%s'." %
                          (out, err))
-
-
-class DummyIP(IPv4Address):
-    def __init__(self, *args, **kwargs):
-        super(DummyIP, self).__init__(*args, **kwargs)
-
-        octets = [int(i) for i in str(self).split('.')]
-        self.mac = "02:02:%02x:%02x:%02x:%02x" % tuple(octets)
-
-
-class NetworkInfo(IPv4Network):
-    def __init__(self, cidr, nettype):
-        super(NetworkInfo, self).__init__(cidr)
-
-        self.nettype = nettype
-        self.usable = list()
-        self.reserved = list()
-
-        if nettype == 'tor_net':
-            offsets = [6, 7]
-        elif nettype == 'tor_net2':
-            offsets = [7, 8]
-        elif nettype == 'vm_storage_net':
-            offsets = [39]
-        else:
-            offsets = []
-
-        for offset in offsets:
-            self.reserved.append(DummyIP(self[offset]))
-
-        first_usable = max(offsets or [4]) + 1
-        for i in range(first_usable, self.numhosts - 1):
-            self.usable.append(DummyIP(self[i]))
-
-    @property
-    def gateway(self):
-        return self[1]
-
-    def __getitem__(self, idx):
-        # Cast the result to DummyIP, so the .mac property can be used
-        return DummyIP(super(NetworkInfo, self).__getitem__(idx))
-
-
-class DummyNetworks(object):
-    # Borg
-    __shared_state = {}
-
-    def __init__(self, *args, **kwargs):
-        self.__dict__ = self.__shared_state
-        if getattr(self, "unknown", None):
-            return
-        object.__init__(self, *args, **kwargs)
-        self.unknown = list()
-        self.tor_net = list()
-        self.tor_net2 = list()
-        self.tor_net4 = list()
-        self.vm_storage_net = list()
-        self.vpls = list()
-        self.all = list()
-        self.unknown.append(NetworkInfo("4.2.1.0/26", "unknown"))
-        self.unknown.append(NetworkInfo("4.2.1.64/26", "unknown"))
-        self.unknown.append(NetworkInfo("4.2.6.128/29", "unknown"))
-        self.unknown.append(NetworkInfo("4.2.6.136/29", "unknown"))
-        self.unknown.append(NetworkInfo("4.2.6.144/29", "unknown"))
-        self.unknown.append(NetworkInfo("4.2.6.152/29", "unknown"))
-        self.unknown.append(NetworkInfo("4.2.6.160/29", "unknown"))
-        self.unknown.append(NetworkInfo("4.2.6.168/29", "unknown"))
-        self.unknown.append(NetworkInfo("4.2.6.176/29", "unknown"))
-        self.unknown.append(NetworkInfo("4.2.6.184/29", "unknown"))
-        self.unknown.append(NetworkInfo("4.2.10.0/24", "unknown"))
-
-        # Zebra/bonding/bridge: eth0 address/mac
-        self.unknown.append(NetworkInfo("4.2.12.0/26", "unknown"))
-
-        # Zebra/bonding/bridge: eth1 address/mac
-        self.unknown.append(NetworkInfo("4.2.12.64/26", "unknown"))
-
-        # Zebra/bonding/bridge: virtual interface addresses
-        self.unknown.append(NetworkInfo("4.2.12.128/26", "unknown"))
-
-        # Static routing tests
-        self.unknown.append(NetworkInfo("4.2.14.0/25", "unknown"))
-        self.unknown.append(NetworkInfo("4.2.14.128/25", "unknown"))
-
-        # Small networks
-        self.unknown.append(NetworkInfo("4.2.15.0/32", "unknown"))
-
-        # autopg v2
-        self.unknown.append(NetworkInfo("4.2.18.0/29", "unknown"))
-        self.unknown.append(NetworkInfo("4.2.18.16/29", "unknown"))
-
-        # Switch loopback
-        self.unknown.append(NetworkInfo("4.2.19.0/24", "unknown"))
-
-        # Switch sync testing
-        self.unknown.append(NetworkInfo("4.2.20.0/24", "unknown"))
-
-        self.tor_net.append(NetworkInfo("4.2.1.128/26", "tor_net"))
-        self.tor_net.append(NetworkInfo("4.2.1.192/26", "tor_net"))
-        self.tor_net.append(NetworkInfo("4.2.2.0/26", "tor_net"))
-        self.tor_net.append(NetworkInfo("4.2.2.64/26", "tor_net"))
-        self.tor_net.append(NetworkInfo("4.2.2.128/26", "tor_net"))
-        self.tor_net.append(NetworkInfo("4.2.2.192/26", "tor_net"))
-        self.tor_net.append(NetworkInfo("4.2.9.0/26", "tor_net"))
-        self.tor_net.append(NetworkInfo("4.2.9.64/26", "tor_net"))
-        self.tor_net.append(NetworkInfo("4.2.9.128/26", "tor_net"))
-        self.tor_net.append(NetworkInfo("4.2.9.192/26", "tor_net"))
-        self.tor_net.append(NetworkInfo("4.2.3.0/25", "tor_net"))
-        self.tor_net.append(NetworkInfo("4.2.3.128/25", "tor_net"))
-        self.tor_net.append(NetworkInfo("4.2.5.0/25", "tor_net"))
-        self.tor_net2.append(NetworkInfo("4.2.4.0/25", "tor_net2"))
-        self.tor_net2.append(NetworkInfo("4.2.4.128/25", "tor_net2"))
-        self.tor_net2.append(NetworkInfo("4.2.6.192/26", "tor_net2"))
-        self.tor_net2.append(NetworkInfo("4.2.7.0/25", "tor_net2"))
-        self.tor_net2.append(NetworkInfo("4.2.7.128/25", "tor_net2"))
-        self.tor_net2.append(NetworkInfo("4.2.11.0/28", "tor_net2"))
-        self.tor_net4.append(NetworkInfo("4.2.8.0/25", "tor_net4"))
-        self.vm_storage_net.append(NetworkInfo("4.2.6.0/25", "vm_storage_net"))
-        self.vpls.append(NetworkInfo("4.2.13.0/24", "vpls"))
-        self.all.extend(self.unknown)
-        self.all.extend(self.tor_net)
-        self.all.extend(self.tor_net2)
-        self.all.extend(self.tor_net4)
-        self.all.extend(self.vm_storage_net)
-        self.all.extend(self.vpls)
-
-        # network base svc maps, deliberately not in self.all
-        self.netsvcmap = NetworkInfo("4.2.16.0/26", "unknown")
-        self.netperssvcmap = NetworkInfo("4.2.17.0/26", "unknown")

@@ -18,14 +18,13 @@
 """ This is needed to make sure that a server is bound to the aqd service
     before make aquilon runs."""
 
-
 import socket
-import unittest
 
 if __name__ == "__main__":
     import utils
     utils.import_depends()
 
+import unittest2 as unittest
 from brokertest import TestBrokerCommand
 
 
@@ -109,7 +108,7 @@ class TestPrebindServer(TestBrokerCommand):
         # The IP address comes from fakebin/dsdb.d, not from the real DNS.
         self.searchoutput(out,
                           '"server_ips" = list\(\s*"10.184.155.249",\s*"%s"\s*\);' %
-                          self.net.unknown[0].usable[0],
+                          self.net["unknown0"].usable[0],
                           command)
 
 

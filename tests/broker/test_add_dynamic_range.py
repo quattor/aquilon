@@ -17,13 +17,11 @@
 # limitations under the License.
 """Module for testing the add dynamic range command."""
 
-
-import unittest
-
 if __name__ == "__main__":
     import utils
     utils.import_depends()
 
+import unittest2 as unittest
 from ipaddr import IPv4Address
 from brokertest import TestBrokerCommand
 
@@ -36,16 +34,16 @@ class TestAddDynamicRange(TestBrokerCommand):
 
     def testadddifferentnetworks(self):
         command = ["add_dynamic_range",
-                   "--startip=%s" % self.net.tor_net2[0].usable[2],
-                   "--endip=%s" % self.net.tor_net2[1].usable[2],
+                   "--startip=%s" % self.net["dyndhcp0"].usable[2],
+                   "--endip=%s" % self.net["dyndhcp1"].usable[2],
                    "--dns_domain=aqd-unittest.ms.com"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "must be on the same subnet", command)
 
     def testaddmissingdomain(self):
         command = ["add_dynamic_range",
-                   "--startip=%s" % self.net.tor_net2[0].usable[2],
-                   "--endip=%s" % self.net.tor_net2[0].usable[-3],
+                   "--startip=%s" % self.net["dyndhcp0"].usable[2],
+                   "--endip=%s" % self.net["dyndhcp0"].usable[-3],
                    "--dns_domain=dns_domain_does_not_exist"]
         out = self.notfoundtest(command)
         self.matchoutput(out,
@@ -54,8 +52,8 @@ class TestAddDynamicRange(TestBrokerCommand):
 
     def testaddrange(self):
         messages = []
-        for ip in range(int(self.net.tor_net2[0].usable[2]),
-                        int(self.net.tor_net2[0].usable[-3]) + 1):
+        for ip in range(int(self.net["dyndhcp0"].usable[2]),
+                        int(self.net["dyndhcp0"].usable[-3]) + 1):
             address = IPv4Address(ip)
             hostname = dynname(address)
             self.dsdb_expect_add(hostname, address)
@@ -63,8 +61,8 @@ class TestAddDynamicRange(TestBrokerCommand):
                             "-status aq" % (hostname, address))
 
         command = ["add_dynamic_range",
-                   "--startip=%s" % self.net.tor_net2[0].usable[2],
-                   "--endip=%s" % self.net.tor_net2[0].usable[-3],
+                   "--startip=%s" % self.net["dyndhcp0"].usable[2],
+                   "--endip=%s" % self.net["dyndhcp0"].usable[-3],
                    "--dns_domain=aqd-unittest.ms.com"]
         err = self.statustest(command)
         for message in messages:
@@ -75,8 +73,8 @@ class TestAddDynamicRange(TestBrokerCommand):
         command = "search_dns --record_type=dynamic_stub"
         out = self.commandtest(command.split(" "))
         # Assume that first three octets are the same.
-        start = self.net.tor_net2[0].usable[2]
-        end = self.net.tor_net2[0].usable[-3]
+        start = self.net["dyndhcp0"].usable[2]
+        end = self.net["dyndhcp0"].usable[-3]
         checked = False
         for i in range(int(start), int(end) + 1):
             checked = True
@@ -88,40 +86,40 @@ class TestAddDynamicRange(TestBrokerCommand):
         self.failUnless(checked, "Problem with test algorithm or data.")
 
     def testshowrange(self):
-        net = self.net.tor_net2[0]
+        net = self.net["dyndhcp0"]
         start = net.usable[2]
         end = net.usable[-3]
         command = "show dynamic range --ip %s" % IPv4Address(int(start) + 1)
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Dynamic Range: %s - %s" % (start, end), command)
-        self.matchoutput(out, "Network: %s [%s]" % (net.ip, net),
+        self.matchoutput(out, "Network: %s [%s]" % (net.name, net),
                          command)
 
     def testshowfqdn(self):
-        net = self.net.tor_net2[0]
+        net = self.net["dyndhcp0"]
         start = net.usable[2]
         end = net.usable[-3]
         command = ["show", "dynamic", "range", "--fqdn", dynname(end)]
         out = self.commandtest(command)
         self.matchoutput(out, "Dynamic Range: %s - %s" % (start, end), command)
-        self.matchoutput(out, "Network: %s [%s]" % (net.ip, net),
+        self.matchoutput(out, "Network: %s [%s]" % (net.name, net),
                          command)
 
     def testverifynetwork(self):
-        command = "show network --ip %s" % self.net.tor_net2[0].ip
+        command = "show network --ip %s" % self.net["dyndhcp0"].ip
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Dynamic Ranges: %s-%s" %
-                         (self.net.tor_net2[0].usable[2],
-                          self.net.tor_net2[0].usable[-3]), command)
+                         (self.net["dyndhcp0"].usable[2],
+                          self.net["dyndhcp0"].usable[-3]), command)
 
     def testverifynetworkproto(self):
-        command = "show network --ip %s --format proto" % self.net.tor_net2[0].ip
+        command = "show network --ip %s --format proto" % self.net["dyndhcp0"].ip
         out = self.commandtest(command.split(" "))
         msg = self.parse_netlist_msg(out, expect=1)
         network = msg.networks[0]
         hosts = set([host.fqdn for host in network.hosts])
-        start = self.net.tor_net2[0].usable[2]
-        end = self.net.tor_net2[0].usable[-3]
+        start = self.net["dyndhcp0"].usable[2]
+        end = self.net["dyndhcp0"].usable[-3]
         for i in range(int(start), int(end) + 1):
             ip = IPv4Address(i)
             self.failUnless(dynname(ip) in hosts, "%s is missing from network"
@@ -129,33 +127,33 @@ class TestAddDynamicRange(TestBrokerCommand):
 
     def testfailipalreadytaken(self):
         command = ["add_dynamic_range",
-                   "--startip", self.net.tor_net[12].usable[0],
-                   "--endip", self.net.tor_net[12].usable[1],
+                   "--startip", self.net["tor_net_12"].usable[0],
+                   "--endip", self.net["tor_net_12"].usable[1],
                    "--prefix=oops",
                    "--dns_domain=aqd-unittest.ms.com"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "the following IP addresses are already in use",
                          command)
-        self.matchoutput(out, str(self.net.tor_net[12].usable[0]), command)
+        self.matchoutput(out, str(self.net["tor_net_12"].usable[0]), command)
 
     def testfaildnsalreadytaken(self):
         command = ["add_dynamic_range",
-                   "--startip", self.net.tor_net2[0].usable[2],
-                   "--endip", self.net.tor_net2[0].usable[3],
+                   "--startip", self.net["dyndhcp0"].usable[2],
+                   "--endip", self.net["dyndhcp0"].usable[3],
                    "--prefix=oops",
                    "--dns_domain=aqd-unittest.ms.com"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "the following DNS records already exist", command)
         self.matchoutput(out, "%s [%s]" %
-                         (dynname(self.net.tor_net2[0].usable[2]),
-                          self.net.tor_net2[0].usable[2]), command)
+                         (dynname(self.net["dyndhcp0"].usable[2]),
+                          self.net["dyndhcp0"].usable[2]), command)
         self.matchoutput(out, "%s [%s]" %
-                         (dynname(self.net.tor_net2[0].usable[3]),
-                          self.net.tor_net2[0].usable[3]), command)
+                         (dynname(self.net["dyndhcp0"].usable[3]),
+                          self.net["dyndhcp0"].usable[3]), command)
 
     def testaddendingrange(self):
         # Set up a network that has its final IP address taken.
-        ip = self.net.tor_net2[1].usable[-1]
+        ip = self.net["dyndhcp1"].usable[-1]
         hostname = dynname(ip)
         self.dsdb_expect_add(hostname, ip)
         command = ["add_dynamic_range", "--startip", ip, "--endip", ip,
@@ -169,27 +167,27 @@ class TestAddDynamicRange(TestBrokerCommand):
 
     def testfailaddrestricted(self):
         command = ["add_dynamic_range",
-                   "--startip", self.net.tor_net2[1].reserved[0],
-                   "--endip", self.net.tor_net2[1].reserved[1],
+                   "--startip", self.net["dyndhcp1"].reserved[0],
+                   "--endip", self.net["dyndhcp1"].reserved[1],
                    "--dns_domain=aqd-unittest.ms.com"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "The IP address %s is reserved for dynamic "
                          "DHCP for a switch on subnet %s" %
-                         (self.net.tor_net2[1].reserved[0],
-                          self.net.tor_net2[1].ip),
+                         (self.net["dyndhcp1"].reserved[0],
+                          self.net["dyndhcp1"].ip),
                          command)
 
     def testdsdbrollback(self):
-        for ip in range(int(self.net.tor_net2[2].usable[2]),
-                        int(self.net.tor_net2[2].usable[4]) + 1):
+        for ip in range(int(self.net["vmotion_net"].usable[2]),
+                        int(self.net["vmotion_net"].usable[4]) + 1):
             self.dsdb_expect_add(dynname(IPv4Address(ip)), IPv4Address(ip))
             self.dsdb_expect_delete(IPv4Address(ip))
-        bad_ip = self.net.tor_net2[2].usable[5]
+        bad_ip = self.net["vmotion_net"].usable[5]
         self.dsdb_expect_add(dynname(bad_ip), bad_ip, fail=True)
         command = ["add_dynamic_range",
-                   "--startip", self.net.tor_net2[2].usable[2],
-                   "--endip", self.net.tor_net2[2].usable[5],
+                   "--startip", self.net["vmotion_net"].usable[2],
+                   "--endip", self.net["vmotion_net"].usable[5],
                    "--dns_domain", "aqd-unittest.ms.com"]
         out = self.badrequesttest(command)
         self.dsdb_verify()
@@ -197,15 +195,15 @@ class TestAddDynamicRange(TestBrokerCommand):
 
     def testfillnetwork(self):
         messages = []
-        for ip in range(int(self.net.tor_net2[5].usable[0]),
-                        int(self.net.tor_net2[5].usable[-1]) + 1):
+        for ip in range(int(self.net["dyndhcp3"].usable[0]),
+                        int(self.net["dyndhcp3"].usable[-1]) + 1):
             address = IPv4Address(ip)
             hostname = dynname(address)
             self.dsdb_expect_add(hostname, address)
             messages.append("DSDB: add_host -host_name %s -ip_address %s "
                             "-status aq" % (hostname, address))
         command = ["add_dynamic_range",
-                   "--fillnetwork", self.net.tor_net2[5].ip,
+                   "--fillnetwork", self.net["dyndhcp3"].ip,
                    "--dns_domain=aqd-unittest.ms.com"]
         err = self.statustest(command)
         for message in messages:
@@ -214,17 +212,17 @@ class TestAddDynamicRange(TestBrokerCommand):
 
     def testverifyfillnetwork(self):
         # Check that the network has only dynamic entries
-        checkip = self.net.tor_net2[5].ip
-        while checkip < self.net.tor_net2[5].usable[0]:
+        checkip = self.net["dyndhcp3"].ip
+        while checkip < self.net["dyndhcp3"].usable[0]:
             command = ['search_dns', '--ip', checkip]
             self.noouttest(command)
             checkip += 1
-        for ip in self.net.tor_net2[5].usable:
+        for ip in self.net["dyndhcp3"].usable:
             command = ['search_dns', '--ip', checkip,
                        '--record_type=dynamic_stub']
             out = self.commandtest(command)
             self.matchoutput(out, 'aqd-unittest.ms.com', command)
-        broadcast = self.net.tor_net2[5].broadcast
+        broadcast = self.net["dyndhcp3"].broadcast
         command = ['search_dns', '--ip', broadcast]
         self.noouttest(command)
 

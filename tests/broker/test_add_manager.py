@@ -17,19 +17,18 @@
 # limitations under the License.
 """Module for testing the add manager command."""
 
-import unittest
-
 if __name__ == "__main__":
     import utils
     utils.import_depends()
 
+import unittest2 as unittest
 from brokertest import TestBrokerCommand
 
 
 class TestAddManager(TestBrokerCommand):
 
     def testaddaddrinuse(self):
-        ip = self.net.unknown[0].usable[2]
+        ip = self.net["unknown0"].usable[2]
         command = ["add", "manager", "--ip", ip,
                    "--hostname", "unittest00.one-nyp.ms.com"]
         out = self.badrequesttest(command)
@@ -39,7 +38,7 @@ class TestAddManager(TestBrokerCommand):
                          command)
 
     def testaddaddrmismatch(self):
-        ip = self.net.unknown[0].usable[-1]
+        ip = self.net["unknown0"].usable[-1]
         command = ["add", "manager", "--ip", ip,
                    "--manager", "unittest02.one-nyp.ms.com",
                    "--hostname", "unittest00.one-nyp.ms.com"]
@@ -52,14 +51,14 @@ class TestAddManager(TestBrokerCommand):
     # Note: If changing this, also change testverifyshowmissingmanager
     # in test_add_aquilon_host.py.
     def testaddunittest00r(self):
-        ip = self.net.unknown[0].usable[4]
+        ip = self.net["unknown0"].usable[4]
         self.dsdb_expect_add("unittest00r.one-nyp.ms.com", ip, "bmc", ip.mac)
         self.noouttest(["add", "manager", "--ip", ip,
                         "--hostname", "unittest00.one-nyp.ms.com"])
         self.dsdb_verify()
 
     def testaddunittest00ragain(self):
-        ip = self.net.unknown[0].usable[4]
+        ip = self.net["unknown0"].usable[4]
         command = ["add", "manager", "--ip", ip,
                    "--hostname", "unittest00.one-nyp.ms.com"]
         out = self.badrequesttest(command)
@@ -74,11 +73,11 @@ class TestAddManager(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
                          "Manager: unittest00r.one-nyp.ms.com [%s]" %
-                         self.net.unknown[0].usable[4],
+                         self.net["unknown0"].usable[4],
                          command)
         self.searchoutput(out,
                           r"Interface: bmc %s$" %
-                          self.net.unknown[0].usable[4].mac,
+                          self.net["unknown0"].usable[4].mac,
                           command)
         self.matchoutput(out, "Blade: ut3c1n3", command)
 
@@ -87,7 +86,7 @@ class TestAddManager(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
                          "Manager: unittest00r.one-nyp.ms.com [%s]" %
-                         self.net.unknown[0].usable[4],
+                         self.net["unknown0"].usable[4],
                          command)
 
     def testverifycatut3c1n3interfaces(self):
@@ -97,11 +96,11 @@ class TestAddManager(TestBrokerCommand):
                           r'"console/bmc" = nlist\(\s*'
                           r'"fqdn", "unittest00r.one-nyp.ms.com",\s*'
                           r'"hwaddr", "%s"\s*\);' %
-                          self.net.unknown[0].usable[4].mac.lower(),
+                          self.net["unknown0"].usable[4].mac.lower(),
                           command)
 
     def testaddunittest02rsa(self):
-        ip = self.net.unknown[0].usable[9]
+        ip = self.net["unknown0"].usable[9]
         self.dsdb_expect_add("unittest02rsa.one-nyp.ms.com", ip, "ilo", ip.mac)
         self.noouttest(["add", "manager", "--interface", "ilo",
                         "--ip", ip, "--mac", ip.mac,
@@ -114,11 +113,11 @@ class TestAddManager(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
                          "Manager: unittest02rsa.one-nyp.ms.com [%s]" %
-                         self.net.unknown[0].usable[9],
+                         self.net["unknown0"].usable[9],
                          command)
         self.searchoutput(out,
                           r"Interface: ilo %s$" %
-                          self.net.unknown[0].usable[9].mac,
+                          self.net["unknown0"].usable[9].mac,
                           command)
         self.matchoutput(out, "Blade: ut3c5n10", command)
 
@@ -127,33 +126,33 @@ class TestAddManager(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
                          "Manager: unittest02rsa.one-nyp.ms.com [%s]" %
-                         self.net.unknown[0].usable[9],
+                         self.net["unknown0"].usable[9],
                          command)
 
     def testaddbadunittest12bmc(self):
         command = ["add", "interface", "--interface", "bmc",
                    "--hostname", "unittest12.aqd-unittest.ms.com",
-                   "--mac", self.net.unknown[0].usable[7].mac]
+                   "--mac", self.net["unknown0"].usable[7].mac]
         out = self.badrequesttest(command)
         self.matchoutput(out, "already has an interface with MAC", command)
 
     def testfailaddunittest12bmc(self):
-        command = ["add", "manager", "--ip", self.net.unknown[0].usable[0],
+        command = ["add", "manager", "--ip", self.net["unknown0"].usable[0],
                    "--hostname", "unittest02.one-nyp.ms.com",
                    "--manager", "unittest02ipmi.one-nyp.ms.com",
                    "--interface", "ipmi",
-                   "--mac", self.net.unknown[0].usable[0].mac]
+                   "--mac", self.net["unknown0"].usable[0].mac]
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "MAC address %s is already in use" %
-                         self.net.unknown[0].usable[0].mac,
+                         self.net["unknown0"].usable[0].mac,
                          command)
 
     # Taking advantage of the fact that this runs after add_machine
     # and add_host, and that this *should* create a manager
     # Lots of verifications steps for this single test...
     def testaddunittest12bmc(self):
-        ip = self.net.unknown[0].usable[8]
+        ip = self.net["unknown0"].usable[8]
         self.dsdb_expect_delete(ip)
         self.dsdb_expect_add("unittest12r.aqd-unittest.ms.com", ip, "bmc",
                              ip.mac)
@@ -170,11 +169,11 @@ class TestAddManager(TestBrokerCommand):
     # Test that the interface cannot be removed as long as the manager exists
     def testdelinterface(self):
         command = ["del", "interface", "--mac",
-                   self.net.unknown[0].usable[8].mac]
+                   self.net["unknown0"].usable[8].mac]
         out = self.badrequesttest(command)
         self.matchoutput(out, "still has the following addresses configured",
                          command)
-        self.matchoutput(out, str(self.net.unknown[0].usable[8]), command)
+        self.matchoutput(out, str(self.net["unknown0"].usable[8]), command)
 
     def testverifyunittest13removed(self):
         command = "show host --hostname unittest13.one-nyp.ms.com"
@@ -196,16 +195,16 @@ class TestAddManager(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
                          "Primary Name: unittest12.aqd-unittest.ms.com [%s]" %
-                         self.net.unknown[0].usable[7],
+                         self.net["unknown0"].usable[7],
                          command)
         self.matchoutput(out,
                          "Manager: unittest12r.aqd-unittest.ms.com [%s]" %
-                         self.net.unknown[0].usable[8],
+                         self.net["unknown0"].usable[8],
                          command)
         self.searchoutput(out, "Interface: eth0 %s \[boot, default_route\]" %
-                          self.net.unknown[0].usable[7].mac.lower(), command)
+                          self.net["unknown0"].usable[7].mac.lower(), command)
         self.searchoutput(out, "Interface: bmc %s$" %
-                          self.net.unknown[0].usable[8].mac.lower(), command)
+                          self.net["unknown0"].usable[8].mac.lower(), command)
 
     def testverifymanagerall(self):
         command = ["show", "manager", "--all"]

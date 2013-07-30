@@ -17,12 +17,11 @@
 # limitations under the License.
 """Module for testing the del interface command."""
 
-import unittest
-
 if __name__ == "__main__":
     import utils
     utils.import_depends()
 
+import unittest2 as unittest
 from brokertest import TestBrokerCommand
 
 
@@ -37,7 +36,7 @@ class TestDelInterface(TestBrokerCommand):
 
     def testdelut3c1n3eth1(self):
         self.noouttest(["del", "interface",
-                        "--mac", self.net.unknown[0].usable[3].mac.upper()])
+                        "--mac", self.net["unknown0"].usable[3].mac.upper()])
 
     def testnotamachine(self):
         command = ["del", "interface", "--interface", "xge49",

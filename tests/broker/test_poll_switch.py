@@ -18,7 +18,6 @@
 """Module for testing the poll switch command."""
 
 import re
-import unittest
 from time import sleep
 import socket
 
@@ -26,6 +25,7 @@ if __name__ == "__main__":
     import utils
     utils.import_depends()
 
+import unittest2 as unittest
 from brokertest import TestBrokerCommand
 
 
@@ -135,10 +135,11 @@ class TestPollSwitch(TestBrokerCommand):
         command = ["poll", "switch", "--vlan", "--switch",
                    "ut01ga2s01.aqd-unittest.ms.com"]
         (out, err) = self.successtest(command)
+        net = self.net["vmotion_net"]
         self.matchoutput(err,
                          "Switch ut01ga2s01.aqd-unittest.ms.com: skipping VLAN "
                          "714, because network bitmask value 24 differs from "
-                         "prefixlen 26 of network 4.2.6.192.",
+                         "prefixlen 26 of network %s." % net.name,
                          command)
         service = self.config.get("broker", "poll_helper_service")
         self.matchoutput(err,
@@ -154,18 +155,18 @@ class TestPollSwitch(TestBrokerCommand):
         for i in range(1, 13):
             self.matchoutput(out,
                              "Port %d: %s" %
-                             (i, self.net.tor_net2[2].usable[i + 1].mac),
+                             (i, self.net["vmotion_net"].usable[i + 1].mac),
                          command)
-        self.matchoutput(out, "VLAN 701: %s" % self.net.vm_storage_net[0].ip,
+        self.matchoutput(out, "VLAN 701: %s" % self.net["vm_storage_net"].ip,
                          command)
         # I was lazy... really this should be some separate non-routeable
         # subnet and not the tor_net2...
-        self.matchoutput(out, "VLAN 702: %s" % self.net.tor_net2[2].ip,
+        self.matchoutput(out, "VLAN 702: %s" % self.net["vmotion_net"].ip,
                          command)
-        self.matchoutput(out, "VLAN 710: %s" % self.net.unknown[2].ip, command)
-        self.matchoutput(out, "VLAN 711: %s" % self.net.unknown[3].ip, command)
-        self.matchoutput(out, "VLAN 712: %s" % self.net.unknown[4].ip, command)
-        self.matchoutput(out, "VLAN 713: %s" % self.net.unknown[5].ip, command)
+        self.matchoutput(out, "VLAN 710: %s" % self.net["ut01ga2s01_v710"].ip, command)
+        self.matchoutput(out, "VLAN 711: %s" % self.net["ut01ga2s01_v711"].ip, command)
+        self.matchoutput(out, "VLAN 712: %s" % self.net["ut01ga2s01_v712"].ip, command)
+        self.matchoutput(out, "VLAN 713: %s" % self.net["ut01ga2s01_v713"].ip, command)
         self.matchclean(out, "VLAN 714", command)
 
     def testverifyut11s01p1(self):
@@ -186,18 +187,18 @@ class TestPollSwitch(TestBrokerCommand):
         for i in range(13, 25):
             self.matchoutput(out,
                              "Port %d: %s" %
-                             (i - 12, self.net.tor_net2[2].usable[i + 1].mac),
+                             (i - 12, self.net["vmotion_net"].usable[i + 1].mac),
                              command)
-        self.matchoutput(out, "VLAN 701: %s" % self.net.vm_storage_net[0].ip,
+        self.matchoutput(out, "VLAN 701: %s" % self.net["vm_storage_net"].ip,
                          command)
         # I was lazy... really this should be some separate non-routeable
         # subnet and not the tor_net2...
-        self.matchoutput(out, "VLAN 702: %s" % self.net.tor_net2[2].ip,
+        self.matchoutput(out, "VLAN 702: %s" % self.net["vmotion_net"].ip,
                          command)
-        self.matchoutput(out, "VLAN 710: %s" % self.net.unknown[6].ip, command)
-        self.matchoutput(out, "VLAN 711: %s" % self.net.unknown[7].ip, command)
-        self.matchoutput(out, "VLAN 712: %s" % self.net.unknown[8].ip, command)
-        self.matchoutput(out, "VLAN 713: %s" % self.net.unknown[9].ip, command)
+        self.matchoutput(out, "VLAN 710: %s" % self.net["ut01ga2s02_v710"].ip, command)
+        self.matchoutput(out, "VLAN 711: %s" % self.net["ut01ga2s02_v711"].ip, command)
+        self.matchoutput(out, "VLAN 712: %s" % self.net["ut01ga2s02_v712"].ip, command)
+        self.matchoutput(out, "VLAN 713: %s" % self.net["ut01ga2s02_v713"].ip, command)
 
     def testpollut01ga2s03(self):
         self.successtest(["poll", "switch",

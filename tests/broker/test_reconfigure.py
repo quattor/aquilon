@@ -20,13 +20,13 @@
 
 import os
 import re
-import unittest
 from datetime import datetime
 
 if __name__ == "__main__":
     from broker import utils
     utils.import_depends()
 
+import unittest2 as unittest
 from broker.brokertest import TestBrokerCommand
 from broker.grntest import VerifyGrnsMixin
 from broker.notificationtest import VerifyNotificationsMixin
@@ -100,11 +100,11 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
                           r'"gateway", "%s",\s*'
                           r'"netmask", "255.255.0.0"\s*\)\s*'
                           r'\)\s*\)' %
-                          (self.net.unknown[0].broadcast,
-                           self.net.unknown[0].gateway,
-                           self.net.unknown[0].usable[0],
-                           self.net.unknown[0].netmask,
-                           self.net.unknown[0].gateway),
+                          (self.net["unknown0"].broadcast,
+                           self.net["unknown0"].gateway,
+                           self.net["unknown0"].usable[0],
+                           self.net["unknown0"].netmask,
+                           self.net["unknown0"].gateway),
                           command)
         self.matchoutput(out, '"system/advertise_status" = true;', command)
         self.matchoutput(out, '"system/owner_eon_id" = %d;' %
@@ -184,11 +184,11 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
                           r'"gateway", "%s",\s*'
                           r'"netmask", "255.255.0.0"\s*\)\s*'
                           r'\)\s*\)' %
-                          (self.net.unknown[0].broadcast,
-                           self.net.unknown[0].gateway,
-                           self.net.unknown[0].usable[2],
-                           self.net.unknown[0].netmask,
-                           self.net.unknown[0].gateway),
+                          (self.net["unknown0"].broadcast,
+                           self.net["unknown0"].gateway,
+                           self.net["unknown0"].usable[2],
+                           self.net["unknown0"].netmask,
+                           self.net["unknown0"].gateway),
                           command)
         self.searchoutput(out,
                           r'"eth1", nlist\(\s*'
@@ -206,11 +206,11 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
                           r'"gateway", "%s",\s*'
                           r'"netmask", "255.255.0.0"\s*\)\s*'
                           r'\)\s*\)' %
-                          (self.net.unknown[0].broadcast,
-                           self.net.unknown[0].gateway,
-                           self.net.unknown[0].usable[3],
-                           self.net.unknown[0].netmask,
-                           self.net.unknown[0].gateway),
+                          (self.net["unknown0"].broadcast,
+                           self.net["unknown0"].gateway,
+                           self.net["unknown0"].usable[3],
+                           self.net["unknown0"].netmask,
+                           self.net["unknown0"].gateway),
                           command)
         self.matchoutput(out, '"system/advertise_status" = false;', command)
 

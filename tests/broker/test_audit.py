@@ -17,7 +17,6 @@
 # limitations under the License.
 """ Module for testing the search_audit command """
 
-import unittest
 import re
 from time import time
 from datetime import datetime, timedelta
@@ -26,6 +25,7 @@ if __name__ == "__main__":
     import utils
     utils.import_depends()
 
+import unittest2 as unittest
 from dateutil.parser import parse
 from dateutil.tz import tzutc
 

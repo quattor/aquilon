@@ -17,29 +17,32 @@
 # limitations under the License.
 """Module for testing commands that remove virtual hardware."""
 
-import unittest
-
 if __name__ == "__main__":
     import utils
     utils.import_depends()
 
+import unittest2 as unittest
 from brokertest import TestBrokerCommand
 
 
 class TestDel10GigHardware(TestBrokerCommand):
 
     def test_200_del_hosts(self):
+        nets = (self.net["ut01ga2s01_v710"], self.net["ut01ga2s01_v711"],
+                self.net["ut01ga2s01_v712"], self.net["ut01ga2s01_v713"],
+                self.net["ut01ga2s02_v710"], self.net["ut01ga2s02_v711"],
+                self.net["ut01ga2s02_v712"], self.net["ut01ga2s02_v713"])
         for i in range(0, 8) + range(9, 17):
             hostname = "ivirt%d.aqd-unittest.ms.com" % (1 + i)
             command = "del_host --hostname %s" % hostname
 
             if i < 9:
-                net_index = (i % 4) + 2
+                net_index = (i % 4)
                 usable_index = i / 4
             else:
-                net_index = ((i - 9) % 4) + 6
+                net_index = ((i - 9) % 4) + 4
                 usable_index = (i - 9) / 4
-            ip = self.net.unknown[net_index].usable[usable_index]
+            ip = nets[net_index].usable[usable_index]
             self.dsdb_expect_delete(ip)
 
             (out, err) = self.successtest(command.split(" "))
@@ -49,7 +52,7 @@ class TestDel10GigHardware(TestBrokerCommand):
     def test_300_delaux(self):
         for i in range(1, 25):
             hostname = "evh%d-e1.aqd-unittest.ms.com" % (i + 50)
-            self.dsdb_expect_delete(self.net.vm_storage_net[0].usable[i - 1])
+            self.dsdb_expect_delete(self.net["vm_storage_net"].usable[i - 1])
             command = ["del", "auxiliary", "--auxiliary", hostname]
             (out, err) = self.successtest(command)
             self.assertEmptyOut(out, command)

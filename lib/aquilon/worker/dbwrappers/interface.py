@@ -293,7 +293,8 @@ def choose_port_group(session, logger, dbmachine):
     networks = session.query(Network).\
             join("observed_vlans", "vlan").\
             filter(VlanInfo.vlan_type == "user").\
-            filter(ObservedVlan.switch == sw).all()
+            filter(ObservedVlan.switch == sw).\
+            order_by(VlanInfo.vlan_id).all()
 
     # then filter by capacity
     networks = [nw for nw in networks

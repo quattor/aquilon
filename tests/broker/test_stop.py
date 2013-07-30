@@ -19,13 +19,13 @@
 
 import os
 import signal
-import unittest
 from time import sleep
 
 if __name__ == "__main__":
     import utils
     utils.import_depends()
 
+import unittest2 as unittest
 from aquilon.config import Config
 
 

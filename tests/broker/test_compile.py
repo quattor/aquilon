@@ -18,7 +18,6 @@
 """Module for testing the compile command."""
 
 import os
-import unittest
 import gzip
 from cStringIO import StringIO
 from cPickle import Pickler, Unpickler
@@ -26,12 +25,12 @@ from subprocess import Popen, PIPE
 from datetime import datetime
 import time
 
-import xml.etree.ElementTree as ET
-
 if __name__ == "__main__":
     import utils
     utils.import_depends()
 
+import xml.etree.ElementTree as ET
+import unittest2 as unittest
 from brokertest import TestBrokerCommand
 from notificationtest import VerifyNotificationsMixin
 

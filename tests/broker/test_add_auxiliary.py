@@ -17,19 +17,18 @@
 # limitations under the License.
 """Module for testing the add auxiliary command."""
 
-import unittest
-
 if __name__ == "__main__":
     import utils
     utils.import_depends()
 
+import unittest2 as unittest
 from brokertest import TestBrokerCommand
 
 
 class TestAddAuxiliary(TestBrokerCommand):
 
     def testaddunittest00e1(self):
-        ip = self.net.unknown[0].usable[3]
+        ip = self.net["unknown0"].usable[3]
         self.dsdb_expect_add("unittest00-e1.one-nyp.ms.com", ip, "eth1", ip.mac,
                              "unittest00.one-nyp.ms.com")
         self.noouttest(["add", "auxiliary", "--ip", ip,
@@ -42,11 +41,11 @@ class TestAddAuxiliary(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
                          "Auxiliary: unittest00-e1.one-nyp.ms.com [%s]" %
-                         self.net.unknown[0].usable[3],
+                         self.net["unknown0"].usable[3],
                          command)
         self.searchoutput(out,
                           r"Interface: eth1 %s$" %
-                          self.net.unknown[0].usable[3].mac,
+                          self.net["unknown0"].usable[3].mac,
                           command)
         self.matchoutput(out, "Blade: ut3c1n3", command)
 
@@ -56,7 +55,7 @@ class TestAddAuxiliary(TestBrokerCommand):
         self.matchoutput(out, "unittest00-e1.one-nyp.ms.com", command)
 
     def testrejectmultipleaddress(self):
-        command = ["add", "auxiliary", "--ip", self.net.unknown[0].usable[-1],
+        command = ["add", "auxiliary", "--ip", self.net["unknown0"].usable[-1],
                    "--auxiliary", "unittest00-e2.one-nyp.ms.com",
                    "--hostname", "unittest00.one-nyp.ms.com",
                    "--interface", "eth1"]
@@ -64,13 +63,13 @@ class TestAddAuxiliary(TestBrokerCommand):
         self.matchoutput(out,
                          "Interface eth1 of machine unittest00.one-nyp.ms.com "
                          "already has the following addresses: "
-                         "eth1 [%s]" % self.net.unknown[0].usable[3],
+                         "eth1 [%s]" % self.net["unknown0"].usable[3],
                          command)
 
     # TODO: can't check this with the aq client since it detects the conflict
     # itself. Move this check to test_client_bypass once that can use knc
     #def testhostmachinemismatch(self):
-    #    command = ["add", "auxiliary", "--ip", self.net.unknown[0].usable[-1],
+    #    command = ["add", "auxiliary", "--ip", self.net["unknown0"].usable[-1],
     #               "--auxiliary", "unittest00-e2.one-nyp.ms.com",
     #               "--hostname", "unittest00.one-nyp.ms.com",
     #               "--machine", "ut3c1n5", "--interface", "eth1"]
@@ -99,8 +98,8 @@ class TestAddAuxiliary(TestBrokerCommand):
         command = ["add", "auxiliary",
                    "--auxiliary", "unittest01-e1.one-nyp.ms.com",
                    "--machine", "ut3c1n4", "--interface", "eth2",
-                   "--mac", self.net.tor_net[0].reserved[0].mac,
-                   "--ip", self.net.tor_net[0].reserved[0]]
+                   "--mac", self.net["tor_net_0"].reserved[0].mac,
+                   "--ip", self.net["tor_net_0"].reserved[0]]
         out = self.badrequesttest(command)
         self.matchoutput(out, "reserved for dynamic DHCP", command)
 
@@ -115,8 +114,8 @@ class TestAddAuxiliary(TestBrokerCommand):
         command = ["add", "auxiliary",
                    "--auxiliary", "unittest01-e1.one-nyp.ms.com",
                    "--machine", "ut3c1n4", "--interface", "eth3",
-                   "--mac", self.net.tor_net[0].reserved[1].mac,
-                   "--ip", self.net.tor_net[0].reserved[1]]
+                   "--mac", self.net["tor_net_0"].reserved[1].mac,
+                   "--ip", self.net["tor_net_0"].reserved[1]]
         out = self.badrequesttest(command)
         self.matchoutput(out, "reserved for dynamic DHCP", command)
 
@@ -129,12 +128,12 @@ class TestAddAuxiliary(TestBrokerCommand):
         command = ["add", "auxiliary",
                    "--auxiliary", "unittest01-e4.one-nyp.ms.com",
                    "--machine", "ut3c1n4", "--interface", "eth4",
-                   "--mac", self.net.tor_net[0].usable[0].mac,
-                   "--ip", self.net.tor_net[0].usable[0]]
+                   "--mac", self.net["tor_net_0"].usable[0].mac,
+                   "--ip", self.net["tor_net_0"].usable[0]]
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "MAC address %s is already in use" %
-                         self.net.tor_net[0].usable[0].mac,
+                         self.net["tor_net_0"].usable[0].mac,
                          command)
 
     def testverifyrejectmacinuse(self):

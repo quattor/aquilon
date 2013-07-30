@@ -17,37 +17,37 @@
 # limitations under the License.
 """Module for testing the del building command."""
 
-import unittest
-
 if __name__ == "__main__":
     import utils
     utils.import_depends()
 
+import unittest2 as unittest
 from brokertest import TestBrokerCommand
 
 
 class TestDelBuilding(TestBrokerCommand):
 
-    def testdelbu(self):
+    def test_100_del_bu(self):
         self.dsdb_expect_del_campus_building("ny", "bu")
         self.dsdb_expect("delete_building_aq -building bu")
         command = "del building --building bu"
         self.noouttest(command.split(" "))
         self.dsdb_verify()
 
-    def testverifydelbu(self):
-        command = "show building --building bu"
-        self.notfoundtest(command.split(" "))
-
-    def testdelex(self):
+    def test_100_del_ex(self):
         self.dsdb_expect("delete_building_aq -building cards")
         command = "del building --building cards"
         self.noouttest(command.split(" "))
         self.dsdb_verify()
 
-    def testdelbunotindsdb(self):
-        ## add building
+    def test_100_del_tu(self):
+        self.dsdb_expect_del_campus_building("ta", "tu")
+        self.dsdb_expect("delete_building_aq -building tu")
+        command = "del building --building tu"
+        self.noouttest(command.split(" "))
+        self.dsdb_verify()
 
+    def test_110_del_bunotindsdb(self):
         test_building = "bz"
         self.dsdb_expect("add_building_aq -building_name bz -city ex "
                          "-building_addr Nowhere")
@@ -66,44 +66,42 @@ class TestDelBuilding(TestBrokerCommand):
                          command)
         self.dsdb_verify()
 
-    def testdelnettest02(self):
+    def test_120_add_nettest_net(self):
+        self.net.allocate_network(self, "nettest_net", 24, "unknown",
+                                  "building", "nettest",
+                                  comments="Made-up network")
+
+    def test_121_del_nettest_fail(self):
+        # try delete building
+        command = "del building --building nettest"
+        err = self.badrequesttest(command.split(" "))
+        self.matchoutput(err,
+                         "Bad Request: Could not delete building nettest, "
+                         "networks were found using this location.",
+                         command)
+        self.dsdb_verify(empty=True)
+
+    def test_122_cleanup_nettest_net(self):
+        self.net.dispose_network(self, "nettest_net")
+
+    def test_130_del_nettest(self):
         self.dsdb_expect_del_campus_building("ny", "nettest")
         self.dsdb_expect("delete_building_aq -building nettest")
         command = "del building --building nettest"
         self.noouttest(command.split(" "))
         self.dsdb_verify()
 
-    def testdelnettest01(self):
-        test_bu = "nettest"
-
-        # add network to building
-        self.noouttest(["add_network", "--ip", "192.176.6.0",
-                        "--network", "test_warn_network",
-                        "--netmask", "255.255.255.0",
-                        "--building", test_bu,
-                        "--type", "unknown",
-                        "--comments", "Made-up network"])
-
-        # try delete building
-        command = "del building --building %s" % test_bu
-        err = self.badrequesttest(command.split(" "))
-        self.matchoutput(err,
-                         "Bad Request: Could not delete building %s, "
-                         "networks were found using this location." % test_bu,
+    def test_200_del_building_notexist(self):
+        command = "del building --building building-does-not-exist"
+        out = self.notfoundtest(command.split(" "))
+        self.matchoutput(out, "Building building-does-not-exist not found.",
                          command)
-        self.dsdb_verify(empty=True)
 
-        # delete network
-        self.noouttest(["del_network", "--ip", "192.176.6.0"])
+    def test_300_verify_bu(self):
+        command = "show building --building bu"
+        self.notfoundtest(command.split(" "))
 
-    def test_deletetu(self):
-        self.dsdb_expect_del_campus_building("ta", "tu")
-        self.dsdb_expect("delete_building_aq -building tu")
-        command = "del building --building tu"
-        self.noouttest(command.split(" "))
-        self.dsdb_verify()
-
-    def test_verify_deletetu(self):
+    def test_300_verify_tu(self):
         command = "show building --building tu"
         self.notfoundtest(command.split(" "))
 

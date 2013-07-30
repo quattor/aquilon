@@ -17,12 +17,11 @@
 # limitations under the License.
 """Module for testing the update network command."""
 
-import unittest
-
 if __name__ == "__main__":
     import utils
     utils.import_depends()
 
+import unittest2 as unittest
 from brokertest import TestBrokerCommand
 
 
@@ -46,10 +45,10 @@ class TestUpdateNetwork(TestBrokerCommand):
 
     # There should be a test_constraint_network.py one day...
     def test_900_delinuse(self):
-        net = self.net.unknown[0]
+        net = self.net["unknown0"]
         command = ["del", "network", "--ip", net.ip]
         out = self.badrequesttest(command)
-        self.matchoutput(out, "Network %s is still in use" % net.ip, command)
+        self.matchoutput(out, "Network %s is still in use" % net.name, command)
 
 
 if __name__ == '__main__':

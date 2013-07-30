@@ -17,12 +17,11 @@
 # limitations under the License.
 """Module for testing the show machine command."""
 
-import unittest
-
 if __name__ == "__main__":
     import utils
     utils.import_depends()
 
+import unittest2 as unittest
 from brokertest import TestBrokerCommand
 
 
@@ -30,7 +29,7 @@ class TestShowMachine(TestBrokerCommand):
     def testverifyut3c1n3interfacescsv(self):
         command = "show machine --machine ut3c1n3 --format csv"
         out = self.commandtest(command.split(" "))
-        net = self.net.unknown[0]
+        net = self.net["unknown0"]
         self.matchoutput(out,
                          "ut3c1n3,ut3,ut,ibm,hs21-8853l5u,KPDZ406,eth0,%s,%s" %
                          (net.usable[2].mac, net.usable[2]), command)

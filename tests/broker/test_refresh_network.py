@@ -22,12 +22,11 @@ immediately.
 
 """
 
-import unittest
-
 if __name__ == "__main__":
     import utils
     utils.import_depends()
 
+import unittest2 as unittest
 from ipaddr import IPv4Address, IPv4Network
 
 from brokertest import TestBrokerCommand

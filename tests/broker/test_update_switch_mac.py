@@ -19,7 +19,6 @@
 
 import re
 import os
-import unittest
 from time import sleep
 import socket
 
@@ -27,6 +26,7 @@ if __name__ == "__main__":
     import utils
     utils.import_depends()
 
+import unittest2 as unittest
 from brokertest import TestBrokerCommand
 
 # This suite replicates parts of test_poll_switch testing update_switch --discovered_macs.

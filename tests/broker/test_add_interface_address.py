@@ -17,12 +17,11 @@
 # limitations under the License.
 """Module for testing the add interface address command."""
 
-import unittest
-
 if __name__ == "__main__":
     import utils
     utils.import_depends()
 
+import unittest2 as unittest
 from brokertest import TestBrokerCommand
 from test_add_dynamic_range import dynname
 
@@ -30,7 +29,7 @@ from test_add_dynamic_range import dynname
 class TestAddInterfaceAddress(TestBrokerCommand):
 
     def testaddunittest20e0(self):
-        ip = self.net.unknown[11].usable[0]
+        ip = self.net["zebra_eth0"].usable[0]
         fqdn = "unittest20-e0.aqd-unittest.ms.com"
         self.dsdb_expect_add(fqdn, ip, "eth0", ip.mac,
                              primary="unittest20.aqd-unittest.ms.com")
@@ -40,7 +39,7 @@ class TestAddInterfaceAddress(TestBrokerCommand):
         self.dsdb_verify()
 
     def testaddunittest20e0again(self):
-        ip = self.net.unknown[11].usable[0]
+        ip = self.net["zebra_eth0"].usable[0]
         fqdn = "unittest20-e0.aqd-unittest.ms.com"
         command = ["add", "interface", "address", "--machine", "ut3c5n2",
                    "--interface", "eth0", "--fqdn", fqdn, "--ip", ip]
@@ -52,7 +51,7 @@ class TestAddInterfaceAddress(TestBrokerCommand):
 
     def testaddunittest20e0namemismatch(self):
         # No label, different FQDN, different IP
-        ip = self.net.unknown[11].usable[-1]
+        ip = self.net["zebra_eth0"].usable[-1]
         fqdn = "unittest20-e0-1.aqd-unittest.ms.com"
         command = ["add", "interface", "address", "--machine", "ut3c5n2",
                    "--interface", "eth0", "--fqdn", fqdn, "--ip", ip]
@@ -63,7 +62,7 @@ class TestAddInterfaceAddress(TestBrokerCommand):
 
     def testaddunittest20e0ipmismatch(self):
         # No label, same FQDN, different IP
-        ip = self.net.unknown[11].usable[-1]
+        ip = self.net["zebra_eth0"].usable[-1]
         fqdn = "unittest20-e0.aqd-unittest.ms.com"
         command = ["add", "interface", "address", "--machine", "ut3c5n2",
                    "--interface", "eth0", "--fqdn", fqdn, "--ip", ip]
@@ -77,7 +76,7 @@ class TestAddInterfaceAddress(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out, "DNS Record: unittest20-e0.aqd-unittest.ms.com",
                          command)
-        self.matchoutput(out, "IP: %s" % self.net.unknown[11].usable[0],
+        self.matchoutput(out, "IP: %s" % self.net["zebra_eth0"].usable[0],
                          command)
         self.matchoutput(out, "Reverse PTR: unittest20.aqd-unittest.ms.com",
                          command)
@@ -86,7 +85,7 @@ class TestAddInterfaceAddress(TestBrokerCommand):
         # test_add_aquilon_host would be a better place for this test, but that
         # runs before test_add_interface_address so the transits are not set up
         # yet
-        e0net = self.net.unknown[11]
+        e0net = self.net["zebra_eth0"]
         e0ip = e0net.usable[0]
         command = ["show", "network", "--ip", e0net.ip, "--format", "proto"]
         out = self.commandtest(command)
@@ -109,7 +108,7 @@ class TestAddInterfaceAddress(TestBrokerCommand):
                         (ut20.mac, e0ip.mac))
 
     def testaddbyip(self):
-        ip = self.net.unknown[12].usable[3]
+        ip = self.net["zebra_eth1"].usable[3]
         fqdn = "unittest20-e1-1.aqd-unittest.ms.com"
         self.dsdb_expect_add(fqdn, ip, "eth1_e1",
                              primary="unittest20.aqd-unittest.ms.com")
@@ -123,7 +122,7 @@ class TestAddInterfaceAddress(TestBrokerCommand):
         command = ["add", "interface", "address", "--machine", "ut3c1n3",
                    "--interface", "eth1", "--label", "e3",
                    "--fqdn", "unittest01.one-nyp.ms.com",
-                   "--ip", self.net.unknown[0].usable[10]]
+                   "--ip", self.net["unknown0"].usable[10]]
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "DNS Record unittest01.one-nyp.ms.com is already used "
@@ -134,7 +133,7 @@ class TestAddInterfaceAddress(TestBrokerCommand):
         command = ["add", "interface", "address", "--machine", "ut3c1n3",
                    "--interface", "eth1", "--label", "hostname",
                    "--fqdn", "hostname-label.one-nyp.ms.com",
-                   "--ip", self.net.unknown[0].usable[-1]]
+                   "--ip", self.net["unknown0"].usable[-1]]
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "The 'hostname' label can only be managed by "
@@ -156,7 +155,7 @@ class TestAddInterfaceAddress(TestBrokerCommand):
         self.matchoutput(out, "already has an alias named", command)
 
     def testrejectduplicateuse(self):
-        ip = self.net.unknown[0].usable[3]
+        ip = self.net["unknown0"].usable[3]
         command = ["add", "interface", "address", "--machine", "ut3c5n2",
                    "--interface", "eth1", "--label", "e2",
                    "--fqdn", "unittest00-e1.one-nyp.ms.com"]
@@ -168,7 +167,7 @@ class TestAddInterfaceAddress(TestBrokerCommand):
 
     def testrejectdyndns(self):
         # The FQDN does not exist yet, but the IP is used for dynamic DHCP
-        ip = self.net.tor_net2[0].usable[2]
+        ip = self.net["dyndhcp0"].usable[2]
         command = ["add", "interface", "address", "--machine", "ut3c5n2",
                    "--interface", "eth1", "--label", "e3",
                    "--fqdn", "dyndhcp.aqd-unittest.ms.com", "--ip", ip]
@@ -178,7 +177,7 @@ class TestAddInterfaceAddress(TestBrokerCommand):
 
     def testrejectdyndnsfqdn(self):
         # The FQDN exists and is used for dynamic DHCP
-        ip = self.net.tor_net2[0].usable[2]
+        ip = self.net["dyndhcp0"].usable[2]
         command = ["add", "interface", "address", "--machine", "ut3c5n2",
                    "--interface", "eth1", "--label", "e3",
                    "--fqdn", dynname(ip)]
@@ -188,7 +187,7 @@ class TestAddInterfaceAddress(TestBrokerCommand):
 
     def testrejectreserved(self):
         # Address in the reserved range
-        ip = self.net.tor_net2[0].reserved[0]
+        ip = self.net["dyndhcp0"].reserved[0]
         command = ["add", "interface", "address", "--machine", "ut3c5n2",
                    "--interface", "eth1", "--label", "e3",
                    "--fqdn", "dyndhcp.aqd-unittest.ms.com", "--ip", ip]
@@ -196,11 +195,11 @@ class TestAddInterfaceAddress(TestBrokerCommand):
         self.matchoutput(out,
                          "The IP address %s is reserved for dynamic DHCP for "
                          "a switch on subnet %s." %
-                         (ip, self.net.tor_net2[0].ip),
+                         (ip, self.net["dyndhcp0"].ip),
                          command)
 
     def testrejectrestricteddomain(self):
-        ip = self.net.tor_net2[0].usable[-1]
+        ip = self.net["dyndhcp0"].usable[-1]
         command = ["add", "interface", "address", "--machine", "ut3c5n2",
                    "--interface", "eth1", "--label", "e3",
                    "--fqdn", "foo.restrict.aqd-unittest.ms.com", "--ip", ip]
@@ -220,7 +219,7 @@ class TestAddInterfaceAddress(TestBrokerCommand):
                          command)
 
     def testmixenvironments(self):
-        net = self.net.unknown[1]
+        net = self.net["unknown1"]
         ip = net[3]
         command = ["add", "interface", "address", "--machine", "ut3c5n7",
                    "--interface", "eth0", "--ip", ip, "--label", "e0",
@@ -242,7 +241,7 @@ class TestAddInterfaceAddress(TestBrokerCommand):
         self.matchoutput(out, "Machine no-such-machine not found.", command)
 
     def testmissingnetenv(self):
-        net = self.net.unknown[1]
+        net = self.net["unknown1"]
         ip = net[3]
         command = ["add", "interface", "address", "--machine", "ut3c5n7",
                    "--interface", "eth0", "--ip", ip, "--label", "e0",
@@ -254,7 +253,7 @@ class TestAddInterfaceAddress(TestBrokerCommand):
                          command)
 
     def testaddunittest25utcolo(self):
-        net = self.net.unknown[1]
+        net = self.net["unknown1"]
         ip = net[4]
         command = ["add", "interface", "address", "--machine", "ut3c5n7",
                    "--interface", "eth1", "--ip", ip,
@@ -273,7 +272,7 @@ class TestAddInterfaceAddress(TestBrokerCommand):
         self.matchclean(out, "Reverse", command)
 
     def testaddunittest25utcolo2(self):
-        net = self.net.unknown[1]
+        net = self.net["unknown1"]
         command = ["add", "interface", "address", "--machine", "ut3c5n7",
                    "--interface", "eth2", "--ipfromip", net.ip,
                    "--fqdn", "unittest25-e2.utcolo.aqd-unittest.ms.com",
@@ -283,7 +282,7 @@ class TestAddInterfaceAddress(TestBrokerCommand):
         self.dsdb_verify(empty=True)
 
     def testaddunittest25utcolo3(self):
-        net = self.net.unknown[1]
+        net = self.net["unknown1"]
         command = ["add", "interface", "address", "--machine", "ut3c5n7",
                    "--interface", "eth2", "--ipfromip", net.ip,
                    "--fqdn", "unittest25-e2-2.utcolo.aqd-unittest.ms.com",
@@ -296,8 +295,8 @@ class TestAddInterfaceAddress(TestBrokerCommand):
                          command)
 
     def testaddunittest25excx(self):
-        net_internal = self.net.unknown[0]
-        net_excx = self.net.unknown[0].subnet()[0]
+        net_internal = self.net["unknown0"]
+        net_excx = self.net["unknown0"].subnet()[0]
         ip = net_excx[3]
         command = ["add", "interface", "address", "--machine", "ut3c5n7",
                    "--interface", "eth2", "--ip", ip,
@@ -308,7 +307,8 @@ class TestAddInterfaceAddress(TestBrokerCommand):
                          "Network %s in network environment internal used on "
                          "public interface eth0 of machine "
                          "unittest25.aqd-unittest.ms.com overlaps requested "
-                         "network excx-net in network environment excx." % net_internal.ip,
+                         "network excx-net in network environment excx." %
+                         net_internal.name,
                          command)
 
     def testverifyunittest23(self):
@@ -333,7 +333,7 @@ class TestAddInterfaceAddress(TestBrokerCommand):
                           command)
 
     def testaddunittest26(self):
-        ip = self.net.unknown[14].usable[0]
+        ip = self.net["routing1"].usable[0]
         fqdn = "unittest26-e1.aqd-unittest.ms.com"
         self.dsdb_expect_add(fqdn, ip, "eth1", ip.mac,
                              primary="unittest26.aqd-unittest.ms.com")
@@ -344,7 +344,7 @@ class TestAddInterfaceAddress(TestBrokerCommand):
         self.dsdb_verify()
 
     def testaddut3gd1r04vlan110(self):
-        ip = self.net.tor_net[12].usable[1]
+        ip = self.net["tor_net_12"].usable[1]
         self.dsdb_expect_add("ut3gd1r04-vlan110.aqd-unittest.ms.com", ip,
                              "vlan110", primary="ut3gd1r04.aqd-unittest.ms.com",
                              comments="Some new switch comments")
@@ -355,7 +355,7 @@ class TestAddInterfaceAddress(TestBrokerCommand):
         self.dsdb_verify()
 
     def testaddut3gd1r04vlan110hsrp(self):
-        ip = self.net.tor_net[12].usable[2]
+        ip = self.net["tor_net_12"].usable[2]
         self.dsdb_expect_add("ut3gd1r04-vlan110-hsrp.aqd-unittest.ms.com", ip,
                              "vlan110_hsrp", primary="ut3gd1r04.aqd-unittest.ms.com",
                              comments="Some new switch comments")
@@ -367,7 +367,7 @@ class TestAddInterfaceAddress(TestBrokerCommand):
 
     def testaddut3gd1r04loop0(self):
         # Use the network address
-        ip = self.net.unknown[17][0]
+        ip = self.net["autopg1"][0]
         self.dsdb_expect_add("ut3gd1r04-loop0.aqd-unittest.ms.com", ip,
                              "loop0", primary="ut3gd1r04.aqd-unittest.ms.com",
                              comments="Some new switch comments")
@@ -386,15 +386,15 @@ class TestAddInterfaceAddress(TestBrokerCommand):
                           r"\s+Network Environment: internal$"
                           r"\s+Provides: ut3gd1r04-vlan110.aqd-unittest.ms.com \[%s\]$"
                           r"\s+Provides: ut3gd1r04-vlan110-hsrp.aqd-unittest.ms.com \[%s\] \(label: hsrp\)$"
-                          % (self.net.tor_net[12].usable[1],
-                             self.net.tor_net[12].usable[2]),
+                          % (self.net["tor_net_12"].usable[1],
+                             self.net["tor_net_12"].usable[2]),
                           command)
         self.searchoutput(out,
                           r"Interface: loop0 \(no MAC addr\)$"
                           r"\s+Type: loopback$"
                           r"\s+Network Environment: internal$"
                           r"\s+Provides: ut3gd1r04-loop0.aqd-unittest.ms.com \[%s\]$"
-                          % self.net.unknown[17][0],
+                          % self.net["autopg1"][0],
                           command)
 
 

@@ -17,12 +17,11 @@
 # limitations under the License.
 """Module for testing the reset advertised status command."""
 
-import unittest
-
 if __name__ == "__main__":
     import broker.utils
     broker.utils.import_depends()
 
+import unittest2 as unittest
 from broker.brokertest import TestBrokerCommand
 
 

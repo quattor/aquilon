@@ -17,12 +17,11 @@
 # limitations under the License.
 """Module for testing the dump_dns command."""
 
-import unittest
-
 if __name__ == '__main__':
     import utils
     utils.import_depends()
 
+import unittest2 as unittest
 from brokertest import TestBrokerCommand
 
 
@@ -40,16 +39,16 @@ class TestDumpDns(TestBrokerCommand):
         # Primary name
         self.matchoutput(out,
                          "=unittest20.aqd-unittest.ms.com:%s" %
-                         self.net.unknown[13].usable[2],
+                         self.net["zebra_vip"].usable[2],
                          command)
         # Auxiliary address
         self.matchoutput(out,
                          "+unittest20-e0.aqd-unittest.ms.com:%s" %
-                         self.net.unknown[11].usable[0],
+                         self.net["zebra_eth0"].usable[0],
                          command)
         self.matchoutput(out,
                          "^%s:unittest20.aqd-unittest.ms.com" %
-                         inaddr_ptr(self.net.unknown[11].usable[0]),
+                         inaddr_ptr(self.net["zebra_eth0"].usable[0]),
                          command)
         # CNAME
         self.matchoutput(out,
@@ -79,7 +78,7 @@ class TestDumpDns(TestBrokerCommand):
         # reference it in the reverse record
         self.matchoutput(out,
                          "=unittest25-e1.utcolo.aqd-unittest.ms.com:%s" %
-                         self.net.unknown[1][4],
+                         self.net["unknown1"][4],
                          command)
 
     def test_bind(self):
@@ -88,20 +87,20 @@ class TestDumpDns(TestBrokerCommand):
         # Primary name
         self.matchoutput(out,
                          "unittest20.aqd-unittest.ms.com.\tIN\tA\t%s" %
-                         self.net.unknown[13].usable[2],
+                         self.net["zebra_vip"].usable[2],
                          command)
         self.matchoutput(out,
                          "%s.\tIN\tPTR\tunittest20.aqd-unittest.ms.com." %
-                         inaddr_ptr(self.net.unknown[13].usable[2]),
+                         inaddr_ptr(self.net["zebra_vip"].usable[2]),
                          command)
         # Auxiliary address
         self.matchoutput(out,
                          "unittest20-e0.aqd-unittest.ms.com.\tIN\tA\t%s" %
-                         self.net.unknown[11].usable[0],
+                         self.net["zebra_eth0"].usable[0],
                          command)
         self.matchoutput(out,
                          "%s.\tIN\tPTR\tunittest20.aqd-unittest.ms.com." %
-                         inaddr_ptr(self.net.unknown[11].usable[0]),
+                         inaddr_ptr(self.net["zebra_eth0"].usable[0]),
                          command)
         # CNAME
         self.matchoutput(out,

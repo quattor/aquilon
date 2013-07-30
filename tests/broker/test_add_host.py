@@ -17,13 +17,13 @@
 # limitations under the License.
 """Module for testing the add host command."""
 
-import unittest
-
 if __name__ == "__main__":
     from broker import utils
     utils.import_depends()
 
-from broker.brokertest import TestBrokerCommand, DummyIP
+import unittest2 as unittest
+from broker.brokertest import TestBrokerCommand
+from networktest import DummyIP
 
 
 class TestAddHost(TestBrokerCommand):
@@ -32,7 +32,7 @@ class TestAddHost(TestBrokerCommand):
         hostname = self.config.get("unittest", "hostname")
         # We _could_ also look up the real address of the host...
         self.dsdb_expect_add(hostname, "127.0.0.1", "eth0",
-                             self.net.unknown[0].usable[19].mac)
+                             self.net["unknown0"].usable[19].mac)
         self.noouttest(["add", "host",
                         "--hostname", hostname,
                         "--ip", "127.0.0.1", "--machine", "ut3c5n6",
@@ -44,7 +44,7 @@ class TestAddHost(TestBrokerCommand):
                         "--instance", "localhost", "--hostname", hostname])
 
     def testaddunittest02(self):
-        ip = self.net.unknown[0].usable[0]
+        ip = self.net["unknown0"].usable[0]
         self.dsdb_expect_add("unittest02.one-nyp.ms.com", ip, "eth0", ip.mac,
                              comments="Some machine comments")
         self.noouttest(["add", "host",
@@ -56,7 +56,7 @@ class TestAddHost(TestBrokerCommand):
         self.dsdb_verify()
 
     def testaddafsbynet(self):
-        ip = self.net.netsvcmap.usable[0]
+        ip = self.net["netsvcmap"].usable[0]
         self.dsdb_expect_add("afs-by-net.aqd-unittest.ms.com", ip, "eth0", ip.mac,
                              comments="For network based service mappings")
         self.noouttest(["add", "host",
@@ -69,7 +69,7 @@ class TestAddHost(TestBrokerCommand):
         self.dsdb_verify()
 
     def testaddnetmappers(self):
-        ip = self.net.netperssvcmap.usable[0]
+        ip = self.net["netperssvcmap"].usable[0]
         self.dsdb_expect_add("netmap-pers.aqd-unittest.ms.com", ip, "eth0", ip.mac,
                              comments="For net/pers based service mappings")
         self.noouttest(["add", "host",
@@ -82,7 +82,7 @@ class TestAddHost(TestBrokerCommand):
         self.dsdb_verify()
 
     def testaddjackhost(self):
-        ip = self.net.unknown[0].usable[17]
+        ip = self.net["unknown0"].usable[17]
         self.dsdb_expect_add("jack.cards.example.com", ip, "eth0", ip.mac,
                              comments="interface for jack")
         self.noouttest(["add", "host",
@@ -101,7 +101,7 @@ class TestAddHost(TestBrokerCommand):
         self.matchoutput(out, "Used by GRN: grn:/example/cards", command)
 
     def testmachinereuse(self):
-        ip = self.net.unknown[0].usable[-1]
+        ip = self.net["unknown0"].usable[-1]
         command = ["add", "host", "--hostname", "used-already.one-nyp.ms.com",
                    "--ip", ip, "--machine", "ut3c5n10", "--domain", "unittest",
                    "--buildstatus", "build", "--archetype", "aquilon",
@@ -116,7 +116,7 @@ class TestAddHost(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
                          "Primary Name: unittest02.one-nyp.ms.com [%s]" %
-                         self.net.unknown[0].usable[0],
+                         self.net["unknown0"].usable[0],
                          command)
         self.matchoutput(out, "Blade: ut3c5n10", command)
         self.matchoutput(out, "Archetype: aquilon", command)
@@ -132,7 +132,7 @@ class TestAddHost(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
                          "Primary Name: afs-by-net.aqd-unittest.ms.com [%s]" %
-                         self.net.netsvcmap.usable[0],
+                         self.net["netsvcmap"].usable[0],
                          command)
         self.matchoutput(out, "Blade: ut3c5n11", command)
         self.matchoutput(out, "Archetype: aquilon", command)
@@ -148,7 +148,7 @@ class TestAddHost(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
                          "Primary Name: unittest02.one-nyp.ms.com [%s]" %
-                         self.net.unknown[0].usable[0],
+                         self.net["unknown0"].usable[0],
                          command)
 
     def testverifyaddafsbynetut3c5n11(self):
@@ -156,7 +156,7 @@ class TestAddHost(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
                          "Primary Name: afs-by-net.aqd-unittest.ms.com [%s]" %
-                         self.net.netsvcmap.usable[0],
+                         self.net["netsvcmap"].usable[0],
                          command)
 
     def testverifyaddafsbynetut3c5n12(self):
@@ -164,7 +164,7 @@ class TestAddHost(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
                          "Primary Name: netmap-pers.aqd-unittest.ms.com [%s]" %
-                         self.net.netperssvcmap.usable[0],
+                         self.net["netperssvcmap"].usable[0],
                          command)
 
     def testverifyhostdns(self):
@@ -183,7 +183,7 @@ class TestAddHost(TestBrokerCommand):
         self.parse_hostlist_msg(out)
 
     def testaddunittest15(self):
-        ip = self.net.tor_net[0].usable[1]
+        ip = self.net["tor_net_0"].usable[1]
         self.dsdb_expect_add("unittest15.aqd-unittest.ms.com", ip, "eth0",
                              ip.mac)
         self.noouttest(["add", "host",
@@ -200,14 +200,14 @@ class TestAddHost(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
                          "Primary Name: unittest15.aqd-unittest.ms.com [%s]" %
-                         self.net.tor_net[0].usable[1],
+                         self.net["tor_net_0"].usable[1],
                          command)
         self.matchoutput(out, "Personality: inventory", command)
 
     def testaddunittest16bad(self):
         command = ["add", "host",
                    "--hostname", "unittest16.aqd-unittest.ms.com",
-                   "--ipfromip", self.net.tor_net2[1].usable[-1],
+                   "--ipfromip", self.net["dyndhcp1"].usable[-1],
                    "--ipalgorithm", "max",
                    "--machine", "ut8s02p2", "--domain", "unittest",
                    "--buildstatus", "build", "--archetype", "aquilon",
@@ -234,7 +234,7 @@ class TestAddHost(TestBrokerCommand):
                          command)
 
     def testaddunittest16baddomain(self):
-        net = self.net.tor_net[0]
+        net = self.net["tor_net_0"]
         command = ["add", "host", "--hostname", "unittest16.aqd-unittest.ms.com",
                    "--ipfromip", net.usable[0], "--ipalgorithm", "lowest",
                    "--machine", "ut8s02p2", "--domain", "nomanage",
@@ -246,7 +246,7 @@ class TestAddHost(TestBrokerCommand):
                          "is not allowed.", command)
 
     def testaddunittest16good(self):
-        net = self.net.tor_net[0]
+        net = self.net["tor_net_0"]
         self.dsdb_expect_add("unittest16.aqd-unittest.ms.com", net.usable[2],
                              "eth0", net.usable[2].mac)
         self.noouttest(["add", "host",
@@ -263,13 +263,13 @@ class TestAddHost(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
                          "Primary Name: unittest16.aqd-unittest.ms.com [%s]" %
-                         self.net.tor_net[0].usable[2],
+                         self.net["tor_net_0"].usable[2],
                          command)
         self.matchoutput(out, "Personality: compileserver", command)
 
     #test aquilons default linux/5.0.1-x86_64
     def testaddunittest17(self):
-        ip = self.net.tor_net[0].usable[3]
+        ip = self.net["tor_net_0"].usable[3]
         self.dsdb_expect_add("unittest17.aqd-unittest.ms.com", ip, "eth0",
                              ip.mac)
         self.noouttest(["add", "host",
@@ -285,7 +285,7 @@ class TestAddHost(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
                          "Primary Name: unittest17.aqd-unittest.ms.com [%s]" %
-                         self.net.tor_net[0].usable[3],
+                         self.net["tor_net_0"].usable[3],
                          command)
         self.matchoutput(out,
                          "Template: aquilon/os/linux/5.0.1-x86_64/config" +
@@ -294,7 +294,7 @@ class TestAddHost(TestBrokerCommand):
         self.matchoutput(out, "Personality: inventory", command)
 
     def testaddnointerface(self):
-        ip = self.net.unknown[0].usable[-1]
+        ip = self.net["unknown0"].usable[-1]
         command = ["add", "host", "--hostname", "unittest03.aqd-unittest.ms.com",
                    "--ip", ip, "--machine", "ut3c1n9",
                    "--domain", "unittest", "--archetype", "aquilon"]
@@ -316,7 +316,7 @@ class TestAddHost(TestBrokerCommand):
         # reserved for manage tests.
         servers = 0
         user = self.config.get("unittest", "user")
-        net = self.net.tor_net[1]
+        net = self.net["hp_eth0"]
         for i in range(51, 100):
             if servers < 10:
                 servers += 1
@@ -350,7 +350,7 @@ class TestAddHost(TestBrokerCommand):
         # This is used for utmc7 and update_machine testing:
         # evh10.aqd-unittest.ms.com
         # The other hosts are left for future use.
-        net = self.net.tor_net[2]
+        net = self.net["verari_eth0"]
         for i in range(101, 111):
             port = i - 100
             hostname = "evh%d.aqd-unittest.ms.com" % port
@@ -367,7 +367,7 @@ class TestAddHost(TestBrokerCommand):
 
     def testpopulate10gigrackhosts(self):
         # Assuming evh11 - evh50 will eventually be claimed above.
-        net = self.net.tor_net2[2]
+        net = self.net["vmotion_net"]
         for i in range(1, 25):
             hostname = "evh%d.aqd-unittest.ms.com" % (i + 50)
             if i < 13:
@@ -387,8 +387,8 @@ class TestAddHost(TestBrokerCommand):
         self.dsdb_verify()
 
     def testpopulate_esx_bcp_clusterhosts(self):
-        utnet = self.net.tor_net2[3]
-        npnet = self.net.tor_net2[4]
+        utnet = self.net["esx_bcp_ut"]
+        npnet = self.net["esx_bcp_np"]
         for i in range(25, 49):
             port = i - 24
 
@@ -429,7 +429,7 @@ class TestAddHost(TestBrokerCommand):
         self.assertEqual(host.operating_system.archetype.name, "vmhost")
         self.assertEqual(host.operating_system.name, "esxi")
         self.assertEqual(host.operating_system.version, "4.0.0")
-        self.assertEqual(host.ip, str(self.net.tor_net[2].usable[1]))
+        self.assertEqual(host.ip, str(self.net["verari_eth0"].usable[1]))
         self.assertEqual(host.machine.name, "ut10s04p1")
         self.assertEqual(len(host.machine.interfaces), 2)
         self.assertEqual(host.machine.location.name, 'ut10')
@@ -440,7 +440,7 @@ class TestAddHost(TestBrokerCommand):
                          "campus:ny city:ny building:ut")
         for i in host.machine.interfaces:
             if i.device == 'eth0':
-                self.assertEqual(i.ip, str(self.net.tor_net[2].usable[1]))
+                self.assertEqual(i.ip, str(self.net["verari_eth0"].usable[1]))
                 # We're not using this field anymore...
                 self.assertEqual(i.network_id, 0)
             elif i.device == 'eth1':
@@ -452,13 +452,13 @@ class TestAddHost(TestBrokerCommand):
     def testaddhostnousefularchetype(self):
         command = ["add", "host", "--archetype", "filer",
                    "--hostname", "unittest01.one-nyp.ms.com",
-                   "--ip", self.net.unknown[0].usable[10],
+                   "--ip", self.net["unknown0"].usable[10],
                    "--domain", "unittest", "--machine", "ut3c1n4"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Can not determine a sensible default OS", command)
 
     def testaddccisshost(self):
-        ip = self.net.unknown[0].usable[18]
+        ip = self.net["unknown0"].usable[18]
         self.dsdb_expect_add("unittest18.aqd-unittest.ms.com", ip, "eth0",
                              ip.mac)
         command = ["add", "host", "--archetype", "aquilon",
@@ -468,7 +468,7 @@ class TestAddHost(TestBrokerCommand):
         self.dsdb_verify()
 
     def testaddfiler(self):
-        ip = self.net.vm_storage_net[0].usable[25]
+        ip = self.net["vm_storage_net"].usable[25]
         self.dsdb_expect_add("filer1.ms.com", ip, "v0")
         command = ["add", "host", "--archetype", "filer",
                    "--hostname", "filer1.ms.com", "--ip", ip,
@@ -479,7 +479,7 @@ class TestAddHost(TestBrokerCommand):
 
     #test aurora and windows defaults now
     def testaddauroradefaultos(self):
-        ip = self.net.tor_net[10].usable[-1]
+        ip = self.net["utpgsw0-v710"].usable[-1]
         self.dsdb_expect("show_host -host_name test-aurora-default-os")
         self.noouttest(["add", "host", "--archetype", "aurora",
                         "--hostname", "test-aurora-default-os.ms.com",
@@ -499,9 +499,9 @@ class TestAddHost(TestBrokerCommand):
                          command)
 
     def testaddwindowsefaultos(self):
-        ip = self.net.tor_net[10].usable[-2]
+        ip = self.net["utpgsw0-v710"].usable[-2]
         self.dsdb_expect_add("test-windows-default-os.msad.ms.com", ip,
-                             "eth0", self.net.tor_net[0].usable[5].mac)
+                             "eth0", self.net["tor_net_0"].usable[5].mac)
         self.noouttest(["add", "host", "--archetype", "windows",
                         "--hostname", "test-windows-default-os.msad.ms.com",
                         "--ip", ip, "--domain", "ny-prod",
@@ -521,7 +521,7 @@ class TestAddHost(TestBrokerCommand):
 
     def testaddf5(self):
         # The IP address is also a /32 network
-        ip = self.net.unknown[16].ip
+        ip = self.net["f5test"].ip
         self.dsdb_expect_add("f5test.aqd-unittest.ms.com", ip, "eth0",
                              DummyIP(ip).mac)
         command = ["add", "host", "--hostname", "f5test.aqd-unittest.ms.com",

@@ -18,13 +18,13 @@
 """Module for testing the vulcan2 related commands."""
 
 import os
-import unittest
 from datetime import datetime
 
 if __name__ == "__main__":
     import utils
     utils.import_depends()
 
+import unittest2 as unittest
 from brokertest import TestBrokerCommand
 from notificationtest import VerifyNotificationsMixin
 
@@ -38,7 +38,7 @@ class TestVulcanLocalDisk(VerifyNotificationsMixin, TestBrokerCommand):
     machine = "utpgs01p0"
 
     def getip(self):
-        return self.net.unknown[18].usable[0]
+        return self.net["autopg2"].usable[0]
 
     def test_000_add_vlocal(self):
         # vmhost archetype
@@ -96,7 +96,7 @@ class TestVulcanLocalDisk(VerifyNotificationsMixin, TestBrokerCommand):
 
     # reusing vulcan2 subnets here.
     def test_020_addutpgsw(self):
-        ip = self.net.unknown[17].usable[0]
+        ip = self.net["autopg1"].usable[0]
 
         self.dsdb_expect_add(self.switch, ip, "xge49",
                              ip.mac)
@@ -308,7 +308,7 @@ class TestVulcanLocalDisk(VerifyNotificationsMixin, TestBrokerCommand):
         self.noouttest(["del", "machine", "--machine", self.machine])
 
     def test_308_delutpgsw(self):
-        ip = self.net.unknown[17].usable[0]
+        ip = self.net["autopg1"].usable[0]
         plenary = self.plenary_name("switchdata", self.switch)
         self.failUnless(os.path.exists(plenary),
                     "Plenary file '%s' does not exist" % plenary)

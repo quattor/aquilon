@@ -17,19 +17,18 @@
 # limitations under the License.
 """Module for testing the add service address command."""
 
-import unittest
-
 if __name__ == "__main__":
     import utils
     utils.import_depends()
 
+import unittest2 as unittest
 from brokertest import TestBrokerCommand
 
 
 class TestAddServiceAddress(TestBrokerCommand):
 
     def testsystemzebramix(self):
-        ip = self.net.unknown[0].usable[3]
+        ip = self.net["unknown0"].usable[3]
         command = ["add", "service", "address",
                    "--hostname", "unittest20.aqd-unittest.ms.com",
                    "--interfaces", "eth0,eth1", "--name", "e2",
@@ -43,7 +42,7 @@ class TestAddServiceAddress(TestBrokerCommand):
     def testaddzebra2(self):
         # Use an address that is smaller than the primary IP to verify that the
         # primary IP is not removed
-        ip = self.net.unknown[13].usable[1]
+        ip = self.net["zebra_vip"].usable[1]
         self.dsdb_expect_add("zebra2.aqd-unittest.ms.com", ip, "le1")
         command = ["add", "service", "address",
                    "--hostname", "unittest20.aqd-unittest.ms.com",
@@ -54,7 +53,7 @@ class TestAddServiceAddress(TestBrokerCommand):
         self.dsdb_verify()
 
     def testverifyzebra2(self):
-        ip = self.net.unknown[13].usable[1]
+        ip = self.net["zebra_vip"].usable[1]
         command = ["show", "service", "address", "--name", "zebra2",
                    "--hostname", "unittest20.aqd-unittest.ms.com"]
         out = self.commandtest(command)
@@ -66,7 +65,7 @@ class TestAddServiceAddress(TestBrokerCommand):
         self.matchoutput(out, "Interfaces: eth0, eth1", command)
 
     def testverifyzebra2proto(self):
-        ip = self.net.unknown[13].usable[1]
+        ip = self.net["zebra_vip"].usable[1]
         command = ["show", "host",
                    "--hostname", "unittest20.aqd-unittest.ms.com",
                    "--format", "proto"]
@@ -89,15 +88,15 @@ class TestAddServiceAddress(TestBrokerCommand):
                                               host.resources]))
 
     def testverifyzebra2dns(self):
-        ip = self.net.unknown[13].usable[1]
+        ip = self.net["zebra_vip"].usable[1]
         command = ["show", "fqdn", "--fqdn", "zebra2.aqd-unittest.ms.com"]
         out = self.commandtest(command)
         self.matchclean(out, "Reverse", command)
 
     def testaddzebra3(self):
         # Adding an even lower IP should cause zebra2 to be renumbered in DSDB
-        zebra2_ip = self.net.unknown[13].usable[1]
-        zebra3_ip = self.net.unknown[13].usable[0]
+        zebra2_ip = self.net["zebra_vip"].usable[1]
+        zebra3_ip = self.net["zebra_vip"].usable[0]
         self.dsdb_expect_rename("zebra2.aqd-unittest.ms.com", iface="le1",
                                 new_iface="le2")
         self.dsdb_expect_add("zebra3.aqd-unittest.ms.com", zebra3_ip, "le1")
@@ -110,9 +109,9 @@ class TestAddServiceAddress(TestBrokerCommand):
         self.dsdb_verify()
 
     def testverifyunittest20(self):
-        ip = self.net.unknown[13].usable[2]
-        zebra2_ip = self.net.unknown[13].usable[1]
-        zebra3_ip = self.net.unknown[13].usable[0]
+        ip = self.net["zebra_vip"].usable[2]
+        zebra2_ip = self.net["zebra_vip"].usable[1]
+        zebra3_ip = self.net["zebra_vip"].usable[0]
         command = ["show", "host", "--hostname",
                    "unittest20.aqd-unittest.ms.com"]
         out = self.commandtest(command)
@@ -147,7 +146,7 @@ class TestAddServiceAddress(TestBrokerCommand):
                           command)
 
     def testfailbadname(self):
-        ip = self.net.unknown[0].usable[-1]
+        ip = self.net["unknown0"].usable[-1]
         command = ["add", "service", "address",
                    "--hostname", "unittest20.aqd-unittest.ms.com",
                    "--interfaces", "eth0,eth1", "--name", "hostname",
@@ -162,7 +161,7 @@ class TestAddServiceAddress(TestBrokerCommand):
                          command)
 
     def testfailbadinterface(self):
-        ip = self.net.unknown[0].usable[-1]
+        ip = self.net["unknown0"].usable[-1]
         command = ["add", "service", "address",
                    "--hostname", "unittest20.aqd-unittest.ms.com",
                    "--interfaces", "eth0,eth2", "--name", "badiface",
@@ -175,7 +174,7 @@ class TestAddServiceAddress(TestBrokerCommand):
                          command)
 
     def testfailbadnetenv(self):
-        net = self.net.unknown[0]
+        net = self.net["unknown0"]
         subnet = net.subnet()[0]
         command = ["add", "service", "address",
                    "--hostname", "unittest20.aqd-unittest.ms.com",

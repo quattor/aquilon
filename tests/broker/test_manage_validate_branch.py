@@ -17,14 +17,13 @@
 # limitations under the License.
 """Module for testing the manage command."""
 
-
 import os
-import unittest
 
 if __name__ == "__main__":
     import utils
     utils.import_depends()
 
+import unittest2 as unittest
 from broker.brokertest import TestBrokerCommand
 
 

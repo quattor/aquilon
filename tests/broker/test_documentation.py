@@ -18,13 +18,13 @@
 """Module for testing errors in the documentation."""
 
 import os
-import unittest
 from subprocess import Popen, PIPE
 
 if __name__ == '__main__':
     import utils
     utils.import_depends()
 
+import unittest2 as unittest
 from brokertest import TestBrokerCommand
 
 

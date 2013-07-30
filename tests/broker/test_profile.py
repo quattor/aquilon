@@ -17,9 +17,7 @@
 # limitations under the License.
 """Module for testing the generated profiles."""
 
-
 import os
-import unittest
 from lxml import etree
 import gzip
 
@@ -27,6 +25,7 @@ if __name__ == "__main__":
     import utils
     utils.import_depends()
 
+import unittest2 as unittest
 from brokertest import TestBrokerCommand
 
 

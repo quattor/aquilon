@@ -17,12 +17,11 @@
 # limitations under the License.
 """Module for testing the search system command."""
 
-import unittest
-
 if __name__ == "__main__":
     import utils
     utils.import_depends()
 
+import unittest2 as unittest
 from brokertest import TestBrokerCommand
 
 
@@ -83,7 +82,7 @@ class TestSearchSystem(TestBrokerCommand):
 #       self.matchclean(out, "unittest02.one-nyp.ms.com", command)
 
     def testipavailable(self):
-        command = "search system --ip %s" % self.net.unknown[0].usable[2]
+        command = "search system --ip %s" % self.net["unknown0"].usable[2]
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "unittest00.one-nyp.ms.com", command)
 
@@ -92,7 +91,7 @@ class TestSearchSystem(TestBrokerCommand):
         self.noouttest(command.split(" "))
 
     def testnetworkipavailable(self):
-        command = "search system --networkip %s" % self.net.unknown[0].ip
+        command = "search system --networkip %s" % self.net["unknown0"].ip
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "ut3c5.aqd-unittest.ms.com", command)
         self.matchoutput(out, "unittest00.one-nyp.ms.com", command)
@@ -109,7 +108,7 @@ class TestSearchSystem(TestBrokerCommand):
                          command)
 
 #   def testmacavailable(self):
-#       command = "search system --mac %s" % self.net.unknown[0].usable[2].mac
+#       command = "search system --mac %s" % self.net["unknown0"].usable[2].mac
 #       out = self.commandtest(command.split(" "))
 #       self.matchoutput(out, "unittest00.one-nyp.ms.com", command)
 

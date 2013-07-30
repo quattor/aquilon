@@ -17,12 +17,11 @@
 # limitations under the License.
 """Module for testing the search switch command."""
 
-import unittest
-
 if __name__ == "__main__":
     import utils
     utils.import_depends()
 
+import unittest2 as unittest
 from brokertest import TestBrokerCommand
 
 
@@ -32,7 +31,7 @@ class TestSearchSwitch(TestBrokerCommand):
         command = ["search_switch", "--switch=ut3gd1r06.aqd-unittest.ms.com",
                    "--format=csv"]
         out = self.commandtest(command)
-        ip = self.net.tor_net[8].usable[1]
+        ip = self.net["tor_net_8"].usable[1]
         self.matchoutput(out,
                          "ut3gd1r06.aqd-unittest.ms.com,%s,tor,ut3,ut,"
                          "generic,temp_switch,,xge49,%s" % (ip, ip.mac),
@@ -42,7 +41,7 @@ class TestSearchSwitch(TestBrokerCommand):
         command = ["search_switch", "--switch=ut3gd1r01.aqd-unittest.ms.com",
                    "--format=csv"]
         out = self.commandtest(command)
-        ip = self.net.tor_net[12].usable[0]
+        ip = self.net["tor_net_12"].usable[0]
         self.matchoutput(out,
                          "ut3gd1r01.aqd-unittest.ms.com,%s,bor,ut3,ut,"
                          "hp,uttorswitch,SNgd1r01,," % ip,
@@ -102,7 +101,7 @@ class TestSearchSwitch(TestBrokerCommand):
         command = ["search_switch", "--serial=SNgd1r05_new", "--fullinfo",
                    "--format=csv"]
         out = self.commandtest(command)
-        ip = self.net.tor_net[7].usable[0]
+        ip = self.net["tor_net_7"].usable[0]
         self.matchoutput(out,
                          "ut3gd1r05.aqd-unittest.ms.com,%s,tor,ut4,ut,"
                          "hp,uttorswitch,SNgd1r05_new,," % ip,
@@ -114,7 +113,7 @@ class TestSearchSwitch(TestBrokerCommand):
         self.matchoutput(out, "Switch: ut3gd1r01", command)
         self.matchoutput(out,
                          "Primary Name: ut3gd1r01.aqd-unittest.ms.com [%s]" %
-                         self.net.tor_net[12].usable[0],
+                         self.net["tor_net_12"].usable[0],
                          command)
         self.matchoutput(out, "Switch Type: bor", command)
         self.matchoutput(out, "Rack: ut3", command)
@@ -123,7 +122,7 @@ class TestSearchSwitch(TestBrokerCommand):
         self.matchoutput(out, "Switch: ut3gd1r04", command)
         self.matchoutput(out,
                          "Primary Name: ut3gd1r04.aqd-unittest.ms.com [%s]" %
-                         self.net.tor_net[6].usable[1],
+                         self.net["verari_eth1"].usable[1],
                          command)
         self.matchoutput(out, "Switch Type: tor", command)
 
@@ -134,7 +133,7 @@ class TestSearchSwitch(TestBrokerCommand):
         self.matchoutput(out, "Switch: ut3gd1r04", command)
         self.matchoutput(out,
                          "Primary Name: ut3gd1r04.aqd-unittest.ms.com [%s]" %
-                         self.net.tor_net[6].usable[1],
+                         self.net["verari_eth1"].usable[1],
                          command)
         self.matchoutput(out, "Switch Type: bor", command)
         self.matchoutput(out, "Rack: ut3", command)
@@ -143,12 +142,12 @@ class TestSearchSwitch(TestBrokerCommand):
     def testsearchswitchallcsv(self):
         command = ["search_switch", "--all", "--format=csv"]
         out = self.commandtest(command)
-        ip = self.net.tor_net[8].usable[1]
+        ip = self.net["tor_net_8"].usable[1]
         self.matchoutput(out,
                          "ut3gd1r06.aqd-unittest.ms.com,%s,tor,ut3,ut,"
                          "generic,temp_switch,,xge49,%s" % (ip, ip.mac),
                          command)
-        ip = self.net.tor_net[12].usable[0]
+        ip = self.net["tor_net_12"].usable[0]
         self.matchoutput(out,
                          "ut3gd1r01.aqd-unittest.ms.com,%s,bor,ut3,ut,"
                          "hp,uttorswitch,SNgd1r01,," % ip,

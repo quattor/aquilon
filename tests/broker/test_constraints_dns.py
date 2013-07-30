@@ -17,12 +17,11 @@
 # limitations under the License.
 """Module for testing constraints in commands involving DNS."""
 
-import unittest
-
 if __name__ == "__main__":
     import utils
     utils.import_depends()
 
+import unittest2 as unittest
 from brokertest import TestBrokerCommand
 
 
@@ -67,7 +66,7 @@ class TestDnsConstraints(TestBrokerCommand):
                          command)
 
     def testdelserviceaddress(self):
-        ip = self.net.unknown[13].usable[1]
+        ip = self.net["zebra_vip"].usable[1]
         command = ["del", "address", "--fqdn", "zebra2.aqd-unittest.ms.com"]
         out = self.badrequesttest(command)
         self.matchoutput(out,

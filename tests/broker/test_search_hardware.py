@@ -17,12 +17,11 @@
 # limitations under the License.
 """Module for testing the search hardware command."""
 
-import unittest
-
 if __name__ == "__main__":
     import utils
     utils.import_depends()
 
+import unittest2 as unittest
 from brokertest import TestBrokerCommand
 
 
@@ -93,7 +92,7 @@ class TestSearchHardware(TestBrokerCommand):
         self.noouttest(command.split(" "))
 
     def testmacavailable(self):
-        command = "search hardware --mac " + self.net.unknown[0].usable[2].mac
+        command = "search hardware --mac " + self.net["unknown0"].usable[2].mac
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "ut3c1n3", command)
 

@@ -17,19 +17,20 @@
 # limitations under the License.
 """Module for testing the del_network command."""
 
-import unittest
-
 if __name__ == "__main__":
     import utils
     utils.import_depends()
 
+import unittest2 as unittest
 from brokertest import TestBrokerCommand
 
 
 class TestDelNetwork(TestBrokerCommand):
 
     def testdelnetwork(self):
-        for network in self.net.all:
+        for network in self.net:
+            if not network.autocreate:
+                continue
             command = ["del_network", "--ip=%s" % network.ip]
             self.noouttest(command)
 
@@ -43,7 +44,9 @@ class TestDelNetwork(TestBrokerCommand):
         self.noouttest(["del", "network", "--ip", ip])
 
     def testshownetworkall(self):
-        for network in self.net.all:
+        for network in self.net:
+            if not network.autocreate:
+                continue
             command = "show network --ip %s --hosts" % network.ip
             out = self.notfoundtest(command.split(" "))
 
@@ -92,43 +95,43 @@ class TestDelNetwork(TestBrokerCommand):
         self.noouttest(["del", "network", "--ip", "127.0.0.0"])
 
     def testdelexcx(self):
-        net = self.net.unknown[0].subnet()[0]
+        net = self.net["unknown0"].subnet()[0]
         command = ["del", "network", "--ip", net.ip,
                    "--network_environment", "excx"]
         self.noouttest(command)
 
     def testdelnetsvcmap(self):
-        net = self.net.netsvcmap
+        net = self.net["netsvcmap"]
         command = ["del", "network", "--ip", net.ip]
         self.noouttest(command)
 
     def testdelnetperssvcmap(self):
-        net = self.net.netperssvcmap
+        net = self.net["netperssvcmap"]
         command = ["del", "network", "--ip", net.ip]
         self.noouttest(command)
 
     def testdelutcolo(self):
-        net = self.net.unknown[1]
+        net = self.net["unknown1"]
         command = ["del", "network", "--ip", net.ip,
                    "--network_environment", "utcolo"]
         self.noouttest(command)
 
     def testverifyexcx(self):
-        net = self.net.unknown[0].subnet()[0]
+        net = self.net["unknown0"].subnet()[0]
         command = ["search", "network", "--all", "--network_environment", "excx"]
         out = self.commandtest(command)
         self.matchclean(out, "excx-net", command)
         self.matchclean(out, str(net.ip), command)
 
     def testverifynetsvcmap(self):
-        net = self.net.netsvcmap
+        net = self.net["netsvcmap"]
         command = ["search", "network", "--all"]
         out = self.commandtest(command)
         self.matchclean(out, "netsvcmap", command)
         self.matchclean(out, str(net.ip), command)
 
     def testverifyutcolo(self):
-        net = self.net.unknown[1]
+        net = self.net["unknown1"]
         command = ["search", "network", "--all", "--network_environment", "utcolo"]
         out = self.commandtest(command)
         self.matchclean(out, "utcolo-net", command)

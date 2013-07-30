@@ -18,12 +18,12 @@
 """Module for testing the make command."""
 
 import os
-import unittest
 
 if __name__ == "__main__":
     import utils
     utils.import_depends()
 
+import unittest2 as unittest
 from brokertest import TestBrokerCommand
 
 
@@ -40,7 +40,7 @@ class TestMake(TestBrokerCommand):
         self.matchoutput(out, "Template: service/afs/q.ny.ms.com", command)
 
     def testmakeafsbynet_2_mapservice(self):
-        ip = self.net.netsvcmap.subnet()[0].ip
+        ip = self.net["netsvcmap"].subnet()[0].ip
 
         self.noouttest(["map", "service", "--networkip", ip,
                         "--service", "afs", "--instance", "afs-by-net"])
@@ -48,7 +48,7 @@ class TestMake(TestBrokerCommand):
                         "--service", "afs", "--instance", "afs-by-net2"])
 
     def testmakeafsbynet_3_verifymapservice(self):
-        ip = self.net.netsvcmap.subnet()[0].ip
+        ip = self.net["netsvcmap"].subnet()[0].ip
 
         command = ["show_map", "--service=afs", "--instance=afs-by-net",
                    "--networkip=%s" % ip]
@@ -59,7 +59,7 @@ class TestMake(TestBrokerCommand):
                          command)
 
     def testmakeafsbynet_3_verifymapservice_proto(self):
-        ip = self.net.netsvcmap.subnet()[0].ip
+        ip = self.net["netsvcmap"].subnet()[0].ip
 
         command = ["show_map", "--service=afs", "--instance=afs-by-net",
                    "--networkip=%s" % ip, "--format=proto"]
@@ -81,7 +81,7 @@ class TestMake(TestBrokerCommand):
         self.matchoutput(out, "Template: service/afs/afs-by-net", command)
 
     def testmakeafsbynet_5_mapconflicts(self):
-        ip = self.net.netsvcmap.subnet()[0].ip
+        ip = self.net["netsvcmap"].subnet()[0].ip
 
         command = ["map", "service", "--networkip", ip,
                         "--service", "afs", "--instance", "afs-by-net",
@@ -120,7 +120,7 @@ class TestMake(TestBrokerCommand):
         self.matchoutput(out, "Template: service/netmap/p-q.ny.ms.com", command)
 
     def testmakenetmappers_3_mapservice(self):
-        ip = self.net.netperssvcmap.subnet()[0].ip
+        ip = self.net["netperssvcmap"].subnet()[0].ip
 
         self.noouttest(["map", "service", "--networkip", ip,
                         "--service", "netmap", "--instance", "netmap-pers",
@@ -128,7 +128,7 @@ class TestMake(TestBrokerCommand):
                         "--archetype", "aquilon"])
 
     def testmakenetmappers_4_verifymapservice(self):
-        ip = self.net.netperssvcmap.subnet()[0].ip
+        ip = self.net["netperssvcmap"].subnet()[0].ip
 
         command = ["show_map", "--service=netmap", "--instance=netmap-pers",
                    "--networkip=%s" % ip, "--personality", "eaitools",
@@ -141,7 +141,7 @@ class TestMake(TestBrokerCommand):
                          command)
 
     def testmakenetmappers_5_verifymapservice_proto(self):
-        ip = self.net.netperssvcmap.subnet()[0].ip
+        ip = self.net["netperssvcmap"].subnet()[0].ip
 
         command = ["show_map", "--service=netmap", "--instance=netmap-pers",
                    "--networkip=%s" % ip, "--personality", "eaitools",
@@ -204,20 +204,20 @@ class TestMake(TestBrokerCommand):
         self.matchoutput(err, "2/2 compiled", command)
 
     def testverifyunittest20(self):
-        eth0_ip = self.net.unknown[11].usable[0]
-        eth0_broadcast = self.net.unknown[11].broadcast
-        eth0_netmask = self.net.unknown[11].netmask
-        eth0_gateway = self.net.unknown[11].gateway
+        eth0_ip = self.net["zebra_eth0"].usable[0]
+        eth0_broadcast = self.net["zebra_eth0"].broadcast
+        eth0_netmask = self.net["zebra_eth0"].netmask
+        eth0_gateway = self.net["zebra_eth0"].gateway
 
-        eth1_ip = self.net.unknown[12].usable[0]
-        eth1_broadcast = self.net.unknown[12].broadcast
-        eth1_netmask = self.net.unknown[12].netmask
-        eth1_gateway = self.net.unknown[12].gateway
-        eth1_1_ip = self.net.unknown[12].usable[3]
+        eth1_ip = self.net["zebra_eth1"].usable[0]
+        eth1_broadcast = self.net["zebra_eth1"].broadcast
+        eth1_netmask = self.net["zebra_eth1"].netmask
+        eth1_gateway = self.net["zebra_eth1"].gateway
+        eth1_1_ip = self.net["zebra_eth1"].usable[3]
 
-        hostname_ip = self.net.unknown[13].usable[2]
-        zebra2_ip = self.net.unknown[13].usable[1]
-        zebra3_ip = self.net.unknown[13].usable[0]
+        hostname_ip = self.net["zebra_vip"].usable[2]
+        zebra2_ip = self.net["zebra_vip"].usable[1]
+        zebra3_ip = self.net["zebra_vip"].usable[0]
 
         command = ["cat", "--hostname", "unittest20.aqd-unittest.ms.com",
                    "--data"]
@@ -241,10 +241,10 @@ class TestMake(TestBrokerCommand):
                           r'"system/network/routers" = nlist\(\s*'
                           r'"eth0", list\(\s*"%s",\s*"%s"\s*\),\s*'
                           r'"eth1", list\(\s*"%s",\s*"%s"\s*\)\s*'
-                          r'\);' % (self.net.unknown[11][1],
-                                    self.net.unknown[11][2],
-                                    self.net.unknown[12][1],
-                                    self.net.unknown[12][2]),
+                          r'\);' % (self.net["zebra_eth0"][1],
+                                    self.net["zebra_eth0"][2],
+                                    self.net["zebra_eth1"][1],
+                                    self.net["zebra_eth1"][2]),
                           command)
         self.searchoutput(out,
                           r'"eth0", nlist\(\s*'
@@ -327,7 +327,7 @@ class TestMake(TestBrokerCommand):
         self.matchoutput(err, "2/2 compiled", command)
 
     def testverifyunittest21(self):
-        net = self.net.unknown[11]
+        net = self.net["zebra_eth0"]
         command = ["cat", "--hostname", "unittest21.aqd-unittest.ms.com",
                    "--data"]
         out = self.commandtest(command)
@@ -349,7 +349,7 @@ class TestMake(TestBrokerCommand):
         command = ["cat", "--hostname", "unittest23.aqd-unittest.ms.com",
                    "--data"]
         out = self.commandtest(command)
-        net = self.net.vpls[0]
+        net = self.net["vpls"]
         ip = net.usable[1]
         router = net[1]
         self.searchoutput(out,
@@ -381,7 +381,7 @@ class TestMake(TestBrokerCommand):
         command = ["cat", "--hostname", "unittest24.aqd-unittest.ms.com",
                    "--data"]
         out = self.commandtest(command)
-        net = self.net.vpls[0]
+        net = self.net["vpls"]
         ip = net.usable[2]
         router = net[2]
         self.searchoutput(out,
@@ -413,7 +413,7 @@ class TestMake(TestBrokerCommand):
         command = ["cat", "--hostname", "unittest25.aqd-unittest.ms.com",
                    "--data"]
         out = self.commandtest(command)
-        net = self.net.unknown[1]
+        net = self.net["unknown1"]
         ip = net[4]
         router = net[2]
         self.searchoutput(out,
@@ -429,7 +429,7 @@ class TestMake(TestBrokerCommand):
                           (net.broadcast, router, ip, net.netmask),
                           command)
         self.matchoutput(out, '"system/network/default_gateway" = "%s";' %
-                         self.net.unknown[0].gateway, command)
+                         self.net["unknown0"].gateway, command)
 
     def testmakeaurora(self):
         command = ["make", "--hostname", self.aurora_with_node + ".ms.com"]

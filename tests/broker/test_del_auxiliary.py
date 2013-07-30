@@ -17,19 +17,18 @@
 # limitations under the License.
 """Module for testing the del auxiliary command."""
 
-import unittest
-
 if __name__ == "__main__":
     import utils
     utils.import_depends()
 
+import unittest2 as unittest
 from brokertest import TestBrokerCommand
 
 
 class TestDelAuxiliary(TestBrokerCommand):
 
     def testdelunittest00e1(self):
-        self.dsdb_expect_delete(self.net.unknown[0].usable[3])
+        self.dsdb_expect_delete(self.net["unknown0"].usable[3])
         command = "del auxiliary --auxiliary unittest00-e1.one-nyp.ms.com"
         (out, err) = self.successtest(command.split(" "))
         self.assertEmptyOut(out, command)
