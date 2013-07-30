@@ -156,7 +156,8 @@ class PlenaryServiceInstanceToplevel(StructurePlenary):
         self.plenary_template = "config"
 
     def body(self, lines):
-        pan_include(lines, "servicedata/%s/config" % self.service)
+        pan_include(lines,
+                    PlenaryServiceToplevel.template_name(self.dbobj.service))
         lines.append("")
         pan_assign(lines, "instance", self.name)
         pan_assign(lines, "servers", self.dbobj.server_fqdns)
@@ -219,10 +220,12 @@ class PlenaryServiceInstanceClientDefault(Plenary):
         self.plenary_template = "config"
 
     def body(self, lines):
+        path = PlenaryServiceInstanceToplevel.template_name(self.dbobj)
         pan_assign(lines, "/system/services/%s" % self.service,
-                   StructureTemplate('servicedata/%s/%s/config' % (self.service,
-                                                                   self.name)))
-        pan_include(lines, "service/%s/client/config" % self.service)
+                   StructureTemplate(path))
+
+        path = PlenaryServiceClientDefault.template_name(self.dbobj.service)
+        pan_include(lines, path)
 
 
 class PlenaryServiceInstanceServerDefault(Plenary):
@@ -250,7 +253,9 @@ class PlenaryServiceInstanceServerDefault(Plenary):
         self.plenary_template = "config"
 
     def body(self, lines):
+        path = PlenaryServiceInstanceServer.template_name(self.dbobj)
         pan_assign(lines, "/system/provides/%s" % self.service,
-                   StructureTemplate('servicedata/%s/%s/srvconfig' %
-                                     (self.service, self.name)))
-        pan_include(lines, "service/%s/server/config" % self.service)
+                   StructureTemplate(path))
+
+        path = PlenaryServiceServerDefault.template_name(self.dbobj.service)
+        pan_include(lines, path)

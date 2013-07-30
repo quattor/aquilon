@@ -212,7 +212,9 @@ class PlenaryPersonalityBase(Plenary):
                    self.dbobj.owner_eon_id)
 
         ## include pre features
-        pan_include_if_exists(lines, "%s/pre_feature" % self.plenary_core)
+        path = PlenaryPersonalityPreFeature.template_name(self.dbobj)
+        pan_include_if_exists(lines, path)
+
         ## process parameter templates
         pan_include_if_exists(lines, "personality/config")
         pan_assign(lines, "/system/personality/name", self.name)
@@ -227,7 +229,8 @@ class PlenaryPersonalityBase(Plenary):
             pan_include(lines, "features/personality/config_override/config")
 
         ## include post features
-        pan_include_if_exists(lines, "%s/post_feature" % self.plenary_core)
+        path = PlenaryPersonalityPostFeature.template_name(self.dbobj)
+        pan_include_if_exists(lines, path)
 
 
 class PlenaryPersonalityPreFeature(Plenary):

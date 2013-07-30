@@ -28,7 +28,10 @@ from aquilon.aqdb.model import (Host, VlanInterface, BondingInterface,
 from aquilon.worker.locks import CompileKey
 from aquilon.worker.templates import (Plenary, ObjectPlenary, StructurePlenary,
                                       PlenaryCollection, PlenaryClusterClient,
-                                      PlenaryMachineInfo)
+                                      PlenaryMachineInfo, PlenaryResource,
+                                      PlenaryPersonalityBase,
+                                      PlenaryServiceInstanceClientDefault,
+                                      PlenaryServiceInstanceServerDefault)
 from aquilon.worker.templates.panutils import (StructureTemplate, PanValue,
                                                pan_assign, pan_append,
                                                pan_include)
@@ -299,9 +302,9 @@ class PlenaryHostData(StructurePlenary):
             lines.append("")
             for resource in sorted(self.dbobj.resholder.resources,
                                    key=attrgetter('resource_type', 'name')):
+                res_path = PlenaryResource.template_name(resource)
                 pan_append(lines, "system/resources/" + resource.resource_type,
-                           StructureTemplate(resource.template_base +
-                                             '/config'))
+                           StructureTemplate(res_path))
 
 
 class PlenaryToplevelHost(ObjectPlenary):
@@ -358,7 +361,7 @@ class PlenaryToplevelHost(ObjectPlenary):
 
         for si in self.dbobj.services_used:
             required_services.discard(si.service)
-            services.append(si.cfg_path + '/client/config')
+            services.append(PlenaryServiceInstanceClientDefault.template_name(si))
         if required_services:
             missing = ", ".join(sorted([srv.name for srv in required_services]))
             raise IncompleteError("Host %s is missing the following required "
@@ -367,7 +370,7 @@ class PlenaryToplevelHost(ObjectPlenary):
 
         provides = []
         for si in self.dbobj.services_provided:
-            provides.append('%s/server/config' % si.cfg_path)
+            provides.append(PlenaryServiceInstanceServerDefault.template_name(si))
 
         # Ensure used/provided services have a stable order
         services.sort()
@@ -377,8 +380,9 @@ class PlenaryToplevelHost(ObjectPlenary):
         pan_include(lines, ["pan/units", "pan/functions"])
         lines.append("")
 
+        path = PlenaryHostData.template_name(self.dbobj)
         pan_assign(lines, "/",
-                   StructureTemplate("hostdata/%s" % self.name,
+                   StructureTemplate(path,
                                      {"metadata": PanValue("/metadata")}))
         pan_include(lines, "archetype/base")
         pan_include(lines, self.dbobj.operating_system.cfg_path + '/config')
@@ -386,10 +390,8 @@ class PlenaryToplevelHost(ObjectPlenary):
         pan_include(lines, services)
         pan_include(lines, provides)
 
-        personality_template = "personality/%s/config" % \
-                self.dbobj.personality.name
-
-        pan_include(lines, personality_template)
+        path = PlenaryPersonalityBase.template_name(self.dbobj.personality)
+        pan_include(lines, path)
 
         if self.dbobj.cluster:
             pan_include(lines,

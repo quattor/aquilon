@@ -18,19 +18,10 @@
 from aquilon.worker.templates.base import (Plenary, StructurePlenary,
                                            ObjectPlenary, PlenaryCollection)
 from aquilon.worker.templates.city import PlenaryCity
-from aquilon.worker.templates.cluster import (PlenaryCluster,
-                                              PlenaryClusterData,
-                                              PlenaryClusterObject,
-                                              PlenaryClusterClient)
-from aquilon.worker.templates.metacluster import (PlenaryMetaCluster,
-                                                  PlenaryMetaClusterData,
-                                                  PlenaryMetaClusterObject)
+from aquilon.worker.templates.personality import (PlenaryPersonality,
+                                                  PlenaryPersonalityBase)
 from aquilon.worker.templates.switch import PlenarySwitch
 from aquilon.worker.templates.machine import PlenaryMachineInfo
-from aquilon.worker.templates.host import (PlenaryHost, PlenaryHostData,
-                                           PlenaryToplevelHost,
-                                           PlenaryNamespacedHost)
-from aquilon.worker.templates.personality import PlenaryPersonality
 from aquilon.worker.templates.resource import PlenaryResource
 from aquilon.worker.templates.service import (PlenaryService,
                                               PlenaryServiceToplevel,
@@ -41,5 +32,15 @@ from aquilon.worker.templates.service import (PlenaryService,
                                               PlenaryServiceInstanceClientDefault,
                                               PlenaryServiceInstanceServer,
                                               PlenaryServiceInstanceServerDefault)
+from aquilon.worker.templates.metacluster import (PlenaryMetaCluster,
+                                                  PlenaryMetaClusterData,
+                                                  PlenaryMetaClusterObject)
+from aquilon.worker.templates.cluster import (PlenaryCluster,
+                                              PlenaryClusterData,
+                                              PlenaryClusterObject,
+                                              PlenaryClusterClient)
+from aquilon.worker.templates.host import (PlenaryHost, PlenaryHostData,
+                                           PlenaryToplevelHost,
+                                           PlenaryNamespacedHost)
 
 from aquilon.worker.templates.domain import TemplateDomain

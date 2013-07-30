@@ -20,7 +20,9 @@ import logging
 
 from aquilon.aqdb.model import MetaCluster
 from aquilon.worker.templates import (Plenary, ObjectPlenary, StructurePlenary,
-                                      PlenaryCollection)
+                                      PlenaryCollection, PlenaryPersonalityBase,
+                                      PlenaryResource,
+                                      PlenaryServiceInstanceClientDefault)
 from aquilon.worker.templates.panutils import (StructureTemplate, PanValue,
                                                pan_assign, pan_include,
                                                pan_append)
@@ -107,9 +109,9 @@ class PlenaryMetaClusterData(StructurePlenary):
         if self.dbobj.resholder:
             for resource in sorted(self.dbobj.resholder.resources,
                                    key=attrgetter('resource_type', 'name')):
+                res_path = PlenaryResource.template_name(resource)
                 pan_append(lines, "system/resources/" + resource.resource_type,
-                           StructureTemplate(resource.template_base +
-                                             '/config'))
+                           StructureTemplate(res_path))
 
 
 class PlenaryMetaClusterObject(ObjectPlenary):
@@ -141,11 +143,11 @@ class PlenaryMetaClusterObject(ObjectPlenary):
 
         #for esx_management_server
         for servinst in sorted(self.dbobj.service_bindings):
-            pan_include(lines, "service/%s/%s/client/config" %
-                        (servinst.service.name, servinst.name))
+            path = PlenaryServiceInstanceClientDefault.template_name(servinst)
+            pan_include(lines, path)
 
-        pan_include(lines, "personality/%s/config" %
-                    self.dbobj.personality.name)
+        path = PlenaryPersonalityBase.template_name(self.dbobj.personality)
+        pan_include(lines, path)
         pan_include(lines, "archetype/final")
 
 

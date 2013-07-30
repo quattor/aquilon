@@ -98,9 +98,9 @@ class PlenaryResource(StructurePlenary):
     def body_resourcegroup(self, lines):
         if self.dbobj.resholder:
             for resource in self.dbobj.resholder.resources:
+                res_path = self.template_name(resource)
                 pan_append(lines, "resources/" + resource.resource_type,
-                           StructureTemplate(resource.template_base +
-                                             "/config"))
+                           StructureTemplate(res_path))
 
     def body_reboot_iv(self, lines):
         pan_assign(lines, "justification", self.dbobj.justification)
@@ -112,10 +112,9 @@ class PlenaryResource(StructurePlenary):
         pan_assign(lines, "interfaces", self.dbobj.interfaces)
 
     def body_virtual_machine(self, lines):
-
         machine = self.dbobj.machine
-        pan_assign(lines, "hardware",
-                   StructureTemplate(PlenaryMachineInfo.template_name(machine)))
+        path = PlenaryMachineInfo.template_name(machine)
+        pan_assign(lines, "hardware", StructureTemplate(path))
 
         # One day we may get to the point where this will be required.
         # FIXME: read the data from the host data template
