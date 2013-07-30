@@ -56,6 +56,10 @@ class PlenaryServiceToplevel(StructurePlenary):
     to all instances.
     """
 
+    @classmethod
+    def template_name(cls, dbservice):
+        return "servicedata/%s/config" % dbservice.name
+
     def __init__(self, dbservice, logger=LOGGER):
         super(PlenaryServiceToplevel, self).__init__(dbservice, logger=logger)
 
@@ -72,6 +76,10 @@ class PlenaryServiceClientDefault(Plenary):
     defines configuration for clients only, but is applicable
     to all instances of the service.
     """
+
+    @classmethod
+    def template_name(cls, dbservice):
+        return "service/%s/client/config" % dbservice.name
 
     def __init__(self, dbservice, logger=LOGGER):
         super(PlenaryServiceClientDefault, self).__init__(dbservice,
@@ -90,6 +98,10 @@ class PlenaryServiceServerDefault(Plenary):
     defines configuration for servers only, but is applicable
     to all instances of the service.
     """
+
+    @classmethod
+    def template_name(cls, dbservice):
+        return "service/%s/server/config" % dbservice.name
 
     def __init__(self, dbservice, logger=LOGGER):
         super(PlenaryServiceServerDefault, self).__init__(dbservice,
@@ -129,6 +141,11 @@ class PlenaryServiceInstanceToplevel(StructurePlenary):
     servers and the instance name)
     """
 
+    @classmethod
+    def template_name(cls, dbinstance):
+        return "servicedata/%s/%s/config" % (dbinstance.service.name,
+                                             dbinstance.name)
+
     def __init__(self, dbinstance, logger=LOGGER):
         super(PlenaryServiceInstanceToplevel, self).__init__(dbinstance,
                                                              logger=logger)
@@ -157,6 +174,11 @@ class PlenaryServiceInstanceServer(StructurePlenary):
     of clients and the instance name)
     """
 
+    @classmethod
+    def template_name(cls, dbinstance):
+        return "servicedata/%s/%s/srvconfig" % (dbinstance.service.name,
+                                                dbinstance.name)
+
     def __init__(self, dbinstance, logger=LOGGER):
         super(PlenaryServiceInstanceServer, self).__init__(dbinstance,
                                                            logger=logger)
@@ -181,6 +203,11 @@ class PlenaryServiceInstanceClientDefault(Plenary):
     This template defines configuration for clients only, and
     is specific to the instance.
     """
+
+    @classmethod
+    def template_name(cls, dbinstance):
+        return "service/%s/%s/client/config" % (dbinstance.service.name,
+                                                dbinstance.name)
 
     def __init__(self, dbinstance, logger=LOGGER):
         super(PlenaryServiceInstanceClientDefault, self).__init__(dbinstance,
@@ -207,6 +234,11 @@ class PlenaryServiceInstanceServerDefault(Plenary):
     sufficient. The template defines configuration for servers
     only and is specific to the service instance.
     """
+
+    @classmethod
+    def template_name(cls, dbinstance):
+        return "service/%s/%s/server/config" % (dbinstance.service.name,
+                                                dbinstance.name)
 
     def __init__(self, dbinstance, logger=LOGGER):
         super(PlenaryServiceInstanceServerDefault, self).__init__(dbinstance,

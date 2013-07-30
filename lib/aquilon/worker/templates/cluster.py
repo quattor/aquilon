@@ -52,6 +52,10 @@ Plenary.handlers[StorageCluster] = PlenaryCluster
 
 class PlenaryClusterData(StructurePlenary):
 
+    @classmethod
+    def template_name(cls, dbcluster):
+        return "clusterdata/" + dbcluster.name
+
     def __init__(self, dbcluster, logger=LOGGER):
         super(PlenaryClusterData, self).__init__(dbcluster, logger=logger)
 
@@ -65,7 +69,8 @@ class PlenaryClusterData(StructurePlenary):
 
     def get_key(self):
         return CompileKey(domain=self.dbobj.branch.name,
-                          profile=self.plenary_template_name, logger=self.logger)
+                          profile=self.template_name(self.dbobj),
+                          logger=self.logger)
 
     def body(self, lines):
         pan_assign(lines, "system/cluster/name", self.name)
@@ -160,6 +165,10 @@ class PlenaryClusterObject(ObjectPlenary):
     are contained inside the cluster (via an include of the clusterdata plenary)
     """
 
+    @classmethod
+    def template_name(cls, dbcluster):
+        return "clusters/" + dbcluster.name
+
     def __init__(self, dbcluster, logger=LOGGER):
         super(PlenaryClusterObject, self).__init__(dbcluster, logger=logger)
 
@@ -170,7 +179,8 @@ class PlenaryClusterObject(ObjectPlenary):
 
     def get_key(self):
         return CompileKey(domain=self.dbobj.branch.name,
-                          profile=self.plenary_template_name, logger=self.logger)
+                          profile=self.template_name(self.dbobj),
+                          logger=self.logger)
 
     def body(self, lines):
         pan_include(lines, ["pan/units", "pan/functions"])
@@ -193,6 +203,10 @@ class PlenaryClusterClient(Plenary):
     A host that is a member of a cluster will include the cluster client
     plenary template. This just names the cluster and nothing more.
     """
+
+    @classmethod
+    def template_name(cls, dbcluster):
+        return "cluster/%s/client" % dbcluster.name
 
     def __init__(self, dbcluster, logger=LOGGER):
         super(PlenaryClusterClient, self).__init__(dbcluster, logger=logger)

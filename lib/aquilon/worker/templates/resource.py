@@ -23,7 +23,7 @@ from aquilon.aqdb.model import (Application, Filesystem, Intervention,
                                 RebootIntervention, ServiceAddress,
                                 VirtualMachine, Share)
 from aquilon.worker.templates import (Plenary, StructurePlenary,
-                                      PlenaryCollection)
+                                      PlenaryCollection, PlenaryMachineInfo)
 from aquilon.worker.templates.panutils import (StructureTemplate, pan_assign,
                                                pan_append)
 
@@ -31,6 +31,10 @@ LOGGER = logging.getLogger('aquilon.server.templates.resource')
 
 
 class PlenaryResource(StructurePlenary):
+
+    @classmethod
+    def template_name(cls, dbresource):
+        return dbresource.template_base + "/config"
 
     def __init__(self, dbresource, logger=LOGGER):
         super(PlenaryResource, self).__init__(dbresource, logger=logger)
@@ -110,9 +114,8 @@ class PlenaryResource(StructurePlenary):
     def body_virtual_machine(self, lines):
 
         machine = self.dbobj.machine
-        pmac = Plenary.get_plenary(machine)
         pan_assign(lines, "hardware",
-                   StructureTemplate(pmac.plenary_template_name))
+                   StructureTemplate(PlenaryMachineInfo.template_name(machine)))
 
         # One day we may get to the point where this will be required.
         # FIXME: read the data from the host data template

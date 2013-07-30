@@ -44,6 +44,10 @@ class PlenaryMetaCluster(PlenaryCollection):
 
 class PlenaryMetaClusterData(StructurePlenary):
 
+    @classmethod
+    def template_name(cls, dbmetacluster):
+        return "clusterdata/" + dbmetacluster.name
+
     def __init__(self, dbmetacluster, logger=LOGGER):
         super(PlenaryMetaClusterData, self).__init__(dbmetacluster,
                                                      logger=logger)
@@ -109,6 +113,10 @@ class PlenaryMetaClusterData(StructurePlenary):
 
 
 class PlenaryMetaClusterObject(ObjectPlenary):
+
+    @classmethod
+    def template_name(cls, dbmetacluster):
+        return "clusters/" + dbmetacluster.name
 
     def __init__(self, dbmetacluster, logger=LOGGER):
         super(PlenaryMetaClusterObject, self).__init__(dbmetacluster,

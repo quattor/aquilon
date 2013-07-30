@@ -163,6 +163,11 @@ class FeatureTemplate(TemplateFormatter):
 
 
 class PlenaryPersonalityBase(Plenary):
+
+    @classmethod
+    def template_name(cls, dbpersonality):
+        return "personality/%s/config" % dbpersonality.name
+
     def __init__(self, dbpersonality, logger=LOGGER):
         super(PlenaryPersonalityBase, self).__init__(dbpersonality,
                                                      logger=logger)
@@ -226,6 +231,11 @@ class PlenaryPersonalityBase(Plenary):
 
 
 class PlenaryPersonalityPreFeature(Plenary):
+
+    @classmethod
+    def template_name(cls, dbpersonality):
+        return "personality/%s/pre_feature" % dbpersonality
+
     def __init__(self, dbpersonality, logger=LOGGER):
         super(PlenaryPersonalityPreFeature, self).__init__(dbpersonality,
                                                            logger=logger)
@@ -254,6 +264,11 @@ class PlenaryPersonalityPreFeature(Plenary):
 
 
 class PlenaryPersonalityPostFeature(Plenary):
+
+    @classmethod
+    def template_name(cls, dbpersonality):
+        return "personality/%s/post_feature" % dbpersonality
+
     def __init__(self, dbpersonality, logger=LOGGER):
         super(PlenaryPersonalityPostFeature, self).__init__(dbpersonality,
                                                             logger=logger)
@@ -269,6 +284,11 @@ class PlenaryPersonalityPostFeature(Plenary):
 
 
 class PlenaryPersonalityParameter(StructurePlenary):
+
+    @classmethod
+    def template_name(cls, ptmpl):
+        return "personality/%s/%s" % (ptmpl.personality.name, ptmpl.template)
+
     def __init__(self, ptmpl, logger=LOGGER):
         super(PlenaryPersonalityParameter, self).__init__(ptmpl,
                                                           logger=logger)

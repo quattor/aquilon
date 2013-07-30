@@ -93,6 +93,12 @@ class Plenary(object):
         """For debug output."""
         return "%s(%s)" % (self.__class__.__name__, self.dbobj)
 
+    @classmethod
+    def template_name(cls, dbobj):  # pylint: disable=W0613
+        """ Name of the template as used by PAN, relative to the load path """
+        raise InternalError("%s must override the template_name() method." %
+                            cls.__name__)
+
     @property
     def plenary_directory(self):
         """ Directory where the plenary template lives """
@@ -106,14 +112,6 @@ class Plenary(object):
         """ Full absolute path name of the plenary template """
         return "%s/%s%s" % (self.plenary_directory, self.plenary_template,
                             TEMPLATE_EXTENSION)
-
-    @property
-    def plenary_template_name(self):
-        """ Name of the template as used by PAN, relative to the load path """
-        if self.plenary_core:
-            return "%s/%s" % (self.plenary_core, self.plenary_template)
-        else:
-            return self.plenary_template
 
     def body(self, lines):
         """
@@ -165,7 +163,7 @@ class Plenary(object):
         if type:
             type = type + " "
 
-        lines.append("%stemplate %s;" % (type, self.plenary_template_name))
+        lines.append("%stemplate %s;" % (type, self.template_name(self.dbobj)))
         lines.append("")
 
         self.body(lines)
@@ -346,7 +344,7 @@ class ObjectPlenary(Plenary):
 
     def _generate_content(self):
         lines = []
-        lines.append("object template %s;" % self.plenary_template_name)
+        lines.append("object template %s;" % self.template_name(self.dbobj))
         lines.append("")
 
         if self.loadpath:
@@ -504,7 +502,7 @@ class PlenaryCollection(object):
                 for obj in plen.object_templates:
                     yield obj
             elif plen.template_type == 'object':
-                yield plen.plenary_template_name
+                yield plen.template_name(plen.dbobj)
 
     def write(self, locked=False, content=None):
         # If locked is True, assume error handling happens higher

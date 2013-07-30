@@ -30,6 +30,12 @@ LOGGER = logging.getLogger(__name__)
 
 class PlenaryMachineInfo(StructurePlenary):
 
+    @classmethod
+    def template_name(cls, dbmachine):
+        loc = dbmachine.location
+        return "machine/%s/%s/%s/%s" % (loc.hub.fullname.lower(), loc.building,
+                                        loc.rack, dbmachine.label)
+
     def __init__(self, dbmachine, logger=LOGGER):
         super(PlenaryMachineInfo, self).__init__(dbmachine, logger=logger)
 

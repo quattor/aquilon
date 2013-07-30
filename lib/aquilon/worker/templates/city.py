@@ -27,6 +27,10 @@ LOGGER = logging.getLogger(__name__)
 
 class PlenaryCity(Plenary):
 
+    @classmethod
+    def template_name(cls, dbcity):
+        return "site/%s/%s/config" % (dbcity.hub.fullname.lower(), dbcity.name)
+
     def __init__(self, dbcity, logger=LOGGER):
         super(PlenaryCity, self).__init__(dbcity, logger=logger)
 

@@ -31,6 +31,10 @@ class PlenarySwitch(StructurePlenary):
     A facade for the variety of PlenarySwitch subsidiary files
     """
 
+    @classmethod
+    def template_name(cls, dbhost):
+        return "switchdata/" + str(dbhost.fqdn)
+
     def __init__(self, dbswitch, logger=LOGGER):
         super(PlenarySwitch, self).__init__(dbswitch, logger=logger)
 
