@@ -168,12 +168,15 @@ class PlenaryPersonalityBase(Plenary):
     def template_name(cls, dbpersonality):
         return "personality/%s/config" % dbpersonality.name
 
+    @classmethod
+    def loadpath(cls, dbpersonality):
+        return dbpersonality.archetype.name
+
     def __init__(self, dbpersonality, logger=LOGGER):
         super(PlenaryPersonalityBase, self).__init__(dbpersonality,
                                                      logger=logger)
 
         self.name = str(dbpersonality)
-        self.loadpath = dbpersonality.archetype.name
 
         self.plenary_core = "personality/%s" % self.name
         self.plenary_template = "config"
@@ -239,10 +242,13 @@ class PlenaryPersonalityPreFeature(Plenary):
     def template_name(cls, dbpersonality):
         return "personality/%s/pre_feature" % dbpersonality
 
+    @classmethod
+    def loadpath(cls, dbpersonality):
+        return dbpersonality.archetype.name
+
     def __init__(self, dbpersonality, logger=LOGGER):
         super(PlenaryPersonalityPreFeature, self).__init__(dbpersonality,
                                                            logger=logger)
-        self.loadpath = dbpersonality.archetype.name
         self.plenary_core = "personality/%s" % dbpersonality
         self.plenary_template = "pre_feature"
 
@@ -272,10 +278,13 @@ class PlenaryPersonalityPostFeature(Plenary):
     def template_name(cls, dbpersonality):
         return "personality/%s/post_feature" % dbpersonality
 
+    @classmethod
+    def loadpath(cls, dbpersonality):
+        return dbpersonality.archetype.name
+
     def __init__(self, dbpersonality, logger=LOGGER):
         super(PlenaryPersonalityPostFeature, self).__init__(dbpersonality,
                                                             logger=logger)
-        self.loadpath = dbpersonality.archetype.name
         self.plenary_core = "personality/%s" % dbpersonality
         self.plenary_template = "post_feature"
 
@@ -292,10 +301,13 @@ class PlenaryPersonalityParameter(StructurePlenary):
     def template_name(cls, ptmpl):
         return "personality/%s/%s" % (ptmpl.personality.name, ptmpl.template)
 
+    @classmethod
+    def loadpath(cls, ptmpl):
+        return ptmpl.personality.archetype.name
+
     def __init__(self, ptmpl, logger=LOGGER):
         super(PlenaryPersonalityParameter, self).__init__(ptmpl,
                                                           logger=logger)
-        self.loadpath = ptmpl.personality.archetype.name
         self.plenary_core = "personality/%s" % ptmpl.personality
         self.plenary_template = ptmpl.template
         self.parameters = ptmpl.values

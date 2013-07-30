@@ -175,7 +175,6 @@ class PlenaryClusterObject(ObjectPlenary):
         super(PlenaryClusterObject, self).__init__(dbcluster, logger=logger)
 
         self.name = dbcluster.name
-        self.loadpath = dbcluster.personality.archetype.name
         self.plenary_core = "clusters"
         self.plenary_template = dbcluster.name
 

@@ -323,7 +323,6 @@ class PlenaryToplevelHost(ObjectPlenary):
         # object has been deleted
         self.branch = dbhost.branch
         self.name = dbhost.fqdn
-        self.loadpath = dbhost.personality.archetype.name
         self.plenary_core = ""
         self.plenary_template = self.name
 

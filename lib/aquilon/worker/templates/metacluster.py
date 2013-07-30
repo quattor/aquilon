@@ -126,7 +126,6 @@ class PlenaryMetaClusterObject(ObjectPlenary):
 
         self.name = dbmetacluster.name
 
-        self.loadpath = self.dbobj.personality.archetype.name
         self.plenary_core = "clusters"
         self.plenary_template = dbmetacluster.name
 

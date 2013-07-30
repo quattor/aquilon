@@ -61,7 +61,6 @@ class Plenary(object):
 
         self.dir = self.config.get("broker", "plenarydir")
 
-        self.loadpath = None
         self.plenary_template = None
         self.plenary_core = None
 
@@ -99,11 +98,17 @@ class Plenary(object):
         raise InternalError("%s must override the template_name() method." %
                             cls.__name__)
 
+    @classmethod
+    def loadpath(cls, dbobj):  # pylint: disable=W0613
+        """ Return the LOADPATH the template is relative to """
+        return ""
+
     @property
     def plenary_directory(self):
         """ Directory where the plenary template lives """
-        if self.loadpath and self.template_type != "object":
-            return "%s/%s/%s" % (self.dir, self.loadpath, self.plenary_core)
+        loadpath = self.loadpath(self.dbobj)
+        if loadpath and self.template_type != "object":
+            return "%s/%s/%s" % (self.dir, loadpath, self.plenary_core)
         else:
             return "%s/%s" % (self.dir, self.plenary_core)
 
@@ -342,13 +347,19 @@ class ObjectPlenary(Plenary):
         self.dir = os.path.join(self.config.get("broker", "builddir"),
                                 "domains", dbobj.branch.name, "profiles")
 
+    @classmethod
+    def loadpath(cls, dbobj):
+        """ Return the default LOADPATH for this object profile """
+        return dbobj.personality.archetype.name
+
     def _generate_content(self):
         lines = []
         lines.append("object template %s;" % self.template_name(self.dbobj))
         lines.append("")
 
-        if self.loadpath:
-            pan_variable(lines, "LOADPATH", [self.loadpath])
+        loadpath = self.loadpath(self.dbobj)
+        if loadpath:
+            pan_variable(lines, "LOADPATH", [loadpath])
             lines.append("")
         pan_assign(lines, "/metadata/template/branch/name",
                    self.dbobj.branch.name)
