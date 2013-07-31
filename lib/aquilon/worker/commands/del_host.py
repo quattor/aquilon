@@ -59,7 +59,6 @@ class CommandDelHost(BrokerCommand):
             # Check dependencies, translate into user-friendly message
             dbhost = hostname_to_host(session, hostname)
             host_plenary = Plenary.get_plenary(dbhost, logger=logger)
-            domain = dbhost.branch.name
             deps = get_host_dependencies(session, dbhost)
             if (len(deps) != 0):
                 deptext = "\n".join(["  %s" % d for d in deps])
@@ -128,15 +127,17 @@ class CommandDelHost(BrokerCommand):
             key = host_plenary.get_remove_key()
             with CompileKey.merge([key, bindings.get_write_key(),
                                    resources.get_remove_key()]) as key:
-                host_plenary.cleanup(domain, locked=True)
+                host_plenary.remove(locked=True)
+
                 # And we also want to remove the profile itself
-                profiles = self.config.get("broker", "profilesdir")
+                basename = os.path.join(self.config.get("broker",
+                                                        "profilesdir"),
+                                        fqdn)
                 # Only one of these should exist, but it doesn't hurt
                 # to try to clean up both.
-                xmlfile = os.path.join(profiles, fqdn + ".xml")
-                remove_file(xmlfile, logger=logger)
-                xmlgzfile = xmlfile + ".gz"
-                remove_file(xmlgzfile, logger=logger)
+                for ext in (".xml", ".xml.gz"):
+                    remove_file(basename + ext, logger=logger)
+
                 # And the cached template created by ant
                 remove_file(os.path.join(self.config.get("broker",
                                                          "quattordir"),

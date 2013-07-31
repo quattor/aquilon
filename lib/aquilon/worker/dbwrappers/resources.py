@@ -110,8 +110,6 @@ def del_resource(session, logger, dbresource, dsdb_callback=None, **arguments):
     holder_plenary = Plenary.get_plenary(holder.holder_object, logger=logger)
     remove_plenary = Plenary.get_plenary(dbresource, logger=logger)
 
-    domain = holder.holder_object.branch.name
-
     holder.resources.remove(dbresource)
     session.flush()
 
@@ -123,7 +121,7 @@ def del_resource(session, logger, dbresource, dsdb_callback=None, **arguments):
         try:
             holder_plenary.write(locked=True)
         except IncompleteError:
-            holder_plenary.cleanup(domain, locked=True)
+            holder_plenary.remove(locked=True)
 
         remove_plenary.remove(locked=True)
 
@@ -147,8 +145,6 @@ def add_resource(session, logger, holder, dbresource, dsdb_callback=None,
     holder_plenary = Plenary.get_plenary(holder.holder_object, logger=logger)
     res_plenary = Plenary.get_plenary(dbresource, logger=logger)
 
-    domain = holder.holder_object.branch.name
-
     session.flush()
 
     key = CompileKey.merge([res_plenary.get_write_key(),
@@ -159,7 +155,7 @@ def add_resource(session, logger, holder, dbresource, dsdb_callback=None,
         try:
             holder_plenary.write(locked=True)
         except IncompleteError:
-            holder_plenary.cleanup(domain, locked=True)
+            holder_plenary.remove(locked=True)
 
         if dsdb_callback:
             dsdb_callback(session, logger, dbresource, **arguments)

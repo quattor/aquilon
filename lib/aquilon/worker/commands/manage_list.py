@@ -67,13 +67,12 @@ class CommandManageList(BrokerCommand):
             validate_branch_commits(dbsource, dbsource_author,
                                     dbbranch, dbauthor, logger, self.config)
 
-        old_branch = dbhost.branch.name
-
         plenaries = PlenaryCollection(logger=logger)
         for dbhost in dbhosts:
+            plenaries.append(Plenary.get_plenary(dbhost))
+
             dbhost.branch = dbbranch
             dbhost.sandbox_author = dbauthor
-            plenaries.append(Plenary.get_plenary(dbhost))
 
         session.flush()
 
@@ -82,7 +81,7 @@ class CommandManageList(BrokerCommand):
         try:
             lock_queue.acquire(key)
             plenaries.stash()
-            plenaries.cleanup(old_branch, locked=True)
+            plenaries.remove(locked=True)
             plenaries.write(locked=True)
         except:
             plenaries.restore_stash()

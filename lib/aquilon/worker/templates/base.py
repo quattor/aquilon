@@ -266,25 +266,6 @@ class Plenary(object):
                 lock_queue.release(key)
         return
 
-    def cleanup(self, domain, locked=False):
-        """
-        remove all files related to an object template including
-        any intermediate build files
-        """
-        key = None
-        try:
-            if not locked:
-                key = self.get_remove_key()
-                lock_queue.acquire(key)
-            self.remove(locked=True)
-        except:
-            if not locked:
-                self.restore_stash()
-            raise
-        finally:
-            if not locked:
-                lock_queue.release(key)
-
     def stash(self):
         """Record the state of the plenary to make restoration possible.
 
@@ -355,6 +336,7 @@ class ObjectPlenary(Plenary):
         super(ObjectPlenary, self).__init__(dbobj, logger)
 
         self.old_name = self.template_name(dbobj)
+        self.old_branch = dbobj.branch.name
 
     @classmethod
     def loadpath(cls, dbobj):
@@ -395,7 +377,7 @@ class ObjectPlenary(Plenary):
 
         return "\n".join(lines) + "\n"
 
-    def cleanup(self, domain, locked=False):
+    def remove(self, locked=False):
         """
         remove all files related to an object template including
         any intermediate build files
@@ -405,14 +387,15 @@ class ObjectPlenary(Plenary):
             if not locked:
                 key = self.get_remove_key()
                 lock_queue.acquire(key)
+            self.stash()
 
-            # Can't call remove() here because it relies on the new domain.
-            qdir = self.config.get("broker", "quattordir")
             # Only one or the other of .xml/.xml.gz should be there...
             # it doesn't hurt to clean up both.
             # .xml.dep is used up to and including panc 9.2
             # .dep is used by panc 9.4 and higher
-            basename = os.path.join(qdir, "build", "xml", domain, self.old_name)
+            basename = os.path.join(self.config.get("broker", "quattordir"),
+                                    "build", "xml", self.old_branch,
+                                    self.old_name)
             for ext in (".xml", ".xml.gz", ".xml.dep", ".dep"):
                 remove_file(basename + ext, logger=self.logger)
             try:
@@ -420,18 +403,7 @@ class ObjectPlenary(Plenary):
             except OSError:
                 pass
 
-            # This is almost self.full_path(), except we're using the domain
-            # passed by the caller
-            builddir = self.config.get("broker", "builddir")
-            mainfile = os.path.join(builddir, "domains", domain, "profiles",
-                                    self.old_name + TEMPLATE_EXTENSION)
-
-            remove_file(mainfile, logger=self.logger)
-            try:
-                os.removedirs(os.path.dirname(mainfile))
-            except OSError:
-                pass
-            self.removed = True
+            super(ObjectPlenary, self).remove(locked=True)
         except:
             if not locked:
                 self.restore_stash()
@@ -568,23 +540,6 @@ class PlenaryCollection(object):
                 lock_queue.acquire(key)
             for plen in self.plenaries:
                 plen.remove(locked=True)
-        except:
-            if not locked:
-                self.restore_stash()
-            raise
-        finally:
-            if not locked:
-                lock_queue.release(key)
-
-    def cleanup(self, domain, locked=False):
-        key = None
-        try:
-            if not locked:
-                key = self.get_remove_key()
-                lock_queue.acquire(key)
-            self.stash()
-            for plen in self.plenaries:
-                plen.cleanup(domain, locked=True)
         except:
             if not locked:
                 self.restore_stash()

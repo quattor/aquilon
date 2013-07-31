@@ -112,7 +112,6 @@ class CommandManageHostname(BrokerCommand):
         dbhost = hostname_to_host(session, hostname)
         dbsource = dbhost.branch
         dbsource_author = dbhost.sandbox_author
-        old_branch = dbhost.branch.name
 
         if dbhost.cluster:
             raise ArgumentError("Cluster nodes must be managed at the "
@@ -123,11 +122,12 @@ class CommandManageHostname(BrokerCommand):
             validate_branch_commits(dbsource, dbsource_author,
                                     dbbranch, dbauthor, logger, self.config)
 
+        plenary_host = PlenaryHost(dbhost, logger=logger)
+
         dbhost.branch = dbbranch
         dbhost.sandbox_author = dbauthor
-        session.add(dbhost)
+
         session.flush()
-        plenary_host = PlenaryHost(dbhost, logger=logger)
 
         # We're crossing domains, need to lock everything.
         # XXX: There's a directory per domain.  Do we need subdirectories
@@ -138,7 +138,7 @@ class CommandManageHostname(BrokerCommand):
             lock_queue.acquire(key)
 
             plenary_host.stash()
-            plenary_host.cleanup(old_branch, locked=True)
+            plenary_host.remove(locked=True)
 
             # Now we recreate the plenary to ensure that the domain is ready
             # to compile, however (esp. if there was no existing template), we
@@ -151,7 +151,7 @@ class CommandManageHostname(BrokerCommand):
                 # It would be nice to flag the state in the the host?
                 pass
         except:
-            # This will not restore the cleaned up files.  That's OK.
+            # This will not restore the cleaned up build files.  That's OK.
             # They will be recreated as needed.
             plenary_host.restore_stash()
             raise
