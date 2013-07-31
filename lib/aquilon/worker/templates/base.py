@@ -72,6 +72,12 @@ class Plenary(object):
         self.removed = False
         self.changed = False
 
+    @property
+    def old_path(self):
+        # FIXME: this should be just a simple field, but self.plenary_file
+        # cannot be called inside __init__()
+        return self.plenary_file
+
     def __hash__(self):
         """Since equality is based on dbobj, just hash on it."""
         return hash(self.dbobj)
@@ -169,7 +175,7 @@ class Plenary(object):
 
         return "\n".join(lines) + "\n"
 
-    def write(self, locked=False, content=None):
+    def write(self, locked=False):
         """Write out the template.
 
         If the content is unchanged, then the file will not be modified
@@ -197,17 +203,9 @@ class Plenary(object):
             if state.deleted:
                 return 0
 
-        if content is None:
-            if not self.new_content:
-                self.new_content = self._generate_content()
-            content = self.new_content
-
-        self.stash()
-        if self.old_content == content and \
-           not self.removed and not self.changed:
-            # optimise out the write (leaving the mtime good for ant)
-            # if nothing is actually changed
-            return 0
+        if not self.new_content:
+            self.new_content = self._generate_content()
+        content = self.new_content
 
         key = None
         try:
@@ -215,9 +213,18 @@ class Plenary(object):
                 key = self.get_write_key()
                 lock_queue.acquire(key)
 
+            self.stash()
+
+            if self.old_content == content and \
+               not self.removed and not self.changed:
+                # optimise out the write (leaving the mtime good for ant)
+                # if nothing is actually changed
+                return 0
+
             dirname = os.path.dirname(self.plenary_file)
             if not os.path.exists(dirname):
                 os.makedirs(dirname)
+
             write_file(self.plenary_file, content, logger=self.logger)
             self.removed = False
             if self.old_content != content:
@@ -233,7 +240,7 @@ class Plenary(object):
         return 1
 
     def read(self):
-        return read_file("", self.plenary_file, logger=self.logger)
+        return read_file("", self.old_path, logger=self.logger)
 
     def remove(self, locked=False):
         """
@@ -246,10 +253,10 @@ class Plenary(object):
                 key = self.get_remove_key()
                 lock_queue.acquire(key)
             self.stash()
-            remove_file(self.plenary_file, logger=self.logger)
-            dirname = os.path.dirname(self.plenary_file)
+
+            remove_file(self.old_path, logger=self.logger)
             try:
-                os.removedirs(dirname)
+                os.removedirs(os.path.dirname(self.old_path))
             except OSError:
                 pass
             self.removed = True
@@ -289,7 +296,7 @@ class Plenary(object):
             return
         try:
             self.old_content = self.read()
-            self.old_mtime = os.stat(self.plenary_file).st_atime
+            self.old_mtime = os.stat(self.old_path).st_atime
         except IOError:
             self.old_content = None
         self.stashed = True
@@ -302,17 +309,24 @@ class Plenary(object):
         """
         if not self.stashed:
             self.logger.info("Attempt to restore plenary '%s' "
-                             "without having saved state." % self.plenary_file)
+                             "without having saved state." % self.old_path)
             return
         # Should this optimization be in use?
         # if not self.changed and not self.removed:
         #    return
-        if (self.old_content is None):
-            self.remove(locked=True)
+        dirname = os.path.dirname(self.old_path)
+        if self.old_content is None:
+            remove_file(self.old_path, logger=self.logger)
+            try:
+                os.removedirs(dirname)
+            except OSError:
+                pass
         else:
-            self.write(locked=True, content=self.old_content)
-            atime = os.stat(self.plenary_file).st_atime
-            os.utime(self.plenary_file, (atime, self.old_mtime))
+            if not os.path.exists(dirname):
+                os.makedirs(dirname)
+            write_file(self.old_path, self.old_content, logger=self.logger)
+            atime = os.stat(self.old_path).st_atime
+            os.utime(self.old_path, (atime, self.old_mtime))
 
     @staticmethod
     def get_plenary(dbobj, logger=LOGGER):
@@ -386,23 +400,20 @@ class ObjectPlenary(Plenary):
             qdir = self.config.get("broker", "quattordir")
             # Only one or the other of .xml/.xml.gz should be there...
             # it doesn't hurt to clean up both.
+            # .xml.dep is used up to and including panc 9.2
+            # .dep is used by panc 9.4 and higher
             xmldir = os.path.join(qdir, "build", "xml", domain,
                                   self.plenary_core)
-            xmlfile = os.path.join(xmldir, self.plenary_template + ".xml")
-            remove_file(xmlfile, logger=self.logger)
-            xmlgzfile = xmlfile + ".gz"
-            remove_file(xmlgzfile, logger=self.logger)
-            # Name used up to and including panc 9.2
-            depfile = xmlfile + ".dep"
-            remove_file(depfile, logger=self.logger)
-            # Name used by panc 9.4 and higher
-            depfile = os.path.join(xmldir, self.plenary_template + ".dep")
-            remove_file(depfile, logger=self.logger)
+            basename = os.path.join(xmldir, self.plenary_template)
+            for ext in (".xml", ".xml.gz", ".xml.dep", ".dep"):
+                remove_file(basename + ext, logger=self.logger)
             try:
                 os.removedirs(xmldir)
             except OSError:
                 pass
 
+            # This is almost self.plenary_file, except we're using the domain
+            # passed by the caller
             builddir = self.config.get("broker", "builddir")
             maindir = os.path.join(builddir, "domains", domain,
                                    "profiles", self.plenary_core)
@@ -512,7 +523,7 @@ class PlenaryCollection(object):
             elif plen.template_type == 'object':
                 yield plen.template_name(plen.dbobj)
 
-    def write(self, locked=False, content=None):
+    def write(self, locked=False):
         # If locked is True, assume error handling happens higher
         # in the stack.
         total = 0
@@ -529,7 +540,7 @@ class PlenaryCollection(object):
                 # IncompleteError is almost pointless in this context, but
                 # it has the nice side effect of not updating the total.
                 try:
-                    total += plen.write(locked=True, content=content)
+                    total += plen.write(locked=True)
                 except IncompleteError, err:
                     self.logger.client_info("Warning: %s" % err)
         except:

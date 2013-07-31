@@ -104,7 +104,7 @@ class PlenaryHost(PlenaryCollection):
             self.plenaries.append(PlenaryToplevelHost(dbhost))
         self.plenaries.append(PlenaryHostData(dbhost))
 
-    def write(self, locked=False, content=None):
+    def write(self, locked=False):
         # Don't bother writing plenary files non-compilable archetypes.
         if not self.dbobj.archetype.is_compileable:
             return 0
@@ -114,7 +114,7 @@ class PlenaryHost(PlenaryCollection):
         # should be removed.
         total = 0
         for plenary in self.plenaries:
-            total += plenary.write(locked=locked, content=content)
+            total += plenary.write(locked=locked)
         return total
 
 

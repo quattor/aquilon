@@ -240,10 +240,6 @@ class PlenaryMachineInfo(StructurePlenary):
         for manager in sorted(managers.keys()):
             pan_assign(lines, "console/%s" % manager, managers[manager])
 
-    def write(self, *args, **kwargs):
-        return Plenary.write(self, *args, **kwargs)
-
-
 Plenary.handlers[Machine] = PlenaryMachineInfo
 
 
