@@ -104,19 +104,13 @@ class Plenary(object):
         return ""
 
     @property
-    def plenary_directory(self):
-        """ Directory where the plenary template lives """
+    def plenary_file(self):
         loadpath = self.loadpath(self.dbobj)
         if loadpath and self.template_type != "object":
-            return "%s/%s/%s" % (self.dir, loadpath, self.plenary_core)
+            dir = "%s/%s/%s" % (self.dir, loadpath, self.plenary_core)
         else:
-            return "%s/%s" % (self.dir, self.plenary_core)
-
-    @property
-    def plenary_file(self):
-        """ Full absolute path name of the plenary template """
-        return "%s/%s%s" % (self.plenary_directory, self.plenary_template,
-                            TEMPLATE_EXTENSION)
+            dir = "%s/%s" % (self.dir, self.plenary_core)
+        return "%s/%s%s" % (dir, self.plenary_template, TEMPLATE_EXTENSION)
 
     def body(self, lines):
         """
@@ -220,8 +214,10 @@ class Plenary(object):
             if not locked:
                 key = self.get_write_key()
                 lock_queue.acquire(key)
-            if not os.path.exists(self.plenary_directory):
-                os.makedirs(self.plenary_directory)
+
+            dirname = os.path.dirname(self.plenary_file)
+            if not os.path.exists(dirname):
+                os.makedirs(dirname)
             write_file(self.plenary_file, content, logger=self.logger)
             self.removed = False
             if self.old_content != content:
@@ -251,8 +247,9 @@ class Plenary(object):
                 lock_queue.acquire(key)
             self.stash()
             remove_file(self.plenary_file, logger=self.logger)
+            dirname = os.path.dirname(self.plenary_file)
             try:
-                os.removedirs(self.plenary_directory)
+                os.removedirs(dirname)
             except OSError:
                 pass
             self.removed = True
