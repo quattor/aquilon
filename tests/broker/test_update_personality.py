@@ -206,7 +206,7 @@ class TestUpdatePersonality(VerifyGrnsMixin, TestBrokerCommand):
         command = ["show_host", "--hostname", "unittest20.aqd-unittest.ms.com"]
         out = self.commandtest(command)
         self.matchoutput(out, "Personality: compileserver", command)
-        self.matchoutput(out, "Owned by GRN: grn:/ms/ei/aquilon/ut2", command)
+        self.matchclean(out, "grn:/ms/ei/aquilon/ut2", command)
 
         command = ["show_host", "--hostname", "unittest02.one-nyp.ms.com"]
         out = self.commandtest(command)
@@ -226,8 +226,9 @@ class TestUpdatePersonality(VerifyGrnsMixin, TestBrokerCommand):
 
         command = ["cat", "--hostname", "unittest20.aqd-unittest.ms.com", "--data"]
         out = self.commandtest(command)
-        self.searchoutput(out, r'"system/owner_eon_id" = %d;' %
+        self.searchclean(out, r'"system/owner_eon_id" = %d;' %
                           self.grns["grn:/ms/ei/aquilon/ut2"], command)
+
 
     def test_150_update_hostenv_infra(self):
         command = ["add_personality", "--archetype=windows", "--grn=grn:/ms/ei/aquilon/aqd",

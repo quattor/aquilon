@@ -109,18 +109,17 @@ class CommandAddHost(BrokerCommand):
             raise ArgumentError("{0:c} {0.label} is already allocated to "
                                 "{1:l}.".format(dbmachine, dbmachine.host))
 
+        dbgrn = None
         if grn or eon_id:
             dbgrn = lookup_grn(session, grn, eon_id, logger=logger,
                                config=self.config)
-        else:
-            dbgrn = dbpersonality.owner_grn
 
         dbhost = Host(machine=dbmachine, branch=dbbranch, owner_grn=dbgrn,
                       sandbox_author=dbauthor, personality=dbpersonality,
                       status=dbstatus, operating_system=dbos, comments=comments)
         session.add(dbhost)
 
-        if self.config.has_option("archetype_" + archetype, "default_grn_target"):
+        if dbgrn and self.config.has_option("archetype_" + archetype, "default_grn_target"):
             dbhost.grns.append((dbhost, dbgrn,
                                 self.config.get("archetype_" + archetype,
                                                 "default_grn_target")))

@@ -305,7 +305,7 @@ class ObjectFormatter(object):
         host_msg.domain.name = str(host.branch.name)
         host_msg.domain.owner = str(host.branch.owner.name)
         host_msg.status = str(host.status.name)
-        host_msg.owner_eonid = host.owner_eon_id
+        host_msg.owner_eonid = host.effective_owner_grn.eon_id
         self.add_personality_data(host_msg.personality, host.personality)
         self.add_archetype_data(host_msg.archetype, host.archetype)
         self.redirect_proto(host.operating_system, host_msg.operating_system)

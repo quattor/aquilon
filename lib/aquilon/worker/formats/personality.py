@@ -68,7 +68,7 @@ class PersonalityFormatter(ObjectFormatter):
                        .format(personality.owner_grn))
         for grn_rec in sorted(personality._grns, key=lambda x: x.target):
             details.append(indent + "  Used by {0.grn:c}: {0.grn.grn} "
-                           "[{0.target}]".format(grn_rec))
+                           "[target: {0.target}]".format(grn_rec))
 
         if personality.config_override:
             details.append(indent + "  Config override: enabled")
