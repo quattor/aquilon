@@ -65,7 +65,7 @@ class NetworkInfo(IPv4Network):
         elif nettype == 'tor_net2':
             offsets = [7, 8]
         elif nettype == 'vm_storage_net':
-            offsets = [39]
+            offsets = [8]
         else:
             offsets = []
 
