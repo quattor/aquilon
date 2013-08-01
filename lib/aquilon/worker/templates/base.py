@@ -241,7 +241,7 @@ class Plenary(object):
     def read(self):
         return read_file("", self.old_path, logger=self.logger)
 
-    def remove(self, locked=False):
+    def remove(self, locked=False, remove_profile=False):
         """
         remove this plenary template
         """
@@ -377,7 +377,7 @@ class ObjectPlenary(Plenary):
 
         return "\n".join(lines) + "\n"
 
-    def remove(self, locked=False):
+    def remove(self, locked=False, remove_profile=False):
         """
         remove all files related to an object template including
         any intermediate build files
@@ -404,6 +404,22 @@ class ObjectPlenary(Plenary):
                 pass
 
             super(ObjectPlenary, self).remove(locked=True)
+
+            if remove_profile:
+                basename = os.path.join(self.config.get("broker",
+                                                        "profilesdir"),
+                                        self.old_name)
+                # Only one of these should exist, but it doesn't hurt
+                # to try to clean up both.
+                for ext in (".xml", ".xml.gz"):
+                    remove_file(basename + ext, logger=self.logger)
+
+                # Remove the cached template created by ant
+                remove_file(os.path.join(self.config.get("broker",
+                                                         "quattordir"),
+                                         "objects",
+                                         self.old_name + TEMPLATE_EXTENSION),
+                            logger=self.logger)
         except:
             if not locked:
                 self.restore_stash()
@@ -531,7 +547,7 @@ class PlenaryCollection(object):
                 lock_queue.release(key)
         return total
 
-    def remove(self, locked=False):
+    def remove(self, locked=False, remove_profile=False):
         self.stash()
         key = None
         try:
@@ -539,7 +555,7 @@ class PlenaryCollection(object):
                 key = self.get_remove_key()
                 lock_queue.acquire(key)
             for plen in self.plenaries:
-                plen.remove(locked=True)
+                plen.remove(locked=True, remove_profile=remove_profile)
         except:
             if not locked:
                 self.restore_stash()

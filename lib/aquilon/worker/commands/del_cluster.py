@@ -15,22 +15,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
-import os
-
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Cluster
 from aquilon.worker.logger import CLIENT_INFO
 from aquilon.notify.index import trigger_notifications
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.templates.base import (Plenary, PlenaryCollection,
-                                           TEMPLATE_EXTENSION)
-from aquilon.utils import remove_file
+from aquilon.worker.templates import Plenary, PlenaryCollection
 
 
 def del_cluster(session, logger, dbcluster, config):
-    cluster = str(dbcluster.name)
-
     if hasattr(dbcluster, 'members') and dbcluster.members:
         raise ArgumentError("%s is still in use by clusters: %s." %
                             (format(dbcluster),
@@ -48,22 +41,7 @@ def del_cluster(session, logger, dbcluster, config):
 
     session.flush()
 
-    with plenaries.get_remove_key():
-        plenaries.remove(locked=True)
-
-        # And we also want to remove the profile itself
-        basename = os.path.join(config.get("broker", "profilesdir"),
-                                "clusters", cluster)
-        # Only one of these should exist, but it doesn't hurt
-        # to try to clean up both.
-        for ext in (".xml", ".xml.gz"):
-            remove_file(basename + ext, logger=logger)
-
-        # And the cached template created by ant
-        remove_file(os.path.join(config.get("broker", "quattordir"),
-                                 "objects", "clusters",
-                                 cluster + TEMPLATE_EXTENSION),
-                    logger=logger)
+    plenaries.remove(remove_profile=True)
 
     trigger_notifications(config, logger, CLIENT_INFO)
 

@@ -16,9 +16,6 @@
 # limitations under the License.
 """Contains the logic for `aq del host`."""
 
-
-import os
-
 from sqlalchemy.orm.attributes import set_committed_value
 
 from aquilon.exceptions_ import ArgumentError
@@ -29,11 +26,9 @@ from aquilon.worker.dbwrappers.host import (hostname_to_host,
                                             get_host_dependencies)
 from aquilon.worker.dbwrappers.dns import delete_dns_record
 from aquilon.worker.processes import DSDBRunner
-from aquilon.worker.templates.base import (Plenary, PlenaryCollection,
-                                           TEMPLATE_EXTENSION)
-from aquilon.worker.templates.service import PlenaryServiceInstanceServer
+from aquilon.worker.templates import (Plenary, PlenaryCollection,
+                                      PlenaryServiceInstanceServer)
 from aquilon.worker.locks import DeleteKey, CompileKey
-from aquilon.utils import remove_file
 
 
 class CommandDelHost(BrokerCommand):
@@ -71,7 +66,6 @@ class CommandDelHost(BrokerCommand):
             oldinfo = DSDBRunner.snapshot_hw(dbmachine)
 
             ip = dbmachine.primary_ip
-            fqdn = dbmachine.fqdn
 
             for si in dbhost.services_used:
                 plenary = PlenaryServiceInstanceServer(si)
@@ -127,22 +121,7 @@ class CommandDelHost(BrokerCommand):
             key = host_plenary.get_remove_key()
             with CompileKey.merge([key, bindings.get_write_key(),
                                    resources.get_remove_key()]) as key:
-                host_plenary.remove(locked=True)
-
-                # And we also want to remove the profile itself
-                basename = os.path.join(self.config.get("broker",
-                                                        "profilesdir"),
-                                        fqdn)
-                # Only one of these should exist, but it doesn't hurt
-                # to try to clean up both.
-                for ext in (".xml", ".xml.gz"):
-                    remove_file(basename + ext, logger=logger)
-
-                # And the cached template created by ant
-                remove_file(os.path.join(self.config.get("broker",
-                                                         "quattordir"),
-                                         "objects", fqdn + TEMPLATE_EXTENSION),
-                            logger=logger)
+                host_plenary.remove(locked=True, remove_profile=True)
                 bindings.write(locked=True)
                 resources.remove(locked=True)
 
