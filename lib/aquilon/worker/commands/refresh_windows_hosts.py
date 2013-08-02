@@ -199,7 +199,7 @@ class CommandRefreshWindowsHosts(BrokerCommand):
             session.add(dbhost)
 
             if self.config.has_option("archetype_windows", "default_grn_target"):
-                dbhost.grns.append((dbhost, dbgrn,
+                dbhost.grns.append((dbhost, dbpersonality.owner_grn,
                                     self.config.get("archetype_",
                                                     "default_grn_target")))
 
