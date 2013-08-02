@@ -254,7 +254,7 @@ reserved_offsets = 0,7,8,-1
 first_usable_offset = 16
 
 [network_vm_storage_net]
-first_usable_offset = 40
+first_usable_offset = 9
 
 [network_vip]
 may_span_buildings = True
