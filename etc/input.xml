@@ -3598,7 +3598,7 @@
       Show details for a cluster.
       <optgroup name="show_cluster_req" mandatory="True" fields="any">
          <option name="cluster" type="string" conflicts="all">Name of the cluster</option>
-         <option name="all" type="flag" conflicts="cluster">Show all clusters</option>
+         <option name="all" type="flag" conflicts="cluster">Show all. Returns only the names of the clusters.</option>
       </optgroup>
       <transport trigger="cluster" method="get" path="cluster/%(cluster)s" />
       <transport trigger="all" method="get" path="cluster/" />
@@ -3665,7 +3665,7 @@
       Show details for an ESX cluster. DEPRECATED
       <optgroup name="show_cluster_req" mandatory="True" fields="any">
          <option name="cluster" type="string" conflicts="all">Name of the cluster</option>
-         <option name="all" type="flag" conflicts="cluster">Show all clusters</option>
+         <option name="all" type="flag" conflicts="cluster">Show all. Returns only the names of the clusters.</option>
       </optgroup>
       <transport trigger="cluster" method="get" path="cluster/esx/%(cluster)s" />
       <transport trigger="all" method="get" path="cluster/esx" />

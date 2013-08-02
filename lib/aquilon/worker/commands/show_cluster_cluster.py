@@ -16,11 +16,49 @@
 # limitations under the License.
 
 
+from sqlalchemy.orm import joinedload, subqueryload, lazyload
+
+from aquilon.exceptions_ import NotFoundException
+from aquilon.aqdb.model import Cluster, VirtualMachine, ClusterResource
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.commands.show_cluster_all import \
-    CommandShowClusterAll
+from aquilon.worker.formats.cluster import ClusterList, SimpleClusterList
 
 
-class CommandShowClusterCluster(CommandShowClusterAll):
+class CommandShowClusterCluster(BrokerCommand):
 
     required_parameters = ['cluster']
+
+    def render(self, session, cluster, **arguments):
+        q = session.query(Cluster)
+        vm_q = session.query(VirtualMachine)
+        vm_q = vm_q.join(ClusterResource, Cluster)
+
+        q = q.filter_by(name=cluster)
+        vm_q = vm_q.filter_by(name=cluster)
+
+        vm_q = vm_q.options(joinedload('machine'),
+                            joinedload('machine.primary_name'),
+                            joinedload('machine.primary_name.fqdn'),
+                            lazyload('machine.host'))
+
+        q = q.options(subqueryload('_hosts'),
+                      joinedload('_hosts.host'),
+                      joinedload('_hosts.host.machine'),
+                      subqueryload('_metacluster'),
+                      joinedload('_metacluster.metacluster'),
+                      joinedload('resholder'),
+                      subqueryload('resholder.resources'),
+                      subqueryload('service_bindings'),
+                      subqueryload('allowed_personalities'))
+        q = q.order_by(Cluster.name)
+        dbclusters = q.all()
+        if cluster and not dbclusters:
+            raise NotFoundException("Cluster %s not found." % cluster)
+
+        # Manual eager-loading of VM resources. All the code does is making sure
+        # the data is pinned in the session's cache
+        machines = {}
+        for vm in vm_q:
+            machines[vm.machine.machine_id] = vm
+
+        return ClusterList(dbclusters)

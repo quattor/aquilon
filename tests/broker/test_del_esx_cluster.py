@@ -83,7 +83,7 @@ class TestDelESXCluster(TestBrokerCommand):
     def testverifyall(self):
         command = ["show_esx_cluster", "--all"]
         out = self.commandtest(command)
-        self.matchclean(out, "ESX Cluster: utecl", command)
+        self.matchclean(out, "utecl", command)
 
     def testdelnotfound(self):
         command = ["del_esx_cluster", "--cluster=esx_cluster-does-not-exist"]

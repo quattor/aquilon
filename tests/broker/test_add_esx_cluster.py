@@ -215,8 +215,8 @@ class TestAddESXCluster(TestBrokerCommand):
     def testverifyshowall(self):
         command = "show esx_cluster --all"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "ESX Cluster: utecl1", command)
-        self.matchoutput(out, "ESX Cluster: utecl2", command)
+        self.matchoutput(out, "utecl1", command)
+        self.matchoutput(out, "utecl2", command)
 
     def testverifyshowmetacluster(self):
         command = "show metacluster --metacluster utmc1"

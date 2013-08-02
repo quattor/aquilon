@@ -16,10 +16,52 @@
 # limitations under the License.
 
 
+from sqlalchemy.orm import joinedload, subqueryload, lazyload
+
+from aquilon.exceptions_ import NotFoundException
+from aquilon.aqdb.model import EsxCluster, VirtualMachine, ClusterResource
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.commands.show_esx_cluster_all import CommandShowESXClusterAll
+from aquilon.worker.formats.cluster import ClusterList, SimpleClusterList
 
 
-class CommandShowESXClusterCluster(CommandShowESXClusterAll):
+class CommandShowESXClusterCluster(BrokerCommand):
 
     required_parameters = ['cluster']
+
+    def render(self, session, cluster, **arguments):
+        q = session.query(EsxCluster)
+        vm_q = session.query(VirtualMachine)
+        vm_q = vm_q.join(ClusterResource, EsxCluster)
+
+        q = q.filter_by(name=cluster)
+        vm_q = vm_q.filter_by(name=cluster)
+
+        vm_q = vm_q.options(joinedload('machine'),
+                            joinedload('machine.primary_name'),
+                            joinedload('machine.primary_name.fqdn'),
+                            lazyload('machine.host'))
+
+        q = q.options(subqueryload('_hosts'),
+                      joinedload('_hosts.host'),
+                      joinedload('_hosts.host.machine'),
+                      subqueryload('_metacluster'),
+                      joinedload('_metacluster.metacluster'),
+                      joinedload('resholder'),
+                      subqueryload('resholder.resources'),
+                      subqueryload('switch'),
+                      joinedload('switch.primary_name'),
+                      joinedload('switch.primary_name.fqdn'),
+                      subqueryload('service_bindings'),
+                      subqueryload('allowed_personalities'))
+        q = q.order_by(EsxCluster.name)
+        dbclusters = q.all()
+        if cluster and not dbclusters:
+            raise NotFoundException("ESX Cluster %s not found." % cluster)
+
+        # Manual eager-loading of VM resources. All the code does is making sure
+        # the data is pinned in the session's cache
+        machines = {}
+        for vm in vm_q:
+            machines[vm.machine.machine_id] = vm
+
+        return ClusterList(dbclusters)
