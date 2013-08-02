@@ -26,7 +26,7 @@ from aquilon.worker.dbwrappers.location import get_location
 from aquilon.worker.dbwrappers.interface import (get_or_create_interface,
                                                  assign_address)
 from aquilon.worker.processes import DSDBRunner
-from aquilon.worker.templates.switch import PlenarySwitch
+from aquilon.worker.templates import Plenary
 
 
 class CommandAddSwitch(BrokerCommand):
@@ -80,7 +80,7 @@ class CommandAddSwitch(BrokerCommand):
 
         session.flush()
 
-        plenary = PlenarySwitch(dbswitch, logger=logger)
+        plenary = Plenary.get_plenary(dbswitch, logger=logger)
         with plenary.get_write_key() as key:
             plenary.stash()
             try:

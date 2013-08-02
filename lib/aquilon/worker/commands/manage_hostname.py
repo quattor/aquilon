@@ -18,16 +18,16 @@
 import os
 import re
 
-from aquilon.exceptions_ import IncompleteError, ArgumentError
+from aquilon.exceptions_ import (IncompleteError, ArgumentError,
+                                 ProcessException)
+from aquilon.aqdb.model import Sandbox
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.branch import get_branch_and_author
 from aquilon.worker.dbwrappers.host import hostname_to_host
-from aquilon.worker.templates.host import PlenaryHost
 from aquilon.worker.locks import lock_queue, CompileKey
 from aquilon.worker.processes import run_git
-from aquilon.aqdb.model import Sandbox
 from aquilon.worker.formats.branch import AuthoredSandbox
-from aquilon.exceptions_ import ProcessException
+from aquilon.worker.templates import Plenary
 
 
 def validate_branch_commits(dbsource, dbsource_author,
@@ -122,7 +122,7 @@ class CommandManageHostname(BrokerCommand):
             validate_branch_commits(dbsource, dbsource_author,
                                     dbbranch, dbauthor, logger, self.config)
 
-        plenary_host = PlenaryHost(dbhost, logger=logger)
+        plenary_host = Plenary.get_plenary(dbhost, logger=logger)
 
         dbhost.branch = dbbranch
         dbhost.sandbox_author = dbauthor

@@ -18,9 +18,9 @@
 
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.templates.machine import PlenaryMachineInfo
 from aquilon.aqdb.model import Machine
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.templates import Plenary
 
 
 class CommandCatMachine(BrokerCommand):
@@ -33,7 +33,7 @@ class CommandCatMachine(BrokerCommand):
                                                 'workstation', 'rackmount']:
             raise ArgumentError("Plenary file not available for %s machines." %
                     dbmachine.model.machine_type)
-        plenary_info = PlenaryMachineInfo(dbmachine, logger=logger)
+        plenary_info = Plenary.get_plenary(dbmachine, logger=logger)
 
         if generate:
             return plenary_info._generate_content()

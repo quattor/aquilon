@@ -25,8 +25,7 @@ from aquilon.worker.dbwrappers.host import (hostlist_to_hosts,
 from aquilon.worker.commands.reset_advertised_status \
      import CommandResetAdvertisedStatus
 from aquilon.worker.templates.domain import TemplateDomain
-from aquilon.worker.templates.base import PlenaryCollection
-from aquilon.worker.templates.host import PlenaryHost
+from aquilon.worker.templates import Plenary, PlenaryCollection
 from aquilon.worker.locks import lock_queue, CompileKey
 
 
@@ -61,7 +60,7 @@ class CommandResetAdvertisedStatusList(CommandResetAdvertisedStatus):
         for dbhost in dbhosts:
             dbhost.advertise_status = False
             session.add(dbhost)
-            plenaries.append(PlenaryHost(dbhost, logger=logger))
+            plenaries.append(Plenary.get_plenary(dbhost))
 
         session.flush()
 

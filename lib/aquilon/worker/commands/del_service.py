@@ -18,9 +18,9 @@
 
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.templates.service import PlenaryService
 from aquilon.aqdb.model import Service
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.templates import Plenary
 
 
 class CommandDelService(BrokerCommand):
@@ -48,7 +48,7 @@ class CommandDelService(BrokerCommand):
         session.delete(dbservice)
         session.flush()
 
-        plenary_info = PlenaryService(dbservice, logger=logger)
+        plenary_info = Plenary.get_plenary(dbservice, logger=logger)
         plenary_info.remove()
 
         return

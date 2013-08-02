@@ -21,9 +21,9 @@ from aquilon.exceptions_ import (ArgumentError, PartialError, IncompleteError,
 from aquilon.aqdb.model import Feature, Archetype, Personality, Model
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.locks import CompileKey
-from aquilon.worker.templates.personality import PlenaryPersonality
 from aquilon.worker.commands.deploy import validate_justification
 from aquilon.worker.dbwrappers.feature import add_link
+from aquilon.worker.templates import Plenary
 
 
 class CommandBindFeature(BrokerCommand):
@@ -124,7 +124,8 @@ class CommandBindFeature(BrokerCommand):
                     continue
 
                 try:
-                    plenary_personality = PlenaryPersonality(personality)
+                    plenary_personality = Plenary.get_plenary(personality,
+                                                              logger=logger)
                     written += plenary_personality.write(locked=True)
                     successful.append(plenary_personality)
                 except IncompleteError:

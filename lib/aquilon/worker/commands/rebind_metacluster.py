@@ -17,9 +17,9 @@
 
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.aqdb.model import MetaCluster, Cluster
-from aquilon.worker.templates.cluster import PlenaryCluster
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.templates import Plenary
 
 
 class CommandRebindMetaCluster(BrokerCommand):
@@ -44,7 +44,7 @@ class CommandRebindMetaCluster(BrokerCommand):
 
         session.flush()
 
-        plenary = PlenaryCluster(dbcluster, logger=logger)
+        plenary = Plenary.get_plenary(dbcluster, logger=logger)
         plenary.write()
 
         return

@@ -20,9 +20,9 @@
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.processes import DSDBRunner
 from aquilon.worker.dbwrappers.location import get_location
-from aquilon.worker.templates.city import PlenaryCity
 from aquilon.worker.locks import lock_queue
 from aquilon.worker.commands.del_location import CommandDelLocation
+from aquilon.worker.templates import Plenary
 
 
 class CommandDelCity(CommandDelLocation):
@@ -36,7 +36,7 @@ class CommandDelCity(CommandDelLocation):
         country = dbcity.country.name
         fullname = dbcity.fullname
 
-        plenary = PlenaryCity(dbcity, logger=logger)
+        plenary = Plenary.get_plenary(dbcity, logger=logger)
         CommandDelLocation.render(self, session=session, name=city,
                                   type='city', **arguments)
         session.flush()

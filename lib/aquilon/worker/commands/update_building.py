@@ -23,8 +23,7 @@ from aquilon.aqdb.model import (Machine, ServiceMap, PersonalityServiceMap,
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.location import get_location
 from aquilon.worker.processes import DSDBRunner
-from aquilon.worker.templates.machine import PlenaryMachineInfo
-from aquilon.worker.templates.base import PlenaryCollection
+from aquilon.worker.templates import Plenary, PlenaryCollection
 
 
 # based on update_rack
@@ -95,7 +94,7 @@ class CommandUpdateBuilding(BrokerCommand):
             query = query.filter(Machine.location_id.in_(dbcity.offspring_ids()))
 
             for dbmachine in query:
-                plenaries.append(PlenaryMachineInfo(dbmachine, logger=logger))
+                plenaries.append(Plenary.get_plenary(dbmachine))
 
         session.flush()
 

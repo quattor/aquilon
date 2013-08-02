@@ -21,7 +21,7 @@ from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.location import add_location
 from aquilon.worker.processes import DSDBRunner
 from aquilon.worker.locks import lock_queue
-from aquilon.worker.templates.city import PlenaryCity
+from aquilon.worker.templates import Plenary
 
 
 class CommandAddCity(BrokerCommand):
@@ -41,7 +41,7 @@ class CommandAddCity(BrokerCommand):
 
         session.flush()
 
-        plenary = PlenaryCity(dbcity, logger=logger)
+        plenary = Plenary.get_plenary(dbcity, logger=logger)
         key = plenary.get_write_key()
         try:
             lock_queue.acquire(key)

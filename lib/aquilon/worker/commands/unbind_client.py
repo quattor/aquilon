@@ -18,13 +18,12 @@
 
 
 from aquilon.exceptions_ import ArgumentError
+from aquilon.aqdb.model import Service
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.host import (hostname_to_host,
                                             get_host_bound_service)
-from aquilon.worker.templates.base import PlenaryCollection
-from aquilon.worker.templates.service import PlenaryServiceInstanceServer
-from aquilon.worker.templates.host import PlenaryHost
-from aquilon.aqdb.model import Service
+from aquilon.worker.templates import (Plenary, PlenaryCollection,
+                                      PlenaryServiceInstanceServer)
 
 
 class CommandUnbindClient(BrokerCommand):
@@ -46,8 +45,8 @@ class CommandUnbindClient(BrokerCommand):
             session.flush()
 
             plenaries = PlenaryCollection(logger=logger)
-            plenaries.append(PlenaryHost(dbhost, logger=logger))
-            plenaries.append(PlenaryServiceInstanceServer(si, logger=logger))
+            plenaries.append(Plenary.get_plenary(dbhost))
+            plenaries.append(PlenaryServiceInstanceServer(si))
             plenaries.write()
 
         return

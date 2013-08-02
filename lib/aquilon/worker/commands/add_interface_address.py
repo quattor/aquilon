@@ -22,9 +22,9 @@ from aquilon.aqdb.model import HardwareEntity, NetworkEnvironment, Interface
 from aquilon.worker.dbwrappers.dns import grab_address
 from aquilon.worker.dbwrappers.interface import (generate_ip,
                                                  assign_address)
-from aquilon.worker.templates.host import PlenaryHost
 from aquilon.worker.locks import lock_queue
 from aquilon.worker.processes import DSDBRunner
+from aquilon.worker.templates import Plenary
 
 
 class CommandAddInterfaceAddress(BrokerCommand):
@@ -142,7 +142,7 @@ class CommandAddInterfaceAddress(BrokerCommand):
 
         dbhost = getattr(dbhw_ent, "host", None)
         if dbhost:
-            plenary_info = PlenaryHost(dbhost, logger=logger)
+            plenary_info = Plenary.get_plenary(dbhost, logger=logger)
             key = plenary_info.get_write_key()
             try:
                 lock_queue.acquire(key)
