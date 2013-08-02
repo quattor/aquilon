@@ -25,7 +25,7 @@ from aquilon.worker.formats.formatters import ObjectFormatter
 from aquilon.worker.formats.list import ListFormatter
 from aquilon.aqdb.model import Chassis
 
-chassis_re = re.compile("^(.*)c(\d+)n(\d+)$")
+chassis_re = re.compile(r"^(.*)c(\d+)n(\d+)$")
 
 
 class ChassisFormatter(ObjectFormatter):

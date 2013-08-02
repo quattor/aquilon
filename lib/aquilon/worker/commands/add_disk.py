@@ -33,7 +33,7 @@ class CommandAddDisk(BrokerCommand):
     # removed
     required_parameters = ["machine", "disk"]
 
-    REGEX_ADDRESS = re.compile("\d+:\d+$")
+    REGEX_ADDRESS = re.compile(r"\d+:\d+$")
 
     def _write_plenary_info(self, dbmachine, logger):
         """write template files"""
@@ -80,8 +80,8 @@ class CommandAddDisk(BrokerCommand):
 
         if share:
             if not CommandAddDisk.REGEX_ADDRESS.match(address):
-                raise ArgumentError("Disk address '%s' is not valid, it must "
-                                    "match \d+:\d+ (e.g. 0:0)." % address)
+                raise ArgumentError(r"Disk address '%s' is not valid, it must "
+                                    r"match \d+:\d+ (e.g. 0:0)." % address)
             if not dbmachine.vm_container:
                 raise ArgumentError("{0} is not a virtual machine, it is not "
                                     "possible to define a virtual disk."
