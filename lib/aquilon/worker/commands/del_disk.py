@@ -16,7 +16,7 @@
 # limitations under the License.
 """Contains the logic for `aq del disk`."""
 
-from aquilon.exceptions_ import ArgumentError, NotFoundException, AquilonError
+from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.aqdb.model import Disk, Machine
 from aquilon.aqdb.model.disk import controller_types
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
@@ -29,7 +29,7 @@ class CommandDelDisk(BrokerCommand):
     required_parameters = ["machine"]
 
     def render(self, session, logger, machine, disk, controller, size, all,
-               dbuser, **arguments):
+               **arguments):
 
         # Handle deprecated arguments
         if arguments.get("type", None):

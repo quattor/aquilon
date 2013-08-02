@@ -81,7 +81,6 @@ class CommandAddServiceAddress(BrokerCommand):
         dbdns_rec, newly_created = grab_address(session, service_address, ip,
                                                 network_environment)
         ip = dbdns_rec.ip
-        dbnetwork = dbdns_rec.network
 
         if map_to_primary:
             if not isinstance(real_holder, Host):

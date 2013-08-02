@@ -30,7 +30,6 @@ from aquilon.aqdb.model import (Cluster, EsxCluster, MetaCluster, Archetype,
 from aquilon.worker.dbwrappers.host import hostname_to_host
 from aquilon.worker.dbwrappers.branch import get_branch_and_author
 from aquilon.worker.dbwrappers.location import get_location
-from aquilon.worker.dbwrappers.resources import get_resource_holder
 
 
 class CommandSearchCluster(BrokerCommand):

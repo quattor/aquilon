@@ -22,11 +22,9 @@ from sqlalchemy.orm import aliased, subqueryload, joinedload
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.formats.machine import SimpleMachineList
 from aquilon.aqdb.model import (Machine, Cpu, Cluster, ClusterResource, Share,
-                                VirtualDisk, Disk, MetaCluster, DnsRecord,
-                                HardwareEntity)
+                                VirtualDisk, Disk, MetaCluster, DnsRecord)
 from aquilon.worker.dbwrappers.hardware_entity import (
     search_hardware_entity_query)
-from aquilon.worker.dbwrappers.host import (hostname_to_host)
 
 
 class CommandSearchMachine(BrokerCommand):
