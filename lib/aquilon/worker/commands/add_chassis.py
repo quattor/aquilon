@@ -70,7 +70,7 @@ class CommandAddChassis(BrokerCommand):
         if ip:
             dbnetwork = get_net_id_from_ip(session, ip)
             check_ip_restrictions(dbnetwork, ip)
-            assign_address(dbinterface, ip, dbnetwork)
+            assign_address(dbinterface, ip, dbnetwork, logger=logger)
 
         session.flush()
 

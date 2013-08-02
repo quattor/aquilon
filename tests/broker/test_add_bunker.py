@@ -28,18 +28,18 @@ from brokertest import TestBrokerCommand
 class TestAddBunker(TestBrokerCommand):
 
     def testaddutbunker1(self):
-        command = ['add_bunker', '--bunker=utbunker1', '--building=ut',
+        command = ['add_bunker', '--bunker=bucket1.ut', '--building=ut',
                    '--fullname=UT b1']
         self.noouttest(command)
 
     def testverifyaddutbunker1(self):
-        command = "show bunker --bunker utbunker1"
+        command = "show bunker --bunker bucket1.ut"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Bunker: utbunker1", command)
+        self.matchoutput(out, "Bunker: bucket1.ut", command)
         self.matchoutput(out, "Fullname: UT b1", command)
 
     def testaddutbunker2(self):
-        command = ['add_bunker', '--bunker=utbunker2', '--room=utroom2']
+        command = ['add_bunker', '--bunker=bucket2.ut', '--room=utroom2']
         self.noouttest(command)
 
     def testaddnyb10(self):
@@ -47,16 +47,16 @@ class TestAddBunker(TestBrokerCommand):
                         "--building", "np"])
 
     def testverifyutbunker2(self):
-        command = "show bunker --bunker utbunker2"
+        command = "show bunker --bunker bucket2.ut"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Bunker: utbunker2", command)
-        self.matchoutput(out, "Fullname: utbunker2", command)
+        self.matchoutput(out, "Bunker: bucket2.ut", command)
+        self.matchoutput(out, "Fullname: bucket2.ut", command)
 
     def testverifyshowcsv(self):
         command = "show bunker --all --format=csv"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "bunker,utbunker1,building,ut", command)
-        self.matchoutput(out, "bunker,utbunker2,room,utroom2", command)
+        self.matchoutput(out, "bunker,bucket1.ut,building,ut", command)
+        self.matchoutput(out, "bunker,bucket2.ut,room,utroom2", command)
 
 
 if __name__ == '__main__':

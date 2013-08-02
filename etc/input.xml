@@ -5210,4 +5210,9 @@
       <transport trigger="vlan" method="get" path="vlan/%(vlan)s" />
    </command>
 
+   <command name="show_bunker_violations">
+      Show bunker violations.
+      <transport method="get" path="bunker_violations" />
+   </command>
+
 </commandline>

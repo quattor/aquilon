@@ -28,23 +28,23 @@ from brokertest import TestBrokerCommand
 class TestDelBunker(TestBrokerCommand):
 
     def test_100_add_bunker_net(self):
-        self.net.allocate_network(self, "utbunker1_net", 24, "unknown",
-                                  "bunker", "utbunker1",
+        self.net.allocate_network(self, "bucket1.ut_net", 24, "unknown",
+                                  "bunker", "bucket1.ut",
                                   comments="Made-up network")
 
     def test_101_del_utbunker1_fail(self):
-        command = "del bunker --bunker utbunker1"
+        command = "del bunker --bunker bucket1.ut"
         err = self.badrequesttest(command.split(" "))
         self.matchoutput(err,
-                         "Bad Request: Could not delete bunker utbunker1, networks "
+                         "Bad Request: Could not delete bunker bucket1.ut, networks "
                          "were found using this location.",
                          command)
 
     def test_102_cleanup_bunker_net(self):
-        self.net.dispose_network(self, "utbunker1_net")
+        self.net.dispose_network(self, "bucket1.ut_net")
 
     def test_110_del_utbunker1(self):
-        command = "del bunker --bunker utbunker1"
+        command = "del bunker --bunker bucket1.ut"
         self.noouttest(command.split(" "))
 
     def test_200_del_bunker_notexist(self):
@@ -53,14 +53,14 @@ class TestDelBunker(TestBrokerCommand):
         self.matchoutput(out, "Bunker bunker-does-not-exist not found.", command)
 
     def test_300_verify_del_utbunker1(self):
-        command = "show bunker --bunker utbunker1"
+        command = "show bunker --bunker bucket1.ut"
         out = self.notfoundtest(command.split(" "))
-        self.matchoutput(out, "Bunker utbunker1 not found.", command)
+        self.matchoutput(out, "Bunker bucket1.ut not found.", command)
 
     def test_300_show_all(self):
         command = ["show_bunker", "--all"]
         out = self.commandtest(command)
-        self.matchclean(out, "utbunker1", command)
+        self.matchclean(out, "bucket1.ut", command)
 
 
 if __name__ == '__main__':

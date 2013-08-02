@@ -96,12 +96,13 @@ class ObservedVlan(Base):
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
 
-    switch = relation(Switch, backref=backref('%ss' % _TN, cascade='delete',
-                                              passive_deletes=True,
-                                              order_by=[vlan_id]))
-    network = relation(Network, backref=backref('%ss' % _TN, cascade='delete',
-                                                passive_deletes=True,
-                                                order_by=[vlan_id]))
+    switch = relation(Switch, innerjoin=True,
+                      backref=backref('%ss' % _TN, cascade='delete',
+                                      passive_deletes=True, order_by=[vlan_id]))
+    network = relation(Network, innerjoin=True,
+                       backref=backref('%ss' % _TN, cascade='delete',
+                                       passive_deletes=True,
+                                       order_by=[vlan_id]))
 
     vlan = relation(VlanInfo, uselist=False,
                     primaryjoin=vlan_id == VlanInfo.vlan_id,

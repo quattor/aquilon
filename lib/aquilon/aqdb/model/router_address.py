@@ -65,7 +65,7 @@ class RouterAddress(Base):
                        backref=backref('routers', cascade="all, delete-orphan",
                                        order_by=[ip]))
 
-    dns_environment = relation(DnsEnvironment)
+    dns_environment = relation(DnsEnvironment, innerjoin=True)
 
     location = relation(Location)
 

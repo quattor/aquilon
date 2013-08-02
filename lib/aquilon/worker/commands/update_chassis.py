@@ -49,7 +49,7 @@ class CommandUpdateChassis(BrokerCommand):
             dbchassis.serial_no = serial
 
         if ip:
-            update_primary_ip(session, dbchassis, ip)
+            update_primary_ip(session, logger, dbchassis, ip)
 
         if comments is not None:
             dbchassis.comments = comments

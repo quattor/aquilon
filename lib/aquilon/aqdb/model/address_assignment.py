@@ -103,9 +103,9 @@ class AddressAssignment(Base):
 
     fqdns = association_proxy('dns_records', 'fqdn')
 
-    network = relation(Network, backref=backref('assignments',
-                                                passive_deletes=True,
-                                                order_by=[ip]))
+    network = relation(Network, innerjoin=True,
+                       backref=backref('assignments', passive_deletes=True,
+                                       order_by=[ip]))
 
     __table_args__ = (UniqueConstraint(interface_id, ip,
                                        name="%s_iface_ip_uk" % _ABV),

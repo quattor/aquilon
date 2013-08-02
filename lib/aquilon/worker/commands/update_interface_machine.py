@@ -64,7 +64,7 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
             if dbhost.archetype.name == 'aurora' and \
                dbhw_ent.primary_ip and not dbinterface.addresses:
                 assign_address(dbinterface, dbhw_ent.primary_ip,
-                               dbhw_ent.primary_name.network)
+                               dbhw_ent.primary_name.network, logger=logger)
 
         # We may need extra IP verification (or an autoip option)...
         # This may also throw spurious errors if attempting to set the

@@ -82,7 +82,7 @@ def search_hardware_entity_query(session, hardware_type=HardwareEntity,
     return q
 
 
-def update_primary_ip(session, dbhw_ent, ip):
+def update_primary_ip(session, logger, dbhw_ent, ip):
     if not dbhw_ent.primary_name:
         raise ArgumentError("{0} does not have a primary name."
                             .format(dbhw_ent))
@@ -116,7 +116,7 @@ def update_primary_ip(session, dbhw_ent, ip):
                                "because it does not have any interfaces "
                                "defined.".format(dbhw_ent))
 
-        assign_address(dbinterface, ip, dbnetwork)
+        assign_address(dbinterface, ip, dbnetwork, logger=logger)
     else:
         dns_rec = dbhw_ent.primary_name
 

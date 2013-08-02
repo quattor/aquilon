@@ -29,7 +29,8 @@ from sqlalchemy.orm import object_session
 
 from aquilon.exceptions_ import ArgumentError, InternalError
 from aquilon.aqdb.model import (Interface, ObservedMac, Fqdn, ARecord, VlanInfo,
-                                ObservedVlan, Network, AddressAssignment, Model)
+                                ObservedVlan, Network, AddressAssignment, Model,
+                                Bunker, Location, HardwareEntity)
 from aquilon.aqdb.model.network import get_net_id_from_ip
 
 
@@ -479,13 +480,71 @@ def get_or_create_interface(session, dbhw_ent, name=None, mac=None,
     return dbinterface
 
 
-def assign_address(dbinterface, ip, dbnetwork, label=None, resource=None):
+def enforce_bucket_alignment(dbrack, dbnetwork, logger):
+    net_loc = dbnetwork.location
+    net_bunker = net_loc.bunker
+    rack_bunker = dbrack.bunker
+
+    if not net_bunker:
+        # The simple case - no alignment is needed
+        if not rack_bunker:
+            return
+
+        # The second easiest case - the rack is in a bunker, but the network is
+        # not
+        logger.warn("Bunker violation: {0:l} is inside {1:l}, but {2:l} is "
+                    "not bunkerized.".format(dbrack, rack_bunker, dbnetwork))
+        return
+
+    session = object_session(dbrack)
+
+    if dbnetwork.may_span_buildings and "." in net_bunker.name:
+        # If a network spans buildings, we pretend it's in the bunker local to
+        # the rack's building, even if it was registered to the other side. This
+        # hack could be removed if we had buckets as a Location subclass.
+        bucket, building = net_bunker.name.split(".", 1)
+        expected_bunker = Bunker.get_unique(session, bucket + "." +
+                                            dbrack.building.name, compel=True)
+    else:
+        expected_bunker = net_bunker
+
+    if not rack_bunker:
+        # The rack is not inside a bunker yet. If there's only one machine
+        # inside the rack, then we can just set the bunker based on the
+        # network's bucket - since we'll in the middle of an address assignment,
+        # the plenary of the machine (if any) will be rewritten anyway.
+        q = session.query(HardwareEntity)
+        q = q.join(Location)
+        q = q.filter(Location.id.in_(dbrack.offspring_ids()))
+        if q.count() > 1:
+            logger.warn("Bunker violation: {0:l} is inside {1:l}, but {2:l} "
+                        "is not inside a bunker."
+                        .format(dbnetwork, net_bunker, dbrack))
+            return
+
+        logger.client_info("Moving {0:l} into {1:l} based on network tagging."
+                           .format(dbrack, expected_bunker))
+        dbrack.update_parent(parent=expected_bunker)
+        rack_bunker = expected_bunker
+
+    if rack_bunker != expected_bunker:
+        logger.warn("Bunker violation: {0:l} is inside {1:l}, but "
+                    "{2:l} is inside {3:l}."
+                    .format(dbrack, rack_bunker, dbnetwork, expected_bunker))
+
+
+def assign_address(dbinterface, ip, dbnetwork, label=None, resource=None,
+                   logger=None):
     assert isinstance(dbinterface, Interface)
 
     dns_environment = dbnetwork.network_environment.dns_environment
 
     if dbinterface.master:
         raise ArgumentError("Slave interfaces cannot hold addresses.")
+
+    dbrack = dbinterface.hardware_entity.location.rack
+    if dbrack:
+        enforce_bucket_alignment(dbrack, dbnetwork, logger)
 
     for addr in dbinterface.assignments:
         if not label and not addr.label:

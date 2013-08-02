@@ -98,8 +98,12 @@ class TestAddSwitch(TestBrokerCommand, VerifySwitchMixin):
                    "--rack", "np7", "--model", "rs g8000",
                    "--interface", "gigabitethernet0/1",
                    "--mac", "0018b1898600", "--ip", "172.31.64.69"]
-        (out, err) = self.successtest(command)
+        err = self.statustest(command)
         self.dsdb_verify()
+        self.matchoutput(err,
+                         "Moving rack np7 into bunker nyb10.np based on "
+                         "network tagging.",
+                         command)
 
     def testaddnp06fals01(self):
         self.dsdb_expect_add("np06fals01.ms.com", "172.31.88.5", "xge49",
@@ -109,8 +113,13 @@ class TestAddSwitch(TestBrokerCommand, VerifySwitchMixin):
                    "--rack", "np7", "--model", "ws-c2960-48tt-l",
                    "--interface", "xge49",
                    "--mac", "001cf699e5c1", "--ip", "172.31.88.5"]
-        (out, err) = self.successtest(command)
+        err = self.statustest(command)
         self.dsdb_verify()
+        self.matchoutput(err,
+                         "Bunker violation: rack np7 is inside bunker "
+                         "nyb10.np, but network nyp_hpl_2960_verari_mnmt is "
+                         "not bunkerized.",
+                         command)
 
     def testaddut01ga1s02(self):
         ip = self.net["tor_net_0"].usable[0]

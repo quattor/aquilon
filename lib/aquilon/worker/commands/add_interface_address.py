@@ -137,7 +137,7 @@ class CommandAddInterfaceAddress(BrokerCommand):
                                                     dbnetwork,
                                                     dbnetwork.network_environment))
 
-        assign_address(dbinterface, ip, dbnetwork, label=label)
+        assign_address(dbinterface, ip, dbnetwork, label=label, logger=logger)
         session.flush()
 
         dbhost = getattr(dbhw_ent, "host", None)

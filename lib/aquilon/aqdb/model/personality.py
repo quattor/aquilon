@@ -66,7 +66,7 @@ class Personality(Base):
                                     nullable=False))
     comments = Column(String(255), nullable=True)
 
-    archetype = relation(Archetype)
+    archetype = relation(Archetype, innerjoin=True)
     owner_grn = relation(Grn, innerjoin=True)
     grns = association_proxy('_grns', 'grn', creator=_pgm_creator)
 

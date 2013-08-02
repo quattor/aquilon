@@ -43,7 +43,7 @@ class Cpu(Base):
                                     nullable=False))
     comments = deferred(Column(String(255), nullable=True))
 
-    vendor = relation(Vendor)
+    vendor = relation(Vendor, innerjoin=True)
 
     __table_args__ = (UniqueConstraint(vendor_id, name, speed,
                                        name='%s_nm_speed_uk' % _TN),)
