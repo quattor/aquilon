@@ -45,7 +45,7 @@ class ClusterFormatter(ObjectFormatter):
                 cluster.down_maint_percent
 
         for host in sorted(cluster.hosts, key=lambda x: x.fqdn):
-            self.add_host_msg(skeleton.hosts.add(), host)
+            self.add_host_data(skeleton.hosts.add(), host)
 
         if cluster.resholder and len(cluster.resholder.resources) > 0:
             for resource in cluster.resholder.resources:

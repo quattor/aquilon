@@ -16,11 +16,9 @@
 # limitations under the License.
 """Host formatter."""
 
-
-from collections import defaultdict
+from aquilon.aqdb.model import Host
 from aquilon.worker.formats.formatters import ObjectFormatter
 from aquilon.worker.formats.list import ListFormatter
-from aquilon.aqdb.model import Host
 
 
 # TODO: this formatter is kept only for the protobuf stuff, otherwise
@@ -60,7 +58,7 @@ class SimpleHostListFormatter(ListFormatter):
         hostlist_msg = self.loaded_protocols[self.protocol].HostList()
         for host in hostlist:
             msg = hostlist_msg.hosts.add()
-            self.add_host_msg(msg, host)
+            self.add_host_data(msg, host)
             for si in host.services_used:
                 srv_msg = msg.services_used.add()
                 srv_msg.service = si.service.name

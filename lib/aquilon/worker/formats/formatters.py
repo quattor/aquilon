@@ -301,22 +301,12 @@ class ObjectFormatter(object):
         msg.owner_eonid = personality.owner_eon_id
 
     def add_host_data(self, host_msg, host):
-        # FIXME: Add branch type and sandbox author to protobufs.
-        host_msg.domain.name = str(host.branch.name)
-        host_msg.domain.owner = str(host.branch.owner.name)
-        host_msg.status = str(host.status.name)
-        host_msg.owner_eonid = host.effective_owner_grn.eon_id
-        self.add_personality_data(host_msg.personality, host.personality)
-        self.add_archetype_data(host_msg.archetype, host.archetype)
-        self.redirect_proto(host.operating_system, host_msg.operating_system)
-
-    def add_host_msg(self, host_msg, host):
         """ Return a host message.
 
             Hosts used to be systems, which makes this method name a bit odd
         """
         if not isinstance(host, Host):
-            raise InternalError("add_host_msg was called with {0} instead of "
+            raise InternalError("add_host_data was called with {0} instead of "
                                 "a Host.".format(host))
         host_msg.type = "host"  # FIXME: is hardcoding this ok?
         host_msg.hostname = str(host.machine.primary_name.fqdn.name)
@@ -334,7 +324,14 @@ class ObjectFormatter(object):
                 r = host_msg.resources.add()
                 self.redirect_proto(resource, r)
 
-        self.add_host_data(host_msg, host)
+        # FIXME: Add branch type and sandbox author to protobufs.
+        host_msg.domain.name = str(host.branch.name)
+        host_msg.domain.owner = str(host.branch.owner.name)
+        host_msg.status = str(host.status.name)
+        host_msg.owner_eonid = host.effective_owner_grn.eon_id
+        self.add_personality_data(host_msg.personality, host.personality)
+        self.add_archetype_data(host_msg.archetype, host.archetype)
+        self.redirect_proto(host.operating_system, host_msg.operating_system)
         self.add_hardware_data(host_msg, host.machine)
 
     def add_dns_domain_msg(self, dns_domain_msg, dns_domain):
@@ -353,10 +350,10 @@ class ObjectFormatter(object):
     def add_service_instance_msg(self, si_msg, service_instance):
         si_msg.name = str(service_instance.name)
         for host in service_instance.server_hosts:
-            self.add_host_msg(si_msg.servers.add(), host)
+            self.add_host_data(si_msg.servers.add(), host)
         # TODO: make this conditional to avoid performance problems
         #for client in service_instance.clients:
-        #    self.add_host_msg(si_msg.clients.add(), client.host)
+        #    self.add_host_data(si_msg.clients.add(), client.host)
 
     def add_service_map_msg(self, sm_msg, service_map):
         if service_map.location:
