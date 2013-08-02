@@ -19,7 +19,6 @@
 from aquilon.aqdb.model import Personality
 from aquilon.worker.formats.formatters import ObjectFormatter
 from aquilon.worker.formats.list import ListFormatter
-from aquilon.worker.templates.base import TEMPLATE_EXTENSION
 
 
 class ThresholdedPersonality(object):
@@ -73,8 +72,8 @@ class PersonalityFormatter(ObjectFormatter):
         if personality.config_override:
             details.append(indent + "  Config override: enabled")
 
-        details.append(indent + "  Template: {0.archetype.name}/personality/{0.name}/config{1}"
-                       .format(personality, TEMPLATE_EXTENSION))
+        details.append(indent + "  Template: {0.archetype.name}/personality/{0.name}/config"
+                       .format(personality))
 
         if has_threshold:
             details.append(indent + "  Threshold: {0}".format(threshold))

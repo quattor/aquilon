@@ -16,8 +16,6 @@
 # limitations under the License.
 """Contains the logic for `aq cat --personality`."""
 
-
-from aquilon.exceptions_ import NotFoundException
 from aquilon.aqdb.model import Personality
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.templates.personality import (PlenaryPersonalityPreFeature,
@@ -26,7 +24,6 @@ from aquilon.worker.templates.personality import (PlenaryPersonalityPreFeature,
                                                   PlenaryPersonalityBase,
                                                   ParameterTemplate,
                                                   get_parameters_by_tmpl)
-from aquilon.worker.templates.base import TEMPLATE_EXTENSION
 
 
 class CommandCatPersonality(BrokerCommand):
@@ -38,27 +35,24 @@ class CommandCatPersonality(BrokerCommand):
         dbpersonality = Personality.get_unique(session, archetype=archetype,
                                                name=personality, compel=True)
 
-        plenary = PlenaryPersonalityBase(dbpersonality, logger=logger)
         if pre_feature:
             plenary = PlenaryPersonalityPreFeature(dbpersonality, logger=logger)
-
-        if post_feature:
+        elif post_feature:
             plenary = PlenaryPersonalityPostFeature(dbpersonality, logger=logger)
-
-        if param_tmpl:
+        elif param_tmpl:
             param_templates = get_parameters_by_tmpl(dbpersonality)
+
             if param_tmpl in param_templates.keys():
-                ptmpl = ParameterTemplate(dbpersonality, param_tmpl,
-                                          param_templates[param_tmpl])
-                plenary = PlenaryPersonalityParameter(ptmpl, logger=logger)
+                values = param_templates[param_tmpl]
             else:
-                raise NotFoundException("No parameter template %s%s found." %
-                                        (param_tmpl, TEMPLATE_EXTENSION))
+                values = {}
 
-        lines = []
-        if generate:
-            lines.append(plenary._generate_content())
+            ptmpl = ParameterTemplate(dbpersonality, param_tmpl, values)
+            plenary = PlenaryPersonalityParameter(ptmpl, logger=logger)
         else:
-            lines.append(plenary.read())
+            plenary = PlenaryPersonalityBase(dbpersonality, logger=logger)
 
-        return lines
+        if generate:
+            return plenary._generate_content()
+        else:
+            return plenary.read()
