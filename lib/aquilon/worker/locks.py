@@ -69,17 +69,6 @@ class CompileKey(LockKey):
                          lock_queue=lock_queue)
 
 
-class DeleteKey(LockKey):
-    """Use when a broad deletion lock is required."""
-    def __init__(self, group=None, logger=LOGGER, loglevel=CLIENT_INFO):
-        self.group = group
-        components = ["delete"]
-        if self.group:
-            components.append(self.group)
-        LockKey.__init__(self, components, logger=logger, loglevel=loglevel,
-                         lock_queue=lock_queue)
-
-
 class SyncKey(LockKey):
     """Locks used by the refresh commands."""
     def __init__(self, data=None, logger=LOGGER, loglevel=CLIENT_INFO):
