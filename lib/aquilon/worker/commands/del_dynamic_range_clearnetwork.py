@@ -22,7 +22,6 @@ from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.commands.del_dynamic_range import CommandDelDynamicRange
 from aquilon.aqdb.model import DynamicStub, Network, NetworkEnvironment
 from aquilon.exceptions_ import ArgumentError
-from aquilon.worker.locks import DeleteKey
 
 
 class CommandDelDynamicRangeClearnetwork(CommandDelDynamicRange):
@@ -30,16 +29,12 @@ class CommandDelDynamicRangeClearnetwork(CommandDelDynamicRange):
     required_parameters = ["clearnetwork"]
 
     def render(self, session, logger, clearnetwork, **arguments):
-        with DeleteKey("system", logger=logger) as key:
-            self.del_dynamic_network(session, logger, clearnetwork)
-            session.commit()
-        return
-
-    def del_dynamic_network(self, session, logger, network):
         dbnet_env = NetworkEnvironment.get_unique_or_default(session)
-        dbnetwork = Network.get_unique(session, network,
+        dbnetwork = Network.get_unique(session, clearnetwork,
                                        network_environment=dbnet_env,
                                        compel=True)
+        dbnetwork.lock_row()
+
         q = session.query(DynamicStub)
         q = q.filter_by(network=dbnetwork)
         q = q.order_by(asc(DynamicStub.ip))
