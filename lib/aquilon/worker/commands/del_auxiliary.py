@@ -16,66 +16,43 @@
 # limitations under the License.
 """Contains the logic for `aq del auxiliary`."""
 
-
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import ARecord
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.processes import DSDBRunner
-from aquilon.worker.locks import DeleteKey
-from aquilon.worker.dbwrappers.dns import delete_dns_record
-from aquilon.worker.templates import Plenary
+from aquilon.worker.commands.del_interface_address import \
+    CommandDelInterfaceAddress
 
 
-class CommandDelAuxiliary(BrokerCommand):
+class CommandDelAuxiliary(CommandDelInterfaceAddress):
 
     required_parameters = ["auxiliary"]
 
     def render(self, session, logger, auxiliary, **arguments):
-        dbmachine = None
-        with DeleteKey("system", logger=logger):
-            # Check dependencies, translate into user-friendly message
-            dbauxiliary = ARecord.get_unique(session, fqdn=auxiliary,
-                                             compel=True)
-            is_aux = True
-            if not dbauxiliary.assignments or len(dbauxiliary.assignments) > 1:
+        # Check dependencies, translate into user-friendly message
+        dbauxiliary = ARecord.get_unique(session, fqdn=auxiliary, compel=True)
+
+        is_aux = True
+        if not dbauxiliary.assignments or len(dbauxiliary.assignments) > 1:
+            is_aux = False
+        else:
+            assignment = dbauxiliary.assignments[0]
+            dbinterface = assignment.interface
+
+            if assignment.ip == dbinterface.hardware_entity.primary_ip:
                 is_aux = False
-            else:
-                assignment = dbauxiliary.assignments[0]
-                dbmachine = assignment.interface.hardware_entity
+            if assignment.interface.interface_type == 'management':
+                is_aux = False
 
-                if assignment.ip == dbmachine.primary_ip:
-                    is_aux = False
-                if assignment.interface.interface_type == 'management':
-                    is_aux = False
+        if not is_aux:
+            raise ArgumentError("{0:a} is not an auxiliary.".format(dbauxiliary))
 
-            if not is_aux:
-                raise ArgumentError("{0:a} is not an auxiliary.".format(dbauxiliary))
-
-            # FIXME: Look for dependencies...
-
-            oldinfo = DSDBRunner.snapshot_hw(dbmachine)
-
-            session.delete(assignment)
-            delete_dns_record(dbauxiliary)
-            session.flush()
-            session.expire(dbmachine)
-
-            dsdb_runner = DSDBRunner(logger=logger)
-            dsdb_runner.update_host(dbmachine, oldinfo)
-            dsdb_runner.commit_or_rollback("Could not remove host %s from DSDB"
-                                           % auxiliary)
-            # Past the point of no return here (DSDB has been updated)...
-            # probably not much of an issue if writing the plenary failed.
-            # Commit the session so that we can free the delete lock.
-            session.commit()
-
-        if dbmachine:
-            plenary_info = Plenary.get_plenary(dbmachine, logger=logger)
-            # This may create a new lock, so we free first above.
-            plenary_info.write()
-
-            if dbmachine.host:
-                # FIXME: Reconfigure
-                pass
-
-        return
+        return super(CommandDelAuxiliary, self).render(session, logger,
+                                                       machine=dbinterface.hardware_entity.label,
+                                                       chassis=None, switch=None, 
+                                                       interface=dbinterface.name,
+                                                       fqdn=auxiliary,
+                                                       ip=assignment.ip,
+                                                       label=None,
+                                                       keep_dns=False,
+                                                       network_environment=None,
+                                                       **arguments)
