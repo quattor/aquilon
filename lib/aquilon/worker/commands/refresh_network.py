@@ -44,7 +44,7 @@ class CommandRefreshNetwork(BrokerCommand):
             raise ArgumentError("--dryrun and --incremental cannot be given "
                                 "simultaneously.")
 
-        key = SyncKey(data="network", logger=logger)
+        key = SyncKey("network", logger=logger)
         lock_queue.acquire(key)
 
         rundir = self.config.get("broker", "rundir")

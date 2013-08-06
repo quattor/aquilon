@@ -27,8 +27,8 @@ from aquilon.worker import depends  # pylint: disable=W0611
 
 from networktest import DummyNetworks
 
-LOCK_RE = re.compile(r'^(acquired|releasing) '
-                     r'((compile|delete|sync) )?lock[^\n]*\n', re.M)
+LOCK_RE = re.compile(r'^(acquired|releasing) exclusive\(.*\), shared\(.*\)\n',
+                     re.M)
 
 DSDB_EXPECT_SUCCESS_FILE = "expected_dsdb_cmds"
 DSDB_EXPECT_FAILURE_FILE = "fail_expected_dsdb_cmds"
