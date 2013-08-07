@@ -34,16 +34,16 @@ class CommandReconfigureList(BrokerCommand):
     required_parameters = ["list"]
 
     def render(self, session, logger, list, archetype, personality,
-               buildstatus, osname, osversion, grn, eon_id, **arguments):
+               buildstatus, osname, osversion, grn, eon_id, cleargrn, **arguments):
         check_hostlist_size(self.command, self.config, list)
         dbhosts = hostlist_to_hosts(session, list)
 
         self.reconfigure_list(session, logger, dbhosts, archetype, personality,
-                              buildstatus, osname, osversion, grn, eon_id, **arguments)
+                              buildstatus, osname, osversion, grn, eon_id, cleargrn, **arguments)
 
     def reconfigure_list(self, session, logger, dbhosts, archetype,
                          personality, buildstatus, osname, osversion,
-                         grn, eon_id, **arguments):
+                         grn, eon_id, cleargrn, **arguments):
         failed = []
         # Check all the parameters up front.
         # Some of these could be more intelligent about defaults
@@ -141,6 +141,9 @@ class CommandReconfigureList(BrokerCommand):
                                    dbarchetype.name))
             if grn or eon_id:
                 dbhost.owner_grn = dbgrn
+
+            if cleargrn:
+                dbhost.owner_grn = None
 
         if failed:
             raise ArgumentError("Cannot modify the following hosts:\n%s" %

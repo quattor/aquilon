@@ -43,6 +43,9 @@
 	<arg choice="plain"><option>--keepbindings</option></arg>
 	<arg choice="plain"><option>--nokeepbindings</option></arg>
       </group>
+      <group choice="opt">
+	<arg choice="plain"><option>--cleargrn</option></arg>
+      </group>
       <group>
 	<synopfragmentref linkend="global-options">Global options</synopfragmentref>
       </group>
@@ -230,6 +233,17 @@
           <para>
             This option will not change the behavior of enforcing the
             service maps for required services.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <option>--cleargrn</option>
+        </term>
+        <listitem>
+          <para>
+            When <option>--cleargrn </option> is passed, the owner GRN
+	    on the host will be removed.
           </para>
         </listitem>
       </varlistentry>

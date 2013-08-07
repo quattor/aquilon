@@ -2024,6 +2024,7 @@
          <option name="keepbindings" type="boolean">Preserve service bindings that are not required</option>
          <option name="grn" type="string" conflicts="eon_id">GRN as string</option>
          <option name="eon_id" type="int" conflicts="grn">Numeric EON ID</option>
+         <option name="cleargrn" type="flag" conflicts="grn eon_id">Clear owner grn</option>
       </optgroup>
       <transport method="post" path="host/%(hostname)s/command/reconfigure" />
       <transport trigger="list" method="post" path="command/reconfigure/list" />
@@ -3090,6 +3091,7 @@
          <option name="keepbindings" type="boolean">Preserve service bindings that are not required</option>
          <option name="grn" type="string" conflicts="eon_id">GRN as string</option>
          <option name="eon_id" type="int" conflicts="grn">Numeric EON ID</option>
+         <option name="cleargrn" type="flag" conflicts="grn eon_id">Clear owner grn</option>
       </optgroup>
       <transport method="post" path="host/%(hostname)s/command/make" />
    </command>
@@ -3117,6 +3119,7 @@
          <option name="keepbindings" type="boolean">Preserve service bindings that are not required</option>
          <option name="grn" type="string" conflicts="eon_id">GRN as string</option>
          <option name="eon_id" type="int" conflicts="grn">Numeric EON ID</option>
+         <option name="cleargrn" type="flag" conflicts="grn eon_id">Clear owner grn</option>
       </optgroup>
       <transport method="post" path="host/%(hostname)s/command/make_aquilon" />
    </command>
