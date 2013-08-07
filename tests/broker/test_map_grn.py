@@ -283,6 +283,65 @@ class TestMapGrn(VerifyGrnsMixin, TestBrokerCommand):
                          "than {1:d}".format(len(hosts), hostlimit),
                          command)
 
+    def test_600_unmap_personality(self):
+        for grn in self.grn_list:
+            command = ["map", "grn", "--grn", grn,
+                   "--personality", "compileserver", "--target", "esp"]
+            self.successtest(command)
+
+        command = ["cat", "--archetype", "aquilon", "--personality", "compileserver"]
+        out = self.commandtest(command)
+        self.check_personality_grns(out, self.grn_list, {"esp": self.grn_list}, command)
+
+        command = ["unmap", "grn", "--clearall",
+                   "--personality", "compileserver", "--target", "esp"]
+        self.successtest(command)
+
+        command = ["cat", "--archetype", "aquilon", "--personality", "compileserver"]
+        out = self.commandtest(command)
+        self.searchclean(out, "system/eon_ids", command)
+
+    def test_620_unmap_unittest12(self):
+        for grn in self.grn_list:
+            command = ["map", "grn", "--grn", grn,
+                       "--hostname", "unittest12.aqd-unittest.ms.com", "--target", "esp"]
+            self.noouttest(command)
+
+        command = ["show_host", "--hostname", "unittest12.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Used by GRN: grn:/ms/ei/aquilon/unittest [target: esp]", command)
+        self.matchoutput(out, "Used by GRN: grn:/ms/ei/aquilon/aqd [target: esp]", command)
+
+        command = ["unmap", "grn", "--clearall",
+                   "--hostname", "unittest12.aqd-unittest.ms.com",
+                   "--target", "esp"]
+        self.successtest(command)
+
+        command = ["show_host", "--hostname", "unittest12.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchclean(out, "^  Used by GRN", command)
+
+    def test_630_map_host_list(self):
+        scratchfile = self.writescratch("hostlist",
+                                        "unittest12.aqd-unittest.ms.com")
+        for grn in self.grn_list:
+            command = ["map", "grn", "--grn", grn, "--list", scratchfile,
+                       "--target", "esp"]
+            self.noouttest(command)
+
+        command = ["show_host",  "--hostname", "unittest12.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Used by GRN: grn:/ms/ei/aquilon/unittest [target: esp]", command)
+        self.matchoutput(out, "Used by GRN: grn:/ms/ei/aquilon/aqd [target: esp]", command)
+
+        command = ["unmap", "grn", "--clearall", "--list", scratchfile,
+                   "--target", "esp"]
+        self.successtest(command)
+
+        command = ["show_host", "--hostname", "unittest12.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchclean(out, "^  Used by GRN", command)
+
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestMapGrn)
