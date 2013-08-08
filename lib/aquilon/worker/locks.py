@@ -30,6 +30,14 @@ LOGGER = logging.getLogger(__name__)
 lock_queue = LockQueue()
 
 
+class NoLockKey(LockKey):
+    """ A key that does not lock anything """
+    def __init__(self, logger=LOGGER, loglevel=CLIENT_INFO):
+        super(NoLockKey, self).__init__(logger=logger, loglevel=loglevel,
+                                        lock_queue=lock_queue)
+        self.transition("initialized", debug=True)
+
+
 # The concept of a "compile" lock somewhat oversimplifies.
 # Broadly speaking there are four phases:
 # 1 - Read plenary templates and profile templates for comparison.

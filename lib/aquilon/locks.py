@@ -45,8 +45,6 @@ class LockQueue(object):
         self.queue = []
 
     def acquire(self, key):
-        if key is None:
-            return
         key.transition("acquiring", debug=True)
         with self.queue_condition:
             if key in self.queue:
@@ -66,8 +64,6 @@ class LockQueue(object):
         blockers and let it know if it is in line.
 
         """
-        if key is None:
-            return False
         key.reset_blockers()
         is_blocked = False
         for k in self.queue:
@@ -82,8 +78,6 @@ class LockQueue(object):
         return is_blocked
 
     def release(self, key):
-        if key is None:
-            return
         key.transition("releasing")
         with self.queue_condition:
             self.queue.remove(key)
@@ -187,9 +181,6 @@ class LockKey(object):
         possible but more work for little gain.
 
         """
-        keylist = [key for key in keylist if key is not None]
-        if not keylist:
-            return None
         # Assume logger/loglevel is consistent across the list.
         logger = keylist[0].logger
         loglevel = keylist[0].loglevel

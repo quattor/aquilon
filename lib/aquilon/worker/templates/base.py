@@ -27,7 +27,7 @@ from sqlalchemy.inspection import inspect
 from aquilon.exceptions_ import InternalError, IncompleteError
 from aquilon.config import Config
 from aquilon.aqdb.model import Base
-from aquilon.worker.locks import lock_queue, CompileKey
+from aquilon.worker.locks import lock_queue, CompileKey, NoLockKey
 from aquilon.worker.templates.panutils import pan_assign, pan_variable
 from aquilon.worker.formats.formatters import ObjectFormatter
 from aquilon.utils import write_file, read_file, remove_file
@@ -141,11 +141,11 @@ class Plenary(object):
         if isinstance(self.dbobj, Base):
             state = inspect(self.dbobj)
             if state.deleted:
-                return None
+                return NoLockKey(logger=self.logger)
 
         if self.will_change():
             return self.get_key()
-        return None
+        return NoLockKey(logger=self.logger)
 
     def get_remove_key(self):
         """Return the relevant key.
@@ -486,13 +486,13 @@ class PlenaryCollection(object):
             yield plen
 
     def get_write_key(self):
-        keylist = []
+        keylist = [NoLockKey(logger=self.logger)]
         for plen in self.plenaries:
             keylist.append(plen.get_write_key())
         return CompileKey.merge(keylist)
 
     def get_remove_key(self):
-        keylist = []
+        keylist = [NoLockKey(logger=self.logger)]
         for plen in self.plenaries:
             keylist.append(plen.get_remove_key())
         return CompileKey.merge(keylist)
