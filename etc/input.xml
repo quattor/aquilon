@@ -144,8 +144,12 @@
          <option name="hostname" type="string" conflicts="all">Host name</option>
          <option name="all" type="flag" conflicts="hostname">Select all hosts</option>
       </optgroup>
+      <optgroup name="show_options" mandatory="False" fields="any">
+	 <option name="grns" type="flag" conflicts="all">Shows grns</option>
+      </optgroup>
+      <transport method="get" path="host/%(hostname)s" />
       <transport trigger="all" method="get" path="host" />
-      <transport trigger="hostname" method="get" path="host/%(hostname)s" />
+      <transport trigger="grns" method="get" path="host/%(hostname)s/grns" />
    </command>
 
    <command name="show_fqdn">

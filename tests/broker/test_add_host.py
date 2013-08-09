@@ -100,6 +100,14 @@ class TestAddHost(TestBrokerCommand):
         self.matchoutput(out, "Owned by GRN: grn:/example/cards", command)
         self.matchoutput(out, "Used by GRN: grn:/example/cards", command)
 
+    def testverifyshowhostjackgrns(self):
+        command = ["show_host", "--grns",
+                   "--hostname=jack.cards.example.com"]
+        (out, err) = self.successtest(command)
+        self.matchoutput(out, "Primary Name: jack.cards.example.com [4.2.1.22]", command)
+        self.matchoutput(out, "Owned by GRN: grn:/example/cards", command)
+        self.matchoutput(out, "Used by GRN: grn:/example/cards [target: esp]", command)
+
     def testmachinereuse(self):
         ip = self.net["unknown0"].usable[-1]
         command = ["add", "host", "--hostname", "used-already.one-nyp.ms.com",
@@ -415,6 +423,32 @@ class TestAddHost(TestBrokerCommand):
                        "--archetype", "vmhost", "--personality", "vulcan-1g-desktop-prod"]
             self.noouttest(command)
         self.dsdb_verify()
+
+    def testverifyshowhostgrns(self):
+        command = ["show_host", "--grns",
+                   "--hostname=unittest02.one-nyp.ms.com"]
+        (out, err) = self.successtest(command)
+        self.matchoutput(out, "Owned by GRN: grn:/ms/ei/aquilon/unittest [inherited]", command)
+        self.matchoutput(out, "Used by GRN: grn:/ms/ei/aquilon/unittest [target: esp] [inherited]", command)
+
+    def testverifyshowhostprotogrns(self):
+        command = ["show_host", "--format=proto", "--grns",
+                   "--hostname=unittest02.one-nyp.ms.com"]
+        (out, err) = self.successtest(command)
+        self.assertEmptyErr(err, command)
+        hostlist = self.parse_hostlist_msg(out, expect=1)
+        host = hostlist.hosts[0]
+        self.assertEqual(host.hostname, "unittest02.one-nyp.ms.com")
+        self.assertEqual(host.personality.archetype.name, "aquilon")
+        self.assertEqual(host.personality.name, "compileserver")
+        self.assertEqual(host.personality.host_environment, "dev")
+        self.assertEqual(host.domain.name, "unittest")
+        self.assertEqual(host.owner_eonid, 3)
+        self.assertEqual(host.eonid_maps[0].target, 'esp')
+        self.assertEqual(host.eonid_maps[0].eonid, 3)
+        self.assertEqual(host.personality.owner_eonid, 3)
+        self.assertEqual(host.personality.eonid_maps[0].target, 'esp')
+        self.assertEqual(host.personality.eonid_maps[0].eonid, 3)
 
     def testverifyshowhostproto(self):
         # We had a bug where a dangling interface with no IP address

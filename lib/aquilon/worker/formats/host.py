@@ -17,6 +17,7 @@
 """Host formatter."""
 
 
+from collections import defaultdict
 from aquilon.worker.formats.formatters import ObjectFormatter
 from aquilon.worker.formats.list import ListFormatter
 from aquilon.aqdb.model import Host
@@ -73,6 +74,72 @@ class SimpleHostListFormatter(ListFormatter):
 
 ObjectFormatter.handlers[SimpleHostList] = SimpleHostListFormatter()
 
+
+class GrnHostList(list):
+    """By convention, holds a list of hosts to be formatted to provide
+       (grn-only) data."""
+    pass
+
+class GrnHostListFormatter(ListFormatter):
+    protocol = "aqdsystems_pb2"
+
+    def format_raw(self, shlist, indent=""):
+        details = []
+        for host in shlist:
+            if host.machine.primary_name:
+                details.append(indent + "Primary Name: "
+                                        "{0:a}".format(host.machine.primary_name))
+            hstr = "  Owned by {0:c}: {0.grn}".format(host.effective_owner_grn)
+
+            if host.effective_owner_grn == host.owner_grn:
+                details.append(indent + hstr)
+            else:
+                details.append(indent + hstr + " [inherited]")
+
+            eon_targets = [grn.target for grn in host._grns]
+            for (target, eon_id_set) in host.effective_grns.iteritems():
+                inherited = ""
+                eon_id_list = list(eon_id_set)
+                eon_id_list.sort()
+                if target not in set(eon_targets):
+                    inherited = " [inherited]"
+                for grn_rec in eon_id_list:
+                    details.append(indent + "  Used by {0:c}: {0.grn} "
+                                            "[target: {1}]{2}"
+                                            .format(grn_rec, target, inherited))
+        return "\n".join(details)
+
+
+    def format_proto(self, hostlist, skeleton=None):
+        hostlist_msg = self.loaded_protocols[self.protocol].HostList()
+        for host in hostlist:
+            msg = hostlist_msg.hosts.add()
+            msg.hostname = str(host.machine.primary_name)
+            msg.domain.name = str(host.branch.name)
+            msg.domain.owner = str(host.branch.owner.name)
+            msg.status = str(host.status.name)
+            msg.owner_eonid = host.effective_owner_grn.eon_id
+            ##personality
+            msg.personality.archetype.name = str(host.archetype)
+            msg.personality.name = str(host.personality)
+            msg.personality.host_environment = str(host.personality.host_environment)
+            msg.personality.owner_eonid = host.personality.owner_eon_id
+            ## eon id maps TBD need both effective and actual
+            for grn_rec in sorted(host.personality._grns, key=lambda x: x.target):
+                map = msg.personality.eonid_maps.add()
+                map.target = grn_rec.target
+                map.eonid = grn_rec.eon_id
+
+            for (target, eon_id_set) in host.effective_grns.iteritems():
+                for grn_rec in list(eon_id_set):
+                    map = msg.eonid_maps.add()
+                    map.target = target
+                    map.eonid = grn_rec.eon_id
+
+        return hostlist_msg.SerializeToString()
+
+
+ObjectFormatter.handlers[GrnHostList] = GrnHostListFormatter()
 
 class HostIPList(list):
     """ By convention, holds tuples of host_name, interface_ip, primary.

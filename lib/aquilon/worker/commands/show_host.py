@@ -21,7 +21,7 @@ from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.host import hostname_to_host
 
 
-class CommandShowHostHostname(BrokerCommand):
+class CommandShowHost(BrokerCommand):
 
     required_parameters = ["hostname"]
 
