@@ -18,8 +18,9 @@
 
 import logging
 
-from aquilon.locks import LockQueue, LockKey
 from aquilon.exceptions_ import InternalError
+from aquilon.locks import LockQueue, LockKey
+from aquilon.aqdb.model import Personality, ServiceInstance
 from aquilon.worker.logger import CLIENT_INFO
 
 LOGGER = logging.getLogger(__name__)
@@ -80,6 +81,43 @@ class CompileKey(LockKey):
             self.exclusive["domain"].add(domain)
         else:
             self.exclusive["misc"].add("compile")
+
+        self.transition("initialized", debug=True)
+
+
+class PlenaryKey(LockKey):
+    def __init__(self, personality=None, service_instance=None,
+                 cluster_member=None, switch=None, exclusive=True,
+                 logger=LOGGER, loglevel=CLIENT_INFO):
+        super(PlenaryKey, self).__init__(logger=logger, loglevel=loglevel,
+                                         lock_queue=lock_queue)
+
+        if exclusive:
+            lockset = self.exclusive
+        else:
+            lockset = self.shared
+
+        if personality:
+            if isinstance(personality, Personality):
+                key = "%s/%s" % (personality.archetype.name, personality.name)
+            else:
+                key = str(personality)
+            lockset["personality"].add(key)
+        if service_instance:
+            if isinstance(service_instance, ServiceInstance):
+                key = "%s/%s" % (service_instance.service.name,
+                                 service_instance.name)
+            else:
+                key = str(service_instance)
+            lockset["service"].add(key)
+        if cluster_member:
+            lockset["cluster_member"].add(str(cluster_member))
+        if switch:
+            lockset["switch"].add(str(switch))
+
+        # Make sure plenary updates conflict with the global compile lock, which
+        # is used by e.g. the flush command.
+        self.shared["misc"].add("compile")
 
         self.transition("initialized", debug=True)
 

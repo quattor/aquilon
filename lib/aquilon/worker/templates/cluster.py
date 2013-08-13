@@ -18,6 +18,8 @@
 import logging
 from operator import attrgetter
 
+from sqlalchemy.inspection import inspect
+
 from aquilon.aqdb.model import (Cluster, EsxCluster, ComputeCluster,
                                 StorageCluster)
 from aquilon.worker.templates import (Plenary, ObjectPlenary, StructurePlenary,
@@ -27,7 +29,7 @@ from aquilon.worker.templates import (Plenary, ObjectPlenary, StructurePlenary,
 from aquilon.worker.templates.panutils import (StructureTemplate, PanValue,
                                                pan_assign, pan_include,
                                                pan_append)
-from aquilon.worker.locks import CompileKey
+from aquilon.worker.locks import CompileKey, PlenaryKey
 
 
 LOGGER = logging.getLogger(__name__)
@@ -58,22 +60,8 @@ class PlenaryClusterData(StructurePlenary):
     def template_name(cls, dbcluster):
         return "clusterdata/" + dbcluster.name
 
-    def __init__(self, dbcluster, logger=LOGGER):
-        super(PlenaryClusterData, self).__init__(dbcluster, logger=logger)
-
-        self.name = dbcluster.name
-        if dbcluster.metacluster:
-            self.metacluster = dbcluster.metacluster.name
-        else:
-            self.metacluster = None
-
-    def get_key(self):
-        return CompileKey(domain=self.dbobj.branch.name,
-                          profile=self.template_name(self.dbobj),
-                          logger=self.logger)
-
     def body(self, lines):
-        pan_assign(lines, "system/cluster/name", self.name)
+        pan_assign(lines, "system/cluster/name", self.dbobj.name)
         pan_assign(lines, "system/cluster/type", self.dbobj.cluster_type)
 
         dbloc = self.dbobj.location_constraint
@@ -144,8 +132,9 @@ class PlenaryClusterData(StructurePlenary):
             getattr(self, fname)(lines)
 
     def body_esx(self, lines):
-        if self.metacluster:
-            pan_assign(lines, "system/metacluster/name", self.metacluster)
+        if self.dbobj.metacluster:
+            pan_assign(lines, "system/metacluster/name",
+                       self.dbobj.metacluster.name)
         pan_assign(lines, "system/cluster/ratio", [self.dbobj.vm_count,
                                                    self.dbobj.host_count])
         pan_assign(lines, "system/cluster/max_hosts",
@@ -170,9 +159,27 @@ class PlenaryClusterObject(ObjectPlenary):
         return "clusters/" + dbcluster.name
 
     def get_key(self):
-        return CompileKey(domain=self.dbobj.branch.name,
-                          profile=self.template_name(self.dbobj),
-                          logger=self.logger)
+        keylist = [super(PlenaryClusterObject, self).get_key()]
+
+        if not inspect(self.dbobj).deleted:
+            keylist.append(PlenaryKey(exclusive=False,
+                                      personality=self.dbobj.personality,
+                                      logger=self.logger))
+            for si in self.dbobj.service_bindings:
+                keylist.append(PlenaryKey(exclusive=False, service_instance=si,
+                                          logger=self.logger))
+
+            if self.dbobj.metacluster:
+                keylist.append(PlenaryKey(exclusive=False,
+                                          cluster_member=self.dbobj.metacluster,
+                                          logger=self.logger))
+            if isinstance(self.dbobj, EsxCluster) and self.dbobj.switch:
+                # TODO: this should become a CompileKey if we start generating
+                # profiles for switches
+                keylist.append(PlenaryKey(exclusive=False,
+                                          switch=self.dbobj.switch,
+                                          logger=self.logger))
+        return CompileKey.merge(keylist)
 
     def body(self, lines):
         pan_include(lines, ["pan/units", "pan/functions"])
@@ -198,13 +205,17 @@ class PlenaryClusterClient(Plenary):
     plenary template. This just names the cluster and nothing more.
     """
 
+    def __init__(self, dbcluster, logger=LOGGER):
+        super(PlenaryClusterClient, self).__init__(dbcluster, logger=logger)
+
+        self.name = dbcluster.name
+
     @classmethod
     def template_name(cls, dbcluster):
         return "cluster/%s/client" % dbcluster.name
 
     def get_key(self):
-        # This takes a domain lock because it could affect all clients...
-        return CompileKey(domain=self.dbobj.branch.name, logger=self.logger)
+        return PlenaryKey(cluster_member=self.name, logger=self.logger)
 
     def body(self, lines):
         pan_assign(lines, "/system/cluster/name", self.dbobj.name)

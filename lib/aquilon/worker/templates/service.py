@@ -15,10 +15,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 import logging
 
+from sqlalchemy.inspection import inspect
+
 from aquilon.aqdb.model import Service, ServiceInstance
+from aquilon.worker.locks import NoLockKey, PlenaryKey
 from aquilon.worker.templates import (Plenary, StructurePlenary,
                                       PlenaryCollection)
 from aquilon.worker.templates.panutils import (StructureTemplate, pan_assign,
@@ -91,12 +93,25 @@ class PlenaryServiceServerDefault(Plenary):
         return "service/%s/server/config" % dbservice.name
 
 
-class PlenaryServiceInstance(PlenaryCollection):
+class SIHelperMixin(object):
+    """
+    Contains common code for all service instance related plenary classes
+    """
+
+    def get_key(self):
+        if inspect(self.dbobj).deleted:
+            return NoLockKey(logger=self.logger)
+        else:
+            return PlenaryKey(service_instance=self.dbobj, logger=self.logger)
+
+
+class PlenaryServiceInstance(SIHelperMixin, PlenaryCollection):
     """
     A facade for the variety of PlenaryServiceInstance subsidiary files
     """
     def __init__(self, dbinstance, logger=LOGGER):
         super(PlenaryServiceInstance, self).__init__(logger=logger)
+        self.dbobj = dbinstance
 
         self.plenaries.append(PlenaryServiceInstanceToplevel(dbinstance,
                                                              logger=logger))
@@ -107,11 +122,10 @@ class PlenaryServiceInstance(PlenaryCollection):
         self.plenaries.append(PlenaryServiceInstanceServerDefault(dbinstance,
                                                                   logger=logger))
 
-
 Plenary.handlers[ServiceInstance] = PlenaryServiceInstance
 
 
-class PlenaryServiceInstanceToplevel(StructurePlenary):
+class PlenaryServiceInstanceToplevel(SIHelperMixin, StructurePlenary):
     """
     This structure template provides information for the template
     specific to the service instance and for use by the client.
@@ -136,7 +150,7 @@ class PlenaryServiceInstanceToplevel(StructurePlenary):
             pan_assign(lines, "server_ips", self.dbobj.server_ips)
 
 
-class PlenaryServiceInstanceServer(StructurePlenary):
+class PlenaryServiceInstanceServer(SIHelperMixin, StructurePlenary):
     """
     This structure template provides information for the template
     specific to the service instance and for use by the server.
@@ -156,7 +170,7 @@ class PlenaryServiceInstanceServer(StructurePlenary):
         pan_assign(lines, "clients", self.dbobj.client_fqdns)
 
 
-class PlenaryServiceInstanceClientDefault(Plenary):
+class PlenaryServiceInstanceClientDefault(SIHelperMixin, Plenary):
     """
     Any client of the service will include this
     template based on service bindings: it will be directly
@@ -181,7 +195,7 @@ class PlenaryServiceInstanceClientDefault(Plenary):
         pan_include(lines, path)
 
 
-class PlenaryServiceInstanceServerDefault(Plenary):
+class PlenaryServiceInstanceServerDefault(SIHelperMixin, Plenary):
     """
     Any server of the servivce will include this
     template based on service bindings: it will be directly

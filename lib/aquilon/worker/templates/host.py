@@ -21,11 +21,13 @@ import logging
 from operator import attrgetter
 from collections import defaultdict
 
+from sqlalchemy.inspection import inspect
+
 from aquilon.config import Config
 from aquilon.exceptions_ import IncompleteError, InternalError
 from aquilon.aqdb.model import (Host, VlanInterface, BondingInterface,
                                 BridgeInterface)
-from aquilon.worker.locks import CompileKey
+from aquilon.worker.locks import CompileKey, PlenaryKey
 from aquilon.worker.templates import (Plenary, ObjectPlenary, StructurePlenary,
                                       PlenaryCollection, PlenaryClusterClient,
                                       PlenaryMachineInfo, PlenaryResource,
@@ -122,25 +124,9 @@ Plenary.handlers[Host] = PlenaryHost
 
 
 class PlenaryHostData(StructurePlenary):
-
     @classmethod
     def template_name(cls, dbhost):
         return "hostdata/" + str(dbhost.fqdn)
-
-    def __init__(self, dbhost, logger=LOGGER):
-        super(PlenaryHostData, self).__init__(dbhost, logger=logger)
-
-        # Store the branch separately so get_key() works even after the dbhost
-        # object has been deleted
-        self.branch = dbhost.branch
-        self.name = dbhost.fqdn
-
-    def get_key(self):
-        # Going with self.name instead of self.template_name() seems like
-        # the right decision here - easier to predict behavior when meshing
-        # with other CompileKey generators like PlenaryMachineInfo.
-        return CompileKey(domain=self.branch.name, profile=self.name,
-                          logger=self.logger)
 
     def body(self, lines):
         interfaces = dict()
@@ -304,13 +290,25 @@ class PlenaryToplevelHost(ObjectPlenary):
     def template_name(cls, dbhost):
         return str(dbhost.fqdn)
 
-    def __init__(self, dbhost, logger=LOGGER):
-        super(PlenaryToplevelHost, self).__init__(dbhost, logger=logger)
+    def get_key(self):
+        keylist = [super(PlenaryToplevelHost, self).get_key()]
 
-        # Store the branch separately so get_key() works even after the dbhost
-        # object has been deleted
-        self.branch = dbhost.branch
-        self.name = dbhost.fqdn
+        if not inspect(self.dbobj).deleted:
+            keylist.append(PlenaryKey(exclusive=False,
+                                      personality=self.dbobj.personality,
+                                      logger=self.logger))
+            for si in self.dbobj.services_used:
+                keylist.append(PlenaryKey(exclusive=False, service_instance=si,
+                                          logger=self.logger))
+            for si in self.dbobj.services_provided:
+                keylist.append(PlenaryKey(exclusive=False, service_instance=si,
+                                          logger=self.logger))
+
+            if self.dbobj.cluster:
+                keylist.append(PlenaryKey(exclusive=False,
+                                          cluster_member=self.dbobj.cluster,
+                                          logger=self.logger))
+        return CompileKey.merge(keylist)
 
     def will_change(self):
         # Need to override to handle IncompleteError...
@@ -323,13 +321,6 @@ class PlenaryToplevelHost(ObjectPlenary):
                 # not caching the return
                 return self.old_content is None
         return self.old_content != self.new_content
-
-    def get_key(self):
-        # Going with self.name instead of self.template_name() seems like
-        # the right decision here - easier to predict behavior when meshing
-        # with other CompileKey generators like PlenaryMachineInfo.
-        return CompileKey(domain=self.branch.name, profile=self.name,
-                          logger=self.logger)
 
     def body(self, lines):
         pers = self.dbobj.personality
@@ -349,9 +340,9 @@ class PlenaryToplevelHost(ObjectPlenary):
             services.append(PlenaryServiceInstanceClientDefault.template_name(si))
         if required_services:
             missing = ", ".join(sorted([srv.name for srv in required_services]))
-            raise IncompleteError("Host %s is missing the following required "
-                                  "services, please run 'aq reconfigure': %s." %
-                                  (self.name, missing))
+            raise IncompleteError("{0} is missing the following required "
+                                  "services, please run 'aq reconfigure': "
+                                  "{1!s}.".format(self.dbobj, missing))
 
         provides = []
         for si in self.dbobj.services_provided:
@@ -384,9 +375,8 @@ class PlenaryToplevelHost(ObjectPlenary):
             pan_include(lines,
                         PlenaryClusterClient.template_name(self.dbobj.cluster))
         elif pers.cluster_required:
-            raise IncompleteError("Host %s personality %s requires cluster "
-                                  "membership, please run 'aq cluster'." %
-                                  (self.name, pers.name))
+            raise IncompleteError("{0} requires cluster membership, please "
+                                  "run 'aq cluster'.".format(pers))
         pan_include(lines, "archetype/final")
 
 

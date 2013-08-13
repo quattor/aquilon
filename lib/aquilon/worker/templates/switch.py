@@ -15,12 +15,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 import logging
 
+from sqlalchemy.inspection import inspect
+
+from aquilon.aqdb.model import Switch
+from aquilon.worker.locks import NoLockKey, PlenaryKey
 from aquilon.worker.templates import Plenary, StructurePlenary
 from aquilon.worker.templates.panutils import pan
-from aquilon.aqdb.model import Switch
 
 
 LOGGER = logging.getLogger(__name__)
@@ -35,10 +37,13 @@ class PlenarySwitch(StructurePlenary):
     def template_name(cls, dbhost):
         return "switchdata/" + str(dbhost.fqdn)
 
-    def __init__(self, dbswitch, logger=LOGGER):
-        super(PlenarySwitch, self).__init__(dbswitch, logger=logger)
-
-        self.name = str(dbswitch.primary_name)
+    def get_key(self):
+        if inspect(self.dbobj).deleted:
+            return NoLockKey(logger=self.logger)
+        else:
+            # TODO: this should become a CompileKey if we start generating
+            # profiles for switches (see also templates/cluster.py)
+            return PlenaryKey(switch=self.dbobj, logger=self.logger)
 
     def body(self, lines):
 

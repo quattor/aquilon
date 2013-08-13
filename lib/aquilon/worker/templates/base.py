@@ -134,8 +134,7 @@ class Plenary(object):
         return self.old_content != self.new_content
 
     def get_key(self):
-        """Base implementation assumes a full compile lock."""
-        return CompileKey(logger=self.logger)
+        return NoLockKey(logger=self.logger)
 
     def _generate_content(self):
         lines = []
@@ -331,6 +330,10 @@ class ObjectPlenary(Plenary):
         # parth of the full path
         return "%s/%s%s" % (cls.base_dir(dbobj), cls.template_name(dbobj),
                             TEMPLATE_EXTENSION)
+
+    def get_key(self):
+        return CompileKey(domain=self.old_branch, profile=self.old_name,
+                          logger=self.logger)
 
     def _generate_content(self):
         lines = []
