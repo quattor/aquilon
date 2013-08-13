@@ -142,7 +142,7 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
         session.flush()
 
         plenary_info = Plenary.get_plenary(dbhw_ent, logger=logger)
-        with plenary_info.get_write_key():
+        with plenary_info.get_key():
             try:
                 plenary_info.write(locked=True)
 

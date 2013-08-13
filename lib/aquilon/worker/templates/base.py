@@ -133,29 +133,6 @@ class Plenary(object):
             self.new_content = self._generate_content()
         return self.old_content != self.new_content
 
-    def get_write_key(self):
-        # This is a hack to handle the case when the DB object has been deleted,
-        # but a plenary instance still references it (probably buried inside a
-        # PlenaryCollection). Calling self.will_change() on such a plenary would
-        # fail, because the primary key is None, which is otherwise impossible.
-        if isinstance(self.dbobj, Base):
-            state = inspect(self.dbobj)
-            if state.deleted:
-                return NoLockKey(logger=self.logger)
-
-        if self.will_change():
-            return self.get_key()
-        return NoLockKey(logger=self.logger)
-
-    def get_remove_key(self):
-        """Return the relevant key.
-
-        In many cases it will be more efficient just to create a full
-        compile lock and bypass this method.
-
-        """
-        return self.get_key()
-
     def get_key(self):
         """Base implementation assumes a full compile lock."""
         return CompileKey(logger=self.logger)
@@ -208,7 +185,7 @@ class Plenary(object):
         key = None
         try:
             if not locked:
-                key = self.get_write_key()
+                key = self.get_key()
                 lock_queue.acquire(key)
 
             self.stash()
@@ -249,7 +226,7 @@ class Plenary(object):
         key = None
         try:
             if not locked:
-                key = self.get_remove_key()
+                key = self.get_key()
                 lock_queue.acquire(key)
             self.stash()
 
@@ -385,7 +362,7 @@ class ObjectPlenary(Plenary):
         key = None
         try:
             if not locked:
-                key = self.get_remove_key()
+                key = self.get_key()
                 lock_queue.acquire(key)
             self.stash()
 
@@ -485,21 +462,11 @@ class PlenaryCollection(object):
         for plen in self.plenaries:
             yield plen
 
-    def get_write_key(self):
-        keylist = [NoLockKey(logger=self.logger)]
-        for plen in self.plenaries:
-            keylist.append(plen.get_write_key())
-        return CompileKey.merge(keylist)
-
-    def get_remove_key(self):
-        keylist = [NoLockKey(logger=self.logger)]
-        for plen in self.plenaries:
-            keylist.append(plen.get_remove_key())
-        return CompileKey.merge(keylist)
-
     def get_key(self):
-        # get_key doesn't make any sense for a plenary collection...
-        raise InternalError("get_key called on PlenaryCollection")
+        keylist = [NoLockKey(logger=self.logger)]
+        for plen in self.plenaries:
+            keylist.append(plen.get_key())
+        return CompileKey.merge(keylist)
 
     def stash(self):
         for plen in self.plenaries:
@@ -529,7 +496,7 @@ class PlenaryCollection(object):
         key = None
         try:
             if not locked:
-                key = self.get_write_key()
+                key = self.get_key()
                 lock_queue.acquire(key)
             for plen in self.plenaries:
                 # IncompleteError is almost pointless in this context, but
@@ -552,7 +519,7 @@ class PlenaryCollection(object):
         key = None
         try:
             if not locked:
-                key = self.get_remove_key()
+                key = self.get_key()
                 lock_queue.acquire(key)
             for plen in self.plenaries:
                 plen.remove(locked=True, remove_profile=remove_profile)

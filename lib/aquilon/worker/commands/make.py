@@ -120,7 +120,7 @@ class CommandMake(BrokerCommand):
         hosts.add(dbhost.fqdn)
 
         # Force a host lock as pan might overwrite the profile...
-        key = chooser.get_write_key()
+        key = chooser.get_key()
         for fqdn in hosts:
             key = CompileKey.merge([key, CompileKey(domain=dbhost.branch.name,
                                                     profile=fqdn,

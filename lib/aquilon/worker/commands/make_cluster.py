@@ -42,7 +42,7 @@ class CommandMakeCluster(BrokerCommand):
         chooser.set_required()
         chooser.flush_changes()
         # Force a domain lock as pan might overwrite any of the profiles...
-        with CompileKey.merge([chooser.get_write_key(),
+        with CompileKey.merge([chooser.get_key(),
                                CompileKey(domain=dbcluster.branch.name,
                                           logger=logger)]):
             try:

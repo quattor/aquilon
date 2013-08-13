@@ -53,10 +53,10 @@ class CommandDelMachine(BrokerCommand):
         session.delete(dbmachine)
         session.flush()
 
-        key = remove_plenaries.get_remove_key()
+        key = remove_plenaries.get_key()
         if dbcontainer:
             plenary_container = Plenary.get_plenary(dbcontainer, logger=logger)
-            key = CompileKey.merge([key, plenary_container.get_write_key()])
+            key = CompileKey.merge([key, plenary_container.get_key()])
         with key:
             remove_plenaries.stash()
             try:

@@ -153,7 +153,7 @@ class CommandAddInterfaceMachine(BrokerCommand):
             plenaries.append(Plenary.get_plenary(dbmachine.host))
         # Even though there may be removals going on the write key
         # should be sufficient here.
-        with plenaries.get_write_key():
+        with plenaries.get_key():
             pending_removals.stash()
             try:
                 plenaries.write(locked=True)

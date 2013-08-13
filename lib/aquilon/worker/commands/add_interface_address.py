@@ -142,7 +142,7 @@ class CommandAddInterfaceAddress(BrokerCommand):
         dbhost = getattr(dbhw_ent, "host", None)
         if dbhost:
             plenary_info = Plenary.get_plenary(dbhost, logger=logger)
-            with plenary_info.get_write_key():
+            with plenary_info.get_key():
                 try:
                     try:
                         plenary_info.write(locked=True)

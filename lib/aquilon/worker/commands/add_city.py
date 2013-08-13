@@ -41,7 +41,7 @@ class CommandAddCity(BrokerCommand):
         session.flush()
 
         plenary = Plenary.get_plenary(dbcity, logger=logger)
-        with plenary.get_write_key():
+        with plenary.get_key():
             try:
                 plenary.write(locked=True)
 

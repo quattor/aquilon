@@ -66,8 +66,7 @@ class CommandDelSwitch(BrokerCommand):
         for dbcluster in dbswitch.esx_clusters:
             plenaries.append(Plenary.get_plenary(dbcluster))
 
-        with CompileKey.merge([switch_plenary.get_remove_key(),
-                               plenaries.get_write_key()]):
+        with CompileKey.merge([switch_plenary.get_key(), plenaries.get_key()]):
             switch_plenary.stash()
             try:
                 plenaries.write(locked=True)
@@ -80,8 +79,6 @@ class CommandDelSwitch(BrokerCommand):
                                                     comments=old_comments)
                     dsdb_runner.commit_or_rollback("Could not remove switch "
                                                    "from DSDB")
-                return
-
             except:
                 plenaries.restore_stash()
                 switch_plenary.restore_stash()

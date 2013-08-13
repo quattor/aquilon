@@ -190,7 +190,7 @@ class CommandReconfigureList(BrokerCommand):
         # a missing service map entry or something).
         # The lock must be over at least the domain, but could be over
         # all if (for example) service plenaries need to change.
-        with CompileKey.merge([p.get_write_key() for p in templates] +
+        with CompileKey.merge([p.get_key() for p in templates] +
                               [CompileKey(domain=dbbranch.name,
                                           logger=logger)]):
             try:

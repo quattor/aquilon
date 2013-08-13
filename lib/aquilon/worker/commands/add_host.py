@@ -179,7 +179,7 @@ class CommandAddHost(BrokerCommand):
         if dbsrv_addr:
             plenaries.append(Plenary.get_plenary(dbsrv_addr))
 
-        with plenaries.get_write_key():
+        with plenaries.get_key():
             try:
                 plenaries.write(locked=True)
 

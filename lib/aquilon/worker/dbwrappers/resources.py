@@ -113,8 +113,7 @@ def del_resource(session, logger, dbresource, dsdb_callback=None, **arguments):
     holder.resources.remove(dbresource)
     session.flush()
 
-    with CompileKey.merge([remove_plenary.get_remove_key(),
-                           holder_plenary.get_write_key()]):
+    with CompileKey.merge([remove_plenary.get_key(), holder_plenary.get_key()]):
         try:
             remove_plenary.stash()
             try:
@@ -144,8 +143,7 @@ def add_resource(session, logger, holder, dbresource, dsdb_callback=None,
 
     session.flush()
 
-    with CompileKey.merge([res_plenary.get_write_key(),
-                           holder_plenary.get_write_key()]):
+    with CompileKey.merge([res_plenary.get_key(), holder_plenary.get_key()]):
         try:
             res_plenary.write(locked=True)
             try:

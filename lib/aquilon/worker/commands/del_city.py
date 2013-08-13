@@ -40,7 +40,7 @@ class CommandDelCity(CommandDelLocation):
                                   type='city', **arguments)
         session.flush()
 
-        with plenary.get_remove_key():
+        with plenary.get_key():
             try:
                 plenary.remove(locked=True)
                 dsdb_runner = DSDBRunner(logger=logger)

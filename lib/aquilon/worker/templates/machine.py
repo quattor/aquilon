@@ -92,10 +92,8 @@ class PlenaryMachineInfo(StructurePlenary):
             return NoLockKey(logger=self.logger)
         # We have at least host or container, maybe both...
         if host:
-            # PlenaryHost is actually a PlenaryCollection... can't call
-            # get_key() directly, so using get_remove_key().
             ph = Plenary.get_plenary(host, logger=self.logger)
-            host_key = ph.get_remove_key()
+            host_key = ph.get_key()
         if container:
             pc = Plenary.get_plenary(container, self.logger)
             container_key = pc.get_key()

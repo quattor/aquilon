@@ -56,7 +56,7 @@ class CommandResetAdvertisedStatusList(BrokerCommand):
 
         session.flush()
 
-        with plenaries.get_write_key():
+        with plenaries.get_key():
             plenaries.stash()
             try:
                 plenaries.write(locked=True)
