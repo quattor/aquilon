@@ -39,8 +39,8 @@ class CommandCompile(BrokerCommand):
                                                      sandbox=sandbox,
                                                      compel=True)
 
-        # Grab a lock on personalities and services used by the domain. Object
-        # templates (hosts, clusters) are protected by the domain lock.
+        # Grab a shared lock on personalities and services used by the domain.
+        # Object templates (hosts, clusters) are protected by the domain lock.
         plenaries = PlenaryCollection(logger=logger)
 
         q1 = session.query(Personality)
@@ -74,7 +74,7 @@ class CommandCompile(BrokerCommand):
             pancexclude = r'components/spma/functions'
         dom = TemplateDomain(dbdomain, dbauthor, logger=logger)
         with CompileKey.merge([CompileKey(domain=dbdomain.name, logger=logger),
-                               plenaries.get_key()]):
+                               plenaries.get_key(exclusive=False)]):
             dom.compile(session,
                         panc_debug_include=pancinclude,
                         panc_debug_exclude=pancexclude,

@@ -84,7 +84,12 @@ class PlenaryMachineInfo(StructurePlenary):
 
         self.sysloc = loc.sysloc()
 
-    def get_key(self):
+    def get_key(self, exclusive=True):
+        if not exclusive:
+            # CompileKey() does not support shared mode
+            raise InternalError("Shared locks are not implemented for machine "
+                                "plenaries.")
+
         # Need a compile key if:
         # - There is a host attached.
         # - This is a virtual machine in a container.

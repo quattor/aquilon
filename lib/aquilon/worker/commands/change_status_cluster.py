@@ -51,7 +51,8 @@ class CommandChangeClusterStatus(BrokerCommand):
             plenaries.stash()
             try:
                 plenaries.write(locked=True)
-                td.compile(session, plenaries.object_templates, locked=True)
+                td.compile(session, only=plenaries.object_templates,
+                           locked=True)
             except:
                 plenaries.restore_stash()
                 raise

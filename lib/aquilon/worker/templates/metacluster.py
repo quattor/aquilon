@@ -108,8 +108,8 @@ class PlenaryMetaClusterObject(ObjectPlenary):
     def template_name(cls, dbmetacluster):
         return "clusters/" + dbmetacluster.name
 
-    def get_key(self):
-        keylist = [super(PlenaryMetaClusterObject, self).get_key()]
+    def get_key(self, exclusive=True):
+        keylist = [super(PlenaryMetaClusterObject, self).get_key(exclusive=exclusive)]
 
         if not inspect(self.dbobj).deleted:
             keylist.append(PlenaryKey(exclusive=False,

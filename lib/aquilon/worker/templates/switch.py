@@ -37,13 +37,14 @@ class PlenarySwitch(StructurePlenary):
     def template_name(cls, dbhost):
         return "switchdata/" + str(dbhost.fqdn)
 
-    def get_key(self):
+    def get_key(self, exclusive=True):
         if inspect(self.dbobj).deleted:
             return NoLockKey(logger=self.logger)
         else:
             # TODO: this should become a CompileKey if we start generating
             # profiles for switches (see also templates/cluster.py)
-            return PlenaryKey(switch=self.dbobj, logger=self.logger)
+            return PlenaryKey(switch=self.dbobj, logger=self.logger,
+                              exclusive=exclusive)
 
     def body(self, lines):
 

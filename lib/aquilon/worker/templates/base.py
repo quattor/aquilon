@@ -133,7 +133,7 @@ class Plenary(object):
             self.new_content = self._generate_content()
         return self.old_content != self.new_content
 
-    def get_key(self):
+    def get_key(self, exclusive=True):
         return NoLockKey(logger=self.logger)
 
     def _generate_content(self):
@@ -331,7 +331,12 @@ class ObjectPlenary(Plenary):
         return "%s/%s%s" % (cls.base_dir(dbobj), cls.template_name(dbobj),
                             TEMPLATE_EXTENSION)
 
-    def get_key(self):
+    def get_key(self, exclusive=True):
+        if not exclusive:
+            # CompileKey() does not support shared mode
+            raise InternalError("Shared locks are not implemented for object "
+                                "plenaries.")
+
         return CompileKey(domain=self.old_branch, profile=self.old_name,
                           logger=self.logger)
 
@@ -465,10 +470,10 @@ class PlenaryCollection(object):
         for plen in self.plenaries:
             yield plen
 
-    def get_key(self):
+    def get_key(self, exclusive=True):
         keylist = [NoLockKey(logger=self.logger)]
         for plen in self.plenaries:
-            keylist.append(plen.get_key())
+            keylist.append(plen.get_key(exclusive=exclusive))
         return CompileKey.merge(keylist)
 
     def stash(self):

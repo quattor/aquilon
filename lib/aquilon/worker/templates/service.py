@@ -98,11 +98,12 @@ class SIHelperMixin(object):
     Contains common code for all service instance related plenary classes
     """
 
-    def get_key(self):
+    def get_key(self, exclusive=True):
         if inspect(self.dbobj).deleted:
             return NoLockKey(logger=self.logger)
         else:
-            return PlenaryKey(service_instance=self.dbobj, logger=self.logger)
+            return PlenaryKey(service_instance=self.dbobj, logger=self.logger,
+                              exclusive=exclusive)
 
 
 class PlenaryServiceInstance(SIHelperMixin, PlenaryCollection):

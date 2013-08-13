@@ -158,8 +158,8 @@ class PlenaryClusterObject(ObjectPlenary):
     def template_name(cls, dbcluster):
         return "clusters/" + dbcluster.name
 
-    def get_key(self):
-        keylist = [super(PlenaryClusterObject, self).get_key()]
+    def get_key(self, exclusive=True):
+        keylist = [super(PlenaryClusterObject, self).get_key(exclusive=exclusive)]
 
         if not inspect(self.dbobj).deleted:
             keylist.append(PlenaryKey(exclusive=False,
@@ -214,8 +214,9 @@ class PlenaryClusterClient(Plenary):
     def template_name(cls, dbcluster):
         return "cluster/%s/client" % dbcluster.name
 
-    def get_key(self):
-        return PlenaryKey(cluster_member=self.name, logger=self.logger)
+    def get_key(self, exclusive=True):
+        return PlenaryKey(cluster_member=self.name, logger=self.logger,
+                          exclusive=exclusive)
 
     def body(self, lines):
         pan_assign(lines, "/system/cluster/name", self.dbobj.name)

@@ -53,9 +53,13 @@ class PlenaryResource(StructurePlenary):
 
         self.branch = holder_object.branch.name
 
-    def get_key(self):
+    def get_key(self, exclusive=True):
         # Resources are tightly bound to their holder, so always lock the
         # holder
+        if not exclusive:
+            # CompileKey() does not support shared mode
+            raise InternalError("Shared locks are not implemented for resource "
+                                "plenaries.")
         return CompileKey(domain=self.branch, profile=self.profile,
                           logger=self.logger)
 

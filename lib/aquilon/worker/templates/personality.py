@@ -163,11 +163,12 @@ class PlenaryPersonality(PlenaryCollection):
 
         self.name = dbpersonality.name
 
-    def get_key(self):
+    def get_key(self, exclusive=True):
         if inspect(self.dbobj).deleted:
             return NoLockKey(logger=self.logger)
         else:
-            return PlenaryKey(personality=self.dbobj, logger=self.logger)
+            return PlenaryKey(personality=self.dbobj, logger=self.logger,
+                              exclusive=exclusive)
 
 Plenary.handlers[Personality] = PlenaryPersonality
 

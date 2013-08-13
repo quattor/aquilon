@@ -290,8 +290,8 @@ class PlenaryToplevelHost(ObjectPlenary):
     def template_name(cls, dbhost):
         return str(dbhost.fqdn)
 
-    def get_key(self):
-        keylist = [super(PlenaryToplevelHost, self).get_key()]
+    def get_key(self, exclusive=True):
+        keylist = [super(PlenaryToplevelHost, self).get_key(exclusive=exclusive)]
 
         if not inspect(self.dbobj).deleted:
             keylist.append(PlenaryKey(exclusive=False,
