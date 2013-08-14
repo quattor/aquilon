@@ -146,7 +146,8 @@ class TemplateDomain(object):
                 nothing_to_do = not hostnames.count() and not clusternames.count()
 
         if nothing_to_do:
-            return 'No hosts: nothing to do.'
+            self.logger.client_info('No object profiles: nothing to do.')
+            return
 
         # The ant wrapper is silly and it may pick up the wrong set of .jars if
         # ANT_HOME is not set
@@ -196,7 +197,6 @@ class TemplateDomain(object):
             # whether or not the property is defined at all.
             args.append("-Dclean.dep.files=%s" % cleandeps)
 
-        out = ''
         try:
             if not locked:
                 if only and len(only) == 1:
@@ -209,9 +209,9 @@ class TemplateDomain(object):
                 lock_queue.acquire(key)
             self.logger.info("starting compile")
             try:
-                out = run_command(args, env=panc_env, logger=self.logger,
-                                  path=config.get("broker", "quattordir"),
-                                  loglevel=CLIENT_INFO)
+                run_command(args, env=panc_env, logger=self.logger,
+                            path=config.get("broker", "quattordir"),
+                            loglevel=CLIENT_INFO)
             except ProcessException, e:
                 raise ArgumentError("\n%s%s" % (e.out, e.err))
         finally:
@@ -219,7 +219,6 @@ class TemplateDomain(object):
                 lock_queue.release(key)
 
         trigger_notifications(config, self.logger, CLIENT_INFO)
-        return out
 
     def sandbox_has_latest(self, config, sandboxdir):
         domainsdir = config.get('broker', 'domainsdir')
