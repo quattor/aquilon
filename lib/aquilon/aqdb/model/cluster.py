@@ -640,4 +640,5 @@ class ClusterServiceBinding(Base):
                       Index('%s_si_idx' % _CSBABV, service_instance_id))
 
 Cluster.service_bindings = relation(ServiceInstance,
-                                    secondary=ClusterServiceBinding.__table__)
+                                    secondary=ClusterServiceBinding.__table__,
+                                    backref=backref("cluster_clients"))

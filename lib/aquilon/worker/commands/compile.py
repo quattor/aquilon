@@ -16,9 +16,13 @@
 # limitations under the License.
 """Contains the logic for `aq compile`."""
 
+from sqlalchemy.sql import and_
 
+from aquilon.aqdb.model import Personality, Host, Cluster, ServiceInstance
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.branch import get_branch_and_author
+from aquilon.worker.locks import CompileKey
+from aquilon.worker.templates import Plenary, PlenaryCollection
 from aquilon.worker.templates.domain import TemplateDomain
 
 
@@ -34,12 +38,46 @@ class CommandCompile(BrokerCommand):
                                                      domain=domain,
                                                      sandbox=sandbox,
                                                      compel=True)
+
+        # Grab a lock on personalities and services used by the domain. Object
+        # templates (hosts, clusters) are protected by the domain lock.
+        plenaries = PlenaryCollection(logger=logger)
+
+        q1 = session.query(Personality)
+        q1 = q1.join(Host)
+        q1 = q1.filter(and_(Host.branch == dbdomain,
+                            Host.sandbox_author == dbauthor))
+
+        q2 = session.query(Personality)
+        q2 = q2.join(Cluster)
+        q2 = q2.filter(and_(Cluster.branch == dbdomain,
+                            Cluster.sandbox_author == dbauthor))
+
+        for dbpers in q1.union(q2):
+            plenaries.append(Plenary.get_plenary(dbpers))
+
+        q1 = session.query(ServiceInstance)
+        q1 = q1.join(ServiceInstance.clients)
+        q1 = q1.filter(and_(Host.branch == dbdomain,
+                            Host.sandbox_author == dbauthor))
+
+        q2 = session.query(ServiceInstance)
+        q2 = q2.join(ServiceInstance.cluster_clients)
+        q2 = q2.filter(and_(Cluster.branch == dbdomain,
+                            Cluster.sandbox_author == dbauthor))
+
+        for si in q1.union(q2):
+            plenaries.append(Plenary.get_plenary(si))
+
         if pancdebug:
             pancinclude = r'.*'
             pancexclude = r'components/spma/functions'
         dom = TemplateDomain(dbdomain, dbauthor, logger=logger)
-        dom.compile(session,
-                    panc_debug_include=pancinclude,
-                    panc_debug_exclude=pancexclude,
-                    cleandeps=cleandeps)
+        with CompileKey.merge([CompileKey(domain=dbdomain.name, logger=logger),
+                               plenaries.get_key()]):
+            dom.compile(session,
+                        panc_debug_include=pancinclude,
+                        panc_debug_exclude=pancexclude,
+                        cleandeps=cleandeps,
+                        locked=True)
         return
