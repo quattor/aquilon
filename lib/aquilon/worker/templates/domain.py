@@ -52,29 +52,16 @@ class TemplateDomain(object):
             dirs.append(os.path.join(config.get("broker", "domainsdir"),
                                      self.domain.name))
 
+        dirs.append(os.path.join(config.get("broker", "builddir"),
+                                 "domains", self.domain.name))
+
+        # This is a bit redundant. When creating the directories, the "clusters"
+        # subdir would be enough; when removing them, the base dir would be
+        # enough. Having both does not hurt and does not need such extra logic.
         dirs.append(os.path.join(config.get("broker", "quattordir"),
-                                 "cfg",
-                                 "domains",
-                                 self.domain.name))
-
+                                 "build", "xml", self.domain.name))
         dirs.append(os.path.join(config.get("broker", "quattordir"),
-                                 "build",
-                                 "xml",
-                                 self.domain.name))
-
-        return dirs
-
-    def outputdirs(self):
-        """Returns a list of directories that should exist before compiling"""
-        config = Config()
-        dirs = []
-        dirs.append(config.get("broker", "profilesdir"))
-        # The regression tests occasionally have issues with panc
-        # auto-creating this directory - not sure why.
-        if self.domain.clusters:
-            dirs.append(os.path.join(config.get("broker", "quattordir"),
-                                     "build", "xml", self.domain.name,
-                                     "clusters"))
+                                 "build", "xml", self.domain.name, "clusters"))
         return dirs
 
     def compile(self, session, only=None, locked=False,
@@ -116,7 +103,7 @@ class TemplateDomain(object):
         # Ensure that the compile directory is in a good state.
         outputdir = config.get("broker", "profilesdir")
 
-        for d in self.directories() + self.outputdirs():
+        for d in self.directories() + [config.get("broker", "profilesdir")]:
             if not os.path.exists(d):
                 try:
                     self.logger.info("creating %s" % d)
