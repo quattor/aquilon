@@ -20,7 +20,7 @@ from aquilon.aqdb.model import Host, Personality
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.branch import get_branch_and_author
 from aquilon.worker.dbwrappers.host import validate_branch_author
-from aquilon.worker.templates.domain import TemplateDomain
+from aquilon.worker.templates import Plenary, PlenaryCollection, TemplateDomain
 
 
 class CommandCompilePersonality(BrokerCommand):
@@ -57,10 +57,14 @@ class CommandCompilePersonality(BrokerCommand):
         # If the domain was not specified, set it to the domain of first host
         dbdomain, dbauthor = validate_branch_author(host_list)
 
+        plenaries = PlenaryCollection(logger=logger)
+        for host in host_list:
+            plenaries.append(Plenary.get_plenary(host))
+
         dom = TemplateDomain(dbdomain, dbauthor, logger=logger)
-        profile_list = [h.fqdn for h in host_list]
-        dom.compile(session, only=profile_list,
-                    panc_debug_include=pancinclude,
-                    panc_debug_exclude=pancexclude,
-                    cleandeps=cleandeps)
+        with plenaries.get_key():
+            dom.compile(session, only=plenaries.object_templates,
+                        panc_debug_include=pancinclude,
+                        panc_debug_exclude=pancexclude,
+                        cleandeps=cleandeps, locked=True)
         return
