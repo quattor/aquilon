@@ -16,27 +16,10 @@
 # limitations under the License.
 """Contains the logic for `aq compile`."""
 
-
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.templates.domain import TemplateDomain
 from aquilon.aqdb.model import Cluster, MetaCluster
-
-
-def add_cluster_data(dbclus):
-    def add_member_hosts(c, profile_list):
-        for h in c.hosts:
-            profile_list.append(h.fqdn)
-
-    profile_list = ["clusters/%s" % dbclus.name]
-
-    if isinstance(dbclus, MetaCluster):
-        for c in dbclus.members:
-            profile_list.append("clusters/%s" % c.name)
-            add_member_hosts(c, profile_list)
-    else:
-        add_member_hosts(dbclus, profile_list)
-
-    return profile_list
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.templates import Plenary, PlenaryCollection
+from aquilon.worker.templates.domain import TemplateDomain
 
 
 class CommandCompileCluster(BrokerCommand):
@@ -47,16 +30,28 @@ class CommandCompileCluster(BrokerCommand):
     def render(self, session, logger, cluster,
                pancinclude, pancexclude, pancdebug, cleandeps,
                **arguments):
-        dbclus = Cluster.get_unique(session, cluster, compel=True)
+        dbcluster = Cluster.get_unique(session, cluster, compel=True)
         if pancdebug:
             pancinclude = r'.*'
             pancexclude = r'components/spma/functions'
-        dom = TemplateDomain(dbclus.branch, dbclus.sandbox_author,
+        dom = TemplateDomain(dbcluster.branch, dbcluster.sandbox_author,
                              logger=logger)
-        profile_list = add_cluster_data(dbclus)
 
-        dom.compile(session, only=profile_list,
-                    panc_debug_include=pancinclude,
-                    panc_debug_exclude=pancexclude,
-                    cleandeps=cleandeps)
+        plenaries = PlenaryCollection(logger=logger)
+
+        def add_cluster_plenaries(cluster):
+            plenaries.append(Plenary.get_plenary(cluster))
+            for host in cluster.hosts:
+                plenaries.append(Plenary.get_plenary(host))
+
+        add_cluster_plenaries(dbcluster)
+        if isinstance(dbcluster, MetaCluster):
+            for cluster in dbcluster.members:
+                add_cluster_plenaries(cluster)
+
+        with plenaries.get_key():
+            dom.compile(session, only=plenaries.object_templates,
+                        panc_debug_include=pancinclude,
+                        panc_debug_exclude=pancexclude,
+                        cleandeps=cleandeps, locked=True)
         return
