@@ -80,7 +80,8 @@ class CommandManageCluster(BrokerCommand):
         session.flush()
 
         # We're crossing domains, need to lock everything.
-        with CompileKey(logger=logger):
+        with CompileKey.merge([CompileKey(domain=dbsource.name, logger=logger),
+                               CompileKey(domain=dbbranch.name, logger=logger)]):
             plenaries.stash()
             try:
                 plenaries.remove(locked=True)
