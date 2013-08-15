@@ -21,7 +21,7 @@ from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Switch
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.dns import delete_dns_record
-from aquilon.worker.locks import lock_queue, CompileKey
+from aquilon.worker.locks import CompileKey
 from aquilon.worker.processes import DSDBRunner
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
 
@@ -66,25 +66,24 @@ class CommandDelSwitch(BrokerCommand):
         for dbcluster in dbswitch.esx_clusters:
             plenaries.append(Plenary.get_plenary(dbcluster))
 
-        key = CompileKey.merge([switch_plenary.get_remove_key(),
-                                plenaries.get_write_key()])
-
-        try:
-            lock_queue.acquire(key)
+        with CompileKey.merge([switch_plenary.get_remove_key(),
+                               plenaries.get_write_key()]):
             switch_plenary.stash()
-            plenaries.write(locked=True)
-            switch_plenary.remove(locked=True)
+            try:
+                plenaries.write(locked=True)
+                switch_plenary.remove(locked=True)
 
-            if ip:
-                dsdb_runner = DSDBRunner(logger=logger)
-                # FIXME: restore interface name/MAC on rollback
-                dsdb_runner.delete_host_details(old_fqdn, ip, comments=old_comments)
-                dsdb_runner.commit_or_rollback("Could not remove switch from DSDB")
-            return
+                if ip:
+                    dsdb_runner = DSDBRunner(logger=logger)
+                    # FIXME: restore interface name/MAC on rollback
+                    dsdb_runner.delete_host_details(old_fqdn, ip,
+                                                    comments=old_comments)
+                    dsdb_runner.commit_or_rollback("Could not remove switch "
+                                                   "from DSDB")
+                return
 
-        except:
-            plenaries.restore_stash()
-            switch_plenary.restore_stash()
-            raise
-        finally:
-            lock_queue.release(key)
+            except:
+                plenaries.restore_stash()
+                switch_plenary.restore_stash()
+                raise
+        return

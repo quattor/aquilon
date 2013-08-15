@@ -27,7 +27,7 @@ from aquilon.worker.dbwrappers.resources import (find_share,
                                                  get_resource_holder)
 from aquilon.worker.templates.machine import machine_plenary_will_move
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
-from aquilon.worker.locks import lock_queue, CompileKey
+from aquilon.worker.locks import CompileKey
 from aquilon.worker.processes import DSDBRunner
 
 
@@ -230,27 +230,24 @@ class CommandUpdateMachine(BrokerCommand):
         if remove_plenaries.plenaries and dbmachine.host:
             plenaries.append(Plenary.get_plenary(dbmachine.host))
 
-        key = CompileKey.merge([plenaries.get_write_key(),
-                                remove_plenaries.get_remove_key()])
-        try:
-            lock_queue.acquire(key)
+        with CompileKey.merge([plenaries.get_write_key(),
+                               remove_plenaries.get_remove_key()]):
             remove_plenaries.stash()
-            plenaries.write(locked=True)
-            remove_plenaries.remove(locked=True)
+            try:
+                plenaries.write(locked=True)
+                remove_plenaries.remove(locked=True)
 
-            if dbmachine.host:
-                # XXX: May need to reconfigure.
-                pass
+                if dbmachine.host:
+                    # XXX: May need to reconfigure.
+                    pass
 
-            dsdb_runner = DSDBRunner(logger=logger)
-            dsdb_runner.update_host(dbmachine, oldinfo)
-            dsdb_runner.commit_or_rollback("Could not update machine in DSDB")
-        except:
-            plenaries.restore_stash()
-            remove_plenaries.restore_stash()
-            raise
-        finally:
-            lock_queue.release(key)
+                dsdb_runner = DSDBRunner(logger=logger)
+                dsdb_runner.update_host(dbmachine, oldinfo)
+                dsdb_runner.commit_or_rollback("Could not update machine in DSDB")
+            except:
+                plenaries.restore_stash()
+                remove_plenaries.restore_stash()
+                raise
 
         return
 

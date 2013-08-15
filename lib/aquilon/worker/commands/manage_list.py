@@ -23,7 +23,7 @@ from aquilon.worker.dbwrappers.branch import get_branch_and_author
 from aquilon.worker.dbwrappers.host import (hostlist_to_hosts,
                                             check_hostlist_size,
                                             validate_branch_author)
-from aquilon.worker.locks import lock_queue, CompileKey
+from aquilon.worker.locks import CompileKey
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
 
 
@@ -72,16 +72,13 @@ class CommandManageList(BrokerCommand):
         session.flush()
 
         # We're crossing domains, need to lock everything.
-        key = CompileKey(logger=logger)
-        try:
-            lock_queue.acquire(key)
+        with CompileKey(logger=logger):
             plenaries.stash()
-            plenaries.remove(locked=True)
-            plenaries.write(locked=True)
-        except:
-            plenaries.restore_stash()
-            raise
-        finally:
-            lock_queue.release(key)
+            try:
+                plenaries.remove(locked=True)
+                plenaries.write(locked=True)
+            except:
+                plenaries.restore_stash()
+                raise
 
         return

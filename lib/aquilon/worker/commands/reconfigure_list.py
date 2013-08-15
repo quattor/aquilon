@@ -25,7 +25,7 @@ from aquilon.worker.dbwrappers.host import (hostlist_to_hosts,
                                             check_hostlist_size,
                                             validate_branch_author)
 from aquilon.worker.templates.domain import TemplateDomain
-from aquilon.worker.locks import lock_queue, CompileKey
+from aquilon.worker.locks import CompileKey
 from aquilon.worker.services import Chooser
 
 
@@ -190,29 +190,27 @@ class CommandReconfigureList(BrokerCommand):
         # a missing service map entry or something).
         # The lock must be over at least the domain, but could be over
         # all if (for example) service plenaries need to change.
-        key = CompileKey.merge([p.get_write_key() for p in templates] +
-                               [CompileKey(domain=dbbranch.name,
-                                           logger=logger)])
-        try:
-            lock_queue.acquire(key)
-            logger.client_info("Writing %s plenary templates.", len(templates))
-            # FIXME: if one of the templates raises IncompleteError (e.g.
-            # a host should be in a cluster, but it is not), then we return an
-            # InternalError to the client, which is not nice
-            for template in templates:
-                logger.debug("Writing %s", template)
-                template.write(locked=True)
-            td = TemplateDomain(dbbranch, dbauthor, logger=logger)
-            td.compile(session, locked=True)
-        except:
-            logger.client_info("Restoring plenary templates.")
-            for template in templates:
-                logger.debug("Restoring %s", template)
-                template.restore_stash()
-            # Okay, cleaned up templates, make sure the caller knows
-            # we've aborted so that DB can be appropriately rollback'd.
-            raise
-        finally:
-            lock_queue.release(key)
+        with CompileKey.merge([p.get_write_key() for p in templates] +
+                              [CompileKey(domain=dbbranch.name,
+                                          logger=logger)]):
+            try:
+                logger.client_info("Writing %s plenary templates.",
+                                   len(templates))
+                # FIXME: if one of the templates raises IncompleteError (e.g. a
+                # host should be in a cluster, but it is not), then we return an
+                # InternalError to the client, which is not nice
+                for template in templates:
+                    logger.debug("Writing %s", template)
+                    template.write(locked=True)
+                td = TemplateDomain(dbbranch, dbauthor, logger=logger)
+                td.compile(session, locked=True)
+            except:
+                logger.client_info("Restoring plenary templates.")
+                for template in templates:
+                    logger.debug("Restoring %s", template)
+                    template.restore_stash()
+                # Okay, cleaned up templates, make sure the caller knows
+                # we've aborted so that DB can be appropriately rollback'd.
+                raise
 
         return

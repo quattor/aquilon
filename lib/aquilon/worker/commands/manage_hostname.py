@@ -24,7 +24,7 @@ from aquilon.aqdb.model import Sandbox
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.branch import get_branch_and_author
 from aquilon.worker.dbwrappers.host import hostname_to_host
-from aquilon.worker.locks import lock_queue, CompileKey
+from aquilon.worker.locks import CompileKey
 from aquilon.worker.processes import run_git
 from aquilon.worker.formats.branch import AuthoredSandbox
 from aquilon.worker.templates import Plenary
@@ -132,30 +132,25 @@ class CommandManageHostname(BrokerCommand):
         # We're crossing domains, need to lock everything.
         # XXX: There's a directory per domain.  Do we need subdirectories
         # for different authors for a sandbox?
-        key = CompileKey(logger=logger)
-
-        try:
-            lock_queue.acquire(key)
-
+        with CompileKey(logger=logger):
             plenary_host.stash()
-            plenary_host.remove(locked=True)
-
-            # Now we recreate the plenary to ensure that the domain is ready
-            # to compile, however (esp. if there was no existing template), we
-            # have to be aware that there might not be enough information yet
-            # with which we can create a template
             try:
-                plenary_host.write(locked=True)
-            except IncompleteError:
-                # This template cannot be written, we leave it alone
-                # It would be nice to flag the state in the the host?
-                pass
-        except:
-            # This will not restore the cleaned up build files.  That's OK.
-            # They will be recreated as needed.
-            plenary_host.restore_stash()
-            raise
-        finally:
-            lock_queue.release(key)
+                plenary_host.remove(locked=True)
+
+                # Now we recreate the plenary to ensure that the domain is ready
+                # to compile, however (esp. if there was no existing template),
+                # we have to be aware that there might not be enough information
+                # yet with which we can create a template
+                try:
+                    plenary_host.write(locked=True)
+                except IncompleteError:
+                    # This template cannot be written, we leave it alone
+                    # It would be nice to flag the state in the the host?
+                    pass
+            except:
+                # This will not restore the cleaned up build files.  That's OK.
+                # They will be recreated as needed.
+                plenary_host.restore_stash()
+                raise
 
         return

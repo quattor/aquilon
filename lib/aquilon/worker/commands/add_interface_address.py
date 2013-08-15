@@ -22,7 +22,6 @@ from aquilon.aqdb.model import HardwareEntity, NetworkEnvironment, Interface
 from aquilon.worker.dbwrappers.dns import grab_address
 from aquilon.worker.dbwrappers.interface import (generate_ip,
                                                  assign_address)
-from aquilon.worker.locks import lock_queue
 from aquilon.worker.processes import DSDBRunner
 from aquilon.worker.templates import Plenary
 
@@ -143,29 +142,25 @@ class CommandAddInterfaceAddress(BrokerCommand):
         dbhost = getattr(dbhw_ent, "host", None)
         if dbhost:
             plenary_info = Plenary.get_plenary(dbhost, logger=logger)
-            key = plenary_info.get_write_key()
-            try:
-                lock_queue.acquire(key)
-
+            with plenary_info.get_write_key():
                 try:
-                    plenary_info.write(locked=True)
-                except IncompleteError:
-                    # FIXME: if this command is used after "add host" but before
-                    # "make", then writing out the template will fail due to
-                    # required services not being assigned. Ignore this error
-                    # for now.
-                    plenary_info.restore_stash()
+                    try:
+                        plenary_info.write(locked=True)
+                    except IncompleteError:
+                        # FIXME: if this command is used after "add host" but
+                        # before "make", then writing out the template will fail
+                        # due to required services not being assigned. Ignore
+                        # this error for now.
+                        plenary_info.restore_stash()
 
-                dsdb_runner = DSDBRunner(logger=logger)
-                if delete_old_dsdb_entry:
-                    dsdb_runner.delete_host_details(dbdns_rec.fqdn, ip)
-                dsdb_runner.update_host(dbhw_ent, oldinfo)
-                dsdb_runner.commit_or_rollback("Could not add host to DSDB")
-            except:
-                plenary_info.restore_stash()
-                raise
-            finally:
-                lock_queue.release(key)
+                    dsdb_runner = DSDBRunner(logger=logger)
+                    if delete_old_dsdb_entry:
+                        dsdb_runner.delete_host_details(dbdns_rec.fqdn, ip)
+                    dsdb_runner.update_host(dbhw_ent, oldinfo)
+                    dsdb_runner.commit_or_rollback("Could not add host to DSDB")
+                except:
+                    plenary_info.restore_stash()
+                    raise
         else:
             dsdb_runner = DSDBRunner(logger=logger)
             if delete_old_dsdb_entry:

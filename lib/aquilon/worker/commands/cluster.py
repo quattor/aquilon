@@ -27,7 +27,7 @@ from aquilon.worker.dbwrappers.host import hostname_to_host
 from aquilon.worker.dbwrappers.resources import walk_resources
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
 from aquilon.worker.services import Chooser
-from aquilon.worker.locks import lock_queue, CompileKey
+from aquilon.worker.locks import CompileKey
 
 
 class CommandCluster(BrokerCommand):
@@ -138,18 +138,15 @@ class CommandCluster(BrokerCommand):
         chooser.set_required()
         chooser.flush_changes()
         # the chooser will include the host plenary
-        key = CompileKey.merge([chooser.get_write_key(),
-                                plenaries.get_write_key()])
-
-        try:
-            lock_queue.acquire(key)
-            chooser.write_plenary_templates(locked=True)
-            plenaries.write(locked=True)
-        except:
-            chooser.restore_stash()
-            plenaries.restore_stash()
-            raise
-        finally:
-            lock_queue.release(key)
+        with CompileKey.merge([chooser.get_write_key(),
+                               plenaries.get_write_key()]):
+            plenaries.stash()
+            try:
+                chooser.write_plenary_templates(locked=True)
+                plenaries.write(locked=True)
+            except:
+                chooser.restore_stash()
+                plenaries.restore_stash()
+                raise
 
         return

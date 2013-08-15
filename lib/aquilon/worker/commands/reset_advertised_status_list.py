@@ -24,7 +24,6 @@ from aquilon.worker.dbwrappers.host import (hostlist_to_hosts,
                                             validate_branch_author)
 from aquilon.worker.templates.domain import TemplateDomain
 from aquilon.worker.templates import Plenary, PlenaryCollection
-from aquilon.worker.locks import lock_queue, CompileKey
 
 
 class CommandResetAdvertisedStatusList(BrokerCommand):
@@ -57,17 +56,14 @@ class CommandResetAdvertisedStatusList(BrokerCommand):
 
         session.flush()
 
-        key = CompileKey.merge([plenaries.get_write_key()])
-        try:
-            lock_queue.acquire(key)
+        with plenaries.get_write_key():
             plenaries.stash()
-            plenaries.write(locked=True)
-            td = TemplateDomain(dbbranch, dbauthor, logger=logger)
-            td.compile(session, only=compileable, locked=True)
-        except:
-            plenaries.restore_stash()
-            raise
-        finally:
-            lock_queue.release(key)
+            try:
+                plenaries.write(locked=True)
+                td = TemplateDomain(dbbranch, dbauthor, logger=logger)
+                td.compile(session, only=compileable, locked=True)
+            except:
+                plenaries.restore_stash()
+                raise
 
         return

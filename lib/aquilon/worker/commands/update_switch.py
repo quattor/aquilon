@@ -28,7 +28,7 @@ from aquilon.worker.dbwrappers.hardware_entity import (update_primary_ip,
 from aquilon.worker.dbwrappers.observed_mac import (
     update_or_create_observed_mac)
 from aquilon.worker.dbwrappers.switch import discover_switch
-from aquilon.worker.locks import lock_queue, CompileKey
+from aquilon.worker.locks import CompileKey
 from aquilon.worker.processes import DSDBRunner
 from aquilon.worker.templates.base import Plenary
 
@@ -99,22 +99,22 @@ class CommandUpdateSwitch(BrokerCommand):
         key = switch_plenary.get_write_key()
         if remove_plenary:
             key = CompileKey.merge([key, remove_plenary.get_remove_key()])
-        try:
-            lock_queue.acquire(key)
+        with key:
             if remove_plenary:
                 remove_plenary.stash()
-                remove_plenary.remove(locked=True)
-            switch_plenary.write(locked=True)
+            switch_plenary.stash()
+            try:
+                if remove_plenary:
+                    remove_plenary.remove(locked=True)
+                switch_plenary.write(locked=True)
 
-            dsdb_runner = DSDBRunner(logger=logger)
-            dsdb_runner.update_host(dbswitch, oldinfo)
-            dsdb_runner.commit_or_rollback("Could not update switch in DSDB")
-        except:
-            if remove_plenary:
-                remove_plenary.restore_stash()
-            switch_plenary.restore_stash()
-            raise
-        finally:
-            lock_queue.release(key)
+                dsdb_runner = DSDBRunner(logger=logger)
+                dsdb_runner.update_host(dbswitch, oldinfo)
+                dsdb_runner.commit_or_rollback("Could not update switch in DSDB")
+            except:
+                if remove_plenary:
+                    remove_plenary.restore_stash()
+                switch_plenary.restore_stash()
+                raise
 
         return

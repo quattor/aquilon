@@ -30,7 +30,6 @@ from aquilon.worker.dbwrappers.interface import (get_or_create_interface,
                                                  choose_port_group,
                                                  assign_address)
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
-from aquilon.worker.locks import lock_queue
 from aquilon.worker.processes import DSDBRunner
 
 
@@ -160,21 +159,18 @@ class CommandAddInterfaceMachine(BrokerCommand):
             plenaries.append(Plenary.get_plenary(dbmachine.host))
         # Even though there may be removals going on the write key
         # should be sufficient here.
-        key = plenaries.get_write_key()
-        try:
-            lock_queue.acquire(key)
+        with plenaries.get_write_key():
             pending_removals.stash()
-            plenaries.write(locked=True)
-            pending_removals.remove(locked=True)
+            try:
+                plenaries.write(locked=True)
+                pending_removals.remove(locked=True)
 
-            dsdb_runner.update_host(dbmachine, oldinfo)
-            dsdb_runner.commit_or_rollback("Could not update host in DSDB")
-        except:
-            plenaries.restore_stash()
-            pending_removals.restore_stash()
-            raise
-        finally:
-            lock_queue.release(key)
+                dsdb_runner.update_host(dbmachine, oldinfo)
+                dsdb_runner.commit_or_rollback("Could not update host in DSDB")
+            except:
+                plenaries.restore_stash()
+                pending_removals.restore_stash()
+                raise
 
         if dbmachine.host:
             # FIXME: reconfigure host

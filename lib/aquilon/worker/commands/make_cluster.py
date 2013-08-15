@@ -21,7 +21,7 @@ from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.aqdb.model import Cluster
 from aquilon.worker.templates.domain import TemplateDomain
-from aquilon.worker.locks import lock_queue, CompileKey
+from aquilon.worker.locks import CompileKey
 from aquilon.worker.services import Chooser
 from aquilon.worker.commands.compile_cluster import add_cluster_data
 
@@ -42,29 +42,24 @@ class CommandMakeCluster(BrokerCommand):
         chooser.set_required()
         chooser.flush_changes()
         # Force a domain lock as pan might overwrite any of the profiles...
-        key = CompileKey.merge([chooser.get_write_key(),
-                                CompileKey(domain=dbcluster.branch.name,
-                                           logger=logger)])
-        try:
-            lock_queue.acquire(key)
-            chooser.write_plenary_templates(locked=True)
+        with CompileKey.merge([chooser.get_write_key(),
+                               CompileKey(domain=dbcluster.branch.name,
+                                          logger=logger)]):
+            try:
+                chooser.write_plenary_templates(locked=True)
 
-            profile_list = add_cluster_data(dbcluster)
-            profile_list.extend(chooser.changed_server_fqdns())
+                profile_list = add_cluster_data(dbcluster)
+                profile_list.extend(chooser.changed_server_fqdns())
 
-            td = TemplateDomain(dbcluster.branch, dbcluster.sandbox_author,
-                                logger=logger)
-            td.compile(session, only=profile_list, locked=True)
+                td = TemplateDomain(dbcluster.branch, dbcluster.sandbox_author,
+                                    logger=logger)
+                td.compile(session, only=profile_list, locked=True)
 
-        except:
-            chooser.restore_stash()
+            except:
+                chooser.restore_stash()
 
-            # Okay, cleaned up templates, make sure the caller knows
-            # we've aborted so that DB can be appropriately rollback'd.
-
-            raise
-
-        finally:
-            lock_queue.release(key)
+                # Okay, cleaned up templates, make sure the caller knows
+                # we've aborted so that DB can be appropriately rollback'd.
+                raise
 
         return

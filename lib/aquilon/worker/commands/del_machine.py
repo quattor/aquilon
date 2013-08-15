@@ -18,7 +18,7 @@
 
 from aquilon.exceptions_ import ArgumentError, AquilonError
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.locks import lock_queue, CompileKey
+from aquilon.worker.locks import CompileKey
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
 from aquilon.aqdb.model import Machine
 
@@ -57,19 +57,17 @@ class CommandDelMachine(BrokerCommand):
         if dbcontainer:
             plenary_container = Plenary.get_plenary(dbcontainer, logger=logger)
             key = CompileKey.merge([key, plenary_container.get_write_key()])
-        try:
-            lock_queue.acquire(key)
+        with key:
             remove_plenaries.stash()
-            if dbcontainer:
-                plenary_container.write(locked=True)
-            remove_plenaries.remove(locked=True)
-        except:
-            remove_plenaries.restore_stash()
-            if dbcontainer:
-                plenary_container.restore_stash()
-            raise
-        finally:
-            lock_queue.release(key)
+            try:
+                if dbcontainer:
+                    plenary_container.write(locked=True)
+                remove_plenaries.remove(locked=True)
+            except:
+                remove_plenaries.restore_stash()
+                if dbcontainer:
+                    plenary_container.restore_stash()
+                raise
         return
 
     def _remove_from_rp(self, na_obj):

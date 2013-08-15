@@ -20,7 +20,7 @@
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.templates.domain import TemplateDomain
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
-from aquilon.worker.locks import lock_queue, CompileKey
+from aquilon.worker.locks import CompileKey
 from aquilon.aqdb.model import Cluster, ClusterLifecycle
 
 
@@ -48,17 +48,13 @@ class CommandChangeClusterStatus(BrokerCommand):
             plenaries.append(Plenary.get_plenary(dbhost))
 
         # Force a host lock as pan might overwrite the profile...
-        key = CompileKey(domain=dbcluster.branch.name, logger=logger)
-        try:
-            lock_queue.acquire(key)
-
-            plenaries.write(locked=True)
-            td = TemplateDomain(dbcluster.branch, dbcluster.sandbox_author,
-                                logger=logger)
-            td.compile(session, plenaries.object_templates, locked=True)
-        except:
-            plenaries.restore_stash()
-            raise
-        finally:
-            lock_queue.release(key)
+        with CompileKey(domain=dbcluster.branch.name, logger=logger):
+            try:
+                plenaries.write(locked=True)
+                td = TemplateDomain(dbcluster.branch, dbcluster.sandbox_author,
+                                    logger=logger)
+                td.compile(session, plenaries.object_templates, locked=True)
+            except:
+                plenaries.restore_stash()
+                raise
         return

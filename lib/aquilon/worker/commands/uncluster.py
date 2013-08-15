@@ -21,7 +21,7 @@ from aquilon.aqdb.model import Cluster, Personality, ServiceAddress
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.host import hostname_to_host
 from aquilon.worker.dbwrappers.resources import walk_resources
-from aquilon.worker.locks import lock_queue, CompileKey
+from aquilon.worker.locks import CompileKey
 from aquilon.worker.templates.base import Plenary
 
 
@@ -66,20 +66,17 @@ class CommandUncluster(BrokerCommand):
         # must be in the same domain.
         host_plenary = Plenary.get_plenary(dbhost, logger=logger)
         cluster_plenary = Plenary.get_plenary(dbcluster, logger=logger)
-        key = CompileKey(domain=dbcluster.branch.name, logger=logger)
-        try:
-            lock_queue.acquire(key)
-            cluster_plenary.write(locked=True)
+        with CompileKey(domain=dbcluster.branch.name, logger=logger):
             try:
-                host_plenary.write(locked=True)
-            except IncompleteError:
-                host_plenary.remove(locked=True)
-        except:
-            cluster_plenary.restore_stash()
-            host_plenary.restore_stash()
-            raise
-        finally:
-            lock_queue.release(key)
+                cluster_plenary.write(locked=True)
+                try:
+                    host_plenary.write(locked=True)
+                except IncompleteError:
+                    host_plenary.remove(locked=True)
+            except:
+                cluster_plenary.restore_stash()
+                host_plenary.restore_stash()
+                raise
 
 
 def remove_service_addresses(dbcluster, dbhost):
