@@ -419,9 +419,26 @@ class Chooser(object):
                 self.instances_unbound.add(instance)
 
     def stash_services(self):
+        changed_servers = set()
         for instance in self.instances_bound.union(self.instances_unbound):
+            changed_servers.update(instance.servers)
+
             plenary = PlenaryServiceInstanceServer(instance, logger=self.logger)
             self.plenaries.append(plenary)
+
+        for srv in changed_servers:
+            host = srv.host
+
+            # Skip servers that do not have a profile
+            if not host.personality.archetype.is_compileable:
+                continue
+
+            # Skip servers that are in a different domain/sandbox
+            if (host.branch != self.dbobj.branch or
+                host.sandbox_author_id != self.dbobj.sandbox_author_id):
+                continue
+
+            self.plenaries.append(Plenary.get_plenary(host))
 
     def flush_changes(self):
         self.session.flush()
@@ -438,18 +455,6 @@ class Chooser(object):
 
     def restore_stash(self):
         self.plenaries.restore_stash()
-
-    def changed_server_fqdns(self):
-        hosts = set()
-        for instance in chain(self.instances_bound, self.instances_unbound):
-            for srv in instance.servers:
-                # Skip servers that do not have a profile
-                if not srv.host.personality.archetype.is_compileable:
-                    continue
-                if (srv.host.branch == self.dbobj.branch and
-                    srv.host.sandbox_author_id == self.dbobj.sandbox_author_id):
-                    hosts.add(str(srv.host.fqdn))
-        return hosts
 
 
 class HostChooser(Chooser):

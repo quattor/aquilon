@@ -16,7 +16,8 @@
 # limitations under the License.
 """Contains the logic for `aq reconfigure --list`."""
 
-from aquilon.exceptions_ import ArgumentError, NotFoundException
+from aquilon.exceptions_ import (ArgumentError, NotFoundException,
+                                 IncompleteError)
 from aquilon.aqdb.model import (Archetype, Personality, OperatingSystem,
                                 HostLifecycle)
 from aquilon.worker.broker import BrokerCommand
@@ -24,7 +25,7 @@ from aquilon.worker.dbwrappers.grn import lookup_grn
 from aquilon.worker.dbwrappers.host import (hostlist_to_hosts,
                                             check_hostlist_size,
                                             validate_branch_author)
-from aquilon.worker.templates.domain import TemplateDomain
+from aquilon.worker.templates import PlenaryCollection, TemplateDomain
 from aquilon.worker.locks import CompileKey
 from aquilon.worker.services import Chooser
 
@@ -177,12 +178,13 @@ class CommandReconfigureList(BrokerCommand):
         if not choosers:
             return
 
-        # Optimize so that duplicate service plenaries are not re-written
-        templates = set()
+        plenaries = PlenaryCollection(logger=logger)
         for chooser in choosers:
             # chooser.plenaries is a PlenaryCollection - this flattens
             # that top level.
-            templates.update(chooser.plenaries.plenaries)
+            # FIXME: this does not really work as expected, as the actual
+            # Plenary objects are different even if they point to the same file
+            plenaries.extend(chooser.plenaries.plenaries)
 
         td = TemplateDomain(dbbranch, dbauthor, logger=logger)
 
@@ -190,28 +192,37 @@ class CommandReconfigureList(BrokerCommand):
         # actual writing and compile is done.  This will allow for fast
         # turnaround on errors (no need to wait for a lock if there's
         # a missing service map entry or something).
-        # The lock must be over at least the domain, but could be over
-        # all if (for example) service plenaries need to change.
-        with CompileKey.merge([p.get_key() for p in templates] +
-                              [CompileKey(domain=dbbranch.name,
+        # The lock must include the domain, because we're compiling it as a
+        # whole.
+        with CompileKey.merge([plenaries.get_key(),
+                               CompileKey(domain=dbbranch.name,
                                           logger=logger)]):
+            plenaries.stash()
             try:
                 logger.client_info("Writing %s plenary templates.",
-                                   len(templates))
-                # FIXME: if one of the templates raises IncompleteError (e.g. a
-                # host should be in a cluster, but it is not), then we return an
-                # InternalError to the client, which is not nice
-                for template in templates:
+                                   len(plenaries.plenaries))
+                errors = []
+                for template in plenaries.plenaries:
                     logger.debug("Writing %s", template)
-                    template.write(locked=True)
+                    try:
+                        template.write(locked=True)
+                    except IncompleteError, err:
+                        # Ignore IncompleteError for hosts added indirectly,
+                        # e.g. servers of service instances. It is debatable
+                        # if this is the right thing to do, but it preserves the
+                        # status quo, and can be revisited later.
+                        if template.dbobj not in dbhosts:
+                            logger.client_info("Warning: %s" % err)
+                        else:
+                            errors.append(str(err))
+
+                if errors:
+                    raise ArgumentError("\n".join(errors))
+
                 td.compile(session, locked=True)
             except:
                 logger.client_info("Restoring plenary templates.")
-                for template in templates:
-                    logger.debug("Restoring %s", template)
-                    template.restore_stash()
-                # Okay, cleaned up templates, make sure the caller knows
-                # we've aborted so that DB can be appropriately rollback'd.
+                plenaries.restore_stash()
                 raise
 
         return
