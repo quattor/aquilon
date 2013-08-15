@@ -61,12 +61,10 @@ class CommandUncluster(BrokerCommand):
         session.flush()
         session.expire(dbhost, ['_cluster'])
 
-        # Will need to write a cluster plenary and either write or
-        # remove a host plenary.  Grab the domain key since the two
-        # must be in the same domain.
         host_plenary = Plenary.get_plenary(dbhost, logger=logger)
         cluster_plenary = Plenary.get_plenary(dbcluster, logger=logger)
-        with CompileKey(domain=dbcluster.branch.name, logger=logger):
+        with CompileKey.merge([host_plenary.get_key(),
+                              cluster_plenary.get_key()]):
             try:
                 cluster_plenary.write(locked=True)
                 try:

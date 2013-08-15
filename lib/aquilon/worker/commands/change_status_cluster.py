@@ -16,12 +16,9 @@
 # limitations under the License.
 """Contains the logic for `aq change status`."""
 
-
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.templates.domain import TemplateDomain
-from aquilon.worker.templates.base import Plenary, PlenaryCollection
-from aquilon.worker.locks import CompileKey
 from aquilon.aqdb.model import Cluster, ClusterLifecycle
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.templates import Plenary, PlenaryCollection, TemplateDomain
 
 
 class CommandChangeClusterStatus(BrokerCommand):
@@ -47,12 +44,13 @@ class CommandChangeClusterStatus(BrokerCommand):
         for dbhost in dbcluster.hosts:
             plenaries.append(Plenary.get_plenary(dbhost))
 
+        td = TemplateDomain(dbcluster.branch, dbcluster.sandbox_author,
+                            logger=logger)
         # Force a host lock as pan might overwrite the profile...
-        with CompileKey(domain=dbcluster.branch.name, logger=logger):
+        with plenaries.get_key():
+            plenaries.stash()
             try:
                 plenaries.write(locked=True)
-                td = TemplateDomain(dbcluster.branch, dbcluster.sandbox_author,
-                                    logger=logger)
                 td.compile(session, plenaries.object_templates, locked=True)
             except:
                 plenaries.restore_stash()

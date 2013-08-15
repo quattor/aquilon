@@ -119,6 +119,8 @@ class CommandMake(BrokerCommand):
         hosts = chooser.changed_server_fqdns()
         hosts.add(dbhost.fqdn)
 
+        td = TemplateDomain(dbhost.branch, dbhost.sandbox_author, logger=logger)
+
         # Force a host lock as pan might overwrite the profile...
         key = chooser.get_key()
         for fqdn in hosts:
@@ -129,8 +131,6 @@ class CommandMake(BrokerCommand):
             try:
                 chooser.write_plenary_templates(locked=True)
 
-                td = TemplateDomain(dbhost.branch, dbhost.sandbox_author,
-                                    logger=logger)
                 td.compile(session, only=hosts, locked=True)
 
             except:

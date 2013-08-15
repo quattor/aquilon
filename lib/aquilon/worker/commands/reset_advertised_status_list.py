@@ -16,14 +16,12 @@
 # limitations under the License.
 """Contains the logic for `aq reset advertised status --list`."""
 
-
 from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.host import (hostlist_to_hosts,
                                             check_hostlist_size,
                                             validate_branch_author)
-from aquilon.worker.templates.domain import TemplateDomain
-from aquilon.worker.templates import Plenary, PlenaryCollection
+from aquilon.worker.templates import Plenary, PlenaryCollection, TemplateDomain
 
 
 class CommandResetAdvertisedStatusList(BrokerCommand):
@@ -44,7 +42,7 @@ class CommandResetAdvertisedStatusList(BrokerCommand):
             if dbhost.status.name == 'ready':
                 failed.append("{0:l} is in ready status, "
                               "advertised status can be reset only "
-                              "when host is in non ready state".format(dbhost))
+                              "when host is in non ready state.".format(dbhost))
         if failed:
             raise ArgumentError("Cannot modify the following hosts:\n%s" %
                                 "\n".join(failed))
@@ -56,11 +54,11 @@ class CommandResetAdvertisedStatusList(BrokerCommand):
 
         session.flush()
 
+        td = TemplateDomain(dbbranch, dbauthor, logger=logger)
         with plenaries.get_key():
             plenaries.stash()
             try:
                 plenaries.write(locked=True)
-                td = TemplateDomain(dbbranch, dbauthor, logger=logger)
                 td.compile(session, only=compileable, locked=True)
             except:
                 plenaries.restore_stash()

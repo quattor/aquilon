@@ -93,7 +93,7 @@ class CommandDelHost(BrokerCommand):
             plenaries.append(Plenary.get_plenary(dbmachine.vm_container))
 
         with CompileKey.merge([plenaries.get_key(),
-                               remove_plenaries.get_key()]) as key:
+                               remove_plenaries.get_key()]):
             plenaries.stash()
             remove_plenaries.stash()
 

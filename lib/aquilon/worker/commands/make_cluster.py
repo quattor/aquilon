@@ -41,6 +41,8 @@ class CommandMakeCluster(BrokerCommand):
                           required_only=not(keepbindings))
         chooser.set_required()
         chooser.flush_changes()
+        td = TemplateDomain(dbcluster.branch, dbcluster.sandbox_author,
+                            logger=logger)
         # Force a domain lock as pan might overwrite any of the profiles...
         with CompileKey.merge([chooser.get_key(),
                                CompileKey(domain=dbcluster.branch.name,
@@ -51,8 +53,6 @@ class CommandMakeCluster(BrokerCommand):
                 profile_list = add_cluster_data(dbcluster)
                 profile_list.extend(chooser.changed_server_fqdns())
 
-                td = TemplateDomain(dbcluster.branch, dbcluster.sandbox_author,
-                                    logger=logger)
                 td.compile(session, only=profile_list, locked=True)
 
             except:

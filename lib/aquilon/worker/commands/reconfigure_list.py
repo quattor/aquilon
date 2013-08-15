@@ -184,6 +184,8 @@ class CommandReconfigureList(BrokerCommand):
             # that top level.
             templates.update(chooser.plenaries.plenaries)
 
+        td = TemplateDomain(dbbranch, dbauthor, logger=logger)
+
         # Don't bother locking until every possible check before the
         # actual writing and compile is done.  This will allow for fast
         # turnaround on errors (no need to wait for a lock if there's
@@ -202,7 +204,6 @@ class CommandReconfigureList(BrokerCommand):
                 for template in templates:
                     logger.debug("Writing %s", template)
                     template.write(locked=True)
-                td = TemplateDomain(dbbranch, dbauthor, logger=logger)
                 td.compile(session, locked=True)
             except:
                 logger.client_info("Restoring plenary templates.")

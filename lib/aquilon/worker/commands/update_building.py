@@ -99,7 +99,7 @@ class CommandUpdateBuilding(BrokerCommand):
         session.flush()
 
         if plenaries.plenaries:
-            with plenaries.get_key() as key:
+            with plenaries.get_key():
                 plenaries.stash()
                 try:
                     plenaries.write(locked=True)
