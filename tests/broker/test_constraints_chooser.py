@@ -47,7 +47,7 @@ class TestChooserConstraints(TestBrokerCommand):
         self.assertEmptyOut(out, command)
         self.matchoutput(err,
                          "aquilon61.aqd-unittest.ms.com adding binding for "
-                         "service chooser_test instance max_clients",
+                         "service instance chooser_test/max_clients",
                          command)
 
     def test_100_failmaxclients(self):
@@ -83,7 +83,7 @@ class TestChooserConstraints(TestBrokerCommand):
         self.assertEmptyOut(out, command)
         self.matchoutput(err,
                          "aquilon61.aqd-unittest.ms.com removing binding for "
-                         "service chooser_test instance max_clients",
+                         "service instance chooser_test/max_clients",
                          command)
 
     def test_210_cleanupservice(self):

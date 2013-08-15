@@ -41,7 +41,7 @@ class TestBindClient(TestBrokerCommand):
         (out, err) = self.successtest(command)
         self.matchoutput(err,
                          "unittest02.one-nyp.ms.com adding binding for "
-                         "service afs instance q.ny.ms.com",
+                         "service instance afs/q.ny.ms.com",
                          command)
 
     def testverifybindafs(self):
@@ -65,7 +65,7 @@ class TestBindClient(TestBrokerCommand):
         (out, err) = self.successtest(command)
         self.matchoutput(err,
                          "unittest02.one-nyp.ms.com adding binding for "
-                         "service dns instance unittest",
+                         "service instance dns/unittest",
                          command)
 
     def testbindutsi1(self):
@@ -74,7 +74,7 @@ class TestBindClient(TestBrokerCommand):
         (out, err) = self.successtest(command)
         self.matchoutput(err,
                          "unittest00.one-nyp.ms.com adding binding for "
-                         "service utsvc instance utsi1",
+                         "service instance utsvc/utsi1",
                          command)
 
     def testverifybindutsi1(self):
@@ -109,7 +109,7 @@ class TestBindClient(TestBrokerCommand):
                    "--hostname", "unittest02.one-nyp.ms.com",
                    "--service", "utsvc", "--instance", "utsi2"]
         (out, err) = self.successtest(command)
-        self.matchoutput(err, "Creating service Chooser", command)
+        self.matchoutput(err, "Creating service chooser", command)
 
     def testverifybindutsi2(self):
         command = "show host --hostname unittest02.one-nyp.ms.com"
@@ -131,7 +131,7 @@ class TestBindClient(TestBrokerCommand):
         err = self.statustest(command)
         self.matchoutput(err,
                          "unittest02.one-nyp.ms.com adding binding for "
-                         "service bootserver instance unittest",
+                         "service instance bootserver/unittest",
                          command)
 
     def testverifybindbootserver(self):
@@ -147,7 +147,7 @@ class TestBindClient(TestBrokerCommand):
         (out, err) = self.successtest(command)
         self.matchoutput(err,
                          "unittest02.one-nyp.ms.com adding binding for "
-                         "service ntp instance pa.ny.na",
+                         "service instance ntp/pa.ny.na",
                          command)
 
     def testverifybindntp(self):
@@ -167,7 +167,7 @@ class TestBindClient(TestBrokerCommand):
         (out, err) = self.successtest(command)
         self.matchoutput(err,
                          "unittest00.one-nyp.ms.com adding binding for "
-                         "service bootserver instance unittest",
+                         "service instance bootserver/unittest",
                          command)
 
     def testverifybindautobootserver(self):
@@ -183,7 +183,7 @@ class TestBindClient(TestBrokerCommand):
         (out, err) = self.successtest(command)
         self.matchoutput(err,
                          "unittest00.one-nyp.ms.com adding binding for "
-                         "service ntp instance pa.ny.na",
+                         "service instance ntp/pa.ny.na",
                          command)
 
     def testverifybindautontp(self):
