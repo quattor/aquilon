@@ -24,7 +24,6 @@ from aquilon.utils import force_ratio
 from aquilon.aqdb.model import (Personality, ClusterLifecycle, MetaCluster,
                                 Switch, Cluster)
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
-from aquilon.worker.locks import lock_queue
 
 
 class CommandAddCluster(BrokerCommand):
@@ -129,14 +128,6 @@ class CommandAddCluster(BrokerCommand):
         session.refresh(dbcluster)
 
         plenaries.append(Plenary.get_plenary(dbcluster))
+        plenaries.write()
 
-        key = plenaries.get_write_key()
-
-        try:
-            lock_queue.acquire(key)
-            plenaries.write(locked=True)
-        except:
-            plenaries.restore_stash()
-            raise
-        finally:
-            lock_queue.release(key)
+        return

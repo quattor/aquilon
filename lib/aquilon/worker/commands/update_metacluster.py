@@ -21,7 +21,6 @@ from aquilon.aqdb.model import MetaCluster
 from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.commands.update_cluster import update_cluster_location
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
-from aquilon.worker.locks import lock_queue
 
 
 class CommandUpdateMetaCluster(BrokerCommand):
@@ -73,16 +72,6 @@ class CommandUpdateMetaCluster(BrokerCommand):
         dbmetacluster.validate()
 
         plenary_info = Plenary.get_plenary(dbmetacluster, logger=logger)
-        key = plenary_info.get_write_key()
-
-        try:
-            lock_queue.acquire(key)
-
-            plenary_info.write(locked=True)
-        except:
-            plenary_info.restore_stash()
-            raise
-        finally:
-            lock_queue.release(key)
+        plenary_info.write()
 
         return
