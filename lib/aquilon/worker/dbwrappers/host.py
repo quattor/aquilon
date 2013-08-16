@@ -16,9 +16,10 @@
 # limitations under the License.
 """Wrappers to make getting and using hosts simpler."""
 
+from sqlalchemy.orm import joinedload
 
 from aquilon.exceptions_ import NotFoundException, ArgumentError
-from aquilon.aqdb.model import Machine
+from aquilon.aqdb.model import Machine, DnsEnvironment, DnsDomain, DnsRecord
 from aquilon.aqdb.model.dns_domain import parse_fqdn
 from collections import defaultdict
 from types import ListType
@@ -42,18 +43,43 @@ def hostname_to_host(session, hostname):
 
 
 def hostlist_to_hosts(session, hostlist):
-    dbhosts = []
+    dbdns_env = DnsEnvironment.get_unique_or_default(session)
     failed = []
+    dbhosts = []
+    dns_domains = {}
     for host in hostlist:
+        if "." not in host:
+            failed.append("%s: Not an FQDN." % host)
+            continue
+        short, dns_domain = host.split(".", 1)
         try:
-            dbhosts.append(hostname_to_host(session, host))
-        except NotFoundException, nfe:
-            failed.append("%s: %s" % (host, nfe))
-        except ArgumentError, ae:
-            failed.append("%s: %s" % (host, ae))
+            if dns_domain not in dns_domains:
+                dbdns_domain = DnsDomain.get_unique(session, dns_domain,
+                                                    compel=True)
+
+                dns_domains[dns_domain] = dbdns_domain
+
+            dbdns_rec = DnsRecord.get_unique(session, name=short,
+                                             dns_domain=dns_domains[dns_domain],
+                                             dns_environment=dbdns_env,
+                                             query_options=[joinedload('hardware_entity')],
+                                             compel=True)
+            if not isinstance(dbdns_rec.hardware_entity, Machine) or \
+               not dbdns_rec.hardware_entity.host:
+                raise NotFoundException("Host %s not found." % host)
+            dbhosts.append(dbdns_rec.hardware_entity.host)
+
+        except NotFoundException, err:
+            failed.append("%s: %s" % (host, err))
+            continue
+        except ArgumentError, err:
+            failed.append("%s: %s" % (host, err))
+            continue
+
     if failed:
         raise ArgumentError("Invalid hosts in list:\n%s" %
                             "\n".join(failed))
+
     if not dbhosts:
         raise ArgumentError("Empty list.")
     return dbhosts
