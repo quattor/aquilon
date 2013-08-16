@@ -25,13 +25,12 @@ from sqlalchemy import (Column, Integer, Sequence, String, DateTime,
                         ForeignKey, UniqueConstraint, PrimaryKeyConstraint,
                         Index)
 from sqlalchemy.orm import (relation, contains_eager, column_property, backref,
-                            deferred, defer, undefer, aliased, lazyload)
-from sqlalchemy.orm.session import object_session
-from sqlalchemy.sql.expression import or_
-from sqlalchemy.sql import select, func
+                            deferred, defer, undefer, aliased, lazyload,
+                            object_session)
+from sqlalchemy.sql import select, func, or_
 
 from aquilon.aqdb.model import (Base, Service, Host, DnsRecord, DnsDomain,
-                                Machine, Fqdn, Personality, Archetype)
+                                Machine, Fqdn)
 from aquilon.aqdb.column_types.aqstr import AqStr
 
 _TN = 'service_instance'
@@ -79,23 +78,13 @@ class ServiceInstance(Base):
         """
         from aquilon.aqdb.model import Cluster, MetaCluster, MetaClusterMember
 
-        session = object_session(self)
-
-        # personalities by service
-        q = session.query(Personality.id)
-        q = q.join(Archetype).filter(Archetype.cluster_type != None)
-        q = q.filter(Personality.services.contains(self.service))
-        personality_ids = [p[0] for p in q]
-
-        # personalities by archetype service
-        q = session.query(Personality.id)
-        q = q.join(Archetype).filter(Archetype.cluster_type != None)
-        q = q.filter(Archetype.services.contains(self.service))
-        personality_ids.extend([p[0] for p in q])
-
+        # Check if the service instance is used by any cluster-bound personality
+        personality_ids = self.service.cluster_aligned_personalities
         if not personality_ids:
             # By far, the common case.
             return self._client_count
+
+        session = object_session(self)
 
         clusters = {}
 
