@@ -8,13 +8,22 @@
 #
 """Basic setup.py for packaging Aquilon itself"""
 
-import sys
+import glob
 import os
+import shutil
+import sys
 from distutils.core import setup
 from subprocess import Popen
-import glob
+from distutils.command.install_scripts import install_scripts
 
 VERSIONFILE = "VERSION"
+
+class install_init_d_stuff(install_scripts):
+    """Renames the aqd.rh init script into aqd"""
+    def run(self):
+        shutil.move("etc/rc.d/init.d/aqd.rh", "etc/rc.d/init.d/aqd")
+        os.unlink("etc/rc.d/init.d/aqd.ms")
+        install_scripts.run(self)
 
 
 def get_version():
@@ -38,9 +47,10 @@ setup(name="aquilon",
       author_email="quattor-aquilon@lists.sourceforge.net",
       package_dir={'' : 'lib/python2.6'},
       packages=["aquilon"],
+      cmdclass = {"install_scripts" : install_init_d_stuff},
       data_files=[("/usr/share/aquilon/config", glob.glob("etc/*.conf*")),
                   ("/usr/share/aquilon", glob.glob("etc/*.xml")),
-                  ("/etc/init.d", glob.glob("etc/rc.d/init.d/*"))],
+                  ("/etc/init.d", ["etc/rc.d/init.d/aqd"])],
 
       scripts=glob.glob(os.path.join("bin", "a*")),
       url="http://quattor.org")
