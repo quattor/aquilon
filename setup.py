@@ -25,8 +25,9 @@ class install_init_d_stuff(install_scripts):
         os.unlink("etc/rc.d/init.d/aqd.ms")
         install_scripts.run(self)
 
-
 def get_version():
+    """Returns a version for the package, based on git-describe, or in the
+    VERSION file."""
     try:
         with open(VERSIONFILE) as f:
             return f.readline().strip()
@@ -46,7 +47,7 @@ setup(name="aquilon",
       author="Quattor collaboration",
       author_email="quattor-aquilon@lists.sourceforge.net",
       package_dir={'' : 'lib/python2.6'},
-      packages=["aquilon"],
+      packages=["aquilon", "aquilon.client", "aquilon.worker", "aquilon.aqdb"],
       cmdclass = {"install_scripts" : install_init_d_stuff},
       data_files=[("/usr/share/aquilon/config", glob.glob("etc/*.conf*")),
                   ("/usr/share/aquilon", glob.glob("etc/*.xml")),
