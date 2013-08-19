@@ -20,7 +20,7 @@
 RETVAL=0
 prog="aqd"
 pidfile=/var/run/aqd.pid
-twistd=/opt/aquilon/bin/twistd.py
+twistd=/usr/bin/twistd
 conffile="/etc/aqd.conf"
 logfile=/var/log/aqd.log
 lockfile=/var/lock/subsys/aqd
