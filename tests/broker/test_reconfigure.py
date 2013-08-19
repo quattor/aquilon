@@ -651,6 +651,25 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
                           r'list\(\s*"new-york.ms.com"\s*\);',
                           command)
 
+    def test_170_reconfigurelist_grn(self):
+        hosts = ["aquilon95.aqd-unittest.ms.com",
+                 "aquilon91.aqd-unittest.ms.com"]
+
+        for h in hosts:
+            command = "show host --hostname %s" % h
+            out = self.commandtest(command.split(" "))
+            self.matchoutput(out, "Owned by GRN: grn:/ms/ei/aquilon/unittest", command)
+
+        scratchfile = self.writescratch("grnlist", "\n".join(hosts))
+        command = ["reconfigure", "--list", scratchfile,
+                   "--grn=grn:/ms/ei/aquilon/aqd"]
+        out = self.successtest (command)
+
+        for h in hosts:
+            command = "show host --hostname %s" % h
+            out = self.commandtest(command.split(" "))
+            self.matchoutput(out, "Owned by GRN: grn:/ms/ei/aquilon/aqd", command)
+
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestReconfigure)
