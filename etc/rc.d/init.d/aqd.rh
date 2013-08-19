@@ -24,7 +24,7 @@ twistd=/opt/aquilon/bin/twistd.py
 conffile="/etc/aqd.conf"
 logfile=/var/log/aqd.log
 lockfile=/var/lock/subsys/aqd
-py_bin=/usr/local/aquilon/pythonenv/bin/python2.6
+py_bin=/usr/bin/python
 
 start() {
     if [[ -x $py_bin ]]; then
@@ -40,7 +40,7 @@ start() {
                 success
             fi
         fi
-        echo 
+        echo
         return $RETVAL
     else
         exit 5
