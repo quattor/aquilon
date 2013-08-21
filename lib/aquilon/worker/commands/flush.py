@@ -18,6 +18,7 @@
 
 
 from collections import defaultdict
+import gc
 
 from sqlalchemy.orm import (joinedload, subqueryload, lazyload, contains_eager,
                             undefer)
@@ -119,26 +120,9 @@ class CommandFlush(BrokerCommand):
             set_committed_value(iface, "slaves",
                                 slaves_by_id.get(iface_id, None))
 
-    def render(self, session, logger,
-               services, personalities, machines, clusters, hosts,
-               locations, resources, switches, all,
+    def render(self, session, logger, services, personalities, machines,
+               clusters, hosts, locations, resources, switches, all,
                **arguments):
-        success = []
-        failed = []
-        written = 0
-
-        # Caches for keeping preloaded data pinned in memory, since the SQLA
-        # session holds a weak reference only
-        resource_by_id = {}
-        resholder_by_id = {}
-        service_instances = None
-        racks = None
-
-        # Object caches that are accessed directly
-        disks_by_machine = defaultdict(list)
-        interfaces_by_hwent = defaultdict(list)
-        interfaces_by_id = {}
-
         if all:
             services = True
             personalities = True
@@ -147,9 +131,26 @@ class CommandFlush(BrokerCommand):
             hosts = True
             locations = True
             resources = True
+            switches = True
 
         with CompileKey(logger=logger):
             logger.client_info("Loading data.")
+
+            success = []
+            failed = []
+            written = 0
+
+            # Caches for keeping preloaded data pinned in memory, since the SQLA
+            # session holds a weak reference only
+            resource_by_id = {}
+            resholder_by_id = {}
+            service_instances = None  # pylint: disable=W0612
+            racks = None  # pylint: disable=W0612
+
+            # Object caches that are accessed directly
+            disks_by_machine = defaultdict(list)
+            interfaces_by_hwent = defaultdict(list)
+            interfaces_by_id = {}
 
             # When flushing clusters/hosts, loading the resource holder is done
             # as the query that loads those objects. But when flushing resources
@@ -172,6 +173,13 @@ class CommandFlush(BrokerCommand):
             if hosts or clusters or resources or machines:
                 self.preload_virt_disk_info(session, resource_by_id)
 
+                # Most machines are in racks...
+                q = session.query(Rack)
+                q = q.options(subqueryload("dns_maps"),
+                              subqueryload("parents"),
+                              subqueryload("parents.dns_maps"))
+                racks = q.all()
+
             if hosts or clusters or resources:
                 self.preload_resources(session, resource_by_id)
 
@@ -184,13 +192,6 @@ class CommandFlush(BrokerCommand):
                 q = q.options(subqueryload("service"))
                 service_instances = q.all()
 
-            if machines or clusters:
-                # Most machines are in racks...
-                q = session.query(Rack)
-                q = q.options(subqueryload("dns_maps"),
-                              subqueryload("parents"))
-                racks = q.all()
-
             if locations:
                 logger.client_info("Flushing locations.")
                 for dbloc in session.query(City).all():
@@ -198,8 +199,7 @@ class CommandFlush(BrokerCommand):
                         plenary = Plenary.get_plenary(dbloc, logger=logger)
                         written += plenary.write(locked=True)
                     except Exception, e:
-                        failed.append("City %s failed: %s" %
-                                      dbloc, e)
+                        failed.append("{0} failed: {1}".format(dbloc, e))
                         continue
 
             if services:
@@ -212,8 +212,7 @@ class CommandFlush(BrokerCommand):
                                                            logger=logger)
                         written += plenary_info.write(locked=True)
                     except Exception, e:
-                        failed.append("Service %s failed: %s" %
-                                      (dbservice.name, e))
+                        failed.append("{0} failed: {1}".format(dbservice, e))
                         continue
 
                     for dbinst in dbservice.instances:
@@ -222,8 +221,7 @@ class CommandFlush(BrokerCommand):
                                                                logger=logger)
                             written += plenary_info.write(locked=True)
                         except Exception, e:
-                            failed.append("Service %s instance %s failed: %s" %
-                                          (dbservice.name, dbinst.name, e))
+                            failed.append("{0} failed: {1}".format(dbinst, e))
                             continue
 
             if personalities:
@@ -256,8 +254,7 @@ class CommandFlush(BrokerCommand):
                                                            logger=logger)
                         written += plenary_info.write(locked=True)
                     except Exception, e:
-                        failed.append("Personality %s failed: %s" %
-                                      (persona.name, e))
+                        failed.append("{0} failed: {1}".format(persona, e))
                         continue
 
             if machines:
@@ -299,11 +296,7 @@ class CommandFlush(BrokerCommand):
                                                            logger=logger)
                         written += plenary_info.write(locked=True)
                     except Exception, e:
-                        label = machine.label
-                        if machine.host:
-                            label = "%s (host: %s)" % (machine.label,
-                                                       machine.host.fqdn)
-                        failed.append("Machine %s failed: %s" % (label, e))
+                        failed.append("{0} failed: {1}".format(machine, e))
                         continue
 
             if hosts:
@@ -315,7 +308,7 @@ class CommandFlush(BrokerCommand):
                               lazyload("location_constraint"),
                               lazyload("personality"),
                               lazyload("branch"))
-                cluster_cache = q.all()
+                cluster_cache = q.all()  # pylint: disable=W0612
 
                 cnt = session.query(Host).count()
                 idx = 0
@@ -360,6 +353,7 @@ class CommandFlush(BrokerCommand):
             if clusters:
                 logger.client_info("Flushing clusters.")
                 q = session.query(Cluster)
+                q = q.with_polymorphic('*')
                 q = q.options(subqueryload('_hosts'),
                               joinedload('_hosts.host'),
                               joinedload('_hosts.host.machine'),
@@ -373,7 +367,7 @@ class CommandFlush(BrokerCommand):
                 idx = 0
                 for clus in q:
                     idx += 1
-                    if idx % 20 == 0:  # pragma: no cover
+                    if idx % 50 == 0:  # pragma: no cover
                         logger.client_info("Processing cluster %d of %d..." %
                                            (idx, cnt))
                     try:
@@ -399,9 +393,12 @@ class CommandFlush(BrokerCommand):
                     except Exception, e:
                         failed.append("{0} failed: {1}".format(dbresource, e))
 
-            if switches or all:
+            if switches:
                 logger.client_info("Flushing switches.")
-                for dbswitch in session.query(Switch).all():
+                q = session.query(Switch)
+                q = q.options(subqueryload('observed_vlans'),
+                              joinedload('observed_vlans.network'))
+                for dbswitch in q:
                     try:
                         plenary = Plenary.get_plenary(dbswitch, logger=logger)
                         written += plenary.write(locked=True)
@@ -415,5 +412,8 @@ class CommandFlush(BrokerCommand):
                                (written, written + len(failed)))
             if failed:
                 raise PartialError(success, failed)
+
+        session.expunge_all()
+        gc.collect()
 
         return
