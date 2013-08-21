@@ -13,10 +13,14 @@ import os
 import shutil
 import sys
 from distutils.core import setup
-from subprocess import Popen
+from subprocess import Popen, PIPE
 from distutils.command.install_scripts import install_scripts
+from distutils.command.build import build
 
 VERSIONFILE = "VERSION"
+
+class BuildExcept(Exception):
+    pass
 
 class install_init_d_stuff(install_scripts):
     """Renames the aqd.rh init script into aqd"""
