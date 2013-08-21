@@ -54,7 +54,7 @@ setup(name="aquilon",
       packages=["aquilon", "aquilon.client", "aquilon.worker", "aquilon.aqdb"],
       cmdclass = {"install_scripts" : install_init_d_stuff},
       data_files=[("/usr/share/aquilon/config", glob.glob("etc/*.conf*")),
-                  ("/usr/share/aquilon", glob.glob("etc/*.xml")),
+                  ("/etc/aquilon", glob.glob("etc/*.xml")),
                   ("/etc/init.d", ["etc/rc.d/init.d/aqd"])],
 
       scripts=glob.glob(os.path.join("bin", "a*")),
