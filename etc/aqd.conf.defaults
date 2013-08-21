@@ -187,7 +187,7 @@ default_network_type = unknown
 [archetype_aquilon]
 default_personality = inventory
 default_osname = linux
-default_osversion = 5.0.1-x86_64
+default_osversion = 6.0-x86_64
 default_grn_target = esp
 host_grn_targets = esp,hlmplus
 personality_grn_targets = esp,hlmplus
