@@ -251,7 +251,7 @@ class TestParameterDefinition(TestBrokerCommand):
 
     def test_150_del_validation(self):
         cmd = ["add_personality", "--archetype", ARCHETYPE,
-               "--personality=paramtest", "--eon_id=2", "--host_environment=legacy"]
+               "--personality=paramtest", "--eon_id=2", "--host_environment=dev"]
         self.noouttest(cmd)
 
         cmd = ["add_parameter", "--personality=paramtest", "--path=testpath",

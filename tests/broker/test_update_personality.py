@@ -229,37 +229,6 @@ class TestUpdatePersonality(VerifyGrnsMixin, TestBrokerCommand):
         self.searchoutput(out, r'"system/owner_eon_id" = %d;' %
                           self.grns["grn:/ms/ei/aquilon/ut2"], command)
 
-    def test_150_update_hostenv_infra(self):
-        command = ["add_personality", "--archetype=windows", "--grn=grn:/ms/ei/aquilon/aqd",
-                   "--personality=prod-perim", "--host_environment=legacy"]
-        self.successtest(command)
-
-        command = ["update_personality", "--personality=prod-perim",
-                    "--archetype=windows", "--host_environment=infra"]
-        out = self.successtest(command)
-
-        command = ["show_personality", "--personality=prod-perim",
-                   "--archetype=windows"]
-        out = self.commandtest(command)
-        self.matchoutput(out, "Environment: infra", command)
-
-        command = ["del_personality", "--archetype=windows", "--personality=prod-perim"]
-        self.successtest(command)
-
-    def test_155_update_hostenv_prod(self):
-        command = ["update_personality", "--personality=desktop",
-                    "--archetype=windows", "--host_environment=prod"]
-        out = self.successtest(command)
-
-        command = ["show_personality", "--personality=desktop",
-                   "--archetype=windows"]
-        out = self.commandtest(command)
-        self.matchoutput(out, "Environment: prod", command)
-
-        command = ["cat", "--personality=desktop"]
-        out = self.commandtest(command)
-        self.searchoutput(out, r'"/system/personality/host_environment" = "prod";', command)
-
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestUpdatePersonality)
     unittest.TextTestRunner(verbosity=2).run(suite)

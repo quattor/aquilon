@@ -65,7 +65,7 @@ class TestAddPersonality(VerifyGrnsMixin, TestBrokerCommand):
     def testaddeaipersonality(self):
         command = ["add_personality", "--personality=eaitools",
                    "--archetype=aquilon", "--eon_id=2",
-                   "--host_environment=legacy",
+                   "--host_environment=dev",
                    "--comments", "Existing personality for netperssvcmap tests"]
         self.noouttest(command)
         self.verifycatforpersonality("aquilon", "eaitools")
@@ -351,7 +351,7 @@ class TestAddPersonality(VerifyGrnsMixin, TestBrokerCommand):
     def testaddwindowsdesktop(self):
         command = ["add", "personality", "--personality", "desktop",
                    "--archetype", "windows", "--grn", "grn:/ms/windows/desktop",
-                   "--host_environment", "legacy"]
+                   "--host_environment", "dev"]
         self.noouttest(command)
         self.verifycatforpersonality("windows", "desktop")
 
@@ -369,7 +369,7 @@ class TestAddPersonality(VerifyGrnsMixin, TestBrokerCommand):
         # This personality is 'bad' because there will not be a set of
         # templates defined for it in the repository.
         command = ["add_personality", "--personality=badpersonality",
-                   "--host_environment=legacy",
+                   "--host_environment=dev",
                    "--archetype=aquilon", "--eon_id=2"]
         self.noouttest(command)
 
@@ -389,7 +389,7 @@ class TestAddPersonality(VerifyGrnsMixin, TestBrokerCommand):
         # This personality is double 'bad'... there will be a required
         # service for the personality that has no instances.
         command = ["add_personality", "--personality=badpersonality2",
-                   "--host_environment=legacy",
+                   "--host_environment=dev",
                    "--archetype=aquilon", "--eon_id=2"]
         self.noouttest(command)
 
@@ -467,7 +467,7 @@ class TestAddPersonality(VerifyGrnsMixin, TestBrokerCommand):
 
     def testaddduplicate(self):
         command = ["add_personality", "--personality", "inventory",
-                   "--host_environment=legacy",
+                   "--host_environment=dev",
                    "--archetype", "aquilon", "--eon_id=2"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Personality inventory, archetype aquilon "
@@ -475,7 +475,7 @@ class TestAddPersonality(VerifyGrnsMixin, TestBrokerCommand):
 
     def testaddesxserver(self):
         command = ["add_personality", "--cluster_required", "--eon_id=2",
-                   "--host_environment=legacy",
+                   "--host_environment=dev",
                    "--personality=esx_server", "--archetype=vmhost"]
         self.noouttest(command)
         self.verifycatforpersonality("vmhost", "esx_server",
@@ -485,7 +485,7 @@ class TestAddPersonality(VerifyGrnsMixin, TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out, "Requires clustered hosts", command)
 
-        command = ["add_personality", "--eon_id=2", "--host_environment=legacy",
+        command = ["add_personality", "--eon_id=2", "--host_environment=dev",
                    "--personality=esx_server", "--archetype=esx_cluster"]
         self.noouttest(command)
         self.verifycatforpersonality("esx_cluster", "esx_server")
@@ -497,25 +497,25 @@ class TestAddPersonality(VerifyGrnsMixin, TestBrokerCommand):
         command = ["add_personality", "--host_environment=prod",
                    "--personality=vulcan-1g-desktop-prod", "--archetype=esx_cluster", "--eon_id=2"]
         self.noouttest(command)
-        command = ["add_personality", "--host_environment=legacy",
+        command = ["add_personality", "--host_environment=dev",
                    "--personality=metacluster", "--archetype=metacluster", "--eon_id=2"]
         self.noouttest(command)
 
     def testaddv2personalities(self):
-        command = ["add_personality", "--cluster_required", "--host_environment=legacy",
+        command = ["add_personality", "--cluster_required", "--host_environment=dev",
                    "--personality=vulcan2-10g-test", "--archetype=vmhost", "--eon_id=2"]
         self.noouttest(command)
-        command = ["add_personality", "--host_environment=legacy",
+        command = ["add_personality", "--host_environment=dev",
                    "--personality=vulcan2-10g-test", "--archetype=esx_cluster", "--eon_id=2"]
         self.noouttest(command)
-        command = ["add_personality", "--host_environment=legacy",
+        command = ["add_personality", "--host_environment=dev",
                    "--personality=vulcan2-test", "--archetype=metacluster", "--eon_id=2"]
         self.noouttest(command)
         self.verifycatforpersonality("esx_cluster", "vulcan2-10g-test")
 
     def testaddesxstandalone(self):
         command = ["add_personality", "--personality=esx_standalone",
-                   "--host_environment=legacy",
+                   "--host_environment=dev",
                    "--archetype=vmhost", "--eon_id=2"]
         self.noouttest(command)
         self.verifycatforpersonality("vmhost", "esx_standalone",
@@ -526,19 +526,19 @@ class TestAddPersonality(VerifyGrnsMixin, TestBrokerCommand):
         self.matchclean(out, "Requires clustered hosts", command)
 
     def testaddgridpersonality(self):
-        command = ["add_personality", "--eon_id=2", "--host_environment=legacy",
+        command = ["add_personality", "--eon_id=2", "--host_environment=dev",
                    "--personality=hadoop", "--archetype=gridcluster"]
         self.noouttest(command)
         self.verifycatforpersonality("gridcluster", "hadoop")
 
     def testaddhapersonality(self):
-        command = ["add_personality", "--eon_id=2", "--host_environment=legacy",
+        command = ["add_personality", "--eon_id=2", "--host_environment=dev",
                    "--personality=vcs-msvcs", "--archetype=hacluster"]
         self.noouttest(command)
         self.verifycatforpersonality("hacluster", "vcs-msvcs")
 
     def verifycatforpersonality(self, archetype, personality,
-                                config_override=False, host_env='legacy',
+                                config_override=False, host_env='dev',
                                 grn=None):
         command = ["cat", "--archetype", archetype, "--personality", personality]
         out = self.commandtest(command)
@@ -576,16 +576,16 @@ class TestAddPersonality(VerifyGrnsMixin, TestBrokerCommand):
 
     def testverifyshowdiff2(self):
         command = ["show_diff", "--personality=utpersonality/dev",
-                   "--archetype=aquilon", "--other=esx_server", "--other_archetype=vmhost"]
+                   "--archetype=aquilon", "--other=vulcan-1g-desktop-prod", "--other_archetype=vmhost"]
         out = self.commandtest(command)
         self.searchoutput(out,
                           r'missing Options in Personality aquilon/utpersonality/dev:\s+Cluster Required',
                           command)
         self.searchoutput(out,
-                          r'matching Options with different values:\s+Environment value=dev, othervalue=legacy',
+                          r'matching Options with different values:\s+Environment value=dev, othervalue=prod',
                           command)
         self.searchoutput(out,
-                          r'missing Options in Personality vmhost/esx_server:\s+ConfigOverride',
+                          r'missing Options in Personality vmhost/vulcan-1g-desktop-prod:\s+ConfigOverride',
                           command)
 
     def testfailnoenvironment(self):
@@ -702,10 +702,10 @@ class TestAddPersonality(VerifyGrnsMixin, TestBrokerCommand):
         command = ["search_personality", "--host_environment", "dev",
                    "--eon_id", 2, "--format=proto"]
         out = self.commandtest(command)
-        pl = self.parse_personality_msg(out, 1)
+        pl = self.parse_personality_msg(out, 13)
         personality = pl.personalities[0]
         self.failUnlessEqual(personality.archetype.name, "aquilon")
-        self.failUnlessEqual(personality.name, "utpersonality/dev")
+        self.failUnlessEqual(personality.name, "badpersonality")
         self.failUnlessEqual(personality.owner_eonid, self.grns[GRN])
         self.failUnlessEqual(personality.host_environment, "dev")
 
@@ -727,6 +727,14 @@ class TestAddPersonality(VerifyGrnsMixin, TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out, "vmhost/vulcan-1g-desktop-prod", command)
         self.matchclean(out, "esx_cluster/vulcan-1g-desktop-prod", command)
+
+    def testaddpersonalitylegacy(self):
+        command = ["add_personality", "--personality=testlegacy",
+                   "--archetype=aquilon", "--grn=%s" % GRN,
+                   "--host_environment=legacy"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Legacy is not a valid environment for a new personality.",
+                         command)
 
 
 if __name__ == '__main__':
