@@ -24,11 +24,11 @@ from sqlalchemy.orm import joinedload, subqueryload, lazyload, contains_eager
 from sqlalchemy.orm.attributes import set_committed_value
 
 from aquilon.exceptions_ import PartialError, IncompleteError
-from aquilon.aqdb.model import (Service, Machine, Chassis, Host,
-                                Personality, Cluster, City, Rack, Resource,
-                                ResourceHolder, HostResource, ClusterResource,
-                                VirtualMachine, Filesystem, RebootSchedule,
-                                Share, Disk, Interface, AddressAssignment,
+from aquilon.aqdb.model import (Service, Machine, Chassis, Host, Personality,
+                                Cluster, City, Rack, Resource, HostResource,
+                                ClusterResource, VirtualMachine, Filesystem,
+                                RebootSchedule, Hostlink, ServiceAddress, Share,
+                                Disk, Interface, AddressAssignment,
                                 ServiceInstance, Switch)
 from aquilon.aqdb.data_sync.storage import cache_storage_data
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
@@ -51,6 +51,32 @@ class CommandFlush(BrokerCommand):
         q = q.options(joinedload('holder'))
         for res in q:
             cache[res.id] = res
+
+    def preload_resources(self, session, cache):
+        # Load the most common resource types. Using
+        # with_polymorphic('*') on Resource would generate a huge query,
+        # so do something more targeted. More resource subclasses may be
+        # added later if they become common.
+        preload_classes = {
+            Hostlink: [],
+            ServiceAddress: [joinedload('dns_record'),
+                             joinedload('assignments'),
+                             joinedload('assignments.interface'),
+                             lazyload('assignments.interface.hardware_entity')],
+            RebootSchedule: [],
+            VirtualMachine: [joinedload('machine'),
+                             joinedload('machine.primary_name'),
+                             joinedload('machine.primary_name.fqdn')],
+        }
+
+        for cls, options in preload_classes.items():
+            q = session.query(cls)
+            q = q.options(joinedload('holder'))
+            if options:
+                q = q.options(*options)
+
+            for res in q:
+                cache[res.id] = res
 
     def render(self, session, logger,
                services, personalities, machines, clusters, hosts,
@@ -102,40 +128,11 @@ class CommandFlush(BrokerCommand):
                 for resholder in q:
                     resholder_by_id[resholder.id] = resholder
 
-            if hosts or clusters or resources:
-                # Load the most common resource types. Using
-                # with_polymorphic('*') on Resource would generate a huge query,
-                # so do something more targeted. More resource subclasses may be
-                # added later if they become common.
-                preload_classes = {
-                    RebootSchedule: [],
-                    VirtualMachine: [joinedload('machine'),
-                                     joinedload('machine.primary_name'),
-                                     joinedload('machine.primary_name.fqdn')],
-                }
-
-                for cls, options in preload_classes.items():
-                    q = session.query(cls)
-
-                    # If only hosts or only clusters are needed, don't load
-                    # resources of the other kind
-                    if hosts and not clusters and not resources:
-                        q = q.join(ResourceHolder)
-                        q = q.options(contains_eager('holder'))
-                        q = q.filter_by(holder_type='host')
-                    if clusters and not hosts and not resources:
-                        q = q.join(ResourceHolder)
-                        q = q.filter_by(holder_type='cluster')
-                        q = q.options(contains_eager('holder'))
-
-                    if options:
-                        q = q.options(*options)
-
-                    for res in q:
-                        resource_by_id[res.id] = res
-
             if hosts or clusters or resources or machines:
                 self.preload_virt_disk_info(session, resource_by_id)
+
+            if hosts or clusters or resources:
+                self.preload_resources(session, resource_by_id)
 
             if hosts or machines:
                 # Polymorphic loading cannot be applied to eager-loaded
@@ -312,7 +309,8 @@ class CommandFlush(BrokerCommand):
                               joinedload("machine.primary_name"),
                               joinedload("machine.primary_name.fqdn"),
                               subqueryload("_grns"),
-                              subqueryload("resholder"),
+                              joinedload("resholder"),
+                              subqueryload("resholder.resources"),
                               subqueryload("services_used"),
                               subqueryload("_services_provided"),
                               subqueryload("_cluster"),
