@@ -117,7 +117,7 @@ class MachineFormatter(ObjectFormatter):
             details.append(indent + "  Disk: %s %d GB %s (%s)%s" %
                            (d.device_name, d.capacity, d.controller_type,
                             extra, flags))
-        for i in machine.interfaces:
+        for i in sorted(machine.interfaces, key=attrgetter('name')):
             details.append(self.redirect_raw(i, indent + "  "))
         if machine.comments:
             details.append(indent + "  Comments: %s" % machine.comments)
