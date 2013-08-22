@@ -19,7 +19,7 @@
 
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.user_principal import (
-        get_or_create_user_principal)
+    get_or_create_user_principal)
 from aquilon.aqdb.model import Role
 
 

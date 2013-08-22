@@ -32,7 +32,7 @@ class Share(Resource):
     id = Column(Integer, ForeignKey('resource.id',
                                     name='%s_resource_fk' % (_TN),
                                     ondelete='CASCADE'),
-                                    primary_key=True)
+                primary_key=True)
 
     def __init__(self, *args, **kwargs):
         super(Share, self).__init__(*args, **kwargs)

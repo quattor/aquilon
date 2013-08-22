@@ -311,8 +311,7 @@ def read_file(path, filename, logger=LOGGER):
     try:
         return open(fullfile).read()
     except OSError, e:
-        raise AquilonError("Could not read contents of %s: %s"
-                % (fullfile, e))
+        raise AquilonError("Could not read contents of %s: %s" % (fullfile, e))
 
 
 def remove_file(filename, logger=LOGGER):

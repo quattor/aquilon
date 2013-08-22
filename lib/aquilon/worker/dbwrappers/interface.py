@@ -292,17 +292,16 @@ def choose_port_group(session, logger, dbmachine):
 
     # filter for user vlans only
     networks = session.query(Network).\
-            join("observed_vlans", "vlan").\
-            filter(VlanInfo.vlan_type == "user").\
-            filter(ObservedVlan.switch == sw).\
-            order_by(VlanInfo.vlan_id).all()
+        join("observed_vlans", "vlan").\
+        filter(VlanInfo.vlan_type == "user").\
+        filter(ObservedVlan.switch == sw).\
+        order_by(VlanInfo.vlan_id).all()
 
     # then filter by capacity
-    networks = [nw for nw in networks
-                   if not nw.is_at_guest_capacity]
+    networks = [nw for nw in networks if not nw.is_at_guest_capacity]
 
-    for dbobserved_vlan in [vlan for n in networks
-                 for vlan in n.observed_vlans if vlan.vlan_type == "user"]:
+    for dbobserved_vlan in [vlan for n in networks for vlan in n.observed_vlans
+                            if vlan.vlan_type == "user"]:
         if not selected_vlan or \
            selected_vlan.guest_count > dbobserved_vlan.guest_count:
             selected_vlan = dbobserved_vlan
@@ -599,9 +598,9 @@ def rename_interface(session, dbinterface, rename_to):
                 new_name = "%s-%s" % (short, rename_to)
             fqdn_changes.extend([(dns_rec.fqdn, new_name) for dns_rec
                                  in addr.dns_records
-                                 if dns_rec.fqdn.name == old_name and
-                                    dns_rec.fqdn.dns_domain == dbdns_domain and
-                                    dns_rec.fqdn != primary_fqdn])
+                                 if (dns_rec.fqdn.name == old_name and
+                                     dns_rec.fqdn.dns_domain == dbdns_domain and
+                                     dns_rec.fqdn != primary_fqdn)])
     else:
         dbdns_domain = dbdns_env = None
 

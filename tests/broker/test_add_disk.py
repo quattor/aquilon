@@ -29,7 +29,8 @@ class TestAddDisk(TestBrokerCommand):
 
     def testaddut3c5n10disk(self):
         self.noouttest(["add", "disk", "--machine", "ut3c5n10",
-            "--disk", "sdb", "--controller", "scsi", "--size", "34"])
+                        "--disk", "sdb", "--controller", "scsi",
+                        "--size", "34"])
 
     def testfailaddut3c5n10disk(self):
         command = ["add_disk", "--machine=ut3c5n10", "--disk=sdc",

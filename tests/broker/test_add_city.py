@@ -138,7 +138,8 @@ class TestAddCity(TestBrokerCommand):
         command = "show building --building bx"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Location Parents: [Organization ms, Hub ny, "
-                    "Continent na, Country us, Campus na, City e4]", command)
+                         "Continent na, Country us, Campus na, City e4]",
+                         command)
 
     def testaddcitycampus(self):
         ## add city

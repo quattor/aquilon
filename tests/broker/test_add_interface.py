@@ -335,8 +335,8 @@ class TestAddInterface(TestBrokerCommand):
         command = "show manager --missing"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
-            "# No host found for machine ut3c1n3 with management interface",
-            command)
+                         "# No host found for machine ut3c1n3 with management interface",
+                         command)
 
     def testverifycatut3c1n3interfaces(self):
         command = "cat --machine ut3c1n3"
@@ -617,8 +617,8 @@ class TestAddInterface(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.searchoutput(out,
                           r"Interface: eth0 %s \[boot, default_route\]" %
-                         self.net["tor_net_0"].usable[4].mac.lower(),
-                         command)
+                          self.net["tor_net_0"].usable[4].mac.lower(),
+                          command)
 
     def testaddut8s02p5eth0(self):
         self.noouttest(["add", "interface", "--interface", "eth0",

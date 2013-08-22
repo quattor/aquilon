@@ -187,7 +187,7 @@ class TestUsecaseDatabase(TestBrokerCommand):
                          self.plenary_name("resource", "cluster", "nydb1",
                                            "application", "nydb1", "config"),
                          self.plenary_name("resource", "cluster", "nydb1",
-                                           "service_address",  "nydb1nydb1",
+                                           "service_address", "nydb1nydb1",
                                            "config")]
 
         # Verify that we got the paths right

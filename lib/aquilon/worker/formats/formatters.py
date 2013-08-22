@@ -218,13 +218,13 @@ class ObjectFormatter(object):
     @staticmethod
     def redirect_raw(result, indent=""):
         handler = ObjectFormatter.handlers.get(result.__class__,
-                ObjectFormatter.default_handler)
+                                               ObjectFormatter.default_handler)
         return handler.format_raw(result, indent)
 
     @staticmethod
     def redirect_csv(result):
         handler = ObjectFormatter.handlers.get(result.__class__,
-                ObjectFormatter.default_handler)
+                                               ObjectFormatter.default_handler)
         return handler.format_csv(result)
 
     @staticmethod
@@ -236,13 +236,13 @@ class ObjectFormatter(object):
     @staticmethod
     def redirect_html(result):
         handler = ObjectFormatter.handlers.get(result.__class__,
-                ObjectFormatter.default_handler)
+                                               ObjectFormatter.default_handler)
         return handler.format_html(result)
 
     @staticmethod
     def redirect_proto(result, skeleton=None):
         handler = ObjectFormatter.handlers.get(result.__class__,
-                ObjectFormatter.default_handler)
+                                               ObjectFormatter.default_handler)
         return handler.format_proto(result, skeleton)
 
     def add_hardware_data(self, host_msg, hwent):
@@ -364,18 +364,18 @@ class ObjectFormatter(object):
         if service_map.location:
             sm_msg.location.name = str(service_map.location.name)
             sm_msg.location.location_type = \
-                    str(service_map.location.location_type)
+                str(service_map.location.location_type)
         else:
             sm_msg.network.ip = str(service_map.network.ip)
             sm_msg.network.env_name = \
-                    service_map.network.network_environment.name
+                service_map.network.network_environment.name
 
         self.add_service_msg(sm_msg.service,
                              service_map.service, service_map.service_instance)
         if hasattr(service_map, "personality"):
             sm_msg.personality.name = str(service_map.personality)
             sm_msg.personality.archetype.name = \
-                    str(service_map.personality.archetype.name)
+                str(service_map.personality.archetype.name)
         else:
             sm_msg.personality.archetype.name = 'aquilon'
 

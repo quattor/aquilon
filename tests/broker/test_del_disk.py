@@ -29,11 +29,11 @@ class TestDelDisk(TestBrokerCommand):
 
     def testdelut3c1n3sda(self):
         self.noouttest(["del", "disk", "--machine", "ut3c1n3",
-            "--controller", "scsi", "--size", "68"])
+                        "--controller", "scsi", "--size", "68"])
 
     def testdelut3c1n3sdb(self):
         self.noouttest(["del", "disk", "--machine", "ut3c1n3",
-            "--disk", "c0d0"])
+                        "--disk", "c0d0"])
 
     def testverifydelut3c1n3sda(self):
         command = "show machine --machine ut3c1n3"

@@ -96,7 +96,7 @@ class Cluster(Base):
 
     branch_id = Column(Integer, ForeignKey('branch.id',
                                            name='cluster_branch_fk'),
-                                           nullable=False)
+                       nullable=False)
 
     sandbox_author_id = Column(Integer,
                                ForeignKey('user_principal.id',
@@ -200,21 +200,19 @@ class Cluster(Base):
 
     def validate_membership(self, host, error=ArgumentError, **kwargs):
         if host.machine.location != self.location_constraint and \
-               self.location_constraint not in \
-               host.machine.location.parents:
+                self.location_constraint not in \
+                host.machine.location.parents:
             raise error("Host location {0} is not within cluster "
                         "location {1}.".format(host.machine.location,
                                                self.location_constraint))
 
         if host.branch != self.branch or \
-               host.sandbox_author != self.sandbox_author:
-            raise ArgumentError("{0} {1} {2} does not match {3:l} {4} "
-                                "{5}.".format(host,
-                                              host.branch.branch_type,
-                                              host.authored_branch,
-                                              self,
-                                              self.branch.branch_type,
-                                              self.authored_branch))
+                host.sandbox_author != self.sandbox_author:
+            raise ArgumentError("{0} {1} {2} does not match {3:l} {4} {5}."
+                                .format(host, host.branch.branch_type,
+                                        host.authored_branch, self,
+                                        self.branch.branch_type,
+                                        self.authored_branch))
 
     def validate(self, max_hosts=None, error=ArgumentError, **kwargs):
         session = object_session(self)
@@ -226,13 +224,8 @@ class Cluster(Base):
         set_committed_value(self, '_hosts', members)
 
         if self.cluster_type != 'meta':
-            for i in [
-                    "down_hosts_threshold",
-                    "down_hosts_percent",
-                    "down_maint_percent",
-                    "personality_id"
-                    #"branch_id"
-                ]:
+            for i in ["down_hosts_threshold", "down_hosts_percent",
+                      "down_maint_percent", "personality_id"]:
                 if getattr(self, i, None) is None:
                     raise error("Attribute %s must be set for a %s cluster." %
                                 (i, self.cluster_type))
@@ -269,7 +262,7 @@ class Cluster(Base):
         if lowercase:
             parts = clsname.split()
             clsname = ' '.join(map(
-                    lambda x: x if x[:-1].isupper() else x.lower(), parts))
+                lambda x: x if x[:-1].isupper() else x.lower(), parts))
         if class_only:
             return clsname.__format__(passthrough)
         val = "%s %s" % (clsname, instance)
@@ -290,7 +283,7 @@ class ComputeCluster(Cluster):
     id = Column(Integer, ForeignKey('%s.id' % _TN,
                                     name='compute_cluster_fk',
                                     ondelete='CASCADE'),
-                                    primary_key=True)
+                primary_key=True)
 
 compute_cluster = ComputeCluster.__table__  # pylint: disable=C0103
 compute_cluster.info['unique_fields'] = ['name']
@@ -307,7 +300,7 @@ class StorageCluster(Cluster):
     id = Column(Integer, ForeignKey('%s.id' % _TN,
                                     name='storage_cluster_fk',
                                     ondelete='CASCADE'),
-                                    primary_key=True)
+                primary_key=True)
 
     def validate_membership(self, host, error=ArgumentError, **kwargs):
         super(StorageCluster, self).validate_membership(host=host, error=error,
@@ -332,8 +325,8 @@ class EsxCluster(Cluster):
     _class_label = 'ESX Cluster'
 
     esx_cluster_id = Column(Integer, ForeignKey('%s.id' % _TN,
-                                            name='%s_cluster_fk' % _ETN,
-                                            ondelete='CASCADE'),
+                                                name='%s_cluster_fk' % _ETN,
+                                                ondelete='CASCADE'),
                             #if the cluster record is deleted so is esx_cluster
                             primary_key=True)
 
@@ -492,14 +485,12 @@ class EsxCluster(Cluster):
             for res in q:
                 resource_by_id[res.id] = res
 
-
         if vm_part is None:
             vm_part = self.vm_count
         if host_part is None:
             host_part = self.host_count
         if current_vm_count is None:
             current_vm_count = len(self.virtual_machines)
-
 
         if current_host_count is None:
             current_host_count = len(self.hosts)
@@ -568,16 +559,16 @@ class HostClusterMember(Base):
     __tablename__ = _HCM
 
     cluster_id = Column(Integer, ForeignKey('%s.id' % _TN,
-                                                name='hst_clstr_mmbr_clstr_fk',
-                                                ondelete='CASCADE'),
+                                            name='hst_clstr_mmbr_clstr_fk',
+                                            ondelete='CASCADE'),
                         #if the cluster is deleted, so is membership
                         nullable=False)
 
     host_id = Column(Integer, ForeignKey('host.machine_id',
                                          name='hst_clstr_mmbr_hst_fk',
                                          ondelete='CASCADE'),
-                        #if the host is deleted, so is the membership
-                        nullable=False)
+                     #if the host is deleted, so is the membership
+                     nullable=False)
 
     node_index = Column(Integer, nullable=False)
 

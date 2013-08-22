@@ -17,7 +17,6 @@
 """Contains the logic for `aq search dns `."""
 
 
-from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import (DnsRecord, ARecord, Alias, SrvRecord, Fqdn,
                                 DnsDomain, DnsEnvironment, Network,
                                 NetworkEnvironment, AddressAssignment)

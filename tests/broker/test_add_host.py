@@ -187,12 +187,12 @@ class TestAddHost(TestBrokerCommand):
         self.dsdb_expect_add("unittest15.aqd-unittest.ms.com", ip, "eth0",
                              ip.mac)
         self.noouttest(["add", "host",
-            "--hostname", "unittest15.aqd-unittest.ms.com",
-            "--ipfromsystem", "ut01ga1s02.aqd-unittest.ms.com",
-            "--ipalgorithm", "max",
-            "--osname", "linux", "--osversion", "5.0.1-x86_64",
-            "--machine", "ut8s02p1", "--domain", "unittest",
-            "--buildstatus", "build", "--archetype", "aquilon"])
+                        "--hostname", "unittest15.aqd-unittest.ms.com",
+                        "--ipfromsystem", "ut01ga1s02.aqd-unittest.ms.com",
+                        "--ipalgorithm", "max",
+                        "--osname", "linux", "--osversion", "5.0.1-x86_64",
+                        "--machine", "ut8s02p1", "--domain", "unittest",
+                        "--buildstatus", "build", "--archetype", "aquilon"])
         self.dsdb_verify()
 
     def testverifyunittest15(self):
@@ -273,10 +273,10 @@ class TestAddHost(TestBrokerCommand):
         self.dsdb_expect_add("unittest17.aqd-unittest.ms.com", ip, "eth0",
                              ip.mac)
         self.noouttest(["add", "host",
-            "--hostname", "unittest17.aqd-unittest.ms.com",
-            "--ipfromsystem", "ut01ga1s02.aqd-unittest.ms.com",
-            "--machine", "ut8s02p3", "--domain", "unittest",
-            "--buildstatus", "build", "--archetype", "aquilon"])
+                        "--hostname", "unittest17.aqd-unittest.ms.com",
+                        "--ipfromsystem", "ut01ga1s02.aqd-unittest.ms.com",
+                        "--machine", "ut8s02p3", "--domain", "unittest",
+                        "--buildstatus", "build", "--archetype", "aquilon"])
         self.dsdb_verify()
 
     def testverifyunittest17(self):

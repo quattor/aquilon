@@ -232,9 +232,9 @@ class TestParameterDefinition(TestBrokerCommand):
 
     def test_146_update(self):
         cmd = ["update_parameter_definition", "--archetype", ARCHETYPE,
-              "--path=testint", "--description=testint",
-              "--default=100", "--required",
-              "--rebuild_required"]
+               "--path=testint", "--description=testint",
+               "--default=100", "--required",
+               "--rebuild_required"]
         self.noouttest(cmd)
 
     def test_147_verify_add(self):
@@ -258,7 +258,7 @@ class TestParameterDefinition(TestBrokerCommand):
                "--value=test"]
         self.noouttest(cmd)
 
-        cmd = ["del_parameter_definition", "--archetype", ARCHETYPE, "--path=testpath" ]
+        cmd = ["del_parameter_definition", "--archetype", ARCHETYPE, "--path=testpath"]
         out = self.badrequesttest(cmd)
         self.matchoutput(out, "Parameter with path testpath used by following and cannot be deleted", cmd)
 
@@ -276,13 +276,13 @@ class TestParameterDefinition(TestBrokerCommand):
             self.noouttest(cmd)
 
     def test_200_verify_delete(self):
-        cmd = ["search_parameter_definition", "--archetype", ARCHETYPE ]
+        cmd = ["search_parameter_definition", "--archetype", ARCHETYPE]
 
         err = self.notfoundtest(cmd)
         self.matchoutput(err, "Not Found: No parameter definitions found for archetype aquilon", cmd)
 
     def test_210_invalid_path_cleaned(self):
-        for path in ["/startslash", "endslash/"] :
+        for path in ["/startslash", "endslash/"]:
             cmd = ["add_parameter_definition", "--archetype", ARCHETYPE,
                    "--path=%s" % path, "--template=foo", "--value_type=string"]
             self.noouttest(cmd)
@@ -293,7 +293,7 @@ class TestParameterDefinition(TestBrokerCommand):
 
     def test_215_invalid_path1(self):
         for path in ["!badchar", "@badchar", "#badchar", "$badchar", "%badchar", "^badchar",
-                     "&badchar", "*badchar" ":badchar", ";badcharjk", "+badchar"] :
+                     "&badchar", "*badchar" ":badchar", ";badcharjk", "+badchar"]:
             cmd = ["add_parameter_definition", "--archetype", ARCHETYPE,
                    "--path=%s" % path, "--template=foo", "--value_type=string"]
             err = self.badrequesttest(cmd)
@@ -302,7 +302,7 @@ class TestParameterDefinition(TestBrokerCommand):
 
     def test_220_valid_path(self):
         for path in ["multi/part1/part2", "noslash", "valid/with_under", "valid/with.dot",
-                     "valid/with-dash", "with_under", "with.dot", "with-dash"] :
+                     "valid/with-dash", "with_under", "with.dot", "with-dash"]:
 
             cmd = ["add_parameter_definition", "--archetype", ARCHETYPE,
                    "--path=%s" % path, "--template=foo", "--value_type=string"]

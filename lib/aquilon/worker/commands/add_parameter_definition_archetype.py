@@ -35,7 +35,6 @@ class CommandAddParameterDefintionArchetype(BrokerCommand):
         if not dbarchetype.paramdef_holder:
             dbarchetype.paramdef_holder = ArchetypeParamDef()
 
-
         ## strip slash from path start and end
         if path.startswith("/"):
             path = path[1:]

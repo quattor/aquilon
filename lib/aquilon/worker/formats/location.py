@@ -42,7 +42,7 @@ class LocationFormatter(ObjectFormatter):
             details.append(indent + "  Comments: %s" % location.comments)
         if location.parents:
             details.append(indent + "  Location Parents: [%s]" %
-                    ", ".join(format(p) for p in location.parents))
+                           ", ".join(format(p) for p in location.parents))
         if location.default_dns_domain:
             details.append(indent + "  Default DNS Domain: %s" %
                            location.default_dns_domain)

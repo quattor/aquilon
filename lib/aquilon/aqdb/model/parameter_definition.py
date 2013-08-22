@@ -75,7 +75,7 @@ class ArchetypeParamDef(ParamDefHolder):
 
     archetype = relation(Archetype, uselist=False, lazy='subquery',
                          backref=backref('paramdef_holder', uselist=False,
-                                    cascade='all, delete-orphan'))
+                                         cascade='all, delete-orphan'))
 
     __extra_table_args__ = (UniqueConstraint(archetype_id,
                                              name='param_def_holder_archetype_uk'),)
@@ -100,7 +100,7 @@ class FeatureParamDef(ParamDefHolder):
 
     feature = relation(Feature, uselist=False,
                        backref=backref('paramdef_holder', uselist=False,
-                                    cascade='all, delete-orphan'))
+                                       cascade='all, delete-orphan'))
 
     __extra_table_args__ = (UniqueConstraint(feature_id,
                                              name='param_def_holder_feature_uk'),)
@@ -139,7 +139,7 @@ class ParamDefinition(Base):
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
     rebuild_required = Column(Boolean(name="%s_rebuild_ck" % _TN),
-                                      nullable=False, default=False)
+                              nullable=False, default=False)
     holder = relation(ParamDefHolder, innerjoin=True,
                       backref=backref('param_definitions',
                                       cascade='all, delete-orphan'))

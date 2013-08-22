@@ -28,8 +28,8 @@ class ServiceInstanceFormatter(ObjectFormatter):
     protocol = "aqdservices_pb2"
 
     def format_raw(self, si, indent=""):
-        details = [indent + "Service: %s Instance: %s"
-                % (si.service.name, si.name)]
+        details = [indent + "Service: %s Instance: %s" % (si.service.name,
+                                                          si.name)]
         details.append(indent + "  Template: %s" % si.cfg_path)
         for host in si.server_hosts:
             details.append(indent + "  Server: %s" % host.fqdn)
@@ -83,6 +83,7 @@ class ServiceInstanceListFormatter(ListFormatter):
         return servicelist_msg.SerializeToString()
 
 ObjectFormatter.handlers[ServiceInstanceList] = ServiceInstanceListFormatter()
+
 
 class ServiceShareList(list):
     pass

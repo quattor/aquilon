@@ -32,7 +32,7 @@ class TestDelInterface(TestBrokerCommand):
 
     def testdelut3c1n3eth0(self):
         self.noouttest(["del", "interface", "--interface", "eth0",
-            "--machine", "ut3c1n3"])
+                        "--machine", "ut3c1n3"])
 
     def testdelut3c1n3eth1(self):
         self.noouttest(["del", "interface",

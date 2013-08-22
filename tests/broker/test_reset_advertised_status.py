@@ -135,13 +135,13 @@ class TestResetAdvertisedStatus(TestBrokerCommand):
         user = self.config.get("unittest", "user")
         hostlimit = self.config.getint("broker", "reset_advertised_status_max_list_size")
         hosts = []
-        for i in range(1,20):
-            hosts.append("thishostdoesnotexist%d.aqd-unittest.ms.com\n" %i)
+        for i in range(1, 20):
+            hosts.append("thishostdoesnotexist%d.aqd-unittest.ms.com\n" % i)
         scratchfile = self.writescratch("mapgrnlistlimit", "".join(hosts))
         command = ["unmap", "grn", "--grn", "grn:/ms/ei/aquilon/aqd",
                    "--list", scratchfile, "--target", "esp"]
         out = self.badrequesttest(command)
-        self.matchoutput(out,"The number of hosts in list {0:d} can not be more "
+        self.matchoutput(out, "The number of hosts in list {0:d} can not be more "
                          "than {1:d}".format(len(hosts), hostlimit), command)
 
 

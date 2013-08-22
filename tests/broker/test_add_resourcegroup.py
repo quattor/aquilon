@@ -127,8 +127,8 @@ class TestAddResourceGroup(TestBrokerCommand):
         self.assertTrue(rg_msg,
                         "Resourcegroup utvcs1as1 not found in the resources. "
                         "Existing resources: %s" %
-                        ", ".join(["%s %s" % (res.type, res.name) for res in
-                                              cluster.resources]))
+                        ", ".join(["%s %s" % (res.type, res.name)
+                                   for res in cluster.resources]))
         fs_found = False
         for resource in rg_msg.resourcegroup.resources:
             if resource.name == "fs1" and resource.type == "filesystem":
@@ -143,8 +143,8 @@ class TestAddResourceGroup(TestBrokerCommand):
         self.assertTrue(fs_found,
                         "Filesystem fs1 not found in the resourcegroup. "
                         "Existing resources: %s" %
-                        ", ".join(["%s %s" % (res.type, res.name) for res in
-                                              rg_msg.resourcegroup.resources]))
+                        ", ".join(["%s %s" % (res.type, res.name)
+                                   for res in rg_msg.resourcegroup.resources]))
 
     def test_200_add_bad_type(self):
         command = ["add_resourcegroup", "--resourcegroup=utvcs1as1",

@@ -452,7 +452,7 @@ class TestAddVirtualHardware(TestBrokerCommand):
         # os
         self.searchoutput(out, r"^    Template: windows/os/windows/nt61e/config"
                           + self.template_extension,
-                         command)
+                          command)
         self.searchoutput(out, r"^    Comments: Windows 7 Enterprise \(x86\)",
                           command)
 

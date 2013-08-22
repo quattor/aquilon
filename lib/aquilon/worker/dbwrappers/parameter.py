@@ -34,12 +34,11 @@ def get_parameter_holder(session, archetype=None, personality=None,
                          auto_include=False):
     db_param_holder = None
     dbpersonality = None
-    if  isinstance(personality, Personality):
+    if isinstance(personality, Personality):
         dbpersonality = personality
     else:
         dbpersonality = Personality.get_unique(session, name=personality,
-                                                   archetype=archetype,
-                                                   compel=True)
+                                               archetype=archetype, compel=True)
     db_param_holder = dbpersonality.paramholder
 
     if db_param_holder is None and auto_include:
@@ -165,7 +164,7 @@ def validate_value(label, value_type, value):
     elif value_type == 'json':
         retval = force_json_dict(label, value)
 
-    if  retval == None:
+    if retval == None:
         raise ArgumentError("Value %s for path %s has to be of type %s." %
                             (value, label, value_type))
 
@@ -331,13 +330,11 @@ def validate_personality_config(session, archetype, personality):
         parameters are also validated.
     """
     dbpersonality = None
-    if  isinstance(personality, Personality):
+    if isinstance(personality, Personality):
         dbpersonality = personality
     else:
-        dbpersonality = Personality.get_unique(session,
-                                           name=personality,
-                                           archetype=archetype,
-                                           compel=True)
+        dbpersonality = Personality.get_unique(session, name=personality,
+                                               archetype=archetype, compel=True)
     dbarchetype = dbpersonality.archetype
 
     error = []
@@ -358,6 +355,7 @@ def validate_personality_config(session, archetype, personality):
                 error.append("Feature Binding : %s" % link.feature)
                 error += tmp_error
     return error
+
 
 def validate_param_definition(path, value_type, default=None):
     """

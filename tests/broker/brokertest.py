@@ -80,12 +80,12 @@ class TestBrokerCommand(unittest.TestCase):
 
         if self.config.has_option("unittest", "aurora_with_node"):
             self.aurora_with_node = self.config.get("unittest",
-                    "aurora_with_node")
+                                                    "aurora_with_node")
         else:
             self.aurora_with_node = "oyidb1622"
         if self.config.has_option("unittest", "aurora_without_node"):
             self.aurora_without_node = self.config.get("unittest",
-                    "aurora_without_node")
+                                                       "aurora_without_node")
         else:
             self.aurora_without_node = "pissp1"
         self.gzip_profiles = self.config.getboolean("panc", "gzip_output")
@@ -221,22 +221,25 @@ class TestBrokerCommand(unittest.TestCase):
         (p, out, err) = self.runcommand(command, **kwargs)
         self.assertEmptyErr(err, command)
         self.assertEqual(p.returncode, 0,
-                "Non-zero return code for %s, STDOUT:\n@@@\n'%s'\n@@@\n"
-                % (command, out))
+                         "Non-zero return code for %s, "
+                         "STDOUT:\n@@@\n'%s'\n@@@\n"
+                         % (command, out))
         return out
 
     def noouttest(self, command, **kwargs):
         out = self.commandtest(command, **kwargs)
         self.assertEqual(out, "",
-                "STDOUT for %s was not empty:\n@@@\n'%s'\n@@@\n"
-                % (command, out))
+                         "STDOUT for %s was not empty:\n@@@\n'%s'\n@@@\n"
+                         % (command, out))
 
     def ignoreoutputtest(self, command, **kwargs):
         (p, out, err) = self.runcommand(command, **kwargs)
         # Ignore out/err unless we get a non-zero return code, then log it.
         self.assertEqual(p.returncode, 0,
-                "Non-zero return code for %s, STDOUT:\n@@@\n'%s'\n@@@\nSTDERR:\n@@@\n'%s'\n@@@\n"
-                % (command, out, err))
+                         "Non-zero return code for %s, "
+                         "STDOUT:\n@@@\n'%s'\n@@@\n"
+                         "STDERR:\n@@@\n'%s'\n@@@\n"
+                         % (command, out, err))
         return
 
     # Right now, commands are not implemented consistently.  When that is
@@ -490,8 +493,10 @@ class TestBrokerCommand(unittest.TestCase):
         # Ignore out/err unless we get a non-zero return code, then log it.
         (out, err) = p.communicate()
         self.assertEqual(p.returncode, 0,
-                "Non-zero return code for %s, STDOUT:\n@@@\n'%s'\n@@@\nSTDERR:\n@@@\n'%s'\n@@@\n"
-                % (command, out, err))
+                         "Non-zero return code for %s, "
+                         "STDOUT:\n@@@\n'%s'\n@@@\n"
+                         "STDERR:\n@@@\n'%s'\n@@@\n"
+                         % (command, out, err))
         return (out, err)
 
     def gitcommand_expectfailure(self, command, **kwargs):
@@ -499,8 +504,10 @@ class TestBrokerCommand(unittest.TestCase):
         # Ignore out/err unless we get a non-zero return code, then log it.
         (out, err) = p.communicate()
         self.failIfEqual(p.returncode, 0,
-                "Zero return code for %s, STDOUT:\n@@@\n'%s'\n@@@\nSTDERR:\n@@@\n'%s'\n@@@\n"
-                % (command, out, err))
+                         "Zero return code for %s, "
+                         "STDOUT:\n@@@\n'%s'\n@@@\n"
+                         "STDERR:\n@@@\n'%s'\n@@@\n"
+                         % (command, out, err))
         return (out, err)
 
     def check_git_merge_health(self, repo):

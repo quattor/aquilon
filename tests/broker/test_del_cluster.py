@@ -65,7 +65,7 @@ class TestDelCluster(TestBrokerCommand):
         self.notfoundtest(command)
 
         profile = os.path.join(self.config.get("broker", "profilesdir"),
-                                "clusters", "utvcs1.xml")
+                               "clusters", "utvcs1.xml")
         self.failIf(os.path.exists(profile),
                     "Profile file '%s' still exists" % profile)
 

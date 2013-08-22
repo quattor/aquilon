@@ -34,12 +34,10 @@ _TN = 'clusterlifecycle'
 class ClusterLifecycle(StateEngine, Base):
     """ Describes the state a cluster is within the provisioning lifecycle """
 
-    transitions = {
-               'build'        : ['ready', 'decommissioned'],
-               'ready'        : ['rebuild', 'decommissioned'],
-               'rebuild'      : ['ready', 'decommissioned'],
-               'decommissioned' : ['rebuild'],
-               }
+    transitions = {'build': ['ready', 'decommissioned'],
+                   'ready': ['rebuild', 'decommissioned'],
+                   'rebuild': ['ready', 'decommissioned'],
+                   'decommissioned': ['rebuild']}
 
     __tablename__ = _TN
 
@@ -107,17 +105,15 @@ class Decommissioned(ClusterLifecycle):
         if dbcluster.hosts and (not config.has_option(section, opt) or
                                 not config.getboolean(section, opt)):
             raise ArgumentError("Cannot change state to {0}, as {1}'s "
-                                "archetype is {2}.".format(
-                                                    dbdecommissioned.name,
-                                                    dbcluster,
-                                                    archetype.name))
+                                "archetype is {2}."
+                                .format(dbdecommissioned.name, dbcluster,
+                                        archetype.name))
 
         if dbcluster.virtual_machines:
             raise ArgumentError("Cannot change state to {0}, as {1} has "
-                                "{2} VM(s).".format(
-                                                    dbdecommissioned.name,
-                                                    dbcluster,
-                                                    len(dbcluster.virtual_machines)))
+                                "{2} VM(s)."
+                                .format(dbdecommissioned.name, dbcluster,
+                                        len(dbcluster.virtual_machines)))
 
         for dbhost in dbcluster.hosts:
             dbhost.status.transition(dbhost, dbdecommissioned)

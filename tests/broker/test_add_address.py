@@ -162,9 +162,9 @@ class TestAddAddress(TestBrokerCommand):
     def test_450_add_too_long_name(self):
         ip = self.net["unknown0"].usable[16]
         cmd = ['add', 'address', '--fqdn',
-            #          1         2         3         4         5         6
-            's234567890123456789012345678901234567890123456789012345678901234' +
-            '.aqd-unittest.ms.com', '--dns_environment', 'internal', '--ip', ip]
+               #         1         2         3         4         5         6
+               's234567890123456789012345678901234567890123456789012345678901234' +
+               '.aqd-unittest.ms.com', '--dns_environment', 'internal', '--ip', ip]
         out = self.badrequesttest(cmd)
         self.matchoutput(out,
                          "DNS name components must have a length between 1 and 63.",

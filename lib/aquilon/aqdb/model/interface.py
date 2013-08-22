@@ -233,7 +233,7 @@ class ManagementInterface(Interface):
         return value
 
 
-class  OnboardInterface(Interface):
+class OnboardInterface(Interface):
     """ Switch/chassis interfaces """
 
     _class_label = "On-board Admin Interface"

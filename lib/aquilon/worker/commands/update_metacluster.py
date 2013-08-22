@@ -21,7 +21,7 @@ from aquilon.aqdb.model import MetaCluster
 from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.commands.update_cluster import update_cluster_location
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
-from aquilon.worker.locks import lock_queue, CompileKey
+from aquilon.worker.locks import lock_queue
 
 
 class CommandUpdateMetaCluster(BrokerCommand):
@@ -58,10 +58,9 @@ class CommandUpdateMetaCluster(BrokerCommand):
         remove_plenaries = PlenaryCollection(logger=logger)
 
         location_updated = update_cluster_location(session, logger,
-                                          dbmetacluster,
-                                          fix_location,
-                                          plenaries, remove_plenaries,
-                                          **arguments)
+                                                   dbmetacluster, fix_location,
+                                                   plenaries, remove_plenaries,
+                                                   **arguments)
 
         if location_updated:
             cluster_updated = True

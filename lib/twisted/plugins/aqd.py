@@ -140,7 +140,7 @@ class AQDMaker(object):
         # importing aqdb.  This is a hack until aqdb can be imported without
         # firing up database connections.
         resources = __import__("aquilon.worker.resources", globals(), locals(),
-                ["RestServer"], -1)
+                               ["RestServer"], -1)
         RestServer = getattr(resources, "RestServer")
 
         restServer = RestServer(config)
@@ -230,7 +230,7 @@ class AQDMaker(object):
                 log.msg("Could not remove old socket '%s': %s" % (sockname, e))
 
         unixsocket = "unix:%s" % sockname
-        kncSite = KNCSite( restServer )
+        kncSite = KNCSite(restServer)
 
         multiService = MultiService()
         multiService.addService(strports.service(unixsocket, kncSite))

@@ -220,7 +220,7 @@ class TestRefreshNetwork(TestBrokerCommand):
     # 300 add a small dynamic range to 0.1.1.0
     def test_300_adddynamicrange(self):
         for ip in range(int(IPv4Address("0.1.1.4")),
-                          int(IPv4Address("0.1.1.8")) + 1):
+                        int(IPv4Address("0.1.1.8")) + 1):
             self.dsdb_expect_add(dynname(IPv4Address(ip)), IPv4Address(ip))
         command = ["add_dynamic_range", "--startip=0.1.1.4", "--endip=0.1.1.8",
                    "--dns_domain=aqd-unittest.ms.com"]
@@ -281,7 +281,7 @@ class TestRefreshNetwork(TestBrokerCommand):
     # 650 delete the dynamic range
     def test_650_deldynamicrange(self):
         for ip in range(int(IPv4Address("0.1.1.4")),
-                          int(IPv4Address("0.1.1.8")) + 1):
+                        int(IPv4Address("0.1.1.8")) + 1):
             self.dsdb_expect_delete(IPv4Address(ip))
         command = ["del_dynamic_range", "--startip=0.1.1.4", "--endip=0.1.1.8"]
         self.successtest(command)

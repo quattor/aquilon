@@ -16,7 +16,7 @@
 # limitations under the License.
 
 
-from aquilon.aqdb.model import Share, ClusterResource
+from aquilon.aqdb.model import Share
 from aquilon.worker.broker import BrokerCommand, validate_basic
 from aquilon.worker.dbwrappers.resources import (add_resource,
                                                  get_resource_holder)
@@ -40,5 +40,3 @@ class CommandAddShare(BrokerCommand):
         add_resource(session, logger, holder, dbshare)
 
         return
-
-

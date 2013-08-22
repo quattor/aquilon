@@ -31,7 +31,7 @@ from aquilon.worker.dbwrappers.feature import add_link
 from aquilon.worker.dbwrappers.grn import lookup_grn
 from aquilon.worker.templates.personality import PlenaryPersonality
 
-VALID_PERSONALITY_RE = re.compile('^[a-zA-Z0-9_-]+\/?[a-zA-Z0-9_-]+$')
+VALID_PERSONALITY_RE = re.compile(r'^[a-zA-Z0-9_-]+\/?[a-zA-Z0-9_-]+$')
 
 
 class CommandAddPersonality(BrokerCommand):
@@ -112,7 +112,7 @@ class CommandAddPersonality(BrokerCommand):
             ## service maps
             q = session.query(PersonalityServiceMap).filter_by(personality=dbfrom_persona)
 
-            for sm in q.all() :
+            for sm in q.all():
                 dbmap = PersonalityServiceMap(service_instance=sm.service_instance,
                                               location=sm.location,
                                               network=sm.network,

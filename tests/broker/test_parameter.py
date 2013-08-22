@@ -253,7 +253,6 @@ class TestParameter(TestBrokerCommand):
         self.matchoutput(err, "'/system/personality/function' does not have an associated value", command)
         self.matchoutput(err, "BUILD FAILED", command)
 
-
     def test_320_add_all_required(self):
         path = "espinfo/threshold"
         value = 0
@@ -378,21 +377,22 @@ class TestParameter(TestBrokerCommand):
                "--other", OTHER_PERSONALITY]
 
         out = self.commandtest(cmd)
-        self.searchoutput(out, r'Differences for Parameters:\s*'
-                               r'missing Parameters in Personality aquilon/eaitools:\s*'
-                               r'//action/testaction/command\s*'
-                               r'//action/testaction/user\s*'
-                               r'//action/testaction2/command\s*'
-                               r'//action/testaction2/timeout\s*'
-                               r'//action/testaction2/user\s*'
-                               r'matching Parameters with different values:\s*'
-                               r'//espinfo/function value=production, othervalue=development\s*'
-                               r'//espinfo/users value=someusers, otherusers, othervalue=IT / TECHNOLOGY',
-                         cmd)
+        self.searchoutput(out,
+                          r'Differences for Parameters:\s*'
+                          r'missing Parameters in Personality aquilon/eaitools:\s*'
+                          r'//action/testaction/command\s*'
+                          r'//action/testaction/user\s*'
+                          r'//action/testaction2/command\s*'
+                          r'//action/testaction2/timeout\s*'
+                          r'//action/testaction2/user\s*'
+                          r'matching Parameters with different values:\s*'
+                          r'//espinfo/function value=production, othervalue=development\s*'
+                          r'//espinfo/users value=someusers, otherusers, othervalue=IT / TECHNOLOGY',
+                          cmd)
 
     def test_520_copy_from(self):
         cmd = ["add_personality", "--archetype", ARCHETYPE, "--personality", "myshinynew",
-                "--eon_id=2", "--copy_from", PERSONALITY, "--host_environment", "dev"]
+               "--eon_id=2", "--copy_from", PERSONALITY, "--host_environment", "dev"]
         self.successtest(cmd)
 
         cmd = ["show_diff", "--archetype", ARCHETYPE, "--personality", PERSONALITY,
@@ -403,17 +403,26 @@ class TestParameter(TestBrokerCommand):
         self.successtest(cmd)
 
     def test_530_search_parameter(self):
-        cmd = ["search_parameter", "--archetype", ARCHETYPE, "--path", "espinfo/function" ]
+        cmd = ["search_parameter", "--archetype", ARCHETYPE, "--path", "espinfo/function"]
         out = self.commandtest(cmd)
-        self.searchoutput(out,'Personality aquilon/compileserver:\s*espinfo/function: "development"', cmd)
-        self.searchoutput(out,'Personality aquilon/inventory:\s*espinfo/function: "development"', cmd)
-        self.searchoutput(out,'Personality aquilon/unixeng-test:\s*espinfo/function: "development"', cmd)
-        self.searchoutput(out,'Personality aquilon/testpersona/dev:\s*espinfo/function: "production"', cmd)
-        self.searchoutput(out,'Personality aquilon/eaitools:\s*espinfo/function: "development"', cmd)
- 
+        self.searchoutput(out,
+                          r'Personality aquilon/compileserver:\s*espinfo/function: "development"',
+                          cmd)
+        self.searchoutput(out,
+                          r'Personality aquilon/inventory:\s*espinfo/function: "development"',
+                          cmd)
+        self.searchoutput(out,
+                          r'Personality aquilon/unixeng-test:\s*espinfo/function: "development"',
+                          cmd)
+        self.searchoutput(out,
+                          r'Personality aquilon/testpersona/dev:\s*espinfo/function: "production"',
+                          cmd)
+        self.searchoutput(out,
+                          r'Personality aquilon/eaitools:\s*espinfo/function: "development"',
+                          cmd)
 
     def test_535_search_parameter(self):
-        cmd = ["search_parameter", "--archetype", ARCHETYPE, "--path", "action" ]
+        cmd = ["search_parameter", "--archetype", ARCHETYPE, "--path", "action"]
         out = self.commandtest(cmd)
         self.searchoutput(out, r'Personality aquilon/testpersona/dev:\s*'
                                r'action: {"testaction": {"command": "/bin/testaction", "user": "user2"}, '

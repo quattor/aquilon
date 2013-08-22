@@ -216,10 +216,11 @@ class TestAddMachine(TestBrokerCommand):
 
     def testaddut3c1n3(self):
         self.noouttest(["add", "machine", "--machine", "ut3c1n3",
-            "--chassis", "ut3c1.aqd-unittest.ms.com", "--slot", "3",
-            "--model", "hs21-8853l5u", "--cpucount", "2",
-            "--cpuvendor", "intel", "--cpuname", "xeon", "--cpuspeed", "2660",
-            "--memory", "8192", "--serial", "KPDZ406"])
+                        "--chassis", "ut3c1.aqd-unittest.ms.com", "--slot", "3",
+                        "--model", "hs21-8853l5u", "--cpucount", "2",
+                        "--cpuvendor", "intel", "--cpuname", "xeon",
+                        "--cpuspeed", "2660",
+                        "--memory", "8192", "--serial", "KPDZ406"])
 
     def testshowslot(self):
         command = "show machine --slot 3"
@@ -270,7 +271,8 @@ class TestAddMachine(TestBrokerCommand):
 
     def testaddut3c1n4(self):
         self.noouttest(["add", "machine", "--machine", "ut3c1n4",
-            "--rack", "ut3", "--model", "hs21-8853l5u", "--serial", "KPDZ407"])
+                        "--rack", "ut3", "--model", "hs21-8853l5u",
+                        "--serial", "KPDZ407"])
 
     def testverifyaddut3c1n4(self):
         command = "show machine --machine ut3c1n4"
@@ -358,9 +360,10 @@ class TestAddMachine(TestBrokerCommand):
     # (There should be no cpu with speed==2 in the database)
     def testrejectut3c1n5(self):
         self.badrequesttest(["add", "machine", "--machine", "ut3c1n5",
-            "--rack", "ut3", "--model", "hs21-8853l5u", "--cpucount", "2",
-            "--cpuvendor", "intel", "--cpuname", "xeon", "--cpuspeed", "2",
-            "--memory", "8192", "--serial", "KPDZ406"])
+                             "--rack", "ut3", "--model", "hs21-8853l5u",
+                             "--cpucount", "2", "--cpuvendor", "intel",
+                             "--cpuname", "xeon", "--cpuspeed", "2",
+                             "--memory", "8192", "--serial", "KPDZ406"])
 
     def testverifyrejectut3c1n5(self):
         command = "show machine --machine ut3c1n5"
@@ -368,9 +371,9 @@ class TestAddMachine(TestBrokerCommand):
 
     def testrejectmissingmemory(self):
         command = ["add", "machine", "--machine", "ut3c1n6",
-            "--rack", "ut3", "--model", "utblade", "--cpucount", "2",
-            "--cpuvendor", "intel", "--cpuname", "xeon", "--cpuspeed", "2500",
-            "--serial", "AAAAAAA"]
+                   "--rack", "ut3", "--model", "utblade", "--cpucount", "2",
+                   "--cpuvendor", "intel", "--cpuname", "xeon",
+                   "--cpuspeed", "2500", "--serial", "AAAAAAA"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "does not have machine specification defaults, please specify --memory",
@@ -381,8 +384,8 @@ class TestAddMachine(TestBrokerCommand):
         out = self.notfoundtest(command.split(" "))
 
     def testrejectmissingmodel(self):
-        command = ["add", "machine", "--machine", "ut3c1n7",
-            "--rack", "ut3", "--model", "utblade", "--serial", "BBBBBBB"]
+        command = ["add", "machine", "--machine", "ut3c1n7", "--rack", "ut3",
+                   "--model", "utblade", "--serial", "BBBBBBB"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "does not have machine specification defaults",
                          command)
@@ -397,7 +400,7 @@ class TestAddMachine(TestBrokerCommand):
     # is actually a host.  The other is a management interface.
     def testaddut3s01p1a(self):
         self.noouttest(["add", "machine", "--machine", "ut3s01p1a",
-            "--rack", "ut3", "--model", "poweredge_6650"])
+                        "--rack", "ut3", "--model", "poweredge_6650"])
 
     def testverifyaddut3s01p1a(self):
         command = "show machine --machine ut3s01p1a"
@@ -406,7 +409,7 @@ class TestAddMachine(TestBrokerCommand):
 
     def testaddut3s01p1b(self):
         self.noouttest(["add", "machine", "--machine", "ut3s01p1b",
-            "--rack", "ut3", "--model", "poweredge_6650"])
+                        "--rack", "ut3", "--model", "poweredge_6650"])
 
     def testverifyaddut3s01p1b(self):
         command = "show machine --machine ut3s01p1b"
@@ -418,7 +421,7 @@ class TestAddMachine(TestBrokerCommand):
     # (ut01ga1s02.aqd-unittest.ms.com).
     def testaddut8s02p1(self):
         self.noouttest(["add", "machine", "--machine", "ut8s02p1",
-            "--rack", "ut8", "--model", "vb1205xm"])
+                        "--rack", "ut8", "--model", "vb1205xm"])
 
     def testverifyaddut8s02p1(self):
         command = "show machine --machine ut8s02p1"
@@ -427,7 +430,7 @@ class TestAddMachine(TestBrokerCommand):
 
     def testaddut8s02p2(self):
         self.noouttest(["add", "machine", "--machine", "ut8s02p2",
-            "--rack", "ut8", "--model", "vb1205xm"])
+                        "--rack", "ut8", "--model", "vb1205xm"])
 
     def testverifyaddut8s02p2(self):
         command = "show machine --machine ut8s02p2"
@@ -436,7 +439,7 @@ class TestAddMachine(TestBrokerCommand):
 
     def testaddut8s02p3(self):
         self.noouttest(["add", "machine", "--machine", "ut8s02p3",
-            "--rack", "ut8", "--model", "vb1205xm"])
+                        "--rack", "ut8", "--model", "vb1205xm"])
 
     def testverifyaddut8s02p3(self):
         command = "show machine --machine ut8s02p3"
@@ -447,7 +450,7 @@ class TestAddMachine(TestBrokerCommand):
     # archetypes aurora and windows for increased code coverage
     def testaddut8s02p4(self):
         self.noouttest(["add", "machine", "--machine", "ut8s02p4",
-            "--rack", "ut8", "--model", "vb1205xm"])
+                        "--rack", "ut8", "--model", "vb1205xm"])
 
     def testverifyaddut8s02p4(self):
         command = "show machine --machine ut8s02p4"
@@ -456,7 +459,7 @@ class TestAddMachine(TestBrokerCommand):
 
     def testaddut8s02p5(self):
         self.noouttest(["add", "machine", "--machine", "ut8s02p5",
-            "--rack", "ut8", "--model", "vb1205xm"])
+                        "--rack", "ut8", "--model", "vb1205xm"])
 
     def testverifyaddut8s02p5(self):
         command = "show machine --machine ut8s02p5"
@@ -466,7 +469,7 @@ class TestAddMachine(TestBrokerCommand):
     def testaddutnorack(self):
         # A machine that's not in a rack
         self.noouttest(["add", "machine", "--machine", "utnorack",
-            "--desk", "utdesk1", "--model", "poweredge_6650"])
+                        "--desk", "utdesk1", "--model", "poweredge_6650"])
 
     # This test should look very different, but these were needed for
     # testing chassis updates...

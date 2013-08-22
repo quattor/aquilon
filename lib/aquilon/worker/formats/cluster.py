@@ -42,7 +42,7 @@ class ClusterFormatter(ObjectFormatter):
         if cluster.down_maint_threshold is not None:
             skeleton.maint_threshold = cluster.down_maint_threshold
             skeleton.maint_threshold_is_percent = \
-                                           cluster.down_maint_percent
+                cluster.down_maint_percent
 
         for host in sorted(cluster.hosts, key=lambda x: x.fqdn):
             self.add_host_msg(skeleton.hosts.add(), host)
@@ -92,7 +92,7 @@ class ClusterFormatter(ObjectFormatter):
     def format_raw(self, cluster, indent=""):
         details = [indent + "{0:c}: {0.name}".format(cluster)]
         if cluster.metacluster:
-            details.append(indent + \
+            details.append(indent +
                            "  {0:c}: {0.name}".format(cluster.metacluster))
         details.append(self.redirect_raw(cluster.location_constraint,
                                          indent + "  "))
@@ -110,7 +110,7 @@ class ClusterFormatter(ObjectFormatter):
                 dht = int((cluster.down_maint_threshold *
                            len(cluster.hosts)) / 100)
                 details.append(indent + "  Maintenance Threshold: %s (%s%%)" %
-                           (dht, cluster.down_maint_threshold))
+                               (dht, cluster.down_maint_threshold))
             else:
                 details.append(indent + "  Maintenance Threshold: %s" %
                                cluster.down_maint_threshold)

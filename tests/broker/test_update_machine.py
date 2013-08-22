@@ -29,7 +29,7 @@ class TestUpdateMachine(TestBrokerCommand):
 
     def testupdateut3c1n3(self):
         self.noouttest(["update", "machine", "--machine", "ut3c1n3",
-            "--slot", "10", "--serial", "USN99C5553"])
+                        "--slot", "10", "--serial", "USN99C5553"])
 
     def testverifyupdateut3c1n3(self):
         command = "show machine --machine ut3c1n3"
@@ -63,8 +63,8 @@ class TestUpdateMachine(TestBrokerCommand):
 
     def testupdateut3c5n10(self):
         self.noouttest(["update", "machine",
-            "--hostname", "unittest02.one-nyp.ms.com",
-            "--chassis", "ut3c5.aqd-unittest.ms.com", "--slot", "2"])
+                        "--hostname", "unittest02.one-nyp.ms.com",
+                        "--chassis", "ut3c5.aqd-unittest.ms.com", "--slot", "2"])
 
     def testverifyshowslot(self):
         command = "show machine --slot 2"
@@ -108,25 +108,25 @@ class TestUpdateMachine(TestBrokerCommand):
 
     def testupdateut3c1n4(self):
         self.noouttest(["update", "machine", "--machine", "ut3c1n4",
-            "--serial", "USNKPDZ407"])
+                        "--serial", "USNKPDZ407"])
 
     def testupdateut3c1n4cpubadvendor(self):
         self.notfoundtest(["update", "machine", "--machine", "ut3c1n4",
-            "--cpuvendor", "no-such-vendor"])
+                           "--cpuvendor", "no-such-vendor"])
 
     def testupdateut3c1n4cpubadname(self):
         self.notfoundtest(["update", "machine", "--machine", "ut3c1n4",
-            "--cpuname", "no-such-cpu"])
+                           "--cpuname", "no-such-cpu"])
 
     def testupdateut3c1n4cpureal(self):
         self.noouttest(["update", "machine", "--machine", "ut3c1n4",
-            "--cpuname", "xeon_3000"])
+                        "--cpuname", "xeon_3000"])
 
     def testupdateut3c1n4rack(self):
         # Changing the rack will hit the machine_plenary_will_move logic so we
         # can test if the host profile gets written
         self.noouttest(["update", "machine", "--machine", "ut3c1n4",
-            "--rack", "ut4"])
+                        "--rack", "ut4"])
 
     def testverifyupdateut3c1n4(self):
         command = "show machine --machine ut3c1n4"

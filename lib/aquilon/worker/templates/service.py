@@ -22,7 +22,6 @@ from aquilon.aqdb.model import Service, ServiceInstance
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
 from aquilon.worker.templates.panutils import (StructureTemplate, pan_assign,
                                                pan_include)
-from aquilon.exceptions_ import NotFoundException
 
 LOGGER = logging.getLogger(__name__)
 

@@ -17,7 +17,6 @@
 
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.commands.bind_feature import CommandBindFeature
-from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import FeatureLink
 from aquilon.worker.dbwrappers.parameter import del_all_feature_parameter
 

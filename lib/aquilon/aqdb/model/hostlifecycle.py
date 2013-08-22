@@ -32,22 +32,20 @@ _TN = 'hostlifecycle'
 class HostLifecycle(StateEngine, Base):
     """ Describes the state a host is within the provisioning lifecycle """
 
-    transitions = {
-               'blind'        : ['build', 'failed', 'decommissioned'],
-               'build'        : ['almostready', 'ready', 'failed',
-                                 'rebuild', 'reinstall', 'decommissioned'],
-               'install'      : ['build', 'reinstall', 'failed',
-                                 'decommissioned'],
-               'almostready'  : ['ready', 'rebuild', 'reinstall', 'failed',
-                                 'decommissioned'],
-               'ready'        : ['almostready', 'rebuild', 'reinstall',
-                                 'failed', 'decommissioned'],
-               'reinstall'    : ['rebuild', 'failed', 'decommissioned'],
-               'rebuild'      : ['almostready', 'ready', 'reinstall', 'failed',
-                                 'decommissioned'],
-               'failed'       : ['rebuild', 'reinstall', 'decommissioned'],
-               'decommissioned' : ['rebuild', 'reinstall'],
-               }
+    transitions = {'blind': ['build', 'failed', 'decommissioned'],
+                   'build': ['almostready', 'ready', 'failed', 'rebuild',
+                             'reinstall', 'decommissioned'],
+                   'install': ['build', 'reinstall', 'failed',
+                               'decommissioned'],
+                   'almostready': ['ready', 'rebuild', 'reinstall', 'failed',
+                                   'decommissioned'],
+                   'ready': ['almostready', 'rebuild', 'reinstall', 'failed',
+                             'decommissioned'],
+                   'reinstall': ['rebuild', 'failed', 'decommissioned'],
+                   'rebuild': ['almostready', 'ready', 'reinstall', 'failed',
+                               'decommissioned'],
+                   'failed': ['rebuild', 'reinstall', 'decommissioned'],
+                   'decommissioned': ['rebuild', 'reinstall']}
 
     __tablename__ = _TN
 

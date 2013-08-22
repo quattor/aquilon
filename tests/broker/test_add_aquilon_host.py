@@ -55,8 +55,8 @@ class TestAddAquilonHost(TestBrokerCommand):
         command = "show manager --missing"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
-            "aq add manager --hostname 'unittest00.one-nyp.ms.com' --ip 'IP'",
-            command)
+                         "aq add manager --hostname 'unittest00.one-nyp.ms.com' --ip 'IP'",
+                         command)
 
     def testverifyshowmanagermissingcsv(self):
         command = "show manager --missing --format=csv"
@@ -193,8 +193,8 @@ class TestAddAquilonHost(TestBrokerCommand):
         self.assertTrue(found,
                         "Service address hostname not found in the resources. "
                         "Existing resources: %s" %
-                        ", ".join(["%s %s" % (res.type, res.name) for res in
-                                              host.resources]))
+                        ", ".join(["%s %s" % (res.type, res.name)
+                                   for res in host.resources]))
 
     def testverifyunittest20hostname(self):
         ip = self.net["zebra_vip"].usable[2]

@@ -156,10 +156,10 @@ class PersonalityFormatter(ObjectFormatter):
 
         return container
 
-
 ObjectFormatter.handlers[Personality] = PersonalityFormatter()
 ObjectFormatter.handlers[ThresholdedPersonality] = PersonalityFormatter()
 ObjectFormatter.handlers[PersonalityList] = PersonalityListFormatter()
+
 
 class SimplePersonalityList(list):
     """Holds a list of personalities for which a list will be formatted

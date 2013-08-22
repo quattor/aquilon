@@ -103,7 +103,7 @@ class PlenaryClusterData(Plenary):
                        self.dbobj.dmt_value)
         if self.dbobj.down_hosts_percent:
             pan_assign(lines, "system/cluster/down_hosts_percent",
-                         self.dbobj.down_hosts_threshold)
+                       self.dbobj.down_hosts_threshold)
             pan_assign(lines, "system/cluster/down_hosts_as_percent",
                        self.dbobj.down_hosts_percent)
         if self.dbobj.down_maint_percent:
@@ -141,7 +141,7 @@ class PlenaryClusterData(Plenary):
         if self.metacluster:
             pan_assign(lines, "system/metacluster/name", self.metacluster)
         pan_assign(lines, "system/cluster/ratio", [self.dbobj.vm_count,
-                                                    self.dbobj.host_count])
+                                                   self.dbobj.host_count])
         pan_assign(lines, "system/cluster/max_hosts",
                    self.dbobj.max_hosts)
         lines.append("")

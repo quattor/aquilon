@@ -268,7 +268,7 @@ class DbFactory(object):
             return [name for (name, ) in self.safe_execute(sql)]
         elif self.engine.dialect.name == 'postgresql':
             sql = "select table_name from information_schema.tables " \
-                    "where table_schema='public'"
+                "where table_schema='public'"
             return [name for (name, ) in self.safe_execute(sql)]
 
     def get_sequences(self):
@@ -280,7 +280,7 @@ class DbFactory(object):
             return [name for (name, ) in self.safe_execute(sql)]
         elif self.engine.dialect.name == 'postgresql':
             sql = "select sequence_name from information_schema.sequences " \
-                    "where sequence_schema='public'"
+                "where sequence_schema='public'"
             return [name for (name, ) in self.safe_execute(sql)]
 
     def drop_all_tables_and_sequences(self, no_confirm=False):  # pragma: no cover

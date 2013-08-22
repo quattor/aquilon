@@ -24,6 +24,7 @@ from aquilon.exceptions_ import ArgumentError
 class CommandValidateParameter(BrokerCommand):
 
     required_parameters = ["personality"]
+
     def render(self, session, logger, personality, archetype, **arguments):
 
         errors = validate_personality_config(session, archetype, personality)
@@ -35,4 +36,3 @@ class CommandValidateParameter(BrokerCommand):
 
         logger.client_info("All required parameters specified.")
         return
-

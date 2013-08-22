@@ -32,8 +32,8 @@ class TestPrebindServer(TestBrokerCommand):
 
     def testbindntpserver(self):
         self.noouttest(["bind", "server",
-            "--hostname", "nyaqd1.ms.com",
-            "--service", "ntp", "--instance", "pa.ny.na"])
+                        "--hostname", "nyaqd1.ms.com",
+                        "--service", "ntp", "--instance", "pa.ny.na"])
 
     def testverifybindntp(self):
         command = "show service --service ntp --instance pa.ny.na"
@@ -42,8 +42,8 @@ class TestPrebindServer(TestBrokerCommand):
 
     def testbindaqdserver(self):
         self.noouttest(["bind", "server",
-            "--hostname", "nyaqd1.ms.com",
-            "--service", "aqd", "--instance", "ny-prod"])
+                        "--hostname", "nyaqd1.ms.com",
+                        "--service", "aqd", "--instance", "ny-prod"])
 
     def testverifybindaqd(self):
         command = "show service --service aqd --instance ny-prod"

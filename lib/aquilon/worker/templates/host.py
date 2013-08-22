@@ -253,7 +253,6 @@ class PlenaryHostData(Plenary):
         pan_assign(lines, "system/build", self.dbobj.status.name)
         pan_assign(lines, "system/advertise_status", self.dbobj.advertise_status)
 
-
         ## process grns
         eon_id_map = defaultdict(set)
 
@@ -275,7 +274,7 @@ class PlenaryHostData(Plenary):
         if self.config.has_option("archetype_" + archetype,
                                   "default_grn_target"):
             default_grn_target = self.config.get("archetype_" + archetype,
-                            "default_grn_target")
+                                                 "default_grn_target")
 
             eon_id_set = eon_id_map[default_grn_target]
 
@@ -283,7 +282,6 @@ class PlenaryHostData(Plenary):
             eon_id_list.sort()
             if eon_id_list:
                 pan_assign(lines, "system/eon_ids", eon_id_list)
-
 
         pan_assign(lines, "system/owner_eon_id", self.dbobj.owner_eon_id)
 
@@ -380,7 +378,7 @@ class PlenaryToplevelHost(Plenary):
         pan_include(lines, provides)
 
         personality_template = "personality/%s/config" % \
-                self.dbobj.personality.name
+            self.dbobj.personality.name
 
         pan_include(lines, personality_template)
 

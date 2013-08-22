@@ -24,7 +24,7 @@ from aquilon.worker.templates.base import Plenary
 from aquilon.worker.templates.cluster import (PlenaryClusterObject,
                                               PlenaryClusterData)
 from aquilon.worker.templates.metacluster import (PlenaryMetaClusterObject,
-                                              PlenaryMetaClusterData)
+                                                  PlenaryMetaClusterData)
 
 
 class CommandCatCluster(BrokerCommand):

@@ -114,8 +114,8 @@ class TestAddRebootSchedule(TestBrokerCommand):
         self.assertTrue(found,
                         "Reboot schedule not found in the resources. "
                         "Existing resources: %s" %
-                        ", ".join(["%s %s" % (res.type, res.name) for res in
-                                              host.resources]))
+                        ", ".join(["%s %s" % (res.type, res.name)
+                                   for res in host.resources]))
 
     def test_200_add_existing(self):
         command = ["add_reboot_schedule",

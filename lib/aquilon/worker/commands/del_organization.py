@@ -26,5 +26,6 @@ class CommandDelOrganization(CommandDelLocation):
     required_parameters = ["organization"]
 
     def render(self, session, organization, **arguments):
-        return CommandDelLocation.render(self, session=session, name=organization,
-                type='company', **arguments)
+        return CommandDelLocation.render(self, session=session,
+                                         name=organization, type='company',
+                                         **arguments)

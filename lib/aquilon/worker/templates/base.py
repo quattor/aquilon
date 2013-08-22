@@ -537,10 +537,10 @@ class TemplateFormatter(ObjectFormatter):
     def __init__(self):
         super(TemplateFormatter, self).__init__()
         self.mako_dir = os.path.join(self.config.get("broker", "srcdir"), "lib",
-                            "aquilon", "worker", "templates", "mako")
+                                     "aquilon", "worker", "templates", "mako")
         self.lookup_raw = TemplateLookup(directories=[os.path.join(self.mako_dir, "raw")],
-                                imports=['from string import rstrip',
-                                         'from '
-                                         'aquilon.worker.formats.formatters '
-                                         'import shift'],
-                                default_filters=['unicode', 'rstrip'])
+                                         imports=['from string import rstrip',
+                                                  'from '
+                                                  'aquilon.worker.formats.formatters '
+                                                  'import shift'],
+                                         default_filters=['unicode', 'rstrip'])

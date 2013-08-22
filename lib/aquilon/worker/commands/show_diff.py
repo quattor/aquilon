@@ -38,7 +38,8 @@ class CommandShowDiff(BrokerCommand):
             other_archetype = archetype
 
         db_other_persona = Personality.get_unique(session, name=other,
-                                           archetype=other_archetype, compel=True)
+                                                  archetype=other_archetype,
+                                                  compel=True)
 
         ret = defaultdict(dict)
         self.populate_data(session, dbpersona, "my", ret)

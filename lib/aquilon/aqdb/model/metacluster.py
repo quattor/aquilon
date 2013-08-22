@@ -50,10 +50,9 @@ class MetaCluster(Cluster):
     __mapper_args__ = {'polymorphic_identity': 'meta'}
     _class_label = "Metacluster"
 
-    id = Column(Integer, ForeignKey('%s.id' % _TN,
-                                    name='meta_cluster_fk',
+    id = Column(Integer, ForeignKey('%s.id' % _TN, name='meta_cluster_fk',
                                     ondelete='CASCADE'),
-                                    primary_key=True)
+                primary_key=True)
 
     max_clusters = Column(Integer, nullable=False)
 
@@ -62,7 +61,6 @@ class MetaCluster(Cluster):
 
     members = association_proxy('_clusters', 'cluster',
                                 creator=lambda x: MetaClusterMember(cluster=x))
-
 
     # see cluster.minimum_location
     @property
@@ -138,8 +136,8 @@ class MetaCluster(Cluster):
     # see cluster.validate_membership
     def validate_membership(self, cluster, error=ArgumentError, **kwargs):
 
-        if cluster.branch != self.branch or \
-               cluster.sandbox_author != self.sandbox_author:
+        if (cluster.branch != self.branch or
+            cluster.sandbox_author != self.sandbox_author):
             raise ArgumentError("{0} {1} {2} does not match {3:l} {4} "
                                 "{5}.".format(cluster,
                                               cluster.branch.branch_type,

@@ -188,7 +188,7 @@ class TestUsecaseHACluster(TestBrokerCommand):
 
     def test_400_try_deco_hacl1(self):
         command = ["change_status", "--cluster", "hacl1", "--buildstatus",
-                  "decommissioned"]
+                   "decommissioned"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "Cannot change state to decommissioned, as "

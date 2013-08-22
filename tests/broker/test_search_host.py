@@ -378,8 +378,8 @@ class TestSearchHost(TestBrokerCommand):
     def testserverofservice04(self):
         """search host for a defined service but no servers assigned"""
         self.noouttest(["unbind", "server",
-            "--hostname", "unittest01.one-nyp.ms.com",
-            "--service", "foo", "--instance", "fooinst2"])
+                        "--hostname", "unittest01.one-nyp.ms.com",
+                        "--service", "foo", "--instance", "fooinst2"])
 
         self.noouttest(["search", "host",
                         "--server_of_service", "foo", "--server_of_instance", "fooinst2"])

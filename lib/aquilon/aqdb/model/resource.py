@@ -144,7 +144,7 @@ class Resource(Base):
 
     __table_args__ = (UniqueConstraint(holder_id, name, resource_type,
                                        name='%s_holder_name_type_uk' % _TN),
-                      Index('%s_holder_idx' %_TN, holder_id))
+                      Index('%s_holder_idx' % _TN, holder_id))
     __mapper_args__ = {'polymorphic_on': resource_type}
 
     @property

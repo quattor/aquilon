@@ -74,8 +74,8 @@ class TestAddHostlink(TestBrokerCommand):
         self.assertTrue(hostlinkfound,
                         "Hostlink app1 not found in the resources. "
                         "Existing resources: %s" %
-                        ", ".join(["%s %s" % (res.type, res.name) for res in
-                                              host.resources]))
+                        ", ".join(["%s %s" % (res.type, res.name)
+                                   for res in host.resources]))
 
     def test_110_cat_host(self):
         command = ["cat", "--hostname", "server1.aqd-unittest.ms.com", "--data"]

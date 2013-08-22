@@ -28,7 +28,7 @@ import unittest2 as unittest
 from brokertest import TestBrokerCommand
 from notificationtest import VerifyNotificationsMixin
 
-# see test_vulcan2.py
+
 class TestVulcanLocalDisk(VerifyNotificationsMixin, TestBrokerCommand):
 
     metacluster = "utmc9"
@@ -125,7 +125,7 @@ class TestVulcanLocalDisk(VerifyNotificationsMixin, TestBrokerCommand):
         out = self.commandtest(command.split(" "))
 
         macs = ["02:02:04:02:12:06", "02:02:04:02:12:07"]
-        for i in range(0,2):
+        for i in range(0, 2):
             self.matchoutput(out, "Port et1-%d: %s" % (i + 1, macs[i]), command)
 
     def test_030_addswitch(self):
@@ -161,7 +161,7 @@ class TestVulcanLocalDisk(VerifyNotificationsMixin, TestBrokerCommand):
             machine = "utpgm%d" % i
 
             command = ["add", "machine", "--machine", machine,
-                            "--vmhost", self.vmhost, "--model", "utmedium"]
+                       "--vmhost", self.vmhost, "--model", "utmedium"]
             self.noouttest(command)
 
     def test_120_cat_vmhost(self):
@@ -175,13 +175,12 @@ class TestVulcanLocalDisk(VerifyNotificationsMixin, TestBrokerCommand):
                          'virtual_machine/utpgm0/config"));' % self.vmhost,
                          command)
 
-
     def test_122_addvmfswohost(self):
         # Try to bind to fs1 of another host.
         command = ["add", "disk", "--machine", "utpgm0",
-            "--disk", "sda", "--controller", "scsi",
-            "--filesystem", "utfs1n", "--address", "0:0",
-            "--size", "34"]
+                   "--disk", "sda", "--controller", "scsi",
+                   "--filesystem", "utfs1n", "--address", "0:0",
+                   "--size", "34"]
 
         out = self.notfoundtest(command)
         self.matchoutput(out,
@@ -207,9 +206,9 @@ class TestVulcanLocalDisk(VerifyNotificationsMixin, TestBrokerCommand):
         for i in range(0, 3):
             machine = "utpgm%d" % i
             self.noouttest(["add", "disk", "--machine", machine,
-                "--disk", "sda", "--controller", "scsi",
-                "--filesystem", "utfs1", "--address", "0:0",
-                "--size", "34"])
+                            "--disk", "sda", "--controller", "scsi",
+                            "--filesystem", "utfs1", "--address", "0:0",
+                            "--size", "34"])
 
     def test_140_verifyaddutpgm0disk(self):
         for i in range(0, 3):
@@ -247,7 +246,6 @@ class TestVulcanLocalDisk(VerifyNotificationsMixin, TestBrokerCommand):
         out = self.commandtest(command)
         self.matchclean(out, "Template: service/vcenter/ut", command)
 
-
     def check_path_exclusive(self, path, wrongpath):
         self.failIf(os.path.exists(wrongpath),
                     "Plenary file '%s' not removed." % wrongpath)
@@ -276,14 +274,12 @@ class TestVulcanLocalDisk(VerifyNotificationsMixin, TestBrokerCommand):
             out = self.commandtest(command)
             self.matchoutput(out, "Rack: ut13", command)
 
-
     # deletes
-
 
     def test_290_delutpgm0disk(self):
         for i in range(0, 3):
             self.noouttest(["del", "disk", "--machine", "utpgm%d" % i,
-                "--controller", "scsi", "--disk", "sda"])
+                            "--controller", "scsi", "--disk", "sda"])
 
     # deleting fs before depending disk would drop them as well
     def test_295_delvmfs(self):
@@ -311,7 +307,7 @@ class TestVulcanLocalDisk(VerifyNotificationsMixin, TestBrokerCommand):
         ip = self.net["autopg1"].usable[0]
         plenary = self.plenary_name("switchdata", self.switch)
         self.failUnless(os.path.exists(plenary),
-                    "Plenary file '%s' does not exist" % plenary)
+                        "Plenary file '%s' does not exist" % plenary)
 
         self.dsdb_expect_delete(ip)
         command = "del switch --switch %s" % self.switch

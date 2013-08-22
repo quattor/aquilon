@@ -199,7 +199,8 @@ class TestAudit(TestBrokerCommand):
         my_end_time = int(time())
 
         cmd2 = ["search_audit", "--username", self.user,
-               "--command", "search_audit", "--format", "proto", "--limit", "2"]
+                "--command", "search_audit", "--format", "proto",
+                "--limit", "2"]
         out = self.commandtest(cmd2)
         outlist = self.parse_audit_msg(out)
         unit = outlist.transactions[1]

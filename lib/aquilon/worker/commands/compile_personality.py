@@ -17,7 +17,6 @@
 """Contains the logic for `aq compile --personality`."""
 
 
-from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.branch import get_branch_and_author
 from aquilon.worker.dbwrappers.host import validate_branch_author
@@ -42,7 +41,7 @@ class CommandCompilePersonality(BrokerCommand):
                                                          compel=True)
 
         dbpersonality = Personality.get_unique(session, name=personality,
-                                           archetype=archetype, compel=True)
+                                               archetype=archetype, compel=True)
         if pancdebug:
             pancinclude = r'.*'
             pancexclude = r'components/spma/functions'

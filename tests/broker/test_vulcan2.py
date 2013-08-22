@@ -332,9 +332,10 @@ class TestVulcan20(VerifyNotificationsMixin, TestBrokerCommand):
 
     def test_108_addutpgmdisk(self):
         for i in range(0, 3):
-            self.noouttest(["add", "disk", "--machine", "utpgm%d" %i,
-                "--disk", "sda", "--controller", "scsi", "--share", "test_v2_share",
-                "--size", "34", "--resourcegroup", "utmc8as1", "--address", "0:0"])
+            self.noouttest(["add", "disk", "--machine", "utpgm%d" % i,
+                            "--disk", "sda", "--controller", "scsi",
+                            "--share", "test_v2_share", "--size", "34",
+                            "--resourcegroup", "utmc8as1", "--address", "0:0"])
 
     def test_109_verifyaddutpgm0disk(self):
         command = "show machine --machine utpgm0"
@@ -354,10 +355,10 @@ class TestVulcan20(VerifyNotificationsMixin, TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out, '"harddisks/{sda}" = nlist(', command)
         self.searchoutput(out,
-                r'"mountpoint", "/vol/lnn30f1v1/test_v2_share",\s*'
-                r'"path", "utpgm0/sda.vmdk",\s*'
-                r'"server", "lnn30f1",\s*'
-                r'"sharename", "test_v2_share"', command)
+                          r'"mountpoint", "/vol/lnn30f1v1/test_v2_share",\s*'
+                          r'"path", "utpgm0/sda.vmdk",\s*'
+                          r'"server", "lnn30f1",\s*'
+                          r'"sharename", "test_v2_share"', command)
 
     def test_111_addfilesystemfail(self):
         command = ["add_filesystem", "--filesystem=fs1", "--type=ext3",
@@ -593,11 +594,10 @@ class TestVulcan20(VerifyNotificationsMixin, TestBrokerCommand):
 
 #    Storage group related deletes
 
-
     def test_202_delutpgmdisk(self):
         for i in range(0, 3):
-            self.noouttest(["del", "disk", "--machine", "utpgm%d" %i,
-                "--controller", "scsi", "--disk", "sda"])
+            self.noouttest(["del", "disk", "--machine", "utpgm%d" % i,
+                            "--controller", "scsi", "--disk", "sda"])
 
     def test_204_delresourcegroup(self):
         command = ["del_share", "--resourcegroup=utmc8as1",
@@ -660,7 +660,7 @@ class TestVulcan20(VerifyNotificationsMixin, TestBrokerCommand):
             swname = "utpgsw%d.aqd-unittest.ms.com" % i
             plenary = self.plenary_name("switchdata", swname)
             self.failUnless(os.path.exists(plenary),
-                        "Plenary file '%s' does not exist" % plenary)
+                            "Plenary file '%s' does not exist" % plenary)
 
             self.dsdb_expect_delete(ip)
             command = "del switch --switch %s" % swname

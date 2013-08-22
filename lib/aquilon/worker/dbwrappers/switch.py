@@ -259,7 +259,7 @@ def discover_switch(session, logger, config, dbswitch, dryrun):
         comments = " ".join(data["tags"]) + " " + comments
 
         # Normalize white space
-        comments = re.sub("\s+", " ", comments)
+        comments = re.sub(r"\s+", " ", comments)
         comments = comments.strip()
 
     # This is the easy part, so deal with it first

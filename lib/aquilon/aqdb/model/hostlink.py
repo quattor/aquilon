@@ -28,10 +28,9 @@ class Hostlink(Resource):
     __tablename__ = _TN
     __mapper_args__ = {'polymorphic_identity': 'hostlink'}
 
-    id = Column(Integer, ForeignKey('resource.id',
-                                    name='hostlink_resource_fk',
+    id = Column(Integer, ForeignKey('resource.id', name='%s_resource_fk' % _TN,
                                     ondelete='CASCADE'),
-                                    primary_key=True)
+                primary_key=True)
 
     target = Column(String(255), nullable=False)
     owner_user = Column(String(32), default='root', nullable=False)

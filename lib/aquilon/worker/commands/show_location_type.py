@@ -20,7 +20,7 @@
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.orm import subqueryload
 
-from aquilon.exceptions_ import ArgumentError, NotFoundException
+from aquilon.exceptions_ import NotFoundException
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.aqdb.model import Location
 from aquilon.worker.formats.location import LocationList

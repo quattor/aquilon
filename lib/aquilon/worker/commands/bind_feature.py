@@ -75,7 +75,7 @@ class CommandBindFeature(BrokerCommand):
 
         if model:
             dbmodel = Model.get_unique(session, name=model, vendor=vendor,
-                                        compel=True)
+                                       compel=True)
 
             if dbmodel.machine_type == "nic":
                 feature_type = "interface"
@@ -98,9 +98,9 @@ class CommandBindFeature(BrokerCommand):
         # TODO: should the limit be configurable?
         if justification_required and cnt > 0:
             if not justification:
-                raise AuthorizationException(
-                      "Changing feature bindings for more "
-                      "than just a personality requires --justification.")
+                raise AuthorizationException("Changing feature bindings for "
+                                             "more than just a personality "
+                                             "requires --justification.")
             validate_justification(user, justification)
 
         self.do_link(session, logger, dbfeature, params)

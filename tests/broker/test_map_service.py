@@ -222,9 +222,9 @@ class TestMapService(TestBrokerCommand):
 
     def testmaputsilpersona2(self):
         self.noouttest(["add_personality", "--personality", "testme",
-                          "--eon_id", "2", "--archetype", "aquilon",
-                          "--copy_from", "lemon-collector-oracle",
-                          "--host_environment", "dev"])
+                        "--eon_id", "2", "--archetype", "aquilon",
+                        "--copy_from", "lemon-collector-oracle",
+                        "--host_environment", "dev"])
 
         command = ["show_map", "--archetype=aquilon",
                    "--service=utsvc"]

@@ -23,7 +23,7 @@ from aquilon.worker.dbwrappers.host import (hostlist_to_hosts,
                                             check_hostlist_size,
                                             validate_branch_author)
 from aquilon.worker.commands.reset_advertised_status \
-     import CommandResetAdvertisedStatus
+    import CommandResetAdvertisedStatus
 from aquilon.worker.templates.domain import TemplateDomain
 from aquilon.worker.templates.base import PlenaryCollection
 from aquilon.worker.templates.host import PlenaryHost

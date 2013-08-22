@@ -24,7 +24,7 @@ if __name__ == "__main__":
 import unittest2 as unittest
 from brokertest import TestBrokerCommand
 
-# taken from test_add_service.py
+
 class TestAddShare(TestBrokerCommand):
     def testaddnasshares(self):
         # Creates shares test_share_1 through test_share_9
@@ -144,4 +144,3 @@ class TestAddShare(TestBrokerCommand):
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddShare)
     unittest.TextTestRunner(verbosity=2).run(suite)
-

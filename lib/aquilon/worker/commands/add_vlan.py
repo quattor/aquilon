@@ -18,7 +18,7 @@
 
 
 from aquilon.aqdb.model import VlanInfo
-from aquilon.worker.broker import BrokerCommand, validate_basic # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand, validate_basic  # pylint: disable=W0611
 
 
 class CommandAddVlan(BrokerCommand):
@@ -32,10 +32,8 @@ class CommandAddVlan(BrokerCommand):
 
         VlanInfo.get_unique(session, vlan_id=vlan, preclude=True)
 
-        dbvlan = VlanInfo(vlan_id=vlan, port_group=name,
-                         vlan_type=vlan_type)
+        dbvlan = VlanInfo(vlan_id=vlan, port_group=name, vlan_type=vlan_type)
         session.add(dbvlan)
         session.flush()
 
         return
-

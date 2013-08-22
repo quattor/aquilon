@@ -33,15 +33,13 @@ class CommandUpdParameterDefintionFeature(BrokerCommand):
         if not dbfeature.paramdef_holder:
             dbfeature.paramdef_holder = FeatureParamDef()
 
-
         db_paramdef = ParamDefinition.get_unique(session, path=path,
                                                  holder=dbfeature.paramdef_holder,
                                                  compel=True)
 
         if default:
-            validate_param_definition(db_paramdef.path,
-                                  db_paramdef.value_type,
-                                  default)
+            validate_param_definition(db_paramdef.path, db_paramdef.value_type,
+                                      default)
             db_paramdef.default = default
 
         if required is not None:

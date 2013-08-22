@@ -90,7 +90,7 @@ class ObservedVlan(Base):
                         nullable=False)
 
     vlan_id = Column(Integer, ForeignKey('vlan_info.vlan_id',
-                                           name='%s_vlan_fk' % _ABV),
+                                         name='%s_vlan_fk' % _ABV),
                      nullable=False)
 
     creation_date = deferred(Column(DateTime, default=datetime.now,

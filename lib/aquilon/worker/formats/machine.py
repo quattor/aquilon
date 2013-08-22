@@ -98,8 +98,8 @@ class MachineFormatter(ObjectFormatter):
             details.append(indent + "  Slot: %d" % slot.slot_number)
         details.append(indent + "  {0:c}: {0.name} {1:c}: {1.name}".format(
             machine.model.vendor, machine.model))
-        details.append(indent + "  Cpu: %s x %d" %
-                (machine.cpu, machine.cpu_quantity))
+        details.append(indent + "  Cpu: %s x %d" % (machine.cpu,
+                                                    machine.cpu_quantity))
         details.append(indent + "  Memory: %d MB" % machine.memory)
         if machine.serial_no:
             details.append(indent + "  Serial: %s" % machine.serial_no)

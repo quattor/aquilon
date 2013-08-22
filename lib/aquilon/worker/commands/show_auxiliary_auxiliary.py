@@ -27,8 +27,7 @@ class CommandShowAuxiliaryAuxiliary(BrokerCommand):
     required_parameters = ["auxiliary"]
 
     def render(self, session, auxiliary, **kwargs):
-        dbdns_rec = ARecord.get_unique(session, fqdn=auxiliary,
-                                             compel=True)
+        dbdns_rec = ARecord.get_unique(session, fqdn=auxiliary, compel=True)
         if not dbdns_rec.assignments:
             raise ArgumentError("Address {0:a} is not assigned to any "
                                 "interfaces.".format(dbdns_rec))

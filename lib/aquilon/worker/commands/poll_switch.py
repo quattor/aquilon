@@ -180,7 +180,8 @@ class CommandPollSwitch(BrokerCommand):
                                                 compel=False)
                 if not vlan_info:
                     logger.client_info("vlan {0} is not defined in AQ. Please "
-                            "use add_vlan to add it.".format(vlan_int))
+                                       "use add_vlan to add it."
+                                       .format(vlan_int))
                     continue
 
                 if vlan_info.vlan_type == "unknown":

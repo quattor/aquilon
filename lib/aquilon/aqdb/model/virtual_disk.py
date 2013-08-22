@@ -44,9 +44,9 @@ class VirtualDisk(Disk):
 
     def __repr__(self):
         return "<%s %s (%s) of machine %s, %d GB, provided by %s>" % \
-                (self._get_class_label(), self.device_name,
-                 self.controller_type, self.machine.label, self.capacity,
-                 (self.share.name if self.share else "no_share"))
+            (self._get_class_label(), self.device_name,
+             self.controller_type, self.machine.label, self.capacity,
+             (self.share.name if self.share else "no_share"))
 
 # The formatter code is interested in the count of disks/machines, and it is
 # cheaper to query the DB than to load all entities into memory
@@ -59,6 +59,7 @@ Share.machine_count = column_property(
     select([func.count(func.distinct(VirtualDisk.machine_id))],
            VirtualDisk.share_id == Share.id)
     .label("machine_count"), deferred=True)
+
 
 class VirtualLocalDisk(Disk):
     filesystem_id = Column(Integer, ForeignKey('filesystem.id',
@@ -79,9 +80,9 @@ class VirtualLocalDisk(Disk):
 
     def __repr__(self):
         return "<%s %s (%s) of machine %s, %d GB, provided by %s>" % \
-                (self._get_class_label(), self.device_name,
-                 self.controller_type, self.machine.label, self.capacity,
-                 (self.filesystem.name if self.filesystem else "no_filesystem"))
+            (self._get_class_label(), self.device_name,
+             self.controller_type, self.machine.label, self.capacity,
+             (self.filesystem.name if self.filesystem else "no_filesystem"))
 
 Filesystem.virtual_disk_count = column_property(
     select([func.count()],

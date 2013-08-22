@@ -38,7 +38,7 @@ class CommandMapGrn(BrokerCommand):
                 target == grn_rec.target):
                 return
 
-        obj.grns.append((obj,grn,target))
+        obj.grns.append((obj, grn, target))
 
     def render(self, session, logger, target, grn, eon_id, hostname, list, personality,
                archetype, **arguments):

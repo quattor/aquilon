@@ -48,7 +48,7 @@ class CommandUpdateRack(BrokerCommand):
                 dbrack.default_dns_domain = None
         if bunker or room or building:
             dbparent = get_location(session, bunker=bunker, room=room,
-                                  building=building)
+                                    building=building)
             # This one would change the template's locations hence forbidden
             if dbparent.building != dbrack.building:
                 # Doing this both to reduce user error and to limit

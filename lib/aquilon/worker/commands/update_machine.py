@@ -80,8 +80,9 @@ class CommandUpdateMachine(BrokerCommand):
                 if dbcl != dblocation:
                     if chassis or slot is not None:
                         raise ArgumentError("{0} conflicts with chassis {1!s} "
-                                            "location {2}.".format(dblocation,
-                                                        dbslot.chassis, dbcl))
+                                            "location {2}."
+                                            .format(dblocation, dbslot.chassis,
+                                                    dbcl))
                     else:
                         loc_clear_chassis = True
             if loc_clear_chassis:

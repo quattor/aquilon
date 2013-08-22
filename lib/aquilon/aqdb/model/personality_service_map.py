@@ -56,8 +56,8 @@ class PersonalityServiceMap(Base):
                             nullable=False)
 
     network_id = Column(Integer, ForeignKey('network.id', ondelete='CASCADE',
-                                             name='%s_net_fk' % _ABV),
-                         nullable=True)
+                                            name='%s_net_fk' % _ABV),
+                        nullable=True)
 
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
@@ -99,7 +99,7 @@ class PersonalityServiceMap(Base):
 
     def __init__(self, network=None, location=None, **kwargs):
         super(PersonalityServiceMap, self).__init__(network=network,
-                                         location=location, **kwargs)
+                                                    location=location, **kwargs)
         if network and location:  # pragma: no cover
             raise ValueError("A service can't be mapped to a Network and a "
                              "Location at the same time")

@@ -100,7 +100,7 @@ def update_grn_map(config, session, logger):
             changed = False
             eon_id = int(row["id"])
             disabled = int(row["can_map_resources"]) == 0 or \
-                    int(row["deleted"]) != 0
+                int(row["deleted"]) != 0
 
             if eon_id not in grns:
                 if not row["name"]:

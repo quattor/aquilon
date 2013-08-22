@@ -40,6 +40,5 @@ class CommandSearchParameter(BrokerCommand):
         if not db_paramdef:
             return
 
-
         holder = search_path_in_personas(session, path, db_paramdef.holder)
         return SimpleParameterList(holder.iteritems())

@@ -114,7 +114,7 @@ def _forbid_dyndns(dbdns_rec):
     """ Raise an error if the address is reserved for dynamic DHCP """
     if isinstance(dbdns_rec, DynamicStub):
         raise ArgumentError("Address {0:a} is reserved for dynamic "
-                        "DHCP.".format(dbdns_rec))
+                            "DHCP.".format(dbdns_rec))
 
 
 # Locking rules:
