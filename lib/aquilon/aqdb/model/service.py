@@ -32,10 +32,12 @@ from datetime import datetime
 
 from sqlalchemy import (Column, Integer, Sequence, String, DateTime, ForeignKey,
                         UniqueConstraint, PrimaryKeyConstraint, Index)
-from sqlalchemy.orm import relation, backref, deferred
+from sqlalchemy.orm import relation, backref, deferred, aliased, object_session
+from sqlalchemy.sql import or_
+from sqlalchemy.util import memoized_property
 
-from aquilon.aqdb.model import Base, Archetype, Personality
 from aquilon.aqdb.column_types.aqstr import AqStr
+from aquilon.aqdb.model import Base, Archetype, Personality
 
 _TN = 'service'
 _SLI = 'service_list_item'
@@ -62,6 +64,22 @@ class Service(Base):
     @property
     def cfg_path(self):
         return 'service/%s' % (self.name)
+
+    @memoized_property
+    def cluster_aligned_personalities(self):
+        session = object_session(self)
+
+        PersService = aliased(Service)
+        ArchService = aliased(Service)
+
+        # Check if the service instance is used by any cluster-bound personality
+        q = session.query(Personality.id)
+        q = q.outerjoin(PersService, Personality.services)
+        q = q.reset_joinpoint()
+        q = q.join(Archetype).filter(Archetype.cluster_type != None)
+        q = q.outerjoin(ArchService, Archetype.services)
+        q = q.filter(or_(PersService.id == self.id, ArchService.id == self.id))
+        return [pers.id for pers in q]
 
 service = Service.__table__  # pylint: disable=C0103
 service.info['unique_fields'] = ['name']
