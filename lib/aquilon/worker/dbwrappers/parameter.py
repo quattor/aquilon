@@ -224,14 +224,12 @@ def validate_rebuild_required(session, path, param_holder):
 
 
 def get_parameters(session, archetype=None, personality=None):
-
     param_holder = get_parameter_holder(session, archetype=archetype,
                                         personality=personality,
                                         auto_include=False)
     if param_holder is None:
         return []
-    q = session.query(Parameter).filter_by(holder=param_holder)
-    return q.all()
+    return param_holder.parameters
 
 
 def get_paramdef_for_parameter(session, path, param_holder, dbfeaturelink=None):

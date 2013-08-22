@@ -19,16 +19,18 @@
 
 from collections import defaultdict
 
-from sqlalchemy.orm import joinedload, subqueryload, lazyload, contains_eager
+from sqlalchemy.orm import (joinedload, subqueryload, lazyload, contains_eager,
+                            undefer)
 from sqlalchemy.orm.attributes import set_committed_value
 
 from aquilon.exceptions_ import PartialError, IncompleteError
 from aquilon.aqdb.model import (Service, Machine, Chassis, Host, Personality,
-                                Cluster, City, Rack, Resource, HostResource,
-                                ClusterResource, VirtualMachine, Filesystem,
-                                RebootSchedule, Hostlink, ServiceAddress, Share,
-                                Disk, Interface, AddressAssignment,
-                                ServiceInstance, Switch)
+                                Archetype, Cluster, City, Rack, Resource,
+                                HostResource, ClusterResource, VirtualMachine,
+                                Filesystem, RebootSchedule, Hostlink,
+                                ServiceAddress, Share, Disk, Interface,
+                                AddressAssignment, ServiceInstance, Switch,
+                                ParamDefHolder, Feature)
 from aquilon.aqdb.data_sync.storage import cache_storage_data
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.templates.base import Plenary
@@ -226,7 +228,29 @@ class CommandFlush(BrokerCommand):
 
             if personalities:
                 logger.client_info("Flushing personalities.")
-                for persona in session.query(Personality).all():
+
+                q = session.query(Feature)
+                q = q.with_polymorphic('*')
+                q = q.options(joinedload('paramdef_holder'),
+                              undefer('comments'))
+                features = q.all()  # pylint: disable=W0612
+
+                q = session.query(Archetype)
+                q = q.options(subqueryload('features'),
+                              joinedload('paramdef_holder'))
+                archetypes = q.all()  # pylint: disable=W0612
+
+                q = session.query(ParamDefHolder)
+                q = q.with_polymorphic('*')
+                q = q.options(subqueryload('param_definitions'))
+                paramdefs = q.all()  # pylint: disable=W0612
+
+                q = session.query(Personality)
+                q = q.options(subqueryload('_grns'),
+                              subqueryload('features'),
+                              joinedload('paramholder'),
+                              subqueryload('paramholder.parameters'))
+                for persona in q:
                     try:
                         plenary_info = Plenary.get_plenary(persona,
                                                            logger=logger)
