@@ -265,10 +265,8 @@ class CommandFlush(BrokerCommand):
                         logger.client_info("Processing machine %d of %d..." %
                                            (idx, cnt))
 
-                    if machine.id in disks_by_machine:
-                        disks_by_machine[machine.id].sort(key=attrgetter('device_name'))
-                        set_committed_value(machine, 'disks',
-                                            disks_by_machine[machine.id])
+                    set_committed_value(machine, 'disks',
+                                        disks_by_machine.get(machine.id, None))
 
                     if machine.id in interfaces_by_machine:
                         interfaces_by_machine[machine.id].sort(key=attrgetter('name'))

@@ -22,7 +22,7 @@ from sqlalchemy import (Column, Integer, DateTime, Sequence, String, Boolean,
                         ForeignKey, UniqueConstraint)
 from sqlalchemy.orm import relation, backref, deferred
 
-from aquilon.aqdb.model import Base, Machine, ServiceInstance
+from aquilon.aqdb.model import Base, Machine
 from aquilon.aqdb.column_types import AqStr, Enum
 
 disk_types = ['local', 'san', 'virtual_disk', 'virtual_localdisk']
@@ -63,13 +63,8 @@ class Disk(Base):
 
     comments = deferred(Column(String(255), nullable=True))
 
-    # The order_by here ensures that machine templates always list the
-    # disks in the same order.  Technically order is irrelevant in the
-    # template since the disks are stored in a hash but this helps with
-    # the tests and with preventing spurious re-writes.
     machine = relation(Machine, innerjoin=True,
-                       backref=backref('disks', cascade='all',
-                                       order_by=[device_name]))
+                       backref=backref('disks', cascade='all'))
 
     __table_args__ = (UniqueConstraint(machine_id, device_name,
                                        name='disk_mach_dev_name_uk'),)
