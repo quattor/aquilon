@@ -38,6 +38,20 @@ from aquilon.worker.locks import CompileKey
 
 class CommandFlush(BrokerCommand):
 
+    def preload_virt_disk_info(self, session, cache):
+        share_info = cache_storage_data()
+
+        q = session.query(Share)
+        q = q.options(joinedload('holder'))
+        for res in q:
+            res.populate_share_info(share_info)
+            cache[res.id] = res
+
+        q = session.query(Filesystem)
+        q = q.options(joinedload('holder'))
+        for res in q:
+            cache[res.id] = res
+
     def render(self, session, logger,
                services, personalities, machines, clusters, hosts,
                locations, resources, switches, all,
@@ -94,15 +108,11 @@ class CommandFlush(BrokerCommand):
                 # so do something more targeted. More resource subclasses may be
                 # added later if they become common.
                 preload_classes = {
-                    Filesystem: [],
                     RebootSchedule: [],
                     VirtualMachine: [joinedload('machine'),
                                      joinedload('machine.primary_name'),
                                      joinedload('machine.primary_name.fqdn')],
-                    Share: [],
                 }
-
-                share_info = cache_storage_data()
 
                 for cls, options in preload_classes.items():
                     q = session.query(cls)
@@ -123,10 +133,9 @@ class CommandFlush(BrokerCommand):
 
                     for res in q:
                         resource_by_id[res.id] = res
-                        try:
-                            res.populate_share_info(share_info)
-                        except AttributeError:
-                            pass
+
+            if hosts or clusters or resources or machines:
+                self.preload_virt_disk_info(session, resource_by_id)
 
             if hosts or machines:
                 # Polymorphic loading cannot be applied to eager-loaded
