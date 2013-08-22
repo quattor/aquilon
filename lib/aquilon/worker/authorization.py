@@ -264,6 +264,7 @@ class AuthorizationBroker(object):
                               'del_personality',
                               'add_parameter', 'update_parameter',
                               'del_parameter', 'add_required_service',
+                              'add_required_service_personality',
                               'bind_feature', 'unbind_feature',
                               'validate_parameter',
                               'add_hostlink', 'del_hostlink',
