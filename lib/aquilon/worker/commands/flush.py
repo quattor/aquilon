@@ -80,6 +80,7 @@ class CommandFlush(BrokerCommand):
     def preload_interfaces(self, session, hosts, interfaces_by_id,
                            interfaces_by_hwent):
         addrs_by_iface = defaultdict(list)
+        slaves_by_id = defaultdict(list)
 
         # Polymorphic loading cannot be applied to eager-loaded
         # attributes, so load interfaces manually.
@@ -89,6 +90,8 @@ class CommandFlush(BrokerCommand):
         for iface in q:
             interfaces_by_hwent[iface.hardware_entity_id].append(iface)
             interfaces_by_id[iface.id] = iface
+            if iface.master_id:
+                slaves_by_id[iface.master_id].append(iface)
 
         # subqueryload() and with_polymorphic() do not play nice
         # together, so do it by hand
@@ -98,7 +101,10 @@ class CommandFlush(BrokerCommand):
         q = q.order_by(AddressAssignment._label)
 
         # Machine templates want the management interface only
-        if not hosts:
+        if hosts:
+            q = q.options(subqueryload("network.static_routes"),
+                          subqueryload("network.routers"))
+        else:
             q = q.join(Interface)
             q = q.filter_by(interface_type='management')
 
@@ -108,6 +114,8 @@ class CommandFlush(BrokerCommand):
         for iface_id, iface in interfaces_by_id.iteritems():
             set_committed_value(iface, "assignments",
                                 addrs_by_iface.get(iface_id, None))
+            set_committed_value(iface, "slaves",
+                                slaves_by_id.get(iface_id, None))
 
     def render(self, session, logger,
                services, personalities, machines, clusters, hosts,
@@ -242,7 +250,7 @@ class CommandFlush(BrokerCommand):
                 q = session.query(Chassis)
                 q = q.options(joinedload("primary_name"),
                               joinedload("primary_name.fqdn"))
-                chassis = q.all()
+                chassis = q.all()  # pylint: disable=W0612
 
                 q = session.query(Machine)
                 q = q.options(lazyload("host"),
@@ -298,7 +306,10 @@ class CommandFlush(BrokerCommand):
                               subqueryload("_services_provided"),
                               subqueryload("_cluster"),
                               lazyload("_cluster.host"),
-                              lazyload("_cluster.cluster"))
+                              lazyload("_cluster.cluster"),
+                              subqueryload("personality"),
+                              subqueryload("personality._grns"))
+
                 for h in q:
                     idx += 1
                     if idx % 1000 == 0:  # pragma: no cover
