@@ -18,7 +18,6 @@
 
 
 from collections import defaultdict
-from operator import attrgetter
 
 from sqlalchemy.orm import joinedload, subqueryload, lazyload, contains_eager
 from sqlalchemy.orm.attributes import set_committed_value
@@ -78,6 +77,38 @@ class CommandFlush(BrokerCommand):
             for res in q:
                 cache[res.id] = res
 
+    def preload_interfaces(self, session, hosts, interfaces_by_id,
+                           interfaces_by_hwent):
+        addrs_by_iface = defaultdict(list)
+
+        # Polymorphic loading cannot be applied to eager-loaded
+        # attributes, so load interfaces manually.
+        q = session.query(Interface)
+        q = q.with_polymorphic('*')
+        q = q.options(lazyload("hardware_entity"))
+        for iface in q:
+            interfaces_by_hwent[iface.hardware_entity_id].append(iface)
+            interfaces_by_id[iface.id] = iface
+
+        # subqueryload() and with_polymorphic() do not play nice
+        # together, so do it by hand
+        q = session.query(AddressAssignment)
+        q = q.options(joinedload("network"),
+                      joinedload("dns_records"))
+        q = q.order_by(AddressAssignment._label)
+
+        # Machine templates want the management interface only
+        if not hosts:
+            q = q.join(Interface)
+            q = q.filter_by(interface_type='management')
+
+        for addr in q:
+            addrs_by_iface[addr.interface_id].append(addr)
+
+        for iface_id, iface in interfaces_by_id.iteritems():
+            set_committed_value(iface, "assignments",
+                                addrs_by_iface.get(iface_id, None))
+
     def render(self, session, logger,
                services, personalities, machines, clusters, hosts,
                locations, resources, switches, all,
@@ -95,7 +126,7 @@ class CommandFlush(BrokerCommand):
 
         # Object caches that are accessed directly
         disks_by_machine = defaultdict(list)
-        interfaces_by_machine = defaultdict(list)
+        interfaces_by_hwent = defaultdict(list)
         interfaces_by_id = {}
 
         if all:
@@ -135,34 +166,8 @@ class CommandFlush(BrokerCommand):
                 self.preload_resources(session, resource_by_id)
 
             if hosts or machines:
-                # Polymorphic loading cannot be applied to eager-loaded
-                # attributes, so load interfaces manually.
-                q = session.query(Interface)
-                q = q.with_polymorphic('*')
-                q = q.options(lazyload("hardware_entity"))
-                for iface in q:
-                    interfaces_by_machine[iface.hardware_entity_id].append(iface)
-                    interfaces_by_id[iface.id] = iface
-
-                if hosts:
-                    # subqueryload() and with_polymorphic() do not play nice
-                    # together, so do it by hand
-                    q = session.query(AddressAssignment)
-                    q = q.options(joinedload("network"),
-                                  joinedload("dns_records"))
-                    q = q.order_by(AddressAssignment._label)
-                    addrs_by_iface = defaultdict(list)
-                    for addr in q:
-                        addrs_by_iface[addr.interface_id].append(addr)
-                    for interface_id, addrs in addrs_by_iface.items():
-                        set_committed_value(interfaces_by_id[interface_id],
-                                            "assignments", addrs)
-
-                    q = session.query(Interface.id)
-                    q = q.filter(~Interface.assignments.any())
-                    for id in q.all():
-                        set_committed_value(interfaces_by_id[id[0]],
-                                            "assignments", None)
+                self.preload_interfaces(session, hosts, interfaces_by_id,
+                                        interfaces_by_hwent)
 
             if hosts or services:
                 q = session.query(ServiceInstance)
@@ -239,25 +244,6 @@ class CommandFlush(BrokerCommand):
                               joinedload("primary_name.fqdn"))
                 chassis = q.all()
 
-                # Load manager addresses
-                # TODO: only if not hosts
-                manager_addrs = defaultdict(list)
-                q = session.query(AddressAssignment)
-                q = q.join(Interface)
-                q = q.filter_by(interface_type="management")
-                q = q.options(contains_eager("interface"),
-                              joinedload("dns_records"),
-                              lazyload("interface.hardware_entity"))
-                for addr in q:
-                    manager_addrs[addr.interface.id].append(addr)
-                for interface_id, addrs in manager_addrs.items():
-                    if interface_id not in interfaces_by_id:
-                        # Should not happen...
-                        continue
-                    addrs.sort(key=attrgetter("label"))
-                    set_committed_value(interfaces_by_id[interface_id],
-                                        "assignments", addrs)
-
                 q = session.query(Machine)
                 q = q.options(lazyload("host"),
                               lazyload("primary_name"),
@@ -273,11 +259,8 @@ class CommandFlush(BrokerCommand):
 
                     set_committed_value(machine, 'disks',
                                         disks_by_machine.get(machine.id, None))
-
-                    if machine.id in interfaces_by_machine:
-                        interfaces_by_machine[machine.id].sort(key=attrgetter('name'))
-                        set_committed_value(machine, 'interfaces',
-                                            interfaces_by_machine[machine.id])
+                    set_committed_value(machine, 'interfaces',
+                                        interfaces_by_hwent.get(machine.id, None))
 
                     try:
                         plenary_info = Plenary.get_plenary(machine,
@@ -327,10 +310,8 @@ class CommandFlush(BrokerCommand):
 
                     # TODO: this is redundant when machines are flushed as well,
                     # but should not hurt
-                    if h.machine.id in interfaces_by_machine:
-                        interfaces_by_machine[h.machine.id].sort(key=attrgetter('name'))
-                        set_committed_value(h.machine, 'interfaces',
-                                            interfaces_by_machine[h.machine.id])
+                    set_committed_value(h.machine, 'interfaces',
+                                        interfaces_by_hwent.get(h.machine.id, None))
 
                     try:
                         plenary_host = Plenary.get_plenary(h, logger=logger)
