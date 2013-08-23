@@ -283,13 +283,14 @@ class TestAddHost(TestBrokerCommand):
         #verifies default os and personality for aquilon
         command = "show host --hostname unittest17.aqd-unittest.ms.com"
         out = self.commandtest(command.split(" "))
+        osversion = self.config.get("archetype_aquilon", "default_osversion")
         self.matchoutput(out,
                          "Primary Name: unittest17.aqd-unittest.ms.com [%s]" %
                          self.net["tor_net_0"].usable[3],
                          command)
         self.matchoutput(out,
-                         "Template: aquilon/os/linux/5.0.1-x86_64/config" +
-                         self.template_extension,
+                         "Template: aquilon/os/linux/%s/config%s" %
+                         (osversion, self.template_extension),
                          command)
         self.matchoutput(out, "Personality: inventory", command)
 

@@ -59,6 +59,9 @@ class CommandAddPersonality(BrokerCommand):
                                     "for {0:l}, please specify "
                                     "--host_environment.".format(dbarchetype))
 
+        if host_environment == 'legacy':
+            raise ArgumentError("Legacy is not a valid environment for a new personality.")
+
         HostEnvironment.polymorphic_subclass(host_environment,
                                              "Unknown environment name")
         Personality.validate_env_in_name(personality, host_environment)

@@ -35,6 +35,10 @@ class TestAddOS(TestBrokerCommand):
                          "archetype aquilon already exists.",
                          command)
 
+    def testadd60(self):
+        command = "add os --archetype aquilon --osname linux --osversion 6.0-x86_64"
+        self.noouttest(command.split(" "))
+
     def testaddbadname(self):
         command = "add os --archetype aquilon --osname oops@! --osversion 1.0"
         out = self.badrequesttest(command.split(" "))

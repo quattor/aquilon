@@ -223,7 +223,7 @@ class TestParameterDefinitionFeature(TestBrokerCommand):
                           cmd)
 
     def test_150_del_validation(self):
-        cmd = ["add_personality", "--archetype=aquilon", "--personality=paramtest", "--eon_id=2", "--host_environment=legacy"]
+        cmd = ["add_personality", "--archetype=aquilon", "--personality=paramtest", "--eon_id=2", "--host_environment=dev"]
         self.noouttest(cmd)
 
         cmd = ["bind_feature", "--personality=paramtest", "--feature", FEATURE]
