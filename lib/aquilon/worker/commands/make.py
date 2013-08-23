@@ -33,7 +33,7 @@ class CommandMake(BrokerCommand):
     required_parameters = ["hostname"]
 
     def render(self, session, logger, hostname, osname, osversion, archetype,
-               personality, buildstatus, keepbindings, grn, eon_id,
+               personality, buildstatus, keepbindings, grn, eon_id, cleargrn,
                **arguments):
         dbhost = hostname_to_host(session, hostname)
 
@@ -99,6 +99,9 @@ class CommandMake(BrokerCommand):
             dbgrn = lookup_grn(session, grn, eon_id, logger=logger,
                                config=self.config)
             dbhost.owner_grn = dbgrn
+
+        if cleargrn:
+            dbhost.owner_grn = None
 
         session.flush()
 

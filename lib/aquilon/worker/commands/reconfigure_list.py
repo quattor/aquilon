@@ -24,6 +24,7 @@ from aquilon.worker.dbwrappers.host import (hostlist_to_hosts,
 from aquilon.aqdb.model import (Archetype, Personality,
                                 OperatingSystem, HostLifecycle)
 from aquilon.worker.templates.domain import TemplateDomain
+from aquilon.worker.dbwrappers.grn import lookup_grn
 from aquilon.worker.locks import lock_queue, CompileKey
 from aquilon.worker.services import Chooser
 
@@ -33,16 +34,16 @@ class CommandReconfigureList(BrokerCommand):
     required_parameters = ["list"]
 
     def render(self, session, logger, list, archetype, personality,
-               buildstatus, osname, osversion, **arguments):
+               buildstatus, osname, osversion, grn, eon_id, cleargrn, **arguments):
         check_hostlist_size(self.command, self.config, list)
         dbhosts = hostlist_to_hosts(session, list)
 
         self.reconfigure_list(session, logger, dbhosts, archetype, personality,
-                              buildstatus, osname, osversion, **arguments)
+                              buildstatus, osname, osversion, grn, eon_id, cleargrn, **arguments)
 
     def reconfigure_list(self, session, logger, dbhosts, archetype,
                          personality, buildstatus, osname, osversion,
-                         **arguments):
+                         grn, eon_id, cleargrn, **arguments):
         failed = []
         # Check all the parameters up front.
         # Some of these could be more intelligent about defaults
@@ -84,6 +85,10 @@ class CommandReconfigureList(BrokerCommand):
         if buildstatus:
             dbstatus = HostLifecycle.get_unique(session, buildstatus,
                                                 compel=True)
+
+        if grn or eon_id:
+            dbgrn = lookup_grn(session, grn, eon_id, logger=logger,
+                               config=self.config)
 
         # Take a shortcut if there's nothing to do, but only after all the other
         # parameters have been checked
@@ -134,6 +139,11 @@ class CommandReconfigureList(BrokerCommand):
                                   "%s." %
                                   (dbhost.fqdn, dbhost.personality.name,
                                    dbarchetype.name))
+            if grn or eon_id:
+                dbhost.owner_grn = dbgrn
+
+            if cleargrn:
+                dbhost.owner_grn = None
 
         if failed:
             raise ArgumentError("Cannot modify the following hosts:\n%s" %

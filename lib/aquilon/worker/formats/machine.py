@@ -143,11 +143,12 @@ class MachineFormatter(ObjectFormatter):
             details.append(indent +
                            "  Advertise Status: %s" % host.advertise_status)
 
-            details.append(indent + "  Owned by {0:c}: {0.grn}"
-                           .format(host.owner_grn))
+            if host.owner_grn:
+                details.append(indent + "  Owned by {0:c}: {0.grn}"
+                               .format(host.owner_grn))
             for grn_rec in sorted(host._grns, key=lambda x: x.target):
                 details.append(indent + "  Used by {0.grn:c}: {0.grn.grn} "
-                               "[{0.target}]".format(grn_rec))
+                               "[target: {0.target}]".format(grn_rec))
 
             for feature in model_features(machine.model,
                                           host.personality.archetype,

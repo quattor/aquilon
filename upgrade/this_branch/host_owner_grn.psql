@@ -1,0 +1,1 @@
+ALTER TABLE host ALTER COLUMN owner_eon_id DROP NOT NULL;

@@ -254,18 +254,10 @@ class PlenaryHostData(Plenary):
         pan_assign(lines, "system/advertise_status", self.dbobj.advertise_status)
 
         ## process grns
-        eon_id_map = defaultdict(set)
-
-        # own
-        for grn_rec in self.dbobj._grns:
-            eon_id_map[grn_rec.target].add(grn_rec.grn.eon_id)
-
-        # pers level
-        for grn_rec in pers._grns:
-            eon_id_map[grn_rec.target].add(grn_rec.grn.eon_id)
+        eon_id_map = self.dbobj.effective_grns
 
         for (target, eon_id_set) in eon_id_map.iteritems():
-            eon_id_list = list(eon_id_set)
+            eon_id_list = [grn.eon_id for grn in eon_id_set]
             eon_id_list.sort()
             pan_assign(lines, "system/eon_id_maps/%s" % target, eon_id_list)
 
@@ -278,12 +270,12 @@ class PlenaryHostData(Plenary):
 
             eon_id_set = eon_id_map[default_grn_target]
 
-            eon_id_list = list(eon_id_set)
+            eon_id_list = [grn.eon_id for grn in eon_id_set]
             eon_id_list.sort()
             if eon_id_list:
                 pan_assign(lines, "system/eon_ids", eon_id_list)
 
-        pan_assign(lines, "system/owner_eon_id", self.dbobj.owner_eon_id)
+        pan_assign(lines, "system/owner_eon_id", self.dbobj.effective_owner_grn.eon_id)
 
         if self.dbobj.cluster:
             pan_assign(lines, "system/cluster/name", self.dbobj.cluster.name)

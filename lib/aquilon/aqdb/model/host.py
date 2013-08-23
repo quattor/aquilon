@@ -27,6 +27,7 @@ from aquilon.aqdb.model import (Base, Branch, Machine, HostLifecycle, Grn,
                                 Personality, OperatingSystem, UserPrincipal)
 
 from aquilon.aqdb.column_types import AqStr
+from collections import defaultdict
 
 _TN = 'host'
 _HOSTGRN = 'host_grn_map'
@@ -84,7 +85,7 @@ class Host(Base):
 
     owner_eon_id = Column(Integer, ForeignKey('grn.eon_id',
                                               name='%s_owner_grn_fk' % _TN),
-                          nullable=False)
+                          nullable=True)
 
     # something to retain the advertised status of the host
     advertise_status = Column(Boolean(name="%s_advertise_status_valid_ck" % _TN),
@@ -108,7 +109,7 @@ class Host(Base):
     personality = relation(Personality, innerjoin=True)
     status = relation(HostLifecycle, innerjoin=True)
     operating_system = relation(OperatingSystem, innerjoin=True)
-    owner_grn = relation(Grn, innerjoin=True)
+    owner_grn = relation(Grn)
     grns = association_proxy('_grns', 'grn', creator=_hgm_creator)
 
     __table_args__ = (Index('host_prsnlty_idx', personality_id),
@@ -141,6 +142,30 @@ class Host(Base):
                     mach.append(res.machine)
         return mach
 
+    @property
+    def effective_owner_grn(self):
+        if self.owner_grn:
+            return self.owner_grn
+        else:
+            return self.personality.owner_grn
+
+    @property
+    def effective_grns(self):
+        ## process grns
+        eon_id_map = defaultdict(set)
+        pers_eon_id_map = defaultdict(set)
+
+        # own
+        for grn_rec in self._grns:
+            eon_id_map[grn_rec.target].add(grn_rec.grn)
+        for grn_rec in self.personality._grns:
+            pers_eon_id_map[grn_rec.target].add(grn_rec.grn)
+
+        for target in pers_eon_id_map:
+            if not (target in eon_id_map):
+                eon_id_map[target] = pers_eon_id_map[target]
+
+        return eon_id_map
 
 class HostGrnMap(Base):
     __tablename__ = _HOSTGRN
