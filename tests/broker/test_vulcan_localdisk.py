@@ -220,6 +220,23 @@ class TestVulcanLocalDisk(VerifyNotificationsMixin, TestBrokerCommand):
             self.searchoutput(out, r"Disk: sda 34 GB scsi \(virtual_localdisk from utfs1\) \[boot\]$",
                               command)
 
+    def test_150_verifyutfs1(self):
+        command = ["show_filesystem", "--filesystem=utfs1"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Filesystem: utfs1", command)
+        self.matchoutput(out, "Bound to: Host %s" % self.vmhost, command)
+        self.matchoutput(out, "Virtual Disk Count: 3", command)
+
+
+    def test_155_catutpgm0(self):
+        command = ["cat", "--machine", "utpgm0"]
+        out = self.commandtest(command)
+        self.matchoutput(out, '', command)
+        self.matchoutput(out, '"filesystemname", "utfs1",', command)
+        self.matchoutput(out, '"mountpoint", "/mnt",', command)
+        self.matchoutput(out, '"path", "utpgm0/sda.vmdk"', command)
+
+
     def test_160_addinterfaces(self):
         # TODO: fixed mac addresses grabbed from test_vulcan2 until automac\pg
         # for localdisk is implemented.
@@ -228,13 +245,6 @@ class TestVulcanLocalDisk(VerifyNotificationsMixin, TestBrokerCommand):
         for i in range(0, 2):
             self.noouttest(["add", "interface", "--machine", "utpgm%d" % i,
                             "--interface", "eth0", "--automac", "--autopg"])
-
-    def test_150_verifyutfs1(self):
-        command = ["show_filesystem", "--filesystem=utfs1"]
-        out = self.commandtest(command)
-        self.matchoutput(out, "Filesystem: utfs1", command)
-        self.matchoutput(out, "Bound to: Host %s" % self.vmhost, command)
-        self.matchoutput(out, "Virtual Disk Count: 3", command)
 
     def test_200_make_host(self):
         basetime = datetime.now()

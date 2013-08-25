@@ -145,7 +145,7 @@ class PlenaryMachineInfo(Plenary):
                 params["path"] = "%s/%s.vmdk" % (self.machine, disk.device_name)
                 params["address"] = disk.address
                 params["filesystemname"] = filesystem.name
-                params["mountpoint"] = filesystem.mount
+                params["mountpoint"] = filesystem.mountpoint
 
                 tpl = params
 
