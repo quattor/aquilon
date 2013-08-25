@@ -64,6 +64,12 @@ class TestVulcanLocalDisk(VerifyNotificationsMixin, TestBrokerCommand):
                    "--grn", "grn:/ms/ei/aquilon/aqd"]
         self.noouttest(command)
 
+        command = ["add_personality", "--archetype", "aquilon",
+                   "--personality", "virteng-perf-test",
+                   "--host_environment=dev",
+                   "--grn", "grn:/ms/ei/aquilon/aqd"]
+        self.noouttest(command)
+
         command = ["add_required_service", "--service", "esx_management_server",
                    "--personality", "vulcan-local-disk",
                    "--archetype", "esx_cluster"]
@@ -246,6 +252,30 @@ class TestVulcanLocalDisk(VerifyNotificationsMixin, TestBrokerCommand):
             self.noouttest(["add", "interface", "--machine", "utpgm%d" % i,
                             "--interface", "eth0", "--automac", "--autopg"])
 
+    def test_170_add_vm_hosts(self):
+        self.dsdb_expect_add("utpgm0.aqd-unittest.ms.com", "4.2.18.6", "eth0", "00:50:56:01:20:00")
+        command = ["add", "host", "--hostname", "utpgm0.aqd-unittest.ms.com",
+                   "--ip", "4.2.18.6",
+                   "--machine", "utpgm0",
+                   "--domain", "unittest", "--buildstatus", "build",
+                   "--osname", "linux", "--osversion", "6.0-x86_64",
+                   "--archetype", "aquilon",
+                   "--personality", "virteng-perf-test"]
+        self.noouttest(command)
+        self.dsdb_verify()
+
+
+    def test_175_make_vm_host(self):
+        basetime = datetime.now()
+        command = ["make", "--hostname", "utpgm0.aqd-unittest.ms.com"]
+        self.successtest(command)
+        self.wait_notification(basetime, 1)
+
+        command = ["show", "host", "--hostname", "utpgm0.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        #TODO what to test here?
+        # self.matchclean(out, "Template: service/vcenter/ut", command)
+
     def test_200_make_host(self):
         basetime = datetime.now()
         command = ["make", "--hostname", "utpgh0.aqd-unittest.ms.com"]
@@ -297,6 +327,14 @@ class TestVulcanLocalDisk(VerifyNotificationsMixin, TestBrokerCommand):
                    "--hostname=%s" % self.vmhost]
         self.successtest(command)
 
+    def test_305_del_vm_host(self):
+        basetime = datetime.now()
+        self.dsdb_expect_delete("4.2.18.6")
+        command = ["del", "host", "--hostname", "utpgm0.aqd-unittest.ms.com"]
+        self.statustest(command)
+        self.wait_notification(basetime, 1)
+        self.dsdb_verify()
+
     def test_310_del_vms(self):
         for i in range(0, 3):
             machine = "utpgm%d" % i
@@ -343,6 +381,10 @@ class TestVulcanLocalDisk(VerifyNotificationsMixin, TestBrokerCommand):
             self.metacluster + self.profile_suffix)))
 
     def test_500_del_vlocal(self):
+        command = ["del_personality", "--archetype", "aquilon",
+                   "--personality", "virteng-perf-test"]
+        self.noouttest(command)
+
         command = ["del_personality", "--archetype", "esx_cluster",
                    "--personality", "vulcan-local-disk"]
         self.noouttest(command)
