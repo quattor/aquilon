@@ -34,7 +34,7 @@ class TestVulcan20(VerifyNotificationsMixin, TestBrokerCommand):
 
     def test_000_addutmc8(self):
         command = ["add_metacluster", "--metacluster=utmc8",
-                   "--personality=vulcan2-test", "--archetype=metacluster",
+                   "--personality=vulcan2", "--archetype=metacluster",
                    "--domain=unittest", "--building=ut", "--domain=unittest",
                    "--comments=autopg_v2_tests"]
         self.noouttest(command)
@@ -417,7 +417,7 @@ class TestVulcan20(VerifyNotificationsMixin, TestBrokerCommand):
         self.noouttest(command)
 
         command = ["add_required_service", "--service", "vcenter",
-                   "--archetype", "metacluster", "--personality", "vulcan2-test"]
+                   "--archetype", "metacluster", "--personality", "vulcan2"]
         self.noouttest(command)
 
     def test_151_mapvcenterservices(self):
@@ -478,7 +478,7 @@ class TestVulcan20(VerifyNotificationsMixin, TestBrokerCommand):
 
     def test_153_unbindvcenterservices(self):
         command = ["del_required_service", "--service", "vcenter",
-                   "--archetype", "metacluster", "--personality", "vulcan2-test"]
+                   "--archetype", "metacluster", "--personality", "vulcan2"]
         self.noouttest(command)
 
         command = ["del_required_service", "--service", "vcenter",
@@ -524,11 +524,11 @@ class TestVulcan20(VerifyNotificationsMixin, TestBrokerCommand):
         self.noouttest(command)
 
         command = ["add_required_service", "--service", "esx_management_server",
-                   "--archetype", "metacluster", "--personality", "vulcan2-test"]
+                   "--archetype", "metacluster", "--personality", "vulcan2"]
         self.noouttest(command)
 
         command = ["map", "service", "--service", "esx_management_server", "--instance", "ut.mc",
-                   "--building", "ut", "--personality", "vulcan2-test",
+                   "--building", "ut", "--personality", "vulcan2",
                    "--archetype", "metacluster"]
         self.noouttest(command)
 
@@ -577,7 +577,7 @@ class TestVulcan20(VerifyNotificationsMixin, TestBrokerCommand):
 
     def test_180_remove_mc_esx_service(self):
         command = ["del_required_service", "--service", "esx_management_server",
-                   "--archetype", "metacluster", "--personality", "vulcan2-test"]
+                   "--archetype", "metacluster", "--personality", "vulcan2"]
         self.noouttest(command)
 
         command = ["unbind_cluster", "--cluster", "utmc8", "--service", "esx_management_server",
@@ -585,7 +585,7 @@ class TestVulcan20(VerifyNotificationsMixin, TestBrokerCommand):
         self.noouttest(command)
 
         command = ["unmap", "service", "--service", "esx_management_server", "--instance", "ut.mc",
-                   "--building", "ut", "--personality", "vulcan2-test",
+                   "--building", "ut", "--personality", "vulcan2",
                    "--archetype", "metacluster"]
         self.noouttest(command)
 

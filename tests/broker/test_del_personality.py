@@ -98,7 +98,7 @@ class TestDelPersonality(TestBrokerCommand):
                    "--personality=vulcan2-10g-test", "--archetype=esx_cluster"]
         self.noouttest(command)
         command = ["del_personality",
-                   "--personality=vulcan2-test", "--archetype=metacluster"]
+                   "--personality=vulcan2", "--archetype=metacluster"]
         self.noouttest(command)
 
 

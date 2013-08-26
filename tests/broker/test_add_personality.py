@@ -509,7 +509,7 @@ class TestAddPersonality(VerifyGrnsMixin, TestBrokerCommand):
                    "--personality=vulcan2-10g-test", "--archetype=esx_cluster", "--eon_id=2"]
         self.noouttest(command)
         command = ["add_personality", "--host_environment=dev",
-                   "--personality=vulcan2-test", "--archetype=metacluster", "--eon_id=2"]
+                   "--personality=vulcan2", "--archetype=metacluster", "--eon_id=2"]
         self.noouttest(command)
         self.verifycatforpersonality("esx_cluster", "vulcan2-10g-test")
 

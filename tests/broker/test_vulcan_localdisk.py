@@ -76,7 +76,7 @@ class TestVulcanLocalDisk(VerifyNotificationsMixin, TestBrokerCommand):
 
     def test_005_addutmc9(self):
         command = ["add_metacluster", "--metacluster=%s" % self.metacluster,
-                   "--personality=vulcan2-test", "--archetype=metacluster",
+                   "--personality=vulcan2", "--archetype=metacluster",
                    "--domain=unittest", "--building=ut", "--domain=unittest",
                    "--comments=vulcan_localdisk_test"]
         self.noouttest(command)
