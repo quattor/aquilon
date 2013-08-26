@@ -16,7 +16,8 @@
 # limitations under the License.
 """ Disk for share """
 
-from sqlalchemy import Column, Integer, ForeignKey, Index
+from sqlalchemy import Column, Boolean, Integer, ForeignKey, Index
+from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.orm import relation, backref, column_property
 from sqlalchemy.sql import select, func
 
@@ -25,8 +26,16 @@ from aquilon.aqdb.model import Disk, Share, Filesystem
 _TN = 'disk'
 
 
+class SnapshotableMixin(object):
+    @declared_attr
+    def snapshotable(cls):
+        col = Column(Boolean(name="%s_snapshotable_ck" % _TN),
+                     nullable=True)
+        return Disk.__table__.c.get('snapshotable', col)
+
+
 # Disk subclass for Share class
-class VirtualDisk(Disk):
+class VirtualDisk(SnapshotableMixin,Disk):
     share_id = Column(Integer, ForeignKey('share.id', name='%s_share_fk' % _TN,
                                           ondelete='CASCADE'),
                       nullable=True)
@@ -61,7 +70,7 @@ Share.machine_count = column_property(
     .label("machine_count"), deferred=True)
 
 
-class VirtualLocalDisk(Disk):
+class VirtualLocalDisk(SnapshotableMixin,Disk):
     filesystem_id = Column(Integer, ForeignKey('filesystem.id',
                                                name='%s_filesystem_fk' % _TN,
                                                ondelete='CASCADE'),
