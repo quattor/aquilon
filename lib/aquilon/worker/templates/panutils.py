@@ -110,8 +110,11 @@ def pan_create(path, params=None, indent=0):
     return "\n".join(("%s" % x) for x in accumulator)
 
 
-def pan_assign(lines, path, value):
-    lines.append('"%s" = %s;' % (path, pan(value)))
+def pan_assign(lines, path, value, final=False):
+    if final:
+        lines.append('final "%s" = %s;' % (path, pan(value)))
+    else:
+        lines.append('"%s" = %s;' % (path, pan(value)))
 
 
 def pan_append(lines, path, value):

@@ -552,7 +552,7 @@ class TestAddPersonality(VerifyGrnsMixin, TestBrokerCommand):
                          command)
         self.matchoutput(out, '"/system/personality/name" = "%s";' % personality,
                          command)
-        self.matchoutput(out, '"/system/personality/host_environment" = "%s";' % host_env,
+        self.matchoutput(out, 'final "/system/personality/host_environment" = "%s";' % host_env,
                          command)
         if config_override:
             self.searchoutput(out, r'include { "features/personality/config_override/config" };\s*'

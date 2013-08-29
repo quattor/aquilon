@@ -18,7 +18,7 @@
 import logging
 from collections import defaultdict
 
-from aquilon.aqdb.model import Personality, Parameter
+from aquilon.aqdb.model import Personality, Parameter, HostEnvironment
 from aquilon.worker.templates.base import (Plenary, TemplateFormatter,
                                            PlenaryCollection)
 from aquilon.worker.templates.panutils import (pan_include, pan_variable,
@@ -205,8 +205,11 @@ class PlenaryPersonalityBase(Plenary):
         ## process parameter templates
         pan_include_if_exists(lines, "personality/config")
         pan_assign(lines, "/system/personality/name", self.name)
-        pan_assign(lines, "/system/personality/host_environment",
-                   self.dbobj.host_environment)
+        legacy_env = HostEnvironment.get_unique(object_session(self.dbobj),
+                                                'legacy', compel=True)
+        if self.dbobj.host_environment != legacy_env:
+            pan_assign(lines, "/system/personality/host_environment",
+                              self.dbobj.host_environment, True)
 
         ## TODO : This is just to satisfy quattor schema
         ## needs to be removed as soon as the schema allows this
