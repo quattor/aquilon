@@ -21,7 +21,7 @@ from aquilon.exceptions_ import ArgumentError, IncompleteError
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.host import hostname_to_host
 from aquilon.worker.templates.domain import TemplateDomain
-from aquilon.worker.templates.host import PlenaryHost
+from aquilon.worker.templates import Plenary
 from aquilon.worker.locks import lock_queue, CompileKey
 from aquilon.aqdb.model import HostLifecycle
 
@@ -41,7 +41,7 @@ class CommandChangeStatus(BrokerCommand):
         session.add(dbhost)
         session.flush()
 
-        plenary = PlenaryHost(dbhost, logger=logger)
+        plenary = Plenary.get_plenary(dbhost, logger=logger)
         # Force a host lock as pan might overwrite the profile...
         key = CompileKey(domain=dbhost.branch.name, profile=dbhost.fqdn,
                          logger=logger)

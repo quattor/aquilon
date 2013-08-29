@@ -26,8 +26,12 @@ from aquilon.exceptions_ import IncompleteError, InternalError
 from aquilon.aqdb.model import (Host, VlanInterface, BondingInterface,
                                 BridgeInterface)
 from aquilon.worker.locks import CompileKey
-from aquilon.worker.templates.base import Plenary, PlenaryCollection
-from aquilon.worker.templates.cluster import PlenaryClusterClient
+from aquilon.worker.templates import (Plenary, ObjectPlenary, StructurePlenary,
+                                      PlenaryCollection, PlenaryClusterClient,
+                                      PlenaryMachineInfo, PlenaryResource,
+                                      PlenaryPersonalityBase,
+                                      PlenaryServiceInstanceClientDefault,
+                                      PlenaryServiceInstanceServerDefault)
 from aquilon.worker.templates.panutils import (StructureTemplate, PanValue,
                                                pan_assign, pan_append,
                                                pan_include)
@@ -87,10 +91,11 @@ class PlenaryHost(PlenaryCollection):
       if host profiles should be put into a "flat" toplevel (non-namespaced)
     """
     def __init__(self, dbhost, logger=LOGGER):
+        super(PlenaryHost, self).__init__(logger=logger)
+
         if not isinstance(dbhost, Host):
             raise InternalError("PlenaryHost called with %s instead of Host" %
                                 dbhost.__class__.name)
-        PlenaryCollection.__init__(self, logger=logger)
         self.dbobj = dbhost
         self.config = Config()
         if self.config.getboolean("broker", "namespaced_host_profiles"):
@@ -99,7 +104,7 @@ class PlenaryHost(PlenaryCollection):
             self.plenaries.append(PlenaryToplevelHost(dbhost))
         self.plenaries.append(PlenaryHostData(dbhost))
 
-    def write(self, locked=False, content=None):
+    def write(self, locked=False):
         # Don't bother writing plenary files non-compilable archetypes.
         if not self.dbobj.archetype.is_compileable:
             return 0
@@ -109,30 +114,31 @@ class PlenaryHost(PlenaryCollection):
         # should be removed.
         total = 0
         for plenary in self.plenaries:
-            total += plenary.write(locked=locked, content=content)
+            total += plenary.write(locked=locked)
         return total
 
 
 Plenary.handlers[Host] = PlenaryHost
 
 
-class PlenaryHostData(Plenary):
+class PlenaryHostData(StructurePlenary):
 
-    template_type = "structure"
+    @classmethod
+    def template_name(cls, dbhost):
+        return "hostdata/" + str(dbhost.fqdn)
 
     def __init__(self, dbhost, logger=LOGGER):
-        Plenary.__init__(self, dbhost, logger=logger)
+        super(PlenaryHostData, self).__init__(dbhost, logger=logger)
+
         # Store the branch separately so get_key() works even after the dbhost
         # object has been deleted
         self.branch = dbhost.branch
         self.name = dbhost.fqdn
-        self.plenary_core = "hostdata"
-        self.plenary_template = self.name
 
     def get_key(self):
-        # Going with self.name instead of self.plenary_template_name seems like
+        # Going with self.name instead of self.template_name() seems like
         # the right decision here - easier to predict behavior when meshing
-        # with other CompileKey generators like PlenaryMachine.
+        # with other CompileKey generators like PlenaryMachineInfo.
         return CompileKey(domain=self.branch.name, profile=self.name,
                           logger=self.logger)
 
@@ -235,9 +241,8 @@ class PlenaryHostData(Plenary):
             interfaces[dbinterface.name] = ifdesc
 
         # Okay, here's the real content
-        pmachine = Plenary.get_plenary(self.dbobj.machine, logger=self.logger)
-        pan_assign(lines, "hardware",
-                   StructureTemplate(pmachine.plenary_template_name))
+        path = PlenaryMachineInfo.template_name(self.dbobj.machine)
+        pan_assign(lines, "hardware", StructureTemplate(path))
 
         lines.append("")
         pan_assign(lines, "system/network/interfaces", interfaces)
@@ -285,27 +290,27 @@ class PlenaryHostData(Plenary):
             lines.append("")
             for resource in sorted(self.dbobj.resholder.resources,
                                    key=attrgetter('resource_type', 'name')):
+                res_path = PlenaryResource.template_name(resource)
                 pan_append(lines, "system/resources/" + resource.resource_type,
-                           StructureTemplate(resource.template_base +
-                                             '/config'))
+                           StructureTemplate(res_path))
 
 
-class PlenaryToplevelHost(Plenary):
+class PlenaryToplevelHost(ObjectPlenary):
     """
     A plenary template for a host, stored at the toplevel of the profiledir
     """
 
-    template_type = "object"
+    @classmethod
+    def template_name(cls, dbhost):
+        return str(dbhost.fqdn)
 
     def __init__(self, dbhost, logger=LOGGER):
-        Plenary.__init__(self, dbhost, logger=logger)
+        super(PlenaryToplevelHost, self).__init__(dbhost, logger=logger)
+
         # Store the branch separately so get_key() works even after the dbhost
         # object has been deleted
         self.branch = dbhost.branch
         self.name = dbhost.fqdn
-        self.loadpath = dbhost.personality.archetype.name
-        self.plenary_core = ""
-        self.plenary_template = self.name
 
     def will_change(self):
         # Need to override to handle IncompleteError...
@@ -320,9 +325,9 @@ class PlenaryToplevelHost(Plenary):
         return self.old_content != self.new_content
 
     def get_key(self):
-        # Going with self.name instead of self.plenary_template_name seems like
+        # Going with self.name instead of self.template_name() seems like
         # the right decision here - easier to predict behavior when meshing
-        # with other CompileKey generators like PlenaryMachine.
+        # with other CompileKey generators like PlenaryMachineInfo.
         return CompileKey(domain=self.branch.name, profile=self.name,
                           logger=self.logger)
 
@@ -341,7 +346,7 @@ class PlenaryToplevelHost(Plenary):
 
         for si in self.dbobj.services_used:
             required_services.discard(si.service)
-            services.append(si.cfg_path + '/client/config')
+            services.append(PlenaryServiceInstanceClientDefault.template_name(si))
         if required_services:
             missing = ", ".join(sorted([srv.name for srv in required_services]))
             raise IncompleteError("Host %s is missing the following required "
@@ -350,7 +355,7 @@ class PlenaryToplevelHost(Plenary):
 
         provides = []
         for si in self.dbobj.services_provided:
-            provides.append('%s/server/config' % si.cfg_path)
+            provides.append(PlenaryServiceInstanceServerDefault.template_name(si))
 
         # Ensure used/provided services have a stable order
         services.sort()
@@ -360,23 +365,24 @@ class PlenaryToplevelHost(Plenary):
         pan_include(lines, ["pan/units", "pan/functions"])
         lines.append("")
 
+        path = PlenaryHostData.template_name(self.dbobj)
         pan_assign(lines, "/",
-                   StructureTemplate("hostdata/%s" % self.name,
+                   StructureTemplate(path,
                                      {"metadata": PanValue("/metadata")}))
         pan_include(lines, "archetype/base")
-        pan_include(lines, self.dbobj.operating_system.cfg_path + '/config')
+
+        opsys = self.dbobj.operating_system
+        pan_include(lines, "os/%s/%s/config" % (opsys.name, opsys.version))
 
         pan_include(lines, services)
         pan_include(lines, provides)
 
-        personality_template = "personality/%s/config" % \
-            self.dbobj.personality.name
-
-        pan_include(lines, personality_template)
+        path = PlenaryPersonalityBase.template_name(self.dbobj.personality)
+        pan_include(lines, path)
 
         if self.dbobj.cluster:
-            clplenary = PlenaryClusterClient(self.dbobj.cluster)
-            pan_include(lines, clplenary.plenary_template_name)
+            pan_include(lines,
+                        PlenaryClusterClient.template_name(self.dbobj.cluster))
         elif pers.cluster_required:
             raise IncompleteError("Host %s personality %s requires cluster "
                                   "membership, please run 'aq cluster'." %
@@ -388,6 +394,7 @@ class PlenaryNamespacedHost(PlenaryToplevelHost):
     """
     A plenary template describing a host, namespaced by DNS domain
     """
-    def __init__(self, dbhost, logger=LOGGER):
-        PlenaryToplevelHost.__init__(self, dbhost, logger=logger)
-        self.plenary_core = dbhost.fqdn.dns_domain.name
+
+    @classmethod
+    def template_name(cls, dbhost):
+        return "%s/%s" % (dbhost.fqdn.dns_domain.name, dbhost.fqdn)

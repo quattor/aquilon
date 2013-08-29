@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+    #!/usr/bin/env python
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
@@ -443,15 +443,14 @@ class TestAddVirtualHardware(TestBrokerCommand):
 
         out = self.commandtest(command.split(" "))
 
-        # core info
         self.searchoutput(out, r"^Virtual_machine: evm1", command)
         self.searchoutput(out, r"^  Primary Name: aqddesk1.msad.ms.com",
                           command)
         self.searchoutput(out, r"^  Comments: Windows Virtual Desktop", command)
-
-        # os
-        self.searchoutput(out, r"^    Template: windows/os/windows/nt61e/config"
-                          + self.template_extension,
+        self.searchoutput(out,
+                          r'Operating System: windows\s*'
+                          r'Version: nt61e\s*'
+                          r'Archetype: windows',
                           command)
         self.searchoutput(out, r"^    Comments: Windows 7 Enterprise \(x86\)",
                           command)

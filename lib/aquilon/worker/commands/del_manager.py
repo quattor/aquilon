@@ -23,7 +23,7 @@ from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.processes import DSDBRunner
 from aquilon.worker.locks import DeleteKey
 from aquilon.worker.dbwrappers.dns import delete_dns_record
-from aquilon.worker.templates.machine import PlenaryMachineInfo
+from aquilon.worker.templates import Plenary
 
 
 class CommandDelManager(BrokerCommand):
@@ -66,7 +66,7 @@ class CommandDelManager(BrokerCommand):
             session.commit()
 
         if dbmachine:
-            plenary_info = PlenaryMachineInfo(dbmachine, logger=logger)
+            plenary_info = Plenary.get_plenary(dbmachine, logger=logger)
             # This may create a new lock, so we free first above.
             plenary_info.write()
 

@@ -186,10 +186,10 @@ class Chooser(object):
         self.finalize_service_instances()
         self.analyze_changes()
         if not force and self.instances_bound and self.instances_unbound:
-            cfg_path = list(self.instances_unbound)[0].cfg_path
-            self.error("%s is already bound to %s, use unbind "
-                       "to clear first or rebind to force." %
-                       (self.description, cfg_path))
+            si = list(self.instances_unbound)[0]
+            self.error("{0} is already bound to {1:l}, use unbind "
+                       "to clear first or rebind to force."
+                       .format(self.description, si))
             self.check_errors()
         self.stash_services()
         self.apply_changes()
@@ -495,8 +495,8 @@ class HostChooser(Chooser):
         set_committed_value(self.dbhost, 'services_used', q.all())
         for si in self.dbhost.services_used:
             self.original_service_instances[si.service] = si
-            self.logger.debug("%s original binding: %s",
-                              self.description, si.cfg_path)
+            self.logger.debug("{0} original binding: {1}"
+                              .format(self.description, si))
         self.cluster_aligned_services = {}
         if self.dbhost.cluster:
             # Note that cluster services are currently ignored unless
@@ -627,8 +627,8 @@ class ClusterChooser(Chooser):
         """
         for si in self.dbcluster.service_bindings:
             self.original_service_instances[si.service] = si
-            self.logger.debug("%s original binding: %s",
-                              self.description, si.cfg_path)
+            self.logger.debug("{0} original binding: {1:l}"
+                              .format(self.description, si))
 
     def generate_description(self):
         return format(self.dbcluster)

@@ -21,19 +21,24 @@ import logging
 
 from aquilon.aqdb.model import Machine
 from aquilon.worker.locks import CompileKey
-from aquilon.worker.templates.base import Plenary
+from aquilon.worker.templates import Plenary, StructurePlenary
 from aquilon.worker.templates.panutils import (StructureTemplate, pan_assign,
                                                pan_include, PanMetric)
 
 LOGGER = logging.getLogger(__name__)
 
 
-class PlenaryMachineInfo(Plenary):
+class PlenaryMachineInfo(StructurePlenary):
 
-    template_type = "structure"
+    @classmethod
+    def template_name(cls, dbmachine):
+        loc = dbmachine.location
+        return "machine/%s/%s/%s/%s" % (loc.hub.fullname.lower(), loc.building,
+                                        loc.rack, dbmachine.label)
 
     def __init__(self, dbmachine, logger=LOGGER):
-        Plenary.__init__(self, dbmachine, logger=logger)
+        super(PlenaryMachineInfo, self).__init__(dbmachine, logger=logger)
+
         self.machine = dbmachine.label
 
         loc = dbmachine.location
@@ -76,10 +81,6 @@ class PlenaryMachineInfo(Plenary):
             self.dns_search_domains.extend(extra_domains)
 
         self.sysloc = loc.sysloc()
-
-        # If this changes need to update machine_plenary_will_move() to match.
-        self.plenary_core = "machine/%(hub)s/%(building)s/%(rack)s" % self.__dict__
-        self.plenary_template = self.machine
 
     def get_key(self):
         host = self.dbobj.host
@@ -232,10 +233,6 @@ class PlenaryMachineInfo(Plenary):
         # "/console" directly
         for manager in sorted(managers.keys()):
             pan_assign(lines, "console/%s" % manager, managers[manager])
-
-    def write(self, *args, **kwargs):
-        return Plenary.write(self, *args, **kwargs)
-
 
 Plenary.handlers[Machine] = PlenaryMachineInfo
 

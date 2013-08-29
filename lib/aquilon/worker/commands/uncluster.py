@@ -73,7 +73,7 @@ class CommandUncluster(BrokerCommand):
             try:
                 host_plenary.write(locked=True)
             except IncompleteError:
-                host_plenary.cleanup(domain=dbhost.branch.name, locked=True)
+                host_plenary.remove(locked=True)
         except:
             cluster_plenary.restore_stash()
             host_plenary.restore_stash()

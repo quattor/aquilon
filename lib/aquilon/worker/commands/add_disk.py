@@ -24,7 +24,7 @@ from aquilon.aqdb.model import (Machine, LocalDisk, VirtualDisk,
 from aquilon.aqdb.model.disk import controller_types
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.resources import find_share
-from aquilon.worker.templates.machine import PlenaryMachineInfo
+from aquilon.worker.templates import Plenary
 
 
 class CommandAddDisk(BrokerCommand):
@@ -34,11 +34,6 @@ class CommandAddDisk(BrokerCommand):
     required_parameters = ["machine", "disk"]
 
     REGEX_ADDRESS = re.compile(r"\d+:\d+$")
-
-    def _write_plenary_info(self, dbmachine, logger):
-        """write template files"""
-        plenary_info = PlenaryMachineInfo(dbmachine, logger=logger)
-        plenary_info.write()
 
     def render(self, session, logger, machine, disk, controller, share,
                filesystem, resourcegroup, address, comments, size, boot, **kw):
@@ -116,5 +111,7 @@ class CommandAddDisk(BrokerCommand):
 
         dbmachine.disks.append(dbdisk)
 
-        self._write_plenary_info(dbmachine, logger)
+        plenary_info = Plenary.get_plenary(dbmachine, logger=logger)
+        plenary_info.write()
+
         return

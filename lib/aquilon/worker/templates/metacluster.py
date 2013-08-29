@@ -19,7 +19,10 @@ from operator import attrgetter
 import logging
 
 from aquilon.aqdb.model import MetaCluster
-from aquilon.worker.templates.base import Plenary, PlenaryCollection
+from aquilon.worker.templates import (Plenary, ObjectPlenary, StructurePlenary,
+                                      PlenaryCollection, PlenaryPersonalityBase,
+                                      PlenaryResource,
+                                      PlenaryServiceInstanceClientDefault)
 from aquilon.worker.templates.panutils import (StructureTemplate, PanValue,
                                                pan_assign, pan_include,
                                                pan_append)
@@ -34,30 +37,26 @@ class PlenaryMetaCluster(PlenaryCollection):
     A facade for the variety of PlenaryMetaCluster subsidiary files
     """
     def __init__(self, dbcluster, logger=LOGGER):
-        PlenaryCollection.__init__(self, logger=logger)
+        super(PlenaryMetaCluster, self).__init__(logger=logger)
+
         self.dbobj = dbcluster
         self.plenaries.append(PlenaryMetaClusterObject(dbcluster, logger=logger))
         self.plenaries.append(PlenaryMetaClusterData(dbcluster, logger=logger))
 
 
-class PlenaryMetaClusterData(Plenary):
+class PlenaryMetaClusterData(StructurePlenary):
 
-    template_type = "structure"
-
-    def __init__(self, dbmetacluster, logger=LOGGER):
-        Plenary.__init__(self, dbmetacluster, logger=logger)
-        self.name = dbmetacluster.name
-
-        # TODO maybe metaclusterdata
-        self.plenary_core = "clusterdata"
-        self.plenary_template = dbmetacluster.name
+    @classmethod
+    def template_name(cls, dbmetacluster):
+        return "clusterdata/" + dbmetacluster.name
 
     def get_key(self):
         return CompileKey(domain=self.dbobj.branch.name,
-                          profile=self.plenary_template, logger=self.logger)
+                          profile=self.template_name(self.dbobj),
+                          logger=self.logger)
 
     def body(self, lines):
-        pan_assign(lines, "system/metacluster/name", self.name)
+        pan_assign(lines, "system/metacluster/name", self.dbobj.name)
         pan_assign(lines, "system/metacluster/type", self.dbobj.cluster_type)
 
         dbloc = self.dbobj.location_constraint
@@ -101,41 +100,36 @@ class PlenaryMetaClusterData(Plenary):
         if self.dbobj.resholder:
             for resource in sorted(self.dbobj.resholder.resources,
                                    key=attrgetter('resource_type', 'name')):
+                res_path = PlenaryResource.template_name(resource)
                 pan_append(lines, "system/resources/" + resource.resource_type,
-                           StructureTemplate(resource.template_base +
-                                             '/config'))
+                           StructureTemplate(res_path))
 
 
-class PlenaryMetaClusterObject(Plenary):
+class PlenaryMetaClusterObject(ObjectPlenary):
 
-    template_type = "object"
-
-    def __init__(self, dbmetacluster, logger=LOGGER):
-        Plenary.__init__(self, dbmetacluster, logger=logger)
-        self.name = dbmetacluster.name
-
-        self.loadpath = self.dbobj.personality.archetype.name
-        self.plenary_core = "clusters"
-        self.plenary_template = dbmetacluster.name
+    @classmethod
+    def template_name(cls, dbmetacluster):
+        return "clusters/" + dbmetacluster.name
 
     def get_key(self):
         return CompileKey(domain=self.dbobj.branch.name,
-                          profile=self.plenary_template, logger=self.logger)
+                          profile=self.template_name(self.dbobj),
+                          logger=self.logger)
 
     def body(self, lines):
         pan_include(lines, ["pan/units", "pan/functions"])
         pan_assign(lines, "/",
-                   StructureTemplate("clusterdata/%s" % self.name,
+                   StructureTemplate("clusterdata/%s" % self.dbobj.name,
                                      {"metadata": PanValue("/metadata")}))
         pan_include(lines, "archetype/base")
 
         #for esx_management_server
         for servinst in sorted(self.dbobj.service_bindings):
-            pan_include(lines, "service/%s/%s/client/config" %
-                        (servinst.service.name, servinst.name))
+            path = PlenaryServiceInstanceClientDefault.template_name(servinst)
+            pan_include(lines, path)
 
-        pan_include(lines, "personality/%s/config" %
-                    self.dbobj.personality.name)
+        path = PlenaryPersonalityBase.template_name(self.dbobj.personality)
+        pan_include(lines, path)
         pan_include(lines, "archetype/final")
 
 

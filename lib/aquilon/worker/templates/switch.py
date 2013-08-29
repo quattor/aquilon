@@ -18,7 +18,7 @@
 
 import logging
 
-from aquilon.worker.templates.base import Plenary
+from aquilon.worker.templates import Plenary, StructurePlenary
 from aquilon.worker.templates.panutils import pan
 from aquilon.aqdb.model import Switch
 
@@ -26,20 +26,19 @@ from aquilon.aqdb.model import Switch
 LOGGER = logging.getLogger(__name__)
 
 
-class PlenarySwitch(Plenary):
-
-    template_type = "structure"
-
+class PlenarySwitch(StructurePlenary):
     """
     A facade for the variety of PlenarySwitch subsidiary files
     """
 
+    @classmethod
+    def template_name(cls, dbhost):
+        return "switchdata/" + str(dbhost.fqdn)
+
     def __init__(self, dbswitch, logger=LOGGER):
-        Plenary.__init__(self, dbswitch, logger=logger)
-        self.dbobj = dbswitch
+        super(PlenarySwitch, self).__init__(dbswitch, logger=logger)
+
         self.name = str(dbswitch.primary_name)
-        self.plenary_core = "switchdata"
-        self.plenary_template = self.name
 
     def body(self, lines):
 

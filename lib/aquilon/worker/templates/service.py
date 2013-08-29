@@ -19,7 +19,8 @@
 import logging
 
 from aquilon.aqdb.model import Service, ServiceInstance
-from aquilon.worker.templates.base import Plenary, PlenaryCollection
+from aquilon.worker.templates import (Plenary, StructurePlenary,
+                                      PlenaryCollection)
 from aquilon.worker.templates.panutils import (StructureTemplate, pan_assign,
                                                pan_include)
 
@@ -31,7 +32,8 @@ class PlenaryService(PlenaryCollection):
     A facade for the variety of PlenaryService subsidiary files
     """
     def __init__(self, dbservice, logger=LOGGER):
-        PlenaryCollection.__init__(self, logger=logger)
+        super(PlenaryService, self).__init__(logger=logger)
+
         self.dbobj = dbservice
         self.plenaries.append(PlenaryServiceToplevel(dbservice, logger=logger))
         self.plenaries.append(PlenaryServiceClientDefault(dbservice,
@@ -43,7 +45,7 @@ class PlenaryService(PlenaryCollection):
 Plenary.handlers[Service] = PlenaryService
 
 
-class PlenaryServiceToplevel(Plenary):
+class PlenaryServiceToplevel(StructurePlenary):
     """
     The top-level service template does nothing. It is really
     a placeholder which can be overridden by the library
@@ -54,12 +56,9 @@ class PlenaryServiceToplevel(Plenary):
     to all instances.
     """
 
-    template_type = "structure"
-
-    def __init__(self, dbservice, logger=LOGGER):
-        Plenary.__init__(self, dbservice, logger=logger)
-        self.plenary_core = "servicedata/%s" % dbservice.name
-        self.plenary_template = "config"
+    @classmethod
+    def template_name(cls, dbservice):
+        return "servicedata/%s/config" % dbservice.name
 
 
 class PlenaryServiceClientDefault(Plenary):
@@ -72,12 +71,9 @@ class PlenaryServiceClientDefault(Plenary):
     to all instances of the service.
     """
 
-    template_type = ""
-
-    def __init__(self, dbservice, logger=LOGGER):
-        Plenary.__init__(self, dbservice, logger=logger)
-        self.plenary_core = "service/%s/client" % dbservice.name
-        self.plenary_template = "config"
+    @classmethod
+    def template_name(cls, dbservice):
+        return "service/%s/client/config" % dbservice.name
 
 
 class PlenaryServiceServerDefault(Plenary):
@@ -90,12 +86,9 @@ class PlenaryServiceServerDefault(Plenary):
     to all instances of the service.
     """
 
-    template_type = ""
-
-    def __init__(self, dbservice, logger=LOGGER):
-        Plenary.__init__(self, dbservice, logger=logger)
-        self.plenary_core = "service/%s/server" % dbservice.name
-        self.plenary_template = "config"
+    @classmethod
+    def template_name(cls, dbservice):
+        return "service/%s/server/config" % dbservice.name
 
 
 class PlenaryServiceInstance(PlenaryCollection):
@@ -103,7 +96,8 @@ class PlenaryServiceInstance(PlenaryCollection):
     A facade for the variety of PlenaryServiceInstance subsidiary files
     """
     def __init__(self, dbinstance, logger=LOGGER):
-        PlenaryCollection.__init__(self, logger=logger)
+        super(PlenaryServiceInstance, self).__init__(logger=logger)
+
         self.plenaries.append(PlenaryServiceInstanceToplevel(dbinstance,
                                                              logger=logger))
         self.plenaries.append(PlenaryServiceInstanceClientDefault(dbinstance,
@@ -117,7 +111,7 @@ class PlenaryServiceInstance(PlenaryCollection):
 Plenary.handlers[ServiceInstance] = PlenaryServiceInstance
 
 
-class PlenaryServiceInstanceToplevel(Plenary):
+class PlenaryServiceInstanceToplevel(StructurePlenary):
     """
     This structure template provides information for the template
     specific to the service instance and for use by the client.
@@ -127,25 +121,22 @@ class PlenaryServiceInstanceToplevel(Plenary):
     servers and the instance name)
     """
 
-    template_type = "structure"
-
-    def __init__(self, dbinstance, logger=LOGGER):
-        Plenary.__init__(self, dbinstance, logger=logger)
-        self.service = dbinstance.service.name
-        self.name = dbinstance.name
-        self.plenary_core = "servicedata/%(service)s/%(name)s" % self.__dict__
-        self.plenary_template = "config"
+    @classmethod
+    def template_name(cls, dbinstance):
+        return "servicedata/%s/%s/config" % (dbinstance.service.name,
+                                             dbinstance.name)
 
     def body(self, lines):
-        pan_include(lines, "servicedata/%s/config" % self.service)
+        pan_include(lines,
+                    PlenaryServiceToplevel.template_name(self.dbobj.service))
         lines.append("")
-        pan_assign(lines, "instance", self.name)
+        pan_assign(lines, "instance", self.dbobj.name)
         pan_assign(lines, "servers", self.dbobj.server_fqdns)
-        if self.service == 'dns':
+        if self.dbobj.service.name == 'dns':
             pan_assign(lines, "server_ips", self.dbobj.server_ips)
 
 
-class PlenaryServiceInstanceServer(Plenary):
+class PlenaryServiceInstanceServer(StructurePlenary):
     """
     This structure template provides information for the template
     specific to the service instance and for use by the server.
@@ -155,17 +146,13 @@ class PlenaryServiceInstanceServer(Plenary):
     of clients and the instance name)
     """
 
-    template_type = "structure"
-
-    def __init__(self, dbinstance, logger=LOGGER):
-        Plenary.__init__(self, dbinstance, logger=logger)
-        self.service = dbinstance.service.name
-        self.name = dbinstance.name
-        self.plenary_core = "servicedata/%(service)s/%(name)s" % self.__dict__
-        self.plenary_template = "srvconfig"
+    @classmethod
+    def template_name(cls, dbinstance):
+        return "servicedata/%s/%s/srvconfig" % (dbinstance.service.name,
+                                                dbinstance.name)
 
     def body(self, lines):
-        pan_assign(lines, "instance", self.name)
+        pan_assign(lines, "instance", self.dbobj.name)
         pan_assign(lines, "clients", self.dbobj.client_fqdns)
 
 
@@ -180,43 +167,39 @@ class PlenaryServiceInstanceClientDefault(Plenary):
     is specific to the instance.
     """
 
-    template_type = ""
-
-    def __init__(self, dbinstance, logger=LOGGER):
-        Plenary.__init__(self, dbinstance, logger=logger)
-        self.service = dbinstance.service.name
-        self.name = dbinstance.name
-        self.plenary_core = "service/%(service)s/%(name)s/client" % self.__dict__
-        self.plenary_template = "config"
+    @classmethod
+    def template_name(cls, dbinstance):
+        return "service/%s/%s/client/config" % (dbinstance.service.name,
+                                                dbinstance.name)
 
     def body(self, lines):
-        pan_assign(lines, "/system/services/%s" % self.service,
-                   StructureTemplate('servicedata/%s/%s/config' % (self.service,
-                                                                   self.name)))
-        pan_include(lines, "service/%s/client/config" % self.service)
+        path = PlenaryServiceInstanceToplevel.template_name(self.dbobj)
+        pan_assign(lines, "/system/services/%s" % self.dbobj.service,
+                   StructureTemplate(path))
+
+        path = PlenaryServiceClientDefault.template_name(self.dbobj.service)
+        pan_include(lines, path)
 
 
 class PlenaryServiceInstanceServerDefault(Plenary):
     """
     Any server of the servivce will include this
     template based on service bindings: it will be directly
-    included from within the host.tpl. This may be overridden
+    included from within the host plenary. This may be overridden
     within the template library, but this template should be
     sufficient. The template defines configuration for servers
     only and is specific to the service instance.
     """
 
-    template_type = ""
-
-    def __init__(self, dbinstance, logger=LOGGER):
-        Plenary.__init__(self, dbinstance, logger=logger)
-        self.service = dbinstance.service.name
-        self.name = dbinstance.name
-        self.plenary_core = "service/%(service)s/%(name)s/server" % self.__dict__
-        self.plenary_template = "config"
+    @classmethod
+    def template_name(cls, dbinstance):
+        return "service/%s/%s/server/config" % (dbinstance.service.name,
+                                                dbinstance.name)
 
     def body(self, lines):
-        pan_assign(lines, "/system/provides/%s" % self.service,
-                   StructureTemplate('servicedata/%s/%s/srvconfig' %
-                                     (self.service, self.name)))
-        pan_include(lines, "service/%s/server/config" % self.service)
+        path = PlenaryServiceInstanceServer.template_name(self.dbobj)
+        pan_assign(lines, "/system/provides/%s" % self.dbobj.service,
+                   StructureTemplate(path))
+
+        path = PlenaryServiceServerDefault.template_name(self.dbobj.service)
+        pan_include(lines, path)

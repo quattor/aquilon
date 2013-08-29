@@ -21,9 +21,9 @@ from aquilon.exceptions_ import ArgumentError, IncompleteError
 from aquilon.aqdb.model import (HardwareEntity, Interface, AddressAssignment,
                                 ARecord, NetworkEnvironment)
 from aquilon.worker.dbwrappers.dns import delete_dns_record
-from aquilon.worker.templates.host import PlenaryHost
 from aquilon.worker.locks import lock_queue
 from aquilon.worker.processes import DSDBRunner
+from aquilon.worker.templates import Plenary
 from aquilon.utils import first_of
 
 
@@ -110,7 +110,7 @@ class CommandDelInterfaceAddress(BrokerCommand):
 
         dbhost = getattr(dbhw_ent, "host", None)
         if dbhost:
-            plenary_info = PlenaryHost(dbhost, logger=logger)
+            plenary_info = Plenary.get_plenary(dbhost, logger=logger)
             key = plenary_info.get_write_key()
             try:
                 lock_queue.acquire(key)

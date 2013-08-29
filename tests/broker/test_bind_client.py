@@ -47,7 +47,9 @@ class TestBindClient(TestBrokerCommand):
     def testverifybindafs(self):
         command = "show host --hostname unittest02.one-nyp.ms.com"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Template: service/afs/q.ny.ms.com", command)
+        self.matchoutput(out,
+                         "Uses Service: afs Instance: q.ny.ms.com",
+                         command)
 
     def testverifycatafs(self):
         command = ["cat", "--service", "afs", "--instance", "q.ny.ms.com",
@@ -78,7 +80,9 @@ class TestBindClient(TestBrokerCommand):
     def testverifybindutsi1(self):
         command = "show host --hostname unittest00.one-nyp.ms.com"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Template: service/utsvc/utsi1", command)
+        self.matchoutput(out,
+                         "Uses Service: utsvc Instance: utsi1",
+                         command)
 
     # FIXME: the broker does not populate the client list for performance
     # reasons
@@ -110,12 +114,16 @@ class TestBindClient(TestBrokerCommand):
     def testverifybindutsi2(self):
         command = "show host --hostname unittest02.one-nyp.ms.com"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Template: service/utsvc/utsi2", command)
+        self.matchoutput(out,
+                         "Uses Service: utsvc Instance: utsi2",
+                         command)
 
     def testverifybinddns(self):
         command = "show host --hostname unittest02.one-nyp.ms.com"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Template: service/dns/utdnsinstance", command)
+        self.matchoutput(out,
+                         "Uses Service: dns Instance: utdnsinstance",
+                         command)
 
     def testbindbootserver(self):
         command = ["bind", "client", "--hostname", "unittest02.one-nyp.ms.com",
@@ -129,7 +137,9 @@ class TestBindClient(TestBrokerCommand):
     def testverifybindbootserver(self):
         command = "show host --hostname unittest02.one-nyp.ms.com"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Template: service/bootserver/np.test", command)
+        self.matchoutput(out,
+                         "Uses Service: bootserver Instance: np.test",
+                         command)
 
     def testbindntp(self):
         command = ["bind", "client", "--hostname", "unittest02.one-nyp.ms.com",
@@ -143,7 +153,9 @@ class TestBindClient(TestBrokerCommand):
     def testverifybindntp(self):
         command = "show host --hostname unittest02.one-nyp.ms.com"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Template: service/ntp/pa.ny.na", command)
+        self.matchoutput(out,
+                         "Uses Service: ntp Instance: pa.ny.na",
+                         command)
 
     # For unittest00, will test that afs and dns are bound by make aquilon
     # because they are required services.  Checking the service map
@@ -161,7 +173,9 @@ class TestBindClient(TestBrokerCommand):
     def testverifybindautobootserver(self):
         command = "show host --hostname unittest00.one-nyp.ms.com"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Template: service/bootserver/np.test", command)
+        self.matchoutput(out,
+                         "Uses Service: bootserver Instance: np.test",
+                         command)
 
     def testbindautontp(self):
         command = ["bind", "client", "--hostname", "unittest00.one-nyp.ms.com",
@@ -175,7 +189,9 @@ class TestBindClient(TestBrokerCommand):
     def testverifybindautontp(self):
         command = "show host --hostname unittest00.one-nyp.ms.com"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Template: service/ntp/pa.ny.na", command)
+        self.matchoutput(out,
+                         "Uses Service: ntp Instance: pa.ny.na",
+                         command)
 
 
 if __name__ == '__main__':

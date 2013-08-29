@@ -19,7 +19,7 @@
 
 from aquilon.aqdb.model import City
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.templates.city import PlenaryCity
+from aquilon.worker.templates import Plenary
 
 
 class CommandCatCity(BrokerCommand):
@@ -28,7 +28,7 @@ class CommandCatCity(BrokerCommand):
 
     def render(self, generate, session, logger, city, **kwargs):
         dbcity = City.get_unique(session, city, compel=True)
-        plenary_info = PlenaryCity(dbcity, logger=logger)
+        plenary_info = Plenary.get_plenary(dbcity, logger=logger)
 
         if generate:
             return plenary_info._generate_content()

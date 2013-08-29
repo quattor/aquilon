@@ -15,23 +15,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
-import os
-
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Cluster
 from aquilon.worker.logger import CLIENT_INFO
 from aquilon.notify.index import trigger_notifications
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.templates.base import (Plenary, PlenaryCollection,
-                                           TEMPLATE_EXTENSION)
-from aquilon.worker.locks import CompileKey
-from aquilon.utils import remove_file
+from aquilon.worker.templates import Plenary, PlenaryCollection
 
 
 def del_cluster(session, logger, dbcluster, config):
-    cluster = str(dbcluster.name)
-
     if hasattr(dbcluster, 'members') and dbcluster.members:
         raise ArgumentError("%s is still in use by clusters: %s." %
                             (format(dbcluster),
@@ -40,33 +32,16 @@ def del_cluster(session, logger, dbcluster, config):
         hosts = ", ".join([h.fqdn for h in dbcluster.hosts])
         raise ArgumentError("%s is still in use by hosts: %s." %
                             (format(dbcluster), hosts))
-    cluster_plenary = Plenary.get_plenary(dbcluster, logger=logger)
-    resources = PlenaryCollection(logger=logger)
+    plenaries = PlenaryCollection(logger=logger)
+    plenaries.append(Plenary.get_plenary(dbcluster))
     if dbcluster.resholder:
         for res in dbcluster.resholder.resources:
-            resources.append(Plenary.get_plenary(res))
-    domain = dbcluster.branch.name
+            plenaries.append(Plenary.get_plenary(res))
     session.delete(dbcluster)
 
     session.flush()
 
-    key = cluster_plenary.get_remove_key()
-    with CompileKey.merge([key, resources.get_remove_key()]):
-        cluster_plenary.cleanup(domain, locked=True)
-        # And we also want to remove the profile itself
-        profiles = config.get("broker", "profilesdir")
-        # Only one of these should exist, but it doesn't hurt
-        # to try to clean up both.
-        xmlfile = os.path.join(profiles, "clusters", cluster + ".xml")
-        remove_file(xmlfile, logger=logger)
-        xmlgzfile = xmlfile + ".gz"
-        remove_file(xmlgzfile, logger=logger)
-        # And the cached template created by ant
-        remove_file(os.path.join(config.get("broker", "quattordir"),
-                                 "objects", "clusters",
-                                 cluster + TEMPLATE_EXTENSION),
-                    logger=logger)
-        resources.remove(locked=True)
+    plenaries.remove(remove_profile=True)
 
     trigger_notifications(config, logger, CLIENT_INFO)
 

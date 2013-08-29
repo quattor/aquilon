@@ -23,8 +23,7 @@ from aquilon.exceptions_ import ArgumentError, UnimplementedError
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.aqdb.model import (Vendor, Model, Cpu, MachineSpecs, Machine, Disk,
                                 HardwareEntity, Interface)
-from aquilon.worker.templates.base import PlenaryCollection
-from aquilon.worker.templates.machine import PlenaryMachineInfo
+from aquilon.worker.templates import Plenary, PlenaryCollection
 
 
 class CommandUpdateModel(BrokerCommand):
@@ -167,7 +166,7 @@ class CommandUpdateModel(BrokerCommand):
 
         plenaries = PlenaryCollection(logger=logger)
         for dbmachine in dbmachines:
-            plenaries.append(PlenaryMachineInfo(dbmachine, logger=logger))
+            plenaries.append(Plenary.get_plenary(dbmachine))
         plenaries.write()
 
         return

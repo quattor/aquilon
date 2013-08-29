@@ -32,6 +32,7 @@ from sqlalchemy.sql import select, func, or_
 from aquilon.aqdb.model import (Base, Service, Host, DnsRecord, DnsDomain,
                                 Machine, Fqdn)
 from aquilon.aqdb.column_types.aqstr import AqStr
+from collections import defaultdict
 
 _TN = 'service_instance'
 _ABV = 'svc_inst'
@@ -62,10 +63,6 @@ class ServiceInstance(Base):
     def __format__(self, format_spec):
         instance = "%s/%s" % (self.service.name, self.name)
         return self.format_helper(format_spec, instance)
-
-    @property
-    def cfg_path(self):
-        return 'service/%s/%s' % (self.service.name, self.name)
 
     @property
     def client_count(self):

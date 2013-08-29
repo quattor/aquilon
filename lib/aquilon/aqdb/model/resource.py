@@ -62,9 +62,6 @@ class ResourceHolder(Base):
     def validate_resources(self, key, value):
         return value
 
-    @property
-    def holder_path(self):
-        return "%s/%s" % (self.holder_type, self.holder_name)
 
 
 class HostResource(ResourceHolder):
@@ -146,12 +143,6 @@ class Resource(Base):
                                        name='%s_holder_name_type_uk' % _TN),
                       Index('%s_holder_idx' % _TN, holder_id))
     __mapper_args__ = {'polymorphic_on': resource_type}
-
-    @property
-    def template_base(self):
-        return "resource/%s/%s/%s" % (self.holder.holder_path,
-                                      self.resource_type,
-                                      self.name)
 
     @validates('holder')
     def _validate_holder(self, key, value):

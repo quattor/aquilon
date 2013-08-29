@@ -16,13 +16,13 @@
 # limitations under the License.
 
 
+from aquilon.exceptions_ import ArgumentError
+from aquilon.aqdb.model import (MetaCluster, Personality, ClusterLifecycle,
+                                Location)
 from aquilon.worker.broker import BrokerCommand, validate_basic
 from aquilon.worker.dbwrappers.branch import get_branch_and_author
 from aquilon.worker.dbwrappers.location import get_location
-from aquilon.aqdb.model import (MetaCluster, Personality, ClusterLifecycle,
-                                Location)
-from aquilon.worker.templates.metacluster import PlenaryMetaCluster
-from aquilon.exceptions_ import ArgumentError
+from aquilon.worker.templates import Plenary
 
 
 class CommandAddMetaCluster(BrokerCommand):
@@ -100,7 +100,7 @@ class CommandAddMetaCluster(BrokerCommand):
         session.add(dbcluster)
         session.flush()
 
-        plenary = PlenaryMetaCluster(dbcluster, logger=logger)
+        plenary = Plenary.get_plenary(dbcluster, logger=logger)
         plenary.write()
 
         return

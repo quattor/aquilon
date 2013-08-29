@@ -18,16 +18,16 @@
 import os
 import re
 
-from aquilon.exceptions_ import IncompleteError, ArgumentError
+from aquilon.exceptions_ import (IncompleteError, ArgumentError,
+                                 ProcessException)
+from aquilon.aqdb.model import Sandbox
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.branch import get_branch_and_author
 from aquilon.worker.dbwrappers.host import hostname_to_host
-from aquilon.worker.templates.host import PlenaryHost
 from aquilon.worker.locks import lock_queue, CompileKey
 from aquilon.worker.processes import run_git
-from aquilon.aqdb.model import Sandbox
 from aquilon.worker.formats.branch import AuthoredSandbox
-from aquilon.exceptions_ import ProcessException
+from aquilon.worker.templates import Plenary
 
 
 def validate_branch_commits(dbsource, dbsource_author,
@@ -112,7 +112,6 @@ class CommandManageHostname(BrokerCommand):
         dbhost = hostname_to_host(session, hostname)
         dbsource = dbhost.branch
         dbsource_author = dbhost.sandbox_author
-        old_branch = dbhost.branch.name
 
         if dbhost.cluster:
             raise ArgumentError("Cluster nodes must be managed at the "
@@ -123,11 +122,12 @@ class CommandManageHostname(BrokerCommand):
             validate_branch_commits(dbsource, dbsource_author,
                                     dbbranch, dbauthor, logger, self.config)
 
+        plenary_host = Plenary.get_plenary(dbhost, logger=logger)
+
         dbhost.branch = dbbranch
         dbhost.sandbox_author = dbauthor
-        session.add(dbhost)
+
         session.flush()
-        plenary_host = PlenaryHost(dbhost, logger=logger)
 
         # We're crossing domains, need to lock everything.
         # XXX: There's a directory per domain.  Do we need subdirectories
@@ -138,7 +138,7 @@ class CommandManageHostname(BrokerCommand):
             lock_queue.acquire(key)
 
             plenary_host.stash()
-            plenary_host.cleanup(old_branch, locked=True)
+            plenary_host.remove(locked=True)
 
             # Now we recreate the plenary to ensure that the domain is ready
             # to compile, however (esp. if there was no existing template), we
@@ -151,7 +151,7 @@ class CommandManageHostname(BrokerCommand):
                 # It would be nice to flag the state in the the host?
                 pass
         except:
-            # This will not restore the cleaned up files.  That's OK.
+            # This will not restore the cleaned up build files.  That's OK.
             # They will be recreated as needed.
             plenary_host.restore_stash()
             raise

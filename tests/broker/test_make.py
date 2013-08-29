@@ -37,7 +37,9 @@ class TestMake(TestBrokerCommand):
 
         command = "show host --hostname afs-by-net.aqd-unittest.ms.com"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Template: service/afs/q.ny.ms.com", command)
+        self.matchoutput(out,
+                         "Uses Service: afs Instance: q.ny.ms.com",
+                         command)
 
     def testmakeafsbynet_2_mapservice(self):
         ip = self.net["netsvcmap"].subnet()[0].ip
@@ -78,7 +80,10 @@ class TestMake(TestBrokerCommand):
 
         command = "show host --hostname afs-by-net.aqd-unittest.ms.com"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Template: service/afs/afs-by-net", command)
+        # This can be either afs-by-net or afs-by-net2
+        self.matchoutput(out,
+                         "Uses Service: afs Instance: afs-by-net",
+                         command)
 
     def testmakeafsbynet_5_mapconflicts(self):
         ip = self.net["netsvcmap"].subnet()[0].ip
@@ -103,7 +108,9 @@ class TestMake(TestBrokerCommand):
 
         command = "show host --hostname netmap-pers.aqd-unittest.ms.com"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Template: service/netmap/q.ny.ms.com", command)
+        self.matchoutput(out,
+                         "Uses Service: netmap Instance: q.ny.ms.com",
+                         command)
 
     def testmakenetmappers_2_maplocsvc_pers(self):
         """Maps a location based personality service map to be overridden by a
@@ -117,7 +124,9 @@ class TestMake(TestBrokerCommand):
 
         command = "show host --hostname netmap-pers.aqd-unittest.ms.com"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Template: service/netmap/p-q.ny.ms.com", command)
+        self.matchoutput(out,
+                         "Uses Service: netmap Instance: p-q.ny.ms.com",
+                         command)
 
     def testmakenetmappers_3_mapservice(self):
         ip = self.net["netperssvcmap"].subnet()[0].ip
@@ -163,7 +172,9 @@ class TestMake(TestBrokerCommand):
 
         command = "show host --hostname netmap-pers.aqd-unittest.ms.com"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Template: service/netmap/netmap-pers", command)
+        self.matchoutput(out,
+                         "Uses Service: netmap Instance: netmap-pers",
+                         command)
 
     def testmakevmhosts(self):
         for i in range(1, 6):

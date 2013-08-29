@@ -22,8 +22,11 @@ import logging
 
 from mako.lookup import TemplateLookup
 
+from sqlalchemy.inspection import inspect
+
 from aquilon.exceptions_ import InternalError, IncompleteError
 from aquilon.config import Config
+from aquilon.aqdb.model import Base
 from aquilon.worker.locks import lock_queue, CompileKey
 from aquilon.worker.templates.panutils import pan_assign, pan_variable
 from aquilon.worker.formats.formatters import ObjectFormatter
@@ -37,7 +40,7 @@ TEMPLATE_EXTENSION = _config.get("panc", "template_extension")
 
 class Plenary(object):
 
-    template_type = None
+    template_type = ""
     """ Specifies the PAN template type to generate """
 
     handlers = {}
@@ -46,32 +49,20 @@ class Plenary(object):
         subclass.
 
     """
-    def __init__(self, dbobj=None, logger=LOGGER):
+    def __init__(self, dbobj, logger=LOGGER):
+        super(Plenary, self).__init__()
+
+        if not dbobj:
+            raise ValueError("A plenary instance must be bound to a DB object.")
+
         self.config = Config()
         self.dbobj = dbobj
         self.logger = logger
 
-        if self.template_type is None:
-            raise InternalError("Plenary class %s did not set the template "
-                                "type" % self.__class__.__name__)
-
-        # Object templates live under the branch-specific build directory.
-        # Everything else lives under the common plenary directory.
-        if self.template_type == "object":
-            if not dbobj or not hasattr(dbobj, "branch"):
-                raise InternalError("Plenaries meant to be compiled need a DB "
-                                    "object that has a branch; got: %r" % dbobj)
-            self.dir = "%s/domains/%s/profiles" % (
-                self.config.get("broker", "builddir"), dbobj.branch.name)
-        else:
-            self.dir = self.config.get("broker", "plenarydir")
-
-        self.loadpath = None
-        self.plenary_template = None
-        self.plenary_core = None
-
         self.new_content = None
+
         # The following attributes are for stash/restore_stash
+        self.old_path = self.full_path(dbobj)
         self.old_content = None
         self.old_mtime = None
         self.stashed = False
@@ -94,31 +85,36 @@ class Plenary(object):
             return False
         return self.dbobj == other.dbobj
 
-    def __str__(self):
+    def __repr__(self):
         """For debug output."""
-        return "Plenary(%s)" % self.dbobj
+        return "%s(%s)" % (self.__class__.__name__, self.dbobj)
 
-    @property
-    def plenary_directory(self):
-        """ Directory where the plenary template lives """
-        if self.loadpath and self.template_type != "object":
-            return "%s/%s/%s" % (self.dir, self.loadpath, self.plenary_core)
-        else:
-            return "%s/%s" % (self.dir, self.plenary_core)
-
-    @property
-    def plenary_file(self):
-        """ Full absolute path name of the plenary template """
-        return "%s/%s%s" % (self.plenary_directory, self.plenary_template,
-                            TEMPLATE_EXTENSION)
-
-    @property
-    def plenary_template_name(self):
+    @classmethod
+    def template_name(cls, dbobj):  # pylint: disable=W0613
         """ Name of the template as used by PAN, relative to the load path """
-        if self.plenary_core:
-            return "%s/%s" % (self.plenary_core, self.plenary_template)
+        raise InternalError("%s must override the template_name() method." %
+                            cls.__name__)
+
+    @classmethod
+    def loadpath(cls, dbobj):  # pylint: disable=W0613
+        """ Return the LOADPATH the template is relative to """
+        return ""
+
+    @classmethod
+    def base_dir(cls, dbobj):  # pylint: disable=W0613
+        """ Base directory of the plenary template """
+        return _config.get("broker", "plenarydir")
+
+    @classmethod
+    def full_path(cls, dbobj):
+        """ Full absolute path name of the plenary template """
+        loadpath = cls.loadpath(dbobj)
+        if loadpath:
+            return "%s/%s/%s%s" % (cls.base_dir(dbobj), loadpath,
+                                   cls.template_name(dbobj), TEMPLATE_EXTENSION)
         else:
-            return self.plenary_template
+            return "%s/%s%s" % (cls.base_dir(dbobj), cls.template_name(dbobj),
+                                TEMPLATE_EXTENSION)
 
     def body(self, lines):
         """
@@ -138,6 +134,15 @@ class Plenary(object):
         return self.old_content != self.new_content
 
     def get_write_key(self):
+        # This is a hack to handle the case when the DB object has been deleted,
+        # but a plenary instance still references it (probably buried inside a
+        # PlenaryCollection). Calling self.will_change() on such a plenary would
+        # fail, because the primary key is None, which is otherwise impossible.
+        if isinstance(self.dbobj, Base):
+            state = inspect(self.dbobj)
+            if state.deleted:
+                return None
+
         if self.will_change():
             return self.get_key()
         return None
@@ -156,33 +161,19 @@ class Plenary(object):
         return CompileKey(logger=self.logger)
 
     def _generate_content(self):
-        """Not meant to be overridden or called directly."""
         lines = []
         type = self.template_type
-        if type is not None and type is not "":
+        if type:
             type = type + " "
 
-        lines.append("%stemplate %s;" % (type, self.plenary_template_name))
+        lines.append("%stemplate %s;" % (type, self.template_name(self.dbobj)))
         lines.append("")
-
-        if self.template_type == "object":
-            if self.loadpath:
-                pan_variable(lines, "LOADPATH", [self.loadpath])
-                lines.append("")
-            pan_assign(lines, "/metadata/template/branch/name",
-                       self.dbobj.branch.name)
-            pan_assign(lines, "/metadata/template/branch/type",
-                       self.dbobj.branch.branch_type)
-            if self.dbobj.branch.branch_type == 'sandbox':
-                pan_assign(lines, "/metadata/template/branch/author",
-                           self.dbobj.sandbox_author.name)
-            lines.append("")
 
         self.body(lines)
 
         return "\n".join(lines) + "\n"
 
-    def write(self, locked=False, content=None):
+    def write(self, locked=False):
         """Write out the template.
 
         If the content is unchanged, then the file will not be modified
@@ -201,26 +192,39 @@ class Plenary(object):
            not self.dbobj.personality.archetype.is_compileable:
             return 0
 
-        if content is None:
-            if not self.new_content:
-                self.new_content = self._generate_content()
-            content = self.new_content
+        # This is a hack to handle the case when the DB object has been deleted,
+        # but a plenary instance still references it (probably buried inside a
+        # PlenaryCollection). Calling self.will_change() on such a plenary would
+        # fail, because the primary key is None, which is otherwise impossible.
+        if isinstance(self.dbobj, Base):
+            state = inspect(self.dbobj)
+            if state.deleted:
+                return 0
 
-        self.stash()
-        if self.old_content == content and \
-           not self.removed and not self.changed:
-            # optimise out the write (leaving the mtime good for ant)
-            # if nothing is actually changed
-            return 0
+        if not self.new_content:
+            self.new_content = self._generate_content()
+        content = self.new_content
 
         key = None
         try:
             if not locked:
                 key = self.get_write_key()
                 lock_queue.acquire(key)
-            if not os.path.exists(self.plenary_directory):
-                os.makedirs(self.plenary_directory)
-            write_file(self.plenary_file, content, logger=self.logger)
+
+            self.stash()
+
+            if self.old_content == content and \
+               not self.removed and not self.changed:
+                # optimise out the write (leaving the mtime good for ant)
+                # if nothing is actually changed
+                return 0
+
+            path = self.full_path(self.dbobj)
+            dirname = os.path.dirname(path)
+            if not os.path.exists(dirname):
+                os.makedirs(dirname)
+
+            write_file(path, content, logger=self.logger)
             self.removed = False
             if self.old_content != content:
                 self.changed = True
@@ -235,9 +239,9 @@ class Plenary(object):
         return 1
 
     def read(self):
-        return read_file("", self.plenary_file, logger=self.logger)
+        return read_file("", self.old_path, logger=self.logger)
 
-    def remove(self, locked=False):
+    def remove(self, locked=False, remove_profile=False):
         """
         remove this plenary template
         """
@@ -248,9 +252,10 @@ class Plenary(object):
                 key = self.get_remove_key()
                 lock_queue.acquire(key)
             self.stash()
-            remove_file(self.plenary_file, logger=self.logger)
+
+            remove_file(self.old_path, logger=self.logger)
             try:
-                os.removedirs(self.plenary_directory)
+                os.removedirs(os.path.dirname(self.old_path))
             except OSError:
                 pass
             self.removed = True
@@ -260,62 +265,6 @@ class Plenary(object):
             if not locked:
                 lock_queue.release(key)
         return
-
-    def cleanup(self, domain, locked=False):
-        """
-        remove all files related to an object template including
-        any intermediate build files
-        """
-        key = None
-        try:
-            if not locked:
-                key = self.get_remove_key()
-                lock_queue.acquire(key)
-
-            if self.template_type == "object":
-                # Can't call remove() here because it relies on the new domain.
-                qdir = self.config.get("broker", "quattordir")
-                # Only one or the other of .xml/.xml.gz should be there...
-                # it doesn't hurt to clean up both.
-                xmldir = os.path.join(qdir, "build", "xml", domain,
-                                      self.plenary_core)
-                xmlfile = os.path.join(xmldir, self.plenary_template + ".xml")
-                remove_file(xmlfile, logger=self.logger)
-                xmlgzfile = xmlfile + ".gz"
-                remove_file(xmlgzfile, logger=self.logger)
-                # Name used up to and including panc 9.2
-                depfile = xmlfile + ".dep"
-                remove_file(depfile, logger=self.logger)
-                # Name used by panc 9.4 and higher
-                depfile = os.path.join(xmldir, self.plenary_template + ".dep")
-                remove_file(depfile, logger=self.logger)
-                try:
-                    os.removedirs(xmldir)
-                except OSError:
-                    pass
-
-                builddir = self.config.get("broker", "builddir")
-                maindir = os.path.join(builddir, "domains", domain,
-                                       "profiles", self.plenary_core)
-                mainfile = os.path.join(maindir, self.plenary_template +
-                                        TEMPLATE_EXTENSION)
-                remove_file(mainfile, logger=self.logger)
-                try:
-                    os.removedirs(maindir)
-                except OSError:
-                    pass
-                self.removed = True
-            else:
-                # Non-object templates do not depend on the domain, so calling
-                # remove() is fine
-                self.remove(locked=True)
-        except:
-            if not locked:
-                self.restore_stash()
-            raise
-        finally:
-            if not locked:
-                lock_queue.release(key)
 
     def stash(self):
         """Record the state of the plenary to make restoration possible.
@@ -327,7 +276,7 @@ class Plenary(object):
             return
         try:
             self.old_content = self.read()
-            self.old_mtime = os.stat(self.plenary_file).st_atime
+            self.old_mtime = os.stat(self.old_path).st_atime
         except IOError:
             self.old_content = None
         self.stashed = True
@@ -340,17 +289,24 @@ class Plenary(object):
         """
         if not self.stashed:
             self.logger.info("Attempt to restore plenary '%s' "
-                             "without having saved state." % self.plenary_file)
+                             "without having saved state." % self.old_path)
             return
         # Should this optimization be in use?
         # if not self.changed and not self.removed:
         #    return
-        if (self.old_content is None):
-            self.remove(locked=True)
+        dirname = os.path.dirname(self.old_path)
+        if self.old_content is None:
+            remove_file(self.old_path, logger=self.logger)
+            try:
+                os.removedirs(dirname)
+            except OSError:
+                pass
         else:
-            self.write(locked=True, content=self.old_content)
-            atime = os.stat(self.plenary_file).st_atime
-            os.utime(self.plenary_file, (atime, self.old_mtime))
+            if not os.path.exists(dirname):
+                os.makedirs(dirname)
+            write_file(self.old_path, self.old_content, logger=self.logger)
+            atime = os.stat(self.old_path).st_atime
+            os.utime(self.old_path, (atime, self.old_mtime))
 
     @staticmethod
     def get_plenary(dbobj, logger=LOGGER):
@@ -361,6 +317,116 @@ class Plenary(object):
 
     def set_logger(self, logger):
         self.logger = logger
+
+
+class StructurePlenary(Plenary):
+
+    template_type = "structure"
+
+
+class ObjectPlenary(Plenary):
+
+    template_type = "object"
+
+    def __init__(self, dbobj=None, logger=LOGGER):
+        if not dbobj or not hasattr(dbobj, "branch"):
+            raise InternalError("Plenaries meant to be compiled need a DB "
+                                "object that has a branch; got: %r" % dbobj)
+
+        super(ObjectPlenary, self).__init__(dbobj, logger)
+
+        self.old_name = self.template_name(dbobj)
+        self.old_branch = dbobj.branch.name
+
+    @classmethod
+    def loadpath(cls, dbobj):
+        """ Return the default LOADPATH for this object profile """
+        return dbobj.personality.archetype.name
+
+    @classmethod
+    def base_dir(cls, dbobj):
+        return os.path.join(_config.get("broker", "builddir"),
+                            "domains", dbobj.branch.name, "profiles")
+
+    @classmethod
+    def full_path(cls, dbobj):
+        # loadpath is interpreted differently for object templates, it's not
+        # parth of the full path
+        return "%s/%s%s" % (cls.base_dir(dbobj), cls.template_name(dbobj),
+                            TEMPLATE_EXTENSION)
+
+    def _generate_content(self):
+        lines = []
+        lines.append("object template %s;" % self.template_name(self.dbobj))
+        lines.append("")
+
+        loadpath = self.loadpath(self.dbobj)
+        if loadpath:
+            pan_variable(lines, "LOADPATH", [loadpath])
+            lines.append("")
+        pan_assign(lines, "/metadata/template/branch/name",
+                   self.dbobj.branch.name)
+        pan_assign(lines, "/metadata/template/branch/type",
+                   self.dbobj.branch.branch_type)
+        if self.dbobj.branch.branch_type == 'sandbox':
+            pan_assign(lines, "/metadata/template/branch/author",
+                       self.dbobj.sandbox_author.name)
+        lines.append("")
+
+        self.body(lines)
+
+        return "\n".join(lines) + "\n"
+
+    def remove(self, locked=False, remove_profile=False):
+        """
+        remove all files related to an object template including
+        any intermediate build files
+        """
+        key = None
+        try:
+            if not locked:
+                key = self.get_remove_key()
+                lock_queue.acquire(key)
+            self.stash()
+
+            # Only one or the other of .xml/.xml.gz should be there...
+            # it doesn't hurt to clean up both.
+            # .xml.dep is used up to and including panc 9.2
+            # .dep is used by panc 9.4 and higher
+            basename = os.path.join(self.config.get("broker", "quattordir"),
+                                    "build", "xml", self.old_branch,
+                                    self.old_name)
+            for ext in (".xml", ".xml.gz", ".xml.dep", ".dep"):
+                remove_file(basename + ext, logger=self.logger)
+            try:
+                os.removedirs(os.path.dirname(basename))
+            except OSError:
+                pass
+
+            super(ObjectPlenary, self).remove(locked=True)
+
+            if remove_profile:
+                basename = os.path.join(self.config.get("broker",
+                                                        "profilesdir"),
+                                        self.old_name)
+                # Only one of these should exist, but it doesn't hurt
+                # to try to clean up both.
+                for ext in (".xml", ".xml.gz"):
+                    remove_file(basename + ext, logger=self.logger)
+
+                # Remove the cached template created by ant
+                remove_file(os.path.join(self.config.get("broker",
+                                                         "quattordir"),
+                                         "objects",
+                                         self.old_name + TEMPLATE_EXTENSION),
+                            logger=self.logger)
+        except:
+            if not locked:
+                self.restore_stash()
+            raise
+        finally:
+            if not locked:
+                lock_queue.release(key)
 
 
 class PlenaryCollection(object):
@@ -383,6 +449,8 @@ class PlenaryCollection(object):
 
     """
     def __init__(self, logger=LOGGER):
+        super(PlenaryCollection, self).__init__()
+
         self.plenaries = []
         self.logger = logger
 
@@ -448,9 +516,9 @@ class PlenaryCollection(object):
                 for obj in plen.object_templates:
                     yield obj
             elif plen.template_type == 'object':
-                yield plen.plenary_template_name
+                yield plen.template_name(plen.dbobj)
 
-    def write(self, locked=False, content=None):
+    def write(self, locked=False):
         # If locked is True, assume error handling happens higher
         # in the stack.
         total = 0
@@ -467,7 +535,7 @@ class PlenaryCollection(object):
                 # IncompleteError is almost pointless in this context, but
                 # it has the nice side effect of not updating the total.
                 try:
-                    total += plen.write(locked=True, content=content)
+                    total += plen.write(locked=True)
                 except IncompleteError, err:
                     self.logger.client_info("Warning: %s" % err)
         except:
@@ -479,7 +547,7 @@ class PlenaryCollection(object):
                 lock_queue.release(key)
         return total
 
-    def remove(self, locked=False):
+    def remove(self, locked=False, remove_profile=False):
         self.stash()
         key = None
         try:
@@ -487,24 +555,7 @@ class PlenaryCollection(object):
                 key = self.get_remove_key()
                 lock_queue.acquire(key)
             for plen in self.plenaries:
-                plen.remove(locked=True)
-        except:
-            if not locked:
-                self.restore_stash()
-            raise
-        finally:
-            if not locked:
-                lock_queue.release(key)
-
-    def cleanup(self, domain, locked=False):
-        key = None
-        try:
-            if not locked:
-                key = self.get_remove_key()
-                lock_queue.acquire(key)
-            self.stash()
-            for plen in self.plenaries:
-                plen.cleanup(domain, locked=True)
+                plen.remove(locked=True, remove_profile=remove_profile)
         except:
             if not locked:
                 self.restore_stash()

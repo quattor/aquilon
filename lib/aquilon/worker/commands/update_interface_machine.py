@@ -18,15 +18,15 @@
 
 
 from aquilon.exceptions_ import ArgumentError, AquilonError
+from aquilon.aqdb.model import Machine, Interface, Model
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.interface import (verify_port_group,
                                                  choose_port_group,
                                                  assign_address,
                                                  rename_interface)
 from aquilon.worker.locks import lock_queue
-from aquilon.worker.templates.machine import PlenaryMachineInfo
+from aquilon.worker.templates import Plenary
 from aquilon.worker.processes import DSDBRunner
-from aquilon.aqdb.model import Machine, Interface, Model
 from aquilon.utils import first_of
 
 
@@ -143,7 +143,7 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
         session.flush()
         session.refresh(dbhw_ent)
 
-        plenary_info = PlenaryMachineInfo(dbhw_ent, logger=logger)
+        plenary_info = Plenary.get_plenary(dbhw_ent, logger=logger)
         key = plenary_info.get_write_key()
         try:
             lock_queue.acquire(key)

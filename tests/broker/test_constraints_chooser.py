@@ -73,7 +73,8 @@ class TestChooserConstraints(TestBrokerCommand):
     def test_120_verifyrebind(self):
         command = ["show_host", "--hostname=aquilon61.aqd-unittest.ms.com"]
         out = self.commandtest(command)
-        self.matchoutput(out, "Template: service/chooser_test/max_clients",
+        self.matchoutput(out,
+                         "Uses Service: chooser_test Instance: max_clients",
                          command)
 
     def test_200_cleanuphost(self):

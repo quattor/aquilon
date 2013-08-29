@@ -20,7 +20,10 @@ from operator import attrgetter
 
 from aquilon.aqdb.model import (Cluster, EsxCluster, ComputeCluster,
                                 StorageCluster)
-from aquilon.worker.templates.base import Plenary, PlenaryCollection
+from aquilon.worker.templates import (Plenary, ObjectPlenary, StructurePlenary,
+                                      PlenaryCollection, PlenaryResource,
+                                      PlenaryServiceInstanceClientDefault,
+                                      PlenaryPersonalityBase)
 from aquilon.worker.templates.panutils import (StructureTemplate, PanValue,
                                                pan_assign, pan_include,
                                                pan_append)
@@ -35,7 +38,8 @@ class PlenaryCluster(PlenaryCollection):
     A facade for the variety of PlenaryCluster subsidiary files
     """
     def __init__(self, dbcluster, logger=LOGGER):
-        PlenaryCollection.__init__(self, logger=logger)
+        super(PlenaryCluster, self).__init__(logger=logger)
+
         self.dbobj = dbcluster
         self.plenaries.append(PlenaryClusterObject(dbcluster, logger=logger))
         self.plenaries.append(PlenaryClusterData(dbcluster, logger=logger))
@@ -48,23 +52,25 @@ Plenary.handlers[EsxCluster] = PlenaryCluster
 Plenary.handlers[StorageCluster] = PlenaryCluster
 
 
-class PlenaryClusterData(Plenary):
+class PlenaryClusterData(StructurePlenary):
 
-    template_type = "structure"
+    @classmethod
+    def template_name(cls, dbcluster):
+        return "clusterdata/" + dbcluster.name
 
     def __init__(self, dbcluster, logger=LOGGER):
-        Plenary.__init__(self, dbcluster, logger=logger)
+        super(PlenaryClusterData, self).__init__(dbcluster, logger=logger)
+
         self.name = dbcluster.name
         if dbcluster.metacluster:
             self.metacluster = dbcluster.metacluster.name
         else:
             self.metacluster = None
-        self.plenary_core = "clusterdata"
-        self.plenary_template = dbcluster.name
 
     def get_key(self):
         return CompileKey(domain=self.dbobj.branch.name,
-                          profile=self.plenary_template_name, logger=self.logger)
+                          profile=self.template_name(self.dbobj),
+                          logger=self.logger)
 
     def body(self, lines):
         pan_assign(lines, "system/cluster/name", self.name)
@@ -124,9 +130,9 @@ class PlenaryClusterData(Plenary):
         if self.dbobj.resholder:
             for resource in sorted(self.dbobj.resholder.resources,
                                    key=attrgetter('resource_type', 'name')):
+                res_path = PlenaryResource.template_name(resource)
                 pan_append(lines, "system/resources/" + resource.resource_type,
-                           StructureTemplate(resource.template_base +
-                                             '/config'))
+                           StructureTemplate(res_path))
         pan_assign(lines, "system/build", self.dbobj.status.name)
         if self.dbobj.allowed_personalities:
             pan_assign(lines, "system/cluster/allowed_personalities",
@@ -152,39 +158,36 @@ class PlenaryClusterData(Plenary):
                        self.dbobj.switch.primary_name)
 
 
-class PlenaryClusterObject(Plenary):
+class PlenaryClusterObject(ObjectPlenary):
     """
     A cluster has its own output profile, so the plenary cluster template
     is an object template that includes the data about which machines
     are contained inside the cluster (via an include of the clusterdata plenary)
     """
 
-    template_type = "object"
-
-    def __init__(self, dbcluster, logger=LOGGER):
-        Plenary.__init__(self, dbcluster, logger=logger)
-        self.name = dbcluster.name
-        self.loadpath = dbcluster.personality.archetype.name
-        self.plenary_core = "clusters"
-        self.plenary_template = dbcluster.name
+    @classmethod
+    def template_name(cls, dbcluster):
+        return "clusters/" + dbcluster.name
 
     def get_key(self):
         return CompileKey(domain=self.dbobj.branch.name,
-                          profile=self.plenary_template_name, logger=self.logger)
+                          profile=self.template_name(self.dbobj),
+                          logger=self.logger)
 
     def body(self, lines):
         pan_include(lines, ["pan/units", "pan/functions"])
+        path = PlenaryClusterData.template_name(self.dbobj)
         pan_assign(lines, "/",
-                   StructureTemplate("clusterdata/%s" % self.name,
+                   StructureTemplate(path,
                                      {"metadata": PanValue("/metadata")}))
         pan_include(lines, "archetype/base")
 
         for servinst in sorted(self.dbobj.service_bindings):
-            pan_include(lines, "service/%s/%s/client/config" %
-                        (servinst.service.name, servinst.name))
+            path = PlenaryServiceInstanceClientDefault.template_name(servinst)
+            pan_include(lines, path)
 
-        pan_include(lines, "personality/%s/config" %
-                    self.dbobj.personality.name)
+        path = PlenaryPersonalityBase.template_name(self.dbobj.personality)
+        pan_include(lines, path)
         pan_include(lines, "archetype/final")
 
 
@@ -194,20 +197,16 @@ class PlenaryClusterClient(Plenary):
     plenary template. This just names the cluster and nothing more.
     """
 
-    template_type = ""
-
-    def __init__(self, dbcluster, logger=LOGGER):
-        Plenary.__init__(self, dbcluster, logger=logger)
-        self.name = dbcluster.name
-        self.plenary_core = "cluster/%s" % self.name
-        self.plenary_template = "client"
+    @classmethod
+    def template_name(cls, dbcluster):
+        return "cluster/%s/client" % dbcluster.name
 
     def get_key(self):
         # This takes a domain lock because it could affect all clients...
         return CompileKey(domain=self.dbobj.branch.name, logger=self.logger)
 
     def body(self, lines):
-        pan_assign(lines, "/system/cluster/name", self.name)
+        pan_assign(lines, "/system/cluster/name", self.dbobj.name)
         # We could just use a PAN external reference to pull in this value from
         # the cluster template, but since we know that these templates are
         # always in sync, we can duplicate the content here to avoid the
@@ -215,9 +214,9 @@ class PlenaryClusterClient(Plenary):
         if self.dbobj.resholder:
             for resource in sorted(self.dbobj.resholder.resources,
                                    key=attrgetter('resource_type', 'name')):
+                res_path = PlenaryResource.template_name(resource)
                 pan_append(lines, "/system/cluster/resources/" +
-                           resource.resource_type,
-                           StructureTemplate(resource.template_base + '/config'))
+                           resource.resource_type, StructureTemplate(res_path))
         lines.append("include { if_exists('features/' + value('/system/archetype/name') + '/%s/%s/config') };"
                      % (self.dbobj.personality.archetype.name,
                         self.dbobj.personality.name))

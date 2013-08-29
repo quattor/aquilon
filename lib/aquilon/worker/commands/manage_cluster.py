@@ -43,7 +43,6 @@ class CommandManageCluster(BrokerCommand):
         dbcluster = Cluster.get_unique(session, cluster, compel=True)
         dbsource = dbcluster.branch
         dbsource_author = dbcluster.sandbox_author
-        old_branch = dbcluster.branch.name
 
         if not force:
             validate_branch_commits(dbsource, dbsource_author,
@@ -54,32 +53,29 @@ class CommandManageCluster(BrokerCommand):
                                 "it must be managed at metacluster level.".
                                 format(dbcluster, dbcluster.metacluster))
 
-        old_branch = dbcluster.branch.name
         plenaries = PlenaryCollection(logger=logger)
 
         # manage at metacluster level
         if dbcluster.cluster_type == 'meta':
+            plenaries.append(Plenary.get_plenary(dbcluster))
             clusters = dbcluster.members
 
             dbcluster.branch = dbbranch
             dbcluster.sandbox_author = dbauthor
-            session.add(dbcluster)
-            plenaries.append(Plenary.get_plenary(dbcluster))
         else:
             clusters = [dbcluster]
 
         for cluster in clusters:
-            # manage at cluster level
-            # Need to set the new branch *before* creating the plenary objects.
+            plenaries.append(Plenary.get_plenary(cluster))
+
             cluster.branch = dbbranch
             cluster.sandbox_author = dbauthor
-            session.add(cluster)
-            plenaries.append(Plenary.get_plenary(cluster))
+
             for dbhost in cluster.hosts:
+                plenaries.append(Plenary.get_plenary(dbhost))
+
                 dbhost.branch = dbbranch
                 dbhost.sandbox_author = dbauthor
-                session.add(dbhost)
-                plenaries.append(Plenary.get_plenary(dbhost))
 
         session.flush()
 
@@ -88,7 +84,7 @@ class CommandManageCluster(BrokerCommand):
         try:
             lock_queue.acquire(key)
             plenaries.stash()
-            plenaries.cleanup(old_branch, locked=True)
+            plenaries.remove(locked=True)
             plenaries.write(locked=True)
         except:
             plenaries.restore_stash()

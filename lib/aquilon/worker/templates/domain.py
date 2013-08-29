@@ -37,6 +37,8 @@ LOGGER = logging.getLogger(__name__)
 class TemplateDomain(object):
 
     def __init__(self, domain, author=None, logger=LOGGER):
+        super(TemplateDomain, self).__init__()
+
         self.domain = domain
         self.author = author
         self.logger = logger

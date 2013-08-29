@@ -19,7 +19,7 @@
 
 from aquilon.aqdb.model import Switch
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.templates.switch import PlenarySwitch
+from aquilon.worker.templates import Plenary
 
 
 class CommandCatSwitch(BrokerCommand):
@@ -28,7 +28,7 @@ class CommandCatSwitch(BrokerCommand):
 
     def render(self, generate, session, logger, switch, **kwargs):
         dbswitch = Switch.get_unique(session, switch, compel=True)
-        plenary_info = PlenarySwitch(dbswitch, logger=logger)
+        plenary_info = Plenary.get_plenary(dbswitch, logger=logger)
 
         if generate:
             return plenary_info._generate_content()

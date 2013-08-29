@@ -171,12 +171,16 @@ class TestMakeAquilon(VerifyNotificationsMixin, TestBrokerCommand):
     def testverifybindautoafs(self):
         command = "show host --hostname unittest00.one-nyp.ms.com"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Template: service/afs/q.ny.ms.com", command)
+        self.matchoutput(out,
+                         "Uses Service: afs Instance: q.ny.ms.com",
+                         command)
 
     def testverifybindautodns(self):
         command = "show host --hostname unittest00.one-nyp.ms.com"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Template: service/dns/utdnsinstance", command)
+        self.matchoutput(out,
+                         "Uses Service: dns Instance: utdnsinstance",
+                         command)
 
     def testverifyproto(self):
         command = ["show", "host", "--hostname=unittest00.one-nyp.ms.com",
@@ -386,10 +390,11 @@ class TestMakeAquilon(VerifyNotificationsMixin, TestBrokerCommand):
                          "Primary Name: unittest17.aqd-unittest.ms.com [%s]" %
                          self.net["tor_net_0"].usable[3],
                          command)
-        self.matchoutput(out,
-                         "Template: aquilon/os/linux/5.0.1-x86_64/config" +
-                         self.template_extension,
-                         command)
+        self.searchoutput(out,
+                          r'Operating System: linux\s*'
+                          r'Version: 5\.0\.1-x86_64\s*'
+                          r'Archetype: aquilon',
+                          command)
 
     def testverifyunittest17proto(self):
         command = ["show_host", "--format=proto",

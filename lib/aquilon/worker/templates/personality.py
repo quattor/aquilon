@@ -19,17 +19,19 @@ import logging
 from collections import defaultdict
 
 from aquilon.aqdb.model import Personality, Parameter, HostEnvironment
-from aquilon.worker.templates.base import (Plenary, TemplateFormatter,
-                                           PlenaryCollection)
+from aquilon.config import Config
+from aquilon.worker.templates.base import (Plenary, StructurePlenary,
+                                           TemplateFormatter, PlenaryCollection)
 from aquilon.worker.templates.panutils import (pan_include, pan_variable,
                                                pan_assign, pan_append,
                                                pan_include_if_exists)
 from aquilon.worker.dbwrappers.parameter import (validate_value,
                                                  get_parameters)
 from sqlalchemy.orm import object_session
-from collections import defaultdict
 
 LOGGER = logging.getLogger(__name__)
+
+_config = Config()
 
 
 def string_to_list(data):
@@ -124,9 +126,20 @@ def get_parameters_by_tmpl(dbpersonality):
     return ret
 
 
-class PlenaryPersonality(PlenaryCollection):
+# Normally we have exactly one instance of every plenary class per DB object.
+# This class just wraps the (personality, template path) tuple to make parameter
+# plenaries behave the same way.
+class ParameterTemplate(object):
+    def __init__(self, dbpersonality, template, values):
+        self.personality = dbpersonality
+        self.template = template
+        self.values = values
 
-    template_type = ""
+    def __str__(self):
+        return "%s/%s" % (self.personality.name, self.template)
+
+
+class PlenaryPersonality(PlenaryCollection):
 
     def __init__(self, dbpersonality, logger=LOGGER):
         super(PlenaryPersonality, self).__init__(logger=logger)
@@ -142,9 +155,8 @@ class PlenaryPersonality(PlenaryCollection):
 
         ## mulitple structure templates for parameters
         for path, values in get_parameters_by_tmpl(dbpersonality).items():
-            plenary = PlenaryPersonalityParameter(dbpersonality, path, values,
-                                                  logger=logger)
-            self.plenaries.append(plenary)
+            ptmpl = ParameterTemplate(dbpersonality, path, values)
+            self.plenaries.append(PlenaryPersonalityParameter(ptmpl))
 
 Plenary.handlers[Personality] = PlenaryPersonality
 
@@ -155,20 +167,16 @@ class FeatureTemplate(TemplateFormatter):
 
 class PlenaryPersonalityBase(Plenary):
 
-    template_type = ''
+    @classmethod
+    def template_name(cls, dbpersonality):
+        return "personality/%s/config" % dbpersonality.name
 
-    def __init__(self, dbpersonality, logger=LOGGER):
-        super(PlenaryPersonalityBase, self).__init__(dbpersonality,
-                                                     logger=logger)
-
-        self.name = str(dbpersonality)
-        self.loadpath = dbpersonality.archetype.name
-
-        self.plenary_core = "personality/%s" % self.name
-        self.plenary_template = "config"
+    @classmethod
+    def loadpath(cls, dbpersonality):
+        return dbpersonality.archetype.name
 
     def body(self, lines):
-        pan_variable(lines, "PERSONALITY", self.name)
+        pan_variable(lines, "PERSONALITY", self.dbobj.name)
 
         ## process grns
         eon_id_map = defaultdict(set)
@@ -201,15 +209,17 @@ class PlenaryPersonalityBase(Plenary):
                    self.dbobj.owner_eon_id)
 
         ## include pre features
-        pan_include_if_exists(lines, "%s/pre_feature" % self.plenary_core)
+        path = PlenaryPersonalityPreFeature.template_name(self.dbobj)
+        pan_include_if_exists(lines, path)
+
         ## process parameter templates
         pan_include_if_exists(lines, "personality/config")
-        pan_assign(lines, "/system/personality/name", self.name)
+        pan_assign(lines, "/system/personality/name", self.dbobj.name)
         legacy_env = HostEnvironment.get_unique(object_session(self.dbobj),
                                                 'legacy', compel=True)
         if self.dbobj.host_environment != legacy_env:
             pan_assign(lines, "/system/personality/host_environment",
-                              self.dbobj.host_environment, True)
+                       self.dbobj.host_environment, True)
 
         ## TODO : This is just to satisfy quattor schema
         ## needs to be removed as soon as the schema allows this
@@ -219,19 +229,19 @@ class PlenaryPersonalityBase(Plenary):
             pan_include(lines, "features/personality/config_override/config")
 
         ## include post features
-        pan_include_if_exists(lines, "%s/post_feature" % self.plenary_core)
+        path = PlenaryPersonalityPostFeature.template_name(self.dbobj)
+        pan_include_if_exists(lines, path)
 
 
 class PlenaryPersonalityPreFeature(Plenary):
 
-    template_type = ""
+    @classmethod
+    def template_name(cls, dbpersonality):
+        return "personality/%s/pre_feature" % dbpersonality
 
-    def __init__(self, dbpersonality, logger=LOGGER):
-        super(PlenaryPersonalityPreFeature, self).__init__(dbpersonality,
-                                                           logger=logger)
-        self.loadpath = dbpersonality.archetype.name
-        self.plenary_core = "personality/%s" % dbpersonality
-        self.plenary_template = "pre_feature"
+    @classmethod
+    def loadpath(cls, dbpersonality):
+        return dbpersonality.archetype.name
 
     def body(self, lines):
         feat_tmpl = FeatureTemplate()
@@ -255,14 +265,13 @@ class PlenaryPersonalityPreFeature(Plenary):
 
 class PlenaryPersonalityPostFeature(Plenary):
 
-    template_type = ""
+    @classmethod
+    def template_name(cls, dbpersonality):
+        return "personality/%s/post_feature" % dbpersonality
 
-    def __init__(self, dbpersonality, logger=LOGGER):
-        super(PlenaryPersonalityPostFeature, self).__init__(dbpersonality,
-                                                            logger=logger)
-        self.loadpath = dbpersonality.archetype.name
-        self.plenary_core = "personality/%s" % dbpersonality
-        self.plenary_template = "post_feature"
+    @classmethod
+    def loadpath(cls, dbpersonality):
+        return dbpersonality.archetype.name
 
     def body(self, lines):
         feat_tmpl = FeatureTemplate()
@@ -271,18 +280,20 @@ class PlenaryPersonalityPostFeature(Plenary):
                 helper_feature_template(feat_tmpl, link, lines)
 
 
-class PlenaryPersonalityParameter(Plenary):
+class PlenaryPersonalityParameter(StructurePlenary):
 
-    template_type = "structure"
+    @classmethod
+    def template_name(cls, ptmpl):
+        return "personality/%s/%s" % (ptmpl.personality.name, ptmpl.template)
 
-    def __init__(self, dbpersonality, template, parameters, logger=LOGGER):
-        super(PlenaryPersonalityParameter, self).__init__(dbpersonality,
+    @classmethod
+    def loadpath(cls, ptmpl):
+        return ptmpl.personality.archetype.name
+
+    def __init__(self, ptmpl, logger=LOGGER):
+        super(PlenaryPersonalityParameter, self).__init__(ptmpl,
                                                           logger=logger)
-        self.loadpath = dbpersonality.archetype.name
-        self.plenary_core = "personality/%s" % dbpersonality
-        self.plenary_template = template
-
-        self.parameters = parameters
+        self.parameters = ptmpl.values
 
     def body(self, lines):
         for path in self.parameters:

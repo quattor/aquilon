@@ -21,7 +21,7 @@ from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Chassis, Machine, Switch, Interface
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.interface import assign_address
-from aquilon.worker.templates.machine import PlenaryMachineInfo
+from aquilon.worker.templates import Plenary
 
 
 class _Goto(Exception):
@@ -113,6 +113,6 @@ class CommandDelInterface(BrokerCommand):
         session.flush()
 
         if dbhw_ent.hardware_type == 'machine':
-            plenary_info = PlenaryMachineInfo(dbhw_ent, logger=logger)
+            plenary_info = Plenary.get_plenary(dbhw_ent, logger=logger)
             plenary_info.write()
         return

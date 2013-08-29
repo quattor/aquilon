@@ -29,7 +29,7 @@ from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.parameter import get_parameters
 from aquilon.worker.dbwrappers.feature import add_link
 from aquilon.worker.dbwrappers.grn import lookup_grn
-from aquilon.worker.templates.personality import PlenaryPersonality
+from aquilon.worker.templates import Plenary
 
 VALID_PERSONALITY_RE = re.compile(r'^[a-zA-Z0-9_-]+\/?[a-zA-Z0-9_-]+$')
 
@@ -127,6 +127,6 @@ class CommandAddPersonality(BrokerCommand):
 
         session.flush()
 
-        plenary = PlenaryPersonality(dbpersona, logger=logger)
+        plenary = Plenary.get_plenary(dbpersona, logger=logger)
         plenary.write()
         return

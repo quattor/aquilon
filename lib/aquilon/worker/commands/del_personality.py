@@ -19,7 +19,7 @@
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Personality, Host, Cluster
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.templates.personality import PlenaryPersonality
+from aquilon.worker.templates import Plenary
 
 
 class CommandDelPersonality(BrokerCommand):
@@ -36,7 +36,7 @@ class CommandDelPersonality(BrokerCommand):
             raise ArgumentError("{0} is still in use and cannot be deleted."
                                 .format(dbpersona))
 
-        plenary = PlenaryPersonality(dbpersona, logger=logger)
+        plenary = Plenary.get_plenary(dbpersona, logger=logger)
         session.delete(dbpersona)
         session.flush()
         plenary.remove()

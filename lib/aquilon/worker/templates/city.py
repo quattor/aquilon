@@ -19,7 +19,7 @@
 import logging
 
 from aquilon.aqdb.model import City
-from aquilon.worker.templates.base import Plenary
+from aquilon.worker.templates import Plenary
 from aquilon.worker.templates.panutils import pan_variable
 
 LOGGER = logging.getLogger(__name__)
@@ -27,13 +27,9 @@ LOGGER = logging.getLogger(__name__)
 
 class PlenaryCity(Plenary):
 
-    template_type = ""
-
-    def __init__(self, dbcity, logger=LOGGER):
-        Plenary.__init__(self, dbcity, logger=logger)
-        self.plenary_core = "site/%s/%s" % (
-            dbcity.hub.fullname.lower(), dbcity.name)
-        self.plenary_template = "config"
+    @classmethod
+    def template_name(cls, dbcity):
+        return "site/%s/%s/config" % (dbcity.hub.fullname.lower(), dbcity.name)
 
     def body(self, lines):
         pan_variable(lines, "TIMEZONE", self.dbobj.timezone)

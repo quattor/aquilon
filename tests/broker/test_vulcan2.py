@@ -445,7 +445,9 @@ class TestVulcan20(VerifyNotificationsMixin, TestBrokerCommand):
 
         command = ["show", "host", "--hostname", "utpgh0.aqd-unittest.ms.com"]
         out = self.commandtest(command)
-        self.matchoutput(out, "Template: service/vcenter/ut", command)
+        self.matchoutput(out,
+                         "Uses Service: vcenter Instance: ut",
+                         command)
 
         command = "show metacluster --metacluster utmc8"
         out = self.commandtest(command.split(" "))
@@ -507,7 +509,9 @@ class TestVulcan20(VerifyNotificationsMixin, TestBrokerCommand):
 
         command = ["show", "host", "--hostname", "utpgh0.aqd-unittest.ms.com"]
         out = self.commandtest(command)
-        self.matchclean(out, "Template: service/vcenter/ut", command)
+        self.matchclean(out,
+                        "Uses Service: vcenter Instance: ut",
+                        command)
 
     def test_155_delvcenterservices(self):
         command = ["del", "service", "--service", "vcenter", "--instance", "ut"]

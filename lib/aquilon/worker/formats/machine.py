@@ -162,10 +162,14 @@ class MachineFormatter(ObjectFormatter):
                 details.append(indent + "  {0:c}: {0.name} [post_personality]"
                                .format(feature))
 
-            for si in host.services_used:
-                details.append(indent + "  Template: %s" % si.cfg_path)
-            for si in host.services_provided:
-                details.append(indent + "  Provides: %s" % si.cfg_path)
+            for si in sorted(host.services_used,
+                             key=lambda x: (x.service.name, x.name)):
+                details.append(indent + "  Uses Service: %s Instance: %s"
+                               % (si.service.name, si.name))
+            for si in sorted(host.services_provided,
+                             key=lambda x: (x.service.name, x.name)):
+                details.append(indent + "  Provides Service: %s Instance: %s"
+                               % (si.service.name, si.name))
             if host.comments:
                 details.append(indent + "  Comments: %s" % host.comments)
         return "\n".join(details)

@@ -25,8 +25,8 @@ from aquilon.worker.dbwrappers.interface import (generate_ip,
                                                  get_or_create_interface,
                                                  assign_address)
 from aquilon.worker.locks import lock_queue
-from aquilon.worker.templates.machine import PlenaryMachineInfo
 from aquilon.worker.processes import DSDBRunner
+from aquilon.worker.templates import Plenary
 
 
 class CommandAddManager(BrokerCommand):
@@ -65,7 +65,7 @@ class CommandAddManager(BrokerCommand):
 
         session.flush()
 
-        plenary_info = PlenaryMachineInfo(dbmachine, logger=logger)
+        plenary_info = Plenary.get_plenary(dbmachine, logger=logger)
         key = plenary_info.get_write_key()
         try:
             lock_queue.acquire(key)
