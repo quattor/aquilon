@@ -27,7 +27,7 @@ from sqlalchemy.sql import or_
 
 from aquilon.exceptions_ import ArgumentError, InternalError
 from aquilon.aqdb.model import (Host, Cluster, Service, ServiceInstance,
-                                MetaCluster, EsxCluster, Archetype, Personality)
+                                MetaCluster, Archetype, Personality)
 from aquilon.worker.templates import (Plenary, PlenaryCollection,
                                       PlenaryServiceInstanceServer)
 
@@ -421,7 +421,6 @@ class Chooser(object):
     def stash_services(self):
         for instance in self.instances_bound.union(self.instances_unbound):
             plenary = PlenaryServiceInstanceServer(instance, logger=self.logger)
-            plenary.stash()
             self.plenaries.append(plenary)
 
     def flush_changes(self):
@@ -431,6 +430,7 @@ class Chooser(object):
         return self.plenaries.get_key()
 
     def write_plenary_templates(self, locked=False):
+        self.plenaries.stash()
         self.plenaries.write(locked=locked)
 
     def prestash_primary(self):
@@ -582,21 +582,15 @@ class HostChooser(Chooser):
             self.dbhost.services_used.remove(instance)
 
     def prestash_primary(self):
-        plenary_host = Plenary.get_plenary(self.dbhost, logger=self.logger)
-        plenary_host.stash()
-        self.plenaries.append(plenary_host)
+        self.plenaries.append(Plenary.get_plenary(self.dbhost))
+
         # This may be too much action at a distance... however, if
         # we are potentially re-writing a host plenary, it seems like
-        # a good idea to also verify known dependencies.
-        plenary_machine = Plenary.get_plenary(self.dbhost.machine,
-                                              logger=self.logger)
-        plenary_machine.stash()
-        self.plenaries.append(plenary_machine)
+        # a good idea to also verify and refresh known dependencies.
+        self.plenaries.append(Plenary.get_plenary(self.dbhost.machine))
         if self.dbhost.resholder:
             for dbres in self.dbhost.resholder.resources:
-                resource_plenary = Plenary.get_plenary(dbres, logger=self.logger)
-                resource_plenary.stash()
-                self.plenaries.append(resource_plenary)
+                self.plenaries.append(Plenary.get_plenary(dbres))
 
 
 class ClusterChooser(Chooser):
@@ -670,39 +664,21 @@ class ClusterChooser(Chooser):
                 # Note, host plenary will be written later.
 
     def prestash_primary(self):
-        def add_cluster_data(cluster, logger):
+        def add_cluster_dependencies(cluster):
+            self.plenaries.append(Plenary.get_plenary(cluster))
+
             for dbhost in cluster.hosts:
-                host_plenary = Plenary.get_plenary(dbhost, logger=self.logger)
-                host_plenary.stash()
-                self.plenaries.append(host_plenary)
+                self.plenaries.append(Plenary.get_plenary(dbhost))
 
             if cluster.resholder:
                 for dbres in cluster.resholder.resources:
-                    resource_plenary = Plenary.get_plenary(dbres, logger=self.logger)
-                    resource_plenary.stash()
-                    self.plenaries.append(resource_plenary)
+                    self.plenaries.append(Plenary.get_plenary(dbres))
 
-            if isinstance(cluster, EsxCluster) and cluster.switch:
-                sw_plenary = Plenary.get_plenary(cluster.switch, logger=self.logger)
-                sw_plenary.stash()
-                self.plenaries.append(sw_plenary)
+            if hasattr(cluster, 'switch') and cluster.switch:
+                self.plenaries.append(Plenary.get_plenary(cluster.switch))
 
-        plenary_cluster = Plenary.get_plenary(self.dbcluster, logger=self.logger)
-        plenary_cluster.stash()
-        self.plenaries.append(plenary_cluster)
-
-        if self.dbcluster.resholder:
-            for dbres in self.dbcluster.resholder.resources:
-                resource_plenary = Plenary.get_plenary(dbres, logger=self.logger)
-                resource_plenary.stash()
-                self.plenaries.append(resource_plenary)
+        add_cluster_dependencies(self.dbcluster)
 
         if isinstance(self.dbcluster, MetaCluster):
-            for c in self.dbcluster.members:
-                plenary_cluster = Plenary.get_plenary(c,
-                                                      logger=self.logger)
-                plenary_cluster.stash()
-                self.plenaries.append(plenary_cluster)
-                add_cluster_data(c, self.logger)
-        else:
-            add_cluster_data(self.dbcluster, self.logger)
+            for cluster in self.dbcluster.members:
+                add_cluster_dependencies(cluster)
