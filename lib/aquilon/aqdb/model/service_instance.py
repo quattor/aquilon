@@ -32,7 +32,6 @@ from sqlalchemy.sql import select, func, or_
 from aquilon.aqdb.model import (Base, Service, Host, DnsRecord, DnsDomain,
                                 Machine, Fqdn)
 from aquilon.aqdb.column_types.aqstr import AqStr
-from collections import defaultdict
 
 _TN = 'service_instance'
 _ABV = 'svc_inst'
