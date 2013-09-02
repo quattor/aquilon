@@ -17,9 +17,8 @@
 
 from datetime import datetime
 
-from sqlalchemy import (Column, Enum, Integer, DateTime, Sequence, String,
+from sqlalchemy import (Column, Enum, Integer, DateTime, Sequence,
                         UniqueConstraint, event)
-from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import object_session, deferred
 
 from aquilon.exceptions_ import ArgumentError

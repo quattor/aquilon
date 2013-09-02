@@ -22,7 +22,6 @@ from sqlalchemy import (Column, Integer, DateTime, Sequence, String,
                         UniqueConstraint, event)
 
 from aquilon.aqdb.model import Base, SingleInstanceMixin
-from aquilon.exceptions_ import ArgumentError
 
 _TN = 'host_environment'
 

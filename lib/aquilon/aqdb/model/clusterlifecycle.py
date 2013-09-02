@@ -18,8 +18,7 @@
 from datetime import datetime
 
 from sqlalchemy import (Column, Enum, Integer, DateTime, Sequence,
-                        String, UniqueConstraint, event)
-from sqlalchemy.exc import IntegrityError
+                        UniqueConstraint, event)
 from sqlalchemy.orm import deferred
 from sqlalchemy.orm.session import object_session
 

@@ -19,11 +19,11 @@ import sys
 from inspect import isclass
 
 from sqlalchemy.schema import CreateTable
-from sqlalchemy.orm.session import Session, object_session
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
-from sqlalchemy.orm.properties import RelationProperty, ColumnProperty
 from sqlalchemy.ext.associationproxy import AssociationProxy, _lazy_collection
+from sqlalchemy.orm.session import Session, object_session
+from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 from sqlalchemy.inspection import inspect
 
 from aquilon.utils import monkeypatch
@@ -344,7 +344,7 @@ class Base(object):
                 pass
 
     @classmethod
-    def ddl(self):  # pragma: no cover
+    def ddl(cls):  # pragma: no cover
         """ Returns the DDL SqlAlchemy will use to generate the table.
 
             This method is used to aid rapid upgrade sql scripts for new
@@ -353,7 +353,7 @@ class Base(object):
             module contains utilities for this and should also be part of the
             creation of any new tables during upgrade procedures """
 
-        return str(CreateTable(self.__table__))
+        return str(CreateTable(cls.__table__))
 
     @classmethod
     def __declare_last__(cls):
