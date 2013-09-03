@@ -150,3 +150,5 @@ def validate_branch_author(dbhosts):
                  (len(authors[author]), author.name) for author in keys]
         raise ArgumentError("All hosts must be managed by the same "
                             "sandbox author:\n%s" % "\n".join(stats))
+
+    return (branches.popitem()[0], authors.popitem()[0])

@@ -46,7 +46,7 @@ class CommandManageList(BrokerCommand):
 
         failed = []
 
-        validate_branch_author(dbhosts)
+        dbsource, dbsource_author = validate_branch_author(dbhosts)
         for dbhost in dbhosts:
             # check if any host in the list is a cluster node
             if dbhost.cluster:
@@ -58,11 +58,6 @@ class CommandManageList(BrokerCommand):
             raise ArgumentError("Cannot modify the following hosts:\n%s" %
                                 "\n".join(failed))
 
-        # since we have already checked if all hosts in list are within the
-        # same branch, we only need one dbsource to validate the branch
-        dbhost = dbhosts[0]
-        dbsource = dbhost.branch
-        dbsource_author = dbhost.sandbox_author
         if not force:
             validate_branch_commits(dbsource, dbsource_author,
                                     dbbranch, dbauthor, logger, self.config)

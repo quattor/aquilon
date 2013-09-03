@@ -18,18 +18,16 @@
 
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.host import (hostlist_to_hosts,
                                             check_hostlist_size,
                                             validate_branch_author)
-from aquilon.worker.commands.reset_advertised_status \
-    import CommandResetAdvertisedStatus
 from aquilon.worker.templates.domain import TemplateDomain
 from aquilon.worker.templates import Plenary, PlenaryCollection
 from aquilon.worker.locks import lock_queue, CompileKey
 
 
-class CommandResetAdvertisedStatusList(CommandResetAdvertisedStatus):
+class CommandResetAdvertisedStatusList(BrokerCommand):
     """ reset advertised status for a list of hosts """
 
     required_parameters = ["list"]
@@ -38,11 +36,7 @@ class CommandResetAdvertisedStatusList(CommandResetAdvertisedStatus):
         check_hostlist_size(self.command, self.config, list)
         dbhosts = hostlist_to_hosts(session, list)
 
-        self.resetadvertisedstatus_list(session, logger, dbhosts)
-
-    def resetadvertisedstatus_list(self, session, logger, dbhosts):
-
-        validate_branch_author(dbhosts)
+        dbbranch, dbauthor = validate_branch_author(dbhosts)
 
         failed = []
         compileable = []
@@ -59,13 +53,10 @@ class CommandResetAdvertisedStatusList(CommandResetAdvertisedStatus):
         plenaries = PlenaryCollection(logger=logger)
         for dbhost in dbhosts:
             dbhost.advertise_status = False
-            session.add(dbhost)
             plenaries.append(Plenary.get_plenary(dbhost))
 
         session.flush()
 
-        dbbranch = dbhosts[0].branch
-        dbauthor = dbhosts[0].sandbox_author
         key = CompileKey.merge([plenaries.get_write_key()])
         try:
             lock_queue.acquire(key)
