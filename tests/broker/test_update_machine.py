@@ -291,7 +291,7 @@ class TestUpdateMachine(TestBrokerCommand):
                          "Warning: Host server9.aqd-unittest.ms.com is missing "
                          "the following required services, please run 'aq "
                          "reconfigure': afs, aqd, bootserver, dns, lemon, "
-                         "ntp, support-group.",
+                         "ntp, support-group, syslogng.",
                          command)
 
     def testverifydifferentrack(self):

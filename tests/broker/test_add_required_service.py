@@ -86,6 +86,11 @@ class TestAddRequiredService(TestBrokerCommand):
         command += " --justification tcm=12345678"
         self.noouttest(command.split(" "))
 
+    def testaddrequiredsyslogng(self):
+        command = "add required service --service syslogng --archetype aquilon"
+        command += " --justification tcm=12345678"
+        self.noouttest(command.split(" "))
+
     def testverifyaddrequiredservices(self):
         command = "show archetype --archetype aquilon"
         out = self.commandtest(command.split(" "))
@@ -95,6 +100,7 @@ class TestAddRequiredService(TestBrokerCommand):
         self.matchoutput(out, "Service: dns", command)
         self.matchoutput(out, "Service: ntp", command)
         self.matchoutput(out, "Service: lemon", command)
+        self.matchoutput(out, "Service: syslogng", command)
 
     def testverifyaddrequiredafs(self):
         command = "show service --service afs"
