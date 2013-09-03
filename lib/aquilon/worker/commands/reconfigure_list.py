@@ -192,11 +192,7 @@ class CommandReconfigureList(BrokerCommand):
         # actual writing and compile is done.  This will allow for fast
         # turnaround on errors (no need to wait for a lock if there's
         # a missing service map entry or something).
-        # The lock must include the domain, because we're compiling it as a
-        # whole.
-        with CompileKey.merge([plenaries.get_key(),
-                               CompileKey(domain=dbbranch.name,
-                                          logger=logger)]):
+        with plenaries.get_key():
             plenaries.stash()
             try:
                 logger.client_info("Writing %s plenary templates.",
@@ -219,7 +215,8 @@ class CommandReconfigureList(BrokerCommand):
                 if errors:
                     raise ArgumentError("\n".join(errors))
 
-                td.compile(session, locked=True)
+                td.compile(session, only=plenaries.object_templates,
+                           locked=True)
             except:
                 logger.client_info("Restoring plenary templates.")
                 plenaries.restore_stash()
