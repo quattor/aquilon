@@ -44,7 +44,7 @@ class CommandChangeStatus(BrokerCommand):
             plenary.stash()
             try:
                 plenary.write(locked=True)
-                td.compile(session, only=[dbhost.fqdn], locked=True)
+                td.compile(session, only=plenary.object_templates, locked=True)
             except IncompleteError:
                 raise ArgumentError("Run aq make for host %s first." % dbhost.fqdn)
             except:
