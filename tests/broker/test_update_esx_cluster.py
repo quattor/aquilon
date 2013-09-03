@@ -206,8 +206,8 @@ class TestUpdateESXCluster(TestBrokerCommand):
         out = self.badrequesttest(command)
         # The command complains both about the broker personality and OS.
         self.matchoutput(out,
-                         "No personality vulcan-1g-desktop-prod found for "
-                         "archetype windows.",
+                         "Personality vulcan-1g-desktop-prod, "
+                         "archetype windows not found.",
                          command)
         self.matchoutput(out,
                          "Cannot change archetype because operating system "

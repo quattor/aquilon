@@ -16,15 +16,15 @@
 # limitations under the License.
 """Contains the logic for `aq reconfigure --list`."""
 
-
-from aquilon.exceptions_ import ArgumentError
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.dbwrappers.host import (hostlist_to_hosts,
-                                            check_hostlist_size)
-from aquilon.aqdb.model import (Archetype, Personality,
-                                OperatingSystem, HostLifecycle)
-from aquilon.worker.templates.domain import TemplateDomain
+from aquilon.exceptions_ import ArgumentError, NotFoundException
+from aquilon.aqdb.model import (Archetype, Personality, OperatingSystem,
+                                HostLifecycle)
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.grn import lookup_grn
+from aquilon.worker.dbwrappers.host import (hostlist_to_hosts,
+                                            check_hostlist_size,
+                                            validate_branch_author)
+from aquilon.worker.templates.domain import TemplateDomain
 from aquilon.worker.locks import lock_queue, CompileKey
 from aquilon.worker.services import Chooser
 
@@ -33,17 +33,15 @@ class CommandReconfigureList(BrokerCommand):
 
     required_parameters = ["list"]
 
-    def render(self, session, logger, list, archetype, personality,
-               buildstatus, osname, osversion, grn, eon_id, cleargrn, **arguments):
+    def render(self, session, logger, list, **arguments):
         check_hostlist_size(self.command, self.config, list)
         dbhosts = hostlist_to_hosts(session, list)
 
-        self.reconfigure_list(session, logger, dbhosts, archetype, personality,
-                              buildstatus, osname, osversion, grn, eon_id, cleargrn, **arguments)
+        self.reconfigure_list(session, logger, dbhosts, **arguments)
 
-    def reconfigure_list(self, session, logger, dbhosts, archetype,
-                         personality, buildstatus, osname, osversion,
-                         grn, eon_id, cleargrn, **arguments):
+    def reconfigure_list(self, session, logger, dbhosts, archetype, personality,
+                         keepbindings, buildstatus, osname, osversion, grn,
+                         eon_id, cleargrn, **arguments):
         failed = []
         # Check all the parameters up front.
         # Some of these could be more intelligent about defaults
@@ -95,21 +93,12 @@ class CommandReconfigureList(BrokerCommand):
         if not dbhosts:
             return
 
+        dbbranch, dbauthor = validate_branch_author(dbhosts)
+
         personalities = {}
-        branches = {}
-        authors = {}
         # Do any final cross-list or dependency checks before entering
         # the Chooser loop.
         for dbhost in dbhosts:
-            if dbhost.branch in branches:
-                branches[dbhost.branch].append(dbhost)
-            else:
-                branches[dbhost.branch] = [dbhost]
-            if dbhost.sandbox_author in authors:
-                authors[dbhost.sandbox_author].append(dbhost)
-            else:
-                authors[dbhost.sandbox_author] = [dbhost]
-
             if dbos and not dbarchetype and dbhost.archetype != dbos.archetype:
                 failed.append("{0}: Cannot change operating system because it "
                               "needs {1:l} instead of "
@@ -132,13 +121,16 @@ class CommandReconfigureList(BrokerCommand):
             if personality:
                 personalities[dbhost.fqdn] = dbpersonality
             elif archetype:
-                personalities[dbhost.fqdn] = Personality.get_unique(session,
-                    name=dbhost.personality.name, archetype=dbarchetype)
-                if not personalities[dbhost.fqdn]:
-                    failed.append("%s: No personality %s found for archetype "
-                                  "%s." %
-                                  (dbhost.fqdn, dbhost.personality.name,
-                                   dbarchetype.name))
+                # This is a strange case - changing archetype while keeping
+                # the personality
+                try:
+                    pers = Personality.get_unique(session,
+                                                  name=dbhost.personality.name,
+                                                  archetype=dbarchetype,
+                                                  compel=True)
+                    personalities[dbhost.fqdn] = pers
+                except NotFoundException, err:
+                    failed.append("%s: %s" % (dbhost.fqdn, err))
             if grn or eon_id:
                 dbhost.owner_grn = dbgrn
 
@@ -148,43 +140,22 @@ class CommandReconfigureList(BrokerCommand):
         if failed:
             raise ArgumentError("Cannot modify the following hosts:\n%s" %
                                 "\n".join(failed))
-        if len(branches) > 1:
-            keys = branches.keys()
-            branch_sort = lambda x, y: cmp(len(branches[x]), len(branches[y]))
-            keys.sort(cmp=branch_sort)
-            stats = ["{0:d} hosts in {1:l}".format(len(branches[branch]), branch)
-                     for branch in keys]
-            raise ArgumentError("All hosts must be in the same domain or "
-                                "sandbox:\n%s" % "\n".join(stats))
-        dbbranch = branches.keys()[0]
-        if len(authors) > 1:
-            keys = authors.keys()
-            author_sort = lambda x, y: cmp(len(authors[x]), len(authors[y]))
-            keys.sort(cmp=author_sort)
-            stats = ["%s hosts with sandbox author %s" %
-                     (len(authors[author]), author.name) for author in keys]
-            raise ArgumentError("All hosts must be managed by the same "
-                                "sandbox author:\n%s" % "\n".join(stats))
-        dbauthor = authors.keys()[0]
 
-        failed = []
-        choosers = []
         for dbhost in dbhosts:
             if dbhost.fqdn in personalities:
                 dbhost.personality = personalities[dbhost.fqdn]
-                session.add(dbhost)
             if osversion:
                 dbhost.operating_system = dbos
-                session.add(dbhost)
             if buildstatus:
                 dbhost.status.transition(dbhost, dbstatus)
-                session.add(dbhost)
+
         session.flush()
 
         logger.client_info("Verifying service bindings.")
+        choosers = []
         for dbhost in dbhosts:
             if dbhost.archetype.is_compileable:
-                if arguments.get("keepbindings", None):
+                if keepbindings:
                     chooser = Chooser(dbhost, logger=logger,
                                       required_only=False)
                 else:
