@@ -696,7 +696,7 @@ class TestBrokerCommand(unittest.TestCase):
     def verify_buildfiles(self, domain, object,
                           want_exist=True, command='manage'):
         qdir = self.config.get('broker', 'quattordir')
-        domaindir = os.path.join(qdir, 'build', 'xml', domain)
+        domaindir = os.path.join(qdir, 'build', domain)
         xmlfile = os.path.join(domaindir, object + self.profile_suffix)
         depfile = os.path.join(domaindir, object + '.dep')
         builddir = self.config.get('broker', 'builddir')

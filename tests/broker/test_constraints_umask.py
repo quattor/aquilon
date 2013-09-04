@@ -41,7 +41,7 @@ class TestUmaskConstraints(TestBrokerCommand):
     # permissions.  This gets created as part of test_make_aquilon.
     def testdirpermission(self):
         qdir = self.config.get('broker', 'quattordir')
-        dirstat = os.stat(os.path.join(qdir, 'build', 'xml', 'unittest'))
+        dirstat = os.stat(os.path.join(qdir, 'build', 'unittest'))
         self.assert_(dirstat.st_mode & stat.S_IROTH)
 
 

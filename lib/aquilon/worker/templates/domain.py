@@ -53,14 +53,10 @@ class TemplateDomain(object):
                                      self.domain.name))
 
         dirs.append(os.path.join(config.get("broker", "quattordir"),
-                                 "cfg",
-                                 "domains",
-                                 self.domain.name))
+                                 "cfg", "domains", self.domain.name))
 
         dirs.append(os.path.join(config.get("broker", "quattordir"),
-                                 "build",
-                                 "xml",
-                                 self.domain.name))
+                                 "build", self.domain.name))
 
         return dirs
 
@@ -73,8 +69,7 @@ class TemplateDomain(object):
         # auto-creating this directory - not sure why.
         if self.domain.clusters:
             dirs.append(os.path.join(config.get("broker", "quattordir"),
-                                     "build", "xml", self.domain.name,
-                                     "clusters"))
+                                     "build", self.domain.name, "clusters"))
         return dirs
 
     def compile(self, session, only=None, locked=False,

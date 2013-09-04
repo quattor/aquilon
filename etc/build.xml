@@ -43,8 +43,8 @@
 
 	<!-- objects/*.tpl = working object tpls, copied from source.profiles -->
 	<property name="global.profiles" location="${basedir}/objects" />
-	<!-- build/xml/$domain/* = (pan deps and pan output xml files) -->
-	<property name="compiled.profiles" location="${basedir}/build/xml/${domain}" />
+	<!-- build/$domain/* = (pan deps and pan output files) -->
+	<property name="compiled.profiles" location="${basedir}/build/${domain}" />
 	<!-- web/htdocs/profiles = compiled profiles to be served to clients -->
 	<property name="distributed.profiles" location="${basedir}/web/htdocs/profiles" />
 
