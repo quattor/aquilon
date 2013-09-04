@@ -34,8 +34,8 @@
 	<property name="domain" value="ny-prod" />
 	<!-- cfg/domains/$domain/profiles/*.tpl = input host profiles -->
 	<property name="source.profiles" location="${basedir}/cfg/domains/${domain}/profiles" />
-	<!-- plenary = 'complete' supplemental broker-generated templates -->
-	<property name="plenary" location="${basedir}/plenary" />
+	<!-- cfg/plenary = 'complete' supplemental broker-generated templates -->
+	<property name="plenary" location="${basedir}/cfg/plenary" />
 	<!-- swrep = auto-generated templates for the rpms -->
 	<property name="swrep" location="${basedir}/swrep" />
 	<!-- templates/${domain} = domain template source repo -->

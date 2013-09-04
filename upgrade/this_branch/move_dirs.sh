@@ -14,10 +14,14 @@ fi
 if [ -z "$1" ]; then
 	old_build="$quattordir/build/xml"
 	new_build="$quattordir/build"
+	old_plenary="$quattordir/plenary"
+	new_plenary="$quattordir/cfg/plenary"
 	revert=0
 elif [ "$1" == "--revert" ]; then
 	old_build="$quattordir/build"
 	new_build="$quattordir/build/xml"
+	old_plenary="$quattordir/cfg/plenary"
+	new_plenary="$quattordir/plenary"
 	revert=1
 else
 	echo "Usage: $0 [--revert]" 1>&2
@@ -30,6 +34,7 @@ if [ ! -d "$old_build" ]; then
 fi
 
 echo "Will move the contents of $old_build to $new_build"
+echo "Will rename $old_plenary to $new_plenary"
 echo ""
 echo "Press ENTER to proceed, Ctrl+C to abort."
 
@@ -43,6 +48,7 @@ fi
 
 set -x
 find "$old_build" -mindepth 1 -maxdepth 1 -type d -not -name "xml" -execdir mv --verbose '{}' "$new_build/" ';'
+mv "$old_plenary" "$new_plenary"
 set +x
 
 if [ $revert == 0 ]; then
