@@ -345,7 +345,7 @@ class ObjectPlenary(Plenary):
 
     @classmethod
     def base_dir(cls, dbobj):
-        return os.path.join(_config.get("broker", "builddir"),
+        return os.path.join(_config.get("broker", "cfgdir"),
                             "domains", dbobj.branch.name, "profiles")
 
     @classmethod

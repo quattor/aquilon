@@ -134,7 +134,7 @@ class TestBrokerCommand(unittest.TestCase):
         self.assert_(0, "template %s does not exist with any extension" % base)
 
     def build_profile_name(self, *template, **args):
-        base = os.path.join(self.config.get("broker", "builddir"),
+        base = os.path.join(self.config.get("broker", "cfgdir"),
                             "domains", args.get("domain"),
                             "profiles", *template)
         return base + self.template_extension
@@ -699,8 +699,8 @@ class TestBrokerCommand(unittest.TestCase):
         domaindir = os.path.join(qdir, 'build', domain)
         xmlfile = os.path.join(domaindir, object + self.profile_suffix)
         depfile = os.path.join(domaindir, object + '.dep')
-        builddir = self.config.get('broker', 'builddir')
-        profile = os.path.join(builddir, 'domains', domain, 'profiles',
+        cfgdir = self.config.get('broker', 'cfgdir')
+        profile = os.path.join(cfgdir, 'domains', domain, 'profiles',
                                object + self.template_extension)
         for f in [xmlfile, depfile, profile]:
             if want_exist:

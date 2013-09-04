@@ -175,7 +175,7 @@ kill_from_pid_file(pid_file)
 # FIXME: Need to be careful about attempting to nuke templatesdir...
 dirs = [config.get("database", "dbdir"), config.get("unittest", "scratchdir")]
 for label in ["quattordir", "templatesdir", "domainsdir", "rundir", "logdir",
-              "profilesdir", "plenarydir", "builddir", "kingdir", "swrepdir"]:
+              "profilesdir", "plenarydir", "cfgdir", "kingdir", "swrepdir"]:
     dirs.append(config.get("broker", label))
 
 existing_dirs = [d for d in dirs if os.path.exists(d)]
