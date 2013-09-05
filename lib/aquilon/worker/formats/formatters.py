@@ -394,6 +394,10 @@ class ObjectFormatter(object):
         feat_msg.type = str(feature.feature_type)
         feat_msg.post_personality = feature.post_personality
 
+    def add_resource_data(self, resource_msg, resource):
+        resource_msg.name = str(resource.name)
+        resource_msg.type = str(resource.resource_type)
+
 ObjectFormatter.default_handler = ObjectFormatter()
 
 

@@ -16,7 +16,6 @@
 # limitations under the License.
 """VirtualMachine Resource formatter."""
 
-
 from aquilon.worker.formats.formatters import ObjectFormatter
 from aquilon.worker.formats.resource import ResourceFormatter
 from aquilon.aqdb.model import VirtualMachine
@@ -42,7 +41,7 @@ class VirtualMachineFormatter(ResourceFormatter):
         if not container:
             container = self.loaded_protocols[self.protocol].ResourceList()
             skeleton = container.resources.add()
-        return super(VirtualMachineFormatter, self).format_proto(vm, skeleton)
-
+        self.add_resource_data(skeleton, vm)
+        return container
 
 ObjectFormatter.handlers[VirtualMachine] = VirtualMachineFormatter()

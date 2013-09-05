@@ -16,7 +16,6 @@
 # limitations under the License.
 """Filesystem Resource formatter."""
 
-
 from aquilon.worker.formats.formatters import ObjectFormatter
 from aquilon.worker.formats.resource import ResourceFormatter
 from aquilon.aqdb.model import Filesystem
@@ -42,6 +41,7 @@ class FilesystemFormatter(ResourceFormatter):
         if not container:
             container = self.loaded_protocols[self.protocol].ResourceList()
             skeleton = container.resources.add()
+        self.add_resource_data(skeleton, fs)
         skeleton.fsdata.mount = fs.mount
         skeleton.fsdata.fstype = str(fs.fstype)
         skeleton.fsdata.blockdevice = str(fs.blockdev)
@@ -49,7 +49,6 @@ class FilesystemFormatter(ResourceFormatter):
         skeleton.fsdata.opts = str(fs.mountoptions)
         skeleton.fsdata.freq = fs.dumpfreq
         skeleton.fsdata.passno = fs.passno
-        return super(FilesystemFormatter, self).format_proto(fs, skeleton)
-
+        return container
 
 ObjectFormatter.handlers[Filesystem] = FilesystemFormatter()

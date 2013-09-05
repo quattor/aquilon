@@ -16,7 +16,6 @@
 # limitations under the License.
 """RebootIntervention Resource formatter."""
 
-
 from aquilon.worker.formats.formatters import ObjectFormatter
 from aquilon.worker.formats.resource import ResourceFormatter
 from aquilon.aqdb.model import RebootIntervention
@@ -37,13 +36,13 @@ class RebootInterventionFormatter(ResourceFormatter):
         if not container:
             container = self.loaded_protocols[self.protocol].ResourceList()
             skeleton = container.resources.add()
+        self.add_resource_data(skeleton, rs)
         # XXX: The protocol does not have an rsdata field, and even if it
         # did, why would reboot intervention fill it in?  Could use ivdata,
         # not sure if we want a separate rivdata.
         #skeleton.rsdata.start_date = rs.start_date
         #skeleton.rsdata.expiry_date = str(rs.expiry_date)
         #skeleton.rsdata.justification = str(rs.justification)
-        return super(RebootInterventionFormatter, self).format_proto(rs, skeleton)
-
+        return container
 
 ObjectFormatter.handlers[RebootIntervention] = RebootInterventionFormatter()

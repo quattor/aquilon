@@ -25,7 +25,7 @@ from aquilon.aqdb.model import Resource
 class ResourceFormatter(ObjectFormatter):
     protocol = "aqdsystems_pb2"
 
-    def extra_details(self, share, indent=""):
+    def extra_details(self, share, indent=""):  # pylint: disable=W0613
         return []
 
     def format_raw(self, resource, indent=""):
@@ -44,10 +44,8 @@ class ResourceFormatter(ObjectFormatter):
         if not container:
             container = self.loaded_protocols[self.protocol].ResourceList()
             skeleton = container.resources.add()
-        skeleton.name = str(resource.name)
-        skeleton.type = str(resource.resource_type)
+        self.add_resource_data(skeleton, resource)
         return container
-
 
 ObjectFormatter.handlers[Resource] = ResourceFormatter()
 

@@ -16,7 +16,6 @@
 # limitations under the License.
 """Service Address Resource formatter."""
 
-
 from aquilon.worker.formats.formatters import ObjectFormatter
 from aquilon.worker.formats.resource import ResourceFormatter
 from aquilon.aqdb.model import ServiceAddress
@@ -36,10 +35,10 @@ class ServiceAddressFormatter(ResourceFormatter):
         if not container:
             container = self.loaded_protocols[self.protocol].ResourceList()
             skeleton = container.resources.add()
+        self.add_resource_data(skeleton, srv)
         skeleton.service_address.ip = str(srv.dns_record.ip)
         skeleton.service_address.fqdn = str(srv.dns_record.fqdn)
         skeleton.service_address.interfaces.extend(srv.interfaces)
-        return super(ServiceAddressFormatter, self).format_proto(srv, skeleton)
-
+        return container
 
 ObjectFormatter.handlers[ServiceAddress] = ServiceAddressFormatter()

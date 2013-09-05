@@ -16,7 +16,6 @@
 # limitations under the License.
 """Share Resource formatter."""
 
-
 from aquilon.worker.formats.formatters import ObjectFormatter
 from aquilon.worker.formats.resource import ResourceFormatter
 from aquilon.aqdb.model import Share
@@ -39,11 +38,11 @@ class ShareFormatter(ResourceFormatter):
         if not container:
             container = self.loaded_protocols[self.protocol].ResourceList()
             skeleton = container.resources.add()
+        self.add_resource_data(skeleton, share)
         skeleton.share.server = share.server
         skeleton.share.mount = share.mount
         skeleton.share.disk_count = share.disk_count
         skeleton.share.machine_count = share.machine_count
-        return super(ShareFormatter, self).format_proto(share, skeleton)
-
+        return container
 
 ObjectFormatter.handlers[Share] = ShareFormatter()

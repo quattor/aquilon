@@ -36,10 +36,10 @@ class RebootScheduleFormatter(ResourceFormatter):
         if not container:
             container = self.loaded_protocols[self.protocol].ResourceList()
             skeleton = container.resources.add()
+        self.add_resource_data(skeleton, rs)
         skeleton.reboot_schedule.week = str(rs.week)
         skeleton.reboot_schedule.day = str(rs.day)
         skeleton.reboot_schedule.time = str(rs.time)
-        return super(RebootScheduleFormatter, self).format_proto(rs, skeleton)
-
+        return container
 
 ObjectFormatter.handlers[RebootSchedule] = RebootScheduleFormatter()

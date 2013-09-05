@@ -43,6 +43,7 @@ class InterventionFormatter(ResourceFormatter):
         if not container:
             container = self.loaded_protocols[self.protocol].ResourceList()
             skeleton = container.resources.add()
+        self.add_resource_data(skeleton, resource)
         skeleton.ivdata.expiry = timegm(resource.expiry_date.utctimetuple())
         skeleton.ivdata.start = timegm(resource.start_date.utctimetuple())
         if resource.users is not None:
@@ -52,8 +53,6 @@ class InterventionFormatter(ResourceFormatter):
         skeleton.ivdata.justification = resource.justification
         if resource.disabled is not None:
             skeleton.ivdata.disabled = resource.disabled
-        return super(InterventionFormatter, self).format_proto(resource,
-                                                               skeleton)
-
+        return container
 
 ObjectFormatter.handlers[Intervention] = InterventionFormatter()
