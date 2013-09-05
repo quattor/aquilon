@@ -55,7 +55,7 @@ setup(name="aquilon",
       packages=["aquilon", "aquilon.client", "aquilon.worker", "aquilon.aqdb",
                 "twisted.plugins", "ms", "ms.version", "ms.modulecmd"],
       cmdclass = {"install_scripts" : install_init_d_stuff},
-      data_files=[("/usr/share/aquilon/config", glob.glob("etc/*.conf*")),
+      data_files=[("/usr/share/aquilon/etc", glob.glob("etc/*.conf*")),
                   ("/etc/aquilon", glob.glob("etc/*.xml")),
                   ("/etc/init.d", ["etc/rc.d/init.d/aqd"])],
 
