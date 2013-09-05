@@ -16,10 +16,8 @@
 # limitations under the License.
 """Service formatter."""
 
-
 from aquilon.aqdb.model import Service
 from aquilon.worker.formats.formatters import ObjectFormatter
-from aquilon.worker.formats.list import ListFormatter
 
 
 class ServiceFormatter(ObjectFormatter):
@@ -48,14 +46,3 @@ class ServiceFormatter(ObjectFormatter):
         self.add_service_data(skeleton, service)
 
 ObjectFormatter.handlers[Service] = ServiceFormatter()
-
-
-class ServiceList(list):
-    """Class to hold a list of services to be formatted"""
-    pass
-
-
-class ServiceListFormatter(ListFormatter):
-    pass
-
-ObjectFormatter.handlers[ServiceList] = ServiceListFormatter()

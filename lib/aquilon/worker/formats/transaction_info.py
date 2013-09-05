@@ -15,10 +15,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """ Transaction formatter """
+
 import calendar
 
 from aquilon.worker.formats.formatters import ObjectFormatter
-from aquilon.worker.formats.list import ListFormatter
 from aquilon.aqdb.model import Xtn
 
 
@@ -44,14 +44,3 @@ class TransactionFormatter(ObjectFormatter):
             arg.value = i.value
 
 ObjectFormatter.handlers[Xtn] = TransactionFormatter()
-
-
-class TransactionList(list):
-    """ A list of transactions (xtns) to display """
-    pass
-
-
-class TransactionListFormatter(ListFormatter):
-    pass
-
-ObjectFormatter.handlers[TransactionList] = TransactionListFormatter()

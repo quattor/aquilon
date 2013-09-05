@@ -18,9 +18,8 @@
 
 from sqlalchemy.orm import subqueryload, joinedload, undefer
 
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.aqdb.model import DnsDomain
-from aquilon.worker.formats.dns_domain import DNSDomainList
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 
 
 class CommandShowDnsDomainAll(BrokerCommand):
@@ -34,4 +33,4 @@ class CommandShowDnsDomainAll(BrokerCommand):
                       subqueryload('_ns_records'),
                       joinedload('_ns_records.a_record.fqdn'),
                       joinedload('_ns_records.a_record.fqdn.dns_domain'))
-        return DNSDomainList(q.all())
+        return q.all()

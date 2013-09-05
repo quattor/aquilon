@@ -15,21 +15,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
-from aquilon.worker.formats.resource import ResourceList
 from aquilon.worker.dbwrappers.resources import get_resource_holder
 
 
 def show_resource(session, hostname, cluster, resourcegroup,
                   all, name, resource_class):
     q = session.query(resource_class)
-    if all:
-        return ResourceList(q.all())
     if name:
         q = q.filter_by(name=name)
-
     if hostname or cluster or resourcegroup:
         who = get_resource_holder(session, hostname, cluster, resourcegroup)
         q = q.filter_by(holder=who)
 
-    return ResourceList(q.all())
+    return q.all()

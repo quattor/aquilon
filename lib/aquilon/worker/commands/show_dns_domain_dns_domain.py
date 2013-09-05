@@ -19,7 +19,6 @@
 from sqlalchemy.orm import undefer
 
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.formats.dns_domain import DNSDomainList
 from aquilon.aqdb.model import DnsDomain
 
 
@@ -29,6 +28,5 @@ class CommandShowDnsDomainDnsDomain(BrokerCommand):
 
     def render(self, session, dns_domain, **arguments):
         options = [undefer('comments')]
-        return DNSDomainList([DnsDomain.get_unique(session, dns_domain,
-                                                   compel=True,
-                                                   query_options=options)])
+        return DnsDomain.get_unique(session, dns_domain, compel=True,
+                                    query_options=options)

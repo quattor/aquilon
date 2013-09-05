@@ -16,7 +16,6 @@
 # limitations under the License.
 """Contains the logic for `aq show personality`."""
 
-
 from sqlalchemy.orm import joinedload, subqueryload, contains_eager
 from sqlalchemy.sql import or_
 
@@ -24,8 +23,7 @@ from aquilon.aqdb.model import (Archetype, Personality, HostEnvironment,
                                 PersonalityGrnMap)
 from aquilon.worker.dbwrappers.grn import lookup_grn
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.formats.personality import (PersonalityList,
-                                                SimplePersonalityList)
+from aquilon.worker.formats.personality import SimplePersonalityList
 
 
 class CommandSearchPersonality(BrokerCommand):
@@ -65,6 +63,6 @@ class CommandSearchPersonality(BrokerCommand):
                           subqueryload('features'),
                           joinedload('features.feature'),
                           joinedload('cluster_infos'))
-            return PersonalityList(q.all())
+            return q.all()
         else:
             return SimplePersonalityList(q.all())

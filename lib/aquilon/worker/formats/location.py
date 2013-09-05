@@ -16,7 +16,6 @@
 # limitations under the License.
 """Location formatter."""
 
-
 from aquilon.worker.formats.formatters import ObjectFormatter
 from aquilon.worker.formats.list import ListFormatter
 from aquilon.aqdb.model import Location, Rack, Building
@@ -85,20 +84,8 @@ class LocationFormatter(ObjectFormatter):
 
         return details
 
-
-class LocationList(list):
-    """Holds a list of locations for which a location list will be formatted
-    """
-    pass
-
-
-class LocationListFormatter(ListFormatter):
-    pass
-
 for location_type, mapper in Location.__mapper__.polymorphic_map.items():
     ObjectFormatter.handlers[mapper.class_] = LocationFormatter()
-
-ObjectFormatter.handlers[LocationList] = LocationListFormatter()
 
 
 class SimpleLocationList(list):
@@ -107,7 +94,7 @@ class SimpleLocationList(list):
     pass
 
 
-class SimpleLocationListFormatter(LocationListFormatter):
+class SimpleLocationListFormatter(ListFormatter):
     template_html = "simple_location_list.mako"
 
     def format_raw(self, result, indent=""):
@@ -115,6 +102,5 @@ class SimpleLocationListFormatter(LocationListFormatter):
 
     def csv_fields(self, location):
         return (location.name,)
-
 
 ObjectFormatter.handlers[SimpleLocationList] = SimpleLocationListFormatter()

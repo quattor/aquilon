@@ -15,13 +15,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 from sqlalchemy.orm import joinedload, subqueryload, lazyload
 
 from aquilon.exceptions_ import NotFoundException
 from aquilon.aqdb.model import Cluster, VirtualMachine, ClusterResource
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.formats.cluster import ClusterList
 
 
 class CommandShowClusterCluster(BrokerCommand):
@@ -62,4 +60,4 @@ class CommandShowClusterCluster(BrokerCommand):
         for vm in vm_q:
             machines[vm.machine.machine_id] = vm
 
-        return ClusterList(dbclusters)
+        return dbclusters

@@ -18,7 +18,6 @@
 
 from aquilon.aqdb.model import OperatingSystem
 from aquilon.worker.formats.formatters import ObjectFormatter
-from aquilon.worker.formats.list import ListFormatter
 
 
 class OSFormatter(ObjectFormatter):
@@ -37,13 +36,3 @@ class OSFormatter(ObjectFormatter):
         self.add_os_data(skeleton, os)
 
 ObjectFormatter.handlers[OperatingSystem] = OSFormatter()
-
-
-class OperatingSystemList(list):
-    """Holds instances of OperatingSystem."""
-
-
-class OSListFormatter(ListFormatter):
-    pass
-
-ObjectFormatter.handlers[OperatingSystemList] = OSListFormatter()

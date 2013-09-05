@@ -16,9 +16,7 @@
 # limitations under the License.
 """Resource formatter."""
 
-
 from aquilon.worker.formats.formatters import ObjectFormatter
-from aquilon.worker.formats.list import ListFormatter
 from aquilon.aqdb.model import Resource
 
 
@@ -42,14 +40,3 @@ class ResourceFormatter(ObjectFormatter):
         self.add_resource_data(skeleton, resource)
 
 ObjectFormatter.handlers[Resource] = ResourceFormatter()
-
-
-class ResourceList(list):
-    pass
-
-
-class ResourceListFormatter(ListFormatter):
-    pass
-
-
-ObjectFormatter.handlers[ResourceList] = ResourceListFormatter()

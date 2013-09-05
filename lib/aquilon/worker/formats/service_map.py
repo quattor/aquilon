@@ -16,9 +16,7 @@
 # limitations under the License.
 """ServiceMap formatter."""
 
-
 from aquilon.worker.formats.formatters import ObjectFormatter
-from aquilon.worker.formats.list import ListFormatter
 from aquilon.aqdb.model import ServiceMap, PersonalityServiceMap
 
 
@@ -45,13 +43,3 @@ class PersonalityServiceMapFormatter(ServiceMapFormatter):
 
 ObjectFormatter.handlers[PersonalityServiceMap] = \
         PersonalityServiceMapFormatter()
-
-
-class ServiceMapList(list):
-    pass
-
-
-class ServiceMapListFormatter(ListFormatter):
-    pass
-
-ObjectFormatter.handlers[ServiceMapList] = ServiceMapListFormatter()

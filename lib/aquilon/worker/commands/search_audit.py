@@ -18,12 +18,12 @@
 
 from dateutil.parser import parse
 from dateutil.tz import tzutc
+
 from sqlalchemy.sql.expression import asc, desc, or_, exists
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.formats.transaction_info import TransactionList
 from aquilon.aqdb.model import Xtn, XtnDetail, XtnEnd
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 
 _IGNORED_COMMANDS = ('show_active_locks', 'show_active_commands', 'cat',
                      'search_audit')
@@ -116,4 +116,4 @@ class CommandSearchAudit(BrokerCommand):
         else:
             q = q.from_self().order_by(asc(Xtn.start_time))
 
-        return TransactionList(q.all())
+        return q.all()

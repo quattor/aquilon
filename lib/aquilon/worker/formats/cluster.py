@@ -182,16 +182,4 @@ class SimpleClusterListFormatter(ListFormatter):
     def format_raw(self, sclist, indent=""):
         return str("\n".join([indent + cluster.name for cluster in sclist]))
 
-
 ObjectFormatter.handlers[SimpleClusterList] = SimpleClusterListFormatter()
-
-
-class ClusterList(list):
-    pass
-
-
-class ClusterListFormatter(ListFormatter):
-    pass
-
-
-ObjectFormatter.handlers[ClusterList] = ClusterListFormatter()

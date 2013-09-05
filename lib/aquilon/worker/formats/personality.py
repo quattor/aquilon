@@ -30,14 +30,6 @@ class ThresholdedPersonality(object):
         self.maintenance_threshold = thresholds.get('maintenance_threshold')
 
 
-class PersonalityList(list):
-    """Holds instances of ThresholdedPersonality."""
-
-
-class PersonalityListFormatter(ListFormatter):
-    pass
-
-
 class PersonalityFormatter(ObjectFormatter):
     def format_raw(self, personality, indent=""):
         # Transparently handle Personality and ThresholdedPersonality
@@ -143,7 +135,6 @@ class PersonalityFormatter(ObjectFormatter):
 
 ObjectFormatter.handlers[Personality] = PersonalityFormatter()
 ObjectFormatter.handlers[ThresholdedPersonality] = PersonalityFormatter()
-ObjectFormatter.handlers[PersonalityList] = PersonalityListFormatter()
 
 
 class SimplePersonalityList(list):
@@ -151,7 +142,7 @@ class SimplePersonalityList(list):
        in a simple (name-only) manner."""
 
 
-class SimplePersonalityListFormatter(PersonalityListFormatter):
+class SimplePersonalityListFormatter(ListFormatter):
     def format_raw(self, result, indent=""):
         return str("\n".join([indent + "{0.archetype.name}/{0.name}".format(obj) for obj in result]))
 

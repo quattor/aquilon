@@ -16,12 +16,10 @@
 # limitations under the License.
 """Contains the logic for `aq show service --service`."""
 
-
+from aquilon.aqdb.model import Service, ServiceInstance
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.host import hostname_to_host
 from aquilon.worker.dbwrappers.service_instance import get_service_instance
-from aquilon.aqdb.model import Service, ServiceInstance
-from aquilon.worker.formats.service_instance import ServiceInstanceList
 
 
 class CommandShowServiceService(BrokerCommand):
@@ -39,13 +37,13 @@ class CommandShowServiceService(BrokerCommand):
             q = q.join('servers')
             q = q.filter_by(host=dbserver)
             q = q.order_by(ServiceInstance.name)
-            return ServiceInstanceList(q.all())
+            return q.all()
         elif dbclient:
             service_instances = dbclient.services_used
             service_instances = [si for si in service_instances if si.service == dbservice]
             if instance:
                 service_instances = [si for si in service_instances if si.name == instance]
-            return ServiceInstanceList(service_instances)
+            return service_instances
 
         if not instance:
             return dbservice

@@ -16,9 +16,7 @@
 # limitations under the License.
 """ServiceInstance formatter."""
 
-
 from aquilon.worker.formats.formatters import ObjectFormatter
-from aquilon.worker.formats.list import ListFormatter
 from aquilon.aqdb.model import ServiceInstance
 from aquilon.aqdb.data_sync.storage import (find_storage_data,
                                             cache_storage_data)
@@ -63,17 +61,6 @@ class ServiceInstanceFormatter(ObjectFormatter):
         return max_clients
 
 ObjectFormatter.handlers[ServiceInstance] = ServiceInstanceFormatter()
-
-
-class ServiceInstanceList(list):
-    """holds a list of service instances to be formatted"""
-    pass
-
-
-class ServiceInstanceListFormatter(ListFormatter):
-    pass
-
-ObjectFormatter.handlers[ServiceInstanceList] = ServiceInstanceListFormatter()
 
 
 class ServiceShareList(list):

@@ -16,7 +16,6 @@
 # limitations under the License.
 """DNS Domain formatter."""
 
-
 from aquilon.worker.formats.formatters import ObjectFormatter
 from aquilon.worker.formats.list import ListFormatter
 from aquilon.aqdb.model import DnsDomain
@@ -63,13 +62,4 @@ class DnsDomainFormatter(ObjectFormatter):
         skeleton = container.dns_domains.add()
         self.add_dns_domain_data(skeleton, dns_domain)
 
-class DNSDomainList(list):
-    """By convention, holds DnsDomain objects."""
-    pass
-
-
-class DNSDomainListFormatter(ListFormatter):
-    pass
-
 ObjectFormatter.handlers[DnsDomain] = DnsDomainFormatter()
-ObjectFormatter.handlers[DNSDomainList] = DNSDomainListFormatter()
