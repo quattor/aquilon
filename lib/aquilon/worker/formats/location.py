@@ -49,8 +49,24 @@ class LocationFormatter(ObjectFormatter):
         return "\n".join(details)
 
     def format_proto(self, loc, skeleton=None):
-        loclistf = LocationListFormatter()
-        return(loclistf.format_proto([loc], skeleton))
+        container = skeleton
+        if not container:
+            container = self.loaded_protocols[self.protocol].LocationList()
+            skeleton = container.locations.add()
+        skeleton.name = str(loc.name)
+        skeleton.location_type = str(loc.location_type)
+        skeleton.fullname = str(loc.fullname)
+        if isinstance(loc, Rack) and loc.rack_row and loc.rack_column:
+            skeleton.row = loc.rack_row
+            skeleton.col = loc.rack_column
+        if hasattr(loc, "timezone"):
+            skeleton.timezone = loc.timezone
+
+        for p in loc.parents:
+            parent = skeleton.parents.add()
+            parent.name = p.name
+            parent.location_type = p.location_type
+        return container
 
     def csv_fields(self, location):
         details = [location.location_type, location.name]
@@ -86,25 +102,11 @@ class LocationListFormatter(ListFormatter):
     protocol = "aqdlocations_pb2"
 
     def format_proto(self, result, skeleton=None):
-        loclist_msg = self.loaded_protocols[self.protocol].LocationList()
+        if not skeleton:
+            skeleton = self.loaded_protocols[self.protocol].LocationList()
         for loc in result:
-            msg = loclist_msg.locations.add()
-            msg.name = str(loc.name)
-            msg.location_type = str(loc.location_type)
-            msg.fullname = str(loc.fullname)
-            if isinstance(loc, Rack) and loc.rack_row and loc.rack_column:
-                msg.row = loc.rack_row
-                msg.col = loc.rack_column
-            if hasattr(loc, "timezone"):
-                msg.timezone = loc.timezone
-
-            for p in loc.parents:
-                parent = msg.parents.add()
-                parent.name = p.name
-                parent.location_type = p.location_type
-
-        return loclist_msg.SerializeToString()
-
+            self.redirect_proto(loc, skeleton.locations.add())
+        return skeleton
 
 for location_type, mapper in Location.__mapper__.polymorphic_map.items():
     ObjectFormatter.handlers[mapper.class_] = LocationFormatter()

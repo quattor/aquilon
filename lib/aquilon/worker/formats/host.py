@@ -27,9 +27,20 @@ class HostFormatter(ObjectFormatter):
     protocol = "aqdsystems_pb2"
 
     def format_proto(self, host, skeleton=None):
-        # we actually want to return a SimpleHostList of one host...
-        shlf = SimpleHostListFormatter()
-        return(shlf.format_proto([host], skeleton))
+        container = skeleton
+        if not container:
+            container = self.loaded_protocols[self.protocol].HostList()
+            skeleton = container.hosts.add()
+        self.add_host_data(skeleton, host)
+        for si in host.services_used:
+            srv_msg = skeleton.services_used.add()
+            srv_msg.service = si.service.name
+            srv_msg.instance = si.name
+        for si in host.services_provided:
+            srv_msg = skeleton.services_provided.add()
+            srv_msg.service = si.service.name
+            srv_msg.instance = si.name
+        return container
 
     def format_raw(self, host, indent=""):
         return self.redirect_raw(host.machine, indent)
@@ -55,20 +66,11 @@ class SimpleHostListFormatter(ListFormatter):
         return (host.fqdn,)
 
     def format_proto(self, hostlist, skeleton=None):
-        hostlist_msg = self.loaded_protocols[self.protocol].HostList()
+        if not skeleton:
+            skeleton = self.loaded_protocols[self.protocol].HostList()
         for host in hostlist:
-            msg = hostlist_msg.hosts.add()
-            self.add_host_data(msg, host)
-            for si in host.services_used:
-                srv_msg = msg.services_used.add()
-                srv_msg.service = si.service.name
-                srv_msg.instance = si.name
-            for si in host.services_provided:
-                srv_msg = msg.services_provided.add()
-                srv_msg.service = si.service.name
-                srv_msg.instance = si.name
-
-        return hostlist_msg.SerializeToString()
+            self.redirect_proto(host, skeleton.hosts.add())
+        return skeleton
 
 ObjectFormatter.handlers[SimpleHostList] = SimpleHostListFormatter()
 
@@ -134,8 +136,7 @@ class GrnHostListFormatter(ListFormatter):
                     map.target = target
                     map.eonid = grn_rec.eon_id
 
-        return hostlist_msg.SerializeToString()
-
+        return hostlist_msg
 
 ObjectFormatter.handlers[GrnHostList] = GrnHostListFormatter()
 

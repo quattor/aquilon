@@ -31,8 +31,12 @@ class ServiceMapFormatter(ObjectFormatter):
                 sm.service.name, sm.service_instance.name, format(sm.mapped_to))
 
     def format_proto(self, sm, skeleton=None):
-        smlf = ServiceMapListFormatter()
-        return smlf.format_proto([sm], skeleton)
+        container = skeleton
+        if not container:
+            container = self.loaded_protocols[self.protocol].ServiceMapList()
+            skeleton = container.servicemaps.add()
+        self.add_service_map_data(skeleton, sm)
+        return container
 
 ObjectFormatter.handlers[ServiceMap] = ServiceMapFormatter()
 
@@ -57,9 +61,10 @@ class ServiceMapListFormatter(ListFormatter):
     protocol = "aqdservices_pb2"
 
     def format_proto(self, sml, skeleton=None):
-        servicemap_list_msg = self.loaded_protocols[self.protocol].ServiceMapList()
+        if not skeleton:
+            skeleton = self.loaded_protocols[self.protocol].ServiceMapList()
         for sm in sml:
-            self.add_service_map_data(servicemap_list_msg.servicemaps.add(), sm)
-        return servicemap_list_msg.SerializeToString()
+            self.redirect_proto(sm, skeleton.servicemaps.add())
+        return skeleton
 
 ObjectFormatter.handlers[ServiceMapList] = ServiceMapListFormatter()

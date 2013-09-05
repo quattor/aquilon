@@ -126,81 +126,6 @@ class NetworkFormatter(ObjectFormatter):
 
         return "\n".join(details)
 
-    def format_proto(self, network, skeleton=None):
-        snlf = SimpleNetworkListFormatter()
-        return(snlf.format_proto([network], skeleton))
-
-ObjectFormatter.handlers[Network] = NetworkFormatter()
-
-
-class NetworkHostList(list):
-    """Holds a list of networks for which a host list will be formatted
-    """
-    pass
-
-
-class NetworkHostListFormatter(ListFormatter):
-    protocol = "aqdnetworks_pb2"
-
-    def format_raw(self, netlist, indent=""):
-        details = []
-
-        for network in netlist:
-            # we'll get the header from the existing formatter
-            nfm = NetworkFormatter()
-            details.append(indent + nfm.format_raw(network))
-
-            for addr in network.assignments:
-                iface = addr.interface
-                hw_ent = iface.hardware_entity
-                if addr.fqdns:
-                    names = ", ".join([str(fqdn) for fqdn in addr.fqdns])
-                else:
-                    names = "unknown"
-                details.append(indent + "  {0:c}: {0.printable_name}, "
-                               "interface: {1.logical_name}, "
-                               "MAC: {2.mac}, IP: {1.ip} ({3})".format(
-                                   hw_ent, addr, iface, names))
-        return "\n".join(details)
-
-    def format_proto(self, netlist, skeleton=None):
-        snlf = SimpleNetworkListFormatter()
-        return(snlf.format_proto(netlist, skeleton))
-
-ObjectFormatter.handlers[NetworkHostList] = NetworkHostListFormatter()
-
-
-class SimpleNetworkList(list):
-    """By convention, holds a list of networks to be formatted in a simple
-    network map type format."""
-    pass
-
-
-class SimpleNetworkListFormatter(ListFormatter):
-    protocol = "aqdnetworks_pb2"
-    fields = ["Network", "IP", "Netmask", "Sysloc", "Country", "Side", "Network Type", "Discoverable", "Discovered", "Comments"]
-
-    def format_raw(self, nlist, indent=""):
-        details = [indent + "\t".join(self.fields)]
-        for network in nlist:
-            details.append(indent + str("\t".join([network.name,
-                                                   str(network.ip),
-                                                   str(network.netmask),
-                                                   str(network.location.sysloc()),
-                                                   str(network.location.country),
-                                                   network.side,
-                                                   network.network_type,
-                                                   "False",
-                                                   "False",
-                                                   str(network.comments)])))
-        return "\n".join(details)
-
-    def format_proto(self, nlist, skeleton=None):
-        netlist_msg = self.loaded_protocols[self.protocol].NetworkList()
-        for n in nlist:
-            self.add_net_data(netlist_msg.networks.add(), n)
-        return netlist_msg.SerializeToString()
-
     def add_net_data(self, net_msg, net):
         net_msg.name = str(net.name)
         net_msg.id = net.id
@@ -324,6 +249,89 @@ class SimpleNetworkListFormatter(ListFormatter):
             host_msg.fqdn = str(dynhost.fqdn)
             host_msg.dns_domain = str(dynhost.fqdn.dns_domain)
             host_msg.ip = str(dynhost.ip)
+
+    def format_proto(self, network, skeleton=None):
+        container = skeleton
+        if not container:
+            container = self.loaded_protocols[self.protocol].NetworkList()
+            skeleton = container.networks.add()
+        self.add_net_data(skeleton, network)
+        return container
+
+ObjectFormatter.handlers[Network] = NetworkFormatter()
+
+
+class NetworkHostList(list):
+    """Holds a list of networks for which a host list will be formatted
+    """
+    pass
+
+
+class NetworkHostListFormatter(ListFormatter):
+    protocol = "aqdnetworks_pb2"
+
+    def format_raw(self, netlist, indent=""):
+        details = []
+
+        for network in netlist:
+            # we'll get the header from the existing formatter
+            nfm = NetworkFormatter()
+            details.append(indent + nfm.format_raw(network))
+
+            for addr in network.assignments:
+                iface = addr.interface
+                hw_ent = iface.hardware_entity
+                if addr.fqdns:
+                    names = ", ".join([str(fqdn) for fqdn in addr.fqdns])
+                else:
+                    names = "unknown"
+                details.append(indent + "  {0:c}: {0.printable_name}, "
+                               "interface: {1.logical_name}, "
+                               "MAC: {2.mac}, IP: {1.ip} ({3})".format(
+                                   hw_ent, addr, iface, names))
+        return "\n".join(details)
+
+    def format_proto(self, netlist, skeleton=None):
+        if not skeleton:
+            skeleton = self.loaded_protocols[self.protocol].NetworkList()
+        for network in netlist:
+            self.redirect_proto(network, skeleton.networks.add())
+        return skeleton
+
+ObjectFormatter.handlers[NetworkHostList] = NetworkHostListFormatter()
+
+
+class SimpleNetworkList(list):
+    """By convention, holds a list of networks to be formatted in a simple
+    network map type format."""
+    pass
+
+
+class SimpleNetworkListFormatter(ListFormatter):
+    protocol = "aqdnetworks_pb2"
+    fields = ["Network", "IP", "Netmask", "Sysloc", "Country", "Side", "Network Type", "Discoverable", "Discovered", "Comments"]
+
+    def format_raw(self, nlist, indent=""):
+        details = [indent + "\t".join(self.fields)]
+        for network in nlist:
+            details.append(indent + str("\t".join([network.name,
+                                                   str(network.ip),
+                                                   str(network.netmask),
+                                                   str(network.location.sysloc()),
+                                                   str(network.location.country),
+                                                   network.side,
+                                                   network.network_type,
+                                                   "False",
+                                                   "False",
+                                                   str(network.comments)])))
+        return "\n".join(details)
+
+    def format_proto(self, nlist, skeleton=None):
+        if not skeleton:
+            skeleton = self.loaded_protocols[self.protocol].NetworkList()
+        for n in nlist:
+            self.redirect_proto(n, skeleton.networks.add())
+        return skeleton
 
     def csv_fields(self, network):
         return (network.name, network.ip, network.netmask,

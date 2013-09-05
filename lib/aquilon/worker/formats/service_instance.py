@@ -49,8 +49,12 @@ class ServiceInstanceFormatter(ObjectFormatter):
         return "\n".join(details)
 
     def format_proto(self, si, skeleton=None):
-        silf = ServiceInstanceListFormatter()
-        return silf.format_proto([si], skeleton)
+        container = skeleton
+        if not container:
+            container = self.loaded_protocols[self.protocol].ServiceList()
+            skeleton = container.services.add()
+        self.add_service_data(skeleton, si.service, si)
+        return container
 
     # Applies to service_instance/share as well.
     @classmethod
@@ -76,10 +80,11 @@ class ServiceInstanceListFormatter(ListFormatter):
     protocol = "aqdservices_pb2"
 
     def format_proto(self, sil, skeleton=None):
-        servicelist_msg = self.loaded_protocols[self.protocol].ServiceList()
+        if not skeleton:
+            skeleton = self.loaded_protocols[self.protocol].ServiceList()
         for si in sil:
-            self.add_service_data(servicelist_msg.services.add(), si.service, si)
-        return servicelist_msg.SerializeToString()
+            self.redirect_proto(si, skeleton.services.add())
+        return skeleton
 
 ObjectFormatter.handlers[ServiceInstanceList] = ServiceInstanceListFormatter()
 
