@@ -20,6 +20,7 @@
 import os
 import csv
 import cStringIO
+import sys
 
 from mako.lookup import TemplateLookup
 
@@ -112,7 +113,6 @@ class ObjectFormatter(object):
     loaded for each requested protocol. Rather than trying to import one
     each time, the dict can be checked and value returned."""
     config = Config()
-    protodir = config.get("protocols", "directory")
 
     handlers = {}
 
@@ -139,26 +139,29 @@ class ObjectFormatter(object):
     lookup_html = TemplateLookup(directories=[os.path.join(mako_dir, "html")])
 
     def __init__(self):
-        if hasattr(self, "protocol"):
-            if not self.protocol in self.loaded_protocols:
-                try:
-                    self.loaded_protocols[self.protocol] = __import__(self.protocol)
-                except ImportError, e:  # pragma: no cover
-                    self.loaded_protocols[self.protocol] = False
-                    error = "path %s protocol: %s error: %s" % (self.protodir, self.protocol, e)
-                    raise ProtocolError(error)
-            else:  # pragma: no cover
-                if self.loaded_protocols[self.protocol] == False:
-                    error = "path %s protocol: %s error: previous import attempt was unsuccessful" % (self.protodir, self.protocol)
-                    raise ProtocolError(error)
+        if not hasattr(self, "protocol"):
+            return
 
-    def get_protocol(self):
-        if hasattr(self, "protocol"):
-            return self.protocol
+        if self.protocol in self.loaded_protocols:
+            if self.loaded_protocols[self.protocol] == False:
+                error = "Protocol %s: previous import attempt was unsuccessful" % self.protocol
+                raise ProtocolError(error)
+            return
 
-    def get_protocol_path(self):
-        if hasattr(self, "protodir"):
-            return self.protodir
+        protodir = self.config.get("protocols", "directory")
+
+        # Modifying sys.path here is ugly. We could try playing with
+        # find_module()/load_module(), but there are dependencies between the
+        # protocols, that could fail if sys.path is not set up and the protocols
+        # are loaded in the wrong order.
+        if protodir not in sys.path:
+            sys.path.append(protodir)
+
+        try:
+            self.loaded_protocols[self.protocol] = __import__(self.protocol)
+        except ImportError, err:  # pragma: no cover
+            self.loaded_protocols[self.protocol] = False
+            raise ProtocolError("Protocol %s: %s" % (self.protocol, err))
 
     def format_raw(self, result, indent=""):
         if hasattr(self, "template_raw"):
