@@ -52,7 +52,7 @@ import sys
 import os
 import xml.etree.ElementTree as ET
 
-from twisted.web import server, resource, http, static
+from twisted.web import server, resource, http
 from twisted.internet import defer, threads, reactor
 from twisted.python import log
 
@@ -387,6 +387,18 @@ class RestServer(ResponsePage):
                             pbt[paramtype].append(option_name)
                         else:
                             pbt[paramtype] = [option_name]
+
+                    for format in command.getiterator("format"):
+                        if "name" not in format.attrib:
+                            log.msg("Warning: incorrect format specification "
+                                    "for %s." % myinstance.command)
+                            continue
+
+                        style = format.attrib["name"]
+                        if hasattr(myinstance.formatter, "config_" + style):
+                            meth = getattr(myinstance.formatter, "config_" +
+                                           style)
+                            meth(format, myinstance.command)
 
         cache_version(config)
         log.msg("Starting aqd version %s" % config.get("broker", "version"))

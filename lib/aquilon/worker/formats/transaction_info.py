@@ -23,16 +23,8 @@ from aquilon.aqdb.model import Xtn
 
 
 class TransactionFormatter(ObjectFormatter):
-    """ Format a single transaction """
-    protocol = "aqdaudit_pb2"
-
-    def format_proto(self, xtn, skeleton=None):
-        container = skeleton
-        if not container:
-            myproto = self.loaded_protocols[self.protocol]
-            container = myproto.TransactionList()
-            skeleton = container.transactions.add()
-
+    def format_proto(self, xtn, container):
+        skeleton = container.transactions.add()
         skeleton.start_time = calendar.timegm(xtn.start_time.utctimetuple())
         skeleton.username = str(xtn.username)
         skeleton.command = str(xtn.command)
@@ -51,8 +43,6 @@ class TransactionFormatter(ObjectFormatter):
             arg.name = i.name
             arg.value = i.value
 
-        return container
-
 ObjectFormatter.handlers[Xtn] = TransactionFormatter()
 
 
@@ -62,16 +52,6 @@ class TransactionList(list):
 
 
 class TransactionListFormatter(ListFormatter):
-    """ Format lists of audit info """
-    protocol = "aqdaudit_pb2"
-
-    def format_proto(self, stlist, skeleton=None):
-        if not skeleton:
-            myproto = self.loaded_protocols[self.protocol]
-            skeleton = myproto.TransactionList()
-        for i in stlist:
-            self.redirect_proto(i, skeleton.transactions.add())
-        return skeleton
-
+    pass
 
 ObjectFormatter.handlers[TransactionList] = TransactionListFormatter()

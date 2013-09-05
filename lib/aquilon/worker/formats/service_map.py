@@ -23,20 +23,14 @@ from aquilon.aqdb.model import ServiceMap, PersonalityServiceMap
 
 
 class ServiceMapFormatter(ObjectFormatter):
-    protocol = "aqdservices_pb2"
-
     def format_raw(self, sm, indent=""):
         return indent + \
                 "Archetype: aquilon Service: %s Instance: %s Map: %s" % (
                 sm.service.name, sm.service_instance.name, format(sm.mapped_to))
 
-    def format_proto(self, sm, skeleton=None):
-        container = skeleton
-        if not container:
-            container = self.loaded_protocols[self.protocol].ServiceMapList()
-            skeleton = container.servicemaps.add()
+    def format_proto(self, sm, container):
+        skeleton = container.servicemaps.add()
         self.add_service_map_data(skeleton, sm)
-        return container
 
 ObjectFormatter.handlers[ServiceMap] = ServiceMapFormatter()
 
@@ -58,13 +52,6 @@ class ServiceMapList(list):
 
 
 class ServiceMapListFormatter(ListFormatter):
-    protocol = "aqdservices_pb2"
-
-    def format_proto(self, sml, skeleton=None):
-        if not skeleton:
-            skeleton = self.loaded_protocols[self.protocol].ServiceMapList()
-        for sm in sml:
-            self.redirect_proto(sm, skeleton.servicemaps.add())
-        return skeleton
+    pass
 
 ObjectFormatter.handlers[ServiceMapList] = ServiceMapListFormatter()

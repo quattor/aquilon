@@ -22,23 +22,17 @@ from aquilon.aqdb.model import ServiceAddress
 
 
 class ServiceAddressFormatter(ResourceFormatter):
-    protocol = "aqdsystems_pb2"
-
     def extra_details(self, srv, indent=""):
         details = []
         details.append(indent + "  Address: {0:a}".format(srv.dns_record))
         details.append(indent + "  Interfaces: %s" % ", ".join(srv.interfaces))
         return details
 
-    def format_proto(self, srv, skeleton=None):
-        container = skeleton
-        if not container:
-            container = self.loaded_protocols[self.protocol].ResourceList()
-            skeleton = container.resources.add()
+    def format_proto(self, srv, container):
+        skeleton = container.resources.add()
         self.add_resource_data(skeleton, srv)
         skeleton.service_address.ip = str(srv.dns_record.ip)
         skeleton.service_address.fqdn = str(srv.dns_record.fqdn)
         skeleton.service_address.interfaces.extend(srv.interfaces)
-        return container
 
 ObjectFormatter.handlers[ServiceAddress] = ServiceAddressFormatter()

@@ -24,13 +24,8 @@ from aquilon.worker.formats.list import ListFormatter
 # TODO: this formatter is kept only for the protobuf stuff, otherwise
 # MachineFormatter does everything
 class HostFormatter(ObjectFormatter):
-    protocol = "aqdsystems_pb2"
-
-    def format_proto(self, host, skeleton=None):
-        container = skeleton
-        if not container:
-            container = self.loaded_protocols[self.protocol].HostList()
-            skeleton = container.hosts.add()
+    def format_proto(self, host, container):
+        skeleton = container.hosts.add()
         self.add_host_data(skeleton, host)
         for si in host.services_used:
             srv_msg = skeleton.services_used.add()
@@ -40,7 +35,6 @@ class HostFormatter(ObjectFormatter):
             srv_msg = skeleton.services_provided.add()
             srv_msg.service = si.service.name
             srv_msg.instance = si.name
-        return container
 
     def format_raw(self, host, indent=""):
         return self.redirect_raw(host.machine, indent)
@@ -55,7 +49,6 @@ class SimpleHostList(list):
 
 
 class SimpleHostListFormatter(ListFormatter):
-    protocol = "aqdsystems_pb2"
     template_html = "simple_host_list.mako"
 
     def format_raw(self, shlist, indent=""):
@@ -64,13 +57,6 @@ class SimpleHostListFormatter(ListFormatter):
     # TODO: Should probably display some useful info...
     def csv_fields(self, host):
         return (host.fqdn,)
-
-    def format_proto(self, hostlist, skeleton=None):
-        if not skeleton:
-            skeleton = self.loaded_protocols[self.protocol].HostList()
-        for host in hostlist:
-            self.redirect_proto(host, skeleton.hosts.add())
-        return skeleton
 
 ObjectFormatter.handlers[SimpleHostList] = SimpleHostListFormatter()
 
@@ -81,8 +67,6 @@ class GrnHostList(list):
     pass
 
 class GrnHostListFormatter(ListFormatter):
-    protocol = "aqdsystems_pb2"
-
     def format_raw(self, shlist, indent=""):
         details = []
         for host in shlist:
@@ -109,11 +93,9 @@ class GrnHostListFormatter(ListFormatter):
                                             .format(grn_rec, target, inherited))
         return "\n".join(details)
 
-
-    def format_proto(self, hostlist, skeleton=None):
-        hostlist_msg = self.loaded_protocols[self.protocol].HostList()
+    def format_proto(self, hostlist, container):
         for host in hostlist:
-            msg = hostlist_msg.hosts.add()
+            msg = container.hosts.add()
             msg.hostname = str(host.machine.primary_name)
             msg.domain.name = str(host.branch.name)
             msg.domain.owner = str(host.branch.owner.name)
@@ -135,8 +117,6 @@ class GrnHostListFormatter(ListFormatter):
                     map = msg.eonid_maps.add()
                     map.target = target
                     map.eonid = grn_rec.eon_id
-
-        return hostlist_msg
 
 ObjectFormatter.handlers[GrnHostList] = GrnHostListFormatter()
 

@@ -91,8 +91,6 @@ def possible_mac_addresses(interface):
 
 
 class NetworkFormatter(ObjectFormatter):
-    protocol = "aqdnetworks_pb2"
-
     def format_raw(self, network, indent=""):
         netmask = network.netmask
         sysloc = network.location.sysloc()
@@ -250,13 +248,9 @@ class NetworkFormatter(ObjectFormatter):
             host_msg.dns_domain = str(dynhost.fqdn.dns_domain)
             host_msg.ip = str(dynhost.ip)
 
-    def format_proto(self, network, skeleton=None):
-        container = skeleton
-        if not container:
-            container = self.loaded_protocols[self.protocol].NetworkList()
-            skeleton = container.networks.add()
+    def format_proto(self, network, container):
+        skeleton = container.networks.add()
         self.add_net_data(skeleton, network)
-        return container
 
 ObjectFormatter.handlers[Network] = NetworkFormatter()
 
@@ -291,13 +285,6 @@ class NetworkHostListFormatter(ListFormatter):
                                    hw_ent, addr, iface, names))
         return "\n".join(details)
 
-    def format_proto(self, netlist, skeleton=None):
-        if not skeleton:
-            skeleton = self.loaded_protocols[self.protocol].NetworkList()
-        for network in netlist:
-            self.redirect_proto(network, skeleton.networks.add())
-        return skeleton
-
 ObjectFormatter.handlers[NetworkHostList] = NetworkHostListFormatter()
 
 
@@ -325,13 +312,6 @@ class SimpleNetworkListFormatter(ListFormatter):
                                                    "False",
                                                    str(network.comments)])))
         return "\n".join(details)
-
-    def format_proto(self, nlist, skeleton=None):
-        if not skeleton:
-            skeleton = self.loaded_protocols[self.protocol].NetworkList()
-        for n in nlist:
-            self.redirect_proto(n, skeleton.networks.add())
-        return skeleton
 
     def csv_fields(self, network):
         return (network.name, network.ip, network.netmask,

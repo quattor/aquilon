@@ -25,8 +25,6 @@ from aquilon.aqdb.data_sync.storage import (find_storage_data,
 
 
 class ServiceInstanceFormatter(ObjectFormatter):
-    protocol = "aqdservices_pb2"
-
     def format_raw(self, si, indent=""):
         details = [indent + "Service: %s Instance: %s"
                 % (si.service.name, si.name)]
@@ -48,13 +46,9 @@ class ServiceInstanceFormatter(ObjectFormatter):
             details.append(indent + "  Comments: %s" % si.comments)
         return "\n".join(details)
 
-    def format_proto(self, si, skeleton=None):
-        container = skeleton
-        if not container:
-            container = self.loaded_protocols[self.protocol].ServiceList()
-            skeleton = container.services.add()
+    def format_proto(self, si, container):
+        skeleton = container.services.add()
         self.add_service_data(skeleton, si.service, si)
-        return container
 
     # Applies to service_instance/share as well.
     @classmethod
@@ -77,14 +71,7 @@ class ServiceInstanceList(list):
 
 
 class ServiceInstanceListFormatter(ListFormatter):
-    protocol = "aqdservices_pb2"
-
-    def format_proto(self, sil, skeleton=None):
-        if not skeleton:
-            skeleton = self.loaded_protocols[self.protocol].ServiceList()
-        for si in sil:
-            self.redirect_proto(si, skeleton.services.add())
-        return skeleton
+    pass
 
 ObjectFormatter.handlers[ServiceInstanceList] = ServiceInstanceListFormatter()
 

@@ -163,6 +163,8 @@ class Command(Element):
                 self.optgroups.append(OptGroup(child))
             elif child.tag == 'transport':
                 self.transports.append(Transport(child))
+            elif child.tag in ['format', 'message_class']:
+                pass
             elif child.tag == etree.Comment:
                 pass
             else:

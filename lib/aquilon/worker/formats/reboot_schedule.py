@@ -22,8 +22,6 @@ from aquilon.aqdb.model import RebootSchedule
 
 
 class RebootScheduleFormatter(ResourceFormatter):
-    protocol = "aqdsystems_pb2"
-
     def extra_details(self, rs, indent=""):
         details = []
         details.append(indent + "  Week: {0.week}".format(rs))
@@ -31,15 +29,11 @@ class RebootScheduleFormatter(ResourceFormatter):
         details.append(indent + "  Time: {0.time}".format(rs))
         return details
 
-    def format_proto(self, rs, skeleton=None):
-        container = skeleton
-        if not container:
-            container = self.loaded_protocols[self.protocol].ResourceList()
-            skeleton = container.resources.add()
+    def format_proto(self, rs, container):
+        skeleton = container.resources.add()
         self.add_resource_data(skeleton, rs)
         skeleton.reboot_schedule.week = str(rs.week)
         skeleton.reboot_schedule.day = str(rs.day)
         skeleton.reboot_schedule.time = str(rs.time)
-        return container
 
 ObjectFormatter.handlers[RebootSchedule] = RebootScheduleFormatter()

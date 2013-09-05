@@ -23,8 +23,6 @@ from aquilon.aqdb.model import Location, Rack, Building
 
 
 class LocationFormatter(ObjectFormatter):
-    protocol = "aqdlocations_pb2"
-
     def format_raw(self, location, indent=""):
         details = [indent + "{0:c}: {0.name}".format(location)]
         if location.fullname:
@@ -48,11 +46,8 @@ class LocationFormatter(ObjectFormatter):
                            location.default_dns_domain)
         return "\n".join(details)
 
-    def format_proto(self, loc, skeleton=None):
-        container = skeleton
-        if not container:
-            container = self.loaded_protocols[self.protocol].LocationList()
-            skeleton = container.locations.add()
+    def format_proto(self, loc, container):
+        skeleton = container.locations.add()
         skeleton.name = str(loc.name)
         skeleton.location_type = str(loc.location_type)
         skeleton.fullname = str(loc.fullname)
@@ -66,7 +61,6 @@ class LocationFormatter(ObjectFormatter):
             parent = skeleton.parents.add()
             parent.name = p.name
             parent.location_type = p.location_type
-        return container
 
     def csv_fields(self, location):
         details = [location.location_type, location.name]
@@ -99,14 +93,7 @@ class LocationList(list):
 
 
 class LocationListFormatter(ListFormatter):
-    protocol = "aqdlocations_pb2"
-
-    def format_proto(self, result, skeleton=None):
-        if not skeleton:
-            skeleton = self.loaded_protocols[self.protocol].LocationList()
-        for loc in result:
-            self.redirect_proto(loc, skeleton.locations.add())
-        return skeleton
+    pass
 
 for location_type, mapper in Location.__mapper__.polymorphic_map.items():
     ObjectFormatter.handlers[mapper.class_] = LocationFormatter()

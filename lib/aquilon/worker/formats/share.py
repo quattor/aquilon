@@ -33,16 +33,12 @@ class ShareFormatter(ResourceFormatter):
 
         return details
 
-    def format_proto(self, share, skeleton=None):
-        container = skeleton
-        if not container:
-            container = self.loaded_protocols[self.protocol].ResourceList()
-            skeleton = container.resources.add()
+    def format_proto(self, share, container):
+        skeleton = container.resources.add()
         self.add_resource_data(skeleton, share)
         skeleton.share.server = share.server
         skeleton.share.mount = share.mount
         skeleton.share.disk_count = share.disk_count
         skeleton.share.machine_count = share.machine_count
-        return container
 
 ObjectFormatter.handlers[Share] = ShareFormatter()

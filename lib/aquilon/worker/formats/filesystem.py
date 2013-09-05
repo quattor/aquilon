@@ -22,8 +22,6 @@ from aquilon.aqdb.model import Filesystem
 
 
 class FilesystemFormatter(ResourceFormatter):
-    protocol = "aqdsystems_pb2"
-
     def extra_details(self, fs, indent=""):
         details = []
         details.append(indent + "  Block Device: %s" % fs.blockdev)
@@ -36,11 +34,8 @@ class FilesystemFormatter(ResourceFormatter):
         details.append(indent + "  Virtual Disk Count: %d" % fs.virtual_disk_count)
         return details
 
-    def format_proto(self, fs, skeleton=None):
-        container = skeleton
-        if not container:
-            container = self.loaded_protocols[self.protocol].ResourceList()
-            skeleton = container.resources.add()
+    def format_proto(self, fs, container):
+        skeleton = container.resources.add()
         self.add_resource_data(skeleton, fs)
         skeleton.fsdata.mount = fs.mount
         skeleton.fsdata.fstype = str(fs.fstype)
@@ -49,6 +44,5 @@ class FilesystemFormatter(ResourceFormatter):
         skeleton.fsdata.opts = str(fs.mountoptions)
         skeleton.fsdata.freq = fs.dumpfreq
         skeleton.fsdata.passno = fs.passno
-        return container
 
 ObjectFormatter.handlers[Filesystem] = FilesystemFormatter()

@@ -42,6 +42,45 @@ class ResponseFormatter(object):
     """
     formats = ["raw", "csv", "html", "proto", "djb"]
 
+    loaded_protocols = {}
+
+    def __init__(self):
+        self.protobuf_container = None
+
+    def config_proto(self, node, command):
+        desc_node = node.find("message_class")
+        if desc_node is None or "name" not in desc_node.attrib or \
+           "module" not in desc_node.attrib:
+            raise ProtocolError("Invalid protobuf definition for %s." % command)
+
+        module = desc_node.attrib["module"]
+        msgclass = desc_node.attrib["name"]
+
+        if module in self.loaded_protocols and \
+           self.loaded_protocols[module] == False:
+            raise ProtocolError("Protocol %s: previous import attempt was "
+                                "unsuccessful" % module)
+
+        if module not in self.loaded_protocols:
+            config = Config()
+            protodir = config.get("protocols", "directory")
+
+            # Modifying sys.path here is ugly. We could try playing with
+            # find_module()/load_module(), but there are dependencies between
+            # the protocols, that could fail if sys.path is not set up and the
+            # protocols are loaded in the wrong order.
+            if protodir not in sys.path:
+                sys.path.append(protodir)
+
+            try:
+                self.loaded_protocols[module] = __import__(module)
+            except ImportError, err:  # pragma: no cover
+                self.loaded_protocols[module] = False
+                raise ProtocolError("Protocol %s: %s" % (module, err))
+
+        self.protobuf_container = getattr(self.loaded_protocols[module],
+                                          msgclass)
+
     def format(self, style, result, request):
         """The main entry point - it is expected that any consumers call
             this method and let the magic happen.
@@ -61,23 +100,11 @@ class ResponseFormatter(object):
         return ObjectFormatter.redirect_djb(result)
 
     def format_proto(self, result, request):
-        """This implementation is very similar to format_raw.
-
-        The result should just always be set up so that we can serialize
-        it here and return that string.  Howver, there is still code
-        from the original implementation that has already done that
-        before we get here.
-
-        Also of concern is that some/many of the current protobuf
-        formatters are unimplemented and will return raw output.
-        The check for a SerializeToString method may be left here to
-        handle those cases.
-
-        """
-        res = ObjectFormatter.redirect_proto(result)
-        if hasattr(res, "SerializeToString"):
-            return res.SerializeToString()
-        return res
+        if not self.protobuf_container:
+            raise ProtocolError("Protobuf formatter is not available")
+        container = self.protobuf_container()
+        ObjectFormatter.redirect_proto(result, container)
+        return container.SerializeToString()
 
     def format_html(self, result, request):
         if request.code and request.code >= 300:
@@ -107,11 +134,6 @@ class ObjectFormatter(object):
         useful information.
      """
 
-    loaded_protocols = {}
-
-    """The loaded_protocols dict will store the modules that are being
-    loaded for each requested protocol. Rather than trying to import one
-    each time, the dict can be checked and value returned."""
     config = Config()
 
     handlers = {}
@@ -137,31 +159,6 @@ class ObjectFormatter(object):
                                          'import shift'],
                                 default_filters=['unicode', 'rstrip'])
     lookup_html = TemplateLookup(directories=[os.path.join(mako_dir, "html")])
-
-    def __init__(self):
-        if not hasattr(self, "protocol"):
-            return
-
-        if self.protocol in self.loaded_protocols:
-            if self.loaded_protocols[self.protocol] == False:
-                error = "Protocol %s: previous import attempt was unsuccessful" % self.protocol
-                raise ProtocolError(error)
-            return
-
-        protodir = self.config.get("protocols", "directory")
-
-        # Modifying sys.path here is ugly. We could try playing with
-        # find_module()/load_module(), but there are dependencies between the
-        # protocols, that could fail if sys.path is not set up and the protocols
-        # are loaded in the wrong order.
-        if protodir not in sys.path:
-            sys.path.append(protodir)
-
-        try:
-            self.loaded_protocols[self.protocol] = __import__(self.protocol)
-        except ImportError, err:  # pragma: no cover
-            self.loaded_protocols[self.protocol] = False
-            raise ProtocolError("Protocol %s: %s" % (self.protocol, err))
 
     def format_raw(self, result, indent=""):
         if hasattr(self, "template_raw"):
@@ -209,8 +206,9 @@ class ObjectFormatter(object):
         # We get here if the command throws an exception
         return self.format_raw(result)
 
-    def format_proto(self, result, skeleton=None):
-        return self.format_raw(result)
+    def format_proto(self, result, container):  # pylint: disable=W0613
+        # There's no default protobuf message type
+        raise ProtocolError("Protobuf formatter is not available")
 
     def format_html(self, result):
         if hasattr(self, "template_html"):
@@ -243,10 +241,10 @@ class ObjectFormatter(object):
         return handler.format_html(result)
 
     @staticmethod
-    def redirect_proto(result, skeleton=None):
+    def redirect_proto(result, container):
         handler = ObjectFormatter.handlers.get(result.__class__,
                                                ObjectFormatter.default_handler)
-        return handler.format_proto(result, skeleton)
+        handler.format_proto(result, container)
 
     def add_hardware_data(self, host_msg, hwent):
         host_msg.machine.name = str(hwent.label)
@@ -330,8 +328,7 @@ class ObjectFormatter(object):
 
         if host.resholder and len(host.resholder.resources) > 0:
             for resource in host.resholder.resources:
-                r = host_msg.resources.add()
-                self.redirect_proto(resource, r)
+                self.redirect_proto(resource, host_msg)
 
         # FIXME: Add branch type and sandbox author to protobufs.
         host_msg.domain.name = str(host.branch.name)

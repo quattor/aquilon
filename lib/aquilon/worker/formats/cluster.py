@@ -24,13 +24,8 @@ from aquilon.aqdb.model import (Cluster, EsxCluster, ComputeCluster,
 
 
 class ClusterFormatter(ObjectFormatter):
-    protocol = "aqdsystems_pb2"
-
-    def format_proto(self, cluster, skeleton):
-        container = skeleton
-        if not container:
-            container = self.loaded_protocols[self.protocol].ClusterList()
-            skeleton = container.clusters.add()
+    def format_proto(self, cluster, container):
+        skeleton = container.clusters.add()
         skeleton.name = str(cluster.name)
         skeleton.status = str(cluster.status)
         self.add_personality_data(skeleton.personality, cluster.personality)
@@ -49,8 +44,7 @@ class ClusterFormatter(ObjectFormatter):
 
         if cluster.resholder and len(cluster.resholder.resources) > 0:
             for resource in cluster.resholder.resources:
-                r = skeleton.resources.add()
-                self.redirect_proto(resource, r)
+                self.redirect_proto(resource, skeleton)
 
         for dbsi in cluster.service_bindings:
             # Should be just 'services', but that would change the protocol.
@@ -86,8 +80,6 @@ class ClusterFormatter(ObjectFormatter):
 
         if cluster.max_hosts:
             skeleton.max_members = cluster.max_hosts
-
-        return container
 
     def format_raw(self, cluster, indent=""):
         details = [indent + "{0:c}: {0.name}".format(cluster)]
@@ -199,14 +191,7 @@ class ClusterList(list):
 
 
 class ClusterListFormatter(ListFormatter):
-    protocol = "aqdsystems_pb2"
-
-    def format_proto(self, cluslist, skeleton=None):
-        if not skeleton:
-            skeleton = self.loaded_protocols[self.protocol].ClusterList()
-        for resource in cluslist:
-            self.redirect_proto(resource, skeleton.clusters.add())
-        return skeleton
+    pass
 
 
 ObjectFormatter.handlers[ClusterList] = ClusterListFormatter()

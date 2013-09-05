@@ -24,8 +24,6 @@ from aquilon.aqdb.model import ResourceGroup
 
 
 class ResourceGroupFormatter(ResourceFormatter):
-    protocol = "aqdsystems_pb2"
-
     def extra_details(self, rg, indent=""):
         details = []
         if rg.required_type:
@@ -38,18 +36,13 @@ class ResourceGroupFormatter(ResourceFormatter):
 
         return details
 
-    def format_proto(self, rg, skeleton=None):
-        container = skeleton
-        if not container:
-            container = self.loaded_protocols[self.protocol].ResourceList()
-            skeleton = container.resources.add()
+    def format_proto(self, rg, container):
+        skeleton = container.resources.add()
         self.add_resource_data(skeleton, rg)
         if rg.required_type:
             skeleton.resourcegroup.required_type = rg.required_type
         if rg.resholder and rg.resholder.resources:
             for resource in rg.resholder.resources:
-                r = skeleton.resourcegroup.resources.add()
-                self.redirect_proto(resource, r)
-        return container
+                self.redirect_proto(resource, skeleton.resourcegroup)
 
 ObjectFormatter.handlers[ResourceGroup] = ResourceGroupFormatter()

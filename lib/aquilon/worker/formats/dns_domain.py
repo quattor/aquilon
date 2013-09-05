@@ -59,6 +59,9 @@ class DnsDomainFormatter(ObjectFormatter):
         # are *not* included by the association proxy
         return msg
 
+    def format_proto(self, dns_domain, container):
+        skeleton = container.dns_domains.add()
+        self.add_dns_domain_data(skeleton, dns_domain)
 
 class DNSDomainList(list):
     """By convention, holds DnsDomain objects."""
@@ -66,19 +69,7 @@ class DNSDomainList(list):
 
 
 class DNSDomainListFormatter(ListFormatter):
-
-    protocol = "aqddnsdomains_pb2"
-
-    def format_proto(self, dns_domain_list, skeleton=None):
-        dns_domain_list_msg = \
-                self.loaded_protocols[self.protocol].DNSDomainList()
-        for dns_domain in dns_domain_list:
-            msg = dns_domain_list_msg.dns_domains.add()
-            self.add_dns_domain_data(msg, dns_domain)
-        return dns_domain_list_msg.SerializeToString()
-
-    def csv_fields(self, dns_domain):
-        return (dns_domain.name, dns_domain.comments)
+    pass
 
 ObjectFormatter.handlers[DnsDomain] = DnsDomainFormatter()
 ObjectFormatter.handlers[DNSDomainList] = DNSDomainListFormatter()

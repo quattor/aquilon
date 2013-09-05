@@ -72,10 +72,9 @@ class ListFormatter(ObjectFormatter):
     def format_djb(self, result):
         return "\n".join([self.redirect_djb(item) for item in result])
 
-    def format_proto(self, result, skeleton=None):
+    def format_proto(self, result, container):
         for item in result:
-            skeleton = self.redirect_proto(item, skeleton)
-        return skeleton
+            self.redirect_proto(item, container)
 
 ObjectFormatter.handlers[list] = ListFormatter()
 ObjectFormatter.handlers[Query] = ListFormatter()
