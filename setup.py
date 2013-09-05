@@ -43,6 +43,24 @@ def get_version():
             else:
                 raise
 
+def find_packages(path):
+    """Finds all the Python packages under path"""
+    n = len(path)+1
+    l = []
+    for dirpath, dirnames, filenames in os.walk(path):
+        for d in dirnames:
+            base = dirpath[n:].replace(os.path.sep, ".")
+            base = base.strip()
+            if base:
+                m = '.'.join([base, d])
+            else:
+                m = d
+            l.append(m)
+    return l
+
+all_packages = find_packages("lib/python2.6")
+all_packages.extend(find_packages("bootstrap/bootstrap_ms"))
+
 setup(name="aquilon",
       version=get_version(),
       description="Aquilon",
@@ -50,10 +68,10 @@ setup(name="aquilon",
       license="Apache 2.0",
       author="Quattor collaboration",
       author_email="quattor-aquilon@lists.sourceforge.net",
-      package_dir={'' : 'lib/python2.6',
+      package_dir={'aquilon' : 'lib/python2.6/aquilon',
+                   'twisted' : 'lib/python2.6/twisted',
                    'ms': 'bootstrap/bootstrap_ms/ms'},
-      packages=["aquilon", "aquilon.client", "aquilon.worker", "aquilon.aqdb",
-                "twisted.plugins", "ms", "ms.version", "ms.modulecmd"],
+      packages=all_packages,
       cmdclass = {"install_scripts" : install_init_d_stuff},
       data_files=[("/usr/share/aquilon/etc", glob.glob("etc/*.conf*")),
                   ("/etc/aquilon", glob.glob("etc/*.xml")),
