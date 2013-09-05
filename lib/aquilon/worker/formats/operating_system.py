@@ -41,9 +41,7 @@ class OSFormatter(ObjectFormatter):
             myproto = self.loaded_protocols[self.protocol]
             container = myproto.OperatingSystemList()
             skeleton = container.operating_systems.add()
-        skeleton.name = str(os.name)
-        skeleton.version = str(os.version)
-        self.redirect_proto(os.archetype, skeleton.archetype)
+        self.add_os_data(skeleton, os)
         return container
 
 ObjectFormatter.handlers[OperatingSystem] = OSFormatter()

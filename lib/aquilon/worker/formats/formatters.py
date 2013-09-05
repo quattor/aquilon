@@ -303,6 +303,12 @@ class ObjectFormatter(object):
         msg.host_environment = str(personality.host_environment)
         msg.owner_eonid = personality.owner_eon_id
 
+    def add_os_data(self, msg, operating_system):
+        msg.name = str(operating_system.name)
+        msg.version = str(operating_system.version)
+        # We don't need the services here, so don't call add_archetype_data()
+        msg.archetype.name = str(operating_system.archetype.name)
+
     def add_host_data(self, host_msg, host):
         """ Return a host message.
 
@@ -334,7 +340,7 @@ class ObjectFormatter(object):
         host_msg.owner_eonid = host.effective_owner_grn.eon_id
         self.add_personality_data(host_msg.personality, host.personality)
         self.add_archetype_data(host_msg.archetype, host.archetype)
-        self.redirect_proto(host.operating_system, host_msg.operating_system)
+        self.add_os_data(host_msg.operating_system, host.operating_system)
         self.add_hardware_data(host_msg, host.machine)
 
     def add_dns_domain_data(self, dns_domain_msg, dns_domain):
