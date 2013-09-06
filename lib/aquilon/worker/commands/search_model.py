@@ -16,12 +16,11 @@
 # limitations under the License.
 """Contains the logic for `aq search model`."""
 
-
 from sqlalchemy.orm import aliased, joinedload, contains_eager
 
 from aquilon.aqdb.model import Model, Vendor, Cpu, MachineSpecs
 from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.formats.model import SimpleModelList
+from aquilon.worker.formats.list import StringAttributeList
 
 
 class CommandSearchModel(BrokerCommand):
@@ -89,4 +88,6 @@ class CommandSearchModel(BrokerCommand):
         if fullinfo or style != 'raw':
             return q.all()
         else:
-            return SimpleModelList(q.all())
+            return StringAttributeList(q.all(),
+                                       lambda x: "%s/%s" % (x.vendor.name,
+                                                            x.name))

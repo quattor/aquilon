@@ -18,10 +18,10 @@
 
 from sqlalchemy.orm import subqueryload, joinedload, contains_eager, undefer
 
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.formats.switch import SimpleSwitchList
 from aquilon.aqdb.model import Switch, DnsRecord, Fqdn, DnsDomain
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.hardware_entity import search_hardware_entity_query
+from aquilon.worker.formats.list import StringAttributeList
 
 
 class CommandSearchSwitch(BrokerCommand):
@@ -66,4 +66,4 @@ class CommandSearchSwitch(BrokerCommand):
                           # checks for their existence anyway
                           joinedload('model.machine_specs'))
             return q.all()
-        return SimpleSwitchList(q.all())
+        return StringAttributeList(q.all(), "printable_name")

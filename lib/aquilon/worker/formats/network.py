@@ -324,20 +324,3 @@ class SimpleNetworkListFormatter(ListFormatter):
             % {"ip": n.ip} for n in nlist])
 
 ObjectFormatter.handlers[SimpleNetworkList] = SimpleNetworkListFormatter()
-
-
-class ShortNetworkList(list):
-    """By convention, holds a list of networks to be formatted.
-
-    The format is just the IP and mask.
-
-    """
-    pass
-
-
-class ShortNetworkListFormatter(SimpleNetworkListFormatter):
-
-    def format_raw(self, nlist, indent=""):
-        return "\n".join(["%s/%s" % (n.ip, n.cidr) for n in nlist])
-
-ObjectFormatter.handlers[ShortNetworkList] = ShortNetworkListFormatter()

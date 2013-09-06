@@ -17,18 +17,17 @@
 # limitations under the License.
 """contains logic for aq search rack"""
 
-
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.formats.location import SimpleLocationList
-from aquilon.worker.dbwrappers.location import get_location
 from aquilon.aqdb.model import Location, Rack
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.dbwrappers.location import get_location
+from aquilon.worker.formats.list import StringAttributeList
 
 
 class CommandSearchRack(BrokerCommand):
 
     required_parameters = []
 
-    def render(self, session, logger, rack, row, column, fullinfo, **arguments):
+    def render(self, session, rack, row, column, fullinfo, **arguments):
 
         dbparent = get_location(session, **arguments)
         q = session.query(Rack)
@@ -47,4 +46,4 @@ class CommandSearchRack(BrokerCommand):
 
         if fullinfo:
             return q.all()
-        return SimpleLocationList(q.all())
+        return StringAttributeList(q.all(), "name")

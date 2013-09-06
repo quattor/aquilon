@@ -42,25 +42,6 @@ class HostFormatter(ObjectFormatter):
 ObjectFormatter.handlers[Host] = HostFormatter()
 
 
-class SimpleHostList(list):
-    """By convention, holds a list of hosts to be formatted in a simple
-       (fqdn-only) manner."""
-    pass
-
-
-class SimpleHostListFormatter(ListFormatter):
-    template_html = "simple_host_list.mako"
-
-    def format_raw(self, shlist, indent=""):
-        return str("\n".join([indent + host.fqdn for host in shlist]))
-
-    # TODO: Should probably display some useful info...
-    def csv_fields(self, host):
-        return (host.fqdn,)
-
-ObjectFormatter.handlers[SimpleHostList] = SimpleHostListFormatter()
-
-
 class GrnHostList(list):
     """By convention, holds a list of hosts to be formatted to provide
        (grn-only) data."""
@@ -119,6 +100,7 @@ class GrnHostListFormatter(ListFormatter):
                     map.eonid = grn_rec.eon_id
 
 ObjectFormatter.handlers[GrnHostList] = GrnHostListFormatter()
+
 
 class HostIPList(list):
     """ By convention, holds tuples of host_name, interface_ip, primary.

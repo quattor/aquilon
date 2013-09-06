@@ -21,7 +21,7 @@ from sqlalchemy.sql import or_
 
 from aquilon.exceptions_ import NotFoundException
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.formats.cluster import SimpleClusterList
+from aquilon.worker.formats.list import StringAttributeList
 from aquilon.aqdb.model import (Cluster, EsxCluster, MetaCluster, Archetype,
                                 Personality, Machine, Switch, ClusterLifecycle,
                                 Service, ServiceInstance, Share,
@@ -257,4 +257,4 @@ class CommandSearchCluster(BrokerCommand):
 
         if fullinfo:
             return q.all()
-        return SimpleClusterList(q.all())
+        return StringAttributeList(q.all(), "name")

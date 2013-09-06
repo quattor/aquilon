@@ -17,10 +17,9 @@
 
 from operator import attrgetter
 
-from aquilon.worker.formats.formatters import ObjectFormatter
-from aquilon.worker.formats.list import ListFormatter
 from aquilon.aqdb.model import (Cluster, EsxCluster, ComputeCluster,
                                 StorageCluster)
+from aquilon.worker.formats.formatters import ObjectFormatter
 
 
 class ClusterFormatter(ObjectFormatter):
@@ -170,16 +169,3 @@ ObjectFormatter.handlers[Cluster] = ClusterFormatter()
 ObjectFormatter.handlers[EsxCluster] = ClusterFormatter()
 ObjectFormatter.handlers[ComputeCluster] = ClusterFormatter()
 ObjectFormatter.handlers[StorageCluster] = ClusterFormatter()
-
-
-class SimpleClusterList(list):
-    """By convention, holds a list of clusters to be formatted in a simple
-       (name-only) manner."""
-    pass
-
-
-class SimpleClusterListFormatter(ListFormatter):
-    def format_raw(self, sclist, indent=""):
-        return str("\n".join([indent + cluster.name for cluster in sclist]))
-
-ObjectFormatter.handlers[SimpleClusterList] = SimpleClusterListFormatter()

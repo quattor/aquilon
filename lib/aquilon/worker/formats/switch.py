@@ -16,10 +16,8 @@
 # limitations under the License.
 """Switch formatter."""
 
-
-from aquilon.worker.formats.formatters import ObjectFormatter
-from aquilon.worker.formats.list import ListFormatter
 from aquilon.aqdb.model import Switch
+from aquilon.worker.formats.formatters import ObjectFormatter
 
 
 class SwitchInterfaceTuple(tuple):
@@ -92,14 +90,3 @@ class SwitchFormatter(ObjectFormatter):
         return f.csv_fields(item)
 
 ObjectFormatter.handlers[Switch] = SwitchFormatter()
-
-
-class SimpleSwitchList(list):
-    pass
-
-
-class SimpleSwitchListFormatter(ListFormatter):
-    def format_raw(self, objects, indent=""):
-        return "\n".join([indent + str(obj.fqdn) for obj in objects])
-
-ObjectFormatter.handlers[SimpleSwitchList] = SimpleSwitchListFormatter()
