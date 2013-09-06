@@ -19,7 +19,7 @@ import ms.version
 import ms.modulecmd
 
 ms.modulecmd.load('fsf/libtool/1.5.18')
-ms.modulecmd.load('fsf/graphviz/2.24.0')
+ms.modulecmd.load('fsf/graphviz/2.28.0')
 
 ms.version.addpkg('pyparsing', '1.5.5')  # pydot relies on pyparsing
 ms.version.addpkg('pydot', '1.0.2')
@@ -151,21 +151,6 @@ def create_schema_graph(tables=None, metadata=None, show_datatypes=False,
             graph_edge.set_parent_graph(graph.get_parent_graph)
             graph.add_edge(graph_edge)
     return graph
-
-
-def write_schema_dot(meta, file_name='/tmp/aqdb_schema.dot'):
-    create_schema_graph(metadata=meta).write(file_name)
-
-
-def write_uml_png(file_name='/tmp/aqdb_uml.png'):
-    r = Base._decl_class_registry
-    g = create_uml_graph([class_mapper(c) for c in r.itervalues()])
-    g.write_png(file_name)
-
-
-def write_schema_png(meta, file_name="/tmp/aqdb_schema.png"):
-    create_schema_graph(metadata=meta).write_png(file_name)
-
 
 def _render_table_record(table, show_datatypes=False):
     def format_col_type(col):
