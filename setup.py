@@ -60,6 +60,8 @@ def find_packages(path):
 
 all_packages = find_packages("lib/python2.6")
 all_packages.extend(find_packages("bootstrap/bootstrap_ms"))
+all_scripts = glob.glob(os.path.join("bin", "a*"))
+all_scripts.extend(glob.glob(os.path.join("bootstrap", "*.py")))
 
 setup(name="aquilon",
       version=get_version(),
@@ -76,6 +78,5 @@ setup(name="aquilon",
       data_files=[("/usr/share/aquilon/etc", glob.glob("etc/*.conf*")),
                   ("/etc/aquilon", glob.glob("etc/*.xml")),
                   ("/etc/init.d", ["etc/rc.d/init.d/aqd"])],
-
-      scripts=glob.glob(os.path.join("bin", "a*")),
+      scripts=all_scripts,
       url="http://quattor.org")
