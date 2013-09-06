@@ -33,7 +33,7 @@ start() {
             RETVAL=1
             failure
         else
-            su -s /bin/bash aquilon "PYTHONPATH=/usr/lib*/python*/site-packages/SQLAlch*egg/ $py_bin $twistd --logfile=$logfile --pidfile=$pidfile aqd --config=$conffile"
+            su -s /bin/bash aquilon -c "PYTHONPATH=/usr/lib*/python*/site-packages/SQLAlch*egg/ $py_bin $twistd --logfile=$logfile --pidfile=$pidfile aqd --config=$conffile"
             RETVAL=$?
             if [[ $RETVAL -eq 0 ]]; then
                 touch $lockfile
