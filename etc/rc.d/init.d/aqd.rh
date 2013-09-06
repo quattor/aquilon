@@ -25,6 +25,7 @@ conffile="/etc/aqd.conf"
 logfile=/var/log/aqd.log
 lockfile=/var/lock/subsys/aqd
 py_bin=/usr/bin/python
+export PYTHONPATH=/usr/lib*/python*/site-packages/SQLAlch*egg/
 
 start() {
     if [[ -x $py_bin ]]; then
