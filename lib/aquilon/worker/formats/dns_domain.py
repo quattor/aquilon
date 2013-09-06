@@ -17,7 +17,6 @@
 """DNS Domain formatter."""
 
 from aquilon.worker.formats.formatters import ObjectFormatter
-from aquilon.worker.formats.list import ListFormatter
 from aquilon.aqdb.model import DnsDomain
 
 
@@ -40,23 +39,6 @@ class DnsDomainFormatter(ObjectFormatter):
 
     def csv_fields(self, dns_domain):
         return (dns_domain.name, dns_domain.comments)
-
-    def format_djb(self, dns_domain):
-        """ djb format for ns records copied from existing data.header """
-        msg = ''
-        lf = ListFormatter()
-        if len(dns_domain._ns_records) > 0:
-            msg += ''.join([msg, lf.format_djb(dns_domain._ns_records)])
-        #NOTE: This is VASTLY incomplete as yet. This will provide a full dump
-        # a dns domain in the future
-
-        #TODO: include SOA information
-        #TODO: when association proxy to System or DnsRecord table, then
-        #msg = ''.join([msg, lf.format_djb(dns_domain.dns_records)])
-        # will provide a full domain dump into djb. Also include all other
-        # records like SRVs, MXes, etc., while ensuring that reserved hosts
-        # are *not* included by the association proxy
-        return msg
 
     def format_proto(self, dns_domain, container):
         skeleton = container.dns_domains.add()
