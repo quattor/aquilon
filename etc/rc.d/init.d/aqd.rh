@@ -27,15 +27,13 @@ lockfile=/var/lock/subsys/aqd
 py_bin=/usr/bin/python
 
 start() {
-    export PYTHONPATH=/usr/lib*/python*/site-packages/SQLAlch*egg/
-    echo $PYTHONPATH
     if [[ -x $py_bin ]]; then
         echo -n "Starting aquilon broker: "
         if [[ $UID -ne 0 ]]; then
             RETVAL=1
             failure
         else
-            $py_bin $twistd --logfile=$logfile --pidfile=$pidfile aqd --config=$conffile
+            su -s /bin/bash aquilon "PYTHONPATH=/usr/lib*/python*/site-packages/SQLAlch*egg/ $py_bin $twistd --logfile=$logfile --pidfile=$pidfile aqd --config=$conffile"
             RETVAL=$?
             if [[ $RETVAL -eq 0 ]]; then
                 touch $lockfile
