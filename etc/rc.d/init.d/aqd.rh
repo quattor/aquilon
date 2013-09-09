@@ -22,7 +22,7 @@ prog="aqd"
 pidfile=/var/run/aqd.pid
 twistd=/usr/bin/twistd
 conffile="/etc/aqd.conf"
-logfile=/var/log/aqd.log
+logfile=/var/log/aquilon/aqd.log
 lockfile=/var/lock/subsys/aqd
 py_bin=/usr/bin/python
 
