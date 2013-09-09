@@ -19,11 +19,13 @@
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import (Cpu, Chassis, ChassisSlot, Model, Cluster,
-                                Machine, BundleResource, VirtualDisk)
+                                Machine, BundleResource,
+                                VirtualDisk, VirtualLocalDisk,
+                                Filesystem, Share)
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.hardware_entity import update_primary_ip
 from aquilon.worker.dbwrappers.location import get_location
-from aquilon.worker.dbwrappers.resources import (find_share,
+from aquilon.worker.dbwrappers.resources import (find_resource,
                                                  get_resource_holder)
 from aquilon.worker.templates import (Plenary, PlenaryCollection,
                                       PlenaryHostData)
@@ -33,6 +35,18 @@ from aquilon.worker.processes import DSDBRunner
 class CommandUpdateMachine(BrokerCommand):
 
     required_parameters = ["machine"]
+
+    # handles clusters and hosts
+    def get_metacluster(self, holder):
+        if hasattr(holder, "metacluster"):
+            return holder.metacluster
+
+        # vmhost
+        if holder.cluster:
+            return holder.cluster.metacluster
+        else:
+            # TODO vlocal still has clusters, so this case not tested yet.
+            return None
 
     def render(self, session, logger, machine, model, vendor, serial,
                chassis, slot, clearchassis, multislot,
@@ -161,19 +175,12 @@ class CommandUpdateMachine(BrokerCommand):
                                             cluster=cluster, compel=False)
             new_holder = resholder.holder_object
 
-            # TODO: do we want to allow moving machines between the cluster and
-            # metacluster level?
-            if new_holder.__class__ != old_holder.__class__:
-                raise ArgumentError("Cannot move a VM between a cluster and a "
-                                    "stand-alone host.")
-
-            if cluster:
-                if new_holder.metacluster != old_holder.metacluster \
-                   and not allow_metacluster_change:
-                    raise ArgumentError("Current {0:l} does not match "
-                                        "new {1:l}."
-                                        .format(old_holder.metacluster,
-                                                new_holder.metacluster))
+            if self.get_metacluster(new_holder) != self.get_metacluster(old_holder) \
+               and not allow_metacluster_change:
+                raise ArgumentError("Current {0:l} does not match "
+                                    "new {1:l}."
+                                    .format(self.get_metacluster(old_holder),
+                                            self.get_metacluster(new_holder)))
 
             plenaries.append(Plenary.get_plenary(old_holder))
             plenaries.append(Plenary.get_plenary(new_holder))
@@ -181,27 +188,39 @@ class CommandUpdateMachine(BrokerCommand):
             dbmachine.vm_container.holder = resholder
 
             for dbdisk in dbmachine.disks:
-                if not isinstance(dbdisk, VirtualDisk):
-                    continue
-                old_share = dbdisk.share
-                if isinstance(old_share.holder, BundleResource):
-                    resourcegroup = old_share.holder.holder_name
-                else:
-                    resourcegroup = None
-                new_share = find_share(new_holder, resourcegroup, old_share.name,
-                                       error=ArgumentError)
+                if isinstance(dbdisk, VirtualDisk):
+                    old_share = dbdisk.share
+                    if isinstance(old_share.holder, BundleResource):
+                        resourcegroup = old_share.holder.resourcegroup.name
+                    else:
+                        resourcegroup = None
 
-                # If the shares are registered at the metacluster level and both
-                # clusters are in the same metacluster, then there will be no
-                # real change here
-                if new_share != old_share:
-                    old_share.disks.remove(dbdisk)
-                    new_share.disks.append(dbdisk)
+                    new_share = find_resource(Share, new_holder, resourcegroup, old_share.name,
+                                           error=ArgumentError)
+
+                    # If the shares are registered at the metacluster level and both
+                    # clusters are in the same metacluster, then there will be no
+                    # real change here
+                    if new_share != old_share:
+                        old_share.disks.remove(dbdisk)
+                        new_share.disks.append(dbdisk)
+
+                if isinstance(dbdisk, VirtualLocalDisk):
+                    old_filesystem = dbdisk.filesystem
+
+                    new_filesystem = find_resource(Filesystem, new_holder, None,
+                                                   old_filesystem.name,
+                                                   error=ArgumentError)
+
+                    if new_filesystem != old_filesystem:
+                        old_filesystem.disks.remove(dbdisk)
+                        new_filesystem.disks.append(dbdisk)
 
             if isinstance(new_holder, Cluster):
                 dbmachine.location = new_holder.location_constraint
             else:
-                dbmachine.location = new_holder.location
+                # vmhost
+                dbmachine.location = new_holder.machine.location
 
         session.flush()
 

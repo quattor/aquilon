@@ -185,19 +185,19 @@ def walk_resources(dbobj):
             yield res
 
 
-def find_share(dbobj, resourcegroup, share, ignore=None,
+def find_resource(cls, dbobj, resourcegroup, resource, ignore=None,
                error=NotFoundException):
     """
-    Find a suitable share resource.
+    Find a suitable share or filesystem resource.
 
-    dbobj is either a host, cluster, or metacluster. If dbobj is a cluster
-    that is part of a metacluster, and the share is not defined at the cluster
+    dbobj is either a host, cluster, or metacluster. If dbobj is a cluster that
+    is part of a metacluster, and the resource is not defined at the cluster
     level, then it is also searched for at the metacluster level. If
-    resourcegroup is not None, the share must be part of the named
+    resourcegroup is not None, the resource must be part of the named
     resourcegroup; otherwise, it must not be inside a resourcegroup.
 
-    If the value of ignore is an existing Share instance, then that instance
-    will be ignored by find_share.
+    If the value of ignore is an existing Share or Filesystem instance, then
+    that instance will be ignored by find_resource.
     """
 
     session = object_session(dbobj)
@@ -213,8 +213,8 @@ def find_share(dbobj, resourcegroup, share, ignore=None,
         holder = dbobj.resholder
 
     if holder:
-        q = session.query(Share)
-        q = q.filter_by(name=share, holder=holder)
+        q = session.query(cls)
+        q = q.filter_by(name=resource, holder=holder)
         if ignore:
             q = q.filter_by(id != ignore.id)
 
@@ -225,19 +225,24 @@ def find_share(dbobj, resourcegroup, share, ignore=None,
         except NoResultFound:
             pass
 
-    # No luck. If this was a cluster, try to find the share at the metacluster
+    # No luck. If this was a cluster, try to find the resource at the metacluster
     # level, but if even that fails, report the problem for the cluster.
     if hasattr(dbobj, 'metacluster') and dbobj.metacluster:
         try:
-            return find_share(dbobj.metacluster, resourcegroup, share,
+            return find_resource(cls, dbobj.metacluster, resourcegroup, resource,
                               ignore=ignore, error=error)
         except error:
             pass
 
+    clslabel = cls._get_class_label().lower()
+
     if resourcegroup:
-        msg = "{0} does not have share {1!s} assigned to it in " + \
-            "resourcegroup {2}.".format(dbobj, share, resourcegroup)
+        msg = "{0} does not have {1} {2!s} assigned to it in " + \
+              "resourcegroup {3}.".format(dbobj, clslabel,
+                                          resource, resourcegroup)
     else:
-        msg = "{0} does not have share {1!s} assigned to it.".format(dbobj,
-                                                                     share)
+        msg = "{0} does not have {1} ""{2!s} assigned to it.".format(dbobj,
+                                                                     clslabel,
+                                                                     resource)
+
     raise error(msg)
