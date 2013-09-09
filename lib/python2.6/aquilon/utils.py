@@ -226,8 +226,8 @@ def configuration_directory(basedir):
     and friends.  If we are running from a working copy, this is
     "basedir/etc".  If not, it will be /usr/share/aquilon/etc.
     """
-    wc = os.path.join(basedir, "etc")
-    if os.path.isdir(wc):
-        return wc
+    wc = os.path.join(basedir, "etc", "aqd.conf.defaults")
+    if os.path.isfile(wc):
+        return os.path.dirname(wc)
     else:
         return SHARE_CFG
