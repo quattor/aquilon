@@ -23,7 +23,7 @@ import pwd
 from ConfigParser import SafeConfigParser
 
 from aquilon.exceptions_ import AquilonError
-
+from aquilon.utils import configuration_directory
 
 def get_username():
     return pwd.getpwuid(os.getuid()).pw_name
@@ -38,8 +38,10 @@ global_defaults = {
             "user": os.environ.get("USER") or get_username(),
             # Only used by unit tests at the moment, but maybe useful for
             # scripts that want to execute stand-alone.
-            "srcdir": os.path.realpath(os.path.join(
-                            os.path.dirname(__file__), "..", "..", "..")),
+            "srcdir": os.path.realpath(configuration_directory(
+                                       os.path.join(
+                                           os.path.dirname(__file__),
+                                           "..", "..", ".."))),
             "hostname": socket.getfqdn(),
         }
 
