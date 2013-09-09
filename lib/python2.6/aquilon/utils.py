@@ -36,7 +36,6 @@ _nocolons_re = re.compile(r'^([0-9a-f]{2}){6}$')
 _two_re = re.compile(r'[0-9a-f]{2}')
 _padded_re = re.compile(r'^([0-9a-f]{2}:){5}([0-9a-f]{2})$')
 
-
 SHARE_CFG = "/usr/share/aquilon/etc"
 
 def kill_from_pid_file(pid_file):  # pragma: no cover
@@ -228,7 +227,7 @@ def configuration_directory(basedir):
     "basedir/etc".  If not, it will be /usr/share/aquilon/etc.
     """
     wc = os.path.join(basedir, "etc")
-    if os.path.isdir(wc)
+    if os.path.isdir(wc):
         return wc
     else:
         return SHARE_CFG
