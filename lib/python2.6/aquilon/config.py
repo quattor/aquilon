@@ -69,8 +69,7 @@ class Config(SafeConfigParser):
             self.baseconfig = os.path.realpath(
                     os.environ.get("AQDCONF", "/etc/aqd.conf"))
         SafeConfigParser.__init__(self, defaults)
-        src_defaults = os.path.join(defaults["srcdir"],
-                "etc", "aqd.conf.defaults")
+        src_defaults = os.path.join(defaults["srcdir"], "aqd.conf.defaults")
         read_files = self.read([src_defaults, self.baseconfig])
         for file in [src_defaults, self.baseconfig]:
             if file not in read_files:
