@@ -77,6 +77,7 @@ setup(name="aquilon",
       cmdclass = {"install_scripts" : install_init_d_stuff},
       data_files=[("/usr/share/aquilon/etc",
                    glob.glob("etc/*.conf*") + glob.glob("etc/*xml")),
-                  ("/etc/init.d", ["etc/rc.d/init.d/aqd"])],
+                  ("/etc/init.d", ["etc/rc.d/init.d/aqd"]),
+                  ("/etc/sysconfig", "etc/sysconfig/aqd")],
       scripts=all_scripts,
       url="http://quattor.org")

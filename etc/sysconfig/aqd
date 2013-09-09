@@ -1,0 +1,8 @@
+PROG="aqd"
+PIDFILE=/var/run/aquilon/aqd.pid
+TWISTD=/usr/bin/twistd
+CONF_FILE="/etc/aqd.conf"
+LOGFILE=/var/log/aquilon/aqd.log
+LOCKFILE=/var/lock/subsys/aqd
+PY_BIN=/usr/bin/python
+USERNAME=aquilon

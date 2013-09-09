@@ -16,10 +16,10 @@
 
 # Source function library
 . /etc/rc.d/init.d/functions
-
+. /etc/sysconfig/aqd
 RETVAL=0
 prog="aqd"
-pidfile=/var/run/aqd.pid
+pidfile=/var/run/aquaqd.pid
 twistd=/usr/bin/twistd
 conffile="/etc/aqd.conf"
 logfile=/var/log/aquilon/aqd.log
@@ -27,16 +27,16 @@ lockfile=/var/lock/subsys/aqd
 py_bin=/usr/bin/python
 
 start() {
-    if [[ -x $py_bin ]]; then
+    if [[ -x $PY_BIN ]]; then
         echo -n "Starting aquilon broker: "
         if [[ $UID -ne 0 ]]; then
             RETVAL=1
             failure
         else
-            su -s /bin/bash aquilon -c "PYTHONPATH=/usr/lib*/python*/site-packages/SQLAlch*egg/ $py_bin $twistd --logfile=$logfile --pidfile=$pidfile aqd --config=$conffile"
+            su -s /bin/bash $USERNAME -c "$PY_BIN $TWISTD --logfile=$LOGFILE --pidfile=$PIDFILE aqd --config=$CONF_FILE"
             RETVAL=$?
             if [[ $RETVAL -eq 0 ]]; then
-                touch $lockfile
+                touch $LOCKFILE
                 success
             fi
         fi
@@ -53,10 +53,10 @@ stop() {
         RETVAL=1
         failure
     else
-        killproc -p $pidfile $py_bin
+        killproc -p $PIDFILE $PY_BIN
         RETVAL=$?
         if [[ $RETVAL -eq 0 ]]; then
-            rm -f $lockfile
+            rm -f $LOCKFILE
         fi
     fi
     echo
@@ -93,7 +93,7 @@ case "$1" in
         RETVAL=$?
         ;;
     status)
-        status -p $pidfile aqd
+        status -p $PIDFILE aqd
         RETVAL=$?
         ;;
     *)
