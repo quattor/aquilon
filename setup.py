@@ -78,6 +78,7 @@ setup(name="aquilon",
       data_files=[("/usr/share/aquilon/etc",
                    glob.glob("etc/*.conf*") + glob.glob("etc/*xml")),
                   ("/etc/init.d", ["etc/rc.d/init.d/aqd"]),
-                  ("/etc/sysconfig", ["etc/sysconfig/aqd"])],
+                  ("/etc/sysconfig", ["etc/sysconfig/aqd"]),
+                  ("/etc/bash_completion.d", ["aq_bash_completion.sh"])],
       scripts=all_scripts,
       url="http://quattor.org")
