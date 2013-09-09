@@ -43,7 +43,6 @@ _nocolons_re = re.compile(r'^([0-9a-f]{2}){6}$')
 _two_re = re.compile(r'[0-9a-f]{2}')
 _padded_re = re.compile(r'^([0-9a-f]{2}:){5}([0-9a-f]{2})$')
 
-
 def kill_from_pid_file(pid_file):  # pragma: no cover
     if os.path.isfile(pid_file):
         f = open(pid_file)
@@ -223,7 +222,6 @@ def first_of(iterable, function):
         if function(item):
             return item
     return None
-
 
 def remove_dir(dir, logger=LOGGER):
     """Remove a directory.  Could have been implemented as a call to rm -rf."""

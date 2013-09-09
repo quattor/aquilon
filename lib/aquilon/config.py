@@ -24,9 +24,35 @@ from ConfigParser import SafeConfigParser
 
 from aquilon.exceptions_ import AquilonError
 
+_SRCDIR = os.path.realpath(os.path.join(os.path.dirname(__file__),
+                                        "..", ".."))
+
 
 def get_username():
     return pwd.getpwuid(os.getuid()).pw_name
+
+
+def config_filename(name):
+    """
+    Return the full path of a configuration file.
+
+    If we're running from the source tree, then use the default files;
+    otherwise, use the system-wide ones.
+    """
+    if os.path.exists(os.path.join(_SRCDIR, "etc", "aqd.conf.dev")):
+        return os.path.join(_SRCDIR, "etc", name)
+
+    paths_to_try = [os.path.join("/etc", name),
+                    os.path.join("/usr", "share", "aquilon", "etc", name),
+                    os.path.join(_SRCDIR, "etc", name)]
+    for path in paths_to_try:
+        if os.path.exists(path):
+            return path
+
+    # We know it does not exist, but returning the name may give the user a
+    # clue
+    return paths_to_try[0]
+
 
 # All defaults should be in etc/aqd.conf.defaults.  This is only needed to
 # supply defaults that are determined by code at run time.
@@ -38,8 +64,7 @@ global_defaults = {
     "user": os.environ.get("USER") or get_username(),
     # Only used by unit tests at the moment, but maybe useful for
     # scripts that want to execute stand-alone.
-    "srcdir": os.path.realpath(os.path.join(os.path.dirname(__file__),
-                                                    "..", "..")),
+            "srcdir": _SRCDIR,
     "hostname": socket.getfqdn(),
 }
 
@@ -67,8 +92,7 @@ class Config(SafeConfigParser):
             self.baseconfig = os.path.realpath(os.environ.get("AQDCONF",
                                                               "/etc/aqd.conf"))
         SafeConfigParser.__init__(self, defaults)
-        src_defaults = os.path.join(defaults["srcdir"], "etc",
-                                    "aqd.conf.defaults")
+        src_defaults = config_filename("aqd.conf.defaults")
         read_files = self.read([src_defaults, self.baseconfig])
         for file in [src_defaults, self.baseconfig]:
             if file not in read_files:

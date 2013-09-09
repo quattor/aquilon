@@ -20,7 +20,7 @@ import os
 from os import environ as os_environ
 import logging
 
-from aquilon.config import Config
+from aquilon.config import Config, config_filename
 from aquilon.exceptions_ import ArgumentError, ProcessException, InternalError
 from aquilon.aqdb.model import (Host, Cluster, Fqdn, DnsRecord, HardwareEntity,
                                 Machine)
@@ -157,8 +157,7 @@ class TemplateDomain(object):
         args = [config.get("broker", "ant")]
         args.append("--noconfig")
         args.append("-f")
-        args.append("%s/build.xml" %
-                    config.get("broker", "compiletooldir"))
+        args.append(config_filename("build.xml"))
         args.append("-Dbasedir=%s" % config.get("broker", "quattordir"))
         args.append("-Dpanc.jar=%s" % self.domain.compiler)
         args.append("-Dpanc.formats=%s" % ",".join(formats))
