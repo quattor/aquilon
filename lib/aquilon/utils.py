@@ -43,14 +43,6 @@ _nocolons_re = re.compile(r'^([0-9a-f]{2}){6}$')
 _two_re = re.compile(r'[0-9a-f]{2}')
 _padded_re = re.compile(r'^([0-9a-f]{2}:){5}([0-9a-f]{2})$')
 
-# Regexp used to check if a value is suitable to be used as an nlist key,
-# without escaping.
-nlist_key_re = re.compile('^[a-zA-Z_][a-zA-Z0-9_.-]*$')
-
-# Regexp used to check if a value is suitable to be used as a template name
-template_name_re = re.compile(r'^[a-zA-Z0-9_.-]+$')
-
-
 def kill_from_pid_file(pid_file):  # pragma: no cover
     if os.path.isfile(pid_file):
         f = open(pid_file)
