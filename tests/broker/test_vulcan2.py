@@ -27,9 +27,11 @@ if __name__ == "__main__":
 import unittest2 as unittest
 from brokertest import TestBrokerCommand
 from notificationtest import VerifyNotificationsMixin
+from machinetest import MachineTestMixin
 
 
-class TestVulcan20(VerifyNotificationsMixin, TestBrokerCommand):
+class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
+                   TestBrokerCommand):
     # Metacluster / cluster / Switch tests
 
     def test_000_addutmc8(self):
@@ -94,18 +96,10 @@ class TestVulcan20(VerifyNotificationsMixin, TestBrokerCommand):
 
     # for each cluster's hosts
     def test_004_add10gigracks(self):
-        for port in range(0, 2):
-            self.noouttest(["add", "machine", "--machine", "utpgs01p%d" % port,
-                            "--rack", "ut3", "--model", "vb1205xm"])
-
-    def test_005_add10gigrackinterfaces(self):
         for i in range(0, 2):
-            ip = self.net["autopg2"].usable[i]
             machine = "utpgs01p%d" % i
-
-            self.noouttest(["add", "interface", "--interface", "eth0",
-                            "--machine", machine,
-                            "--mac", ip.mac])
+            self.create_machine(machine, "vb1205xm", rack="ut3",
+                                eth0_mac=self.net["autopg2"].usable[i].mac)
 
     def test_006_populate10gigrackhosts(self):
         for i in range(0, 2):
@@ -342,8 +336,8 @@ class TestVulcan20(VerifyNotificationsMixin, TestBrokerCommand):
         command = "show machine --machine utpgm0"
         out = self.commandtest(command.split(" "))
         self.searchoutput(out, r"Disk: sda 34 GB scsi "
-                          "\(virtual_disk from test_v2_share\) "
-                          "\[boot,snapshot\]$", command)
+                          r"\(virtual_disk from test_v2_share\) "
+                          r"\[boot,snapshot\]$", command)
 
         command = ["show_share", "--resourcegroup=utmc8as1",
                    "--cluster=utmc8", "--share=test_v2_share"]

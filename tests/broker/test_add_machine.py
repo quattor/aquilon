@@ -23,9 +23,11 @@ if __name__ == "__main__":
 
 import unittest2 as unittest
 from brokertest import TestBrokerCommand
+from machinetest import MachineTestMixin
+from networktest import DummyIP
 
 
-class TestAddMachine(TestBrokerCommand):
+class TestAddMachine(MachineTestMixin, TestBrokerCommand):
 
     def testaddut3c5n10(self):
         self.noouttest(["add", "machine", "--machine", "ut3c5n10",
@@ -56,27 +58,15 @@ class TestAddMachine(TestBrokerCommand):
 
     # Copy of ut3c5n10, for network based service mappings
     def testaddut3c5n11(self):
-        self.noouttest(["add", "machine", "--machine", "ut3c5n11",
-                        "--rack", "ut3", "--model", "hs21-8853l5u",
-                        "--comments", "For network based service mappings"])
+        self.create_machine_hs21("ut3c5n11", rack="ut3",
+                                 comments="For network based service mappings",
+                                 eth0_mac=self.net["netsvcmap"].usable[0].mac)
 
     # Copy of ut3c5n10, for network based service mappings
     def testaddut3c5n12(self):
-        self.noouttest(["add", "machine", "--machine", "ut3c5n12",
-                        "--rack", "ut3", "--model", "hs21-8853l5u",
-                        "--comments", "For net/pers based service mappings"])
-
-    def testverifyaddut3c5n11(self):
-        command = "show machine --machine ut3c5n11"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Blade: ut3c5n11", command)
-        self.matchoutput(out, "Rack: ut3", command)
-        self.matchoutput(out, "Vendor: ibm Model: hs21-8853l5u", command)
-        self.matchoutput(out, "Cpu: xeon_2660 x 2", command)
-        self.matchoutput(out, "Memory: 8192 MB", command)
-        self.matchoutput(out, "Comments: For network based service mappings",
-                         command)
-        self.matchclean(out, "Primary Name:", command)
+        self.create_machine_hs21("ut3c5n12", rack="ut3",
+                                 comments="For net/pers based service mappings",
+                                 eth0_mac=self.net["netperssvcmap"].usable[0].mac)
 
     def testverifydelmodel(self):
         # This should be in test_del_model.py but when that is run there are no
@@ -120,18 +110,26 @@ class TestAddMachine(TestBrokerCommand):
 
     # Used for Zebra tests
     def testaddut3c5n2(self):
-        self.noouttest(["add", "machine", "--machine", "ut3c5n2",
-                        "--rack", "ut3", "--model", "hs21-8853l5u"])
+        self.create_machine_hs21("ut3c5n2", rack="ut3",
+                                 interfaces=["eth0", "eth1"],
+                                 eth0_mac=self.net["zebra_eth0"].usable[0].mac,
+                                 eth0_vendor="intel", eth0_model="e1000",
+                                 eth1_mac=self.net["zebra_eth1"].usable[0].mac,
+                                 eth1_model="e1000")
 
     # Used for bonding tests
     def testaddut3c5n3(self):
-        self.noouttest(["add", "machine", "--machine", "ut3c5n3",
-                        "--rack", "ut3", "--model", "hs21-8853l5u"])
+        self.create_machine_hs21("ut3c5n3", rack="ut3",
+                                 interfaces=["eth0", "eth1"],
+                                 eth0_mac=self.net["zebra_eth0"].usable[1].mac,
+                                 eth1_mac=self.net["zebra_eth1"].usable[1].mac)
 
     # Used for bridge tests
     def testaddut3c5n4(self):
-        self.noouttest(["add", "machine", "--machine", "ut3c5n4",
-                        "--rack", "ut3", "--model", "hs21-8853l5u"])
+        self.create_machine_hs21("ut3c5n4", rack="ut3",
+                                 interfaces=["eth0", "eth1"],
+                                 eth0_mac=self.net["zebra_eth0"].usable[2].mac,
+                                 eth1_mac=self.net["zebra_eth1"].usable[2].mac)
 
     # Used for house-of-cards location testing
     def testaddjack(self):
@@ -145,13 +143,13 @@ class TestAddMachine(TestBrokerCommand):
 
     # Used for VPLS network tests
     def testaddut3c5n5(self):
-        self.noouttest(["add", "machine", "--machine", "ut3c5n5",
-                        "--rack", "ut3", "--model", "hs21-8853l5u"])
+        self.create_machine_hs21("ut3c5n5", rack="ut3",
+                                 eth0_mac=self.net["vpls"].usable[1].mac)
 
     # Test normalization
     def testaddnp3c5n5(self):
-        self.noouttest(["add", "machine", "--machine", "np3C5N5",
-                        "--rack", "np3", "--model", "hs21-8853l5u"])
+        self.create_machine_hs21("np3C5N5", rack="np3",
+                                 eth0_mac=self.net["vpls"].usable[2].mac)
 
     def testverifynormalization(self):
         command = "show machine --machine NP3c5N5"
@@ -164,18 +162,24 @@ class TestAddMachine(TestBrokerCommand):
 
     # Used for testing notifications
     def testaddut3c5n6(self):
-        self.noouttest(["add", "machine", "--machine", "ut3c5n6",
-                        "--rack", "ut3", "--model", "hs21-8853l5u"])
+        self.create_machine_hs21("ut3c5n6", rack="ut3",
+                                 eth0_mac=self.net["unknown0"].usable[19].mac)
 
     # Network environment testing
     def testaddut3c5n7(self):
-        self.noouttest(["add", "machine", "--machine", "ut3c5n7",
-                        "--rack", "ut3", "--model", "hs21-8853l5u"])
+        net = self.net["unknown0"]
+        self.create_machine_hs21("ut3c5n7", rack="ut3",
+                                 interfaces=["eth0", "eth1", "eth2"],
+                                 eth0_mac=net.usable[20].mac,
+                                 eth1_mac=net.usable[21].mac,
+                                 eth2_mac=net.usable[22].mac)
 
     # Network environment testing
     def testaddut3c5n8(self):
-        self.noouttest(["add", "machine", "--machine", "ut3c5n8",
-                        "--rack", "ut3", "--model", "hs21-8853l5u"])
+        self.create_machine_hs21("ut3c5n8", rack="ut3",
+                                 interfaces=["eth0", "eth1"],
+                                 eth0_mac=self.net["unknown0"].usable[23].mac,
+                                 eth1_mac=self.net["routing1"].usable[0].mac)
 
     def testaddut3c1n3(self):
         self.noouttest(["add", "machine", "--machine", "ut3c1n3",
@@ -267,8 +271,8 @@ class TestAddMachine(TestBrokerCommand):
                           command)
 
     def testaddccissmachine(self):
-        self.noouttest(["add", "machine", "--machine", "ut3c1n8",
-                        "--rack", "ut3", "--model", "utccissmodel"])
+        self.create_machine("ut3c1n8", "utccissmodel", rack="ut3",
+                            eth0_mac=self.net["unknown0"].usable[18].mac)
 
     def testverifyccissmachine(self):
         command = "show machine --machine ut3c1n8"
@@ -382,52 +386,12 @@ class TestAddMachine(TestBrokerCommand):
     # When doing an end-to-end test, these entries should be
     # created as part of a sweep of a Verari rack
     # (ut01ga1s02.aqd-unittest.ms.com).
-    def testaddut8s02p1(self):
-        self.noouttest(["add", "machine", "--machine", "ut8s02p1",
-                        "--rack", "ut8", "--model", "vb1205xm"])
-
-    def testverifyaddut8s02p1(self):
-        command = "show machine --machine ut8s02p1"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Blade: ut8s02p1", command)
-
-    def testaddut8s02p2(self):
-        self.noouttest(["add", "machine", "--machine", "ut8s02p2",
-                        "--rack", "ut8", "--model", "vb1205xm"])
-
-    def testverifyaddut8s02p2(self):
-        command = "show machine --machine ut8s02p2"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Blade: ut8s02p2", command)
-
-    def testaddut8s02p3(self):
-        self.noouttest(["add", "machine", "--machine", "ut8s02p3",
-                        "--rack", "ut8", "--model", "vb1205xm"])
-
-    def testverifyaddut8s02p3(self):
-        command = "show machine --machine ut8s02p3"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Blade: ut8s02p3", command)
-
-    # one-offs for testing odd add host parameter combinations for
-    # archetypes aurora and windows for increased code coverage
-    def testaddut8s02p4(self):
-        self.noouttest(["add", "machine", "--machine", "ut8s02p4",
-                        "--rack", "ut8", "--model", "vb1205xm"])
-
-    def testverifyaddut8s02p4(self):
-        command = "show machine --machine ut8s02p4"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Blade: ut8s02p4", command)
-
-    def testaddut8s02p5(self):
-        self.noouttest(["add", "machine", "--machine", "ut8s02p5",
-                        "--rack", "ut8", "--model", "vb1205xm"])
-
-    def testverifyaddut8s02p5(self):
-        command = "show machine --machine ut8s02p5"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Blade: ut8s02p5", command)
+    def testaddverariut8(self):
+        net = self.net["tor_net_0"]
+        for port in range (1, 6):
+            machine = "ut8s02p%d" % port
+            self.create_machine(machine, "vb1205xm", rack="ut8",
+                                eth0_mac=net.usable[port].mac)
 
     def testaddutnorack(self):
         # A machine that's not in a rack
@@ -438,46 +402,54 @@ class TestAddMachine(TestBrokerCommand):
     # testing chassis updates...
     def testaddhprack(self):
         # number 50 is in use by the tor_switch.
+        net = self.net["hp_eth0"]
         for i in range(51, 100):
             port = i - 50
-            self.noouttest(["add", "machine", "--machine", "ut9s03p%d" % port,
-                            "--rack", "ut9", "--model", "bl260c"])
-
-    def testverifyaddhprack(self):
-        for i in range(51, 100):
-            port = i - 50
-            command = "show machine --machine ut9s03p%d" % port
-            out = self.commandtest(command.split(" "))
-            self.matchoutput(out, "Blade: ut9s03p%d" % port, command)
+            machine = "ut9s03p%d" % port
+            self.create_machine(machine, "bl260c", rack="ut9",
+                                eth0_mac=net.usable[port].mac)
 
     def testaddverarirack(self):
         # number 100 is in use by the tor_switch.
         # The virtual machine tests require quite a bit of memory...
         for i in range(101, 150):
             port = i - 100
-            self.noouttest(["add", "machine", "--machine", "ut10s04p%d" % port,
-                            "--rack", "ut10", "--model", "vb1205xm",
-                            "--memory", 81920])
+            machine = "ut10s04p%d" % port
+            eth0_mac = self.net["verari_eth0"].usable[port].mac
+            eth1_mac = self.net["verari_eth1"].usable[port].mac
+            self.create_machine(machine, "vb1205xm", memory=81920, rack="ut10",
+                                interfaces=["eth0", "eth1"],
+                                eth0_mac=eth0_mac, eth1_mac=eth1_mac)
 
     def testadd10gigracks(self):
         for port in range(1, 13):
-            self.noouttest(["add", "machine", "--machine", "ut11s01p%d" % port,
-                            "--rack", "ut11", "--model", "vb1205xm"])
-            self.noouttest(["add", "machine", "--machine", "ut12s02p%d" % port,
-                            "--rack", "ut12", "--model", "vb1205xm"])
+            for (template, rack, offset) in [('ut11s01p%d', "ut11", 0),
+                                             ('ut12s02p%d', "ut12", 12)]:
+                machine = template % port
+                # Both counts would start at 0 except the tor_net has two
+                # switches taking IPs.
+                i = port + 1 + offset
+                j = port - 1 + offset
+                eth0_mac = self.net["vmotion_net"].usable[i].mac
+                eth1_mac = self.net["vm_storage_net"].usable[j].mac
+                self.create_machine_verari(machine, rack=rack,
+                                           interfaces=["eth0", "eth1"],
+                                           eth0_mac=eth0_mac,
+                                           eth1_mac=eth1_mac,
+                                           eth1_pg="storage-v701")
 
     def testaddharacks(self):
         # Machines for metacluster high availability testing
         for port in range(1, 25):
-            for rack in ["ut13", "np13"]:
-                self.noouttest(["add", "machine",
-                                "--machine", "%ss03p%d" % (rack, port),
-                                "--rack", rack, "--model", "vb1205xm"])
+            for template, rack, net in [('ut13s03p%d', 'ut13', self.net["esx_bcp_ut"]),
+                                        ('np13s03p%d', 'np13', self.net["esx_bcp_np"])]:
+                machine = template % port
+                self.create_machine_verari(machine, rack=rack,
+                                           eth0_mac=net.usable[port].mac)
 
     def testaddf5test(self):
-        command = ["add", "machine", "--machine", "f5test", "--vendor", "f5",
-                   "--model", "f5_model", "--rack", "ut3"]
-        self.noouttest(command)
+        ip = DummyIP(self.net["f5test"].ip)
+        self.create_machine("f5test", "f5_model", rack="ut3", eth0_mac=ip.mac)
 
     # FIXME: Missing a test for adding a macihne to a chassis where the
     # fqdn given for the chassis isn't *actually* a chassis.
