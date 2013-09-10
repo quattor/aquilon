@@ -58,18 +58,12 @@ class TestAddMachine(TestBrokerCommand):
     def testaddut3c5n11(self):
         self.noouttest(["add", "machine", "--machine", "ut3c5n11",
                         "--rack", "ut3", "--model", "hs21-8853l5u",
-                        "--cpucount", "2", "--cpuvendor", "intel",
-                        "--cpuname", "xeon", "--cpuspeed", "2660",
-                        "--memory", "8192", "--serial", "99C5553",
                         "--comments", "For network based service mappings"])
 
     # Copy of ut3c5n10, for network based service mappings
     def testaddut3c5n12(self):
         self.noouttest(["add", "machine", "--machine", "ut3c5n12",
                         "--rack", "ut3", "--model", "hs21-8853l5u",
-                        "--cpucount", "2", "--cpuvendor", "intel",
-                        "--cpuname", "xeon", "--cpuspeed", "2660",
-                        "--memory", "8192", "--serial", "99C5553",
                         "--comments", "For net/pers based service mappings"])
 
     def testverifyaddut3c5n11(self):
@@ -80,7 +74,6 @@ class TestAddMachine(TestBrokerCommand):
         self.matchoutput(out, "Vendor: ibm Model: hs21-8853l5u", command)
         self.matchoutput(out, "Cpu: xeon_2660 x 2", command)
         self.matchoutput(out, "Memory: 8192 MB", command)
-        self.matchoutput(out, "Serial: 99C5553", command)
         self.matchoutput(out, "Comments: For network based service mappings",
                          command)
         self.matchclean(out, "Primary Name:", command)
@@ -128,58 +121,37 @@ class TestAddMachine(TestBrokerCommand):
     # Used for Zebra tests
     def testaddut3c5n2(self):
         self.noouttest(["add", "machine", "--machine", "ut3c5n2",
-                        "--rack", "ut3", "--model", "hs21-8853l5u",
-                        "--cpucount", "2", "--cpuvendor", "intel",
-                        "--cpuname", "xeon", "--cpuspeed", "2660",
-                        "--memory", "8192"])
+                        "--rack", "ut3", "--model", "hs21-8853l5u"])
 
     # Used for bonding tests
     def testaddut3c5n3(self):
         self.noouttest(["add", "machine", "--machine", "ut3c5n3",
-                        "--rack", "ut3", "--model", "hs21-8853l5u",
-                        "--cpucount", "2", "--cpuvendor", "intel",
-                        "--cpuname", "xeon", "--cpuspeed", "2660",
-                        "--memory", "8192"])
+                        "--rack", "ut3", "--model", "hs21-8853l5u"])
 
     # Used for bridge tests
     def testaddut3c5n4(self):
         self.noouttest(["add", "machine", "--machine", "ut3c5n4",
-                        "--rack", "ut3", "--model", "hs21-8853l5u",
-                        "--cpucount", "2", "--cpuvendor", "intel",
-                        "--cpuname", "xeon", "--cpuspeed", "2660",
-                        "--memory", "8192"])
+                        "--rack", "ut3", "--model", "hs21-8853l5u"])
 
     # Used for house-of-cards location testing
     def testaddjack(self):
         self.noouttest(["add", "machine", "--machine", "jack",
-                        "--rack", "cards1", "--model", "hs21-8853l5u",
-                        "--cpucount", "2", "--cpuvendor", "intel",
-                        "--cpuname", "xeon", "--cpuspeed", "2660",
-                        "--memory", "8192"])
+                        "--rack", "cards1", "--model", "hs21-8853l5u"])
 
     # Used for filer - a fake machine for now
     def testaddfiler(self):
         self.noouttest(["add", "machine", "--machine", "filer1",
-                        "--rack", "ut3", "--model", "hs21-8853l5u",
-                        "--cpucount", "2", "--cpuvendor", "intel",
-                        "--cpuname", "xeon", "--cpuspeed", "2660",
-                        "--memory", "8192"])
+                        "--rack", "ut3", "--model", "hs21-8853l5u"])
 
     # Used for VPLS network tests
     def testaddut3c5n5(self):
         self.noouttest(["add", "machine", "--machine", "ut3c5n5",
-                        "--rack", "ut3", "--model", "hs21-8853l5u",
-                        "--cpucount", "2", "--cpuvendor", "intel",
-                        "--cpuname", "xeon", "--cpuspeed", "2660",
-                        "--memory", "8192"])
+                        "--rack", "ut3", "--model", "hs21-8853l5u"])
 
     # Test normalization
     def testaddnp3c5n5(self):
         self.noouttest(["add", "machine", "--machine", "np3C5N5",
-                        "--rack", "np3", "--model", "hs21-8853l5u",
-                        "--cpucount", "2", "--cpuvendor", "intel",
-                        "--cpuname", "xeon", "--cpuspeed", "2660",
-                        "--memory", "8192"])
+                        "--rack", "np3", "--model", "hs21-8853l5u"])
 
     def testverifynormalization(self):
         command = "show machine --machine NP3c5N5"
@@ -193,26 +165,17 @@ class TestAddMachine(TestBrokerCommand):
     # Used for testing notifications
     def testaddut3c5n6(self):
         self.noouttest(["add", "machine", "--machine", "ut3c5n6",
-                        "--rack", "ut3", "--model", "hs21-8853l5u",
-                        "--cpucount", "2", "--cpuvendor", "intel",
-                        "--cpuname", "xeon", "--cpuspeed", "2660",
-                        "--memory", "8192"])
+                        "--rack", "ut3", "--model", "hs21-8853l5u"])
 
     # Network environment testing
     def testaddut3c5n7(self):
         self.noouttest(["add", "machine", "--machine", "ut3c5n7",
-                        "--rack", "ut3", "--model", "hs21-8853l5u",
-                        "--cpucount", "2", "--cpuvendor", "intel",
-                        "--cpuname", "xeon", "--cpuspeed", "2660",
-                        "--memory", "8192"])
+                        "--rack", "ut3", "--model", "hs21-8853l5u"])
 
     # Network environment testing
     def testaddut3c5n8(self):
         self.noouttest(["add", "machine", "--machine", "ut3c5n8",
-                        "--rack", "ut3", "--model", "hs21-8853l5u",
-                        "--cpucount", "2", "--cpuvendor", "intel",
-                        "--cpuname", "xeon", "--cpuspeed", "2660",
-                        "--memory", "8192"])
+                        "--rack", "ut3", "--model", "hs21-8853l5u"])
 
     def testaddut3c1n3(self):
         self.noouttest(["add", "machine", "--machine", "ut3c1n3",
