@@ -24,9 +24,10 @@ if __name__ == "__main__":
 import unittest2 as unittest
 from broker.brokertest import TestBrokerCommand
 from networktest import DummyIP
+from machinetest import MachineTestMixin
 
 
-class TestAddHost(TestBrokerCommand):
+class TestAddHost(MachineTestMixin, TestBrokerCommand):
 
     def testaddutnotify(self):
         hostname = self.config.get("unittest", "hostname")
@@ -56,27 +57,17 @@ class TestAddHost(TestBrokerCommand):
 
     def testaddafsbynet(self):
         ip = self.net["netsvcmap"].usable[0]
-        self.dsdb_expect_add("afs-by-net.aqd-unittest.ms.com", ip, "eth0", ip.mac,
-                             comments="For network based service mappings")
-        self.noouttest(["add", "host",
-                        "--hostname", "afs-by-net.aqd-unittest.ms.com",
-                        "--ip", ip,
-                        "--machine", "ut3c5n11", "--domain", "unittest",
-                        "--archetype", "aquilon",
-                        "--personality", "compileserver"])
-        self.dsdb_verify()
+        self.create_host("afs-by-net.aqd-unittest.ms.com", ip, "ut3c5n11",
+                         model="hs21-8853l5u", rack="ut3",
+                         personality="compileserver",
+                         comments="For network based service mappings")
 
     def testaddnetmappers(self):
         ip = self.net["netperssvcmap"].usable[0]
-        self.dsdb_expect_add("netmap-pers.aqd-unittest.ms.com", ip, "eth0", ip.mac,
-                             comments="For net/pers based service mappings")
-        self.noouttest(["add", "host",
-                        "--hostname", "netmap-pers.aqd-unittest.ms.com",
-                        "--ip", ip,
-                        "--machine", "ut3c5n12", "--domain", "unittest",
-                        "--archetype", "aquilon",
-                        "--personality", "eaitools"])
-        self.dsdb_verify()
+        self.create_host("netmap-pers.aqd-unittest.ms.com", ip, "ut3c5n12",
+                         model="hs21-8853l5u", rack="ut3",
+                         personality="eaitools",
+                         comments="For net/pers based service mappings")
 
     def testaddjackhost(self):
         ip = self.net["unknown0"].usable[17]
@@ -132,45 +123,12 @@ class TestAddHost(TestBrokerCommand):
         self.matchoutput(out, "Version: 5.0.1-x86_64", command)
         self.matchoutput(out, "Advertise Status: False", command)
 
-    def testverifyaddafsbynet(self):
-        osversion = self.config.get("archetype_aquilon", "default_osversion")
-        command = "show host --hostname afs-by-net.aqd-unittest.ms.com"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out,
-                         "Primary Name: afs-by-net.aqd-unittest.ms.com [%s]" %
-                         self.net["netsvcmap"].usable[0],
-                         command)
-        self.matchoutput(out, "Blade: ut3c5n11", command)
-        self.matchoutput(out, "Archetype: aquilon", command)
-        self.matchoutput(out, "Personality: compileserver", command)
-        self.matchoutput(out, "Domain: unittest", command)
-        self.matchoutput(out, "Build Status: build", command)
-        self.matchoutput(out, "Operating System: linux", command)
-        self.matchoutput(out, "Version: %s" % osversion, command)
-        self.matchoutput(out, "Advertise Status: False", command)
-
     def testverifyunittest02machine(self):
         command = "show machine --machine ut3c5n10"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
                          "Primary Name: unittest02.one-nyp.ms.com [%s]" %
                          self.net["unknown0"].usable[0],
-                         command)
-
-    def testverifyaddafsbynetut3c5n11(self):
-        command = "show machine --machine ut3c5n11"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out,
-                         "Primary Name: afs-by-net.aqd-unittest.ms.com [%s]" %
-                         self.net["netsvcmap"].usable[0],
-                         command)
-
-    def testverifyaddafsbynetut3c5n12(self):
-        command = "show machine --machine ut3c5n12"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out,
-                         "Primary Name: netmap-pers.aqd-unittest.ms.com [%s]" %
-                         self.net["netperssvcmap"].usable[0],
                          command)
 
     def testverifyhostdns(self):
@@ -317,6 +275,7 @@ class TestAddHost(TestBrokerCommand):
         servers = 0
         user = self.config.get("unittest", "user")
         net = self.net["hp_eth0"]
+        # number 50 is in use by the tor_switch.
         for i in range(51, 100):
             if servers < 10:
                 servers += 1
@@ -324,15 +283,9 @@ class TestAddHost(TestBrokerCommand):
             else:
                 hostname = "aquilon%d.aqd-unittest.ms.com" % i
             port = i - 50
-            self.dsdb_expect_add(hostname, net.usable[port], "eth0",
-                                 net.usable[port].mac)
-            command = ["add", "host", "--hostname", hostname,
-                       "--ip", net.usable[port],
-                       "--machine", "ut9s03p%d" % port,
-                       "--sandbox", "%s/utsandbox" % user,
-                       "--archetype", "aquilon", "--personality", "inventory"]
-            self.noouttest(command)
-        self.dsdb_verify()
+            machine = "ut9s03p%d" % port
+            self.create_host(hostname, net.usable[port], machine, rack="ut9",
+                             model="bl260c", sandbox="%s/utsandbox" % user)
 
     def testpopulateverarirackhosts(self):
         # These are used in add_virtual_hardware:
@@ -348,20 +301,24 @@ class TestAddHost(TestBrokerCommand):
         # This is used for utmc7 and update_machine testing:
         # evh10.aqd-unittest.ms.com
         # The other hosts are left for future use.
-        net = self.net["verari_eth0"]
+        eth0_net = self.net["verari_eth0"]
+        eth1_net = self.net["verari_eth1"]
+        # number 100 is in use by the tor_switch.
         for i in range(101, 111):
             port = i - 100
             hostname = "evh%d.aqd-unittest.ms.com" % port
-            self.dsdb_expect_add(hostname, net.usable[port], "eth0",
-                                 net.usable[port].mac)
-            command = ["add", "host", "--hostname", hostname,
-                       "--ip", net.usable[port],
-                       "--machine", "ut10s04p%d" % port,
-                       "--domain", "unittest",
-                       "--osname", "esxi", "--osversion", "4.0.0",
-                       "--archetype", "vmhost", "--personality", "vulcan-1g-desktop-prod"]
-            self.noouttest(command)
-        self.dsdb_verify()
+            machine = "ut10s04p%d" % port
+            ip = eth0_net.usable[port]
+            eth0_mac = ip.mac
+            eth1_mac = eth1_net.usable[port].mac
+            # The virtual machine tests require quite a bit of memory...
+            self.create_host(hostname, ip, machine,
+                             interfaces=["eth0", "eth1"],
+                             model="vb1205xm", memory=81920, rack="ut10",
+                             eth0_mac=eth0_mac, eth1_mac=eth1_mac,
+                             archetype="vmhost",
+                             personality="vulcan-1g-desktop-prod",
+                             osname="esxi", osversion="4.0.0")
 
     def testpopulate10gigrackhosts(self):
         # Assuming evh11 - evh50 will eventually be claimed above.

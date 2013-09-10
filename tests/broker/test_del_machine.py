@@ -37,24 +37,6 @@ class TestDelMachine(TestBrokerCommand):
         command = "show machine --machine ut3c5n10"
         self.notfoundtest(command.split(" "))
 
-    # Copy of ut3c5n10, for network based service mappings
-    def testdelut3c5n11(self):
-        command = "del machine --machine ut3c5n11"
-        self.noouttest(command.split(" "))
-
-    def testverifydelut3c5n11(self):
-        command = "show machine --machine ut3c5n11"
-        self.notfoundtest(command.split(" "))
-
-    # Copy of ut3c5n10, for network / pers based service mappings
-    def testdelut3c5n12(self):
-        command = "del machine --machine ut3c5n12"
-        self.noouttest(command.split(" "))
-
-    def testverifydelut3c5n12(self):
-        command = "show machine --machine ut3c5n12"
-        self.notfoundtest(command.split(" "))
-
     def testdelut3c1n3(self):
         command = "del machine --machine ut3c1n3"
         self.noouttest(command.split(" "))
@@ -71,116 +53,18 @@ class TestDelMachine(TestBrokerCommand):
         command = "show machine --machine ut3c1n4"
         self.notfoundtest(command.split(" "))
 
-    def testdelut3c1n8(self):
-        command = "del machine --machine ut3c1n8"
-        self.noouttest(command.split(" "))
-
     def testdelut3c1n9(self):
         command = "del machine --machine ut3c1n9"
         self.noouttest(command.split(" "))
 
-    def testdelut3s01p1(self):
-        command = "del machine --machine ut3s01p1"
-        self.noouttest(command.split(" "))
-
-    def testverifydelut3s01p1(self):
-        command = "show machine --machine ut3s01p1"
-        self.notfoundtest(command.split(" "))
-
-    def testdelut8s02p1(self):
-        command = "del machine --machine ut8s02p1"
-        self.noouttest(command.split(" "))
-
-    def testverifydelut8s02p1(self):
-        command = "show machine --machine ut8s02p1"
-        self.notfoundtest(command.split(" "))
-
-    def testdelut8s02p2(self):
-        command = "del machine --machine ut8s02p2"
-        self.noouttest(command.split(" "))
-
-    def testverifydelut8s02p2(self):
-        command = "show machine --machine ut8s02p2"
-        self.notfoundtest(command.split(" "))
-
-    def testdelut8s02p3(self):
-        command = "del machine --machine ut8s02p3"
-        self.noouttest(command.split(" "))
-
-    def testverifydelut8s02p3(self):
-        command = "show machine --machine ut8s02p3"
-        self.notfoundtest(command.split(" "))
-
-    def testdelut8s02p4(self):
-        command = "del machine --machine ut8s02p4"
-        self.noouttest(command.split(" "))
-
-    def testverifydelut8s02p4(self):
-        command = "show machine --machine ut8s02p4"
-        self.notfoundtest(command.split(" "))
-
-    def testdelut8s02p5(self):
-        command = "del machine --machine ut8s02p5"
-        self.noouttest(command.split(" "))
-
-    def testverifydelut8s02p5(self):
-        command = "show machine --machine ut8s02p5"
-        self.notfoundtest(command.split(" "))
-
-    def testdelhprack(self):
-        for i in range(51, 100):
-            port = i - 50
-            command = "del machine --machine ut9s03p%d" % port
-            self.noouttest(command.split(" "))
-
-    def testverifydelhprack(self):
-        for i in range(51, 100):
-            port = i - 50
-            command = "show machine --machine ut9s03p%d" % port
-            self.notfoundtest(command.split(" "))
-
-    def testdelverarirack(self):
-        for i in range(101, 150):
-            port = i - 100
-            command = "del machine --machine ut10s04p%d" % port
-            self.noouttest(command.split(" "))
-
-    def testverifydelverarirack(self):
-        for i in range(101, 150):
-            port = i - 100
-            command = "show machine --machine ut10s04p%d" % port
-            self.notfoundtest(command.split(" "))
-
-    def testdel10gigracks(self):
-        for port in range(1, 13):
-            command = "del machine --machine ut11s01p%d" % port
-            self.noouttest(command.split(" "))
-            command = "del machine --machine ut12s02p%d" % port
-            self.noouttest(command.split(" "))
-
-    def testdelharacks(self):
-        # Machines for metacluster high availability testing
-        for port in range(1, 25):
-            for rack in ["ut13", "np13"]:
-                machine = "%ss03p%d" % (rack, port)
-                self.noouttest(["del_machine", "--machine", machine])
+    def testdelverariut8(self):
+        # The first 3 are deleted in test_del_host
+        for port in range(4, 6):
+            machine = "ut8s02p%d" % port
+            self.noouttest(["del_machine", "--machine", machine])
+            self.notfoundtest(["show_machine", "--machine", machine])
 
     # FIXME: Add a test for deleting a machine with only auxiliaries.
-
-    def testdelut3c5n2(self):
-        self.noouttest(["del", "machine", "--machine", "ut3c5n2"])
-
-    def testdelut3c5n3(self):
-        self.noouttest(["del", "machine", "--machine", "ut3c5n3"])
-
-    def testdelut3c5n4(self):
-        self.noouttest(["del", "machine", "--machine", "ut3c5n4"])
-
-    def testdelut3c5n5(self):
-        self.noouttest(["del", "machine", "--machine", "ut3c5n5"])
-
-    def testdelnp3c5n5(self):
-        self.noouttest(["del", "machine", "--machine", "np3c5n5"])
 
     def testdeljack(self):
         self.noouttest(["del", "machine", "--machine", "jack"])
@@ -196,18 +80,6 @@ class TestDelMachine(TestBrokerCommand):
     def testdelut3c5n6(self):
         self.noouttest(["del", "machine", "--machine", "ut3c5n6"])
 
-    def testdelut3c5n7(self):
-        self.noouttest(["del", "machine", "--machine", "ut3c5n7"])
-
-    def testdelut3c5n8(self):
-        self.noouttest(["del", "machine", "--machine", "ut3c5n8"])
-
-    def testdelfiler(self):
-        self.noouttest(["del", "machine", "--machine", "filer1"])
-
-    def testdelf5test(self):
-        self.noouttest(["del", "machine", "--machine", "f5test"])
-
     def testdelutnorack(self):
         self.noouttest(["del", "machine", "--machine", "utnorack"])
 
@@ -222,6 +94,9 @@ class TestDelMachine(TestBrokerCommand):
 
     def testdelaurorawithoutrack(self):
         self.noouttest(["del_machine", "--machine", self.aurora_without_rack])
+
+    def testverifyall(self):
+        self.noouttest(["show_machine", "--all"])
 
 
 if __name__ == '__main__':

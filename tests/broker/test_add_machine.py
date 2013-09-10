@@ -56,18 +56,6 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
         self.matchoutput(out, "Comments: Some machine comments", command)
         self.matchclean(out, "Primary Name:", command)
 
-    # Copy of ut3c5n10, for network based service mappings
-    def testaddut3c5n11(self):
-        self.create_machine_hs21("ut3c5n11", rack="ut3",
-                                 comments="For network based service mappings",
-                                 eth0_mac=self.net["netsvcmap"].usable[0].mac)
-
-    # Copy of ut3c5n10, for network based service mappings
-    def testaddut3c5n12(self):
-        self.create_machine_hs21("ut3c5n12", rack="ut3",
-                                 comments="For net/pers based service mappings",
-                                 eth0_mac=self.net["netperssvcmap"].usable[0].mac)
-
     def testverifydelmodel(self):
         # This should be in test_del_model.py but when that is run there are no
         # more machines defined...
@@ -397,29 +385,6 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
         # A machine that's not in a rack
         self.noouttest(["add", "machine", "--machine", "utnorack",
                         "--desk", "utdesk1", "--model", "poweredge_6650"])
-
-    # This test should look very different, but these were needed for
-    # testing chassis updates...
-    def testaddhprack(self):
-        # number 50 is in use by the tor_switch.
-        net = self.net["hp_eth0"]
-        for i in range(51, 100):
-            port = i - 50
-            machine = "ut9s03p%d" % port
-            self.create_machine(machine, "bl260c", rack="ut9",
-                                eth0_mac=net.usable[port].mac)
-
-    def testaddverarirack(self):
-        # number 100 is in use by the tor_switch.
-        # The virtual machine tests require quite a bit of memory...
-        for i in range(101, 150):
-            port = i - 100
-            machine = "ut10s04p%d" % port
-            eth0_mac = self.net["verari_eth0"].usable[port].mac
-            eth1_mac = self.net["verari_eth1"].usable[port].mac
-            self.create_machine(machine, "vb1205xm", memory=81920, rack="ut10",
-                                interfaces=["eth0", "eth1"],
-                                eth0_mac=eth0_mac, eth1_mac=eth1_mac)
 
     def testadd10gigracks(self):
         for port in range(1, 13):

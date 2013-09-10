@@ -27,9 +27,11 @@ if __name__ == "__main__":
 import unittest2 as unittest
 from brokertest import TestBrokerCommand
 from notificationtest import VerifyNotificationsMixin
+from machinetest import MachineTestMixin
 
 
-class TestVulcanLocalDisk(VerifyNotificationsMixin, TestBrokerCommand):
+class TestVulcanLocalDisk(VerifyNotificationsMixin, MachineTestMixin,
+                          TestBrokerCommand):
 
     metacluster = "utmc9"
     cluster = "utlccl1"
@@ -139,22 +141,10 @@ class TestVulcanLocalDisk(VerifyNotificationsMixin, TestBrokerCommand):
                           "--switch=%s" % self.switch])
 
     def test_050_add_vmhost(self):
-        self.noouttest(["add", "machine", "--machine", self.machine,
-                        "--rack", "ut3", "--model", "vb1205xm"])
-
-        self.noouttest(["add", "interface", "--interface", "eth0",
-                        "--machine", self.machine,
-                        "--mac", self.getip().mac])
-
-        self.dsdb_expect_add(self.vmhost, self.getip(), "eth0", self.getip().mac)
-        command = ["add", "host", "--hostname", self.vmhost, "--ip", self.getip(),
-                   "--machine", self.machine,
-                   "--domain", "unittest", "--buildstatus", "build",
-                   "--osname", "esxi", "--osversion", "4.0.0",
-                   "--archetype", "vmhost",
-                   "--personality", "vulcan-local-disk"]
-        self.noouttest(command)
-        self.dsdb_verify()
+        self.create_host(self.vmhost, self.net["autopg2"].usable[0], self.machine,
+                         model="vb1205xm", rack="ut3",
+                         archetype="vmhost", personality="vulcan-local-disk",
+                         osname="esxi", osversion="4.0.0")
 
     def test_060_bind_host_to_cluster(self):
         self.successtest(["make", "cluster", "--cluster", self.cluster])

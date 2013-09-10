@@ -19,8 +19,19 @@
 from collections import defaultdict
 
 
+class MachineData(object):
+    def __init__(self, name, model):
+        self.name = name
+        self.model = model
+        self.comments = None
+        self.interfaces = {}
+        # Other attributes are created on-demand based on the parameters. If you
+        # need some attribute (e.g. memory) always avilable, initialize it to
+        # None here.
+
+
 class MachineTestMixin(object):
-    def verify_show_machine(self, name, interfaces=None, model=None,
+    def verify_show_machine(self, name, interfaces=None, zebra=False, model=None,
                             vendor=None, cluster=None, vmhost=None, memory=None,
                             **kwargs):
         if not interfaces:
@@ -65,8 +76,10 @@ class MachineTestMixin(object):
         for nic_name, params in iface_params.items():
             if nic_name == "eth0":
                 flagstr = r" \[boot, default_route\]"
+            elif zebra and nic_name == "eth1":
+                flagstr = r" \[default_route\]"
             else:
-                flagstr = r""
+                flagstr = ""
 
             if "mac" in params:
                 regexp = r"Interface: %s %s%s$" % (nic_name, params["mac"],
@@ -87,6 +100,12 @@ class MachineTestMixin(object):
             if "pg" in params:
                 regexp += r"\s+Port Group: %s" % params["pg"]
 
+            if "ip" in params:
+                regexp += r"\s+Network Environment: internal$"
+                regexp += r"\s+Provides: %s \[%s\]$" % (
+                    params["fqdn"].replace(".", r"\."),
+                    str(params["ip"]).replace(".", r"\."))
+
             self.searchoutput(show_out, regexp, show_cmd)
 
         # Allow the caller to do further testing if it wants
@@ -96,6 +115,8 @@ class MachineTestMixin(object):
         kwargs = orig_kwargs.copy()
         if not interfaces:
             interfaces = ["eth0"]
+
+        machdef = MachineData(name, model)
 
         # We assume the vendor will be guessed
         add_machine_args = ["--machine", name,
@@ -107,6 +128,7 @@ class MachineTestMixin(object):
             if optional not in kwargs:
                 continue
             value = kwargs.pop(optional)
+            setattr(machdef, optional, value)
             add_machine_args.extend(["--" + optional, value])
 
         self.noouttest(["add_machine"] + add_machine_args)
@@ -139,8 +161,12 @@ class MachineTestMixin(object):
                 self.noouttest(add_ifaddr_args)
                 self.dsdb_verify()
 
+            machdef.interfaces[nic_name] = params
+
         if kwargs:
             raise ValueError("Unprocessed arguments: %r" % kwargs)
+
+        return machdef
 
     def create_machine_hs21(self, name, interfaces=None, **orig_kwargs):
         kwargs = orig_kwargs.copy()
@@ -189,3 +215,77 @@ class MachineTestMixin(object):
         self.matchoutput(show_out, "Blade: %s" % name.lower(), show_cmd)
         self.matchclean(show_out, "Primary Name:", show_cmd)
         return show_cmd, show_out
+
+    def create_host(self, hostname, ip, machine,
+                    interfaces=None, zebra=False, model=None,
+                    archetype="aquilon", **orig_kwargs):
+        kwargs = orig_kwargs.copy()
+
+        # Separate the host-specific arguments
+        host_kwargs = {}
+        for arg in ["domain", "sandbox", "personality", "osname", "osversion",
+                    "buildstatus", "grn", "eon_id"]:
+            if arg in kwargs:
+                host_kwargs[arg] = kwargs.pop(arg)
+
+        if not interfaces:
+            interfaces = ["eth0"]
+            if "eth0_mac" not in kwargs:
+                kwargs["eth0_mac"] = ip.mac
+
+        if "domain" not in host_kwargs and "sandbox" not in host_kwargs:
+            host_kwargs["domain"] = "unittest"
+
+        machdef = self.create_machine(machine, model, interfaces, **kwargs)
+
+        for nic_name, params in machdef.interfaces.items():
+            if "ip" not in params:
+                continue
+            self.dsdb_expect_delete(params["ip"])
+            self.dsdb_expect_add(params["fqdn"], params["ip"], nic_name,
+                                 params["mac"], primary=hostname)
+
+        command = ["add_host", "--hostname", hostname, "--ip", ip,
+                   "--machine", machine, "--archetype", archetype]
+        for arg, value in host_kwargs.items():
+            command.extend(["--" + arg, value])
+
+        if zebra:
+            self.dsdb_expect_add(hostname, ip, "le0", comments=machdef.comments)
+            command.extend(["--zebra_interfaces", ",".join(interfaces)])
+        else:
+            # FIXME: do not hardcode eth0?
+            self.dsdb_expect_add(hostname, ip, "eth0", ip.mac, comments=machdef.comments)
+
+        self.noouttest(command)
+        self.dsdb_verify()
+
+        show_cmd, show_out = self.verify_show_machine(machine, interfaces,
+                                                      zebra=zebra, **kwargs)
+        self.matchoutput(show_out, "Primary Name: %s [%s]" % (hostname, ip),
+                         show_cmd)
+        for nic_name, params in machdef.interfaces.items():
+            if "ip" not in params:
+                continue
+            self.matchoutput(show_out, "Auxiliary: %s [%s]" % (params["fqdn"],
+                                                               params["ip"]),
+                             show_cmd)
+        return show_cmd, show_out
+
+    def delete_host(self, hostname, ip, machine, interfaces=None, **kwargs):
+        if not interfaces:
+            interfaces = []
+
+        for nic_name in interfaces:
+            nic_ip = kwargs.get(nic_name + "_ip", None)
+            if nic_ip and nic_ip != ip:
+                self.dsdb_expect_delete(nic_ip)
+                self.noouttest(["del_interface_address", "--machine", machine,
+                               "--interface", nic_name, "--ip", nic_ip])
+                self.dsdb_verify()
+
+        self.dsdb_expect_delete(ip)
+        self.statustest(["del_host", "--hostname", hostname])
+        self.dsdb_verify()
+
+        self.noouttest(["del_machine", "--machine", machine])
