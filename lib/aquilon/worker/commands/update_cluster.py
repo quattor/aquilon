@@ -140,7 +140,6 @@ class CommandUpdateCluster(BrokerCommand):
         if not cluster_updated:
             return
 
-        session.add(dbcluster)
         session.flush()
 
         plenaries.append(Plenary.get_plenary(dbcluster))
@@ -199,7 +198,6 @@ def update_cluster_location(session, logger, dbcluster,
                     plenary = Plenary.get_plenary(dbmachine, logger=logger)
                     remove_plenaries.append(plenary)
                     dbmachine.location = dblocation
-                    session.add(dbmachine)
                     # This plenary will have a path to the new location.
                     plenaries.append(Plenary.get_plenary(dbmachine))
                     # Update the path to the machine plenary in the

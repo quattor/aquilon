@@ -38,7 +38,6 @@ class CommandChangeStatus(BrokerCommand):
         if not changed or not dbhost.archetype.is_compileable:
             return
 
-        session.add(dbhost)
         session.flush()
 
         plenary = Plenary.get_plenary(dbhost, logger=logger)

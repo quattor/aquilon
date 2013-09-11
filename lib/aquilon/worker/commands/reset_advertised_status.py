@@ -40,7 +40,6 @@ class CommandResetAdvertisedStatus(BrokerCommand):
 
         dbhost.advertise_status = False
 
-        session.add(dbhost)
         session.flush()
 
         if dbhost.archetype.is_compileable:

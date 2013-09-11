@@ -233,7 +233,6 @@ def sync_domain(dbdomain, logger=LOGGER, locked=False):
             lock_queue.release(key)
     if dbdomain.tracked_branch:
         dbdomain.rollback_commit = rollback_commit
-        session.add(dbdomain)
 
 
 IP_NOT_DEFINED_RE = re.compile(r"Host with IP address "

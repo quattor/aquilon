@@ -140,7 +140,6 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
             rename_interface(session, dbinterface, rename_to)
 
         session.flush()
-        session.refresh(dbhw_ent)
 
         plenary_info = Plenary.get_plenary(dbhw_ent, logger=logger)
         with plenary_info.get_write_key():
