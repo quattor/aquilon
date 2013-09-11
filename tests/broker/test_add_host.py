@@ -97,10 +97,12 @@ class TestAddHost(TestBrokerCommand):
         self.matchoutput(out, "Used by GRN: grn:/example/cards", command)
 
     def testverifyshowhostjackgrns(self):
+        ip = self.net["unknown0"].usable[17]
         command = ["show_host", "--grns",
                    "--hostname=jack.cards.example.com"]
         (out, err) = self.successtest(command)
-        self.matchoutput(out, "Primary Name: jack.cards.example.com [4.2.1.22]", command)
+        self.matchoutput(out, "Primary Name: jack.cards.example.com [%s]" % ip,
+                         command)
         self.matchoutput(out, "Owned by GRN: grn:/example/cards", command)
         self.matchoutput(out, "Used by GRN: grn:/example/cards [target: esp]", command)
 

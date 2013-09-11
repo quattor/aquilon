@@ -257,9 +257,10 @@ class TestVulcanLocalDisk(VerifyNotificationsMixin, TestBrokerCommand):
                             "--interface", "eth0", "--automac", "--autopg"])
 
     def test_170_add_vm_hosts(self):
-        self.dsdb_expect_add("utpgm0.aqd-unittest.ms.com", "4.2.18.6", "eth0", "00:50:56:01:20:00")
+        ip = self.net["autopg1"].usable[1]
+        self.dsdb_expect_add("utpgm0.aqd-unittest.ms.com", ip, "eth0", "00:50:56:01:20:00")
         command = ["add", "host", "--hostname", "utpgm0.aqd-unittest.ms.com",
-                   "--ip", "4.2.18.6",
+                   "--ip", ip,
                    "--machine", "utpgm0",
                    "--domain", "unittest", "--buildstatus", "build",
                    "--archetype", "aquilon",
@@ -332,7 +333,7 @@ class TestVulcanLocalDisk(VerifyNotificationsMixin, TestBrokerCommand):
 
     def test_305_del_vm_host(self):
         basetime = datetime.now()
-        self.dsdb_expect_delete("4.2.18.6")
+        self.dsdb_expect_delete(self.net["autopg1"].usable[1])
         command = ["del", "host", "--hostname", "utpgm0.aqd-unittest.ms.com"]
         self.statustest(command)
         self.wait_notification(basetime, 1)

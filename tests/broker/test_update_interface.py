@@ -274,6 +274,7 @@ class TestUpdateInterface(TestBrokerCommand):
         net = self.net["unknown0"]
         eth0ip = net.usable[11]
         eth1ip = net.usable[12]
+        route_gateway = net.gateway
         # Use --generate as update_interface does not update the on-disk
         # templates
         command = "cat --hostname unittest02.one-nyp.ms.com --data --generate"
@@ -293,11 +294,11 @@ class TestUpdateInterface(TestBrokerCommand):
                           r'"route", list\(\s*'
                           r'nlist\(\s*'
                           r'"address", "250.250.0.0",\s*'
-                          r'"gateway", "4.2.1.1",\s*'
+                          r'"gateway", "%s",\s*'
                           r'"netmask", "255.255.0.0"\s*\)\s*'
                           r'\)\s*\)' %
                           (net.broadcast, net.gateway,
-                           eth0ip, net.netmask),
+                           eth0ip, net.netmask, route_gateway),
                           command)
         self.searchoutput(out, r'"eth1", nlist\(\s*"bootproto", "none"\s*\)',
                           command)
