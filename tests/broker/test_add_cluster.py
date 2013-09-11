@@ -71,7 +71,6 @@ class TestAddCluster(TestBrokerCommand):
     def test_20_fail_add_existing(self):
         command = ["add_cluster", "--cluster=utvcs1",
                    "--building=ut",
-                   "--buildstatus=build",
                    "--domain=unittest", "--down_hosts_threshold=0",
                    "--archetype=hacluster", "--personality=vcs-msvcs"]
         out = self.badrequesttest(command)

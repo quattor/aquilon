@@ -262,7 +262,6 @@ class TestVulcanLocalDisk(VerifyNotificationsMixin, TestBrokerCommand):
                    "--ip", "4.2.18.6",
                    "--machine", "utpgm0",
                    "--domain", "unittest", "--buildstatus", "build",
-                   "--osname", "linux", "--osversion", "6.0-x86_64",
                    "--archetype", "aquilon",
                    "--personality", "virteng-perf-test"]
         self.noouttest(command)

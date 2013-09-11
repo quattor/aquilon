@@ -258,6 +258,7 @@ class TestSearchHost(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "unittest02.one-nyp.ms.com", command)
         self.matchoutput(out, "unittest00.one-nyp.ms.com", command)
+        self.matchclean(out, self.aurora_with_node, command)
 
     def testosunavailable(self):
         command = "search host --osname os-does-not-exist --osversion foo --archetype aquilon"
@@ -269,11 +270,15 @@ class TestSearchHost(TestBrokerCommand):
         command = "search host --osname linux"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "unittest02.one-nyp.ms.com", command)
+        self.matchoutput(out, self.aurora_with_node, command)
+        self.matchoutput(out, self.aurora_without_node, command)
 
     def testosversiononly(self):
         command = "search host --osversion 5.0.1-x86_64"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "unittest00.one-nyp.ms.com", command)
+        self.matchoutput(out, self.aurora_with_node, command)
+        self.matchoutput(out, self.aurora_without_node, command)
 
     def testserviceavailable(self):
         command = "search host --service utsvc"

@@ -341,16 +341,14 @@ class TestMakeAquilon(VerifyNotificationsMixin, TestBrokerCommand):
     def testmissingrequiredservice(self):
         command = ["make", "aquilon",
                    "--hostname", "aquilon91.aqd-unittest.ms.com",
-                   "--personality", "badpersonality2",
-                   "--osname", "linux", "--osversion", "5.0.1-x86_64"]
+                   "--personality", "badpersonality2"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Could not find a relevant service map", command)
 
     def testmissingrequiredservicedebug(self):
         command = ["make", "aquilon", "--debug",
                    "--hostname", "aquilon92.aqd-unittest.ms.com",
-                   "--personality", "badpersonality2",
-                   "--osname", "linux", "--osversion", "5.0.1-x86_64"]
+                   "--personality", "badpersonality2"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Creating service Chooser", command)
         self.matchoutput(out, "Could not find a relevant service map", command)
@@ -358,8 +356,7 @@ class TestMakeAquilon(VerifyNotificationsMixin, TestBrokerCommand):
     def testmissingpersonalitytemplate(self):
         command = ["make", "aquilon",
                    "--hostname", "aquilon93.aqd-unittest.ms.com",
-                   "--personality", "badpersonality",
-                   "--osname", "linux", "--osversion", "5.0.1-x86_64"]
+                   "--personality", "badpersonality"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "'/system/personality/function' does not have an associated value", command)
         self.failIf(os.path.exists(

@@ -33,7 +33,6 @@ class TestAddAquilonHost(TestBrokerCommand):
         self.noouttest(["add", "aquilon", "host",
                         "--hostname", "unittest00.one-nyp.ms.com", "--ip", ip,
                         "--machine", "ut3c1n3", "--domain", "unittest",
-                        "--osname", "linux", "--osversion", "5.0.1-x86_64",
                         "--personality", "inventory", "--buildstatus", "blind"])
         self.dsdb_verify()
 
@@ -70,7 +69,6 @@ class TestAddAquilonHost(TestBrokerCommand):
         self.noouttest(["add", "aquilon", "host",
                         "--hostname", "unittest12.aqd-unittest.ms.com",
                         "--ip", ip, "--buildstatus", "blind",
-                        "--osname", "linux", "--osversion", "5.0.1-x86_64",
                         "--machine", "ut3s01p1a", "--domain", "unittest"])
         self.dsdb_verify()
 
@@ -95,7 +93,6 @@ class TestAddAquilonHost(TestBrokerCommand):
                         "--hostname", "unittest13.aqd-unittest.ms.com",
                         "--ip", ip, "--buildstatus", "blind",
                         "--machine", "ut3s01p1b", "--domain", "unittest",
-                        "--osname", "linux", "--osversion", "5.0.1-x86_64",
                         "--personality", "compileserver"])
         self.dsdb_verify()
 
@@ -116,10 +113,8 @@ class TestAddAquilonHost(TestBrokerCommand):
         ip = self.net["zebra_vip"].usable[2]
         command = ["add", "aquilon", "host",
                    "--hostname", "unittest20.aqd-unittest.ms.com",
-                   "--ip", ip, "--buildstatus", "build",
-                   "--zebra_interfaces", "eth0,eth2",
+                   "--ip", ip, "--zebra_interfaces", "eth0,eth2",
                    "--machine", "ut3c5n2", "--domain", "unittest",
-                   "--osname", "linux", "--osversion", "5.0.1-x86_64",
                    "--personality", "compileserver"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Machine unittest20.aqd-unittest.ms.com does not "
@@ -146,10 +141,8 @@ class TestAddAquilonHost(TestBrokerCommand):
                              eth1_ip.mac, primary="unittest20.aqd-unittest.ms.com")
         self.noouttest(["add", "aquilon", "host",
                         "--hostname", "unittest20.aqd-unittest.ms.com",
-                        "--ip", ip, "--buildstatus", "build",
-                        "--zebra_interfaces", "eth0,eth1",
+                        "--ip", ip, "--zebra_interfaces", "eth0,eth1",
                         "--machine", "ut3c5n2", "--domain", "unittest",
-                        "--osname", "linux", "--osversion", "5.0.1-x86_64",
                         "--personality", "compileserver"])
         self.dsdb_verify()
 
@@ -224,9 +217,8 @@ class TestAddAquilonHost(TestBrokerCommand):
         self.dsdb_expect_add("unittest21.aqd-unittest.ms.com", ip, "bond0")
         self.noouttest(["add", "aquilon", "host",
                         "--hostname", "unittest21.aqd-unittest.ms.com",
-                        "--ip", ip, "--buildstatus", "build",
-                        "--machine", "ut3c5n3", "--domain", "unittest",
-                        "--osname", "linux", "--osversion", "5.0.1-x86_64",
+                        "--ip", ip, "--machine", "ut3c5n3",
+                        "--domain", "unittest",
                         "--personality", "compileserver"])
         self.dsdb_verify()
 
@@ -261,9 +253,8 @@ class TestAddAquilonHost(TestBrokerCommand):
         self.dsdb_expect_add("unittest22.aqd-unittest.ms.com", ip, "br0")
         self.noouttest(["add", "aquilon", "host",
                         "--hostname", "unittest22.aqd-unittest.ms.com",
-                        "--ip", ip, "--buildstatus", "build",
-                        "--machine", "ut3c5n4", "--domain", "unittest",
-                        "--osname", "linux", "--osversion", "5.0.1-x86_64",
+                        "--ip", ip, "--machine", "ut3c5n4",
+                        "--domain", "unittest",
                         "--personality", "compileserver"])
         self.dsdb_verify()
 
@@ -299,9 +290,8 @@ class TestAddAquilonHost(TestBrokerCommand):
                              ip.mac)
         self.noouttest(["add", "aquilon", "host",
                         "--hostname", "unittest23.aqd-unittest.ms.com",
-                        "--ip", ip, "--buildstatus", "build",
-                        "--machine", "ut3c5n5", "--domain", "unittest",
-                        "--osname", "linux", "--osversion", "5.0.1-x86_64",
+                        "--ip", ip, "--machine", "ut3c5n5",
+                        "--domain", "unittest",
                         "--personality", "compileserver"])
         self.dsdb_verify()
 
@@ -311,9 +301,8 @@ class TestAddAquilonHost(TestBrokerCommand):
                              ip.mac)
         self.noouttest(["add", "aquilon", "host",
                         "--hostname", "unittest24.aqd-unittest.ms.com",
-                        "--ip", ip, "--buildstatus", "build",
-                        "--machine", "np3c5n5", "--domain", "unittest",
-                        "--osname", "linux", "--osversion", "5.0.1-x86_64",
+                        "--ip", ip, "--machine", "np3c5n5",
+                        "--domain", "unittest",
                         "--personality", "compileserver"])
         self.dsdb_verify()
 
@@ -323,9 +312,8 @@ class TestAddAquilonHost(TestBrokerCommand):
                              ip.mac)
         self.noouttest(["add", "aquilon", "host",
                         "--hostname", "unittest25.aqd-unittest.ms.com",
-                        "--ip", ip, "--buildstatus", "build",
-                        "--machine", "ut3c5n7", "--domain", "unittest",
-                        "--osname", "linux", "--osversion", "5.0.1-x86_64",
+                        "--ip", ip, "--machine", "ut3c5n7",
+                        "--domain", "unittest",
                         "--personality", "compileserver"])
         self.dsdb_verify()
 
@@ -335,9 +323,8 @@ class TestAddAquilonHost(TestBrokerCommand):
                              ip.mac)
         self.noouttest(["add", "aquilon", "host",
                         "--hostname", "unittest26.aqd-unittest.ms.com",
-                        "--ip", ip, "--buildstatus", "build",
-                        "--machine", "ut3c5n8", "--domain", "unittest",
-                        "--osname", "linux", "--osversion", "5.0.1-x86_64",
+                        "--ip", ip, "--machine", "ut3c5n8",
+                        "--domain", "unittest",
                         "--personality", "compileserver"])
         self.dsdb_verify()
 
