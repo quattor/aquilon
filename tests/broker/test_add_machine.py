@@ -479,20 +479,6 @@ class TestAddMachine(TestBrokerCommand):
                    "--model", "f5_model", "--rack", "ut3"]
         self.noouttest(command)
 
-    def testverifymachineall(self):
-        command = ["show", "machine", "--all"]
-        out = self.commandtest(command)
-        self.matchoutput(out, "ut3c5n10", command)
-        self.matchoutput(out, "ut3c1n3", command)
-        self.matchoutput(out, "ut3c1n4", command)
-        self.matchoutput(out, "ut3s01p1a", command)
-        self.matchoutput(out, "ut3s01p1b", command)
-        self.matchoutput(out, "ut8s02p1", command)
-        self.matchoutput(out, "ut9s03p1", command)
-        self.matchoutput(out, "ut10s04p1", command)
-        self.matchoutput(out, "ut11s01p1", command)
-        self.matchoutput(out, "f5test", command)
-
     # FIXME: Missing a test for adding a macihne to a chassis where the
     # fqdn given for the chassis isn't *actually* a chassis.
     # FIXME: Missing a test for chassis without a slot.  (May not be possible
