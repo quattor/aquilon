@@ -166,8 +166,7 @@ class TestDelHost(VerifyNotificationsMixin, TestBrokerCommand):
 
     def testdelaurorawithoutnode(self):
         command = "del host --hostname %s.ms.com" % self.aurora_without_node
-        (out, err) = self.successtest(command.split(" "))
-        self.assertEmptyOut(out, command)
+        err = self.statustest(command.split(" "))
         self.matchoutput(err,
                          "WARNING: removing host %s.ms.com from AQDB "
                          "and *not* changing DSDB." % self.aurora_without_node,
@@ -177,12 +176,9 @@ class TestDelHost(VerifyNotificationsMixin, TestBrokerCommand):
         command = "show host --hostname %s.ms.com" % self.aurora_without_node
         self.notfoundtest(command.split(" "))
 
-    aurora_without_rack = "oy605c2n6"
-
     def testdelaurorawithoutrack(self):
         command = "del host --hostname %s.ms.com" % self.aurora_without_rack
-        (out, err) = self.successtest(command.split(" "))
-        self.assertEmptyOut(out, command)
+        err = self.statustest(command.split(" "))
         self.matchoutput(err,
                          "WARNING: removing host %s.ms.com from AQDB "
                          "and *not* changing DSDB." % self.aurora_without_rack,

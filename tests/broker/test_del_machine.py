@@ -211,6 +211,18 @@ class TestDelMachine(TestBrokerCommand):
     def testdelutnorack(self):
         self.noouttest(["del", "machine", "--machine", "utnorack"])
 
+    def testdelnyaqd1(self):
+        self.noouttest(["del_machine", "--machine", "ny00l4as01"])
+
+    def testdelaurorawithnode(self):
+        self.noouttest(["del_machine", "--machine", self.aurora_with_node])
+
+    def testdelaurorawithoutnode(self):
+        self.noouttest(["del_machine", "--machine", self.aurora_without_node])
+
+    def testdelaurorawithoutrack(self):
+        self.noouttest(["del_machine", "--machine", self.aurora_without_rack])
+
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelMachine)

@@ -44,6 +44,10 @@ class TestBrokerCommand(unittest.TestCase):
     sandboxdir = None
     user = None
 
+    aurora_with_node = "oy604c2n6"
+    aurora_without_node = "pissp1"
+    aurora_without_rack = "oy605c2n6"
+
     @classmethod
     def setUpClass(cls):
         cls.config = Config()
@@ -61,6 +65,10 @@ class TestBrokerCommand(unittest.TestCase):
         cls.sandboxdir = os.path.join(cls.config.get("broker", "templatesdir"),
                                       cls.user)
 
+        cls.template_extension = cls.config.get("panc", "template_extension")
+        cls.gzip_profiles = cls.config.getboolean("panc", "gzip_output")
+        cls.profile_suffix = ".xml.gz" if cls.gzip_profiles else ".xml"
+
         # Need to import protocol buffers after we have the config
         # object all squared away and we can set the sys.path
         # variable appropriately.
@@ -76,21 +84,6 @@ class TestBrokerCommand(unittest.TestCase):
             globals()[m] = __import__(m)
 
     def setUp(self):
-        self.template_extension = self.config.get("panc", "template_extension")
-
-        if self.config.has_option("unittest", "aurora_with_node"):
-            self.aurora_with_node = self.config.get("unittest",
-                                                    "aurora_with_node")
-        else:
-            self.aurora_with_node = "oyidb1622"
-        if self.config.has_option("unittest", "aurora_without_node"):
-            self.aurora_without_node = self.config.get("unittest",
-                                                       "aurora_without_node")
-        else:
-            self.aurora_without_node = "pissp1"
-        self.gzip_profiles = self.config.getboolean("panc", "gzip_output")
-        self.profile_suffix = ".xml.gz" if self.gzip_profiles else ".xml"
-
         for name in [DSDB_EXPECT_SUCCESS_FILE, DSDB_EXPECT_FAILURE_FILE,
                      DSDB_ISSUED_CMDS_FILE, DSDB_EXPECT_FAILURE_ERROR]:
             path = os.path.join(self.dsdb_coverage_dir, name)
