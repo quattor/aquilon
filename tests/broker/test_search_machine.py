@@ -148,6 +148,12 @@ class TestSearchMachine(TestBrokerCommand):
         self.matchclean(out, "evm2", command)
         self.matchclean(out, "evm10", command)
 
+    def testip(self):
+        ip = self.net["unknown0"].usable[2]
+        command = ["search_machine", "--ip=%s" % ip]
+        out = self.commandtest(command)
+        self.matchoutput(out, "ut3c1n3", command)
+
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestSearchMachine)

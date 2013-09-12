@@ -562,6 +562,14 @@ class TestSearchHost(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.parse_hostlist_msg(out, expect=1)
 
+    def testip(self):
+        ip = self.net["unknown0"].usable[2]
+        command = ["search_host", "--ip=%s" % ip]
+        out = self.commandtest(command)
+        self.matchoutput(out, "unittest00.one-nyp.ms.com", command)
+        self.matchclean(out, "unittest02", command)
+
+
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestSearchHost)
     unittest.TextTestRunner(verbosity=5).run(suite)

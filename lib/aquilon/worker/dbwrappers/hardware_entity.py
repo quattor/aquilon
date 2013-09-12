@@ -33,7 +33,7 @@ from aquilon.utils import first_of
 def search_hardware_entity_query(session, hardware_type=HardwareEntity,
                                  subquery=False,
                                  model=None, vendor=None, machine_type=None,
-                                 exact_location=False,
+                                 exact_location=False, ip=None,
                                  mac=None, pg=None, serial=None,
                                  interface_model=None, interface_vendor=None,
                                  **kwargs):
@@ -56,12 +56,15 @@ def search_hardware_entity_query(session, hardware_type=HardwareEntity,
         subq = Model.get_matching_query(session, name=model, vendor=vendor,
                                         machine_type=machine_type, compel=True)
         q = q.filter(HardwareEntity.model_id.in_(subq))
-    if mac or pg or interface_vendor or interface_model:
+    if ip or mac or pg or interface_vendor or interface_model:
         q = q.join('interfaces')
         if mac:
             q = q.filter_by(mac=mac)
         if pg:
             q = q.filter_by(port_group=pg)
+        if ip:
+            q = q.join(AddressAssignment)
+            q = q.filter(AddressAssignment.ip == ip)
         if interface_model or interface_vendor:
             # HardwareEntity also has a .model relation, so we have to be
             # explicit here
