@@ -51,17 +51,35 @@ class TestMapService(TestBrokerCommand):
         self.matchoutput(out, "No matching map found.", command)
 
     def testmapdns(self):
-        self.noouttest(["map", "service", "--hub", "ny",
-                        "--service", "dns", "--instance", "utdnsinstance"])
+        self.noouttest(["map", "service", "--building", "ut",
+                        "--service", "dns", "--instance", "unittest"])
+        self.noouttest(["map", "service", "--building", "cards",
+                        "--service", "dns", "--instance", "unittest"])
+        self.noouttest(["map", "service", "--building", "np",
+                        "--service", "dns", "--instance", "one-nyp"])
 
-    def testverifymapdns(self):
-        command = ["show", "map", "--hub", "ny",
-                   "--service", "dns", "--instance", "utdnsinstance"]
+    def testverifymapdnsut(self):
+        command = ["show", "map", "--building", "ut", "--service", "dns"]
         out = self.commandtest(command)
         self.matchoutput(out,
                          "Archetype: aquilon Service: dns "
-                         "Instance: utdnsinstance Map: Hub ny",
+                         "Instance: unittest Map: Building ut",
                          command)
+        self.matchclean(out, "cards", command)
+        self.matchclean(out, "one-nyp", command)
+
+    def testverifymapdnsinstance(self):
+        command = ["show", "map", "--service", "dns", "--instance", "unittest"]
+        out = self.commandtest(command)
+        self.matchoutput(out,
+                         "Archetype: aquilon Service: dns "
+                         "Instance: unittest Map: Building ut",
+                         command)
+        self.matchoutput(out,
+                         "Archetype: aquilon Service: dns "
+                         "Instance: unittest Map: Building cards",
+                         command)
+        self.matchclean(out, "one-nyp", command)
 
     def testmapaqd(self):
         self.noouttest(["map", "service", "--campus", "ny",
@@ -99,24 +117,25 @@ class TestMapService(TestBrokerCommand):
 
     def testmapbootserver(self):
         self.noouttest(["map", "service", "--building", "ut",
-                        "--service", "bootserver", "--instance", "np.test"])
+                        "--service", "bootserver", "--instance", "unittest"])
         self.noouttest(["map", "service", "--building", "cards",
-                        "--service", "bootserver", "--instance", "np.test"])
+                        "--service", "bootserver", "--instance", "unittest"])
         self.noouttest(["map", "service", "--building", "np",
-                        "--service", "bootserver", "--instance", "np.test"])
+                        "--service", "bootserver", "--instance", "one-nyp"])
 
     def testverifymapbootserver(self):
         command = ["show_map", "--service", "bootserver",
-                   "--instance", "np.test"]
+                   "--instance", "unittest"]
         out = self.commandtest(command)
         self.matchoutput(out,
                          "Archetype: aquilon Service: bootserver "
-                         "Instance: np.test Map: Building ut",
+                         "Instance: unittest Map: Building ut",
                          command)
         self.matchoutput(out,
                          "Archetype: aquilon Service: bootserver "
-                         "Instance: np.test Map: Building cards",
+                         "Instance: unittest Map: Building cards",
                          command)
+        self.matchclean(out, "Building np", command)
 
     def testmapntp(self):
         self.noouttest(["map", "service", "--city", "ny",
@@ -377,7 +396,7 @@ class TestMapService(TestBrokerCommand):
                          command)
         self.matchoutput(out,
                          "Archetype: aquilon Service: bootserver "
-                         "Instance: np.test Map: Building ut",
+                         "Instance: unittest Map: Building ut",
                          command)
         self.matchoutput(out,
                          "Archetype: aquilon Service: ntp "
@@ -389,7 +408,7 @@ class TestMapService(TestBrokerCommand):
                          command)
         self.matchoutput(out,
                          "Archetype: aquilon Service: dns "
-                         "Instance: utdnsinstance Map: Hub ny",
+                         "Instance: unittest Map: Building ut",
                          command)
         self.matchoutput(out,
                          "Archetype: aquilon Personality: lemon-collector-oracle "

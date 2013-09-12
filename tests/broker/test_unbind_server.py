@@ -40,7 +40,6 @@ class TestUnbindServer(TestBrokerCommand):
         command = ["cat", "--hostname", "unittest02.one-nyp.ms.com"]
         out = self.commandtest(command)
         self.searchoutput(out, r'/utsvc/[^/]+/server', command)
-        self.searchoutput(out, r'/dns/[^/]+/server', command)
 
     def testunbindutsi1unittest02(self):
         command = ["unbind", "server",
@@ -49,17 +48,6 @@ class TestUnbindServer(TestBrokerCommand):
         err = self.statustest(command)
         self.check_last_server_msg(err, command, "utsvc", "utsi1",
                                    "unittest02.one-nyp.ms.com")
-
-    def testunbinddns(self):
-        self.noouttest(["unbind", "server",
-                        "--hostname", "unittest02.one-nyp.ms.com",
-                        "--service", "dns", "--all"])
-        command = ["unbind", "server",
-                   "--hostname", "nyaqd1.ms.com",
-                   "--service", "dns", "--all"]
-        err = self.statustest(command)
-        self.check_last_server_msg(err, command, "dns", "utdnsinstance",
-                                   "nyaqd1.ms.com")
 
     # Should have already been unbound...
     # Hmm... this (as implemented) actually returns 0.  Kind of a pointless
@@ -84,7 +72,6 @@ class TestUnbindServer(TestBrokerCommand):
         command = ["cat", "--hostname", "unittest02.one-nyp.ms.com"]
         out = self.commandtest(command)
         self.searchclean(out, r'/utsvc/[^/]+/server', command)
-        self.searchclean(out, r'/dns/[^/]+/server', command)
 
     def testverifybindutsi1(self):
         command = "show service --service utsvc --instance utsi1"
@@ -116,6 +103,23 @@ class TestUnbindServer(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchclean(out, "unittest02.one-nyp.ms.com", command)
         self.matchclean(out, "unittest00.one-nyp.ms.com", command)
+
+    def testunbinddns(self):
+        command = ["unbind", "server", "--service", "dns", "--all",
+                   "--hostname", "infra1.one-nyp.ms.com"]
+        err = self.statustest(command)
+        self.check_last_server_msg(err, command, "dns", "one-nyp",
+                                   "infra1.one-nyp.ms.com")
+
+        self.noouttest(["unbind", "server",
+                        "--hostname", "infra1.aqd-unittest.ms.com",
+                        "--service", "dns", "--all"])
+
+        command = ["unbind", "server", "--service", "dns", "--all",
+                   "--hostname", "nyaqd1.ms.com"]
+        err = self.statustest(command)
+        self.check_last_server_msg(err, command, "dns", "unittest",
+                                   "nyaqd1.ms.com")
 
     def testunbindntp(self):
         command = ["unbind", "server",
@@ -167,16 +171,24 @@ class TestUnbindServer(TestBrokerCommand):
 
     def testunbindbootserver(self):
         command = ["unbind_server",
-                   "--hostname=server9.aqd-unittest.ms.com",
+                   "--hostname=infra1.aqd-unittest.ms.com",
                    "--service=bootserver", "--all"]
         err = self.statustest(command)
-        self.check_last_server_msg(err, command, "bootserver", "np.test",
-                                   "server9.aqd-unittest.ms.com")
+        self.check_last_server_msg(err, command, "bootserver", "unittest",
+                                   "infra1.aqd-unittest.ms.com")
+
+        command = ["unbind_server",
+                   "--hostname=infra1.one-nyp.ms.com",
+                   "--service=bootserver", "--all"]
+        err = self.statustest(command)
+        self.check_last_server_msg(err, command, "bootserver", "one-nyp",
+                                   "infra1.one-nyp.ms.com")
 
     def testverifyunbindbootserver(self):
         command = "show service --service bootserver"
         out = self.commandtest(command.split(" "))
-        self.matchclean(out, "server9.aqd-unittest.ms.com", command)
+        self.matchclean(out, "infra1.aqd-unittest.ms.com", command)
+        self.matchclean(out, "infra1.one-nyp.ms.com", command)
 
     def testunbindchooser(self):
         for service in ["chooser1", "chooser2", "chooser3"]:

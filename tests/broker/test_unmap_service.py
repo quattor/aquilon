@@ -89,11 +89,11 @@ class TestUnmapService(TestBrokerCommand):
 
     def testunmapdns(self):
         self.noouttest(["unmap", "service", "--hub", "ny",
-                        "--service", "dns", "--instance", "utdnsinstance"])
+                        "--service", "dns", "--instance", "unittest"])
 
     def testverifyunmapdns(self):
         command = ["show_map",
-                   "--service=dns", "--instance=utdnsinstance", "--hub=ny"]
+                   "--service=dns", "--instance=unittest", "--hub=ny"]
         self.notfoundtest(command)
 
     def testunmapaqd(self):
@@ -128,17 +128,17 @@ class TestUnmapService(TestBrokerCommand):
 
     def testunmapbootserver(self):
         self.noouttest(["unmap", "service", "--building", "ut",
-                        "--service", "bootserver", "--instance", "np.test"])
+                        "--service", "bootserver", "--instance", "one-nyp"])
         self.noouttest(["unmap", "service", "--building", "cards",
-                        "--service", "bootserver", "--instance", "np.test"])
+                        "--service", "bootserver", "--instance", "one-nyp"])
         self.noouttest(["unmap", "service", "--building", "np",
-                        "--service", "bootserver", "--instance", "np.test"])
+                        "--service", "bootserver", "--instance", "one-nyp"])
 
     def testverifyunmapbootserver(self):
-        command = ["show_map", "--service=bootserver", "--instance=np.test",
+        command = ["show_map", "--service=bootserver", "--instance=one-nyp",
                    "--building=ut"]
         self.notfoundtest(command)
-        command = ["show_map", "--service=bootserver", "--instance=np.test",
+        command = ["show_map", "--service=bootserver", "--instance=one-nyp",
                    "--building=cards"]
         self.notfoundtest(command)
 

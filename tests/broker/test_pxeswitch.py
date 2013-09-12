@@ -58,7 +58,7 @@ class TestPxeswitch(TestBrokerCommand):
         self.matchoutput(err, "--sshdir %s" % sshdir, command)
         user = self.config.get("broker", "installfe_user")
         self.matchoutput(err,
-                         "--servers %s@server9.aqd-unittest.ms.com" % user,
+                         "--servers %s@infra1.aqd-unittest.ms.com" % user,
                          command)
 
     def testinstallunittest00noconf(self):
@@ -76,7 +76,7 @@ class TestPxeswitch(TestBrokerCommand):
         self.matchoutput(err, "--sshdir %s" % sshdir, command)
         user = self.config.get("broker", "installfe_user")
         self.matchoutput(err,
-                         "--servers %s@server9.aqd-unittest.ms.com" % user,
+                         "--servers %s@infra1.aqd-unittest.ms.com" % user,
                          command)
 
     def testinstallunittest02(self):

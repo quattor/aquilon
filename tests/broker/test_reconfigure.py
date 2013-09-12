@@ -132,10 +132,10 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
                          """include { "service/afs/q.ny.ms.com/client/config" };""",
                          command)
         self.matchoutput(out,
-                         """include { "service/bootserver/np.test/client/config" };""",
+                         """include { "service/bootserver/unittest/client/config" };""",
                          command)
         self.matchoutput(out,
-                         """include { "service/dns/utdnsinstance/client/config" };""",
+                         """include { "service/dns/unittest/client/config" };""",
                          command)
         self.matchoutput(out,
                          """include { "service/ntp/pa.ny.na/client/config" };""",
@@ -229,10 +229,10 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
                          """include { "service/afs/q.ny.ms.com/client/config" };""",
                          command)
         self.matchoutput(out,
-                         """include { "service/bootserver/np.test/client/config" };""",
+                         """include { "service/bootserver/unittest/client/config" };""",
                          command)
         self.matchoutput(out,
-                         """include { "service/dns/utdnsinstance/client/config" };""",
+                         """include { "service/dns/unittest/client/config" };""",
                          command)
         self.matchoutput(out,
                          """include { "service/ntp/pa.ny.na/client/config" };""",
@@ -435,13 +435,13 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
                          """include { "service/ntp/pa.ny.na/client/config" };""",
                          command)
         self.matchoutput(out,
-                         """include { "service/bootserver/np.test/client/config" };""",
+                         """include { "service/bootserver/unittest/client/config" };""",
                          command)
         self.matchoutput(out,
                          """include { "service/afs/q.ny.ms.com/client/config" };""",
                          command)
         self.matchoutput(out,
-                         """include { "service/dns/utdnsinstance/client/config" };""",
+                         """include { "service/dns/unittest/client/config" };""",
                          command)
         self.matchoutput(out,
                          """include { "personality/inventory/config" };""",

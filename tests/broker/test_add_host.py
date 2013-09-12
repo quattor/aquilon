@@ -69,6 +69,32 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
                          personality="eaitools",
                          comments="For net/pers based service mappings")
 
+    def testaddutinfra(self):
+        eth0_ip = self.net["unknown0"].usable[33]
+        eth1_ip = self.net["unknown1"].usable[34]
+        ip = self.net["zebra_vip"].usable[3]
+        self.create_host("infra1.aqd-unittest.ms.com", ip, "ut3c5n13",
+                         model="hs21-8853l5u", rack="ut3",
+                         interfaces=["eth0", "eth1"], zebra=True,
+                         eth0_mac=eth0_ip.mac, eth0_ip=eth0_ip,
+                         eth0_fqdn = "infra1-e0.aqd-unittest.ms.com",
+                         eth1_mac=eth1_ip.mac, eth1_ip=eth1_ip,
+                         eth1_fqdn = "infra1-e1.aqd-unittest.ms.com",
+                         personality="infra")
+
+    def testaddnpinfra(self):
+        eth0_ip = self.net["unknown0"].usable[35]
+        eth1_ip = self.net["unknown1"].usable[36]
+        ip = self.net["zebra_vip"].usable[4]
+        self.create_host("infra1.one-nyp.ms.com", ip, "np3c5n13",
+                         model="hs21-8853l5u", rack="np3",
+                         interfaces=["eth0", "eth1"], zebra=True,
+                         eth0_mac=eth0_ip.mac, eth0_ip=eth0_ip,
+                         eth0_fqdn = "infra1-e0.one-nyp.ms.com",
+                         eth1_mac=eth1_ip.mac, eth1_ip=eth1_ip,
+                         eth1_fqdn = "infra1-e1.one-nyp.ms.com",
+                         personality="infra")
+
     def testaddjackhost(self):
         ip = self.net["unknown0"].usable[17]
         self.dsdb_expect_add("jack.cards.example.com", ip, "eth0", ip.mac,

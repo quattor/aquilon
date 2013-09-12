@@ -69,14 +69,15 @@ class TestPrebindServer(TestBrokerCommand):
         self.matchoutput(out, "Server: nyaqd1.ms.com", command)
 
     def testbindbootserver(self):
-        self.noouttest(["bind_server",
-                        "--hostname=server9.aqd-unittest.ms.com",
-                        "--service=bootserver", "--instance=np.test"])
+        self.noouttest(["bind_server", "--hostname=infra1.aqd-unittest.ms.com",
+                        "--service=bootserver", "--instance=unittest"])
+        self.noouttest(["bind_server", "--hostname=infra1.one-nyp.ms.com",
+                        "--service=bootserver", "--instance=one-nyp"])
 
     def testverifybindbootserver(self):
-        command = "show service --service bootserver --instance np.test"
+        command = "show service --service bootserver --instance one-nyp"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Server: server9.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "Server: infra1.one-nyp.ms.com", command)
 
     def testbindchooser(self):
         for service in ["chooser1", "chooser2", "chooser3"]:
@@ -92,23 +93,26 @@ class TestPrebindServer(TestBrokerCommand):
 
     def testbinddns(self):
         self.noouttest(["bind", "server",
-                        "--hostname", "unittest02.one-nyp.ms.com",
-                        "--service", "dns", "--instance", "utdnsinstance"])
+                        "--hostname", "infra1.aqd-unittest.ms.com",
+                        "--service", "dns", "--instance", "unittest"])
         self.noouttest(["bind", "server",
                         "--hostname", "nyaqd1.ms.com",
-                        "--service", "dns", "--instance", "utdnsinstance"])
+                        "--service", "dns", "--instance", "unittest"])
+        self.noouttest(["bind", "server",
+                        "--hostname", "infra1.one-nyp.ms.com",
+                        "--service", "dns", "--instance", "one-nyp"])
 
     def testcatdns(self):
-        command = "cat --service dns --instance utdnsinstance"
+        command = "cat --service dns --instance unittest"
         out = self.commandtest(command.split(" "))
         self.searchoutput(out,
-                          r'"servers" = list\(\s*"nyaqd1.ms.com",\s*'
-                          r'"unittest02.one-nyp.ms.com"\s*\);',
+                          r'"servers" = list\(\s*"infra1\.aqd-unittest\.ms\.com",\s*'
+                          r'"nyaqd1\.ms\.com"\s*\);',
                           command)
         # The IP address comes from fakebin/dsdb.d, not from the real DNS.
         self.searchoutput(out,
-                          '"server_ips" = list\(\s*"10.184.155.249",\s*"%s"\s*\);' %
-                          self.net["unknown0"].usable[0],
+                          r'"server_ips" = list\(\s*"%s",\s*"10\.184\.155\.249"\s*\);' %
+                          self.net["zebra_vip"].usable[3],
                           command)
 
 

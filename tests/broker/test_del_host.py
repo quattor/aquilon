@@ -261,6 +261,22 @@ class TestDelHost(VerifyNotificationsMixin, MachineTestMixin,
         self.delete_host("f5test.aqd-unittest.ms.com", self.net["f5test"].ip,
                          "f5test")
 
+    def testdelutinfra(self):
+        eth0_ip = self.net["unknown0"].usable[33]
+        eth1_ip = self.net["unknown1"].usable[34]
+        ip = self.net["zebra_vip"].usable[3]
+        self.delete_host("infra1.aqd-unittest.ms.com", ip, "ut3c5n13",
+                         interfaces=["eth0", "eth1"],
+                         eth0_ip=eth0_ip, eth1_ip=eth1_ip)
+
+    def testdelnpinfra(self):
+        eth0_ip = self.net["unknown0"].usable[35]
+        eth1_ip = self.net["unknown1"].usable[36]
+        ip = self.net["zebra_vip"].usable[4]
+        self.delete_host("infra1.one-nyp.ms.com", ip, "np3c5n13",
+                         interfaces=["eth0", "eth1"],
+                         eth0_ip=eth0_ip, eth1_ip=eth1_ip)
+
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelHost)

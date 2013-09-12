@@ -714,6 +714,12 @@ class TestAddPersonality(VerifyGrnsMixin, TestBrokerCommand):
         self.matchoutput(out, "Legacy is not a valid environment for a new personality.",
                          command)
 
+    def testaddinfra(self):
+        command = ["add_personality", "--personality", "infra",
+                   "--archetype", "aquilon", "--grn", "grn:/ms/ei/aquilon/aqd",
+                   "--host_environment", "infra"]
+        self.noouttest(command)
+
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddPersonality)
