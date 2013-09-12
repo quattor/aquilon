@@ -302,8 +302,9 @@ class TestSearchHost(TestBrokerCommand):
         command = "search host --service utsvc " \
                   "--instance service-instance-does-not-exist"
         out = self.notfoundtest(command.split(" "))
-        self.matchoutput(out, "Service utsvc, instance "
-                              "service-instance-does-not-exist not found",
+        self.matchoutput(out,
+                         "Service Instance service-instance-does-not-exist, "
+                         "service utsvc not found.",
                          command)
 
     def testinstanceavailable(self):
@@ -370,8 +371,9 @@ class TestSearchHost(TestBrokerCommand):
         command = "search host --server_of_service foo " \
                   "--server_of_instance service-instance-does-not-exist"
         out = self.notfoundtest(command.split(" "))
-        self.matchoutput(out, "Service foo, instance "
-                              "service-instance-does-not-exist not found",
+        self.matchoutput(out,
+                         "Service Instance service-instance-does-not-exist, "
+                         "service foo not found",
                          command)
 
     def testserverofinstanceunavailable(self):

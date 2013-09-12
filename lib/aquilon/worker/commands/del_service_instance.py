@@ -17,9 +17,8 @@
 """Contains a wrapper for `aq del service --instance`."""
 
 from aquilon.exceptions_ import ArgumentError
+from aquilon.aqdb.model import Service, ServiceInstance
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.dbwrappers.service_instance import get_service_instance
-from aquilon.aqdb.model import Service
 from aquilon.worker.templates.base import Plenary
 
 
@@ -29,7 +28,8 @@ class CommandDelServiceInstance(BrokerCommand):
 
     def render(self, session, logger, service, instance, **arguments):
         dbservice = Service.get_unique(session, service, compel=True)
-        dbsi = get_service_instance(session, dbservice, instance)
+        dbsi = ServiceInstance.get_unique(session, service=dbservice,
+                                          name=instance, compel=True)
         if dbsi.client_count > 0:
             raise ArgumentError("Service %s, instance %s still has clients and "
                                 "cannot be deleted." %

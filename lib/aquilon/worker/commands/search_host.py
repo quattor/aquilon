@@ -23,15 +23,14 @@ from sqlalchemy.sql import and_, or_
 from aquilon.exceptions_ import NotFoundException
 from aquilon.aqdb.model import (Host, Cluster, Archetype, Personality,
                                 PersonalityGrnMap, HostGrnMap, HostLifecycle,
-                                OperatingSystem, Service, Share, VirtualDisk,
-                                Disk, Machine, Model, DnsRecord, ARecord, Fqdn,
-                                DnsDomain, Interface, AddressAssignment,
-                                NetworkEnvironment, Network, MetaCluster,
-                                VirtualMachine, ClusterResource)
+                                OperatingSystem, Service, ServiceInstance,
+                                Share, VirtualDisk, Disk, Machine, Model,
+                                DnsRecord, ARecord, Fqdn, DnsDomain, Interface,
+                                AddressAssignment, NetworkEnvironment, Network,
+                                MetaCluster, VirtualMachine, ClusterResource)
 from aquilon.aqdb.model.dns_domain import parse_fqdn
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.formats.host import SimpleHostList
-from aquilon.worker.dbwrappers.service_instance import get_service_instance
 from aquilon.worker.dbwrappers.branch import get_branch_and_author
 from aquilon.worker.dbwrappers.grn import lookup_grn
 from aquilon.worker.dbwrappers.location import get_location
@@ -198,7 +197,8 @@ class CommandSearchHost(BrokerCommand):
         if service:
             dbservice = Service.get_unique(session, service, compel=True)
             if instance:
-                dbsi = get_service_instance(session, dbservice, instance)
+                dbsi = ServiceInstance.get_unique(session, service=dbservice,
+                                                  name=instance, compel=True)
                 q = q.filter(Host.services_used.contains(dbsi))
             else:
                 q = q.join('services_used')
@@ -213,10 +213,12 @@ class CommandSearchHost(BrokerCommand):
             dbserver_service = Service.get_unique(session, server_of_service,
                                                   compel=True)
             if server_of_instance:
-                dbssi = get_service_instance(session, dbserver_service,
-                                             server_of_instance)
+                dbsi = ServiceInstance.get_unique(session,
+                                                  service=dbserver_service,
+                                                  name=server_of_instance,
+                                                  compel=True)
                 q = q.join('_services_provided')
-                q = q.filter_by(service_instance=dbssi)
+                q = q.filter_by(service_instance=dbsi)
                 q = q.reset_joinpoint()
             else:
                 q = q.join('_services_provided', 'service_instance')

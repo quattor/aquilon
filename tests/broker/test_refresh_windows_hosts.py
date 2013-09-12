@@ -258,9 +258,10 @@ class TestRefreshWindowsHosts(TestBrokerCommand):
         (out, err) = self.successtest(command)
         self.assertEmptyOut(out, command)
 
-        self.matchoutput(err, "WARNING: Server %s, is the last server bound to "
-                         "Service %s, instance %s which still has clients"
-                         % ("desktop3.msad.ms.com", "utsvc", "utsi1"),
+        self.matchoutput(err,
+                         "WARNING: Host desktop3.msad.ms.com was the last "
+                         "server bound to service instance utsvc/utsi1, which "
+                         "still has clients.",
                          command)
 
     def test_410_cleanrun(self):

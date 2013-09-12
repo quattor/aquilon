@@ -24,11 +24,14 @@ if __name__ == "__main__":
 import unittest2 as unittest
 from brokertest import TestBrokerCommand
 
-SRV_MSG = "WARNING: Server %s, is the last server bound to Service %s which still has clients"
-SRVINST_MSG = "WARNING: Server %s, is the last server bound to Service %s, instance %s which still has clients"
-
 
 class TestUnbindServer(TestBrokerCommand):
+    def check_last_server_msg(self, out, command, service, instance, host):
+        self.matchoutput(out,
+                         "WARNING: Host %s was the last server bound to "
+                         "service instance %s/%s, which still has clients." %
+                         (host, service, instance),
+                         command)
 
     def testcheckinitialplenary(self):
         # This test must use the same regular expressions as
@@ -43,13 +46,9 @@ class TestUnbindServer(TestBrokerCommand):
         command = ["unbind", "server",
                    "--hostname", "unittest02.one-nyp.ms.com",
                    "--service", "utsvc", "--all"]
-
-        (out, err) = self.successtest(command)
-        self.assertEmptyOut(out, command)
-
-        self.matchoutput(err,
-                         SRV_MSG % ("unittest02.one-nyp.ms.com", "utsvc"),
-                         command)
+        err = self.statustest(command)
+        self.check_last_server_msg(err, command, "utsvc", "utsi1",
+                                   "unittest02.one-nyp.ms.com")
 
     def testunbinddns(self):
         self.noouttest(["unbind", "server",
@@ -58,13 +57,9 @@ class TestUnbindServer(TestBrokerCommand):
         command = ["unbind", "server",
                    "--hostname", "nyaqd1.ms.com",
                    "--service", "dns", "--all"]
-
-        (out, err) = self.successtest(command)
-        self.assertEmptyOut(out, command)
-
-        self.matchoutput(err,
-                         SRV_MSG % ("nyaqd1.ms.com", "dns"),
-                         command)
+        err = self.statustest(command)
+        self.check_last_server_msg(err, command, "dns", "utdnsinstance",
+                                   "nyaqd1.ms.com")
 
     # Should have already been unbound...
     # Hmm... this (as implemented) actually returns 0.  Kind of a pointless
@@ -94,20 +89,16 @@ class TestUnbindServer(TestBrokerCommand):
     def testverifybindutsi1(self):
         command = "show service --service utsvc --instance utsi1"
         out = self.commandtest(command.split(" "))
-        self.matchclean(out, "Server: unittest02.one-nyp.ms.com", command)
-        self.matchclean(out, "Server: unittest00.one-nyp.ms.com", command)
+        self.matchclean(out, "unittest02.one-nyp.ms.com", command)
+        self.matchclean(out, "unittest00.one-nyp.ms.com", command)
 
     def testunbindutsi2unittest00(self):
         command = ["unbind", "server",
                    "--hostname", "unittest00.one-nyp.ms.com",
                    "--service", "utsvc", "--instance", "utsi2"]
-
-        (out, err) = self.successtest(command)
-        self.assertEmptyOut(out, command)
-
-        self.matchoutput(err,
-                         SRVINST_MSG % ("unittest00.one-nyp.ms.com", "utsvc", "utsi2"),
-                         command)
+        err = self.statustest(command)
+        self.check_last_server_msg(err, command, "utsvc", "utsi2",
+                                   "unittest00.one-nyp.ms.com")
 
     def testverifycatutsi2(self):
         command = "cat --service utsvc --instance utsi2"
@@ -123,88 +114,69 @@ class TestUnbindServer(TestBrokerCommand):
     def testverifybindutsi2(self):
         command = "show service --service utsvc --instance utsi2"
         out = self.commandtest(command.split(" "))
-        self.matchclean(out, "Server: unittest02.one-nyp.ms.com", command)
-        self.matchclean(out, "Server: unittest00.one-nyp.ms.com", command)
+        self.matchclean(out, "unittest02.one-nyp.ms.com", command)
+        self.matchclean(out, "unittest00.one-nyp.ms.com", command)
 
     def testunbindntp(self):
         command = ["unbind", "server",
                    "--hostname", "nyaqd1.ms.com", "--service", "ntp", "--all"]
-
-        (out, err) = self.successtest(command)
-        self.assertEmptyOut(out, command)
-
-        self.matchoutput(err,
-                         SRV_MSG % ("nyaqd1.ms.com", "ntp"),
-                         command)
+        err = self.statustest(command)
+        self.check_last_server_msg(err, command, "ntp", "pa.ny.na",
+                                   "nyaqd1.ms.com")
 
     def testverifyunbindntp(self):
         command = "show service --service ntp"
         out = self.commandtest(command.split(" "))
-        self.matchclean(out, "Server: nyaqd1.ms.com", command)
+        self.matchclean(out, "nyaqd1.ms.com", command)
 
     def testunbindaqd(self):
         command = ["unbind", "server",
                    "--hostname", "nyaqd1.ms.com", "--service", "aqd", "--all"]
-
-        (out, err) = self.successtest(command)
-        self.assertEmptyOut(out, command)
-
-        self.matchoutput(err,
-                         SRV_MSG % ("nyaqd1.ms.com", "aqd"),
-                         command)
+        err = self.statustest(command)
+        self.check_last_server_msg(err, command, "aqd", "ny-prod",
+                                   "nyaqd1.ms.com")
 
     def testverifyunbindaqd(self):
         command = "show service --service aqd"
         out = self.commandtest(command.split(" "))
-        self.matchclean(out, "Server: nyaqd1.ms.com", command)
+        self.matchclean(out, "nyaqd1.ms.com", command)
 
     def testunbindlemon(self):
         command = ["unbind", "server", "--hostname", "nyaqd1.ms.com",
                    "--service", "lemon", "--all"]
-
-        (out, err) = self.successtest(command)
-        self.assertEmptyOut(out, command)
-
-        self.matchoutput(err,
-                         SRV_MSG % ("nyaqd1.ms.com", "lemon"),
-                         command)
+        err = self.statustest(command)
+        self.check_last_server_msg(err, command, "lemon", "ny-prod",
+                                   "nyaqd1.ms.com")
 
     def testverifyunbindlemon(self):
         command = "show service --service lemon"
         out = self.commandtest(command.split(" "))
-        self.matchclean(out, "Server: nyaqd1.ms.com", command)
+        self.matchclean(out, "nyaqd1.ms.com", command)
 
     def testunbindsyslogng(self):
         command = ["unbind", "server", "--hostname", "nyaqd1.ms.com",
                    "--service", "syslogng", "--all"]
-
-        (out, err) = self.successtest(command)
-        self.assertEmptyOut(out, command)
-
-        self.matchoutput(err, SRV_MSG % ("nyaqd1.ms.com", "syslogng"),
-                         command)
+        err = self.statustest(command)
+        self.check_last_server_msg(err, command, "syslogng", "ny-prod",
+                                   "nyaqd1.ms.com")
 
     def testverifyunbindsyslogng(self):
         command = "show service --service syslogng"
         out = self.commandtest(command.split(" "))
-        self.matchclean(out, "Server: nyaqd1.ms.com", command)
+        self.matchclean(out, "nyaqd1.ms.com", command)
 
     def testunbindbootserver(self):
         command = ["unbind_server",
                    "--hostname=server9.aqd-unittest.ms.com",
                    "--service=bootserver", "--all"]
-
-        (out, err) = self.successtest(command)
-        self.assertEmptyOut(out, command)
-
-        self.matchoutput(err,
-                         SRV_MSG % ("server9.aqd-unittest.ms.com", "bootserver"),
-                         command)
+        err = self.statustest(command)
+        self.check_last_server_msg(err, command, "bootserver", "np.test",
+                                   "server9.aqd-unittest.ms.com")
 
     def testverifyunbindbootserver(self):
         command = "show service --service bootserver"
         out = self.commandtest(command.split(" "))
-        self.matchclean(out, "Server: server9.aqd-unittest.ms.com", command)
+        self.matchclean(out, "server9.aqd-unittest.ms.com", command)
 
     def testunbindchooser(self):
         for service in ["chooser1", "chooser2", "chooser3"]:
@@ -217,13 +189,12 @@ class TestUnbindServer(TestBrokerCommand):
                 instance = "ut.%s" % n
                 command = ["unbind", "server", "--hostname", server,
                            "--service", service, "--instance", instance]
-                (out, err) = self.successtest(command)
-                self.assertEmptyOut(out, command)
+                self.statustest(command)
 
     def testunbindpollhelper(self):
         service = self.config.get("broker", "poll_helper_service")
-        self.successtest(["unbind", "server", "--hostname", "nyaqd1.ms.com",
-                          "--service", service, "--instance", "unittest"])
+        self.statustest(["unbind", "server", "--hostname", "nyaqd1.ms.com",
+                         "--service", service, "--instance", "unittest"])
 
 
 if __name__ == '__main__':
