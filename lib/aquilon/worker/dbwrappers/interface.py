@@ -346,6 +346,11 @@ def get_or_create_interface(session, dbhw_ent, name=None, mac=None,
     is raised if a conflicting interface already exists.
     """
 
+    # The database enforces lower case strings for the (interface) name.  Force
+    # the passed name to lower case for comparisons.
+    if name:
+        name = name.strip().lower()
+
     dbinterface = None
     if mac:
         # Look for the MAC globally. If it is present, check that it belongs to
