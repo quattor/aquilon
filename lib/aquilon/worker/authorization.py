@@ -59,9 +59,6 @@ class AuthorizationBroker(object):
             self.raise_auth_error(principal, action, resource)
         # Right now, anybody in a group can do anything they want, except...
         if action in ['add_archetype', 'update_archetype', 'del_archetype',
-                      'add_vendor', 'del_vendor',
-                      'add_os', 'update_os', 'del_os',
-                      'add_model', 'update_model', 'del_model',
                       'add_organization', 'del_organization',
                       'add_grn', 'del_grn', 'update_grn',
                       'add_vlan', 'del_vlan',
@@ -70,6 +67,14 @@ class AuthorizationBroker(object):
                 raise AuthorizationException(
                     "Must have the engineering or aqd_admin role to %s." %
                     action)
+        if action in ['add_vendor', 'del_vendor',
+                      'add_os', 'update_os', 'del_os',
+                      'add_model', 'update_model', 'del_model']:
+            if dbuser.role.name not in ['engineering', 'aqd_admin',
+                                        'network_engineering']:
+                raise AuthorizationException(
+                    "Must have the engineering, network_engineering or "
+                    "aqd_admin role to %s." % action)
         if action in ['permission']:
             if dbuser.role.name not in ['aqd_admin', 'gatekeeper']:
                 raise AuthorizationException(
@@ -170,10 +175,7 @@ class AuthorizationBroker(object):
                               'del_interface_address_switch',
                               'add_alias', 'del_alias',
                               'refresh_network',
-                              'update_router',
-                              'add_vendor', 'del_vendor',
-                              'add_os', 'update_os', 'del_os',
-                              'add_model', 'update_model', 'del_model']:
+                              'update_router']:
                 self.raise_auth_error(principal, action, resource)
         if dbuser.role.name == 'edc':
             if action not in ['add_rack', 'add_machine', 'add_host',
