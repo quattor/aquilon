@@ -280,6 +280,7 @@ class AuthorizationBroker(object):
                 self.raise_auth_error(principal, action, resource)
         if dbuser.role.name == 'webops':
             if action not in ['add_address', 'del_address',
+                              'update_address',
                               'add_alias', 'del_alias', 'update_alias']:
                 self.raise_auth_error(principal, action, resource)
         return True
