@@ -123,6 +123,9 @@ class PlenaryMachineInfo(StructurePlenary):
             if disk.bootable:
                 params["boot"] = True
 
+            if hasattr(disk, "snapshotable") and disk.snapshotable is not None:
+                params["snapshot"] = disk.snapshotable
+
             if disk.disk_type == 'local':
                 tpl = StructureTemplate("hardware/harddisk/generic/%s" %
                                         disk.controller_type, params)

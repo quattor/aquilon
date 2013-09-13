@@ -36,7 +36,8 @@ class CommandAddDisk(BrokerCommand):
     REGEX_ADDRESS = re.compile(r"\d+:\d+$")
 
     def render(self, session, logger, machine, disk, controller, share,
-               filesystem, resourcegroup, address, comments, size, boot, **kw):
+               filesystem, resourcegroup, address, comments, size, boot,
+               snapshot, **kw):
 
         # Handle deprecated arguments
         if kw.get("type"):
@@ -86,7 +87,7 @@ class CommandAddDisk(BrokerCommand):
                                  resourcegroup, share)
             dbdisk = VirtualDisk(device_name=disk, controller_type=controller,
                                  bootable=boot, capacity=size, address=address,
-                                 comments=comments)
+                                 snapshotable=snapshot, comments=comments)
 
             dbshare.disks.append(dbdisk)
         elif filesystem:
@@ -102,6 +103,7 @@ class CommandAddDisk(BrokerCommand):
             dbdisk = VirtualLocalDisk(device_name=disk,
                                       controller_type=controller, bootable=boot,
                                       capacity=size, address=address,
+                                      snapshotable=snapshot,
                                       comments=comments)
             dbfs.disks.append(dbdisk)
 

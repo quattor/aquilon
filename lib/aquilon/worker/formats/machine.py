@@ -110,10 +110,17 @@ class MachineFormatter(ObjectFormatter):
             elif hasattr(d, "filesystem") and d.filesystem:
                 extra = extra + " from " + d.filesystem.name
 
+            flag_list = [];
             if d.bootable:
-                flags = " [boot]"
+                flag_list.append("boot")
+            if hasattr(d, "snapshotable") and d.snapshotable:
+                flag_list.append("snapshot")
+
+            if flag_list:
+                flags = " [%s]" % ",".join(flag_list)
             else:
                 flags = ""
+
             details.append(indent + "  Disk: %s %d GB %s (%s)%s" %
                            (d.device_name, d.capacity, d.controller_type,
                             extra, flags))

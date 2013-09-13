@@ -334,14 +334,16 @@ class TestVulcan20(VerifyNotificationsMixin, TestBrokerCommand):
         for i in range(0, 3):
             self.noouttest(["add", "disk", "--machine", "utpgm%d" % i,
                             "--disk", "sda", "--controller", "scsi",
-                            "--share", "test_v2_share", "--size", "34",
-                            "--resourcegroup", "utmc8as1", "--address", "0:0"])
+                            "--snapshot", "--share", "test_v2_share",
+                            "--size", "34", "--resourcegroup", "utmc8as1",
+                            "--address", "0:0"])
 
     def test_109_verifyaddutpgm0disk(self):
         command = "show machine --machine utpgm0"
         out = self.commandtest(command.split(" "))
         self.searchoutput(out, r"Disk: sda 34 GB scsi "
-                          "\(virtual_disk from test_v2_share\) \[boot\]$", command)
+                          "\(virtual_disk from test_v2_share\) "
+                          "\[boot,snapshot\]$", command)
 
         command = ["show_share", "--resourcegroup=utmc8as1",
                    "--cluster=utmc8", "--share=test_v2_share"]
@@ -358,7 +360,9 @@ class TestVulcan20(VerifyNotificationsMixin, TestBrokerCommand):
                           r'"mountpoint", "/vol/lnn30f1v1/test_v2_share",\s*'
                           r'"path", "utpgm0/sda.vmdk",\s*'
                           r'"server", "lnn30f1",\s*'
-                          r'"sharename", "test_v2_share"', command)
+                          r'"sharename", "test_v2_share",\s*'
+                          r'"snapshot", true',
+                          command)
 
     def test_111_addfilesystemfail(self):
         command = ["add_filesystem", "--filesystem=fs1", "--type=ext3",

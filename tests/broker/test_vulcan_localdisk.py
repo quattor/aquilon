@@ -226,6 +226,10 @@ class TestVulcanLocalDisk(VerifyNotificationsMixin, TestBrokerCommand):
             self.searchoutput(out, r"Disk: sda 34 GB scsi \(virtual_localdisk from utfs1\) \[boot\]$",
                               command)
 
+        command = ["cat", "--machine", "utpgm0", "--generate"]
+        out = self.commandtest(command)
+        self.matchclean(out, "snapshot", command)
+
     def test_150_verifyutfs1(self):
         command = ["show_filesystem", "--filesystem=utfs1"]
         out = self.commandtest(command)
