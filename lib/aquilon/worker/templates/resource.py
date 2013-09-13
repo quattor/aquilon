@@ -15,8 +15,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 import logging
+from operator import attrgetter
 import os.path
 
 from aquilon.aqdb.model import (Application, Filesystem, Intervention,
@@ -88,12 +88,12 @@ class PlenaryResource(StructurePlenary):
         pan_assign(lines, "expiry", self.dbobj.expiry_date.isoformat())
 
         if self.dbobj.users:
-            pan_assign(lines, "users", self.dbobj.users.split(","))
+            pan_assign(lines, "users", sorted(self.dbobj.users.split(",")))
         if self.dbobj.groups:
-            pan_assign(lines, "groups", self.dbobj.groups.split(","))
+            pan_assign(lines, "groups", sorted(self.dbobj.groups.split(",")))
 
         if self.dbobj.disabled:
-            pan_assign(lines, "disabled", self.dbobj.disabled.split(","))
+            pan_assign(lines, "disabled", sorted(self.dbobj.disabled.split(",")))
 
     def body_reboot_schedule(self, lines):
         pan_assign(lines, "time", self.dbobj.time)
@@ -102,7 +102,8 @@ class PlenaryResource(StructurePlenary):
 
     def body_resourcegroup(self, lines):
         if self.dbobj.resholder:
-            for resource in self.dbobj.resholder.resources:
+            for resource in sorted(self.dbobj.resholder.resources,
+                                   key=attrgetter("resource_type", "name")):
                 res_path = self.template_name(resource)
                 pan_append(lines, "resources/" + resource.resource_type,
                            StructureTemplate(res_path))
@@ -123,7 +124,7 @@ class PlenaryResource(StructurePlenary):
 
         # One day we may get to the point where this will be required.
         # FIXME: read the data from the host data template
-        if (machine.host):
+        if machine.host:
             # we fill this in manually instead of just assigning
             # 'system' = value("hostname:/system")
             # because the target host might not actually have a profile.

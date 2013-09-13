@@ -103,7 +103,7 @@ class MachineFormatter(ObjectFormatter):
         details.append(indent + "  Memory: %d MB" % machine.memory)
         if machine.serial_no:
             details.append(indent + "  Serial: %s" % machine.serial_no)
-        for d in machine.disks:
+        for d in sorted(machine.disks, key=attrgetter('device_name')):
             extra = d.disk_type
             if hasattr(d, "share") and d.share:
                 extra = extra + " from " + d.share.name
@@ -117,7 +117,7 @@ class MachineFormatter(ObjectFormatter):
             details.append(indent + "  Disk: %s %d GB %s (%s)%s" %
                            (d.device_name, d.capacity, d.controller_type,
                             extra, flags))
-        for i in machine.interfaces:
+        for i in sorted(machine.interfaces, key=attrgetter('name')):
             details.append(self.redirect_raw(i, indent + "  "))
         if machine.comments:
             details.append(indent + "  Comments: %s" % machine.comments)
