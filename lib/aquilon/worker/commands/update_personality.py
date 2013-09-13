@@ -88,8 +88,7 @@ class CommandUpdatePersonality(BrokerCommand):
             dbpersona.cluster_required = cluster_required
 
         if host_environment is not None:
-            legacy_env = HostEnvironment.get_unique(session, 'legacy', compel=True)
-            if dbpersona.host_environment == legacy_env:
+            if dbpersona.host_environment.name == 'legacy':
                 HostEnvironment.polymorphic_subclass(host_environment,
                                                      "Unknown environment name")
                 Personality.validate_env_in_name(personality, host_environment)

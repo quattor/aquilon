@@ -17,9 +17,8 @@
 
 from datetime import datetime
 
-from sqlalchemy import (Column, Enum, Integer, DateTime, Sequence, String,
+from sqlalchemy import (Column, Enum, Integer, DateTime, Sequence,
                         UniqueConstraint, event)
-from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import object_session, deferred
 
 from aquilon.exceptions_ import ArgumentError
@@ -115,9 +114,7 @@ class Ready(HostLifecycle):
 
     def onEnter(self, obj):
         if obj.cluster and obj.cluster.status.name != 'ready':
-            dbstate = HostLifecycle.get_unique(object_session(obj),
-                                               'almostready',
-                                               compel=True)
+            dbstate = Almostready.get_instance(object_session(obj))
             obj.status.transition(obj, dbstate)
         else:
             obj.advertise_status = True

@@ -21,13 +21,12 @@ from sqlalchemy.orm import deferred
 from sqlalchemy import (Column, Integer, DateTime, Sequence, String,
                         UniqueConstraint, event)
 
-from aquilon.aqdb.model import Base
-from aquilon.exceptions_ import ArgumentError
+from aquilon.aqdb.model import Base, SingleInstanceMixin
 
 _TN = 'host_environment'
 
 
-class HostEnvironment(Base):
+class HostEnvironment(SingleInstanceMixin, Base):
     """ Describes the state a host is within the provisioning lifecycle """
     __tablename__ = _TN
 

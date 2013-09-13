@@ -18,8 +18,10 @@
 import logging
 from collections import defaultdict
 
-from aquilon.aqdb.model import Personality, Parameter, HostEnvironment
+from sqlalchemy.orm import object_session
+
 from aquilon.config import Config
+from aquilon.aqdb.model import Personality, Parameter
 from aquilon.worker.templates.base import (Plenary, StructurePlenary,
                                            TemplateFormatter, PlenaryCollection)
 from aquilon.worker.templates.panutils import (pan_include, pan_variable,
@@ -27,7 +29,6 @@ from aquilon.worker.templates.panutils import (pan_include, pan_variable,
                                                pan_include_if_exists)
 from aquilon.worker.dbwrappers.parameter import (validate_value,
                                                  get_parameters)
-from sqlalchemy.orm import object_session
 
 LOGGER = logging.getLogger(__name__)
 
@@ -215,9 +216,7 @@ class PlenaryPersonalityBase(Plenary):
         ## process parameter templates
         pan_include_if_exists(lines, "personality/config")
         pan_assign(lines, "/system/personality/name", self.dbobj.name)
-        legacy_env = HostEnvironment.get_unique(object_session(self.dbobj),
-                                                'legacy', compel=True)
-        if self.dbobj.host_environment != legacy_env:
+        if self.dbobj.host_environment.name != 'legacy':
             pan_assign(lines, "/system/personality/host_environment",
                        self.dbobj.host_environment, True)
 

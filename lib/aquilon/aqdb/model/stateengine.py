@@ -15,10 +15,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from sqlalchemy.orm.session import Session, object_session
+
 from aquilon.exceptions_ import ArgumentError, NotFoundException
+from aquilon.aqdb.model import SingleInstanceMixin
 
 
-class StateEngine:
+class StateEngine(SingleInstanceMixin):
     transitions = {}  # Override in derived class!
 
     def transition(self, obj, target_state):

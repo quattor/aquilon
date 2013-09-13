@@ -17,7 +17,7 @@
 
 import aquilon.aqdb.depends
 
-from aquilon.aqdb.model.base import Base
+from aquilon.aqdb.model.base import Base, SingleInstanceMixin
 from aquilon.aqdb.model.stateengine import StateEngine
 
 #AUTHORIZATION
