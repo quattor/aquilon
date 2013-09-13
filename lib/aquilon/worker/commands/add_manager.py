@@ -24,7 +24,6 @@ from aquilon.worker.dbwrappers.dns import grab_address
 from aquilon.worker.dbwrappers.interface import (generate_ip,
                                                  get_or_create_interface,
                                                  assign_address)
-from aquilon.worker.locks import lock_queue
 from aquilon.worker.processes import DSDBRunner
 from aquilon.worker.templates import Plenary
 
@@ -66,19 +65,16 @@ class CommandAddManager(BrokerCommand):
         session.flush()
 
         plenary_info = Plenary.get_plenary(dbmachine, logger=logger)
-        key = plenary_info.get_write_key()
-        try:
-            lock_queue.acquire(key)
-            plenary_info.write(locked=True)
+        with plenary_info.get_write_key():
+            try:
+                plenary_info.write(locked=True)
 
-            dsdb_runner = DSDBRunner(logger=logger)
-            dsdb_runner.update_host(dbmachine, oldinfo)
-            dsdb_runner.commit_or_rollback("Could not add host to DSDB")
-        except:
-            plenary_info.restore_stash()
-            raise
-        finally:
-            lock_queue.release(key)
+                dsdb_runner = DSDBRunner(logger=logger)
+                dsdb_runner.update_host(dbmachine, oldinfo)
+                dsdb_runner.commit_or_rollback("Could not add host to DSDB")
+            except:
+                plenary_info.restore_stash()
+                raise
 
         if dbmachine.host:
             # XXX: Host needs to be reconfigured.

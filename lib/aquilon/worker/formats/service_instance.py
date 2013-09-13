@@ -28,8 +28,8 @@ class ServiceInstanceFormatter(ObjectFormatter):
     protocol = "aqdservices_pb2"
 
     def format_raw(self, si, indent=""):
-        details = [indent + "Service: %s Instance: %s"
-                % (si.service.name, si.name)]
+        details = [indent + "Service: %s Instance: %s" % (si.service.name,
+                                                          si.name)]
         for host in si.server_hosts:
             details.append(indent + "  Server: %s" % host.fqdn)
         for map in si.service_map:

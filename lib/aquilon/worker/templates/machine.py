@@ -20,7 +20,7 @@
 import logging
 
 from aquilon.aqdb.model import Machine
-from aquilon.worker.locks import CompileKey
+from aquilon.worker.locks import CompileKey, NoLockKey
 from aquilon.worker.templates import Plenary, StructurePlenary
 from aquilon.worker.templates.panutils import (StructureTemplate, pan_assign,
                                                pan_include, PanMetric)
@@ -89,7 +89,7 @@ class PlenaryMachineInfo(StructurePlenary):
         # - There is a host attached.
         # - This is a virtual machine in a container.
         if not host and not container:
-            return None
+            return NoLockKey(logger=self.logger)
         # We have at least host or container, maybe both...
         if host:
             # PlenaryHost is actually a PlenaryCollection... can't call

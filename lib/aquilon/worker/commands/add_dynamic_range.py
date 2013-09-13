@@ -45,8 +45,8 @@ class CommandAddDynamicRange(BrokerCommand):
                                 (startip, startnet.ip, endip, endnet.ip))
         dbdns_domain = DnsDomain.get_unique(session, dns_domain, compel=True)
 
-        dbdns_domain.lock_row()
         startnet.lock_row()
+        dbdns_domain.lock_row()
 
         q = session.query(AddressAssignment.ip)
         q = q.filter_by(network=startnet)

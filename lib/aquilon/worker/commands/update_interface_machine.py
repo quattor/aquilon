@@ -24,7 +24,6 @@ from aquilon.worker.dbwrappers.interface import (verify_port_group,
                                                  choose_port_group,
                                                  assign_address,
                                                  rename_interface)
-from aquilon.worker.locks import lock_queue
 from aquilon.worker.templates import Plenary
 from aquilon.worker.processes import DSDBRunner
 from aquilon.utils import first_of
@@ -144,23 +143,20 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
         session.refresh(dbhw_ent)
 
         plenary_info = Plenary.get_plenary(dbhw_ent, logger=logger)
-        key = plenary_info.get_write_key()
-        try:
-            lock_queue.acquire(key)
-            plenary_info.write(locked=True)
+        with plenary_info.get_write_key():
+            try:
+                plenary_info.write(locked=True)
 
-            if dbhw_ent.host and dbhw_ent.host.archetype.name != "aurora":
-                dsdb_runner = DSDBRunner(logger=logger)
-                dsdb_runner.update_host(dbhw_ent, oldinfo)
-                dsdb_runner.commit_or_rollback()
-        except AquilonError, err:
-            plenary_info.restore_stash()
-            raise ArgumentError(err)
-        except:
-            plenary_info.restore_stash()
-            raise
-        finally:
-            lock_queue.release(key)
+                if dbhw_ent.host and dbhw_ent.host.archetype.name != "aurora":
+                    dsdb_runner = DSDBRunner(logger=logger)
+                    dsdb_runner.update_host(dbhw_ent, oldinfo)
+                    dsdb_runner.commit_or_rollback()
+            except AquilonError, err:
+                plenary_info.restore_stash()
+                raise ArgumentError(err)
+            except:
+                plenary_info.restore_stash()
+                raise
 
         for name, value in audit_results:
             self.audit_result(session, name, value, **arguments)

@@ -24,7 +24,7 @@ from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.grn import lookup_grn
 from aquilon.worker.dbwrappers.host import hostname_to_host
 from aquilon.worker.templates.domain import TemplateDomain
-from aquilon.worker.locks import lock_queue, CompileKey
+from aquilon.worker.locks import CompileKey
 from aquilon.worker.services import Chooser
 
 
@@ -125,23 +125,20 @@ class CommandMake(BrokerCommand):
             key = CompileKey.merge([key, CompileKey(domain=dbhost.branch.name,
                                                     profile=fqdn,
                                                     logger=logger)])
-        try:
-            lock_queue.acquire(key)
-            chooser.write_plenary_templates(locked=True)
+        with key:
+            try:
+                chooser.write_plenary_templates(locked=True)
 
-            td = TemplateDomain(dbhost.branch, dbhost.sandbox_author,
-                                logger=logger)
-            td.compile(session, only=hosts, locked=True)
+                td = TemplateDomain(dbhost.branch, dbhost.sandbox_author,
+                                    logger=logger)
+                td.compile(session, only=hosts, locked=True)
 
-        except:
-            if chooser:
-                chooser.restore_stash()
+            except:
+                if chooser:
+                    chooser.restore_stash()
 
-            # Okay, cleaned up templates, make sure the caller knows
-            # we've aborted so that DB can be appropriately rollback'd.
-            raise
-
-        finally:
-            lock_queue.release(key)
+                # Okay, cleaned up templates, make sure the caller knows
+                # we've aborted so that DB can be appropriately rollback'd.
+                raise
 
         return

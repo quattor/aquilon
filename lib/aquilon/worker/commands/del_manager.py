@@ -16,62 +16,40 @@
 # limitations under the License.
 """Contains the logic for `aq del manager`."""
 
-
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import ARecord
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.processes import DSDBRunner
-from aquilon.worker.locks import DeleteKey
-from aquilon.worker.dbwrappers.dns import delete_dns_record
-from aquilon.worker.templates import Plenary
+from aquilon.worker.commands.del_interface_address import \
+    CommandDelInterfaceAddress
 
 
-class CommandDelManager(BrokerCommand):
+class CommandDelManager(CommandDelInterfaceAddress):
 
     required_parameters = ["manager"]
 
     def render(self, session, logger, manager, **arguments):
-        dbmachine = None
-        with DeleteKey("system", logger=logger):
-            # Check dependencies, translate into user-friendly message
-            dbmanager = ARecord.get_unique(session, fqdn=manager, compel=True)
+        # Check dependencies, translate into user-friendly message
+        dbmanager = ARecord.get_unique(session, fqdn=manager, compel=True)
 
-            is_mgr = True
-            if not dbmanager.assignments or len(dbmanager.assignments) > 1:
-                is_mgr = False
+        is_mgr = True
+        if not dbmanager.assignments or len(dbmanager.assignments) > 1:
+            is_mgr = False
+        else:
             assignment = dbmanager.assignments[0]
             dbinterface = assignment.interface
+
             if dbinterface.interface_type != 'management':
                 is_mgr = False
-            if not is_mgr:
-                raise ArgumentError("{0:a} is not a manager.".format(dbmanager))
 
-            # FIXME: Look for dependencies...
+        if not is_mgr:
+            raise ArgumentError("{0:a} is not a manager.".format(dbmanager))
 
-            dbmachine = dbinterface.hardware_entity
-            oldinfo = DSDBRunner.snapshot_hw(dbmachine)
-
-            dbinterface.assignments.remove(assignment)
-            delete_dns_record(dbmanager)
-            session.flush()
-
-            dsdb_runner = DSDBRunner(logger=logger)
-            dsdb_runner.update_host(dbmachine, oldinfo)
-            dsdb_runner.commit_or_rollback("Could not remove host %s from DSDB"
-                                           % manager)
-
-            # Past the point of no return here (DSDB has been updated)...
-            # probably not much of an issue if writing the plenary failed.
-            # Commit the session so that we can free the delete lock.
-            session.commit()
-
-        if dbmachine:
-            plenary_info = Plenary.get_plenary(dbmachine, logger=logger)
-            # This may create a new lock, so we free first above.
-            plenary_info.write()
-
-            if dbmachine.host:
-                # FIXME: Reconfigure
-                pass
-
-        return
+        return super(CommandDelManager, self).render(session, logger,
+                                                     machine=dbinterface.hardware_entity.label,
+                                                     chassis=None, switch=None, 
+                                                     interface=dbinterface.name,
+                                                     fqdn=manager,
+                                                     ip=assignment.ip,
+                                                     label=None, keep_dns=False,
+                                                     network_environment=None,
+                                                     **arguments)

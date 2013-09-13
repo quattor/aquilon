@@ -20,7 +20,6 @@
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.processes import DSDBRunner
 from aquilon.worker.dbwrappers.location import get_location
-from aquilon.worker.locks import lock_queue
 from aquilon.worker.commands.del_location import CommandDelLocation
 from aquilon.worker.templates import Plenary
 
@@ -41,17 +40,14 @@ class CommandDelCity(CommandDelLocation):
                                   type='city', **arguments)
         session.flush()
 
-        key = plenary.get_remove_key()
-        try:
-            lock_queue.acquire(key)
-            plenary.remove(locked=True)
-            dsdb_runner = DSDBRunner(logger=logger)
-            dsdb_runner.del_city(name, country, fullname)
-            dsdb_runner.commit_or_rollback()
-        except:
-            plenary.restore_stash()
-            raise
-        finally:
-            lock_queue.release(key)
+        with plenary.get_remove_key():
+            try:
+                plenary.remove(locked=True)
+                dsdb_runner = DSDBRunner(logger=logger)
+                dsdb_runner.del_city(name, country, fullname)
+                dsdb_runner.commit_or_rollback()
+            except:
+                plenary.restore_stash()
+                raise
 
         return

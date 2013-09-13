@@ -24,7 +24,7 @@ from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.exceptions_ import ProcessException, ArgumentError
 from aquilon.aqdb.model import Domain
 from aquilon.worker.processes import run_git
-from aquilon.worker.locks import lock_queue, CompileKey
+from aquilon.worker.locks import CompileKey
 
 
 class CommandRollback(BrokerCommand):
@@ -64,19 +64,16 @@ class CommandRollback(BrokerCommand):
         dbdomain.rollback_commit = None
         session.add(dbdomain)
 
-        key = CompileKey(domain=dbdomain.name, logger=logger)
-        try:
-            lock_queue.acquire(key)
-            run_git(["push", ".", "+%s:%s" % (ref, dbdomain.name)],
-                    path=kingdir, logger=logger)
-            # Duplicated this logic from aquilon.worker.processes.sync_domain()
-            run_git(["fetch"], path=domaindir, logger=logger)
-            run_git(["reset", "--hard", "origin/%s" % dbdomain.name],
-                    path=domaindir, logger=logger)
-        except ProcessException, e:
-            raise ArgumentError("Problem encountered updating templates for "
-                                "domain %s: %s", dbdomain.name, e)
-        finally:
-            lock_queue.release(key)
+        with CompileKey(domain=dbdomain.name, logger=logger):
+            try:
+                run_git(["push", ".", "+%s:%s" % (ref, dbdomain.name)],
+                        path=kingdir, logger=logger)
+                # Duplicated this logic from aquilon.worker.processes.sync_domain()
+                run_git(["fetch"], path=domaindir, logger=logger)
+                run_git(["reset", "--hard", "origin/%s" % dbdomain.name],
+                        path=domaindir, logger=logger)
+            except ProcessException, e:
+                raise ArgumentError("Problem encountered updating templates "
+                                    "for domain %s: %s", dbdomain.name, e)
 
         return

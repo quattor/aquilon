@@ -20,7 +20,6 @@ from aquilon.aqdb.model import City, Country, Campus
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.location import add_location
 from aquilon.worker.processes import DSDBRunner
-from aquilon.worker.locks import lock_queue
 from aquilon.worker.templates import Plenary
 
 
@@ -42,17 +41,15 @@ class CommandAddCity(BrokerCommand):
         session.flush()
 
         plenary = Plenary.get_plenary(dbcity, logger=logger)
-        key = plenary.get_write_key()
-        try:
-            lock_queue.acquire(key)
-            plenary.write(locked=True)
+        with plenary.get_write_key():
+            try:
+                plenary.write(locked=True)
 
-            dsdb_runner = DSDBRunner(logger=logger)
-            dsdb_runner.add_city(city, dbcity.country.name, fullname)
-            dsdb_runner.commit_or_rollback()
+                dsdb_runner = DSDBRunner(logger=logger)
+                dsdb_runner.add_city(city, dbcity.country.name, fullname)
+                dsdb_runner.commit_or_rollback()
 
-        except:
-            plenary.restore_stash()
-            raise
-        finally:
-            lock_queue.release(key)
+            except:
+                plenary.restore_stash()
+                raise
+        return

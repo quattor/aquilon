@@ -16,12 +16,11 @@
 # limitations under the License.
 """Contains the logic for `aq compile --personality`."""
 
-
+from aquilon.aqdb.model import Host, Personality
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.branch import get_branch_and_author
 from aquilon.worker.dbwrappers.host import validate_branch_author
 from aquilon.worker.templates.domain import TemplateDomain
-from aquilon.aqdb.model import (Host, Personality)
 
 
 class CommandCompilePersonality(BrokerCommand):
@@ -55,15 +54,10 @@ class CommandCompilePersonality(BrokerCommand):
 
         host_list = q.all()
 
-        validate_branch_author(host_list)
-        # if domain not determined set it
-        # to the domain of first host
-        if not dbdomain:
-            dbdomain = host_list[0].branch
-            dbauthor = host_list[0].sandbox_author
+        # If the domain was not specified, set it to the domain of first host
+        dbdomain, dbauthor = validate_branch_author(host_list)
 
-        dom = TemplateDomain(dbdomain, dbauthor,
-                             logger=logger)
+        dom = TemplateDomain(dbdomain, dbauthor, logger=logger)
         profile_list = [h.fqdn for h in host_list]
         dom.compile(session, only=profile_list,
                     panc_debug_include=pancinclude,

@@ -27,7 +27,7 @@ from aquilon.aqdb.model import (Cluster, ClusterResource, HostResource,
                                 RebootIntervention)
 from aquilon.worker.templates import Plenary
 from aquilon.worker.dbwrappers.host import hostname_to_host
-from aquilon.worker.locks import lock_queue, CompileKey
+from aquilon.worker.locks import CompileKey
 
 
 def get_resource_holder(session, hostname=None, cluster=None, resgroup=None,
@@ -113,26 +113,23 @@ def del_resource(session, logger, dbresource, dsdb_callback=None, **arguments):
     holder.resources.remove(dbresource)
     session.flush()
 
-    key = CompileKey.merge([remove_plenary.get_remove_key(),
-                            holder_plenary.get_write_key()])
-    try:
-        lock_queue.acquire(key)
-        remove_plenary.stash()
+    with CompileKey.merge([remove_plenary.get_remove_key(),
+                           holder_plenary.get_write_key()]):
         try:
-            holder_plenary.write(locked=True)
-        except IncompleteError:
-            holder_plenary.remove(locked=True)
+            remove_plenary.stash()
+            try:
+                holder_plenary.write(locked=True)
+            except IncompleteError:
+                holder_plenary.remove(locked=True)
 
-        remove_plenary.remove(locked=True)
+            remove_plenary.remove(locked=True)
 
-        if dsdb_callback:
-            dsdb_callback(session, logger, holder, dbresource, **arguments)
-    except:
-        holder_plenary.restore_stash()
-        remove_plenary.restore_stash()
-        raise
-    finally:
-        lock_queue.release(key)
+            if dsdb_callback:
+                dsdb_callback(session, logger, holder, dbresource, **arguments)
+        except:
+            holder_plenary.restore_stash()
+            remove_plenary.restore_stash()
+            raise
 
     return
 
@@ -147,25 +144,22 @@ def add_resource(session, logger, holder, dbresource, dsdb_callback=None,
 
     session.flush()
 
-    key = CompileKey.merge([res_plenary.get_write_key(),
-                            holder_plenary.get_write_key()])
-    try:
-        lock_queue.acquire(key)
-        res_plenary.write(locked=True)
+    with CompileKey.merge([res_plenary.get_write_key(),
+                           holder_plenary.get_write_key()]):
         try:
-            holder_plenary.write(locked=True)
-        except IncompleteError:
-            holder_plenary.remove(locked=True)
+            res_plenary.write(locked=True)
+            try:
+                holder_plenary.write(locked=True)
+            except IncompleteError:
+                holder_plenary.remove(locked=True)
 
-        if dsdb_callback:
-            dsdb_callback(session, logger, dbresource, **arguments)
+            if dsdb_callback:
+                dsdb_callback(session, logger, dbresource, **arguments)
 
-    except:
-        res_plenary.restore_stash()
-        holder_plenary.restore_stash()
-        raise
-    finally:
-        lock_queue.release(key)
+        except:
+            res_plenary.restore_stash()
+            holder_plenary.restore_stash()
+            raise
 
     return
 

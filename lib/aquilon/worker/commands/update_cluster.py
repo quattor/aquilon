@@ -22,7 +22,7 @@ from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.location import get_location
 from aquilon.worker.templates.machine import machine_plenary_will_move
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
-from aquilon.worker.locks import lock_queue, CompileKey
+from aquilon.worker.locks import CompileKey
 from aquilon.utils import force_ratio
 
 
@@ -144,19 +144,16 @@ class CommandUpdateCluster(BrokerCommand):
         session.flush()
 
         plenaries.append(Plenary.get_plenary(dbcluster))
-        key = CompileKey.merge([plenaries.get_write_key(),
-                                remove_plenaries.get_remove_key()])
-        try:
-            lock_queue.acquire(key)
+        with CompileKey.merge([plenaries.get_write_key(),
+                               remove_plenaries.get_remove_key()]):
             remove_plenaries.stash()
-            plenaries.write(locked=True)
-            remove_plenaries.remove(locked=True)
-        except:
-            remove_plenaries.restore_stash()
-            plenaries.restore_stash()
-            raise
-        finally:
-            lock_queue.release(key)
+            try:
+                plenaries.write(locked=True)
+                remove_plenaries.remove(locked=True)
+            except:
+                remove_plenaries.restore_stash()
+                plenaries.restore_stash()
+                raise
 
         return
 

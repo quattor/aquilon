@@ -22,7 +22,6 @@ from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.aqdb.model import ARecord, DnsEnvironment, NetworkEnvironment
 from aquilon.aqdb.model.dns_domain import parse_fqdn
 from aquilon.exceptions_ import ArgumentError, NotFoundException
-from aquilon.worker.locks import DeleteKey
 from aquilon.worker.processes import DSDBRunner
 from aquilon.worker.dbwrappers.dns import delete_dns_record
 
@@ -43,75 +42,74 @@ class CommandDelAddressDNSEnvironment(BrokerCommand):
         dbdns_env = DnsEnvironment.get_unique(session, dns_environment,
                                               compel=True)
 
-        with DeleteKey("system", logger=logger):
-            # We can't use get_unique() here, since we always want to filter by
-            # DNS environment, even if no FQDN was given
-            q = session.query(ARecord)
-            if ip:
-                q = q.filter_by(ip=ip)
-            q = q.join(ARecord.fqdn)
-            q = q.options(contains_eager('fqdn'))
-            q = q.filter_by(dns_environment=dbdns_env)
+        # We can't use get_unique() here, since we always want to filter by
+        # DNS environment, even if no FQDN was given
+        q = session.query(ARecord)
+        if ip:
+            q = q.filter_by(ip=ip)
+        q = q.join(ARecord.fqdn)
+        q = q.options(contains_eager('fqdn'))
+        q = q.filter_by(dns_environment=dbdns_env)
+        if fqdn:
+            (name, dbdns_domain) = parse_fqdn(session, fqdn)
+            q = q.filter_by(name=name)
+            q = q.filter_by(dns_domain=dbdns_domain)
+        try:
+            dbaddress = q.one()
+        except NoResultFound:
+            parts = []
             if fqdn:
-                (name, dbdns_domain) = parse_fqdn(session, fqdn)
-                q = q.filter_by(name=name)
-                q = q.filter_by(dns_domain=dbdns_domain)
-            try:
-                dbaddress = q.one()
-            except NoResultFound:
-                parts = []
-                if fqdn:
-                    parts.append(fqdn)
-                if ip:
-                    parts.append("ip %s" % ip)
-                raise NotFoundException("DNS Record %s not found." %
-                                        ", ".join(parts))
-            except MultipleResultsFound:
-                parts = []
-                if fqdn:
-                    parts.append(fqdn)
-                if ip:
-                    parts.append("ip %s" % ip)
-                raise NotFoundException("DNS Record %s is not unique." %
-                                        ", ".join(parts))
+                parts.append(fqdn)
+            if ip:
+                parts.append("ip %s" % ip)
+            raise NotFoundException("DNS Record %s not found." %
+                                    ", ".join(parts))
+        except MultipleResultsFound:
+            parts = []
+            if fqdn:
+                parts.append(fqdn)
+            if ip:
+                parts.append("ip %s" % ip)
+            raise NotFoundException("DNS Record %s is not unique." %
+                                    ", ".join(parts))
 
-            if dbaddress.hardware_entity:
-                raise ArgumentError("DNS Record {0:a} is the primary name of "
-                                    "{1:l}, therefore it cannot be "
-                                    "deleted.".format(dbaddress,
-                                                      dbaddress.hardware_entity))
+        dbaddress.network.lock_row()
 
-            if dbaddress.service_address:
-                # TODO: print the holder object
-                raise ArgumentError("DNS Record {0:a} is used as a service "
-                                    "address, therefore it cannot be deleted."
-                                    .format(dbaddress))
+        if dbaddress.hardware_entity:
+            raise ArgumentError("DNS Record {0:a} is the primary name of "
+                                "{1:l}, therefore it cannot be "
+                                "deleted.".format(dbaddress,
+                                                  dbaddress.hardware_entity))
 
-            # Do not allow deleting the DNS record if the IP address is still in
-            # use - except if there are other DNS records having the same
-            # address
-            if dbaddress.assignments:
-                last_use = []
-                # FIXME: race condition here, we should use
-                # SELECT ... FOR UPDATE
-                for addr in dbaddress.assignments:
-                    if len(addr.dns_records) == 1:
-                        last_use.append(addr)
-                if last_use:
-                    users = " ,".join([format(addr.interface, "l") for addr in
-                                       last_use])
-                    raise ArgumentError("IP address %s is still in use by %s." %
-                                        (ip, users))
-            ip = dbaddress.ip
-            old_fqdn = str(dbaddress.fqdn)
-            old_comments = dbaddress.comments
-            delete_dns_record(dbaddress)
-            session.flush()
+        if dbaddress.service_address:
+            # TODO: print the holder object
+            raise ArgumentError("DNS Record {0:a} is used as a service "
+                                "address, therefore it cannot be deleted."
+                                .format(dbaddress))
 
-            if dbdns_env.is_default:
-                dsdb_runner = DSDBRunner(logger=logger)
-                dsdb_runner.delete_host_details(old_fqdn, ip,
-                                                comments=old_comments)
-                dsdb_runner.commit_or_rollback()
+        # Do not allow deleting the DNS record if the IP address is still in
+        # use - except if there are other DNS records having the same
+        # address
+        if dbaddress.assignments:
+            last_use = []
+            for addr in dbaddress.assignments:
+                if len(addr.dns_records) == 1:
+                    last_use.append(addr)
+            if last_use:
+                users = " ,".join([format(addr.interface, "l") for addr in
+                                   last_use])
+                raise ArgumentError("IP address %s is still in use by %s." %
+                                    (ip, users))
+        ip = dbaddress.ip
+        old_fqdn = str(dbaddress.fqdn)
+        old_comments = dbaddress.comments
+        delete_dns_record(dbaddress)
+        session.flush()
+
+        if dbdns_env.is_default:
+            dsdb_runner = DSDBRunner(logger=logger)
+            dsdb_runner.delete_host_details(old_fqdn, ip,
+                                            comments=old_comments)
+            dsdb_runner.commit_or_rollback()
 
         return

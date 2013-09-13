@@ -22,7 +22,7 @@ from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.commands.manage_hostname import validate_branch_commits
 from aquilon.worker.dbwrappers.branch import get_branch_and_author
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
-from aquilon.worker.locks import lock_queue, CompileKey
+from aquilon.worker.locks import CompileKey
 
 
 class CommandManageCluster(BrokerCommand):
@@ -80,16 +80,13 @@ class CommandManageCluster(BrokerCommand):
         session.flush()
 
         # We're crossing domains, need to lock everything.
-        key = CompileKey(logger=logger)
-        try:
-            lock_queue.acquire(key)
+        with CompileKey(logger=logger):
             plenaries.stash()
-            plenaries.remove(locked=True)
-            plenaries.write(locked=True)
-        except:
-            plenaries.restore_stash()
-            raise
-        finally:
-            lock_queue.release(key)
+            try:
+                plenaries.remove(locked=True)
+                plenaries.write(locked=True)
+            except:
+                plenaries.restore_stash()
+                raise
 
         return

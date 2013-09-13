@@ -21,7 +21,6 @@ from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.aqdb.model import ARecord, NetworkEnvironment
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.exceptions_ import ArgumentError
-from aquilon.worker.locks import DeleteKey
 from aquilon.worker.processes import DSDBRunner
 from aquilon.worker.dbwrappers.dns import delete_dns_record
 
@@ -31,12 +30,6 @@ class CommandDelDynamicRange(BrokerCommand):
     required_parameters = ["startip", "endip"]
 
     def render(self, session, logger, startip, endip, **arguments):
-        with DeleteKey("system", logger=logger) as key:
-            self.del_dynamic_range(session, logger, startip, endip)
-            session.commit()
-        return
-
-    def del_dynamic_range(self, session, logger, startip, endip):
         dbnet_env = NetworkEnvironment.get_unique_or_default(session)
         startnet = get_net_id_from_ip(session, startip, dbnet_env)
         endnet = get_net_id_from_ip(session, endip, dbnet_env)
@@ -44,6 +37,9 @@ class CommandDelDynamicRange(BrokerCommand):
             raise ArgumentError("IP addresses %s (%s) and %s (%s) must be "
                                 "on the same subnet." %
                                 (startip, startnet.ip, endip, endnet.ip))
+
+        startnet.lock_row()
+
         q = session.query(ARecord)
         q = q.filter_by(network=startnet)
         q = q.filter(ARecord.ip >= startip)

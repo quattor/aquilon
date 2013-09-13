@@ -18,6 +18,8 @@
 
 import logging
 from threading import Condition
+from collections import defaultdict
+from itertools import chain
 
 from aquilon.exceptions_ import InternalError
 
@@ -43,8 +45,6 @@ class LockQueue(object):
         self.queue = []
 
     def acquire(self, key):
-        if key is None:
-            return
         key.transition("acquiring", debug=True)
         with self.queue_condition:
             if key in self.queue:
@@ -64,8 +64,6 @@ class LockQueue(object):
         blockers and let it know if it is in line.
 
         """
-        if key is None:
-            return False
         key.reset_blockers()
         is_blocked = False
         for k in self.queue:
@@ -80,8 +78,6 @@ class LockQueue(object):
         return is_blocked
 
     def release(self, key):
-        if key is None:
-            return
         key.transition("releasing")
         with self.queue_condition:
             self.queue.remove(key)
@@ -90,30 +86,36 @@ class LockQueue(object):
 
 
 class LockKey(object):
-    """Create a key composed of an ordered list of components.
+    """Create a key composed of a bunch of unrelated items.
 
-    The intent is that this class is subclassed to take a dictionary
-    and provide validation before setting the components variable.
+    The intent is that this class is subclassed to provide validation.
 
     """
 
-    def __init__(self, components, logger=LOGGER, loglevel=logging.INFO,
+    def __init__(self, logger=LOGGER, loglevel=logging.INFO,
                  lock_queue=None):
-        self.components = components
+        self.shared = defaultdict(set)
+        self.exclusive = defaultdict(set)
         self.logger = logger
         self.loglevel = loglevel
         self.blocker_count = None
         self.lock_queue = lock_queue
         self.state = None
-        self.transition("initialized", debug=True)
 
     def __str__(self):
-        if not self.components:
-            return 'lock'
-        if len(self.components) == 1:
-            return '%s lock' % self.components[0]
-        return '%s lock for %s' % (self.components[0],
-                                   "/".join(self.components[1:]))
+        exc_items = []
+        shared_items = []
+        for name, items in self.exclusive.iteritems():
+            exc_items.extend(["%s/%s" % (name, item) for item in items])
+
+        for name, items in self.shared.iteritems():
+            shared_items.extend(["%s/%s" % (name, item) for item in items])
+
+        exc_items.sort()
+        shared_items.sort()
+
+        return "exclusive(%s), shared(%s)" % (", ".join(exc_items),
+                                              ", ".join(shared_items))
 
     def __enter__(self):
         if not self.lock_queue:  # pragma: no cover
@@ -128,6 +130,17 @@ class LockKey(object):
         self.logger.log(self.loglevel, *args, **kwargs)
 
     def transition(self, state, debug=False):
+        # Sanity checking. Locks in the queue may be touched from other threads,
+        # and if a key is a DB object, that may trigger trying to access the
+        # underlying DB connection from the wrong thread, which in turn leads to
+        # very "interesting" errors. So make sure only strings are used.
+        if state == "initialized":
+            for keys in chain(self.exclusive.itervalues(),
+                              self.shared.itervalues()):
+                for key in keys:
+                    if not isinstance(key, basestring):
+                        raise ValueError("Lock key contains %r" % key)
+
         self.state = state
         if debug:
             self.logger.debug('%s %s', state, self)
@@ -143,27 +156,21 @@ class LockKey(object):
     def blocks(self, key):
         """Determine if this key blocks another.
 
-        The algorithm exploits the zip() implementation.  There are two
-        basic cases:
-
-        The keys are the same length.  They only block each other if
-        they match exactly.  Using zip to interleave the parts for
-        comparison should make sense here.  If any of the parts are
-        not equal then the two keys do not conflict.
-
-        The keys are different length.  Here, they block if one is
-        a superset of the other.  That is, if the shorter keys matches
-        all the components of the longer key.  The zip() method will
-        truncate the comparison to the length of the shorter list.
-        Thus the logic is the same - if all the paired components
-        match then the keys are blocked.
-
+        The other key is blocked if:
+            - our exclusive set intersects with their shared or exclusive
+            - our shared set intersects with their exclusive
         """
 
-        for (a, b) in zip(self.components, key.components):
-            if a != b:
-                return False
-        return True
+        for name, items in self.exclusive.iteritems():
+            if (name in key.exclusive and items & key.exclusive[name]) or \
+               (name in key.shared and items & key.shared[name]):
+                return True
+
+        for name, items in self.shared.iteritems():
+            if name in key.exclusive and items & key.exclusive[name]:
+                return True
+
+        return False
 
     @staticmethod
     def merge(keylist):
@@ -174,20 +181,21 @@ class LockKey(object):
         possible but more work for little gain.
 
         """
-        keylist = [key for key in keylist if key is not None]
-        if not keylist:
-            return None
-        components = []
         # Assume logger/loglevel is consistent across the list.
         logger = keylist[0].logger
         loglevel = keylist[0].loglevel
         lock_queue = keylist[0].lock_queue
-        for position in zip(*[key.components for key in keylist]):
-            unique_elements = set(position)
-            if len(unique_elements) == 1:
-                components.append(unique_elements.pop())
-            else:
-                return LockKey(components, logger=logger, loglevel=loglevel,
-                               lock_queue=lock_queue)
-        return LockKey(components, logger=logger, loglevel=loglevel,
-                       lock_queue=lock_queue)
+        merged = LockKey(logger=logger, loglevel=loglevel,
+                         lock_queue=lock_queue)
+        for key in keylist:
+            for name, items in key.exclusive.iteritems():
+                merged.exclusive[name] |= items
+            for name, items in key.shared.iteritems():
+                merged.shared[name] |= items
+
+        # Normalization. If something is locked exclusively, then it makes no
+        # sense to have the same item in the shared set as well.
+        for name, items in merged.shared.iteritems():
+            if name in merged.exclusive:
+                items -= merged.exclusive[name]
+        return merged

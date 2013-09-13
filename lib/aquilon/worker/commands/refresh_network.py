@@ -24,7 +24,7 @@ from aquilon.aqdb.data_sync.qip import QIPRefresh
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.processes import run_command
 from aquilon.worker.dbwrappers.location import get_location
-from aquilon.worker.locks import lock_queue, SyncKey
+from aquilon.worker.locks import SyncKey
 from aquilon.utils import remove_dir
 
 
@@ -44,24 +44,23 @@ class CommandRefreshNetwork(BrokerCommand):
             raise ArgumentError("--dryrun and --incremental cannot be given "
                                 "simultaneously.")
 
-        key = SyncKey(data="network", logger=logger)
-        lock_queue.acquire(key)
+        with SyncKey("network", logger=logger):
+            rundir = self.config.get("broker", "rundir")
+            tempdir = mkdtemp(prefix="refresh_network_", dir=rundir)
+            try:
+                args = [self.config.get("broker", "qip_dump_subnetdata"),
+                        "--datarootdir", tempdir, "--format", "txt",
+                        "--noaudit"]
+                run_command(args, logger=logger)
 
-        rundir = self.config.get("broker", "rundir")
-        tempdir = mkdtemp(prefix="refresh_network_", dir=rundir)
-        try:
-            args = [self.config.get("broker", "qip_dump_subnetdata"),
-                    "--datarootdir", tempdir, "--format", "txt", "--noaudit"]
-            run_command(args, logger=logger)
+                subnetdata = file(os.path.join(tempdir, "subnetdata.txt"), "r")
+                refresher = QIPRefresh(session, logger, dbbuilding, dryrun,
+                                       incremental)
+                refresher.refresh(subnetdata)
 
-            subnetdata = file(os.path.join(tempdir, "subnetdata.txt"), "r")
-            refresher = QIPRefresh(session, logger, dbbuilding, dryrun, incremental)
-            refresher.refresh(subnetdata)
+                session.flush()
 
-            session.flush()
-
-            if dryrun:
-                session.rollback()
-        finally:
-            lock_queue.release(key)
-            remove_dir(tempdir, logger=logger)
+                if dryrun:
+                    session.rollback()
+            finally:
+                remove_dir(tempdir, logger=logger)

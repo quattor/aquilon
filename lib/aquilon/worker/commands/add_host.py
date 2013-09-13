@@ -27,7 +27,6 @@ from aquilon.worker.dbwrappers.dns import grab_address
 from aquilon.worker.dbwrappers.grn import lookup_grn
 from aquilon.worker.dbwrappers.interface import generate_ip, assign_address
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
-from aquilon.worker.locks import lock_queue
 from aquilon.worker.processes import DSDBRunner
 
 
@@ -180,32 +179,31 @@ class CommandAddHost(BrokerCommand):
         if dbsrv_addr:
             plenaries.append(Plenary.get_plenary(dbsrv_addr))
 
-        key = plenaries.get_write_key()
-        try:
-            lock_queue.acquire(key)
-            plenaries.write(locked=True)
+        with plenaries.get_write_key():
+            try:
+                plenaries.write(locked=True)
 
-            # XXX: This (and some of the code above) is horrible.  There
-            # should be a generic/configurable hook here that could kick
-            # in based on archetype and/or domain.
-            dsdb_runner = DSDBRunner(logger=logger)
-            if dbhost.archetype.name == 'aurora':
-                # For aurora, check that DSDB has a record of the host.
-                if not skip_dsdb_check:
-                    try:
-                        dsdb_runner.show_host(hostname)
-                    except ProcessException, e:
-                        raise ArgumentError("Could not find host in DSDB: %s" % e)
-            elif not dbmachine.primary_ip:
-                logger.info("No IP for %s, not adding to DSDB." % dbmachine.fqdn)
-            else:
-                dsdb_runner.update_host(dbmachine, oldinfo)
-                dsdb_runner.commit_or_rollback("Could not add host to DSDB")
-        except:
-            plenaries.restore_stash()
-            raise
-        finally:
-            lock_queue.release(key)
+                # XXX: This (and some of the code above) is horrible.  There
+                # should be a generic/configurable hook here that could kick
+                # in based on archetype and/or domain.
+                dsdb_runner = DSDBRunner(logger=logger)
+                if dbhost.archetype.name == 'aurora':
+                    # For aurora, check that DSDB has a record of the host.
+                    if not skip_dsdb_check:
+                        try:
+                            dsdb_runner.show_host(hostname)
+                        except ProcessException, e:
+                            raise ArgumentError("Could not find host in DSDB: "
+                                                "%s" % e)
+                elif not dbmachine.primary_ip:
+                    logger.info("No IP for %s, not adding to DSDB." %
+                                dbmachine.fqdn)
+                else:
+                    dsdb_runner.update_host(dbmachine, oldinfo)
+                    dsdb_runner.commit_or_rollback("Could not add host to DSDB")
+            except:
+                plenaries.restore_stash()
+                raise
 
         for name, value in audit_results:
             self.audit_result(session, name, value, **arguments)

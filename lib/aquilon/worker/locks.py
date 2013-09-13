@@ -30,6 +30,14 @@ LOGGER = logging.getLogger(__name__)
 lock_queue = LockQueue()
 
 
+class NoLockKey(LockKey):
+    """ A key that does not lock anything """
+    def __init__(self, logger=LOGGER, loglevel=CLIENT_INFO):
+        super(NoLockKey, self).__init__(logger=logger, loglevel=loglevel,
+                                        lock_queue=lock_queue)
+        self.transition("initialized", debug=True)
+
+
 # The concept of a "compile" lock somewhat oversimplifies.
 # Broadly speaking there are four phases:
 # 1 - Read plenary templates and profile templates for comparison.
@@ -54,38 +62,38 @@ class CompileKey(LockKey):
         A profile could be a host or a cluster.
 
         """
+        super(CompileKey, self).__init__(logger=logger, loglevel=loglevel,
+                                         lock_queue=lock_queue)
 
-        self.domain = domain
-        self.profile = profile
-        components = ["compile"]
-        if self.domain:
-            components.append(self.domain)
-            if self.profile:
-                components.append(self.profile)
-        elif self.profile:
-            raise InternalError("Compile lock request for %s missing domain." %
-                                self.profile)
-        LockKey.__init__(self, components, logger=logger, loglevel=loglevel,
-                         lock_queue=lock_queue)
+        # Emulate the previous behavior:
+        # - if no profile is provided, then this is a domain-wide lock
+        # - if no domain is provided either, then this is a global lock
+        if profile:
+            if not domain:
+                raise InternalError("Compile lock request for %s missing "
+                                    "domain." % profile)
+            self.shared["misc"].add("compile")
+            self.shared["domain"].add(domain)
+            self.exclusive["profile"].add(profile)
+        elif domain:
+            self.shared["misc"].add("compile")
+            self.exclusive["domain"].add(domain)
+        else:
+            self.exclusive["misc"].add("compile")
 
-
-class DeleteKey(LockKey):
-    """Use when a broad deletion lock is required."""
-    def __init__(self, group=None, logger=LOGGER, loglevel=CLIENT_INFO):
-        self.group = group
-        components = ["delete"]
-        if self.group:
-            components.append(self.group)
-        LockKey.__init__(self, components, logger=logger, loglevel=loglevel,
-                         lock_queue=lock_queue)
+        self.transition("initialized", debug=True)
 
 
 class SyncKey(LockKey):
-    """Locks used by the refresh commands."""
-    def __init__(self, data=None, logger=LOGGER, loglevel=CLIENT_INFO):
-        self.data = data
-        components = ["sync"]
-        if self.data:
-            components.append(self.data)
-        LockKey.__init__(self, components, logger=logger, loglevel=loglevel,
-                         lock_queue=lock_queue)
+    """
+    Locks used by the refresh commands.
+
+    This type of lock is intended to protect high-level commands from running in
+    parallel.
+    """
+    def __init__(self, data, logger=LOGGER, loglevel=CLIENT_INFO):
+        super(SyncKey, self).__init__(logger=logger, loglevel=loglevel,
+                                      lock_queue=lock_queue)
+
+        self.exclusive["sync"].add(data)
+        self.transition("initialized", debug=True)

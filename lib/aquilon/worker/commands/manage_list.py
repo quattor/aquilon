@@ -23,7 +23,7 @@ from aquilon.worker.dbwrappers.branch import get_branch_and_author
 from aquilon.worker.dbwrappers.host import (hostlist_to_hosts,
                                             check_hostlist_size,
                                             validate_branch_author)
-from aquilon.worker.locks import lock_queue, CompileKey
+from aquilon.worker.locks import CompileKey
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
 
 
@@ -46,7 +46,7 @@ class CommandManageList(BrokerCommand):
 
         failed = []
 
-        validate_branch_author(dbhosts)
+        dbsource, dbsource_author = validate_branch_author(dbhosts)
         for dbhost in dbhosts:
             # check if any host in the list is a cluster node
             if dbhost.cluster:
@@ -58,11 +58,6 @@ class CommandManageList(BrokerCommand):
             raise ArgumentError("Cannot modify the following hosts:\n%s" %
                                 "\n".join(failed))
 
-        # since we have already checked if all hosts in list are within the
-        # same branch, we only need one dbsource to validate the branch
-        dbhost = dbhosts[0]
-        dbsource = dbhost.branch
-        dbsource_author = dbhost.sandbox_author
         if not force:
             validate_branch_commits(dbsource, dbsource_author,
                                     dbbranch, dbauthor, logger, self.config)
@@ -77,16 +72,13 @@ class CommandManageList(BrokerCommand):
         session.flush()
 
         # We're crossing domains, need to lock everything.
-        key = CompileKey(logger=logger)
-        try:
-            lock_queue.acquire(key)
+        with CompileKey(logger=logger):
             plenaries.stash()
-            plenaries.remove(locked=True)
-            plenaries.write(locked=True)
-        except:
-            plenaries.restore_stash()
-            raise
-        finally:
-            lock_queue.release(key)
+            try:
+                plenaries.remove(locked=True)
+                plenaries.write(locked=True)
+            except:
+                plenaries.restore_stash()
+                raise
 
         return

@@ -26,9 +26,6 @@ class CommandReconfigureMembersof(CommandReconfigureList):
 
     required_parameters = ["membersof"]
 
-    def render(self, session, logger, membersof, archetype, personality,
-               buildstatus, osname, osversion, **arguments):
+    def render(self, session, logger, membersof, **arguments):
         dbcluster = Cluster.get_unique(session, membersof, compel=True)
-        self.reconfigure_list(session, logger, dbcluster.hosts,
-                              archetype, personality,
-                              buildstatus, osname, osversion, **arguments)
+        self.reconfigure_list(session, logger, dbcluster.hosts, **arguments)
