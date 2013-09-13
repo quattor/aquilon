@@ -298,6 +298,9 @@ class TestCompile(VerifyNotificationsMixin, TestBrokerCommand):
         command = ['manage', '--hostname=unittest02.one-nyp.ms.com',
                    '--domain=unittest', '--force']
         self.successtest(command)
+        # Make sure the build files exist - further tests depend on that
+        command = ['compile', '--hostname=unittest02.one-nyp.ms.com']
+        self.successtest(command)
 
     def test_600_aqcompile(self):
         aqcompile = os.path.join(self.config.get("broker", "srcdir"),
