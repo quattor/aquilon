@@ -166,7 +166,10 @@ class AuthorizationBroker(object):
                               'update_router']:
                 self.raise_auth_error(principal, action, resource)
         if dbuser.role.name == 'network_engineering':
-            if action not in ['add_rack', 'add_switch',
+            if action not in ['add_vendor', 'del_vendor',
+                              'add_os', 'update_os', 'del_os',
+                              'add_model', 'update_model', 'del_model',
+                              'add_rack', 'add_switch',
                               'update_rack', 'update_switch',
                               'del_rack', 'del_switch',
                               'add_interface_switch', 'del_interface_switch',
