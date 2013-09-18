@@ -105,6 +105,11 @@ pool_timeout =
 [database]
 database_section = database_sqlite
 
+# Log query execution times. You probably also want to enable the logging of
+# the queries too, by adjusting the level of sqlalchemy.engine in the [logging]
+# section.
+#log_query_times = yes
+
 [broker]
 default_organization = ms
 servername = %(hostname)s

@@ -20,6 +20,7 @@ import re
 import os
 import sys
 import logging
+import time
 from numbers import Number
 
 from aquilon.aqdb import depends  # pylint: disable=W0611
@@ -110,6 +111,18 @@ def oracle_reset_action(dbapi_con, con_record):  # pylint: disable=W0613
         pass
 
 
+def timer_start(conn, cursor, statement, parameters, context, executemany):
+    # pylint: disable=W0613
+    conn.info.setdefault('query_start_time', []).append(time.time())
+
+
+def timer_stop(conn, cursor, statement, parameters, context, executemany):
+    # pylint: disable=W0613
+    total = time.time() - conn.info['query_start_time'].pop(-1)
+    log = logging.getLogger(__name__)
+    log.info("Query running time: %f", total)
+
+
 class DbFactory(object):
     __shared_state = {}
     __started = False  # at the class definition, that is
@@ -132,6 +145,11 @@ class DbFactory(object):
 
         if self.verbose:
             engine.echo = True
+
+        if config.has_option("database", "log_query_times") and \
+           config.getboolean("database", "log_query_times"):
+            event.listen(engine, "before_cursor_execute", timer_start)
+            event.listen(engine, "after_cursor_execute", timer_stop)
 
         return engine
 
