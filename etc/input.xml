@@ -181,6 +181,7 @@
          <option name="model" type="string">model name</option>
          <option name="machine_type" type="string">machine type for the model (blade, virtual_machine, etc.)</option>
          <option name="vendor" type="string">vendor name</option>
+         <option name="ip" type="ipv4">IP address</option>
          <option name="mac" type="mac">MAC address of an attached interface</option>
          <option name="pg" type="string">port group of an attached interface</option>
          <option name="interface_model" type="string">Having an interface of the given model</option>
@@ -228,6 +229,7 @@
          <option name="model" type="string">model name</option>
          <option name="machine_type" type="string">machine type for the model (blade, virtual_machine, etc.)</option>
          <option name="vendor" type="string">vendor name</option>
+         <option name="ip" type="ipv4">IP address</option>
          <option name="mac" type="mac">MAC address of an attached interface</option>
          <option name="interface_model" type="string">Having an interface of the given model</option>
          <option name="interface_vendor" type="string">Having an interface of the given vendor</option>
@@ -3353,6 +3355,7 @@
       separate line for each.
       <optgroup name="search_switch_opts" mandatory="True" fields="any">
          <option name="switch" type="string">switch fully qualified name</option>
+         <option name="ip" type="ipv4">IP address</option>
          <option name="vlan" type="int">Vlan ID</option>
          <option name="type" type="string">Type (tor, bor, agg)</option>
          <option name="model" type="string">switch model</option>

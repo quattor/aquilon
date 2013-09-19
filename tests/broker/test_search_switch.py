@@ -153,6 +153,31 @@ class TestSearchSwitch(TestBrokerCommand):
                          "hp,uttorswitch,SNgd1r01,," % ip,
                          command)
 
+    def testsearchswitchip(self):
+        ip = self.net["tor_net_0"].usable[0]
+        command = ["search_switch", "--ip=%s" % ip]
+        out = self.commandtest(command)
+        self.matchoutput(out, "ut01ga1s02.aqd-unittest.ms.com", command)
+
+    def testsearchswitchipfullinfo(self):
+        ip = self.net["tor_net_0"].usable[0]
+        command = ["search_switch", "--ip=%s" % ip, "--fullinfo"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Switch: ut01ga1s02", command)
+        self.matchoutput(out,
+                         "Primary Name: ut01ga1s02.aqd-unittest.ms.com"
+                         " [%s]" % ip, command)
+        self.matchoutput(out, "Switch Type: tor", command)
+        out = self.commandtest(command)
+
+    def testsearchswitchipcsv(self):
+        ip = self.net["tor_net_0"].usable[0]
+        command = ["search_switch", "--ip=%s" % ip, "--format=csv"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "ut01ga1s02.aqd-unittest.ms.com,%s,tor,ut8"
+                         ",ut,bnt,rs g8000,,xge49,%s" % (ip, ip.mac),
+                         command)
+
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestSearchSwitch)
