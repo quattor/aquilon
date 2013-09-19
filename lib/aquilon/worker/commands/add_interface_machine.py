@@ -43,12 +43,6 @@ class CommandAddInterfaceMachine(BrokerCommand):
         oldinfo = DSDBRunner.snapshot_hw(dbmachine)
         audit_results = []
 
-        q = session.query(Interface)
-        q = q.filter_by(name=interface, hardware_entity=dbmachine)
-        if q.first():
-            raise ArgumentError("Machine %s already has an interface named %s."
-                                % (machine, interface))
-
         if not type:
             type = 'public'
             management_types = ['bmc', 'ilo', 'ipmi']

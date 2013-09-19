@@ -95,8 +95,8 @@ class TestAddInterface(TestBrokerCommand):
                    "--machine", "ut3c5n10",
                    "--mac", self.net["unknown0"].usable[-1].mac]
         out = self.badrequesttest(command)
-        self.matchoutput(out, "Machine ut3c5n10 already has an interface named "
-                         "eth1.", command)
+        self.matchoutput(out, "Bad Request: Public Interface eth1 of machine "
+                         "ut3c5n10 already exists.", command)
 
     def testaddut3c5n10eth2badmac(self):
         command = ["add", "interface", "--interface", "eth2",
