@@ -111,6 +111,8 @@ class AuthorizationBroker(object):
                               'add_interface_machine',
                               'add_interface_address',
                               'add_interface_chassis',
+                              'update_interface_hostname',
+                              'update_interface_machine',
                               'del_interface', 'del_interface_address',
                               'add_alias', 'update_alias', 'del_alias',
                               'add_address', 'del_address',
