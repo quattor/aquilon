@@ -78,8 +78,6 @@ class TestAddAuroraHost(TestBrokerCommand):
         self.matchoutput(out, "Could not find not-in-dsdb in DSDB", command)
         self.dsdb_verify()
 
-    aurora_without_rack = "oy605c2n6"
-
     def testdsdbrackmissing(self):
         self.dsdb_expect("show_host -host_name %s" % self.aurora_without_rack)
         self.dsdb_expect("show_rack -rack_name oy605", fail=True)

@@ -132,10 +132,10 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
                          """include { "service/afs/q.ny.ms.com/client/config" };""",
                          command)
         self.matchoutput(out,
-                         """include { "service/bootserver/np.test/client/config" };""",
+                         """include { "service/bootserver/unittest/client/config" };""",
                          command)
         self.matchoutput(out,
-                         """include { "service/dns/utdnsinstance/client/config" };""",
+                         """include { "service/dns/unittest/client/config" };""",
                          command)
         self.matchoutput(out,
                          """include { "service/ntp/pa.ny.na/client/config" };""",
@@ -229,10 +229,10 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
                          """include { "service/afs/q.ny.ms.com/client/config" };""",
                          command)
         self.matchoutput(out,
-                         """include { "service/bootserver/np.test/client/config" };""",
+                         """include { "service/bootserver/unittest/client/config" };""",
                          command)
         self.matchoutput(out,
-                         """include { "service/dns/utdnsinstance/client/config" };""",
+                         """include { "service/dns/unittest/client/config" };""",
                          command)
         self.matchoutput(out,
                          """include { "service/ntp/pa.ny.na/client/config" };""",
@@ -404,6 +404,7 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
             self.noouttest(command)
 
     def testverifyremovebindingscat(self):
+        osversion = self.config.get("archetype_aquilon", "default_osversion")
         command = "cat --hostname aquilon87.aqd-unittest.ms.com --data"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
@@ -425,7 +426,7 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
                          """\"/\" = create(\"hostdata/aquilon87.aqd-unittest.ms.com\"""",
                          command)
         self.matchoutput(out,
-                         """include { "os/linux/5.0.1-x86_64/config" };""",
+                         'include { "os/linux/%s/config" };' % osversion,
                          command)
         self.matchoutput(out,
                          """include { "service/aqd/ny-prod/client/config" };""",
@@ -434,13 +435,13 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
                          """include { "service/ntp/pa.ny.na/client/config" };""",
                          command)
         self.matchoutput(out,
-                         """include { "service/bootserver/np.test/client/config" };""",
+                         """include { "service/bootserver/unittest/client/config" };""",
                          command)
         self.matchoutput(out,
                          """include { "service/afs/q.ny.ms.com/client/config" };""",
                          command)
         self.matchoutput(out,
-                         """include { "service/dns/utdnsinstance/client/config" };""",
+                         """include { "service/dns/unittest/client/config" };""",
                          command)
         self.matchoutput(out,
                          """include { "personality/inventory/config" };""",

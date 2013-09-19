@@ -60,9 +60,7 @@ class CommandRollback(BrokerCommand):
                                 (dbdomain.tracked_branch.name, ref))
 
         dbdomain.tracked_branch.is_sync_valid = False
-        session.add(dbdomain.tracked_branch)
         dbdomain.rollback_commit = None
-        session.add(dbdomain)
 
         with CompileKey(domain=dbdomain.name, logger=logger):
             try:

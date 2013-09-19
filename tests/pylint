@@ -26,6 +26,7 @@ sys.path.append(srcdir)
 import aquilon.aqdb.depends
 import aquilon.worker.depends
 import aquilon.client.depends
+import depends
 # Any other packages?
 
 # Any of the above may override the default location for ms.version...

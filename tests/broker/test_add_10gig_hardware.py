@@ -290,8 +290,7 @@ class TestAdd10GigHardware(TestBrokerCommand):
 
             command = ["add_host", "--hostname", hostname,
                        "--machine", machine, "--autoip", "--domain=unittest",
-                       "--archetype=aquilon", "--personality=inventory",
-                       "--osname=linux", "--osversion=5.0.1-x86_64"]
+                       "--archetype=aquilon", "--personality=inventory"]
             (out, err) = self.successtest(command)
         self.dsdb_verify()
 
@@ -301,8 +300,7 @@ class TestAdd10GigHardware(TestBrokerCommand):
         self.dsdb_expect_add("ivirt17.aqd-unittest.ms.com", ip, "eth0", mac)
         command = ["add", "host", "--prefix", "ivirt", "--machine", "evm26",
                    "--autoip", "--domain", "unittest",
-                   "--archetype", "aquilon", "--personality", "inventory",
-                   "--osname", "linux", "--osversion", "5.0.1-x86_64"]
+                   "--archetype", "aquilon", "--personality", "inventory"]
         out = self.commandtest(command)
         # This also verifies that we use the mapping for the building, not the
         # city

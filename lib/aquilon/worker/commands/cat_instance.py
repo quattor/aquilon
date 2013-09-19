@@ -16,14 +16,12 @@
 # limitations under the License.
 """Contains the logic for `aq cat --service --instance`."""
 
-
+from aquilon.aqdb.model import Service, ServiceInstance
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.dbwrappers.service_instance import get_service_instance
 from aquilon.worker.templates.service import (PlenaryServiceInstanceToplevel,
                                               PlenaryServiceInstanceClientDefault,
                                               PlenaryServiceInstanceServer,
                                               PlenaryServiceInstanceServerDefault)
-from aquilon.aqdb.model import Service
 
 
 class CommandCatInstance(BrokerCommand):
@@ -33,7 +31,8 @@ class CommandCatInstance(BrokerCommand):
     def render(self, session, logger, service, instance, default, server,
                generate, **kwargs):
         dbservice = Service.get_unique(session, service, compel=True)
-        dbsi = get_service_instance(session, dbservice, instance)
+        dbsi = ServiceInstance.get_unique(session, service=dbservice,
+                                          name=instance, compel=True)
         if default:
             if server:
                 plenary_info = PlenaryServiceInstanceServerDefault(dbsi,

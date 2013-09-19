@@ -25,6 +25,7 @@ import unittest2 as unittest
 from broker.brokertest import TestBrokerCommand
 
 aquilon_hosts = None
+aquilon_personalities = None
 inventory_hosts = None
 hs21_hosts = None
 
@@ -46,7 +47,7 @@ class TestBindFeature(TestBrokerCommand):
 
     def setUp(self):
         # We don't want to query these for every test executed...
-        global aquilon_hosts, inventory_hosts, hs21_hosts
+        global aquilon_hosts, inventory_hosts, hs21_hosts, aquilon_personalities
 
         super(TestBindFeature, self).setUp()
 
@@ -71,12 +72,24 @@ class TestBindFeature(TestBrokerCommand):
             hostlist = self.parse_hostlist_msg(out)
             hs21_hosts = len(hostlist.hosts)
 
+        if aquilon_personalities is None:
+            command = ["search", "personality", "--archetype", "aquilon",
+                       "--format", "proto"]
+            out = self.commandtest(command)
+            perslist = self.parse_personality_msg(out)
+            aquilon_personalities = len(perslist.personalities)
+
+    def verify_personality_flush(self, err, command):
+        self.matchoutput(err, "Flushed %d/%d templates" %
+                         (aquilon_personalities, aquilon_personalities),
+                         command)
+
     def test_100_bind_archetype(self):
         command = ["bind", "feature", "--feature", "pre_host",
                    "--archetype", "aquilon",
                    "--justification", "tcm=12345678"]
-        (out, err) = self.successtest(command)
-        self.matchoutput(err, "Flushed 10/10 templates", command)
+        err = self.statustest(command)
+        self.verify_personality_flush(err, command)
         # We can't easily check the number of templates that got refreshed since
         # there's no easy way to query if "make" was run for a host or not
 
@@ -112,8 +125,8 @@ class TestBindFeature(TestBrokerCommand):
     def test_110_bind_personality(self):
         command = ["bind", "feature", "--feature", "post_host",
                    "--personality", "inventory"]
-        (out, err) = self.successtest(command)
-        self.matchclean(err, "Flushed 10/10", command)
+        err = self.statustest(command)
+        self.matchoutput(err, "Flushed 1/1 templates.", command)
 
     def test_111_verify_show_personality(self):
         command = ["show", "personality", "--personality", "inventory"]
@@ -168,7 +181,7 @@ class TestBindFeature(TestBrokerCommand):
     def test_120_bind_personality_redundant(self):
         command = ["bind", "feature", "--feature", "pre_host",
                    "--personality", "inventory"]
-        (out, err) = self.successtest(command)
+        err = self.statustest(command)
         self.matchoutput(err,
                          "Warning: host feature pre_host is already bound to "
                          "archetype aquilon; binding it to personality "
@@ -185,7 +198,7 @@ class TestBindFeature(TestBrokerCommand):
     def test_122_undo_redundant_personality(self):
         command = ["unbind", "feature", "--feature", "pre_host",
                    "--personality", "inventory"]
-        (out, err) = self.successtest(command)
+        err = self.statustest(command)
         self.matchoutput(err, "Flushed 1/1 templates.", command)
 
     def test_123_verify_undo(self):
@@ -197,13 +210,13 @@ class TestBindFeature(TestBrokerCommand):
     def test_125_bind_archetype_redundant(self):
         command = ["bind", "feature", "--feature", "post_host",
                    "--archetype", "aquilon", "--justification", "tcm=12345678"]
-        (out, err) = self.successtest(command)
+        err = self.statustest(command)
         self.matchoutput(err,
                          "Warning: host feature post_host is bound to "
                          "personality aquilon/inventory which is now "
                          "redundant; consider removing it.",
                          command)
-        self.matchoutput(err, "Flushed 10/10 templates", command)
+        self.verify_personality_flush(err, command)
 
     def test_126_verify_show_feature(self):
         command = ["show", "feature", "--feature", "post_host", "--type", "host"]
@@ -215,8 +228,8 @@ class TestBindFeature(TestBrokerCommand):
         command = ["unbind", "feature", "--feature", "post_host",
                    "--archetype", "aquilon",
                    "--justification", "tcm=12345678"]
-        (out, err) = self.successtest(command)
-        self.matchoutput(err, "Flushed 10/10 templates", command)
+        err = self.statustest(command)
+        self.verify_personality_flush(err, command)
 
     def test_128_verify_undo(self):
         command = ["show", "feature", "--feature", "post_host", "--type", "host"]
@@ -229,8 +242,8 @@ class TestBindFeature(TestBrokerCommand):
                    "--model", "hs21-8853l5u",
                    "--archetype", "aquilon",
                    "--justification", "tcm=12345678"]
-        (out, err) = self.successtest(command)
-        self.matchoutput(err, "Flushed 10/10 templates.", command)
+        err = self.statustest(command)
+        self.verify_personality_flush(err, command)
 
     def test_131_verify_show_model(self):
         command = ["show", "model", "--model", "hs21-8853l5u"]
@@ -350,7 +363,7 @@ class TestBindFeature(TestBrokerCommand):
     def test_160_bind_interface_personality(self):
         command = ["bind", "feature", "--feature", "src_route",
                    "--personality", "compileserver", "--interface", "bond0"]
-        (out, err) = self.successtest(command)
+        err = self.statustest(command)
         self.matchoutput(err, "Flushed 1/1 templates.", command)
 
     def test_161_verify_show_personality(self):

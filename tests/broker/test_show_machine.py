@@ -26,6 +26,21 @@ from brokertest import TestBrokerCommand
 
 
 class TestShowMachine(TestBrokerCommand):
+    def testverifymachineall(self):
+        command = ["show", "machine", "--all"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "ut3c5n10", command)
+        self.matchoutput(out, "ut3c1n3", command)
+        self.matchoutput(out, "ut3c1n4", command)
+        self.matchoutput(out, "ut3s01p1", command)
+        self.matchoutput(out, "ut8s02p1", command)
+        self.matchoutput(out, "ut9s03p1", command)
+        self.matchoutput(out, "ut10s04p1", command)
+        self.matchoutput(out, "ut11s01p1", command)
+        self.matchoutput(out, "f5test", command)
+        self.matchclean(out, "ut3s01p1a", command)
+        self.matchclean(out, "ut3s01p1b", command)
+
     def testverifyut3c1n3interfacescsv(self):
         command = "show machine --machine ut3c1n3 --format csv"
         out = self.commandtest(command.split(" "))

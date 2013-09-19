@@ -137,7 +137,6 @@ class TestAddESXCluster(TestBrokerCommand):
     def testfailaddexisting(self):
         command = ["add_esx_cluster", "--cluster=utecl1",
                    "--metacluster=utmc1", "--building=ut",
-                   "--buildstatus=build",
                    "--domain=unittest", "--down_hosts_threshold=2",
                    "--archetype=esx_cluster",
                    "--personality=vulcan-1g-desktop-prod"]
@@ -147,7 +146,6 @@ class TestAddESXCluster(TestBrokerCommand):
     def testfailaddnoncampus(self):
         command = ["add_esx_cluster", "--cluster=uteclfail",
                    "--metacluster=utmc1", "--country=us",
-                   "--buildstatus=build",
                    "--domain=unittest", "--down_hosts_threshold=2",
                    "--archetype=esx_cluster",
                    "--personality=vulcan-1g-desktop-prod"]
@@ -157,7 +155,6 @@ class TestAddESXCluster(TestBrokerCommand):
     def testfailmetaclusternotfound(self):
         command = ["add_esx_cluster", "--cluster=utecl999",
                    "--domain=unittest", "--down_hosts_threshold=2",
-                   "--buildstatus=build",
                    "--metacluster=metacluster-does-not-exist", "--building=ut",
                    "--archetype=esx_cluster",
                    "--personality=vulcan-1g-desktop-prod"]
@@ -181,7 +178,6 @@ class TestAddESXCluster(TestBrokerCommand):
     def testfailinvalidname(self):
         command = ["add_esx_cluster", "--cluster=invalid?!?",
                    "--domain=unittest", "--down_hosts_threshold=2",
-                   "--buildstatus=build",
                    "--metacluster=utmc1", "--building=ut",
                    "--archetype=esx_cluster",
                    "--personality=vulcan-1g-desktop-prod"]
@@ -193,7 +189,6 @@ class TestAddESXCluster(TestBrokerCommand):
         command = ["add_esx_cluster", "--cluster=newcluster",
                    "--domain=unittest", "--down_hosts_threshold=2",
                    "--metacluster=utmc3", "--building=ut",
-                   "--buildstatus=build",
                    "--archetype=esx_cluster",
                    "--personality=vulcan-1g-desktop-prod"]
         out = self.badrequesttest(command)
@@ -234,7 +229,6 @@ class TestAddESXCluster(TestBrokerCommand):
         command = ["add_esx_cluster", "--cluster=utecl3",
                    "--max_members=0", "--down_hosts_threshold=2",
                    "--metacluster=utmc2", "--building=ut",
-                   "--buildstatus=build",
                    "--domain=unittest",
                    "--archetype=esx_cluster",
                    "--personality=vulcan-1g-desktop-prod"]
@@ -263,7 +257,6 @@ class TestAddESXCluster(TestBrokerCommand):
         # Bog standard - used for some noop tests
         command = ["add_esx_cluster", "--cluster=utecl4",
                    "--metacluster=utmc2", "--building=ut",
-                   "--buildstatus=build",
                    "--domain=unittest", "--down_hosts_threshold=2",
                    "--archetype=esx_cluster",
                    "--personality=vulcan-1g-desktop-prod"]
@@ -305,7 +298,6 @@ class TestAddESXCluster(TestBrokerCommand):
         for i in range(5, 11):
             command = ["add_esx_cluster", "--cluster=utecl%d" % i,
                        "--metacluster=utmc4", "--building=ut",
-                       "--buildstatus=build",
                        "--domain=unittest", "--down_hosts_threshold=2",
                        "--archetype=esx_cluster",
                        "--personality=vulcan-1g-desktop-prod"]

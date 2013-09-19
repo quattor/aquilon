@@ -54,7 +54,6 @@ class CommandUpdateChassis(BrokerCommand):
         if comments is not None:
             dbchassis.comments = comments
 
-        session.add(dbchassis)
         session.flush()
 
         dsdb_runner = DSDBRunner(logger=logger)

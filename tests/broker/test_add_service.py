@@ -98,23 +98,25 @@ class TestAddService(TestBrokerCommand):
         self.noouttest(command)
 
     def testaddbootserverinstance(self):
-        command = "add service --service bootserver --instance np.test"
-        self.noouttest(command.split(" "))
+        self.noouttest(["add_service", "--service", "bootserver", "--instance", "unittest"])
+        self.noouttest(["add_service", "--service", "bootserver", "--instance", "one-nyp"])
 
     def testverifyaddbootserverinstance(self):
         command = "show service --service bootserver"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Service: bootserver Instance: np.test", command)
+        self.matchoutput(out, "Service: bootserver Instance: unittest", command)
+        self.matchoutput(out, "Service: bootserver Instance: one-nyp", command)
         self.searchoutput(out, r"^  Comments: Some service comments", command)
 
     def testadddnsinstance(self):
-        command = "add service --service dns --instance utdnsinstance"
-        self.noouttest(command.split(" "))
+        self.noouttest(["add_service", "--service", "dns", "--instance", "unittest"])
+        self.noouttest(["add_service", "--service", "dns", "--instance", "one-nyp"])
 
     def testverifyadddnsinstance(self):
         command = "show service --service dns"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Service: dns Instance: utdnsinstance", command)
+        self.matchoutput(out, "Service: dns Instance: unittest", command)
+        self.matchoutput(out, "Service: dns Instance: one-nyp", command)
 
     def testaddntpinstance(self):
         command = "add service --service ntp --instance pa.ny.na"

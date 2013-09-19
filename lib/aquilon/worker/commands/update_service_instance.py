@@ -40,7 +40,6 @@ class CommandUpdateServiceInstance(BrokerCommand):
             raise ArgumentError("Missing --max_clients or --default argument "
                                 "to update service %s instance %s." %
                                 (dbservice.name, dbsi.name))
-        session.add(dbsi)
         session.flush()
 
         plenary = Plenary.get_plenary(dbsi, logger=logger)

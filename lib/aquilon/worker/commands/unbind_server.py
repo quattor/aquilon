@@ -16,11 +16,9 @@
 # limitations under the License.
 """Contains the logic for `aq unbind server`."""
 
-
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.aqdb.model import Service, ServiceInstance
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.host import hostname_to_host
-from aquilon.worker.dbwrappers.service_instance import get_service_instance
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
 
 
@@ -31,32 +29,36 @@ class CommandUnbindServer(BrokerCommand):
     def render(self, session, logger, hostname, service, instance, **arguments):
         dbhost = hostname_to_host(session, hostname)
         dbservice = Service.get_unique(session, service, compel=True)
-        msg = "Service %s" % service
+
         if instance:
-            dbinstances = [get_service_instance(session, dbservice, instance)]
-            msg = "Service %s, instance %s" % (service, instance)
+            dbsi = ServiceInstance.get_unique(session, service=dbservice,
+                                              name=instance, compel=True)
+            dbinstances = [dbsi]
         else:
             q = session.query(ServiceInstance)
             q = q.filter_by(service=dbservice)
             q = q.join('servers')
             q = q.filter_by(host=dbhost)
             dbinstances = q.all()
-        for dbinstance in dbinstances:
-            if dbhost in dbinstance.server_hosts:
-                if (dbinstance.client_count > 0 and
-                    len(dbinstance.server_hosts) <= 1):
-                    logger.warning("WARNING: Server %s, is the last server "
-                                   "bound to %s which still has clients" %
-                                   (hostname, msg))
-
-                dbinstance.server_hosts.remove(dbhost)
-                session.expire(dbhost, ['_services_provided'])
-        session.flush()
 
         plenaries = PlenaryCollection(logger=logger)
         plenaries.append(Plenary.get_plenary(dbhost))
+
         for dbinstance in dbinstances:
+            if dbhost not in dbinstance.server_hosts:
+                continue
+
             plenaries.append(Plenary.get_plenary(dbinstance))
+            dbinstance.server_hosts.remove(dbhost)
+            session.expire(dbhost, ['_services_provided'])
+
+            if dbinstance.client_count > 0 and not dbinstance.server_hosts:
+                logger.warning("WARNING: {0} was the last server "
+                               "bound to {1:l}, which still has clients."
+                               .format(dbhost, dbinstance))
+
+        session.flush()
+
         plenaries.write()
 
         return

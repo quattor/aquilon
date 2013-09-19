@@ -77,13 +77,14 @@ class TestDelService(TestBrokerCommand):
         self.matchclean(out, "Service: afs Instance: q.ln.ms.com", command)
 
     def testdelbootserverinstance(self):
-        command = "del service --service bootserver --instance np.test"
-        self.noouttest(command.split(" "))
+        self.noouttest(["del_service", "--service", "bootserver", "--instance", "one-nyp"])
+        self.noouttest(["del_service", "--service", "bootserver", "--instance", "unittest"])
 
     def testverifydelbootserverinstance(self):
         command = "show service --service bootserver"
         out = self.commandtest(command.split(" "))
-        self.matchclean(out, "Service: bootserver Instance: np.test", command)
+        self.matchclean(out, "one-nyp", command)
+        self.matchclean(out, "unittest", command)
 
     def testdellemoninstance(self):
         command = "del service --service lemon --instance ny-prod"
@@ -95,17 +96,17 @@ class TestDelService(TestBrokerCommand):
         self.matchclean(out, "Service: lemon Instance: ny-prod", command)
 
     def testdeldnsinstance(self):
-        command = "del service --service dns --instance utdnsinstance"
+        command = "del service --service dns --instance unittest"
         self.noouttest(command.split(" "))
 
     def testverifydeldnsinstance(self):
         command = "show service --service dns"
         out = self.commandtest(command.split(" "))
-        self.matchclean(out, "Service: dns Instance: utdnsinstance", command)
+        self.matchclean(out, "Service: dns Instance: unittest", command)
 
     def testverifydnsinstanceplenary(self):
         dir = os.path.join(self.config.get("broker", "plenarydir"),
-                           "service", "dns", "utdnsinstance")
+                           "service", "dns", "unittest")
         self.failIf(os.path.exists(dir),
                     "Plenary directory '%s' still exists" % dir)
 

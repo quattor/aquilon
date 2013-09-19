@@ -15,11 +15,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 from aquilon.exceptions_ import ArgumentError, NotFoundException
+from aquilon.aqdb.model import Cluster, Service, ServiceInstance
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.aqdb.model import Cluster, Service
-from aquilon.worker.dbwrappers.service_instance import get_service_instance
 from aquilon.worker.templates.base import Plenary
 
 
@@ -30,7 +28,8 @@ class CommandUnbindClusterService(BrokerCommand):
     def render(self, session, logger, cluster, service, instance, **arguments):
 
         dbservice = Service.get_unique(session, service, compel=True)
-        dbinstance = get_service_instance(session, dbservice, instance)
+        dbinstance = ServiceInstance.get_unique(session, service=dbservice,
+                                                name=instance, compel=True)
         dbcluster = Cluster.get_unique(session, cluster, compel=True)
         if dbinstance not in dbcluster.service_bindings:
             raise NotFoundException("{0} is not bound to {1:l}."

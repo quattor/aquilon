@@ -99,9 +99,7 @@ class TestVlan(TestBrokerCommand):
         self.matchoutput(out,
                          "utpgsw0.aqd-unittest.ms.com,%s,tor,ut3,ut,bnt,"
                          "rs g8000,,xge49,%s" % (ip, ip.mac), command)
-        self.matchclean(out,
-                        "ut3gd1r01.aqd-unittest.ms.com,4.2.5.8,bor,ut3,ut,hp,"
-                        "uttorswitch,SNgd1r01,,", command)
+        self.matchclean(out, "ut3gd1r01", command)
 
     def test_020_faildelvlan(self):
         command = ["del_vlan", "--vlan=714"]

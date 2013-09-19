@@ -67,7 +67,6 @@ class CommandUpdateMetaCluster(BrokerCommand):
         if not cluster_updated:
             return
 
-        session.add(dbmetacluster)
         session.flush()
         dbmetacluster.validate()
 

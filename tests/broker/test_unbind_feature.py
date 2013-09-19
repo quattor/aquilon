@@ -24,18 +24,34 @@ if __name__ == "__main__":
 import unittest2 as unittest
 from brokertest import TestBrokerCommand
 
+aquilon_personalities = None
+
 
 class TestUnbindFeature(TestBrokerCommand):
 
     def setUp(self):
+        global aquilon_personalities
+
         super(TestUnbindFeature, self).setUp()
+
+        if aquilon_personalities is None:
+            command = ["search", "personality", "--archetype", "aquilon",
+                       "--format", "proto"]
+            out = self.commandtest(command)
+            perslist = self.parse_personality_msg(out)
+            aquilon_personalities = len(perslist.personalities)
+
+    def verify_personality_flush(self, err, command):
+        self.matchoutput(err, "Flushed %d/%d templates" %
+                         (aquilon_personalities, aquilon_personalities),
+                         command)
 
     def test_100_unbind_archetype(self):
         command = ["unbind", "feature", "--feature", "pre_host",
                    "--archetype", "aquilon",
                    "--justification", "tcm=12345678"]
-        (out, err) = self.successtest(command)
-        self.matchoutput(err, "Flushed 10/10 templates.", command)
+        err = self.statustest(command)
+        self.verify_personality_flush(err, command)
 
     def test_101_verify_archetype(self):
         command = ["show", "archetype", "--archetype", "aquilon"]
@@ -62,7 +78,7 @@ class TestUnbindFeature(TestBrokerCommand):
     def test_110_unbind_personality(self):
         command = ["unbind", "feature", "--feature", "post_host",
                    "--personality", "inventory"]
-        (out, err) = self.successtest(command)
+        err = self.statustest(command)
         self.matchoutput(err, "Flushed 1/1 templates.", command)
 
     def test_130_unbind_model(self):
@@ -70,8 +86,8 @@ class TestUnbindFeature(TestBrokerCommand):
                    "--model", "hs21-8853l5u",
                    "--archetype", "aquilon",
                    "--justification", "tcm=12345678"]
-        (out, err) = self.successtest(command)
-        self.matchoutput(err, "Flushed 10/10 templates.", command)
+        err = self.statustest(command)
+        self.verify_personality_flush(err, command)
 
     def test_131_verify_show_model(self):
         command = ["show", "model", "--model", "hs21-8853l5u"]
@@ -101,13 +117,13 @@ class TestUnbindFeature(TestBrokerCommand):
                    "--model", "e1000", "--vendor", "intel",
                    "--personality", "compileserver",
                    "--interface", "eth1"]
-        (out, err) = self.successtest(command)
+        err = self.statustest(command)
         self.matchoutput(err, "Flush", command)
 
     def test_160_unbind_interface_personality(self):
         command = ["unbind", "feature", "--feature", "src_route",
                    "--personality", "compileserver", "--interface", "bond0"]
-        (out, err) = self.successtest(command)
+        err = self.statustest(command)
         self.matchoutput(err, "Flushed 1/1 templates.", command)
 
     def test_161_verify_show_feature(self):

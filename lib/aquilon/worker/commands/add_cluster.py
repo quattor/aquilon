@@ -125,7 +125,6 @@ class CommandAddCluster(BrokerCommand):
 
         session.add(dbcluster)
         session.flush()
-        session.refresh(dbcluster)
 
         plenaries.append(Plenary.get_plenary(dbcluster))
         plenaries.write()

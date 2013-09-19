@@ -45,7 +45,7 @@ class TestUpdateService(TestBrokerCommand):
         self.matchoutput(out, "Service: bootserver", command)
         self.matchoutput(out, "Default Maximum Client Count: Unlimited",
                          command)
-        self.matchoutput(out, "Service: bootserver Instance: np.test", command)
+        self.matchoutput(out, "Service: bootserver Instance: one-nyp", command)
         self.matchoutput(out, "Maximum Client Count: Default (Unlimited)",
                          command)
 
@@ -59,13 +59,13 @@ class TestUpdateService(TestBrokerCommand):
         self.matchoutput(out, "Service: bootserver", command)
         self.matchoutput(out, "Default Maximum Client Count: Unlimited",
                          command)
-        self.matchoutput(out, "Service: bootserver Instance: np.test", command)
+        self.matchoutput(out, "Service: bootserver Instance: one-nyp", command)
         self.matchoutput(out, "Maximum Client Count: Default (Unlimited)",
                          command)
 
     def test_600_updatebootserverinstance(self):
         command = ["update_service", "--service=bootserver",
-                   "--instance=np.test", "--max_clients=1000"]
+                   "--instance=one-nyp", "--max_clients=1000"]
         self.noouttest(command)
 
     def test_700_verifyupdatebootserverservice(self):
@@ -74,7 +74,7 @@ class TestUpdateService(TestBrokerCommand):
         self.matchoutput(out, "Service: bootserver", command)
         self.matchoutput(out, "Default Maximum Client Count: Unlimited",
                          command)
-        self.matchoutput(out, "Service: bootserver Instance: np.test", command)
+        self.matchoutput(out, "Service: bootserver Instance: one-nyp", command)
         self.matchoutput(out, "Maximum Client Count: 1000", command)
 
     def test_100_updateutsvc(self):

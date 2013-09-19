@@ -36,6 +36,12 @@ class TestMakeAquilon(VerifyNotificationsMixin, TestBrokerCommand):
         which has the specific feature of auto-binding required services
     """
 
+    def testmakeinfra(self):
+        command = ["make", "--hostname", "infra1.one-nyp.ms.com"]
+        self.statustest(command)
+        command = ["make", "--hostname", "infra1.aqd-unittest.ms.com"]
+        self.statustest(command)
+
     def testmakeunittest02(self):
         basetime = datetime.now()
         command = ["make", "aquilon",
@@ -114,10 +120,10 @@ class TestMakeAquilon(VerifyNotificationsMixin, TestBrokerCommand):
                          """include { "service/afs/q.ny.ms.com/client/config" };""",
                          command)
         self.matchoutput(out,
-                         """include { "service/bootserver/np.test/client/config" };""",
+                         """include { "service/bootserver/unittest/client/config" };""",
                          command)
         self.matchoutput(out,
-                         """include { "service/dns/utdnsinstance/client/config" };""",
+                         """include { "service/dns/unittest/client/config" };""",
                          command)
         self.matchoutput(out,
                          """include { "service/ntp/pa.ny.na/client/config" };""",
@@ -148,7 +154,7 @@ class TestMakeAquilon(VerifyNotificationsMixin, TestBrokerCommand):
                          command)
         self.matchoutput(err,
                          "unittest00.one-nyp.ms.com adding binding for "
-                         "service dns instance utdnsinstance",
+                         "service dns instance unittest",
                          command)
         self.matchoutput(err,
                          "unittest00.one-nyp.ms.com adding binding for "
@@ -179,7 +185,7 @@ class TestMakeAquilon(VerifyNotificationsMixin, TestBrokerCommand):
         command = "show host --hostname unittest00.one-nyp.ms.com"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
-                         "Uses Service: dns Instance: utdnsinstance",
+                         "Uses Service: dns Instance: unittest",
                          command)
 
     def testverifyproto(self):
@@ -205,7 +211,7 @@ class TestMakeAquilon(VerifyNotificationsMixin, TestBrokerCommand):
         services = set()
         for svc_msg in host.services_used:
             services.add("%s/%s" % (svc_msg.service, svc_msg.instance))
-        for binding in ("dns/utdnsinstance", "afs/q.ny.ms.com", "aqd/ny-prod"):
+        for binding in ("dns/unittest", "afs/q.ny.ms.com", "aqd/ny-prod"):
             self.failUnless(binding in services,
                             "Service binding %s is missing from protobuf "
                             "message. All bindings: %s" %
@@ -261,10 +267,10 @@ class TestMakeAquilon(VerifyNotificationsMixin, TestBrokerCommand):
                          """include { "service/afs/q.ny.ms.com/client/config" };""",
                          command)
         self.matchoutput(out,
-                         """include { "service/bootserver/np.test/client/config" };""",
+                         """include { "service/bootserver/unittest/client/config" };""",
                          command)
         self.matchoutput(out,
-                         """include { "service/dns/utdnsinstance/client/config" };""",
+                         """include { "service/dns/unittest/client/config" };""",
                          command)
         self.matchoutput(out,
                          """include { "service/ntp/pa.ny.na/client/config" };""",
@@ -285,8 +291,8 @@ class TestMakeAquilon(VerifyNotificationsMixin, TestBrokerCommand):
         command = "show service --client unittest00.one-nyp.ms.com"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Service: afs Instance: q.ny.ms.com", command)
-        self.matchoutput(out, "Service: bootserver Instance: np.test", command)
-        self.matchoutput(out, "Service: dns Instance: utdnsinstance", command)
+        self.matchoutput(out, "Service: bootserver Instance: unittest", command)
+        self.matchoutput(out, "Service: dns Instance: unittest", command)
         self.matchoutput(out, "Service: ntp Instance: pa.ny.na", command)
 
     def testmakehpinventory(self):
@@ -341,16 +347,14 @@ class TestMakeAquilon(VerifyNotificationsMixin, TestBrokerCommand):
     def testmissingrequiredservice(self):
         command = ["make", "aquilon",
                    "--hostname", "aquilon91.aqd-unittest.ms.com",
-                   "--personality", "badpersonality2",
-                   "--osname", "linux", "--osversion", "5.0.1-x86_64"]
+                   "--personality", "badpersonality2"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Could not find a relevant service map", command)
 
     def testmissingrequiredservicedebug(self):
         command = ["make", "aquilon", "--debug",
                    "--hostname", "aquilon92.aqd-unittest.ms.com",
-                   "--personality", "badpersonality2",
-                   "--osname", "linux", "--osversion", "5.0.1-x86_64"]
+                   "--personality", "badpersonality2"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Creating service Chooser", command)
         self.matchoutput(out, "Could not find a relevant service map", command)
@@ -358,8 +362,7 @@ class TestMakeAquilon(VerifyNotificationsMixin, TestBrokerCommand):
     def testmissingpersonalitytemplate(self):
         command = ["make", "aquilon",
                    "--hostname", "aquilon93.aqd-unittest.ms.com",
-                   "--personality", "badpersonality",
-                   "--osname", "linux", "--osversion", "5.0.1-x86_64"]
+                   "--personality", "badpersonality"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "'/system/personality/function' does not have an associated value", command)
         self.failIf(os.path.exists(

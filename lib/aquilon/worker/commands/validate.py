@@ -31,6 +31,6 @@ class CommandValidate(BrokerCommand):
             logger.warn("{0} already marked as valid.".format(dbbranch))
         # For now, comments just get stored in the audit log.
         dbbranch.is_sync_valid = True
-        session.add(dbbranch)
+        session.flush()
         # FIXME: Run tests?
         return
