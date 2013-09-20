@@ -62,7 +62,8 @@ from aquilon.worker.broker import BrokerCommand, ERROR_TO_CODE
 from aquilon.worker import commands
 from aquilon.worker.processes import cache_version
 from aquilon.utils import (force_int, force_float, force_boolean, force_ipv4,
-                           force_mac, force_ascii, force_list, force_json_dict)
+                           force_mac, force_ascii, force_list, force_json_dict,
+                           configuration_directory)
 
 
 class ResponsePage(resource.Resource):
@@ -269,7 +270,9 @@ class RestServer(ResponsePage):
         varmatch = re.compile(r'^%\((.*)\)s$')
 
         BINDIR = os.path.dirname(os.path.realpath(sys.argv[0]))
-        tree = ET.parse(os.path.join(BINDIR, '..', 'etc', 'input.xml'))
+        SRCDIR = os.path.realpath(os.path.join(BINDIR, ".."))
+        tree = ET.parse(os.path.join(configuration_directory(SRCDIR),
+                                     "input.xml"))
 
         for command in tree.getiterator("command"):
             for transport in command.getiterator("transport"):

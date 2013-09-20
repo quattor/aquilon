@@ -43,6 +43,7 @@ _nocolons_re = re.compile(r'^([0-9a-f]{2}){6}$')
 _two_re = re.compile(r'[0-9a-f]{2}')
 _padded_re = re.compile(r'^([0-9a-f]{2}:){5}([0-9a-f]{2})$')
 
+SHARE_CFG = "/usr/share/aquilon/etc"
 
 def kill_from_pid_file(pid_file):  # pragma: no cover
     if os.path.isfile(pid_file):
@@ -224,6 +225,19 @@ def first_of(iterable, function):
             return item
     return None
 
+def configuration_directory(basedir):
+    """
+    Return the directory that contains the shared configuration files.
+
+    This is the dirname for build.xml, input.xml, aqd.conf.defaults
+    and friends.  If we are running from a working copy, this is
+    "basedir/etc".  If not, it will be /usr/share/aquilon/etc.
+    """
+    wc = os.path.join(basedir, "etc", "aqd.conf.defaults")
+    if os.path.isfile(wc):
+        return os.path.dirname(wc)
+    else:
+        return SHARE_CFG
 
 def remove_dir(dir, logger=LOGGER):
     """Remove a directory.  Could have been implemented as a call to rm -rf."""
