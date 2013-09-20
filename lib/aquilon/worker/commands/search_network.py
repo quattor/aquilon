@@ -26,7 +26,7 @@ from aquilon.aqdb.model import (Network, Machine, VlanInfo, ObservedVlan,
                                 NetworkEnvironment)
 from aquilon.aqdb.model.dns_domain import parse_fqdn
 from aquilon.worker.dbwrappers.location import get_location
-from aquilon.worker.formats.network import ShortNetworkList
+from aquilon.worker.formats.list import StringAttributeList
 from aquilon.aqdb.model.network import get_net_id_from_ip
 
 
@@ -123,4 +123,5 @@ class CommandSearchNetwork(BrokerCommand):
         if fullinfo:
             q = q.options(undefer('comments'))
             return q.all()
-        return ShortNetworkList(q.all())
+        return StringAttributeList(q.all(),
+                                   lambda n: "%s/%s" % (n.ip, n.cidr))

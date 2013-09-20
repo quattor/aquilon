@@ -16,7 +16,6 @@
 # limitations under the License.
 """Contains the logic for `aq search host`."""
 
-
 from sqlalchemy.orm import aliased, contains_eager
 from sqlalchemy.sql import and_, or_
 
@@ -30,7 +29,7 @@ from aquilon.aqdb.model import (Host, Cluster, Archetype, Personality,
                                 MetaCluster, VirtualMachine, ClusterResource)
 from aquilon.aqdb.model.dns_domain import parse_fqdn
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.formats.host import SimpleHostList
+from aquilon.worker.formats.list import StringAttributeList
 from aquilon.worker.dbwrappers.branch import get_branch_and_author
 from aquilon.worker.dbwrappers.grn import lookup_grn
 from aquilon.worker.dbwrappers.location import get_location
@@ -287,4 +286,4 @@ class CommandSearchHost(BrokerCommand):
 
         if fullinfo:
             return q.all()
-        return SimpleHostList(q.all())
+        return StringAttributeList(q.all(), "fqdn")

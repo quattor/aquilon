@@ -16,15 +16,14 @@
 # limitations under the License.
 """Contains the logic for `aq search machine`."""
 
-
 from sqlalchemy.orm import aliased, subqueryload, joinedload
 
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.formats.machine import SimpleMachineList
 from aquilon.aqdb.model import (Machine, Cpu, Cluster, ClusterResource, Share,
                                 VirtualDisk, Disk, MetaCluster, DnsRecord)
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.hardware_entity import (
     search_hardware_entity_query)
+from aquilon.worker.formats.list import StringAttributeList
 
 
 class CommandSearchMachine(BrokerCommand):
@@ -82,4 +81,4 @@ class CommandSearchMachine(BrokerCommand):
                           subqueryload('host.services_used'),
                           subqueryload('host._cluster'))
             return q.all()
-        return SimpleMachineList(q.all())
+        return StringAttributeList(q.all(), "label")

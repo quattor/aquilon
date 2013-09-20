@@ -17,20 +17,14 @@
 
 from operator import attrgetter
 
-from aquilon.worker.formats.formatters import ObjectFormatter
-from aquilon.worker.formats.list import ListFormatter
 from aquilon.aqdb.model import (Cluster, EsxCluster, ComputeCluster,
                                 StorageCluster)
+from aquilon.worker.formats.formatters import ObjectFormatter
 
 
 class ClusterFormatter(ObjectFormatter):
-    protocol = "aqdsystems_pb2"
-
-    def format_proto(self, cluster, skeleton):
-        container = skeleton
-        if not container:
-            container = self.loaded_protocols[self.protocol].ClusterList()
-            skeleton = container.clusters.add()
+    def format_proto(self, cluster, container):
+        skeleton = container.clusters.add()
         skeleton.name = str(cluster.name)
         skeleton.status = str(cluster.status)
         self.add_personality_data(skeleton.personality, cluster.personality)
@@ -45,12 +39,11 @@ class ClusterFormatter(ObjectFormatter):
                 cluster.down_maint_percent
 
         for host in sorted(cluster.hosts, key=lambda x: x.fqdn):
-            self.add_host_msg(skeleton.hosts.add(), host)
+            self.add_host_data(skeleton.hosts.add(), host)
 
         if cluster.resholder and len(cluster.resholder.resources) > 0:
             for resource in cluster.resholder.resources:
-                r = skeleton.resources.add()
-                self.redirect_proto(resource, r)
+                self.redirect_proto(resource, skeleton)
 
         for dbsi in cluster.service_bindings:
             # Should be just 'services', but that would change the protocol.
@@ -86,8 +79,6 @@ class ClusterFormatter(ObjectFormatter):
 
         if cluster.max_hosts:
             skeleton.max_members = cluster.max_hosts
-
-        return container
 
     def format_raw(self, cluster, indent=""):
         details = [indent + "{0:c}: {0.name}".format(cluster)]
@@ -178,35 +169,3 @@ ObjectFormatter.handlers[Cluster] = ClusterFormatter()
 ObjectFormatter.handlers[EsxCluster] = ClusterFormatter()
 ObjectFormatter.handlers[ComputeCluster] = ClusterFormatter()
 ObjectFormatter.handlers[StorageCluster] = ClusterFormatter()
-
-
-class SimpleClusterList(list):
-    """By convention, holds a list of clusters to be formatted in a simple
-       (name-only) manner."""
-    pass
-
-
-class SimpleClusterListFormatter(ListFormatter):
-    def format_raw(self, sclist, indent=""):
-        return str("\n".join([indent + cluster.name for cluster in sclist]))
-
-
-ObjectFormatter.handlers[SimpleClusterList] = SimpleClusterListFormatter()
-
-
-class ClusterList(list):
-    pass
-
-
-class ClusterListFormatter(ListFormatter):
-    protocol = "aqdsystems_pb2"
-
-    def format_proto(self, cluslist, skeleton=None):
-        if not skeleton:
-            skeleton = self.loaded_protocols[self.protocol].ClusterList()
-        for resource in cluslist:
-            self.redirect_proto(resource, skeleton.clusters.add())
-        return skeleton
-
-
-ObjectFormatter.handlers[ClusterList] = ClusterListFormatter()

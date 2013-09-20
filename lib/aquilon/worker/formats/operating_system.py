@@ -16,15 +16,11 @@
 # limitations under the License.
 """ Operating System formatter """
 
-
 from aquilon.aqdb.model import OperatingSystem
 from aquilon.worker.formats.formatters import ObjectFormatter
-from aquilon.worker.formats.list import ListFormatter
 
 
 class OSFormatter(ObjectFormatter):
-    protocol = "aqdsystems_pb2"
-
     def format_raw(self, os, indent=""):
         details = []
         details.append(indent + "{0:c}: {0.name}".format(os))
@@ -35,33 +31,8 @@ class OSFormatter(ObjectFormatter):
 
         return "\n".join(details)
 
-    def format_proto(self, os, skeleton=None):
-        container = skeleton
-        if not container:
-            myproto = self.loaded_protocols[self.protocol]
-            container = myproto.OperatingSystemList()
-            skeleton = container.operating_systems.add()
-        skeleton.name = str(os.name)
-        skeleton.version = str(os.version)
-        self.redirect_proto(os.archetype, skeleton.archetype)
-        return container
+    def format_proto(self, os, container):
+        skeleton = container.operating_systems.add()
+        self.add_os_data(skeleton, os)
 
 ObjectFormatter.handlers[OperatingSystem] = OSFormatter()
-
-
-class OperatingSystemList(list):
-    """Holds instances of OperatingSystem."""
-
-
-class OSListFormatter(ListFormatter):
-    protocol = "aqdsystems_pb2"
-
-    def format_proto(self, osl, skeleton=None):
-        if not skeleton:
-            myproto = self.loaded_protocols[self.protocol]
-            skeleton = myproto.OperatingSystemList()
-        for os in osl:
-            self.redirect_proto(os, skeleton.operating_systems.add())
-        return skeleton
-
-ObjectFormatter.handlers[OperatingSystemList] = OSListFormatter()

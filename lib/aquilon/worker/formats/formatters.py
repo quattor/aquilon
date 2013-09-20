@@ -20,6 +20,7 @@
 import os
 import csv
 import cStringIO
+import sys
 
 from mako.lookup import TemplateLookup
 
@@ -41,6 +42,45 @@ class ResponseFormatter(object):
     """
     formats = ["raw", "csv", "html", "proto", "djb"]
 
+    loaded_protocols = {}
+
+    def __init__(self):
+        self.protobuf_container = None
+
+    def config_proto(self, node, command):
+        desc_node = node.find("message_class")
+        if desc_node is None or "name" not in desc_node.attrib or \
+           "module" not in desc_node.attrib:
+            raise ProtocolError("Invalid protobuf definition for %s." % command)
+
+        module = desc_node.attrib["module"]
+        msgclass = desc_node.attrib["name"]
+
+        if module in self.loaded_protocols and \
+           self.loaded_protocols[module] == False:
+            raise ProtocolError("Protocol %s: previous import attempt was "
+                                "unsuccessful" % module)
+
+        if module not in self.loaded_protocols:
+            config = Config()
+            protodir = config.get("protocols", "directory")
+
+            # Modifying sys.path here is ugly. We could try playing with
+            # find_module()/load_module(), but there are dependencies between
+            # the protocols, that could fail if sys.path is not set up and the
+            # protocols are loaded in the wrong order.
+            if protodir not in sys.path:
+                sys.path.append(protodir)
+
+            try:
+                self.loaded_protocols[module] = __import__(module)
+            except ImportError, err:  # pragma: no cover
+                self.loaded_protocols[module] = False
+                raise ProtocolError("Protocol %s: %s" % (module, err))
+
+        self.protobuf_container = getattr(self.loaded_protocols[module],
+                                          msgclass)
+
     def format(self, style, result, request):
         """The main entry point - it is expected that any consumers call
             this method and let the magic happen.
@@ -60,23 +100,11 @@ class ResponseFormatter(object):
         return ObjectFormatter.redirect_djb(result)
 
     def format_proto(self, result, request):
-        """This implementation is very similar to format_raw.
-
-        The result should just always be set up so that we can serialize
-        it here and return that string.  Howver, there is still code
-        from the original implementation that has already done that
-        before we get here.
-
-        Also of concern is that some/many of the current protobuf
-        formatters are unimplemented and will return raw output.
-        The check for a SerializeToString method may be left here to
-        handle those cases.
-
-        """
-        res = ObjectFormatter.redirect_proto(result)
-        if hasattr(res, "SerializeToString"):
-            return res.SerializeToString()
-        return res
+        if not self.protobuf_container:
+            raise ProtocolError("Protobuf formatter is not available")
+        container = self.protobuf_container()
+        ObjectFormatter.redirect_proto(result, container)
+        return container.SerializeToString()
 
     def format_html(self, result, request):
         if request.code and request.code >= 300:
@@ -106,13 +134,7 @@ class ObjectFormatter(object):
         useful information.
      """
 
-    loaded_protocols = {}
-
-    """The loaded_protocols dict will store the modules that are being
-    loaded for each requested protocol. Rather than trying to import one
-    each time, the dict can be checked and value returned."""
     config = Config()
-    protodir = config.get("protocols", "directory")
 
     handlers = {}
 
@@ -137,28 +159,6 @@ class ObjectFormatter(object):
                                          'import shift'],
                                 default_filters=['unicode', 'rstrip'])
     lookup_html = TemplateLookup(directories=[os.path.join(mako_dir, "html")])
-
-    def __init__(self):
-        if hasattr(self, "protocol"):
-            if not self.protocol in self.loaded_protocols:
-                try:
-                    self.loaded_protocols[self.protocol] = __import__(self.protocol)
-                except ImportError, e:  # pragma: no cover
-                    self.loaded_protocols[self.protocol] = False
-                    error = "path %s protocol: %s error: %s" % (self.protodir, self.protocol, e)
-                    raise ProtocolError(error)
-            else:  # pragma: no cover
-                if self.loaded_protocols[self.protocol] == False:
-                    error = "path %s protocol: %s error: previous import attempt was unsuccessful" % (self.protodir, self.protocol)
-                    raise ProtocolError(error)
-
-    def get_protocol(self):
-        if hasattr(self, "protocol"):
-            return self.protocol
-
-    def get_protocol_path(self):
-        if hasattr(self, "protodir"):
-            return self.protodir
 
     def format_raw(self, result, indent=""):
         if hasattr(self, "template_raw"):
@@ -206,8 +206,9 @@ class ObjectFormatter(object):
         # We get here if the command throws an exception
         return self.format_raw(result)
 
-    def format_proto(self, result, skeleton=None):
-        return self.format_raw(result)
+    def format_proto(self, result, container):  # pylint: disable=W0613
+        # There's no default protobuf message type
+        raise ProtocolError("Protobuf formatter is not available")
 
     def format_html(self, result):
         if hasattr(self, "template_html"):
@@ -240,10 +241,10 @@ class ObjectFormatter(object):
         return handler.format_html(result)
 
     @staticmethod
-    def redirect_proto(result, skeleton=None):
+    def redirect_proto(result, container):
         handler = ObjectFormatter.handlers.get(result.__class__,
                                                ObjectFormatter.default_handler)
-        return handler.format_proto(result, skeleton)
+        handler.format_proto(result, container)
 
     def add_hardware_data(self, host_msg, hwent):
         host_msg.machine.name = str(hwent.label)
@@ -300,23 +301,19 @@ class ObjectFormatter(object):
         msg.host_environment = str(personality.host_environment)
         msg.owner_eonid = personality.owner_eon_id
 
-    def add_host_data(self, host_msg, host):
-        # FIXME: Add branch type and sandbox author to protobufs.
-        host_msg.domain.name = str(host.branch.name)
-        host_msg.domain.owner = str(host.branch.owner.name)
-        host_msg.status = str(host.status.name)
-        host_msg.owner_eonid = host.effective_owner_grn.eon_id
-        self.add_personality_data(host_msg.personality, host.personality)
-        self.add_archetype_data(host_msg.archetype, host.archetype)
-        self.redirect_proto(host.operating_system, host_msg.operating_system)
+    def add_os_data(self, msg, operating_system):
+        msg.name = str(operating_system.name)
+        msg.version = str(operating_system.version)
+        # We don't need the services here, so don't call add_archetype_data()
+        msg.archetype.name = str(operating_system.archetype.name)
 
-    def add_host_msg(self, host_msg, host):
+    def add_host_data(self, host_msg, host):
         """ Return a host message.
 
             Hosts used to be systems, which makes this method name a bit odd
         """
-        if not isinstance(host, Host):
-            raise InternalError("add_host_msg was called with {0} instead of "
+        if not isinstance(host, Host):  # pragma: no cover
+            raise InternalError("add_host_data was called with {0} instead of "
                                 "a Host.".format(host))
         host_msg.type = "host"  # FIXME: is hardcoding this ok?
         host_msg.hostname = str(host.machine.primary_name.fqdn.name)
@@ -331,34 +328,42 @@ class ObjectFormatter(object):
 
         if host.resholder and len(host.resholder.resources) > 0:
             for resource in host.resholder.resources:
-                r = host_msg.resources.add()
-                self.redirect_proto(resource, r)
+                self.redirect_proto(resource, host_msg)
 
-        self.add_host_data(host_msg, host)
+        # FIXME: Add branch type and sandbox author to protobufs.
+        host_msg.domain.name = str(host.branch.name)
+        host_msg.domain.owner = str(host.branch.owner.name)
+        host_msg.status = str(host.status.name)
+        host_msg.owner_eonid = host.effective_owner_grn.eon_id
+        self.add_personality_data(host_msg.personality, host.personality)
+        self.add_archetype_data(host_msg.archetype, host.archetype)
+        self.add_os_data(host_msg.operating_system, host.operating_system)
         self.add_hardware_data(host_msg, host.machine)
 
-    def add_dns_domain_msg(self, dns_domain_msg, dns_domain):
+    def add_dns_domain_data(self, dns_domain_msg, dns_domain):
         dns_domain_msg.name = str(dns_domain.name)
 
-    def add_service_msg(self, service_msg, service, service_instance=False):
+    def add_service_data(self, service_msg, service, service_instance=None):
         """Adds a service message, will either nest the given service_instance in the message,
         or will add all the service instances which are available as a backref from a service object"""
         service_msg.name = str(service.name)
         if service_instance:
-            self.add_service_instance_msg(service_msg.serviceinstances.add(), service_instance)
+            msg = service_msg.serviceinstances.add()
+            self.add_service_instance_data(msg, service_instance)
         else:
             for si in service.instances:
-                self.add_service_instance_msg(service_msg.serviceinstances.add(), si)
+                msg = service_msg.serviceinstances.add()
+                self.add_service_instance_data(msg, si)
 
-    def add_service_instance_msg(self, si_msg, service_instance):
+    def add_service_instance_data(self, si_msg, service_instance):
         si_msg.name = str(service_instance.name)
         for host in service_instance.server_hosts:
-            self.add_host_msg(si_msg.servers.add(), host)
+            self.add_host_data(si_msg.servers.add(), host)
         # TODO: make this conditional to avoid performance problems
         #for client in service_instance.clients:
-        #    self.add_host_msg(si_msg.clients.add(), client.host)
+        #    self.add_host_data(si_msg.clients.add(), client.host)
 
-    def add_service_map_msg(self, sm_msg, service_map):
+    def add_service_map_data(self, sm_msg, service_map):
         if service_map.location:
             sm_msg.location.name = str(service_map.location.name)
             sm_msg.location.location_type = \
@@ -368,8 +373,8 @@ class ObjectFormatter(object):
             sm_msg.network.env_name = \
                 service_map.network.network_environment.name
 
-        self.add_service_msg(sm_msg.service,
-                             service_map.service, service_map.service_instance)
+        self.add_service_data(sm_msg.service, service_map.service,
+                              service_map.service_instance)
         if hasattr(service_map, "personality"):
             sm_msg.personality.name = str(service_map.personality)
             sm_msg.personality.archetype.name = \
@@ -377,7 +382,7 @@ class ObjectFormatter(object):
         else:
             sm_msg.personality.archetype.name = 'aquilon'
 
-    def add_featurelink_msg(self, feat_msg, featlink):
+    def add_featurelink_data(self, feat_msg, featlink):
         feat_msg.name = str(featlink.feature.name)
         feat_msg.type = str(featlink.feature.feature_type)
         feat_msg.post_personality = featlink.feature.post_personality
@@ -387,10 +392,14 @@ class ObjectFormatter(object):
         if featlink.interface_name:
             feat_msg.interface_name = str(featlink.interface_name)
 
-    def add_feature_msg(self, feat_msg, feature):
+    def add_feature_data(self, feat_msg, feature):
         feat_msg.name = str(feature.name)
         feat_msg.type = str(feature.feature_type)
         feat_msg.post_personality = feature.post_personality
+
+    def add_resource_data(self, resource_msg, resource):
+        resource_msg.name = str(resource.name)
+        resource_msg.type = str(resource.resource_type)
 
 ObjectFormatter.default_handler = ObjectFormatter()
 

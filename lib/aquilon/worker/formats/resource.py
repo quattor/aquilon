@@ -16,16 +16,12 @@
 # limitations under the License.
 """Resource formatter."""
 
-
 from aquilon.worker.formats.formatters import ObjectFormatter
-from aquilon.worker.formats.list import ListFormatter
 from aquilon.aqdb.model import Resource
 
 
 class ResourceFormatter(ObjectFormatter):
-    protocol = "aqdsystems_pb2"
-
-    def extra_details(self, share, indent=""):
+    def extra_details(self, share, indent=""):  # pylint: disable=W0613
         return []
 
     def format_raw(self, resource, indent=""):
@@ -39,38 +35,8 @@ class ResourceFormatter(ObjectFormatter):
         details.extend(self.extra_details(resource, indent))
         return "\n".join(details)
 
-    def format_proto(self, resource, skeleton=None):
-        container = skeleton
-        if not container:
-            container = self.loaded_protocols[self.protocol].ResourceList()
-            skeleton = container.resources.add()
-        skeleton.name = str(resource.name)
-        skeleton.type = str(resource.resource_type)
-        return container
-
+    def format_proto(self, resource, container):
+        skeleton = container.resources.add()
+        self.add_resource_data(skeleton, resource)
 
 ObjectFormatter.handlers[Resource] = ResourceFormatter()
-
-
-class ResourceList(list):
-    pass
-
-
-class ResourceListFormatter(ListFormatter):
-    protocol = "aqdsystems_pb2"
-
-    def format_raw(self, reslist, indent=""):
-        details = []
-        for resource in reslist:
-            details.append(self.redirect_raw(resource, indent))
-        return "\n".join(details)
-
-    def format_proto(self, reslist, skeleton=None):
-        if not skeleton:
-            skeleton = self.loaded_protocols[self.protocol].ResourceList()
-        for resource in reslist:
-            self.redirect_proto(resource, skeleton.resources.add())
-        return skeleton
-
-
-ObjectFormatter.handlers[ResourceList] = ResourceListFormatter()

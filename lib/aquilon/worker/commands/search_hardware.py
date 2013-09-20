@@ -18,11 +18,11 @@
 
 from sqlalchemy.orm import subqueryload, joinedload
 
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.formats.hardware_entity import SimpleHardwareEntityList
 from aquilon.aqdb.model import HardwareEntity
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.hardware_entity import (
     search_hardware_entity_query)
+from aquilon.worker.formats.list import StringAttributeList
 
 
 class CommandSearchHardware(BrokerCommand):
@@ -32,14 +32,11 @@ class CommandSearchHardware(BrokerCommand):
     def render(self, session, fullinfo, style, **arguments):
         if fullinfo or style != "raw":
             q = search_hardware_entity_query(session, HardwareEntity, **arguments)
-        else:
-            q = search_hardware_entity_query(session, HardwareEntity.label, **arguments)
-
-        if fullinfo:
             q = q.options(joinedload('location'),
                           subqueryload('interfaces'),
                           joinedload('interfaces.assignments'),
                           joinedload('interfaces.assignments.dns_records'))
             return q.all()
         else:
-            return SimpleHardwareEntityList(q.all())
+            q = search_hardware_entity_query(session, HardwareEntity.label, **arguments)
+            return StringAttributeList(q.all(), "label")

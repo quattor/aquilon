@@ -16,17 +16,13 @@
 # limitations under the License.
 """ServiceInstance formatter."""
 
-
 from aquilon.worker.formats.formatters import ObjectFormatter
-from aquilon.worker.formats.list import ListFormatter
 from aquilon.aqdb.model import ServiceInstance
 from aquilon.aqdb.data_sync.storage import (find_storage_data,
                                             cache_storage_data)
 
 
 class ServiceInstanceFormatter(ObjectFormatter):
-    protocol = "aqdservices_pb2"
-
     def format_raw(self, si, indent=""):
         details = [indent + "Service: %s Instance: %s" % (si.service.name,
                                                           si.name)]
@@ -48,9 +44,9 @@ class ServiceInstanceFormatter(ObjectFormatter):
             details.append(indent + "  Comments: %s" % si.comments)
         return "\n".join(details)
 
-    def format_proto(self, si, skeleton=None):
-        silf = ServiceInstanceListFormatter()
-        return silf.format_proto([si], skeleton)
+    def format_proto(self, si, container):
+        skeleton = container.services.add()
+        self.add_service_data(skeleton, si.service, si)
 
     # Applies to service_instance/share as well.
     @classmethod
@@ -65,23 +61,6 @@ class ServiceInstanceFormatter(ObjectFormatter):
         return max_clients
 
 ObjectFormatter.handlers[ServiceInstance] = ServiceInstanceFormatter()
-
-
-class ServiceInstanceList(list):
-    """holds a list of service instances to be formatted"""
-    pass
-
-
-class ServiceInstanceListFormatter(ListFormatter):
-    protocol = "aqdservices_pb2"
-
-    def format_proto(self, sil, skeleton=None):
-        servicelist_msg = self.loaded_protocols[self.protocol].ServiceList()
-        for si in sil:
-            self.add_service_msg(servicelist_msg.services.add(), si.service, si)
-        return servicelist_msg.SerializeToString()
-
-ObjectFormatter.handlers[ServiceInstanceList] = ServiceInstanceListFormatter()
 
 
 class ServiceShareList(list):

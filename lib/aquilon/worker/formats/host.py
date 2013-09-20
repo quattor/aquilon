@@ -16,63 +16,30 @@
 # limitations under the License.
 """Host formatter."""
 
-
-from collections import defaultdict
+from aquilon.aqdb.model import Host
 from aquilon.worker.formats.formatters import ObjectFormatter
 from aquilon.worker.formats.list import ListFormatter
-from aquilon.aqdb.model import Host
 
 
 # TODO: this formatter is kept only for the protobuf stuff, otherwise
 # MachineFormatter does everything
 class HostFormatter(ObjectFormatter):
-    protocol = "aqdsystems_pb2"
-
-    def format_proto(self, host, skeleton=None):
-        # we actually want to return a SimpleHostList of one host...
-        shlf = SimpleHostListFormatter()
-        return(shlf.format_proto([host], skeleton))
+    def format_proto(self, host, container):
+        skeleton = container.hosts.add()
+        self.add_host_data(skeleton, host)
+        for si in host.services_used:
+            srv_msg = skeleton.services_used.add()
+            srv_msg.service = si.service.name
+            srv_msg.instance = si.name
+        for si in host.services_provided:
+            srv_msg = skeleton.services_provided.add()
+            srv_msg.service = si.service.name
+            srv_msg.instance = si.name
 
     def format_raw(self, host, indent=""):
         return self.redirect_raw(host.machine, indent)
 
 ObjectFormatter.handlers[Host] = HostFormatter()
-
-
-class SimpleHostList(list):
-    """By convention, holds a list of hosts to be formatted in a simple
-       (fqdn-only) manner."""
-    pass
-
-
-class SimpleHostListFormatter(ListFormatter):
-    protocol = "aqdsystems_pb2"
-    template_html = "simple_host_list.mako"
-
-    def format_raw(self, shlist, indent=""):
-        return str("\n".join([indent + host.fqdn for host in shlist]))
-
-    # TODO: Should probably display some useful info...
-    def csv_fields(self, host):
-        return (host.fqdn,)
-
-    def format_proto(self, hostlist, skeleton=None):
-        hostlist_msg = self.loaded_protocols[self.protocol].HostList()
-        for host in hostlist:
-            msg = hostlist_msg.hosts.add()
-            self.add_host_msg(msg, host)
-            for si in host.services_used:
-                srv_msg = msg.services_used.add()
-                srv_msg.service = si.service.name
-                srv_msg.instance = si.name
-            for si in host.services_provided:
-                srv_msg = msg.services_provided.add()
-                srv_msg.service = si.service.name
-                srv_msg.instance = si.name
-
-        return hostlist_msg.SerializeToString()
-
-ObjectFormatter.handlers[SimpleHostList] = SimpleHostListFormatter()
 
 
 class GrnHostList(list):
@@ -81,8 +48,6 @@ class GrnHostList(list):
     pass
 
 class GrnHostListFormatter(ListFormatter):
-    protocol = "aqdsystems_pb2"
-
     def format_raw(self, shlist, indent=""):
         details = []
         for host in shlist:
@@ -109,11 +74,9 @@ class GrnHostListFormatter(ListFormatter):
                                             .format(grn_rec, target, inherited))
         return "\n".join(details)
 
-
-    def format_proto(self, hostlist, skeleton=None):
-        hostlist_msg = self.loaded_protocols[self.protocol].HostList()
+    def format_proto(self, hostlist, container):
         for host in hostlist:
-            msg = hostlist_msg.hosts.add()
+            msg = container.hosts.add()
             msg.hostname = str(host.machine.primary_name)
             msg.domain.name = str(host.branch.name)
             msg.domain.owner = str(host.branch.owner.name)
@@ -136,10 +99,8 @@ class GrnHostListFormatter(ListFormatter):
                     map.target = target
                     map.eonid = grn_rec.eon_id
 
-        return hostlist_msg.SerializeToString()
-
-
 ObjectFormatter.handlers[GrnHostList] = GrnHostListFormatter()
+
 
 class HostIPList(list):
     """ By convention, holds tuples of host_name, interface_ip, primary.

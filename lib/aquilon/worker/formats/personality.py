@@ -30,24 +30,7 @@ class ThresholdedPersonality(object):
         self.maintenance_threshold = thresholds.get('maintenance_threshold')
 
 
-class PersonalityList(list):
-    """Holds instances of ThresholdedPersonality."""
-
-
-class PersonalityListFormatter(ListFormatter):
-    protocol = "aqdsystems_pb2"
-
-    def format_proto(self, tpl, skeleton=None):
-        if not skeleton:
-            skeleton = self.loaded_protocols[self.protocol].PersonalityList()
-        for personality in tpl:
-            self.redirect_proto(personality, skeleton.personalities.add())
-        return skeleton
-
-
 class PersonalityFormatter(ObjectFormatter):
-    protocol = "aqdsystems_pb2"
-
     def format_raw(self, personality, indent=""):
         # Transparently handle Personality and ThresholdedPersonality
         has_threshold = False
@@ -120,11 +103,8 @@ class PersonalityFormatter(ObjectFormatter):
                                info.vmhost_overcommit_memory)
         return "\n".join(details)
 
-    def format_proto(self, personality, skeleton=None):
-        container = skeleton
-        if not container:
-            container = self.loaded_protocols[self.protocol].PersonalityList()
-            skeleton = container.personalities.add()
+    def format_proto(self, personality, container):
+        skeleton = container.personalities.add()
         # Transparently handle Personality and ThresholdedPersonality
         threshold = None
         if hasattr(personality, "dbpersonality"):
@@ -141,7 +121,7 @@ class PersonalityFormatter(ObjectFormatter):
                                      x.feature.name))
 
         for link in features:
-            self.add_featurelink_msg(skeleton.features.add(), link)
+            self.add_featurelink_data(skeleton.features.add(), link)
 
         for service in personality.services:
             rsvc_msg = skeleton.required_services.add()
@@ -153,11 +133,8 @@ class PersonalityFormatter(ObjectFormatter):
         skeleton.config_override = personality.config_override
         skeleton.cluster_required = personality.cluster_required
 
-        return container
-
 ObjectFormatter.handlers[Personality] = PersonalityFormatter()
 ObjectFormatter.handlers[ThresholdedPersonality] = PersonalityFormatter()
-ObjectFormatter.handlers[PersonalityList] = PersonalityListFormatter()
 
 
 class SimplePersonalityList(list):
@@ -165,25 +142,19 @@ class SimplePersonalityList(list):
        in a simple (name-only) manner."""
 
 
-class SimplePersonalityListFormatter(PersonalityListFormatter):
-    protocol = "aqdsystems_pb2"
-
+class SimplePersonalityListFormatter(ListFormatter):
     def format_raw(self, result, indent=""):
         return str("\n".join([indent + "{0.archetype.name}/{0.name}".format(obj) for obj in result]))
 
     def csv_fields(self, obj):
         return (obj.archetype.name, obj.name,)
 
-    def format_proto(self, tpl, skeleton=None):
-        if not skeleton:
-            skeleton = self.loaded_protocols[self.protocol].PersonalityList()
+    def format_proto(self, tpl, container):
         for personality in tpl:
-            container = skeleton.personalities.add()
-            container.name = str(personality)
-            container.archetype.name = str(personality.archetype.name)
-            container.host_environment = str(personality.host_environment)
-            container.owner_eonid = personality.owner_eon_id
-
-        return skeleton
+            skeleton = container.personalities.add()
+            skeleton.name = str(personality)
+            skeleton.archetype.name = str(personality.archetype.name)
+            skeleton.host_environment = str(personality.host_environment)
+            skeleton.owner_eonid = personality.owner_eon_id
 
 ObjectFormatter.handlers[SimplePersonalityList] = SimplePersonalityListFormatter()

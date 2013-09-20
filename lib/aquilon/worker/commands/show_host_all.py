@@ -16,12 +16,11 @@
 # limitations under the License.
 """Contains the logic for `aq show host --all`."""
 
-
 from sqlalchemy.orm import contains_eager
 
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.formats.host import SimpleHostList
 from aquilon.aqdb.model import Host, Machine, DnsRecord, DnsDomain, Fqdn
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.formats.list import StringAttributeList
 
 
 class CommandShowHostAll(BrokerCommand):
@@ -30,9 +29,9 @@ class CommandShowHostAll(BrokerCommand):
         q = session.query(Host)
         q = q.join(Machine, DnsRecord, (Fqdn, DnsRecord.fqdn_id == Fqdn.id),
                    DnsDomain)
-        q = q.options(contains_eager('machine'))
-        q = q.options(contains_eager('machine.primary_name'))
-        q = q.options(contains_eager('machine.primary_name.fqdn'))
-        q = q.options(contains_eager('machine.primary_name.fqdn.dns_domain'))
+        q = q.options(contains_eager('machine'),
+                      contains_eager('machine.primary_name'),
+                      contains_eager('machine.primary_name.fqdn'),
+                      contains_eager('machine.primary_name.fqdn.dns_domain'))
         q = q.order_by(Fqdn.name, DnsDomain.name)
-        return SimpleHostList(q.all())
+        return StringAttributeList(q.all(), "fqdn")

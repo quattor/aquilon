@@ -16,15 +16,11 @@
 # limitations under the License.
 """Location formatter."""
 
-
-from aquilon.worker.formats.formatters import ObjectFormatter
-from aquilon.worker.formats.list import ListFormatter
 from aquilon.aqdb.model import Location, Rack, Building
+from aquilon.worker.formats.formatters import ObjectFormatter
 
 
 class LocationFormatter(ObjectFormatter):
-    protocol = "aqdlocations_pb2"
-
     def format_raw(self, location, indent=""):
         details = [indent + "{0:c}: {0.name}".format(location)]
         if location.fullname:
@@ -48,9 +44,21 @@ class LocationFormatter(ObjectFormatter):
                            location.default_dns_domain)
         return "\n".join(details)
 
-    def format_proto(self, loc, skeleton=None):
-        loclistf = LocationListFormatter()
-        return(loclistf.format_proto([loc], skeleton))
+    def format_proto(self, loc, container):
+        skeleton = container.locations.add()
+        skeleton.name = str(loc.name)
+        skeleton.location_type = str(loc.location_type)
+        skeleton.fullname = str(loc.fullname)
+        if isinstance(loc, Rack) and loc.rack_row and loc.rack_column:
+            skeleton.row = loc.rack_row
+            skeleton.col = loc.rack_column
+        if hasattr(loc, "timezone"):
+            skeleton.timezone = loc.timezone
+
+        for p in loc.parents:
+            parent = skeleton.parents.add()
+            parent.name = p.name
+            parent.location_type = p.location_type
 
     def csv_fields(self, location):
         details = [location.location_type, location.name]
@@ -75,57 +83,5 @@ class LocationFormatter(ObjectFormatter):
 
         return details
 
-
-class LocationList(list):
-    """Holds a list of locations for which a location list will be formatted
-    """
-    pass
-
-
-class LocationListFormatter(ListFormatter):
-    protocol = "aqdlocations_pb2"
-
-    def format_proto(self, result, skeleton=None):
-        loclist_msg = self.loaded_protocols[self.protocol].LocationList()
-        for loc in result:
-            msg = loclist_msg.locations.add()
-            msg.name = str(loc.name)
-            msg.location_type = str(loc.location_type)
-            msg.fullname = str(loc.fullname)
-            if isinstance(loc, Rack) and loc.rack_row and loc.rack_column:
-                msg.row = loc.rack_row
-                msg.col = loc.rack_column
-            if hasattr(loc, "timezone"):
-                msg.timezone = loc.timezone
-
-            for p in loc.parents:
-                parent = msg.parents.add()
-                parent.name = p.name
-                parent.location_type = p.location_type
-
-        return loclist_msg.SerializeToString()
-
-
 for location_type, mapper in Location.__mapper__.polymorphic_map.items():
     ObjectFormatter.handlers[mapper.class_] = LocationFormatter()
-
-ObjectFormatter.handlers[LocationList] = LocationListFormatter()
-
-
-class SimpleLocationList(list):
-    """Holds a list of locations for which a location list will be formatted
-       in a simple (name-only) manner."""
-    pass
-
-
-class SimpleLocationListFormatter(LocationListFormatter):
-    template_html = "simple_location_list.mako"
-
-    def format_raw(self, result, indent=""):
-        return str("\n".join([indent + location.name for location in result]))
-
-    def csv_fields(self, location):
-        return (location.name,)
-
-
-ObjectFormatter.handlers[SimpleLocationList] = SimpleLocationListFormatter()

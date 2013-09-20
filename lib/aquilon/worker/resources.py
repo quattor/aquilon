@@ -52,7 +52,7 @@ import sys
 import os
 import xml.etree.ElementTree as ET
 
-from twisted.web import server, resource, http, static
+from twisted.web import server, resource, http
 from twisted.internet import defer, threads, reactor
 from twisted.python import log
 
@@ -213,10 +213,12 @@ class ResponsePage(resource.Resource):
         return defer.succeed(arguments)
 
     def format(self, result, request):
-        style = getattr(self, "output_format", None)
-        if style is None:
-            style = getattr(request, "output_format", "raw")
-        return self.formatter.format(style, result, request)
+        # This method is called to format error messages, and the only format
+        # we currently support for those is "raw"
+        #style = getattr(self, "output_format", None)
+        #if style is None:
+        #    style = getattr(request, "output_format", "raw")
+        return self.formatter.format("raw", result, request)
 
     def finishRender(self, result, request):
         if result:
@@ -385,6 +387,18 @@ class RestServer(ResponsePage):
                             pbt[paramtype].append(option_name)
                         else:
                             pbt[paramtype] = [option_name]
+
+                    for format in command.getiterator("format"):
+                        if "name" not in format.attrib:
+                            log.msg("Warning: incorrect format specification "
+                                    "for %s." % myinstance.command)
+                            continue
+
+                        style = format.attrib["name"]
+                        if hasattr(myinstance.formatter, "config_" + style):
+                            meth = getattr(myinstance.formatter, "config_" +
+                                           style)
+                            meth(format, myinstance.command)
 
         cache_version(config)
         log.msg("Starting aqd version %s" % config.get("broker", "version"))

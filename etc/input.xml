@@ -150,6 +150,9 @@
       <transport method="get" path="host/%(hostname)s" />
       <transport trigger="all" method="get" path="host" />
       <transport trigger="grns" method="get" path="host/%(hostname)s/grns" />
+      <format name="proto">
+         <message_class name="HostList" module="aqdsystems_pb2"/>
+      </format>
    </command>
 
    <command name="show_fqdn">
@@ -345,6 +348,9 @@
          <option name="fullinfo" type="flag">show full information for the matching hosts</option>
       </optgroup>
       <transport method="get" path="find/cluster" />
+      <format name="proto">
+         <message_class name="ClusterList" module="aqdsystems_pb2"/>
+      </format>
    </command>
 
    <command name="search_host">
@@ -407,6 +413,9 @@
          <option name="fullinfo" type="flag">show full information for the matching hosts</option>
       </optgroup>
       <transport method="get" path="find/host" />
+      <format name="proto" >
+         <message_class name="HostList" module="aqdsystems_pb2"/>
+      </format>
    </command>
 
    <command name="search_esx_cluster">
@@ -476,6 +485,9 @@
          <option name="fullinfo" type="flag">show full information for the matching clusters</option>
       </optgroup>
       <transport method="get" path="find/cluster/esx" />
+      <format name="proto" >
+         <message_class name="ClusterList" module="aqdsystems_pb2"/>
+      </format>
    </command>
 
    <command name="search_observed_mac">
@@ -655,6 +667,9 @@
          <option name="network_environment" type="string">Network environment (default: internal)</option>
       </optgroup>
       <transport method="get" path="network" />
+      <format name="proto" >
+         <message_class name="NetworkList" module="aqdnetworks_pb2"/>
+      </format>
    </command>
 
    <command name="search_network">
@@ -699,6 +714,9 @@
          <option name="fullinfo" type="flag">show full information for the matching networks</option>
       </optgroup>
       <transport method="get" path="find/network" />
+      <format name="proto" >
+         <message_class name="NetworkList" module="aqdnetworks_pb2"/>
+      </format>
    </command>
 
    <command name="refresh_network">
@@ -1711,6 +1729,9 @@
       </optgroup>
       <transport trigger="service" method="get" path="service/%(service)s"/>
       <transport method="get" path="service" />
+      <format name="proto" >
+         <message_class name="ServiceList" module="aqdservices_pb2"/>
+      </format>
    </command>
 
    <command name="show_nas_disk_share">
@@ -1925,6 +1946,9 @@
          <option name="include_parents" type="flag">Include mappings of parent locations</option>
       </optgroup>
       <transport method="get" path="show/map" />
+      <format name="proto" >
+         <message_class name="ServiceMapList" module="aqdservices_pb2"/>
+      </format>
    </command>
 
    <command name="unmap_service">
@@ -2501,6 +2525,9 @@
       </optgroup>
       <transport trigger="all" method="get" path="location/rack" />
       <transport trigger="rack" method="get" path="location/rack/%(rack)s" />
+      <format name="proto" >
+         <message_class name="LocationList" module="aqdlocations_pb2"/>
+      </format>
    </command>
 
    <command name="del_rack">
@@ -2536,6 +2563,9 @@
       </optgroup>
       <transport trigger="all" method="get" path="location/desk" />
       <transport trigger="desk" method="get" path="location/desk/%(desk)s" />
+      <format name="proto" >
+         <message_class name="LocationList" module="aqdlocations_pb2"/>
+      </format>
    </command>
 
    <command name="del_desk">
@@ -2586,6 +2616,9 @@
       </optgroup>
       <transport trigger="all" method="get" path="location/building" />
       <transport trigger="building" method="get" path="location/building/%(building)s" />
+      <format name="proto" >
+         <message_class name="LocationList" module="aqdlocations_pb2"/>
+      </format>
    </command>
 
    <command name="del_building">
@@ -2641,6 +2674,9 @@
       </optgroup>
       <transport trigger="all" method="get" path="location/room" />
       <transport trigger="room" method="get" path="location/room/%(room)s" />
+      <format name="proto" >
+         <message_class name="LocationList" module="aqdlocations_pb2"/>
+      </format>
    </command>
 
    <command name="del_room">
@@ -2678,6 +2714,9 @@
       </optgroup>
       <transport trigger="all" method="get" path="location/bunker" />
       <transport trigger="bunker" method="get" path="location/bunker/%(bunker)s" />
+      <format name="proto" >
+         <message_class name="LocationList" module="aqdlocations_pb2"/>
+      </format>
    </command>
 
    <command name="del_bunker">
@@ -2699,6 +2738,9 @@
       </optgroup>
       <transport trigger="all" method="get" path="location/campus" />
       <transport trigger="campus" method="get" path="location/campus/%(campus)s" />
+      <format name="proto" >
+         <message_class name="LocationList" module="aqdlocations_pb2"/>
+      </format>
    </command>
 
    <command name="add_city">
@@ -2745,6 +2787,9 @@
       </optgroup>
       <transport trigger="all" method="get" path="location/city" />
       <transport trigger="city" method="get" path="location/city/%(city)s" />
+      <format name="proto" >
+         <message_class name="LocationList" module="aqdlocations_pb2"/>
+      </format>
    </command>
 
    <command name="del_city">
@@ -2779,6 +2824,9 @@
       </optgroup>
       <transport trigger="all" method="get" path="location/country" />
       <transport trigger="country" method="get" path="location/country/%(country)s" />
+      <format name="proto" >
+         <message_class name="LocationList" module="aqdlocations_pb2"/>
+      </format>
    </command>
 
    <command name="del_country">
@@ -2813,6 +2861,9 @@
       </optgroup>
       <transport trigger="all" method="get" path="location/continent" />
       <transport trigger="continent" method="get" path="location/continent/%(continent)s" />
+      <format name="proto" >
+         <message_class name="LocationList" module="aqdlocations_pb2"/>
+      </format>
    </command>
 
    <command name="del_continent">
@@ -2855,6 +2906,9 @@
       </optgroup>
       <transport trigger="all" method="get" path="location/organization" />
       <transport trigger="organization" method="get" path="location/organization/%(organization)s" />
+      <format name="proto" >
+         <message_class name="LocationList" module="aqdlocations_pb2"/>
+      </format>
    </command>
 
    <command name="add_hub">
@@ -2881,6 +2935,9 @@
       </optgroup>
       <transport trigger="all" method="get" path="location/hub" />
       <transport trigger="hub" method="get" path="location/hub/%(hub)s" />
+      <format name="proto" >
+         <message_class name="LocationList" module="aqdlocations_pb2"/>
+      </format>
    </command>
 
    <command name="del_hub">
@@ -3008,6 +3065,9 @@
          <option name="all" type="flag">Show all operating systems</option>
       </optgroup>
       <transport method="get" path="os"/>
+      <format name="proto" >
+         <message_class name="OperatingSystemList" module="aqdsystems_pb2"/>
+      </format>
   </command>
 
   <command name="del_personality">
@@ -3055,6 +3115,9 @@
          <option name="sandbox" type="string" conflicts="domain">Name of the sandbox (given as 'author/branch')</option>
       </optgroup>
       <transport method="get" path="personality" />
+      <format name="proto" >
+         <message_class name="PersonalityList" module="aqdsystems_pb2"/>
+      </format>
   </command>
 
   <command name="search_personality">
@@ -3071,6 +3134,9 @@
             <option name="fullinfo" type="flag">show full information for the matching personalities</option>
       </optgroup>
       <transport method="get" path="find/personality" />
+      <format name="proto" >
+         <message_class name="PersonalityList" module="aqdsystems_pb2"/>
+      </format>
   </command>
 
    <command name="make">
@@ -3494,6 +3560,9 @@
       </optgroup>
       <transport trigger="dns_domain" method="get" path="dns_domain/%(dns_domain)s" />
       <transport trigger="all" method="get" path="dns_domain" />
+      <format name="proto" >
+         <message_class name="DNSDomainList" module="aqddnsdomains_pb2"/>
+      </format>
    </command>
 
    <command name="del_dns_domain">
@@ -3568,6 +3637,9 @@
       </optgroup>
       <transport trigger="all" method="get" path="metacluster" />
       <transport trigger="metacluster" method="get" path="metacluster/%(metacluster)s" />
+      <format name="proto" >
+         <message_class name="ClusterList" module="aqdsystems_pb2"/>
+      </format>
    </command>
 
    <command name="update_metacluster">
@@ -3613,6 +3685,9 @@
       </optgroup>
       <transport trigger="cluster" method="get" path="cluster/%(cluster)s" />
       <transport trigger="all" method="get" path="cluster/" />
+      <format name="proto" >
+         <message_class name="ClusterList" module="aqdsystems_pb2"/>
+      </format>
    </command>
 
    <command name="add_esx_cluster">
@@ -3680,6 +3755,9 @@
       </optgroup>
       <transport trigger="cluster" method="get" path="cluster/esx/%(cluster)s" />
       <transport trigger="all" method="get" path="cluster/esx" />
+      <format name="proto" >
+         <message_class name="ClusterList" module="aqdsystems_pb2"/>
+      </format>
    </command>
 
    <command name="update_esx_cluster">
@@ -4397,6 +4475,9 @@
          </option>
       </optgroup>
       <transport method="get" path="find/audit" />
+      <format name="proto" >
+         <message_class name="TransactionList" module="aqdaudit_pb2"/>
+      </format>
    </command>
 
    <command name="show_reboot_schedule">
@@ -4407,6 +4488,9 @@
          <option name="all" type="flag">list all schedules</option>
       </optgroup>
       <transport method="get" path="resource/reboot_schedule/reboot_schedule" />
+      <format name="proto" >
+         <message_class name="ResourceList" module="aqdsystems_pb2"/>
+      </format>
    </command>
 
    <command name="add_reboot_schedule">
@@ -4454,6 +4538,9 @@
          <option name="all" type="flag">list all interventions</option>
       </optgroup>
       <transport method="get" path="resource/reboot_intervention" />
+      <format name="proto" >
+         <message_class name="ResourceList" module="aqdsystems_pb2"/>
+      </format>
    </command>
 
    <command name="add_reboot_intervention">
@@ -4542,6 +4629,9 @@
       </optgroup>
       <transport method="get" trigger="filesystem" path="resource/filesystem/%(filesystem)s" />
       <transport method="get" path="find/resource/filesystem" />
+      <format name="proto" >
+         <message_class name="ResourceList" module="aqdsystems_pb2"/>
+      </format>
    </command>
 
    <command name="add_share">
@@ -4585,6 +4675,9 @@
       </optgroup>
       <transport method="get" trigger="share" path="resource/share/%(share)s" />
       <transport method="get" path="find/resource/share" />
+      <format name="proto" >
+         <message_class name="ResourceList" module="aqdsystems_pb2"/>
+      </format>
    </command>
 
    <command name="add_application">
@@ -4629,6 +4722,9 @@
       </optgroup>
       <transport method="get" trigger="application" path="resource/application/%(application)s" />
       <transport method="get" path="find/resource/application" />
+      <format name="proto" >
+         <message_class name="ResourceList" module="aqdsystems_pb2"/>
+      </format>
    </command>
 
    <command name="add_hostlink">
@@ -4676,6 +4772,9 @@
       </optgroup>
       <transport method="get" trigger="hostlink" path="resource/hostlink/%(hostlink)s" />
       <transport method="get" path="find/resource/hostlink" />
+      <format name="proto" >
+         <message_class name="ResourceList" module="aqdsystems_pb2"/>
+      </format>
    </command>
 
 
@@ -4711,6 +4810,9 @@
       </optgroup>
       <transport method="get" trigger="intervention" path="resource/intervention/%(intervention)s" />
       <transport method="get" path="find/resource/intervention" />
+      <format name="proto" >
+         <message_class name="ResourceList" module="aqdsystems_pb2"/>
+      </format>
    </command>
 
    <command name="del_intervention">
@@ -4773,6 +4875,9 @@
       </optgroup>
       <transport method="get" trigger="name" path="resource/service_address/%(name)s" />
       <transport method="get" path="find/resource/service_address" />
+      <format name="proto" >
+         <message_class name="ResourceList" module="aqdsystems_pb2"/>
+      </format>
    </command>
 
    <command name="add_grn">
@@ -4912,6 +5017,9 @@
       </optgroup>
       <transport method="get" trigger="resourcegroup" path="resource/resourcegroup/%(resourcegroup)s" />
       <transport method="get" path="find/resource/resourcegroup" />
+      <format name="proto" >
+         <message_class name="ResourceList" module="aqdsystems_pb2"/>
+      </format>
    </command>
 
    <command name="add_feature">
@@ -5013,6 +5121,9 @@
          <option name="archetype" type="string">Archetype</option>
       </optgroup>
       <transport method="get" path="personality/personality/%(personality)s/parameters"/>
+      <format name="proto" >
+         <message_class name="ParameterList" module="aqdparameters_pb2"/>
+      </format>
    </command>
 
    <command name="validate_parameter">
@@ -5180,6 +5291,9 @@
       </optgroup>
       <transport method="get" trigger="archetype" path="archetype/%(archetype)s/parameter_definitions"/>
       <transport method="get" trigger="feature" path="feature/%(type)s/%(feature)s/parameter_definitions"/>
+      <format name="proto" >
+         <message_class name="ParamDefinitionList" module="aqdparamdefinitions_pb2"/>
+      </format>
    </command>
 
    <command name="search_parameter">

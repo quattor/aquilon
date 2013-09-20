@@ -16,23 +16,19 @@
 # limitations under the License.
 """ServiceMap formatter."""
 
-
 from aquilon.worker.formats.formatters import ObjectFormatter
-from aquilon.worker.formats.list import ListFormatter
 from aquilon.aqdb.model import ServiceMap, PersonalityServiceMap
 
 
 class ServiceMapFormatter(ObjectFormatter):
-    protocol = "aqdservices_pb2"
-
     def format_raw(self, sm, indent=""):
         return indent + \
                 "Archetype: aquilon Service: %s Instance: %s Map: %s" % (
                 sm.service.name, sm.service_instance.name, format(sm.mapped_to))
 
-    def format_proto(self, sm, skeleton=None):
-        smlf = ServiceMapListFormatter()
-        return smlf.format_proto([sm], skeleton)
+    def format_proto(self, sm, container):
+        skeleton = container.servicemaps.add()
+        self.add_service_map_data(skeleton, sm)
 
 ObjectFormatter.handlers[ServiceMap] = ServiceMapFormatter()
 
@@ -47,19 +43,3 @@ class PersonalityServiceMapFormatter(ServiceMapFormatter):
 
 ObjectFormatter.handlers[PersonalityServiceMap] = \
         PersonalityServiceMapFormatter()
-
-
-class ServiceMapList(list):
-    pass
-
-
-class ServiceMapListFormatter(ListFormatter):
-    protocol = "aqdservices_pb2"
-
-    def format_proto(self, sml, skeleton=None):
-        servicemap_list_msg = self.loaded_protocols[self.protocol].ServiceMapList()
-        for sm in sml:
-            self.add_service_map_msg(servicemap_list_msg.servicemaps.add(), sm)
-        return servicemap_list_msg.SerializeToString()
-
-ObjectFormatter.handlers[ServiceMapList] = ServiceMapListFormatter()

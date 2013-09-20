@@ -22,8 +22,6 @@ from sqlalchemy.orm import joinedload, subqueryload, undefer, contains_eager
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.aqdb.model import Service, ServiceInstance
 from aquilon.worker.dbwrappers.host import hostname_to_host
-from aquilon.worker.formats.service_instance import ServiceInstanceList
-from aquilon.worker.formats.service import ServiceList
 
 
 class CommandShowService(BrokerCommand):
@@ -41,12 +39,12 @@ class CommandShowService(BrokerCommand):
             q = q.join('servers')
             q = q.filter_by(host=dbserver)
             q = q.order_by(Service.name, ServiceInstance.name)
-            return ServiceInstanceList(q.all())
+            return q.all()
         elif dbclient:
             service_instances = dbclient.services_used
             if instance:
                 service_instances = [si for si in service_instances if si.name == instance]
-            return ServiceInstanceList(service_instances)
+            return service_instances
         else:
             # Try to load as much as we can as bulk queries since loading the
             # objects one by one is much more expensive
@@ -65,4 +63,4 @@ class CommandShowService(BrokerCommand):
             q = q.options(subqueryload('instances.personality_service_map'))
             q = q.options(joinedload('instances.personality_service_map.location'))
             q = q.order_by(Service.name, ServiceInstance.name)
-            return ServiceList(q.all())
+            return q.all()

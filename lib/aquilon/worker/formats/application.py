@@ -16,29 +16,21 @@
 # limitations under the License.
 """Application Resource formatter."""
 
-
 from aquilon.worker.formats.formatters import ObjectFormatter
 from aquilon.worker.formats.resource import ResourceFormatter
 from aquilon.aqdb.model import Application
 
 
 class ApplicationFormatter(ResourceFormatter):
-    protocol = "aqdsystems_pb2"
-
     def extra_details(self, app, indent=""):
         details = []
         details.append(indent + "  EON id: %s" % app.eonid)
 
         return details
 
-    def format_proto(self, app, skeleton=None):
-        container = skeleton
-        if not container:
-            container = self.loaded_protocols[self.protocol].ResourceList()
-            skeleton = container.resources.add()
+    def format_proto(self, app, container):
+        skeleton = container.resources.add()
+        self.add_resource_data(skeleton, app)
         skeleton.appdata.eonid = app.eonid
-        return super(ApplicationFormatter, self).format_proto(app,
-                                                              skeleton)
-
 
 ObjectFormatter.handlers[Application] = ApplicationFormatter()

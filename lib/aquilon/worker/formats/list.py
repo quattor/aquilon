@@ -16,9 +16,9 @@
 # limitations under the License.
 """List formatter."""
 
-
 import csv
 import cStringIO
+from operator import attrgetter
 
 from sqlalchemy.orm.collections import InstrumentedList
 from sqlalchemy.orm.query import Query
@@ -72,10 +72,9 @@ class ListFormatter(ObjectFormatter):
     def format_djb(self, result):
         return "\n".join([self.redirect_djb(item) for item in result])
 
-    def format_proto(self, result, skeleton=None):
+    def format_proto(self, result, container):
         for item in result:
-            skeleton = self.redirect_proto(item, skeleton)
-        return skeleton
+            self.redirect_proto(item, container)
 
 ObjectFormatter.handlers[list] = ListFormatter()
 ObjectFormatter.handlers[Query] = ListFormatter()
@@ -92,21 +91,15 @@ class StringListFormatter(ListFormatter):
     def format_raw(self, objects, indent=""):
         return "\n".join([indent + str(obj) for obj in objects])
 
-    def format_csv(self, objects):
-        # Optimized version to skip the csv_tolist() redirections
-        strbuf = cStringIO.StringIO()
-        writer = csv.writer(strbuf, dialect='aquilon')
-        for obj in objects:
-            writer.writerow((str(obj),))
-        return strbuf.getvalue()
-
-
 ObjectFormatter.handlers[StringList] = StringListFormatter()
 
 
 class StringAttributeList(list):
-    def __init__(self, items, attr_name):
-        self.attr_name = attr_name
+    def __init__(self, items, attr):
+        if isinstance(attr, basestring):
+            self.getter = attrgetter(attr)
+        else:
+            self.getter = attr
         super(StringAttributeList, self).__init__(items)
 
 
@@ -114,16 +107,6 @@ class StringAttributeListFormatter(ListFormatter):
     """ Format a single attribute of every object as a string """
 
     def format_raw(self, objects, indent=""):
-        return "\n".join([indent + str(getattr(obj, objects.attr_name))
-                          for obj in objects])
-
-    def format_csv(self, objects):
-        # Optimized version to skip the csv_tolist() redirections
-        strbuf = cStringIO.StringIO()
-        writer = csv.writer(strbuf, dialect='aquilon')
-        for obj in objects:
-            writer.writerow((str(getattr(obj, objects.attr_name)),))
-        return strbuf.getvalue()
-
+        return "\n".join([indent + str(objects.getter(obj)) for obj in objects])
 
 ObjectFormatter.handlers[StringAttributeList] = StringAttributeListFormatter()

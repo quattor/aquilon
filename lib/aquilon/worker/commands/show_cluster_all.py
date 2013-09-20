@@ -15,14 +15,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 from aquilon.aqdb.model import Cluster
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.formats.cluster import SimpleClusterList
+from aquilon.worker.formats.list import StringAttributeList
 
 
 class CommandShowClusterAll(BrokerCommand):
 
+    query_class = Cluster
+
     def render(self, session, **arguments):
-        q = session.query(Cluster.name).order_by(Cluster.name)
-        return SimpleClusterList(q.all())
+        q = session.query(self.query_class.name).order_by(self.query_class.name)
+        return StringAttributeList(q.all(), "name")

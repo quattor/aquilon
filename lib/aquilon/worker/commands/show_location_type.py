@@ -16,14 +16,12 @@
 # limitations under the License.
 """Contains the logic for `aq show location --type`."""
 
-
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.orm import subqueryload
 
 from aquilon.exceptions_ import NotFoundException
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.aqdb.model import Location
-from aquilon.worker.formats.location import LocationList
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 
 
 class CommandShowLocationType(BrokerCommand):
@@ -44,5 +42,4 @@ class CommandShowLocationType(BrokerCommand):
                 raise NotFoundException("%s %s not found." %
                                         (cls._get_class_label(), name))
 
-        return LocationList(query.order_by(Location.location_type,
-                                           Location.name).all())
+        return query.order_by(Location.location_type, Location.name).all()

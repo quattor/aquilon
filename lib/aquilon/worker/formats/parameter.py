@@ -24,9 +24,6 @@ from aquilon.aqdb.model import Parameter
 
 
 class ParameterFormatter(ObjectFormatter):
-
-    protocol = "aqdparameters_pb2"
-
     def format_raw(self, param, indent=""):
         details = []
         for k in param.value:
@@ -34,11 +31,7 @@ class ParameterFormatter(ObjectFormatter):
             details.append(indent + "{0}: {1}".format(k, str_value))
         return "\n".join(details)
 
-    def format_proto(self, param, skeleton=None):
-        container = skeleton
-        if not container:
-            container = self.loaded_protocols[self.protocol].ParameterList()
-
+    def format_proto(self, param, container):
         param_definitions = None
         paramdef_holder = None
         dbpersonality = param.holder.personality
@@ -69,8 +62,6 @@ class ParameterFormatter(ObjectFormatter):
                         skeleton.value = json.dumps(value)
                     else:
                         skeleton.value = str(value)
-
-        return container
 
 
 ObjectFormatter.handlers[Parameter] = ParameterFormatter()
@@ -139,8 +130,6 @@ class SimpleParameterList(list):
 
 
 class SimpleParameterListFormatter(ListFormatter):
-    protocol = "aqdsystems_pb2"
-
     def format_raw(self, hlist, indent=""):
         ret = []
         for k, v in hlist:
@@ -149,7 +138,7 @@ class SimpleParameterListFormatter(ListFormatter):
                 ret.append(indent + "  {0}: {1}".format(ikey, json.dumps(v[ikey])))
         return "\n".join(ret)
 
-    def format_proto(self, hostlist, skeleton=None):
+    def format_proto(self, hostlist, container):
         pass
 
 ObjectFormatter.handlers[SimpleParameterList] = SimpleParameterListFormatter()

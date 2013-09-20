@@ -16,7 +16,6 @@
 # limitations under the License.
 """Contains the logic for `aq show personality`."""
 
-
 import os
 import re
 
@@ -24,8 +23,7 @@ from sqlalchemy.orm import joinedload, subqueryload, contains_eager
 
 from aquilon.aqdb.model import Archetype, Personality
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.formats.personality import (ThresholdedPersonality,
-                                                PersonalityList)
+from aquilon.worker.formats.personality import ThresholdedPersonality
 from aquilon.worker.dbwrappers.branch import get_branch_and_author
 
 
@@ -60,10 +58,10 @@ class CommandShowPersonality(BrokerCommand):
                       subqueryload('features'),
                       joinedload('features.feature'),
                       joinedload('cluster_infos'))
-        results = PersonalityList()
         if not dbbranch:
-            results.extend(q.all())
-            return results
+            return q.all()
+
+        results = []
         for dbpersonality in q.all():
             # In theory the results here could be inconsistent if the
             # domain is being written to.  In practice... it's not worth

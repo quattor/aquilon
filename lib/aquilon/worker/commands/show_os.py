@@ -15,11 +15,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.formats.operating_system import OperatingSystemList
 from aquilon.exceptions_ import NotFoundException
 from aquilon.aqdb.model import OperatingSystem, Archetype
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 
 
 class CommandShowOS(BrokerCommand):
@@ -39,4 +37,4 @@ class CommandShowOS(BrokerCommand):
         oslist = q.all()
         if not oslist:
             raise NotFoundException("No matching operating system.")
-        return OperatingSystemList(oslist)
+        return oslist

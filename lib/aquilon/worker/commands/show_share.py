@@ -21,7 +21,6 @@ from aquilon.aqdb.model import Share
 from aquilon.aqdb.data_sync.storage import cache_storage_data
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.resources import get_resource_holder
-from aquilon.worker.formats.resource import ResourceList
 
 
 class CommandShowShare(BrokerCommand):
@@ -47,4 +46,4 @@ class CommandShowShare(BrokerCommand):
         for dbshare in shares:
             dbshare.populate_share_info(share_info)
 
-        return ResourceList(shares)
+        return shares

@@ -193,17 +193,6 @@ class MachineFormatter(ObjectFormatter):
 ObjectFormatter.handlers[Machine] = MachineFormatter()
 
 
-class SimpleMachineList(list):
-    pass
-
-
-class SimpleMachineListFormatter(ListFormatter):
-    def format_raw(self, smlist, indent=""):
-        return str("\n".join([indent + machine.label for machine in smlist]))
-
-ObjectFormatter.handlers[SimpleMachineList] = SimpleMachineListFormatter()
-
-
 class MachineMacList(list):
     """ Holds MAC, machine-name [, hostname] """
     pass

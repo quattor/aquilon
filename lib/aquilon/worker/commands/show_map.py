@@ -18,12 +18,11 @@
 
 
 from aquilon.exceptions_ import NotFoundException
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.aqdb.model import (Personality, Service, ServiceMap,
                                 PersonalityServiceMap,
                                 NetworkEnvironment)
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.location import get_location
-from aquilon.worker.formats.service_map import ServiceMapList
 from aquilon.worker.dbwrappers.network import get_network_byip
 
 
@@ -87,7 +86,7 @@ class CommandShowMap(BrokerCommand):
             for i in range(len(queries)):
                 queries[i] = queries[i].filter_by(network=dbnetwork)
 
-        results = ServiceMapList()
+        results = []
         for q in queries:
             results.extend(q.all())
         if service and instance and dblocation:

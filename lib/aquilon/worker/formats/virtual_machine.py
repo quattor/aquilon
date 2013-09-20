@@ -16,15 +16,12 @@
 # limitations under the License.
 """VirtualMachine Resource formatter."""
 
-
 from aquilon.worker.formats.formatters import ObjectFormatter
 from aquilon.worker.formats.resource import ResourceFormatter
 from aquilon.aqdb.model import VirtualMachine
 
 
 class VirtualMachineFormatter(ResourceFormatter):
-    protocol = "aqdsystems_pb2"
-
     def format_raw(self, vm, indent=""):
         # There will be a lot of VMs attached to a cluster, so be terse.
         dbmachine = vm.machine
@@ -37,12 +34,8 @@ class VirtualMachineFormatter(ResourceFormatter):
         return indent + "%s: %s (%s, %d MB)" % (
             vm._get_class_label(), dbmachine.label, name, dbmachine.memory)
 
-    def format_proto(self, vm, skeleton=None):
-        container = skeleton
-        if not container:
-            container = self.loaded_protocols[self.protocol].ResourceList()
-            skeleton = container.resources.add()
-        return super(VirtualMachineFormatter, self).format_proto(vm, skeleton)
-
+    def format_proto(self, vm, container):
+        skeleton = container.resources.add()
+        self.add_resource_data(skeleton, vm)
 
 ObjectFormatter.handlers[VirtualMachine] = VirtualMachineFormatter()

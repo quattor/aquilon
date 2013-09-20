@@ -118,7 +118,6 @@ class AQDMaker(object):
         log_module_load(m, config.get("broker", "CheckNet_module"))
         if config.has_option("database", "module"):
             log_module_load(m, config.get("database", "module"))
-        sys.path.append(config.get("protocols", "directory"))
 
         # Set this up before the aqdb libs get imported...
         integrate_logging(config)

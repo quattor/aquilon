@@ -16,10 +16,8 @@
 # limitations under the License.
 """Service formatter."""
 
-
 from aquilon.aqdb.model import Service
 from aquilon.worker.formats.formatters import ObjectFormatter
-from aquilon.worker.formats.list import ListFormatter
 
 
 class ServiceFormatter(ObjectFormatter):
@@ -43,25 +41,8 @@ class ServiceFormatter(ObjectFormatter):
             details.append(self.redirect_raw(instance, indent + "  "))
         return "\n".join(details)
 
-    def format_proto(self, service, skeleton=None):
-        slf = ServiceListFormatter()
-        return slf.format_proto([service], skeleton)
+    def format_proto(self, service, container):
+        skeleton = container.services.add()
+        self.add_service_data(skeleton, service)
 
 ObjectFormatter.handlers[Service] = ServiceFormatter()
-
-
-class ServiceList(list):
-    """Class to hold a list of services to be formatted"""
-    pass
-
-
-class ServiceListFormatter(ListFormatter):
-    protocol = "aqdservices_pb2"
-
-    def format_proto(self, sl, skeleton=None):
-        servicelist_msg = self.loaded_protocols[self.protocol].ServiceList()
-        for service in sl:
-            self.add_service_msg(servicelist_msg.services.add(), service)
-        return servicelist_msg.SerializeToString()
-
-ObjectFormatter.handlers[ServiceList] = ServiceListFormatter()
