@@ -604,7 +604,8 @@ class TemplateFormatter(ObjectFormatter):
         super(TemplateFormatter, self).__init__()
         self.mako_dir = os.path.join(self.config.get("broker", "srcdir"), "lib",
                                      "aquilon", "worker", "templates", "mako")
-        self.lookup_raw = TemplateLookup(directories=[os.path.join(self.mako_dir, "raw")],
+        self.lookup_raw = TemplateLookup(directories=[os.path.join(self.mako_dir, "raw"),
+                                                      "/usr/share/aquilon/mako/raw"],
                                          imports=['from string import rstrip',
                                                   'from '
                                                   'aquilon.worker.formats.formatters '

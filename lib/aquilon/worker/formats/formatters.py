@@ -152,7 +152,8 @@ class ObjectFormatter(object):
     # might also be an issue when we switch to multi-process.
     # Not using cache because it only has the lifetime of the template, and
     # because we do not have the beaker module installed.
-    lookup_raw = TemplateLookup(directories=[os.path.join(mako_dir, "raw")],
+    lookup_raw = TemplateLookup(directories=[os.path.join(mako_dir, "raw"),
+                                             "/usr/share/aquilon/mako/raw"],
                                 imports=['from string import rstrip',
                                          'from '
                                          'aquilon.worker.formats.formatters '
