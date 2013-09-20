@@ -23,10 +23,25 @@ import pwd
 from ConfigParser import SafeConfigParser
 
 from aquilon.exceptions_ import AquilonError
-from aquilon.utils import configuration_directory
 
 def get_username():
     return pwd.getpwuid(os.getuid()).pw_name
+
+def configuration_directory(basedir):
+    """
+    Return the directory that contains the shared configuration files.
+
+    This is the dirname for build.xml, input.xml, aqd.conf.defaults
+    and friends.  If we are running from a working copy, this is
+    "basedir/etc".  If not, it will be /usr/share/aquilon/etc.
+    """
+    wc = os.path.join(basedir, "etc", "aqd.conf.defaults")
+    if os.path.isfile(wc):
+        return os.path.dirname(wc)
+    else:
+        return SHARE_CFG
+
+
 
 # All defaults should be in etc/aqd.conf.defaults.  This is only needed to
 # supply defaults that are determined by code at run time.

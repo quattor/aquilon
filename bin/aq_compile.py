@@ -38,7 +38,7 @@ LIBDIR = os.path.join(SRCDIR, "lib")
 sys.path.append(LIBDIR)
 
 from aquilon.config import Config
-from aquilon.utils import configuration_directory
+from aquilon.config import configuration_directory
 
 def run_domain_compile(options, config):
     panc_env = os.environ.copy()

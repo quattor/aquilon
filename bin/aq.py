@@ -48,7 +48,7 @@ from aquilon.client.knchttp import KNCHTTPConnection
 from aquilon.client.chunked import ChunkedHTTPConnection
 from aquilon.client.optparser import OptParser, ParsingError
 from aquilon.python_patches import load_uuid_quickly
-from aquilon.utils import configuration_directory as cfgdir
+from aquilon.config import configuration_directory as cfgdir
 
 # Stolen from aquilon.worker.formats.fomatters
 csv.register_dialect('aquilon', delimiter=',', quoting=csv.QUOTE_MINIMAL,
