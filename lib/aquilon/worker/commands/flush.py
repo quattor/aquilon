@@ -65,8 +65,7 @@ class CommandFlush(BrokerCommand):
             Hostlink: [],
             ServiceAddress: [joinedload('dns_record'),
                              joinedload('assignments'),
-                             joinedload('assignments.interface'),
-                             lazyload('assignments.interface.hardware_entity')],
+                             joinedload('assignments.interface')],
             RebootSchedule: [],
             VirtualMachine: [joinedload('machine'),
                              joinedload('machine.primary_name'),
@@ -91,7 +90,6 @@ class CommandFlush(BrokerCommand):
         # attributes, so load interfaces manually.
         q = session.query(Interface)
         q = q.with_polymorphic('*')
-        q = q.options(lazyload("hardware_entity"))
         for iface in q:
             interfaces_by_hwent[iface.hardware_entity_id].append(iface)
             interfaces_by_id[iface.id] = iface

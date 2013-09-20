@@ -36,6 +36,7 @@ class CommandShowNetwork(BrokerCommand):
         if hosts or style == "proto":
             options.extend([subqueryload("assignments"),
                             joinedload("assignments.interface"),
+                            joinedload("assignments.interface.hardware_entity"),
                             joinedload("assignments.dns_records"),
                             subqueryload("dynamic_stubs")])
         dbnet_env = NetworkEnvironment.get_unique_or_default(session,

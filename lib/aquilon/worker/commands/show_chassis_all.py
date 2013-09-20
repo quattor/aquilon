@@ -43,7 +43,6 @@ class CommandShowChassisAll(BrokerCommand):
                           lazyload('slots.machine.host'),
 
                           subqueryload('interfaces'),
-                          lazyload('interfaces.hardware_entity'),
                           joinedload('interfaces.assignments'),
                           joinedload('interfaces.assignments.network'),
                           joinedload('interfaces.assignments.dns_records'))

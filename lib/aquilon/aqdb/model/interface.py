@@ -107,7 +107,7 @@ class Interface(DeviceLinkMixin, Base):
     # snapshot_hw(), so it is not worth deferring it
     comments = Column('comments', String(255), nullable=True)
 
-    hardware_entity = relation(HardwareEntity, lazy=False, innerjoin=True,
+    hardware_entity = relation(HardwareEntity, innerjoin=True,
                                backref=backref('interfaces',
                                                cascade='all, delete-orphan'))
 

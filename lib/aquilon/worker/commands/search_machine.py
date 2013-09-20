@@ -133,7 +133,6 @@ class CommandSearchMachine(BrokerCommand):
         if fullinfo or style != "raw":
             q = q.options(joinedload('location'),
                           subqueryload('interfaces'),
-                          lazyload('interfaces.hardware_entity'),
                           joinedload('interfaces.assignments'),
                           joinedload('interfaces.assignments.dns_records'),
                           joinedload('chassis_slot'),
