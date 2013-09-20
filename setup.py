@@ -58,7 +58,7 @@ def find_packages(path):
             l.append(m)
     return l
 
-all_packages = find_packages("lib/python2.6")
+all_packages = find_packages("lib")
 all_packages.extend(find_packages("bootstrap/bootstrap_ms"))
 all_scripts = glob.glob(os.path.join("bin", "a*"))
 all_scripts.extend(glob.glob(os.path.join("bootstrap", "*.py")))
@@ -70,8 +70,8 @@ setup(name="aquilon",
       license="Apache 2.0",
       author="Quattor collaboration",
       author_email="quattor-aquilon@lists.sourceforge.net",
-      package_dir={'aquilon' : 'lib/python2.6/aquilon',
-                   'twisted' : 'lib/python2.6/twisted',
+      package_dir={'aquilon' : 'lib/aquilon',
+                   'twisted' : 'lib/twisted',
                    'ms': 'bootstrap/bootstrap_ms/ms'},
       packages=all_packages,
       cmdclass = {"install_scripts" : install_init_d_stuff},
@@ -79,6 +79,10 @@ setup(name="aquilon",
                    glob.glob("etc/*.conf*") + glob.glob("etc/*xml")),
                   ("/etc/init.d", ["etc/rc.d/init.d/aqd"]),
                   ("/etc/sysconfig", ["etc/sysconfig/aqd"]),
-                  ("/etc/bash_completion.d", ["aq_bash_completion.sh"])],
+                  ("/etc/bash_completion.d", ["aq_bash_completion.sh"]),
+                  ("/usr/lib/python2.6/site_packages/aquilon/broker/formats/mako/raw",
+                   glob.glob("lib/aquilon/worker/formats/mako/raw/*mako")),
+                  ("/usr/lib/python2.6/site_packages/aquilon/broker/formats/mako/html",
+                   glob.glob("lib/aquilon/worker/formats/mako/raw/*mako"))],
       scripts=all_scripts,
       url="http://quattor.org")
