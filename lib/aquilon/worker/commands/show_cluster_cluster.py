@@ -37,8 +37,7 @@ class CommandShowClusterCluster(BrokerCommand):
 
         vm_q = vm_q.options(joinedload('machine'),
                             joinedload('machine.primary_name'),
-                            joinedload('machine.primary_name.fqdn'),
-                            lazyload('machine.host'))
+                            joinedload('machine.primary_name.fqdn'))
 
         q = q.options(subqueryload('_hosts'),
                       lazyload('_hosts.cluster'),

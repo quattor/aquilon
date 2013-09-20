@@ -284,8 +284,7 @@ class CommandFlush(BrokerCommand):
                 chassis = q.all()  # pylint: disable=W0612
 
                 q = session.query(Machine)
-                q = q.options(lazyload("host"),
-                              lazyload("primary_name"),
+                q = q.options(lazyload("primary_name"),
                               subqueryload("chassis_slot"))
 
                 cnt = q.count()

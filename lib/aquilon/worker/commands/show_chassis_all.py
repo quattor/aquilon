@@ -40,7 +40,6 @@ class CommandShowChassisAll(BrokerCommand):
 
                           # A rare case when we don't need primary name/host
                           lazyload('slots.machine.primary_name'),
-                          lazyload('slots.machine.host'),
 
                           subqueryload('interfaces'),
                           joinedload('interfaces.assignments'),
