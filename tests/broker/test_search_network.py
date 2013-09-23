@@ -159,6 +159,21 @@ class TestSearchNetwork(TestBrokerCommand):
             else:
                 self.matchclean(out, str(net), command)
 
+    def testdynrangecsv(self):
+        command = ["search_network", "--has_dynamic_ranges", "--format", "csv"]
+        out = self.commandtest(command)
+        expect = [self.net["dyndhcp0"], self.net["dyndhcp1"],
+                  self.net["dyndhcp3"]]
+        for network in self.net:
+            if not network.autocreate:
+                continue
+            if network in expect:
+                self.matchoutput(out, "%s,%s,%s,ut.ny.na,us,a,%s,\n" % (
+                    network.name, network.ip, network.netmask, network.nettype),
+                    command)
+            else:
+                self.matchclean(out, str(network.ip), command)
+
     def testside(self):
         command = ["search", "network", "--side", "b"]
         out = self.commandtest(command)
