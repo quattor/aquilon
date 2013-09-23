@@ -124,6 +124,11 @@ class NetworkFormatter(ObjectFormatter):
 
         return "\n".join(details)
 
+    def csv_fields(self, network):
+        return (network.name, network.ip, network.netmask,
+                network.location.sysloc(), network.location.country,
+                network.side, network.network_type, network.comments)
+
     def add_net_data(self, net_msg, net):
         net_msg.name = str(net.name)
         net_msg.id = net.id
