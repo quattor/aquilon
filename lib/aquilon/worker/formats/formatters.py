@@ -93,7 +93,10 @@ class ResponseFormatter(object):
         return ObjectFormatter.redirect_raw(result)
 
     def format_csv(self, result, request):
-        return ObjectFormatter.redirect_csv(result)
+        strbuf = cStringIO.StringIO()
+        writer = csv.writer(strbuf, dialect='aquilon')
+        ObjectFormatter.redirect_csv(result, writer)
+        return strbuf.getvalue()
 
     def format_djb(self, result, request):
         """ For tinydns-data formatting. use raw for now. """
@@ -168,39 +171,13 @@ class ObjectFormatter(object):
         return indent + str(result)
 
     def csv_fields(self, result):
-        """Return the attributes that should be printed in CSV format.
+        raise ProtocolError("{0:c} does not have a CSV formatter."
+                            .format(result))
 
-        The returned value must always be a sequence, even if it contains just
-        one item."""
-        return (str(result),)
-
-    def csv_tolist(self, result):
-        """Convert a single object to a list.
-
-        Override this method if you want to print multiple lines in CSV format
-        for a single object.
-        """
-        return (result,)
-
-    def format_csv(self, result):
-        """CSV output provider.
-
-        There are two ways to customize this method. In the simple case, you
-        want exactly one line of output for every result object. In this case,
-        the descendant formatter classes should override the cvs_fields() method
-        to select the data that should be printed.
-
-        There are cases however when you want multiple lines for a single
-        object (e.g. a separate line for every interface a machine has). In this
-        case the descendant classes should override the csv_tolist() method.
-        """
-        strbuf = cStringIO.StringIO()
-        writer = csv.writer(strbuf, dialect='aquilon')
-        for item in self.csv_tolist(result):
-            fields = self.csv_fields(item)
+    def format_csv(self, result, writer):
+        for fields in self.csv_fields(result):
             if fields:
                 writer.writerow(fields)
-        return strbuf.getvalue()
 
     def format_djb(self, result):
         # We get here if the command throws an exception
@@ -208,7 +185,8 @@ class ObjectFormatter(object):
 
     def format_proto(self, result, container):  # pylint: disable=W0613
         # There's no default protobuf message type
-        raise ProtocolError("Protobuf formatter is not available")
+        raise ProtocolError("{0:c} does not have a protobuf formatter."
+                            .format(result))
 
     def format_html(self, result):
         if hasattr(self, "template_html"):
@@ -223,10 +201,10 @@ class ObjectFormatter(object):
         return handler.format_raw(result, indent)
 
     @staticmethod
-    def redirect_csv(result):
+    def redirect_csv(result, writer):
         handler = ObjectFormatter.handlers.get(result.__class__,
                                                ObjectFormatter.default_handler)
-        return handler.format_csv(result)
+        return handler.format_csv(result, writer)
 
     @staticmethod
     def redirect_djb(result):

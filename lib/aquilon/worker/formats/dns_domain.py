@@ -38,7 +38,7 @@ class DnsDomainFormatter(ObjectFormatter):
         return "\n".join(details)
 
     def csv_fields(self, dns_domain):
-        return (dns_domain.name, dns_domain.comments)
+        yield (dns_domain.name, dns_domain.comments)
 
     def format_proto(self, dns_domain, container):
         skeleton = container.dns_domains.add()

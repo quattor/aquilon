@@ -20,32 +20,6 @@ from aquilon.aqdb.model import NetworkDevice
 from aquilon.worker.formats.formatters import ObjectFormatter
 
 
-class NetworkDeviceInterfaceTuple(tuple):
-    """Encapsulates a (switch, selected interface) triplet"""
-
-
-class NetworkDeviceInterfaceTupleFormatter(ObjectFormatter):
-    def csv_fields(self, item):
-        device = item[0]
-        interface = item[1]
-
-        details = [device.fqdn,
-                   device.primary_ip,
-                   device.switch_type,
-                   device.location.rack.name if device.location.rack else None,
-                   device.location.building.name,
-                   device.model.vendor.name,
-                   device.model.name,
-                   device.serial_no]
-        if interface:
-            details.extend([interface.name, interface.mac])
-        else:
-            details.extend([None, None])
-        return details
-
-ObjectFormatter.handlers[NetworkDeviceInterfaceTuple] = NetworkDeviceInterfaceTupleFormatter()
-
-
 class NetworkDeviceFormatter(ObjectFormatter):
     def format_raw(self, device, indent=""):
         details = [indent + "%s: %s" % (str(device.model.model_type).capitalize(),
@@ -73,20 +47,26 @@ class NetworkDeviceFormatter(ObjectFormatter):
             details.append(indent + "  Comments: %s" % device.comments)
         return "\n".join(details)
 
-    def csv_tolist(self, device):
-        interfaces = []
-        for i in device.interfaces:
-            # XXX What semantics do we want here?
-            if not i.mac:
-                continue
-            interfaces.append(i)
-        if len(interfaces):
-            return [NetworkDeviceInterfaceTuple((device, i)) for i in interfaces]
-        else:
-            return [NetworkDeviceInterfaceTuple((device, None))]
+    def csv_fields(self, device):
+        interfaces = [iface for iface in device.interfaces
+                      if iface.mac]
+        if not interfaces:
+            interfaces.append(None)
 
-    def csv_fields(self, item):
-        f = NetworkDeviceInterfaceTupleFormatter()
-        return f.csv_fields(item)
+        for interface in interfaces:
+            details = [device.fqdn,
+                       device.primary_ip,
+                       device.switch_type,
+                       device.location.rack.name if device.location.rack else None,
+                       device.location.building.name,
+                       device.model.vendor.name,
+                       device.model.name,
+                       device.serial_no]
+            if interface:
+                details.extend([interface.name, interface.mac])
+            else:
+                details.extend([None, None])
+
+            yield details
 
 ObjectFormatter.handlers[NetworkDevice] = NetworkDeviceFormatter()

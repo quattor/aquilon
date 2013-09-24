@@ -24,33 +24,6 @@ from aquilon.worker.dbwrappers.feature import (model_features,
                                                personality_features)
 
 
-class MachineInterfacePair(tuple):
-    """Encapsulates a (machine, selected interface) pair"""
-    pass
-
-
-class MachineInterfacePairFormatter(ObjectFormatter):
-    def csv_fields(self, item):
-        machine = item[0]
-        addr = item[1]
-
-        rack = None
-        if machine.location.rack:
-            rack = machine.location.rack.name
-        building = None
-        if machine.location.building:
-            building = machine.location.building.name
-        details = [machine.label, rack, building, machine.model.vendor.name,
-                   machine.model.name, machine.serial_no]
-        if addr:
-            details.extend([addr.logical_name, addr.interface.mac, addr.ip])
-        else:
-            details.extend([None, None, None])
-        return details
-
-ObjectFormatter.handlers[MachineInterfacePair] = MachineInterfacePairFormatter()
-
-
 class MachineFormatter(ObjectFormatter):
     def format_raw(self, machine, indent=""):
         details = [indent + "%s: %s" % (str(machine.model.model_type).capitalize(),
@@ -189,13 +162,24 @@ class MachineFormatter(ObjectFormatter):
                 details.append(indent + "  Comments: %s" % host.comments)
         return "\n".join(details)
 
-    def csv_tolist(self, machine):
-        if machine.interfaces:
-            entries = []
-            for addr in machine.all_addresses():
-                entries.append(MachineInterfacePair((machine, addr)))
-            return entries
-        else:
-            return [MachineInterfacePair((machine, None))]
+    def csv_fields(self, machine):
+        addrs = list(machine.all_addresses())
+        if not addrs:
+            addrs.append(None)
+
+        for addr in addrs:
+            rack = None
+            if machine.location.rack:
+                rack = machine.location.rack.name
+            building = None
+            if machine.location.building:
+                building = machine.location.building.name
+            details = [machine.label, rack, building, machine.model.vendor.name,
+                       machine.model.name, machine.serial_no]
+            if addr:
+                details.extend([addr.logical_name, addr.interface.mac, addr.ip])
+            else:
+                details.extend([None, None, None])
+            yield details
 
 ObjectFormatter.handlers[Machine] = MachineFormatter()
