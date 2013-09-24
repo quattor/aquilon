@@ -39,12 +39,17 @@ class TestAddShare(TestBrokerCommand):
         self.noouttest(["add_share", "--cluster=utecl13",
                         "--share=test_share_1"])
 
+    def testaddnotinnasobjects(self):
+        self.noouttest(["add_share", "--cluster", "utecl1",
+                        "--share", "not_in_nasobjects"])
+
     # test_share_1 must appear once.
     def testverifyshowutmc1(self):
         command = ["show_metacluster", "--metacluster=utmc1"]
         out = self.commandtest(command)
         self.searchoutput(out,
-                          r"\s*Share: test_share_1\s*"
+                          r"Share: not_in_nasobjects\s*"
+                          r"Share: test_share_1\s*"
                           r"Share: test_share_2\s*"
                           r"Share: test_share_3\s*"
                           r"Share: test_share_4\s*"
@@ -79,6 +84,14 @@ class TestAddShare(TestBrokerCommand):
         self.matchclean(out, "Comments", command)
         self.matchclean(out, "Share: test_share_2", command)
 
+    def testverifynotinnasobjects(self):
+        command = ["show_share", "--cluster", "utecl1",
+                   "--share", "not_in_nasobjects"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Share: not_in_nasobjects", command)
+        self.matchoutput(out, "Server: None", command)
+        self.matchoutput(out, "Mountpoint: None", command)
+
     def testverifyshowshareproto(self):
         command = ["show_share", "--cluster=utecl1", "--share=test_share_1",
                    "--format", "proto"]
@@ -90,6 +103,19 @@ class TestAddShare(TestBrokerCommand):
         self.failUnlessEqual(resource.share.server, "lnn30f1")
         self.failUnlessEqual(resource.share.mount,
                              "/vol/lnn30f1v1/test_share_1")
+        self.failUnlessEqual(resource.share.disk_count, 0)
+        self.failUnlessEqual(resource.share.machine_count, 0)
+
+    def testverifyshownotinnasobjectsproto(self):
+        command = ["show_share", "--cluster", "utecl1",
+                   "--share", "not_in_nasobjects", "--format", "proto"]
+        out = self.commandtest(command)
+        reslist = self.parse_resourcelist_msg(out, expect=1)
+        resource = reslist.resources[0]
+        self.failUnlessEqual(resource.name, "not_in_nasobjects")
+        self.failUnlessEqual(resource.type, "share")
+        self.failIf(hasattr(resource, 'server'))
+        self.failIf(hasattr(resource, 'mount'))
         self.failUnlessEqual(resource.share.disk_count, 0)
         self.failUnlessEqual(resource.share.machine_count, 0)
 
