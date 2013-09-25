@@ -764,11 +764,6 @@
       <transport method="get" path="search/hostiplist" />
    </command>
 
-   <command name="show_machinemaclist">
-      Shows a list of all MAC addresses.
-      <transport method="get" path="search/machinemaclist" />
-   </command>
-
    <command name="show_hostmachinelist">
       %prog show hostmachinelist
       Shows a list of all hosts and the machine (aka node) they're associated with.

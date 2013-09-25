@@ -164,7 +164,6 @@ from test_constraints_dns import TestDnsConstraints
 from test_constraints_network import TestNetworkConstraints
 from test_show_hostiplist import TestShowHostIPList
 from test_show_hostmachinelist import TestShowHostMachineList
-from test_show_machinemaclist import TestShowMachineMacList
 from test_show_service_all import TestShowServiceAll
 from test_show_campus import TestShowCampus
 from test_show_fqdn import TestShowFqdn
@@ -358,7 +357,7 @@ class BrokerTestSuite(unittest.TestSuite):
                      TestClusterConstraints, TestMetaClusterConstraints,
                      TestLocationConstraints,
                      TestDnsConstraints,
-                     TestShowHostIPList, TestShowHostMachineList, TestShowMachineMacList,
+                     TestShowHostIPList, TestShowHostMachineList,
                      TestShowServiceAll, TestShowCampus, TestShowFqdn,
                      TestSearchRack,
                      TestShowSwitch, TestSearchSwitch,
