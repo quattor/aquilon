@@ -764,16 +764,6 @@
       <transport method="get" path="search/hostiplist" />
    </command>
 
-   <command name="show_hostmachinelist">
-      %prog show hostmachinelist
-      Shows a list of all hosts and the machine (aka node) they're associated with.
-      <optgroup name="show_hostmachinelist_options">
-         <option name="archetype" type="string">Archetype name</option>
-      </optgroup>
-      <transport trigger="archetype" method="get" path="archetype/%(archetype)s/hostmachinelist" />
-      <transport method="get" path="search/hostmachinelist" />
-   </command>
-
    <command name="add_cpu">
       Add a new CPU type to the database.
       <optgroup name="add_cpu_opts" mandatory="True" fields="all">

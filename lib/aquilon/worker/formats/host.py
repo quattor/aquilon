@@ -115,15 +115,3 @@ class HostIPListFormatter(ListFormatter):
         return hostips
 
 ObjectFormatter.handlers[HostIPList] = HostIPListFormatter()
-
-
-class HostMachineList(list):
-    """By convention, holds Host objects."""
-    pass
-
-
-class HostMachineListFormatter(ListFormatter):
-    def csv_fields(self, host):
-        return (host.fqdn, host.machine.label)
-
-ObjectFormatter.handlers[HostMachineList] = HostMachineListFormatter()
