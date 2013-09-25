@@ -798,14 +798,8 @@
       <optgroup name="add_disk_opts" mandatory="True" fields="all">
          <option name="machine" type="string">Machine name</option>
          <option name="disk" type="string">Disk/device name</option>
-         <optgroup name="controller_opts" fields="any">
-            <option name="controller" type="string" conflicts="type">Type of the controller/interface</option>
-            <option name="type" type="string" conflicts="controller">[Deprecated] Type of the controller/interface</option>
-         </optgroup>
-         <optgroup name="size_opts" fields="any">
-            <option name="size" type="int" conflicts="capacity">Capacity of the disk (GB)</option>
-            <option name="capacity" type="int" conflicts="size">[Deprecated] Capacity of the disk (GB)</option>
-         </optgroup>
+         <option name="controller" type="string" conflicts="type">Type of the controller/interface</option>
+         <option name="size" type="int" conflicts="capacity">Capacity of the disk (GB)</option>
       </optgroup>
       <optgroup name="nas_opts" fields="all">
          <optgroup name="share_opts" fields="any">
@@ -834,14 +828,8 @@
       </optgroup>
       <optgroup name="del_disk_optional_opts" mandatory="False">
          <option name="disk" type="string">device name of the disk (like sda)</option>
-         <optgroup name="controller_opts" fields="any">
-            <option name="controller" type="string" conflicts="type">type of the disk</option>
-            <option name="type" type="string" conflicts="controller">[Deprecated] type of the disk</option>
-         </optgroup>
-         <optgroup name="size_opts" fields="any">
-            <option name="size" type="int" conflicts="capacity">capacity of the disk (GB)</option>
-            <option name="capacity" type="int" conflicts="size">[Deprecated] capacity of the disk (GB)</option>
-         </optgroup>
+         <option name="controller" type="string" conflicts="type">type of the disk</option>
+         <option name="size" type="int" conflicts="capacity">capacity of the disk (GB)</option>
          <option name="all" type="flag">remove any matching disks</option>
       </optgroup>
       <transport trigger="disk" method="delete" path="machine/%(machine)s/disk/%(disk)s" />

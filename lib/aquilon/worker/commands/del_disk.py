@@ -29,17 +29,6 @@ class CommandDelDisk(BrokerCommand):
 
     def render(self, session, logger, machine, disk, controller, size, all,
                **arguments):
-
-        # Handle deprecated arguments
-        if arguments.get("type", None):
-            self.deprecated_option("type", "Please use --controller instead.",
-                                   logger=logger, **arguments)
-            controller = arguments["type"]
-        if arguments.get("capacity", None):
-            self.deprecated_option("capacity", "Please use --size instead.",
-                                   logger=logger, **arguments)
-            size = arguments["capacity"]
-
         dbmachine = Machine.get_unique(session, machine, compel=True)
         q = session.query(Disk).filter_by(machine=dbmachine)
         if disk:

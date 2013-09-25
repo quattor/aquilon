@@ -27,27 +27,12 @@ from aquilon.worker.templates import Plenary
 
 class CommandAddDisk(BrokerCommand):
     """Add a disk object (local or share) to a machine"""
-    # FIXME: add "controller" and "size" once the deprecated alternatives are
-    # removed
-    required_parameters = ["machine", "disk"]
+
+    required_parameters = ["machine", "disk", "size", "controller"]
 
     def render(self, session, logger, machine, disk, controller, share,
                filesystem, resourcegroup, address, comments, size, boot,
                snapshot, **kw):
-
-        # Handle deprecated arguments
-        if kw.get("type"):
-            self.deprecated_option("type", "Please use --controller instead.",
-                                   logger=logger, **kw)
-            controller = kw["type"]
-        if kw.get("capacity"):
-            self.deprecated_option("capacity", "Please use --size instead.",
-                                   logger=logger, **kw)
-            size = kw["capacity"]
-        if not size or not controller:
-            raise ArgumentError("Please specify both --size "
-                                "and --controller.")
-
         if controller not in controller_types:
             raise ArgumentError("%s is not a valid controller type, use one "
                                 "of: %s." % (controller,

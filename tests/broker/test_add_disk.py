@@ -33,13 +33,9 @@ class TestAddDisk(TestBrokerCommand):
                         "--size", "34", "--comments", "Disk comments"])
 
     def test_110_add_ut3c1n3_disk(self):
-        # Use the deprecated option names here
         command = ["add", "disk", "--machine", "ut3c1n3", "--disk", "c0d0",
-                   "--type", "cciss", "--capacity", "34"]
-        (out, err) = self.successtest(command)
-        self.assertEmptyOut(out, command)
-        self.matchoutput(err, "The --type option is deprecated.", command)
-        self.matchoutput(err, "The --capacity option is deprecated.", command)
+                   "--controller", "cciss", "--size", "34"]
+        self.noouttest(command)
 
     def test_200_bad_controller(self):
         command = ["add_disk", "--machine=ut3c5n10", "--disk=sdc",
