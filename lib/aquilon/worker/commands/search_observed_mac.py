@@ -32,11 +32,6 @@ class CommandSearchObservedMac(BrokerCommand):
         if switch:
             dbswitch = Switch.get_unique(session, switch, compel=True)
             q = q.filter_by(switch=dbswitch)
-        if arguments.get("port_number", None):
-            self.deprecated_option("port_number", "Please use --port instead.",
-                                   logger=logger, **arguments)
-            port = str(arguments["port_number"])
-
         if port is not None:
             q = q.filter_by(port=port)
         if mac:
