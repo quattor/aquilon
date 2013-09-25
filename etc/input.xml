@@ -2436,11 +2436,9 @@
       <optgroup name="show_chassis_opts" mandatory="True" fields="any">
          <option name="chassis" type="string" conflicts="all">Chassis name</option>
          <option name="all" type="flag" conflicts="chassis">Select all</option>
-         <option name="missing" type="flag" conflicts="chassis">Show blades that has no chassis</option>
       </optgroup>
       <transport trigger="all" method="get" path="chassis" />
       <transport trigger="chassis" method="get" path="chassis/%(chassis)s" />
-      <transport trigger="missing" method="get" path="find/missing_chassis" />
    </command>
 
    <command name="del_chassis">
