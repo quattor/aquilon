@@ -21,7 +21,8 @@ import logging
 
 from aquilon.aqdb.model import Machine
 from aquilon.worker.locks import CompileKey, NoLockKey
-from aquilon.worker.templates import Plenary, StructurePlenary
+from aquilon.worker.templates import (Plenary, StructurePlenary,
+                                      add_location_info)
 from aquilon.worker.templates.panutils import (StructureTemplate, pan_assign,
                                                pan_include, PanMetric)
 
@@ -42,33 +43,6 @@ class PlenaryMachineInfo(StructurePlenary):
         self.machine = dbmachine.label
 
         loc = dbmachine.location
-        self.hub = loc.hub.fullname.lower()
-        self.building = loc.building.name
-        self.city = loc.city.name
-        self.continent = loc.continent.name
-
-        if loc.rack:
-            self.rack = loc.rack.name
-            self.rackrow = loc.rack.rack_row
-            self.rackcol = loc.rack.rack_column
-        else:
-            self.rack = None
-
-        if loc.room:
-            self.room = loc.room.name
-        else:
-            self.room = None
-
-        if loc.bunker:
-            self.bunker = loc.bunker.name
-        else:
-            self.bunker = None
-
-        if loc.campus:
-            self.campus = loc.campus.name
-        else:
-            self.campus = None
-
         self.dns_search_domains = []
         parents = loc.parents[:]
         parents.append(loc)
@@ -79,8 +53,6 @@ class PlenaryMachineInfo(StructurePlenary):
                              for map in parent.dns_maps
                              if map.dns_domain.name not in self.dns_search_domains]
             self.dns_search_domains.extend(extra_domains)
-
-        self.sysloc = loc.sysloc()
 
     def get_key(self):
         host = self.dbobj.host
@@ -187,18 +159,8 @@ class PlenaryMachineInfo(StructurePlenary):
                     interfaces[interface.name] = StructureTemplate(path, ifinfo)
 
         # Firstly, location
-        pan_assign(lines, "location", self.sysloc)
-        pan_assign(lines, "sysloc/building", self.building)
-        pan_assign(lines, "sysloc/city", self.city)
-        pan_assign(lines, "sysloc/continent", self.continent)
-        if self.rack:
-            pan_assign(lines, "rack/name", self.rack)
-            if self.rackrow:
-                pan_assign(lines, "rack/row", self.rackrow)
-            if self.rackcol:
-                pan_assign(lines, "rack/column", self.rackcol)
-        if self.room:
-            pan_assign(lines, "rack/room", self.room)
+        add_location_info(lines, self.dbobj.location)
+        pan_assign(lines, "location", self.dbobj.location.sysloc())
 
         # And a chassis location?
         if self.dbobj.chassis_slot:
@@ -206,12 +168,6 @@ class PlenaryMachineInfo(StructurePlenary):
             pan_assign(lines, "chassis", slot.chassis.fqdn)
             pan_assign(lines, "slot", slot.slot_number)
 
-        #if self.hub:
-        #    pan_assign(lines, "sysloc/hub", self.hub)
-        if self.campus:
-            pan_assign(lines, "sysloc/campus", self.campus)
-        if self.bunker:
-            pan_assign(lines, "sysloc/bunker", self.bunker)
         if self.dns_search_domains:
             pan_assign(lines, "sysloc/dns_search_domains",
                        self.dns_search_domains)

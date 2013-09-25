@@ -595,3 +595,25 @@ class TemplateFormatter(ObjectFormatter):
                                                   'aquilon.worker.formats.formatters '
                                                   'import shift'],
                                          default_filters=['unicode', 'rstrip'])
+
+
+def add_location_info(lines, dblocation, prefix=""):
+    if dblocation.continent:
+        pan_assign(lines, prefix + "sysloc/continent", dblocation.continent.name)
+    if dblocation.city:
+        pan_assign(lines, prefix + "sysloc/city", dblocation.city.name)
+    if dblocation.building:
+        pan_assign(lines, prefix + "sysloc/building", dblocation.building.name)
+    # FIXME: add hub?
+    if dblocation.campus:
+        pan_assign(lines, prefix + "sysloc/campus", dblocation.campus.name)
+    if dblocation.bunker:
+        pan_assign(lines, prefix + "sysloc/bunker", dblocation.bunker.name)
+    if dblocation.rack:
+        pan_assign(lines, prefix + "rack/name", dblocation.rack.name)
+        if dblocation.rack_row:
+            pan_assign(lines, prefix + "rack/row", dblocation.rack_row)
+        if dblocation.rack_column:
+            pan_assign(lines, prefix + "rack/column", dblocation.rack_column)
+    if dblocation.room:
+        pan_assign(lines, prefix + "rack/room", dblocation.room.name)

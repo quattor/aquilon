@@ -23,7 +23,7 @@ from aquilon.aqdb.model import (Cluster, EsxCluster, ComputeCluster,
 from aquilon.worker.templates import (Plenary, ObjectPlenary, StructurePlenary,
                                       PlenaryCollection, PlenaryResource,
                                       PlenaryServiceInstanceClientDefault,
-                                      PlenaryPersonalityBase)
+                                      PlenaryPersonalityBase, add_location_info)
 from aquilon.worker.templates.panutils import (StructureTemplate, PanValue,
                                                pan_assign, pan_include,
                                                pan_append)
@@ -77,30 +77,12 @@ class PlenaryClusterData(StructurePlenary):
         pan_assign(lines, "system/cluster/type", self.dbobj.cluster_type)
 
         dbloc = self.dbobj.location_constraint
+        add_location_info(lines, dbloc, prefix="system/cluster/")
         pan_assign(lines, "system/cluster/sysloc/location", dbloc.sysloc())
-        if dbloc.continent:
-            pan_assign(lines, "system/cluster/sysloc/continent",
-                       dbloc.continent.name)
-        if dbloc.city:
-            pan_assign(lines, "system/cluster/sysloc/city", dbloc.city.name)
         if dbloc.campus:
-            pan_assign(lines, "system/cluster/sysloc/campus",
-                       dbloc.campus.name)
             ## maintaining this so templates dont break
             ## during transtion period.. should be DEPRECATED
             pan_assign(lines, "system/cluster/campus", dbloc.campus.name)
-        if dbloc.building:
-            pan_assign(lines, "system/cluster/sysloc/building",
-                       dbloc.building.name)
-        if dbloc.bunker:
-            pan_assign(lines, "system/cluster/sysloc/bunker", dbloc.bunker.name)
-        if dbloc.rack:
-            pan_assign(lines, "system/cluster/rack/row", dbloc.rack.rack_row)
-            pan_assign(lines, "system/cluster/rack/column",
-                       dbloc.rack.rack_column)
-            pan_assign(lines, "system/cluster/rack/name", dbloc.rack.name)
-        if dbloc.room:
-            pan_assign(lines, "system/cluster/rack/room", dbloc.room)
 
         pan_assign(lines, "system/cluster/down_hosts_threshold",
                    self.dbobj.dht_value)

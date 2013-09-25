@@ -16,7 +16,8 @@
 # limitations under the License.
 
 from aquilon.worker.templates.base import (Plenary, StructurePlenary,
-                                           ObjectPlenary, PlenaryCollection)
+                                           ObjectPlenary, PlenaryCollection,
+                                           add_location_info)
 from aquilon.worker.templates.city import PlenaryCity
 from aquilon.worker.templates.personality import (PlenaryPersonality,
                                                   PlenaryPersonalityBase)
