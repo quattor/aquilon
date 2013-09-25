@@ -755,15 +755,6 @@
       <transport method="post" path="command/refresh_windows_hosts" />
    </command>
 
-   <command name="show_hostiplist">
-      Shows a list of all hosts.  Can be narrowed by archetype.
-      <optgroup name="show_hostiplist_options">
-         <option name="archetype" type="string">Archetype name</option>
-      </optgroup>
-      <transport trigger="archetype" method="get" path="search/hostiplist/archetype/%(archetype)s" />
-      <transport method="get" path="search/hostiplist" />
-   </command>
-
    <command name="add_cpu">
       Add a new CPU type to the database.
       <optgroup name="add_cpu_opts" mandatory="True" fields="all">

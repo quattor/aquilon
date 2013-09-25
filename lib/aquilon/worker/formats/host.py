@@ -100,18 +100,3 @@ class GrnHostListFormatter(ListFormatter):
                     map.eonid = grn_rec.eon_id
 
 ObjectFormatter.handlers[GrnHostList] = GrnHostListFormatter()
-
-
-class HostIPList(list):
-    """ By convention, holds tuples of host_name, interface_ip, primary.
-        The third field is only used for auxiliary systems, and
-        supplies the primary host name.  This allows reverse lookups
-        to resolve back to the primary name."""
-    pass
-
-
-class HostIPListFormatter(ListFormatter):
-    def csv_fields(self, hostips):
-        return hostips
-
-ObjectFormatter.handlers[HostIPList] = HostIPListFormatter()
