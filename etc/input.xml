@@ -1148,11 +1148,9 @@
       <optgroup name="show_manager_opts" mandatory="True" fields="any">
          <option name="manager" type="string" conflicts="all missing">Manger name</option>
          <option name="all" type="flag" conflicts="manager missing">Select all managers</option>
-         <option name="missing" type="boolean" conflicts="manager all">Generate commands to create missing managers</option>
       </optgroup>
       <transport trigger="all" method="get" path="manager" />
       <transport trigger="manager" method="get" path="manager/%(manager)s" />
-      <transport trigger="missing" method="get" path="find/missing_managers" />
    </command>
 
    <command name="del_manager">

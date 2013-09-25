@@ -280,13 +280,6 @@ class TestAddInterface(TestBrokerCommand):
                           self.net["unknown0"].usable[4].mac.lower(),
                           command)
 
-    def testverifyshowmanagermissing(self):
-        command = "show manager --missing"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out,
-                         "# No host found for machine ut3c1n3 with management interface",
-                         command)
-
     def testverifycatut3c1n3interfaces(self):
         command = "cat --machine ut3c1n3"
         out = self.commandtest(command.split(" "))

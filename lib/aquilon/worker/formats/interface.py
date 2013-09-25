@@ -23,7 +23,6 @@ from aquilon.aqdb.model import (Interface, PublicInterface, ManagementInterface,
                                 BondingInterface, BridgeInterface,
                                 LoopbackInterface)
 from aquilon.worker.formats.formatters import ObjectFormatter
-from aquilon.worker.formats.list import ListFormatter
 from aquilon.worker.dbwrappers.feature import interface_features
 
 
@@ -122,31 +121,3 @@ ObjectFormatter.handlers[VlanInterface] = InterfaceFormatter()
 ObjectFormatter.handlers[BondingInterface] = InterfaceFormatter()
 ObjectFormatter.handlers[BridgeInterface] = InterfaceFormatter()
 ObjectFormatter.handlers[LoopbackInterface] = InterfaceFormatter()
-
-
-class MissingManagersList(list):
-    pass
-
-
-class MissingManagersFormatter(ListFormatter):
-    def format_raw(self, mmlist, indent=""):
-        commands = []
-        for interface in mmlist:
-            hwent = interface.hardware_entity
-            if hwent.fqdn:
-                # FIXME: Deal with multiple management interfaces?
-                commands.append("aq add manager --hostname '%s' --ip 'IP'" %
-                                hwent.fqdn)
-            else:
-                commands.append("# No host found for machine %s with management interface" %
-                                hwent.label)
-        return "\n".join(commands)
-
-    def csv_fields(self, interface):
-        fqdn = interface.hardware_entity.fqdn
-        if fqdn:
-            return (fqdn,)
-        else:
-            return None
-
-ObjectFormatter.handlers[MissingManagersList] = MissingManagersFormatter()
