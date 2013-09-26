@@ -45,7 +45,8 @@ class ResourceHolder(Base):
 
     # I don't like this as a string...
     holder_type = Column(AqStr(16), nullable=False)
-    __mapper_args__ = {'polymorphic_on': holder_type}
+    __mapper_args__ = {'polymorphic_on': holder_type,
+                       'with_polymorphic': '*'}
 
     @property
     def holder_name(self):  # pragma: no cover
