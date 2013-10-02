@@ -1,0 +1,136 @@
+<?xml version="1.0"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>org.quattor.aquilon</groupId>
+  <artifactId>aquilon-book</artifactId>
+  <version>0.1-SNAPSHOT</version>
+  <packaging>jar</packaging>
+  <name>aquilon-book</name>
+  <description>Aquilon</description>
+
+<!--
+  <parent>
+    <groupId>org.quattor.aquilon</groupId>
+    <artifactId>aquilon</artifactId>
+    <version>0.1-SNAPSHOT</version>
+  </parent>
+-->
+
+  <build>
+
+    <plugins>
+
+      <plugin>
+	<groupId>org.apache.maven.plugins</groupId>
+	<artifactId>maven-assembly-plugin</artifactId>
+	
+	<executions>
+	  <execution>
+	    <id>bundle</id>
+	    <goals>
+	      <goal>single</goal>
+	    </goals>
+	    <phase>package</phase>
+	    <configuration>
+	      <appendAssemblyId>false</appendAssemblyId>
+	      <descriptors>
+		<descriptor>src/main/assembly/bundle.xml</descriptor>
+	      </descriptors>
+	    </configuration>
+	  </execution>
+	</executions>
+      </plugin>
+      
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-resources-plugin</artifactId>
+        <executions>
+
+          <execution>
+            <phase>process-resources</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${basedir}/target/resources</outputDirectory>
+              <nonFilteredFileExtensions>
+                <nonFilteredFileExtension>pdf</nonFilteredFileExtension>
+              </nonFilteredFileExtensions>
+              <resources>
+                <resource>
+                  <directory>${basedir}/src/main/resources</directory>
+                  <filtering>true</filtering>
+                </resource>
+                <resource>
+                  <directory>${basedir}/src/main/markdown</directory>
+                  <filtering>false</filtering>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+
+          <execution>
+            <id>final-resources</id>
+            <phase>process-resources</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${basedir}/target/${project.version}/${project.artifactId}</outputDirectory>
+              <nonFilteredFileExtensions>
+                <nonFilteredFileExtension>pdf</nonFilteredFileExtension>
+              </nonFilteredFileExtensions>
+              <resources>
+                <resource>
+                  <directory>${basedir}/src/main/resources</directory>
+                  <filtering>true</filtering>
+                  <excludes>
+                    <exclude>title.txt</exclude>
+                  </excludes>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <executions>
+
+          <execution>
+            <id>all-docs</id>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+            <phase>compile</phase>
+            <configuration>
+              <workingDirectory>${basedir}/target/resources</workingDirectory>
+              <executable>${basedir}/src/main/scripts/process-docs.py</executable>
+              <arguments>
+                <argument>${basedir}/target/${project.version}/${project.artifactId}</argument>
+                <argument>${project.artifactId}</argument>
+              </arguments>
+            </configuration>
+          </execution>
+
+        </executions>
+
+      </plugin>
+
+    </plugins>
+
+  </build>
+
+  <licenses>
+    <license>
+      <name>The Apache Software License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+
+</project>

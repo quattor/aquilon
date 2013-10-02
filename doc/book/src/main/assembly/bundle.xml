@@ -1,0 +1,25 @@
+<assembly>
+  <id>bundle</id>
+  
+  <includeBaseDirectory>false</includeBaseDirectory>
+  
+  <formats>
+    <format>tar.gz</format>
+    <format>zip</format>
+  </formats>
+  
+  <fileSets>
+    
+    <fileSet>
+      <directory>${project.basedir}/target/${project.version}</directory>
+      <outputDirectory>${project.version}</outputDirectory>
+      <fileMode>0644</fileMode>
+      <directoryMode>0755</directoryMode>
+      <includes>
+        <include>**/*</include>
+      </includes>
+    </fileSet>
+    
+  </fileSets>
+  
+</assembly>

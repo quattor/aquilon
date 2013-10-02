@@ -1,0 +1,6 @@
+% ${project.description}
+% Quattor Collaboration
+% Version ${project.version}
+
+
+

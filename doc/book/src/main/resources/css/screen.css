@@ -1,0 +1,106 @@
+
+body {
+  font-family: serif;
+  color: black;
+  background-color: white;
+  max-width: 700px;
+}
+
+/* Title bar of the document. */
+
+header {
+  display: block;
+  padding-left: 200px;
+  background: #eee url(../images/quattor_logo.png) no-repeat 15px center;
+}
+
+header h1, header h2, header h3, header h4, header h5, header h6 {
+  font-family: Ariel, sans-serif;
+  font-style: italic;
+  font-weight: normal;
+}
+
+header h1 {
+  font-family: "Ariel Black", sans-serif;
+  font-style: normal;
+  font-weight: bold;
+}
+
+/* Table of contents. */
+
+nav {
+  font-family: sans-serif;
+  background-color: #eee;
+}
+
+nav a {
+  text-decoration: none;
+  color: inherit;
+}
+
+nav a:hover {
+  text-decoration: underline;
+}
+
+nav ul {
+  padding-left: 0;
+  margin-left: 0;
+  list-style-type:none;
+}
+
+nav li {
+  font-style: normal;
+  font-weight: normal;
+}
+
+nav > ul > li {
+  margin-top: 0.5em;
+  font-weight: bold;
+}
+
+nav ul {
+  padding-left: 0;
+  margin-left: 1em;
+  list-style-type: none;
+}
+
+nav > ul {
+  margin-left: 0em;
+}
+
+/* Section headers. */
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: sans-serif;
+  color: black;
+  display: block;
+  border-bottom: none;
+}
+
+h1 {
+  padding-top: 1em;
+  border-bottom: 2px solid black;
+}
+
+h1 > a, h2 > a, h3 > a, h4 > a, h5 > a, h6 > a {
+  text-decoration: none;
+  color: inherit;
+}
+
+h1 > a:hover, h2 > a:hover, h3 > a:hover, h4 > a:hover, h5 > a:hover, h6 > a:hover {
+  text-decoration: none;
+  color: inherit;
+}
+
+.header-section-number {
+  padding-right: 0.5em;
+}
+
+/* Program listings */
+
+pre {
+  background-color: #eee;
+  border: 1px solid #aaa;
+  padding: 0.25em 0.5em 0.25em 0.5em;
+}
+
