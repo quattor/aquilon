@@ -30,8 +30,8 @@ from aquilon.aqdb.model import (Service, Machine, Chassis, Host, Personality,
                                 HostResource, ClusterResource, VirtualMachine,
                                 Filesystem, RebootSchedule, Hostlink,
                                 ServiceAddress, Share, Disk, Interface,
-                                AddressAssignment, ServiceInstance, Switch,
-                                ParamDefHolder, Feature)
+                                AddressAssignment, ServiceInstance, 
+                                NetworkDevice, ParamDefHolder, Feature)
 from aquilon.aqdb.data_sync.storage import cache_storage_data
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.templates.base import Plenary
@@ -395,15 +395,15 @@ class CommandFlush(BrokerCommand):
 
             if switches:
                 logger.client_info("Flushing switches.")
-                q = session.query(Switch)
+                q = session.query(NetworkDevice)
                 q = q.options(subqueryload('observed_vlans'),
                               joinedload('observed_vlans.network'))
-                for dbswitch in q:
+                for dbnetdev in q:
                     try:
-                        plenary = Plenary.get_plenary(dbswitch, logger=logger)
+                        plenary = Plenary.get_plenary(dbnetdev, logger=logger)
                         written += plenary.write(locked=True)
                     except Exception, e:
-                        failed.append("{0} failed: {1}".format(dbswitch, e))
+                        failed.append("{0} failed: {1}".format(dbnetdev, e))
 
             # written + len(failed) isn't actually the total that should
             # have been done, but it's the easiest to implement for this

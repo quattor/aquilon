@@ -22,13 +22,14 @@ from aquilon.aqdb.model import ObservedMac
 
 def update_or_create_observed_mac(session, dbswitch, port, mac, now):
     dbobserved_mac = session.query(ObservedMac).filter_by(
-        switch=dbswitch, port=port, mac_address=mac).first()
+        network_device=dbswitch, port=port, mac_address=mac).first()
     if dbobserved_mac:
         dbobserved_mac.last_seen = now
         return dbobserved_mac
     # Set creation_date explicitely instead of relying on the default to ensure
     # creation_date == last_seen
-    dbobserved_mac = ObservedMac(switch=dbswitch, port=port, mac_address=mac,
-                                 creation_date=now, last_seen=now)
+    dbobserved_mac = ObservedMac(network_device=dbswitch, port=port,
+                                 mac_address=mac, creation_date=now,
+                                 last_seen=now)
     session.add(dbobserved_mac)
     return dbobserved_mac

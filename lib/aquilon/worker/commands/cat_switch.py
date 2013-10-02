@@ -16,7 +16,7 @@
 # limitations under the License.
 """Contains the logic for `aq cat --switch`."""
 
-from aquilon.aqdb.model import Switch
+from aquilon.aqdb.model import NetworkDevice
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.templates import Plenary
 
@@ -26,8 +26,8 @@ class CommandCatSwitch(BrokerCommand):
     required_parameters = ["switch"]
 
     def render(self, generate, session, logger, switch, **kwargs):
-        dbswitch = Switch.get_unique(session, switch, compel=True)
-        plenary_info = Plenary.get_plenary(dbswitch, logger=logger)
+        dbnetdev = NetworkDevice.get_unique(session, switch, compel=True)
+        plenary_info = Plenary.get_plenary(dbnetdev, logger=logger)
 
         if generate:
             return plenary_info._generate_content()

@@ -21,7 +21,7 @@ from aquilon.worker.templates.base import (Plenary, StructurePlenary,
 from aquilon.worker.templates.city import PlenaryCity
 from aquilon.worker.templates.personality import (PlenaryPersonality,
                                                   PlenaryPersonalityBase)
-from aquilon.worker.templates.switch import PlenarySwitch
+from aquilon.worker.templates.network_device import PlenaryNetworkDevice
 from aquilon.worker.templates.machine import PlenaryMachineInfo
 from aquilon.worker.templates.resource import PlenaryResource
 from aquilon.worker.templates.service import (PlenaryService,

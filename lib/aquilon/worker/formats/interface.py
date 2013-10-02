@@ -47,7 +47,7 @@ class InterfaceFormatter(ObjectFormatter):
             obs = interface.last_observation
             if obs:
                 details.append(indent + "  Last switch poll: %s port %s [%s]" %
-                               (obs.switch, obs.port, obs.last_seen))
+                               (obs.network_device, obs.port, obs.last_seen))
         else:
             details = [indent + "Interface: %s (no MAC addr)%s" %
                        (interface.name, flagstr)]

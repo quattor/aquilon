@@ -15,7 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from aquilon.aqdb.model import Cluster, Personality, Switch
+from aquilon.aqdb.model import Cluster, Personality, NetworkDevice
 from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.location import get_location
@@ -73,11 +73,11 @@ class CommandUpdateCluster(BrokerCommand):
         if switch is not None:
             if switch:
                 # FIXME: Verify that any hosts are on the same network
-                dbswitch = Switch.get_unique(session, switch, compel=True)
-                plenaries.append(Plenary.get_plenary(dbswitch))
+                dbnetdev = NetworkDevice.get_unique(session, switch, compel=True)
+                plenaries.append(Plenary.get_plenary(dbnetdev))
             else:
-                dbswitch = None
-            dbcluster.switch = dbswitch
+                dbnetdev = None
+            dbcluster.network_device = dbnetdev
             cluster_updated = True
 
         if memory_capacity is not None:

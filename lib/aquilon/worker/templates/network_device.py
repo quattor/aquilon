@@ -19,18 +19,18 @@ import logging
 
 from sqlalchemy.inspection import inspect
 
-from aquilon.aqdb.model import Switch
 from aquilon.worker.locks import NoLockKey, PlenaryKey
 from aquilon.worker.templates import Plenary, StructurePlenary
 from aquilon.worker.templates.panutils import pan
+from aquilon.aqdb.model import NetworkDevice
 
 
 LOGGER = logging.getLogger(__name__)
 
 
-class PlenarySwitch(StructurePlenary):
+class PlenaryNetworkDevice(StructurePlenary):
     """
-    A facade for the variety of PlenarySwitch subsidiary files
+    A facade for the variety of PlenaryNetworkDevice subsidiary files
     """
 
     @classmethod
@@ -43,7 +43,7 @@ class PlenarySwitch(StructurePlenary):
         else:
             # TODO: this should become a CompileKey if we start generating
             # profiles for switches (see also templates/cluster.py)
-            return PlenaryKey(switch=self.dbobj, logger=self.logger,
+            return PlenaryKey(network_device=self.dbobj, logger=self.logger,
                               exclusive=exclusive)
 
     def body(self, lines):
@@ -62,4 +62,4 @@ class PlenarySwitch(StructurePlenary):
 
         lines.append('"system/network/vlans" = %s;' % pan(vlans))
 
-Plenary.handlers[Switch] = PlenarySwitch
+Plenary.handlers[NetworkDevice] = PlenaryNetworkDevice

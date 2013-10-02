@@ -180,7 +180,7 @@ class HardwareEntity(Base):
                     # We know the primary name, do not load it again
                     set_committed_value(hwe, 'primary_name', dns_rec)
                 raise ArgumentError("{0} exists, but is not a {1}."
-                                    .format(hwe, hardware_type))
+                                    .format(hwe, clslabel.lower()))
             except NoResultFound:
                 hwe = None
 

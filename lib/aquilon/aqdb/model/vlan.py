@@ -25,7 +25,7 @@ from sqlalchemy.sql import func, and_
 
 from aquilon.exceptions_ import NotFoundException, InternalError
 from aquilon.aqdb.column_types import AqStr, Enum
-from aquilon.aqdb.model import Base, Network, Switch
+from aquilon.aqdb.model import Base, Network, NetworkDevice
 
 MAX_VLANS = 4096  # IEEE 802.1Q standard
 
@@ -79,10 +79,11 @@ class ObservedVlan(Base):
     """ reports the observance of a vlan/network on a switch """
     __tablename__ = 'observed_vlan'
 
-    switch_id = Column(Integer, ForeignKey('switch.hardware_entity_id',
-                                           ondelete='CASCADE',
-                                           name='%s_hw_fk' % _ABV),
-                       nullable=False)
+    network_device_id = Column(Integer, 
+                               ForeignKey('network_device.hardware_entity_id',
+                                          ondelete='CASCADE',
+                                          name='%s_hw_fk' % _ABV),
+                               nullable=False)
 
     network_id = Column(Integer, ForeignKey('network.id',
                                             ondelete='CASCADE',
@@ -96,9 +97,10 @@ class ObservedVlan(Base):
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
 
-    switch = relation(Switch, innerjoin=True,
-                      backref=backref('%ss' % _TN, cascade='delete',
-                                      passive_deletes=True, order_by=[vlan_id]))
+    network_device = relation(NetworkDevice, innerjoin=True,
+                              backref=backref('%ss' % _TN, cascade='delete',
+                                              passive_deletes=True, 
+                                              order_by=[vlan_id]))
     network = relation(Network, innerjoin=True,
                        backref=backref('%ss' % _TN, cascade='delete',
                                        passive_deletes=True,
@@ -109,7 +111,7 @@ class ObservedVlan(Base):
                     foreign_keys=[VlanInfo.vlan_id],
                     viewonly=True)
 
-    __table_args__ = (PrimaryKeyConstraint(switch_id, network_id, vlan_id,
+    __table_args__ = (PrimaryKeyConstraint(network_device_id, network_id, vlan_id,
                                            name="%s_pk" % _TN),
                       CheckConstraint(and_(vlan_id >= 0,
                                            vlan_id < MAX_VLANS),
@@ -138,7 +140,7 @@ class ObservedVlan(Base):
         q = session.query(func.count())
         q = q.filter(and_(
             # Select VMs on clusters that belong to the given switch
-            EsxCluster.switch_id == self.switch_id,
+            EsxCluster.network_device_id == self.network_device_id,
             Cluster.id == EsxCluster.esx_cluster_id,
             ClusterResource.cluster_id == Cluster.id,
             Resource.holder_id == ClusterResource.id,
@@ -152,13 +154,13 @@ class ObservedVlan(Base):
         return q.scalar()
 
     @classmethod
-    def get_network(cls, session, switch, vlan_id, compel=NotFoundException):
-        q = session.query(cls).filter_by(switch=switch, vlan_id=vlan_id)
+    def get_network(cls, session, network_device, vlan_id, compel=NotFoundException):
+        q = session.query(cls).filter_by(network_device=network_device, vlan_id=vlan_id)
         nets = q.all()
         if not nets:
             raise compel("No network found for switch %s and VLAN %s" %
-                         (switch.fqdn, vlan_id))
+                         (network_device.fqdn, vlan_id))
         if len(nets) > 1:
             raise InternalError("More than one network found for switch %s "
-                                "and VLAN %s" % (switch.fqdn, vlan_id))
+                                "and VLAN %s" % (network_device.fqdn, vlan_id))
         return nets[0].network

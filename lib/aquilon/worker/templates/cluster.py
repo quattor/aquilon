@@ -124,9 +124,9 @@ class PlenaryClusterData(StructurePlenary):
         lines.append("")
 
         lines.append("")
-        if isinstance(self.dbobj, EsxCluster) and self.dbobj.switch:
+        if isinstance(self.dbobj, EsxCluster) and self.dbobj.network_device:
             pan_assign(lines, "system/cluster/switch",
-                       self.dbobj.switch.primary_name)
+                       self.dbobj.network_device.primary_name)
 
 
 class PlenaryClusterObject(ObjectPlenary):
@@ -155,11 +155,11 @@ class PlenaryClusterObject(ObjectPlenary):
                 keylist.append(PlenaryKey(exclusive=False,
                                           cluster_member=self.dbobj.metacluster,
                                           logger=self.logger))
-            if isinstance(self.dbobj, EsxCluster) and self.dbobj.switch:
+            if isinstance(self.dbobj, EsxCluster) and self.dbobj.network_device:
                 # TODO: this should become a CompileKey if we start generating
                 # profiles for switches
                 keylist.append(PlenaryKey(exclusive=False,
-                                          switch=self.dbobj.switch,
+                                          network_device=self.dbobj.network_device,
                                           logger=self.logger))
         return CompileKey.merge(keylist)
 

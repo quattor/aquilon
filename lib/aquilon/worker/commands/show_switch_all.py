@@ -19,13 +19,13 @@
 from sqlalchemy.orm import joinedload, subqueryload, contains_eager, undefer
 
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.aqdb.model import Switch, DnsRecord, DnsDomain, Fqdn
+from aquilon.aqdb.model import NetworkDevice, DnsRecord, DnsDomain, Fqdn
 
 
 class CommandShowSwitchAll(BrokerCommand):
 
     def render(self, session, **arguments):
-        q = session.query(Switch)
+        q = session.query(NetworkDevice)
 
         q = q.options(subqueryload('location'),
                       subqueryload('interfaces'),
@@ -49,6 +49,6 @@ class CommandShowSwitchAll(BrokerCommand):
                       contains_eager('primary_name.fqdn'),
                       contains_eager('primary_name.fqdn.dns_domain'))
         q = q.reset_joinpoint()
-        q = q.order_by(Fqdn.name, DnsDomain.name, Switch.label)
+        q = q.order_by(Fqdn.name, DnsDomain.name, NetworkDevice.label)
 
         return q.all()

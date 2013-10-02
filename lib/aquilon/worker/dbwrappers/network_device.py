@@ -73,7 +73,7 @@ def determine_helper_args(config):
     return ssh_args
 
 
-def discover_switch(session, logger, config, dbswitch, dryrun):
+def discover_network_device(session, logger, config, dbswitch, dryrun):
     """
     Perform switch discovery
 

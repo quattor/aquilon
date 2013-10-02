@@ -31,7 +31,7 @@ from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.column_types import AqStr
 from aquilon.aqdb.model import (Base, Host, Location, Personality,
                                 ClusterLifecycle, ServiceInstance, Branch,
-                                Switch, UserPrincipal)
+                                NetworkDevice, UserPrincipal)
 
 # List of functions allowed to be used in vmhost_capacity_function
 restricted_builtins = {'None': None,
@@ -336,15 +336,15 @@ class EsxCluster(Cluster):
     # Memory capacity override
     memory_capacity = Column(Integer, nullable=True)
 
-    switch_id = Column(Integer,
-                       ForeignKey('switch.hardware_entity_id',
-                                  name='%s_switch_fk' % _ETN),
-                       nullable=True)
+    network_device_id = Column(Integer,
+                               ForeignKey('network_device.hardware_entity_id',
+                                          name='%s_network_device_fk' % _ETN),
+                               nullable=True)
 
-    switch = relation(Switch, lazy=False,
-                      backref=backref('esx_clusters'))
+    network_device = relation(NetworkDevice, lazy=False,
+                              backref=backref('esx_clusters'))
 
-    __table_args__ = (Index("%s_switch_idx" % _ETN, switch_id),)
+    __table_args__ = (Index("%s_network_device_idx" % _ETN, network_device_id),)
     __mapper_args__ = {'polymorphic_identity': 'esx'}
 
     @property

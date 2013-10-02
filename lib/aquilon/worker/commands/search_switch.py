@@ -18,7 +18,7 @@
 
 from sqlalchemy.orm import subqueryload, joinedload, contains_eager, undefer
 
-from aquilon.aqdb.model import Switch, DnsRecord, Fqdn, DnsDomain
+from aquilon.aqdb.model import NetworkDevice, DnsRecord, Fqdn, DnsDomain
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.hardware_entity import search_hardware_entity_query
 from aquilon.worker.formats.list import StringAttributeList
@@ -29,13 +29,13 @@ class CommandSearchSwitch(BrokerCommand):
     required_parameters = []
 
     def render(self, session, switch, type, vlan, fullinfo, **arguments):
-        q = search_hardware_entity_query(session, hardware_type=Switch,
+        q = search_hardware_entity_query(session, hardware_type=NetworkDevice,
                                          **arguments)
         if type:
             q = q.filter_by(switch_type=type)
         if switch:
-            dbswitch = Switch.get_unique(session, switch, compel=True)
-            q = q.filter_by(id=dbswitch.id)
+            dbnetdev = NetworkDevice.get_unique(session, switch, compel=True)
+            q = q.filter_by(id=dbnetdev.id)
 
         if vlan:
             q = q.join("observed_vlans", "vlan").filter_by(vlan_id=vlan)
@@ -48,7 +48,7 @@ class CommandSearchSwitch(BrokerCommand):
                       contains_eager('primary_name.fqdn'),
                       contains_eager('primary_name.fqdn.dns_domain'))
         q = q.reset_joinpoint()
-        q = q.order_by(Fqdn.name, DnsDomain.name, Switch.label)
+        q = q.order_by(Fqdn.name, DnsDomain.name, NetworkDevice.label)
 
         if fullinfo:
             q = q.options(joinedload('location'),

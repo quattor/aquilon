@@ -18,7 +18,7 @@
 
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import Switch, Model
+from aquilon.aqdb.model import NetworkDevice, Model
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.dns import grab_address
@@ -47,7 +47,7 @@ class CommandAddSwitch(BrokerCommand):
         if not label:
             label = dbdns_rec.fqdn.name
             try:
-                Switch.check_label(label)
+                NetworkDevice.check_label(label)
             except ArgumentError:
                 raise ArgumentError("Could not deduce a valid hardware label "
                                     "from the switch name.  Please specify "
@@ -55,10 +55,11 @@ class CommandAddSwitch(BrokerCommand):
 
         # FIXME: What do the error messages for an invalid enum (switch_type)
         # look like?
-        dbswitch = Switch(label=label, switch_type=type, location=dblocation,
-                          model=dbmodel, serial_no=serial, comments=comments)
-        session.add(dbswitch)
-        dbswitch.primary_name = dbdns_rec
+        dbnetdev = NetworkDevice(label=label, switch_type=type, 
+                                 location=dblocation, model=dbmodel, 
+                                 serial_no=serial, comments=comments)
+        session.add(dbnetdev)
+        dbnetdev.primary_name = dbdns_rec
 
         # FIXME: get default name from the model
         iftype = "oa"
@@ -70,7 +71,7 @@ class CommandAddSwitch(BrokerCommand):
             if interface.lower().startswith("lo"):
                 iftype = "loopback"
 
-        dbinterface = get_or_create_interface(session, dbswitch,
+        dbinterface = get_or_create_interface(session, dbnetdev,
                                               name=interface, mac=mac,
                                               interface_type=iftype,
                                               comments=ifcomments)
@@ -80,13 +81,13 @@ class CommandAddSwitch(BrokerCommand):
 
         session.flush()
 
-        plenary = Plenary.get_plenary(dbswitch, logger=logger)
+        plenary = Plenary.get_plenary(dbnetdev, logger=logger)
         with plenary.get_key():
             plenary.stash()
             try:
                 plenary.write(locked=True)
                 dsdb_runner = DSDBRunner(logger=logger)
-                dsdb_runner.update_host(dbswitch, None)
+                dsdb_runner.update_host(dbnetdev, None)
                 dsdb_runner.commit_or_rollback("Could not add switch to DSDB")
             except:
                 plenary.restore_stash()

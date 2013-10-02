@@ -1,4 +1,4 @@
-# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# -*- cpyi-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
 # Copyright (C) 2008,2009,2010,2011,2012,2013  Contributor
@@ -111,14 +111,14 @@ def generate_ip(session, logger, dbinterface, ip=None, ipfromip=None,
                 raise ArgumentError("Can only automatically assign an IP "
                                     "address to an interface with a port "
                                     "group on virtual machines or ESX hosts.")
-            if not dbcluster.switch:
+            if not dbcluster.network_device:
                 raise ArgumentError("Cannot automatically assign an IP "
                                     "address to an interface with a port group "
                                     "since {0} is not associated with a "
                                     "switch.".format(dbcluster))
             vlan_id = VlanInfo.get_vlan_id(session, dbinterface.port_group)
             dbnetwork = ObservedVlan.get_network(session, vlan_id=vlan_id,
-                                                 switch=dbcluster.switch,
+                                                 network_device=dbcluster.network_device,
                                                  compel=ArgumentError)
         elif dbinterface.mac:
             q = session.query(ObservedMac)
@@ -128,11 +128,12 @@ def generate_ip(session, logger, dbinterface, ip=None, ipfromip=None,
             if not dbom:
                 raise ArgumentError("No switch found in the discovery table "
                                     "for MAC address %s." % dbinterface.mac)
-            if not dbom.switch.primary_ip:
+            if not dbom.network_device.primary_ip:
                 raise ArgumentError("{0} does not have a primary IP address "
                                     "to use for network "
-                                    "selection.".format(dbom.switch))
-            dbnetwork = get_net_id_from_ip(session, dbom.switch.primary_ip)
+                                    "selection.".format(dbom.network_device))
+            dbnetwork = get_net_id_from_ip(session,
+                                           dbom.network_device.primary_ip)
         else:
             raise ArgumentError("{0} has neither a MAC address nor port group "
                                 "information, it is not possible to generate "
@@ -247,34 +248,34 @@ def verify_port_group(dbmachine, port_group):
     session = object_session(dbmachine)
     dbvi = VlanInfo.get_unique(session, port_group=port_group, compel=True)
     if dbmachine.model.machine_type == "virtual_machine":
-        dbswitch = dbmachine.cluster.switch
-        if not dbswitch:
+        dbnetdev = dbmachine.cluster.network_device
+        if not dbnetdev:
             raise ArgumentError("Cannot verify port group availability: no "
                                 "switch record for {0}.".format(dbmachine.cluster))
         q = session.query(ObservedVlan)
         q = q.filter_by(vlan_id=dbvi.vlan_id)
-        q = q.filter_by(switch=dbswitch)
+        q = q.filter_by(network_device=dbnetdev)
         try:
             dbobserved_vlan = q.one()
         except NoResultFound:
             raise ArgumentError("Cannot verify port group availability: "
                                 "no record for VLAN {0} on "
-                                "{1:l}.".format(dbvi.vlan_id, dbswitch))
+                                "{1:l}.".format(dbvi.vlan_id, dbnetdev))
         except MultipleResultsFound:  # pragma: no cover
             raise InternalError("Too many subnets found for VLAN {0} "
-                                "on {1:l}.".format(dbvi.vlan_id, dbswitch))
+                                "on {1:l}.".format(dbvi.vlan_id, dbnetdev))
         if dbobserved_vlan.network.is_at_guest_capacity:
             raise ArgumentError("Port group {0} is full for "
                                 "{1:l}.".format(dbvi.port_group,
-                                                dbobserved_vlan.switch))
+                                                dbobserved_vlan.network_device))
     elif dbmachine.host and dbmachine.host.cluster and \
-         dbmachine.host.cluster.switch:
-        dbswitch = dbmachine.host.cluster.switch
+         dbmachine.host.cluster.network_device:
+        dbnetdev = dbmachine.host.cluster.network_device
         q = session.query(ObservedVlan)
-        q = q.filter_by(vlan_id=dbvi.vlan_id, switch=dbswitch)
+        q = q.filter_by(vlan_id=dbvi.vlan_id, network_device=dbnetdev)
         if not q.count():
             raise ArgumentError("VLAN {0} not found for "
-                                "{1:l}.".format(dbvi.vlan_id, dbswitch))
+                                "{1:l}.".format(dbvi.vlan_id, dbnetdev))
     return dbvi.port_group
 
 
@@ -282,19 +283,19 @@ def choose_port_group(session, logger, dbmachine):
     if dbmachine.model.machine_type != "virtual_machine":
         raise ArgumentError("Can only automatically generate "
                             "portgroup entry for virtual hardware.")
-    if not dbmachine.cluster.switch:
+    if not dbmachine.cluster.network_device:
         raise ArgumentError("Cannot automatically allocate port group: no "
                             "switch record for {0}.".format(dbmachine.cluster))
 
     selected_vlan = None
 
-    sw = dbmachine.cluster.switch
+    dbnetdev = dbmachine.cluster.network_device
 
     # filter for user vlans only
     networks = session.query(Network).\
         join("observed_vlans", "vlan").\
         filter(VlanInfo.vlan_type == "user").\
-        filter(ObservedVlan.switch == sw).\
+        filter(ObservedVlan.network_device == dbnetdev).\
         order_by(VlanInfo.vlan_id).all()
 
     # then filter by capacity
@@ -308,10 +309,10 @@ def choose_port_group(session, logger, dbmachine):
 
     if selected_vlan:
         logger.info("Selected port group {0} for {1:l} (based on {2:l})"
-                    .format(selected_vlan.port_group, dbmachine, sw))
+                    .format(selected_vlan.port_group, dbmachine, dbnetdev))
         return selected_vlan.port_group
     raise ArgumentError("No available user port groups on "
-                        "{0:l}.".format(dbmachine.cluster.switch))
+                        "{0:l}.".format(dbmachine.cluster.network_device))
 
 
 def _type_msg(interface_type, bootable):

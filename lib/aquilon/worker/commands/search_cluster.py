@@ -23,10 +23,10 @@ from aquilon.exceptions_ import NotFoundException
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.formats.list import StringAttributeList
 from aquilon.aqdb.model import (Cluster, EsxCluster, MetaCluster, Archetype,
-                                Personality, Machine, Switch, ClusterLifecycle,
-                                Service, ServiceInstance, Share,
-                                ClusterResource, VirtualMachine, BundleResource,
-                                ResourceGroup)
+                                Personality, Machine, NetworkDevice, 
+                                ClusterLifecycle,Service, ServiceInstance, 
+                                Share, ClusterResource, VirtualMachine, 
+                                BundleResource, ResourceGroup)
 from aquilon.worker.dbwrappers.host import hostname_to_host
 from aquilon.worker.dbwrappers.branch import get_branch_and_author
 from aquilon.worker.dbwrappers.location import get_location
@@ -156,8 +156,8 @@ class CommandSearchCluster(BrokerCommand):
         if capacity_override:
             q = q.filter(EsxCluster.memory_capacity != None)
         if esx_switch:
-            dbswitch = Switch.get_unique(session, esx_switch, compel=True)
-            q = q.filter_by(switch=dbswitch)
+            dbnetdev = NetworkDevice.get_unique(session, esx_switch, compel=True)
+            q = q.filter_by(network_device=dbnetdev)
 
         if service:
             dbservice = Service.get_unique(session, name=service, compel=True)

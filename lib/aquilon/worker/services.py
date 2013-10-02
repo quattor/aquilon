@@ -25,7 +25,7 @@ from sqlalchemy.sql import or_
 
 from aquilon.exceptions_ import ArgumentError, InternalError
 from aquilon.aqdb.model import (Host, Cluster, Service, ServiceInstance,
-                                MetaCluster, Archetype, Personality)
+                                MetaCluster, EsxCluster, Archetype, Personality)
 from aquilon.worker.templates import (Plenary, PlenaryCollection,
                                       PlenaryServiceInstanceServer)
 
@@ -463,7 +463,7 @@ class HostChooser(Chooser):
             self.network = None
 
         # all of them would be self. but that should be optimized
-        # dbhost.machine.interfaces[x].assignments[y].network
+        # dbhost.hardware_entity.interfaces[x].assignments[y].network
 
         """Stores interim service instance lists."""
         q = self.session.query(Service)
@@ -645,8 +645,8 @@ class ClusterChooser(Chooser):
                 for dbres in cluster.resholder.resources:
                     self.plenaries.append(Plenary.get_plenary(dbres))
 
-            if hasattr(cluster, 'switch') and cluster.switch:
-                self.plenaries.append(Plenary.get_plenary(cluster.switch))
+            if isinstance(cluster, EsxCluster) and cluster.network_device:
+                self.plenaries.append(Plenary.get_plenary(cluster.network_device))
 
         add_cluster_dependencies(self.dbobj)
 
