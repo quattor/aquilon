@@ -58,22 +58,13 @@ class PlenaryClusterData(StructurePlenary):
     def template_name(cls, dbcluster):
         return "clusterdata/" + dbcluster.name
 
-    def __init__(self, dbcluster, logger=LOGGER):
-        super(PlenaryClusterData, self).__init__(dbcluster, logger=logger)
-
-        self.name = dbcluster.name
-        if dbcluster.metacluster:
-            self.metacluster = dbcluster.metacluster.name
-        else:
-            self.metacluster = None
-
     def get_key(self):
         return CompileKey(domain=self.dbobj.branch.name,
                           profile=self.template_name(self.dbobj),
                           logger=self.logger)
 
     def body(self, lines):
-        pan_assign(lines, "system/cluster/name", self.name)
+        pan_assign(lines, "system/cluster/name", self.dbobj.name)
         pan_assign(lines, "system/cluster/type", self.dbobj.cluster_type)
 
         dbloc = self.dbobj.location_constraint
@@ -126,8 +117,9 @@ class PlenaryClusterData(StructurePlenary):
             getattr(self, fname)(lines)
 
     def body_esx(self, lines):
-        if self.metacluster:
-            pan_assign(lines, "system/metacluster/name", self.metacluster)
+        if self.dbobj.metacluster:
+            pan_assign(lines, "system/metacluster/name",
+                       self.dbobj.metacluster.name)
         pan_assign(lines, "system/cluster/ratio", [self.dbobj.vm_count,
                                                    self.dbobj.host_count])
         pan_assign(lines, "system/cluster/max_hosts",

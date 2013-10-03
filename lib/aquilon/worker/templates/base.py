@@ -16,7 +16,6 @@
 # limitations under the License.
 """Any work by the broker to write out (or read in?) templates lives here."""
 
-
 import os
 import logging
 
@@ -34,12 +33,8 @@ from aquilon.utils import write_file, read_file, remove_file
 
 LOGGER = logging.getLogger(__name__)
 
-_config = Config()
-TEMPLATE_EXTENSION = _config.get("panc", "template_extension")
-
 
 class Plenary(object):
-
     template_type = ""
     """ Specifies the PAN template type to generate """
 
@@ -49,13 +44,16 @@ class Plenary(object):
         subclass.
 
     """
+
+    config = Config()
+    TEMPLATE_EXTENSION = config.get("panc", "template_extension")
+
     def __init__(self, dbobj, logger=LOGGER):
         super(Plenary, self).__init__()
 
         if not dbobj:
             raise ValueError("A plenary instance must be bound to a DB object.")
 
-        self.config = Config()
         self.dbobj = dbobj
         self.logger = logger
 
@@ -103,7 +101,7 @@ class Plenary(object):
     @classmethod
     def base_dir(cls, dbobj):  # pylint: disable=W0613
         """ Base directory of the plenary template """
-        return _config.get("broker", "plenarydir")
+        return cls.config.get("broker", "plenarydir")
 
     @classmethod
     def full_path(cls, dbobj):
@@ -111,10 +109,10 @@ class Plenary(object):
         loadpath = cls.loadpath(dbobj)
         if loadpath:
             return "%s/%s/%s%s" % (cls.base_dir(dbobj), loadpath,
-                                   cls.template_name(dbobj), TEMPLATE_EXTENSION)
+                                   cls.template_name(dbobj), cls.TEMPLATE_EXTENSION)
         else:
             return "%s/%s%s" % (cls.base_dir(dbobj), cls.template_name(dbobj),
-                                TEMPLATE_EXTENSION)
+                                cls.TEMPLATE_EXTENSION)
 
     def body(self, lines):
         """
@@ -345,7 +343,7 @@ class ObjectPlenary(Plenary):
 
     @classmethod
     def base_dir(cls, dbobj):
-        return os.path.join(_config.get("broker", "builddir"),
+        return os.path.join(cls.config.get("broker", "builddir"),
                             "domains", dbobj.branch.name, "profiles")
 
     @classmethod
@@ -353,7 +351,7 @@ class ObjectPlenary(Plenary):
         # loadpath is interpreted differently for object templates, it's not
         # parth of the full path
         return "%s/%s%s" % (cls.base_dir(dbobj), cls.template_name(dbobj),
-                            TEMPLATE_EXTENSION)
+                            cls.TEMPLATE_EXTENSION)
 
     def _generate_content(self):
         lines = []
@@ -418,7 +416,7 @@ class ObjectPlenary(Plenary):
                 remove_file(os.path.join(self.config.get("broker",
                                                          "quattordir"),
                                          "objects",
-                                         self.old_name + TEMPLATE_EXTENSION),
+                                         self.old_name + self.TEMPLATE_EXTENSION),
                             logger=self.logger)
         except:
             if not locked:

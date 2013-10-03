@@ -37,23 +37,6 @@ class PlenaryMachineInfo(StructurePlenary):
         return "machine/%s/%s/%s/%s" % (loc.hub.fullname.lower(), loc.building,
                                         loc.rack, dbmachine.label)
 
-    def __init__(self, dbmachine, logger=LOGGER):
-        super(PlenaryMachineInfo, self).__init__(dbmachine, logger=logger)
-
-        self.machine = dbmachine.label
-
-        loc = dbmachine.location
-        self.dns_search_domains = []
-        parents = loc.parents[:]
-        parents.append(loc)
-        parents.reverse()
-        for parent in parents:
-            # Filter out duplicates
-            extra_domains = [map.dns_domain.name
-                             for map in parent.dns_maps
-                             if map.dns_domain.name not in self.dns_search_domains]
-            self.dns_search_domains.extend(extra_domains)
-
     def get_key(self):
         host = self.dbobj.host
         container = self.dbobj.vm_container
@@ -107,7 +90,7 @@ class PlenaryMachineInfo(StructurePlenary):
             elif disk.disk_type == 'virtual_disk':
                 share = disk.share
 
-                params["path"] = "%s/%s.vmdk" % (self.machine, disk.device_name)
+                params["path"] = "%s/%s.vmdk" % (self.dbobj.label, disk.device_name)
                 params["address"] = disk.address
                 params["sharename"] = share.name
                 params["server"] = share.server
@@ -118,7 +101,7 @@ class PlenaryMachineInfo(StructurePlenary):
             elif disk.disk_type == 'virtual_localdisk':
                 filesystem = disk.filesystem
 
-                params["path"] = "%s/%s.vmdk" % (self.machine, disk.device_name)
+                params["path"] = "%s/%s.vmdk" % (self.dbobj.label, disk.device_name)
                 params["address"] = disk.address
                 params["filesystemname"] = filesystem.name
                 params["mountpoint"] = filesystem.mountpoint
@@ -168,15 +151,25 @@ class PlenaryMachineInfo(StructurePlenary):
             pan_assign(lines, "chassis", slot.chassis.fqdn)
             pan_assign(lines, "slot", slot.slot_number)
 
-        if self.dns_search_domains:
-            pan_assign(lines, "sysloc/dns_search_domains",
-                       self.dns_search_domains)
+        dns_search_domains = []
+        parents = self.dbobj.location.parents[:]
+        parents.append(self.dbobj.location)
+        parents.reverse()
+        for parent in parents:
+            # Filter out duplicates
+            extra_domains = [map.dns_domain.name
+                             for map in parent.dns_maps
+                             if map.dns_domain.name not in dns_search_domains]
+            dns_search_domains.extend(extra_domains)
+
+        if dns_search_domains:
+            pan_assign(lines, "sysloc/dns_search_domains", dns_search_domains)
 
         # Now describe the hardware
         lines.append("")
         if self.dbobj.serial_no:
             pan_assign(lines, "serialnumber", self.dbobj.serial_no)
-        pan_assign(lines, "nodename", self.machine)
+        pan_assign(lines, "nodename", self.dbobj.label)
         pan_include(lines, "hardware/machine/%s/%s" %
                     (self.dbobj.model.vendor.name, self.dbobj.model.name))
 

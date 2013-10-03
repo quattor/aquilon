@@ -16,10 +16,8 @@
 # limitations under the License.
 """Any work by the broker to write out (or read in?) templates lives here."""
 
-
 import logging
 from operator import attrgetter
-from collections import defaultdict
 
 from aquilon.config import Config
 from aquilon.exceptions_ import IncompleteError, InternalError
@@ -97,10 +95,10 @@ class PlenaryHost(PlenaryCollection):
             raise InternalError("PlenaryHost called with %s instead of Host" %
                                 dbhost.__class__.name)
         self.dbobj = dbhost
-        self.config = Config()
-        if self.config.getboolean("broker", "namespaced_host_profiles"):
+        config = Config()
+        if config.getboolean("broker", "namespaced_host_profiles"):
             self.plenaries.append(PlenaryNamespacedHost(dbhost))
-        if self.config.getboolean("broker", "flat_host_profiles"):
+        if config.getboolean("broker", "flat_host_profiles"):
             self.plenaries.append(PlenaryToplevelHost(dbhost))
         self.plenaries.append(PlenaryHostData(dbhost))
 
@@ -146,8 +144,6 @@ class PlenaryHostData(StructurePlenary):
         interfaces = dict()
         routers = {}
         default_gateway = None
-
-        pers = self.dbobj.personality
 
         # FIXME: Enforce that one of the interfaces is marked boot?
         for dbinterface in self.dbobj.machine.interfaces:
@@ -377,7 +373,7 @@ class PlenaryToplevelHost(ObjectPlenary):
         pan_include(lines, services)
         pan_include(lines, provides)
 
-        path = PlenaryPersonalityBase.template_name(self.dbobj.personality)
+        path = PlenaryPersonalityBase.template_name(pers)
         pan_include(lines, path)
 
         if self.dbobj.cluster:

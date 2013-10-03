@@ -20,7 +20,6 @@ from collections import defaultdict
 
 from sqlalchemy.orm import object_session
 
-from aquilon.config import Config
 from aquilon.aqdb.model import Personality, Parameter
 from aquilon.worker.templates.base import (Plenary, StructurePlenary,
                                            TemplateFormatter, PlenaryCollection)
@@ -31,8 +30,6 @@ from aquilon.worker.dbwrappers.parameter import (validate_value,
                                                  get_parameters)
 
 LOGGER = logging.getLogger(__name__)
-
-_config = Config()
 
 
 def string_to_list(data):

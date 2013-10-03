@@ -35,11 +35,6 @@ class PlenarySwitch(StructurePlenary):
     def template_name(cls, dbhost):
         return "switchdata/" + str(dbhost.fqdn)
 
-    def __init__(self, dbswitch, logger=LOGGER):
-        super(PlenarySwitch, self).__init__(dbswitch, logger=logger)
-
-        self.name = str(dbswitch.primary_name)
-
     def body(self, lines):
 
         vlans = {}
