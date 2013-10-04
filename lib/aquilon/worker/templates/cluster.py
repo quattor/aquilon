@@ -69,10 +69,6 @@ class PlenaryClusterData(StructurePlenary):
         dbloc = self.dbobj.location_constraint
         add_location_info(lines, dbloc, prefix="system/cluster/")
         pan_assign(lines, "system/cluster/sysloc/location", dbloc.sysloc())
-        if dbloc.campus:
-            ## maintaining this so templates dont break
-            ## during transtion period.. should be DEPRECATED
-            pan_assign(lines, "system/cluster/campus", dbloc.campus.name)
 
         pan_assign(lines, "system/cluster/down_hosts_threshold",
                    self.dbobj.dht_value)

@@ -61,10 +61,6 @@ class PlenaryMetaClusterData(StructurePlenary):
         dbloc = self.dbobj.location_constraint
         add_location_info(lines, dbloc, prefix="system/metacluster/")
         pan_assign(lines, "system/metacluster/sysloc/location", dbloc.sysloc())
-        if dbloc.campus:
-            ## maintaining this so templates dont break
-            ## during transtion period.. should be DEPRECATED
-            pan_assign(lines, "system/metacluster/campus", dbloc.campus.name)
 
         lines.append("")
 
