@@ -221,13 +221,10 @@ class Plenary(object):
                 return 0
 
             path = self.full_path(self.dbobj)
-            dirname = os.path.dirname(path)
-            if not os.path.exists(dirname):
-                os.makedirs(dirname)
 
             self.logger.debug("Writing %r [%s]" % (self, path))
 
-            write_file(path, content, logger=self.logger)
+            write_file(path, content, create_directory=True, logger=self.logger)
             self.removed = False
             if self.old_content != content:
                 self.changed = True
@@ -257,12 +254,8 @@ class Plenary(object):
             self.stash()
 
             self.logger.debug("Removing %r [%s]" % (self, self.old_path))
-            remove_file(self.old_path, logger=self.logger)
-            try:
-                os.removedirs(os.path.dirname(self.old_path))
-            except OSError:
-                pass
-
+            remove_file(self.old_path, cleanup_directory=True,
+                        logger=self.logger)
             self.removed = True
         # Most of the error handling routines would restore_stash...
         # but there's no need here if the remove failed. :)
@@ -300,17 +293,12 @@ class Plenary(object):
         # if not self.changed and not self.removed:
         #    return
         self.logger.debug("Restoring %r [%s]" % (self, self.old_path))
-        dirname = os.path.dirname(self.old_path)
         if self.old_content is None:
-            remove_file(self.old_path, logger=self.logger)
-            try:
-                os.removedirs(dirname)
-            except OSError:
-                pass
+            remove_file(self.old_path, cleanup_directory=True,
+                        logger=self.logger)
         else:
-            if not os.path.exists(dirname):
-                os.makedirs(dirname)
-            write_file(self.old_path, self.old_content, logger=self.logger)
+            write_file(self.old_path, self.old_content, create_directory=True,
+                       logger=self.logger)
             atime = os.stat(self.old_path).st_atime
             os.utime(self.old_path, (atime, self.old_mtime))
 
