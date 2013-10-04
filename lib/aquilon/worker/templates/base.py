@@ -18,6 +18,8 @@
 
 import os
 import logging
+import threading
+import weakref
 
 from mako.lookup import TemplateLookup
 
@@ -32,6 +34,11 @@ from aquilon.worker.formats.formatters import ObjectFormatter
 from aquilon.utils import write_file, read_file, remove_file
 
 LOGGER = logging.getLogger(__name__)
+
+# Maintain a cache of plenaries, to avoid creating multiple plenary objects
+# referencing the same file. The cache is per-thread, to avoid mixing objects
+# from different sessions.
+_mylocal = threading.local()
 
 
 class Plenary(object):
@@ -337,7 +344,16 @@ class Plenary(object):
         else:
             handler = cls
 
-        return handler(dbobj, logger=logger)
+        if not hasattr(_mylocal, "plenaries"):
+            _mylocal.plenaries = weakref.WeakValueDictionary()
+
+        key = (handler, dbobj)
+        try:
+            return _mylocal.plenaries[key]
+        except KeyError:
+            plenary = handler(dbobj, logger=logger)
+            _mylocal.plenaries[key] = plenary
+            return plenary
 
     def set_logger(self, logger):
         self.logger = logger
