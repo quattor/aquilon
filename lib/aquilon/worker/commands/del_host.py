@@ -60,7 +60,7 @@ class CommandDelHost(BrokerCommand):
         ip = dbmachine.primary_ip
 
         for si in dbhost.services_used:
-            plenaries.append(PlenaryServiceInstanceServer(si))
+            plenaries.append(PlenaryServiceInstanceServer.get_plenary(si))
             logger.info("Before deleting {0:l}, removing binding to {1:l}"
                         .format(dbhost, si))
 
@@ -93,7 +93,7 @@ class CommandDelHost(BrokerCommand):
             plenaries.append(Plenary.get_plenary(dbmachine.vm_container))
 
         with CompileKey.merge([plenaries.get_write_key(),
-                               remove_plenaries.get_remove_key()]) as key:
+                               remove_plenaries.get_remove_key()]):
             plenaries.stash()
             remove_plenaries.stash()
 

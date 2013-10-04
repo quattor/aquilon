@@ -420,7 +420,8 @@ class Chooser(object):
 
     def stash_services(self):
         for instance in self.instances_bound.union(self.instances_unbound):
-            plenary = PlenaryServiceInstanceServer(instance, logger=self.logger)
+            plenary = PlenaryServiceInstanceServer.get_plenary(instance,
+                                                               logger=self.logger)
             plenary.stash()
             self.plenaries.append(plenary)
 

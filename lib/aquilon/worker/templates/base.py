@@ -302,12 +302,17 @@ class Plenary(object):
             atime = os.stat(self.old_path).st_atime
             os.utime(self.old_path, (atime, self.old_mtime))
 
-    @staticmethod
-    def get_plenary(dbobj, logger=LOGGER):
-        if dbobj.__class__ not in Plenary.handlers:
-            raise InternalError("Class %s does not have a plenary handler" %
-                                dbobj.__class__.__name__)
-        return Plenary.handlers[dbobj.__class__](dbobj, logger=logger)
+    @classmethod
+    def get_plenary(cls, dbobj, logger=LOGGER):
+        if cls == Plenary:
+            if dbobj.__class__ not in Plenary.handlers:
+                raise InternalError("Class %s does not have a plenary handler" %
+                                    dbobj.__class__.__name__)
+            handler = Plenary.handlers[dbobj.__class__]
+        else:
+            handler = cls
+
+        return handler(dbobj, logger=logger)
 
     def set_logger(self, logger):
         self.logger = logger

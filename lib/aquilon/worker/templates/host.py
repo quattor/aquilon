@@ -97,10 +97,10 @@ class PlenaryHost(PlenaryCollection):
         self.dbobj = dbhost
         config = Config()
         if config.getboolean("broker", "namespaced_host_profiles"):
-            self.plenaries.append(PlenaryNamespacedHost(dbhost))
+            self.plenaries.append(PlenaryNamespacedHost.get_plenary(dbhost))
         if config.getboolean("broker", "flat_host_profiles"):
-            self.plenaries.append(PlenaryToplevelHost(dbhost))
-        self.plenaries.append(PlenaryHostData(dbhost))
+            self.plenaries.append(PlenaryToplevelHost.get_plenary(dbhost))
+        self.plenaries.append(PlenaryHostData.get_plenary(dbhost))
 
     def write(self, locked=False):
         # Don't bother writing plenary files non-compilable archetypes.

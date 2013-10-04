@@ -35,11 +35,9 @@ class PlenaryService(PlenaryCollection):
         super(PlenaryService, self).__init__(logger=logger)
 
         self.dbobj = dbservice
-        self.plenaries.append(PlenaryServiceToplevel(dbservice, logger=logger))
-        self.plenaries.append(PlenaryServiceClientDefault(dbservice,
-                                                          logger=logger))
-        self.plenaries.append(PlenaryServiceServerDefault(dbservice,
-                                                          logger=logger))
+        self.plenaries.append(PlenaryServiceToplevel.get_plenary(dbservice))
+        self.plenaries.append(PlenaryServiceClientDefault.get_plenary(dbservice))
+        self.plenaries.append(PlenaryServiceServerDefault.get_plenary(dbservice))
 
 
 Plenary.handlers[Service] = PlenaryService
@@ -98,14 +96,10 @@ class PlenaryServiceInstance(PlenaryCollection):
     def __init__(self, dbinstance, logger=LOGGER):
         super(PlenaryServiceInstance, self).__init__(logger=logger)
 
-        self.plenaries.append(PlenaryServiceInstanceToplevel(dbinstance,
-                                                             logger=logger))
-        self.plenaries.append(PlenaryServiceInstanceClientDefault(dbinstance,
-                                                                  logger=logger))
-        self.plenaries.append(PlenaryServiceInstanceServer(dbinstance,
-                                                           logger=logger))
-        self.plenaries.append(PlenaryServiceInstanceServerDefault(dbinstance,
-                                                                  logger=logger))
+        self.plenaries.append(PlenaryServiceInstanceToplevel.get_plenary(dbinstance))
+        self.plenaries.append(PlenaryServiceInstanceClientDefault.get_plenary(dbinstance))
+        self.plenaries.append(PlenaryServiceInstanceServer.get_plenary(dbinstance))
+        self.plenaries.append(PlenaryServiceInstanceServerDefault.get_plenary(dbinstance))
 
 
 Plenary.handlers[ServiceInstance] = PlenaryServiceInstance

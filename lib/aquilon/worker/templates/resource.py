@@ -157,12 +157,12 @@ class PlenaryResourceGroup(PlenaryCollection):
         super(PlenaryResourceGroup, self).__init__(logger=logger)
 
         self.dbobj = dbresource
-        self.real_plenary = PlenaryResource(dbresource, logger=logger)
+        self.real_plenary = PlenaryResource.get_plenary(dbresource)
 
         self.plenaries.append(self.real_plenary)
         if dbresource.resholder:
             for res in dbresource.resholder.resources:
-                self.plenaries.append(PlenaryResource(res))
+                self.plenaries.append(PlenaryResource.get_plenary(res))
 
     def read(self):
         # This is used by the cat command

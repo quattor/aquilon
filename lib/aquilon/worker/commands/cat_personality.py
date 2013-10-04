@@ -36,9 +36,11 @@ class CommandCatPersonality(BrokerCommand):
                                                name=personality, compel=True)
 
         if pre_feature:
-            plenary = PlenaryPersonalityPreFeature(dbpersonality, logger=logger)
+            plenary = PlenaryPersonalityPreFeature.get_plenary(dbpersonality,
+                                                               logger=logger)
         elif post_feature:
-            plenary = PlenaryPersonalityPostFeature(dbpersonality, logger=logger)
+            plenary = PlenaryPersonalityPostFeature.get_plenary(dbpersonality,
+                                                                logger=logger)
         elif param_tmpl:
             param_templates = get_parameters_by_tmpl(dbpersonality)
 
@@ -50,7 +52,8 @@ class CommandCatPersonality(BrokerCommand):
             ptmpl = ParameterTemplate(dbpersonality, param_tmpl, values)
             plenary = PlenaryPersonalityParameter(ptmpl, logger=logger)
         else:
-            plenary = PlenaryPersonalityBase(dbpersonality, logger=logger)
+            plenary = PlenaryPersonalityBase.get_plenary(dbpersonality,
+                                                         logger=logger)
 
         if generate:
             return plenary._generate_content()

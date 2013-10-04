@@ -41,8 +41,8 @@ class PlenaryMetaCluster(PlenaryCollection):
         super(PlenaryMetaCluster, self).__init__(logger=logger)
 
         self.dbobj = dbcluster
-        self.plenaries.append(PlenaryMetaClusterObject(dbcluster, logger=logger))
-        self.plenaries.append(PlenaryMetaClusterData(dbcluster, logger=logger))
+        self.plenaries.append(PlenaryMetaClusterObject.get_plenary(dbcluster))
+        self.plenaries.append(PlenaryMetaClusterData.get_plenary(dbcluster))
 
 
 class PlenaryMetaClusterData(StructurePlenary):
