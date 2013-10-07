@@ -49,8 +49,9 @@ class CommandAddRebootIntervention(BrokerCommand):
             raise ArgumentError("the expiry value '%s' could not be "
                                 "interpreted: %s" % (expiry, e))
 
+        now = datetime.utcnow().replace(microsecond=0)
         if start_time is None:
-            start_when = datetime.utcnow().replace(microsecond=0)
+            start_when = now
         else:
             try:
                 start_when = parse(start_time)
@@ -62,13 +63,8 @@ class CommandAddRebootIntervention(BrokerCommand):
         if start_when > expire_when:
             raise ArgumentError("the start time is later than the expiry time")
 
-        # Check there is a reboot_schedule
-        q = session.query(RebootSchedule)
-        try:
-            who = get_resource_holder(session, hostname, cluster)
-            q.filter_by(holder=who).one()
-        except NoResultFound, e:
-            raise ArgumentError("there is no reboot_schedule defined")
+        if (start_when < now) or (expire_when < now):
+            raise ArgumentError("The start time or expiry time are in the past.")
 
         # More thorough check reboot_schedule and intervention
         # XXX TODO
