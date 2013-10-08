@@ -24,11 +24,13 @@ if __name__ == "__main__":
 import unittest2 as unittest
 from broker.brokertest import TestBrokerCommand
 from broker.grntest import VerifyGrnsMixin
+from broker.personalitytest import PersonalityTestMixin
 
 GRN = "grn:/ms/ei/aquilon/aqd"
 
 
-class TestAddPersonality(VerifyGrnsMixin, TestBrokerCommand):
+class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
+                         TestBrokerCommand):
 
     def testaddutpersonality(self):
         command = ["add_personality", "--personality=utpersonality/dev",
@@ -67,6 +69,8 @@ class TestAddPersonality(VerifyGrnsMixin, TestBrokerCommand):
                    "--comments", "Existing personality for netperssvcmap tests"]
         self.noouttest(command)
         self.verifycatforpersonality("aquilon", "eaitools")
+        # The basic parameter set needs to be initialized for further tests
+        self.setup_personality("aquilon", "eaitools")
 
     def testverifyutpersonalitynothreshold(self):
         user = self.config.get("unittest", "user")
@@ -601,12 +605,17 @@ class TestAddPersonality(VerifyGrnsMixin, TestBrokerCommand):
         self.noouttest(command)
 
     def testaddaquilonpersonalities(self):
-        for personality in ["compileserver", "inventory", "sybase-test",
-                            "lemon-collector-oracle", "unixeng-test"]:
-            self.noouttest(["add", "personality", "--personality", personality,
-                            "--archetype", "aquilon",
-                            "--host_environment=dev",
-                            "--grn", "grn:/ms/ei/aquilon/unittest"])
+        personalities = {
+            'compileserver': {},
+            'inventory': {},
+            'sybase-test': {},
+            'lemon-collector-oracle': {},
+            'unixeng-test': {},
+            'infra': {'grn': 'grn:/ms/ei/aquilon/aqd',
+                      'environment': 'infra'}
+        }
+        for personality, kwargs in personalities.items():
+            self.create_personality("aquilon", personality, **kwargs)
 
     def testsearchpersonality00(self):
         command = ["search", "personality", "--grn", "grn:/ms/ei/aquilon/aqd"]
@@ -713,12 +722,6 @@ class TestAddPersonality(VerifyGrnsMixin, TestBrokerCommand):
         out = self.badrequesttest(command)
         self.matchoutput(out, "Legacy is not a valid environment for a new personality.",
                          command)
-
-    def testaddinfra(self):
-        command = ["add_personality", "--personality", "infra",
-                   "--archetype", "aquilon", "--grn", "grn:/ms/ei/aquilon/aqd",
-                   "--host_environment", "infra"]
-        self.noouttest(command)
 
 
 if __name__ == '__main__':

@@ -157,27 +157,6 @@ class TestSetupParams(TestBrokerCommand):
 
                 self.noouttest(cmd)
 
-    def add_parameter(self, archetype, personality, data):
-        cmd = ["add_parameter", "--archetype=%s" % archetype,
-               "--personality=%s" % personality]
-        for key, value in data.items():
-            cmd.append("--path=%s" % key)
-            cmd.append("--value=%s" % value)
-            self.successtest(cmd)
-
-    def test_010_setup_personality(self):
-        data = {"espinfo/function": "development",
-                "espinfo/class": "INFRASTRUCTURE",
-                "espinfo/users": "IT / TECHNOLOGY",
-                "espinfo/threshold": 0}
-
-        self.add_parameter("aquilon", "compileserver", data)
-        self.add_parameter("aquilon", "inventory", data)
-        self.add_parameter("aquilon", "eaitools", data)
-        self.add_parameter("aquilon", "unixeng-test", data)
-        self.add_parameter("aquilon", "sybase-test", data)
-        self.add_parameter("aquilon", "infra", data)
-
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestSetupParams)
