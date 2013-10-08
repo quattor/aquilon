@@ -196,6 +196,13 @@ class TestDelService(TestBrokerCommand):
         command = "del service --service support-group --instance ec-service"
         self.noouttest(command.split(" "))
 
+    def testdelvcenterservices(self):
+        command = ["del", "service", "--service", "vcenter", "--instance", "ut"]
+        self.noouttest(command)
+
+        command = ["del", "service", "--service", "vcenter", "--instance", "np"]
+        self.noouttest(command)
+
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelService)

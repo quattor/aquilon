@@ -24,8 +24,37 @@ if __name__ == "__main__":
 import unittest2 as unittest
 from brokertest import TestBrokerCommand
 
+default_services = {
+    "aqd": ["ny-prod"],
+    "dns": ["unittest", "one-nyp"],
+    "esx_management_server": ["ut.a", "ut.b", "np"],
+    "lemon": ["ny-prod"],
+    "ntp": ["pa.ny.na"],
+    "support-group": ["ec-service"],
+    "syslogng": ["ny-prod"],
+    "utnotify": ["localhost"],
+    "vcenter": ["ut", "np"],
+    "vmseasoning": ["salt", "pepper", "sugar"],
+}
+
 
 class TestAddService(TestBrokerCommand):
+
+    def testadddefaults(self):
+        for service, instances in default_services.items():
+            self.noouttest(["add_service", "--service", service])
+            for instance in instances:
+                self.noouttest(["add_service", "--service", service,
+                                "--instance", instance])
+
+    def testverifydefaults(self):
+        for service, instances in default_services.items():
+            command = ["show_service", "--service", service]
+            out = self.commandtest(command)
+            for instance in instances:
+                self.matchoutput(out,
+                                 "Service: %s Instance: %s" % (service, instance),
+                                 command)
 
     def testaddafsinstance(self):
         command = ["add", "service", "--service", "afs",
@@ -107,52 +136,6 @@ class TestAddService(TestBrokerCommand):
         self.matchoutput(out, "Service: bootserver Instance: unittest", command)
         self.matchoutput(out, "Service: bootserver Instance: one-nyp", command)
         self.searchoutput(out, r"^  Comments: Some service comments", command)
-
-    def testadddnsinstance(self):
-        self.noouttest(["add_service", "--service", "dns", "--instance", "unittest"])
-        self.noouttest(["add_service", "--service", "dns", "--instance", "one-nyp"])
-
-    def testverifyadddnsinstance(self):
-        command = "show service --service dns"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Service: dns Instance: unittest", command)
-        self.matchoutput(out, "Service: dns Instance: one-nyp", command)
-
-    def testaddntpinstance(self):
-        command = "add service --service ntp --instance pa.ny.na"
-        self.noouttest(command.split(" "))
-
-    def testverifyaddntpinstance(self):
-        command = "show service --service ntp"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Service: ntp Instance: pa.ny.na", command)
-
-    def testaddaqdinstance(self):
-        command = "add service --service aqd --instance ny-prod"
-        self.noouttest(command.split(" "))
-
-    def testverifyaddaqdinstance(self):
-        command = "show service --service aqd"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Service: aqd Instance: ny-prod", command)
-
-    def testaddlemoninstance(self):
-        command = "add service --service lemon --instance ny-prod"
-        self.noouttest(command.split(" "))
-
-    def testverifyaddlemoninstance(self):
-        command = "show service --service lemon"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Service: lemon Instance: ny-prod", command)
-
-    def testaddsyslognginstance(self):
-        command = "add service --service syslogng --instance ny-prod"
-        self.noouttest(command.split(" "))
-
-    def testverifyaddsyslognginstance(self):
-        command = "show service --service syslogng"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Service: syslogng Instance: ny-prod", command)
 
     def testaddutsi1instance(self):
         command = "add service --service utsvc --instance utsi1"
@@ -336,55 +319,11 @@ class TestAddService(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Service: unmapped", command)
 
-    def testaddesxmanagement(self):
-        command = "add service --service esx_management_server --instance ut.a"
-        self.noouttest(command.split(" "))
-        command = "add service --service esx_management_server --instance ut.b"
-        self.noouttest(command.split(" "))
-        command = "add service --service esx_management_server --instance np"
-        self.noouttest(command.split(" "))
-
-    def testverifyesxmanagement(self):
-        command = "show service --service esx_management_server"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Service: esx_management_server", command)
-        self.matchoutput(out, "Service: esx_management_server Instance: ut.a",
-                         command)
-        self.matchoutput(out, "Service: esx_management_server Instance: ut.b",
-                         command)
-        self.matchoutput(out, "Service: esx_management_server Instance: np",
-                         command)
-
-    def testaddvmseasoning(self):
-        command = "add service --service vmseasoning --instance salt"
-        self.noouttest(command.split(" "))
-        command = "add service --service vmseasoning --instance pepper"
-        self.noouttest(command.split(" "))
-        command = "add service --service vmseasoning --instance sugar"
-        self.noouttest(command.split(" "))
-
-    def testverifyvmseasoning(self):
-        command = "show service --service vmseasoning"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Service: vmseasoning", command)
-        self.matchoutput(out, "Service: vmseasoning Instance: salt", command)
-        self.matchoutput(out, "Service: vmseasoning Instance: pepper", command)
-        self.matchclean(out, "Disk Count", command)
-
-    def testaddnotify(self):
-        self.noouttest(["add", "service", "--service", "utnotify"])
-        self.noouttest(["add", "service", "--service", "utnotify",
-                        "--instance", "localhost"])
-
     def testaddpollhelper(self):
         service = self.config.get("broker", "poll_helper_service")
         self.noouttest(["add", "service", "--service", service])
         self.noouttest(["add", "service", "--service", service,
                         "--instance", "unittest"])
-
-    def testaddsupportgroup(self):
-        self.noouttest(["add_service", "--service", "support-group",
-                        "--instance", "ec-service"])
 
 
 if __name__ == '__main__':

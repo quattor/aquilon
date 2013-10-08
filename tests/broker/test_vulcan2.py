@@ -404,12 +404,6 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
 
 #    metacluster aligned svc tests
     def test_150_addvcenterservices(self):
-        command = ["add", "service", "--service", "vcenter", "--instance", "ut"]
-        self.noouttest(command)
-
-        command = ["add", "service", "--service", "vcenter", "--instance", "np"]
-        self.noouttest(command)
-
         command = ["add_required_service", "--service", "vcenter",
                    "--archetype", "vmhost", "--personality", "vulcan2-10g-test"]
         self.noouttest(command)
@@ -510,13 +504,6 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
         self.matchclean(out,
                         "Uses Service: vcenter Instance: ut",
                         command)
-
-    def test_155_delvcenterservices(self):
-        command = ["del", "service", "--service", "vcenter", "--instance", "ut"]
-        self.noouttest(command)
-
-        command = ["del", "service", "--service", "vcenter", "--instance", "np"]
-        self.noouttest(command)
 
 #
 ##    service binding conflicts

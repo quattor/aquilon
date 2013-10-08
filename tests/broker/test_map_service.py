@@ -24,14 +24,82 @@ if __name__ == "__main__":
 import unittest2 as unittest
 from brokertest import TestBrokerCommand
 
+default_maps = {
+    "afs": {
+        "q.ny.ms.com": {
+            "building": ["ut", "np"],
+            "city": ["ex"],
+        },
+    },
+    "aqd": {
+        "ny-prod": {
+            "campus": ["ny"],
+            "city": ["ex"],
+        },
+    },
+    "bootserver": {
+        "unittest": {
+            "building": ["ut", "cards"],
+        },
+        "one-nyp": {
+            "building": ["np"],
+        },
+    },
+    "dns": {
+        "unittest": {
+            "building": ["ut", "cards"],
+        },
+        "one-nyp": {
+            "building": ["np"],
+        },
+    },
+    "lemon": {
+        "ny-prod": {
+            "campus": ["ny"],
+            "city": ["ex"],
+        },
+    },
+    "ntp": {
+        "pa.ny.na": {
+            "city": ["ny", "ex"],
+        },
+    },
+    "syslogng": {
+        "ny-prod": {
+            "campus": ["ny"],
+            "city": ["ex"],
+        },
+    },
+    "support-group": {
+        "ec-service": {
+            "organization": ["ms"],
+        },
+    },
+}
+
 
 class TestMapService(TestBrokerCommand):
+    def testmapdefaults(self):
+        for service, maps in default_maps.items():
+            for instance, locations in maps.items():
+                for loc_type, loc_names in locations.items():
+                    for loc_name in loc_names:
+                        self.noouttest(["map_service", "--service", service,
+                                        "--instance", instance,
+                                        "--" + loc_type, loc_name])
 
-    def testmapafs(self):
-        self.noouttest(["map", "service", "--building", "ut",
-                        "--service", "afs", "--instance", "q.ny.ms.com"])
-        self.noouttest(["map", "service", "--building", "np",
-                        "--service", "afs", "--instance", "q.ny.ms.com"])
+    def testverifydefaults(self):
+        command = ["show_map", "--all"]
+        mapstr = "Archetype: aquilon Service: %s Instance: %s Map: %s %s"
+        out = self.commandtest(command)
+        for service, maps in default_maps.items():
+            for instance, locations in maps.items():
+                for loc_type, loc_names in locations.items():
+                    for loc_name in loc_names:
+                        self.matchoutput(out, mapstr % (service, instance,
+                                                        loc_type.capitalize(),
+                                                        loc_name),
+                                         command)
 
     def testverifymapafs(self):
         command = "show map --service afs --instance q.ny.ms.com --building ut"
@@ -41,22 +109,10 @@ class TestMapService(TestBrokerCommand):
                          "Instance: q.ny.ms.com Map: Building ut",
                          command)
 
-    def testmapafsextra(self):
-        self.noouttest(["map", "service", "--city", "ex",
-                        "--service", "afs", "--instance", "q.ny.ms.com"])
-
     def testverifynomatch(self):
         command = "show map --service afs --instance q.ny.ms.com --organization ms"
         out = self.notfoundtest(command.split(" "))
         self.matchoutput(out, "No matching map found.", command)
-
-    def testmapdns(self):
-        self.noouttest(["map", "service", "--building", "ut",
-                        "--service", "dns", "--instance", "unittest"])
-        self.noouttest(["map", "service", "--building", "cards",
-                        "--service", "dns", "--instance", "unittest"])
-        self.noouttest(["map", "service", "--building", "np",
-                        "--service", "dns", "--instance", "one-nyp"])
 
     def testverifymapdnsut(self):
         command = ["show", "map", "--building", "ut", "--service", "dns"]
@@ -81,48 +137,6 @@ class TestMapService(TestBrokerCommand):
                          command)
         self.matchclean(out, "one-nyp", command)
 
-    def testmapaqd(self):
-        self.noouttest(["map", "service", "--campus", "ny",
-                        "--service", "aqd", "--instance", "ny-prod"])
-        self.noouttest(["map", "service", "--city", "ex",
-                        "--service", "aqd", "--instance", "ny-prod"])
-
-    def testverifymapaqd(self):
-        command = ["show_map",
-                   "--service=aqd", "--instance=ny-prod", "--campus=ny"]
-        out = self.commandtest(command)
-        self.matchoutput(out,
-                         "Archetype: aquilon Service: aqd "
-                         "Instance: ny-prod Map: Campus ny",
-                         command)
-
-    def testmaplemon(self):
-        self.noouttest(["map", "service", "--campus", "ny",
-                        "--service", "lemon", "--instance", "ny-prod"])
-        self.noouttest(["map", "service", "--city", "ex",
-                        "--service", "lemon", "--instance", "ny-prod"])
-
-    def testverifymaplemon(self):
-        command = ["show_map",
-                   "--service=lemon", "--instance=ny-prod"]
-        out = self.commandtest(command)
-        self.matchoutput(out,
-                         "Archetype: aquilon Service: lemon "
-                         "Instance: ny-prod Map: Campus ny",
-                         command)
-        self.matchoutput(out,
-                         "Archetype: aquilon Service: lemon "
-                         "Instance: ny-prod Map: City ex",
-                         command)
-
-    def testmapbootserver(self):
-        self.noouttest(["map", "service", "--building", "ut",
-                        "--service", "bootserver", "--instance", "unittest"])
-        self.noouttest(["map", "service", "--building", "cards",
-                        "--service", "bootserver", "--instance", "unittest"])
-        self.noouttest(["map", "service", "--building", "np",
-                        "--service", "bootserver", "--instance", "one-nyp"])
-
     def testverifymapbootserver(self):
         command = ["show_map", "--service", "bootserver",
                    "--instance", "unittest"]
@@ -136,42 +150,6 @@ class TestMapService(TestBrokerCommand):
                          "Instance: unittest Map: Building cards",
                          command)
         self.matchclean(out, "Building np", command)
-
-    def testmapntp(self):
-        self.noouttest(["map", "service", "--city", "ny",
-                        "--service", "ntp", "--instance", "pa.ny.na"])
-        self.noouttest(["map", "service", "--city", "ex",
-                        "--service", "ntp", "--instance", "pa.ny.na"])
-
-    def testverifymapntp(self):
-        command = ["show_map", "--service=ntp", "--instance=pa.ny.na"]
-        out = self.commandtest(command)
-        self.matchoutput(out,
-                         "Archetype: aquilon Service: ntp "
-                         "Instance: pa.ny.na Map: City ny",
-                         command)
-        self.matchoutput(out,
-                         "Archetype: aquilon Service: ntp "
-                         "Instance: pa.ny.na Map: City ex",
-                         command)
-
-    def testmapsyslogng(self):
-        self.noouttest(["map", "service", "--campus", "ny",
-                        "--service", "syslogng", "--instance", "ny-prod"])
-        self.noouttest(["map", "service", "--city", "ex",
-                        "--service", "syslogng", "--instance", "ny-prod"])
-
-    def testverifymapsyslogng(self):
-        command = ["show_map", "--service=syslogng", "--instance=ny-prod"]
-        out = self.commandtest(command)
-        self.matchoutput(out,
-                         "Archetype: aquilon Service: syslogng "
-                         "Instance: ny-prod Map: Campus ny",
-                         command)
-        self.matchoutput(out,
-                         "Archetype: aquilon Service: syslogng "
-                         "Instance: ny-prod Map: City ex",
-                         command)
 
     def testmaputsi1(self):
         self.noouttest(["map", "service", "--building", "ut",
@@ -382,10 +360,6 @@ class TestMapService(TestBrokerCommand):
     def testzcleanup(self):
         self.successtest(["del_personality", "--personality", "testme",
                           "--archetype", "aquilon"])
-
-    def testmapsupportgroup(self):
-        self.noouttest(["map_service", "--service", "support-group",
-                        "--instance", "ec-service", "--organization", "ms"])
 
     def testverifyparents(self):
         command = ["show_map", "--rack", "ut3", "--include_parents"]

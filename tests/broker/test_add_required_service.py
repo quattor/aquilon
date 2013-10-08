@@ -24,6 +24,13 @@ if __name__ == "__main__":
 import unittest2 as unittest
 from brokertest import TestBrokerCommand
 
+archetype_required = {
+    'aquilon': ["dns", "aqd", "ntp", "bootserver", "support-group", "lemon",
+                "syslogng"],
+    'esx_cluster': ["esx_management_server"],
+    'vmhost': ["dns", "ntp", "syslogng"],
+}
+
 
 class TestAddRequiredService(TestBrokerCommand):
 
@@ -55,52 +62,27 @@ class TestAddRequiredService(TestBrokerCommand):
                          "Service does-not-exist not found.",
                          command)
 
-    def testaddrequireddns(self):
-        command = "add required service --service dns --archetype aquilon"
-        command += " --justification tcm=12345678"
-        self.noouttest(command.split(" "))
+    def testadddefault(self):
+        # Setup required services, as expected by the templates.
+        for archetype, servicelist in archetype_required.items():
+            for service in servicelist:
+                self.noouttest(["add_required_service", "--service", service,
+                                "--archetype", archetype,
+                                "--justification", "tcm=12345678"])
 
-    def testaddrequiredaqd(self):
-        command = "add required service --service aqd --archetype aquilon"
-        command += " --justification tcm=12345678"
-        self.noouttest(command.split(" "))
+    def testverifyadddefault(self):
+        all_services = set()
+        for archetype, servicelist in archetype_required.items():
+            all_services.update(servicelist)
 
-    def testaddrequiredntp(self):
-        command = "add required service --service ntp --archetype aquilon"
-        command += " --justification tcm=12345678"
-        self.noouttest(command.split(" "))
+        for archetype, servicelist in archetype_required.items():
+            command = ["show_archetype", "--archetype", archetype]
+            out = self.commandtest(command)
+            for service in servicelist:
+                self.matchoutput(out, "Service: %s" % service, command)
 
-    def testaddrequiredbootserver(self):
-        command = ["add_required_service",
-                   "--service=bootserver", "--archetype=aquilon",
-                   "--justification", "tcm=12345678"]
-        self.noouttest(command)
-
-    def testaddrequiredsupportgroup(self):
-        self.noouttest(["add_required_service", "--service", "support-group",
-                        "--archetype", "aquilon",
-                        "--justification", "tcm=12345678"])
-
-    def testaddrequiredlemon(self):
-        command = "add required service --service lemon --archetype aquilon"
-        command += " --justification tcm=12345678"
-        self.noouttest(command.split(" "))
-
-    def testaddrequiredsyslogng(self):
-        command = "add required service --service syslogng --archetype aquilon"
-        command += " --justification tcm=12345678"
-        self.noouttest(command.split(" "))
-
-    def testverifyaddrequiredservices(self):
-        command = "show archetype --archetype aquilon"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Service: afs", command)
-        self.matchoutput(out, "Service: aqd", command)
-        self.matchoutput(out, "Service: bootserver", command)
-        self.matchoutput(out, "Service: dns", command)
-        self.matchoutput(out, "Service: ntp", command)
-        self.matchoutput(out, "Service: lemon", command)
-        self.matchoutput(out, "Service: syslogng", command)
+            for service in all_services - set(servicelist):
+                self.matchclean(out, "Service: %s" % service, command)
 
     def testverifyaddrequiredafs(self):
         command = "show service --service afs"
@@ -183,31 +165,9 @@ class TestAddRequiredService(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out, "Service: badservice", command)
 
-    def testaddrequiredvmhost(self):
-        command = "add required service --service dns --archetype vmhost"
-        command += " --justification tcm=12345678"
-        self.noouttest(command.split(" "))
-        command = "add required service --service ntp --archetype vmhost"
-        command += " --justification tcm=12345678"
-        self.noouttest(command.split(" "))
-        command = "add required service --service syslogng --archetype vmhost"
-        command += " --justification tcm=12345678"
-        self.noouttest(command.split(" "))
-
-    def testverifyaddrequiredvmhost(self):
-        command = "show archetype --archetype vmhost"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Service: dns", command)
-        self.matchoutput(out, "Service: ntp", command)
-        self.matchoutput(out, "Service: syslogng", command)
-        self.matchclean(out, "Service: afs", command)
-
     def testaddrequiredesx(self):
         command = ["add_required_service", "--service=esx_management_server",
                    "--archetype=vmhost", "--personality=vulcan-1g-desktop-prod"]
-        self.noouttest(command)
-        command = ["add_required_service", "--service=esx_management_server",
-                   "--archetype=esx_cluster", "--justification", "tcm=12345678"]
         self.noouttest(command)
         command = ["add_required_service", "--service=esx_management_server",
                    "--archetype=vmhost", "--personality=vulcan2-10g-test"]
