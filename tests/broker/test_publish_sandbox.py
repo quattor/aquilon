@@ -206,6 +206,29 @@ class TestPublishSandbox(TestBrokerCommand):
                          "added personality vulcan-1g-desktop-prod"],
                         cwd=sandboxdir)
 
+    def testaddutva(self):
+        sandboxdir = os.path.join(self.sandboxdir, "utsandbox")
+        template = self.template_name("hardware", "machine", "utvendor",
+                                      "utva", sandbox="utsandbox")
+        modeldir = os.path.dirname(template)
+        if not os.path.exists(modeldir):
+            os.makedirs(modeldir)
+        f = open(template, 'w')
+        try:
+            f.writelines(
+                """structure template hardware/machine/utvendor/utva;
+
+"manufacturer" = "utvendor";
+"model" = "utva";
+"template_name" = "utva";
+                """)
+        finally:
+            f.close()
+        self.gitcommand(["add", "utva" + self.template_extension],
+                        cwd=modeldir)
+        self.gitcommand(["commit", "-a", "-m", "added model utva"],
+                        cwd=sandboxdir)
+
     def testaddutmedium(self):
         sandboxdir = os.path.join(self.sandboxdir, "utsandbox")
         template = self.template_name("hardware", "machine", "utvendor",

@@ -1,0 +1,2 @@
+ALTER TABLE machine ADD uri VARCHAR2(255 CHAR);
+QUIT;

@@ -130,6 +130,10 @@ class MachineFormatter(ObjectFormatter):
             details.append(self.redirect_raw(i, indent + "  "))
         if machine.comments:
             details.append(indent + "  Comments: %s" % machine.comments)
+
+        if machine.uri:
+            details.append(indent + "  URI: %s" % machine.uri)
+
         if machine.host:
             host = machine.host
             if host.cluster:

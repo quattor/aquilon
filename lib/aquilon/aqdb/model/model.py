@@ -68,6 +68,10 @@ class Model(Base):
         session = object_session(self)
         return self.default_nic_model(session)
 
+    @property
+    def is_virtual(self):
+        return self.machine_type in ["virtual_machine", "virtual_appliance"]
+
 model = Model.__table__  # pylint: disable=C0103
 model.info['unique_fields'] = ['name', 'vendor']
 model.info['extra_search_fields'] = ['machine_type']

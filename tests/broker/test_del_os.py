@@ -33,6 +33,11 @@ class TestDelOS(TestBrokerCommand):
                    "--osname=utos", "--osversion=1.0"]
         self.noouttest(command)
 
+    def testdelutappos(self):
+        command = ["del_os", "--archetype=utappliance",
+                   "--osname=utos", "--osversion=1.0"]
+        self.noouttest(command)
+
     def testverifydelos(self):
         command = "show os --osname utos --archetype=utarchetype1"
         self.notfoundtest(command.split(" "))

@@ -16,7 +16,7 @@
 # limitations under the License.
 """The tables/objects/mappings related to hardware in Aquilon. """
 
-from sqlalchemy import Column, Integer, ForeignKey
+from sqlalchemy import Column, Integer, ForeignKey, String
 from sqlalchemy.orm import relation
 
 from aquilon.aqdb.model import Cpu, HardwareEntity
@@ -43,6 +43,8 @@ class Machine(HardwareEntity):
     memory = Column(Integer, nullable=False, default=512)
 
     cpu = relation(Cpu, innerjoin=True)
+
+    uri = Column(String(255), nullable=True)
 
     @property
     def cluster(self):

@@ -36,7 +36,8 @@ class CommandAddModel(BrokerCommand):
         # Specifically not allowing new models to be added that are of
         # type aurora_node - that is only meant for the dummy aurora_model.
         allowed_types = ["blade", "rackmount", "workstation", "switch",
-                         "chassis", "virtual_machine", "nic"]
+                         "chassis", "virtual_machine", "nic", "virtual_appliance"]
+
         if type not in allowed_types:
             raise ArgumentError("The model's machine type must be one of: %s." %
                                 ", ".join(allowed_types))

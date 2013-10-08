@@ -63,6 +63,10 @@ class TestDelModel(TestBrokerCommand):
         command = ["del_model", "--model=utlarge", "--vendor=utvendor"]
         self.noouttest(command)
 
+    def test_130_delutva(self):
+        command = ["del_model", "--model=utva", "--vendor=utvendor"]
+        self.noouttest(command)
+
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelModel)

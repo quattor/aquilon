@@ -50,7 +50,7 @@ class CommandUpdateMachine(BrokerCommand):
     def render(self, session, logger, machine, model, vendor, serial,
                chassis, slot, clearchassis, multislot,
                vmhost, cluster, allow_metacluster_change,
-               cpuname, cpuvendor, cpuspeed, cpucount, memory, ip,
+               cpuname, cpuvendor, cpuspeed, cpucount, memory, ip, uri,
                **arguments):
         dbmachine = Machine.get_unique(session, machine, compel=True)
         oldinfo = DSDBRunner.snapshot_hw(dbmachine)
@@ -119,18 +119,20 @@ class CommandUpdateMachine(BrokerCommand):
                 vendor = dbmachine.model.vendor.name
             dbmodel = Model.get_unique(session, name=model, vendor=vendor,
                                        compel=True)
+
             if dbmodel.machine_type not in ['blade', 'rackmount',
                                             'workstation', 'aurora_node',
-                                            'virtual_machine']:
+                                            'virtual_machine',
+                                            'virtual_appliance']:
                 raise ArgumentError("The update_machine command cannot update "
                                     "machines of type %s." %
                                     dbmodel.machine_type)
+
             # We probably could do this by forcing either cluster or
             # location data to be available as appropriate, but really?
             # Failing seems reasonable.
             if dbmodel.machine_type != dbmachine.model.machine_type and \
-               'virtual_machine' in [dbmodel.machine_type,
-                                     dbmachine.model.machine_type]:
+               (dbmodel.is_virtual or dbmachine.model.is_virtual):
                 raise ArgumentError("Cannot change machine from %s to %s." %
                                     (dbmachine.model.machine_type,
                                      dbmodel.machine_type))
@@ -158,6 +160,14 @@ class CommandUpdateMachine(BrokerCommand):
 
         if ip:
             update_primary_ip(session, logger, dbmachine, ip)
+
+        if uri and dbmachine.model.machine_type != 'virtual_appliance':
+            raise ArgumentError("URI can be specified only for virtual "
+                                "appliances and the model's type is %(type)s" %
+                                {"type": dbmachine.model.machine_type})
+
+        if uri:
+            dbmachine.uri = uri
 
         # FIXME: For now, if a machine has its interface(s) in a portgroup
         # this command will need to be followed by an update_interface to

@@ -246,7 +246,7 @@ def verify_port_group(dbmachine, port_group):
         return None
     session = object_session(dbmachine)
     dbvi = VlanInfo.get_unique(session, port_group=port_group, compel=True)
-    if dbmachine.model.machine_type == "virtual_machine":
+    if dbmachine.model.is_virtual:
         dbswitch = dbmachine.cluster.switch
         if not dbswitch:
             raise ArgumentError("Cannot verify port group availability: no "
@@ -279,7 +279,7 @@ def verify_port_group(dbmachine, port_group):
 
 
 def choose_port_group(session, logger, dbmachine):
-    if dbmachine.model.machine_type != "virtual_machine":
+    if not dbmachine.model.is_virtual:
         raise ArgumentError("Can only automatically generate "
                             "portgroup entry for virtual hardware.")
     if not dbmachine.cluster.switch:

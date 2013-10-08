@@ -1,0 +1,1 @@
+ALTER TABLE machine ADD uri VARCHAR(255);
