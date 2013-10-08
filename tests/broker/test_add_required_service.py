@@ -165,29 +165,6 @@ class TestAddRequiredService(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out, "Service: badservice", command)
 
-    def testaddrequiredesx(self):
-        command = ["add_required_service", "--service=esx_management_server",
-                   "--archetype=vmhost", "--personality=vulcan-1g-desktop-prod"]
-        self.noouttest(command)
-        command = ["add_required_service", "--service=esx_management_server",
-                   "--archetype=vmhost", "--personality=vulcan2-10g-test"]
-        self.noouttest(command)
-        command = ["add_required_service", "--service=vmseasoning",
-                   "--archetype=vmhost", "--personality=vulcan-1g-desktop-prod"]
-        self.noouttest(command)
-
-    def testverifyaddrequiredesx(self):
-        command = ["show_personality",
-                   "--archetype=vmhost", "--personality=vulcan-1g-desktop-prod"]
-        out = self.commandtest(command)
-        self.matchoutput(out, "Service: esx_management_server", command)
-        self.matchoutput(out, "Service: vmseasoning", command)
-
-        command = ["show_archetype",
-                   "--archetype=esx_cluster"]
-        out = self.commandtest(command)
-        self.matchoutput(out, "Service: esx_management_server", command)
-
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddRequiredService)

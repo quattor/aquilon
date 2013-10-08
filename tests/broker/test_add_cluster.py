@@ -23,11 +23,16 @@ if __name__ == "__main__":
 
 import unittest2 as unittest
 from brokertest import TestBrokerCommand
+from personalitytest import PersonalityTestMixin
 
 
-class TestAddCluster(TestBrokerCommand):
+class TestAddCluster(PersonalityTestMixin, TestBrokerCommand):
 
-    def test_00_add_utvcs1(self):
+    def test_10_add_metrocluster(self):
+        self.create_personality("storagecluster", "metrocluster",
+                                environment="prod")
+
+    def test_10_add_utvcs1(self):
         command = ["add_cluster", "--cluster=utvcs1",
                    "--building=ut",
                    "--domain=unittest", "--down_hosts_threshold=0",
@@ -35,7 +40,7 @@ class TestAddCluster(TestBrokerCommand):
                    "--archetype=hacluster", "--personality=vcs-msvcs"]
         self.noouttest(command)
 
-    def test_10_verify_utvcs1(self):
+    def test_11_verify_utvcs1(self):
         command = "show cluster --cluster utvcs1"
         out = self.commandtest(command.split(" "))
         default_max = self.config.get("archetype_hacluster",
@@ -51,7 +56,7 @@ class TestAddCluster(TestBrokerCommand):
         self.matchoutput(out, "Domain: unittest", command)
         self.matchclean(out, "Comments", command)
 
-    def test_10_verify_cat_utvcs1(self):
+    def test_11_verify_cat_utvcs1(self):
         obj_cmd, obj, data_cmd, data = self.verify_cat_clusters("utvcs1",
                                                                 "hacluster",
                                                                 "vcs-msvcs",

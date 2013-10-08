@@ -474,30 +474,9 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
         self.noouttest(command)
         self.verifycatforpersonality("esx_cluster", "esx_server")
 
-    def testaddv1personalities(self):
-        command = ["add_personality", "--cluster_required", "--host_environment=prod",
-                   "--personality=vulcan-1g-desktop-prod", "--archetype=vmhost", "--eon_id=2"]
-        self.noouttest(command)
-        command = ["add_personality", "--host_environment=prod",
-                   "--personality=vulcan-1g-desktop-prod", "--archetype=esx_cluster", "--eon_id=2"]
-        self.noouttest(command)
-        command = ["add_personality", "--host_environment=dev",
-                   "--personality=metacluster", "--archetype=metacluster", "--eon_id=2"]
-        self.noouttest(command)
-
-    def testaddv2personalities(self):
-        command = ["add_personality", "--cluster_required", "--host_environment=dev",
-                   "--personality=vulcan2-10g-test", "--archetype=vmhost", "--eon_id=2"]
-        self.noouttest(command)
-        command = ["add_personality", "--host_environment=dev",
-                   "--personality=vulcan2-10g-test", "--archetype=esx_cluster", "--eon_id=2"]
-        self.noouttest(command)
-        command = ["add_personality", "--host_environment=dev",
-                   "--personality=vulcan2", "--archetype=metacluster", "--eon_id=2"]
-        self.noouttest(command)
-        self.verifycatforpersonality("esx_cluster", "vulcan2-10g-test")
-
     def testaddesxstandalone(self):
+        # Can't use create_personality() here, because the --cluster_required
+        # flag is intentionally missing.
         command = ["add_personality", "--personality=esx_standalone",
                    "--host_environment=dev",
                    "--archetype=vmhost", "--eon_id=2"]
@@ -562,22 +541,6 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
                             "--archetype", archetype,
                             "--host_environment", "prod",
                             "--grn", "grn:/ms/ei/aquilon/unittest"])
-
-    def testaddvulcandektop(self):
-        command = ["add", "personality",
-                   "--personality", "vulcan-10g-desktop-prod",
-                   "--archetype", "vmhost",
-                   "--host_environment=prod",
-                   "--grn", "grn:/ms/ei/aquilon/unittest"]
-        self.noouttest(command)
-
-    def testaddmetrocluster(self):
-        command = ["add", "personality",
-                   "--personality", "metrocluster",
-                   "--archetype", "storagecluster",
-                   "--host_environment=prod",
-                   "--grn", "grn:/ms/ei/aquilon/unittest"]
-        self.noouttest(command)
 
     def testaddaquilonpersonalities(self):
         personalities = {

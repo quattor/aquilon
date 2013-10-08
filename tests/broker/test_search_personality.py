@@ -100,7 +100,7 @@ class TestSearchPersonality(VerifyGrnsMixin, TestBrokerCommand):
         command = ["search_personality", "--host_environment", "dev",
                    "--eon_id", 2, "--format=proto"]
         out = self.commandtest(command)
-        pl = self.parse_personality_msg(out, 13)
+        pl = self.parse_personality_msg(out, 10)
         personality = pl.personalities[0]
         self.failUnlessEqual(personality.archetype.name, "aquilon")
         self.failUnlessEqual(personality.name, "badpersonality")

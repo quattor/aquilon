@@ -90,17 +90,6 @@ class TestDelPersonality(TestBrokerCommand):
                    "--personality=metacluster", "--archetype=metacluster"]
         self.noouttest(command)
 
-    def testdelv2personalities(self):
-        command = ["del_personality",
-                   "--personality=vulcan2-10g-test", "--archetype=vmhost"]
-        self.noouttest(command)
-        command = ["del_personality",
-                   "--personality=vulcan2-10g-test", "--archetype=esx_cluster"]
-        self.noouttest(command)
-        command = ["del_personality",
-                   "--personality=vulcan2", "--archetype=metacluster"]
-        self.noouttest(command)
-
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelPersonality)

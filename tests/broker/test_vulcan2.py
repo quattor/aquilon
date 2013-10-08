@@ -28,13 +28,49 @@ import unittest2 as unittest
 from brokertest import TestBrokerCommand
 from notificationtest import VerifyNotificationsMixin
 from machinetest import MachineTestMixin
+from personalitytest import PersonalityTestMixin
 
 
 class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
-                   TestBrokerCommand):
+                   PersonalityTestMixin, TestBrokerCommand):
     # Metacluster / cluster / Switch tests
 
-    def test_000_addutmc8(self):
+    def test_000_add_personalities(self):
+        vmhost_maps = {
+            "esx_management_server": {
+                "ut.a": {
+                    "building": ["ut"],
+                },
+            },
+            "vcenter": {
+                "ut": {
+                    "building": ["ut"],
+                },
+                "np": {
+                    "building": ["np"],
+                },
+            },
+        }
+        esx_cluster_maps = {
+            "esx_management_server": {
+                "ut.a": {
+                    "building": ["ut"],
+                },
+            },
+        }
+
+        # We can't set up the vcenter bindings/maps here, because the first
+        # batch of tests do not work with it. Sigh.
+        self.create_personality("vmhost", "vulcan2-10g-test",
+                                grn="grn:/ms/ei/aquilon/aqd",
+                                required=["esx_management_server"],
+                                maps=vmhost_maps)
+        self.create_personality("esx_cluster", "vulcan2-10g-test",
+                                grn="grn:/ms/ei/aquilon/aqd",
+                                maps=esx_cluster_maps)
+        self.create_personality("metacluster", "vulcan2")
+
+    def test_001_addutmc8(self):
         command = ["add_metacluster", "--metacluster=utmc8",
                    "--personality=vulcan2", "--archetype=metacluster",
                    "--domain=unittest", "--building=ut", "--domain=unittest",
@@ -51,13 +87,13 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
         self.noouttest(command)
 
     # see testaddutmc4
-    def test_001_addutpgcl(self):
+    def test_002_addutpgcl(self):
         # Allocate utecl5 - utecl10 for utmc4 (autopg testing)
         for i in range(0, 2):
             self.add_utcluster("utpgcl%d" % i, "utmc8")
 
     # see     def testaddut01ga2s02(self):
-    def test_002_addutpgsw(self):
+    def test_003_addutpgsw(self):
         # Deprecated.
 
         for i in range(0, 2):
@@ -74,7 +110,7 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
 
     # see     def testverifypollut01ga2s01(self):
     # see fakevlan2net
-    def test_003_pollutpgsw(self):
+    def test_004_pollutpgsw(self):
         macs = ["02:02:04:02:12:05", "02:02:04:02:12:06"]
         for i in range(0, 2):
             command = ["poll", "switch", "--vlan", "--switch",
@@ -95,7 +131,7 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
             self.matchoutput(out, "Port et1-1: %s" % macs[i], command)
 
     # for each cluster's hosts
-    def test_004_add10gigracks(self):
+    def test_005_add10gigracks(self):
         for i in range(0, 2):
             machine = "utpgs01p%d" % i
             self.create_machine(machine, "vb1205xm", rack="ut3",
@@ -412,17 +448,6 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
                    "--archetype", "metacluster", "--personality", "vulcan2"]
         self.noouttest(command)
 
-    def test_151_mapvcenterservices(self):
-        command = ["map", "service", "--service", "vcenter", "--instance", "ut",
-                   "--building", "ut", "--personality", "vulcan2-10g-test",
-                   "--archetype", "vmhost"]
-        self.noouttest(command)
-
-        command = ["map", "service", "--service", "vcenter", "--instance", "np",
-                   "--building", "np", "--personality", "vulcan2-10g-test",
-                   "--archetype", "vmhost"]
-        self.noouttest(command)
-
     def test_152_bindvcenterservices(self):
         command = ["bind_cluster", "--cluster", "utmc8", "--service", "vcenter",
                    "--instance", "ut"]
@@ -679,6 +704,11 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
         self.assertFalse(os.path.exists(os.path.join(
             self.config.get("broker", "profilesdir"), "clusters",
             "utmc8%s" % self.profile_suffix)))
+
+    def test_800_cleanup(self):
+        self.drop_personality("vmhost", "vulcan2-10g-test")
+        self.drop_personality("esx_cluster", "vulcan2-10g-test")
+        self.drop_personality("metacluster", "vulcan2")
 
 
 if __name__ == '__main__':

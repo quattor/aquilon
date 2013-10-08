@@ -28,10 +28,11 @@ import unittest2 as unittest
 from brokertest import TestBrokerCommand
 from notificationtest import VerifyNotificationsMixin
 from machinetest import MachineTestMixin
+from personalitytest import PersonalityTestMixin
 
 
 class TestVulcanLocalDisk(VerifyNotificationsMixin, MachineTestMixin,
-                          TestBrokerCommand):
+                          PersonalityTestMixin, TestBrokerCommand):
 
     metacluster = "utmc9"
     cluster = "utlccl1"
@@ -43,48 +44,28 @@ class TestVulcanLocalDisk(VerifyNotificationsMixin, MachineTestMixin,
         return self.net["autopg2"].usable[0]
 
     def test_000_add_vlocal(self):
-        # vmhost archetype
-        command = ["add_personality", "--archetype", "vmhost",
-                   "--personality", "vulcan-local-disk",
-                   "--host_environment=dev",
-                   "--grn", "grn:/ms/ei/aquilon/aqd"]
-        self.noouttest(command)
+        maps = {
+            "esx_management_server": {
+                "ut.a": {
+                    "building": ["ut"],
+                },
+            },
+        }
 
-        command = ["add_required_service", "--service", "esx_management_server",
-                   "--personality", "vulcan-local-disk",
-                   "--archetype", "vmhost"]
-        self.noouttest(command)
-
-        command = ["map", "service", "--service", "esx_management_server", "--instance", "ut.a",
-                   "--building", "ut", "--personality", "vulcan-local-disk",
-                   "--archetype", "vmhost"]
-        self.noouttest(command)
-
-        command = ["add_personality", "--archetype", "esx_cluster",
-                   "--personality", "vulcan-local-disk",
-                   "--host_environment=dev",
-                   "--grn", "grn:/ms/ei/aquilon/aqd"]
-        self.noouttest(command)
-
-        command = ["add_personality", "--archetype", "aquilon",
-                   "--personality", "virteng-perf-test",
-                   "--host_environment=dev",
-                   "--grn", "grn:/ms/ei/aquilon/aqd"]
-        self.noouttest(command)
-
-        command = ["add_required_service", "--service", "esx_management_server",
-                   "--personality", "vulcan-local-disk",
-                   "--archetype", "esx_cluster"]
-        self.noouttest(command)
-
-        command = ["map", "service", "--service", "esx_management_server", "--instance", "ut.a",
-                   "--building", "ut", "--personality", "vulcan-local-disk",
-                   "--archetype", "esx_cluster"]
-        self.noouttest(command)
+        self.create_personality("vmhost", "vulcan-local-disk",
+                                grn="grn:/ms/ei/aquilon/aqd", maps=maps,
+                                required=["esx_management_server"])
+        self.create_personality("esx_cluster", "vulcan-local-disk",
+                                grn="grn:/ms/ei/aquilon/aqd", maps=maps)
+        self.create_personality("aquilon", "virteng-perf-test",
+                                grn="grn:/ms/ei/aquilon/aqd")
+        # FIXME: Localdisk setups should not have a metacluster, but the
+        # templates expect one to exist
+        self.create_personality("metacluster", "vulcan-local-disk")
 
     def test_005_addutmc9(self):
         command = ["add_metacluster", "--metacluster=%s" % self.metacluster,
-                   "--personality=vulcan2", "--archetype=metacluster",
+                   "--personality=vulcan-local-disk", "--archetype=metacluster",
                    "--domain=unittest", "--building=ut", "--domain=unittest",
                    "--comments=vulcan_localdisk_test"]
         self.noouttest(command)
@@ -375,27 +356,11 @@ class TestVulcanLocalDisk(VerifyNotificationsMixin, MachineTestMixin,
             self.metacluster + self.profile_suffix)))
 
     def test_500_del_vlocal(self):
-        command = ["del_personality", "--archetype", "aquilon",
-                   "--personality", "virteng-perf-test"]
-        self.noouttest(command)
+        self.drop_personality("aquilon", "virteng-perf-test")
+        self.drop_personality("esx_cluster", "vulcan-local-disk")
+        self.drop_personality("vmhost", "vulcan-local-disk")
+        self.drop_personality("metacluster", "vulcan-local-disk")
 
-        command = ["del_personality", "--archetype", "esx_cluster",
-                   "--personality", "vulcan-local-disk"]
-        self.noouttest(command)
-
-        command = ["unmap", "service", "--service", "esx_management_server", "--instance", "ut.a",
-                   "--building", "ut", "--personality", "vulcan-local-disk",
-                   "--archetype", "vmhost"]
-        self.noouttest(command)
-
-        command = ["del_required_service", "--service", "esx_management_server",
-                   "--personality", "vulcan-local-disk",
-                   "--archetype", "vmhost"]
-        self.noouttest(command)
-
-        command = ["del_personality", "--archetype", "vmhost",
-                   "--personality", "vulcan-local-disk"]
-        self.noouttest(command)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestVulcanLocalDisk)
