@@ -55,6 +55,7 @@ from test_merge_conflicts import TestMergeConflicts
 from test_add_archetype import TestAddArchetype
 from test_add_os import TestAddOS
 from test_add_personality import TestAddPersonality
+from test_search_personality import TestSearchPersonality
 from test_add_service import TestAddService
 from test_update_service import TestUpdateService
 from test_add_required_service import TestAddRequiredService
@@ -363,6 +364,7 @@ class BrokerTestSuite(unittest.TestSuite):
                      TestShowSwitch, TestSearchSwitch,
                      TestSearchHardware, TestSearchMachine, TestShowMachine,
                      TestSearchDns, TestDumpDns,
+                     TestSearchPersonality,
                      TestSearchSystem, TestSearchHost, TestSearchESXCluster,
                      TestSearchClusterESX, TestSearchCluster,
                      TestSearchObservedMac, TestSearchNext, TestSearchNetwork,

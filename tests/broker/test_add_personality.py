@@ -547,31 +547,6 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
                              personality, command)
             self.matchclean(out, 'config_override', command)
 
-    def testverifyshowdiff1(self):
-        command = ["show_diff", "--personality=utpersonality/dev",
-                   "--archetype=aquilon", "--other=generic"]
-        out = self.commandtest(command)
-        self.searchoutput(out,
-                          r'missing Options in Personality aquilon/generic:\s+ConfigOverride',
-                          command)
-        self.searchoutput(out,
-                          r'missing Grns in Personality aquilon/generic:\s+GRN %s' % GRN,
-                          command)
-
-    def testverifyshowdiff2(self):
-        command = ["show_diff", "--personality=utpersonality/dev",
-                   "--archetype=aquilon", "--other=vulcan-1g-desktop-prod", "--other_archetype=vmhost"]
-        out = self.commandtest(command)
-        self.searchoutput(out,
-                          r'missing Options in Personality aquilon/utpersonality/dev:\s+Cluster Required',
-                          command)
-        self.searchoutput(out,
-                          r'matching Options with different values:\s+Environment value=dev, othervalue=prod',
-                          command)
-        self.searchoutput(out,
-                          r'missing Options in Personality vmhost/vulcan-1g-desktop-prod:\s+ConfigOverride',
-                          command)
-
     def testfailnoenvironment(self):
         command = ["add_personality", "--eon_id=2", "--archetype=aquilon",
                    "--personality=no-environment"]
@@ -616,104 +591,6 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
         }
         for personality, kwargs in personalities.items():
             self.create_personality("aquilon", personality, **kwargs)
-
-    def testsearchpersonality00(self):
-        command = ["search", "personality", "--grn", "grn:/ms/ei/aquilon/aqd"]
-        out = self.commandtest(command)
-        self.matchoutput(out, "aquilon/eaitools", command)
-        self.matchoutput(out, "aquilon/utpersonality/dev", command)
-        self.matchoutput(out, "esx_cluster/esx_server", command)
-        self.matchoutput(out, "esx_cluster/vulcan-1g-desktop-prod", command)
-
-    def testsearchpersonality01(self):
-        command = ["search", "personality", "--host_environment", "prod"]
-        out = self.commandtest(command)
-        self.matchoutput(out, "aquilon/generic", command)
-        self.matchoutput(out, "aurora/generic", command)
-        self.matchoutput(out, "filer/generic", command)
-        self.matchoutput(out, "f5/generic", command)
-        self.matchoutput(out, "esx_cluster/vulcan-1g-desktop-prod", command)
-        self.matchoutput(out, "storagecluster/metrocluster", command)
-        self.matchclean(out, "utpersonality/dev", command)
-
-    def testsearchpersonality02(self):
-        command = ["search", "personality", "--config_override"]
-        out = self.commandtest(command)
-        self.matchoutput(out, "aquilon/utpersonality/dev", command)
-        self.matchclean(out, "aurora/generic", command)
-        self.matchclean(out, "filer/generic", command)
-
-    def testsearchpersonality03(self):
-        command = ["search", "personality",
-                   "--host_environment", "dev", "--grn", "grn:/ms/ei/aquilon/aqd"]
-        out = self.commandtest(command)
-        self.matchoutput(out, "aquilon/utpersonality/dev", command)
-
-    def testsearchpersonality04(self):
-        command = ["search", "personality", "--eon_id", 2]
-        out = self.commandtest(command)
-        self.matchoutput(out, "aquilon/eaitools", command)
-        self.matchoutput(out, "aquilon/utpersonality/dev", command)
-        self.matchoutput(out, "esx_cluster/esx_server", command)
-        self.matchoutput(out, "esx_cluster/vulcan-1g-desktop-prod", command)
-        self.matchoutput(out, "gridcluster/hadoop", command)
-        self.matchclean(out, "storagecluster/metrocluster", command)
-
-    def testsearchpersonality05(self):
-        command = ["search", "personality", "--host_environment", "dev", "--eon_id", 2]
-        out = self.commandtest(command)
-        self.matchoutput(out, "aquilon/utpersonality/dev", command)
-
-    def testsearchpersonality06(self):
-        command = ["search", "personality", "--host_environment", "dev",
-                   "--eon_id", 2, "--fullinfo"]
-        out = self.commandtest(command)
-        self.matchoutput(out, "Personality: utpersonality/dev Archetype: aquilon",
-                         command)
-        self.matchoutput(out,
-                         "Template: aquilon/personality/utpersonality/dev/config",
-                         command)
-        self.matchoutput(out, "Config override: enabled", command)
-        self.matchoutput(out, "Environment: dev", command)
-        self.matchoutput(out, "Comments: Some personality comments", command)
-        self.matchclean(out, "Threshold:", command)
-        self.matchclean(out, "Personality: inventory Archetype: aquilon",
-                        command)
-        self.matchclean(out,
-                        "Template: aquilon/personality/inventory/config",
-                        command)
-        self.matchoutput(out, "Owned by GRN: %s" % GRN, command)
-        self.matchoutput(out, "Used by GRN: %s" % GRN, command)
-
-    def testsearchpersonality07(self):
-        command = ["search_personality", "--host_environment", "dev",
-                   "--eon_id", 2, "--format=proto"]
-        out = self.commandtest(command)
-        pl = self.parse_personality_msg(out, 13)
-        personality = pl.personalities[0]
-        self.failUnlessEqual(personality.archetype.name, "aquilon")
-        self.failUnlessEqual(personality.name, "badpersonality")
-        self.failUnlessEqual(personality.owner_eonid, self.grns[GRN])
-        self.failUnlessEqual(personality.host_environment, "dev")
-
-    def testsearchpersonality08(self):
-        command = ["search", "personality", "--archetype", "aurora",
-                   "--host_environment", "prod", "--eon_id", 2]
-        out = self.commandtest(command)
-        self.noouttest(command)
-
-    def testsearchpersonality09(self):
-        command = ["search", "personality", "--personality", "vulcan-1g-desktop-prod"]
-        out = self.commandtest(command)
-        self.matchoutput(out, "esx_cluster/vulcan-1g-desktop-prod", command)
-        self.matchoutput(out, "vmhost/vulcan-1g-desktop-prod", command)
-
-    def testsearchpersonality10(self):
-        command = ["search", "personality", "--personality", "vulcan-1g-desktop-prod",
-                   "--archetype", "vmhost"]
-        out = self.commandtest(command)
-        self.matchoutput(out, "vmhost/vulcan-1g-desktop-prod", command)
-        self.matchclean(out, "esx_cluster/vulcan-1g-desktop-prod", command)
 
     def testaddpersonalitylegacy(self):
         command = ["add_personality", "--personality=testlegacy",
