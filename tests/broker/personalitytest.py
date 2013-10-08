@@ -23,6 +23,11 @@ default_parameters = {
         "espinfo/users": "IT / TECHNOLOGY",
         "espinfo/threshold": 0
     },
+    'vmhost': {
+        "espinfo/function": "development",
+        "espinfo/class": "INFRASTRUCTURE",
+        "espinfo/users": "IT / TECHNOLOGY",
+    },
 }
 
 clustered_archetypes = ["vmhost"]
