@@ -40,6 +40,7 @@ class Disk(Base):
         Base Class for polymorphic representation of disk or disk-like resources
     """
     __tablename__ = _TN
+    _instance_label = 'device_name'
 
     id = Column(Integer, Sequence('%s_id_seq' % _TN), primary_key=True)
     disk_type = Column(String(64), nullable=False)

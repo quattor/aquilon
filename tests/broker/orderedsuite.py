@@ -96,6 +96,7 @@ from test_add_chassis import TestAddChassis
 from test_update_chassis import TestUpdateChassis
 from test_add_machine import TestAddMachine
 from test_add_disk import TestAddDisk
+from test_update_disk import TestUpdateDisk
 from test_add_interface import TestAddInterface
 from test_add_address import TestAddAddress
 from test_add_alias import TestAddAlias
@@ -370,6 +371,7 @@ class BrokerTestSuite(unittest.TestSuite):
                      TestSearchObservedMac, TestSearchNext, TestSearchNetwork,
                      TestSearchModel,
                      TestUpdateInterface, TestUpdateMachine, TestUpdateModel,
+                     TestUpdateDisk,
                      TestUpdateRack,
                      TestUpdateAlias, TestUpdateSrvRecord, TestUpdateAddress,
                      TestBindFeature, TestUnbindFeature,

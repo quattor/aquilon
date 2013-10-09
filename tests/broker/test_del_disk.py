@@ -29,17 +29,17 @@ class TestDelDisk(TestBrokerCommand):
 
     def test_100_del_ut3c1n3_sda(self):
         self.noouttest(["del", "disk", "--machine", "ut3c1n3",
-                        "--controller", "scsi", "--size", "68"])
+                        "--controller", "sata", "--size", "50"])
 
     def test_101_del_ut3c1n3_c0d0(self):
         self.noouttest(["del", "disk", "--machine", "ut3c1n3",
-                        "--disk", "c0d0"])
+                        "--disk", "c0d1"])
 
     def test_200_show_ut3c1n3(self):
         command = "show machine --machine ut3c1n3"
         out = self.commandtest(command.split(" "))
         self.matchclean(out, "Disk: sda 68 GB scsi", command)
-        self.matchclean(out, "Disk: c0d0", command)
+        self.matchclean(out, "Disk: c0d1", command)
 
     # This should now list the 34 GB disk that was added previously...
     def test_200_cat_ut3c1n3(self):
