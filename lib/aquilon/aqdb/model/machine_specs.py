@@ -23,11 +23,11 @@ from datetime import datetime
 
 from sqlalchemy import (Column, Integer, DateTime, Sequence, String, ForeignKey,
                         UniqueConstraint)
-from sqlalchemy.orm import relation, backref, deferred
+from sqlalchemy.orm import relation, backref, deferred, validates
 
 from aquilon.aqdb.column_types import Enum
-from aquilon.aqdb.model import Base, Model, Cpu
-from aquilon.aqdb.model.disk import disk_types, controller_types
+from aquilon.aqdb.model import Base, Model, Cpu, Disk
+from aquilon.aqdb.model.disk import controller_types
 
 
 class MachineSpecs(Base):
@@ -54,7 +54,7 @@ class MachineSpecs(Base):
 
     memory = Column(Integer, nullable=False, default=0)
 
-    disk_type = Column(Enum(64, disk_types), nullable=False)
+    disk_type = Column(String(64), nullable=False)
     disk_capacity = Column(Integer, nullable=False, default=36)
     controller_type = Column(Enum(64, controller_types), nullable=False)
 
@@ -75,6 +75,11 @@ class MachineSpecs(Base):
 
     __table_args__ = (UniqueConstraint(model_id,
                                        name='machine_specs_model_uk'),)
+
+    @validates('disk_type')
+    def validate_disk(self, key, value):  # pylint: disable=W0613
+        Disk.polymorphic_subclass(value, "Invalid disk type")
+        return value
 
     @property
     def disk_name(self):

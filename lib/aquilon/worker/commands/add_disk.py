@@ -16,8 +16,6 @@
 # limitations under the License.
 """Contains the logic for `aq add disk`."""
 
-import re
-
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import (Machine, LocalDisk, VirtualDisk,
                                 VirtualLocalDisk, Filesystem)
@@ -32,8 +30,6 @@ class CommandAddDisk(BrokerCommand):
     # FIXME: add "controller" and "size" once the deprecated alternatives are
     # removed
     required_parameters = ["machine", "disk"]
-
-    REGEX_ADDRESS = re.compile(r"\d+:\d+$")
 
     def render(self, session, logger, machine, disk, controller, share,
                filesystem, resourcegroup, address, comments, size, boot,
@@ -75,9 +71,6 @@ class CommandAddDisk(BrokerCommand):
             boot = (disk == "sda" or disk == "c0d0")
 
         if share:
-            if not CommandAddDisk.REGEX_ADDRESS.match(address):
-                raise ArgumentError(r"Disk address '%s' is not valid, it must "
-                                    r"match \d+:\d+ (e.g. 0:0)." % address)
             if not dbmachine.vm_container:
                 raise ArgumentError("{0} is not a virtual machine, it is not "
                                     "possible to define a virtual disk."

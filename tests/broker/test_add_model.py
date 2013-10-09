@@ -159,6 +159,14 @@ class TestAddModel(TestBrokerCommand):
         self.matchoutput(out, "Model utblade, vendor aurora_vendor already "
                          "exists.", command)
 
+    def test_300_bad_disktype(self):
+        command = ["add_model", "--model=bad-disk-type", "--vendor=utvendor",
+                   "--type=virtual_machine", "--cpuname=xeon_5150",
+                   "--cpunum=1", "--mem=8192", "--disktype=bad-disk-type",
+                   "--diskcontroller=sata", "--disksize=15", "--nics=1"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Invalid disk type 'bad-disk-type'.", command)
+
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddModel)

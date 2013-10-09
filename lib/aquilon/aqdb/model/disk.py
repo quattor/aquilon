@@ -17,17 +17,20 @@
 """ Polymorphic representation of disks which may be local or san """
 
 from datetime import datetime
+import re
 
 from sqlalchemy import (Column, Integer, DateTime, Sequence, String, Boolean,
                         ForeignKey, UniqueConstraint)
-from sqlalchemy.orm import relation, backref, deferred
+from sqlalchemy.orm import relation, backref, deferred, validates
 
+from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Base, Machine
 from aquilon.aqdb.column_types import AqStr, Enum
 
-disk_types = ['local', 'san', 'virtual_disk', 'virtual_localdisk']
+# FIXME: this list should not be hardcoded here
 controller_types = ['cciss', 'ide', 'sas', 'sata', 'scsi', 'flash',
                     'fibrechannel']
+address_re = re.compile(r"\d+:\d+$")
 
 _TN = 'disk'
 
@@ -39,7 +42,7 @@ class Disk(Base):
     __tablename__ = _TN
 
     id = Column(Integer, Sequence('%s_id_seq' % _TN), primary_key=True)
-    disk_type = Column(Enum(64, disk_types), nullable=False)
+    disk_type = Column(String(64), nullable=False)
     capacity = Column(Integer, nullable=False)
     device_name = Column(AqStr(128), nullable=False, default='sda')
     controller_type = Column(Enum(64, controller_types), nullable=False)
@@ -70,6 +73,13 @@ class Disk(Base):
                                        name='disk_mach_dev_name_uk'),)
     __mapper_args__ = {'polymorphic_on': disk_type,
                        'with_polymorphic': '*'}
+
+    @validates('address')
+    def validate_address(self, key, value):  # pylint: disable=W0613
+        if not address_re.match(value):
+            raise ArgumentError(r"Disk address '%s' is not valid, it must "
+                                r"match \d+:\d+ (e.g. 0:0)." % value)
+        return value
 
     def __repr__(self):
         # The default __repr__() is too long
