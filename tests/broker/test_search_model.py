@@ -182,7 +182,6 @@ class TestSearchModel(TestBrokerCommand):
     def test_200_search_disk_size(self):
         command = ["search_model", "--disksize", "36"]
         out = self.commandtest(command)
-        self.matchoutput(out, "hp/uttorswitch", command)
         self.matchoutput(out, "hp/bl260c", command)
         self.matchoutput(out, "dell/poweredge_6650", command)
         self.matchclean(out, "utlarge", command)

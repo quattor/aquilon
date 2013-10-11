@@ -111,6 +111,11 @@ class CommandUpdateModel(BrokerCommand):
 
         if not dbmodel.machine_specs:
             if cpu_values or nic_values or spec_values:
+                # You can't add a non-machine model with machine_specs
+                # thus we only need to check here if you try and update
+                if not dbmodel.model_type.isMachineType():
+                    raise ArgumentError("Machine specfications are only valid"
+                                        " for machine types")
                 if not cpu_values or len(spec_values) < len(spec_args):
                     raise ArgumentError("Missing required parameters to store "
                                         "machine specs for the model.  Please "

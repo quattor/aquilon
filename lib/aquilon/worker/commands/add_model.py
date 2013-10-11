@@ -46,6 +46,9 @@ class CommandAddModel(BrokerCommand):
         session.flush()
 
         if cpuname or cpuvendor or cpuspeed is not None:
+            if not type.isMachineType():
+                raise ArgumentError("Machine specfications are only valid"
+                                    " for machine types")
             dbcpu = Cpu.get_unique(session, name=cpuname, vendor=cpuvendor,
                                    speed=cpuspeed, compel=True)
             if nicmodel or nicvendor:
