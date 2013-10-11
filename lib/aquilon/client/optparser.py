@@ -460,10 +460,10 @@ class Option(Element):
                 return "--[no]" + self.name
             else:
                 return "--%s|--%s" % (self.name, self.reverse)
-        elif self.type in ["string", "file", "list", "int", "enum"]:
-            return "--" + self.name + " " + self.name.upper()
-        else:
+        elif self.type in ["flag"]:
             return "--" + self.name
+        else:
+            return "--" + self.name + " " + self.name.upper()
 
     def recursiveHelp(self, indentlevel, width=None):
         whitespace = " " * (4 * indentlevel)
